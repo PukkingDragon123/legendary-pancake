@@ -3,7 +3,7 @@
 import { computed, signal } from '@preact/signals';
 import type { OwlLook, OutfitSlot } from '../owl/model.ts';
 import { PIECES } from '../owl/outfits.ts';
-import { PALETTE } from '../owl/palette.ts';
+import { PALETTE, type Skin } from '../owl/palette.ts';
 import type { SleepSession } from '../sleep/types.ts';
 import { defaultBlockConfig, type BlockConfig } from './blocker.ts';
 import { AREAS, ITEM_BY_ID, levelOf, TRINKET, ZONE_LEVEL, type LootEntry } from './catalog.ts';
@@ -37,7 +37,7 @@ export interface Save {
   streak: number;
   bestStreak: number;
   lastNightKey?: string;
-  owned: { items: string[]; pieces: string[]; palettes: string[] };
+  owned: { items: string[]; pieces: string[]; palettes: string[]; skins: Skin[] };
   /** extra copies of furniture the player owns beyond those placed (inventory counts) */
   furniture: Record<string, string>;
   collection: Record<string, number>;
@@ -62,9 +62,9 @@ const KEY = 'hoot-hollow:save:v1';
 export function freshSave(): Save {
   const hour12 = (() => { try { return new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions().hour12 ?? false; } catch { return false; } })();
   return {
-    v: 1, name: 'Pip', look: { palette: 'tabby', outfit: { head: 'nightcap' } },
+    v: 1, name: 'Pip', look: { skin: 'owl', palette: 'tawny', outfit: { head: 'nightcap' } },
     acorns: 250, stones: 20, xp: 0, streak: 0, bestStreak: 0,
-    owned: { items: ['nestbed', 'moonlamp', 'roundrug', 'fernpot', 'candles', 'stool'], pieces: ['nightcap', 'sprout', 'satchel'], palettes: ['tabby'] },
+    owned: { items: ['nestbed', 'moonlamp', 'roundrug', 'fernpot', 'candles', 'stool'], pieces: ['nightcap', 'sprout', 'satchel'], palettes: ['tawny'], skins: ['owl'] },
     furniture: { g_back: 'nestbed', g_left: 'moonlamp', g_mid: 'roundrug', g_frontL: 'fernpot' },
     collection: {}, area: 'woods',
     sleep: { goalMin: 480, wake: '07:00', days: [1, 2, 3, 4, 5], smartMin: 20, alarmSound: 'alarm_musicbox', alarmOn: true, reminders: true, windDownMin: 30, mic: true, clips: false, sensitivity: 0.5, soundscape: 'amb_rain', soundscapeMin: 30, soundscapeVol: 0.6 },

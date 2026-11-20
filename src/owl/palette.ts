@@ -50,18 +50,18 @@ export interface OwlPalette {
 export const PALETTES: OwlPalette[] = [
   // ---------------------------------------------------------------- owl coats
   {
-    id: 'tawny', name: 'Tawny', skin: 'owl', pattern: 'owl', price: 0, blurb: 'Warm cocoa feathers with cream freckles, like hot chocolate before bed.',
-    fur: '#9b6441', stripe: '#5f3822', wing: '#a36a3e', speck: '#f4dcb2', belly: '#f7e7c9', mark: '#b98250', muzzle: '#fcf0da', liner: '#6a3f26', ear: '#f4dcb2',
-    nose: '#f3b24a', paw: '#f2be5c', eye: '#1a1210', blush: '#ff9cb0',
+    id: 'tawny', name: 'Tawny', skin: 'owl', pattern: 'owl', price: 0, blurb: 'Toffee feathers with cream freckles, like hot cocoa before bed.',
+    fur: '#b0703f', stripe: '#7a4528', wing: '#b8774a', speck: '#fbe6c2', belly: '#fbecd2', mark: '#d39a63', muzzle: '#fff5e4', liner: '#8a5232', ear: '#fbe6c2',
+    nose: '#f2a84c', paw: '#f5bf63', eye: '#2a1a14', blush: '#f7a3ae',
   },
   {
     id: 'snowy', name: 'Snowy', skin: 'owl', pattern: 'owl', price: 600, blurb: 'Pure as fresh snow, with a few ink-dot flecks.',
-    fur: '#eef2f7', stripe: '#9aa6bb', wing: '#e9eef5', speck: '#39404f', belly: '#ffffff', mark: '#c3cddc', muzzle: '#ffffff', liner: '#a3afc2', ear: '#ffffff',
-    nose: '#454b59', paw: '#e9edf3', eye: '#141724', blush: '#ffb3c4',
+    fur: '#f1f4f8', stripe: '#b6c0d0', wing: '#eef2f7', speck: '#4a5266', belly: '#ffffff', mark: '#cdd5e2', muzzle: '#ffffff', liner: '#b3bdcc', ear: '#ffffff',
+    nose: '#59606f', paw: '#eef1f5', eye: '#1e2230', blush: '#ffbccb',
   },
   {
     id: 'barn', name: 'Barn Owl', skin: 'owl', pattern: 'owl', price: 900, blurb: 'Golden wings and a heart-shaped moon of a face.',
-    fur: '#d8a258', stripe: '#94643a', wing: '#d9a05a', speck: '#a8a29a', belly: '#fff8ee', mark: '#e2bd8a', muzzle: '#fffaf1', liner: '#b7834b', ear: '#f8eedc',
+    fur: '#dcaa62', stripe: '#a87344', wing: '#dda763', speck: '#fff4e0', belly: '#fffaf1', mark: '#e8c592', muzzle: '#fffcf5', liner: '#c08c52', ear: '#fff4e0',
     nose: '#e9d7c2', paw: '#e8c79e', eye: '#1c1410', blush: '#ffa8b8',
   },
   {

@@ -1,7 +1,7 @@
 # Hoot Hollow Bedtime (browser extension)
 
 A web page can't block other websites, so Hoot Hollow comes with this small companion extension.
-At bedtime, Pip the Meowl (a kitten's head on a little barn owl's body) tucks in social media: TikTok, Instagram, Facebook, X/Twitter, Reddit, YouTube,
+At bedtime, Pip the owl tucks in social media: TikTok, Instagram, Facebook, X/Twitter, Reddit, YouTube,
 Snapchat, Threads, Pinterest, Twitch and Discord, plus any sites you add. A visit to one of them
 lands on a quiet night-sky page instead of the feed.
 
@@ -17,6 +17,10 @@ lands on a quiet night-sky page instead of the feed.
 - Each domain also covers its subdomains (`reddit.com` covers `old.reddit.com`, `m.reddit.com`, ...).
 - When bedtime starts, tabs already open on blocked sites are politely moved to the bedtime page. It keeps
   a link back for the morning.
+- **Pip's look.** By default Pip is a round little tawny owl. The app can switch on the unlockable
+  **Meowl** skin (a kitten's head on a little owl's body) by sending `mascot: 'meowl'` in the config. The
+  bedtime page and the popup draw whichever look the app last sent. The look is cosmetic, so it applies
+  at once, even during a strict window. The toolbar icons always show the owl.
 
 Plain JS/HTML/CSS, Manifest V3, no build step.
 
@@ -89,8 +93,11 @@ await bridge.sendConfig({ ...defaultBlockConfig(), start: '22:00', strict: true 
 await bridge.setSleep(true, wakeAtMs);      // and setSleep(false) in the morning
 ```
 
-`BlockStatus` has one optional field beyond the base contract: `pendingConfig`. It holds a config that
-arrived while strict mode was blocking and will apply once blocking ends.
+Optional fields beyond the base contract:
+
+- `BlockConfig.mascot`: `'owl'` (the default when missing) or `'meowl'`.
+- `BlockStatus.pendingConfig`: a config that arrived while strict mode was blocking. It applies once
+  blocking ends.
 
 The schedule maths (`isBlockedNow`, `nextChange`, `nextWake`, `normalizeDomain`, ...) appears twice, in
 `src/game/blocker.ts` and `lib/schedule.js`. The two copies match line for line, including handling of
@@ -150,8 +157,8 @@ bridge.js          content script: app <-> extension postMessage bridge
 blocked.html/.css/.js  bedtime page (pixel sky, fireflies, Pip on a branch)
 popup.html/.css/.js    toolbar popup (status, window, sites, pairing, gentle pause)
 lib/schedule.js    schedule + domain helpers (mirror of src/game/blocker.ts)
-lib/owl.js         Pip the Meowl, drawn pixel by pixel (also the source of the 32/128 px icons)
+lib/owl.js         Pip drawn pixel by pixel, as the default owl or the Meowl skin (also the source of the 32/128 px icons)
 fonts.css, fonts/  bundled Pixelify Sans, Silkscreen, Nunito (SIL OFL, see fonts/OFL.txt)
-icons/             16/32/48/128 px Meowl icons
-tools/make-icons.mjs  regenerates icons/ (node tools/make-icons.mjs [--preview out.png]), no dependencies
+icons/             16/32/48/128 px owl icons
+tools/make-icons.mjs  regenerates icons/ (node tools/make-icons.mjs [--preview out.png] [--mascot meowl --out dir]), no dependencies
 ```

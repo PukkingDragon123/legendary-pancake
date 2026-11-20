@@ -85,10 +85,15 @@ async function saveConfig(mutate) {
 // ---- Pip ----------------------------------------------------------------------------------------
 
 const CROP = { x: 32, y: 13, w: 33, h: 41 }; // Pip without the branch, ears to toes
-const pipFrames = {
-  closed: [0, 1].map((b) => frameCanvas(pipFrame({ breath: b, eyes: 'closed', branch: false }))),
-  open: [0, 1].map((b) => frameCanvas(pipFrame({ breath: b, eyes: 'open', branch: false }))),
-};
+/** Pre-rendered frames per look ('owl' by default, or the Meowl skin), built on first use. */
+const lookFrames = {};
+function framesFor(look) {
+  if (!lookFrames[look]) {
+    const f = (breath, eyes) => frameCanvas(pipFrame({ breath, eyes, branch: false, mascot: look }));
+    lookFrames[look] = { closed: [f(0, 'closed'), f(1, 'closed')], open: [f(0, 'open'), f(1, 'open')] };
+  }
+  return lookFrames[look];
+}
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 let breath = 0;
 
@@ -96,7 +101,8 @@ function drawPip() {
   const ctx = el.pip.getContext('2d');
   ctx.clearRect(0, 0, CROP.w, CROP.h);
   const asleep = state?.status?.blocking;
-  const set = asleep ? pipFrames.closed : pipFrames.open;
+  const look = state?.status?.config?.mascot === 'meowl' ? 'meowl' : 'owl';
+  const set = asleep ? framesFor(look).closed : framesFor(look).open;
   ctx.drawImage(set[reduce.matches ? 0 : breath], CROP.x, CROP.y, CROP.w, CROP.h, 0, 0, CROP.w, CROP.h);
 }
 

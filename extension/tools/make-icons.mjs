@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-// Writes the extension's toolbar/store icons (icons/icon-{16,32,48,128}.png): Pip the Meowl (a
-// kitten's head on a little barn owl's body) in pixel art. No dependencies: the PNG is encoded here
-// with node:zlib plus a CRC32 table. Output is deterministic.
+// Writes the extension's toolbar/store icons (icons/icon-{16,32,48,128}.png): Pip the owl in pixel
+// art. No dependencies: the PNG is encoded here with node:zlib plus a CRC32 table. Output is
+// deterministic.
 //
-//   node extension/tools/make-icons.mjs            # writes extension/icons/*.png
-//   node extension/tools/make-icons.mjs --preview  # also writes icons/preview.png (all sizes, enlarged)
+//   node extension/tools/make-icons.mjs                      # owl icons -> extension/icons/
+//   node extension/tools/make-icons.mjs --preview out.png    # also an enlarged preview sheet
+//   node extension/tools/make-icons.mjs --mascot meowl --out some/dir   # the Meowl skin's icons
 //
-// Two sprites, so every size is an exact integer upscale and stays crisp:
+// Two sprites per look, so every size is an exact integer upscale and stays crisp:
 // - 16x16 (used for 16 and 48 = 3x): a hand-drawn face. Only the left half is drawn; the right half is
 //   mirrored, then the eye catch-lights go on top (same corner on both eyes, so not mirrored).
 // - 32x32 (used for 32 and 128 = 4x): cropped from lib/owl.js, the same Pip the bedtime page draws.
@@ -69,7 +70,47 @@ export function encodePNG(w, h, rgba) {
 
 // ---- art ---------------------------------------------------------------------------------------
 
-const PAL = {
+const OWL_PAL = {
+  '.': null,
+  o: '#1b1326', // outline
+  c: '#9b6441', // cocoa crown
+  C: '#b07a50', // crown, lit
+  d: '#7d4c2f', // crown shade / bar
+  k: '#f4dcb2', // freckle / tuft tip
+  r: '#6a3f26', // ruff around the facial disc
+  D: '#fcf0da', // facial disc
+  E: '#e8d3ae', // facial disc shade
+  B: '#fffaf0', // brow
+  e: '#1a1210', // eye
+  w: '#ffffff', // catch-light
+  y: '#f3b24a', // beak
+  Y: '#b8792a', // beak tip
+  b: '#f2a5a3', // blush
+};
+
+// 16x16 owl face (default look), left half (cols 0-7); col 7 sits next to the centre line.
+const OWL16 = [
+  '........',
+  '.o......',
+  '.ko.....',
+  '.ccooooo',
+  'ockBBBcd',
+  'ocrrrrrd',
+  'orEDDDEr',
+  'orDeeDDr',
+  'orDeeDDy',
+  'orbDDDDY',
+  'orEDDDDD',
+  'ocrEDDDD',
+  'occrEDDD',
+  '.occrrED',
+  '..occcrr',
+  '...ooooo',
+];
+// at 16 px a catch-light swallows a quarter of the eye, so the owl's dots stay solid
+const OWL16_GLINT = [];
+
+const MEOWL_PAL = {
   '.': null,
   o: '#1b1326', // outline
   f: '#c4935f', // tabby fur
@@ -89,8 +130,8 @@ const PAL = {
   b: '#f4a3a8', // blush
 };
 
-// 16x16 Meowl face, left half (cols 0-7); col 7 sits next to the centre line.
-const FACE16 = [
+// 16x16 Meowl face (unlockable look), left half.
+const MEOWL16 = [
   '........',
   '.o......',
   '.oo.....',
@@ -108,10 +149,15 @@ const FACE16 = [
   '..oggVVV',
   '...ooooo',
 ];
-// catch-lights: the same (top-left) corner of each eye, so not mirrored
-const GLINT16 = [[3, 7], [11, 7]];
+const MEOWL16_GLINT = [[3, 7], [11, 7]];
 
-function sprite(half, glints) {
+const FACES = {
+  owl: { half: OWL16, glints: OWL16_GLINT, pal: OWL_PAL },
+  meowl: { half: MEOWL16, glints: MEOWL16_GLINT, pal: MEOWL_PAL },
+};
+
+/** Mirror a left-half sprite, add the (unmirrored) catch-lights, map to colours. */
+function sprite({ half, glints, pal }) {
   const n = half.length;
   const rows = half.map((row) => {
     if (row.length !== n / 2) throw new Error(`row "${row}" should be ${n / 2} wide`);
@@ -119,15 +165,15 @@ function sprite(half, glints) {
   });
   for (const [x, y] of glints) rows[y][x] = 'w';
   return rows.map((r) => r.map((ch) => {
-    const c = PAL[ch];
+    const c = pal[ch];
     if (c === undefined) throw new Error(`unknown palette key "${ch}"`);
     return c;
   }));
 }
 
 /** 32x32: the head and shoulders of the same Pip the bedtime page draws (eyes open, no moon rim). */
-function sprite32() {
-  const f = pipFrame({ eyes: 'open', breath: 0, branch: false, rim: false });
+function sprite32(mascot) {
+  const f = pipFrame({ mascot, eyes: 'open', breath: 0, branch: false, rim: false });
   let top = f.h;
   for (let i = 0; i < f.px.length; i++) if (f.px[i]) top = Math.min(top, Math.floor(i / f.w));
   const X0 = 33; // the figure is centred on column 48: crop 33..64
@@ -160,9 +206,9 @@ function render(rows, scale) {
   return { size: n, rgba: out };
 }
 
-export function icons() {
-  const s16 = sprite(FACE16, GLINT16);
-  const s32 = sprite32();
+export function icons(mascot = 'owl') {
+  const s16 = sprite(FACES[mascot]);
+  const s32 = sprite32(mascot);
   return {
     16: render(s16, 1),
     32: render(s32, 1),
@@ -171,11 +217,11 @@ export function icons() {
   };
 }
 
-function preview(set) {
+function preview(set, mascot) {
   // night-blue strip with every size at 1x and enlarged, plus a light strip for toolbar contrast
   const pad = 16;
   const items = [16, 32, 48, 128].map((k) => set[k]);
-  const big = [render(sprite(FACE16, GLINT16), 12), render(sprite32(), 8)];
+  const big = [render(sprite(FACES[mascot]), 12), render(sprite32(mascot), 8)];
   const all = [...items, ...big];
   const W = all.reduce((a, it) => a + it.size + pad, pad);
   const H = (Math.max(...all.map((it) => it.size)) + pad * 2) * 2;
@@ -199,19 +245,25 @@ function preview(set) {
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
+  const arg = (name) => {
+    const i = process.argv.indexOf(name);
+    const v = i === -1 ? undefined : process.argv[i + 1];
+    return v && !v.startsWith('--') ? v : undefined;
+  };
+  const mascot = arg('--mascot') ?? 'owl';
+  if (!(mascot in FACES)) throw new Error(`--mascot must be one of ${Object.keys(FACES).join(', ')}`);
   const here = dirname(fileURLToPath(import.meta.url));
-  const outDir = join(here, '..', 'icons');
+  const outDir = arg('--out') ?? join(here, '..', 'icons');
   mkdirSync(outDir, { recursive: true });
-  const set = icons();
+  const set = icons(mascot);
   for (const [size, img] of Object.entries(set)) {
     const file = join(outDir, `icon-${size}.png`);
     writeFileSync(file, encodePNG(img.size, img.size, img.rgba));
     console.log('wrote', file);
   }
-  const pv = process.argv.indexOf('--preview');
-  if (pv !== -1) {
-    const file = process.argv[pv + 1] && !process.argv[pv + 1].startsWith('--') ? process.argv[pv + 1] : join(outDir, 'preview.png');
-    writeFileSync(file, preview(set));
+  if (process.argv.includes('--preview')) {
+    const file = arg('--preview') ?? join(outDir, 'preview.png');
+    writeFileSync(file, preview(set, mascot));
     console.log('wrote', file);
   }
 }

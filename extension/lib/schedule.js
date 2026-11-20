@@ -11,6 +11,7 @@
  * @property {number[]} days    nights the window starts on, 0 = Sunday
  * @property {boolean} strict   no pausing / loosening while blocking
  * @property {boolean} duringSleepOnly  only block while the app reports sleep mode
+ * @property {'owl'|'meowl'} [mascot]  Pip's look: default 'owl', or the unlockable Meowl skin
  */
 
 /**
@@ -72,6 +73,7 @@ export function defaultBlockConfig() {
     days: [...ALL_DAYS],
     strict: false,
     duringSleepOnly: false,
+    mascot: 'owl',
   };
 }
 
@@ -238,6 +240,7 @@ export function sanitizeConfig(input, base = defaultBlockConfig()) {
     days,
     strict: bool(src.strict, base.strict),
     duringSleepOnly: bool(src.duringSleepOnly, base.duringSleepOnly),
+    mascot: src.mascot === 'owl' || src.mascot === 'meowl' ? src.mascot : base.mascot === 'meowl' ? 'meowl' : 'owl',
   };
 }
 

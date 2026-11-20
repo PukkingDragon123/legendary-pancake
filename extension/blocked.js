@@ -1,5 +1,5 @@
 // The bedtime page every blocked site lands on. Draws a pixel night sky (drifting stars, a crescent
-// moon, hills, fireflies) and Pip the Meowl asleep on a branch, and keeps the words in step with the status
+// moon, hills, fireflies) and Pip asleep on a branch, and keeps the words in step with the status
 // the background worker publishes in chrome.storage.local.
 
 import { PIP_H, PIP_W, ZGLYPHS, frameCanvas, pipFrame } from './lib/owl.js';
@@ -326,11 +326,17 @@ function drawFlies(t) {
 
 // ---- Pip ----------------------------------------------------------------------------------------
 
-const frames = {
-  closed: [frameCanvas(pipFrame({ breath: 0, eyes: 'closed' })), frameCanvas(pipFrame({ breath: 1, eyes: 'closed' }))],
-  open: [frameCanvas(pipFrame({ breath: 0, eyes: 'open' })), frameCanvas(pipFrame({ breath: 1, eyes: 'open' }))],
-  blink: [frameCanvas(pipFrame({ breath: 0, eyes: 'blink' })), frameCanvas(pipFrame({ breath: 1, eyes: 'blink' }))],
-};
+/** Pre-rendered frames for one of Pip's looks ('owl' by default, or the Meowl skin). */
+function buildFrames(look) {
+  const f = (breath, eyes) => frameCanvas(pipFrame({ breath, eyes, mascot: look }));
+  return {
+    closed: [f(0, 'closed'), f(1, 'closed')],
+    open: [f(0, 'open'), f(1, 'open')],
+    blink: [f(0, 'blink'), f(1, 'blink')],
+  };
+}
+let look = 'owl';
+let frames = buildFrames(look);
 let awake = false;
 /** guided breathing (fallback when the app isn't paired): null or start time */
 let guide = null;
@@ -450,10 +456,14 @@ function render() {
   const mode = blocking ? 'blocking' : paused ? 'paused' : 'awake';
   document.body.dataset.state = mode;
   awake = mode !== 'blocking';
-  pipCanvas.setAttribute(
-    'aria-label',
-    awake ? 'Pip the Meowl, awake on a branch' : 'Pip the Meowl, asleep on a branch, breathing slowly',
-  );
+  const wanted = s?.config?.mascot === 'meowl' ? 'meowl' : 'owl';
+  if (wanted !== look) {
+    look = wanted;
+    frames = buildFrames(look);
+    if (reduce) paint(8);
+  }
+  const who = look === 'meowl' ? 'Pip in its Meowl look' : 'Pip the owl';
+  pipCanvas.setAttribute('aria-label', awake ? `${who}, awake on a branch` : `${who}, asleep on a branch, breathing slowly`);
 
   if (mode === 'blocking') {
     setText(el.title, 'Shh… the forest is asleep');
@@ -549,7 +559,6 @@ async function send(msg) {
 // ---- boot ---------------------------------------------------------------------------------------
 
 layout();
-start();
 render();
 
 (async () => {
@@ -557,6 +566,7 @@ render();
   state.status = stored.status ?? null;
   state.app = stored.app ?? {};
   render();
+  start(); // after the stored config is known, so the right look of Pip is drawn from the first frame
   // count a turned-away visit (not for tabs we tucked in ourselves, and not on reload)
   const nav = performance.getEntriesByType('navigation')[0];
   const reload = nav && /** @type {PerformanceNavigationTiming} */ (nav).type === 'reload';

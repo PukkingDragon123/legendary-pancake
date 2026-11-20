@@ -1,0 +1,11 @@
+export declare const SPRITES: Record<string, { w: number; h: number; rows: string[]; pal: Record<string, string> }>;
+export declare function spriteURL(name: string, scale?: number): string;
+export declare function spriteCanvas(name: string, scale?: number): HTMLCanvasElement;
+export declare function hasSprite(name: string): boolean;
+export declare const Grid: any;
+export declare const Pix: any;
+export declare function render(g: any, key?: any, opt?: any): any;
+export declare function T(r: string, chars?: string, g?: string): Record<string, string>;
+export declare function icon(name: string, key: Record<string, string>, rows: string[] | (() => string[]), opt?: any): void;
+export declare function draw(name: string, fn: () => any): void;
+export declare const RAMPS: Record<string, string[]>;

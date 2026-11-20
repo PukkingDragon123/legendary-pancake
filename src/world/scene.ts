@@ -78,6 +78,9 @@ export class Scene {
   private weeds: THREE.Group;
   private smokeT = 0;
   private hourOverride: number | null = null;
+  /** breathing: a warm glow at the owl's chest and a gentle camera dolly */
+  private glow: THREE.PointLight;
+  private breathZoom = 1;
 
   constructor(canvas: HTMLCanvasElement, look: OwlLook, quality: Quality) {
     this.quality = quality;
@@ -115,6 +118,8 @@ export class Scene {
     this.lantern.position.copy(this.house.lampAt);
     this.scene.add(this.room, this.lantern);
 
+    this.glow = new THREE.PointLight(0xffd59a, 0, 5, 1.4);
+    this.scene.add(this.glow);
     this.fireflies = new Fireflies(quality === 'high' ? 90 : 50, new THREE.Vector3(0, 0, 0), 11);
     this.scene.add(this.fireflies.mesh);
 
@@ -315,6 +320,29 @@ export class Scene {
 
   setLook(look: OwlLook) { this.owl.rebuild(look); }
 
+  /** Drive the scene from the breathing exercise (null ends it). */
+  breathFx(lung: number | null, kind: 'in' | 'out' | 'hold' | 'rest' = 'rest') {
+    const chest = this.owl.node.position.clone().add(new THREE.Vector3(0, 0.75, 0.35));
+    if (lung === null) {
+      this.glow.intensity = 0; this.fireflies.gather = null; this.fireflies.pull = 0; this.fireflies.release = 0; this.breathZoom = 1;
+      this.fireflies.rehome(new THREE.Vector3(0, 0, 0), 11, [0.4, 3.2]);
+      if (this.owl.pose === 'breathe') this.owl.pose = 'stand';
+      return;
+    }
+    if (this.owl.pose !== 'breathe') {
+      this.owl.pose = 'breathe';
+      this.fireflies.rehome(chest, 3.6, [0.4, 2.8]);
+    }
+    this.owl.breath = lung;
+    this.glow.position.copy(chest).add(new THREE.Vector3(0, 0.2, 0.6));
+    this.glow.intensity = 1.2 + lung * 4;
+    this.fireflies.gather = chest;
+    this.fireflies.pull = kind === 'in' ? 0.55 + lung * 0.6 : kind === 'hold' ? 0.4 : 0;
+    this.fireflies.release = kind === 'out' ? 0.7 : 0;
+    this.breathZoom = 1 - lung * 0.07;
+  }
+  chestScreen() { return this.screenOf(this.owl.node.position.clone().add(new THREE.Vector3(0, 0.72, 0.3))); }
+
   // ---------------------------------------------------------------- views & sky
 
   setView(v: View) {
@@ -349,7 +377,7 @@ export class Scene {
   }
 
   resize() {
-    const c = this.renderer.domElement, w = c.clientWidth || innerWidth, h = c.clientHeight || innerHeight;
+    const w = innerWidth, h = innerHeight;
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     const hf = (30 * Math.PI) / 180;
@@ -372,10 +400,10 @@ export class Scene {
     const o = this.owl.node.position, H = new THREE.Vector3(HOUSE.x, 0, HOUSE.z);
     const portrait = this.camera.aspect < 1;
     switch (this.view) {
-      case 'interior': return { yaw: 0, pitch: 0.2, dist: portrait ? 11.5 : 8.5, target: new THREE.Vector3(H.x, 2.4, H.z + 0.4) };
-      case 'loft': return { yaw: 0, pitch: 0.12, dist: portrait ? 9 : 7, target: new THREE.Vector3(H.x, 4.2, H.z - 0.4) };
-      case 'owl': return { yaw: -0.15, pitch: 0.1, dist: portrait ? 5.2 : 4.2, target: new THREE.Vector3(o.x, o.y + 0.9, o.z) };
-      case 'breathe': return { yaw: 0, pitch: 0.08, dist: portrait ? 6.4 : 5.2, target: new THREE.Vector3(MEADOW.x, 1.55, 2.6) };
+      case 'interior': return { yaw: 0, pitch: 0.22, dist: portrait ? 14 : 8.5, target: new THREE.Vector3(H.x, 2.2, H.z + 0.2) };
+      case 'loft': return { yaw: 0, pitch: 0.14, dist: portrait ? 11 : 7, target: new THREE.Vector3(H.x, 4.2, H.z - 0.4) };
+      case 'owl': return { yaw: -0.15, pitch: 0.12, dist: portrait ? 7.4 : 4.6, target: new THREE.Vector3(o.x, o.y + 0.85, o.z) };
+      case 'breathe': return { yaw: 0, pitch: 0.1, dist: portrait ? 9.2 : 5.6, target: new THREE.Vector3(MEADOW.x, portrait ? 1.35 : 1.45, 2.6) };
       case 'sleep': return { yaw: 0.1, pitch: 0.24, dist: portrait ? 26 : 20, target: new THREE.Vector3(0, 4.2, -3.5) };
       case 'wake': return { yaw: -0.08, pitch: 0.2, dist: portrait ? 15 : 12, target: new THREE.Vector3(0, 2.2, -0.5) };
       case 'garden': return { yaw: -0.25, pitch: 0.55, dist: portrait ? 15 : 12, target: new THREE.Vector3(GARDEN.x, 0.4, GARDEN.z) };
@@ -417,7 +445,7 @@ export class Scene {
 
     // camera
     const g = this.goal();
-    g.yaw += this.userYaw; g.dist *= this.userZoom;
+    g.yaw += this.userYaw; g.dist *= this.userZoom * (this.view === 'breathe' ? this.breathZoom : 1);
     const k = 1 - Math.exp(-dt * 3.2), c = this.cur;
     c.yaw += (g.yaw - c.yaw) * k; c.pitch += (g.pitch - c.pitch) * k; c.dist += (g.dist - c.dist) * k; c.target.lerp(g.target, k);
     const cp = Math.cos(c.pitch);
@@ -426,7 +454,7 @@ export class Scene {
     this.camera.position.set(c.target.x + Math.sin(c.yaw + drift) * cp * c.dist, c.target.y + Math.sin(c.pitch) * c.dist, c.target.z + Math.cos(c.yaw + drift) * cp * c.dist);
     this.camera.lookAt(c.target);
     this.shiftCur += (this.shift - this.shiftCur) * k;
-    const el = this.renderer.domElement, w = el.clientWidth, h = el.clientHeight;
+    const w = innerWidth, h = innerHeight;
     if (Math.abs(this.shiftCur) > 0.002) this.camera.setViewOffset(w, h, 0, (this.shiftCur * h) / 2, w, h); else this.camera.clearViewOffset();
 
     this.sky.update(t, this.camera);

@@ -29,7 +29,16 @@ export interface BlockConfig {
   strict: boolean;
   /** ignore the window and only block while the app says a sleep session / wind-down is active */
   duringSleepOnly: boolean;
+  /**
+   * How Pip looks on the bedtime page and in the popup: the default owl, or the unlockable Meowl skin
+   * (a kitten's head on a little owl's body). Optional; missing means 'owl'. Purely cosmetic, so it
+   * applies at once even while strict mode is blocking.
+   */
+  mascot?: Mascot;
 }
+
+/** Pip's looks: 'owl' is the default, 'meowl' an unlockable skin. */
+export type Mascot = 'owl' | 'meowl';
 
 export interface BlockStatus {
   installed: true;
@@ -87,6 +96,7 @@ export function defaultBlockConfig(): BlockConfig {
     days: [...ALL_DAYS],
     strict: false,
     duringSleepOnly: false,
+    mascot: 'owl',
   };
 }
 

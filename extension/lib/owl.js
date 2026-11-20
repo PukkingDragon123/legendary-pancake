@@ -1,6 +1,9 @@
-// Pip the Meowl (a kitten's head on a little barn owl's body), drawn pixel by pixel. Builds small
-// sprite frames (arrays of colours) that pages blit onto a low-resolution canvas and scale up with
-// `image-rendering: pixelated`. tools/make-icons.mjs crops the toolbar icon from the same art.
+// Pip, drawn pixel by pixel. Two looks share one scaffold (branch, body proportions, outline, rim):
+//   'owl'   (default) a round little tawny owl
+//   'meowl' (unlockable skin) a kitten's head on a little barn owl's body
+// Builds small sprite frames (arrays of colours) that pages blit onto a low-resolution canvas and
+// scale up with `image-rendering: pixelated`. tools/make-icons.mjs crops the toolbar icon from the
+// same art.
 //
 // Lighting: moonlight from the upper right (cool rim light). Shapes are analytic (ellipses, triangles
 // and hand-placed details), shaded with short ramps and light 2x2 dithering, then outlined against
@@ -8,9 +11,46 @@
 
 export const PIP_W = 96;
 export const PIP_H = 64;
+export const MASCOTS = Object.freeze(['owl', 'meowl']);
 
+/** Shared by both looks: outline, moonlight, the branch. */
 const C = {
   outline: '#1b1326',
+  rim: '#a3b1ea',
+  rimSoft: '#7c7fb8',
+  bark: ['#2c1b1c', '#3f2a25', '#56392d', '#6e4c38'],
+  barkRim: '#7f8bc2',
+  leaf: ['#1f3a39', '#2f5449', '#467559', '#6c9a6b'],
+  leafRim: '#a6c7a0',
+};
+
+/** Pip's default look: a round little tawny owl. Ramps run dark -> light. */
+const OWL = {
+  crown: ['#5f3822', '#7d4c2f', '#9b6441', '#b07a50', '#c4925f'], // cocoa crown + back (#9b6441)
+  freckle: '#f4dcb2',
+  bar: '#5f3822',
+  tuftTip: '#f4dcb2',
+  disc: ['#e8d3ae', '#f5e6c9', '#fcf0da'], // facial disc (#fcf0da)
+  discLine: '#e7cfa5', // soft radiating feather lines
+  ruff: '#6a3f26',
+  brow: '#fffaf0',
+  eye: '#1a1210',
+  glint: '#ffffff',
+  beak: ['#b8792a', '#f3b24a', '#ffd683'], // honey beak (#f3b24a)
+  blush: '#f2a5a3',
+  body: ['#5f3822', '#7d4c2f', '#9b6441', '#b07a50', '#c4925f'],
+  wing: ['#5f3822', '#82512f', '#a36a3e', '#bd8456'], // (#a36a3e)
+  wingSpot: '#f4dcb2',
+  wingBar: '#5f3822',
+  belly: ['#e9d4ae', '#f1dfbf', '#f7e7c9'], // cream belly (#f7e7c9)
+  scallop: '#e8d0a6',
+  chevron: '#b98250',
+  feet: ['#c9912f', '#f2be5c'], // yellow feet (#f2be5c)
+  talon: '#3a2418',
+};
+
+/** The unlockable Meowl look: a kitten's head on a little barn owl's body. */
+const MEOWL = {
   // toasty tabby fur, dark -> light (base #c4935f)
   fur: ['#835a3a', '#a57548', '#c4935f', '#d6a874', '#e6c08e'],
   stripe: '#6a4a33',
@@ -24,7 +64,6 @@ const C = {
   blush: '#f4a3a8',
   whisker: '#fffdf8',
   whiskerTip: '#cfcbe0',
-  // barn-owl body
   body: ['#8a5a32', '#ae7543', '#cf8f52', '#dfa66b', '#ebbf88'],
   wing: ['#7a4c27', '#a26a3b', '#cf8f52', '#e0a96c'],
   wingBar: '#7d5130',
@@ -32,13 +71,8 @@ const C = {
   chest: ['#e4dbcc', '#f1ebe0', '#fdfaf3'],
   feet: ['#e2dbcf', '#fdfaf3'],
   talon: '#8a8580',
-  rim: '#a3b1ea',
-  rimSoft: '#7c7fb8',
-  bark: ['#2c1b1c', '#3f2a25', '#56392d', '#6e4c38'],
-  barkRim: '#7f8bc2',
-  leaf: ['#1f3a39', '#2f5449', '#467559', '#6c9a6b'],
-  leafRim: '#a6c7a0',
 };
+
 
 const BAYER2 = [
   [0.25, 0.75],
@@ -128,7 +162,7 @@ export function pipFrame(opts = {}) {
     for (let y = 0; y < PIP_H; y++) {
       for (let x = 0; x < PIP_W; x++) {
         const k = g.kind(x, y);
-        if (!k || k === 'eye' || k === 'feet' || k === 'face' || k === 'earIn') continue;
+        if (!k || k === 'eye' || k === 'feet' || k === 'face' || k === 'earIn' || k === 'ruff') continue;
         if (g.get(x + 1, y) && g.get(x, y - 1)) continue;
         if (k === 'bark') {
           const thin = g.kind(x, y + 2) !== 'bark';
@@ -146,6 +180,225 @@ export function pipFrame(opts = {}) {
   if (c.after) c.after(out);
 
   return { w: PIP_W, h: PIP_H, px: out };
+}
+
+/** Pip's default look: a round little tawny owl, head wider than tall. */
+function drawOwl(c) {
+  const { g, cx, mirror, feetY, breath, lift, eyes, L } = c;
+  const P = OWL;
+  const both = (x, y, color, kind = 'face') => {
+    g.set(x, y, color, kind);
+    g.set(mirror(x), y, color, kind);
+  };
+  const shadeAt = (nx, ny) => {
+    const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
+    return Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]);
+  };
+
+  // ---- body ----------------------------------------------------------------------------------
+  const bry = 10.4 + breath * 0.5;
+  const bcy = feetY - 0.4 - bry;
+  c.bcy = bcy;
+  const brxAt = (dy) => 12.0 + 1.4 * Math.max(-0.4, dy / bry);
+  for (let y = 0; y < PIP_H; y++) {
+    for (let x = 0; x < PIP_W; x++) {
+      const dy = y + 0.5 - bcy;
+      const nx = (x + 0.5 - cx) / brxAt(dy);
+      const ny = dy / bry;
+      if (nx * nx + ny * ny > 1) continue;
+      let v = 0.16 + 0.84 * shadeAt(nx, ny);
+      if (ny > 0.55) v -= 0.5 * (ny - 0.55);
+      g.set(x, y, P.body[rampIdx(clamp01(v), P.body.length, x, y, 0.35)], 'body');
+    }
+  }
+
+  // ---- wings: light spots on the coverts, barred flight feathers ---------------------------
+  for (const side of [-1, 1]) {
+    const wcx = cx + side * 9.3;
+    const wcy = bcy + 2.6;
+    const wrx = 5.2;
+    const wry = 8.8;
+    const bottom = Math.floor(wcy + wry);
+    for (let y = Math.floor(wcy - wry); y <= bottom; y++) {
+      for (let x = Math.floor(wcx - wrx); x <= Math.ceil(wcx + wrx); x++) {
+        if (g.kind(x, y) !== 'body') continue;
+        const dx = (x + 0.5 - wcx) / wrx;
+        const dy = (y + 0.5 - wcy) / wry;
+        const d = dx * dx + dy * dy;
+        if (d > 1) continue;
+        const inner = side < 0 ? dx > 0.35 : dx < -0.35;
+        let v = (side > 0 ? 0.66 : 0.4) - 0.25 * dy;
+        if (inner && d > 0.45) v += 0.28;
+        let color = P.wing[rampIdx(clamp01(v), P.wing.length, x, y, 0.3)];
+        const fromBottom = bottom - y;
+        if (dy > 0.25 && fromBottom % 2 === 1 && (x + y) % 4 !== 0) color = P.wingBar;
+        else if (dy > -0.75 && dy < 0.1 && y % 3 === 0 && (x + Math.floor(y / 3)) % 3 === 0) color = P.wingSpot;
+        g.set(x, y, color, 'wing');
+      }
+    }
+  }
+  for (let y = 0; y < PIP_H; y++) {
+    for (let x = 0; x < PIP_W; x++) {
+      if (g.kind(x, y) !== 'wing') continue;
+      const toward = x + 0.5 < cx ? x + 1 : x - 1;
+      if (g.kind(toward, y) === 'body') g.set(x, y, P.wing[0], 'wing');
+    }
+  }
+
+  // ---- cream belly: soft scallops and small brown chevrons ---------------------------------
+  const ccy = bcy - 0.6;
+  for (let y = Math.floor(ccy - 11); y <= Math.ceil(ccy + 11); y++) {
+    for (let x = 38; x <= 59; x++) {
+      const dx = (x + 0.5 - cx) / 7.6;
+      const dy = (y + 0.5 - ccy) / 10.4;
+      if (dx * dx + dy * dy > 1 || g.kind(x, y) !== 'body') continue;
+      const v = 0.82 - 0.4 * dy + 0.22 * dx;
+      let color = P.belly[rampIdx(clamp01(v), P.belly.length, x, y, 0.3)];
+      if (y % 3 === 0 && (x + Math.floor(y / 3) * 2) % 4 !== 0 && dx * dx + dy * dy < 0.8) color = P.scallop;
+      g.set(x, y, color, 'chest');
+    }
+  }
+  for (let r = 0; r < 4; r++) {
+    const y = Math.round(bcy - 1 + r * 3);
+    for (let x = 43 + (r % 2 ? 2 : 0); x <= 55; x += 4) {
+      if (g.kind(x, y) !== 'chest' || g.kind(x - 1, y - 1) !== 'chest' || g.kind(x + 1, y - 1) !== 'chest') continue;
+      g.set(x, y, P.chevron, 'chest');
+      g.set(x - 1, y - 1, P.chevron, 'chest');
+      g.set(x + 1, y - 1, P.chevron, 'chest');
+    }
+  }
+
+  // ---- yellow feet with dark talons --------------------------------------------------------
+  for (const s of [1, -1]) {
+    const X = (x) => (s > 0 ? x : mirror(x));
+    for (const x of [44, 45]) g.set(X(x), feetY - 1, P.feet[1], 'feet');
+    g.set(X(43), feetY, P.talon, 'feet');
+    g.set(X(44), feetY, P.feet[1], 'feet');
+    g.set(X(45), feetY, P.feet[0], 'feet');
+    g.set(X(46), feetY, P.talon, 'feet');
+  }
+
+  // ---- round head, wider than tall ---------------------------------------------------------
+  const hry = 10.0;
+  const hcy = feetY - 21.2 - lift;
+  const hrxAt = (dy) => 14.0 + 0.6 * Math.max(0, dy / hry);
+  const headTopF = hcy - hry;
+  const inHead = (x, y) => {
+    const dy = y + 0.5 - hcy;
+    return ((x + 0.5 - cx) / hrxAt(dy)) ** 2 + (dy / hry) ** 2 <= 1;
+  };
+  for (let y = 0; y < PIP_H; y++) {
+    for (let x = 0; x < PIP_W; x++) {
+      if (!inHead(x, y)) continue;
+      const dy = y + 0.5 - hcy;
+      const nx = (x + 0.5 - cx) / hrxAt(dy);
+      const ny = dy / hry;
+      const v = 0.2 + 0.8 * shadeAt(nx, ny) + (ny > 0.55 ? 0.12 : 0);
+      g.set(x, y, P.crown[rampIdx(clamp01(v), P.crown.length, x, y, 0.35)], 'head');
+    }
+  }
+  const topOf = (x) => {
+    for (let y = 0; y < PIP_H; y++) if (inHead(x, y)) return y;
+    return PIP_H;
+  };
+
+  // short feathery ear tufts with light tips (only the part poking above the head)
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 6; i++) {
+      const x = side < 0 ? 39 + i : mirror(39 + i);
+      const y0 = Math.round(headTopF - 2.4 + i * 0.95);
+      for (let y = y0; y < topOf(x); y++) {
+        if (g.get(x, y)) continue;
+        const tip = y === y0 && i < 2;
+        g.set(x, y, tip ? P.tuftTip : P.crown[side > 0 ? 3 : y === y0 ? 2 : 1], 'head');
+      }
+    }
+  }
+
+  // head shadow on the body under the chin
+  const shade = { body: P.body[0], wing: P.wing[0], chest: P.belly[0] };
+  for (let y = PIP_H - 1; y > 0; y--) {
+    for (let x = 0; x < PIP_W; x++) {
+      const k = g.kind(x, y);
+      if (k in shade && g.kind(x, y - 1) === 'head') g.set(x, y, shade[k], k);
+    }
+  }
+
+  const hc = Math.round(hcy);
+  const ht = Math.round(headTopF);
+
+  // cream freckles and darker bars on the crown
+  for (let y = ht; y <= hc + 8; y++) {
+    for (let x = 34; x <= 62; x++) {
+      if (g.kind(x, y) !== 'head' || y % 2 !== 0 || (x * 3 + y) % 7 !== 0) continue;
+      g.set(x, y, P.freckle, 'head');
+    }
+  }
+  both(45, ht + 2, P.bar, 'head');
+  both(46, ht + 2, P.bar, 'head');
+  both(41, ht + 4, P.bar, 'head');
+  both(42, ht + 4, P.bar, 'head');
+  g.set(48, ht + 3, P.bar, 'head');
+
+  // ---- facial disc: two round cream discs in a heart/mask, framed by a dark ruff -----------
+  const dcy = hc + 1.0;
+  const R = 5.1;
+  for (let y = hc - 7; y <= hc + 10; y++) {
+    for (let x = 34; x <= 62; x++) {
+      if (g.kind(x, y) !== 'head') continue;
+      const d1 = Math.hypot(x + 0.5 - 44.0, y + 0.5 - dcy);
+      const d2 = Math.hypot(x + 0.5 - 53.0, y + 0.5 - dcy);
+      const inV = inTri(x, y, [43.6, dcy + 2.2], [53.4, dcy + 2.2], [48.5, dcy + 6.6]);
+      if (d1 <= R || d2 <= R || inV) {
+        const near = d1 <= d2 ? 44.0 : 53.0;
+        const dm = Math.min(d1, d2);
+        const v = 0.98 - 0.08 * dm - 0.05 * Math.max(0, y + 0.5 - dcy);
+        let color = P.disc[rampIdx(clamp01(v), P.disc.length, x, y, 0.3)];
+        // soft feather lines radiating from each eye
+        const k = Math.atan2(y + 0.5 - dcy, x + 0.5 - near) / (Math.PI / 4);
+        if (dm >= 2.7 && dm <= R - 0.4 && Math.abs(k - Math.round(k)) < 0.15) color = P.discLine;
+        g.set(x, y, color, 'face');
+      } else if (d1 <= R + 1.15 || d2 <= R + 1.15 || inTri(x, y, [42.4, dcy + 1.6], [54.6, dcy + 1.6], [48.5, dcy + 8.1])) {
+        g.set(x, y, P.ruff, 'ruff');
+      }
+    }
+  }
+
+  // small white brows over the discs, dipping toward the beak
+  for (const x of [42, 43, 44, 45]) both(x, hc - 6, P.brow);
+  both(46, hc - 5, P.brow);
+
+  // eyes: small glossy dots in the middle of each disc, or sleepy curves
+  if (eyes === 'open') {
+    for (const s of [1, -1]) {
+      const X = (x) => (s > 0 ? x : mirror(x));
+      ['.##.', '####', '####', '.##.'].forEach((row, ry) =>
+        [...row].forEach((ch, rx) => {
+          if (ch === '#') g.set(X(42 + rx), hc - 1 + ry, P.eye, 'eye');
+        }),
+      );
+    }
+    g.set(43, hc, P.glint, 'eye'); // same catch-light corner on both eyes
+    g.set(52, hc, P.glint, 'eye');
+  } else if (eyes === 'blink') {
+    for (const x of [42, 43, 44, 45]) both(x, hc + 1, P.eye, 'eye');
+  } else {
+    both(42, hc + 1, P.eye, 'eye');
+    both(43, hc + 2, P.eye, 'eye');
+    both(44, hc + 2, P.eye, 'eye');
+    both(45, hc + 1, P.eye, 'eye');
+  }
+
+  // small hooked honey beak between and below the eyes
+  both(47, hc + 1, P.beak[1]);
+  g.set(48, hc + 1, P.beak[2], 'face');
+  both(47, hc + 2, P.beak[0]);
+  g.set(48, hc + 2, P.beak[1], 'face');
+  g.set(48, hc + 3, P.beak[0], 'face');
+
+  // a little pink blush
+  both(41, hc + 3, P.blush);
+  both(42, hc + 3, P.blush);
 }
 
 /** The Meowl skin: a kitten's head on a little barn owl's body. */

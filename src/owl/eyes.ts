@@ -81,15 +81,15 @@ export class Eye {
     if (mode === 'happy' || mode === 'closed') {
       // a soft curved line: ^ when delighted, ‿ when asleep
       for (let x = 2; x < N - 2; x++) {
-        const nx = (x + 0.5 - C) / 5.6;
+        const nx = (x + 0.5 - C) / 4.6;
         if (Math.abs(nx) > 1) continue;
         const k = Math.sqrt(1 - nx * nx);
-        const y = mode === 'happy' ? C + 1.6 - k * 3.4 : C - 0.6 + k * 2.4;
+        const y = mode === 'happy' ? C + 1.2 - k * 2.6 : C - 0.4 + k * 1.9;
         put(x, y, this.ink); put(x, y + 1, this.ink);
       }
     } else {
       // the bead: shifts a little with the glance, grows in the dark
-      const R = Math.max(3.6, Math.min(7.2, mode === 'wide' ? 6.9 : 4.9 + (s.pupil - 5) * 0.42));
+      const R = Math.max(3.2, Math.min(5.2, mode === 'wide' ? 4.9 : 3.9 + (s.pupil - 5) * 0.28));
       const cx = C + s.lx * 1.1, cy = C + s.ly * 0.9;
       const nxOf = (x: number) => (x + 0.5 - cx) / R;
       const lidEdge = (x: number) => { const nx = nxOf(x); return cy - R + s.lid * 2 * R * 1.04 + (1 - nx * nx) * 1.2 * s.lid + s.tilt * nx * inner * 2.6 * Math.min(1, s.lid * 3 + 0.4); };
@@ -103,7 +103,7 @@ export class Eye {
         if (s.low > 0.03 && yy > lowEdge(x)) { put(x, y, this.lidc[3]); continue; }
         // glossy bead: darkest at the top, a cool sheen pooling at the bottom
         const dy = (yy - cy) / R;
-        put(x, y, dy > 0.62 && Math.abs(x + 0.5 - cx) < R * 0.6 ? this.bead[1] : this.bead[0]);
+        put(x, y, this.bead[0]);
       }
       const dot = (px: number, py: number, r: number, c: number) => {
         for (let y = Math.floor(py - r - 1); y <= py + r + 1; y++) for (let x = Math.floor(px - r - 1); x <= px + r + 1; x++)
@@ -127,11 +127,10 @@ export class Eye {
         }
       } else {
         // catch-lights: one big, one tiny, opposite corners; they stay put while the bead glances
-        const big = Math.max(1.3, R * 0.36);
-        dot(cx - R * 0.32 - s.lx * 0.4, cy - R * 0.34, big, white);
-        dot(cx + R * 0.42, cy + R * 0.38, Math.max(0.6, R * 0.14), 0xe8f0ff);
+        // a simple dot with one tiny glint
+        dot(cx - R * 0.36, cy - R * 0.38, 1.05, white);
         if (mode === 'sparkle' || mode === 'wide') {
-          dot(cx + R * 0.3, cy - R * 0.5, 0.75, white);
+          dot(cx + R * 0.38, cy + R * 0.3, 0.7, white);
           if (mode === 'sparkle') { for (const k of [-1, 0, 1]) { if (open(Math.round(cx - 1 + k), Math.round(cy + 2))) put(cx - 1 + k, cy + 2, white); } }
         }
       }

@@ -91,7 +91,7 @@ export function plate(x: number, y: number, z: number, w: number, h: number, d: 
 // ------------------------------------------------------------------ painting
 
 /** Ramps with warm shadows for warm colours (no grey-lavender mud on cream and white). */
-function fr(c: string, step = 0.05): Ramp {
+function fr(c: string, step = 0.042): Ramp {
   const [, C, h] = toLch(col(c));
   const warm = (h > 15 && h < 115) || C < 0.05;
   return ramp(col(c), warm ? { cool: 40, warm: 88, shift: 0.045, step } : { step });
@@ -136,13 +136,13 @@ function feather(a: number, b: number, fw: number, fh: number, seed: number) {
   const arc = 0.45 + 0.55 * Math.sqrt(Math.max(0, 1 - (2 * u - 1) ** 2));
   const dd = v - arc;
   let L: number;
-  if (dd >= 0) L = -0.95 + Math.min(dd, 0.3) * 2.2;
+  if (dd >= 0) L = -0.7 + Math.min(dd, 0.3) * 1.7;
   else {
     L = 0.4 - v * 0.55 - Math.abs(u - 0.5) * 0.6;
     if (dd > -0.15) L += 0.6;
     else if (Math.abs(u - 0.5) < 0.07 && v > 0.12) L -= 0.32;
   }
-  L += (hash(row, c, 3, seed) - 0.5) * 0.45;
+  L += (hash(row, c, 3, seed) - 0.5) * 0.25;
   return { L, row, col: c, u, v, dd };
 }
 
@@ -294,13 +294,12 @@ export function meowlPainter(p: OwlPalette): Painter {
     ohead(t) {
       if (t.face === 3) return tone(belly, -0.5);
       // the front of the head behind the disc is the dark ruff that frames it
-      if (t.face === 4 && t.y < G.headTop - 1.6) return tone(liner, soft(t, G.headTop, 12) * 0.5 - 0.1 + strokes(t.x, -t.y, 1, 0.5, 4) * 0.6);
+      if (t.face === 4 && t.y < G.headTop - 1.6) return tone(liner, soft(t, G.headTop, 12) * 0.4 + 0.4);
       const [a, b] = surf(t);
       const f = feather(a, G.headTop + 2 - t.y + (t.face === 2 ? (G.headFront - t.z) * 0.9 - (G.headTop + 2 - t.y) : 0), 1.75, 1.2, 5);
       const base = soft(t, G.headTop, 12) * 0.75;
-      if (f.dd < -0.12 && hash(f.row, f.col, 7, 5) < 0.3 && Math.hypot((f.u - 0.5) * 1.75, (f.v - 0.36) * 1.2) < 0.36) return tone(speck, base * 0.5 + 0.5);
-      const dark = hash(f.row, f.col, 9, 5) > 0.84;
-      return tone(dark ? stripe : fur, base + f.L + (dark ? 0.9 : 0));
+      if (f.dd < -0.12 && (f.row + f.col * 2) % 5 === 0 && Math.hypot((f.u - 0.5) * 1.75, (f.v - 0.36) * 1.2) < 0.34) return tone(speck, base * 0.4 + 0.6);
+      return tone(fur, base + f.L * 0.8);
     },
     disc(t) {
       // sides of the raised disc are the ruff: a crisp dark outline around the face
@@ -311,8 +310,8 @@ export function meowlPainter(p: OwlPalette): Painter {
       let L = 0.7 - Math.max(0, d - 2.6) * 0.32;
       // fine radiating feathers, painted as alternating soft strokes
       const ray = Math.sin(ang * 16 + d * 0.9);
-      if (ray > 0.66) L -= 0.42; else if (ray < -0.8) L += 0.18;
-      if (d > 2.75 && d < 3.25) L -= 0.55; // a soft socket ring round each eye
+      if (ray > 0.72) L -= 0.28;
+      if (d > 2.6 && d < 3.0) L -= 0.3; // a soft socket ring round each eye
       if (Math.hypot(Math.abs(t.x) - 5.4, t.y - 16.5) < 1.1) return tone(blush, 0.5 + (t.y > 16.8 ? 0.4 : 0));
       if (Math.abs(t.x) < 1.9 && t.y < 16.2) L += 0.35;
       return tone(muzzle, L + (hash(Math.floor(t.x * 3), Math.floor(t.y * 3), 2, 8) - 0.5) * 0.14);
@@ -351,8 +350,8 @@ export function meowlPainter(p: OwlPalette): Painter {
       const [a, b] = surf(t);
       const f = feather(a, b, 2.1, 1.5, 13);
       const base = soft(t, G.bodyY + G.bodyH, 12) * 0.75;
-      if (f.dd < -0.12 && hash(f.row, f.col, 7, 13) < 0.22 && Math.hypot((f.u - 0.5) * 2.1, (f.v - 0.36) * 1.5) < 0.4) return tone(speck, base * 0.5 + 0.4);
-      return tone(hash(f.row, f.col, 9, 13) > 0.85 ? stripe : wing, base + f.L);
+      if (f.dd < -0.12 && (f.row * 2 + f.col) % 5 === 0 && Math.hypot((f.u - 0.5) * 2.1, (f.v - 0.36) * 1.5) < 0.38) return tone(speck, base * 0.4 + 0.5);
+      return tone(wing, base + f.L * 0.8);
     };
     P.body = (t) => (t.face === 3 || (t.face === 4 && Math.hypot(t.x / 4.9, (t.y - 8.4) / 5.4) < 1) ? P.obelly(t) : P.back(t));
     const meowlWing = P.wing;
@@ -362,8 +361,8 @@ export function meowlPainter(p: OwlPalette): Painter {
       if (b < 5.2 && (outer || t.face === 2)) {
         const a = -t.z;
         const f = feather(a + 50, b, 1.75, 1.2, 31);
-        if (f.dd < -0.12 && hash(f.row, f.col, 7, 31) < 0.42 && Math.hypot((f.u - 0.5) * 1.75, (f.v - 0.34) * 1.2) < 0.36) return tone(speck, 0.55);
-        return tone(wing, soft(t, G.shoulderY + 1, 12) * 0.7 + 0.2 + f.L);
+        if (f.dd < -0.12 && (f.row + f.col) % 3 === 0 && Math.hypot((f.u - 0.5) * 1.75, (f.v - 0.34) * 1.2) < 0.34) return tone(speck, 0.6);
+        return tone(wing, soft(t, G.shoulderY + 1, 12) * 0.7 + 0.2 + f.L * 0.8);
       }
       return meowlWing(t);
     };

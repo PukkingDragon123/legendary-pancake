@@ -279,12 +279,18 @@ async function saveConfigNow(input, from) {
   const st = await load();
   const next = sanitizeConfig(input, st.config);
   if (locked(st, now)) {
-    const grown = { ...st.config, sites: union(st.config.sites, next.sites), custom: union(st.config.custom, next.custom) };
+    // additions and Pip's look apply at once; anything that loosens waits for the window to end
+    const grown = {
+      ...st.config,
+      sites: union(st.config.sites, next.sites),
+      custom: union(st.config.custom, next.custom),
+      mascot: next.mascot,
+    };
     let pending;
     if (from === 'app') pending = next;
     else {
       const p = st.pendingConfig ?? st.config;
-      pending = { ...p, sites: union(p.sites, next.sites), custom: union(p.custom, next.custom) };
+      pending = { ...p, sites: union(p.sites, next.sites), custom: union(p.custom, next.custom), mascot: next.mascot };
     }
     const same = JSON.stringify(pending) === JSON.stringify(grown);
     await api.storage.local.set({ config: grown, pendingConfig: same ? null : pending });
