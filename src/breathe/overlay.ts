@@ -75,10 +75,10 @@ export class BreathOverlay {
       const dd = Math.hypot(x + 0.5 - ox, (y + 0.5 - oy) * 1.04) - R;
       const ad = Math.abs(dd);
       let a = 0;
-      if (ad < 1.1) a = 0.95;
+      if (ad < 1.6) a = 0.95;
       else {
         // halo: falls off with distance, quantised through an ordered dither so it stays pixel-crisp
-        const fall = Math.max(0, 1 - ad / (dd < 0 ? reach * 1.2 : reach)) ** 2 * 0.55;
+        const fall = Math.max(0, 1 - ad / (dd < 0 ? reach * 1.2 : reach)) ** 2 * 0.7;
         a = fall > BAYER[(y & 3) * 4 + (x & 3)] * 0.9 ? Math.min(0.55, fall + 0.18) : 0;
       }
       if (a) add(x, y, cr, cg, cb, a * shimmer * intensity);

@@ -77,7 +77,8 @@ export function BreatheSession() {
     let last = performance.now(), raf = 0, lastCue = '';
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
-      const dt = Math.min(0.05, (now - last) / 1000);
+      // (dev) window.__breathSpeed fast-forwards the session for screenshots on slow renderers
+      const dt = Math.min(0.05, (now - last) / 1000) * ((window as unknown as { __breathSpeed?: number }).__breathSpeed ?? 1);
       last = now;
       if (st.current.paused) return;
       let lung = 0, kind: Phase['kind'] = 'rest';
