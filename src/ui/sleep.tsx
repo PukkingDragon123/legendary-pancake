@@ -1,20 +1,58 @@
 // Sleep: the bedside alarm clock and tonight's plan; the dim night screen while you sleep (and Pip
 // explores); and the morning alarm.
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { AREA } from '../game/catalog.ts';
 import { bedtimeOf, blockStatus, demoTonight, endNight, eventsTonight, micState, nextWakeAt, phase, requestNotifications, snooze, startNight, syncReminders, trace } from '../game/night.ts';
 import { edit, save } from '../game/store.ts';
 import { WoodClock } from './clock.tsx';
-import { IcoBed, IcoBell, IcoMap, IcoMic, IcoMoon, IcoPause, IcoPlay, IcoShield, IcoSparkle, IcoSun, SOUNDSCAPE_ICON } from './icons.tsx';
+import { IcoBed, IcoBell, IcoMap, IcoMic, IcoMoon, IcoPause, IcoPlay, IcoShield, IcoSparkle, IcoSun, Px, SOUNDSCAPE_ICON } from './icons.tsx';
 import { fmtDur, fmtHM, fmtTime, Setting, Sheet, SlideToConfirm, Tags, tap, toast, Toggle, useTick } from './kit.tsx';
 import { panel, sceneRef, tab } from './state.ts';
 
 const SOUNDSCAPES = [
-  { v: 'none', label: 'Silence' }, { v: 'amb_rain', label: 'Rain' }, { v: 'amb_waves', label: 'Waves' }, { v: 'amb_brown', label: 'Steady hush' },
+  { v: 'none', label: 'Silence' }, { v: 'amb_rain', label: 'Rain' }, { v: 'amb_waves', label: 'Waves' }, { v: 'amb_brown', label: 'Hush' },
   { v: 'amb_forest_night', label: 'Night forest' }, { v: 'amb_fire', label: 'Fireplace' }, { v: 'amb_stream', label: 'Stream' }, { v: 'music_lullaby', label: 'Lullaby' },
 ];
 const ALARMS = [{ v: 'alarm_musicbox', label: 'Music box' }, { v: 'alarm_kalimba', label: 'Kalimba' }, { v: 'alarm_birds', label: 'Dawn birds' }, { v: 'alarm_bells', label: 'Lullaby bells' }];
+/** tile art for each sound: a sprite and a little sky behind it */
+const SOUND_ART: Record<string, { sprite: string; sky: [string, string] }> = {
+  none: { sprite: 'speaker_off', sky: ['#7d7f9c', '#4b4d68'] }, amb_rain: { sprite: 'rain', sky: ['#5f78b8', '#2f3f78'] },
+  amb_waves: { sprite: 'waves', sky: ['#4fa6b8', '#24607a'] }, amb_brown: { sprite: 'wind', sky: ['#9a86c8', '#56448a'] },
+  amb_forest_night: { sprite: 'leaf', sky: ['#4f8a5a', '#23452f'] }, amb_fire: { sprite: 'campfire', sky: ['#d98a4a', '#7a3424'] },
+  amb_stream: { sprite: 'drop', sky: ['#5fb8c8', '#2d6f8a'] }, music_lullaby: { sprite: 'music', sky: ['#c27ab8', '#5e3478'] },
+  alarm_musicbox: { sprite: 'music', sky: ['#f0c26a', '#c07a3a'] }, alarm_kalimba: { sprite: 'note', sky: ['#e8a07a', '#a65242'] },
+  alarm_birds: { sprite: 'birdhouse', sky: ['#9fd0e8', '#5b93c0'] }, alarm_bells: { sprite: 'bell', sky: ['#f4d77a', '#c8913a'] },
+};
+/** Illustrated sound tiles: tap to choose and hear a few seconds; the chosen one wears a gold frame. */
+function SoundTiles(p: { options: { v: string; label: string }[]; value: string; onPick: (v: string) => void; preview: (v: string) => number }) {
+  const [hearing, setHearing] = useState<string | null>(null);
+  const timer = useRef(0);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  return (
+    <div class="sound-tiles">
+      {p.options.map((o) => {
+        const a = SOUND_ART[o.v] ?? SOUND_ART.none, on = p.value === o.v, live = hearing === o.v;
+        return (
+          <button class={'pick sound-tile' + (on ? ' on' : '') + (live ? ' live' : '')} aria-pressed={on} onClick={() => {
+            tap('ui_tab', 0.4); p.onPick(o.v);
+            const ms = p.preview(o.v);
+            clearTimeout(timer.current);
+            setHearing(ms ? o.v : null);
+            if (ms) timer.current = window.setTimeout(() => setHearing(null), ms);
+          }}>
+            <span class="sky" style={{ '--a': a.sky[0], '--b': a.sky[1] } as any}>
+              <i class="star s1" /><i class="star s2" /><i class="star s3" />
+              <Px name={a.sprite} size={40} />
+              {live && <span class="eq"><i /><i /><i /><i /></span>}
+            </span>
+            <span class="name">{o.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 export function SleepSheet() {
@@ -61,7 +99,7 @@ export function SleepSheet() {
 
       <div class="card col">
         <Setting icon={<IcoBell />} title="Alarm" sub={p.alarmOn ? `${ALARMS.find((a) => a.v === p.alarmSound)?.label} · swells gently` : 'No alarm tonight'}><Toggle on={p.alarmOn} onChange={(v) => set((x) => { x.alarmOn = v; })} label="Alarm" /></Setting>
-        {p.alarmOn && <Tags value={p.alarmSound} onChange={(v) => { set((x) => { x.alarmSound = v; }); sound.preview(v, 4, 'alarm'); }} options={ALARMS} />}
+        {p.alarmOn && <SoundTiles value={p.alarmSound} options={ALARMS} onPick={(v) => set((x) => { x.alarmSound = v; })} preview={(v) => { sound.preview(v, 4, 'alarm'); return 4000; }} />}
       </div>
 
       <div class="card col">
@@ -73,7 +111,7 @@ export function SleepSheet() {
 
       <div class="card col">
         <div><h3>Falling-asleep sounds</h3><p class="small muted">Real recordings, fading out softly</p></div>
-        <div class="tags">{SOUNDSCAPES.map((o) => { const I = SOUNDSCAPE_ICON[o.v]; return <button class={'tag' + (p.soundscape === o.v ? ' on' : '')} style="--tag:#4a58a8" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.soundscape = o.v; }); if (o.v !== 'none') sound.preview(o.v, 5); }}>{I && <I size={20} />}{o.label}</button>; })}</div>
+        <SoundTiles value={p.soundscape} options={SOUNDSCAPES} onPick={(v) => set((x) => { x.soundscape = v; })} preview={(v) => { if (v === 'none') return 0; sound.preview(v, 5); return 5000; }} />
         {p.soundscape !== 'none' && <>
           <Tags value={p.soundscapeMin} onChange={(v) => set((x) => { x.soundscapeMin = v; })} options={[{ v: 15, label: '15 min' }, { v: 30, label: '30 min' }, { v: 60, label: '1 hour' }, { v: 0, label: 'All night' }]} />
           <div class="row"><span class="small muted" style="width:56px">Volume</span><input class="slider grow" type="range" min="0.1" max="1" step="0.05" value={p.soundscapeVol} onInput={(e) => set((x) => { x.soundscapeVol = +(e.target as HTMLInputElement).value; })} /></div>
@@ -133,7 +171,7 @@ export function NightOverlay() {
       <div class="grow" />
       <div class="col" style="padding:0 20px calc(22px + var(--safe-b));gap:12px;max-width:520px;width:100%;margin:0 auto" onClick={(e) => e.stopPropagation()}>
         <div class="card night" style="padding:12px 14px">
-          <div class="spread"><span class="label">{micState.value === 'listening' ? 'Listening on this device' : micState.value === 'denied' ? 'Microphone blocked: tracking by time only' : micState.value === 'paused' ? 'Paused: keep the screen on' : 'Tracking by time only'}</span><span class="label">{eventsTonight.value} sounds</span></div>
+          <div class="spread"><span class="label">{micState.value === 'listening' ? 'Listening on this device' : micState.value === 'denied' ? 'Microphone blocked: tracking by time only' : micState.value === 'paused' ? 'Paused: keep the screen on' : micState.value === 'unsupported' ? 'Tracking by time (the mic works in the full app)' : 'Tracking by time only'}</span><span class="label">{eventsTonight.value} sounds</span></div>
           {micState.value === 'listening' && <Squiggle />}
         </div>
         <div class="row" style="gap:10px">

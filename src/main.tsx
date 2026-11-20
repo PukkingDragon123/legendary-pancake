@@ -7,6 +7,8 @@ import { connectBlocker, notePeek, phase, pushBlockerConfig, resumeNight, setupR
 import { dayKey, edit, save, zones } from './game/store.ts';
 import { consumeLaunchAction, onSWMessage, registerSW } from './sleep/index.ts';
 import { App } from './ui/app.tsx';
+import { flyReward, watchLevel } from './ui/fx.tsx';
+import { progress } from './game/quests.ts';
 import { IcoAcorn, IcoMoon, IcoSparkle, IcoStone } from './ui/icons.tsx';
 import { toast } from './ui/kit.tsx';
 import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
@@ -40,6 +42,22 @@ async function boot() {
   sound.volumes({ sfx: st.sfx, music: st.music, amb: st.ambience });
   scene.on((e) => {
     if (e.type === 'sound') sceneSound(e.id);
+    if (e.type === 'catch') {
+      sound.play('sparkle', { volume: 0.5 });
+      edit((x) => { x.acorns += 1; });
+      flyReward('acorn', 10, { x: e.x, y: e.y });
+      if (progress('catch')) toast('Quest done: fireflies caught!', IcoSparkle);
+    }
+    if (e.type === 'pet' && phase.value === 'day') {
+      scene.owl.setMood('love', 1.6);
+      scene.owl.play('nod');
+      sound.play('pet_purr', { volume: 0.35, gap: 900 });
+      const o = scene.owl.node.position; scene.fx.burst('hearts', o.x, o.y + 1.3, o.z, 2);
+      if (progress('pet')) toast('Quest done: Pip feels very loved', IcoSparkle);
+    }
+    if (e.type === 'tapGround' && phase.value === 'day' && !breathing.value && !panel.value && tab.value === 'home') {
+      if (scene.hopTo(e.x, e.z)) { progress('hop'); sound.play('rustle_grass', { volume: 0.3, gap: 300 }); }
+    }
     if (e.type === 'tapOwl' && phase.value === 'day' && !breathing.value) {
       scene.owl.poke();
       say(lines.poke());
@@ -88,7 +106,12 @@ async function boot() {
   if (phase.value === 'sleeping') void resumeNight();
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase.value === 'sleeping') notePeek(); });
   void connectBlocker();
-  void registerSW();
+  if (import.meta.env.MODE !== 'artifact') void registerSW();
+  watchLevel();
+  // a #breathe link (from the bedtime blocker) opens the breathing exercise
+  const route = () => { if (location.hash === '#breathe' && save.value.onboarded && phase.value === 'day') { tab.value = 'breathe'; panel.value = null; } };
+  route();
+  addEventListener('hashchange', route);
   onSWMessage((m) => { if (m.action === 'snooze') snooze(9); else if (m.action === 'dismiss') void endNight(); });
   const la = consumeLaunchAction();
   if (la?.action === 'snooze') snooze(9);

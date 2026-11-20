@@ -12,11 +12,17 @@ import { IcoAcorn, IcoLock, IcoSatchel, IcoSparkle, IcoStone } from './icons.tsx
 import { Price, Seg, Sheet, tap, toast } from './kit.tsx';
 import { coatIcon, itemIcon, pieceIcon } from './portraits.ts';
 import { marketTab, panel } from './state.ts';
+import { ask } from './fx.tsx';
+import { spriteURL } from './px/sprites.js';
 
 /** Where real payments would plug in (App Store, Play Billing, Stripe...). */
 export interface PurchaseProvider { buy(p: Product): Promise<boolean> }
 export const demoStore: PurchaseProvider = {
-  async buy(p) { await new Promise((r) => setTimeout(r, 600)); return confirm(`Demo store\n\n${p.name} (${p.blurb}) for ${p.price}.\n\nThis build has no payment provider connected, so nothing will be charged. Grant it for testing?`); },
+  async buy(p) {
+    await new Promise((r) => setTimeout(r, 250));
+    return ask({ title: p.name, art: spriteURL(p.stones ? 'moonstone' : 'star', 6), ok: `Grant for testing`, cancel: 'Cancel', tone: 'honey',
+      body: <>{p.blurb} · <b>{p.price}</b><br /><span class="small">Demo store: no payment provider is connected, so nothing is charged.</span></> });
+  },
 };
 
 function Detail(p: { b: Buyable; name: string; blurb: string; art: string; onClose: () => void }) {
@@ -135,7 +141,7 @@ function Stones() {
         <div class="row" style="gap:10px"><IcoSparkle size={40} /><div><h2 style="color:#fff4d6">Hoot Hollow Plus</h2><p class="small" style="opacity:.85">{s.plus.active ? `Active · ${s.plus.plan === 'yearly' ? 'yearly' : 'monthly'} plan` : 'Optional. Everything important stays free.'}</p></div></div>
         <ul>{PLUS_PERKS.map((p) => <li>{p}</li>)}</ul>
         {!s.plus.active ? <div class="col" style="gap:8px">{PLUS_PLANS.map((p) => <button class="btn pillow honey block" onClick={() => void plus(p)}>{p.blurb} · {p.price}{p.badge && <span class="small" style="opacity:.8"> ({p.badge})</span>}</button>)}</div>
-          : <button class="btn soft block" onClick={() => { tap(); if (confirm('Cancel Hoot Hollow Plus? (demo store)')) edit((x) => { x.plus = { active: false }; }); }}>Manage subscription</button>}
+          : <button class="btn soft block" onClick={async () => { tap(); if (await ask({ title: 'Cancel Plus?', body: 'Pip keeps everything already collected. (Demo store, nothing is charged.)', ok: 'Cancel Plus', cancel: 'Keep it', tone: 'berry' })) edit((x) => { x.plus = { active: false }; }); }}>Manage subscription</button>}
       </div>
       <div class="col" style="gap:8px"><div class="label">Moonstones</div>
         {STONE_PACKS.map((p) => (

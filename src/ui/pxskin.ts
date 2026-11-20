@@ -78,6 +78,21 @@ export function installPixelSkin() {
 .seal{background:${fixedBg('medallion', 3)} no-repeat 0 0/100% 100%}
 .title-ribbon{${frameStyle('ribbon_green', 2)}}
 .plaque{${frameStyle('plaque', 2)}}
+.modal{${frameStyle('parchment', 3)}}
+.quest.ready{${frameStyle('sticky_note', 2)}}
+.quest.claimed{${frameStyle('parchment_dark', 2)}}
+.qbar{${frameStyle('bar_track', 2)}}
+.qbar>i{${frameStyle('bar_fill_green', 2)}}
+.quest.ready .qbar>i{${frameStyle('bar_fill_gold', 2)}}
+.title-ribbon.red{${frameStyle('ribbon_red', 2)}}
+.ribbon-head{${frameStyle('ribbon_green', 2)}}
+.pick{${frameStyle('slot_brass', 2)}}
+.pick.on{${frameStyle('slot_gold_active', 2)}}
+.pick.locked{${frameStyle('slot_locked', 2)}}
+.pick.sound-tile{${frameStyle('slot_brass', 1)}}
+.pick.sound-tile.on{${frameStyle('slot_gold_active', 1)}}
+.think{${frameStyle('bubble_think', 2)}}
+.tooltip{${frameStyle('tooltip', 2)}}
 `;
   const st = document.createElement('style');
   st.id = 'hh-pixel-skin';

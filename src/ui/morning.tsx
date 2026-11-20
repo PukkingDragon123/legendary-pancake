@@ -12,6 +12,9 @@ import { IcoAcorn, IcoPlay, IcoSatchel, IcoStar, IcoStone, Px } from './icons.ts
 import { fmtDur, fmtTime, Sheet, tap, toast } from './kit.tsx';
 import { coatIcon, itemIcon, pieceIcon } from './portraits.ts';
 import { lines, say, sceneRef } from './state.ts';
+import { progress } from '../game/quests.ts';
+import { flyReward } from './fx.tsx';
+import { voice, type Tts } from './voice.ts';
 
 const STAGE_Y: Record<Stage, number> = { awake: 0, rem: 1, light: 2, deep: 3 };
 const STAGE_C: Record<Stage, string> = { awake: '#f2a65a', rem: '#9a7ae0', light: '#7fb0e8', deep: '#3f5aa8' };
@@ -54,7 +57,7 @@ function Clips(p: { id: string }) {
 export function NightReport(p: { s: SleepSession; onNext?: () => void; onClose?: () => void }) {
   const s = p.s, r = s.report!, h12 = save.value.settings.hour12;
   const qual = { restless: 'A restless night', okay: 'An okay night', good: 'A good night', great: 'A wonderful night' }[r.quality];
-  const setMood = (n: number) => { tap('stamp', 0.5); edit((x) => { const ni = x.nights.find((y) => y.id === s.id); if (ni) ni.mood = n; }); };
+  const setMood = (n: number) => { tap('stamp', 0.5); edit((x) => { const ni = x.nights.find((y) => y.id === s.id); if (ni) ni.mood = n; }); progress('mood'); };
   const mood = save.value.nights.find((y) => y.id === s.id)?.mood;
   return (
     <Sheet title={qual} sub={new Date(s.start).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + (s.simulated ? ' · demo night' : '')} onClose={p.onClose}>
@@ -80,7 +83,7 @@ export function NightReport(p: { s: SleepSession; onNext?: () => void; onClose?:
         <div><div class="label" style="margin-bottom:8px">How do you feel?</div>
           <div class="moods">{MOODS.map((m, i) => <button class={'mood' + (mood === i ? ' on' : '')} aria-label={m} onClick={() => setMood(i)}><MoodFace n={i} /></button>)}</div>
         </div>
-        <textarea class="field" placeholder="Dreams, thoughts, anything…" value={save.value.nights.find((y) => y.id === s.id)?.note ?? ''} onInput={(e) => { const v = (e.target as HTMLTextAreaElement).value; edit((x) => { const ni = x.nights.find((y) => y.id === s.id); if (ni) ni.note = v; }); }} />
+        <textarea class="field" placeholder="Dreams, thoughts, anything…" value={save.value.nights.find((y) => y.id === s.id)?.note ?? ''} onInput={(e) => { const v = (e.target as HTMLTextAreaElement).value; edit((x) => { const ni = x.nights.find((y) => y.id === s.id); if (ni) ni.note = v; }); if (v.trim().length > 3) progress('note'); }} />
       </div></div>
       {save.value.plus.active && <Clips id={s.id} />}
       {p.onNext && <button class="btn pillow honey big block" onClick={() => { tap('paper_flip', 0.6); p.onNext!(); }}><IcoSatchel size={40} />See what Pip found</button>}
@@ -111,8 +114,19 @@ export function Treasure(p: { onDone: () => void }) {
     if (!adv) return;
     if (stage === 'story' && shown < adv.story.length) { const id = setTimeout(() => { setShown(shown + 1); sound.play('pencil', { volume: 0.35 }); }, shown ? 1300 : 400); return () => clearTimeout(id); }
   }, [stage, shown, adv]);
+  const [tts, setTts] = useState<Tts | null>(null);
+  const [reading, setReading] = useState(false);
+  useEffect(() => { let live = true; void voice().then((t) => { if (live && t) { setTts(t); t.onState((st) => setReading(st.state === 'speaking' || st.state === 'paused')); } }); return () => { live = false; }; }, []);
+  useEffect(() => () => tts?.stop(), [tts]);
   if (!adv) return null;
   const area = AREA[adv.area];
+  const readAloud = () => {
+    if (!tts) return;
+    tap('page', 0.4);
+    if (reading) { tts.stop(); return; }
+    setShown(adv.story.length);
+    tts.speak(adv.story.map((text) => ({ text, voice: 'rounded', rate: 0.92 })), { voice: 'rounded' }).catch(() => setReading(false));
+  };
   const open = () => {
     tap('reward_unlock', 0.7);
     setStage('open');
@@ -128,6 +142,9 @@ export function Treasure(p: { onDone: () => void }) {
     tap('coin_purse', 0.7);
     sound.play('reward_coin', { volume: 0.6 });
     collectAdventure();
+    flyReward('acorn', adv.acorns);
+    setTimeout(() => flyReward('star', adv.xp, { x: innerWidth / 2, y: innerHeight * 0.6 }), 300);
+    if (adv.stones) setTimeout(() => flyReward('moonstone', adv.stones * 10), 600);
     const sc = sceneRef.current;
     if (sc) { sc.owl.play('dance'); const o = sc.owl.node.position; sc.fx.burst('coins', o.x, o.y + 0.8, o.z + 0.3, 14); }
     toast(`+${adv.acorns} acorns · +${adv.xp} XP${adv.stones ? ` · +${adv.stones} moonstones` : ''}`, IcoAcorn);
@@ -138,6 +155,7 @@ export function Treasure(p: { onDone: () => void }) {
     <Sheet title={`Adventure in ${area?.name ?? 'the woods'}`} sub="From Pip's travel journal">
       <div class="card col" style="gap:10px">
         <span class="pin" />
+        {tts && <button class={'read-aloud icon-btn' + (reading ? ' on' : '')} aria-label={reading ? 'Stop reading' : 'Hear Pip tell it'} onClick={readAloud}><Px name={reading ? 'pause' : 'speaker_on'} size={40} /></button>}
         {adv.story.slice(0, shown).map((l) => <p class="note" style="animation:rise .6s var(--ease)">{l}</p>)}
         {shown < adv.story.length && <p class="note" style="opacity:.5">…</p>}
       </div>

@@ -106,7 +106,7 @@ export function edit(f: (s: Save) => void) {
   persist();
 }
 export function flush() { clearTimeout(timer); try { localStorage.setItem(KEY, JSON.stringify(save.value)); } catch { /* */ } }
-export function resetSave() { localStorage.removeItem(KEY); save.value = freshSave(); }
+export function resetSave() { try { localStorage.removeItem(KEY); } catch { /* storage blocked */ } save.value = freshSave(); }
 
 // ------------------------------------------------------------------ derived
 
@@ -157,11 +157,13 @@ export function buy(b: Buyable): string | null {
 
 export function wear(slot: OutfitSlot, id: string | null) {
   edit((s) => { if (id) s.look.outfit[slot] = id; else delete s.look.outfit[slot]; });
+  void import('./quests.ts').then((q) => q.progress('dress'));
 }
-export function setCoat(id: string) { edit((s) => { s.look.palette = id; }); }
+export function setCoat(id: string) { edit((s) => { s.look.palette = id; }); void import('./quests.ts').then((q) => q.progress('dress')); }
 
 export function placeFurniture(slot: string, item: string | null) {
   edit((s) => { if (item) { for (const [k, v] of Object.entries(s.furniture)) if (v === item) delete s.furniture[k]; s.furniture[slot] = item; } else delete s.furniture[slot]; });
+  if (item) void import('./quests.ts').then((q) => q.progress('decorate'));
 }
 
 export const trinketName = (id: string) => TRINKET[id]?.name ?? id;

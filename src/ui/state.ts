@@ -3,7 +3,7 @@ import { signal } from '@preact/signals';
 import type { Scene } from '../world/scene.ts';
 
 export type Tab = 'home' | 'sleep' | 'breathe' | 'journal' | 'market';
-export type Panel = null | 'wardrobe' | 'decorate' | 'map' | 'settings' | 'night';
+export type Panel = null | 'wardrobe' | 'decorate' | 'map' | 'settings' | 'night' | 'quests';
 
 export const tab = signal<Tab>('home');
 export const panel = signal<Panel>(null);

@@ -13,7 +13,7 @@ import { buildFlora, planForest, type Flora, type ForestPlan } from './flora.ts'
 import { Fx, SPR } from './fx.ts';
 import { GRASS, makeGrass, FG, type GrassItem } from './grass.ts';
 import { buildGardenFence, buildHouse, type House, type Slot, type Zone } from './house.ts';
-import { GARDEN, groundY, HOUSE, MEADOW } from './layout.ts';
+import { GARDEN, groundY, HOUSE, MEADOW, walkable } from './layout.ts';
 import { hourFor, Sky, type SkyMode } from './sky.ts';
 import { buildTerrain, type Terrain } from './terrain.ts';
 
@@ -24,7 +24,9 @@ export type SceneEvent =
   | { type: 'tapOwl' }
   | { type: 'tapSlot'; id: string }
   | { type: 'tapGround'; x: number; z: number }
-  | { type: 'sound'; id: string };
+  | { type: 'sound'; id: string }
+  | { type: 'catch'; x: number; y: number }
+  | { type: 'pet'; x: number; y: number };
 
 export const ALL_ITEMS: ItemDef[] = [...HOME_ITEMS, ...FURNITURE];
 export const ITEMS: Record<string, ItemDef> = Object.fromEntries(ALL_ITEMS.map((i) => [i.id, i]));
@@ -56,7 +58,8 @@ export class Scene {
   /** decorate mode: show slot markers and accept slot taps */
   decorating = false;
   /** where the owl is supposed to be */
-  owlPlace: 'porch' | 'bed' | 'inside' | 'away' | 'log' | 'loft' = 'porch';
+  owlPlace: 'porch' | 'bed' | 'inside' | 'away' | 'log' | 'loft' | 'roam' = 'porch';
+  private roamAt = new THREE.Vector3();
 
   private cam: Cam = { yaw: 0, pitch: 0.3, dist: 19, target: new THREE.Vector3(0, 2.6, -2.2) };
   private cur: Cam = { yaw: 0, pitch: 0.3, dist: 19, target: new THREE.Vector3(0, 2.6, -2.2) };
@@ -163,6 +166,7 @@ export class Scene {
     if (p === 'inside') return s.inside.clone();
     if (p === 'loft') return s.loft.clone();
     if (p === 'log') return new THREE.Vector3(MEADOW.x, 0.66, 2.6);
+    if (p === 'roam') return this.roamAt.clone();
     return new THREE.Vector3(0, 9, -30);
   }
 
@@ -178,7 +182,7 @@ export class Scene {
 
   /** Hop or fly to another spot. */
   moveOwl(p: Scene['owlPlace'], done?: () => void) {
-    if (p === this.owlPlace && !this.trip) { done?.(); return; }
+    if (p === this.owlPlace && p !== 'roam' && !this.trip) { done?.(); return; }
     const from = this.owl.node.position.clone(), to = this.spot(p);
     const d = from.distanceTo(to);
     const fly = d > 2.4 || Math.abs(to.y - from.y) > 0.6;
@@ -187,6 +191,15 @@ export class Scene {
     this.owl.pose = fly ? 'fly' : 'stand';
     if (fly) this.emit({ type: 'sound', id: 'owl_flap' });
     this.trip = { from, to, t: 0, dur: fly ? Math.max(1.1, d * 0.28) : d * 0.55 + 0.3, mode: fly ? 'fly' : 'hop', done, arc: fly ? Math.max(1.2, d * 0.25) : 0 };
+  }
+
+  /** Hop to a spot on the meadow the player tapped. Returns false if Pip can't go there. */
+  hopTo(x: number, z: number): boolean {
+    if (this.trip || this.owl.pose !== 'stand' || !walkable(x, z)) return false;
+    this.roamAt.set(x, groundY(x, z), z);
+    this.owlPlace = 'roam' as never;
+    this.moveOwl('roam');
+    return true;
   }
 
   /** Fly off into the night for an adventure. */
@@ -474,12 +487,19 @@ export class Scene {
 
   private input(el: HTMLCanvasElement) {
     const pts = new Map<number, { x: number; y: number }>();
-    let moved = 0, pinch = 0, downAt = 0;
+    let moved = 0, pinch = 0, downAt = 0, onOwl = false, rub = 0;
+    const owlHit = (cx: number, cy: number) => {
+      if (!this.owl.node.visible) return false;
+      const r = el.getBoundingClientRect();
+      this.ray.setFromCamera(new THREE.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1), this.camera);
+      return this.ray.ray.distanceToPoint(this.owl.node.position.clone().add(new THREE.Vector3(0, 0.85, 0))) < 0.9;
+    };
     el.style.touchAction = 'none';
     el.addEventListener('pointerdown', (e) => {
       el.setPointerCapture(e.pointerId);
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      moved = 0; downAt = performance.now();
+      moved = 0; downAt = performance.now(); rub = 0;
+      onOwl = pts.size === 1 && owlHit(e.clientX, e.clientY);
       if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); }
     });
     el.addEventListener('pointermove', (e) => {
@@ -494,6 +514,7 @@ export class Scene {
         pinch = d;
         return;
       }
+      if (onOwl) { rub += Math.abs(dx) + Math.abs(dy); if (rub > 70) { rub = 0; this.emit({ type: 'pet', x: e.clientX, y: e.clientY }); } return; }
       if (moved > 6 && this.view !== 'breathe' && this.view !== 'sleep') this.userYaw = Math.max(-0.7, Math.min(0.7, this.userYaw - dx * 0.004));
     });
     const up = (e: PointerEvent) => {
@@ -509,6 +530,14 @@ export class Scene {
         const items = [...this.placed.entries()];
         const hit2 = this.ray.intersectObjects(items.map(([, v]) => v.mesh), false)[0];
         if (hit2) { const found = items.find(([, v]) => v.mesh === hit2.object); if (found) { this.emit({ type: 'tapSlot', id: found[0] }); return; } }
+      }
+      const fi = this.fireflies.pick(this.ray.ray);
+      if (fi >= 0) {
+        const p = this.fireflies.position(fi);
+        this.fx.burst('sparkle', p.x, p.y, p.z, 10);
+        this.fireflies.respawn(fi);
+        this.emit({ type: 'catch', x: e.clientX, y: e.clientY });
+        return;
       }
       if (this.owl.node.visible) {
         const c = this.owl.node.position.clone().add(new THREE.Vector3(0, 0.85, 0));

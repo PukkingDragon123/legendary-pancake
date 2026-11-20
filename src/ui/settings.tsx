@@ -8,6 +8,23 @@ import { WoodClock } from './clock.tsx';
 import { IcoBell, IcoClose, IcoGear, IcoMic, IcoNote, IcoPhoneOff, IcoPlus, IcoShield, IcoSparkle } from './icons.tsx';
 import { fmtDur, fmtHM, Setting, Sheet, Tags, tap, toast, Toggle } from './kit.tsx';
 import { panel, sceneRef, tab } from './state.ts';
+import { ask } from './fx.tsx';
+import { spriteURL } from './px/sprites.js';
+
+/** Save the journal as JSON: through the host's download sheet when embedded, else a plain link. */
+async function exportJournal() {
+  const data = JSON.stringify(save.value, null, 2), filename = 'hoot-hollow-journal.json';
+  const host = (window as any).claude;
+  if (host?.use) {
+    try {
+      const dl = await host.use('downloads');
+      if (dl) { await dl.save({ filename, data }); toast('Journal saved', IcoNote); return; }
+    } catch { toast('Export was cancelled', IcoNote); return; }
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+  a.download = filename; a.click();
+}
 
 const pretty = (d: string) => d.replace(/\.(com|net|tv)$/, '').replace(/^x$/, 'X (Twitter)').replace(/^\w/, (c) => c.toUpperCase());
 
@@ -77,9 +94,9 @@ export function Settings() {
         <div class="label">Your data</div>
         <p class="small muted">Everything (nights, recordings, Pip's treasures) is stored only on this device. Nothing is uploaded.</p>
         <div class="row" style="gap:8px;flex-wrap:wrap">
-          <button class="btn soft sm" onClick={() => { tap(); flush(); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(save.value, null, 2)], { type: 'application/json' })); a.download = 'hoot-hollow-journal.json'; a.click(); }}>Export journal</button>
+          <button class="btn soft sm" onClick={() => { tap(); flush(); void exportJournal(); }}>Export journal</button>
           <button class="btn soft sm" onClick={() => { tap(); demoTonight(); panel.value = null; }}>Preview a demo night</button>
-          <button class="btn soft sm" style="color:#b3304a" onClick={() => { if (confirm('Erase everything and start over? This cannot be undone.')) { resetSave(); location.reload(); } }}>Start over</button>
+          <button class="btn soft sm" style="color:#b3304a" onClick={async () => { if (await ask({ title: 'Start over?', body: 'This erases Pip, the journal and every treasure. It cannot be undone.', ok: 'Erase everything', cancel: 'Keep my hollow', tone: 'berry', art: spriteURL('owl', 4) })) { resetSave(); location.reload(); } }}>Start over</button>
         </div>
       </div>
       <div class="card col small">

@@ -8,6 +8,7 @@ import { AlarmClock, analyze, closeAlarmNotification, demoNight, nextOccurrence,
 import { rollAdventure } from './adventure.ts';
 import { BlockerBridge, type BlockStatus } from './blocker.ts';
 import { dayKey, edit, flush, ownsEntry, save } from './store.ts';
+import { progress } from './quests.ts';
 
 export type Phase = 'day' | 'sleeping' | 'ringing' | 'morning';
 
@@ -77,6 +78,8 @@ function onLevel(l: LiveLevel) {
 async function startRecorder(s: SleepSession) {
   const p = save.value.sleep;
   if (!p.mic) { micState.value = 'off'; return; }
+  // inside the claude.ai artifact frame there is no microphone: the night is tracked by time
+  if (import.meta.env.MODE === 'artifact') { micState.value = 'unsupported'; edit((x) => { if (x.active) x.active.session.micUsed = false; }); return; }
   recorder = new SleepRecorder({
     onLevel, sensitivity: p.sensitivity, recordClips: p.clips && save.value.plus.active, sessionId: s.id, origin: s.start,
     onEvent: () => { eventsTonight.value++; },
@@ -102,6 +105,7 @@ export async function startNight(o: { alarm: boolean }) {
   sound.unlock();
   const p = save.value.sleep;
   const start = Date.now();
+  { const [bh, bm] = bedtimeOf(p.wake, p.goalMin).split(':').map(Number); const b = new Date(start); b.setHours(bh, bm, 0, 0); if (b.getTime() - start < 12 * 3600_000 && b.getTime() >= start - 60_000) progress('early'); }
   const wakeTarget = o.alarm && p.alarmOn ? nextWakeAt(start + 20 * 60_000) : undefined;
   const session: SleepSession = { id: 'n' + start.toString(36), start, wakeTarget, smartWindowMin: p.smartMin, micUsed: p.mic, epochs: [], events: [] };
   edit((x) => { x.active = { session, area: x.area, peeks: [] }; });
@@ -187,6 +191,7 @@ function finishSession(s: SleepSession, area: string, peeks: number[]) {
     }
   });
   flush();
+  if (!s.simulated && report.asleep >= 7 * 3600_000) progress('sleep7');
   phase.value = 'morning';
 }
 

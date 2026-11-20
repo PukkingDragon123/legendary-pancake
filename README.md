@@ -46,6 +46,14 @@ Other scripts: `npm test` (44 sleep-engine tests), `npm run typecheck`. Dev-only
 `/dev-owl.html` (owl coats/outfits/expressions sheet), `/dev-scene.html?hour=22&view=home`
 (scene views and times of day), `/dev-px.html` (every pixel icon and UI frame).
 
+### As a claude.ai Artifact
+
+`npm run build:artifact` builds a relative-path bundle into `dist-artifact/` for publishing as a
+claude.ai Artifact. In that mode the service worker is skipped, nights are tracked by time (the
+artifact frame has no microphone), the adventure story can be read aloud through the host's `tts`
+capability, and the journal export goes through the host's `downloads` capability. Linking to
+`#breathe` opens the breathing exercise.
+
 ### The bedtime blocker extension
 
 Load `extension/` as an unpacked extension (Chrome/Edge/Brave: `chrome://extensions`, Developer mode,
@@ -95,5 +103,7 @@ is listed in [`docs/AUDIO-CREDITS.md`](docs/AUDIO-CREDITS.md) and `public/sfx/cr
   minute late; it can't ring if the app is closed. A native wrapper or push server would remove this.
 - **Social-media blocking works in desktop browsers** via the extension. Mobile browsers don't run
   extensions, so the app points you to Screen Time / Digital Wellbeing.
+- **The Artifact build can't use the microphone or a service worker**, so sleep tracking there is
+  by time only and reminders fire only while the page is open.
 - **Payments are a demo.** Wire a real provider into `PurchaseProvider` before shipping.
 - The sounds were chosen by measurement (levels, loops, clipping), not auditioned by ear.

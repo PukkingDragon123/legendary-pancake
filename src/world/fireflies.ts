@@ -86,6 +86,21 @@ export class Fireflies {
     }
   }
 
+  /** The firefly nearest a tap ray (within reach), or -1. */
+  pick(ray: THREE.Ray, reach = 0.55): number {
+    if (this.alpha < 0.5) return -1;
+    let best = -1, bd = reach;
+    this.flies.forEach((f, i) => { const d = ray.distanceToPoint(f.p); if (d < bd) { bd = d; best = i; } });
+    return best;
+  }
+  position(i: number) { return this.flies[i].p.clone(); }
+  /** Send a caught firefly back out into the dark somewhere else. */
+  respawn(i: number) {
+    const f = this.flies[i], a = Math.random() * Math.PI * 2, r = 4 + Math.random() * 6;
+    f.p.set(Math.cos(a) * r, 0.5 + Math.random() * 2.4, Math.sin(a) * r);
+    f.v.set(0, 0, 0);
+  }
+
   update(dt: number, t: number) {
     this.mat.uniforms.uTime.value = t;
     this.mat.uniforms.uAlpha.value = this.alpha;

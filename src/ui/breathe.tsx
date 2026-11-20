@@ -9,12 +9,41 @@ import { dayKey, edit, save } from '../game/store.ts';
 import { IcoAcorn, IcoBreath, IcoClose, IcoPause, IcoPlay } from './icons.tsx';
 import { haptic, Setting, Sheet, Tags, tap, toast, Toggle } from './kit.tsx';
 import { breathing, lines, say, sceneRef } from './state.ts';
+import { progress } from '../game/quests.ts';
+import { flyReward } from './fx.tsx';
 
-function Rhythm(p: { id: string }) {
+function Rhythm(p: { id: string; live?: boolean }) {
   const pt = PATTERN[p.id];
   const total = pt.phases.reduce((a, x) => a + x.sec, 0);
   const col = { in: '#e8a83a', hold: '#c9b8e8', out: '#7f9be0', rest: '#c9b8e8' };
-  return <div class="rhythm" style="width:100%">{pt.phases.map((x) => <i style={{ width: `${(x.sec / total) * 100}%`, background: col[x.kind], opacity: x.kind === 'hold' || x.kind === 'rest' ? 0.7 : 1 }} />)}</div>;
+  const head = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (!p.live || !head.current) return;
+    const a = head.current.animate([{ left: '0%' }, { left: '100%' }], { duration: total * 1000, iterations: Infinity, easing: 'linear' });
+    return () => a.cancel();
+  }, [p.live, p.id]);
+  return <div class="rhythm" style="width:100%;position:relative">{pt.phases.map((x) => <i style={{ width: `${(x.sec / total) * 100}%`, background: col[x.kind], opacity: x.kind === 'hold' || x.kind === 'rest' ? 0.7 : 1 }} />)}{p.live && <b class="playhead" ref={head as any} />}</div>;
+}
+
+/** The pattern's lantern breathes the rhythm itself: swells on the inhale, rests, settles on the exhale. */
+function Lantern(p: { id: string; live: boolean }) {
+  const el = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!p.live || !el.current) return;
+    const pt = PATTERN[p.id], total = pt.phases.reduce((a, x) => a + x.sec, 0);
+    let t = 0, sc = 0.86;
+    const frames: Keyframe[] = [{ offset: 0, transform: `scale(${sc})`, filter: 'drop-shadow(0 0 0 rgba(255,214,120,0))' }];
+    for (const ph of pt.phases) {
+      t += ph.sec;
+      if (ph.kind === 'in') sc = Math.min(1.28, sc + 0.42 * (ph.sec / 4));
+      if (ph.kind === 'out') sc = 0.86;
+      const glow = (sc - 0.86) / 0.42;
+      frames.push({ offset: t / total, transform: `scale(${sc.toFixed(3)})`, filter: `drop-shadow(0 0 ${Math.round(glow * 10)}px rgba(255,214,120,${(glow * 0.9).toFixed(2)}))` });
+    }
+    const a = el.current.animate(frames, { duration: total * 1000, iterations: Infinity, easing: 'ease-in-out' });
+    return () => a.cancel();
+  }, [p.live, p.id]);
+  return <span class="lantern" ref={el}><IcoBreath size={40} /></span>;
 }
 
 export function BreathePicker() {
@@ -25,11 +54,11 @@ export function BreathePicker() {
       <div class="col" style="gap:8px">
         {PATTERNS.map((p) => (
           <button class={'pattern' + (b.pattern === p.id ? ' on' : '')} onClick={() => { tap('ui_tab', 0.45); edit((x) => { x.breath.pattern = p.id; }); }}>
-            <IcoBreath size={40} />
+            <Lantern id={p.id} live={b.pattern === p.id} />
             <div class="grow col" style="gap:4px">
               <div class="spread"><b class="display" style="font-size:17px">{p.name}</b><span class="label">{p.best}</span></div>
               <span class="small muted">{p.blurb}</span>
-              <Rhythm id={p.id} />
+              <Rhythm id={p.id} live={b.pattern === p.id} />
             </div>
           </button>
         ))}
@@ -113,6 +142,8 @@ export function BreatheSession() {
     const first = save.value.breath.lastDay !== today;
     const reward = first ? 20 : 5;
     edit((x) => { x.breath.sessions++; x.breath.minutes += minutes; x.breath.lastDay = today; x.acorns += reward; x.xp += 10; });
+    progress('breathe');
+    setTimeout(() => flyReward('acorn', reward * 3), 600);
     sound.play('bowl', { volume: 0.6 });
     sc?.breathFx(null);
     sc?.owl.setMood('joy', 2.5);

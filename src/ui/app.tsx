@@ -1,11 +1,14 @@
 // The app shell: HUD, dock, tonight's ticket, Pip's speech bubble, and whichever sheet, panel or
 // overlay is open. The 3D scene lives underneath on its own canvas.
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { sound } from '../audio/sound.ts';
+import { claimable } from '../game/quests.ts';
+import { Ceremony, Dialogs, Flyers, QuestBoard } from './fx.tsx';
 import { bedtimeOf, phase } from '../game/night.ts';
 import { level, save } from '../game/store.ts';
 import { AREA } from '../game/catalog.ts';
 import { BreathePicker, BreatheSession } from './breathe.tsx';
-import { IcoAcorn, IcoBrush, IcoCandle, IcoClock, IcoGear, IcoHanger, IcoHouse, IcoJar, IcoJournal, IcoMap, IcoMoon, IcoSatchel, IconDefs, IcoStone } from './icons.tsx';
+import { Px, IcoAcorn, IcoBrush, IcoCandle, IcoClock, IcoGear, IcoHanger, IcoHouse, IcoJar, IcoJournal, IcoMap, IcoMoon, IcoSatchel, IconDefs, IcoStone } from './icons.tsx';
 import { Journal } from './journal.tsx';
 import { fmtDur, fmtHM, Rolling, tap, Toasts, useTick } from './kit.tsx';
 import { Market } from './market.tsx';
@@ -32,8 +35,8 @@ function Hud() {
         <button class="chip" style="margin-left:6px" onClick={() => { tap(); tab.value = 'journal'; }} aria-label="Night streak"><IcoCandle size={40} />{s.streak} night{s.streak === 1 ? '' : 's'}</button>
       </div>
       <div class="chips">
-        <button class="chip" onClick={() => { tap(); tab.value = 'market'; }} aria-label="Acorns"><IcoAcorn size={40} /><Rolling value={s.acorns} /></button>
-        <button class="chip" onClick={() => { tap(); tab.value = 'market'; }} aria-label="Moonstones"><IcoStone size={40} /><Rolling value={s.stones} /></button>
+        <button class="chip" data-chip="acorn" onClick={() => { tap(); tab.value = 'market'; }} aria-label="Acorns"><IcoAcorn size={40} /><Rolling value={s.acorns} /></button>
+        <button class="chip" data-chip="moonstone" onClick={() => { tap(); tab.value = 'market'; }} aria-label="Moonstones"><IcoStone size={40} /><Rolling value={s.stones} /></button>
       </div>
     </div>
   );
@@ -41,10 +44,14 @@ function Hud() {
 
 function Tools() {
   const away = tab.value !== 'home' || !!panel.value || phase.value !== 'day' || !!breathing.value || !save.value.onboarded;
-  const t = (label: string, I: typeof IcoBrush, p: typeof panel.value) => (
-    <div class="tool"><button class="icon-btn" aria-label={label} onClick={() => { tap('ui_open', 0.5); panel.value = p; }}><I size={40} /></button><span>{label}</span></div>
+  const ready = claimable();
+  const t = (label: string, I: typeof IcoBrush | null, p: typeof panel.value, dot = 0, sprite = '') => (
+    <div class="tool">
+      <button class="icon-btn" aria-label={label} onClick={() => { tap('ui_open', 0.5); panel.value = p; }}>{I ? <I size={30} /> : <Px name={sprite} size={30} />}{dot > 0 && <span class="badge-dot">{dot}</span>}</button>
+      <span>{label}</span>
+    </div>
   );
-  return <div class={'tools' + (away ? ' away' : '')}>{t('Settings', IcoGear, 'settings')}{t('Dress up', IcoHanger, 'wardrobe')}{t('Decorate', IcoBrush, 'decorate')}{t('Map', IcoMap, 'map')}</div>;
+  return <div class={'tools' + (away ? ' away' : '')}>{t('Settings', IcoGear, 'settings')}{t('Quests', null, 'quests', ready, 'clipboard')}{t('Dress up', IcoHanger, 'wardrobe')}{t('Decorate', IcoBrush, 'decorate')}{t('Map', IcoMap, 'map')}</div>;
 }
 
 function Ticket() {
@@ -87,8 +94,24 @@ function Bubble() {
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, [b?.id]);
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    if (!b) return;
+    setShown(0);
+    let i = 0;
+    const voices = ['voice_a', 'voice_b', 'voice_c', 'voice_e'];
+    const id = setInterval(() => {
+      i++;
+      setShown(i);
+      const ch = b.text[i - 1] ?? '';
+      // Pip's little voice: a soft blip every other letter, pitched by the letter
+      if (i % 2 === 0 && /[a-z]/i.test(ch)) sound.play(voices[ch.charCodeAt(0) % voices.length], { volume: 0.18, rate: 1.5 + ((ch.charCodeAt(0) * 7) % 11) / 40, gap: 40 });
+      if (i >= b.text.length) clearInterval(id);
+    }, 28);
+    return () => clearInterval(id);
+  }, [b?.id]);
   if (!b || phase.value !== 'day' || breathing.value) return null;
-  return <div class="bubble" ref={ref} key={b.id}><span class="who">{save.value.name}</span>{b.text}</div>;
+  return <div class="bubble" ref={ref} key={b.id}><span class="who">{save.value.name}</span>{b.text.slice(0, shown)}<span style="opacity:0">{b.text.slice(shown)}</span></div>;
 }
 
 const DOCK: { id: Tab; label: string; I: typeof IcoHouse }[] = [
@@ -130,6 +153,7 @@ export function App() {
       {ph === 'day' && panel.value === 'decorate' && <Decorate />}
       {ph === 'day' && panel.value === 'map' && <MapPanel />}
       {panel.value === 'settings' && <Settings />}
+      {ph === 'day' && panel.value === 'quests' && <QuestBoard />}
       <Dock />
       {night && night.report && ph === 'day' && <NightReport s={night} onClose={() => { nightOpen.value = null; }} />}
       {breathing.value && <BreatheSession key={JSON.stringify(breathing.value)} />}
@@ -137,6 +161,9 @@ export function App() {
       {ph === 'ringing' && <AlarmOverlay />}
       {ph === 'morning' && <Morning />}
       {!s.onboarded && ph === 'day' && <Onboarding />}
+      <Flyers />
+      <Ceremony />
+      <Dialogs />
       <Toasts />
     </div>
   );
