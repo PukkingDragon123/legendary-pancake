@@ -1,0 +1,14 @@
+import { Scene, type View } from '../world/scene.ts';
+const q = new URLSearchParams(location.search);
+const sc = new Scene(document.getElementById('c') as HTMLCanvasElement, { palette: q.get('pal') ?? 'tabby', outfit: q.get('outfit') ? JSON.parse(q.get('outfit')!) : {} }, 'high');
+(window as any).sc = sc;
+if (q.get('hour')) sc.setHour(+q.get('hour')!);
+sc.setZones({ loft: !!q.get('loft'), deck: !!q.get('deck'), garden: !!q.get('garden') });
+sc.setFurniture({ g_back: 'nestbed', g_left: 'moonlamp', g_right: 'bookshelf', g_mid: 'roundrug', w_back: 'cuckoo', g_frontL: 'fernpot', l_left: 'armchair', l_right: 'telescope' });
+sc.setView((q.get('view') ?? 'home') as View);
+if (q.get('place')) sc.placeOwl(q.get('place') as any);
+if (q.get('hour')) sc.setHour(+q.get('hour')!);
+if (q.get('decor')) sc.setDecorating(true);
+sc.snapCamera();
+for (let i = 0; i < 60; i++) sc.step(1 / 30, false);
+sc.start();

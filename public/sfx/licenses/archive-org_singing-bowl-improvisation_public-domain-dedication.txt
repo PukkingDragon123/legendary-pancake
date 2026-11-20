@@ -1,0 +1,31 @@
+Source: https://archive.org/details/SingingBowlImprovisation (retrieved 2026-11-20)
+Metadata: https://archive.org/metadata/SingingBowlImprovisation (retrieved 2026-11-20)
+
+Item metadata as published by archive.org (fields copied verbatim):
+
+    title: Singing Bowl Improvisation
+    creator: luke jones
+    description: Short back garden singing bowl improv.
+    subject: singing bowls
+    licenseurl: http://creativecommons.org/licenses/publicdomain/
+    addeddate: 2008-07-08 13:42:44
+    publicdate: 2008-07-08 13:43:36
+    collection: opensource_audio, community
+
+The licenseurl http://creativecommons.org/licenses/publicdomain/ redirects to
+https://creativecommons.org/publicdomain/certification/1.0/us/ ("Copyright-Only Dedication (based on United States law)
+or Public Domain Certification 1.0 United States"). Verbatim from that deed page (retrieved 2026-11-20):
+
+    Notice 2010-10-11: Creative Commons has retired this legal tool and does not recommend that it be applied to works.
+
+    The person or persons who have associated work with this document (the "Dedicator" or "Certifier") hereby either (a) certifies that, to the best of his knowledge, the work of authorship identified is in the public domain of the country from which the work is published, or (b) hereby dedicates whatever copyright the dedicators holds in the work of authorship identified below (the "Work") to the public domain. A certifier, moreover, dedicates any copyright interest he may have in the associated work, and for these purposes, is described as a "dedicator" below. A certifier has taken reasonable steps to verify the copyright status of this work. Certifier recognizes that his good faith efforts may not shield him from liability if in fact the work certified is not in the public domain.
+
+Notes:
+  * The dedication was attached by the uploader of the item, who names "luke jones" as creator; the description says it is
+    a "short back garden singing bowl improv", which reads as the uploader's own recording. archive.org does not verify
+    such claims.
+  * Creative Commons retired this tool in 2010 (CC0 replaced it), but a dedication made with it in 2008 still applies.
+    It is a public-domain dedication, not CC0; it is based on United States law.
+
+Recording used: bowls.mp3 (the item's VBR MP3 file), 70.21-79.76 s (one strike and its decay)
+Used for: bowl.mp3

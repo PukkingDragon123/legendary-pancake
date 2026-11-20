@@ -1,0 +1,22 @@
+Source: https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm (retrieved 2026-11-10)
+
+Verbatim statement on that page:
+
+    The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the "National Park Service" where appropriate.
+
+Recordings used from this library:
+
+  * https://www.nps.gov/yell/learn/photosmultimedia/sounds-soundscapes.htm
+      page text: Soundscape - Lower Geyser Basin (Strong Wind) A strong wind blows in the trees around the boardwalks of Lower Geyser Basin. Binaural recording, best heard through headphones. Credit / Author: NPS/Peter Comley Date created: 03/21/2015
+      used for: amb_wind.mp3
+
+
+  * https://www.nps.gov/yell/learn/photosmultimedia/sounds-dawnchorus.htm (retrieved 2026-11-20)
+      page text: Dawn Chorus Immerse yourself in some early morning birdsong recorded near Mammoth Hot Springs. Credit / Author: NPS/Jennifer Jerrett Date created: 06/28/2014 Audio Transcript Sustained Sound [Many different kinds of birds singing] [Woodpeckers drumming]
+      used for: alarm_birds.mp3
+
+  * https://www.nps.gov/yell/learn/photosmultimedia/sounds-hurricanevent.htm (retrieved 2026-11-20)
+      page text: Hurricane Vent [...] Now, Hurricane is no longer an erupting geyser, but rather a powerful steam vent that can be heard from the boardwalk overlooking Porcelain Basin. What will Hurricane sound like years from now? Binaural recording. Credit / Author: NPS/Peter Comley Date created: 03/23/2015 Audio Transcript Sustained Sound [Powerful steam venting and hissing]
+      used for: amb_brown.mp3
+
+The library-page statement above was re-read on 2026-11-20 (page unchanged: sha256 2f4464cc6dc09fc4d54bddbe0b105b900caaee08b2107630cea86bcffd9511a7).

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="light" />
+    <title>Hoot Hollow Bedtime</title>
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="popup.css" />
+    <script type="module" src="popup.js"></script>
+  </head>
+  <body>
+    <div class="frame">
+      <span class="peg peg-tl" aria-hidden="true"></span>
+      <span class="peg peg-tr" aria-hidden="true"></span>
+      <span class="peg peg-bl" aria-hidden="true"></span>
+      <span class="peg peg-br" aria-hidden="true"></span>
+
+      <main class="paper">
+        <header class="head">
+          <canvas id="owl" width="32" height="36" aria-hidden="true"></canvas>
+          <div class="brand">
+            <h1>Hoot Hollow</h1>
+            <p class="sub">Bedtime guard</p>
+          </div>
+          <label class="switch" title="Turn the blocker on or off">
+            <input type="checkbox" id="enabled" />
+            <span class="track" aria-hidden="true"><span class="knob"></span></span>
+            <span class="sr">Blocker on</span>
+          </label>
+        </header>
+
+        <section class="status" id="status" data-mode="awake" aria-live="polite">
+          <div class="status-text">
+            <p class="status-title" id="status-title">Loading&hellip;</p>
+            <p class="status-sub" id="status-sub"></p>
+          </div>
+          <button class="mini" id="pause-btn" type="button" hidden>Just this once&hellip;</button>
+          <button class="mini" id="resume-btn" type="button" hidden>Back to bed</button>
+        </section>
+
+        <form class="pause" id="pause-form" hidden autocomplete="off">
+          <p>
+            Pip will look the other way for <b>5 minutes</b>, then it&rsquo;s back to the nest. To promise, type
+            <q class="phrase">i choose sleep</q>
+          </p>
+          <div class="row">
+            <input id="pause-input" type="text" spellcheck="false" aria-label="Type: i choose sleep" placeholder="i choose sleep" />
+            <button class="btn" id="pause-go" type="submit" disabled>Pause</button>
+          </div>
+          <button class="link" id="pause-cancel" type="button">Never mind, I&rsquo;ll rest</button>
+        </form>
+
+        <p class="lock" id="lock" hidden></p>
+
+        <section class="block">
+          <h2>Bedtime window</h2>
+          <div class="window-row">
+            <input type="time" id="start" aria-label="Bedtime starts" required />
+            <span class="to">to</span>
+            <input type="time" id="end" aria-label="Bedtime ends" required />
+          </div>
+          <div class="days" id="days" role="group" aria-label="Nights"></div>
+          <div class="toggles">
+            <label class="check" title="No pausing, and no loosening settings, while bedtime is on">
+              <input type="checkbox" id="strict" /><span class="box" aria-hidden="true"></span>Strict mode
+            </label>
+            <label class="check" title="Ignore the window; block only while Hoot Hollow says you're winding down or asleep">
+              <input type="checkbox" id="sleep-only" /><span class="box" aria-hidden="true"></span>Only in sleep mode
+            </label>
+          </div>
+        </section>
+
+        <section class="block">
+          <h2>Sites <span class="count" id="site-count"></span></h2>
+          <div class="sites" id="sites"></div>
+          <form class="add" id="add-form" autocomplete="off">
+            <input id="add-input" type="text" spellcheck="false" placeholder="add a site, e.g. news.example.com" aria-label="Add a site to block" />
+            <button class="btn" type="submit">Add</button>
+          </form>
+          <p class="error" id="add-error" role="alert" hidden></p>
+        </section>
+
+        <section class="block app">
+          <h2>Hoot Hollow app</h2>
+          <div class="app-row">
+            <p id="app-line">Not paired yet.</p>
+            <button class="mini" id="open-app" type="button" hidden>Open</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

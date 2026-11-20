@@ -1,0 +1,89 @@
+// The shape of the forest diorama: where the clearing, pond, paths and hills are.
+// Everything else (terrain, planting, navigation, water shader) reads from these functions.
+import { fbm } from '../gfx/noise.ts';
+
+/** World is N x N blocks centred on the origin; +z is towards the default camera. */
+export const N = 48;
+export const HALF = N / 2;
+export const SEED = 20261110;
+
+export const POND = { x: 7.8, z: 3.4, rx: 3.9, rz: 2.8 };
+/** Placeable garden plot (centre and half extents, blocks). */
+export const GARDEN = { x: -7.6, z: 3.0, hw: 3.2, hd: 2.6 };
+/** The owl's tree house: trunk centre and footprint radius in blocks. */
+export const HOUSE = { x: 0, z: -4.4, r: 3.4 };
+/** A clear spot in front of the house where the owl sits for breathing exercises. */
+export const MEADOW = { x: 1.2, z: 3.2 };
+
+/** Distance from the house trunk in blocks (negative inside). */
+export const houseD = (x: number, z: number) => Math.hypot(x - HOUSE.x, z - HOUSE.z) - HOUSE.r;
+export const WATER_Y = -0.34;
+
+/** < 1 inside the pond. */
+export function pondD(x: number, z: number): number {
+  const dx = (x - POND.x) / POND.rx, dz = (z - POND.z) / POND.rz;
+  const a = Math.atan2(dz, dx);
+  return Math.hypot(dx, dz) + 0.08 * Math.sin(a * 3 + 1.3) + 0.05 * Math.sin(a * 7 + 0.4);
+}
+
+const PATHS: [number, number][][] = [
+  [[0, -1.2], [0.3, 1.6], [-0.4, 4.4], [0.6, 7.6], [2.8, 11], [5.6, 15.5], [7.5, 24]],
+  [[-0.2, 4.6], [-3.4, 4.0], [-5.0, 3.4]],
+];
+
+/** Distance in blocks to the nearest path centre line. */
+export function pathD(x: number, z: number): number {
+  let best = 99;
+  for (const p of PATHS) {
+    for (let i = 0; i < p.length - 1; i++) {
+      const [ax, az] = p[i], [bx, bz] = p[i + 1];
+      const vx = bx - ax, vz = bz - az;
+      const t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / (vx * vx + vz * vz)));
+      const d = Math.hypot(x - ax - vx * t, z - az - vz * t);
+      if (d < best) best = d;
+    }
+  }
+  return best;
+}
+
+/** 1 in the open clearing, falling to 0 under the trees. */
+export function clearing(x: number, z: number): number {
+  const r = Math.hypot(x * 0.92 + 0.6, z - 0.4) + (fbm(x / 6, 1, z / 6, SEED) - 0.5) * 3;
+  return Math.max(0, Math.min(1, (10.2 - r) / 2.4));
+}
+
+export const inGarden = (x: number, z: number, pad = 0) =>
+  Math.abs(x - GARDEN.x) < GARDEN.hw - pad && Math.abs(z - GARDEN.z) < GARDEN.hd - pad;
+
+const hCache = new Int8Array(N * N).fill(-99);
+
+/** Terrain height in whole blocks for a cell. */
+export function cellH(i: number, j: number): number {
+  if (i < 0 || j < 0 || i >= N || j >= N) return 3;
+  const k = j * N + i;
+  if (hCache[k] !== -99) return hCache[k];
+  const x = i + 0.5 - HALF, z = j + 0.5 - HALF;
+  let h = 0;
+  if (pondD(x, z) < 0.9) h = -1;
+  else {
+    const r = Math.hypot(x * 0.94, z) + (fbm(x / 7, 5, z / 7, SEED) - 0.5) * 7;
+    if (r > 13.8) h = 1;
+    if (r > 18.2) h = 2;
+    if (r > 22) h = 3;
+    // the path stays walkable where it leaves the clearing
+    if (pathD(x, z) < 1.3 && h > 0) h = Math.max(0, h - 1);
+  }
+  return (hCache[k] = h);
+}
+
+/** Ground height in blocks at a world position. */
+export function groundY(x: number, z: number): number {
+  return Math.max(cellH(Math.floor(x + HALF), Math.floor(z + HALF)), -1);
+}
+
+export interface Collider { x: number; z: number; r: number }
+
+/** Is this a spot an animal can stand on (open, dry, level ground)? */
+export function walkable(x: number, z: number): boolean {
+  return Math.hypot(x, z) < 12.5 && groundY(x, z) === 0 && pondD(x, z) > 1.12 && houseD(x, z) > 0.6;
+}

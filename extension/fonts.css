@@ -1,0 +1,42 @@
+/* Bundled OFL fonts (see fonts/OFL.txt). Each stack falls back to system fonts. */
+@font-face {
+  font-family: 'Pixelify Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/pixelify-sans-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pixelify Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/pixelify-sans-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Silkscreen';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/silkscreen-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('fonts/nunito-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('fonts/nunito-700.woff2') format('woff2');
+}
+
+:root {
+  --font-pixel: 'Pixelify Sans', ui-rounded, 'Trebuchet MS', system-ui, sans-serif;
+  --font-tiny: 'Silkscreen', ui-monospace, 'Courier New', monospace;
+  --font-body: 'Nunito', ui-rounded, 'Segoe UI', system-ui, -apple-system, sans-serif;
+}

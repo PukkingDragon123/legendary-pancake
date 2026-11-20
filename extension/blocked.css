@@ -1,0 +1,309 @@
+:root {
+  --night-0: #050820;
+  --night-1: #0b1030;
+  --night-2: #141b48;
+  --cream: #f7e9c4;
+  --cream-dim: #d9cfae;
+  --muted: #a7b0dd;
+  --faint: #6f78b2;
+  --amber: #f3b84a;
+  --amber-hi: #ffd98a;
+  --amber-lo: #c4852c;
+  --ink: #2a1810;
+  --line: #05071a;
+  --firefly: #e6f28a;
+  --px: 4px; /* one art pixel at the current scale; blocked.js keeps it in step with the canvas */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--night-1);
+  color: var(--cream);
+}
+
+body {
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#sky {
+  position: fixed;
+  inset: 0 auto auto 0;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  z-index: 0;
+}
+
+.scene {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 20px 88px;
+}
+
+/* a soft pool of darkness behind the words so stars never fight the text */
+.scene::before {
+  content: '';
+  position: absolute;
+  inset: 8% 0 12%;
+  background: radial-gradient(48% 46% at 50% 56%, rgb(5 8 32 / 0.62), rgb(5 8 32 / 0) 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  font: 400 12px/1 var(--font-tiny);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.moon-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--amber);
+  box-shadow: 0 0 0 2px rgb(243 184 74 / 0.25);
+}
+
+.perch {
+  position: relative;
+  line-height: 0;
+  margin: 0 0 6px;
+}
+
+#owl {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  width: calc(96 * var(--px));
+  height: calc(64 * var(--px));
+  max-width: calc(100vw - 32px);
+  height: auto;
+  aspect-ratio: 96 / 64;
+}
+
+h1 {
+  margin: 4px 0 10px;
+  font: 700 clamp(30px, 4.4vw, 48px) / 1.1 var(--font-pixel);
+  letter-spacing: 0.01em;
+  color: var(--cream);
+  text-shadow:
+    0 3px 0 var(--line),
+    0 0 24px rgb(160 176 255 / 0.18);
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 0 0 18px;
+  max-width: 34em;
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.55;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+.lede strong {
+  color: var(--cream);
+  font-weight: 700;
+}
+
+.site {
+  font-family: var(--font-pixel);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 1px 8px 2px;
+  background: rgb(255 255 255 / 0.06);
+  box-shadow:
+    0 -2px 0 0 rgb(167 176 221 / 0.22),
+    0 2px 0 0 rgb(167 176 221 / 0.22),
+    -2px 0 0 0 rgb(167 176 221 / 0.22),
+    2px 0 0 0 rgb(167 176 221 / 0.22);
+  white-space: nowrap;
+}
+
+/* pixel "pill": notched corners from four hard shadows */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 4px 26px;
+  padding: 9px 16px 8px 14px;
+  font: 400 13px/1 var(--font-tiny);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cream-dim);
+  background: rgb(8 12 40 / 0.78);
+  box-shadow:
+    0 -3px 0 0 #2a3270,
+    0 3px 0 0 #2a3270,
+    -3px 0 0 0 #2a3270,
+    3px 0 0 0 #2a3270;
+}
+
+.chip[hidden] {
+  display: none;
+}
+
+.chip-moon {
+  fill: var(--amber);
+  flex: none;
+}
+
+.breath-cue {
+  margin: -10px 0 22px;
+  min-height: 1.4em;
+  font: 400 20px/1.4 var(--font-pixel);
+  color: var(--firefly);
+  letter-spacing: 0.04em;
+  transition: opacity 600ms ease;
+}
+
+.breath-cue[hidden] {
+  display: none;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 22px;
+  margin: 0 0 22px;
+}
+
+.btn {
+  --edge: var(--line);
+  appearance: none;
+  border: 0;
+  margin: 4px;
+  padding: 14px 24px 15px;
+  font: 700 18px/1 var(--font-pixel);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    transform 120ms steps(2),
+    filter 120ms;
+}
+
+.btn[hidden] {
+  display: none;
+}
+
+.btn-primary {
+  color: var(--ink);
+  background: var(--amber);
+  box-shadow:
+    inset 0 -4px 0 0 var(--amber-lo),
+    inset 0 4px 0 0 var(--amber-hi),
+    0 -4px 0 0 var(--edge),
+    0 4px 0 0 var(--edge),
+    -4px 0 0 0 var(--edge),
+    4px 0 0 0 var(--edge),
+    0 10px 0 0 rgb(0 0 0 / 0.35);
+}
+
+.btn-ghost {
+  --edge: #3a437f;
+  color: var(--cream);
+  background: rgb(20 27 72 / 0.85);
+  box-shadow:
+    inset 0 -4px 0 0 rgb(0 0 0 / 0.25),
+    inset 0 4px 0 0 rgb(255 255 255 / 0.06),
+    0 -4px 0 0 var(--edge),
+    0 4px 0 0 var(--edge),
+    -4px 0 0 0 var(--edge),
+    4px 0 0 0 var(--edge),
+    0 10px 0 0 rgb(0 0 0 / 0.35);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+.btn:active {
+  transform: translateY(2px);
+  filter: brightness(0.96);
+}
+
+.btn:focus-visible {
+  outline: 3px dashed var(--cream);
+  outline-offset: 9px;
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  cursor: not-allowed;
+  filter: grayscale(0.6) brightness(0.8);
+  transform: none;
+}
+
+.note {
+  margin: 0;
+  max-width: 40em;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--faint);
+  text-wrap: pretty;
+}
+
+.note b {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.foot {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  z-index: 1;
+  text-align: center;
+  font: 400 10px/1 var(--font-tiny);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(167 176 221 / 0.42);
+  pointer-events: none;
+}
+
+/* the forest is awake (blocking ended or paused) */
+body[data-state='awake'] .scene::before,
+body[data-state='paused'] .scene::before {
+  background: radial-gradient(48% 46% at 50% 56%, rgb(5 8 32 / 0.5), rgb(5 8 32 / 0) 100%);
+}
+
+@media (max-height: 640px) {
+  .scene {
+    justify-content: flex-start;
+    padding-top: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .breath-cue {
+    transition: none;
+  }
+  .btn:hover,
+  .btn:active {
+    transform: none;
+  }
+}

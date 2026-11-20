@@ -1,0 +1,33 @@
+Source: https://www.nps.gov/aboutus/disclaimer.htm (NPS website disclaimer, retrieved 2026-11-20)
+
+Verbatim statement on that page (section "Ownership"):
+
+    Copyright law does not protect “any work of the U.S. Government” where “a work prepared by an officer or employee of
+    the U.S. Government as part of that person's official duties” (See, 17 U.S.C. §§ 101, 105). Thus, material created
+    by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in
+    the public domain. It may be distributed or copied as permitted by applicable law. When material produced by the
+    National Park Service, including (but not limited to) information, documents, comments, photos, graphics and other
+    images, films, music, and other audiovisual materials are used, reproduced, or copied, a citation or acknowledgement
+    of the National Park Service as the source is appreciated.
+
+The same page also says that not all content on nps.gov is created or owned by the NPS. The two recordings below were
+therefore only accepted because their NPS media records credit the National Park Service itself ("NPS, Kristal Ip" and
+"NSNSD / Emma Brown"; NSNSD is the NPS Natural Sounds and Night Skies Division), i.e. they are works of the U.S. Government.
+
+Recordings used (records read from the NPS multimedia audio API, https://developer.nps.gov/api/v1/multimedia/audio, on 2026-11-20):
+
+  * record id: A6B0C5D8-741A-422C-95E4-E368204DB46C
+      title: Early Morning Summer Sounds
+      park: San Francisco Maritime National Historical Park
+      credit: NPS, Kristal Ip
+      description: Early morning summer sounds of gentle waves washing over rocks at Aquatic Park beach.
+      file: https://www.nps.gov/nps-audiovideo/legacy/mp3/pwr/avElement/safr-130718-084230-AquaticParkWavesCloseUpedit1min.mp3
+      used for: amb_waves.mp3
+
+  * record id: B4535041-73BC-457B-97B7-EF2C537AF032
+      title: Barred Owl
+      park: Weir Farm National Historical Park
+      credit: NSNSD / Emma Brown
+      description: The sound of Peepers and a Barred Owl hooting at Weir Farm National Historical Park.
+      file: https://www.nps.gov/nps-audiovideo/audiovideo/5170e4f6-aeca-430d-b8ef-bdf9e28622b3.mp3
+      used for: amb_forest_night.mp3

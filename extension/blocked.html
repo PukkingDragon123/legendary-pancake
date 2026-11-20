@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Shh&hellip; the forest is asleep</title>
+    <link rel="icon" href="icons/icon-32.png" />
+    <link rel="stylesheet" href="fonts.css" />
+    <link rel="stylesheet" href="blocked.css" />
+    <script type="module" src="blocked.js"></script>
+  </head>
+  <body data-state="blocking">
+    <canvas id="sky" aria-hidden="true"></canvas>
+
+    <main class="scene">
+      <p class="eyebrow"><span class="moon-dot" aria-hidden="true"></span>Hoot Hollow &middot; bedtime</p>
+
+      <div class="perch">
+        <canvas id="owl" width="96" height="64" role="img" aria-label="Pip the owl, asleep on a branch, breathing slowly"></canvas>
+      </div>
+
+      <h1 id="title">Shh&hellip; the forest is asleep</h1>
+      <p class="lede" id="lede">
+        <strong id="site" class="site">this site</strong> <span id="lede-rest">is tucked in until morning.</span>
+      </p>
+
+      <p class="chip" id="chip" hidden>
+        <svg class="chip-moon" viewBox="0 0 7 7" width="14" height="14" shape-rendering="crispEdges" aria-hidden="true">
+          <rect x="2" y="0" width="3" height="1" />
+          <rect x="1" y="1" width="2" height="1" />
+          <rect x="0" y="2" width="2" height="3" />
+          <rect x="1" y="5" width="2" height="1" />
+          <rect x="2" y="6" width="3" height="1" />
+        </svg>
+        <span id="chip-text"></span>
+      </p>
+
+      <p class="breath-cue" id="cue" aria-live="polite" hidden></p>
+
+      <div class="actions">
+        <a id="continue" class="btn btn-primary" hidden>Continue</a>
+        <button id="breathe" class="btn btn-primary" type="button">Breathe with Pip</button>
+        <button id="open" class="btn btn-ghost" type="button">Open Hoot Hollow</button>
+      </div>
+
+      <p class="note" id="note"></p>
+    </main>
+
+    <footer class="foot">Hoot Hollow Bedtime &middot; everything stays on this device</footer>
+  </body>
+</html>
