@@ -113,9 +113,9 @@ body {
 }
 
 /* Pip perches on the status card: toes overlap its top edge */
-#owl {
-  width: 64px;
-  height: 72px;
+#pip {
+  width: 66px;
+  height: 82px;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   margin: 0 -2px -4px -4px;

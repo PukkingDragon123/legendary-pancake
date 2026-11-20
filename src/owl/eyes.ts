@@ -149,8 +149,8 @@ export class Eye {
 }
 
 /** Eye colours from a coat: lids are the fur around the eye, so a closing lid melts into the face. */
-export const eyeColours = (p: { eye: string; fur: string; liner: string; pattern: string; stripe: string }): EyeColours => ({
+export const eyeColours = (p: { eye: string; fur: string; liner: string; pattern: string; stripe: string; muzzle: string; skin: string }): EyeColours => ({
   eye: p.eye,
-  lid: p.pattern === 'points' ? '#' + mix(p.fur, p.stripe, 0.5).toString(16).padStart(6, '0') : p.fur,
+  lid: p.skin === 'owl' ? '#' + mix(p.muzzle, p.liner, 0.12).toString(16).padStart(6, '0') : p.pattern === 'points' ? '#' + mix(p.fur, p.stripe, 0.5).toString(16).padStart(6, '0') : p.fur,
   liner: p.liner,
 });

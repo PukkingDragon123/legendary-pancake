@@ -1,14 +1,14 @@
-// Pip the Meowl: a kitten's head on a plump little barn owl. Pointy ears with pink insides, a white
-// muzzle and blaze, a tiny pink nose, whiskers and small glossy bead eyes, on a soft white chest
-// framed by golden, pepper-speckled owl wings. Built from rounded voxel volumes and painted at three
-// texels per model pixel with soft, directional "brush stroke" shading rather than noise, so it
-// reads as hand-painted.
+// Pip: a plump little owl with a raised facial disc, a hooked beak, feathery ear tufts and small,
+// simple bead eyes, built from rounded voxel volumes and painted at three texels per model pixel.
+// Feathers are painted, not noised: every scalloped feather has a soft dome of light, a shaft, a lit
+// rim and a shadow on the feather beneath, with freckles and barring placed by hand-tuned rules.
+// The Meowl skin swaps the head for a kitten's (pointy ears, white muzzle, pink nose, whiskers).
 import * as THREE from 'three';
-import { box, buildRig, PX, type BoneSpec, type BoxSpec, type Painter, type Rig, type Texel, type Vec3 } from '../gfx/box.ts';
+import { box, buildRig, lean, PX, type BoneSpec, type BoxSpec, type Painter, type Rig, type Texel, type Vec3 } from '../gfx/box.ts';
 import { col, mix, ramp, toLch, tone, type Ramp } from '../gfx/color.ts';
 import { fbm, hash } from '../gfx/noise.ts';
 import { Eye, eyeColours } from './eyes.ts';
-import { palette, type OwlPalette } from './palette.ts';
+import { palette, type OwlPalette, type Skin } from './palette.ts';
 import { dressOwl } from './outfits.ts';
 
 /** Texels per model pixel. */
@@ -23,6 +23,8 @@ export const G = {
   neckY: 13.4,
   wingX: 7.5, shoulderY: 13.4,
   noseY: 17.6,
+  /** front of the owl's facial disc */
+  discFront: 7.45,
 } as const;
 
 export type BoneName = 'body' | 'head' | 'tuftL' | 'tuftR' | 'browL' | 'browR' | 'jaw' | 'wingL' | 'wingR' | 'tail' | 'legL' | 'legR';
@@ -124,7 +126,29 @@ function surf(t: Texel): [number, number] {
   }
 }
 
+/**
+ * One painted feather in a field of overlapping scales: a soft dome of light, darker edges, a faint
+ * shaft down the middle, a lit rim along the rounded tip and a shadow cast on the feather beneath.
+ */
+function feather(a: number, b: number, fw: number, fh: number, seed: number) {
+  const fy = b / fh, row = Math.floor(fy), v = fy - row;
+  const fx = a / fw + (row & 1) * 0.5, c = Math.floor(fx), u = fx - c;
+  const arc = 0.45 + 0.55 * Math.sqrt(Math.max(0, 1 - (2 * u - 1) ** 2));
+  const dd = v - arc;
+  let L: number;
+  if (dd >= 0) L = -0.95 + Math.min(dd, 0.3) * 2.2;
+  else {
+    L = 0.4 - v * 0.55 - Math.abs(u - 0.5) * 0.6;
+    if (dd > -0.15) L += 0.6;
+    else if (Math.abs(u - 0.5) < 0.07 && v > 0.12) L -= 0.32;
+  }
+  L += (hash(row, c, 3, seed) - 0.5) * 0.45;
+  return { L, row, col: c, u, v, dd };
+}
+
 export function meowlPainter(p: OwlPalette): Painter {
+  const owl = p.skin === 'owl';
+  const mark = owl && p.mark ? fr(p.mark) : null;
   const fur = fr(p.fur), stripe = fr(p.stripe), wing = fr(p.wing), speck = fr(p.speck), belly = fr(p.belly, 0.04);
   const muzzle = fr(p.muzzle, 0.04), ear = fr(p.ear), nose = fr(p.nose, 0.07), paw = fr(p.paw, 0.04), liner = fr(p.liner);
   const blush = ramp(col(p.blush)), talon = ramp(0x8a8590, { step: 0.06 }), mouthR = ramp(0xd8546a);
@@ -248,8 +272,8 @@ export function meowlPainter(p: OwlPalette): Painter {
       const vane = ((a + 100) / 1.5) % 1;
       L += vane < 0.14 ? -0.7 : vane > 0.85 ? 0.3 : 0;
       const bar = Math.floor((b + 0.4) / 1.35) % 2 === 0;
-      if (hash(Math.floor(t.x * 3 + t.z * 3), Math.floor(t.y * 3), 3, 7) > 0.94) return tone(speck, 0.4);
-      return tone(wing, L + (bar ? -0.55 : 0.1));
+      if (!owl && hash(Math.floor(t.x * 3 + t.z * 3), Math.floor(t.y * 3), 3, 7) > 0.94) return tone(speck, 0.4);
+      return bar && owl ? tone(stripe, L + 1.3) : tone(wing, L + (bar ? -0.55 : 0.1));
     },
     prim(t) {
       const vane = ((-t.z * 1.2 + 100) / 1.35) % 1;
@@ -265,13 +289,91 @@ export function meowlPainter(p: OwlPalette): Painter {
     leg(t) { return tone(paw, soft(t, 3.3, 3) * 0.5 + 0.2 + strokes(t.x * 2 + t.z, -t.y, 0.9, 0.4, 41) * 0.6); },
     paw(t) { return tone(paw, soft(t, 1.2, 1.2) * 0.5 + 0.3 + (t.face === 4 && Math.floor(t.x * 3 + 30) % 3 === 0 ? -0.7 : 0)); },
     talon(t) { return tone(talon, t.face === 2 ? 0.8 : -0.2); },
+
+    // ---------------- owl skin
+    ohead(t) {
+      if (t.face === 3) return tone(belly, -0.5);
+      // the front of the head behind the disc is the dark ruff that frames it
+      if (t.face === 4 && t.y < G.headTop - 1.6) return tone(liner, soft(t, G.headTop, 12) * 0.5 - 0.1 + strokes(t.x, -t.y, 1, 0.5, 4) * 0.6);
+      const [a, b] = surf(t);
+      const f = feather(a, G.headTop + 2 - t.y + (t.face === 2 ? (G.headFront - t.z) * 0.9 - (G.headTop + 2 - t.y) : 0), 1.75, 1.2, 5);
+      const base = soft(t, G.headTop, 12) * 0.75;
+      if (f.dd < -0.12 && hash(f.row, f.col, 7, 5) < 0.3 && Math.hypot((f.u - 0.5) * 1.75, (f.v - 0.36) * 1.2) < 0.36) return tone(speck, base * 0.5 + 0.5);
+      const dark = hash(f.row, f.col, 9, 5) > 0.84;
+      return tone(dark ? stripe : fur, base + f.L + (dark ? 0.9 : 0));
+    },
+    disc(t) {
+      // sides of the raised disc are the ruff: a crisp dark outline around the face
+      if (t.face !== 4) return tone(liner, (t.face === 2 ? 0.3 : -0.4) + strokes(t.x * 2, t.y * 2, 0.8, 0.4, 6) * 0.5);
+      const dl = Math.hypot(t.x + ex, t.y - ey), dr = Math.hypot(t.x - ex, t.y - ey);
+      const near = dl < dr ? -1 : 1, d = Math.min(dl, dr);
+      const ang = Math.atan2(t.y - ey, t.x - near * ex);
+      let L = 0.7 - Math.max(0, d - 2.6) * 0.32;
+      // fine radiating feathers, painted as alternating soft strokes
+      const ray = Math.sin(ang * 16 + d * 0.9);
+      if (ray > 0.66) L -= 0.42; else if (ray < -0.8) L += 0.18;
+      if (d > 2.75 && d < 3.25) L -= 0.55; // a soft socket ring round each eye
+      if (Math.hypot(Math.abs(t.x) - 5.4, t.y - 16.5) < 1.1) return tone(blush, 0.5 + (t.y > 16.8 ? 0.4 : 0));
+      if (Math.abs(t.x) < 1.9 && t.y < 16.2) L += 0.35;
+      return tone(muzzle, L + (hash(Math.floor(t.x * 3), Math.floor(t.y * 3), 2, 8) - 0.5) * 0.14);
+    },
+    tuft(t) {
+      const L = soft(t, G.headTop + 4, 5) * 0.8;
+      const streak = Math.abs(((Math.abs(t.x) * 3 + t.z * 2) % 3) - 1.5) < 0.35;
+      return tone(streak ? stripe : fur, L + (streak ? 1.1 : 0.2) + strokes(t.x * 2, t.y * 2, 0.7, 0.35, 2) * 0.6);
+    },
+    tufttip(t) { return tone(ear, soft(t, G.headTop + 5, 4) * 0.4 + 0.5); },
+    brow(t) { return tone(muzzle, soft(t, 24, 2) * 0.5 + 0.6 + (Math.floor(t.x * 3 + t.y * 1.5) % 3 === 0 ? -0.45 : 0)); },
+    beak(t) {
+      let L = FACE[t.face] * 1.2 + 0.1;
+      if (t.face === 2 && t.bz < 0.5) L -= 0.8;
+      if ((t.face === 4 || t.face === 2) && t.bx < t.sx * 0.42 && t.by > t.sy * 0.45) L += 1.1;
+      return tone(nose, L);
+    },
+    obelly(t) {
+      if (t.face !== 4 && t.face !== 3) return P.back(t);
+      const top = G.bodyY + G.bodyH + 1, b = top - t.y;
+      const f = feather(t.x + 30, b, 1.9, 1.3, 21);
+      let L = soft(t, top, 12) * 0.5 + 0.35 + f.L * 0.5;
+      if (t.face === 4 && Math.abs(t.x) > G.bodyW / 2 - 1.2) L -= 0.4;
+      // little arrowhead chevrons in rows, denser lower down
+      if (mark && b > 3.2 && t.face === 4) {
+        const rI = Math.floor(b / 2.05), vv = b / 2.05 - rI, off = (rI & 1) * 1.45;
+        const cx = Math.round((t.x - off) / 2.9) * 2.9 + off, dx = t.x - cx;
+        if (Math.abs(dx) < 1.0 && Math.abs(vv - 0.3 - Math.abs(dx) * 0.34) < 0.15 && hash(rI, Math.round(cx * 3), 4, 0) > 0.15) return tone(mark, L * 0.5 + (dx < 0 ? 0.3 : -0.2));
+      }
+      return tone(belly, L);
+    },
   };
+  if (owl) {
+    // owls: feathered back and wings with freckles instead of pepper speckles
+    P.back = (t) => {
+      const [a, b] = surf(t);
+      const f = feather(a, b, 2.1, 1.5, 13);
+      const base = soft(t, G.bodyY + G.bodyH, 12) * 0.75;
+      if (f.dd < -0.12 && hash(f.row, f.col, 7, 13) < 0.22 && Math.hypot((f.u - 0.5) * 2.1, (f.v - 0.36) * 1.5) < 0.4) return tone(speck, base * 0.5 + 0.4);
+      return tone(hash(f.row, f.col, 9, 13) > 0.85 ? stripe : wing, base + f.L);
+    };
+    P.body = (t) => (t.face === 3 || (t.face === 4 && Math.hypot(t.x / 4.9, (t.y - 8.4) / 5.4) < 1) ? P.obelly(t) : P.back(t));
+    const meowlWing = P.wing;
+    P.wing = (t) => {
+      const b = G.shoulderY + 1 - t.y;
+      const outer = (t.face === 0 && t.x > 0) || (t.face === 1 && t.x < 0);
+      if (b < 5.2 && (outer || t.face === 2)) {
+        const a = -t.z;
+        const f = feather(a + 50, b, 1.75, 1.2, 31);
+        if (f.dd < -0.12 && hash(f.row, f.col, 7, 31) < 0.42 && Math.hypot((f.u - 0.5) * 1.75, (f.v - 0.34) * 1.2) < 0.36) return tone(speck, 0.55);
+        return tone(wing, soft(t, G.shoulderY + 1, 12) * 0.7 + 0.2 + f.L);
+      }
+      return meowlWing(t);
+    };
+  }
   return (t) => (P[t.tag] ?? P.body)(t);
 }
 
 // ------------------------------------------------------------------ the parts
 
-export interface OwlLook { palette: string; outfit: Partial<Record<OutfitSlot, string>> }
+export interface OwlLook { skin?: Skin; palette: string; outfit: Partial<Record<OutfitSlot, string>> }
 export type OutfitSlot = 'head' | 'face' | 'neck' | 'body' | 'back';
 
 export interface OwlParts {
@@ -290,31 +392,52 @@ function baseParts(pal: OwlPalette): OwlParts {
 
   // body: a plump rounded barrel, white chest in front
   P.add('body', ...sculpt(0, G.bodyY, 0, G.bodyW, G.bodyD, [[0, 1, 1.5, 2.4], [1, 2.2, 0.5, 3], [2.2, 9.6, 0, 3.4], [9.6, 11, 0.6, 3.2]], m, { tag: 'body' }));
-  P.add('body', ...plate(0, G.bodyY + 1.2, G.bodyD / 2 - 0.1, 8.6, 6.4, 0.6, 2.8, m, { tag: 'belly' }));
+  P.add('body', ...plate(0, G.bodyY + 1.2, G.bodyD / 2 - 0.1, 8.6, 6.4, 0.6, 2.8, m, { tag: pal.skin === 'owl' ? 'obelly' : 'belly' }));
   P.add('body', ...sculpt(0, G.bodyY - 0.4, 0, G.bodyW - 3.6, G.bodyD - 3.6, [[0, 0.6, 0, 2]], m, { tag: 'belly' }));
 
-  // head: a round kitten head, cheek ruffs, a raised white muzzle
-  P.add('head', ...sculpt(0, G.headY, G.headZ, G.headW, G.headD, [[0, 1, 1.4, 3], [1, 2.2, 0.5, 3.6], [2.2, 10, 0, 4], [10, 11.6, 0.6, 3.8], [11.6, 12.8, 1.9, 3.4]], m, { tag: 'head' }));
-  for (const sd of [-1, 1]) {
-    P.add('head', { ...box(sd * 7.8, G.headY + 0.5, 1.8, 1.6, 3.4, 5.6, m, { tag: 'cheek' }), rot: [0, 0, sd * 16], pivot: [sd * 7.6, G.headY + 2, 1.8] });
-  }
-  P.add('head', ...plate(0, 14.6, G.headFront + 0.45, 7.4, 4.4, 0.9, 2, m, { tag: 'muzzle' }));
-  P.add('head', ...plate(0, 14.0, G.headFront + 0.2, 4.6, 2.2, 0.9, 1, m, { tag: 'muzzle' }));
-  // nose: a tiny pink triangle
-  P.add('head', box(0, G.noseY, G.faceFront + 0.25, 1.9, 0.8, 0.6, m, { tag: 'nose' }), box(0, G.noseY - 0.5, G.faceFront + 0.25, 1.0, 0.55, 0.55, m, { tag: 'nose' }));
-  // whiskers
-  for (const sd of [-1, 1]) for (const [y, a] of [[16.9, 7], [16.2, -5]] as const) {
-    P.add('head', { ...box(sd * 4.9, y, G.faceFront - 0.3, 3.0, 0.24, 0.24, m, { tag: 'whisker' }), rot: [0, -sd * 12, sd * a], pivot: [sd * 3.4, y, G.faceFront - 0.3] });
-  }
-  // the mouth (shown when Pip opens it; the actor scales it)
-  P.add('jaw', box(0, 15.7, G.faceFront + 0.05, 1.7, 1.1, 0.3, m, { tag: 'mouth' }));
-  // ears: stacked slabs tapering to a point, leaning out a little
-  for (const [bone, sd] of [['tuftL', -1], ['tuftR', 1]] as const) {
-    const th = 13 * (Math.PI / 180), px = sd * 4.9;
-    for (let k = 0; k < 3; k++) {
-      const w = 5.6 - k * 1.75, d = 2.6 - k * 0.4, h = 1.45;
-      const cx = px + sd * Math.sin(th) * k * h, cy = 24.0 + Math.cos(th) * k * h;
-      P.add(bone, { ...box(cx, cy, 0.2, w, h + 0.05, d, m, { tag: 'ear' }), rot: [0, 0, -sd * 13], pivot: [cx, cy, 0.2] });
+  if (pal.skin === 'owl') {
+    // head: big and round, a raised two-disc facial mask, a hooked beak, soft brows and ear tufts
+    P.add('head', ...sculpt(0, G.headY, G.headZ, G.headW, G.headD, [[0, 1, 1.4, 3], [1, 2.2, 0.5, 3.6], [2.2, 10, 0, 4], [10, 11.6, 0.6, 3.8], [11.6, 12.8, 1.9, 3.4]], m, { tag: 'ohead' }));
+    const pz = G.headFront + 0.5, df = G.discFront;
+    P.add('head', ...plate(-G.eyeX, G.eyeY - 4.25, pz, 8.1, 8.5, 0.9, 3.9, m, { tag: 'disc' }));
+    P.add('head', ...plate(G.eyeX, G.eyeY - 4.25, pz + 0.08, 8.1, 8.5, 0.9, 3.9, m, { tag: 'disc' }));
+    P.add('head', ...plate(0, 14.2, pz - 0.1, 5.2, 5, 0.9, 1.8, m, { tag: 'disc' }));
+    P.add('head', box(0, 16.3, df + 0.65, 2.1, 1.9, 1.3, m, { tag: 'beak' }), box(0, 15.7, df + 1.0, 1.25, 0.8, 0.9, m, { tag: 'beak' }), box(0, 17.9, df + 0.35, 1.3, 1.0, 0.8, m, { tag: 'beak' }));
+    P.add('jaw', box(0, 15.5, df + 0.3, 1.6, 0.9, 0.3, m, { tag: 'mouth' }));
+    for (const [bone, sd] of [['browL', -1], ['browR', 1]] as const) {
+      P.add(bone, { ...box(sd * (G.eyeX + 0.4), 23.15, df + 0.15, 3.8, 0.8, 0.8, m, { tag: 'brow' }), rot: [0, 0, -sd * 5], pivot: [sd * G.eyeX, 23.5, df] });
+      P.add(bone, { ...box(sd * (G.eyeX + 2.5), 22.85, df + 0.05, 1.3, 0.75, 0.7, m, { tag: 'brow' }), rot: [0, 0, -sd * 24], pivot: [sd * (G.eyeX + 2), 23.2, df] });
+    }
+    for (const [bone, sd] of [['tuftL', -1], ['tuftR', 1]] as const) {
+      const px = sd * 5.3;
+      P.add(bone, lean(box(px, 23.9, 0.4, 2.8, 2.8, 2.4, m, { tag: 'tuft' }), 0, 0, -sd * 18));
+      P.add(bone, lean(box(px + sd * 0.85, 26.2, 0.3, 1.9, 1.9, 1.8, m, { tag: 'tuft' }), 0, 0, -sd * 34));
+      P.add(bone, lean(box(px + sd * 1.9, 27.6, 0.25, 1.1, 1.1, 1.1, m, { tag: 'tufttip' }), 0, 0, -sd * 52));
+    }
+  } else {
+    // head: a round kitten head, cheek ruffs, a raised white muzzle
+    P.add('head', ...sculpt(0, G.headY, G.headZ, G.headW, G.headD, [[0, 1, 1.4, 3], [1, 2.2, 0.5, 3.6], [2.2, 10, 0, 4], [10, 11.6, 0.6, 3.8], [11.6, 12.8, 1.9, 3.4]], m, { tag: 'head' }));
+    for (const sd of [-1, 1]) {
+      P.add('head', { ...box(sd * 7.8, G.headY + 0.5, 1.8, 1.6, 3.4, 5.6, m, { tag: 'cheek' }), rot: [0, 0, sd * 16], pivot: [sd * 7.6, G.headY + 2, 1.8] });
+    }
+    P.add('head', ...plate(0, 14.6, G.headFront + 0.45, 7.4, 4.4, 0.9, 2, m, { tag: 'muzzle' }));
+    P.add('head', ...plate(0, 14.0, G.headFront + 0.2, 4.6, 2.2, 0.9, 1, m, { tag: 'muzzle' }));
+    // nose: a tiny pink triangle
+    P.add('head', box(0, G.noseY, G.faceFront + 0.25, 1.9, 0.8, 0.6, m, { tag: 'nose' }), box(0, G.noseY - 0.5, G.faceFront + 0.25, 1.0, 0.55, 0.55, m, { tag: 'nose' }));
+    // whiskers
+    for (const sd of [-1, 1]) for (const [y, a] of [[16.9, 7], [16.2, -5]] as const) {
+      P.add('head', { ...box(sd * 4.9, y, G.faceFront - 0.3, 3.0, 0.24, 0.24, m, { tag: 'whisker' }), rot: [0, -sd * 12, sd * a], pivot: [sd * 3.4, y, G.faceFront - 0.3] });
+    }
+    // the mouth (shown when Pip opens it; the actor scales it)
+    P.add('jaw', box(0, 15.7, G.faceFront + 0.05, 1.7, 1.1, 0.3, m, { tag: 'mouth' }));
+    // ears: stacked slabs tapering to a point, leaning out a little
+    for (const [bone, sd] of [['tuftL', -1], ['tuftR', 1]] as const) {
+      const th = 13 * (Math.PI / 180), px = sd * 4.9;
+      for (let k = 0; k < 3; k++) {
+        const w = 5.6 - k * 1.75, d = 2.6 - k * 0.4, h = 1.45;
+        const cx = px + sd * Math.sin(th) * k * h, cy = 24.0 + Math.cos(th) * k * h;
+        P.add(bone, { ...box(cx, cy, 0.2, w, h + 0.05, d, m, { tag: 'ear' }), rot: [0, 0, -sd * 13], pivot: [cx, cy, 0.2] });
+      }
     }
   }
   // wings: golden barn-owl wings folded along the sides, primaries poking out behind
@@ -357,7 +480,7 @@ export function buildOwl(look: OwlLook): OwlModel {
   const eyeMeshes = eyes.map((e, i) => {
     const mat = new THREE.MeshLambertMaterial({ map: e.tex, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: e.tex, emissiveIntensity: 0.18, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
     const m = new THREE.Mesh(geo, mat);
-    m.position.set(((i ? 1 : -1) * G.eyeX - hp[0]) * PX, (G.eyeY - hp[1]) * PX, (G.headFront + 0.12 - hp[2]) * PX);
+    m.position.set(((i ? 1 : -1) * G.eyeX - hp[0]) * PX, (G.eyeY - hp[1]) * PX, ((pal.skin === 'owl' ? G.discFront + 0.06 : G.headFront + 0.12) - hp[2]) * PX);
     m.castShadow = false;
     head.add(m);
     return m;

@@ -387,14 +387,14 @@ export function extensionInstallSteps(browser: InstallBrowser): string[] {
         'Get the Hoot Hollow source and find its extension/ folder.',
         'Open chrome://extensions and turn on Developer mode (top right).',
         'Click "Load unpacked" and choose the extension/ folder.',
-        'Pin the owl from the puzzle-piece menu, then come back to this tab (reload it if Hoot Hollow does not notice).',
+        'Pin Pip from the puzzle-piece menu, then come back to this tab (reload it if Hoot Hollow does not notice).',
       ];
     case 'edge':
       return [
         'Get the Hoot Hollow source and find its extension/ folder.',
         'Open edge://extensions and turn on Developer mode (left sidebar).',
         'Click "Load unpacked" and choose the extension/ folder.',
-        'Show the owl in the toolbar from the Extensions menu, then come back to this tab (reload it if needed).',
+        'Show Pip in the toolbar from the Extensions menu, then come back to this tab (reload it if needed).',
       ];
     case 'firefox':
       return [

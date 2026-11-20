@@ -1,31 +1,39 @@
-// Pip the owl, drawn pixel by pixel. Builds small sprite frames (arrays of colours) that pages blit
-// onto a low-resolution canvas and scale up with `image-rendering: pixelated`.
+// Pip the Meowl (a kitten's head on a little barn owl's body), drawn pixel by pixel. Builds small
+// sprite frames (arrays of colours) that pages blit onto a low-resolution canvas and scale up with
+// `image-rendering: pixelated`. tools/make-icons.mjs crops the toolbar icon from the same art.
 //
-// Lighting: moonlight from the upper right (cool rim light), warm bounce from below. Shapes are
-// analytic (ellipses + hand-placed details), shaded with a 4-step ramp and light 2x2 dithering,
-// then outlined against empty space only, which is how hand-made sprites tend to be built.
+// Lighting: moonlight from the upper right (cool rim light). Shapes are analytic (ellipses, triangles
+// and hand-placed details), shaded with short ramps and light 2x2 dithering, then outlined against
+// empty space only, the way hand-made sprites tend to be built. Everything is deterministic.
 
-export const OWL_W = 96;
-export const OWL_H = 64;
+export const PIP_W = 96;
+export const PIP_H = 64;
 
 const C = {
   outline: '#1b1326',
-  body: ['#3a2232', '#563130', '#77473a', '#986246', '#b47d55'],
+  // toasty tabby fur, dark -> light (base #c4935f)
+  fur: ['#835a3a', '#a57548', '#c4935f', '#d6a874', '#e6c08e'],
+  stripe: '#6a4a33',
+  earIn: ['#d98892', '#f2a7b0', '#f8c4ca'],
+  white: ['#e6ded0', '#f4eee4', '#fffdf8'],
+  nose: '#f39aa5',
+  noseShade: '#d97f8c',
+  mouth: '#7a5646',
+  eye: '#16131b',
+  glint: '#ffffff',
+  blush: '#f4a3a8',
+  whisker: '#fffdf8',
+  whiskerTip: '#cfcbe0',
+  // barn-owl body
+  body: ['#8a5a32', '#ae7543', '#cf8f52', '#dfa66b', '#ebbf88'],
+  wing: ['#7a4c27', '#a26a3b', '#cf8f52', '#e0a96c'],
+  wingBar: '#7d5130',
+  speckle: '#a39d96',
+  chest: ['#e4dbcc', '#f1ebe0', '#fdfaf3'],
+  feet: ['#e2dbcf', '#fdfaf3'],
+  talon: '#8a8580',
   rim: '#a3b1ea',
   rimSoft: '#7c7fb8',
-  disc: ['#b99a77', '#d9be93', '#efdcb3', '#fbf0d2'],
-  belly: ['#b48d66', '#ceaa7e', '#e2c597'],
-  chevron: '#9a7253',
-  wing: ['#3f2630', '#55332f', '#6f4636', '#8c5d42'],
-  wingSpot: '#d9bd92',
-  lid: '#2a1a2e',
-  lash: '#4a3040',
-  blush: '#e19a8e',
-  beak: ['#b8742a', '#e6a23f', '#f7c766'],
-  feet: ['#a76d29', '#e0a446'],
-  iris: ['#d98e22', '#f5bd3e'],
-  pupil: '#1b1326',
-  glint: '#fffbe8',
   bark: ['#2c1b1c', '#3f2a25', '#56392d', '#6e4c38'],
   barkRim: '#7f8bc2',
   leaf: ['#1f3a39', '#2f5449', '#467559', '#6c9a6b'],
@@ -53,7 +61,7 @@ class Grid {
   in(x, y) {
     return x >= 0 && y >= 0 && x < this.w && y < this.h;
   }
-  set(x, y, color, kind = 'owl') {
+  set(x, y, color, kind) {
     if (!this.in(x, y)) return;
     this.c[y * this.w + x] = color;
     this.k[y * this.w + x] = kind;
@@ -66,230 +74,323 @@ class Grid {
   }
 }
 
+/** Is the pixel centre (x+0.5, y+0.5) inside triangle a-b-c? */
+function inTri(x, y, a, b, c) {
+  const px = x + 0.5;
+  const py = y + 0.5;
+  const s = (p, q, r) => (p[0] - r[0]) * (q[1] - r[1]) - (q[0] - r[0]) * (p[1] - r[1]);
+  const pt = [px, py];
+  const d1 = s(pt, a, b);
+  const d2 = s(pt, b, c);
+  const d3 = s(pt, c, a);
+  const neg = d1 < 0 || d2 < 0 || d3 < 0;
+  const pos = d1 > 0 || d2 > 0 || d3 > 0;
+  return !(neg && pos);
+}
+
 /**
- * @param {{ breath?: 0|1, eyes?: 'closed'|'open'|'blink', branch?: boolean, oy?: number }} [opts]
+ * One frame of Pip.
+ * @param {{ mascot?: 'owl'|'meowl', breath?: 0|1, eyes?: 'closed'|'open'|'blink', branch?: boolean, oy?: number, rim?: boolean }} [opts]
  * @returns {{ w: number, h: number, px: (string|null)[] }}
  */
-export function owlFrame(opts = {}) {
+export function pipFrame(opts = {}) {
+  const mascot = opts.mascot === 'meowl' ? 'meowl' : 'owl';
   const breath = opts.breath ?? 0;
   const eyes = opts.eyes ?? 'closed';
   const withBranch = opts.branch ?? true;
-  const OY = opts.oy ?? 8; // vertical offset so there's sky above the tufts for drifting Zzz
-  const g = new Grid(OWL_W, OWL_H);
+  const withRim = opts.rim ?? true;
+  const OY = opts.oy ?? 8; // vertical offset so there's sky above the ears for drifting Zzz
+  const g = new Grid(PIP_W, PIP_H);
 
-  const cx = 48.5; // odd-width body: column 48 is the centre line, x mirrors to 96 - x
+  const cx = 48.5; // odd-width figure: column 48 is the centre line, pixel x mirrors to 96 - x
+  const mirror = (x) => 96 - x;
   const feetY = 44 + OY; // first row of the branch top surface
-  const ry = 14 + breath * 0.6;
-  const cy = feetY - 0.4 - ry;
-  const top = cy - ry;
-  const lift = breath; // features ride up 1px on the in-breath
+  const lift = breath; // the head rides up 1px on the in-breath
+  const L = norm3(0.42, -0.6, 0.68); // light from upper right, a little in front
 
-  // light from upper right and a little in front
-  const L = norm3(0.42, -0.6, 0.68);
-
-  // ---- branch (behind the feet) ------------------------------------------------------------
   if (withBranch) drawBranch(g, feetY);
 
-  // ---- body ----------------------------------------------------------------------------------
-  const rxAt = (dy) => 13.2 + 1.4 * Math.max(-0.45, dy / ry); // a touch pear-shaped
-  const inBody = (x, y) => {
-    const dy = y + 0.5 - cy;
-    const dx = x + 0.5 - cx;
-    return (dx / rxAt(dy)) ** 2 + (dy / ry) ** 2 <= 1;
-  };
-  for (let y = 0; y < OWL_H; y++) {
-    for (let x = 0; x < OWL_W; x++) {
-      if (!inBody(x, y)) continue;
-      const dy = y + 0.5 - cy;
-      const dx = x + 0.5 - cx;
-      const rx = rxAt(dy);
-      const nx = dx / rx;
-      const ny = dy / ry;
-      const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
-      let v = 0.16 + 0.84 * Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]);
-      if (ny > 0.55) v -= 0.5 * (ny - 0.55); // tucked under
-      g.set(x, y, C.body[rampIdx(clamp01(v), C.body.length, x, y, 0.35)]);
+  const c = { g, cx, mirror, feetY, breath, lift, eyes, L, bcy: feetY - 11, after: null };
+  if (mascot === 'meowl') drawMeowl(c);
+  else drawOwl(c);
+
+  // ---- outline against empty space ---------------------------------------------------------
+  const out = g.c.slice();
+  for (let y = 0; y < PIP_H; y++) {
+    for (let x = 0; x < PIP_W; x++) {
+      if (g.get(x, y)) continue;
+      if (g.kind(x - 1, y) || g.kind(x + 1, y) || g.kind(x, y - 1) || g.kind(x, y + 1)) out[y * PIP_W + x] = C.outline;
     }
   }
-  const bodyTop = (x) => {
-    for (let y = 0; y < OWL_H; y++) if (inBody(x, y)) return y;
-    return OWL_H;
-  };
 
-  // ---- ear tufts: little wedges leaning outwards, rooted in the head -----------------------
-  for (const side of [-1, 1]) {
-    const tipX = side < 0 ? 38 : 58;
-    for (let i = 0; i < 6; i++) {
-      const x = tipX - side * i;
-      const y0 = Math.round(top - 3.5 + i * 0.9) - lift;
-      const y1 = bodyTop(x) + 1;
-      for (let y = y0; y <= y1; y++) {
-        const edge = y === y0;
-        const shade = side > 0 ? (edge ? 4 : 3) : edge ? 2 : 1 + (i > 2 ? 1 : 0);
-        if (g.kind(x, y) === 'owl' && y > y0 + 1) continue; // keep the body's own shading
-        g.set(x, y, C.body[shade]);
+  // ---- cool moonlight rim on the upper right ----------------------------------------------
+  if (withRim) {
+    for (let y = 0; y < PIP_H; y++) {
+      for (let x = 0; x < PIP_W; x++) {
+        const k = g.kind(x, y);
+        if (!k || k === 'eye' || k === 'feet' || k === 'face' || k === 'earIn') continue;
+        if (g.get(x + 1, y) && g.get(x, y - 1)) continue;
+        if (k === 'bark') {
+          const thin = g.kind(x, y + 2) !== 'bark';
+          if (!g.get(x, y - 1)) out[y * PIP_W + x] = thin || x % 7 === 3 ? C.bark[3] : x % 7 === 0 ? C.rimSoft : C.barkRim;
+        } else if (k === 'leaf') {
+          if (!g.get(x + 1, y) && !g.get(x, y - 1)) out[y * PIP_W + x] = C.leafRim;
+        } else if (x + 0.5 > cx + 2 && y < feetY - 6) {
+          const strong = !g.get(x + 1, y - 1) && y < c.bcy - 2;
+          out[y * PIP_W + x] = strong ? C.rim : C.rimSoft;
+        }
       }
     }
   }
-  // crown feather marks
-  for (const [x, dy] of [[45, 3], [48, 2], [51, 3]]) {
-    const y = Math.round(top) + dy - lift;
-    if (g.get(x, y)) g.set(x, y, C.body[4]);
-    if (g.get(x - 1, y + 1)) g.set(x - 1, y + 1, C.body[3]);
-    if (g.get(x + 1, y + 1)) g.set(x + 1, y + 1, C.body[3]);
+
+  if (c.after) c.after(out);
+
+  return { w: PIP_W, h: PIP_H, px: out };
+}
+
+/** The Meowl skin: a kitten's head on a little barn owl's body. */
+function drawMeowl(c) {
+  const { g, cx, mirror, feetY, breath, lift, eyes, L } = c;
+  const C = MEOWL;
+
+  // ---- barn-owl body ------------------------------------------------------------------------------
+  const bry = 10.4 + breath * 0.5;
+  const bcy = feetY - 0.4 - bry;
+  const brxAt = (dy) => 12.0 + 1.4 * Math.max(-0.4, dy / bry); // a touch pear-shaped
+  const inBody = (x, y) => {
+    const dy = y + 0.5 - bcy;
+    return ((x + 0.5 - cx) / brxAt(dy)) ** 2 + (dy / bry) ** 2 <= 1;
+  };
+  for (let y = 0; y < PIP_H; y++) {
+    for (let x = 0; x < PIP_W; x++) {
+      if (!inBody(x, y)) continue;
+      const dy = y + 0.5 - bcy;
+      const nx = (x + 0.5 - cx) / brxAt(dy);
+      const ny = dy / bry;
+      const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
+      let v = 0.16 + 0.84 * Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]);
+      if (ny > 0.55) v -= 0.5 * (ny - 0.55);
+      g.set(x, y, C.body[rampIdx(clamp01(v), C.body.length, x, y, 0.35)], 'body');
+    }
   }
 
-  // ---- folded wings: darker crescents down each side with feather-tip notches ------------
+  // ---- golden barn-owl wings: pepper speckles, barred flight-feather tips -------------------
   for (const side of [-1, 1]) {
-    const wcx = cx + side * 9.6;
-    const wcy = cy + 4.5;
+    const wcx = cx + side * 9.3;
+    const wcy = bcy + 2.6;
     const wrx = 5.2;
-    const wry = 10;
-    for (let y = Math.floor(wcy - wry); y <= Math.ceil(wcy + wry); y++) {
+    const wry = 8.8;
+    const bottom = Math.floor(wcy + wry);
+    for (let y = Math.floor(wcy - wry); y <= bottom; y++) {
       for (let x = Math.floor(wcx - wrx); x <= Math.ceil(wcx + wrx); x++) {
-        if (g.kind(x, y) !== 'owl') continue;
+        if (g.kind(x, y) !== 'body') continue;
         const dx = (x + 0.5 - wcx) / wrx;
         const dy = (y + 0.5 - wcy) / wry;
         const d = dx * dx + dy * dy;
         if (d > 1) continue;
-        const inner = side < 0 ? dx > 0.35 : dx < -0.35; // edge facing the belly
-        let v = (side > 0 ? 0.62 : 0.34) - 0.28 * dy;
-        if (inner && d > 0.45) v += 0.3; // lit leading edge
-        let idx = rampIdx(clamp01(v), C.wing.length, x, y, 0.3);
-        g.set(x, y, C.wing[idx], 'wing');
-      }
-    }
-    // a few soft spots, staggered like real wing coverts
-    for (const [dx, dy] of [[-1, -4], [1, -2], [-1, 0], [1, 2], [0, 4]]) {
-      const x = Math.round(wcx + side * dx);
-      const y = Math.round(wcy + dy);
-      if (g.kind(x, y) === 'wing') g.set(x, y, C.wingSpot, 'wing');
-    }
-    // feather tips at the bottom of the wing
-    for (let i = 0; i < 3; i++) {
-      const x = Math.round(wcx + side * (i * 2 - 1));
-      const y = Math.round(wcy + wry - 2 - i * 0.6);
-      if (g.kind(x, y) === 'wing') g.set(x, y, C.wing[0], 'wing');
-    }
-  }
-
-  // ---- belly with neat chevrons --------------------------------------------------------------
-  const bcy = cy + 7.5;
-  for (let y = Math.floor(bcy - 8); y <= Math.ceil(bcy + 8); y++) {
-    for (let x = 39; x <= 58; x++) {
-      const dx = (x + 0.5 - cx) / 7.0;
-      const dy = (y + 0.5 - bcy) / 7.6;
-      if (dx * dx + dy * dy > 1 || g.kind(x, y) !== 'owl') continue;
-      const v = 0.7 - 0.45 * dy + 0.15 * dx;
-      g.set(x, y, C.belly[rampIdx(clamp01(v), C.belly.length, x, y, 0.25)], 'belly');
-    }
-  }
-  for (let r = 0; r < 4; r++) {
-    const y = Math.round(bcy - 3 + r * 3);
-    const off = r % 2 ? 2 : 0;
-    for (let x = 43 + off; x <= 55; x += 4) {
-      if (g.kind(x, y) !== 'belly' || g.kind(x - 1, y - 1) !== 'belly' || g.kind(x + 1, y - 1) !== 'belly') continue;
-      g.set(x, y, C.chevron, 'belly');
-      g.set(x - 1, y - 1, C.chevron, 'belly');
-      g.set(x + 1, y - 1, C.chevron, 'belly');
-    }
-  }
-
-  // ---- facial disc (two soft goggles) ------------------------------------------------------
-  const eyeY = Math.round(top) + 11 - lift;
-  for (const ex of [44.0, 53.0]) {
-    for (let y = eyeY - 6; y <= eyeY + 6; y++) {
-      for (let x = Math.floor(ex - 6); x <= Math.ceil(ex + 6); x++) {
-        const dx = x + 0.5 - ex;
-        const dy = y + 0.5 - (eyeY + 0.5);
-        const d = Math.hypot(dx, dy * 1.06);
-        if (d > 5.2 || !g.get(x, y)) continue;
-        const v = 0.95 - 0.12 * d + 0.06 * (dx * (ex < 48 ? -1 : 1)) - 0.05 * dy;
-        const idx = d > 4.4 ? 0 : rampIdx(clamp01(v), C.disc.length, x, y, 0.35);
-        g.set(x, y, C.disc[Math.max(idx, d > 4.4 ? 0 : 1)], 'disc');
+        const inner = side < 0 ? dx > 0.35 : dx < -0.35; // edge facing the chest catches light
+        let v = (side > 0 ? 0.66 : 0.4) - 0.25 * dy;
+        if (inner && d > 0.45) v += 0.28;
+        let color = C.wing[rampIdx(clamp01(v), C.wing.length, x, y, 0.3)];
+        const fromBottom = bottom - y;
+        if (dy > 0.25 && fromBottom % 2 === 1 && (x + y) % 4 !== 0) color = C.wingBar; // barred flight-feather tips
+        else if (dy <= 0.25 && y % 2 === 0 && (x * 3 + y + (hash(x >> 2, y >> 2) & 1)) % 4 === 0) color = C.speckle; // fine grey pepper
+        g.set(x, y, color, 'wing');
       }
     }
   }
 
-  // ---- eyes ---------------------------------------------------------------------------------
-  if (eyes === 'open') {
-    for (const ex of [44.0, 53.0]) {
-      for (let y = eyeY - 3; y <= eyeY + 3; y++) {
-        for (let x = Math.floor(ex - 3); x <= Math.ceil(ex + 3); x++) {
-          const d = Math.hypot(x + 0.5 - ex, y + 0.5 - (eyeY + 0.5));
-          if (d > 3.1) continue;
-          g.set(x, y, d > 2.4 ? C.lid : C.iris[y < eyeY ? 0 : 1], 'eye');
-        }
+  // a darker leading edge where each wing folds over the chest
+  for (let y = 0; y < PIP_H; y++) {
+    for (let x = 0; x < PIP_W; x++) {
+      if (g.kind(x, y) !== 'wing') continue;
+      const toward = x + 0.5 < cx ? x + 1 : x - 1;
+      if (g.kind(toward, y) === 'body') g.set(x, y, C.wing[0], 'wing');
+    }
+  }
+
+  // ---- soft white chest ---------------------------------------------------------------------
+  const ccy = bcy - 0.6;
+  for (let y = Math.floor(ccy - 11); y <= Math.ceil(ccy + 11); y++) {
+    for (let x = 38; x <= 59; x++) {
+      const dx = (x + 0.5 - cx) / 7.6;
+      const dy = (y + 0.5 - ccy) / 10.4;
+      if (dx * dx + dy * dy > 1 || g.kind(x, y) !== 'body') continue;
+      const v = 0.82 - 0.4 * dy + 0.22 * dx;
+      g.set(x, y, C.chest[rampIdx(clamp01(v), C.chest.length, x, y, 0.3)], 'chest');
+    }
+  }
+
+  // ---- fluffy white feet with tiny grey talons ----------------------------------------------
+  for (const s of [1, -1]) {
+    const X = (x) => (s > 0 ? x : mirror(x));
+    for (const x of [44, 45]) g.set(X(x), feetY - 2, C.feet[1], 'feet');
+    for (const x of [43, 44, 45, 46]) g.set(X(x), feetY - 1, x === 43 ? C.feet[0] : C.feet[1], 'feet');
+    for (const x of [43, 45]) g.set(X(x), feetY, C.talon, 'feet');
+  }
+
+  // ---- kitten head (wider than tall, chubby cheeks) -----------------------------------------
+  const hry = 10.2;
+  const hcy = feetY - 21.2 - lift;
+  const hrxAt = (dy) => 13.8 + 1.2 * Math.max(0, dy / hry); // cheeks fill out at the bottom
+  const headTopF = hcy - hry;
+
+  // ears first, so the head covers their base
+  for (const s of [1, -1]) {
+    const P = (x, y) => [s > 0 ? x : 97 - x, y];
+    const apex = P(37.0, headTopF - 5.8);
+    const bl = P(34.6, headTopF + 4.2);
+    const br = P(45.0, headTopF + 0.8);
+    for (let y = Math.floor(headTopF - 7); y <= Math.ceil(headTopF + 5); y++) {
+      for (let x = 30; x <= 66; x++) {
+        if (!inTri(x, y, apex, bl, br)) continue;
+        const t = (y + 0.5 - (headTopF - 5.8)) / 10; // 0 at the tip
+        const v = (s > 0 ? 0.42 : 0.72) + 0.1 * t;
+        g.set(x, y, C.fur[rampIdx(clamp01(v), C.fur.length, x, y, 0.3)], 'ear');
       }
-      const px = Math.round(ex) - 1;
-      g.set(px, eyeY, C.pupil, 'eye');
-      g.set(px + 1, eyeY, C.pupil, 'eye');
-      g.set(px, eyeY + 1, C.pupil, 'eye');
-      g.set(px + 1, eyeY + 1, C.pupil, 'eye');
-      g.set(px + 1, eyeY - 1, C.glint, 'eye');
     }
-  } else {
-    // sleepy closed eyes: a soft downward curve, lids slightly heavier for 'blink'
-    const arc = [
-      [-3, -1],
-      [-2, 0], [-1, 0], [0, 0], [1, 0],
-      [2, -1],
-    ];
-    for (const [ex, sgn] of [[44, -1], [52, 1]]) {
-      for (const [dx, dy] of arc) {
-        const x = sgn < 0 ? ex + dx : ex - dx; // mirror
-        g.set(x, eyeY + dy, C.lid, 'eye');
+  }
+
+  for (let y = 0; y < PIP_H; y++) {
+    for (let x = 0; x < PIP_W; x++) {
+      const dy = y + 0.5 - hcy;
+      const rx = hrxAt(dy);
+      const nx = (x + 0.5 - cx) / rx;
+      const ny = dy / hry;
+      if (nx * nx + ny * ny > 1) continue;
+      const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
+      // warm bounce light from the white chest keeps the chin from going muddy
+      const v = 0.2 + 0.8 * Math.max(0, nx * L[0] + ny * L[1] + nz * L[2]) + (ny > 0.55 ? 0.18 : 0);
+      g.set(x, y, C.fur[rampIdx(clamp01(v), C.fur.length, x, y, 0.35)], 'head');
+    }
+  }
+
+  // pink inner ears, only on ear pixels the head didn't cover
+  for (const s of [1, -1]) {
+    const P = (x, y) => [s > 0 ? x : 97 - x, y];
+    const apex = P(37.7, headTopF - 3.4);
+    const bl = P(36.6, headTopF + 2.6);
+    const br = P(43.0, headTopF + 1.2);
+    for (let y = Math.floor(headTopF - 5); y <= Math.ceil(headTopF + 4); y++) {
+      for (let x = 30; x <= 66; x++) {
+        if (g.kind(x, y) !== 'ear' || !inTri(x, y, apex, bl, br)) continue;
+        const t = (y + 0.5 - (headTopF - 3.4)) / 6;
+        g.set(x, y, C.earIn[t < 0.35 ? 0 : t < 0.8 ? 1 : 2], 'earIn');
       }
-      // a tiny lash at the outer corner
-      const outer = sgn < 0 ? ex - 4 : ex + 4;
-      g.set(outer, eyeY, C.lash, 'eye');
-      if (eyes === 'blink') for (const dx of [-1, 0]) g.set(sgn < 0 ? ex + dx : ex - dx, eyeY - 1, C.lash, 'eye');
     }
   }
 
-  // ---- beak + blush -------------------------------------------------------------------------
-  const by = eyeY + 2;
-  g.set(47, by, C.beak[1], 'beak');
-  g.set(48, by, C.beak[2], 'beak');
-  g.set(49, by, C.beak[1], 'beak');
-  g.set(48, by + 1, C.beak[1], 'beak');
-  g.set(48, by + 2, C.beak[0], 'beak');
-  for (const x of [40, 41, 55, 56]) g.set(x, by + 1, C.blush, 'disc');
-
-  // ---- feet gripping the branch -------------------------------------------------------------
-  for (const fx of [44, 52]) {
-    const toes = fx < 48 ? [fx - 1, fx + 1, fx + 3] : [fx - 3, fx - 1, fx + 1];
-    for (let x = toes[0]; x <= toes[2]; x++) g.set(x, feetY - 1, C.feet[1], 'feet');
-    for (const x of toes) g.set(x, feetY, C.feet[0], 'feet');
-  }
-
-  // ---- outline against empty space, then a cool moonlight rim on the upper right ----------
-  const out = g.c.slice();
-  for (let y = 0; y < OWL_H; y++) {
-    for (let x = 0; x < OWL_W; x++) {
-      if (g.get(x, y)) continue;
-      const n = [g.kind(x - 1, y), g.kind(x + 1, y), g.kind(x, y - 1), g.kind(x, y + 1)];
-      if (n.some((k) => k && k !== 'leafless')) out[y * OWL_W + x] = C.outline;
-    }
-  }
-  for (let y = 0; y < OWL_H; y++) {
-    for (let x = 0; x < OWL_W; x++) {
+  // the head casts a soft shadow on the body just under the cheeks
+  const shade = { body: C.body[0], wing: C.wing[0], chest: C.chest[0] };
+  for (let y = PIP_H - 1; y > 0; y--) {
+    for (let x = 0; x < PIP_W; x++) {
       const k = g.kind(x, y);
-      if (!k || k === 'eye' || k === 'beak' || k === 'feet') continue;
-      const emptyUR = !g.get(x + 1, y) || !g.get(x, y - 1);
-      if (!emptyUR) continue;
-      if (k === 'bark') {
-        const thin = g.kind(x, y + 2) !== 'bark';
-        if (!g.get(x, y - 1)) out[y * OWL_W + x] = thin || x % 7 === 3 ? C.bark[3] : x % 7 === 0 ? C.rimSoft : C.barkRim;
-      } else if (k === 'leaf') {
-        if (!g.get(x + 1, y) && !g.get(x, y - 1)) out[y * OWL_W + x] = C.leafRim;
-      } else if (x + 0.5 > cx + 2 && y < cy + 6) {
-        const strong = !g.get(x + 1, y - 1) && y < cy - 2;
-        out[y * OWL_W + x] = strong ? C.rim : C.rimSoft;
-      }
+      if (k in shade && g.kind(x, y - 1) === 'head') g.set(x, y, shade[k], k);
     }
   }
-  return { w: OWL_W, h: OWL_H, px: out };
+
+  const hc = Math.round(hcy); // face rows hang off this
+  const ht = Math.round(headTopF);
+  const both = (x, y, color, kind = 'face') => {
+    g.set(x, y, color, kind);
+    g.set(mirror(x), y, color, kind);
+  };
+
+  // tabby markings: a little "M" on the forehead, a couple of side stripes
+  for (const [x, y0, y1] of [[45, ht + 2, ht + 4], [47, ht + 3, ht + 4]]) {
+    for (let y = y0; y <= y1; y++) both(x, y, C.stripe);
+  }
+  both(37, hc - 5, C.stripe);
+  both(38, hc - 5, C.stripe);
+  both(36, hc - 3, C.stripe);
+  both(37, hc - 3, C.stripe);
+
+  // white blaze between the eyes running down into the muzzle
+  for (let y = hc - 4; y <= hc + 1; y++) {
+    g.set(48, y, C.white[2], 'face');
+    if (y >= hc - 2) both(47, y, y >= hc ? C.white[2] : C.white[1]);
+  }
+  const mcy = hc + 3.6;
+  for (let y = hc; y <= hc + 7; y++) {
+    for (let x = 41; x <= 56; x++) {
+      const dx = (x + 0.5 - cx) / 5.7;
+      const dy = (y + 0.5 - mcy) / 3.1;
+      if (dx * dx + dy * dy > 1 || !g.get(x, y)) continue;
+      const v = 0.95 - 0.35 * Math.max(0, dy) - (Math.abs(dx) > 0.85 ? 0.3 : 0);
+      g.set(x, y, C.white[rampIdx(clamp01(v), C.white.length, x, y, 0.2)], 'face');
+    }
+  }
+
+  // white chin flowing into the chest
+  for (let y = hc + 5; y <= Math.ceil(hcy + hry); y++) {
+    const half = 3.8 + (y - (hc + 5)) * 0.75;
+    for (let x = 38; x <= 59; x++) {
+      const k = g.kind(x, y);
+      if ((k !== 'head' && k !== 'face') || Math.abs(x + 0.5 - cx) > half) continue;
+      const edge = Math.abs(x + 0.5 - cx) > half - 1;
+      g.set(x, y, edge ? C.white[0] : y > hc + 7 ? C.white[1] : C.white[2], 'face');
+    }
+  }
+
+  // eyes: small glossy dots, or sleepy curves
+  if (eyes === 'open') {
+    for (const s of [1, -1]) {
+      const X = (x) => (s > 0 ? x : mirror(x));
+      const dot = ['.##.', '####', '####', '.##.'];
+      dot.forEach((row, ry) =>
+        [...row].forEach((ch, rx) => {
+          if (ch === '#') g.set(X(41 + rx), hc - 2 + ry, C.eye, 'eye');
+        }),
+      );
+    }
+    g.set(42, hc - 1, C.glint, 'eye'); // the same catch-light corner on both eyes
+    g.set(53, hc - 1, C.glint, 'eye');
+  } else if (eyes === 'blink') {
+    for (const x of [41, 42, 43, 44]) both(x, hc, C.eye, 'eye');
+  } else {
+    // closed: a soft downward curve
+    both(41, hc, C.eye, 'eye');
+    both(42, hc + 1, C.eye, 'eye');
+    both(43, hc + 1, C.eye, 'eye');
+    both(44, hc, C.eye, 'eye');
+  }
+  // the thin dark tabby flick from each outer eye corner
+  both(40, hc, C.stripe);
+  both(39, hc, C.stripe);
+  both(38, hc + 1, C.stripe);
+
+  // tiny pink nose and a little "w" mouth
+  both(47, hc + 2, C.nose);
+  g.set(48, hc + 2, C.nose, 'face');
+  g.set(48, hc + 3, C.noseShade, 'face');
+  g.set(48, hc + 4, C.mouth, 'face');
+  both(46, hc + 4, C.mouth);
+  both(47, hc + 5, C.mouth);
+
+  // rosy cheeks
+  both(40, hc + 2, C.blush);
+  both(41, hc + 2, C.blush);
+
+  c.bcy = bcy;
+  // little white whiskers, drawn after the outline so they reach past it
+  c.after = (out) => {
+    const whisker = (pts) => {
+      for (const [x, y, tip] of pts) {
+        const c = tip ? C.whiskerTip : C.whisker;
+        out[y * PIP_W + x] = c;
+        out[y * PIP_W + mirror(x)] = c;
+      }
+    };
+    whisker([[42, hc + 3], [41, hc + 3], [40, hc + 3], [39, hc + 3], [38, hc + 3], [37, hc + 2], [36, hc + 2, true]]);
+    whisker([[42, hc + 5], [41, hc + 5], [40, hc + 5], [39, hc + 5], [38, hc + 6], [37, hc + 6, true]]);
+  };
+}
+
+/** Small deterministic hash for speckle placement. */
+function hash(x, y) {
+  let h = (x * 374761393 + y * 668265263) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return (h ^ (h >>> 16)) >>> 0;
 }
 
 function drawBranch(g, topY) {
@@ -340,7 +441,7 @@ function drawBranch(g, topY) {
         if (ch !== '#') return;
         const x = lx + dx * dir;
         const y = ly + dy;
-        const rib = up ? dx + dy === 4 || dx + dy === 3 && dy > 2 : dy === 2 && dx > 0 && dx < 5;
+        const rib = up ? dx + dy === 4 || (dx + dy === 3 && dy > 2) : dy === 2 && dx > 0 && dx < 5;
         const v = rib ? 0.3 : 0.88 - dy * 0.14 + tone;
         g.set(x, y, C.leaf[rampIdx(clamp01(v), C.leaf.length, x, y, 0.3)], 'leaf');
       }),

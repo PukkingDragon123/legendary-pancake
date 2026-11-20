@@ -1,8 +1,8 @@
 // The bedtime page every blocked site lands on. Draws a pixel night sky (drifting stars, a crescent
-// moon, hills, fireflies) and Pip asleep on a branch, and keeps the words in step with the status
+// moon, hills, fireflies) and Pip the Meowl asleep on a branch, and keeps the words in step with the status
 // the background worker publishes in chrome.storage.local.
 
-import { OWL_H, OWL_W, ZGLYPHS, frameCanvas, owlFrame } from './lib/owl.js';
+import { PIP_H, PIP_W, ZGLYPHS, frameCanvas, pipFrame } from './lib/owl.js';
 import { durationLabel, timeLabel, clockLabel } from './lib/schedule.js';
 
 const api = globalThis.browser ?? globalThis.chrome;
@@ -70,8 +70,8 @@ const HILL_NEAR = '#080c27';
 
 const sky = /** @type {HTMLCanvasElement} */ (document.getElementById('sky'));
 const sctx = sky.getContext('2d');
-const owlCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('owl'));
-const octx = owlCanvas.getContext('2d');
+const pipCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById('pip'));
+const octx = pipCanvas.getContext('2d');
 
 let S = 4; // CSS px per art pixel
 let cw = 0;
@@ -97,7 +97,7 @@ function layout() {
   sky.height = ch;
   sky.style.width = cw * S + 'px';
   sky.style.height = ch * S + 'px';
-  owlCanvas.style.width = OWL_W * S + 'px';
+  pipCanvas.style.width = PIP_W * S + 'px';
   horizon = Math.round(ch * 0.8);
   const r = Math.max(5, Math.min(11, Math.round(Math.min(cw, ch) * 0.05)));
   moon = { x: Math.round(cw * 0.83), y: Math.round(ch * 0.15) + r, r };
@@ -327,9 +327,9 @@ function drawFlies(t) {
 // ---- Pip ----------------------------------------------------------------------------------------
 
 const frames = {
-  closed: [frameCanvas(owlFrame({ breath: 0, eyes: 'closed' })), frameCanvas(owlFrame({ breath: 1, eyes: 'closed' }))],
-  open: [frameCanvas(owlFrame({ breath: 0, eyes: 'open' })), frameCanvas(owlFrame({ breath: 1, eyes: 'open' }))],
-  blink: [frameCanvas(owlFrame({ breath: 0, eyes: 'blink' })), frameCanvas(owlFrame({ breath: 1, eyes: 'blink' }))],
+  closed: [frameCanvas(pipFrame({ breath: 0, eyes: 'closed' })), frameCanvas(pipFrame({ breath: 1, eyes: 'closed' }))],
+  open: [frameCanvas(pipFrame({ breath: 0, eyes: 'open' })), frameCanvas(pipFrame({ breath: 1, eyes: 'open' }))],
+  blink: [frameCanvas(pipFrame({ breath: 0, eyes: 'blink' })), frameCanvas(pipFrame({ breath: 1, eyes: 'blink' }))],
 };
 let awake = false;
 /** guided breathing (fallback when the app isn't paired): null or start time */
@@ -345,7 +345,7 @@ function breathAt(t) {
   return t % 4.4 < 1.9 ? 1 : 0;
 }
 
-/** Zzz: a new glyph every ~2.8 s rises from the right tuft and drifts away. */
+/** Zzz: a new glyph every ~2.8 s rises beside the right ear and drifts away. */
 function drawZ(t) {
   const period = 2.8;
   for (let k = 0; k < 3; k++) {
@@ -355,15 +355,15 @@ function drawZ(t) {
     const life = age / (period * 3);
     const big = life > 0.33 ? 0 : 1;
     const g = ZGLYPHS[big];
-    const x = Math.round(61 + life * 14 + Math.sin(age * 1.6) * 1.5);
-    const y = Math.round(16 - life * 15);
+    const x = Math.round(64 + life * 13 + Math.sin(age * 1.6) * 1.5);
+    const y = Math.round(15 - life * 14);
     octx.fillStyle = life < 0.55 ? '#cfd7ff' : life < 0.8 ? '#8d97d6' : '#4d5799';
     g.forEach((row, gy) => [...row].forEach((c, gx) => c === '#' && octx.fillRect(x + gx, y + gy, 1, 1)));
   }
 }
 
-function drawOwl(t) {
-  octx.clearRect(0, 0, OWL_W, OWL_H);
+function drawPip(t) {
+  octx.clearRect(0, 0, PIP_W, PIP_H);
   const b = reduce ? 0 : breathAt(t);
   let set = frames.closed;
   if (awake) set = !reduce && t % 5 < 0.18 ? frames.blink : frames.open;
@@ -383,7 +383,7 @@ function paint(t) {
   drawShootingStar(t);
   sctx.drawImage(groundLayer, 0, 0);
   drawFlies(t);
-  drawOwl(t);
+  drawPip(t);
 }
 
 function loop(now) {
@@ -450,9 +450,9 @@ function render() {
   const mode = blocking ? 'blocking' : paused ? 'paused' : 'awake';
   document.body.dataset.state = mode;
   awake = mode !== 'blocking';
-  owlCanvas.setAttribute(
+  pipCanvas.setAttribute(
     'aria-label',
-    awake ? 'Pip the owl, awake on a branch' : 'Pip the owl, asleep on a branch, breathing slowly',
+    awake ? 'Pip the Meowl, awake on a branch' : 'Pip the Meowl, asleep on a branch, breathing slowly',
   );
 
   if (mode === 'blocking') {

@@ -1,7 +1,7 @@
 # Hoot Hollow Bedtime (browser extension)
 
 A web page can't block other websites, so Hoot Hollow comes with this small companion extension.
-At bedtime, Pip the owl tucks in social media: TikTok, Instagram, Facebook, X/Twitter, Reddit, YouTube,
+At bedtime, Pip the Meowl (a kitten's head on a little barn owl's body) tucks in social media: TikTok, Instagram, Facebook, X/Twitter, Reddit, YouTube,
 Snapchat, Threads, Pinterest, Twitch and Discord, plus any sites you add. A visit to one of them
 lands on a quiet night-sky page instead of the feed.
 
@@ -27,7 +27,7 @@ Plain JS/HTML/CSS, Manifest V3, no build step.
 1. Open the extensions page: `chrome://extensions`, `edge://extensions`, `brave://extensions`, ...
 2. Turn on **Developer mode** (top right in Chrome; left sidebar in Edge).
 3. Click **Load unpacked** and choose this `extension/` folder.
-4. Pin the owl from the puzzle-piece menu so you can see its status.
+4. Pin Pip from the puzzle-piece menu so you can see its status.
 5. To block in private windows too, open the extension's **Details** and turn on **Allow in Incognito**.
 
 Chromium shows a "developer mode extensions" reminder now and then. That is normal for unpacked
@@ -150,8 +150,8 @@ bridge.js          content script: app <-> extension postMessage bridge
 blocked.html/.css/.js  bedtime page (pixel sky, fireflies, Pip on a branch)
 popup.html/.css/.js    toolbar popup (status, window, sites, pairing, gentle pause)
 lib/schedule.js    schedule + domain helpers (mirror of src/game/blocker.ts)
-lib/owl.js         Pip, drawn pixel by pixel
+lib/owl.js         Pip the Meowl, drawn pixel by pixel (also the source of the 32/128 px icons)
 fonts.css, fonts/  bundled Pixelify Sans, Silkscreen, Nunito (SIL OFL, see fonts/OFL.txt)
-icons/             16/32/48/128 px owl icons
+icons/             16/32/48/128 px Meowl icons
 tools/make-icons.mjs  regenerates icons/ (node tools/make-icons.mjs [--preview out.png]), no dependencies
 ```

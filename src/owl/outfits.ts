@@ -29,6 +29,8 @@ const def = (id: string, slot: OutfitSlot, name: string, price: number, blurb: s
 };
 export const PIECE: Record<string, PieceDef> = {};
 
+/** depth of the face plane the eyes sit on (the owl's disc stands out further than the Meowl's face) */
+const fz = (P: OwlParts) => (P.pal.skin === 'owl' ? 7.45 : 6.6);
 const fineJ = (t: Texel) => (hash(Math.floor(t.x * 3), Math.floor(t.y * 3), Math.floor(t.z * 3), 77) - 0.5) * 0.35;
 
 /** Chunky hand-knit stitches: little V columns stacked in rows. */
@@ -160,25 +162,25 @@ function ring(P: OwlParts, cx: number, cy: number, z: number, size: number, th: 
 }
 def('glasses', 'face', 'Reading Glasses', 180, 'For bedtime stories and very small print.', (P) => {
   const m = metal('#c99a3a');
-  for (const sd of [-1, 1]) ring(P, sd * G.eyeX, G.eyeY, G.faceFront + 0.7, 6, 0.55, m);
-  P.add('head', box(0, G.eyeY + 0.9, G.faceFront + 0.7, 1.5, 0.5, 0.6, m));
+  for (const sd of [-1, 1]) ring(P, sd * G.eyeX, G.eyeY, fz(P) + 0.7, 6, 0.55, m);
+  P.add('head', box(0, G.eyeY + 0.9, fz(P) + 0.7, 1.5, 0.5, 0.6, m));
   for (const sd of [-1, 1]) P.add('head', box(sd * 7.4, G.eyeY + 2.2, 2.2, 0.5, 0.5, 9, m));
 });
 def('sleepmask', 'face', 'Sleepy Mask', 120, 'Worn on the forehead, ready for lights-out.', (P) => {
   const m = cloth('#9a7fd6', { trim: '#f5d36b', hem: 0.6 }), k = flatLash();
-  P.add('head', box(0, 22.6, G.faceFront + 0.5, 14.2, 3.2, 0.9, m));
-  for (const sd of [-1, 1]) P.add('head', box(sd * 3.6, 23.6, G.faceFront + 1.05, 3.4, 0.5, 0.2, k), box(sd * 3.6 + sd * -1.4, 23.2, G.faceFront + 1.05, 0.5, 0.5, 0.2, k), box(sd * 3.6 + sd * 1.4, 23.2, G.faceFront + 1.05, 0.5, 0.5, 0.2, k));
+  P.add('head', box(0, 22.6, fz(P) + 0.5, 14.2, 3.2, 0.9, m));
+  for (const sd of [-1, 1]) P.add('head', box(sd * 3.6, 23.6, fz(P) + 1.05, 3.4, 0.5, 0.2, k), box(sd * 3.6 + sd * -1.4, 23.2, fz(P) + 1.05, 0.5, 0.5, 0.2, k), box(sd * 3.6 + sd * 1.4, 23.2, fz(P) + 1.05, 0.5, 0.5, 0.2, k));
   for (const sd of [-1, 1]) P.add('head', box(sd * 8.3, 22.8, 1.8, 0.6, 1.2, 10, cloth('#7d63bd')));
 });
 function flatLash(): Painter { const r = ramp(0x2a1d33); return (t) => tone(r, t.face === 2 ? 1 : 0); }
 def('monocle', 'face', 'Gentlebird Monocle', 260, 'Distinguished. Slightly smug.', (P) => {
   const m = metal(GOLD);
-  ring(P, G.eyeX, G.eyeY, G.faceFront + 0.7, 6.2, 0.6, m);
-  P.add('head', box(G.eyeX + 2.9, G.eyeY - 6.6, G.faceFront + 0.6, 0.4, 3.6, 0.4, m));
+  ring(P, G.eyeX, G.eyeY, fz(P) + 0.7, 6.2, 0.6, m);
+  P.add('head', box(G.eyeX + 2.9, G.eyeY - 6.6, fz(P) + 0.6, 0.4, 3.6, 0.4, m));
 });
 def('stargoggles', 'face', 'Star Goggles', 70, 'Pushed up, ready for meteor showers.', (P) => {
   const m = metal('#8a93a8'), g = lamp('#9fe7ff');
-  for (const sd of [-1, 1]) P.add('head', box(sd * 3.4, 22.8, G.faceFront + 0.6, 4.6, 3, 1.4, m), box(sd * 3.4, 23.3, G.faceFront + 1.35, 3.2, 2, 0.2, g, { glow: true }));
+  for (const sd of [-1, 1]) P.add('head', box(sd * 3.4, 22.8, fz(P) + 0.6, 4.6, 3, 1.4, m), box(sd * 3.4, 23.3, fz(P) + 1.35, 3.2, 2, 0.2, g, { glow: true }));
   P.add('head', box(0, 23.2, 0.2, G.headW + 0.8, 1.4, G.headD + 0.8, cloth('#3c4256'), { skip: 'ud' }));
 }, { premium: true });
 

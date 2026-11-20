@@ -19,21 +19,23 @@ scene.add(sun, new THREE.HemisphereLight(0xffeedd, 0x5a4638, 1.2));
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshLambertMaterial({ color: 0x3a4060 }));
 ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
 
-const looks = (q.get('set') ?? 'palettes') === 'palettes'
-  ? ['tabby', 'ginger', 'snow', 'tuxedo', 'calico', 'siamese', 'midnight', 'aurora'].map((p) => ({ palette: p, outfit: {} }))
+const set = q.get('set') ?? 'palettes';
+const looks = set === 'palettes'
+  ? ['tawny', 'snowy', 'barn', 'mossy', 'rosy', 'midnight_owl', 'ember_owl', 'aurora_owl'].map((p) => ({ skin: 'owl' as const, palette: p, outfit: {} }))
+  : set === 'meowl' ? ['tabby', 'ginger', 'snow', 'tuxedo', 'calico', 'siamese', 'midnight', 'aurora'].map((p) => ({ skin: 'meowl' as const, palette: p, outfit: {} }))
   : [
-    { palette: 'tabby', outfit: { head: 'nightcap', neck: 'scarf' } },
-    { palette: 'snow', outfit: { head: 'wizard', body: 'cloudcloak' } },
-    { palette: 'ginger', outfit: { head: 'explorer', back: 'satchel', neck: 'bandana' } },
-    { palette: 'calico', outfit: { head: 'toadstool', body: 'sweater' } },
-    { palette: 'siamese', outfit: { head: 'bow', face: 'glasses', body: 'cardigan' } },
-    { palette: 'midnight', outfit: { head: 'crown', body: 'royalcape', neck: 'moonpendant' } },
-    { palette: 'tuxedo', outfit: { head: 'froghat', body: 'raincoat' } },
-    { palette: 'aurora', outfit: { face: 'sleepmask', body: 'pajamas', back: 'fairywings' } },
+    { palette: 'tawny', outfit: { head: 'nightcap', neck: 'scarf' } },
+    { palette: 'snowy', outfit: { head: 'wizard', body: 'cloudcloak' } },
+    { palette: 'barn', outfit: { head: 'explorer', back: 'satchel', neck: 'bandana' } },
+    { palette: 'mossy', outfit: { head: 'toadstool', body: 'sweater' } },
+    { palette: 'rosy', outfit: { head: 'bow', face: 'glasses', body: 'cardigan' } },
+    { skin: 'meowl' as const, palette: 'tabby', outfit: { head: 'crown', neck: 'moonpendant' } },
+    { palette: 'midnight_owl', outfit: { head: 'froghat', body: 'raincoat' } },
+    { palette: 'aurora_owl', outfit: { face: 'sleepmask', body: 'pajamas', back: 'fairywings' } },
   ];
 const exprs: Partial<EyeState>[] = [{}, { mode: 'happy' }, { lid: 0.55, pupil: 6.5 }, { mode: 'heart' }, { mode: 'wide' }, { tilt: 0.8, lid: 0.35 }, { mode: 'closed' }, { mode: 'sparkle', pupil: 6.5, lx: 0.4 }];
 looks.forEach((look, i) => {
-  const o = buildOwl(look);
+  const o = buildOwl(look as any);
   const c = i % 4, row = Math.floor(i / 4);
   o.rig.root.position.set((c - 1.5) * 2.4, 0, row * -2.6 + 1.2);
   o.rig.root.rotation.y = q.get('back') ? Math.PI + 0.5 : -0.35 + c * 0.15;

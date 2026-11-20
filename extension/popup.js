@@ -1,7 +1,7 @@
 // Toolbar popup: status, the bedtime window, sites, pairing info and the gentle pause.
 // All changes go through the background worker, which enforces strict mode.
 
-import { frameCanvas, owlFrame } from './lib/owl.js';
+import { frameCanvas, pipFrame } from './lib/owl.js';
 import {
   DEFAULT_SITES,
   SITE_NAMES,
@@ -18,7 +18,7 @@ const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Frid
 
 const $ = (id) => /** @type {any} */ (document.getElementById(id));
 const el = {
-  owl: /** @type {HTMLCanvasElement} */ ($('owl')),
+  pip: /** @type {HTMLCanvasElement} */ ($('pip')),
   enabled: $('enabled'),
   status: $('status'),
   statusTitle: $('status-title'),
@@ -82,28 +82,28 @@ async function saveConfig(mutate) {
   }
 }
 
-// ---- owl ----------------------------------------------------------------------------------------
+// ---- Pip ----------------------------------------------------------------------------------------
 
-const CROP = { x: 33, y: 18, w: 32, h: 36 }; // Pip without the branch, feet included
-const owlFrames = {
-  closed: [0, 1].map((b) => frameCanvas(owlFrame({ breath: b, eyes: 'closed', branch: false }))),
-  open: [0, 1].map((b) => frameCanvas(owlFrame({ breath: b, eyes: 'open', branch: false }))),
+const CROP = { x: 32, y: 13, w: 33, h: 41 }; // Pip without the branch, ears to toes
+const pipFrames = {
+  closed: [0, 1].map((b) => frameCanvas(pipFrame({ breath: b, eyes: 'closed', branch: false }))),
+  open: [0, 1].map((b) => frameCanvas(pipFrame({ breath: b, eyes: 'open', branch: false }))),
 };
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 let breath = 0;
 
-function drawOwl() {
-  const ctx = el.owl.getContext('2d');
+function drawPip() {
+  const ctx = el.pip.getContext('2d');
   ctx.clearRect(0, 0, CROP.w, CROP.h);
   const asleep = state?.status?.blocking;
-  const set = asleep ? owlFrames.closed : owlFrames.open;
+  const set = asleep ? pipFrames.closed : pipFrames.open;
   ctx.drawImage(set[reduce.matches ? 0 : breath], CROP.x, CROP.y, CROP.w, CROP.h, 0, 0, CROP.w, CROP.h);
 }
 
 setInterval(() => {
   if (reduce.matches) return;
   breath ^= 1;
-  drawOwl();
+  drawPip();
 }, 2200);
 
 // ---- render -------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ function render() {
   const { status, app, locked } = state;
   const cfg = status.config;
   const now = Date.now();
-  drawOwl();
+  drawPip();
 
   // header switch
   el.enabled.checked = cfg.enabled;
@@ -207,7 +207,7 @@ function render() {
     if (state.sleep?.active) el.appLine.append(document.createElement('br'), 'Sleep mode is on.');
     el.openApp.hidden = false;
   } else {
-    el.appLine.append(dot, 'Not paired yet. Open Hoot Hollow in this browser and it will find the owl.');
+    el.appLine.append(dot, 'Not paired yet. Open Hoot Hollow in this browser and Pip will find it.');
     el.openApp.hidden = true;
   }
 }

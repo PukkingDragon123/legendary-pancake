@@ -1,18 +1,21 @@
 #!/usr/bin/env node
-// Writes the extension's toolbar/store icons (icons/icon-{16,32,48,128}.png): Pip the owl's face
-// in pixel art. No dependencies: the PNG is encoded here with node:zlib plus a CRC32 table.
+// Writes the extension's toolbar/store icons (icons/icon-{16,32,48,128}.png): Pip the Meowl (a
+// kitten's head on a little barn owl's body) in pixel art. No dependencies: the PNG is encoded here
+// with node:zlib plus a CRC32 table. Output is deterministic.
 //
 //   node extension/tools/make-icons.mjs            # writes extension/icons/*.png
 //   node extension/tools/make-icons.mjs --preview  # also writes icons/preview.png (all sizes, enlarged)
 //
-// Two hand-drawn sprites: a 16x16 face (used for 16 and 48 = 3x) and a 32x32 face (32 and 128 = 4x),
-// so every size is an exact integer upscale and stays crisp. Only the left half of each face is
-// drawn; the right half is mirrored, then a few deliberately asymmetric pixels (eye glints) go on top.
+// Two sprites, so every size is an exact integer upscale and stays crisp:
+// - 16x16 (used for 16 and 48 = 3x): a hand-drawn face. Only the left half is drawn; the right half is
+//   mirrored, then the eye catch-lights go on top (same corner on both eyes, so not mirrored).
+// - 32x32 (used for 32 and 128 = 4x): cropped from lib/owl.js, the same Pip the bedtime page draws.
 
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pipFrame } from '../lib/owl.js';
 
 // ---- PNG encoder -------------------------------------------------------------------------------
 
@@ -69,84 +72,44 @@ export function encodePNG(w, h, rgba) {
 const PAL = {
   '.': null,
   o: '#1b1326', // outline
-  d: '#563130', // shadow brown
-  b: '#77473a', // brown
-  B: '#986246', // light brown
-  h: '#b47d55', // highlight
-  r: '#a9b8f0', // moonlight rim
-  c: '#d9be93', // facial disc shade
-  C: '#efdcb3', // facial disc
-  W: '#fbf0d2', // facial disc light
-  y: '#f5bd3e', // iris
-  Y: '#d98e22', // iris shade
-  p: '#1b1326', // pupil
-  w: '#fffbe8', // glint
-  k: '#f7c766', // beak light
-  K: '#e6a23f', // beak
-  q: '#b8742a', // beak shade
-  s: '#e19a8e', // blush
-  e: '#ceaa7e', // belly
-  E: '#9a7253', // belly marks
+  f: '#c4935f', // tabby fur
+  F: '#d6a874', // fur, lit
+  L: '#e6c08e', // fur highlight
+  g: '#a57548', // fur shade
+  G: '#835a3a', // fur deep shade
+  s: '#6a4a33', // tabby stripe
+  p: '#f2a7b0', // inner ear
+  P: '#d98892', // inner ear shade
+  W: '#fffdf8', // white blaze / muzzle
+  V: '#e6ded0', // white, shaded
+  n: '#f39aa5', // nose
+  m: '#7a5646', // mouth
+  e: '#16131b', // eye
+  w: '#ffffff', // catch-light
+  b: '#f4a3a8', // blush
 };
 
-// 16x16, left half (cols 0-7); col 7 sits next to the centre line.
+// 16x16 Meowl face, left half (cols 0-7); col 7 sits next to the centre line.
 const FACE16 = [
   '........',
   '.o......',
   '.oo.....',
-  '.oho....',
-  '.obhoooo',
-  'obbbBBhh',
-  'obcCCCcB',
-  'ocCoooCb',
-  'oCoyyyoB',
-  'oCoypyok',
-  'oCoYyYoK',
-  'ocCoooCb',
-  'obccCcbb',
-  'odbbbbee',
-  '.odbbeEe',
-  '..oooooo',
+  '.opo....',
+  '.oppoooo',
+  '.ofpsFsL',
+  'offfsFFW',
+  'offeeffW',
+  'ofseeffW',
+  'ofbffWWn',
+  'oWWfWmWm',
+  'offfWWmW',
+  'ogffVWWW',
+  '.ogfVWWW',
+  '..oggVVV',
+  '...ooooo',
 ];
-// glints: [x, y] in the full sprite (not mirrored)
-const GLINT16 = [[5, 8], [12, 8]];
-
-// 32x32, left half (cols 0-15)
-const FACE32 = [
-  '................',
-  '................',
-  '..oo............',
-  '..oho...........',
-  '..ohho..........',
-  '..obhho.........',
-  '..obbhhooooooooo',
-  '.obbbbBBBBhhhhhh',
-  '.obbbBBBBBBBBBhh',
-  'obbbcccccccbBBBB',
-  'obbcCCCCCCCcbBBB',
-  'obcCCCooooCCcbBB',
-  'obcCCoyyyyoCCcbB',
-  'obcCoyyyyyyoCCcb',
-  'ocCCoyyppyyoCCcb',
-  'ocCoyyppppyyoCcK',
-  'ocCoyyppppyyoCck',
-  'ocCoYyyppyyYoCck',
-  'ocCCoYyyyyyoCCcK',
-  'ocCCoYYyyYYoCCcq',
-  'obcCCooooooCCcbq',
-  'obbcCCCCCCCCcbbb',
-  'obbbcccccccccbbb',
-  'odbbbbbbbbbbbeee',
-  'odbbbbbbbbbbeeee',
-  'odbbbbbbbbbeeEee',
-  '.odbbbbbbbbeEeee',
-  '.odbbbbbbbeeeeEe',
-  '..odbbbbbbeeEeee',
-  '...oddbbbbeeeeee',
-  '....oooooooooooo',
-  '................',
-];
-const GLINT32 = [[9, 13], [10, 13], [9, 14], [24, 13], [25, 13], [24, 14]];
+// catch-lights: the same (top-left) corner of each eye, so not mirrored
+const GLINT16 = [[3, 7], [11, 7]];
 
 function sprite(half, glints) {
   const n = half.length;
@@ -155,6 +118,25 @@ function sprite(half, glints) {
     return (row + [...row].reverse().join('')).split('');
   });
   for (const [x, y] of glints) rows[y][x] = 'w';
+  return rows.map((r) => r.map((ch) => {
+    const c = PAL[ch];
+    if (c === undefined) throw new Error(`unknown palette key "${ch}"`);
+    return c;
+  }));
+}
+
+/** 32x32: the head and shoulders of the same Pip the bedtime page draws (eyes open, no moon rim). */
+function sprite32() {
+  const f = pipFrame({ eyes: 'open', breath: 0, branch: false, rim: false });
+  let top = f.h;
+  for (let i = 0; i < f.px.length; i++) if (f.px[i]) top = Math.min(top, Math.floor(i / f.w));
+  const X0 = 33; // the figure is centred on column 48: crop 33..64
+  const rows = [];
+  for (let y = top; y < top + 32; y++) {
+    const row = [];
+    for (let x = X0; x < X0 + 32; x++) row.push(f.px[y * f.w + x] ?? null);
+    rows.push(row);
+  }
   return rows;
 }
 
@@ -163,14 +145,12 @@ function hexRGBA(hex) {
   return [(v >> 16) & 255, (v >> 8) & 255, v & 255, 255];
 }
 
-/** Upscale a sprite by an integer factor into RGBA bytes. */
+/** Upscale a sprite (rows of '#rrggbb' or null) by an integer factor into RGBA bytes. */
 function render(rows, scale) {
   const n = rows.length * scale;
   const out = new Uint8Array(n * n * 4);
   rows.forEach((row, y) =>
-    row.forEach((ch, x) => {
-      const col = PAL[ch];
-      if (col === undefined) throw new Error(`unknown palette key "${ch}"`);
+    row.forEach((col, x) => {
       if (!col) return;
       const rgba = hexRGBA(col);
       for (let yy = 0; yy < scale; yy++)
@@ -182,7 +162,7 @@ function render(rows, scale) {
 
 export function icons() {
   const s16 = sprite(FACE16, GLINT16);
-  const s32 = sprite(FACE32, GLINT32);
+  const s32 = sprite32();
   return {
     16: render(s16, 1),
     32: render(s32, 1),
@@ -195,7 +175,7 @@ function preview(set) {
   // night-blue strip with every size at 1x and enlarged, plus a light strip for toolbar contrast
   const pad = 16;
   const items = [16, 32, 48, 128].map((k) => set[k]);
-  const big = [render(sprite(FACE16, GLINT16), 12), render(sprite(FACE32, GLINT32), 8)];
+  const big = [render(sprite(FACE16, GLINT16), 12), render(sprite32(), 8)];
   const all = [...items, ...big];
   const W = all.reduce((a, it) => a + it.size + pad, pad);
   const H = (Math.max(...all.map((it) => it.size)) + pad * 2) * 2;
