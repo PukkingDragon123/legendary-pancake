@@ -1,6 +1,9 @@
 /* Queen Neve's boutique: frosted-ice pixel UI (frames come from ./art.js as .if-<frame> classes,
    buttons as .nv-btn.<tone>). OWNED BY THE SHOP BUILDER. */
 
+/* the boutique's 3D stage must get taps where no UI covers it (style.css's `#ui > *` otherwise
+   makes the whole .layer catch them) */
+#ui > .layer:has(> .nv-shop) { pointer-events: none; }
 .layer > .nv-shop { pointer-events: none; }
 .nv-shop { position: absolute; inset: 0; color: #16284f; font-family: var(--font-body); }
 .nv-shop .px, .nv-gacha .px, #hh-moments .px { image-rendering: pixelated; }

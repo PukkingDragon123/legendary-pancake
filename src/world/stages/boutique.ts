@@ -327,6 +327,7 @@ export class Boutique implements Stage {
   private stands: Stand[] = [];
   private aurora!: THREE.ShaderMaterial;
   private chandelier = new THREE.Group();
+  private ornaments: THREE.Group[] = [];
   private chandLight: THREE.PointLight;
   private disposables: (() => void)[] = [];
   private time = 0;
@@ -536,6 +537,36 @@ export class Boutique implements Stage {
     this.chandelier.add(halo);
     this.chandelier.position.set(0, 5.55, 0.9);
     this.scene.add(this.chandelier);
+
+    // snowflake ornaments twirling on silver threads
+    const flake = (r: number): BoxSpec[] => {
+      const out: BoxSpec[] = [];
+      for (let k = 0; k < 3; k++) {
+        const a = k * 60;
+        out.push({ ...box(0, -r, 0, 1.2, 2 * r, 0.8, glowIce, { glow: true }), rot: [0, 0, a], pivot: [0, 0, 0] });
+        for (const sd of [-1, 1]) out.push({ ...box(0, sd * r * 0.55 - 0.6, 0, r * 0.7, 1.2, 0.8, lamp('#e8f8ff'), { glow: true }), rot: [0, 0, a], pivot: [0, 0, 0] });
+      }
+      out.push(box(0, -1.2, 0, 2.4, 2.4, 1.2, lamp('#fff2c6'), { glow: true }));
+      return out;
+    };
+    const spots: [number, number, number, number][] = [[-4.6, 4.9, -0.2, 5], [-2.0, 5.3, 1.8, 4], [2.1, 5.1, 1.9, 4.5], [4.5, 4.7, -0.4, 5.5], [-5.6, 5.4, 2.6, 3.5], [5.8, 5.5, 2.4, 3.5]];
+    for (const [x, y, z, r] of spots) {
+      const g = new THREE.Group();
+      const m = mesh([...flake(r), box(0, r, 0, 0.4, 30, 0.4, silver)], { shadow: false });
+      this.disposables.push(() => m.userData.dispose?.());
+      g.add(m);
+      g.position.set(x, y, z);
+      g.userData.spin = 0.4 + hash(x, y, z) * 0.5;
+      this.ornaments.push(g);
+      this.scene.add(g);
+    }
+
+    // the boutique's sign above the arch: an ice plaque with a gold crown
+    this.add([
+      box(0, oy1 + ar + 10, wz + 6, 46, 14, 3, clearIce('#e6f6ff')), box(0, oy1 + ar + 9, wz + 5, 50, 1.5, 4, gold), box(0, oy1 + ar + 24, wz + 5, 50, 1.5, 4, gold),
+      box(0, oy1 + ar + 13, wz + 8, 12, 4, 1.5, gold), box(-5, oy1 + ar + 17, wz + 8, 2, 4, 1.5, gold), box(0, oy1 + ar + 17, wz + 8, 2, 5, 1.5, gold), box(5, oy1 + ar + 17, wz + 8, 2, 4, 1.5, gold),
+      box(0, oy1 + ar + 22, wz + 8.5, 1.5, 1.5, 1, lamp('#bfeaff'), { glow: true }), box(-5, oy1 + ar + 21, wz + 8.5, 1.2, 1.2, 1, lamp('#ffb0c8'), { glow: true }), box(5, oy1 + ar + 21, wz + 8.5, 1.2, 1.2, 1, lamp('#c8b0ff'), { glow: true }),
+    ]);
   }
 
   private makeStand(i: number, x: number, top: number, z: number): Stand {
@@ -697,6 +728,7 @@ export class Boutique implements Stage {
 
     // the chandelier sways and its light breathes
     this.chandelier.rotation.y = t * 0.12;
+    for (const o of this.ornaments) { o.rotation.y = t * o.userData.spin; o.rotation.z = Math.sin(t * 0.8 + o.position.x) * 0.06; }
     this.chandelier.rotation.z = Math.sin(t * 0.6) * 0.015;
     this.chandLight.intensity = 9 + Math.sin(t * 1.3) * 0.6;
 
@@ -747,12 +779,14 @@ export class Boutique implements Stage {
 
   // ---------------------------------------------------------------- input
 
-  pointer(type: 'down' | 'move' | 'up', x: number, y: number, ray: THREE.Ray): boolean {
-    if (type === 'down') { this.downAt = { x, y, t: performance.now() }; return true; }
+  pointer(type: 'down' | 'move' | 'up', x: number, y: number, ray: THREE.Ray, e?: PointerEvent): boolean {
+    // event timestamps, not the clock: a slow frame between down and up must not cancel the tap
+    const at = e?.timeStamp ?? performance.now();
+    if (type === 'down') { this.downAt = { x, y, t: at }; return true; }
     if (type !== 'up' || !this.downAt) return true;
     const d = this.downAt;
     this.downAt = null;
-    if (Math.hypot(x - d.x, y - d.y) > 10 || performance.now() - d.t > 700) return true;
+    if (Math.hypot(x - d.x, y - d.y) > 12 || at - d.t > 900) return true;
     this.ray.ray.copy(ray);
     const hit = this.ray.intersectObjects(this.stands.map((s) => s.hit), false)[0];
     if (hit) { this.onPick?.(hit.object.userData.stand as number); return true; }
