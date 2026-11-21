@@ -52,7 +52,7 @@ const items: ItemDef[] = [];
 const add = (d: ItemDef) => items.push(d);
 
 add({
-  id: 'nestbed', name: 'Twig Nest Bed', cat: 'beds', price: 0, blurb: 'Woven from the softest twigs, lined with a patchwork quilt.',
+  id: 'nestbed', name: 'Twig Nest Bed', cat: 'beds', price: 0, size: [1.5, 1.5], blurb: 'Woven from the softest twigs, lined with a patchwork quilt.',
   sleep: { x: 0, y: 6, z: 0 },
   build: () => {
     const tw = twigs(), q = quilt('#e9a9a1', '#f6e6c6', '#9ec3d9'), pil = cloth('#fbf4e4', { shade: { noise: 0.2 } });
@@ -64,7 +64,7 @@ add({
   },
 });
 add({
-  id: 'moonlamp', name: 'Crescent Moon Lamp', cat: 'lights', price: 160, blurb: 'A soft, warm nightlight shaped like a smiling moon.',
+  id: 'moonlamp', name: 'Crescent Moon Lamp', cat: 'lights', price: 160, small: true, blurb: 'A soft, warm nightlight shaped like a smiling moon.',
   light: { x: 0, y: 14, z: 0, color: 0xffd98a, power: 1.6 },
   build: () => {
     const base = wy(W.walnut), glow = lamp('#ffe7a0');
@@ -81,7 +81,7 @@ add({
   },
 });
 add({
-  id: 'bookshelf', name: 'Storybook Shelf', cat: 'decor', price: 220, blurb: 'Bedtime stories, field guides and one cookbook about worms.',
+  id: 'bookshelf', name: 'Storybook Shelf', cat: 'storage', price: 220, size: [1, 0.5], surface: 26, blurb: 'Bedtime stories, field guides and one cookbook about worms.',
   build: () => {
     const fr = wy(W.oak), out: BoxSpec[] = [box(-8, 0, 0, 1.6, 26, 7, fr), box(8, 0, 0, 1.6, 26, 7, fr), box(0, 0, -3.2, 17.6, 26, 0.8, wy(W.dark, 4))];
     for (const y of [0, 8.4, 16.8, 25]) out.push(box(0, y, 0, 15, 1.2, 7, wx(W.light, 0)));
@@ -91,7 +91,7 @@ add({
   },
 });
 add({
-  id: 'armchair', name: 'Velvet Armchair', cat: 'seating', price: 300, blurb: 'Deep, squashy, and just the right size for an owl.',
+  id: 'armchair', name: 'Velvet Armchair', cat: 'seating', price: 300, size: [1, 1], blurb: 'Deep, squashy, and just the right size for an owl.',
   sit: [{ x: 0, y: 6, z: 1 }],
   build: () => {
     const v = cloth('#7a4fa0', { shade: { noise: 0.25 } }), legs = wy(W.walnut);
@@ -105,7 +105,7 @@ add({
   },
 });
 add({
-  id: 'cuckoo', name: 'Cuckoo Clock', cat: 'wall', price: 260, blurb: 'Hoots on the hour. Very politely.',
+  id: 'cuckoo', name: 'Cuckoo Clock', cat: 'wall', price: 260, wall: true, blurb: 'Hoots on the hour. Very politely.',
   build: () => {
     const fr = wy('#8a5532'), face = smooth('#fbf2dc'), hand = flat('#2a1d14'), roof = wx('#5a3a22', 2);
     const out: BoxSpec[] = [box(0, 0, 0, 12, 12, 3, fr), box(0, 12, 0, 13, 1.4, 4, roof), { ...box(-3.4, 12.6, 0, 8, 1.4, 4.4, roof), rot: [0, 0, 32] }, { ...box(3.4, 12.6, 0, 8, 1.4, 4.4, roof), rot: [0, 0, -32] }];
@@ -115,7 +115,7 @@ add({
   },
 });
 add({
-  id: 'painting', name: 'Moonlit Painting', cat: 'wall', price: 180, blurb: 'A tiny landscape of the lake under a full moon.',
+  id: 'painting', name: 'Moonlit Painting', cat: 'wall', price: 180, wall: true, blurb: 'A tiny landscape of the lake under a full moon.',
   build: () => {
     const fr = metal('#c9963a');
     const art: Painter = (t) => {
@@ -130,7 +130,7 @@ add({
   },
 });
 add({
-  id: 'fireplace', name: 'Stone Hearth', cat: 'lights', price: 520, level: 4, blurb: 'Crackles softly all night. Toasts marshmallows by day.',
+  id: 'fireplace', name: 'Stone Hearth', cat: 'lights', price: 520, level: 4, size: [1.5, 1], surface: 0, blurb: 'Crackles softly all night. Toasts marshmallows by day.',
   light: { x: 0, y: 6, z: 3, color: 0xff9a4a, power: 2.4 },
   build: () => {
     const st = rock('#9a9488', { seed: 3 }), out: BoxSpec[] = [];
@@ -141,7 +141,7 @@ add({
   },
 });
 add({
-  id: 'fernpot', name: 'Potted Fern', cat: 'plants', price: 90, blurb: 'Loves the shade. Hates being watered by owls.',
+  id: 'fernpot', name: 'Potted Fern', cat: 'plants', price: 90, small: true, blurb: 'Loves the shade. Hates being watered by owls.',
   build: () => {
     const p = solid('#b8603a', { noise: 0.4 }), lf = leaves('#4f9e45', { seed: 9 });
     const out: BoxSpec[] = [box(0, 0, 0, 6, 5, 6, p), box(0, 4.4, 0, 7, 1.4, 7, p), box(0, 5.4, 0, 5, 0.6, 5, solid('#4a3424'))];
@@ -150,7 +150,7 @@ add({
   },
 });
 add({
-  id: 'wardrobe', name: 'Painted Wardrobe', cat: 'decor', price: 360, blurb: 'Where Pip keeps every hat. There are many hats.',
+  id: 'wardrobe', name: 'Painted Wardrobe', cat: 'storage', price: 360, size: [1, 0.5], surface: 26, blurb: 'Where Pip keeps every hat. There are many hats.',
   build: () => {
     const body = wy('#5f8fa8', 4), trim = wy('#3f6a80'), knob = metal(GOLD);
     const flower: Painter = (t) => {
@@ -161,7 +161,7 @@ add({
   },
 });
 add({
-  id: 'candles', name: 'Candle Cluster', cat: 'lights', price: 70, blurb: 'Three little flames that never drip on the rug.',
+  id: 'candles', name: 'Candle Cluster', cat: 'lights', price: 70, small: true, blurb: 'Three little flames that never drip on the rug.',
   light: { x: 0, y: 8, z: 0, color: 0xffb35a, power: 1.0 },
   build: () => {
     const wax = smooth('#fbf1dc'), out: BoxSpec[] = [box(0, 0, 0, 8, 1, 6, metal('#b08a4a'))];
@@ -170,7 +170,7 @@ add({
   },
 });
 add({
-  id: 'record', name: 'Gramophone', cat: 'decor', price: 420, level: 3, blurb: 'Plays lullabies on rainy nights.',
+  id: 'record', name: 'Gramophone', cat: 'fun', price: 420, level: 3, small: true, blurb: 'Plays lullabies on rainy nights.',
   build: () => {
     const out: BoxSpec[] = [box(0, 0, 0, 10, 5, 9, wy(W.walnut, 3)), box(0, 5, 0, 8, 0.6, 8, solid('#1f1a1e')), box(-2, 5.6, 1, 1, 3, 1, metal(GOLD))];
     for (let i = 0; i < 5; i++) out.push(box(-2 - i * 0.2, 8 + i * 1.6, 1 - i * 0.9, 2 + i * 1.6, 1.6, 2 + i * 1.6, metal(GOLD)));
@@ -178,11 +178,11 @@ add({
   },
 });
 add({
-  id: 'nightstand', name: 'Bedside Table', cat: 'tables', price: 140, blurb: 'Holds a glass of water and tomorrow’s good intentions.',
-  build: () => [box(0, 0, 0, 9, 9, 8, wy(W.oak, 3)), box(0, 9, 0, 10, 1, 9, wx(W.light, 0)), box(0, 4.5, 4.05, 6, 0.4, 0.2, flat('#3a2516')), box(0, 5.6, 4.1, 1.2, 0.8, 0.6, metal(GOLD)), box(-2, 10, 0, 2, 3, 2, smooth('#bfe7ff', { noise: 0 })), box(2.4, 10, 1, 3, 1, 2.4, cloth('#c0533f'))],
+  id: 'nightstand', name: 'Bedside Table', cat: 'tables', price: 140, size: [0.5, 0.5], surface: 10, blurb: 'Holds a glass of water and tomorrow’s good intentions.',
+  build: () => [box(0, 0, 0, 9, 9, 8, wy(W.oak, 3)), box(0, 9, 0, 10, 1, 9, wx(W.light, 0)), box(0, 4.5, 4.05, 6, 0.4, 0.2, flat('#3a2516')), box(0, 5.6, 4.1, 1.2, 0.8, 0.6, metal(GOLD))],
 });
 add({
-  id: 'roundrug', name: 'Moon Rug', cat: 'decor', price: 120, flatItem: true, blurb: 'A round woven rug with a crescent in the middle.',
+  id: 'roundrug', name: 'Moon Rug', cat: 'rugs', price: 120, flatItem: true, rug: true, size: [1.5, 1.5], blurb: 'A round woven rug with a crescent in the middle.',
   build: () => {
     const r1 = R('#3f5c9a'), r2 = R('#f3d27a'), r3 = R('#e8dcc0');
     const p: Painter = (t) => {
@@ -196,16 +196,16 @@ add({
   },
 });
 add({
-  id: 'mushlamp', name: 'Glowcap Lamp', cat: 'lights', price: 240, blurb: 'Grown, not built. Glows a gentle blue.',
+  id: 'mushlamp', name: 'Glowcap Lamp', cat: 'lights', price: 240, small: true, blurb: 'Grown, not built. Glows a gentle blue.',
   light: { x: 0, y: 10, z: 0, color: 0x8fe0ff, power: 1.4 },
   build: () => [box(0, 0, 0, 3, 9, 3, smooth('#efe6d2')), box(0, 9, 0, 11, 2.4, 11, lamp('#7fd6f0'), { glow: true }), box(0, 11.4, 0, 7, 1.6, 7, lamp('#a6e8ff'), { glow: true }), box(-4, 0, 3, 2, 4, 2, smooth('#efe6d2')), box(-4, 4, 3, 5, 1.4, 5, lamp('#7fd6f0'), { glow: true })],
 });
 add({
-  id: 'teaset', name: 'Chamomile Tea Set', cat: 'tables', price: 200, blurb: 'Two cups of sleepy tea, always warm.',
+  id: 'teaset', name: 'Chamomile Tea Set', cat: 'tables', price: 200, size: [1, 1], surface: 0, blurb: 'Two cups of sleepy tea, always warm.',
   build: () => [box(0, 0, 0, 2, 8, 2, wy(W.dark)), box(0, 0, 0, 7, 1, 7, wx(W.dark, 0)), box(0, 8, 0, 14, 1.2, 14, wx(W.light, 0)), box(-3, 9.2, 0, 4, 3.4, 4, smooth('#f4f0e6')), box(-0.6, 10.6, 0, 1.4, 0.8, 0.8, smooth('#f4f0e6')), box(3, 9.2, 2.4, 2.4, 1.8, 2.4, smooth('#9fd3c7')), box(3.4, 9.2, -2.4, 2.4, 1.8, 2.4, smooth('#f2a7b8'))],
 });
 add({
-  id: 'starmap', name: 'Star Chart', cat: 'wall', price: 300, level: 5, blurb: 'Every constellation Pip has flown under.',
+  id: 'starmap', name: 'Star Chart', cat: 'wall', price: 300, level: 5, wall: true, blurb: 'Every constellation Pip has flown under.',
   build: () => {
     const p: Painter = (t) => {
       if (t.face !== 4) return tone(ramp(0x6b4a2c), 0);
@@ -217,11 +217,11 @@ add({
   },
 });
 add({
-  id: 'toybox', name: 'Plush Pile', cat: 'play', price: 150, blurb: 'A plush mouse, a plush moon and a plush, slightly worried worm.',
+  id: 'toybox', name: 'Plush Pile', cat: 'fun', price: 150, size: [1, 0.5], surface: 0, blurb: 'A plush mouse, a plush moon and a plush, slightly worried worm.',
   build: () => [box(0, 0, 0, 12, 6, 8, wy('#e3a85f', 3)), box(0, 6, 0, 13, 1, 9, wy('#c98a46')), box(-3, 7, 0, 4, 4, 4, smooth('#c9c3d6')), box(-3, 11, 1.4, 1.2, 1.2, 1.2, smooth('#f2a7b8')), box(2.4, 7, -1, 4, 3.4, 3, smooth('#ffe08a')), box(3, 7, 2.4, 5, 1.6, 1.6, smooth('#f29ab0'))],
 });
 add({
-  id: 'mushpot', name: 'Mushroom Planter', cat: 'plants', price: 110, blurb: 'A happy family of little toadstools.',
+  id: 'mushpot', name: 'Mushroom Planter', cat: 'plants', price: 110, small: true, blurb: 'A happy family of little toadstools.',
   build: () => [box(0, 0, 0, 8, 4, 6, wx(W.oak, 2)), box(0, 4, 0, 7, 0.6, 5, solid('#4a3424')), box(-2, 4.6, 0, 1.4, 3, 1.4, smooth('#f4ead6')), box(-2, 7.4, 0, 4, 1.4, 4, smooth('#d8402f')), box(2, 4.6, 0.6, 1, 2, 1, smooth('#f4ead6')), box(2, 6.4, 0.6, 3, 1, 3, smooth('#e8963a'))],
 });
 
