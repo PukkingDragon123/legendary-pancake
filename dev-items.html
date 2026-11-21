@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Item sheet</title>
+  <style>
+    @font-face { font-family: 'TBME Body'; src: url('/src/assets/fonts/TBMEGoofy-Regular.woff2') format('woff2'); }
+    html, body { margin: 0; background: #2a2230; color: #f4e6c8; font-family: 'TBME Body', monospace; }
+    body { padding: 14px 16px 40px; }
+    h1 { font-size: 22px; margin: 0 0 4px; color: #ffd98a; letter-spacing: 1px; }
+    h2 { font-size: 17px; margin: 22px 0 8px; color: #ffd98a; border-bottom: 2px solid #5a4548; padding-bottom: 4px; }
+    .sub { font-size: 13px; color: #b9a58a; margin-bottom: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 200px), 1fr)); gap: 10px; }
+    .cell { background: linear-gradient(#4a3a3c, #3a2e32); border: 2px solid #6b5248; box-shadow: 0 3px 0 #1a1418; padding: 6px; position: relative; }
+    .cell img, .cell canvas { width: 100%; display: block; image-rendering: auto; background: radial-gradient(circle at 50% 40%, #5c4a4e, #3a2e32 75%); }
+    .cell .nm { font-size: 14px; margin-top: 5px; color: #fff3d6; }
+    .cell .meta { font-size: 11px; color: #c0a888; margin-top: 2px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+    .chip { font-size: 10px; padding: 1px 4px; background: #2a2027; border: 1px solid #6b5248; color: #e8d2a8; }
+    .r-common { color: #d8d0c0; } .r-uncommon { color: #8fdc7a; } .r-rare { color: #7cc4ff; } .r-epic { color: #d39bff; } .r-legendary { color: #ffc94a; }
+    .fin canvas { image-rendering: pixelated; }
+    .sw { display: inline-block; width: 12px; height: 12px; border: 1px solid #1a1418; vertical-align: middle; margin-right: 2px; }
+    #one { display: block; width: 100vw; height: 100vh; }
+    body.one { padding: 0; overflow: hidden; }
+    .label { position: fixed; left: 12px; top: 10px; font-size: 18px; color: #ffd98a; text-shadow: 2px 2px 0 #1a1418; }
+  </style>
+</head>
+<body>
+  <script type="module" src="/src/dev/itemsheet.ts"></script>
+</body>
+</html>
