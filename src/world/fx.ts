@@ -1,5 +1,7 @@
 // 2D pixel-art particles living in the 3D world: falling leaves, petals, pollen, fireflies, footstep
 // puffs, hearts and notes above the animals, reward bursts, and the square pixels of the teleport.
+// [world3] Every preset draws from the calm palette (src/gfx/palette.ts), and nothing glows as a soft
+// additive blob: "glowing" particles are crisp unlit pixel sprites that dissolve on a dither grid.
 import * as THREE from 'three';
 import { groundY } from './layout.ts';
 
@@ -21,7 +23,7 @@ const ART: Record<string, string[]> = {
   puff2: ['..##.#..', '.####.#.', '######..', '#####.+.', '.###.++.', '+.++.+..', '..+.....', '........'],
   puff3: ['.#...#..', '...#....', '#.....#.', '...+....', '.+...+..', '....+...', '..+.....', '........'],
   drop: ['...#....', '...#....', '..###...', '..###...', '.#####..', '.####+..', '..##+...', '........'],
-  glow: ['..----..', '.-++++-.', '-++##++-', '-+####+-', '-+####+-', '-++##++-', '.-++++-.', '..----..'],
+  glow: ['........', '........', '...+....', '..+##+..', '..+##+..', '....+...', '........', '........'],
   pixel: ['########', '########', '########', '########', '########', '########', '########', '########'],
   bang: ['...##...', '...##...', '...##...', '...##...', '...##...', '........', '...##...', '........'],
   ask: ['..####..', '.##..##.', '.....##.', '....##..', '...##...', '........', '...##...', '........'],
@@ -99,14 +101,12 @@ varying vec2 vUv; varying vec3 vColor; varying float vAlpha;
 void main() {
   vec4 t = texture2D(uMap, vUv);
   if (t.a < 0.5) discard;
-  if (uAdd > 0.5) { gl_FragColor = vec4(t.rgb * vColor * vAlpha, 1.0); }
-  else {
-    // fade by dissolving on an ordered dither grid instead of blending, so pixels stay crisp
-    vec2 p = floor(gl_FragCoord.xy / 2.0);
-    float th = fract(dot(p, vec2(0.5, 0.25)) + 0.125 * mod(p.x, 2.0));
-    if (vAlpha < 0.98 && vAlpha < th + 0.06) discard;
-    gl_FragColor = vec4(t.rgb * vColor * uLight, 1.0);
-  }
+  // fade by dissolving on an ordered dither grid instead of blending, so pixels stay crisp
+  vec2 p = floor(gl_FragCoord.xy / 2.0);
+  float th = fract(dot(p, vec2(0.5, 0.25)) + 0.125 * mod(p.x, 2.0));
+  if (vAlpha < 0.98 && vAlpha < th + 0.06) discard;
+  // [world3] lit particles take the scene light; "glowing" ones are unlit pixels in their own colour
+  gl_FragColor = vec4(t.rgb * vColor * (uAdd > 0.5 ? vec3(1.0) : uLight), 1.0);
   #include <colorspace_fragment>
 }`;
 
@@ -153,7 +153,7 @@ class Layer {
       this.geo.setAttribute(n, at);
     }
     this.mat = new THREE.ShaderMaterial({
-      vertexShader: VS, fragmentShader: FS, depthWrite: !add, transparent: add, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending,
+      vertexShader: VS, fragmentShader: FS, depthWrite: !add, transparent: false, blending: THREE.NormalBlending,
       uniforms: { uMap: { value: tex }, uGrid: { value: new THREE.Vector2(COLS, ROWS) }, uLight: { value: new THREE.Color(1, 1, 1) }, uAdd: { value: add ? 1 : 0 } },
     });
     this.mesh = new THREE.Mesh(this.geo, this.mat);
@@ -231,34 +231,34 @@ export class Fx {
     for (let i = 0; i < n; i++) {
       const a = R(0, Math.PI * 2);
       switch (kind) {
-        case 'hearts': this.emit({ x: x + R(-0.3, 0.3), y, z: z + R(-0.2, 0.2), vy: R(0.5, 0.9), life: R(1, 1.5), frame: SPR.heart, color: i % 2 ? 0xff6f91 : 0xff9db5, size: R(0.32, 0.46), flutter: 0.25, fadeIn: 0.1, delay: i * 0.12 }); break;
-        case 'notes': this.emit({ x: x + R(-0.3, 0.3), y, z, vy: R(0.5, 0.8), vx: R(-0.2, 0.2), life: 1.4, frame: SPR.note, color: [0x7fd6ff, 0xffe066, 0xff9db5][i % 3], size: 0.4, flutter: 0.3, delay: i * 0.18 }); break;
-        case 'stars': this.emit({ x, y, z, vx: Math.cos(a) * R(0.8, 1.6), vy: R(1, 2.2), vz: Math.sin(a) * R(0.8, 1.6), life: R(0.7, 1.1), frame: SPR.star, color: i % 2 ? 0xffe066 : 0xfff6c0, size: R(0.3, 0.45), gravity: 3, drag: 1.2 }); break;
-        case 'sparkle': this.emit({ x: x + R(-0.5, 0.5), y: y + R(-0.2, 0.6), z: z + R(-0.5, 0.5), life: R(0.4, 0.8), frame: SPR.spark1, frames: 3, fps: 8, color: 0xfff6c0, size: R(0.3, 0.5), add: true, delay: i * 0.05 }); break;
-        case 'dust': this.emit({ x: x + R(-0.15, 0.15), y: y + 0.05, z: z + R(-0.15, 0.15), vx: Math.cos(a) * 0.4, vy: R(0.2, 0.5), vz: Math.sin(a) * 0.4, life: R(0.35, 0.55), frame: SPR.puff1, frames: 3, fps: 7, color: 0xb9d98a, size: R(0.25, 0.4), drag: 2 }); break;
-        case 'coins': this.emit({ x, y, z, vx: Math.cos(a) * R(0.6, 1.5), vy: R(2, 3.4), vz: Math.sin(a) * R(0.6, 1.5), life: R(0.9, 1.3), frame: SPR.coin, color: 0xffcf3a, size: 0.34, gravity: 7, land: true, fadeOut: 0.2 }); break;
-        case 'crumbs': this.emit({ x, y, z, vx: Math.cos(a) * R(0.3, 0.8), vy: R(0.6, 1.3), vz: Math.sin(a) * R(0.3, 0.8), life: R(0.5, 0.8), frame: SPR.crumb, color: [0xe0a85a, 0xfbf6ea, 0xc98a4a][i % 3], size: 0.4, gravity: 6, land: true }); break;
-        case 'splash': this.emit({ x, y, z, vx: Math.cos(a) * R(0.4, 1.1), vy: R(1.2, 2.4), vz: Math.sin(a) * R(0.4, 1.1), life: R(0.5, 0.8), frame: SPR.drop, color: 0xbfeeff, size: 0.28, gravity: 7 }); break;
-        case 'zzz': this.emit({ x: x + i * 0.12, y: y + i * 0.1, z, vx: 0.12, vy: 0.3, life: 1.8, frame: SPR.zed, color: 0xcfe2ff, size: 0.28 + i * 0.08, fadeIn: 0.2, delay: i * 0.5 }); break;
-        case 'leaves': this.emit({ x: x + R(-0.6, 0.6), y: y + R(-0.3, 0.3), z: z + R(-0.6, 0.6), vx: Math.cos(a) * 0.8, vy: R(0.6, 1.6), vz: Math.sin(a) * 0.8, life: R(1.2, 2), frame: SPR.leaf1, frames: 3, fps: 5, color: [0x6cb845, 0x9ad05a, 0x4c9b3b][i % 3], size: 0.4, gravity: 2.2, drag: 1.4, wind: 0.6, flutter: 0.5, land: true }); break;
-        case 'confetti': this.emit({ x, y, z, vx: Math.cos(a) * R(0.8, 2), vy: R(2, 3.6), vz: Math.sin(a) * R(0.8, 2), life: R(1.1, 1.7), frame: SPR.pixel, color: [0xff6f91, 0xffe066, 0x7fd6ff, 0x9be36a, 0xc39bff][i % 5], size: R(0.1, 0.16), gravity: 5, drag: 1, flutter: 0.6, land: true }); break;
+        case 'hearts': this.emit({ x: x + R(-0.3, 0.3), y, z: z + R(-0.2, 0.2), vy: R(0.5, 0.9), life: R(1, 1.5), frame: SPR.heart, color: i % 2 ? 0xc9828a : 0xe8b4ae, size: R(0.32, 0.46), flutter: 0.25, fadeIn: 0.1, delay: i * 0.12 }); break;
+        case 'notes': this.emit({ x: x + R(-0.3, 0.3), y, z, vy: R(0.5, 0.8), vx: R(-0.2, 0.2), life: 1.4, frame: SPR.note, color: [0x86a9b0, 0xdcb072, 0xd9aca4][i % 3], size: 0.4, flutter: 0.3, delay: i * 0.18 }); break;
+        case 'stars': this.emit({ x, y, z, vx: Math.cos(a) * R(0.8, 1.6), vy: R(1, 2.2), vz: Math.sin(a) * R(0.8, 1.6), life: R(0.7, 1.1), frame: SPR.star, color: i % 2 ? 0xdcb072 : 0xf1d39a, size: R(0.3, 0.45), gravity: 3, drag: 1.2 }); break;
+        case 'sparkle': this.emit({ x: x + R(-0.5, 0.5), y: y + R(-0.2, 0.6), z: z + R(-0.5, 0.5), life: R(0.4, 0.8), frame: SPR.spark1, frames: 3, fps: 8, color: 0xf1d39a, size: R(0.3, 0.5), add: true, delay: i * 0.05 }); break;
+        case 'dust': this.emit({ x: x + R(-0.15, 0.15), y: y + 0.05, z: z + R(-0.15, 0.15), vx: Math.cos(a) * 0.4, vy: R(0.2, 0.5), vz: Math.sin(a) * 0.4, life: R(0.35, 0.55), frame: SPR.puff1, frames: 3, fps: 7, color: 0xdccfb0, size: R(0.25, 0.4), drag: 2 }); break;
+        case 'coins': this.emit({ x, y, z, vx: Math.cos(a) * R(0.6, 1.5), vy: R(2, 3.4), vz: Math.sin(a) * R(0.6, 1.5), life: R(0.9, 1.3), frame: SPR.coin, color: 0xc8a764, size: 0.34, gravity: 7, land: true, fadeOut: 0.2 }); break;
+        case 'crumbs': this.emit({ x, y, z, vx: Math.cos(a) * R(0.3, 0.8), vy: R(0.6, 1.3), vz: Math.sin(a) * R(0.3, 0.8), life: R(0.5, 0.8), frame: SPR.crumb, color: [0xc59a52, 0xf4eedd, 0xbf9d74][i % 3], size: 0.4, gravity: 6, land: true }); break;
+        case 'splash': this.emit({ x, y, z, vx: Math.cos(a) * R(0.4, 1.1), vy: R(1.2, 2.4), vz: Math.sin(a) * R(0.4, 1.1), life: R(0.5, 0.8), frame: SPR.drop, color: 0xdfe9ea, size: 0.28, gravity: 7 }); break;
+        case 'zzz': this.emit({ x: x + i * 0.12, y: y + i * 0.1, z, vx: 0.12, vy: 0.3, life: 1.8, frame: SPR.zed, color: 0xd3cce0, size: 0.28 + i * 0.08, fadeIn: 0.2, delay: i * 0.5 }); break;
+        case 'leaves': this.emit({ x: x + R(-0.6, 0.6), y: y + R(-0.3, 0.3), z: z + R(-0.6, 0.6), vx: Math.cos(a) * 0.8, vy: R(0.6, 1.6), vz: Math.sin(a) * 0.8, life: R(1.2, 2), frame: SPR.leaf1, frames: 3, fps: 5, color: [0x66844f, 0x86a06a, 0xa7b788][i % 3], size: 0.4, gravity: 2.2, drag: 1.4, wind: 0.6, flutter: 0.5, land: true }); break;
+        case 'confetti': this.emit({ x, y, z, vx: Math.cos(a) * R(0.8, 2), vy: R(2, 3.6), vz: Math.sin(a) * R(0.8, 2), life: R(1.1, 1.7), frame: SPR.pixel, color: [0xd9aca4, 0xdcb072, 0x86a9b0, 0xa7b788, 0xb4a9c9][i % 5], size: R(0.1, 0.16), gravity: 5, drag: 1, flutter: 0.6, land: true }); break;
         // [world] happy puffs, magic swirls, feathers, petals and snow
-        case 'puffs': this.emit({ x: x + R(-0.15, 0.15), y: y + R(-0.1, 0.2), z: z + R(-0.15, 0.15), vx: Math.cos(a) * R(0.9, 1.8), vy: R(0.3, 1.1), vz: Math.sin(a) * R(0.9, 1.8), life: R(0.6, 0.95), frame: i % 3 ? SPR.cloud : SPR.cloud2, color: color ?? [0xffffff, 0xfff1f6, 0xf3ecff][i % 3], size: R(0.26, 0.44), grow: 0.9, drag: 3.4, fadeOut: 0.35, delay: i * 0.015 }); break;
+        case 'puffs': this.emit({ x: x + R(-0.15, 0.15), y: y + R(-0.1, 0.2), z: z + R(-0.15, 0.15), vx: Math.cos(a) * R(0.9, 1.8), vy: R(0.3, 1.1), vz: Math.sin(a) * R(0.9, 1.8), life: R(0.6, 0.95), frame: i % 3 ? SPR.cloud : SPR.cloud2, color: color ?? [0xf4eedd, 0xeae0c8, 0xd3cce0][i % 3], size: R(0.26, 0.44), grow: 0.9, drag: 3.4, fadeOut: 0.35, delay: i * 0.015 }); break;
         case 'magic': {
           const r0 = R(0.35, 0.7);
-          this.emit({ x: x + Math.cos(a) * r0, y: y + R(-0.2, 0.3), z: z + Math.sin(a) * r0, vx: -Math.sin(a) * 1.4, vy: R(0.7, 1.4), vz: Math.cos(a) * 1.4, life: R(0.9, 1.4), frame: [SPR.spark1, SPR.diamond, SPR.orb][i % 3], frames: i % 3 ? 1 : 3, fps: 9, color: color ?? [0xc9a6ff, 0x8ff0ff, 0xffe27a, 0xff9de2][i % 4], size: R(0.22, 0.4), add: true, tx: x, ty: y + 1.6, tz: z, pull: 0.6, swirl: 3.2, fadeIn: 0.1, fadeOut: 0.4, delay: i * 0.03 });
+          this.emit({ x: x + Math.cos(a) * r0, y: y + R(-0.2, 0.3), z: z + Math.sin(a) * r0, vx: -Math.sin(a) * 1.4, vy: R(0.7, 1.4), vz: Math.cos(a) * 1.4, life: R(0.9, 1.4), frame: [SPR.spark1, SPR.diamond, SPR.orb][i % 3], frames: i % 3 ? 1 : 3, fps: 9, color: color ?? [0xb4a9c9, 0xbcd6dc, 0xf1d39a, 0xd9aca4][i % 4], size: R(0.22, 0.4), add: true, tx: x, ty: y + 1.6, tz: z, pull: 0.6, swirl: 3.2, fadeIn: 0.1, fadeOut: 0.4, delay: i * 0.03 });
           break;
         }
-        case 'feathers': this.emit({ x: x + R(-0.2, 0.2), y: y + R(-0.1, 0.3), z: z + R(-0.2, 0.2), vx: Math.cos(a) * R(0.8, 2), vy: R(0.6, 1.8), vz: Math.sin(a) * R(0.8, 2), life: R(1.6, 2.6), frame: SPR.feather1, frames: 3, fps: 3, color: color ?? 0xd8b48a, size: R(0.2, 0.3), gravity: 1.1, drag: 2.4, flutter: 0.7, land: true }); break;
-        case 'petals': this.emit({ x: x + R(-0.6, 0.6), y: y + R(-0.2, 0.4), z: z + R(-0.6, 0.6), vx: Math.cos(a) * 0.6, vy: R(0.4, 1.2), vz: Math.sin(a) * 0.6, life: R(1.6, 2.4), frame: SPR.petal, color: color ?? [0xffc2d6, 0xffffff, 0xff9dbd][i % 3], size: R(0.22, 0.32), gravity: 1.2, drag: 1.5, wind: 0.6, flutter: 0.7, land: true }); break;
-        case 'snow': this.emit({ x: x + R(-0.8, 0.8), y: y + R(0, 0.6), z: z + R(-0.8, 0.8), vy: R(-0.3, -0.1), life: R(2, 3), frame: SPR.flake, color: color ?? 0xffffff, size: R(0.14, 0.22), gravity: 0.2, drag: 1, wind: 0.4, flutter: 0.4, land: true }); break;
-        case 'bang': case 'ask': case 'dots': this.emit({ x, y, z, vy: 0.25, life: 1.2, frame: kind === 'bang' ? SPR.bang : kind === 'ask' ? SPR.ask : SPR.dots, color: kind === 'bang' ? 0xffd84a : 0xffffff, size: 0.5, fadeIn: 0.08 }); return;
+        case 'feathers': this.emit({ x: x + R(-0.2, 0.2), y: y + R(-0.1, 0.3), z: z + R(-0.2, 0.2), vx: Math.cos(a) * R(0.8, 2), vy: R(0.6, 1.8), vz: Math.sin(a) * R(0.8, 2), life: R(1.6, 2.6), frame: SPR.feather1, frames: 3, fps: 3, color: color ?? 0xd9bf93, size: R(0.2, 0.3), gravity: 1.1, drag: 2.4, flutter: 0.7, land: true }); break;
+        case 'petals': this.emit({ x: x + R(-0.6, 0.6), y: y + R(-0.2, 0.4), z: z + R(-0.6, 0.6), vx: Math.cos(a) * 0.6, vy: R(0.4, 1.2), vz: Math.sin(a) * 0.6, life: R(1.6, 2.4), frame: SPR.petal, color: color ?? [0xe8b4ae, 0xf4eedd, 0xd9aca4][i % 3], size: R(0.22, 0.32), gravity: 1.2, drag: 1.5, wind: 0.6, flutter: 0.7, land: true }); break;
+        case 'snow': this.emit({ x: x + R(-0.8, 0.8), y: y + R(0, 0.6), z: z + R(-0.8, 0.8), vy: R(-0.3, -0.1), life: R(2, 3), frame: SPR.flake, color: color ?? 0xf5f7f2, size: R(0.14, 0.22), gravity: 0.2, drag: 1, wind: 0.4, flutter: 0.4, land: true }); break;
+        case 'bang': case 'ask': case 'dots': this.emit({ x, y, z, vy: 0.25, life: 1.2, frame: kind === 'bang' ? SPR.bang : kind === 'ask' ? SPR.ask : SPR.dots, color: kind === 'bang' ? 0xdcb072 : 0xf4eedd, size: 0.5, fadeIn: 0.08 }); return;
       }
     }
   }
 
   /** A ring ripple spreading flat on the pond. */
   ripple(x: number, y: number, z: number) {
-    this.emit({ x, y: y + 0.03, z, life: 0.9, frame: SPR.ring, color: 0xe8fbff, size: 0.3, grow: 2.4, fadeOut: 0.5, flat: true });
+    this.emit({ x, y: y + 0.03, z, life: 0.9, frame: SPR.ring, color: 0xdfe9ea, size: 0.3, grow: 2.4, fadeOut: 0.5, flat: true });
   }
 }

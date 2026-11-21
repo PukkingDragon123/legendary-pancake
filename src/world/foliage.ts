@@ -7,7 +7,8 @@
 import * as THREE from 'three';
 import { wind } from '../gfx/box.ts';
 import { rng } from '../gfx/noise.ts';
-import type { LeafKind, PlantModel } from '../assets/nature.ts';
+import type { LeafKind } from '../assets/nature.ts';
+import type { KitShape } from './forestkit.ts';
 import { GRASS } from './grass.ts';
 import { WX } from './weather.ts';
 
@@ -151,7 +152,8 @@ export function paintLeafAtlas(): Uint8Array<ArrayBuffer> {
 }
 
 /** Accent colours per cell (petals, berries, catkins). */
-const ACCENTS: Record<number, number> = { [CELL.birchB]: 0xc9c25a, [CELL.blossomA]: 0xffb8d0, [CELL.blossomB]: 0xffc8da, [CELL.berry]: 0xe0384e, [CELL.flower]: 0xfff0f6 };
+// [world3] calm palette: straw catkins, rose and blush petals, berry red, paper-white blossom
+const ACCENTS: Record<number, number> = { [CELL.birchB]: 0xb9b07a, [CELL.blossomA]: 0xe8bcb8, [CELL.blossomB]: 0xf1d4cf, [CELL.berry]: 0xa8505c, [CELL.flower]: 0xf4eedd };
 
 /** Which cells each leaf kind draws from. */
 export const CELLS: Record<LeafKind, number[]> = {
@@ -200,11 +202,11 @@ uniform vec3 uAccent[16]; uniform float uSnow; uniform float uWet;
 varying vec2 vUv; varying vec2 vLocal; varying vec3 vCol; varying float vAo; varying vec3 vN; varying vec3 vW; varying float vCell;
 #include <fog_pars_fragment>
 vec3 rampC(vec3 t, float L) {
-  if (L < 0.27) return t * vec3(0.26, 0.3, 0.42);
-  if (L < 0.5) return t * vec3(0.58, 0.64, 0.74);
+  if (L < 0.27) return t * vec3(0.3, 0.34, 0.42) + vec3(0.02, 0.025, 0.035);
+  if (L < 0.5) return t * vec3(0.62, 0.67, 0.74);
   if (L < 0.74) return t;
-  if (L < 0.93) return t * 1.3 + vec3(0.02, 0.03, 0.0);
-  return t * 1.6 + vec3(0.06, 0.06, 0.02);
+  if (L < 0.93) return t * 1.22 + vec3(0.035, 0.03, 0.0);
+  return t * 1.42 + vec3(0.08, 0.07, 0.03);
 }
 void main() {
   vec4 tx = texture2D(uMap, vUv);
@@ -213,8 +215,8 @@ void main() {
   vec3 base;
   if (m < 0.15) base = rampC(vCol, L);
   else if (m < 0.47) base = rampC(uAccent[int(vCell + 0.5)], L);
-  else if (m < 0.78) base = rampC(vec3(0.24, 0.15, 0.09), L + 0.2);
-  else base = vec3(0.95, 0.72, 0.2);
+  else if (m < 0.78) base = rampC(vec3(0.27, 0.22, 0.18), L + 0.2);
+  else base = vec3(0.86, 0.69, 0.45);
   vec3 N = normalize(vN);
   float ndl = max(dot(N, uSunDir), 0.0);
   vec3 amb = mix(uGround, uSky, N.y * 0.5 + 0.5) * 0.78;
@@ -245,7 +247,8 @@ function atlas(): THREE.DataTexture {
   return (atlasTex = t);
 }
 
-export interface CardSource { kind: string; model: PlantModel; spots: { x: number; y: number; z: number; yaw: number; s: number }[] }
+/** [world3] a plant's leaf masses (model units, 16 = 1 block) come from the lowpix kit (forestkit.ts) */
+export interface CardSource { kind: string; model: KitShape; spots: { x: number; y: number; z: number; yaw: number; s: number }[] }
 /** What a season does to one plant's cards. */
 export interface CardLook { tint: number; keep: number; cells?: number[]; dry?: number }
 

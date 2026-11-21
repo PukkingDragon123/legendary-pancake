@@ -4,6 +4,7 @@
 // from this app's Sky every frame instead of Moleforge's forest atmosphere module.
 import * as THREE from 'three';
 import { FG, NCELL, paintGrassAtlas } from './grassAtlas.js';
+import { fromLch, toLch } from '../gfx/color.ts';
 
 export { FG };
 export interface GrassItem { x: number; y: number; z: number; rot: number; size: number; cell: number; tint: number }
@@ -148,13 +149,40 @@ void main() {
   #include <fog_fragment>
 }`;
 
+/**
+ * [world3] Move Moleforge's bright atlas onto Hoot Hollow's calm palette: every colour keeps its
+ * pixel and its value but loses some chroma (capped), greens drift towards sage and moss, and the
+ * flowers settle into the palette's honey, rose, berry, lilac and lake accents.
+ */
+function calm(cv: HTMLCanvasElement): HTMLCanvasElement {
+  const ctx = cv.getContext('2d')!, img = ctx.getImageData(0, 0, cv.width, cv.height), d = img.data, memo = new Map<number, number>();
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] === 0) continue;
+    const key = (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
+    let c = memo.get(key);
+    if (c === undefined) {
+      const [L, C, h] = toLch(key);
+      const green = h > 95 && h < 165;
+      // greens: sage/moss hue, gentle chroma; flowers: softer, a touch lighter; never neon
+      const hh = green ? h + (128 - h) * 0.35 : h;
+      const cc = Math.min(green ? 0.085 : 0.1, C * (green ? 0.66 : 0.6));
+      const ll = green ? L * 0.97 : L + (0.74 - L) * 0.12;
+      c = fromLch(ll, cc, hh);
+      memo.set(key, c);
+    }
+    d[i] = (c >> 16) & 255; d[i + 1] = (c >> 8) & 255; d[i + 2] = c & 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  return cv;
+}
+
 let tex: THREE.Texture | null = null;
 
 /** An instanced field of crossed-quad clumps, chunked so off-screen parts are culled. */
 export function makeGrass(items: GrassItem[], cell = 10): THREE.Group {
   const grp = new THREE.Group();
   if (!tex) {
-    const t = new THREE.CanvasTexture(paintGrassAtlas());
+    const t = new THREE.CanvasTexture(calm(paintGrassAtlas()));
     t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; t.colorSpace = THREE.SRGBColorSpace;
     tex = t;
   }

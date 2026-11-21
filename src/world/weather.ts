@@ -12,6 +12,7 @@ import { wind } from '../gfx/box.ts';
 import { hash } from '../gfx/noise.ts';
 import { moonPhase, seasonOf, type Season, type SeasonInfo } from './astro.ts';
 import { SPR } from './fx.ts';
+import { SURFACE_Y } from './terrain.ts';
 import { GRASS } from './grass.ts';
 import { groundY, HALF, N, POND, pondD, WATER_Y } from './layout.ts';
 import { place, setPlace, today } from './sky.ts';
@@ -452,14 +453,14 @@ export class Weather {
     this.lastSeason = key;
     this.sc.flora.setSeason(s);
     this.sc.critters.setSeason(s.season, s.t);
-    const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.06, 0.92], summer: [1, 1, 1], autumn: [1.14, 0.94, 0.64], winter: [0.9, 0.9, 0.86] };
+    const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.04, 0.94], summer: [1, 1, 1], autumn: [1.08, 0.96, 0.78], winter: [0.9, 0.91, 0.9] }; // [world3] calm
     GRASS.uTint.value.setRGB(...tint[s.season]);
     const late = s.season === 'autumn' ? Math.max(0, (s.t - 0.45) / 0.55) : 0;
     GRASS.uBloom.value = s.season === 'winter' ? 0 : s.season === 'autumn' ? 0.3 * (1 - late) : 1;
     GRASS.uLitter.value = s.season === 'autumn' ? 0.35 + late * 0.5 : s.season === 'winter' ? 0.25 : 0;
     // the painted ground follows along: golden leaf litter in autumn, faded in winter
     const ground = this.sc.terrain.group.getObjectByName('ground') as THREE.Mesh | undefined;
-    const gt: Record<Season, number> = { spring: 0xf4fff0, summer: 0xffffff, autumn: 0xffe6c4, winter: 0xe8ece6 };
+    const gt: Record<Season, number> = { spring: 0xf6fbf0, summer: 0xffffff, autumn: 0xf6e6cc, winter: 0xe6eae6 };
     if (ground) (ground.material as THREE.MeshLambertMaterial).color.setHex(gt[s.season]);
   }
 
@@ -539,13 +540,13 @@ export class Weather {
       while (this.splashT >= 1) {
         this.splashT -= 1;
         const x = gx + (Math.random() - 0.5) * 18, z = gz + (Math.random() - 0.5) * 14;
-        if (pondD(x, z) < 0.95) { sc.fx.ripple(x, WATER_Y, z); continue; }
+        if (pondD(x, z) < 0.95) { sc.fx.ripple(x, SURFACE_Y, z); continue; }
         if (Math.abs(x) > HALF - 1 || Math.abs(z) > HALF - 1) continue;
         const y = groundY(x, z);
         sc.fx.emit({ x, y: y + 0.03, z, life: 0.28, frame: SPR.splat1, frames: 3, fps: 11, color: 0xd8e8ff, size: 0.26 });
         if (Math.random() < 0.18) sc.fx.emit({ x, y: y + 0.02, z, life: 0.8, frame: SPR.ring, color: 0xc9dcf0, size: 0.18, grow: 2.2, fadeOut: 0.5, flat: true });
       }
-      if (Math.random() < dt * v.rain * 10) sc.fx.ripple(POND.x + (Math.random() - 0.5) * POND.rx * 1.4, WATER_Y, POND.z + (Math.random() - 0.5) * POND.rz * 1.3);
+      if (Math.random() < dt * v.rain * 10) sc.fx.ripple(POND.x + (Math.random() - 0.5) * POND.rx * 1.4, SURFACE_Y, POND.z + (Math.random() - 0.5) * POND.rz * 1.3); // [world3] on the raised surface
     }
 
     // a quiet rain ambience while the hollow is in view during the day

@@ -403,15 +403,17 @@ export class Scene {
     const h = this.hourOverride ?? (this.skyMode === 'dawn' ? 6.5 : hourFor(this.skyMode as SkyMode));
     this.sky.setHour(h);
     (this.terrain.water.uniforms.uLight.value as THREE.Color).copy(this.sky.ambient).multiplyScalar(1.15);
-    (this.terrain.water.uniforms.uDeep.value as THREE.Color).set(this.sky.night > 0.5 ? 0x1c3a6a : 0x2f7fa8);
+    (this.terrain.water.uniforms.uDeep.value as THREE.Color).set(this.sky.night > 0.5 ? 0x1c2a38 : 0x3f6670); // [world3] calm palette
+    (this.terrain.water.uniforms.uSky.value as THREE.Color).copy(this.sky.fog.color); // [world3] the pond mirrors the misty sky
     this.fx.setLight(this.sky.ambient);
     const night = this.sky.night;
+    this.flora.setNight(THREE.MathUtils.smoothstep(night, 0.35, 0.9)); // [world3] moonglow caps
     GRASS.uKey.value.copy(this.sky.sun.color).multiplyScalar(this.sky.sun.intensity * 0.42);
     GRASS.uSky.value.copy(this.sky.hemi.color).multiplyScalar(this.sky.hemi.intensity * 0.85);
     GRASS.uGround.value.copy(this.sky.hemi.groundColor).multiplyScalar(this.sky.hemi.intensity);
     GRASS.uSunDir.value.copy(this.sky.sunDir);
     GRASS.uDapple.value = night > 0.5 ? 0.25 : 1;
-    this.house.panes.color.set(night > 0.4 ? 0xffc86a : 0x3a4a6a);
+    this.house.panes.color.set(night > 0.4 ? 0xf1c88a : 0x46596a); // [world3] lamp-gold / slate
     this.room.intensity = 1.2 + night * 3.5;
     this.lantern.intensity = night * 6;
     this.fireflies.alpha = night > 0.4 && (this.weather?.firefliesOk ?? true) ? 1 : 0; // [world] not in winter or rain
