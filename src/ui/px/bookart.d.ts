@@ -1,0 +1,44 @@
+export interface Art { url: string; w: number; h: number }
+export declare class Px {
+  w: number; h: number; d: Uint8ClampedArray<ArrayBuffer>;
+  constructor(w: number, h: number);
+  set(x: number, y: number, c: string | number[], a?: number): this;
+  canvas(): HTMLCanvasElement;
+}
+export declare function art(key: string, paint: () => Px): Art;
+export declare function rnd(seed: number): () => number;
+export declare const LEA: string[];
+export declare const BRASS: string[];
+export declare const PAPER: string[];
+export declare const INK: string, INK_L: string, RED: string, BLUE: string, RULE: string, MARGIN: string, GRAPHITE: string;
+export declare const RIBBONS: Record<string, string[]>;
+export declare const MOOD_INK: string[];
+export declare function halfArt(side: 'L' | 'R' | 'S', pw: number, ph: number, B: number, depth: number): Art;
+export declare function pageArt(pw: number, ph: number, side: 'L' | 'R' | 'S', deco?: 'plain' | 'frame' | 'rules', seed?: number, rules?: { r0: number; step: number } | null): Art;
+export declare function endpaperArt(pw: number, ph: number): Art;
+export declare function plateArt(w: number, h: number): Art;
+export declare function coverGeo(cw: number, ch: number): { cx: number; cy: number; r: number; pl: { x: number; y: number; w: number; h: number }; title: number };
+export declare function coverArt(cw: number, ch: number): Art;
+export declare function coverBackArt(cw: number, ch: number, B: number): Art;
+export declare function spineArt(D: number, ch: number): Art;
+export declare function blockEdgeArt(w: number, h: number, kind: 'fore' | 'head'): Art;
+export declare function claspArt(): Art;
+export declare function ribbonArt(len: number, col?: string): Art;
+export declare function tabArt(col: string, w: number, h: number, orient?: 'right' | 'left' | 'top'): Art;
+export declare function cornerArt(side: 'L' | 'R', n?: number): Art;
+export declare function tapeArt(variant?: string, w?: number, h?: number, seed?: number): Art;
+export declare function swashArt(w: number, col?: string): Art;
+export declare function ovalFrameArt(w: number, h: number): Art;
+export declare function stickerArt(col: string, n?: number): Art;
+export declare function stampRingArt(col: string, n?: number, seed?: number): Art;
+export declare function sealArt(color: string, emblem: string): Art;
+export declare function pencilSealArt(emblem: string): Art;
+export declare function moodArt(n: number): Art;
+export declare function pipArt(frame: 'stand' | 'blink' | 'pull' | 'pull2' | 'phew' | 'hop' | 'look', species?: string, eye?: string, cap?: boolean): Art;
+export declare function sleepDoodle(): Art;
+export declare function moonDoodle(): Art;
+export declare function mapArt(w: number, h: number, areas: { id: string; x: number; y: number; seen: boolean }[]): Art;
+export declare const HUD_BOOK: { w: number; h: number; cw: number; ch: number; rib: number[] };
+export declare function hudCover(): Art;
+export declare function hudBase(): Art;
+export declare function hudRibbon(): Art;
