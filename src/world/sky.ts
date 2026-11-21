@@ -1,44 +1,234 @@
-// Light and atmosphere: a day/night cycle with a pixel sky, warm key light with soft shadows,
-// coloured ambient, depth fog and sun shafts falling through the canopy.
+// [world] Light and atmosphere. A day/night cycle that follows the real sun (sunrise and sunset from
+// the date and the player's rough latitude), a pixel sky dome with the real moon phase, a drifting
+// pixel cloud layer, the milky way, aurora on clear cold nights, lightning flashes, crisp pixel stars
+// with the odd shooting star, a warm key light with soft shadows, coloured ambient, depth fog and
+// sun shafts falling through the canopy. The weather feeds `wx`; the scene calls setHour().
 import * as THREE from 'three';
+import { guessPlace, moonPhase, skyHour, sunDay, type Place, type SunDay } from './astro.ts';
 
 interface Key { h: number; sun: number; sunI: number; top: number; hor: number; sky: number; ground: number; fog: number; hemiI: number; night: number; rays: number }
 const KEYS: Key[] = [
-  { h: 0, sun: 0x8fb0ff, sunI: 0.75, top: 0x070b24, hor: 0x1c2c5c, sky: 0x5f7ed6, ground: 0x1c2a44, fog: 0x18244c, hemiI: 0.95, night: 1, rays: 0 },
-  { h: 4.6, sun: 0x8fb0ff, sunI: 0.75, top: 0x0a1030, hor: 0x24356a, sky: 0x6a86d6, ground: 0x1c2a44, fog: 0x1c2a55, hemiI: 0.95, night: 1, rays: 0 },
-  { h: 6.2, sun: 0xffb48a, sunI: 1.3, top: 0x4a5aa6, hor: 0xf9b08e, sky: 0xcdb6e0, ground: 0x5a4a52, fog: 0xd8a9a6, hemiI: 1.05, night: 0.25, rays: 0.9 },
+  { h: 0, sun: 0x8fb0ff, sunI: 0.75, top: 0x050822, hor: 0x1a2a5a, sky: 0x5f7ed6, ground: 0x1c2a44, fog: 0x18244c, hemiI: 0.95, night: 1, rays: 0 },
+  { h: 4.6, sun: 0x8fb0ff, sunI: 0.75, top: 0x0a1030, hor: 0x2a3a72, sky: 0x6a86d6, ground: 0x1c2a44, fog: 0x1c2a55, hemiI: 0.95, night: 1, rays: 0 },
+  { h: 5.5, sun: 0xd8a0c8, sunI: 0.9, top: 0x2a2f78, hor: 0xd88aa0, sky: 0x9d92d0, ground: 0x3a3450, fog: 0x8a6c94, hemiI: 1.0, night: 0.62, rays: 0.2 },
+  { h: 6.2, sun: 0xffb48a, sunI: 1.3, top: 0x4a5aa6, hor: 0xfbb08a, sky: 0xcdb6e0, ground: 0x5a4a52, fog: 0xd8a9a6, hemiI: 1.05, night: 0.25, rays: 0.9 },
+  { h: 7.2, sun: 0xffd2a0, sunI: 1.9, top: 0x5a8ad8, hor: 0xffd8b0, sky: 0xd8dcf0, ground: 0x6e7a5a, fog: 0xe8d0bc, hemiI: 0.98, night: 0.04, rays: 1 },
   { h: 8.5, sun: 0xfff0cf, sunI: 2.5, top: 0x58aaf0, hor: 0xcdeeff, sky: 0xd6ebff, ground: 0x7d9a62, fog: 0xcfe9f1, hemiI: 0.92, night: 0, rays: 0.75 },
   { h: 13, sun: 0xfff7e6, sunI: 2.7, top: 0x4a9fee, hor: 0xc6ebff, sky: 0xe2f1ff, ground: 0x86a468, fog: 0xd3eef4, hemiI: 0.95, night: 0, rays: 0.55 },
   { h: 16.8, sun: 0xffc983, sunI: 2.6, top: 0x5b8fd8, hor: 0xffdca6, sky: 0xffe6c6, ground: 0x857c52, fog: 0xf3d6aa, hemiI: 0.85, night: 0, rays: 1 },
   { h: 18.8, sun: 0xff8f68, sunI: 1.4, top: 0x3c3f8c, hor: 0xf58d6c, sky: 0xc9a0cc, ground: 0x4d3c56, fog: 0xc08c9c, hemiI: 1.0, night: 0.3, rays: 0.8 },
+  { h: 19.6, sun: 0xb08ad0, sunI: 0.9, top: 0x1c2260, hor: 0x8a5a8a, sky: 0x8a86d0, ground: 0x2a2a48, fog: 0x4a3a6a, hemiI: 0.98, night: 0.7, rays: 0.1 },
   { h: 20.4, sun: 0x8fb0ff, sunI: 0.75, top: 0x0c1234, hor: 0x2a3a74, sky: 0x6a86d6, ground: 0x1c2a44, fog: 0x1d2b58, hemiI: 0.95, night: 1, rays: 0 },
-  { h: 24, sun: 0x8fb0ff, sunI: 0.75, top: 0x070b24, hor: 0x1c2c5c, sky: 0x5f7ed6, ground: 0x1c2a44, fog: 0x18244c, hemiI: 0.95, night: 1, rays: 0 },
+  { h: 24, sun: 0x8fb0ff, sunI: 0.75, top: 0x050822, hor: 0x1a2a5a, sky: 0x5f7ed6, ground: 0x1c2a44, fog: 0x18244c, hemiI: 0.95, night: 1, rays: 0 },
 ];
+
+/** What the weather asks of the sky. All 0..1. */
+export interface SkyWeather {
+  /** cloud cover of the pixel cloud layer */
+  cloud: number;
+  /** grey overcast: dims the sun, greys the sky and light */
+  overcast: number;
+  /** mist: pulls the fog in and whitens it */
+  fog: number;
+  /** cold blue cast (snow) */
+  cold: number;
+  /** lightning flash */
+  flash: number;
+  /** aurora curtains (clear cold nights) */
+  aurora: number;
+  /** how high the sun climbs today (0 low winter sun .. 1 high summer sun) */
+  sunHeight: number;
+}
+
+// ---------------------------------------------------------------- shared GLSL
+
+const NOISE = /* glsl */ `
+float h21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float vn(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(h21(i), h21(i + vec2(1.0, 0.0)), f.x), mix(h21(i + vec2(0.0, 1.0)), h21(i + vec2(1.0, 1.0)), f.x), f.y); }
+float fbm2(vec2 p) { float v = 0.0, a = 0.55; for (int i = 0; i < 4; i++) { v += vn(p) * a; p = p * 2.03 + 17.1; a *= 0.5; } return v; }
+float bayer2(vec2 a) { a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
+float bayer4(vec2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
+uniform float uCloud; uniform float uTime;
+// a square sky pixel grid in direction space so everything up there stays crisp and stable
+vec3 skyPixel(vec3 d, float s) {
+  float el = asin(clamp(d.y, -1.0, 1.0)), az = atan(d.z, d.x);
+  float row = floor(el / s) + 0.5;
+  float elq = row * s;
+  float n = max(1.0, floor(6.2832 * cos(elq) / s));
+  float azq = (floor(az / 6.2832 * n) + 0.5) / n * 6.2832;
+  return vec3(cos(azq) * cos(elq), sin(elq), sin(azq) * cos(elq));
+}
+// the cloud layer as seen along a direction: blocky pixel clouds on a flat ceiling
+vec2 cloudUv(vec3 d) { return d.xz / (d.y + 0.06) * 0.85 + vec2(uTime * 0.011, uTime * 0.0045); }
+float cloudN(vec2 uv) { return fbm2(uv * 1.25) + (vn(uv * 5.0) - 0.5) * 0.12; }
+float cloudAt(vec3 d) {
+  if (d.y <= 0.0 || uCloud <= 0.001) return 0.0;
+  float th = mix(0.78, 0.22, uCloud);
+  return step(th, cloudN(cloudUv(skyPixel(d, 0.0056)))) * smoothstep(0.015, 0.09, d.y);
+}
+`;
 
 const SKY_VS = /* glsl */ `varying vec3 vDir; void main() { vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
 const SKY_FS = /* glsl */ `
-uniform vec3 uTop; uniform vec3 uHor; uniform vec3 uSunDir; uniform vec3 uSunCol; uniform float uNight; uniform float uTime;
+uniform vec3 uTop; uniform vec3 uHor; uniform vec3 uSunDir; uniform vec3 uSunDisc; uniform vec3 uSunCol; uniform float uNight; uniform float uDay;
+uniform vec3 uMoonDir; uniform float uMoonPhase; uniform float uMoonSize; uniform float uMoonVis; uniform float uHemi;
+uniform float uSunSize; uniform float uOvercast; uniform float uFlash; uniform float uAurora; uniform float uMilky;
+uniform vec3 uCloudLit; uniform vec3 uCloudDark; uniform vec3 uFogCol; uniform float uHaze; uniform vec3 uMilkyN;
 varying vec3 vDir;
-float h21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+${NOISE}
 void main() {
   vec3 d = normalize(vDir);
+  vec3 dq = skyPixel(d, 0.0042);
   // banded gradient: a few flat steps instead of a smooth ramp keeps the sky feeling like pixel art
   float t = clamp(d.y * 1.6 + 0.12, 0.0, 1.0);
   t = floor(t * 14.0) / 14.0;
   vec3 col = mix(uHor, uTop, t);
-  vec2 g = floor(vec2(atan(d.z, d.x) * 90.0, d.y * 140.0));
-  float star = step(0.9965, h21(g)) * uNight * step(0.05, d.y);
-  col += star * (0.6 + 0.4 * sin(uTime * 2.0 + h21(g + 3.0) * 6.28));
-  // a square sun or moon
-  vec3 s = normalize(uSunDir);
-  vec3 r = normalize(cross(vec3(0.0, 1.0, 0.0), s)), u = cross(s, r);
-  vec2 p = vec2(dot(d, r), dot(d, u));
-  float disc = step(max(abs(p.x), abs(p.y)), 0.045) * step(0.0, dot(d, s));
-  float halo = (1.0 - smoothstep(0.0, 0.32, length(p))) * step(0.0, dot(d, s));
-  col = mix(col, uSunCol, disc) + uSunCol * halo * 0.22;
+
+  // a dense dust of faint one-pixel stars on the sky grid, thicker along the milky way
+  if (uNight > 0.3 && dq.y > -0.02) {
+    vec2 cell = vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0042;
+    float x = dot(dq, uMilkyN);
+    float p = 0.016 + 0.05 * exp(-x * x / 0.02) * uMilky;
+    float hs = h21(floor(cell) + 0.5);
+    if (hs < p) {
+      float tw = 0.55 + 0.45 * sin(uTime * (1.0 + hs * 90.0) + hs * 300.0);
+      col += vec3(0.75, 0.8, 1.0) * (0.25 + 0.5 * h21(floor(cell) + 7.5)) * tw * smoothstep(0.3, 0.9, uNight) * (1.0 - uOvercast) * smoothstep(-0.02, 0.04, dq.y);
+    }
+  }
+  // milky way: a dusty band of light with a dark lane, dithered to a few levels
+  if (uMilky > 0.01 && dq.y > -0.05) {
+    float x = dot(dq, uMilkyN);
+    float core = exp(-x * x / 0.018) * (0.55 + 0.75 * fbm2(vec2(atan(dq.z, dq.x) * 3.0, x * 9.0)));
+    float lane = exp(-pow((x + 0.018) / 0.035, 2.0)) * smoothstep(0.35, 0.75, fbm2(vec2(atan(dq.z, dq.x) * 6.0, 3.0)));
+    float g = max(0.0, core - lane * 0.7) * uMilky * smoothstep(-0.06, 0.06, dq.y);
+    vec2 cell = vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0042;
+    g = floor(g * 5.0 + bayer4(cell) * 0.95) / 5.0;
+    col += mix(vec3(0.16, 0.18, 0.36), vec3(0.5, 0.46, 0.52), clamp(g, 0.0, 1.0)) * g * 0.55;
+  }
+
+  // aurora: green curtains with violet tops, rippling slowly over the north
+  if (uAurora > 0.01 && dq.y > 0.03) {
+    vec2 a = dq.xz / (dq.y + 0.3);
+    float x = a.x * 1.4 + sin(a.y * 2.1 + uTime * 0.13) * 0.7 + uTime * 0.02;
+    float curtain = pow(0.5 + 0.5 * sin(x * 2.6 + sin(x * 1.3 + uTime * 0.17) * 2.2), 2.5);
+    float rays = 0.55 + 0.45 * sin(atan(dq.z, dq.x) * 260.0 + sin(uTime * 0.6 + x) * 2.0);
+    float band = smoothstep(0.06, 0.2, dq.y) * (1.0 - smoothstep(0.3, 0.7, dq.y)) * smoothstep(0.35, -0.5, dq.z);
+    float A = curtain * rays * band * uAurora;
+    A = floor(A * 5.0 + bayer4(vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0042) * 0.9) / 5.0;
+    vec3 ac = mix(vec3(0.25, 1.0, 0.6), vec3(0.85, 0.35, 1.0), smoothstep(0.18, 0.5, dq.y));
+    col += ac * A * 0.55;
+  }
+
+  // the sun: a round pixel disc with stepped halo rings
+  vec3 s = normalize(uSunDisc);
+  if (uDay > 0.01 && dot(d, s) > 0.0) {
+    vec3 r = normalize(cross(vec3(0.0, 1.0, 0.0), s)), u = cross(s, r);
+    vec2 p = vec2(dot(d, r), dot(d, u)) / uSunSize;
+    vec2 q = (floor(p * 7.0) + 0.5) / 7.0;
+    float disc = step(length(q), 1.0);
+    float halo = floor((1.0 - smoothstep(1.0, 7.0, length(p))) * 4.0) / 4.0;
+    float vis = uDay * (1.0 - uOvercast * 0.9);
+    col = mix(col, mix(uSunCol, vec3(1.0, 0.99, 0.92), 0.6), disc * vis) + uSunCol * halo * 0.18 * vis;
+  }
+
+  // the moon in its real phase: pixel sphere, maria and craters, earthshine on the dark side
+  vec3 m = normalize(uMoonDir);
+  float moonCover = 0.0;
+  if (uMoonVis > 0.01 && dot(d, m) > 0.0) {
+    vec3 r = normalize(cross(vec3(0.0, 1.0, 0.0), m)), u = cross(m, r);
+    vec2 p = vec2(dot(d, r), dot(d, u)) / uMoonSize;
+    float px = 13.0 + uMoonSize * 40.0;
+    vec2 q = (floor(p * px) + 0.5) / px;
+    float rr = length(q);
+    float halo = 1.0 - smoothstep(uMoonSize, uMoonSize + 0.17, length(p) * uMoonSize);
+    float lit = 0.5 - 0.5 * cos(uMoonPhase * 6.2832);
+    col += vec3(0.55, 0.62, 0.85) * floor(halo * 4.0) / 4.0 * 0.22 * uMoonVis * (0.25 + lit);
+    if (rr < 1.0) {
+      vec3 n = vec3(q, sqrt(1.0 - rr * rr));
+      float ang = uMoonPhase * 6.2832;
+      vec3 L = vec3(sin(ang) * uHemi, 0.0, -cos(ang));
+      float lt = dot(n, L);
+      float maria = fbm2(q * 2.3 + 4.0);
+      float crater = step(0.86, h21(floor(q * px) + 3.0)) * step(rr, 0.85);
+      vec3 bright = mix(vec3(0.99, 0.97, 0.88), vec3(0.78, 0.8, 0.86), smoothstep(0.5, 0.66, maria)) - crater * 0.12;
+      bright *= 0.86 + 0.14 * n.z;
+      vec3 dark = mix(uTop, vec3(0.16, 0.19, 0.3), 0.7) * (1.0 + 0.25 * (1.0 - smoothstep(0.5, 0.66, maria)));
+      vec3 mc = lt > 0.02 ? bright : lt > -0.06 ? mix(dark, bright, 0.35) : dark;
+      if (rr > 0.9) mc *= 0.88;
+      col = mix(col, mc, uMoonVis);
+      moonCover = 1.0;
+    }
+  }
+
+  // drifting pixel cloud layer, lit from the sun/moon side with a stepped rim
+  if (uCloud > 0.001 && d.y > 0.0) {
+    // sampled on the sky pixel grid, so cloud pixels are the same size everywhere you look
+    vec2 uv = cloudUv(skyPixel(d, 0.0056));
+    float th = mix(0.78, 0.22, uCloud);
+    float n = cloudN(uv);
+    if (n > th) {
+      vec2 sd = normalize(uSunDir.xz + 0.0001) * 0.09;
+      float shade = clamp((n - cloudN(uv - sd)) * 6.0 + 0.5, 0.0, 1.0);
+      float thick = smoothstep(th, th + 0.22, n);
+      float lvl = floor(clamp(shade * 0.8 + (1.0 - thick) * 0.45, 0.0, 1.0) * 3.0) / 3.0;
+      vec3 cc = mix(uCloudDark, uCloudLit, lvl);
+      float edge = smoothstep(0.015, 0.09, d.y);
+      col = mix(col, cc, edge * (0.82 + 0.18 * uCloud));
+    }
+  }
+  // haze in the distance (fog weather)
+  col = mix(col, uFogCol, uHaze * (1.0 - smoothstep(0.0, 0.5, d.y)));
+  col += uFlash * vec3(0.7, 0.76, 0.95) * (0.6 + 0.4 * step(0.0, d.y));
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
 }`;
+
+// ---------------------------------------------------------------- stars
+
+const STAR_VS = /* glsl */ `
+attribute float aSize; attribute float aSeed; attribute vec3 aCol;
+uniform float uNight; uniform float uPR; uniform float uClear; uniform vec2 uRes;
+varying vec3 vCol; varying float vA; varying float vSize;
+${NOISE}
+void main() {
+  vec3 d = normalize(position);
+  float tw = 0.62 + 0.38 * sin(uTime * (1.3 + aSeed * 3.1) + aSeed * 41.0);
+  vA = uNight * uClear * (1.0 - cloudAt(d)) * smoothstep(-0.01, 0.035, d.y) * tw;
+  vCol = aCol;
+  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  gl_Position = projectionMatrix * mv;
+  // snap to the pixel grid so stars stay crisp squares
+  vec2 hp = uRes * 0.5 / uPR;
+  gl_Position.xy = (floor(gl_Position.xy / gl_Position.w * hp) + 0.5) / hp * gl_Position.w;
+  vSize = aSize;
+  gl_PointSize = aSize * uPR;
+}`;
+const STAR_FS = /* glsl */ `
+varying vec3 vCol; varying float vA; varying float vSize;
+void main() {
+  if (vA < 0.02) discard;
+  vec2 c = (gl_PointCoord - 0.5) * vSize;
+  float a = vA;
+  if (vSize > 2.5) {
+    // a little plus-shaped twinkle for the bright ones
+    if (abs(c.x) > 0.5 && abs(c.y) > 0.5) discard;
+    if (abs(c.x) > 0.5 || abs(c.y) > 0.5) a *= 0.55;
+  }
+  gl_FragColor = vec4(vCol * a, 1.0);
+}`;
+
+const SHOOT_VS = /* glsl */ `
+attribute float aA; uniform float uPR; uniform vec2 uRes;
+varying float vA;
+void main() {
+  vA = aA;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  vec2 hp = uRes * 0.5 / uPR;
+  gl_Position.xy = (floor(gl_Position.xy / gl_Position.w * hp) + 0.5) / hp * gl_Position.w;
+  gl_PointSize = (aA > 0.9 ? 3.0 : 2.0) * uPR;
+}`;
+const SHOOT_FS = /* glsl */ `varying float vA; void main() { if (vA < 0.03) discard; gl_FragColor = vec4(vec3(1.0, 0.97, 0.85) * vA, 1.0); }`;
 
 const RAY_FS = /* glsl */ `
 uniform vec3 uCol; uniform float uAlpha; uniform float uTime; uniform float uSeed;
@@ -55,21 +245,46 @@ const RAY_VS = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position
 
 export type SkyMode = 'clock' | 'day' | 'golden' | 'night';
 
+const STAR_R = 150;
+const tmpA = new THREE.Color(), tmpB = new THREE.Color();
+
 export class Sky {
   readonly sun = new THREE.DirectionalLight(0xffffff, 2);
   readonly hemi = new THREE.HemisphereLight(0xffffff, 0x888888, 1);
   readonly fog = new THREE.Fog(0xcfe9f1, 24, 62);
   readonly dome: THREE.Mesh;
+  readonly stars: THREE.Points;
+  private shoot: THREE.Points;
+  private shootPos: Float32Array; private shootA: Float32Array;
+  private shooting: { from: THREE.Vector3; to: THREE.Vector3; t: number; dur: number } | null = null;
+  private nextShoot = 6;
   private rays: { mesh: THREE.Mesh; base: THREE.Vector3; mat: THREE.ShaderMaterial }[] = [];
   private domeMat: THREE.ShaderMaterial;
+  private starMat: THREE.ShaderMaterial;
+  private shootMat: THREE.ShaderMaterial;
   /** 0 by day, 1 at night */
   night = 0;
   rayPower = 0;
   hour = 13;
   readonly sunDir = new THREE.Vector3(0.4, 0.8, 0.45);
+  /** where the moon hangs in the sky (not where the night light comes from) */
+  readonly moonDir = new THREE.Vector3(0.25, 0.5, -1).normalize();
   readonly ambient = new THREE.Color(1, 1, 1);
+  /** today's real moon phase (0 new .. 0.5 full) */
+  moonPhase = moonPhase(new Date());
+  /** what the weather asks of the sky (see SkyWeather) */
+  wx: SkyWeather = { cloud: 0.25, overcast: 0, fog: 0, cold: 0, flash: 0, aurora: 0, sunHeight: 0.7 };
+  /** cinematics: hang a big moon somewhere specific */
+  moonOverride: { dir: THREE.Vector3; size: number } | null = null;
+  /** cinematics: force the milky way / stars to full strength */
+  starBoost = 0;
+  /** cinematics: fade the moon out and in (0..1) */
+  moonFade = 1;
+  /** cinematics: draw the sun disc somewhere visible (the light keeps its own direction) */
+  sunDisc: { dir: THREE.Vector3; size: number } | null = null;
+  private baseFogNear = 24; private baseFogFar = 62;
 
-  constructor(scene: THREE.Scene, shadowSize: number) {
+  constructor(scene: THREE.Scene, shadowSize: number, quality: 'low' | 'high' = 'high') {
     scene.fog = this.fog;
     scene.add(this.sun, this.sun.target, this.hemi);
     this.sun.castShadow = true;
@@ -80,14 +295,81 @@ export class Sky {
     this.sun.shadow.normalBias = 0.035;
     this.sun.shadow.radius = 2.2;
 
+    const shared = { uTime: { value: 0 }, uCloud: { value: 0.25 } };
     this.domeMat = new THREE.ShaderMaterial({
       vertexShader: SKY_VS, fragmentShader: SKY_FS, side: THREE.BackSide, depthWrite: false, fog: false,
-      uniforms: { uTop: { value: new THREE.Color() }, uHor: { value: new THREE.Color() }, uSunDir: { value: this.sunDir }, uSunCol: { value: new THREE.Color() }, uNight: { value: 0 }, uTime: { value: 0 } },
+      uniforms: {
+        ...shared,
+        uTop: { value: new THREE.Color() }, uHor: { value: new THREE.Color() }, uSunDir: { value: this.sunDir }, uSunDisc: { value: new THREE.Vector3(0, 1, 0) }, uSunCol: { value: new THREE.Color() },
+        uNight: { value: 0 }, uDay: { value: 1 }, uMoonDir: { value: new THREE.Vector3().copy(this.moonDir) }, uMoonPhase: { value: this.moonPhase }, uMoonSize: { value: 0.05 },
+        uMoonVis: { value: 0 }, uHemi: { value: 1 }, uSunSize: { value: 0.04 }, uOvercast: { value: 0 }, uFlash: { value: 0 }, uAurora: { value: 0 }, uMilky: { value: 0 },
+        uCloudLit: { value: new THREE.Color() }, uCloudDark: { value: new THREE.Color() }, uFogCol: { value: new THREE.Color() }, uHaze: { value: 0 },
+        uMilkyN: { value: new THREE.Vector3(0.926, -0.345, -0.14).normalize() },
+      },
     });
-    this.dome = new THREE.Mesh(new THREE.SphereGeometry(180, 24, 12), this.domeMat);
+    this.dome = new THREE.Mesh(new THREE.SphereGeometry(180, 32, 16), this.domeMat);
     this.dome.renderOrder = -10;
     this.dome.frustumCulled = false;
     scene.add(this.dome);
+
+    // stars: a crisp pixel point field, a third of it crowded into the milky way
+    const n = quality === 'high' ? 5200 : 2600;
+    const pos = new Float32Array(n * 3), size = new Float32Array(n), seed = new Float32Array(n), colr = new Float32Array(n * 3);
+    const N = (this.domeMat.uniforms.uMilkyN.value as THREE.Vector3).clone();
+    const v = new THREE.Vector3(), a = new THREE.Vector3(), b = new THREE.Vector3();
+    a.crossVectors(N, new THREE.Vector3(0, 1, 0)).normalize(); b.crossVectors(N, a).normalize();
+    let s = 12345;
+    const rnd = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+    const palette = [[1, 1, 1], [0.8, 0.88, 1], [1, 0.94, 0.8], [1, 0.8, 0.7], [0.75, 0.82, 1]];
+    for (let i = 0; i < n; i++) {
+      if (i % 3 === 0) {
+        const ang = rnd() * Math.PI * 2, off = (rnd() + rnd() + rnd() - 1.5) * 0.12;
+        v.copy(a).multiplyScalar(Math.cos(ang)).addScaledVector(b, Math.sin(ang)).addScaledVector(N, off).normalize();
+      } else if (i % 5 === 1) {
+        // extra stars low over the trees, where the home view looks
+        const az = rnd() * Math.PI * 2, el = rnd() * rnd() * 0.32;
+        v.set(Math.cos(az) * Math.cos(el), Math.sin(el), Math.sin(az) * Math.cos(el));
+      } else {
+        v.set(rnd() * 2 - 1, rnd() * 2 - 1, rnd() * 2 - 1);
+        if (v.lengthSq() > 1 || v.lengthSq() < 0.01) { i--; continue; }
+        v.normalize();
+      }
+      if (v.y < -0.05) v.y = -v.y;
+      pos.set([v.x * STAR_R, v.y * STAR_R, v.z * STAR_R], i * 3);
+      const m = rnd();
+      size[i] = m > 0.985 ? 3 : m > 0.86 ? 2 : 1;
+      seed[i] = rnd();
+      const c = palette[Math.floor(rnd() * palette.length)], br = size[i] > 1 ? 1 : 0.5 + rnd() * 0.45;
+      colr.set([c[0] * br, c[1] * br, c[2] * br], i * 3);
+    }
+    const sg = new THREE.BufferGeometry();
+    sg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    sg.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+    sg.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
+    sg.setAttribute('aCol', new THREE.BufferAttribute(colr, 3));
+    this.starMat = new THREE.ShaderMaterial({
+      vertexShader: STAR_VS, fragmentShader: STAR_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+      uniforms: { ...shared, uNight: { value: 0 }, uPR: { value: 1 }, uClear: { value: 1 }, uRes: { value: new THREE.Vector2(1, 1) } },
+    });
+    this.stars = new THREE.Points(sg, this.starMat);
+    this.stars.frustumCulled = false;
+    this.stars.renderOrder = -9;
+    scene.add(this.stars);
+
+    // shooting stars: a head and a fading pixel trail
+    this.shootPos = new Float32Array(18 * 3); this.shootA = new Float32Array(18);
+    const shg = new THREE.BufferGeometry();
+    shg.setAttribute('position', new THREE.BufferAttribute(this.shootPos, 3).setUsage(THREE.DynamicDrawUsage));
+    shg.setAttribute('aA', new THREE.BufferAttribute(this.shootA, 1).setUsage(THREE.DynamicDrawUsage));
+    this.shootMat = new THREE.ShaderMaterial({
+      vertexShader: SHOOT_VS, fragmentShader: SHOOT_FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+      uniforms: { uPR: this.starMat.uniforms.uPR, uRes: this.starMat.uniforms.uRes },
+    });
+    this.shoot = new THREE.Points(shg, this.shootMat);
+    this.shoot.frustumCulled = false;
+    this.shoot.renderOrder = -8;
+    this.shoot.visible = false;
+    scene.add(this.shoot);
 
     // shafts of light landing at fixed spots around the clearing
     const spots: [number, number, number][] = [[-5.5, -3.5, 2.6], [1.5, -5.5, 2.0], [-7.5, 3.5, 2.2], [5.5, -1.5, 1.8], [-1.5, 3.2, 3.0], [8.5, 7.0, 2.2], [-3, -7.5, 1.7]];
@@ -107,6 +389,7 @@ export class Sky {
     this.setHour(13);
   }
 
+  /** Set the sky hour (6.2 = sunrise, 12.6 = noon, 18.8 = sunset) and apply the weather on top. */
   setHour(h: number) {
     this.hour = ((h % 24) + 24) % 24;
     let i = 0;
@@ -114,31 +397,114 @@ export class Sky {
     const a = KEYS[i], b = KEYS[i + 1], t = (this.hour - a.h) / (b.h - a.h);
     const mix = (x: number, y: number) => new THREE.Color(x).lerp(new THREE.Color(y), t);
     const num = (x: number, y: number) => x + (y - x) * t;
+    const w = this.wx, U = this.domeMat.uniforms;
     this.night = num(a.night, b.night);
-    this.rayPower = num(a.rays, b.rays);
-    this.sun.color.copy(mix(a.sun, b.sun));
-    this.sun.intensity = num(a.sunI, b.sunI);
-    this.hemi.color.copy(mix(a.sky, b.sky));
-    this.hemi.groundColor.copy(mix(a.ground, b.ground));
-    this.hemi.intensity = num(a.hemiI, b.hemiI);
-    this.fog.color.copy(mix(a.fog, b.fog));
-    this.domeMat.uniforms.uTop.value.copy(mix(a.top, b.top));
-    this.domeMat.uniforms.uHor.value.copy(mix(a.hor, b.hor));
-    this.domeMat.uniforms.uSunCol.value.copy(this.night > 0.6 ? new THREE.Color(0xe8f0ff) : this.sun.color.clone().lerp(new THREE.Color(0xffffff), 0.5));
-    this.domeMat.uniforms.uNight.value = this.night;
-    // the sun arcs from one side of the clearing to the other; at night the moon holds a fixed angle
-    const day = this.hour > 5.6 && this.hour < 19.6;
-    const k = day ? (this.hour - 5.6) / 14 : 0.35;
-    const az = -1.25 + k * 2.5, el = day ? 0.5 + Math.sin(k * Math.PI) * 0.55 : 0.95;
+    const day = 1 - this.night;
+    // grey everything towards an overcast sky, cool it for snow
+    const grey = (c: THREE.Color, k: number, dark = 1) => { const l = c.r * 0.3 + c.g * 0.55 + c.b * 0.15; return c.lerp(tmpA.setRGB(l * dark * 0.95, l * dark, l * dark * 1.08), k); };
+    const cold = (c: THREE.Color) => c.lerp(tmpB.setRGB(c.r * 0.86, c.g * 0.95, Math.min(1, c.b * 1.12 + 0.03)), w.cold);
+    const oc = w.overcast;
+    this.rayPower = num(a.rays, b.rays) * (1 - Math.max(oc, w.fog * 0.7, w.cloud * 0.5));
+    this.sun.color.copy(cold(grey(mix(a.sun, b.sun), oc * 0.8)));
+    const seasonal = 0.82 + 0.18 * w.sunHeight;
+    this.sun.intensity = num(a.sunI, b.sunI) * (1 - oc * 0.8 - w.fog * 0.25) * (this.night > 0.5 ? 1 : seasonal) + w.flash * 4;
+    this.hemi.color.copy(cold(grey(mix(a.sky, b.sky), oc * 0.6)));
+    this.hemi.groundColor.copy(cold(grey(mix(a.ground, b.ground), oc * 0.4, 0.9)));
+    this.hemi.intensity = num(a.hemiI, b.hemiI) * (1 - oc * 0.1) + w.flash * 1.5;
+    const fogC = cold(grey(mix(a.fog, b.fog), oc * 0.65));
+    fogC.lerp(tmpA.setRGB(0.74, 0.78, 0.82).multiplyScalar(0.22 + 0.7 * day + 0.08), w.fog * 0.7);
+    this.fog.color.copy(fogC);
+    // mist hangs between the trees but the hollow itself stays readable
+    this.fog.near = this.baseFogNear * (1 - w.fog * 0.62) * (1 - oc * 0.15);
+    this.fog.far = this.baseFogFar * (1 - w.fog * 0.3) * (1 - oc * 0.1);
+    U.uTop.value.copy(cold(grey(mix(a.top, b.top), oc * 0.75, 0.82 + day * 0.2)));
+    U.uHor.value.copy(cold(grey(mix(a.hor, b.hor), oc * 0.6, 0.9)));
+    U.uSunCol.value.copy(this.sun.color).lerp(tmpA.set(0xffffff), 0.5);
+    U.uNight.value = this.night;
+    U.uDay.value = Math.max(0, 1 - this.night * 1.6);
+    U.uOvercast.value = oc;
+    U.uFlash.value = w.flash;
+    U.uCloud.value = Math.max(w.cloud, oc * 0.95);
+    U.uAurora.value = w.aurora * this.night * (1 - oc);
+    U.uMilky.value = Math.max(this.starBoost, this.night * (1 - oc) * (1 - w.fog * 0.8)) * (1 - Math.max(w.cloud - 0.5, 0) * 1.6);
+    U.uHaze.value = w.fog;
+    U.uFogCol.value.copy(this.fog.color);
+    // clouds: lit sides follow the sun colour, shadowed sides the sky; dark and heavy when overcast
+    const litC = new THREE.Color().copy(U.uSunCol.value).lerp(tmpA.setRGB(1, 1, 1), 0.35).multiplyScalar(0.75 + day * 0.3);
+    if (this.night > 0.5) litC.copy(U.uHor.value).lerp(tmpA.setRGB(0.55, 0.6, 0.78), 0.45).multiplyScalar(0.9);
+    const darkC = new THREE.Color().copy(U.uHor.value).lerp(U.uTop.value, 0.4).multiplyScalar(0.72);
+    U.uCloudLit.value.copy(grey(litC, oc * 0.5, 0.85 - oc * 0.15)).multiplyScalar(1 - oc * 0.25);
+    U.uCloudDark.value.copy(grey(darkC, oc * 0.5, 0.85)).multiplyScalar(1 - oc * 0.3);
+    if (w.flash > 0) { (U.uCloudLit.value as THREE.Color).lerp(tmpA.setRGB(0.95, 0.96, 1), w.flash); (U.uCloudDark.value as THREE.Color).lerp(tmpA.setRGB(0.6, 0.62, 0.75), w.flash); }
+
+    // the sun arcs from one side of the clearing to the other (higher in summer); at night the
+    // light comes from a fixed moonlit angle in front of the house
+    const isDay = this.hour > 5.6 && this.hour < 19.6;
+    const k = isDay ? (this.hour - 5.6) / 14 : 0.35;
+    const peak = 0.38 + 0.72 * w.sunHeight;
+    const az = -1.25 + k * 2.5, el = isDay ? 0.45 + Math.sin(k * Math.PI) * (peak - 0.45 + 0.1) : 0.95;
     this.sunDir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el) * 0.8 + 0.25).normalize();
     this.sun.position.copy(this.sunDir).multiplyScalar(42);
     this.sun.target.position.set(0, 0, 0);
     this.ambient.copy(this.hemi.color).multiplyScalar(0.45 * this.hemi.intensity).add(this.sun.color.clone().multiplyScalar(0.22 * this.sun.intensity));
+    U.uSunDisc.value.copy(this.sunDisc ? this.sunDisc.dir : this.sunDir).normalize();
+    U.uSunSize.value = this.sunDisc ? this.sunDisc.size : 0.04;
+
+    // the visible moon drifts across the sky in front of the clearing through the night
+    const nh = this.hour < 12 ? this.hour + 24 : this.hour;
+    const nk = THREE.MathUtils.clamp((nh - 18) / 13, 0, 1);
+    // kept low and to the right of the tree house, where the home and sleep views can see it
+    const maz = 0.3 - nk * 0.6, mel = 0.1 + Math.sin(nk * Math.PI) * 0.09;
+    this.moonDir.set(Math.sin(maz) * Math.cos(mel), Math.sin(mel), -Math.cos(maz) * Math.cos(mel)).normalize();
+    const mo = this.moonOverride;
+    U.uMoonDir.value.copy(mo ? mo.dir : this.moonDir).normalize();
+    U.uMoonSize.value = mo ? mo.size : 0.05;
+    U.uMoonPhase.value = this.moonPhase;
+    // a new moon is (nearly) invisible; the cinematic moon always shows
+    const litFrac = 0.5 - 0.5 * Math.cos(this.moonPhase * Math.PI * 2);
+    U.uMoonVis.value = (mo ? 1 : THREE.MathUtils.smoothstep(this.night, 0.2, 0.7) * Math.min(1, 0.25 + litFrac * 3)) * this.moonFade;
+    this.starMat.uniforms.uNight.value = Math.max(this.starBoost, THREE.MathUtils.smoothstep(this.night, 0.35, 0.95));
+    this.starMat.uniforms.uClear.value = (1 - oc) * (1 - w.fog * 0.85);
   }
 
-  update(time: number, camera: THREE.Camera) {
+  /** Southern hemisphere players see the moon lit from the other side. */
+  setHemisphere(south: boolean) { this.domeMat.uniforms.uHemi.value = south ? -1 : 1; }
+
+  /** Send a shooting star across the sky (directions default to a random arc in front). */
+  shootingStar(from?: THREE.Vector3, to?: THREE.Vector3, dur = 0.9) {
+    const r = () => Math.random();
+    const f = from?.clone().normalize() ?? new THREE.Vector3(r() * 1.4 - 0.7, 0.35 + r() * 0.4, -1).normalize();
+    const t = to?.clone().normalize() ?? f.clone().add(new THREE.Vector3((r() < 0.5 ? -1 : 1) * (0.25 + r() * 0.2), -0.12 - r() * 0.1, 0)).normalize();
+    this.shooting = { from: f, to: t, t: 0, dur };
+  }
+
+  update(time: number, camera: THREE.Camera, dt = 1 / 60) {
     this.domeMat.uniforms.uTime.value = time;
+    this.starMat.uniforms.uTime.value = time;
     this.dome.position.copy(camera.position);
+    this.stars.position.copy(camera.position);
+    this.shoot.position.copy(camera.position);
+
+    // shooting stars on clear nights
+    const clear = this.starMat.uniforms.uClear.value as number;
+    if (!this.shooting && this.night > 0.8 && clear > 0.6 && (this.nextShoot -= dt) <= 0) { this.nextShoot = 9 + Math.random() * 22; this.shootingStar(); }
+    const sh = this.shooting;
+    if (sh) {
+      sh.t += dt;
+      const k = sh.t / sh.dur, n = this.shootA.length, p = new THREE.Vector3();
+      for (let i = 0; i < n; i++) {
+        const kk = k - i * 0.022;
+        const a = kk < 0 || kk > 1 ? 0 : (1 - i / n) * Math.sin(Math.min(1, k) * Math.PI) ** 0.5;
+        p.copy(sh.from).lerp(sh.to, THREE.MathUtils.clamp(kk, 0, 1)).normalize().multiplyScalar(STAR_R * 0.95);
+        this.shootPos.set([p.x, p.y, p.z], i * 3);
+        this.shootA[i] = a;
+      }
+      (this.shoot.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true;
+      (this.shoot.geometry.attributes.aA as THREE.BufferAttribute).needsUpdate = true;
+      this.shoot.visible = true;
+      if (k > 1.6) { this.shooting = null; this.shoot.visible = false; }
+    }
+
     const axis = this.sunDir, toCam = new THREE.Vector3(), x = new THREE.Vector3(), zv = new THREE.Vector3(), m = new THREE.Matrix4();
     this.rays.forEach((r, i) => {
       const flick = 0.75 + 0.25 * Math.sin(time * 0.35 + i * 2.1);
@@ -155,12 +521,48 @@ export class Sky {
       r.mesh.position.copy(r.base).addScaledVector(axis, -1.5);
     });
   }
+
+  /** Tell the star shader the canvas size (in CSS px) and pixel ratio. */
+  setViewport(w: number, h: number, pr: number) {
+    this.starMat.uniforms.uRes.value.set(w * pr, h * pr);
+    this.starMat.uniforms.uPR.value = Math.max(1, Math.round(pr));
+  }
 }
 
-/** Hour of the local day for a sky mode. */
+// ---------------------------------------------------------------- where and when
+
+const GEO_KEY = 'hoot-hollow:geo';
+let placeCache: Place | null = null;
+
+/** The player's rough location: shared geolocation (cached by the weather), else a timezone guess. */
+export function place(): Place {
+  if (placeCache) return placeCache;
+  try {
+    const raw = localStorage.getItem(GEO_KEY);
+    if (raw) { const g = JSON.parse(raw) as { lat: number; lon: number }; if (Number.isFinite(g.lat) && Number.isFinite(g.lon)) return (placeCache = { lat: g.lat, lon: g.lon, source: 'geo' }); }
+  } catch { /* storage blocked */ }
+  let tz: string | undefined;
+  try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { /* old browser */ }
+  return (placeCache = guessPlace(tz, typeof navigator !== 'undefined' ? navigator.language : undefined));
+}
+/** Remember a real location (from geolocation). */
+export function setPlace(lat: number, lon: number) {
+  placeCache = { lat, lon, source: 'geo' };
+  try { localStorage.setItem(GEO_KEY, JSON.stringify({ lat: Math.round(lat * 100) / 100, lon: Math.round(lon * 100) / 100 })); } catch { /* storage blocked */ }
+}
+
+let sunCache: { key: string; day: SunDay } | null = null;
+/** Today's sunrise/sunset for the player's place. */
+export function today(now = new Date()): SunDay {
+  const p = place(), key = `${now.toDateString()}|${p.lat}|${p.lon}`;
+  if (sunCache?.key !== key) sunCache = { key, day: sunDay(now, p.lat, p.lon) };
+  return sunCache.day;
+}
+
+/** Sky hour for a sky mode: the clock mode follows the real sun. */
 export function hourFor(mode: SkyMode, now = new Date()): number {
   if (mode === 'day') return 11;
   if (mode === 'golden') return 17.2;
   if (mode === 'night') return 22;
-  return now.getHours() + now.getMinutes() / 60;
+  return skyHour(now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600, today(now));
 }

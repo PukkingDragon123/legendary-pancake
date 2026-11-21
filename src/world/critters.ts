@@ -59,6 +59,14 @@ export class Critters {
   private flies: { rig: Rig; pos: THREE.Vector3; goal: THREE.Vector3; t: number; hover: number }[] = [];
   private bugs: { mesh: THREE.Object3D; a: number }[] = [];
   private acc = { leaf: 0, mote: 0, fly: 0, gust: 0 };
+  // [world] seasons and weather
+  /** falling-leaf rate multiplier and colours (null = each tree's own colour) */
+  private leafRate = 1;
+  private leafCols: number[] | null = null;
+  private petals = false;
+  private winter = false;
+  /** rain or snow: butterflies, bees and dragonflies take cover, dust motes settle */
+  shelter = false;
 
   constructor(private plan: ForestPlan, private fx: Fx, quality: 'low' | 'high', private sound: (id: string, at?: THREE.Vector3) => void) {
     const cols = ['#f08a2c', '#5aa9e6', '#f6d04a', '#f58fb0', '#c39bff', '#fbfbf6'];
@@ -104,6 +112,14 @@ export class Critters {
     }
   }
 
+  /** [world] Seasonal life: autumn leaf fall, spring petals, no butterflies in winter. */
+  setSeason(s: 'spring' | 'summer' | 'autumn' | 'winter', t = 0.5) {
+    this.winter = s === 'winter';
+    this.petals = s === 'spring';
+    this.leafRate = s === 'autumn' ? 2.6 + t * 1.6 : s === 'spring' ? 0.9 : s === 'summer' ? 0.45 : 0;
+    this.leafCols = s === 'autumn' ? [0xe8742a, 0xd2452e, 0xf2b33c, 0xb8642a, 0xf09a3a, 0x9a5a2a] : s === 'spring' ? [0xffc2d6, 0xffffff, 0xff9dbd, 0xb8e06a] : null;
+  }
+
   /** The nearest butterfly, for animals that feel like chasing one. */
   nearestButterfly(p: THREE.Vector3): THREE.Vector3 | null {
     let best: THREE.Vector3 | null = null, bd = 9;
@@ -113,9 +129,10 @@ export class Critters {
 
   update(dt: number, t: number, animals: THREE.Vector3[], night: number, windX: number, windZ: number, gust: number) {
     const day = night < 0.5;
+    const out = day && !this.shelter && !this.winter;
     for (const f of this.flyers) {
-      f.rig.root.visible = day;
-      if (!day) continue;
+      f.rig.root.visible = out;
+      if (!out) continue;
       f.t -= dt;
       const scared = animals.find((a) => a.distanceTo(f.pos) < 1.3);
       if (f.t <= 0 || scared) {
@@ -179,8 +196,8 @@ export class Critters {
       f.rig.bones.tail.rotation.y = Math.sin(t * (f.jump >= 0 ? 16 : 6) + f.a) * 0.6;
     }
     for (const d of this.flies) {
-      d.rig.root.visible = day;
-      if (!day) continue;
+      d.rig.root.visible = out;
+      if (!out) continue;
       d.t -= dt;
       if (d.t <= 0) {
         d.t = rand(0.8, 2.6);
@@ -203,12 +220,13 @@ export class Critters {
 
     // ---- ambient particles
     const fx = this.fx, a = this.acc;
-    if ((a.leaf -= dt) <= 0 && this.plan.leafSources.length) {
-      a.leaf = rand(0.18, 0.5) / (0.6 + gust * 3);
-      const s = pick(this.plan.leafSources), ang = rand(0, 6.28), d = Math.sqrt(Math.random()) * s.r, pink = s.color === 0xf7b3c8;
-      fx.emit({ x: s.x + Math.cos(ang) * d, y: s.y + rand(-0.8, 0.6), z: s.z + Math.sin(ang) * d, vy: -0.25, life: rand(6, 9), frame: pink ? SPR.petal : SPR.leaf1, frames: pink ? 1 : 3, fps: 3.5, size: rand(0.34, 0.48), color: s.color, gravity: 0.32, drag: 0.7, wind: 0.9, flutter: 0.7, land: true, fadeOut: 1.2 });
+    if (this.leafRate > 0 && (a.leaf -= dt) <= 0 && this.plan.leafSources.length) {
+      a.leaf = rand(0.18, 0.5) / (0.6 + gust * 3) / this.leafRate;
+      const s = pick(this.plan.leafSources), ang = rand(0, 6.28), d = Math.sqrt(Math.random()) * s.r, pink = s.color === 0xf7b3c8 || (this.petals && Math.random() < 0.5);
+      const c = this.leafCols ? pick(this.leafCols) : s.color;
+      fx.emit({ x: s.x + Math.cos(ang) * d, y: s.y + rand(-0.8, 0.6), z: s.z + Math.sin(ang) * d, vy: -0.25, life: rand(6, 9), frame: pink ? SPR.petal : SPR.leaf1, frames: pink ? 1 : 3, fps: 3.5, size: rand(0.26, 0.4), color: c, gravity: 0.32, drag: 0.7, wind: 0.9, flutter: 0.7, land: true, fadeOut: 1.2 });
     }
-    if (day && (a.mote -= dt) <= 0) {
+    if (out && (a.mote -= dt) <= 0) {
       a.mote = 0.16;
       fx.emit({ x: rand(-9, 9), y: rand(0.4, 3.4), z: rand(-8, 7), vy: rand(0.03, 0.14), life: rand(4, 7), frame: SPR.mote, size: rand(0.3, 0.5), color: 0xfff3c4, wind: 0.25, flutter: 0.15, add: true, fadeIn: 1.2, fadeOut: 1.4 });
     }

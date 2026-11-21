@@ -1,8 +1,11 @@
 // Planting: decides where every tree, bush, flower patch, mushroom ring and grass clump goes,
-// then draws each variety as one instanced mesh.
+// then draws each variety as one instanced mesh. [world] Trees and bushes are drawn as wood + a
+// seasonal voxel crown + 2D pixel leaf cards (foliage.ts); setSeason() dresses them for the time of year.
 import * as THREE from 'three';
 import { buildProp, propInstances, type BoxSpec, type Prop } from '../gfx/box.ts';
-import { rng, type Rng } from '../gfx/noise.ts';
+import { hash, rng, type Rng } from '../gfx/noise.ts';
+import type { SeasonInfo } from './astro.ts';
+import { CELLS, Foliage, type CardLook } from './foliage.ts';
 import * as F from '../assets/nature.ts';
 import { clearing, groundY, HALF, houseD, inGarden, pathD, pondD, SEED, WATER_Y, type Collider } from './layout.ts';
 import { FG, type GrassItem } from './grass.ts';
@@ -24,21 +27,27 @@ export interface ForestPlan {
 }
 
 const KINDS: Record<string, () => BoxSpec[]> = {
-  oak1: () => F.oak(31), oak2: () => F.oak(32, { leaf: '#3f8f45' }), oak3: () => F.oak(41, { leaf: '#5aa63c' }),
-  birch1: () => F.birch(33), birch2: () => F.birch(43), pine1: () => F.pine(34), pine2: () => F.pine(44),
-  blossom: () => F.blossomTree(35), maple: () => F.oak(36, { leaf: '#ee8a2e' }), sapling: () => F.sapling(30),
-  bush: () => F.bush(20), bushBerry: () => F.bush(21, '#3f8f45', '#e0465a'), bushFlower: () => F.bush(22, '#58a83e', '#fff2f7'),
   rock1: () => F.boulder(23), rock2: () => F.boulder(24, '#a39a8d'), pebbles: () => F.pebbles(25),
   log: () => F.fallenLog(26), stump: () => F.stump(27),
   toadstool: () => F.toadstool(14), toadstoolBig: () => F.toadstool(15, '#da4230', 1.6), bolete: () => F.bolete(16),
   chanterelle: () => F.chanterelles(17), glow: () => F.glowshroom(18), purple: () => F.toadstool(19, '#9a6fe0'),
   daisy: () => F.daisy(6), daisyPink: () => F.daisy(7, '#ffd9e6', '#f59a2f'), tulipRed: () => F.tulip(8), tulipYellow: () => F.tulip(9, '#f9cf45'),
   tulipPink: () => F.tulip(10, '#f58fb0'), bluebell: () => F.bluebell(10), lavender: () => F.lavender(11), poppy: () => F.poppy(12), sunflower: () => F.sunflower(13),
+  forgetme: () => F.forgetMeNot(3), buttercup: () => F.buttercup(2),
   clover: () => F.clover(5), fern: () => F.fern(4),
-    reeds: () => F.reeds(29), lily: () => F.lilyPad(28), lotus: () => F.lilyPad(28, true),
+  reeds: () => F.reeds(29), lily: () => F.lilyPad(28), lotus: () => F.lilyPad(28, true),
 };
-const NO_SHADOW = new Set(['grassA', 'grassB', 'grassTall', 'clover', 'fern', 'pebbles', 'lily', 'lotus']);
-const LEAF_COLOR: Record<string, number> = { oak1: 0x5aa63c, oak2: 0x4c9b3b, oak3: 0x6cb845, birch1: 0xb5d94f, birch2: 0xb5d94f, blossom: 0xf7b3c8, maple: 0xf09a3a };
+/** [world] Trees and bushes: wood + seasonal voxel crown + 2D pixel leaf cards. */
+const PLANTS: Record<string, () => F.PlantModel> = {
+  oak1: () => F.oak(31), oak2: () => F.oak(32, '#3f8f45'), oak3: () => F.oak(41, '#5aa63c'),
+  birch1: () => F.birch(33), birch2: () => F.birch(43), pine1: () => F.pine(34), pine2: () => F.pine(44),
+  blossom: () => F.blossomTree(35), maple: () => F.maple(36), sapling: () => F.sapling(30),
+  bush: () => F.bush(20), bushBerry: () => F.bush(21, '#3f8f45', '#e0465a', 'berry'), bushFlower: () => F.bush(22, '#58a83e', '#fff2f7', 'flowerbush'),
+};
+const FLOWERS = new Set(['daisy', 'daisyPink', 'tulipRed', 'tulipYellow', 'tulipPink', 'bluebell', 'lavender', 'poppy', 'sunflower', 'forgetme', 'buttercup']);
+const MUSHROOMS = new Set(['toadstool', 'toadstoolBig', 'bolete', 'chanterelle', 'glow', 'purple']);
+const NO_SHADOW = new Set(['grassA', 'grassB', 'grassTall', 'clover', 'fern', 'pebbles', 'lily', 'lotus', ...FLOWERS]);
+const LEAF_COLOR: Record<string, number> = { oak1: 0x5aa63c, oak2: 0x4c9b3b, oak3: 0x6cb845, birch1: 0xb5d94f, birch2: 0xb5d94f, blossom: 0xf7b3c8, maple: 0xd0503a };
 
 export function planForest(quality: 'low' | 'high'): ForestPlan {
   const r = rng(SEED);
@@ -112,26 +121,27 @@ export function planForest(quality: 'low' | 'high'): ForestPlan {
     const a = r.range(0, Math.PI * 2), d = r.range(0.9, 1.7), cx = t.x + Math.cos(a) * d, cz = t.z + Math.sin(a) * d;
     if (!dry(cx, cz, 1.2, 0.9) || groundY(cx, cz) < 0) continue;
     const kind = r.pick(['toadstool', 'toadstool', 'bolete', 'chanterelle', 'glow', 'purple', 'toadstoolBig']);
-    for (let k = 0, n = kind === 'toadstoolBig' ? 1 : r.int(2, 4); k < n; k++) put(kind, cx + r.range(-0.55, 0.55), cz + r.range(-0.55, 0.55), r.range(0.75, 1.25), r.range(0, 6.28));
+    for (let k = 0, n = kind === 'toadstoolBig' ? 1 : r.int(2, 4); k < n; k++) put(kind, cx + r.range(-0.55, 0.55), cz + r.range(-0.55, 0.55), r.range(0.6, 0.95), r.range(0, 6.28));
   }
-  for (let i = 0; i < 9; i++) { const a = (i / 9) * Math.PI * 2; put(i % 3 ? 'toadstool' : 'purple', 5.4 + Math.cos(a) * 1.25, -2.6 + Math.sin(a) * 1.25, r.range(0.7, 1), a); }
+  for (let i = 0; i < 9; i++) { const a = (i / 9) * Math.PI * 2; put(i % 3 ? 'toadstool' : 'purple', 5.4 + Math.cos(a) * 1.25, -2.6 + Math.sin(a) * 1.25, r.range(0.55, 0.8), a); }
 
   // flowers grow in drifts of one kind
   const drift = (kind: string, cx: number, cz: number, n: number, rad: number) => {
     flowers.push({ x: cx, z: cz });
     for (let i = 0; i < n; i++) {
       const a = r.range(0, Math.PI * 2), d = Math.sqrt(r()) * rad, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d;
-      if (dry(x, z, 1.18, 0.95) && groundY(x, z) >= 0 && !nearTrunk(x, z, 0.7) && !inGarden(x, z, 0.4)) put(kind, x, z, r.range(0.85, 1.3), r.range(0, 6.28));
+      if (dry(x, z, 1.18, 0.95) && groundY(x, z) >= 0 && !nearTrunk(x, z, 0.7) && !inGarden(x, z, 0.4)) put(kind, x, z, r.range(0.7, 1.0), r.range(0, 6.28));
     }
   };
-  const driftKinds = ['daisy', 'tulipRed', 'bluebell', 'lavender', 'poppy', 'daisyPink', 'tulipYellow', 'tulipPink'];
+  const driftKinds = ['daisy', 'tulipRed', 'bluebell', 'lavender', 'poppy', 'daisyPink', 'tulipYellow', 'tulipPink', 'forgetme', 'buttercup'];
   const fixed: [string, number, number][] = [['daisy', -6.4, -2.6], ['tulipRed', 3.6, 6.2], ['lavender', -8.2, 7.6], ['poppy', 4.4, -0.4], ['bluebell', -5.6, -6.2], ['tulipPink', -3.4, 0.4], ['daisyPink', 9.6, -0.6], ['tulipYellow', -3.8, 8.6], ['lavender', 10.6, 6.6], ['daisy', 5.2, 8.4]];
-  for (const [k, x, z] of fixed) drift(k, x, z, quality === 'high' ? 14 : 8, 1.7);
-  for (let i = 0; i < 16; i++) {
+  fixed.push(['forgetme', -1.6, 6.4], ['buttercup', 6.8, -4.6], ['forgetme', 2.6, -1.2], ['buttercup', -9.4, 2.4]);
+  for (const [k, x, z] of fixed) drift(k, x, z, quality === 'high' ? 22 : 12, 1.8);
+  for (let i = 0; i < 18; i++) {
     const a = r.range(0, Math.PI * 2), d = r.range(9.5, 17);
-    drift(r.pick(driftKinds), Math.cos(a) * d, Math.sin(a) * d, quality === 'high' ? 9 : 5, 1.5);
+    drift(r.pick(driftKinds), Math.cos(a) * d, Math.sin(a) * d, quality === 'high' ? 13 : 7, 1.6);
   }
-  for (const [x, z] of [[-6.6, -3.0], [-7.6, -3.7], [-5.9, -3.8]] as const) put('sunflower', x, z, r.range(1, 1.2), r.range(-0.4, 0.4));
+  for (const [x, z] of [[-6.6, -3.0], [-7.6, -3.7], [-5.9, -3.8]] as const) put('sunflower', x, z, r.range(0.95, 1.1), r.range(-0.4, 0.4));
 
   for (let i = 0; i < 70; i++) {
     const t = r.pick(trunks), a = r.range(0, Math.PI * 2), d = r.range(0.8, 2.2), x = t.x + Math.cos(a) * d, z = t.z + Math.sin(a) * d;
@@ -168,15 +178,69 @@ export function planForest(quality: 'low' | 'high'): ForestPlan {
   return { lists, colliders, shade, leafSources, flowers, perches, seats, grass };
 }
 
-export interface Flora { group: THREE.Group; props: Map<string, Prop>; dispose(): void }
+export interface Flora {
+  group: THREE.Group;
+  props: Map<string, Prop>;
+  foliage: Foliage;
+  /** [world] dress the forest for a season */
+  setSeason(info: SeasonInfo): void;
+  dispose(): void;
+}
 
-export function buildFlora(plan: ForestPlan): Flora {
+// ---------------------------------------------------------------- seasons
+
+type Group = 'deciduous' | 'pine' | 'bush';
+const groupOf = (kind: string): Group => (kind.startsWith('pine') ? 'pine' : kind.startsWith('bush') ? 'bush' : 'deciduous');
+/** Per-kind crown uniforms: recolour by brightness, and strip leaves away. */
+interface CrownU { uRecolor: { value: number }; uBare: { value: number }; uLumK: { value: number } }
+
+const CROWN_VERT = `#include <begin_vertex>
+vBareCell = floor((position - normal * 0.05) * 3.2);
+#ifdef USE_INSTANCING
+vBareCell += floor(instanceMatrix[3].xyz * 7.0);
+#endif`;
+const CROWN_FRAG = `#include <map_fragment>
+if (uBare > 0.001) { vec3 hb = fract(vBareCell * vec3(0.1031, 0.1030, 0.0973)); hb += dot(hb, hb.yxz + 33.33); if (fract((hb.x + hb.y) * hb.z) < uBare) discard; }
+{ float lum = dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11)); diffuseColor.rgb = mix(diffuseColor.rgb, vec3(lum * uLumK), uRecolor); }`;
+
+function patchCrown(m: THREE.Material, u: CrownU) {
+  const prev = m.onBeforeCompile, prevKey = m.customProgramCacheKey;
+  m.onBeforeCompile = (sh, r) => {
+    prev.call(m, sh, r);
+    Object.assign(sh.uniforms, u);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vBareCell;')
+      .replace('#include <begin_vertex>', CROWN_VERT);
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vBareCell; uniform float uRecolor; uniform float uBare; uniform float uLumK;')
+      .replace('#include <map_fragment>', CROWN_FRAG);
+  };
+  const base = prevKey.call(m);
+  m.customProgramCacheKey = () => base + '|crown';
+  m.needsUpdate = true;
+}
+
+const lumOf = (hex: string) => { const c = new THREE.Color(hex); return c.r * 0.3 + c.g * 0.59 + c.b * 0.11; };
+const H = (i: number, k: number) => hash(i, k, 0, 4242);
+/** Season colours for each kind: spring, summer (null = as painted), autumn picks, winter. */
+const SEASON_TINT: Record<string, { spring: number; summer: number | null; autumn: number[]; winter: number | null }> = {
+  oak: { spring: 0x8ccf4a, summer: null, autumn: [0xd9822b, 0xc9562a, 0xe3a83a, 0xb8743a, 0xd06a2a], winter: null },
+  birch: { spring: 0xbfe35a, summer: null, autumn: [0xf2c437, 0xe8b02a, 0xf6d04a], winter: null },
+  maple: { spring: 0xc8604a, summer: 0xb04438, autumn: [0xe8402a, 0xf0602a, 0xd8302a], winter: null },
+  blossom: { spring: 0xf5a3bd, summer: 0x5aa83c, autumn: [0xe0703a, 0xd8502e], winter: null },
+  sapling: { spring: 0x9ad450, summer: null, autumn: [0xe3a83a, 0xd9822b], winter: null },
+  pine: { spring: 0x2f7a58, summer: null, autumn: [0x2c7556], winter: 0x2a6a5c },
+  bush: { spring: 0x7cc24a, summer: null, autumn: [0xc0602a, 0xd8a03a, 0x9a7a3a, 0xb04a2a], winter: 0x7a6a48 },
+};
+const tintKey = (kind: string) => (kind.startsWith('oak') ? 'oak' : kind.startsWith('birch') ? 'birch' : kind.startsWith('pine') ? 'pine' : kind.startsWith('bush') ? 'bush' : kind);
+const CARD_SUMMER: Record<string, number> = { oak1: 0x4c9b3b, oak2: 0x3f8f45, oak3: 0x5aa63c, birch1: 0x9ccb3f, birch2: 0x9ccb3f, pine1: 0x2c7556, pine2: 0x2c7556, blossom: 0x5aa83c, maple: 0xb04438, sapling: 0x4c9b3b, bush: 0x4a9a3c, bushBerry: 0x3f8f45, bushFlower: 0x58a83e };
+
+interface PlantSet { kind: string; model: F.PlantModel; wood: THREE.InstancedMesh | null; crown: THREE.InstancedMesh; u: CrownU; spots: Spot[] }
+
+export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): Flora {
   const group = new THREE.Group(), props = new Map<string, Prop>();
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), c = new THREE.Color();
-  for (const [kind, spots] of plan.lists) {
-    const prop = buildProp(KINDS[kind]());
-    props.set(kind, prop);
-    const mesh = propInstances(prop, spots.length, !NO_SHADOW.has(kind));
+  const place = (mesh: THREE.InstancedMesh, spots: Spot[]) => {
     spots.forEach((s, i) => {
       q.setFromAxisAngle(up, s.yaw);
       m.compose(new THREE.Vector3(s.x, s.y, s.z), q, new THREE.Vector3(s.s, s.s, s.s));
@@ -185,10 +249,109 @@ export function buildFlora(plan: ForestPlan): Flora {
     });
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-    mesh.name = kind;
-    group.add(mesh);
+  };
+  const plants: PlantSet[] = [], small = new Map<string, THREE.InstancedMesh>();
+  for (const [kind, list] of plan.lists) {
+    // shuffle so trimming `count` for the season removes a random scatter, not whole drifts
+    const r = rng(kind.length * 977 + list.length);
+    const spots = list.slice().sort(() => r() - 0.5);
+    if (PLANTS[kind]) {
+      const model = PLANTS[kind]();
+      const crownProp = buildProp(model.crown, { swayH: model.top, wind: true });
+      props.set(kind, crownProp);
+      const crown = propInstances(crownProp, spots.length, true);
+      place(crown, spots);
+      for (let i = 0; i < spots.length; i++) crown.setColorAt(i, c.setRGB(1, 1, 1));
+      crown.name = kind + ':crown';
+      const u: CrownU = { uRecolor: { value: 0 }, uBare: { value: 0 }, uLumK: { value: 1 / Math.max(0.02, lumOf(model.base)) } };
+      for (const mat of crownProp.mats) patchCrown(mat, u);
+      let wood: THREE.InstancedMesh | null = null;
+      if (model.wood.length) {
+        const woodProp = buildProp(model.wood, { swayH: model.top });
+        props.set(kind + ':wood', woodProp);
+        wood = propInstances(woodProp, spots.length, !kind.startsWith('bush'));
+        place(wood, spots);
+        wood.name = kind + ':wood';
+        group.add(wood);
+      }
+      group.add(crown);
+      plants.push({ kind, model, wood, crown, u, spots });
+    } else {
+      const prop = buildProp(KINDS[kind]());
+      props.set(kind, prop);
+      const mesh = propInstances(prop, spots.length, !NO_SHADOW.has(kind));
+      place(mesh, spots);
+      mesh.name = kind;
+      group.add(mesh);
+      small.set(kind, mesh);
+    }
   }
-  return { group, props, dispose() { for (const p of props.values()) { p.geo.dispose(); p.tex.dispose(); p.mats.forEach((x) => x.dispose()); } } };
+  const foliage = new Foliage(plants.map((p) => ({ kind: p.kind, model: p.model, spots: p.spots })), quality);
+  group.add(foliage.group);
+
+  function setSeason(info: SeasonInfo) {
+    const s = info.season, late = s === 'autumn' ? Math.max(0, (info.t - 0.45) / 0.55) : 0, early = s === 'autumn' ? Math.max(0, 1 - info.t / 0.3) : 0;
+    const looks: CardLook[][] = [];
+    for (const p of plants) {
+      const g = groupOf(p.kind), T = SEASON_TINT[tintKey(p.kind)] ?? SEASON_TINT.oak;
+      const per: CardLook[] = [];
+      // crown: recolour from the painted brightness and thin out towards winter
+      let recolor = 1, bare = 0;
+      if (s === 'summer' && T.summer === null) recolor = 0;
+      if (s === 'spring' && p.kind === 'blossom') recolor = 0;
+      if (g === 'pine') recolor = s === 'winter' ? 1 : 0;
+      if (g === 'deciduous') bare = s === 'winter' ? 1 : s === 'autumn' ? 0.15 + late * 0.55 : 0;
+      if (g === 'bush') bare = s === 'winter' ? 0.55 : s === 'autumn' ? late * 0.3 : 0;
+      p.u.uRecolor.value = recolor; p.u.uBare.value = bare;
+      p.crown.visible = bare < 0.98;
+      p.spots.forEach((_, i) => {
+        let tint: number;
+        if (s === 'spring') tint = T.spring;
+        else if (s === 'summer') tint = T.summer ?? -1;
+        else if (s === 'autumn') {
+          // early autumn keeps some trees green; late autumn browns everything
+          const green = H(i, p.kind.length) < early * 0.7;
+          tint = green ? (T.summer ?? CARD_SUMMER[p.kind] ?? 0x4c9b3b) : T.autumn[Math.floor(H(i, 7) * T.autumn.length)];
+          if (late > 0 && !green) tint = new THREE.Color(tint).lerp(new THREE.Color(0x9a6a3a), late * 0.35 * H(i, 9)).getHex();
+        } else tint = T.winter ?? 0x8a6a44;
+        const crownTint = tint < 0 ? null : tint;
+        // recolouring keeps the painted shading; the instance colour carries the hue
+        if (recolor > 0 && crownTint !== null) p.crown.setColorAt(i, c.setHex(crownTint));
+        else p.crown.setColorAt(i, c.setRGB(0.94 + H(i, 3) * 0.1, 0.96 + H(i, 4) * 0.08, 0.94 + H(i, 5) * 0.08));
+        const cardTint = crownTint ?? CARD_SUMMER[p.kind] ?? 0x4c9b3b;
+        let keep = 1, cells: number[] | undefined, dry: number | undefined;
+        if (g === 'deciduous') {
+          if (s === 'winter') { keep = 0; dry = 0x8a6a44; }
+          else if (s === 'autumn') { keep = 1 - late * 0.55; dry = 0x9a6a3a; }
+          if (p.kind === 'blossom') cells = s === 'spring' ? CELLS.blossom : s === 'winter' ? undefined : CELLS.birch;
+        } else if (g === 'bush') {
+          if (s === 'winter') { keep = 0.25; dry = 0x7a5a3a; }
+          else if (s === 'autumn') keep = 1 - late * 0.3;
+          if (p.kind === 'bushFlower' && (s === 'autumn' || s === 'winter')) cells = CELLS.bush;
+          if (p.kind === 'bushBerry' && s === 'spring') cells = CELLS.bush;
+        }
+        per.push({ tint: cardTint, keep, cells, dry });
+      });
+      if (p.crown.instanceColor) p.crown.instanceColor.needsUpdate = true;
+      looks.push(per);
+    }
+    foliage.setSeason((src, inst) => looks[src][inst]);
+    // flowers bloom in spring and summer, thin out in autumn and vanish under winter; mushrooms love autumn
+    for (const [kind, mesh] of small) {
+      const n = (mesh.userData.full ??= mesh.count) as number;
+      let k = 1;
+      if (FLOWERS.has(kind)) k = s === 'winter' ? 0 : s === 'autumn' ? (kind === 'lavender' || kind === 'daisy' || kind === 'sunflower' ? 0.45 : 0.15) * (1 - late * 0.6) : s === 'spring' && (kind === 'sunflower' || kind === 'lavender') ? 0.3 : 1;
+      else if (MUSHROOMS.has(kind)) k = s === 'winter' ? 0.15 : s === 'spring' ? 0.5 : 1;
+      else if (kind === 'clover' || kind === 'fern') k = s === 'winter' ? 0.35 : 1;
+      mesh.count = Math.round(n * k);
+      mesh.visible = mesh.count > 0;
+    }
+  }
+
+  return {
+    group, props, foliage, setSeason,
+    dispose() { for (const p of props.values()) { p.geo.dispose(); p.tex.dispose(); p.mats.forEach((x) => x.dispose()); } foliage.dispose(); },
+  };
 }
 
 export type { Rng };

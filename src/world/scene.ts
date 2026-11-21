@@ -15,6 +15,7 @@ import { buildGardenFence, buildHouse, type House, type Slot, type Zone } from '
 import { GARDEN, groundY, HOUSE, MEADOW, walkable } from './layout.ts';
 import { hourFor, Sky, type SkyMode } from './sky.ts';
 import { buildTerrain, type Terrain } from './terrain.ts';
+import { Weather } from './weather.ts'; // [world]
 
 export type View = 'home' | 'interior' | 'loft' | 'owl' | 'breathe' | 'sleep' | 'garden' | 'deck' | 'wake';
 export type Quality = 'low' | 'high';
@@ -63,6 +64,8 @@ export class Scene {
   readonly house: House;
   readonly owl: OwlActor;
   readonly fireflies: Fireflies;
+  /** [world] real-world weather and seasons (see weather.ts) */
+  readonly weather: Weather;
   readonly quality: Quality;
   view: View = 'home';
   skyMode: SkyMode | 'dawn' = 'clock';
@@ -118,9 +121,9 @@ export class Scene {
     r.outputColorSpace = THREE.SRGBColorSpace;
 
     this.plan = planForest(quality);
-    this.sky = new Sky(this.scene, quality === 'high' ? 2048 : 1024);
+    this.sky = new Sky(this.scene, quality === 'high' ? 2048 : 1024, quality); // [world]
     this.terrain = buildTerrain(this.plan.shade);
-    this.flora = buildFlora(this.plan);
+    this.flora = buildFlora(this.plan, quality); // [world]
     this.fx = new Fx(quality === 'high' ? 1800 : 900);
     this.critters = new Critters(this.plan, this.fx, quality, (id) => this.emit({ type: 'sound', id }));
     this.house = buildHouse();
@@ -157,6 +160,7 @@ export class Scene {
     this.scene.add(this.owl.node);
     this.placeOwl('porch');
 
+    this.weather = new Weather(this); // [world] after the owl, house and flora exist
     this.resize();
     this.applySky();
     this.input(canvas);
@@ -474,7 +478,9 @@ export class Scene {
     }
     wind.uTime.value = t;
     GRASS.uTime.value = t;
-    const gust = 0.07 + 0.05 * Math.sin(t * 0.21) + 0.03 * Math.sin(t * 0.53 + 1.3);
+    // [world] the weather sets how hard the wind blows (calm fog .. storm)
+    const windK = this.weather ? 0.55 + this.weather.vis.wind * 1.4 : 1;
+    const gust = (0.07 + 0.05 * Math.sin(t * 0.21) + 0.03 * Math.sin(t * 0.53 + 1.3)) * windK;
     wind.uWind.value.z = gust;
     GRASS.uWind.value.set(0.82, 0.57).multiplyScalar(0.6 + gust * 5);
     this.fx.windX = wind.uWind.value.x * gust * 9; this.fx.windZ = wind.uWind.value.y * gust * 9;
@@ -518,7 +524,8 @@ export class Scene {
     const w = innerWidth, h = innerHeight;
     if (Math.abs(this.shiftCur) > 0.002) this.camera.setViewOffset(w, h, 0, (this.shiftCur * h) / 2, w, h); else this.camera.clearViewOffset();
 
-    this.sky.update(t, this.camera);
+    this.sky.setViewport(innerWidth, innerHeight, this.renderer.getPixelRatio()); // [world]
+    this.sky.update(t, this.camera, dt);
     if (!draw) return;
     this.renderer.render(this.scene, this.camera);
   }
