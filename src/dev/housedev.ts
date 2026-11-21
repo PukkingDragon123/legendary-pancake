@@ -1,10 +1,12 @@
 // Dev preview of the hollow oak: ?hour=21&view=home&floors=f1,f2&open=all&q=low&build=f1&yaw=0.5
-// `open=all` unpacks every box; `open=f1_pip,f1_cozy` just those; `stack=1` adds a lamp on a table.
+// `open=all` unpacks every box; `open=f1_pip,f1_cozy` just those; `cam=yaw,pitch,dist,x,y,z` pins the camera
+// (target in world units); `extra=1` adds a few more pieces. window.__ready turns true once the oak has loaded.
 import { Scene, type View } from '../world/scene.ts';
-import { FINISH, FINISHES, type Finish } from '../assets/registry.ts';
+import { FINISH, FINISHES, ITEMS, type Finish } from '../assets/registry.ts';
 import { freshSave } from '../game/store.ts';
 import { openBox, putItem, seedHome, unlockFloor } from '../game/home.ts';
 import type { FloorId } from '../world/house/plan.ts';
+import * as THREE from 'three';
 
 const q = new URLSearchParams(location.search);
 // two stand-in finishes so the wallpaper/flooring pipeline can be previewed before the content pack lands
@@ -19,6 +21,8 @@ if (q.get('demo')) {
   } });
   add({ id: 'floor_demo_check', name: 'Mossy Checker Tiles', kind: 'flooring', price: 90, blurb: 'Cool stone squares with moss in the cracks.', swatch: ['#c8c0b0', '#8a9a6a', '#5a6a4a'], paint: (u, v) => ((u % 12) < 1 || (v % 12) < 1 ? 0x5f8a44 : (Math.floor(u / 12) + Math.floor(v / 12)) % 2 ? 0xd8cfbe : 0x9aa08a) });
 }
+// `glb=cushion:devtest/x.glb,armchair:house/box_f1_cozy.glb` stands GLB models in for items (loader test)
+for (const pair of (q.get('glb') ?? '').split(',').filter(Boolean)) { const [id, path] = pair.split(':'); if (ITEMS[id]) ITEMS[id].model = path; }
 const s = freshSave();
 seedHome(s);
 s.coins = 99999;
@@ -29,16 +33,19 @@ if (q.get('wall') && s.home.floors.f1) s.home.floors.f1.wall = q.get('wall')!;
 if (q.get('floor') && s.home.floors.f1) s.home.floors.f1.floor = q.get('floor')!;
 if (q.get('extra')) for (const [id, x, z, r] of [['cuckoo', 26, 0, 0], ['painting', 31, 0, 0], ['fireplace', -2, -8, 0]] as const) putItem(s, 'f1', { id, x, z, rot: r, wall: id === 'fireplace' ? undefined : 30 });
 const sc = new Scene(document.getElementById('c') as HTMLCanvasElement, { species: 'tawny', palette: 'tawny', outfit: {} } as never, (q.get('q') as 'low') ?? 'high');
-(window as unknown as { sc: Scene; save: unknown }).sc = sc;
-(window as unknown as { save: unknown }).save = s;
+const w = window as unknown as Record<string, unknown>;
+w.sc = sc;
+w.save = s;
+w.THREE = THREE;
 /** for staged screenshots: dev.open('f1_cozy') plays the unpacking, dev.unlock('f2') pops the boards */
-(window as unknown as { dev: unknown }).dev = {
+w.dev = {
   s,
   open(id: string) {
     const at = sc.rooms.boxWorld(id)!;
     sc.rooms.openBox(id, () => { const r = openBox(s, id); sc.setHome(s.home); r?.placed.forEach((p, i) => sc.rooms.flyIn(p.uid, at.clone().setY(at.y + 0.7), i * 0.22)); });
   },
   unlock(f: FloorId) { unlockFloor(s, f, 99); sc.setHome(s.home, true); },
+  cam(yaw: number, pitch: number, dist: number, x: number, y: number, z: number) { sc.director = () => ({ yaw, pitch, dist, target: new THREE.Vector3(x, y, z), snap: true }); },
 };
 sc.setZones({ garden: true });
 sc.setHome(s.home);
@@ -53,6 +60,8 @@ if (q.get('build')) {
   tgt.y = sc.floorY(f);
   sc.director = () => ({ yaw, pitch, dist, target: tgt, snap: true });
 }
+if (q.get('cam')) { const [yaw, pitch, dist, x, y, z] = q.get('cam')!.split(',').map(Number); (w.dev as { cam: (...a: number[]) => void }).cam(yaw, pitch, dist, x, y, z); }
 sc.snapCamera();
 for (let i = 0; i < 60; i++) sc.step(1 / 30, false);
 sc.start();
+sc.house.ready.then(() => setTimeout(() => { w.__ready = true; }, 1500));

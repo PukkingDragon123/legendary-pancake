@@ -28,7 +28,7 @@ export const bstate = {
   busy: signal(false),
 };
 
-interface Pending { id: string; source: 'inv' | 'buy'; p: Placed; mesh: THREE.Mesh; ok: boolean; base: number; on?: string }
+interface Pending { id: string; source: 'inv' | 'buy'; p: Placed; mesh: THREE.Object3D; ok: boolean; base: number; on?: string }
 type Mode = 'none' | 'pan' | 'drag-item' | 'drag-pending' | 'pinch';
 
 const STEEP = 1.3, TILTED = 0.82;
@@ -243,7 +243,7 @@ export class BuildController {
     const fit = checkFit(save.value, fid, p);
     this.pending = { id, source, p: { ...p, uid: '__pending' }, mesh, ok: fit.ok, base: fit.base, on: fit.on };
     sc.rooms.place(mesh, fid, this.pending.p, fit.base);
-    sc.rooms.highlight(mesh, fit.ok ? 0x9cff9c : 0xff6a5a);
+    sc.rooms.highlight(mesh, fit.ok ? 0xc4dc94 : 0xe08a74);
     this.grid.footprint(k.wall ? null : rectOf(p), fit.ok);
     bstate.sel.value = { pending: true, id, ok: fit.ok, reason: fit.reason, source };
     blip('ui_drop', 0.5);
@@ -256,7 +256,7 @@ export class BuildController {
     const fit = checkFit(save.value, fid, { ...cand, uid: '__pending' });
     P.p = { ...cand, uid: '__pending' }; P.ok = fit.ok; P.base = fit.base; P.on = fit.on;
     this.scene.rooms.place(P.mesh, fid, P.p, fit.base);
-    this.scene.rooms.setHighlightColor(fit.ok ? 0x9cff9c : 0xff6a5a);
+    this.scene.rooms.setHighlightColor(fit.ok ? 0xc4dc94 : 0xe08a74);
     this.grid.footprint(kindOf(P.id).wall ? null : rectOf(P.p), fit.ok);
     bstate.sel.value = { pending: true, id: P.id, ok: fit.ok, reason: fit.reason, source: P.source };
   }
@@ -387,7 +387,7 @@ export class BuildController {
         for (const u of this.dragGroup(D.uid).slice(1)) rooms.meshOf(u)?.position.add(delta);
       }
     }
-    rooms.setHighlightColor(ok ? 0x9cff9c : 0xff6a5a);
+    rooms.setHighlightColor(ok ? 0xc4dc94 : 0xe08a74);
     this.grid.footprint(kindOf(p.id).wall ? null : rectOf(D.cand), ok);
     sound.play('ui_drag', { volume: 0.25, gap: 70, rate: ok ? 1.1 : 0.8 });
     bstate.sel.value = { uid: D.uid, id: p.id, ok, reason: ok ? undefined : checkFit(save.value, fid, D.cand, new Set(this.dragGroup(D.uid))).reason };
