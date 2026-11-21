@@ -157,7 +157,7 @@ add({
 });
 
 add({
-  id: 'vanity', name: 'Gilded Vanity', cat: 'tables', price: 560, rarity: 'rare', size: [2, 1], surface: 13,
+  id: 'vanity', name: 'Gilded Vanity', cat: 'tables', price: 560, rarity: 'rare', size: [2, 2], surface: 13,
   blurb: 'Feather-preening station with an oval mirror that flatters every angle.',
   sit: [{ x: 0, y: 0, z: 11, rot: 180 }],
   build: () => {

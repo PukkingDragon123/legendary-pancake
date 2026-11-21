@@ -428,6 +428,19 @@ export function chain(pts: Vec3[], th: number, p: Painter, o: Partial<BoxSpec> =
   return out;
 }
 
+/** Planks following points in the x-y plane, each `depth` deep along z (curved head boards, arches, rockers). */
+export function chainXY(pts: Vec3[], th: number, depth: number, p: Painter, o: Partial<BoxSpec> = {}): BoxSpec[] {
+  const out: BoxSpec[] = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [ax, ay, az] = pts[i], [bx, by] = pts[i + 1];
+    const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
+    if (len < 0.01) continue;
+    const cx = (ax + bx) / 2, cy = (ay + by) / 2, L = len + th * 0.6;
+    out.push({ ...box(cx, cy - L / 2, az, th, L, depth, p, o), rot: [0, 0, (Math.atan2(-dx, dy) * 180) / Math.PI] as Vec3, pivot: [cx, cy, az] as Vec3 });
+  }
+  return out;
+}
+
 /** A hanging curve between two points (catenary-ish), as a list of points. */
 export function sag(a: Vec3, b: Vec3, drop: number, n = 8): Vec3[] {
   return Array.from({ length: n + 1 }, (_, i) => {

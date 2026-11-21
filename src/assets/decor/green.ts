@@ -31,7 +31,7 @@ function blade(base: Vec3, len: number, w: number, pitch: number, yaw: number, c
 // ------------------------------------------------------------------ plants
 
 add({
-  id: 'monstera', name: 'Swiss-Cheese Monstera', cat: 'plants', price: 340, rarity: 'uncommon', size: [1, 1],
+  id: 'monstera', name: 'Swiss-Cheese Monstera', cat: 'plants', price: 340, rarity: 'uncommon', size: [2, 2],
   blurb: 'Big split leaves that make any corner feel like a jungle nap spot.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -45,7 +45,7 @@ add({
       if (ax > 0.25 && ax < 0.4 && ((a * 6 + 0.5) % 1) < 0.12) return 0;
       return 1;
     };
-    const leavesAt: [number, number, number, number, number][] = [[0, 20, 22, 0, 16], [70, 25, 12, 1, 15], [150, 17, 26, 2, 14], [215, 23, 8, 3, 16], [290, 19, 18, 4, 14], [35, 29, 34, 5, 12]];
+    const leavesAt: [number, number, number, number, number][] = [[0, 20, 22, 0, 14], [70, 25, 14, 1, 13], [150, 17, 26, 2, 13], [215, 23, 12, 3, 14], [290, 19, 18, 4, 13], [35, 29, 34, 5, 11]];
     for (const [yaw, h, pitch, seed, len] of leavesAt) {
       const rad = (yaw * Math.PI) / 180, bx = Math.sin(rad) * 3.4, bz = Math.cos(rad) * 3.4;
       out.push(...chain([[Math.sin(rad) * 0.8, 8.6, Math.cos(rad) * 0.8], [bx * 0.6, h * 0.7, bz * 0.6], [bx, h, bz]], 0.7, solid('#4f8a3a', { noise: 0.2 })));
@@ -183,7 +183,7 @@ add({
       return 1;
     };
     const ls: [number, number, number, number][] = [[18, 20, 40, 0], [21, 140, 30, 1], [24, 260, 35, 2], [27, 60, 20, 3], [30, 190, 25, 4], [33, 320, 30, 5], [36, 100, 10, 6], [39, 230, 5, 7], [41, 0, -40, 8]];
-    for (const [y, yaw, pitch, i] of ls) out.push(blade([Math.sin((yaw * Math.PI) / 180) * 0.6, y, Math.cos((yaw * Math.PI) / 180) * 0.6], 11, 8, pitch * 0.6, yaw, i % 2 ? '#2f7a3a' : '#3f8a45', fiddle, i));
+    for (const [y, yaw, pitch, i] of ls) out.push(blade([Math.sin((yaw * Math.PI) / 180) * 0.6, y, Math.cos((yaw * Math.PI) / 180) * 0.6], 9.6, 7.4, pitch * 0.6, yaw, i % 2 ? '#2f7a3a' : '#3f8a45', fiddle, i));
     return out;
   },
 });

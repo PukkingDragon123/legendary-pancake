@@ -8,7 +8,8 @@ import { LIGHTS } from './decor/lights.ts';
 import { TRINKETS } from './decor/trinkets.ts';
 import { GREEN } from './decor/green.ts';
 import { FUN } from './decor/fun.ts';
+import { DECOR_FINISHES as FINISH_LIST } from './decor/finishes.ts';
 
 export const DECOR_ITEMS: ItemDef[] = [...BEDS_AND_SEATS, ...TABLES_AND_STORAGE, ...LIGHTS, ...TRINKETS, ...GREEN, ...FUN];
 /** extra wallpapers and floorings beyond the base two */
-export const DECOR_FINISHES: Finish[] = [];
+export const DECOR_FINISHES: Finish[] = FINISH_LIST;
