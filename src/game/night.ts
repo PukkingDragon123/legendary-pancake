@@ -7,8 +7,9 @@ import { sound } from '../audio/sound.ts';
 import { AlarmClock, analyze, closeAlarmNotification, demoNight, nextOccurrence, Reminders, showAlarmNotification, SleepRecorder, type LiveLevel, type ReminderKind, type SleepSession } from '../sleep/index.ts';
 import { rollAdventure } from './adventure.ts';
 import { BlockerBridge, type BlockStatus } from './blocker.ts';
-import { dayKey, edit, flush, grant, ownsEntry, save } from './store.ts';
+import { dayKey, edit, flush, grant, ownsEntry, save, type DayPlan } from './store.ts';
 import { progress } from './quests.ts';
+import { alarmDays, nextWakeFromRoutine, tonightPlan } from './routine.ts';
 
 export type Phase = 'day' | 'sleeping' | 'ringing' | 'morning';
 
@@ -33,10 +34,37 @@ export function bedtimeOf(wake: string, goalMin: number): string {
   return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 }
 
-/** The next wake-up time for the current prefs (repeat days, or the next occurrence if none). */
+/**
+ * The next wake-up time: the morning after the next planned night of the weekly routine
+ * (`save.routine`), falling back to the older single wake time (`sleep.wake` + repeat days).
+ */
 export function nextWakeAt(now = Date.now()): number {
+  const t = nextWakeFromRoutine(save.value.routine, now);
+  if (t !== null) return t;
   const p = save.value.sleep;
   return nextOccurrence(p.wake, now, p.days.length ? p.days : undefined);
+}
+
+/** Tonight's plan from the weekly routine (bed, wake, length, whether it's planned). */
+export const tonight = (now = Date.now()) => tonightPlan(save.value.routine, now);
+
+/**
+ * Keep the older single-schedule prefs (`sleep.wake`, `goalMin`, `days`) in step with tonight's
+ * routine so the ticket, reminders and anything else reading them stay right.
+ */
+export function syncRoutine(now = Date.now()) {
+  const r = save.value.routine;
+  if (!r || r.length !== 7) return;
+  const t = tonightPlan(r, now), days = alarmDays(r);
+  const p = save.value.sleep, goal = Math.max(240, Math.min(720, t.min));
+  if (p.wake === t.wake && p.goalMin === goal && p.days.join() === days.join()) return;
+  edit((x) => { x.sleep.wake = t.wake; x.sleep.goalMin = goal; x.sleep.days = days; });
+  syncReminders();
+}
+/** Replace the weekly routine (the clock's clipboard writes through this). */
+export function setRoutine(r: DayPlan[]) {
+  edit((x) => { x.routine = r; });
+  syncRoutine();
 }
 
 export async function connectBlocker() {
@@ -103,10 +131,12 @@ function armAlarm(s: SleepSession) {
 /** Lights out. Call from the tap (it unlocks audio for the alarm). */
 export async function startNight(o: { alarm: boolean }) {
   sound.unlock();
-  const p = save.value.sleep;
   const start = Date.now();
+  syncRoutine(start);
+  const p = save.value.sleep;
   { const [bh, bm] = bedtimeOf(p.wake, p.goalMin).split(':').map(Number); const b = new Date(start); b.setHours(bh, bm, 0, 0); if (b.getTime() - start < 12 * 3600_000 && b.getTime() >= start - 60_000) progress('early'); }
-  const wakeTarget = o.alarm && p.alarmOn ? nextWakeAt(start + 20 * 60_000) : undefined;
+  const planned = tonight(start).on;
+  const wakeTarget = o.alarm && p.alarmOn && planned ? nextWakeAt(start + 20 * 60_000) : undefined;
   const session: SleepSession = { id: 'n' + start.toString(36), start, wakeTarget, smartWindowMin: p.smartMin, micUsed: p.mic, epochs: [], events: [] };
   edit((x) => { x.active = { session, area: x.area, peeks: [] }; });
   flush();
@@ -144,12 +174,32 @@ export function snooze(min = 9) {
   phase.value = 'sleeping';
 }
 
+// ------------------------------------------------------------------ the phone lock
+
+const LOCK_KEY = 'hoot-hollow:lock';
+const readLock = () => { try { return localStorage.getItem(LOCK_KEY) === '1'; } catch { return false; } };
+/** The can't-sleep phone lock is up (a full-screen night that resists being opened). */
+export const phoneLocked = signal<boolean>(!!save.value.active && readLock());
+/**
+ * Lock or unlock the phone for the rest of the night. Locking also (re)tells the blocker extension
+ * to block until the alarm; unlocking counts as a peek in the morning report.
+ */
+export function setPhoneLock(on: boolean) {
+  phoneLocked.value = on;
+  try { if (on) localStorage.setItem(LOCK_KEY, '1'); else localStorage.removeItem(LOCK_KEY); } catch { /* storage blocked */ }
+  if (on) {
+    const a = save.value.active;
+    void bridge.setSleep(true, a?.session.wakeTarget).then((st) => { if (st) blockStatus.value = st; });
+    sound.play('clock_wind', { volume: 0.3 });
+  } else notePeek(true);
+}
+
 /** Note when the phone was picked up during the night (shown in the morning report). */
-export function notePeek() {
+export function notePeek(force = false) {
   const a = save.value.active;
   if (!a || phase.value !== 'sleeping') return;
   const now = Date.now();
-  if (now - a.session.start < 15 * 60_000) return;
+  if (!force && now - a.session.start < 15 * 60_000) return;
   if (a.peeks.length && now - a.peeks[a.peeks.length - 1] < 5 * 60_000) return;
   edit((x) => { x.active?.peeks.push(now); });
 }
@@ -161,6 +211,7 @@ export async function endNight(): Promise<void> {
   void closeAlarmNotification();
   alarm.cancel();
   const a = save.value.active;
+  if (phoneLocked.value) { phoneLocked.value = false; try { localStorage.removeItem(LOCK_KEY); } catch { /* */ } }
   if (!a) { phase.value = 'day'; return; }
   const rec = recorder?.stop();
   recorder = null;
@@ -217,3 +268,6 @@ export function demoTonight() {
 }
 
 export function setMicSensitivity(v: number) { edit((x) => { x.sleep.sensitivity = v; }); }
+
+// keep the older prefs in step with the routine from the first moment (tonight changes daily)
+syncRoutine();

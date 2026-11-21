@@ -7,8 +7,11 @@ import { BreathOverlay } from '../breathe/overlay.ts';
 import { BreathSession, PATTERN, PATTERNS, type Phase } from '../breathe/session.ts';
 import { dayKey, edit, save } from '../game/store.ts';
 import { IcoAcorn, IcoBreath, IcoClose, IcoPause, IcoPlay } from './icons.tsx';
-import { haptic, Setting, Sheet, Tags, tap, toast, Toggle } from './kit.tsx';
-import { breathing, lines, say, sceneRef } from './state.ts';
+import { haptic, tap, toast, Toggle } from './kit.tsx';
+import { breathing, lines, panel, say, sceneRef } from './state.ts';
+import { phase } from '../game/night.ts';
+import { injectSleepFrames } from './sleepkit.tsx';
+import './breathe.css';
 import { progress } from '../game/quests.ts';
 import { flyReward } from './fx.tsx';
 
@@ -46,32 +49,45 @@ function Lantern(p: { id: string; live: boolean }) {
   return <span class="lantern" ref={el}><IcoBreath size={40} /></span>;
 }
 
-export function BreathePicker() {
+/**
+ * Choose a rhythm: lantern cards on a dark wooden board, each lantern swelling with its own
+ * breath. `embedded` shows it inside another screen (the bedtime ritual) instead of on its own.
+ */
+export function BreathePicker(p: { embedded?: boolean; preset?: string; onClose?: () => void; onBegin?: () => void } = {}) {
+  injectSleepFrames();
   const b = save.value.breath;
   const [follow, setFollow] = useState(false);
-  return (
-    <Sheet title="Breathe with Pip" sub="A few slow breaths in the moonlit clearing">
-      <div class="col" style="gap:8px">
-        {PATTERNS.map((p) => (
-          <button class={'pattern' + (b.pattern === p.id ? ' on' : '')} onClick={() => { tap('ui_tab', 0.45); edit((x) => { x.breath.pattern = p.id; }); }}>
-            <Lantern id={p.id} live={b.pattern === p.id} />
-            <div class="grow col" style="gap:4px">
-              <div class="spread"><b class="display" style="font-size:17px">{p.name}</b><span class="label">{p.best}</span></div>
-              <span class="small muted">{p.blurb}</span>
-              <Rhythm id={p.id} live={b.pattern === p.id} />
+  useEffect(() => { if (p.preset && PATTERN[p.preset] && b.pattern !== p.preset) edit((x) => { x.breath.pattern = p.preset!; }); }, []);
+  const close = () => { tap('ui_close', 0.45); if (p.onClose) p.onClose(); else if (panel.value === 'breathe') panel.value = null; };
+  const board = (
+    <div class={'bp hh-wood-dark' + (p.embedded ? ' embedded' : '')} role="dialog" aria-label="Breathe with Pip">
+      <header class="bp-head">
+        <span class="bp-lamp"><IcoBreath size={40} /></span>
+        <div class="grow"><h2>Breathe with Pip</h2><p>Pick a rhythm. Pip breathes it with you.</p></div>
+        <button class="bp-x" aria-label="Close" onClick={close}><IcoClose size={30} /></button>
+      </header>
+      <div class="bp-list">
+        {PATTERNS.map((pt) => (
+          <button class={'bp-card' + (b.pattern === pt.id ? ' on' : '')} style={{ '--pc': pt.color } as any} onClick={() => { tap('ui_tab', 0.45); edit((x) => { x.breath.pattern = pt.id; }); }}>
+            <Lantern id={pt.id} live={b.pattern === pt.id} />
+            <div class="grow col" style="gap:3px">
+              <div class="spread"><b>{pt.name}</b><span class="bp-best">{pt.best}</span></div>
+              <small>{pt.blurb}</small>
+              <Rhythm id={pt.id} live={b.pattern === pt.id} />
             </div>
           </button>
         ))}
       </div>
-      <div class="card col">
-        <div class="label">Length</div>
-        <Tags value={b.durationMin} onChange={(v) => edit((x) => { x.breath.durationMin = v; })} options={[{ v: 1, label: '1 min' }, { v: 3, label: '3 min' }, { v: 5, label: '5 min' }, { v: 10, label: '10 min' }]} />
-        <Setting title="Follow me" sub="Hold the screen to breathe in, let go to breathe out. Pip follows your pace."><Toggle on={follow} onChange={setFollow} label="Follow me" /></Setting>
-        <Setting title="Chimes & haptics" sub="A soft chime and a gentle buzz at each turn"><Toggle on={b.voice} onChange={(v) => edit((x) => { x.breath.voice = v; x.breath.haptics = v; })} label="Chimes" /></Setting>
+      <div class="bp-opts">
+        <div class="bp-len"><span>Length</span>{[1, 3, 5, 10].map((m) => <button class={'hh-tab' + (b.durationMin === m ? ' on' : '')} onClick={() => { tap('ui_tab', 0.4); edit((x) => { x.breath.durationMin = m; }); }}>{m} min</button>)}</div>
+        <div class="bp-toggle"><span class="grow"><b>Follow me</b><small>Hold the screen to breathe in, let go to breathe out</small></span><Toggle on={follow} onChange={setFollow} label="Follow me" /></div>
+        <div class="bp-toggle"><span class="grow"><b>Chimes and haptics</b><small>A soft chime and buzz at each turn</small></span><Toggle on={b.voice} onChange={(v) => edit((x) => { x.breath.voice = v; x.breath.haptics = v; })} label="Chimes" /></div>
       </div>
-      <button class="btn pillow honey big block" onClick={() => { tap('ui_confirm'); breathing.value = { pattern: b.pattern, minutes: b.durationMin, follow }; }}><IcoPlay size={40} />Begin</button>
-    </Sheet>
+      <button class="hh-btn-gold bp-go" onClick={() => { tap('ui_confirm'); p.onBegin?.(); breathing.value = { pattern: b.pattern, minutes: b.durationMin, follow }; }}><IcoPlay size={40} />Begin</button>
+    </div>
   );
+  if (p.embedded) return board;
+  return <div class="bp-back" onClick={(e) => { if (e.target === e.currentTarget) close(); }}>{board}</div>;
 }
 
 export function BreatheSession() {
@@ -95,8 +111,9 @@ export function BreatheSession() {
     sound.preload(['breath_in', 'breath_out', 'breath_hold', 'bowl']);
     sound.music('music_breath');
     sound.play('bowl', { volume: 0.55 });
-    sc?.moveOwl('log', () => sc.owl.setMood('calm'));
-    sc?.setView('breathe');
+    // at night Pip is away exploring: breathe under the night sky instead of at the log
+    const night = phase.value === 'sleeping';
+    if (!night) { sc?.moveOwl('log', () => sc.owl.setMood('calm')); sc?.setView('breathe'); }
     let warm = 3.2; // a few seconds to settle before the first breath
     session.onPhase = (ph: Phase) => {
       if (!b.voice) return;
@@ -119,8 +136,8 @@ export function BreatheSession() {
         if (key !== lastCue) { lastCue = key; setCue({ label: s.phase.label, left: s.left, cycle: s.cycle, cycles: s.cycles, follow: s.follow }); }
         if (s.done) { finish(session); return; }
       }
-      sc?.breathFx(lung, kind);
-      const p = sc ? sc.chestScreen() : { x: innerWidth / 2, y: innerHeight / 2 };
+      if (!night) sc?.breathFx(lung, kind);
+      const p = sc && !night ? sc.chestScreen() : { x: innerWidth / 2, y: innerHeight * 0.46 };
       overlay.draw(dt, p.x, p.y, lung, kind, warm > 0 ? 1 - warm / 3.2 : 1);
     };
     raf = requestAnimationFrame(loop);
@@ -140,15 +157,18 @@ export function BreatheSession() {
     const minutes = Math.round(session.total / 60) || 1;
     const today = dayKey();
     const first = save.value.breath.lastDay !== today;
-    const reward = first ? 20 : 5;
-    edit((x) => { x.breath.sessions++; x.breath.minutes += minutes; x.breath.lastDay = today; x.coins += reward; x.xp += 10; });
+    const night = phase.value === 'sleeping';
+    const reward = night ? 0 : first ? 20 : 5;
+    edit((x) => { x.breath.sessions++; x.breath.minutes += minutes; x.breath.lastDay = today; x.coins += reward; x.xp += night ? 0 : 10; });
     progress('breathe');
-    setTimeout(() => flyReward('acorn', reward * 3), 600);
-    sound.play('bowl', { volume: 0.6 });
+    if (reward) setTimeout(() => flyReward('acorn', reward * 3), 600);
+    sound.play('bowl', { volume: night ? 0.35 : 0.6 });
     sc?.breathFx(null);
-    sc?.owl.setMood('joy', 2.5);
-    sc?.owl.play('nod');
-    if (sc) { const o = sc.owl.node.position; sc.fx.burst('hearts', o.x, o.y + 1.4, o.z, 4); }
+    if (!night) {
+      sc?.owl.setMood('joy', 2.5);
+      sc?.owl.play('nod');
+      if (sc) { const o = sc.owl.node.position; sc.fx.burst('hearts', o.x, o.y + 1.4, o.z, 4); }
+    }
     setDone({ breaths: session.breaths, minutes, reward });
   };
 
@@ -156,6 +176,7 @@ export function BreatheSession() {
     tap('ui_close');
     const sc = sceneRef.current;
     breathing.value = null;
+    if (phase.value === 'sleeping') { sc?.setView('sleep'); return; }
     sc?.setView('home');
     sc?.moveOwl('porch');
     if (done) setTimeout(() => say(lines.breathe()), 800);
@@ -185,7 +206,7 @@ export function BreatheSession() {
           <div class="sheet-body center" style="align-items:center;gap:12px">
             <h1>Lovely.</h1>
             <p class="muted">{done.breaths} calm breath{done.breaths === 1 ? '' : 's'} over {done.minutes} minute{done.minutes === 1 ? '' : 's'}. Pip feels all floaty.</p>
-            <div class="row" style="gap:6px;font-weight:800"><IcoAcorn size={40} />+{done.reward} coins{done.reward > 5 ? ' (first today)' : ''}</div>
+            {done.reward > 0 ? <div class="row" style="gap:6px;font-weight:800"><IcoAcorn size={40} />+{done.reward} acorns{done.reward > 5 ? ' (first today)' : ''}</div> : <p class="muted">Now let your eyes close. Goodnight.</p>}
             <div class="row" style="width:100%;gap:10px">
               <button class="btn soft grow" onClick={() => { tap(); breathing.value = null; setTimeout(() => { breathing.value = { ...cfg }; }, 50); }}>Again</button>
               <button class="btn pillow grow" onClick={close}>Done</button>
