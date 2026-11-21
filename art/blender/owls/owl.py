@@ -77,6 +77,7 @@ class Owl:
         s.k = k = g('k', 1.0)
         s.queen = g('queen', False)
         s.cat = g('cat', False)
+        s.fluff = g('fluff', 0.0)  # lumpy, ragged plumage in the silhouette itself (a great grey, a snowy)
         # ---- the body: an egg on short legs
         s.leg = g('leg', 1.6) * k
         s.bw = 24.0 * k * g('bw', 1.0)
@@ -138,6 +139,20 @@ class Owl:
         return hw * (1 - r ** e) ** (1 / e)
 
     # -------------------------------------------------------------- pieces
+    def fluffy(s, k=1.0, back_only=False):
+        """A coarse sculpt: soft lumps of plumage pushed into the form (and so into the facets), ragged toward the hem."""
+        amp = s.fluff * s.k * k * 1.3
+
+        def f(h):
+            def fn(V, N):
+                d = 0.5 * np.sin(V[:, 0] * 0.95 + V[:, 2] * 0.55) * np.sin(V[:, 1] * 0.85 + 1.3) + 0.5 * np.sin(V[:, 2] * 1.25 + V[:, 0] * 0.45 + 0.7)
+                d = amp * d + amp * 0.6 * tk.smoothstep(s.bz0 + 4 * s.k, s.bz0, V[:, 2]) * np.abs(np.sin(np.arctan2(V[:, 0], V[:, 1]) * 7))
+                if back_only:
+                    d = d * tk.smoothstep(-0.55, -0.1, N[:, 1])
+                return d
+            tk.push(h, fn)
+        return f
+
     def build_body(s):
         k = s.k
         R = s.body_rings()
@@ -165,7 +180,7 @@ class Owl:
             return (N[:, 1] < -0.15) & (np.abs(C[:, 0]) < half) & (zf < 0.97)
 
         o = tk.loft('body', R, n=18, up=(0, -1, 0), cap0='round', cap1='round', capd=1.6 * k)
-        s.B.add('body', low(o, 'body', 420, lo=1, hi=3, sculpt=sc, region=('back', [('belly', belly)])))
+        s.B.add('body', lowx(o, 'body', 420 + int(160 * s.fluff), lo=1, hi=3, sculpt=sc, coarse=s.fluffy(1.0) if s.fluff else None, region=('back', [('belly', belly)])))
         s.bone('body', (0, -0.3 * k, s.bz0 + 3.0 * k), 'root')
 
     def disc_d(s, X, Z):
@@ -238,7 +253,11 @@ class Owl:
         if s.cat:
             rules = [('muzzle', lambda C, N: (N[:, 1] < -0.35) & (np.hypot(C[:, 0] / 1.25, C[:, 2] - (s.ez - 3.2 * k)) < 5.2 * k))]
         o = tk.loft('head', R, n=18, up=(0, 0, 1), cap0='round', cap1='round', capd=2.0 * k)
-        s.B.add('head', lowx(o, 'head', 470, lo=1, hi=3, sculpt=fine, coarse=None if s.cat else sc, region=('crown', rules)))
+        def coarse(h):
+            sc(h)
+            if s.fluff:
+                s.fluffy(0.7, back_only=True)(h)
+        s.B.add('head', lowx(o, 'head', 470 + int(120 * s.fluff), lo=1, hi=3, sculpt=fine, coarse=None if s.cat else coarse, region=('crown', rules)))
         s.bone('head', (0, s.hy + s.hd * 0.05, s.bz1 - 2.5 * k), 'body')
         # ---- the beak: a little hooked bill, its waxy cere, the lower mandible on its own joint
         bk = s.beak
@@ -1200,6 +1219,14 @@ def preview(O, F, path):
 
 
 def main(mid):
+    lock = os.path.join(ROOT, 'art', 'blender', '_build', 'owls', 'locks', mid)
+    if os.environ.get('OWL_LOCKS', '1') == '1' and '--fast' in FLAGS:  # (two build lanes share one list: each model once)
+        os.makedirs(os.path.dirname(lock), exist_ok=True)
+        try:
+            os.close(os.open(lock, os.O_CREAT | os.O_EXCL))
+        except FileExistsError:
+            print(f'[owls/{mid}] built by the other lane: skipped', flush=True)
+            return
     spec = specs.get(mid)
     facet.TRIS = (1100, 1950, 1950) if mid == 'queen' else (1100, 1900, 1950)  # (the queen carries her regalia)
     tk.reset()

@@ -35,8 +35,9 @@ export const defaultEye = (): EyeState => ({ lid: 0, low: 0, tilt: 0, lx: 0, ly:
 export const EYE_N = 96;
 const N = EYE_N;
 const C = (N - 1) / 2;
-/** The dot's radius as a share of the half patch (the GLB's patch is 2.1 dot radii across each way). */
-export const DOT_SHARE = 1 / 2.1;
+/** The dot's radius as a share of the half patch (the GLB's patch is 2.1 toy eye radii across each way); the dots
+ * are drawn smaller than the toy's eye radius: small solid ink dots, the way the owner likes them. */
+export const DOT_SHARE = 0.58 / 2.1;
 /** Legacy: the old eye plane's size factor (kept for callers that size planes from it). */
 export const EYE_PLANE = 2.1;
 

@@ -390,6 +390,234 @@ def glasses(O, B, k):
     B.add('piece', low(br, 'bridge', 20, region='wire'))
 
 
+@piece('monocle', 'anchor_face')
+def monocle(O, B, k):
+    y, cx, cz = O.yF - 1.5, O.ex, O.ez
+    pts = [(cx + math.cos(2 * math.pi * i / 16) * 3.9, y, cz + math.sin(2 * math.pi * i / 16) * 3.7) for i in range(16)]
+    B.add('piece', low(tk.tube('rim', pts, [0.5] * 16, n=6, closed=True), 'rim', 70, region='gold'))
+    ch = [(cx + 3.6, y + 0.2, cz - 1.6), (cx + 5.0, y + 1.4, cz - 5.0), (cx + 4.6, y + 2.6, cz - 9.0), (cx + 2.6, y + 2.4, cz - 12.0)]
+    B.add('piece', low(tk.tube('chain', ch, [0.28] * 4, n=5), 'chain', 30, region='gold'))
+
+
+def sweater_like(O, B, name, arc=250, z0f=0.22, grow=0.5, collar=True, buttons=0, hood=False):
+    z0, z1 = O.bz0 + O.bh * z0f, O.bz1 - 1.6
+    o = shell(name, O, z0, z1, grow, arc=arc, centre=0, n=22, rings=7, flare=0.4, th=0.8)
+
+    def knit(h):
+        tk.push(h, lambda V, N: 0.12 * (np.abs(np.sin(V[:, 2] * 2.6)) > 0.85) - 0.06 * (np.abs(np.sin(V[:, 0] * 2.2 + V[:, 1] * 1.5)) > 0.9))
+    B.add('piece', low(o, name, 320, lo=1, hi=2, sculpt=knit, region='knit'))
+    hw, ft, bk, yc = O.body_at(z0)
+    pts = []
+    for i in range(17):
+        a = math.radians(-arc / 2 + arc * i / 16)
+        pts.append((math.sin(a) * (hw + grow + 0.6), yc - math.cos(a) * ((ft if math.cos(a) > 0 else bk) + grow + 0.6), z0 + 0.3))
+    B.add('piece', low(tk.tube('hem', pts, [0.9] * 17, n=6), 'hem', 80, region='rib'))
+    for i in range(buttons):
+        z = z1 - 2.5 - i * (z1 - z0 - 4) / max(1, buttons - 1)
+        hw, ft, bk, yc = O.body_at(z)
+        b = tk.lathe(f'btn{i}', [(0, -0.4), (0.9, -0.3), (1.0, 0.1), (0, 0.4)], n=8)
+        tk.rotate(b, 90, 'X')
+        tk.move(b, (0, yc - ft - grow - 1.0, z))
+        B.add('piece', low(b, f'btn{i}', 16, region='button'))
+
+
+@piece('sweater', 'anchor_chest')
+def sweater(O, B, k):
+    sweater_like(O, B, 'jumper')
+
+
+@piece('pajamas', 'anchor_chest')
+def pajamas(O, B, k):
+    sweater_like(O, B, 'pj', arc=260, z0f=0.1, buttons=3)
+
+
+@piece('cardigan', 'anchor_chest')
+def cardigan(O, B, k):
+    sweater_like(O, B, 'cardi', arc=230, buttons=3)
+
+
+@piece('raincoat', 'anchor_chest')
+def raincoat(O, B, k):
+    sweater_like(O, B, 'coat', arc=270, z0f=0.05, grow=0.7, buttons=2)
+
+
+@piece('cloudcloak', 'anchor_back')
+def cloudcloak(O, B, k):
+    z0, z1 = O.bz0 + 1.0, O.bz1 - 0.8
+    o = shell('cloak', O, z0, z1, 2.6, arc=220, centre=180, n=22, rings=7, flare=2.0, th=0.9)
+
+    def puff(h):
+        tk.push(h, lambda V, N: 0.55 * np.abs(np.sin(V[:, 0] * 0.9 + 1.0) * np.sin(V[:, 2] * 0.8)) * (N[:, 1] > -0.2))
+    B.add('piece', low(o, 'cloak', 300, lo=1, hi=2, sculpt=puff, region='cloud'))
+    z = O.bz1 - 1.8
+    hw, ft, bk, yc = O.body_at(z)
+    col = tk.tube('collar', ring_pts(hw + 2.2, ft + 1.9, bk + 2.4, yc, z, n=16, wob=0.05), [1.9] * 16, n=8, closed=True, squash=0.85)
+    B.add('piece', low(col, 'collar', 120, region='cloud'))
+
+
+@piece('bowtie', 'anchor_neck')
+def bowtie(O, B, k):
+    z = O.bz1 - 3.2
+    hw, ft, bk, yc = O.body_at(z)
+    c = V3(0, yc - ft - 0.8, z)
+    for sx in (-1, 1):
+        o = tk.loft(f'wing{sx}', [{'c': tuple(c + V3(sx * 0.6, 0, 0)), 'w': 1.6, 'h': 0.6}, {'c': tuple(c + V3(sx * 3.0, -0.2, 0)), 'w': 3.8, 'h': 0.8},
+                                  {'c': tuple(c + V3(sx * 4.2, -0.1, 0)), 'w': 3.4, 'h': 0.7}], n=8, up=(0, -1, 0), cap0='round', cap1='round')
+        B.add('piece', low(o, f'wing{sx}', 50, region='velvet'))
+    kn = tk.lathe('knot', [(0, -1.0), (1.1, -0.8), (1.3, 0), (1.1, 0.8), (0, 1.0)], n=8)
+    tk.rotate(kn, 90, 'X')
+    tk.move(kn, tuple(c + V3(0, -0.6, 0)))
+    B.add('piece', low(kn, 'knot', 30, region='velvet'))
+
+
+@piece('bandana', 'anchor_neck')
+def bandana(O, B, k):
+    z = O.bz1 - 2.4
+    hw, ft, bk, yc = O.body_at(z)
+    B.add('piece', low(tk.tube('band', ring_pts(hw + 0.9, ft + 0.9, bk + 0.9, yc, z, n=16), [1.1] * 16, n=6, closed=True, squash=0.8), 'band', 90, region='cloth'))
+    # the triangle hanging down the breast
+    zz = z - 1.0
+    w = hw * 1.25
+    pts = [(-w, zz), (w, zz), (0, zz - 8.5)]
+    o = tk.slab('tri', pts, 0.8, plane='XZ', at=0.0, bevel=0.3, segs=1)
+    tk.subsurf(o, 1)
+
+    def hugf(V):
+        V = V.copy()
+        _, ftz, _, ycz = O.body_at(np.clip(V[:, 2], O.bz0, O.bz1))
+        V[:, 1] = ycz - (ftz + 0.9) * np.sqrt(np.clip(1 - (V[:, 0] / (hw + 2.0)) ** 2, 0.05, 1)) + V[:, 1]
+        return V
+    tk.deform(o, hugf)
+    tk.fix_normals(o)
+    B.add('piece', low(o, 'tri', 80, region='cloth'))
+
+
+@piece('bell', 'anchor_neck')
+def bell(O, B, k):
+    z = O.bz1 - 2.6
+    hw, ft, bk, yc = O.body_at(z)
+    B.add('piece', low(tk.tube('collar', ring_pts(hw + 0.8, ft + 0.8, bk + 0.8, yc, z, n=16), [0.8] * 16, n=6, closed=True, squash=1.4), 'collar', 90, region='leather'))
+    bl = tk.lathe('bell', [(0, -2.0), (1.9, -1.6), (2.2, -0.6), (1.6, 0.8), (0.6, 1.5), (0, 1.7)], n=10)
+    tk.move(bl, (0, yc - ft - 2.2, z - 2.4))
+    B.add('piece', low(bl, 'bell', 60, region='silver'))
+
+
+@piece('moonpendant', 'anchor_neck')
+def moonpendant(O, B, k):
+    z = O.bz1 - 2.4
+    hw, ft, bk, yc = O.body_at(z)
+    pts = []
+    for i in range(16):
+        a = 2 * math.pi * i / 16
+        dz = -3.2 * max(0, math.cos(a)) ** 2
+        pts.append((math.sin(a) * (hw + 0.7), yc - math.cos(a) * ((ft if math.cos(a) > 0 else bk) + 0.7), z + dz))
+    B.add('piece', low(tk.tube('chain', pts, [0.3] * 16, n=5, closed=True), 'chain', 60, region='silver'))
+    pts = []
+    for i in range(13):
+        a = math.radians(-120 + 240 * i / 12)
+        pts.append((math.cos(a) * 2.2, math.sin(a) * 2.2))
+    for i in range(13):
+        a = math.radians(120 - 240 * i / 12)
+        pts.append((math.cos(a) * 1.6 + 1.0, math.sin(a) * 1.7))
+    m = tk.slab('moon', pts, 1.0, plane='XZ', at=0.0, bevel=0.3, segs=1)
+    tk.move(m, (0, yc - ft - 1.6, z - 5.6))
+    B.add('piece', low(m, 'moon', 40, region='moonstone'))
+
+
+@piece('sleepmask', 'anchor_head')
+def sleepmask(O, B, k):
+    z = O.ez + O.er * 3.6
+    hw, ft, bk, yc = head_section(O, z, 0.5)
+    B.add('piece', low(tk.tube('band', ring_pts(hw, ft, bk, yc, z, n=18), [0.7] * 18, n=6, closed=True, squash=1.6), 'band', 90, region='band'))
+    for sx in (-1, 1):
+        o = tk.lathe(f'eye{sx}', [(0, -0.6), (3.3, -0.5), (3.6, 0.0), (3.2, 0.5), (0, 0.6)], n=12)
+        tk.scale(o, (1.0, 1.0, 0.75))
+        tk.rotate(o, 90, 'X')
+        tk.rotate(o, -sx * 18, 'Z')
+        tk.move(o, (sx * O.ex * 0.85, O.yF + 1.4, z + 0.3))
+        B.add('piece', low(o, f'eye{sx}', 50, region='satin'))
+
+
+@piece('acorn', 'anchor_head', hides=True)
+def acorn(O, B, k):
+    base = O.hz + O.hh * 0.22
+    hw, ft, bk, yc = head_section(O, base, 1.0)
+    cap = tk.loft('cap', [dict(c=(0, yc, base), w=hw * 2 + 1.2, h=(ft + bk + 1.2) * 0.5, e=2.0), dict(c=(0, yc, base + 4.0), w=hw * 1.8, h=(ft + bk) * 0.45, e=2.0),
+                          dict(c=(0, yc, base + 7.5), w=hw * 1.1, h=(ft + bk) * 0.28, e=2.0)], n=16, up=(0, -1, 0), cap0=None, cap1='round')
+    sol = cap.modifiers.new('s', 'SOLIDIFY')
+    sol.thickness = 0.9
+    tk.apply(cap)
+
+    def scales(h):
+        tk.push(h, lambda V, N: 0.3 * (np.abs(np.sin(V[:, 2] * 2.4 + np.arctan2(V[:, 0], V[:, 1]) * 6)) > 0.7))
+    B.add('piece', low(cap, 'cap', 220, lo=1, hi=2, sculpt=scales, region='cupule'))
+    st = tk.tube('stem', [(0, yc, base + 8.5), (0.6, yc, base + 10.5), (1.8, yc + 0.3, base + 11.4)], [0.9, 0.7, 0.5], n=6)
+    B.add('piece', low(st, 'stem', 24, region='stem'))
+
+
+@piece('toadstool', 'anchor_head', hides=True)
+def toadstool(O, B, k):
+    base = O.hz + O.hh * 0.26
+    hw, ft, bk, yc = head_section(O, base, 1.0)
+    cap = tk.lathe('cap', [(0, 6.5), (hw * 0.7, 5.6), (hw * 1.18, 2.6), (hw * 1.3, 0.2), (hw * 1.18, -0.4), (hw * 0.8, -0.2), (0, 0.2)], n=18)
+    tk.scale(cap, (1.0, (ft + bk) / (2 * hw), 1.0))
+    tk.move(cap, (0, yc, base))
+    B.add('piece', low(cap, 'cap', 220, lo=1, hi=2, region=('cap', [('gills', lambda C, N: N[:, 2] < -0.3)])))
+
+
+@piece('sprout', 'anchor_head')
+def sprout(O, B, k):
+    top = O.hz + O.hh * 0.5
+    st = tk.tube('stem', [(0, O.hy, top - 1.0), (0.3, O.hy, top + 2.6), (0.2, O.hy + 0.2, top + 4.4)], [0.55, 0.45, 0.35], n=6)
+    B.add('piece', low(st, 'stem', 24, region='stem'))
+    for sx in (-1, 1):
+        pts = [(0, 0), (sx * 2.2, 1.0), (sx * 4.2, 0.6), (sx * 5.0, -0.2), (sx * 3.0, -1.0), (sx * 1.2, -0.8)]
+        if sx < 0:
+            pts = pts[::-1]
+        o = tk.slab(f'leaf{sx}', pts, 0.5, plane='XZ', at=0.0, bevel=0.2, segs=1)
+        tk.subsurf(o, 1)
+        tk.rotate(o, sx * 20, 'Y')
+        tk.move(o, (0.2, O.hy + 0.2, top + 4.2))
+        B.add('piece', low(o, f'leaf{sx}', 40, region='leaf'))
+
+
+@piece('lantern', 'anchor_back')
+def lantern(O, B, k):
+    z = O.bz0 + O.bh * 0.5
+    hw, ft, bk, yc = O.body_at(z)
+    y = yc + bk + 3.0
+    jar = tk.lathe('jar', [(0, -3.4), (2.4, -3.2), (2.8, -1.6), (2.8, 1.8), (2.2, 2.8), (1.6, 3.2), (0, 3.2)], n=12)
+    tk.move(jar, (hw * 0.4, y, z - 1.0))
+    B.add('piece', low(jar, 'jar', 90, region='glass'))
+    lid = tk.lathe('lid', [(0, 3.0), (1.9, 3.0), (2.0, 3.8), (0, 4.0)], n=10)
+    tk.move(lid, (hw * 0.4, y, z - 1.0))
+    B.add('piece', low(lid, 'lid', 30, region='brass'))
+    strap = tk.tube('strap', [(hw * 0.4, y, z + 3.2), (hw * 0.4, y - 1.6, z + 6.5), (0, yc + bk - 0.6, z + 8.0)], [0.4] * 3, n=5)
+    B.add('piece', low(strap, 'strap', 24, region='leather'))
+    for i in range(4):  # the fireflies inside
+        f = tk.lathe(f'fly{i}', [(0, -0.4), (0.4, 0), (0, 0.4)], n=6)
+        tk.move(f, (hw * 0.4 + math.cos(i * 1.7) * 1.2, y + math.sin(i * 2.3) * 1.0, z - 1.5 + i * 1.0))
+        B.add('piece', low(f, f'fly{i}', 8, region='glow'))
+
+
+@piece('fairywings', 'anchor_back')
+def fairywings(O, B, k):
+    z = O.bz0 + O.bh * 0.62
+    hw, ft, bk, yc = O.body_at(z)
+    y = yc + bk + 0.4
+    for sx in (-1, 1):
+        for j, (L, a, zz) in enumerate(((9.5, 38, 1.0), (6.5, -18, -2.4))):
+            pts = [(0, 0), (L * 0.35, L * 0.35), (L * 0.9, L * 0.45), (L, L * 0.15), (L * 0.75, -L * 0.15), (L * 0.3, -L * 0.12)]
+            if sx < 0:
+                pts = [(-x, y_) for x, y_ in pts][::-1]
+            o = tk.slab(f'w{sx}{j}', pts, 0.35, plane='XZ', at=0.0, bevel=0.12, segs=1)
+            tk.subsurf(o, 1)
+            tk.rotate(o, sx * a, 'Y')
+            tk.rotate(o, -25, 'X')
+            tk.move(o, (sx * 1.0, y + 1.0, z + zz))
+            B.add('piece', low(o, f'w{sx}{j}', 50, region='gauze'))
+
+
 # ====================================================================== paint
 def paint(P, pt, pid):
     import face  # noqa: F401
@@ -493,6 +721,75 @@ def paint(P, pt, pid):
         fill('gem', '#9cc8d8' if pid == 'frost_cape' else '#d8b45c', 0.25, brush={'preset': 'gloss', 'shine': 0.7})
     elif pid == 'glasses':
         fill('wire', '#c8a764', 0.15, brush='metal')
+    elif pid == 'monocle':
+        fill('gold', '#c8a764', 0.15, brush='metal')
+    elif pid in ('sweater', 'pajamas', 'cardigan', 'raincoat'):
+        base, rib, accent = {'sweater': ('#617f8c', '#eae0c8', '#f1d39a'), 'pajamas': ('#d3e0dc', '#86a9b0', '#617f8c'),
+                             'cardigan': ('#c0866a', '#a66c55', '#eae0c8'), 'raincoat': ('#dcb072', '#c59a52', '#f4eedd')}[pid]
+        fill('knit', base, 0.05, brush='cloth' if pid != 'raincoat' else {'preset': 'lacquer', 'shine': 0.35})
+        m = reg('knit')
+        if pid == 'pajamas':
+            fill(m & (np.mod(X / 2.4, 1.0) < 0.35), accent, 0.05)
+        elif pid == 'sweater':
+            top = float(Z[m].max()) if m.any() else 0
+            mid = top - 6.5
+            moon = m & (Y < 0) & (np.hypot(X - 0.3, Z - mid) < 2.6) & (np.hypot(X - 1.5, Z - mid - 0.8) > 2.2)
+            P.flat(moon, accent)
+            for i, (xx, zz) in enumerate(((-6, mid + 2), (5.5, mid + 3), (-4, mid - 3.5), (6.5, mid - 2.5))):
+                P.flat(m & (Y < 0) & (np.abs(X - xx) + np.abs(Z - zz) < 0.7), '#f4eedd')
+        elif pid == 'cardigan':
+            fill(m & (np.abs(X) < 0.9) & (Y < 0), rib, 0.05)
+        if pid != 'raincoat':
+            knit(m, None)
+        fill('rib', rib, 0.05)
+        fill('button', '#9c7a56' if pid != 'raincoat' else '#6f553d', 0.15, brush={'preset': 'gloss', 'shine': 0.5}, n=6)
+    elif pid == 'cloudcloak':
+        fill('cloud', '#eef0ea', 0.15, brush={'preset': 'pvc', 'L': 2.2, 'W': 0.9}, tex='skin', light=0.5)
+        P.recolour(reg('cloud') & (P.ao < 0.75) & (P.idx >= 0), pt.ramp('#c4d4dc', 7, shift=0.06))
+    elif pid == 'bowtie':
+        fill('velvet', '#6e5266', 0.05, brush={'preset': 'cloth', 'L': 1.4})
+        m = reg('velvet')
+        P.flat(m & (owlmod._dots(P, 0.35, 1.3, seed=2)), '#b4a9c9')
+    elif pid == 'bandana':
+        fill('cloth', '#b2504a', 0.05)
+        m = reg('cloth')
+        P.flat(m & owlmod._dots(P, 0.35, 1.6, seed=5), '#f4eedd')
+    elif pid == 'bell':
+        fill('leather', '#6f553d', 0.05, brush='wood')
+        fill('silver', '#c8ccd0', 0.15, brush='metal')
+    elif pid == 'moonpendant':
+        fill('silver', '#c8ccd0', 0.15, brush='metal')
+        fill('moonstone', '#dfe9ea', 0.25, brush={'preset': 'gloss', 'shine': 0.8}, light=0.6)
+    elif pid == 'sleepmask':
+        fill('band', '#46596a', 0.05)
+        fill('satin', '#617f8c', 0.1, brush={'preset': 'lacquer', 'shine': 0.3})
+        m = reg('satin')
+        P.flat(m & (np.abs(np.abs(Z - (Z[m].mean() if m.any() else 0)) - 0.2) < 0.18) & (np.abs(np.abs(X) - 5.0) < 2.2), '#f1d39a')
+    elif pid == 'acorn':
+        fill('cupule', '#9c7a56', 0.05, brush={'preset': 'wood', 'flow': 'around'})
+        P.shift(reg('cupule') & (P.cav > 0.55) & (P.idx >= 0), 1)
+        fill('stem', '#6f553d', 0.05, brush='wood')
+    elif pid == 'toadstool':
+        fill('cap', '#b2504a', 0.1, brush={'preset': 'skin', 'shine': 0.3})
+        fill('gills', '#eae0c8', 0.05, brush={'preset': 'wood', 'flow': 'around'})
+        m = reg('cap')
+        who, d = P.dabs(m & (Z > Z[m].min() + 1.5 if m.any() else m), size=2.4, spacing=4.2, seed=6)
+        fill(m & (who >= 0) & (d < 0.6), '#f4eedd', 0.2, brush='pvc')
+    elif pid == 'sprout':
+        fill('stem', '#86a06a', 0.05, brush='wood')
+        fill('leaf', '#86a06a', 0.1, brush={'preset': 'pvc', 'L': 1.6, 'flow': 'along', 'axis': (1, 0, 0)})
+        m = reg('leaf')
+        P.shift(m & (np.abs(Z - (Z[m].mean() if m.any() else 0)) < 0.18) & (P.idx >= 0), -1)
+    elif pid == 'lantern':
+        fill('glass', '#aec8cc', 0.25, brush={'preset': 'gloss', 'shine': 0.7}, light=0.6)
+        fill('brass', '#c8a764', 0.15, brush='metal')
+        fill('leather', '#6f553d', 0.05, brush='wood')
+        fill('glow', '#f1d39a', 0.5, brush=False, light=0.8)
+    elif pid == 'fairywings':
+        fill('gauze', '#d3cce0', 0.2, brush={'preset': 'gloss', 'L': 1.8, 'flow': 'along', 'axis': (1, 0, 0.5)}, light=0.6)
+        m = reg('gauze')
+        P.shift(m & (np.abs(np.sin(np.arctan2(Z - Z.mean(), np.abs(X)) * 9)) < 0.12) & (P.idx >= 0), -1)
+        P.flat(m & owlmod._dots(P, 0.3, 1.4, seed=8), '#f5f7f2')
     P.clusters()
     return P.done()
 

@@ -49,15 +49,15 @@ else if (set === 'outfits') entries = [
   { look: sp(q.get('sp') ?? 'sawwhet', { head: 'bow', face: 'monocle' }), label: 'bow+monocle' },
   { look: sp(q.get('sp') ?? 'greatgrey', { head: 'crown', back: 'backpack' }), label: 'crown+backpack' },
   { look: sp(q.get('sp') ?? 'burrowing', { head: 'froghat' }), label: 'froghat' },
-  { look: sp(q.get('sp') ?? 'longeared', { head: 'beret', face: 'stargoggles' }), label: 'beret' },
+  { look: sp(q.get('sp') ?? 'horned', { head: 'beret', face: 'stargoggles' }), label: 'beret' },
   { look: sp(q.get('sp') ?? 'eagle', { head: 'flowercrown' }), label: 'flowercrown' },
   { look: sp(q.get('sp') ?? 'horned', { head: 'stargoggles' }), label: 'goggles' },
-  { look: sp(q.get('sp') ?? 'little', { head: 'santa_hat', body: 'holiday_sweater' }), label: 'santa+jumper' },
+  { look: sp(q.get('sp') ?? 'burrowing', { head: 'santa_hat', body: 'holiday_sweater' }), label: 'santa+jumper' },
 ];
 else if (set === 'series') entries = [
   { look: sp('tawny', { head: 'santa_hat', neck: 'candy_scarf', body: 'holiday_sweater' }), label: 'Frostlight' },
   { look: sp('barn', { head: 'reindeer_antlers', neck: 'candy_scarf' }), label: 'Antlers' },
-  { look: sp('longeared', { head: 'star_crown', back: 'moon_cape' }), label: 'Starfall' },
+  { look: sp('greatgrey', { head: 'star_crown', back: 'moon_cape' }), label: 'Starfall' },
   { look: sp('snowy', { head: 'nightcap' }), label: 'Nightcap' },
   { look: sp('eagle', { head: 'ice_crown', back: 'frost_cape' }), label: 'Ice regalia' },
 ];
