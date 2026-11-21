@@ -287,12 +287,13 @@ const SCENES: Record<string, (p: Pix, r: Rnd) => void> = {
     p.disc(96, 46, 6, K.lampHi);
     // fairy chimneys
     const chimney = (x: number, base: number, h: number, w: number) => {
-      p.poly([[x - w, base], [x + w, base], [x + 2, base - h], [x - 2, base - h]], 0xd6b8a0);
-      for (let y = base - h; y < base; y++) p.set(x + Math.round(((y - base + h) / h) * w * 0.8), y, 0xb89a86);
+      p.poly([[x - w, base], [x + w, base], [x + 2, base - h], [x - 2, base - h]], 0xe8d2bc);
+      p.poly([[x, base], [x + w, base], [x + 2, base - h], [x, base - h]], 0xb8967e);
+      for (let y = base - h; y < base; y++) { const t = (y - base + h) / h; p.set(x - 2 - Math.round(t * (w - 2)), y, 0xf4e4d0); p.set(x + 2 + Math.round(t * (w - 2)), y, 0x8a6a5a); if (y % 4 === 0) p.set(x + 1, y, 0xa88676); }
       p.ellipse(x, base - h - 1, 4, 2, 0x8a6a5a); p.hline(x - 3, x + 2, base - h - 2, 0xa88676);
       if (h > 14) { window(p, x - 1, base - h + 6, 1, 2, K.lamp); p.rect(x + 1, base - h + 10, 1, 2, 0x6a4a40); }
     };
-    ridge(p, noisy(52, 8, 0.05, 2), 0xc8a890, 0xdcc0a8);
+    ridge(p, noisy(52, 8, 0.05, 2), 0xa88a7a, 0xc0a08c);
     for (const [x, h, w] of [[12, 22, 7], [26, 30, 8], [42, 18, 6], [58, 26, 8], [74, 16, 6], [88, 24, 7], [106, 30, 9]] as [number, number, number][]) chimney(x, 66, h, w);
     ridge(p, noisy(68, 3, 0.1, 5), 0xb89a86, 0xd6b8a0);
     // balloons drifting up at dawn
@@ -317,15 +318,23 @@ const SCENES: Record<string, (p: Pix, r: Rnd) => void> = {
     for (let j = 0; j < 12; j++) { const hw = Math.round(Math.sin((j / 12) * Math.PI * 0.95 + 0.25) * 8); p.hline(W2 - hw, W2 + hw, 25 - j, j > 8 ? shade : mar); p.set(W2 + hw, 25 - j, shade); }
     p.vline(W2, 9, 13, K.ochre); p.set(W2, 8, K.honey);
     for (const dx of [-26, 25]) { p.rect(W2 + dx, 18, 2, 22, mar); p.set(W2 + dx + 1, 18, shade); p.rect(W2 + dx - 1, 17, 4, 1, mar); p.rect(W2 + dx, 15, 2, 2, mar); p.hline(W2 + dx - 1, W2 + dx + 2, 26, shade); p.hline(W2 + dx - 1, W2 + dx + 2, 33, shade); }
-    // gardens with cypress trees and the long pool
-    ridge(p, () => 44, K.forest, K.pine);
-    for (const x of [8, 18, 28, 92, 102, 112]) { for (let j = 0; j < 10; j++) p.hline(x - Math.round(Math.sin(j / 10 * Math.PI) * 2), x + Math.round(Math.sin(j / 10 * Math.PI) * 2), 50 - j, K.forest); }
-    p.rect(40, 46, 40, 26, 0x2a3446);
-    reflect(p, 46, PH, 0x2a3446, 0.55);
-    ridge(p, () => 46, K.forest, K.pine); p.rect(0, 46, 40, 26, K.forest); p.rect(80, 46, 40, 26, K.forest);
-    for (let y = 46; y < PH; y++) { const w = 6 + (y - 46); p.hline(60 - w, 60 + w, y, p.get(60, y) === K.forest ? 0x2a3446 : p.get(60, y)); }
-    for (let y = 46; y < PH; y++) { const w = 6 + (y - 46); const sy = 46 - (y - 46) - 1; for (let x = 60 - w; x <= 60 + w; x++) { const c = p.get(x, sy); p.set(x, y, c === -1 || c === K.forest ? 0x2a3446 : mix(c, 0x2a3446, 0.45)); } p.set(60 - w - 1, y, K.pebble); p.set(60 + w + 1, y, K.pebble); }
-    ripples(p, 50, 71, K.lavender, r, 8);
+    // the garden: lawns, a narrow pool running towards us, cypress rows along it
+    for (let y = 44; y < PH; y++) for (let x = 0; x < PW; x++) p.set(x, y, (y + (x >> 3)) % 5 === 0 ? 0x34503a : K.forest);
+    p.hline(0, PW - 1, 44, K.pine);
+    for (let y = 44; y < PH; y++) {
+      const t = (y - 44) / (PH - 44), w = Math.round(3 + t * 12);
+      const sy = 44 - Math.round((y - 44) * 0.9) - 1;
+      for (let x = 60 - w; x <= 60 + w; x++) {
+        const c = p.get(x, sy);
+        p.set(x, y, c === -1 || c === K.forest || c === 0x34503a ? 0x2a3446 : mix(c, 0x2a3446, 0.4 + t * 0.2));
+      }
+      p.set(60 - w - 1, y, K.pebble); p.set(60 + w + 1, y, K.pebble); p.set(60 - w - 2, y, K.stone); p.set(60 + w + 2, y, K.stone);
+    }
+    for (let i = 0; i < 4; i++) {
+      const y = 50 + i * 6, t = (y - 44) / (PH - 44), off = Math.round(3 + t * 12) + 5 + i * 2, h = 6 + i * 3;
+      for (const sx of [-1, 1]) for (let j = 0; j < h; j++) { const hw = Math.round(Math.sin((j / h) * Math.PI) * (1 + i * 0.5)); p.hline(60 + sx * off - hw, 60 + sx * off + hw, y - j, j % 3 ? K.pine : 0x2c4430); }
+    }
+    ripples(p, 50, 71, K.lavender, r, 6);
   },
   iceland(p, r) {
     sky(p, [K.deep, K.deepNight, K.night, 0x2c4048, 0x34505a], 0, 46);
@@ -409,7 +418,13 @@ const SCENES: Record<string, (p: Pix, r: Rnd) => void> = {
     // snowy peaks
     const peaks = (x: number) => 14 + Math.abs(((x + 10) % 34) - 17) * 1.2 + fbm1(x * 0.12, 2) * 3;
     ridge(p, peaks, 0x3e4a5c, K.snow, 44);
-    for (let x = 0; x < PW; x++) for (let y = 0; y < 44; y++) if (p.get(x, y) === 0x3e4a5c && y < peaks(x) + 6 && bayer(x, y) < 0.6) p.set(x, y, K.frost);
+    for (let x = 0; x < PW; x++) {
+      const top = peaks(x), slope = peaks(x + 1) - peaks(x - 1);
+      for (let y = Math.ceil(top); y < 44; y++) {
+        const d = y - top;
+        if (d < 10 - (slope > 0 ? 4 : 0) + fbm1(x * 0.3, 5) * 4) p.set(x, y, slope > 0 ? (bayer(x, y) < 0.5 ? K.ice : 0x8fa6b2) : (d < 2 ? K.snow : K.frost));
+      }
+    }
     // pine forest
     for (let i = 0; i < 26; i++) { const x = i * 5 + Math.floor(r() * 3); pine(p, x, 46, 8 + Math.floor(r() * 6), 0x223a30, 0x2f4a3c); }
     // the turquoise lake under the moon
@@ -553,6 +568,16 @@ export function postcardArt(id: string, scale: number): string {
   const p = new Pix(PW, PH);
   (SCENES[id] ?? SCENES.highlands)(p, rng(id.length * 31 + id.charCodeAt(0)));
   for (let i = 0; i < p.data.length; i++) if (p.data[i] === -1) p.data[i] = K.night;
+  // printed on rough card: colours a little faded towards a warm grey, a fibre grain, an uneven inked edge
+  for (let y = 0; y < PH; y++) for (let x = 0; x < PW; x++) {
+    const i = y * PW + x, c = p.data[i];
+    const r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255, l = r * 0.3 + g * 0.59 + b * 0.11;
+    const grain = 1 + (hash(x >> 1, y, 77) - 0.5) * 0.06;
+    const f = (v: number, w: number) => Math.max(0, Math.min(255, Math.round((v * 0.78 + l * w * 0.22) * grain)));
+    p.data[i] = (f(r, 1.04) << 16) | (f(g, 1.0) << 8) | f(b, 0.9);
+  }
+  for (let x = 0; x < PW; x++) for (const y of [0, PH - 1]) if (hash(x, y, 78) > 0.2) p.set(x, y, 0x3d3229);
+  for (let y = 0; y < PH; y++) for (const x of [0, PW - 1]) if (hash(x, y, 79) > 0.2) p.set(x, y, 0x3d3229);
   const url = p.url(scale);
   cache.set(key, url);
   return url;

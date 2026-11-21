@@ -1,0 +1,529 @@
+{
+ "name": "sv_tartanrug",
+ "description": "Highland Tartan Rug",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 4,
+ "grounded": true,
+ "budget": {
+  "tris": 600,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   40
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "plum": [
+    "#120b12",
+    "#2e1e2d",
+    "#493245",
+    "#62475b",
+    "#826479",
+    "#a4909c",
+    "#c5bcc1",
+    "#e8e6e7"
+   ],
+   "moss": [
+    "#111a0e",
+    "#2f4425",
+    "#506b3e",
+    "#749059",
+    "#96aa7e",
+    "#b5bfa4",
+    "#d2d6c8",
+    "#eeefea"
+   ],
+   "pine": [
+    "#080f09",
+    "#152516",
+    "#233b23",
+    "#355033",
+    "#54734e",
+    "#839f79",
+    "#b5c2ae",
+    "#e4e7e1"
+   ],
+   "dusk": [
+    "#0d1117",
+    "#232f3a",
+    "#3a4e5c",
+    "#546f7c",
+    "#73919b",
+    "#9cb0b4",
+    "#c3cecf",
+    "#e9ecec"
+   ],
+   "night": [
+    "#030407",
+    "#141924",
+    "#27313f",
+    "#45566b",
+    "#647d95",
+    "#91a3b2",
+    "#bdc8cf",
+    "#e8ebed"
+   ],
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "rug": {
+   "ramp": "moss",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "weave_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.21,
+     "seed": 0
+    },
+    {
+     "id": "weave_b",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.18,
+     "seed": 1,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "weave_c",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.18,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/rough_linen",
+     "scale": 6,
+     "amount": 0.55,
+     "ramps": [
+      "moss"
+     ]
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "moss": "cloth"
+    }
+   }
+  },
+  "fringe": {
+   "ramp": "oat",
+   "tone": 4.0,
+   "light": 0.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.7,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": []
+  },
+  "back": {
+   "ramp": "moss",
+   "tone": 3.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "weave_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.27999999999999997,
+     "seed": 0
+    },
+    {
+     "id": "weave_b",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.24,
+     "seed": 1,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "weave_c",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.24,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/rough_linen",
+     "scale": 6,
+     "amount": 0.55,
+     "ramps": [
+      "moss"
+     ]
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "moss": "cloth"
+    }
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "rug",
+   "shape": "box",
+   "size": [
+    44.0,
+    0.8,
+    30.0
+   ],
+   "pivot": [
+    0.0,
+    0.4,
+    0.0
+   ],
+   "style": "rug",
+   "paint": {
+    "stamps": [
+     {
+      "face": "top",
+      "at": [
+       0,
+       0
+      ],
+      "art": [
+       "keekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeeke",
+       "keekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeeke",
+       "keekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeeke",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbpp",
+       "gppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppb",
+       "ppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbb",
+       "pggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbp",
+       "ggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbpp",
+       "gppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "bggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbb",
+       "ggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbb",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "bggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbb",
+       "ggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbb",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "yggyyggyyggyyppyypgyybdydbdydbdydbdydbdydbdyygpyyppyyggyyggyyggydkdyyggyyggyyggyyppyypgyybdydbdydbdydbdydbdydbdyygpyyppyyggyyggyyggydkdyyggyyggyyggyyppyypgyybdydbdydbdydbdydbdy",
+       "ggyyggyyggyyppyyppyygdydbdydbdydydydbdydbdyyggyyppyyggyyggyyggyykdydggyyggyyggyyppyyppyygdydbdydbdydydydbdydbdyyggyyppyyggyyggyyggyykdydggyyggyyggyyppyyppyygdydbdydbdydydydbdyd",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "bggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbb",
+       "ggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbb",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "bggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbb",
+       "ggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbb",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbb",
+       "pggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbp",
+       "ggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbpp",
+       "gppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppb",
+       "ppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbb",
+       "pggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbp",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggkkggkkggkkpdkdpdkkgdkdbdkdbdkdydkdbdkdbdkkggkdpdkdggkkggkkggkkkdkdggkkggkkggkkpdkdpdkkgdkdbdkdbdkdydkdbdkdbdkkggkdpdkdggkkggkkggkkkdkdggkkggkkggkkpdkdpdkkgdkdbdkdbdkdydkdbdkd",
+       "gkkggkkggkkgdkdpdkkggkdbdkdbdkdydkdbdkdbdkdggkdpdkdpgkkggkkggkkgdkdkgkkggkkggkkgdkdpdkkggkdbdkdbdkdydkdbdkdbdkdggkdpdkdpgkkggkkggkkgdkdkgkkggkkggkkgdkdpdkkggkdbdkdbdkdydkdbdkdb",
+       "kkggkkggkkggkdpdkdggkdbdkdbdkdbdkdbdkdbdkdbgkkpdkdpdkkggkkggkkggkdkdkkggkkggkkggkdpdkdggkdbdkdbdkdbdkdbdkdbdkdbgkkpdkdpdkkggkkggkkggkdkdkkggkkggkkggkdpdkdggkdbdkdbdkdbdkdbdkdbd",
+       "kggkkggkkggkdpdkdpgkkbdkdbdkdbdkdbdkdbdkdbdkkgdkdpdkkggkkggkkggkdkdkkggkkggkkggkdpdkdpgkkbdkdbdkdbdkdbdkdbdkdbdkkgdkdpdkkggkkggkkggkdkdkkggkkggkkggkdpdkdpgkkbdkdbdkdbdkdbdkdbdk",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbpp",
+       "gppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppb",
+       "ppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbb",
+       "pggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbp",
+       "ggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbpp",
+       "gppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppbbppggpppppppgppggppggppgdpdkgppggppggppgpppppppggppbbppbbppyyppbbppb",
+       "ggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbbggbgggppggppggggggggggggggkkggggggggggggggppggggggbbggbbggbyggbbggbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "bggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbb",
+       "ggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbb",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "bggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbb",
+       "ggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbb",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "yggyyggyyggyyppyypgyybdydbdydbdydbdydbdydbdyygpyyppyyggyyggyyggydkdyyggyyggyyggyyppyypgyybdydbdydbdydbdydbdydbdyygpyyppyyggyyggyyggydkdyyggyyggyyggyyppyypgyybdydbdydbdydbdydbdy",
+       "ggyyggyyggyyppyyppyygdydbdydbdydydydbdydbdyyggyyppyyggyyggyyggyykdydggyyggyyggyyppyyppyygdydbdydbdydydydbdydbdyyggyyppyyggyyggyyggyykdydggyyggyyggyyppyyppyygdydbdydbdydydydbdyd",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "bggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbb",
+       "ggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbb",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "bggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbbbbbbbgpbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbpgbbbbbbbbbbbbbdbbbbbbb",
+       "ggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbbbbbbggbbppbbggbbggbbggbbkdbdggbbggbbggbbppbbppbbgbbbbbbbbbbdybbbbbbb",
+       "gbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbbbbbggbbppbbpgbbggbbggbbgdbdkgbbggbbggbbgpbbppbbggbbbbbbbbbbydbbbbbbb",
+       "bbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbbbbbgbbppbbppbbggbbggbbggbdkdbbggbbggbbggbbppbbggbbbbbbbbbbbdbbbbbbbb",
+       "gggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbggbbgggpggppggggggggggggggkkggggggggggggggppggpgggbbggbbggbbggbbggbbg",
+       "ggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbggbbggggggppggggggggggggggkkggggggggggggggppggppgggbggbbggbbggybggbbgg",
+       "ggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggbbggggggppggpggggggggggggkggkggggggggggggpggppggggggbbggbbggyyggbbggb",
+       "ppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbbppbgppppppppppggppggppggpdkdppggppggppggppppppggppbbppbbppbyppbbppbb",
+       "pggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbppbbppgpppppppggppggppggpdkdppggppggppggpppppppgppbbppbbppbbppbbppbbp",
+       "ggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbppbbppggppppppggppggppggppkdpdggppggppggppppppppppgbppbbppbbppybppbbpp",
+       "keekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeeke",
+       "keekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeeke",
+       "keekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeekeeke"
+      ],
+      "key": {
+       "g": "moss:3",
+       "p": "plum:4",
+       "b": "dusk:3",
+       "y": "honey:5",
+       "k": "pine:1",
+       "d": "night:3",
+       "e": "moss:2"
+      }
+     }
+    ]
+   },
+   "chamfer": 0.2
+  },
+  {
+   "id": "fringe0",
+   "shape": "card",
+   "size": [
+    43.0,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    0.05,
+    15.5
+   ],
+   "style": "fringe",
+   "paint": {
+    "art_key": {
+     "|": "oat:5"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.",
+    "|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.",
+    "|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.",
+    "|.............|.............|.............|.............|.............|.............|.............|.............|.............|.............|.............|.............|......."
+   ]
+  },
+  {
+   "id": "fringe1",
+   "shape": "card",
+   "size": [
+    43.0,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    0.05,
+    -15.5
+   ],
+   "rotation": [
+    0.0,
+    180.0,
+    0.0
+   ],
+   "style": "fringe",
+   "paint": {
+    "art_key": {
+     "|": "oat:5"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.",
+    "|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.|.",
+    "|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.....|.",
+    "|.............|.............|.............|.............|.............|.............|.............|.............|.............|.............|.............|.............|......."
+   ]
+  },
+  {
+   "id": "corner",
+   "shape": "prism",
+   "size": [
+    6.0,
+    6.0,
+    0.6
+   ],
+   "pivot": [
+    18.8,
+    0.95,
+    11.8
+   ],
+   "rotation": [
+    -90.0,
+    45.0,
+    0.0
+   ],
+   "style": "back",
+   "sides": 3,
+   "angle": 180
+  }
+ ]
+}

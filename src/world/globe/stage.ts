@@ -10,6 +10,8 @@
 // [globe] OWNED BY THE GLOBE BUILDER.
 import * as THREE from 'three';
 import type { Stage } from '../scene.ts';
+import { OwlActor } from '../../owl/actor.ts';
+import type { OwlLook } from '../../owl/model.ts';
 import { flightArc, latLonToVec3, subsolar } from './earth.ts';
 import { buildStand } from './stand.ts';
 
@@ -61,7 +63,7 @@ void main(){
   float ndl = dot(n, uSun);
   // cloud shadows fall a little away from the sun
   float cs = cloud(normalize(n - uSun * 0.035), uCloud);
-  float shadowed = step(0.66, cs) * step(0.0, ndl);
+  float shadowed = step(0.69, cs) * step(0.0, ndl);
   float k = ndl * 7.0 + (b - 0.5) * 0.9;
   vec3 day = d.rgb;
   bool water = d.a < 0.97;
@@ -98,16 +100,16 @@ void main(){
   vec3 n = normalize(vN);
   float c = cloud(n, uCloud);
   float b = bayer(gl_FragCoord.xy);
-  if (c < 0.655) discard;
+  if (c < 0.675) discard;
   float ndl = dot(n, uSun);
-  float k = ndl * 7.0 + (b - 0.5) * 0.9 + (c - 0.64) * 5.0;
+  float k = ndl * 7.0 + (b - 0.5) * 0.9 + (c - 0.66) * 5.0;
   vec3 col;
-  if (k > 1.8) col = vec3(0.95, 0.95, 0.91);
-  else if (k > 0.7) col = vec3(0.84, 0.86, 0.86);
+  if (k > 1.8) col = vec3(0.9, 0.91, 0.87);
+  else if (k > 0.7) col = vec3(0.78, 0.81, 0.82);
   else if (k > -0.4) col = vec3(0.7, 0.6, 0.63);
   else { if (b > 0.45) discard; col = vec3(0.22, 0.26, 0.34); }
-  if (c < 0.69 && b > 0.5) discard;   // thin, ragged pixel edges
-  if (c < 0.67 && b > 0.25) discard;
+  if (c < 0.71 && b > 0.5) discard;   // thin, ragged pixel edges
+  if (c < 0.69 && b > 0.25) discard;
   float rim = normalize(vVN).z;
   if (rim < 0.3 + b * 0.1) col *= 0.88;
   gl_FragColor = vec4(col, 1.0);
@@ -234,6 +236,10 @@ export class GlobeStage implements Stage {
   private routeFade = 0;
   private stand: THREE.Object3D | null = null;
   ready = false;
+  /** Pip, flying slow loops round the globe */
+  private owl: OwlActor | null = null;
+  private owlPivot = new THREE.Group();
+  private owlA = 0;
   spin = 0; spinVel = 0;
   private spinGoal: number | null = null;
   private cur: Orbit = { yaw: 0, pitch: 0.16, dist: 7, ty: 0 };
@@ -307,6 +313,10 @@ export class GlobeStage implements Stage {
       this.earthMat.uniforms.uNight.value = n;
       this.ready = true;
     }).catch(() => { this.ready = true; });
+    // light for Pip (the planet, stand and sky use their own banded shaders)
+    const key = new THREE.DirectionalLight(0xfff0d8, 3.2);
+    key.position.set(-3, 4, 5);
+    this.world.add(new THREE.HemisphereLight(0xeef2ff, 0x5a4a3c, 2.4), key, this.owlPivot);
     void buildStand().then((s) => { this.stand = s; this.world.add(s); this.tilt.add(s.userData.ring as THREE.Object3D); });
   }
 
@@ -366,6 +376,20 @@ export class GlobeStage implements Stage {
     this.route = new THREE.Points(g, new THREE.ShaderMaterial({ vertexShader: routeVS, fragmentShader: routeFS, uniforms: { uTime: { value: 0 }, uFade: { value: 0 } } }));
     this.routeFade = 0;
     this.spinG.add(this.route);
+  }
+
+  /** Let Pip fly round the globe in the given look (null: no owl). */
+  setOwl(look: OwlLook | null) {
+    if (this.owl) { this.owlPivot.remove(this.owl.node); this.owl = null; }
+    if (!look) return;
+    try {
+      const o = new OwlActor(look, {});
+      o.pose = 'fly';
+      o.node.scale.setScalar(0.11);
+      o.node.traverse((n) => { n.castShadow = false; n.receiveShadow = false; });
+      this.owlPivot.add(o.node);
+      this.owl = o;
+    } catch (e) { console.warn('globe owl', e); }
   }
 
   setZoom(z: number) { this.zoom = Math.max(0.8, Math.min(1.7, z)); this.frame(); }
@@ -459,6 +483,20 @@ export class GlobeStage implements Stage {
       u.uTime.value = t; u.uFade.value = this.routeFade;
     }
     (this.stand?.userData.animate as ((t: number) => void) | undefined)?.(t);
+    if (this.owl) {
+      // a lazy tilted loop just outside the ring, rising and dipping, banking into the turn
+      this.owlA += dt * 0.32;
+      const a = this.owlA, R = 1.52;
+      const pos = new THREE.Vector3(Math.cos(a) * R, Math.sin(a * 2) * 0.12 + Math.sin(a) * 0.38, Math.sin(a) * R * 0.92);
+      const ahead = new THREE.Vector3(Math.cos(a + 0.05) * R, Math.sin((a + 0.05) * 2) * 0.12 + Math.sin(a + 0.05) * 0.38, Math.sin(a + 0.05) * R * 0.92);
+      const o = this.owl.node;
+      o.position.copy(pos);
+      o.rotation.set(0, Math.atan2(ahead.x - pos.x, ahead.z - pos.z), 0);
+      o.rotateZ(-0.35);
+      o.position.y -= 0.08;
+      this.owl.dark = 0.6;
+      this.owl.update(dt);
+    }
 
     // atmosphere: a billboard at the centre; the ring itself is drawn per art pixel in the shader
     this.atmo.quaternion.copy(this.cam.quaternion);

@@ -1,0 +1,479 @@
+{
+ "name": "sv_kiwi",
+ "description": "Kiwi Plush",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 1200,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   36,
+   14
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "cream": [
+    "#36210c",
+    "#734b1b",
+    "#af782b",
+    "#d3a353",
+    "#e2c690",
+    "#f1e6cc",
+    "#f6f2e2",
+    "#fdfcf8"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "tawny": [
+    "#1b0d0a",
+    "#46261d",
+    "#6e4331",
+    "#956446",
+    "#b28a67",
+    "#c5ae93",
+    "#dacfbe",
+    "#f0ede7"
+   ],
+   "buff": [
+    "#2b180c",
+    "#6e4521",
+    "#af7738",
+    "#cfa971",
+    "#ddc9a1",
+    "#e5dabc",
+    "#eee9d6",
+    "#f8f7f0"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "fur": {
+   "ramp": "tawny",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.9,
+    "dark_shift": -0.9,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.4,
+     "seed": 5
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/knitted_fleece",
+     "scale": 6,
+     "amount": 0.4,
+     "ramps": [
+      "tawny"
+     ]
+    },
+    {
+     "id": "tufts",
+     "op": "spots",
+     "count": 10,
+     "radius": [
+      0.2,
+      0.35
+     ],
+     "shift": 0.6,
+     "seed": 6
+    },
+    {
+     "id": "crown",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 0.8,
+     "density": 0.3,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "vertical",
+    "length": 1.4,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "tawny": "fur"
+    }
+   }
+  },
+  "beak": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.2,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "pool",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.8,
+     "density": 0.9,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.5,
+    "rough": 0.35,
+    "textures": {
+     "cream": "liquid"
+    }
+   }
+  },
+  "eye": {
+   "ramp": "ink",
+   "tone": 1.2,
+   "light": 0.3,
+   "rim": {
+    "light": 0,
+    "dark": 0,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "glint",
+     "op": "gloss",
+     "shift": 2.4,
+     "density": 0.6,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "leg": {
+   "ramp": "buff",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.7,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "fibre",
+     "op": "noise",
+     "scale": 0.7,
+     "amount": 0.5,
+     "seed": 0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 0.8,
+    "width": 0.3,
+    "rough": 0.5,
+    "textures": {
+     "buff": "cloth"
+    }
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "body",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    4.6,
+    0.0
+   ],
+   "style": "fur",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      -4.6
+     ],
+     "size": [
+      4.0,
+      4.2
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.4,
+      -2.6
+     ],
+     "size": [
+      7.4,
+      6.6
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.6,
+      0.4
+     ],
+     "size": [
+      8.0,
+      7.2
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.8,
+      2.6
+     ],
+     "size": [
+      6.6,
+      6.2
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      1.4,
+      4.4
+     ],
+     "size": [
+      4.2,
+      4.2
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.1
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "beak",
+   "shape": "prism",
+   "size": [
+    0.9,
+    0.9,
+    6.6
+   ],
+   "pivot": [
+    0.0,
+    6.0,
+    5.8
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    3.0
+   ],
+   "rotation": [
+    30.0,
+    0.0,
+    0.0
+   ],
+   "style": "beak",
+   "sides": 6,
+   "front_scale": [
+    0.45,
+    0.45
+   ]
+  },
+  {
+   "id": "eye-1",
+   "shape": "prism",
+   "size": [
+    0.7,
+    0.7,
+    0.4
+   ],
+   "pivot": [
+    -1.5,
+    6.9,
+    5.4
+   ],
+   "rotation": [
+    0.0,
+    -35.0,
+    0.0
+   ],
+   "style": "eye",
+   "sides": 6
+  },
+  {
+   "id": "leg-1",
+   "shape": "prism",
+   "size": [
+    0.9,
+    0.9,
+    1.6
+   ],
+   "pivot": [
+    -1.6,
+    0.6,
+    0.8
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.8
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "leg",
+   "sides": 6
+  },
+  {
+   "id": "foot-1",
+   "shape": "box",
+   "size": [
+    1.8,
+    0.6,
+    2.4
+   ],
+   "pivot": [
+    -1.6,
+    0.3,
+    1.6
+   ],
+   "style": "leg",
+   "chamfer": 0.2
+  },
+  {
+   "id": "eye1",
+   "shape": "prism",
+   "size": [
+    0.7,
+    0.7,
+    0.4
+   ],
+   "pivot": [
+    1.5,
+    6.9,
+    5.4
+   ],
+   "rotation": [
+    0.0,
+    35.0,
+    0.0
+   ],
+   "style": "eye",
+   "sides": 6
+  },
+  {
+   "id": "leg1",
+   "shape": "prism",
+   "size": [
+    0.9,
+    0.9,
+    1.6
+   ],
+   "pivot": [
+    1.6,
+    0.6,
+    0.8
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.8
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "leg",
+   "sides": 6
+  },
+  {
+   "id": "foot1",
+   "shape": "box",
+   "size": [
+    1.8,
+    0.6,
+    2.4
+   ],
+   "pivot": [
+    1.6,
+    0.3,
+    1.6
+   ],
+   "style": "leg",
+   "chamfer": 0.2
+  }
+ ]
+}

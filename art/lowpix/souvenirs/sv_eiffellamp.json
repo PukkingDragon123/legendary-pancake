@@ -1,0 +1,844 @@
+{
+ "name": "sv_eiffellamp",
+ "description": "Eiffel Tower Lamp",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 7,
+ "grounded": true,
+ "budget": {
+  "tris": 1600,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   14
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "glow": [
+    "#241304",
+    "#c27917",
+    "#f1d39a",
+    "#f3dfb1",
+    "#f6eac8",
+    "#faf4df",
+    "#fdfcf5"
+   ],
+   "lacquer": [
+    "#040406",
+    "#181821",
+    "#2e2f3a",
+    "#505261",
+    "#737688",
+    "#9b9ea8",
+    "#c3c5c9",
+    "#eaeaeb"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "fe": {
+   "ramp": "brass",
+   "tone": 2.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.3,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "lattice",
+     "op": "grille",
+     "rect": [
+      0,
+      0,
+      1,
+      1
+     ],
+     "period": 3,
+     "dir": "h",
+     "slit_tone": 1.2
+    },
+    {
+     "id": "x",
+     "op": "stripes",
+     "axis": [
+      1,
+      1,
+      0
+     ],
+     "period": 1.4,
+     "width": 0.18,
+     "shift": -1.2
+    },
+    {
+     "id": "x2",
+     "op": "stripes",
+     "axis": [
+      -1,
+      1,
+      0
+     ],
+     "period": 1.4,
+     "width": 0.18,
+     "shift": -1.2
+    },
+    {
+     "id": "bulbs",
+     "op": "spots",
+     "count": 30,
+     "radius": [
+      0.16,
+      0.22
+     ],
+     "ramp": "glow",
+     "tone": 5.0
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.2,
+     "density": 0.4,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "brass": "metal"
+    }
+   }
+  },
+  "base": {
+   "ramp": "lacquer",
+   "tone": 2.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.4,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "depth",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3,
+     "seed": 0
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 4,
+     "shift": 2.2,
+     "density": 0.9,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 2.0,
+    "width": 0.4,
+    "rough": 0.25,
+    "textures": {
+     "lacquer": "liquid"
+    }
+   }
+  },
+  "brassb": {
+   "ramp": "lacquer",
+   "tone": 3.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.4,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "depth",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3,
+     "seed": 0
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 4,
+     "shift": 2.2,
+     "density": 0.9,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 2.0,
+    "width": 0.4,
+    "rough": 0.25,
+    "textures": {
+     "lacquer": "liquid"
+    }
+   }
+  },
+  "brassr": {
+   "ramp": "brass",
+   "tone": 3.4,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "archst": {
+   "ramp": "brass",
+   "tone": 2.6,
+   "light": 1.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.7,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": []
+  },
+  "beam": {
+   "ramp": "glow",
+   "tone": 5.0,
+   "light": 0.25,
+   "rim": {
+    "light": 1,
+    "dark": 0,
+    "light_shift": 0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "plinth",
+   "shape": "prism",
+   "size": [
+    12.0,
+    12.0,
+    1.4
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.7
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "base",
+   "sides": 12,
+   "front_scale": [
+    0.92,
+    0.92
+   ]
+  },
+  {
+   "id": "plinthtop",
+   "shape": "prism",
+   "size": [
+    10.6,
+    10.6,
+    0.5
+   ],
+   "pivot": [
+    0.0,
+    1.4,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.25
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brassb",
+   "sides": 12
+  },
+  {
+   "id": "plinthring",
+   "shape": "prism",
+   "size": [
+    11.2,
+    11.2,
+    0.3
+   ],
+   "pivot": [
+    0.0,
+    1.2,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.15
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brassr",
+   "sides": 12
+  },
+  {
+   "id": "leg0",
+   "shape": "taper",
+   "size": [
+    1.4,
+    1.4,
+    7.8
+   ],
+   "pivot": [
+    -3.05,
+    5.8,
+    -3.05
+   ],
+   "rotation": [
+    -72.7341905049854,
+    0.0,
+    -17.265809495014594
+   ],
+   "style": "fe",
+   "front_scale": [
+    0.7,
+    0.7
+   ]
+  },
+  {
+   "id": "leg1",
+   "shape": "taper",
+   "size": [
+    1.4,
+    1.4,
+    7.8
+   ],
+   "pivot": [
+    3.05,
+    5.8,
+    -3.05
+   ],
+   "rotation": [
+    -72.7341905049854,
+    0.0,
+    17.265809495014594
+   ],
+   "style": "fe",
+   "front_scale": [
+    0.7,
+    0.7
+   ]
+  },
+  {
+   "id": "leg2",
+   "shape": "taper",
+   "size": [
+    1.4,
+    1.4,
+    7.8
+   ],
+   "pivot": [
+    -3.05,
+    5.8,
+    3.05
+   ],
+   "rotation": [
+    -107.2658094950146,
+    0.0,
+    -17.265809495014594
+   ],
+   "style": "fe",
+   "front_scale": [
+    0.7,
+    0.7
+   ]
+  },
+  {
+   "id": "leg3",
+   "shape": "taper",
+   "size": [
+    1.4,
+    1.4,
+    7.8
+   ],
+   "pivot": [
+    3.05,
+    5.8,
+    3.05
+   ],
+   "rotation": [
+    -107.2658094950146,
+    0.0,
+    17.265809495014594
+   ],
+   "style": "fe",
+   "front_scale": [
+    0.7,
+    0.7
+   ]
+  },
+  {
+   "id": "arch0",
+   "shape": "card",
+   "size": [
+    6.6,
+    2.2
+   ],
+   "pivot": [
+    0.0,
+    4.6,
+    4.0
+   ],
+   "style": "archst",
+   "paint": {
+    "art_key": {
+     "a": "brass:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "....aaaaaaaaaaaa....",
+    "..aaa..........aaa..",
+    ".aa..............aa.",
+    "aa................aa",
+    "a..................a"
+   ]
+  },
+  {
+   "id": "arch1",
+   "shape": "card",
+   "size": [
+    6.6,
+    2.2
+   ],
+   "pivot": [
+    0.0,
+    4.6,
+    -4.0
+   ],
+   "rotation": [
+    0.0,
+    180.0,
+    0.0
+   ],
+   "style": "archst",
+   "paint": {
+    "art_key": {
+     "a": "brass:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "....aaaaaaaaaaaa....",
+    "..aaa..........aaa..",
+    ".aa..............aa.",
+    "aa................aa",
+    "a..................a"
+   ]
+  },
+  {
+   "id": "arch2",
+   "shape": "card",
+   "size": [
+    6.6,
+    2.2
+   ],
+   "pivot": [
+    4.0,
+    4.6,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "archst",
+   "paint": {
+    "art_key": {
+     "a": "brass:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "....aaaaaaaaaaaa....",
+    "..aaa..........aaa..",
+    ".aa..............aa.",
+    "aa................aa",
+    "a..................a"
+   ]
+  },
+  {
+   "id": "arch3",
+   "shape": "card",
+   "size": [
+    6.6,
+    2.2
+   ],
+   "pivot": [
+    -4.0,
+    4.6,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    0.0
+   ],
+   "style": "archst",
+   "paint": {
+    "art_key": {
+     "a": "brass:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "....aaaaaaaaaaaa....",
+    "..aaa..........aaa..",
+    ".aa..............aa.",
+    "aa................aa",
+    "a..................a"
+   ]
+  },
+  {
+   "id": "deck1",
+   "shape": "box",
+   "size": [
+    7.4,
+    0.8,
+    7.4
+   ],
+   "pivot": [
+    0.0,
+    9.6,
+    0.0
+   ],
+   "style": "fe"
+  },
+  {
+   "id": "mid",
+   "shape": "taper",
+   "size": [
+    4.6,
+    4.6,
+    5.2
+   ],
+   "pivot": [
+    0.0,
+    12.6,
+    0.0
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "fe",
+   "front_scale": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "id": "deck2",
+   "shape": "box",
+   "size": [
+    3.4,
+    0.6,
+    3.4
+   ],
+   "pivot": [
+    0.0,
+    15.3,
+    0.0
+   ],
+   "style": "fe"
+  },
+  {
+   "id": "spire",
+   "shape": "taper",
+   "size": [
+    2.4,
+    2.4,
+    6.0
+   ],
+   "pivot": [
+    0.0,
+    18.6,
+    0.0
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "fe",
+   "front_scale": [
+    0.28,
+    0.28
+   ]
+  },
+  {
+   "id": "cupola",
+   "shape": "prism",
+   "size": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    21.5,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.5
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "fe",
+   "sides": 6
+  },
+  {
+   "id": "glow_beacon",
+   "shape": "prism",
+   "size": [
+    0.9,
+    0.9,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    22.4,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.5
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "beam",
+   "sides": 6
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 3.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "glow_beacon",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.25,
+       0.25,
+       0.25
+      ],
+      "cycles": 3,
+      "shape": "pulse"
+     }
+    }
+   ]
+  }
+ }
+}

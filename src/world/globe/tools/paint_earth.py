@@ -42,7 +42,7 @@ def ramp(*cols):
 # Ramps darkest first; everything leans on src/gfx/palette.ts (moss, sage, pine, straw, ochre, slate, lake, mist).
 R = {
     "ocean": ramp("#34485a", "#3d5264", "#46596a", "#506778", "#5b7584", "#678691", "#7598a0", "#86a9b0", "#9dbfc0", "#b9d3cf"),
-    "surf": ramp("#c9ddd6", "#dfe9e4"),
+    "surf": ramp("#a9c0bc", "#bccfca"),
     "temperate": ramp("#3b5536", "#4a663f", "#567446", "#64834f", "#74925a", "#86a06a", "#9aaf7a", "#b0c08e"),
     "forest": ramp("#2a3d2e", "#334a34", "#3f5a3b", "#4b6a42", "#587949", "#688a53", "#7c9b5f"),
     "boreal": ramp("#263830", "#2f4437", "#3a5140", "#465f4a", "#546d56", "#667d64", "#7a8e74"),
@@ -442,6 +442,16 @@ def paint_level(mask4k, W):
     seaice = water & (((lat > 70) & (fbm(P, 6.0, 4, 81) + (lat - 79) / 14 > 0.55)) | ((lat < -64) & (near > 0.22) & (fbm(P, 7.0, 4, 82) > 0.42)))
     put(seaice, R["snow"], 4.4 + clusters * 0.9)
     put(seaice & (np.abs(fbm(P, 18.0, 2, 83) - 0.5) < 0.03), R["snow"], 1.8)
+
+    # ---- the hand-made map look: an uneven ink line round every coast, muted colours, paper grain
+    ink = np.array([74.0, 62.0, 50.0])
+    coast = land & (dl == 1) & ~B["ice"] & (hash2(xx // 2, yy // 2, 201) > 0.12)
+    img[coast] = img[coast] * 0.3 + ink * 0.7
+    lum = img @ np.array([0.3, 0.59, 0.11])
+    img = img * 0.7 + (lum[..., None] * np.array([1.05, 1.0, 0.9])[None, None]) * 0.3
+    grain = (fbm(P, 60.0, 2, 203) - 0.5) * 0.1
+    img = img * (1 + grain[..., None])
+    img = np.round(img / 4) * 4          # back onto a stepped palette
 
     alpha = np.full((H, W), 255, np.uint8)
     alpha[water & ~seaice] = 240

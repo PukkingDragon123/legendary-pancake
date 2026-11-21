@@ -11,6 +11,7 @@ r.setSize(innerWidth, innerHeight, false);
 r.outputColorSpace = THREE.SRGBColorSpace;
 const st = new GlobeStage(r);
 st.setPlaces(AREAS);
+st.setOwl({ skin: 'owl', species: 'tawny', palette: 'tawny', outfit: { head: 'nightcap' } } as never);
 st.resize(innerWidth, innerHeight);
 if (q.get('spin')) st.spin = Number(q.get('spin'));
 const f = q.get('focus');

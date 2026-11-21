@@ -1,7 +1,9 @@
 // Souvenirs: one or two keepsakes from each of the twenty real places on the globe. Pip finds them on
-// night trips to that place (never in the store). Each is a lowpix model (low poly, hand-painted pixel
-// atlas) in public/models/souvenirs/<id>.glb, built from art/lowpix/souvenirs. Units are game px (16 per
-// block); the GLB root is scaled 1/16 so it lands in world units like the other props.
+// night trips to that place (never in the store). Each is a low-poly model with a hand-painted texture in
+// public/models/souvenirs/<id>.glb: most are modelled in art/lowpix/souvenirs (lofts and lathes, painted
+// style), a few are borrowed and restyled (art/lowpix/souvenirs/_kit/borrow.py; credits in
+// docs/credits/globe.md). Every GLB has one root node in world units (16 game px = 1 block), standing
+// bottom-centre on the floor and facing +Z; wall pieces hang with their back on z = 0.
 // [globe] OWNED BY THE GLOBE BUILDER.
 import { box, type BoxSpec } from '../gfx/box.ts';
 import { solid } from '../gfx/mats.ts';
@@ -32,9 +34,9 @@ const S: SouvenirInfo[] = [
   { id: 'sv_highlandcow', name: 'Highland Cow Plush', place: 'highlands', cat: 'fun', rarity: 'rare', size: [1, 1], h: 11, small: true,
     blurb: 'Morag’s little twin. The fringe is very long; she can still see you, apparently.' },
   { id: 'sv_kyotolantern', name: 'Kyoto Paper Lantern', place: 'kyoto', cat: 'lights', rarity: 'uncommon', size: [1, 1], h: 15, small: true,
-    light: { x: 0, y: 9, z: 0, color: 0xf1c28a, power: 1.2 },
-    blurb: 'A red paper chōchin on a little stand. The brushed letters say “sleep well”.' },
-  { id: 'sv_torii', name: 'Little Torii Gate', place: 'kyoto', cat: 'decor', rarity: 'uncommon', size: [2, 1], h: 22,
+    light: { x: 0, y: 8, z: 0, color: 0xf1c28a, power: 1.2 },
+    blurb: 'A red paper chōchin with brushed letters that say “sleep well”. It glows the colour of a temple lane at night.' },
+  { id: 'sv_torii', name: 'Little Torii Gate', place: 'kyoto', cat: 'decor', rarity: 'uncommon', size: [2, 0.5], h: 19,
     blurb: 'A vermilion gate on stone feet. Walk under it and the day gets a little calmer.' },
   { id: 'sv_eiffellamp', name: 'Eiffel Tower Lamp', place: 'paris', cat: 'lights', rarity: 'rare', size: [1, 1], h: 22, small: true,
     light: { x: 0, y: 12, z: 0, color: 0xf1d39a, power: 1.3 },
@@ -47,6 +49,8 @@ const S: SouvenirInfo[] = [
     blurb: 'Black lacquer, a silver prow and a gondolier’s oar, resting on a little wooden cradle.' },
   { id: 'sv_bluedome', name: 'Blue-Dome Chapel', place: 'santorini', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 14, small: true,
     blurb: 'A whitewashed chapel with a blue dome and a bell tower. The tiny bell really rings.' },
+  { id: 'sv_bust', name: 'Marble Bust', place: 'santorini', cat: 'decor', rarity: 'rare', size: [1, 1], h: 14, small: true,
+    blurb: 'A thoughtful philosopher in island marble. He has opinions about your bookshelf.' },
   { id: 'sv_camelrug', name: 'Camel Kilim Rug', place: 'sahara', cat: 'rugs', rarity: 'uncommon', size: [3, 2], h: 1, rug: true,
     blurb: 'Hand-knotted in desert reds and indigo, with a caravan of camels marching round the border.' },
   { id: 'sv_brasslantern', name: 'Moroccan Lantern', place: 'sahara', cat: 'lights', rarity: 'rare', size: [1, 1], h: 18, small: true,
@@ -69,8 +73,8 @@ const S: SouvenirInfo[] = [
     blurb: 'Bright stripes of alpaca wool with diamonds and little condors woven in, hung from a wooden rod.' },
   { id: 'sv_toucan', name: 'Toucan Perch', place: 'amazon', cat: 'decor', rarity: 'rare', size: [1, 1], h: 16, small: true,
     blurb: 'A carved toucan on a jungle branch, its big beak painted the colours of a sunset.' },
-  { id: 'sv_giraffe', name: 'Giraffe Carving', place: 'serengeti', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 26,
-    blurb: 'Carved from one piece of wood, spots and all. Tall enough to look over the sofa.' },
+  { id: 'sv_elephant', name: 'Elephant Carving', place: 'serengeti', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 12, small: true,
+    blurb: 'Carved from one piece of dark wood, trunk raised for luck. The calf in the herd looked just like it.' },
   { id: 'sv_canoe', name: 'Red Canoe', place: 'banff', cat: 'wall', rarity: 'rare', size: [3, 0.5], h: 8, wall: true,
     blurb: 'Cedar ribs, a red canvas skin and a paddle, mounted on the wall for dreaming of lakes.' },
   { id: 'sv_sandbottle', name: 'Sand Art Bottle', place: 'petra', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 12, small: true,
@@ -78,10 +82,12 @@ const S: SouvenirInfo[] = [
   { id: 'sv_lotuslamp', name: 'Lotus Lamp', place: 'angkor', cat: 'lights', rarity: 'uncommon', size: [1, 1], h: 8, small: true,
     light: { x: 0, y: 6, z: 0, color: 0xf1c08a, power: 1.0 },
     blurb: 'A pink stone lotus on a lily pad, with a little flame floating in the middle.' },
-  { id: 'sv_coraljar', name: 'Coral Jar', place: 'reef', cat: 'decor', rarity: 'rare', size: [1, 1], h: 13, small: true,
-    blurb: 'A glass jar of coral and sea glass with two tiny fish who never stop exploring.' },
+  { id: 'sv_conch', name: 'Spider Conch Shell', place: 'reef', cat: 'decor', rarity: 'rare', size: [1, 1], h: 4, small: true,
+    blurb: 'A spiny pink-lipped shell washed up on a sandy cay. Hold it to your ear: the reef is still in there.' },
   { id: 'sv_sambadrum', name: 'Samba Drum', place: 'rio', cat: 'fun', rarity: 'uncommon', size: [1, 1], h: 13,
     blurb: 'A surdo drum with painted rims and a pair of mallets. One tap and the whole house wants to dance.' },
+  { id: 'sv_cavaquinho', name: 'Cavaquinho', place: 'rio', cat: 'wall', rarity: 'rare', size: [1, 0.5], h: 17, wall: true,
+    blurb: 'A little four-string guitar for the wall. It remembers every samba it was ever played in.' },
   { id: 'sv_kiwi', name: 'Kiwi Plush', place: 'milford', cat: 'fun', rarity: 'rare', size: [1, 1], h: 9, small: true,
     blurb: 'Round, brown, fluffy and nocturnal, with a long curious beak. Pip’s new best friend.' },
   { id: 'sv_penguin', name: 'Penguin Plush', place: 'antarctica', cat: 'fun', rarity: 'epic', size: [1, 1], h: 15, small: true,

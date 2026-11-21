@@ -16,7 +16,7 @@ import { Px } from '../icons.tsx';
 import { haptic, tap, toast } from '../kit.tsx';
 import { frameStyle } from '../px/frames.js';
 import { panel, sceneRef } from '../state.ts';
-import { homeSprite, moonIcon, padlock, paperFrame, paperTile, passportCover, passportTile, PIN_H, PIN_W, pinSheet, postageStamp, postmark, ringSheet, stampArt, type PinState } from './art.ts';
+import { homeSprite, inkFrame, moonIcon, padlock, paperFrame, paperTile, passportCover, passportTile, PIN_H, PIN_W, pinSheet, postageStamp, postmark, ringSheet, stampArt, type PinState } from './art.ts';
 import './globe.css';
 import { devScale } from './pix.ts';
 import { postcardArt } from './postcards.ts';
@@ -31,7 +31,7 @@ function injectCSS() {
   const el = document.createElement('style');
   const k = Math.min(3, Math.max(1, Math.round(devicePixelRatio || 1)));
   el.textContent = `
-.gb-board{${frameStyle('wood', 3)}}
+.gb-board{border-style:solid;border-width:9px;border-image:url("${inkFrame(3 * k)}") ${7 * 3 * k} / 9px round;background:url("${paperTile(2 * k, 0xeae0c8)}") 0 0/48px 48px,#eae0c8;background-clip:padding-box;color:#2e2b24}
 .gb-card{border-style:solid;border-width:10px;border-image:url("${paperFrame(2 * k)}") ${5 * 2 * k} / 10px round;background:url("${paperTile(2 * k)}") 0 0/48px 48px,#f4eedd;background-clip:padding-box}
 .gb-page{background:url("${passportTile(2 * k)}") 0 0/64px 64px,#e9e3cf}
 .gb-cover{background-image:url("${passportCover(3 * k)}")}
@@ -81,6 +81,7 @@ export function GlobePanel() {
     try { st = new GlobeStage(sc.renderer); } catch (e) { console.warn('globe failed', e); return; }
     stageRef.current = st;
     st.setPlaces([...AREAS.map((a) => ({ id: a.id, lat: a.lat, lon: a.lon })), { id: '@home', lat: home.lat, lon: home.lon }]);
+    st.setOwl(save.value.look);
     const tonight = AREA[save.value.area];
     if (tonight) { st.spin = spinFor(st, tonight); st.setRoute(home, tonight); }
     sc.setStage(st);
@@ -118,7 +119,7 @@ export function GlobePanel() {
       if (!selRef.current) {
         const bot = h - ((document.querySelector('.gb-dock') as HTMLElement | null)?.offsetHeight ?? 100) - 6;
         const reg = bot - top;
-        const r = Math.min(w * 0.4, reg * 0.34);
+        const r = Math.min(w * 0.36, reg * 0.31);
         st.setView(w / 2, top + r * 1.28, r);
       } else if (isSide()) {
         const left = w - Math.min(440, w * 0.4) - 24;
@@ -266,7 +267,7 @@ function Postcard(p: { a: Area; px: number; onClose: () => void; onStep: (d: num
       <div class="gb-front">
         <img class="gb-scene" src={postcardArt(a.id, 2 * k)} alt="" draggable={false} />
         {!open && <div class="gb-veil"><img src={padlock(3 * k)} alt="" /></div>}
-        <div class="gb-greet"><small>Greetings from</small><b style={{ color: a.color }}>{a.title}</b></div>
+        <div class="gb-greet"><small>Greetings from</small><b>{a.title}</b></div>
         <img class="gb-stamp" src={postageStamp(a, 2 * k)} alt="" />
         <img class="gb-mark" src={postmark(a, 2 * k)} alt="" />
       </div>

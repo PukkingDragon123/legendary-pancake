@@ -1,0 +1,1460 @@
+{
+ "name": "sv_tajmodel",
+ "description": "Marble Taj Mahal",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 2200,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   14
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "berry": [
+    "#1a0c12",
+    "#42222c",
+    "#683944",
+    "#8c525b",
+    "#a97477",
+    "#be9d9c",
+    "#d5c5c4",
+    "#efeae9"
+   ],
+   "lilac": [
+    "#171324",
+    "#3e345d",
+    "#665795",
+    "#9a8cb9",
+    "#beb4cf",
+    "#d2cadb",
+    "#e4dfe8",
+    "#f5f3f6"
+   ],
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "stone": [
+    "#171412",
+    "#3b352f",
+    "#5e574d",
+    "#81796d",
+    "#9d988f",
+    "#b6b5af",
+    "#d1d1ce",
+    "#ededed"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "marble": [
+    "#392c22",
+    "#65513d",
+    "#91775a",
+    "#b19d83",
+    "#ccc1b0",
+    "#e8e4dc",
+    "#f1efea",
+    "#fafaf8"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "mb": {
+   "ramp": "marble",
+   "tone": 5.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.9,
+    "dark_shift": -0.9,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "cloud",
+     "op": "noise",
+     "scale": 1.8,
+     "amount": 0.5,
+     "seed": 0
+    },
+    {
+     "id": "veins",
+     "op": "cracks",
+     "scale": 0.8,
+     "width": 0.05,
+     "threshold": 0.86,
+     "shift": -1.3
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.0,
+     "density": 0.5,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.35,
+    "textures": {
+     "marble": "stone"
+    }
+   }
+  },
+  "inlay": {
+   "ramp": "marble",
+   "tone": 4.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.9,
+    "dark_shift": -0.9,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "cloud",
+     "op": "noise",
+     "scale": 1.8,
+     "amount": 0.5,
+     "seed": 0
+    },
+    {
+     "id": "veins",
+     "op": "cracks",
+     "scale": 0.8,
+     "width": 0.05,
+     "threshold": 0.86,
+     "shift": -1.3
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.0,
+     "density": 0.5,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.35,
+    "textures": {
+     "marble": "stone"
+    }
+   },
+   "stamps": []
+  },
+  "gold": {
+   "ramp": "brass",
+   "tone": 4.4,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "plinth",
+   "shape": "box",
+   "size": [
+    16.0,
+    1.6,
+    16.0
+   ],
+   "pivot": [
+    0.0,
+    0.8,
+    0.0
+   ],
+   "style": "mb",
+   "paint": {
+    "layers": [
+     {
+      "id": "flowers",
+      "op": "spots",
+      "count": 30,
+      "radius": [
+       0.15,
+       0.22
+      ],
+      "ramp": "berry",
+      "tone": 4,
+      "faces": [
+       "sides"
+      ]
+     }
+    ]
+   },
+   "chamfer": 0.2
+  },
+  {
+   "id": "hall",
+   "shape": "prism",
+   "size": [
+    9.6,
+    9.6,
+    6.4
+   ],
+   "pivot": [
+    0.0,
+    1.6,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    3.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "paint": {
+    "stamps": [
+     {
+      "faces": [
+       "sides"
+      ],
+      "at": [
+       8,
+       6
+      ],
+      "art": [
+       "..kkkk..",
+       ".kkkkkk.",
+       "kkkkkkkk",
+       "kkkkkkkk",
+       "kkkkkkkk",
+       "kkkkkkkk",
+       "kkkkkkkk",
+       "kkkkkkkk"
+      ],
+      "key": {
+       "k": "lilac:1"
+      }
+     },
+     {
+      "faces": [
+       "sides"
+      ],
+      "at": [
+       3,
+       8
+      ],
+      "art": [
+       ".kk.",
+       "kkkk",
+       "kkkk",
+       "kkkk",
+       "kkkk"
+      ],
+      "key": {
+       "k": "lilac:2"
+      }
+     },
+     {
+      "faces": [
+       "sides"
+      ],
+      "at": [
+       16,
+       8
+      ],
+      "art": [
+       ".kk.",
+       "kkkk",
+       "kkkk",
+       "kkkk",
+       "kkkk"
+      ],
+      "key": {
+       "k": "lilac:2"
+      }
+     }
+    ]
+   },
+   "sides": 8,
+   "angle": 22.5
+  },
+  {
+   "id": "parapet",
+   "shape": "prism",
+   "size": [
+    10.2,
+    10.2,
+    0.6
+   ],
+   "pivot": [
+    0.0,
+    8.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.3
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8,
+   "angle": 22.5
+  },
+  {
+   "id": "drum",
+   "shape": "prism",
+   "size": [
+    5.2,
+    5.2,
+    1.6
+   ],
+   "pivot": [
+    0.0,
+    8.6,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.8
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 12
+  },
+  {
+   "id": "dome",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    10.2,
+    0.0
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 5.0
+    },
+    {
+     "at": [
+      0,
+      0.8,
+      0
+     ],
+     "size": 6.0
+    },
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": 6.6
+    },
+    {
+     "at": [
+      0,
+      3.4,
+      0
+     ],
+     "size": 6.0
+    },
+    {
+     "at": [
+      0,
+      4.6,
+      0
+     ],
+     "size": 4.4
+    },
+    {
+     "at": [
+      0,
+      5.6,
+      0
+     ],
+     "size": 2.4
+    },
+    {
+     "at": [
+      0,
+      6.2,
+      0
+     ],
+     "size": 0.8
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "finial",
+   "shape": "prism",
+   "size": [
+    0.4,
+    0.4,
+    1.4
+   ],
+   "pivot": [
+    0.0,
+    16.3,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.7
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "gold",
+   "sides": 6,
+   "front_scale": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "id": "chhatri0",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    1.4
+   ],
+   "pivot": [
+    -3.2,
+    8.6,
+    -3.2
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.7
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "cdome0",
+   "shape": "loft",
+   "pivot": [
+    -3.2,
+    10.0,
+    -3.2
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 2.2
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": 0.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "chhatri1",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    1.4
+   ],
+   "pivot": [
+    3.2,
+    8.6,
+    -3.2
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.7
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "cdome1",
+   "shape": "loft",
+   "pivot": [
+    3.2,
+    10.0,
+    -3.2
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 2.2
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": 0.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "chhatri2",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    1.4
+   ],
+   "pivot": [
+    -3.2,
+    8.6,
+    3.2
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.7
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "cdome2",
+   "shape": "loft",
+   "pivot": [
+    -3.2,
+    10.0,
+    3.2
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 2.2
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": 0.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "chhatri3",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    1.4
+   ],
+   "pivot": [
+    3.2,
+    8.6,
+    3.2
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.7
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "cdome3",
+   "shape": "loft",
+   "pivot": [
+    3.2,
+    10.0,
+    3.2
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 2.2
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": 0.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "minaret0",
+   "shape": "prism",
+   "size": [
+    1.3,
+    1.3,
+    10.0
+   ],
+   "pivot": [
+    -7.0,
+    1.6,
+    -7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    5.0
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8,
+   "front_scale": [
+    0.85,
+    0.85
+   ]
+  },
+  {
+   "id": "bal0_4.4",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    0.4
+   ],
+   "pivot": [
+    -7.0,
+    4.4,
+    -7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "bal0_7.8",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    0.4
+   ],
+   "pivot": [
+    -7.0,
+    7.8,
+    -7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "mcap0",
+   "shape": "loft",
+   "pivot": [
+    -7.0,
+    11.6,
+    -7.0
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 0.3
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "minaret1",
+   "shape": "prism",
+   "size": [
+    1.3,
+    1.3,
+    10.0
+   ],
+   "pivot": [
+    7.0,
+    1.6,
+    -7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    5.0
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8,
+   "front_scale": [
+    0.85,
+    0.85
+   ]
+  },
+  {
+   "id": "bal1_4.4",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    0.4
+   ],
+   "pivot": [
+    7.0,
+    4.4,
+    -7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "bal1_7.8",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    0.4
+   ],
+   "pivot": [
+    7.0,
+    7.8,
+    -7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "mcap1",
+   "shape": "loft",
+   "pivot": [
+    7.0,
+    11.6,
+    -7.0
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 0.3
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "minaret2",
+   "shape": "prism",
+   "size": [
+    1.3,
+    1.3,
+    10.0
+   ],
+   "pivot": [
+    -7.0,
+    1.6,
+    7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    5.0
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8,
+   "front_scale": [
+    0.85,
+    0.85
+   ]
+  },
+  {
+   "id": "bal2_4.4",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    0.4
+   ],
+   "pivot": [
+    -7.0,
+    4.4,
+    7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "bal2_7.8",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    0.4
+   ],
+   "pivot": [
+    -7.0,
+    7.8,
+    7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "mcap2",
+   "shape": "loft",
+   "pivot": [
+    -7.0,
+    11.6,
+    7.0
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 0.3
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "minaret3",
+   "shape": "prism",
+   "size": [
+    1.3,
+    1.3,
+    10.0
+   ],
+   "pivot": [
+    7.0,
+    1.6,
+    7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    5.0
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8,
+   "front_scale": [
+    0.85,
+    0.85
+   ]
+  },
+  {
+   "id": "bal3_4.4",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    0.4
+   ],
+   "pivot": [
+    7.0,
+    4.4,
+    7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "bal3_7.8",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    0.4
+   ],
+   "pivot": [
+    7.0,
+    7.8,
+    7.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "mb",
+   "sides": 8
+  },
+  {
+   "id": "mcap3",
+   "shape": "loft",
+   "pivot": [
+    7.0,
+    11.6,
+    7.0
+   ],
+   "style": "mb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 0.3
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  }
+ ]
+}

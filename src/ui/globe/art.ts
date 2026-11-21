@@ -175,6 +175,23 @@ export function paperFrame(scale: number, edge = LINEN): string {
   });
 }
 
+/** A border-image tile for a hand-inked paper label (24 x 24, 7px slice): linen paper, an uneven ink line that
+ * wobbles and doubles back like a pen stroke, a darker hard shadow along the bottom. */
+export function inkFrame(scale: number): string {
+  return memo(`inkf:${scale}`, () => {
+    const N = 24, p = new Pix(N, N), ink = 0x3d3229, ink2 = 0x5b4a3c;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const e = Math.min(x, y, N - 1 - x, N - 1 - y);
+      if (e < 1 && hash(x, y, 31) < 0.35) continue;
+      const h = hash(x, y, 32);
+      p.set(x, y, e <= 1 ? (h < 0.25 ? ink2 : ink) : e === 2 && h < 0.18 ? ink2 : h < 0.06 ? LINEN : h > 0.97 ? 0xe2d6bc : OAT);
+      if (y === N - 2 && e === 1) p.set(x, y, 0x2a221c);
+      if (e === 3 && ((x + y * 3) % 7 === 0) && x > 2 && y > 2 && x < N - 3 && y < N - 3) p.set(x, y, mix(OAT, ink, 0.25));
+    }
+    return p.url(scale);
+  });
+}
+
 /** A small paper-fibre tile for large paper areas. */
 export function paperTile(scale: number, base = PAPER): string {
   return memo(`ptile:${scale}:${base}`, () => {

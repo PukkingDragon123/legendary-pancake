@@ -1,0 +1,633 @@
+{
+ "name": "sv_andeanweave",
+ "description": "Andean Weaving",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 6,
+ "grounded": true,
+ "budget": {
+  "tris": 800,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   16,
+   6
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "oak": [
+    "#362018",
+    "#513426",
+    "#6b4a35",
+    "#846245",
+    "#9c7a56",
+    "#ad9472",
+    "#bcac91",
+    "#cbc3af",
+    "#dcd8cc"
+   ],
+   "walnut": [
+    "#21130f",
+    "#362119",
+    "#4a3124",
+    "#5d4330",
+    "#6f553d",
+    "#937755",
+    "#ad9979",
+    "#c2b7a0",
+    "#d9d4c7"
+   ],
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "plum": [
+    "#120b12",
+    "#2e1e2d",
+    "#493245",
+    "#62475b",
+    "#826479",
+    "#a4909c",
+    "#c5bcc1",
+    "#e8e6e7"
+   ],
+   "fern": [
+    "#0c150a",
+    "#22371c",
+    "#3b572f",
+    "#577544",
+    "#7a995e",
+    "#a2b48c",
+    "#c7cfba",
+    "#eaece5"
+   ],
+   "night": [
+    "#030407",
+    "#141924",
+    "#27313f",
+    "#45566b",
+    "#647d95",
+    "#91a3b2",
+    "#bdc8cf",
+    "#e8ebed"
+   ],
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "vermilion": [
+    "#1d090c",
+    "#4b191c",
+    "#772d2c",
+    "#a1483f",
+    "#bc7162",
+    "#cc9e8f",
+    "#dec7bb",
+    "#f2ebe6"
+   ],
+   "indigo": [
+    "#0a0a16",
+    "#1a1c39",
+    "#2c325b",
+    "#404c7b",
+    "#586da0",
+    "#889ab9",
+    "#b7c3d2",
+    "#e4e9ed"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "oak": {
+   "ramp": "walnut",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.7,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 7,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 8,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "walnut"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.45,
+     "shift": 0.9,
+     "scratches": 0.006
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "x",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "walnut": "wood"
+    }
+   }
+  },
+  "cl": {
+   "ramp": "vermilion",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "weave_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.24499999999999997,
+     "seed": 0
+    },
+    {
+     "id": "weave_b",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.21,
+     "seed": 1,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "weave_c",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.21,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/rough_linen",
+     "scale": 5,
+     "amount": 0.55,
+     "ramps": [
+      "vermilion"
+     ]
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "vermilion": "cloth"
+    }
+   }
+  },
+  "cord": {
+   "ramp": "oat",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.7,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "fibre",
+     "op": "noise",
+     "scale": 0.7,
+     "amount": 0.5,
+     "seed": 0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 0.8,
+    "width": 0.3,
+    "rough": 0.5,
+    "textures": {
+     "oat": "cloth"
+    }
+   }
+  },
+  "tas": {
+   "ramp": "oat",
+   "tone": 4.2,
+   "light": 0.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.7,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "cloth",
+   "shape": "box",
+   "size": [
+    22.0,
+    15.0,
+    0.5
+   ],
+   "pivot": [
+    0.0,
+    11.1,
+    0.7
+   ],
+   "style": "cl",
+   "paint": {
+    "stamps": [
+     {
+      "face": "front",
+      "at": [
+       0,
+       0
+      ],
+      "art": [
+       "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+       "yyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyyccccccccc",
+       "cccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyy",
+       "cccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyy",
+       "rrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrr",
+       "ccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyyccc",
+       "cccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccc",
+       "cccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccc",
+       "yyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrr",
+       "yyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyyccccccccc",
+       "cccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyy",
+       "cccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyy",
+       "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+       "ggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbg",
+       "gbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgg",
+       "bbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbggg",
+       "bbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggb",
+       "bgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbb",
+       "gggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbb",
+       "ggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbg",
+       "gbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgg",
+       "bbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbggg",
+       "bbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggb",
+       "bgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbb",
+       "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+       "ggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbg",
+       "ccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprr",
+       "cpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrc",
+       "pprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrcc",
+       "prrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccp",
+       "rrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpp",
+       "rccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccppr",
+       "ccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprr",
+       "cpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrc",
+       "pprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrcc",
+       "prrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccp",
+       "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+       "rccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccppr",
+       "ccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprr",
+       "cccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrr",
+       "ccccccpprrryyyrrrppcccccccccccpprrryyyrrrppcccccccccccpprrryyyrrrppcccccccccccpprrryyyrrrppcccccccccccpprrryyyrrrppcccccccccccpprrry",
+       "cccccpprrryyyyyrrrppcccccccccpprrryyyyyrrrppcccccccccpprrryyyyyrrrppcccccccccpprrryyyyyrrrppcccccccccpprrryyyyyrrrppcccccccccpprrryy",
+       "ccccpprrryyyyyyyrrrppcccccccpprrryyyyyyyrrrppcccccccpprrryyyyyyyrrrppcccccccpprrryyyyyyyrrrppcccccccpprrryyyyyyyrrrppcccccccpprrryyy",
+       "cccccpprrryyyyyrrrppcccccccccpprrryyyyyrrrppcccccccccpprrryyyyyrrrppcccccccccpprrryyyyyrrrppcccccccccpprrryyyyyrrrppcccccccccpprrryy",
+       "ccccccpprrryyyrrrppcccccccccccpprrryyyrrrppcccccccccccpprrryyyrrrppcccccccccccpprrryyyrrrppcccccccccccpprrryyyrrrppcccccccccccpprrry",
+       "cccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrr",
+       "ccccccccpprrrrrppcccccccccccccccpprrrrrppcccccccccccccccpprrrrrppcccccccccccccccpprrrrrppcccccccccccccccpprrrrrppcccccccccccccccpprr",
+       "cccccccccpprrrppcccccccccccccccccpprrrppcccccccccccccccccpprrrppcccccccccccccccccpprrrppcccccccccccccccccpprrrppcccccccccccccccccppr",
+       "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+       "cccccccccpprrrppcccccccccccccccccpprrrppcccccccccccccccccpprrrppcccccccccccccccccpprrrppcccccccccccccccccpprrrppcccccccccccccccccppr",
+       "ccccccccpprrrrrppcccccccccccccccpprrrrrppcccccccccccccccpprrrrrppcccccccccccccccpprrrrrppcccccccccccccccpprrrrrppcccccccccccccccpprr",
+       "cccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrryrrrppcccccccccccccpprrr",
+       "ccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprr",
+       "rccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccppr",
+       "rrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpp",
+       "prrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccp",
+       "pprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrcc",
+       "cpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrc",
+       "ccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprr",
+       "rccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccppr",
+       "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+       "prrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccp",
+       "pprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrcc",
+       "cpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrc",
+       "ccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprrccpprr",
+       "bgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbb",
+       "gggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbb",
+       "ggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbg",
+       "gbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgg",
+       "bbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbggg",
+       "bbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggb",
+       "bgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbb",
+       "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+       "ggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbg",
+       "gbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgg",
+       "bbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbggg",
+       "bbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggb",
+       "bgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbbbgggbb",
+       "cccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccc",
+       "cccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccc",
+       "yyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrr",
+       "yyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyyccccccccc",
+       "cccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyy",
+       "cccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyy",
+       "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+       "ccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyyccc",
+       "cccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccc",
+       "cccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccc",
+       "yyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrryyyrrrrrrrrr",
+       "yyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyycccccccccyyyccccccccc"
+      ],
+      "key": {
+       "r": "vermilion:4",
+       "c": "oat:5",
+       "y": "honey:5",
+       "g": "fern:4",
+       "b": "indigo:3",
+       "p": "plum:4",
+       "k": "night:2"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "rod",
+   "shape": "prism",
+   "size": [
+    1.0,
+    1.0,
+    26.0
+   ],
+   "pivot": [
+    0.0,
+    19.0,
+    0.9
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "oak",
+   "sides": 8
+  },
+  {
+   "id": "knob-1",
+   "shape": "prism",
+   "size": [
+    1.6,
+    1.6,
+    1.0
+   ],
+   "pivot": [
+    -13.4,
+    18.5,
+    0.9
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.5
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "oak",
+   "sides": 8
+  },
+  {
+   "id": "knob1",
+   "shape": "prism",
+   "size": [
+    1.6,
+    1.6,
+    1.0
+   ],
+   "pivot": [
+    13.4,
+    18.5,
+    0.9
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.5
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "oak",
+   "sides": 8
+  },
+  {
+   "id": "cord",
+   "shape": "box",
+   "size": [
+    0.3,
+    3.0,
+    0.3
+   ],
+   "pivot": [
+    0.0,
+    20.8,
+    0.6
+   ],
+   "style": "cord"
+  },
+  {
+   "id": "tassels",
+   "shape": "card",
+   "size": [
+    22.0,
+    3.2
+   ],
+   "pivot": [
+    0.0,
+    2.0,
+    0.95
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "a": "vermilion:4",
+     "b": "honey:5",
+     "c": "oat:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.",
+    "a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c.a.b.c."
+   ]
+  }
+ ]
+}

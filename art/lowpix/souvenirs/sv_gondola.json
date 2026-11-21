@@ -1,0 +1,557 @@
+{
+ "name": "sv_gondola",
+ "description": "Gondola Model",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 7,
+ "grounded": true,
+ "budget": {
+  "tris": 1400,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   40,
+   20
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "oak": [
+    "#362018",
+    "#513426",
+    "#6b4a35",
+    "#846245",
+    "#9c7a56",
+    "#ad9472",
+    "#bcac91",
+    "#cbc3af",
+    "#dcd8cc"
+   ],
+   "berry": [
+    "#1a0c12",
+    "#42222c",
+    "#683944",
+    "#8c525b",
+    "#a97477",
+    "#be9d9c",
+    "#d5c5c4",
+    "#efeae9"
+   ],
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "pebble": [
+    "#1f1a15",
+    "#504539",
+    "#80725e",
+    "#a79d8b",
+    "#c1bcb0",
+    "#d1cfc6",
+    "#e2e1dd",
+    "#f4f4f2"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "lacquer": [
+    "#040406",
+    "#181821",
+    "#2e2f3a",
+    "#505261",
+    "#737688",
+    "#9b9ea8",
+    "#c3c5c9",
+    "#eaeaeb"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "lac": {
+   "ramp": "lacquer",
+   "tone": 2.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.4,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "depth",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3,
+     "seed": 0
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 4,
+     "shift": 2.2,
+     "density": 0.9,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 2.0,
+    "width": 0.4,
+    "rough": 0.25,
+    "textures": {
+     "lacquer": "liquid"
+    }
+   }
+  },
+  "oak": {
+   "ramp": "oak",
+   "tone": 4.4,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.7,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 7,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 8,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "oak"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.45,
+     "shift": 0.9,
+     "scratches": 0.006
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "x",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "oak": "wood"
+    }
+   }
+  },
+  "velv": {
+   "ramp": "berry",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.7,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "fibre",
+     "op": "noise",
+     "scale": 0.7,
+     "amount": 0.5,
+     "seed": 0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 0.8,
+    "width": 0.3,
+    "rough": 0.5,
+    "textures": {
+     "berry": "cloth"
+    }
+   }
+  },
+  "silver": {
+   "ramp": "pebble",
+   "tone": 5.0,
+   "light": 1.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.7,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "cradle-5",
+   "shape": "box",
+   "size": [
+    5.4,
+    2.0,
+    1.2
+   ],
+   "pivot": [
+    0.0,
+    1.0,
+    -5.0
+   ],
+   "style": "oak",
+   "chamfer": 0.3
+  },
+  {
+   "id": "cradle5",
+   "shape": "box",
+   "size": [
+    5.4,
+    2.0,
+    1.2
+   ],
+   "pivot": [
+    0.0,
+    1.0,
+    5.0
+   ],
+   "style": "oak",
+   "chamfer": 0.3
+  },
+  {
+   "id": "hull",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    2.2,
+    0.0
+   ],
+   "style": "lac",
+   "paint": {
+    "layers": [
+     {
+      "id": "trim",
+      "op": "band",
+      "axis": "y",
+      "from": 0.55,
+      "to": 0.7,
+      "ramp": "brass",
+      "tone": 5
+     }
+    ]
+   },
+   "rings": [
+    {
+     "at": [
+      0.0,
+      3.2,
+      -11.0
+     ],
+     "size": [
+      0.6,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      1.2,
+      -8.0
+     ],
+     "size": [
+      3.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.4,
+      -3.0
+     ],
+     "size": [
+      4.6,
+      2.6
+     ]
+    },
+    {
+     "at": [
+      0.3,
+      0.4,
+      2.0
+     ],
+     "size": [
+      4.6,
+      2.6
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      1.0,
+      7.0
+     ],
+     "size": [
+      3.2,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      3.6,
+      10.4
+     ],
+     "size": [
+      0.8,
+      0.9
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.4
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "seat",
+   "shape": "box",
+   "size": [
+    3.6,
+    0.8,
+    3.0
+   ],
+   "pivot": [
+    0.0,
+    4.0,
+    -1.0
+   ],
+   "style": "velv",
+   "chamfer": 0.4
+  },
+  {
+   "id": "seatback",
+   "shape": "box",
+   "size": [
+    3.6,
+    1.6,
+    0.6
+   ],
+   "pivot": [
+    0.0,
+    4.8,
+    -2.6
+   ],
+   "style": "lac"
+  },
+  {
+   "id": "ferro",
+   "shape": "card",
+   "size": [
+    1.6,
+    3.0
+   ],
+   "pivot": [
+    0.0,
+    5.6,
+    11.0
+   ],
+   "style": "silver",
+   "paint": {
+    "art_key": {
+     "s": "pebble:6"
+    }
+   },
+   "plane": "yz",
+   "art": [
+    "sss...",
+    "s.sss.",
+    "sssss.",
+    "s.sss.",
+    "sssss.",
+    "s.sss.",
+    "ssssss",
+    ".sssss"
+   ]
+  },
+  {
+   "id": "forcola",
+   "shape": "box",
+   "size": [
+    0.8,
+    2.6,
+    0.8
+   ],
+   "pivot": [
+    1.8,
+    4.8,
+    -6.0
+   ],
+   "style": "oak"
+  },
+  {
+   "id": "oar",
+   "shape": "box",
+   "size": [
+    0.4,
+    0.4,
+    13.0
+   ],
+   "pivot": [
+    1.6,
+    6.0,
+    -1.0
+   ],
+   "rotation": [
+    8.0,
+    6.0,
+    0.0
+   ],
+   "style": "oak"
+  },
+  {
+   "id": "blade",
+   "shape": "box",
+   "size": [
+    0.3,
+    0.6,
+    2.4
+   ],
+   "pivot": [
+    2.2,
+    5.3,
+    5.6
+   ],
+   "rotation": [
+    8.0,
+    6.0,
+    0.0
+   ],
+   "style": "oak"
+  }
+ ]
+}

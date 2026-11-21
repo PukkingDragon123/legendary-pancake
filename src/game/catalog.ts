@@ -82,7 +82,7 @@ export const AREAS: Area[] = ([
   }),
   place({
     id: 'santorini', name: 'Santorini', title: 'Santorini', stamp: 'SANTORINI', country: 'Greece', continent: 'Europe',
-    level: 3, lat: 36.42, lon: 25.43, color: '#4f78a8', kin: 'lake', tz: 'Europe/Athens', souvenirs: ['sv_bluedome'],
+    level: 3, lat: 36.42, lon: 25.43, color: '#4f78a8', kin: 'lake', tz: 'Europe/Athens', souvenirs: ['sv_bluedome', 'sv_bust'],
     blurb: 'White houses tumbling down a cliff, blue domes and a sea that turns pink at sunset.',
     sights: ['white houses tumbling down the cliffs', 'blue domes shining under the moon', 'a sunset that turned the whole sea pink', 'windmills turning above the caldera'],
     friends: ['a donkey who climbs the steps at night', 'a fisherman mending his nets', 'a family of cats on a blue doorstep', 'a sleepy gecko on a warm wall'],
@@ -146,7 +146,7 @@ export const AREAS: Area[] = ([
   }),
   place({
     id: 'serengeti', name: 'the Serengeti', title: 'The Serengeti', stamp: 'SERENGETI', country: 'Tanzania', continent: 'Africa',
-    level: 11, lat: -2.33, lon: 34.83, color: '#b08a4a', kin: 'woods', tz: 'Africa/Dar_es_Salaam', souvenirs: ['sv_giraffe'],
+    level: 11, lat: -2.33, lon: 34.83, color: '#b08a4a', kin: 'woods', tz: 'Africa/Dar_es_Salaam', souvenirs: ['sv_elephant'],
     blurb: 'Endless golden grass, acacia trees against a huge orange moon and herds walking to the horizon.',
     sights: ['acacia trees against a huge orange moon', 'a herd of zebra stretching to the horizon', 'a snowy mountain top far, far away', 'a waterhole shining like a mirror'],
     friends: ['a giraffe who can see everything', 'an elephant family with a tiny calf', 'a lion cub who pounces on tails', 'a chatty weaver bird'],
@@ -178,7 +178,7 @@ export const AREAS: Area[] = ([
   }),
   place({
     id: 'reef', name: 'the Great Barrier Reef', title: 'The Great Barrier Reef', stamp: 'THE REEF', country: 'Australia', continent: 'Oceania',
-    level: 15, lat: -18.3, lon: 147.7, color: '#4f9a9a', kin: 'lake', tz: 'Australia/Brisbane', souvenirs: ['sv_coraljar'],
+    level: 15, lat: -18.3, lon: 147.7, color: '#4f9a9a', kin: 'lake', tz: 'Australia/Brisbane', souvenirs: ['sv_conch'],
     blurb: 'Coral gardens in every colour, sea turtles gliding by and sandy islands ringed with turquoise.',
     sights: ['coral gardens in every colour', 'a turtle gliding through blue water', 'a sandy island ringed with turquoise', 'the reef glowing softly under the moon'],
     friends: ['a green sea turtle called Shelly', 'a clownfish in a wavy anemone', 'a gentle manta ray', 'a dugong munching seagrass'],
@@ -186,7 +186,7 @@ export const AREAS: Area[] = ([
   }),
   place({
     id: 'rio', name: 'Rio de Janeiro', title: 'Rio de Janeiro', stamp: 'RIO', country: 'Brazil', continent: 'South America',
-    level: 16, lat: -22.91, lon: -43.17, color: '#a8705a', kin: 'lake', tz: 'America/Sao_Paulo', souvenirs: ['sv_sambadrum'],
+    level: 16, lat: -22.91, lon: -43.17, color: '#a8705a', kin: 'lake', tz: 'America/Sao_Paulo', souvenirs: ['sv_sambadrum', 'sv_cavaquinho'],
     blurb: 'Green mountains dropping into the sea, a long moonlit beach and drums that never quite stop.',
     sights: ['Sugarloaf Mountain at sunrise', 'a statue with open arms above the clouds', 'samba drums echoing from the hills', 'a long beach glittering under the stars'],
     friends: ['a samba dancer with a feathered crown', 'a marmoset riding the cable car', 'a family of capybaras', 'a scarlet macaw'],

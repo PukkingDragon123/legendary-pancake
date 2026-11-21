@@ -1,0 +1,738 @@
+{
+ "name": "sv_puffin",
+ "description": "Puffin Plush",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 7,
+ "grounded": true,
+ "budget": {
+  "tris": 1600,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   16
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ],
+   "stone": [
+    "#171412",
+    "#3b352f",
+    "#5e574d",
+    "#81796d",
+    "#9d988f",
+    "#b6b5af",
+    "#d1d1ce",
+    "#ededed"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "snow": [
+    "#232f1a",
+    "#4c6438",
+    "#779858",
+    "#a2ba89",
+    "#ccd8be",
+    "#f5f7f2",
+    "#fefefd"
+   ],
+   "soot": [
+    "#060404",
+    "#211915",
+    "#3a3029",
+    "#645549",
+    "#8d7c6a",
+    "#aca295",
+    "#ccc7bf",
+    "#ecebe9"
+   ],
+   "orange": [
+    "#240d07",
+    "#5c2813",
+    "#924a21",
+    "#c67331",
+    "#d49d61",
+    "#debe8f",
+    "#e9dabb",
+    "#f6f2e6"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "blk": {
+   "ramp": "soot",
+   "tone": 3.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.9,
+    "dark_shift": -0.9,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.4,
+     "seed": 1
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/knitted_fleece",
+     "scale": 6,
+     "amount": 0.4,
+     "ramps": [
+      "soot"
+     ]
+    },
+    {
+     "id": "tufts",
+     "op": "spots",
+     "count": 10,
+     "radius": [
+      0.2,
+      0.35
+     ],
+     "shift": 0.6,
+     "seed": 2
+    },
+    {
+     "id": "crown",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 0.8,
+     "density": 0.3,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "vertical",
+    "length": 1.4,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "soot": "fur"
+    }
+   }
+  },
+  "wht": {
+   "ramp": "snow",
+   "tone": 4.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.9,
+    "dark_shift": -0.9,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.4,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/knitted_fleece",
+     "scale": 6,
+     "amount": 0.4,
+     "ramps": [
+      "snow"
+     ]
+    },
+    {
+     "id": "tufts",
+     "op": "spots",
+     "count": 10,
+     "radius": [
+      0.2,
+      0.35
+     ],
+     "shift": 0.6,
+     "seed": 3
+    },
+    {
+     "id": "crown",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 0.8,
+     "density": 0.3,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "vertical",
+    "length": 1.4,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "snow": "fur"
+    }
+   }
+  },
+  "org": {
+   "ramp": "orange",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.7,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "fibre",
+     "op": "noise",
+     "scale": 0.7,
+     "amount": 0.5,
+     "seed": 0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 0.8,
+    "width": 0.3,
+    "rough": 0.5,
+    "textures": {
+     "orange": "cloth"
+    }
+   }
+  },
+  "eye": {
+   "ramp": "ink",
+   "tone": 1.2,
+   "light": 0.3,
+   "rim": {
+    "light": 0,
+    "dark": 0,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "glint",
+     "op": "gloss",
+     "shift": 2.4,
+     "density": 0.6,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "beak": {
+   "ramp": "orange",
+   "tone": 4.4,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.0,
+    "dark_shift": -1.0,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "base",
+     "op": "band",
+     "axis": "z",
+     "from": -1.0,
+     "to": -0.45,
+     "ramp": "stone",
+     "tone": 3.6
+    },
+    {
+     "id": "line",
+     "op": "band",
+     "axis": "z",
+     "from": -0.45,
+     "to": -0.3,
+     "ramp": "honey",
+     "tone": 5.4
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "tl": {
+   "ramp": "soot",
+   "tone": 3.0,
+   "light": 1.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.7,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "body",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "blk",
+   "rings": [
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": 4.4
+    },
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": 6.6
+    },
+    {
+     "at": [
+      0,
+      4.0,
+      0
+     ],
+     "size": 7.6
+    },
+    {
+     "at": [
+      0,
+      6.2,
+      0
+     ],
+     "size": 7.0
+    },
+    {
+     "at": [
+      0,
+      8.0,
+      0
+     ],
+     "size": 5.6
+    },
+    {
+     "at": [
+      0,
+      8.8,
+      0
+     ],
+     "size": 4.6
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "belly",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    1.2
+   ],
+   "style": "wht",
+   "rings": [
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 3.6
+    },
+    {
+     "at": [
+      0,
+      2.2,
+      0
+     ],
+     "size": 5.6
+    },
+    {
+     "at": [
+      0,
+      4.0,
+      0
+     ],
+     "size": 6.4
+    },
+    {
+     "at": [
+      0,
+      6.0,
+      0
+     ],
+     "size": 5.6
+    },
+    {
+     "at": [
+      0,
+      7.4,
+      0
+     ],
+     "size": 4.2
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "head",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "blk",
+   "rings": [
+    {
+     "at": [
+      0,
+      8.4,
+      0
+     ],
+     "size": 4.2
+    },
+    {
+     "at": [
+      0,
+      9.0,
+      0
+     ],
+     "size": 5.6
+    },
+    {
+     "at": [
+      0,
+      10.6,
+      0
+     ],
+     "size": 6.0
+    },
+    {
+     "at": [
+      0,
+      12.0,
+      0
+     ],
+     "size": 5.0
+    },
+    {
+     "at": [
+      0,
+      12.8,
+      0
+     ],
+     "size": 3.0
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "cheek-1",
+   "shape": "box",
+   "size": [
+    2.6,
+    2.8,
+    2.4
+   ],
+   "pivot": [
+    -1.6,
+    10.4,
+    1.4
+   ],
+   "style": "wht",
+   "chamfer": 0.9
+  },
+  {
+   "id": "eye-1",
+   "shape": "prism",
+   "size": [
+    0.8,
+    0.8,
+    0.5
+   ],
+   "pivot": [
+    -1.7,
+    11.0,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    -20.0,
+    0.0
+   ],
+   "style": "eye",
+   "sides": 6
+  },
+  {
+   "id": "wing-1",
+   "shape": "taper",
+   "size": [
+    1.4,
+    5.0,
+    3.0
+   ],
+   "pivot": [
+    -3.7,
+    4.8,
+    -0.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    10.0
+   ],
+   "style": "blk",
+   "front_scale": [
+    0.8,
+    0.5
+   ]
+  },
+  {
+   "id": "foot-1",
+   "shape": "box",
+   "size": [
+    2.0,
+    0.7,
+    2.8
+   ],
+   "pivot": [
+    -1.5,
+    0.35,
+    1.4
+   ],
+   "style": "org",
+   "chamfer": 0.3
+  },
+  {
+   "id": "cheek1",
+   "shape": "box",
+   "size": [
+    2.6,
+    2.8,
+    2.4
+   ],
+   "pivot": [
+    1.6,
+    10.4,
+    1.4
+   ],
+   "style": "wht",
+   "chamfer": 0.9
+  },
+  {
+   "id": "eye1",
+   "shape": "prism",
+   "size": [
+    0.8,
+    0.8,
+    0.5
+   ],
+   "pivot": [
+    1.7,
+    11.0,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    20.0,
+    0.0
+   ],
+   "style": "eye",
+   "sides": 6
+  },
+  {
+   "id": "wing1",
+   "shape": "taper",
+   "size": [
+    1.4,
+    5.0,
+    3.0
+   ],
+   "pivot": [
+    3.7,
+    4.8,
+    -0.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -10.0
+   ],
+   "style": "blk",
+   "front_scale": [
+    0.8,
+    0.5
+   ]
+  },
+  {
+   "id": "foot1",
+   "shape": "box",
+   "size": [
+    2.0,
+    0.7,
+    2.8
+   ],
+   "pivot": [
+    1.5,
+    0.35,
+    1.4
+   ],
+   "style": "org",
+   "chamfer": 0.3
+  },
+  {
+   "id": "beak",
+   "shape": "taper",
+   "size": [
+    2.4,
+    3.0,
+    2.8
+   ],
+   "pivot": [
+    0.0,
+    10.0,
+    3.6
+   ],
+   "style": "beak",
+   "front_scale": [
+    0.35,
+    0.35
+   ],
+   "front_shift": [
+    0,
+    -0.4
+   ]
+  },
+  {
+   "id": "tail",
+   "shape": "card",
+   "size": [
+    2.4,
+    2.0
+   ],
+   "pivot": [
+    0.0,
+    2.6,
+    -3.6
+   ],
+   "style": "tl",
+   "paint": {
+    "art_key": {
+     "a": "soot:3"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    ".aa.",
+    "aaaa",
+    "aaaa"
+   ]
+  }
+ ]
+}
