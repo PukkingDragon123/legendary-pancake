@@ -1,82 +1,96 @@
-// Pixel art for the bedtime table and the morning: Pip (awake, sleepy, asleep), the candle, the
-// mug, the phone, the bedroom window, the moon, presents and the gift sack, calendar stickers.
+// Pixel art for the bedtime table and the morning: the cuckoo songbird, Pip's nest, carved moon
+// ornaments, the candle, the mug, the phone, the bedroom window, the moon, presents and the gift
+// sack, calendar stickers. (No 2D owl: Pip appears only as renders of the 3D model.)
 // Everything is painted procedurally into an Art buffer at pixel resolution.
 import { Art, ballShade, dtone, hash, INK, lit, tone, type Col } from './sleepart.ts';
 
-// ------------------------------------------------------------------ Pip
+// ------------------------------------------------------------------ little birds, the nest, carvings
+// (Pip is never drawn in 2D: where Pip must appear the UI shows a render of the 3D model. These
+// are the other small characters and ornaments of the sleep screens.)
 
-export interface OwlPose {
-  eyes?: 'open' | 'half' | 'closed' | 'happy';
-  beak?: 'open' | 'closed';
-  cap?: boolean;
+export interface BirdPose {
   /** wing lift 0..1 */
   wing?: number;
-  /** look offset for the pupils, -1..1 */
-  look?: number;
-  blush?: boolean;
-  /** body squash (breathing): 1 = rest */
+  beak?: 'open' | 'closed';
+  /** body squash: 1 = rest */
   squash?: number;
 }
 /**
- * Pip, a tawny owl, centred at (cx, cy) (the middle of the body). `k` scales the drawing (1 = about
- * 26 px tall). Drawn with outlines; call on an empty area or a fresh Art for clean edges.
+ * The cuckoo-clock songbird: a round wren-like bird with a cocked tail, a dot eye, a pointed beak
+ * and a barred wing, centred at (cx, cy). `k` scales it (1 = about 16 px long).
  */
-export function owl(a: Art, cx: number, cy: number, k = 1, p: OwlPose = {}) {
-  const o = new Art(Math.ceil(34 * k) + 4, Math.ceil(34 * k) + 4);
-  const ox = o.w / 2, oy = o.h / 2 + 2 * k;
-  const sq = p.squash ?? 1;
-  const by = oy + 4 * k, hy = oy - 4.5 * k * sq;
-  // wings behind the body
-  const lift = (p.wing ?? 0) * 5 * k;
-  for (const sd of [-1, 1]) o.ell(ox + sd * 8.6 * k, by + 0.5 * k - lift * 0.6, 3.2 * k, 6.8 * k, ballShade('cinnamon', ox + sd * 8.6 * k, by - lift * 0.6, 6 * k, 2.2, 1.6));
-  // body
-  o.ell(ox, by, 8.4 * k, 8.8 * k * sq, ballShade('cinnamon', ox, by, 9 * k, 3, 2));
-  // belly with little chevrons
-  o.ell(ox, by + 1.6 * k, 5.2 * k, 6.2 * k * sq, (x, y) => {
-    const v = (Math.round(y - by) % 3 === 0 && Math.abs(((x - ox) % 3) + 0.5) < 1) ? tone('cinnamon', 2) : dtone('parch', 3.6 + lit(x - ox, y - by, 6 * k) * 1.2, x, y);
-    return v;
-  });
-  // head
-  o.ell(ox, hy, 9.6 * k, 7.6 * k, ballShade('cinnamon', ox, hy, 9 * k, 3.2, 2));
-  // ear tufts
-  for (const sd of [-1, 1]) o.poly([[ox + sd * 4.5 * k, hy - 6 * k], [ox + sd * 9.2 * k, hy - 9.5 * k], [ox + sd * 8.6 * k, hy - 3 * k]], tone('cinnamon', 2));
-  // facial discs
-  for (const sd of [-1, 1]) o.disc(ox + sd * 4 * k, hy + 0.6 * k, 4.2 * k, (x, y) => dtone('tan', 4.2 + lit(x - ox, y - hy, 8 * k) * 0.8, x, y));
-  // brow ridge
-  o.line(ox - 1 * k, hy - 3.6 * k, ox - 7 * k, hy - 4.6 * k, tone('cinnamon', 1));
-  o.line(ox + 1 * k, hy - 3.6 * k, ox + 7 * k, hy - 4.6 * k, tone('cinnamon', 1));
-  // eyes
-  const eyes = p.eyes ?? 'open';
-  for (const sd of [-1, 1]) {
-    const ex = ox + sd * 4 * k, ey = hy + 0.6 * k, r = 2.6 * k;
-    if (eyes === 'open' || eyes === 'half') {
-      o.disc(ex, ey, r, (x, y) => (y < ey - r * 0.2 && eyes === 'half' ? tone('cinnamon', 3) : tone('yellow', 3)));
-      o.disc(ex + (p.look ?? 0) * 0.8 * k, ey + 0.3 * k, r * 0.55, INK);
-      o.px(ex - 0.8 * k, ey - 0.8 * k + (eyes === 'half' ? 1.2 * k : 0), '#ffffff');
-      if (eyes === 'half') o.line(ex - r, ey - r * 0.2, ex + r, ey - r * 0.2, tone('cinnamon', 1));
-    } else if (eyes === 'closed') {
-      // a soft downward curve
-      for (let i = -2; i <= 2; i++) o.px(ex + i * k * 0.9, ey + (Math.abs(i) === 2 ? 0 : 1) * Math.max(1, k * 0.7), tone('cinnamon', 0));
-    } else {
-      // happy: upward arcs
-      for (let i = -2; i <= 2; i++) o.px(ex + i * k * 0.9, ey + (Math.abs(i) === 2 ? 1 : 0) * Math.max(1, k * 0.7), tone('cinnamon', 0));
-    }
-  }
-  if (p.blush) for (const sd of [-1, 1]) { o.px(ox + sd * 6.6 * k, hy + 3.4 * k, '#f08aa8'); o.px(ox + sd * 7.4 * k, hy + 3.4 * k, '#f08aa8'); }
+export function songbird(a: Art, cx: number, cy: number, k = 1, p: BirdPose = {}) {
+  const o = new Art(Math.ceil(24 * k) + 6, Math.ceil(22 * k) + 6);
+  const ox = o.w / 2, oy = o.h / 2 + k, sq = p.squash ?? 1;
+  // cocked tail
+  o.poly([[ox - 5 * k, oy - 1 * k], [ox - 11 * k, oy - 7 * k], [ox - 9 * k, oy - 8.5 * k], [ox - 3.5 * k, oy - 3 * k]], (x, y) => dtone('cinnamon', 2.4 + ((Math.floor(x + y) % 3) ? 0.6 : 0), x, y));
+  // body and head
+  o.ell(ox, oy, 6.4 * k, 5 * k * sq, ballShade('cinnamon', ox, oy, 6 * k, 3, 1.8));
+  o.ell(ox, oy + 1.8 * k, 4.2 * k, 2.8 * k * sq, (x, y) => dtone('parch', 3.6 + lit(x - ox, y - oy, 5 * k), x, y));
+  o.disc(ox + 4.2 * k, oy - 3.4 * k, 3.4 * k, ballShade('cinnamon', ox + 4.2 * k, oy - 3.4 * k, 3.4 * k, 3.2, 1.6));
+  // wing with bars, lifted when it sings
+  const lift = (p.wing ?? 0) * 3 * k;
+  o.ell(ox - 1 * k, oy - 0.6 * k - lift, 3.6 * k, 2.4 * k, (x, y) => (Math.floor(x - y) % 3 === 0 ? tone('cinnamon', 1) : tone('cinnamon', 2)));
+  // eye (a simple dot) and brow stripe
+  o.px(ox + 5 * k, oy - 4 * k, INK);
+  o.line(ox + 2.6 * k, oy - 5.4 * k, ox + 6.6 * k, oy - 5 * k, tone('parch', 4));
   // beak
   if (p.beak === 'open') {
-    o.poly([[ox - 1.8 * k, hy + 2 * k], [ox + 1.8 * k, hy + 2 * k], [ox, hy + 3.6 * k]], tone('orange', 4));
-    o.poly([[ox - 1.4 * k, hy + 4.2 * k], [ox + 1.4 * k, hy + 4.2 * k], [ox, hy + 6 * k]], tone('orange', 2));
-    o.rect(ox - 1 * k, hy + 3.6 * k, Math.max(1, 2 * k), Math.max(1, 0.8 * k), '#5a1a14');
-  } else o.poly([[ox - 1.8 * k, hy + 2 * k], [ox + 1.8 * k, hy + 2 * k], [ox, hy + 5.4 * k]], (x, y) => (x < ox ? tone('orange', 4) : tone('orange', 3)));
-  // feet
-  for (const sd of [-1, 1]) for (let t = -1; t <= 1; t++) o.rect(ox + sd * 3.4 * k + t * 1.2 * k, by + 8.2 * k * sq, Math.max(1, k), Math.max(1, 1.4 * k), tone('orange', 3));
-  // nightcap
-  if (p.cap) {
-    o.poly([[ox - 8.5 * k, hy - 4.5 * k], [ox + 7.5 * k, hy - 6.5 * k], [ox + 12 * k, hy - 15 * k], [ox + 2 * k, hy - 12 * k]], (x, y) => ((Math.floor((x + y) / (2 * k)) % 2) ? tone('blue', 3) : tone('blue', 2)));
-    o.rect(ox - 9 * k, hy - 6 * k, 17.5 * k, 2.4 * k, (x, y) => dtone('white', 4 + (hash(x, y) - 0.5), x, y));
-    o.disc(ox + 12.5 * k, hy - 15.5 * k, 2.2 * k, ballShade('white', ox + 12.5 * k, hy - 15.5 * k, 2 * k, 4, 1));
+    o.poly([[ox + 7 * k, oy - 4.2 * k], [ox + 10.6 * k, oy - 5.4 * k], [ox + 7.2 * k, oy - 3.2 * k]], tone('honey', 4));
+    o.poly([[ox + 7 * k, oy - 2.8 * k], [ox + 10 * k, oy - 1.8 * k], [ox + 7.2 * k, oy - 2.2 * k]], tone('honey', 2));
+  } else o.poly([[ox + 7 * k, oy - 4 * k], [ox + 10.4 * k, oy - 3.2 * k], [ox + 7 * k, oy - 2.4 * k]], tone('honey', 3));
+  // legs
+  for (const dx of [-1.2, 1.2]) o.rect(ox + dx * k, oy + 4.6 * k * sq, Math.max(1, k * 0.8), Math.max(1, 1.6 * k), tone('wood', 1));
+  o.outline(INK);
+  a.stamp(o, cx - ox, cy - oy);
+}
+
+/**
+ * A cosy woven nest with a patchwork blanket tucked in, a striped nightcap's pom poking out and a
+ * little pillow: Pip's bed, seen from outside (no owl drawn). `breath` (about -1..1) lifts the
+ * blanket. Centred on (cx, cy), about 40 x 20 px at k = 1.
+ */
+export function nest(a: Art, cx: number, cy: number, k = 1, breath = 0) {
+  const o = new Art(Math.ceil(48 * k) + 4, Math.ceil(30 * k) + 4);
+  const ox = o.w / 2, oy = o.h / 2 + 3 * k;
+  // the blanket mound
+  const lift = Math.round(breath * k);
+  o.ell(ox + 2 * k, oy - 5 * k - lift, 14 * k, 7 * k, (x, y) => {
+    const cx2 = Math.floor((x - ox) / (4 * k)), cy2 = Math.floor((y - oy) / (3 * k)), kk = ((cx2 * 3 + cy2 * 5) % 5 + 5) % 5;
+    if (Math.floor(x - ox) % Math.round(4 * k) === 0 || Math.floor(y - oy) % Math.round(3 * k) === 0) return tone('blue', 2);
+    const ramp = kk === 1 ? 'yellow' : kk === 3 ? 'red' : kk === 4 ? 'green' : 'blue';
+    return dtone(ramp, 3 + lit(x - ox, y - oy + 5 * k, 12 * k) * 1.1, x, y);
+  });
+  // a little pillow and the nightcap pom peeking out
+  o.ell(ox - 10 * k, oy - 6 * k, 5 * k, 3 * k, ballShade('cream', ox - 10 * k, oy - 6 * k, 5 * k, 3.6, 1.2));
+  o.poly([[ox - 13 * k, oy - 8 * k], [ox - 6 * k, oy - 9.5 * k], [ox - 4 * k, oy - 13 * k]], (x, y) => ((Math.floor((x + y) / (2 * k)) % 2) ? tone('red', 3) : tone('cream', 4)));
+  o.disc(ox - 3.6 * k, oy - 13.6 * k, 1.8 * k, ballShade('white', ox - 3.6 * k, oy - 13.6 * k, 1.8 * k, 4, 1));
+  // the woven nest bowl: twigs crossing in bands, ends sticking out
+  o.ell(ox, oy + 1 * k, 20 * k, 7.5 * k, (x, y) => {
+    if (y < oy - 2 * k) return null;
+    const band = Math.floor((y - oy) / (2 * k)), cross = Math.floor((x + band * 3 + (band % 2 ? y : -y) * 0.8) / (3 * k));
+    return dtone((band + cross) % 3 === 0 ? 'wood' : 'lwood', 2.2 + ((cross % 2) ? 0.7 : 0) - Math.max(0, (y - oy) / (6 * k)), x, y);
+  });
+  for (let i = 0; i < 7; i++) {
+    const x0 = ox - 19 * k + i * 6.2 * k, y0 = oy - 1 * k + (i % 2) * 2 * k;
+    o.line(x0, y0, x0 + (i % 2 ? 4 : -4) * k, y0 - 2.5 * k, tone('wood', 3));
   }
+  o.line(ox - 21 * k, oy + 1 * k, ox - 24 * k, oy - 1.5 * k, tone('lwood', 3));
+  o.line(ox + 20 * k, oy + 0.5 * k, ox + 24 * k, oy - 2 * k, tone('lwood', 3));
+  // a tuft of moss on the rim
+  for (let x = Math.round(ox + 6 * k); x < ox + 13 * k; x++) o.px(x, Math.round(oy - 2 * k + (x % 2)), tone('moss', 4));
+  o.outline(INK);
+  a.stamp(o, cx - ox, cy - oy);
+}
+
+/** A carved crescent moon with a star: an ornament for clocks and frames. */
+export function crescentOrnament(a: Art, cx: number, cy: number, r: number, ramp = 'wood') {
+  const o = new Art(Math.ceil(r * 2) + 8, Math.ceil(r * 2) + 8);
+  const ox = o.w / 2, oy = o.h / 2;
+  o.disc(ox, oy, r, ballShade(ramp, ox, oy, r, 3.2, 1.6));
+  for (let y = 0; y < o.h; y++) for (let x = 0; x < o.w; x++) if (Math.hypot(x + 0.5 - (ox + r * 0.45), y + 0.5 - (oy - r * 0.3)) < r * 0.82) o.d[y * o.w + x] = 0;
+  const sx = ox + r * 0.55, sy = oy + r * 0.1;
+  o.px(sx, sy, tone(ramp, 5)); o.px(sx - 1, sy, tone(ramp, 4)); o.px(sx + 1, sy, tone(ramp, 4)); o.px(sx, sy - 1, tone(ramp, 4)); o.px(sx, sy + 1, tone(ramp, 4));
   o.outline(INK);
   a.stamp(o, cx - ox, cy - oy);
 }

@@ -15,6 +15,7 @@ import { bedtimeOf, phase } from '../../game/night.ts';
 import { claimable, todaysQuests } from '../../game/quests.ts';
 import { dayKey, level, save } from '../../game/store.ts';
 import { portrait } from '../portraits.ts';
+import { pixelate } from '../pxfx.tsx';
 import { haptic } from '../kit.tsx';
 import { breathing, panel, say, sceneRef, type Panel } from '../state.ts';
 import { chainTile, plank, plaque, ropeTile, shelf, tag, type Inner } from './paint.ts';
@@ -103,7 +104,14 @@ function NameSign() {
   const [ref, sw] = useSwing({ amp: 0.7, rate: 0.8 });
   const [xp, setXp] = useState(false);
   const tm = useRef(0);
-  const pic = useMemo(() => { try { return portrait(s.look); } catch { return ''; } }, [JSON.stringify(s.look)]);
+  // Pip's face is a tiny render of the 3D model, re-sampled to art pixels so it sits in the pixel sign
+  const [pic, setPic] = useState('');
+  useEffect(() => {
+    let live = true, url = '';
+    try { url = portrait(s.look); } catch { url = ''; }
+    if (url) void pixelate(url, 25).then((u) => { if (live) setPic(u); });
+    return () => { live = false; };
+  }, [JSON.stringify(s.look)]);
   const night = (sceneRef.current?.sky.night ?? 0) > 0.5;
   const tapSign = () => {
     kick(sw, 70);
@@ -117,7 +125,7 @@ function NameSign() {
   return (
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={42} />
-      <button class="hh-board hh-nameboard px" style={{ backgroundImage: bg(plank(96, 36, { seed: 4, nails: [[26, 4], [71, 4]], carve: true })) }} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
+      <button class="hh-board hh-nameboard px" style={{ backgroundImage: bg(plank(96, 36, { seed: 4, nails: [[26, 4], [71, 4]], carve: true, moss: [[34, 52], [80, 90]], ivy: [[92, 3, 9]] })) }} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
         <span class={'hh-portrait' + (night ? ' night' : '')}>
           {pic ? <img class="hh-face" src={pic} alt="" draggable={false} /> : <span class="hh-face" />}
           <PxAnim tl={[['hud_ring', 1e9]]} size={64} class="hh-ring" />
@@ -162,7 +170,7 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
   return (
     <div class={'hh-hang hh-curhang ' + p.kind} ref={ref}>
       <Ropes xs={[22, 102]} top={p.kind === 'coin' ? -28 : -16} len={p.kind === 'coin' ? 36 : 24} chain />
-      <div class="hh-board hh-curboard px" style={{ backgroundImage: bg(plank(62, 20, { seed: p.kind === 'coin' ? 7 : 9, nails: [[11, 3], [51, 3]], tone: p.kind === 'coin' ? 'wood' : 'dwood' })) }} onClick={tapSign} role="group" aria-label={`${label}: ${p.value.toLocaleString()}`}>
+      <div class="hh-board hh-curboard px" style={{ backgroundImage: bg(plank(62, 20, { seed: p.kind === 'coin' ? 7 : 9, nails: [[11, 3], [51, 3]], tone: p.kind === 'coin' ? 'wood' : 'dwood', moss: p.kind === 'coin' ? [[20, 32]] : [[38, 46]] })) }} onClick={tapSign} role="group" aria-label={`${label}: ${p.value.toLocaleString()}`}>
         <span class={'hh-cur-ico ' + p.kind} data-chip={p.kind} ref={ico}>
           <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}

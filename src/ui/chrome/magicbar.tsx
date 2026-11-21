@@ -1,5 +1,5 @@
-// The level bar as an arcane glass tube between two brass caps, filled with swirling liquid
-// light: a flowing noise pattern, a bright wobbling meniscus, rising bubbles that pop into tiny
+// The level bar as a glass tube between two brass caps, filled with swirling liquid moonlight
+// (lake, mist and dusk blues from the calm palette): a flowing noise pattern, a bright wobbling meniscus, rising bubbles that pop into tiny
 // sparkles. XP gains surge the fill with sparks flying off the surface; a level-up fills it to the
 // brim, flashes, drains and refills. Painted per texel on a tiny canvas (2 CSS px per texel).
 import { useEffect, useRef } from 'preact/hooks';
@@ -7,10 +7,10 @@ import { vnoise } from './paint.ts';
 import { clockNow } from './pxanim.tsx';
 import { uiBurst } from './uifx.ts';
 
-const PAL = ['#25165e', '#3f27a6', '#6247e6', '#4aa6ff', '#9ff0ff', '#f4ffff'].map((h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; });
-const GOLD = [[122, 74, 18], [176, 102, 26], [229, 163, 32], [255, 210, 63], [255, 233, 138], [255, 251, 224]];
-const BRASS = [[58, 38, 16], [92, 66, 25], [141, 108, 50], [184, 146, 76], [220, 189, 114], [246, 230, 172]];
-const INK = [42, 26, 20];
+const PAL = ['#2b3a4c', '#46596a', '#617f8c', '#86a9b0', '#c6dcd8', '#f4f1e4'].map((h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; });
+const GOLD = [[142, 116, 64], [168, 138, 78], [197, 154, 82], [220, 176, 114], [241, 211, 154], [248, 236, 210]];
+const BRASS = [[51, 41, 26], [123, 101, 56], [142, 116, 64], [200, 167, 100], [214, 184, 118], [241, 211, 154]];
+const INK = [46, 43, 36];
 const CYL = [1, 0.7, 0.35, 0.1, 0, -0.2, -0.45, -0.75];
 
 interface Bub { x: number; y: number; v: number }
@@ -90,23 +90,23 @@ export function MagicBar(p: { level: number; into: number; need: number; w?: num
           if (x >= xm - 1) set(x, y, PAL[r < 2 ? 5 : 4]);
         } else {
           // empty glass: dark, with a faint inner glow next to the surface
-          set(x, y, r === 0 ? [44, 36, 78] : r === 7 ? [16, 12, 32] : [26, 20, 50]);
+          set(x, y, r === 0 ? [52, 64, 80] : r === 7 ? [22, 28, 37] : [33, 42, 54]);
           if (x - xm < 2 && xf > x0) blend(x, y, PAL[3], 0.35);
-          if ((x - x0) % Math.max(4, Math.round(len / 4)) === 0 && r > 5) set(x, y, [74, 64, 120]);
+          if ((x - x0) % Math.max(4, Math.round(len / 4)) === 0 && r > 5) set(x, y, [70, 89, 106]);
         }
         // glass reflection streak
-        if (r === 1 && (x + 2) % 9 < 6) blend(x, y, [255, 255, 255], 0.38);
+        if (r === 1 && (x + 2) % 9 < 6) blend(x, y, [244, 238, 221], 0.38);
       }
       // bubbles and twinkles inside the liquid
       s.bubs = s.bubs.filter((b) => {
         const bx = Math.round(b.x), by = Math.round(b.y);
-        if (by < 2 || bx >= xf) { if (by < 2 && bx < xf && bx > x0) { set(bx, 2, [255, 255, 255]); } return false; }
-        set(bx, by, [232, 255, 255]);
+        if (by < 2 || bx >= xf) { if (by < 2 && bx < xf && bx > x0) { set(bx, 2, [244, 238, 221]); } return false; }
+        set(bx, by, [211, 224, 220]);
         return true;
       });
       if (xf > x0 + 4) for (let i = 0; i < 2; i++) {
         const sx = x0 + 1 + Math.floor(((t * 3.1 + i * 7.3) % 1) * (xf - x0 - 2)), sy = 3 + ((Math.floor(t * 5) + i * 3) % 5);
-        if (Math.floor(t * 6 + i) % 3 === 0) set(sx, sy, [255, 255, 255]);
+        if (Math.floor(t * 6 + i) % 3 === 0) set(sx, sy, [244, 238, 221]);
       }
       g.putImageData(img, 0, 0);
     };

@@ -33,67 +33,71 @@ function twinkle(g, x, y, ph, big = 'S', dim = 's') {
 }
 
 // =====================================================================================
-// MAIN BUTTON: SLEEP. A crescent moon over a tiny bed; Pip asleep under a patchwork quilt in
-// a red nightcap; Zzz rising; stars twinkling; the quilt rises and falls with each breath.
+// MAIN BUTTON: SLEEP. A turned-down bed under the night sky: a carved headboard with a moon
+// cut-out, a plump pillow with a striped nightcap resting on it, a patchwork quilt (stitched
+// squares in honey, berry and sage) that rises and falls over a sleepy lump, a crescent moon
+// rocking on its thread, stars twinkling and Zzz drifting up. (No owl is drawn: Pip only ever
+// appears as the 3D model.)
 // =====================================================================================
 const SLEEP_KEY = {
-  M: 'yellow.R@moon', m: 'yellow:5', S: '#fff8d0!', s: '#9c94dc!',
-  W: 'wood.x@bed', w: 'wood:5', d: 'dwood.s@leg', H: 'wood.y@post',
+  M: 'yellow.R@moon', m: 'yellow:5', t: 'cream:2', S: '#fff8d0!', s: '#9c94dc!',
+  W: 'wood.x@bed', w: 'wood:5', d: 'dwood.s@leg', H: 'wood.y@post', h: 'wood:1', o: 'dwood:1',
   P: 'cream.r@pillow', p: 'cream:2',
-  B: 'blue.r@quilt', b: 'blue:2', q: 'sky:4', Q: 'yellow:3', r: 'red:3',
-  O: 'cinnamon.r@owl', F: 'tan.r@face', Y: 'honey:4', n: 'pink:3',
-  C: 'red.r@cap', c: 'cream:4', o: 'white:5',
+  B: 'blue.r@quilt', b: 'blue:2', q: 'sky:4', Q: 'yellow:3', r: 'red:3', g: 'green:3', x: 'cream:5',
+  C: 'red.r@cap', c: 'cream:4', O: 'white:5',
   Z: '#efe8ff', z: '#a69ee0!',
 };
 function drawSleep(g, f) {
   // stars
-  [[4, 3], [11, 6], [17, 2], [3, 10], [29, 15], [21, 11], [8, 1]].forEach(([x, y], i) => twinkle(g, x, y, f + i * 3));
-  // moon
-  g.ellipse(24.5, 7, 5.2, 5.2, 'M');
-  g.ellipse(27.2, 5, 4.3, 4.3, '.');
-  g.set(20, 6, 'm').set(20, 7, 'm').set(21, 9, 'm');
-  // bed: headboard, footboard, rail, legs
-  g.rect(2, 14, 4, 14, 'H');
-  g.ellipse(4, 14, 2.2, 2, 'H');
-  g.rect(3, 16, 2, 8, 'w');
-  g.rect(27, 19, 3, 9, 'H');
-  g.ellipse(28.5, 19, 1.8, 1.6, 'H');
-  g.rect(5, 24, 23, 3, 'W');
-  g.line(6, 25, 26, 25, 'w');
+  [[4, 3], [11, 6], [16, 2], [3, 10], [29, 14], [21, 9], [8, 1], [26, 2]].forEach(([x, y], i) => twinkle(g, x, y, f + i * 3));
+  // crescent moon on a thread, rocking
+  const rock = [0, 1, 1, 0, 0, -1, -1, 0][f % 8];
+  g.line(24, 0, 24 + rock, 2, 't');
+  g.ellipse(24.5 + rock, 7, 4.8, 4.8, 'M');
+  g.ellipse(27 + rock, 5.4, 4, 4, '.');
+  g.set(21 + rock, 6, 'm').set(21 + rock, 7, 'm').set(22 + rock, 10, 'm');
+  // headboard: two posts with round finials and a panel with a moon cut-out
+  g.rect(2, 13, 3, 15, 'H'); g.rect(8, 15, 2, 6, 'H');
+  g.ellipse(3.5, 13, 1.9, 1.7, 'H'); g.ellipse(9, 15, 1.4, 1.2, 'H');
+  g.rect(5, 15, 3, 6, 'W');
+  g.set(6, 17, 'o').set(6, 18, 'o').set(5, 17, 'o'); // the little moon cut-out
+  g.line(3, 15, 3, 26, 'w');
+  // footboard
+  g.rect(27, 19, 3, 9, 'H'); g.ellipse(28.5, 19, 1.7, 1.5, 'H'); g.line(28, 20, 28, 26, 'w');
+  // rail and legs
+  g.rect(5, 24, 23, 3, 'W'); g.line(6, 25, 26, 25, 'w'); g.line(6, 26, 26, 26, 'h');
   g.rect(2, 28, 2, 2, 'd'); g.rect(28, 28, 2, 2, 'd');
-  // pillow + Pip's head
-  g.ellipse(9.5, 20, 4.2, 2.6, 'P');
-  g.line(7, 21, 12, 21, 'p');
-  g.ellipse(10.5, 16.6, 4.3, 3.9, 'O');
-  g.ellipse(10.8, 17.3, 3.1, 2.6, 'F');
-  g.set(9, 17, 'k').set(8, 16, 'k'); // closed eyes, curved down
-  g.set(12, 17, 'k').set(13, 16, 'k');
-  g.set(10, 18, 'Y').set(11, 18, 'Y');
-  g.set(8, 18, 'n').set(13, 18, 'n');
-  // nightcap flopping back over the headboard, pom bobbing with the breath
-  const br = f >= 2 && f <= 5 ? 1 : 0;
-  g.poly([[6.5, 14], [15, 13.6], [13, 10.6], [8.5, 9.4], [4.5, 9.6 + br], [3.6, 11 + br], [6.6, 12.2]], 'C');
-  g.rect(7, 13, 8, 1, 'c');
-  g.ellipse(3.4, 10.6 + br, 1.6, 1.6, 'o');
-  g.set(10, 11, 'c').set(13, 12, 'c').set(7, 11, 'c');
-  // quilt (rises with the breath)
+  // plump pillow and a striped nightcap resting on it
+  g.ellipse(10.5, 19.5, 4.6, 2.7, 'P');
+  g.line(8, 21, 13, 21, 'p'); g.set(7, 19, 'p');
+  g.poly([[8, 18.6], [14, 18.4], [15.6, 16], [12.5, 15], [10, 16]], 'C');
+  for (const [x, y] of [[10, 17], [12, 16], [13, 17], [14, 16]]) g.set(x, y, 'c');
+  g.rect(8, 18, 6, 1, 'c');
+  g.ellipse(16, 15.4, 1.3, 1.3, 'O');
+  // patchwork quilt over a sleepy lump that breathes
   const lift = f >= 2 && f <= 5 ? 1 : 0;
-  g.poly([[7.5, 25], [7.5, 21.5], [11, 19.5 - lift], [16, 18.4 - lift], [21, 19.6], [27.5, 20], [27.5, 25]], 'B');
-  for (let y = 18; y < 25; y++) for (let x = 7; x < 28; x++) if (g.get(x, y) === 'B' && ((x >> 1) + (y >> 1)) % 3 === 0) g.set(x, y, 'b');
-  for (let x = 8; x < 27; x += 3) g.set(x, 22, 'q');
-  g.set(17, 20 - lift, 'Q').set(22, 21, 'Q').set(13, 23, 'r').set(24, 23, 'r');
-  // Zzz rising from Pip
+  g.poly([[9, 25], [9, 21.6], [13, 20.6 - lift], [17.5, 18.6 - lift], [22, 19.4 - lift], [27.5, 20.2], [27.5, 25]], 'B');
+  for (let y = 18; y < 25; y++) for (let x = 9; x < 28; x++) {
+    if (g.get(x, y) !== 'B') continue;
+    const px = Math.floor((x - 9) / 4), py = Math.floor((y - 17) / 3), k = (px * 3 + py * 5) % 5;
+    if ((x - 9) % 4 === 3 || (y - 17) % 3 === 2) g.set(x, y, 'b'); // stitched seams
+    else if (k === 1) g.set(x, y, 'Q');
+    else if (k === 3) g.set(x, y, 'r');
+    else if (k === 4) g.set(x, y, 'g');
+  }
+  for (let x = 10; x < 27; x += 2) g.set(x, 24, 'x'); // a cream binding
+  // Zzz rising
   for (let k = 0; k < 2; k++) {
     const t = ((f + k * 4) % 8) / 8;
     const size = t < 0.34 ? 3 : t < 0.7 ? 4 : 5;
-    const x = Math.round(14 + t * 3 + Math.sin(t * 6.3) * 1.2), y = Math.round(11 - t * 10.5);
+    const x = Math.round(15 + t * 3 + Math.sin(t * 6.3) * 1.2), y = Math.round(12 - t * 10.5);
     glyph(g, x, y, ZG[size], t > 0.82 ? 'z' : 'Z');
   }
 }
 frames('nav_sleep', 8, SLEEP_KEY, drawSleep);
-// tapped: Pip stirs, a big Z puffs out
+// tapped: the quilt stirs, a big Z puffs out
 frames('nav_sleep_tap', 3, SLEEP_KEY, (g, f) => {
-  drawSleep(g, f * 2);
+  drawSleep(g, f * 2 + 2);
   if (f > 0) glyph(g, 17 + f, 9 - f * 3, ZG[5], 'Z');
 });
 

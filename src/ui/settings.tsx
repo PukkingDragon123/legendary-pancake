@@ -43,8 +43,8 @@ function Blocker() {
       <Setting title="Strict mode" sub="No pausing during bedtime. Changes wait until morning."><Toggle on={b.strict} onChange={(v) => set((x) => { x.strict = v; })} label="Strict mode" /></Setting>
       <div class="label">Sites</div>
       <div class="tags">
-        {DEFAULT_SITES.map((d) => <button class={'tag' + (b.sites.includes(d) ? ' on' : '')} style="--tag:#4a58a8" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.sites = x.sites.includes(d) ? x.sites.filter((y) => y !== d) : [...x.sites, d]; }); }}>{pretty(d)}</button>)}
-        {b.custom.map((d) => <button class="tag on" style="--tag:#7a5fd0" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.custom = x.custom.filter((y) => y !== d); }); }}>{d}<IcoClose size={20} /></button>)}
+        {DEFAULT_SITES.map((d) => <button class={'tag' + (b.sites.includes(d) ? ' on' : '')} style="--tag:#49637f" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.sites = x.sites.includes(d) ? x.sites.filter((y) => y !== d) : [...x.sites, d]; }); }}>{pretty(d)}</button>)}
+        {b.custom.map((d) => <button class="tag on" style="--tag:#787097" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.custom = x.custom.filter((y) => y !== d); }); }}>{d}<IcoClose size={20} /></button>)}
       </div>
       <form class="row" onSubmit={(e) => { e.preventDefault(); const d = normalizeDomain(custom); if (!d) { toast('That doesn’t look like a website'); return; } set((x) => { if (!x.custom.includes(d)) x.custom.push(d); }); setCustom(''); tap('ui_confirm'); }}>
         <input class="field" placeholder="Add a site, e.g. news.example.com" value={custom} onInput={(e) => setCustom((e.target as HTMLInputElement).value)} />
@@ -97,7 +97,7 @@ export function Settings() {
           <button class="btn soft sm" onClick={() => { tap(); flush(); void exportJournal(); }}>Export journal</button>
           <button class="btn soft sm" onClick={() => { tap(); demoTonight(); panel.value = null; }}>Preview a demo night</button>
           <button class="btn soft sm" onClick={() => { tap(); edit((x) => { x.onboarded = false; x.profile.interviewed = false; }); flush(); location.reload(); }}>Replay the interview</button>
-          <button class="btn soft sm" style="color:#b3304a" onClick={async () => { if (await ask({ title: 'Start over?', body: 'This erases Pip, the journal and every treasure. It cannot be undone.', ok: 'Erase everything', cancel: 'Keep my hollow', tone: 'berry', art: spriteURL('owl', 4) })) { resetSave(); location.reload(); } }}>Start over</button>
+          <button class="btn soft sm" style="color:#945352" onClick={async () => { if (await ask({ title: 'Start over?', body: 'This erases Pip, the journal and every treasure. It cannot be undone.', ok: 'Erase everything', cancel: 'Keep my hollow', tone: 'berry', art: spriteURL('owl', 4) })) { resetSave(); location.reload(); } }}>Start over</button>
         </div>
       </div>
       <div class="card col small">

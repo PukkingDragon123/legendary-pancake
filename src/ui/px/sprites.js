@@ -20,6 +20,7 @@
 // Everything is plain data until a sprite is first read; canvases are built
 // on first render and cached. Importing this module never touches the DOM.
 import { FACE3D } from './faceHook.js'; // [v26 faces3d] character faces are 3D renders (src/ui/faces3d.js)
+import { calm, calmRGB } from './calm.js'; // [ui3] every sprite is graded into Hoot Hollow's calm palette
 
 // ===========================================================================
 // COLOUR
@@ -42,7 +43,7 @@ const lum = (c) => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
 
 // Hue-shifted ramps, dark -> light. Tone 3 is the base colour, 1..5 are used
 // by automatic shading, tone 0 is the deepest shade (inner lines).
-const RAMPS = {
+const RAMPS_SRC = {
   gold: ['#7a4a12', '#b0661a', '#e5a320', '#ffd23f', '#ffe98a', '#fffbe0'],
   brass: ['#3a2610', '#5c4219', '#8d6c32', '#b8924c', '#dcbd72', '#f6e6ac'],
   copper: ['#4a1e14', '#74301e', '#a04a2a', '#c86a3a', '#e8945a', '#fcc490'],
@@ -103,11 +104,15 @@ const RAMPS = {
   furw: ['#5e4e4c', '#a0928e', '#cfc5bf', '#efe8e2', '#faf6f2', '#ffffff'],
   denim: ['#1a2440', '#26365e', '#344c80', '#4866a2', '#6a88c0', '#9cb4dc'],
 };
+// [ui3] The sprite renderer works in the source ramps and every finished sprite is graded once
+// (finalize); RAMPS, for modules that paint with the ramps directly, holds the graded colours.
+const RAMPS = {};
+for (const k of Object.keys(RAMPS_SRC)) RAMPS[k] = RAMPS_SRC[k].map((c) => calm(c));
 const RAMP_RGB = {};
 function ramp(name) {
   let r = RAMP_RGB[name];
   if (!r) {
-    const src = RAMPS[name];
+    const src = RAMPS_SRC[name] || RAMPS[name];
     if (!src) throw new Error('unknown ramp ' + name);
     r = RAMP_RGB[name] = src.map(rgb);
   }
@@ -467,7 +472,19 @@ const CHARS = (() => {
   return s;
 })();
 
+const GRADE = new Map();
+function gradePix(p) {
+  const d = p.d;
+  for (let i = 0; i < d.length; i += 4) {
+    if (!d[i + 3]) continue;
+    const k = (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
+    let c = GRADE.get(k);
+    if (!c) { c = calmRGB([d[i], d[i + 1], d[i + 2]]); GRADE.set(k, c); }
+    d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
+  }
+}
 function finalize(p) {
+  if (!p.raw) gradePix(p); // [ui3] the calm grade
   const { w, h, d } = p;
   const map = new Map();
   const pal = {};
@@ -4253,7 +4270,7 @@ function getSprite(name) {
 
 // dev helpers (used by the preview page)
 export const __dev = { BUILD_WARN, RAMPS, Grid, Pix, render, finalize };
-export { Grid, Pix, render, T, icon, draw, RAMPS };
+export { Grid, Pix, render, T, icon, draw, RAMPS, RAMPS_SRC };
 
 const canvasCache = new Map();
 const urlCache = new Map();

@@ -12,7 +12,8 @@ import { WoodClock } from './clock.tsx';
 import { Px } from './icons.tsx';
 import { fmtDur, fmtTime, SlideToConfirm, tap, useTick } from './kit.tsx';
 import { Art, dtone, hash, tone } from './px/sleepart.ts';
-import { moon, moonPhase, owl } from './px/sleepprops.ts';
+import { moon, moonPhase, nest } from './px/sleepprops.ts';
+import { PipPix } from './pippix.tsx';
 import { ArtCanvas, HoldButton, injectSleepFrames, nowT, Paper } from './sleepkit.tsx';
 import { breathing, panel, sceneRef } from './state.ts';
 import { voice, type Tts } from './voice.ts';
@@ -25,12 +26,12 @@ export const SOUNDSCAPES = [
 export const ALARMS = [{ v: 'alarm_musicbox', label: 'Music box' }, { v: 'alarm_kalimba', label: 'Kalimba' }, { v: 'alarm_birds', label: 'Dawn birds' }, { v: 'alarm_bells', label: 'Bells' }];
 /** tile art for each sound: a sprite and a little sky behind it */
 const SOUND_ART: Record<string, { sprite: string; sky: [string, string] }> = {
-  none: { sprite: 'speaker_off', sky: ['#7d7f9c', '#4b4d68'] }, amb_rain: { sprite: 'rain', sky: ['#5f78b8', '#2f3f78'] },
-  amb_waves: { sprite: 'waves', sky: ['#4fa6b8', '#24607a'] }, amb_brown: { sprite: 'wind', sky: ['#9a86c8', '#56448a'] },
-  amb_forest_night: { sprite: 'leaf', sky: ['#4f8a5a', '#23452f'] }, amb_fire: { sprite: 'campfire', sky: ['#d98a4a', '#7a3424'] },
-  amb_stream: { sprite: 'drop', sky: ['#5fb8c8', '#2d6f8a'] }, music_lullaby: { sprite: 'music', sky: ['#c27ab8', '#5e3478'] },
-  alarm_musicbox: { sprite: 'music', sky: ['#f0c26a', '#c07a3a'] }, alarm_kalimba: { sprite: 'note', sky: ['#e8a07a', '#a65242'] },
-  alarm_birds: { sprite: 'birdhouse', sky: ['#9fd0e8', '#5b93c0'] }, alarm_bells: { sprite: 'bell', sky: ['#f4d77a', '#c8913a'] },
+  none: { sprite: 'speaker_off', sky: ['#77819d', '#454f68'] }, amb_rain: { sprite: 'rain', sky: ['#607e99', '#2b465f'] },
+  amb_waves: { sprite: 'waves', sky: ['#74a1aa', '#375f6d'] }, amb_brown: { sprite: 'wind', sky: ['#998bb3', '#564c70'] },
+  amb_forest_night: { sprite: 'leaf', sky: ['#678555', '#2e4328'] }, amb_fire: { sprite: 'campfire', sky: ['#c59371', '#703c2e'] },
+  amb_stream: { sprite: 'drop', sky: ['#84b2ba', '#446d7b'] }, music_lullaby: { sprite: 'music', sky: ['#b487a6', '#554063'] },
+  alarm_musicbox: { sprite: 'music', sky: ['#e9c389', '#af815f'] }, alarm_kalimba: { sprite: 'note', sky: ['#dfa489', '#995b4c'] },
+  alarm_birds: { sprite: 'birdhouse', sky: ['#a6d0df', '#6c93a7'] }, alarm_bells: { sprite: 'bell', sky: ['#f3d598', '#bb9565'] },
 };
 /** Illustrated sound tiles: tap to choose and hear a few seconds; the chosen one wears a gold frame. */
 export function SoundTiles(p: { options: { v: string; label: string }[]; value: string; onPick: (v: string) => void; preview: (v: string) => number; cols?: number }) {
@@ -128,19 +129,22 @@ function Journey(p: { frac: number; color: string }) {
     // the oak at home (left) and the area's landmark (right)
     a.rect(6, 12, 3, 11, tone('wood', 1));
     a.ell(7.5, 11, 6, 5, (x, y) => dtone('moss', 1.4 + (hash(x, y) - 0.5) * 0.6, x, y));
-    a.px(8, 17, '#ffd23f'); a.px(9, 17, '#ffb83a');
+    a.px(8, 17, '#f5d290'); a.px(9, 17, '#e8bf8c');
     a.ell(W - 10, 21, 7, 4, (x, y) => dtone('navy', 2.4, x, y));
     for (let i = 0; i < 5; i++) a.px(W - 14 + i * 2, 19 - (i % 2), p.color);
     // dotted trail (an arc)
     const pt = (u: number): [number, number] => [12 + u * (W - 26), 20 - Math.sin(u * Math.PI) * 13];
-    for (let u = 0; u <= 1.0001; u += 1 / 40) { const [x, y] = pt(u); a.px(x, y, u <= p.frac ? '#ffe08a' : '#3c4a80'); }
+    for (let u = 0; u <= 1.0001; u += 1 / 40) { const [x, y] = pt(u); a.px(x, y, u <= p.frac ? '#efe1c7' : '#36516b'); }
     // twinkles
-    for (let i = 0; i < 14; i++) { const sx = Math.floor(hash(i, 3) * W), sy = Math.floor(hash(i, 4) * 12); if ((f + i) % 5) a.px(sx, sy, (f + i) % 3 ? '#4a5aa0' : '#c8d0ff'); }
-    // Pip
+    for (let i = 0; i < 14; i++) { const sx = Math.floor(hash(i, 3) * W), sy = Math.floor(hash(i, 4) * 12); if ((f + i) % 5) a.px(sx, sy, (f + i) % 3 ? '#48637e' : '#bfd5f6'); }
+    // Pip's lantern travelling the trail, a few sparks drifting behind it
     const [ox, oy] = pt(Math.max(0.02, Math.min(0.98, p.frac)));
-    const o = new Art(24, 24);
-    owl(o, 12, 13 + Math.round(Math.sin(t * 3) * 0.6), 0.48, { eyes: 'open', wing: (f % 2) ? 1 : 0.2, cap: true });
-    a.stamp(o, ox - 12, oy - 15);
+    const bob = Math.round(Math.sin(t * 3) * 0.6), lx = Math.round(ox), ly = Math.round(oy) - 4 + bob;
+    for (let i = 1; i <= 3; i++) { const [sx, sy] = pt(Math.max(0, p.frac - i * 0.035)); if ((f + i) % 3) a.px(sx, sy - 3 + ((f + i) % 2), i === 1 ? '#f1d39a' : '#c8a764'); }
+    a.rect(lx - 1, ly - 4, 3, 1, tone('iron', 2)); a.px(lx, ly - 5, tone('iron', 3));
+    a.rect(lx - 2, ly - 3, 5, 5, (x, y) => (x === lx - 2 || x === lx + 2 ? tone('brass', 2) : (f % 2 && y === ly - 1) ? '#fff2c9' : '#f1d39a'));
+    a.rect(lx - 2, ly + 2, 5, 1, tone('brass', 1));
+    a.px(lx - 3, ly - 1, '#c8a764'); a.px(lx + 3, ly - 1, '#c8a764');
   }} />;
 }
 
@@ -148,7 +152,7 @@ function Journey(p: { frac: number; color: string }) {
 function MoonClock(p: { size: number }) {
   const N = 44;
   return <ArtCanvas w={N} h={N} k={p.size} fps={4} class="moonclock" draw={(a, t, f) => {
-    for (let i = 0; i < 10; i++) { const x = Math.floor(hash(i, 1, 2) * N), y = Math.floor(hash(i, 2, 2) * N); if (Math.hypot(x - N / 2, y - N / 2) > 17 && (f + i) % 6) a.px(x, y, (f + i) % 4 ? '#5a6aa8' : '#fff3c8'); }
+    for (let i = 0; i < 10; i++) { const x = Math.floor(hash(i, 1, 2) * N), y = Math.floor(hash(i, 2, 2) * N); if (Math.hypot(x - N / 2, y - N / 2) > 17 && (f + i) % 6) a.px(x, y, (f + i) % 4 ? '#56718d' : '#f9f1e0'); }
     moon(a, N / 2, N / 2, 12, { phase: moonPhase(), glow: 0.7, face: 'sleep' });
     void t;
   }} />;
@@ -158,7 +162,7 @@ function Squiggle() {
   const t = trace.value.slice(-90);
   if (t.length < 2) return <span class="squig" />;
   const pts = t.map((v, i) => `${(i / 89) * 120},${18 - Math.min(16, v * 0.7)}`).join(' ');
-  return <svg class="squig" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true"><polyline points={pts} fill="none" stroke="#ffcf8a" stroke-opacity=".5" stroke-width="2" /></svg>;
+  return <svg class="squig" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true"><polyline points={pts} fill="none" stroke="#f8d1a0" stroke-opacity=".5" stroke-width="2" /></svg>;
 }
 
 const micLine = () => ({
@@ -195,7 +199,7 @@ export function NightOverlay() {
         <div class="n-alarm"><Px name="alarm" size={30} />{wake ? <>Alarm {fmtTime(wake, h12)}{s.sleep.smartMin ? <span class="soft"> · smart from {fmtTime(wake - s.sleep.smartMin * 60000, h12)}</span> : null}</> : 'No alarm tonight'}</div>
       </div>
       <div class="n-trip">
-        <Journey frac={frac} color={area?.color ?? '#ffd23f'} />
+        <Journey frac={frac} color={area?.color ?? '#f5d290'} />
         <div class="n-trip-l"><span>Home</span><span>{fmtDur(Date.now() - a.session.start)} away</span><span>{area?.name}</span></div>
       </div>
       <div class="n-bottom" onClick={(e) => e.stopPropagation()}>
@@ -308,17 +312,16 @@ function CantSleep(p: { onClose: () => void }) {
 // ------------------------------------------------------------------ the phone lock
 
 function SleepingPip() {
-  return <ArtCanvas w={64} h={46} k={4} fps={5} class="lock-pip" label="Pip asleep" draw={(a, t, f) => {
-    // a soft cloud to sleep on
-    for (const [cx, cy, r] of [[18, 36, 9], [32, 33, 12], [46, 36, 9], [30, 40, 10]] as const) a.disc(cx, cy, r, (x, y) => dtone('lilac', 3.6 + (y < cy - r * 0.4 ? 1 : 0) - (y > 40 ? 0.8 : 0), x, y));
-    a.outline('#1a1840');
-    const breath = Math.sin(t * 1.4) * 0.03;
-    owl(a, 32, 22, 0.95, { eyes: 'closed', cap: true, blush: true, squash: 1 + breath });
+  return <ArtCanvas w={64} h={46} k={4} fps={5} class="lock-pip" label="Pip asleep in the nest" draw={(a, t, f) => {
+    // a soft cloud, and Pip's nest on it with the blanket rising and falling
+    for (const [cx, cy, r] of [[18, 38, 9], [32, 35, 12], [46, 38, 9], [30, 42, 10]] as const) a.disc(cx, cy, r, (x, y) => dtone('lilac', 3.6 + (y < cy - r * 0.4 ? 1 : 0) - (y > 42 ? 0.8 : 0), x, y));
+    a.outline('#202942');
+    nest(a, 31, 28, 0.95, Math.sin(t * 1.4) > 0.2 ? 1 : 0);
     // drifting z's
     for (let i = 0; i < 3; i++) {
       const k = ((t * 0.35 + i / 3) % 1), zx = 44 + k * 12 + Math.sin(k * 6 + i) * 2, zy = 14 - k * 14;
       if (k > 0.85) continue;
-      const c = k < 0.5 ? '#e8ecff' : '#9aa4d8', sz = i === 1 ? 5 : 4;
+      const c = k < 0.5 ? '#eaedf2' : '#90aaca', sz = i === 1 ? 5 : 4;
       a.rect(zx, zy, sz, 1, c); for (let j = 1; j < sz - 1; j++) a.px(zx + sz - 1 - j, zy + j, c); a.rect(zx, zy + sz - 1, sz, 1, c);
     }
     void f;
@@ -365,13 +368,8 @@ function PhoneLock() {
 // ------------------------------------------------------------------ the alarm
 
 function WakingPip() {
-  return <ArtCanvas w={46} h={46} k={4} fps={6} class="wake-pip" label="Pip waking up" draw={(a, t, f) => {
-    const cyc = (t % 3) / 3;
-    const eyes = cyc < 0.35 ? 'half' : cyc < 0.5 ? 'closed' : 'open';
-    const stretch = cyc > 0.6 && cyc < 0.85;
-    owl(a, 23, 26, 1.05, { eyes, cap: true, wing: stretch ? 1 : 0, beak: cyc > 0.15 && cyc < 0.3 ? 'open' : 'closed', squash: stretch ? 1.06 : 1 });
-    void f;
-  }} />;
+  // a render of the 3D Pip, in art pixels, stretching awake (CSS steps)
+  return <span class="wake-pip"><PipPix n={46} size={184} shot="full" label="Pip waking up" /></span>;
 }
 
 export function AlarmOverlay() {

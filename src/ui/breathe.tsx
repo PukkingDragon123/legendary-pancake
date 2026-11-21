@@ -18,7 +18,7 @@ import { flyReward } from './fx.tsx';
 function Rhythm(p: { id: string; live?: boolean }) {
   const pt = PATTERN[p.id];
   const total = pt.phases.reduce((a, x) => a + x.sec, 0);
-  const col = { in: '#e8a83a', hold: '#c9b8e8', out: '#7f9be0', rest: '#c9b8e8' };
+  const col = { in: '#d5ae7b', hold: '#c9b9e1', out: '#82a1bd', rest: '#c9b9e1' };
   const head = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!p.live || !head.current) return;
@@ -35,7 +35,7 @@ function Lantern(p: { id: string; live: boolean }) {
     if (!p.live || !el.current) return;
     const pt = PATTERN[p.id], total = pt.phases.reduce((a, x) => a + x.sec, 0);
     let t = 0, sc = 0.86;
-    const frames: Keyframe[] = [{ offset: 0, transform: `scale(${sc})`, filter: 'drop-shadow(0 0 0 rgba(255,214,120,0))' }];
+    const frames: Keyframe[] = [{ offset: 0, transform: `scale(${sc})`, filter: 'drop-shadow(0 0 0 rgba(245, 215, 166,0))' }];
     for (const ph of pt.phases) {
       t += ph.sec;
       if (ph.kind === 'in') sc = Math.min(1.28, sc + 0.42 * (ph.sec / 4));
@@ -186,7 +186,7 @@ export function BreatheSession() {
   const tapBurst = (e: PointerEvent) => { st.current.overlay?.burst(e.clientX, e.clientY); sound.play('sparkle', { volume: 0.25, gap: 120 }); };
 
   return (
-    <div class="overlay" ref={host} style="background:radial-gradient(120% 70% at 50% 40%, rgba(0,0,0,0) 30%, rgba(5,6,18,.55))"
+    <div class="overlay" ref={host} style="background:var(--px-vignette-soft) 0 0/100% 100% no-repeat;image-rendering:pixelated"
       onPointerDown={(e) => { press(true); if (!cfg.follow) tapBurst(e); }} onPointerUp={() => press(false)} onPointerCancel={() => press(false)}>
       {!done && <div class="breath-cue">
         <h1 key={cue.label}>{cue.label}</h1>

@@ -1,4 +1,4 @@
-// 2D pixel-art particles for the interface (puffs, sparkles, hearts, swirling magic motes,
+// 2D pixel-art particles for the interface, in the calm palette (puffs, sparkles, hearts, swirling magic motes,
 // spinning acorns, stars, snow, leaves, confetti), drawn on one overlay canvas above the UI.
 // One canvas texel is 2 CSS px, so particles share the chunky pixel grid of the sprites.
 // Anyone may call uiBurst(kind, x, y, n) with screen coordinates in CSS px.
@@ -23,8 +23,8 @@ type Win = Window & { __chromeT?: number };
 
 const R = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-const MAGIC = ['#c9a6ff', '#8f6bff', '#7fe3ff', '#ffffff', '#ffd86a', '#ff9be8'];
-const CONFETTI = ['#e8473d', '#ffcc34', '#46963c', '#3c88d8', '#f08aa8', '#9a7ed8', '#fff3c4'];
+const MAGIC = ['#b4a9c9', '#d3cce0', '#aec8cc', '#f4eedd', '#f1d39a', '#d9aca4'];
+const CONFETTI = ['#c0866a', '#f1d39a', '#86a06a', '#86a9b0', '#d9aca4', '#b4a9c9', '#f4eedd', '#dcb072'];
 const fr = (base: string, n: number) => Array.from({ length: n }, (_, i) => `${base}_${i}`);
 
 function ensure() {
@@ -148,28 +148,28 @@ function draw(c: CanvasRenderingContext2D, p: P) {
     const img = spriteCanvas(p.frames[f], 1);
     c.drawImage(img, tx - (img.width >> 1), ty - (img.height >> 1));
   } else if (p.kind === 'magic') {
-    p.trail!.forEach(([x, y], i) => { c.globalAlpha = 0.75 - i * 0.16; c.fillStyle = i < 2 ? p.col! : '#6a4cd8'; c.fillRect(Math.round(x / B), Math.round(y / B), 1, 1); });
+    p.trail!.forEach(([x, y], i) => { c.globalAlpha = 0.75 - i * 0.16; c.fillStyle = i < 2 ? p.col! : '#617f8c'; c.fillRect(Math.round(x / B), Math.round(y / B), 1, 1); });
     c.globalAlpha = (k > 0.8 ? 0.5 : 1) * 0.6;
     c.fillStyle = p.col!;
     c.fillRect(tx - 1, ty, 3, 1); c.fillRect(tx, ty - 1, 1, 3);
     c.globalAlpha = k > 0.8 ? 0.5 : 1;
-    c.fillStyle = Math.floor(p.age * 12 + p.w) % 3 === 0 ? '#ffffff' : p.col!;
+    c.fillStyle = Math.floor(p.age * 12 + p.w) % 3 === 0 ? '#f4eedd' : p.col!;
     c.fillRect(tx, ty, 1, 1);
   } else if (p.kind === 'confetti') {
     const flip = Math.floor(p.age * p.fps + p.ph) % 4;
     c.fillStyle = p.col!;
     if (flip === 0) c.fillRect(tx - 1, ty, 3, 2);
     else if (flip === 1) c.fillRect(tx, ty - 1, 2, 3);
-    else if (flip === 2) { c.fillRect(tx - 1, ty, 3, 1); c.globalAlpha *= 0.5; c.fillStyle = '#2a1a14'; c.fillRect(tx - 1, ty + 1, 3, 1); }
+    else if (flip === 2) { c.fillRect(tx - 1, ty, 3, 1); c.globalAlpha *= 0.5; c.fillStyle = '#2e2b24'; c.fillRect(tx - 1, ty + 1, 3, 1); }
     else c.fillRect(tx, ty - 1, 1, 3);
   } else if (p.kind === 'firefly') {
     const pulse = 0.5 + 0.5 * Math.sin(p.age * p.w * 2 + p.ph);
     const fade = Math.min(1, p.age / 0.6, (p.life - p.age) / 0.6);
     c.globalAlpha = fade * (0.15 + pulse * 0.3);
-    c.fillStyle = '#e8b830';
+    c.fillStyle = '#c8a764';
     c.fillRect(tx - 1, ty, 3, 1); c.fillRect(tx, ty - 1, 1, 3);
     c.globalAlpha = fade * (0.6 + pulse * 0.4);
-    c.fillStyle = pulse > 0.6 ? '#fff6a0' : '#ffe060';
+    c.fillStyle = pulse > 0.6 ? '#f4eedd' : '#f1d39a';
     c.fillRect(tx, ty, 1, 1);
   }
   c.globalAlpha = 1;

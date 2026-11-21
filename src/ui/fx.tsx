@@ -17,6 +17,7 @@ import { openPanel } from './chrome/hud.tsx';
 import { MagicBar } from './chrome/magicbar.tsx';
 import { PxAnim, seq } from './chrome/pxanim.tsx';
 import { uiBurst, uiBurstAt } from './chrome/uifx.ts';
+import { pixelate, PxBurst } from './pxfx.tsx';
 
 // ------------------------------------------------------------------ dialogs
 
@@ -114,17 +115,15 @@ export function Ceremony() {
   if (!c) return null;
   const zone = (Object.entries(ZONE_LEVEL) as [keyof typeof ZONE_LEVEL, number][]).find(([, l]) => l === c.level);
   const area = AREAS.find((a) => a.level === c.level);
-  let owl = '';
-  try { owl = owlFull(save.value.look); } catch { /* no WebGL */ }
   return (
     <div class={'lvup' + (step === 0 ? ' pre' : '')} onClick={() => step > 1 && (ceremony.value = null)}>
       <div class="lvup-stack">
-        {step > 0 && <div class="lvup-rays" />}
+        {step > 0 && <PxBurst class="lvup-rays" size={Math.min(900, Math.max(innerWidth, innerHeight) * 1.1)} scale={3} color="#d3cce0" glow="#f1d39a" rays={14} alpha={0.32} />}
         <RuneCircle n={120} drawMs={1000} />
         <div class="lvup-medal"><PxAnim tl={seq('hud_rune', 8, 120)} size={144} /><b>{c.level}</b></div>
         <div class="lvup-title">Level {c.level}!</div>
         {step === 0 && <div class="lvup-bar spill"><MagicBar level={c.level - 1} into={62} need={100} overflow w={56} big /></div>}
-        {step > 0 && <div class="lvup-owl">{owl ? <img src={owl} alt="" /> : <Px name="owl" size={120} />}</div>}
+        {step > 0 && <CeremonyOwl />}
       </div>
       {step > 1 && (
         <div class="lvup-card" onClick={(e) => e.stopPropagation()}>
@@ -141,6 +140,17 @@ export function Ceremony() {
       )}
     </div>
   );
+}
+/** Pip at the ceremony: a render of the 3D model, re-sampled to art pixels (no 2D owl drawing). */
+function CeremonyOwl() {
+  const [url, setUrl] = useState('');
+  useEffect(() => {
+    let live = true, src = '';
+    try { src = owlFull(save.value.look); } catch { /* no WebGL */ }
+    if (src) void pixelate(src, 60).then((u) => { if (live) setUrl(u); });
+    return () => { live = false; };
+  }, []);
+  return <div class="lvup-owl">{url && <img src={url} alt="" />}</div>;
 }
 let lastLevel = level.value.level;
 /** Call once at boot: shows the ceremony whenever the level goes up. */

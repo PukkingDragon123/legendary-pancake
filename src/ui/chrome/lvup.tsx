@@ -1,4 +1,5 @@
-// Level-up pieces: a rotating arcane rune circle that draws itself in, painted per texel.
+// Level-up pieces: a turning moonlit rune circle that draws itself in, painted per texel in the
+// calm palette (lilac, mist, lamp-gold), hard pixels only.
 import { useEffect, useRef } from 'preact/hooks';
 import { clockNow } from './pxanim.tsx';
 
@@ -16,7 +17,7 @@ export function RuneCircle(p: { n?: number; drawMs?: number; scale?: number }) {
     const t0 = clockNow(), c = (N - 1) / 2;
     let raf = 0, last = 0;
     const put = (x: number, y: number, col: number[], a = 255) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= N || y >= N) return; const i = (y * N + x) * 4; d[i] = col[0]; d[i + 1] = col[1]; d[i + 2] = col[2]; d[i + 3] = Math.max(d[i + 3], a); };
-    const VIO = [143, 107, 255], CY = [127, 227, 255], WH = [240, 252, 255], DIM = [74, 52, 150], GOLD = [255, 216, 106];
+    const VIO = [180, 169, 201], CY = [174, 200, 204], WH = [244, 238, 221], DIM = [110, 82, 102], GOLD = [241, 211, 154];
     const ring = (r: number, upto: number, rot: number, col: number[], dash = 0) => {
       const steps = Math.ceil(r * 7);
       for (let i = 0; i < steps * upto; i++) {
@@ -70,5 +71,5 @@ export function RuneCircle(p: { n?: number; drawMs?: number; scale?: number }) {
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);
   }, [N]);
-  return <canvas ref={ref} class="lvup-circle" style={{ width: `${N * S}px`, height: `${N * S}px`, filter: 'drop-shadow(0 0 6px rgba(127,227,255,.65))' }} aria-hidden="true" />;
+  return <canvas ref={ref} class="lvup-circle" style={{ width: `${N * S}px`, height: `${N * S}px`, filter: 'drop-shadow(0 0 6px rgba(175, 220, 230,.65))' }} aria-hidden="true" />;
 }
