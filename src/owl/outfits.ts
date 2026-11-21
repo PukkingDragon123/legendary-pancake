@@ -1,36 +1,52 @@
 // The owl's wardrobe. Every piece is real geometry layered onto the owl's bones (caps, brims,
 // scarves, capes, satchels), painted in the same pixel style as the feathers so outfits look
-// modelled, not pasted on.
-import { box, type BoxSpec, type Painter, type Texel } from '../gfx/box.ts';
-import { col, ramp, tone } from '../gfx/color.ts';
+// modelled, not pasted on. Pieces read the wearer's anchor points (`G`, set per owl by dressOwl), so
+// the same hat sits right on a flat-headed Little Owl, a tufted Eagle-Owl or a huge Great Grey.
+import { box, lean, type BoxSpec, type Painter, type Texel } from '../gfx/box.ts';
+import { col, mix, ramp, tone } from '../gfx/color.ts';
 import { cloth, lamp, leaves, lvl, metal, R, smooth, solid, type Tint } from '../gfx/mats.ts';
-import { hash } from '../gfx/noise.ts';
+import { fbm, hash } from '../gfx/noise.ts';
+import { bodyDepth, bodyHalfW, geoOf, type Geo } from './geo.ts';
 import type { BoneName, OutfitSlot, OwlParts } from './model.ts';
+import { speciesOf } from './species.ts';
 
-// geometry constants are duplicated here (not imported) to avoid a circular import at load time
-const G = { bodyY: 3, bodyH: 11, bodyW: 13, bodyD: 11, headY: 12.4, headH: 12.8, headW: 16.4, headD: 12.6, headZ: 0.2, headTop: 25.2, faceFront: 6.6, eyeX: 3.95, eyeY: 19.5, neckY: 13.4 };
+/** The anchors of the owl being dressed right now (dressOwl sets them before each piece). */
+let G: Geo = geoOf(speciesOf('tawny').shape);
+let headTop = G.headTop;
 
 export interface PieceDef {
   id: string;
   slot: OutfitSlot;
   name: string;
   blurb: string;
-  /** coins, or moonstones when premium */
+  /** acorns, or moon gems when premium */
   price: number;
   premium?: boolean;
   /** found only on adventures in this area */
   area?: string;
+  /** limited series piece from the Snow Queen's banners (never in the regular store) */
+  series?: string;
+  /** not sold anywhere (Queen Neve's own regalia) */
+  noStore?: boolean;
   make(P: OwlParts): void;
 }
 
 export const PIECES: PieceDef[] = [];
-const def = (id: string, slot: OutfitSlot, name: string, price: number, blurb: string, make: PieceDef['make'], o: { premium?: boolean; area?: string } = {}) => {
+const def = (id: string, slot: OutfitSlot, name: string, price: number, blurb: string, make: PieceDef['make'], o: { premium?: boolean; area?: string; series?: string; noStore?: boolean } = {}) => {
   PIECES.push({ id, slot, name, price, blurb, make, ...o });
 };
 export const PIECE: Record<string, PieceDef> = {};
 
-/** depth of the face plane the eyes sit on (the owl's disc stands out further than the Meowl's face) */
-const fz = (P: OwlParts) => (P.pal.skin === 'owl' ? 7.45 : 6.6);
+/** depth of the face plane the eyes sit on */
+const fz = (P: OwlParts) => P.g.discFront;
+/** the body's cross-section at height y: half width, front and back (the body is an egg of tiers) */
+const at = (y: number) => ({ hw: bodyHalfW(G, y), ...bodyDepth(G, y) });
+/** a band hugging the body at height y (scarves, collars, straps) */
+const band = (y: number, h: number, grow: number, m: Painter, o: Partial<BoxSpec> = {}): BoxSpec => {
+  const a = at(y + h / 2);
+  return box(0, y, (a.front + a.back) / 2, a.hw * 2 + grow * 2, h, a.front - a.back + grow * 2, m, o);
+};
+const neckY = () => G.bodyTop - 1.2;
 const fineJ = (t: Texel) => (hash(Math.floor(t.x * 3), Math.floor(t.y * 3), Math.floor(t.z * 3), 77) - 0.5) * 0.35;
 
 /** Chunky hand-knit stitches: little V columns stacked in rows. */
@@ -50,7 +66,7 @@ function knit(c: Tint, o: { stripe?: Tint; every?: number; rib?: boolean } = {})
   };
 }
 
-/** A white fluffy trim (pompoms, cuffs, cloud puffs). */
+/** A white fluffy trim (pompoms, cuffs, cloud puffs, fur). */
 const fluff = (c: Tint = '#fbf8f2'): Painter => {
   const r = R(c);
   return (t) => tone(r, lvl(t, { noise: 0.9, scale: 1.1, speck: 0.8, rim: 0.6 }) * 0.7 + 0.4 + fineJ(t) * 2);
@@ -62,7 +78,7 @@ const motif = (c: Tint, dot: Tint, every = 2.6, starry = false): Painter => {
   return (t) => {
     const across = t.face === 0 || t.face === 1 ? t.z : t.x;
     const gx = Math.round(across / every), gy = Math.round(t.y / every);
-    const ox = across - gx * every - (gy & 1 ? every / 2 : 0) * 0, oy = t.y - gy * every;
+    const ox = across - gx * every, oy = t.y - gy * every;
     const L = lvl(t, { noise: 0.25, speck: 0.2, rim: 0.5 }) * 0.8 + fineJ(t);
     const hit = starry ? (Math.abs(ox) < 0.2 && Math.abs(oy) < 0.55) || (Math.abs(oy) < 0.2 && Math.abs(ox) < 0.55) : Math.hypot(ox, oy) < 0.42;
     if (hit && hash(gx, gy, t.face, 5) > (starry ? 0.35 : 0.1)) return tone(d, 1);
@@ -70,89 +86,167 @@ const motif = (c: Tint, dot: Tint, every = 2.6, starry = false): Painter => {
   };
 };
 
+/** Velvet: deep folds and a soft sheen along the lit edges. */
+const velvet = (c: Tint): Painter => {
+  const r = R(c);
+  return (t) => {
+    let L = lvl(t, { noise: 0.5, scale: 2.2, speck: 0, rim: 0.9, grad: 0.8 }) * 0.9;
+    if (t.face !== 2 && t.face !== 3 && hash(Math.floor((t.face < 2 ? t.z : t.x) * 1.2), t.face, 4, 9) > 0.75) L -= 0.6;
+    return tone(r, L + fineJ(t));
+  };
+};
+
+/** Ice crystal: bright facets with a cold core, white glints and frosty edges. */
+const ice = (c = '#bfe8ff'): Painter => {
+  const r = ramp(col(c), { step: 0.07, cool: 250 });
+  return (t) => {
+    const e = Math.min(t.u + 0.5, t.w - t.u - 0.5, t.v + 0.5, t.h - t.v - 0.5);
+    let L = [0.6, -0.2, 1.6, -1, 0.9, -0.4][t.face] + (e < 1.5 ? 1.4 : 0) - (Math.abs(t.u + 0.5 - t.w / 2) < t.w * 0.15 ? 0.9 : 0);
+    if ((t.u + t.v) % 7 === 0) L += 1.2;
+    if (hash(t.u, t.v, t.face, 3) > 0.94) return 0xffffff;
+    return tone(r, L);
+  };
+};
+
 const GOLD = '#f2b632';
-const headTop = G.headY + G.headH;
 
 // ------------------------------------------------------------------ head
 
 def('nightcap', 'head', 'Starry Nightcap', 0, 'The classic. Comes with a pompom that bobs when Pip nods off.', (P) => {
   const m = cloth('#4a5fb0', { stripe: '#f3e9cf', stripeEvery: 3 }), f = fluff();
   P.tufts = false;
-  P.add('head', box(0, headTop - 1.4, G.headZ, G.headW + 1, 2.2, G.headD + 1, f, { tag: 'brim' }));
-  const steps: [number, number, number, number, number][] = [[0, headTop + 0.6, 13.6, 2.8, 11.6], [1, headTop + 3.2, 10.6, 2.6, 9], [2.6, headTop + 5.4, 7.8, 2.2, 6.8], [4.8, headTop + 6.9, 5.4, 1.8, 5], [7, headTop + 6.8, 3.6, 1.8, 3.6], [8.6, headTop + 5.4, 2.8, 1.9, 2.8]];
-  for (const [x, y, w, h, d] of steps) P.add('head', box(x, y, G.headZ - 0.4 - x * 0.06, w, h, d, m));
-  P.add('head', box(9.2, headTop + 2.4, -0.4, 3.4, 3.2, 3.4, f, { tag: 'pom' }));
+  const s = G.headW / 16.4;
+  P.add('head', box(0, headTop - 1.6, G.headZ, G.headW + 0.8, 2.2, G.headD + 0.8, f, { tag: 'brim' }));
+  const steps: [number, number, number, number, number][] = [[0, 0.6, 13.6, 2.8, 11.6], [1, 3.2, 10.6, 2.6, 9], [2.6, 5.4, 7.8, 2.2, 6.8], [4.8, 6.9, 5.4, 1.8, 5], [7, 6.8, 3.6, 1.8, 3.6], [8.6, 5.4, 2.8, 1.9, 2.8]];
+  for (const [x, y, w, h, d] of steps) P.add('head', box(x * s, headTop + y - 0.2, G.headZ - 0.4 - x * 0.06, w * s, h, d * s, m));
+  P.add('head', box(9.2 * s, headTop + 2.2, -0.4, 3.4, 3.2, 3.4, f, { tag: 'pom' }));
 });
 def('beanie', 'head', 'Mossy Beanie', 220, 'Hand-knit by a very patient hedgehog.', (P) => {
   P.tufts = false;
   const m = knit('#5f9a52'), rib = knit('#e9d9b2');
-  P.add('head', box(0, headTop - 1.6, G.headZ, G.headW + 1, 2.4, G.headD + 1, rib));
-  P.add('head', box(0, headTop + 0.6, G.headZ - 0.2, G.headW - 0.6, 2.2, G.headD - 0.6, m), box(0, headTop + 2.6, G.headZ - 0.3, G.headW - 4, 1.6, G.headD - 3.6, m));
-  P.add('head', box(0, headTop + 4, G.headZ - 0.3, 3.6, 3.2, 3.6, fluff('#f3e2bd'), { tag: 'pom' }));
+  P.add('head', box(0, headTop - 1.8, G.headZ, G.headW + 0.8, 2.4, G.headD + 0.8, rib));
+  P.add('head', box(0, headTop + 0.4, G.headZ - 0.2, G.headW - 0.8, 2.2, G.headD - 0.8, m), box(0, headTop + 2.4, G.headZ - 0.3, G.headW - 4, 1.6, G.headD - 3.6, m));
+  P.add('head', box(0, headTop + 3.8, G.headZ - 0.3, 3.6, 3.2, 3.6, fluff('#f3e2bd'), { tag: 'pom' }));
 });
 def('explorer', 'head', 'Explorer Helmet', 380, 'For mapping mushroom caves and moonlit marshes.', (P) => {
   P.tufts = false;
-  const m = smooth('#e4cf9a'), band = cloth('#7a4a2b');
-  P.add('head', box(0, headTop - 0.8, G.headZ + 0.4, G.headW + 5, 0.9, G.headD + 5, m));
-  P.add('head', box(0, headTop - 0.2, G.headZ, G.headW - 1, 3, G.headD - 1, m), box(0, headTop + 2.6, G.headZ, G.headW - 4, 1.6, G.headD - 4, m), box(0, headTop + 4, G.headZ, 2, 0.8, 2, metal(GOLD)));
-  P.add('head', box(0, headTop - 0.1, G.headZ, G.headW - 0.6, 1.1, G.headD - 0.6, band, { skip: 'ud' }));
+  const m = smooth('#e4cf9a'), band2 = cloth('#7a4a2b');
+  P.add('head', box(0, headTop - 1.0, G.headZ + 0.4, G.headW + 5, 0.9, G.headD + 5, m));
+  P.add('head', box(0, headTop - 0.4, G.headZ, G.headW - 1, 3, G.headD - 1, m), box(0, headTop + 2.4, G.headZ, G.headW - 4, 1.6, G.headD - 4, m), box(0, headTop + 3.8, G.headZ, 2, 0.8, 2, metal(GOLD)));
+  P.add('head', box(0, headTop - 0.3, G.headZ, G.headW - 0.6, 1.1, G.headD - 0.6, band2, { skip: 'ud' }));
 }, { area: 'woods' });
 def('wizard', 'head', 'Stargazer Hat', 90, 'Every sparkle is a wish someone made while falling asleep.', (P) => {
   P.tufts = false;
   const m = motif('#2b2f7a', '#ffd84a', 2.4, true);
-  P.add('head', box(0, headTop - 0.8, G.headZ, G.headW + 6, 0.9, G.headD + 6, m));
-  const steps: [number, number, number, number][] = [[headTop, 13, 3, 0], [headTop + 3, 10, 3, -0.8], [headTop + 6, 7, 2.6, -1.8], [headTop + 8.6, 4.4, 2.2, -3], [headTop + 10.6, 2.4, 1.8, -4.4]];
-  for (const [y, w, h, z] of steps) P.add('head', box(0, y, G.headZ + z, w, h, w, m));
-  P.add('head', box(0, headTop + 12.2, G.headZ - 5.4, 1.6, 1.6, 1.6, lamp('#ffe27a'), { glow: true }));
+  P.add('head', box(0, headTop - 1.0, G.headZ, G.headW + 6, 0.9, G.headD + 6, m));
+  const steps: [number, number, number, number][] = [[headTop - 0.2, 13, 3, 0], [headTop + 2.8, 10, 3, -0.8], [headTop + 5.8, 7, 2.6, -1.8], [headTop + 8.4, 4.4, 2.2, -3], [headTop + 10.4, 2.4, 1.8, -4.4]];
+  for (const [y, w, h, z] of steps) P.add('head', box(0, y, G.headZ + z, w * G.headW / 16.4, h, w * G.headW / 16.4, m));
+  P.add('head', box(0, headTop + 12, G.headZ - 5.4, 1.6, 1.6, 1.6, lamp('#ffe27a'), { glow: true }));
 }, { premium: true });
 def('flowercrown', 'head', 'Daisy Crown', 160, 'Picked at dawn from the edge of Whispering Woods.', (P) => {
   const leaf = leaves('#5aa047', { seed: 4 });
-  const n = 14;
+  const n = 14, rx = G.headW * 0.45, rz = G.headD * 0.49;
   for (let i = 0; i < n; i++) {
-    const a = (i / n) * Math.PI * 2, x = Math.sin(a) * 7.4, z = G.headZ + Math.cos(a) * 6.2;
-    P.add('head', box(x, headTop - 0.7, z, 1.6, 1.1, 1.6, leaf));
+    const a = (i / n) * Math.PI * 2, x = Math.sin(a) * rx, z = G.headZ + Math.cos(a) * rz;
+    P.add('head', box(x, headTop - 1.4, z, 1.6, 1.1, 1.6, leaf));
     if (i % 2 === 0) {
       const petal = i % 4 === 0 ? smooth('#fffaf0') : smooth('#ffd1e0');
-      P.add('head', box(x, headTop + 0.3, z, 2.2, 0.8, 2.2, petal), box(x, headTop + 0.9, z, 1, 0.6, 1, smooth('#ffc93a')));
+      P.add('head', box(x, headTop - 0.4, z, 2.2, 0.8, 2.2, petal), box(x, headTop + 0.2, z, 1, 0.6, 1, smooth('#ffc93a')));
     }
   }
 });
 def('crown', 'head', 'Moon Crown', 160, 'Forged from the first light of a crescent moon.', (P) => {
   const g = metal(GOLD);
-  P.add('head', box(0, headTop - 0.3, G.headZ, 9, 1.8, 7.6, g, { skip: 'ud' }));
-  for (const [x, z] of [[-3.8, 0], [3.8, 0], [0, 3.4], [0, -3.4], [-2.8, 2.6], [2.8, 2.6], [-2.8, -2.6], [2.8, -2.6]]) P.add('head', box(x, headTop + 1.4, G.headZ + z, 1.1, 1.6, 1.1, g));
-  P.add('head', box(0, headTop + 1.2, G.headZ + 3.9, 1.6, 1.6, 0.8, lamp('#8fe3ff'), { glow: true }));
+  P.add('head', box(0, headTop - 0.6, G.headZ, 9, 1.8, 7.6, g, { skip: 'ud' }));
+  for (const [x, z] of [[-3.8, 0], [3.8, 0], [0, 3.4], [0, -3.4], [-2.8, 2.6], [2.8, 2.6], [-2.8, -2.6], [2.8, -2.6]]) P.add('head', box(x, headTop + 1.1, G.headZ + z, 1.1, 1.6, 1.1, g));
+  P.add('head', box(0, headTop + 0.9, G.headZ + 3.9, 1.6, 1.6, 0.8, lamp('#8fe3ff'), { glow: true }));
 }, { premium: true });
 def('beret', 'head', 'Painter Beret', 260, 'Tilted just so. Artistic sighs not included.', (P) => {
   const m = cloth('#c2423f');
-  P.add('head', { ...box(1.4, headTop - 0.4, G.headZ, G.headW - 1, 1.8, G.headD - 0.4, m), rot: [0, 0, -8] }, { ...box(1.8, headTop + 1.2, G.headZ, G.headW - 4, 1, G.headD - 3, m), rot: [0, 0, -8] }, box(0.5, headTop + 2.2, G.headZ, 0.8, 1, 0.8, m));
+  P.add('head', { ...box(1.4, headTop - 0.7, G.headZ, G.headW - 1, 1.8, G.headD - 0.4, m), rot: [0, 0, -8] }, { ...box(1.8, headTop + 0.9, G.headZ, G.headW - 4, 1, G.headD - 3, m), rot: [0, 0, -8] }, box(0.5, headTop + 1.9, G.headZ, 0.8, 1, 0.8, m));
 });
 def('acorn', 'head', 'Acorn Cap', 140, 'Borrowed from a very large acorn. It said yes.', (P) => {
   const cup = (() => { const r = R('#8a5a32'); return (t: Texel) => tone(r, lvl(t, { noise: 0.2 }) * 0.7 + ((Math.floor(t.x * 1.5) + Math.floor(t.y * 1.5) + Math.floor(t.z * 1.5)) % 2 ? -0.7 : 0.5)); })();
-  P.add('head', box(0, headTop - 1.2, G.headZ, G.headW + 1.2, 2.6, G.headD + 1.2, cup), box(0, headTop + 1.4, G.headZ, G.headW - 3, 1.6, G.headD - 3, cup), box(0, headTop + 3, G.headZ, 1.4, 2.2, 1.4, solid('#5e3a20')));
+  P.add('head', box(0, headTop - 1.5, G.headZ, G.headW + 1.2, 2.6, G.headD + 1.2, cup), box(0, headTop + 1.1, G.headZ, G.headW - 3, 1.6, G.headD - 3, cup), box(0, headTop + 2.7, G.headZ, 1.4, 2.2, 1.4, solid('#5e3a20')));
   P.tufts = false;
 });
 def('toadstool', 'head', 'Toadstool Cap', 300, 'Spotted in the Mushroom Grotto. Very fashionable there.', (P) => {
   P.tufts = false;
   const m = motif('#d8402f', '#fff6e8', 3.2);
-  P.add('head', box(0, headTop - 0.6, G.headZ, G.headW + 3, 2.2, G.headD + 3, m), box(0, headTop + 1.6, G.headZ, G.headW - 1, 2, G.headD - 1, m), box(0, headTop + 3.6, G.headZ, G.headW - 6, 1.4, G.headD - 6, m));
-  P.add('head', box(0, headTop - 1.2, G.headZ, G.headW + 2, 0.7, G.headD + 2, smooth('#f6ead2'), { skip: 'u' }));
+  P.add('head', box(0, headTop - 0.9, G.headZ, G.headW + 3, 2.2, G.headD + 3, m), box(0, headTop + 1.3, G.headZ, G.headW - 1, 2, G.headD - 1, m), box(0, headTop + 3.3, G.headZ, G.headW - 6, 1.4, G.headD - 6, m));
+  P.add('head', box(0, headTop - 1.5, G.headZ, G.headW + 2, 0.7, G.headD + 2, smooth('#f6ead2'), { skip: 'u' }));
 }, { area: 'grotto' });
 def('froghat', 'head', 'Froggy Hat', 340, 'Ribbit. That is all.', (P) => {
   P.tufts = false;
   const g = smooth('#78c25a'), w = smooth('#fffdf2'), k = smooth('#1d2321');
-  P.add('head', box(0, headTop - 1, G.headZ, G.headW + 1, 3, G.headD + 1, g), box(0, headTop + 2, G.headZ, G.headW - 3, 1.4, G.headD - 3, g));
-  for (const sd of [-1, 1]) P.add('head', box(sd * 4.2, headTop + 2.4, G.headZ + 3.2, 3.4, 2.8, 3, g), box(sd * 4.2, headTop + 3, G.headZ + 4.75, 2.2, 1.8, 0.2, w), box(sd * 4.2, headTop + 3.3, G.headZ + 4.9, 1, 1, 0.2, k));
-  P.add('head', box(0, headTop + 0.6, G.headZ + G.headD / 2 + 0.5, 4, 0.6, 0.3, smooth('#e66a7a')));
+  P.add('head', box(0, headTop - 1.3, G.headZ, G.headW + 1, 3, G.headD + 1, g), box(0, headTop + 1.7, G.headZ, G.headW - 3, 1.4, G.headD - 3, g));
+  for (const sd of [-1, 1]) P.add('head', box(sd * 4.2, headTop + 2.1, G.headZ + 3.2, 3.4, 2.8, 3, g), box(sd * 4.2, headTop + 2.7, G.headZ + 4.75, 2.2, 1.8, 0.2, w), box(sd * 4.2, headTop + 3, G.headZ + 4.9, 1, 1, 0.2, k));
+  P.add('head', box(0, headTop + 0.3, G.headZ + G.headD / 2 + 0.5, 4, 0.6, 0.3, smooth('#e66a7a')));
 }, { area: 'lake' });
 def('bow', 'head', 'Ribbon Bow', 90, 'A big soft bow, tied between the ears.', (P) => {
   const m = cloth('#ff8fb1', { shade: { noise: 0.2 } });
-  P.add('head', box(-2.6, headTop - 0.4, 2.4, 2, 2, 2, m), { ...box(-4.6, headTop - 1, 2.4, 3, 3.2, 1.2, m), rot: [0, 0, 18] }, { ...box(-0.6, headTop - 1, 2.4, 3, 3.2, 1.2, m), rot: [0, 0, -18] });
+  P.add('head', box(-2.6, headTop - 0.7, 2.4, 2, 2, 2, m), { ...box(-4.6, headTop - 1.3, 2.4, 3, 3.2, 1.2, m), rot: [0, 0, 18] }, { ...box(-0.6, headTop - 1.3, 2.4, 3, 3.2, 1.2, m), rot: [0, 0, -18] });
 });
 def('sprout', 'head', 'Little Sprout', 0, 'It grows a tiny bit every good night of sleep.', (P) => {
   const stem = solid('#4f9a3c'), leaf = leaves('#6fc054', { seed: 2 });
-  P.add('head', box(0, headTop - 0.2, 1, 0.8, 3, 0.8, stem), { ...box(-1.5, headTop + 2.4, 1, 3, 0.8, 1.8, leaf), rot: [0, 0, 22] }, { ...box(1.6, headTop + 2.0, 1, 2.6, 0.8, 1.6, leaf), rot: [0, 0, -26] });
+  P.add('head', box(0, headTop - 0.6, 1, 0.8, 3, 0.8, stem), { ...box(-1.5, headTop + 2, 1, 3, 0.8, 1.8, leaf), rot: [0, 0, 22] }, { ...box(1.6, headTop + 1.6, 1, 2.6, 0.8, 1.6, leaf), rot: [0, 0, -26] });
 });
+
+// ---------------- Frostlight & Starfall series (banner pulls only)
+
+def('santa_hat', 'head', 'Frostlight Santa Hat', 0, 'Red velvet, a snowy brim and a pompom that flops when Pip nods.', (P) => {
+  P.tufts = false;
+  const red = velvet('#c8202e'), fur = fluff('#fdfbf6');
+  P.add('head', box(0, headTop - 1.8, G.headZ, G.headW + 1.2, 2.4, G.headD + 1.2, fur));
+  const s = G.headW / 16;
+  const steps: [number, number, number, number][] = [[0, 0.4, 14.4, 2.6], [0.6, 2.8, 11.6, 2.4], [1.8, 4.8, 8.8, 2.2], [3.4, 6.4, 6.2, 1.8], [5.2, 7.2, 4.2, 1.6], [7, 6.9, 3, 1.6], [8.4, 5.8, 2.4, 1.6]];
+  steps.forEach(([x, y, w, h], i) => P.add('head', box(x * s, headTop + y - 0.4, G.headZ - 0.3 - i * 0.25, w * s, h, Math.max(2.2, w * s * 0.86), red)));
+  P.add('head', box(9.2 * s, headTop + 3.6, G.headZ - 2, 3.2, 3.2, 3.2, fur, { tag: 'pom' }));
+}, { series: 'frostlight', noStore: true });
+def('reindeer_antlers', 'head', 'Reindeer Antlers', 0, 'Soft velvet antlers on a jingly headband. Rudolph approved.', (P) => {
+  P.tufts = false;
+  const antler = (() => { const r = R('#8a5a34'); return (t: Texel) => tone(r, lvl(t, { noise: 0.6, scale: 1.2, speck: 0.4, rim: 0.7 }) * 0.8 + 0.2); })();
+  const bandM = velvet('#b8202c');
+  const hb = at(0);
+  void hb;
+  P.add('head', box(0, headTop - 1.2, G.headZ + 0.6, G.headW * 0.55, 0.9, 1.4, bandM));
+  for (const sd of [-1, 1]) {
+    const x = sd * Math.min(4.4, G.headW * 0.28), y = headTop - 0.8, z = G.headZ + 0.4;
+    P.add('head', box(x, y - 1.2, z, 1.4, 1.6, 1.4, bandM));
+    P.add('head', lean(box(x, y, z, 1.1, 5.2, 1.1, antler), -6, 0, -sd * 20));
+    P.add('head', lean(box(x + sd * 1.6, y + 4.4, z - 0.2, 0.9, 3.4, 0.9, antler), -10, 0, -sd * 48));
+    P.add('head', lean(box(x + sd * 0.5, y + 2.4, z + 0.3, 0.85, 3.0, 0.85, antler), 14, 0, sd * 18));
+    P.add('head', lean(box(x + sd * 1.0, y + 4.8, z, 0.8, 2.6, 0.8, antler), -4, 0, sd * 6));
+    P.add('head', box(x, y - 1.9, z + 0.9, 1, 1, 1, metal('#f2c84a')));
+  }
+}, { series: 'frostlight', noStore: true });
+def('star_crown', 'head', 'Starfall Crown', 0, 'Five fallen stars, set in gold. They hum softly at night.', (P) => {
+  P.tufts = false;
+  const g = metal('#f6c544'), gem = lamp('#fff2a8');
+  const rx = Math.min(4.8, G.headW * 0.3), rz = Math.min(4.2, G.headD * 0.33);
+  P.add('head', box(0, headTop - 0.9, G.headZ, rx * 2 + 1.4, 1.5, rz * 2 + 1.4, g, { skip: 'ud' }));
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2, x = Math.sin(a) * rx, z = G.headZ + Math.cos(a) * rz;
+    P.add('head', box(x, headTop + 0.6, z, 1.2, 1.8, 1.2, g), box(x, headTop + 2.2, z, 1.6, 0.5, 0.5, gem, { glow: true }), box(x, headTop + 1.8, z, 0.5, 1.4, 0.5, gem, { glow: true }));
+  }
+  P.add('head', box(0, headTop + 0.2, G.headZ + rz + 0.6, 1.4, 1.4, 0.6, lamp('#ffd36a'), { glow: true }));
+}, { series: 'starfall', noStore: true });
+
+// ---------------- Queen Neve's regalia (not sold anywhere)
+
+def('ice_crown', 'head', 'Ice Crown', 0, 'Grown from a single winter night. Never melts, never stops sparkling.', (P) => {
+  P.tufts = false;
+  const silver = metal('#dfe8f4'), cr = ice('#a8dcff'), cr2 = ice('#e4f5ff');
+  const rx = Math.min(4.6, G.headW * 0.29), rz = Math.min(4, G.headD * 0.31);
+  P.add('head', box(0, headTop - 1.0, G.headZ, rx * 2 + 1.6, 1.2, rz * 2 + 1.6, silver, { skip: 'ud' }));
+  const spikes: [number, number, number][] = [[0, 6.4, 1.5], [0.11, 3.6, 1.1], [-0.11, 3.6, 1.1], [0.2, 4.8, 1.2], [-0.2, 4.8, 1.2], [0.31, 3, 1], [-0.31, 3, 1], [0.42, 3.8, 1.1], [-0.42, 3.8, 1.1], [0.5, 2.8, 1]];
+  for (const [f, h, w] of spikes) {
+    const a = f * Math.PI * 2, x = Math.sin(a) * rx, z = G.headZ + Math.cos(a) * rz;
+    P.add('head', lean(box(x, headTop - 0.2, z, w, h, w, f === 0 ? cr2 : cr), 0, 0, -x * 2.2));
+    P.add('head', lean(box(x, headTop - 0.2 + h * 0.55, z, w * 0.55, h * 0.62, w * 0.55, cr2, { glow: true }), 0, 0, -x * 2.2));
+  }
+  P.add('head', box(0, headTop + 0.2, G.headZ + rz + 0.7, 1.6, 1.8, 0.7, lamp('#7fd4ff'), { glow: true }));
+}, { noStore: true });
 
 // ------------------------------------------------------------------ face
 
@@ -161,84 +255,107 @@ function ring(P: OwlParts, cx: number, cy: number, z: number, size: number, th: 
   P.add(bone, box(cx, cy + h - th, z, size, th, 0.6, m), box(cx, cy - h, z, size, th, 0.6, m), box(cx - h + th / 2, cy - h, z, th, size, 0.6, m), box(cx + h - th / 2, cy - h, z, th, size, 0.6, m));
 }
 def('glasses', 'face', 'Reading Glasses', 180, 'For bedtime stories and very small print.', (P) => {
-  const m = metal('#c99a3a');
-  for (const sd of [-1, 1]) ring(P, sd * G.eyeX, G.eyeY, fz(P) + 0.7, 6, 0.55, m);
-  P.add('head', box(0, G.eyeY + 0.9, fz(P) + 0.7, 1.5, 0.5, 0.6, m));
-  for (const sd of [-1, 1]) P.add('head', box(sd * 7.4, G.eyeY + 2.2, 2.2, 0.5, 0.5, 9, m));
+  const m = metal('#c99a3a'), s = G.eyeS + 1.3, z = fz(P) + 0.85;
+  for (const sd of [-1, 1]) ring(P, sd * G.eyeX, G.eyeY, z, s, 0.5, m);
+  P.add('head', box(0, G.eyeY + 0.6, z, Math.max(0.8, G.eyeX * 2 - s), 0.5, 0.6, m));
+  for (const sd of [-1, 1]) P.add('head', box(sd * (G.eyeX + s / 2 + 0.2), G.eyeY + 0.8, z - 2.5, 0.5, 0.5, 5, m));
 });
 def('sleepmask', 'face', 'Sleepy Mask', 120, 'Worn on the forehead, ready for lights-out.', (P) => {
   const m = cloth('#9a7fd6', { trim: '#f5d36b', hem: 0.6 }), k = flatLash();
-  P.add('head', box(0, 22.6, fz(P) + 0.5, 14.2, 3.2, 0.9, m));
-  for (const sd of [-1, 1]) P.add('head', box(sd * 3.6, 23.6, fz(P) + 1.05, 3.4, 0.5, 0.2, k), box(sd * 3.6 + sd * -1.4, 23.2, fz(P) + 1.05, 0.5, 0.5, 0.2, k), box(sd * 3.6 + sd * 1.4, 23.2, fz(P) + 1.05, 0.5, 0.5, 0.2, k));
-  for (const sd of [-1, 1]) P.add('head', box(sd * 8.3, 22.8, 1.8, 0.6, 1.2, 10, cloth('#7d63bd')));
+  const y = Math.min(G.eyeY + G.eyeS * 0.62, headTop - 3.6), z = fz(P) + 1.2;
+  P.add('head', box(0, y, z - 0.3, Math.min(14.2, G.headW - 1.2), 3.0, 0.9, m));
+  for (const sd of [-1, 1]) P.add('head', box(sd * 3.4, y + 1.0, z + 0.2, 3.2, 0.5, 0.2, k), box(sd * 3.4 - sd * 1.3, y + 0.6, z + 0.2, 0.5, 0.5, 0.2, k), box(sd * 3.4 + sd * 1.3, y + 0.6, z + 0.2, 0.5, 0.5, 0.2, k));
+  for (const sd of [-1, 1]) P.add('head', box(sd * (G.headW / 2 + 0.1), y + 0.2, G.headZ + 0.6, 0.6, 1.2, G.headD - 1, cloth('#7d63bd')));
 });
 function flatLash(): Painter { const r = ramp(0x2a1d33); return (t) => tone(r, t.face === 2 ? 1 : 0); }
 def('monocle', 'face', 'Gentlebird Monocle', 260, 'Distinguished. Slightly smug.', (P) => {
-  const m = metal(GOLD);
-  ring(P, G.eyeX, G.eyeY, fz(P) + 0.7, 6.2, 0.6, m);
-  P.add('head', box(G.eyeX + 2.9, G.eyeY - 6.6, fz(P) + 0.6, 0.4, 3.6, 0.4, m));
+  const m = metal(GOLD), s = G.eyeS + 1.4;
+  ring(P, G.eyeX, G.eyeY, fz(P) + 0.85, s, 0.55, m);
+  P.add('head', box(G.eyeX + s / 2 - 0.2, G.eyeY - s / 2 - 3.4, fz(P) + 0.8, 0.4, 3.6, 0.4, m));
 });
 def('stargoggles', 'face', 'Star Goggles', 70, 'Pushed up, ready for meteor showers.', (P) => {
   const m = metal('#8a93a8'), g = lamp('#9fe7ff');
-  for (const sd of [-1, 1]) P.add('head', box(sd * 3.4, 22.8, fz(P) + 0.6, 4.6, 3, 1.4, m), box(sd * 3.4, 23.3, fz(P) + 1.35, 3.2, 2, 0.2, g, { glow: true }));
-  P.add('head', box(0, 23.2, 0.2, G.headW + 0.8, 1.4, G.headD + 0.8, cloth('#3c4256'), { skip: 'ud' }));
+  const y = Math.min(G.eyeY + G.eyeS * 0.55, headTop - 3.4), z = fz(P) + 0.9;
+  for (const sd of [-1, 1]) P.add('head', box(sd * 3.2, y, z - 0.3, 4.4, 3, 1.4, m), box(sd * 3.2, y + 0.5, z + 0.45, 3.0, 2, 0.2, g, { glow: true }));
+  P.add('head', box(0, y + 0.4, G.headZ, G.headW + 0.6, 1.4, G.headD + 0.6, cloth('#3c4256'), { skip: 'ud' }));
 }, { premium: true });
 
 // ------------------------------------------------------------------ neck
 
 def('scarf', 'neck', 'Cosy Scarf', 150, 'Knitted in the colours of autumn leaves.', (P) => {
-  const m = knit('#d9573b', { stripe: '#f2c35a', every: 4 });
-  P.add('body', box(0, G.neckY - 1.8, 0.6, G.bodyW + 1.6, 2.6, G.bodyD + 2.6, m));
-  P.add('body', { ...box(3.4, G.neckY - 7, G.bodyD / 2 + 1.6, 2.8, 5.6, 1.1, m), rot: [8, 0, 6] }, box(3.8, G.neckY - 7.8, G.bodyD / 2 + 1.9, 3, 0.9, 1, fluff('#f2c35a')));
+  const m = knit('#d9573b', { stripe: '#f2c35a', every: 4 }), y = neckY() - 1.4, a = at(y - 4);
+  P.add('body', band(y, 2.6, 0.9, m));
+  P.add('body', { ...box(G.bodyW * 0.22, y - 5.6, a.front + 0.5, 2.8, 5.6, 1.1, m), rot: [8, 0, 6] }, box(G.bodyW * 0.25, y - 6.4, a.front + 0.8, 3, 0.9, 1, fluff('#f2c35a')));
 });
 def('bowtie', 'neck', 'Velvet Bowtie', 110, 'For formal hoots.', (P) => {
-  const m = cloth('#7a2f5a');
-  const z = G.bodyD / 2 + 1.7;
-  P.add('body', box(0, G.neckY - 2.3, z, 1.4, 1.4, 1, m), { ...box(-1.9, G.neckY - 2.6, z - 0.1, 2.6, 2, 0.8, m), rot: [0, 0, -10] }, { ...box(1.9, G.neckY - 2.6, z - 0.1, 2.6, 2, 0.8, m), rot: [0, 0, 10] });
+  const m = cloth('#7a2f5a'), y = neckY() - 1.6, z = at(y).front + 0.7;
+  P.add('body', box(0, y, z, 1.4, 1.4, 1, m), { ...box(-1.9, y - 0.3, z - 0.1, 2.6, 2, 0.8, m), rot: [0, 0, -10] }, { ...box(1.9, y - 0.3, z - 0.1, 2.6, 2, 0.8, m), rot: [0, 0, 10] });
 });
 def('bandana', 'neck', 'Trail Bandana', 130, 'Every adventurer needs one.', (P) => {
-  const m = motif('#3f7fc4', '#ffffff', 2);
-  P.add('body', box(0, G.neckY - 1.6, 0.4, G.bodyW + 1.2, 1.6, G.bodyD + 2.2, m));
-  P.add('body', box(0, G.neckY - 3.4, G.bodyD / 2 + 1.4, 6, 1.8, 0.8, m), box(0, G.neckY - 4.8, G.bodyD / 2 + 1.4, 3.4, 1.4, 0.8, m), box(0, G.neckY - 5.8, G.bodyD / 2 + 1.4, 1.2, 1, 0.8, m));
+  const m = motif('#3f7fc4', '#ffffff', 2), y = neckY() - 1.2, z = at(y - 3).front + 0.5;
+  P.add('body', band(y, 1.6, 0.7, m));
+  P.add('body', box(0, y - 1.8, z, 6, 1.8, 0.8, m), box(0, y - 3.2, z, 3.4, 1.4, 0.8, m), box(0, y - 4.2, z, 1.2, 1, 0.8, m));
 }, { area: 'woods' });
 def('bell', 'neck', 'Silver Bell', 200, 'Jingles softly when Pip hops.', (P) => {
-  P.add('body', box(0, G.neckY - 1.4, 0.4, G.bodyW + 1, 1, G.bodyD + 2, cloth('#3f8a7a'), { skip: 'ud' }));
-  P.add('body', box(0, G.neckY - 3.4, G.bodyD / 2 + 1.6, 2.4, 2.2, 2, metal('#d8dde8')), box(0, G.neckY - 3.6, G.bodyD / 2 + 2.65, 0.6, 0.6, 0.2, solid('#2a2f3a')));
+  const y = neckY() - 1.0, z = at(y - 2).front + 0.9;
+  P.add('body', band(y, 1, 0.5, cloth('#3f8a7a'), { skip: 'ud' }));
+  P.add('body', box(0, y - 2.2, z, 2.4, 2.2, 2, metal('#d8dde8')), box(0, y - 2.4, z + 1.05, 0.6, 0.6, 0.2, solid('#2a2f3a')));
 });
 def('moonpendant', 'neck', 'Moonstone Pendant', 80, 'Glows faintly, like a nightlight you can wear.', (P) => {
-  P.add('body', box(0, G.neckY - 1.4, 0.4, G.bodyW + 1, 0.6, G.bodyD + 2, metal(GOLD), { skip: 'ud' }));
-  P.add('body', box(0, G.neckY - 4.2, G.bodyD / 2 + 1.7, 2.4, 2.8, 0.8, lamp('#bfe9ff'), { glow: true }), box(0, G.neckY - 1.8, G.bodyD / 2 + 1.6, 0.6, 1.2, 0.6, metal(GOLD)));
+  const y = neckY() - 1.0, z = at(y - 3).front + 0.4;
+  P.add('body', band(y, 0.6, 0.45, metal(GOLD), { skip: 'ud' }));
+  P.add('body', box(0, y - 2.8, z, 2.4, 2.8, 0.8, lamp('#bfe9ff'), { glow: true }), box(0, y - 0.4, z - 0.1, 0.6, 1.2, 0.6, metal(GOLD)));
 }, { premium: true });
+def('candy_scarf', 'neck', 'Candy Cane Scarf', 0, 'Peppermint stripes, wound twice and still too long.', (P) => {
+  const r = R('#d8222e'), w = R('#fff8f0');
+  const m: Painter = (t) => {
+    const across = t.face === 0 || t.face === 1 ? t.z : t.x;
+    const k = Math.floor((across + t.y * 1.1 + 40) / 1.2) % 2;
+    const L = lvl(t, { noise: 0.2, speck: 0, rim: 0.6 }) * 0.8 + ((Math.floor(t.y * 1.5) % 2) ? -0.2 : 0.2);
+    return tone(k ? w : r, L + fineJ(t));
+  };
+  const y = neckY() - 1.6, a = at(y - 4);
+  P.add('body', band(y, 2.8, 1.0, m), band(y + 1.6, 1.4, 1.3, m));
+  P.add('body', { ...box(-G.bodyW * 0.2, y - 6.4, a.front + 0.6, 2.6, 6.4, 1.0, m), rot: [6, 0, -5] });
+  for (const k of [-1, 0, 1]) P.add('body', box(-G.bodyW * 0.2 + k * 0.8 - 0.5, y - 7.6, a.front + 0.95, 0.4, 1.2, 0.4, fluff('#fff8f0')));
+}, { series: 'frostlight', noStore: true });
 
 // ------------------------------------------------------------------ body
 
-/** A shell over the barrel body, leaving the wings outside. */
+/** A shell of fabric hugging the body's tiers, leaving the wings outside. */
 function torso(P: OwlParts, m: Painter, top = 1.4) {
-  P.add('body', box(0, G.bodyY + 0.6, 0.5, G.bodyW + 0.8, G.bodyH - top, G.bodyD + 2, m, { tag: 'torso', skip: 'u' }));
-  P.add('body', box(0, G.bodyY + 0.6 + G.bodyH - top - 0.01, 0.5, G.bodyW - 1, 0.8, G.bodyD + 0.2, m, { tag: 'torso' }));
+  const tiers: [number, number][] = [[0.08, 0.2], [0.2, 0.45], [0.45, 0.62], [0.62, 0.78], [0.78, 0.9]];
+  const limit = G.bodyY + G.bodyH - top;
+  for (const [h0, h1] of tiers) {
+    const y0 = G.bodyY + h0 * G.bodyH, y1 = Math.min(limit, G.bodyY + h1 * G.bodyH);
+    if (y1 <= y0 + 0.2) continue;
+    P.add('body', { ...band(y0, y1 - y0, 0.45, m, { tag: 'torso' }) });
+  }
+  P.add('body', band(Math.min(limit, G.bodyY + 0.9 * G.bodyH) - 0.6, 0.8, 0.2, m, { tag: 'torso' }));
 }
 const front = (base: Painter, f: (x: number, y: number) => number | null): Painter => (t) => {
   if (t.tag === 'torso' && t.face === 4) { const c = f(t.x, t.y); if (c !== null) return c; }
   return base(t);
 };
+const chestY = () => G.bodyY + G.bodyH * 0.62;
 
 def('sweater', 'body', 'Moon Sweater', 320, 'Chunky knit with a crescent moon on the front.', (P) => {
-  const gold = ramp(col('#f6d36a'));
+  const gold = ramp(col('#f6d36a')), cy = chestY();
   torso(P, front(knit('#3d5aa0'), (x, y) => {
-    const d1 = Math.hypot(x - 0.2, y - 8.6), d2 = Math.hypot(x - 1.6, y - 9.4);
-    return d1 < 2.6 && d2 > 2.3 ? tone(gold, 0.5 + (y > 9 ? 0.6 : 0)) : null;
+    const d1 = Math.hypot(x - 0.2, y - cy), d2 = Math.hypot(x - 1.6, y - cy - 0.8);
+    return d1 < 2.6 && d2 > 2.3 ? tone(gold, 0.5 + (y > cy + 0.4 ? 0.6 : 0)) : null;
   }));
-  P.add('body', box(0, G.bodyY + 0.2, 0.5, G.bodyW + 1.2, 1.2, G.bodyD + 2.4, knit('#2b4280'), { skip: 'u' }));
+  P.add('body', band(G.bodyY + G.bodyH * 0.08, 1.2, 0.7, knit('#2b4280'), { skip: 'u' }));
 });
 def('pajamas', 'body', 'Striped Pajamas', 260, 'Soft flannel, perfect for the long night ahead.', (P) => {
   const b = ramp(col('#fff4dc'));
   torso(P, front(cloth('#7fb6e8', { stripe: '#e9f3ff', stripeEvery: 2 }), (x, y) => (Math.abs(x) < 0.45 && Math.floor(y) % 3 === 0 ? tone(b, 1) : null)));
-  P.add('body', box(0, G.neckY - 1.2, 0.5, G.bodyW + 1.4, 1, G.bodyD + 2.4, cloth('#4f86c4'), { skip: 'ud' }));
+  P.add('body', band(neckY() - 1.4, 1, 0.8, cloth('#4f86c4'), { skip: 'ud' }));
 });
 def('raincoat', 'body', 'Puddle Raincoat', 340, 'Glossy yellow, for drizzly adventures.', (P) => {
   const k = ramp(col('#3a2d1a'));
   torso(P, front(smooth('#f6c534', { rim: 1.4 }), (x, y) => (Math.abs(x) < 0.4 && Math.floor(y) % 3 === 0 ? tone(k, 0) : null)));
-  P.add('body', box(0, G.neckY - 2.6, -G.bodyD / 2 - 0.8, G.bodyW, 4, 2.4, smooth('#e3b22a')));
+  P.add('body', box(0, neckY() - 2.4, at(neckY() - 2).back - 0.8, G.bodyW - 2, 3.6, 2.2, smooth('#e3b22a')));
 }, { area: 'lake' });
 def('cardigan', 'body', 'Grandma Cardigan', 280, 'Has a pocket. The pocket has a biscuit.', (P) => {
   const btn = ramp(col('#f3e2c0'));
@@ -249,31 +366,58 @@ def('cardigan', 'body', 'Grandma Cardigan', 280, 'Has a pocket. The pocket has a
   }));
 });
 def('royalcape', 'body', 'Royal Cape', 180, 'Velvet and ermine, for the ruler of Hoot Hollow.', (P) => {
-  const m = cloth('#8a1f3c', { trim: '#fbf6ee', hem: 1.4 });
-  P.add('body', box(0, G.neckY - 3.4, -0.2, G.bodyW + 5.6, 3.2, G.bodyD + 3, m, { skip: 'd' }), box(0, G.bodyY - 0.6, -G.bodyD / 2 - 1.6, G.bodyW + 5.2, G.bodyH - 2, 1.2, m));
-  P.add('body', box(0, G.neckY - 1, 0, G.bodyW + 3.4, 1.8, G.bodyD + 2.6, motif('#fbf6ee', '#1b1b22', 1.6)));
+  const m = cloth('#8a1f3c', { trim: '#fbf6ee', hem: 1.4 }), y = neckY();
+  P.add('body', band(y - 3.0, 3.0, 1.6, m, { skip: 'd' }), box(0, G.bodyY - 0.6, at(G.bodyY + 4).back - 1.4, G.bodyW + 4.6, y - G.bodyY - 2.4, 1.2, m));
+  P.add('body', band(y - 0.4, 1.8, 1.4, motif('#fbf6ee', '#1b1b22', 1.6)));
 }, { premium: true });
 def('cloudcloak', 'body', 'Cloud Cloak', 220, 'Woven from the softest cloud over Starfall Peak.', (P) => {
-  const f = fluff('#f4f6ff');
-  for (const [x, y, z, s] of [[-6, 11.5, 0, 4.4], [6, 11.5, 0, 4.4], [-3.4, 12.6, -3, 4], [3.4, 12.6, -3, 4], [0, 12, -4.4, 4.6], [-6.4, 8.6, -2, 3.6], [6.4, 8.6, -2, 3.6], [0, 8, -6, 4.2], [-3.6, 5, -6, 3.6], [3.6, 5, -6, 3.6]] as const) P.add('body', box(x, y, z, s, s * 0.8, s, f));
+  const f = fluff('#f4f6ff'), s = G.bodyW / 13, y0 = G.bodyY - 3;
+  for (const [x, y, z, sz] of [[-6, 11.5, 0, 4.4], [6, 11.5, 0, 4.4], [-3.4, 12.6, -3, 4], [3.4, 12.6, -3, 4], [0, 12, -4.4, 4.6], [-6.4, 8.6, -2, 3.6], [6.4, 8.6, -2, 3.6], [0, 8, -6, 4.2], [-3.6, 5, -6, 3.6], [3.6, 5, -6, 3.6]] as const) P.add('body', box(x * s, y0 + y * G.bodyH / 11, z * s, sz, sz * 0.8, sz, f));
 }, { premium: true, area: 'peak' });
+def('holiday_sweater', 'body', 'Frostlight Jumper', 0, 'The festive jumper: snowflakes, zigzags and one very proud reindeer.', (P) => {
+  const red = R('#c42430'), white = R('#fbf5ea'), green = R('#2f7a46');
+  const m: Painter = (t) => {
+    const across = t.face === 0 || t.face === 1 ? t.z * 1.3 : t.x;
+    const sx = Math.floor(across * 1.5), sy = Math.floor(t.y * 1.5);
+    const v = t.y * 1.5 - sy, u = across * 1.5 - sx;
+    let L = lvl(t, { noise: 0.15, speck: 0, rim: 0.5, grad: 0.5 }) * 0.8 + (Math.abs(u - 0.5) * 2 > 0.75 - v * 0.5 ? -0.7 : 0.3);
+    if (t.face === 2 || t.face === 3) L = lvl(t, { noise: 0.2 }) * 0.6;
+    const yy = sy - Math.floor((G.bodyY + G.bodyH * 0.5) * 1.5);
+    // a white zigzag band above a green band, snowflakes scattered over red
+    if (yy === 4 || yy === 5) return tone(green, L);
+    if (yy >= 6 && yy <= 7 && Math.abs(((sx % 4) + 4) % 4 - 1.5) <= (yy - 6) + 0.5) return tone(white, L);
+    if (yy === -4) return tone(white, L);
+    const cx = ((sx % 6) + 6) % 6, cyy = ((yy % 6) + 6) % 6;
+    if (yy < -5 || yy > 8) { if ((cx === 3 && cyy >= 2 && cyy <= 4) || (cyy === 3 && cx >= 2 && cx <= 4)) return tone(white, L); }
+    if (yy > -4 && yy < 4 && Math.abs(sx) <= 0 && t.face === 4) return tone(white, L);
+    return tone(red, L);
+  };
+  torso(P, m, 1.2);
+  const cy = chestY(), z = at(cy).front + 0.5;
+  // a little stitched reindeer face on the front
+  const brown = smooth('#8a5a34'), nose = lamp('#ff3a3a');
+  P.add('body', box(0, cy - 1.4, z, 3, 2.6, 0.3, brown), box(0, cy - 1.6, z + 0.2, 1, 1, 0.3, nose, { glow: true }));
+  for (const sd of [-1, 1]) P.add('body', lean(box(sd * 1.6, cy + 1.0, z, 0.5, 1.8, 0.3, smooth('#d9b98a')), 0, 0, -sd * 30));
+  P.add('body', band(G.bodyY + G.bodyH * 0.08, 1.2, 0.7, knit('#2f7a46'), { skip: 'u' }), band(neckY() - 1.6, 1.0, 0.75, knit('#fbf5ea')));
+}, { series: 'frostlight', noStore: true });
 
 // ------------------------------------------------------------------ back
 
 def('satchel', 'back', 'Explorer Satchel', 0, 'Pip packs it before every night adventure.', (P) => {
   const strap = cloth('#6b4426'), bag = (() => { const r = R('#9a6235'); return (t: Texel) => tone(r, lvl(t, { noise: 0.4, scale: 1.5 }) * 0.8 + (t.by > t.sy - 1.3 && t.face === 0 ? 0.8 : 0)); })();
-  P.add('body', { ...box(0, 7.2, 0.4, 1.2, 12, G.bodyD + 1.8, strap, { skip: 'ud' }), rot: [0, 0, 34] });
-  P.add('body', box(7.4, 3.8, 2.6, 2.4, 4.2, 4.6, bag), box(8.7, 6.3, 2.6, 0.4, 1.6, 4.8, strap), box(8.95, 6.2, 2.6, 0.3, 0.8, 0.9, metal(GOLD)));
+  const y = G.bodyY + G.bodyH * 0.35, x = at(y).hw + 2.6;
+  P.add('body', { ...box(0, G.bodyY + G.bodyH * 0.35, 0.4, 1.2, G.bodyH * 0.95, at(y + 3).front - at(y + 3).back + 1.8, strap, { skip: 'ud' }), rot: [0, 0, 34] });
+  P.add('body', box(x, y - 2, 2.2, 2.4, 4.2, 4.6, bag), box(x + 1.3, y + 0.5, 2.2, 0.4, 1.6, 4.8, strap), box(x + 1.55, y + 0.4, 2.2, 0.3, 0.8, 0.9, metal(GOLD)));
 });
 def('backpack', 'back', 'Trail Backpack', 300, 'Room for snacks, maps and one emergency acorn.', (P) => {
-  const m = cloth('#4f8a52', { trim: '#2f5a34', hem: 1 });
-  P.add('body', box(0, 5, -G.bodyD / 2 - 2.2, 9, 8, 3.6, m), box(0, 9.8, -G.bodyD / 2 - 2.6, 9.4, 2.4, 4, cloth('#3d6d40')), box(0, 6.4, -G.bodyD / 2 - 4.2, 5, 3, 0.8, cloth('#3d6d40')));
-  for (const sd of [-1, 1]) P.add('body', box(sd * 3, 6, 0.4, 1, 7.6, G.bodyD + 1.6, cloth('#2f5a34'), { skip: 'ud' }));
+  const m = cloth('#4f8a52', { trim: '#2f5a34', hem: 1 }), y = G.bodyY + G.bodyH * 0.25, bz = at(y + 4).back - 2.4;
+  P.add('body', box(0, y, bz, 9, 8, 3.6, m), box(0, y + 4.8, bz - 0.4, 9.4, 2.4, 4, cloth('#3d6d40')), box(0, y + 1.4, bz - 2, 5, 3, 0.8, cloth('#3d6d40')));
+  for (const sd of [-1, 1]) P.add('body', box(sd * 3, y + 1, 0.4, 1, 7.6, at(y + 5).front - at(y + 5).back + 1.6, cloth('#2f5a34'), { skip: 'ud' }));
 });
 def('lantern', 'back', 'Firefly Lantern', 420, 'A jar of friendly fireflies that light the way home.', (P) => {
-  const frame = metal('#5b6170'), glass = lamp('#ffe28a');
-  P.add('body', box(0, 8, -G.bodyD / 2 - 0.8, 1, 6, 1, solid('#6b4426')), box(0, 13.6, -G.bodyD / 2 - 1.6, 1, 1, 2.6, solid('#6b4426')));
-  P.add('body', box(0, 14.2, -G.bodyD / 2 - 3, 3.4, 0.6, 3.4, frame), box(0, 10.8, -G.bodyD / 2 - 3, 3, 3.4, 3, glass, { glow: true }), box(0, 10.4, -G.bodyD / 2 - 3, 3.4, 0.5, 3.4, frame));
+  const frame = metal('#5b6170'), glass = lamp('#ffe28a'), bz = at(G.bodyY + 6).back;
+  P.add('body', box(0, G.bodyY + 5, bz - 0.8, 1, 6, 1, solid('#6b4426')), box(0, G.bodyY + 10.6, bz - 1.6, 1, 1, 2.6, solid('#6b4426')));
+  P.add('body', box(0, G.bodyY + 11.2, bz - 3, 3.4, 0.6, 3.4, frame), box(0, G.bodyY + 7.8, bz - 3, 3, 3.4, 3, glass, { glow: true }), box(0, G.bodyY + 7.4, bz - 3, 3.4, 0.5, 3.4, frame));
 }, { area: 'grotto' });
 def('fairywings', 'back', 'Moth Fairy Wings', 250, 'Dusted with moonlight. They flutter when Pip is happy.', (P) => {
   const w = (() => {
@@ -283,21 +427,74 @@ def('fairywings', 'back', 'Moth Fairy Wings', 250, 'Dusted with moonlight. They 
       return ring2 > 0.8 ? tone(e, 0.4) : tone(r, 1 + (ring2 < 0.3 ? 1.5 : 0) - ring2);
     };
   })();
+  const bz = at(G.bodyY + 8).back - 1.4, y = G.bodyY + G.bodyH * 0.3;
   for (const sd of [-1, 1]) {
-    P.add('body', { ...box(sd * 5.6, 7, -G.bodyD / 2 - 1.4, 8, 9, 0.5, w, { glow: true }), rot: [0, sd * 24, sd * 18] });
-    P.add('body', { ...box(sd * 4.4, 3.4, -G.bodyD / 2 - 1.4, 5, 5, 0.5, w, { glow: true }), rot: [0, sd * 24, -sd * 22] });
+    P.add('body', { ...box(sd * 5.6, y + 2, bz, 8, 9, 0.5, w, { glow: true }), rot: [0, sd * 24, sd * 18] });
+    P.add('body', { ...box(sd * 4.4, y - 1.6, bz, 5, 5, 0.5, w, { glow: true }), rot: [0, sd * 24, -sd * 22] });
   }
 }, { premium: true });
 
+/** A cape hanging from the shoulders down the back, with a collar, clasp and hem. */
+function cape(P: OwlParts, cloth2: Painter, trim: Painter, clasp: Painter, o: { furCollar?: boolean } = {}) {
+  const y = neckY(), a = at(y - 1), bottom = G.bodyY - 0.4;
+  const hw = at(G.bodyY + G.bodyH * 0.4).hw;
+  // collar round the neck, then the cape falls behind the wings, flaring a little at the hem
+  P.add('body', band(y - 1.4, o.furCollar ? 2.4 : 1.6, o.furCollar ? 1.3 : 0.9, o.furCollar ? trim : cloth2));
+  const rows = 5, top = y - 1.0;
+  for (let i = 0; i < rows; i++) {
+    const y0 = bottom + ((top - bottom) * i) / rows, h = (top - bottom) / rows + 0.05, k = 1 - i / rows;
+    const back = at(y0 + h / 2).back - 1.3 - k * 1.1;
+    P.add('body', box(0, y0, back, (hw + 2.6) * 2 + k * 2.2, h, 0.8, cloth2));
+  }
+  P.add('body', box(0, bottom - 0.4, at(bottom + 2).back - 2.45, (hw + 2.6) * 2 + 2.4, 1.0, 1.0, trim));
+  for (const sd of [-1, 1]) P.add('body', box(sd * (a.hw + 0.6), y - 3.8, (a.front + a.back) / 2 - 0.6, 1.0, 3.2, a.front - a.back - 1.4, cloth2));
+  P.add('body', box(0, y - 2.6, a.front + 1.0, 1.8, 1.8, 0.6, clasp, { glow: true }));
+}
+def('moon_cape', 'back', 'Moonlit Cape', 0, 'Midnight blue, sewn with silver stars and clasped with a crescent moon.', (P) => {
+  cape(P, motif('#1e2160', '#e8ecff', 2.2, true), metal('#e7c35a'), lamp('#fff0b0'));
+}, { series: 'starfall', noStore: true });
+def('frost_cape', 'back', 'Frost Cape', 0, 'Snowflakes embroidered in silver thread, trimmed with the softest white fur.', (P) => {
+  const base = R('#cfe6fb'), thread = R('#ffffff'), deep = R('#8fbde8');
+  const flake: Painter = (t) => {
+    const across = t.face === 0 || t.face === 1 ? t.z : t.x;
+    const gx = Math.round(across / 3.2), gy = Math.round((t.y + (gx & 1) * 1.6) / 3.2);
+    const ox = across - gx * 3.2, oy = t.y + (gx & 1) * 1.6 - gy * 3.2;
+    const r = Math.hypot(ox, oy), a = Math.atan2(oy, ox);
+    let L = lvl(t, { noise: 0.4, speck: 0.3, rim: 0.6 }) * 0.8 + fineJ(t);
+    if (t.face !== 2 && t.face !== 3 && hash(Math.floor(across * 1.2), t.face, 4, 9) > 0.78) L -= 0.5;
+    const arm = Math.abs(Math.sin(a * 3)) < 0.16 + 0.05 / Math.max(0.2, r);
+    if (r < 1.25 && arm) return tone(thread, 0.6);
+    if (r < 0.3) return tone(thread, 0.8);
+    if (fbm(t.x * 0.4, t.y * 0.4, t.z * 0.4, 6) > 0.66) return tone(deep, L);
+    return tone(base, L);
+  };
+  cape(P, flake, fluff('#ffffff'), lamp('#bfeaff'), { furCollar: true });
+}, { noStore: true });
+
 for (const p of PIECES) PIECE[p.id] = p;
 
-/** Apply an outfit (slot → piece id) to the owl's parts. */
+/** Apply an outfit (slot -> piece id) to the owl's parts. */
 export function dressOwl(P: OwlParts, outfit: Partial<Record<OutfitSlot, string>>) {
+  G = P.g;
+  headTop = P.g.headTop;
   for (const id of Object.values(outfit)) {
     const p = id ? PIECE[id] : undefined;
     if (p) p.make(P);
   }
 }
 
+/** Something held under the wing (Queen Neve's scepter). */
+export function holdItem(P: OwlParts, id: string) {
+  G = P.g;
+  if (id === 'scepter') {
+    const silver = metal('#e8eef8'), cr = ice('#bde6ff');
+    const y = G.bodyY + G.bodyH * 0.45, x = at(y).hw + 2.0, z = at(y).front - 1.2;
+    P.add('wingR', lean(box(x, G.bodyY - 0.4, z, 0.6, G.bodyH * 0.95, 0.6, silver), 14, 0, -8));
+    const tipY = G.bodyY - 0.4 + G.bodyH * 0.92, tx = x + Math.sin((8 * Math.PI) / 180) * -G.bodyH * 0.1, tz = z + G.bodyH * 0.22;
+    P.add('wingR', box(tx, tipY, tz, 1.6, 0.5, 1.6, silver), box(tx, tipY + 0.4, tz, 1.3, 2.6, 1.3, cr, { glow: true }), box(tx, tipY + 1.1, tz, 2.4, 1.0, 0.6, cr), box(tx, tipY + 3.0, tz, 0.6, 1.0, 0.6, cr, { glow: true }));
+  }
+}
+
 export const SLOT_ORDER: OutfitSlot[] = ['head', 'face', 'neck', 'body', 'back'];
 export const SLOT_NAME: Record<OutfitSlot, string> = { head: 'Hats', face: 'Face', neck: 'Neck', body: 'Clothes', back: 'Back' };
+export { mix };

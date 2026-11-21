@@ -80,7 +80,7 @@ async function boot() {
       zoneKey = zk; scene.setZones(zones.value);
       for (const [k, v] of Object.entries(zones.value)) if (v && !before[k]) toast(`New room unlocked: ${k === 'loft' ? 'the Loft' : k === 'garden' ? 'the Garden' : 'the Stargazing Deck'}!`, IcoSparkle, 4200);
     }
-    if (bk !== blockKey) { blockKey = bk; edit((x) => { x.blocker.mascot = x.look.skin ?? 'owl'; }); void pushBlockerConfig(); }
+    if (bk !== blockKey) { blockKey = bk; edit((x) => { x.blocker.mascot = x.look.skin === 'meowl' ? 'meowl' : 'owl'; /* [owl] skins are now any special-skin id */ }); void pushBlockerConfig(); }
   });
   // camera framing follows what's open
   effect(() => {

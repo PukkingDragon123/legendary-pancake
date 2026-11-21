@@ -17,7 +17,7 @@ import { panel, sceneRef } from './state.ts';
 
 export function Wardrobe() {
   const s = save.value, look = s.look;
-  const skin: Skin = look.skin ?? 'owl';
+  const skin = (look.skin ?? 'owl') as Skin;
   const [slot, setSlot] = useState<OutfitSlot | 'coat'>('head');
   const [trying, setTrying] = useState<string | null>(null);
   useEffect(() => {
