@@ -89,6 +89,7 @@ add({
   id: 'moon_bed', name: 'Crescent Moon Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
   blurb: 'Curl up in the curve of the moon under a quilt of stars, with three wishes dangling from the tip.',
   sleep: { x: 2, y: 14, z: 0, rot: 90 },
+  light: { x: -14, y: 18, z: 4, color: 0xfff0b8, power: 1 },
   build: () => {
     const out: BoxSpec[] = [];
     const moon: Painter = (t) => {
