@@ -376,7 +376,10 @@ function WakingPip() {
 
 export function AlarmOverlay() {
   injectSleepFrames();
-  const s = save.value, t = tonight();
+  const s = save.value, sess = s.active?.session;
+  // the clock shows the night that is ending: lights-out to the alarm that is ringing
+  const hm = (t: number) => { const d = new Date(t); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  const t = sess ? { bed: hm(sess.start), wake: hm(sess.wakeTarget ?? Date.now()) } : tonight();
   return (
     <div class="overlay dawn">
       <div class="dawn-sky" />

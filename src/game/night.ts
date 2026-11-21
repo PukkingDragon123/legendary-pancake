@@ -2,7 +2,7 @@
 // microphone tracker, arms the smart alarm, tells the blocker extension to hold the line, plays
 // the soundscape, notices phone peeks, then turns the recording into a report, an adventure and
 // rewards. Survives a page reload mid-night by resuming from the save.
-import { signal } from '@preact/signals';
+import { effect, signal } from '@preact/signals';
 import { sound } from '../audio/sound.ts';
 import { AlarmClock, analyze, closeAlarmNotification, demoNight, nextOccurrence, Reminders, showAlarmNotification, SleepRecorder, type LiveLevel, type ReminderKind, type SleepSession } from '../sleep/index.ts';
 import { rollAdventure } from './adventure.ts';
@@ -271,3 +271,11 @@ export function setMicSensitivity(v: number) { edit((x) => { x.sleep.sensitivity
 
 // keep the older prefs in step with the routine from the first moment (tonight changes daily)
 syncRoutine();
+// ...and whenever anything (the clock's clipboard, the interview) changes the routine, and as the
+// day rolls over
+let routineSeen = JSON.stringify(save.value.routine);
+effect(() => {
+  const k = JSON.stringify(save.value.routine);
+  if (k !== routineSeen) { routineSeen = k; queueMicrotask(() => syncRoutine()); }
+});
+if (typeof window !== 'undefined') window.setInterval(() => syncRoutine(), 10 * 60_000);

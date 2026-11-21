@@ -16,6 +16,7 @@ import { demoTonight, phase, setPhoneLock } from '../game/night.ts';
 import { lootTable } from '../game/catalog.ts';
 import { App } from '../ui/app.tsx';
 import { panel } from '../ui/state.ts';
+import { departing } from '../ui/sleep.tsx';
 
 const q = new URLSearchParams(location.search);
 const screen = q.get('s') ?? 'art';
@@ -78,6 +79,7 @@ async function boot() {
   if (screen === 'breathe') panel.value = 'breathe';
   if (screen === 'night' || screen === 'lock') startFakeNight();
   if (screen === 'lock') setPhoneLock(true);
+  if (screen === 'depart') { startFakeNight(); departing.value = true; }
   if (screen === 'alarm') { startFakeNight(); phase.value = 'ringing'; }
   if (screen === 'gift') {
     demoTonight();

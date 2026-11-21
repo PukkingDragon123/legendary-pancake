@@ -21,7 +21,8 @@
 .bp-opts { display: flex; flex-direction: column; gap: 6px; padding: 8px 8px; background: rgba(16, 10, 6, 0.35); box-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.35); }
 .bp-len { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; }
 .bp-len > span { font-size: 15px; color: #d4b078; margin-right: 6px; text-transform: uppercase; }
-.bp-len .hh-tab { font-size: 16px; color: #3b2414; padding: 0 2px; }
+.bp-len { flex-wrap: nowrap; }
+.bp-len .hh-tab { font-size: 15px; color: #3b2414; padding: 0 1px; white-space: nowrap; }
 .bp-toggle { display: flex; align-items: center; gap: 8px; }
 .bp-toggle b { display: block; font-size: 17px; font-weight: 400; }
 .bp-toggle small { display: block; font-size: 13px; color: #c8b090; }
