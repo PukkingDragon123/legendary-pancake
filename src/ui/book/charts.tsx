@@ -76,9 +76,11 @@ export function weekBars(week: { day: Date; night?: Night }[], goalMin: number) 
       labels.push({ x: cx, y: bot + 2, text: d.day.toLocaleDateString([], { weekday: 'narrow' }), align: 'c', small: true, color: LABEL });
       if (!d.night) { g.dashH(x0, x0 + bw - 1, bot, P.pebble, 1, 1); return; }
       const hrs = d.night.report.asleep / 3.6e6, y = yOf(Math.min(max, hrs));
-      const [fill, ink] = SCORE_TINT(d.night.report.score);
-      g.bar(x0, y, bw, bot - y + 1, fill, ink);
-      labels.push({ x: cx, y: y + 2, text: hrs.toFixed(1).replace('.0', ''), align: 'c', small: true, color: hexOf(P.paper) });
+      // a pencil-hatched wooden bar; only its cap carries the score's colour
+      const [, ink] = SCORE_TINT(d.night.report.score);
+      g.bar(x0, y, bw, bot - y + 1, mixHex(P.linen, P.wood, 0.45), P.ink2);
+      g.hline(x0 + 1, x0 + bw - 2, y + 1, ink); g.hline(x0 + 1, x0 + bw - 2, y + 2, ink);
+      labels.push({ x: cx, y: y + 4, text: hrs.toFixed(1).replace('.0', ''), align: 'c', small: true, color: hexOf(P.ink) });
     });
     const gy = yOf(goalMin / 60);
     g.dashH(L, R, gy, P.terracotta, 3, 2);
@@ -106,12 +108,12 @@ export function scoreSteps(nights: Night[]) {
     // the stepped line: flat until halfway to the next night, then a hard step
     for (let i = 0; i < pts.length; i++) {
       const a = pts[i], xa = i ? Math.round((pts[i - 1].x + a.x) / 2) : a.x, xb = i < pts.length - 1 ? Math.round((a.x + pts[i + 1].x) / 2) : a.x;
-      g.hline(xa, xb, a.y, P.slate);
-      if (i < pts.length - 1) g.vline(xb, a.y, pts[i + 1].y, P.slate);
-      // shade the ground below in a light stipple
-      for (let x = xa; x <= xb; x++) for (let y = a.y + 2; y <= bot; y++) if ((x + y) % 3 === 0) g.set(x, y, mixHex(P.paper, P.lake, 0.35));
+      g.hline(xa, xb, a.y, P.ink2);
+      if (i < pts.length - 1) g.vline(xb, a.y, pts[i + 1].y, P.ink2);
+      // pencil stipple under the line
+      for (let x = xa; x <= xb; x++) for (let y = a.y + 2; y <= bot; y++) if ((x + y) % 3 === 0) g.set(x, y, mixHex(P.paper, P.stone, 0.32));
     }
-    for (const q of pts) { const [fill, ink] = SCORE_TINT(q.s); g.box(q.x - 1, q.y - 1, 3, 3, ink); g.set(q.x, q.y, fill); }
+    for (const q of pts) { const [, ink] = SCORE_TINT(q.s); g.box(q.x - 1, q.y - 1, 3, 3, P.ink2); g.set(q.x, q.y, ink); }
     const last = pts[pts.length - 1];
     g.vline(last.x - 4, last.y - 4, last.y + 4, P.terracotta); g.hline(last.x - 4, last.x - 3, last.y - 4, P.terracotta); g.hline(last.x - 4, last.x - 3, last.y + 4, P.terracotta);
     labels.push({ x: last.x - 6, y: last.y - 4, text: String(last.s), align: 'r', color: hexOf(P.clay) });

@@ -224,40 +224,67 @@ export function paperArt(w: number, h: number, side: 'L' | 'R' | 'S', seed = 1):
 
 // ------------------------------------------------------------------ small pieces
 
+const mutec = (c: number, k = 0.45) => { const a = rgb(c), b = rgb(P.linen); return ((Math.round(a[0] + (b[0] - a[0]) * k) << 16) | (Math.round(a[1] + (b[1] - a[1]) * k) << 8) | Math.round(a[2] + (b[2] - a[2]) * k)); };
+const inkc = (c: number, k = 0.45) => { const a = rgb(c), b = rgb(P.ink); return ((Math.round(a[0] + (b[0] - a[0]) * k) << 16) | (Math.round(a[1] + (b[1] - a[1]) * k) << 8) | Math.round(a[2] + (b[2] - a[2]) * k)); };
+/** Section accents (dark, mid, light), muted towards linen: colour only as a small accent. */
 export const TAB_COLORS: Record<string, [number, number, number]> = {
-  moss: [P.pine, P.moss, P.sage], lake: [P.slate, P.lake, P.sky], berry: [P.plum, P.berry, P.rose], honey: [P.brassDark, P.ochre, P.honey],
+  moss: [inkc(P.pine, 0.2), mutec(P.moss, 0.25), mutec(P.sage, 0.35)], lake: [inkc(P.slate, 0.2), mutec(P.lake, 0.25), mutec(P.sky, 0.35)],
+  berry: [inkc(P.plum, 0.2), mutec(P.berry, 0.25), mutec(P.rose, 0.35)], honey: [inkc(P.brassDark, 0.2), mutec(P.ochre, 0.25), mutec(P.honey, 0.35)],
 };
-/** A cloth index tab sticking up from the page (w x h texels), stitched, with a notched top. */
+const CLOTH: RGB[] = [rgb(P.straw), mix(rgb(P.straw), rgb(P.linen), 0.5), rgb(P.linen), mix(rgb(P.linen), rgb(P.oat), 0.5), rgb(P.oat), rgb(P.paper)];
+/** A linen index tab standing up from the page (w x h texels): woven, frayed at the top corners, a coloured running stitch. */
 export function tabArt(col: string, w: number, h: number, on: boolean): Art {
   return art(`tab:${col}:${w}x${h}:${on}`, () => {
-    const p = new Px(w, h), [d, m, l] = (TAB_COLORS[col] ?? TAB_COLORS.moss).map(rgb);
+    const p = new Px(w, h), [d, m] = (TAB_COLORS[col] ?? TAB_COLORS.moss).map(rgb);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       if (y < 2 && (x < 2 - y || x > w - 3 + y)) continue;                         // stepped top corners
-      const weave = ((x + y) % 2 === 0 && h2(x, y, 4) > 0.5) ? -0.12 : 0;
-      let t = (on ? 0.62 : 0.45) - y / h * 0.3 + weave + (x === 0 ? 0.25 : x === w - 1 ? -0.25 : 0);
-      if (y === 0) t = 0.95;
-      p.set(x, y, t > 0.6 ? l : t > 0.3 ? m : d);
+      if (y === 0 && h2(x, 0, 6) > 0.8) continue;                                     // a little fray
+      const weave = (x % 2 === 0) !== (y % 2 === 0) ? -0.08 : 0.02;
+      let t = (on ? 0.8 : 0.55) - y / h * 0.35 + weave + (x === 0 ? 0.12 : x === w - 1 ? -0.3 : 0) + (h2(x >> 1, y, 3) - 0.5) * 0.1;
+      if (y === 0) t = 0.9;
+      p.set(x, y, pick(CLOTH, clamp(t, 0, 1), x, y, 0.6));
     }
-    for (let x = 2; x < w - 2; x += 2) p.set(x, 2, mix(l, rgb(P.snow), 0.4));     // stitching under the top
+    // a running stitch in the section's colour, and a darker hem at the bottom where it meets the board
+    for (let x = 2; x < w - 2; x++) if ((x + (on ? 0 : 1)) % 3 !== 0) p.set(x, 3, on ? d : m);
+    for (let x = 0; x < w; x++) p.set(x, h - 1, mix(rgb(P.straw), rgb(P.woodDark), 0.4));
     return p;
   });
 }
 
-export const SCORE_TINT = (s: number): [number, number] => (s >= 85 ? [P.fern, P.pine] : s >= 70 ? [P.lake, P.slate] : s >= 50 ? [P.ochre, P.brassDark] : [P.terracotta, P.clay]);
+/** [muted field, ink] for a score: colour stays a small accent. */
+export const SCORE_TINT = (s: number): [number, number] => { const c = s >= 85 ? P.fern : s >= 70 ? P.lake : s >= 50 ? P.ochre : P.terracotta; return [mutec(c, 0.62), inkc(c, 0.42)]; };
 export const scoreHex = (s: number) => hexOf(SCORE_TINT(s)[1]);
-/** A square ink stamp with notched corners, for a score (n x n texels). */
+/** A square rubber stamp inked on the page for a score (n x n texels): a double border with uneven ink, a faint wash inside. */
 export function badgeArt(score: number, n: number): Art {
   const [fill, ink] = SCORE_TINT(score);
   return art(`badge:${fill}:${n}`, () => {
-    const p = new Px(n, n), f = rgb(fill), k = rgb(ink), hi = mix(f, rgb(P.paper), 0.35);
+    const p = new Px(n, n), f = rgb(fill), k = rgb(ink), paper = rgb(P.paper);
     for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
       const e = Math.min(x, y, n - 1 - x, n - 1 - y);
-      const notch = (x < 2 || x > n - 3) && (y < 2 || y > n - 3) && !(x === 1 && y === 1) && !(x === n - 2 && y === 1) && !(x === 1 && y === n - 2) && !(x === n - 2 && y === n - 2);
-      if (notch) continue;
-      let c = e === 0 ? k : e === 1 ? hi : f;
-      if (e > 1 && h2(x, y, 7) > 0.9) c = mix(f, rgb(P.paper), 0.2);              // ink not quite even
+      if (e === 0 && (x === 0 || x === n - 1) && (y === 0 || y === n - 1)) continue;   // worn corners
+      const thin = h2(x, y, 11) > 0.86;                                                    // the ink skips here and there
+      let c: RGB | null;
+      if (e === 0) c = thin ? mix(k, paper, 0.55) : k;
+      else if (e === 1) c = mix(f, paper, 0.55);
+      else if (e === 2) c = thin ? mix(k, paper, 0.4) : mix(k, f, 0.25);
+      else c = h2(x, y, 7) > 0.85 ? mix(f, paper, 0.3) : mix(f, paper, 0.12);
       p.set(x, y, c);
     }
+    return p;
+  });
+}
+
+/** A hand-inked frame for 9-slicing (24 x 24, slice 6): wobbly double lines that overshoot at the corners. */
+export function inkFrameArt(seed = 1): Art {
+  return art(`inkframe:${seed}`, () => {
+    const N = 24, p = new Px(N, N), ink = mix(rgb(P.ink2), rgb(P.linen), 0.25), faint = mix(rgb(P.ink3), rgb(P.linen), 0.55);
+    const wob = (i: number, s: number) => (h2(i >> 2, s, seed) > 0.7 ? 1 : 0);
+    for (let i = 0; i < N; i++) {
+      if (h2(i, 1, seed) > 0.08) { p.set(i, 1 + wob(i, 2), ink); p.set(i, N - 2 - wob(i, 3), ink); p.set(1 + wob(i, 4), i, ink); p.set(N - 2 - wob(i, 5), i, ink); }
+      if (h2(i, 9, seed) > 0.4) { p.set(i, 3, faint); p.set(3, i, faint); }
+    }
+    // corner overshoots, like a quick pen box
+    p.set(0, 1, ink); p.set(N - 1, N - 2, ink); p.set(1, N - 1, ink); p.set(N - 2, 0, ink);
     return p;
   });
 }
@@ -311,7 +338,7 @@ const EMB: Record<string, string[]> = {
   hat: ['.........', '...xxx...', '..xxxxx..', '..xxxxx..', '..xxxxx..', 'xxxxxxxxx', '.........', '.........', '.........'],
   crown: ['.........', 'x...x...x', 'xx.xxx.xx', 'xxxxxxxxx', 'xxxxxxxxx', 'xxxxxxxxx', '.........', '.........', '.........'],
 };
-const STAMP_COL: Record<string, [number, number]> = { red: [P.terracotta, P.clay], gold: [P.honey, P.brassDark], green: [P.moss, P.pine], blue: [P.lake, P.slate], purple: [P.lilac, P.plum], pink: [P.rose, P.berry] };
+const STAMP_COL: Record<string, [number, number]> = { red: [mutec(P.terracotta), inkc(P.clay)], gold: [mutec(P.honey), inkc(P.brassDark)], green: [mutec(P.moss), inkc(P.pine)], blue: [mutec(P.lake), inkc(P.slate)], purple: [mutec(P.lilac), inkc(P.plum)], pink: [mutec(P.rose), inkc(P.berry)] };
 /** An achievement as a postage stamp (16 x 18): perforated edge, coloured field, emblem. Pencil outline when not earned. */
 export function stampArt(color: string, emblem: string, done: boolean): Art {
   return art(`stamp:${color}:${emblem}:${done}`, () => {
@@ -342,9 +369,9 @@ const ICONS: Record<string, string[]> = {
 };
 export function iconArt(name: string, tint: string): Art {
   return art(`icon:${name}:${tint}`, () => {
-    const p = new Px(11, 11), [d, m, l] = (TAB_COLORS[tint] ?? TAB_COLORS.moss).map(rgb);
+    const p = new Px(11, 11), [d, m] = (TAB_COLORS[tint] ?? TAB_COLORS.moss).map(rgb);
     (ICONS[name] ?? ICONS.stats).forEach((r, y) => [...r].forEach((ch, x) => {
-      const c = ch === 'd' ? d : ch === 'm' ? m : ch === 'l' ? (name === 'nights' ? rgb(P.honey) : l) : ch === 'e' ? rgb(P.ink2) : null;
+      const c = ch === 'd' ? rgb(P.ink2) : ch === 'm' ? m : ch === 'l' ? (name === 'nights' ? rgb(P.ochre) : d) : ch === 'e' ? rgb(P.ink3) : null;
       if (c) p.set(x, y, c);
     }));
     return p;

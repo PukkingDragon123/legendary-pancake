@@ -92,7 +92,7 @@ const leafMask = (ax, ay, a, len, wid) => (x, y) => {
 const WOOD = [shadow(C('barkDark'), 0.6), C('barkDark'), C('woodDeep'), mix(C('woodDeep'), C('woodDark'), 0.5), C('woodDark'), mix(C('woodDark'), C('wood'), 0.55), C('wood'), light(C('wood'), 0.35), C('woodLight'), light(C('woodLight'), 0.5)];
 const BRASS = [shadow(C('brassDark'), 0.7), mix(C('brassDark'), C('woodDeep'), 0.3), C('brassDark'), mix(C('brassDark'), C('brass'), 0.5), C('brass'), mix(C('brass'), C('honey'), 0.5), light(C('brass'), 0.6), C('lamp'), light(C('lamp'), 0.8)];
 const ENAMEL = [C('straw'), mix(C('straw'), C('linen'), 0.5), C('linen'), mix(C('linen'), C('oat'), 0.5), C('oat'), mix(C('oat'), C('paper'), 0.5), C('paper'), mix(C('paper'), C('snow'), 0.5)];
-const STEEL = [C('deepNight'), C('night'), mix(C('night'), C('slate'), 0.5), C('slate'), C('dusk'), C('lake'), C('sky')];
+const STEEL = [mix(C('ink'), C('deepNight'), 0.5), C('ink'), mix(C('ink'), C('iron'), 0.5), C('iron'), C('stoneDark'), C('stone'), C('pebble')];
 const MOSS = [C('forest'), C('pine'), C('leaf'), C('fern'), C('moss'), C('sage'), C('sageLight')];
 const INK = C('ink'), INK2 = C('ink2');
 const OUT = mix(shadow(C('barkDark'), 0.8), C('deepNight'), 0.4); // outline ink: deep slate-brown
@@ -149,7 +149,7 @@ function paintCase() {
   // ground shadow (behind everything): a dithered pixel ellipse
   for (let y = 166; y < 180; y++) for (let x = 0; x < W; x++) {
     const nx = (x + 0.5 - CX) / 54, ny = (y + 0.5 - 172) / 6.2, d = nx * nx + ny * ny;
-    if (d < 1) { const a = d < 0.45 ? 0.62 : d < 0.75 ? 0.4 : 0.22; if (bayer(x, y) < a + 0.2) b.set(x, y, mix(C('deepNight'), C('night'), 0.3), 255); }
+    if (d < 1) { const a = d < 0.45 ? 0.62 : d < 0.75 ? 0.4 : 0.22; if (bayer(x, y) < a + 0.2) b.set(x, y, mul(mix(C('ink'), C('deepNight'), 0.4), 0.62), 255); }
   }
   // bun feet: turned wood with a brass collar
   for (const [x0, x1] of FEET) {
@@ -299,34 +299,36 @@ function paintCase() {
 
 // ------------------------------------------------------------------ the dial plate: brass arch with the moon window, spandrels, enamel dial
 
-const LACQ = [shadow(C('forest'), 0.6), C('forest'), mix(C('forest'), C('pine'), 0.5), C('pine'), mix(C('pine'), C('leaf'), 0.45), C('leaf')];
+const INLAY = [mix(C('woodLight'), C('woodDark'), 0.35), C('woodLight'), C('woodPale'), light(C('woodPale'), 0.3)];
 function paintPlate(b) {
   for (let y = 0; y < PLATE.y1; y++) for (let x = PLATE.x0; x < PLATE.x1; x++) {
     if (!inPlate(x, y)) continue;
     const dArch = y < PLATE.y0 ? PLATE.r - dist(x, y, CX, PLATE.y0) : 99;
     const edge = Math.min(x - PLATE.x0, PLATE.x1 - 1 - x, PLATE.y1 - 1 - y, dArch);
-    // a deep moss-green lacquered plate, hand painted: soft brush strokes, warmer where the lamp falls
-    const stroke = fbm(x * 0.11 + y * 0.03, y * 0.22, 51) - 0.5;
-    let t = 0.5 + lit(x, y) * 2.2 + stroke * 0.45 - Math.max(0, dist(x, y, CX, DY) - 44) * 0.012;
-    if (edge < 1) { b.set(x, y, x < CX && y < DY ? BRASS[6] : BRASS[2]); continue; }  // gilt border bead
-    if (edge < 2) { b.set(x, y, BRASS[4]); continue; }
-    if (edge < 3) t = 0.08;                                                          // a shadow line inside it
-    // rubbed wear at the edges shows a little brass ground
-    if (edge < 5 && hash(x, y, 33) > 0.93) { b.set(x, y, BRASS[3]); continue; }
-    b.set(x, y, pick(LACQ, clamp(t, 0, 1), x, y, 1));
+    // a burr-walnut veneer: swirling figure with little dark eyes, warmer where the lamp falls
+    const w = fbm(x * 0.07, y * 0.07, 61);
+    const swirl = Math.sin(fbm(x * 0.13 + w * 2.2, y * 0.13 - w * 2.2, 62) * 22) * 0.5 + 0.5;
+    const eye = vnoise(x * 0.45, y * 0.45, 63) > 0.86 ? -0.16 : 0;
+    let t = 0.3 + swirl * 0.2 + eye + lit(x, y) * 1.8 - Math.max(0, dist(x, y, CX, DY) - 44) * 0.01;
+    if (edge < 1) { b.set(x, y, x < CX && y < DY ? BRASS[6] : BRASS[2]); continue; }  // a thin brass bead
+    if (edge < 2) t = 0.1;                                                           // shadow line
+    else if (edge < 3) { b.set(x, y, pick(INLAY, 0.6 + (x < CX ? 0.2 : -0.1), x, y)); continue; } // boxwood stringing
+    else if (edge < 4) t = 0.14;
+    b.set(x, y, pick(WOOD, clamp(t, 0, 0.7), x, y, 1));
   }
-  // gold-leaf vine scroll painted in the arch around the moon window, with leaves and tiny stars
+  // marquetry in the arch around the moon window: a light-wood vine with leaves
   for (let y = 18; y < PLATE.y0; y++) for (let x = PLATE.x0; x < PLATE.x1; x++) {
     if (!inPlate(x, y)) continue;
     const d = dist(x, y, CX, PLATE.y0);
     if (d < MOONW.r + 2 || d > PLATE.r - 3.5) continue;
     const a = Math.atan2(y + 0.5 - PLATE.y0, x + 0.5 - CX);
-    const rr = 24.5 + Math.sin(a * 8) * 3.0, off = d - rr;
-    if (Math.abs(off) < 0.6) b.set(x, y, x < CX ? BRASS[6] : BRASS[4]);
-    else if (Math.sin(a * 8) > 0.55 && off > 0.6 && off < 2.6 && Math.cos(a * 8) * (x < CX ? 1 : -1) > -0.2) b.set(x, y, off < 1.6 ? BRASS[5] : BRASS[3]);
-    else if (Math.sin(a * 8) < -0.55 && off < -0.6 && off > -2.6) b.set(x, y, off > -1.6 ? BRASS[5] : BRASS[3]);
+    const rr = 24.5 + Math.sin(a * 8) * 1.8, off = d - rr;
+    if (Math.abs(off) < 0.6) b.set(x, y, INLAY[x < CX ? 2 : 1]);
+    else if (Math.sin(a * 8) > 0.55 && off > 0.6 && off < 2.6 && Math.cos(a * 8) * (x < CX ? 1 : -1) > -0.2) b.set(x, y, off < 1.6 ? INLAY[2] : INLAY[0]);
+    else if (Math.sin(a * 8) < -0.55 && off < -0.6 && off > -2.6) b.set(x, y, off > -1.6 ? INLAY[2] : INLAY[0]);
   }
-  for (const [sx, sy] of [[29, 45], [83, 45], [33, 34], [79, 34], [42, 25], [70, 25], [56, 21]]) { b.set(sx, sy, C('lamp')); b.set(sx - 1, sy, BRASS[4]); b.set(sx + 1, sy, BRASS[4]); b.set(sx, sy - 1, BRASS[4]); b.set(sx, sy + 1, BRASS[4]); }
+  // a few brass pins for stars
+  for (const [sx, sy] of [[29, 45], [83, 45], [42, 25], [70, 25], [56, 21]]) { b.set(sx, sy, BRASS[6]); b.set(sx + 1, sy + 1, BRASS[2]); }
   // moon window rim and the two painted hills (the humps)
   for (let y = 30; y < PLATE.y0 + 1; y++) for (let x = 36; x < 76; x++) {
     const d = dist(x, y, MOONW.cx, MOONW.cy);
@@ -670,23 +672,30 @@ function sparkle() {
 // ------------------------------------------------------------------ the wall behind: a calm painted night, and a pool of lamplight
 
 function wallTile() {
-  const N = 96, b = new Buf(N, N);
-  const RAMPW = [mix(C('deepNight'), C('forest'), 0.12), mix(C('deepNight'), C('night'), 0.5), C('night'), mix(C('night'), C('slate'), 0.3), mix(C('night'), C('slate'), 0.55)];
+  const N = 128, b = new Buf(N, N);
+  const RAMPW = [mix(C('ink'), C('deepNight'), 0.6), mix(C('ink'), C('deepNight'), 0.3), C('ink'), mix(C('ink'), C('barkDark'), 0.5), mix(C('ink'), C('stoneDark'), 0.4)];
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     // tileable noise: wrap coordinates on a torus
     const tx = (x / N) * Math.PI * 2, ty = (y / N) * Math.PI * 2;
-    const n1 = vnoise(3 + Math.cos(tx) * 2.2, 3 + Math.sin(tx) * 2.2 + Math.cos(ty) * 1.4, 5);
-    const n2 = vnoise(9 + Math.cos(ty) * 3.5, 9 + Math.sin(ty) * 3.5 + Math.sin(tx) * 1.2, 6);
-    // brush strokes: soft horizontal-ish streaks
-    const stroke = Math.sin(y * 0.38 + n1 * 6) * 0.5 + 0.5;
-    let t = 0.42 + (n1 - 0.5) * 0.5 + (n2 - 0.5) * 0.3 + (stroke - 0.5) * 0.12;
+    const n1 = vnoise(3 + Math.cos(tx) * 2.6, 3 + Math.sin(tx) * 2.6 + Math.cos(ty) * 1.8, 5);
+    const n2 = vnoise(9 + Math.cos(ty) * 4.5, 9 + Math.sin(ty) * 4.5 + Math.sin(tx) * 1.6, 6);
+    const n3 = vnoise(20 + Math.cos(tx) * 9 + Math.sin(ty) * 3, 20 + Math.sin(tx) * 9 + Math.cos(ty) * 9, 7);
+    // soft painted strokes: horizontal-ish streaks of plaster
+    const stroke = Math.sin(y * 0.3 + n1 * 5 + n3 * 2) * 0.5 + 0.5;
+    const t = 0.44 + (n1 - 0.5) * 0.26 + (n2 - 0.5) * 0.22 + (n3 - 0.5) * 0.18 + (stroke - 0.5) * 0.1;
     b.set(x, y, pick(RAMPW, clamp(t, 0, 1), x, y, 1.1));
   }
-  // a faint leafy damask: tiny sprigs on a diamond lattice
-  const sprig = [[0, 0], [0, -1], [0, -2], [-1, -2], [1, -3], [-1, 0], [1, -1]];
-  for (const [ox, oy] of [[24, 24], [72, 72], [72, 24], [24, 72]]) for (const [dx, dy] of sprig) b.set(ox + dx, oy + dy, mix(C('night'), C('slate'), 0.7));
-  for (const [ox, oy] of [[48, 48], [0, 48], [48, 0], [0, 0]]) { b.set(ox, oy, mix(C('night'), C('dusk'), 0.35)); b.set((ox + 1) % N, oy, mix(C('night'), C('slate'), 0.5)); }
   return { url: b.url(), N };
+}
+
+/** A dithered shadow strip for the screen edges (vignette), dark at x = 0 fading over `n` texels. */
+function edgeShade(n, vertical) {
+  const b = vertical ? new Buf(4, n) : new Buf(n, 4);
+  for (let k = 0; k < n; k++) for (let j = 0; j < 4; j++) {
+    const x = vertical ? j : k, y = vertical ? k : j, f = 1 - k / n;
+    if (bayer(x, y) < f * f * 0.9) b.set(x, y, mix(C('ink'), C('deepNight'), 0.6), 150);
+  }
+  return b.url();
 }
 
 /** A pool of warm lamplight behind the clock, in hard stepped bands with ordered dither between them. */
@@ -723,6 +732,7 @@ const caseOut = (() => {
 
 const hourS = handStrip(HOUR, mix(INK, C('deepNight'), 0.3)), minS = handStrip(MINUTE, mix(INK, C('deepNight'), 0.3)), secS = handStrip(SECOND, null);
 const pend = pendulumStrip(), moon = moonStrip(), dr = door(), ptr = pointer(), wall = wallTile(), pool = lampPool();
+const EDGE = 40, edgeH = edgeShade(EDGE, false), edgeV = edgeShade(EDGE, true);
 const HO = { x: CX - FR / 2, y: DY - FR / 2 }; // hand frame offset in the clock
 
 // ---- progress timing: the minute hand sweeps 0..~55 of 60 while loading (fast at first, then a crawl)
@@ -746,10 +756,14 @@ const moonFrames = Array.from({ length: MOON_N - 2 }, (_, i) => i);             
 
 const CSS = `
 #boot{--k:min(calc(88vw / ${W}),calc(66vh / ${H}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
-background:${css(C('night'))} url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s steps(6)}
+background:${css(C('ink'))} url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s steps(6)}
 @supports (width:round(nearest,1px,1px)){#boot{--k:max(1px,min(round(nearest,min(calc(88vw / ${W}),calc(66vh / ${H})),1px),round(down,min(calc(98vw / ${W}),calc(90vh / ${H})),1px)))}}
 #boot.gone:not(.hold):not(.js){opacity:0;pointer-events:none}
 #boot *{position:absolute;display:block;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;pointer-events:none}
+#boot .bt-edge{left:0;top:0;width:${EDGE}em;height:100%;background:url(${edgeH}) 0 0/${EDGE}em 4em repeat-y}
+#boot .bt-edge.r{left:auto;right:0;transform:scaleX(-1)}
+#boot .bt-edge.t{width:100%;height:${EDGE}em;background:url(${edgeV}) 0 0/4em ${EDGE}em repeat-x}
+#boot .bt-edge.b{top:auto;bottom:0;width:100%;height:${EDGE}em;background:url(${edgeV}) 0 0/4em ${EDGE}em repeat-x;transform:scaleY(-1)}
 #boot .bt-pool{width:${pool.w}em;height:${pool.h}em;left:50%;top:50%;margin:-${(pool.h * 0.47 + 6).toFixed(1)}em 0 0 -${pool.w / 2}em;background:url(${pool.url}) 0 0/100% 100%;animation:bt-flick 3.2s steps(1) infinite}
 #boot .bt-mote{width:1em;height:1em;background:${css(C('lamp'))};opacity:0;animation:bt-mote 9s steps(36) infinite}
 #boot .bt-stage{position:relative;width:${W}em;height:${H}em;flex:none;margin-top:-4em;transform-origin:50% ${((DY / H) * 100).toFixed(3)}%}
@@ -795,7 +809,7 @@ const sparks = [[CX - 20, 18, -10, -12], [CX + 14, 14, 12, -14], [CX - 3, 2, -2,
 const html = `<!-- boot:begin (generated by src/onboard/tools/bootart.mjs; edit the generator, not this block) -->
     <style>${CSS}</style>
     <div id="boot" role="progressbar" aria-label="Loading" data-art='${JSON.stringify({ fr: FR, fn: FN, mw: moon.w, mn: MOON_N, cx: CX, dy: DY, rd: R_DIAL })}'>
-      <i class="bt-pool"></i>${motes.map(([x, y, d]) => `<i class="bt-mote" style="left:calc(50% + ${x}em);top:calc(50% + ${y}em);animation-delay:${d}s"></i>`).join('')}
+      <i class="bt-edge"></i><i class="bt-edge r"></i><i class="bt-edge t"></i><i class="bt-edge b"></i><i class="bt-pool"></i>${motes.map(([x, y, d]) => `<i class="bt-mote" style="left:calc(50% + ${x}em);top:calc(50% + ${y}em);animation-delay:${d}s"></i>`).join('')}
       <div class="bt-stage"><div class="bt-clock">
         <i class="bt-moon"></i>
         <img class="bt-case" src="${caseOut.url()}" alt="" />

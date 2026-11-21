@@ -49,6 +49,9 @@ type RGB = number;
 const pk = (c: RGB, a = 255) => ((a << 24) | ((c & 255) << 16) | (c & 0xff00) | ((c >> 16) & 255)) >>> 0;
 const mixc = (a: RGB, b: RGB, t: number): RGB => { const ch = (h: number, s: number) => (h >> s) & 255; const m = (s: number) => Math.round(ch(a, s) + (ch(b, s) - ch(a, s)) * t); return (m(16) << 16) | (m(8) << 8) | m(0); };
 const CLEAR = 0;
+/** muted towards linen (k) and a charcoal ink for the big dark covers: colour stays an accent */
+const mute = (c: RGB, k = 0.35): RGB => mixc(c, P.linen, k);
+const CHAR = mixc(P.ink, P.deepNight, 0.45), CHAR2 = mixc(P.ink, P.stoneDark, 0.35);
 const smooth = (t: number) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 const BAYER8 = (() => { const m = [0, 32, 8, 40, 2, 34, 10, 42, 48, 16, 56, 24, 50, 18, 58, 26, 12, 44, 4, 36, 14, 46, 6, 38, 60, 28, 52, 20, 62, 30, 54, 22, 3, 35, 11, 43, 1, 33, 9, 41, 51, 19, 59, 27, 49, 17, 57, 25, 15, 47, 7, 39, 13, 45, 5, 37, 63, 31, 55, 23, 61, 29, 53, 21]; return m.map((v) => (v + 0.5) / 64); })();
@@ -81,7 +84,7 @@ const LEAF_ROWS = [
   ['..sd...', '.dmmd..', '.dlmmd.', '.dmlmmd', '..dmmmd', '...dd..', '.......'],
   ['.......', '..ddd..', '.dmmmd.', 'olllmms', '.dmmmd.', '..ddd..', '.......'],
 ];
-const LEAF_TINTS: [RGB, RGB, RGB][] = [[P.pine, P.fern, P.sage], [P.leaf, P.moss, P.sageLight], [P.woodDark, P.ochre, P.honey], [P.berry, P.terracotta, P.rose], [P.forest, P.leaf, P.moss]];
+const LEAF_TINTS: [RGB, RGB, RGB][] = [[P.pine, P.fern, P.sage], [P.leaf, P.moss, P.sageLight], [P.woodDark, P.ochre, P.honey], [P.clay, P.terracotta, P.rose], [P.forest, P.leaf, P.moss]].map((t) => t.map((c) => mixc(c, P.stone, 0.3)) as [RGB, RGB, RGB]);
 const leafSpr = (tint: number, f: number) => sprite(`lf${tint}_${f}`, () => { const [d, m, l] = LEAF_TINTS[tint % LEAF_TINTS.length]; return grid(LEAF_ROWS[f & 3], { d, m, l, s: P.bark, o: P.bark }); });
 const FEATHER_ROWS = [
   ['....w....', '...wcw...', '..wcwcw..', '..wcwcw..', '.wcwqwcw.', '.wcwqwcw.', '.wcwqwcw.', '..wcqcw..', '..wcqcw..', '...wqw...', '....q....', '....q....'],
@@ -152,7 +155,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     case 'fade':
     case 'dither': {
       // an 8x8 ordered dither with a diagonal drift: the dusk pours in from the top-left
-      const c1 = pk(P.night), c2 = pk(mixc(P.night, P.slate, 0.35)), c3 = pk(P.deepNight);
+      const c1 = pk(CHAR), c2 = pk(CHAR2), c3 = pk(mixc(CHAR, P.deepNight, 0.5));
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
         const drift = ((x + y) / (W + H)) * 0.5;
         const th = bayer8(x, y) * 0.62 + drift * (r.rev ? -1 : 1) + (r.rev ? 0.5 : 0);
@@ -162,7 +165,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     }
     case 'iris': {
       const R = (1 - cov) * (Math.hypot(Math.max(r.cx, W - r.cx), Math.max(r.cy, H - r.cy)) + 4);
-      const ink = pk(P.deepNight), dot = pk(mixc(P.night, P.lake, 0.4)), rim = pk(P.brass), rim2 = pk(P.brassDark), hi = pk(P.lamp);
+      const ink = pk(CHAR), dot = pk(CHAR2), rim = pk(P.brass), rim2 = pk(P.brassDark), hi = pk(P.lamp);
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
         // a chunky stepped circle: distance measured on a 2-texel grid
         const d = Math.hypot((x >> 1) * 2 + 1 - r.cx, (y >> 1) * 2 + 1 - r.cy);
@@ -173,7 +176,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     }
     case 'leaves': {
       const span = H + 46, edge = (phase === 'in' ? e : e) * span - 22, up = phase === 'out';
-      const pal = [P.forest, P.pine, P.leaf, P.fern, P.moss].map((c) => pk(c)), rim = pk(mixc(P.forest, P.deepNight, 0.5));
+      const pal = [P.forest, P.pine, P.leaf, P.fern, P.moss].map((c) => pk(mixc(c, P.stoneDark, 0.38))), rim = pk(mixc(P.forest, P.ink, 0.6));
       for (let x = 0; x < W; x++) {
         const jag = vnoise(x * 0.18, 0, 5) * 8 + Math.sin(x * 0.55) * 2;
         const lim = edge + jag;
@@ -241,7 +244,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     case 'fireflies': {
       // dusk closes in from the edges towards the centre in dithered rings
       const far = Math.hypot(Math.max(r.cx, W - r.cx), Math.max(r.cy, H - r.cy));
-      const c1 = pk(mixc(P.deepNight, P.forest, 0.25)), c2 = pk(P.night);
+      const c1 = pk(CHAR), c2 = pk(mixc(CHAR, P.night, 0.4));
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
         const d = Math.hypot(x - r.cx, (y - r.cy) * 1.1) / far;
         if (1 - d + bayer(x, y) * 0.35 < (1.35 * (1 - cov)) ) continue;
@@ -309,8 +312,8 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     }
     case 'mosaic': {
       const T = 8, cols = Math.ceil(W / T), rows = Math.ceil(H / T);
-      const faces: [number, number, number][] = [[P.moss, P.sage, P.fern], [P.oat, P.paper, P.linen], [P.sage, P.sageLight, P.moss], [P.linen, P.oat, P.straw]].map((f) => f.map((c) => pk(c)) as [number, number, number]);
-      const ink = pk(P.forest);
+      const faces: [number, number, number][] = [[P.linen, P.oat, P.straw], [P.oat, P.paper, P.linen], [mute(P.sage, 0.45), mute(P.sageLight, 0.45), mute(P.moss, 0.45)], [P.linen, P.oat, P.straw], [P.straw, P.linen, mixc(P.straw, P.woodLight, 0.5)]].map((f) => f.map((c) => pk(c)) as [number, number, number]);
+      const ink = pk(P.ink3);
       for (let j = 0; j < rows; j++) for (let i = 0; i < cols; i++) {
         const order = ((r.rev ? cols - i + rows - j : i + j) / (cols + rows)) * 0.6 + hash(i, j, 12) * 0.25;
         const q = clamp((cov - order) / 0.15, 0, 1);
@@ -331,7 +334,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     case 'branch': {
       // a leafy branch sweeps left to right (right to left reversed), dusk behind it
       const span = W + 60, front = e * span - 30, rev = r.rev;
-      const dusk = pk(mixc(P.night, P.pine, 0.35)), dusk2 = pk(mixc(P.night, P.pine, 0.55)), bark = [P.barkDark, P.bark, P.woodDark].map((c) => pk(c));
+      const dusk = pk(CHAR), dusk2 = pk(mixc(CHAR, P.pine, 0.25)), bark = [P.barkDark, P.bark, P.woodDark].map((c) => pk(c));
       const edgeAt = (y: number) => front + Math.sin(y * 0.09 + 1) * 6 + Math.sin(y * 0.23) * 2;
       for (let y = 0; y < H; y++) {
         const ex = edgeAt(y);
@@ -355,7 +358,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
       // a hand sweeps round from 12 o'clock and paints a cream dial behind it
       const R = Math.hypot(Math.max(r.cx, W - r.cx), Math.max(r.cy, H - r.cy)) + 2;
       const sweep = cov * Math.PI * 2 * (phase === 'out' ? 1 : 1);
-      const face = pk(P.oat), face2 = pk(P.paper), tick = pk(P.ink2), hand = pk(P.slate), handHi = pk(P.lake), tip = pk(P.ink);
+      const face = pk(P.oat), face2 = pk(mixc(P.oat, P.paper, 0.5)), tick = pk(P.ink2), hand = pk(P.slate), handHi = pk(P.lake), tip = pk(P.ink);
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
         let a = Math.atan2(x - r.cx, -(y - r.cy)); // 0 at 12, clockwise
         if (r.rev) a = -a;
@@ -364,7 +367,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
         if (!covered) continue;
         // a plain paper dial, faintly mottled, with one row of minute ticks
         const d = Math.hypot(x - r.cx, y - r.cy), RT = Math.min(W, H) * 0.42;
-        let c = vnoise(x * 0.09, y * 0.09, 6) > 0.62 ? face2 : face;
+        let c = vnoise(x * 0.09, y * 0.09, 6) > 0.7 ? face2 : face;
         const m = (a / (Math.PI * 2)) * 60;
         if (d > RT - (Math.round(m) % 5 === 0 ? 6 : 3) && d < RT && Math.abs(m - Math.round(m)) * (d * 0.105) < 0.55) c = tick;
         buf[y * W + x] = c;
@@ -384,7 +387,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     case 'curtain': {
       // two velvet curtains slide in from the sides on a brass rail (they open the same way)
       const half = Math.ceil(W / 2) + 4, reach = e * half;
-      const vel = [P.plum, P.berry, mixc(P.berry, P.rose, 0.35), P.rose].map((c) => pk(c)), rail = [P.brassDark, P.brass, P.lamp].map((c) => pk(c)), fringe = pk(P.honey);
+      const vel = [mixc(P.straw, P.woodDark, 0.35), P.straw, P.linen, P.oat].map((c) => pk(c)), rail = [P.woodDeep, P.wood, P.woodLight].map((c) => pk(c)), fringe = pk(mixc(P.straw, P.rose, 0.35));
       const amt = phase === 'in' ? reach : half - reach;
       for (const side of [0, 1]) {
         for (let k = 0; k < amt; k++) {
@@ -405,8 +408,8 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     case 'blueprint': {
       const span = H + 16;
       const yr = phase === 'in' ? e * span - 8 : (1 - e) * span - 8;
-      const base = pk(P.dusk), minor = pk(mixc(P.dusk, P.lake, 0.3)), major = pk(mixc(P.dusk, P.sky, 0.5)), draw = pk(P.frost), shadow = pk(P.ink, 80);
-      const roll = [P.slate, P.dusk, P.lake, P.sky, P.mist, P.sky, P.lake, P.dusk, P.slate].map((c) => pk(c));
+      const bp = mixc(P.slate, P.stone, 0.45), base = pk(bp), minor = pk(mixc(bp, P.mist, 0.15)), major = pk(mixc(bp, P.mist, 0.32)), draw = pk(P.paper), shadow = pk(P.ink, 80);
+      const roll = [P.slate, P.dusk, P.lake, P.sky, P.mist, P.sky, P.lake, P.dusk, P.slate].map((c) => pk(mixc(c, P.stone, 0.45)));
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
         if (y < yr) {
           let c = base;
@@ -423,7 +426,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     }
     case 'stars': {
       // the night falls in dithered bands from the top
-      const bands = [P.deepNight, mixc(P.deepNight, P.night, 0.5), P.night, mixc(P.night, P.slate, 0.4), mixc(P.night, P.plum, 0.45)];
+      const bands = [P.deepNight, mixc(P.deepNight, P.night, 0.5), P.night, mixc(P.night, P.slate, 0.4), mixc(P.night, P.stoneDark, 0.45)];
       for (let y = 0; y < H; y++) {
         const k = y / H, col = pk(bands[Math.min(bands.length - 1, Math.floor(k * bands.length + bayer(0, y) * 0.6))]);
         for (let x = 0; x < W; x++) if (bayer8(x, y) < cov * 1.18 - (1 - k) * 0.14) buf[y * W + x] = col;
@@ -441,7 +444,7 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
     }
     case 'sunrise': {
       // dawn bands; the sun climbs and the bands peel away upwards as it reveals
-      const bands = [P.dusk, P.lilac, P.rose, P.blush, P.honey, P.lamp].map((c) => pk(c));
+      const bands = [P.dusk, P.lilac, P.rose, P.blush, P.honey, P.lamp].map((c) => pk(mute(c, 0.4)));
       const sunY = H * (0.95 - (phase === 'in' ? e * 0.3 : 0.3 + e * 0.45));
       for (let y = 0; y < H; y++) {
         const k = y / H, bi = Math.min(bands.length - 1, Math.floor(k * bands.length * 1.05));
@@ -590,7 +593,7 @@ const OPEN: Partial<Record<NonNullable<Panel>, [TransitionKind, TransitionOpts?]
   map: ['branch', { speed: 1.15 }], quests: ['mosaic', { speed: 1.3 }], settings: ['blinds', { speed: 1.2 }], breathe: ['fireflies'], night: ['stars'],
 };
 const CLOSE: Partial<Record<NonNullable<Panel>, [TransitionKind, TransitionOpts?]>> = {
-  sleep: ['fireflies', { speed: 1.2 }], clock: ['clock', { reverse: true, speed: 1.35 }], book: ['page', { reverse: true, speed: 1.25 }], build: ['blueprint', { speed: 1.3 }], decorate: ['blueprint', { speed: 1.3 }],
+  sleep: ['stars', { speed: 1.25 }], clock: ['clock', { reverse: true, speed: 1.35 }], book: ['page', { reverse: true, speed: 1.25 }], build: ['blueprint', { speed: 1.3 }], decorate: ['blueprint', { speed: 1.3 }],
   shop: ['snow', { speed: 1.2 }], wardrobe: ['curtain', { speed: 1.3 }], map: ['leaves', { speed: 1.35 }], quests: ['dither', { speed: 1.4 }], settings: ['blinds', { reverse: true, speed: 1.4 }],
   breathe: ['feathers', { speed: 1.2 }], night: ['sunrise'],
 };

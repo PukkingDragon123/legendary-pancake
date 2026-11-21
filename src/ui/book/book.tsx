@@ -14,7 +14,7 @@ import { uiBurst } from '../chrome/uifx.ts';
 import { fmtDur, fmtTime } from '../kit.tsx';
 import { panel, sceneRef } from '../state.ts';
 import { CSS_TOKENS } from '../../gfx/palette.ts';
-import { arrowArt, boardArt, coverArt, hexOf, iconArt, moodArt, MOOD_NAMES, paperArt, ribbonArt, scoreHex, tabArt } from './art.ts';
+import { arrowArt, boardArt, coverArt, hexOf, iconArt, inkFrameArt, moodArt, MOOD_NAMES, paperArt, ribbonArt, scoreHex, tabArt } from './art.ts';
 import { Chart, hypnoSteps, STAGE_INK, STAGE_NAME, stageBar } from './charts.tsx';
 import { layout, type BookLayout } from './layout.ts';
 import { Badge, buildPages, Img, SECTIONS, type PageCtx, type PageDef, type SectionId } from './pages.tsx';
@@ -184,7 +184,7 @@ export function Book() {
 
   return (
     <div class={`bk-stage ph-${phase}` + (L.single ? ' single' : ' spread')} ref={stage} role="dialog" aria-modal="true" aria-label={`${s.name}'s sleep diary`}
-      style={{ '--T': `${T}px`, '--fs': `${L.fs}px` } as Record<string, string>}>
+      style={{ '--T': `${T}px`, '--fs': `${L.fs}px`, '--inkframe': `url(${inkFrameArt(1).url})`, '--inkframe2': `url(${inkFrameArt(2).url})` } as Record<string, string>}>
       <div class="bk-dim" onClick={close} />
       <div class="bk-book" style={{ left: `${L.x}px`, top: `${L.y}px`, width: `${L.BW}px`, height: `${L.BH}px` }}>
         {/* cloth index tabs along the top edge */}
