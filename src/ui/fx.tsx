@@ -50,18 +50,26 @@ export function Dialogs() {
 interface Flyer { id: number; sprite: string; x: number; y: number; tx: number; ty: number; delay: number }
 const flyers = signal<Flyer[]>([]);
 let fid = 0;
+// [shop] which sprite flies and which HUD chip it lands in: acorns ('coin', legacy 'acorn') fly as
+// spinning acorns into [data-chip="coin"], moon gems ('gem', legacy 'moonstone') into [data-chip="gem"]
+const FLY: Record<string, { sprite: string; frames: number; chip: string; gem?: boolean }> = {
+  coin: { sprite: 'owlcoin', frames: 8, chip: 'coin' }, acorn: { sprite: 'owlcoin', frames: 8, chip: 'coin' },
+  gem: { sprite: 'moongem', frames: 8, chip: 'gem', gem: true }, moonstone: { sprite: 'moongem', frames: 8, chip: 'gem', gem: true },
+  star: { sprite: 'star', frames: 0, chip: 'star' },
+};
 /** Sprites arc from a screen point into the matching HUD counter, which bumps as each one lands. */
-export function flyReward(kind: 'acorn' | 'moonstone' | 'star', count: number, from?: { x: number; y: number }) {
-  const target = document.querySelector(`[data-chip="${kind}"]`) as HTMLElement | null;
+export function flyReward(kind: 'coin' | 'gem' | 'star' | 'acorn' | 'moonstone', count: number, from?: { x: number; y: number }) {
+  const fly = FLY[kind] ?? FLY.coin;
+  const target = document.querySelector(`[data-chip="${fly.chip}"]`) as HTMLElement | null;
   const r = target?.getBoundingClientRect();
   const tx = r ? r.left + 18 : innerWidth - 60, ty = r ? r.top + 18 : 30;
   const f = from ?? { x: innerWidth / 2, y: innerHeight * 0.55 };
   const n = Math.min(12, Math.max(3, Math.round(count / 10)));
   const list: Flyer[] = [];
-  for (let i = 0; i < n; i++) list.push({ id: ++fid, sprite: kind, x: f.x + (Math.random() - 0.5) * 90, y: f.y + (Math.random() - 0.5) * 50, tx, ty, delay: i * 70 });
+  for (let i = 0; i < n; i++) list.push({ id: ++fid, sprite: fly.frames ? `${fly.sprite}_f${i % fly.frames}` : fly.sprite, x: f.x + (Math.random() - 0.5) * 90, y: f.y + (Math.random() - 0.5) * 50, tx, ty, delay: i * 70 });
   flyers.value = [...flyers.value, ...list];
   list.forEach((fl, i) => setTimeout(() => {
-    sound.play(kind === 'moonstone' ? 'reward_gem' : 'reward_coin', { volume: 0.35, rate: 1 + i * 0.03, gap: 40 });
+    sound.play(fly.gem ? 'reward_gem' : 'reward_coin', { volume: 0.35, rate: 1 + i * 0.03, gap: 40 });
     target?.classList.remove('bump'); void target?.offsetWidth; target?.classList.add('bump');
     haptic(4);
   }, fl.delay + 620));
