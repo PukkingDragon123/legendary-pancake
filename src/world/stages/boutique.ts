@@ -11,7 +11,7 @@ import { cloth, lamp, lvl, metal, R, smooth, solid, type Tint } from '../../gfx/
 import { hash } from '../../gfx/noise.ts';
 import { ITEMS } from '../../assets/registry.ts';
 import { OwlActor, type OwlAction, type OwlFx, type OwlMood } from '../../owl/actor.ts';
-import { buildOwl, G, plate, sculpt, type BoneName, type OwlLook, type OwlParts } from '../../owl/model.ts';
+import { buildOwl, owlBoxes, type BoneName, type OwlLook } from '../../owl/model.ts';
 import { PIECE } from '../../owl/outfits.ts';
 import { palette } from '../../owl/palette.ts';
 import { QUEEN_LOOK } from '../../owl/queen.ts';
@@ -155,26 +155,21 @@ function pillar(x: number, z: number, H: number): BoxSpec[] {
   return out;
 }
 
-/** The porcelain owl form a piece of clothing is shown on, plus the piece itself. */
+/** The porcelain owl form a piece of clothing is shown on, plus the piece itself: a real snowy-owl
+ * body (so every piece sits on its own anchors) glazed white, wearing the piece in its own colours. */
 function bustBoxes(pieceId: string): BoxSpec[] | null {
   const def = PIECE[pieceId];
   if (!def) return null;
-  const pal = palette('snowy');
-  const bones = {} as Record<BoneName, BoxSpec[]>;
-  for (const k of ['body', 'head', 'tuftL', 'tuftR', 'browL', 'browR', 'jaw', 'wingL', 'wingR', 'tail', 'legL', 'legR'] as BoneName[]) bones[k] = [];
-  const P: OwlParts = { bones, add: (bone, ...b) => bones[bone].push(...b), pal, tufts: true };
+  const base: OwlLook = { species: 'snowy', palette: 'snowy', outfit: {} };
+  let bare: Record<BoneName, BoxSpec[]>, dressed: Record<BoneName, BoxSpec[]>;
+  try { bare = owlBoxes(base); dressed = owlBoxes({ ...base, outfit: { [def.slot]: pieceId } }); } catch { return null; }
   const pz = porcelain(), pd = porcelain('#dfe9f5');
-  P.add('body', ...sculpt(0, G.bodyY, 0, G.bodyW, G.bodyD, [[0, 1, 1.5, 2.4], [1, 2.2, 0.5, 3], [2.2, 9.6, 0, 3.4], [9.6, 11, 0.6, 3.2]], pz));
-  P.add('head', ...sculpt(0, G.headY, G.headZ, G.headW, G.headD, [[0, 1, 1.4, 3], [1, 2.2, 0.5, 3.6], [2.2, 10, 0, 4], [10, 11.6, 0.6, 3.8], [11.6, 12.8, 1.9, 3.4]], pz));
-  P.add('head', ...plate(-G.eyeX, G.eyeY - 4.25, G.headFront + 0.5, 8.1, 8.5, 0.9, 3.9, pd), ...plate(G.eyeX, G.eyeY - 4.25, G.headFront + 0.58, 8.1, 8.5, 0.9, 3.9, pd));
-  P.add('head', box(0, 16.3, G.discFront + 0.65, 2.1, 1.9, 1.3, gold));
-  for (const sd of [-1, 1]) P.add('head', box(sd * G.eyeX, G.eyeY - 0.6, G.discFront + 0.5, 3.2, 0.9, 0.5, solid('#8aa6cc')), box(sd * (G.eyeX + 1.6), G.eyeY - 0.2, G.discFront + 0.5, 0.9, 0.9, 0.5, solid('#8aa6cc')));
-  for (const sd of [-1, 1]) P.add('tuftL', box(sd * 5.3, 23.9, 0.4, 2.8, 2.8, 2.4, pz));
-  P.add('wingL', ...sculpt(-G.wingX, 3.8, -0.5, 2.3, 9.8, [[0, 10, 0, 1]], pz));
-  P.add('wingR', ...sculpt(G.wingX, 3.8, -0.5, 2.3, 9.8, [[0, 10, 0, 1]], pz));
-  try { def.make(P); } catch { /* a piece that needs more of the owl than the bust has */ }
+  const all: BoxSpec[] = [];
+  for (const bone of Object.keys(dressed) as BoneName[]) {
+    const n = bare[bone]?.length ?? 0;
+    dressed[bone].forEach((b, i) => all.push(i < n ? { ...b, mat: bone === 'head' && i % 3 === 0 ? pd : pz, glow: false } : b));
+  }
   // a little turned stand under the bust
-  const all = Object.values(bones).flat();
   all.push(box(0, -4, 0, 4, 7, 4, silver), box(0, -6, 0, 11, 2, 11, gold));
   return all.map((b) => ({ ...b, at: [b.at[0], b.at[1] + 6, b.at[2]] as [number, number, number], pivot: b.pivot ? [b.pivot[0], b.pivot[1] + 6, b.pivot[2]] as [number, number, number] : undefined }));
 }
