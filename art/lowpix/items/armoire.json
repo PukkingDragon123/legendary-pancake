@@ -1,0 +1,2111 @@
+{
+ "name": "armoire",
+ "description": "Grand Armoire",
+ "author": "Hoot Hollow (furnB)",
+ "license": "CC0-1.0",
+ "density": 3,
+ "budget": {
+  "tris": 3000,
+  "colors": 400
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.62
+  ],
+  "strength": 0.75,
+  "gradient": 0.35,
+  "ao": 1.1,
+  "ao_height": 3.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.88
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.5,
+  "width": 0.4,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "wd_russet": "wood",
+   "br_gold": "metal",
+   "wd_dark": "wood",
+   "pa_inner": "none",
+   "gl_mirror": "none",
+   "wd_light": "wood",
+   "cl_hat": "cloth",
+   "cl_hatband": "cloth",
+   "br_brass": "metal",
+   "br_verdigris": "metal",
+   "cl_coat": "cloth",
+   "kn_scarf": "cloth",
+   "kn_scarf_s": "cloth",
+   "cl_boot": "cloth"
+  }
+ },
+ "render": {
+  "background": "#2a3330",
+  "hero": [
+   -34,
+   24
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "wd_russet": [
+    "#3a3635",
+    "#483b34",
+    "#5a4335",
+    "#704d38",
+    "#8a5a3c",
+    "#a16f4b",
+    "#b78158",
+    "#c89265"
+   ],
+   "br_gold": [
+    "#47483f",
+    "#605a45",
+    "#80724e",
+    "#a78f5b",
+    "#d4b36a",
+    "#edc97a",
+    "#fcdb88",
+    "#fbe992"
+   ],
+   "wd_dark": [
+    "#343436",
+    "#3e3934",
+    "#4b4036",
+    "#5c4a38",
+    "#6f553d",
+    "#86694c",
+    "#9c7c5a",
+    "#af8d66"
+   ],
+   "pa_inner": [
+    "#2d2e2f",
+    "#332f2d",
+    "#3d332b",
+    "#4a392b",
+    "#604c3a",
+    "#755f46",
+    "#887053"
+   ],
+   "gl_mirror": [
+    "#455258",
+    "#6e8085",
+    "#a9c3c6",
+    "#c0d7d5",
+    "#d3e8e1",
+    "#e3f3e4"
+   ],
+   "wd_light": [
+    "#474542",
+    "#5c5549",
+    "#786954",
+    "#998063",
+    "#bf9d74",
+    "#d7b283",
+    "#ebc490",
+    "#fbd29b"
+   ],
+   "cl_hat": [
+    "#2b3742",
+    "#313f4b",
+    "#3a4a58",
+    "#46596a",
+    "#5b6c78",
+    "#6f7d84",
+    "#818b8e"
+   ],
+   "cl_hatband": [
+    "#413840",
+    "#68464d",
+    "#9e5f66",
+    "#b57375",
+    "#c88481",
+    "#d9948b"
+   ],
+   "br_brass": [
+    "#45453e",
+    "#5c5542",
+    "#7a6c4b",
+    "#9e8656",
+    "#c8a764",
+    "#e1bc74",
+    "#f6cf81",
+    "#fbdd8d"
+   ],
+   "br_verdigris": [
+    "#475853",
+    "#6f8a78",
+    "#829b84",
+    "#93a98f"
+   ],
+   "cl_coat": [
+    "#504a3b",
+    "#6e5e3f",
+    "#967946",
+    "#c59a52",
+    "#dbad5f",
+    "#edbd6c",
+    "#fbcb76"
+   ],
+   "kn_scarf": [
+    "#36463a",
+    "#42553f",
+    "#536a45",
+    "#66844f",
+    "#7b975d",
+    "#8ea769",
+    "#a0b574"
+   ],
+   "kn_scarf_s": [
+    "#626562",
+    "#88877e",
+    "#b9b2a1",
+    "#f1e6cc",
+    "#fef9da",
+    "#fdf8e5",
+    "#fbf4e5"
+   ],
+   "cl_boot": [
+    "#323031",
+    "#3d332f",
+    "#4b392e",
+    "#5e4130",
+    "#73533e",
+    "#87654a",
+    "#987455"
+   ]
+  }
+ },
+ "styles": {
+  "wood_russet_y": {
+   "ramp": "wd_russet",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.1
+   },
+   "brush": {
+    "flow": "y",
+    "length": 2.6,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 5.0,
+     "amount": 0.35
+    },
+    {
+     "id": "fibre",
+     "op": "photo",
+     "src": "assets/photos/bark_brown_02",
+     "scale": 18.0,
+     "amount": 0.18,
+     "ramps": [
+      "wd_russet"
+     ]
+    },
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 1.1,
+     "width": 0.3,
+     "shift": -0.75,
+     "wobble": 0.55,
+     "wobble_scale": 5.0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "late0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 4.07,
+     "width": 0.18,
+     "shift": 0.55,
+     "wobble": 0.9,
+     "wobble_scale": 7.0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.1,
+     "width": 0.3,
+     "shift": -0.75,
+     "wobble": 0.55,
+     "wobble_scale": 5.0,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "late1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 4.07,
+     "width": 0.18,
+     "shift": 0.55,
+     "wobble": 0.9,
+     "wobble_scale": 7.0,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "endgrain",
+     "op": "fill",
+     "shift": -0.55,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "endrings",
+     "op": "noise",
+     "scale": 0.9,
+     "amount": 0.5,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 3,
+     "radius": [
+      0.45,
+      0.8
+     ],
+     "stretch": [
+      1,
+      3,
+      1
+     ],
+     "shift": -1.8,
+     "ring": 0.55,
+     "centre_shift": -0.6,
+     "min_gap": 3,
+     "faces": [
+      "-bottom"
+     ]
+    },
+    {
+     "id": "rubbed",
+     "op": "wear",
+     "width": 2,
+     "density": 0.32,
+     "shift": 0.9
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.1,
+     "density": 0.35,
+     "post": true
+    }
+   ]
+  },
+  "wood_russet_x": {
+   "ramp": "wd_russet",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.1
+   },
+   "brush": {
+    "flow": "x",
+    "length": 2.6,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 5.0,
+     "amount": 0.35
+    },
+    {
+     "id": "fibre",
+     "op": "photo",
+     "src": "assets/photos/bark_brown_02",
+     "scale": 18.0,
+     "amount": 0.18,
+     "ramps": [
+      "wd_russet"
+     ]
+    },
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.1,
+     "width": 0.3,
+     "shift": -0.75,
+     "wobble": 0.55,
+     "wobble_scale": 5.0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "late0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 4.07,
+     "width": 0.18,
+     "shift": 0.55,
+     "wobble": 0.9,
+     "wobble_scale": 7.0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.1,
+     "width": 0.3,
+     "shift": -0.75,
+     "wobble": 0.55,
+     "wobble_scale": 5.0,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "late1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 4.07,
+     "width": 0.18,
+     "shift": 0.55,
+     "wobble": 0.9,
+     "wobble_scale": 7.0,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "endgrain",
+     "op": "fill",
+     "shift": -0.55,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "endrings",
+     "op": "noise",
+     "scale": 0.9,
+     "amount": 0.5,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 3,
+     "radius": [
+      0.45,
+      0.8
+     ],
+     "stretch": [
+      3,
+      1,
+      1
+     ],
+     "shift": -1.8,
+     "ring": 0.55,
+     "centre_shift": -0.6,
+     "min_gap": 3,
+     "faces": [
+      "-bottom"
+     ]
+    },
+    {
+     "id": "rubbed",
+     "op": "wear",
+     "width": 2,
+     "density": 0.32,
+     "shift": 0.9
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.1,
+     "density": 0.35,
+     "post": true
+    }
+   ]
+  },
+  "metal_gold": {
+   "ramp": "br_gold",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.5,
+    "dark_shift": -1.3
+   },
+   "brush": {
+    "flow": "long",
+    "length": 1.2,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.6,
+     "amount": 0.55
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.6,
+     "density": 0.5,
+     "post": true
+    }
+   ]
+  },
+  "wood_dark_ry": {
+   "ramp": "wd_dark",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.1
+   },
+   "brush": {
+    "flow": "long",
+    "length": 2.6,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 5.0,
+     "amount": 0.35
+    },
+    {
+     "id": "fibre",
+     "op": "photo",
+     "src": "assets/photos/bark_brown_02",
+     "scale": 18.0,
+     "amount": 0.18,
+     "ramps": [
+      "wd_dark"
+     ]
+    },
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0.6
+     ],
+     "period": 1.1,
+     "width": 0.3,
+     "shift": -0.7,
+     "wobble": 0.55,
+     "wobble_scale": 5.0,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "endgrain",
+     "op": "fill",
+     "shift": -0.5,
+     "faces": [
+      "caps"
+     ]
+    },
+    {
+     "id": "rubbed",
+     "op": "wear",
+     "width": 2,
+     "density": 0.32,
+     "shift": 0.9
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.1,
+     "density": 0.35,
+     "post": true
+    }
+   ]
+  },
+  "plain_inner": {
+   "ramp": "pa_inner",
+   "tone": 2.2,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35
+    }
+   ],
+   "brush": {
+    "off": true
+   },
+   "light": 0.3,
+   "dither": 0.0
+  },
+  "wood_light_x": {
+   "ramp": "wd_light",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.1
+   },
+   "brush": {
+    "flow": "x",
+    "length": 2.6,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 5.0,
+     "amount": 0.35
+    },
+    {
+     "id": "fibre",
+     "op": "photo",
+     "src": "assets/photos/bark_brown_02",
+     "scale": 18.0,
+     "amount": 0.18,
+     "ramps": [
+      "wd_light"
+     ]
+    },
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.1,
+     "width": 0.3,
+     "shift": -0.75,
+     "wobble": 0.55,
+     "wobble_scale": 5.0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "late0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 4.07,
+     "width": 0.18,
+     "shift": 0.55,
+     "wobble": 0.9,
+     "wobble_scale": 7.0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.1,
+     "width": 0.3,
+     "shift": -0.75,
+     "wobble": 0.55,
+     "wobble_scale": 5.0,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "late1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 4.07,
+     "width": 0.18,
+     "shift": 0.55,
+     "wobble": 0.9,
+     "wobble_scale": 7.0,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "endgrain",
+     "op": "fill",
+     "shift": -0.55,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "endrings",
+     "op": "noise",
+     "scale": 0.9,
+     "amount": 0.5,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 3,
+     "radius": [
+      0.45,
+      0.8
+     ],
+     "stretch": [
+      3,
+      1,
+      1
+     ],
+     "shift": -1.8,
+     "ring": 0.55,
+     "centre_shift": -0.6,
+     "min_gap": 3,
+     "faces": [
+      "-bottom"
+     ]
+    },
+    {
+     "id": "rubbed",
+     "op": "wear",
+     "width": 2,
+     "density": 0.32,
+     "shift": 0.9
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.1,
+     "density": 0.35,
+     "post": true
+    }
+   ]
+  },
+  "soft_hat": {
+   "ramp": "cl_hat",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "flow": "path",
+    "length": 1.4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.5,
+     "amount": 0.4
+    }
+   ]
+  },
+  "metal_brass": {
+   "ramp": "br_brass",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.5,
+    "dark_shift": -1.3
+   },
+   "brush": {
+    "flow": "long",
+    "length": 1.2,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.6,
+     "amount": 0.55
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.2,
+     "threshold": 0.74,
+     "ramp": "br_verdigris",
+     "tone": 1.6,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.6,
+     "density": 0.5,
+     "post": true
+    }
+   ]
+  },
+  "fab_coat": {
+   "ramp": "cl_coat",
+   "tone": 3.2,
+   "rim": {
+    "light_shift": 1.1,
+    "dark_shift": -1.2,
+    "light": 1,
+    "dark": 1
+   },
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 4.0,
+     "amount": 0.4
+    },
+    {
+     "id": "warp",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0.3
+     ],
+     "period": 1.0,
+     "width": 0.34,
+     "shift": -0.22
+    },
+    {
+     "id": "nub",
+     "op": "spots",
+     "count": 10,
+     "radius": [
+      0.3,
+      0.45
+     ],
+     "shift": 0.5,
+     "roughness": 0.1
+    },
+    {
+     "id": "sunfade",
+     "op": "patches",
+     "scale": 3.5,
+     "threshold": 0.62,
+     "shift": 0.5,
+     "faces": [
+      "up"
+     ]
+    }
+   ]
+  },
+  "knit_scarf": {
+   "ramp": "kn_scarf",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "stitches",
+     "op": "scales",
+     "along": "x",
+     "size": [
+      1.0,
+      1.0
+     ],
+     "shape": "round",
+     "gradient": 1.1,
+     "rim": -0.9,
+     "shadow": -1.0,
+     "jitter": 0.25
+    },
+    {
+     "id": "stripe",
+     "op": "stripes",
+     "axis": "y",
+     "period": 2.0,
+     "width": 0.3,
+     "ramp": "kn_scarf_s",
+     "tone": 3.4,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "stripe_t",
+     "op": "stripes",
+     "axis": "z",
+     "period": 2.0,
+     "width": 0.3,
+     "ramp": "kn_scarf_s",
+     "tone": 3.6,
+     "faces": [
+      "top"
+     ]
+    },
+    {
+     "id": "stitches2",
+     "op": "scales",
+     "along": "x",
+     "size": [
+      1.0,
+      1.0
+     ],
+     "shape": "round",
+     "gradient": 1.1,
+     "rim": -0.9,
+     "shadow": -1.0,
+     "jitter": 0.25
+    }
+   ]
+  },
+  "soft_boot": {
+   "ramp": "cl_boot",
+   "tone": 3,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "flow": "path",
+    "length": 1.4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.5,
+     "amount": 0.4
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "foot",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "size": 2.8
+    },
+    {
+     "at": [
+      0.0,
+      2.4,
+      0.0
+     ],
+     "size": 2.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    -9.6,
+    0.0,
+    -3.8
+   ],
+   "style": "wood_dark_ry",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "foot1",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "size": 2.8
+    },
+    {
+     "at": [
+      0.0,
+      2.4,
+      0.0
+     ],
+     "size": 2.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    -9.6,
+    0.0,
+    3.8
+   ],
+   "style": "wood_dark_ry",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "foot2",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "size": 2.8
+    },
+    {
+     "at": [
+      0.0,
+      2.4,
+      0.0
+     ],
+     "size": 2.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    9.6,
+    0.0,
+    -3.8
+   ],
+   "style": "wood_dark_ry",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "foot3",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "size": 2.8
+    },
+    {
+     "at": [
+      0.0,
+      2.4,
+      0.0
+     ],
+     "size": 2.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    9.6,
+    0.0,
+    3.8
+   ],
+   "style": "wood_dark_ry",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "base",
+   "shape": "box",
+   "size": [
+    22.0,
+    4.6,
+    10.6
+   ],
+   "style": "wood_russet_x",
+   "pivot": [
+    0.0,
+    4.7,
+    0.0
+   ],
+   "chamfer": 0.4
+  },
+  {
+   "id": "drawer",
+   "shape": "box",
+   "size": [
+    19.0,
+    3.4,
+    0.6
+   ],
+   "style": "wood_russet_x",
+   "pivot": [
+    0.0,
+    4.7,
+    5.4
+   ],
+   "chamfer": 0.25,
+   "paint": {
+    "layers": [
+     {
+      "id": "panel",
+      "op": "panel",
+      "inset": 1,
+      "shift": -1.4,
+      "highlight": 0.8,
+      "shadow": -0.6,
+      "min_size": 5
+     }
+    ]
+   }
+  },
+  {
+   "id": "drawer_knob",
+   "shape": "prism",
+   "sides": 6,
+   "size": [
+    1.4,
+    1.4,
+    0.8
+   ],
+   "style": "metal_gold",
+   "pivot": [
+    -5.32,
+    4.7,
+    6.1000000000000005
+   ]
+  },
+  {
+   "id": "drawer_knob1",
+   "shape": "prism",
+   "sides": 6,
+   "size": [
+    1.4,
+    1.4,
+    0.8
+   ],
+   "style": "metal_gold",
+   "pivot": [
+    5.32,
+    4.7,
+    6.1000000000000005
+   ]
+  },
+  {
+   "id": "side",
+   "shape": "box",
+   "size": [
+    1.6,
+    31.0,
+    10.6
+   ],
+   "style": "wood_russet_y",
+   "pivot": [
+    -10.2,
+    22.5,
+    0.0
+   ],
+   "chamfer": 0.3,
+   "paint": {
+    "layers": [
+     {
+      "id": "panel",
+      "op": "panel",
+      "inset": 3,
+      "shift": -1.2,
+      "faces": [
+       "left",
+       "right"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "side1",
+   "shape": "box",
+   "size": [
+    1.6,
+    31.0,
+    10.6
+   ],
+   "style": "wood_russet_y",
+   "pivot": [
+    10.2,
+    22.5,
+    0.0
+   ],
+   "chamfer": 0.3,
+   "paint": {
+    "layers": [
+     {
+      "id": "panel",
+      "op": "panel",
+      "inset": 3,
+      "shift": -1.2,
+      "faces": [
+       "left",
+       "right"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "back",
+   "shape": "box",
+   "size": [
+    19.0,
+    31.0,
+    1.0
+   ],
+   "style": "plain_inner",
+   "pivot": [
+    0.0,
+    22.5,
+    -4.8
+   ]
+  },
+  {
+   "id": "floor",
+   "shape": "box",
+   "size": [
+    19.0,
+    0.6,
+    9.6
+   ],
+   "style": "wood_russet_x",
+   "pivot": [
+    0.0,
+    7.4,
+    0.0
+   ]
+  },
+  {
+   "id": "door",
+   "shape": "box",
+   "size": [
+    9.6,
+    30.4,
+    0.8
+   ],
+   "style": "wood_russet_y",
+   "pivot": [
+    4.8,
+    22.2,
+    4.9
+   ],
+   "chamfer": 0.2,
+   "paint": {
+    "stamps": [
+     {
+      "face": "front",
+      "at": [
+       0,
+       0
+      ],
+      "art": [
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       "..............e..............",
+       "...........eeemeee...........",
+       "..........ewwmmmmme..........",
+       ".........emwwmmmwmme.........",
+       "........emmmwwmmmmmme........",
+       ".......emmmmwwmmmwmmme.......",
+       ".......mmmmmmwwmmmwmmm.......",
+       "......emmmmmmwwmmmwmmme......",
+       "......mmmmmmmmwwmmmwmmm......",
+       ".....emmmmmmmmwwmmmwmmme.....",
+       "....emmmmmmmmmmwwmmmwmmme....",
+       "....mmmmmmmmmmmmwmmmmmmmm....",
+       "....mmmmmmmmmmmmwwmmmwmmm....",
+       "...emmmmmmmmmmmmmwwmmmmmme...",
+       "...emmmmmmmmmmmmmwwmmmwmme...",
+       "...emmmmmmmmmmmmmmwwmmmwme...",
+       "...emmmmmmmmmmmmmmwwmmmwme...",
+       "...emmmmmmmmmmmmmmmwwmmmwe...",
+       "...emmmmmmmmmmmmmmmwwmmmwe...",
+       "...emmmmmmmmmmmmmmmmwwmmme...",
+       "...emmmmmmmmmmmmmmmmwwmmme...",
+       "...ewmmmmmmmmmmmmmmmmwwmme...",
+       "...emmmmmmmmmmmmmmmmmmwwme...",
+       "...emwmmmmmmmmmmmmmmmmwwme...",
+       "...emmmmmmmmmmmmmmmmmmmwwe...",
+       "...emmwmmmmmmmmmmmmmmmmwwe...",
+       "...emmmwmmmmmmmmmmmmmmmmwe...",
+       "...emmmwmmmmmmmmmmmmmmmmwe...",
+       "...ewmmmwmmmmmmmmmmmmmmmme...",
+       "...ewmmmwmmmmmmmmmmmmmmmme...",
+       "...ewwmmmwmmmmmmmmmmmmmmme...",
+       "...emwmmmmmmmmmmmmmmmmmmme...",
+       "...emwwmmmwmmmmmmmmmmmmmme...",
+       "...emmwwmmmmmmmmmmmmmmmmme...",
+       "...emmwwmmmwmmmmmmmmmmmmme...",
+       "...emmmwwmmmwmmmmmmmmmmmme...",
+       "...emmmwwmmmwmmmmmmmmmmmme...",
+       "...ennnnwwnnnwnnnnnnnnnnne...",
+       "...ennnnwwnnnwnnnnnnnnnnne...",
+       "...ennnnnwwnnnwnnnnnnnnnne...",
+       "...ennnnnwwnnnwnnnnnnnnnne...",
+       "...ennnnnnwwnnnwnnnnnnnnne...",
+       "...ennnnnnnwwnnnnnnnnnnnne...",
+       "...ennnnnnnwwnnnwnnnnnnnne...",
+       "...ennnnnnnnwwnnnnnnnnnnne...",
+       "...ennnnnnnnwwnnnwnnnnnnne...",
+       "...ennnnnnnnnwwnnnwnnnnnne...",
+       "...ennnnnnnnnwwnnnwnnnnnne...",
+       "...ennnnnnnnnnwwnnnwnnnnne...",
+       "...ennnnnnnnnnwwnnnwnnnnne...",
+       "...ennnnnnnnnnnwwnnnwnnnne...",
+       "...ennnnnnnnnnnnwnnnnnnnne...",
+       "...ennnnnnnnnnnnwwnnnwnnne...",
+       "...ennnnnnnnnnnnnwwnnnnnne...",
+       "...ennnnnnnnnnnnnwwnnnwnne...",
+       "...ennnnnnnnnnnnnnwwnnnwne...",
+       "...ennnnnnnnnnnnnnwwnnnwne...",
+       "...ennnnnnnnnnnnnnnwwnnnwe...",
+       "...ennnnnnnnnnnnnnnwwnnnwe...",
+       "...ennnnnnnnnnnnnnnnwwnnne...",
+       "...ennnnnnnnnnnnnnnnwwnnne...",
+       "...ewnnnnnnnnnnnnnnnnwwnne...",
+       "...ennnnnnnnnnnnnnnnnnwwne...",
+       "...enwnnnnnnnnnnnnnnnnwwne...",
+       "...ennnnnnnnnnnnnnnnnnnwwe...",
+       "...ennwnnnnnnnnnnnnnnnnwwe...",
+       "...ennnwnnnnnnnnnnnnnnnnwe...",
+       "...ennnwnnnnnnnnnnnnnnnnwe...",
+       "...ewnnnwnnnnnnnnnnnnnnnne...",
+       "...ewnnnwnnnnnnnnnnnnnnnne...",
+       "...ewwnnnwnnnnnnnnnnnnnnne...",
+       "...enwnnnnnnnnnnnnnnnnnnne...",
+       "...enwwnnnwnnnnnnnnnnnnnne...",
+       "...ennwwnnnnnnnnnnnnnnnnne...",
+       "...ennwwnnnwnnnnnnnnnnnnne...",
+       "...ennnwwnnnwnnnnnnnnnnnne...",
+       "...ennnwwnnnwnnnnnnnnnnnne...",
+       "...eeeeeeeeeeeeeeeeeeeeeee...",
+       ".............................",
+       ".............................",
+       ".............................",
+       "............................."
+      ],
+      "key": {
+       "e": "wd_russet:1",
+       "w": "gl_mirror:5",
+       "m": "gl_mirror:3",
+       "n": "gl_mirror:2",
+       "p": "wd_russet:5"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "handle",
+   "shape": "box",
+   "size": [
+    0.8,
+    2.6,
+    0.6
+   ],
+   "style": "metal_gold",
+   "pivot": [
+    1.2,
+    21.0,
+    5.5
+   ],
+   "chamfer": 0.2
+  },
+  {
+   "id": "hinge",
+   "shape": "bone",
+   "pivot": [
+    -9.6,
+    7.0,
+    5.3
+   ],
+   "rotation": [
+    0.0,
+    -62.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "wd_russet"
+   }
+  },
+  {
+   "id": "door1",
+   "shape": "box",
+   "size": [
+    9.6,
+    30.4,
+    0.8
+   ],
+   "style": "wood_russet_y",
+   "pivot": [
+    4.8,
+    15.2,
+    -0.4
+   ],
+   "parent": "hinge",
+   "chamfer": 0.2,
+   "paint": {
+    "stamps": [
+     {
+      "face": "front",
+      "at": [
+       0,
+       0
+      ],
+      "art": [
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       "..............e..............",
+       "...........eeepeee...........",
+       "..........epppppppe..........",
+       ".........epppppppppe.........",
+       "........epppppppppppe........",
+       ".......epppppppppppppe.......",
+       ".......ppppppppppppppp.......",
+       "......epppppppppppppppe......",
+       "......ppppppppppppppppp......",
+       ".....epppppppppppppppppe.....",
+       "....epppppppppppppppppppe....",
+       "....ppppppppppppppppppppp....",
+       "....ppppppppppppppppppppp....",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...eeeeeeeeeeeeeeeeeeeeeee...",
+       ".............................",
+       ".............................",
+       ".............................",
+       "............................."
+      ],
+      "key": {
+       "e": "wd_russet:1",
+       "w": "gl_mirror:5",
+       "m": "gl_mirror:3",
+       "n": "gl_mirror:2",
+       "p": "wd_russet:5"
+      }
+     },
+     {
+      "face": "back",
+      "at": [
+       0,
+       0
+      ],
+      "art": [
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       ".............................",
+       "..............e..............",
+       "...........eeepeee...........",
+       "..........epppppppe..........",
+       ".........epppppppppe.........",
+       "........epppppppppppe........",
+       ".......epppppppppppppe.......",
+       ".......ppppppppppppppp.......",
+       "......epppppppppppppppe......",
+       "......ppppppppppppppppp......",
+       ".....epppppppppppppppppe.....",
+       "....epppppppppppppppppppe....",
+       "....ppppppppppppppppppppp....",
+       "....ppppppppppppppppppppp....",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...epppppppppppppppppppppe...",
+       "...eeeeeeeeeeeeeeeeeeeeeee...",
+       ".............................",
+       ".............................",
+       ".............................",
+       "............................."
+      ],
+      "key": {
+       "e": "wd_russet:1",
+       "w": "gl_mirror:5",
+       "m": "gl_mirror:3",
+       "n": "gl_mirror:2",
+       "p": "wd_russet:5"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "handle1",
+   "shape": "box",
+   "size": [
+    0.8,
+    2.6,
+    0.6
+   ],
+   "style": "metal_gold",
+   "pivot": [
+    8.4,
+    14.0,
+    0.3
+   ],
+   "parent": "hinge",
+   "chamfer": 0.2
+  },
+  {
+   "id": "ishelf",
+   "shape": "box",
+   "size": [
+    9.0,
+    0.8,
+    9.0
+   ],
+   "style": "wood_light_x",
+   "pivot": [
+    -5.0,
+    28.4,
+    0.0
+   ]
+  },
+  {
+   "id": "hatbrim",
+   "shape": "prism",
+   "sides": 10,
+   "size": [
+    6.4,
+    6.4,
+    0.4
+   ],
+   "style": "soft_hat",
+   "pivot": [
+    -5.0,
+    29.0,
+    0.4
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "id": "hatcrown",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 3.6
+    },
+    {
+     "at": [
+      0.0,
+      2.6,
+      0.0
+     ],
+     "size": 3.2
+    },
+    {
+     "at": [
+      0.0,
+      3.2,
+      0.0
+     ],
+     "size": 2.4
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 0,
+   "pivot": [
+    -5.0,
+    29.2,
+    0.4
+   ],
+   "style": "soft_hat",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "paint": {
+    "layers": [
+     {
+      "id": "band",
+      "op": "band",
+      "axis": "path",
+      "from": 0.0,
+      "to": 0.3,
+      "ramp": "cl_hatband",
+      "tone": 3
+     }
+    ]
+   }
+  },
+  {
+   "id": "rod",
+   "shape": "prism",
+   "sides": 6,
+   "size": [
+    0.6,
+    0.6,
+    9.0
+   ],
+   "style": "metal_brass",
+   "pivot": [
+    -5.0,
+    25.6,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ]
+  },
+  {
+   "id": "hanger",
+   "shape": "box",
+   "size": [
+    4.4,
+    0.5,
+    0.5
+   ],
+   "style": "wood_light_x",
+   "pivot": [
+    -6.0,
+    24.8,
+    0.0
+   ]
+  },
+  {
+   "id": "coat",
+   "shape": "taper",
+   "size": [
+    5.0,
+    12.0,
+    2.8
+   ],
+   "style": "fab_coat",
+   "pivot": [
+    -6.0,
+    18.6,
+    0.0
+   ],
+   "front_scale": [
+    1.25,
+    1.0
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "layers": [
+     {
+      "id": "buttons",
+      "op": "spots",
+      "centers": [
+       [
+        0,
+        1.5,
+        -3,
+        0.35
+       ],
+       [
+        0,
+        1.5,
+        -1,
+        0.35
+       ],
+       [
+        0,
+        1.5,
+        1,
+        0.35
+       ],
+       [
+        0,
+        1.5,
+        3,
+        0.35
+       ]
+      ],
+      "shift": -1.8,
+      "faces": [
+       "top"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "scarf",
+   "shape": "box",
+   "size": [
+    2.2,
+    13.0,
+    0.8
+   ],
+   "style": "knit_scarf",
+   "pivot": [
+    -2.4,
+    18.6,
+    1.2
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    3.0
+   ]
+  },
+  {
+   "id": "boot",
+   "shape": "box",
+   "size": [
+    2.2,
+    5.0,
+    2.2
+   ],
+   "style": "soft_boot",
+   "pivot": [
+    -6.4,
+    10.4,
+    0.4
+   ],
+   "chamfer": 0.4
+  },
+  {
+   "id": "toe",
+   "shape": "box",
+   "size": [
+    2.2,
+    1.6,
+    2.4
+   ],
+   "style": "soft_boot",
+   "pivot": [
+    -6.4,
+    8.6,
+    2.2
+   ],
+   "chamfer": 0.5
+  },
+  {
+   "id": "boot1",
+   "shape": "box",
+   "size": [
+    2.2,
+    5.0,
+    2.2
+   ],
+   "style": "soft_boot",
+   "pivot": [
+    -3.2,
+    10.4,
+    0.4
+   ],
+   "chamfer": 0.4
+  },
+  {
+   "id": "toe1",
+   "shape": "box",
+   "size": [
+    2.2,
+    1.6,
+    2.4
+   ],
+   "style": "soft_boot",
+   "pivot": [
+    -3.2,
+    8.6,
+    2.2
+   ],
+   "chamfer": 0.5
+  },
+  {
+   "id": "cornice",
+   "shape": "box",
+   "size": [
+    23.0,
+    1.6,
+    11.4
+   ],
+   "style": "wood_russet_x",
+   "pivot": [
+    0.0,
+    38.8,
+    0.0
+   ],
+   "chamfer": 0.3
+  },
+  {
+   "id": "cornice2",
+   "shape": "box",
+   "size": [
+    24.6,
+    1.4,
+    12.4
+   ],
+   "style": "wood_russet_x",
+   "pivot": [
+    0.0,
+    40.3,
+    0.0
+   ],
+   "chamfer": 0.5
+  },
+  {
+   "id": "crest",
+   "shape": "box",
+   "size": [
+    16.0,
+    7.0,
+    0.8
+   ],
+   "style": "wood_russet_x",
+   "pivot": [
+    0.0,
+    44.5,
+    5.0
+   ],
+   "paint": {
+    "stamps": [
+     {
+      "faces": [
+       "front",
+       "back"
+      ],
+      "at": [
+       0,
+       0
+      ],
+      "art": [
+       "________________________##______________________",
+       "_______________________####_____________________",
+       "_______________________####c____________________",
+       "______________________#####c____________________",
+       "_____________________######cc___________________",
+       "_________________cccc######cc___________________",
+       "________________#cccc######ccc__________________",
+       "_______________##cccc#gggg#ccc__________________",
+       "_______________##cccc#gggg#cccc_________________",
+       "______________###ccccggggggcccc#________________",
+       "______________###ccccggggggcccc###cc____________",
+       "_____________c###ccccggggggcccc###ccc___________",
+       "_____________c###ccccggggggcccc###cccc__________",
+       "____________cc###ccccggggggcccc###cccc__________",
+       "___________ccc###cccc#gggg#cccc###cccc#_________",
+       "_______###cccc###cccc#gggg#cccc###cccc#_________",
+       "______c###cccc###cccc##gg##cccc###cccc##________",
+       "_____cc###cccc###cccc######cccc###cccc##________",
+       "_____cc###cccc###cccc######cccc###cccc###_______",
+       "____ccc###cccc###cccc######cccc###cccc###c______",
+       "____ccc###cccc###cccc######cccc###cccc###cccc#__"
+      ],
+      "key": {
+       "#": "wd_russet:4",
+       "c": "wd_russet:2",
+       "g": "br_gold:6"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

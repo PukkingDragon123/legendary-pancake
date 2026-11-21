@@ -1,0 +1,529 @@
+{
+ "name": "beanbag",
+ "description": "Squashy Beanbag",
+ "author": "Hoot Hollow (furnB)",
+ "license": "CC0-1.0",
+ "density": 4,
+ "budget": {
+  "tris": 3000,
+  "colors": 400
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.62
+  ],
+  "strength": 0.75,
+  "gradient": 0.35,
+  "ao": 1.1,
+  "ao_height": 3.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.88
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.5,
+  "width": 0.4,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "cl_cord": "cloth",
+   "cl_dent": "cloth",
+   "cl_button": "cloth",
+   "cl_strap": "cloth",
+   "pa_tag": "none"
+  }
+ },
+ "render": {
+  "background": "#2a3330",
+  "hero": [
+   -34,
+   24
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "cl_cord": [
+    "#4f4442",
+    "#6c544b",
+    "#926b58",
+    "#c0866a",
+    "#d69878",
+    "#e8aa84",
+    "#f7b78e"
+   ],
+   "cl_dent": [
+    "#473c3c",
+    "#604841",
+    "#7f5749",
+    "#a66c55",
+    "#bb7f62",
+    "#ce8f6f",
+    "#de9e79"
+   ],
+   "cl_button": [
+    "#473c3c",
+    "#604841",
+    "#7f5749",
+    "#a66c55",
+    "#bb7f62",
+    "#ce8f6f",
+    "#de9e79"
+   ],
+   "cl_strap": [
+    "#473c3c",
+    "#604841",
+    "#7f5749",
+    "#a66c55",
+    "#bb7f62",
+    "#ce8f6f",
+    "#de9e79"
+   ],
+   "pa_tag": [
+    "#5d6263",
+    "#858782",
+    "#b8b5ab",
+    "#f4eedd",
+    "#fefbec",
+    "#fcf7ed",
+    "#fbf3e4"
+   ]
+  }
+ },
+ "styles": {
+  "soft_cord": {
+   "ramp": "cl_cord",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "flow": "path",
+    "length": 1.4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.5,
+     "amount": 0.4
+    },
+    {
+     "id": "wale",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.042,
+     "width": 0.45,
+     "shift": -0.8
+    },
+    {
+     "id": "seams",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.1667,
+     "width": 0.05,
+     "shift": -1.6
+    }
+   ]
+  },
+  "soft_dent": {
+   "ramp": "cl_dent",
+   "tone": 3.0,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "flow": "vertical",
+    "length": 1.4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.5,
+     "amount": 0.4
+    },
+    {
+     "id": "wale",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.5,
+     "width": 0.45,
+     "shift": -0.7
+    }
+   ]
+  },
+  "soft_button": {
+   "ramp": "cl_button",
+   "tone": 2.4,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "flow": "path",
+    "length": 1.4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.5,
+     "amount": 0.4
+    }
+   ]
+  },
+  "soft_strap": {
+   "ramp": "cl_strap",
+   "tone": 2.6,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "flow": "path",
+    "length": 1.4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.5,
+     "amount": 0.4
+    }
+   ]
+  },
+  "plain_tag": {
+   "ramp": "pa_tag",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "logo",
+     "op": "rect",
+     "rect": [
+      0.2,
+      0.35,
+      0.8,
+      0.6
+     ],
+     "ramp": "cl_cord",
+     "tone": 3
+    }
+   ],
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0
+  }
+ },
+ "parts": [
+  {
+   "id": "bag",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.6
+     ],
+     "size": [
+      13.0,
+      12.6
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      1.4,
+      0.6
+     ],
+     "size": [
+      16.4,
+      15.8
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      3.6,
+      0.4
+     ],
+     "size": [
+      17.0,
+      16.2
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      5.8,
+      -0.4
+     ],
+     "size": [
+      16.4,
+      14.6
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      7.4,
+      -2.6
+     ],
+     "size": [
+      15.2,
+      10.4
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      9.6,
+      -3.8
+     ],
+     "size": [
+      13.8,
+      7.8
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      12.4,
+      -4.4
+     ],
+     "size": [
+      11.0,
+      6.2
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      14.4,
+      -4.7
+     ],
+     "size": [
+      6.6,
+      4.2
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      15.2,
+      -4.8
+     ],
+     "size": [
+      2.0,
+      1.4
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 0,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "soft_cord",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "dent",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      11.0,
+      6.4
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.25,
+      0.0
+     ],
+     "size": [
+      10.0,
+      5.6
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.4,
+      0.0
+     ],
+     "size": [
+      6.0,
+      3.2
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.2,
+    6.7,
+    2.2
+   ],
+   "style": "soft_dent",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "rotation": [
+    -14.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "id": "button",
+   "shape": "prism",
+   "sides": 8,
+   "size": [
+    1.8,
+    1.8,
+    0.5
+   ],
+   "style": "soft_button",
+   "pivot": [
+    0.0,
+    15.15,
+    -4.6
+   ],
+   "rotation": [
+    -110.0,
+    0,
+    0
+   ]
+  },
+  {
+   "id": "handle",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.6,
+      0.5
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.9,
+      -0.7
+     ],
+     "size": [
+      2.6,
+      0.5
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      1.8,
+      0.0
+     ],
+     "size": [
+      2.6,
+      0.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    9.0,
+    -8.0
+   ],
+   "style": "soft_strap",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "rotation": [
+    -20.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "id": "tag",
+   "shape": "box",
+   "size": [
+    2.0,
+    1.4,
+    0.3
+   ],
+   "style": "plain_tag",
+   "pivot": [
+    3.6,
+    3.0,
+    7.9
+   ],
+   "rotation": [
+    0.0,
+    12.0,
+    0.0
+   ]
+  }
+ ]
+}
