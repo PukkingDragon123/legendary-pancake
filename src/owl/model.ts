@@ -460,6 +460,8 @@ export function buildOwl(look: OwlLook): OwlModel {
   const rig = buildRig(bones, { density: OWL_DENS });
 
   rig.bones.jaw.visible = false;
+  // a whisper of self-light keeps the plumage readable in the hollow's dusky evenings
+  for (const m of rig.mats) if ((m as THREE.MeshLambertMaterial).isMeshLambertMaterial) Object.assign(m, { emissive: new THREE.Color(0xffffff), emissiveMap: rig.tex, emissiveIntensity: 0.13 });
   const cols = eyeColoursFor(P);
   const eyes: [Eye, Eye] = [new Eye(-1, cols), new Eye(1, cols)];
   const head = rig.bones.head, hp = piv.head;

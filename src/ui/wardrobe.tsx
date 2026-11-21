@@ -280,7 +280,7 @@ export function Wardrobe() {
   useEffect(() => {
     const sc = sceneRef.current;
     sc?.setView('owl');
-    sc?.owl.setMood('proud', 2);
+    sc?.owl.setMood('happy', 2.5);
     if (sc) sc.owl.still = true;
     return () => { if (sc) { sc.owl.still = false; sc.setView('home'); sc.setLook(save.value.look); } };
   }, []);
