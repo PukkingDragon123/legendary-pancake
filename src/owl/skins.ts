@@ -7,7 +7,7 @@ import { col, ramp, tone, type Ramp } from '../gfx/color.ts';
 import { fbm, hash } from '../gfx/noise.ts';
 import type { EyeColours } from './eyes.ts';
 import { bodyDepth, bodyHalfW, type Geo } from './geo.ts';
-import type { OwlParts } from './model.ts';
+import type { OwlParts } from './legacy.ts';
 import { fr, lit, type Kit } from './plumage.ts';
 
 export interface SkinDef2 { id: string; name: string; blurb: string; series?: string; /** particle puff colour */ feather: string }
