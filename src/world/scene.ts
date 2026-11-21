@@ -1,8 +1,9 @@
 // The living diorama: renderer, camera views, day/night sky, the forest clearing (terrain, voxel
-// flora, Moleforge pixel grass, critters, fireflies), Pip's tree house with its furniture slots,
-// and Pip. Exposes a small API for the UI and emits events for taps and sounds.
+// flora, Moleforge pixel grass, critters, fireflies), Pip's grand hollow oak with its rooms, moving
+// boxes and boarded-up floors, and Pip. Exposes a small API for the UI and emits events for taps
+// and sounds.
 import * as THREE from 'three';
-import { buildProp, propMesh, PX, wind, type Prop } from '../gfx/box.ts';
+import { PX, wind } from '../gfx/box.ts';
 import { ALL_ITEMS, ITEMS } from '../assets/registry.ts';
 import { OwlActor, type OwlFx, type OwlSound } from '../owl/actor.ts';
 import { featherColour, type OwlLook } from '../owl/model.ts';
@@ -12,16 +13,23 @@ import { buildFlora, planForest, type Flora, type ForestPlan } from './flora.ts'
 import { Fx, SPR } from './fx.ts';
 import { GRASS, makeGrass, FG, type GrassItem } from './grass.ts';
 import { buildGardenFence, buildHouse, type House, type Slot, type Zone } from './house.ts';
+import { CUT } from './house/kit.ts';
+import { FLOOR_IDS, FLOOR_Y, R_IN, type FloorId } from './house/plan.ts';
 import { GARDEN, groundY, HOUSE, MEADOW, walkable } from './layout.ts';
+import { Rooms } from './rooms.ts';
+import type { Save } from '../game/store.ts';
 import { hourFor, Sky, type SkyMode } from './sky.ts';
 import { buildTerrain, type Terrain } from './terrain.ts';
 
-export type View = 'home' | 'interior' | 'loft' | 'owl' | 'breathe' | 'sleep' | 'garden' | 'deck' | 'wake';
+export type View = 'home' | 'interior' | 'loft' | 'attic' | 'owl' | 'breathe' | 'sleep' | 'garden' | 'deck' | 'wake';
 export type Quality = 'low' | 'high';
 
 export type SceneEvent =
   | { type: 'tapOwl' }
   | { type: 'tapSlot'; id: string }
+  | { type: 'tapBox'; id: string; x: number; y: number }
+  | { type: 'tapItem'; uid: string; fid: FloorId; x: number; y: number }
+  | { type: 'tapLock'; floor: FloorId }
   | { type: 'tapGround'; x: number; z: number }
   | { type: 'sound'; id: string }
   | { type: 'catch'; x: number; y: number }
@@ -70,11 +78,14 @@ export class Scene {
   time = 0;
   /** fraction of the screen covered by a bottom sheet; the view shifts up to compensate */
   shift = 0;
-  /** decorate mode: show slot markers and accept slot taps */
+  /** @deprecated the slot decorator is gone; build mode (src/build) edits rooms directly */
   decorating = false;
   /** where the owl is supposed to be */
-  owlPlace: 'porch' | 'bed' | 'inside' | 'away' | 'log' | 'loft' | 'roam' = 'porch';
+  owlPlace: 'porch' | 'bed' | 'inside' | 'away' | 'log' | 'loft' | 'roam' | 'launch' | 'balcony' | 'seat' = 'porch';
   private roamAt = new THREE.Vector3();
+  private seatAt = new THREE.Vector3();
+  /** furniture, wallpaper and moving boxes inside the oak */
+  readonly rooms: Rooms;
 
   private cam: Cam = { yaw: 0, pitch: 0.3, dist: 19, target: new THREE.Vector3(0, 2.6, -2.2) };
   private cur: Cam = { yaw: 0, pitch: 0.3, dist: 19, target: new THREE.Vector3(0, 2.6, -2.2) };
@@ -86,9 +97,6 @@ export class Scene {
   private last = 0;
   private skyT = 0;
   private ray = new THREE.Raycaster();
-  private props = new Map<string, Prop>();
-  private placed = new Map<string, { item: string; mesh: THREE.Mesh; light?: THREE.PointLight }>();
-  private markers = new Map<string, THREE.Mesh>();
   private trip: Trip | null = null;
   private room: THREE.PointLight;
   private lantern: THREE.PointLight;
@@ -124,6 +132,7 @@ export class Scene {
     this.fx = new Fx(quality === 'high' ? 1800 : 900);
     this.critters = new Critters(this.plan, this.fx, quality, (id) => this.emit({ type: 'sound', id }));
     this.house = buildHouse();
+    this.rooms = new Rooms(this.house);
     const grass = makeGrass(this.plan.grass);
     this.scene.add(this.terrain.group, this.flora.group, grass, this.house.group, this.critters.group, this.fx.group);
 
@@ -138,10 +147,10 @@ export class Scene {
     this.weeds = makeGrass(weedItems);
     this.scene.add(this.weeds);
 
-    // lights inside the hollow: a soft fill so the room reads by day, the lantern at night
-    this.room = new THREE.PointLight(0xffd7a0, 0, 9, 1.6);
-    this.room.position.set(HOUSE.x, 2.6, HOUSE.z + 0.4);
-    this.lantern = new THREE.PointLight(0xffc06a, 0, 8, 1.4);
+    // lights inside the hollow: a soft fill so the living room reads by day, the lantern at night
+    this.room = new THREE.PointLight(0xffd7a0, 0, 11, 1.5);
+    this.room.position.set(HOUSE.x, 2.6, HOUSE.z + 1.6);
+    this.lantern = new THREE.PointLight(0xffc06a, 0, 10, 1.4);
     this.lantern.position.copy(this.house.lampAt);
     this.scene.add(this.room, this.lantern);
 
@@ -155,7 +164,7 @@ export class Scene {
       sound: (id) => this.emit({ type: 'sound', id: 'owl_' + id }),
     });
     this.scene.add(this.owl.node);
-    this.placeOwl('porch');
+    this.placeOwl('inside'); // [house] Pip hangs out in the living room by day
 
     this.resize();
     this.applySky();
@@ -189,10 +198,15 @@ export class Scene {
     if (p === 'bed') return s.bed.clone();
     if (p === 'inside') return s.inside.clone();
     if (p === 'loft') return s.loft.clone();
+    if (p === 'launch') return s.launch.clone();
+    if (p === 'balcony') return s.balcony.clone();
+    if (p === 'seat') return this.seatAt.clone();
     if (p === 'log') return new THREE.Vector3(MEADOW.x, 0.66, 2.6);
     if (p === 'roam') return this.roamAt.clone();
-    return new THREE.Vector3(0, 9, -30);
+    return new THREE.Vector3(0, 12, -34);
   }
+  /** Perch Pip on a seat (a world point from rooms.seats()). */
+  sitAt(at: THREE.Vector3, done?: () => void) { this.seatAt.copy(at); this.moveOwl('seat', done); }
 
   placeOwl(p: Scene['owlPlace']) {
     this.trip = null;
@@ -219,8 +233,11 @@ export class Scene {
 
   /** Hop to a spot on the meadow the player tapped. Returns false if Pip can't go there. */
   hopTo(x: number, z: number): boolean {
-    if (this.trip || this.owl.pose !== 'stand' || !walkable(x, z)) return false;
-    this.roamAt.set(x, groundY(x, z), z);
+    if (this.trip || this.owl.pose !== 'stand') return false;
+    // [house] inside the living room Pip can wander the floor too
+    const inRoom = Math.hypot(x - HOUSE.x, z - HOUSE.z) < R_IN * PX - 0.6;
+    if (!inRoom && !walkable(x, z)) return false;
+    this.roamAt.set(x, inRoom ? FLOOR_Y.f1 * PX : groundY(x, z), z);
     this.owlPlace = 'roam' as never;
     this.moveOwl('roam');
     return true;
@@ -284,47 +301,35 @@ export class Scene {
     }
   }
 
-  // ---------------------------------------------------------------- furniture
+  // ---------------------------------------------------------------- the house: rooms, boxes, floors
 
-  private propFor(id: string): Prop | null {
-    if (this.props.has(id)) return this.props.get(id)!;
-    const def = ITEMS[id];
-    if (!def) return null;
-    const p = buildProp(def.build());
-    this.props.set(id, p);
-    return p;
-  }
-
-  /** Make the furniture in every slot match the save. */
-  setFurniture(map: Record<string, string>) {
-    for (const [slot, rec] of this.placed) if (map[slot] !== rec.item) { this.scene.remove(rec.mesh); if (rec.light) this.scene.remove(rec.light); this.placed.delete(slot); }
-    for (const [slotId, item] of Object.entries(map)) {
-      if (!item || this.placed.get(slotId)?.item === item) continue;
-      const slot = this.house.slots.find((s) => s.id === slotId);
-      const prop = this.propFor(item);
-      if (!slot || !prop) continue;
-      const mesh = propMesh(prop);
-      mesh.position.copy(slot.pos);
-      mesh.rotation.y = slot.rot;
-      mesh.name = 'item:' + slotId;
-      this.scene.add(mesh);
-      const def = ITEMS[item];
-      let light: THREE.PointLight | undefined;
-      if (def.light) {
-        light = new THREE.PointLight(def.light.color, 0, 5, 1.6);
-        light.position.copy(slot.pos).add(new THREE.Vector3(def.light.x * PX, def.light.y * PX, def.light.z * PX));
-        light.userData.power = def.light.power;
-        this.scene.add(light);
-      }
-      this.placed.set(slotId, { item, mesh, light });
+  /** Make the rooms, boxes and boarded-up floors match the save (call whenever save.home changes). */
+  setHome(home: Save['home'], animateUnlock = false) {
+    for (const f of FLOOR_IDS) {
+      const want = home.unlocked.includes(f);
+      if (want !== this.house.isOpen(f)) this.house.setFloorOpen(f, want, animateUnlock && want);
     }
-    this.applySky();
+    this.rooms.sync(home);
+    this.refreshSpots();
   }
+  /** Pip's bed and hangout spots follow the furniture. */
+  refreshSpots() {
+    const bed = this.rooms.bedSpot();
+    const s = this.house.spots;
+    if (bed) s.bed.copy(bed.at); else s.bed.copy(this.rooms.freeSpot('f1', -6, -40));
+    s.inside.copy(this.rooms.freeSpot('f1', -10, 34));
+    s.loft.copy(this.house.isOpen('f2') ? this.rooms.freeSpot('f2', -8, 28) : s.inside);
+    if (this.owlPlace === 'bed' && !this.trip) this.owl.node.position.copy(s.bed);
+  }
+  /** World y of a floor's walking surface. */
+  floorY(fid: FloorId) { return FLOOR_Y[fid] * PX; }
 
-  /** Spawn a sparkle burst over a slot (after placing something). */
-  celebrate(slotId: string) {
-    const s = this.house.slots.find((x) => x.id === slotId);
-    if (s) { this.fx.burst('sparkle', s.pos.x, s.pos.y + 0.5, s.pos.z, 12); this.fx.burst('stars', s.pos.x, s.pos.y + 0.3, s.pos.z, 6); }
+  /** @deprecated rooms come from save.home now (see setHome); kept so older callers compile. */
+  setFurniture(_map: Record<string, string>) { /* superseded by setHome */ }
+  /** Spawn a sparkle burst somewhere in the house (world point), e.g. after placing something. */
+  celebrate(at: THREE.Vector3 | string) {
+    if (typeof at === 'string') return;
+    this.fx.burst('sparkle', at.x, at.y + 0.5, at.z, 12); this.fx.burst('stars', at.x, at.y + 0.3, at.z, 6);
   }
 
   setZones(z: Partial<Record<Zone, boolean>>) {
@@ -334,26 +339,8 @@ export class Scene {
     }
   }
 
-  setDecorating(on: boolean, zone: Slot['zone'] | 'all' = 'all') {
-    this.decorating = on;
-    for (const m of this.markers.values()) this.scene.remove(m);
-    this.markers.clear();
-    if (!on) return;
-    const tex = ringTexture();
-    for (const s of this.house.slots) {
-      if (zone !== 'all' && s.zone !== zone) continue;
-      if (s.zone !== 'ground' && !this.house.zones[s.zone as Zone]) continue;
-      const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false, color: 0xffe6a0 });
-      const geo = s.kind === 'wall' ? new THREE.PlaneGeometry(1.1, 1.1) : new THREE.PlaneGeometry(1.2, 1.2);
-      const m = new THREE.Mesh(geo, mat);
-      m.position.copy(s.pos);
-      if (s.kind === 'wall') m.position.z += 0.08; else { m.rotation.x = -Math.PI / 2; m.position.y += 0.02; }
-      m.userData.slot = s.id;
-      m.renderOrder = 9;
-      this.markers.set(s.id, m);
-      this.scene.add(m);
-    }
-  }
+  /** @deprecated the slot decorator is gone (build mode lives in src/build). */
+  setDecorating(on: boolean, _zone: Slot['zone'] | 'all' = 'all') { this.decorating = on; }
 
   setLook(look: OwlLook) { this.owl.rebuild(look); }
 
@@ -424,7 +411,7 @@ export class Scene {
     this.room.intensity = 1.2 + night * 3.5;
     this.lantern.intensity = night * 6;
     this.fireflies.alpha = night > 0.4 ? 1 : 0;
-    for (const p of this.placed.values()) if (p.light) p.light.intensity = (0.4 + night * 3.2) * (p.light.userData.power ?? 1);
+    // furniture lights follow the sky every frame in rooms.update
   }
 
   resize() {
@@ -451,16 +438,19 @@ export class Scene {
   private goal(): Cam {
     const o = this.owl.node.position, H = new THREE.Vector3(HOUSE.x, 0, HOUSE.z);
     const portrait = this.camera.aspect < 1;
+    const L = this.house.spots.launch;
     switch (this.view) {
-      case 'interior': return { yaw: 0, pitch: 0.22, dist: portrait ? 14 : 8.5, target: new THREE.Vector3(H.x, 2.2, H.z + 0.2) };
-      case 'loft': return { yaw: 0, pitch: 0.14, dist: portrait ? 11 : 7, target: new THREE.Vector3(H.x, 4.2, H.z - 0.4) };
+      // [house] framing for the grand oak: three floors, a canopy above and a launch platform on the limb
+      case 'interior': return { yaw: 0.1, pitch: 0.42, dist: portrait ? 16 : 12, target: new THREE.Vector3(H.x, 1.5, H.z + 0.6) };
+      case 'loft': return { yaw: 0, pitch: 0.16, dist: portrait ? 17 : 12, target: new THREE.Vector3(H.x, 6.6, H.z + 1.2) };
+      case 'attic': return { yaw: 0, pitch: 0.12, dist: portrait ? 17 : 12, target: new THREE.Vector3(H.x, 11.1, H.z + 1.2) };
       case 'owl': return { yaw: -0.15, pitch: 0.12, dist: portrait ? 7.4 : 4.6, target: new THREE.Vector3(o.x, o.y + 0.85, o.z) };
       case 'breathe': return { yaw: 0, pitch: 0.1, dist: portrait ? 9.2 : 5.6, target: new THREE.Vector3(MEADOW.x, portrait ? 1.35 : 1.45, 2.6) };
-      case 'sleep': return { yaw: 0.1, pitch: 0.24, dist: portrait ? 26 : 20, target: new THREE.Vector3(0, 4.2, -3.5) };
-      case 'wake': return { yaw: -0.08, pitch: 0.2, dist: portrait ? 15 : 12, target: new THREE.Vector3(0, 2.2, -0.5) };
+      case 'sleep': return { yaw: 0.1, pitch: 0.22, dist: portrait ? 40 : 42, target: new THREE.Vector3(0, portrait ? 9.5 : 8.5, H.z + 1) };
+      case 'wake': return { yaw: -0.08, pitch: 0.18, dist: portrait ? 24 : 20, target: new THREE.Vector3(1.5, 3.6, H.z + 3) };
       case 'garden': return { yaw: -0.25, pitch: 0.55, dist: portrait ? 15 : 12, target: new THREE.Vector3(GARDEN.x, 0.4, GARDEN.z) };
-      case 'deck': return { yaw: -0.4, pitch: 0.18, dist: portrait ? 12 : 9, target: new THREE.Vector3(HOUSE.x + 4, 9.6, HOUSE.z) };
-      default: return { yaw: 0, pitch: 0.3, dist: portrait ? 24 : 18, target: new THREE.Vector3(0, portrait ? 3.6 : 3.0, -2.2) };
+      case 'deck': return { yaw: 0.55, pitch: 0.16, dist: portrait ? 16 : 12, target: new THREE.Vector3(L.x - 1.5, L.y - 0.6, L.z + 1) };
+      default: return { yaw: 0.16, pitch: 0.24, dist: portrait ? 33 : 37, target: new THREE.Vector3(0, portrait ? 8.2 : 7.0, H.z + 1.2) };
     }
   }
 
@@ -490,6 +480,9 @@ export class Scene {
     this.critters.update(dt, t, this.owl.node.visible ? [op] : [], this.sky.night, wind.uWind.value.x, wind.uWind.value.y, gust);
     this.fireflies.update(dt, t);
     this.fx.update(dt, t);
+    const hooks = { fx: this.fx, sound: (id: string) => this.emit({ type: 'sound', id }), night: this.sky.night };
+    this.house.update(dt, t, hooks);
+    this.rooms.update(dt, t, hooks);
 
     // chimney smoke and a lantern flicker
     if ((this.smokeT -= dt) <= 0) {
@@ -499,7 +492,6 @@ export class Scene {
     }
     if (this.sky.night > 0.4) this.lantern.intensity = 6 * this.sky.night * (0.92 + Math.sin(t * 13) * 0.04 + Math.sin(t * 7.3) * 0.04);
     for (const f of this.tickers) f(dt, t);
-    for (const m of this.markers.values()) { const s = 1 + Math.sin(t * 3 + m.position.x) * 0.08; m.scale.setScalar(s); (m.material as THREE.MeshBasicMaterial).opacity = 0.65 + Math.sin(t * 3) * 0.25; }
 
     // camera
     const shot = this.director?.(dt, t) ?? null;
@@ -514,6 +506,9 @@ export class Scene {
     const drift = !shot && (this.view === 'home' || this.view === 'sleep') ? Math.sin(t * 0.07) * 0.05 : 0;
     this.camera.position.set(c.target.x + Math.sin(c.yaw + drift) * cp * c.dist, c.target.y + Math.sin(c.pitch) * c.dist, c.target.z + Math.cos(c.yaw + drift) * cp * c.dist);
     this.camera.lookAt(c.target);
+    // [house] fog eases back as the camera pulls out to frame the whole oak
+    this.sky.fog.near = Math.max(24, c.dist * 0.8); this.sky.fog.far = this.sky.fog.near + 40;
+    CUT.uCutCam.value.copy(this.camera.position);
     this.shiftCur += (this.shift - this.shiftCur) * k;
     const w = innerWidth, h = innerHeight;
     if (Math.abs(this.shiftCur) > 0.002) this.camera.setViewOffset(w, h, 0, (this.shiftCur * h) / 2, w, h); else this.camera.clearViewOffset();
@@ -580,14 +575,6 @@ export class Scene {
       if (moved > 8 || performance.now() - downAt > 600) return;
       const r = el.getBoundingClientRect();
       this.ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), this.camera);
-      if (this.decorating) {
-        const hit = this.ray.intersectObjects([...this.markers.values()], false)[0];
-        if (hit) { this.emit({ type: 'tapSlot', id: hit.object.userData.slot }); return; }
-        // tapping furniture also selects its slot
-        const items = [...this.placed.entries()];
-        const hit2 = this.ray.intersectObjects(items.map(([, v]) => v.mesh), false)[0];
-        if (hit2) { const found = items.find(([, v]) => v.mesh === hit2.object); if (found) { this.emit({ type: 'tapSlot', id: found[0] }); return; } }
-      }
       const fi = this.fireflies.pick(this.ray.ray);
       if (fi >= 0) {
         const p = this.fireflies.position(fi);
@@ -600,6 +587,18 @@ export class Scene {
         const c = this.owl.node.position.clone().add(new THREE.Vector3(0, 0.85, 0));
         if (this.ray.ray.distanceToPoint(c) < 0.9) { this.emit({ type: 'tapOwl' }); return; }
       }
+      // [house] moving boxes, boarded-up floors and furniture
+      const pk = this.rooms.pick(this.ray.ray);
+      if (pk?.kind === 'box') { this.emit({ type: 'tapBox', id: pk.id, x: e.clientX, y: e.clientY }); return; }
+      const lock = this.house.pickLock(this.ray.ray);
+      if (lock) { this.emit({ type: 'tapLock', floor: lock }); return; }
+      if (pk?.kind === 'item') { this.emit({ type: 'tapItem', uid: pk.id, fid: pk.fid, x: e.clientX, y: e.clientY }); return; }
+      // a tap on the living room floor walks Pip over there
+      const fy = FLOOR_Y.f1 * PX, tf = (fy - this.ray.ray.origin.y) / this.ray.ray.direction.y;
+      if (tf > 0) {
+        const g = this.ray.ray.origin.clone().addScaledVector(this.ray.ray.direction, tf);
+        if (Math.hypot(g.x - HOUSE.x, g.z - HOUSE.z) < R_IN * PX - 0.6) { this.emit({ type: 'tapGround', x: g.x, z: g.z }); return; }
+      }
       const o = this.ray.ray, tt = -o.origin.y / o.direction.y;
       if (tt > 0) { const g = o.origin.clone().addScaledVector(o.direction, tt); this.emit({ type: 'tapGround', x: g.x, z: g.z }); }
     };
@@ -607,26 +606,4 @@ export class Scene {
     el.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); });
     el.addEventListener('wheel', (e) => { if (this.interceptor && !this.stage && this.interceptor('wheel', e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e)) { e.preventDefault(); return; } this.userZoom = Math.max(0.6, Math.min(1.35, this.userZoom * (1 + Math.sign(e.deltaY) * 0.06))); e.preventDefault(); }, { passive: false });
   }
-}
-
-let ringTex: THREE.CanvasTexture | null = null;
-/** A soft pixel ring with a plus in the middle: marks an empty furniture slot. */
-function ringTexture(): THREE.CanvasTexture {
-  if (ringTex) return ringTex;
-  const n = 32, c = document.createElement('canvas');
-  c.width = c.height = n;
-  const g = c.getContext('2d')!, img = g.createImageData(n, n);
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    const d = Math.hypot(x + 0.5 - n / 2, y + 0.5 - n / 2);
-    let a = 0;
-    if (d > 12 && d < 14.5) a = 255;
-    else if (d < 12) a = 50;
-    if ((Math.abs(x + 0.5 - n / 2) < 1.2 && d < 6) || (Math.abs(y + 0.5 - n / 2) < 1.2 && d < 6)) a = 255;
-    const i = (y * n + x) * 4;
-    img.data[i] = 255; img.data[i + 1] = 245; img.data[i + 2] = 215; img.data[i + 3] = a;
-  }
-  g.putImageData(img, 0, 0);
-  ringTex = new THREE.CanvasTexture(c);
-  ringTex.magFilter = THREE.NearestFilter; ringTex.minFilter = THREE.NearestFilter;
-  return ringTex;
 }

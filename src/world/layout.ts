@@ -10,8 +10,10 @@ export const SEED = 20261110;
 export const POND = { x: 7.8, z: 3.4, rx: 3.9, rz: 2.8 };
 /** Placeable garden plot (centre and half extents, blocks). */
 export const GARDEN = { x: -7.6, z: 3.0, hw: 3.2, hd: 2.6 };
-/** The owl's tree house: trunk centre and footprint radius in blocks. */
-export const HOUSE = { x: 0, z: -4.4, r: 3.4 };
+/** The owl's tree house: trunk centre and footprint radius in blocks (the grand hollow oak, 84 px trunk radius). */
+export const HOUSE = { x: 0, z: -6.6, r: 6.1 };
+/** how far the buttress roots, porch steps and the great limb's shadow spread past the trunk */
+export const HOUSE_SKIRT = 1.5;
 /** A clear spot in front of the house where the owl sits for breathing exercises. */
 export const MEADOW = { x: 1.2, z: 3.2 };
 
@@ -27,7 +29,9 @@ export function pondD(x: number, z: number): number {
 }
 
 const PATHS: [number, number][][] = [
-  [[0, -1.2], [0.3, 1.6], [-0.4, 4.4], [0.6, 7.6], [2.8, 11], [5.6, 15.5], [7.5, 24]],
+  [[0, -1.4], [0.3, 1.6], [-0.4, 4.4], [0.6, 7.6], [2.8, 11], [5.6, 15.5], [7.5, 24]],
+  // stepping off the porch round the right of the trunk
+  [[6.2, -4.2], [5.4, -1.6], [3.0, 0.6], [0.6, 1.4]],
   [[-0.2, 4.6], [-3.4, 4.0], [-5.0, 3.4]],
 ];
 
@@ -85,5 +89,5 @@ export interface Collider { x: number; z: number; r: number }
 
 /** Is this a spot an animal can stand on (open, dry, level ground)? */
 export function walkable(x: number, z: number): boolean {
-  return Math.hypot(x, z) < 12.5 && groundY(x, z) === 0 && pondD(x, z) > 1.12 && houseD(x, z) > 0.6;
+  return Math.hypot(x, z) < 12.5 && groundY(x, z) === 0 && pondD(x, z) > 1.12 && houseD(x, z) > HOUSE_SKIRT;
 }

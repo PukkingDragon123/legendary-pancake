@@ -29,7 +29,7 @@ export interface ItemDef {
   /** animals may walk through it (rugs, stepping stones, arches) */
   flatItem?: boolean;
   // ---- build mode (all optional; sensible defaults are derived from the model's bounds)
-  /** footprint in build-grid cells [w, d] before rotation */
+  /** footprint in blocks (16 px) [w, d] before rotation; halves are fine (the build grid is 8 px) */
   size?: [number, number];
   /** height in px of a flat top that small items can stand on (tables, shelves, dressers) */
   surface?: number;
@@ -143,7 +143,7 @@ add({
 });
 
 add({
-  id: 'swing', name: 'Tree Swing', cat: 'play', price: 380, level: 4, blurb: 'Wheee. Again.',
+  id: 'swing', name: 'Tree Swing', cat: 'fun', price: 380, level: 4, blurb: 'Wheee. Again.',
   sit: [{ x: 0, y: 6, z: 0 }], play: { x: 0, y: 6, z: 0 },
   build: () => {
     const out: BoxSpec[] = [];
@@ -171,7 +171,7 @@ add({
 // ------------------------------------------------------------------ tables
 
 add({
-  id: 'table', name: 'Picnic Table', cat: 'tables', price: 200, blurb: 'Sturdy enough for group projects.',
+  id: 'table', name: 'Picnic Table', cat: 'tables', price: 200, size: [1.5, 1], surface: 11, blurb: 'Sturdy enough for group projects.',
   eat: { x: 0, y: 0, z: 11, rot: 180 },
   build: () => [
     box(0, 9, 0, 24, 2, 13, wx(W.oak, 3)),
@@ -182,7 +182,7 @@ add({
 });
 
 add({
-  id: 'teatable', name: 'Tea Table', cat: 'tables', price: 260, level: 2, blurb: 'Two cups. One is for you.',
+  id: 'teatable', name: 'Tea Table', cat: 'tables', price: 260, level: 2, size: [1, 1], surface: 0, blurb: 'Two cups. One is for you.',
   eat: { x: 0, y: 0, z: 10, rot: 180 },
   build: () => {
     const china: Painter = (t) => (hash(Math.floor(t.x * 1.3 + 40), Math.floor(t.y * 1.3), Math.floor(t.z * 1.3 + 40), 8) > 0.74 ? tone(R('#3b6fc4'), 0.2) : tone(R('#f6f7ff'), lvl(t, { noise: 0.1 })));
@@ -197,7 +197,7 @@ add({
 });
 
 add({
-  id: 'desk', name: 'Study Desk', cat: 'tables', price: 340, level: 2, blurb: 'Where the homework fears to be.',
+  id: 'desk', name: 'Study Desk', cat: 'tables', price: 340, level: 2, size: [1.5, 0.5], surface: 0, blurb: 'Where the homework fears to be.',
   sit: [{ x: -2, y: 0, z: 9, rot: 180 }],
   light: { x: 7, y: 17, z: -2, color: 0xffd98a, power: 0.8 },
   build: () => {
@@ -416,12 +416,12 @@ add({
 // ------------------------------------------------------------------ potted plants
 
 add({
-  id: 'potflowers', name: 'Tulip Pot', cat: 'plants', price: 70, blurb: 'Low effort, high charm.',
+  id: 'potflowers', name: 'Tulip Pot', cat: 'plants', price: 70, small: true, blurb: 'Low effort, high charm.',
   build: () => [...pot(0, 0, 7, 6), ...place(tulip(1, '#e9463f'), -1.5, 5, 0.5), ...place(tulip(2, '#f9cf45'), 1.5, 5, -0.5), ...place(tulip(3, '#f58fb0'), 0, 5, 1.6)],
 });
 
 add({
-  id: 'cactus', name: 'Brave Cactus', cat: 'plants', price: 95, blurb: 'Hug at your own risk.',
+  id: 'cactus', name: 'Brave Cactus', cat: 'plants', price: 95, small: true, blurb: 'Hug at your own risk.',
   build: () => {
     const gr = R('#5aa85a');
     const c: Painter = (t) => tone(gr, lvl(t, { noise: 0.3 }) + (t.u % 2 ? -0.7 : 0.4) + (hash(t.u, t.v, t.face, 3) > 0.86 ? 2 : 0));
@@ -464,7 +464,7 @@ add({
 // ------------------------------------------------------------------ decor and play
 
 add({
-  id: 'ball', name: 'Bouncy Ball', cat: 'play', price: 50, blurb: 'Boing-certified.',
+  id: 'ball', name: 'Bouncy Ball', cat: 'fun', small: true, price: 50, blurb: 'Boing-certified.',
   play: { x: 0, y: 0, z: 0 },
   build: () => {
     const cs = [R('#e5484d'), R('#fbf6ea'), R('#4aa8f0'), R('#f6c531')];
@@ -474,7 +474,7 @@ add({
 });
 
 add({
-  id: 'blocks', name: 'ABC Blocks', cat: 'play', price: 75, blurb: 'Stack them. Knock them. Repeat.',
+  id: 'blocks', name: 'ABC Blocks', cat: 'fun', small: true, price: 75, blurb: 'Stack them. Knock them. Repeat.',
   play: { x: 0, y: 0, z: 0 },
   build: () => {
     const glyphs: Record<string, string[]> = { A: ['.X.', 'X.X', 'XXX', 'X.X'], B: ['XX.', 'XXX', 'X.X', 'XXX'], C: ['XXX', 'X..', 'X..', 'XXX'] };
@@ -493,7 +493,7 @@ add({
 });
 
 add({
-  id: 'books', name: 'Book Tower', cat: 'decor', price: 65, blurb: 'Technically a to-read pile.',
+  id: 'books', name: 'Book Tower', cat: 'decor', price: 65, small: true, blurb: 'Technically a to-read pile.',
   build: () => ['#d8433f', '#3f78c9', '#f2b632', '#57a84a', '#8d62d6'].map((c, i) => ({ ...box((i % 2) * 0.6 - 0.3, i * 2, 0, 8 - (i % 3), 2, 6, book(c)), rot: [0, (i * 23) % 40 - 20, 0] as Vec3 })),
 });
 
@@ -526,7 +526,7 @@ add({
 });
 
 add({
-  id: 'chest', name: 'Treasure Chest', cat: 'decor', price: 400, level: 5, blurb: 'Full of finished-homework energy.',
+  id: 'chest', name: 'Treasure Chest', cat: 'storage', price: 400, level: 5, size: [1, 0.5], surface: 0, blurb: 'Full of finished-homework energy.',
   build: () => {
     const band = (base: Painter): Painter => (t) => ((t.face >= 4 || t.face === 2) && (t.u === 2 || t.u === t.w - 3) ? metal(GOLD)(t) : base(t));
     const coin: Painter = (t) => tone(ramp(0xf6c531, { step: 0.08 }), (hash(Math.floor(t.x), Math.floor(t.y * 2), Math.floor(t.z), 2) - 0.4) * 3.4);
@@ -536,13 +536,13 @@ add({
 });
 
 add({
-  id: 'trophy', name: 'Gold Trophy', cat: 'decor', price: 0, gems: 25, blurb: 'For outstanding assignment-slaying.',
+  id: 'trophy', name: 'Gold Trophy', cat: 'decor', price: 0, gems: 25, small: true, blurb: 'For outstanding assignment-slaying.',
   build: () => [box(0, 0, 0, 8, 3, 8, bricks('#9aa0ab', { w: 4, h: 3 }), { skip: 'd' }), box(0, 3, 0, 6, 1, 6, rock('#b0b4be')), box(0, 4, 0, 4, 1, 4, metal(GOLD)), box(0, 5, 0, 2, 3, 2, metal(GOLD)),
     box(0, 8, 0, 6, 5, 6, metal(GOLD)), box(0, 13, 0, 7, 1, 7, metal(GOLD)), box(-4, 9, 0, 2, 3, 1, metal(GOLD)), box(4, 9, 0, 2, 3, 1, metal(GOLD)), box(0, 10, 3.1, 2, 2, 0.4, flat('#fff3b0'))],
 });
 
 add({
-  id: 'globe', name: 'Desk Globe', cat: 'decor', price: 220, level: 3, blurb: 'Spin it. Point. Go there one day.',
+  id: 'globe', name: 'Desk Globe', cat: 'decor', price: 220, level: 3, small: true, blurb: 'Spin it. Point. Go there one day.',
   build: () => {
     const sea = R('#4a9be0'), land = R('#63b556');
     const g: Painter = (t) => (hash(Math.floor(t.x / 2.2 + 30), Math.floor(t.y / 2.2 + 30), Math.floor(t.z / 2.2 + 30), 11) > 0.56 ? tone(land, lvl(t, { noise: 0.4 })) : tone(sea, lvl(t, { noise: 0.2 })));
@@ -560,7 +560,7 @@ add({
 });
 
 add({
-  id: 'rug', name: 'Woven Rug', cat: 'decor', price: 100, blurb: 'Ties the clearing together.',
+  id: 'rug', name: 'Woven Rug', cat: 'rugs', price: 100, rug: true, size: [1.5, 1], blurb: 'Ties the clearing together.',
   flatItem: true, sit: [{ x: 0, y: 1, z: 0 }], sleep: { x: 0, y: 1, z: 0, rot: 90 },
   build: () => {
     const a = R('#3f9fa8'), b = R('#fbf1e6'), c = R('#e2863a');
