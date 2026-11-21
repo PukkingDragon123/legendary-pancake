@@ -120,7 +120,7 @@ async function boot() {
   const today = dayKey();
   if (save.value.daily.day !== today) {
     edit((x) => { x.daily = { day: today, gift: true, pets: 0 }; x.coins += 25; });
-    if (save.value.onboarded) setTimeout(() => toast('+25 coins: a little gift from Pip', IcoAcorn), 1600);
+    if (save.value.onboarded) setTimeout(() => toast('+25 acorns: a little gift from Pip', IcoAcorn), 1600);
   }
   const plus = save.value.plus;
   if (plus.active && Date.now() - (plus.lastStipend ?? 0) > 7 * 86400_000) {
