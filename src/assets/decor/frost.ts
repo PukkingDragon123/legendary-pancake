@@ -41,7 +41,7 @@ const TREE_TIERS: [number, number, number][] = [[6, 9, 15], [14, 8, 12.6], [21, 
 const coneR = (y: number) => { for (const [y0, h, r] of TREE_TIERS) if (y >= y0 && y < y0 + h) return r * (1 - ((y - y0) / h) * 0.45); return 1; };
 
 add({
-  id: 'xmas_tree', name: 'Frostlight Fir', cat: 'seasonal', rarity: 'epic', size: [2, 2],
+  id: 'xmas_tree', model: 'items/xmas_tree.glb', name: 'Frostlight Fir', cat: 'seasonal', rarity: 'epic', size: [2, 2],
   blurb: 'A snow-dusted fir with glass baubles, a ribbon of gold tinsel and lights that twinkle all night.',
   light: { x: 0, y: 26, z: 6, color: 0xffd9a0, power: 2 },
   build: () => {
@@ -107,7 +107,7 @@ add({
 // ------------------------------------------------------------------ gingerbread house
 
 add({
-  id: 'gingerbread_house', name: 'Gingerbread Cottage', cat: 'seasonal', rarity: 'epic', size: [2, 2], small: true,
+  id: 'gingerbread_house', model: 'items/gingerbread_house.glb', name: 'Gingerbread Cottage', cat: 'seasonal', rarity: 'epic', size: [2, 2], small: true,
   blurb: 'Iced walls, a peppermint roof and a warm glow inside. Smells like cinnamon. Do not eat the door.',
   light: { x: 0, y: 6, z: 6, color: 0xffb86a, power: 1.1 },
   build: () => {
@@ -157,7 +157,7 @@ add({
 
 const GLOBE: [number, number, number][] = [[0, 2, 5], [2, 2, 6.4], [4, 2, 7], [6, 2, 6.8], [8, 2, 6], [10, 1.6, 4.6], [11.6, 1.2, 2.8]];
 add({
-  id: 'snow_globe', name: 'Hollow Snow Globe', cat: 'seasonal', rarity: 'epic', size: [1, 1], small: true,
+  id: 'snow_globe', model: 'items/snow_globe.glb', name: 'Hollow Snow Globe', cat: 'seasonal', rarity: 'epic', size: [1, 1], small: true,
   blurb: 'A tiny hollow tree under glass, lit from within. Snow swirls round it forever.',
   light: { x: 0, y: 8, z: 0, color: 0xcfe8ff, power: 0.9 },
   build: () => {
@@ -193,7 +193,7 @@ add({
 // ------------------------------------------------------------------ sleigh bed
 
 add({
-  id: 'sleigh_bed', name: 'Sleigh Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
+  id: 'sleigh_bed', model: 'items/sleigh_bed.glb', name: 'Sleigh Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
   blurb: 'Red lacquer, gold scrollwork and sleigh bells. Dreams depart nightly for the North.',
   sleep: { x: 2, y: 10, z: 0, rot: 90 },
   build: () => {
@@ -241,7 +241,7 @@ add({
 // ------------------------------------------------------------------ nutcracker
 
 add({
-  id: 'nutcracker', name: 'Captain Nutcracker', cat: 'seasonal', rarity: 'epic', size: [1, 1],
+  id: 'nutcracker', model: 'items/nutcracker.glb', name: 'Captain Nutcracker', cat: 'seasonal', rarity: 'epic', size: [1, 1],
   blurb: 'Stands guard over the hollow all December. Clacks his jaw at anyone who looks at him.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -282,7 +282,7 @@ add({
 // ------------------------------------------------------------------ candy cane
 
 add({
-  id: 'candy_cane', name: 'Giant Candy Cane', cat: 'seasonal', rarity: 'rare', size: [1, 1],
+  id: 'candy_cane', model: 'items/candy_cane.glb', name: 'Giant Candy Cane', cat: 'seasonal', rarity: 'rare', size: [1, 1],
   blurb: 'Peppermint-striped, taller than Pip and tied with a velvet bow.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -303,7 +303,7 @@ add({
 // ------------------------------------------------------------------ cocoa mug
 
 add({
-  id: 'cocoa_mug', name: 'Marshmallow Cocoa', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
+  id: 'cocoa_mug', model: 'items/cocoa_mug.glb', name: 'Marshmallow Cocoa', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
   blurb: 'A snowflake mug of cocoa, piled with cream and marshmallows. Still steaming, somehow, forever.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -343,7 +343,7 @@ add({
 // ------------------------------------------------------------------ wreath
 
 add({
-  id: 'wreath', name: 'Holly Wreath', cat: 'seasonal', rarity: 'rare', size: [1, 1], wall: true,
+  id: 'wreath', model: 'items/wreath.glb', name: 'Holly Wreath', cat: 'seasonal', rarity: 'rare', size: [1, 1], wall: true,
   blurb: 'Fir, holly berries, pine cones and two little brass bells that ring when the door opens.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -373,7 +373,7 @@ add({
 // ------------------------------------------------------------------ poinsettia
 
 add({
-  id: 'poinsettia', name: 'Frostlight Poinsettia', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
+  id: 'poinsettia', model: 'items/poinsettia.glb', name: 'Frostlight Poinsettia', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
   blurb: 'Crimson star-leaves in a gold-foil pot. Turns a whole windowsill into a celebration.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -402,7 +402,7 @@ add({
 // ------------------------------------------------------------------ present pile
 
 add({
-  id: 'present_pile', name: 'Pile of Presents', cat: 'seasonal', rarity: 'rare', size: [2, 1],
+  id: 'present_pile', model: 'items/present_pile.glb', name: 'Pile of Presents', cat: 'seasonal', rarity: 'rare', size: [2, 1],
   blurb: 'Stripes, spots and stars, all tied with bows. The little one keeps wriggling.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -443,7 +443,7 @@ add({
 // ------------------------------------------------------------------ stockings
 
 add({
-  id: 'stockings', name: 'Knitted Stockings', cat: 'seasonal', rarity: 'rare', size: [2, 1], wall: true,
+  id: 'stockings', model: 'items/stockings.glb', name: 'Knitted Stockings', cat: 'seasonal', rarity: 'rare', size: [2, 1], wall: true,
   blurb: 'Three hand-knitted stockings on a garland: one for Pip, one for you, one for whoever turns up.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -476,7 +476,7 @@ add({
 // ------------------------------------------------------------------ snowflake rug
 
 add({
-  id: 'snowflake_rug', name: 'Snowflake Rug', cat: 'seasonal', rarity: 'rare', size: [2, 2], rug: true, flatItem: true,
+  id: 'snowflake_rug', model: 'items/snowflake_rug.glb', name: 'Snowflake Rug', cat: 'seasonal', rarity: 'rare', size: [2, 2], rug: true, flatItem: true,
   blurb: 'An icy-blue round rug with a six-armed snowflake that never melts, edged with snowball pom-poms.',
   sit: [{ x: 0, y: 1, z: 0 }],
   build: () => {
@@ -506,7 +506,7 @@ add({
 // ------------------------------------------------------------------ icicle lights
 
 add({
-  id: 'icicle_lights', name: 'Icicle Lights', cat: 'seasonal', rarity: 'rare', size: [3, 1], wall: true,
+  id: 'icicle_lights', model: 'items/icicle_lights.glb', name: 'Icicle Lights', cat: 'seasonal', rarity: 'rare', size: [3, 1], wall: true,
   blurb: 'Glass icicles that drip with cold blue light, one after another, all along the wall.',
   light: { x: 0, y: -5, z: 3, color: 0xbfe4ff, power: 1.3 },
   build: () => {

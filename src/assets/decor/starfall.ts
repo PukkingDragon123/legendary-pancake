@@ -30,7 +30,7 @@ const starry = (base = '#2a2a6a', o: { tuft?: number; seed?: number } = {}): Pai
 // ------------------------------------------------------------------ star projector
 
 add({
-  id: 'star_projector', name: 'Orrery Star Projector', cat: 'seasonal', rarity: 'epic', size: [1, 1], small: true,
+  id: 'star_projector', model: 'items/star_projector.glb', name: 'Orrery Star Projector', cat: 'seasonal', rarity: 'epic', size: [1, 1], small: true,
   blurb: 'A pierced brass dome turns slowly over a candle-bright core, sprinkling the walls with constellations.',
   light: { x: 0, y: 12, z: 0, color: 0xc8b0ff, power: 2 },
   build: () => {
@@ -86,7 +86,7 @@ function crescentRows(): string[] {
 }
 
 add({
-  id: 'moon_bed', name: 'Crescent Moon Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
+  id: 'moon_bed', model: 'items/moon_bed.glb', name: 'Crescent Moon Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
   blurb: 'Curl up in the curve of the moon under a quilt of stars, with three wishes dangling from the tip.',
   sleep: { x: 2, y: 14, z: 0, rot: 90 },
   light: { x: -14, y: 18, z: 4, color: 0xfff0b8, power: 1 },
@@ -126,7 +126,7 @@ add({
 // ------------------------------------------------------------------ brass telescope
 
 add({
-  id: 'telescope_brass', name: 'Stargazer’s Brass Telescope', cat: 'seasonal', rarity: 'epic', size: [2, 2],
+  id: 'telescope_brass', model: 'items/telescope_brass.glb', name: 'Stargazer’s Brass Telescope', cat: 'seasonal', rarity: 'epic', size: [2, 2],
   blurb: 'Polished brass, leather grips and a finder scope. It drifts slowly across the sky, looking for wishes.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -163,7 +163,7 @@ add({
 // ------------------------------------------------------------------ star jar
 
 add({
-  id: 'star_jar', name: 'Jar of Fallen Stars', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
+  id: 'star_jar', model: 'items/star_jar.glb', name: 'Jar of Fallen Stars', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
   blurb: 'Collected one by one from the meadow after the meteor shower. They hum very quietly.',
   light: { x: 0, y: 6, z: 0, color: 0xffe9a0, power: 1.4 },
   build: () => {
@@ -200,7 +200,7 @@ const PLANETS: { r: number; c: string; arm: number; ang: number; drop: number; r
 ];
 
 add({
-  id: 'planet_mobile', name: 'Planetarium Mobile', cat: 'seasonal', rarity: 'rare', size: [1, 1], wall: true,
+  id: 'planet_mobile', model: 'items/planet_mobile.glb', name: 'Planetarium Mobile', cat: 'seasonal', rarity: 'rare', size: [1, 1], wall: true,
   blurb: 'A little sun and four planets on brass arms, turning slowly from a curly wall bracket.',
   light: { x: 0, y: -4, z: 12, color: 0xffc86a, power: 0.8 },
   build: () => {
@@ -229,7 +229,7 @@ add({
 // ------------------------------------------------------------------ cloud pouf
 
 add({
-  id: 'cloud_pouf', name: 'Sleepy Cloud Pouf', cat: 'seasonal', rarity: 'rare', size: [2, 1],
+  id: 'cloud_pouf', model: 'items/cloud_pouf.glb', name: 'Sleepy Cloud Pouf', cat: 'seasonal', rarity: 'rare', size: [2, 1],
   blurb: 'A plump little cloud that drifted in and dozed off. Very comfortable. Do not wake it.',
   sit: [{ x: 0, y: 11, z: 1 }],
   build: () => {
@@ -250,7 +250,7 @@ add({
 // ------------------------------------------------------------------ comet rug
 
 add({
-  id: 'comet_rug', name: 'Comet Rug', cat: 'seasonal', rarity: 'rare', size: [3, 2], rug: true, flatItem: true,
+  id: 'comet_rug', model: 'items/comet_rug.glb', name: 'Comet Rug', cat: 'seasonal', rarity: 'rare', size: [3, 2], rug: true, flatItem: true,
   blurb: 'A golden star streaking across the floor with a long, soft tail of dusk colours.',
   build: () => {
     const head = R('#f6c84a'), cols = ['#f6e0a0', '#f2a0c8', '#b88ae8', '#6a6ad8', '#3a3a8a'].map((c) => R(c));

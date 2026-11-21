@@ -1,0 +1,872 @@
+{
+ "name": "candy_cane",
+ "description": "A giant peppermint candy cane, taller than Pip, planted in a little snow drift and tied with a velvet bow with long tails.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 2.8,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": true,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "holly": [
+    "#483a42",
+    "#865661",
+    "#9a5e66",
+    "#a06361",
+    "#a4695a",
+    "#ad735b",
+    "#c68d74",
+    "#e8b4ae"
+   ],
+   "sage": [
+    "#394343",
+    "#4b564d",
+    "#636f5b",
+    "#82906f",
+    "#a7b788",
+    "#bfcc97",
+    "#d3dea4",
+    "#e4ebad"
+   ],
+   "snow": [
+    "#7a8c9e",
+    "#84a5ad",
+    "#adc9cf",
+    "#c9dcdc",
+    "#d8e4e2",
+    "#e5edec",
+    "#f6f8f3",
+    "#fbfcf8"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "snow",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 0.8,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "flow": "horizontal",
+    "rough": 0.45
+   },
+   "layers": [
+    {
+     "id": "drifts",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.7
+    },
+    {
+     "id": "hollows",
+     "op": "patches",
+     "scale": 1.8,
+     "threshold": 0.66,
+     "shift": -0.8
+    },
+    {
+     "id": "glint",
+     "op": "gloss",
+     "length": 1,
+     "shift": 1.5,
+     "density": 0.25,
+     "post": true
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "snow",
+   "tone": 6.0,
+   "rim": {
+    "light_shift": 1.2,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "off": true
+   },
+   "layers": [
+    {
+     "id": "stripe",
+     "op": "stripes",
+     "axis": "path",
+     "period": 2.6,
+     "width": 0.42,
+     "zigzag": [
+      2.6,
+      2
+     ],
+     "zig_axis": "around",
+     "ramp": "holly",
+     "tone": 4.2
+    },
+    {
+     "id": "thin",
+     "op": "stripes",
+     "axis": "path",
+     "period": 2.6,
+     "width": 0.08,
+     "phase": 1.612,
+     "zigzag": [
+      2.6,
+      2
+     ],
+     "zig_axis": "around",
+     "ramp": "sage",
+     "tone": 3.6
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.6,
+     "density": 0.8,
+     "post": true
+    }
+   ]
+  },
+  "s3": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s7": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "drift",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      10.8,
+      10.8
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8,
+      0
+     ],
+     "size": [
+      10.0,
+      10.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": [
+      6.8,
+      6.8
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.4,
+      0
+     ],
+     "size": [
+      2.4,
+      2.4
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s1",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "cane",
+   "shape": "loft",
+   "pivot": [
+    -1.0,
+    0.8,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      11.2,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      20.2,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    },
+    {
+     "at": [
+      0.4,
+      24.2,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    },
+    {
+     "at": [
+      2.2,
+      26.8,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    },
+    {
+     "at": [
+      4.6,
+      27.4,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    },
+    {
+     "at": [
+      6.8,
+      26.4,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    },
+    {
+     "at": [
+      7.6,
+      24.0,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    },
+    {
+     "at": [
+      7.4,
+      21.8,
+      0.0
+     ],
+     "size": [
+      3.3,
+      3.3
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s2"
+  },
+  {
+   "id": "loop0",
+   "shape": "loft",
+   "pivot": [
+    -1.0,
+    21.4,
+    1.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      -2.6,
+      1.8,
+      0.5
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      -3.6,
+      0.2,
+      0.4
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      -2.2,
+      -1.0,
+      0.3
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      -0.2,
+      0.1
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s3"
+  },
+  {
+   "id": "tail0",
+   "shape": "loft",
+   "pivot": [
+    -1.0,
+    21.0,
+    1.6
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      -1.2,
+      -2.4,
+      0.4
+     ],
+     "size": [
+      1.4,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      -1.6,
+      -5.4,
+      0.2
+     ],
+     "size": [
+      1.5,
+      0.6
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s4"
+  },
+  {
+   "id": "loop1",
+   "shape": "loft",
+   "pivot": [
+    -1.0,
+    21.4,
+    1.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      2.6,
+      1.8,
+      0.5
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      3.6,
+      0.2,
+      0.4
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      2.2,
+      -1.0,
+      0.3
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      -0.2,
+      0.1
+     ],
+     "size": [
+      1.8,
+      0.7
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s5"
+  },
+  {
+   "id": "tail1",
+   "shape": "loft",
+   "pivot": [
+    -1.0,
+    21.0,
+    1.6
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      1.2,
+      -2.4,
+      0.4
+     ],
+     "size": [
+      1.4,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      1.6,
+      -5.4,
+      0.2
+     ],
+     "size": [
+      1.5,
+      0.6
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s6"
+  },
+  {
+   "id": "knot",
+   "shape": "loft",
+   "pivot": [
+    -1.0,
+    20.35,
+    1.7
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.2782485578727799,
+      0
+     ],
+     "size": [
+      1.3435,
+      1.3435
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.95,
+      0
+     ],
+     "size": [
+      1.9,
+      1.9
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.62175144212722,
+      0
+     ],
+     "size": [
+      1.3435,
+      1.3435
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.9,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s7",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  }
+ ]
+}

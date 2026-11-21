@@ -1,0 +1,1616 @@
+{
+ "name": "moth_arcade",
+ "description": "A tall arcade cabinet in midnight blue with gold trim: a glowing marquee, side art of moths round a moonlit lamp, a screen where little moths flutter toward the lamp, a joystick, two buttons and glowing coin slots.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 2.6,
+ "budget": {
+  "tris": 3200,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": true,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "berry": [
+    "#37353d",
+    "#483a42",
+    "#5e434a",
+    "#7c4f56",
+    "#9e5f66",
+    "#b67475",
+    "#ca8683",
+    "#dc978d"
+   ],
+   "bulb": [
+    "#c59a52",
+    "#dcb072",
+    "#f1d39a",
+    "#f8e6bc",
+    "#f4eedd",
+    "#fffcf2"
+   ],
+   "ember": [
+    "#9e5f66",
+    "#a66c55",
+    "#c0866a",
+    "#e8b4ae",
+    "#f1d39a",
+    "#fff6e6"
+   ],
+   "gold": [
+    "#8a5a3c",
+    "#8d703f",
+    "#b58f4d",
+    "#d2a764",
+    "#d3ac6c",
+    "#d4b473",
+    "#f3d89f",
+    "#fcf4bb"
+   ],
+   "holly": [
+    "#483a42",
+    "#865661",
+    "#9a5e66",
+    "#a06361",
+    "#a4695a",
+    "#ad735b",
+    "#c68d74",
+    "#e8b4ae"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "lake": [
+    "#334149",
+    "#415159",
+    "#536870",
+    "#6a868c",
+    "#86a9b0",
+    "#9ebec0",
+    "#b3cfcb",
+    "#c5ddd4"
+   ],
+   "lavender": [
+    "#404651",
+    "#585c68",
+    "#797a87",
+    "#a29fb0",
+    "#d3cce0",
+    "#ebe1f0",
+    "#fcf2ec",
+    "#fbf2e2"
+   ],
+   "lilac": [
+    "#3a414d",
+    "#4f5160",
+    "#6a687c",
+    "#8c869f",
+    "#b4a9c9",
+    "#ccbed8",
+    "#e0cfe5",
+    "#f0dde2"
+   ],
+   "moss": [
+    "#333f3e",
+    "#414f43",
+    "#53634c",
+    "#6a7f59",
+    "#86a06a",
+    "#9eb579",
+    "#b3c686",
+    "#c5d491"
+   ],
+   "navy": [
+    "#1b222d",
+    "#2f3140",
+    "#404354",
+    "#4e5869",
+    "#5b7280",
+    "#6d8d98",
+    "#86a9b0"
+   ],
+   "night": [
+    "#1c232c",
+    "#1b222d",
+    "#232c39",
+    "#364554",
+    "#4f6675",
+    "#678692",
+    "#86a9b0"
+   ],
+   "plum": [
+    "#2f333d",
+    "#393642",
+    "#463c4a",
+    "#584556",
+    "#6e5266",
+    "#856675",
+    "#9a7983",
+    "#ae8a8d"
+   ],
+   "silver": [
+    "#46596a",
+    "#617f8c",
+    "#6a655c",
+    "#908a7e",
+    "#b9b2a4",
+    "#d3e0dc",
+    "#dfe9ea",
+    "#f5f7f2"
+   ],
+   "soot": [
+    "#231f1b",
+    "#352d26",
+    "#332d26",
+    "#3a362d",
+    "#524d40",
+    "#6f6856"
+   ],
+   "star": [
+    "#c59a52",
+    "#dcb072",
+    "#f1d39a",
+    "#f9e9c2",
+    "#fff8e6"
+   ],
+   "verd": [
+    "#364246",
+    "#4c5b58",
+    "#6c8075",
+    "#96b09c",
+    "#b8ceb2",
+    "#d4e4c1"
+   ],
+   "walnut": [
+    "#2b2c2d",
+    "#3a312a",
+    "#46372a",
+    "#553e2e",
+    "#654a36",
+    "#7c6044",
+    "#a17f5a",
+    "#bf9d74"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "navy",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.12,
+     "ramp": "walnut",
+     "tone": 3
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "soot",
+   "tone": 2.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.2
+    }
+   ]
+  },
+  "s3": {
+   "ramp": "ember",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "navy",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.12,
+     "ramp": "walnut",
+     "tone": 3
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "silver",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "holly",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s7": {
+   "ramp": "honey",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s8": {
+   "ramp": "lake",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "navy",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.12,
+     "ramp": "walnut",
+     "tone": 3
+    }
+   ]
+  },
+  "s10": {
+   "ramp": "soot",
+   "tone": 1.8,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.2
+    }
+   ]
+  },
+  "s11": {
+   "ramp": "night",
+   "tone": 3.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s12": {
+   "ramp": "lilac",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s13": {
+   "ramp": "lilac",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s14": {
+   "ramp": "lilac",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s15": {
+   "ramp": "navy",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.12,
+     "ramp": "walnut",
+     "tone": 3
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "bulb",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s17": {
+   "ramp": "navy",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s18": {
+   "ramp": "navy",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s19": {
+   "ramp": "gold",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s20": {
+   "ramp": "gold",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "base",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    8.0,
+    -0.5
+   ],
+   "size": [
+    15.0,
+    16.0,
+    12.0
+   ],
+   "style": "s1",
+   "chamfer": 0.3
+  },
+  {
+   "id": "kick",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    1.0,
+    5.6
+   ],
+   "size": [
+    14.0,
+    2.0,
+    0.4
+   ],
+   "style": "s2"
+  },
+  {
+   "id": "glow_slots",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    7.0,
+    5.62
+   ],
+   "art": [
+    ".fffffff...fffffff..",
+    ".fpppppf...fpppppf..",
+    ".fppgppf...fppgppf..",
+    ".fppgppf...fppgppf..",
+    ".fppgppf...fppgppf..",
+    ".fppgppf...fppgppf..",
+    ".fpppppf...fpppppf..",
+    ".fffffff...fffffff.."
+   ],
+   "plane": "xy",
+   "style": "s3",
+   "paint": {
+    "art_key": {
+     "f": "gold:3",
+     "p": "berry:2",
+     "g": "ember:5"
+    }
+   }
+  },
+  {
+   "id": "panel",
+   "shape": "taper",
+   "pivot": [
+    0.0,
+    16.6,
+    3.6
+   ],
+   "size": [
+    15.0,
+    2.4,
+    5.0
+   ],
+   "style": "s4",
+   "front_scale": [
+    1,
+    0.5
+   ],
+   "chamfer": 0.3,
+   "front_shift": [
+    0,
+    -0.6
+   ]
+  },
+  {
+   "id": "stick",
+   "shape": "loft",
+   "pivot": [
+    -3.0,
+    17.4,
+    3.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.44,
+      0.44
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.2,
+      0
+     ],
+     "size": [
+      0.44,
+      0.44
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 5,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s5",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "stick_ball",
+   "shape": "loft",
+   "pivot": [
+    -3.0,
+    18.95,
+    3.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.2196699141100894,
+      0
+     ],
+     "size": [
+      1.0607,
+      1.0607
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.75,
+      0
+     ],
+     "size": [
+      1.5,
+      1.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.2803300858899105,
+      0
+     ],
+     "size": [
+      1.0607,
+      1.0607
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.5,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s6",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "button0",
+   "shape": "loft",
+   "pivot": [
+    1.8,
+    17.4,
+    3.6
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      1.5,
+      1.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      1.5,
+      1.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s7",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "button1",
+   "shape": "loft",
+   "pivot": [
+    4.2,
+    17.4,
+    3.6
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      1.5,
+      1.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      1.5,
+      1.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s8",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "upper",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    27.4,
+    -2.5
+   ],
+   "size": [
+    15.0,
+    19.0,
+    8.0
+   ],
+   "style": "s9",
+   "chamfer": 0.3
+  },
+  {
+   "id": "bezel",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    26.0,
+    1.6
+   ],
+   "rotation": [
+    -8.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    13.0,
+    12.0,
+    0.6
+   ],
+   "style": "s10",
+   "chamfer": 0.2
+  },
+  {
+   "id": "glow_screen",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    26.0,
+    1.95
+   ],
+   "rotation": [
+    -8.0,
+    0.0,
+    0.0
+   ],
+   "art": [
+    "bbbbbbbbbbrbbfffbrbbbbbbbbbb",
+    "bbbbbbbbbbbrlfffrbbbbbbbbbbb",
+    "bbbbbbbbbbblrLLrlbbbbsbbsbbb",
+    "bbbbbbbbbbllLrrLllbbsbbbbbbb",
+    "bbbbbbbbbbllLrrLllbbbbbbbbbb",
+    "bsbbbbbbbbblrLLrlbbbbsbbbbbb",
+    "bbbbbbbbbbbrllllrbbbbbbbbbbb",
+    "aaaaaaaaasraallaaraaaaaaaaaa",
+    "aaaaaaaaaraaaaasaaraaaaaaaaa",
+    "aaaaaaasaasaaaaaaaaaaaaaaaaa",
+    "asaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "aaasaaaaasaaaaaaaaaaaaaaaaaa",
+    "aaaannaaaaaaaaaaaaaaaaaaaaaa",
+    "asannnnaaaaaaaaaaaaaaaaaaaaa",
+    "aasnnnnaaaaaaaaaaaaaaaaaaaaa",
+    "aaaannaaaaaaaaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "asaaaaaaaaaaaaaaaaaaaaaasaaa",
+    "aaasaaaaaaaaaaaaaaaaaaaaasaa",
+    "aaaaasaaaaaaaaasaaaaaaaaaaaa",
+    "gggggggggggggggggggggggggggg",
+    "gggtgtgtgtgggggggggggggggggg",
+    "gggggggggggggggggggggggggggg"
+   ],
+   "plane": "xy",
+   "style": "s11",
+   "paint": {
+    "art_key": {
+     "a": "night:2",
+     "b": "night:3",
+     "s": "star:3",
+     "l": "bulb:3",
+     "L": "bulb:5",
+     "f": "gold:4",
+     "r": "bulb:2",
+     "g": "moss:2",
+     "t": "honey:5",
+     "n": "lilac:3"
+    }
+   }
+  },
+  {
+   "id": "glow_moth0",
+   "shape": "card",
+   "pivot": [
+    -4.0,
+    24.0,
+    2.2
+   ],
+   "rotation": [
+    -8.0,
+    0.0,
+    0.0
+   ],
+   "art": [
+    "a.b.a",
+    "aabaa",
+    ".a.a."
+   ],
+   "plane": "xy",
+   "style": "s12",
+   "paint": {
+    "art_key": {
+     "a": "lavender:5",
+     "b": "plum:2"
+    }
+   }
+  },
+  {
+   "id": "glow_moth1",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    24.0,
+    2.2
+   ],
+   "rotation": [
+    -8.0,
+    0.0,
+    0.0
+   ],
+   "art": [
+    "a.b.a",
+    "aabaa",
+    ".a.a."
+   ],
+   "plane": "xy",
+   "style": "s13",
+   "paint": {
+    "art_key": {
+     "a": "lavender:5",
+     "b": "plum:2"
+    }
+   }
+  },
+  {
+   "id": "glow_moth2",
+   "shape": "card",
+   "pivot": [
+    4.0,
+    24.0,
+    2.2
+   ],
+   "rotation": [
+    -8.0,
+    0.0,
+    0.0
+   ],
+   "art": [
+    "a.b.a",
+    "aabaa",
+    ".a.a."
+   ],
+   "plane": "xy",
+   "style": "s14",
+   "paint": {
+    "art_key": {
+     "a": "lavender:5",
+     "b": "plum:2"
+    }
+   }
+  },
+  {
+   "id": "marquee_box",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    38.0,
+    -2.0
+   ],
+   "size": [
+    15.4,
+    4.0,
+    9.0
+   ],
+   "style": "s15",
+   "chamfer": 0.3
+  },
+  {
+   "id": "glow_marquee",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    38.0,
+    2.55
+   ],
+   "art": [
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+    "baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+    "bamaTTTatttaTTTatttaTTTatttaTTTatmtb",
+    "bmmmTTTatttaTTTatttaTTTatttaTTTammmb",
+    "bamaTTTatttaTTTatttaTTTatttaTTTatmtb",
+    "baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+    "baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+   ],
+   "plane": "xy",
+   "style": "s16",
+   "paint": {
+    "art_key": {
+     "a": "bulb:4",
+     "b": "gold:3",
+     "t": "berry:2",
+     "T": "night:2",
+     "m": "lilac:3"
+    }
+   }
+  },
+  {
+   "id": "side0",
+   "shape": "card",
+   "pivot": [
+    -7.56,
+    21.0,
+    -0.5
+   ],
+   "art": [
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    ".............llll.mmnmm.......",
+    "...........lllllll.mnm........",
+    "..........llllllllll..........",
+    "..........lllLLLLlll..........",
+    ".........lllLLLLLLlll.........",
+    ".........lllLLLLLLlll.........",
+    ".........lllLLLLLLlll.........",
+    ".........lllLLLLLLlll.........",
+    "..........lllLLLLlll..........",
+    "..........llllllllll..........",
+    "...........llllmmnmm..........",
+    ".............ll.mnm...........",
+    ".......................mmnmm..",
+    "........................mnm...",
+    "..............................",
+    ".........mmnmm................",
+    "..........mnm.................",
+    "..............................",
+    ".....................mmnmm....",
+    "......................mnm.....",
+    "..............................",
+    "..............................",
+    "..............................",
+    ".............................g",
+    "............................gg",
+    "..........................gggg",
+    ".........................ggg..",
+    ".........mmnmm.........gggg...",
+    "..........mnm.........ggg.....",
+    ".....................ggg......",
+    "...................gggg.......",
+    ".......ggg........ggg.........",
+    "......gggggggg..gggg..........",
+    ".....ggg..gggggggg............",
+    "....ggg.......ggg.............",
+    "...ggg........................",
+    "..ggg.........................",
+    ".ggg..........................",
+    "ggg...........................",
+    "gg............................"
+   ],
+   "plane": "yz",
+   "style": "s17",
+   "paint": {
+    "art_key": {
+     "l": "honey:5",
+     "L": "honey:7",
+     "m": "lilac:5",
+     "n": "plum:2",
+     "g": "moss:3"
+    }
+   }
+  },
+  {
+   "id": "side1",
+   "shape": "card",
+   "pivot": [
+    7.56,
+    21.0,
+    -0.5
+   ],
+   "art": [
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    "..............................",
+    ".............llll.mmnmm.......",
+    "...........lllllll.mnm........",
+    "..........llllllllll..........",
+    "..........lllLLLLlll..........",
+    ".........lllLLLLLLlll.........",
+    ".........lllLLLLLLlll.........",
+    ".........lllLLLLLLlll.........",
+    ".........lllLLLLLLlll.........",
+    "..........lllLLLLlll..........",
+    "..........llllllllll..........",
+    "...........llllmmnmm..........",
+    ".............ll.mnm...........",
+    ".......................mmnmm..",
+    "........................mnm...",
+    "..............................",
+    ".........mmnmm................",
+    "..........mnm.................",
+    "..............................",
+    ".....................mmnmm....",
+    "......................mnm.....",
+    "..............................",
+    "..............................",
+    "..............................",
+    ".............................g",
+    "............................gg",
+    "..........................gggg",
+    ".........................ggg..",
+    ".........mmnmm.........gggg...",
+    "..........mnm.........ggg.....",
+    ".....................ggg......",
+    "...................gggg.......",
+    ".......ggg........ggg.........",
+    "......gggggggg..gggg..........",
+    ".....ggg..gggggggg............",
+    "....ggg.......ggg.............",
+    "...ggg........................",
+    "..ggg.........................",
+    ".ggg..........................",
+    "ggg...........................",
+    "gg............................"
+   ],
+   "plane": "yz",
+   "style": "s18",
+   "paint": {
+    "art_key": {
+     "l": "honey:5",
+     "L": "honey:7",
+     "m": "lilac:5",
+     "n": "plum:2",
+     "g": "moss:3"
+    }
+   }
+  },
+  {
+   "id": "tmold0",
+   "shape": "box",
+   "pivot": [
+    -7.6,
+    20.0,
+    5.4
+   ],
+   "size": [
+    0.4,
+    40.0,
+    0.5
+   ],
+   "style": "s19"
+  },
+  {
+   "id": "tmold1",
+   "shape": "box",
+   "pivot": [
+    7.6,
+    20.0,
+    5.4
+   ],
+   "size": [
+    0.4,
+    40.0,
+    0.5
+   ],
+   "style": "s20"
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 3.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "glow_moth0",
+     "channel": "position",
+     "keys": [
+      [
+       0.0,
+       [
+        0.0,
+        3.2,
+        0
+       ]
+      ],
+      [
+       0.5,
+       [
+        2.164399598730861,
+        1.2014716810310084,
+        0
+       ]
+      ],
+      [
+       1.0,
+       [
+        2.1663895001406646,
+        0.7970593452443048,
+        0
+       ]
+      ],
+      [
+       1.5,
+       [
+        0.00398163229121707,
+        3.5999918830614006,
+        0
+       ]
+      ],
+      [
+       2.0,
+       [
+        -2.1624042072242484,
+        0.8058921188243808,
+        0
+       ]
+      ],
+      [
+       2.5,
+       [
+        -2.168373906406184,
+        1.1926551562325942,
+        0
+       ]
+      ],
+      [
+       3.0,
+       [
+        0.0,
+        3.2,
+        0
+       ]
+      ]
+     ],
+     "ease": "smooth"
+    },
+    {
+     "part": "glow_moth1",
+     "channel": "position",
+     "keys": [
+      [
+       0.0,
+       [
+        2.1663895001406646,
+        0.7970593452443048,
+        0
+       ]
+      ],
+      [
+       0.5,
+       [
+        0.00398163229121707,
+        3.5999918830614006,
+        0
+       ]
+      ],
+      [
+       1.0,
+       [
+        -2.1624042072242484,
+        0.8058921188243808,
+        0
+       ]
+      ],
+      [
+       1.5,
+       [
+        -2.168373906406184,
+        1.1926551562325942,
+        0
+       ]
+      ],
+      [
+       2.0,
+       [
+        -0.007963254482844975,
+        3.1999675323279573,
+        0
+       ]
+      ],
+      [
+       2.5,
+       [
+        2.1604033306822283,
+        1.2103206137738927,
+        0
+       ]
+      ],
+      [
+       3.0,
+       [
+        2.1663895001406646,
+        0.7970593452443048,
+        0
+       ]
+      ]
+     ],
+     "ease": "smooth"
+    },
+    {
+     "part": "glow_moth2",
+     "channel": "position",
+     "keys": [
+      [
+       0.0,
+       [
+        -2.1624042072242484,
+        0.8058921188243808,
+        0
+       ]
+      ],
+      [
+       0.5,
+       [
+        -2.168373906406184,
+        1.1926551562325942,
+        0
+       ]
+      ],
+      [
+       1.0,
+       [
+        -0.007963254482844975,
+        3.1999675323279573,
+        0
+       ]
+      ],
+      [
+       1.5,
+       [
+        2.1604033306822275,
+        1.210320613773895,
+        0
+       ]
+      ],
+      [
+       2.0,
+       [
+        2.1703528124938853,
+        0.7882591586815395,
+        0
+       ]
+      ],
+      [
+       2.5,
+       [
+        0.011944856475321279,
+        3.5999269480467375,
+        0
+       ]
+      ],
+      [
+       3.0,
+       [
+        -2.1624042072242484,
+        0.8058921188243808,
+        0
+       ]
+      ]
+     ],
+     "ease": "smooth"
+    },
+    {
+     "part": "stick_ball",
+     "channel": "position",
+     "osc": {
+      "axis": "x",
+      "amp": 0.3,
+      "cycles": 3
+     }
+    }
+   ]
+  }
+ }
+}

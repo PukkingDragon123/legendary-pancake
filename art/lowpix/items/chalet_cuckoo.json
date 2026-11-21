@@ -1,0 +1,1738 @@
+{
+ "name": "chalet_cuckoo",
+ "description": "A carved walnut chalet clock: shingled roof with a carved bird on the ridge, leaf carvings, a cream dial, a little door where a wooden owlet pops out to hoot, a leaf pendulum and pinecone weights.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 3.0,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "brass": [
+    "#434035",
+    "#5b4131",
+    "#82673c",
+    "#b08c4b",
+    "#c6a05b",
+    "#d0aa69",
+    "#e1b97c",
+    "#f1d6a2",
+    "#f4eedd"
+   ],
+   "cream": [
+    "#444a4e",
+    "#626562",
+    "#88877e",
+    "#b9b2a1",
+    "#f1e6cc",
+    "#fefbdc",
+    "#fcf7e7",
+    "#fbf2e2"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "ink": [
+    "#1b222d",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856",
+    "#6a655c"
+   ],
+   "iron": [
+    "#1b222d",
+    "#362e2a",
+    "#2c3139",
+    "#45484c",
+    "#625f59",
+    "#757066",
+    "#969083",
+    "#b9b2a4"
+   ],
+   "soot": [
+    "#231f1b",
+    "#352d26",
+    "#332d26",
+    "#3a362d",
+    "#524d40",
+    "#6f6856"
+   ],
+   "tawny": [
+    "#39393a",
+    "#4b413b",
+    "#644f3f",
+    "#836047",
+    "#a87652",
+    "#c08b61",
+    "#d49d6e",
+    "#e5ac7a"
+   ],
+   "walnut": [
+    "#2b2c2d",
+    "#3a312a",
+    "#46372a",
+    "#553e2e",
+    "#654a36",
+    "#7c6044",
+    "#a17f5a",
+    "#bf9d74"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "walnut",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0.83
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0.83
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1.6,
+      1,
+      1.6
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "walnut",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0.83
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0.83
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1.6,
+      1,
+      1.6
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ]
+  },
+  "s3": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s4": {
+   "ramp": "walnut",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "shingles",
+     "op": "scales",
+     "shape": "round",
+     "along": "z",
+     "size": [
+      1.0,
+      0.9
+     ],
+     "gap": 0.8,
+     "highlight": 0.8,
+     "shadow": -1.1,
+     "jitter": 0.5
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "walnut",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "shingles",
+     "op": "scales",
+     "shape": "round",
+     "along": "z",
+     "size": [
+      1.0,
+      0.9
+     ],
+     "gap": 0.8,
+     "highlight": 0.8,
+     "shadow": -1.1,
+     "jitter": 0.5
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s7": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s8": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s9": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s10": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s11": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s12": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s13": {
+   "ramp": "ink",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s14": {
+   "ramp": "ink",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s15": {
+   "ramp": "tawny",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "belly",
+     "op": "band",
+     "axis": "z",
+     "from": 0.2,
+     "to": 1.0,
+     "ramp": "cream",
+     "tone": 4.4
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "tawny",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "eyes",
+     "op": "spots",
+     "centers": [
+      [
+       -0.45,
+       1.25,
+       0.95,
+       0.22
+      ],
+      [
+       0.45,
+       1.25,
+       0.95,
+       0.22
+      ]
+     ],
+     "ramp": "soot",
+     "tone": 0.4,
+     "roughness": 0
+    }
+   ]
+  },
+  "s17": {
+   "ramp": "honey",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s18": {
+   "ramp": "walnut",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0.83
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0.83
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    }
+   ]
+  },
+  "s19": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s20": {
+   "ramp": "iron",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s21": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "scales",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.8
+     ],
+     "gap": 0.7,
+     "highlight": 1.0,
+     "shadow": -1.2
+    }
+   ]
+  },
+  "s22": {
+   "ramp": "iron",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s23": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "scales",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.8
+     ],
+     "gap": 0.7,
+     "highlight": 1.0,
+     "shadow": -1.2
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "case",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    9.8,
+    2.0
+   ],
+   "size": [
+    11.0,
+    11.6,
+    4.0
+   ],
+   "style": "s1",
+   "chamfer": 0.3
+  },
+  {
+   "id": "ledge",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    3.8,
+    2.4
+   ],
+   "size": [
+    12.4,
+    0.8,
+    4.8
+   ],
+   "style": "s2",
+   "chamfer": 0.25
+  },
+  {
+   "id": "gable",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    18.6,
+    4.05
+   ],
+   "art": [
+    ".................aa.................",
+    "................aaba................",
+    "...............abaaaa...............",
+    "..............baaaabaa..............",
+    ".............aaaabaaaab.............",
+    "............aaabaaaabaaa............",
+    "...........aabaaaeeaaaaba...........",
+    "..........abaaaeeeeeebaaaa..........",
+    ".........baaaabeddddeaaabaa.........",
+    "........aaaabaeddddddebaaaab........",
+    ".......aaabaaaeddddddeaaabaaa.......",
+    "......aabaaaabeddddddeabaaaaba......",
+    ".....abaaaabaaeddddddeaaaabaaaa.....",
+    "....baaaabaaaabeddddedaabaaaabaa....",
+    "...aaaabaaaabaaeeeeeedbaaaabaaaab...",
+    "..aaabaaaabaaaaddeedddaaabaaaabaaa..",
+    ".aabaaaabaaaabadddddddabaaaabaaaaba.",
+    "abaaaabaaaabaaadddddddaaaabaaaabaaaa"
+   ],
+   "plane": "xy",
+   "style": "s3",
+   "paint": {
+    "art_key": {
+     "a": "walnut:4",
+     "b": "walnut:3",
+     "d": "soot:0",
+     "e": "honey:4"
+    }
+   }
+  },
+  {
+   "id": "roof0",
+   "shape": "box",
+   "pivot": [
+    -3.3,
+    18.7,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    40.0
+   ],
+   "size": [
+    8.6,
+    0.7,
+    6.2
+   ],
+   "style": "s4",
+   "chamfer": 0.15
+  },
+  {
+   "id": "roof1",
+   "shape": "box",
+   "pivot": [
+    3.3,
+    18.7,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -40.0
+   ],
+   "size": [
+    8.6,
+    0.7,
+    6.2
+   ],
+   "style": "s5",
+   "chamfer": 0.15
+  },
+  {
+   "id": "bird",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    22.9,
+    2.6
+   ],
+   "art": [
+    "..aa....",
+    ".aaaa..a",
+    "aaaaaaaa",
+    ".aaaaaa.",
+    "..a..a.."
+   ],
+   "plane": "xy",
+   "style": "s6",
+   "paint": {
+    "art_key": {
+     "a": "walnut:5"
+    }
+   }
+  },
+  {
+   "id": "leaf0",
+   "shape": "card",
+   "pivot": [
+    -4.0,
+    13.2,
+    4.05
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    30.0
+   ],
+   "art": [
+    "....ll......",
+    "...lllll....",
+    ".lllllllll..",
+    "vvvvvvvvvvvv",
+    ".lllllllll..",
+    "...lllll....",
+    "....ll......"
+   ],
+   "plane": "xy",
+   "style": "s7",
+   "paint": {
+    "art_key": {
+     "l": "walnut:5",
+     "v": "walnut:2"
+    }
+   }
+  },
+  {
+   "id": "leaf1",
+   "shape": "card",
+   "pivot": [
+    4.0,
+    13.2,
+    4.05
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -30.0
+   ],
+   "art": [
+    "....ll......",
+    "...lllll....",
+    ".lllllllll..",
+    "vvvvvvvvvvvv",
+    ".lllllllll..",
+    "...lllll....",
+    "....ll......"
+   ],
+   "plane": "xy",
+   "style": "s8",
+   "paint": {
+    "art_key": {
+     "l": "walnut:5",
+     "v": "walnut:2"
+    }
+   }
+  },
+  {
+   "id": "leaf2",
+   "shape": "card",
+   "pivot": [
+    -4.4,
+    6.0,
+    4.05
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -40.0
+   ],
+   "art": [
+    "....ll......",
+    "...lllll....",
+    ".lllllllll..",
+    "vvvvvvvvvvvv",
+    ".lllllllll..",
+    "...lllll....",
+    "....ll......"
+   ],
+   "plane": "xy",
+   "style": "s9",
+   "paint": {
+    "art_key": {
+     "l": "walnut:5",
+     "v": "walnut:2"
+    }
+   }
+  },
+  {
+   "id": "leaf3",
+   "shape": "card",
+   "pivot": [
+    4.4,
+    6.0,
+    4.05
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    40.0
+   ],
+   "art": [
+    "....ll......",
+    "...lllll....",
+    ".lllllllll..",
+    "vvvvvvvvvvvv",
+    ".lllllllll..",
+    "...lllll....",
+    "....ll......"
+   ],
+   "plane": "xy",
+   "style": "s10",
+   "paint": {
+    "art_key": {
+     "l": "walnut:5",
+     "v": "walnut:2"
+    }
+   }
+  },
+  {
+   "id": "leaf4",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    4.9,
+    4.05
+   ],
+   "art": [
+    "....ll......",
+    "...lllll....",
+    ".lllllllll..",
+    "vvvvvvvvvvvv",
+    ".lllllllll..",
+    "...lllll....",
+    "....ll......"
+   ],
+   "plane": "xy",
+   "style": "s11",
+   "paint": {
+    "art_key": {
+     "l": "walnut:5",
+     "v": "walnut:2"
+    }
+   }
+  },
+  {
+   "id": "dial",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    9.4,
+    4.06
+   ],
+   "art": [
+    ".......bbbbbbb.......",
+    ".....bbbfffffbbb.....",
+    "....bbffrrtrrffbb....",
+    "...bfftrfftffrtffb...",
+    "..bffrtffftffftrffb..",
+    ".bbfrfffffffffffrfbb.",
+    ".bfttfffffffffffttfb.",
+    "bbfrfffffffffffffrfbb",
+    "bfrfffffffffffffffrfb",
+    "bfrffffffftfffffffrfb",
+    "bftttfffftttfffftttfb",
+    "bfrffffffftfffffffrfb",
+    "bfrfffffffffffffffrfb",
+    "bbfrfffffffffffffrfbb",
+    ".bfttfffffffffffttfb.",
+    ".bbfrfffffffffffrfbb.",
+    "..bffrtffftffftrffb..",
+    "...bfftrfftffrtffb...",
+    "....bbffrrtrrffbb....",
+    ".....bbbfffffbbb.....",
+    ".......bbbbbbb......."
+   ],
+   "plane": "xy",
+   "style": "s12",
+   "paint": {
+    "art_key": {
+     "b": "brass:4",
+     "f": "cream:5",
+     "r": "cream:3",
+     "t": "ink:1"
+    }
+   }
+  },
+  {
+   "id": "hand_h",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    9.4,
+    4.12
+   ],
+   "offset": [
+    -0.0402,
+    0.6696,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    60.0
+   ],
+   "art": [
+    ".t.",
+    ".t.",
+    ".t.",
+    ".t.",
+    ".t."
+   ],
+   "plane": "xy",
+   "style": "s13",
+   "paint": {
+    "art_key": {
+     "t": "ink:1"
+    }
+   }
+  },
+  {
+   "id": "hand_m",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    9.4,
+    4.14
+   ],
+   "offset": [
+    0.0,
+    1.3,
+    0.0
+   ],
+   "art": [
+    ".t.",
+    ".t.",
+    ".t.",
+    ".t.",
+    ".t.",
+    ".t.",
+    ".t.",
+    ".t."
+   ],
+   "plane": "xy",
+   "style": "s14",
+   "paint": {
+    "art_key": {
+     "t": "ink:1"
+    }
+   }
+  },
+  {
+   "id": "owlet",
+   "shape": "bone",
+   "pivot": [
+    0.0,
+    16.6,
+    2.6
+   ]
+  },
+  {
+   "id": "owlet_body",
+   "shape": "loft",
+   "parent": "owlet",
+   "pivot": [
+    0.0,
+    -1.58,
+    0.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.2635565477625725,
+      0
+     ],
+     "size": [
+      1.4107,
+      1.4107
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9535565477625725,
+      0
+     ],
+     "size": [
+      2.2825,
+      2.2825
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8064434522374273,
+      0
+     ],
+     "size": [
+      2.2825,
+      2.2825
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.4964434522374273,
+      0
+     ],
+     "size": [
+      1.4107,
+      1.4107
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.76,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s15",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "owlet_head",
+   "shape": "loft",
+   "parent": "owlet",
+   "pivot": [
+    0.0,
+    0.65,
+    0.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.2005321559063052,
+      0
+     ],
+     "size": [
+      1.2343,
+      1.2343
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7255321559063052,
+      0
+     ],
+     "size": [
+      1.9972,
+      1.9972
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.3744678440936948,
+      0
+     ],
+     "size": [
+      1.9972,
+      1.9972
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.899467844093695,
+      0
+     ],
+     "size": [
+      1.2343,
+      1.2343
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s16",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "owlet_beak",
+   "shape": "card",
+   "parent": "owlet",
+   "pivot": [
+    0.0,
+    1.5,
+    1.46
+   ],
+   "art": [
+    "a",
+    "a"
+   ],
+   "plane": "xy",
+   "style": "s17",
+   "paint": {
+    "art_key": {
+     "a": "honey:4"
+    }
+   }
+  },
+  {
+   "id": "pend",
+   "shape": "bone",
+   "pivot": [
+    0.0,
+    4.2,
+    2.6
+   ]
+  },
+  {
+   "id": "rod",
+   "shape": "box",
+   "parent": "pend",
+   "pivot": [
+    0.0,
+    -4.0,
+    0.0
+   ],
+   "size": [
+    0.4,
+    8.0,
+    0.25
+   ],
+   "style": "s18"
+  },
+  {
+   "id": "bob",
+   "shape": "card",
+   "parent": "pend",
+   "pivot": [
+    0.0,
+    -10.2,
+    0.1
+   ],
+   "art": [
+    "............",
+    ".....av.....",
+    "..vvaavavv..",
+    "...vvvvvv...",
+    "..aaaavaaa..",
+    ".avvvavvvva.",
+    ".aaavvvvaaa.",
+    ".avaaavaava.",
+    ".aavvvvvvaa.",
+    "..aaavvaaa..",
+    "..vvaavavv..",
+    "..aavvvvaa..",
+    "...aaavaa...",
+    "....aava....",
+    ".....av....."
+   ],
+   "plane": "xy",
+   "style": "s19",
+   "paint": {
+    "art_key": {
+     "a": "walnut:5",
+     "v": "walnut:3"
+    }
+   }
+  },
+  {
+   "id": "chain0",
+   "shape": "loft",
+   "pivot": [
+    -3.0,
+    4.0,
+    2.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      -12.0,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s20"
+  },
+  {
+   "id": "cone0",
+   "shape": "loft",
+   "pivot": [
+    -3.0,
+    -12.4,
+    2.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": [
+      2.5,
+      2.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.0,
+      0
+     ],
+     "size": [
+      2.1,
+      2.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.8,
+      0
+     ],
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      4.2,
+      0
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s21",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "chain1",
+   "shape": "loft",
+   "pivot": [
+    3.0,
+    4.0,
+    2.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      -8.8,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s22"
+  },
+  {
+   "id": "cone1",
+   "shape": "loft",
+   "pivot": [
+    3.0,
+    -9.2,
+    2.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": [
+      2.5,
+      2.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.0,
+      0
+     ],
+     "size": [
+      2.1,
+      2.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.8,
+      0
+     ],
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      4.2,
+      0
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s23",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 6.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "pend",
+     "osc": {
+      "axis": "z",
+      "amp": 10,
+      "cycles": 4
+     }
+    },
+    {
+     "part": "owlet",
+     "channel": "position",
+     "keys": [
+      [
+       0,
+       [
+        0,
+        0,
+        -1.6
+       ]
+      ],
+      [
+       3.6,
+       [
+        0,
+        0,
+        -1.6
+       ]
+      ],
+      [
+       3.9,
+       [
+        0,
+        0,
+        1.4
+       ],
+       "out_back"
+      ],
+      [
+       5.1,
+       [
+        0,
+        0,
+        1.4
+       ]
+      ],
+      [
+       5.5,
+       [
+        0,
+        0,
+        -1.6
+       ],
+       "in"
+      ]
+     ]
+    },
+    {
+     "part": "owlet_head",
+     "keys": [
+      [
+       0,
+       0
+      ],
+      [
+       4.0,
+       0
+      ],
+      [
+       4.3,
+       14
+      ],
+      [
+       4.6,
+       -14
+      ],
+      [
+       4.9,
+       0
+      ]
+     ],
+     "axis": "z"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,2543 @@
+{
+ "name": "snowflake_rug",
+ "description": "A round tufted rug in icy blues with a big six-armed snowflake worked in cream wool, a scalloped border and snowball pom-poms all the way round.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 3.0,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": true,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "ice": [
+    "#617f8c",
+    "#81a3ab",
+    "#a3bfc4",
+    "#b6d0d5",
+    "#c6dadc",
+    "#d6e3e0",
+    "#e2ebeb",
+    "#f5f7f2"
+   ],
+   "snow": [
+    "#7a8c9e",
+    "#84a5ad",
+    "#adc9cf",
+    "#c9dcdc",
+    "#d8e4e2",
+    "#e5edec",
+    "#f6f8f3",
+    "#fbfcf8"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "ice",
+   "tone": 3.8,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "ice",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s3": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s7": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s8": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s10": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s11": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s12": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s13": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s14": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s15": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s17": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s18": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s19": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s20": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s21": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s22": {
+   "ramp": "snow",
+   "tone": 5.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "rug",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      30.0,
+      30.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": [
+      30.4,
+      30.4
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "size": [
+      29.6,
+      29.6
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 24,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s1",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "top",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    0.95,
+    0.0
+   ],
+   "art": [
+    ".....................................eeeeeeeeeeeeee.....................................",
+    ".................................eeeeeeeeeeeeeeeeeeeeee.................................",
+    ".............................eeeeeeeeeeaaaaaccccceeeeeeeeee.............................",
+    "...........................eeeeeeecccccaaaaaccccccaaaaeeeeeee...........................",
+    ".........................eeeeeaaaacccccaaaaaccccccaaaaaccceeeee.........................",
+    ".......................eeeeeaaaaaacaaaaaaaaaaaaaaaaaaaaccccceeeee.......................",
+    ".....................eeeeecccaaaaaaaaaaaaaaaaaaaaaaaaaaaccccaaeeeee.....................",
+    "...................eeeeecccccaaaaaaaaaaaaaaaaaaaaaaaaaaaaaacaaaaeeeee...................",
+    "..................eeeeaacccaaaaaaaaaaaaaaaaSSaaaaaaaaaaaaaaaaaaaaceeee..................",
+    ".................eeeaaaacaaaaaaaaaaaaaaaaaSSSSaaaaaaaaaaaaaaaaaaaccceee.................",
+    "...............eeeeaaaaaaaaaaaaaaaaaabbbbbbSSbbbbbbaaaaaaaaaaaaaacccceeee...............",
+    "..............eeeecaaaaaaaaaaaaaabbbbbbbbbbssbbbbbbbbbbaaaaaaaaaaacccceeee..............",
+    ".............eeeecccaaaaaaaaaaabbbbbbbbbbbbssbbbbbbbbbbbbaaaaaaaaaaacaaeeee.............",
+    "............eeeccccaaaaaaaaabbbbbbbbbbbbbbbssbbbbbbbbbbbbbbbaaaaaaaaaaaaaeee............",
+    "...........eeeccccaaaaaaaaabbbbbbbbbbbbbsbbssbbsbbbbbbbbbbbbbaaaaaaaaaaaaaeee...........",
+    "..........eeeaaccaaaaaaaabbbbbbbbbbbbaaassssssssaaabbbbbbbbbbbbaaaaaaaaaacceee..........",
+    "..........eeeaaaaaaaaaaabbbbbbbbbbaaaaaaaassssaaaaaaaabbbbbbbbbbaaaaaaaaccceee..........",
+    ".........eeeaaaaaaaaaabbbbbbbbbaaaaaaaaaaaassaaaaaaaaaaaabbbbbbbbbaaaaaaaccceee.........",
+    "........eeeaaaaaaaaaabbbbbbbbbaaaaaaaaaaaaassaaaaaaaaaaaaabbbbbbbbbaaaaaaaccceee........",
+    ".......eeeccaaaaaaaabbbbbbbbaaaaaaaaaaaaaaassaaaaaaaaaaaaaaabbbbbbbbaaaaaaaccaeee.......",
+    ".......eecccaaaaaaabbbbbbbaaaaaaaaaaaassaaassaaassaaaaaaaaaaaabbbbbbbaaaaaaaaaaee.......",
+    "......eeecccaaaaaabbbbbbbaaaaaaaaaaaaaasssassasssaaaaaaaaaaaaaabbbbbbbaaaaaaaaaeee......",
+    "......eecccaaaaaabbbbbbbaaaaaaaaaaaaaaaassssssssaaaaaaaaaaaaaaaabbbbbbbaaaaaaaaaee......",
+    ".....eeeccaaaaaaabbbbbbaaaaaaaaaaaaaaaaaaassssaaaaaaaaaaaaaaaaaaabbbbbbaaaaaaaaaeee.....",
+    ".....eeaaaaaaaaabbbbbbaaaaaaaaaaaaaaaaaaaaassaaaaaaaaaaaaaaaaaaaaabbbbbbaaaaaaaccee.....",
+    "....eeeaaaaaaSSbbbbbbaaaaaaaaaaaaaaaaabbbbbssbbbbbaaaaaaaaaaaaaaaaabbbbbbSSaaaacceee....",
+    "....eeaaaaaaaSSSbbbbsaaaaaaaaaaaaaabbbbbbbbssbbbbbbbbaaaaaaaaaaaaaasbbbbSSSaaaacccee....",
+    "...eeeaaaaaaaSSSssbbsaaaaasaaaaaaabbbssbbbbssbbbbssbbbaaaaaaasaaaaasbbssSSSaaaaacceee...",
+    "...eecaaaaaaabbssssasaaaassaaaaabbbbbbssbbbssbbbssbbbbbbaaaaassaaaasassssbbaaaaacccee...",
+    "..eeeccaaaaaabbbbsssssaaaasaaaabbbbbbbbsssassasssbbbbbbbbaaaasaaaasssssbbbbaaaaaaaaeee..",
+    "..eecccaaaaaabbbbbsssssaaasaaabbssbbbbaaassssssaaabbbbssbbaaasaaasssssbbbbbaaaaaaaaaee..",
+    "..eecccaaaaabbbbbsssssssaasaabbbssbbaaaaaassssaaaaaabbssbbbaasaasssssssbbbbbaaaaaaaaee..",
+    "..eeccaaaaaabbbbsssaaasssssabbbbssbaaaaaaaassaaaaaaaabssbbbbasssssaaasssbbbbaaaaaaaaee..",
+    ".eeeccaaaaabbbbbbaaaaaaassssbbbbssaaaaaaaaassaaaaaaaaassbbbbssssaaaaaaabbbbbbaaaaaaaeee.",
+    ".eeaaaaaaaabbbbbaaaaaaaassssssbbbsaaaaaaaaassaaaaaaaaasbbbssssssaaaaaaaabbbbbaaaaacccee.",
+    ".eeaaaaaaaabbbbbaaaaaasssabssssbasaaaaaaaaassaaaaaaaaasabssssbasssaaaaaabbbbbaaaaaaccee.",
+    ".eeaaaaaaaabbbbbaaaasssaaabbbsssssaaaaaaaaassaaaaaaaaasssssbbbaaasssaaaabbbbbaaaaaaccee.",
+    "eeeaaaaaaabbbbbaaaaaaaaaaabbbbbssssaaaaaaaassaaaaaaaassssbbbbbaaaaaaaaaaabbbbbaaaaacceee",
+    "eeeaaaaaaabbbbbaaaaaaaaaabbbbbassssssaaaaaSSSSaaaaassssssabbbbbaaaaaaaaaabbbbbaaaaacceee",
+    "eecccaaaaabbbbbaaaaaaaaaabbbbsssaassssaaSSSSSSSSaassssaasssbbbbaaaaaaaaaabbbbbaaaaaaaaee",
+    "eecccaaaaabbbbbaaaaaaaaaabssssaaaaaasssSSSSssSSSSsssaaaaaassssbaaaaaaaaaabbbbbaaaaaaaaee",
+    "eecccaaaaabbbbbaaaaaaaaaabssbbaaaaaaassSSSSssSSSSssaaaaaaabbssbaaaaaaaaaabbbbbaaaaaaaaee",
+    "eecccaaaaabbbbbaaaaaaaaaabbbbaaaaaaaaaSSssssssssSSaaaaaaaaabbbbaaaaaaaaaabbbbbaaaaaaaaee",
+    "eecccaaaaabbbbbaaaaaaaaabbbbbaaaaaaaaaSSSssssssSSSaaaaaaaaabbbbbaaaaaaaaabbbbbaaaaaaaaee",
+    "eecccaaaaabbbbbaaaaaaaaabbbbbaaaaaaaaaSSSssssssSSSaaaaaaaaabbbbbaaaaaaaaabbbbbaaaaacccee",
+    "eeaaaaaaaabbbbbaaaaaaaaaabbbbaaaaaaaaaSSssssssssSSaaaaaaaaabbbbaaaaaaaaaabbbbbaaaaacccee",
+    "eeaaaaaaaabbbbbaaaaaaaaaabssbbaaaaaaassSSSSssSSSSssaaaaaaabbssbaaaaaaaaaabbbbbaaaaacccee",
+    "eeaaaaaaaabbbbbaaaaaaaaaabssssaaaaaasssSSSSssSSSSsssaaaaaassssbaaaaaaaaaabbbbbaaaaacccee",
+    "eeaaaaaaaabbbbbaaaaaaaaaabbbbsssaassssaaSSSSSSSSaassssaasssbbbbaaaaaaaaaabbbbbaaaaacccee",
+    "eeeaaaaaaabbbbbaaaaaaaaaabbbbbassssssaaaaaSSSSaaaaassssssabbbbbaaaaaaaaaabbbbbaaaaacceee",
+    "eeeccaaaaabbbbbaaaaaaaaaaabbbbbssssaaaaaaaassaaaaaaaassssbbbbbaaaaaaaaaaabbbbbaaaaaaaeee",
+    ".eeccaaaaaabbbbbaaaasssaaabbbsssssaaaaaaaaassaaaaaaaaasssssbbbaaasssaaaabbbbbaaaaaaaaee.",
+    ".eeccaaaaaabbbbbaaaaaasssabssssbasaaaaaaaaassaaaaaaaaasabssssbasssaaaaaabbbbbaaaaaaaaee.",
+    ".eecccaaaaabbbbbaaaaaaaassssssbbbsaaaaaaaaassaaaaaaaaasbbbssssssaaaaaaaabbbbbaaaaaaaaee.",
+    ".eeeccaaaaabbbbbbaaaaaaassssbbbbssaaaaaaaaassaaaaaaaaassbbbbssssaaaaaaabbbbbbaaaaaaaeee.",
+    "..eeaaaaaaaabbbbsssaaasssssabbbbssbaaaaaaaassaaaaaaaabssbbbbasssssaaasssbbbbaaaaaaccee..",
+    "..eeaaaaaaaabbbbbsssssssaasaabbbssbbaaaaaassssaaaaaabbssbbbaasaasssssssbbbbbaaaaacccee..",
+    "..eeaaaaaaaaabbbbbsssssaaasaaabbssbbbbaaassssssaaabbbbssbbaaasaaasssssbbbbbaaaaaacccee..",
+    "..eeeaaaaaaaabbbbsssssaaaasaaaabbbbbbbbsssassasssbbbbbbbbaaaasaaaasssssbbbbaaaaaacceee..",
+    "...eeaaaaaaaabbssssasaaaassaaaaabbbbbbssbbbssbbbssbbbbbbaaaaassaaaasassssbbaaaaaaccee...",
+    "...eeeccaaaaaSSSssbbsaaaaasaaaaaaabbbssbbbbssbbbbssbbbaaaaaaasaaaaasbbssSSSaaaaaaaeee...",
+    "....eecccaaaaSSSbbbbsaaaaaaaaaaaaaabbbbbbbbssbbbbbbbbaaaaaaaaaaaaaasbbbbSSSaaaaaaaee....",
+    "....eeeccaaaaSSbbbbbbaaaaaaaaaaaaaaaaabbbbbssbbbbbaaaaaaaaaaaaaaaaabbbbbbSSaaaaaaeee....",
+    ".....eecccaaaaaabbbbbbaaaaaaaaaaaaaaaaaaaaassaaaaaaaaaaaaaaaaaaaaabbbbbbaaaaaaaaaee.....",
+    ".....eeeccaaaaaaabbbbbbaaaaaaaaaaaaaaaaaaassssaaaaaaaaaaaaaaaaaaabbbbbbaaaaaaacaeee.....",
+    "......eeaaaaaaaaabbbbbbbaaaaaaaaaaaaaaaassssssssaaaaaaaaaaaaaaaabbbbbbbaaaaaacccee......",
+    "......eeeaaaaaaaaabbbbbbbaaaaaaaaaaaaaasssassasssaaaaaaaaaaaaaabbbbbbbaaaaaaccceee......",
+    ".......eeaaaaaaaaaabbbbbbbaaaaaaaaaaaassaaassaaassaaaaaaaaaaaabbbbbbbaaaaaaacccee.......",
+    ".......eeeaaaaaaaaaabbbbbbbbaaaaaaaaaaaaaaassaaaaaaaaaaaaaaabbbbbbbbaaaaaaaacceee.......",
+    "........eeeaccaaaaaaabbbbbbbbbaaaaaaaaaaaaassaaaaaaaaaaaaabbbbbbbbbaaaaaaaaaaeee........",
+    ".........eeecccaaaaaaabbbbbbbbbaaaaaaaaaaaassaaaaaaaaaaaabbbbbbbbbaaaaaaaaaaeee.........",
+    "..........eeecccaaaaaaaabbbbbbbbbbaaaaaaaassssaaaaaaaabbbbbbbbbbaaaaaaaaaaaeee..........",
+    "..........eeeccccaaaaaaaabbbbbbbbbbbbaaassssssssaaabbbbbbbbbbbbaaaaaaaaccaaeee..........",
+    "...........eeeccaaaaaaaaaaabbbbbbbbbbbbbsbbssbbsbbbbbbbbbbbbbaaaaaaaaacccceee...........",
+    "............eeeaaaaaaaaaaaaabbbbbbbbbbbbbbbssbbbbbbbbbbbbbbbaaaaaaaaacccceee............",
+    ".............eeeeaaaaaaaaaaaaaabbbbbbbbbbbbssbbbbbbbbbbbbaaaaaaaaaaaccceeee.............",
+    "..............eeeeaaccaaaaaaaaaaabbbbbbbbbbssbbbbbbbbbbaaaaaaaaaaaaaaceeee..............",
+    "...............eeeeccccaaaaaaaaaaaaaabbbbbbSSbbbbbbaaaaaaaaaaaaaaaaaaeeee...............",
+    ".................eeecccccaaaaaaaaaaaaaaaaaSSSSaaaaaaaaaaaaaaaaacaaaaeee.................",
+    "..................eeeeccaaaaaaaaaaaaaaaaaaaSSaaaaaaaaaaaaaaaaccccaeeee..................",
+    "...................eeeeeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaccccceeeee...................",
+    ".....................eeeeeaaacccaaaaaaaaaaaaaaaaaaaaaaaaaaaacceeeee.....................",
+    ".......................eeeeeacccccaaaaaaaaaaaaaaaaaaaccaaaaaeeeee.......................",
+    ".........................eeeeeccccaaaaaccccccaaaaacccccaaaeeeee.........................",
+    "...........................eeeeeeeaaaaaccccccaaaaacccceeeeeee...........................",
+    ".............................eeeeeeeeeeccccccaaaaeeeeeeeeee.............................",
+    ".................................eeeeeeeeeeeeeeeeeeeeee.................................",
+    ".....................................eeeeeeeeeeeeee....................................."
+   ],
+   "plane": "xz",
+   "style": "s2",
+   "paint": {
+    "art_key": {
+     "a": "ice:3",
+     "b": "ice:4",
+     "c": "snow:5",
+     "e": "ice:2",
+     "s": "snow:6",
+     "S": "snow:7"
+    }
+   }
+  },
+  {
+   "id": "pom0",
+   "shape": "loft",
+   "pivot": [
+    15.3,
+    0.0,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s3",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom1",
+   "shape": "loft",
+   "pivot": [
+    14.5512,
+    0.0,
+    4.728
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s4",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom2",
+   "shape": "loft",
+   "pivot": [
+    12.378,
+    0.0,
+    8.9931
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s5",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom3",
+   "shape": "loft",
+   "pivot": [
+    8.9931,
+    0.0,
+    12.378
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s6",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom4",
+   "shape": "loft",
+   "pivot": [
+    4.728,
+    0.0,
+    14.5512
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s7",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom5",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    15.3
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s8",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom6",
+   "shape": "loft",
+   "pivot": [
+    -4.728,
+    0.0,
+    14.5512
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s9",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom7",
+   "shape": "loft",
+   "pivot": [
+    -8.9931,
+    0.0,
+    12.378
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s10",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom8",
+   "shape": "loft",
+   "pivot": [
+    -12.378,
+    0.0,
+    8.9931
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s11",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom9",
+   "shape": "loft",
+   "pivot": [
+    -14.5512,
+    0.0,
+    4.728
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s12",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom10",
+   "shape": "loft",
+   "pivot": [
+    -15.3,
+    0.0,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s13",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom11",
+   "shape": "loft",
+   "pivot": [
+    -14.5512,
+    0.0,
+    -4.728
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s14",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom12",
+   "shape": "loft",
+   "pivot": [
+    -12.378,
+    0.0,
+    -8.9931
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s15",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom13",
+   "shape": "loft",
+   "pivot": [
+    -8.9931,
+    0.0,
+    -12.378
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s16",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom14",
+   "shape": "loft",
+   "pivot": [
+    -4.728,
+    0.0,
+    -14.5512
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s17",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom15",
+   "shape": "loft",
+   "pivot": [
+    -0.0,
+    0.0,
+    -15.3
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s18",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom16",
+   "shape": "loft",
+   "pivot": [
+    4.728,
+    0.0,
+    -14.5512
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s19",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom17",
+   "shape": "loft",
+   "pivot": [
+    8.9931,
+    0.0,
+    -12.378
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s20",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom18",
+   "shape": "loft",
+   "pivot": [
+    12.378,
+    0.0,
+    -8.9931
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s21",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pom19",
+   "shape": "loft",
+   "pivot": [
+    14.5512,
+    0.0,
+    -4.728
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.24895923599143466,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.85,
+      0
+     ],
+     "size": [
+      1.7,
+      1.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4510407640085654,
+      0
+     ],
+     "size": [
+      1.2021,
+      1.2021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s22",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  }
+ ]
+}

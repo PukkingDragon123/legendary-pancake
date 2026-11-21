@@ -70,7 +70,7 @@ function rise(obj: THREE.Object3D, t: number, at: Vec3, height: number, spread =
 const BOWL: [number, number, number][] = [[0, 2, 3.8], [2, 2, 5.2], [4, 2, 6.1], [6, 2, 6.4], [8, 2, 6.1], [10, 1.6, 5.3]];
 
 add({
-  id: 'goldfish_bowl', name: 'Goldfish Bowl', cat: 'fun', price: 260, rarity: 'uncommon', size: [1, 1], small: true,
+  id: 'goldfish_bowl', model: 'items/goldfish_bowl.glb', name: 'Goldfish Bowl', cat: 'fun', price: 260, rarity: 'uncommon', size: [1, 1], small: true,
   blurb: 'Home of Marmalade, who swims laps all night and has opinions about the castle.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -107,7 +107,7 @@ const PLATY: FishLook = { len: 3.6, body: '#f2a83a', belly: '#ffe08a', fin: '#f8
 const ANGEL: FishLook = { len: 4.2, body: '#e8e0d0', belly: '#f6f0e4', fin: '#f6f0e4', stripe: '#3a3040' };
 
 add({
-  id: 'aquarium', name: 'Planted Aquarium', cat: 'fun', price: 0, gems: 80, rarity: 'epic', size: [2, 1],
+  id: 'aquarium', model: 'items/aquarium.glb', name: 'Planted Aquarium', cat: 'fun', price: 0, gems: 80, rarity: 'epic', size: [2, 1],
   blurb: 'A whole river in a box: tetras, a platy, an angelfish and a sunken treasure chest.',
   light: { x: 0, y: 30, z: 0, color: 0x9fe0ff, power: 1.2 },
   build: () => {
@@ -163,7 +163,7 @@ add({
 
 const TA = 17, TB = 9.5, TY = 2.2;
 add({
-  id: 'toy_train', name: 'Clockwork Train Loop', cat: 'fun', price: 0, gems: 60, rarity: 'epic', size: [3, 2],
+  id: 'toy_train', model: 'items/toy_train.glb', name: 'Clockwork Train Loop', cat: 'fun', price: 0, gems: 60, rarity: 'epic', size: [3, 2],
   blurb: 'A tiny engine, a coal tender and one passenger car, forever going round to Snoozeville.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -240,7 +240,7 @@ add({
 // ------------------------------------------------------------------ rocking horse
 
 add({
-  id: 'rocking_horse', name: 'Dapple Rocking Horse', cat: 'fun', price: 440, rarity: 'rare', size: [2, 1],
+  id: 'rocking_horse', model: 'items/rocking_horse.glb', name: 'Dapple Rocking Horse', cat: 'fun', price: 440, rarity: 'rare', size: [2, 1],
   blurb: 'Clip-clop, clip-clop. Named Biscuit. Has been to the moon (allegedly).',
   sit: [{ x: 0, y: 15, z: 0, rot: 90 }],
   build: () => {
@@ -275,7 +275,7 @@ add({
 // ------------------------------------------------------------------ music box
 
 add({
-  id: 'music_box', name: 'Owlet Music Box', cat: 'fun', price: 420, rarity: 'rare', size: [1, 1], small: true,
+  id: 'music_box', model: 'items/music_box.glb', name: 'Owlet Music Box', cat: 'fun', price: 420, rarity: 'rare', size: [1, 1], small: true,
   blurb: 'Wind the crank and a tiny owlet pirouettes to a lullaby only you can hear.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -330,7 +330,7 @@ const MOTH_TITLE = [
 ];
 
 add({
-  id: 'moth_arcade', name: 'Moth Catcher Arcade', cat: 'fun', price: 0, gems: 150, rarity: 'legendary', size: [1, 1],
+  id: 'moth_arcade', model: 'items/moth_arcade.glb', name: 'Moth Catcher Arcade', cat: 'fun', price: 0, gems: 150, rarity: 'legendary', size: [1, 1],
   blurb: 'Catch the moths before they reach the lamp! Pip’s high score is 4,210. Nobody believes it.',
   light: { x: 0, y: 22, z: 6, color: 0xb88aff, power: 1.4 },
   build: () => {
@@ -395,7 +395,7 @@ add({
 // ------------------------------------------------------------------ hamster wheel
 
 add({
-  id: 'hamster_wheel', name: 'Dormouse Exercise Wheel', cat: 'fun', price: 210, rarity: 'uncommon', size: [1, 1],
+  id: 'hamster_wheel', model: 'items/hamster_wheel.glb', name: 'Dormouse Exercise Wheel', cat: 'fun', price: 210, rarity: 'uncommon', size: [1, 1],
   blurb: 'Clover the dormouse runs about four steps, then naps for an hour. Very relatable.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -441,7 +441,7 @@ add({
 // ------------------------------------------------------------------ bird feeder
 
 add({
-  id: 'bird_feeder', name: 'Bluebird Feeder', cat: 'fun', price: 230, rarity: 'uncommon', size: [1, 1],
+  id: 'bird_feeder', model: 'items/bird_feeder.glb', name: 'Bluebird Feeder', cat: 'fun', price: 230, rarity: 'uncommon', size: [1, 1],
   blurb: 'A seed house on a post. Sid the bluebird visits daily and leaves the shells everywhere.',
   build: () => {
     const out: BoxSpec[] = [];

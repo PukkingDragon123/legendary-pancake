@@ -1,0 +1,286 @@
+{
+ "name": "comet_rug",
+ "description": "A tufted rug shaped like a golden star streaking across the floor, its long soft tail fading from honey through rose and lilac into dusk blue, with little stitched sparkles.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 2.6,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": true,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "dusk": [
+    "#2d3a43",
+    "#35444d",
+    "#40535d",
+    "#4f6672",
+    "#617f8c",
+    "#79949c",
+    "#8ea6a8",
+    "#a1b5b2"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "lamp": [
+    "#c59a52",
+    "#dcb072",
+    "#f1d39a",
+    "#f7e2b8",
+    "#f4eedd",
+    "#fffaf0"
+   ],
+   "lilac": [
+    "#3a414d",
+    "#4f5160",
+    "#6a687c",
+    "#8c869f",
+    "#b4a9c9",
+    "#ccbed8",
+    "#e0cfe5",
+    "#f0dde2"
+   ],
+   "navy": [
+    "#1b222d",
+    "#2f3140",
+    "#404354",
+    "#4e5869",
+    "#5b7280",
+    "#6d8d98",
+    "#86a9b0"
+   ],
+   "rose": [
+    "#414147",
+    "#5b5255",
+    "#7d6a69",
+    "#a78883",
+    "#d9aca4",
+    "#f1c1b3",
+    "#fcd2bf",
+    "#fbe0c8"
+   ],
+   "snow": [
+    "#7a8c9e",
+    "#84a5ad",
+    "#adc9cf",
+    "#c9dcdc",
+    "#d8e4e2",
+    "#e5edec",
+    "#f6f8f3",
+    "#fbfcf8"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "honey",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s2": {
+   "ramp": "navy",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "rug",
+   "shape": "card",
+   "pivot": [
+    -1.0,
+    0.7,
+    0.0
+   ],
+   "art": [
+    ".............................................................................................................",
+    "........................................................................................ee...................",
+    "..................................................................................eeeeeeeee..................",
+    "...........................................................................eeeeeeeeeeeeee3e..................",
+    ".......................................................................eeeeeeeeeeee4333322e..................",
+    "..................................................................eeeeeeeeee333s3433332232e..................",
+    "..........................................................eeeeeeeeeeeeee43333334333222322he..................",
+    "......................................................eeeeeeeeeeeeee334333333433322232222he..................",
+    "...................................................eeeeeeee3343333334333333433s222322222hhhe.................",
+    "........................................eeeeeeeeeeeeeee43334s333334333333432222232222223hhhe.................",
+    ".....................................eeeeeeeeeeseeee443s3433333343333334222222322222232hhhhhe................",
+    "...................................eeeeeee444444544333343333334333333422222232222223222hhhhhe................",
+    "...............................eeeeeee454444445433333433333343333323222222322222232222hhhHhhe................",
+    "....................eeeeeeeeeeeeeee44544443343333334s333334333222322222232222223222222hhHHhhhe...............",
+    "..................eeeeeeeeeeeeee4445444333433333343333334322222322222232222s232222212hhhHHHhheeeeeee.........",
+    "................eeeee4444454444445443333433333343333334222222322222232222223222hhhhhhhhhHHHhhhhhhhhheee......",
+    ".....eeeeeeeeeeeeee444445444444543333343333334333333322222232222223222222322hhhhhhhhhhhHHHHHhhhhhhhhhhhe.....",
+    "..eeeeeeeeeeeeeee444445443333433333343333334333222322222232222223222222311111hhhhhhHHHHHHHHHHHHHhhhhhhe......",
+    ".eeee5s44eeee5444444433333343333334333333322222232222223222222322s221211111121hhhhHHHHHccccHHHHHHhhhhe.......",
+    "eee45444444544433343s3333433333343322223222222322222232222223221111211111121111hhhhHHHHcccccHHHHhhhhe........",
+    "e343333334333333433333343332s232222223222222322222232222222111111211111121111112hhhhHHHcccccHHHhhhee.........",
+    "eee444454444s453333s3433333343333333222222322222232222223222222211111121111112111hhhhHHcccccHHhhhe...........",
+    ".eeee5444eeee4444445333333433333343333334222s2232222223222222322222221111112111111hhhHHccccHHHhhe............",
+    "..eeeeeeeeeeeeeee54444445333333433333343333334322222322222232222223222221211s11121hhhHHHHHHHHHhhe............",
+    ".....eeeeeeeeeeeeee444544444454443334333333433333343222223222222322222s32222112111hhhHHHHHHHHHhhe............",
+    "................eeeee444444544444454333334333333433333332222223222222322222232s111hhhHHHhhhHHHhhhe...........",
+    "..................eeeeeeeeeeeeee544444443333334333333433332232s2222322222232222223hhHHhhhhhhHHhhhe...........",
+    "....................eeeeeeeeeeeeeee445444433433333343333334333222322222232222223s2hhHhhhhhhhhhHhhe...........",
+    "...............................eeeeeee4444544444343333334333333433222232222223222hhhhhhh21ehhhhhhe...........",
+    "...................................eeeeeees44445444333433333343333334322222322222hhhhh2223eeehhhhe...........",
+    ".....................................eeeeeeeeeeeeeee54333334333333433333232222223hhh222322e..eehhhe..........",
+    "........................................eeeeeeeeeeeeeee4343333s343333334333222322h22232222e....ehhe..........",
+    "...................................................eeeeeeee3334333333433333343222223222222e.....ee...........",
+    "......................................................eeeeeeeeeeeeee3333334333333322222232e..................",
+    "..........................................................eeeeeeeeeeeeee433333343332223222e..................",
+    "..................................................................eeeeeeeeee34333333432222e..................",
+    ".......................................................................eeeeeeeeeeee3333323e..................",
+    "...........................................................................eeeeeeeeeeeeee3e..................",
+    "..................................................................................eeeeeeeee..................",
+    "........................................................................................ee...................",
+    "............................................................................................................."
+   ],
+   "plane": "xz",
+   "style": "s1",
+   "paint": {
+    "art_key": {
+     "1": "honey:5",
+     "2": "rose:4",
+     "3": "lilac:4",
+     "4": "dusk:4",
+     "5": "navy:4",
+     "e": "navy:2",
+     "s": "snow:6",
+     "h": "honey:5",
+     "H": "lamp:4",
+     "c": "lamp:5"
+    }
+   }
+  },
+  {
+   "id": "rug_base",
+   "shape": "card",
+   "pivot": [
+    -1.0,
+    0.25,
+    0.0
+   ],
+   "art": [
+    "........................................................................................dd...................",
+    "..................................................................................ddddddddd..................",
+    "...........................................................................ddddddddddddddddd.................",
+    ".......................................................................ddddddddddddddddddddd.................",
+    "..................................................................dddddddddddddddddddddddddd.................",
+    "..........................................................dddddddddddddddddddddddddddddddddd.................",
+    "......................................................dddddddddddddddddddddddddddddddddddddd.................",
+    "...................................................ddddddddddddddddddddddddddddddddddddddddd.................",
+    "........................................ddddddddddddddddddddddddddddddddddddddddddddddddddddd................",
+    ".....................................dddddddddddddddddddddddddddddddddddddddddddddddddddddddd................",
+    "...................................ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd...............",
+    "...............................ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd...............",
+    "....................dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd...............",
+    "..................dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.........",
+    "................ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd......",
+    ".....ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.....",
+    "..ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd....",
+    ".ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.....",
+    "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd......",
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.......",
+    "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd........",
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.........",
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd...........",
+    ".ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd...........",
+    "..dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd...........",
+    ".....dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd..........",
+    "................ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd..........",
+    "..................ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd..........",
+    "....................ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd..........",
+    "...............................dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd..........",
+    "...................................ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.........",
+    ".....................................ddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ddddddd.........",
+    "........................................dddddddddddddddddddddddddddddddddddddddddddddddddddd...dddd..........",
+    "...................................................ddddddddddddddddddddddddddddddddddddddddd....dd...........",
+    "......................................................dddddddddddddddddddddddddddddddddddddd.................",
+    "..........................................................dddddddddddddddddddddddddddddddddd.................",
+    "..................................................................dddddddddddddddddddddddddd.................",
+    ".......................................................................ddddddddddddddddddddd.................",
+    "...........................................................................ddddddddddddddddd.................",
+    "..................................................................................ddddddddd..................",
+    "........................................................................................dd..................."
+   ],
+   "plane": "xz",
+   "style": "s2",
+   "paint": {
+    "art_key": {
+     "d": "navy:1"
+    }
+   }
+  }
+ ]
+}

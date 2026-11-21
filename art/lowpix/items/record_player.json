@@ -1,0 +1,1472 @@
+{
+ "name": "record_player",
+ "description": "A dusk-blue leatherette suitcase record player with brass corners, the lid propped open on its cream speaker cloth, a spinning record with a honey label and a silver tone arm.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 3.2,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "brass": [
+    "#434035",
+    "#5b4131",
+    "#82673c",
+    "#b08c4b",
+    "#c6a05b",
+    "#d0aa69",
+    "#e1b97c",
+    "#f1d6a2",
+    "#f4eedd"
+   ],
+   "cream": [
+    "#444a4e",
+    "#626562",
+    "#88877e",
+    "#b9b2a1",
+    "#f1e6cc",
+    "#fefbdc",
+    "#fcf7e7",
+    "#fbf2e2"
+   ],
+   "dusk": [
+    "#2d3a43",
+    "#35444d",
+    "#40535d",
+    "#4f6672",
+    "#617f8c",
+    "#79949c",
+    "#8ea6a8",
+    "#a1b5b2"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "iron": [
+    "#1b222d",
+    "#362e2a",
+    "#2c3139",
+    "#45484c",
+    "#625f59",
+    "#757066",
+    "#969083",
+    "#b9b2a4"
+   ],
+   "linen": [
+    "#414749",
+    "#5b5d59",
+    "#7e7b70",
+    "#a8a18c",
+    "#dccfb0",
+    "#f4e4c0",
+    "#fcf5cb",
+    "#fbf2d4"
+   ],
+   "russet": [
+    "#343436",
+    "#413835",
+    "#544134",
+    "#6c4c37",
+    "#8a5a3c",
+    "#a16f4b",
+    "#b78158",
+    "#c89265"
+   ],
+   "silver": [
+    "#46596a",
+    "#617f8c",
+    "#6a655c",
+    "#908a7e",
+    "#b9b2a4",
+    "#d3e0dc",
+    "#dfe9ea",
+    "#f5f7f2"
+   ],
+   "soot": [
+    "#231f1b",
+    "#352d26",
+    "#332d26",
+    "#3a362d",
+    "#524d40",
+    "#6f6856"
+   ],
+   "verd": [
+    "#364246",
+    "#4c5b58",
+    "#6c8075",
+    "#96b09c",
+    "#b8ceb2",
+    "#d4e4c1"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "dusk",
+   "tone": 3.8,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "flow": "horizontal",
+    "rough": 0.6
+   },
+   "layers": [
+    {
+     "id": "weave",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.0,
+      1
+     ],
+     "period": 0.35,
+     "width": 0.5,
+     "shift": -0.35
+    },
+    {
+     "id": "weft",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.35,
+     "width": 0.5,
+     "shift": -0.25
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7
+    },
+    {
+     "id": "stitch",
+     "op": "panel",
+     "inset": 2,
+     "shift": 1.4,
+     "highlight": 0,
+     "shadow": 0
+    },
+    {
+     "id": "scuff",
+     "op": "wear",
+     "width": 1,
+     "density": 0.2,
+     "ramp": "dusk",
+     "tone": 5
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "linen",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.3
+    }
+   ]
+  },
+  "s3": {
+   "ramp": "brass",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "brass",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "brass",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "brass",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s7": {
+   "ramp": "brass",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s8": {
+   "ramp": "russet",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.2
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "linen",
+   "tone": 3.4,
+   "rim": {
+    "light": 0
+   },
+   "layers": [
+    {
+     "id": "g",
+     "op": "grille",
+     "rect": [
+      0.05,
+      0.1,
+      0.95,
+      0.9
+     ],
+     "period": 2,
+     "dir": "v",
+     "slit_tone": 1.0
+    }
+   ]
+  },
+  "s10": {
+   "ramp": "dusk",
+   "tone": 3.8,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "flow": "horizontal",
+    "rough": 0.6
+   },
+   "layers": [
+    {
+     "id": "weave",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.0,
+      1
+     ],
+     "period": 0.35,
+     "width": 0.5,
+     "shift": -0.35
+    },
+    {
+     "id": "weft",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.35,
+     "width": 0.5,
+     "shift": -0.25
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7
+    },
+    {
+     "id": "stitch",
+     "op": "panel",
+     "inset": 2,
+     "shift": 1.4,
+     "highlight": 0,
+     "shadow": 0
+    },
+    {
+     "id": "scuff",
+     "op": "wear",
+     "width": 1,
+     "density": 0.2,
+     "ramp": "dusk",
+     "tone": 5
+    }
+   ]
+  },
+  "s11": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "flow": "horizontal",
+    "rough": 0.6
+   },
+   "layers": [
+    {
+     "id": "weave",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.0,
+      1
+     ],
+     "period": 0.3,
+     "width": 0.5,
+     "shift": -0.35
+    },
+    {
+     "id": "weft",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.3,
+     "width": 0.5,
+     "shift": -0.25
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7
+    },
+    {
+     "id": "dots",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.6,
+     "width": 0.35,
+     "shift": -0.8
+    }
+   ]
+  },
+  "s12": {
+   "ramp": "silver",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s13": {
+   "ramp": "soot",
+   "tone": 4.0,
+   "light": 0.4,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s14": {
+   "ramp": "silver",
+   "tone": 5,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s15": {
+   "ramp": "silver",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "silver",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s17": {
+   "ramp": "iron",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s18": {
+   "ramp": "cream",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s19": {
+   "ramp": "cream",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "case",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    2.5,
+    0.2
+   ],
+   "size": [
+    14.0,
+    4.0,
+    10.0
+   ],
+   "style": "s1",
+   "chamfer": 0.5
+  },
+  {
+   "id": "deck",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    4.55,
+    0.2
+   ],
+   "size": [
+    13.0,
+    0.35,
+    9.0
+   ],
+   "style": "s2"
+  },
+  {
+   "id": "corner0",
+   "shape": "box",
+   "pivot": [
+    -6.7,
+    0.9,
+    4.9
+   ],
+   "size": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "style": "s3",
+   "chamfer": 0.2
+  },
+  {
+   "id": "corner1",
+   "shape": "box",
+   "pivot": [
+    6.7,
+    0.9,
+    4.9
+   ],
+   "size": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "style": "s4",
+   "chamfer": 0.2
+  },
+  {
+   "id": "corner2",
+   "shape": "box",
+   "pivot": [
+    -6.7,
+    0.9,
+    -4.5
+   ],
+   "size": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "style": "s5",
+   "chamfer": 0.2
+  },
+  {
+   "id": "corner3",
+   "shape": "box",
+   "pivot": [
+    6.7,
+    0.9,
+    -4.5
+   ],
+   "size": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "style": "s6",
+   "chamfer": 0.2
+  },
+  {
+   "id": "latch",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    3.9,
+    5.3
+   ],
+   "size": [
+    1.6,
+    1.2,
+    0.4
+   ],
+   "style": "s7",
+   "chamfer": 0.15
+  },
+  {
+   "id": "handle",
+   "shape": "loft",
+   "pivot": [
+    -2.0,
+    2.6,
+    5.3
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.8,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      0.4,
+      -0.2,
+      0.9
+     ],
+     "size": [
+      0.8,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      3.6,
+      -0.2,
+      0.9
+     ],
+     "size": [
+      0.8,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      4.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.8,
+      0.8
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s8"
+  },
+  {
+   "id": "grille_front",
+   "shape": "box",
+   "pivot": [
+    2.8,
+    2.4,
+    5.25
+   ],
+   "size": [
+    7.0,
+    2.0,
+    0.2
+   ],
+   "style": "s9"
+  },
+  {
+   "id": "lid",
+   "shape": "bone",
+   "pivot": [
+    0.0,
+    4.6,
+    -4.8
+   ],
+   "rotation": [
+    -108.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "id": "lid_shell",
+   "shape": "box",
+   "parent": "lid",
+   "pivot": [
+    0.0,
+    -4.6887,
+    -1.1029
+   ],
+   "size": [
+    14.0,
+    0.8,
+    9.6
+   ],
+   "style": "s10",
+   "chamfer": 0.3
+  },
+  {
+   "id": "lid_cloth",
+   "shape": "box",
+   "parent": "lid",
+   "pivot": [
+    0.0,
+    -4.8432,
+    -0.6273
+   ],
+   "size": [
+    12.4,
+    0.2,
+    8.2
+   ],
+   "style": "s11"
+  },
+  {
+   "id": "platter",
+   "shape": "loft",
+   "pivot": [
+    -1.2,
+    0.0,
+    0.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      4.7,
+      0
+     ],
+     "size": [
+      9.2,
+      9.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      5.1,
+      0
+     ],
+     "size": [
+      9.2,
+      9.2
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 16,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s12",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "spin",
+   "shape": "bone",
+   "pivot": [
+    -1.2,
+    5.1,
+    0.4
+   ]
+  },
+  {
+   "id": "record",
+   "shape": "card",
+   "parent": "spin",
+   "pivot": [
+    0.0,
+    0.06,
+    0.0
+   ],
+   "art": [
+    "..........vggggggv..........",
+    "........ggvvvvvvvvgg........",
+    "......ggvvgggvvsggvvgg......",
+    ".....gvvgvvvgggsvvvgvvg.....",
+    "....gvgvvggvvvvsvggvvgvg....",
+    "...gvgvggvgggggsggvggvgvg...",
+    "..gvgvgvvgvvgggsvvgvvgvgvg..",
+    "..gvvgvggvggvvvvggvggvgvvg..",
+    ".gvgvgvgvgvggggggvgvgvgvgvg.",
+    ".gvvgvgvgvgvvllvvgvgvgvgvvg.",
+    "vvgvggvgvgvllllllvgvgvggvgvv",
+    "gvgvvgvggvllllllllvggvgvvgvg",
+    "gvggvggvgvllllllllvgvggvggvg",
+    "gvsssssvgllllhhllllgvggvgvvg",
+    "gvvgvggvgllllhhllllgvggvgvvg",
+    "gvggvggvgvllllllllvgvsssssvg",
+    "gvgvvgvggvllllllllvggvgvvgvg",
+    "vvgvggvgvgvllllllvgvgvggvgvv",
+    ".gvvgvgvgvgvvllvvgvgvgvgvvg.",
+    ".gvgvgvgvgvggggggvgvgvgvgvg.",
+    "..gvvgvggvggvvvvggvggvgvvg..",
+    "..gvgvgvvgvvgsggvvgvvgvgvg..",
+    "...gvgvggvgggsggggvggvgvg...",
+    "....gvgvvggvvsvvvggvvgvg....",
+    ".....gvvgvvvgsggvvvgvvg.....",
+    "......ggvvgggsvgggvvgg......",
+    "........ggvvvvvvvvgg........",
+    "..........vggggggv.........."
+   ],
+   "plane": "xz",
+   "style": "s13",
+   "paint": {
+    "art_key": {
+     "v": "soot:1",
+     "g": "soot:2",
+     "l": "honey:4",
+     "h": "soot:0",
+     "s": "soot:4"
+    }
+   }
+  },
+  {
+   "id": "spindle",
+   "shape": "loft",
+   "parent": "spin",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7,
+      0
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 5,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s14",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "arm_base",
+   "shape": "loft",
+   "pivot": [
+    4.6,
+    4.7,
+    -2.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s15",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "arm",
+   "shape": "loft",
+   "pivot": [
+    4.6,
+    5.9,
+    -2.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "at": [
+      -0.2,
+      0.1,
+      2.6
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "at": [
+      -1.4,
+      -0.1,
+      4.8
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "at": [
+      -2.6,
+      -0.3,
+      5.6
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 5,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s16"
+  },
+  {
+   "id": "headshell",
+   "shape": "box",
+   "pivot": [
+    1.6,
+    5.5,
+    3.4
+   ],
+   "rotation": [
+    0.0,
+    50.0,
+    0.0
+   ],
+   "size": [
+    1.0,
+    0.45,
+    1.6
+   ],
+   "style": "s17"
+  },
+  {
+   "id": "knob0",
+   "shape": "loft",
+   "pivot": [
+    4.2,
+    4.7,
+    3.8
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s18",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "knob1",
+   "shape": "loft",
+   "pivot": [
+    5.6,
+    4.7,
+    3.8
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s19",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 1.8,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "spin",
+     "keys": [
+      [
+       0,
+       0
+      ],
+      [
+       1.8,
+       -360
+      ]
+     ],
+     "axis": "y",
+     "ease": "linear"
+    }
+   ]
+  }
+ }
+}
