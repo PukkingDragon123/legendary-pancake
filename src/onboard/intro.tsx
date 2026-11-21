@@ -71,6 +71,13 @@ async function askMic(): Promise<boolean> {
   } catch { return false; }
 }
 
+/** A faint pencil sketch to fill a quiet page. */
+function Doodle(p: { kind: string; species: string }) {
+  const icon = p.kind === 'you' ? 'ob_owl_tawny' : p.kind === 'name' ? 'ob_owl_' + p.species : 'ob_pillows';
+  const note = p.kind === 'you' ? 'hello!' : p.kind === 'name' ? 'me?' : 'zzz';
+  return <><Px name={icon} size={84} class="cb-doodle" /><span class="cb-doodle-note">{note}</span></>;
+}
+
 export function Intro() {
   const room = useRef<InterviewRoom | null>(null);
   const [a, setA] = useState<Answers>(() => answersFrom(save.value));
@@ -223,9 +230,10 @@ export function Intro() {
     const react = beatOf(st.react?.(aRef.current));
     sound.play('paper_flip', { volume: 0.55 });
     setFlipFrom(i);
-    window.setTimeout(() => setFlipFrom(null), 760);
     setSi(i + 1);
-    startStep(i + 1, react);
+    // let the page flip over the clip before the board goes down and Pip reacts
+    window.setTimeout(() => { setFlipFrom(null); sound.play('wood_knock', { volume: 0.3 }); }, 760);
+    window.setTimeout(() => { if (phaseRef.current === 'write') startStep(i + 1, react); }, fast ? 0 : 620);
   };
 
   const approve = () => {
@@ -291,7 +299,7 @@ export function Intro() {
     for (let i = 0; i < 30; i++) r.update(1 / 30, 0);
     const q = new URLSearchParams(location.search);
     const devStep = DEV ? q.get('ob') : null;
-    (window as unknown as { hhIntro: unknown }).hhIntro = { room: r, a: () => aRef.current, next: () => void next() };
+    (window as unknown as { hhIntro: unknown }).hhIntro = { room: r, a: () => aRef.current, next: () => void next(), flip: () => { holdWrite.current = false; afterWrite(); } };
     let alive = true;
     (async () => {
       if (devStep) {
@@ -339,9 +347,13 @@ export function Intro() {
     })();
     const onResize = () => setWide(innerWidth >= 860 && innerWidth > innerHeight);
     addEventListener('resize', onResize);
+    // space / enter moves the conversation on (unless you're typing)
+    const onKey = (e: KeyboardEvent) => { if ((e.key === ' ' || e.key === 'Enter') && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLButtonElement)) { e.preventDefault(); tapRef.current(); } };
+    addEventListener('keydown', onKey);
     return () => {
       alive = false;
       removeEventListener('resize', onResize);
+      removeEventListener('keydown', onKey);
       clearTimeout(autoT.current);
       const rr = room.current;
       if (rr) { rr.setVignette(null); if (sc.stage === rr) sc.setStage(null); }
@@ -373,6 +385,8 @@ export function Intro() {
     if (phase === 'ask') room.current?.pip.poke();
   };
 
+  const tapRef = useRef(onTap);
+  tapRef.current = onTap;
   const st = STEPS[si];
   const plan = useMemo(() => planOf(a), [a]);
   const canNext = !st || st.kind !== 'choice' || !!picked[st.id] || !!written[si];
@@ -387,6 +401,7 @@ export function Intro() {
         </div>
         <h2 class="cb-title">{s.title}</h2>
         <div class="cb-body">{body(s, i, live)}</div>
+        {(s.kind === 'text' || s.kind === 'hours') && <Doodle kind={s.id} species={a.species} />}
         {s.kind !== 'plan' && (
           <div class="cb-foot">
             <span class={'cb-ans' + ((written[i]?.length ?? 0) > 40 ? ' longer' : (written[i]?.length ?? 0) > 22 ? ' long' : '')}><small>Answer:</small>{written[i] && <Hand key={written[i]} text={written[i]} fast={!live || fast} onDone={live ? afterWrite : undefined} />}</span>
@@ -422,7 +437,6 @@ export function Intro() {
             <div class="cb-chips">
               {(k === 'name' ? ['Pip', 'Hoot', 'Mochi', 'Biscuit', 'Luna'] : []).map((n) => <button type="button" class="cb-chip" key={n} disabled={!interactive} onClick={() => { set('name', n); tapSound('pencil', 0.4); room.current?.sparkle(room.current.pip.headWorld, 4); }}>{n}</button>)}
             </div>
-            {k === 'name' && <Px name="ob_name_tag" size={56} class="cb-deco" />}
           </div>
         );
       }
@@ -430,7 +444,7 @@ export function Intro() {
         const sp = speciesOf(a.species);
         return (
           <>
-            <Cards opts={s.opts!} value={[a.species]} cols={wide ? 2 : 3} small onPick={(v) => interactive && pick(s, v)} onPeek={(v) => interactive && peek(s, v)} />
+            <Cards opts={s.opts!} value={[a.species]} cols={wide ? 2 : 3} small={!wide} onPick={(v) => interactive && pick(s, v)} onPeek={(v) => interactive && peek(s, v)} />
             <p class="cb-blurb"><b>{sp.name}</b> <i>{sp.latin}</i><br />{sp.blurb}</p>
           </>
         );
@@ -439,10 +453,11 @@ export function Intro() {
         const f = s.field!;
         const value = s.id === 'mic' ? (picked.mic ? [a.mic ? 'yes' : 'no'] : []) : s.kind === 'multi' ? (a[f] as string[]) : picked[s.id] ? [String(a[f])] : [];
         const many = (s.opts?.length ?? 0) > 6;
+        const cols = many ? (wide ? 3 : 4) : 2;
         return (
           <>
             {s.id === 'mic' && <p class="cb-blurb">Pip listens on this device only, for snores, sleep-talk and tossing. {ARTIFACT ? 'This preview can’t use the microphone; the full app can.' : 'You can change it any time in Settings.'}</p>}
-            <Cards opts={s.opts!} value={value} multi={s.kind === 'multi'} cols={many ? 3 : 2} small={many} rows={s.opts!.length <= 4} onPick={(v) => interactive && pick(s, v)} onPeek={(v) => interactive && peek(s, v)} />
+            <Cards opts={s.opts!} value={value} multi={s.kind === 'multi'} cols={cols} small={many} rows={s.opts!.length <= 4} onPick={(v) => interactive && pick(s, v)} onPeek={(v) => interactive && peek(s, v)} />
             {s.kind === 'multi' && <small class="cb-note">Pick as many as you like.</small>}
           </>
         );
@@ -469,10 +484,10 @@ export function Intro() {
 
   const showBoard = phase !== 'boot' && phase !== 'wake' && phase !== 'done';
   return (
-    <div class={'ob' + (wide ? ' wide' : '') + (fast ? ' ob-fast' : '')} data-phase={phase}>
+    <div class={'ob' + (wide ? ' wide' : '') + (fast ? ' ob-fast' : '') + ((STEPS[si]?.opts?.length ?? 0) > 4 ? ' tall' : '')} data-phase={phase}>
       <div class="ob-tap" onPointerDown={onTap} />
       <div class="ob-ft">
-        <FloatText line={phase === 'boot' || phase === 'wake' ? null : line} onTalk={onTalk} done={onLineDone} finish={finish} fast={fast} />
+        <FloatText line={phase === 'boot' || phase === 'wake' ? null : line} onTalk={onTalk} done={onLineDone} finish={finish} fast={fast} low={sceneRef.current?.quality === 'low'} />
       </div>
       {showBoard && (
         <div class={'cb' + (flipFrom !== null ? ' lift' : '') + (phase === 'outro' ? ' fly' : '')}>

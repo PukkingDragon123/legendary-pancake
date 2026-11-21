@@ -21,12 +21,13 @@ function parse(text: string): Ch[][] {
 }
 const plain = (text: string) => text.replace(/\*/g, '');
 const VOICES = ['voice_a', 'voice_b', 'voice_c', 'voice_d', 'voice_e'];
-const DEPTH = 6;
+/** extrusion layers (fewer on low-quality devices) */
+const LAYERS = { high: [0, 1, 2, 3, 4, 5], low: [1, 3, 5] };
 
 /** Delay before the next letter: a beat after punctuation. */
 const pause = (c: string) => (c === '.' || c === '!' || c === '?' ? 210 : c === ',' || c === ':' ? 110 : 0);
 
-export function FloatText(p: { line: Line | null; onTalk?: () => void; fast?: boolean; done?: (id: number) => void; finish?: number }) {
+export function FloatText(p: { line: Line | null; onTalk?: () => void; fast?: boolean; done?: (id: number) => void; finish?: number; low?: boolean }) {
   const line = p.line;
   const [shown, setShown] = useState(0);
   const [prev, setPrev] = useState<Line | null>(null);
@@ -75,15 +76,15 @@ export function FloatText(p: { line: Line | null; onTalk?: () => void; fast?: bo
   const complete = !!line && shown >= total;
   return (
     <div class="ft-wrap" aria-live="polite">
-      {prev && <Words key={'p' + prev.id} words={parse(prev.text)} shown={1e9} out who={prev.who} />}
-      {line && <Words key={line.id} words={words} shown={shown} who={line.who} />}
+      {prev && <Words key={'p' + prev.id} words={parse(prev.text)} shown={1e9} out who={prev.who} layers={p.low ? LAYERS.low : LAYERS.high} />}
+      {line && <Words key={line.id} words={words} shown={shown} who={line.who} layers={p.low ? LAYERS.low : LAYERS.high} />}
       {line && <span class="sr-only">{plain(line.text)}</span>}
       {complete && <i class="ft-next" key={'n' + line.id} />}
     </div>
   );
 }
 
-function Words(p: { words: Ch[][]; shown: number; out?: boolean; who?: string }) {
+function Words(p: { words: Ch[][]; shown: number; out?: boolean; who?: string; layers: number[] }) {
   return (
     <div class={'ft-line' + (p.out ? ' out' : '')} aria-hidden="true">
       {p.who && <span class="ft-who"><b>{p.who}</b></span>}
@@ -96,7 +97,7 @@ function Words(p: { words: Ch[][]; shown: number; out?: boolean; who?: string })
                 <span class={'ft-c' + (on ? ' in' : '') + (c.em ? ' em' : '')} style={`--i:${c.i}`} key={c.i}>
                   <span class="ft-b">
                     <i class="ft-s">{c.ch}</i>
-                    {Array.from({ length: DEPTH }, (_, k) => <i class={'ft-d d' + k} key={k}>{c.ch}</i>)}
+                    {p.layers.map((k) => <i class={'ft-d d' + k} key={k}>{c.ch}</i>)}
                     <i class="ft-o">{c.ch}</i>
                     <i class="ft-g">{c.ch}</i>
                     <b class="ft-f">{c.ch}</b>

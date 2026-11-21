@@ -14,7 +14,7 @@ import * as P from './props.ts';
 import { SkyView, type Weather } from './skyview.ts';
 
 export type ShotName = 'establish' | 'pip' | 'pipL' | 'pipR' | 'close' | 'desk' | 'window' | 'clock' | 'clockwin' | 'board' | 'floor' | 'bed' | 'low' | 'wide' | 'tower';
-interface Shot { target: THREE.Vector3; yaw: number; pitch: number; dist: number; fov?: number }
+interface Shot { target: THREE.Vector3; yaw: number; pitch: number; dist: number; fov?: number; /** distance on a portrait screen */ pd?: number }
 
 const U = (px: number) => px * PX;
 const R0 = 80;
@@ -31,19 +31,19 @@ export const SPOT = {
 const DESK_Z = U(P.DESK.z), DESK_TOP = U(P.DESK.h);
 
 const SHOTS: Record<ShotName, () => Shot> = {
-  establish: () => ({ target: new THREE.Vector3(0, 2.0, -1.4), yaw: 0, pitch: 0.12, dist: 11.5 }),
-  wide: () => ({ target: new THREE.Vector3(0.2, 1.8, -1.0), yaw: 0.32, pitch: 0.2, dist: 10 }),
+  establish: () => ({ target: new THREE.Vector3(0, 2.0, -1.4), yaw: 0, pitch: 0.12, dist: 11.5, pd: 7.4 }),
+  wide: () => ({ target: new THREE.Vector3(0.2, 1.8, -1.0), yaw: 0.32, pitch: 0.2, dist: 10, pd: 7.2 }),
   pip: () => ({ target: new THREE.Vector3(0, 1.85, -3.3), yaw: 0, pitch: 0.22, dist: 5.2 }),
   pipL: () => ({ target: new THREE.Vector3(-0.1, 1.8, -3.2), yaw: -0.42, pitch: 0.16, dist: 5.4 }),
-  pipR: () => ({ target: new THREE.Vector3(0.15, 1.85, -3.1), yaw: 0.45, pitch: 0.12, dist: 5.6 }),
+  pipR: () => ({ target: new THREE.Vector3(0.15, 1.95, -3.1), yaw: 0.45, pitch: 0.14, dist: 6.4 }),
   close: () => ({ target: new THREE.Vector3(0, 2.05, -3.5), yaw: 0.08, pitch: 0.24, dist: 3.6 }),
   low: () => ({ target: new THREE.Vector3(0, 1.8, -3.0), yaw: -0.18, pitch: 0.0, dist: 6 }),
-  desk: () => ({ target: new THREE.Vector3(0.3, 1.2, -2.6), yaw: 0.18, pitch: 0.5, dist: 5.4 }),
-  window: () => ({ target: SPOT.window.clone().add(new THREE.Vector3(0.8, -0.6, 0.6)), yaw: -0.62, pitch: 0.06, dist: 5.6 }),
+  desk: () => ({ target: new THREE.Vector3(0.45, 1.0, -2.3), yaw: 0.2, pitch: 0.48, dist: 5.4 }),
+  window: () => ({ target: SPOT.window.clone().add(new THREE.Vector3(1.1, -0.6, 0.8)), yaw: -0.36, pitch: 0.06, dist: 5.4 }),
   clock: () => ({ target: SPOT.clock.clone().add(new THREE.Vector3(0, -0.5, 0.6)), yaw: 0.05, pitch: -0.04, dist: 4.4 }),
   clockwin: () => ({ target: SPOT.clock.clone().lerp(SPOT.window, 0.45).add(new THREE.Vector3(0.1, -0.7, 1.2)), yaw: -0.2, pitch: 0.02, dist: 6.2 }),
   tower: () => ({ target: SPOT.floor.clone().add(new THREE.Vector3(-0.2, 1.5, 0)), yaw: 0.3, pitch: 0.18, dist: 7.2 }),
-  board: () => ({ target: SPOT.board.clone().add(new THREE.Vector3(-0.6, -0.4, 0.6)), yaw: 0.6, pitch: 0.05, dist: 5 }),
+  board: () => ({ target: SPOT.board.clone().add(new THREE.Vector3(-0.9, -0.4, 0.8)), yaw: 0.36, pitch: 0.05, dist: 5 }),
   floor: () => ({ target: SPOT.floor.clone().add(new THREE.Vector3(-0.4, 0.95, 0.2)), yaw: 0.3, pitch: 0.36, dist: 6.6 }),
   bed: () => ({ target: SPOT.bed.clone().add(new THREE.Vector3(-0.2, 0.3, 0.5)), yaw: 0.36, pitch: 0.34, dist: 7 }),
 };
@@ -160,6 +160,8 @@ export class InterviewRoom implements Stage {
     add(P.windowFrame(15), SPOT.window.x, SPOT.window.y, SPOT.window.z, ca);
     add(P.corkBoard(), SPOT.board.x, U(40), SPOT.board.z, -ca);
     add(P.shelf(), Math.sin(1.22) * U(R0 - 7), 0, -Math.cos(1.22) * U(R0 - 7), -1.22);
+    add(P.painting(), Math.sin(-0.33) * U(R0 + 0.6), U(60), -Math.cos(-0.33) * U(R0 + 0.6), 0.33);
+    add(P.wallShelf(), Math.sin(0.34) * U(R0 - 1.5), U(50), -Math.cos(0.34) * U(R0 - 1.5), -0.34);
     add(P.fernPot(), Math.sin(-1.2) * U(R0 - 10), 0, -Math.cos(-1.2) * U(R0 - 10));
     add(P.fernPot(), U(-64), 0, U(32));
     add(P.bookStack(4), U(-46), 0, U(18), 0.4);
@@ -330,7 +332,8 @@ export class InterviewRoom implements Stage {
   }
   cut(name: ShotName) { this.go(name, true); }
   get shotNow() { return this.shotName; }
-  private snap() { const s = this.shot; this.cur = { target: s.target.clone(), yaw: s.yaw, pitch: s.pitch, dist: s.dist }; }
+  private snap() { const s = this.shot; this.cur = { target: s.target.clone(), yaw: s.yaw, pitch: s.pitch, dist: this.distOf(s) }; }
+  private distOf(s: Shot) { return this.camera.aspect < 0.8 ? s.pd ?? s.dist * 1.12 : s.dist; }
 
   /** Screen position (CSS px) of a world point under the current camera. */
   screenOf(v: THREE.Vector3) {
@@ -352,12 +355,12 @@ export class InterviewRoom implements Stage {
     // the pillow tower shot rides up with Pip
     if (this.shotName === 'tower') s.target.y = 0.9 + this.pip.node.position.y * 0.8;
     const k = 1 - Math.exp(-dt * 2.1);
-    c.yaw += (s.yaw - c.yaw) * k; c.pitch += (s.pitch - c.pitch) * k; c.dist += (s.dist - c.dist) * k; c.target.lerp(s.target, k);
+    c.yaw += (s.yaw - c.yaw) * k; c.pitch += (s.pitch - c.pitch) * k; c.dist += (this.distOf(s) - c.dist) * k; c.target.lerp(s.target, k);
     // slow push-in after each move, and a soft handheld drift
     const since = t - this.shotAt, push = 1 - 0.075 * Math.min(1, since / 9) * Math.min(1, since / 9);
     const yaw = c.yaw + Math.sin(t * 0.37) * 0.012 + Math.sin(t * 1.13 + 1) * 0.004;
     const pitch = c.pitch + Math.sin(t * 0.51 + 2) * 0.008 + Math.sin(t * 1.7) * 0.002;
-    const dist = c.dist * push * (this.camera.aspect < 0.8 ? 1.12 : 1);
+    const dist = c.dist * push;
     const cp = Math.cos(pitch);
     const tg = c.target;
     this.camera.position.set(tg.x + Math.sin(yaw) * cp * dist, tg.y + Math.sin(pitch) * dist, tg.z + Math.cos(yaw) * cp * dist);

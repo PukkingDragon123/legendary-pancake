@@ -29,6 +29,8 @@ function loop(id: string, level = 0.55) {
 }
 const later = (ms: number, f: () => void) => { const id = window.setTimeout(f, ms); return () => clearTimeout(id); };
 const shot = (r: InterviewRoom, s: ShotName) => r.go(s);
+/** Back to the desk for vignettes that happen there. */
+const desk = (r: InterviewRoom) => { if (r.pipSpot !== 'desk') r.pipTo('desk'); };
 
 // ------------------------------------------------------------------ shared bits
 
@@ -87,6 +89,7 @@ function sheepScene(r: InterviewRoom): Vig {
 
 /** The window shows another hour (and weather); Pip turns to look. */
 function windowScene(r: InterviewRoom, hour: number | null, weather: Parameters<InterviewRoom['window']>[1], mood: Parameters<InterviewRoom['pip']['setMood']>[0], act?: Parameters<InterviewRoom['pip']['play']>[0], snd?: string, s: ShotName = 'window'): Vig {
+  desk(r);
   r.window(hour, weather);
   r.pip.lookAt = SPOT.window.clone();
   r.pip.setMood(mood);
@@ -97,6 +100,7 @@ function windowScene(r: InterviewRoom, hour: number | null, weather: Parameters<
 
 /** A phone: tucked into the drawer that shuts, buzzing on the desk, or glowing in Pip's face. */
 function phoneScene(r: InterviewRoom, mode: 'drawer' | 'buzz' | 'face'): Vig {
+  desk(r);
   const offs: (() => void)[] = [];
   if (mode === 'drawer') {
     shot(r, 'desk');
@@ -147,8 +151,7 @@ function phoneScene(r: InterviewRoom, mode: 'drawer' | 'buzz' | 'face'): Vig {
   }
   // late-night scrolling: the room dims and a cold blue glow lights Pip's face
   shot(r, 'close');
-  const head = r.pip.headWorld;
-  const at = V(head.x + 0.1, head.y - 0.55, head.z + 0.5);
+  const at = SPOT.desk.clone().add(V(0.12, 0.95, 0.62));
   r.spawn('phone', P.phone, at, { ry: Math.PI, tick: (o, t) => { o.rotation.x = -1.25 + Math.sin(t * 2) * 0.03; } });
   const glow = new THREE.PointLight(0x7fb8ff, 0, 3, 1.5);
   glow.position.copy(at).add(V(0, 0.15, 0.05));
@@ -163,6 +166,7 @@ function phoneScene(r: InterviewRoom, mode: 'drawer' | 'buzz' | 'face'): Vig {
 }
 
 function micScene(r: InterviewRoom): Vig {
+  desk(r);
   const at = DESK_L.clone().add(V(0.05, 0, 0.05));
   r.spawn('mic', P.microphone, at, { ry: 0.25 });
   shot(r, 'desk');
@@ -181,6 +185,7 @@ function micScene(r: InterviewRoom): Vig {
 }
 
 function mugScene(r: InterviewRoom, kind: 'none' | 'morning' | 'late'): Vig {
+  desk(r);
   const at = DESK_R.clone();
   if (kind === 'none') { r.spawn('milk', P.milk, at.clone().add(V(-0.25, 0, 0.1))); r.spawn('teapot', P.teapot, at.clone().add(V(0.35, 0, -0.1)), { delay: 0.15, ry: -0.5 }); }
   else r.spawn('mug', () => P.mug(kind === 'late' ? '#3c5aa8' : '#c94f3f'), at, { ry: -0.4 });
@@ -203,6 +208,7 @@ function mugScene(r: InterviewRoom, kind: 'none' | 'morning' | 'late'): Vig {
 
 /** A sound to relax to: the window, a prop and a loop. */
 function relaxScene(r: InterviewRoom, id: string): Vig {
+  if (id !== 'fire') desk(r);
   const offs: (() => void)[] = [];
   let tick: ((dt: number) => void) | null = null;
   r.pip.setMood('calm');
@@ -289,7 +295,7 @@ function towerScene(r: InterviewRoom, hours: number): Vig {
     if (n >= 10) r.pip.play('flap');
   };
   set(hours);
-  return { set, exit() { r.placePip('desk'); calm(r); } };
+  return { set, exit() { r.pipTo('desk'); calm(r); } };
 }
 
 // ------------------------------------------------------------------ the table
@@ -306,6 +312,7 @@ export const VIGNETTES: Record<string, Make> = {
     return { exit() { off(); v.exit?.(); } };
   },
   'goals:steady_routine': (r) => {
+    desk(r);
     shot(r, 'clock');
     r.spinClock(4); r.ticking = true;
     r.pip.lookAt = SPOT.clock.clone();
@@ -337,7 +344,7 @@ export const VIGNETTES: Record<string, Make> = {
   'caffeine:late': (r) => mugScene(r, 'late'),
   // microphone
   'mic:yes': (r) => micScene(r),
-  'mic:no': (r) => { shot(r, 'pipL'); r.pip.setMood('happy'); r.pip.play('nod'); return { exit() { calm(r); } }; },
+  'mic:no': (r) => { desk(r); shot(r, 'pipL'); r.pip.setMood('happy'); r.pip.play('nod'); return { exit() { calm(r); } }; },
   // hours of sleep (live value)
   'hours:tower': (r) => towerScene(r, 8),
 };

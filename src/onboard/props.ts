@@ -28,13 +28,20 @@ const wz = (c: string, plank = 3, seed = 0) => wood(c, { axis: 'z', plank, seed 
 const brass = metal('#c9a14a');
 const steel = metal('#9aa2b4');
 const paper = (c = '#f6efdc'): Painter => solid(c, { noise: 0.25, speck: 0.2, rim: 0.4 });
-const book = (c: string): Painter => {
+/** A book lying flat (spine to -x, page edges on the other sides) or standing up (spine to +z). */
+const book = (c: string, upright = false): Painter => {
   const r = R(c), page = R('#f6efdc'), gold = R('#e8c25a');
+  const spine = upright ? 4 : 1;
+  const pages = upright ? [2, 5] : [0, 4, 5];
   return (t) => {
-    if (t.face === 4 || t.face === 0) return tone(page, t.v % 2 ? 0.3 : -0.6);
+    if (pages.includes(t.face)) return tone(page, (upright ? t.u : t.v) % 2 ? 0.3 : -0.6);
     const L = lvl(t, { noise: 0.2 });
-    if (t.face === 1 && (t.u === 1 || t.u === t.w - 2) && t.h > 3) return tone(gold, 0.4);
-    if (t.face === 1 && t.v > 0 && t.v < t.h - 1 && (t.u === 2 || t.u === t.w - 3)) return tone(r, L - 1);
+    if (t.face === spine) {
+      // gold bands across the spine and a darker title block
+      const along = upright ? t.v : t.u, len = upright ? t.h : t.w;
+      if (len > 5 && (along === 1 || along === len - 2)) return tone(gold, 0.4);
+      if (len > 7 && along > len / 2 - 2 && along < len / 2 + 1) return tone(r, L - 1.1);
+    }
     return tone(r, L);
   };
 };
@@ -61,7 +68,7 @@ function heartwood(R0: number): Painter {
 
 // ------------------------------------------------------------------ the room shell
 
-export const ROOM = { R: 100, H: 92, A0: -84, A1: 84 };
+export const ROOM = { R: 82, H: 92, A0: -86, A1: 86 };
 
 /** Curved back wall (an arc of segments), the floor slice of the trunk and the ceiling. */
 export function shell(): BoxSpec[] {
@@ -108,6 +115,9 @@ export function frontArch(): BoxSpec[] {
     out.push(box(x, -10, 0, 16, ROOM.H + 22, 18, P));
     out.push(lean(box(x - sd * 6, ROOM.H - 6, 0, 18, 12, 16, P), 0, 0, -sd * 30));
   }
+  // the lintel: the cut trunk closes over the top of the opening
+  out.push(box(0, ROOM.H + 2, 0, 2 * (ROOM.R + 12), 16, 18, P));
+  for (const sd of [-1, 1]) out.push(lean(box(sd * (ROOM.R - 14), ROOM.H - 2, 0, 22, 8, 16, P), 0, 0, sd * 12));
   return out;
 }
 
@@ -191,7 +201,7 @@ export function standingBooks(n: number, seed = 3): BoxSpec[] {
   for (let i = 0; i < n; i++) {
     const w = 2 + (hash(i, seed, 1) > 0.6 ? 1 : 0), h = 9 + Math.floor(hash(i, seed, 2) * 4);
     const tilt = i === n - 1 ? -14 : 0;
-    out.push(lean(box(x, 0, 0, w, h, 8, book(cols[Math.floor(hash(i, seed, 3) * cols.length)])), 0, 0, tilt));
+    out.push(lean(box(x, 0, 0, w, h, 8, book(cols[Math.floor(hash(i, seed, 3) * cols.length)], true)), 0, 0, tilt));
     x += w + 0.2;
   }
   return out;
@@ -444,4 +454,32 @@ export function sunflowerPot(): BoxSpec[] {
 }
 export function noteCard(): BoxSpec[] {
   return [box(0, 0, 0, 8, 0.4, 10, paper('#f9d856')), box(0, 0.4, 0, 6, 0.1, 0.6, flat('#3a4a8a'))];
+}
+
+/** A framed little painting of the Hollow at night. */
+export function painting(): BoxSpec[] {
+  const pic: Painter = (t) => {
+    if (t.face !== 4) return 0x3b2414;
+    const u = t.u / t.w, v = t.v / t.h;
+    if (Math.hypot(u - 0.7, v - 0.72) < 0.12) return 0xf7efd0;
+    const hill = 0.32 + Math.sin(u * 7) * 0.06;
+    if (v < hill) return v < hill - 0.12 ? 0x1f4a2c : 0x2e6a3a;
+    if (Math.abs(u - 0.3) < 0.06 && v < 0.62) return 0x5a3a24;
+    if (Math.hypot(u - 0.3, v - 0.66) < 0.14) return 0x3a7a3e;
+    if ((Math.floor(u * 40) * 7 + Math.floor(v * 30) * 13) % 37 === 0) return 0xfff6d8;
+    return v > 0.7 ? 0x1c2560 : 0x2a3784;
+  };
+  const f = wx('#c9a14a', 0, 3), fy = wy('#b8924c', 0);
+  return [box(0, 1, 0, 14, 10, 0.6, pic), box(0, 0, 0.4, 17, 1.4, 1.6, f), box(0, 11, 0.4, 17, 1.4, 1.6, f), box(-7.8, 0, 0.4, 1.4, 12.4, 1.6, fy), box(7.8, 0, 0.4, 1.4, 12.4, 1.6, fy)];
+}
+
+/** A little wall shelf with jars of dried herbs and a sleeping-cap moth. */
+export function wallShelf(): BoxSpec[] {
+  const glass = (c: string): Painter => (t) => (t.face === 2 ? 0x8a5a34 : tone(R(c), lvl(t, { noise: 0.2 }) + (t.u === 1 ? 1.2 : 0)));
+  return [
+    box(0, 0, 0, 24, 1.6, 6, wx('#8a5a34', 0)), box(-9, -4, -2, 1.4, 4, 2, wy('#6a4428')), box(9, -4, -2, 1.4, 4, 2, wy('#6a4428')),
+    box(-7, 1.6, 0.5, 4, 6, 4, glass('#7ab8a0')), box(-7, 7.6, 0.5, 4.4, 1, 4.4, flat('#a86d38')),
+    box(-1.5, 1.6, 0.5, 3.4, 4.5, 3.4, glass('#d8a85a')), box(-1.5, 6.1, 0.5, 3.8, 1, 3.8, flat('#a86d38')),
+    box(4.5, 1.6, 0.5, 5, 3.6, 4, solid('#c9683f')), box(4.5, 5.2, 0.5, 4, 3, 3, leaves('#5a9a3e', { seed: 7 })), box(6, 7, 0.5, 2, 3, 2, leaves('#86c05a', { seed: 9 })),
+  ];
 }
