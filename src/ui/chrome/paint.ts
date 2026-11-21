@@ -179,10 +179,10 @@ export function branch(w: number, h: number, from: 'left' | 'right', seed = 3): 
       const pat = ['.ab.', 'abbc', '.bcc', '..c.'];
       pat.forEach((r, j) => { for (let i = 0; i < 4; i++) { const ch = r[flipL ? 3 - i : i]; if (ch === '.') continue; const t = ch === 'a' ? 5 : ch === 'b' ? (s > 0.5 ? 4 : 3) : 2; b.set(x + i, y + j, L[t]); } });
     };
-    const spots = [0.18, 0.4, 0.58, 0.78, 0.94];
+    const spots = [0.08, 0.2, 0.33, 0.45, 0.58, 0.7, 0.82, 0.94];
     spots.forEach((p, i) => {
       const u = p * w, c = cy(u);
-      const n = 3 + Math.round(hash(i, 0, seed) * 3);
+      const n = 5 + Math.round(hash(i, 0, seed) * 4);
       for (let k = 0; k < n; k++) {
         const ox = (hash(i, k, seed + 1) - 0.5) * 12, oy = (hash(i, k, seed + 2) - 0.5) * 9 + (k % 2 ? -3 : 3);
         const X = from === 'left' ? u + ox : w - 1 - (u + ox);

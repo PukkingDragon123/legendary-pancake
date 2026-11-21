@@ -16,13 +16,13 @@ import { claimable, todaysQuests } from '../../game/quests.ts';
 import { dayKey, level, save } from '../../game/store.ts';
 import { portrait } from '../portraits.ts';
 import { haptic } from '../kit.tsx';
-import { breathing, panel, sceneRef, type Panel } from '../state.ts';
+import { breathing, panel, say, sceneRef, type Panel } from '../state.ts';
 import { branch, chainTile, plank, plaque, ropeTile, shelf, tag, type Inner } from './paint.ts';
 import { framesOf, hold, PxAnim, rep, seq, type Timeline } from './pxanim.tsx';
 import { MagicBar } from './magicbar.tsx';
 import { addSwing, kick, makeSwing, removeSwing, type Swing } from './swing.ts';
 import { clearTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts';
-import { lastPointer, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
+import { lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
 import './chrome.css';
 import '../px/currency.js';
@@ -43,6 +43,7 @@ export const VIA: Partial<Record<NonNullable<Panel>, TransitionKind>> = {
 };
 /** Open a place with its transition (and the screen point to centre an iris on). */
 export function openPanel(id: Panel, o: TransitionOpts = {}) {
+  if ((window as unknown as { __chromeHold?: boolean }).__chromeHold) return; // screenshots: stay on the press
   const k = id ? VIA[id] : undefined;
   if (!k) { panel.value = id; return; }
   if (id === 'wardrobe' && o.x === undefined) {
@@ -337,7 +338,7 @@ export function MainNav() {
 }
 
 // dev and screenshot hooks
-if (typeof window !== 'undefined') (window as unknown as { hhChrome: unknown }).hhChrome = { transition, previewTransition, clearTransition, openPanel, uiBurst, hudOverride };
+if (typeof window !== 'undefined') (window as unknown as { hhChrome: unknown }).hhChrome = { transition, previewTransition, clearTransition, openPanel, uiBurst, uiAdvance, hudOverride, say };
 
 /** Frame sheets for the dev page. */
 export const CHROME_TIMELINES = { MAIN, TOOLS, hold };

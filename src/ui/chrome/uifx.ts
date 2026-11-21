@@ -53,10 +53,10 @@ function spawn(kind: UiFxKind, x: number, y: number): P {
   const base: P = { kind, x, y, vx: 0, vy: 0, g: 0, drag: 0, life: 1, age: 0, fps: 10, f0: Math.floor(Math.random() * 4), ph: Math.random() * 6.28, ox: x, oy: y, r: 0, w: 0 };
   const a = Math.random() * Math.PI * 2;
   switch (kind) {
-    case 'puff': { const s = R(30, 90); return { ...base, vx: Math.cos(a) * s, vy: Math.sin(a) * s * 0.6 - 20, drag: 3.2, g: -10, life: R(0.45, 0.7), frames: fr('fx_puff', 6), fps: 0, f0: 0 }; }
+    case 'puff': { const s = R(70, 150); return { ...base, vx: Math.cos(a) * s, vy: Math.sin(a) * s * 0.6 - 25, drag: 3.6, g: -14, life: R(0.55, 0.8), frames: fr('fx_puff', 6), fps: 0, f0: 0 }; }
     case 'sparkle': { const s = R(70, 190); return { ...base, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 40, drag: 3.5, g: 40, life: R(0.55, 0.95), frames: fr('fx_spark', 4), fps: 12 }; }
-    case 'hearts': return { ...base, vx: R(-40, 40), vy: R(-110, -60), drag: 1.2, g: -20, life: R(1, 1.5), frames: fr('fx_heart', 2), fps: 4 };
-    case 'magic': return { ...base, vx: 0, vy: R(-50, -20), drag: 0, g: -15, life: R(0.9, 1.5), r: R(4, 14), w: R(5, 9) * (Math.random() < 0.5 ? -1 : 1), col: pick(MAGIC), trail: [] };
+    case 'hearts': return { ...base, vx: R(-70, 70), vy: R(-130, -60), drag: 1.2, g: -20, life: R(1, 1.5), frames: fr('fx_heart', 2), fps: 4 };
+    case 'magic': return { ...base, vx: 0, vy: R(-60, -20), drag: 0, g: -15, life: R(0.9, 1.5), r: R(6, 18), w: R(5, 9) * (Math.random() < 0.5 ? -1 : 1), col: pick(MAGIC), trail: [] };
     case 'coins': return { ...base, vx: R(-120, 120), vy: R(-300, -160), drag: 0.6, g: 620, life: R(0.9, 1.3), frames: fr('fx_acorn', 4), fps: R(10, 16) };
     case 'stars': { const s = R(90, 220); return { ...base, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 60, drag: 2.2, g: 90, life: R(0.8, 1.2), frames: fr('fx_star', 3), fps: 10 }; }
     case 'snow': return { ...base, x: x + R(-60, 60), vx: R(-20, 20), vy: R(15, 50), drag: 0.3, g: 6, life: R(1.6, 2.6), frames: fr('fx_snow', 2), fps: 3 };
@@ -118,7 +118,7 @@ function move(p: P, dt: number) {
   if (p.kind === 'magic') {
     // swirl around a rising centre, the orbit widening
     p.oy += p.vy * dt; p.vy += p.g * dt;
-    p.ph += p.w * dt; p.r += dt * 18;
+    p.ph += p.w * dt; p.r += dt * 26;
     p.trail!.unshift([p.x, p.y]); if (p.trail!.length > 4) p.trail!.pop();
     p.x = p.ox + Math.cos(p.ph) * p.r; p.y = p.oy + Math.sin(p.ph) * p.r * 0.55;
     return;
@@ -148,23 +148,35 @@ function draw(c: CanvasRenderingContext2D, p: P) {
     const img = spriteCanvas(p.frames[f], 1);
     c.drawImage(img, tx - (img.width >> 1), ty - (img.height >> 1));
   } else if (p.kind === 'magic') {
-    p.trail!.forEach(([x, y], i) => { c.globalAlpha = 0.6 - i * 0.14; c.fillStyle = i < 1 ? p.col! : '#6a4cd8'; c.fillRect(Math.round(x / B), Math.round(y / B), 1, 1); });
-    c.globalAlpha = k > 0.8 ? 0.5 : 1;
-    c.fillStyle = p.col!; c.fillRect(tx, ty, 1, 1);
-    if (Math.floor(p.age * 12) % 3 === 0) { c.globalAlpha *= 0.55; c.fillRect(tx - 1, ty, 1, 1); c.fillRect(tx + 1, ty, 1, 1); c.fillRect(tx, ty - 1, 1, 1); c.fillRect(tx, ty + 1, 1, 1); }
-  } else if (p.kind === 'confetti') {
-    const flip = Math.floor(p.age * p.fps + p.ph) % 3;
+    p.trail!.forEach(([x, y], i) => { c.globalAlpha = 0.75 - i * 0.16; c.fillStyle = i < 2 ? p.col! : '#6a4cd8'; c.fillRect(Math.round(x / B), Math.round(y / B), 1, 1); });
+    c.globalAlpha = (k > 0.8 ? 0.5 : 1) * 0.6;
     c.fillStyle = p.col!;
-    c.fillRect(tx, ty, flip === 0 ? 2 : 1, flip === 1 ? 2 : 1);
+    c.fillRect(tx - 1, ty, 3, 1); c.fillRect(tx, ty - 1, 1, 3);
+    c.globalAlpha = k > 0.8 ? 0.5 : 1;
+    c.fillStyle = Math.floor(p.age * 12 + p.w) % 3 === 0 ? '#ffffff' : p.col!;
+    c.fillRect(tx, ty, 1, 1);
+  } else if (p.kind === 'confetti') {
+    const flip = Math.floor(p.age * p.fps + p.ph) % 4;
+    c.fillStyle = p.col!;
+    if (flip === 0) c.fillRect(tx - 1, ty, 3, 2);
+    else if (flip === 1) c.fillRect(tx, ty - 1, 2, 3);
+    else if (flip === 2) { c.fillRect(tx - 1, ty, 3, 1); c.globalAlpha *= 0.5; c.fillStyle = '#2a1a14'; c.fillRect(tx - 1, ty + 1, 3, 1); }
+    else c.fillRect(tx, ty - 1, 1, 3);
   } else if (p.kind === 'firefly') {
     const pulse = 0.5 + 0.5 * Math.sin(p.age * p.w * 2 + p.ph);
     const fade = Math.min(1, p.age / 0.6, (p.life - p.age) / 0.6);
-    c.globalAlpha = fade * (0.25 + pulse * 0.35);
-    c.fillStyle = '#ffd84a';
+    c.globalAlpha = fade * (0.15 + pulse * 0.3);
+    c.fillStyle = '#e8b830';
     c.fillRect(tx - 1, ty, 3, 1); c.fillRect(tx, ty - 1, 1, 3);
     c.globalAlpha = fade * (0.6 + pulse * 0.4);
-    c.fillStyle = pulse > 0.6 ? '#fffbd0' : '#ffe878';
+    c.fillStyle = pulse > 0.6 ? '#fff6a0' : '#ffe060';
     c.fillRect(tx, ty, 1, 1);
   }
   c.globalAlpha = 1;
+}
+
+/** Dev/screenshot helper: run the particle simulation forward by `sec` seconds right now. */
+export function uiAdvance(sec: number) {
+  for (let t = 0; t < sec; t += 1 / 60) for (let i = parts.length - 1; i >= 0; i--) { const p = parts[i]; p.age += 1 / 60; if (p.age >= p.life) parts.splice(i, 1); else move(p, 1 / 60); }
+  start();
 }

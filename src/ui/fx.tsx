@@ -13,6 +13,7 @@ import { haptic, Sheet, tap } from './kit.tsx';
 import { panel, sceneRef } from './state.ts';
 import { owlFull } from './portraits.ts';
 import { RuneCircle } from './chrome/lvup.tsx';
+import { openPanel } from './chrome/hud.tsx';
 import { MagicBar } from './chrome/magicbar.tsx';
 import { PxAnim, seq } from './chrome/pxanim.tsx';
 import { uiBurst, uiBurstAt } from './chrome/uifx.ts';
@@ -109,14 +110,12 @@ export function Ceremony() {
   try { owl = owlFull(save.value.look); } catch { /* no WebGL */ }
   return (
     <div class={'lvup' + (step === 0 ? ' pre' : '')} onClick={() => step > 1 && (ceremony.value = null)}>
-      {step > 0 && <div class="lvup-rays" />}
-      <RuneCircle n={120} drawMs={1000} />
       <div class="lvup-stack">
+        {step > 0 && <div class="lvup-rays" />}
+        <RuneCircle n={120} drawMs={1000} />
         <div class="lvup-medal"><PxAnim tl={seq('hud_rune', 8, 120)} size={144} /><b>{c.level}</b></div>
         <div class="lvup-title">Level {c.level}!</div>
-        <div class={'lvup-bar' + (step === 0 ? ' spill' : '')}>
-          <MagicBar level={step === 0 ? c.level - 1 : c.level} into={step === 0 ? 62 : 0} need={100} overflow={step === 0} w={56} big />
-        </div>
+        {step === 0 && <div class="lvup-bar spill"><MagicBar level={c.level - 1} into={62} need={100} overflow w={56} big /></div>}
         {step > 0 && <div class="lvup-owl">{owl ? <img src={owl} alt="" /> : <Px name="owl" size={120} />}</div>}
       </div>
       {step > 1 && (
@@ -126,8 +125,8 @@ export function Ceremony() {
           {area && <div class="lvup-unlock"><Px name="map" size={40} /><span>New place to explore: <b>{area.name}</b></span></div>}
           {!zone && !area && <div class="lvup-unlock"><Px name="sparkle" size={40} /><span>Rarer treasures turn up on adventures now.</span></div>}
           <div class="row" style="gap:6px">
-            {zone && <button class="btn soft grow" onClick={() => { ceremony.value = null; panel.value = 'decorate'; }}>Go see</button>}
-            {area && !zone && <button class="btn soft grow" onClick={() => { ceremony.value = null; panel.value = 'map'; }}>Open map</button>}
+            {zone && <button class="btn soft grow" onClick={() => { ceremony.value = null; openPanel('decorate'); }}>Go see</button>}
+            {area && !zone && <button class="btn soft grow" onClick={() => { ceremony.value = null; openPanel('map'); }}>Open map</button>}
             <button class="btn pillow honey grow" onClick={(e) => { tap(); uiBurstAt(e.currentTarget as Element, 'stars', 8); ceremony.value = null; }}>Hooray!</button>
           </div>
         </div>

@@ -75,9 +75,13 @@ function Bubble() {
     if (!b) return;
     setShown(0);
     let i = 0;
+    const t0 = performance.now();
     const voices = ['voice_a', 'voice_b', 'voice_c', 'voice_e'];
     const id = setInterval(() => {
-      i++;
+      // letters follow the clock, so a slow device catches up instead of crawling
+      const n = Math.min(b.text.length, Math.floor((performance.now() - t0) / 28) + 1);
+      if (n === i) return;
+      i = n;
       setShown(i);
       const ch = b.text[i - 1] ?? '';
       // Pip's little voice: a soft blip every other letter, pitched by the letter

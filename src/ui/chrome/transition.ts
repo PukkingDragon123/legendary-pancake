@@ -114,8 +114,11 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
         const k = y / H, cr = Math.round(top[0] + (bot[0] - top[0]) * k), cg = Math.round(top[1] + (bot[1] - top[1]) * k), cb = Math.round(top[2] + (bot[2] - top[2]) * k);
         const base = ((255 << 24) | (cb << 16) | (cg << 8) | cr) >>> 0, frost = pk('#ffffff'), deep = pk('#9cc8ec');
         for (let x = 0; x < W; x++) {
-          const streak = vnoise(x * 0.05 - t * 1.2, y * 0.22, 4) * 0.35;
-          if (bayer(x, y) < cov * 1.25 - streak) buf[y * W + x] = hash(x, y, 8) > 0.96 ? frost : hash(x, y, 9) > 0.985 ? deep : base;
+          // drifting banks of snow with dithered edges, plus wind streaks
+          const n = vnoise(x * 0.045 - t * 0.9, y * 0.07 + t * 0.2, 4);
+          const v = cov * 1.75 - 0.38 - n * 0.75;
+          const streak = cov > 0.08 && vnoise(x * 0.025 - t * 3, y * 0.6, 6) > 0.8;
+          if (v > bayer(x, y) * 0.5 || streak) buf[y * W + x] = streak && v <= 0.5 ? frost : hash(x, y, 8) > 0.96 ? frost : hash(x, y, 9) > 0.985 ? deep : base;
         }
       }
       const vis = Math.min(1, cov * 2 + 0.25);
@@ -131,8 +134,9 @@ function paint(r: Run, phase: 'in' | 'out', p: number, t: number) {
       const xe = W - e * span;
       const paper = pk('#f3e2b8'), line = pk('#dcc394'), margin = pk('#d99080'), curl = pk('#fff7e0'), curl2 = pk('#e2c992'), ink = pk('#3b2414'), shade = pk('#000000', 70), fleck = pk('#e8d3a0');
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-        const covered = phase === 'in' ? x > xe : x < xe;
-        const d = phase === 'in' ? x - xe : xe - x; // distance into the page from its moving edge
+        const xs = xe + (1 - y / H) * 14 * Math.sin(e * Math.PI); // the edge leans while the page turns
+        const covered = phase === 'in' ? x > xs : x < xs;
+        const d = phase === 'in' ? x - xs : xs - x; // distance into the page from its moving edge
         if (covered) {
           let c = y % 8 === 6 ? line : paper;
           if (x === Math.round(W * 0.14) || x === Math.round(W * 0.14) + 1) c = margin;
