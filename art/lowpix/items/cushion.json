@@ -1,0 +1,859 @@
+{
+ "name": "cushion",
+ "description": "Floor Cushion",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 7,
+ "grounded": true,
+ "budget": {
+  "tris": 1400,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   28
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "rose": [
+    "#2b0e12",
+    "#6f272b",
+    "#b04542",
+    "#cd8a82",
+    "#ddb9b0",
+    "#e5cfc7",
+    "#eee3dd",
+    "#f8f5f2"
+   ],
+   "sage": [
+    "#162010",
+    "#3d522c",
+    "#688249",
+    "#93aa6f",
+    "#b3bf97",
+    "#c9cfb5",
+    "#dee1d2",
+    "#f3f3ee"
+   ],
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "c": {
+   "ramp": "rose",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "weave_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.1575,
+     "seed": 0
+    },
+    {
+     "id": "weave_b",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.135,
+     "seed": 1,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "weave_c",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.135,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rough_linen",
+     "scale": 6,
+     "amount": 0.55,
+     "ramps": [
+      "rose"
+     ]
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "rose": "cloth"
+    }
+   }
+  },
+  "btn": {
+   "ramp": "sage",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "weave_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.06999999999999999,
+     "seed": 0
+    },
+    {
+     "id": "weave_b",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.06,
+     "seed": 1,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "weave_c",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.06,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rough_linen",
+     "scale": 4,
+     "amount": 0.55,
+     "ramps": [
+      "sage"
+     ]
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "sage": "cloth"
+    }
+   }
+  },
+  "tas": {
+   "ramp": "honey",
+   "tone": 4.4,
+   "light": 0.8,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "body",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    2.05,
+    0.0
+   ],
+   "style": "c",
+   "paint": {
+    "layers": [
+     {
+      "id": "pipe",
+      "op": "band",
+      "axis": "y",
+      "from": -0.07,
+      "to": 0.07,
+      "ramp": "sage",
+      "tone": 4.4
+     },
+     {
+      "id": "pipe_s",
+      "op": "band",
+      "axis": "y",
+      "from": -0.13,
+      "to": -0.07,
+      "shift": -1.0
+     },
+     {
+      "id": "quilt_a",
+      "op": "stripes",
+      "axis": [
+       1,
+       0,
+       1
+      ],
+      "period": 2.4,
+      "width": 0.07,
+      "shift": -0.9,
+      "faces": [
+       "up"
+      ]
+     },
+     {
+      "id": "quilt_b",
+      "op": "stripes",
+      "axis": [
+       1,
+       0,
+       -1
+      ],
+      "period": 2.4,
+      "width": 0.07,
+      "shift": -0.9,
+      "faces": [
+       "up"
+      ]
+     },
+     {
+      "id": "dimple",
+      "op": "spots",
+      "centers": [
+       [
+        0,
+        2.0,
+        0,
+        1.0
+       ]
+      ],
+      "shift": -0.8
+     }
+    ]
+   },
+   "rings": [
+    {
+     "at": [
+      -5.8,
+      0,
+      0
+     ],
+     "size": [
+      9.347999999999999,
+      0.9019999999999999
+     ]
+    },
+    {
+     "at": [
+      -4.872,
+      0,
+      0
+     ],
+     "size": [
+      10.83,
+      2.9519999999999995
+     ]
+    },
+    {
+     "at": [
+      -2.9,
+      0,
+      0
+     ],
+     "size": [
+      11.4,
+      3.8949999999999996
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0,
+      0
+     ],
+     "size": [
+      11.4,
+      4.1
+     ]
+    },
+    {
+     "at": [
+      2.9,
+      0,
+      0
+     ],
+     "size": [
+      11.4,
+      3.8949999999999996
+     ]
+    },
+    {
+     "at": [
+      4.872,
+      0,
+      0
+     ],
+     "size": [
+      10.83,
+      2.9519999999999995
+     ]
+    },
+    {
+     "at": [
+      5.8,
+      0,
+      0
+     ],
+     "size": [
+      9.347999999999999,
+      0.9019999999999999
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.2
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "button",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    3.85,
+    0.0
+   ],
+   "style": "btn",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.1
+    },
+    {
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "size": 1.2
+    },
+    {
+     "at": [
+      0,
+      0.45,
+      0
+     ],
+     "size": 0.7
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "tas0",
+   "shape": "bone",
+   "pivot": [
+    -5.7,
+    2.0,
+    5.0
+   ]
+  },
+  {
+   "id": "tassel0_0",
+   "shape": "card",
+   "parent": "tas0",
+   "size": [
+    0.9,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "k": "honey:2",
+     "l": "honey:5",
+     "d": "honey:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...kkk...",
+    "...kkk...",
+    "...kkk...",
+    "...dld...",
+    "..ldldl..",
+    "..ldldl..",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld."
+   ]
+  },
+  {
+   "id": "tassel0_1",
+   "shape": "card",
+   "parent": "tas0",
+   "size": [
+    0.9,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "k": "honey:2",
+     "l": "honey:5",
+     "d": "honey:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...kkk...",
+    "...kkk...",
+    "...kkk...",
+    "...dld...",
+    "..ldldl..",
+    "..ldldl..",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld."
+   ]
+  },
+  {
+   "id": "tas1",
+   "shape": "bone",
+   "pivot": [
+    5.7,
+    2.0,
+    5.0
+   ]
+  },
+  {
+   "id": "tassel1_0",
+   "shape": "card",
+   "parent": "tas1",
+   "size": [
+    0.9,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "k": "honey:2",
+     "l": "honey:5",
+     "d": "honey:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...kkk...",
+    "...kkk...",
+    "...kkk...",
+    "...dld...",
+    "..ldldl..",
+    "..ldldl..",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld."
+   ]
+  },
+  {
+   "id": "tassel1_1",
+   "shape": "card",
+   "parent": "tas1",
+   "size": [
+    0.9,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "k": "honey:2",
+     "l": "honey:5",
+     "d": "honey:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...kkk...",
+    "...kkk...",
+    "...kkk...",
+    "...dld...",
+    "..ldldl..",
+    "..ldldl..",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld."
+   ]
+  },
+  {
+   "id": "tas2",
+   "shape": "bone",
+   "pivot": [
+    -5.7,
+    2.0,
+    -5.0
+   ]
+  },
+  {
+   "id": "tassel2_0",
+   "shape": "card",
+   "parent": "tas2",
+   "size": [
+    0.9,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "k": "honey:2",
+     "l": "honey:5",
+     "d": "honey:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...kkk...",
+    "...kkk...",
+    "...kkk...",
+    "...dld...",
+    "..ldldl..",
+    "..ldldl..",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld."
+   ]
+  },
+  {
+   "id": "tassel2_1",
+   "shape": "card",
+   "parent": "tas2",
+   "size": [
+    0.9,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "k": "honey:2",
+     "l": "honey:5",
+     "d": "honey:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...kkk...",
+    "...kkk...",
+    "...kkk...",
+    "...dld...",
+    "..ldldl..",
+    "..ldldl..",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld."
+   ]
+  },
+  {
+   "id": "tas3",
+   "shape": "bone",
+   "pivot": [
+    5.7,
+    2.0,
+    -5.0
+   ]
+  },
+  {
+   "id": "tassel3_0",
+   "shape": "card",
+   "parent": "tas3",
+   "size": [
+    0.9,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "k": "honey:2",
+     "l": "honey:5",
+     "d": "honey:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...kkk...",
+    "...kkk...",
+    "...kkk...",
+    "...dld...",
+    "..ldldl..",
+    "..ldldl..",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld."
+   ]
+  },
+  {
+   "id": "tassel3_1",
+   "shape": "card",
+   "parent": "tas3",
+   "size": [
+    0.9,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "tas",
+   "paint": {
+    "art_key": {
+     "k": "honey:2",
+     "l": "honey:5",
+     "d": "honey:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...kkk...",
+    "...kkk...",
+    "...kkk...",
+    "...dld...",
+    "..ldldl..",
+    "..ldldl..",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld.",
+    ".dldldld."
+   ]
+  }
+ ]
+}

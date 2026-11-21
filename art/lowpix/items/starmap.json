@@ -1,0 +1,618 @@
+{
+ "name": "starmap",
+ "description": "Star Chart",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": false,
+ "budget": {
+  "tris": 900,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   24,
+   8
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "walnut": [
+    "#21130f",
+    "#362119",
+    "#4a3124",
+    "#5d4330",
+    "#6f553d",
+    "#937755",
+    "#ad9979",
+    "#c2b7a0",
+    "#d9d4c7"
+   ],
+   "paper": [
+    "#37240f",
+    "#835d25",
+    "#c79844",
+    "#ddc591",
+    "#f4eedd",
+    "#f8f6ec",
+    "#fdfdfa"
+   ],
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "dusk": [
+    "#0d1117",
+    "#232f3a",
+    "#3a4e5c",
+    "#546f7c",
+    "#73919b",
+    "#9cb0b4",
+    "#c3cecf",
+    "#e9ecec"
+   ],
+   "night": [
+    "#030407",
+    "#141924",
+    "#27313f",
+    "#45566b",
+    "#647d95",
+    "#91a3b2",
+    "#bdc8cf",
+    "#e8ebed"
+   ],
+   "mist": [
+    "#192827",
+    "#4a726b",
+    "#89afa6",
+    "#d3e0dc",
+    "#e0e8e5",
+    "#edf1ef",
+    "#f9faf9"
+   ],
+   "lilac": [
+    "#171324",
+    "#3e345d",
+    "#665795",
+    "#9a8cb9",
+    "#beb4cf",
+    "#d2cadb",
+    "#e4dfe8",
+    "#f5f3f6"
+   ],
+   "brass": [
+    "#29170c",
+    "#50321b",
+    "#75512b",
+    "#98733e",
+    "#b49557",
+    "#bfae7c",
+    "#ccc4a0",
+    "#dbd8c2",
+    "#ecece1"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "glow": [
+    "#241304",
+    "#c27917",
+    "#f1d39a",
+    "#f3dfb1",
+    "#f6eac8",
+    "#faf4df",
+    "#fdfcf5"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "rod": {
+   "ramp": "walnut",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 1,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 8,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 2,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 9,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 4
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "walnut"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.3,
+     "shift": 0.9,
+     "scratches": 2
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "x",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "walnut": "wood"
+    }
+   }
+  },
+  "cap": {
+   "ramp": "brass",
+   "tone": 3.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.5,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.9
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.55,
+     "seed": 0
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/metal_plate_02",
+     "scale": 8,
+     "amount": 0.35,
+     "ramps": [
+      "brass"
+     ]
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.6,
+     "density": 0.6,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "brass": "metal"
+    }
+   }
+  },
+  "paper": {
+   "ramp": "night",
+   "tone": 3,
+   "light": 0.4,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  },
+  "cord": {
+   "ramp": "oat",
+   "tone": 3,
+   "light": 0.5,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "rod0",
+   "shape": "prism",
+   "size": [
+    1.2,
+    1.2,
+    15.6
+   ],
+   "pivot": [
+    0.0,
+    10.2,
+    0.7
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "rod",
+   "sides": 8
+  },
+  {
+   "id": "cap0-1",
+   "shape": "prism",
+   "size": [
+    1.6,
+    1.6,
+    0.8
+   ],
+   "pivot": [
+    -8.1,
+    10.2,
+    0.7
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "cap",
+   "sides": 8
+  },
+  {
+   "id": "cap01",
+   "shape": "prism",
+   "size": [
+    1.6,
+    1.6,
+    0.8
+   ],
+   "pivot": [
+    8.1,
+    10.2,
+    0.7
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "cap",
+   "sides": 8
+  },
+  {
+   "id": "rod1",
+   "shape": "prism",
+   "size": [
+    1.2,
+    1.2,
+    15.6
+   ],
+   "pivot": [
+    0.0,
+    0.8,
+    0.7
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "rod",
+   "sides": 8
+  },
+  {
+   "id": "cap1-1",
+   "shape": "prism",
+   "size": [
+    1.6,
+    1.6,
+    0.8
+   ],
+   "pivot": [
+    -8.1,
+    0.8,
+    0.7
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "cap",
+   "sides": 8
+  },
+  {
+   "id": "cap11",
+   "shape": "prism",
+   "size": [
+    1.6,
+    1.6,
+    0.8
+   ],
+   "pivot": [
+    8.1,
+    0.8,
+    0.7
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "cap",
+   "sides": 8
+  },
+  {
+   "id": "chart",
+   "shape": "card",
+   "size": [
+    14.6,
+    9.0
+   ],
+   "pivot": [
+    0.0,
+    5.5,
+    0.45
+   ],
+   "style": "paper",
+   "paint": {
+    "art_key": {
+     "a": "night:1",
+     "b": "night:2",
+     "c": "night:3",
+     "d": "dusk:2",
+     "e": "glow:3",
+     "f": "glow:5",
+     "g": "glow:6",
+     "h": "brass:4",
+     "i": "brass:6",
+     "j": "mist:3",
+     "k": "lilac:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+    "iaaaaaaaaaaaaaaaeaaacaaaaaaabbbbbbcbbbbbbcbbbebbcbbbbbbbbbbbbbcbbbbbbbbbbbbbcbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaai",
+    "iahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhai",
+    "iahacaaaaaacaaaaaeaaaabbbbbbbbbbcbbbbbebbbbbbbcbbbbbbcbbbebbbbbbbbbbbbbbbbcbbbbbbcbbbbbbcbbaaaacaaaaaacaaaaaahai",
+    "iehaaaaaaaaaaaaaaaeabbbbbbbbbbbcbbbbbbbbbbebbcbbbbbbbehhhhhhebbbbbbbbbeebcbbbbbbbbbbbbbcbbbbbaceaaaaaaaaaaaachai",
+    "iahaaaaaacaaaaaaaabbbbbcbbbbbbbebebbbbbbbbbbeebbhhhhbbbbbbebbhhhhcbbbbbbbbebbbbbbbbbbbbbbbbbbcbaaaaaaaaeaaaaahai",
+    "iahaaaaacaaaaaaabbbbbbcbbbbbbcbbbbbbcbbbbbbbbehbbhhhhhhhhhhhhhhhbbhhbbbebbbbbbbbbbbebbbebbbbcbbbbaaaaaaaaaaaahai",
+    "iahaaaaaaaaaaabbbbbbbbbbbbbbcbbbbbbcbbbbbbbhhbhhhhbbbbbbcbbbbbbhhhhbhhcbbbbbbcbbbbbbcbbbbbbcbebbbbbaaaaaaaaaahai",
+    "iahaaacaaaaaabbbbbbbbbbbbbbcbbbbbebbbbbbbhhhhhbbbbbbbbbbbbbbbbcbbbbhehehbbbbbbbbbbbcbbbbbbbbbbbbbbbbaaaacaaaahai",
+    "iahaaaaaaaabcbbbbbbbbbbbebebbbbbbcbbbbbhhbhhbbbbbbbbbbcbbbbbbbbbbbbbbhhbhhbebbbbbbcbbbbbebbbbbbbbbbbbbacaaaaahei",
+    "iahaaaaaaabcbbebbbbbbbbbbbbbbbbbbbbbbbhehebbebbbbbbbbcbbbbbbbbbbbbbcbbbhhbhbbbbbbbbbbbbbcbbbbbbcbbbbbebaaaaaahai",
+    "iahaaaaabebbbbbbbcbbbbbbbbbbbbbbbbbbbhbhhbbbbcbbbbbbcbbbbbebbbbbbbbbbbbbhhbhbbbbbbbbbbbcbbbbbbbbbbbbbcbbbaaachai",
+    "iahaaaabbbbbbbbbbbbbbbbebbbbbbbbbbbehhhbbbbbcbbbbbbcebbbbbebbbbbbbbbbbbbcbhhhhbcbbbbbbbbebbbbebbbbbbcbbbbbaaahai",
+    "ichaaabbbbbbbbbcebbbbbcbbbbbbbbbbbhhhhbbbbbbbbbbbbbbbbbbbcbebbbbbbbbbbbcbbbhhhhbbbbbbcbbbbbbbbbbbbbbbbbbbbcaahai",
+    "iahaabbbbbbbbbcbbbbbbbbbbbbbcbbbbhehhbbbbbcbbbbbbcbbbbbbcbeebbbbbbbbefbbbbbbhhhhbbbbcbbfbbbcbbbbbbcbbbbbbcebehai",
+    "iahabbebbbbbbcbbbbbbbbbebbbbbbbbbhhhbbbbbbbbbbbbbbbbbbbcbbbbbbbbbebbfgfbbbbbchhhbbbbbbfgfbbbbbbbbcbbbbbbbbbebhai",
+    "iahbbbbbbbbbcbbbbbbebbbbbbbbbbbbhfhbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbcfbkbbebbbhhhbbbbkbfbcbbbbbbcbbbbbbcbbbbbhai",
+    "iahbbbbbbbbcbbbbbecbbbbebbbbbbbhfgfbbbbcbbbbbbcbbbbbbbbbbbbbbbbbbbbcbbkbbbcbbbbhbhbbebkbcbbbbbbcbbbbbbbbbbbbbhei",
+    "ibhcbbbbbbbbbbbbbbbbbbbbcbbbbbhkhfbkbbebbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbkbbbbbbhbkbbbbcbbbbbbcbbbbbbcbbbbbechbi",
+    "ibhbbbbbbcbbbbbbbbbbbbbbbebbbkhhhbbbbckbbbbbcbbbbbbbbbbbbbbbbbbbbcebbbkbbbbbkbbbkhhbbkbbbbbbbbbbbbbbcbbbbbbcbhbi",
+    "ichbbbbbcbbbbbbbbbbbbbbbfbkbbebhbbbbebbbkbfcbbbbbbbbbbbbbeebbbbbbbbbbbbcbbbbbbfbbhbhbcbbbbbbbbbbbbbbbbbbbbcbbhbi",
+    "ibhbbbbbbbbbbbbbbbbbbcbfgfbbchhbbbbbbbbebfgfbbbbbbbbbbbbbbbbbbbcbbbbbbckbbbbbfgfbbhhckbbbbbcbbbbbbbbbbbbbcbbehbi",
+    "ibhbbbcbbbbbbbbbbbbbcbbbfbbbhhhbbbcbbbbbbbfbbbbbbbbbbbbcbbbbbebbbbebbcbbbbbbcbfbbbhhhbbbbbbbbbbbbcbbbbebcbbbbhbi",
+    "ibhbbbbbbbbbcbbbbbbbbbbbbkbbhhbbbbbbbbbbekbbbbbcbbbbbbbbbbbbbbbbbbbbcbbbkbbcbbbbbbchkbbbbbbbbbbbcbbbbbbcbbbbbhci",
+    "iehbbbbbbbbcbbbbbbcbebbbbbbhbhbbbbbbbbbbbbbbbbcbbbbbbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbhbebbcbbbbbbcbbbbbbbbbbbbbhbi",
+    "ibhbbbbbbbbbbbbbbbbbbbbbbbkhhbbcbbbbbbcbkbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbkbbbbbbbbbkehbcbbbbbbcbbbbbbbbbbbbbchbi",
+    "ibhbbbbbbbbbbbbbcbbbbbbcbbbbhbbbbbbbbcbbbbbbcbbbbbbcbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbhbcbbbbbbbbbbbbbcbbbbbbcbhbi",
+    "ichbbbbbcbbbbbbbbbbbbbcbbbhbkcbbbbbbcbbkbbbbbbbbbbcbbbbbbcbbbbbbcbbebbbbbfbbbbcbbbfbhbhbbbbbcbbbbbbbbbbbbbbbbhbi",
+    "ibhbbbbbbbbbbbbbbbbbbbbbbbhhhfbbbbbbbbfbbbcbbbbbbbbbbbbbbbbbbbbcbbebbbcbfgfbkckbkfgfhhhbbbbbbbbbbbbbbbbbbcbbbhbi",
+    "ibhbbbcbbbbbbcbbbbbbbbbbbbhhfgfkbkckefgfbbbbbbbbbbbbbebcbbbbbbbbbbbbbcbbbfbbbbbbbbfbbhhbbbcbbbbbbcbbbbbbcbbbbhbi",
+    "ibhbbbbbbbbbcbbbbbbbbbbbbbhhbfbbbcbebbfbcbbbbbbbbbbbbbiibbbebcbbbbbbbbbbbbbcbbbbbbcbbhhbbcbbbbbbbbbbbbbbbbbbbhbi",
+    "ibhbcbbbbbbbbbbbbbbbbbbbbbbhbbbbcbbbbbbcbbbbbbbbbbbbbifbbbbbebbbbbbcbbbbbbbbbbbbbcbbehbbcbbbbbbbbbbbbbcbbbbbbhbi",
+    "ibhbbbbbbbbbbbbbbcbbbeebbhbhbbbcbbbbbbbbbbbbbbbbbebbifbbebbbbbbbbbcbbbbbbcbbbebbcbbbbhbhbbbbbbbbbbbbbbbbbbbbbhbi",
+    "ibhbbbbbbbbbbbbbbbbbbbbcbhbhbbbbbbbbbcbbbbbbcbbbbbbiffbbbbbbbbbbbbbbbbbbbebbbbbcbbbbbhbhbbbbbcbbbbbbbbbbbbbcbhbi",
+    "ibhbbbbbcbbbbbbcbbbbbbcbbhbhbcbbbbbbcbbbbbbbbbbbbbbiffbbbbbbbbbbcbbbbbbbbbbbbbcbbbbbbhbhbbbbbbbbbbbbbbbbbbcebhbi",
+    "ibhbbbbcbbbbbbbbbbbbbbbbbhbhcbbbbbbbbbbbbbcbbbbbbcbiffbbcbbbbbbcbbbbbbbbbbbbbbbbbbbbchbhbbbcbbbbbbbbbbbbbcbbbhbi",
+    "ibhbbbbbbbbbbcbbbbbbbbbbbhbhbbbbbbbbbbbbbbbbbbbbcbbifffcbbbbbbcbbbbbbbbbbbbbbbbebbbbbhbhbbebbbbbbcbbbbbbbbbbbhbi",
+    "ibhbbbbbbbbbbbbbbbbbbbbbbhchbbebbbbbbbbbebbbbbbbbbbifffbebbbbebbbbbbcbebbbbbbbbbbbcbbhbhbbbbbbbbcbbbbbbbbbbbbhei",
+    "ibhbbbbbbbbcbbbbbbcbbbbbbhbhbbbbcebbbbbcbbbbbbcbbbbbiffffbbbbbbbbbbcbebbbbbbbbbbbbbbbhbhcbbbbbbcbbbbbbebbbbbbhbi",
+    "ibhcbbbbbbcbbbbbbbbbbbbbbbbhbbbbbbbbbbbbbbbbbbbbbbbbbifffffiebbbbbbbbbbbbcbbbbbbcbbbbhbcbbbbbbbbbbbbbcbbbbbbbhbi",
+    "ibhbbbbbbebbbbbbbbbbbbbcbbhhbbcbbbbbbbbbbbbbcbbbbbbbbbiiiiiebbbbbbbbbbbbbbbbbbbbbbbbbhhbbebbbcbbbbbbcbbbbbbbbhbi",
+    "ibhbbbbbcbbbbbbcbbbbbbcbbbhhbbbbbbbbbbbbbbbbbbbbbebbbbbbbbbbbbbbbbbbbbbcbebbbbbbfbbbbhhbbbbbcbbbbbbcbbbbbbcbbhbi",
+    "ibhbbbecbbbbbbcbbbbbbbbbbehhebbbbfbbbbbbbbcbbbbbbbbbbbbbbbbbbbbbbbbbbbcbbbbbbbbfgfkbhhhbbbbbbbbbbbcbbebbbbbbbhbi",
+    "ibhbbbcbbbbbbcbbbbbbbbbbbbhchbbbfgfbbbbbbbbbbbbbbbebbbbbbbbbbfbbbbebbcbbbbbbbbbbfbbbkbhbbbcbbbbbbbbbbbbbbbbbbhbi",
+    "ibhbbcebbbbbcbebbbbbbbbbbbcbhbkbbfbkbbbbcbbbbbbbbbbbbbbbbbbbfgfbbbbbcbbbbbbcbbbbbbcbhbkbbcbbbbbbbbbbbbbcbbbbbhbi",
+    "ibhbbbbbbbbcbbbbbbcbbbbbbckhkbbbbbbbbkbkbbbebbcbbbbbbbbbbbbkcfbkbbbbbbbbbbbbbbbbbcbbhhbbkbkfbbbbbbbbbbebbbbbbhbi",
+    "ibhcbbbbbecbbbbbbbbbfbkbkbbhbhbcbbbbbbcbbkbbbbbbbbbbcbbkbkebbbbbbkbbbbbbebbbbbbbbbbhbhbcbbfgfbcbbbbbbbbbbbbbbhbi",
+    "iehbbbbbbcbbbbbbcbbfgfbebbbbhhbbbbbbbbbbbbbkbbbbbbbkbkbbbbcbbbbbbcbkbbbbbbbbbbbcbbbhhbbbbbbfbbbbbbbbbbbbbbbbbhbi",
+    "ibhbbbbbcbbbbbbcbbbbfbcbbbbbhhhbbbbbcbbbbbbcbbkfbkbbbbbbbcbbbbbbcbbbbkbbkbbbbbcbbbhhhbbbbbbkbbbbbbbcbbbbbbcbbhbi",
+    "ibhbbbbbbbbbbbbbbbbbbbbbbbbbbhhbbbbcbbbbbbbbbbfgfbbbbbbbcbbbbbbbbbbbbbbbbbkbfbbbbbhhcbbbbbbbbebbbbcbbbbbbcbbbhbi",
+    "ibhbbbcbbbbbbbbbbbbbbbbbbbbcbhbhbbebbbbbbbbbbbbfcbbbbbbcbbbebbbbbbbbbcbbbbbfgfbebhbhbbbbbbkbbbbbbbbebbbbcbbbbhbi",
+    "ibhbbbbbbbbbbbbbbbbcbbbbbbbbbbhhhcbbbbbbbbbbbbbebbbbbbbbbbbbbbbbbbbbcbbbbbbbfbbbhhhbbbbbbcbbbbbbcbbbbbbbbbbbbhbi",
+    "ibhbcbbbbbbbbbbbbbcbbbbbbbbbbbhbhbbbbbbcbbbebbebbbbbbebbbbbbcbbbbbbbbbbbbebbbbbbhbhbbbbbbbkbbbebbebbbbbbbbbbbhbi",
+    "iahcbbbbbbbbbbbbbbbbbbbbbbbbbbbhbhbbbbbbebbbbcbbbbbbbbbbbbbbbbbbbbcbbbbbbbbbbbbhchbbbbbbbbbbbbbbbbbbbbbbbeebbhbi",
+    "iahbbbbbbbbbbbbbbbbbbbbbbbbbbbcbhhhbbbbbbbbbcbbbbbbcebbbbbcbbbbbbbbbbebbcbbbbbhhhbbbebbbbkbbbbbbebbbcbbbbbbbbhai",
+    "ichaebbbcbebbbbbbbbbbbcbbbbbbcbbbhhhcbbbbbbbbbbbbbcbbbbbbebbbbbbbbbbbbbbbbbbbhhhbbbbbbbbbfbbbbbbibebbbbbbbbbbhai",
+    "iahaabbcbbbbbbcbbbbbbcbbbbbbbbbbbhhhhbbbbbcbbbbbbcbbbbbbcbbbbbbbbbbbbbcbbbbbhehhbbbbbbbbfgfbbbbbibcbbbbbbcbbahai",
+    "iahaaabbbbbbbbbbbbbbcebbbbbbbbbbbbhhhhbbbcbbbbbecbbbebbbbbbbbbcbbbbbbbbbbbbhhhhbebbcbbbbbfcbbbbiiibbbbbbcbbaahai",
+    "iehaaaabbbbbcbbbbbbbbbebbbcbbbbbbcbhhhhbbbbbbbbcbbbebbbbbbbbbbbbbbbbbbbbbbhhhhbbbbcbbbbbbbbbiiiiiiiibbecbbaaahai",
+    "iahaaaaabbecbbbbbbbbbbbbbcbbbbbbcbbbbhbhhbbbbbbbbbbbbcbbbbbbcbbbbbbcbbbbhhchbbbbbcbbbbbbbbbbbbbiiibbbbcbbaaaahai",
+    "iahcaaaaaacbbbbbbbbbbbbbbbbbbbbbbbbbbbhbhhbbbbbbbbbbbbbbbbbbbbbbbbebbbbhhchbbbbbbbbbbbbcbbbbbbbiiibbbbbaaaaechai",
+    "iahaaaaaaaabbbbbcbbbbbbbbbbbbbebbbbbbbbhhbhhbbbbbbbcbbbbbbbbbbbbbbbbbhhbhhbbbbbbbbbbbbcbbbbbbbbbibbbcbaaaaaaahai",
+    "iahaaaaaaaeaabbcbbbbbbcbbbbbbcbbbbbbbbbbbhhhhhbbbbbbebbbbbbbbbbbcbbhhhhhbbbbbbbbbbbbbbbbbbbbbbbbibbcaaaaaacaahai",
+    "iahaaaacaaaaaacbbbbbbbbbbbbbbbbbbbbcbbbbbbchhbhhhhbbbebbbbbbbbbhhhhbhhcbbbbbbbbbbbbbcbbbbebbbbbbbbbaaaaaaaaaehai",
+    "iahaaacaaaaaaaaebbbbbbbbbbbcbbebbbbbbbbbbbbbbhhbchhhhehhhhhhhhhhbbhhbcbbbbbbbbbbbbbcbbbbbbcbbbbbbceaaaaacaaaahai",
+    "iahaacaaaaaacaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbchhhhbbbbbbbbbhhehbbbbbbbbbbcbbbbbbcbbbbbbbbbbbbaaaaeaaaaaaaaahai",
+    "iahacaaaaaaaaaaaaaaabbbbbcbbbebbcbbbbbbbbbbbbbcbbbbbbhhhhhhhcbebbbbbbbbebebbbbbbbcbbbbbbcbbbbaaaaaaeaaaaaaaaahai",
+    "iahhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhai",
+    "iaaaaaaeaaaaaaaaaaaaaaaaabbbbbcbbbbbbcbbbbbecbbbbbbbbbbebbbbbbbbbcbbbbbbcbbbbbbbbbbbbbbbaaaaaaaaaaaacaaaaaacaaai",
+    "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+   ]
+  },
+  {
+   "id": "cord",
+   "shape": "card",
+   "size": [
+    13.0,
+    2.8
+   ],
+   "pivot": [
+    0.0,
+    12.0,
+    0.6
+   ],
+   "style": "cord",
+   "paint": {
+    "art_key": {
+     "c": "oat:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...........................cccccc...........................",
+    ".........................cccc..cccc.........................",
+    ".......................ccc........ccc.......................",
+    ".....................ccc............ccc.....................",
+    "...................ccc................ccc...................",
+    "................cccc....................cccc................",
+    "..............cccc........................cccc..............",
+    "............cccc............................cccc............",
+    "..........cccc................................cccc..........",
+    "........ccc......................................ccc........",
+    "......ccc..........................................ccc......",
+    "....ccc..............................................ccc....",
+    ".cccc..................................................cccc.",
+    "ccc......................................................ccc"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,2210 @@
+{
+ "name": "fireplace",
+ "description": "Stone Hearth",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 5,
+ "grounded": true,
+ "budget": {
+  "tris": 3200,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   28,
+   14
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "oak": [
+    "#362018",
+    "#513426",
+    "#6b4a35",
+    "#846245",
+    "#9c7a56",
+    "#ad9472",
+    "#bcac91",
+    "#cbc3af",
+    "#dcd8cc"
+   ],
+   "walnut": [
+    "#21130f",
+    "#362119",
+    "#4a3124",
+    "#5d4330",
+    "#6f553d",
+    "#937755",
+    "#ad9979",
+    "#c2b7a0",
+    "#d9d4c7"
+   ],
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "moss": [
+    "#111a0e",
+    "#2f4425",
+    "#506b3e",
+    "#749059",
+    "#96aa7e",
+    "#b5bfa4",
+    "#d2d6c8",
+    "#eeefea"
+   ],
+   "lake": [
+    "#10181e",
+    "#2c424e",
+    "#4a6d7b",
+    "#6e98a3",
+    "#96b4b8",
+    "#b5c9ca",
+    "#d2dddd",
+    "#eef2f1"
+   ],
+   "ochre": [
+    "#211108",
+    "#563318",
+    "#895a29",
+    "#b9863c",
+    "#cbaa68",
+    "#d7c694",
+    "#e5debe",
+    "#f5f3e7"
+   ],
+   "cream": [
+    "#36210c",
+    "#734b1b",
+    "#af782b",
+    "#d3a353",
+    "#e2c690",
+    "#f1e6cc",
+    "#f6f2e2",
+    "#fdfcf8"
+   ],
+   "brass": [
+    "#29170c",
+    "#50321b",
+    "#75512b",
+    "#98733e",
+    "#b49557",
+    "#bfae7c",
+    "#ccc4a0",
+    "#dbd8c2",
+    "#ecece1"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "iron": [
+    "#0f0d0c",
+    "#262320",
+    "#3c3935",
+    "#514f4b",
+    "#706e6a",
+    "#969695",
+    "#bebebe",
+    "#e6e6e6"
+   ],
+   "stone": [
+    "#171412",
+    "#3b352f",
+    "#5e574d",
+    "#81796d",
+    "#9d988f",
+    "#b6b5af",
+    "#d1d1ce",
+    "#ededed"
+   ],
+   "pebble": [
+    "#1f1a15",
+    "#504539",
+    "#80725e",
+    "#a79d8b",
+    "#c1bcb0",
+    "#d1cfc6",
+    "#e2e1dd",
+    "#f4f4f2"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "flame": [
+    "#a8643c",
+    "#d58a4a",
+    "#e9ad5f",
+    "#f4cd84",
+    "#fbe5b0",
+    "#fff6df"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "stn": {
+   "ramp": "stone",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "blocks",
+     "op": "scales",
+     "along": "x",
+     "size": [
+      3.2,
+      2.2
+     ],
+     "shape": "square",
+     "gap": 0.18,
+     "highlight": 1,
+     "shadow": 1,
+     "jitter": 0.6,
+     "gradient": 0.4
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rock_face_03",
+     "scale": 12,
+     "amount": 0.9,
+     "ramps": [
+      "stone"
+     ]
+    },
+    {
+     "id": "clusters",
+     "op": "noise",
+     "scale": 1.5,
+     "amount": 0.7,
+     "seed": 1
+    },
+    {
+     "id": "cracks",
+     "op": "cracks",
+     "scale": 1.0,
+     "width": 0.06,
+     "threshold": 0.82,
+     "shift": -1.2,
+     "bevel": true
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.3,
+     "shift": 1.0
+    },
+    {
+     "id": "moss",
+     "op": "patches",
+     "scale": 1.6,
+     "threshold": 0.83,
+     "ramp": "moss",
+     "tone": 3.6
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.6,
+    "rough": 0.7,
+    "textures": {
+     "stone": "stone",
+     "moss": "moss"
+    }
+   }
+  },
+  "soot": {
+   "ramp": "iron",
+   "tone": 1.4,
+   "light": 0.6,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "soot",
+     "op": "noise",
+     "scale": 1.0,
+     "amount": 0.8
+    }
+   ]
+  },
+  "key": {
+   "ramp": "pebble",
+   "tone": 4.4,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rock_face_03",
+     "scale": 12,
+     "amount": 0.9,
+     "ramps": [
+      "pebble"
+     ]
+    },
+    {
+     "id": "clusters",
+     "op": "noise",
+     "scale": 1.5,
+     "amount": 0.7,
+     "seed": 5
+    },
+    {
+     "id": "cracks",
+     "op": "cracks",
+     "scale": 1.0,
+     "width": 0.06,
+     "threshold": 0.82,
+     "shift": -1.2,
+     "bevel": true
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.3,
+     "shift": 1.0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.6,
+    "rough": 0.7,
+    "textures": {
+     "pebble": "stone",
+     "moss": "moss"
+    }
+   }
+  },
+  "beam": {
+   "ramp": "oak",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 4,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 11,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 5,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 12,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 7
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "oak"
+     ]
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 3,
+     "radius": [
+      0.35,
+      0.7
+     ],
+     "stretch": [
+      2.6,
+      1,
+      1
+     ],
+     "ramp": "oak",
+     "tone": 1.2,
+     "bevel": {
+      "highlight_shift": 1.4,
+      "shadow_shift": -1.2
+     },
+     "seed": 9,
+     "faces": [
+      "sides",
+      "top"
+     ],
+     "asymmetric": true
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.45,
+     "shift": 0.9,
+     "scratches": 2
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "x",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "oak": "wood"
+    }
+   }
+  },
+  "flag": {
+   "ramp": "pebble",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rock_face_03",
+     "scale": 12,
+     "amount": 0.9,
+     "ramps": [
+      "pebble"
+     ]
+    },
+    {
+     "id": "clusters",
+     "op": "noise",
+     "scale": 1.5,
+     "amount": 0.7,
+     "seed": 7
+    },
+    {
+     "id": "cracks",
+     "op": "cracks",
+     "scale": 1.0,
+     "width": 0.06,
+     "threshold": 0.82,
+     "shift": -1.2,
+     "bevel": true
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.3,
+     "shift": 1.0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.6,
+    "rough": 0.7,
+    "textures": {
+     "pebble": "stone",
+     "moss": "moss"
+    }
+   }
+  },
+  "barkst": {
+   "ramp": "pebble",
+   "tone": 5,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "outline": "dark"
+   },
+   "layers": [
+    {
+     "id": "lent",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.0,
+     "width": 0.15,
+     "shift": -2.4,
+     "wobble": 0.4
+    },
+    {
+     "id": "char",
+     "op": "patches",
+     "scale": 0.8,
+     "threshold": 0.55,
+     "ramp": "iron",
+     "tone": 1.2
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "pebble": "wood"
+    }
+   }
+  },
+  "ember": {
+   "ramp": "flame",
+   "tone": 2.6,
+   "light": 0.25,
+   "rim": {
+    "light": 1,
+    "dark": 0,
+    "light_shift": 0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "fl": {
+   "ramp": "flame",
+   "tone": 4.0,
+   "light": 0.25,
+   "rim": {
+    "light": 1,
+    "dark": 0,
+    "light_shift": 0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "stub": {
+   "ramp": "cream",
+   "tone": 5.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "warm",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.4
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.4,
+     "seed": 0
+    }
+   ],
+   "brush": {
+    "flow": "vertical",
+    "length": 1.4,
+    "width": 0.4,
+    "rough": 0.3,
+    "textures": {
+     "cream": "organic"
+    }
+   }
+  },
+  "jarst": {
+   "ramp": "lake",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.2,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "pool",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "speck",
+     "op": "spots",
+     "count": 14,
+     "radius": [
+      0.1,
+      0.18
+     ],
+     "shift": -1.6,
+     "seed": 1
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.8,
+     "density": 0.9,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.5,
+    "rough": 0.35,
+    "textures": {
+     "lake": "liquid"
+    }
+   }
+  },
+  "fr": {
+   "ramp": "walnut",
+   "tone": 4,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 9,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 16,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 10,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 17,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 12
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "walnut"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.45,
+     "shift": 0.9,
+     "scratches": 2
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "y",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "walnut": "wood"
+    }
+   }
+  },
+  "br": {
+   "ramp": "iron",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.3,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.6,
+     "seed": 0
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/metal_plate_02",
+     "scale": 8,
+     "amount": 0.5,
+     "ramps": [
+      "iron"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.2,
+     "density": 0.4,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "iron": "metal"
+    }
+   }
+  },
+  "brk": {
+   "ramp": "brass",
+   "tone": 3.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.5,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.9
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.55,
+     "seed": 0
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/metal_plate_02",
+     "scale": 8,
+     "amount": 0.35,
+     "ramps": [
+      "brass"
+     ]
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.6,
+     "density": 0.6,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "brass": "metal"
+    }
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "pier-1",
+   "shape": "box",
+   "size": [
+    5.0,
+    14.0,
+    8.0
+   ],
+   "pivot": [
+    -7.0,
+    7.0,
+    0.2
+   ],
+   "style": "stn",
+   "hide": [
+    "bottom"
+   ],
+   "chamfer": 0.4
+  },
+  {
+   "id": "pier1",
+   "shape": "box",
+   "size": [
+    5.0,
+    14.0,
+    8.0
+   ],
+   "pivot": [
+    7.0,
+    7.0,
+    0.2
+   ],
+   "style": "stn",
+   "hide": [
+    "bottom"
+   ],
+   "chamfer": 0.4
+  },
+  {
+   "id": "arch",
+   "shape": "box",
+   "size": [
+    19.0,
+    3.6,
+    8.6
+   ],
+   "pivot": [
+    0.0,
+    15.8,
+    0.2
+   ],
+   "style": "stn",
+   "chamfer": 0.5
+  },
+  {
+   "id": "keystone",
+   "shape": "box",
+   "size": [
+    2.4,
+    3.0,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    13.9,
+    4.5
+   ],
+   "style": "key",
+   "chamfer": 0.3
+  },
+  {
+   "id": "breast",
+   "shape": "box",
+   "size": [
+    14.0,
+    8.6,
+    5.6
+   ],
+   "pivot": [
+    0.0,
+    21.7,
+    -1.0
+   ],
+   "style": "stn",
+   "chamfer": 0.4
+  },
+  {
+   "id": "firebox",
+   "shape": "box",
+   "size": [
+    9.4,
+    13.6,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    6.8,
+    -3.2
+   ],
+   "style": "soot"
+  },
+  {
+   "id": "fbside_l",
+   "shape": "box",
+   "size": [
+    0.6,
+    13.6,
+    6.0
+   ],
+   "pivot": [
+    -4.4,
+    6.8,
+    0.0
+   ],
+   "style": "soot"
+  },
+  {
+   "id": "fbside_r",
+   "shape": "box",
+   "size": [
+    0.6,
+    13.6,
+    6.0
+   ],
+   "pivot": [
+    4.4,
+    6.8,
+    0.0
+   ],
+   "style": "soot"
+  },
+  {
+   "id": "fbtop",
+   "shape": "box",
+   "size": [
+    9.4,
+    0.6,
+    6.0
+   ],
+   "pivot": [
+    0.0,
+    13.7,
+    0.0
+   ],
+   "style": "soot"
+  },
+  {
+   "id": "mantel",
+   "shape": "box",
+   "size": [
+    20.0,
+    1.8,
+    3.4
+   ],
+   "pivot": [
+    0.0,
+    18.5,
+    4.0
+   ],
+   "style": "beam",
+   "chamfer": 0.35
+  },
+  {
+   "id": "corbel-1",
+   "shape": "taper",
+   "size": [
+    1.4,
+    2.4,
+    2.4
+   ],
+   "pivot": [
+    -8.2,
+    16.4,
+    4.4
+   ],
+   "style": "beam",
+   "front_scale": [
+    1,
+    0.3
+   ],
+   "front_shift": [
+    0,
+    0.8
+   ]
+  },
+  {
+   "id": "corbel1",
+   "shape": "taper",
+   "size": [
+    1.4,
+    2.4,
+    2.4
+   ],
+   "pivot": [
+    8.2,
+    16.4,
+    4.4
+   ],
+   "style": "beam",
+   "front_scale": [
+    1,
+    0.3
+   ],
+   "front_shift": [
+    0,
+    0.8
+   ]
+  },
+  {
+   "id": "hearth",
+   "shape": "box",
+   "size": [
+    22.0,
+    1.0,
+    5.0
+   ],
+   "pivot": [
+    0.0,
+    0.5,
+    5.2
+   ],
+   "style": "flag",
+   "chamfer": 0.3
+  },
+  {
+   "id": "log0",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    7.6
+   ],
+   "pivot": [
+    -0.6,
+    1.9,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    72.0,
+    8.0
+   ],
+   "style": "barkst",
+   "sides": 7
+  },
+  {
+   "id": "log1",
+   "shape": "prism",
+   "size": [
+    1.7,
+    1.7,
+    7.2
+   ],
+   "pivot": [
+    0.8,
+    2.2,
+    0.2
+   ],
+   "rotation": [
+    0.0,
+    -66.0,
+    -6.0
+   ],
+   "style": "barkst",
+   "sides": 7
+  },
+  {
+   "id": "log2",
+   "shape": "prism",
+   "size": [
+    1.4,
+    1.4,
+    6.0
+   ],
+   "pivot": [
+    0.1,
+    3.4,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    92.0,
+    4.0
+   ],
+   "style": "barkst",
+   "sides": 7
+  },
+  {
+   "id": "glow_embers",
+   "shape": "box",
+   "size": [
+    7.4,
+    0.5,
+    4.6
+   ],
+   "pivot": [
+    0.0,
+    1.25,
+    0.6
+   ],
+   "style": "ember"
+  },
+  {
+   "id": "flame0",
+   "shape": "bone",
+   "pivot": [
+    -1.6,
+    2.6,
+    0.8
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "glow_flame0_0",
+   "shape": "card",
+   "parent": "flame0",
+   "size": [
+    3.0,
+    5.6
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    2.75,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "glow_flame0_1",
+   "shape": "card",
+   "parent": "flame0",
+   "size": [
+    3.0,
+    5.6
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    2.75,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "flame1",
+   "shape": "bone",
+   "pivot": [
+    1.2,
+    2.6,
+    0.4
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "glow_flame1_0",
+   "shape": "card",
+   "parent": "flame1",
+   "size": [
+    3.4,
+    6.6
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    3.25,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "glow_flame1_1",
+   "shape": "card",
+   "parent": "flame1",
+   "size": [
+    3.4,
+    6.6
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    3.25,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "flame2",
+   "shape": "bone",
+   "pivot": [
+    0.0,
+    2.6,
+    1.4
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "glow_flame2_0",
+   "shape": "card",
+   "parent": "flame2",
+   "size": [
+    2.6,
+    4.6
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    2.25,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "glow_flame2_1",
+   "shape": "card",
+   "parent": "flame2",
+   "size": [
+    2.6,
+    4.6
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    2.25,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "flame3",
+   "shape": "bone",
+   "pivot": [
+    2.4,
+    2.6,
+    1.0
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "glow_flame3_0",
+   "shape": "card",
+   "parent": "flame3",
+   "size": [
+    2.0,
+    3.6
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    1.75,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "glow_flame3_1",
+   "shape": "card",
+   "parent": "flame3",
+   "size": [
+    2.0,
+    3.6
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    1.75,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "flame4",
+   "shape": "bone",
+   "pivot": [
+    -2.6,
+    2.6,
+    0.2
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "glow_flame4_0",
+   "shape": "card",
+   "parent": "flame4",
+   "size": [
+    2.2,
+    3.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    1.85,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "glow_flame4_1",
+   "shape": "card",
+   "parent": "flame4",
+   "size": [
+    2.2,
+    3.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    1.85,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "art_key": {
+     "c": "flame:5",
+     "y": "flame:3",
+     "o": "flame:2",
+     "r": "flame:1"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "...r...",
+    "...r...",
+    "...y...",
+    "..oyo..",
+    "..yyy..",
+    ".oycyo.",
+    ".ycccy.",
+    "oycccyo",
+    ".ycccy.",
+    ".oycyo.",
+    "..ycy..",
+    "..yyy.."
+   ]
+  },
+  {
+   "id": "stub",
+   "shape": "loft",
+   "pivot": [
+    -6.4,
+    19.4,
+    4.2
+   ],
+   "style": "stub",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0,
+      1.9,
+      0
+     ],
+     "size": 1.1
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "jar",
+   "shape": "loft",
+   "pivot": [
+    6.6,
+    19.4,
+    4.0
+   ],
+   "style": "jarst",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "size": 1.8
+    },
+    {
+     "at": [
+      0,
+      2.2,
+      0
+     ],
+     "size": 1.8
+    },
+    {
+     "at": [
+      0,
+      2.6,
+      0
+     ],
+     "size": 1.0
+    },
+    {
+     "at": [
+      0,
+      2.9,
+      0
+     ],
+     "size": 1.1
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "print",
+   "shape": "box",
+   "size": [
+    3.4,
+    4.2,
+    0.4
+   ],
+   "pivot": [
+    2.2,
+    21.5,
+    3.4
+   ],
+   "rotation": [
+    -8.0,
+    -10.0,
+    0.0
+   ],
+   "style": "fr",
+   "paint": {
+    "layers": [
+     {
+      "id": "pic",
+      "op": "rect",
+      "rect": [
+       0.18,
+       0.15,
+       0.82,
+       0.85
+      ],
+      "ramp": "oat",
+      "tone": 5,
+      "faces": [
+       "front"
+      ],
+      "bevel": true
+     },
+     {
+      "id": "owl",
+      "op": "spots",
+      "centers": [
+       [
+        0,
+        0.1,
+        0.25,
+        0.8
+       ]
+      ],
+      "ramp": "ochre",
+      "tone": 3.4,
+      "faces": [
+       "front"
+      ]
+     },
+     {
+      "id": "eyes",
+      "op": "spots",
+      "centers": [
+       [
+        -0.3,
+        0.35,
+        0.25,
+        0.16
+       ],
+       [
+        0.3,
+        0.35,
+        0.25,
+        0.16
+       ]
+      ],
+      "ramp": "ink",
+      "tone": 1,
+      "faces": [
+       "front"
+      ]
+     }
+    ]
+   },
+   "chamfer": 0.15
+  },
+  {
+   "id": "poker",
+   "shape": "prism",
+   "size": [
+    0.4,
+    0.4,
+    10.0
+   ],
+   "pivot": [
+    10.0,
+    0.1,
+    4.8
+   ],
+   "offset": [
+    0.0,
+    -0.0,
+    5.0
+   ],
+   "rotation": [
+    -80.0,
+    0.0,
+    10.0
+   ],
+   "style": "br",
+   "sides": 5
+  },
+  {
+   "id": "pokerknob",
+   "shape": "loft",
+   "pivot": [
+    11.6,
+    9.8,
+    6.6
+   ],
+   "style": "brk",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": 1.0
+    },
+    {
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ]
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 1.6,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "flame0",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.08,
+       0.16,
+       0.08
+      ],
+      "cycles": 3,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "flame0",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 2,
+      "phase": 0.3
+     }
+    },
+    {
+     "part": "flame0",
+     "osc": {
+      "axis": "x",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.6
+     }
+    },
+    {
+     "part": "flame1",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.08,
+       0.16,
+       0.08
+      ],
+      "cycles": 3,
+      "phase": 0.23
+     }
+    },
+    {
+     "part": "flame1",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 2,
+      "phase": 0.53
+     }
+    },
+    {
+     "part": "flame1",
+     "osc": {
+      "axis": "x",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.83
+     }
+    },
+    {
+     "part": "flame2",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.08,
+       0.16,
+       0.08
+      ],
+      "cycles": 3,
+      "phase": 0.46
+     }
+    },
+    {
+     "part": "flame2",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 2,
+      "phase": 0.76
+     }
+    },
+    {
+     "part": "flame2",
+     "osc": {
+      "axis": "x",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 1.06
+     }
+    },
+    {
+     "part": "flame3",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.08,
+       0.16,
+       0.08
+      ],
+      "cycles": 3,
+      "phase": 0.6900000000000001
+     }
+    },
+    {
+     "part": "flame3",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 2,
+      "phase": 0.99
+     }
+    },
+    {
+     "part": "flame3",
+     "osc": {
+      "axis": "x",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 1.29
+     }
+    },
+    {
+     "part": "flame4",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.08,
+       0.16,
+       0.08
+      ],
+      "cycles": 3,
+      "phase": 0.92
+     }
+    },
+    {
+     "part": "flame4",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 2,
+      "phase": 1.22
+     }
+    },
+    {
+     "part": "flame4",
+     "osc": {
+      "axis": "x",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 1.52
+     }
+    }
+   ]
+  }
+ }
+}
