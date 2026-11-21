@@ -26,6 +26,28 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Optional premium**: moonstones and a Hoot Hollow Plus subscription. The bundled store is a
   clearly labelled demo (`src/ui/market.tsx`, `PurchaseProvider`): nothing is charged.
 
+## What's new in the big hollow update
+
+- **Loading screen and interview**: Pip sleeps on a moonlit branch while the app loads; tap to wake him,
+  then answer his questions in a little office in the oak. His lines float as 3D pixel text and each answer
+  is acted out live (a cozy bed for "sleep better", sheep for "fall asleep faster"...). Answers are pencilled
+  onto a clipboard and stamped into your sleep plan. Settings > Replay the interview shows it again.
+- **Realistic species owls**: ten real owls in detailed voxels (Tawny, Barn, Snowy, Burrowing, Saw-whet,
+  Little, Great Horned, Long-eared, Great Grey, Eurasian Eagle-Owl), plus Gingerbread, Snowman, Celestial and
+  Meowl skins, in a pixel dressing room.
+- **A grand hollow oak**: three floors (Living Room open, Bedroom at Lv 3, Attic Observatory at Lv 6, boarded
+  up until repaired), moving boxes to unpack for free furniture, and a top-down blueprint build mode with
+  free camera, move/turn/store, stacking, wall items, wallpaper and flooring.
+- **Sleep, Clock, Book**: a bedtime ritual on the nightstand (personalised wind-down, breathing, hold to sleep,
+  can't-sleep help and a phone lock), a cuckoo clock with a routine clipboard and sticker calendar, and a big
+  flippable book of stats, nights, collection, achievements and adventures.
+- **Queen Neve's boutique**: daily deals on stands, a free gift, acorn piles, and weekly series wish banners
+  (Frostlight Festival, Starfall Dreams) with pity and a shooting-star reveal.
+- **The world**: real sunrise/sunset, moon phase and season; weather (rain, storms, snow that settles, fog);
+  a bushier forest of pixel-art leaves; Pip packs up and flies off across the night sky, and comes home at
+  dawn with presents (furniture and outfits).
+- **Hanging wooden signs** with a magic level bar, animated main buttons, pixel UI particles and transitions.
+
 ## Run it
 
 ```bash

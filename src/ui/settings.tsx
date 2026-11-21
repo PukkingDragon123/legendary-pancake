@@ -96,6 +96,7 @@ export function Settings() {
         <div class="row" style="gap:8px;flex-wrap:wrap">
           <button class="btn soft sm" onClick={() => { tap(); flush(); void exportJournal(); }}>Export journal</button>
           <button class="btn soft sm" onClick={() => { tap(); demoTonight(); panel.value = null; }}>Preview a demo night</button>
+          <button class="btn soft sm" onClick={() => { tap(); edit((x) => { x.onboarded = false; x.profile.interviewed = false; }); flush(); location.reload(); }}>Replay the interview</button>
           <button class="btn soft sm" style="color:#b3304a" onClick={async () => { if (await ask({ title: 'Start over?', body: 'This erases Pip, the journal and every treasure. It cannot be undone.', ok: 'Erase everything', cancel: 'Keep my hollow', tone: 'berry', art: spriteURL('owl', 4) })) { resetSave(); location.reload(); } }}>Start over</button>
         </div>
       </div>
