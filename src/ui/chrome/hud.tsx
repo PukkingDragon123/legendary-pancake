@@ -50,7 +50,7 @@ export function openPanel(id: Panel, o: TransitionOpts = {}) {
     const sc = sceneRef.current;
     if (sc) { const p = sc.screenOf(sc.owl.headWorld); o = { ...o, x: p.x, y: p.y }; }
   }
-  void transition(k, () => { panel.value = id; }, o);
+  void transition(k, () => { panel.value = id; }, { speed: id === 'quests' ? 1.5 : id === 'map' ? 1.2 : 1, ...o });
 }
 
 /** A pendulum bound to an element: returns [ref callback, swing]. */
@@ -273,7 +273,7 @@ export function SideTools() {
   const fresh = save.value.shop.day !== dayKey();
   return (
     <div class={'hh-tools' + (away ? ' away' : '')} aria-label="Tools">
-      <i class="hh-toolrope" style={{ backgroundImage: bg(ropeTile()) }} />
+      <i class="hh-toolrope" style={{ '--rope': bg(ropeTile()) } as Record<string, string>} />
       {TOOLS.map((t, i) => <ToolTag key={t.id} t={t} i={i} badge={t.id === 'quests' ? ready : 0} isNew={t.id === 'shop' && fresh} />)}
     </div>
   );
