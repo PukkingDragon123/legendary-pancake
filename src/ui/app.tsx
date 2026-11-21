@@ -14,7 +14,8 @@ import { MapPanel, Wardrobe } from './panels.tsx';
 import { Settings } from './settings.tsx';
 import { AlarmOverlay, NightOverlay } from './sleep.tsx';
 import { breathing, bubble, nightOpen, panel, sceneRef } from './state.ts';
-import { Hud, MainNav, SideTools } from './chrome/hud.tsx';
+import { Hud, MainNav, openPanel, SideTools } from './chrome/hud.tsx'; // [chrome] openPanel for the ticket
+import { uiBurst, uiBurstAt } from './chrome/uifx.ts'; // [chrome] bubble puff, ticket stars
 import { SleepScreen } from './sleepflow.tsx';
 import { ClockScreen } from './clockscreen.tsx';
 import { Book } from './book/book.tsx';
@@ -22,6 +23,7 @@ import { BuildMode } from './build.tsx';
 import { Shop } from './shop/shop.tsx';
 import { Intro } from './intro.tsx';
 
+// [chrome] Tonight's ticket: a punched paper ticket with a stub, stamped with the place Pip explores.
 function Ticket() {
   useTick(30000);
   const s = save.value, p = s.sleep;
@@ -35,17 +37,22 @@ function Ticket() {
   const late = diff <= 0;
   const soon = !late && diff < 90 * 60_000;
   return (
-    <div class={'ticket' + (away ? ' away' : '')}>
-      <div class="when"><IcoMoon size={40} style="margin:0 auto" /><small>{late ? 'LATE' : 'BED'}</small></div>
-      <div class="grow">
-        <b class="display" style="font-size:17px">{late ? 'Past bedtime, sleepyhead' : soon ? `Bedtime in ${fmtDur(diff)}` : `Bedtime at ${fmtHM(bed, s.settings.hour12)}`}</b>
-        <div class="small muted">Wake {fmtHM(p.wake, s.settings.hour12)} · tonight: {AREA[s.area]?.name}</div>
+    <div class={'hh-ticket' + (away ? ' away' : '')}>
+      <div class={'hh-tkt-stub' + (late ? ' late' : '')}><IcoMoon size={40} /><small>{late ? 'LATE' : 'BED'}</small></div>
+      <i class="hh-tkt-perf" />
+      <div class="hh-tkt-body">
+        <div class="t">
+          <b class="display">{late ? 'Past bedtime, sleepyhead' : soon ? `Bedtime in ${fmtDur(diff)}` : `Bedtime at ${fmtHM(bed, s.settings.hour12)}`}</b>
+          <div class="small muted">Wake {fmtHM(p.wake, s.settings.hour12)} · tonight: {AREA[s.area]?.name}</div>
+        </div>
+        <button class={'btn pillow sm' + (late || soon ? ' night' : '')} onClick={(e) => { tap('ui_open'); uiBurstAt(e.currentTarget as Element, 'stars', 6); openPanel('sleep'); }}>{late || soon ? 'Get cozy' : 'Plan'}</button>
       </div>
-      <button class={'btn pillow sm' + (late || soon ? ' night' : '')} onClick={() => { tap('ui_open'); panel.value = 'sleep'; }}>{late || soon ? 'Get cozy' : 'Plan'}</button>
     </div>
   );
 }
 
+// [chrome] Pip's speech bubble: pops in from Pip's beak with a little puff, letters hop in as Pip
+// "says" them, and a sleepy dot-dot-dot bobs once Pip has finished.
 function Bubble() {
   const ref = useRef<HTMLDivElement>(null);
   const b = bubble.value;
@@ -56,20 +63,25 @@ function Bubble() {
       const sc = sceneRef.current, el = ref.current;
       if (!sc || !el) return;
       const p = sc.screenOf(sc.owl.headWorld);
-      el.style.left = `${Math.max(130, Math.min(innerWidth - 130, p.x))}px`;
-      el.style.top = `${Math.max(90, p.y - 12)}px`;
+      el.style.left = `${Math.max(130, Math.min(innerWidth - 140, p.x))}px`;
+      el.style.top = `${Math.max(176, p.y - 12)}px`;
     };
     raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
+    const puff = setTimeout(() => { const el = ref.current; if (!el) return; const r = el.getBoundingClientRect(); uiBurst('puff', r.left + r.width / 2, r.bottom + 10, 4); }, 60);
+    return () => { cancelAnimationFrame(raf); clearTimeout(puff); };
   }, [b?.id]);
   const [shown, setShown] = useState(0);
   useEffect(() => {
     if (!b) return;
     setShown(0);
     let i = 0;
+    const t0 = performance.now();
     const voices = ['voice_a', 'voice_b', 'voice_c', 'voice_e'];
     const id = setInterval(() => {
-      i++;
+      // letters follow the clock, so a slow device catches up instead of crawling
+      const n = Math.min(b.text.length, Math.floor((performance.now() - t0) / 28) + 1);
+      if (n === i) return;
+      i = n;
       setShown(i);
       const ch = b.text[i - 1] ?? '';
       // Pip's little voice: a soft blip every other letter, pitched by the letter
@@ -79,7 +91,13 @@ function Bubble() {
     return () => clearInterval(id);
   }, [b?.id]);
   if (!b || phase.value !== 'day' || breathing.value) return null;
-  return <div class="bubble" ref={ref} key={b.id}><span class="who">{save.value.name}</span>{b.text.slice(0, shown)}<span style="opacity:0">{b.text.slice(shown)}</span></div>;
+  return (
+    <div class="hh-bubble" ref={ref} key={b.id}>
+      <span class="who">{save.value.name}</span>
+      <span class="txt">{[...b.text].map((ch, i) => <span class={'ch' + (i < shown ? ' on' : '') + (i === shown - 1 && ch !== ' ' ? ' new' : '')}>{ch}</span>)}</span>
+      {shown >= b.text.length && <i class="bob" />}
+    </div>
+  );
 }
 
 export function App() {

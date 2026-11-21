@@ -22,8 +22,9 @@ export function toast(text: string, icon?: Toast['icon'], ms = 2800) {
   setTimeout(() => { toasts.value = toasts.value.map((t) => (t.id === id ? { ...t, out: true } : t)); }, ms);
   setTimeout(() => { toasts.value = toasts.value.filter((t) => t.id !== id); }, ms + 400);
 }
+/** [chrome] Toasts are parchment scrolls that unroll below the hanging signs (styles in ui/chrome/chrome.css). */
 export function Toasts() {
-  return <div class="toasts">{toasts.value.map((t) => <div key={t.id} class={'toast' + (t.out ? ' out' : '')}>{t.icon ? <t.icon size={40} /> : null}<span>{t.text}</span></div>)}</div>;
+  return <div class="hh-toasts" role="status">{toasts.value.map((t) => <div key={t.id} class={'hh-toast' + (t.out ? ' out' : '')}><div class="hh-toast-body">{t.icon ? <t.icon size={40} /> : null}<span>{t.text}</span></div></div>)}</div>;
 }
 
 // ------------------------------------------------------------------ sheet
