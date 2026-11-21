@@ -46,21 +46,22 @@ function path(pts: THREE.Vector3[], k: number): THREE.Vector3 {
 const leather = (c: string): Painter => { const r = ramp(c); return (t) => tone(r, lvl(t, { noise: 0.45, scale: 1.6, rim: 0.8 }) + (t.u % 5 === 0 && t.face >= 4 ? -0.5 : 0)); };
 
 function satchel(): BoxSpec[] {
-  const body = leather('#9a5a34'), flap = leather('#7a4228');
-  const stitch: Painter = (t) => (t.u % 2 === 0 && (t.v === 0 || t.v === t.h - 1) ? 0xf0d9a8 : flap(t));
+  // [world3] calm palette: muted saddle leather, oat stitching, brass buckle
+  const body = leather('#8c6448'), flap = leather('#6f553d');
+  const stitch: Painter = (t) => (t.u % 2 === 0 && (t.v === 0 || t.v === t.h - 1) ? 0xeae0c8 : flap(t));
   return [
     box(0, 0, 0, 7, 5, 3, body),
     box(0, 2.6, 0.2, 7.4, 2.8, 3.6, stitch),
-    box(0, 2.4, 1.95, 1.8, 1.8, 0.5, metal('#f0c85a')),
-    box(0, 2.9, 2.2, 0.8, 0.8, 0.3, solid('#5a3a20', { noise: 0 })),
+    box(0, 2.4, 1.95, 1.8, 1.8, 0.5, metal('#c8a764')),
+    box(0, 2.9, 2.2, 0.8, 0.8, 0.3, solid('#4a392b', { noise: 0 })),
     box(-3.6, 0.5, 0, 0.5, 3.6, 2.4, flap), box(3.6, 0.5, 0, 0.5, 3.6, 2.4, flap),
   ];
 }
-function strap(): BoxSpec[] { return [box(0, 0, 0, 1.2, 16, 0.8, leather('#6a3820'))]; }
+function strap(): BoxSpec[] { return [box(0, 0, 0, 1.2, 16, 0.8, leather('#5b4a3c'))]; }
 function goggles(): BoxSpec[] {
-  const brass = metal('#e2b24a');
-  const glass: Painter = (t) => { const r = ramp('#7fd0f0'); return tone(r, (t.u + t.v) % 4 === 0 ? 2 : t.face === 4 ? 0.4 : -0.6); };
-  const band = cloth('#5a3a2a', { stripe: '#7a4a32', stripeEvery: 2 });
+  const brass = metal('#c8a764');
+  const glass: Painter = (t) => { const r = ramp('#86a9b0'); return tone(r, (t.u + t.v) % 4 === 0 ? 2 : t.face === 4 ? 0.4 : -0.6); };
+  const band = cloth('#4a392b', { stripe: '#6f553d', stripeEvery: 2 });
   return [
     box(0, 0.4, -1, 17, 1.6, 1, band),
     box(-2.6, 0, 0, 4.2, 4.2, 1.2, brass), box(2.6, 0, 0, 4.2, 4.2, 1.2, brass),
@@ -70,24 +71,24 @@ function goggles(): BoxSpec[] {
 }
 const ITEMS: (() => BoxSpec[])[] = [
   // a rolled map with a red ribbon
-  () => [box(0, 0, 0, 5, 2, 2, solid('#f1e2bc', { noise: 0.3 })), box(0, -0.1, 0, 1, 2.2, 2.2, solid('#d8463a', { noise: 0 }))],
+  () => [box(0, 0, 0, 5, 2, 2, solid('#eae0c8', { noise: 0.3 })), box(0, -0.1, 0, 1, 2.2, 2.2, solid('#a8505c', { noise: 0 }))],
   // an acorn
-  () => [box(0, 0, 0, 3, 3, 3, smooth('#c8873e')), box(0, 2.4, 0, 3.6, 1.4, 3.6, solid('#7a5230', { noise: 0.8, scale: 0.8 })), box(0, 3.6, 0, 0.8, 1, 0.8, solid('#5a3a20'))],
+  () => [box(0, 0, 0, 3, 3, 3, smooth('#bf9d74')), box(0, 2.4, 0, 3.6, 1.4, 3.6, solid('#6f553d', { noise: 0.8, scale: 0.8 })), box(0, 3.6, 0, 0.8, 1, 0.8, solid('#4a392b'))],
   // a tiny lantern
-  () => [box(0, 0, 0, 2.6, 0.6, 2.6, metal('#3a3a48')), box(0, 0.6, 0, 2, 2.4, 2, lamp('#ffd07a'), { glow: true }), box(0, 3, 0, 2.6, 0.6, 2.6, metal('#3a3a48')), box(0, 3.6, 0, 1, 0.8, 0.4, metal('#3a3a48'))],
+  () => [box(0, 0, 0, 2.6, 0.6, 2.6, metal('#46596a')), box(0, 0.6, 0, 2, 2.4, 2, lamp('#f1d39a'), { glow: true }), box(0, 3, 0, 2.6, 0.6, 2.6, metal('#46596a')), box(0, 3.6, 0, 1, 0.8, 0.4, metal('#46596a'))],
   // a star-shaped cookie
   () => {
-    const r = ramp('#e6a64a');
+    const r = ramp('#dcb072');
     const p: Painter = (t) => { const dx = t.bx - 2, dz = t.bz - 2; const a = Math.atan2(dz, dx), d = Math.hypot(dx, dz); return d > 1.3 + 0.9 * Math.abs(Math.cos(a * 2.5)) ? -1 : tone(r, t.face === 2 ? (d < 0.8 ? 1.4 : 0.6) : -0.6); };
     return [box(0, 0, 0, 4, 1, 4, p, { cut: true })];
   },
 ];
 function bundle(): BoxSpec[] {
-  const c = cloth('#d84a4a', { check: '#f2c35a', seed: 3 });
+  const c = cloth('#c0866a', { check: '#eae0c8', seed: 3 });
   return [
     box(0, 0, 0, 8, 6, 8, c), box(0, 1, 0, 9, 3, 9, c), box(0, 6, 0, 4, 2, 4, c),
     { ...box(-2, 7, 0, 3, 2.4, 1.2, c), rot: [0, 0, 35] }, { ...box(2, 7, 0, 3, 2.4, 1.2, c), rot: [0, 0, -35] },
-    box(3.2, 3, 4.4, 2.4, 2.4, 0.4, metal('#f2c85a')),
+    box(3.2, 3, 4.4, 2.4, 2.4, 0.4, metal('#c8a764')),
   ];
 }
 
@@ -135,7 +136,7 @@ function silhouette(scene: Scene, on: boolean) {
       if (!mat.color) continue;
       if (on) {
         if (mat.userData.silC === undefined) { mat.userData.silC = mat.color.getHex(); mat.userData.silE = mat.emissiveIntensity; }
-        mat.color.setRGB(0.06, 0.06, 0.12);
+        mat.color.setRGB(0.07, 0.08, 0.11);
         if (mat.emissiveIntensity !== undefined) mat.emissiveIntensity = 0;
       } else if (mat.userData.silC !== undefined) {
         mat.color.setHex(mat.userData.silC); if (mat.userData.silE !== undefined) mat.emissiveIntensity = mat.userData.silE;
@@ -265,13 +266,13 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
     [4.5, () => { owl.lookAt = null; pop(gog); const h = headWorld(); fx.burst('magic', h.x, h.y - 0.2, h.z, 12); sound.play('sparkle', { volume: 0.5 }); owl.setMood('proud', 1.6); owl.play('nod'); }],
     [5.3, () => { owl.lookAt = scene.camera.position.clone(); owl.setMood('joy', 2.2); }],
     [5.55, () => { owl.play('wave'); sound.play('owl_hoot', { volume: 0.55 }); const h = headWorld(); fx.burst('hearts', h.x, h.y + 0.1, h.z, 3); }],
-    [6.5, () => { const h = headWorld(); fx.burst('puffs', h.x, h.y + 0.2, h.z, 4, 0xfff6e0); }],
+    [6.5, () => { const h = headWorld(); fx.burst('puffs', h.x, h.y + 0.2, h.z, 4, 0xf4eedd); }],
     [7.0, () => { owl.lookAt = null; owl.play('hop'); }],
     [7.45, () => { owl.play('hop'); }],
     [8.45, () => {
       owl.pose = 'fly'; owl.setMood('excited', 4);
       const p = owl.node.position;
-      fx.burst('feathers', p.x, p.y + 0.5, p.z, 14, 0xe8d2b0); fx.burst('puffs', p.x, p.y + 0.05, p.z, 6, 0xf4ecdc); fx.burst('dust', p.x, p.y, p.z, 8); fx.burst('stars', p.x, p.y + 0.6, p.z, 6);
+      fx.burst('feathers', p.x, p.y + 0.5, p.z, 14, 0xd9bf93); fx.burst('puffs', p.x, p.y + 0.05, p.z, 6, 0xeae0c8); fx.burst('dust', p.x, p.y, p.z, 8); fx.burst('stars', p.x, p.y + 0.6, p.z, 6);
       sound.play('wings_flutter', { volume: 0.8 }); sound.play('pet_jump', { volume: 0.5, rate: 0.8 });
       flyFrom = climbPts();
     }],
@@ -298,7 +299,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
         it.position.y += Math.sin(k * Math.PI) * 0.7;
         it.rotation.y += dt * 9; it.rotation.x += dt * 5;
         it.scale.setScalar(1 - Math.max(0, k - 0.7) * 2.6);
-        if (Math.random() < 0.5) fx.emit({ x: it.position.x, y: it.position.y, z: it.position.z, life: 0.4, frame: SPR.spark1, frames: 3, fps: 9, color: 0xfff2b0, size: 0.18, add: true });
+        if (Math.random() < 0.5) fx.emit({ x: it.position.x, y: it.position.y, z: it.position.z, life: 0.4, frame: SPR.spark1, frames: 3, fps: 9, color: 0xf1d39a, size: 0.18, add: true });
       } else if (it.visible) {
         it.visible = false; squash = 1;
         fx.burst('sparkle', to.x, to.y + 0.1, to.z, 6); fx.burst('stars', to.x, to.y, to.z, 3);
@@ -342,7 +343,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
     if (t > 8.5 && t < 13.8 && (trailT -= dt) <= 0) {
       trailT = 0.06;
       const p = n.position;
-      fx.emit({ x: p.x + (Math.random() - 0.5) * 0.3, y: p.y + 0.5, z: p.z + (Math.random() - 0.5) * 0.3, vy: -0.2, life: 0.9, frame: Math.random() < 0.6 ? SPR.spark1 : SPR.diamond, frames: 1, color: [0xfff2b0, 0xc9a6ff, 0x9ff0ff][Math.floor(Math.random() * 3)], size: 0.11, add: true, fadeOut: 0.5 });
+      fx.emit({ x: p.x + (Math.random() - 0.5) * 0.3, y: p.y + 0.5, z: p.z + (Math.random() - 0.5) * 0.3, vy: -0.2, life: 0.9, frame: Math.random() < 0.6 ? SPR.spark1 : SPR.diamond, frames: 1, color: [0xf1d39a, 0xb4a9c9, 0xbcd6dc][Math.floor(Math.random() * 3)], size: 0.11, add: true, fadeOut: 0.5 });
     }
     // the sky opens up as the camera climbs
     sky.starBoost = smooth01(span(t, 9.2, 11.4));
@@ -415,7 +416,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
     [4.9, () => {
       landed = true; owl.pose = 'stand'; owl.play('hop');
       const p = H;
-      fx.burst('dust', p.x, p.y, p.z, 10); fx.burst('puffs', p.x, p.y + 0.15, p.z, 8, 0xf6e8d2); fx.burst('feathers', p.x, p.y + 0.6, p.z, 5, 0xe8d2b0);
+      fx.burst('dust', p.x, p.y, p.z, 10); fx.burst('puffs', p.x, p.y + 0.15, p.z, 8, 0xeae0c8); fx.burst('feathers', p.x, p.y + 0.6, p.z, 5, 0xd9bf93);
       sound.play('pet_land', { volume: 0.6 });
       owl.lookAt = scene.camera.position.clone();
     }],
@@ -429,7 +430,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
       owl.play('present');
     }],
     [6.25, () => { owl.play('dance'); owl.setMood('joy', 3); sound.play('pet_happy', { volume: 0.55 }); const h = owl.headWorld; fx.burst('hearts', h.x, h.y + 0.2, h.z, 4); }],
-    [7.3, () => { const h = owl.headWorld; fx.burst('puffs', h.x, h.y + 0.3, h.z, 6, 0xfff0f6); fx.burst('notes', h.x, h.y + 0.2, h.z, 3); }],
+    [7.3, () => { const h = owl.headWorld; fx.burst('puffs', h.x, h.y + 0.3, h.z, 6, 0xf4eedd); fx.burst('notes', h.x, h.y + 0.2, h.z, 3); }],
   ];
 
   const frame = (t: number, dt: number) => {
@@ -441,7 +442,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
       const v = ahead.sub(p);
       if (v.lengthSq() > 1e-7) n.rotation.y = Math.atan2(v.x, v.z);
       n.rotation.z = Math.sin(t * 1.3) * 0.08;
-      if ((trailT -= dt) <= 0) { trailT = 0.08; fx.emit({ x: p.x, y: p.y + 0.4, z: p.z, vy: -0.15, life: 0.8, frame: SPR.spark1, frames: 3, fps: 7, color: 0xffe6a8, size: 0.2, add: true }); }
+      if ((trailT -= dt) <= 0) { trailT = 0.08; fx.emit({ x: p.x, y: p.y + 0.4, z: p.z, vy: -0.15, life: 0.8, frame: SPR.spark1, frames: 3, fps: 7, color: 0xf1d39a, size: 0.2, add: true }); }
     } else {
       landT += dt;
       n.position.copy(H);

@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { wind } from '../gfx/box.ts';
-import { loadGLB } from '../gfx/glb.ts';
+import { loadGLB, preloadGLB } from '../gfx/glb.ts';
 import SHAPE_DATA from '../assets/nature/shapes.json';
 import type { LeafKind } from '../assets/nature.ts';
 
@@ -114,3 +114,6 @@ export function loadKit(id: string, o: { sway?: number; top?: number } = {}): Pr
 
 /** Every kit model the forest uses (for preloading behind the loading clock). */
 export const KIT_IDS = ['oak_a', 'oak_b', 'maple', 'blossom', 'birch', 'pine_a', 'pine_b', 'sapling', 'bush', 'stump', 'log', 'rock_a', 'rock_b', 'toadstools', 'boletes', 'chanterelles', 'moonglow'];
+
+/** Start loading the forest models early (e.g. behind the loading clock). */
+export const preloadForest = () => preloadGLB(KIT_IDS.map((id) => `world/${id}.glb`));

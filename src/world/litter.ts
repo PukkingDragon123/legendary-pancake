@@ -111,7 +111,7 @@ const rampOf = (c: number, n = 5) => Array.from({ length: n }, (_, i) => {
 
 export function paintLitter(): Uint8Array {
   const p = new Pix(), r = rng(5150);
-  const stone = rampOf(P.stone, 6), pebble = rampOf(P.pebble, 6), dark = rampOf(P.stoneDark, 5);
+  const stone = rampOf(0xa39d90, 6), pebble = rampOf(P.pebble, 6), dark = rampOf(P.stone, 5);
   const bark = rampOf(P.bark, 5), wood = rampOf(P.woodDark, 5), moss = rampOf(P.moss, 6), fern = rampOf(P.fern, 5);
   const ochre = rampOf(P.ochre, 5), rust = rampOf(P.clay, 5), olive = rampOf(0x8a8a4a, 5), honey = rampOf(P.honey, 5), umber = rampOf(P.umber, 5);
   const lily = rampOf(0x5f7d4c, 6), rose = rampOf(P.rose, 5), blush = rampOf(P.blush, 5), paper = rampOf(P.paper, 4), cream = rampOf(P.cream, 5), buff = rampOf(P.buff, 5);
@@ -241,8 +241,8 @@ void main() {
   float sd = smoothstep(0.36, 0.46, n);
   sd = floor(sd * 3.0 + bayer4(gl_FragCoord.xy) * 0.999) / 3.0;
   float sun = mix(1.0, mix(0.42, 1.0, sd), uDapple);
-  vec3 amb = mix(uGround, uSky, 0.75) * 0.72;
-  vec3 lit = amb + uKey * (0.6 * sun + 0.06) * max(uSunDir.y, 0.25);
+  vec3 amb = mix(uGround, uSky, 0.7) * 0.8;
+  vec3 lit = amb + uKey * (0.95 * sun + 0.08) * clamp(uSunDir.y * 1.4, 0.35, 1.0);
   vec3 col = t.rgb * vTint * uSeason * lit * (1.0 - uWet * 0.28);
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>

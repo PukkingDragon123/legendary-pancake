@@ -13,23 +13,35 @@ import { SURFACE_Y } from './terrain.ts';
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
 
-function flyer(body: BoneSpec['boxes'], wing: (side: number) => BoneSpec['boxes'], wy: number): Rig {
+function flyer(body: BoneSpec['boxes'], wing: (side: number) => BoneSpec['boxes'], wy: number, density?: number): Rig {
   return buildRig([
     { name: 'root', pivot: [0, 0, 0], boxes: body },
     { name: 'wingL', parent: 'root', pivot: [-0.5, wy, 0], boxes: wing(-1) },
     { name: 'wingR', parent: 'root', pivot: [0.5, wy, 0], boxes: wing(1) },
-  ]);
+  ], { density });
+}
+
+/** [world3] A butterfly wing painted as pixel art on a thin cut-out card: a rounded forewing and a
+ *  smaller hindwing with a dark border, pale eye-spots and a darker underside. */
+function wingPainter(c: string, side: number): Painter {
+  const r = ramp(c);
+  return (t) => {
+    if (t.face !== 2 && t.face !== 3) return -1;
+    const u = side < 0 ? 1 - t.bx / t.sx : t.bx / t.sx, v = t.bz / t.sz;
+    const f = ((u - 0.08) / 0.98) ** 2 + ((v - 0.66) / 0.38) ** 2, h = ((u - 0.02) / 0.72) ** 2 + ((v - 0.26) / 0.3) ** 2;
+    const fore = f < 1 && v > 0.36, hind = h < 1;
+    if (!fore && !hind) return -1;
+    if (t.face === 3) return tone(r, -1.6);
+    const edge = fore ? f > 0.6 : h > 0.55;
+    if (edge) return (Math.floor(t.bx * 2) + Math.floor(t.bz * 2)) % 5 === 0 ? 0xeae0c8 : tone(r, -2.4);
+    if (fore && Math.abs(u - 0.6) < 0.09 && Math.abs(v - 0.72) < 0.07) return 0xf4eedd;
+    if (hind && Math.abs(u - 0.4) < 0.08 && Math.abs(v - 0.24) < 0.06) return tone(r, -2);
+    return tone(r, 0.9 - u * 0.9 + (u < 0.18 ? -0.8 : 0));
+  };
 }
 
 function butterfly(c: string): Rig {
-  const r = ramp(c);
-  // bright wings with a darker trailing edge and a pale spot, like a painted pixel sprite folded in two
-  const w: Painter = (t) => {
-    const edge = t.bz < 1 || (t.bx < 1 && t.x < 0) || (t.bx > t.sx - 1 && t.x > 0);
-    const spot = Math.abs(t.bx - t.sx / 2) < 0.8 && Math.abs(t.bz - t.sz / 2) < 0.8;
-    return tone(r, edge ? -1.6 : spot ? 2.2 : 0.4 + (t.face === 2 ? 0.5 : -0.6));
-  };
-  return flyer([box(0, 0, 0, 1, 1, 4, solid('#4b463a', { noise: 0 }))], (s) => [box(s * 3, 0.4, 0.8, 5, 0.5, 4, w), box(s * 2.5, 0.4, -1.8, 4, 0.5, 3, w)], 0.5);
+  return flyer([box(0, 0, 0, 1, 1, 4, solid('#4b463a', { noise: 0 }))], (s) => [box(s * 3.2, 0.4, 0.2, 6, 0.25, 7, wingPainter(c, s), { cut: true })], 0.5, 4);
 }
 function bee(): Rig {
   const stripes: Painter = (t) => (Math.floor(t.bz) % 2 ? 0x2e2b24 : 0xdcb072);

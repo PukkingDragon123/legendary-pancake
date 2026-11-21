@@ -10,8 +10,8 @@ import { fbm, hash } from '../gfx/noise.ts';
 import { cellH, clearing, HALF, inGarden, N, pathD, POND, pondD, SEED, WATER_Y, type Collider } from './layout.ts';
 
 const S = N * 16;
-/** [world3] The pond surface sits a little below the grass so it covers the stepped bed; ripples, pads and koi use it. */
-export const SURFACE_Y = WATER_Y + 0.26;
+/** [world3] The pond surface sits a hair above the grass so its rounded edge hides the stepped bed; ripples, pads and koi use it. */
+export const SURFACE_Y = 0.02;
 const R = (c: number[], mid = Math.floor(c.length / 2)): Ramp => ({ c, mid });
 // ramps run dark -> light, shadows leaning slate and lights leaning lamp-gold (src/gfx/palette.ts)
 const GRASS_R = R([0x24342a, 0x2e4230, 0x3a5236, 0x4b6640, 0x5c7748, 0x6e8752, 0x82985e, 0x98aa70, 0xb0bd88], 4);
@@ -228,7 +228,7 @@ export function buildTerrain(shade: Collider[]): Terrain {
 
   // pond surface
   const water = new THREE.ShaderMaterial({
-    vertexShader: WATER_VS, fragmentShader: WATER_FS, transparent: true, fog: true, depthWrite: false,
+    vertexShader: WATER_VS, fragmentShader: WATER_FS, transparent: true, fog: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -4,
     uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
       uTime: { value: 0 }, uDeep: { value: new THREE.Color(0x3f6670) }, uShallow: { value: new THREE.Color(0x86a9b0) }, uFoam: { value: new THREE.Color(0xdfe9ea) }, uSky: { value: new THREE.Color(0xd2dfd8) },
       uLight: { value: new THREE.Color(1, 1, 1) }, uPond: { value: new THREE.Vector4(POND.x, POND.z, POND.rx, POND.rz) }, uIce: { value: 0 },

@@ -214,10 +214,12 @@ class Kit:
         r = self.r
         fr = [(-0.98, 0.18), (-0.72, 0.72), (-0.3, 0.97), (0.15, 1.0), (0.55, 0.84), (0.86, 0.5), (1.0, 0.0)]
         rings = []
+        # the solid core sits a little inside the leaf-card shell, so the cards make the silhouette
+        core = 0.84
         for ky, ks in fr:
             j = 1 + r.uniform(-lump, lump)
-            sx, sz = 2 * rx * ks * j, 2 * rz * ks * (1 + r.uniform(-lump, lump))
-            rings.append(((cx + r.uniform(-1, 1) * rx * lump * 0.6, cy + ky * ry, cz + r.uniform(-1, 1) * rz * lump * 0.6), [max(0.2, sx), max(0.2, sz)]))
+            sx, sz = 2 * rx * ks * j * core, 2 * rz * ks * (1 + r.uniform(-lump, lump)) * core
+            rings.append(((cx + r.uniform(-1, 1) * rx * lump * 0.6, cy + ky * ry * core, cz + r.uniform(-1, 1) * rz * lump * 0.6), [max(0.2, sx), max(0.2, sz)]))
         self.loft('crown', rings, f'crown_{ramp}', sides=sides, rnd=2.0, caps=(True, True), subdiv=0, up=[0, 0, 1])
         self.blobs.append({'x': round(cx, 2), 'y': round(cy, 2), 'z': round(cz, 2), 'rx': round(rx, 2), 'ry': round(ry, 2), 'rz': round(rz, 2)})
 
@@ -300,10 +302,10 @@ def pine(name, seed):
     for i in range(tiers):
         f = 1 - i / tiers
         rad = 7 + f * 21
-        nb = 5 + (2 if f > 0.5 else 0)
+        nb = 3 + (1 if f > 0.5 else 0)
         a0 = r.uniform(0, math.tau)
         for b in range(nb):
-            k.limb(0, y + 2, 0, a0 + b / nb * math.tau + r.uniform(-0.2, 0.2), r.uniform(-14, 4), rad * 0.86, 2.2, -8, style='barkpine', twigs=0, sides=4)
+            k.limb(0, y + 2, 0, a0 + b / nb * math.tau + r.uniform(-0.2, 0.2), r.uniform(-14, 4), rad * 0.86, 2.2, -8, style='barkpine', twigs=0, sides=3)
         # a drooping skirt of needles: a flattened cone, wider at the bottom edge
         jx, jz = r.uniform(-1, 1), r.uniform(-1, 1)
         w1, w2 = r.uniform(0.86, 1.0), r.uniform(0.86, 1.0)
