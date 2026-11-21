@@ -99,12 +99,12 @@ void main() {
   // milky way: a dusty band of light with a dark lane, dithered to a few levels
   if (uMilky > 0.01 && dq.y > -0.05) {
     float x = dot(dq, uMilkyN);
-    float core = exp(-x * x / 0.018) * (0.55 + 0.75 * fbm2(vec2(atan(dq.z, dq.x) * 3.0, x * 9.0)));
+    float core = exp(-x * x / 0.024) * (0.55 + 0.8 * fbm2(vec2(atan(dq.z, dq.x) * 3.0, x * 9.0)));
     float lane = exp(-pow((x + 0.018) / 0.035, 2.0)) * smoothstep(0.35, 0.75, fbm2(vec2(atan(dq.z, dq.x) * 6.0, 3.0)));
     float g = max(0.0, core - lane * 0.7) * uMilky * smoothstep(-0.06, 0.06, dq.y);
     vec2 cell = vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0042;
     g = floor(g * 5.0 + bayer4(cell) * 0.95) / 5.0;
-    col += mix(vec3(0.16, 0.18, 0.36), vec3(0.5, 0.46, 0.52), clamp(g, 0.0, 1.0)) * g * 0.55;
+    col += mix(vec3(0.18, 0.2, 0.4), vec3(0.56, 0.5, 0.56), clamp(g, 0.0, 1.0)) * g * 0.75;
   }
 
   // aurora: green curtains with violet tops, rippling slowly over the north
@@ -304,7 +304,8 @@ export class Sky {
         uNight: { value: 0 }, uDay: { value: 1 }, uMoonDir: { value: new THREE.Vector3().copy(this.moonDir) }, uMoonPhase: { value: this.moonPhase }, uMoonSize: { value: 0.05 },
         uMoonVis: { value: 0 }, uHemi: { value: 1 }, uSunSize: { value: 0.04 }, uOvercast: { value: 0 }, uFlash: { value: 0 }, uAurora: { value: 0 }, uMilky: { value: 0 },
         uCloudLit: { value: new THREE.Color() }, uCloudDark: { value: new THREE.Color() }, uFogCol: { value: new THREE.Color() }, uHaze: { value: 0 },
-        uMilkyN: { value: new THREE.Vector3(0.926, -0.345, -0.14).normalize() },
+        // the band rises from the trees left of the house and arcs up past where the cinematic moon hangs
+        uMilkyN: { value: new THREE.Vector3(-0.474, 0.852, 0.217).normalize() },
       },
     });
     this.dome = new THREE.Mesh(new THREE.SphereGeometry(180, 32, 16), this.domeMat);

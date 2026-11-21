@@ -382,6 +382,7 @@ export class Weather {
     this.bolt.frustumCulled = false; this.bolt.visible = false; this.bolt.renderOrder = -7; this.bolt.userData.noSnowMap = true;
     sc.scene.add(this.rain.mesh, this.snowP.mesh, this.bolt);
     sc.owl.node.userData.noSnowMap = true;
+    sc.owl.node.userData.noWeather = true;
     sc.critters.group.userData.noSnowMap = true;
     this.patchAll();
     this.refresh();
@@ -435,11 +436,14 @@ export class Weather {
 
   /** Find lit materials the patch hasn't seen yet (new furniture, the house...). */
   patchAll() {
-    this.sc.scene.traverse((o) => {
+    // (Pip keeps his feathers dry: anything under a `noWeather` node is left alone)
+    const walk = (o: THREE.Object3D) => {
+      if (o.userData.noWeather) return;
       const m = (o as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
-      if (!m) return;
-      if (Array.isArray(m)) m.forEach(patchWeather); else patchWeather(m);
-    });
+      if (m) { if (Array.isArray(m)) m.forEach(patchWeather); else patchWeather(m); }
+      for (const c of o.children) walk(c);
+    };
+    walk(this.sc.scene);
   }
 
   private applySeason() {
@@ -448,11 +452,14 @@ export class Weather {
     this.lastSeason = key;
     this.sc.flora.setSeason(s);
     this.sc.critters.setSeason(s.season, s.t);
-    const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.06, 0.92], summer: [1, 1, 1], autumn: [1.1, 0.95, 0.72], winter: [0.9, 0.9, 0.86] };
+    const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.06, 0.92], summer: [1, 1, 1], autumn: [1.14, 0.94, 0.64], winter: [0.9, 0.9, 0.86] };
     GRASS.uTint.value.setRGB(...tint[s.season]);
+    const late = s.season === 'autumn' ? Math.max(0, (s.t - 0.45) / 0.55) : 0;
+    GRASS.uBloom.value = s.season === 'winter' ? 0 : s.season === 'autumn' ? 0.3 * (1 - late) : 1;
+    GRASS.uLitter.value = s.season === 'autumn' ? 0.35 + late * 0.5 : s.season === 'winter' ? 0.25 : 0;
     // the painted ground follows along: golden leaf litter in autumn, faded in winter
     const ground = this.sc.terrain.group.getObjectByName('ground') as THREE.Mesh | undefined;
-    const gt: Record<Season, number> = { spring: 0xf4fff0, summer: 0xffffff, autumn: 0xfff0d8, winter: 0xe8ece6 };
+    const gt: Record<Season, number> = { spring: 0xf4fff0, summer: 0xffffff, autumn: 0xffe6c4, winter: 0xe8ece6 };
     if (ground) (ground.material as THREE.MeshLambertMaterial).color.setHex(gt[s.season]);
   }
 

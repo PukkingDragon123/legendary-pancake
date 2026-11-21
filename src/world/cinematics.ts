@@ -331,7 +331,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
       n.scale.set(1 - st * 0.1, 1 + st * 0.22, 1 - st * 0.1);
     }
     if (t >= 11.2) {
-      const u = span(t, 11.2, 14.4), p = skyAt(smooth01(u) * 0.75 + u * 0.25);
+      const u = span(t, 11.2, 13.9), p = skyAt(smooth01(u) * 0.75 + u * 0.25);
       const v = skyAt(Math.min(1, u + 0.02)).sub(p);
       n.position.copy(p);
       if (v.lengthSq() > 1e-6) n.rotation.y = Math.atan2(v.x, v.z);
@@ -339,7 +339,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
       n.visible = u < 1;
     }
     // a twinkling trail behind Pip in the air
-    if (t > 8.5 && t < 14.2 && (trailT -= dt) <= 0) {
+    if (t > 8.5 && t < 13.8 && (trailT -= dt) <= 0) {
       trailT = 0.06;
       const p = n.position;
       fx.emit({ x: p.x + (Math.random() - 0.5) * 0.3, y: p.y + 0.5, z: p.z + (Math.random() - 0.5) * 0.3, vy: -0.2, life: 0.9, frame: Math.random() < 0.6 ? SPR.spark1 : SPR.diamond, frames: 1, color: [0xfff2b0, 0xc9a6ff, 0x9ff0ff][Math.floor(Math.random() * 3)], size: 0.11, add: true, fadeOut: 0.5 });
@@ -365,7 +365,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
     return look(C.clone().addScaledVector(side, drift), C.clone().addScaledVector(m, 14), 42);
   };
 
-  return runner(scene, 15, evs, frame, shot, (how) => {
+  return runner(scene, 14.3, evs, frame, shot, (how) => {
     silhouette(scene, false);
     for (const it of items) { scene.scene.remove(it); }
     for (const p of [bag, band, gog]) p.parent?.remove(p);

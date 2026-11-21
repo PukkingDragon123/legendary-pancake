@@ -28,6 +28,10 @@ export const GRASS = {
   uSnow: { value: 0 },
   /** 0..1 rain-soaked: darker, glossier */
   uWet: { value: 0 },
+  /** 0..1 how many wildflowers are in bloom (they go to seed in autumn, vanish in winter) */
+  uBloom: { value: 1 },
+  /** 0..1 fallen leaves among the short grass (autumn) */
+  uLitter: { value: 0 },
 };
 
 /** A small tileable value-noise texture used for dappled light and patchy hue. */
@@ -63,7 +67,7 @@ attribute vec3 iData;   // size, cell, tint
 uniform float uTime;
 uniform vec2 uWind;
 uniform vec4 uPush[4];
-uniform float uSnow;
+uniform float uSnow; uniform float uBloom; uniform float uLitter;
 varying vec2 vUv;
 varying vec3 vW;
 varying float vTint;
@@ -91,7 +95,13 @@ void main() {
     w.xz += dir * k * 0.35 * iData.x;
     w.y -= k * 0.3 * iData.x;
   }
-  vUv = vec2((iData.y + uv.x) / ${NCELL.toFixed(1)}, uv.y);
+  // [world] seasons: wildflowers go to seed and dry out, leaves gather in the short grass
+  float cellI = iData.y;
+  float hb = fract(sin(dot(iPos.xz, vec2(12.9898, 78.233))) * 43758.5453);
+  bool bloom = (cellI > 2.5 && cellI < 10.5 && cellI != 9.0) || (cellI > 19.5 && cellI < 22.5);
+  if (bloom && hb > uBloom) cellI = hb > 0.78 ? 24.0 : hb > 0.62 ? 19.0 : 13.0;
+  if (cellI < 1.5 && hb < uLitter * 0.45) cellI = 24.0;
+  vUv = vec2((cellI + uv.x) / ${NCELL.toFixed(1)}, uv.y);
   vW = w;
   vTint = iData.z;
   vH = h;
