@@ -80,7 +80,7 @@ function OverviewPage(p: { c: PageCtx; s: Save; nights: Night[]; demo: boolean }
   const week = lastWeek(p.nights), wk = week.filter((d) => d.night).map((d) => d.night!);
   const wa = averages(wk), all = averages(p.nights);
   const best = p.nights.reduce<Night | undefined>((b, n) => (!b || n.report.score > b.report.score ? n : b), undefined);
-  const chartH = Math.round(Math.min(L.PH * (L.single ? 0.34 : 0.3), p.c.cw * (L.single ? 0.72 : 0.6)));
+  const chartH = Math.round(Math.min(L.PH * (L.single ? 0.34 : 0.21), p.c.cw * (L.single ? 0.72 : 0.6)));
   return (
     <div class="bk-col">
       <Head kicker={`${s.name}'s sleep diary`} title="This week" right={p.demo ? <span class="bk-demo">demo</span> : undefined} />
