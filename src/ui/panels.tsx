@@ -1,116 +1,18 @@
 // Panels opened from the home screen: the wardrobe (try outfits and coats live), decorating the
 // tree house (tap a glowing spot, pick a piece), and the map of places Pip can explore.
 import { useEffect, useState } from 'preact/hooks';
-import { sound } from '../audio/sound.ts';
 import { AREAS, TRINKETS, ZONE_LEVEL, ZONE_NAME } from '../game/catalog.ts';
-import { areaOpen, buy, edit, level, placeFurniture, priceOf, save, setCoat, wear, zones } from '../game/store.ts';
-import type { OutfitSlot } from '../owl/model.ts';
-import { PIECES, SLOT_NAME, SLOT_ORDER } from '../owl/outfits.ts';
-import { coatsFor, SKINS, type Skin } from '../owl/palette.ts';
+import { areaOpen, buy, edit, level, placeFurniture, save, zones } from '../game/store.ts';
 import { ITEMS } from '../world/scene.ts';
-import { IcoBrush, IcoCheck, IcoClose, IcoHanger, IcoLock, IcoMap, IcoSparkle } from './icons.tsx';
-import { Price, Sheet, Tags, tap, toast } from './kit.tsx';
-import { coatIcon, itemIcon, pieceIcon } from './portraits.ts';
+import { IcoBrush, IcoCheck, IcoClose, IcoLock, IcoMap } from './icons.tsx';
+import { Sheet, Tags, tap, toast } from './kit.tsx';
+import { itemIcon } from './portraits.ts';
 import { panel, sceneRef } from './state.ts';
 
 // ------------------------------------------------------------------ wardrobe
 
-export function Wardrobe() {
-  const s = save.value, look = s.look;
-  const skin = (look.skin ?? 'owl') as Skin;
-  const [slot, setSlot] = useState<OutfitSlot | 'coat'>('head');
-  const [trying, setTrying] = useState<string | null>(null);
-  useEffect(() => {
-    const sc = sceneRef.current;
-    sc?.setView('owl');
-    sc?.owl.setMood('proud', 2);
-    sc && (sc.owl.still = true);
-    return () => { if (sc) { sc.owl.still = false; sc.setView('home'); sc.setLook(save.value.look); } };
-  }, []);
-  // preview something not yet owned on the live owl
-  useEffect(() => {
-    const sc = sceneRef.current;
-    if (!sc) return;
-    if (!trying) { sc.setLook(save.value.look); return; }
-    if (slot === 'coat') sc.setLook({ ...look, palette: trying });
-    else sc.setLook({ ...look, outfit: { ...look.outfit, [slot]: trying } });
-  }, [trying, slot]);
-  const pieces = PIECES.filter((p) => p.slot === slot);
-  const coats = coatsFor(skin);
-  const ownsSkin = (k: Skin) => k === 'owl' || s.owned.skins.includes(k);
-  return (
-    <Sheet class="short" title={<span class="row" style="gap:8px"><IcoHanger size={40} />Wardrobe</span>} onClose={() => { if (panel.value === 'wardrobe') panel.value = null; }}>
-      <Tags value={slot} onChange={(v) => { setSlot(v); setTrying(null); }} options={[...SLOT_ORDER.map((k) => ({ v: k as OutfitSlot | 'coat', label: SLOT_NAME[k] })), { v: 'coat', label: 'Coat & look' }]} />
-      {slot === 'coat' ? (
-        <>
-          <div class="grid">{SKINS.map((k) => (
-            <button class={'tile' + (skin === k.id ? ' on' : '')} onClick={() => {
-              tap();
-              if (!ownsSkin(k.id)) { toast(`The ${k.name} look is in the Market`, IcoSparkle); return; }
-              const coat = coatsFor(k.id).find((c) => s.owned.palettes.includes(c.id))?.id ?? coatsFor(k.id)[0].id;
-              edit((x) => { x.look.skin = k.id; x.look.palette = coat; });
-              sceneRef.current?.owl.play('ruffle');
-            }}>
-              <div class="art"><img src={coatIcon(k.id === 'owl' ? 'tawny' : 'tabby', k.id)} alt="" /></div>
-              <div class="nm">{k.name}</div>{ownsSkin(k.id) ? <span class="owned">{skin === k.id ? 'Wearing' : 'Owned'}</span> : <Price gems={k.gems} />}
-            </button>
-          ))}</div>
-          <div class="grid">{coats.map((c) => {
-            const owned = s.owned.palettes.includes(c.id), on = look.palette === c.id;
-            return (
-              <button class={'tile' + (on || trying === c.id ? ' on' : '')} onClick={() => {
-                tap();
-                if (owned) { setTrying(null); setCoat(c.id); sceneRef.current?.owl.play('ruffle'); sound.play('fabric', { volume: 0.5 }); }
-                else setTrying(c.id);
-              }}>
-                <div class="art"><img src={coatIcon(c.id, c.skin)} alt="" loading="lazy" /></div>
-                <div class="nm">{c.name}</div>
-                {owned ? <span class="owned">{on ? 'Wearing' : 'Owned'}</span> : c.unlock ? <span class="small muted">Found on adventures</span> : <Price {...priceOf({ kind: 'palette', id: c.id })} />}
-              </button>
-            );
-          })}</div>
-        </>
-      ) : (
-        <div class="grid">
-          <button class={'tile' + (!look.outfit[slot] ? ' on' : '')} onClick={() => { tap(); setTrying(null); wear(slot, null); }}><div class="art"><IcoClose size={40} /></div><div class="nm">Nothing</div></button>
-          {pieces.map((p) => {
-            const owned = s.owned.pieces.includes(p.id), on = look.outfit[slot] === p.id;
-            return (
-              <button class={'tile' + (on || trying === p.id ? ' on' : '')} onClick={() => {
-                tap();
-                if (owned) { setTrying(null); wear(slot, p.id); sceneRef.current?.owl.play(slot === 'head' ? 'hop' : 'ruffle'); sound.play('fabric', { volume: 0.5 }); }
-                else setTrying(p.id);
-              }}>
-                <div class="art"><img src={pieceIcon(p.id, p.slot, look)} alt="" loading="lazy" /></div>
-                <div class="nm">{p.name}</div>
-                {owned ? <span class="owned">{on ? 'Wearing' : 'Owned'}</span> : p.area ? <span class="small muted">Found in {AREAS.find((a) => a.id === p.area)?.name}</span> : <Price {...priceOf({ kind: 'piece', id: p.id })} />}
-              </button>
-            );
-          })}
-        </div>
-      )}
-      {trying && (() => {
-        const kind = slot === 'coat' ? 'palette' : 'piece';
-        const def = slot === 'coat' ? coats.find((c) => c.id === trying) : PIECES.find((p) => p.id === trying);
-        const found = slot === 'coat' ? !!(def as { unlock?: string })?.unlock : !!(def as { area?: string })?.area;
-        return (
-          <div class="card row" style="position:sticky;bottom:0">
-            <div class="grow"><b>{def?.name}</b><div class="small muted">{found ? 'Pip can find this on an adventure.' : 'Trying it on'}</div></div>
-            <button class="btn soft sm" onClick={() => { tap('ui_back'); setTrying(null); }}>Back</button>
-            {!found && <button class="btn pillow honey sm" onClick={() => {
-              const err = buy({ kind, id: trying });
-              if (err) { tap('ui_error'); toast(err); return; }
-              sound.play('ui_buy', { volume: 0.6 });
-              if (kind === 'palette') setCoat(trying); else wear(slot as OutfitSlot, trying);
-              setTrying(null);
-              sceneRef.current?.owl.play('dance');
-            }}>Buy <Price {...priceOf({ kind, id: trying })} /></button>}
-          </div>
-        );
-      })()}
-    </Sheet>
-  );
-}
+// [owl] the dressing room lives in its own module (species, skins and outfit drawers)
+export { Wardrobe } from './wardrobe.tsx';
 
 // ------------------------------------------------------------------ decorate
 
