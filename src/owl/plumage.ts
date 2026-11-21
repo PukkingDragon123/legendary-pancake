@@ -13,7 +13,9 @@ import type { Plumage, SpeciesDef } from './species.ts';
 
 /** Ramps with warm shadows for warm colours; whites can ask for cool, snowy shadows. */
 export function fr(c: string | number, step = 0.045, cool = false): Ramp {
-  const [, C, h] = toLch(col(c));
+  const [Lc, C, h] = toLch(col(c));
+  // near-whites shade to soft neutral greys (warm hue drift turns them pink)
+  if (Lc > 0.9 && C < 0.04) return ramp(col(c), cool ? { step, cool: 250, warm: 90, shift: 0.03 } : { step, cool: 80, warm: 90, shift: 0.015 });
   const warm = !cool && ((h > 15 && h < 115) || C < 0.05);
   return ramp(col(c), warm ? { cool: 40, warm: 88, shift: 0.045, step } : { step, cool: 255, shift: 0.06 });
 }
@@ -177,7 +179,7 @@ export function paintKit(sp: SpeciesDef, g: Geo, opts: { fem?: boolean } = {}): 
         const heavy = fem ? (zone === 'cov' ? 0.72 : 0.92) : 0.06;
         if (f.h > heavy && curve > 0.55 && curve < 0.82 && cu < 0.44) return tone(upD, L * 0.4 + (fem ? 1.6 : 0.2) + (cu > 0.36 ? 0.7 : 0));
         if (!fem && f.h2 > 0.55 && curve > 0.26 && curve < 0.38 && cu < 0.3) return tone(upD, L * 0.4 + 0.9);
-        return tone(up, L + 0.15);
+        return tone(up, L * 0.85 - 0.45);
       }
       case 'spotted': {
         const rate = id === 'sawwhet' ? { crown: 0.7, back: 0.25, scap: 0.85, cov: 0.45 }[zone] : id === 'little' ? { crown: 0.85, back: 0.6, scap: 0.85, cov: 0.65 }[zone] : { crown: 0.75, back: 0.75, scap: 0.85, cov: 0.75 }[zone];
@@ -238,18 +240,19 @@ export function paintKit(sp: SpeciesDef, g: Geo, opts: { fem?: boolean } = {}): 
         return lowMix(L, pale);
       }
       case 'dots': {
-        // white with a few fine dark dots, a golden wash creeping onto the breast sides
-        if (c.h > 0.6 && hgt > 0.25 && Math.hypot((c.u - 0.5) * 1.85, (v - 0.5) * 2.3) < 0.2) return tone(unM, 0.4);
+        // silky white with fine dark dots, soft feather scallops and a golden wash on the breast sides
+        if (c.h > 0.42 && hgt > 0.22 && Math.hypot((c.u - 0.5) * 1.6, (v - 0.62) * 2.2) < 0.17) return tone(unM, 0.5);
         const side = Math.abs(Math.atan2(t.x, t.z));
-        if (hgt > 0.5 && side > 0.7 && fbm(t.x * 0.5, t.y * 0.5, t.z * 0.5, 3) + (side - 0.7) * 0.5 > 0.72) return tone(wash, L + 0.2);
-        return tone(un, L + 0.25);
+        if (hgt > 0.45 && side > 0.6 && fbm(t.x * 0.5, t.y * 0.5, t.z * 0.5, 3) + (side - 0.6) * 0.5 > 0.7) return tone(wash, L);
+        const scal = v > 0.78 - Math.abs(c.u - 0.5) * 0.5 ? -0.5 : 0;
+        return tone(un, L * 0.8 - 0.55 + scal);
       }
       case 'snowy': {
         const curve = v + 0.16 * (1 - arc(c.u));
         const dens = fem ? 0.97 : hgt > 0.86 ? 0.75 : hgt > 0.22 ? 0.12 : 0.7;
         if (c.h > dens && curve > 0.42 && curve < 0.62 && cu < 0.42) return tone(unM, L * 0.4 + (cu > 0.32 ? 0.9 : 0.3));
         if (!fem && c.h2 > 0.55 && hgt > 0.3 && hgt < 0.8 && curve > 0.12 && curve < 0.24 && cu < 0.3) return tone(unM, L * 0.4 + 1.0);
-        return tone(un, L + 0.25);
+        return tone(un, L * 0.8 - 0.5 + (v > 0.8 - Math.abs(c.u - 0.5) * 0.5 ? -0.45 : 0));
       }
       case 'barred': {
         // burrowing owl: a spotted brown breast band, then wavy brown bars on cream
@@ -367,6 +370,13 @@ export function paintKit(sp: SpeciesDef, g: Geo, opts: { fem?: boolean } = {}): 
         return tone(disc, L);
       }
       case 'rings': {
+        // the white bow tie under the bill, knotted with a black chin spot
+        if (t.y < g.beakY - 1.0 && t.y > g.beakY - 4.6 && ax < 3.8) {
+          if (ax < 0.6 && t.y < g.beakY - 2.3) return tone(dark, -1.2);
+          const yc = g.beakY - 2.9 + (ax - 0.5) * 0.5, half = 0.8 - Math.max(0, ax - 0.6) * 0.17;
+          if (ax > 0.55 && ax < 3.5 && Math.abs(t.y - yc) < half) return tone(brow, L * 0.3 + 0.9 - (Math.abs(t.y - yc) > half - 0.22 ? 0.5 : 0));
+          return tone(discD, L * 0.5 + 0.2);
+        }
         // concentric dark rings, a pale halo and a dark crescent round each small eye
         if (rr < 1.0 && rr > 0.25) return tone(brow, L * 0.4 + 0.5);
         if (rr < 1.5 && t.y < ey) return tone(discD, L * 0.5 + 0.3);
@@ -412,7 +422,7 @@ export function paintKit(sp: SpeciesDef, g: Geo, opts: { fem?: boolean } = {}): 
     frame(t, g.head, Rh, F);
     let L = F.L * 0.95 + 0.05;
     // throat below the disc: soft down (white bib on the big eared owls)
-    if (Math.abs(F.az) < 0.9 && t.y < g.beakTip - 0.2 && F.ny < 0.3) {
+    if (Math.abs(t.x) < g.headW * 0.24 && Math.abs(F.az) < 0.7 && t.y < g.beakTip - 0.2 && F.ny < 0.3) {
       L += down(t.x * 2, -t.y, 6);
       if (P.bib) return tone(bib, L * 0.6 + 0.4);
       return tone(chin, L * 0.7);
@@ -526,14 +536,17 @@ export function paintKit(sp: SpeciesDef, g: Geo, opts: { fem?: boolean } = {}): 
   };
 
   const tuftP = (n: number): Painter => (t) => {
-    let L = FACE[t.face] * 0.8 + 0.15 + (t.by / Math.max(0.5, t.sy)) * 0.5;
+    // one tuft reads as a single clump: crown-coloured at the root, dark through the middle with
+    // fine pale barbs slanting up the vanes, a darker tip; the boxes share the pattern in world space
+    const along = t.by / Math.max(0.5, t.sy);
+    let L = FACE[t.face] * 0.8 + 0.15 + along * 0.4 + (n === 0 ? -0.1 : 0);
     if (t.face === 3) L -= 0.6;
-    const across = t.face === 0 || t.face === 1 ? t.bz / t.sz : t.bx / t.sx;
-    const edge = Math.abs(across - 0.5) > 0.3;
-    if (snowy) return tone(up, L + (!fem && pep(t, 3) > 0.88 ? -2 : 0));
-    if (edge) return tone(tuftEdge, L * 0.6);
-    if (t.by < 0.6 && n % 2 === 0) return tone(up, L);
-    return tone(tuftR, L * 0.6 + (Math.abs(across - 0.5) < 0.08 ? -0.5 : 0.25));
+    if (snowy) return tone(up, L * 0.8 - 0.3 + (!fem && pep(t, 3) > 0.88 ? -2 : 0));
+    if (n === 0 && along < 0.55) return tone(up, L);
+    if (along > 0.88) return tone(tuftR, L * 0.5 - 0.2);
+    const barb = fract(Math.abs(t.x) * 1.6 + t.y * 1.1 + t.z * 0.4);
+    if (barb < 0.22) return tone(tuftEdge, L * 0.5 + 0.1);
+    return tone(tuftR, L * 0.6 + 0.2);
   };
 
   // ---------------------------------------------------------------- legs, feet, beak

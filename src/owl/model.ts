@@ -252,7 +252,7 @@ function buildSpecies(P: OwlParts) {
   const fem = P.look.feminine ? 0.4 : 0;
 
   // body: an egg of thin stepped layers, the breast bulging forward
-  P.add('body', ...volume({ ...g.body, hw: (q) => g.body.hw(q) - fem }, k.body, { step: 0.55, maxH: 3 }));
+  P.add('body', ...volume({ ...g.body, hw: (q) => g.body.hw(q) - fem }, k.body, { step: 0.45, maxH: 2.6 }));
 
   // head: a domed skull sliced the same way, plus a nape stepping down into the mantle
   P.add('head', ...volume(g.head, k.head, { step: 0.42, maxH: 2.4 }));
@@ -275,7 +275,7 @@ function buildSpecies(P: OwlParts) {
   P.add('head', box(0, by - 1.55, df + 0.75, 1.05, 1.15, 0.9, k.beak), box(0, by - 2.15, df + 0.85, 0.75, 0.7, 0.62, k.beak), box(0, by - 2.5, df + 0.72, 0.45, 0.45, 0.42, k.beak));
   for (const sd of [-1, 1]) P.add('head', { ...box(sd * 0.85, by - 1.35, df + 0.3, 0.8, 1.5, 0.45, k.bristle), rot: [0, sd * 14, -sd * 8] });
   // chin under the bill (the great grey's bow tie sits here)
-  if (s.disc === 'round') for (const sd of [-1, 1]) P.add('head', { ...box(sd * 1.3, by - 4.0, df - 0.05, 2.2, 1.2, 0.5, k.chin), rot: [0, 0, sd * 22] }, { ...box(sd * 0.45, by - 3.75, df + 0.05, 0.7, 0.7, 0.45, k.chin) });
+  // (the great grey's white bow tie is painted into its disc)
   // the lower mandible and mouth (shown when Pip opens the beak)
   P.add('jaw', box(0, by - 2.7, df + 0.85, 1.1, 0.45, 0.95, k.beak), box(0, by - 2.3, df + 0.8, 0.85, 0.25, 0.7, k.tongue), box(0, by - 2.4, df + 0.45, 1.2, 0.9, 0.4, k.gape));
 
@@ -285,7 +285,8 @@ function buildSpecies(P: OwlParts) {
   const big = id === 'little' || id === 'burrowing' ? 1.35 : 1;
   for (const [bone, sd] of [['browL', -1], ['browR', 1]] as const) {
     const yb = ey + es * 0.5;
-    if (big > 1) P.add(bone, { ...box(sd * (ex - es * 0.05), yb - 0.05, df + 0.06, es * 1.05, 0.75, 0.32, k.brow), rot: [0, 0, sd * (4 - frown * 0.6)] });
+    // the little owls' bold white brows sit over the top of the ruff, frowning towards the bill
+    if (big > 1) P.add(bone, { ...box(sd * (ex - es * 0.08), yb + 0.05, g.rimFront - 0.1, es * 1.15, 0.85, 0.4, k.brow), rot: [0, 0, sd * (6 - frown * 0.7)] });
     P.add(bone, { ...box(sd * (ex - es * 0.3), yb - 0.15, df + 0.05, es * 0.44, 0.5, 0.35, k.brow), rot: [0, 0, sd * (-6 - frown)] });
     P.add(bone, { ...box(sd * (ex + es * 0.12), yb + 0.08, df + 0.04, es * 0.46, 0.45, 0.3, k.brow), rot: [0, 0, sd * (6 - frown * 0.3)] });
   }
@@ -294,11 +295,11 @@ function buildSpecies(P: OwlParts) {
   const tf = s.tuft;
   if (tf) for (const [bone, sd] of [['tuftL', -1], ['tuftR', 1]] as const) {
     // a broad base, then overlapping feathers that narrow towards the tip
-    P.add(bone, lean(box(sd * tf.x, g.headTop - 1.8, g.headZ + 0.3, tf.w * 1.05, Math.min(2.4, tf.len * 0.45), 1.5, k.tuft(0)), -6, 0, -sd * tf.lean * 0.8));
+    P.add(bone, lean(box(sd * tf.x, g.headTop - 1.8, g.headZ + 0.3, tf.w * 1.05, Math.min(2.6, tf.len * 0.5), 1.5, k.tuft(0)), -6, 0, -sd * tf.lean * 0.85));
     for (let i = 0; i < 3; i++) {
-      const c = i - 1, len = tf.len * (i === 1 ? 1 : 0.72);
-      const x = sd * (tf.x + c * tf.w * 0.24);
-      P.add(bone, lean(box(x, g.headTop - 1.5, g.headZ + 0.45 - Math.abs(c) * 0.3 - (tf.back ?? 0), tf.w * (i === 1 ? 0.55 : 0.45), len + 0.6, 0.75, k.tuft(i + 1)), -8 - Math.abs(c) * 3, 0, -sd * (tf.lean + c * sd * 6)));
+      const c = i - 1, len = tf.len * (i === 1 ? 1 : 0.8);
+      const x = sd * (tf.x + c * tf.w * 0.17);
+      P.add(bone, lean(box(x, g.headTop - 1.5, g.headZ + 0.45 - Math.abs(c) * 0.25 - (tf.back ?? 0), tf.w * (i === 1 ? 0.62 : 0.56), len + 0.6, 0.8, k.tuft(i + 1)), -8 - Math.abs(c) * 2, 0, -sd * (tf.lean + c * sd * 3)));
     }
   }
 
