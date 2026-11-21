@@ -7,6 +7,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { Px } from '../ui/icons.tsx';
 import { haptic } from '../ui/kit.tsx';
+import { uiBurstAt } from '../ui/chrome/uifx.ts';
 import { boxURL, stampToolURL } from './cbart.ts';
 import { decoURL } from './paper.js';
 import { fmt, toMin, hm, type Opt } from './script.ts';
@@ -41,26 +42,26 @@ export function Card(p: { o: Opt; on: boolean; i: number; onPick: () => void; on
   return (
     <button
       type="button"
-      class={'cb-opt' + (p.on ? ' on' : '') + (p.small ? ' sm' : '')}
+      class={'obc-opt' + (p.on ? ' on' : '') + (p.small ? ' sm' : '')}
       style={`--r:${(r * 0.45).toFixed(2)}deg;--d:${p.i * 45}ms`}
       onPointerEnter={(e) => { if (e.pointerType === 'mouse') p.onPeek(true); }}
       onPointerLeave={(e) => { if (e.pointerType === 'mouse') p.onPeek(false); }}
-      onClick={() => p.onPick()}
+      onClick={(e) => { uiBurstAt(e.currentTarget, p.on ? 'puff' : 'sparkle', p.on ? 5 : 9); p.onPick(); }}
     >
-      <img class="cb-box" src={boxURL(p.on)} alt="" draggable={false} />
-      <span class="cb-vig"><Px name={p.o.icon} size={p.small ? 34 : 44} /></span>
-      <span class="cb-txt">
-        <b class="cb-lbl">{p.o.label}</b>
-        {p.o.sub && !p.small && <small class="cb-sub">{p.o.sub}</small>}
+      <img class="obc-box" src={boxURL(p.on)} alt="" draggable={false} />
+      <span class="obc-vig"><Px name={p.o.icon} size={p.small ? 34 : 44} /></span>
+      <span class="obc-txt">
+        <b class="obc-lbl">{p.o.label}</b>
+        {p.o.sub && !p.small && <small class="obc-sub">{p.o.sub}</small>}
       </span>
-      {p.on && <svg class="cb-circle" viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true"><path d="M8 34 C 6 12, 40 4, 62 6 S 98 18, 94 36 S 60 58, 36 56 S 4 46, 12 22" /></svg>}
+      {p.on && <svg class="obc-circle" viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true"><path d="M8 34 C 6 12, 40 4, 62 6 S 98 18, 94 36 S 60 58, 36 56 S 4 46, 12 22" /></svg>}
     </button>
   );
 }
 
 export function Cards(p: { opts: Opt[]; value: string[]; multi?: boolean; cols?: number; small?: boolean; rows?: boolean; onPick: (v: string) => void; onPeek: (v: string | null) => void }) {
   return (
-    <div class={'cb-opts' + (p.small ? ' sm' : '') + (p.rows ? ' rows' : '')} style={`--cols:${p.rows ? 1 : p.cols ?? 2}`}>
+    <div class={'obc-opts' + (p.small ? ' sm' : '') + (p.rows ? ' rows' : '')} style={`--cols:${p.rows ? 1 : p.cols ?? 2}`}>
       {p.opts.map((o, i) => <Card key={o.v} o={o} i={i} on={p.value.includes(o.v)} small={p.small && !p.rows} onPick={() => p.onPick(o.v)} onPeek={(on) => p.onPeek(on ? o.v : null)} />)}
     </div>
   );
@@ -94,7 +95,7 @@ export function WakeDial(p: { value: string; hour12: boolean; onChange: (v: stri
   const [hx, hy] = pt(a, R - 10);
   const [tx, ty] = pt(a, R - 36);
   return (
-    <div class="cb-dial">
+    <div class="obc-dial">
       <svg ref={ref} viewBox="0 0 200 200" shape-rendering="crispEdges"
         onPointerDown={(e) => { (e.currentTarget as Element).setPointerCapture(e.pointerId); set(e); }}
         onPointerMove={(e) => { if (e.buttons) set(e); }}>
@@ -102,7 +103,7 @@ export function WakeDial(p: { value: string; hour12: boolean; onChange: (v: stri
         <circle cx={cx} cy={cy} r={R + 4} fill="#a86d38" />
         {segs}
         <circle cx={cx} cy={cy} r={R - 20} fill="#f6ecd2" />
-        {[0, 6, 12, 18].map((h) => { const [x, y] = pt((h / 24) * Math.PI * 2, R - 31); return <text key={h} x={x} y={y + 5} text-anchor="middle" class="cb-dial-n">{p.hour12 ? ((h + 11) % 12) + 1 + (h < 12 ? 'a' : 'p') : h}</text>; })}
+        {[0, 6, 12, 18].map((h) => { const [x, y] = pt((h / 24) * Math.PI * 2, R - 31); return <text key={h} x={x} y={y + 5} text-anchor="middle" class="obc-dial-n">{p.hour12 ? ((h + 11) % 12) + 1 + (h < 12 ? 'a' : 'p') : h}</text>; })}
         {Array.from({ length: 24 }, (_, h) => { const [x, y] = pt((h / 24) * Math.PI * 2, R - 23); return <rect key={'t' + h} x={x - 1} y={y - 1} width={h % 6 ? 2 : 4} height={h % 6 ? 2 : 4} fill="#7b4b2c" />; })}
         {/* the moon at midnight and the sun at noon */}
         <g transform={`translate(${cx - 6} ${cy - R + 4})`}><rect x="2" y="0" width="8" height="12" fill="#ffe98a" /><rect x="0" y="2" width="12" height="8" fill="#ffe98a" /><rect x="6" y="0" width="6" height="10" fill="#2c3784" /></g>
@@ -110,17 +111,17 @@ export function WakeDial(p: { value: string; hour12: boolean; onChange: (v: stri
         <line x1={cx} y1={cy} x2={tx} y2={ty} stroke="#3b2414" stroke-width="6" stroke-linecap="square" />
         <line x1={cx} y1={cy} x2={tx} y2={ty} stroke="#c98f55" stroke-width="2" stroke-linecap="square" />
         <rect x={cx - 6} y={cy - 6} width="12" height="12" fill="#b8924c" stroke="#3b2414" stroke-width="2" />
-        <g class="cb-knob" transform={`translate(${hx} ${hy})`}>
+        <g class="obc-knob" transform={`translate(${hx} ${hy})`}>
           <rect x="-11" y="-11" width="22" height="22" fill="#3b2414" />
           <rect x="-9" y="-9" width="18" height="18" fill="#ffd23f" />
           <rect x="-9" y="-9" width="18" height="4" fill="#fff3a3" />
           <rect x="-3" y="-3" width="6" height="6" fill="#b0661a" />
         </g>
       </svg>
-      <div class="cb-dial-row">
-        <button type="button" class="cb-wbtn" onClick={() => { tapSound('ui_tap'); p.onChange(hm(min - 15)); }}>-15</button>
-        <Hand key={p.value} text={fmt(p.value, p.hour12)} class="cb-big" fast />
-        <button type="button" class="cb-wbtn" onClick={() => { tapSound('ui_tap'); p.onChange(hm(min + 15)); }}>+15</button>
+      <div class="obc-dial-row">
+        <button type="button" class="obc-wbtn" onClick={() => { tapSound('ui_tap'); p.onChange(hm(min - 15)); }}>-15</button>
+        <Hand key={p.value} text={fmt(p.value, p.hour12)} class="obc-big" fast />
+        <button type="button" class="obc-wbtn" onClick={() => { tapSound('ui_tap'); p.onChange(hm(min + 15)); }}>+15</button>
       </div>
     </div>
   );
@@ -131,35 +132,36 @@ export function HoursPick(p: { value: number; onChange: (v: number) => void }) {
   const v = p.value;
   const set = (x: number) => { const n = Math.max(5, Math.min(11, Math.round(x * 2) / 2)); if (n !== v) { p.onChange(n); tapSound(n > v ? 'ui_check' : 'ui_back', 0.4); } };
   return (
-    <div class="cb-hours">
-      <div class="cb-dial-row">
-        <button type="button" class="cb-wbtn big" onClick={() => set(v - 0.5)}>-</button>
-        <span class="cb-num"><Hand key={v} text={String(v).replace('.5', '½')} class="cb-huge" fast /><small>hours</small></span>
-        <button type="button" class="cb-wbtn big" onClick={() => set(v + 0.5)}>+</button>
+    <div class="obc-hours">
+      <div class="obc-dial-row">
+        <button type="button" class="obc-wbtn big" onClick={() => set(v - 0.5)}>-</button>
+        <span class="obc-num"><Hand key={v} text={String(v).replace('.5', '½')} class="obc-huge" fast /><small>hours</small></span>
+        <button type="button" class="obc-wbtn big" onClick={() => set(v + 0.5)}>+</button>
       </div>
-      <div class="cb-moons">
+      <div class="obc-moons">
         {Array.from({ length: 11 }, (_, i) => (
-          <button type="button" key={i} class={'cb-moon' + (i < Math.ceil(v) ? ' on' : '') + (i === Math.ceil(v) - 1 && v % 1 ? ' half' : '')} onClick={() => set(i + 1)} aria-label={`${i + 1} hours`}>
+          <button type="button" key={i} class={'obc-moon' + (i < Math.ceil(v) ? ' on' : '') + (i === Math.ceil(v) - 1 && v % 1 ? ' half' : '')} onClick={() => set(i + 1)} aria-label={`${i + 1} hours`}>
             <Px name="moon" size={22} />
           </button>
         ))}
       </div>
-      <small class="cb-note">Most grown-ups need 7 to 9 hours.</small>
+      <small class="obc-note">Most grown-ups need 7 to 9 hours.</small>
     </div>
   );
 }
 
 /** The rubber stamp coming down on the plan. */
 export function Stamp(p: { onHit: () => void }) {
-  useEffect(() => { const id = window.setTimeout(() => { sound.play('stamp', { volume: 0.8 }); haptic(30); p.onHit(); }, 420); return () => clearTimeout(id); }, []);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => { const id = window.setTimeout(() => { sound.play('stamp', { volume: 0.8 }); haptic(30); uiBurstAt(ref.current, 'puff', 10); uiBurstAt(ref.current, 'confetti', 18); p.onHit(); }, 420); return () => clearTimeout(id); }, []);
   return (
-    <div class="cb-stamp">
-      <img class="cb-stamp-tool" src={stampToolURL()} alt="" draggable={false} />
-      <span class="cb-ink">APPROVED</span>
+    <div class="obc-stamp" ref={ref}>
+      <img class="obc-stamp-tool" src={stampToolURL()} alt="" draggable={false} />
+      <span class="obc-ink">APPROVED</span>
     </div>
   );
 }
 
 export function Row(p: { icon: string; label: string; children: ComponentChildren }) {
-  return <div class="cb-row"><Px name={p.icon} size={26} /><span class="cb-row-l">{p.label}</span><i class="cb-dots" /><span class="cb-row-v">{p.children}</span></div>;
+  return <div class="obc-row"><Px name={p.icon} size={26} /><span class="obc-row-l">{p.label}</span><i class="obc-dots" /><span class="obc-row-v">{p.children}</span></div>;
 }

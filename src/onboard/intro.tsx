@@ -7,7 +7,6 @@ import { sound } from '../audio/sound.ts';
 import { syncReminders, requestNotifications } from '../game/night.ts';
 import { edit, save } from '../game/store.ts';
 import type { OwlLook } from '../owl/model.ts';
-import { PALETTE } from '../owl/palette.ts';
 import { speciesOf } from '../owl/species.ts';
 import { Px } from '../ui/icons.tsx';
 import { sceneRef, say } from '../ui/state.ts';
@@ -34,23 +33,23 @@ function injectCSS() {
   cssDone = true;
   const k = Math.min(3, Math.max(1, Math.round(devicePixelRatio || 1)));
   const css = `
-.cb-board{background:url(${boardURL(480, 780)}) 0 0/480px 780px,#7a5232;clip-path:${pixelCorners(5)}}
-.cb-sheet,.cb-page{background:url(${sheetURL(420, 720)}) 0 0/420px 720px,#f6eed8}
-.cb-under.u2{background:url(${sheetURL(420, 720, 9)}) 0 0/420px 720px,#efe4c8}
-.cb-clip{background:url(${clipURL()}) 0 0/100% 100% no-repeat}
-.cb-opt{${frameStyle('parchment', 2)}}
-.cb-opt.on{${frameStyle('parchment_dark', 2)}}
-.cb-next{${frameStyle('button_green', 3)}}
-.cb-next:active:not(:disabled){${frameStyle('button_green_down', 3)}}
-.cb-next.gold{${frameStyle('button_gold', 3)}}
-.cb-next.gold:active:not(:disabled){${frameStyle('button_gold_down', 3)}}
-.cb-next:disabled{${frameStyle('button_disabled', 3)}}
-.cb-wbtn{${frameStyle('button_cream', 2)}}
-.cb-wbtn:active{${frameStyle('button_cream_down', 2)}}
-.cb-skip{${frameStyle('sticky_note', 2)}}
+.obc-board{background:url(${boardURL(480, 780)}) 0 0/480px 780px,#7a5232;clip-path:${pixelCorners(5)}}
+.obc-sheet,.obc-page{background:url(${sheetURL(420, 720)}) 0 0/420px 720px,#f6eed8}
+.obc-under.u2{background:url(${sheetURL(420, 720, 9)}) 0 0/420px 720px,#efe4c8}
+.obc-clip{background:url(${clipURL()}) 0 0/100% 100% no-repeat}
+.obc-opt{${frameStyle('parchment', 2)}}
+.obc-opt.on{${frameStyle('parchment_dark', 2)}}
+.obc-next{${frameStyle('button_green', 3)}}
+.obc-next:active:not(:disabled){${frameStyle('button_green_down', 3)}}
+.obc-next.gold{${frameStyle('button_gold', 3)}}
+.obc-next.gold:active:not(:disabled){${frameStyle('button_gold_down', 3)}}
+.obc-next:disabled{${frameStyle('button_disabled', 3)}}
+.obc-wbtn{${frameStyle('button_cream', 2)}}
+.obc-wbtn:active{${frameStyle('button_cream_down', 2)}}
+.obc-skip{${frameStyle('sticky_note', 2)}}
 .ft-who b{${frameStyle('plaque', 2)}}
-.cb-tick{background:url(${boxURL(true)}) 0 0/100% 100% no-repeat}
-.cb-ink{-webkit-mask:url(${speckURL()}) 0 0/64px 64px;mask:url(${speckURL()}) 0 0/64px 64px}
+.obc-tick{background:url(${boxURL(true)}) 0 0/100% 100% no-repeat}
+.obc-ink{-webkit-mask:url(${speckURL()}) 0 0/64px 64px;mask:url(${speckURL()}) 0 0/64px 64px}
 .ft-next{background:url(${spriteURL('arrow_down', 2 * k)}) 0 0/100% 100% no-repeat}
 `;
   const st = document.createElement('style');
@@ -59,8 +58,8 @@ function injectCSS() {
   document.head.appendChild(st);
 }
 
-const coatFor = (species: string, look: OwlLook) => (PALETTE[species]?.skin === 'owl' ? species : look.palette);
-const lookFor = (species: string): OwlLook => { const l = save.value.look; return { ...l, skin: 'owl', species, palette: coatFor(species, l) }; };
+/** Pip as a given species (species and palette both carry the id, as the owl model expects) */
+const lookFor = (species: string): OwlLook => ({ ...save.value.look, skin: 'owl', species, palette: species });
 const beatOf = (b: Beat | string | null | undefined): Beat | null => (b == null ? null : typeof b === 'string' ? { text: b } : b);
 
 async function askMic(): Promise<boolean> {
@@ -75,7 +74,7 @@ async function askMic(): Promise<boolean> {
 function Doodle(p: { kind: string; species: string }) {
   const icon = p.kind === 'you' ? 'ob_owl_tawny' : p.kind === 'name' ? 'ob_owl_' + p.species : 'ob_pillows';
   const note = p.kind === 'you' ? 'hello!' : p.kind === 'name' ? 'me?' : 'zzz';
-  return <><Px name={icon} size={84} class="cb-doodle" /><span class="cb-doodle-note">{note}</span></>;
+  return <><Px name={icon} size={84} class="obc-doodle" /><span class="obc-doodle-note">{note}</span></>;
 }
 
 export function Intro() {
@@ -394,24 +393,24 @@ export function Intro() {
     const s = STEPS[i];
     if (!s) return null;
     return (
-      <div class={'cb-page' + (live ? '' : ' out')} key={'pg' + i}>
-        <div class="cb-head">
-          <span class="cb-no">No. {String(i + 1).padStart(2, '0')}<small>/{STEPS.length}</small></span>
-          <span class="cb-prog">{STEPS.map((_, k) => <i key={k} class={k < i ? 'done' : k === i ? 'now' : ''} />)}</span>
+      <div class={'obc-page' + (live ? '' : ' out')} key={'pg' + i}>
+        <div class="obc-head">
+          <span class="obc-no">No. {String(i + 1).padStart(2, '0')}<small>/{STEPS.length}</small></span>
+          <span class="obc-prog">{STEPS.map((_, k) => <i key={k} class={k < i ? 'done' : k === i ? 'now' : ''} />)}</span>
         </div>
-        <h2 class="cb-title">{s.title}</h2>
-        <div class="cb-body">{body(s, i, live)}</div>
+        <h2 class="obc-title">{s.title}</h2>
+        <div class="obc-body">{body(s, i, live)}</div>
         {(s.kind === 'text' || s.kind === 'hours') && <Doodle kind={s.id} species={a.species} />}
         {s.kind !== 'plan' && (
-          <div class="cb-foot">
-            <span class={'cb-ans' + ((written[i]?.length ?? 0) > 40 ? ' longer' : (written[i]?.length ?? 0) > 22 ? ' long' : '')}><small>Answer:</small>{written[i] && <Hand key={written[i]} text={written[i]} fast={!live || fast} onDone={live ? afterWrite : undefined} />}</span>
-            {live && <button type="button" class="cb-next" disabled={phase !== 'ask' || !canNext} onClick={() => void next()}>{canNext ? 'Next' : 'Pick one'}<i class="cb-arrow" /></button>}
+          <div class="obc-foot">
+            <span class={'obc-ans' + ((written[i]?.length ?? 0) > 40 ? ' longer' : (written[i]?.length ?? 0) > 22 ? ' long' : '')}><small>Answer:</small>{written[i] && <Hand key={written[i]} text={written[i]} fast={!live || fast} onDone={live ? afterWrite : undefined} />}</span>
+            {live && <button type="button" class="obc-next" disabled={phase !== 'ask' || !canNext} onClick={() => void next()}>{canNext ? 'Next' : 'Pick one'}<i class="obc-arrow" /></button>}
           </div>
         )}
         {s.kind === 'plan' && live && (
-          <div class="cb-foot">
-            <label class="cb-check" onClick={() => { setRemind(!remind); tapSound('ui_toggle', 0.4); }}><img src={boxURL(remind)} alt="" />Remind me to wind down</label>
-            <button type="button" class="cb-next gold" disabled={phase !== 'ask'} onClick={() => void next()}>Approve!</button>
+          <div class="obc-foot">
+            <label class="obc-check" onClick={() => { setRemind(!remind); tapSound('ui_toggle', 0.4); }}><img src={boxURL(remind)} alt="" />Remind me to wind down</label>
+            <button type="button" class="obc-next gold" disabled={phase !== 'ask'} onClick={() => void next()}>Approve!</button>
           </div>
         )}
         {s.kind === 'plan' && (phase === 'stamp' || stamped) && live && <Stamp onHit={onStamp} />}
@@ -426,16 +425,16 @@ export function Intro() {
       case 'text': {
         const k = s.field as 'you' | 'name';
         return (
-          <div class="cb-text">
-            <label class="cb-label">{k === 'you' ? 'Your name' : 'Owl’s name'}</label>
-            <div class="cb-line">
-              <img class="cb-pen" src={spriteURL('ob_pencil', 2)} alt="" />
-              <input class="cb-input" value={a[k]} maxLength={16} placeholder={k === 'you' ? 'write here...' : 'Pip'} disabled={!interactive} spellcheck={false} autocomplete="off"
+          <div class="obc-text">
+            <label class="obc-label">{k === 'you' ? 'Your name' : 'Owl’s name'}</label>
+            <div class="obc-line">
+              <img class="obc-pen" src={spriteURL('ob_pencil', 2)} alt="" />
+              <input class="obc-input" value={a[k]} maxLength={16} placeholder={k === 'you' ? 'write here...' : 'Pip'} disabled={!interactive} spellcheck={false} autocomplete="off"
                 onInput={(e) => { set(k, (e.target as HTMLInputElement).value); sound.play('ui_type', { volume: 0.3, rate: 0.9 + Math.random() * 0.3, gap: 30 }); room.current?.pip.play('peck'); }}
                 onKeyDown={(e) => { if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); void next(); } }} />
             </div>
-            <div class="cb-chips">
-              {(k === 'name' ? ['Pip', 'Hoot', 'Mochi', 'Biscuit', 'Luna'] : []).map((n) => <button type="button" class="cb-chip" key={n} disabled={!interactive} onClick={() => { set('name', n); tapSound('pencil', 0.4); room.current?.sparkle(room.current.pip.headWorld, 4); }}>{n}</button>)}
+            <div class="obc-chips">
+              {(k === 'name' ? ['Pip', 'Hoot', 'Mochi', 'Biscuit', 'Luna'] : []).map((n) => <button type="button" class="obc-chip" key={n} disabled={!interactive} onClick={() => { set('name', n); tapSound('pencil', 0.4); room.current?.sparkle(room.current.pip.headWorld, 4); }}>{n}</button>)}
             </div>
           </div>
         );
@@ -445,7 +444,7 @@ export function Intro() {
         return (
           <>
             <Cards opts={s.opts!} value={[a.species]} cols={wide ? 2 : 3} small={!wide} onPick={(v) => interactive && pick(s, v)} onPeek={(v) => interactive && peek(s, v)} />
-            <p class="cb-blurb"><b>{sp.name}</b> <i>{sp.latin}</i><br />{sp.blurb}</p>
+            <p class="obc-blurb"><b>{sp.name}</b> <i>{sp.latin}</i><br />{sp.blurb}</p>
           </>
         );
       }
@@ -456,9 +455,9 @@ export function Intro() {
         const cols = many ? (wide ? 3 : 4) : 2;
         return (
           <>
-            {s.id === 'mic' && <p class="cb-blurb">Pip listens on this device only, for snores, sleep-talk and tossing. {ARTIFACT ? 'This preview can’t use the microphone; the full app can.' : 'You can change it any time in Settings.'}</p>}
+            {s.id === 'mic' && <p class="obc-blurb">Pip listens on this device only, for snores, sleep-talk and tossing. {ARTIFACT ? 'This preview can’t use the microphone; the full app can.' : 'You can change it any time in Settings.'}</p>}
             <Cards opts={s.opts!} value={value} multi={s.kind === 'multi'} cols={cols} small={many} rows={s.opts!.length <= 4} onPick={(v) => interactive && pick(s, v)} onPeek={(v) => interactive && peek(s, v)} />
-            {s.kind === 'multi' && <small class="cb-note">Pick as many as you like.</small>}
+            {s.kind === 'multi' && <small class="obc-note">Pick as many as you like.</small>}
           </>
         );
       }
@@ -467,14 +466,14 @@ export function Intro() {
       case 'plan': {
         const d = (k: number) => (fast ? 0 : 300 + k * 700);
         return (
-          <div class="cb-plan">
+          <div class="obc-plan">
             <Row icon="moon" label="Bedtime"><Hand text={fmt(plan.bed, hour12)} delay={d(0)} fast={!live || fast} /></Row>
             <Row icon="candle" label="Wind down"><Hand text={`${fmt(plan.windDown, hour12)}`} delay={d(1)} fast={!live || fast} /></Row>
             <Row icon="alarm" label="Wake up"><Hand text={`${fmt(plan.wake, hour12)}`} delay={d(2)} fast={!live || fast} /></Row>
             <Row icon="music" label="Alarm"><Hand text={ALARM_NAME[plan.alarm] ?? 'Music box'} delay={d(3)} fast={!live || fast} /></Row>
             <Row icon={RELAX.find((r) => r.sound === plan.soundscape)?.icon ?? 'rain'} label="Sleep sound"><Hand text={SOUND_NAME[plan.soundscape] ?? 'rain'} delay={d(4)} fast={!live || fast} /></Row>
             {plan.blocker && <Row icon="shield" label="Bedtime Blocker"><Hand text={a.phone === 'nightly' ? 'On' : 'Ready'} delay={d(5)} fast={!live || fast} /></Row>}
-            {plan.tips.length > 0 && <div class="cb-tips">{plan.tips.map((t, k) => <span key={t} class="cb-tip"><Hand text={'• ' + t} delay={d(6 + k)} fast={!live || fast} /></span>)}</div>}
+            {plan.tips.length > 0 && <div class="obc-tips">{plan.tips.map((t, k) => <span key={t} class="obc-tip"><Hand text={'• ' + t} delay={d(6 + k)} fast={!live || fast} /></span>)}</div>}
           </div>
         );
       }
@@ -490,19 +489,19 @@ export function Intro() {
         <FloatText line={phase === 'boot' || phase === 'wake' ? null : line} onTalk={onTalk} done={onLineDone} finish={finish} fast={fast} low={sceneRef.current?.quality === 'low'} />
       </div>
       {showBoard && (
-        <div class={'cb' + (flipFrom !== null ? ' lift' : '') + (phase === 'outro' ? ' fly' : '')}>
-          <div class="cb-board" />
-          <div class="cb-paper">
-            <div class="cb-under u2" />
-            <div class="cb-under cb-sheet" />
+        <div class={'obc' + (flipFrom !== null ? ' lift' : '') + (phase === 'outro' ? ' fly' : '')}>
+          <div class="obc-board" />
+          <div class="obc-paper">
+            <div class="obc-under u2" />
+            <div class="obc-under obc-sheet" />
             {pageOf(si, true)}
             {flipFrom !== null && pageOf(flipFrom, false)}
           </div>
-          <div class="cb-clip" />
+          <div class="obc-clip" />
           {STEPS[si]?.kind !== 'plan' && (
-            <div class={'cb-skip' + (skipOpen ? ' open' : '')}>
+            <div class={'obc-skip' + (skipOpen ? ' open' : '')}>
               {!skipOpen ? <button type="button" onClick={() => { setSkipOpen(true); tapSound('paper_flip', 0.4); }}>Skip<small>been here before?</small></button>
-                : <span>Skip it? Pip picks cozy defaults.<span class="cb-skip-row"><button type="button" onClick={skip}>Yes</button><button type="button" onClick={() => { setSkipOpen(false); tapSound('ui_back', 0.4); }}>No</button></span></span>}
+                : <span>Skip it? Pip picks cozy defaults.<span class="obc-skip-row"><button type="button" onClick={skip}>Yes</button><button type="button" onClick={() => { setSkipOpen(false); tapSound('ui_back', 0.4); }}>No</button></span></span>}
             </div>
           )}
         </div>

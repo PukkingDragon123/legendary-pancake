@@ -37,6 +37,7 @@ describe('applyAnswers', () => {
     expect(s.profile.you).toBe('Sam');
     expect(s.name).toBe('Hoot');
     expect(s.look.species).toBe('snowy');
+    expect(s.look.palette).toBe('snowy');
     expect(s.owned.species).toContain('snowy');
     expect(s.sleep.wake).toBe('06:30');
     expect(s.sleep.goalMin).toBe(450);

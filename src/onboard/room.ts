@@ -62,7 +62,10 @@ export interface Vig { update?(t: number, dt: number): void; exit?(): void; /** 
 export class InterviewRoom implements Stage {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(32, 1, 0.1, 200);
-  readonly pip: OwlActor;
+  /** Pip as he looks right now; one actor per species, built once and reused for previews */
+  private actor: OwlActor;
+  private actors = new Map<string, OwlActor>();
+  get pip(): OwlActor { return this.actor; }
   readonly fx = new Fx(700);
   readonly sky = new SkyView();
   time = 0;
@@ -216,10 +219,7 @@ export class InterviewRoom implements Stage {
     this.disposers.push(() => { pm2.geometry.dispose(); (pm2.material as THREE.Material).dispose(); tex.dispose(); });
 
     // ---- Pip
-    this.pip = new OwlActor(look, {
-      fx: (k, at, n) => this.owlFx(k, at, n),
-      sound: (id) => sceneSound('owl_' + id),
-    });
+    this.actor = this.makeActor(look);
     s.add(this.pip.node);
     this.pip.node.position.copy(SPOT.desk);
     this.dress();
@@ -239,6 +239,7 @@ export class InterviewRoom implements Stage {
     const ex = eyes?.[1] ? Math.abs(eyes[1].position.x) / PX : G.eyeX;
     const ey = eyes?.[1] ? eyes[1].position.y / PX : G.eyeY - 13.4;
     const ez = eyes?.[1] ? eyes[1].position.z / PX : G.discFront - 0.4;
+    const geo = (this.pip.model as { g?: typeof G }).g ?? G;
     if (this.glassesOn && B.head) {
       const g = P.mesh(P.glasses(ex, 3.1), 4, false);
       g.position.set(0, U(ey - 0.6), U(ez + 0.9));
@@ -247,7 +248,7 @@ export class InterviewRoom implements Stage {
     }
     if (this.boardOn && B.body) {
       const c = P.mesh(P.clipboardSmall(), 3, false);
-      c.position.set(U(2.2), U(1.5), U(G.bodyD / 2 + 2.6));
+      c.position.set(U(2.2), U(1.5), U(geo.bodyD / 2 + 2.6));
       c.rotation.set(-0.95, -0.15, -0.1);
       c.name = 'ob-board';
       B.body.add(c);
@@ -266,11 +267,27 @@ export class InterviewRoom implements Stage {
     this.undress(); this.dress();
   }
 
-  /** Swap Pip's look with a puff of feathers (the species preview). */
+  private lookKey = (l: OwlLook) => `${l.skin ?? 'owl'}:${l.species ?? ''}:${l.palette}`;
+  private makeActor(look: OwlLook) {
+    const a = new OwlActor(look, { fx: (k, at, n) => this.owlFx(k, at, n), sound: (id) => sceneSound('owl_' + id) });
+    this.actors.set(this.lookKey(look), a);
+    return a;
+  }
+
+  /** Swap Pip's look with a puff of feathers (the species preview). Each look is built once. */
   setLook(look: OwlLook, poof = true) {
-    this.undress();
-    this.pip.rebuild(look);
-    this.dress();
+    const key = this.lookKey(look), old = this.actor;
+    const next = this.actors.get(key) ?? this.makeActor(look);
+    if (next !== old) {
+      next.node.position.copy(old.node.position);
+      next.node.rotation.copy(old.node.rotation);
+      next.pose = old.pose; next.lookAt = old.lookAt; next.breath = old.breath;
+      next.setMood(old.mood);
+      this.scene.remove(old.node);
+      this.scene.add(next.node);
+      this.actor = next;
+      this.undress(); this.dress();
+    }
     if (poof) {
       const at = this.pip.node.position.clone().add(new THREE.Vector3(0, 1.0, 0.1));
       this.fx.burst('sparkle', at.x, at.y, at.z, 10);
@@ -571,7 +588,7 @@ export class InterviewRoom implements Stage {
     for (const m of this.cache.values()) (m.userData.dispose as (() => void) | undefined)?.();
     this.cache.clear();
     this.undress();
-    this.pip.dispose();
+    for (const a of this.actors.values()) a.dispose();
     this.sky.dispose();
   }
 }

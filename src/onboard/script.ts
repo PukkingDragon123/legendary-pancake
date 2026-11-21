@@ -1,7 +1,6 @@
 // The interview itself: Pip's lines, the clipboard pages and their options, his reactions, and
 // how the answers become a sleep plan and land in the save.
 import type { OwlAction, OwlMood } from '../owl/actor.ts';
-import { PALETTE } from '../owl/palette.ts';
 import { SPECIES, speciesOf } from '../owl/species.ts';
 import type { Profile, Save } from '../game/store.ts';
 import type { ShotName } from './room.ts';
@@ -116,15 +115,12 @@ export function applyAnswers(s: Save, a: Answers, o: { finish?: boolean } = {}) 
   const pl = planOf(a);
   s.profile = { ...s.profile, you: a.you.trim(), goals: [...a.goals], sleepHours: pl.goalMin / 60, latency: a.latency, phone: a.phone, chronotype: a.chrono, caffeine: a.caffeine, relax: [...a.relax], interviewed: true };
   s.name = a.name.trim() || 'Pip';
+  // the owl model reads species, older saves migrate through palette: both carry the id
   const sp = speciesOf(a.species);
   s.look.species = sp.id;
+  s.look.palette = sp.id;
   if (!s.owned.species.includes(sp.id)) s.owned.species.push(sp.id);
-  // a matching owl coat, when there is one, so the model and the wardrobe agree
-  const coat = PALETTE[sp.id];
-  if (coat && coat.skin === 'owl' && (!s.look.skin || s.look.skin === 'owl')) {
-    s.look.palette = sp.id;
-    if (!s.owned.palettes.includes(sp.id)) s.owned.palettes.push(sp.id);
-  }
+  if (!s.owned.palettes.includes(sp.id)) s.owned.palettes.push(sp.id);
   s.sleep.wake = a.wake;
   s.sleep.goalMin = pl.goalMin;
   s.sleep.windDownMin = pl.windDownMin;
