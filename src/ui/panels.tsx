@@ -1,11 +1,11 @@
 // Panels opened from the home screen: the wardrobe (try outfits and coats live), decorating the
-// tree house (tap a glowing spot, pick a piece), and the map of places Pip can explore.
+// tree house (tap a glowing spot, pick a piece), and the globe of places Pip can explore.
 import { useEffect, useState } from 'preact/hooks';
-import { AREAS, TRINKETS, ZONE_LEVEL, ZONE_NAME } from '../game/catalog.ts';
-import { areaOpen, buy, edit, level, placeFurniture, save, zones } from '../game/store.ts';
+import { ZONE_LEVEL, ZONE_NAME } from '../game/catalog.ts'; // [globe] AREAS/TRINKETS moved to the globe
+import { buy, level, placeFurniture, save, zones } from '../game/store.ts'; // [globe]
 import { ITEMS } from '../world/scene.ts';
-import { IcoBrush, IcoCheck, IcoClose, IcoLock, IcoMap } from './icons.tsx';
-import { Sheet, Tags, tap, toast } from './kit.tsx';
+import { IcoBrush, IcoCheck, IcoClose, IcoLock } from './icons.tsx'; // [globe]
+import { Sheet, Tags, tap } from './kit.tsx'; // [globe]
 import { itemIcon } from './portraits.ts';
 import { panel, sceneRef } from './state.ts';
 
@@ -87,45 +87,7 @@ export function Decorate() {
 
 // ------------------------------------------------------------------ map
 
-export function MapPanel() {
-  const s = save.value;
-  const [sel, setSel] = useState(s.area);
-  const a = AREAS.find((x) => x.id === sel)!;
-  const isOpen = areaOpen(sel);
-  const found = TRINKETS.filter((t) => t.area === sel && s.collection[t.id]).length, total = TRINKETS.filter((t) => t.area === sel).length;
-  return (
-    <Sheet title={<span class="row" style="gap:8px"><IcoMap size={40} />Where will Pip go tonight?</span>} onClose={() => { if (panel.value === 'map') panel.value = null; }}>
-      <div class="map">
-        <svg class="terrain" viewBox="0 0 100 105" preserveAspectRatio="none" aria-hidden="true">
-          <defs><pattern id="hatch" width="2.5" height="2.5" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><line x1="0" y1="0" x2="0" y2="2.5" stroke="#6b8f4a" stroke-width=".5" opacity=".5" /></pattern></defs>
-          <path d="M8 60 Q20 45 34 52 T58 62 Q66 78 50 86 T18 84 Q4 76 8 60Z" fill="#9cc47a" opacity=".55" />
-          <path d="M8 60 Q20 45 34 52 T58 62 Q66 78 50 86 T18 84 Q4 76 8 60Z" fill="url(#hatch)" />
-          <path d="M62 34 Q78 26 90 36 Q96 50 84 56 Q70 58 64 48Z" fill="#8fc0e8" opacity=".75" stroke="#4f8fd0" stroke-width=".4" />
-          <path d="M4 26 L14 10 L20 20 L26 8 L36 26Z" fill="#c9c2d6" stroke="#6a6280" stroke-width=".5" />
-          <path d="M14 10 L16 15 L12 15Z M26 8 L28 13 L24 13Z" fill="#fff" />
-          <path d="M36 34 Q46 22 58 30 Q60 40 48 42 Q38 42 36 34Z" fill="#b8a6e0" opacity=".6" />
-          <path d="M52 70 Q64 64 74 72 Q72 82 60 82Z" fill="#e0a6c8" opacity=".55" />
-          <path d="M30 64 C40 60 50 66 62 72 S78 56 78 44 S56 30 46 30 S24 22 20 18" fill="none" stroke="#c0533f" stroke-width=".7" stroke-dasharray="1.6 1.6" />
-          {[[12, 70], [22, 76], [16, 64], [40, 76], [30, 82], [46, 70]].map(([x, y]) => <path d={`M${x} ${y - 4}l2.4 4h-4.8z`} fill="#4f8a3c" />)}
-          <text x="50" y="100" text-anchor="middle" font-size="3.4" font-family="Fraunces Variable, serif" fill="#6b4a2c" font-style="italic">The Land around Hoot Hollow</text>
-        </svg>
-        {AREAS.map((ar) => (
-          <button class={'pinpt' + (sel === ar.id ? ' on' : '') + (areaOpen(ar.id) ? '' : ' locked')} style={{ left: `${ar.x * 100}%`, top: `${ar.y * 100}%` }} onClick={() => { tap('paper_flip', 0.4); setSel(ar.id); }}>
-            <span class="flag">{!areaOpen(ar.id) && <IcoLock size={20} style="display:inline;vertical-align:-1px;margin-right:3px" />}{ar.name}</span><span class="stem" /><span class="dotp" />
-          </button>
-        ))}
-      </div>
-      <div class="card col">
-        <div class="spread"><h3 style={{ color: a.color }}>{a.name}</h3><span class="label">{found}/{total} treasures</span></div>
-        <p class="small muted">{a.blurb}</p>
-        {isOpen ? (
-          <button class={'btn ' + (s.area === sel ? 'soft' : 'pillow')} onClick={() => { tap('ui_confirm'); edit((x) => { x.area = sel; }); toast(`Tonight: ${a.name}`, IcoMap); }}>{s.area === sel ? 'Tonight’s destination' : 'Explore here tonight'}</button>
-        ) : (
-          <p class="small"><IcoLock size={20} style="display:inline;vertical-align:-2px" /> Opens at level {a.level}{a.streak ? ` with a ${a.streak}-night streak` : ''}.</p>
-        )}
-      </div>
-    </Sheet>
-  );
-}
+// [globe] the map is now the globe of twenty real places (src/ui/globe/globe.tsx)
+export { GlobePanel as MapPanel } from './globe/globe.tsx';
 
 export const _k = { buy };
