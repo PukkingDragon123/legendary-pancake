@@ -15,6 +15,7 @@ import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
 import { installPixelSkin } from './ui/pxskin.ts';
 import { Scene } from './world/scene.ts';
+import { bindHome } from './build/home-sync.ts'; // [house]
 
 async function boot() {
   installPixelSkin();
@@ -27,7 +28,7 @@ async function boot() {
   const scene = new Scene(canvas, save.value.look, quality);
   sceneRef.current = scene;
   (window as unknown as { hh: unknown }).hh = { scene, save, phase, tab, panel };
-  scene.setFurniture(save.value.furniture);
+  bindHome(scene); // [house] rooms, moving boxes and boarded-up floors follow save.home
   scene.setZones(zones.value);
   if (phase.value === 'sleeping') scene.placeOwl('away');
   // settle springs, particles and the camera before the first visible frame
@@ -78,9 +79,10 @@ async function boot() {
     if (zk !== zoneKey) {
       const before = JSON.parse(zoneKey) as Record<string, boolean>;
       zoneKey = zk; scene.setZones(zones.value);
-      for (const [k, v] of Object.entries(zones.value)) if (v && !before[k]) toast(`New room unlocked: ${k === 'loft' ? 'the Loft' : k === 'garden' ? 'the Garden' : 'the Stargazing Deck'}!`, IcoSparkle, 4200);
+      for (const [k, v] of Object.entries(zones.value)) if (v && !before[k] && k === 'garden') toast( // [house] floors announce themselves (home-sync)
+        'New room unlocked: the Garden!', IcoSparkle, 4200);
     }
-    if (bk !== blockKey) { blockKey = bk; edit((x) => { x.blocker.mascot = x.look.skin ?? 'owl'; }); void pushBlockerConfig(); }
+    if (bk !== blockKey) { blockKey = bk; edit((x) => { x.blocker.mascot = x.look.skin === 'meowl' ? 'meowl' : 'owl'; /* [owl] skins are now any special-skin id */ }); void pushBlockerConfig(); }
   });
   // camera framing follows what's open
   effect(() => {
@@ -120,7 +122,7 @@ async function boot() {
   const today = dayKey();
   if (save.value.daily.day !== today) {
     edit((x) => { x.daily = { day: today, gift: true, pets: 0 }; x.coins += 25; });
-    if (save.value.onboarded) setTimeout(() => toast('+25 coins: a little gift from Pip', IcoAcorn), 1600);
+    if (save.value.onboarded) setTimeout(() => toast('+25 acorns: a little gift from Pip', IcoAcorn), 1600);
   }
   const plus = save.value.plus;
   if (plus.active && Date.now() - (plus.lastStipend ?? 0) > 7 * 86400_000) {

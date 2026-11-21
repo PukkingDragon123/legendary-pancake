@@ -21,6 +21,17 @@ export const GRASS = {
   uCloud: { value: null as THREE.Texture | null },
   /** things pressing the grass down: x, z, radius, strength (up to 4) */
   uPush: { value: Array.from({ length: 4 }, () => new THREE.Vector4()) },
+  // [world] seasons and weather
+  /** colour multiplier for the season (golden in autumn, faded in winter) */
+  uTint: { value: new THREE.Color(1, 1, 1) },
+  /** 0..1 snow lying on the ground: blades sink in and frost at the tips */
+  uSnow: { value: 0 },
+  /** 0..1 rain-soaked: darker, glossier */
+  uWet: { value: 0 },
+  /** 0..1 how many wildflowers are in bloom (they go to seed in autumn, vanish in winter) */
+  uBloom: { value: 1 },
+  /** 0..1 fallen leaves among the short grass (autumn) */
+  uLitter: { value: 0 },
 };
 
 /** A small tileable value-noise texture used for dappled light and patchy hue. */
@@ -56,6 +67,7 @@ attribute vec3 iData;   // size, cell, tint
 uniform float uTime;
 uniform vec2 uWind;
 uniform vec4 uPush[4];
+uniform float uSnow; uniform float uBloom; uniform float uLitter;
 varying vec2 vUv;
 varying vec3 vW;
 varying float vTint;
@@ -63,6 +75,7 @@ varying float vH;
 #include <fog_pars_vertex>
 void main() {
   vec3 p = position * iData.x;
+  p.y *= 1.0 - uSnow * 0.5;
   float c = cos(iPos.w), s = sin(iPos.w);
   p.xz = mat2(c, -s, s, c) * p.xz;
   vec3 w = (modelMatrix * vec4(iPos.xyz + p, 1.0)).xyz;
@@ -82,7 +95,13 @@ void main() {
     w.xz += dir * k * 0.35 * iData.x;
     w.y -= k * 0.3 * iData.x;
   }
-  vUv = vec2((iData.y + uv.x) / ${NCELL.toFixed(1)}, uv.y);
+  // [world] seasons: wildflowers go to seed and dry out, leaves gather in the short grass
+  float cellI = iData.y;
+  float hb = fract(sin(dot(iPos.xz, vec2(12.9898, 78.233))) * 43758.5453);
+  bool bloom = (cellI > 2.5 && cellI < 10.5 && cellI != 9.0) || (cellI > 19.5 && cellI < 22.5);
+  if (bloom && hb > uBloom) cellI = hb > 0.78 ? 24.0 : hb > 0.62 ? 19.0 : 13.0;
+  if (cellI < 1.5 && hb < uLitter * 0.45) cellI = 24.0;
+  vUv = vec2((cellI + uv.x) / ${NCELL.toFixed(1)}, uv.y);
   vW = w;
   vTint = iData.z;
   vH = h;
@@ -96,6 +115,7 @@ uniform sampler2D uMap;
 uniform sampler2D uCloud;
 uniform vec3 uKey; uniform vec3 uSky; uniform vec3 uGround; uniform vec3 uSunDir;
 uniform float uBright; uniform float uDapple; uniform float uTime; uniform vec2 uWind;
+uniform vec3 uTint; uniform float uSnow; uniform float uWet;
 varying vec2 vUv;
 varying vec3 vW;
 varying float vTint;
@@ -115,7 +135,11 @@ void main() {
   vec3 amb = mix(uGround, uSky, 0.3 + vH * 0.6) * 0.72;
   vec3 lit = amb + uKey * (0.62 * sun + 0.06);
   float pt = texture2D(uCloud, vW.xz * 0.05).r - 0.5;
-  vec3 col = t.rgb * vTint * lit * uBright * (1.0 + vec3(0.1, 0.04, -0.08) * pt * 2.0);
+  vec3 col = t.rgb * uTint * vTint * lit * uBright * (1.0 + vec3(0.1, 0.04, -0.08) * pt * 2.0);
+  col *= 1.0 - uWet * 0.18;
+  // frost and snow clinging to the lower blades
+  float frost = uSnow * step(vH, uSnow * 0.55 + fract(sin(dot(floor(vW.xz * 16.0), vec2(12.9898, 78.233))) * 43758.5453) * 0.35);
+  col = mix(col, vec3(0.92, 0.95, 1.0) * (amb * 1.25 + uKey * 0.55 * sun), frost);
   vec3 V = normalize(vW - cameraPosition);
   float back = pow(max(dot(V, uSunDir), 0.0), 5.0);
   col += t.rgb * uKey * back * (0.35 + vH) * 1.1 * (0.25 + 0.75 * sun);

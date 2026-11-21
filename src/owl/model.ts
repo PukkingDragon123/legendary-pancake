@@ -1,55 +1,82 @@
-// Pip: a plump little owl with a raised facial disc, a hooked beak, feathery ear tufts and small,
-// simple bead eyes, built from rounded voxel volumes and painted at three texels per model pixel.
-// Feathers are painted, not noised: every scalloped feather has a soft dome of light, a shaft, a lit
-// rim and a shadow on the feather beneath, with freckles and barring placed by hand-tuned rules.
-// The Meowl skin swaps the head for a kitten's (pointy ears, white muzzle, pink nose, whiskers).
+// Pip, modelled on real owls. Each species gets its own proportions (a Saw-whet's huge round head,
+// a Burrowing Owl's stilts, a Great Grey's dish of a face). The egg-shaped body and the domed head
+// are sliced from smooth profiles into stepped voxel layers; on top sit many plates: a dished facial
+// disc framed by a raised ruff, brows, rictal bristles and a hooked beak with its cere, nape and
+// mantle feathers, flank feathers fluffing over the wings, folded wings in layers (scapulars, covert
+// rows with hanging tips, secondaries, separated primaries crossing over the tail), a barred tail
+// fan, feathered legs, toes and curved talons. Everything is painted at four texels per pixel.
 import * as THREE from 'three';
-import { box, buildRig, lean, PX, type BoneSpec, type BoxSpec, type Painter, type Rig, type Texel, type Vec3 } from '../gfx/box.ts';
-import { col, mix, ramp, toLch, tone, type Ramp } from '../gfx/color.ts';
-import { fbm, hash } from '../gfx/noise.ts';
-import { Eye, eyeColours } from './eyes.ts';
-import { palette, type OwlPalette, type Skin } from './palette.ts';
-import { dressOwl } from './outfits.ts';
+import { box, buildRig, lean, PX, type BoneSpec, type BoxSpec, type Painter, type Rig, type Vec3 } from '../gfx/box.ts';
+import { col, mix } from '../gfx/color.ts';
+import { Eye, EYE_PLANE, type EyeColours } from './eyes.ts';
+import { bodyDepth, bodyHalfW, geoOf, type Geo, type Profile } from './geo.ts';
+import { M, MEOWL_IRIS, meowlHead, shiftBoxes } from './meowl.ts';
+import { palette, PALETTE, type OwlPalette } from './palette.ts';
+import { paintKit, type Kit } from './plumage.ts';
+import { dressOwl, holdItem } from './outfits.ts';
+import { skinEyes, skinExtras, skinKit, SPECIAL_SKIN } from './skins.ts';
+import { resolveSpecies, speciesOf, type SpeciesDef } from './species.ts';
 
 /** Texels per model pixel. */
-export const OWL_DENS = 3;
+export const OWL_DENS = 4;
 
-/** Key measurements in model px (16 px = one block). Pip faces +z. */
-export const G = {
-  bodyY: 3, bodyH: 11, bodyW: 13, bodyD: 11,
-  headY: 12.4, headH: 12.8, headW: 16.4, headD: 12.6, headZ: 0.2,
-  headTop: 25.2, headFront: 6.5, faceFront: 7.4,
-  eyeX: 3.95, eyeY: 19.5, eyeS: 5.1,
-  neckY: 13.4,
-  wingX: 7.5, shoulderY: 13.4,
-  noseY: 17.6,
-  /** front of the owl's facial disc */
-  discFront: 7.45,
-} as const;
-
-export type BoneName = 'body' | 'head' | 'tuftL' | 'tuftR' | 'browL' | 'browR' | 'jaw' | 'wingL' | 'wingR' | 'tail' | 'legL' | 'legR';
-
-export const PIVOTS: Record<BoneName, Vec3> = {
-  body: [0, G.bodyY, 0],
-  head: [0, G.neckY, 0.4],
-  tuftL: [-4.9, 24.4, 0.2],
-  tuftR: [4.9, 24.4, 0.2],
-  browL: [-G.eyeX, 23, G.headFront],
-  browR: [G.eyeX, 23, G.headFront],
-  jaw: [0, 16.3, G.faceFront],
-  wingL: [-6.4, G.shoulderY, -0.4],
-  wingR: [6.4, G.shoulderY, -0.4],
-  tail: [0, 4.6, -5.2],
-  legL: [-2.7, 2.8, 0.8],
-  legR: [2.7, 2.8, 0.8],
-};
+export type BoneName = 'body' | 'head' | 'tuftL' | 'tuftR' | 'browL' | 'browR' | 'jaw' | 'wingL' | 'wingR' | 'handL' | 'handR' | 'tail' | 'legL' | 'legR';
+const BONES: BoneName[] = ['body', 'head', 'tuftL', 'tuftR', 'browL', 'browR', 'jaw', 'wingL', 'wingR', 'handL', 'handR', 'tail', 'legL', 'legR'];
 const PARENT: Partial<Record<BoneName, BoneName>> = {
-  tuftL: 'head', tuftR: 'head', browL: 'head', browR: 'head', jaw: 'head', wingL: 'body', wingR: 'body', tail: 'body',
+  tuftL: 'head', tuftR: 'head', browL: 'head', browR: 'head', jaw: 'head', wingL: 'body', wingR: 'body', handL: 'wingL', handR: 'wingR', tail: 'body',
 };
+
+export type Pivots = Record<BoneName, Vec3>;
+
+/** Where the primaries root on the folded wing (the hand bone's pivot). */
+const handAt = (g: Geo, sd: number): Vec3 => {
+  const y = g.bodyY + g.bodyH * 0.42;
+  return [sd * (bodyHalfW(g, y) + 0.9), y, bodyDepth(g, y).back * 0.45];
+};
+
+export function pivotsOf(g: Geo): Pivots {
+  const t = g.shape.tuft;
+  const hw = bodyHalfW(g, g.shoulderY);
+  return {
+    body: [0, g.bodyY, 0],
+    head: [0, g.neckY, g.headZ - 0.2],
+    tuftL: [-(t?.x ?? 4.6), g.headTop - 0.8, g.headZ + 0.4],
+    tuftR: [t?.x ?? 4.6, g.headTop - 0.8, g.headZ + 0.4],
+    browL: [-g.eyeX, g.eyeY + g.eyeS * 0.5, g.discFront],
+    browR: [g.eyeX, g.eyeY + g.eyeS * 0.5, g.discFront],
+    jaw: [0, g.beakY - 1.7, g.discFront + 0.4],
+    wingL: [-(hw + 0.4), g.shoulderY, 0.2],
+    wingR: [hw + 0.4, g.shoulderY, 0.2],
+    handL: handAt(g, -1),
+    handR: handAt(g, 1),
+    tail: [0, g.bodyY + 1.6, bodyDepth(g, g.bodyY + 1.6).back + 1.2],
+    legL: [-g.legX, g.legTop, 0.6],
+    legR: [g.legX, g.legTop, 0.6],
+  };
+}
+
+/** Key measurements of the default (Tawny) owl. Per-model values live on `OwlModel.g`. */
+export const G: Geo = geoOf(speciesOf('tawny').shape);
+export const PIVOTS: Pivots = pivotsOf(G);
 
 // ------------------------------------------------------------------ rounded volumes
 
-/** A box with stepped (chamfered) edges: reads as rounded at pixel scale. Thin axes stay square. */
+/** A rounded-rectangle footprint as strips following a quarter circle of radius c. */
+function rounded(x: number, y: number, z: number, w: number, h: number, d: number, c: number, m: Painter, o: Partial<BoxSpec> = {}): BoxSpec[] {
+  c = Math.max(0, Math.min(c, d / 2 - 0.3, w / 2 - 0.3));
+  const out: BoxSpec[] = [];
+  const core = d - 2 * c;
+  out.push(box(x, y, z, w, h, core, m, o));
+  const n = c > 1.6 ? 3 : 2, step = c / n;
+  for (let k = 0; k < n; k++) {
+    const s = (k + 0.5) * step, inset = c - Math.sqrt(Math.max(0, c * c - s * s));
+    const off = core / 2 + k * step + step / 2;
+    for (const sd of [-1, 1]) out.push(box(x, y, z + sd * off, w - 2 * inset, h, step, m, { ...o, skip: (o.skip ?? '') + (sd > 0 ? 'n' : 's') }));
+  }
+  return out;
+}
+
+/** A box with stepped edges: reads as rounded at pixel scale. */
 export function rbox(x: number, y: number, z: number, w: number, h: number, d: number, mat: Painter, o: Partial<BoxSpec> = {}, r = 1): BoxSpec[] {
   const rx = Math.min(r, w / 2 - 0.2), ry = Math.min(r, h / 2 - 0.2), rz = Math.min(r, d / 2 - 0.2);
   const out: BoxSpec[] = [];
@@ -59,407 +86,306 @@ export function rbox(x: number, y: number, z: number, w: number, h: number, d: n
   return out.length ? out : [box(x, y, z, w, h, d, mat, o)];
 }
 
-/** A rounded-rectangle footprint as non-overlapping strips following a quarter circle of radius c. */
-function rounded(x: number, y: number, z: number, w: number, h: number, d: number, c: number, m: Painter, o: Partial<BoxSpec>, axis: 'xz' | 'xy'): BoxSpec[] {
-  const along = axis === 'xz' ? d : h;
-  c = Math.max(0, Math.min(c, along / 2 - 0.3, w / 2 - 0.3));
-  const out: BoxSpec[] = [];
-  const core = along - 2 * c;
-  if (axis === 'xz') out.push(box(x, y, z, w, h, core, m, o)); else out.push(box(x, y + c, z, w, core, d, m, o));
+/** Rounded voxel volume from horizontal slices: [y0, y1, inset, corner] relative to the bottom. */
+export function sculpt(x: number, y: number, z: number, w: number, d: number, prof: [number, number, number, number][], m: Painter, o: Partial<BoxSpec> = {}): BoxSpec[] {
+  return prof.flatMap(([y0, y1, inset, c]) => rounded(x, y + y0, z, w - 2 * inset, y1 - y0, d - 2 * inset, c, m, o));
+}
+
+/** A flat rounded plate facing +z (rows of boxes). */
+export function plate(x: number, y: number, z: number, w: number, h: number, d: number, c: number, m: Painter, o: Partial<BoxSpec> = {}): BoxSpec[] {
+  c = Math.max(0, Math.min(c, h / 2 - 0.3, w / 2 - 0.3));
+  const out: BoxSpec[] = [box(x, y + c, z, w, h - 2 * c, d, m, o)];
   const n = 2, step = c / n;
   for (let k = 0; k < n; k++) {
     const s = (k + 0.5) * step, inset = c - Math.sqrt(Math.max(0, c * c - s * s));
-    const ww = w - 2 * inset, off = core / 2 + k * step + step / 2;
-    for (const sd of [-1, 1]) {
-      if (axis === 'xz') out.push(box(x, y, z + sd * off, ww, h, step, m, o));
-      else out.push(box(x, y + c + core / 2 + sd * off - step / 2, z, ww, step, d, m, o));
-    }
+    out.push(box(x, y + c - (k + 1) * step, z, w - 2 * inset, step, d, m, o), box(x, y + h - c + k * step, z, w - 2 * inset, step, d, m, o));
   }
   return out;
 }
 
-/** Rounded voxel volume from horizontal slices: [y0, y1, inset, corner] relative to the bottom. */
-export function sculpt(x: number, y: number, z: number, w: number, d: number, prof: [number, number, number, number][], m: Painter, o: Partial<BoxSpec> = {}): BoxSpec[] {
-  return prof.flatMap(([y0, y1, inset, c]) => rounded(x, y + y0, z, w - 2 * inset, y1 - y0, d - 2 * inset, c, m, o, 'xz'));
-}
-
-/** A flat rounded plate facing +z. */
-export function plate(x: number, y: number, z: number, w: number, h: number, d: number, c: number, m: Painter, o: Partial<BoxSpec> = {}): BoxSpec[] {
-  return rounded(x, y, z, w, h, d, c, m, o, 'xy');
-}
-
-// ------------------------------------------------------------------ painting
-
-/** Ramps with warm shadows for warm colours (no grey-lavender mud on cream and white). */
-function fr(c: string, step = 0.042): Ramp {
-  const [, C, h] = toLch(col(c));
-  const warm = (h > 15 && h < 115) || C < 0.05;
-  return ramp(col(c), warm ? { cool: 40, warm: 88, shift: 0.045, step } : { step });
-}
-
-/** Baked light per face: east, west, up, down, front, back (softer than the world's). */
-const FACE = [0.05, -0.35, 0.7, -1.2, 0.2, -0.45];
-
-/** Soft painterly shading: face light, a world-space top-to-bottom gradient and a gentle edge falloff. */
-function soft(t: Texel, top: number, span: number): number {
-  let L = FACE[t.face] + ((t.y - top) / span) * 0.9 + 0.35;
-  if (t.face !== 2 && t.face !== 3 && t.w >= 4 && (t.u === 0 || t.u === t.w - 1)) L -= 0.25;
-  return L;
-}
-
-/** Directional brush strokes: short, slightly offset dabs that read as fur or feathers. */
-function strokes(a: number, b: number, len = 1.7, wid = 0.67, seed = 0): number {
-  const colI = Math.floor(a / wid), off = hash(colI, 0, 0, seed) * len;
-  const row = Math.floor((b + off) / len);
-  const h = hash(colI, row, 1, seed);
-  return h > 0.72 ? 0.32 : h < 0.22 ? -0.3 : 0;
-}
-
-function surf(t: Texel): [number, number] {
-  switch (t.face) {
-    case 4: return [t.x, -t.y];
-    case 5: return [-t.x + 40, -t.y];
-    case 0: return [-t.z + 20, -t.y];
-    case 1: return [t.z + 60, -t.y];
-    case 2: return [t.x, -t.z];
-    default: return [t.x, t.z];
-  }
-}
-
 /**
- * One painted feather in a field of overlapping scales: a soft dome of light, darker edges, a faint
- * shaft down the middle, a lit rim along the rounded tip and a shadow cast on the feather beneath.
+ * Slice a profiled volume into stepped layers. A new layer starts whenever the outline drifts by more
+ * than `step` px, so domes get many thin steps and straight flanks a few tall ones. Faces fully
+ * covered by the neighbouring layer are skipped.
  */
-function feather(a: number, b: number, fw: number, fh: number, seed: number) {
-  const fy = b / fh, row = Math.floor(fy), v = fy - row;
-  const fx = a / fw + (row & 1) * 0.5, c = Math.floor(fx), u = fx - c;
-  const arc = 0.45 + 0.55 * Math.sqrt(Math.max(0, 1 - (2 * u - 1) ** 2));
-  const dd = v - arc;
-  let L: number;
-  if (dd >= 0) L = -0.7 + Math.min(dd, 0.3) * 1.7;
-  else {
-    L = 0.4 - v * 0.55 - Math.abs(u - 0.5) * 0.6;
-    if (dd > -0.15) L += 0.6;
-    else if (Math.abs(u - 0.5) < 0.07 && v > 0.12) L -= 0.32;
+function volume(prof: Profile, m: Painter, o: { k0?: number; k1?: number; step?: number; grow?: number; round?: number; maxH?: number } = {}): BoxSpec[] {
+  const k0 = o.k0 ?? 0, k1 = o.k1 ?? 1, step = o.step ?? 0.32, grow = o.grow ?? 0, maxH = o.maxH ?? 2.4;
+  const cuts = [k0];
+  let ref = k0;
+  const N = 200;
+  for (let i = 1; i <= N; i++) {
+    const k = k0 + ((k1 - k0) * i) / N;
+    const drift = Math.max(Math.abs(prof.hw(k) - prof.hw(ref)), Math.abs(prof.front(k) - prof.front(ref)), Math.abs(prof.back(k) - prof.back(ref)));
+    if (drift > step || (k - ref) * prof.h > maxH || i === N) { cuts.push(k); ref = k; }
   }
-  L += (hash(row, c, 3, seed) - 0.5) * 0.25;
-  return { L, row, col: c, u, v, dd };
+  const layers: { y: number; h: number; hw: number; f: number; bk: number }[] = [];
+  for (let i = 0; i + 1 < cuts.length; i++) {
+    const a = cuts[i], b = cuts[i + 1], mid = (a + b) / 2;
+    const hw = prof.hw(mid) + grow, f = prof.front(mid) + grow, bk = prof.back(mid) - grow;
+    layers.push({ y: prof.y0 + a * prof.h, h: (b - a) * prof.h, hw, f, bk });
+  }
+  const out: BoxSpec[] = [];
+  layers.forEach((L, i) => {
+    const below = layers[i - 1], above = layers[i + 1];
+    const covers = (o2: typeof L | undefined) => !!o2 && o2.hw >= L.hw - 0.02 && o2.f >= L.f - 0.02 && o2.bk <= L.bk + 0.02;
+    const skip = (covers(below) ? 'd' : '') + (covers(above) ? 'u' : '');
+    const w = L.hw * 2, d = L.f - L.bk;
+    out.push(...rounded(0, L.y, (L.f + L.bk) / 2, w, L.h, d, Math.min(w, d) * (o.round ?? 0.42), m, skip ? { skip } : {}));
+  });
+  return out;
 }
 
-export function meowlPainter(p: OwlPalette): Painter {
-  const owl = p.skin === 'owl';
-  const mark = owl && p.mark ? fr(p.mark) : null;
-  const fur = fr(p.fur), stripe = fr(p.stripe), wing = fr(p.wing), speck = fr(p.speck), belly = fr(p.belly, 0.04);
-  const muzzle = fr(p.muzzle, 0.04), ear = fr(p.ear), nose = fr(p.nose, 0.07), paw = fr(p.paw, 0.04), liner = fr(p.liner);
-  const blush = ramp(col(p.blush)), talon = ramp(0x8a8590, { step: 0.06 }), mouthR = ramp(0xd8546a);
-  const patch = p.patch ? fr(p.patch) : stripe;
-  const ex = G.eyeX, ey = G.eyeY;
-  const pattern = p.pattern;
+// ------------------------------------------------------------------ the look
 
-  /** Coat colour at a texel on the head/back fur: base, tabby stripe, calico patch or siamese point. */
-  const coat = (t: Texel, L: number): number => {
-    const [a, b] = surf(t);
-    L += strokes(a, b, 1.6, 0.67, 3);
-    if (pattern === 'tabby') {
-      // stripes wrap around the head and back like a real tabby's mackerel bands
-      const w = (fbm(t.x / 5, t.y / 5, t.z / 5, 7) - 0.5) * 2.2;
-      const band = t.face === 2 ? Math.sin((Math.abs(t.x) + w) * 1.35) : Math.sin((t.y + w + (t.face === 5 ? t.x * 0.2 : 0)) * 1.25);
-      if (band > 0.62) return tone(stripe, L * 0.7 + (band > 0.85 ? -0.2 : 0.4));
-    } else if (pattern === 'calico') {
-      const n = fbm(t.x / 4.5, t.y / 4.5, t.z / 4.5, 21);
-      if (n > 0.6) return tone(patch, L);
-      if (n < 0.33) return tone(stripe, L * 0.7 + 0.3);
-    } else if (pattern === 'tuxedo') {
-      return tone(fur, L * 0.8);
-    } else if (pattern === 'points') {
-      if (t.y > G.headTop - 2 || t.tag === 'ear') return tone(stripe, L * 0.7 + 0.2);
-    }
-    return tone(fur, L);
-  };
-
-  const P: Record<string, Painter> = {
-    head(t) {
-      const L = soft(t, G.headTop, 12);
-      if (t.face === 3) return tone(muzzle, -0.4);
-      if (t.face !== 4) return coat(t, L);
-      const ax = Math.abs(t.x), dEye = Math.hypot(ax - ex, t.y - ey);
-      // eyeliner hugging the lower edge of each eye, flicking out at the outer corner
-      if (dEye > 2.5 && dEye < 2.95 && t.y < ey - 0.6 && ax > ex) return tone(liner, 0.2);
-      if (ax > ex + 2.2 && ax < ex + 4.6 && Math.abs(t.y - (ey - 0.5 - (ax - ex - 2.2) * 0.38)) < 0.42) return tone(liner, 0);
-      if (ax > ex + 2.6 && ax < ex + 4.4 && Math.abs(t.y - (ey - 2.2 - (ax - ex - 2.6) * 0.3)) < 0.36 && pattern !== 'solid') return tone(liner, 0.4);
-      // the white blaze between the eyes, narrowing towards the forehead
-      const blaze = 1.45 - Math.max(0, t.y - 18.6) * 0.22;
-      if (pattern !== 'points' && ax < blaze && t.y < 23.2) return tone(muzzle, L * 0.5 + 0.4);
-      // the tabby "M" on the forehead
-      if (pattern !== 'solid' && pattern !== 'tuxedo' && t.y > 22.2 && t.y < 24.6 && (Math.abs(ax - 2.1) < 0.42 || (Math.abs(ax - 4.4) < 0.42 && t.y < 23.9))) return tone(stripe, 0);
-      if (Math.hypot(ax - 5.4, t.y - 16.7) < 1.2) return tone(blush, 0.5 + (t.y > 17.6 ? 0.4 : 0));
-      if (pattern === 'tuxedo' && t.y < 18 && ax < 5.4) return tone(muzzle, L * 0.5);
-      if (pattern === 'points' && ax < 4.2 && t.y < 19.4) return tone(stripe, L * 0.5 + (ax > 3 ? 0.6 : 0));
-      // the face itself stays clean: no mackerel bands across it, just soft painted fur
-      if (pattern === 'tabby' || pattern === 'solid' || pattern === 'tuxedo') return tone(fur, L + 0.15 + strokes(t.x, -t.y, 1.4, 0.67, 3) * 0.7);
-      return coat(t, L + 0.15);
-    },
-    cheek(t) {
-      // fluffy cheek ruffs: soft tufts below the ears
-      const L = soft(t, 18, 6) + strokes(t.z * 1.4, t.y, 1.1, 0.5, 9);
-      return pattern === 'solid' || pattern === 'tuxedo' || pattern === 'calico' ? tone(muzzle, L * 0.6) : coat(t, L);
-    },
-    muzzle(t) {
-      const L = soft(t, 18.8, 5) * 0.6 + 0.3;
-      if (t.face === 4) {
-        const ax = Math.abs(t.x);
-        // the little "w" mouth under the nose
-        if (Math.abs(t.x) < 0.17 && t.y > 16.35 && t.y < 17.2) return tone(nose, -1.6);
-        if (Math.abs(Math.hypot(ax - 0.62, t.y - 16.6) - 0.6) < 0.17 && t.y < 16.6) return tone(nose, -1.6);
-        // whisker pads
-        if ([[2.1, 17.0], [2.6, 16.3], [1.8, 15.8]].some(([x, y]) => Math.hypot(ax - x, t.y - y) < 0.3)) return tone(muzzle, -1.4);
-        if (pattern === 'points') return tone(stripe, L * 0.5 + 0.8 - Math.max(0, ax - 2) * 0.4);
-        return tone(muzzle, L + (t.y < 15.4 ? -0.3 : 0));
-      }
-      return pattern === 'points' ? tone(stripe, L * 0.5) : tone(muzzle, L - 0.6);
-    },
-    nose(t) { return tone(nose, (t.face === 2 ? 1.2 : t.face === 4 ? 0.3 : -0.5) + (t.face === 4 && t.bx < t.sx * 0.45 && t.by > t.sy * 0.5 ? 0.9 : 0)); },
-    mouth(t) { return tone(mouthR, t.face === 4 ? (t.by < t.sy * 0.45 ? 0.6 : -0.6) : -1); },
-    whisker(t) { return tone(ramp(0xfffdf6), t.face === 2 ? 1 : 0); },
-    ear(t) {
-      const L = soft(t, G.headTop + 5, 6);
-      // pink inner ear on the front, with a lighter heart and a dark rim at the tip
-      if (t.face === 4) {
-        const inset = Math.min(t.bx, t.sx - t.bx);
-        if (inset > 0.6 && t.sy > 0) return tone(ear, (inset > 1.3 ? 0.6 : -0.3) + (t.y - G.headTop) * 0.08);
-      }
-      if (t.y > G.headTop + 3.2 && pattern !== 'solid') return tone(pattern === 'points' ? stripe : liner, 0.4);
-      return coat(t, L);
-    },
-    body(t) {
-      // the soft white chest covers the front; golden owl feathers wrap the back
-      if (t.face === 3 || t.face === 4) return P.belly(t);
-      return P.back(t);
-    },
-    belly(t) {
-      let L = soft(t, G.bodyY + G.bodyH, 12) * 0.55 + 0.45;
-      // barely-there feather scallops, painted, not noisy
-      const row = Math.floor((G.bodyY + G.bodyH + 2 - t.y) / 1.25), off = (row & 1) * 0.9;
-      const u = ((t.x + 40 + off) / 1.8) % 1, v = ((G.bodyY + G.bodyH + 2 - t.y) / 1.25) % 1;
-      if (v > 0.62 + Math.abs(u - 0.5) * 0.5) L -= 0.38;
-      L += strokes(t.x * 1.2, -t.y, 1.2, 0.6, 5) * 0.6;
-      if (t.face === 4 && Math.abs(t.x) > G.bodyW / 2 - 1.4) L -= 0.4;
-      return tone(belly, L);
-    },
-    back(t) {
-      const [a, b] = surf(t);
-      const L = soft(t, G.bodyY + G.bodyH, 12) + strokes(a, b, 1.4, 0.67, 13);
-      if (hash(Math.floor(t.x * 3), Math.floor(t.y * 3), Math.floor(t.z * 3), 4) > 0.93) return tone(speck, 0.3);
-      return tone(wing, L);
-    },
-    wing(t) {
-      const outer = (t.face === 0 && t.x > 0) || (t.face === 1 && t.x < 0);
-      const top = G.shoulderY + 1;
-      if (!outer && t.face !== 2 && t.face !== 4 && t.face !== 5) return tone(wing, -0.9);
-      const a = t.face === 4 || t.face === 5 ? t.x * 3 : -t.z, b = top - t.y;
-      let L = soft(t, top, 12) * 0.8 + 0.25;
-      if (b < 5.2) {
-        // coverts: rounded feather tips in soft rows, peppered with fine grey speckles
-        const row = Math.floor(b / 1.3), off = (row & 1) * 0.9;
-        const u = ((a + 50 + off) / 1.8) % 1, v = (b / 1.3) % 1;
-        if (v > 0.66 + Math.abs(u - 0.5) * 0.45) L -= 0.55; else if (v < 0.2) L += 0.25;
-        const k = hash(Math.floor(t.x * 3 + t.z * 3), Math.floor(t.y * 3), 2, 7);
-        if (k > 0.9) return tone(speck, 0.6);
-        if (k < 0.04) return tone(speck, -0.6);
-        return tone(wing, L + strokes(a, b, 1.2, 0.5, 2) * 0.6);
-      }
-      // flight feathers: long vanes with soft darker bars
-      const vane = ((a + 100) / 1.5) % 1;
-      L += vane < 0.14 ? -0.7 : vane > 0.85 ? 0.3 : 0;
-      const bar = Math.floor((b + 0.4) / 1.35) % 2 === 0;
-      if (!owl && hash(Math.floor(t.x * 3 + t.z * 3), Math.floor(t.y * 3), 3, 7) > 0.94) return tone(speck, 0.4);
-      return bar && owl ? tone(stripe, L + 1.3) : tone(wing, L + (bar ? -0.55 : 0.1));
-    },
-    prim(t) {
-      const vane = ((-t.z * 1.2 + 100) / 1.35) % 1;
-      let L = soft(t, 7, 6) * 0.6 + (vane < 0.18 ? -0.8 : 0.1);
-      if (t.by < 0.8) L -= 0.5;
-      const bar = Math.floor((t.y + 30) / 1.1) % 2 === 0;
-      return tone(wing, L + (bar ? -0.7 : 0));
-    },
-    tail(t) {
-      const L = soft(t, 5, 4) * 0.7;
-      return tone(wing, L + (Math.floor((t.z + 30) / 1.1) % 2 === 0 ? -0.6 : 0.1));
-    },
-    leg(t) { return tone(paw, soft(t, 3.3, 3) * 0.5 + 0.2 + strokes(t.x * 2 + t.z, -t.y, 0.9, 0.4, 41) * 0.6); },
-    paw(t) { return tone(paw, soft(t, 1.2, 1.2) * 0.5 + 0.3 + (t.face === 4 && Math.floor(t.x * 3 + 30) % 3 === 0 ? -0.7 : 0)); },
-    talon(t) { return tone(talon, t.face === 2 ? 0.8 : -0.2); },
-
-    // ---------------- owl skin
-    ohead(t) {
-      if (t.face === 3) return tone(belly, -0.5);
-      // the front of the head behind the disc is the dark ruff that frames it
-      if (t.face === 4 && t.y < G.headTop - 1.6) return tone(liner, soft(t, G.headTop, 12) * 0.4 + 0.4);
-      const [a, b] = surf(t);
-      const f = feather(a, G.headTop + 2 - t.y + (t.face === 2 ? (G.headFront - t.z) * 0.9 - (G.headTop + 2 - t.y) : 0), 1.75, 1.2, 5);
-      const base = soft(t, G.headTop, 12) * 0.75;
-      if (f.dd < -0.12 && (f.row + f.col * 2) % 5 === 0 && Math.hypot((f.u - 0.5) * 1.75, (f.v - 0.36) * 1.2) < 0.34) return tone(speck, base * 0.4 + 0.6);
-      return tone(fur, base + f.L * 0.8);
-    },
-    disc(t) {
-      // sides of the raised disc are the ruff: a crisp dark outline around the face
-      if (t.face !== 4) return tone(liner, (t.face === 2 ? 0.3 : -0.4) + strokes(t.x * 2, t.y * 2, 0.8, 0.4, 6) * 0.5);
-      const dl = Math.hypot(t.x + ex, t.y - ey), dr = Math.hypot(t.x - ex, t.y - ey);
-      const near = dl < dr ? -1 : 1, d = Math.min(dl, dr);
-      const ang = Math.atan2(t.y - ey, t.x - near * ex);
-      let L = 0.7 - Math.max(0, d - 2.6) * 0.32;
-      // fine radiating feathers, painted as alternating soft strokes
-      const ray = Math.sin(ang * 16 + d * 0.9);
-      if (ray > 0.72) L -= 0.28;
-      if (d > 2.6 && d < 3.0) L -= 0.3; // a soft socket ring round each eye
-      if (Math.hypot(Math.abs(t.x) - 5.4, t.y - 16.5) < 1.1) return tone(blush, 0.5 + (t.y > 16.8 ? 0.4 : 0));
-      if (Math.abs(t.x) < 1.9 && t.y < 16.2) L += 0.35;
-      return tone(muzzle, L + (hash(Math.floor(t.x * 3), Math.floor(t.y * 3), 2, 8) - 0.5) * 0.14);
-    },
-    tuft(t) {
-      const L = soft(t, G.headTop + 4, 5) * 0.8;
-      const streak = Math.abs(((Math.abs(t.x) * 3 + t.z * 2) % 3) - 1.5) < 0.35;
-      return tone(streak ? stripe : fur, L + (streak ? 1.1 : 0.2) + strokes(t.x * 2, t.y * 2, 0.7, 0.35, 2) * 0.6);
-    },
-    tufttip(t) { return tone(ear, soft(t, G.headTop + 5, 4) * 0.4 + 0.5); },
-    brow(t) { return tone(muzzle, soft(t, 24, 2) * 0.5 + 0.6 + (Math.floor(t.x * 3 + t.y * 1.5) % 3 === 0 ? -0.45 : 0)); },
-    beak(t) {
-      let L = FACE[t.face] * 1.2 + 0.1;
-      if (t.face === 2 && t.bz < 0.5) L -= 0.8;
-      if ((t.face === 4 || t.face === 2) && t.bx < t.sx * 0.42 && t.by > t.sy * 0.45) L += 1.1;
-      return tone(nose, L);
-    },
-    obelly(t) {
-      if (t.face !== 4 && t.face !== 3) return P.back(t);
-      const top = G.bodyY + G.bodyH + 1, b = top - t.y;
-      const f = feather(t.x + 30, b, 1.9, 1.3, 21);
-      let L = soft(t, top, 12) * 0.5 + 0.35 + f.L * 0.5;
-      if (t.face === 4 && Math.abs(t.x) > G.bodyW / 2 - 1.2) L -= 0.4;
-      // little arrowhead chevrons in rows, denser lower down
-      if (mark && b > 3.2 && t.face === 4) {
-        const rI = Math.floor(b / 2.05), vv = b / 2.05 - rI, off = (rI & 1) * 1.45;
-        const cx = Math.round((t.x - off) / 2.9) * 2.9 + off, dx = t.x - cx;
-        if (Math.abs(dx) < 1.0 && Math.abs(vv - 0.3 - Math.abs(dx) * 0.34) < 0.15 && hash(rI, Math.round(cx * 3), 4, 0) > 0.15) return tone(mark, L * 0.5 + (dx < 0 ? 0.3 : -0.2));
-      }
-      return tone(belly, L);
-    },
-  };
-  if (owl) {
-    // owls: feathered back and wings with freckles instead of pepper speckles
-    P.back = (t) => {
-      const [a, b] = surf(t);
-      const f = feather(a, b, 2.1, 1.5, 13);
-      const base = soft(t, G.bodyY + G.bodyH, 12) * 0.75;
-      if (f.dd < -0.12 && (f.row * 2 + f.col) % 5 === 0 && Math.hypot((f.u - 0.5) * 2.1, (f.v - 0.36) * 1.5) < 0.38) return tone(speck, base * 0.4 + 0.5);
-      return tone(wing, base + f.L * 0.8);
-    };
-    P.body = (t) => (t.face === 3 || (t.face === 4 && Math.hypot(t.x / 4.9, (t.y - 8.4) / 5.4) < 1) ? P.obelly(t) : P.back(t));
-    const meowlWing = P.wing;
-    P.wing = (t) => {
-      const b = G.shoulderY + 1 - t.y;
-      const outer = (t.face === 0 && t.x > 0) || (t.face === 1 && t.x < 0);
-      if (b < 5.2 && (outer || t.face === 2)) {
-        const a = -t.z;
-        const f = feather(a + 50, b, 1.75, 1.2, 31);
-        if (f.dd < -0.12 && (f.row + f.col) % 3 === 0 && Math.hypot((f.u - 0.5) * 1.75, (f.v - 0.34) * 1.2) < 0.34) return tone(speck, 0.6);
-        return tone(wing, soft(t, G.shoulderY + 1, 12) * 0.7 + 0.2 + f.L * 0.8);
-      }
-      return meowlWing(t);
-    };
-  }
-  return (t) => (P[t.tag] ?? P.body)(t);
-}
-
-// ------------------------------------------------------------------ the parts
+export type OutfitSlot = 'head' | 'face' | 'neck' | 'body' | 'back';
 
 export interface OwlLook {
-  skin?: Skin;
-  /** real owl species the body is modelled on (see species registry); falls back to the palette */
+  /** 'owl' (plain species plumage), 'meowl' (kitten head), or a special skin id (gingerbread...) */
+  skin?: string;
+  /** real owl species the body is modelled on (see species registry). Source of truth. */
   species?: string;
+  /** legacy coat id; still read for old saves and Meowl coats */
   palette: string;
   outfit: Partial<Record<OutfitSlot, string>>;
+  /** feminine styling: long lashes, a soft blush, slimmer and more elegant (Queen Neve) */
+  feminine?: boolean;
+  /** something carried under the right wing ('scepter') */
+  held?: string;
 }
-export type OutfitSlot = 'head' | 'face' | 'neck' | 'body' | 'back';
 
 export interface OwlParts {
   bones: Record<BoneName, BoxSpec[]>;
   add(bone: BoneName, ...b: BoxSpec[]): void;
+  /** legacy coat (Meowl coats); species plumage is in `species` */
   pal: OwlPalette;
-  /** show the ears (big hats tuck them in) */
+  species: SpeciesDef;
+  skin: string;
+  /** anchor points for this owl's proportions */
+  g: Geo;
+  kit: Kit;
+  /** show the ear tufts (big hats tuck them in) */
   tufts: boolean;
+  look: OwlLook;
 }
 
-function baseParts(pal: OwlPalette): OwlParts {
-  const m = meowlPainter(pal);
-  const bones = {} as Record<BoneName, BoxSpec[]>;
-  for (const k of Object.keys(PIVOTS) as BoneName[]) bones[k] = [];
-  const P: OwlParts = { bones, add: (bone, ...b) => bones[bone].push(...b), pal, tufts: true };
+// ------------------------------------------------------------------ the facial disc
 
-  // body: a plump rounded barrel, white chest in front
-  P.add('body', ...sculpt(0, G.bodyY, 0, G.bodyW, G.bodyD, [[0, 1, 1.5, 2.4], [1, 2.2, 0.5, 3], [2.2, 9.6, 0, 3.4], [9.6, 11, 0.6, 3.2]], m, { tag: 'body' }));
-  P.add('body', ...plate(0, G.bodyY + 1.2, G.bodyD / 2 - 0.1, 8.6, 6.4, 0.6, 2.8, m, { tag: pal.skin === 'owl' ? 'obelly' : 'belly' }));
-  P.add('body', ...sculpt(0, G.bodyY - 0.4, 0, G.bodyW - 3.6, G.bodyD - 3.6, [[0, 0.6, 0, 2]], m, { tag: 'belly' }));
+type DiscField = (x: number, y: number) => number;
 
-  if (pal.skin === 'owl') {
-    // head: big and round, a raised two-disc facial mask, a hooked beak, soft brows and ear tufts
-    P.add('head', ...sculpt(0, G.headY, G.headZ, G.headW, G.headD, [[0, 1, 1.4, 3], [1, 2.2, 0.5, 3.6], [2.2, 10, 0, 4], [10, 11.6, 0.6, 3.8], [11.6, 12.8, 1.9, 3.4]], m, { tag: 'ohead' }));
-    const pz = G.headFront + 0.5, df = G.discFront;
-    P.add('head', ...plate(-G.eyeX, G.eyeY - 4.25, pz, 8.1, 8.5, 0.9, 3.9, m, { tag: 'disc' }));
-    P.add('head', ...plate(G.eyeX, G.eyeY - 4.25, pz + 0.08, 8.1, 8.5, 0.9, 3.9, m, { tag: 'disc' }));
-    P.add('head', ...plate(0, 14.2, pz - 0.1, 5.2, 5, 0.9, 1.8, m, { tag: 'disc' }));
-    P.add('head', box(0, 16.3, df + 0.65, 2.1, 1.9, 1.3, m, { tag: 'beak' }), box(0, 15.7, df + 1.0, 1.25, 0.8, 0.9, m, { tag: 'beak' }), box(0, 17.9, df + 0.35, 1.3, 1.0, 0.8, m, { tag: 'beak' }));
-    P.add('jaw', box(0, 15.5, df + 0.3, 1.6, 0.9, 0.3, m, { tag: 'mouth' }));
-    for (const [bone, sd] of [['browL', -1], ['browR', 1]] as const) {
-      P.add(bone, { ...box(sd * (G.eyeX + 0.4), 23.15, df + 0.15, 3.8, 0.8, 0.8, m, { tag: 'brow' }), rot: [0, 0, -sd * 5], pivot: [sd * G.eyeX, 23.5, df] });
-      P.add(bone, { ...box(sd * (G.eyeX + 2.5), 22.85, df + 0.05, 1.3, 0.75, 0.7, m, { tag: 'brow' }), rot: [0, 0, -sd * 24], pivot: [sd * (G.eyeX + 2), 23.2, df] });
-    }
-    for (const [bone, sd] of [['tuftL', -1], ['tuftR', 1]] as const) {
-      const px = sd * 5.3;
-      P.add(bone, lean(box(px, 23.9, 0.4, 2.8, 2.8, 2.4, m, { tag: 'tuft' }), 0, 0, -sd * 18));
-      P.add(bone, lean(box(px + sd * 0.85, 26.2, 0.3, 1.9, 1.9, 1.8, m, { tag: 'tuft' }), 0, 0, -sd * 34));
-      P.add(bone, lean(box(px + sd * 1.9, 27.6, 0.25, 1.1, 1.1, 1.1, m, { tag: 'tufttip' }), 0, 0, -sd * 52));
-    }
-  } else {
-    // head: a round kitten head, cheek ruffs, a raised white muzzle
-    P.add('head', ...sculpt(0, G.headY, G.headZ, G.headW, G.headD, [[0, 1, 1.4, 3], [1, 2.2, 0.5, 3.6], [2.2, 10, 0, 4], [10, 11.6, 0.6, 3.8], [11.6, 12.8, 1.9, 3.4]], m, { tag: 'head' }));
-    for (const sd of [-1, 1]) {
-      P.add('head', { ...box(sd * 7.8, G.headY + 0.5, 1.8, 1.6, 3.4, 5.6, m, { tag: 'cheek' }), rot: [0, 0, sd * 16], pivot: [sd * 7.6, G.headY + 2, 1.8] });
-    }
-    P.add('head', ...plate(0, 14.6, G.headFront + 0.45, 7.4, 4.4, 0.9, 2, m, { tag: 'muzzle' }));
-    P.add('head', ...plate(0, 14.0, G.headFront + 0.2, 4.6, 2.2, 0.9, 1, m, { tag: 'muzzle' }));
-    // nose: a tiny pink triangle
-    P.add('head', box(0, G.noseY, G.faceFront + 0.25, 1.9, 0.8, 0.6, m, { tag: 'nose' }), box(0, G.noseY - 0.5, G.faceFront + 0.25, 1.0, 0.55, 0.55, m, { tag: 'nose' }));
-    // whiskers
-    for (const sd of [-1, 1]) for (const [y, a] of [[16.9, 7], [16.2, -5]] as const) {
-      P.add('head', { ...box(sd * 4.9, y, G.faceFront - 0.3, 3.0, 0.24, 0.24, m, { tag: 'whisker' }), rot: [0, -sd * 12, sd * a], pivot: [sd * 3.4, y, G.faceFront - 0.3] });
-    }
-    // the mouth (shown when Pip opens it; the actor scales it)
-    P.add('jaw', box(0, 15.7, G.faceFront + 0.05, 1.7, 1.1, 0.3, m, { tag: 'mouth' }));
-    // ears: stacked slabs tapering to a point, leaning out a little
-    for (const [bone, sd] of [['tuftL', -1], ['tuftR', 1]] as const) {
-      const th = 13 * (Math.PI / 180), px = sd * 4.9;
-      for (let k = 0; k < 3; k++) {
-        const w = 5.6 - k * 1.75, d = 2.6 - k * 0.4, h = 1.45;
-        const cx = px + sd * Math.sin(th) * k * h, cy = 24.0 + Math.cos(th) * k * h;
-        P.add(bone, { ...box(cx, cy, 0.2, w, h + 0.05, d, m, { tag: 'ear' }), rot: [0, 0, -sd * 13], pivot: [cx, cy, 0.2] });
+function discField(g: Geo): { f: DiscField; y0: number; y1: number; x1: number; rim: number } {
+  const s = g.shape, ex = g.eyeX, ey = g.eyeY, rim = 0.85;
+  let rD = s.discR * s.headW;
+  rD = Math.min(rD, g.headW / 2 + 0.35 - rim - ex);
+  const cap = Math.min(ey + rD * 0.9, g.headTop - 1.4 - rim);
+  const ell = (x: number, y: number, cx: number, cy: number, rx: number, ry: number) => (Math.hypot((x - cx) / rx, (y - cy) / ry) - 1) * Math.min(rx, ry);
+  let f: DiscField;
+  if (s.disc === 'heart') {
+    const tipY = ey - rD * 1.8, lx = ex * 0.8, ly = ey + rD * 0.1;
+    f = (x, y) => {
+      const ax = Math.abs(x);
+      let d = ell(ax, y, lx, ly, rD * 1.04, rD * 0.95);
+      if (y < ly && y > tipY) {
+        const half = ((y - tipY) / (ly - tipY)) ** 0.8 * (lx + rD * 0.95);
+        d = Math.min(d, (ax - half) * 0.9);
       }
+      return Math.max(d, y - cap);
+    };
+  } else if (s.disc === 'round') {
+    const r = Math.min(g.headW / 2 - rim + 0.3, rD * 1.45), cy = ey - 0.8;
+    f = (x, y) => Math.max(ell(x, y, 0, cy, r, r * 0.98), y - cap - 0.8);
+  } else {
+    const cy = ey - rD * 0.6;
+    f = (x, y) => {
+      const ax = Math.abs(x);
+      const d = Math.min(ell(ax, y, ex, ey, rD, rD * 0.95), ell(ax, y, 0, cy, rD * 0.8, rD));
+      return Math.max(d, y - cap);
+    };
+  }
+  return { f, y0: ey - rD * 2.3, y1: cap + rim + 0.5, x1: g.headW / 2 + 1.5, rim };
+}
+
+/** How deep the eyes sit in their sockets in the disc. */
+const SOCKET = 0.32;
+
+/** Scan the disc field row by row into boxes: the dished disc, the raised ruff and its softer outer edge. */
+function buildDisc(P: OwlParts) {
+  const g = P.g, k = P.kit;
+  const { f, y0, y1, x1, rim } = discField(g);
+  const dy = 0.5, dx = 0.25;
+  type Run = [number, number, number];
+  const rows: { y: number; runs: Run[] }[] = [];
+  for (let y = Math.floor(y0 * 2) / 2; y < y1; y += dy) {
+    const runs: Run[] = [];
+    let cur = 0, start = 0;
+    for (let x = 0; x <= x1; x += dx) {
+      const px = x + dx / 2, py = y + dy / 2, d = f(px, py);
+      const socket = Math.hypot(px - g.eyeX, py - g.eyeY) < g.eyeS / 2 + 0.9;
+      const c = d < 0 ? (socket ? 4 : 1) : d < rim * 0.6 ? 2 : d < rim ? 3 : 0;
+      if (c !== cur) { if (cur) runs.push([start, x, cur]); cur = c; start = x; }
+    }
+    if (cur) runs.push([start, x1, cur]);
+    rows.push({ y, runs });
+  }
+  for (let i = 0; i < rows.length;) {
+    let j = i + 1;
+    const key = JSON.stringify(rows[i].runs);
+    while (j < rows.length && JSON.stringify(rows[j].runs) === key) j++;
+    const y = rows[i].y, h = (j - i) * dy;
+    // the disc fills back to wherever the skull's front is at this height
+    const kH = Math.max(0, Math.min(1, (y + h / 2 - g.headY) / g.headH));
+    const back = Math.min(g.headFront - 0.8, g.head.front(kH) - 0.6);
+    for (const [a, b, c] of rows[i].runs) {
+      const front = c === 1 ? g.discFront : c === 4 ? g.discFront - SOCKET : c === 2 ? g.rimFront : g.rimFront - 0.45;
+      const m = c === 1 || c === 4 ? k.disc : c === 2 ? k.ruff : k.ruffOut;
+      const d = front - back, zc = back + d / 2;
+      if (a === 0) P.add('head', box(0, y, zc, b * 2, h, d, m, { skip: 'n' }));
+      else for (const sd of [-1, 1]) P.add('head', box((sd * (a + b)) / 2, y, zc, b - a, h, d, m, { skip: 'n' }));
+    }
+    i = j;
+  }
+}
+
+// ------------------------------------------------------------------ species body
+
+function buildSpecies(P: OwlParts) {
+  const g = P.g, s = g.shape, k = P.kit, H = g.bodyH;
+  const fem = P.look.feminine ? 0.4 : 0;
+
+  // body: an egg of thin stepped layers, the breast bulging forward
+  P.add('body', ...volume({ ...g.body, hw: (q) => g.body.hw(q) - fem }, k.body, { step: 0.45, maxH: 2.6 }));
+
+  // head: a domed skull sliced the same way, plus a nape stepping down into the mantle
+  P.add('head', ...volume(g.head, k.head, { step: 0.42, maxH: 2.4 }));
+  const nk = 0.12, nb = g.head.back(nk);
+  P.add('head', ...rounded(0, g.headY - 0.8, nb + 1.4, g.head.hw(nk) * 2 - 2, 2.4, 2.6, 0.9, k.head));
+  // mantle: two overlapping rows of feather plates across the upper back
+  for (const [q, inset] of [[0.8, 0.6], [0.68, 1.4]] as const) {
+    const y = g.bodyY + q * H, hw = bodyHalfW(g, y + 1.2) - inset, bk = bodyDepth(g, y + 1.2).back;
+    P.add('body', box(0, y, bk + 0.05, hw * 2, 2.6, 0.7, k.scap));
+    for (let x = -hw + 1.0; x <= hw - 0.9; x += 1.8) P.add('body', box(x, y - 0.55, bk - 0.05, 1.5, 0.9, 0.55, k.scap));
+  }
+
+  buildDisc(P);
+  const df = g.discFront, ex = g.eyeX, ey = g.eyeY, es = g.eyeS;
+  // a raised ridge of feathers between the eyes down to the bill
+  P.add('head', box(0, g.beakY + 0.3, df + 0.05, 0.85, ey + es * 0.3 - g.beakY - 0.3, 0.4, k.ridge));
+  // the beak: a waxy cere, the upper mandible and its downward hook; bristles fan over its base
+  const by = g.beakY;
+  P.add('head', box(0, by - 0.5, df + 0.4, 1.25, 0.6, 0.6, k.cere));
+  P.add('head', box(0, by - 1.55, df + 0.75, 1.05, 1.15, 0.9, k.beak), box(0, by - 2.15, df + 0.85, 0.75, 0.7, 0.62, k.beak), box(0, by - 2.5, df + 0.72, 0.45, 0.45, 0.42, k.beak));
+  for (const sd of [-1, 1]) P.add('head', { ...box(sd * 0.85, by - 1.35, df + 0.3, 0.8, 1.5, 0.45, k.bristle), rot: [0, sd * 14, -sd * 8] });
+  // chin under the bill (the great grey's bow tie sits here)
+  // (the great grey's white bow tie is painted into its disc)
+  // the lower mandible and mouth (shown when Pip opens the beak)
+  P.add('jaw', box(0, by - 2.7, df + 0.85, 1.1, 0.45, 0.95, k.beak), box(0, by - 2.3, df + 0.8, 0.85, 0.25, 0.7, k.tongue), box(0, by - 2.4, df + 0.45, 1.2, 0.9, 0.4, k.gape));
+
+  // brows: soft feather arcs over each eye (white on many species), on their own bones
+  const id = P.species.id;
+  const frown = id === 'little' ? 16 : id === 'burrowing' ? 9 : id === 'horned' || id === 'eagle' ? 10 : id === 'sawwhet' ? 4 : 0;
+  const big = id === 'little' || id === 'burrowing' ? 1.35 : 1;
+  for (const [bone, sd] of [['browL', -1], ['browR', 1]] as const) {
+    const yb = ey + es * 0.5;
+    // the little owls' bold white brows sit over the top of the ruff, frowning towards the bill
+    if (big > 1) P.add(bone, { ...box(sd * (ex - es * 0.08), yb + 0.05, g.rimFront - 0.1, es * 1.15, 0.85, 0.4, k.brow), rot: [0, 0, sd * (6 - frown * 0.7)] });
+    P.add(bone, { ...box(sd * (ex - es * 0.3), yb - 0.15, df + 0.05, es * 0.44, 0.5, 0.35, k.brow), rot: [0, 0, sd * (-6 - frown)] });
+    P.add(bone, { ...box(sd * (ex + es * 0.12), yb + 0.08, df + 0.04, es * 0.46, 0.45, 0.3, k.brow), rot: [0, 0, sd * (6 - frown * 0.3)] });
+  }
+
+  // ear tufts: fans of stiff feathers
+  const tf = s.tuft;
+  if (tf) for (const [bone, sd] of [['tuftL', -1], ['tuftR', 1]] as const) {
+    // a broad base, then overlapping feathers that narrow towards the tip
+    P.add(bone, lean(box(sd * tf.x, g.headTop - 1.8, g.headZ + 0.3, tf.w * 1.05, Math.min(2.6, tf.len * 0.5), 1.5, k.tuft(0)), -6, 0, -sd * tf.lean * 0.85));
+    for (let i = 0; i < 3; i++) {
+      const c = i - 1, len = tf.len * (i === 1 ? 1 : 0.8);
+      const x = sd * (tf.x + c * tf.w * 0.17);
+      P.add(bone, lean(box(x, g.headTop - 1.5, g.headZ + 0.45 - Math.abs(c) * 0.25 - (tf.back ?? 0), tf.w * (i === 1 ? 0.62 : 0.56), len + 0.6, 0.8, k.tuft(i + 1)), -8 - Math.abs(c) * 2, 0, -sd * (tf.lean + c * sd * 3)));
     }
   }
-  // wings: golden barn-owl wings folded along the sides, primaries poking out behind
+
+  // wings: a folded slab hugging the flank in layers, coverts over the shoulder, primaries crossing the tail
+  const top = g.shoulderY + 0.6, bottom = g.bodyY + 1.4;
+  const nRows = 9, rowH = (top - bottom) / nRows;
   for (const [bone, sd] of [['wingL', -1], ['wingR', 1]] as const) {
-    const x = sd * G.wingX;
-    P.add(bone, ...rbox(x, 3.8, -0.5, 2.3, 10, 9.8, m, { tag: 'wing', rot: [0, 0, -sd * 3], pivot: [sd * 6.4, G.shoulderY, -0.4] }, 1.1));
-    P.add(bone, { ...box(x - sd * 0.1, 2.2, -3.8, 1.8, 3.8, 6.2, m, { tag: 'prim' }), rot: [-14, 0, -sd * 3], pivot: [x, 6, -0.6] });
+    for (let r = 0; r < nRows; r++) {
+      const y = bottom + r * rowH, f = (r + 0.5) / nRows; // 0 bottom .. 1 top
+      const half = bodyHalfW(g, y + rowH / 2), dep = bodyDepth(g, y + rowH / 2);
+      // a teardrop seen from the side: a rounded shoulder, the wrist bulging forward low on the
+      // flank, the trailing edge sweeping back towards the tail
+      const zF = dep.front * (f > 0.82 ? 0.62 - (f - 0.82) * 2.6 : -0.25 + 0.9 * Math.sin(f * 1.9)), zB = dep.back - 0.45 - (f < 0.3 ? (0.3 - f) * 1.8 : 0);
+      const th = 1.0 + 0.7 * Math.sin(Math.min(1, f * 1.4) * Math.PI * 0.8) * (f > 0.9 ? 0.6 : 1);
+      P.add(bone, box(sd * (half + th / 2 - 0.55), y, (zF + zB) / 2, th, rowH + 0.04, zF - zB, k.wing, { skip: sd > 0 ? 'w' : 'e' }));
+      // the folded wing wraps round onto the back, leaving a strip of mantle down the spine
+      const inner = 0.7 + f * 0.9, wBack = half + th - 0.55 - inner;
+      P.add(bone, box(sd * (inner + wBack / 2), y, zB + 0.4, wBack, rowH + 0.04, 0.8, k.wing, { skip: 's' + (sd > 0 ? 'e' : 'w') }));
+    }
+    // secondaries' rounded tips hanging along the lower edge of the folded wing
+    {
+      const y = bottom - 0.55, half = bodyHalfW(g, bottom + 0.4) + 0.45, dep = bodyDepth(g, bottom + 0.4);
+      for (let z = dep.back + 0.4; z < dep.front * -0.1; z += 1.5) P.add(bone, box(sd * half, y, z, 0.6, 0.9, 1.3, k.wing));
+    }
+    // coverts: two overlapping rows on the upper wing, each with hanging feather tips
+    for (const [row, rh] of [[0, 2.8], [1, 2.4]] as const) {
+      const yTop = top + 0.2 - row * 2.2, y = yTop - rh;
+      const half = bodyHalfW(g, y + rh / 2) + 0.55 + 0.25 - row * 0.12, dep = bodyDepth(g, y + rh / 2);
+      const zF = dep.front * (0.45 - row * 0.15), zB = dep.back * 0.88;
+      P.add(bone, box(sd * half, y, (zF + zB) / 2, 0.45, rh, zF - zB, k.cov));
+      for (let z = zB + 0.85 + row * 0.7; z < zF - 0.4; z += 1.55) P.add(bone, box(sd * (half + 0.02), y - 0.65, z, 0.42, 0.85, 1.35, k.cov));
+    }
+    // scapulars: a row of plates along the top back edge of the folded wing
+    {
+      const y = top - 1.8, half = bodyHalfW(g, y + 1) + 0.3, dep = bodyDepth(g, y + 1);
+      P.add(bone, box(sd * (half - 0.6), y, dep.back * 0.55, 1.6, 2.4, dep.back * -0.7, k.scap));
+    }
+    // primaries: a stepped bunch of long feathers with separated tips, converging over the tail
+    const hand = bone === 'wingL' ? 'handL' : 'handR';
+    const pv = handAt(g, sd);
+    // each runs back along the lower flank from the wrist, then bends over the back so the wing
+    // tips cross above the tail
+    const D2R = 180 / Math.PI;
+    for (let i = 0; i < 5; i++) {
+      const yA = pv[1] - i * 0.42, half = bodyHalfW(g, yA - 1) + 1.35 + i * 0.04;
+      const zA = bodyDepth(g, yA).front * 0.12 - i * 0.55, zBk = bodyDepth(g, yA - 1.4).back - 0.7 - i * 0.1;
+      const yB = yA - 1.2 - i * 0.12;
+      // segment along the side (thin in x)
+      const dy1 = yB - yA, dz1 = zBk - zA, len1 = Math.hypot(dy1, dz1);
+      const a1 = Math.asin(dy1 / len1) * D2R;
+      P.add(hand, { at: [sd * half - 0.18, yA - 0.5, zA - len1], size: [0.36, 1.0 - i * 0.05, len1 + 0.3], mat: k.prim(i), rot: [a1, 0, 0], pivot: [sd * half, yA, zA] });
+      // segment over the back (thin in z), from the trailing corner to the crossing tip
+      const tx = sd * (0.25 - i * 0.3), ty = g.bodyY + 0.4 - s.wingDrop * 0.5 + (4 - i) * 0.1, tz = zBk - 0.35 - s.wingBack * 0.3 - i * 0.08;
+      const sx = sd * (half - 0.4), dx = tx - sx, dy = ty - yB, dz = tz - zBk, len2 = Math.hypot(dx, dy, dz);
+      const al = Math.asin(-dz / len2) * D2R, ga = Math.atan2(dx, -dy) * D2R;
+      P.add(hand, { at: [sx - 0.55, yB - len2, zBk - 0.18], size: [1.1 - i * 0.05, len2 + 0.2, 0.36], mat: k.primTip(i), rot: [al, 0, ga], pivot: [sx, yB, zBk] });
+    }
   }
-  P.add('tail', { ...box(0, 3.4, -6.6, 7.4, 1.6, 3.6, m, { tag: 'tail' }), rot: [22, 0, 0], pivot: [0, 4.6, -5.2] });
-  // fluffy white feathered legs and paws with tiny talons
+  // tail: a short barred fan under the wing tips
+  const tl = s.tailLen + 2.6, tz = pivotsOf(g).tail[2] + 0.4;
+  for (let i = -2; i <= 2; i++) {
+    const x = i * 1.15, y = g.bodyY + 1.3 - Math.abs(i) * 0.12;
+    P.add('tail', { ...box(x, y, tz - tl / 2, 1.45, 0.42, tl, k.tail(i + 2)), rot: [-26 + Math.abs(i) * 2, i * 6, 0], pivot: [x, y, tz] });
+  }
+
+  // legs: feathered (or bare) tarsi, toes and curved dark talons
+  const bare = s.toes === 'bare', lw = s.legW;
   for (const [bone, sd] of [['legL', -1], ['legR', 1]] as const) {
-    const x = sd * 2.7;
-    P.add(bone, box(x, 0.9, 0.8, 3.2, 2.4, 3.2, m, { tag: 'leg' }), box(x, 0, 2.1, 3.6, 1.3, 2.8, m, { tag: 'paw' }));
-    for (const k of [-1, 0, 1]) P.add(bone, box(x + k * 1.15, 0, 3.6, 0.6, 0.45, 0.6, m, { tag: 'talon' }));
+    const x = sd * g.legX, z = 0.6;
+    if (bare || s.legH > 2) {
+      P.add(bone, ...rbox(x, g.toeH * 0.5, z, lw, g.legTop - g.toeH * 0.5 + 0.4, lw, k.leg, {}, 0.3));
+      P.add(bone, ...rbox(x, g.legTop - 1.6, z - 0.1, lw * 1.6 + 0.6, 2.6, lw * 1.5 + 0.5, k.knicker, {}, 0.6));
+    } else {
+      P.add(bone, ...rbox(x, g.toeH * 0.4, z, lw, g.legTop - g.toeH * 0.4 + 0.9, lw * 0.95, k.leg, {}, 0.7));
+    }
+    const toeW = s.toes === 'feathered' ? 1.2 : 0.8, toeL = s.toes === 'feathered' ? 2.4 : 2.2;
+    const rootZ = z + lw * 0.3;
+    for (const [a, len] of [[-30, toeL * 0.88], [-4, toeL], [24, toeL * 0.92], [180, toeL * 0.55]] as const) {
+      const ang = sd * a, rad = (ang * Math.PI) / 180, dx = Math.sin(rad), dz = Math.cos(rad);
+      P.add(bone, { ...box(x + (dx * len) / 2, 0, rootZ + (dz * len) / 2, toeW, g.toeH * (s.toes === 'feathered' ? 1.0 : 0.75), len, k.toe), rot: [0, ang, 0] });
+      P.add(bone, { ...box(x + dx * (len + 0.25), 0.32, rootZ + dz * (len + 0.25), 0.42, 0.4, 0.7, k.talon), rot: [0, ang, 0] }, { ...box(x + dx * (len + 0.6), 0, rootZ + dz * (len + 0.6), 0.36, 0.62, 0.36, k.talon), rot: [0, ang, 0] });
+    }
   }
-  return P;
 }
+
+// ------------------------------------------------------------------ assembly
 
 export interface OwlModel {
   rig: Rig;
@@ -467,32 +393,90 @@ export interface OwlModel {
   eyeMeshes: THREE.Mesh[];
   look: OwlLook;
   height: number;
+  /** this owl's anchor points and bone pivots (they vary with the species) */
+  g: Geo;
+  pivots: Pivots;
+  species: SpeciesDef;
   dispose(): void;
 }
 
-export function buildOwl(look: OwlLook): OwlModel {
+function makeParts(look: OwlLook): OwlParts {
+  const skin = look.skin && look.skin !== 'owl' ? look.skin : 'owl';
+  const species = resolveSpecies(look);
+  const g = geoOf(species.shape);
   const pal = palette(look.palette);
-  const P = baseParts(pal);
+  let kit = paintKit(species, g, { fem: !!look.feminine });
+  if (SPECIAL_SKIN[skin] && skin !== 'meowl') kit = skinKit(skin, g, kit);
+  const bones = {} as Record<BoneName, BoxSpec[]>;
+  for (const k of BONES) bones[k] = [];
+  return { bones, add: (bone, ...b) => bones[bone].push(...b), pal, species, skin, g, kit, tufts: true, look };
+}
+
+/** Eye colours for an owl: iris, the feathered lid and its dark margin. */
+function eyeColoursFor(P: OwlParts): EyeColours {
+  const sp = P.species.plumage;
+  if (P.skin === 'meowl') {
+    const coat = P.pal.skin === 'meowl' ? P.pal : PALETTE.tabby;
+    return { iris: MEOWL_IRIS[coat.id] ?? '#9cc43c', lid: coat.fur, rim: coat.liner, slit: true };
+  }
+  const base: EyeColours = { iris: sp.iris, lid: '#' + mix(sp.disc, sp.rim, 0.18).toString(16).padStart(6, '0'), rim: sp.lidRim, lashes: !!P.look.feminine };
+  return skinEyes(P.skin, base);
+}
+
+/** The boxes of an owl's species body per bone, without building meshes (dev tools, stats). */
+export function owlBoxes(look: OwlLook): Record<BoneName, BoxSpec[]> {
+  const P = makeParts(look);
+  buildSpecies(P);
   dressOwl(P, look.outfit);
+  return P.bones;
+}
+
+export function buildOwl(look: OwlLook): OwlModel {
+  const P = makeParts(look);
+  const g = P.g;
+  let eyeAt: { x: number; y: number; z: number; s: number } = { x: g.eyeX, y: g.eyeY, z: g.discFront - SOCKET + 0.06, s: g.eyeS };
+  buildSpecies(P);
+  if (P.skin === 'meowl') {
+    // a kitten head on the owl's body: swap the head
+    const coat = P.pal.skin === 'meowl' ? P.pal : PALETTE.tabby;
+    const mh = meowlHead(coat);
+    const dy = g.headY - M.headY, dz = g.headZ - M.headZ;
+    P.bones.head = shiftBoxes(mh.boxes.head, dy, dz);
+    P.bones.jaw = shiftBoxes(mh.boxes.jaw, dy, dz);
+    P.bones.tuftL = shiftBoxes(mh.boxes.tuftL, dy, dz);
+    P.bones.tuftR = shiftBoxes(mh.boxes.tuftR, dy, dz);
+    P.bones.browL = []; P.bones.browR = [];
+    // outfits read the kitten's face planes
+    Object.assign(g, { headTop: M.headTop + dy, headFront: M.headFront + dz, discFront: M.headFront + 0.9 + dz, faceFront: M.headFront + 0.9 + dz, rimFront: M.faceFront + dz, eyeX: M.eyeX, eyeY: M.eyeY + dy, eyeS: M.eyeS, headW: M.headW, headD: M.headD, headH: M.headH, tuftTop: M.headTop + 4 + dy });
+    eyeAt = { x: M.eyeX, y: M.eyeY + dy, z: M.headFront + 0.12 + dz, s: M.eyeS * 0.82 };
+  } else if (SPECIAL_SKIN[P.skin]) skinExtras(P.skin, P);
+  if (look.feminine) femininity(P);
+  dressOwl(P, look.outfit);
+  if (look.held) holdItem(P, look.held);
   if (!P.tufts) { P.bones.tuftL = []; P.bones.tuftR = []; }
-  const bones: BoneSpec[] = (Object.keys(PIVOTS) as BoneName[]).map((name) => ({ name, parent: PARENT[name], pivot: PIVOTS[name], boxes: P.bones[name] }));
+  const piv = pivotsOf(g);
+  if (P.skin === 'meowl') { const dy = g.headY - M.headY, dz = g.headZ - M.headZ; piv.jaw = [0, 16.3 + dy, M.faceFront + dz]; piv.tuftL = [-4.9, 24.4 + dy, 0.2 + dz]; piv.tuftR = [4.9, 24.4 + dy, 0.2 + dz]; }
+  const bones: BoneSpec[] = BONES.map((name) => ({ name, parent: PARENT[name], pivot: piv[name], boxes: P.bones[name] }));
   const rig = buildRig(bones, { density: OWL_DENS });
 
   rig.bones.jaw.visible = false;
-  const eyes: [Eye, Eye] = [new Eye(-1, eyeColours(pal)), new Eye(1, eyeColours(pal))];
-  const head = rig.bones.head, hp = PIVOTS.head;
-  const geo = new THREE.PlaneGeometry(G.eyeS * PX, G.eyeS * PX);
+  // a whisper of self-light keeps the plumage readable in the hollow's dusky evenings
+  for (const m of rig.mats) if ((m as THREE.MeshLambertMaterial).isMeshLambertMaterial) Object.assign(m, { emissive: new THREE.Color(0xffffff), emissiveMap: rig.tex, emissiveIntensity: 0.13 });
+  const cols = eyeColoursFor(P);
+  const eyes: [Eye, Eye] = [new Eye(-1, cols), new Eye(1, cols)];
+  const head = rig.bones.head, hp = piv.head;
+  const geo = new THREE.PlaneGeometry(eyeAt.s * EYE_PLANE * PX, eyeAt.s * EYE_PLANE * PX);
   const eyeMeshes = eyes.map((e, i) => {
-    const mat = new THREE.MeshLambertMaterial({ map: e.tex, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: e.tex, emissiveIntensity: 0.18, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+    const mat = new THREE.MeshLambertMaterial({ map: e.tex, alphaTest: 0.5, emissive: 0xffffff, emissiveMap: e.tex, emissiveIntensity: cols.glow ? 0.75 : 0.22, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
     const m = new THREE.Mesh(geo, mat);
-    m.position.set(((i ? 1 : -1) * G.eyeX - hp[0]) * PX, (G.eyeY - hp[1]) * PX, ((pal.skin === 'owl' ? G.discFront + 0.06 : G.headFront + 0.12) - hp[2]) * PX);
+    m.position.set(((i ? 1 : -1) * eyeAt.x - hp[0]) * PX, (eyeAt.y - hp[1]) * PX, (eyeAt.z - hp[2]) * PX);
     m.castShadow = false;
     head.add(m);
     return m;
   });
   rig.root.traverse((o) => { if ((o as THREE.Mesh).isMesh && !(eyeMeshes as THREE.Object3D[]).includes(o)) o.castShadow = true; });
   return {
-    rig, eyes, eyeMeshes, look, height: rig.height,
+    rig, eyes, eyeMeshes, look, height: rig.height, g, pivots: piv, species: P.species,
     dispose() {
       rig.dispose(); geo.dispose();
       eyeMeshes.forEach((m) => (m.material as THREE.Material).dispose());
@@ -501,6 +485,23 @@ export function buildOwl(look: OwlLook): OwlModel {
   };
 }
 
-/** Feather colour for particle puffs. */
-export const featherColour = (paletteId: string): number => col(palette(paletteId).wing);
+/** Queen Neve's touches: a soft blush under each eye (her lashes are drawn by the eye itself). */
+function femininity(P: OwlParts) {
+  const g = P.g;
+  const blush: Painter = (t) => {
+    const d = Math.hypot((t.bx - t.sx / 2) / (t.sx / 2), (t.by - t.sy / 2) / (t.sy / 2));
+    return d < 0.55 ? 0xffb8cc : d < 0.85 ? 0xffcddb : 0xffe0e8;
+  };
+  for (const sd of [-1, 1]) P.add('head', box(sd * (g.eyeX + 0.5), g.eyeY - g.eyeS * 0.78, g.discFront + 0.03, 2.4, 1.1, 0.1, blush));
+}
+
+/** Feather colour for particle puffs: accepts a look or a species / legacy palette id. */
+export function featherColour(look: OwlLook | string): number {
+  if (typeof look === 'string') {
+    const sp = resolveSpecies({ palette: look, species: undefined });
+    return col(sp.plumage.wing);
+  }
+  if (look.skin && SPECIAL_SKIN[look.skin] && look.skin !== 'meowl') return col(SPECIAL_SKIN[look.skin].feather);
+  return col(resolveSpecies(look).plumage.wing);
+}
 export { mix };

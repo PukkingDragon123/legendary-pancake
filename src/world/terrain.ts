@@ -104,7 +104,7 @@ void main() {
 const WATER_FS = /* glsl */ `
 uniform float uTime;
 uniform vec3 uDeep; uniform vec3 uShallow; uniform vec3 uFoam; uniform vec3 uLight;
-uniform vec4 uPond;
+uniform vec4 uPond; uniform float uIce;
 varying vec2 vW;
 #include <fog_pars_fragment>
 float h21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
@@ -121,7 +121,16 @@ void main() {
   col = mix(col, uFoam, foam * 0.85);
   float sp = step(0.988, h21(q * 16.0 + floor(uTime * 2.5) * 7.0)) * (1.0 - foam);
   col = col * uLight + sp * uFoam * 0.7;
-  gl_FragColor = vec4(col, 0.72 + foam * 0.25 + sp * 0.2);
+  float alpha = 0.72 + foam * 0.25 + sp * 0.2;
+  // [world] frozen pond: pale blue ice with white cracks and frosted rim
+  if (uIce > 0.01) {
+    float crack = step(0.93, h21(floor(q * 4.0))) + step(abs(sin(q.x * 2.1 + q.y * 3.3) + sin(q.y * 1.7 - q.x * 0.9)), 0.05);
+    vec3 ice = mix(vec3(0.68, 0.82, 0.9), vec3(0.88, 0.95, 1.0), clamp(smoothstep(0.3, 1.0, pd) + band * 0.15, 0.0, 1.0));
+    ice = mix(ice, vec3(0.97, 0.99, 1.0), clamp(crack, 0.0, 1.0) * 0.7 + foam * 0.6);
+    col = mix(col, ice * uLight * 1.1, uIce);
+    alpha = mix(alpha, 0.94, uIce);
+  }
+  gl_FragColor = vec4(col, alpha);
   #include <colorspace_fragment>
   #include <fog_fragment>
 }`;
@@ -174,7 +183,7 @@ export function buildTerrain(shade: Collider[]): Terrain {
     vertexShader: WATER_VS, fragmentShader: WATER_FS, transparent: true, fog: true, depthWrite: false,
     uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
       uTime: { value: 0 }, uDeep: { value: new THREE.Color('#2f7fa8') }, uShallow: { value: new THREE.Color('#7fd6e6') }, uFoam: { value: new THREE.Color('#f4ffff') },
-      uLight: { value: new THREE.Color(1, 1, 1) }, uPond: { value: new THREE.Vector4(POND.x, POND.z, POND.rx, POND.rz) },
+      uLight: { value: new THREE.Color(1, 1, 1) }, uPond: { value: new THREE.Vector4(POND.x, POND.z, POND.rx, POND.rz) }, uIce: { value: 0 },
     }]),
   });
   const wm = new THREE.Mesh(new THREE.PlaneGeometry(POND.rx * 2.4, POND.rz * 2.4), water);

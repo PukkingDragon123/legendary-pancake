@@ -37,6 +37,17 @@ const ART: Record<string, string[]> = {
   feather3: ['.....#..', '....##..', '...###..', '..###+..', '..##+...', '.##+....', '.#+.....', '#.......'],
   moon: ['..###...', '.##.....', '##......', '##......', '##......', '.##.....', '..###...', '........'],
   bigstar: ['...#....', '...#....', '..###...', '#######.', '..###...', '..#.#...', '.#...#..', '........'],
+  // [world] rain splashes, snow, happy puffs and magic
+  splat1: ['........', '........', '........', '........', '........', '...##...', '..####..', '........'],
+  splat2: ['........', '........', '........', '.#....#.', '..#..#..', '...##...', '.##..##.', '........'],
+  splat3: ['........', '#......#', '........', '.#....#.', '........', '........', '#......#', '........'],
+  flake: ['...#....', '.#.#.#..', '..###...', '#######.', '..###...', '.#.#.#..', '...#....', '........'],
+  cloud: ['..###...', '.#####+.', '########', '#######+', '+######+', '-+####+-', '.-++++-.', '..----..'],
+  cloud2: ['........', '.##..##.', '########', '#######+', '+#####++', '.-+++--.', '........', '........'],
+  swirl1: ['..###...', '.#...#..', '#..#..#.', '#.#.#.#.', '#.#..#..', '.#...#..', '..###...', '........'],
+  swirl2: ['...##...', '..#..#..', '.#.##.#.', '.#.#..#.', '.#..##..', '..#.....', '...###..', '........'],
+  orb: ['........', '..-++-..', '.-+##+-.', '.+####+.', '.+####+.', '.-+##+-.', '..-++-..', '........'],
+  diamond: ['...#....', '..#+#...', '.#+#+#..', '#+###+#.', '.#+#+#..', '..#+#...', '...#....', '........'],
 };
 const NAMES = Object.keys(ART);
 export const SPR = Object.fromEntries(NAMES.map((n, i) => [n, i])) as Record<keyof typeof ART, number>;
@@ -66,13 +77,19 @@ attribute vec3 iPos; attribute vec4 iData; attribute vec3 iColor;
 uniform vec2 uGrid;
 varying vec2 vUv; varying vec3 vColor; varying float vAlpha;
 void main() {
-  vec4 mv = viewMatrix * vec4(iPos, 1.0);
-  mv.xy += position.xy * iData.x;
-  gl_Position = projectionMatrix * mv;
+  bool isFlat = iData.w > 1.5;
+  if (isFlat) {
+    // lying on the ground or the water: ripples, puddle rings
+    gl_Position = projectionMatrix * viewMatrix * vec4(iPos + vec3(position.x, 0.0, -position.y) * iData.x, 1.0);
+  } else {
+    vec4 mv = viewMatrix * vec4(iPos, 1.0);
+    mv.xy += position.xy * iData.x;
+    gl_Position = projectionMatrix * mv;
+  }
   float f = floor(iData.y + 0.5);
   vec2 cell = vec2(mod(f, uGrid.x), floor(f / uGrid.x));
   vec2 u = uv;
-  if (iData.w > 0.5) u.x = 1.0 - u.x;
+  if (mod(iData.w, 2.0) > 0.5) u.x = 1.0 - u.x;
   vUv = (cell + u) / uGrid;
   vColor = iColor; vAlpha = iData.z;
 }`;
@@ -114,6 +131,8 @@ export interface Emit {
   /** pull towards a point: used by the teleport */
   tx?: number; ty?: number; tz?: number; pull?: number; swirl?: number;
   delay?: number;
+  /** lie flat on the xz plane instead of facing the camera */
+  flat?: boolean;
 }
 
 interface P extends Required<Omit<Emit, 'tx' | 'ty' | 'tz'>> { age: number; seed: number; tx: number; ty: number; tz: number; landed: boolean; r: number; g: number; b: number }
@@ -167,7 +186,7 @@ class Layer {
       const fi = Math.min(1, p.fadeIn ? p.age / p.fadeIn : 1), fo = Math.min(1, p.fadeOut ? (p.life - p.age) / p.fadeOut : 1);
       const frame = p.frame + (p.frames > 1 && !p.landed ? Math.floor(p.age * p.fps + p.seed * p.frames) % p.frames : 0);
       this.pos[n * 3] = p.x; this.pos[n * 3 + 1] = p.y; this.pos[n * 3 + 2] = p.z;
-      this.dat[n * 4] = p.size * (1 + p.grow * (p.age / p.life)); this.dat[n * 4 + 1] = frame; this.dat[n * 4 + 2] = fi * fo; this.dat[n * 4 + 3] = p.seed > 0.5 ? 1 : 0;
+      this.dat[n * 4] = p.size * (1 + p.grow * (p.age / p.life)); this.dat[n * 4 + 1] = frame; this.dat[n * 4 + 2] = fi * fo; this.dat[n * 4 + 3] = (p.seed > 0.5 ? 1 : 0) + (p.flat ? 2 : 0);
       this.col[n * 3] = p.r; this.col[n * 3 + 1] = p.g; this.col[n * 3 + 2] = p.b;
       L[n++] = p;
     }
@@ -178,6 +197,9 @@ class Layer {
 }
 
 const tmp = new THREE.Color();
+
+export type BurstKind = 'hearts' | 'stars' | 'notes' | 'dust' | 'sparkle' | 'coins' | 'crumbs' | 'splash' | 'zzz' | 'leaves' | 'bang' | 'ask' | 'dots' | 'confetti'
+  | 'puffs' | 'magic' | 'feathers' | 'petals' | 'snow';
 
 export class Fx {
   readonly group = new THREE.Group();
@@ -195,7 +217,7 @@ export class Fx {
     tmp.setHex(e.color ?? 0xffffff);
     const p: P = {
       vx: 0, vy: 0, vz: 0, size: 0.5, frames: 1, fps: 6, color: 0xffffff, gravity: 0, drag: 0, wind: 0, add: false, fadeIn: 0, fadeOut: 0.3, grow: 0, land: false, flutter: 0, pull: 0, swirl: 0, delay: 0,
-      tx: 0, ty: 0, tz: 0, ...e, age: 0, seed: Math.random(), landed: false, r: tmp.r, g: tmp.g, b: tmp.b,
+      tx: 0, ty: 0, tz: 0, flat: false, ...e, age: 0, seed: Math.random(), landed: false, r: tmp.r, g: tmp.g, b: tmp.b,
     };
     (e.add ? this.glow : this.solid).push(p);
   }
@@ -204,7 +226,7 @@ export class Fx {
 
   // ---- presets
 
-  burst(kind: 'hearts' | 'stars' | 'notes' | 'dust' | 'sparkle' | 'coins' | 'crumbs' | 'splash' | 'zzz' | 'leaves' | 'bang' | 'ask' | 'dots' | 'confetti', x: number, y: number, z: number, n = 6) {
+  burst(kind: BurstKind, x: number, y: number, z: number, n = 6, color?: number) {
     const R = (a: number, b: number) => a + Math.random() * (b - a);
     for (let i = 0; i < n; i++) {
       const a = R(0, Math.PI * 2);
@@ -220,13 +242,23 @@ export class Fx {
         case 'zzz': this.emit({ x: x + i * 0.12, y: y + i * 0.1, z, vx: 0.12, vy: 0.3, life: 1.8, frame: SPR.zed, color: 0xcfe2ff, size: 0.28 + i * 0.08, fadeIn: 0.2, delay: i * 0.5 }); break;
         case 'leaves': this.emit({ x: x + R(-0.6, 0.6), y: y + R(-0.3, 0.3), z: z + R(-0.6, 0.6), vx: Math.cos(a) * 0.8, vy: R(0.6, 1.6), vz: Math.sin(a) * 0.8, life: R(1.2, 2), frame: SPR.leaf1, frames: 3, fps: 5, color: [0x6cb845, 0x9ad05a, 0x4c9b3b][i % 3], size: 0.4, gravity: 2.2, drag: 1.4, wind: 0.6, flutter: 0.5, land: true }); break;
         case 'confetti': this.emit({ x, y, z, vx: Math.cos(a) * R(0.8, 2), vy: R(2, 3.6), vz: Math.sin(a) * R(0.8, 2), life: R(1.1, 1.7), frame: SPR.pixel, color: [0xff6f91, 0xffe066, 0x7fd6ff, 0x9be36a, 0xc39bff][i % 5], size: R(0.1, 0.16), gravity: 5, drag: 1, flutter: 0.6, land: true }); break;
+        // [world] happy puffs, magic swirls, feathers, petals and snow
+        case 'puffs': this.emit({ x: x + R(-0.15, 0.15), y: y + R(-0.1, 0.2), z: z + R(-0.15, 0.15), vx: Math.cos(a) * R(0.9, 1.8), vy: R(0.3, 1.1), vz: Math.sin(a) * R(0.9, 1.8), life: R(0.6, 0.95), frame: i % 3 ? SPR.cloud : SPR.cloud2, color: color ?? [0xffffff, 0xfff1f6, 0xf3ecff][i % 3], size: R(0.26, 0.44), grow: 0.9, drag: 3.4, fadeOut: 0.35, delay: i * 0.015 }); break;
+        case 'magic': {
+          const r0 = R(0.35, 0.7);
+          this.emit({ x: x + Math.cos(a) * r0, y: y + R(-0.2, 0.3), z: z + Math.sin(a) * r0, vx: -Math.sin(a) * 1.4, vy: R(0.7, 1.4), vz: Math.cos(a) * 1.4, life: R(0.9, 1.4), frame: [SPR.spark1, SPR.diamond, SPR.orb][i % 3], frames: i % 3 ? 1 : 3, fps: 9, color: color ?? [0xc9a6ff, 0x8ff0ff, 0xffe27a, 0xff9de2][i % 4], size: R(0.22, 0.4), add: true, tx: x, ty: y + 1.6, tz: z, pull: 0.6, swirl: 3.2, fadeIn: 0.1, fadeOut: 0.4, delay: i * 0.03 });
+          break;
+        }
+        case 'feathers': this.emit({ x: x + R(-0.2, 0.2), y: y + R(-0.1, 0.3), z: z + R(-0.2, 0.2), vx: Math.cos(a) * R(0.8, 2), vy: R(0.6, 1.8), vz: Math.sin(a) * R(0.8, 2), life: R(1.6, 2.6), frame: SPR.feather1, frames: 3, fps: 3, color: color ?? 0xd8b48a, size: R(0.2, 0.3), gravity: 1.1, drag: 2.4, flutter: 0.7, land: true }); break;
+        case 'petals': this.emit({ x: x + R(-0.6, 0.6), y: y + R(-0.2, 0.4), z: z + R(-0.6, 0.6), vx: Math.cos(a) * 0.6, vy: R(0.4, 1.2), vz: Math.sin(a) * 0.6, life: R(1.6, 2.4), frame: SPR.petal, color: color ?? [0xffc2d6, 0xffffff, 0xff9dbd][i % 3], size: R(0.22, 0.32), gravity: 1.2, drag: 1.5, wind: 0.6, flutter: 0.7, land: true }); break;
+        case 'snow': this.emit({ x: x + R(-0.8, 0.8), y: y + R(0, 0.6), z: z + R(-0.8, 0.8), vy: R(-0.3, -0.1), life: R(2, 3), frame: SPR.flake, color: color ?? 0xffffff, size: R(0.14, 0.22), gravity: 0.2, drag: 1, wind: 0.4, flutter: 0.4, land: true }); break;
         case 'bang': case 'ask': case 'dots': this.emit({ x, y, z, vy: 0.25, life: 1.2, frame: kind === 'bang' ? SPR.bang : kind === 'ask' ? SPR.ask : SPR.dots, color: kind === 'bang' ? 0xffd84a : 0xffffff, size: 0.5, fadeIn: 0.08 }); return;
       }
     }
   }
 
-  /** A ring ripple spreading on the pond. */
+  /** A ring ripple spreading flat on the pond. */
   ripple(x: number, y: number, z: number) {
-    this.emit({ x, y: y + 0.03, z, life: 0.9, frame: SPR.ring, color: 0xe8fbff, size: 0.3, grow: 2.4, fadeOut: 0.5 });
+    this.emit({ x, y: y + 0.03, z, life: 0.9, frame: SPR.ring, color: 0xe8fbff, size: 0.3, grow: 2.4, fadeOut: 0.5, flat: true });
   }
 }
