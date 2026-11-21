@@ -67,6 +67,8 @@ export class Critters {
   private winter = false;
   /** rain or snow: butterflies, bees and dragonflies take cover, dust motes settle */
   shelter = false;
+  /** glow-bugs at night (not in winter or rain) */
+  fireflies = true;
 
   constructor(private plan: ForestPlan, private fx: Fx, quality: 'low' | 'high', private sound: (id: string, at?: THREE.Vector3) => void) {
     const cols = ['#f08a2c', '#5aa9e6', '#f6d04a', '#f58fb0', '#c39bff', '#fbfbf6'];
@@ -230,7 +232,7 @@ export class Critters {
       a.mote = 0.16;
       fx.emit({ x: rand(-9, 9), y: rand(0.4, 3.4), z: rand(-8, 7), vy: rand(0.03, 0.14), life: rand(4, 7), frame: SPR.mote, size: rand(0.3, 0.5), color: 0xfff3c4, wind: 0.25, flutter: 0.15, add: true, fadeIn: 1.2, fadeOut: 1.4 });
     }
-    if (night > 0.4 && (a.fly -= dt) <= 0) {
+    if (night > 0.4 && this.fireflies && (a.fly -= dt) <= 0) {
       a.fly = 0.14;
       const x = rand(-11, 11), z = rand(-10, 9);
       fx.emit({ x, y: groundY(x, z) + rand(0.35, 2.4), z, vx: rand(-0.2, 0.2), vy: rand(-0.05, 0.12), vz: rand(-0.2, 0.2), life: rand(2.6, 4.6), frame: SPR.glow, size: rand(0.16, 0.27), color: 0xc8f060, flutter: 0.35, add: true, fadeIn: 0.9, fadeOut: 1.1 });

@@ -427,7 +427,7 @@ export class Scene {
     this.house.panes.color.set(night > 0.4 ? 0xffc86a : 0x3a4a6a);
     this.room.intensity = 1.2 + night * 3.5;
     this.lantern.intensity = night * 6;
-    this.fireflies.alpha = night > 0.4 ? 1 : 0;
+    this.fireflies.alpha = night > 0.4 && (this.weather?.firefliesOk ?? true) ? 1 : 0; // [world] not in winter or rain
     for (const p of this.placed.values()) if (p.light) p.light.intensity = (0.4 + night * 3.2) * (p.light.userData.power ?? 1);
   }
 

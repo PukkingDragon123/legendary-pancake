@@ -108,10 +108,10 @@ const petalMat = (c: Tint) => solid(c, { noise: 0.25, rim: 0.4, speck: 0.3 });
 
 export function daisy(seed: number, petal: Tint = '#fbfaf2', centre: Tint = '#f5c12f'): BoxSpec[] {
   const p = petalMat(petal), c = solid(centre, { noise: 0.4 });
+  // a plus of petals round a raised yellow eye (three boxes per bloom)
   return clump(seed, 7, 3.2, 4, 8, (x, h, z) => [
-    box(x, h, z, 1, 1, 1, c, { sway: 1 }),
-    box(x + 1, h - 0.2, z, 1, 0.6, 1, p, { sway: 1 }), box(x - 1, h - 0.2, z, 1, 0.6, 1, p, { sway: 1 }),
-    box(x, h - 0.2, z + 1, 1, 0.6, 1, p, { sway: 1 }), box(x, h - 0.2, z - 1, 1, 0.6, 1, p, { sway: 1 }),
+    box(x, h, z, 1, 1, 1, c, { sway: 1, skip: 'd' }),
+    box(x, h - 0.2, z, 3, 0.6, 1, p, { sway: 1, skip: 'd' }), box(x, h - 0.2, z, 1, 0.6, 3, p, { sway: 1, skip: 'd' }),
   ]);
 }
 
@@ -541,7 +541,7 @@ export function pine(seed: number): PlantModel {
     const a = (i / 4) * Math.PI * 2 + 0.6;
     wood.push({ ...box(Math.cos(a) * 5, -1.5, Math.sin(a) * 5, 3, 4, 8, b), rot: [-24, (-a * 180) / Math.PI + 90, 0] });
   }
-  const v = new Vox(5);
+  const v = new Vox(6);
   const tiers = r.int(6, 7);
   let y = 15;
   for (let i = 0; i < tiers; i++) {
@@ -556,7 +556,8 @@ export function pine(seed: number): PlantModel {
   }
   blobs.push({ x: 0, y: y + 3, z: 0, rx: 5, ry: 8, rz: 5 });
   v.blob(0, y + 3, 0, 4, 8, 4, seed + 60, 0.1, 0.9);
-  v.emit(leafSet(PAL.pine, seed), 0.22, crown, seed, 0.3, strand(PAL.pine));
+  // (the needle cards fringe the tiers, so the voxels can stay simple)
+  v.emit(leafSet(PAL.pine, seed), 0.22, crown, seed, 0.16);
   const top = y + 11;
   return { wood, crown, blobs, leaf: 'pine', top, sway: 0.22, base: PAL.pine };
 }

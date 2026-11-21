@@ -410,7 +410,7 @@ export class Sky {
     this.sun.intensity = num(a.sunI, b.sunI) * (1 - oc * 0.8 - w.fog * 0.25) * (this.night > 0.5 ? 1 : seasonal) + w.flash * 4;
     this.hemi.color.copy(cold(grey(mix(a.sky, b.sky), oc * 0.6)));
     this.hemi.groundColor.copy(cold(grey(mix(a.ground, b.ground), oc * 0.4, 0.9)));
-    this.hemi.intensity = num(a.hemiI, b.hemiI) * (1 - oc * 0.1) + w.flash * 1.5;
+    this.hemi.intensity = num(a.hemiI, b.hemiI) * (1 - oc * 0.24) + w.flash * 1.5;
     const fogC = cold(grey(mix(a.fog, b.fog), oc * 0.65));
     fogC.lerp(tmpA.setRGB(0.74, 0.78, 0.82).multiplyScalar(0.22 + 0.7 * day + 0.08), w.fog * 0.7);
     this.fog.color.copy(fogC);

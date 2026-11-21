@@ -218,7 +218,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   // a big moon rising over the trees beside the hollow (away from the house) for the sky shot
   const m = V(0.82, 0.52, -0.25).normalize();
   const side = new THREE.Vector3().crossVectors(m, V(0, 1, 0)).normalize(), upv = new THREE.Vector3().crossVectors(side, m).normalize();
-  const C = L.clone().add(V(-1.0, 2.6, 0.9));
+  const C = L.clone().add(V(-3.0, 2.8, 1.6));
   sky.moonOverride = { dir: m.clone(), size: 0.05 };
   sky.moonFade = 1;
 
@@ -271,7 +271,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
     [8.45, () => {
       owl.pose = 'fly'; owl.setMood('excited', 4);
       const p = owl.node.position;
-      fx.burst('feathers', p.x, p.y + 0.5, p.z, 12, 0xe8d2b0); fx.burst('puffs', p.x, p.y + 0.1, p.z, 10); fx.burst('dust', p.x, p.y, p.z, 8); fx.burst('stars', p.x, p.y + 0.6, p.z, 6);
+      fx.burst('feathers', p.x, p.y + 0.5, p.z, 14, 0xe8d2b0); fx.burst('puffs', p.x, p.y + 0.05, p.z, 6, 0xf4ecdc); fx.burst('dust', p.x, p.y, p.z, 8); fx.burst('stars', p.x, p.y + 0.6, p.z, 6);
       sound.play('wings_flutter', { volume: 0.8 }); sound.play('pet_jump', { volume: 0.5, rate: 0.8 });
       flyFrom = climbPts();
     }],
@@ -404,7 +404,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   let landed = false, dropped = false, dropT = 0, landT = 0, trailT = 0;
   const dropTo = H.clone().add(V(0.42, 0.02, 0.5));
   let dropFrom = new THREE.Vector3();
-  const pts = [H.clone().add(V(5.5, 9, 42)), H.clone().add(V(3.2, 6.4, 20)), H.clone().add(V(-1.4, 3.6, 7.2)), H.clone().add(V(0.4, 1.4, 1.6)), H.clone()];
+  const pts = [H.clone().add(V(5, 6.5, 44)), H.clone().add(V(3.0, 4.2, 21)), H.clone().add(V(-1.0, 2.5, 7.4)), H.clone().add(V(0.3, 1.2, 1.7)), H.clone()];
   // (from the left of the path, so the fallen log stays out of the shot)
   const camFront = () => H.clone().add(V(-1.7 * P, 1.5, 5.4 * P));
 
@@ -435,7 +435,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   const frame = (t: number, dt: number) => {
     const n = owl.node;
     if (!landed) {
-      const k = span(t, 0, 4.9), e = 1 - Math.pow(1 - k, 1.6);
+      const k = span(t, 0, 4.9), e = k * k * 0.35 + k * 0.65;
       const p = path(pts, e), ahead = path(pts, Math.min(1, e + 0.02));
       n.position.copy(p);
       const v = ahead.sub(p);

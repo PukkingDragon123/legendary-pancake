@@ -371,6 +371,8 @@ export class Weather {
   private snapNext = true;
   /** cinematics: look like this for a while without touching the real weather */
   hold: WeatherState | null = null;
+  /** dev / previews: force the aurora on or off (null = natural) */
+  auroraForce: boolean | null = null;
   constructor(private sc: Scene) {
     const q = sc.quality === 'high';
     this.rain = new Precip(q ? 2400 : 1000, false);
@@ -387,6 +389,9 @@ export class Weather {
     void this.startLive();
     exposeDev(this);
   }
+
+  /** Fireflies only come out on warm, dry nights. */
+  get firefliesOk() { return season.value.season !== 'winter' && this.vis.rain < 0.2 && this.vis.snow < 0.2 && this.vis.cover < 0.3; }
 
   /** Force a weather (dev / previews); null returns to the real weather. */
   set(kind: WeatherKind | null, intensity = 0.85, temp?: number) {
@@ -460,7 +465,8 @@ export class Weather {
 
     const w = this.hold ?? weather.value, info = season.value;
     const night = sc.sky.night;
-    const aurora = night > 0.5 && (info.season === 'winter' || Math.abs(place().lat) > 52 || (w.temp ?? 10) < -2) && hash(Math.floor(Date.now() / 86400000), 9, 0, 77) < 0.45;
+    // aurora on some clear, cold nights (more often the further north or south the player is)
+    const aurora = this.auroraForce ?? (night > 0.5 && (info.season === 'winter' || Math.abs(place().lat) > 52 || (w.temp ?? 10) < -2) && hash(Math.floor(Date.now() / 86400000), 9, 0, 77) < 0.3 + Math.max(0, Math.abs(place().lat) - 45) / 30);
     const tg = targetFor(w, info, aurora);
     const v = this.vis;
     const k = this.snapNext ? 1 : 1 - Math.exp(-dt / 5);
@@ -511,6 +517,7 @@ export class Weather {
       u.uDrift.value.set(wx, wz).multiplyScalar(p === this.rain ? 1.5 + v.wind * 3 : 0.4 + v.wind * 1.2);
     }
     sc.critters.shelter = v.rain > 0.25 || v.snow > 0.3 || v.storm > 0.2;
+    sc.critters.fireflies = this.firefliesOk;
     this.rain.amount = v.rain * (sc.stage ? 0 : 1);
     this.snowP.amount = v.snow * (sc.stage ? 0 : 1);
     const lightC = sky.ambient.clone().multiplyScalar(1.3).add(new THREE.Color(0.08, 0.09, 0.12));
@@ -581,5 +588,6 @@ function exposeDev(w: Weather) {
   win.__weather = (kind?: WeatherKind | null, intensity?: number, temp?: number) => { w.set(kind ?? null, intensity, temp); w.snap(kind === 'snow' ? 1 : kind ? 0 : undefined); return weather.value; };
   win.__season = (s?: Season | null, t?: number) => { w.setSeason(s ?? null, t); return season.value; };
   win.__wx = w;
+  win.__aurora = (on: boolean | null = true) => { w.auroraForce = on; };
   win.__WX = WX;
 }
