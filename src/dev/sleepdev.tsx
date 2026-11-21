@@ -12,13 +12,16 @@ import { candle, GIFT_LOOK, moon, mug, nightWindow, owl, phone, present, sack, s
 import { CH, CW, FINISHES, paintCuckoo } from '../ui/px/cuckoo.ts';
 import { edit, save } from '../game/store.ts';
 import { demoNight } from '../sleep/index.ts';
-import { phase, setPhoneLock } from '../game/night.ts';
+import { demoTonight, phase, setPhoneLock } from '../game/night.ts';
+import { lootTable } from '../game/catalog.ts';
 import { App } from '../ui/app.tsx';
 import { panel } from '../ui/state.ts';
 
 const q = new URLSearchParams(location.search);
 const screen = q.get('s') ?? 'art';
 if (q.get('t')) (window as unknown as { __artT: number }).__artT = +q.get('t')!;
+if (q.get('cuckoo')) (window as unknown as { __cuckooOut: boolean }).__cuckooOut = true;
+if (q.get('step')) (window as unknown as { __giftStage: unknown }).__giftStage = { step: q.get('step'), gift: +(q.get('gift') ?? 0), stage: +(q.get('stage') ?? 0), t: +(q.get('gt') ?? 0) };
 
 function Canvas(p: { w: number; h: number; k: number; draw: (a: Art) => void; label?: string }) {
   return <figure style="margin:6px;color:#fff;font:11px sans-serif;display:inline-block;vertical-align:top"><canvas class="px" width={p.w} height={p.h} style={{ width: p.w * p.k + 'px', height: p.h * p.k + 'px', background: '#3a3550' }} ref={(c) => { if (!c) return; const a = new Art(p.w, p.h); p.draw(a); a.put(c.getContext('2d')!); }} /><figcaption>{p.label}</figcaption></figure>;
@@ -76,6 +79,12 @@ async function boot() {
   if (screen === 'night' || screen === 'lock') startFakeNight();
   if (screen === 'lock') setPhoneLock(true);
   if (screen === 'alarm') { startFakeNight(); phase.value = 'ringing'; }
+  if (screen === 'gift') {
+    demoTonight();
+    const t = lootTable('woods');
+    const item = t.find((e) => e.kind === 'item')!, piece = t.find((e) => e.kind === 'piece') ?? t[1], item2 = t.filter((e) => e.kind === 'item')[3] ?? t[2];
+    edit((x) => { if (x.pending) { x.pending.adventure.finds = [{ ...item, rarity: 'common' }, { ...piece, rarity: 'rare' }, { ...item2, rarity: 'legendary' }]; x.pending.adventure.gems = 2; } });
+  }
   render(<App />, root);
   (window as unknown as { __ready: number }).__ready = 1;
 }
