@@ -31,7 +31,7 @@ input, textarea, select { font: inherit; color: inherit; }
 img.px, .px { image-rendering: pixelated; image-rendering: crisp-edges; }
 #world { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; outline: none; }
 #ui { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
-#ui > * { pointer-events: auto; }
+#ui > *:not(.layer) { pointer-events: auto; }
 .layer { position: absolute; inset: 0; pointer-events: none; user-select: none; -webkit-user-select: none; }
 .layer > * { pointer-events: auto; }
 
