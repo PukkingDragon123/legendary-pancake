@@ -127,7 +127,7 @@ function frostlight(w: number, h: number): Pix {
     for (let k = 0; k < 4; k++) p.set(x, sag + k, (x + k) % 3 === 0 ? '#0f3a26' : k === 0 ? '#3f8f5f' : '#1f5a3c');
     if (x % 11 === 0) { const c = ['#e8343f', '#ffd84a', '#7ac8ff', '#f2f2f2'][(x / 11) % 4]; p.circle(x, sag + 6, 2.2, c); p.set(x - 1, sag + 5, '#ffffff', 0.7); }
   }
-  for (const sx of [0, w]) { const dir = sx ? -1 : 1; for (let i = 0; i < h * 0.3; i++) { p.set(sx + dir * (i * 0.55), i * 1.1 + 2, '#d9343f'); p.set(sx + dir * (i * 0.55 + 1), i * 1.1 + 2, '#ff6a6a'); p.set(sx + dir * (i * 0.55 + 2), i * 1.1 + 2, '#a8202c'); } }
+  for (const sx of [0, w]) { const dir = sx ? -1 : 1; for (let i = 0; i < Math.min(w, h) * 0.16; i++) { p.set(sx + dir * (i * 0.55), i * 1.1 + 2, '#d9343f'); p.set(sx + dir * (i * 0.55 + 1), i * 1.1 + 2, '#ff6a6a'); p.set(sx + dir * (i * 0.55 + 2), i * 1.1 + 2, '#a8202c'); } }
   // candy cane in the corner
   const ccx = w * 0.96, ccy = h * 0.9;
   for (let i = 0; i < h * 0.22; i++) { p.set(ccx, ccy - i, Math.floor(i / 2) % 2 ? '#ffffff' : '#e8343f'); p.set(ccx + 1, ccy - i, Math.floor(i / 2) % 2 ? '#e8e8e8' : '#b82030'); }
@@ -146,9 +146,10 @@ function starfall(w: number, h: number): Pix {
   // a big crescent moon
   const mx = w * 0.18, my = h * 0.22, mr = Math.max(6, h * 0.1);
   p.glow(mx, my, mr * 3, '#ffe9a8', 0.4);
-  p.circle(mx, my, mr, '#fff4c8');
-  p.circle(mx + mr * 0.45, my - mr * 0.25, mr * 0.9, '#2a1a66');
-  p.glow(mx + mr * 0.45, my - mr * 0.25, mr * 0.9, '#1c1150', 0);
+  for (let y = Math.floor(my - mr); y <= my + mr; y++) for (let x = Math.floor(mx - mr); x <= mx + mr; x++) {
+    const inMoon = (x + 0.5 - mx) ** 2 + (y + 0.5 - my) ** 2 <= mr * mr, inBite = (x + 0.5 - mx - mr * 0.45) ** 2 + (y + 0.5 - my + mr * 0.3) ** 2 <= (mr * 0.88) ** 2;
+    if (inMoon && !inBite) p.set(x, y, (x + y) % 7 === 0 ? '#f2e2a8' : '#fff4c8');
+  }
   // falling stars
   for (let i = 0; i < 6; i++) {
     const x0 = w * (0.3 + r() * 0.75), y0 = h * (0.02 + r() * 0.4), len = h * (0.12 + r() * 0.15);
@@ -174,6 +175,33 @@ function starfall(w: number, h: number): Pix {
     p.glow(x, sy, 5, '#ffe08a', 0.3);
   }
   return p;
+}
+
+/** The night sky of the wish cinematic: dithered dusk, stars, an aurora or a nebula, snowy hills and pines. */
+function nightSky(w: number, h: number, motif: 'snow' | 'stars'): Pix {
+  const p = new Pix(w, h), r = rng(strSeed('night' + motif + w + 'x' + h));
+  p.grad(0, h * 0.86, motif === 'stars' ? ['#03020f', '#0d0830', '#221454', '#4a2c86', '#8a5ab4'] : ['#02040f', '#060c2a', '#0e1c50', '#1d3a7c', '#3a62a8']);
+  if (motif === 'snow') for (let x = 0; x < w; x++) for (let k = 0; k < 3; k++) {
+    const y0 = h * (0.18 + k * 0.07) + Math.sin(x * 0.05 + k * 2) * h * 0.05 + Math.sin(x * 0.13 + k) * h * 0.015;
+    for (let y = Math.floor(y0); y < y0 + h * 0.12; y++) { const f = 1 - (y - y0) / (h * 0.12); if (r() < f * 0.5) p.add(x, y, k === 1 ? [40, 200, 150] : [90, 60, 200], 0.18 * f); }
+  }
+  else for (let i = 0; i < 4; i++) p.glow(w * (0.2 + r() * 0.6), h * (0.2 + r() * 0.3), h * 0.2, ['#8a5ae0', '#e070c0'][i % 2], 0.25);
+  for (let i = 0; i < w * h * 0.01; i++) p.set(r() * w, r() * h * 0.8, r() < 0.2 ? '#fff6d8' : '#cfe0ff', 0.3 + r() * 0.7);
+  for (let i = 0; i < 14; i++) { const x = r() * w, y = r() * h * 0.6; p.set(x, y, '#ffffff'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) p.set(x + dx, y + dy, '#9fc0ff', 0.7); }
+  const hor = h * 0.8;
+  for (let x = -4; x < w + 4; x += 3 + r() * 4) p.pine(x, hor + h * 0.04 + Math.sin(x * 0.07) * h * 0.02, h * (0.08 + r() * 0.09), '#08142a', '#5a78a8', { seed: x + 7 });
+  for (let y = Math.floor(hor); y < h; y++) for (let x = 0; x < w; x++) {
+    const hill = hor + Math.sin(x * 0.04) * h * 0.03 + Math.sin(x * 0.11 + 2) * h * 0.012;
+    if (y >= hill) p.set(x, y, y - hill < 1.5 ? '#c8dcf4' : (x * 5 + y * 3) % 17 === 0 ? '#9ab8e0' : '#7e9ed0');
+  }
+  return p;
+}
+const skyCache = new Map<string, string>();
+export function skyArt(motif: 'snow' | 'stars', w: number, h: number): string {
+  const key = motif + w + 'x' + h;
+  let u = skyCache.get(key);
+  if (!u) { u = nightSky(w, h, motif).url(); skyCache.set(key, u); }
+  return u;
 }
 
 const bannerCache = new Map<string, string>();

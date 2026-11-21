@@ -363,3 +363,20 @@ icon('shop_timer', { F: 'steel.y@frame', f: 'steel:5', G: 'glass.r@g', S: 'ice:5
 ]);
 // a gem-to-acorn swap arrow
 icon('shop_swap', { A: 'gold.x@arr', a: 'gold:5' }, ['....A....', '....AA...', 'AAAAAAA..', 'AaaaaaAA.', 'AAAAAAA..', '....AA...', '....A....']);
+
+// a mystery present: a frosted box with a violet bow and a big gold question mark
+icon('shop_mystery', { B: 'lilac.r@box', b: 'lilac:5', D: 'lilac:1', R: 'purple.y@rib', r: 'purple:5', Q: 'gold.R@q', q: 'gold:1', w: '#ffffff' }, () => {
+  const g = new Grid(24, 24);
+  g.rect(3, 12, 18, 10, 'B');
+  g.rect(2, 9, 20, 4, 'B');
+  g.rect(10, 9, 4, 13, 'R'); g.rect(2, 10, 20, 2, 'R');
+  g.ellipse(7.5, 6.4, 4, 3, 'R'); g.ellipse(16.5, 6.4, 4, 3, 'R');
+  g.ellipse(7.5, 6.4, 1.6, 1.2, 'D'); g.ellipse(16.5, 6.4, 1.6, 1.2, 'D');
+  g.rect(10, 6, 4, 4, 'R'); g.set(11, 6, 'r');
+  // the question mark on the front
+  g.stamp(4, 13, ['.QQQ.', 'Q...Q', '...Q.', '..Q..', '.....', '..Q..'], { Q: 'Q' });
+  g.stamp(15, 13, ['.QQQ.', 'Q...Q', '...Q.', '..Q..', '.....', '..Q..'], { Q: 'Q' });
+  for (const [x, y] of [[4, 20], [19, 20], [3, 12], [20, 12]]) g.set(x, y, 'b');
+  g.set(21, 2, '*').set(20, 3, 'w').set(22, 3, 'w').set(21, 4, 'w').set(2, 4, 'w');
+  return g.rows();
+});

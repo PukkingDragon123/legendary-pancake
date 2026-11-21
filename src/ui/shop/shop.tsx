@@ -5,7 +5,7 @@
 // Portrait: the boutique fills the top, the shop scrolls below. Scrolling down reaches the weekly
 // series; a series opens its gacha banner (gacha.tsx).
 import type { ComponentChildren } from 'preact';
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
 import { PIECE } from '../../owl/outfits.ts';
 import { QUEEN_NAME } from '../../owl/queen.ts';
@@ -67,21 +67,25 @@ let lineId = 0;
 function QueenBubble(p: { stage: Boutique | null; line: Line | null; layout: 'side' | 'top' }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(0);
+  const place = () => {
+    const el = ref.current, st = p.stage;
+    if (!el || !st) return;
+    const q = st.queenScreen();
+    // beside the queen's head, tail pointing at her, never over the shop panel or off screen
+    const w = el.offsetWidth || 240, minL = p.layout === 'side' ? Math.min(innerWidth - w - 8, innerWidth * 0.5 + 20) : 8;
+    const left = Math.max(minL, Math.min(innerWidth - w - 8, q.x + 34 - w * 0.12));
+    el.style.left = `${left}px`;
+    el.style.top = `${Math.max(p.layout === 'side' ? 120 : 112, q.y + 18)}px`;
+    el.style.setProperty('--tail', `${Math.max(12, Math.min(w - 24, q.x - left))}px`);
+  };
   useEffect(() => {
     let raf = 0;
-    const loop = () => {
-      raf = requestAnimationFrame(loop);
-      const el = ref.current, st = p.stage;
-      if (!el || !st) return;
-      const q = st.queenScreen();
-      const minX = p.layout === 'side' ? innerWidth * 0.5 + 130 : 130;
-      el.style.left = `${Math.max(minX, Math.min(innerWidth - 130, q.x))}px`;
-      el.style.top = `${Math.max(p.layout === 'side' ? 140 : 150, q.y)}px`;
-    };
+    const loop = () => { raf = requestAnimationFrame(loop); place(); };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
   }, [p.stage, p.layout]);
   const l = p.line;
+  useLayoutEffect(place, [l?.id]);
   useEffect(() => {
     if (!l) return;
     setShown(0);
@@ -121,7 +125,7 @@ function Timer(p: { ms: number; label?: string }) {
   return <span class="nv-timer if-ice_chip"><Px name="shop_timer" size={22} />{p.label && <span class="nv-timer-l">{p.label}</span>}<b>{fmtLeft(p.ms)}</b></span>;
 }
 function MissingArt(p: { name: string; size?: number }) {
-  return <div class="nv-missing" style={p.size ? { width: `${p.size}px`, height: `${p.size}px` } : undefined}><b>?</b><span>{p.name}</span></div>;
+  return <div class="nv-missing" style={p.size ? { width: `${p.size}px`, height: `${p.size}px` } : undefined}><Px name="shop_mystery" size={p.size ? p.size * 0.6 : 48} class="nv-float" /><span>{p.name}</span></div>;
 }
 
 // ------------------------------------------------------------------ the shop
@@ -165,7 +169,7 @@ export function Shop() {
     const t = setTimeout(() => say(pick(LINES.hello)), 900);
     const onResize = () => setLayout(isSide() ? 'side' : 'top');
     addEventListener('resize', onResize);
-    if (import.meta.env.DEV) (window as unknown as { hhShop: unknown }).hhShop = { stage: b, open: (id: string) => setGacha(id), say };
+    if (import.meta.env.DEV) (window as unknown as { hhShop: unknown }).hhShop = { stage: b, open: (id: string) => setGacha(id), say, moment: rewardMoment };
     return () => {
       clearTimeout(t);
       removeEventListener('resize', onResize);

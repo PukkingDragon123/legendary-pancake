@@ -339,6 +339,7 @@ export class Boutique implements Stage {
   private w = 1; private h = 1;
   private ray = new THREE.Raycaster();
   private downAt: { x: number; y: number; t: number } | null = null;
+  private dealKey = '';
 
   constructor(deals: DisplayItem[] = []) {
     const S = this.scene;
@@ -575,6 +576,9 @@ export class Boutique implements Stage {
 
   /** Put today's deals on the stands (missing ids show a mystery crate). */
   setDeals(deals: DisplayItem[]) {
+    const key = deals.map((d) => d.kind + ':' + d.id).join('|');
+    if (key === this.dealKey) return;
+    this.dealKey = key;
     this.stands.forEach((s, i) => {
       if (s.model) { s.holder.remove(s.model.obj); s.model.dispose(); s.model = null; }
       const d = deals[i];

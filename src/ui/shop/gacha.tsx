@@ -14,7 +14,7 @@ import { Px } from '../icons.tsx';
 import { haptic, Rolling, toast, useTick } from '../kit.tsx';
 import { panel } from '../state.ts';
 import { AnimPx, rewardMoment } from './moment.tsx';
-import { bannerArt, bigOwl, prizeArt, skinLook } from './paint.ts';
+import { bannerArt, bigOwl, prizeArt, skinLook, skyArt } from './paint.ts';
 
 const fmt = (n: number) => n.toLocaleString('en-US');
 const isSide = () => innerWidth >= innerHeight * 1.05 && innerWidth >= 640;
@@ -30,7 +30,7 @@ function PrizeImg(p: { e: Pick<SeriesEntry, 'kind' | 'id'>; big?: boolean }) {
   const big = p.big && p.e.kind === 'skin' && SPECIAL_SKIN[p.e.id];
   const a = big ? bigOwl(skinLook(p.e.id), 512) : prizeArt(p.e.kind, p.e.id, look);
   if (a) return <img class={'nv-prize-art ' + p.e.kind} src={a} alt="" draggable={false} />;
-  return <div class="nv-missing"><b>?</b><span>{p.big ? nameOf(p.e.kind, p.e.id) : 'Arriving soon'}</span></div>;
+  return <div class={'nv-missing' + (p.big ? ' big' : '')}><Px name="shop_mystery" size={p.big ? 160 : 48} class="nv-float" /><span>{p.big ? 'A surprise, still being wrapped' : 'Arriving soon'}</span></div>;
 }
 
 // ------------------------------------------------------------------ the banner
@@ -78,7 +78,7 @@ export function Gacha(p: { seriesId: string; onClose: () => void; onBuyGems: () 
 
       <header class="nv-g-top">
         <button class="nv-btn frost nv-g-close" aria-label="Back to the boutique" onClick={close}><Px name="arrow_left" size={22} /></button>
-        <span class="nv-g-limited if-ice_chip"><Px name="shop_timer" size={20} />{on ? <>Limited · ends in <b>{fmtLeft(msToWeek())}</b></> : <>Arrives in <b>{fmtLeft(msToWeek())}</b></>}</span>
+        <span class="nv-g-limited if-ice_chip"><Px name="shop_timer" size={20} />{on ? <><span class="nv-lim-l">Limited · </span>ends in <b>{fmtLeft(msToWeek())}</b></> : <>Arrives in <b>{fmtLeft(msToWeek())}</b></>}</span>
         <span class="grow" />
         <button class="nv-g-gems if-ice_chip" onClick={p.onBuyGems} aria-label="Moon gems: get more"><AnimPx name="moongem" size={26} /><b><Rolling value={sv.gems} /></b><span class="nv-plus">+</span></button>
       </header>
@@ -211,10 +211,9 @@ export function PullShow(p: { prizes: Prize[]; motif: 'snow' | 'stars'; onDone: 
     <div class={'nv-pull ' + phase + ' best' + best} onClick={next}>
       {phase === 'sky' && (
         <div class="nv-sky">
-          <div class="nv-sky-stars" />
-          <div class="nv-sky-hill" />
+          <img class="nv-sky-art" src={skyArt(p.motif, isSide() ? 320 : 180, isSide() ? 180 : 320)} alt="" />
           {Array.from({ length: shoot }, (_, k) => (
-            <div class={'nv-shoot r' + (k === 0 ? best : Math.min(best, 4) - (k % 2))} style={{ top: `${14 + k * 9}%`, animationDelay: `${0.25 + k * 0.22}s`, '--len': `${k === 0 ? 46 : 28}vmax` } as unknown as string}><i /></div>
+            <div class={'nv-shoot r' + (k === 0 ? best : Math.min(best, 4) - (k % 2)) + (k === 0 ? ' lead' : '')} style={{ top: `${(k === 0 ? 20 : 8 + k * 11)}%`, animationDelay: `${0.25 + k * 0.22}s`, '--len': `${k === 0 ? 52 : 30}vmax` } as unknown as string}><i /><b /></div>
           ))}
           <div class={'nv-sky-flash r' + best} />
           <span class="nv-skip">Tap to skip</span>
@@ -224,6 +223,7 @@ export function PullShow(p: { prizes: Prize[]; motif: 'snow' | 'stars'; onDone: 
         <div class={'nv-reveal r' + pr.stars} key={i}>
           <div class="nv-reveal-burst" />
           <div class="nv-reveal-rays" />
+          <div class="nv-reveal-motes" aria-hidden="true">{Array.from({ length: pr.stars * 6 }, (_, k) => <i style={{ left: `${(k * 37 + 11) % 100}%`, animationDelay: `${(k % 7) * 0.31}s`, animationDuration: `${2.4 + (k % 4) * 0.6}s` }} />)}</div>
           <div class="nv-reveal-art"><PrizeImg e={pr.entry} big /></div>
           <div class="nv-reveal-text">
             <Stars n={pr.stars} size={26} pop />
@@ -241,7 +241,7 @@ export function PullShow(p: { prizes: Prize[]; motif: 'snow' | 'stars'; onDone: 
           <div class={'nv-sum-grid n' + p.prizes.length}>
             {[...p.prizes].map((x, k) => ({ x, k })).sort((a, b) => b.x.stars - a.x.stars || a.k - b.k).map(({ x, k }) => (
               <div class={'nv-sum-card r' + x.stars} style={{ animationDelay: `${k * 0.06}s` }}>
-                <div class="nv-sum-art">{(() => { const a = prizeArt(x.entry.kind, x.entry.id, look); return a ? <img src={a} alt="" /> : <div class="nv-missing sm"><b>?</b></div>; })()}</div>
+                <div class="nv-sum-art">{(() => { const a = prizeArt(x.entry.kind, x.entry.id, look); return a ? <img src={a} alt="" /> : <Px name="shop_mystery" size={64} />; })()}</div>
                 <Stars n={x.stars} size={9} />
                 <small>{nameOf(x.entry.kind, x.entry.id)}</small>
                 {x.isNew ? <span class="nv-new sm">NEW</span> : x.dupe ? <span class="nv-dupe sm">+{x.dupe}</span> : null}
