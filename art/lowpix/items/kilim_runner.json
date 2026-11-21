@@ -1,0 +1,316 @@
+{
+ "name": "kilim_runner",
+ "description": "Kilim Hall Runner",
+ "author": "Hoot Hollow (furnB)",
+ "license": "CC0-1.0",
+ "density": 3,
+ "budget": {
+  "tris": 3000,
+  "colors": 400
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.62
+  ],
+  "strength": 0.75,
+  "gradient": 0.35,
+  "ao": 1.1,
+  "ao_height": 3.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.88
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.5,
+  "width": 0.4,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "ru_kR": "cloth",
+   "ru_kC": "cloth",
+   "ru_kN": "cloth",
+   "ru_kG": "cloth",
+   "ru_kP": "cloth",
+   "ru_kT": "cloth",
+   "pa_fringe": "none"
+  }
+ },
+ "render": {
+  "background": "#2a3330",
+  "hero": [
+   -26,
+   40
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "ru_kR": [
+    "#4a3e3c",
+    "#715145",
+    "#a66c55",
+    "#ba7d62",
+    "#cc8d6d",
+    "#db9c78"
+   ],
+   "ru_kC": [
+    "#626562",
+    "#9f9c8e",
+    "#f1e6cc",
+    "#fef8d9",
+    "#fdf8e4",
+    "#fcf4e7"
+   ],
+   "ru_kN": [
+    "#2c3843",
+    "#364552",
+    "#46596a",
+    "#5a6a77",
+    "#6c7b82",
+    "#7e898c"
+   ],
+   "ru_kG": [
+    "#544d3b",
+    "#846c43",
+    "#c59a52",
+    "#d9ab5f",
+    "#ebbb6a",
+    "#f9c875"
+   ],
+   "ru_kP": [
+    "#2a3834",
+    "#324635",
+    "#3f5a3b",
+    "#536b48",
+    "#667c53",
+    "#778a5f"
+   ],
+   "ru_kT": [
+    "#524743",
+    "#816152",
+    "#c0866a",
+    "#d49877",
+    "#e6a782",
+    "#f5b58c"
+   ],
+   "pa_fringe": [
+    "#5d605e",
+    "#83837a",
+    "#b5af9e",
+    "#f1e6cc",
+    "#fefadb",
+    "#fcf7e6",
+    "#fbf3e4"
+   ]
+  }
+ },
+ "styles": {
+  "kside": {
+   "ramp": "ru_kN",
+   "tone": 2.6,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "weft",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.8
+    }
+   ]
+  },
+  "plain_fringe": {
+   "ramp": "pa_fringe",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35
+    }
+   ],
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0
+  }
+ },
+ "parts": [
+  {
+   "id": "rug",
+   "shape": "box",
+   "size": [
+    44.0,
+    0.6,
+    15.0
+   ],
+   "style": "kside",
+   "pivot": [
+    0.0,
+    0.3,
+    0.0
+   ],
+   "paint": {
+    "stamps": [
+     {
+      "face": "top",
+      "at": [
+       0,
+       0
+      ],
+      "art": [
+       "3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn",
+       "NNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNN",
+       "NnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn3nnNnnNnn",
+       "NNNGCCGGCCGG2CGGCCGGCCGGCCGGCCGGCCG4CCGGCCGGCCGGCCGGCCGGCC4GCCGGCCGGCCGGCCGGCCGGC2GGCCCGGCCGGCCGGCCGGCCG4CCGGCCGGCCGGCCGGCCGGCC4GNNN",
+       "NnnCcgGccGgcCggCcgGccGgcCggCcgGccGgcCgg2cgGccGgcCggCcgGccGgcCggCcgGccGgcCggCcgGccGgcCcgGccGgcCggCcgGccGgcCgg2cgGccGgcCggCcgGccGgcNnn",
+       "NNNCGNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNCCNNN",
+       "NnnGgnNnnNnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNcgNnn",
+       "NNNGC3NTTTTRRRRRRRRRRRRRRRRR1RRRRRRRRTTTTRRRRRRRRRR1RRRRRRRRRRRRRRRTTTTRRR1RRRRRRRRRRRRRRRRRRRRRR6TTTRRRRRRRRRRRRRRRRRRR1RRRRNNGGNNN",
+       "NnnCcnNtt6trRrrRrrRrrRrrRrrRrrRrrRrrRttTtrRrrRrrRrrRrrRrrRrrRrrRrrRttTtrRrrRrr1rrRrrRrrRrrRrrRrrRttTtrRrrRrrRrrRrrRrrRrrRrrRrnNgcNnn",
+       "NNNCGNNCCCCTT1RRRRRRRRRRRRRRRRRRRRRT6CCCCTTRRRRRRRRRRRRRRRR1RRRRRTTCCCCTTRRRRRRRRR1RRRRRRRRRRRRTTCCCCTTRR1RRRRRRRRRRRRRRRRRRRNNC2NNN",
+       "NnnGgnNccCctTrrRrrRrrRrrRrrRrrRrrRrtTccCctTrrRrrRrrRrrRrrRrrRrr1rtTccCctTrrRrrRrrRrrRrrRrrRrrRrtTccCctTrrRrrRrrRrrRrrRrrRrrRrnNcgNnn",
+       "NNNGCNNPPPPCCTTRRRRRR1RRRRRRRRRRRTTCCPPPPCCT6RRRRRRRRRRRRRRRRRRTTCC5PPPCCTTRRRRRRRRRRRRRRR1RRTTCCPPPPCCTTRRRRRRRR1RRRRRRRRRTTNNGGNNN",
+       "NnnCcnNppPpcCttRrrRrrRrrRrrRrrRrrTtcCppPpcCttRrr1rrRrrRrrRrrRrrTtcCppPpcCttRrrRrrRrrRrrRrrRrrTtcCppPpcCttRrrRrrRrrRrr1rrRrrTtnNgcNnn",
+       "NNNCGN3NNNNPPCCTTRRRRRRRRRRRR1RTTCCPPNNNNPPCCTTRRRRR1RRRRRRRRTTCCPPNNNNPPCC6TRRRRRRRRRRRRRRTTCCPPN3NNPPCCTTRRRRRRRRRRRRRR6TCCNNCCNNN",
+       "NnnGgnNnnNnpPccTtrRrrRrrRrrRrrRtt2cpPnnNnpPccTtrRrrRrrRrrRrrRttCcpPnnNnpPccTtrRrrRrrRrrRrrRttCcpPnnNnp5ccTtrRrrRrrRrrRrrRttCcnNcgNnn",
+       "NNNGCNNCCCCNNP5CCTTRRRRRRRRRRTTCCPPNN2CCCNNPPCCTTRRRRRRRRRRT6CCPPNNCCCCNNPPCCTTRRRR1RRRRRTTCCPPNNCCCCNNPPC2TTRRRRRRRRRRTTCCPPNNGG3NN",
+       "NnnCcnNccCcnNppCct6rrRrrRrrRrtTccPpnNccCcnNppCctTrrRrrRrrRrtTccPpnNccCcnNppCctTrrRrrRrr1rtTccPpnNccCcnNppCctTrrRrrRrrRrtTccPpnNgcNnn",
+       "NNNCGNNCCCCCCNNPPCCTTR1RRRRTTCCPPNNCCCCCCCCNN5PCCTTRRRRRRTTCCPPNNCCC2CCCCNNPPCCTTRRRRRRTTCC5PNNCCCCCCCCNNPPCCTTRRR1RRTTCCPPNNNNCCNNN",
+       "Nnn4gnNccCccCnnPpcCttRrrRrrTtcCppNncCccCccCnnPpcCttRrrRrrTtcCppNncCccCcc2nnPpcCttRrrRrrTtcCppNncCccCccCnnPpcCttRrrRrrTtcCppNnnNcgNnn",
+       "NNNGCNN4GGGCCCCNNPPCCTTRRTTCCP5NNCCCCGGGGCCCCNNPPCCTT1RTTCCPPNNCCCCGGGGCCCCN3PPCCTTRRTTCCPPNNCCCCGG4GCCCCNNPPCCTTRRTTCCPPN3CCNNGGNNN",
+       "NnnCcnNggGgcCccNnpPccTtrRttCcpPnnCccCggGgcCccNnpPccTtrRtt2cpPnnCccCggGgcCccNnpPccTtrRttCcpPnnCccCggGgcCccNnpPccTtrRttCcpPnnCcn3gcNnn",
+       "NNNCGNNGGGGGGCC2CNNPPCCTTCCPPNNCCCCGGG4GGGGCCCCNNPPCCTTCCPPNN2CCCGGGGGGGGCCCCNNPPCCT6CCPPNNCCCCGGGGGGGGCCCC3NPPCCTTCCPPNNCCCCNNCCN3N",
+       "NnnGgnNggGggGccCcnNppCctTccPpnNccCcgGggGgg4ccCcnNppCctTccPpnNccCcgGggGggGccCcnNppCctTccPpnNccCcgGggGggGccCcnNpp2ctTccPpnNccCcnNcgNnn",
+       "3NNGCNNGGGGGGCCCCNNPPCC6TCCPPNNCCCCGGGGGGGGCCC2NNPPCCTTCCPPNNCCCCGGGG4GGGCCCCNNPPCCTTCCPPNNC2CCGGGGGGGGCCCCNNPPCCTT2CPPNNCCCCNNGGNNN",
+       "NnnCcnNggGgcCccNnpPccTtrRtt2cpPnnCccCggGgcCccNnpPccTtrRttCcpPnnCccCggGgcCccNnpPccTtrRttCcpPnnCcc2ggGgcCccNnpPccTtrRttCcpPnnCcnNgcNnn",
+       "NNNCGNNG4GGCCCCNNPPCCTTRRTTCCPP3NCCCCGGGGCCCCNNPPCCTTR1TTCCPPNNCCCCGGGGCCCCNN5PCCTTRRTTCCPPNNCCCCGGG4CCCCNNPPCCTTRRTTCCPPNN2CNNCCNNN",
+       "NnnGgnNccCcc2nnPpcCttRrrRrrTtcCppNncCccCccCnnPpcCttRrrRrrTtcCppNncCccCccCnnPpcCtt1rrRrrTtcCppNncCccCccCnnPpcCttRrrRrrTtcCppNnnNcgNnn",
+       "NNNGCNNCCCCCCNNP5CCTTRRRRRRTTCCPPNNCCCC2CCCNNPPCCTTRRRRRRTTCCP5NNCCCCCCCCNNPPCCTTRRRR1RTTCCPPNNCCCCCCCCNNPPC2TTRRRRRRTTCCPPNNNNGGNN3",
+       "NnnCcnNccCcnNppCctTrrRrrRrrRrtTccPpnNccCcnNppCctTrrRrrRrrRrtTccPpn3ccCcnNppCctTrrRrrRrrRrtTccPpnNccCcnNppCctTrrRrrRrrRrtTccPpnNgcNnn",
+       "N3NCGNNCCCCNNPPCCTTRRRRR1RRRRTTCCPPNNCCCCNNPPCC6TRRRRRRRRRRTTCCPPNNCCC2NNPPCCTTRRRRRRRRRRTTCC5PNNCCCCNNPPCCTTRRRRRRR1RRTTCCPPNNCCNNN",
+       "NnnGgnNnnNnpPccTtrRrrRrrRrrRrrRttCcpPnnNnpPccTtrRrr1rrRrrRrrRttCcpPnnNnpPccTtrRrrRrrRrrRrrRttCcpPnnNnpPccTtrRrrRrrRrrRrr1ttCcnNcgNnn",
+       "NNNGCNNNN3NPPCCTTRRRRRRRRRRRRRRT6CCPPNNNNPPCCTTRRRRRRRR1RRRRRTTCCPPNNNNPPCCTTR1RRRRRRRRRRRRTTCCPPNNNN5PCCTTRRRRRRRRRRRRRRTTC2NNGGNNN",
+       "NnnCcnNppPpcCttRrrRrrRrrRrrRrrRrrTtc2ppPpcCttRrrRrrRrrRrrRrrRrrTtcCppPpcCttRrrRrrRrrRrrRrrRrrTtcCppPpcCtt1rrRrrRrrRrrRrrRrrTtnNgcNnn",
+       "NNNCGNNPPPPCCTTRR1RRRRRRRRRRRRRRRTTCCPPP5CCTTRRRRRRRRRRRRRRRRRR6TCCPPPPCCTTRRRRRRRRRRR1RRRRRRTTCCPPPPCCTTRRRR1RRRRRRRRRRRRRTTNNCCNNN",
+       "NnnGgnNccCctTrrRrrRrr1rrRrrRrrRrrRrtTccCctTrrRrrRrrRrrRrrRrrRrrRrtTccCctTrrRrrRrrRrrRrrRrr1rrRrtTccCctTrrRrrRrrRrrRrrRrrRrrRrnNcgNnn",
+       "NN3GCNNCCCCTTRRRRRRRRRRRR1RRRRRRRRRTTCCCCTTRRRRR1RRRRRRRRRRRRRRRRTTCCCC6TRRRRRRRRRRRRRRRRRRRRR1TTCCCCTTRRRRRRRRRRRRRR1RRRRRRRNNGGNNN",
+       "NnnCcn3ttTtrRrrRrrRrrRrrRrrRrrRrrRrrRttTtrRrrRrrRrrRrrRrrRrrRrrRrrRttTtrRrr1rrRrrRrrRrrRrrRrrRrrRttTtrRrrRrrRrrRrrRrrRrrRrrRrnNgcNnn",
+       "NNNCGNNTTT6RRRRRRRRRRRRRRRRRRRRRR1RRRTTTTRRRRRRRRRRRRRRR1RRRRRRRRRRTTTTRRRRRRRR1RRRRRRRRRRRRRRRRRTTTTR1RRRRRRRRRRRRRRRRRRRRRR3NCCNNN",
+       "NnnGgnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNcg3nn",
+       "NNNGCNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNGGNNN",
+       "NnnCcgGccGgcCggCcgGccGgcCggCcgGccGgcCggCcgGcc4gcCcgGccGgcCggCcgGccGgcCggCcgGccGgcCggCcgGccGgcCggCcgGccGgcCggCcgGcc4gcCggCcgGccGgcNnn",
+       "NNN2GGCCGGCCGGCCGGCCGGCCGG2CGGCCGGCCGGCCGGCCGGCCC4GCCGGCCGGCCGGCCGGCCGGC2GGCCGGCCGGCCGGCCGGCCGG2CGGCCGGCCGGCCGGCCGGCCG4CCGGCCGGCCNNN",
+       "NnnNnnNnnNnnNnnNnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn",
+       "NNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNNNNNNNNNNNNNNNNNNN3NNNNN",
+       "NnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn3nnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnnNnn"
+      ],
+      "key": {
+       "R": "ru_kR:3",
+       "r": "ru_kR:2",
+       "1": "ru_kR:4",
+       "C": "ru_kC:3",
+       "c": "ru_kC:2",
+       "2": "ru_kC:4",
+       "N": "ru_kN:3",
+       "n": "ru_kN:2",
+       "3": "ru_kN:4",
+       "G": "ru_kG:3",
+       "g": "ru_kG:2",
+       "4": "ru_kG:4",
+       "P": "ru_kP:3",
+       "p": "ru_kP:2",
+       "5": "ru_kP:4",
+       "T": "ru_kT:3",
+       "t": "ru_kT:2",
+       "6": "ru_kT:4"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "fringe",
+   "shape": "card",
+   "plane": "xz",
+   "style": "plain_fringe",
+   "art": [
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "k...#.k...#.k...#.k...#.k...#.k...#.k...#.k.."
+   ],
+   "size": [
+    15.0,
+    2.0
+   ],
+   "pivot": [
+    -23.0,
+    0.25,
+    0.0
+   ],
+   "paint": {
+    "art_key": {
+     "k": "pa_fringe:1"
+    }
+   },
+   "rotation": [
+    0,
+    -90,
+    0
+   ]
+  },
+  {
+   "id": "fringe1",
+   "shape": "card",
+   "plane": "xz",
+   "style": "plain_fringe",
+   "art": [
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "##.##.##.##.##.##.##.##.##.##.##.##.##.##.##.",
+    "k...#.k...#.k...#.k...#.k...#.k...#.k...#.k.."
+   ],
+   "size": [
+    15.0,
+    2.0
+   ],
+   "pivot": [
+    23.0,
+    0.25,
+    0.0
+   ],
+   "paint": {
+    "art_key": {
+     "k": "pa_fringe:1"
+    }
+   },
+   "rotation": [
+    0,
+    90,
+    0
+   ]
+  }
+ ]
+}
