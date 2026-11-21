@@ -44,6 +44,12 @@ export interface ItemDef {
   series?: string;
   /** not sold in the build store (adventure or gacha only) */
   noStore?: boolean;
+  /**
+   * The hand-made model (lowpix GLB under public/models, e.g. 'items/armchair.glb'). When set, it
+   * replaces `build()` everywhere (rooms, store icons, shop stands). Animation clips in the GLB play
+   * on loop ('idle' first). `build()` stays as the instant fallback while the GLB loads.
+   */
+  model?: string;
   /** moving parts added as children of the placed mesh (a fish in a bowl, a flame, a pendulum) */
   parts?: () => import('three').Object3D[];
   /** called every frame with the placed object (its moving parts are its children) */
