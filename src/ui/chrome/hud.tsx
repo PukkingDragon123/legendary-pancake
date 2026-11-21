@@ -1,5 +1,5 @@
 // OWNED BY THE UI-CHROME BUILDER: the HUD and the home-screen controls.
-//   Hud       carved wooden signs hanging by ropes and chains from leafy branches at the top edge:
+//   Hud       carved wooden signs hanging by ropes and chains from the top edge:
 //             Pip's name, portrait and the magic level bar (left); acorns and moon gems (right)
 //   SideTools wooden tags strung on a rope down the right side (Build, Shop, Dress up, Quests,
 //             Map, Settings) with animated pixel icons
@@ -17,7 +17,7 @@ import { dayKey, level, save } from '../../game/store.ts';
 import { portrait } from '../portraits.ts';
 import { haptic } from '../kit.tsx';
 import { breathing, panel, say, sceneRef, type Panel } from '../state.ts';
-import { branch, chainTile, plank, plaque, ropeTile, shelf, tag, type Inner } from './paint.ts';
+import { chainTile, plank, plaque, ropeTile, shelf, tag, type Inner } from './paint.ts';
 import { framesOf, hold, PxAnim, rep, seq, type Timeline } from './pxanim.tsx';
 import { MagicBar } from './magicbar.tsx';
 import { addSwing, kick, makeSwing, removeSwing, type Swing } from './swing.ts';
@@ -211,7 +211,6 @@ export function Hud() {
     <div class="hh-hud">
       <div class={'hh-left' + (nameAway ? ' away' : '')}>
         <div class="hh-lift"><NameSign /></div>
-        <img class="hh-branch left px" src={branch(124, 18, 'left', 3)} alt="" draggable={false} />
       </div>
       <div class={'hh-right' + (curAway ? ' away' : '')}>
         <div class="hh-lift">
@@ -219,7 +218,6 @@ export function Hud() {
             <CurrencySign kind="gem" value={s.gems} swing={gemSw} />
           </CurrencySign>
         </div>
-        <img class="hh-branch right px" src={branch(92, 18, 'right', 8)} alt="" draggable={false} />
       </div>
     </div>
   );

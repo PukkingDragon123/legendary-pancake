@@ -454,7 +454,13 @@ export class Scene {
       case 'wake': return { yaw: -0.08, pitch: 0.18, dist: portrait ? 24 : 20, target: new THREE.Vector3(1.5, 3.6, H.z + 3) };
       case 'garden': return { yaw: -0.25, pitch: 0.55, dist: portrait ? 15 : 12, target: new THREE.Vector3(GARDEN.x, 0.4, GARDEN.z) };
       case 'deck': return { yaw: 0.55, pitch: 0.16, dist: portrait ? 16 : 12, target: new THREE.Vector3(L.x - 1.5, L.y - 0.6, L.z + 1) };
-      default: return { yaw: 0.16, pitch: 0.24, dist: portrait ? 33 : 37, target: new THREE.Vector3(0, portrait ? 8.2 : 7.0, H.z + 1.2) };
+      default: {
+        // frame the rooms that are open (the boarded-up floors peek in above), not the whole oak
+        const open = (['f1', 'f2', 'f3'] as const).filter((f) => this.house.isOpen(f));
+        const n = Math.max(1, open.length), lo = this.house.floorY('f1'), hi = this.house.floorY(open[n - 1] ?? 'f1') + 4.4;
+        const mid = (lo + hi) / 2;
+        return { yaw: 0.12, pitch: 0.2, dist: (portrait ? 21 : 17) + (n - 1) * (portrait ? 7 : 5), target: new THREE.Vector3(0, mid + (portrait ? -0.2 : 0.4), H.z + 1.2) };
+      }
     }
   }
 
