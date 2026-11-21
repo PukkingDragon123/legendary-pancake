@@ -193,3 +193,6 @@ export function QuestBoard() {
     </Sheet>
   );
 }
+
+// dev and screenshot hooks
+if (typeof window !== 'undefined') (window as unknown as { hhFx: unknown }).hhFx = { ask, ceremony, flyReward };

@@ -18,7 +18,7 @@ import { flyReward } from './fx.tsx';
 function Rhythm(p: { id: string; live?: boolean }) {
   const pt = PATTERN[p.id];
   const total = pt.phases.reduce((a, x) => a + x.sec, 0);
-  const col = { in: '#d5ae7b', hold: '#c9b9e1', out: '#82a1bd', rest: '#c9b9e1' };
+  const col = { in: '#c9b194', hold: '#c6bcd6', out: '#8da0b1', rest: '#c6bcd6' };
   const head = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!p.live || !head.current) return;
@@ -35,13 +35,14 @@ function Lantern(p: { id: string; live: boolean }) {
     if (!p.live || !el.current) return;
     const pt = PATTERN[p.id], total = pt.phases.reduce((a, x) => a + x.sec, 0);
     let t = 0, sc = 0.86;
-    const frames: Keyframe[] = [{ offset: 0, transform: `scale(${sc})`, filter: 'drop-shadow(0 0 0 rgba(245, 215, 166,0))' }];
+    const frames: Keyframe[] = [{ offset: 0, transform: `scale(${sc})`, filter: 'brightness(1)' }];
     for (const ph of pt.phases) {
       t += ph.sec;
       if (ph.kind === 'in') sc = Math.min(1.28, sc + 0.42 * (ph.sec / 4));
       if (ph.kind === 'out') sc = 0.86;
       const glow = (sc - 0.86) / 0.42;
-      frames.push({ offset: t / total, transform: `scale(${sc.toFixed(3)})`, filter: `drop-shadow(0 0 ${Math.round(glow * 10)}px rgba(255,214,120,${(glow * 0.9).toFixed(2)}))` });
+      // the lantern brightens in hard steps (no soft blur glow)
+      frames.push({ offset: t / total, transform: `scale(${sc.toFixed(3)})`, filter: `brightness(${(1 + Math.round(glow * 3) * 0.08).toFixed(2)})` });
     }
     const a = el.current.animate(frames, { duration: total * 1000, iterations: Infinity, easing: 'ease-in-out' });
     return () => a.cancel();

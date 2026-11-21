@@ -11,6 +11,7 @@ type C = [number, number, number];
 const hexc = (h: string): C => { const n = parseInt(calm(h).replace('#', '').slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 const RAMP = (name: string): C[] => (RAMPS_SRC[name] ?? RAMPS_SRC.wood).map(hexc);
 export const INK: C = [46, 43, 36];
+const INK2: C = [74, 62, 50];
 const mix = (a: C, b: C, t: number): C => [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];
 
 export function hash(x: number, y: number, s = 0): number {
@@ -97,7 +98,7 @@ export function plank(w: number, h: number, o: PlankOpts = {}): string {
     for (let i = 0; i < Math.max(1, Math.round(w / 40)); i++) knots.push([6 + hash(i, 1, seed) * (w - 12), 3 + hash(i, 2, seed) * (h - 6)]);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       if (!inside(x, y)) continue;
-      if (!inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1)) { b.set(x, y, INK); continue; }
+      if (!inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1)) { b.set(x, y, hash(x, y, seed + 31) > 0.84 ? INK2 : INK); continue; } // a hand-inked, uneven edge
       const pi = Math.min(planks - 1, Math.floor((y - 1) / ph));
       let t = woodTone(x, y, seed, pi);
       for (const [kx, ky] of knots) { const d = Math.hypot((x - kx) / 2.6, (y - ky) / 1.3); if (d < 1) t = d < 0.5 ? 1 : 2; else if (d < 1.5 && t > 2) t = 3; }
@@ -292,6 +293,10 @@ export function plaque(w: number, h: number, inner: Inner, seed = 5, plateH = 12
       for (let j = 0; j < 4; j++) for (let i = 0; i < 4 - j; i++) { const x = cx + i * sx, y = cy + j * sy; if (inside(x, y) && b.a(x, y)) b.set(x, y, B[j === 0 || i === 0 ? 4 : 3]); }
       rivet(b, cx + sx * 1, cy + sy * 1, B);
     }
+    // a cushion of moss on the top rail and a sprig of ivy down one side (each plaque differs)
+    const m0 = 8 + Math.floor(hash(seed, 1) * (w - 30));
+    moss(b, m0, m0 + 12 + Math.floor(hash(seed, 2) * 6), 0, seed);
+    if (seed % 2) ivy(b, w - 3, 6, 9, -1, seed); else ivy(b, 2, 8, 7, 1, seed);
     return b;
   });
 }

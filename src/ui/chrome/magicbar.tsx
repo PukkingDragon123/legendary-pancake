@@ -6,10 +6,11 @@ import { useEffect, useRef } from 'preact/hooks';
 import { vnoise } from './paint.ts';
 import { clockNow } from './pxanim.tsx';
 import { uiBurst } from './uifx.ts';
+import { calmRGB } from '../px/calm.js';
 
-const PAL = ['#2b3a4c', '#46596a', '#617f8c', '#86a9b0', '#c6dcd8', '#f4f1e4'].map((h) => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; });
-const GOLD = [[142, 116, 64], [168, 138, 78], [197, 154, 82], [220, 176, 114], [241, 211, 154], [248, 236, 210]];
-const BRASS = [[51, 41, 26], [123, 101, 56], [142, 116, 64], [200, 167, 100], [214, 184, 118], [241, 211, 154]];
+const PAL = ['#2b3a4c', '#46596a', '#617f8c', '#86a9b0', '#c6dcd8', '#f4f1e4'].map((h) => { const n = parseInt(h.slice(1), 16); return calmRGB([(n >> 16) & 255, (n >> 8) & 255, n & 255]); });
+const GOLD = [[142, 116, 64], [168, 138, 78], [197, 154, 82], [220, 176, 114], [241, 211, 154], [248, 236, 210]].map(calmRGB);
+const BRASS = [[51, 41, 26], [123, 101, 56], [142, 116, 64], [200, 167, 100], [214, 184, 118], [241, 211, 154]].map(calmRGB);
 const INK = [46, 43, 36];
 const CYL = [1, 0.7, 0.35, 0.1, 0, -0.2, -0.45, -0.75];
 

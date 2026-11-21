@@ -214,7 +214,7 @@ export function phone(a: Art, x: number, y: number, bed: boolean) {
 
 // ------------------------------------------------------------------ the bedroom window
 
-/** A night window (size w x h): sky, stars, moon, treetops, wooden frame and plum curtains. */
+/** A night window (size w x h): sky, stars, moon, treetops, wooden frame and hand-woven linen curtains. */
 export function nightWindow(a: Art, w: number, h: number, f: number, o: { phase?: number; dim?: number } = {}) {
   const fx = Math.round(w * 0.16), fw = w - fx * 2, fy = 4, fh = h - 10;
   // sky
@@ -255,7 +255,11 @@ export function nightWindow(a: Art, w: number, h: number, f: number, o: { phase?
       for (let i = 0; i < cwy; i++) {
         const xx = side ? w - 1 - i + sway : i + sway;
         const fold = Math.sin((i / Math.max(1, cwy)) * Math.PI * 3) * 1.1;
-        a.px(xx, y, tie ? tone('gold', 3) : dtone('plum', 3 + fold + (o.dim ?? 0), xx, y));
+        // hand-woven linen: soft folds, a faint check, a sage stripe near the leading edge, a stitched hem
+        const edge = cwy - 1 - i, hem = y === h - 4 && i % 2 === 0;
+        const col = tie ? tone('moss', 2) : edge === 2 || edge === 3 ? dtone('moss', 2.6 + fold * 0.6 + (o.dim ?? 0), xx, y)
+          : dtone('sand', 2.6 + fold + (o.dim ?? 0) - (((i >> 1) + (y >> 1)) % 4 === 0 ? 0.35 : 0), xx, y);
+        a.px(xx, y, hem ? tone('sand', 5) : col);
       }
     }
   }

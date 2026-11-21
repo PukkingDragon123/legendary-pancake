@@ -34,7 +34,7 @@ import './morning.css';
 // ------------------------------------------------------------------ the night report
 
 const STAGE_Y: Record<Stage, number> = { awake: 0, rem: 1, light: 2, deep: 3 };
-const STAGE_C: Record<Stage, string> = { awake: '#dbaf89', rem: '#9588b0', light: '#8cb2c9', deep: '#46637d' };
+const STAGE_C: Record<Stage, string> = { awake: '#ceb39d', rem: '#938ca4', light: '#9ab0be', deep: '#516271' };
 
 export function Hypnogram(p: { s: SleepSession; h12: boolean; compact?: boolean }) {
   const st = p.s.stages ?? [];
@@ -50,8 +50,8 @@ export function Hypnogram(p: { s: SleepSession; h12: boolean; compact?: boolean 
     <svg viewBox={`0 0 ${W} ${H + 18}`} width="100%" aria-label="Sleep stages through the night">
       {(['awake', 'rem', 'light', 'deep'] as Stage[]).map((k) => <g><rect x="0" y={top + STAGE_Y[k] * rowH - rowH * 0.38} width={W} height={rowH * 0.76} fill={STAGE_C[k]} opacity=".14" />{!p.compact && <text x="3" y={top + STAGE_Y[k] * rowH + 4} font-size="9" font-weight="800" fill={STAGE_C[k]} opacity=".9">{k === 'rem' ? 'REM' : k[0].toUpperCase() + k.slice(1)}</text>}</g>)}
       {st.map((s, i) => (i % 2 === 0 ? <rect x={x(i)} y={top + STAGE_Y[s] * rowH - rowH * 0.25} width={Math.max(0.6, x(i + 2) - x(i))} height={rowH * 0.5} fill={STAGE_C[s]} opacity=".55" /> : null))}
-      <path d={d} fill="none" stroke="#382c22" stroke-width="2" stroke-linejoin="miter" shape-rendering="crispEdges" />
-      {hours.map((t) => { const xx = ((t - start) / (end - start)) * W; return <g><line x1={xx} y1={top - 4} x2={xx} y2={H - 4} stroke="#382c22" stroke-opacity=".15" stroke-dasharray="2 3" /><text x={xx} y={H + 14} font-size="10" font-weight="700" text-anchor="middle" fill="#907664">{new Date(t).toLocaleTimeString([], { hour: 'numeric', hour12: p.h12 }).replace(':00', '')}</text></g>; })}
+      <path d={d} fill="none" stroke="#382d22" stroke-width="2" stroke-linejoin="miter" shape-rendering="crispEdges" />
+      {hours.map((t) => { const xx = ((t - start) / (end - start)) * W; return <g><line x1={xx} y1={top - 4} x2={xx} y2={H - 4} stroke="#382d22" stroke-opacity=".15" stroke-dasharray="2 3" /><text x={xx} y={H + 14} font-size="10" font-weight="700" text-anchor="middle" fill="#8f7665">{new Date(t).toLocaleTimeString([], { hour: 'numeric', hour12: p.h12 }).replace(':00', '')}</text></g>; })}
     </svg>
   );
 }
@@ -180,10 +180,10 @@ function Confetti(p: { api: { current: Burst | null } }) {
 
 type Step = 'arrive' | 'sack' | 'gift' | 'haul';
 const PAPER_COLORS: Record<string, string[]> = {
-  common: ['#82965e', '#abba7f', '#f0dbbd', '#5f7542'], uncommon: ['#658859', '#93b786', '#f5d290', '#4a6b40'],
-  rare: ['#668ba1', '#8cb5c9', '#f7f1e6', '#46677e'], legendary: ['#f2ce8d', '#ede4cf', '#ae6c5f', '#cda671'],
+  common: ['#869271', '#adb794', '#ebdcc6', '#647253'], uncommon: ['#6f8368', '#9cb295', '#e9d5ae', '#53674c'],
+  rare: ['#738996', '#9bb2be', '#f7f1e6', '#526673'], legendary: ['#e6d0aa', '#eae4d7', '#9d756d', '#c1a98b'],
 };
-const CONFETTI = ['#f5d290', '#df989d', '#8cb5c9', '#9eb277', '#f8f2e0', '#a198c1'];
+const CONFETTI = ['#e9d5ae', '#cda1a4', '#9bb2be', '#a2ae8c', '#f6f2e6', '#a09bb4'];
 
 /** Dev/screenshot hook: window.__giftStage = { step, gift, stage, t } jumps straight to a moment. */
 type DevGift = { step?: Step; gift?: number; stage?: number; t?: number };

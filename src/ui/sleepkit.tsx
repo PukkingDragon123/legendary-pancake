@@ -113,7 +113,7 @@ export function PencilTick(p: { on: boolean; size?: number }) {
   const s = p.size ?? 28;
   return (
     <svg class={'hh-tick' + (p.on ? ' on' : '')} width={s} height={s} viewBox="0 0 14 14" shape-rendering="crispEdges" aria-hidden="true">
-      <path d="M1 7 L5 11 L13 2" fill="none" stroke="#314460" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" pathLength="1" />
+      <path d="M1 7 L5 11 L13 2" fill="none" stroke="#384456" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" pathLength="1" />
     </svg>
   );
 }

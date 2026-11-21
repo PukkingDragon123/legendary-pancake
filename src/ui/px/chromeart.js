@@ -90,7 +90,7 @@ function drawSleep(g, f) {
   for (let k = 0; k < 2; k++) {
     const t = ((f + k * 4) % 8) / 8;
     const size = t < 0.34 ? 3 : t < 0.7 ? 4 : 5;
-    const x = Math.round(15 + t * 3 + Math.sin(t * 6.3) * 1.2), y = Math.round(12 - t * 10.5);
+    const x = Math.round(11 + t * 3 + Math.sin(t * 6.3) * 1.2), y = Math.round(13 - t * 10.5);
     glyph(g, x, y, ZG[size], t > 0.82 ? 'z' : 'Z');
   }
 }

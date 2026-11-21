@@ -26,12 +26,12 @@ export const SOUNDSCAPES = [
 export const ALARMS = [{ v: 'alarm_musicbox', label: 'Music box' }, { v: 'alarm_kalimba', label: 'Kalimba' }, { v: 'alarm_birds', label: 'Dawn birds' }, { v: 'alarm_bells', label: 'Bells' }];
 /** tile art for each sound: a sprite and a little sky behind it */
 const SOUND_ART: Record<string, { sprite: string; sky: [string, string] }> = {
-  none: { sprite: 'speaker_off', sky: ['#77819d', '#454f68'] }, amb_rain: { sprite: 'rain', sky: ['#607e99', '#2b465f'] },
-  amb_waves: { sprite: 'waves', sky: ['#74a1aa', '#375f6d'] }, amb_brown: { sprite: 'wind', sky: ['#998bb3', '#564c70'] },
-  amb_forest_night: { sprite: 'leaf', sky: ['#678555', '#2e4328'] }, amb_fire: { sprite: 'campfire', sky: ['#c59371', '#703c2e'] },
-  amb_stream: { sprite: 'drop', sky: ['#84b2ba', '#446d7b'] }, music_lullaby: { sprite: 'music', sky: ['#b487a6', '#554063'] },
-  alarm_musicbox: { sprite: 'music', sky: ['#e9c389', '#af815f'] }, alarm_kalimba: { sprite: 'note', sky: ['#dfa489', '#995b4c'] },
-  alarm_birds: { sprite: 'birdhouse', sky: ['#a6d0df', '#6c93a7'] }, alarm_bells: { sprite: 'bell', sky: ['#f3d598', '#bb9565'] },
+  none: { sprite: 'speaker_off', sky: ['#7a8196', '#484f63'] }, amb_rain: { sprite: 'rain', sky: ['#6b7d8d', '#364655'] },
+  amb_waves: { sprite: 'waves', sky: ['#839da3', '#465d65'] }, amb_brown: { sprite: 'wind', sky: ['#978ea6', '#544f64'] },
+  amb_forest_night: { sprite: 'leaf', sky: ['#6e8164', '#31422c'] }, amb_fire: { sprite: 'campfire', sky: ['#b79884', '#64433a'] },
+  amb_stream: { sprite: 'drop', sky: ['#94aeb3', '#536b73'] }, music_lullaby: { sprite: 'music', sky: ['#a98ea0', '#514459'] },
+  alarm_musicbox: { sprite: 'music', sky: ['#ddc6a4', '#a28672'] }, alarm_kalimba: { sprite: 'note', sky: ['#cfaa9a', '#8a645a'] },
+  alarm_birds: { sprite: 'birdhouse', sky: ['#b3cdd6', '#7a919d'] }, alarm_bells: { sprite: 'bell', sky: ['#e9d7b2', '#b0987d'] },
 };
 /** Illustrated sound tiles: tap to choose and hear a few seconds; the chosen one wears a gold frame. */
 export function SoundTiles(p: { options: { v: string; label: string }[]; value: string; onPick: (v: string) => void; preview: (v: string) => number; cols?: number }) {
@@ -129,14 +129,14 @@ function Journey(p: { frac: number; color: string }) {
     // the oak at home (left) and the area's landmark (right)
     a.rect(6, 12, 3, 11, tone('wood', 1));
     a.ell(7.5, 11, 6, 5, (x, y) => dtone('moss', 1.4 + (hash(x, y) - 0.5) * 0.6, x, y));
-    a.px(8, 17, '#f5d290'); a.px(9, 17, '#e8bf8c');
+    a.px(8, 17, '#e9d5ae'); a.px(9, 17, '#dbc3a5');
     a.ell(W - 10, 21, 7, 4, (x, y) => dtone('navy', 2.4, x, y));
     for (let i = 0; i < 5; i++) a.px(W - 14 + i * 2, 19 - (i % 2), p.color);
     // dotted trail (an arc)
     const pt = (u: number): [number, number] => [12 + u * (W - 26), 20 - Math.sin(u * Math.PI) * 13];
-    for (let u = 0; u <= 1.0001; u += 1 / 40) { const [x, y] = pt(u); a.px(x, y, u <= p.frac ? '#efe1c7' : '#36516b'); }
+    for (let u = 0; u <= 1.0001; u += 1 / 40) { const [x, y] = pt(u); a.px(x, y, u <= p.frac ? '#eae2d1' : '#405060'); }
     // twinkles
-    for (let i = 0; i < 14; i++) { const sx = Math.floor(hash(i, 3) * W), sy = Math.floor(hash(i, 4) * 12); if ((f + i) % 5) a.px(sx, sy, (f + i) % 3 ? '#48637e' : '#bfd5f6'); }
+    for (let i = 0; i < 14; i++) { const sx = Math.floor(hash(i, 3) * W), sy = Math.floor(hash(i, 4) * 12); if ((f + i) % 5) a.px(sx, sy, (f + i) % 3 ? '#526272' : '#c7d4e9'); }
     // Pip's lantern travelling the trail, a few sparks drifting behind it
     const [ox, oy] = pt(Math.max(0.02, Math.min(0.98, p.frac)));
     const bob = Math.round(Math.sin(t * 3) * 0.6), lx = Math.round(ox), ly = Math.round(oy) - 4 + bob;
@@ -152,7 +152,7 @@ function Journey(p: { frac: number; color: string }) {
 function MoonClock(p: { size: number }) {
   const N = 44;
   return <ArtCanvas w={N} h={N} k={p.size} fps={4} class="moonclock" draw={(a, t, f) => {
-    for (let i = 0; i < 10; i++) { const x = Math.floor(hash(i, 1, 2) * N), y = Math.floor(hash(i, 2, 2) * N); if (Math.hypot(x - N / 2, y - N / 2) > 17 && (f + i) % 6) a.px(x, y, (f + i) % 4 ? '#56718d' : '#f9f1e0'); }
+    for (let i = 0; i < 10; i++) { const x = Math.floor(hash(i, 1, 2) * N), y = Math.floor(hash(i, 2, 2) * N); if (Math.hypot(x - N / 2, y - N / 2) > 17 && (f + i) % 6) a.px(x, y, (f + i) % 4 ? '#607081' : '#f6f1e5'); }
     moon(a, N / 2, N / 2, 12, { phase: moonPhase(), glow: 0.7, face: 'sleep' });
     void t;
   }} />;
@@ -162,7 +162,7 @@ function Squiggle() {
   const t = trace.value.slice(-90);
   if (t.length < 2) return <span class="squig" />;
   const pts = t.map((v, i) => `${(i / 89) * 120},${18 - Math.min(16, v * 0.7)}`).join(' ');
-  return <svg class="squig" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true"><polyline points={pts} fill="none" stroke="#f8d1a0" stroke-opacity=".5" stroke-width="2" /></svg>;
+  return <svg class="squig" viewBox="0 0 120 20" preserveAspectRatio="none" aria-hidden="true"><polyline points={pts} fill="none" stroke="#ecd4b6" stroke-opacity=".5" stroke-width="2" /></svg>;
 }
 
 const micLine = () => ({
@@ -199,7 +199,7 @@ export function NightOverlay() {
         <div class="n-alarm"><Px name="alarm" size={30} />{wake ? <>Alarm {fmtTime(wake, h12)}{s.sleep.smartMin ? <span class="soft"> · smart from {fmtTime(wake - s.sleep.smartMin * 60000, h12)}</span> : null}</> : 'No alarm tonight'}</div>
       </div>
       <div class="n-trip">
-        <Journey frac={frac} color={area?.color ?? '#f5d290'} />
+        <Journey frac={frac} color={area?.color ?? '#e9d5ae'} />
         <div class="n-trip-l"><span>Home</span><span>{fmtDur(Date.now() - a.session.start)} away</span><span>{area?.name}</span></div>
       </div>
       <div class="n-bottom" onClick={(e) => e.stopPropagation()}>
@@ -315,13 +315,13 @@ function SleepingPip() {
   return <ArtCanvas w={64} h={46} k={4} fps={5} class="lock-pip" label="Pip asleep in the nest" draw={(a, t, f) => {
     // a soft cloud, and Pip's nest on it with the blanket rising and falling
     for (const [cx, cy, r] of [[18, 38, 9], [32, 35, 12], [46, 38, 9], [30, 42, 10]] as const) a.disc(cx, cy, r, (x, y) => dtone('lilac', 3.6 + (y < cy - r * 0.4 ? 1 : 0) - (y > 42 ? 0.8 : 0), x, y));
-    a.outline('#202942');
+    a.outline('#232a39');
     nest(a, 31, 28, 0.95, Math.sin(t * 1.4) > 0.2 ? 1 : 0);
     // drifting z's
     for (let i = 0; i < 3; i++) {
       const k = ((t * 0.35 + i / 3) % 1), zx = 44 + k * 12 + Math.sin(k * 6 + i) * 2, zy = 14 - k * 14;
       if (k > 0.85) continue;
-      const c = k < 0.5 ? '#eaedf2' : '#90aaca', sz = i === 1 ? 5 : 4;
+      const c = k < 0.5 ? '#ebedef' : '#9aa9bd', sz = i === 1 ? 5 : 4;
       a.rect(zx, zy, sz, 1, c); for (let j = 1; j < sz - 1; j++) a.px(zx + sz - 1 - j, zy + j, c); a.rect(zx, zy + sz - 1, sz, 1, c);
     }
     void f;

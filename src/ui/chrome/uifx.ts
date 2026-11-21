@@ -6,6 +6,7 @@
 import { spriteCanvas } from '../px/sprites.js';
 import '../px/chromeart.js';
 import { reducedMotion } from './swing.ts';
+import { calm } from '../px/calm.js';
 
 export type UiFxKind = 'puff' | 'sparkle' | 'hearts' | 'magic' | 'coins' | 'stars' | 'snow' | 'leaves' | 'confetti';
 
@@ -23,8 +24,8 @@ type Win = Window & { __chromeT?: number };
 
 const R = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-const MAGIC = ['#b4a9c9', '#d3cce0', '#aec8cc', '#f4eedd', '#f1d39a', '#d9aca4'];
-const CONFETTI = ['#c0866a', '#f1d39a', '#86a06a', '#86a9b0', '#d9aca4', '#b4a9c9', '#f4eedd', '#dcb072'];
+const MAGIC = ['#b4a9c9', '#d3cce0', '#aec8cc', '#f4eedd', '#f1d39a', '#d9aca4'].map((c) => calm(c));
+const CONFETTI = ['#c0866a', '#f1d39a', '#86a06a', '#86a9b0', '#d9aca4', '#b4a9c9', '#f4eedd', '#dcb072'].map((c) => calm(c));
 const fr = (base: string, n: number) => Array.from({ length: n }, (_, i) => `${base}_${i}`);
 
 function ensure() {

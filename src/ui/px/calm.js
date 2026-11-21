@@ -1,4 +1,5 @@
-// Hoot Hollow's colour grade, "Moss & Moonlight" (see src/gfx/palette.ts and docs/ART-STYLE.md).
+// Hoot Hollow's colour grade, "Moss & Moonlight" (see src/gfx/palette.ts and docs/ART-STYLE.md),
+// tuned quiet for the interface: mostly neutral paper, linen, wood and ink, colour as an accent.
 // calm(colour) takes any colour (the old saturated The Bear Must Eat ramps, a CSS hex, an [r,g,b])
 // and moves it into the calm, natural palette: hues pulled to the palette's anchors (reds to
 // terracotta and berry, yellows to honey and lamp, greens to moss, blues to lake and dusk, purples
@@ -44,6 +45,10 @@ function cmax(h) {
   return 0.085;
 }
 
+// The interface is quiet: paper, linen, warm wood and ink, colour only as a small accent. Every
+// hue family's ceiling is scaled by this (1 = the palette's own strength).
+const QUIET = 0.6;
+
 const cache = new Map();
 /** Grade one colour into the calm palette. Accepts '#rgb', '#rrggbb', '#rrggbbaa' or [r,g,b(,a)]. Returns the same kind. */
 export function calm(c) {
@@ -75,7 +80,7 @@ export function calmRGB(rgb) {
   let L = Math.max(L0, 0.2 + L0 * 0.36);
   L = Math.min(L, 0.955 + (L0 - 0.95) * 0.3);
   // chroma: a soft knee under a per-hue ceiling; very light and very dark colours stay quieter
-  let Cm = cmax(h);
+  let Cm = cmax(h) * QUIET;
   if (L > 0.88) Cm *= Math.max(0.22, 1 - (L - 0.88) * 18); // pale colours settle into oat and linen paper
   if (L < 0.38) Cm *= 0.45 + (L / 0.38) * 0.55;
   const k = Cm * 0.62;

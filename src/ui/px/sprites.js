@@ -444,7 +444,8 @@ function render(g, key = {}, opt = {}) {
           if (X < 0 || Y < 0 || X >= W || Y >= H) continue;
           const j = Y * W + X, sj = spec[j];
           if (!sj || sj.noOl || !col[j]) continue;
-          const c = ol === 'ink' ? INK : sj.kind === 'line' ? mix(col[j], INK, 0.45) : darkOf(sj, col[j], 0.8);
+          // [ui3] a softer, coloured outline (the darkest tone of the shape, not black ink): hand-painted, not blocky
+          const c = ol === 'ink' ? INK : sj.kind === 'line' ? mix(col[j], INK, 0.4) : darkOf(sj, col[j], 0.6);
           if (!best || lum(c) < lum(best)) best = c;
         }
         if (best) add.push([i, typeof ol === 'string' && ol[0] === '#' ? rgb(ol) : best]);

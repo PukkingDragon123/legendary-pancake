@@ -231,7 +231,7 @@ function RoutineBoard() {
           <div class="cb-detail-h"><b>{DAY_NAME[sel]} night</b><span>{fmtDur(plan.min * 60_000)}</span></div>
           <div class="cb-times"><span><Px name="moon" size={30} />Bed <b>{fmtHM(plan.bed, h12)}</b></span><span><Px name="sun" size={30} />Wake <b>{fmtHM(plan.wake, h12)}</b> <small>{DAY_SHORT[(sel + 1) % 7]}</small></span></div>
           <button class="cb-check" onClick={() => { tap('pencil', 0.5); setRoutine(setNight(r, sel, { on: !plan.on })); }}>
-            <span class={'box' + (plan.on ? ' on' : '')}>{plan.on && <svg viewBox="0 0 14 14" width="26" height="26" shape-rendering="crispEdges"><path d="M1 7 L5 11 L13 2" fill="none" stroke="#27304b" stroke-width="2.4" /></svg>}</span>
+            <span class={'box' + (plan.on ? ' on' : '')}>{plan.on && <svg viewBox="0 0 14 14" width="26" height="26" shape-rendering="crispEdges"><path d="M1 7 L5 11 L13 2" fill="none" stroke="#2b3142" stroke-width="2.4" /></svg>}</span>
             <span>Alarm and bedtime reminder{plan.on ? '' : ' (free night: sleep in)'}</span>
           </button>
           <div class="cb-stamps">

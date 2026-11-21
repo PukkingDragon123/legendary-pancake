@@ -15,6 +15,8 @@
 // Fixed-size pieces (medallion, bubble_tail, think_tail) have fixed: true and
 // slice [0, 0, 0, 0]; frameStyle() returns a background for those.
 
+import { calm } from './calm.js';
+
 // ---------------------------------------------------------------- colour
 function rgb(h) {
   const s = h.replace('#', '');
@@ -163,21 +165,27 @@ const hn = (x, y, s = 0) => {
 // Hoot Hollow's "Moss & Moonlight" palette (src/gfx/palette.ts): oat paper, muted warm woods,
 // mossy greens, honey and lamp-gold, berry, dusk blues, brass. Outlines are warm ink, never black.
 const PAL = {
-  parch: { ol: '#5a4733', hi: '#f6f1e2', base: '#eae0c8', base2: '#e4d9be', sh: '#dccfb0', sh2: '#c9b78d', fib: '#f2ebd8', fib2: '#d8cba9', fleck: '#c7b58e', stain: '#e0d2b2' },
-  parchD: { ol: '#4f3e2d', hi: '#eee5cf', base: '#dccfb0', base2: '#d5c7a6', sh: '#cdbd98', sh2: '#b5a27c', fib: '#e6dbc0', fib2: '#c8b892', fleck: '#b9a780', stain: '#d0c09d' },
-  wood: { ol: '#2f261e', hi: '#d8bf98', lt: '#bf9d74', base: '#9c7a56', b2: '#a48160', sh: '#86684a', dk: '#6f553d', grain: '#8b6b4b', grain2: '#7a5d42', knot: '#4a392b', fill: '#6f553d', fillHi: '#7d6047' },
-  woodD: { ol: '#1f1a15', hi: '#9c7a56', lt: '#86684a', base: '#6f553d', b2: '#765b42', sh: '#5d4734', dk: '#4a392b', grain: '#624b37', grain2: '#56412f', knot: '#2f261e', fill: '#4a392b', fillHi: '#55422f' },
-  green: { ol: '#2c4030', hi: '#c4cfa3', lt: '#a2b582', base: '#7b9660', sh: '#5f7d4a', dk: '#465f3a' },
-  greenH: { ol: '#2c4030', hi: '#d6dfb8', lt: '#b5c494', base: '#8aa56d', sh: '#6a8853', dk: '#4e6a40' },
-  red: { ol: '#3b2427', hi: '#e3bcb3', lt: '#c18a85', base: '#a2646a', sh: '#84505a', dk: '#633c45' },
-  gold: { ol: '#4a392b', hi: '#f8ecd2', lt: '#f1d39a', base: '#dcb072', sh: '#c59a52', dk: '#8e7440' },
-  grey: { ol: '#3f3c37', hi: '#d8d2c5', lt: '#bdb6a8', base: '#a39c8e', sh: '#857f73', dk: '#6a655c' },
+  parch: { ol2: '#6b5a45', ol: '#5a4733', hi: '#f6f1e2', base: '#eae0c8', base2: '#e4d9be', sh: '#dccfb0', sh2: '#c9b78d', fib: '#f2ebd8', fib2: '#d8cba9', fleck: '#c7b58e', stain: '#e0d2b2' },
+  parchD: { ol2: '#625140', ol: '#4f3e2d', hi: '#eee5cf', base: '#dccfb0', base2: '#d5c7a6', sh: '#cdbd98', sh2: '#b5a27c', fib: '#e6dbc0', fib2: '#c8b892', fleck: '#b9a780', stain: '#d0c09d' },
+  wood: { ol2: '#40352a', ol: '#2f261e', hi: '#d8bf98', lt: '#bf9d74', base: '#9c7a56', b2: '#a48160', sh: '#86684a', dk: '#6f553d', grain: '#8b6b4b', grain2: '#7a5d42', knot: '#4a392b', fill: '#6f553d', fillHi: '#7d6047' },
+  woodD: { ol2: '#2f271f', ol: '#1f1a15', hi: '#9c7a56', lt: '#86684a', base: '#6f553d', b2: '#765b42', sh: '#5d4734', dk: '#4a392b', grain: '#624b37', grain2: '#56412f', knot: '#2f261e', fill: '#4a392b', fillHi: '#55422f' },
+  green: { ol: '#33402f', hi: '#cfd3bb', lt: '#aab394', base: '#8a9776', sh: '#717e60', dk: '#556049', st: '#c9ceb3' },
+  greenH: { ol: '#33402f', hi: '#dadecb', lt: '#b8c0a3', base: '#98a484', sh: '#7d8a6b', dk: '#5e6a51', st: '#d6dac4' },
+  red: { ol: '#3e2d2b', hi: '#e3cdc4', lt: '#c4a29a', base: '#a9837b', sh: '#8d6b65', dk: '#6c514d', st: '#dcc4bb' },
+  gold: { ol: '#4a3d2e', hi: '#f6eedb', lt: '#eadbb8', base: '#d9c49a', sh: '#bfa77b', dk: '#8e7a56', st: '#f4ead2' },
+  grey: { ol: '#3f3c37', hi: '#d8d2c5', lt: '#bdb6a8', base: '#a39c8e', sh: '#857f73', dk: '#6a655c', st: '#c6c0b3' },
   brass: { ol: '#33291a', hi: '#f1d39a', lt: '#d6b876', base: '#c8a764', sh: '#a88a4e', dk: '#7b6538' },
   iron: { ol: '#23221f', hi: '#959189', lt: '#75726b', base: '#5c5a56', sh: '#4a4844', dk: '#383633' },
-  night: { ol: '#1b222d', hi: '#aec8cc', lt: '#86a9b0', base: '#617f8c', sh: '#4d6676', dk: '#36475a' },
-  cream: { ol: '#5a4733', hi: '#fbf7ec', lt: '#f4eedd', base: '#eae0c8', sh: '#dccfb0', dk: '#c9b78d' },
+  night: { ol: '#1f252d', hi: '#bcc6c6', lt: '#97a4a8', base: '#6f7e84', sh: '#5a676e', dk: '#424d56', st: '#a9b5b7' },
+  cream: { ol: '#5a4733', hi: '#fbf7ec', lt: '#f4eedd', base: '#eae0c8', sh: '#dccfb0', dk: '#c9b78d', st: '#bba98a' },
 };
 const SHADOW = [34, 38, 40]; // slate-ink drop shadow
+// every frame colour goes through the same calm grade as the sprites (quiet, mostly neutral)
+for (const P of Object.values(PAL)) for (const k of Object.keys(P)) P[k] = calm(P[k]);
+for (const P of Object.values(PAL)) if (P.lt && P.base && !P.b2) { const a = rgb(P.base), c = rgb(P.lt); P.b2 = '#' + [0, 1, 2].map((i) => Math.round((a[i] + c[i]) / 2).toString(16).padStart(2, '0')).join(''); }
+// hand-made ink: the outline wanders between two inks and now and then thickens by a pixel
+const inkAt = (P, u, v, s = 0) => (hn(u, v, 40 + s) > 0.86 ? P.ol2 || P.ol : P.ol);
+const thick = (u, v, s = 0) => hn(u >> 1, v >> 1, 50 + s) > 0.83;
 
 // ---------------------------------------------------------------- texture helpers
 // For frames shown with border-image-repeat: repeat, texture must tile: (u, v) are coordinates in
@@ -225,10 +233,12 @@ function parchment(P, seed) {
     const W = b.w, H = b.h, L = lattice(spec);
     const [, , mw, mh] = L(0, 0), fib = fibreMask(mw, mh, seed);
     bevel(b, rrMask(0, 0, W, H - 1, 2.2), (d, l, x, y) => {
-      if (d === 0) return P.ol;
+      const [u, v] = L(x, y);
+      if (d === 0) return inkAt(P, u, v, seed);
+      if (d === 1 && thick(u, v, seed)) return P.ol2 || P.ol; // the pen pressed a little harder here
       if (d === 1) return l > 0 ? P.hi : l < 0 ? P.sh : P.base;
       if (d === 2 && l < 0) return P.sh;
-      const [u, v] = L(x, y), f = fib(u, v);
+      const f = fib(u, v);
       if (f === 1) return P.fib;
       if (f === 2) return P.fib2;
       if (f === 3) return P.fleck;
@@ -256,8 +266,8 @@ function wood(P, seed) {
     const W = b.w, H = b.h, T = 6, L = lattice(spec);
     const [, , mw, mh] = L(0, 0);
     bevel(b, rrMask(0, 0, W, H, 1.6), (d, l, x, y) => {
-      if (d === 0) return P.ol;
-      if (d === 1) return l > 0 ? P.lt : P.sh;
+      if (d === 0) { const [u, v] = L(x, y); return inkAt(P, u, v, seed); }
+      if (d === 1) { const [u, v] = L(x, y); return hn(u, v, seed + 9) > 0.9 ? P.hi : l > 0 ? P.lt : P.sh; } // worn, rubbed-pale edges
       if (d < T - 1) {
         // grain runs along each plank: rows across, streaks along (periodic so the edges tile)
         const horiz = Math.min(y, H - 1 - y) <= Math.min(x, W - 1 - x);
@@ -310,7 +320,7 @@ function ribbon(P) {
       if (y === 2) return x % 2 ? P.hi : P.lt; // stitching along the top
       if (y === H - 5) return x % 2 ? P.dk : P.sh; // stitching along the bottom
       if (y >= H - 6) return P.sh;
-      return (x * 5 + y * 3) % 11 === 0 && y > 3 && y < H - 7 ? P.lt : P.base; // a faint weave
+      return (x * 5 + y * 3) % 23 === 0 && y > 3 && y < H - 7 ? P.lt : P.base; // a faint weave
     });
     b.rows(5, H - 4, ['oo', 'do', '.o'], { o: P.ol, d: P.dk });
     b.rows(W - 7, H - 4, ['oo', 'od', 'o.'], { o: P.ol, d: P.dk });
@@ -320,7 +330,8 @@ function ribbon(P) {
 def('ribbon_green', { w: 40, h: 17, slice: [4, 11, 6, 11], repeat: 'repeat stretch' }, ribbon(PAL.green));
 def('ribbon_red', { w: 40, h: 17, slice: [4, 11, 6, 11], repeat: 'repeat stretch' }, ribbon(PAL.red));
 
-// chunky pixel buttons with a thick bottom lip, a soft top gloss band and stepped corners
+// buttons are stitched cloth patches on a thick felt lip: a faint linen weave, a running stitch
+// just inside the edge, a lit top fold, stepped corners. They tile, so the stitches stay crisp.
 function button(P, down = false) {
   return (b) => {
     const W = b.w, H = b.h, top = down ? 2 : 0, lip = down ? 0 : 2;
@@ -333,14 +344,20 @@ function button(P, down = false) {
       if (yy === 1) return P.hi;
       if (yy === 2) return P.lt;
       if (yy === bodyH - 3) return P.sh;
-      return P.base;
+      // running stitch, 3 px in from the edge (period 3 along the top and bottom, 5 down the sides)
+      if (d === 3 && P.st && !down) {
+        const horiz = yy === 3 || yy === bodyH - 4;
+        if (horiz ? x % 3 !== 0 : (y % 5) < 3) return P.st;
+      }
+      const wx = x % 6, wy = y % 5;
+      return (wx === 1 && wy === 1) || (wx === 4 && wy === 3) ? P.b2 || P.lt : P.base; // two linen slubs per tile (tile-periodic)
     });
     if (down) b.hline(2, W - 3, top + 1, P.sh).hline(3, W - 4, top + 2, P.base);
-    else b.set(2, 2, P.hi).set(3, 1, '#fbf7ec').set(2, 3, P.hi);
+    else b.set(2, 2, P.hi).set(3, 1, P.hi).set(2, 3, P.hi);
     return b;
   };
 }
-const BTN = { w: 16, h: 16, slice: [5, 5, 6, 5] };
+const BTN = { w: 16, h: 16, slice: [5, 5, 6, 5], repeat: 'repeat' };
 def('button_green', BTN, button(PAL.green));
 def('button_green_hover', BTN, button(PAL.greenH));
 def('button_green_down', BTN, button(PAL.green, true));
@@ -602,7 +619,7 @@ def('bar_fill_gold', { w: 8, h: 8, slice: [3, 3, 3, 3] }, barFill(PAL.gold));
 
 // small paper pill for tags and labels
 def('chip', { w: 12, h: 10, slice: [4, 5, 4, 5] }, (b) => {
-  bevel(b, rrMask(0, 0, 12, 9, 4.5), (d, l) => (d === 0 ? '#5a4733' : d === 1 ? (l > 0 ? '#fbf7ec' : '#dccfb0') : '#f3ecdb'));
+  bevel(b, rrMask(0, 0, 12, 9, 4.5), (d, l, x, y) => (d === 0 ? '#5a4733' : d === 1 ? (l > 0 ? '#fbf7ec' : '#dccfb0') : (y === 2 || y === 6) && x % 2 ? '#e3d8c0' : '#f3ecdb'));
   b.hline(2, 9, 9, [...SHADOW, 60]);
   return b;
 });
