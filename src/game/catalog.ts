@@ -166,7 +166,7 @@ export function trinketUrl(id: string, scale = 4, silhouette = false): string {
 
 // ------------------------------------------------------------------ loot tables
 
-export type LootKind = 'trinket' | 'item' | 'piece' | 'palette';
+export type LootKind = 'item' | 'piece' | 'palette' | 'trinket' | 'finish' | 'skin' | 'species';
 export interface LootEntry { kind: LootKind; id: string; rarity: Rarity; area: string }
 
 /** Every area offers its own trinkets plus a few themed furniture pieces, outfits and coats. */

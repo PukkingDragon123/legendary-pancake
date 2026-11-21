@@ -44,8 +44,10 @@ export interface ItemDef {
   series?: string;
   /** not sold in the build store (adventure or gacha only) */
   noStore?: boolean;
-  /** an idle animation hook: called every frame with the placed mesh (fish swimming, flames...) */
-  animate?: (mesh: import('three').Object3D, t: number) => void;
+  /** moving parts added as children of the placed mesh (a fish in a bowl, a flame, a pendulum) */
+  parts?: () => import('three').Object3D[];
+  /** called every frame with the placed object (its moving parts are its children) */
+  animate?: (obj: import('three').Object3D, t: number, dt: number) => void;
 }
 
 const W = { oak: '#b87a41', dark: '#7b4b2c', light: '#dcab68', pale: '#ead3a4', red: '#b84a3b', white: '#f2ede2', blue: '#5f8fc9' };

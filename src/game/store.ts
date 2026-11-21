@@ -84,7 +84,7 @@ export interface Save {
   streak: number;
   bestStreak: number;
   lastNightKey?: string;
-  owned: { items: string[]; pieces: string[]; palettes: string[]; skins: Skin[] };
+  owned: { items: string[]; pieces: string[]; palettes: string[]; skins: string[]; species: string[]; finishes: string[] };
   /** extra copies of furniture the player owns beyond those placed (inventory counts) */
   furniture: Record<string, string>;
   collection: Record<string, number>;
@@ -116,7 +116,7 @@ export function freshSave(): Save {
     routine: [0, 1, 2, 3, 4, 5, 6].map((d) => ({ on: true, bed: d === 5 || d === 6 ? '23:30' : '23:00', wake: d === 0 || d === 6 ? '08:00' : '07:00' })),
     shop: { day: '', bought: [], free: false, pity: {} },
     coins: 250, gems: 20, xp: 0, streak: 0, bestStreak: 0,
-    owned: { items: ['nestbed', 'moonlamp', 'roundrug', 'fernpot', 'candles', 'stool'], pieces: ['nightcap', 'sprout', 'satchel'], palettes: ['tawny'], skins: ['owl'] },
+    owned: { items: ['nestbed', 'moonlamp', 'roundrug', 'fernpot', 'candles', 'stool'], pieces: ['nightcap', 'sprout', 'satchel'], palettes: ['tawny'], skins: ['owl'], species: ['tawny'], finishes: ['wall_heartwood', 'floor_planks'] },
     furniture: { g_back: 'nestbed', g_left: 'moonlamp', g_mid: 'roundrug', g_frontL: 'fernpot' },
     collection: {}, area: 'woods',
     sleep: { goalMin: 480, wake: '07:00', days: [1, 2, 3, 4, 5], smartMin: 20, alarmSound: 'alarm_musicbox', alarmOn: true, reminders: true, windDownMin: 30, mic: true, clips: false, sensitivity: 0.5, soundscape: 'amb_rain', soundscapeMin: 30, soundscapeVol: 0.6 },
@@ -180,6 +180,9 @@ export const dayKey = (t = Date.now()) => { const d = new Date(t); return `${d.g
 
 export function ownsEntry(s: Save, e: Pick<LootEntry, 'kind' | 'id'>): boolean {
   if (e.kind === 'item') return s.owned.items.includes(e.id);
+  if (e.kind === 'finish') return s.owned.finishes.includes(e.id);
+  if (e.kind === 'skin') return s.owned.skins.includes(e.id);
+  if (e.kind === 'species') return s.owned.species.includes(e.id);
   if (e.kind === 'piece') return s.owned.pieces.includes(e.id);
   if (e.kind === 'palette') return s.owned.palettes.includes(e.id);
   return (s.collection[e.id] ?? 0) > 0;
@@ -190,6 +193,9 @@ export function grant(s: Save, e: Pick<LootEntry, 'kind' | 'id'>) {
   if (e.kind === 'piece' && !s.owned.pieces.includes(e.id)) s.owned.pieces.push(e.id);
   if (e.kind === 'palette' && !s.owned.palettes.includes(e.id)) s.owned.palettes.push(e.id);
   if (e.kind === 'trinket') s.collection[e.id] = (s.collection[e.id] ?? 0) + 1;
+  if (e.kind === 'finish' && !s.owned.finishes.includes(e.id)) s.owned.finishes.push(e.id);
+  if (e.kind === 'skin' && !s.owned.skins.includes(e.id)) s.owned.skins.push(e.id);
+  if (e.kind === 'species' && !s.owned.species.includes(e.id)) s.owned.species.push(e.id);
 }
 
 export type Buyable = { kind: 'item' | 'piece' | 'palette'; id: string };
