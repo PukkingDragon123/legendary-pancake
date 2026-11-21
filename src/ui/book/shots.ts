@@ -19,16 +19,18 @@ function pump() {
   setTimeout(step, 0);
 }
 const done = new Map<string, string>();
-/** A data URL made by `make()` later (one job per frame), cached by key. '' until ready. */
-export function useLazy(key: string, make: () => string | Promise<string>): string {
-  const [url, setUrl] = useState(() => done.get(key) ?? '');
+/** A data URL made by `make()` later (one job per frame), cached by key: undefined while pending, '' if it failed. */
+export function useLazy(key: string, make: () => string | Promise<string>): string | undefined {
+  const [url, setUrl] = useState<string | undefined>(() => done.get(key));
   useEffect(() => {
     const have = done.get(key);
     if (have !== undefined) { setUrl(have); return; }
     let live = true;
+    setUrl(undefined);
     jobs.push(() => {
-      const r = make();
       const fin = (u: string) => { done.set(key, u); if (live) setUrl(u); };
+      let r: string | Promise<string>;
+      try { r = make(); } catch (e) { console.warn('book picture', key, e); fin(''); return; }
       if (typeof r === 'string') fin(r); else void r.then(fin, () => fin(''));
     });
     pump();

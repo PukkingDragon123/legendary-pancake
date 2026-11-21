@@ -1,6 +1,9 @@
 // Dev preview of every piece of the book's pixel art (dev-book.html?art=1).
 import * as A from '../ui/px/bookart.js';
 import { AREAS } from '../game/catalog.ts';
+import { h, render } from 'preact';
+import { BookIcon } from '../ui/book/bookicon.tsx';
+import { spriteURL } from '../ui/px/sprites.js';
 
 export function showArt(root: HTMLElement) {
   root.style.cssText = 'background:#3a3046;color:#fff;font:11px sans-serif;padding:8px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;overflow:auto;height:100vh;box-sizing:border-box';
@@ -38,4 +41,8 @@ export function showArt(root: HTMLElement) {
   add('moon doodle', A.moonDoodle(), 3);
   add('map', A.mapArt(200, 150, AREAS.map((a, i) => ({ id: a.id, x: a.x, y: a.y, seen: i < 3 }))), 2);
   add('hud base', A.hudBase(), 4); add('hud cover', A.hudCover(), 4); add('hud rib', A.hudRibbon(), 4);
+  const icon = document.createElement('div');
+  icon.style.cssText = 'display:flex;gap:16px;align-items:flex-end;padding:8px;background:#5a3a22';
+  root.appendChild(icon);
+  render(h('div', { style: 'display:flex;gap:16px;align-items:flex-end' }, [h(BookIcon, { size: 44 }), h(BookIcon, { size: 90 }), h('img', { src: spriteURL('bigbook', 3), style: 'image-rendering:pixelated' })]), icon);
 }

@@ -54,13 +54,15 @@ export function layout(vw: number, vh: number): BookLayout {
   const ox = (single ? B : pw + B) * T, oy = B * T;
   const cx = single ? 0 : (pw + B) * T, cw = (single ? pw + 2 * B : pw + B) * T;
   const shut = single ? 0 : -cw / 2;
-  const size = 34 * T;
-  // Pip waits beside the book when there is room, otherwise on the floor under its bottom-left corner
-  const besideX = x - size - TAB * T - 2;
+  // Pip waits beside the book when there is room (drawn bigger on roomy screens), otherwise on the
+  // floor under its bottom-left corner
+  let size = 34 * (single ? T : T + 1);
+  let besideX = x - size - TAB * T - 2;
+  if (besideX < 4 && !single) { size = 34 * T; besideX = x - size - TAB * T - 2; }
   const pip = besideX >= 4 ? { x: besideX, y: y + BH, size } : { x: Math.max(4, x + 6), y: Math.min(vh - 8, y + BH + TAIL * T + size * 0.9), size };
   const PW = pw * T, PH = ph * T;
   const fs = Math.round(Math.max(14, Math.min(19, PW / 25)));
   const rule = Math.max(6, Math.round((fs * 1.5) / T)) * T;
   const r0 = Math.ceil((15 * T + 2.72 * fs + 10) / T) * T;
-  return { vw, vh, T, single, B, TAB, TAIL, pw, ph, PW, PH, W, H, BW, BH, x, y, ox, oy, cx, cw, shut, D: 18, pip, fs, rule, r0 };
+  return { vw, vh, T, single, B, TAB, TAIL, pw, ph, PW, PH, W, H, BW, BH, x, y, ox, oy, cx, cw, shut, D: 24, pip, fs, rule, r0 };
 }

@@ -158,13 +158,13 @@ export const RIBBONS = {
 
 // extra material ramps for the sprite kit (unique names, so nothing else is touched)
 Object.assign(RAMPS, {
-  bk_lea: ['#0f1230', '#171c44', '#202858', '#2a346c', '#435296', '#5868ac'],
-  bk_wax_red: ['#3e0c12', '#6a1620', '#94222c', '#c0343a', '#e05a52', '#f8907a'],
-  bk_wax_gold: ['#5a3006', '#8a520c', '#b87a18', '#e0a430', '#f6cc5a', '#fff0a0'],
-  bk_wax_green: ['#0e2a1a', '#1a4a2c', '#2a6a40', '#3e8c56', '#62b072', '#9ad69a'],
-  bk_wax_blue: ['#0e1a3e', '#182c62', '#24408a', '#3460b4', '#5a88d4', '#94b8ee'],
-  bk_wax_purple: ['#1e0e34', '#341a56', '#50287e', '#6e3ca4', '#9466c8', '#c4a0e8'],
-  bk_wax_pink: ['#46102a', '#741c46', '#a02c62', '#cc4a84', '#ec7ea8', '#fcb8d0'],
+  bklea: ['#0f1230', '#171c44', '#202858', '#2a346c', '#435296', '#5868ac'],
+  bkwaxred: ['#3e0c12', '#6a1620', '#94222c', '#c0343a', '#e05a52', '#f8907a'],
+  bkwaxgold: ['#5a3006', '#8a520c', '#b87a18', '#e0a430', '#f6cc5a', '#fff0a0'],
+  bkwaxgreen: ['#0e2a1a', '#1a4a2c', '#2a6a40', '#3e8c56', '#62b072', '#9ad69a'],
+  bkwaxblue: ['#0e1a3e', '#182c62', '#24408a', '#3460b4', '#5a88d4', '#94b8ee'],
+  bkwaxpurple: ['#1e0e34', '#341a56', '#50287e', '#6e3ca4', '#9466c8', '#c4a0e8'],
+  bkwaxpink: ['#46102a', '#741c46', '#a02c62', '#cc4a84', '#ec7ea8', '#fcb8d0'],
 });
 
 // ------------------------------------------------------------------ leather boards
@@ -285,14 +285,23 @@ export function pageArt(pw, ph, side, deco = 'plain', seed = 5, rules = null) {
 }
 
 /** Marbled endpaper (the inside of the covers). */
+// a printed endpaper: midnight paper with a lattice of gold stars, crescent moons and tiny owls
+const EP_STAR = ['..#..', '.###.', '#####', '.###.', '.#.#.'];
+const EP_MOON = ['.##..', '##...', '##...', '##...', '.##..'];
+const EP_OWL = ['#...#', '#####', '#.#.#', '#####', '.###.'];
 function paintEndpaper(pw, ph) {
   const p = new Px(pw, ph);
+  const NAVY = ['#0e1430', '#141c40', '#1a244e', '#202c5a'];
   for (let y = 0; y < ph; y++) for (let x = 0; x < pw; x++) {
-    const sw = Math.sin(y / 14 + vn(x / 20, y / 26, 3) * 5) * 2.2;
-    const t = vn(x / 13 + sw, y / 7, 9) * 0.78 + vn(x / 4, y / 4, 4) * 0.22;
-    let c = t > 0.72 ? '#ecdcb0' : t > 0.68 ? '#c89a3a' : t > 0.55 ? '#34548a' : t > 0.36 ? '#1c2a56' : t > 0.34 ? '#a04450' : '#121a3c';
-    if (bay(x, y) < 0.1 && t > 0.53 && t < 0.66) c = '#5a7aaa';
-    p.set(x, y, c);
+    const v = 1.6 + (vn(x / 9, y / 9, 3) - 0.5) * 1.1 + (vn(x / 2.5, y / 2.5, 5) - 0.5) * 0.5;
+    p.set(x, y, NAVY[clamp(Math.floor(v + bay(x, y)), 0, 3)]);
+  }
+  const S = 18, motifs = [EP_STAR, EP_MOON, EP_STAR, EP_OWL];
+  for (let j = -1; j * S < ph + S; j++) for (let i = -1; i * S < pw + S; i++) {
+    const ox = i * S + (j % 2 ? S / 2 : 0) + 6, oy = j * S + 6, m = motifs[((i + j * 3) % 4 + 4) % 4];
+    m.forEach((row, yy) => [...row].forEach((ch, xx) => { if (ch === '#') p.set(ox + xx, oy + yy, yy < 2 ? BRASS[4] : BRASS[3]); }));
+    p.set(ox + 2 + S / 2, oy + 2 + S / 2, BRASS[2]); // a small dot between motifs
+    if (h2(i, j, 7) < 0.3) p.set(ox + 2 + S / 2 + 1, oy + 2 + S / 2 - 1, BRASS[1]);
   }
   // a little shadow along the gutter (right edge: this is a left page) and a paper rim
   for (let y = 0; y < ph; y++) for (let k = 0; k < 6; k++) p.mix(pw - 1 - k, y, '#000000', 0.35 - k * 0.055);
@@ -687,11 +696,11 @@ const EMB = {
   heart: ['...........', '.###...###.', '#####.#####', '###########', '###########', '###########', '.#########.', '..#######..', '...#####...', '....###....', '.....#.....'],
   phases: ['...#####...', '..#..####..', '.#...#####.', '#....######', '#....######', '#....######', '#....######', '#....######', '.#...#####.', '..#..####..', '...#####...'],
 };
-const SEAL_R = { red: 'bk_wax_red', gold: 'bk_wax_gold', green: 'bk_wax_green', blue: 'bk_wax_blue', purple: 'bk_wax_purple', pink: 'bk_wax_pink' };
+const SEAL_R = { red: 'bkwaxred', gold: 'bkwaxgold', green: 'bkwaxgreen', blue: 'bkwaxblue', purple: 'bkwaxpurple', pink: 'bkwaxpink' };
 /** A pressed wax seal (28 texels) with an embossed emblem. */
 export function sealArt(color, emblem) {
   return art(`seal:${color}:${emblem}`, () => {
-    const N = 30, c = (N - 1) / 2, ramp = RAMPS[SEAL_R[color] || 'bk_wax_red'];
+    const N = 30, c = (N - 1) / 2, ramp = RAMPS[SEAL_R[color] || 'bkwaxred'];
     const p = new Px(N, N);
     for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
       const dx = x - c, dy = y - c, a = Math.atan2(dy, dx), d = Math.hypot(dx, dy);
@@ -880,6 +889,26 @@ export function mapArt(w, h, areas) {
     const S = Math.min(w, h) / 120; // doodle scale
     // the lake first (it is a shape on the land)
     if (A.lake) { const L = A.lake; wash(L.X, L.Y, 16 * S, 9 * S, '#6aa8d8', L.seen ? 0.5 : 0.18); p.ell(L.X, L.Y, 16 * S, 9 * S, INK, 0, TAU, 0.12, 9); for (let k = 0; k < 4; k++) { const yy = L.Y - 3 * S + k * 2.2 * S; p.line(L.X - 6 * S + k * 2, yy, L.X - 2 * S + k * 2, yy, BLUE, 160); } }
+    // a river winding down from the peak, past the caverns, into the lake and off the map
+    if (A.peak && A.lake) {
+      const pts = [], k0 = A.peak, k1 = A.caverns ?? A.lake, k2 = A.lake;
+      for (let i = 0; i <= 60; i++) {
+        const t = i / 60, u = t < 0.5 ? t * 2 : (t - 0.5) * 2;
+        const a = t < 0.5 ? k0 : k1, b = t < 0.5 ? k1 : k2;
+        const x = a.X + (b.X - a.X) * u + Math.sin(t * 19) * 3 * S, y = a.Y + 9 * S * (t < 0.5 ? 1 - u : 0) + (b.Y - a.Y) * u + Math.cos(t * 13) * 2 * S;
+        pts.push([x, y]);
+      }
+      for (let i = 1; i < pts.length; i++) { p.line(pts[i - 1][0], pts[i - 1][1], pts[i][0], pts[i][1], '#5a8ac0', 200); p.line(pts[i - 1][0] + 1, pts[i - 1][1] + 1, pts[i][0] + 1, pts[i][1] + 1, '#9ac0e8', 160); }
+      const L = A.lake;
+      for (let x = L.X + 15 * S; x < w - 5; x++) { const y = L.Y + Math.sin(x / 6) * 2 * S + (x - L.X) * 0.12; p.set(x, y, '#5a8ac0', 200); p.set(x, y + 1, '#9ac0e8', 150); }
+    }
+    // little trees and grass tufts all over the lower lands
+    for (let i = 0; i < 70; i++) {
+      const x = 10 + R() * (w - 20), y = h * 0.35 + R() * (h * 0.6 - 10);
+      if (Object.values(A).some((a) => Math.hypot(a.X - x, a.Y - y) < 15 * S)) continue;
+      if (R() < 0.45) { p.disc(x, y - 2 * S, 1.7 * S, R() < 0.5 ? '#8ab070' : '#6e9a5a'); p.ell(x, y - 2 * S, 1.8 * S, 1.9 * S, INK_L); p.set(x, y, INK_L); p.set(x, y + 1, INK_L); }
+      else { p.set(x - 1, y, INK_L, 170); p.set(x, y - 1, INK_L, 170); p.set(x + 1, y, INK_L, 170); }
+    }
     // hills scattered around
     for (let i = 0; i < 9; i++) {
       const x = 14 + R() * (w - 28), y = 14 + R() * (h - 28), s = (3 + R() * 3) * S;
@@ -1017,7 +1046,7 @@ export function hudRibbon() {
 }
 
 // a plain 20 x 20 dock icon in the shared sprite set: <Px name="bigbook" />
-icon('bigbook', { L: 'bk_lea.f@cover', l: 'bk_lea:1', S: 'bk_lea.x@spine', G: 'gold.R@g', g: 'gold:2', P: 'parch.f@pages', p: 'parch:2', r: 'red.x@rib', y: 'gold:5' }, () => {
+icon('bigbook', { L: 'bklea.f@cover', l: 'bklea:1', S: 'bklea.x@spine', G: 'gold.R@g', g: 'gold:2', P: 'parch.f@pages', p: 'parch:2', r: 'red.x@rib', y: 'gold:5' }, () => {
   const g = new Grid(20, 20);
   g.rect(4, 2, 14, 15, 'P');
   for (let y = 3; y < 17; y += 2) g.set(17, y, 'p');

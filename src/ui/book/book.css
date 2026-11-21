@@ -279,7 +279,7 @@
 .bk-stories { position: absolute; left: var(--padl); right: var(--padr); margin-top: calc(var(--rule) * .22); }
 .bk-story { position: relative; padding-right: calc(var(--T) * 32); }
 .bk-story h4 { margin: 0; font-weight: 400; font-size: calc(var(--fs) * .86); line-height: var(--rule); color: #a8302a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bk-story p { margin: 0; font-size: calc(var(--fs) * .82); line-height: var(--rule); color: #3b2414; }
+.bk-story p { margin: 0; font-size: max(12.5px, calc(var(--fs) * .84)); line-height: var(--rule); color: #3b2414; }
 .bk-story + .bk-story { margin-top: var(--rule); }
 .bk-postmark { position: absolute; right: 0; top: calc(var(--rule) * .2); display: flex; flex-direction: column; align-items: center; justify-content: center; background-size: 100% 100%; image-rendering: pixelated; rotate: 12deg; opacity: .85; line-height: 1; }
 .bk-postmark small { font-size: calc(var(--fs) * .42); letter-spacing: 1px; text-transform: uppercase; }

@@ -44,7 +44,7 @@ let openedBefore = false;
 
 // ------------------------------------------------------------------ timeline
 
-const TUG = 430;
+const TUG = 430, TILT = 21;
 function enterPlan(tugs: number) {
   const drag0 = 260, drag1 = drag0 + tugs * TUG, arrive = drag1 + 380, clasp = drag1 + 470, cover0 = clasp + 240, cover1 = cover0 + 760;
   return { tugs, drag0, drag1, arrive, clasp, cover0, cover1, total: cover1 + 40 };
@@ -372,7 +372,7 @@ export function Book() {
     const T = LRef.current, ps = pipState.current;
     const startOff = T.vw + 40 - (T.x + T.cx + T.shut) + T.D * T.T;
     if (dim.current) dim.current.style.opacity = String(clamp(el / 320, 0, 1));
-    let off = startOff, sx = 1, sy = 1, rz = 0, y = 0, tilt = 16;
+    let off = startOff, sx = 1, sy = 1, rz = 0, y = 0, tilt = TILT;
     if (el < p.drag0) off = startOff;
     else if (el < p.drag1) {
       const q = tugPose(el, p.drag0, p.tugs, startOff, 0);
@@ -390,7 +390,7 @@ export function Book() {
     } else { off = 0; ps.frame = 'phew'; }
     if (el >= p.drag1) {
       const u = clamp((el - p.drag1) / (p.arrive - p.drag1), 0, 1);
-      tilt = 16 * (1 - eOutBack(u));
+      tilt = TILT * (1 - eOutBack(u));
       y = -Math.sin(Math.PI * u) * 14;
       if (fired(el, last, p.drag1 + (p.arrive - p.drag1) * 0.9)) { sfx('wood_knock', 0.55, 0.6); sfx('pet_land', 0.4); uiBurst('puff', coverLeft(0) + 12, T.y + T.BH, 8); uiBurst('puff', coverLeft(0) + T.cw - 12, T.y + T.BH, 8); }
     }
@@ -432,7 +432,7 @@ export function Book() {
     const shift = lerp(0, T.shut, e);
     const endOff = -(T.x + T.cx + T.shut + T.cw + T.D * T.T + T.pip.size * 2 + 120);
     let off = 0, sx = 1, sy = 1, rz = 0, tilt = 0;
-    if (el >= p.hop1) tilt = 16 * eOut3(clamp((el - p.hop1) / (p.tilt1 - p.hop1 + 1), 0, 1));
+    if (el >= p.hop1) tilt = TILT * eOut3(clamp((el - p.hop1) / (p.tilt1 - p.hop1 + 1), 0, 1));
     if (el >= p.drag0) {
       const q = tugPose(el, p.drag0, p.tugs, 0, endOff);
       off = q.x; sx = q.sx; sy = q.sy; rz = q.rz;
@@ -549,7 +549,7 @@ export function Book() {
   };
 
   return (
-    <div class={'bk-stage' + (L.single ? ' single' : ' spread') + (shut ? ' bk-shut' : '') + ` ph-${phase}`} ref={stage} style={{ '--T': `${T}px`, '--fs': `${L.fs}px`, '--rule': `${L.rule}px`, '--r0': `${L.r0}px` } as Record<string, string>} onPointerDown={phase === 'enter' ? skip : undefined}>
+    <div class={'bk-stage' + (L.single ? ' single' : ' spread') + (shut ? ' bk-shut' : '') + ` ph-${phase}`} ref={stage} role="dialog" aria-modal="true" aria-label={`${s.name}'s Book of Nights`} style={{ '--T': `${T}px`, '--fs': `${L.fs}px`, '--rule': `${L.rule}px`, '--r0': `${L.r0}px` } as Record<string, string>} onPointerDown={phase === 'enter' ? skip : undefined}>
       <div class="bk-dim" ref={dim} onClick={close} />
       <div class="bk-mover" ref={mover} style={{ left: `${L.x}px`, top: `${L.y}px`, width: `${L.BW}px`, height: `${L.BH}px`, transformOrigin: `${L.cx + L.cw / 2}px ${L.BH}px` }}>
         <div class="bk-book" ref={bookEl} style={{ width: `${L.BW}px`, height: `${L.BH}px` }}>

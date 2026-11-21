@@ -73,15 +73,15 @@ function MoodStamp(p: { n?: number; T: number; on?: boolean; onClick?: () => voi
   return <Img a={moodArt(p.n)} T={p.T} class={'bk-mood' + (p.on === false ? ' off' : '')} style={`--r:${((p.n * 37) % 11) - 5}deg`} />;
 }
 
-function Pola(p: { url: string; name: string; have: boolean; tint: string; seed: number; T: number; size: number; sub?: string }) {
+function Pola(p: { url: string | undefined; name: string; have: boolean; tint: string; seed: number; T: number; size: number; sub?: string }) {
   const rot = ((p.seed * 53) % 9) - 4;
   const tapes = ['pink', 'mint', 'yellow', 'blue', 'lilac', 'red'];
-  const sk = useLazy('sk:' + p.name + p.url.length, () => (p.have ? '' : sketch(p.url)));
+  const sk = useLazy('sk:' + p.name + (p.url?.length ?? -1), () => (p.have || !p.url ? '' : sketch(p.url)));
   return (
     <figure class={'bk-pola' + (p.have ? '' : ' ghost')} style={{ '--r': `${rot}deg`, '--tint': p.tint, width: `${p.size}px` } as Record<string, string>}>
       {p.have && <Img a={tapeArt(tapes[p.seed % tapes.length], 22, 8, p.seed)} T={p.T} class="bk-tape" />}
       <div class="bk-shot" style={{ height: `${Math.round(p.size * 0.82)}px` }}>
-        {p.have ? (p.url ? <img src={p.url} alt="" draggable={false} /> : <i class="bk-dev" />) : (sk ? <img class="bk-sketch" src={sk} alt="" draggable={false} /> : null)}
+        {p.have ? (p.url ? <img src={p.url} alt="" draggable={false} /> : p.url === '' ? <Px name="sparkle" size={Math.round(p.size * 0.4)} /> : <i class="bk-dev" />) : (sk ? <img class="bk-sketch" src={sk} alt="" draggable={false} /> : null)}
         {!p.have && <b class="bk-q">?</b>}
       </div>
       <figcaption>{p.have ? p.name : '?'}{p.sub && p.have ? <small>{p.sub}</small> : null}</figcaption>
@@ -269,7 +269,7 @@ function AveragesPage(p: { c: PageCtx; s: Save; nights: Night[] }) {
         <tr><th>Drifting off</th><td>{has ? `${Math.round(a.latency)} min` : dash}</td></tr>
         <tr><th>Score</th><td>{has ? Math.round(a.score) : dash}</td></tr>
       </tbody></table>
-      {has ? <Chart w={p.c.cw} h={Math.round(p.c.L.fs * 5.4)} T={T} draw={timeStrips(p.nights.slice(-30), h12)} dep={'t' + p.nights.length + (p.nights.at(-1)?.id ?? '')} label="Bedtimes and wake times" /> : <p class="bk-muted">Averages appear after your first night with Pip.</p>}
+      {has ? <Chart w={p.c.cw} h={Math.round(p.c.L.fs * 5.4)} T={T} draw={timeStrips(p.nights.slice(-30), h12)} dep={'t' + p.nights.length + (p.nights.at(-1)?.id ?? '')} label="Bedtimes and wake times" /> : <div class="bk-empty"><Img a={moonDoodle()} T={T * 1.5} /><p>Averages appear after your first night with Pip.</p></div>}
       {has && <>
         <Chart w={p.c.cw} h={Math.round(p.c.L.fs * 1.4)} T={T} draw={stageBar(a)} dep={'g' + p.nights.length} label="Average sleep stages" class="bk-stagebar" />
         <div class="bk-legend">{(['deep', 'light', 'rem', 'awake'] as const).map((k) => <span><i style={{ background: STAGE_INK[k] }} />{k === 'rem' ? 'dreaming' : k} {Math.round(a[k] * 100)}%</span>)}</div>
@@ -399,6 +399,7 @@ function MapPage(p: { c: PageCtx; s: Save }) {
       <Head kicker="Adventures" title="Where Pip flies" c={p.c} />
       <div class="bk-map" style={{ width: `${mw * T}px`, height: `${mh * T}px` }}>
         <Img a={m} T={T} />
+        <span class="bk-place home" style={{ left: `${(16 * Math.min(mw, mh) / 120 + 8) * T}px`, top: `${(mh - 18 * Math.min(mw, mh) / 120 - 8) * T}px` }}>Home</span>
         {AREAS.map((a) => {
           const seen = p.s.seen.areas.includes(a.id);
           return <span class={'bk-place' + (seen ? '' : ' unseen')} style={{ left: `${(8 + a.x * (mw - 16)) * T}px`, top: `${(8 + a.y * (mh - 16)) * T}px` }}>{a.name}{!seen && <small>level {a.level}</small>}</span>;
@@ -414,8 +415,10 @@ function stories(s: Save, nights: Night[]): Story[] {
   const seen = s.seen.areas.length ? s.seen.areas : ['woods'];
   return [...nights].reverse().filter((n) => n.report.asleep > 0).slice(0, 8).map((n) => {
     if (s.pending?.sessionId === n.id) return { id: n.id, when: n.start, area: s.pending.adventure.area, lines: s.pending.adventure.story };
-    const area = seen[n.start % seen.length];
-    const adv = rollAdventure({ area, report: n.report, seed: n.start % 100000, owned: () => false, plus: false, name: s.name, streak: 0 });
+    // the night's own area is not stored, so pick one Pip has seen, steadily per night
+    const h = Math.imul(Math.floor(n.start / 60000) ^ 0x5bd1e995, 2654435761) >>> 0;
+    const area = seen[h % seen.length];
+    const adv = rollAdventure({ area, report: n.report, seed: (h >>> 8) % 100000, owned: () => false, plus: false, name: s.name, streak: 0 });
     return { id: n.id, when: n.start, area: adv.area, lines: adv.story };
   });
 }
@@ -512,7 +515,7 @@ export function buildPages(s: Save, L: BookLayout): PageDef[] {
     parts.forEach((part, i) => add(`al-${cat.id}-${i}`, 'collection', 'plain', (c) => <AlbumPage c={c} cat={cat} entries={part} part={i} parts={parts.length} cols={cols} />));
   }
   // seals
-  const sl = seals(s), sc = L.single ? 3 : 4, sealH = 30 * L.T * 1.5 + L.fs * 3.2, perSeal = sc * Math.max(2, Math.floor((L.PH - L.fs * 5.2 - L.T * 24) / (sealH + 8)));
+  const sl = seals(s), sc = L.single ? 3 : 4, sealH = 30 * L.T * 1.5 + L.fs * 2.4, perSeal = sc * Math.max(2, Math.floor((L.PH - L.r0 - 18 * L.T) / (sealH + 8)));
   const got = sl.filter((x) => x.done).length;
   chunk(sl, perSeal).forEach((part, i) => add('seals' + i, 'seals', 'plain', (c) => <SealsPage c={c} list={part} first={i === 0} total={sl.length} got={got} cols={sc} />));
   // adventures

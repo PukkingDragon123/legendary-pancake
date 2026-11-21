@@ -99,7 +99,7 @@ export function scoreTrend(nights: Night[]) {
     const labels: Label[] = [{ x: L - 2, y: yOf(100), text: '100', align: 'r', small: true, color: '#7a5a3c' }, { x: L - 2, y: yOf(mid), text: String(mid), align: 'r', small: true, color: '#7a5a3c' }, { x: L - 2, y: bot - 4, text: String(lo), align: 'r', small: true, color: '#7a5a3c' }];
     if (list.length < 2) {
       g.dashed(L + 4, yOf(60), R - 4, yOf(72), GRAPHITE, 70, 1, 3);
-      labels.push({ x: (L + R) / 2, y: yOf(40), text: list.length ? 'one more night to draw a line' : 'a line appears after two nights', align: 'c', small: true, color: '#7a5a3c' });
+      labels.push({ x: (L + R) / 2, y: (top + bot) / 2 + 6, text: list.length ? 'one more night to draw a line' : 'a line appears after two nights', align: 'c', small: true, color: '#7a5a3c' });
       if (list.length) g.disc(L + 6, yOf(list[0].report.score), 1.6, scoreInk(list[0].report.score));
       return labels;
     }
