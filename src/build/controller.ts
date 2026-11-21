@@ -234,7 +234,7 @@ export class BuildController {
     const k = kindOf(id);
     // somewhere near the middle of the view
     const c = sc.house.toLocal(new THREE.Vector3(HOUSE.x, 0, HOUSE.z).add(this.pan));
-    const pref: [number, number, number] = k.wall ? [slotOf(Math.atan2(-Math.sin(this.yaw), -Math.cos(this.yaw))), defaultWallY(id), 0] : [Math.round(c.x / CELL - k.w / 2), Math.round(c.z / CELL - k.d / 2), (4 - Math.round(this.yaw / (Math.PI / 2)) % 4 + 4) % 4];
+    const pref: [number, number, number] = k.wall ? [slotOf(Math.atan2(-Math.sin(this.yaw), -Math.cos(this.yaw))), defaultWallY(id), 0] : [Math.round(c.x / CELL - k.w / 2), Math.round(c.z / CELL - k.d / 2), ((Math.round(this.yaw / (Math.PI / 2)) % 4) + 4) % 4];
     const p = findSpot(save.value, fid, id, pref);
     if (!p) return 'No free spot on this floor';
     const mesh = sc.rooms.makeItem(id);
