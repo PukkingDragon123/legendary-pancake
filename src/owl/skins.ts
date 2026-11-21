@@ -245,9 +245,10 @@ export function skinExtras(id: string, P: OwlParts) {
       const L = FACE[t.face] + (Math.abs(v - 0.5) > 0.32 ? -0.6 : 0.3);
       return Math.floor(across / 1.6) % 2 === 0 && t.face !== 2 ? tone(cream, L) : tone(red, L + (row % 2 ? 0 : -0.2));
     };
-    const ny = g.bodyTop - 1.2, hw = bodyHalfW(g, ny);
-    P.add('body', box(0, ny - 0.6, -0.1, hw * 2 + 1.4, 2.0, g.bodyD - 1.4, knit));
-    P.add('body', { ...box(hw * 0.4, ny - 5.4, front(ny - 3) + 0.6, 2.2, 5, 0.7, knit), rot: [6, 0, 8] });
+    const ny = g.bodyTop - 2.4, hw = bodyHalfW(g, ny + 1), dep = bodyDepth(g, ny + 1);
+    P.add('body', box(0, ny, (dep.front + dep.back) / 2, hw * 2 + 1.6, 2.2, dep.front - dep.back + 1.6, knit));
+    P.add('body', { ...box(hw * 0.45, ny - 4.6, dep.front + 0.6, 2.2, 5, 0.7, knit), rot: [6, 0, 8] });
+    for (const k2 of [-1, 0, 1]) P.add('body', box(hw * 0.45 + k2 * 0.7 + 0.3, ny - 5.4, dep.front + 0.95, 0.35, 1.0, 0.35, knit));
   }
   if (id === 'celestial') {
     // a tiny golden crescent moon pinned at the chest

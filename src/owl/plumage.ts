@@ -104,7 +104,9 @@ export interface Kit {
 
 export function paintKit(sp: SpeciesDef, g: Geo, opts: { fem?: boolean } = {}): Kit {
   const fem = !!opts.fem;
-  const P: Plumage = sp.plumage, id = sp.id;
+  const id = sp.id;
+  // Queen Neve's snowy plumage is the clean, frost-white kind
+  const P: Plumage = fem && id === 'snowy' ? { ...sp.plumage, up: '#f3f7fc', under: '#f6f9fd', underLow: '#fbfdff', disc: '#fbfdff', wing: '#f1f5fb', tail: '#f3f7fc', leg: '#f8fbff', toe: '#f6f9fd', rim: '#e4ecf6', iris: '#f5cf1e' } : sp.plumage;
   const snowy = id === 'snowy';
   const R = (c: string | number, step = 0.045) => fr(c, step, snowy);
   const up = R(P.up), upD = R(P.upDark, 0.05), upL = R(P.upLight, 0.035);
@@ -123,6 +125,7 @@ export function paintKit(sp: SpeciesDef, g: Geo, opts: { fem?: boolean } = {}): 
   const unMid = R(mix(P.under, P.underMark, 0.4));
   const softBrow = R(mix(P.brow, P.disc, 0.45));
   const lowMix = (L: number, k: number) => (k > 0 ? tone(unLow, L) : tone(un, L));
+  const frost = fem && snowy ? ramp(col('#cdeaff'), { step: 0.05 }) : null;
 
   const bodyTop = g.bodyTop, bodyY = g.bodyY, bH = g.bodyH;
   const Rb = (g.bodyW + g.bodyD) / 4, Rh = (g.headW + g.headD) / 4;
@@ -393,6 +396,8 @@ export function paintKit(sp: SpeciesDef, g: Geo, opts: { fem?: boolean } = {}): 
 
   const bodyP: Painter = (t) => {
     if (t.face === 3) return tone(un, -1.1);
+    // Queen Neve's feathers glitter with frost
+    if (frost && pep(t, 77) > 0.982) return tone(frost, 1.5);
     frame(t, g.body, Rb, F);
     const L = F.L;
     // underparts wrap round the front; the back is upperparts; a soft ragged seam (under the wings)

@@ -82,7 +82,8 @@ export class Eye {
 
   setColours(cols: EyeColours) {
     this.cols = cols;
-    this.iris = ramp(col(cols.iris), { n: 7, step: 0.07 }).c;
+    // keep the hue steady across the iris shades (yellow eyes must stay yellow, not drift orange)
+    this.iris = ramp(col(cols.iris), { n: 7, step: 0.065, shift: 0.02 }).c;
     this.lidc = ramp(col(cols.lid), { n: 5, step: 0.05 }).c;
     this.rim = col(cols.rim);
     const c = col(cols.iris);
@@ -151,7 +152,7 @@ export class Eye {
         const sa = a + Math.PI / 2, rr = R * (0.28 + 0.36 * Math.pow(Math.abs(Math.cos(sa * 2.5)), 5));
         if (r < rr) return r < R * 0.2 ? 0xfff6c8 : 0xffc93a;
       } else if (mode === 'spiral') {
-        if ((r - a * 1.4 + 40) % 3.4 < 1.3) return 0x1a1414;
+        if ((r - a * 1.4 + 40) % 3.4 < 1.3) return this.dark ? 0xe8dcc8 : 0x1a1414;
       } else if ((this.cols.slit ? slitIn : r < pr)) {
         return dy > pr * 0.35 && !this.dark ? 0x141826 : 0x08080c;
       }

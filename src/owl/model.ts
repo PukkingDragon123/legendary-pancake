@@ -252,10 +252,10 @@ function buildSpecies(P: OwlParts) {
   const fem = P.look.feminine ? 0.4 : 0;
 
   // body: an egg of thin stepped layers, the breast bulging forward
-  P.add('body', ...volume({ ...g.body, hw: (q) => g.body.hw(q) - fem }, k.body, { step: 0.34 }));
+  P.add('body', ...volume({ ...g.body, hw: (q) => g.body.hw(q) - fem }, k.body, { step: 0.55, maxH: 3 }));
 
   // head: a domed skull sliced the same way, plus a nape stepping down into the mantle
-  P.add('head', ...volume(g.head, k.head, { step: 0.33, maxH: 2 }));
+  P.add('head', ...volume(g.head, k.head, { step: 0.42, maxH: 2.4 }));
   const nk = 0.12, nb = g.head.back(nk);
   P.add('head', ...rounded(0, g.headY - 0.8, nb + 1.4, g.head.hw(nk) * 2 - 2, 2.4, 2.6, 0.9, k.head));
   // mantle: two overlapping rows of feather plates across the upper back
@@ -271,9 +271,9 @@ function buildSpecies(P: OwlParts) {
   P.add('head', box(0, g.beakY + 0.3, df + 0.05, 0.85, ey + es * 0.3 - g.beakY - 0.3, 0.4, k.ridge));
   // the beak: a waxy cere, the upper mandible and its downward hook; bristles fan over its base
   const by = g.beakY;
-  P.add('head', box(0, by - 0.55, df + 0.55, 1.5, 0.75, 0.8, k.cere));
-  P.add('head', box(0, by - 1.75, df + 0.95, 1.3, 1.35, 1.1, k.beak), box(0, by - 2.45, df + 1.1, 0.95, 0.8, 0.75, k.beak), box(0, by - 2.85, df + 0.98, 0.55, 0.5, 0.5, k.beak));
-  for (const sd of [-1, 1]) P.add('head', { ...box(sd * 0.95, by - 1.5, df + 0.4, 0.9, 1.7, 0.5, k.bristle), rot: [0, sd * 14, -sd * 8] });
+  P.add('head', box(0, by - 0.5, df + 0.4, 1.25, 0.6, 0.6, k.cere));
+  P.add('head', box(0, by - 1.55, df + 0.75, 1.05, 1.15, 0.9, k.beak), box(0, by - 2.15, df + 0.85, 0.75, 0.7, 0.62, k.beak), box(0, by - 2.5, df + 0.72, 0.45, 0.45, 0.42, k.beak));
+  for (const sd of [-1, 1]) P.add('head', { ...box(sd * 0.85, by - 1.35, df + 0.3, 0.8, 1.5, 0.45, k.bristle), rot: [0, sd * 14, -sd * 8] });
   // chin under the bill (the great grey's bow tie sits here)
   if (s.disc === 'round') for (const sd of [-1, 1]) P.add('head', { ...box(sd * 1.3, by - 4.0, df - 0.05, 2.2, 1.2, 0.5, k.chin), rot: [0, 0, sd * 22] }, { ...box(sd * 0.45, by - 3.75, df + 0.05, 0.7, 0.7, 0.45, k.chin) });
   // the lower mandible and mouth (shown when Pip opens the beak)
