@@ -11,6 +11,11 @@ import { IcoAcorn, IcoStar, Px } from './icons.tsx';
 import { spriteURL } from './px/sprites.js';
 import { haptic, Sheet, tap } from './kit.tsx';
 import { panel, sceneRef } from './state.ts';
+import { owlFull } from './portraits.ts';
+import { RuneCircle } from './chrome/lvup.tsx';
+import { MagicBar } from './chrome/magicbar.tsx';
+import { PxAnim, seq } from './chrome/pxanim.tsx';
+import { uiBurst, uiBurstAt } from './chrome/uifx.ts';
 
 // ------------------------------------------------------------------ dialogs
 
@@ -75,36 +80,55 @@ export function Flyers() {
 // ------------------------------------------------------------------ level-up ceremony
 
 export const ceremony = signal<{ level: number } | null>(null);
+// [chrome] the ceremony: a rune circle draws itself in while the magic bar overflows, then a
+// burst of magic, the glowing rune medallion with the new level, Pip, and what just opened up.
 export function Ceremony() {
   const c = ceremony.value;
   const [step, setStep] = useState(0);
   useEffect(() => {
     if (!c) return;
     setStep(0);
-    sound.play('reward_levelup', { volume: 0.7 });
-    const sc = sceneRef.current;
-    if (sc) { sc.owl.play('dance'); const o = sc.owl.node.position; sc.fx.burst('confetti', o.x, o.y + 1.5, o.z, 40); sc.fx.burst('stars', o.x, o.y + 1.2, o.z, 14); }
-    const t = setTimeout(() => setStep(1), 900);
-    return () => clearTimeout(t);
+    sound.play('tp_shimmer', { volume: 0.45 });
+    const ts = [
+      setTimeout(() => {
+        setStep(1);
+        sound.play('reward_levelup', { volume: 0.7 });
+        const x = innerWidth / 2, y = innerHeight * 0.4;
+        uiBurst('magic', x, y, 40); uiBurst('stars', x, y, 16); uiBurst('confetti', x, y - 40, 34); uiBurst('sparkle', x, y, 14);
+        const sc = sceneRef.current;
+        if (sc) { sc.owl.play('dance'); const o = sc.owl.node.position; sc.fx.burst('confetti', o.x, o.y + 1.5, o.z, 40); sc.fx.burst('stars', o.x, o.y + 1.2, o.z, 14); }
+      }, 1150),
+      setTimeout(() => setStep(2), 2000),
+    ];
+    return () => ts.forEach(clearTimeout);
   }, [c?.level]);
   if (!c) return null;
   const zone = (Object.entries(ZONE_LEVEL) as [keyof typeof ZONE_LEVEL, number][]).find(([, l]) => l === c.level);
   const area = AREAS.find((a) => a.level === c.level);
+  let owl = '';
+  try { owl = owlFull(save.value.look); } catch { /* no WebGL */ }
   return (
-    <div class="ceremony" onClick={() => step && (ceremony.value = null)}>
-      <div class="burst" />
-      <div class="ribbon-wrap"><div class="title-ribbon big">Level {c.level}!</div></div>
-      <div class="ceremony-owl floaty"><Px name="owl" size={120} /></div>
-      {step > 0 && (
-        <div class="card ceremony-card" onClick={(e) => e.stopPropagation()}>
-          <h3 class="center">Pip is growing up!</h3>
-          {zone && <div class="unlock row"><Px name="treehouse" size={40} /><span>New room unlocked: <b>{ZONE_NAME[zone[0]]}</b></span></div>}
-          {area && <div class="unlock row"><Px name="map" size={40} /><span>New place to explore: <b>{area.name}</b></span></div>}
-          {!zone && !area && <div class="unlock row"><Px name="sparkle" size={40} /><span>Rarer treasures turn up on adventures now.</span></div>}
+    <div class={'lvup' + (step === 0 ? ' pre' : '')} onClick={() => step > 1 && (ceremony.value = null)}>
+      {step > 0 && <div class="lvup-rays" />}
+      <RuneCircle n={120} drawMs={1000} />
+      <div class="lvup-stack">
+        <div class="lvup-medal"><PxAnim tl={seq('hud_rune', 8, 120)} size={144} /><b>{c.level}</b></div>
+        <div class="lvup-title">Level {c.level}!</div>
+        <div class={'lvup-bar' + (step === 0 ? ' spill' : '')}>
+          <MagicBar level={step === 0 ? c.level - 1 : c.level} into={step === 0 ? 62 : 0} need={100} overflow={step === 0} w={56} big />
+        </div>
+        {step > 0 && <div class="lvup-owl">{owl ? <img src={owl} alt="" /> : <Px name="owl" size={120} />}</div>}
+      </div>
+      {step > 1 && (
+        <div class="lvup-card" onClick={(e) => e.stopPropagation()}>
+          <h3>Pip is growing up!</h3>
+          {zone && <div class="lvup-unlock"><Px name="treehouse" size={40} /><span>New room unlocked: <b>{ZONE_NAME[zone[0]]}</b></span></div>}
+          {area && <div class="lvup-unlock"><Px name="map" size={40} /><span>New place to explore: <b>{area.name}</b></span></div>}
+          {!zone && !area && <div class="lvup-unlock"><Px name="sparkle" size={40} /><span>Rarer treasures turn up on adventures now.</span></div>}
           <div class="row" style="gap:6px">
             {zone && <button class="btn soft grow" onClick={() => { ceremony.value = null; panel.value = 'decorate'; }}>Go see</button>}
             {area && !zone && <button class="btn soft grow" onClick={() => { ceremony.value = null; panel.value = 'map'; }}>Open map</button>}
-            <button class="btn pillow honey grow" onClick={() => { tap(); ceremony.value = null; }}>Hooray!</button>
+            <button class="btn pillow honey grow" onClick={(e) => { tap(); uiBurstAt(e.currentTarget as Element, 'stars', 8); ceremony.value = null; }}>Hooray!</button>
           </div>
         </div>
       )}
