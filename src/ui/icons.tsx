@@ -4,6 +4,7 @@
 import type { JSX } from 'preact';
 import { SPRITES, spriteURL } from './px/sprites.js';
 import './px/hollow.js';
+import './px/currency.js';
 
 type P = { size?: number; class?: string; style?: string };
 
