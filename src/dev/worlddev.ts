@@ -6,7 +6,7 @@
 //   &cineT=seconds     with still=1 and cine=dep|arr: run the cinematic that far, then draw
 // In the console: __weather('rain'), __season('autumn', 0.8), go(seconds) to fast-forward and draw.
 import * as THREE from 'three';
-import { playArrival, playDeparture } from '../world/cinematics.ts';
+import { playArrival, playDeparture, preloadCinematics } from '../world/cinematics.ts';
 import { Scene, type View } from '../world/scene.ts';
 import type { Season } from '../world/astro.ts';
 import type { WeatherKind } from '../world/weather.ts';
@@ -34,12 +34,13 @@ for (let i = 0; i < 30; i++) sc.step(1 / 30, false);
 w.go = (s: number) => { for (let i = 0; i < Math.round(s * 30); i++) sc.step(1 / 30, false); sc.step(0.001, true); };
 w.dep = () => playDeparture(sc, { onDone: () => console.log('[w] departure done') });
 w.arr = () => playArrival(sc, { onLanded: () => console.log('[w] landed'), onDone: () => console.log('[w] arrival done') });
-if (q.get('cine') === 'dep') (w.dep as () => void)();
-if (q.get('cine') === 'arr') (w.arr as () => void)();
+const cine = () => { if (q.get('cine') === 'dep') (w.dep as () => void)(); if (q.get('cine') === 'arr') (w.arr as () => void)(); };
+if (!q.get('still')) cine();
 
 if (q.get('still')) {
   // wait for the hand-made models, then draw a settled frame
-  void sc.flora.ready.then(() => {
+  void Promise.all([sc.flora.ready, preloadCinematics()]).then(() => {
+    cine();
     const ff = +(q.get('cineT') ?? q.get('t') ?? 1.5);
     (w.go as (s: number) => void)(ff);
     const info = sc.renderer.info.render;

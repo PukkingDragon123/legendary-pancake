@@ -13,6 +13,6 @@ if [ ${#ids[@]} -eq 0 ]; then for f in "$HERE"/specs/*.json; do ids+=("$(basenam
 for id in "${ids[@]}"; do
   PYTHONPATH="$LOWPIX" "$PY" -m lowpix build "$HERE/specs/$id.json" -o "$OUT/$id" > "$OUT/$id.log" 2>&1 || { cat "$OUT/$id.log"; exit 1; }
   grep -E "^built|warning: below" "$OUT/$id.log" | head -2
-  cp "$OUT/$id/$id.glb" "$ROOT/public/models/world/$id.glb"
+  cp "$(ls "$OUT/$id/"*.glb | head -1)" "$ROOT/public/models/world/$id.glb"
 done
 ls -la "$ROOT/public/models/world" | tail -n +2

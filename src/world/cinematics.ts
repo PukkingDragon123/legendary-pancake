@@ -11,6 +11,7 @@ import { sound } from '../audio/sound.ts';
 import { box, buildProp, propMesh, PX, type BoxSpec, type Painter } from '../gfx/box.ts';
 import { ramp, tone } from '../gfx/color.ts';
 import { cloth, lamp, lvl, metal, smooth, solid } from '../gfx/mats.ts';
+import { loadGLB } from '../gfx/glb.ts';
 import { SPR } from './fx.ts';
 import type { CamShot, Scene } from './scene.ts';
 
@@ -92,8 +93,40 @@ function bundle(): BoxSpec[] {
   ];
 }
 
+// [world3] The hand-made lowpix props (art/lowpix/world/props.py -> public/models/world/props_*.glb)
+// load in the background; until they are in, the old voxel props stand in.
+const KIT_PROPS = ['satchel', 'strap', 'goggles', 'bundle', 'item0', 'item1', 'item2', 'item3'];
+const kitProps = new Map<string, THREE.Object3D>();
+let kitLoading: Promise<unknown> | null = null;
+/** Load Pip's travel things early (the sleep screen calls this; it is also kicked off on first use). */
+export function preloadCinematics(): Promise<unknown> {
+  kitLoading ??= Promise.allSettled(KIT_PROPS.map((id) => loadGLB(`world/props_${id}.glb`).then((g) => {
+    g.scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      m.castShadow = true;
+      // the lantern glass glows
+      if (/glow/.test(m.name) || /glow/.test(m.parent?.name ?? '')) {
+        const src = m.material as THREE.MeshStandardMaterial;
+        m.material = new THREE.MeshBasicMaterial({ map: src.map, toneMapped: false });
+      }
+    });
+    kitProps.set(id, g.scene);
+  })));
+  return kitLoading;
+}
+
 const propCache = new Map<string, ReturnType<typeof buildProp>>();
-function mesh(key: string, boxes: () => BoxSpec[]): THREE.Mesh {
+function mesh(key: string, boxes: () => BoxSpec[]): THREE.Object3D {
+  void preloadCinematics();
+  const kit = kitProps.get(key);
+  if (kit) {
+    // wrapped, so the cinematic can pop and squash the outer node freely
+    const g = new THREE.Group(), inner = kit.clone(true);
+    inner.scale.setScalar(PX);
+    g.add(inner);
+    return g;
+  }
   let p = propCache.get(key);
   if (!p) { p = buildProp(boxes(), { wind: false }); propCache.set(key, p); }
   const m = propMesh(p);

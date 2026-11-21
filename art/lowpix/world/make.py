@@ -467,6 +467,10 @@ if __name__ == '__main__':
         if k.blobs:
             top = max(b['y'] + b['ry'] for b in k.blobs)
             shapes[mid] = {'leaf': LEAF_KIND[mid], 'top': round(top, 2), 'sway': SWAY[mid], 'blobs': k.blobs}
+    import props
+    for pid, sp in props.all_props().items():
+        with open(os.path.join(SPECS, pid + '.json'), 'w') as fh:
+            json.dump(sp, fh, indent=1)
     out = os.path.join(ROOT, 'src', 'assets', 'nature', 'shapes.json')
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, 'w') as fh:
