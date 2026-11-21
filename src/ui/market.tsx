@@ -20,7 +20,7 @@ export interface PurchaseProvider { buy(p: Product): Promise<boolean> }
 export const demoStore: PurchaseProvider = {
   async buy(p) {
     await new Promise((r) => setTimeout(r, 250));
-    return ask({ title: p.name, art: spriteURL(p.stones ? 'moonstone' : 'star', 6), ok: `Grant for testing`, cancel: 'Cancel', tone: 'honey',
+    return ask({ title: p.name, art: spriteURL(p.gems ? 'moonstone' : 'star', 6), ok: `Grant for testing`, cancel: 'Cancel', tone: 'honey',
       body: <>{p.blurb} · <b>{p.price}</b><br /><span class="small">Demo store: no payment provider is connected, so nothing is charged.</span></> });
   },
 };
@@ -38,7 +38,7 @@ function Detail(p: { b: Buyable; name: string; blurb: string; art: string; onClo
         {owned ? <button class="btn pillow grow" onClick={() => { tap(); panel.value = p.b.kind === 'item' ? 'decorate' : 'wardrobe'; }}>{p.b.kind === 'item' ? 'Place it' : 'Try it on'}</button>
           : <button class="btn pillow honey grow" onClick={() => {
             const err = buy(p.b);
-            if (err) { tap('ui_error'); toast(err, price.stones ? IcoStone : IcoAcorn); return; }
+            if (err) { tap('ui_error'); toast(err, price.gems ? IcoStone : IcoAcorn); return; }
             sound.play('ui_buy', { volume: 0.6 }); sound.play('reward_coin', { volume: 0.4 });
             toast(`${p.name} is yours!`, IcoSparkle);
           }}>Buy <Price {...price} /></button>}
@@ -101,14 +101,14 @@ function Coats() {
           <button class="tile" onClick={() => {
             tap();
             if (ownsSkin(k.id)) { panel.value = 'wardrobe'; return; }
-            if (s.stones < k.stones) { tap('ui_error'); toast('Not enough moonstones', IcoStone); marketTab.value = 'stones'; return; }
-            edit((x) => { x.stones -= k.stones; x.owned.skins = [...x.owned.skins, k.id]; if (k.id === 'meowl' && !x.owned.palettes.includes('tabby')) x.owned.palettes.push('tabby'); });
+            if (s.gems < k.gems) { tap('ui_error'); toast('Not enough moonstones', IcoStone); marketTab.value = 'gems'; return; }
+            edit((x) => { x.gems -= k.gems; x.owned.skins = [...x.owned.skins, k.id]; if (k.id === 'meowl' && !x.owned.palettes.includes('tabby')) x.owned.palettes.push('tabby'); });
             sound.play('reward_unlock', { volume: 0.6 });
             toast(`The ${k.name} look is yours!`, IcoSparkle);
           }}>
             <div class="art"><img src={coatIcon(k.id === 'owl' ? 'tawny' : 'tabby', k.id)} alt="" /></div>
             <div class="nm">{k.name}</div>
-            {ownsSkin(k.id) ? <span class="owned">Owned</span> : <Price stones={k.stones} />}
+            {ownsSkin(k.id) ? <span class="owned">Owned</span> : <Price gems={k.gems} />}
           </button>
         ))}</div>
       </div>
@@ -130,7 +130,7 @@ function Stones() {
   const plus = async (p: Product) => {
     tap();
     if (await demoStore.buy(p)) {
-      edit((x) => { x.plus = { active: true, plan: p.plan, since: Date.now(), lastStipend: Date.now() }; x.stones += 50; });
+      edit((x) => { x.plus = { active: true, plan: p.plan, since: Date.now(), lastStipend: Date.now() }; x.gems += 50; });
       sound.play('reward_levelup', { volume: 0.6 });
       toast('Welcome to Hoot Hollow Plus!', IcoSparkle);
     }
@@ -145,7 +145,7 @@ function Stones() {
       </div>
       <div class="col" style="gap:8px"><div class="label">Moonstones</div>
         {STONE_PACKS.map((p) => (
-          <button class="card row" style="text-align:left" onClick={async () => { tap(); if (await demoStore.buy(p)) { edit((x) => { x.stones += p.stones ?? 0; }); sound.play('reward_gem', { volume: 0.6 }); toast(`+${p.stones} moonstones`, IcoStone); } }}>
+          <button class="card row" style="text-align:left" onClick={async () => { tap(); if (await demoStore.buy(p)) { edit((x) => { x.gems += p.gems ?? 0; }); sound.play('reward_gem', { volume: 0.6 }); toast(`+${p.gems} moonstones`, IcoStone); } }}>
             <IcoStone size={40} /><div class="grow"><b>{p.name}</b><div class="small muted">{p.blurb}</div></div>
             {p.badge && <span class="rarity" style="--rc:#d9576a">{p.badge}</span>}<b class="num">{p.price}</b>
           </button>
@@ -158,8 +158,8 @@ function Stones() {
 
 export function Market() {
   return (
-    <Sheet title={<span class="row" style="gap:8px"><IcoSatchel size={40} />Market</span>} sub={<span class="row" style="gap:12px"><span class="row" style="gap:3px"><IcoAcorn size={20} />{save.value.acorns.toLocaleString()}</span><span class="row" style="gap:3px"><IcoStone size={20} />{save.value.stones}</span></span>}>
-      <Seg value={marketTab.value} onChange={(v) => (marketTab.value = v)} options={[{ v: 'furniture', label: 'Home' }, { v: 'outfits', label: 'Outfits' }, { v: 'coats', label: 'Coats' }, { v: 'stones', label: 'Plus' }]} />
+    <Sheet title={<span class="row" style="gap:8px"><IcoSatchel size={40} />Market</span>} sub={<span class="row" style="gap:12px"><span class="row" style="gap:3px"><IcoAcorn size={20} />{save.value.coins.toLocaleString()}</span><span class="row" style="gap:3px"><IcoStone size={20} />{save.value.gems}</span></span>}>
+      <Seg value={marketTab.value} onChange={(v) => (marketTab.value = v)} options={[{ v: 'furniture', label: 'Home' }, { v: 'outfits', label: 'Outfits' }, { v: 'coats', label: 'Coats' }, { v: 'gems', label: 'Plus' }]} />
       {marketTab.value === 'furniture' ? <Furniture /> : marketTab.value === 'outfits' ? <Outfits /> : marketTab.value === 'coats' ? <Coats /> : <Stones />}
     </Sheet>
   );

@@ -44,7 +44,7 @@ async function boot() {
     if (e.type === 'sound') sceneSound(e.id);
     if (e.type === 'catch') {
       sound.play('sparkle', { volume: 0.5 });
-      edit((x) => { x.acorns += 1; });
+      edit((x) => { x.coins += 1; });
       flyReward('acorn', 10, { x: e.x, y: e.y });
       if (progress('catch')) toast('Quest done: fireflies caught!', IcoSparkle);
     }
@@ -61,7 +61,7 @@ async function boot() {
     if (e.type === 'tapOwl' && phase.value === 'day' && !breathing.value) {
       scene.owl.poke();
       say(lines.poke());
-      if (save.value.daily.pets < 5) { edit((x) => { x.daily.pets++; x.acorns += 2; }); }
+      if (save.value.daily.pets < 5) { edit((x) => { x.daily.pets++; x.coins += 2; }); }
     }
   });
 
@@ -119,12 +119,12 @@ async function boot() {
   // ---- small daily kindnesses
   const today = dayKey();
   if (save.value.daily.day !== today) {
-    edit((x) => { x.daily = { day: today, gift: true, pets: 0 }; x.acorns += 25; });
-    if (save.value.onboarded) setTimeout(() => toast('+25 acorns: a little gift from Pip', IcoAcorn), 1600);
+    edit((x) => { x.daily = { day: today, gift: true, pets: 0 }; x.coins += 25; });
+    if (save.value.onboarded) setTimeout(() => toast('+25 coins: a little gift from Pip', IcoAcorn), 1600);
   }
   const plus = save.value.plus;
   if (plus.active && Date.now() - (plus.lastStipend ?? 0) > 7 * 86400_000) {
-    edit((x) => { x.stones += 50; x.plus.lastStipend = Date.now(); });
+    edit((x) => { x.gems += 50; x.plus.lastStipend = Date.now(); });
     setTimeout(() => toast('+50 moonstones: your weekly Plus thank-you', IcoStone), 2600);
   }
   if (phase.value === 'day' && save.value.onboarded) setTimeout(() => { const h = new Date().getHours(); say(h >= 20 || h < 4 ? lines.evening() : lines.day()); }, 2200);

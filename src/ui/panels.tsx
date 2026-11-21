@@ -52,7 +52,7 @@ export function Wardrobe() {
               sceneRef.current?.owl.play('ruffle');
             }}>
               <div class="art"><img src={coatIcon(k.id === 'owl' ? 'tawny' : 'tabby', k.id)} alt="" /></div>
-              <div class="nm">{k.name}</div>{ownsSkin(k.id) ? <span class="owned">{skin === k.id ? 'Wearing' : 'Owned'}</span> : <Price stones={k.stones} />}
+              <div class="nm">{k.name}</div>{ownsSkin(k.id) ? <span class="owned">{skin === k.id ? 'Wearing' : 'Owned'}</span> : <Price gems={k.gems} />}
             </button>
           ))}</div>
           <div class="grid">{coats.map((c) => {

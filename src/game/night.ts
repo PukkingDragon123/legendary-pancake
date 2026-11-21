@@ -7,7 +7,7 @@ import { sound } from '../audio/sound.ts';
 import { AlarmClock, analyze, closeAlarmNotification, demoNight, nextOccurrence, Reminders, showAlarmNotification, SleepRecorder, type LiveLevel, type ReminderKind, type SleepSession } from '../sleep/index.ts';
 import { rollAdventure } from './adventure.ts';
 import { BlockerBridge, type BlockStatus } from './blocker.ts';
-import { dayKey, edit, flush, ownsEntry, save } from './store.ts';
+import { dayKey, edit, flush, grant, ownsEntry, save } from './store.ts';
 import { progress } from './quests.ts';
 
 export type Phase = 'day' | 'sleeping' | 'ringing' | 'morning';
@@ -200,15 +200,10 @@ export function collectAdventure() {
   const p = save.value.pending;
   if (!p) return;
   edit((x) => {
-    x.acorns += p.adventure.acorns;
+    x.coins += p.adventure.coins;
     x.xp += p.adventure.xp;
-    x.stones += p.adventure.stones;
-    for (const f of p.adventure.finds) {
-      if (f.kind === 'trinket') x.collection[f.id] = (x.collection[f.id] ?? 0) + 1;
-      else if (f.kind === 'item' && !x.owned.items.includes(f.id)) x.owned.items.push(f.id);
-      else if (f.kind === 'piece' && !x.owned.pieces.includes(f.id)) x.owned.pieces.push(f.id);
-      else if (f.kind === 'palette' && !x.owned.palettes.includes(f.id)) x.owned.palettes.push(f.id);
-    }
+    x.gems += p.adventure.gems;
+    for (const f of p.adventure.finds) grant(x, f);
     delete x.pending;
   });
   phase.value = 'day';

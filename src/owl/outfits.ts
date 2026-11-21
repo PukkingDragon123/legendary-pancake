@@ -15,7 +15,7 @@ export interface PieceDef {
   slot: OutfitSlot;
   name: string;
   blurb: string;
-  /** acorns, or moonstones when premium */
+  /** coins, or moonstones when premium */
   price: number;
   premium?: boolean;
   /** found only on adventures in this area */

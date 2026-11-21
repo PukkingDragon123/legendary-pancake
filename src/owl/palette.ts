@@ -39,7 +39,7 @@ export interface OwlPalette {
   blush: string;
   /** a third patch colour (calico) */
   patch?: string;
-  /** cost in acorns; moonstones for premium coats */
+  /** cost in coins; moonstones for premium coats */
   price: number;
   premium?: boolean;
   blurb: string;
@@ -141,8 +141,8 @@ export const PALETTE: Record<string, OwlPalette> = Object.fromEntries(PALETTES.m
 export const palette = (id: string): OwlPalette => PALETTE[id] ?? PALETTES[0];
 export const coatsFor = (skin: Skin) => PALETTES.filter((p) => p.skin === skin);
 
-export interface SkinDef { id: Skin; name: string; blurb: string; stones: number }
+export interface SkinDef { id: Skin; name: string; blurb: string; gems: number }
 export const SKINS: SkinDef[] = [
-  { id: 'owl', name: 'Owl', blurb: 'Pip as Pip has always been: a round little owl with soft, freckled feathers.', stones: 0 },
-  { id: 'meowl', name: 'Meowl', blurb: 'A kitten\u2019s face on an owl\u2019s body. Purrs and hoots. Comes with six cat coats.', stones: 150 },
+  { id: 'owl', name: 'Owl', blurb: 'Pip as Pip has always been: a round little owl with soft, freckled feathers.', gems: 0 },
+  { id: 'meowl', name: 'Meowl', blurb: 'A kitten\u2019s face on an owl\u2019s body. Purrs and hoots. Comes with six cat coats.', gems: 150 },
 ];

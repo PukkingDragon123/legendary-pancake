@@ -3,8 +3,7 @@
 // and Pip. Exposes a small API for the UI and emits events for taps and sounds.
 import * as THREE from 'three';
 import { buildProp, propMesh, PX, wind, type Prop } from '../gfx/box.ts';
-import { FURNITURE, type ItemDef } from '../assets/furniture.ts';
-import { HOME_ITEMS } from '../assets/home.ts';
+import { ALL_ITEMS, ITEMS } from '../assets/registry.ts';
 import { OwlActor, type OwlFx, type OwlSound } from '../owl/actor.ts';
 import { featherColour, type OwlLook } from '../owl/model.ts';
 import { Critters } from './critters.ts';
@@ -28,10 +27,26 @@ export type SceneEvent =
   | { type: 'catch'; x: number; y: number }
   | { type: 'pet'; x: number; y: number };
 
-export const ALL_ITEMS: ItemDef[] = [...HOME_ITEMS, ...FURNITURE];
-export const ITEMS: Record<string, ItemDef> = Object.fromEntries(ALL_ITEMS.map((i) => [i.id, i]));
+export { ALL_ITEMS, ITEMS };
 
 interface Cam { yaw: number; pitch: number; dist: number; target: THREE.Vector3 }
+
+/**
+ * A self-contained set the renderer can show instead of the forest (the interview room, the Snow
+ * Queen's boutique...). The world keeps its state but stops updating while a stage is up.
+ */
+export interface Stage {
+  readonly scene: THREE.Scene;
+  readonly camera: THREE.PerspectiveCamera;
+  update(dt: number, t: number): void;
+  resize?(w: number, h: number): void;
+  /** pointer input in CSS px with a ray through the stage camera; return true when handled */
+  pointer?(type: 'down' | 'move' | 'up', x: number, y: number, ray: THREE.Ray, e: PointerEvent): boolean;
+  dispose?(): void;
+}
+/** A camera shot for directors (cinematics, build mode). */
+export interface CamShot { yaw: number; pitch: number; dist: number; target: THREE.Vector3; fov?: number; snap?: boolean }
+export type PointerHook = (type: 'down' | 'move' | 'up' | 'wheel', x: number, y: number, ray: THREE.Ray, e: PointerEvent | WheelEvent) => boolean;
 
 interface Trip { from: THREE.Vector3; to: THREE.Vector3; t: number; dur: number; mode: 'hop' | 'fly' | 'leave' | 'arrive'; done?: () => void; arc: number }
 
@@ -84,6 +99,15 @@ export class Scene {
   /** breathing: a warm glow at the owl's chest and a gentle camera dolly */
   private glow: THREE.PointLight;
   private breathZoom = 1;
+  /** a stage shown instead of the world (see Stage) */
+  stage: Stage | null = null;
+  /** takes over the camera while set (cinematics, build mode); return null to fall back to the view */
+  director: ((dt: number, t: number) => CamShot | null) | null = null;
+  /** sees world pointer input first (build mode); return true to swallow it */
+  interceptor: PointerHook | null = null;
+  /** called every world frame after the built-in updates (weather, house animations...) */
+  readonly tickers = new Set<(dt: number, t: number) => void>();
+  private baseFov = 32;
 
   constructor(canvas: HTMLCanvasElement, look: OwlLook, quality: Quality) {
     this.quality = quality;
@@ -333,6 +357,20 @@ export class Scene {
 
   setLook(look: OwlLook) { this.owl.rebuild(look); }
 
+  /** Show a stage instead of the forest (null returns to the world). */
+  setStage(st: Stage | null) {
+    if (this.stage === st) return;
+    this.stage?.dispose?.();
+    this.stage = st;
+    if (st) st.resize?.(innerWidth, innerHeight);
+  }
+  /** Normalised device coords -> ray through the given camera. */
+  rayAt(cx: number, cy: number, cam: THREE.Camera = this.camera): THREE.Ray {
+    const r = this.renderer.domElement.getBoundingClientRect();
+    this.ray.setFromCamera(new THREE.Vector2(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1), cam);
+    return this.ray.ray.clone();
+  }
+
   /** Drive the scene from the breathing exercise (null ends it). */
   breathFx(lung: number | null, kind: 'in' | 'out' | 'hold' | 'rest' = 'rest') {
     const chest = this.owl.node.position.clone().add(new THREE.Vector3(0, 0.75, 0.35));
@@ -394,8 +432,9 @@ export class Scene {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     const hf = (30 * Math.PI) / 180;
-    this.camera.fov = Math.min(56, Math.max(30, (2 * Math.atan(Math.tan(hf / 2) / Math.min(1, this.camera.aspect)) * 180) / Math.PI));
+    this.camera.fov = this.baseFov = Math.min(56, Math.max(30, (2 * Math.atan(Math.tan(hf / 2) / Math.min(1, this.camera.aspect)) * 180) / Math.PI));
     this.camera.updateProjectionMatrix();
+    this.stage?.resize?.(w, h);
   }
 
   start() {
@@ -428,6 +467,11 @@ export class Scene {
   step(dt: number, draw = true) {
     this.time += dt;
     const t = this.time;
+    if (this.stage) {
+      this.stage.update(dt, t);
+      if (draw) this.renderer.render(this.stage.scene, this.stage.camera);
+      return;
+    }
     wind.uTime.value = t;
     GRASS.uTime.value = t;
     const gust = 0.07 + 0.05 * Math.sin(t * 0.21) + 0.03 * Math.sin(t * 0.53 + 1.3);
@@ -454,16 +498,20 @@ export class Scene {
       this.fx.emit({ x: c.x + (Math.random() - 0.5) * 0.2, y: c.y, z: c.z, vx: 0.15, vy: 0.55, vz: 0.05, life: 3.2, frame: SPR.puff1, frames: 3, fps: 1.2, color: this.sky.night > 0.5 ? 0x6a7090 : 0xe8e4dc, size: 0.5, grow: 1.2, drag: 0.3, wind: 0.4, fadeOut: 1 });
     }
     if (this.sky.night > 0.4) this.lantern.intensity = 6 * this.sky.night * (0.92 + Math.sin(t * 13) * 0.04 + Math.sin(t * 7.3) * 0.04);
+    for (const f of this.tickers) f(dt, t);
     for (const m of this.markers.values()) { const s = 1 + Math.sin(t * 3 + m.position.x) * 0.08; m.scale.setScalar(s); (m.material as THREE.MeshBasicMaterial).opacity = 0.65 + Math.sin(t * 3) * 0.25; }
 
     // camera
-    const g = this.goal();
-    g.yaw += this.userYaw; g.dist *= this.userZoom * (this.view === 'breathe' ? this.breathZoom : 1);
-    const k = 1 - Math.exp(-dt * 3.2), c = this.cur;
+    const shot = this.director?.(dt, t) ?? null;
+    const g: Cam = shot ?? this.goal();
+    if (!shot) { g.yaw += this.userYaw; g.dist *= this.userZoom * (this.view === 'breathe' ? this.breathZoom : 1); }
+    const wantFov = shot?.fov ?? this.baseFov;
+    if (Math.abs(this.camera.fov - wantFov) > 0.01) { this.camera.fov += (wantFov - this.camera.fov) * Math.min(1, dt * 4); this.camera.updateProjectionMatrix(); }
+    const k = shot?.snap ? 1 : 1 - Math.exp(-dt * 3.2), c = this.cur;
     c.yaw += (g.yaw - c.yaw) * k; c.pitch += (g.pitch - c.pitch) * k; c.dist += (g.dist - c.dist) * k; c.target.lerp(g.target, k);
     const cp = Math.cos(c.pitch);
     // a slow drift keeps the diorama feeling alive even when nobody touches it
-    const drift = this.view === 'home' || this.view === 'sleep' ? Math.sin(t * 0.07) * 0.05 : 0;
+    const drift = !shot && (this.view === 'home' || this.view === 'sleep') ? Math.sin(t * 0.07) * 0.05 : 0;
     this.camera.position.set(c.target.x + Math.sin(c.yaw + drift) * cp * c.dist, c.target.y + Math.sin(c.pitch) * c.dist, c.target.z + Math.cos(c.yaw + drift) * cp * c.dist);
     this.camera.lookAt(c.target);
     this.shiftCur += (this.shift - this.shiftCur) * k;
@@ -495,14 +543,22 @@ export class Scene {
       return this.ray.ray.distanceToPoint(this.owl.node.position.clone().add(new THREE.Vector3(0, 0.85, 0))) < 0.9;
     };
     el.style.touchAction = 'none';
+    // stages and the build mode get first look at every pointer event
+    const hook = (type: 'down' | 'move' | 'up', e: PointerEvent): boolean => {
+      if (this.stage) { this.stage.pointer?.(type, e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY, this.stage.camera), e); return true; }
+      if (this.interceptor) return this.interceptor(type, e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e);
+      return false;
+    };
     el.addEventListener('pointerdown', (e) => {
       el.setPointerCapture(e.pointerId);
+      if (hook('down', e)) return;
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
       moved = 0; downAt = performance.now(); rub = 0;
       onOwl = pts.size === 1 && owlHit(e.clientX, e.clientY);
       if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a.x - b.x, a.y - b.y); }
     });
     el.addEventListener('pointermove', (e) => {
+      if (hook('move', e)) return;
       const p = pts.get(e.pointerId);
       if (!p) return;
       const dx = e.clientX - p.x, dy = e.clientY - p.y;
@@ -518,6 +574,7 @@ export class Scene {
       if (moved > 6 && this.view !== 'breathe' && this.view !== 'sleep') this.userYaw = Math.max(-0.7, Math.min(0.7, this.userYaw - dx * 0.004));
     });
     const up = (e: PointerEvent) => {
+      if (hook('up', e)) { pts.delete(e.pointerId); return; }
       const had = pts.delete(e.pointerId);
       if (!had || pts.size > 0) return;
       if (moved > 8 || performance.now() - downAt > 600) return;
@@ -548,7 +605,7 @@ export class Scene {
     };
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); });
-    el.addEventListener('wheel', (e) => { this.userZoom = Math.max(0.6, Math.min(1.35, this.userZoom * (1 + Math.sign(e.deltaY) * 0.06))); e.preventDefault(); }, { passive: false });
+    el.addEventListener('wheel', (e) => { if (this.interceptor && !this.stage && this.interceptor('wheel', e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e)) { e.preventDefault(); return; } this.userZoom = Math.max(0.6, Math.min(1.35, this.userZoom * (1 + Math.sign(e.deltaY) * 0.06))); e.preventDefault(); }, { passive: false });
   }
 }
 

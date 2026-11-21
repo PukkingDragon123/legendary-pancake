@@ -141,7 +141,7 @@ export function BreatheSession() {
     const today = dayKey();
     const first = save.value.breath.lastDay !== today;
     const reward = first ? 20 : 5;
-    edit((x) => { x.breath.sessions++; x.breath.minutes += minutes; x.breath.lastDay = today; x.acorns += reward; x.xp += 10; });
+    edit((x) => { x.breath.sessions++; x.breath.minutes += minutes; x.breath.lastDay = today; x.coins += reward; x.xp += 10; });
     progress('breathe');
     setTimeout(() => flyReward('acorn', reward * 3), 600);
     sound.play('bowl', { volume: 0.6 });
@@ -185,7 +185,7 @@ export function BreatheSession() {
           <div class="sheet-body center" style="align-items:center;gap:12px">
             <h1>Lovely.</h1>
             <p class="muted">{done.breaths} calm breath{done.breaths === 1 ? '' : 's'} over {done.minutes} minute{done.minutes === 1 ? '' : 's'}. Pip feels all floaty.</p>
-            <div class="row" style="gap:6px;font-weight:800"><IcoAcorn size={40} />+{done.reward} acorns{done.reward > 5 ? ' (first today)' : ''}</div>
+            <div class="row" style="gap:6px;font-weight:800"><IcoAcorn size={40} />+{done.reward} coins{done.reward > 5 ? ' (first today)' : ''}</div>
             <div class="row" style="width:100%;gap:10px">
               <button class="btn soft grow" onClick={() => { tap(); breathing.value = null; setTimeout(() => { breathing.value = { ...cfg }; }, 50); }}>Again</button>
               <button class="btn pillow grow" onClick={close}>Done</button>

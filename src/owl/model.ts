@@ -372,7 +372,13 @@ export function meowlPainter(p: OwlPalette): Painter {
 
 // ------------------------------------------------------------------ the parts
 
-export interface OwlLook { skin?: Skin; palette: string; outfit: Partial<Record<OutfitSlot, string>> }
+export interface OwlLook {
+  skin?: Skin;
+  /** real owl species the body is modelled on (see species registry); falls back to the palette */
+  species?: string;
+  palette: string;
+  outfit: Partial<Record<OutfitSlot, string>>;
+}
 export type OutfitSlot = 'head' | 'face' | 'neck' | 'body' | 'back';
 
 export interface OwlParts {

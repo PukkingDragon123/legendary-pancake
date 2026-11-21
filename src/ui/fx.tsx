@@ -140,8 +140,8 @@ export function QuestBoard() {
                   <button class={'btn sm ' + (done ? 'pillow honey' : 'soft')} disabled={!done} onClick={(e) => {
                     const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
                     const got = claim(q.kind);
-                    if (got) { sound.play('reward_quest', { volume: 0.6 }); flyReward('acorn', got.acorns, { x: r.left + r.width / 2, y: r.top }); }
-                  }}><IcoAcorn size={30} />{d.acorns}</button>
+                    if (got) { sound.play('reward_quest', { volume: 0.6 }); flyReward('acorn', got.coins, { x: r.left + r.width / 2, y: r.top }); }
+                  }}><IcoAcorn size={30} />{d.coins}</button>
                 )}
               </div>
             </div>

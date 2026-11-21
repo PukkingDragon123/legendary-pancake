@@ -9,9 +9,9 @@ export interface AdventureResult {
   area: string;
   story: string[];
   finds: Find[];
-  acorns: number;
+  coins: number;
   xp: number;
-  stones: number;
+  gems: number;
   /** 0..1 how good the trip was */
   luck: number;
 }
@@ -32,20 +32,22 @@ export function rollAdventure(o: { area: string; report: SleepReport; seed: numb
   const hours = rep.asleep / 3.6e6;
   // luck: mostly the sleep score, a little for the streak
   const luck = Math.max(0.05, Math.min(1, rep.score / 100 * 0.85 + Math.min(o.streak, 7) * 0.02));
-  const count = (hours < 1 ? 0 : hours < 4 ? 1 : luck > 0.82 ? 3 : 2) + (o.plus && hours >= 1 ? 1 : 0);
+  // every real night brings at least one present home; good nights bring more
+  const count = (hours < 1 ? 0 : hours < 5 ? 1 : luck > 0.82 ? 3 : 2) + (o.plus && hours >= 1 ? 1 : 0);
 
   const table = lootTable(a.id);
   const finds: Find[] = [];
   for (let i = 0; i < count; i++) {
     // good nights shift the odds towards rare things
     const boost = (k: Rarity) => WEIGHT[k] * (k === 'common' ? 1.4 - luck : k === 'uncommon' ? 1 : 0.4 + luck * 1.6);
-    const pool = table.filter((e) => !finds.some((f) => f.id === e.id) && (e.kind === 'trinket' || !o.owned(e)));
+    // furniture can turn up again (another chair is always welcome); outfits and coats only once
+    const pool = table.filter((e) => !finds.some((f) => f.id === e.id) && (e.kind === 'item' || !o.owned(e)));
     if (!pool.length) break;
     let total = 0;
     for (const e of pool) total += boost(e.rarity);
     let pick = r() * total, chosen = pool[0];
     for (const e of pool) { pick -= boost(e.rarity); if (pick <= 0) { chosen = e; break; } }
-    finds.push({ ...chosen, dupe: chosen.kind === 'trinket' && o.owned(chosen) });
+    finds.push({ ...chosen, dupe: chosen.kind === 'item' && o.owned(chosen) });
   }
 
   const pickOf = <T,>(arr: T[]) => arr[Math.floor(r() * arr.length)];
@@ -58,8 +60,8 @@ export function rollAdventure(o: { area: string; report: SleepReport; seed: numb
     if (hours >= 3) story.push(`Later, ${name} met ${pickOf(a.friends)} and ${pickOf(a.deeds)}.`);
     if (hours >= 6) story.push(pickOf([`By the time the sky turned pink, the satchel was heavy with treasure.`, `${name} flew home the long way round, just to look at the stars a little longer.`, `${name} hummed the whole way home.`]));
   }
-  const acorns = Math.round(30 + rep.score * 1.1 + Math.min(9, hours) * 8);
+  const coins = Math.round(30 + rep.score * 1.1 + Math.min(9, hours) * 8);
   const xp = Math.round(25 + rep.score * 0.9 + Math.min(9, hours) * 5);
-  const stones = luck > 0.9 ? 5 : luck > 0.75 ? 2 : 0;
-  return { area: a.id, story, finds, acorns, xp, stones, luck };
+  const gems = luck > 0.9 ? 5 : luck > 0.75 ? 2 : 0;
+  return { area: a.id, story, finds, coins, xp, gems, luck };
 }

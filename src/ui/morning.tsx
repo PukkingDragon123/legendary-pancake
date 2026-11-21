@@ -142,12 +142,12 @@ export function Treasure(p: { onDone: () => void }) {
     tap('coin_purse', 0.7);
     sound.play('reward_coin', { volume: 0.6 });
     collectAdventure();
-    flyReward('acorn', adv.acorns);
+    flyReward('acorn', adv.coins);
     setTimeout(() => flyReward('star', adv.xp, { x: innerWidth / 2, y: innerHeight * 0.6 }), 300);
-    if (adv.stones) setTimeout(() => flyReward('moonstone', adv.stones * 10), 600);
+    if (adv.gems) setTimeout(() => flyReward('moonstone', adv.gems * 10), 600);
     const sc = sceneRef.current;
     if (sc) { sc.owl.play('dance'); const o = sc.owl.node.position; sc.fx.burst('coins', o.x, o.y + 0.8, o.z + 0.3, 14); }
-    toast(`+${adv.acorns} acorns · +${adv.xp} XP${adv.stones ? ` · +${adv.stones} moonstones` : ''}`, IcoAcorn);
+    toast(`+${adv.coins} coins · +${adv.xp} XP${adv.gems ? ` · +${adv.gems} moonstones` : ''}`, IcoAcorn);
     setTimeout(() => say(lines.morning(save.value.name)), 1200);
     p.onDone();
   };
@@ -174,9 +174,9 @@ export function Treasure(p: { onDone: () => void }) {
             {!adv.finds.length && <p class="muted center">A short trip, so no treasures this time. A full night of sleep means a fuller satchel!</p>}
           </div>
           <div class="row" style="justify-content:center;gap:16px;font-weight:800">
-            <span class="row" style="gap:4px"><IcoAcorn size={40} />+{adv.acorns}</span>
+            <span class="row" style="gap:4px"><IcoAcorn size={40} />+{adv.coins}</span>
             <span class="row" style="gap:4px"><IcoStar size={40} />+{adv.xp} XP</span>
-            {adv.stones > 0 && <span class="row" style="gap:4px"><IcoStone size={40} />+{adv.stones}</span>}
+            {adv.gems > 0 && <span class="row" style="gap:4px"><IcoStone size={40} />+{adv.gems}</span>}
           </div>
           <button class="btn pillow big block" onClick={collect}>Collect</button>
         </>

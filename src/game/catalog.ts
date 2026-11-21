@@ -179,12 +179,18 @@ const AREA_ITEMS: Record<string, string[]> = {
 };
 const RARITY_BY_PRICE = (p: number): Rarity => (p >= 450 ? 'rare' : p >= 220 ? 'uncommon' : 'common');
 
+const AREA_IDS = ['woods', 'grotto', 'lake', 'caverns', 'peak'];
+const hashId = (id: string) => { let h = 7; for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0; return Math.abs(h); };
+/** Which area an item turns up in when no hand-picked list mentions it. */
+const homeArea = (id: string) => { for (const [a, list] of Object.entries(AREA_ITEMS)) if (list.includes(id)) return a; return AREA_IDS[hashId(id) % AREA_IDS.length]; };
+
+/** What Pip can bring home from an area: furniture and decor for the house, and outfits. */
 export function lootTable(area: string): LootEntry[] {
   const out: LootEntry[] = [];
-  for (const t of TRINKETS) if (t.area === area) out.push({ kind: 'trinket', id: t.id, rarity: t.rarity, area });
-  for (const id of AREA_ITEMS[area] ?? []) {
-    const it = ALL_ITEMS.find((i) => i.id === id);
-    if (it) out.push({ kind: 'item', id, rarity: RARITY_BY_PRICE(it.price), area });
+  for (const it of ALL_ITEMS) {
+    if (it.series || it.gems) continue;
+    if (homeArea(it.id) !== area) continue;
+    out.push({ kind: 'item', id: it.id, rarity: RARITY_BY_PRICE(it.price), area });
   }
   for (const p of PIECES) if (p.area === area && !p.premium) out.push({ kind: 'piece', id: p.id, rarity: p.price >= 300 ? 'rare' : 'uncommon', area });
   for (const p of PALETTES) if (p.unlock === area) out.push({ kind: 'palette', id: p.id, rarity: 'legendary', area });
@@ -209,11 +215,11 @@ export const ITEM_BY_ID = Object.fromEntries(ALL_ITEMS.map((i) => [i.id, i]));
 
 // ------------------------------------------------------------------ store
 
-export interface Product { id: string; name: string; blurb: string; price: string; stones?: number; plan?: 'monthly' | 'yearly'; badge?: string }
+export interface Product { id: string; name: string; blurb: string; price: string; gems?: number; plan?: 'monthly' | 'yearly'; badge?: string }
 export const STONE_PACKS: Product[] = [
-  { id: 'stones_s', name: 'Pouch of Moonstones', blurb: '120 moonstones', price: '$1.99', stones: 120 },
-  { id: 'stones_m', name: 'Jar of Moonstones', blurb: '400 moonstones + 40 bonus', price: '$4.99', stones: 440, badge: 'Popular' },
-  { id: 'stones_l', name: 'Chest of Moonstones', blurb: '1,000 moonstones + 200 bonus', price: '$9.99', stones: 1200, badge: 'Best value' },
+  { id: 'stones_s', name: 'Pouch of Moonstones', blurb: '120 moonstones', price: '$1.99', gems: 120 },
+  { id: 'stones_m', name: 'Jar of Moonstones', blurb: '400 moonstones + 40 bonus', price: '$4.99', gems: 440, badge: 'Popular' },
+  { id: 'stones_l', name: 'Chest of Moonstones', blurb: '1,000 moonstones + 200 bonus', price: '$9.99', gems: 1200, badge: 'Best value' },
 ];
 export const PLUS_PLANS: Product[] = [
   { id: 'plus_monthly', name: 'Hoot Hollow Plus', blurb: 'Monthly', price: '$4.99 / month', plan: 'monthly' },

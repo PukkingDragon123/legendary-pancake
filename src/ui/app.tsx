@@ -2,62 +2,30 @@
 // overlay is open. The 3D scene lives underneath on its own canvas.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
-import { claimable } from '../game/quests.ts';
 import { Ceremony, Dialogs, Flyers, QuestBoard } from './fx.tsx';
 import { bedtimeOf, phase } from '../game/night.ts';
-import { level, save } from '../game/store.ts';
+import { save } from '../game/store.ts';
 import { AREA } from '../game/catalog.ts';
 import { BreathePicker, BreatheSession } from './breathe.tsx';
-import { Px, IcoAcorn, IcoBrush, IcoCandle, IcoClock, IcoGear, IcoHanger, IcoHouse, IcoJar, IcoJournal, IcoMap, IcoMoon, IcoSatchel, IconDefs, IcoStone } from './icons.tsx';
-import { Journal } from './journal.tsx';
-import { fmtDur, fmtHM, Rolling, tap, Toasts, useTick } from './kit.tsx';
-import { Market } from './market.tsx';
+import { IconDefs, IcoMoon } from './icons.tsx';
+import { fmtDur, fmtHM, tap, Toasts, useTick } from './kit.tsx';
 import { Morning, NightReport } from './morning.tsx';
-import { Decorate, MapPanel, Wardrobe } from './panels.tsx';
-import { portrait } from './portraits.ts';
-import { Onboarding, Settings } from './settings.tsx';
-import { AlarmOverlay, NightOverlay, SleepSheet } from './sleep.tsx';
-import { breathing, bubble, nightOpen, panel, sceneRef, tab, type Tab } from './state.ts';
-
-function Hud() {
-  const s = save.value, lv = level.value;
-  const away = phase.value !== 'day' || !!breathing.value || panel.value === 'wardrobe';
-  return (
-    <div class={'hud-top' + (away ? ' away' : '')}>
-      <div class="col" style="gap:4px;align-items:flex-start">
-        <button class="profile" onClick={() => { tap(); panel.value = 'wardrobe'; }} aria-label="Pip's wardrobe">
-          <span class="portrait"><img src={portrait(s.look)} alt="" /></span>
-          <span style="text-align:left">
-            <span class="name">{s.name}<span class="lvtag">Lv {lv.level}</span></span>
-            <span class="lvbar" style="display:block"><i style={{ width: `${Math.max(8, Math.round((lv.into / lv.need) * 100))}%` }} /></span>
-          </span>
-        </button>
-        <button class="chip" style="margin-left:6px" onClick={() => { tap(); tab.value = 'journal'; }} aria-label="Night streak"><IcoCandle size={40} />{s.streak} night{s.streak === 1 ? '' : 's'}</button>
-      </div>
-      <div class="chips">
-        <button class="chip" data-chip="acorn" onClick={() => { tap(); tab.value = 'market'; }} aria-label="Acorns"><IcoAcorn size={40} /><Rolling value={s.acorns} /></button>
-        <button class="chip" data-chip="moonstone" onClick={() => { tap(); tab.value = 'market'; }} aria-label="Moonstones"><IcoStone size={40} /><Rolling value={s.stones} /></button>
-      </div>
-    </div>
-  );
-}
-
-function Tools() {
-  const away = tab.value !== 'home' || !!panel.value || phase.value !== 'day' || !!breathing.value || !save.value.onboarded;
-  const ready = claimable();
-  const t = (label: string, I: typeof IcoBrush | null, p: typeof panel.value, dot = 0, sprite = '') => (
-    <div class="tool">
-      <button class="icon-btn" aria-label={label} onClick={() => { tap('ui_open', 0.5); panel.value = p; }}>{I ? <I size={30} /> : <Px name={sprite} size={30} />}{dot > 0 && <span class="badge-dot">{dot}</span>}</button>
-      <span>{label}</span>
-    </div>
-  );
-  return <div class={'tools' + (away ? ' away' : '')}>{t('Settings', IcoGear, 'settings')}{t('Quests', null, 'quests', ready, 'clipboard')}{t('Dress up', IcoHanger, 'wardrobe')}{t('Decorate', IcoBrush, 'decorate')}{t('Map', IcoMap, 'map')}</div>;
-}
+import { MapPanel, Wardrobe } from './panels.tsx';
+import { Settings } from './settings.tsx';
+import { AlarmOverlay, NightOverlay } from './sleep.tsx';
+import { breathing, bubble, nightOpen, panel, sceneRef } from './state.ts';
+import { Hud, MainNav, SideTools } from './chrome/hud.tsx';
+import { SleepScreen } from './sleepflow.tsx';
+import { ClockScreen } from './clockscreen.tsx';
+import { Book } from './book/book.tsx';
+import { BuildMode } from './build.tsx';
+import { Shop } from './shop/shop.tsx';
+import { Intro } from './intro.tsx';
 
 function Ticket() {
   useTick(30000);
   const s = save.value, p = s.sleep;
-  const away = tab.value !== 'home' || !!panel.value || phase.value !== 'day' || !!breathing.value || !save.value.onboarded;
+  const away = !!panel.value || phase.value !== 'day' || !!breathing.value || !save.value.onboarded;
   const bed = bedtimeOf(p.wake, p.goalMin);
   const [h, m] = bed.split(':').map(Number);
   const now = new Date(), t = new Date(now);
@@ -73,7 +41,7 @@ function Ticket() {
         <b class="display" style="font-size:17px">{late ? 'Past bedtime, sleepyhead' : soon ? `Bedtime in ${fmtDur(diff)}` : `Bedtime at ${fmtHM(bed, s.settings.hour12)}`}</b>
         <div class="small muted">Wake {fmtHM(p.wake, s.settings.hour12)} · tonight: {AREA[s.area]?.name}</div>
       </div>
-      <button class={'btn pillow sm' + (late || soon ? ' night' : '')} onClick={() => { tap('ui_open'); tab.value = 'sleep'; }}>{late || soon ? 'Get cozy' : 'Plan'}</button>
+      <button class={'btn pillow sm' + (late || soon ? ' night' : '')} onClick={() => { tap('ui_open'); panel.value = 'sleep'; }}>{late || soon ? 'Get cozy' : 'Plan'}</button>
     </div>
   );
 }
@@ -114,27 +82,6 @@ function Bubble() {
   return <div class="bubble" ref={ref} key={b.id}><span class="who">{save.value.name}</span>{b.text.slice(0, shown)}<span style="opacity:0">{b.text.slice(shown)}</span></div>;
 }
 
-const DOCK: { id: Tab; label: string; I: typeof IcoHouse }[] = [
-  { id: 'home', label: 'Home', I: IcoHouse }, { id: 'sleep', label: 'Sleep', I: IcoClock }, { id: 'breathe', label: 'Breathe', I: IcoJar },
-  { id: 'journal', label: 'Journal', I: IcoJournal }, { id: 'market', label: 'Market', I: IcoSatchel },
-];
-
-function Dock() {
-  const away = phase.value !== 'day' || !!breathing.value || !!panel.value;
-  return (
-    <nav class={'dock' + (away ? ' away' : '')} aria-label="Main">
-      <div class="dock-in">
-        {DOCK.map((d) => (
-          <button class={'dock-item' + (tab.value === d.id ? ' on' : '')} aria-current={tab.value === d.id} onClick={() => { tap(tab.value === d.id ? 'ui_tap' : 'ui_tab', 0.55); tab.value = d.id; panel.value = null; }}>
-            <d.I size={40} />
-            <span>{d.label}</span>
-          </button>
-        ))}
-      </div>
-    </nav>
-  );
-}
-
 export function App() {
   const s = save.value;
   const ph = phase.value;
@@ -143,24 +90,29 @@ export function App() {
     <div class="layer">
       <IconDefs />
       <Hud />
-      <Tools />
+      <SideTools />
       <Ticket />
       <Bubble />
-      {ph === 'day' && !breathing.value && !panel.value && (
-        tab.value === 'sleep' ? <SleepSheet /> : tab.value === 'breathe' ? <BreathePicker /> : tab.value === 'journal' ? <Journal /> : tab.value === 'market' ? <Market /> : null
+      {ph === 'day' && !breathing.value && (
+        panel.value === 'sleep' ? <SleepScreen />
+          : panel.value === 'breathe' ? <BreathePicker />
+          : panel.value === 'clock' ? <ClockScreen />
+          : panel.value === 'book' ? <Book />
+          : panel.value === 'build' || panel.value === 'decorate' ? <BuildMode />
+          : panel.value === 'shop' ? <Shop />
+          : panel.value === 'wardrobe' ? <Wardrobe />
+          : panel.value === 'map' ? <MapPanel />
+          : panel.value === 'quests' ? <QuestBoard />
+          : null
       )}
-      {ph === 'day' && panel.value === 'wardrobe' && <Wardrobe />}
-      {ph === 'day' && panel.value === 'decorate' && <Decorate />}
-      {ph === 'day' && panel.value === 'map' && <MapPanel />}
       {panel.value === 'settings' && <Settings />}
-      {ph === 'day' && panel.value === 'quests' && <QuestBoard />}
-      <Dock />
+      <MainNav />
       {night && night.report && ph === 'day' && <NightReport s={night} onClose={() => { nightOpen.value = null; }} />}
       {breathing.value && <BreatheSession key={JSON.stringify(breathing.value)} />}
       {ph === 'sleeping' && <NightOverlay />}
       {ph === 'ringing' && <AlarmOverlay />}
       {ph === 'morning' && <Morning />}
-      {!s.onboarded && ph === 'day' && <Onboarding />}
+      {!s.onboarded && ph === 'day' && <Intro />}
       <Flyers />
       <Ceremony />
       <Dialogs />

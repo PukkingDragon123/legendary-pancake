@@ -7,7 +7,8 @@ import { hash } from '../gfx/noise.ts';
 import { daisy, PAL, toadstool, tulip } from './nature.ts';
 
 export type Anchor = { x: number; y: number; z: number; rot?: number };
-export type ItemCat = 'seating' | 'tables' | 'lights' | 'plants' | 'decor' | 'play' | 'garden' | 'beds' | 'wall';
+export type ItemCat = 'seating' | 'tables' | 'lights' | 'plants' | 'decor' | 'play' | 'garden' | 'beds' | 'wall' | 'storage' | 'rugs' | 'fun' | 'seasonal';
+export type ItemRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 
 export interface ItemDef {
   id: string;
@@ -27,6 +28,24 @@ export interface ItemDef {
   light?: { x: number; y: number; z: number; color: number; power: number };
   /** animals may walk through it (rugs, stepping stones, arches) */
   flatItem?: boolean;
+  // ---- build mode (all optional; sensible defaults are derived from the model's bounds)
+  /** footprint in build-grid cells [w, d] before rotation */
+  size?: [number, number];
+  /** height in px of a flat top that small items can stand on (tables, shelves, dressers) */
+  surface?: number;
+  /** small enough to stand on another item's surface (lamps, mugs, plants in pots, fish bowls) */
+  small?: boolean;
+  /** hangs on a wall (paintings, clocks, wreaths, shelves) */
+  wall?: boolean;
+  /** lies flat on the floor; other items may stand on top of it */
+  rug?: boolean;
+  rarity?: ItemRarity;
+  /** belongs to a limited series (gacha / seasonal); not sold in the regular build store */
+  series?: string;
+  /** not sold in the build store (adventure or gacha only) */
+  noStore?: boolean;
+  /** an idle animation hook: called every frame with the placed mesh (fish swimming, flames...) */
+  animate?: (mesh: import('three').Object3D, t: number) => void;
 }
 
 const W = { oak: '#b87a41', dark: '#7b4b2c', light: '#dcab68', pale: '#ead3a4', red: '#b84a3b', white: '#f2ede2', blue: '#5f8fc9' };

@@ -4,18 +4,18 @@ import { dayKey, edit, save } from './store.ts';
 
 export type QuestKind = 'breathe' | 'pet' | 'catch' | 'sleep7' | 'early' | 'dress' | 'decorate' | 'note' | 'hop' | 'mood';
 
-export interface QuestDef { kind: QuestKind; title: string; goal: number; acorns: number; xp: number; sprite: string }
+export interface QuestDef { kind: QuestKind; title: string; goal: number; coins: number; xp: number; sprite: string }
 export const QUEST_POOL: QuestDef[] = [
-  { kind: 'breathe', title: 'Breathe with Pip once', goal: 1, acorns: 30, xp: 15, sprite: 'jar' },
-  { kind: 'pet', title: 'Give Pip 3 head scratches', goal: 3, acorns: 15, xp: 8, sprite: 'heart' },
-  { kind: 'catch', title: 'Catch 3 fireflies at dusk', goal: 3, acorns: 25, xp: 12, sprite: 'sparkle' },
-  { kind: 'sleep7', title: 'Sleep 7 hours or more', goal: 1, acorns: 60, xp: 30, sprite: 'nest' },
-  { kind: 'early', title: 'Start sleep before bedtime', goal: 1, acorns: 40, xp: 20, sprite: 'moon' },
-  { kind: 'dress', title: 'Try on a new look', goal: 1, acorns: 15, xp: 8, sprite: 'hanger' },
-  { kind: 'decorate', title: 'Rearrange the tree house', goal: 1, acorns: 20, xp: 10, sprite: 'brush' },
-  { kind: 'note', title: 'Write a line in the dream journal', goal: 1, acorns: 20, xp: 10, sprite: 'pen' },
-  { kind: 'hop', title: 'Walk Pip around the clearing', goal: 5, acorns: 15, xp: 8, sprite: 'treehouse' },
-  { kind: 'mood', title: 'Tell Pip how you slept', goal: 1, acorns: 15, xp: 8, sprite: 'mood3' },
+  { kind: 'breathe', title: 'Breathe with Pip once', goal: 1, coins: 30, xp: 15, sprite: 'jar' },
+  { kind: 'pet', title: 'Give Pip 3 head scratches', goal: 3, coins: 15, xp: 8, sprite: 'heart' },
+  { kind: 'catch', title: 'Catch 3 fireflies at dusk', goal: 3, coins: 25, xp: 12, sprite: 'sparkle' },
+  { kind: 'sleep7', title: 'Sleep 7 hours or more', goal: 1, coins: 60, xp: 30, sprite: 'nest' },
+  { kind: 'early', title: 'Start sleep before bedtime', goal: 1, coins: 40, xp: 20, sprite: 'moon' },
+  { kind: 'dress', title: 'Try on a new look', goal: 1, coins: 15, xp: 8, sprite: 'hanger' },
+  { kind: 'decorate', title: 'Rearrange the tree house', goal: 1, coins: 20, xp: 10, sprite: 'brush' },
+  { kind: 'note', title: 'Write a line in the dream journal', goal: 1, coins: 20, xp: 10, sprite: 'pen' },
+  { kind: 'hop', title: 'Walk Pip around the clearing', goal: 5, coins: 15, xp: 8, sprite: 'treehouse' },
+  { kind: 'mood', title: 'Tell Pip how you slept', goal: 1, coins: 15, xp: 8, sprite: 'mood3' },
 ];
 
 export interface QuestState { kind: QuestKind; prog: number; claimed: boolean }
@@ -60,7 +60,7 @@ export function claim(kind: QuestKind): QuestDef | null {
   edit((x) => {
     const q = (x as unknown as { quests: { list: QuestState[] } }).quests;
     q.list[i].claimed = true;
-    x.acorns += def.acorns;
+    x.coins += def.coins;
     x.xp += def.xp;
   });
   return def;

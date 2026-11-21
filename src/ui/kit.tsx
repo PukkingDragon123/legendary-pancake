@@ -77,9 +77,9 @@ export function Setting(p: { icon?: JSX.Element; title: ComponentChildren; sub?:
   );
 }
 
-export function Price(p: { acorns?: number; stones?: number }) {
-  if (p.stones) return <span class="price"><IcoStone size={20} />{p.stones}</span>;
-  if (p.acorns) return <span class="price"><IcoAcorn size={20} />{p.acorns.toLocaleString()}</span>;
+export function Price(p: { coins?: number; gems?: number }) {
+  if (p.gems) return <span class="price"><IcoStone size={20} />{p.gems}</span>;
+  if (p.coins) return <span class="price"><IcoAcorn size={20} />{p.coins.toLocaleString()}</span>;
   return <span class="price">Free</span>;
 }
 
