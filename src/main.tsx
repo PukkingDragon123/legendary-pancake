@@ -82,7 +82,7 @@ async function boot() {
       for (const [k, v] of Object.entries(zones.value)) if (v && !before[k] && k === 'garden') toast( // [house] floors announce themselves (home-sync)
         'New room unlocked: the Garden!', IcoSparkle, 4200);
     }
-    if (bk !== blockKey) { blockKey = bk; edit((x) => { x.blocker.mascot = x.look.skin ?? 'owl'; }); void pushBlockerConfig(); }
+    if (bk !== blockKey) { blockKey = bk; edit((x) => { x.blocker.mascot = x.look.skin === 'meowl' ? 'meowl' : 'owl'; /* [owl] skins are now any special-skin id */ }); void pushBlockerConfig(); }
   });
   // camera framing follows what's open
   effect(() => {

@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { PX } from '../gfx/box.ts';
 import { defaultEye, type EyeMode, type EyeState } from './eyes.ts';
-import { buildOwl, G, PIVOTS, type OwlLook, type OwlModel } from './model.ts';
+import { buildOwl, type OwlLook, type OwlModel } from './model.ts';
 
 export type OwlMood = 'neutral' | 'happy' | 'joy' | 'sleepy' | 'asleep' | 'surprised' | 'love' | 'proud' | 'curious' | 'sad' | 'worried' | 'dizzy' | 'calm' | 'excited';
 export type OwlAction = 'none' | 'hop' | 'dance' | 'ruffle' | 'yawn' | 'spin' | 'wave' | 'nod' | 'peck' | 'present' | 'stretch' | 'flap' | 'shiver';
@@ -79,6 +79,7 @@ export class OwlActor {
   private zzzT = 0;
   private eye: EyeState = defaultEye();
   private earTwitch = 3;
+  private nictT = -1;
   // springs
   private s = {
     sy: new Spring(1, 1, 160, 11), sxz: new Spring(1, 1, 160, 11), lean: new Spring(0, 0, 90, 13), hopY: new Spring(0, 0, 0, 0),
@@ -143,7 +144,7 @@ export class OwlActor {
     else { this.setMood('surprised', 0.9); this.s.sy.kick(2.4); this.s.tuftL.kick(14); this.s.tuftR.kick(14); this.hooks.sound?.('hoot'); }
   }
 
-  private chest() { return this.node.localToWorld(new THREE.Vector3(0, 10 * PX, 6 * PX)); }
+  private chest() { const g = this.model.g; return this.node.localToWorld(new THREE.Vector3(0, (g.bodyY + g.bodyH * 0.65) * PX, g.chestZ * PX)); }
 
   update(dt: number) {
     this.time += dt;
@@ -196,7 +197,7 @@ export class OwlActor {
     }
     if (this.lookAt && this.pose !== 'sleep') {
       const local = this.node.worldToLocal(this.lookAt.clone());
-      const hp = new THREE.Vector3(0, G.eyeY * PX, 0);
+      const hp = new THREE.Vector3(0, this.model.g.eyeY * PX, 0);
       const d = local.sub(hp);
       const ay = Math.atan2(d.x, d.z), ap = Math.atan2(-d.y, Math.hypot(d.x, d.z));
       yaw = THREE.MathUtils.clamp(ay, -1.2, 1.2) * 0.8; pitch += THREE.MathUtils.clamp(ap, -0.5, 0.5) * 0.7;
@@ -257,13 +258,23 @@ export class OwlActor {
 
     // blinks: soft, quick, sometimes doubled
     if (mode === 'normal' || mode === 'sparkle') {
-      if ((this.nextBlink -= dt) <= 0) { this.blinkT = 0; this.nextBlink = 1.8 + Math.random() * 4 + (Math.random() < 0.2 ? -1.5 : 0); }
+      if ((this.nextBlink -= dt) <= 0) {
+        this.nextBlink = 1.8 + Math.random() * 4 + (Math.random() < 0.2 ? -1.5 : 0);
+        if (Math.random() < 0.28 && this.model.look.skin !== 'meowl') this.nictT = 0; else this.blinkT = 0;
+      }
       if (this.blinkT >= 0) {
         this.blinkT += dt;
         const k = this.blinkT < 0.07 ? this.blinkT / 0.07 : this.blinkT < 0.14 ? 1 : Math.max(0, 1 - (this.blinkT - 0.14) / 0.09);
         lid = Math.max(lid, k);
         if (this.blinkT > 0.23) this.blinkT = -1;
       }
+    }
+
+    let nict = 0;
+    if (this.nictT >= 0) {
+      this.nictT += dt;
+      nict = this.nictT < 0.12 ? this.nictT / 0.12 : Math.max(0, 1 - (this.nictT - 0.16) / 0.16);
+      if (this.nictT > 0.34) this.nictT = -1;
     }
 
     // ---------------- springs
@@ -276,23 +287,32 @@ export class OwlActor {
     if (this.blinkT >= 0) s.lid.x = lid;
 
     // ---------------- apply to bones
-    const body = B.body, head = B.head;
+    const body = B.body, head = B.head, g = this.model.g, PV = this.model.pivots;
     body.scale.set(s.sxz.x, s.sy.x, s.sxz.x);
     body.rotation.x = s.lean.x;
-    const neckH = (G.neckY - G.bodyY) * PX;
-    head.position.set(PIVOTS.head[0] * PX, PIVOTS.head[1] * PX + neckH * (s.sy.x - 1) + Math.sin(s.lean.x) * 0.02, PIVOTS.head[2] * PX + Math.sin(s.lean.x) * neckH);
+    const neckH = (g.neckY - g.bodyY) * PX;
+    head.position.set(PV.head[0] * PX, PV.head[1] * PX + neckH * (s.sy.x - 1) + Math.sin(s.lean.x) * 0.02, PV.head[2] * PX + Math.sin(s.lean.x) * neckH);
     head.rotation.set(s.pitch.x, s.yaw.x, s.roll.x, 'YXZ');
     B.wingL.rotation.set(0, 0, -s.wingL.x);
     B.wingR.rotation.set(0, 0, s.wingR.x);
+    // the hand unfolds as the wing lifts, swinging the primaries out to the full span
+    const spreadL = THREE.MathUtils.clamp(s.wingL.x / 1.4, 0, 1.2), spreadR = THREE.MathUtils.clamp(s.wingR.x / 1.4, 0, 1.2);
+    if (B.handL) B.handL.rotation.set(-spreadL * 0.85, 0, 0);
+    if (B.handR) B.handR.rotation.set(-spreadR * 0.85, 0, 0);
+    // feet tuck back in flight
+    const tuck = this.pose === 'fly' ? 0.9 : 0;
+    B.legL.rotation.x += (tuck - B.legL.rotation.x) * Math.min(1, dt * 8);
+    B.legR.rotation.x = B.legL.rotation.x;
     B.tuftL.rotation.set(-Math.max(0, -s.tuftL.x) * 0.25, 0, -s.tuftL.x * 0.32 + Math.max(0, -s.tuftL.x) * 0.55);
     B.tuftR.rotation.set(-Math.max(0, -s.tuftR.x) * 0.25, 0, s.tuftR.x * 0.32 - Math.max(0, -s.tuftR.x) * 0.55);
-    B.browL.position.y = (PIVOTS.browL[1] - PIVOTS.head[1]) * PX + s.brow.x * 0.6 * PX;
-    B.browR.position.y = (PIVOTS.browR[1] - PIVOTS.head[1]) * PX + s.brow.x * 0.6 * PX;
+    B.browL.position.y = (PV.browL[1] - PV.head[1]) * PX + s.brow.x * 0.6 * PX;
+    B.browR.position.y = (PV.browR[1] - PV.head[1]) * PX + s.brow.x * 0.6 * PX;
     B.browL.rotation.z = -s.browTilt.x * 0.35;
     B.browR.rotation.z = s.browTilt.x * 0.35;
     const mo = Math.max(0, s.jaw.x);
     B.jaw.visible = mo > 0.06;
-    B.jaw.scale.set(0.7 + mo * 0.4, Math.max(0.05, mo * 1.2), 1);
+    if (this.model.look.skin === 'meowl') B.jaw.scale.set(0.7 + mo * 0.4, Math.max(0.05, mo * 1.2), 1);
+    else B.jaw.rotation.x = Math.min(0.75, mo * 0.55);
     B.tail.rotation.x = s.tail.x;
     this.model.rig.root.position.y = this.air;
 
@@ -304,6 +324,7 @@ export class OwlActor {
     this.eye.ly = THREE.MathUtils.clamp(s.ly.x, -1, 1);
     this.eye.mode = mode;
     this.eye.tear = !!F.tear;
+    this.eye.nict = nict;
     this.applyEyes(false);
   }
 

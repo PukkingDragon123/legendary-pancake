@@ -1,8 +1,11 @@
-// Thumbnails are small renders of the real 3D models (furniture, Pip wearing an outfit, coats),
-// made once with an offscreen renderer and cached as data URLs.
+// Thumbnails are small renders of the real 3D models (furniture, Pip wearing an outfit, species,
+// skins), made with one offscreen renderer and cached as data URLs. Owls are heavy to build, so the
+// async helpers (`owlIconAsync`, `useOwlIcon`) render one per frame from a queue and never stall
+// a tap; the old synchronous exports stay for callers that need an answer right away.
 import * as THREE from 'three';
+import { useEffect, useState } from 'preact/hooks';
 import { buildProp, propMesh } from '../gfx/box.ts';
-import { buildOwl, G, type OwlLook } from '../owl/model.ts';
+import { buildOwl, type OwlLook } from '../owl/model.ts';
 import { ITEMS } from '../world/scene.ts';
 
 const S = 192;
@@ -19,7 +22,9 @@ function setup() {
   scene.add(new THREE.HemisphereLight(0xfff4e0, 0x8a7a90, 1.6));
   const d = new THREE.DirectionalLight(0xfff0d8, 1.9);
   d.position.set(-3, 6, 7);
-  scene.add(d);
+  const rim = new THREE.DirectionalLight(0xb8c8ff, 0.7);
+  rim.position.set(5, 3, -5);
+  scene.add(d, rim);
   cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
 }
 
@@ -57,23 +62,102 @@ export const itemIcon = (id: string) => memo('i:' + id, () => {
   return url;
 });
 
-const lookKey = (l: OwlLook) => (l.skin ?? 'owl') + '|' + l.palette + '|' + JSON.stringify(l.outfit);
+export type OwlShot = 'face' | 'full' | 'bust';
+const lookKey = (l: OwlLook) => JSON.stringify([l.skin ?? 'owl', l.species ?? '', l.palette, l.outfit, l.feminine ? 1 : 0, l.held ?? '']);
 
-function owlShot(look: OwlLook, part: 'face' | 'full'): string {
+function owlShot(look: OwlLook, part: OwlShot): string {
   const o = buildOwl(look);
-  // pose the eyes open and happy for portraits
-  o.eyes.forEach((e) => e.draw({ lid: 0, low: 0.18, tilt: 0, lx: 0, ly: 0, pupil: 5.4, mode: 'normal', tear: false }));
+  // pose the eyes open and bright for portraits
+  o.eyes.forEach((e) => e.draw({ lid: 0, low: 0.12, tilt: 0, lx: 0, ly: 0, pupil: 5.6, mode: 'normal', tear: false, nict: 0 }));
   const root = o.rig.root;
   o.rig.bones.jaw.visible = false;
   root.updateMatrixWorld(true);
-  const full = new THREE.Box3().setFromObject(root), px = 1 / 16;
-  const crop = part === 'face' ? new THREE.Box3(new THREE.Vector3(-G.headW / 2 * px - 0.04, (G.headY - 0.6) * px, -0.4), new THREE.Vector3(G.headW / 2 * px + 0.04, Math.min(full.max.y + 0.02, (G.headTop + 3.2) * px), 0.6)) : undefined;
-  const url = shoot(root, part === 'face' ? 0.28 : 0.42, part === 'face' ? 0.1 : 0.18, crop, part === 'face' ? 1.02 : 1.08);
+  const full = new THREE.Box3().setFromObject(root), px = 1 / 16, g = o.g;
+  let crop: THREE.Box3 | undefined;
+  if (part === 'face') {
+    const top = Math.min(full.max.y + 0.02, (Math.max(g.headTop, g.tuftTop) + 1) * px);
+    crop = new THREE.Box3(new THREE.Vector3((-g.headW / 2 - 0.8) * px, (g.headY - 0.8) * px, -0.4), new THREE.Vector3((g.headW / 2 + 0.8) * px, top, 0.6));
+  } else if (part === 'bust') {
+    crop = new THREE.Box3(new THREE.Vector3(full.min.x, (g.bodyY + g.bodyH * 0.35) * px, full.min.z), full.max.clone());
+  }
+  const url = shoot(root, part === 'face' ? 0.3 : 0.42, part === 'face' ? 0.08 : 0.16, crop, part === 'face' ? 1.04 : 1.06);
   o.dispose();
   return url;
 }
 
 export const portrait = (look: OwlLook) => memo('p:' + lookKey(look), () => owlShot(look, 'face'));
 export const owlFull = (look: OwlLook) => memo('f:' + lookKey(look), () => owlShot(look, 'full'));
-export const pieceIcon = (id: string, slot: string, look: OwlLook) => memo('o:' + id + lookKey(look), () => owlShot({ skin: look.skin, palette: look.palette, outfit: { [slot]: id } }, slot === 'head' || slot === 'face' ? 'face' : 'full'));
-export const coatIcon = (palette: string, skin: OwlLook['skin']) => memo('c:' + skin + palette, () => owlShot({ skin, palette, outfit: {} }, 'face'));
+const pieceLook = (id: string, slot: string, look: OwlLook): OwlLook => ({ skin: look.skin, species: look.species, palette: look.palette, outfit: { [slot]: id } });
+const pieceShot = (slot: string): OwlShot => (slot === 'head' || slot === 'face' ? 'face' : 'bust');
+export const pieceIcon = (id: string, slot: string, look: OwlLook) => memo('o:' + id + lookKey(look), () => owlShot(pieceLook(id, slot, look), pieceShot(slot)));
+export const coatIcon = (palette: string, skin: OwlLook['skin']) => memo('c:' + skin + palette, () => owlShot({ skin, palette, species: palette, outfit: {} }, 'face'));
+
+// ------------------------------------------------------------------ async queue
+
+type Job = { key: string; make: () => string; done: ((url: string) => void)[] };
+const queue: Job[] = [];
+const pending = new Map<string, Job>();
+let pumping = false;
+function pump() {
+  if (pumping) return;
+  pumping = true;
+  const step = () => {
+    const job = queue.shift();
+    if (!job) { pumping = false; return; }
+    pending.delete(job.key);
+    const url = memo(job.key, job.make);
+    job.done.forEach((f) => f(url));
+    // one owl per frame keeps taps and scrolling smooth while a shelf of portraits fills in
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function enqueue(key: string, make: () => string, front = false): Promise<string> {
+  const hit = cache.get(key);
+  if (hit !== undefined) return Promise.resolve(hit);
+  return new Promise((res) => {
+    let job = pending.get(key);
+    if (!job) { job = { key, make, done: [] }; pending.set(key, job); if (front) queue.unshift(job); else queue.push(job); }
+    job.done.push(res);
+    pump();
+  });
+}
+
+/** Render an owl portrait without blocking: resolves on a later frame (instantly when cached). */
+export function owlIconAsync(look: OwlLook, part: OwlShot = 'face', front = false): Promise<string> {
+  return enqueue(part[0] + 'a:' + lookKey(look), () => owlShot(look, part), front);
+}
+export function pieceIconAsync(id: string, slot: string, look: OwlLook): Promise<string> {
+  return enqueue('o:' + id + lookKey(look), () => owlShot(pieceLook(id, slot, look), pieceShot(slot)));
+}
+/** Cached URL if this portrait is ready. */
+export const owlIconCached = (look: OwlLook, part: OwlShot = 'face') => cache.get(part[0] + 'a:' + lookKey(look));
+
+/** Preact hook: the portrait URL once rendered ('' until then). */
+export function useOwlIcon(look: OwlLook, part: OwlShot = 'face'): string {
+  const key = part[0] + 'a:' + lookKey(look);
+  const [url, setUrl] = useState(() => cache.get(key) ?? '');
+  useEffect(() => {
+    let live = true;
+    const hit = cache.get(key);
+    if (hit !== undefined) { setUrl(hit); return; }
+    setUrl('');
+    void owlIconAsync(look, part).then((u) => { if (live) setUrl(u); });
+    return () => { live = false; };
+  }, [key]);
+  return url;
+}
+/** Preact hook: an owl wearing one outfit piece. */
+export function usePieceIcon(id: string, slot: string, look: OwlLook): string {
+  const key = 'o:' + id + lookKey(look);
+  const [url, setUrl] = useState(() => cache.get(key) ?? '');
+  useEffect(() => {
+    let live = true;
+    const hit = cache.get(key);
+    if (hit !== undefined) { setUrl(hit); return; }
+    setUrl('');
+    void pieceIconAsync(id, slot, look).then((u) => { if (live) setUrl(u); });
+    return () => { live = false; };
+  }, [key]);
+  return url;
+}
