@@ -12,7 +12,8 @@ import { wind } from '../gfx/box.ts';
 import { hash } from '../gfx/noise.ts';
 import { moonPhase, seasonOf, type Season, type SeasonInfo } from './astro.ts';
 import { SPR } from './fx.ts';
-import { SURFACE_Y } from './terrain.ts';
+import { Ambience } from './ambience.ts';
+import { SURFACE_Y, surfaceY } from './terrain.ts';
 import { GRASS } from './grass.ts';
 import { groundY, HALF, N, POND, pondD, WATER_Y } from './layout.ts';
 import { place, setPlace, today } from './sky.ts';
@@ -374,8 +375,11 @@ export class Weather {
   hold: WeatherState | null = null;
   /** dev / previews: force the aurora on or off (null = natural) */
   auroraForce: boolean | null = null;
+  /** [world3] the small life of the air: motes, pollen, dew, mist, moths, embers, drips, snow puffs, Pip's puffs */
+  private amb: Ambience;
   constructor(private sc: Scene) {
     const q = sc.quality === 'high';
+    this.amb = new Ambience(sc);
     this.rain = new Precip(q ? 2400 : 1000, false);
     this.snowP = new Precip(q ? 1700 : 800, true);
     const bm = new THREE.MeshBasicMaterial({ color: 0xeef4ff, fog: false, transparent: true, depthWrite: false });
@@ -524,6 +528,7 @@ export class Weather {
       u.uTime.value = t; u.uCenter.value.copy(ctr); u.uRes.value.set(size.x * pr, size.y * pr); u.uPx.value = Math.max(1, Math.round(pr));
       u.uDrift.value.set(wx, wz).multiplyScalar(p === this.rain ? 1.5 + v.wind * 3 : 0.4 + v.wind * 1.2);
     }
+    this.amb.tick(dt, { rain: v.rain, snow: v.snow, fog: v.fog, wet: v.wet, cover: v.cover, wind: v.wind, season: info.season });
     sc.critters.shelter = v.rain > 0.25 || v.snow > 0.3 || v.storm > 0.2;
     sc.critters.fireflies = this.firefliesOk;
     this.rain.amount = v.rain * (sc.stage ? 0 : 1);
@@ -542,7 +547,7 @@ export class Weather {
         const x = gx + (Math.random() - 0.5) * 18, z = gz + (Math.random() - 0.5) * 14;
         if (pondD(x, z) < 0.95) { sc.fx.ripple(x, SURFACE_Y, z); continue; }
         if (Math.abs(x) > HALF - 1 || Math.abs(z) > HALF - 1) continue;
-        const y = groundY(x, z);
+        const y = surfaceY(x, z);
         sc.fx.emit({ x, y: y + 0.03, z, life: 0.28, frame: SPR.splat1, frames: 3, fps: 11, color: 0xd8e8ff, size: 0.26 });
         if (Math.random() < 0.18) sc.fx.emit({ x, y: y + 0.02, z, life: 0.8, frame: SPR.ring, color: 0xc9dcf0, size: 0.18, grow: 2.2, fadeOut: 0.5, flat: true });
       }

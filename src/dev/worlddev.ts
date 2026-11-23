@@ -44,7 +44,7 @@ if (q.get('still')) {
     const ff = +(q.get('cineT') ?? q.get('t') ?? 1.5);
     (w.go as (s: number) => void)(ff);
     const info = sc.renderer.info.render;
-    console.log('[w] still at ' + Math.round(performance.now() - t0) + 'ms, leaf cards ' + sc.flora.foliage.count + ', calls ' + info.calls + ', tris ' + info.triangles);
+    console.log('[w] still at ' + Math.round(performance.now() - t0) + 'ms, trees ' + sc.flora.stats.trees + ', flora tris ' + sc.flora.stats.tris + ', calls ' + info.calls + ', tris ' + info.triangles);
     w.__ready = true;
   });
 } else sc.start();

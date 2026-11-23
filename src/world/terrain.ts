@@ -1,32 +1,50 @@
-// Blocky stepped terrain with one continuous, non-repeating painted top texture. [world3] Painted in
-// the calm palette like a picture-book forest floor: sage and moss grass with sunny and shaded
-// patches, cushions of moss and leaf litter under the trees, a warm trodden earth path with worn ruts
-// and pebbles pressed into it, a pebbly shore round the pond, and soil banks with roots, stones and
-// strata where the ground steps down, a lip of grass and moss hanging over each edge.
+// [world3] The ground: one smooth heightfield (rounded hills where the layout steps up, a soft bowl for the
+// pond, a gentle roll under the trees, the clearing kept level for the house), textured like BUSHED's forest
+// floor: Poly Haven forest-floor, bare-earth, cushion-moss and mossy-rock scans re-made as crisp
+// high-resolution pixel art (calm palette, public/textures/bushed), blended by height with a dither so the edges
+// read as hand-placed pixels, under a low-resolution painted tint map (meadow green, leafy shade, trodden path,
+// sandy shore). Nearest magnification, mipmapped minification.
 import * as THREE from 'three';
-import { buildProp, propMesh, type BoxSpec, type Painter } from '../gfx/box.ts';
-import { tone, type Ramp } from '../gfx/color.ts';
 import { fbm, hash } from '../gfx/noise.ts';
-import { cellH, clearing, HALF, inGarden, N, pathD, POND, pondD, SEED, WATER_Y, type Collider } from './layout.ts';
+import { cellH, clearing, HALF, houseD, inGarden, N, pathD, POND, pondD, SEED, type Collider } from './layout.ts';
+import { tex } from './bushed/textures.ts';
 
-const S = N * 16;
-/** [world3] The pond surface sits a hair above the grass so its rounded edge hides the stepped bed; ripples, pads and koi use it. */
+/** [world3] The pond surface sits a hair above the grass so its rounded edge hides the bowl; ripples, pads and koi use it. */
 export const SURFACE_Y = 0.02;
-const R = (c: number[], mid = Math.floor(c.length / 2)): Ramp => ({ c, mid });
-// ramps run dark -> light, shadows leaning slate and lights leaning lamp-gold (src/gfx/palette.ts)
-const GRASS_R = R([0x24342a, 0x2e4230, 0x3a5236, 0x4b6640, 0x5c7748, 0x6e8752, 0x82985e, 0x98aa70, 0xb0bd88], 4);
-const MOSS_R = R([0x2c4030, 0x3f5a3b, 0x557343, 0x66844f, 0x7e9a5c, 0x99b06e], 3);
-const SOIL_R = R([0x231d1b, 0x2f2622, 0x3d3129, 0x4c3d31, 0x5d4b3b, 0x705a46, 0x86705a], 3);
-const PATH_R = R([0x54443a, 0x6a5747, 0x806b56, 0x967f66, 0xa99276, 0xbaa588, 0xcab79c, 0xd9c8ae], 4);
-const SAND_R = R([0x6e6656, 0x8a806a, 0xa49a80, 0xbab096, 0xccc2a8, 0xdcd3bb], 3);
-const BED_R = R([0x1f2c2e, 0x283a3c, 0x324746, 0x3d5552, 0x4a635e, 0x587268], 3);
-const STONE_R = R([0x3d3d3e, 0x4d4c4a, 0x5e5c57, 0x716d66, 0x858076, 0x9a9486, 0xafa999, 0xc6bfae], 4);
-const WET_R = R([0x1f2a2a, 0x2a3836, 0x354644, 0x425450, 0x50625c], 2);
-const LITTER_C = [0x9c6a42, 0xc59a52, 0xa66c55, 0x6f553d, 0x8a8a4a, 0xb0703f];
-const SPECK_C = [0xf4eedd, 0xd9aca4, 0xb4a9c9, 0xdcb072, 0xd3cce0];
 
-function paintTop(shade: Collider[]): THREE.DataTexture {
-  // canopy shade, splatted at 4 cells per block then sampled per texel
+const sm = (t: number) => t * t * (3 - 2 * t);
+let hs: Float32Array | null = null;
+/** cell heights blurred over their neighbours, so a one-block step becomes a slope over three */
+function smoothCells(): Float32Array {
+  if (hs) return hs;
+  const a = new Float32Array((N + 2) * (N + 2));
+  for (let j = -1; j <= N; j++) for (let i = -1; i <= N; i++) {
+    let s = 0, w = 0;
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const k = di === 0 && dj === 0 ? 2 : 1; s += Math.max(0, cellH(i + di, j + dj)) * k; w += k; }
+    a[(j + 1) * (N + 2) + i + 1] = s / w;
+  }
+  return (hs = a);
+}
+
+/** The ground height (blocks) at a world position: what everything in the woods stands on. */
+export function surfaceY(x: number, z: number): number {
+  const a = smoothCells(), W = N + 2;
+  const fx = Math.max(-1, Math.min(N, x + HALF - 0.5)), fz = Math.max(-1, Math.min(N, z + HALF - 0.5));
+  const i = Math.min(N - 1, Math.floor(fx)), j = Math.min(N - 1, Math.floor(fz)), u = sm(Math.max(0, Math.min(1, fx - i))), v = sm(Math.max(0, Math.min(1, fz - j)));
+  const at = (ii: number, jj: number) => a[(jj + 1) * W + ii + 1];
+  let h = (at(i, j) * (1 - u) + at(i + 1, j) * u) * (1 - v) + (at(i, j + 1) * (1 - u) + at(i + 1, j + 1) * u) * v;
+  // a gentle roll under the trees (the clearing and the house stay level)
+  const keep = Math.max(clearing(x, z), 1 - Math.min(1, Math.max(0, houseD(x, z) - 1) / 3));
+  h += (fbm(x / 5, 3, z / 5, SEED) - 0.5) * 0.7 * (1 - keep);
+  // the pond's bowl
+  const pd = pondD(x, z);
+  if (pd < 1) h -= 0.85 * sm(Math.min(1, (1 - pd) / 0.45));
+  return h;
+}
+
+/** Splat weights (r earth, g moss, b rock, a sand) and a tint map, painted at 8 texels a block. */
+function paintMaps(shade: Collider[]): { splat: THREE.DataTexture; tint: THREE.DataTexture } {
+  const T = 8, S = N * T;
   const G = N * 4, sg = new Float32Array(G * G);
   for (const o of shade) {
     const r = o.r, x0 = Math.floor((o.x - r + HALF) * 4), x1 = Math.ceil((o.x + r + HALF) * 4), z0 = Math.floor((o.z - r + HALF) * 4), z1 = Math.ceil((o.z + r + HALF) * 4);
@@ -35,104 +53,77 @@ function paintTop(shade: Collider[]): THREE.DataTexture {
       if (d < 1) sg[j * G + i] = Math.max(sg[j * G + i], 1 - d * d);
     }
   }
-
-  const data = new Uint8Array(S * S * 4);
+  const sp = new Uint8Array(S * S * 4), tn = new Uint8Array(S * S * 4);
+  const clamp01 = (k: number) => Math.max(0, Math.min(1, k));
   for (let pz = 0; pz < S; pz++) {
-    const z = (pz + 0.5) / 16 - HALF, cj = pz >> 4, v = pz & 15;
+    const z = (pz + 0.5) / T - HALF;
     for (let px = 0; px < S; px++) {
-      const x = (px + 0.5) / 16 - HALF, ci = px >> 4, u = px & 15;
-      const h = cellH(ci, cj);
-      // clusters, not noise: two octaves of soft patches plus 2x2 tick marks
-      let L = (fbm(px / 26, 2, pz / 26, SEED) - 0.5) * 2.4 + (fbm(px / 6, 4, pz / 6, SEED) - 0.5) * 1.5;
-      const tick = hash(px >> 1, 9, pz >> 1, SEED);
-      if (tick > 0.86) L += 0.8; else if (tick < 0.08) L -= 0.75;
-      const open = clearing(x, z), sh = sg[(pz >> 2) * G + (px >> 2)];
-      L += (open - 0.5) * 0.9 - sh * 1.5;
-      // contact shadow under higher neighbours, bright lip above lower ones
-      const hn = cellH(ci, cj - 1), hs = cellH(ci, cj + 1), hw = cellH(ci - 1, cj), he = cellH(ci + 1, cj);
-      if (hn > h && v < 4) L -= (4 - v) * 0.45;
-      if (hs > h && v > 11) L -= (v - 11) * 0.45;
-      if (hw > h && u < 4) L -= (4 - u) * 0.45;
-      if (he > h && u > 11) L -= (u - 11) * 0.45;
-      if ((hn < h && v === 0) || (hs < h && v === 15) || (hw < h && u === 0) || (he < h && u === 15)) L += 0.8;
-
-      let c: number;
-      const pd = pondD(x, z);
-      const wob = fbm(px / 5, 7, pz / 5, SEED) - 0.5;
-      const dith = hash(px, 5, pz, SEED);
-      if (pd < 1.0) {
-        // the pond bed: darker towards the middle, silt and the odd pebble
-        c = tone(BED_R, L * 0.45 - (1 - pd) * 2.6 + (hash(px >> 1, 3, pz >> 1, SEED) > 0.93 ? 1.2 : 0));
-      } else if (pd < 1.17 + wob * 0.12) {
-        // the shore: sand with pebbles pressed in
-        const peb = hash(px >> 1, 13, pz >> 1, SEED);
-        c = peb > 0.82 ? tone(STONE_R, L * 0.5 + (peb > 0.94 ? 1.4 : 0.3) - ((px + pz) & 1) * 0.6) : tone(SAND_R, L * 0.55 + (pd - 1.08) * 5 - 0.2);
-      } else {
-        const p = pathD(x, z) + wob * 0.5;
-        if (p < 0.8 || (p < 1.04 && dith < (1.04 - p) / 0.24)) {
-          // trodden earth: lighter down the middle, two worn ruts, pebbles pressed into it, grass creeping in at the edge
-          const t = L * 0.55 + (p < 0.16 ? 0.45 : 0) - (Math.abs(p - 0.42) < 0.07 ? 0.9 : 0) - (p > 0.62 ? 0.5 : 0);
-          const cell = hash(px >> 2, 21, pz >> 2, SEED), cx = (px & 3) - 1.5 + (hash(px >> 2, 22, pz >> 2, SEED) - 0.5), cz = (pz & 3) - 1.5 + (hash(px >> 2, 23, pz >> 2, SEED) - 0.5);
-          if (cell > 0.88 && cx * cx + cz * cz < 2.2) c = tone(STONE_R, 0.6 - cx * 0.5 + cz * 0.6 + (cell > 0.96 ? 0.8 : 0));
-          else if (cell > 0.88 && cx * cx + cz * cz < 3.4) c = tone(PATH_R, t - 1.6);
-          else c = tone(PATH_R, t + (hash(px, 31, pz, SEED) > 0.93 ? 0.9 : 0));
-          if (p > 0.72 && dith > 0.7) c = tone(GRASS_R, L * 0.6 - 0.6);
-        } else if (open < 0.32 && fbm(px / 9, 6, pz / 9, SEED) > 0.58 + open) {
-          // soil under the trees, strewn with leaf litter
-          const lt = hash(px >> 1, 17, pz >> 1, SEED);
-          c = lt > 0.8 ? LITTER_C[Math.floor(hash(px >> 1, 18, pz >> 1, SEED) * LITTER_C.length)] : tone(SOIL_R, L * 0.7 + (dith > 0.9 ? 1 : 0));
-        } else {
-          if (inGarden(x, z, 0.2)) L += (Math.floor((x + z) * 0.8 + 40) % 2 ? 0.4 : 0.05);
-          if (p < 1.3) L -= 0.45;
-          // cushions of moss in the shade, a scatter of tiny petals in the sunny meadow
-          const mz = fbm(px / 7, 11, pz / 7, SEED);
-          if (sh > 0.25 && mz > 0.62) c = tone(MOSS_R, L * 0.5 + (mz > 0.7 ? 1 : 0.2) + (tick > 0.8 ? 0.8 : 0));
-          else if (open > 0.6 && hash(px, 41, pz, SEED) > 0.996) c = SPECK_C[Math.floor(hash(px, 42, pz, SEED) * SPECK_C.length)];
-          else c = tone(GRASS_R, L);
-        }
-      }
+      const x = (px + 0.5) / T - HALF;
+      const open = clearing(x, z), sh = sg[Math.min(G - 1, Math.floor(pz / 2)) * G + Math.min(G - 1, Math.floor(px / 2))];
+      const pd = pondD(x, z), p = pathD(x, z) + (fbm(x * 2, 7, z * 2, SEED) - 0.5) * 0.35;
+      const slope = Math.hypot(surfaceY(x + 0.25, z) - surfaceY(x - 0.25, z), surfaceY(x, z + 0.25) - surfaceY(x, z - 0.25)) * 2;
+      const n1 = fbm(x / 2.4, 2, z / 2.4, SEED), n2 = fbm(x / 1.2, 9, z / 1.2, SEED);
+      let earth = 0, moss = 0, rock = 0, sand = 0;
+      // tint (1 = as scanned): meadow greener and lighter, shade darker and cooler, path warm
+      let tr = 1, tg = 1, tb = 1;
+      const meadow = clamp01(open * 1.2);
+      tr = 0.98 - meadow * 0.1; tg = 1.06 + meadow * 0.2; tb = 0.88 - meadow * 0.1;
+      const dark = 1 - sh * 0.28;
+      tr *= dark; tg *= dark; tb *= dark * 1.04;
+      // trodden path with a lighter middle, grass creeping in at the edge
+      earth = Math.max(earth, clamp01((0.95 - p) / 0.3));
+      if (p < 0.2) { tr *= 1.08; tg *= 1.06; tb *= 1.03; }
+      // bare soil and leaf litter under the trees
+      if (open < 0.35) earth = Math.max(earth, clamp01((n1 - 0.52 - open) * 3) * 0.8);
+      // moss cushions in the shade and on the hills
+      moss = clamp01((n2 - 0.55) * 4) * clamp01(sh * 1.5 + (1 - open) * 0.4);
+      // steep banks show mossy stone
+      rock = clamp01((slope - 0.45) * 2.5);
+      // the pond: a sandy, pebbly shore and a dark bed
+      if (pd < 1.2) { sand = clamp01((1.2 - pd) / 0.1); earth = Math.max(earth, sand * 0.4); }
+      if (pd < 1.0) { tr *= 0.62; tg *= 0.7; tb *= 0.72; }
+      if (inGarden(x, z, 0.2)) { const st = Math.floor((x + z) * 0.8 + 40) % 2 ? 1.06 : 0.97; tr *= st; tg *= st * 1.04; tb *= st; earth *= 0.2; moss = 0; }
+      // a little hand-painted variety
+      const v = 0.94 + hash(px >> 1, 3, pz >> 1, SEED) * 0.08;
       const k = (pz * S + px) * 4;
-      data[k] = (c >> 16) & 255; data[k + 1] = (c >> 8) & 255; data[k + 2] = c & 255; data[k + 3] = 255;
+      sp[k] = Math.round(clamp01(earth) * 255); sp[k + 1] = Math.round(clamp01(moss) * 255); sp[k + 2] = Math.round(clamp01(rock) * 255); sp[k + 3] = Math.round(clamp01(sand) * 255);
+      tn[k] = Math.round(clamp01(tr * v * 0.5) * 255); tn[k + 1] = Math.round(clamp01(tg * v * 0.5) * 255); tn[k + 2] = Math.round(clamp01(tb * v * 0.5) * 255); tn[k + 3] = 255;
     }
   }
-  const tex = new THREE.DataTexture(data, S, S, THREE.RGBAFormat);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.magFilter = THREE.NearestFilter;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
-  tex.generateMipmaps = true;
-  tex.anisotropy = 4;
-  tex.needsUpdate = true;
-  return tex;
+  const mk = (d: Uint8Array<ArrayBuffer>) => {
+    const t = new THREE.DataTexture(d, S, S, THREE.RGBAFormat);
+    t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true;
+    t.colorSpace = THREE.NoColorSpace;
+    t.needsUpdate = true;
+    return t;
+  };
+  return { splat: mk(sp), tint: mk(tn) };
 }
 
-/** Soil banks where the ground steps: a grass lip with moss drips, strata, roots and stones. */
-function sidePainter(): Painter {
-  return (t) => {
-    const col = Math.floor(t.face < 2 ? t.z : t.x), fromTop = t.sy - t.by;
-    const fringe = 2 + Math.floor(hash(col, 1, t.face, SEED) * 3.4);
-    let L = (fbm(t.x / 3.2, t.y / 3.2, t.z / 3.2, SEED) - 0.5) * 1.8 + (t.by < 3 ? -(3 - t.by) * 0.45 : 0) + (t.face === 0 || t.face === 4 ? 0.25 : -0.35);
-    if (t.y < WATER_Y * 16 + 1) return tone(WET_R, L - 0.4);
-    // the pond's banks are sand and pebbles down to the waterline
-    if (pondD(t.x / 16, t.z / 16) < 1.3) {
-      const pe = hash(Math.floor(t.x / 2), Math.floor(t.y / 2), Math.floor(t.z / 2), SEED + 5);
-      return pe > 0.7 ? tone(STONE_R, L * 0.5 + (pe > 0.9 ? 1.2 : 0.2) - (t.y < WATER_Y * 16 + 3 ? 1 : 0)) : tone(SAND_R, L * 0.5 - 0.6 - (t.y < WATER_Y * 16 + 3 ? 1.2 : 0));
-    }
-    // grass lip, with strands of moss hanging further down
-    const drip = hash(col, 7, t.face, SEED) > 0.72 ? 2 + Math.floor(hash(col, 8, t.face, SEED) * 4) : 0;
-    if (fromTop <= fringe) return tone(GRASS_R, L * 0.5 + 0.6 - fromTop * 0.45);
-    if (fromTop <= fringe + drip) return tone(MOSS_R, L * 0.4 - (fromTop - fringe) * 0.4);
-    if (fromTop <= fringe + 1) L -= 1.1;
-    // roots snaking through the bank
-    const along = t.face < 2 ? t.z : t.x;
-    const root = Math.abs(t.y - (fbm(along / 6, 3, t.face, SEED + 9) * 10 + 3 + Math.floor(t.y / 16) * 16)) < 0.7;
-    if (root && hash(Math.floor(along / 4), 4, t.face, SEED) > 0.45) return tone(SOIL_R, 2.4 + (t.y % 2 < 1 ? 0.6 : 0));
-    const pe = hash(Math.floor(t.x / 2), Math.floor(t.y / 2), Math.floor(t.z / 2), SEED + 2);
-    if (pe > 0.9) return tone(STONE_R, L * 0.6 + 0.4 + (pe > 0.97 ? 1 : 0));
-    // strata
-    if (Math.floor(t.y + hash(col >> 2, 2, 0, SEED) * 3) % 6 === 0) L -= 0.75;
-    return tone(SOIL_R, L);
-  };
+const GROUND_PARS = /* glsl */ `
+varying vec3 vGroundW;
+uniform sampler2D uSplat; uniform sampler2D uFloor; uniform sampler2D uEarth; uniform sampler2D uMoss; uniform sampler2D uRock;
+float gBayer(vec2 a) { a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))) * 0.25 + fract(dot(floor(a * 0.5), vec2(0.5, floor(a.y * 0.5) * 0.75))); }
+float gLum(vec3 c) { return dot(c, vec3(0.3, 0.59, 0.11)); }
+// height blend: the brighter (higher) texture wins where weights are close, broken up by a pixel dither
+float gBlend(float w, vec3 a, vec3 b) { return clamp((w - 0.5 + (gLum(b) - gLum(a)) * 0.8 + (gBayer(gl_FragCoord.xy) - 0.5) * 0.22) * 6.0 + 0.5, 0.0, 1.0); }
+`;
+const GROUND_MAP = /* glsl */ `
+{
+  vec2 wp = vGroundW.xz;
+  vec4 sp = texture2D(uSplat, vMapUv);
+  vec3 c = texture2D(uFloor, wp / 3.0).rgb;
+  vec3 e = texture2D(uEarth, wp / 2.0).rgb;
+  vec3 m = texture2D(uMoss, wp / 1.6).rgb;
+  vec3 r = texture2D(uRock, wp / 3.0).rgb;
+  vec3 s = e * vec3(1.32, 1.28, 1.16);
+  c = mix(c, e, gBlend(sp.r, c, e));
+  c = mix(c, m, gBlend(sp.g, c, m));
+  c = mix(c, r, gBlend(sp.b, c, r));
+  c = mix(c, s, gBlend(sp.a, c, s));
+  diffuseColor.rgb = c * texture2D(map, vMapUv).rgb * 2.0;
 }
+`;
 
 const WATER_VS = /* glsl */ `
 varying vec2 vW;
@@ -192,39 +183,38 @@ export interface Terrain {
 export function buildTerrain(shade: Collider[]): Terrain {
   const group = new THREE.Group();
 
-  // top faces: one quad per cell, all sampling the single painted texture
-  const pos: number[] = [], uv: number[] = [], idx: number[] = [];
-  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
-    const y = cellH(i, j), x0 = i - HALF, z0 = j - HALF, b = pos.length / 3;
-    pos.push(x0, y, z0, x0, y, z0 + 1, x0 + 1, y, z0 + 1, x0 + 1, y, z0);
-    uv.push(i / N, j / N, i / N, (j + 1) / N, (i + 1) / N, (j + 1) / N, (i + 1) / N, j / N);
-    idx.push(b, b + 1, b + 2, b, b + 2, b + 3);
+  // [world3] one smooth heightfield, two vertices a block
+  const R = 2, M = N * R;
+  const pos = new Float32Array((M + 1) * (M + 1) * 3), uv = new Float32Array((M + 1) * (M + 1) * 2), idx: number[] = [];
+  for (let j = 0; j <= M; j++) for (let i = 0; i <= M; i++) {
+    const x = i / R - HALF, z = j / R - HALF, k = j * (M + 1) + i;
+    pos.set([x, surfaceY(x, z), z], k * 3);
+    uv.set([i / M, j / M], k * 2);
+    if (i < M && j < M) idx.push(k, k + M + 1, k + M + 2, k, k + M + 2, k + 1);
   }
   const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  geo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
   geo.setIndex(idx);
   geo.computeVertexNormals();
-  const topTex = paintTop(shade);
-  const top = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: topTex }));
+  const { splat, tint } = paintMaps(shade);
+  const detail = (name: string) => { const t = tex(name, { repeat: true }); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearMipmapLinearFilter; return t; };
+  const topMat = new THREE.MeshLambertMaterial({ map: tint });
+  const gu = { uSplat: { value: splat }, uFloor: { value: detail('forest_floor') }, uEarth: { value: detail('earth') }, uMoss: { value: detail('moss') }, uRock: { value: detail('mossy_rock') } };
+  topMat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, gu);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vGroundW;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvGroundW = (modelMatrix * vec4(position, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\n' + GROUND_PARS)
+      .replace('#include <map_fragment>', GROUND_MAP);
+  };
+  topMat.customProgramCacheKey = () => 'hh-ground';
+  const top = new THREE.Mesh(geo, topMat);
   top.receiveShadow = true;
   top.name = 'ground';
   group.add(top);
-
-  // exposed sides: a column box per stepped cell, hidden faces dropped
-  const sides: BoxSpec[] = [], sp = sidePainter();
-  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
-    const h = cellH(i, j);
-    const nb: [number, string][] = [[cellH(i + 1, j), 'e'], [cellH(i - 1, j), 'w'], [cellH(i, j + 1), 's'], [cellH(i, j - 1), 'n']];
-    const low = Math.min(...nb.map((n) => n[0]));
-    if (low >= h) continue;
-    const skip = 'ud' + nb.filter((n) => n[0] >= h).map((n) => n[1]).join('');
-    sides.push({ at: [(i - HALF) * 16, low * 16, (j - HALF) * 16], size: [16, (h - low) * 16, 16], mat: sp, skip });
-  }
-  const sideProp = buildProp(sides, { wind: false });
-  const sideMesh = propMesh(sideProp);
-  sideMesh.castShadow = false;
-  group.add(sideMesh);
 
   // pond surface
   const water = new THREE.ShaderMaterial({
@@ -242,6 +232,6 @@ export function buildTerrain(shade: Collider[]): Terrain {
 
   return {
     group, water,
-    dispose() { geo.dispose(); topTex.dispose(); sideProp.geo.dispose(); sideProp.tex.dispose(); water.dispose(); },
+    dispose() { geo.dispose(); splat.dispose(); tint.dispose(); water.dispose(); },
   };
 }

@@ -10,6 +10,7 @@ import { rng } from '../gfx/noise.ts';
 import type { SeasonInfo } from './astro.ts';
 import { GRASS } from './grass.ts';
 import { WX } from './weather.ts';
+import { vegRect, type VegCell } from './bushed/atlas.ts';
 
 const CS = 32, COLS = 8, ROWS = 3, AW = CS * COLS, AH = CS * ROWS;
 /** Decal cells. */
@@ -249,18 +250,53 @@ void main() {
   #include <fog_fragment>
 }`;
 
-let atlasTex: THREE.DataTexture | null = null;
+let atlasTex: THREE.CanvasTexture | null = null;
+/** [world3] Fallen leaves, needles, twigs, cones and bunchberry come from BUSHED's hand-painted ground-cover
+ *  atlas (Poly Haven scans re-made as pixel art); stones, acorns, petals and the feather stay hand-pixelled. */
+const FROM_VEG: [number, VegCell, boolean][] = [
+  [LT.twig, 'twig', false], [LT.twigs, 'twig', true], [LT.cone, 'cone', false], [LT.needles, 'needles', false],
+  [LT.leaves, 'litter', false], [LT.leaves2, 'litter_mixed', false], [LT.leafdry, 'litter', true], [LT.clover, 'bunch_flower', false],
+];
+const CP = 64;
+let litterResolve: (() => void) | null = null;
+/** Resolves when the borrowed atlas cells are in. */
+export const litterReady = new Promise<void>((res) => { litterResolve = res; });
 function atlas() {
   if (atlasTex) return atlasTex;
-  // rows were painted top-down: flip so v grows upwards
-  const src = paintLitter(), flipped = new Uint8Array(src.length), row = AW * 4;
-  for (let y = 0; y < AH; y++) flipped.set(src.subarray(y * row, (y + 1) * row), (AH - 1 - y) * row);
-  const t = new THREE.DataTexture(flipped, AW, AH, THREE.RGBAFormat);
+  const src = paintLitter();
+  const cv = document.createElement('canvas');
+  cv.width = COLS * CP; cv.height = ROWS * CP;
+  const ctx = cv.getContext('2d')!;
+  ctx.imageSmoothingEnabled = false;
+  const small = document.createElement('canvas');
+  small.width = AW; small.height = AH;
+  small.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(src), AW, AH), 0, 0);
+  ctx.drawImage(small, 0, 0, cv.width, cv.height);
+  const t = new THREE.CanvasTexture(cv);
   t.colorSpace = THREE.SRGBColorSpace;
   t.magFilter = THREE.NearestFilter;
   t.minFilter = THREE.NearestMipmapLinearFilter;
   t.generateMipmaps = true;
-  t.needsUpdate = true;
+  const img = new Image();
+  img.onload = () => {
+    ctx.imageSmoothingEnabled = true;
+    for (const [cell, k, flip] of FROM_VEG) {
+      const [u0, v0, u1, v1] = vegRect(k);
+      const sx = u0 * img.width, sw = (u1 - u0) * img.width, sy = (1 - v1) * img.height, sh = (v1 - v0) * img.height;
+      const f = Math.min(CP / sw, CP / sh), dw = sw * f, dh = sh * f;
+      const cx = (cell % COLS) * CP, cy = Math.floor(cell / COLS) * CP;
+      ctx.clearRect(cx, cy, CP, CP);
+      ctx.save();
+      ctx.translate(cx + CP / 2, cy + CP / 2);
+      if (flip) ctx.rotate(Math.PI);
+      ctx.drawImage(img, sx, sy, sw, sh, -dw / 2, -dh / 2, dw, dh);
+      ctx.restore();
+    }
+    t.needsUpdate = true;
+    litterResolve?.();
+  };
+  img.onerror = () => litterResolve?.();
+  img.src = `${import.meta.env.BASE_URL}textures/bushed/veg_atlas.webp`;
   return (atlasTex = t);
 }
 

@@ -21,6 +21,7 @@ import type { Save } from '../game/store.ts';
 import { hourFor, Sky, type SkyMode } from './sky.ts';
 import { buildTerrain, type Terrain } from './terrain.ts';
 import { Weather } from './weather.ts'; // [world]
+import { Post } from './post.ts'; // [world3]
 
 export type View = 'home' | 'interior' | 'loft' | 'attic' | 'owl' | 'breathe' | 'sleep' | 'garden' | 'deck' | 'wake';
 export type Quality = 'low' | 'high';
@@ -75,6 +76,8 @@ export class Scene {
   /** [world] real-world weather and seasons (see weather.ts) */
   readonly weather: Weather;
   readonly quality: Quality;
+  /** [world3] BUSHED-style post chain: low internal resolution, grade, dither, grain (post.enabled = false to bypass) */
+  readonly post: Post;
   view: View = 'home';
   skyMode: SkyMode | 'dawn' = 'clock';
   paused = false;
@@ -126,6 +129,7 @@ export class Scene {
     r.setPixelRatio(Math.min(devicePixelRatio || 1, quality === 'high' ? 2 : 1.25));
     r.shadowMap.enabled = true;
     r.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.post = new Post(r, quality); // [world3]
     r.outputColorSpace = THREE.SRGBColorSpace;
 
     this.plan = planForest(quality);
@@ -408,6 +412,17 @@ export class Scene {
     this.fx.setLight(this.sky.ambient);
     const night = this.sky.night;
     this.flora.setNight(THREE.MathUtils.smoothstep(night, 0.35, 0.9)); // [world3] moonglow caps
+    // [world3] the grade follows the light: warm calm days, honeyed evenings, cool blue moonlit nights
+    {
+      const g = this.post.grade, hr = this.sky.hour, L = THREE.MathUtils.lerp;
+      const golden = Math.max(THREE.MathUtils.smoothstep(hr, 16.4, 18.2) * (1 - THREE.MathUtils.smoothstep(hr, 19.0, 19.8)), THREE.MathUtils.smoothstep(hr, 5.6, 6.4) * (1 - THREE.MathUtils.smoothstep(hr, 7.4, 8.4)));
+      g.warm = L(0.18, -0.6, night) + golden * 0.25;
+      g.saturation = L(1.0, 0.84, night);
+      g.exposure = L(1.0, 1.1, night);
+      g.bloom = L(0.28, 0.55, night);
+      g.vignette = L(0.28, 0.4, night);
+      g.cold = (this.weather?.vis.cold ?? 0) * 0.6;
+    }
     GRASS.uKey.value.copy(this.sky.sun.color).multiplyScalar(this.sky.sun.intensity * 0.42);
     GRASS.uSky.value.copy(this.sky.hemi.color).multiplyScalar(this.sky.hemi.intensity * 0.85);
     GRASS.uGround.value.copy(this.sky.hemi.groundColor).multiplyScalar(this.sky.hemi.intensity);
@@ -427,6 +442,7 @@ export class Scene {
     const hf = (30 * Math.PI) / 180;
     this.camera.fov = this.baseFov = Math.min(56, Math.max(30, (2 * Math.atan(Math.tan(hf / 2) / Math.min(1, this.camera.aspect)) * 180) / Math.PI));
     this.camera.updateProjectionMatrix();
+    this.post?.resize(w, h); // [world3]
     this.stage?.resize?.(w, h);
   }
 
@@ -471,7 +487,7 @@ export class Scene {
     const t = this.time;
     if (this.stage) {
       this.stage.update(dt, t);
-      if (draw) this.renderer.render(this.stage.scene, this.stage.camera);
+      if (draw) this.post.render(this.stage.scene, this.stage.camera, t); // [world3]
       return;
     }
     wind.uTime.value = t;
@@ -530,7 +546,7 @@ export class Scene {
     this.sky.setViewport(innerWidth, innerHeight, this.renderer.getPixelRatio()); // [world]
     this.sky.update(t, this.camera, dt);
     if (!draw) return;
-    this.renderer.render(this.scene, this.camera);
+    this.post.render(this.scene, this.camera, t); // [world3]
   }
 
   snapCamera() { const g = this.goal(); this.cur.yaw = g.yaw; this.cur.pitch = g.pitch; this.cur.dist = g.dist; this.cur.target.copy(g.target); }

@@ -1,18 +1,11 @@
-// [world3] The hand-made forest kit: lowpix models (art/lowpix/world, built to public/models/world)
-// turned into instancing-ready pieces. Each GLB is split by part name into wood (trunk, roots, limbs,
-// twigs, stumps, rocks...), crown (the low-poly leaf masses the seasons recolour) and glow (moonglow
-// caps), baked into one geometry each in world blocks (16 model units = 1 block), with a per-vertex
-// wind weight so trunks, crowns and the 2D leaf cards (foliage.ts) all sway together.
+// [world3] Models for instancing: a GLB from public/models/world (BUSHED's Poly Haven conversions: boulders,
+// stumps, the fallen trunk, bark debris) split by part name into wood, crown and glow pieces, each baked into
+// one geometry (scaled by 1/16, so callers multiply by 16 for models authored in metres) with an optional
+// per-vertex wind weight that matches the rest of the swaying forest.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { wind } from '../gfx/box.ts';
 import { loadGLB, preloadGLB } from '../gfx/glb.ts';
-import SHAPE_DATA from '../assets/nature/shapes.json';
-import type { LeafKind } from '../assets/nature.ts';
-
-/** A tree or bush's leaf masses (model units) for the leaf cards, from art/lowpix/world/make.py. */
-export interface KitShape { leaf: LeafKind; top: number; sway: number; blobs: { x: number; y: number; z: number; rx: number; ry: number; rz: number }[] }
-export const SHAPES = SHAPE_DATA as unknown as Record<string, KitShape>;
 
 export interface KitPiece { geo: THREE.BufferGeometry; mat: THREE.Material; depth?: THREE.Material }
 export interface KitModel { wood: KitPiece | null; crown: KitPiece | null; glow: KitPiece | null; map: THREE.Texture; height: number }
@@ -112,8 +105,8 @@ export function loadKit(id: string, o: { sway?: number; top?: number } = {}): Pr
   return p;
 }
 
-/** Every kit model the forest uses (for preloading behind the loading clock). */
-export const KIT_IDS = ['oak_a', 'oak_b', 'maple', 'blossom', 'birch', 'pine_a', 'pine_b', 'sapling', 'bush', 'stump', 'log', 'rock_a', 'rock_b', 'toadstools', 'boletes', 'chanterelles', 'moonglow'];
+/** Every model the forest uses (for preloading behind the loading clock). */
+export const KIT_IDS = ['boulder_01', 'rock_07', 'tree_stump_01', 'tree_stump_02', 'dead_tree_trunk', 'bark_debris_01'];
 
 /** Start loading the forest models early (e.g. behind the loading clock). */
 export const preloadForest = () => preloadGLB(KIT_IDS.map((id) => `world/${id}.glb`));

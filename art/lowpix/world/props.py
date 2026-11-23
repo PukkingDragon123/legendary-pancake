@@ -139,3 +139,48 @@ def all_props():
     for k, v in items().items():
         out['props_' + k] = v
     return out
+
+
+# ------------------------------------------------------------------ songbirds (critters.ts swaps these in for the old voxel birds)
+
+BIRD_LOOKS = {
+    'robin': {'back': ['#2a221d', '#3d3029', '#4f4036', '#625142', '#76634f', '#8b775f'], 'chest': ['#5a2e22', '#76402e', '#93533c', '#a66c55', '#c0866a', '#d4a184']},
+    'tit': {'back': ['#232c33', '#2f3d47', '#3f515e', '#506674', '#617f8c', '#7d97a0'], 'chest': ['#6e5a30', '#8e7440', '#a88c52', '#c0a464', '#d4bc7e', '#e4d29e']},
+    'finch': {'back': ['#3b3020', '#57482b', '#6e5a35', '#86704a', '#9c8656', '#b49c68'], 'chest': ['#6e4a36', '#8a5e44', '#a37452', '#b98a64', '#cca27a', '#dcbb94']},
+}
+
+
+def bird(look):
+    L = BIRD_LOOKS[look]
+    ramps = dict(RAMPS, back=L['back'], chest=L['chest'], belly=['#8f8473', '#b5aa92', '#cfc3a6', '#e2d8c0', '#f1e8d4'],
+                 eye=['#1b1714', '#231f1b', '#3a332c'], beak=['#6e5a30', '#977b48', '#b6975b', '#c8a764', '#dcc287'])
+    styles = dict(STYLES)
+    styles['back'] = {'ramp': 'back', 'tone': 3.4, 'rim': RIM, 'brush': {'flow': 'long', 'rough': 0.6}, 'layers': [
+        {'id': 'feathers', 'op': 'scales', 'along': 'x', 'size': [1.2, 0.9], 'gradient': 0.8, 'rim': 1.0, 'shadow': -1.4, 'jitter': 0.6},
+        {'id': 'chest', 'op': 'band', 'axis': [0, -0.4, 1], 'from': 0.15, 'to': 1.0, 'ramp': 'chest', 'tone': 3.6, 'wobble': 0.2},
+        {'id': 'belly', 'op': 'band', 'axis': 'y', 'from': -1.0, 'to': -0.35, 'ramp': 'belly', 'tone': 3.2, 'wobble': 0.25}]}
+    styles['wing'] = {'ramp': 'back', 'tone': 2.8, 'rim': RIM, 'layers': [
+        {'id': 'quills', 'op': 'stripes', 'axis': 'z', 'period': 0.9, 'width': 0.3, 'shift': -1.2},
+        {'id': 'bar', 'op': 'band', 'axis': 'z', 'from': 0.2, 'to': 0.45, 'ramp': 'belly', 'tone': 3.0}]}
+    styles['beak'] = {'ramp': 'beak', 'tone': 3.0, 'rim': RIM}
+    styles['eye'] = {'ramp': 'eye', 'tone': 1.0, 'light': 0, 'rim': {'light': 0, 'dark': 0, 'outline': 'none'}, 'brush': {'off': True}}
+    styles['leg'] = {'ramp': 'wood', 'tone': 2.6, 'rim': {'light': 0, 'dark': 0, 'outline': 'none'}}
+    sp = spec('Bird ' + look, [
+        {'id': 'body', 'shape': 'loft', 'profile': {'sides': 8, 'round': 2.4}, 'subdiv': 1, 'caps': [True, True], 'style': 'back',
+         'rings': [{'at': [0, 3.6, -3.0], 'size': [1.6, 1.2]}, {'at': [0, 3.2, -1.2], 'size': [3.8, 3.6]}, {'at': [0, 3.3, 0.8], 'size': [4.4, 4.6]}, {'at': [0, 3.8, 2.4], 'size': [3.6, 3.8]}]},
+        {'id': 'head', 'shape': 'loft', 'profile': {'sides': 8, 'round': 2.4}, 'subdiv': 1, 'caps': [True, True], 'style': 'back',
+         'rings': [{'at': [0, 5.2, 1.4], 'size': [2.8, 2.8]}, {'at': [0, 5.6, 2.8], 'size': [3.3, 3.1]}, {'at': [0, 5.5, 4.0], 'size': [2.4, 2.3]}, {'at': [0, 5.4, 4.6], 'size': [1.2, 1.2]}],
+         'paint': {'layers': [{'id': 'chest', 'from': 0.45, 'to': 1.0, 'axis': [0, -1, 0.4]}, {'id': 'belly', 'off': True}]}},
+        {'id': 'beak', 'shape': 'taper', 'size': [0.9, 0.7, 1.3], 'pivot': [0, 5.3, 5.0], 'front_scale': [0.15, 0.15], 'style': 'beak'},
+        {'id': 'eye', 'shape': 'prism', 'sides': 6, 'size': [0.7, 0.7, 0.3], 'pivot': [1.35, 5.8, 3.6], 'rotation': [0, 80, 0], 'mirror': True, 'style': 'eye'},
+        {'id': 'tail', 'shape': 'taper', 'size': [2.0, 0.5, 3.4], 'pivot': [0, 4.0, -3.0], 'offset': [0, 0, -1.6], 'rotation': [-22, 0, 0], 'back_scale': [1.3, 1.0], 'style': 'wing'},
+        {'id': 'wing', 'shape': 'taper', 'size': [0.6, 2.4, 4.0], 'pivot': [2.0, 4.4, 1.0], 'offset': [0, -0.6, -1.6], 'back_scale': [1.0, 0.5], 'mirror': True, 'style': 'wing'},
+        {'id': 'leg', 'shape': 'box', 'size': [0.4, 1.8, 0.4], 'pivot': [0.8, 0.9, 0.4], 'mirror': True, 'style': 'leg'},
+    ], 400)
+    sp['palette'] = {'ramps': ramps}
+    sp['styles'] = styles
+    return sp
+
+
+def all_birds():
+    return {f'bird_{k}': bird(k) for k in BIRD_LOOKS}

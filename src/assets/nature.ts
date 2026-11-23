@@ -1,6 +1,6 @@
 // Nature colours and the small voxel plants other models still borrow (daisies, tulips and toadstools
 // for planters, pots and the house). [world3] The forest itself is hand-made lowpix models now
-// (art/lowpix/world -> public/models/world, loaded by world/forestkit.ts) and Moleforge pixel grass.
+// borrowed from BUSHED (world/woods.ts, world/bushed/) with Poly Haven rocks and stumps (world/forestkit.ts).
 import { box, lean, type BoxSpec, type Painter, type Vec3 } from '../gfx/box.ts';
 import { tone } from '../gfx/color.ts';
 import { hash, rng, type Rng } from '../gfx/noise.ts';
@@ -164,8 +164,7 @@ export function toadstool(seed: number, c: Tint = '#b0644f', scale = 1): BoxSpec
 
 
 // ------------------------------------------------------------------ leaf kinds
-// [world3] The forest trees, bushes, rocks, logs and mushroom clusters are lowpix models now
-// (art/lowpix/world, loaded by world/forestkit.ts); their leaf masses live in nature/shapes.json.
+// [world3] The forest trees, shrubs, ground cover, rocks and logs are borrowed from BUSHED now (world/woods.ts).
 
 export type LeafKind = 'oak' | 'birch' | 'pine' | 'maple' | 'blossom' | 'bush' | 'berry' | 'flowerbush';
 export interface Blob { x: number; y: number; z: number; rx: number; ry: number; rz: number }

@@ -1,14 +1,15 @@
 // Small life: butterflies drifting between flower drifts, bees, birds that hop and scatter,
 // koi under the pond surface, ladybirds on the log, and the ambient particle emitters.
 import * as THREE from 'three';
-import { box, buildRig, type BoneSpec, type Painter, type Rig } from '../gfx/box.ts';
+import { box, buildRig, PX, type BoneSpec, type Painter, type Rig } from '../gfx/box.ts';
+import { loadGLB } from '../gfx/glb.ts';
 import { ramp, tone } from '../gfx/color.ts';
 import { smooth, solid } from '../gfx/mats.ts';
 import type { Fx } from './fx.ts';
 import { SPR } from './fx.ts';
 import type { ForestPlan } from './flora.ts';
-import { groundY, POND } from './layout.ts';
-import { SURFACE_Y } from './terrain.ts';
+import { POND } from './layout.ts';
+import { SURFACE_Y, surfaceY as groundY } from './terrain.ts';
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
@@ -55,6 +56,20 @@ function bird(c: string, chest: string): Rig {
     { ...box(0, 3, -3.4, 2, 1, 3, b), rot: [20, 0, 0] }, box(-1, 0, 0.5, 1, 2, 1, smooth('#bf9d74')), box(1, 0, 0.5, 1, 2, 1, smooth('#bf9d74')),
   ], (s) => [box(s * 2.3, 2.6, -0.2, 1, 3, 4, b)], 5.4);
 }
+/** [world3] Lowpix songbirds (art/lowpix/world/props.py): robin, blue tit, finch. */
+const BIRD_KIT = ['bird_robin', 'bird_tit', 'bird_finch'];
+async function kitBird(id: string): Promise<Rig | null> {
+  try {
+    const g = await loadGLB(`world/${id}.glb`);
+    const inner = g.scene.clone(true);
+    inner.scale.setScalar(PX);
+    const root = new THREE.Group();
+    root.add(inner);
+    // the wing joints sit at the shoulders: +x is the bird's right wing, the mirrored copy its left
+    const wingR = inner.getObjectByName('wing') ?? new THREE.Group(), wingL = inner.getObjectByName('wing_mirror') ?? new THREE.Group();
+    return { root, bones: { root, wingL, wingR }, dispose() { /* shared GLB, nothing to free */ } } as unknown as Rig;
+  } catch { return null; }
+}
 function koi(c: string): Rig {
   const base = ramp(c), w = ramp('#eae0c8');
   const p: Painter = (t) => ((Math.floor(t.z + 30) + Math.floor(t.x + 30)) % 3 === 0 ? tone(w, 0) : tone(base, t.face === 2 ? 0.6 : -0.4));
@@ -100,7 +115,16 @@ export class Critters {
     plan.perches.slice(0, quality === 'high' ? 4 : 2).forEach((p, i) => {
       const rig = bird(...looks[i % looks.length]);
       this.group.add(rig.root);
-      this.birds.push({ rig, pos: p.clone(), home: p.clone(), state: 'perch', t: rand(1, 4), from: p.clone(), to: p.clone(), yaw: rand(0, 6.28), hop: 0 });
+      const b: Bird = { rig, pos: p.clone(), home: p.clone(), state: 'perch', t: rand(1, 4), from: p.clone(), to: p.clone(), yaw: rand(0, 6.28), hop: 0 };
+      this.birds.push(b);
+      // [world3] the hand-made lowpix songbird takes over from the voxel stand-in once it has loaded
+      kitBird(BIRD_KIT[i % BIRD_KIT.length]).then((kit) => {
+        if (!kit) return;
+        kit.root.position.copy(b.rig.root.position); kit.root.rotation.copy(b.rig.root.rotation); kit.root.visible = b.rig.root.visible;
+        this.group.remove(b.rig.root); b.rig.dispose();
+        b.rig = kit;
+        this.group.add(kit.root);
+      });
     });
     const koiCols = ['#c0866a', '#dcb072', '#a66c55', '#eae0c8', '#c59a52', '#9e5f66', '#46596a', '#c0866a'];
     for (let i = 0; i < (quality === 'high' ? 8 : 5); i++) {

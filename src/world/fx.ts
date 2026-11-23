@@ -3,7 +3,7 @@
 // [world3] Every preset draws from the calm palette (src/gfx/palette.ts), and nothing glows as a soft
 // additive blob: "glowing" particles are crisp unlit pixel sprites that dissolve on a dither grid.
 import * as THREE from 'three';
-import { groundY } from './layout.ts';
+import { surfaceY } from './terrain.ts';
 
 // Each sprite is 8x8. '#' full, '+' mid, '-' dark, '.' clear. Colour comes from the particle's tint.
 const ART: Record<string, string[]> = {
@@ -50,6 +50,13 @@ const ART: Record<string, string[]> = {
   swirl2: ['...##...', '..#..#..', '.#.##.#.', '.#.#..#.', '.#..##..', '..#.....', '...###..', '........'],
   orb: ['........', '..-++-..', '.-+##+-.', '.+####+.', '.+####+.', '.-+##+-.', '..-++-..', '........'],
   diamond: ['...#....', '..#+#...', '.#+#+#..', '#+###+#.', '.#+#+#..', '..#+#...', '...#....', '........'],
+  // [world3] ambience: mist wisps, moths round the lamps, embers, pollen, dew glints
+  wisp: ['........', '........', '...##+..', '.######+', '########', '.+++++++', '........', '........'],
+  wisp2: ['........', '........', '.##.....', '#####++.', '########', '++++++..', '........', '........'],
+  moth1: ['........', '#+....+#', '##+..+##', '.##++##.', '..+##+..', '...++...', '........', '........'],
+  moth2: ['........', '........', '........', '+##++##+', '.+####+.', '...++...', '........', '........'],
+  ember: ['........', '........', '........', '...#....', '..#+....', '........', '........', '........'],
+  pollen: ['........', '........', '........', '....#...', '...#+...', '....+...', '........', '........'],
 };
 const NAMES = Object.keys(ART);
 export const SPR = Object.fromEntries(NAMES.map((n, i) => [n, i])) as Record<keyof typeof ART, number>;
@@ -181,7 +188,7 @@ class Layer {
         p.vx = (p.vx + wx * p.wind * dt) * dr; p.vz = (p.vz + wz * p.wind * dt) * dr; p.vy *= dr;
         const fl = p.flutter ? Math.sin(t * 3.1 + p.seed * 9) * p.flutter : 0;
         p.x += (p.vx + fl) * dt; p.y += p.vy * dt; p.z += (p.vz + fl * 0.6) * dt;
-        if (p.land) { const gy = groundY(p.x, p.z) + 0.04; if (p.y <= gy) { p.y = gy; p.landed = true; } }
+        if (p.land) { const gy = surfaceY(p.x, p.z) + 0.04; if (p.y <= gy) { p.y = gy; p.landed = true; } }
       }
       const fi = Math.min(1, p.fadeIn ? p.age / p.fadeIn : 1), fo = Math.min(1, p.fadeOut ? (p.life - p.age) / p.fadeOut : 1);
       const frame = p.frame + (p.frames > 1 && !p.landed ? Math.floor(p.age * p.fps + p.seed * p.frames) % p.frames : 0);
@@ -199,7 +206,7 @@ class Layer {
 const tmp = new THREE.Color();
 
 export type BurstKind = 'hearts' | 'stars' | 'notes' | 'dust' | 'sparkle' | 'coins' | 'crumbs' | 'splash' | 'zzz' | 'leaves' | 'bang' | 'ask' | 'dots' | 'confetti'
-  | 'puffs' | 'magic' | 'feathers' | 'petals' | 'snow';
+  | 'puffs' | 'magic' | 'feathers' | 'petals' | 'snow' | 'reward' | 'dew' | 'embers';
 
 export class Fx {
   readonly group = new THREE.Group();
@@ -252,6 +259,15 @@ export class Fx {
         case 'feathers': this.emit({ x: x + R(-0.2, 0.2), y: y + R(-0.1, 0.3), z: z + R(-0.2, 0.2), vx: Math.cos(a) * R(0.8, 2), vy: R(0.6, 1.8), vz: Math.sin(a) * R(0.8, 2), life: R(1.6, 2.6), frame: SPR.feather1, frames: 3, fps: 3, color: color ?? 0xd9bf93, size: R(0.2, 0.3), gravity: 1.1, drag: 2.4, flutter: 0.7, land: true }); break;
         case 'petals': this.emit({ x: x + R(-0.6, 0.6), y: y + R(-0.2, 0.4), z: z + R(-0.6, 0.6), vx: Math.cos(a) * 0.6, vy: R(0.4, 1.2), vz: Math.sin(a) * 0.6, life: R(1.6, 2.4), frame: SPR.petal, color: color ?? [0xe8b4ae, 0xf4eedd, 0xd9aca4][i % 3], size: R(0.22, 0.32), gravity: 1.2, drag: 1.5, wind: 0.6, flutter: 0.7, land: true }); break;
         case 'snow': this.emit({ x: x + R(-0.8, 0.8), y: y + R(0, 0.6), z: z + R(-0.8, 0.8), vy: R(-0.3, -0.1), life: R(2, 3), frame: SPR.flake, color: color ?? 0xf5f7f2, size: R(0.14, 0.22), gravity: 0.2, drag: 1, wind: 0.4, flutter: 0.4, land: true }); break;
+        // [world3] a reward: a rising ring of sparkles and stars with pale motes drifting after it
+        case 'reward': {
+          const r0 = R(0.2, 0.55);
+          this.emit({ x: x + Math.cos(a) * r0, y: y + R(0, 0.3), z: z + Math.sin(a) * r0, vx: Math.cos(a) * R(0.2, 0.7), vy: R(1.2, 2.4), vz: Math.sin(a) * R(0.2, 0.7), life: R(0.9, 1.5), frame: [SPR.spark1, SPR.star, SPR.diamond, SPR.pollen][i % 4], frames: i % 4 ? 1 : 3, fps: 10, color: color ?? [0xf1d39a, 0xdcb072, 0xf4eedd, 0xb4a9c9][i % 4], size: R(0.16, 0.34), gravity: 1.4, drag: 1.2, add: true, flutter: 0.3, fadeOut: 0.5, delay: i * 0.02 });
+          if (i % 3 === 0) this.emit({ x: x + R(-0.4, 0.4), y: y + R(0.2, 1), z: z + R(-0.4, 0.4), vy: R(0.15, 0.4), life: R(1.8, 2.8), frame: SPR.mote, color: 0xf4eedd, size: R(0.08, 0.14), add: true, flutter: 0.4, fadeIn: 0.3, fadeOut: 1, delay: 0.2 + i * 0.04 });
+          break;
+        }
+        case 'dew': this.emit({ x: x + R(-0.4, 0.4), y: y + R(0, 0.2), z: z + R(-0.4, 0.4), life: R(0.4, 0.8), frame: SPR.spark1, frames: 3, fps: 9, color: color ?? 0xeef3f0, size: R(0.08, 0.15), add: true, delay: i * 0.1 }); break;
+        case 'embers': this.emit({ x: x + R(-0.1, 0.1), y, z: z + R(-0.1, 0.1), vx: R(-0.15, 0.25), vy: R(0.5, 1.1), vz: R(-0.15, 0.15), life: R(0.9, 1.6), frame: SPR.ember, color: [0xf1d39a, 0xdcb072, 0xc0866a][i % 3], size: R(0.1, 0.16), add: true, wind: 0.5, flutter: 0.35, fadeOut: 0.6, delay: i * 0.08 }); break;
         case 'bang': case 'ask': case 'dots': this.emit({ x, y, z, vy: 0.25, life: 1.2, frame: kind === 'bang' ? SPR.bang : kind === 'ask' ? SPR.ask : SPR.dots, color: kind === 'bang' ? 0xdcb072 : 0xf4eedd, size: 0.5, fadeIn: 0.08 }); return;
       }
     }

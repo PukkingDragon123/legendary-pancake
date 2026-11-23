@@ -180,15 +180,13 @@ void main() {
       col = mix(col, cc, edge * (0.82 + 0.18 * uCloud));
     }
   }
-  // [world3] distant hills and a far pine line, layered in the mist like a storybook backdrop
+  // [world3] soft distant hills in the mist, like a painted backdrop
   {
     float az = atan(dq.z, dq.x);
-    float hill = 0.028 + 0.03 * fbm2(vec2(az * 2.2, 3.1)) + 0.012 * vn(vec2(az * 9.0, 1.7));
-    float pines = 0.016 + 0.016 * fbm2(vec2(az * 4.0, 8.3)) + 0.022 * pow(abs(fract(az * 38.0 + vn(vec2(az * 6.0, 2.0)) * 2.0) - 0.5) * 2.0, 2.0) * step(0.42, vn(vec2(az * 11.0, 5.0)));
-    vec3 far = mix(uFogCol, uHor, 0.35) * 0.94;
-    vec3 near = mix(uFogCol, uTop, 0.22) * 0.8;
-    if (dq.y < hill) col = mix(col, far, 0.92);
-    if (dq.y < pines) col = mix(col, near, 0.95);
+    float hill = 0.022 + 0.026 * fbm2(vec2(az * 1.6, 3.1)) + 0.008 * vn(vec2(az * 5.0, 1.7));
+    float hill2 = 0.012 + 0.018 * fbm2(vec2(az * 2.7 + 4.0, 7.3));
+    if (dq.y < hill) col = mix(col, mix(uFogCol, uHor, 0.45) * 0.96, 0.85);
+    if (dq.y < hill2) col = mix(col, mix(uFogCol, uTop, 0.18) * 0.88, 0.9);
   }
   // haze in the distance (fog weather)
   col = mix(col, uFogCol, uHaze * (1.0 - smoothstep(0.0, 0.5, d.y)));
@@ -523,7 +521,7 @@ export class Sky {
     const axis = this.sunDir, toCam = new THREE.Vector3(), x = new THREE.Vector3(), zv = new THREE.Vector3(), m = new THREE.Matrix4();
     this.rays.forEach((r, i) => {
       const flick = 0.75 + 0.25 * Math.sin(time * 0.35 + i * 2.1);
-      r.mat.uniforms.uAlpha.value = this.rayPower * 0.36 * flick;
+      r.mat.uniforms.uAlpha.value = this.rayPower * 0.14 * flick; // [world3] soft beams under the post grade
       r.mat.uniforms.uTime.value = time;
       r.mat.uniforms.uCol.value.copy(this.sun.color);
       r.mesh.visible = this.rayPower > 0.02;
