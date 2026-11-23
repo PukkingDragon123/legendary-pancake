@@ -1,59 +1,59 @@
-// Queen Neve's boutique: a snug winter shop seen from just in front of the counter. Oak floorboards,
-// sage panelling under striped wallpaper, a frosted bay window with snow falling on a moonlit
-// evening outside and fairy lights along the pelmet, tall shelves crowded with boxed goods, a glass
-// display case, a garment rail, a hat stand and dress forms, a little wood stove, hanging lanterns.
-// Every prop is a lowpix model (art/lowpix/shop/*.json -> public/models/shop/*.glb): low poly with
-// dense hand-painted pixel textures, lit by warm lamplight and the cool window. Today's three deals
-// are physically on display: outfit pieces on dress forms, plumages as owls on a plinth, furniture
-// on a velvet plinth, and the middle deal on a riser on the counter. Queen Neve stands behind the
-// counter. OWNED BY THE SHOP BUILDER.
+// Queen Neve's boutique: a snug winter shop seen from just in front of the counter. Worn oak
+// floorboards, sage-painted panelling under a hand-striped oat wallpaper, dark beams, a deep bay
+// window onto a moonlit snowy evening with frost on the panes and fairy lights along the pelmet. The
+// furniture and props are real, hand-textured low-poly models borrowed from Poly Haven (CC0), the
+// owner's lumberjack game BUSHED and Gacha Garage, restyled to the calm palette with a matte finish
+// (public/models/shop/*.glb, credits in docs/credits/shop3.md): a glass shop counter with a till, a
+// reception bell and an oil lamp, painted shelves and a hutch, a tiled stove, an armchair and floor
+// lamp, a spinning wheel, a marble bust in a beret, a hat table, a grandfather clock, a potted fir.
+// Today's three deals are on display: on round display tables either side, and on the counter.
+// Queen Neve stands behind the counter. OWNED BY THE SHOP BUILDER.
 import * as THREE from 'three';
 import { box, buildProp, propMesh, type BoxSpec, type Texel } from '../../gfx/box.ts';
-import { instanceGLB } from '../../gfx/glb.ts';
+import { instanceGLB, modelUrl } from '../../gfx/glb.ts';
 import { P } from '../../gfx/palette.ts';
 import { ITEMS } from '../../assets/registry.ts';
 import { OwlActor, type OwlAction, type OwlFx, type OwlMood } from '../../owl/actor.ts';
-import { owlBoxes, type BoneName, type OwlLook } from '../../owl/model.ts';
+import type { OwlLook } from '../../owl/model.ts';
 import { PIECE } from '../../owl/outfits.ts';
 import { QUEEN_LOOK } from '../../owl/queen.ts';
 import { sceneSound, sound } from '../../audio/sound.ts';
 import { Fx, SPR } from '../fx.ts';
 import type { Stage } from '../scene.ts';
-import { bulbTexture, frostTexture, glassTexture, haloTexture, outdoorTexture, poolTexture } from './shopart.ts';
+import { bulbTexture, frostTexture, haloTexture, outdoorTexture, poolTexture } from './shopart.ts';
 
 export interface DisplayItem { kind: 'item' | 'piece' | 'species' | 'skin' | 'finish'; id: string }
 export type BoutiqueLayout = 'side' | 'top';
 
-/** lowpix models are built in units of 1/16 world unit */
-const U = 1 / 16;
-// the window opening in the back wall (see art/lowpix/shop/make.py: WX, WY0, WY1, WZ)
-const WIN = { x: 20 * U, y0: 18 * U, y1: 50 * U, z: -45 * U, glass: -52 * U };
+// the room (world units = metres): back wall at z = -2.8, side walls at x = +-4.25, ceiling at 4.25
+const ROOM = { w: 4.25, back: -2.8, front: 9, h: 4.25, dado: 1.0 };
+// the window opening in the back wall and its glass, set back into a bay
+const WIN = { x: 1.25, y0: 1.125, y1: 3.125, glass: -3.25 };
+const COUNTER_TOP = 1.0;
 
 // ------------------------------------------------------------------ model helpers
 
-/** A lowpix shop model, scaled to world units; parts named *glow* light up. */
-async function shopModel(id: string): Promise<THREE.Object3D> {
+/** A borrowed shop model scaled to `height` metres (or `width`), standing on y = 0, centred on x/z. */
+async function shopModel(id: string, height: number, o: { width?: number } = {}): Promise<THREE.Object3D> {
   const { root } = await instanceGLB(`shop/${id}.glb`);
-  root.scale.setScalar(U);
+  const g = new THREE.Group();
+  g.add(root);
+  root.updateMatrixWorld(true);
+  const b = new THREE.Box3().setFromObject(root), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+  const k = o.width ? o.width / Math.max(0.001, s.x) : height / Math.max(0.001, s.y);
+  root.scale.multiplyScalar(k);
+  root.position.set(-c.x * k, -b.min.y * k, -c.z * k);
   root.traverse((n) => {
     const m = n as THREE.Mesh;
     if (!m.isMesh) return;
-    let o: THREE.Object3D | null = m, glow = false;
-    for (let k = 0; o && k < 3; k++, o = o.parent) if (/glow/.test(o.name)) glow = true;
-    if (glow) {
-      const mat = (m.material as THREE.MeshStandardMaterial).clone();
-      mat.emissive = new THREE.Color(0xffffff);
-      mat.emissiveMap = mat.map;
-      mat.emissiveIntensity = 0.7;
-      mat.userData.flicker = /stove/.test(m.name) || /stove/.test(m.parent?.name ?? '');
-      m.material = mat;
-      m.castShadow = false;
-      m.userData.glow = mat;
+    for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) {
+      // BUSHED's convention: crisp texels up close (nearest), mipmapped in the distance; a matte finish
+      if (mat.map) { mat.map.magFilter = THREE.NearestFilter; mat.map.minFilter = THREE.LinearMipmapLinearFilter; mat.map.needsUpdate = true; }
+      mat.roughness = Math.max(mat.roughness ?? 0.9, 0.82); mat.metalness = Math.min(mat.metalness ?? 0, 0.15);
     }
   });
-  return root;
+  return g;
 }
-const named = (root: THREE.Object3D, name: string) => root.getObjectByName(name) ?? null;
 
 function boxMesh(boxes: BoxSpec[]): THREE.Mesh {
   const m = propMesh(buildProp(boxes, { wind: false }));
@@ -70,56 +70,6 @@ function fit(o: THREE.Object3D, W: number, H: number, D = W) {
   o.scale.multiplyScalar(k);
   o.position.x -= c.x * k; o.position.z -= c.z * k;
   o.position.y -= b.min.y * k;
-}
-
-// the bare snowy owl's body, measured once: dress forms are fitted to it so pieces sit right
-let owlBody: { box: THREE.Box3; bare: Record<BoneName, BoxSpec[]> } | null = null;
-const BASE_OWL: OwlLook = { species: 'snowy', palette: 'snowy', outfit: {} };
-function bareOwl() {
-  if (owlBody) return owlBody;
-  const bare = owlBoxes(BASE_OWL);
-  const box = new THREE.Box3();
-  for (const bone of ['body', 'head'] as BoneName[]) for (const b of bare[bone] ?? []) {
-    const [x, y, z] = b.at, [w, h, d] = b.size;
-    box.expandByPoint(new THREE.Vector3(x * U, y * U, z * U));
-    box.expandByPoint(new THREE.Vector3((x + w) * U, (y + h) * U, (z + d) * U));
-  }
-  owlBody = { box, bare };
-  return owlBody;
-}
-
-/** Just the boxes an outfit piece adds to the snowy owl (the piece itself, in owl space). */
-function pieceBoxes(id: string): BoxSpec[] | null {
-  const def = PIECE[id];
-  if (!def) return null;
-  try {
-    const { bare } = bareOwl();
-    const dressed = owlBoxes({ ...BASE_OWL, outfit: { [def.slot]: id } });
-    const out: BoxSpec[] = [];
-    for (const bone of Object.keys(dressed) as BoneName[]) dressed[bone].slice(bare[bone]?.length ?? 0).forEach((b) => out.push(b));
-    return out.length ? out : null;
-  } catch { return null; }
-}
-
-/** An owl dress form wearing a piece: the form is fitted to the owl's body so the piece sits on it. */
-async function dressedForm(id: string): Promise<THREE.Object3D> {
-  const g = new THREE.Group();
-  const form = await shopModel('bust');
-  const { box } = bareOwl();
-  // the form's linen body spans y 15..37.4, x +-6.3, z +-5.5 (model units)
-  const fw = 12.6 * U, fh = 22.4 * U, fd = 11 * U;
-  const ow = box.max.x - box.min.x, oh = box.max.y - box.min.y, od = box.max.z - box.min.z;
-  const k = oh / fh;
-  form.scale.set(U * Math.max(k * 0.9, (ow / fw) * 0.98), U * k, U * Math.max(k * 0.9, (od / fd) * 0.98));
-  form.position.set((box.min.x + box.max.x) / 2, box.min.y - 15 * U * k, (box.min.z + box.max.z) / 2);
-  g.add(form);
-  const model = (PIECE[id] as unknown as { model?: string })?.model;
-  if (model) {
-    try { const { root } = await instanceGLB(model); g.add(root); return g; } catch { /* fall back to the boxes */ }
-  }
-  const boxes = pieceBoxes(id);
-  if (boxes) g.add(boxMesh(boxes));
-  return g;
 }
 
 /** Today's item: its hand-made GLB when it has one, else its built model. */
@@ -147,46 +97,134 @@ async function itemModel(id: string): Promise<THREE.Object3D | null> {
   return g;
 }
 
+// ------------------------------------------------------------------ the room's surfaces
+
+const loader = new THREE.TextureLoader();
+/** A room texture (BUSHED pixel-art PBR set, restyled): nearest magnification, mipmapped minification. */
+function roomTex(name: string, srgb = true): THREE.Texture {
+  const t = loader.load(modelUrl(`shop/tex/${name}.png`));
+  t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.magFilter = THREE.NearestFilter;
+  t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.anisotropy = 8;
+  return t;
+}
+const pbr = (name: string, normal = true): THREE.MeshStandardMaterialParameters => ({ map: roomTex(name), ...(normal ? { normalMap: roomTex(name + '_n', false), normalScale: new THREE.Vector2(0.8, 0.8) } : {}) });
+/** A flat rectangle whose texture tiles in world units (`tile` metres per repeat). */
+function panel(w: number, h: number, mat: THREE.Material, tile: number, at: [number, number, number], rotY = 0, rotX = 0): THREE.Mesh {
+  const geo = new THREE.PlaneGeometry(w, h);
+  const uv = geo.attributes.uv as THREE.BufferAttribute, pos = geo.attributes.position as THREE.BufferAttribute;
+  const ox = rotY ? at[2] : at[0], oy = rotX ? at[2] : at[1];
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + ox) / tile, (pos.getY(i) + oy) / tile);
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(...at);
+  m.rotation.set(rotX, rotY, 0);
+  m.receiveShadow = true;
+  return m;
+}
+/** A beam, rail or bit of trim: a box whose texture runs along its length. */
+function beam(size: [number, number, number], at: [number, number, number], mat: THREE.Material, tile = 1.2): THREE.Mesh {
+  const geo = new THREE.BoxGeometry(...size);
+  const uv = geo.attributes.uv as THREE.BufferAttribute;
+  const long = Math.max(...size);
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * (long / tile), uv.getY(i) * 0.25);
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(...at);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+
+/** Linen for the curtains: a soft hand-painted weave with a berry hem, drawn once. */
+function linenTexture(): THREE.CanvasTexture {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#e6dcc2'; g.fillRect(0, 0, 64, 64);
+  for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) {
+    const v = ((x * 7 + y * 13) % 11) / 11;
+    if ((x + (y >> 1)) % 3 === 0 || v > 0.86) { g.fillStyle = v > 0.5 ? 'rgba(201,183,141,0.35)' : 'rgba(255,250,238,0.35)'; g.fillRect(x, y, 1, 1); }
+  }
+  g.fillStyle = 'rgba(158,95,102,0.75)'; g.fillRect(0, 2, 64, 3);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+/** A gathered curtain: a plane rippled into folds and caught in at the tie-back. */
+function curtain(mat: THREE.Material, h: number, w: number, side: number): THREE.Mesh {
+  const geo = new THREE.PlaneGeometry(w, h, 24, 20);
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), v = (y + h / 2) / h, u = (x + w / 2) / w;
+    const tie = Math.exp(-((v - 0.42) ** 2) / 0.02);
+    const pinch = 1 - tie * 0.55;
+    pos.setX(i, (x + side * tie * w * 0.25) * pinch);
+    pos.setZ(i, Math.sin(u * Math.PI * 7) * 0.045 * (0.5 + v * 0.6) + Math.sin(u * Math.PI * 3 + 1) * 0.02);
+  }
+  geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, mat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+
 // ------------------------------------------------------------------ the props and where they stand
 
-interface Place { id: string; at: [number, number, number]; yaw?: number; scale?: number; mirror?: boolean }
+interface Place { id: string; h: number; at: [number, number, number]; yaw?: number; width?: number; tag?: string }
 const PROPS: Place[] = [
-  { id: 'room', at: [0, 0, 0] },
-  { id: 'window', at: [0, 0, 0] },
-  { id: 'shelves', at: [-2.56, 0, -2.5] },
-  { id: 'shelves', at: [2.56, 0, -2.5], mirror: true },
-  { id: 'counter', at: [0, 0, -0.75] },
-  { id: 'case', at: [-3.2, 0, -0.05], yaw: 0.6 },
-  { id: 'rail', at: [-3.62, 0, -1.32], yaw: 1.15 },
-  { id: 'bust_dressed', at: [-2.78, 0, -1.78], yaw: 0.35, scale: 0.62 },
-  { id: 'stove', at: [3.62, 0, -1.5], yaw: -0.75 },
-  { id: 'hatstand', at: [3.3, 0, 0.12], yaw: -0.4 },
-  { id: 'bust_dressed', at: [2.9, 0, -0.62], yaw: -0.5, scale: 0.6, mirror: true },
-  { id: 'fir', at: [-3.88, 0, -2.42] },
-  { id: 'plant', at: [0.86, WIN.y0 + 2.2 * U, -2.62] },
-  { id: 'plant', at: [-1.98, 49.2 * U, -2.46], scale: 0.9 },
-  { id: 'garland', at: [0, 3.76 - 16 * U, -2.58] },
-  { id: 'garland', at: [-2.56, 3.2 - 16 * U, -2.2], scale: 0.7 },
-  { id: 'garland', at: [2.56, 3.2 - 16 * U, -2.2], scale: 0.7 },
-  { id: 'doormat', at: [0, 0.005, 1.55] },
-  { id: 'lantern', at: [-1.42, 2.58, -0.45] },
-  { id: 'lantern', at: [1.42, 2.58, -0.45] },
+  // the counter and what stands on it
+  { id: 'gg_showcase', h: COUNTER_TOP, at: [0, 0, -0.78], width: 2.2 },
+  { id: 'till', h: 0.4, at: [0.62, COUNTER_TOP, -0.9], yaw: -0.25 },
+  { id: 'gg_call_bell_p', h: 0.09, at: [0.12, COUNTER_TOP, -0.6], tag: 'bell' },
+  { id: 'oil_lamp', h: 0.55, at: [-0.98, COUNTER_TOP, -0.92] },
+  // back wall, left of the window: painted shelves, a grandfather clock, a monstera, a hat table
+  { id: 'gg_bookshelf', h: 2.2, at: [-2.55, 0, -2.5], width: 1.6, tag: 'stock' },
+  { id: 'clock', h: 2.1, at: [-3.82, 0, -2.42] },
+  { id: 'gg_plant_monstera', h: 1.25, at: [-1.48, 0, -2.42] },
+  { id: 'gg_table_round', h: 0.72, at: [-2.2, 0, -1.55], width: 0.95 },
+  { id: 'gg_wear_boater', h: 0.11, at: [-2.42, 0.72, -1.62], yaw: 0.4 },
+  { id: 'gg_wear_beanie_pom', h: 0.2, at: [-2.0, 0.72, -1.4], yaw: -0.3 },
+  { id: 'gg_wear_fedora', h: 0.13, at: [-2.08, 0.72, -1.8], yaw: 1.2 },
+  // left wall: a white cupboard with a marble bust in a beret, an ornate mirror, a spinning wheel, luggage
+  { id: 'cupboard', h: 1.0, at: [-3.92, 0, -0.95], yaw: Math.PI / 2 },
+  { id: 'bust', h: 0.62, at: [-3.92, 1.0, -0.95], yaw: Math.PI / 2 - 0.5 },
+  { id: 'gg_wear_beret', h: 0.07, at: [-3.88, 1.58, -0.95], yaw: 0.6 },
+  { id: 'mirror', h: 1.25, at: [-4.2, 1.15, 0.25], yaw: Math.PI / 2 },
+  { id: 'spinning_wheel', h: 1.05, at: [-3.45, 0, 0.75], yaw: 0.7 },
+  { id: 'suitcase', h: 0.5, at: [-2.75, 0, 1.55], yaw: 0.35 },
+  { id: 'suitcase', h: 0.42, at: [-2.73, 0.5, 1.53], yaw: 0.6 },
+  // back wall, right of the window: the vintage hutch, a pothos, a potted fir in the corner
+  { id: 'gg_cabinet_vintage', h: 2.25, at: [2.6, 0, -2.45] },
+  { id: 'gg_plant_pothos', h: 0.45, at: [2.2, 2.25, -2.5] },
+  { id: 'fir', h: 1.9, at: [3.95, 0, -2.45] },
+  // right wall: the tiled stove, an armchair with a floor lamp, a tea table, a jar shelf
+  { id: 'stove', h: 1.75, at: [3.85, 0, -1.25], yaw: -Math.PI / 2 },
+  { id: 'gg_armchair', h: 1.0, at: [3.3, 0, 0.5], yaw: -0.85 },
+  { id: 'gg_floor_lamp', h: 1.65, at: [3.85, 0, -0.25] },
+  { id: 'gg_table_side', h: 0.55, at: [2.95, 0, 1.45], yaw: -0.3 },
+  { id: 'tea_set', h: 0.2, at: [2.95, 0.55, 1.45], yaw: 0.4 },
+  { id: 'gg_wall_shelf_jars', h: 0.5, at: [4.12, 1.75, 1.35], yaw: -Math.PI / 2 },
+  // the window seat: pillows, a wooden lantern, the teddy
+  { id: 'pillows', h: 0.32, at: [-0.55, WIN.y0 + 0.09, -2.62], width: 0.9 },
+  { id: 'wood_lantern', h: 0.42, at: [0.95, WIN.y0 + 0.09, -2.66] },
+  { id: 'gg_teddy', h: 0.36, at: [0.45, WIN.y0 + 0.09, -2.6], yaw: -0.3 },
+  // hanging lights
+  { id: 'lantern_chandelier', h: 0.85, at: [0, ROOM.h - 1.1, -0.35], tag: 'hang' },
+  { id: 'gg_lamp_pendant', h: 0.45, at: [-1.9, 3.05, 0.1], tag: 'hang' },
+  { id: 'gg_lamp_pendant', h: 0.45, at: [1.9, 3.05, 0.1], tag: 'hang' },
 ];
 
-// display spots: two dress-form / plinth spots on the floor, one riser on the counter
+// display spots: two round display tables on the floor, one on the counter
 interface SpotDef { x: number; y: number; z: number; floor: boolean }
 const SPOTS: SpotDef[] = [
   { x: -1.86, y: 0, z: 0.16, floor: true },
-  { x: -0.92, y: 17 * U, z: -0.72, floor: false },
+  { x: -0.52, y: COUNTER_TOP, z: -0.74, floor: false },
   { x: 1.86, y: 0, z: 0.16, floor: true },
 ];
+const TABLE_H = 0.62;
 
 interface Stand {
   def: SpotDef;
   group: THREE.Group;
-  /** what stands at the spot (plinth / riser / form) */
   base: THREE.Group;
-  /** the deal itself, which turns and bounces */
   holder: THREE.Group;
   top: number;
   model: THREE.Object3D | null;
@@ -200,9 +238,48 @@ interface Stand {
 
 interface Bulb { s: THREE.Sprite; h: THREE.Sprite; c: THREE.Color; phase: number }
 
+// ------------------------------------------------------------------ BUSHED-style picture: low internal resolution, graded, dithered, grain
+
+const POST_VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }';
+const POST_FS = /* glsl */ `
+uniform sampler2D tColor; uniform vec2 uRes; uniform float uTime, uGrain, uQuant, uVig, uSat, uWarm, uContrast, uExposure;
+varying vec2 vUv;
+float bayer4(vec2 p) { vec2 q = mod(p, 4.0); int i = int(q.x) + int(q.y) * 4;
+  float m[16]; m[0]=0.;m[1]=8.;m[2]=2.;m[3]=10.;m[4]=12.;m[5]=4.;m[6]=14.;m[7]=6.;m[8]=3.;m[9]=11.;m[10]=1.;m[11]=9.;m[12]=15.;m[13]=7.;m[14]=13.;m[15]=5.;
+  for (int k = 0; k < 16; k++) if (k == i) return (m[k] + 0.5) / 16.0; return 0.5; }
+float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
+void main() {
+  vec2 px = floor(vUv * uRes);
+  vec3 col = texture2D(tColor, (px + 0.5) / uRes).rgb * uExposure;
+  col = toSRGB(col / (1.0 + col * 0.18));
+  col = (col - 0.5) * uContrast + 0.5;
+  float l = dot(col, vec3(0.299, 0.587, 0.114));
+  col = mix(vec3(l), col, uSat);
+  // split toning: lamp-warm highlights, slate-cool shadows
+  col += uWarm * (vec3(0.045, 0.02, -0.03) * smoothstep(0.45, 1.0, l) + vec3(-0.02, 0.0, 0.025) * (1.0 - smoothstep(0.0, 0.45, l)));
+  vec2 q = vUv - 0.5;
+  col *= 1.0 - uVig * dot(q, q) * 1.5;
+  col += (hash(px + fract(uTime) * 91.0) - 0.5) * uGrain;
+  col = floor(col * uQuant + 0.5 + (bayer4(px) - 0.5) * 0.9) / uQuant;
+  gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+}`;
+
 export class Boutique implements Stage {
-  readonly scene = new THREE.Scene();
-  readonly camera = new THREE.PerspectiveCamera(30, 1, 0.3, 80);
+  /** the shop itself (rendered at a low internal resolution once a renderer is attached) */
+  readonly room = new THREE.Scene();
+  /** what the app draws: the graded low-res picture on a full-screen triangle (or the room, unattached) */
+  get scene(): THREE.Scene { return this.gl ? this.screen : this.room; }
+  private screen = new THREE.Scene();
+  private gl: THREE.WebGLRenderer | null = null;
+  private rt: THREE.WebGLRenderTarget | null = null;
+  private post = new THREE.ShaderMaterial({
+    vertexShader: POST_VS, fragmentShader: POST_FS, depthTest: false, depthWrite: false,
+    uniforms: { tColor: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uTime: { value: 0 }, uGrain: { value: 0.035 }, uQuant: { value: 48 }, uVig: { value: 0.32 }, uSat: { value: 0.92 }, uWarm: { value: 1.0 }, uContrast: { value: 1.05 }, uExposure: { value: 1.25 } },
+  });
+  /** screen (CSS) pixels per internal pixel */
+  pixel = 1.6;
+  readonly camera = new THREE.PerspectiveCamera(30, 1, 0.2, 80);
   readonly queen: OwlActor;
   readonly fx = new Fx(900);
   /** resolves when the room's models are in */
@@ -216,10 +293,9 @@ export class Boutique implements Stage {
   private queenRig = new THREE.Group();
   private stands: Stand[] = [];
   private bulbs: Bulb[] = [];
-  private lanterns: THREE.Object3D[] = [];
-  private lanternLights: THREE.PointLight[] = [];
-  private glows: THREE.MeshStandardMaterial[] = [];
-  private stoveLight = new THREE.PointLight(0xefb85a, 4, 4.5, 1.6);
+  private swingers: THREE.Object3D[] = [];
+  private lampLights: THREE.PointLight[] = [];
+  private stoveLight = new THREE.PointLight(0xefb85a, 2.2, 3.5, 1.6);
   private focusLight = new THREE.SpotLight(0xf9e9c4, 0, 7, 0.32, 0.6, 1.2);
   private bell: THREE.Object3D | null = null;
   private bellT = 0;
@@ -240,45 +316,54 @@ export class Boutique implements Stage {
   private dead = false;
 
   constructor(deals: DisplayItem[] = []) {
-    const S = this.scene;
+    const S = this.room;
+    const tri = new THREE.BufferGeometry();
+    tri.setAttribute('position', new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
+    tri.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 2, 0, 0, 2], 2));
+    const quad = new THREE.Mesh(tri, this.post);
+    quad.frustumCulled = false;
+    this.screen.add(quad);
+    this.disposables.push(() => { tri.dispose(); this.post.dispose(); this.rt?.dispose(); });
     S.background = new THREE.Color(P.night);
     S.fog = new THREE.Fog(P.night, 14, 40);
 
-    // light: lamp-warm key from the front left, a cool fill from the window, lanterns and the stove
-    S.add(new THREE.HemisphereLight(0xdcd6c6, 0x3d3229, 0.78));
-    const key = new THREE.DirectionalLight(0xf6e2b4, 1.05);
+    // light: a soft warm fill, lamplight from the fittings, a cool breath from the window
+    S.add(new THREE.HemisphereLight(0xe6dcc6, 0x4a392b, 1.3));
+    const key = new THREE.DirectionalLight(0xf6e2b4, 1.15);
     key.position.set(-3.5, 6.5, 6); key.target.position.set(0.4, 0.8, -1.2);
     key.castShadow = true; key.shadow.mapSize.set(1024, 1024);
     const sc = key.shadow.camera; sc.left = -5.5; sc.right = 5.5; sc.top = 5; sc.bottom = -3; sc.near = 1; sc.far = 20;
     key.shadow.bias = -0.0006; key.shadow.normalBias = 0.02;
     S.add(key, key.target);
-    const moon = new THREE.DirectionalLight(0xaec8cc, 0.55);
+    const moon = new THREE.DirectionalLight(0xaec8cc, 0.5);
     moon.position.set(0.6, 4, -8); moon.target.position.set(0, 1, 0);
     S.add(moon, moon.target);
-    const winFill = new THREE.PointLight(0xaec8cc, 2.2, 5, 1.6);
+    const winFill = new THREE.PointLight(0xaec8cc, 1.8, 5, 1.6);
     winFill.position.set(0, 2.2, -2.5);
     S.add(winFill);
-    this.stoveLight.position.set(3.35, 0.7, -1.0);
+    this.stoveLight.position.set(3.4, 0.9, -1.25);
     S.add(this.stoveLight);
-    for (const x of [-1.42, 1.42]) {
-      const l = new THREE.PointLight(0xf4dca6, 3.2, 5.5, 1.5);
-      l.position.set(x, 2.85, -0.45);
+    for (const [x, y, z, i] of [[0, 3.2, -0.35, 2.6], [-1.9, 2.75, 0.1, 1.6], [1.9, 2.75, 0.1, 1.6], [3.85, 1.55, -0.25, 1.4]] as const) {
+      const l = new THREE.PointLight(0xf4dca6, i, 5, 1.5);
+      l.position.set(x, y, z);
+      l.userData.base = i;
       S.add(l);
-      this.lanternLights.push(l);
+      this.lampLights.push(l);
     }
     this.focusLight.position.set(0, 4.1, 1.2);
     S.add(this.focusLight, this.focusLight.target);
 
     // Queen Neve on a little step behind her counter
     this.queen = new OwlActor(QUEEN_LOOK, { fx: (k, at, n) => this.owlFx(k, at, n), sound: (id) => sceneSound('owl_' + id) });
-    this.queen.node.scale.setScalar(1.08);
+    this.queen.node.scale.setScalar(1.28);
     this.queen.setMood('happy');
-    this.queenRig.position.set(0.1, 0.3, -1.6);
+    this.queenRig.position.set(0.1, 0.42, -1.66);
     this.queenRig.add(this.queen.node);
     S.add(this.queenRig);
     S.add(this.fx.group);
     this.fx.setLight(new THREE.Color(0xf4ecd8));
 
+    this.buildRoom();
     this.buildWindow();
     this.buildBulbs();
     SPOTS.forEach((d, i) => this.stands.push(this.makeStand(i, d)));
@@ -287,52 +372,167 @@ export class Boutique implements Stage {
     for (let i = 0; i < 30; i++) this.queen.update(1 / 30);
   }
 
+  /** Draw through this renderer: the room goes to a low-resolution target, then is graded onto the screen. */
+  attach(renderer: THREE.WebGLRenderer) { this.gl = renderer; }
+
+  private renderRoom(t: number) {
+    const gl = this.gl;
+    if (!gl) return;
+    const cw = gl.domElement.clientWidth || this.w, ch = gl.domElement.clientHeight || this.h;
+    const w = Math.max(64, Math.round(cw / this.pixel)), h = Math.max(64, Math.round(ch / this.pixel));
+    if (!this.rt || this.rt.width !== w || this.rt.height !== h) {
+      this.rt?.dispose();
+      this.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: true });
+    }
+    const u = this.post.uniforms;
+    u.tColor.value = this.rt.texture; u.uRes.value.set(w, h); u.uTime.value = t;
+    const prev = gl.getRenderTarget();
+    gl.setRenderTarget(this.rt);
+    gl.render(this.room, this.camera);
+    gl.setRenderTarget(prev);
+  }
+
   // ---------------------------------------------------------------- building the shop
+
+  private mat(o: THREE.MeshStandardMaterialParameters): THREE.MeshStandardMaterial {
+    const m = new THREE.MeshStandardMaterial({ roughness: 0.92, metalness: 0, ...o });
+    this.disposables.push(() => { m.map?.dispose(); m.normalMap?.dispose(); m.dispose(); });
+    return m;
+  }
+
+  /** floorboards, papered walls over panelling, trim, a plaster ceiling on beams */
+  private buildRoom() {
+    const S = this.room, R = ROOM, D = R.front - R.back, mz = (R.front + R.back) / 2;
+    const floor = this.mat(pbr('floor')), paper = this.mat(pbr('paper', false)), panels = this.mat(pbr('panels'));
+    const ceil = this.mat({ ...pbr('walls'), color: 0xd8ccb4 }), dark = this.mat(pbr('beams')), trim = this.mat({ ...pbr('walls'), color: 0xe6dcc6 });
+    const geoms: THREE.BufferGeometry[] = [];
+    const add = (m: THREE.Mesh) => { S.add(m); geoms.push(m.geometry); return m; };
+    add(panel(2 * R.w, D, floor, 2.0, [0, 0, mz], 0, -Math.PI / 2));
+    // a woven runner in front of the counter
+    const rug = add(new THREE.Mesh(new THREE.PlaneGeometry(1.15, 3.6), this.mat({ map: roomTex('rug'), roughness: 1 })));
+    rug.rotation.set(-Math.PI / 2, 0, Math.PI / 2);
+    rug.position.set(0, 0.006, 0.7);
+    rug.receiveShadow = true;
+    // back wall: wallpaper around the window, panelling below the dado
+    const z = R.back, up = R.dado, sideW = R.w - WIN.x;
+    add(panel(sideW, R.h - up, paper, 1.0, [-(WIN.x + sideW / 2), up + (R.h - up) / 2, z]));
+    add(panel(sideW, R.h - up, paper, 1.0, [WIN.x + sideW / 2, up + (R.h - up) / 2, z]));
+    add(panel(2 * WIN.x, R.h - WIN.y1, paper, 1.0, [0, (R.h + WIN.y1) / 2, z]));
+    add(panel(2 * WIN.x, WIN.y0 - up, paper, 1.0, [0, (WIN.y0 + up) / 2, z]));
+    add(panel(2 * R.w, up, panels, 2.0, [0, up / 2, z + 0.01]));
+    // side walls with the same panelling, dado rail, skirting and cornice
+    for (const sd of [-1, 1]) {
+      add(panel(D, R.h - up, paper, 1.0, [sd * R.w, up + (R.h - up) / 2, mz], -sd * Math.PI / 2));
+      add(panel(D, up, panels, 2.0, [sd * (R.w - 0.01), up / 2, mz], -sd * Math.PI / 2));
+      add(beam([0.07, 0.08, D], [sd * (R.w - 0.035), up, mz], trim));
+      add(beam([0.04, 0.16, D], [sd * (R.w - 0.02), 0.08, mz], dark));
+      add(beam([0.12, 0.14, D], [sd * (R.w - 0.06), R.h - 0.07, mz], trim));
+    }
+    add(beam([2 * R.w, 0.08, 0.07], [0, up, z + 0.035], trim));
+    add(beam([2 * R.w, 0.16, 0.04], [0, 0.08, z + 0.02], dark));
+    add(beam([2 * R.w, 0.14, 0.12], [0, R.h - 0.07, z + 0.06], trim));
+    // ceiling and beams
+    add(panel(2 * R.w, D, ceil, 2.0, [0, R.h, mz], 0, Math.PI / 2));
+    for (const bz of [-2.1, -0.4, 1.3, 3.0, 4.7, 6.4]) add(beam([2 * R.w, 0.2, 0.22], [0, R.h - 0.1, bz], dark, 1.6));
+    this.disposables.push(() => { for (const g of geoms) g.dispose(); });
+  }
+
+  /** the bay window: casing, sash, a seat with a cushion, pelmet, curtains, the snowy evening outside */
+  private buildWindow() {
+    const S = this.room, z = ROOM.back;
+    const wood = this.mat({ ...pbr('walls'), color: 0xf0e8d8 }), painted = this.mat(pbr('panels'));
+    const geoms: THREE.BufferGeometry[] = [];
+    const add = <T extends THREE.Mesh>(m: T) => { S.add(m); geoms.push(m.geometry); return m; };
+    const b = (size: [number, number, number], at: [number, number, number], m: THREE.Material = wood) => add(beam(size, at, m, 0.9));
+    const depth = z - WIN.glass, H = WIN.y1 - WIN.y0, g = WIN.glass;
+    // the bay's panelled sides, head and floor
+    for (const sd of [-1, 1]) b([0.06, H, depth], [sd * (WIN.x + 0.03), (WIN.y0 + WIN.y1) / 2, (z + g) / 2], painted);
+    b([2 * WIN.x + 0.12, 0.06, depth], [0, WIN.y1 + 0.03, (z + g) / 2], painted);
+    // sash and glazing bars
+    b([2 * WIN.x, 0.08, 0.07], [0, WIN.y1 - 0.04, g]); b([2 * WIN.x, 0.1, 0.07], [0, WIN.y0 + 0.05, g]);
+    for (const sd of [-1, 1]) b([0.08, H, 0.07], [sd * (WIN.x - 0.04), (WIN.y0 + WIN.y1) / 2, g]);
+    for (const x of [-WIN.x / 3, WIN.x / 3]) b([0.05, H, 0.06], [x, (WIN.y0 + WIN.y1) / 2, g]);
+    b([2 * WIN.x, 0.05, 0.06], [0, WIN.y0 + H * 0.62, g]);
+    // casing on the wall
+    for (const sd of [-1, 1]) b([0.18, H + 0.24, 0.06], [sd * (WIN.x + 0.09), (WIN.y0 + WIN.y1) / 2 + 0.06, z + 0.03]);
+    // the window seat with a plum cushion
+    b([2 * WIN.x + 0.5, 0.08, 0.6], [0, WIN.y0 - 0.04, z + 0.18]);
+    b([2 * WIN.x + 0.4, WIN.y0 - 0.08 - ROOM.dado + 0.04, 0.05], [0, (WIN.y0 - 0.08 + ROOM.dado) / 2, z + 0.46], painted);
+    const cushion = add(new THREE.Mesh(new THREE.BoxGeometry(2 * WIN.x - 0.05, 0.09, 0.44), this.mat({ color: 0x7b6079, roughness: 1 })));
+    cushion.position.set(0, WIN.y0 + 0.045, z + 0.16);
+    cushion.castShadow = cushion.receiveShadow = true;
+    // pelmet and pole
+    b([2 * WIN.x + 0.7, 0.26, 0.14], [0, WIN.y1 + 0.27, z + 0.08], painted);
+    b([2 * WIN.x + 0.8, 0.04, 0.17], [0, WIN.y1 + 0.13, z + 0.09]);
+    // linen curtains gathered at tie-backs
+    const lt = linenTexture(), cm = this.mat({ map: lt, side: THREE.DoubleSide, roughness: 1 });
+    for (const sd of [-1, 1]) {
+      const c = add(curtain(cm, H + 0.35, 0.62, -sd));
+      c.position.set(sd * (WIN.x + 0.26), (WIN.y0 + WIN.y1) / 2 + 0.12, z + 0.2);
+    }
+    // the snowy evening outside and frost on the glass
+    const out = outdoorTexture();
+    const bg = add(new THREE.Mesh(new THREE.PlaneGeometry(4.6, 3.3), new THREE.MeshBasicMaterial({ map: out, fog: false })));
+    bg.position.set(0, 2.05, g - 0.95);
+    const fr = frostTexture([0, 1 / 3, 2 / 3, 1], [0, 0.38, 1]);
+    const frost = add(new THREE.Mesh(new THREE.PlaneGeometry(2 * WIN.x, H), new THREE.MeshBasicMaterial({ map: fr, transparent: true, depthWrite: false })));
+    frost.position.set(0, (WIN.y0 + WIN.y1) / 2, g + 0.045);
+    frost.renderOrder = 2;
+    this.disposables.push(() => { for (const gg of geoms) gg.dispose(); lt.dispose(); out.dispose(); fr.dispose(); (bg.material as THREE.Material).dispose(); (frost.material as THREE.Material).dispose(); });
+  }
 
   private async loadProps() {
     await Promise.all(PROPS.map(async (p) => {
       let o: THREE.Object3D;
-      try { o = await shopModel(p.id); } catch (e) { console.warn('shop model missing', p.id, e); return; }
+      try { o = await shopModel(p.id, p.h, { width: p.width }); } catch (e) { console.warn('shop model missing', p.id, e); return; }
       if (this.dead) return;
-      const g = new THREE.Group();
-      g.add(o);
-      g.position.set(...p.at);
-      g.rotation.y = p.yaw ?? 0;
-      g.scale.set((p.mirror ? -1 : 1) * (p.scale ?? 1), p.scale ?? 1, p.scale ?? 1);
-      if (p.id === 'room') o.traverse((n) => { if ((n as THREE.Mesh).isMesh) n.castShadow = false; });
-      if (p.id === 'lantern') { g.userData.phase = this.lanterns.length * 1.7; this.lanterns.push(g); }
-      if (p.id === 'counter') this.bell = named(o, 'bell_dome');
-      o.traverse((n) => { const m = n.userData.glow as THREE.MeshStandardMaterial | undefined; if (m) { this.glows.push(m); this.disposables.push(() => m.dispose()); } });
-      if (p.id === 'case') this.addCaseGlass(g);
-      this.scene.add(g);
+      o.position.set(...p.at);
+      o.rotation.y = p.yaw ?? 0;
+      if (p.tag === 'bell') this.bell = o;
+      if (p.tag === 'stock') { this.room.add(o); o.updateMatrixWorld(true); void this.stock(o); }
+      if (p.tag === 'hang') {
+        // hung from the ceiling on a cord, swaying a little
+        const top = p.at[1] + new THREE.Box3().setFromObject(o).getSize(new THREE.Vector3()).y;
+        const len = Math.max(0.05, ROOM.h - top);
+        const geo = new THREE.CylinderGeometry(0.008, 0.008, len, 4);
+        const cord = new THREE.Mesh(geo, this.mat({ color: 0x2e2b24 }));
+        cord.position.set(0, top - p.at[1] + len / 2, 0);
+        o.add(cord);
+        this.disposables.push(() => geo.dispose());
+        o.userData.phase = this.swingers.length * 1.7;
+        this.swingers.push(o);
+      }
+      this.room.add(o);
     }));
   }
 
-  private addCaseGlass(g: THREE.Group) {
-    const tex = glassTexture();
-    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide });
-    const geo = new THREE.BoxGeometry(22 * U * 0.98, 6 * U, 9 * U * 0.96);
-    const glass = new THREE.Mesh(geo, mat);
-    glass.position.set(0, 13 * U, 0);
-    glass.renderOrder = 3;
-    g.add(glass);
-    this.disposables.push(() => { tex.dispose(); mat.dispose(); geo.dispose(); });
+  /** Fill a shelf unit: find its boards by casting rays down through it, then set goods on each. */
+  private async stock(unit: THREE.Object3D) {
+    const b = new THREE.Box3().setFromObject(unit), ray = new THREE.Raycaster();
+    const cz = (b.min.z + b.max.z) / 2 + 0.02, w = b.max.x - b.min.x;
+    const goods = ['gg_books_stack', 'gg_wear_beanie_pom', 'mantel_clock', 'basket', 'gg_vase_ceramic', 'gg_wear_boater', 'candlestick', 'gg_books_stack', 'gg_wear_fedora', 'gg_teddy'];
+    const height: Record<string, number> = { gg_books_stack: 0.16, gg_wear_beanie_pom: 0.18, mantel_clock: 0.2, basket: 0.12, gg_vase_ceramic: 0.26, gg_wear_boater: 0.09, candlestick: 0.24, gg_wear_fedora: 0.12, gg_teddy: 0.26 };
+    let k = 0;
+    for (const fx of [0.28, 0.72]) {
+      const x = b.min.x + w * fx;
+      ray.set(new THREE.Vector3(x, b.max.y + 0.5, cz), new THREE.Vector3(0, -1, 0));
+      const ys = ray.intersectObject(unit, true).filter((h) => (h.face?.normal ? h.face.normal.clone().transformDirection(h.object.matrixWorld).y > 0.7 : true)).map((h) => h.point.y);
+      const levels = ys.filter((y, i) => i === 0 || Math.abs(ys[i - 1] - y) > 0.18).filter((y) => y > b.min.y + 0.15 && y < b.max.y - 0.1);
+      if (import.meta.env.DEV) console.debug('shelf levels', levels.map((y) => y.toFixed(2)).join(' '));
+      for (const y of levels) {
+        const id = goods[k++ % goods.length];
+        try {
+          const o = await shopModel(id, height[id] ?? 0.18);
+          if (this.dead) return;
+          o.position.set(x + (k % 2 ? 0.04 : -0.05), y, cz + 0.02);
+          o.rotation.y = (k * 1.3) % 1 - 0.5;
+          this.room.add(o);
+        } catch { /* skip */ }
+      }
+    }
   }
 
-  private buildWindow() {
-    const out = outdoorTexture();
-    const bg = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 3.3), new THREE.MeshBasicMaterial({ map: out, fog: false }));
-    bg.position.set(0, 2.05, WIN.glass - 0.95);
-    this.scene.add(bg);
-    const fr = frostTexture([0, 1 / 3, 2 / 3, 1], [0, 0.38, 1]);
-    const frost = new THREE.Mesh(new THREE.PlaneGeometry(2 * WIN.x, WIN.y1 - WIN.y0), new THREE.MeshBasicMaterial({ map: fr, transparent: true, depthWrite: false }));
-    frost.position.set(0, (WIN.y0 + WIN.y1) / 2, WIN.glass + 0.05);
-    frost.renderOrder = 2;
-    this.scene.add(frost);
-    this.disposables.push(() => { out.dispose(); fr.dispose(); bg.geometry.dispose(); (bg.material as THREE.Material).dispose(); frost.geometry.dispose(); (frost.material as THREE.Material).dispose(); });
-  }
-
-  /** fairy lights strung along the pelmet and over both shelf units */
+  /** fairy lights strung along the pelmet */
   private buildBulbs() {
     const bt = bulbTexture(), ht = haloTexture();
     const cols = [P.lamp, P.honey, P.rose, P.sageLight, P.ice, P.blush];
@@ -343,29 +543,26 @@ export class Boutique implements Stage {
       const at = (t: number) => { const seg = t * hooks, f = seg - Math.floor(seg); return new THREE.Vector3(x0 + (x1 - x0) * t, y - Math.sin(f * Math.PI) * sag, z); };
       for (let i = 0; i <= 60; i++) pts.push(at(i / 60));
       const geo = new THREE.BufferGeometry().setFromPoints(pts);
-      const line = new THREE.Line(geo, wire);
-      this.scene.add(line);
+      this.room.add(new THREE.Line(geo, wire));
       this.disposables.push(() => geo.dispose());
       for (let i = 0; i < n; i++) {
-        const t = (i + 0.5) / n, p = at(t);
+        const p = at((i + 0.5) / n);
         const c = new THREE.Color(cols[(i * 7 + Math.round(x0 * 3)) % cols.length]);
         const sm = new THREE.SpriteMaterial({ map: bt, color: c, fog: false });
         const s = new THREE.Sprite(sm);
-        s.scale.set(0.055, 0.07, 1);
-        s.position.copy(p).add(new THREE.Vector3(0, -0.035, 0.01));
-        const hm = new THREE.SpriteMaterial({ map: ht, color: c, transparent: true, opacity: 0.8, depthWrite: false, fog: false });
+        s.scale.set(0.045, 0.058, 1);
+        s.position.copy(p).add(new THREE.Vector3(0, -0.03, 0.01));
+        const hm = new THREE.SpriteMaterial({ map: ht, color: c, transparent: true, opacity: 0.6, depthWrite: false, fog: false });
         const h = new THREE.Sprite(hm);
-        h.scale.setScalar(0.2);
+        h.scale.setScalar(0.16);
         h.position.copy(s.position);
         h.renderOrder = 4;
-        this.scene.add(s, h);
+        this.room.add(s, h);
         this.bulbs.push({ s, h, c, phase: i * 0.9 + x0 });
         this.disposables.push(() => { sm.dispose(); hm.dispose(); });
       }
     };
-    string(-1.62, 1.62, 3.24, -2.6, 4, 0.12, 22);
-    string(-3.56, -1.56, 3.02, -2.2, 3, 0.1, 13);
-    string(1.56, 3.56, 3.02, -2.2, 3, 0.1, 13);
+    string(-1.7, 1.7, WIN.y1 + 0.13, ROOM.back + 0.2, 4, 0.1, 22);
   }
 
   private makeStand(i: number, d: SpotDef): Stand {
@@ -373,25 +570,25 @@ export class Boutique implements Stage {
     group.position.set(d.x, d.y, d.z);
     const base = new THREE.Group(), holder = new THREE.Group();
     group.add(base, holder);
-    // a stepped pixel pool of light on the floor (or the counter) under the display
     const pt = poolTexture();
     const pm = new THREE.MeshBasicMaterial({ map: pt, color: P.lamp, transparent: true, opacity: 0, depthWrite: false });
-    const pool = new THREE.Mesh(new THREE.PlaneGeometry(d.floor ? 1.5 : 0.7, d.floor ? 1.5 : 0.7), pm);
+    const pool = new THREE.Mesh(new THREE.PlaneGeometry(d.floor ? 1.5 : 0.6, d.floor ? 1.5 : 0.6), pm);
     pool.rotation.x = -Math.PI / 2;
     pool.position.y = 0.012;
     pool.renderOrder = 1;
     group.add(pool);
-    const hh = d.floor ? 1.9 : 0.85;
-    const hit = new THREE.Mesh(new THREE.BoxGeometry(d.floor ? 1.25 : 0.75, hh, d.floor ? 1.1 : 0.6), new THREE.MeshBasicMaterial({ visible: false }));
+    const hh = d.floor ? 1.9 : 0.7;
+    const hit = new THREE.Mesh(new THREE.BoxGeometry(d.floor ? 1.2 : 0.6, hh, d.floor ? 1.1 : 0.5), new THREE.MeshBasicMaterial({ visible: false }));
     hit.position.y = hh / 2;
     hit.userData.stand = i;
     group.add(hit);
     this.disposables.push(() => { pt.dispose(); pm.dispose(); pool.geometry.dispose(); hit.geometry.dispose(); (hit.material as THREE.Material).dispose(); });
-    this.scene.add(group);
-    return { def: d, group, base, holder, top: 0, model: null, owl: null, pool, hit, focus: 0, bounce: 0, sold: false };
+    this.room.add(group);
+    if (d.floor) void shopModel('gg_table_round', TABLE_H, { width: 0.72 }).then((t) => { if (!this.dead) base.add(t); }).catch(() => { /* no table */ });
+    return { def: d, group, base, holder, top: d.floor ? TABLE_H : 0, model: null, owl: null, pool, hit, focus: 0, bounce: 0, sold: false };
   }
 
-  /** Put today's deals on display (unknown ids show a wrapped mystery parcel). */
+  /** Put today's deals on display (unknown ids show a wrapped parcel). */
   setDeals(deals: DisplayItem[]) {
     const key = deals.map((d) => d.kind + ':' + d.id).join('|');
     if (key === this.dealKey) return;
@@ -405,7 +602,7 @@ export class Boutique implements Stage {
   }
 
   private clearStand(s: Stand) {
-    for (const g of [s.base, s.holder]) for (const c of [...g.children]) { g.remove(c); c.userData.dispose?.(); }
+    for (const c of [...s.holder.children]) { s.holder.remove(c); c.userData.dispose?.(); }
     if (s.owl) { s.owl.model.dispose(); s.owl = null; }
     s.model = null;
   }
@@ -413,30 +610,18 @@ export class Boutique implements Stage {
   private async dress(s: Stand, d: DisplayItem, token: number) {
     const floor = s.def.floor;
     try {
-      if (d.kind === 'piece' && PIECE[d.id]) {
-        // a dress form wearing the piece, on its own stand
-        const g = await dressedForm(d.id);
-        if (token !== this.dealToken || this.dead) return;
-        fit(g, floor ? 1.0 : 0.5, floor ? 1.72 : 0.62, floor ? 1.0 : 0.5);
-        if (!floor) { const r = await shopModel('riser'); if (token !== this.dealToken) return; s.base.add(r); s.top = 4.6 * U; }
-        else s.top = 0;
-        s.holder.add(g);
-        s.model = g;
-        return;
-      }
-      // everything else stands on a plinth (floor) or the riser (counter)
-      const plinth = await shopModel(floor ? 'pedestal' : 'riser');
-      if (token !== this.dealToken || this.dead) return;
-      s.base.add(plinth);
-      s.top = floor ? 12.2 * U : 4.6 * U;
-      if (d.kind === 'species' || d.kind === 'skin') {
-        const look: OwlLook = d.kind === 'species' ? { skin: 'owl', species: d.id, palette: d.id, outfit: {} } : { skin: d.id, species: 'snowy', palette: 'snowy', outfit: {} };
+      if (d.kind === 'piece' || d.kind === 'species' || d.kind === 'skin') {
+        // a model owl wearing the piece (or showing the plumage), standing on the display
+        const look: OwlLook = d.kind === 'species' ? { skin: 'owl', species: d.id, palette: d.id, outfit: {} }
+          : d.kind === 'skin' ? { skin: d.id, species: 'snowy', palette: 'snowy', outfit: {} }
+          : { skin: 'owl', species: 'snowy', palette: 'snowy', outfit: PIECE[d.id] ? { [PIECE[d.id].slot]: d.id } : {} };
         const owl = new OwlActor(look, {});
         owl.setMood('happy');
         const g = new THREE.Group();
         g.add(owl.node);
         for (let k = 0; k < 20; k++) owl.update(1 / 30);
-        fit(g, floor ? 0.95 : 0.5, floor ? 1.05 : 0.55, floor ? 0.95 : 0.5);
+        fit(g, floor ? 0.8 : 0.42, floor ? 1.0 : 0.5, floor ? 0.8 : 0.42);
+        if (token !== this.dealToken || this.dead) { owl.model.dispose(); return; }
         s.holder.add(g);
         s.owl = owl; s.model = g;
         return;
@@ -444,7 +629,7 @@ export class Boutique implements Stage {
       let m = d.kind === 'item' ? await itemModel(d.id) : null;
       if (token !== this.dealToken || this.dead) { m?.userData.dispose?.(); return; }
       if (!m) m = boxMesh(parcelBoxes());
-      fit(m, floor ? 1.05 : 0.5, floor ? 1.0 : 0.5, floor ? 0.95 : 0.45);
+      fit(m, floor ? 0.95 : 0.46, floor ? 0.95 : 0.46, floor ? 0.85 : 0.4);
       s.holder.add(m);
       s.model = m;
     } catch (e) { console.warn('display failed', d, e); }
@@ -492,7 +677,7 @@ export class Boutique implements Stage {
     const p = this.standTop(this.stands[i]).add(new THREE.Vector3(0, 0.5, 0)).project(this.camera);
     return { x: (p.x * 0.5 + 0.5) * this.w, y: (-p.y * 0.5 + 0.5) * this.h };
   }
-  private standTop(s: Stand) { return s.group.position.clone().add(new THREE.Vector3(0, s.top + (s.def.floor ? 0.5 : 0.2), 0)); }
+  private standTop(s: Stand) { return s.group.position.clone().add(new THREE.Vector3(0, s.top + (s.def.floor ? 0.45 : 0.2), 0)); }
 
   private sparkleRain(x: number, y: number, z: number, n: number) {
     for (let k = 0; k < n; k++) this.fx.emit({ x: x + (Math.random() - 0.5) * 1.4, y: y + Math.random() * 0.5, z: z + (Math.random() - 0.5) * 0.6, vy: -0.3 - Math.random() * 0.4, life: 1 + Math.random() * 0.8, frame: SPR.spark1, frames: 3, fps: 8, color: k % 3 ? P.frost : P.lamp, size: 0.16 + Math.random() * 0.12, add: true, delay: k * 0.03, flutter: 0.3 });
@@ -537,9 +722,8 @@ export class Boutique implements Stage {
     const t = this.cam.target;
     t.set(0, ty, -0.9);
     this.cam.pos.set(t.x, t.y + Math.sin(pitch) * dist, t.z + Math.cos(pitch) * dist);
-    this.camera.near = 0.2;
     this.camera.far = dist + 30;
-    const f = this.scene.fog as THREE.Fog;
+    const f = this.room.fog as THREE.Fog;
     f.near = dist + 8; f.far = dist + 30;
   }
 
@@ -548,26 +732,22 @@ export class Boutique implements Stage {
   update(dt: number, t: number) {
     this.time += dt;
     this.enter = Math.min(1, this.enter + dt * 0.55);
-    // camera: a slow drift and a gentle push-in on arrival
     const e = 1 - Math.pow(1 - this.enter, 3);
     const drift = Math.sin(t * 0.13) * 0.12;
     this.camera.position.copy(this.cam.pos).add(new THREE.Vector3(drift, (1 - e) * 0.5, (1 - e) * 1.8));
     this.camera.lookAt(this.cam.target.x + drift * 0.4, this.cam.target.y, this.cam.target.z);
 
-    // lanterns sway on their chains, their light breathes; the stove flickers
-    for (const l of this.lanterns) { const ph = l.userData.phase as number; l.rotation.z = Math.sin(t * 0.9 + ph) * 0.025; l.rotation.x = Math.sin(t * 0.7 + ph * 1.3) * 0.02; }
-    this.lanternLights.forEach((l, i) => (l.intensity = 3.1 + Math.sin(t * 2.3 + i * 2) * 0.18 + Math.sin(t * 7.1 + i) * 0.08));
+    // hanging lights sway, lamplight breathes, the stove flickers
+    for (const l of this.swingers) { const ph = l.userData.phase as number; l.rotation.z = Math.sin(t * 0.8 + ph) * 0.02; l.rotation.x = Math.sin(t * 0.6 + ph * 1.3) * 0.015; }
+    this.lampLights.forEach((l, i) => (l.intensity = (l.userData.base as number) * (1 + Math.sin(t * 2.1 + i * 2) * 0.05)));
     const fl = 0.75 + Math.sin(t * 9.3) * 0.12 + Math.sin(t * 13.7 + 1) * 0.1 + Math.sin(t * 3.1) * 0.08;
-    this.stoveLight.intensity = 4 * fl;
-    for (const m of this.glows) m.emissiveIntensity = m.userData.flicker ? fl * 1.1 : 0.62 + Math.sin(t * 2.3) * 0.04;
-    // fairy lights: a slow chase of brightness along each string
+    this.stoveLight.intensity = 2.4 * fl;
     for (const b of this.bulbs) {
       const k = 0.55 + 0.45 * Math.max(0, Math.sin(t * 1.6 + b.phase));
       (b.s.material as THREE.SpriteMaterial).color.copy(b.c).multiplyScalar(0.55 + k * 0.6);
-      (b.h.material as THREE.SpriteMaterial).opacity = 0.15 + k * 0.55;
+      (b.h.material as THREE.SpriteMaterial).opacity = 0.12 + k * 0.45;
     }
-    // the bell wobbles after a ding
-    if (this.bell) { this.bellT = Math.max(0, this.bellT - dt * 1.6); this.bell.rotation.z = Math.sin(this.time * 38) * 0.18 * this.bellT; this.bell.scale.y = 1 + Math.sin(this.time * 30) * 0.05 * this.bellT; }
+    if (this.bell) { this.bellT = Math.max(0, this.bellT - dt * 1.6); this.bell.rotation.z = Math.sin(this.time * 38) * 0.12 * this.bellT; }
 
     // the queen: idle elegance, a curtsy on purchases, glances at her displays
     if (this.curtsy > 0) {
@@ -599,15 +779,15 @@ export class Boutique implements Stage {
       s.owl?.update(dt);
       (s.model?.userData.animate as ((t: number, dt: number) => void) | undefined)?.(t, dt);
       const pm = s.pool.material as THREE.MeshBasicMaterial;
-      const want = s.sold ? 0 : s.focus ? 0.95 : 0.4 + Math.sin(t * 1.8 + s.def.x) * 0.08;
+      const want = s.sold ? 0 : s.focus ? 0.8 : 0.28 + Math.sin(t * 1.8 + s.def.x) * 0.06;
       pm.opacity += (want - pm.opacity) * Math.min(1, dt * 4);
       if (s.focus && !s.sold) lit = s;
     }
-    const fwant = lit ? 26 : 0;
+    const fwant = lit ? 22 : 0;
     this.focusLight.intensity += (fwant - this.focusLight.intensity) * Math.min(1, dt * 4);
     if (lit) { const p = this.standTop(lit); this.focusLight.position.set(p.x * 0.6, 4.1, p.z + 1.6); this.focusLight.target.position.copy(p); }
 
-    // snow falling past the window, and a few warm motes drifting in the lamp light
+    // snow falling past the window, and a few warm motes drifting in the lamplight
     this.snowT -= dt;
     while (this.snowT <= 0) {
       this.snowT += 0.05;
@@ -616,10 +796,10 @@ export class Boutique implements Stage {
     this.moteT -= dt;
     if (this.moteT <= 0) {
       this.moteT = 0.35;
-      const x = (Math.random() - 0.5) * 5, y = 1.2 + Math.random() * 2;
-      this.fx.emit({ x, y, z: -1.8 + Math.random() * 2.4, vx: (Math.random() - 0.5) * 0.05, vy: 0.02 + Math.random() * 0.04, life: 6, frame: SPR.mote, color: P.lamp, size: 0.03 + Math.random() * 0.02, flutter: 0.15, fadeIn: 1.5, fadeOut: 2 });
+      this.fx.emit({ x: (Math.random() - 0.5) * 5, y: 1.2 + Math.random() * 2, z: -1.8 + Math.random() * 2.4, vx: (Math.random() - 0.5) * 0.05, vy: 0.02 + Math.random() * 0.04, life: 6, frame: SPR.mote, color: P.lamp, size: 0.03 + Math.random() * 0.02, flutter: 0.15, fadeIn: 1.5, fadeOut: 2 });
     }
     this.fx.update(dt, t);
+    this.renderRoom(t);
   }
 
   // ---------------------------------------------------------------- input
@@ -638,7 +818,7 @@ export class Boutique implements Stage {
     const hit = this.ray.intersectObjects(this.stands.map((s) => s.hit), false)[0];
     if (hit) { this.onPick?.(hit.object.userData.stand as number); return true; }
     if (ray.distanceToPoint(this.queen.node.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 1.1, 0))) < 0.7) { this.queen.poke(); this.onQueen?.(); return true; }
-    if (this.bell && ray.distanceToPoint(this.bell.getWorldPosition(new THREE.Vector3())) < 0.18) { this.bellT = 1; sound.play('ui_tap', { volume: 0.5, rate: 1.6 }); }
+    if (this.bell && ray.distanceToPoint(this.bell.getWorldPosition(new THREE.Vector3())) < 0.15) { this.bellT = 1; sound.play('ui_tap', { volume: 0.5, rate: 1.6 }); }
     return true;
   }
 
