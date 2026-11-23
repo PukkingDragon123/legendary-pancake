@@ -132,7 +132,7 @@ def moon_bed():
         th = 0.8 + 6.2 * math.sin(math.pi * t) ** 0.8
         rr = R - th / 2
         pts.append((cx + math.cos(a) * rr, cyc + math.sin(a) * rr, 0))
-        sizes.append((th / 2, 10.4 - 2.0 * (1 - math.sin(math.pi * t))))
+        sizes.append((th / 2, 10.4 * (0.3 + 0.7 * math.sin(math.pi * t) ** 0.6)))
     moon = {"ramp": "cream", "tone": 4.6, "rim": {"light_shift": 1.0, "dark_shift": -1.0}, "brush": {"flow": "path", "rough": 0.5},
             "layers": [
                 {"id": "glowedge", "op": "gradient", "axis": "y", "amount": 0.6},
@@ -140,7 +140,17 @@ def moon_bed():
                  "centre_shift": -0.6, "roughness": 0.2},
                 {"id": "dust", "op": "spots", "count": 30, "radius": [0.15, 0.3], "ramp": "honey", "tone": 5},
                 {"id": "gilt", "op": "stripes", "axis": "path", "period": 6.0, "width": 0.05, "ramp": "gold", "tone": 5}]}
-    S.tube("moon", pts, sizes, moon, sides=10, round=3.0, up=[0, 0, 1])
+    S.tube("moon", pts, sizes, moon, sides=10, round=2.6, up=[0, 0, 1])
+    # a sleepy face on both sides of the moon, near the high tip: a closed eye, a rosy cheek, a small smile
+    face = Pix(12, 9)
+    face.path([(1, 2), (3, 3.6), (5.5, 4), (8, 3.4), (9.5, 2)], "i", 1.2)
+    for x in (2.5, 5.0, 7.5):
+        face.line(x, 3.8, x - 0.5, 5.0, "i")
+    face.disc(10.0, 5.6, 1.7, "b", ry=1.1)
+    face.path([(4, 7.2), (5.8, 8.2), (7.6, 7.4)], "i", 1.0)
+    for k, z in enumerate((9.7, -9.7)):
+        S.card(f"face{k}", face.rows, (-16.0, 15.0, z), flat("cream"), rot=(0, 180 * k, -53),
+               key={"i": "russet:2", "b": "blush:4"})
     for k, x in enumerate((-8.0, 8.0)):
         for j, (dx, r) in enumerate([(-1.6, 2.2), (1.4, 2.6), (0.0, 3.0)]):
             S.ball(f"cloud{k}{j}", r, (x + dx, r * 0.8, (j - 1) * 3.0), plain("snow", tone=5.0, layers=[
@@ -249,7 +259,7 @@ def star_jar():
     cloth_lid = cloth("lilac", tone=4.4, weave=0.4, layers=[
         {"id": "gingham", "op": "stripes", "axis": "x", "period": 1.2, "width": 0.5, "ramp": "cream", "tone": 5},
         {"id": "gingham2", "op": "stripes", "axis": "z", "period": 1.2, "width": 0.5, "shift": -0.6}])
-    S.lathe("cloth", [(4.0, 10.0), (4.2, 10.4), (3.5, 11.3), (3.6, 12.2), (2.8, 12.7), (0.4, 12.9)], (0, 0, 0), cloth_lid,
+    S.lathe("cloth", [(3.6, 10.2), (3.75, 10.5), (3.35, 11.3), (3.45, 12.2), (2.7, 12.7), (0.4, 12.9)], (0, 0, 0), cloth_lid,
             sides=12)
     S.lathe("twine", [(3.55, 11.1), (3.55, 11.6)], (0, 0, 0), plain("straw", tone=3.6, layers=[
         {"id": "twist", "op": "stripes", "axis": [0, 1, 1], "period": 0.4, "width": 0.5, "shift": -0.8}]), sides=12,
@@ -269,7 +279,7 @@ def star_jar():
         c = cols[i % 4]
         nm = f"glow_star{i}"
         S.card(nm, star_card(7 if i % 3 else 9), (math.cos(a) * r, y, math.sin(a) * r), glow(c), rot=(hsh(i, 5) * 40 - 20,
-               hsh(i, 4) * 180, hsh(i, 6) * 60), key={"a": f"{c}:4", "b": f"{c}:2", "c": f"{c}:4"})
+               hsh(i, 4) * 180, hsh(i, 6) * 60), key={"a": f"{c}:3", "b": f"{c}:1", "c": f"{c}:4"})
         tracks.append({"part": nm, "channel": "scale", "keys": cycle_keys(
             [(0, [0, 0, 0]), (0.4, [0.35, 0.35, 0.35]), (1.0, [-0.3, -0.3, -0.3]), (1.6, [0, 0, 0]), (4.0, [0, 0, 0])],
             4.0, hsh(i, 9) * 4.0)})

@@ -3,7 +3,7 @@
  "description": "A pine-green woven banner on a walnut rod with turned finials: a gold-stitched border, the hollow's crest of an owl under a crescent moon and seven stars, and gold tassels on its swallowtail.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.0,
+ "density": 6.0,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -48,6 +48,7 @@
   "unlit": false,
   "roughness": 0.9
  },
+ "grounded": false,
  "render": {
   "background": "#27313f",
   "hero": [
@@ -562,75 +563,144 @@
     0.8
    ],
    "art": [
-    "ddddddddddddddddddddddddddddddddddddddddddddd",
-    "ddddbbddddbbddddbbddddbbddddbbddddbbddddbbddd",
-    "bbaabbaabbaabbaabbaabbaabbaabbaabbaabbaabbaab",
-    "bagGggGggGggGggGggGggGggGggGggGggGggGggGggGbb",
-    "aagbaabbaabbaabbaabbaabbaabbaabbaabbaabbaagba",
-    "abgaabbaabbaabbaabbaabbaabbaabbaabbaabbaabgaa",
-    "bbGabbaabbaabbaabbaabbaabbaabbaabbaabbaabbGab",
-    "bagbbaabbaabbaabbaabbaabbaabbaabbaabbaabbagbb",
-    "aagbaabbaabbaabbaabbaabbaabbaabbaabbaabbaagba",
-    "abGaabbaabbaabbaabbaabbaabbaabbaabbaabbaabGaa",
-    "bbgabbaabbaabbaabbaabbaabbaabbaabbaabbaabbgab",
-    "bagbbaabbaabbaabbaabbaabbaabbaabbaabbaabbagbb",
-    "aaGbaabbaabbaabbaabbaabbaabbaabbaabbaabbaaGba",
-    "abgaabbaabbaabbaabbaabbaabbaabbaabbaabbaabgaa",
-    "bbgabbaabbaabbaabbaabbsaaaaabbaabbaabbaabbgab",
-    "baGbbaabbaabbaabbaabmmsaaaaabaabbaabbaabbaGbb",
-    "aagbaabbaabbaabbsabmmasaaaaasabbaabbaabbaagba",
-    "abgaabbaabbaabbasbmmmaaaaaaasbbaabbaabbaabgaa",
-    "bbGabbaabbaabbaabbmmaaaaaaasabaabbaabbaabbGab",
-    "bagbbaabbaasbaabbmmmaaaaaaaaaaabbsabbaabbagbb",
-    "aagbaabbaasssabbammmmaaaaaaaaabbsssbaabbaagba",
-    "abGaabbaabbsabbaammmmaaaaaaaabbaasbaabbaabGaa",
-    "bbgabbaabbaabbaabbmmmmaaaaaabbaabbaabbaabbgab",
-    "bagbbaabbaabbaabbaammmmmamabbaabbaabbaabbagbb",
-    "aaGbaabbaabbaabbaabbmmmmmabbaabbaabbsabbaaGba",
-    "abgaabbsssbaabbaabbaabbaabbaabbaabbsssbaabgaa",
-    "bbgabbaasbaabbaabbaabbaabbaabbaabbaasbaabbgab",
-    "baGbbaabbaabbaabboobbaabbaoobaabbaabbaabbaGbb",
-    "aagbaabbaabbaabbaoobaabbaaooaabbaabbaabbaagba",
-    "abgaabbaabbaabbaaoooabbaaoooabbaabbaabbaabgaa",
-    "bbGabbaabbaabbaabbaaooooobaabbaabbaabbaabbGab",
-    "bagbbaabbaabbaabbaoccoooccobbaabbaabbaabbagbb",
-    "aagbaabbaabbaabbaockkcockkcoaabbaabbaabbaagba",
-    "abGaabbaabbaabbaaockkcockkcoabbaabbaabbaabGaa",
-    "bbgabbaabbaabbaaoooccoyoccooobaabbaabbaabbgab",
-    "bagbbaabbaabbaabooooccyccooooaabbaabbaabbagbb",
-    "aaGbaabbaabbaabbooocccccccoooabbaabbaabbaaGba",
-    "abgaabbaabbaabbaooocOcOcOcooobbaabbaabbaabgaa",
-    "bbgabbaabbaabbaaoocccccccccoobaabbaabbaabbgab",
-    "baGbbaabbaabbaaboocccOcOcOcooaabbaabbaabbaGbb",
-    "aagbaabbaabbaabbaocccccccccoaabbaabbaabbaagba",
-    "abgaabbaabbaabbaaoocOcOcOcooabbaabbaabbaabgaa",
-    "bbGabbaabbaabbaabboocccccooabbaabbaabbaabbGab",
-    "bagbbaabbaabballlaaoocccooablllbbaabbaabbagbb",
-    "aagbaabbaabbaablwwwyyywwyyywalbbaabbaabbaagba",
-    "abGaabbaabbawwwwwwwwwbbawwwwwwwwwbbaabbaabGaa",
-    "bbgabbaabbaabbaabbaabbaabbaabbaabbaabbaabbgab",
-    "bagbbaabbaabbaabbaabbaabbaabbaabbaabbaabbagbb",
-    "aaGbaabbaabbaabbaabbaabbaabbaabbaabbaabbaaGba",
-    "abgaabbaabbaabbaabbaabbaabbaabbaabbaabbaabgaa",
-    "bbgabbaabbaabbaabbaabbaabbaabbaabbaabbaabbgab",
-    "baGbbaabbaabbaabbaabbaabbaabbaabbaabbaabbaGbb",
-    "aagbaabbaabbaabbaabbaabbaabbaabbaabbaabbaagba",
-    "abgaabbaabbaabbaabbaabbaabbaabbaabbaabbaabgaa",
-    "bbGabbaabbaabbaabbaabbaabbaabbaabbaabbaabbGab",
-    "bagbbaabbaabbaabbaabbaabbaabbaabbaabbaabbagbb",
-    "aagbaabbaabbaabbaabbaabbaabbaabbaabbaabbaagba",
-    "abGaabbaabbaabbaabbaabbaabbaabbaabbaabbaabGaa",
-    "bbgabbaabbaabbaabbaabbaabbaabbaabbaabbaabbgab",
-    "bagbbaabbaabbaabbaabbaabbaabbaabbaabbaabbagbb",
-    "aaGbaabbaabbaabbaabbaabbaabbaabbaabbaabbaaGba",
-    "abgaabbaabbaabbaabbaaeeeabbaabbaabbaabbaabgaa",
-    "bbgabbaabbaabbaabbaee...eeaabbaabbaabbaabbgab",
-    "baGbbaabbaabbaabbee.......eebaabbaabbaabbaGbb",
-    "aagbaabbaabbaabee...........eebbaabbaabbaagba",
-    "abgaabbaabbaaee...............eeabbaabbaabgaa",
-    "bbGabbaabbaee...................eeaabbaabbGab",
-    "baabbaabbee.......................eebaabbaabb",
-    "aabbaabee...........................eebbaabba"
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "ddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbdddddd",
+    "ddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbdddddd",
+    "bbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabb",
+    "bbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabb",
+    "bbaaggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGbbbb",
+    "bbaaggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbssaaaaaaaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbssaaaaaaaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbmmmmssaaaaaaaaaabbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbmmmmssaaaaaaaaaabbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbssaabbmmmmaassaaaaaaaaaassaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbssaabbmmmmaassaaaaaaaaaassaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaassbbmmmmmmaaaaaaaaaaaaaassbbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaassbbmmmmmmaaaaaaaaaaaaaassbbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmaaaaaaaaaaaaaassaabbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmaaaaaaaaaaaaaassaabbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbaaggbbbbaaaabbbbaaaassbbaaaabbbbmmmmmmaaaaaaaaaaaaaaaaaaaaaabbbbssaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaassbbaaaabbbbmmmmmmaaaaaaaaaaaaaaaaaaaaaabbbbssaabbbbaaaabbbbaaggbbbb",
+    "aaaaggbbaaaabbbbaaaassssssaabbbbaammmmmmmmaaaaaaaaaaaaaaaaaabbbbssssssbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaassssssaabbbbaammmmmmmmaaaaaaaaaaaaaaaaaabbbbssssssbbaaaabbbbaaaaggbbaa",
+    "aabbGGaaaabbbbaaaabbbbssaabbbbaaaammmmmmmmaaaaaaaaaaaaaaaabbbbaaaassbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbssaabbbbaaaammmmmmmmaaaaaaaaaaaaaaaabbbbaaaassbbaaaabbbbaaaabbGGaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmmmmmaaaaaaaaaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmmmmmaaaaaaaaaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaammmmmmmmmmaammaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaammmmmmmmmmaammaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmmmmmmmaabbbbaaaabbbbaaaabbbbssaabbbbaaaaGGbbaa",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmmmmmmmaabbbbaaaabbbbaaaabbbbssaabbbbaaaaGGbbaa",
+    "aabbggaaaabbbbssssssbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbssssssbbaaaabbggaaaa",
+    "aabbggaaaabbbbssssssbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbssssssbbaaaabbggaaaa",
+    "bbbbggaabbbbaaaassbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaassbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaassbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaassbbaaaabbbbggaabb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbboooobbbbaaaabbbbaaoooobbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbboooobbbbaaaabbbbaaoooobbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaoooobbaaaabbbbaaaaooooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaoooobbaaaabbbbaaaaooooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaaooooooaabbbbaaaaooooooaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaaooooooaabbbbaaaaooooooaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaoooooooooobbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaoooooooooobbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaooccccooooooccccoobbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaooccccooooooccccoobbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaoocckkkkccoocckkkkccooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaoocckkkkccoocckkkkccooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaaoocckkkkccoocckkkkccooaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaaoocckkkkccoocckkkkccooaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaaooooooccccooyyooccccoooooobbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaaooooooccccooyyooccccoooooobbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbooooooooccccyyccccooooooooaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbooooooooccccyyccccooooooooaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbooooooccccccccccccccooooooaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbooooooccccccccccccccooooooaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaooooooccOOccOOccOOccoooooobbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaooooooccOOccOOccOOccoooooobbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaaooooccccccccccccccccccoooobbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaaooooccccccccccccccccccoooobbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbooooccccccOOccOOccOOccooooaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbooooccccccOOccOOccOOccooooaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaooccccccccccccccccccooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaooccccccccccccccccccooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaaooooccOOccOOccOOccooooaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaaooooccOOccOOccOOccooooaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbooooccccccccccooooaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbooooccccccccccooooaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaallllllaaaaooooccccccooooaabbllllllbbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaallllllaaaaooooccccccooooaabbllllllbbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbllwwwwwwyyyyyywwwwyyyyyywwaallbbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbllwwwwwwyyyyyywwwwyyyyyywwaallbbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbGGaaaabbbbaaaabbbbaawwwwwwwwwwwwwwwwwwbbbbaawwwwwwwwwwwwwwwwwwbbbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbaawwwwwwwwwwwwwwwwwwbbbbaawwwwwwwwwwwwwwwwwwbbbbaaaabbbbaaaabbGGaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaeeeeeeaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaeeeeeeaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaeeee......eeeeaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaeeee......eeeeaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbeeee..............eeeebbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbeeee..............eeeebbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbeeee......................eeeebbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbeeee......................eeeebbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaaeeee..............................eeeeaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaaeeee..............................eeeeaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaeeee......................................eeeeaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaeeee......................................eeeeaaaabbbbaaaabbbbGGaabb",
+    "bbaaaabbbbaaaabbbbeeee..............................................eeeebbaaaabbbbaaaabbbb",
+    "bbaaaabbbbaaaabbbbeeee..............................................eeeebbaaaabbbbaaaabbbb",
+    "aaaabbbbaaaabbeeee......................................................eeeebbbbaaaabbbbaa",
+    "aaaabbbbaaaabbeeee......................................................eeeebbbbaaaabbbbaa"
    ],
    "plane": "xy",
    "style": "s1",
@@ -687,7 +757,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -768,7 +838,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -856,7 +926,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -939,7 +1009,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -972,23 +1042,34 @@
     {
      "at": [
       0,
-      0.25,
+      0.14644660940672627,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      0.7071,
+      0.7071
      ]
     },
     {
      "at": [
       0,
-      0.7499999999999999,
+      0.5,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
      ]
     },
     {
@@ -1004,7 +1085,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1063,7 +1144,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1103,23 +1184,34 @@
     {
      "at": [
       0,
-      0.25,
+      0.14644660940672627,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      0.7071,
+      0.7071
      ]
     },
     {
      "at": [
       0,
-      0.7499999999999999,
+      0.5,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
      ]
     },
     {
@@ -1135,7 +1227,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1194,7 +1286,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },

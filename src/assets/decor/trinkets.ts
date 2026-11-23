@@ -20,8 +20,8 @@ const framed = (x: number, y: number, w: number, h: number, art: Painter, frame:
 // ------------------------------------------------------------------ decor
 
 add({
-  id: 'vase_trio', model: 'items/vase_trio.glb', name: 'Glazed Vase Trio', cat: 'decor', price: 160, rarity: 'common', size: [1, 1], small: true,
-  blurb: 'Celadon, cornflower and terracotta, with lavender that never needs water.',
+  id: 'vase_trio', model: 'items/vase_trio.glb', name: 'Painted Vase Trio', cat: 'decor', price: 160, rarity: 'common', size: [1, 1], small: true,
+  blurb: 'A blue-and-white painted vase, a glazed cream jug and a slender brass bud vase. Pip insists they are a family.',
   build: () => {
     const out: BoxSpec[] = [];
     const cel = glaze('#8fbfa4', { dip: '#e8e0c8', dipH: 3, seed: 1 });
@@ -41,7 +41,7 @@ add({
 
 add({
   id: 'reading_pile', model: 'items/reading_pile.glb', name: 'Bedtime Reading Pile', cat: 'decor', price: 90, rarity: 'common', size: [1, 1], small: true,
-  blurb: 'Five books, one pair of round spectacles and a ribbon marking “just one more chapter”.',
+  blurb: 'Five cloth-bound books and a pair of round spectacles, folded on top for “just one more chapter”.',
   build: () => {
     const out: BoxSpec[] = [];
     const cols = ['#3f6fb4', '#b8433a', '#4f8a4a', '#d9a33a', '#7a4fa8'];
@@ -103,7 +103,7 @@ add({
 });
 
 add({
-  id: 'mantel_clock', model: 'items/mantel_clock.glb', name: 'Pendulum Mantel Clock', cat: 'decor', price: 240, rarity: 'uncommon', size: [1, 1], small: true,
+  id: 'mantel_clock', model: 'items/mantel_clock.glb', name: 'Walnut Mantel Clock', cat: 'decor', price: 240, rarity: 'uncommon', size: [1, 1], small: true,
   blurb: 'Tocks softly. Strikes nine for bedtime and absolutely nothing before ten in the morning.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -165,7 +165,7 @@ add({
 
 add({
   id: 'rose_tea_set', model: 'items/rose_tea_set.glb', name: 'Rose Tea Service', cat: 'decor', price: 210, rarity: 'uncommon', size: [1, 1], small: true,
-  blurb: 'A rosebud teapot, two cups and shortbread. Chamomile is already steeping.',
+  blurb: 'A rosebud teapot, two cups on saucers and the sugar bowl on its plate. Chamomile is already steeping.',
   build: () => {
     const out: BoxSpec[] = [];
     const china: Painter = (t) => {

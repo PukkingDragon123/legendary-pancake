@@ -3,7 +3,7 @@
  "description": "Biscuit, a dapple-grey rocking horse on curved walnut rockers: oat yarn mane and tail, a berry leather saddle with brass studs, a bridle and wooden handle pegs.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 2.6,
+ "density": 5.2,
  "budget": {
   "tris": 3200,
   "colors": 220
@@ -1419,7 +1419,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1478,7 +1478,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1532,7 +1532,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1630,7 +1630,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1689,7 +1689,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1743,7 +1743,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1786,7 +1786,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1829,7 +1829,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1872,7 +1872,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1948,7 +1948,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2002,7 +2002,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2067,7 +2067,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2146,11 +2146,16 @@
     -10.0
    ],
    "art": [
-    "..a..",
-    ".aba.",
-    ".aba.",
-    "aabaa",
-    "aaaaa"
+    "....aa....",
+    "....aa....",
+    "..aabbaa..",
+    "..aabbaa..",
+    "..aabbaa..",
+    "..aabbaa..",
+    "aaaabbaaaa",
+    "aaaabbaaaa",
+    "aaaaaaaaaa",
+    "aaaaaaaaaa"
    ],
    "plane": "xy",
    "style": "s13",
@@ -2175,11 +2180,16 @@
     -10.0
    ],
    "art": [
-    "..a..",
-    ".aba.",
-    ".aba.",
-    "aabaa",
-    "aaaaa"
+    "....aa....",
+    "....aa....",
+    "..aabbaa..",
+    "..aabbaa..",
+    "..aabbaa..",
+    "..aabbaa..",
+    "aaaabbaaaa",
+    "aaaabbaaaa",
+    "aaaaaaaaaa",
+    "aaaaaaaaaa"
    ],
    "plane": "xy",
    "style": "s14",
@@ -2204,36 +2214,66 @@
     -36.0
    ],
    "art": [
-    "baab......",
-    "aabaab....",
-    "abaabaab..",
-    "baabaa....",
-    "aabaaba...",
-    "abaabaab..",
-    "baabaa....",
-    "aabaab....",
-    "abaaba....",
-    "baa.......",
-    "aab.......",
-    "abaa......",
-    "ba........",
-    "aab.......",
-    "abaab.....",
-    "baab......",
-    "aabaa.....",
-    "abaabaa...",
-    "baabaa....",
-    "aabaaba...",
-    "abaabaab..",
-    "baabaa....",
-    "aabaab....",
-    "abaaba....",
-    "baab......",
-    "aaba......",
-    "abaa......",
-    "ba........",
-    "aab.......",
-    "abaa......"
+    "bbaaaabb............",
+    "bbaaaabb............",
+    "aaaabbaaaabb........",
+    "aaaabbaaaabb........",
+    "aabbaaaabbaaaabb....",
+    "aabbaaaabbaaaabb....",
+    "bbaaaabbaaaa........",
+    "bbaaaabbaaaa........",
+    "aaaabbaaaabbaa......",
+    "aaaabbaaaabbaa......",
+    "aabbaaaabbaaaabb....",
+    "aabbaaaabbaaaabb....",
+    "bbaaaabbaaaa........",
+    "bbaaaabbaaaa........",
+    "aaaabbaaaabb........",
+    "aaaabbaaaabb........",
+    "aabbaaaabbaa........",
+    "aabbaaaabbaa........",
+    "bbaaaa..............",
+    "bbaaaa..............",
+    "aaaabb..............",
+    "aaaabb..............",
+    "aabbaaaa............",
+    "aabbaaaa............",
+    "bbaa................",
+    "bbaa................",
+    "aaaabb..............",
+    "aaaabb..............",
+    "aabbaaaabb..........",
+    "aabbaaaabb..........",
+    "bbaaaabb............",
+    "bbaaaabb............",
+    "aaaabbaaaa..........",
+    "aaaabbaaaa..........",
+    "aabbaaaabbaaaa......",
+    "aabbaaaabbaaaa......",
+    "bbaaaabbaaaa........",
+    "bbaaaabbaaaa........",
+    "aaaabbaaaabbaa......",
+    "aaaabbaaaabbaa......",
+    "aabbaaaabbaaaabb....",
+    "aabbaaaabbaaaabb....",
+    "bbaaaabbaaaa........",
+    "bbaaaabbaaaa........",
+    "aaaabbaaaabb........",
+    "aaaabbaaaabb........",
+    "aabbaaaabbaa........",
+    "aabbaaaabbaa........",
+    "bbaaaabb............",
+    "bbaaaabb............",
+    "aaaabbaa............",
+    "aaaabbaa............",
+    "aabbaaaa............",
+    "aabbaaaa............",
+    "bbaa................",
+    "bbaa................",
+    "aaaabb..............",
+    "aaaabb..............",
+    "aabbaaaa............",
+    "aabbaaaa............"
    ],
    "plane": "xy",
    "style": "s15",
@@ -2258,36 +2298,66 @@
     -36.0
    ],
    "art": [
-    "baab......",
-    "aabaab....",
-    "abaabaab..",
-    "baabaa....",
-    "aabaaba...",
-    "abaabaab..",
-    "baabaa....",
-    "aabaab....",
-    "abaaba....",
-    "baa.......",
-    "aab.......",
-    "abaa......",
-    "ba........",
-    "aab.......",
-    "abaab.....",
-    "baab......",
-    "aabaa.....",
-    "abaabaa...",
-    "baabaa....",
-    "aabaaba...",
-    "abaabaab..",
-    "baabaa....",
-    "aabaab....",
-    "abaaba....",
-    "baab......",
-    "aaba......",
-    "abaa......",
-    "ba........",
-    "aab.......",
-    "abaa......"
+    "bbaaaabb............",
+    "bbaaaabb............",
+    "aaaabbaaaabb........",
+    "aaaabbaaaabb........",
+    "aabbaaaabbaaaabb....",
+    "aabbaaaabbaaaabb....",
+    "bbaaaabbaaaa........",
+    "bbaaaabbaaaa........",
+    "aaaabbaaaabbaa......",
+    "aaaabbaaaabbaa......",
+    "aabbaaaabbaaaabb....",
+    "aabbaaaabbaaaabb....",
+    "bbaaaabbaaaa........",
+    "bbaaaabbaaaa........",
+    "aaaabbaaaabb........",
+    "aaaabbaaaabb........",
+    "aabbaaaabbaa........",
+    "aabbaaaabbaa........",
+    "bbaaaa..............",
+    "bbaaaa..............",
+    "aaaabb..............",
+    "aaaabb..............",
+    "aabbaaaa............",
+    "aabbaaaa............",
+    "bbaa................",
+    "bbaa................",
+    "aaaabb..............",
+    "aaaabb..............",
+    "aabbaaaabb..........",
+    "aabbaaaabb..........",
+    "bbaaaabb............",
+    "bbaaaabb............",
+    "aaaabbaaaa..........",
+    "aaaabbaaaa..........",
+    "aabbaaaabbaaaa......",
+    "aabbaaaabbaaaa......",
+    "bbaaaabbaaaa........",
+    "bbaaaabbaaaa........",
+    "aaaabbaaaabbaa......",
+    "aaaabbaaaabbaa......",
+    "aabbaaaabbaaaabb....",
+    "aabbaaaabbaaaabb....",
+    "bbaaaabbaaaa........",
+    "bbaaaabbaaaa........",
+    "aaaabbaaaabb........",
+    "aaaabbaaaabb........",
+    "aabbaaaabbaa........",
+    "aabbaaaabbaa........",
+    "bbaaaabb............",
+    "bbaaaabb............",
+    "aaaabbaa............",
+    "aaaabbaa............",
+    "aabbaaaa............",
+    "aabbaaaa............",
+    "bbaa................",
+    "bbaa................",
+    "aaaabb..............",
+    "aaaabb..............",
+    "aabbaaaa............",
+    "aabbaaaa............"
    ],
    "plane": "yz",
    "style": "s16",
@@ -2312,32 +2382,58 @@
     22.0
    ],
    "art": [
-    ".....aba....",
-    ".....baa....",
-    "....baa.a...",
-    "....aab.a...",
-    "...aab.ab...",
-    "...aba.ba...",
-    "...ba.baa...",
-    "..baa.aab...",
-    "..aa.aab....",
-    "..ab.aba....",
-    "..b.aba.b...",
-    ".ba.baa.a...",
-    ".a.baa.aa...",
-    ".a.aab.ab...",
-    "..aab.aba...",
-    "b.aba.baa...",
-    ".aba.baa....",
-    ".baa.aab....",
-    "baa.aab.a...",
-    "aab.aba.b...",
-    "ab.aba.ba...",
-    "ba.baa.aa...",
-    "a.baa.aab...",
-    "a.aab.aba...",
-    ".aab.aba....",
-    ".aba.baa...."
+    "..........aabbaa........",
+    "..........aabbaa........",
+    "..........bbaaaa........",
+    "..........bbaaaa........",
+    "........bbaaaa..aa......",
+    "........bbaaaa..aa......",
+    "........aaaabb..aa......",
+    "........aaaabb..aa......",
+    "......aaaabb..aabb......",
+    "......aaaabb..aabb......",
+    "......aabbaa..bbaa......",
+    "......aabbaa..bbaa......",
+    "......bbaa..bbaaaa......",
+    "......bbaa..bbaaaa......",
+    "....bbaaaa..aaaabb......",
+    "....bbaaaa..aaaabb......",
+    "....aaaa..aaaabb........",
+    "....aaaa..aaaabb........",
+    "....aabb..aabbaa........",
+    "....aabb..aabbaa........",
+    "....bb..aabbaa..bb......",
+    "....bb..aabbaa..bb......",
+    "..bbaa..bbaaaa..aa......",
+    "..bbaa..bbaaaa..aa......",
+    "..aa..bbaaaa..aaaa......",
+    "..aa..bbaaaa..aaaa......",
+    "..aa..aaaabb..aabb......",
+    "..aa..aaaabb..aabb......",
+    "....aaaabb..aabbaa......",
+    "....aaaabb..aabbaa......",
+    "bb..aabbaa..bbaaaa......",
+    "bb..aabbaa..bbaaaa......",
+    "..aabbaa..bbaaaa........",
+    "..aabbaa..bbaaaa........",
+    "..bbaaaa..aaaabb........",
+    "..bbaaaa..aaaabb........",
+    "bbaaaa..aaaabb..aa......",
+    "bbaaaa..aaaabb..aa......",
+    "aaaabb..aabbaa..bb......",
+    "aaaabb..aabbaa..bb......",
+    "aabb..aabbaa..bbaa......",
+    "aabb..aabbaa..bbaa......",
+    "bbaa..bbaaaa..aaaa......",
+    "bbaa..bbaaaa..aaaa......",
+    "aa..bbaaaa..aaaabb......",
+    "aa..bbaaaa..aaaabb......",
+    "aa..aaaabb..aabbaa......",
+    "aa..aaaabb..aabbaa......",
+    "..aaaabb..aabbaa........",
+    "..aaaabb..aabbaa........",
+    "..aabbaa..bbaaaa........",
+    "..aabbaa..bbaaaa........"
    ],
    "plane": "xy",
    "style": "s17",
@@ -2350,27 +2446,19 @@
   },
   {
    "id": "blanket",
-   "shape": "taper",
+   "shape": "box",
    "pivot": [
     -0.6,
-    15.5,
-    0.0
-   ],
-   "rotation": [
-    90.0,
-    0.0,
+    15.3,
     0.0
    ],
    "size": [
     6.6,
     0.4,
-    7.8
+    8.2
    ],
    "style": "s18",
-   "front_scale": [
-    1,
-    1
-   ]
+   "chamfer": 0.15
   },
   {
    "id": "saddle",
@@ -2540,7 +2628,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2686,7 +2774,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2839,7 +2927,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2882,7 +2970,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,

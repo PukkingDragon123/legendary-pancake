@@ -3,7 +3,7 @@
  "description": "A wall of frames on twine and brass pins: a big oak-framed sunset over the far hills, a gilt oval moonlit branch, a pressed rosebud under linen and a little round pinecone sketch.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.0,
+ "density": 6.0,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -1305,33 +1305,60 @@
     0.45
    ],
    "art": [
-    "111111111111111111111111111111111111111",
-    "111111111111111111111111111111111111111",
-    "111111111111111111111111111111111111111",
-    "111112111111211111121111112111111211111",
-    "112111111211111121111112111111211111121",
-    "222222322222232222223222222322222232222",
-    "222322222232222223222222322222232222223",
-    "322222232222223222222322222232222223222",
-    "222232222223222222322222sssss2223222222",
-    "34333333433333343333334sssssss333333433",
-    "33333433333343333334333sssssss333433333",
-    "33433333343333334333333sssssss433333343",
-    "4444444444444444444hhhhsssssss444444444",
-    "444444444444444hhhhhhhhhhhssss444444444",
-    "44444444hhhhhhhhhhhhhhhhhhhhs4444444444",
-    "4hhhhhhhhhhhhhhhhhhhhhhhhhhhhh444444444",
-    "hhhHHHHHHHHHHHHHHHHHHhhhhhhhhhhhhhhhhhh",
-    "HHHHHHHHHHHHHHHHpppppppppphhhhhhhhhhhhh",
-    "HHHtHHtHHtHHtpptpppppppppppppphhhhhhHHH",
-    "ggttgttHttpttpttHHHHHHHHHHpppppphHHHHHg",
-    "gttttttttttttttttHHHHHHHHHHHHHppHHHHggg",
-    "gttttttttttttttttHHHHHHHHHHHHHHHHHggggg",
-    "ggggggggggggggggggggggggggHHHHHgggggggg",
-    "ggggggggggggggggggggggggggggggggggggggg",
-    "ggggggggggggggggggggggggggggggggggggggg",
-    "ggggggggggggggggggggggggggggggggggggggg",
-    "ggggggggggggggggggggggggggggggggggggggg"
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111122111111111111221111111111112211111111111122111111111111221111111111",
+    "111111111122111111111111221111111111112211111111111122111111111111221111111111",
+    "111122111111111111221111111111112211111111111122111111111111221111111111112211",
+    "111122111111111111221111111111112211111111111122111111111111221111111111112211",
+    "222222222222332222222222223322222222222233222222222222332222222222223322222222",
+    "222222222222332222222222223322222222222233222222222222332222222222223322222222",
+    "222222332222222222223322222222222233222222222222332222222222223322222222222233",
+    "222222332222222222223322222222222233222222222222332222222222223322222222222233",
+    "332222222222223322222222222233222222222222332222222222223322222222222233222222",
+    "332222222222223322222222222233222222222222332222222222223322222222222233222222",
+    "222222223322222222222233222222222222332222222222ssssssssss22222233222222222222",
+    "222222223322222222222233222222222222332222222222ssssssssss22222233222222222222",
+    "3344333333333333443333333333334433333333333344ssssssssssssss333333333333443333",
+    "3344333333333333443333333333334433333333333344ssssssssssssss333333333333443333",
+    "3333333333443333333333334433333333333344333333ssssssssssssss333333443333333333",
+    "3333333333443333333333334433333333333344333333ssssssssssssss333333443333333333",
+    "3333443333333333334433333333333344333333333333ssssssssssssss443333333333334433",
+    "3333443333333333334433333333333344333333333333ssssssssssssss443333333333334433",
+    "44444444444444444444444444444444444444hhhhhhhhssssssssssssss444444444444444444",
+    "44444444444444444444444444444444444444hhhhhhhhssssssssssssss444444444444444444",
+    "444444444444444444444444444444hhhhhhhhhhhhhhhhhhhhhhssssssss444444444444444444",
+    "444444444444444444444444444444hhhhhhhhhhhhhhhhhhhhhhssssssss444444444444444444",
+    "4444444444444444hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhss44444444444444444444",
+    "4444444444444444hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhss44444444444444444444",
+    "44hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh444444444444444444",
+    "44hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh444444444444444444",
+    "hhhhhhHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "hhhhhhHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHpppppppppppppppppppphhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHpppppppppppppppppppphhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "HHHHHHttHHHHttHHHHttHHHHttppppttpppppppppppppppppppppppppppphhhhhhhhhhhhHHHHHH",
+    "HHHHHHttHHHHttHHHHttHHHHttppppttpppppppppppppppppppppppppppphhhhhhhhhhhhHHHHHH",
+    "ggggttttggttttHHttttppttttppttttHHHHHHHHHHHHHHHHHHHHpppppppppppphhHHHHHHHHHHgg",
+    "ggggttttggttttHHttttppttttppttttHHHHHHHHHHHHHHHHHHHHpppppppppppphhHHHHHHHHHHgg",
+    "ggttttttttttttttttttttttttttttttttHHHHHHHHHHHHHHHHHHHHHHHHHHppppHHHHHHHHgggggg",
+    "ggttttttttttttttttttttttttttttttttHHHHHHHHHHHHHHHHHHHHHHHHHHppppHHHHHHHHgggggg",
+    "ggttttttttttttttttttttttttttttttttHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHgggggggggg",
+    "ggttttttttttttttttttttttttttttttttHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHgggggggggg",
+    "ggggggggggggggggggggggggggggggggggggggggggggggggggggHHHHHHHHHHgggggggggggggggg",
+    "ggggggggggggggggggggggggggggggggggggggggggggggggggggHHHHHHHHHHgggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg"
    ],
    "plane": "xy",
    "style": "s2",
@@ -1423,31 +1450,56 @@
     0.45
    ],
    "art": [
-    ".......NNnnn.......",
-    ".....nNnNnnnnn.....",
-    "....nnnnnnnnNNn....",
-    "...NnnnnnnNNNNNn...",
-    "..NnNnnNnnNnnnnnN..",
-    "..nnnnnnnNNmnnnnn..",
-    ".nNnnnnNNnmnNnnnNN.",
-    ".nnnNnNnN*mnnnnnnN.",
-    "nnnnnnnnnnmmnnnnnnn",
-    "nnnnnnnnnnnmmmnnnnn",
-    "nnn*nnnnnn*nnnnnnnn",
-    "nnn*nnnnnnnnnnnnnnn",
-    "**nnnnnnnnnllnnnnbb",
-    "nnnllnnnnnnllbbbbbb",
-    "nnnllnnllnllbbbbnnn",
-    "nnnnbbbnnbllbnnnnnn",
-    "nnbbbllbbbbnnnnnnnn",
-    "bbbnnnnnnnnn*nnnnn.",
-    "bnnnnnnnnnnnnnnnnn.",
-    "..nnnnnnnnnnnnnnn..",
-    "..nnnnnnnnnnnnnnn..",
-    "...nnnnnnnnnnnnn...",
-    "....nnn*nnnnnnn....",
-    ".....nnnnnnnnn.....",
-    ".......nnnnn......."
+    "..............NNNNnnnnnn..............",
+    "..............NNNNnnnnnn..............",
+    "..........nnNNnnNNnnnnnnnnnn..........",
+    "..........nnNNnnNNnnnnnnnnnn..........",
+    "........nnnnnnnnnnnnnnnnNNNNnn........",
+    "........nnnnnnnnnnnnnnnnNNNNnn........",
+    "......NNnnnnnnnnnnnnNNNNNNNNNNnn......",
+    "......NNnnnnnnnnnnnnNNNNNNNNNNnn......",
+    "....NNnnNNnnnnNNnnnnNNnnnnnnnnnnNN....",
+    "....NNnnNNnnnnNNnnnnNNnnnnnnnnnnNN....",
+    "....nnnnnnnnnnnnnnNNNNmmnnnnnnnnnn....",
+    "....nnnnnnnnnnnnnnNNNNmmnnnnnnnnnn....",
+    "..nnNNnnnnnnnnNNNNnnmmnnNNnnnnnnNNNN..",
+    "..nnNNnnnnnnnnNNNNnnmmnnNNnnnnnnNNNN..",
+    "..nnnnnnNNnnNNnnNN**mmnnnnnnnnnnnnNN..",
+    "..nnnnnnNNnnNNnnNN**mmnnnnnnnnnnnnNN..",
+    "nnnnnnnnnnnnnnnnnnnnmmmmnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnnnnmmmmnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnnnnnnmmmmmmnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnnnnnnmmmmmmnnnnnnnnnn",
+    "nnnnnn**nnnnnnnnnnnn**nnnnnnnnnnnnnnnn",
+    "nnnnnn**nnnnnnnnnnnn**nnnnnnnnnnnnnnnn",
+    "nnnnnn**nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+    "nnnnnn**nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+    "****nnnnnnnnnnnnnnnnnnllllnnnnnnnnbbbb",
+    "****nnnnnnnnnnnnnnnnnnllllnnnnnnnnbbbb",
+    "nnnnnnllllnnnnnnnnnnnnllllbbbbbbbbbbbb",
+    "nnnnnnllllnnnnnnnnnnnnllllbbbbbbbbbbbb",
+    "nnnnnnllllnnnnllllnnllllbbbbbbbbnnnnnn",
+    "nnnnnnllllnnnnllllnnllllbbbbbbbbnnnnnn",
+    "nnnnnnnnbbbbbbnnnnbbllllbbnnnnnnnnnnnn",
+    "nnnnnnnnbbbbbbnnnnbbllllbbnnnnnnnnnnnn",
+    "nnnnbbbbbbllllbbbbbbbbnnnnnnnnnnnnnnnn",
+    "nnnnbbbbbbllllbbbbbbbbnnnnnnnnnnnnnnnn",
+    "bbbbbbnnnnnnnnnnnnnnnnnn**nnnnnnnnnn..",
+    "bbbbbbnnnnnnnnnnnnnnnnnn**nnnnnnnnnn..",
+    "bbnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn..",
+    "bbnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn..",
+    "....nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn....",
+    "....nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn....",
+    "....nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn....",
+    "....nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn....",
+    "......nnnnnnnnnnnnnnnnnnnnnnnnnn......",
+    "......nnnnnnnnnnnnnnnnnnnnnnnnnn......",
+    "........nnnnnn**nnnnnnnnnnnnnn........",
+    "........nnnnnn**nnnnnnnnnnnnnn........",
+    "..........nnnnnnnnnnnnnnnnnn..........",
+    "..........nnnnnnnnnnnnnnnnnn..........",
+    "..............nnnnnnnnnn..............",
+    "..............nnnnnnnnnn.............."
    ],
    "plane": "xy",
    "style": "s7",
@@ -1671,7 +1723,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1720,20 +1772,34 @@
     0.45
    ],
    "art": [
-    "CccCccCccCccCc",
-    "ccCccrrcCccCcc",
-    "cCccrRrrccCccC",
-    "CccCRRRrcCccCc",
-    "ccCcrRrrCccCcc",
-    "cCccrrrrccCccC",
-    "CccCcrrccCccCc",
-    "ccCccCscCccCcc",
-    "cCccCcslllCccC",
-    "CcclllsccCccCc",
-    "ccCccCscCccCcc",
-    "cCccCcsCccCccC",
-    "CccCccCscCccCc",
-    "ccCccCccCccCcc"
+    "CCccccCCccccCCccccCCccccCCcc",
+    "CCccccCCccccCCccccCCccccCCcc",
+    "ccccCCccccrrrrccCCccccCCcccc",
+    "ccccCCccccrrrrccCCccccCCcccc",
+    "ccCCccccrrRRrrrrccccCCccccCC",
+    "ccCCccccrrRRrrrrccccCCccccCC",
+    "CCccccCCRRRRRRrrccCCccccCCcc",
+    "CCccccCCRRRRRRrrccCCccccCCcc",
+    "ccccCCccrrRRrrrrCCccccCCcccc",
+    "ccccCCccrrRRrrrrCCccccCCcccc",
+    "ccCCccccrrrrrrrrccccCCccccCC",
+    "ccCCccccrrrrrrrrccccCCccccCC",
+    "CCccccCCccrrrrccccCCccccCCcc",
+    "CCccccCCccrrrrccccCCccccCCcc",
+    "ccccCCccccCCssccCCccccCCcccc",
+    "ccccCCccccCCssccCCccccCCcccc",
+    "ccCCccccCCccssllllllCCccccCC",
+    "ccCCccccCCccssllllllCCccccCC",
+    "CCccccllllllssccccCCccccCCcc",
+    "CCccccllllllssccccCCccccCCcc",
+    "ccccCCccccCCssccCCccccCCcccc",
+    "ccccCCccccCCssccCCccccCCcccc",
+    "ccCCccccCCccssCCccccCCccccCC",
+    "ccCCccccCCccssCCccccCCccccCC",
+    "CCccccCCccccCCssccCCccccCCcc",
+    "CCccccCCccccCCssccCCccccCCcc",
+    "ccccCCccccCCccccCCccccCCcccc",
+    "ccccCCccccCCccccCCccccCCcccc"
    ],
    "plane": "xy",
    "style": "s11",
@@ -1821,18 +1887,30 @@
     0.45
    ],
    "art": [
-    "....pppp....",
-    "..pppppppp..",
-    ".pppppipppp.",
-    ".ppppiiippp.",
-    "ppppiiiiippp",
-    "pppiiiiiiipp",
-    "ppppppippppp",
-    "ppppiiiiippp",
-    ".ppppiiippp.",
-    ".pppppipppp.",
-    "..ppppippp..",
-    "....pppp...."
+    "........pppppppp........",
+    "........pppppppp........",
+    "....pppppppppppppppp....",
+    "....pppppppppppppppp....",
+    "..ppppppppppiipppppppp..",
+    "..ppppppppppiipppppppp..",
+    "..ppppppppiiiiiipppppp..",
+    "..ppppppppiiiiiipppppp..",
+    "ppppppppiiiiiiiiiipppppp",
+    "ppppppppiiiiiiiiiipppppp",
+    "ppppppiiiiiiiiiiiiiipppp",
+    "ppppppiiiiiiiiiiiiiipppp",
+    "ppppppppppppiipppppppppp",
+    "ppppppppppppiipppppppppp",
+    "ppppppppiiiiiiiiiipppppp",
+    "ppppppppiiiiiiiiiipppppp",
+    "..ppppppppiiiiiipppppp..",
+    "..ppppppppiiiiiipppppp..",
+    "..ppppppppppiipppppppp..",
+    "..ppppppppppiipppppppp..",
+    "....ppppppppiipppppp....",
+    "....ppppppppiipppppp....",
+    "........pppppppp........",
+    "........pppppppp........"
    ],
    "plane": "xy",
    "style": "s16",
@@ -2008,7 +2086,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2056,7 +2134,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0,
     "angle": 0.0
    },
@@ -2096,23 +2174,34 @@
     {
      "at": [
       0,
-      0.225,
+      0.13180194846605364,
       0
      ],
      "size": [
-      0.7794,
-      0.7794
+      0.6364,
+      0.6364
      ]
     },
     {
      "at": [
       0,
-      0.6749999999999999,
+      0.45,
       0
      ],
      "size": [
-      0.7794,
-      0.7794
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7681980515339464,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
      ]
     },
     {
@@ -2128,7 +2217,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2187,7 +2276,7 @@
     }
    ],
    "profile": {
-    "sides": 3,
+    "sides": 4,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2220,23 +2309,34 @@
     {
      "at": [
       0,
-      0.225,
+      0.13180194846605364,
       0
      ],
      "size": [
-      0.7794,
-      0.7794
+      0.6364,
+      0.6364
      ]
     },
     {
      "at": [
       0,
-      0.6749999999999999,
+      0.45,
       0
      ],
      "size": [
-      0.7794,
-      0.7794
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7681980515339464,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
      ]
     },
     {
@@ -2252,7 +2352,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2311,7 +2411,7 @@
     }
    ],
    "profile": {
-    "sides": 3,
+    "sides": 4,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2344,23 +2444,34 @@
     {
      "at": [
       0,
-      0.225,
+      0.13180194846605364,
       0
      ],
      "size": [
-      0.7794,
-      0.7794
+      0.6364,
+      0.6364
      ]
     },
     {
      "at": [
       0,
-      0.6749999999999999,
+      0.45,
       0
      ],
      "size": [
-      0.7794,
-      0.7794
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7681980515339464,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
      ]
     },
     {
@@ -2376,7 +2487,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2435,7 +2546,7 @@
     }
    ],
    "profile": {
-    "sides": 3,
+    "sides": 4,
     "round": 2.0
    },
    "subdiv": 0,

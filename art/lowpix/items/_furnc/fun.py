@@ -439,9 +439,8 @@ def rocking_horse():
                 tail.set(x, y, "a" if (x + y) % 3 else "b")
     S.card("tail", tail.rows, (-9.4, 9.8, 0), flat("oat"), key={"a": "oat:5", "b": "oat:3"}, rot=(0, 0, 22))
     # saddle, blanket, stirrups, bridle, handle pegs
-    S.taper("blanket", (6.6, 0.4, 7.8), (-0.6, 15.5, 0), plain("dusk", tone=4.0, layers=[
-        {"id": "edge", "op": "band", "axis": "z", "from": 0.8, "to": 1.0, "ramp": "honey", "tone": 4.4}]),
-        rot=(90, 0, 0), front_scale=[1, 1])
+    S.box("blanket", (6.6, 0.4, 8.2), (-0.6, 15.3, 0), plain("dusk", tone=4.0, layers=[
+        {"id": "edge", "op": "band", "axis": "z", "from": 0.8, "to": 1.0, "ramp": "honey", "tone": 4.4}]), chamfer=0.15)
     S.box("saddle", (5.0, 1.4, 5.6), (-0.6, 16.0, 0), plain("berry", tone=3.6, gloss=True, layers=[
         {"id": "studs", "op": "rivets", "inset": 1, "spacing": 4, "ramp": "brass", "tone": 6}]), chamfer=0.6)
     S.box("pommel", (1.2, 1.2, 2.6), (1.8, 16.9, 0), plain("berry", tone=3.4, gloss=True), chamfer=0.4)
@@ -463,7 +462,7 @@ def music_box():
     S.paint("box", layers=[{"id": "inlay", "op": "panel", "inset": 2, "shift": 1.4, "highlight": 1, "shadow": 1,
                             "faces": ["front", "left", "right"]}])
     for k, (x, z) in enumerate([(-5.6, 4.1), (5.6, 4.1), (-5.6, -4.1), (5.6, -4.1)]):
-        S.ball(f"foot{k}", 0.55, (x, 0.35, z), metal("brass"), sides=6, rings=3)
+        S.ball(f"foot{k}", 0.55, (x, 0.55, z), metal("brass"), sides=6, rings=3)
     S.box("velvet", (11.0, 0.3, 8.0), (0, 5.2, 0), cloth("berry", tone=3.6, weave=0.3))
     S.box("comb", (4.0, 0.6, 1.6), (-3.4, 5.6, 2.4), metal("brass", tone=4.6, layers=[
         {"id": "teeth", "op": "stripes", "axis": "x", "period": 0.4, "width": 0.4, "shift": -1.0}]))
@@ -607,7 +606,8 @@ def moth_arcade():
         S.card(f"side{k}", side.rows, (s * 7.56, 21.0, -0.5), flat("navy"), plane="yz",
                key={"l": "honey:5", "L": "lamp:6" if False else "honey:7", "m": "lilac:5", "n": "plum:2", "g": "moss:3"})
     for k, s in enumerate((-1, 1)):
-        S.box(f"tmold{k}", (0.4, 40.0, 0.5), (s * 7.6, 20.0, 5.6 - 0.2), trim)
+        S.box(f"tmold{k}", (0.4, 15.6, 0.5), (s * 7.6, 8.0, 5.4), trim)
+        S.box(f"tmoldu{k}", (0.4, 19.0, 0.5), (s * 7.6, 27.4, 1.4), trim)
     S.anim("idle", 3.0, tracks + [{"part": "stick_ball", "channel": "position", "osc": {"axis": "x", "amp": 0.3, "cycles": 3}}])
     return S
 

@@ -3,7 +3,7 @@
  "description": "A clockwork engine with a coal tender and a passenger car going round a sleeper-and-ballast loop past the little Snoozeville station, a signal and a fir tree. Puffs of steam from the chimney.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 2.6,
+ "density": 5.2,
  "budget": {
   "tris": 3400,
   "colors": 220
@@ -2708,7 +2708,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 0,
@@ -3279,7 +3279,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 0,
@@ -3322,7 +3322,7 @@
     }
    ],
    "profile": {
-    "sides": 16,
+    "sides": 22,
     "round": 2.0,
     "angle": 0.0
    },
@@ -3456,12 +3456,18 @@
     6.6
    ],
    "art": [
-    "bbbbbbbbbbbbbbbbbbbbbbbb",
-    "bppppppppppppppppppppppb",
-    "bpppipipipipppipipippppb",
-    "bppipppppipipppppipipppb",
-    "bppppppppppppppppppppppb",
-    "bbbbbbbbbbbbbbbbbbbbbbbb"
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbppppppppppppppppppppppppppppppppppppppppppppbb",
+    "bbppppppppppppppppppppppppppppppppppppppppppppbb",
+    "bbppppppiippiippiippiippppppiippiippiippppppppbb",
+    "bbppppppiippiippiippiippppppiippiippiippppppppbb",
+    "bbppppiippppppppppiippiippppppppppiippiippppppbb",
+    "bbppppiippppppppppiippiippppppppppiippiippppppbb",
+    "bbppppppppppppppppppppppppppppppppppppppppppppbb",
+    "bbppppppppppppppppppppppppppppppppppppppppppppbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
    ],
    "plane": "xy",
    "style": "s10",
@@ -3521,7 +3527,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0,
     "angle": 0.0
    },
@@ -3581,23 +3587,34 @@
     {
      "at": [
       0,
-      0.225,
+      0.13180194846605364,
       0
      ],
      "size": [
-      0.7794,
-      0.7794
+      0.6364,
+      0.6364
      ]
     },
     {
      "at": [
       0,
-      0.6749999999999999,
+      0.45,
       0
      ],
      "size": [
-      0.7794,
-      0.7794
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7681980515339464,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
      ]
     },
     {
@@ -3613,7 +3630,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -3661,7 +3678,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0,
     "angle": 0.0
    },
@@ -3755,7 +3772,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -3831,7 +3848,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0
    },
    "subdiv": 1,
@@ -3880,7 +3897,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0,
     "angle": 0.0
    },
@@ -3953,7 +3970,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4015,7 +4032,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4140,23 +4157,34 @@
     {
      "at": [
       0,
-      0.2,
+      0.11715728752538102,
       0
      ],
      "size": [
-      0.6928,
-      0.6928
+      0.5657,
+      0.5657
      ]
     },
     {
      "at": [
       0,
-      0.6,
+      0.4,
       0
      ],
      "size": [
-      0.6928,
-      0.6928
+      0.8,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.682842712474619,
+      0
+     ],
+     "size": [
+      0.5657,
+      0.5657
      ]
     },
     {
@@ -4172,7 +4200,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -4242,7 +4270,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4298,7 +4326,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4354,7 +4382,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4410,7 +4438,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4466,7 +4494,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4522,7 +4550,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4563,23 +4591,34 @@
     {
      "at": [
       0,
-      0.25,
+      0.14644660940672627,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      0.7071,
+      0.7071
      ]
     },
     {
      "at": [
       0,
-      0.7499999999999999,
+      0.5,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
      ]
     },
     {
@@ -4595,7 +4634,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -4634,23 +4673,34 @@
     {
      "at": [
       0,
-      0.325,
+      0.19038059222874415,
       0
      ],
      "size": [
-      1.1258,
-      1.1258
+      0.9192,
+      0.9192
      ]
     },
     {
      "at": [
       0,
-      0.9749999999999999,
+      0.65,
       0
      ],
      "size": [
-      1.1258,
-      1.1258
+      1.3,
+      1.3
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1096194077712558,
+      0
+     ],
+     "size": [
+      0.9192,
+      0.9192
      ]
     },
     {
@@ -4666,7 +4716,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -4705,23 +4755,34 @@
     {
      "at": [
       0,
-      0.4,
+      0.23431457505076203,
       0
      ],
      "size": [
-      1.3856,
-      1.3856
+      1.1314,
+      1.1314
      ]
     },
     {
      "at": [
       0,
-      1.2,
+      0.8,
       0
      ],
      "size": [
-      1.3856,
-      1.3856
+      1.6,
+      1.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.365685424949238,
+      0
+     ],
+     "size": [
+      1.1314,
+      1.1314
      ]
     },
     {
@@ -4737,7 +4798,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -4849,7 +4910,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4905,7 +4966,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4961,7 +5022,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -5017,7 +5078,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -5157,7 +5218,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -5213,7 +5274,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -5269,7 +5330,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -5325,7 +5386,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },

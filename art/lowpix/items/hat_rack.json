@@ -3,7 +3,7 @@
  "description": "An oak peg rail with four turned pegs: Pip's striped nightcap with a pompom, a straw sunhat with a berry ribbon and daisies, and a long knitted scarf that is mostly holes and love.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.0,
+ "density": 6.0,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -48,6 +48,7 @@
   "unlit": false,
   "roughness": 0.9
  },
+ "grounded": false,
  "render": {
   "background": "#27313f",
   "hero": [
@@ -973,7 +974,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1061,7 +1062,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1149,7 +1150,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1237,7 +1238,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1320,7 +1321,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1353,34 +1354,45 @@
     {
      "at": [
       0,
-      0.29289321881345254,
+      0.19098300562505255,
       0
      ],
      "size": [
-      1.4142,
-      1.4142
+      1.1756,
+      1.1756
      ]
     },
     {
      "at": [
       0,
-      1.0,
+      0.6909830056250525,
       0
      ],
      "size": [
-      2.0,
-      2.0
+      1.9021,
+      1.9021
      ]
     },
     {
      "at": [
       0,
-      1.7071067811865475,
+      1.3090169943749475,
       0
      ],
      "size": [
-      1.4142,
-      1.4142
+      1.9021,
+      1.9021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8090169943749475,
+      0
+     ],
+     "size": [
+      1.1756,
+      1.1756
      ]
     },
     {
@@ -1396,7 +1408,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1460,7 +1472,7 @@
     }
    ],
    "profile": {
-    "sides": 16,
+    "sides": 22,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1537,7 +1549,7 @@
     }
    ],
    "profile": {
-    "sides": 14,
+    "sides": 20,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1592,7 +1604,7 @@
     }
    ],
    "profile": {
-    "sides": 14,
+    "sides": 20,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1623,15 +1635,24 @@
     0.0
    ],
    "art": [
-    ".........",
-    "..ppppp..",
-    ".ppppppp.",
-    ".ppcccpp.",
-    ".ppcccpp.",
-    ".ppcccpp.",
-    ".ppppppp.",
-    "..ppppp..",
-    "........."
+    "..................",
+    "..................",
+    "....pppppppppp....",
+    "....pppppppppp....",
+    "..pppppppppppppp..",
+    "..pppppppppppppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..pppppppppppppp..",
+    "..pppppppppppppp..",
+    "....pppppppppp....",
+    "....pppppppppp....",
+    "..................",
+    ".................."
    ],
    "plane": "xy",
    "style": "s11",
@@ -1656,15 +1677,24 @@
     0.0
    ],
    "art": [
-    ".........",
-    "..ppppp..",
-    ".ppppppp.",
-    ".ppcccpp.",
-    ".ppcccpp.",
-    ".ppcccpp.",
-    ".ppppppp.",
-    "..ppppp..",
-    "........."
+    "..................",
+    "..................",
+    "....pppppppppp....",
+    "....pppppppppp....",
+    "..pppppppppppppp..",
+    "..pppppppppppppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..ppppccccccpppp..",
+    "..pppppppppppppp..",
+    "..pppppppppppppp..",
+    "....pppppppppp....",
+    "....pppppppppp....",
+    "..................",
+    ".................."
    ],
    "plane": "xy",
    "style": "s12",
@@ -1719,7 +1749,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1784,7 +1814,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1843,7 +1873,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1867,11 +1897,16 @@
     1.8
    ],
    "art": [
-    "a.a.a.a.",
-    "a.a.a.a.",
-    "a..a.a.a",
-    ".a.a..a.",
-    ".a..a.a."
+    "aa..aa..aa..aa..",
+    "aa..aa..aa..aa..",
+    "aa..aa..aa..aa..",
+    "aa..aa..aa..aa..",
+    "aa....aa..aa..aa",
+    "aa....aa..aa..aa",
+    "..aa..aa....aa..",
+    "..aa..aa....aa..",
+    "..aa....aa..aa..",
+    "..aa....aa..aa.."
    ],
    "plane": "xy",
    "style": "s16",
@@ -1890,11 +1925,16 @@
     2.1
    ],
    "art": [
-    "a.a.a.a.",
-    "a.a.a.a.",
-    "a..a.a.a",
-    ".a.a..a.",
-    ".a..a.a."
+    "aa..aa..aa..aa..",
+    "aa..aa..aa..aa..",
+    "aa..aa..aa..aa..",
+    "aa..aa..aa..aa..",
+    "aa....aa..aa..aa",
+    "aa....aa..aa..aa",
+    "..aa..aa....aa..",
+    "..aa..aa....aa..",
+    "..aa....aa..aa..",
+    "..aa....aa..aa.."
    ],
    "plane": "xy",
    "style": "s17",

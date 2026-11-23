@@ -3,7 +3,7 @@
  "description": "The good ship Hootenanny under full sail on a painted sea, inside a green-tinted bottle with a cork, resting on a walnut cradle with a brass name plate.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.2,
+ "density": 6.4,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -48,6 +48,7 @@
   "unlit": false,
   "roughness": 0.9
  },
+ "grounded": true,
  "render": {
   "background": "#27313f",
   "hero": [
@@ -567,13 +568,17 @@
     },
     {
      "id": "foam",
-     "op": "band",
-     "axis": "y",
-     "from": 0.6,
-     "to": 1.0,
+     "op": "spots",
+     "count": 10,
+     "radius": [
+      0.25,
+      0.45
+     ],
      "ramp": "mist",
-     "tone": 4.6,
-     "wobble": 0.2
+     "tone": 5,
+     "faces": [
+      "up"
+     ]
     }
    ]
   },
@@ -875,7 +880,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0
    },
    "subdiv": 1,
@@ -919,7 +924,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -934,7 +939,7 @@
    "shape": "loft",
    "pivot": [
     -5.6,
-    2.5,
+    2.1,
     0.0
    ],
    "rings": [
@@ -945,8 +950,8 @@
       0.0
      ],
      "size": [
-      5.4,
-      2.2
+      5.2,
+      1.4
      ]
     },
     {
@@ -956,13 +961,13 @@
       0.0
      ],
      "size": [
-      5.4,
-      2.2
+      5.2,
+      1.4
      ]
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1048,7 +1053,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1074,14 +1079,22 @@
     0.1
    ],
    "art": [
-    ".ssssss.",
-    "ssssssss",
-    "ssssssss",
-    "SSSSSSSS",
-    "ssssssss",
-    "ssssssss",
-    "SSSSSSSS",
-    ".ssssss."
+    "..ssssssssssss..",
+    "..ssssssssssss..",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "SSSSSSSSSSSSSSSS",
+    "SSSSSSSSSSSSSSSS",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "SSSSSSSSSSSSSSSS",
+    "SSSSSSSSSSSSSSSS",
+    "..ssssssssssss..",
+    "..ssssssssssss.."
    ],
    "plane": "yz",
    "style": "s11",
@@ -1125,7 +1138,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1151,14 +1164,22 @@
     0.1
    ],
    "art": [
-    ".ssssss.",
-    "ssssssss",
-    "ssssssss",
-    "SSSSSSSS",
-    "ssssssss",
-    "ssssssss",
-    "SSSSSSSS",
-    ".ssssss."
+    "..ssssssssssss..",
+    "..ssssssssssss..",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "SSSSSSSSSSSSSSSS",
+    "SSSSSSSSSSSSSSSS",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "ssssssssssssssss",
+    "SSSSSSSSSSSSSSSS",
+    "SSSSSSSSSSSSSSSS",
+    "..ssssssssssss..",
+    "..ssssssssssss.."
    ],
    "plane": "yz",
    "style": "s13",
@@ -1178,8 +1199,10 @@
     0.0
    ],
    "art": [
-    "bbbb",
-    "bb.."
+    "bbbbbbbb",
+    "bbbbbbbb",
+    "bbbb....",
+    "bbbb...."
    ],
    "plane": "xy",
    "style": "s14",

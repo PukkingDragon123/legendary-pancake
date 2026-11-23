@@ -79,38 +79,61 @@ def xmas_tree():
     S.paint("tub", layers=[{"id": "soil", "op": "spots", "centers": [[0, 5.6, 0, 5.2]], "ramp": "snow", "tone": 4.6,
                             "faces": ["end"]}])
     S.cyl("trunk", 1.2, 6.0, (0, 5.0, 0), plain("bark", tone=3.6, noise=0.6), sides=7)
-    # tiers: drooping skirts of fir, each turned a little, snow on every edge
-    fir = leafy("pine", tone=4.2, snow=True)
+    # the fir: a dark inner cone for body, then whorls of drooping painted branch cards (bushy, not a stack of cones)
     tiers = [(12.6, 9.0, 6.4), (11.2, 13.4, 6.0), (9.8, 17.6, 5.6), (8.2, 21.6, 5.2), (6.6, 25.4, 4.8), (5.0, 29.0, 4.4),
              (3.4, 32.4, 4.0), (1.8, 35.4, 3.6)]
-    for k, (r, y, h) in enumerate(tiers):
-        prof = [(r * 0.86, y - 0.9), (r, y - 0.3), (r * 0.82, y + 0.5), (r * 0.42, y + h * 0.7), (0.15, y + h)]
-        S.lathe(f"tier{k}", prof, (0, 0, 0), fir, sides=11 if k < 4 else 9, rot=(0, k * 17, 0), caps=(True, True),
-                subdiv=0)
-    # branch tips poking out round each tier
-    tip = Pix(12, 8)
-    tip.poly([(0, 4), (5, 1), (11.5, 0.5), (12, 4), (11.5, 7.5), (5, 7)], "a")
-    for x in range(0, 12, 2):
-        tip.set(x, 0 if x > 4 else 1, "a"), tip.set(x + 1, 7 if x > 4 else 6, "a")
-    tip.line(0, 4, 11, 4, "b")
-    for x in (3, 6, 9):
-        tip.line(x, 4, x + 2, 1.5, "b"), tip.line(x, 4, x + 2, 6.5, "b")
-    tip.set(10, 1, "s"), tip.set(9, 1, "s"), tip.set(11, 1, "s"), tip.set(8, 2, "s")
+    S.lathe("body", [(6.8, 8.4), (5.4, 14.0), (3.8, 22.0), (2.0, 30.0), (0.2, 38.0)], (0, 0, 0),
+            leafy("pine", tone=2.6), sides=10, caps=(True, False), subdiv=0)
+
+    def branch_art(x, y, cols, rows):
+        u, v = (x + 0.5) / cols, (y + 0.5) / rows * 2 - 1        # u along the branch, v across it
+        half = 0.95 * (1 - u ** 1.6) ** 0.5 * (0.75 + 0.25 * math.sin(u * 3.1))
+        rib = abs(v) < 0.08 and u < 0.92
+        side = abs(abs(v) - (u * 0.0 + ((u * 7.0) % 1.0) * 0.9)) < 0.1 and u > 0.08
+        if abs(v) > half + 0.12 * math.sin(x * 2.1 + y * 1.3):
+            return "."
+        if rib:
+            return "d"
+        n = hsh(x // 2, y // 2, 7)
+        tip = u > 0.84 or abs(v) > half - 0.12
+        if tip and v < 0 and n > 0.55:
+            return "s"
+        if side:
+            return "d"
+        if tip:
+            return "c" if n > 0.4 else "b"
+        return "a" if (x + y) % 3 else ("b" if n > 0.5 else "d")
+
     n = 0
-    for k, (r, y, h) in enumerate(tiers[:7]):
-        cnt = 9 - k
+    for k, (r, y, h) in enumerate(tiers):
+        cnt = max(6, 13 - k)
         for j in range(cnt):
-            a = j * 360 / cnt + k * 23
-            ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
-            S.card(f"tip{n}", tip.rows, (ca * (r + 0.9), y - 0.5, sa * (r + 0.9)), flat("pine"),
-                   rot=(0, -a, -14), key={"a": "pine:4" if (j + k) % 2 else "pine:5", "b": "pine:2", "s": "snow:6"})
+            a = j * 360 / cnt + k * 23 + (hsh(k, j) - 0.5) * 18
+            L = r * (1.02 + (hsh(j, k, 3) - 0.5) * 0.2)
+            S.bone(f"bj{n}", (0, y + 0.4, 0), rot=(0, -a, 0))
+            droop = 22 + k * 3 + (hsh(k, j, 5) - 0.5) * 10
+            S.pcard(f"branch{n}", L, max(2.6, L * 0.8), branch_art,
+                    {"a": "pine:4", "b": "pine:5", "c": "pine:6", "d": "pine:2", "w": "bark:3", "s": "snow:6"},
+                    S.at(f"bj{n}", (L / 2 * math.cos(math.radians(droop)), -L / 2 * math.sin(math.radians(droop)), 0)),
+                    style=flat("pine", light=0.8), parent=f"bj{n}", plane="xz", rot=(0, 0, -droop),
+                    pivot=S.at(f"bj{n}", (0, 0, 0)))
+            n += 1
+        # a second, upturned layer between the whorls fills the gaps
+        for j in range(max(3, cnt - 3)):
+            a = (j + 0.5) * 360 / max(3, cnt - 3) + k * 23
+            L = r * 0.8
+            S.bone(f"bu{n}", (0, y + h * 0.45, 0), rot=(0, -a, 0))
+            S.pcard(f"branch{n}", L, max(2.2, L * 0.6), branch_art,
+                    {"a": "pine:5", "b": "pine:4", "c": "pine:6", "d": "pine:3", "w": "bark:3", "s": "snow:6"},
+                    S.at(f"bu{n}", (L / 2 * 0.94, -L / 2 * 0.34, 0)), style=flat("pine", light=0.8), parent=f"bu{n}",
+                    plane="xz", rot=(0, 0, -20), pivot=S.at(f"bu{n}", (0, 0, 0)))
             n += 1
     # gold tinsel spiral
     helix = []
     for i in range(60):
         t = i / 59
         y = 9.6 + t * 24.0
-        rr = 12.4 - t * 9.6 + 0.6
+        rr = (12.4 - t * 9.6) * 0.86
         a = t * math.pi * 2 * 3.2
         helix.append((math.cos(a) * rr, y, math.sin(a) * rr))
     S.tube("tinsel", helix, 0.32, metal("gold", tone=5.0, layers=[
@@ -124,8 +147,8 @@ def xmas_tree():
             a = j * 360 / (3 if ti < 4 else 2) + ti * 51 + 20
             ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
             br = 1.45 - ti * 0.1
-            S.ball(f"bauble{k}", br, (ca * (r * 0.92), y - 1.3, sa * (r * 0.92)), bauble(cols[k % len(cols)]), sides=8, rings=5)
-            S.box(f"cap{k}", (0.5, 0.4, 0.5), (ca * (r * 0.92), y - 1.3 + br + 0.1, sa * (r * 0.92)), metal("gold", tone=5))
+            S.ball(f"bauble{k}", br, (ca * (r * 0.8), y - 1.6, sa * (r * 0.8)), bauble(cols[k % len(cols)]), sides=8, rings=5)
+            S.box(f"cap{k}", (0.5, 0.4, 0.5), (ca * (r * 0.8), y - 1.6 + br + 0.1, sa * (r * 0.8)), metal("gold", tone=5))
             k += 1
     # candy canes and gingerbread ornaments
     for j, (ti, a) in enumerate([(1, 200), (3, 320), (2, 80)]):
@@ -151,15 +174,15 @@ def xmas_tree():
     li = 0
     for g in range(3):
         S.bone(f"lights{g}", (0, 0, 0))
-    for i in range(27):
-        t = (i + 0.5) / 27
+    for i in range(24):
+        t = (i + 0.5) / 24
         y = 10.2 + t * 23.5
         rr = 12.0 - t * 9.4
         a = t * math.pi * 2 * 3.6 + 1.3
         g = i % 3
         nm = f"glow_bulb{i}"
-        S.ball(nm, 0.62, (math.cos(a) * (rr + 0.4), y, math.sin(a) * (rr + 0.4)), glow(["bulb", "ember", "cold"][g], tone=4.2),
-               sides=6, rings=3)
+        S.ball(nm, 0.62, (math.cos(a) * rr * 0.92, y, math.sin(a) * rr * 0.92), glow(["bulb", "ember", "cold"][g], tone=4.2),
+               sides=5, rings=2)
         tracks.append({"part": nm, "channel": "scale", "keys": cycle_keys(
             [(0, [0, 0, 0]), (0.3, [0.45, 0.45, 0.45]), (0.9, [-0.35, -0.35, -0.35]), (1.6, [0, 0, 0]), (3.0, [0, 0, 0])],
             3.0, g * 1.0 + (i // 3) * 0.13)})
@@ -650,7 +673,7 @@ def poinsettia():
             r = 2.4 if c == 0 else 1.8
             S.card(f"bract{c}_{j}", bract.rows, (cx + math.cos(math.radians(a)) * r, cy + 0.4, cz + math.sin(math.radians(a)) * r),
                    flat("holly"), pivot=(cx, cy, cz), rot=(64 + c * 6, 90 - a, 0),
-                   key={"a": "berry:4", "v": "berry:2", "f": "snow:6"})
+                   key={"a": "berry:5", "v": "berry:3", "f": "snow:6"})
         for m in range(3):
             S.ball(f"bud{c}_{m}", 0.35, (cx + (m - 1) * 0.45, cy + 0.6, cz + (m % 2) * 0.3), plain("honey", tone=5, gloss=True),
                    sides=6, rings=3)

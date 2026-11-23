@@ -296,6 +296,14 @@ def _r(v, n=4):
     return [round(float(x), n) for x in v]
 
 
+# texel density multiplier: fine hand-painted texels instead of chunky pixels (set FURNC_HD=1 for the old look)
+HD = float(__import__("os").environ.get("FURNC_HD", "2"))
+
+
+def smooth_sides(n):
+    return int(min(24, max(n, round(n * 1.4))))
+
+
 class Spec:
     """One item. Coordinates are world px (origin bottom-centre, front +z); parts can hang under bones."""
 
@@ -375,6 +383,7 @@ class Spec:
               round=2.0, angle=0.0, smooth=True, **kw):
         """A turned form round the local y axis: profile = [(radius, y), ...] bottom to top (y from `at`)."""
         rings = [{"at": [0, y, 0], "size": _r([max(r, 0) * 2, max(r, 0) * 2 * squash])} for r, y in profile]
+        sides = smooth_sides(sides)
         return self._add(id, parent, "loft", at, rot, rings=rings, profile={"sides": sides, "round": round, "angle": angle},
                          subdiv=subdiv, caps=list(caps), style=style, up=[0, 0, 1], smooth=smooth, **kw)
 
@@ -388,6 +397,7 @@ class Spec:
         for p, r in zip(pts, rs):
             rr = r if isinstance(r, (list, tuple)) else (r, r)
             rings.append({"at": _r(Rp.T @ (np.array(p, float) - at)), "size": _r([rr[0] * 2, rr[1] * 2])})
+        sides = smooth_sides(sides) if round <= 2.5 else sides
         d = self._add(id, parent, "loft", at, None, rings=rings, profile={"sides": sides, "round": round},
                       subdiv=subdiv, caps=list(caps), style=style, **kw)
         if up is not None:
@@ -398,6 +408,7 @@ class Spec:
         """A low-poly sphere (a lathe with a circular profile); squash = (sx, sy, sz)."""
         sx, sy, sz = squash
         prof = []
+        sides, rings = smooth_sides(sides), max(rings, int(round(rings * 1.35)))
         for i in range(rings + 1):
             a = -math.pi / 2 + math.pi * i / rings
             prof.append((math.cos(a) * r, (math.sin(a) + 1) * r * sy))
@@ -413,7 +424,14 @@ class Spec:
         return self.lathe(id, [(r, 0), (r2 if r2 is not None else r, h)], base, style, parent=parent, sides=sides,
                           rot=rot, caps=caps, subdiv=0, **kw)
 
-    def card(self, id, art, centre, style, parent=None, rot=None, plane="xy", pivot=None, key=None, **kw):
+    def card(self, id, art, centre, style, parent=None, rot=None, plane="xy", pivot=None, key=None, native=False, **kw):
+        """A cut-out card. Art drawn at the item's base density is scaled up by HD (same size, painted edges kept);
+        native=True means the art was drawn at the final (HD) density already."""
+        if not native and HD != 1:
+            k = HD
+            rows, cols = len(art), len(art[0])
+            R, Cc = max(1, round(rows * k)), max(1, round(cols * k))
+            art = ["".join(art[min(rows - 1, int(y / k))][min(cols - 1, int(x / k))] for x in range(Cc)) for y in range(R)]
         at = pivot if pivot is not None else centre
         d = self._add(id, parent, "card", at, rot, centre=centre, art=art, plane=plane, style=style, **kw)
         if key:
@@ -422,12 +440,12 @@ class Spec:
 
     def pcard(self, id, w, h, fn, key, centre, style=None, parent=None, rot=None, plane="xy", pivot=None, dens=None, **kw):
         """A card of w x h px whose pixel art comes from fn(x, y, cols, rows) -> char ('.' clear), y = 0 top row."""
-        d = dens or self.density
+        d = dens or self.density * HD
         cols, rows = max(2, round(w * d)), max(2, round(h * d))
         a = [''.join(fn(x, y, cols, rows) for x in range(cols)) for y in range(rows)]
         st = style or {"ramp": next(iter(key.values())).split(':')[0], "tone": 4, "light": 0.6, "brush": {"off": True},
                        "rim": {"light": 0, "dark": 0}}
-        return self.card(id, a, centre, st, parent=parent, rot=rot, plane=plane, pivot=pivot, key=key, **kw)
+        return self.card(id, a, centre, st, parent=parent, rot=rot, plane=plane, pivot=pivot, key=key, native=True, **kw)
 
     def paint(self, id, **kw):
         """Per-part paint overrides (layers append, stamps append)."""
@@ -477,7 +495,7 @@ class Spec:
             "name": self.id,
             "description": self.desc or self.name,
             "author": "Hoot Hollow (furnC lowpix kit)", "license": "CC0-1.0",
-            "density": self.density,
+            "density": round(self.density * HD, 3),
             "budget": {"tris": self.tris, "colors": 220},
             "light": self.light,
             "brush": self.brush,
@@ -669,7 +687,8 @@ def finish_glb(src_bytes, scale=1 / 16, png=None):
     out = {"asset": {"version": "2.0", "generator": "lowpix + hoot hollow furnC finish"}, "scene": 0,
            "scenes": [{"name": js["scenes"][0].get("name", "item"), "nodes": [0]}],
            "nodes": [], "meshes": [], "materials": [], "accessors": [], "bufferViews": [],
-           "textures": js["textures"], "samplers": js["samplers"], "images": []}
+           "textures": [{"sampler": 0, "extensions": {"EXT_texture_webp": {"source": 0}}}],
+           "samplers": js["samplers"], "images": []}
     blob = bytearray()
 
     def view(data, target=None):
@@ -731,6 +750,15 @@ def finish_glb(src_bytes, scale=1 / 16, png=None):
 
     # animated subtrees: keep joints; a wrapper carries the (static) parent's world transform
     remap = {}
+    # rest pose = the first frame of the idle clip, so a still (unanimated) copy looks like the moving one
+    first = {}
+    anl = js.get("animations", [])
+    idle = next((a for a in anl if a.get("name") == "idle"), anl[0] if anl else None)
+    if idle:
+        for ch in idle["channels"]:
+            smp = idle["samplers"][ch["sampler"]]
+            v = _acc(js, bn, smp["output"])
+            first.setdefault(ch["target"]["node"], {})[ch["target"]["path"]] = [float(x) for x in np.atleast_2d(v)[0]]
 
     def copy_node(i):
         nd = nodes[i]
@@ -738,6 +766,8 @@ def finish_glb(src_bytes, scale=1 / 16, png=None):
         for k in ("translation", "rotation", "scale"):
             if k in nd:
                 new[k] = nd[k]
+        for k, v in first.get(i, {}).items():
+            new[k] = v
         out["nodes"].append(new)
         ni = len(out["nodes"]) - 1
         remap[i] = ni
@@ -798,9 +828,9 @@ def finish_glb(src_bytes, scale=1 / 16, png=None):
         img_bytes = _see_through_alpha(img_bytes, see_through)
     if png:
         img_bytes = png(img_bytes)
-    out["images"] = [{"bufferView": view(img_bytes), "mimeType": "image/png", "name": "atlas"}]
-    out["extensionsUsed"] = ["KHR_mesh_quantization"]
-    out["extensionsRequired"] = ["KHR_mesh_quantization"]
+    out["images"] = [{"bufferView": view(img_bytes), "mimeType": "image/webp", "name": "atlas"}]
+    out["extensionsUsed"] = ["KHR_mesh_quantization", "EXT_texture_webp"]
+    out["extensionsRequired"] = ["KHR_mesh_quantization", "EXT_texture_webp"]
     if any("KHR_materials_unlit" in (m.get("extensions") or {}) for m in out["materials"]):
         out["extensionsUsed"].append("KHR_materials_unlit")
     while len(blob) % 4:

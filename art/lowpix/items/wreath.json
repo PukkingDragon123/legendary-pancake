@@ -3,7 +3,7 @@
  "description": "A full fir wreath dusted with snow: holly sprigs with glossy berries, pine cones, a velvet berry bow with long tails and two little brass bells that swing.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 2.8,
+ "density": 5.6,
  "budget": {
   "tris": 3000,
   "colors": 220
@@ -187,8 +187,8 @@
     {
      "id": "snow",
      "op": "patches",
-     "scale": 1.1,
-     "threshold": 0.6,
+     "scale": 1.0,
+     "threshold": 0.7,
      "ramp": "snow",
      "tone": 5.4,
      "faces": [
@@ -200,16 +200,6 @@
       "shadow_ramp": "pine",
       "shadow_tone": 1.2
      }
-    },
-    {
-     "id": "snowdrip",
-     "op": "drip",
-     "ramp": "snow",
-     "tone": 5.0,
-     "depth": 0.04,
-     "length": 0.15,
-     "width": 0.4,
-     "scale": 1.0
     }
    ]
   },
@@ -1469,7 +1459,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1493,11 +1483,16 @@
     -36.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s2",
@@ -1523,11 +1518,16 @@
     57.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s3",
@@ -1553,11 +1553,16 @@
     -6.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s4",
@@ -1583,11 +1588,16 @@
     87.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s5",
@@ -1613,11 +1623,16 @@
     24.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s6",
@@ -1643,11 +1658,16 @@
     117.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s7",
@@ -1673,11 +1693,16 @@
     54.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s8",
@@ -1703,11 +1728,16 @@
     147.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s9",
@@ -1733,11 +1763,16 @@
     84.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s10",
@@ -1763,11 +1798,16 @@
     177.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s11",
@@ -1793,11 +1833,16 @@
     114.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s12",
@@ -1823,11 +1868,16 @@
     207.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s13",
@@ -1853,11 +1903,16 @@
     144.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s14",
@@ -1883,11 +1938,16 @@
     237.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s15",
@@ -1913,11 +1973,16 @@
     174.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s16",
@@ -1943,11 +2008,16 @@
     267.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s17",
@@ -1973,11 +2043,16 @@
     204.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s18",
@@ -2003,11 +2078,16 @@
     297.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s19",
@@ -2033,11 +2113,16 @@
     234.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s20",
@@ -2063,11 +2148,16 @@
     327.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s21",
@@ -2093,11 +2183,16 @@
     264.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s22",
@@ -2123,11 +2218,16 @@
     357.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s23",
@@ -2153,11 +2253,16 @@
     294.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s24",
@@ -2183,11 +2288,16 @@
     387.0
    ],
    "art": [
-    "........a",
-    "....aaass",
-    "bbbbbbbbb",
-    "....aaaaa",
-    "........a"
+    "................aa",
+    "................aa",
+    "........aaaaaassss",
+    "........aaaaaassss",
+    "bbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbb",
+    "........aaaaaaaaaa",
+    "........aaaaaaaaaa",
+    "................aa",
+    "................aa"
    ],
    "plane": "xy",
    "style": "s25",
@@ -2213,13 +2323,20 @@
     20.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s26",
@@ -2244,13 +2361,20 @@
     140.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s27",
@@ -2275,13 +2399,20 @@
     260.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s28",
@@ -2315,23 +2446,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2347,7 +2489,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2385,23 +2527,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2417,7 +2570,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2455,23 +2608,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2487,7 +2651,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2525,23 +2689,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2557,7 +2732,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2586,13 +2761,20 @@
     140.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s33",
@@ -2617,13 +2799,20 @@
     260.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s34",
@@ -2648,13 +2837,20 @@
     380.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s35",
@@ -2688,23 +2884,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2720,7 +2927,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2758,23 +2965,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2790,7 +3008,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2828,23 +3046,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2860,7 +3089,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2898,23 +3127,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2930,7 +3170,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2959,13 +3199,20 @@
     250.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s40",
@@ -2990,13 +3237,20 @@
     370.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s41",
@@ -3021,13 +3275,20 @@
     490.0
    ],
    "art": [
-    "............",
-    "..a..aa..a..",
-    ".aaaaaaaaaa.",
-    "bbbbbbbbbbbb",
-    ".aaaaaaaaaa.",
-    "..a..aa..a..",
-    "............"
+    "........................",
+    "........................",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "bbbbbbbbbbbbbbbbbbbbbbbb",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "..aaaaaaaaaaaaaaaaaaaa..",
+    "....aa....aaaa....aa....",
+    "....aa....aaaa....aa....",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s42",
@@ -3061,23 +3322,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -3093,7 +3365,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -3131,23 +3403,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -3163,7 +3446,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -3201,23 +3484,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -3233,7 +3527,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -3271,23 +3565,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -3303,7 +3608,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -3378,7 +3683,7 @@
     }
    ],
    "profile": {
-    "sides": 7,
+    "sides": 10,
     "round": 2.0,
     "angle": 0.0
    },
@@ -3455,7 +3760,7 @@
     }
    ],
    "profile": {
-    "sides": 7,
+    "sides": 10,
     "round": 2.0,
     "angle": 0.0
    },
@@ -3532,7 +3837,7 @@
     }
    ],
    "profile": {
-    "sides": 7,
+    "sides": 10,
     "round": 2.0,
     "angle": 0.0
    },
@@ -3615,7 +3920,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -3680,7 +3985,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -3761,7 +4066,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -3826,7 +4131,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -3864,34 +4169,45 @@
     {
      "at": [
       0,
-      0.29289321881345254,
+      0.19098300562505255,
       0
      ],
      "size": [
-      1.4142,
-      1.4142
+      1.1756,
+      1.1756
      ]
     },
     {
      "at": [
       0,
-      1.0,
+      0.6909830056250525,
       0
      ],
      "size": [
-      2.0,
-      2.0
+      1.9021,
+      1.9021
      ]
     },
     {
      "at": [
       0,
-      1.7071067811865475,
+      1.3090169943749475,
       0
      ],
      "size": [
-      1.4142,
-      1.4142
+      1.9021,
+      1.9021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8090169943749475,
+      0
+     ],
+     "size": [
+      1.1756,
+      1.1756
      ]
     },
     {
@@ -3907,7 +4223,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 0,
@@ -4003,7 +4319,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4101,7 +4417,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -4151,7 +4467,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,

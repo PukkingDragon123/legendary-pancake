@@ -3,7 +3,7 @@
  "description": "A leather-wrapped willow hoop strung with a cream moonthread web and glass beads, a moonstone at its heart, and three soft feathers swaying on beaded strings.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.2,
+ "density": 6.4,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -48,6 +48,7 @@
   "unlit": false,
   "roughness": 0.9
  },
+ "grounded": false,
  "render": {
   "background": "#27313f",
   "hero": [
@@ -545,7 +546,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -564,36 +565,66 @@
     0.8
    ],
    "art": [
-    "..............................",
-    "...............wwW............",
-    ".......W..wwwwww.Www..........",
-    ".......wWw.......W.ww.........",
-    ".......wWW......W....ww.......",
-    "......w..W..wwwwWw.....ww.....",
-    ".....w...WWw....W.www...WW....",
-    "....ww..wwW.....W...ww.WWw....",
-    "..bbw..ww..W.wwwW....wWW..w...",
-    "..ww..ww...WWw.WWww..Ww...w...",
-    ".WWW..w...w.W..W...wW..w..w...",
-    "..w.WWW..ww.WWwWw.WWw..ww..w..",
-    "..w..wwWWW..ww...WW.w...w..w..",
-    "..w..w..wWWWw.mm.ww.ww..w..w..",
-    "..w..w..w..w.mMmm.w..w..w...w.",
-    "..w..w..w..w.mmmm.WWWWWWWWWWWW",
-    "..w..w..wWWWw.mm.ww.ww..w..w..",
-    "..w..wwWWW..ww...WW.w...bb.w..",
-    "..w.WWW..ww.WWwWw.WWw..ww..w..",
-    ".WWW..w...w.W..W...wW..w..w...",
-    "..ww..ww...WBw.WWww..Ww...w...",
-    "...ww..ww..WBwwwW....wWW..w...",
-    "....ww..wwW.....W...ww.WWw....",
-    ".....w...WWw....W.www...WW....",
-    "......w..W..wwwwWw.....ww.....",
-    ".......wWW......W....ww.......",
-    ".......wWw.......W.ww.........",
-    "........W.wwwwww.Www..........",
-    "...............wwW............",
-    ".............................."
+    "............................................................",
+    "............................................................",
+    "..............................wwwwWW........................",
+    "..............................wwwwWW........................",
+    "..............WW....wwwwwwwwwwww..WWwwww....................",
+    "..............WW....wwwwwwwwwwww..WWwwww....................",
+    "..............wwWWww..............WW..wwww..................",
+    "..............wwWWww..............WW..wwww..................",
+    "..............wwWWWW............WW........wwww..............",
+    "..............wwWWWW............WW........wwww..............",
+    "............ww....WW....wwwwwwwwWWww..........wwww..........",
+    "............ww....WW....wwwwwwwwWWww..........wwww..........",
+    "..........ww......WWWWww........WW..wwwwww......WWWW........",
+    "..........ww......WWWWww........WW..wwwwww......WWWW........",
+    "........wwww....wwwwWW..........WW......wwww..WWWWww........",
+    "........wwww....wwwwWW..........WW......wwww..WWWWww........",
+    "....bbbbww....wwww....WW..wwwwwwWW........wwWWWW....ww......",
+    "....bbbbww....wwww....WW..wwwwwwWW........wwWWWW....ww......",
+    "....wwww....wwww......WWWWww..WWWWwwww....WWww......ww......",
+    "....wwww....wwww......WWWWww..WWWWwwww....WWww......ww......",
+    "..WWWWWW....ww......ww..WW....WW......wwWW....ww....ww......",
+    "..WWWWWW....ww......ww..WW....WW......wwWW....ww....ww......",
+    "....ww..WWWWWW....wwww..WWWWwwWWww..WWWWww....wwww....ww....",
+    "....ww..WWWWWW....wwww..WWWWwwWWww..WWWWww....wwww....ww....",
+    "....ww....wwwwWWWWWW....wwww......WWWW..ww......ww....ww....",
+    "....ww....wwwwWWWWWW....wwww......WWWW..ww......ww....ww....",
+    "....ww....ww....wwWWWWWWww..mmmm..wwww..wwww....ww....ww....",
+    "....ww....ww....wwWWWWWWww..mmmm..wwww..wwww....ww....ww....",
+    "....ww....ww....ww....ww..mmMMmmmm..ww....ww....ww......ww..",
+    "....ww....ww....ww....ww..mmMMmmmm..ww....ww....ww......ww..",
+    "....ww....ww....ww....ww..mmmmmmmm..WWWWWWWWWWWWWWWWWWWWWWWW",
+    "....ww....ww....ww....ww..mmmmmmmm..WWWWWWWWWWWWWWWWWWWWWWWW",
+    "....ww....ww....wwWWWWWWww..mmmm..wwww..wwww....ww....ww....",
+    "....ww....ww....wwWWWWWWww..mmmm..wwww..wwww....ww....ww....",
+    "....ww....wwwwWWWWWW....wwww......WWWW..ww......bbbb..ww....",
+    "....ww....wwwwWWWWWW....wwww......WWWW..ww......bbbb..ww....",
+    "....ww..WWWWWW....wwww..WWWWwwWWww..WWWWww....wwww....ww....",
+    "....ww..WWWWWW....wwww..WWWWwwWWww..WWWWww....wwww....ww....",
+    "..WWWWWW....ww......ww..WW....WW......wwWW....ww....ww......",
+    "..WWWWWW....ww......ww..WW....WW......wwWW....ww....ww......",
+    "....wwww....wwww......WWBBww..WWWWwwww....WWww......ww......",
+    "....wwww....wwww......WWBBww..WWWWwwww....WWww......ww......",
+    "......wwww....wwww....WWBBwwwwwwWW........wwWWWW....ww......",
+    "......wwww....wwww....WWBBwwwwwwWW........wwWWWW....ww......",
+    "........wwww....wwwwWW..........WW......wwww..WWWWww........",
+    "........wwww....wwwwWW..........WW......wwww..WWWWww........",
+    "..........ww......WWWWww........WW..wwwwww......WWWW........",
+    "..........ww......WWWWww........WW..wwwwww......WWWW........",
+    "............ww....WW....wwwwwwwwWWww..........wwww..........",
+    "............ww....WW....wwwwwwwwWWww..........wwww..........",
+    "..............wwWWWW............WW........wwww..............",
+    "..............wwWWWW............WW........wwww..............",
+    "..............wwWWww..............WW..wwww..................",
+    "..............wwWWww..............WW..wwww..................",
+    "................WW..wwwwwwwwwwww..WWwwww....................",
+    "................WW..wwwwwwwwwwww..WWwwww....................",
+    "..............................wwwwWW........................",
+    "..............................wwwwWW........................",
+    "............................................................",
+    "............................................................"
    ],
    "plane": "xy",
    "style": "s2",
@@ -729,7 +760,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -788,23 +819,34 @@
     {
      "at": [
       0,
-      0.25,
+      0.14644660940672627,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      0.7071,
+      0.7071
      ]
     },
     {
      "at": [
       0,
-      0.7499999999999999,
+      0.5,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
      ]
     },
     {
@@ -820,7 +862,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -850,28 +892,50 @@
     -6.0
    ],
    "art": [
-    "..bsa..",
-    "..asa..",
-    ".aasbb.",
-    ".bbsaa.",
-    ".aasaa.",
-    ".aasbb.",
-    "bbbsaaa",
-    "aaasaaa",
-    "aaasbbb",
-    "bbbsaaa",
-    "aaasaaa",
-    "aaasbbb",
-    "bbbsaaa",
-    ".aasaa.",
-    ".aasbb.",
-    ".bbsaa.",
-    ".aasaa.",
-    "..asb..",
-    "..bsa..",
-    "...s...",
-    "...s...",
-    "...s..."
+    "....bbssaa....",
+    "....bbssaa....",
+    "....aassaa....",
+    "....aassaa....",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "....aassbb....",
+    "....aassbb....",
+    "....bbssaa....",
+    "....bbssaa....",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......"
    ],
    "plane": "xy",
    "style": "s6",
@@ -932,23 +996,34 @@
     {
      "at": [
       0,
-      0.25,
+      0.14644660940672627,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      0.7071,
+      0.7071
      ]
     },
     {
      "at": [
       0,
-      0.7499999999999999,
+      0.5,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
      ]
     },
     {
@@ -964,7 +1039,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -989,28 +1064,50 @@
     0.02
    ],
    "art": [
-    "..bsa..",
-    "..asa..",
-    ".aasbb.",
-    ".bbsaa.",
-    ".aasaa.",
-    ".aasbb.",
-    "bbbsaaa",
-    "aaasaaa",
-    "aaasbbb",
-    "bbbsaaa",
-    "aaasaaa",
-    "aaasbbb",
-    "bbbsaaa",
-    ".aasaa.",
-    ".aasbb.",
-    ".bbsaa.",
-    ".aasaa.",
-    "..asb..",
-    "..bsa..",
-    "...s...",
-    "...s...",
-    "...s..."
+    "....bbssaa....",
+    "....bbssaa....",
+    "....aassaa....",
+    "....aassaa....",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "....aassbb....",
+    "....aassbb....",
+    "....bbssaa....",
+    "....bbssaa....",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......"
    ],
    "plane": "xy",
    "style": "s9",
@@ -1071,23 +1168,34 @@
     {
      "at": [
       0,
-      0.25,
+      0.14644660940672627,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      0.7071,
+      0.7071
      ]
     },
     {
      "at": [
       0,
-      0.7499999999999999,
+      0.5,
       0
      ],
      "size": [
-      0.866,
-      0.866
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
      ]
     },
     {
@@ -1103,7 +1211,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1133,28 +1241,50 @@
     6.0
    ],
    "art": [
-    "..bsa..",
-    "..asa..",
-    ".aasbb.",
-    ".bbsaa.",
-    ".aasaa.",
-    ".aasbb.",
-    "bbbsaaa",
-    "aaasaaa",
-    "aaasbbb",
-    "bbbsaaa",
-    "aaasaaa",
-    "aaasbbb",
-    "bbbsaaa",
-    ".aasaa.",
-    ".aasbb.",
-    ".bbsaa.",
-    ".aasaa.",
-    "..asb..",
-    "..bsa..",
-    "...s...",
-    "...s...",
-    "...s..."
+    "....bbssaa....",
+    "....bbssaa....",
+    "....aassaa....",
+    "....aassaa....",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "....aassbb....",
+    "....aassbb....",
+    "....bbssaa....",
+    "....bbssaa....",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......"
    ],
    "plane": "xy",
    "style": "s12",

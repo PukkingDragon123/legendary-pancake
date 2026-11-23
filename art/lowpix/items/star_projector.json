@@ -3,7 +3,7 @@
  "description": "A brass orrery lamp on a walnut base with little gears: a candle-bright core inside a pierced midnight dome that turns slowly, sprinkling stars, ringed by a gold equator, two meridian arcs with tiny planets, and a crescent moon on top.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.0,
+ "density": 6.0,
  "budget": {
   "tris": 3000,
   "colors": 220
@@ -996,7 +996,7 @@
     }
    ],
    "profile": {
-    "sides": 14,
+    "sides": 20,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1036,23 +1036,34 @@
     {
      "at": [
       0,
-      0.375,
+      0.2196699141100894,
       0
      ],
      "size": [
-      1.299,
-      1.299
+      1.0607,
+      1.0607
      ]
     },
     {
      "at": [
       0,
-      1.1249999999999998,
+      0.75,
       0
      ],
      "size": [
-      1.299,
-      1.299
+      1.5,
+      1.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.2803300858899105,
+      0
+     ],
+     "size": [
+      1.0607,
+      1.0607
      ]
     },
     {
@@ -1068,7 +1079,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1106,23 +1117,34 @@
     {
      "at": [
       0,
-      0.375,
+      0.2196699141100894,
       0
      ],
      "size": [
-      1.299,
-      1.299
+      1.0607,
+      1.0607
      ]
     },
     {
      "at": [
       0,
-      1.1249999999999998,
+      0.75,
       0
      ],
      "size": [
-      1.299,
-      1.299
+      1.5,
+      1.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.2803300858899105,
+      0
+     ],
+     "size": [
+      1.0607,
+      1.0607
      ]
     },
     {
@@ -1138,7 +1160,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1176,23 +1198,34 @@
     {
      "at": [
       0,
-      0.375,
+      0.2196699141100894,
       0
      ],
      "size": [
-      1.299,
-      1.299
+      1.0607,
+      1.0607
      ]
     },
     {
      "at": [
       0,
-      1.1249999999999998,
+      0.75,
       0
      ],
      "size": [
-      1.299,
-      1.299
+      1.5,
+      1.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.2803300858899105,
+      0
+     ],
+     "size": [
+      1.0607,
+      1.0607
      ]
     },
     {
@@ -1208,7 +1241,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1256,20 +1289,34 @@
     0.0
    ],
    "art": [
-    "....gg..gg....",
-    "....gggggg....",
-    ".gggggddggggg.",
-    ".gggddggddggg.",
-    ".ggdgggdggdgg.",
-    ".ggdddgdggdgg.",
-    "ggdggdddgggdgg",
-    "ggdggdddddddgg",
-    ".ggdddgdggdgg.",
-    ".ggdgggdggdgg.",
-    ".gggddggddggg.",
-    ".gggggddggggg.",
-    "....gggggg....",
-    "....gg..gg...."
+    "........gggg....gggg........",
+    "........gggg....gggg........",
+    "........gggggggggggg........",
+    "........gggggggggggg........",
+    "..ggggggggggddddgggggggggg..",
+    "..ggggggggggddddgggggggggg..",
+    "..ggggggddddggggddddgggggg..",
+    "..ggggggddddggggddddgggggg..",
+    "..ggggddggggggddggggddgggg..",
+    "..ggggddggggggddggggddgggg..",
+    "..ggggddddddggddggggddgggg..",
+    "..ggggddddddggddggggddgggg..",
+    "ggggddggggddddddggggggddgggg",
+    "ggggddggggddddddggggggddgggg",
+    "ggggddggggddddddddddddddgggg",
+    "ggggddggggddddddddddddddgggg",
+    "..ggggddddddggddggggddgggg..",
+    "..ggggddddddggddggggddgggg..",
+    "..ggggddggggggddggggddgggg..",
+    "..ggggddggggggddggggddgggg..",
+    "..ggggggddddggggddddgggggg..",
+    "..ggggggddddggggddddgggggg..",
+    "..ggggggggggddddgggggggggg..",
+    "..ggggggggggddddgggggggggg..",
+    "........gggggggggggg........",
+    "........gggggggggggg........",
+    "........gggg....gggg........",
+    "........gggg....gggg........"
    ],
    "plane": "xy",
    "style": "s5",
@@ -1295,16 +1342,26 @@
     0.0
    ],
    "art": [
-    "ggggddgggg",
-    "ggddggddgg",
-    "gdgggdggdg",
-    "gdddgdggdg",
-    "dggdddgggd",
-    "dggddddddd",
-    "gdddgdggdg",
-    "gdgggdggdg",
-    "ggddggddgg",
-    "ggggddgggg"
+    "ggggggggddddgggggggg",
+    "ggggggggddddgggggggg",
+    "ggggddddggggddddgggg",
+    "ggggddddggggddddgggg",
+    "ggddggggggddggggddgg",
+    "ggddggggggddggggddgg",
+    "ggddddddggddggggddgg",
+    "ggddddddggddggggddgg",
+    "ddggggddddddggggggdd",
+    "ddggggddddddggggggdd",
+    "ddggggdddddddddddddd",
+    "ddggggdddddddddddddd",
+    "ggddddddggddggggddgg",
+    "ggddddddggddggggddgg",
+    "ggddggggggddggggddgg",
+    "ggddggggggddggggddgg",
+    "ggggddddggggddddgggg",
+    "ggggddddggggddddgggg",
+    "ggggggggddddgggggggg",
+    "ggggggggddddgggggggg"
    ],
    "plane": "xy",
    "style": "s6",
@@ -1381,7 +1438,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1421,23 +1478,34 @@
     {
      "at": [
       0,
-      0.34833395016045937,
+      0.1979132154706545,
       0
      ],
      "size": [
-      2.6,
-      2.6
+      1.99,
+      1.99
      ]
     },
     {
      "at": [
       0,
-      1.3,
+      0.7615223689149766,
       0
      ],
      "size": [
-      4.5033,
-      4.5033
+      3.677,
+      3.677
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.6050230758507664,
+      0
+     ],
+     "size": [
+      4.8042,
+      4.8042
      ]
     },
     {
@@ -1454,23 +1522,34 @@
     {
      "at": [
       0,
-      3.8999999999999995,
+      3.5949769241492335,
       0
      ],
      "size": [
-      4.5033,
-      4.5033
+      4.8042,
+      4.8042
      ]
     },
     {
      "at": [
       0,
-      4.851666049839541,
+      4.438477631085023,
       0
      ],
      "size": [
-      2.6,
-      2.6
+      3.677,
+      3.677
+     ]
+    },
+    {
+     "at": [
+      0,
+      5.002086784529346,
+      0
+     ],
+     "size": [
+      1.99,
+      1.99
      ]
     },
     {
@@ -1486,7 +1565,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1588,7 +1667,7 @@
     }
    ],
    "profile": {
-    "sides": 14,
+    "sides": 20,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1661,7 +1740,7 @@
     }
    ],
    "profile": {
-    "sides": 14,
+    "sides": 20,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1909,7 +1988,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1963,7 +2042,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2017,7 +2096,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2071,7 +2150,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2236,7 +2315,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2270,34 +2349,45 @@
     {
      "at": [
       0,
-      0.2636038969321073,
+      0.1718847050625473,
       0
      ],
      "size": [
-      1.2728,
-      1.2728
+      1.058,
+      1.058
      ]
     },
     {
      "at": [
       0,
-      0.9,
+      0.6218847050625473,
       0
      ],
      "size": [
-      1.8,
-      1.8
+      1.7119,
+      1.7119
      ]
     },
     {
      "at": [
       0,
-      1.5363961030678928,
+      1.1781152949374527,
       0
      ],
      "size": [
-      1.2728,
-      1.2728
+      1.7119,
+      1.7119
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.6281152949374527,
+      0
+     ],
+     "size": [
+      1.058,
+      1.058
      ]
     },
     {
@@ -2313,7 +2403,7 @@
     }
    ],
    "profile": {
-    "sides": 7,
+    "sides": 10,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2352,34 +2442,45 @@
     {
      "at": [
       0,
-      0.3221825406947978,
+      0.21008130618755783,
       0
      ],
      "size": [
-      1.5556,
-      1.5556
+      1.2931,
+      1.2931
      ]
     },
     {
      "at": [
       0,
-      1.1,
+      0.7600813061875579,
       0
      ],
      "size": [
-      2.2,
-      2.2
+      2.0923,
+      2.0923
      ]
     },
     {
      "at": [
       0,
-      1.8778174593052024,
+      1.4399186938124424,
       0
      ],
      "size": [
-      1.5556,
-      1.5556
+      2.0923,
+      2.0923
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.9899186938124425,
+      0
+     ],
+     "size": [
+      1.2931,
+      1.2931
      ]
     },
     {
@@ -2395,7 +2496,7 @@
     }
    ],
    "profile": {
-    "sides": 7,
+    "sides": 10,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2444,7 +2545,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0,
     "angle": 0.0
    },
@@ -2471,20 +2572,34 @@
     0.0
    ],
    "art": [
-    "....MMM.......",
-    "...MMM........",
-    "..MMM.........",
-    ".MMM..........",
-    "MMMM..........",
-    "MMMM..........",
-    "MMMm..........",
-    "MMmm..........",
-    "Mmmmm.........",
-    "mmmmmm........",
-    ".mmmmmm.......",
-    "..mmmmmmmmmm..",
-    "...mmmmmmmm...",
-    "....mmmmmm...."
+    "........MMMMMM..............",
+    "........MMMMMM..............",
+    "......MMMMMM................",
+    "......MMMMMM................",
+    "....MMMMMM..................",
+    "....MMMMMM..................",
+    "..MMMMMM....................",
+    "..MMMMMM....................",
+    "MMMMMMMM....................",
+    "MMMMMMMM....................",
+    "MMMMMMMM....................",
+    "MMMMMMMM....................",
+    "MMMMMMmm....................",
+    "MMMMMMmm....................",
+    "MMMMmmmm....................",
+    "MMMMmmmm....................",
+    "MMmmmmmmmm..................",
+    "MMmmmmmmmm..................",
+    "mmmmmmmmmmmm................",
+    "mmmmmmmmmmmm................",
+    "..mmmmmmmmmmmm..............",
+    "..mmmmmmmmmmmm..............",
+    "....mmmmmmmmmmmmmmmmmmmm....",
+    "....mmmmmmmmmmmmmmmmmmmm....",
+    "......mmmmmmmmmmmmmmmm......",
+    "......mmmmmmmmmmmmmmmm......",
+    "........mmmmmmmmmmmm........",
+    "........mmmmmmmmmmmm........"
    ],
    "plane": "xy",
    "style": "s19",
@@ -2510,20 +2625,34 @@
     0.0
    ],
    "art": [
-    "....MMM.......",
-    "...MMM........",
-    "..MMM.........",
-    ".MMM..........",
-    "MMMM..........",
-    "MMMM..........",
-    "MMMm..........",
-    "MMmm..........",
-    "Mmmmm.........",
-    "mmmmmm........",
-    ".mmmmmm.......",
-    "..mmmmmmmmmm..",
-    "...mmmmmmmm...",
-    "....mmmmmm...."
+    "........MMMMMM..............",
+    "........MMMMMM..............",
+    "......MMMMMM................",
+    "......MMMMMM................",
+    "....MMMMMM..................",
+    "....MMMMMM..................",
+    "..MMMMMM....................",
+    "..MMMMMM....................",
+    "MMMMMMMM....................",
+    "MMMMMMMM....................",
+    "MMMMMMMM....................",
+    "MMMMMMMM....................",
+    "MMMMMMmm....................",
+    "MMMMMMmm....................",
+    "MMMMmmmm....................",
+    "MMMMmmmm....................",
+    "MMmmmmmmmm..................",
+    "MMmmmmmmmm..................",
+    "mmmmmmmmmmmm................",
+    "mmmmmmmmmmmm................",
+    "..mmmmmmmmmmmm..............",
+    "..mmmmmmmmmmmm..............",
+    "....mmmmmmmmmmmmmmmmmmmm....",
+    "....mmmmmmmmmmmmmmmmmmmm....",
+    "......mmmmmmmmmmmmmmmm......",
+    "......mmmmmmmmmmmmmmmm......",
+    "........mmmmmmmmmmmm........",
+    "........mmmmmmmmmmmm........"
    ],
    "plane": "xy",
    "style": "s20",

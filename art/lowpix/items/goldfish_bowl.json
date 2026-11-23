@@ -3,7 +3,7 @@
  "description": "Marmalade's bowl: a turned walnut stand, a round glass bowl with a wide lip, water, pastel gravel, a little stone castle with a flag, swaying waterweed and Marmalade herself swimming laps.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.5,
+ "density": 7.0,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -1152,7 +1152,7 @@
     }
    ],
    "profile": {
-    "sides": 16,
+    "sides": 22,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1202,7 +1202,7 @@
     }
    ],
    "profile": {
-    "sides": 16,
+    "sides": 22,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1329,7 +1329,7 @@
     }
    ],
    "profile": {
-    "sides": 16,
+    "sides": 22,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1424,7 +1424,7 @@
     }
    ],
    "profile": {
-    "sides": 16,
+    "sides": 22,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1496,7 +1496,7 @@
     }
    ],
    "profile": {
-    "sides": 14,
+    "sides": 20,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1546,7 +1546,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1676,7 +1676,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1722,12 +1722,18 @@
     -1.8
    ],
    "art": [
-    "aaa.",
-    "aaaa",
-    "aa..",
-    "b...",
-    "b...",
-    "b..."
+    "aaaaaa..",
+    "aaaaaa..",
+    "aaaaaaaa",
+    "aaaaaaaa",
+    "aaaa....",
+    "aaaa....",
+    "bb......",
+    "bb......",
+    "bb......",
+    "bb......",
+    "bb......",
+    "bb......"
    ],
    "plane": "xy",
    "style": "s13",
@@ -1767,18 +1773,30 @@
     0.0
    ],
    "art": [
-    ".a.",
-    "aab",
-    ".ab",
-    "aa.",
-    ".ab",
-    "ab.",
-    ".ab",
-    "aa.",
-    ".a.",
-    "aab",
-    ".a.",
-    ".a."
+    "..aa..",
+    "..aa..",
+    "aaaabb",
+    "aaaabb",
+    "..aabb",
+    "..aabb",
+    "aaaa..",
+    "aaaa..",
+    "..aabb",
+    "..aabb",
+    "aabb..",
+    "aabb..",
+    "..aabb",
+    "..aabb",
+    "aaaa..",
+    "aaaa..",
+    "..aa..",
+    "..aa..",
+    "aaaabb",
+    "aaaabb",
+    "..aa..",
+    "..aa..",
+    "..aa..",
+    "..aa.."
    ],
    "plane": "xy",
    "style": "s14",
@@ -1809,15 +1827,24 @@
     0.0
    ],
    "art": [
-    ".a.",
-    "aab",
-    ".ab",
-    "aa.",
-    ".ab",
-    "ab.",
-    ".ab",
-    "aa.",
-    ".a."
+    "..aa..",
+    "..aa..",
+    "aaaabb",
+    "aaaabb",
+    "..aabb",
+    "..aabb",
+    "aaaa..",
+    "aaaa..",
+    "..aabb",
+    "..aabb",
+    "aabb..",
+    "aabb..",
+    "..aabb",
+    "..aabb",
+    "aaaa..",
+    "aaaa..",
+    "..aa..",
+    "..aa.."
    ],
    "plane": "xy",
    "style": "s15",
@@ -1848,16 +1875,26 @@
     0.0
    ],
    "art": [
-    ".a.",
-    "aab",
-    ".ab",
-    "aa.",
-    ".ab",
-    "ab.",
-    ".ab",
-    "aa.",
-    ".a.",
-    "aab"
+    "..aa..",
+    "..aa..",
+    "aaaabb",
+    "aaaabb",
+    "..aabb",
+    "..aabb",
+    "aaaa..",
+    "aaaa..",
+    "..aabb",
+    "..aabb",
+    "aabb..",
+    "aabb..",
+    "..aabb",
+    "..aabb",
+    "aaaa..",
+    "aaaa..",
+    "..aa..",
+    "..aa..",
+    "aaaabb",
+    "aaaabb"
    ],
    "plane": "xy",
    "style": "s16",
@@ -1891,34 +1928,45 @@
     {
      "at": [
       0,
-      0.17573593128807152,
+      0.11458980337503152,
       0
      ],
      "size": [
-      0.8485,
-      0.8485
+      0.7053,
+      0.7053
      ]
     },
     {
      "at": [
       0,
-      0.6,
+      0.41458980337503154,
       0
      ],
      "size": [
-      1.2,
-      1.2
+      1.1413,
+      1.1413
      ]
     },
     {
      "at": [
       0,
-      1.0242640687119284,
+      0.7854101966249685,
       0
      ],
      "size": [
-      0.8485,
-      0.8485
+      1.1413,
+      1.1413
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0854101966249685,
+      0
+     ],
+     "size": [
+      0.7053,
+      0.7053
      ]
     },
     {
@@ -1934,7 +1982,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2014,7 +2062,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2044,13 +2092,20 @@
     0.0
    ],
    "art": [
-    "..aa",
-    ".aab",
-    "aabb",
-    "abb.",
-    "aabb",
-    ".aab",
-    "..aa"
+    "....aaaa",
+    "....aaaa",
+    "..aaaabb",
+    "..aaaabb",
+    "aaaabbbb",
+    "aaaabbbb",
+    "aabbbb..",
+    "aabbbb..",
+    "aaaabbbb",
+    "aaaabbbb",
+    "..aaaabb",
+    "..aaaabb",
+    "....aaaa",
+    "....aaaa"
    ],
    "plane": "xy",
    "style": "s19",
@@ -2071,8 +2126,10 @@
     3.0
    ],
    "art": [
-    "aab.",
-    "abbb"
+    "aaaabb..",
+    "aaaabb..",
+    "aabbbbbb",
+    "aabbbbbb"
    ],
    "plane": "xy",
    "style": "s20",
@@ -2106,23 +2163,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -2138,7 +2206,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2176,23 +2244,34 @@
     {
      "at": [
       0,
-      0.215,
+      0.12594408408978458,
       0
      ],
      "size": [
-      0.7448,
-      0.7448
+      0.6081,
+      0.6081
      ]
     },
     {
      "at": [
       0,
-      0.6449999999999999,
+      0.43,
       0
      ],
      "size": [
-      0.7448,
-      0.7448
+      0.86,
+      0.86
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7340559159102154,
+      0
+     ],
+     "size": [
+      0.6081,
+      0.6081
      ]
     },
     {
@@ -2208,7 +2287,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2246,23 +2325,34 @@
     {
      "at": [
       0,
-      0.255,
+      0.1493755415948608,
       0
      ],
      "size": [
-      0.8833,
-      0.8833
+      0.7212,
+      0.7212
      ]
     },
     {
      "at": [
       0,
-      0.7649999999999999,
+      0.51,
       0
      ],
      "size": [
-      0.8833,
-      0.8833
+      1.02,
+      1.02
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8706244584051392,
+      0
+     ],
+     "size": [
+      0.7212,
+      0.7212
      ]
     },
     {
@@ -2278,7 +2368,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,

@@ -3,7 +3,7 @@
  "description": "Crimson star-leaves frosted at the tips over deep green leaves, little golden flower buds at each heart, in a pot wrapped in crinkled gold foil with a berry bow.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.2,
+ "density": 6.4,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -797,7 +797,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0,
     "angle": 0.0
    },
@@ -868,7 +868,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0,
     "angle": 0.0
    },
@@ -899,12 +899,18 @@
     0.0
    ],
    "art": [
-    "a........a",
-    "aaa....aaa",
-    "aaaabbaaaa",
-    "aaaabbaaaa",
-    "aa......aa",
-    "a........a"
+    "aa................aa",
+    "aa................aa",
+    "aaaaaa........aaaaaa",
+    "aaaaaa........aaaaaa",
+    "aaaaaaaabbbbaaaaaaaa",
+    "aaaaaaaabbbbaaaaaaaa",
+    "aaaaaaaabbbbaaaaaaaa",
+    "aaaaaaaabbbbaaaaaaaa",
+    "aaaa............aaaa",
+    "aaaa............aaaa",
+    "aa................aa",
+    "aa................aa"
    ],
    "plane": "xy",
    "style": "s3",
@@ -934,20 +940,34 @@
     0.0
    ],
    "art": [
-    "...a...",
-    "..ava..",
-    "..ava..",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    "..vvv..",
-    "..ava..",
-    "...v...",
-    "...v..."
+    "......aa......",
+    "......aa......",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "....vvvvvv....",
+    "....vvvvvv....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "......vv......",
+    "......vv......",
+    "......vv......",
+    "......vv......"
    ],
    "plane": "xy",
    "style": "s4",
@@ -977,20 +997,34 @@
     0.0
    ],
    "art": [
-    "...a...",
-    "..ava..",
-    "..ava..",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    "..vvv..",
-    "..ava..",
-    "...v...",
-    "...v..."
+    "......aa......",
+    "......aa......",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "....vvvvvv....",
+    "....vvvvvv....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "......vv......",
+    "......vv......",
+    "......vv......",
+    "......vv......"
    ],
    "plane": "xy",
    "style": "s5",
@@ -1020,20 +1054,34 @@
     0.0
    ],
    "art": [
-    "...a...",
-    "..ava..",
-    "..ava..",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    "..vvv..",
-    "..ava..",
-    "...v...",
-    "...v..."
+    "......aa......",
+    "......aa......",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "....vvvvvv....",
+    "....vvvvvv....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "......vv......",
+    "......vv......",
+    "......vv......",
+    "......vv......"
    ],
    "plane": "xy",
    "style": "s6",
@@ -1063,20 +1111,34 @@
     0.0
    ],
    "art": [
-    "...a...",
-    "..ava..",
-    "..ava..",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    "..vvv..",
-    "..ava..",
-    "...v...",
-    "...v..."
+    "......aa......",
+    "......aa......",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "....vvvvvv....",
+    "....vvvvvv....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "......vv......",
+    "......vv......",
+    "......vv......",
+    "......vv......"
    ],
    "plane": "xy",
    "style": "s7",
@@ -1106,20 +1168,34 @@
     0.0
    ],
    "art": [
-    "...a...",
-    "..ava..",
-    "..ava..",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    "..vvv..",
-    "..ava..",
-    "...v...",
-    "...v..."
+    "......aa......",
+    "......aa......",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "....vvvvvv....",
+    "....vvvvvv....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "......vv......",
+    "......vv......",
+    "......vv......",
+    "......vv......"
    ],
    "plane": "xy",
    "style": "s8",
@@ -1149,20 +1225,34 @@
     0.0
    ],
    "art": [
-    "...a...",
-    "..ava..",
-    "..ava..",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    "..vvv..",
-    "..ava..",
-    "...v...",
-    "...v..."
+    "......aa......",
+    "......aa......",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "....vvvvvv....",
+    "....vvvvvv....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "......vv......",
+    "......vv......",
+    "......vv......",
+    "......vv......"
    ],
    "plane": "xy",
    "style": "s9",
@@ -1192,20 +1282,34 @@
     0.0
    ],
    "art": [
-    "...a...",
-    "..ava..",
-    "..ava..",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    ".avvva.",
-    ".aavaa.",
-    ".vavav.",
-    "..vvv..",
-    "..ava..",
-    "...v...",
-    "...v..."
+    "......aa......",
+    "......aa......",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "..aavvvvvvaa..",
+    "..aavvvvvvaa..",
+    "..aaaavvaaaa..",
+    "..aaaavvaaaa..",
+    "..vvaavvaavv..",
+    "..vvaavvaavv..",
+    "....vvvvvv....",
+    "....vvvvvv....",
+    "....aavvaa....",
+    "....aavvaa....",
+    "......vv......",
+    "......vv......",
+    "......vv......",
+    "......vv......"
    ],
    "plane": "xy",
    "style": "s10",
@@ -1235,27 +1339,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s11",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1279,27 +1397,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s12",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1323,27 +1455,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s13",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1367,27 +1513,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s14",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1411,27 +1571,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s15",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1455,27 +1629,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s16",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1499,27 +1687,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s17",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1547,23 +1749,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -1579,7 +1792,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1617,23 +1830,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -1649,7 +1873,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1687,23 +1911,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -1719,7 +1954,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1753,27 +1988,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s21",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1797,27 +2046,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s22",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1841,27 +2104,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s23",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1885,27 +2162,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s24",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1929,27 +2220,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s25",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -1977,23 +2282,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -2009,7 +2325,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2047,23 +2363,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -2079,7 +2406,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2117,23 +2444,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -2149,7 +2487,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2183,27 +2521,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s29",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -2227,27 +2579,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s30",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -2271,27 +2637,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s31",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -2315,27 +2695,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s32",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -2359,27 +2753,41 @@
     0.0
    ],
    "art": [
-    "....ff....",
-    "...ffvf...",
-    "..vffvfv..",
-    ".aavvvvaa.",
-    ".aaaavaaa.",
-    "aavaavavaa",
-    "aaavvvvaaa",
-    ".aaaavaaa.",
-    ".avaavava.",
-    "..avvvva..",
-    "..aaavaa..",
-    "...aava...",
-    "....av....",
-    ".....v...."
+    "........ffff........",
+    "........ffff........",
+    "......ffffvvff......",
+    "......ffffvvff......",
+    "....vvffffvvffvv....",
+    "....vvffffvvffvv....",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaavvvvvvvvaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaavvaaaavvaavvaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "aaaaaavvvvvvvvaaaaaa",
+    "..aaaaaaaavvaaaaaa..",
+    "..aaaaaaaavvaaaaaa..",
+    "..aavvaaaavvaavvaa..",
+    "..aavvaaaavvaavvaa..",
+    "....aavvvvvvvvaa....",
+    "....aavvvvvvvvaa....",
+    "....aaaaaavvaaaa....",
+    "....aaaaaavvaaaa....",
+    "......aaaavvaa......",
+    "......aaaavvaa......",
+    "........aavv........",
+    "........aavv........",
+    "..........vv........",
+    "..........vv........"
    ],
    "plane": "xy",
    "style": "s33",
    "paint": {
     "art_key": {
-     "a": "berry:4",
-     "v": "berry:2",
+     "a": "berry:5",
+     "v": "berry:3",
      "f": "snow:6"
     }
    }
@@ -2407,23 +2815,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -2439,7 +2858,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2477,23 +2896,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -2509,7 +2939,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2547,23 +2977,34 @@
     {
      "at": [
       0,
-      0.175,
+      0.10251262658470839,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.495,
+      0.495
      ]
     },
     {
      "at": [
       0,
-      0.5249999999999999,
+      0.35,
       0
      ],
      "size": [
-      0.6062,
-      0.6062
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5974873734152916,
+      0
+     ],
+     "size": [
+      0.495,
+      0.495
      ]
     },
     {
@@ -2579,7 +3020,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,

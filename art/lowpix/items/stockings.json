@@ -3,7 +3,7 @@
  "description": "A fir garland with holly berries and three hand-knitted stockings on brass hooks: berry with cream stripes, sage with snowflake dots and honey with a cable band, fluffy cuffs, and a candy cane poking out of one.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 2.8,
+ "density": 5.6,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -198,8 +198,8 @@
     {
      "id": "snow",
      "op": "patches",
-     "scale": 1.1,
-     "threshold": 0.6,
+     "scale": 1.0,
+     "threshold": 0.7,
      "ramp": "snow",
      "tone": 5.4,
      "faces": [
@@ -211,16 +211,6 @@
       "shadow_ramp": "pine",
       "shadow_tone": 1.2
      }
-    },
-    {
-     "id": "snowdrip",
-     "op": "drip",
-     "ramp": "snow",
-     "tone": 5.0,
-     "depth": 0.04,
-     "length": 0.15,
-     "width": 0.4,
-     "scale": 1.0
     }
    ]
   },
@@ -1187,7 +1177,7 @@
     }
    ],
    "profile": {
-    "sides": 7,
+    "sides": 10,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1211,11 +1201,16 @@
     50.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s2",
@@ -1240,11 +1235,16 @@
     90.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s3",
@@ -1269,11 +1269,16 @@
     130.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s4",
@@ -1298,11 +1303,16 @@
     50.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s5",
@@ -1327,11 +1337,16 @@
     90.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s6",
@@ -1356,11 +1371,16 @@
     130.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s7",
@@ -1385,11 +1405,16 @@
     50.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s8",
@@ -1414,11 +1439,16 @@
     90.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s9",
@@ -1443,11 +1473,16 @@
     130.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s10",
@@ -1472,11 +1507,16 @@
     50.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s11",
@@ -1501,11 +1541,16 @@
     90.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s12",
@@ -1530,11 +1575,16 @@
     130.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s13",
@@ -1559,11 +1609,16 @@
     50.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s14",
@@ -1588,11 +1643,16 @@
     90.0
    ],
    "art": [
-    "..aab",
-    ".aaab",
-    "aaaab",
-    ".aaab",
-    "..aab"
+    "....aaaabb",
+    "....aaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "aaaaaaaabb",
+    "aaaaaaaabb",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aaaabb",
+    "....aaaabb"
    ],
    "plane": "xy",
    "style": "s15",
@@ -1626,23 +1686,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -1658,7 +1729,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1696,23 +1767,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -1728,7 +1810,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1766,23 +1848,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -1798,7 +1891,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1836,23 +1929,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -1868,7 +1972,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1906,23 +2010,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -1938,7 +2053,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1976,23 +2091,34 @@
     {
      "at": [
       0,
-      0.275,
+      0.1610912703473989,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      0.7778,
+      0.7778
      ]
     },
     {
      "at": [
       0,
-      0.825,
+      0.55,
       0
      ],
      "size": [
-      0.9526,
-      0.9526
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
      ]
     },
     {
@@ -2008,7 +2134,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2125,7 +2251,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2196,7 +2322,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0,
     "angle": 0.0
    },
@@ -2237,23 +2363,34 @@
     {
      "at": [
       0,
-      0.5,
+      0.29289321881345254,
       0
      ],
      "size": [
-      1.7321,
-      1.3856
+      1.4142,
+      1.1314
      ]
     },
     {
      "at": [
       0,
-      1.4999999999999998,
+      1.0,
       0
      ],
      "size": [
-      1.7321,
-      1.3856
+      2.0,
+      1.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7071067811865475,
+      0
+     ],
+     "size": [
+      1.4142,
+      1.1314
      ]
     },
     {
@@ -2269,7 +2406,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2386,7 +2523,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2457,7 +2594,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0,
     "angle": 0.0
    },
@@ -2498,23 +2635,34 @@
     {
      "at": [
       0,
-      0.5,
+      0.29289321881345254,
       0
      ],
      "size": [
-      1.7321,
-      1.3856
+      1.4142,
+      1.1314
      ]
     },
     {
      "at": [
       0,
-      1.4999999999999998,
+      1.0,
       0
      ],
      "size": [
-      1.7321,
-      1.3856
+      2.0,
+      1.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7071067811865475,
+      0
+     ],
+     "size": [
+      1.4142,
+      1.1314
      ]
     },
     {
@@ -2530,7 +2678,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2647,7 +2795,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2718,7 +2866,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0,
     "angle": 0.0
    },
@@ -2759,23 +2907,34 @@
     {
      "at": [
       0,
-      0.5,
+      0.29289321881345254,
       0
      ],
      "size": [
-      1.7321,
-      1.3856
+      1.4142,
+      1.1314
      ]
     },
     {
      "at": [
       0,
-      1.4999999999999998,
+      1.0,
       0
      ],
      "size": [
-      1.7321,
-      1.3856
+      2.0,
+      1.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7071067811865475,
+      0
+     ],
+     "size": [
+      1.4142,
+      1.1314
      ]
     },
     {
@@ -2791,7 +2950,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2862,7 +3021,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,

@@ -3,7 +3,7 @@
  "description": "A dusk-blue leatherette suitcase record player with brass corners, the lid propped open on its cream speaker cloth, a spinning record with a honey label and a silver tone arm.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.2,
+ "density": 6.4,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -48,6 +48,7 @@
   "unlit": false,
   "roughness": 0.9
  },
+ "grounded": true,
  "render": {
   "background": "#27313f",
   "hero": [
@@ -816,7 +817,7 @@
    "shape": "box",
    "pivot": [
     0.0,
-    2.5,
+    2.1,
     0.2
    ],
    "size": [
@@ -832,12 +833,12 @@
    "shape": "box",
    "pivot": [
     0.0,
-    4.55,
+    4.2,
     0.2
    ],
    "size": [
     13.0,
-    0.35,
+    0.4,
     9.0
    ],
    "style": "s2"
@@ -847,7 +848,7 @@
    "shape": "box",
    "pivot": [
     -6.7,
-    0.9,
+    0.5,
     4.9
    ],
    "size": [
@@ -863,7 +864,7 @@
    "shape": "box",
    "pivot": [
     6.7,
-    0.9,
+    0.5,
     4.9
    ],
    "size": [
@@ -879,7 +880,7 @@
    "shape": "box",
    "pivot": [
     -6.7,
-    0.9,
+    0.5,
     -4.5
    ],
    "size": [
@@ -895,7 +896,7 @@
    "shape": "box",
    "pivot": [
     6.7,
-    0.9,
+    0.5,
     -4.5
    ],
    "size": [
@@ -977,7 +978,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1022,8 +1023,8 @@
    "parent": "lid",
    "pivot": [
     0.0,
-    -4.6887,
-    -1.1029
+    0.4,
+    4.8
    ],
    "size": [
     14.0,
@@ -1039,8 +1040,8 @@
    "parent": "lid",
    "pivot": [
     0.0,
-    -4.8432,
-    -0.6273
+    -0.05,
+    4.8
    ],
    "size": [
     12.4,
@@ -1082,7 +1083,7 @@
     }
    ],
    "profile": {
-    "sides": 16,
+    "sides": 22,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1118,34 +1119,62 @@
     0.0
    ],
    "art": [
-    "..........vggggggv..........",
-    "........ggvvvvvvvvgg........",
-    "......ggvvgggvvsggvvgg......",
-    ".....gvvgvvvgggsvvvgvvg.....",
-    "....gvgvvggvvvvsvggvvgvg....",
-    "...gvgvggvgggggsggvggvgvg...",
-    "..gvgvgvvgvvgggsvvgvvgvgvg..",
-    "..gvvgvggvggvvvvggvggvgvvg..",
-    ".gvgvgvgvgvggggggvgvgvgvgvg.",
-    ".gvvgvgvgvgvvllvvgvgvgvgvvg.",
-    "vvgvggvgvgvllllllvgvgvggvgvv",
-    "gvgvvgvggvllllllllvggvgvvgvg",
-    "gvggvggvgvllllllllvgvggvggvg",
-    "gvsssssvgllllhhllllgvggvgvvg",
-    "gvvgvggvgllllhhllllgvggvgvvg",
-    "gvggvggvgvllllllllvgvsssssvg",
-    "gvgvvgvggvllllllllvggvgvvgvg",
-    "vvgvggvgvgvllllllvgvgvggvgvv",
-    ".gvvgvgvgvgvvllvvgvgvgvgvvg.",
-    ".gvgvgvgvgvggggggvgvgvgvgvg.",
-    "..gvvgvggvggvvvvggvggvgvvg..",
-    "..gvgvgvvgvvgsggvvgvvgvgvg..",
-    "...gvgvggvgggsggggvggvgvg...",
-    "....gvgvvggvvsvvvggvvgvg....",
-    ".....gvvgvvvgsggvvvgvvg.....",
-    "......ggvvgggsvgggvvgg......",
-    "........ggvvvvvvvvgg........",
-    "..........vggggggv.........."
+    "....................vvggggggggggggvv....................",
+    "....................vvggggggggggggvv....................",
+    "................ggggvvvvvvvvvvvvvvvvgggg................",
+    "................ggggvvvvvvvvvvvvvvvvgggg................",
+    "............ggggvvvvggggggvvvvssggggvvvvgggg............",
+    "............ggggvvvvggggggvvvvssggggvvvvgggg............",
+    "..........ggvvvvggvvvvvvggggggssvvvvvvggvvvvgg..........",
+    "..........ggvvvvggvvvvvvggggggssvvvvvvggvvvvgg..........",
+    "........ggvvggvvvvggggvvvvvvvvssvvggggvvvvggvvgg........",
+    "........ggvvggvvvvggggvvvvvvvvssvvggggvvvvggvvgg........",
+    "......ggvvggvvggggvvggggggggggssggggvvggggvvggvvgg......",
+    "......ggvvggvvggggvvggggggggggssggggvvggggvvggvvgg......",
+    "....ggvvggvvggvvvvggvvvvggggggssvvvvggvvvvggvvggvvgg....",
+    "....ggvvggvvggvvvvggvvvvggggggssvvvvggvvvvggvvggvvgg....",
+    "....ggvvvvggvvggggvvggggvvvvvvvvggggvvggggvvggvvvvgg....",
+    "....ggvvvvggvvggggvvggggvvvvvvvvggggvvggggvvggvvvvgg....",
+    "..ggvvggvvggvvggvvggvvggggggggggggvvggvvggvvggvvggvvgg..",
+    "..ggvvggvvggvvggvvggvvggggggggggggvvggvvggvvggvvggvvgg..",
+    "..ggvvvvggvvggvvggvvggvvvvllllvvvvggvvggvvggvvggvvvvgg..",
+    "..ggvvvvggvvggvvggvvggvvvvllllvvvvggvvggvvggvvggvvvvgg..",
+    "vvvvggvvggggvvggvvggvvllllllllllllvvggvvggvvggggvvggvvvv",
+    "vvvvggvvggggvvggvvggvvllllllllllllvvggvvggvvggggvvggvvvv",
+    "ggvvggvvvvggvvggggvvllllllllllllllllvvggggvvggvvvvggvvgg",
+    "ggvvggvvvvggvvggggvvllllllllllllllllvvggggvvggvvvvggvvgg",
+    "ggvvggggvvggggvvggvvllllllllllllllllvvggvvggggvvggggvvgg",
+    "ggvvggggvvggggvvggvvllllllllllllllllvvggvvggggvvggggvvgg",
+    "ggvvssssssssssvvggllllllllhhhhllllllllggvvggggvvggvvvvgg",
+    "ggvvssssssssssvvggllllllllhhhhllllllllggvvggggvvggvvvvgg",
+    "ggvvvvggvvggggvvggllllllllhhhhllllllllggvvggggvvggvvvvgg",
+    "ggvvvvggvvggggvvggllllllllhhhhllllllllggvvggggvvggvvvvgg",
+    "ggvvggggvvggggvvggvvllllllllllllllllvvggvvssssssssssvvgg",
+    "ggvvggggvvggggvvggvvllllllllllllllllvvggvvssssssssssvvgg",
+    "ggvvggvvvvggvvggggvvllllllllllllllllvvggggvvggvvvvggvvgg",
+    "ggvvggvvvvggvvggggvvllllllllllllllllvvggggvvggvvvvggvvgg",
+    "vvvvggvvggggvvggvvggvvllllllllllllvvggvvggvvggggvvggvvvv",
+    "vvvvggvvggggvvggvvggvvllllllllllllvvggvvggvvggggvvggvvvv",
+    "..ggvvvvggvvggvvggvvggvvvvllllvvvvggvvggvvggvvggvvvvgg..",
+    "..ggvvvvggvvggvvggvvggvvvvllllvvvvggvvggvvggvvggvvvvgg..",
+    "..ggvvggvvggvvggvvggvvggggggggggggvvggvvggvvggvvggvvgg..",
+    "..ggvvggvvggvvggvvggvvggggggggggggvvggvvggvvggvvggvvgg..",
+    "....ggvvvvggvvggggvvggggvvvvvvvvggggvvggggvvggvvvvgg....",
+    "....ggvvvvggvvggggvvggggvvvvvvvvggggvvggggvvggvvvvgg....",
+    "....ggvvggvvggvvvvggvvvvggssggggvvvvggvvvvggvvggvvgg....",
+    "....ggvvggvvggvvvvggvvvvggssggggvvvvggvvvvggvvggvvgg....",
+    "......ggvvggvvggggvvggggggssggggggggvvggggvvggvvgg......",
+    "......ggvvggvvggggvvggggggssggggggggvvggggvvggvvgg......",
+    "........ggvvggvvvvggggvvvvssvvvvvvggggvvvvggvvgg........",
+    "........ggvvggvvvvggggvvvvssvvvvvvggggvvvvggvvgg........",
+    "..........ggvvvvggvvvvvvggssggggvvvvvvggvvvvgg..........",
+    "..........ggvvvvggvvvvvvggssggggvvvvvvggvvvvgg..........",
+    "............ggggvvvvggggggssvvggggggvvvvgggg............",
+    "............ggggvvvvggggggssvvggggggvvvvgggg............",
+    "................ggggvvvvvvvvvvvvvvvvgggg................",
+    "................ggggvvvvvvvvvvvvvvvvgggg................",
+    "....................vvggggggggggggvv....................",
+    "....................vvggggggggggggvv...................."
    ],
    "plane": "xz",
    "style": "s13",
@@ -1193,7 +1222,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1243,7 +1272,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1315,7 +1344,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1378,7 +1407,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1428,7 +1457,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0,
     "angle": 0.0
    },

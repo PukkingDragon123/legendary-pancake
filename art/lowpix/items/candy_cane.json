@@ -3,7 +3,7 @@
  "description": "A giant peppermint candy cane, taller than Pip, planted in a little snow drift and tied with a velvet bow with long tails.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 2.8,
+ "density": 5.6,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -390,7 +390,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0,
     "angle": 0.0
    },
@@ -517,7 +517,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0
    },
    "subdiv": 1,
@@ -593,7 +593,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -647,7 +647,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -723,7 +723,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -777,7 +777,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 1,
@@ -810,34 +810,45 @@
     {
      "at": [
       0,
-      0.2782485578727799,
+      0.1814338553437999,
       0
      ],
      "size": [
-      1.3435,
-      1.3435
+      1.1168,
+      1.1168
      ]
     },
     {
      "at": [
       0,
-      0.95,
+      0.6564338553437999,
       0
      ],
      "size": [
-      1.9,
-      1.9
+      1.807,
+      1.807
      ]
     },
     {
      "at": [
       0,
-      1.62175144212722,
+      1.2435661446562,
       0
      ],
      "size": [
-      1.3435,
-      1.3435
+      1.807,
+      1.807
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7185661446562,
+      0
+     ],
+     "size": [
+      1.1168,
+      1.1168
      ]
     },
     {
@@ -853,7 +864,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 0,

@@ -3,7 +3,7 @@
  "description": "A heap of presents in stripes, spots and stars tied with satin ribbons and big bows, a round hat box and a paper gift tag; the little one at the front keeps wriggling.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 2.8,
+ "density": 5.6,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -975,7 +975,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1040,7 +1040,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1073,23 +1073,34 @@
     {
      "at": [
       0,
-      0.3,
+      0.17573593128807152,
       0
      ],
      "size": [
-      1.0392,
-      1.0392
+      0.8485,
+      0.8485
      ]
     },
     {
      "at": [
       0,
-      0.8999999999999998,
+      0.6,
       0
      ],
      "size": [
-      1.0392,
-      1.0392
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0242640687119284,
+      0
+     ],
+     "size": [
+      0.8485,
+      0.8485
      ]
     },
     {
@@ -1105,7 +1116,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1236,7 +1247,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1301,7 +1312,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1334,23 +1345,34 @@
     {
      "at": [
       0,
-      0.3,
+      0.17573593128807152,
       0
      ],
      "size": [
-      1.0392,
-      1.0392
+      0.8485,
+      0.8485
      ]
     },
     {
      "at": [
       0,
-      0.8999999999999998,
+      0.6,
       0
      ],
      "size": [
-      1.0392,
-      1.0392
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0242640687119284,
+      0
+     ],
+     "size": [
+      0.8485,
+      0.8485
      ]
     },
     {
@@ -1366,7 +1388,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1414,7 +1436,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1464,7 +1486,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1514,7 +1536,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1545,12 +1567,18 @@
     -20.0
    ],
    "art": [
-    "ppppppppp",
-    "ppppppppp",
-    "phpipipip",
-    "ppppipipp",
-    "ppppppppp",
-    "ppppppppp"
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "pphhppiippiippiipp",
+    "pphhppiippiippiipp",
+    "ppppppppiippiipppp",
+    "ppppppppiippiipppp",
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "pppppppppppppppppp",
+    "pppppppppppppppppp"
    ],
    "plane": "xy",
    "style": "s19",
@@ -1691,7 +1719,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1757,7 +1785,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1791,23 +1819,34 @@
     {
      "at": [
       0,
-      0.3,
+      0.17573593128807152,
       0
      ],
      "size": [
-      1.0392,
-      1.0392
+      0.8485,
+      0.8485
      ]
     },
     {
      "at": [
       0,
-      0.8999999999999998,
+      0.6,
       0
      ],
      "size": [
-      1.0392,
-      1.0392
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0242640687119284,
+      0
+     ],
+     "size": [
+      0.8485,
+      0.8485
      ]
     },
     {
@@ -1823,7 +1862,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,

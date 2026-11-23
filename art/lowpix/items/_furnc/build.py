@@ -30,6 +30,14 @@ for mod in ("trinkets", "fun", "frost", "starfall"):
     RECIPES.update(m.ITEMS)
 
 
+def webp(png: bytes) -> bytes:
+    """The atlas as WebP: lossy colour (painted texels survive well), exact alpha for cards and glass."""
+    im = Image.open(io.BytesIO(png)).convert("RGBA")
+    buf = io.BytesIO()
+    im.save(buf, "WEBP", quality=86, method=6, alpha_quality=100, exact=True)
+    return buf.getvalue()
+
+
 def small_png(png: bytes) -> bytes:
     """Pixel art atlases have few colours: store them as an indexed PNG with per-index alpha (much smaller)."""
     import numpy as np
@@ -48,7 +56,23 @@ def small_png(png: bytes) -> bytes:
     return buf.getvalue()
 
 
+def build_borrowed(item_id: str):
+    import borrow
+    t0 = time.time()
+    gpath = os.path.join(ROOT, "public", "models", "items", f"{item_id}.glb")
+    st = borrow.ITEMS[item_id](gpath)
+    import subprocess
+    subprocess.run(["node", os.path.join(HERE, "meshopt.cjs"), gpath, gpath], check=True, capture_output=True)
+    lo, hi = st["lo"], st["hi"]
+    print(f"{item_id:20s} BORROWED tris {st['tris']:5d} glb {os.path.getsize(gpath) / 1024:.0f}KB "
+          f"bounds x[{lo[0]:.1f},{hi[0]:.1f}] y[{lo[1]:.1f},{hi[1]:.1f}] z[{lo[2]:.1f},{hi[2]:.1f}] {time.time() - t0:.1f}s",
+          flush=True)
+
+
 def build(item_id: str, sheets: str | None):
+    import borrow
+    if item_id in borrow.ITEMS:
+        return build_borrowed(item_id)
     from lowpix.export import glb_bytes
     from lowpix.model import build_model
     from lowpix.render import contact_sheet
@@ -59,8 +83,13 @@ def build(item_id: str, sheets: str | None):
     spec.save(jpath)
     model = build_model(jpath)
     rep = model.report()
+    while max(rep["atlas"]) > 1024 and spec.density > 0.5:
+        spec.density *= 0.85
+        spec.save(jpath)
+        model = build_model(jpath)
+        rep = model.report()
     raw = glb_bytes(model)
-    glb = lib.finish_glb(raw, png=small_png)
+    glb = lib.finish_glb(raw, png=webp)
     gpath = os.path.join(ROOT, "public", "models", "items", f"{item_id}.glb")
     os.makedirs(os.path.dirname(gpath), exist_ok=True)
     with open(gpath, "wb") as fh:
@@ -125,9 +154,10 @@ if __name__ == "__main__":
         i = args.index("--sheets")
         sheets = args[i + 1]
         del args[i:i + 2]
-    ids = args or sorted(RECIPES)
+    import borrow
+    ids = args or sorted(set(RECIPES) | set(borrow.ITEMS))
     for i in ids:
-        if i not in RECIPES:
+        if i not in RECIPES and i not in borrow.ITEMS:
             print("unknown item", i)
             continue
         try:

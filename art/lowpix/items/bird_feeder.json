@@ -3,7 +3,7 @@
  "description": "A little seed house on an oak post with a mossy shingle roof, a glass seed hopper, perches and spilled seed, ivy climbing the post, and Sid the bluebird hopping and pecking.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.0,
+ "density": 6.0,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -2046,7 +2046,7 @@
     }
    ],
    "profile": {
-    "sides": 5,
+    "sides": 7,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2070,10 +2070,14 @@
     -20.0
    ],
    "art": [
-    ".aa.",
-    "aaab",
-    "aabb",
-    ".ab."
+    "..aaaa..",
+    "..aaaa..",
+    "aaaaaabb",
+    "aaaaaabb",
+    "aaaabbbb",
+    "aaaabbbb",
+    "..aabb..",
+    "..aabb.."
    ],
    "plane": "xy",
    "style": "s21",
@@ -2098,10 +2102,14 @@
     20.0
    ],
    "art": [
-    ".aa.",
-    "aaab",
-    "aabb",
-    ".ab."
+    "..aaaa..",
+    "..aaaa..",
+    "aaaaaabb",
+    "aaaaaabb",
+    "aaaabbbb",
+    "aaaabbbb",
+    "..aabb..",
+    "..aabb.."
    ],
    "plane": "xy",
    "style": "s22",
@@ -2126,10 +2134,14 @@
     -20.0
    ],
    "art": [
-    ".aa.",
-    "aaab",
-    "aabb",
-    ".ab."
+    "..aaaa..",
+    "..aaaa..",
+    "aaaaaabb",
+    "aaaaaabb",
+    "aaaabbbb",
+    "aaaabbbb",
+    "..aabb..",
+    "..aabb.."
    ],
    "plane": "xy",
    "style": "s23",
@@ -2154,10 +2166,14 @@
     20.0
    ],
    "art": [
-    ".aa.",
-    "aaab",
-    "aabb",
-    ".ab."
+    "..aaaa..",
+    "..aaaa..",
+    "aaaaaabb",
+    "aaaaaabb",
+    "aaaabbbb",
+    "aaaabbbb",
+    "..aabb..",
+    "..aabb.."
    ],
    "plane": "xy",
    "style": "s24",
@@ -2182,10 +2198,14 @@
     -20.0
    ],
    "art": [
-    ".aa.",
-    "aaab",
-    "aabb",
-    ".ab."
+    "..aaaa..",
+    "..aaaa..",
+    "aaaaaabb",
+    "aaaaaabb",
+    "aaaabbbb",
+    "aaaabbbb",
+    "..aabb..",
+    "..aabb.."
    ],
    "plane": "xy",
    "style": "s25",
@@ -2210,10 +2230,14 @@
     20.0
    ],
    "art": [
-    ".aa.",
-    "aaab",
-    "aabb",
-    ".ab."
+    "..aaaa..",
+    "..aaaa..",
+    "aaaaaabb",
+    "aaaaaabb",
+    "aaaabbbb",
+    "aaaabbbb",
+    "..aabb..",
+    "..aabb.."
    ],
    "plane": "xy",
    "style": "s26",
@@ -2238,10 +2262,14 @@
     -20.0
    ],
    "art": [
-    ".aa.",
-    "aaab",
-    "aabb",
-    ".ab."
+    "..aaaa..",
+    "..aaaa..",
+    "aaaaaabb",
+    "aaaaaabb",
+    "aaaabbbb",
+    "aaaabbbb",
+    "..aabb..",
+    "..aabb.."
    ],
    "plane": "xy",
    "style": "s27",
@@ -2318,7 +2346,7 @@
     }
    ],
    "profile": {
-    "sides": 3,
+    "sides": 4,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2371,45 +2399,67 @@
     {
      "at": [
       0,
-      0.24827790731256832,
+      0.12874047172685513,
       0
      ],
      "size": [
-      1.9103,
-      1.4518
+      1.4101,
+      1.0717
      ]
     },
     {
      "at": [
       0,
-      0.8982779073125683,
+      0.4894632575836465,
       0
      ],
      "size": [
-      3.0909,
-      2.3491
+      2.541,
+      1.9311
      ]
     },
     {
      "at": [
       0,
-      1.7017220926874317,
+      1.0107227858567913,
       0
      ],
      "size": [
-      3.0909,
-      2.3491
+      3.1685,
+      2.4081
      ]
     },
     {
      "at": [
       0,
-      2.3517220926874316,
+      1.5892772141432088,
       0
      ],
      "size": [
-      1.9103,
-      1.4518
+      3.1685,
+      2.4081
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.1105367424163535,
+      0
+     ],
+     "size": [
+      2.541,
+      1.9311
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.4712595282731447,
+      0
+     ],
+     "size": [
+      1.4101,
+      1.0717
      ]
     },
     {
@@ -2425,7 +2475,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2464,34 +2514,45 @@
     {
      "at": [
       0,
-      0.2782485578727799,
+      0.1814338553437999,
       0
      ],
      "size": [
-      1.3435,
-      1.3435
+      1.1168,
+      1.1168
      ]
     },
     {
      "at": [
       0,
-      0.95,
+      0.6564338553437999,
       0
      ],
      "size": [
-      1.9,
-      1.9
+      1.807,
+      1.807
      ]
     },
     {
      "at": [
       0,
-      1.62175144212722,
+      1.2435661446562,
       0
      ],
      "size": [
-      1.3435,
-      1.3435
+      1.807,
+      1.807
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.7185661446562,
+      0
+     ],
+     "size": [
+      1.1168,
+      1.1168
      ]
     },
     {
@@ -2507,7 +2568,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2562,10 +2623,14 @@
     25.0
    ],
    "art": [
-    "aaa.",
-    "aaaa",
-    ".aab",
-    "..ab"
+    "aaaaaa..",
+    "aaaaaa..",
+    "aaaaaaaa",
+    "aaaaaaaa",
+    "..aaaabb",
+    "..aaaabb",
+    "....aabb",
+    "....aabb"
    ],
    "plane": "xy",
    "style": "s32",
@@ -2586,9 +2651,12 @@
     -1.15
    ],
    "art": [
-    "aaaa.",
-    ".aaab",
-    "..abb"
+    "aaaaaaaa..",
+    "aaaaaaaa..",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aabbbb",
+    "....aabbbb"
    ],
    "plane": "xy",
    "style": "s33",
@@ -2609,9 +2677,12 @@
     1.15
    ],
    "art": [
-    "aaaa.",
-    ".aaab",
-    "..abb"
+    "aaaaaaaa..",
+    "aaaaaaaa..",
+    "..aaaaaabb",
+    "..aaaaaabb",
+    "....aabbbb",
+    "....aabbbb"
    ],
    "plane": "xy",
    "style": "s34",

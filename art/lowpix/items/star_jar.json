@@ -3,7 +3,7 @@
  "description": "A big glass mason jar with a cloth lid tied with twine and a paper tag, full of little fallen stars in honey, rose and moonlight that glow and hum and twinkle in turn.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 3.4,
+ "density": 6.8,
  "budget": {
   "tris": 2600,
   "colors": 220
@@ -773,7 +773,7 @@
     }
    ],
    "profile": {
-    "sides": 14,
+    "sides": 20,
     "round": 2.0,
     "angle": 0.0
    },
@@ -846,7 +846,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0,
     "angle": 0.0
    },
@@ -875,40 +875,7 @@
     {
      "at": [
       0,
-      10.0,
-      0
-     ],
-     "size": [
-      8.0,
-      8.0
-     ]
-    },
-    {
-     "at": [
-      0,
-      10.4,
-      0
-     ],
-     "size": [
-      8.4,
-      8.4
-     ]
-    },
-    {
-     "at": [
-      0,
-      11.3,
-      0
-     ],
-     "size": [
-      7.0,
-      7.0
-     ]
-    },
-    {
-     "at": [
-      0,
-      12.2,
+      10.2,
       0
      ],
      "size": [
@@ -919,12 +886,45 @@
     {
      "at": [
       0,
+      10.5,
+      0
+     ],
+     "size": [
+      7.5,
+      7.5
+     ]
+    },
+    {
+     "at": [
+      0,
+      11.3,
+      0
+     ],
+     "size": [
+      6.7,
+      6.7
+     ]
+    },
+    {
+     "at": [
+      0,
+      12.2,
+      0
+     ],
+     "size": [
+      6.9,
+      6.9
+     ]
+    },
+    {
+     "at": [
+      0,
       12.7,
       0
      ],
      "size": [
-      5.6,
-      5.6
+      5.4,
+      5.4
      ]
     },
     {
@@ -940,7 +940,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0,
     "angle": 0.0
    },
@@ -990,7 +990,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1021,13 +1021,20 @@
     -14.0
    ],
    "art": [
-    ".ppppppppp",
-    "pppppppppp",
-    "pppppssppp",
-    "p..psssspp",
-    "pppppssppp",
-    "ppppsppspp",
-    ".ppppppppp"
+    "..pppppppppppppppppp",
+    "..pppppppppppppppppp",
+    "pppppppppppppppppppp",
+    "pppppppppppppppppppp",
+    "ppppppppppsssspppppp",
+    "ppppppppppsssspppppp",
+    "pp....ppsssssssspppp",
+    "pp....ppsssssssspppp",
+    "ppppppppppsssspppppp",
+    "ppppppppppsssspppppp",
+    "ppppppppssppppsspppp",
+    "ppppppppssppppsspppp",
+    "..pppppppppppppppppp",
+    "..pppppppppppppppppp"
    ],
    "plane": "xy",
    "style": "s5",
@@ -1071,7 +1078,7 @@
     }
    ],
    "profile": {
-    "sides": 3,
+    "sides": 4,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1095,22 +1102,31 @@
     14.148
    ],
    "art": [
-    "....a....",
-    "....a....",
-    "...baa...",
-    ".aaacbbb.",
-    "..bccca..",
-    "..aacbb..",
-    "..abbab..",
-    "..b...a..",
-    "........."
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "......bbaaaa......",
+    "......bbaaaa......",
+    "..aaaaaaccbbbbbb..",
+    "..aaaaaaccbbbbbb..",
+    "....bbccccccaa....",
+    "....bbccccccaa....",
+    "....aaaaccbbbb....",
+    "....aaaaccbbbb....",
+    "....aabbbbaabb....",
+    "....aabbbbaabb....",
+    "....bb......aa....",
+    "....bb......aa....",
+    "..................",
+    ".................."
    ],
    "plane": "xy",
    "style": "s7",
    "paint": {
     "art_key": {
-     "a": "star:4",
-     "b": "star:2",
+     "a": "star:3",
+     "b": "star:1",
      "c": "star:4"
     }
    }
@@ -1129,20 +1145,27 @@
     27.306
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s8",
    "paint": {
     "art_key": {
-     "a": "star:4",
-     "b": "star:2",
+     "a": "star:3",
+     "b": "star:1",
      "c": "star:4"
     }
    }
@@ -1161,20 +1184,27 @@
     56.222
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s9",
    "paint": {
     "art_key": {
-     "a": "ember:4",
-     "b": "ember:2",
+     "a": "ember:3",
+     "b": "ember:1",
      "c": "ember:4"
     }
    }
@@ -1193,22 +1223,31 @@
     17.406
    ],
    "art": [
-    "....a....",
-    "....a....",
-    "...baa...",
-    ".aaacbbb.",
-    "..bccca..",
-    "..aacbb..",
-    "..abbab..",
-    "..b...a..",
-    "........."
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "......bbaaaa......",
+    "......bbaaaa......",
+    "..aaaaaaccbbbbbb..",
+    "..aaaaaaccbbbbbb..",
+    "....bbccccccaa....",
+    "....bbccccccaa....",
+    "....aaaaccbbbb....",
+    "....aaaaccbbbb....",
+    "....aabbbbaabb....",
+    "....aabbbbaabb....",
+    "....bb......aa....",
+    "....bb......aa....",
+    "..................",
+    ".................."
    ],
    "plane": "xy",
    "style": "s10",
    "paint": {
     "art_key": {
-     "a": "moonglow:4",
-     "b": "moonglow:2",
+     "a": "moonglow:3",
+     "b": "moonglow:1",
      "c": "moonglow:4"
     }
    }
@@ -1227,20 +1266,27 @@
     18.328
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s11",
    "paint": {
     "art_key": {
-     "a": "star:4",
-     "b": "star:2",
+     "a": "star:3",
+     "b": "star:1",
      "c": "star:4"
     }
    }
@@ -1259,20 +1305,27 @@
     23.707
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s12",
    "paint": {
     "art_key": {
-     "a": "star:4",
-     "b": "star:2",
+     "a": "star:3",
+     "b": "star:1",
      "c": "star:4"
     }
    }
@@ -1291,22 +1344,31 @@
     18.115
    ],
    "art": [
-    "....a....",
-    "....a....",
-    "...baa...",
-    ".aaacbbb.",
-    "..bccca..",
-    "..aacbb..",
-    "..abbab..",
-    "..b...a..",
-    "........."
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "......bbaaaa......",
+    "......bbaaaa......",
+    "..aaaaaaccbbbbbb..",
+    "..aaaaaaccbbbbbb..",
+    "....bbccccccaa....",
+    "....bbccccccaa....",
+    "....aaaaccbbbb....",
+    "....aaaaccbbbb....",
+    "....aabbbbaabb....",
+    "....aabbbbaabb....",
+    "....bb......aa....",
+    "....bb......aa....",
+    "..................",
+    ".................."
    ],
    "plane": "xy",
    "style": "s13",
    "paint": {
     "art_key": {
-     "a": "ember:4",
-     "b": "ember:2",
+     "a": "ember:3",
+     "b": "ember:1",
      "c": "ember:4"
     }
    }
@@ -1325,20 +1387,27 @@
     49.391
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s14",
    "paint": {
     "art_key": {
-     "a": "moonglow:4",
-     "b": "moonglow:2",
+     "a": "moonglow:3",
+     "b": "moonglow:1",
      "c": "moonglow:4"
     }
    }
@@ -1357,20 +1426,27 @@
     52.761
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s15",
    "paint": {
     "art_key": {
-     "a": "star:4",
-     "b": "star:2",
+     "a": "star:3",
+     "b": "star:1",
      "c": "star:4"
     }
    }
@@ -1389,22 +1465,31 @@
     16.459
    ],
    "art": [
-    "....a....",
-    "....a....",
-    "...baa...",
-    ".aaacbbb.",
-    "..bccca..",
-    "..aacbb..",
-    "..abbab..",
-    "..b...a..",
-    "........."
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "......bbaaaa......",
+    "......bbaaaa......",
+    "..aaaaaaccbbbbbb..",
+    "..aaaaaaccbbbbbb..",
+    "....bbccccccaa....",
+    "....bbccccccaa....",
+    "....aaaaccbbbb....",
+    "....aaaaccbbbb....",
+    "....aabbbbaabb....",
+    "....aabbbbaabb....",
+    "....bb......aa....",
+    "....bb......aa....",
+    "..................",
+    ".................."
    ],
    "plane": "xy",
    "style": "s16",
    "paint": {
     "art_key": {
-     "a": "star:4",
-     "b": "star:2",
+     "a": "star:3",
+     "b": "star:1",
      "c": "star:4"
     }
    }
@@ -1423,20 +1508,27 @@
     0.65
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s17",
    "paint": {
     "art_key": {
-     "a": "ember:4",
-     "b": "ember:2",
+     "a": "ember:3",
+     "b": "ember:1",
      "c": "ember:4"
     }
    }
@@ -1455,20 +1547,27 @@
     17.2
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s18",
    "paint": {
     "art_key": {
-     "a": "moonglow:4",
-     "b": "moonglow:2",
+     "a": "moonglow:3",
+     "b": "moonglow:1",
      "c": "moonglow:4"
     }
    }
@@ -1487,22 +1586,31 @@
     54.314
    ],
    "art": [
-    "....a....",
-    "....a....",
-    "...baa...",
-    ".aaacbbb.",
-    "..bccca..",
-    "..aacbb..",
-    "..abbab..",
-    "..b...a..",
-    "........."
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "......bbaaaa......",
+    "......bbaaaa......",
+    "..aaaaaaccbbbbbb..",
+    "..aaaaaaccbbbbbb..",
+    "....bbccccccaa....",
+    "....bbccccccaa....",
+    "....aaaaccbbbb....",
+    "....aaaaccbbbb....",
+    "....aabbbbaabb....",
+    "....aabbbbaabb....",
+    "....bb......aa....",
+    "....bb......aa....",
+    "..................",
+    ".................."
    ],
    "plane": "xy",
    "style": "s19",
    "paint": {
     "art_key": {
-     "a": "star:4",
-     "b": "star:2",
+     "a": "star:3",
+     "b": "star:1",
      "c": "star:4"
     }
    }
@@ -1521,20 +1629,27 @@
     29.545
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s20",
    "paint": {
     "art_key": {
-     "a": "star:4",
-     "b": "star:2",
+     "a": "star:3",
+     "b": "star:1",
      "c": "star:4"
     }
    }
@@ -1553,20 +1668,27 @@
     21.242
    ],
    "art": [
-    "...a...",
-    "...a...",
-    "aaacbbb",
-    ".bccca.",
-    "..acb..",
-    "..b.a..",
-    "......."
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "......aa......",
+    "aaaaaaccbbbbbb",
+    "aaaaaaccbbbbbb",
+    "..bbccccccaa..",
+    "..bbccccccaa..",
+    "....aaccbb....",
+    "....aaccbb....",
+    "....bb..aa....",
+    "....bb..aa....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s21",
    "paint": {
     "art_key": {
-     "a": "ember:4",
-     "b": "ember:2",
+     "a": "ember:3",
+     "b": "ember:1",
      "c": "ember:4"
     }
    }

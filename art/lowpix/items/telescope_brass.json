@@ -3,7 +3,7 @@
  "description": "A polished brass refractor on a cherry-wood tripod with brass feet and a chain-hung tray: leather grip, gold rings, a finder scope, a dew shield with a glinting lens, and a rolled star chart. It drifts slowly across the sky, looking for wishes.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
- "density": 2.6,
+ "density": 5.2,
  "budget": {
   "tris": 3200,
   "colors": 220
@@ -1429,7 +1429,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1483,7 +1483,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1533,7 +1533,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1587,7 +1587,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1637,7 +1637,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1691,7 +1691,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1741,7 +1741,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0,
     "angle": 0.0
    },
@@ -1791,7 +1791,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1834,7 +1834,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1877,7 +1877,7 @@
     }
    ],
    "profile": {
-    "sides": 4,
+    "sides": 6,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1962,7 +1962,7 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 14,
     "round": 2.0,
     "angle": 0.0
    },
@@ -2091,7 +2091,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2135,7 +2135,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2179,7 +2179,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2223,7 +2223,7 @@
     }
    ],
    "profile": {
-    "sides": 12,
+    "sides": 17,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2243,14 +2243,22 @@
     10.9
    ],
    "art": [
-    "..aaaa..",
-    ".abbaaa.",
-    "abbaaaaa",
-    "abaaaaaa",
-    "aaaaaaaa",
-    "aaaaaaaa",
-    ".aaaaaa.",
-    "..aaaa.."
+    "....aaaaaaaa....",
+    "....aaaaaaaa....",
+    "..aabbbbaaaaaa..",
+    "..aabbbbaaaaaa..",
+    "aabbbbaaaaaaaaaa",
+    "aabbbbaaaaaaaaaa",
+    "aabbaaaaaaaaaaaa",
+    "aabbaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaa",
+    "aaaaaaaaaaaaaaaa",
+    "..aaaaaaaaaaaa..",
+    "..aaaaaaaaaaaa..",
+    "....aaaaaaaa....",
+    "....aaaaaaaa...."
    ],
    "plane": "xy",
    "style": "s19",
@@ -2306,7 +2314,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2350,7 +2358,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2436,7 +2444,7 @@
     }
    ],
    "profile": {
-    "sides": 6,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2479,7 +2487,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,
@@ -2522,7 +2530,7 @@
     }
    ],
    "profile": {
-    "sides": 8,
+    "sides": 11,
     "round": 2.0
    },
    "subdiv": 1,

@@ -254,5 +254,51 @@ async function grid() {
   (window as any).__ready = true;
 }
 
-if (q.get('one')) void liveOne(q.get('one')!);
+/** ?glbs=a.glb,b.glb : any GLBs under public/models, framed and lit like the items (for judging borrowed models). */
+async function rawGrid(paths: string[]) {
+  document.body.style.setProperty('--cell', CELL + 'px');
+  const S = Math.round(CELL * 1.25);
+  const c = document.createElement('canvas');
+  const r = new THREE.WebGLRenderer({ canvas: c, antialias: false, preserveDrawingBuffer: true });
+  r.setSize(S, S, false);
+  r.shadowMap.enabled = true;
+  r.outputColorSpace = THREE.SRGBColorSpace;
+  r.setClearColor(0x000000, 0);
+  const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
+  const g = document.createElement('div');
+  g.className = 'grid';
+  document.body.append(g);
+  for (const p of paths) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    try {
+      const { root } = await instanceGLB(p);
+      const { scene, sun } = stage(NIGHT);
+      scene.add(root);
+      root.updateMatrixWorld(true);
+      const b = new THREE.Box3().setFromObject(root);
+      const k = 1 / Math.max(b.max.x - b.min.x, b.max.y - b.min.y, b.max.z - b.min.z, 1e-6);
+      root.scale.multiplyScalar(k);
+      root.updateMatrixWorld(true);
+      b.setFromObject(root);
+      const fake = { wall: false, rug: false } as ItemDef;
+      scene.add(backdrop(fake, b));
+      sun.target.position.copy(b.getCenter(new THREE.Vector3()));
+      frame(cam, b, YAW, PITCH);
+      r.render(scene, cam);
+      let tris = 0;
+      root.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) tris += (m.geometry.index?.count ?? m.geometry.getAttribute('position').count) / 3; });
+      const img = new Image();
+      img.src = c.toDataURL('image/png');
+      img.width = CELL; img.height = CELL;
+      cell.append(img);
+      cell.insertAdjacentHTML('beforeend', `<div class="nm">${p.split('/').pop()}</div><div class="meta">${Math.round(tris)} tris · ${(1 / k).toFixed(2)} units</div>`);
+    } catch (e) { cell.textContent = 'FAILED ' + p + ' ' + String(e); }
+    g.append(cell);
+  }
+  (window as any).__ready = true;
+}
+
+if (q.get('glbs')) void rawGrid(q.get('glbs')!.split(','));
+else if (q.get('one')) void liveOne(q.get('one')!);
 else void grid();
