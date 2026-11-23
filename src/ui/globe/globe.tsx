@@ -16,10 +16,11 @@ import { Px } from '../icons.tsx';
 import { haptic, tap, toast } from '../kit.tsx';
 import { frameStyle } from '../px/frames.js';
 import { panel, sceneRef } from '../state.ts';
-import { homeSprite, inkFrame, moonIcon, padlock, paperFrame, paperTile, passportCover, passportTile, PIN_H, PIN_W, pinSheet, postageStamp, postmark, ringSheet, stampArt, type PinState } from './art.ts';
+import { agedPaper, homeSprite, inkFrame, leatherFrame, moonIcon, padlock, paperFrame, paperTile, passportCover, passportTile, PIN_H, PIN_W, pinSheet, postageStamp, postmark, ringSheet, stampArt, type PinState } from './art.ts';
 import './globe.css';
 import { devScale } from './pix.ts';
 import { postcardArt } from './postcards.ts';
+import { loadPhotos, photoCredit, photosReady, photoStamp, photoURL } from './placephoto.ts';
 import { nightsAt, startTravel, travelOf } from './travel.ts';
 
 startTravel();
@@ -31,9 +32,10 @@ function injectCSS() {
   const el = document.createElement('style');
   const k = Math.min(3, Math.max(1, Math.round(devicePixelRatio || 1)));
   el.textContent = `
-.gb-board{border-style:solid;border-width:9px;border-image:url("${inkFrame(3 * k)}") ${7 * 3 * k} / 9px round;background:url("${paperTile(2 * k, 0xeae0c8)}") 0 0/48px 48px,#eae0c8;background-clip:padding-box;color:#2e2b24}
-.gb-card{border-style:solid;border-width:10px;border-image:url("${paperFrame(2 * k)}") ${5 * 2 * k} / 10px round;background:url("${paperTile(2 * k)}") 0 0/48px 48px,#f4eedd;background-clip:padding-box}
-.gb-page{background:url("${passportTile(2 * k)}") 0 0/64px 64px,#e9e3cf}
+.gb-board{border-style:solid;border-width:9px;border-image:url("${inkFrame(3 * k)}") ${7 * 3 * k} / 9px round;background:url("${agedPaper(2 * k, 0xe6dcc4)}") 0 0/192px 192px,#e6dcc4;background-clip:padding-box;color:#2e2b24}
+.gb-card{border-style:solid;border-width:10px;border-image:url("${paperFrame(2 * k)}") ${5 * 2 * k} / 10px round;background:url("${agedPaper(2 * k, 0xefe7d3)}") 0 0/192px 192px,#efe7d3;background-clip:padding-box}
+.gb-page{border-style:solid;border-width:30px;border-image:url("${leatherFrame(2 * k)}") ${15 * 2 * k} / 30px stretch;background:url("${passportTile(2 * k)}") 0 0/64px 64px,#e9e3cf;background-clip:padding-box}
+.gb-page::before{content:'';position:absolute;inset:0;pointer-events:none;background:url("${agedPaper(2 * k, 0xe9e3cf)}") 0 0/192px 192px;opacity:.55;mix-blend-mode:multiply}
 .gb-cover{background-image:url("${passportCover(3 * k)}")}
 `;
   document.head.appendChild(el);
@@ -83,13 +85,15 @@ export function GlobePanel() {
     st.setPlaces([...AREAS.map((a) => ({ id: a.id, lat: a.lat, lon: a.lon })), { id: '@home', lat: home.lat, lon: home.lon }]);
     st.setOwl(save.value.look);
     const tonight = AREA[save.value.area];
-    if (tonight) { st.spin = spinFor(st, tonight); st.setRoute(home, tonight); }
+    if (tonight) { st.spin = spinFor(st, tonight); st.setRoute(home, tonight); st.tonight = { id: tonight.id, lat: tonight.lat, lon: tonight.lon }; }
+    loadPhotos();
+    st.sparks.onMeteor = () => sound.play('sparkle', { volume: 0.12, rate: 1.3 + Math.random() * 0.4, gap: 2000 });
     sc.setStage(st);
     setPx(st.px);
     st.onFrame = (pins) => placePins(pins, st!.px);
     st.onTap = (id) => { if (id && id !== '@home') pick(id); else if (!id) { /* empty sky: keep the card */ } };
     st.onSpin = (v) => { if (v > 1.2) sound.play('rustle_grass', { volume: 0.25, rate: 1.4, gap: 300 }); };
-    sound.play('amb_wind', { volume: 0.12 });
+    sound.play('tp_shimmer', { volume: 0.25 });
     const onResize = () => { setSide(isSide()); setPx(st!.px); };
     addEventListener('resize', onResize);
     const onKey = (e: KeyboardEvent) => {
@@ -138,7 +142,7 @@ export function GlobePanel() {
   }, [sel, side]);
 
   // the route always runs to tonight's place
-  useEffect(() => { const st = stageRef.current, t = AREA[s.area]; if (st) st.setRoute(home, t ?? null); }, [s.area]);
+  useEffect(() => { const st = stageRef.current, t = AREA[s.area]; if (st) { st.setRoute(home, t ?? null); st.tonight = t ? { id: t.id, lat: t.lat, lon: t.lon } : null; } }, [s.area]);
 
   function placePins(pins: PinView[], k: number) {
     const selId = selRef.current;
@@ -161,7 +165,7 @@ export function GlobePanel() {
     selRef.current = id;
     const a = id ? AREA[id] : null;
     st?.focus(a ? { id: a.id, lat: a.lat, lon: a.lon } : null);
-    if (a) { tap('paper_flip', 0.5); sound.play('wings_flutter', { volume: 0.25, rate: 1.2 }); haptic(10); }
+    if (a) { tap('paper_flip', 0.5); sound.play('wings_flutter', { volume: 0.25, rate: 1.2 }); sound.play('sparkle', { volume: 0.18, rate: 1.2 }); haptic(10); }
     else tap('ui_back', 0.4);
   }
   function step(d: number) {
@@ -253,6 +257,8 @@ function Postcard(p: { a: Area; px: number; onClose: () => void; onStep: (d: num
     if (!open || isTonight) return;
     edit((x) => { x.area = a.id; });
     tap('ui_confirm');
+    sound.play('reward_unlock', { volume: 0.3 });
+    sound.play('owl_hoot', { volume: 0.25 });
     sound.play('wings_flutter', { volume: 0.5 });
     uiBurstAt(btn.current, 'stars', 12);
     const r = btn.current?.getBoundingClientRect();
@@ -265,12 +271,13 @@ function Postcard(p: { a: Area; px: number; onClose: () => void; onStep: (d: num
     <section class="gb-card gb-post" role="dialog" aria-label={a.title}>
       <button class="gb-close" onClick={p.onClose} aria-label="Close postcard"><Px name="cross" size={20} /></button>
       <div class="gb-front">
-        <img class="gb-scene" src={postcardArt(a.id, 2 * k)} alt="" draggable={false} />
+        <img class={'gb-scene' + (photosReady.value && photoURL(a.id, 2 * k) ? ' photo' : '')} src={(photosReady.value && photoURL(a.id, 2 * k)) || postcardArt(a.id, 2 * k)} alt="" draggable={false} />
         {!open && <div class="gb-veil"><img src={padlock(3 * k)} alt="" /></div>}
         <div class="gb-greet"><small>Greetings from</small><b>{a.title}</b></div>
         <img class="gb-stamp" src={postageStamp(a, 2 * k)} alt="" />
         <img class="gb-mark" src={postmark(a, 2 * k)} alt="" />
       </div>
+      {photosReady.value && photoCredit(a.id) && <p class="gb-credit" title={photoCredit(a.id).url}>Photo: {photoCredit(a.id).author} · {photoCredit(a.id).licence} · Wikimedia Commons</p>}
       <div class="gb-back">
         <div class="gb-meta">
           <span>{a.country}{a.country !== a.continent ? ` · ${a.continent}` : ''}</span>
@@ -333,7 +340,12 @@ function Passport(p: { onClose: () => void; onPick: (id: string) => void }) {
   const stamped = AREAS.filter((a) => log.nights[a.id]).length;
   const [open, setOpen] = useState(false);
   useEffect(() => { const t = setTimeout(() => { setOpen(true); sound.play('paper_flip', { volume: 0.5 }); }, 380); return () => clearTimeout(t); }, []);
-  useEffect(() => { if (open && stamped) { const t = setTimeout(() => sound.play('stamp', { volume: 0.45 }), 260); return () => clearTimeout(t); } }, [open]);
+  // a thump of the stamp for each page of stamps as they land
+  useEffect(() => {
+    if (!open || !stamped) return;
+    const ts = Array.from({ length: Math.min(stamped, 6) }, (_, i) => setTimeout(() => sound.play('stamp', { volume: 0.35, rate: 0.95 + i * 0.04 }), 480 + i * 140));
+    return () => ts.forEach(clearTimeout);
+  }, [open]);
   const list = useMemo(() => AREAS, []);
   return (
     <div class="gb-passport" onClick={p.onClose}>
@@ -352,7 +364,7 @@ function Passport(p: { onClose: () => void; onPick: (id: string) => void }) {
               const st = e ? 'visited' : areaOpen(a.id) ? 'open' : 'locked';
               return (
                 <button class={'gb-st ' + st} style={{ '--d': `${i * 30}ms`, '--r': `${((i * 37) % 7) - 3}px` } as Record<string, string>} onClick={() => { tap('ui_tap', 0.4); p.onPick(a.id); }} title={a.title}>
-                  <img src={stampArt(a, { date: e?.first, state: st, seed: i + 3 }, 2 * k)} alt="" draggable={false} />
+                  <img src={(photosReady.value && photoStamp(a, { date: e?.first, state: st, seed: i + 3 }, 2 * k)) || stampArt(a, { date: e?.first, state: st, seed: i + 3 }, 2 * k)} alt="" draggable={false} />
                   <span>{a.title.replace(/^The /, '')}</span>
                   {st === 'locked' && <small>Lv {a.level}</small>}
                   {e && <small>{e.n} {e.n === 1 ? 'night' : 'nights'}</small>}

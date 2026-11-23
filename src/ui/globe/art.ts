@@ -3,7 +3,7 @@
 // [globe] OWNED BY THE GLOBE BUILDER.
 import type { Area } from '../../game/catalog.ts';
 import { EMBLEM } from './emblems.ts';
-import { bayer, hash, mix, mul, Pix, type C } from './pix.ts';
+import { bayer, hash, mix, mul, Pix, vnoise, type C } from './pix.ts';
 
 const INK = 0x2e2b24, PAPER = 0xf4eedd, OAT = 0xeae0c8, LINEN = 0xdccfb0, STRAW = 0xc9b78d, LAMP = 0xf1d39a, LAMPHI = 0xfbeac2;
 const WOOD = 0x9c7a56, WOODDK = 0x6f553d, BRASS = 0xc8a764, BRASSDK = 0x8e7440, STONE = 0x908a7e, SLATE = 0x46596a;
@@ -188,6 +188,56 @@ export function inkFrame(scale: number): string {
       if (y === N - 2 && e === 1) p.set(x, y, 0x2a221c);
       if (e === 3 && ((x + y * 3) % 7 === 0) && x > 2 && y > 2 && x < N - 3 && y < N - 3) p.set(x, y, mix(OAT, ink, 0.25));
     }
+    return p.url(scale);
+  });
+}
+
+/** Aged paper, painted like BUSHED's paper: a base tone with slow mottling, short pale and dark fibres, a few
+ * foxing specks, every channel stepped so it stays pixel art. Tileable (the mottling uses wrapped noise). */
+export function agedPaper(scale: number, base = 0xebe2cc): string {
+  return memo(`aged:${scale}:${base}`, () => {
+    const N = 96, p = new Pix(N, N);
+    const br = (base >> 16) & 255, bg = (base >> 8) & 255, bb = base & 255;
+    const wrapN = (x: number, y: number, f: number, s: number) => {
+      const u = x / N * f, v = y / N * f;
+      const a = vnoise(u, v, s), b = vnoise(u - f, v, s), c = vnoise(u, v - f, s), d = vnoise(u - f, v - f, s);
+      const fx = x / N, fy = y / N;
+      return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy;
+    };
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const m = (wrapN(x, y, 3, 11) - 0.5) * 14 + (wrapN(x, y, 9, 12) - 0.5) * 7 + (hash(x, y, 13) - 0.5) * 4;
+      const q = (v: number) => Math.round(Math.max(0, Math.min(255, v)) / 3) * 3;
+      p.set(x, y, (q(br + m) << 16) | (q(bg + m * 1.05) << 8) | q(bb + m * 1.2));
+    }
+    for (let i = 0; i < 70; i++) {
+      const x = Math.floor(hash(i, 1, 14) * N), y = Math.floor(hash(i, 2, 14) * N), len = 2 + Math.floor(hash(i, 3, 14) * 4), dark = hash(i, 4, 14) < 0.45;
+      const dx = hash(i, 5, 14) < 0.5 ? 1 : 0;
+      for (let k = 0; k < len; k++) { const xx = (x + k) % N, yy = (y + k * dx) % N; p.set(xx, yy, mul(p.get(xx, yy), dark ? 0.93 : 1.04)); }
+    }
+    for (let i = 0; i < 6; i++) { const x = Math.floor(hash(i, 7, 15) * N), y = Math.floor(hash(i, 8, 15) * N); p.set(x, y, mix(p.get(x, y), 0x9c7a56, 0.5)); p.set(x + 1, y, mix(p.get(x + 1, y), 0x9c7a56, 0.25)); }
+    return p.url(scale);
+  });
+}
+
+/** Bookbinder's leather for the passport (48 x 48 border-image tile, 15px slice): pebbled moss-green grain,
+ * a blind-tooled double rule, a cream running stitch, edges rubbed pale, a gilt dot in each corner. */
+export function leatherFrame(scale: number): string {
+  return memo(`leather:${scale}`, () => {
+    const N = 48, p = new Pix(N, N);
+    const L = [0x1c241e, 0x243026, 0x2c3a2e, 0x344536, 0x3d4f3e, 0x475a47, 0x526551, 0x5f715b];
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const e = Math.min(x, y, N - 1 - x, N - 1 - y);
+      if (e >= 15) { p.set(x, y, L[3]); continue; }
+      const grain = (vnoise(x / 1.7, y / 1.7, 21) - 0.5) * 2.2 + (vnoise(x / 5, y / 5, 22) - 0.5) * 1.6;
+      const wear = e < 3 ? (3 - e) * 0.9 : 0;
+      let v = 3 + grain + wear + (bayer(x, y) - 0.5) * 0.8;
+      if (e === 4) v = 0.6; if (e === 5) v = 5.5;          // tooled rule: groove and lit lip
+      if (e === 10) v = 0.8; if (e === 11) v = 5.2;
+      p.set(x, y, L[Math.max(0, Math.min(L.length - 1, Math.round(v)))]);
+      if (e === 7 && ((x + y) % 4) < 2) p.set(x, y, 0xd8cdb0);                  // running stitch
+      if (e === 0) p.set(x, y, 0x161c18);
+    }
+    for (const [cx, cy] of [[8, 8], [N - 9, 8], [8, N - 9], [N - 9, N - 9]]) { p.set(cx, cy, 0xe0c26a); p.set(cx + 1, cy, 0xb08934); p.set(cx, cy + 1, 0x8c6b28); }
     return p.url(scale);
   });
 }

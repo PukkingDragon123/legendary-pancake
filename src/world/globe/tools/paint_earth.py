@@ -27,6 +27,7 @@ sys.path.insert(0, HERE)
 import geo  # noqa: E402
 
 ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
+PHOTOS = os.path.join(ROOT, "art", "lowpix", "souvenirs", "_kit", "photos")   # CC0 Poly Haven photos
 
 
 def hx(s):
@@ -442,6 +443,22 @@ def paint_level(mask4k, W):
     seaice = water & (((lat > 70) & (fbm(P, 6.0, 4, 81) + (lat - 79) / 14 > 0.55)) | ((lat < -64) & (near > 0.22) & (fbm(P, 7.0, 4, 82) > 0.42)))
     put(seaice, R["snow"], 4.4 + clusters * 0.9)
     put(seaice & (np.abs(fbm(P, 18.0, 2, 83) - 0.5) < 0.03), R["snow"], 1.8)
+
+    # ---- photo-based colour (as in BUSHED): real CC0 photos of leaves, rock and dry earth tiled over their biomes,
+    # their relief and hue drift worked into the paint, so the land has the mottled richness of a real surface
+    def photo(name, tile):
+        im = Image.open(os.path.join(PHOTOS, name, "diff.jpg")).convert("RGB").resize((tile, tile), Image.BOX)
+        a = np.asarray(im, np.float64)
+        a = a / a.reshape(-1, 3).mean(0)
+        reps = (H // tile + 1, W // tile + 1, 1)
+        return np.tile(a, reps)[:H, :W]
+    tile = max(32, int(96 * s))
+    leaves, rock, earth = photo("forest_leaves_02", tile), photo("rock_face_03", tile), photo("clay_floor_001", tile)
+    veg = land & (B["temperate"] | B["boreal"] | B["rain"])
+    dry = land & (B["desert"] | B["savanna"] | B["steppe"])
+    stony = land & (mtn | B["tundra"])
+    for m, ph, k in ((veg, leaves, 0.55), (dry, earth, 0.45), (stony, rock, 0.5)):
+        img[m] = img[m] * (1 - k + k * np.clip(ph[m], 0.6, 1.5))
 
     # ---- the hand-made map look: an uneven ink line round every coast, muted colours, paper grain
     ink = np.array([74.0, 62.0, 50.0])

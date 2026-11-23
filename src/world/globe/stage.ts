@@ -13,6 +13,7 @@ import type { Stage } from '../scene.ts';
 import { OwlActor } from '../../owl/actor.ts';
 import type { OwlLook } from '../../owl/model.ts';
 import { flightArc, latLonToVec3, subsolar } from './earth.ts';
+import { Sparks } from './sparks.ts';
 import { buildStand } from './stand.ts';
 
 const TILT = 23.44 * Math.PI / 180;
@@ -104,8 +105,9 @@ void main(){
   float ndl = dot(n, uSun);
   float k = ndl * 7.0 + (b - 0.5) * 0.9 + (c - 0.69) * 5.0;
   vec3 col;
-  if (k > 1.8) col = vec3(0.9, 0.91, 0.87);
-  else if (k > 0.7) col = vec3(0.78, 0.81, 0.82);
+  if (c < 0.76 && mod(floor(gl_FragCoord.x) + floor(gl_FragCoord.y), 2.0) > 0.5) discard;   // veils: every other pixel
+  if (k > 1.8) col = vec3(0.86, 0.87, 0.84);
+  else if (k > 0.7) col = vec3(0.74, 0.77, 0.79);
   else if (k > -0.4) col = vec3(0.7, 0.6, 0.63);
   else { if (b > 0.45) discard; col = vec3(0.22, 0.26, 0.34); }
   if (c < 0.735 && b > 0.5) discard;   // thin, ragged pixel edges
@@ -176,7 +178,32 @@ void main(){ float s = fract(vT * 34.0 - uTime * 0.9); if (s > 0.55 || vT > uFad
 
 const blitVS = /* glsl */ `uniform vec2 uCover; varying vec2 vUv;
 void main(){ vUv = uv; gl_Position = vec4(-1.0 + (position.x + 1.0) * uCover.x, 1.0 - (1.0 - position.y) * uCover.y, 0.0, 1.0); }`;
-const blitFS = /* glsl */ `uniform sampler2D uTex; varying vec2 vUv; void main(){ gl_FragColor = vec4(texture2D(uTex, vUv).rgb, 1.0); }`;
+// The grade, after BUSHED's renderer (the user's lumberjack game): the low-res frame is lifted and split-toned
+// (warm lamplight highs, cool slate shadows), a touch desaturated, vignetted, given a living film grain per art
+// pixel, then ordered-dithered and quantised so gradients band like hand-placed pixel art.
+const blitFS = /* glsl */ `uniform sampler2D uTex; uniform vec2 uArt; uniform float uTime; varying vec2 vUv;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+float bayer4(vec2 p){ vec2 q = mod(floor(p), 4.0);
+  float b = q.x == 0.0 ? (q.y == 0.0 ? 0.0 : q.y == 1.0 ? 12.0 : q.y == 2.0 ? 3.0 : 15.0)
+          : q.x == 1.0 ? (q.y == 0.0 ? 8.0 : q.y == 1.0 ? 4.0 : q.y == 2.0 ? 11.0 : 7.0)
+          : q.x == 2.0 ? (q.y == 0.0 ? 2.0 : q.y == 1.0 ? 14.0 : q.y == 2.0 ? 1.0 : 13.0)
+          : (q.y == 0.0 ? 10.0 : q.y == 1.0 ? 6.0 : q.y == 2.0 ? 9.0 : 5.0);
+  return (b + 0.5) / 16.0; }
+void main(){
+  vec2 px = floor(vUv * uArt);
+  vec3 col = texture2D(uTex, vUv).rgb;
+  float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
+  col += vec3(0.045, 0.02, -0.03) * smoothstep(0.35, 0.9, l);          // warm highlights
+  col += vec3(-0.012, 0.004, 0.02) * (1.0 - smoothstep(0.0, 0.35, l)); // slate shadows
+  col = mix(vec3(l), col, 0.9);
+  col = col * 1.03 + vec3(0.006, 0.008, 0.014);                          // a gentle lift
+  vec2 cc = vUv - 0.5;
+  col *= 1.0 - 0.28 * smoothstep(0.18, 0.75, dot(cc, cc) * 1.6);         // vignette
+  float g = hash(px + floor(uTime * 12.0) * 17.0) - 0.5;
+  col += g * 0.035 * (1.15 - l);                                          // grain per art pixel
+  col = floor(col * 40.0 + 0.5 + (bayer4(px) - 0.5) * 0.9) / 40.0;      // ordered dither + quantise
+  gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+}`;
 
 // ------------------------------------------------------------------ textures
 
@@ -233,6 +260,13 @@ export class GlobeStage implements Stage {
   private atmoMat: THREE.ShaderMaterial;
   private stars: THREE.Points;
   private route: THREE.Points | null = null;
+  private routePts: THREE.Vector3[] = [];
+  private routeT = 0;
+  /** pixel particles: Pip's trail, place sparkles, the flight-path mote, shooting stars */
+  readonly sparks = new Sparks(700);
+  private sparkT = 0;
+  /** tonight's place (sparkles gently even when not picked) */
+  tonight: GlobePlace | null = null;
   private routeFade = 0;
   private stand: THREE.Object3D | null = null;
   ready = false;
@@ -240,6 +274,7 @@ export class GlobeStage implements Stage {
   private owl: OwlActor | null = null;
   private owlPivot = new THREE.Group();
   private owlA = 0;
+  private owlPos = new THREE.Vector3(1.5, 0.3, 0);
   spin = 0; spinVel = 0;
   private spinGoal: number | null = null;
   private cur: Orbit = { yaw: 0, pitch: 0.16, dist: 7, ty: 0 };
@@ -262,7 +297,7 @@ export class GlobeStage implements Stage {
 
   constructor(private renderer: THREE.WebGLRenderer) {
     this.camera.position.z = 1;
-    this.blit = new THREE.ShaderMaterial({ vertexShader: blitVS, fragmentShader: blitFS, uniforms: { uTex: { value: this.rt.texture }, uCover: { value: new THREE.Vector2(1, 1) } }, depthTest: false, depthWrite: false });
+    this.blit = new THREE.ShaderMaterial({ vertexShader: blitVS, fragmentShader: blitFS, uniforms: { uTex: { value: this.rt.texture }, uCover: { value: new THREE.Vector2(1, 1) }, uArt: { value: new THREE.Vector2(1, 1) }, uTime: { value: 0 } }, depthTest: false, depthWrite: false });
     const q = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), this.blit);
     q.frustumCulled = false;
     this.scene.add(q);
@@ -316,7 +351,7 @@ export class GlobeStage implements Stage {
     // light for Pip (the planet, stand and sky use their own banded shaders)
     const key = new THREE.DirectionalLight(0xfff0d8, 3.2);
     key.position.set(-3, 4, 5);
-    this.world.add(new THREE.HemisphereLight(0xeef2ff, 0x5a4a3c, 2.4), key, this.owlPivot);
+    this.world.add(new THREE.HemisphereLight(0xeef2ff, 0x5a4a3c, 2.4), key, this.owlPivot, this.sparks.points);
     void buildStand().then((s) => { this.stand = s; this.world.add(s); this.tilt.add(s.userData.ring as THREE.Object3D); });
   }
 
@@ -324,10 +359,11 @@ export class GlobeStage implements Stage {
 
   resize(w: number, h: number) {
     this.w = w; this.h = h;
-    this.px = Math.max(2, Math.round(Math.min(w, h) / 270));
+    this.px = Math.min(w, h) > 1100 ? 3 : 2;
     this.rw = Math.ceil(w / this.px); this.rh = Math.ceil(h / this.px);
     this.rt.setSize(this.rw, this.rh);
     this.blit.uniforms.uCover.value.set((this.rw * this.px) / w, (this.rh * this.px) / h);
+    this.blit.uniforms.uArt.value.set(this.rw, this.rh);
     this.cam.aspect = this.rw / this.rh;
     this.cam.updateProjectionMatrix();
     this.frame();
@@ -369,8 +405,10 @@ export class GlobeStage implements Stage {
   /** The dotted flight path from home to tonight's place (null hides it). */
   setRoute(a: { lat: number; lon: number } | null, b: { lat: number; lon: number } | null) {
     if (this.route) { this.spinG.remove(this.route); this.route.geometry.dispose(); this.route = null; }
+    this.routePts = [];
     if (!a || !b) return;
     const pts = flightArc(a, b, 220);
+    this.routePts = pts;
     const g = new THREE.BufferGeometry().setFromPoints(pts);
     g.setAttribute('aT', new THREE.BufferAttribute(new Float32Array(pts.map((_, i) => i / (pts.length - 1))), 1));
     this.route = new THREE.Points(g, new THREE.ShaderMaterial({ vertexShader: routeVS, fragmentShader: routeFS, uniforms: { uTime: { value: 0 }, uFade: { value: 0 } } }));
@@ -475,6 +513,7 @@ export class GlobeStage implements Stage {
     const sunWorld = sunObj.clone().transformDirection(this.spinG.matrixWorld);
     this.earthMat.uniforms.uSunView.value.copy(sunWorld).transformDirection(this.cam.matrixWorldInverse);
     this.earthMat.uniforms.uTime.value = t;
+    this.blit.uniforms.uTime.value = t;
     this.earthMat.uniforms.uCloud.value = t * 0.012;
     (this.stars.material as THREE.ShaderMaterial).uniforms.uTime.value = t;
     if (this.route) {
@@ -487,16 +526,51 @@ export class GlobeStage implements Stage {
       // a lazy tilted loop just outside the ring, rising and dipping, banking into the turn
       this.owlA += dt * 0.32;
       const a = this.owlA, R = 1.52;
-      const pos = new THREE.Vector3(Math.cos(a) * R, Math.sin(a * 2) * 0.12 + Math.sin(a) * 0.38, Math.sin(a) * R * 0.92);
-      const ahead = new THREE.Vector3(Math.cos(a + 0.05) * R, Math.sin((a + 0.05) * 2) * 0.12 + Math.sin(a + 0.05) * 0.38, Math.sin(a + 0.05) * R * 0.92);
+      let pos = new THREE.Vector3(Math.cos(a) * R, Math.sin(a * 2) * 0.12 + Math.sin(a) * 0.38, Math.sin(a) * R * 0.92);
+      let ahead = new THREE.Vector3(Math.cos(a + 0.05) * R, Math.sin((a + 0.05) * 2) * 0.12 + Math.sin(a + 0.05) * 0.38, Math.sin(a + 0.05) * R * 0.92);
+      // with a place picked, Pip circles just above it instead, small and to one side, never over the pin
+      const fp = this.focusId ? this.places.find((x) => x.id === this.focusId) : null;
+      if (fp) {
+        const c = latLonToVec3(fp.lat, fp.lon, 1.0).applyMatrix4(this.spinG.matrixWorld);
+        const up = c.clone().normalize(), side = new THREE.Vector3(0, 1, 0).cross(up).normalize(), fwd = up.clone().cross(side);
+        const ring = (t: number) => c.clone().addScaledVector(up, 0.22 + Math.sin(t * 2) * 0.02).addScaledVector(side, Math.cos(t) * 0.2 + 0.12).addScaledVector(fwd, Math.sin(t) * 0.2);
+        pos = ring(a * 1.6); ahead = ring(a * 1.6 + 0.08);
+      }
+      this.owlPos.lerp(pos, 1 - Math.exp(-dt * 2.2));
       const o = this.owl.node;
-      o.position.copy(pos);
+      o.position.copy(this.owlPos);
+      o.scale.setScalar(fp ? 0.075 : 0.11);
       o.rotation.set(0, Math.atan2(ahead.x - pos.x, ahead.z - pos.z), 0);
       o.rotateZ(-0.35);
       o.position.y -= 0.08;
       this.owl.dark = 0.6;
       this.owl.update(dt);
     }
+
+    // particles
+    this.sparkT += dt;
+    if (this.sparkT > 0.05) {
+      this.sparkT = 0;
+      if (this.owl) {
+        const back = this.owl.node.getWorldDirection(new THREE.Vector3()).multiplyScalar(-0.25);
+        this.sparks.emit(this.owl.node.position.clone().add(new THREE.Vector3(0, 0.05, 0)), back.add(new THREE.Vector3(0, -0.04, 0)), 0.9, Math.random() < 0.6 ? 'gold' : 'cool');
+      }
+      for (const pl of [this.focusId ? this.places.find((x) => x.id === this.focusId) : null, this.tonight]) {
+        if (!pl || (pl === this.tonight && Math.random() < 0.6)) continue;
+        const at = latLonToVec3(pl.lat, pl.lon, 1.0).applyMatrix4(this.spinG.matrixWorld);
+        if (at.clone().normalize().dot(this.cam.position.clone().normalize()) > 0.05) this.sparks.rise(at, at.clone().normalize(), pl.id === this.focusId ? 'gold' : 'cool');
+      }
+    }
+    if (this.routePts.length) {
+      // a bright mote runs along the flight path, home to tonight's place, leaving a fading trail
+      this.routeT = (this.routeT + dt * 0.22) % 1.3;
+      if (this.routeT < 1) {
+        const f = this.routeT * (this.routePts.length - 1), i = Math.floor(f);
+        const q = this.routePts[i].clone().lerp(this.routePts[Math.min(i + 1, this.routePts.length - 1)], f - i).applyMatrix4(this.spinG.matrixWorld);
+        this.sparks.emit(q, new THREE.Vector3(), 0.7, 'gold', i % 3 === 0 ? 2 : 1);
+      }
+    }
+    this.sparks.update(dt, this.cam.position);
 
     // atmosphere: a billboard at the centre; the ring itself is drawn per art pixel in the shader
     this.atmo.quaternion.copy(this.cam.quaternion);
