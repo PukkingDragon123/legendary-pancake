@@ -52,7 +52,14 @@ def swing(p, a):
 
 
 def photo(name, scale=12, amount=0.6, **kw):
-    return dict(op='photo', src=os.path.join(PHOTOS, name), scale=scale, amount=amount, **kw)
+    """A photo layer from photos/<name>_s (CC0 scans, downscaled so they sample cleanly at our texel density).
+    Paths are relative to art/lowpix/house (make.py builds from there)."""
+    return dict(op='photo', src='photos/' + name + '_s', scale=scale, amount=amount, **kw)
+
+
+def paint_photo(name, scale, ramps, tint, tint_amount=0.55, shade=0.13, relight=0.55, **kw):
+    """Paint a surface with a real photo's colours, pulled towards a palette colour and shaded by the painted light."""
+    return photo(name, scale=scale, mode='colour', ramps=ramps, tint=tint, tint_amount=tint_amount, shade=shade, relight=relight, **kw)
 
 
 def ramp(base, steps=7, hue=12, sat=0.06, spread=0.8):
@@ -107,83 +114,78 @@ def house_ramps():
     )
 
 
-RIM = {'light_shift': 0.8, 'dark_shift': -0.9}
+RIM = {'light_shift': 0.5, 'dark_shift': -0.6}
+SOFT = {'length': 3, 'width': 0.9, 'rough': 0.35}
 
 
 def house_styles(S):
-    """The shared material language of the oak: deep furrowed bark with moss and lichen, carved heartwood, planks
-    with nail heads, stone, brass, iron, lamps, glass, leaves, rope and cloth."""
-    S.style('bark', ramp='bark', tone=3.9, rim={'light_shift': 0.5, 'dark_shift': -0.9},
-            brush={'flow': 'vertical', 'length': 5, 'width': 1.2, 'rough': 0.7}, layers=[
-                photo('bark_brown_02', scale=26, amount=0.7),
-                # old-oak bark: long ridges broken into staggered blocks by deep dark furrows, lit along their tops
-                {'id': 'ridges', 'op': 'spots', 'count': 240, 'radius': [1.2, 2.2], 'stretch': [0.4, 4.5, 0.4], 'roughness': 0.5, 'shift': 0.9,
-                 'bevel': {'shadow': 0, 'highlight': 1}},
-                {'id': 'furrows', 'op': 'spots', 'count': 300, 'radius': [0.7, 1.3], 'stretch': [0.35, 6, 0.35], 'roughness': 0.6, 'shift': -1.9,
-                 'bevel': {'shadow': 1, 'highlight': 0}},
-                {'id': 'cracks', 'op': 'cracks', 'scale': 6, 'width': 0.5, 'threshold': 0.74, 'shift': -1.3},
-                {'id': 'mottle', 'op': 'noise', 'scale': 11, 'amount': 0.55},
-                {'id': 'lichen', 'op': 'spots', 'count': 26, 'radius': [0.8, 2.2], 'roughness': 0.7, 'ramp': 'lichen', 'tone': 3.4, 'bevel': {'shadow': 1, 'highlight': 1}},
-                {'id': 'moss', 'op': 'patches', 'scale': 12, 'threshold': 0.76, 'ramp': 'moss', 'tone': 3.2, 'bevel': {'shadow': 1, 'highlight': 1, 'shadow_ramp': 'bark', 'shadow_tone': 1.2}},
-                {'id': 'mossfoot', 'op': 'gradient', 'axis': 'y', 'amount': 0.5},
-            ])
-    S.style('bark_limb', ramp='bark', tone=3.8, rim={'light_shift': 0.6, 'dark_shift': -0.9},
-            brush={'flow': 'path', 'length': 4, 'width': 1, 'rough': 0.65}, layers=[
-                photo('bark_brown_02', scale=20, amount=0.8),
-                {'id': 'furrows', 'op': 'stripes', 'axis': 'around', 'period': 0.08, 'width': 0.25, 'shift': -1.4, 'wobble': 0.5},
-                {'id': 'mottle', 'op': 'noise', 'scale': 7, 'amount': 0.45},
-                {'id': 'moss', 'op': 'patches', 'scale': 5, 'threshold': 0.58, 'ramp': 'moss', 'tone': 3.2, 'faces': ['up'],
-                 'bevel': {'shadow': 1, 'highlight': 1, 'shadow_ramp': 'bark', 'shadow_tone': 1.0}},
-                {'id': 'lichen', 'op': 'spots', 'count': 8, 'radius': [0.8, 2.2], 'ramp': 'lichen', 'tone': 3.4, 'bevel': True},
-            ])
-    S.style('heart', ramp='heart', tone=4.2, rim=RIM, brush={'flow': 'vertical', 'length': 4, 'rough': 0.5, 'textures': {'heart': 'wood'}}, layers=[
-        photo('oak_veneer_01', scale=30, amount=0.5),
-        {'id': 'rings', 'op': 'stripes', 'axis': 'x', 'period': 1.8, 'width': 0.32, 'shift': -0.9, 'wobble': 0.3},
-        {'id': 'mottle', 'op': 'noise', 'scale': 6, 'amount': 0.35}])
-    S.style('plank', ramp='plank', tone=4.2, rim=RIM, brush={'flow': 'long', 'length': 6, 'width': 0.8, 'rough': 0.5}, layers=[
-        photo('weathered_planks', scale=34, amount=0.6),
-        {'id': 'grain', 'op': 'noise', 'scale': 2.5, 'amount': 0.35},
-        {'id': 'wear', 'op': 'wear', 'width': 1, 'density': 0.25, 'ramp': 'dark', 'tone': 2.2}])
-    S.style('wood', ramp='wood', tone=3.8, rim=RIM, brush={'flow': 'long', 'length': 5, 'width': 0.7, 'rough': 0.5}, layers=[
-        photo('oak_veneer_01', scale=24, amount=0.55),
-        {'id': 'grain', 'op': 'noise', 'scale': 2.2, 'amount': 0.35},
-        {'id': 'wear', 'op': 'wear', 'width': 1, 'density': 0.2, 'ramp': 'plank', 'tone': 5.2}])
-    S.style('dark', ramp='dark', tone=3.4, rim=RIM, brush={'flow': 'long', 'length': 5, 'width': 0.7, 'rough': 0.5}, layers=[
-        photo('oak_veneer_01', scale=22, amount=0.5),
-        {'id': 'grain', 'op': 'noise', 'scale': 2, 'amount': 0.3}])
-    S.style('stone', ramp='stone', tone=4.0, rim={'light_shift': 1.0, 'dark_shift': -1.1}, brush={'flow': 'horizontal', 'length': 3, 'rough': 0.6, 'textures': {'stone': 'stone'}}, layers=[
-        photo('rock_face_03', scale=22, amount=0.8),
-        {'id': 'mottle', 'op': 'noise', 'scale': 4, 'amount': 0.4},
-        {'id': 'moss', 'op': 'patches', 'scale': 7, 'threshold': 0.68, 'ramp': 'moss', 'tone': 3.4, 'bevel': {'shadow': 1, 'highlight': 1}},
-        {'id': 'lichen', 'op': 'spots', 'count': 3, 'radius': [0.6, 1.4], 'ramp': 'lichen', 'tone': 3.8}])
-    S.style('brass', ramp='brass', tone=3.8, rim={'light_shift': 1.4, 'dark_shift': -1.2}, brush={'off': True}, layers=[
-        {'id': 'patina', 'op': 'patches', 'scale': 3, 'threshold': 0.7, 'shift': -0.8},
-        {'id': 'gloss', 'op': 'gloss', 'dash': True, 'shift': 1.2}])
-    S.style('iron', ramp='iron', tone=2.8, rim={'light_shift': 1.0, 'dark_shift': -0.8}, brush={'off': True}, layers=[
-        {'id': 'mottle', 'op': 'noise', 'scale': 2, 'amount': 0.4},
-        {'id': 'rust', 'op': 'patches', 'scale': 2.5, 'threshold': 0.74, 'ramp': 'terra', 'tone': 1.6}])
-    S.style('lamp', ramp='lamp', tone=3.4, light=0.15, rim={'light_shift': 0.6, 'dark_shift': -0.4}, brush={'off': True}, layers=[
+    """The shared material language of the oak, painted from real CC0 scans (bark, oak, planks, rock, leaves)
+    pulled towards the calm palette: deep furrowed bark with moss and lichen, carved heartwood, worn planks with
+    nail heads, stone, brass, iron, lamps, glass, leaves, rope and cloth. Soft rims, no pixel outlines."""
+    S.style('bark', ramp='bark', tone=3.9, rim={'light_shift': 0.4, 'dark_shift': -0.7}, brush=dict(SOFT, flow='vertical', length=5), layers=[
+        {'id': 'moss', 'op': 'patches', 'scale': 12, 'threshold': 0.74, 'ramp': 'moss', 'tone': 3.2, 'bevel': {'shadow': 1, 'highlight': 0, 'shadow_ramp': 'bark', 'shadow_tone': 1.2}},
+        {'id': 'lichen', 'op': 'spots', 'count': 18, 'radius': [0.9, 2.6], 'roughness': 0.7, 'ramp': 'lichen', 'tone': 3.4},
+        paint_photo('bark_brown_02', 34, ['bark'], 'bark:6', tint_amount=0.45, shade=0.12),
+        {'id': 'furrows', 'op': 'spots', 'count': 220, 'radius': [0.6, 1.2], 'stretch': [0.35, 6, 0.35], 'roughness': 0.6, 'shift': -2.4},
+        {'id': 'ridges', 'op': 'spots', 'count': 160, 'radius': [1.0, 2.0], 'stretch': [0.4, 4.5, 0.4], 'roughness': 0.5, 'shift': 1.2},
+        {'id': 'mottle', 'op': 'noise', 'scale': 11, 'amount': 0.8},
+        {'id': 'mossfoot', 'op': 'gradient', 'axis': 'y', 'amount': 0.8},
+    ])
+    S.style('bark_limb', ramp='bark', tone=3.8, rim={'light_shift': 0.5, 'dark_shift': -0.7}, brush=dict(SOFT, flow='path', length=4), layers=[
+        {'id': 'moss', 'op': 'patches', 'scale': 5, 'threshold': 0.6, 'ramp': 'moss', 'tone': 3.2, 'faces': ['up'],
+         'bevel': {'shadow': 1, 'highlight': 0, 'shadow_ramp': 'bark', 'shadow_tone': 1.2}},
+        {'id': 'lichen', 'op': 'spots', 'count': 8, 'radius': [0.8, 2.2], 'ramp': 'lichen', 'tone': 3.4},
+        paint_photo('bark_brown_02', 26, ['bark'], 'bark:6', tint_amount=0.45, shade=0.12),
+        {'id': 'furrows', 'op': 'stripes', 'axis': 'around', 'period': 0.08, 'width': 0.22, 'shift': -1.8, 'wobble': 0.5},
+        {'id': 'mottle', 'op': 'noise', 'scale': 7, 'amount': 0.6},
+    ])
+    S.style('heart', ramp='heart', tone=4.2, rim=RIM, brush=dict(SOFT, flow='vertical'), layers=[
+        paint_photo('oak_veneer_01', 30, ['heart'], 'heart:5', tint_amount=0.5),
+        {'id': 'rings', 'op': 'stripes', 'axis': 'x', 'period': 1.8, 'width': 0.3, 'shift': -1.4, 'wobble': 0.3},
+        {'id': 'mottle', 'op': 'noise', 'scale': 6, 'amount': 0.5}])
+    S.style('plank', ramp='plank', tone=4.2, rim=RIM, brush=dict(SOFT, flow='long', length=6), layers=[
+        paint_photo('weathered_planks', 40, ['plank'], 'plank:5', tint_amount=0.5),
+        {'id': 'grain', 'op': 'noise', 'scale': 2.5, 'amount': 0.5},
+        {'id': 'wear', 'op': 'wear', 'width': 1, 'density': 0.25, 'shift': -1.5}])
+    S.style('wood', ramp='wood', tone=3.8, rim=RIM, brush=dict(SOFT, flow='long', length=5), layers=[
+        paint_photo('oak_veneer_01', 26, ['wood'], 'wood:5', tint_amount=0.5),
+        {'id': 'grain', 'op': 'noise', 'scale': 2.2, 'amount': 0.5},
+        {'id': 'wear', 'op': 'wear', 'width': 1, 'density': 0.2, 'shift': 1.4}])
+    S.style('dark', ramp='dark', tone=3.4, rim=RIM, brush=dict(SOFT, flow='long', length=5), layers=[
+        paint_photo('oak_veneer_01', 22, ['dark'], 'dark:4', tint_amount=0.6),
+        {'id': 'grain', 'op': 'noise', 'scale': 2, 'amount': 0.45}])
+    S.style('stone', ramp='stone', tone=4.0, rim={'light_shift': 0.7, 'dark_shift': -0.8}, brush=dict(SOFT, textures={'stone': 'stone'}), layers=[
+        {'id': 'moss', 'op': 'patches', 'scale': 7, 'threshold': 0.7, 'ramp': 'moss', 'tone': 3.2},
+        {'id': 'lichen', 'op': 'spots', 'count': 3, 'radius': [0.6, 1.4], 'ramp': 'lichen', 'tone': 3.8},
+        paint_photo('rock_face_03', 26, ['stone'], 'stone:5', tint_amount=0.45),
+        {'id': 'mottle', 'op': 'noise', 'scale': 4, 'amount': 0.5}])
+    S.style('brass', ramp='brass', tone=3.8, rim={'light_shift': 1.2, 'dark_shift': -1.0}, brush={'off': True}, dither=0, layers=[
+        {'id': 'patina', 'op': 'patches', 'scale': 3, 'threshold': 0.66, 'ramp': 'sky', 'tone': 2.6},
+        {'id': 'mottle', 'op': 'noise', 'scale': 2, 'amount': 0.6},
+        {'id': 'gloss', 'op': 'gloss', 'dash': True, 'shift': 1.8}])
+    S.style('iron', ramp='iron', tone=2.8, rim={'light_shift': 1.0, 'dark_shift': -0.8}, brush={'off': True}, dither=0, layers=[
+        {'id': 'mottle', 'op': 'noise', 'scale': 2, 'amount': 0.7},
+        {'id': 'rust', 'op': 'patches', 'scale': 2.5, 'threshold': 0.72, 'ramp': 'terra', 'tone': 1.6}])
+    S.style('lamp', ramp='lamp', tone=3.4, light=0.15, rim={'light_shift': 0.8, 'dark_shift': -0.5}, brush={'off': True}, dither=0, layers=[
         {'id': 'core', 'op': 'gradient', 'axis': 'y', 'amount': -0.8}])
-    S.style('glass', ramp='glass', tone=2.4, light=0.3, rim={'light_shift': 1.2, 'dark_shift': -0.6}, brush={'off': True}, layers=[
+    S.style('glass', ramp='glass', tone=2.4, light=0.3, rim={'light_shift': 1.6, 'dark_shift': -0.8}, brush={'off': True}, dither=0, layers=[
         {'id': 'sheen', 'op': 'gradient', 'axis': [1, 1, 0], 'amount': 1.2},
         {'id': 'gloss', 'op': 'gloss', 'dash': True, 'shift': 2.0}])
-    S.style('leaf', ramp='leaf', tone=3.6, rim={'light_shift': 0.8, 'dark_shift': -1.0}, brush={'flow': 'vertical', 'length': 2.5, 'rough': 0.8, 'textures': {'leaf': 'organic'}}, layers=[
-        photo('forest_leaves_02', scale=18, amount=0.9),
-        {'id': 'clumps', 'op': 'spots', 'count': 30, 'radius': [1.2, 2.6], 'shift': 0.9, 'roughness': 0.6, 'bevel': {'shadow': 1, 'highlight': 1}},
-        {'id': 'holes', 'op': 'spots', 'count': 18, 'radius': [0.8, 1.6], 'shift': -1.2, 'roughness': 0.6},
+    S.style('leaf', ramp='leaf', tone=3.6, rim={'light_shift': 0.6, 'dark_shift': -0.8}, brush=dict(SOFT, flow='vertical', textures={'leaf': 'organic'}), layers=[
+        paint_photo('forest_leaves_02', 22, ['leaf'], 'leaf:5', tint_amount=0.45),
         {'id': 'under', 'op': 'gradient', 'axis': 'y', 'amount': 1.1}])
-    S.style('moss', ramp='moss', tone=4.0, rim={'light_shift': 0.6, 'dark_shift': -0.8}, brush={'flow': 'vertical', 'length': 2, 'rough': 0.85, 'textures': {'moss': 'moss'}}, layers=[
+    S.style('moss', ramp='moss', tone=4.0, rim={'light_shift': 0.5, 'dark_shift': -0.6}, brush=dict(SOFT, flow='vertical', textures={'moss': 'moss'}), layers=[
+        {'id': 'mottle', 'op': 'noise', 'scale': 2, 'amount': 0.9},
+        {'id': 'tufts', 'op': 'spots', 'count': 12, 'radius': [0.5, 1.2], 'shift': 1.4}])
+    S.style('rope', ramp='rope', tone=3.4, rim=RIM, brush={'off': True}, dither=0, layers=[
+        {'id': 'twist', 'op': 'stripes', 'axis': [1, 1, 1], 'period': 1.4, 'width': 0.35, 'shift': -1.4}])
+    S.style('cloth', ramp='cloth', tone=3.6, rim=RIM, brush=dict(SOFT, flow='vertical', textures={'cloth': 'cloth'}), layers=[
+        {'id': 'weave', 'op': 'noise', 'scale': 1, 'amount': 0.45}])
+    S.style('terra', ramp='terra', tone=3.6, rim={'light_shift': 0.9, 'dark_shift': -0.9}, brush={'off': True}, dither=0, layers=[
         {'id': 'mottle', 'op': 'noise', 'scale': 2, 'amount': 0.6},
-        {'id': 'tufts', 'op': 'spots', 'count': 12, 'radius': [0.5, 1.2], 'shift': 1.0}])
-    S.style('rope', ramp='rope', tone=3.4, rim=RIM, brush={'off': True}, layers=[
-        {'id': 'twist', 'op': 'stripes', 'axis': [1, 1, 1], 'period': 1.4, 'width': 0.35, 'shift': -1.0}])
-    S.style('cloth', ramp='cloth', tone=3.6, rim=RIM, brush={'flow': 'vertical', 'length': 3, 'rough': 0.5, 'textures': {'cloth': 'cloth'}}, layers=[
-        {'id': 'weave', 'op': 'noise', 'scale': 1, 'amount': 0.3}])
-    S.style('terra', ramp='terra', tone=3.6, rim={'light_shift': 1.0, 'dark_shift': -1.0}, brush={'off': True}, layers=[
-        {'id': 'mottle', 'op': 'noise', 'scale': 2, 'amount': 0.4},
-        {'id': 'lip', 'op': 'band', 'axis': 'y', 'from': 0.6, 'to': 1.0, 'shift': 0.5},
+        {'id': 'lip', 'op': 'band', 'axis': 'y', 'from': 0.6, 'to': 1.0, 'shift': 0.8},
         {'id': 'moss', 'op': 'patches', 'scale': 3, 'threshold': 0.72, 'ramp': 'moss', 'tone': 3.2}])
-    S.style('soot', ramp='soot', tone=1.5, light=0.2, brush={'off': True}, rim={'light_shift': 0.3, 'dark_shift': 0})
+    S.style('soot', ramp='soot', tone=1.5, light=0.2, brush={'off': True}, dither=0, rim={'light_shift': 0.3, 'dark_shift': 0})
 
 
 # --------------------------------------------------------------------------------------------------- the spec
@@ -195,13 +197,13 @@ class Spec:
             'license': 'CC0-1.0',
             'density': density,
             'budget': {'tris': tris, 'colors': colors},
-            'light': light or {'dir': [-0.45, 1.0, 0.65], 'strength': 0.42, 'gradient': 0.3, 'ao': 0.6, 'ao_height': 14},
+            'light': light or {'dir': [-0.45, 1.0, 0.65], 'strength': 0.7, 'gradient': 0.45, 'ao': 0.9, 'ao_height': 14},
             'render': {'background': '#1f2622', 'hero': [-30, 16], 'shadow': 0.35},
             'palette': {'ramps': house_ramps()},
             'styles': {},
             'parts': [],
         }
-        self.d['brush'] = brush or {'length': 3, 'width': 0.8, 'rough': 0.55, 'overshoot': 0.3, 'flow': 'horizontal',
+        self.d['brush'] = brush or {'length': 3, 'width': 0.9, 'rough': 0.35, 'overshoot': 0.2, 'flow': 'horizontal',
                                     'flows': {'moss': 'vertical', 'bark': 'vertical'},
                                     'textures': {'stone': 'stone', 'wood': 'wood', 'plank': 'wood', 'dark': 'wood', 'heart': 'wood',
                                                  'moss': 'moss', 'leaf': 'organic', 'bark': 'wood', 'cloth': 'cloth', 'iron': 'metal', 'brass': 'metal'}}

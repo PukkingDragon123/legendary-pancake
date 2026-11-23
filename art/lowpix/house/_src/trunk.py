@@ -10,6 +10,7 @@ a knothole, ivy strands and moss. Doors, porch, balcony, roots, interior fitting
 import math
 import random
 
+from hx import paint_photo as pp
 from hx import (BANDS, CHIMNEY_A, FLOOR_Y, LADDER_A, NSIDES, OPEN_A, R_IN, RO, ROOF_Y, SLAB, WINDOWS, Spec, pol, swing)
 
 FIDS = ['f1', 'f2', 'f3']
@@ -131,7 +132,7 @@ def cut_lips(S, ys, deep=False):
 
 def styles(S):
     S.style('heartcut', ramp='heart', tone=4.4, rim={'light_shift': 0.6, 'dark_shift': -0.7}, brush={'flow': 'vertical', 'length': 4, 'width': 0.6, 'rough': 0.45}, layers=[
-        photo_veneer(),
+        pp('oak_veneer_01', 36, ['heart'], 'heart:5', tint_amount=0.45),
         {'id': 'rings', 'op': 'stripes', 'axis': [1, 0, 0], 'period': 1.9, 'width': 0.3, 'shift': -1.0, 'wobble': 0.35, 'space': 'world'},
         {'id': 'rays', 'op': 'spots', 'count': 18, 'radius': [0.3, 0.6], 'stretch': [6, 0.4, 6], 'shift': 0.8},
         {'id': 'checks', 'op': 'cracks', 'scale': 5, 'width': 0.5, 'threshold': 0.7, 'shift': -1.6},
@@ -155,7 +156,7 @@ def styles(S):
         {'id': 'under', 'op': 'band', 'axis': 'y', 'from': -1, 'to': -0.3, 'ramp': 'dark', 'tone': 3.0, 'faces': ['sides']},
         # the planked ceiling of the room below (the loft's bottom cap)
         {'id': 'ceil', 'op': 'fill', 'faces': ['start'], 'ramp': 'plank', 'tone': 3.3},
-        photo('weathered_planks', scale=40, amount=0.55, faces=['start']),
+        pp('weathered_planks', 44, ['plank'], 'plank:5', tint_amount=0.5, faces=['start']),
         {'id': 'cboards', 'op': 'stripes', 'axis': 'z', 'period': 7, 'width': 0.13, 'shift': -1.5, 'space': 'world', 'faces': ['start'], 'wobble': 0.05},
         {'id': 'cbutts', 'op': 'stripes', 'axis': 'x', 'period': 41, 'width': 0.03, 'shift': -1.3, 'space': 'world', 'faces': ['start']},
         {'id': 'nails', 'op': 'spots', 'count': 120, 'radius': [0.35, 0.5], 'shift': -1.8, 'faces': ['start']},
@@ -206,7 +207,7 @@ def ceiling_fittings(S, y0, holes=()):
     """Under a slab whose underside is at y0: joists running front to back (their end grain at the cut), iron
     straps, a crosswise beam with a boss, hatch frames and the room's hanging lantern."""
     S.style('joist', ramp='dark', tone=3.6, rim=RIM_SOFT, brush={'flow': 'z', 'length': 5, 'rough': 0.5}, layers=[
-        photo('oak_veneer_01', scale=20, amount=0.5),
+        pp('oak_veneer_01', 22, ['dark'], 'dark:4', tint_amount=0.55),
         {'id': 'endgrain', 'op': 'fill', 'faces': ['front'], 'ramp': 'heart', 'tone': 4.4},
         {'id': 'endrings', 'op': 'stripes', 'axis': [1, 1, 0], 'period': 1.2, 'width': 0.3, 'shift': -0.8, 'faces': ['front']},
         {'id': 'wear', 'op': 'wear', 'width': 1, 'density': 0.3, 'ramp': 'heart', 'tone': 5}])
@@ -348,7 +349,7 @@ def ivy(S, a0, y0, length, seed, card_every=1):
 def chimney(S, y0, y1, top=False):
     """The stone chimney stack climbing the back-left of the trunk, coursed rubble with mossy ledges."""
     S.style('chimney', ramp='stone', tone=3.9, rim={'light_shift': 1.0, 'dark_shift': -1.1}, brush={'flow': 'horizontal', 'length': 3, 'rough': 0.6, 'textures': {'stone': 'stone'}}, layers=[
-        photo('rock_face_03', scale=18, amount=0.7),
+        pp('rock_face_03', 22, ['stone'], 'stone:5', tint_amount=0.45),
         {'id': 'blocks', 'op': 'scales', 'along': 'x', 'size': [7, 4.5], 'shape': 'square', 'gap': 0.22, 'gradient': 0.6, 'rim': 0.6, 'highlight': 0.8, 'shadow': -1.6, 'jitter': 0.9},
         {'id': 'soot', 'op': 'gradient', 'axis': 'y', 'amount': -0.4},
         {'id': 'moss', 'op': 'patches', 'scale': 8, 'threshold': 0.66, 'ramp': 'moss', 'tone': 3.4, 'bevel': {'shadow': 1, 'highlight': 1}}])

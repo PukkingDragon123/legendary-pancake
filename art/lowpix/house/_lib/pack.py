@@ -85,6 +85,30 @@ def png_bytes(atlas, keep_alpha):
     return buf.getvalue()
 
 
+def webp_bytes(atlas, keep_alpha, quality=88):
+    """The atlas as a lossy WebP (painted textures compress far better than as PNG); alpha kept for cut-out cards."""
+    img = Image.fromarray(atlas if keep_alpha else atlas[..., :3].copy(), 'RGBA' if keep_alpha else 'RGB')
+    buf = io.BytesIO()
+    img.save(buf, format='WEBP', quality=quality, method=6, alpha_quality=100)
+    return buf.getvalue()
+
+
+# parts painted with these styles are drawn by the game with a crisp tiling texture (public/models/house/tex/),
+# modulated by their painted atlas
+TILES = {'bark': 'bark', 'bark_limb': 'bark', 'root': 'bark', 'plank': 'wood', 'wood': 'wood', 'dark': 'wood', 'frame': 'wood',
+         'joist': 'wood', 'slabedge': 'boards', 'stone': 'stone', 'chimney': 'stone', 'grey': 'grey'}
+
+
+def tile_of(part):
+    st = part.get('style')
+    st = st[-1] if isinstance(st, list) and st else st
+    if not isinstance(st, str) or st not in TILES:
+        return None
+    if (part.get('paint') or {}).get('ramp'):
+        return None  # recoloured parts (a red door, sky-blue box) keep their own paint
+    return 'tile_' + TILES[st]
+
+
 def pack(model, meta, path):
     glow, pane, nodes = set(meta.get('glow', [])), set(meta.get('pane', [])), list(meta.get('nodes', []))
     insts = {i.id: i for i in model.instances}
@@ -97,7 +121,31 @@ def pack(model, meta, path):
             cur = insts.get(cur.parent) if cur.parent else None
         return None
 
-    AH, AW = model.atlas.shape[:2]
+    # faces whose painted images are identical (the same leaf-cluster card, say) share one copy in a repacked atlas
+    from lowpix.pack import shelf_pack
+    src = model.atlas
+    uniq, where = {}, {}
+    for inst in model.instances:
+        for f in inst.faces:
+            x, y = f.rect
+            img = src[y:y + f.H, x:x + f.W]
+            key = (f.W, f.H, hash(img.tobytes()))
+            if key not in uniq:
+                uniq[key] = img
+            where[id(f)] = key
+    keys = list(uniq)
+    AW, AH, pos = shelf_pack([(uniq[k].shape[1], uniq[k].shape[0]) for k in keys], gutter=1)
+    atlas_new = np.zeros((AH, AW, 4), np.uint8)
+    rect = {}
+    for k, (x, y) in zip(keys, pos):
+        im = uniq[k]
+        h, w = im.shape[:2]
+        atlas_new[y:y + h, x:x + w] = im
+        atlas_new[y - 1, x:x + w] = im[0]
+        atlas_new[y + h, x:x + w] = im[-1]
+        atlas_new[y - 1:y + h + 1, x - 1] = atlas_new[y - 1:y + h + 1, x]
+        atlas_new[y - 1:y + h + 1, x + w] = atlas_new[y - 1:y + h + 1, x + w - 1]
+        rect[k] = (x, y)
     groups = {}  # (node, cls) -> lists
     for inst in model.instances:
         if not inst.faces:
@@ -107,10 +155,13 @@ def pack(model, meta, path):
         if nid is not None:
             W = np.linalg.inv(insts[nid].world) @ W
         for f in inst.faces:
-            cls = 'glow' if inst.src_id in glow else 'pane' if inst.src_id in pane else 'card' if f.double_sided else 'solid'
-            g = groups.setdefault((nid, cls), {'P': [], 'UV': [], 'I': [], 'n': 0})
+            cls = 'glow' if inst.src_id in glow else 'pane' if inst.src_id in pane else 'card' if f.double_sided else tile_of(inst.part) or 'solid'
+            g = groups.setdefault((nid, cls), {'P': [], 'UV': [], 'I': [], 'n': 0, 'col': []})
+            if cls.startswith('tile_'):
+                x0, y0 = rect[where[id(f)]]
+                g['col'].append(atlas_new[y0:y0 + f.H, x0:x0 + f.W, :3].reshape(-1, 3))
             pts = f.pts @ W[:3, :3].T + W[:3, 3]
-            x, y = f.rect
+            x, y = rect[where[id(f)]]
             uv = np.c_[(x + f.uv[:, 0] * f.W) / AW, (y + f.uv[:, 1] * f.H) / AH]
             g['P'].append(pts)
             g['UV'].append(uv)
@@ -149,6 +200,8 @@ def pack(model, meta, path):
         return len(accs) - 1
 
     mat_ix = {'solid': 0, 'card': 1, 'glow': 2, 'pane': 3}
+    for k in TILES.values():
+        mat_ix['tile_' + k] = 0
     bounds = [np.full(3, np.inf), np.full(3, -np.inf)]
     tris = 0
     by_node = {}
@@ -169,7 +222,13 @@ def pack(model, meta, path):
         accs[pa]['max'] = [int(v) for v in q.max(axis=0)]
         ta = acc(uv, 'VEC2', 5123, 34962, normalized=True)
         ia = acc(I.astype(np.uint16) if len(P) < 65536 else I, 'SCALAR', 5123 if len(P) < 65536 else 5125, 34963)
-        meshes.append({'name': cls, 'primitives': [{'attributes': {'POSITION': pa, 'TEXCOORD_0': ta}, 'indices': ia, 'material': mat_ix[cls]}]})
+        mesh = {'name': cls, 'primitives': [{'attributes': {'POSITION': pa, 'TEXCOORD_0': ta}, 'indices': ia, 'material': mat_ix[cls]}]}
+        if g.get('col'):
+            # the painted atlas's mean colour under a tiling texture: the game divides by it, so the atlas only
+            # carries the painted variation (moss, lichen, light, wear) over the crisp tiling scan
+            c = np.concatenate(g['col']).astype(np.float64).mean(axis=0) / 255.0
+            mesh['extras'] = {'base': [round(float(v), 4) for v in c]}
+        meshes.append(mesh)
         by_node.setdefault(nid, []).append(len(meshes) - 1)
 
     scene_nodes = []
@@ -190,8 +249,8 @@ def pack(model, meta, path):
         scene_nodes.append(len(gnodes) - 1)
 
     has_cards = ('card' in {c for _, c in groups})
-    atlas = dilate(model.atlas)
-    img = png_bytes(atlas, keep_alpha=has_cards)
+    atlas = dilate(atlas_new)
+    img = webp_bytes(atlas, keep_alpha=has_cards)
     iv = view(img)
 
     def mat(name, ds=False, blend='MASK'):
@@ -203,11 +262,11 @@ def pack(model, meta, path):
 
     gltf = {
         'asset': {'version': '2.0', 'generator': 'hoot-hollow house pack (lowpix)'},
-        'extensionsUsed': ['KHR_mesh_quantization'], 'extensionsRequired': ['KHR_mesh_quantization'],
+        'extensionsUsed': ['KHR_mesh_quantization', 'EXT_texture_webp'], 'extensionsRequired': ['KHR_mesh_quantization', 'EXT_texture_webp'],
         'scene': 0, 'scenes': [{'name': model.name, 'nodes': scene_nodes}], 'nodes': gnodes, 'meshes': meshes,
         'materials': [mat('solid', blend='OPAQUE'), mat('card', True), mat('glow'), mat('pane', True)],
-        'textures': [{'sampler': 0, 'source': 0}], 'samplers': [{'magFilter': 9728, 'minFilter': 9986, 'wrapS': 33071, 'wrapT': 33071}],
-        'images': [{'bufferView': iv, 'mimeType': 'image/png', 'name': 'atlas'}],
+        'textures': [{'sampler': 0, 'extensions': {'EXT_texture_webp': {'source': 0}}}], 'samplers': [{'magFilter': 9729, 'minFilter': 9987, 'wrapS': 33071, 'wrapT': 33071}],
+        'images': [{'bufferView': iv, 'mimeType': 'image/webp', 'name': 'atlas'}],
         'accessors': accs, 'bufferViews': views, 'buffers': [{'byteLength': 0}],
     }
     binary = b''.join(bins)
@@ -220,6 +279,6 @@ def pack(model, meta, path):
     with open(path, 'wb') as fh:
         fh.write(glb)
     lo, hi = bounds
-    return {'bytes': len(glb), 'tris': tris, 'atlas': [int(AW), int(AH)], 'png': len(img),
+    return {'bytes': len(glb), 'tris': tris, 'atlas': [int(AW), int(AH)], 'png': len(img), 'atlas_png': atlas,
             'min': [round(float(v), 1) for v in lo] if np.isfinite(lo).all() else None,
             'max': [round(float(v), 1) for v in hi] if np.isfinite(hi).all() else None}

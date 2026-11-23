@@ -5,7 +5,7 @@ sign, webs and curtain are animated by src/world/house/locks.ts when the boards 
 import math
 import random
 
-from hx import FLOOR_Y, OPEN_A, R_IN, RO, ROOM_H, Spec, text_art
+from hx import FLOOR_Y, OPEN_A, R_IN, RO, ROOM_H, Spec, paint_photo, text_art
 from trunk import R_of, styles as trunk_styles
 
 LEVEL = {'f2': 3, 'f3': 6}
@@ -37,7 +37,7 @@ def boards(fid):
     S = Spec('boards_' + fid, density=2, desc=f'Boarded-up {fid}: planks, sign with padlock, cobwebs, dust sheets')
     trunk_styles(S)
     S.style('grey', ramp='stone', tone=4.4, rim={'light_shift': 0.9, 'dark_shift': -1.1}, brush={'flow': 'x', 'length': 6, 'width': 0.6, 'rough': 0.55, 'textures': {'stone': 'wood'}}, layers=[
-        {'id': 'ph', 'op': 'photo', 'src': S.d['styles']['plank']['layers'][0]['src'], 'scale': 30, 'amount': 0.8},
+        dict(paint_photo('weathered_planks', 34, ['stone'], 'stone:5', tint_amount=0.6), id='ph'),
         {'id': 'streaks', 'op': 'spots', 'count': 10, 'radius': [0.6, 1.2], 'stretch': [8, 0.4, 0.4], 'shift': -1.2},
         {'id': 'knots', 'op': 'spots', 'count': 2, 'radius': [0.8, 1.1], 'ramp': 'dark', 'tone': 2.0, 'bevel': True},
         {'id': 'lichen', 'op': 'spots', 'count': 3, 'radius': [0.6, 1.4], 'ramp': 'lichen', 'tone': 3.4},

@@ -6,7 +6,7 @@
 // and hands back ready-to-place groups.
 import * as THREE from 'three';
 import { PX, wind } from '../../gfx/box.ts';
-import { instanceGLB } from '../../gfx/glb.ts';
+import { instanceGLB, modelUrl } from '../../gfx/glb.ts';
 import { patchCut } from './kit.ts';
 
 /** Shared looks the house drives every frame (night glow, window glass, wind). */
@@ -58,6 +58,8 @@ export interface PartOpts {
   /** panes start dark (boarded-up floor) */
   dead?: boolean;
   shadows?: boolean;
+  /** keep the texture nearest-filtered (pixel-art props) */
+  nearest?: boolean;
 }
 
 export interface HousePart {
@@ -70,18 +72,78 @@ export interface HousePart {
   dispose(): void;
 }
 
+// ------------------------------------------------------------------ tiling scans (BUSHED's look)
+
+/**
+ * The big surfaces (bark, planks, beams, stone) are drawn with crisp high-resolution pixel-art scans that tile in
+ * house space (triplanar: they wrap the round trunk, the roots and the boughs without UVs), modulated by the
+ * model's own painted atlas, which carries the moss, lichen, wear and painted light. House px per repeat:
+ */
+const TILE_SCALE: Record<string, number> = { bark: 72, wood: 34, boards: 60, stone: 42, grey: 46 };
+const tileTex = new Map<string, THREE.Texture>();
+const texLoader = new THREE.TextureLoader();
+function tileTexture(kind: string): THREE.Texture {
+  let t = tileTex.get(kind);
+  if (t) return t;
+  t = texLoader.load(modelUrl(`house/tex/${kind}.png`));
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.magFilter = THREE.NearestFilter;
+  t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.anisotropy = 8;
+  tileTex.set(kind, t);
+  return t;
+}
+
+function patchTile(m: THREE.Material, kind: string, base: THREE.Color) {
+  const u = { uTile: { value: tileTexture(kind) }, uTileBase: { value: base }, uTileScale: { value: TILE_SCALE[kind] ?? 48 } };
+  const prev = m.onBeforeCompile;
+  m.onBeforeCompile = (sh, r) => {
+    prev?.call(m, sh, r);
+    Object.assign(sh.uniforms, u);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vTileP; varying vec3 vTileN;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\nvTileP = (modelMatrix * vec4(transformed, 1.0)).xyz * 16.0;\nvTileN = normalize(mat3(modelMatrix) * objectNormal);');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vTileP; varying vec3 vTileN;\nuniform sampler2D uTile; uniform vec3 uTileBase; uniform float uTileScale;')
+      .replace('#include <map_fragment>', `#include <map_fragment>
+{
+  vec3 tw = pow(abs(normalize(vTileN)), vec3(8.0)); tw /= (tw.x + tw.y + tw.z);
+  vec3 p = vTileP / uTileScale;
+  vec3 tc = texture2D(uTile, vec2(p.z, -p.y)).rgb * tw.x + texture2D(uTile, vec2(p.x, p.z)).rgb * tw.y + texture2D(uTile, vec2(p.x, -p.y)).rgb * tw.z;
+  vec3 k = clamp(diffuseColor.rgb / max(uTileBase, vec3(0.02)), vec3(0.25), vec3(2.4));
+  diffuseColor.rgb = tc * k;
+}`);
+  };
+  const key = m.customProgramCacheKey?.bind(m);
+  m.customProgramCacheKey = () => (key ? key() : '') + '|tile';
+}
+
 function convert(root: THREE.Object3D, o: PartOpts, part: HousePart) {
   const mats = new Map<string, THREE.Material>();
+  let smooth: THREE.Texture | null = null;
   root.traverse((n) => {
     const mesh = n as THREE.Mesh;
     if (!mesh.isMesh) return;
     const src = mesh.material as THREE.MeshStandardMaterial;
-    const map = src.map;
+    let map = src.map;
     const cls = mesh.name.replace(/_\d+$/, '').replace(/\d+$/, '');
-    const key = cls + ':' + (map?.uuid ?? '');
+    const tile = cls.startsWith('tile_') ? cls.slice(5) : '';
+    // crisp pixels up close (nearest magnification, mipmapped minification); under a tiling scan the painted
+    // atlas is only a soft modulation, so that copy is smoothed
+    if (map && tile) {
+      if (!smooth) { smooth = map.clone(); smooth.magFilter = THREE.LinearFilter; smooth.needsUpdate = true; }
+      map = smooth;
+    }
+    const base = tile ? new THREE.Color().fromArray((mesh.userData.base as number[] | undefined) ?? [0.5, 0.4, 0.3]).convertSRGBToLinear() : null;
+    const key = cls + ':' + (map?.uuid ?? '') + (base ? base.getHexString() : '');
     let m = mats.get(key);
     if (!m) {
-      if (cls === 'glow') {
+      if (tile) {
+        m = new THREE.MeshLambertMaterial({ map });
+        patchTile(m, tile, base!);
+        if (o.swaySolid) patchSway(m, o.swaySolid);
+      } else if (cls === 'glow') {
         const g = new THREE.MeshBasicMaterial({ map, toneMapped: false, alphaTest: 0.5 });
         glowMats.add(g);
         m = g;
@@ -95,7 +157,7 @@ function convert(root: THREE.Object3D, o: PartOpts, part: HousePart) {
         m = new THREE.MeshLambertMaterial({ map, alphaTest: 0.5, side: THREE.DoubleSide });
         if (o.sway) patchSway(m, o.sway);
       } else {
-        m = new THREE.MeshLambertMaterial({ map });
+        m = new THREE.MeshLambertMaterial({ map, alphaTest: src.alphaTest > 0 ? 0.5 : 0, side: src.side });
         if (o.swaySolid) patchSway(m, o.swaySolid);
       }
       if (o.cut) patchCut(m);
@@ -154,4 +216,22 @@ export const HOUSE_PARTS: { id: string; band: 'f1' | 'f2' | 'f3' | 'roof'; opts:
   { id: 'roof', band: 'roof', opts: { sway: 0.5 } },
   { id: 'canopy', band: 'roof', opts: { swaySolid: 0.25 } },
   { id: 'leaves', band: 'roof', opts: { sway: 0.9, swaySolid: 0.25 } },
+];
+
+/**
+ * Borrowed CC0 nature props bedded round the foot of the oak (Poly Haven scans as restyled for BUSHED, see
+ * docs/credits/house3.md): angle round the trunk, distance past the flared foot (px), the model's metres -> px
+ * scale, yaw (deg).
+ */
+export const HOUSE_PROPS: { id: string; a: number; d: number; s: number; yaw: number }[] = [
+  { id: 'props/boulder_01', a: -1.26, d: 20, s: 15, yaw: 30 },
+  { id: 'props/stone_01', a: -1.4, d: 36, s: 60, yaw: 70 },
+  { id: 'props/bark_debris_01', a: -1.84, d: 10, s: 15, yaw: -20 },
+  { id: 'props/tree_stump_01', a: 2.12, d: 30, s: 14, yaw: 15 },
+  { id: 'props/rock_07', a: 2.28, d: 12, s: 46, yaw: 110 },
+  { id: 'props/dry_branches_medium_01', a: -2.74, d: 16, s: 17, yaw: 40 },
+  { id: 'props/boulder_01', a: 2.72, d: 8, s: 10, yaw: -60 },
+  { id: 'props/rock_09', a: -1.12, d: 44, s: 60, yaw: 10 },
+  { id: 'props/stone_01', a: 1.78, d: 34, s: 52, yaw: -35 },
+  { id: 'props/rock_07', a: -2.26, d: 30, s: 40, yaw: 200 },
 ];

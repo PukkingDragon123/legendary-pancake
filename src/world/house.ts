@@ -12,9 +12,9 @@ import { SPR } from './fx.ts';
 import { HOUSE } from './layout.ts';
 import { CUT } from './house/kit.ts';
 import { buildLock, stepLock, type Lock, type LockEvent } from './house/locks.ts';
-import { HOUSE_LOOK, HOUSE_PARTS, loadPart, syncLooks, type HousePart } from './house/models.ts';
+import { HOUSE_LOOK, HOUSE_PARTS, HOUSE_PROPS, loadPart, syncLooks, type HousePart } from './house/models.ts';
 import {
-  BALCONY_AT, CHIMNEY_TOP, FLOOR_IDS, FLOOR_Y, LAMP_AT, LAUNCH, OPEN_A, PLATFORM, PORCH_AT, RO, ROOM_H, UNLOCK, type FloorId,
+  BALCONY_AT, CHIMNEY_TOP, FLOOR_IDS, FLOOR_Y, LAMP_AT, LAUNCH, OPEN_A, PLATFORM, PORCH_AT, RO, ROOM_H, trunkR, UNLOCK, type FloorId,
 } from './house/plan.ts';
 
 export type Zone = 'loft' | 'deck' | 'garden';
@@ -107,6 +107,17 @@ export function buildHouse(): House {
     (band === 'roof' ? roof : floors[band]).add(p.root);
     refreshPanes();
   })).then(() => undefined);
+  // borrowed nature props round the foot of the trunk (they load in their own time)
+  for (const pr of HOUSE_PROPS) {
+    loadPart(pr.id, { cut: true, nearest: true }).then((p) => {
+      if (!p) return;
+      const r = trunkR(0) + pr.d;
+      p.root.scale.setScalar(PX * pr.s);
+      p.root.position.set(Math.sin(pr.a) * r * PX, -0.04, Math.cos(pr.a) * r * PX);
+      p.root.rotation.y = (pr.yaw * Math.PI) / 180;
+      floors.f1.add(p.root);
+    });
+  }
 
   let moteT = 0;
   let buildFloor: FloorId | null = null;

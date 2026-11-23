@@ -40,7 +40,7 @@ export function poseOf(fid: FloorId, p: Placed, base: number): { x: number; y: n
 // ------------------------------------------------------------------ finishes on the walls and floors
 
 /** texels per px of the painted wallpaper and flooring */
-const TEX = 2;
+const TEX = 3;
 
 function finishTexture(w: number, h: number, at: (i: number, j: number) => number): THREE.DataTexture {
   const data = new Uint8Array(w * h * 4);

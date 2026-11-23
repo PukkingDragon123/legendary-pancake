@@ -36,9 +36,33 @@ def load(mod):
     return m.specs() if hasattr(m, 'specs') else {}
 
 
+def _order_layers():
+    """Photo-colour layers paint every texel still on their ramps, so layers that move texels to another ramp (moss,
+    lichen, wear chips, fills) must run before them and plain tone shifts (furrows, grain) after: reorder each
+    part's merged paint that way (stable within each group)."""
+    import lowpix.model as M
+    if getattr(M, '_hh_ordered', False):
+        return
+    orig = M.resolve_paint
+
+    def resolve(spec, part):
+        p = orig(spec, part)
+        ls = p.get('layers') or []
+        if any(l.get('op') == 'photo' and l.get('mode') == 'colour' for l in ls):
+            first = [l for l in ls if 'ramp' in l and l.get('op') != 'photo']
+            photo = [l for l in ls if l.get('op') == 'photo' and l.get('mode') == 'colour']
+            rest = [l for l in ls if l not in first and l not in photo]
+            p['layers'] = first + photo + rest
+        return p
+    M.resolve_paint = resolve
+    M._hh_ordered = True
+
+
 def build(id, S, sheet=True):
     from lowpix.model import build_model
     from lowpix.build import export_model
+    _order_layers()
+    os.chdir(HERE)
     t0 = time.time()
     path = os.path.join(HERE, id + '.json')
     model = build_model(path)

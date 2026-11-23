@@ -3,7 +3,7 @@ between them, toadstools and chanterelles, ferns, grass tufts, fallen leaves and
 import math
 import random
 
-from hx import DOOR_A, OPEN_A, Spec, pol
+from hx import DOOR_A, OPEN_A, Spec, paint_photo, pol
 from trunk import R_of
 
 
@@ -73,7 +73,7 @@ def specs():
     S = Spec('roots', density=2, desc='Buttress roots, stones, toadstools, ferns and grass round the foot of the oak')
     S.style('root', ramp='bark', tone=3.8, rim={'light_shift': 0.6, 'dark_shift': -0.9},
             brush={'flow': 'path', 'length': 5, 'width': 1, 'rough': 0.65}, layers=[
-                {'id': 'ph', 'op': 'photo', 'src': S.d['styles']['bark']['layers'][0]['src'], 'scale': 22, 'amount': 0.75},
+                dict(paint_photo('bark_brown_02', 28, ['bark'], 'bark:6', tint_amount=0.45, shade=0.12), id='ph'),
                 {'id': 'furrows', 'op': 'stripes', 'axis': 'around', 'period': 0.09, 'width': 0.22, 'shift': -1.4, 'wobble': 0.6},
                 {'id': 'mottle', 'op': 'noise', 'scale': 7, 'amount': 0.45},
                 {'id': 'moss', 'op': 'drip', 'ramp': 'moss', 'tone': 3.0, 'depth': 0.7, 'length': 3.2, 'width': 0.6, 'scale': 5,
