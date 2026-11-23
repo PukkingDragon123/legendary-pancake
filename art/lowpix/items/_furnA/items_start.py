@@ -106,13 +106,13 @@ def armchair():
     s.box("back", [14.2, 10.6, 3.4], vel, (0, 11.6, -5.0), rot=(-9, 0, 0), chamfer=1.2, hide=["bottom"],
           paint={"layers": tuft_layers})
     s.loft("toproll", [((-7.3, 0, 0), [2.2, 1.6]), ((-6.6, 0, 0), [3.8, 3.0]), ((0, 0, 0), [4.2, 3.2]), ((6.6, 0, 0), [3.8, 3.0]), ((7.3, 0, 0), [2.2, 1.6])],
-           vel_d, at=(0, 16.7, -5.9), sides=10, round_=2.1)
+           vel_d, at=(0, 16.7, -5.9), sides=10, round_=2.1, subdiv=0)
     for side in (-1, 1):
         x = side * 6.75
         sd = "l" if side < 0 else "r"
         s.box(f"arm_{sd}", [2.7, 4.8, 12.4], vel, (x, 8.5, 0.6), chamfer=0.8, hide=["bottom"])
         s.loft(f"armroll_{sd}", [((0, 0, -6.0), [2.6, 2.0]), ((0, 0, -5.2), [3.6, 2.7]), ((0, 0, 5.8), [3.8, 2.8]), ((0, 0, 6.8), [3.4, 2.5])],
-               vel_d, at=(x + side * 0.3, 11.2, 0.4), sides=10, round_=2.1)
+               vel_d, at=(x + side * 0.3, 11.2, 0.4), sides=10, round_=2.1, subdiv=0)
         s.add(f"scroll_{sd}", "prism", [2.6, 2.6, 0.5], vel_d, centre=(x + side * 0.3, 10.6, 7.25), sides=10,
               paint={"layers": [{"id": "swirl", "op": "spots", "centers": [[0, 0, 0.25, 0.8]], "shift": -0.9, "bevel": True}]})
         s.add(f"button_{sd}", "prism", [0.9, 0.9, 0.4], btn, centre=(x + side * 0.3, 10.6, 7.6), sides=8)
@@ -201,7 +201,7 @@ def nestbed():
                                   {"id": "stitch_a", "op": "stripes", "axis": "x", "period": 3.2, "width": 0.05, "phase": 0.45, "shift": 1.6,
                                    "faces": ["up"]},
                               ]})
-    s.lathe("quilt", [(3.4, 16.8), (4.6, 17.8), (5.5, 17.2), (6.1, 14.0), (6.3, 6.0)], quilt, sides=14, round_=2.0, caps=(False, True))
+    s.lathe("quilt", [(3.4, 16.8), (4.6, 17.8), (5.5, 17.2), (6.0, 15.2)], quilt, sides=14, round_=2.0, caps=(False, True))
     # turned-down quilt edge (a soft roll across the front)
     s.loft("fold", [((-6.8, 0, 0), [1.6, 1.0]), ((-5.6, 0, 0), [2.6, 1.6]), ((0, 0.3, 0), [3.0, 1.8]), ((5.6, 0, 0), [2.6, 1.6]), ((6.8, 0, 0), [1.6, 1.0])],
            quilt, at=(0, 6.2, 3.6), sides=8, round_=2.0)
@@ -411,7 +411,7 @@ def bookshelf():
             if abs(x - sxp) < 0.012 and abs(y - 0.3) < 0.07 or abs(y - 0.3) < 0.025 and abs(x - sxp) < 0.035:
                 return "."
         return "h" if y < 0.08 else ("d" if y > edge - 0.07 else "w")
-    s.card("apron", grid_art(84, 14, apron_art), apron, at=(0, 23.3, 3.45), size=[14.0, 2.4],
+    s.card("apron", grid_art(84, 12, apron_art), apron, at=(0, 23.85, 3.45), size=[14.0, 2.0],
            key={"w": "oak:5", "h": "oak:7", "d": "oak:2"})
     bs = book_styles(s)
     cols = ["berry", "lake", "sage", "honey", "plum", "dusk", "rose", "fern", "clay"]
@@ -423,7 +423,7 @@ def bookshelf():
         right = 6.6 - (3.2 if bi == 0 else 2.8 if bi == 1 else 3.6)
         while x < right:
             w = float(rng.uniform(0.8, 1.35))
-            h = float(rng.uniform(4.4, 6.4))
+            h = float(rng.uniform(4.4, 6.4 if bi < 2 else 5.2))
             d = float(rng.uniform(4.4, 5.4))
             c = cols[int(rng.integers(len(cols)))]
             lean = 0.0
@@ -443,12 +443,12 @@ def bookshelf():
                 c = cols[(k * 3 + 1) % len(cols)]
                 book(s, f"stack{k}", bs[c], (rx, y0 + k * 0.95, -0.1), 0.95, 3.6 - k * 0.3, 4.6 - k * 0.2, rot=(0, (k - 1) * 9, 90), seed=40 + k, lie=False)
         elif bi == 1:
-            glass = s.style("glass", glaze("mist", 4.6, speck=False))
-            s.lathe("jar", [(0, 2.0), (0.3, 2.3), (3.0, 2.3), (3.4, 1.8), (3.6, 1.6)], glass, base=(rx, y0, 0.4), sides=10, caps=(False, True))
+            jar = glow("glow", 1.6)
+            jar["layers"] = [{"id": "glass", "op": "gradient", "axis": "y", "amount": 0.6},
+                             {"id": "halo", "op": "spots", "count": 7, "radius": [0.5, 0.6], "ramp": "glow", "tone": 3.6, "seed": 5},
+                             {"id": "flies", "op": "spots", "count": 7, "radius": [0.22, 0.32], "ramp": "glow", "tone": 6, "seed": 5}]
+            s.lathe("glow_jar", [(0, 2.0), (0.3, 2.3), (3.0, 2.3), (3.4, 1.8), (3.6, 1.6)], s.style("jar", jar), base=(rx, y0, 0.4), sides=10, caps=(False, True))
             s.cyl("jarlid", 1.9, 0.6, s.style("cork", wood("pale", 4.0, grain="y", knots=0, wear=0)), (rx, y0 + 3.55, 0.4), sides=10)
-            fl = s.style("fl", glow("glow", 5.0))
-            for k, (dx, dy, dz) in enumerate([(-0.4, 1.0, 1.05), (0.5, 2.0, 1.0), (0.1, 2.7, 1.1), (-0.6, 2.3, 0.9)]):
-                s.box(f"glow_fly{k}", [0.35, 0.35, 0.35], fl, (rx + dx, y0 + dy, 0.4 + dz))
         else:
             scroll = s.style("scroll", cloth("oat", 4.6, weave=0.2, photo="rough_linen", scale=5))
             s.add("map", "prism", [1.6, 1.6, 5.0], scroll, centre=(rx - 0.4, y0 + 0.8, 0.2), rot=(0, 70, 0), sides=8)

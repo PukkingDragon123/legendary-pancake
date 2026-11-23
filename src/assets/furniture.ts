@@ -89,7 +89,7 @@ const add = (d: ItemDef) => items.push(d);
 // ------------------------------------------------------------------ seating
 
 add({
-  id: 'bench', name: 'Wooden Bench', cat: 'seating', price: 120, blurb: 'Room for two and a snack.',
+  id: 'bench', noStore: true, name: 'Wooden Bench', cat: 'seating', price: 120, blurb: 'Room for two and a snack.',
   sit: [{ x: -5, y: 7, z: 0.5 }, { x: 5, y: 7, z: 0.5 }],
   build: () => [
     box(0, 5, 0, 22, 2, 7, wx(W.oak, 3)),
@@ -100,7 +100,7 @@ add({
 });
 
 add({
-  id: 'stool', name: 'Log Stool', cat: 'seating', price: 40, blurb: 'A stump with ambitions.',
+  id: 'stool', model: 'items/stool.glb', name: 'Log Stool', cat: 'seating', price: 40, blurb: 'A stump with ambitions.',
   sit: [{ x: 0, y: 6, z: 0 }],
   build: () => {
     const b = bark(PAL.barkOak, { seed: 3, moss: PAL.moss, mossTo: 7 }), top = wood('#dcab68', { axis: 'y', rings: true });
@@ -109,7 +109,7 @@ add({
 });
 
 add({
-  id: 'chair', name: 'Heart Chair', cat: 'seating', price: 90, blurb: 'Hand-carved, slightly wonky.',
+  id: 'chair', model: 'items/chair.glb', name: 'Heart Chair', cat: 'seating', price: 90, blurb: 'Hand-carved, slightly wonky.',
   sit: [{ x: 0, y: 7, z: 0.5 }],
   build: () => {
     const heart: Painter = (t) => {
@@ -125,13 +125,13 @@ add({
 });
 
 add({
-  id: 'cushion', name: 'Floor Cushion', cat: 'seating', price: 60, blurb: 'Nap-rated.',
+  id: 'cushion', model: 'items/cushion.glb', name: 'Floor Cushion', cat: 'seating', price: 60, blurb: 'Nap-rated.',
   sit: [{ x: 0, y: 4, z: 0 }], sleep: { x: 0, y: 4, z: 0, rot: 90 },
   build: () => [box(0, 0, 0, 11, 3, 11, cloth('#e7697f', { check: '#f6a0b0' }), { skip: 'd' }), box(0, 3, 0, 9, 1, 9, cloth('#e7697f', { check: '#f6a0b0' }), { skip: 'd' }), box(0, 4, 0, 1, 1, 1, flat('#fbf1e6'))],
 });
 
 add({
-  id: 'hammock', name: 'Hammock', cat: 'seating', price: 320, level: 3, blurb: 'Productivity is cancelled.',
+  id: 'hammock', model: 'items/hammock.glb', name: 'Hammock', cat: 'seating', price: 320, level: 3, blurb: 'Productivity is cancelled.',
   sleep: { x: 0, y: 8, z: 0, rot: 90 },
   build: () => {
     const out: BoxSpec[] = [], c = cloth('#f3ead6', { stripe: '#3f9fa8', stripeEvery: 99 });
@@ -149,7 +149,7 @@ add({
 });
 
 add({
-  id: 'swing', name: 'Tree Swing', cat: 'fun', price: 380, level: 4, blurb: 'Wheee. Again.',
+  id: 'swing', noStore: true, name: 'Tree Swing', cat: 'fun', price: 380, level: 4, blurb: 'Wheee. Again.',
   sit: [{ x: 0, y: 6, z: 0 }], play: { x: 0, y: 6, z: 0 },
   build: () => {
     const out: BoxSpec[] = [];
@@ -163,7 +163,7 @@ add({
 });
 
 add({
-  id: 'picnic', name: 'Picnic Blanket', cat: 'seating', price: 180, blurb: 'Basket included. Ants not included.',
+  id: 'picnic', noStore: true, name: 'Picnic Blanket', cat: 'seating', price: 180, blurb: 'Basket included. Ants not included.',
   flatItem: true, sit: [{ x: -7, y: 1, z: 3, rot: 60 }, { x: 5, y: 1, z: 6, rot: -30 }], eat: { x: -1, y: 1, z: 1 },
   build: () => [
     box(0, 0, 0, 28, 1, 22, cloth('#e25555', { check: '#fbf1e6' }), { skip: 'd' }),
@@ -188,7 +188,7 @@ add({
 });
 
 add({
-  id: 'teatable', name: 'Tea Table', cat: 'tables', price: 260, level: 2, size: [1, 1], surface: 0, blurb: 'Two cups. One is for you.',
+  id: 'teatable', model: 'items/teatable.glb', name: 'Tea Table', cat: 'tables', price: 260, level: 2, size: [1, 1], surface: 0, blurb: 'Two cups. One is for you.',
   eat: { x: 0, y: 0, z: 10, rot: 180 },
   build: () => {
     const china: Painter = (t) => (hash(Math.floor(t.x * 1.3 + 40), Math.floor(t.y * 1.3), Math.floor(t.z * 1.3 + 40), 8) > 0.74 ? tone(R('#3b6fc4'), 0.2) : tone(R('#f6f7ff'), lvl(t, { noise: 0.1 })));
@@ -203,7 +203,7 @@ add({
 });
 
 add({
-  id: 'desk', name: 'Study Desk', cat: 'tables', price: 340, level: 2, size: [1.5, 0.5], surface: 0, blurb: 'Where the homework fears to be.',
+  id: 'desk', model: 'items/desk.glb', name: 'Study Desk', cat: 'tables', price: 340, level: 2, size: [1.5, 0.5], surface: 0, blurb: 'Where the homework fears to be.',
   sit: [{ x: -2, y: 0, z: 9, rot: 180 }],
   light: { x: 7, y: 17, z: -2, color: 0xffd98a, power: 0.8 },
   build: () => {
@@ -226,7 +226,7 @@ add({
 // ------------------------------------------------------------------ lights
 
 add({
-  id: 'lanternpost', name: 'Lantern Post', cat: 'lights', price: 150, blurb: 'Glows when the sun clocks off.',
+  id: 'lanternpost', noStore: true, name: 'Lantern Post', cat: 'lights', price: 150, blurb: 'Glows when the sun clocks off.',
   light: { x: 5, y: 13, z: 0, color: 0xffc66b, power: 1.4 },
   build: () => [
     box(0, 0, 0, 5, 2, 5, rock(PAL.stone, { seed: 4, moss: PAL.moss }), { skip: 'd' }), box(0, 2, 0, 2, 18, 2, wy(W.dark)), box(2.5, 18, 0, 8, 2, 2, wx(W.dark, 0)),
@@ -237,7 +237,7 @@ add({
 });
 
 add({
-  id: 'stonelantern', name: 'Stone Lantern', cat: 'lights', price: 280, level: 3, blurb: 'Mossy and wise.',
+  id: 'stonelantern', noStore: true, name: 'Stone Lantern', cat: 'lights', price: 280, level: 3, blurb: 'Mossy and wise.',
   light: { x: 0, y: 12, z: 0, color: 0xffe2a0, power: 1.2 },
   build: () => {
     const st = rock('#9a9ea8', { seed: 7, moss: PAL.moss });
@@ -250,7 +250,7 @@ add({
 });
 
 add({
-  id: 'paperlantern', name: 'Festival Lantern', cat: 'lights', price: 210, blurb: 'Warm red glow, zero fire risk.',
+  id: 'paperlantern', model: 'items/paperlantern.glb', name: 'Festival Lantern', cat: 'lights', price: 210, blurb: 'Warm red glow, zero fire risk.',
   light: { x: 0, y: 12, z: 0, color: 0xff8a5a, power: 1.2 },
   build: () => {
     const rr = R('#e2463c');
@@ -264,7 +264,7 @@ add({
 });
 
 add({
-  id: 'campfire', name: 'Campfire', cat: 'lights', price: 240, level: 2, blurb: 'Marshmallows sold separately.',
+  id: 'campfire', noStore: true, name: 'Campfire', cat: 'lights', price: 240, level: 2, blurb: 'Marshmallows sold separately.',
   light: { x: 0, y: 6, z: 0, color: 0xff9a45, power: 2.2 },
   build: () => {
     const out: BoxSpec[] = [];
@@ -281,7 +281,7 @@ add({
 });
 
 add({
-  id: 'mushroomlamp', name: 'Mushroom Lamp', cat: 'lights', price: 190, blurb: 'Night-light, forest edition.',
+  id: 'mushroomlamp', model: 'items/mushroomlamp.glb', name: 'Mushroom Lamp', cat: 'lights', price: 190, blurb: 'Night-light, forest edition.',
   light: { x: 0, y: 9, z: 0, color: 0x8fe8ff, power: 1.1 },
   build: () => {
     const cr = R('#6fd8f2');
@@ -294,7 +294,7 @@ add({
 // ------------------------------------------------------------------ garden structures
 
 add({
-  id: 'fence', name: 'Picket Fence', cat: 'garden', price: 35, blurb: 'Keeps the tulips in line.',
+  id: 'fence', noStore: true, name: 'Picket Fence', cat: 'garden', price: 35, blurb: 'Keeps the tulips in line.',
   build: () => [
     ...[-7, 7].flatMap((x) => [box(x, 0, 0, 2, 10, 2, wy(W.white)), box(x, 10, 0, 1, 1, 1, wy(W.white))]),
     box(0, 6, 0, 14, 2, 1, wx(W.white, 0)), box(0, 2, 0, 14, 2, 1, wx(W.white, 0)),
@@ -303,7 +303,7 @@ add({
 });
 
 add({
-  id: 'arch', name: 'Rose Arch', cat: 'garden', price: 520, level: 5, blurb: 'A doorway to nowhere in particular.',
+  id: 'arch', noStore: true, name: 'Rose Arch', cat: 'garden', price: 520, level: 5, blurb: 'A doorway to nowhere in particular.',
   flatItem: true,
   build: () => {
     const out: BoxSpec[] = [], w = wy(W.white), lf = leaves('#4f9e45', { seed: 6, bloom: '#f0597e', rate: 0.12 });
@@ -319,7 +319,7 @@ add({
 });
 
 add({
-  id: 'signpost', name: 'Signpost', cat: 'garden', price: 80, blurb: 'Points at naps and snacks.',
+  id: 'signpost', noStore: true, name: 'Signpost', cat: 'garden', price: 80, blurb: 'Points at naps and snacks.',
   build: () => {
     const board = (dir: number): Painter => (t) => {
       const tip = dir > 0 ? t.w - 1 - t.u : t.u;
@@ -333,7 +333,7 @@ add({
 });
 
 add({
-  id: 'mailbox', name: 'Mailbox', cat: 'garden', price: 110, blurb: 'Reminders arrive here first.',
+  id: 'mailbox', noStore: true, name: 'Mailbox', cat: 'garden', price: 110, blurb: 'Reminders arrive here first.',
   build: () => {
     const rr = R('#d8433f');
     const body: Painter = (t) => {
@@ -349,7 +349,7 @@ add({
 });
 
 add({
-  id: 'well', name: 'Wishing Well', cat: 'garden', price: 480, level: 4, blurb: 'Accepts coins. Returns nothing.',
+  id: 'well', noStore: true, name: 'Wishing Well', cat: 'garden', price: 480, level: 4, blurb: 'Accepts coins. Returns nothing.',
   build: () => {
     const br = bricks('#9aa0ab', { w: 5, h: 3, seed: 3 });
     return [
@@ -363,7 +363,7 @@ add({
 });
 
 add({
-  id: 'birdhouse', name: 'Birdhouse', cat: 'garden', price: 170, blurb: 'Small birds, big opinions.',
+  id: 'birdhouse', noStore: true, name: 'Birdhouse', cat: 'garden', price: 170, blurb: 'Small birds, big opinions.',
   build: () => {
     const wall: Painter = (t) => (t.face === 4 && Math.hypot(t.u + 0.5 - t.w / 2, t.v - 3) < 1.5 ? 0x2a1c18 : wy('#8fc4e6', 2)(t));
     return [box(0, 0, 0, 2, 18, 2, wy(W.dark)), box(0, 18, 0, 9, 1, 9, wx(W.oak, 3)), box(0, 19, 0, 6, 6, 6, wall), box(0, 20, 3.8, 1, 1, 2, wy(W.dark)),
@@ -372,7 +372,7 @@ add({
 });
 
 add({
-  id: 'fountain', name: 'Mossy Fountain', cat: 'garden', price: 900, level: 6, blurb: 'The sound of not doing homework.',
+  id: 'fountain', noStore: true, name: 'Mossy Fountain', cat: 'garden', price: 900, level: 6, blurb: 'The sound of not doing homework.',
   build: () => {
     const br = bricks('#a4a9b4', { w: 6, h: 3, seed: 5 }), st = rock('#a4a9b4', { seed: 4, moss: PAL.moss }), wt = water();
     const fall: Painter = (t) => tone(R('#8fdcf2'), (Math.floor(t.y) % 3 === 0 ? 1.6 : 0.2));
@@ -387,13 +387,13 @@ add({
 });
 
 add({
-  id: 'stones', name: 'Stepping Stones', cat: 'garden', price: 45, blurb: 'A path, but make it hopscotch.',
+  id: 'stones', noStore: true, name: 'Stepping Stones', cat: 'garden', price: 45, blurb: 'A path, but make it hopscotch.',
   flatItem: true,
   build: () => [[-7, 2, 9, 7, 10], [3, -3, 8, 8, -15], [9, 5, 6, 6, 30]].map(([x, z, w, d, r], i) => ({ ...box(x, -0.4, z, w, 1.4, d, rock(i % 2 ? '#a39a8d' : '#959aa6', { seed: i, moss: PAL.moss })), rot: [0, r, 0] as Vec3 })),
 });
 
 add({
-  id: 'birdbath', name: 'Bird Bath', cat: 'garden', price: 230, level: 2, blurb: 'A spa for sparrows.',
+  id: 'birdbath', noStore: true, name: 'Bird Bath', cat: 'garden', price: 230, level: 2, blurb: 'A spa for sparrows.',
   build: () => {
     const st = rock('#b0b4be', { seed: 9, moss: PAL.moss });
     return [box(0, 0, 0, 7, 2, 7, st, { skip: 'd' }), box(0, 2, 0, 3, 8, 3, st), box(0, 10, 0, 6, 1, 6, st), box(0, 11, 0, 12, 2, 12, st), box(0, 12.4, 0, 9, 1, 9, water(), { skip: 'd' })];
@@ -401,7 +401,7 @@ add({
 });
 
 add({
-  id: 'banner', name: 'Guild Banner', cat: 'decor', price: 260, level: 3, blurb: 'Your study crest, flying proudly.',
+  id: 'banner', noStore: true, name: 'Guild Banner', cat: 'decor', price: 260, level: 3, blurb: 'Your study crest, flying proudly.',
   build: () => {
     const br = R('#3f66c9'), gr = ramp(0xf2b632);
     const flag: Painter = (t) => {
@@ -422,12 +422,12 @@ add({
 // ------------------------------------------------------------------ potted plants
 
 add({
-  id: 'potflowers', name: 'Tulip Pot', cat: 'plants', price: 70, small: true, blurb: 'Low effort, high charm.',
+  id: 'potflowers', model: 'items/potflowers.glb', name: 'Tulip Pot', cat: 'plants', price: 70, small: true, blurb: 'Low effort, high charm.',
   build: () => [...pot(0, 0, 7, 6), ...place(tulip(1, '#e9463f'), -1.5, 5, 0.5), ...place(tulip(2, '#f9cf45'), 1.5, 5, -0.5), ...place(tulip(3, '#f58fb0'), 0, 5, 1.6)],
 });
 
 add({
-  id: 'cactus', name: 'Brave Cactus', cat: 'plants', price: 95, small: true, blurb: 'Hug at your own risk.',
+  id: 'cactus', model: 'items/cactus.glb', name: 'Brave Cactus', cat: 'plants', price: 95, small: true, blurb: 'Hug at your own risk.',
   build: () => {
     const gr = R('#5aa85a');
     const c: Painter = (t) => tone(gr, lvl(t, { noise: 0.3 }) + (t.u % 2 ? -0.7 : 0.4) + (hash(t.u, t.v, t.face, 3) > 0.86 ? 2 : 0));
@@ -438,7 +438,7 @@ add({
 });
 
 add({
-  id: 'bonsai', name: 'Tiny Bonsai', cat: 'plants', price: 300, level: 4, blurb: 'Decades of patience, bought instantly.',
+  id: 'bonsai', model: 'items/bonsai.glb', name: 'Tiny Bonsai', cat: 'plants', price: 300, level: 4, blurb: 'Decades of patience, bought instantly.',
   build: () => {
     const china: Painter = (t) => (t.face !== 2 && (t.u + t.v) % 4 === 0 ? tone(R('#3b6fc4'), 0) : tone(R('#f6f7ff'), lvl(t, { noise: 0.1 })));
     const lf = leaves('#3f8f45', { seed: 9 }), bk = bark('#6a4630', { seed: 2 });
@@ -450,7 +450,7 @@ add({
 });
 
 add({
-  id: 'planter', name: 'Flower Planter', cat: 'plants', price: 140, blurb: 'A whole meadow, boxed.',
+  id: 'planter', model: 'items/planter.glb', name: 'Flower Planter', cat: 'plants', price: 140, blurb: 'A whole meadow, boxed.',
   build: () => [
     box(0, 1, 0, 18, 5, 7, wx(W.oak, 3)), box(0, 5.4, 0, 16, 1, 5, dirt('#5c3d2a'), { skip: 'd' }), ...[-7.5, 7.5].map((x) => box(x, 0, 0, 2, 2, 7, wy(W.dark))),
     ...place(daisy(1), -6, 6, 0), ...place(tulip(2, '#f58fb0'), -2, 6, 1), ...place(daisy(3, '#ffd9e6', '#f59a2f'), 2, 6, -0.5), ...place(tulip(4, '#a57be0'), 6, 6, 0.5),
@@ -458,7 +458,7 @@ add({
 });
 
 add({
-  id: 'pumpkin', name: 'Plump Pumpkin', cat: 'plants', price: 85, blurb: 'Round, orange, unbothered.',
+  id: 'pumpkin', noStore: true, name: 'Plump Pumpkin', cat: 'plants', price: 85, blurb: 'Round, orange, unbothered.',
   build: () => {
     const pr = R('#f08a2c');
     const p: Painter = (t) => tone(pr, lvl(t, { noise: 0.3 }) + ((t.face < 2 ? t.bz : t.bx) % 3 < 1 && t.face !== 2 ? -1.2 : 0.3));
@@ -470,7 +470,7 @@ add({
 // ------------------------------------------------------------------ decor and play
 
 add({
-  id: 'ball', name: 'Bouncy Ball', cat: 'fun', small: true, price: 50, blurb: 'Boing-certified.',
+  id: 'ball', model: 'items/ball.glb', name: 'Bouncy Ball', cat: 'fun', small: true, price: 50, blurb: 'Boing-certified.',
   play: { x: 0, y: 0, z: 0 },
   build: () => {
     const cs = [R('#e5484d'), R('#fbf6ea'), R('#4aa8f0'), R('#f6c531')];
@@ -480,7 +480,7 @@ add({
 });
 
 add({
-  id: 'blocks', name: 'ABC Blocks', cat: 'fun', small: true, price: 75, blurb: 'Stack them. Knock them. Repeat.',
+  id: 'blocks', model: 'items/blocks.glb', name: 'ABC Blocks', cat: 'fun', small: true, price: 75, blurb: 'Stack them. Knock them. Repeat.',
   play: { x: 0, y: 0, z: 0 },
   build: () => {
     const glyphs: Record<string, string[]> = { A: ['.X.', 'X.X', 'XXX', 'X.X'], B: ['XX.', 'XXX', 'X.X', 'XXX'], C: ['XXX', 'X..', 'X..', 'XXX'] };
@@ -499,12 +499,12 @@ add({
 });
 
 add({
-  id: 'books', name: 'Book Tower', cat: 'decor', price: 65, small: true, blurb: 'Technically a to-read pile.',
+  id: 'books', model: 'items/books.glb', name: 'Book Tower', cat: 'decor', price: 65, small: true, blurb: 'Technically a to-read pile.',
   build: () => ['#d8433f', '#3f78c9', '#f2b632', '#57a84a', '#8d62d6'].map((c, i) => ({ ...box((i % 2) * 0.6 - 0.3, i * 2, 0, 8 - (i % 3), 2, 6, book(c)), rot: [0, (i * 23) % 40 - 20, 0] as Vec3 })),
 });
 
 add({
-  id: 'easel', name: 'Quest Board', cat: 'decor', price: 160, blurb: 'Today\'s plan, in chalk.',
+  id: 'easel', model: 'items/easel.glb', name: 'Quest Board', cat: 'decor', price: 160, blurb: 'Today\'s plan, in chalk.',
   build: () => {
     const bd = R('#3f6b57');
     const board: Painter = (t) => {
@@ -523,7 +523,7 @@ add({
 });
 
 add({
-  id: 'gnome', name: 'Garden Gnome', cat: 'decor', price: 130, blurb: 'Watches your tulips. Judges nothing.',
+  id: 'gnome', model: 'items/gnome.glb', name: 'Garden Gnome', cat: 'decor', price: 130, blurb: 'Watches your tulips. Judges nothing.',
   build: () => [
     box(0, 0, 0, 6, 2, 5, smooth('#3a2f2a'), { skip: 'd' }), box(0, 2, 0, 6, 5, 5, smooth('#3f78c9')), box(0, 4, 2.6, 2, 1, 1, metal(GOLD)), box(0, 7, 0, 6, 4, 5, smooth('#f2c9a0')),
     box(0, 5, 2.4, 5, 4, 1, solid('#fbfbff', { noise: 0.6, scale: 1.3 })), box(0, 9, 2.8, 2, 1, 1, smooth('#f2a58a')), box(-1.5, 10, 2.6, 1, 1, 0.4, flat('#2b2026')), box(1.5, 10, 2.6, 1, 1, 0.4, flat('#2b2026')),
@@ -532,7 +532,7 @@ add({
 });
 
 add({
-  id: 'chest', name: 'Treasure Chest', cat: 'storage', price: 400, level: 5, size: [1, 0.5], surface: 0, blurb: 'Full of finished-homework energy.',
+  id: 'chest', model: 'items/chest.glb', name: 'Treasure Chest', cat: 'storage', price: 400, level: 5, size: [1, 0.5], surface: 0, blurb: 'Full of finished-homework energy.',
   build: () => {
     const band = (base: Painter): Painter => (t) => ((t.face >= 4 || t.face === 2) && (t.u === 2 || t.u === t.w - 3) ? metal(GOLD)(t) : base(t));
     const coin: Painter = (t) => tone(ramp(0xf6c531, { step: 0.08 }), (hash(Math.floor(t.x), Math.floor(t.y * 2), Math.floor(t.z), 2) - 0.4) * 3.4);
@@ -542,13 +542,13 @@ add({
 });
 
 add({
-  id: 'trophy', name: 'Gold Trophy', cat: 'decor', price: 0, gems: 25, small: true, blurb: 'For outstanding assignment-slaying.',
+  id: 'trophy', model: 'items/trophy.glb', name: 'Gold Trophy', cat: 'decor', price: 0, gems: 25, small: true, blurb: 'For outstanding assignment-slaying.',
   build: () => [box(0, 0, 0, 8, 3, 8, bricks('#9aa0ab', { w: 4, h: 3 }), { skip: 'd' }), box(0, 3, 0, 6, 1, 6, rock('#b0b4be')), box(0, 4, 0, 4, 1, 4, metal(GOLD)), box(0, 5, 0, 2, 3, 2, metal(GOLD)),
     box(0, 8, 0, 6, 5, 6, metal(GOLD)), box(0, 13, 0, 7, 1, 7, metal(GOLD)), box(-4, 9, 0, 2, 3, 1, metal(GOLD)), box(4, 9, 0, 2, 3, 1, metal(GOLD)), box(0, 10, 3.1, 2, 2, 0.4, flat('#fff3b0'))],
 });
 
 add({
-  id: 'globe', name: 'Desk Globe', cat: 'decor', price: 220, level: 3, small: true, blurb: 'Spin it. Point. Go there one day.',
+  id: 'globe', model: 'items/globe.glb', name: 'Desk Globe', cat: 'decor', price: 220, level: 3, small: true, blurb: 'Spin it. Point. Go there one day.',
   build: () => {
     const sea = R('#4a9be0'), land = R('#63b556');
     const g: Painter = (t) => (hash(Math.floor(t.x / 2.2 + 30), Math.floor(t.y / 2.2 + 30), Math.floor(t.z / 2.2 + 30), 11) > 0.56 ? tone(land, lvl(t, { noise: 0.4 })) : tone(sea, lvl(t, { noise: 0.2 })));
@@ -558,7 +558,7 @@ add({
 });
 
 add({
-  id: 'telescope', name: 'Star Telescope', cat: 'decor', price: 360, level: 5, blurb: 'For staring at deadlines from afar.',
+  id: 'telescope', model: 'items/telescope.glb', name: 'Star Telescope', cat: 'decor', price: 360, level: 5, blurb: 'For staring at deadlines from afar.',
   build: () => [
     ...[0, 120, 240].map((a) => ({ ...box(0, 0, 0, 1.4, 12, 1.4, wy(W.dark)), rot: [22, a, 0] as Vec3, pivot: [0, 11, 0] as Vec3 })), box(0, 10, 0, 3, 2, 3, metal('#6b7280')),
     ...turn([box(0, 11, 0, 4, 4, 12, metal('#b9c0cc')), box(0, 11.4, 7, 3, 3, 4, metal(GOLD)), box(0, 11, -7, 5, 5, 2, metal('#4b4f5c')), box(0, 12, 9.2, 1.6, 1.6, 1, flat('#2a3550'))], [-28, 30, 0], [0, 12, 0]),
@@ -566,7 +566,7 @@ add({
 });
 
 add({
-  id: 'rug', name: 'Woven Rug', cat: 'rugs', price: 100, rug: true, size: [1.5, 1], blurb: 'Ties the clearing together.',
+  id: 'rug', model: 'items/rug.glb', name: 'Woven Rug', cat: 'rugs', price: 100, rug: true, size: [1.5, 1], blurb: 'Ties the clearing together.',
   flatItem: true, sit: [{ x: 0, y: 1, z: 0 }], sleep: { x: 0, y: 1, z: 0, rot: 90 },
   build: () => {
     const a = R('#3f9fa8'), b = R('#fbf1e6'), c = R('#e2863a');
@@ -582,7 +582,7 @@ add({
 });
 
 add({
-  id: 'wheelbarrow', name: 'Flower Barrow', cat: 'plants', price: 250, level: 3, blurb: 'Retired from work, blooming nicely.',
+  id: 'wheelbarrow', noStore: true, name: 'Flower Barrow', cat: 'plants', price: 250, level: 3, blurb: 'Retired from work, blooming nicely.',
   build: () => [
     ...turn([box(0, 4, 0, 10, 5, 14, wz(W.oak, 3)), box(0, 8.4, 0, 8, 1, 12, dirt('#5c3d2a'), { skip: 'd' }), box(-4, 5, -11, 1.4, 1.4, 9, wz(W.dark, 0)), box(4, 5, -11, 1.4, 1.4, 9, wz(W.dark, 0)),
       ...place(daisy(5), -2, 9, -3), ...place(tulip(6, '#f9cf45'), 2, 9, 1), ...place(daisy(7, '#ffd9e6', '#f59a2f'), 0, 9, 4), ...place(tulip(8), -2, 9, 3)], [-10, 0, 0], [0, 4, 0]),
@@ -591,7 +591,7 @@ add({
 });
 
 add({
-  id: 'scarecrow', name: 'Friendly Scarecrow', cat: 'decor', price: 290, level: 4, blurb: 'Scares nothing. Waves at everything.',
+  id: 'scarecrow', noStore: true, name: 'Friendly Scarecrow', cat: 'decor', price: 290, level: 4, blurb: 'Scares nothing. Waves at everything.',
   build: () => {
     const sack = solid('#e6cf9a', { noise: 0.5, scale: 1.6 });
     const face: Painter = (t) => (t.face === 4 && ((Math.abs(Math.abs(t.u - 3.5) - 2) < 0.6 && t.v === 4) || (t.v === 2 && Math.abs(t.u - 3.5) < 2.2) || (t.v === 1 && Math.abs(Math.abs(t.u - 3.5) - 2) < 0.6 === false && Math.abs(t.u - 3.5) < 1.2)) ? 0x3a2a22 : sack(t));

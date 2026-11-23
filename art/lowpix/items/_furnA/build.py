@@ -31,15 +31,19 @@ MODULES = ["items_start", "items_home", "items_furn"]
 
 
 def all_items():
-    out = {}
+    """Items built here (lowpix specs) and extras (parts merged into borrowed items), minus borrowed ids."""
+    from borrow import BORROWED
+    out, extras = {}, {}
     for m in MODULES:
         try:
             mod = importlib.import_module(m)
         except ModuleNotFoundError:
             continue
         for k, fn in mod.ITEMS.items():
-            out[k] = fn
-    return out
+            if k not in BORROWED:
+                out[k] = fn
+        extras.update(getattr(mod, "EXTRAS", {}))
+    return out, extras
 
 
 # ------------------------------------------------------------------------------------------------ GLB post-process
@@ -103,7 +107,11 @@ def postprocess(src, dst, item_id):
         off += len(c)
     binary = b"".join(out)
     js["buffers"][0]["byteLength"] = len(binary) + ((-len(binary)) % 4)
-    # materials: lit everywhere, an unlit twin for glowing parts
+    return finish_glb(js, binary, dst, item_id)
+
+
+def finish_glb(js, binary, dst, item_id, root_scale=True):
+    """Lit materials with unlit twins for glow parts, one root node scaled to world units, write the file."""
     mats = js["materials"]
     for m in mats:
         m.pop("extensions", None)
@@ -118,19 +126,22 @@ def postprocess(src, dst, item_id):
             mi = prim["material"]
             if mi not in twin:
                 t = json.loads(json.dumps(mats[mi]))
-                t["name"] = mats[mi]["name"] + "_glow"
+                t["name"] = mats[mi].get("name", "mat") + "_glow"
                 t["extensions"] = {"KHR_materials_unlit": {}}
                 mats.append(t)
                 twin[mi] = len(mats) - 1
             prim["material"] = twin[mi]
+    used = [e for e in js.get("extensionsUsed", []) if e != "KHR_materials_unlit"]
     if twin:
-        js["extensionsUsed"] = ["KHR_materials_unlit"]
+        used.append("KHR_materials_unlit")
+    if used:
+        js["extensionsUsed"] = used
     else:
         js.pop("extensionsUsed", None)
-    # one root, scaled to world units
-    roots = js["scenes"][0]["nodes"]
-    js["nodes"].append({"name": item_id, "scale": [1 / 16] * 3, "children": roots})
-    js["scenes"][0]["nodes"] = [len(js["nodes"]) - 1]
+    if root_scale:
+        roots = js["scenes"][0]["nodes"]
+        js["nodes"].append({"name": item_id, "scale": [1 / 16] * 3, "children": roots})
+        js["scenes"][0]["nodes"] = [len(js["nodes"]) - 1]
     js["asset"]["generator"] = "lowpix + Hoot Hollow furnA"
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     with open(dst, "wb") as fh:
@@ -139,20 +150,22 @@ def postprocess(src, dst, item_id):
 
 
 # ------------------------------------------------------------------------------------------------ build
-def build_one(item_id, spec_path, out_dir):
+def build_one(item_id, spec_path, out_dir, publish=True):
     try:
-        return _build_one(item_id, spec_path, out_dir)
+        return _build_one(item_id, spec_path, out_dir, publish)
     except Exception as e:  # report and carry on with the other items
         return {"id": item_id, "error": str(e)[:2000]}
 
 
-def _build_one(item_id, spec_path, out_dir):
+def _build_one(item_id, spec_path, out_dir, publish=True):
     os.chdir(ROOT)
     from lowpix.build import export_all
     t0 = time.time()
     od = os.path.join(out_dir, item_id)
     rep = export_all(spec_path, od, gif=False, sheet=True, hero_size=(900, 700))
     glb = os.path.join(od, f"{item_id}.glb")
+    if not publish:   # an extra part that borrow.py merges into a borrowed item
+        return {"id": item_id, "extra": True, "s": round(time.time() - t0, 1), "warnings": rep.get("warnings")}
     size = postprocess(glb, os.path.join(ROOT, "public", "models", "items", f"{item_id}.glb"), item_id)
     return {"id": item_id, "s": round(time.time() - t0, 1), "kb": round(size / 1024), "tris": rep.get("tris"),
             "atlas": rep.get("atlas"), "colours": rep.get("colours"), "warnings": rep.get("warnings"), "bounds": rep.get("bounds")}
@@ -166,17 +179,17 @@ def main():
     ap.add_argument("--specs-only", action="store_true")
     a = ap.parse_args()
     os.chdir(ROOT)
-    items = all_items()
-    ids = a.ids or list(items)
+    items, extras = all_items()
+    ids = a.ids or list(items) + list(extras)
     spec_dir = os.path.join(ROOT, "art", "lowpix", "items")
     paths = {}
     for i in ids:
-        s = items[i]()
-        paths[i] = os.path.relpath(s.write(spec_dir), ROOT)
+        s = (items.get(i) or extras[i])()
+        paths[i] = os.path.relpath(s.write(spec_dir if i in items else os.path.join(spec_dir, "_furnA", "extras")), ROOT)
     if a.specs_only:
         print("\n".join(paths.values()))
         return
-    jobs = [(i, paths[i], a.out) for i in ids]
+    jobs = [(i, paths[i], a.out, i in items) for i in ids]
     if a.jobs > 1:
         with ProcessPoolExecutor(a.jobs) as ex:
             for r in ex.map(build_one, *zip(*jobs)):

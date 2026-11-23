@@ -154,6 +154,12 @@
     "#f1e6cc",
     "#f6f2e2",
     "#fdfcf8"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
    ]
   }
  },
@@ -620,7 +626,8 @@
     0,
     0,
     1
-   ]
+   ],
+   "subdiv": 0
   },
   {
    "id": "rim",
@@ -915,7 +922,8 @@
     0,
     0,
     1
-   ]
+   ],
+   "subdiv": 0
   },
   {
    "id": "fold",
@@ -1818,36 +1826,36 @@
    },
    "plane": "xy",
    "art": [
-    "...........s......",
-    "...........s......",
-    ".......hhhslll....",
-    ".......dllslld....",
-    ".....hh.dlsld.ld..",
-    "......dhhdsdlld...",
-    ".......dllslld....",
-    "....h...dlsld...d.",
-    ".....hh..dsd..ll..",
-    ".....ddhhhsllldd..",
-    "..hh...lls.lll.ld.",
-    "...dhh.dds.lddld..",
-    ".h..ddhhhsldldd..d",
-    "..hh..lllslll..ld.",
-    "...dhhddlslddlld..",
-    ".h..ddhhdsdlldd..d",
-    "..hh..lllslll..ll.",
-    "..ddhhddlslddlldd.",
-    ".h..dlhhdsdllld..d",
-    "..hh.dlllsllld.ll.",
-    "..ddhhddlslddlldd.",
-    ".h..dlhhdsdllld..d",
-    "..hh.dlllsllld.ld.",
-    "...dhhddlslddlld..",
-    ".h..ddhhdsdlldd..d",
-    "..hh..lllslll..ld.",
-    "...dhhddlslddlld..",
-    "....ddhhdsdlldd...",
-    "......lllslll.....",
-    "......dds.ldd....."
+    "........ss........",
+    "........ss........",
+    "......llssll......",
+    ".......hssl.......",
+    ".....lllsslll.....",
+    "......hhssll......",
+    "....llllssllll....",
+    "..lld.hlssll.dll..",
+    "...lllllsslllll...",
+    ".llld.hlssll.dlll.",
+    "...lllllsslllll...",
+    ".llldhhlssllldlll.",
+    "..llllllssllllll..",
+    "llld.hllsslll.dlll",
+    "..llllldssdlllll..",
+    "llld.hllsslll.dlll",
+    "..llllldssdlllll..",
+    "lll..hllsslll..lll",
+    "..llllldssdlllll..",
+    "....hlllssllll....",
+    "..llllddssddllll..",
+    "....hlllssllll....",
+    "..lllldhssldllll..",
+    ".....lllsslll.....",
+    "....lldhssldll....",
+    ".....lllsslll.....",
+    ".......hssl.......",
+    "......llssll......",
+    ".......hssl.......",
+    "........ss........"
    ]
   }
  ]

@@ -107,15 +107,15 @@
     "#fdfcf8"
    ],
    "brass": [
-    "#29170c",
-    "#50321b",
-    "#75512b",
-    "#98733e",
-    "#b49557",
-    "#bfae7c",
-    "#ccc4a0",
-    "#dbd8c2",
-    "#ecece1"
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
    ],
    "verd": [
     "#354d3f",
@@ -452,7 +452,7 @@
      "width": 1,
      "density": 0.45,
      "shift": 0.9,
-     "scratches": 2
+     "scratches": 0.006
     },
     {
      "id": "polish",
@@ -813,7 +813,7 @@
      "width": 1,
      "density": 0.45,
      "shift": 0.9,
-     "scratches": 2
+     "scratches": 0.006
     },
     {
      "id": "polish",
@@ -887,11 +887,12 @@
   },
   "brk": {
    "ramp": "brass",
-   "tone": 3.6,
+   "tone": 3.4,
+   "dither": 0.15,
    "rim": {
     "light": 1,
     "dark": 1,
-    "light_shift": 1.5,
+    "light_shift": 1.6,
     "dark_shift": -1.2,
     "threshold": 0.25,
     "outline": "dark",
@@ -902,24 +903,42 @@
      "id": "under",
      "op": "gradient",
      "axis": "y",
-     "amount": 0.9
+     "amount": 0.8
     },
     {
      "id": "mottle",
      "op": "noise",
-     "scale": 0.8,
-     "amount": 0.55,
+     "scale": 2.0,
+     "amount": 0.35,
      "seed": 0
     },
     {
-     "id": "photo",
-     "op": "photo",
-     "src": "art/lowpix/items/_furnA/photos/metal_plate_02",
-     "scale": 8,
-     "amount": 0.35,
-     "ramps": [
-      "brass"
-     ]
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
     },
     {
      "id": "tarnish",
@@ -935,23 +954,29 @@
      "seed": 1
     },
     {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
      "id": "polish",
      "op": "gloss",
      "dash": true,
      "length": 2,
-     "shift": 1.6,
-     "density": 0.6,
+     "shift": 2.0,
+     "density": 0.7,
      "post": true
     }
    ],
    "brush": {
-    "flow": "long",
-    "length": 1.6,
-    "width": 0.4,
-    "rough": 0.5,
-    "textures": {
-     "brass": "metal"
-    }
+    "off": true
    }
   }
  },
@@ -1820,7 +1845,8 @@
     0,
     0,
     1
-   ]
+   ],
+   "subdiv": 0
   },
   {
    "id": "jar",
@@ -1885,7 +1911,8 @@
     0,
     0,
     1
-   ]
+   ],
+   "subdiv": 0
   },
   {
    "id": "print",
@@ -2041,7 +2068,8 @@
     0,
     0,
     1
-   ]
+   ],
+   "subdiv": 0
   }
  ],
  "animations": {

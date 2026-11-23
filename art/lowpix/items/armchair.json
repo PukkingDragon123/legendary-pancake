@@ -1196,7 +1196,7 @@
     true,
     true
    ],
-   "subdiv": 1
+   "subdiv": 0
   },
   {
    "id": "arm_l",
@@ -1280,7 +1280,7 @@
     true,
     true
    ],
-   "subdiv": 1
+   "subdiv": 0
   },
   {
    "id": "scroll_l",
@@ -1414,7 +1414,7 @@
     true,
     true
    ],
-   "subdiv": 1
+   "subdiv": 0
   },
   {
    "id": "scroll_r",

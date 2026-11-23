@@ -1,0 +1,901 @@
+{
+ "name": "globe",
+ "description": "Desk Globe",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 1800,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   18
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "walnut": [
+    "#21130f",
+    "#362119",
+    "#4a3124",
+    "#5d4330",
+    "#6f553d",
+    "#937755",
+    "#ad9979",
+    "#c2b7a0",
+    "#d9d4c7"
+   ],
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "sage": [
+    "#162010",
+    "#3d522c",
+    "#688249",
+    "#93aa6f",
+    "#b3bf97",
+    "#c9cfb5",
+    "#dee1d2",
+    "#f3f3ee"
+   ],
+   "lake": [
+    "#10181e",
+    "#2c424e",
+    "#4a6d7b",
+    "#6e98a3",
+    "#96b4b8",
+    "#b5c9ca",
+    "#d2dddd",
+    "#eef2f1"
+   ],
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "wd": {
+   "ramp": "walnut",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 1,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 8,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 2,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 9,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 4
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "walnut"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.45,
+     "shift": 0.9,
+     "scratches": 0.006
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "x",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "walnut": "wood"
+    }
+   }
+  },
+  "br": {
+   "ramp": "brass",
+   "tone": 3.4,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "sea": {
+   "ramp": "lake",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.2,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "depth",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "land",
+     "op": "patches",
+     "scale": 1.8,
+     "threshold": 0.56,
+     "ramp": "sage",
+     "tone": 4.4,
+     "seed": 7,
+     "bevel": true
+    },
+    {
+     "id": "sand",
+     "op": "patches",
+     "scale": 1.8,
+     "threshold": 0.66,
+     "ramp": "oat",
+     "tone": 4.8,
+     "seed": 7
+    },
+    {
+     "id": "grid",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.0833,
+     "width": 0.05,
+     "shift": 0.7
+    },
+    {
+     "id": "lat",
+     "op": "stripes",
+     "axis": "path",
+     "period": 1.6,
+     "width": 0.07,
+     "shift": 0.7
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.6,
+     "density": 0.6,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.5,
+    "rough": 0.35,
+    "textures": {
+     "lake": "liquid"
+    }
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "base",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "wd",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 6.0
+    },
+    {
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "size": 6.2
+    },
+    {
+     "at": [
+      0,
+      0.8,
+      0
+     ],
+     "size": 5.0
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 2.6
+    },
+    {
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "size": 2.0
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "stem",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    1.5,
+    0.0
+   ],
+   "style": "br",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.2
+    },
+    {
+     "at": [
+      0,
+      1.4,
+      0
+     ],
+     "size": 0.8
+    },
+    {
+     "at": [
+      0,
+      2.6,
+      0
+     ],
+     "size": 1.1
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "tilt",
+   "shape": "bone",
+   "pivot": [
+    0.0,
+    8.6,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    23.0
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "meridian",
+   "shape": "loft",
+   "parent": "tilt",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "br",
+   "rings": [
+    {
+     "at": [
+      -0.7195985391850624,
+      -4.543366366737633,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      -2.3260239175387287,
+      -3.968578175497842,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      -3.612457882051426,
+      -2.8478321668252367,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      -4.401925544368161,
+      -1.335309515370526,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      -4.585819735172389,
+      0.360911840348087,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      -4.138842106640219,
+      2.007482507097373,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      -3.122483429451531,
+      3.377883543404154,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      -1.6765642994440877,
+      4.283588699890496,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      4.6,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      1.6765642994440877,
+      4.283588699890496,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      3.122483429451531,
+      3.377883543404154,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      4.138842106640219,
+      2.007482507097373,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      4.585819735172389,
+      0.36091184034808493,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      4.401925544368161,
+      -1.335309515370526,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      3.612457882051426,
+      -2.8478321668252367,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      2.326023917538731,
+      -3.968578175497841,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    },
+    {
+     "at": [
+      0.7195985391850624,
+      -4.543366366737633,
+      0
+     ],
+     "size": [
+      0.5,
+      0.45
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "spin",
+   "shape": "bone",
+   "parent": "tilt",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "ball",
+   "shape": "loft",
+   "parent": "spin",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "sea",
+   "rings": [
+    {
+     "at": [
+      0,
+      -4.0,
+      0
+     ],
+     "size": 0.01
+    },
+    {
+     "at": [
+      0,
+      -3.695518130045147,
+      0
+     ],
+     "size": 3.0614674589207183
+    },
+    {
+     "at": [
+      0,
+      -2.8284271247461903,
+      0
+     ],
+     "size": 5.65685424949238
+    },
+    {
+     "at": [
+      0,
+      -1.5307337294603593,
+      0
+     ],
+     "size": 7.391036260090294
+    },
+    {
+     "at": [
+      0,
+      -2.4492935982947064e-16,
+      0
+     ],
+     "size": 8.0
+    },
+    {
+     "at": [
+      0,
+      1.530733729460359,
+      0
+     ],
+     "size": 7.391036260090294
+    },
+    {
+     "at": [
+      0,
+      2.82842712474619,
+      0
+     ],
+     "size": 5.656854249492381
+    },
+    {
+     "at": [
+      0,
+      3.695518130045147,
+      0
+     ],
+     "size": 3.061467458920719
+    },
+    {
+     "at": [
+      0,
+      4.0,
+      0
+     ],
+     "size": 0.01
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    false
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "axle",
+   "shape": "prism",
+   "parent": "tilt",
+   "size": [
+    0.45,
+    0.45,
+    9.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    90.0,
+    0.0,
+    0.0
+   ],
+   "style": "br",
+   "sides": 5
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 12.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "spin",
+     "keys": [
+      [
+       0,
+       0
+      ],
+      [
+       6.0,
+       180
+      ],
+      [
+       12.0,
+       360
+      ]
+     ],
+     "axis": "y",
+     "ease": "linear"
+    }
+   ]
+  }
+ }
+}

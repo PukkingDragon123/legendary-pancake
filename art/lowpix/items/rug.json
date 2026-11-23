@@ -1,0 +1,382 @@
+{
+ "name": "rug",
+ "description": "Woven Rug",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 6,
+ "grounded": true,
+ "budget": {
+  "tris": 600,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   28,
+   50
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "lake": [
+    "#10181e",
+    "#2c424e",
+    "#4a6d7b",
+    "#6e98a3",
+    "#96b4b8",
+    "#b5c9ca",
+    "#d2dddd",
+    "#eef2f1"
+   ],
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ],
+   "terra": [
+    "#220c0b",
+    "#56261f",
+    "#894634",
+    "#b76d4f",
+    "#c6987d",
+    "#d4b9a3",
+    "#e3d6c7",
+    "#f4f0ea"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "wool": {
+   "ramp": "oat",
+   "tone": 4.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "weave_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.21,
+     "seed": 0
+    },
+    {
+     "id": "weave_b",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.18,
+     "seed": 1,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "weave_c",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.18,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/hessian_230",
+     "scale": 4,
+     "amount": 0.55,
+     "ramps": [
+      "oat"
+     ]
+    },
+    {
+     "id": "border",
+     "op": "band",
+     "axis": "z",
+     "from": 0.72,
+     "to": 0.9,
+     "ramp": "terra",
+     "tone": 4.0,
+     "faces": [
+      "up"
+     ]
+    },
+    {
+     "id": "border2",
+     "op": "band",
+     "axis": "z",
+     "from": -0.9,
+     "to": -0.72,
+     "ramp": "terra",
+     "tone": 4.0,
+     "faces": [
+      "up"
+     ]
+    },
+    {
+     "id": "borderx",
+     "op": "band",
+     "axis": "x",
+     "from": 0.82,
+     "to": 0.92,
+     "ramp": "terra",
+     "tone": 4.0,
+     "faces": [
+      "up"
+     ]
+    },
+    {
+     "id": "borderx2",
+     "op": "band",
+     "axis": "x",
+     "from": -0.92,
+     "to": -0.82,
+     "ramp": "terra",
+     "tone": 4.0,
+     "faces": [
+      "up"
+     ]
+    },
+    {
+     "id": "dia_a",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      1
+     ],
+     "period": 4.0,
+     "width": 0.22,
+     "ramp": "lake",
+     "tone": 3.8,
+     "faces": [
+      "up"
+     ],
+     "zigzag": [
+      0.4,
+      0.8
+     ],
+     "zig_axis": "x"
+    },
+    {
+     "id": "dia_b",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      -1
+     ],
+     "period": 4.0,
+     "width": 0.22,
+     "ramp": "lake",
+     "tone": 3.8,
+     "faces": [
+      "up"
+     ],
+     "zigzag": [
+      0.4,
+      0.8
+     ],
+     "zig_axis": "x"
+    },
+    {
+     "id": "dots",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      1
+     ],
+     "period": 4.0,
+     "width": 0.06,
+     "phase": 1.6,
+     "ramp": "honey",
+     "tone": 4.8,
+     "faces": [
+      "up"
+     ]
+    },
+    {
+     "id": "rows",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.3,
+     "width": 0.5,
+     "shift": -0.35
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "oat": "cloth"
+    }
+   }
+  },
+  "fringe": {
+   "ramp": "oat",
+   "tone": 4.6,
+   "light": 0.7,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "rug",
+   "shape": "box",
+   "size": [
+    21.6,
+    0.45,
+    16.0
+   ],
+   "pivot": [
+    0.0,
+    0.225,
+    0.0
+   ],
+   "style": "wool",
+   "hide": [
+    "bottom"
+   ]
+  },
+  {
+   "id": "fringe-1",
+   "shape": "card",
+   "size": [
+    15.6,
+    1.2
+   ],
+   "pivot": [
+    -11.4,
+    0.1,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    0.0
+   ],
+   "style": "fringe",
+   "paint": {
+    "art_key": {
+     "f": "oat:5",
+     "k": "oat:3"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f."
+   ]
+  },
+  {
+   "id": "fringe1",
+   "shape": "card",
+   "size": [
+    15.6,
+    1.2
+   ],
+   "pivot": [
+    11.4,
+    0.1,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "fringe",
+   "paint": {
+    "art_key": {
+     "f": "oat:5",
+     "k": "oat:3"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.",
+    "f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f.f."
+   ]
+  }
+ ]
+}

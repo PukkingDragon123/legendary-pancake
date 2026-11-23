@@ -1,0 +1,764 @@
+{
+ "name": "cactus",
+ "description": "Brave Cactus",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 1800,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   16
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "rose": [
+    "#2b0e12",
+    "#6f272b",
+    "#b04542",
+    "#cd8a82",
+    "#ddb9b0",
+    "#e5cfc7",
+    "#eee3dd",
+    "#f8f5f2"
+   ],
+   "sage": [
+    "#162010",
+    "#3d522c",
+    "#688249",
+    "#93aa6f",
+    "#b3bf97",
+    "#c9cfb5",
+    "#dee1d2",
+    "#f3f3ee"
+   ],
+   "moss": [
+    "#111a0e",
+    "#2f4425",
+    "#506b3e",
+    "#749059",
+    "#96aa7e",
+    "#b5bfa4",
+    "#d2d6c8",
+    "#eeefea"
+   ],
+   "lake": [
+    "#10181e",
+    "#2c424e",
+    "#4a6d7b",
+    "#6e98a3",
+    "#96b4b8",
+    "#b5c9ca",
+    "#d2dddd",
+    "#eef2f1"
+   ],
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ],
+   "cream": [
+    "#36210c",
+    "#734b1b",
+    "#af782b",
+    "#d3a353",
+    "#e2c690",
+    "#f1e6cc",
+    "#f6f2e2",
+    "#fdfcf8"
+   ],
+   "stone": [
+    "#171412",
+    "#3b352f",
+    "#5e574d",
+    "#81796d",
+    "#9d988f",
+    "#b6b5af",
+    "#d1d1ce",
+    "#ededed"
+   ],
+   "pebble": [
+    "#1f1a15",
+    "#504539",
+    "#80725e",
+    "#a79d8b",
+    "#c1bcb0",
+    "#d1cfc6",
+    "#e2e1dd",
+    "#f4f4f2"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "pot": {
+   "ramp": "cream",
+   "tone": 4.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.2,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "pool",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35,
+     "seed": 1
+    },
+    {
+     "id": "speck",
+     "op": "spots",
+     "count": 14,
+     "radius": [
+      0.1,
+      0.18
+     ],
+     "shift": -1.6,
+     "seed": 2
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.8,
+     "density": 0.9,
+     "post": true
+    },
+    {
+     "id": "band",
+     "op": "band",
+     "axis": "y",
+     "from": 0.2,
+     "to": 0.45,
+     "ramp": "lake",
+     "tone": 4.0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.5,
+    "rough": 0.35,
+    "textures": {
+     "cream": "liquid"
+    }
+   }
+  },
+  "peb": {
+   "ramp": "pebble",
+   "tone": 4.6,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rock_face_03",
+     "scale": 12,
+     "amount": 0.9,
+     "ramps": [
+      "pebble"
+     ]
+    },
+    {
+     "id": "clusters",
+     "op": "noise",
+     "scale": 1.5,
+     "amount": 0.7,
+     "seed": 3
+    },
+    {
+     "id": "cracks",
+     "op": "cracks",
+     "scale": 1.0,
+     "width": 0.06,
+     "threshold": 0.82,
+     "shift": -1.2,
+     "bevel": true
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.3,
+     "shift": 1.0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.6,
+    "rough": 0.7,
+    "textures": {
+     "pebble": "stone",
+     "moss": "moss"
+    }
+   }
+  },
+  "cac": {
+   "ramp": "sage",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.6,
+    "outline": "dark"
+   },
+   "layers": [
+    {
+     "id": "ribs",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.125,
+     "width": 0.25,
+     "shift": -1.1
+    },
+    {
+     "id": "ridge",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.125,
+     "width": 0.12,
+     "phase": 0.06,
+     "shift": 0.9
+    },
+    {
+     "id": "spines",
+     "op": "spots",
+     "count": 60,
+     "radius": [
+      0.1,
+      0.14
+     ],
+     "ramp": "cream",
+     "tone": 6,
+     "seed": 5,
+     "min_gap": 0.4
+    },
+    {
+     "id": "tone",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.5
+    }
+   ],
+   "brush": {
+    "flow": "path",
+    "length": 0.8,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "sage": "organic"
+    }
+   }
+  },
+  "fl": {
+   "ramp": "rose",
+   "tone": 4.4,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.2,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "pool",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.8,
+     "density": 0.9,
+     "post": true
+    },
+    {
+     "id": "petals",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.125,
+     "width": 0.2,
+     "shift": -1.0
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.5,
+    "rough": 0.35,
+    "textures": {
+     "rose": "liquid"
+    }
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "pot",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "pot",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 4.6
+    },
+    {
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "size": 5.2
+    },
+    {
+     "at": [
+      0,
+      4.2,
+      0
+     ],
+     "size": 6.4
+    },
+    {
+     "at": [
+      0,
+      4.6,
+      0
+     ],
+     "size": 7.0
+    },
+    {
+     "at": [
+      0,
+      5.4,
+      0
+     ],
+     "size": 7.0
+    },
+    {
+     "at": [
+      0,
+      5.5,
+      0
+     ],
+     "size": 6.4
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "pebbles",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    5.1,
+    0.0
+   ],
+   "style": "peb",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 6.2
+    },
+    {
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "size": 5.0
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "trunk",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    5.2,
+    0.0
+   ],
+   "style": "cac",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 3.6
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": 4.2
+    },
+    {
+     "at": [
+      0,
+      6.0,
+      0
+     ],
+     "size": 4.0
+    },
+    {
+     "at": [
+      0,
+      8.5,
+      0
+     ],
+     "size": 3.4
+    },
+    {
+     "at": [
+      0,
+      9.6,
+      0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0,
+      10.0,
+      0
+     ],
+     "size": 0.0
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    false
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "arm1",
+   "shape": "loft",
+   "pivot": [
+    1.4,
+    9.0,
+    0.0
+   ],
+   "style": "cac",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      2.2,
+      0.2,
+      0.0
+     ],
+     "size": 2.2
+    },
+    {
+     "at": [
+      2.8,
+      1.4,
+      0.0
+     ],
+     "size": 2.1
+    },
+    {
+     "at": [
+      2.9,
+      3.8,
+      0.0
+     ],
+     "size": 1.9
+    },
+    {
+     "at": [
+      2.9,
+      4.8,
+      0.0
+     ],
+     "size": 0.01
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "arm-1",
+   "shape": "loft",
+   "pivot": [
+    -1.4,
+    11.0,
+    0.0
+   ],
+   "style": "cac",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      -2.2,
+      0.2,
+      0.0
+     ],
+     "size": 2.2
+    },
+    {
+     "at": [
+      -2.8,
+      1.4,
+      0.0
+     ],
+     "size": 2.1
+    },
+    {
+     "at": [
+      -2.9,
+      2.8,
+      0.0
+     ],
+     "size": 1.9
+    },
+    {
+     "at": [
+      -2.9,
+      3.8,
+      0.0
+     ],
+     "size": 0.01
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "flower",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    15.0,
+    0.0
+   ],
+   "style": "fl",
+   "paint": {
+    "layers": [
+     {
+      "id": "eye",
+      "op": "spots",
+      "centers": [
+       [
+        0,
+        1.2,
+        0,
+        0.5
+       ]
+      ],
+      "ramp": "honey",
+      "tone": 5.4,
+      "faces": [
+       "up"
+      ]
+     }
+    ]
+   },
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 0.6
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": 1.8
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": 2.6
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 2.0
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  }
+ ]
+}

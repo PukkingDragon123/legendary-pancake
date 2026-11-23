@@ -369,6 +369,7 @@ class Spec:
         x, y0, z = base
         rr = [{"at": [0, float(y), 0], "size": (list(w) if isinstance(w, (list, tuple)) else float(w))} for y, w in rings]
         kw.setdefault("up", [0, 0, 1])
+        kw.setdefault("subdiv", 0)   # Catmull-Rom would overshoot on unevenly spaced rings and flip the caps
         return self.add(id, "loft", None, style, at=(x, y0, z), parent=parent,
                         rings=rr, profile={"sides": sides, "round": round_}, caps=list(caps), **kw)
 

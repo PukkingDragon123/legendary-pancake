@@ -1,0 +1,659 @@
+{
+ "name": "trophy",
+ "description": "Gold Trophy",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 1600,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   16
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "walnut": [
+    "#21130f",
+    "#362119",
+    "#4a3124",
+    "#5d4330",
+    "#6f553d",
+    "#937755",
+    "#ad9979",
+    "#c2b7a0",
+    "#d9d4c7"
+   ],
+   "berry": [
+    "#1a0c12",
+    "#42222c",
+    "#683944",
+    "#8c525b",
+    "#a97477",
+    "#be9d9c",
+    "#d5c5c4",
+    "#efeae9"
+   ],
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "wd": {
+   "ramp": "walnut",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 2,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 9,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 3,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 10,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 5
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "walnut"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.45,
+     "shift": 0.9,
+     "scratches": 0.006
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "x",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "walnut": "wood"
+    }
+   }
+  },
+  "br": {
+   "ramp": "brass",
+   "tone": 3.8,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "rib": {
+   "ramp": "berry",
+   "tone": 4,
+   "light": 0.7,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "plinth",
+   "shape": "box",
+   "size": [
+    7.6,
+    2.0,
+    7.6
+   ],
+   "pivot": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "style": "wd",
+   "chamfer": 0.3
+  },
+  {
+   "id": "plinth2",
+   "shape": "box",
+   "size": [
+    6.0,
+    1.4,
+    6.0
+   ],
+   "pivot": [
+    0.0,
+    2.7,
+    0.0
+   ],
+   "style": "wd",
+   "chamfer": 0.25
+  },
+  {
+   "id": "plaque",
+   "shape": "box",
+   "size": [
+    4.2,
+    1.1,
+    0.2
+   ],
+   "pivot": [
+    0.0,
+    1.0,
+    3.85
+   ],
+   "style": "br"
+  },
+  {
+   "id": "cup",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    3.4,
+    0.0
+   ],
+   "style": "br",
+   "paint": {
+    "layers": [
+     {
+      "id": "owl",
+      "op": "spots",
+      "centers": [
+       [
+        0,
+        6.4,
+        2.6,
+        1.0
+       ]
+      ],
+      "shift": 0.9,
+      "bevel": true
+     },
+     {
+      "id": "owleyes",
+      "op": "spots",
+      "centers": [
+       [
+        -0.35,
+        6.7,
+        2.75,
+        0.22
+       ],
+       [
+        0.35,
+        6.7,
+        2.75,
+        0.22
+       ]
+      ],
+      "ramp": "brass",
+      "tone": 1.5
+     }
+    ]
+   },
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 3.0
+    },
+    {
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "size": 3.0
+    },
+    {
+     "at": [
+      0,
+      0.8,
+      0
+     ],
+     "size": 1.2
+    },
+    {
+     "at": [
+      0,
+      2.6,
+      0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0,
+      3.2,
+      0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0,
+      4.4,
+      0
+     ],
+     "size": 4.2
+    },
+    {
+     "at": [
+      0,
+      6.6,
+      0
+     ],
+     "size": 5.8
+    },
+    {
+     "at": [
+      0,
+      7.6,
+      0
+     ],
+     "size": 6.2
+    },
+    {
+     "at": [
+      0,
+      8.0,
+      0
+     ],
+     "size": 6.6
+    },
+    {
+     "at": [
+      0,
+      8.3,
+      0
+     ],
+     "size": 6.2
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "handle-1",
+   "shape": "loft",
+   "pivot": [
+    -2.9,
+    10.6,
+    0.0
+   ],
+   "style": "br",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.6
+    },
+    {
+     "at": [
+      -1.8,
+      0.4,
+      0.0
+     ],
+     "size": 0.6
+    },
+    {
+     "at": [
+      -2.0,
+      -1.8,
+      0.0
+     ],
+     "size": 0.6
+    },
+    {
+     "at": [
+      -0.6,
+      -3.0,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 5,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "handle1",
+   "shape": "loft",
+   "pivot": [
+    2.9,
+    10.6,
+    0.0
+   ],
+   "style": "br",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.6
+    },
+    {
+     "at": [
+      1.8,
+      0.4,
+      0.0
+     ],
+     "size": 0.6
+    },
+    {
+     "at": [
+      2.0,
+      -1.8,
+      0.0
+     ],
+     "size": 0.6
+    },
+    {
+     "at": [
+      0.6,
+      -3.0,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 5,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "ribbon",
+   "shape": "card",
+   "size": [
+    2.6,
+    3.2
+   ],
+   "pivot": [
+    0.0,
+    6.2,
+    1.25
+   ],
+   "offset": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "rib",
+   "paint": {
+    "art_key": {
+     "r": "berry:4",
+     "d": "berry:2",
+     "k": "berry:6"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "................",
+    "..rrrrrrrrrrrr..",
+    "..rrrrrrrrrrrr..",
+    "..rrrrrrrrrrrr..",
+    "..rrrrrrrrrrrr..",
+    "..rrrrrrrrrrrr..",
+    "..rrrrrrrrrrrr..",
+    "..rrrrrrrrrrrr..",
+    "..rrrrrrrrrrrr..",
+    ".....rrrrrr.....",
+    ".....rr..rr.....",
+    ".....rr..rr.....",
+    ".....rr..rr.....",
+    "....rrr..rrr....",
+    "....rrr..rrr....",
+    "....rrr..rrr....",
+    "....rr....rr....",
+    "....rr....rr....",
+    "....dd....dd....",
+    "...ddd....ddd..."
+   ]
+  }
+ ]
+}
