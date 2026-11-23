@@ -63,7 +63,7 @@ void main(){
   float ndl = dot(n, uSun);
   // cloud shadows fall a little away from the sun
   float cs = cloud(normalize(n - uSun * 0.035), uCloud);
-  float shadowed = step(0.69, cs) * step(0.0, ndl);
+  float shadowed = step(0.72, cs) * step(0.0, ndl);
   float k = ndl * 7.0 + (b - 0.5) * 0.9;
   vec3 day = d.rgb;
   bool water = d.a < 0.97;
@@ -100,16 +100,16 @@ void main(){
   vec3 n = normalize(vN);
   float c = cloud(n, uCloud);
   float b = bayer(gl_FragCoord.xy);
-  if (c < 0.675) discard;
+  if (c < 0.7) discard;
   float ndl = dot(n, uSun);
-  float k = ndl * 7.0 + (b - 0.5) * 0.9 + (c - 0.66) * 5.0;
+  float k = ndl * 7.0 + (b - 0.5) * 0.9 + (c - 0.69) * 5.0;
   vec3 col;
   if (k > 1.8) col = vec3(0.9, 0.91, 0.87);
   else if (k > 0.7) col = vec3(0.78, 0.81, 0.82);
   else if (k > -0.4) col = vec3(0.7, 0.6, 0.63);
   else { if (b > 0.45) discard; col = vec3(0.22, 0.26, 0.34); }
-  if (c < 0.71 && b > 0.5) discard;   // thin, ragged pixel edges
-  if (c < 0.69 && b > 0.25) discard;
+  if (c < 0.735 && b > 0.5) discard;   // thin, ragged pixel edges
+  if (c < 0.715 && b > 0.25) discard;
   float rim = normalize(vVN).z;
   if (rim < 0.3 + b * 0.1) col *= 0.88;
   gl_FragColor = vec4(col, 1.0);

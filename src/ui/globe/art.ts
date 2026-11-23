@@ -91,7 +91,7 @@ export function homeSprite(scale: number): string {
 export function stampArt(a: Area, opts: { date?: number; state: 'visited' | 'open' | 'locked'; seed: number }, scale: number): string {
   return memo(`stamp:${a.id}:${opts.state}:${opts.date ?? 0}:${scale}`, () => {
     const W = 46, H = 38, p = new Pix(W, H);
-    const ink = opts.state === 'visited' ? hexC(a.color) : opts.state === 'open' ? 0xb2aa98 : 0xc8c0ae;
+    const ink = opts.state === 'visited' ? mix(hexC(a.color), 0x4b463a, 0.32) : opts.state === 'open' ? 0xb2aa98 : 0xc8c0ae;
     const faint = opts.state !== 'visited';
     const dot = (x: number, y: number) => { if (!faint || (x + y) % 2 === 0) { if (!faint && hash(x, y, opts.seed) < 0.07) return; p.set(x, y, ink); } };
     const shape = hash(opts.seed, 3) * 4 | 0;
@@ -116,7 +116,7 @@ export function stampArt(a: Area, opts: { date?: number; state: 'visited' | 'ope
     for (let y = 0; y < 5; y++) for (let x = 0; x < tw; x++) if (tmp.get(x, y) !== -1) dot(Math.round(W / 2 - tw / 2) + x, 20 + y);
     if (opts.state === 'visited' && opts.date) {
       const d = new Date(opts.date);
-      const ds = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getFullYear()).slice(2)}`;
+      const ds = shape === 1 ? `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}` : `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getFullYear()).slice(2)}`;
       const w = Pix.textWidth(ds, 1);
       const t2 = new Pix(w, 5); t2.text(0, 0, ds, ink, 1);
       for (let y = 0; y < 5; y++) for (let x = 0; x < w; x++) if (t2.get(x, y) !== -1) dot(Math.round(W / 2 - w / 2) + x, 28 + y);

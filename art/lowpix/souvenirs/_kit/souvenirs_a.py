@@ -173,7 +173,7 @@ def sv_venicemask():
     """A Venetian Colombina mask for the wall: gold leaf, almond eyes ringed with pearls, a plum lattice brow,
     a spray of feathers and a silk ribbon, hung on a brass nail."""
     s = Spec("sv_venicemask", "Venetian Mask", density=7, tris=600, hero=(0, 6))
-    art = mask_art()
+    art = mask_art(96, 52)
     key = {"g": "brass:5", "h": "brass:7", "d": "brass:2", "e": "brass:4", "w": "snow:5", "p": "plum:4", "q": "brass:6"}
     s.card("mask", art, s.style("mask", flat("brass", 4.4, light=0.4, outline="none")), at=(0, 9.0, 1.4), plane="xy", key=key, size=[14.0, 7.6])
     back = ["".join("k" if ch != "." else "." for ch in r) for r in art]
