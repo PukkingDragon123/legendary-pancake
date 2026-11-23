@@ -1,0 +1,2403 @@
+{
+ "name": "fairy_lights",
+ "description": "Fairy-Light String",
+ "author": "Hoot Hollow (furnB)",
+ "license": "CC0-1.0",
+ "density": 4,
+ "budget": {
+  "tris": 3000,
+  "colors": 400
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.62
+  ],
+  "strength": 0.75,
+  "gradient": 0.35,
+  "ao": 1.1,
+  "ao_height": 3.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.88
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.5,
+  "width": 0.4,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "pa_wire": "none",
+   "br_brass": "metal",
+   "br_verdigris": "metal",
+   "br_cap": "metal",
+   "fm_b0": "none",
+   "fm_b1": "none",
+   "fm_b2": "none",
+   "fm_b3": "none",
+   "fm_b4": "none",
+   "fm_b5": "none"
+  }
+ },
+ "render": {
+  "background": "#2a3330",
+  "hero": [
+   -20,
+   12
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "pa_wire": [
+    "#243031",
+    "#25332f",
+    "#28382e",
+    "#2c4030",
+    "#42543e",
+    "#57654b",
+    "#6b7658"
+   ],
+   "br_brass": [
+    "#45453e",
+    "#5c5542",
+    "#7a6c4b",
+    "#9e8656",
+    "#c8a764",
+    "#e1bc74",
+    "#f6cf81",
+    "#fbdd8d"
+   ],
+   "br_verdigris": [
+    "#475853",
+    "#6f8a78",
+    "#829b84",
+    "#93a98f"
+   ],
+   "br_cap": [
+    "#303e39",
+    "#39493b",
+    "#44583f",
+    "#546c46",
+    "#66844f",
+    "#7f995f",
+    "#95ad6c",
+    "#a9bc79"
+   ],
+   "fm_b0": [
+    "#6e6857",
+    "#a79673",
+    "#f1d39a",
+    "#feeaaa",
+    "#fcf6b7",
+    "#fbf2c0"
+   ],
+   "fm_b1": [
+    "#54646a",
+    "#7b8f94",
+    "#aec8cc",
+    "#c7dedd",
+    "#dcf0e8",
+    "#edf2e1"
+   ],
+   "fm_b2": [
+    "#665b48",
+    "#99805a",
+    "#dcb072",
+    "#f6c682",
+    "#fcd890",
+    "#fbe69a"
+   ],
+   "fm_b3": [
+    "#6e6857",
+    "#a79673",
+    "#f1d39a",
+    "#feeaaa",
+    "#fcf6b7",
+    "#fbf2c0"
+   ],
+   "fm_b4": [
+    "#54646a",
+    "#7b8f94",
+    "#aec8cc",
+    "#c7dedd",
+    "#dcf0e8",
+    "#edf2e1"
+   ],
+   "fm_b5": [
+    "#665b48",
+    "#99805a",
+    "#dcb072",
+    "#f6c682",
+    "#fcd890",
+    "#fbe69a"
+   ]
+  }
+ },
+ "styles": {
+  "plain_wire": {
+   "ramp": "pa_wire",
+   "tone": 3.0,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "twist",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.6,
+     "width": 0.4,
+     "shift": -0.8
+    }
+   ],
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0
+  },
+  "metal_brass": {
+   "ramp": "br_brass",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.5,
+    "dark_shift": -1.3
+   },
+   "brush": {
+    "flow": "long",
+    "length": 1.2,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.6,
+     "amount": 0.55
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.2,
+     "threshold": 0.74,
+     "ramp": "br_verdigris",
+     "tone": 1.6,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.6,
+     "density": 0.5,
+     "post": true
+    }
+   ]
+  },
+  "metal_cap": {
+   "ramp": "br_cap",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.5,
+    "dark_shift": -1.3
+   },
+   "brush": {
+    "flow": "long",
+    "length": 1.2,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.6,
+     "amount": 0.55
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.6,
+     "density": 0.5,
+     "post": true
+    }
+   ]
+  },
+  "glow_b0": {
+   "ramp": "fm_b0",
+   "tone": 4.0,
+   "light": 0.15,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "heat",
+     "op": "gradient",
+     "axis": "y",
+     "amount": -0.8
+    },
+    {
+     "id": "flick",
+     "op": "noise",
+     "scale": 1.0,
+     "amount": 0.5
+    }
+   ]
+  },
+  "glow_b1": {
+   "ramp": "fm_b1",
+   "tone": 4.0,
+   "light": 0.15,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "heat",
+     "op": "gradient",
+     "axis": "y",
+     "amount": -0.8
+    },
+    {
+     "id": "flick",
+     "op": "noise",
+     "scale": 1.0,
+     "amount": 0.5
+    }
+   ]
+  },
+  "glow_b2": {
+   "ramp": "fm_b2",
+   "tone": 4.0,
+   "light": 0.15,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "heat",
+     "op": "gradient",
+     "axis": "y",
+     "amount": -0.8
+    },
+    {
+     "id": "flick",
+     "op": "noise",
+     "scale": 1.0,
+     "amount": 0.5
+    }
+   ]
+  },
+  "glow_b3": {
+   "ramp": "fm_b3",
+   "tone": 4.0,
+   "light": 0.15,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "heat",
+     "op": "gradient",
+     "axis": "y",
+     "amount": -0.8
+    },
+    {
+     "id": "flick",
+     "op": "noise",
+     "scale": 1.0,
+     "amount": 0.5
+    }
+   ]
+  },
+  "glow_b4": {
+   "ramp": "fm_b4",
+   "tone": 4.0,
+   "light": 0.15,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "heat",
+     "op": "gradient",
+     "axis": "y",
+     "amount": -0.8
+    },
+    {
+     "id": "flick",
+     "op": "noise",
+     "scale": 1.0,
+     "amount": 0.5
+    }
+   ]
+  },
+  "glow_b5": {
+   "ramp": "fm_b5",
+   "tone": 4.0,
+   "light": 0.15,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "heat",
+     "op": "gradient",
+     "axis": "y",
+     "amount": -0.8
+    },
+    {
+     "id": "flick",
+     "op": "noise",
+     "scale": 1.0,
+     "amount": 0.5
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "wire",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      -22.0,
+      0.0,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -19.8,
+      -1.3124611797498107,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -17.6,
+      -2.516026908252903,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -15.4,
+      -3.512461179749811,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -13.2,
+      -4.223803458662553,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -11.0,
+      -4.6,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -8.8,
+      -4.623803458662553,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -6.600000000000001,
+      -4.3124611797498105,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -4.399999999999999,
+      -3.716026908252904,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -2.1999999999999993,
+      -2.912461179749811,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.0,
+      -2.0,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      2.2,
+      -2.912461179749811,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      4.4,
+      -3.7160269082529034,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      6.6,
+      -4.3124611797498105,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      8.8,
+      -4.623803458662553,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      11.0,
+      -4.6,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      13.2,
+      -4.2238034586625535,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      15.399999999999999,
+      -3.512461179749811,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      17.6,
+      -2.5160269082529036,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      19.8,
+      -1.312461179749811,
+      1.0
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      22.0,
+      -4.4087284769304716e-16,
+      1.0
+     ],
+     "size": 0.45
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_wire"
+  },
+  {
+   "id": "plate",
+   "shape": "box",
+   "size": [
+    2.0,
+    2.0,
+    0.6
+   ],
+   "style": "metal_brass",
+   "pivot": [
+    -22.0,
+    0.2,
+    0.3
+   ],
+   "chamfer": 0.3
+  },
+  {
+   "id": "hook",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.9
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      -0.8,
+      1.2
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    -22.0,
+    0.4,
+    0.4
+   ],
+   "style": "metal_brass"
+  },
+  {
+   "id": "plate1",
+   "shape": "box",
+   "size": [
+    2.0,
+    2.0,
+    0.6
+   ],
+   "style": "metal_brass",
+   "pivot": [
+    0.0,
+    -1.8,
+    0.3
+   ],
+   "chamfer": 0.3
+  },
+  {
+   "id": "hook1",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.9
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      -0.8,
+      1.2
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -1.6,
+    0.4
+   ],
+   "style": "metal_brass"
+  },
+  {
+   "id": "plate2",
+   "shape": "box",
+   "size": [
+    2.0,
+    2.0,
+    0.6
+   ],
+   "style": "metal_brass",
+   "pivot": [
+    22.0,
+    0.2,
+    0.3
+   ],
+   "chamfer": 0.3
+  },
+  {
+   "id": "hook2",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.9
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      -0.8,
+      1.2
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    22.0,
+    0.4,
+    0.4
+   ],
+   "style": "metal_brass"
+  },
+  {
+   "id": "bulb",
+   "shape": "bone",
+   "pivot": [
+    -19.25,
+    -1.9276603565143233,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb"
+  },
+  {
+   "id": "glow_bulb",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b0",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb"
+  },
+  {
+   "id": "bulb1",
+   "shape": "bone",
+   "pivot": [
+    -16.5,
+    -3.3455844122715708,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap1",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb1"
+  },
+  {
+   "id": "glow_bulb1",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b1",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb1"
+  },
+  {
+   "id": "bulb2",
+   "shape": "bone",
+   "pivot": [
+    -13.75,
+    -4.375966317040632,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap2",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb2"
+  },
+  {
+   "id": "glow_bulb2",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b2",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb2"
+  },
+  {
+   "id": "bulb3",
+   "shape": "bone",
+   "pivot": [
+    -11.0,
+    -4.8999999999999995,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap3",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb3"
+  },
+  {
+   "id": "glow_bulb3",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b3",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb3"
+  },
+  {
+   "id": "bulb4",
+   "shape": "bone",
+   "pivot": [
+    -8.25,
+    -4.875966317040632,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap4",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb4"
+  },
+  {
+   "id": "glow_bulb4",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b4",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb4"
+  },
+  {
+   "id": "bulb5",
+   "shape": "bone",
+   "pivot": [
+    -5.5,
+    -4.345584412271571,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap5",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb5"
+  },
+  {
+   "id": "glow_bulb5",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b5",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb5"
+  },
+  {
+   "id": "bulb6",
+   "shape": "bone",
+   "pivot": [
+    -2.75,
+    -3.4276603565143233,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap6",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb6"
+  },
+  {
+   "id": "glow_bulb6",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b0",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb6"
+  },
+  {
+   "id": "bulb7",
+   "shape": "bone",
+   "pivot": [
+    2.75,
+    -3.4276603565143233,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap7",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb7"
+  },
+  {
+   "id": "glow_bulb7",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b1",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb7"
+  },
+  {
+   "id": "bulb8",
+   "shape": "bone",
+   "pivot": [
+    5.5,
+    -4.345584412271571,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap8",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb8"
+  },
+  {
+   "id": "glow_bulb8",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b2",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb8"
+  },
+  {
+   "id": "bulb9",
+   "shape": "bone",
+   "pivot": [
+    8.25,
+    -4.875966317040632,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap9",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb9"
+  },
+  {
+   "id": "glow_bulb9",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b3",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb9"
+  },
+  {
+   "id": "bulb10",
+   "shape": "bone",
+   "pivot": [
+    11.0,
+    -4.8999999999999995,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap10",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb10"
+  },
+  {
+   "id": "glow_bulb10",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b4",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb10"
+  },
+  {
+   "id": "bulb11",
+   "shape": "bone",
+   "pivot": [
+    13.75,
+    -4.375966317040632,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap11",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb11"
+  },
+  {
+   "id": "glow_bulb11",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b5",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb11"
+  },
+  {
+   "id": "bulb12",
+   "shape": "bone",
+   "pivot": [
+    16.5,
+    -3.345584412271571,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -12.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap12",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb12"
+  },
+  {
+   "id": "glow_bulb12",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b0",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb12"
+  },
+  {
+   "id": "bulb13",
+   "shape": "bone",
+   "pivot": [
+    19.25,
+    -1.9276603565143238,
+    1.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "pa_wire"
+   }
+  },
+  {
+   "id": "cap13",
+   "shape": "box",
+   "size": [
+    0.9,
+    0.8,
+    0.9
+   ],
+   "style": "metal_cap",
+   "pivot": [
+    0.0,
+    -0.4,
+    0.0
+   ],
+   "parent": "bulb13"
+  },
+  {
+   "id": "glow_bulb13",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.9
+    },
+    {
+     "at": [
+      0.0,
+      -0.9,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.9,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    -0.8,
+    0.0
+   ],
+   "style": "glow_b1",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "parent": "bulb13"
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 6.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "glow_bulb",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 1,
+      "phase": 0.0,
+      "shape": "pulse"
+     }
+    },
+    {
+     "part": "bulb",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "glow_bulb1",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 2,
+      "phase": 0.29,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb1",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.13
+     }
+    },
+    {
+     "part": "glow_bulb2",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 3,
+      "phase": 0.58,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb2",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.26
+     }
+    },
+    {
+     "part": "glow_bulb3",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 1,
+      "phase": 0.8699999999999999,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb3",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.39
+     }
+    },
+    {
+     "part": "glow_bulb4",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 2,
+      "phase": 0.15999999999999992,
+      "shape": "pulse"
+     }
+    },
+    {
+     "part": "bulb4",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.52
+     }
+    },
+    {
+     "part": "glow_bulb5",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 3,
+      "phase": 0.44999999999999996,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb5",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.65
+     }
+    },
+    {
+     "part": "glow_bulb6",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 1,
+      "phase": 0.7399999999999998,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb6",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.78
+     }
+    },
+    {
+     "part": "glow_bulb7",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 2,
+      "phase": 0.029999999999999805,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb7",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.91
+     }
+    },
+    {
+     "part": "glow_bulb8",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 3,
+      "phase": 0.31999999999999984,
+      "shape": "pulse"
+     }
+    },
+    {
+     "part": "bulb8",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.040000000000000036
+     }
+    },
+    {
+     "part": "glow_bulb9",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 1,
+      "phase": 0.6099999999999999,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb9",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.16999999999999993
+     }
+    },
+    {
+     "part": "glow_bulb10",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 2,
+      "phase": 0.8999999999999999,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb10",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.30000000000000004
+     }
+    },
+    {
+     "part": "glow_bulb11",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 3,
+      "phase": 0.18999999999999995,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb11",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.43000000000000016
+     }
+    },
+    {
+     "part": "glow_bulb12",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 1,
+      "phase": 0.47999999999999954,
+      "shape": "pulse"
+     }
+    },
+    {
+     "part": "bulb12",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.56
+     }
+    },
+    {
+     "part": "glow_bulb13",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.28,
+       0.28,
+       0.28
+      ],
+      "cycles": 2,
+      "phase": 0.7699999999999996,
+      "shape": "sine"
+     }
+    },
+    {
+     "part": "bulb13",
+     "osc": {
+      "axis": "z",
+      "amp": 3,
+      "cycles": 1,
+      "phase": 0.69
+     }
+    }
+   ]
+  }
+ }
+}

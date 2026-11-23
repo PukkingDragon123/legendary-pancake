@@ -11,7 +11,7 @@ const add = (d: ItemDef) => items.push(d);
 const iron = metal(MET.iron);
 
 add({
-  id: 'fringe_floor_lamp', name: 'Fringed Floor Lamp', cat: 'lights', price: 320, rarity: 'uncommon', size: [1, 1],
+  id: 'fringe_floor_lamp', model: 'items/fringe_floor_lamp.glb', name: 'Fringed Floor Lamp', cat: 'lights', price: 320, rarity: 'uncommon', size: [1, 1],
   blurb: 'A tasselled shade the colour of apricot jam. Reading light, napping light.',
   light: { x: 0, y: 34, z: 0, color: 0xffc98a, power: 1.5 },
   build: () => {
@@ -33,7 +33,7 @@ add({
 });
 
 add({
-  id: 'fairy_lights', name: 'Fairy-Light String', cat: 'lights', price: 150, rarity: 'common', size: [3, 1], wall: true,
+  id: 'fairy_lights', model: 'items/fairy_lights.glb', name: 'Fairy-Light String', cat: 'lights', price: 150, rarity: 'common', size: [3, 1], wall: true,
   blurb: 'Fourteen little bulbs that twinkle like they know a secret.',
   light: { x: 0, y: -6, z: 3, color: 0xffd9a0, power: 1.1 },
   build: () => {
@@ -58,7 +58,7 @@ add({
 });
 
 add({
-  id: 'iron_lantern', name: 'Wrought-Iron Lantern', cat: 'lights', price: 190, rarity: 'common', size: [1, 1], small: true,
+  id: 'iron_lantern', model: 'items/iron_lantern.glb', name: 'Wrought-Iron Lantern', cat: 'lights', price: 190, rarity: 'common', size: [1, 1], small: true,
   blurb: 'Four little windows round a beeswax candle. Carry it, hang it, set it down.',
   light: { x: 0, y: 6, z: 0, color: 0xffb35a, power: 1.2 },
   build: () => {
@@ -76,7 +76,7 @@ add({
 });
 
 add({
-  id: 'candelabra', name: 'Brass Candelabra', cat: 'lights', price: 260, rarity: 'uncommon', size: [1, 1], small: true,
+  id: 'candelabra', model: 'items/candelabra.glb', name: 'Brass Candelabra', cat: 'lights', price: 260, rarity: 'uncommon', size: [1, 1], small: true,
   blurb: 'Five candles for when one is simply not dramatic enough.',
   light: { x: 0, y: 16, z: 0, color: 0xffb860, power: 1.4 },
   build: () => {
@@ -100,7 +100,7 @@ add({
 });
 
 add({
-  id: 'toadstool_lamp', name: 'Toadstool Cottage Lamp', cat: 'lights', price: 280, rarity: 'uncommon', size: [1, 1], small: true,
+  id: 'toadstool_lamp', model: 'items/toadstool_lamp.glb', name: 'Toadstool Cottage Lamp', cat: 'lights', price: 280, rarity: 'uncommon', size: [1, 1], small: true,
   blurb: 'Three glowing mushrooms; the big one has a tiny lit window. Someone lives there.',
   light: { x: 0, y: 10, z: 2, color: 0xffb070, power: 1.3 },
   build: () => {
@@ -132,7 +132,7 @@ add({
 });
 
 add({
-  id: 'firefly_jar', name: 'Firefly Jar', cat: 'lights', price: 220, rarity: 'rare', size: [1, 1], small: true,
+  id: 'firefly_jar', model: 'items/firefly_jar.glb', name: 'Firefly Jar', cat: 'lights', price: 220, rarity: 'rare', size: [1, 1], small: true,
   blurb: 'Five fireflies on a sleepover. The lid has air holes and a very small welcome mat.',
   light: { x: 0, y: 6, z: 0, color: 0xd8ff7a, power: 1.2 },
   build: () => {
