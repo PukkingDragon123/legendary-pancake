@@ -973,7 +973,7 @@ def _markings(O, P, pt, S, C, fill, streaks, spots, bars, dabmask, k):
     elif und == 'streaked':
         streaks(belly, C['underMark'], size=1.0, spacing=2.0, keep=0.7, stretch=2.6)
     elif und == 'finebar':
-        bars(belly, C['underMark'], period=1.5, width=0.24, wob=0.4, broken=0.9)
+        bars(belly, C['underMark'], period=1.6, width=0.15, wob=0.5, broken=0.7)
         streaks(belly & (Z > O.bz0 + O.bh * 0.55), C['underMark'], size=1.0, spacing=2.3, keep=0.5, stretch=2.4)
     elif und == 'longeared':
         streaks(belly, C['underMark'], size=0.9, spacing=2.0, keep=0.75, stretch=3.8)
@@ -985,8 +985,11 @@ def _markings(O, P, pt, S, C, fill, streaks, spots, bars, dabmask, k):
         streaks(belly & (Z > O.bz0 + O.bh * 0.45), C['underMark'], size=1.2, spacing=2.1, keep=0.8, stretch=3.4)
         bars(belly & (Z < O.bz0 + O.bh * 0.6), C['underMark'], period=1.6, width=0.18, broken=0.85)
     if C.get('bib'):  # a white throat bib under the face
-        bib = (belly | back) & (on[:, :, 1] < -0.2) & (Z > O.bz1 - 5.5 * k) & (np.abs(X) < O.bw * 0.3)
-        fill(bib, C['bib'], base=0.15, brush='feather', tex='feather')
+        # a soft pale throat patch: narrow, ragged at its edge, brushed in (never a hard white band)
+        ragged = 0.9 * k * np.sin(X * 1.7 / k) * np.sin(Z * 2.3 / k)
+        bib = (belly | back) & (on[:, :, 1] < -0.35) & (Z > O.bz1 - 4.2 * k + ragged) & (np.abs(X) < O.bw * 0.2 - np.clip(O.bz1 - Z, 0, 9) * 0.5)
+        bib &= dabmask(bib, size=1.4, spacing=1.0, keep=0.9, seed=43, cut=0.98) | (np.abs(X) < O.bw * 0.1)
+        fill(bib, C['bib'], base=0.05, brush='feather', tex='feather')
     # ---------------------------------------------------------------- the face
     eyes = [np.hypot(X - sx * O.ex, Z - O.ez) for sx in (-1, 1)]
     de = np.minimum(*eyes)
@@ -998,8 +1001,11 @@ def _markings(O, P, pt, S, C, fill, streaks, spots, bars, dabmask, k):
         fill(ring & dabmask(disc, size=1.4, spacing=1.3, keep=0.55, seed=33, cut=0.9), C['discDark'], base=0.1,
              brush={'preset': 'feather', 'flow': 'around', 'L': 1.0, 'W': 0.35}, tex=False)
     if dp == 'rings':  # the great grey's dish of concentric rings and its white bow tie
-        ring = disc & (np.abs(np.mod(de / (1.7 * k), 1.0) - 0.5) < 0.16) & (de > O.er * 1.6)
-        fill(ring, C['discDark'], base=0.0, brush={'preset': 'feather', 'flow': _radial(O), 'L': 1.2, 'W': 0.4}, tex=False)
+        # fine broken rings of feathers, soft grey on grey (a dish of ripples, not a target)
+        ring = disc & (np.abs(np.mod(de / (1.75 * k), 1.0) - 0.5) < 0.085) & (de > O.er * 1.8)
+        ring &= dabmask(disc, size=1.5, spacing=1.25, keep=0.78, seed=41, cut=0.95)
+        mid = '#%02x%02x%02x' % tuple(int((int(C['disc'][i:i + 2], 16) * 0.45 + int(C['discDark'][i:i + 2], 16) * 0.55)) for i in (1, 3, 5))
+        fill(ring, mid, base=0.0, brush={'preset': 'feather', 'flow': 'around', 'L': 1.0, 'W': 0.32}, tex=False)
         bow = (disc | ruff | crown) & (np.abs(Z - (O.ez - 7.2 * k)) < 1.2 * k + 0.25 * np.abs(X)) & (np.abs(X) < 4.4 * k) & (on[:, :, 1] < -0.3)
         fill(bow, C['bib'], base=0.2, brush='feather', tex=False)
         chin = (disc | ruff) & (np.abs(X) < 1.3 * k) & (np.abs(Z - (O.ez - 7.2 * k)) < 1.0 * k)
@@ -1198,7 +1204,7 @@ def export(O, F):
     }
     json.dump(meta, open(os.path.join(F.out, O.id + '.rig.json'), 'w'), indent=1)
     import pack
-    pack.webp_glb(raw, os.path.join(OUT_GLB, O.id + '.glb'), lossless=True)
+    pack.webp_glb(raw, os.path.join(OUT_GLB, O.id + '.glb'), lossless=True, normals=False)
     F.log('exported', os.path.join(OUT_GLB, O.id + '.glb'), meta['tris'], 'tris')
 
 
@@ -1244,6 +1250,8 @@ def main(mid):
         preview(O, F, os.path.join(F.out, mid))
         return
     import paint as pt
+    import fig
+    fig.DENS_MAX = 5.6 / max(1.0, O.k) ** 1.5  # (a big owl gets slightly coarser texels: every owl's atlas about the same weight)
     F.unwrap()
     F.bake(ao_samples=24 if '--fast' in FLAGS else 72, ao_dist=6.0, reuse='--repaint' in FLAGS, ao_by_bone=False)
     P = pt.Painter(F.maps, F.region_index, F.size)

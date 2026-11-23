@@ -165,8 +165,8 @@ def nightcap(O, B, k):
 
 @piece('santa_hat', 'anchor_head', hides=True)
 def santa_hat(O, B, k):
-    base = O.hz + O.hh * 0.2
-    cone_hat(O, B, 'cap', base, 1.0, 14.5, 1.3, flop=(-7.0, 7.0, -3.0), reg='velvet', brim=('fur', 2.5), pom=('fur', 3.0))
+    base = O.hz + O.hh * 0.27
+    cone_hat(O, B, 'cap', base, 1.0, 14.5, 1.3, flop=(-7.0, 7.0, -3.0), reg='velvet', brim=('fur', 2.3), pom=('fur', 3.0))
 
 
 @piece('beanie', 'anchor_head', hides=True)
@@ -840,7 +840,7 @@ def build(pid):
                               export_lights=False, export_cameras=False, export_extras=False)
     os.makedirs(OUT, exist_ok=True)
     import pack
-    pack.webp_glb(raw, os.path.join(OUT, pid + '.glb'), lossless=True)
+    pack.webp_glb(raw, os.path.join(OUT, pid + '.glb'), lossless=True, normals=False)
     json.dump({'id': pid, 'anchor': anchor, 'hides': hides, 'tris': F.tris()}, open(os.path.join(F.out, pid + '.piece.json'), 'w'))
     F.log('exported', pid, F.tris(), 'tris')
 

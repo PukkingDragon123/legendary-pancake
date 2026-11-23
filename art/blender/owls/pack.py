@@ -42,8 +42,57 @@ def write_glb(path, J, BIN):
         f.write(BIN)
 
 
-def webp_glb(src, dst, quality=QUALITY, lossless=False):
+def drop_normals(J):
+    """Faceted toys need no normals: the game shades them flat (material.flatShading), so the per-vertex NORMAL streams
+    (12 bytes a vertex) are dropped, with every accessor and buffer view nothing uses any more."""
+    for m in J.get('meshes', []):
+        for pr in m['primitives']:
+            pr['attributes'].pop('NORMAL', None)
+    used = set()
+    for m in J.get('meshes', []):
+        for pr in m['primitives']:
+            used.update(pr['attributes'].values())
+            if 'indices' in pr:
+                used.add(pr['indices'])
+    for a in J.get('animations', []):
+        for sm in a['samplers']:
+            used.update((sm['input'], sm['output']))
+    for sk in J.get('skins', []):
+        if 'inverseBindMatrices' in sk:
+            used.add(sk['inverseBindMatrices'])
+    acc = J.get('accessors', [])
+    keep = [i for i in range(len(acc)) if i in used]
+    remap = {o: n for n, o in enumerate(keep)}
+    J['accessors'] = [acc[i] for i in keep]
+    for m in J.get('meshes', []):
+        for pr in m['primitives']:
+            pr['attributes'] = {k: remap[v] for k, v in pr['attributes'].items()}
+            if 'indices' in pr:
+                pr['indices'] = remap[pr['indices']]
+    for a in J.get('animations', []):
+        for sm in a['samplers']:
+            sm['input'], sm['output'] = remap[sm['input']], remap[sm['output']]
+    for sk in J.get('skins', []):
+        if 'inverseBindMatrices' in sk:
+            sk['inverseBindMatrices'] = remap[sk['inverseBindMatrices']]
+    vused = {a['bufferView'] for a in J['accessors'] if 'bufferView' in a} | {im['bufferView'] for im in J.get('images', []) if 'bufferView' in im}
+    views = J.get('bufferViews', [])
+    vkeep = [i for i in range(len(views)) if i in vused]
+    vmap = {o: n for n, o in enumerate(vkeep)}
+    J['bufferViews'] = [views[i] for i in vkeep]
+    for a in J['accessors']:
+        if 'bufferView' in a:
+            a['bufferView'] = vmap[a['bufferView']]
+    for im in J.get('images', []):
+        if 'bufferView' in im:
+            im['bufferView'] = vmap[im['bufferView']]
+    return J
+
+
+def webp_glb(src, dst, quality=QUALITY, lossless=False, normals=True):
     J, BIN = read_glb(src)
+    if not normals:
+        J = drop_normals(J)
     views = J.get('bufferViews', [])
     blobs = []  # rebuild the binary chunk view by view
     new_views = []

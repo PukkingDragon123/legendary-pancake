@@ -10,7 +10,7 @@ import { bodyDepth, bodyHalfW, geoOf, type Geo } from './geo.ts';
 import type { OwlParts } from './legacy.ts';
 import type { AnchorName, BoneName, OutfitSlot, OwlLook, OwlModel } from './model.ts';
 import * as THREE from 'three';
-import { instanceGLB, loadGLB } from '../gfx/glb.ts';
+import { loadGLB } from '../gfx/glb.ts';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { speciesOf } from './species.ts';
 import { PIECE_MODEL_LIST } from './outfits.gen.ts';
@@ -548,10 +548,18 @@ const loadingPieces = new Map<string, Promise<Loaded | null>>();
 function fetchPiece(id: string): Promise<Loaded | null> {
   let p = loadingPieces.get(id);
   if (!p) {
-    p = loadGLB(piecePath(id)).then((g) => { loadedPieces.set(id, g); return g; }, () => null);
+    p = loadGLB(piecePath(id)).then((g) => { flatten(g.scene); loadedPieces.set(id, g); return g; }, () => null);
     loadingPieces.set(id, p);
   }
   return p;
+}
+/** Faceted toy pieces ship without normals (art/blender/owls/pack.py): shade their facets flat. */
+function flatten(root: THREE.Object3D) {
+  root.traverse((n) => {
+    const m = n as THREE.Mesh;
+    if (!m.isMesh || m.geometry.attributes.normal) return;
+    for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) { mat.flatShading = true; mat.needsUpdate = true; }
+  });
 }
 const wornIds = (look: OwlLook) => SLOT_ORDER.map((s) => look.outfit?.[s]).filter((id): id is string => !!id && !!PIECE_MODELS[id]);
 /** Resolves when every remade piece of this look's outfit has loaded. */
@@ -595,5 +603,6 @@ export function dressModel(model: OwlModel, look: OwlLook): Dressing {
 /** A piece on its own (shop stands, icons): the GLB at the tawny's size, in toy millimetres; null when not remade yet. */
 export async function pieceModel(id: string): Promise<THREE.Object3D | null> {
   if (!PIECE_MODELS[id]) return null;
-  try { return (await instanceGLB(piecePath(id))).root; } catch { return null; }
+  const g = await fetchPiece(id);
+  return g ? cloneSkinned(g.scene) : null;
 }

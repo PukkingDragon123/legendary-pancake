@@ -123,6 +123,8 @@ function prepare(scene: THREE.Object3D) {
     if (!m.isMesh) return;
     if (m.name.startsWith('eye_')) { m.castShadow = false; m.receiveShadow = false; return; }
     const mat = m.material as THREE.MeshStandardMaterial;
+    // the faceted toys ship without normals (art/blender/owls/pack.py): every facet is shaded flat
+    if (mat && !m.geometry.attributes.normal && !mat.flatShading) { mat.flatShading = true; mat.needsUpdate = true; }
     if (mat && mat.map && !mat.userData.owl) {
       mat.userData.owl = true;
       mat.emissive = new THREE.Color(0xffffff);
@@ -232,7 +234,7 @@ export function buildOwl(look: OwlLook): OwlModel {
   const eyes: [Eye, Eye] = [new Eye(-1, cols, id.length * 7 + 3), new Eye(1, cols, id.length * 7 + 3)];
   const eyeMats = eyes.map((e) => new THREE.MeshLambertMaterial({
     map: e.tex, alphaTest: 0.5, transparent: false, emissive: 0xffffff, emissiveMap: e.tex, emissiveIntensity: cols.glow ? 0.9 : 0.16,
-    polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3,
+    polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3, flatShading: true,
   }));
   // the eye decals: positioned now (from the rig sheet), their facets arrive with the GLB
   const eyeMeshes = (['eye_l', 'eye_r'] as const).map((nm, i) => {
