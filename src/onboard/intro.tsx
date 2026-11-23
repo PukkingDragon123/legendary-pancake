@@ -10,6 +10,7 @@ import { syncReminders, requestNotifications } from '../game/night.ts';
 import { edit, save } from '../game/store.ts';
 import { CSS_TOKENS } from '../gfx/palette.ts';
 import type { OwlLook } from '../owl/model.ts';
+import { questionTransition, type TransitionKind } from '../ui/chrome/transition.ts';
 import { sceneRef, say } from '../ui/state.ts';
 import { bootReady, releaseBoot, wakeBoot } from './boot.ts';
 import { boardURL, boxURL, buttonFrame, cardFrame, clipURL, plaqueFrame, sheetURL, slotFrame, speckURL, stampToolURL, tagFrame, vignetteURL } from './cbart.ts';
@@ -27,6 +28,8 @@ const ARTIFACT = import.meta.env.MODE === 'artifact';
 const DEV = import.meta.env.DEV;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 type Phase = 'boot' | 'wake' | 'talk' | 'ask' | 'write' | 'stamp' | 'outro' | 'done';
+/** Some pages arrive with a pixel transition over the clipboard that suits them; the rest flip over the clip. */
+const PAGE_FX: Record<string, TransitionKind> = { species: 'feathers', goals: 'mosaic', wake: 'clock', hours: 'stars', latency: 'fireflies', chrono: 'sunrise', relax: 'leaves', plan: 'page' };
 
 let cssDone = false;
 function injectCSS() {
@@ -243,6 +246,14 @@ export function Intro() {
     if (phaseRef.current !== 'write' || holdWrite.current) return;
     const i = siRef.current, st = STEPS[i];
     const react = beatOf(st.react?.(aRef.current));
+    const fx = fast ? undefined : PAGE_FX[STEPS[i + 1]?.id ?? ''];
+    const el = board.current;
+    if (fx && el) {
+      // a pixel transition sweeps over the clipboard and the new page is under it
+      void questionTransition(() => { setSi(i + 1); }, { rect: el.getBoundingClientRect(), kind: fx, speed: 1.8 });
+      window.setTimeout(() => { if (phaseRef.current === 'write') startStep(i + 1, react); }, 700);
+      return;
+    }
     sound.play('paper_flip', { volume: 0.55 });
     setFlipFrom(i);
     setSi(i + 1);
