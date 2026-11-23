@@ -576,8 +576,8 @@ export const FROST_FINISHES: Finish[] = [
       if (pv < 0.45 || pu < 0.4) return tn(P.dusk, -0.4);
       const near = Math.min(pv, bw - pv, pu, len - pu);
       const feather = Math.abs(Math.sin((u + v) * 1.7) * Math.sin((u - v) * 1.3));
-      if (near < 2.4 && feather > 0.35 + near * 0.22 && h2(u * 2, v * 2, 89) > 0.25) return tn(P.snow, 0.2 - near * 0.1);
-      if ((pu < 1.4 || pu > len - 1.4) && Math.abs(pv - 1.5) < 0.4) return tn(P.iron, 0.2);
+      if (near < 2.0 && feather > 0.45 + near * 0.25 && h2(u * 2, v * 2, 89) > 0.35) return tn(P.snow, 0.15 - near * 0.1);
+      if (Math.min(Math.hypot(pu - 1, pv - 1.5), Math.hypot(len - pu - 1, pv - 1.5)) < 0.36) return tn(P.stone, 0.1);
       return tn(h2(id, 2, 88) > 0.5 ? P.ice : mixc(P.ice, P.mist, 0.5), grainT(pu, pv, id, 90) * 0.7 + (h2(id, 3, 88) - 0.5) * 0.35);
     },
   },
