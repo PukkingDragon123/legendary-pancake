@@ -29,7 +29,7 @@ const jar = (x: number, y: number, z: number, h: number, fill: string, lid = MET
 // ------------------------------------------------------------------ tables
 
 add({
-  id: 'writing_desk', name: 'Roll-Top Writing Desk', cat: 'tables', price: 640, rarity: 'rare', size: [2, 1], surface: 13,
+  id: 'writing_desk', model: 'items/writing_desk.glb', name: 'Roll-Top Writing Desk', cat: 'tables', price: 640, rarity: 'rare', size: [2, 1], surface: 13,
   blurb: 'Eleven cubbyholes, one secret drawer and a quill that only writes kind letters.',
   sit: [{ x: 0, y: 0, z: 10, rot: 180 }],
   build: () => {
@@ -71,7 +71,7 @@ add({
 });
 
 add({
-  id: 'round_table', name: 'Lace-Cloth Round Table', cat: 'tables', price: 420, rarity: 'uncommon', size: [2, 2], surface: 15,
+  id: 'round_table', model: 'items/round_table.glb', name: 'Lace-Cloth Round Table', cat: 'tables', price: 420, rarity: 'uncommon', size: [2, 2], surface: 15,
   blurb: 'Seats four owls, or two owls and a very large pie.',
   eat: { x: 0, y: 0, z: 14, rot: 180 },
   build: () => {
@@ -107,7 +107,7 @@ add({
 });
 
 add({
-  id: 'log_table', name: 'Old-Oak Coffee Table', cat: 'tables', price: 300, rarity: 'uncommon', size: [2, 2], surface: 9,
+  id: 'log_table', model: 'items/log_table.glb', name: 'Old-Oak Coffee Table', cat: 'tables', price: 300, rarity: 'uncommon', size: [2, 2], surface: 9,
   blurb: 'A slice of the hollow’s grandfather tree: 212 rings, one for every story.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -134,7 +134,7 @@ add({
 });
 
 add({
-  id: 'bobbin_side_table', name: 'Bobbin Side Table', cat: 'tables', price: 180, rarity: 'common', size: [1, 1], surface: 15,
+  id: 'bobbin_side_table', model: 'items/bobbin_side_table.glb', name: 'Bobbin Side Table', cat: 'tables', price: 180, rarity: 'common', size: [1, 1], surface: 15,
   blurb: 'Just tall enough for a lamp, a book and a cup of warm milk.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -157,7 +157,7 @@ add({
 });
 
 add({
-  id: 'vanity', name: 'Gilded Vanity', cat: 'tables', price: 560, rarity: 'rare', size: [2, 2], surface: 13,
+  id: 'vanity', model: 'items/vanity.glb', name: 'Gilded Vanity', cat: 'tables', price: 560, rarity: 'rare', size: [2, 2], surface: 13,
   blurb: 'Feather-preening station with an oval mirror that flatters every angle.',
   sit: [{ x: 0, y: 0, z: 11, rot: 180 }],
   build: () => {
@@ -191,7 +191,7 @@ add({
 });
 
 add({
-  id: 'workbench', name: 'Tinkerer’s Workbench', cat: 'tables', price: 520, rarity: 'rare', size: [2, 1], surface: 14,
+  id: 'workbench', model: 'items/workbench.glb', name: 'Tinkerer’s Workbench', cat: 'tables', price: 520, rarity: 'rare', size: [2, 1], surface: 14,
   blurb: 'For fixing clocks, carving whistles and building things nobody asked for.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -225,7 +225,7 @@ add({
 // ------------------------------------------------------------------ storage
 
 add({
-  id: 'painted_dresser', name: 'Painted Dresser', cat: 'storage', price: 480, rarity: 'uncommon', size: [2, 1], surface: 20,
+  id: 'painted_dresser', model: 'items/painted_dresser.glb', name: 'Painted Dresser', cat: 'storage', price: 480, rarity: 'uncommon', size: [2, 1], surface: 20,
   blurb: 'Sage-green, flower-painted, and full of perfectly folded nightcaps.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -255,7 +255,7 @@ add({
 });
 
 add({
-  id: 'library_case', name: 'Library Bookcase', cat: 'storage', price: 560, rarity: 'rare', size: [2, 1], surface: 42,
+  id: 'library_case', model: 'items/library_case.glb', name: 'Library Bookcase', cat: 'storage', price: 560, rarity: 'rare', size: [2, 1], surface: 42,
   blurb: 'Four shelves of adventures, recipes, star charts and one diary with a tiny lock.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -276,7 +276,7 @@ add({
 });
 
 add({
-  id: 'toy_chest', name: 'Starry Toy Chest', cat: 'storage', price: 340, rarity: 'uncommon', size: [2, 1],
+  id: 'toy_chest', model: 'items/toy_chest.glb', name: 'Starry Toy Chest', cat: 'storage', price: 340, rarity: 'uncommon', size: [2, 1],
   blurb: 'Lid open, toys spilling out. The teddy says it was like this when he got here.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -307,7 +307,7 @@ add({
 });
 
 add({
-  id: 'armoire', name: 'Grand Armoire', cat: 'storage', price: 0, gems: 90, rarity: 'epic', size: [2, 1],
+  id: 'armoire', model: 'items/armoire.glb', name: 'Grand Armoire', cat: 'storage', price: 0, gems: 90, rarity: 'epic', size: [2, 1],
   blurb: 'Carved with oak leaves. One door is always a little open, just in case.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -353,7 +353,7 @@ add({
 });
 
 add({
-  id: 'cubby_shelf', name: 'Cubby Shelf', cat: 'storage', price: 380, rarity: 'uncommon', size: [2, 1], surface: 25,
+  id: 'cubby_shelf', model: 'items/cubby_shelf.glb', name: 'Cubby Shelf', cat: 'storage', price: 380, rarity: 'uncommon', size: [2, 1], surface: 25,
   blurb: 'Nine little rooms for nine little treasures. Baskets keep the mess polite.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -380,7 +380,7 @@ add({
 });
 
 add({
-  id: 'apothecary', name: 'Apothecary Cabinet', cat: 'storage', price: 600, rarity: 'rare', size: [1, 1], surface: 27,
+  id: 'apothecary', model: 'items/apothecary.glb', name: 'Apothecary Cabinet', cat: 'storage', price: 600, rarity: 'rare', size: [1, 1], surface: 27,
   blurb: 'Twenty labelled drawers: chamomile, lavender, valerian, and one marked “do not”.',
   build: () => {
     const out: BoxSpec[] = [];

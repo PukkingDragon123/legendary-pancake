@@ -1,0 +1,613 @@
+{
+ "name": "toad_stool",
+ "description": "Toadstool Seat",
+ "author": "Hoot Hollow (furnB)",
+ "license": "CC0-1.0",
+ "density": 4,
+ "budget": {
+  "tris": 3000,
+  "colors": 400
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.62
+  ],
+  "strength": 0.75,
+  "gradient": 0.35,
+  "ao": 1.1,
+  "ao_height": 3.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.88
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.5,
+  "width": 0.4,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "pa_stem": "none",
+   "cl_cap": "cloth",
+   "pa_spot": "none",
+   "pa_gill": "none",
+   "lf_grass": "organic"
+  }
+ },
+ "render": {
+  "background": "#2a3330",
+  "hero": [
+   -34,
+   24
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "pa_stem": [
+    "#5b5e5c",
+    "#807f77",
+    "#b1ab9a",
+    "#eadfc6",
+    "#fef3d5",
+    "#fcf7e1",
+    "#fbf3e4"
+   ],
+   "cl_cap": [
+    "#433b3b",
+    "#55433e",
+    "#6c4e43",
+    "#875c4b",
+    "#a66c55",
+    "#bc7f63",
+    "#d09170",
+    "#e0a17b"
+   ],
+   "pa_spot": [
+    "#575b5a",
+    "#989489",
+    "#f1e6cc",
+    "#fdf9e1",
+    "#fbf3e4"
+   ],
+   "pa_gill": [
+    "#515350",
+    "#8a8271",
+    "#d9c7a4",
+    "#f0dbb3",
+    "#fcecbe",
+    "#fbf3c7"
+   ],
+   "lf_grass": [
+    "#324039",
+    "#3a4b3c",
+    "#465a40",
+    "#556d47",
+    "#66844f",
+    "#7d995e",
+    "#93aa6c",
+    "#a6ba77"
+   ]
+  }
+ },
+ "styles": {
+  "plain_stem": {
+   "ramp": "pa_stem",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "fibres",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.05,
+     "width": 0.25,
+     "shift": -0.5
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.6,
+     "amount": 0.5
+    }
+   ],
+   "brush": {
+    "flow": "vertical",
+    "length": 1.0,
+    "rough": 0.5
+   }
+  },
+  "cap": {
+   "ramp": "cl_cap",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 0.8,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "flow": "path",
+    "length": 1.4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.6
+    },
+    {
+     "id": "streaks",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.06,
+     "width": 0.2,
+     "shift": -0.4
+    },
+    {
+     "id": "spots",
+     "op": "spots",
+     "count": 16,
+     "radius": [
+      0.9,
+      1.6
+     ],
+     "ramp": "pa_spot",
+     "tone": 3.2,
+     "min_gap": 1.4,
+     "roughness": 0.3,
+     "where": {
+      "y": [
+       0.2,
+       1.0
+      ]
+     },
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -1.2,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.4,
+     "post": true
+    }
+   ]
+  },
+  "gills": {
+   "ramp": "pa_gill",
+   "tone": 2.8,
+   "light": 0.3,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "gill",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.025,
+     "width": 0.4,
+     "shift": -1.2
+    }
+   ]
+  },
+  "leafy_grass": {
+   "ramp": "lf_grass",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "vertical",
+    "length": 1.0,
+    "rough": 0.7
+   },
+   "layers": [
+    {
+     "id": "clumps",
+     "op": "noise",
+     "scale": 1.6,
+     "amount": 0.8
+    },
+    {
+     "id": "leaves",
+     "op": "scales",
+     "along": "x",
+     "size": [
+      1.6,
+      1.3
+     ],
+     "shape": "round",
+     "gradient": 1.4,
+     "rim": -1.0,
+     "shadow": -1.4,
+     "jitter": 0.6
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 6.0,
+     "amount": 0.4,
+     "ramps": [
+      "lf_grass"
+     ]
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "stem",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 9.4
+    },
+    {
+     "at": [
+      0.0,
+      0.8,
+      0.0
+     ],
+     "size": 8.4
+    },
+    {
+     "at": [
+      0.0,
+      2.4,
+      0.0
+     ],
+     "size": 7.0
+    },
+    {
+     "at": [
+      0.0,
+      5.4,
+      0.0
+     ],
+     "size": 6.6
+    },
+    {
+     "at": [
+      0.0,
+      7.6,
+      0.0
+     ],
+     "size": 7.4
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 0,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_stem",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "skirt",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 7.2
+    },
+    {
+     "at": [
+      0.0,
+      -0.4,
+      0.0
+     ],
+     "size": 9.0
+    },
+    {
+     "at": [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     "size": 9.4
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    false
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    6.4,
+    0.0
+   ],
+   "style": "plain_stem",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "double_sided": true
+  },
+  {
+   "id": "cap",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 13.6
+    },
+    {
+     "at": [
+      0.0,
+      0.6,
+      0.0
+     ],
+     "size": 16.0
+    },
+    {
+     "at": [
+      0.0,
+      1.6,
+      0.0
+     ],
+     "size": 15.6
+    },
+    {
+     "at": [
+      0.0,
+      2.8,
+      0.0
+     ],
+     "size": 13.0
+    },
+    {
+     "at": [
+      0.0,
+      3.6,
+      0.0
+     ],
+     "size": 9.0
+    },
+    {
+     "at": [
+      0.0,
+      4.0,
+      0.0
+     ],
+     "size": 3.0
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 0,
+   "pivot": [
+    0.0,
+    7.0,
+    0.0
+   ],
+   "style": "cap",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "gills",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 7.0
+    },
+    {
+     "at": [
+      0.0,
+      0.6,
+      0.0
+     ],
+     "size": 14.0
+    },
+    {
+     "at": [
+      0.0,
+      0.7,
+      0.0
+     ],
+     "size": 15.6
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    false
+   ],
+   "subdiv": 0,
+   "pivot": [
+    0.0,
+    6.9,
+    0.0
+   ],
+   "style": "gills",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "double_sided": true
+  },
+  {
+   "id": "grass",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leafy_grass",
+   "art": [
+    "....t.......",
+    ".t..t..t....",
+    ".t.t#..t.t..",
+    ".#.t#.t#.t..",
+    "t#.##.t#.#t.",
+    "t#t##.##t#t.",
+    "##t##t##t##.",
+    "#####t#####t",
+    "###########t",
+    "############"
+   ],
+   "size": [
+    3.0,
+    2.5
+   ],
+   "pivot": [
+    1.6416966879632098,
+    1.25,
+    4.51052457977236
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "paint": {
+    "art_key": {
+     "t": "lf_grass:6"
+    }
+   }
+  },
+  {
+   "id": "grass1",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leafy_grass",
+   "art": [
+    "....t.......",
+    ".t..t..t....",
+    ".t.t#..t.t..",
+    ".#.t#.t#.t..",
+    "t#.##.t#.#t.",
+    "t#t##.##t#t.",
+    "##t##t##t##.",
+    "#####t#####t",
+    "###########t",
+    "############"
+   ],
+   "size": [
+    3.0,
+    2.5
+   ],
+   "pivot": [
+    3.0853805264953893,
+    1.25,
+    -3.677013326971094
+   ],
+   "rotation": [
+    0.0,
+    210.0,
+    0.0
+   ],
+   "paint": {
+    "art_key": {
+     "t": "lf_grass:6"
+    }
+   }
+  },
+  {
+   "id": "grass2",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leafy_grass",
+   "art": [
+    "....t.......",
+    ".t..t..t....",
+    ".t.t#..t.t..",
+    ".#.t#.t#.t..",
+    "t#.##.t#.#t.",
+    "t#t##.##t#t.",
+    "##t##t##t##.",
+    "#####t#####t",
+    "###########t",
+    "############"
+   ],
+   "size": [
+    3.0,
+    2.5
+   ],
+   "pivot": [
+    -4.51052457977236,
+    1.25,
+    -1.641696687963209
+   ],
+   "rotation": [
+    0.0,
+    320.0,
+    0.0
+   ],
+   "paint": {
+    "art_key": {
+     "t": "lf_grass:6"
+    }
+   }
+  }
+ ]
+}

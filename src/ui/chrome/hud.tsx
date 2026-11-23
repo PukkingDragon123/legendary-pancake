@@ -22,13 +22,14 @@ import { chainTile, plank, plaque, ropeTile, shelf, tag, type Inner } from './pa
 import { framesOf, hold, PxAnim, rep, seq, type Timeline } from './pxanim.tsx';
 import { MagicBar } from './magicbar.tsx';
 import { addSwing, kick, makeSwing, removeSwing, type Swing } from './swing.ts';
-import { clearTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts';
+import { clearTransition, installPanelTransitions, panelTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts'; // [motion3] panelTransition, installPanelTransitions
 import { lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
 import './chrome.css';
 import '../px/currency.js';
 
 installChromeSkin();
+installPanelTransitions(); // [motion3] every open, close and switch of a place plays a pixel transition
 
 /**
  * Lets another screen keep parts of the HUD up: 'currency' keeps the acorn and gem signs (e.g. a
@@ -45,13 +46,13 @@ export const VIA: Partial<Record<NonNullable<Panel>, TransitionKind>> = {
 /** Open a place with its transition (and the screen point to centre an iris on). */
 export function openPanel(id: Panel, o: TransitionOpts = {}) {
   if ((window as unknown as { __chromeHold?: boolean }).__chromeHold) return; // screenshots: stay on the press
-  const k = id ? VIA[id] : undefined;
-  if (!k) { panel.value = id; return; }
+  const pt = panelTransition(panel.peek(), id); // [motion3] each place has its own transition (VIA is the old table)
+  if (!pt) { panel.value = id; return; }
   if (id === 'wardrobe' && o.x === undefined) {
     const sc = sceneRef.current;
     if (sc) { const p = sc.screenOf(sc.owl.headWorld); o = { ...o, x: p.x, y: p.y }; }
   }
-  void transition(k, () => { panel.value = id; }, { speed: id === 'quests' ? 1.5 : id === 'map' ? 1.2 : 1, ...o });
+  void transition(pt[0], () => { panel.value = id; }, { ...pt[1], ...o }); // [motion3]
 }
 
 /** A pendulum bound to an element: returns [ref callback, swing]. */

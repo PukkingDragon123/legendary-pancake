@@ -1,64 +1,40 @@
-// Charts drawn into the book by hand: pencil lines with a little wobble, coloured-pencil hatching,
-// ink dots and a red-pen circle round the latest night. They are painted at texel resolution on a
-// canvas (so they are pixel art like the rest of the book) with the labels set in the book's font.
+// Pixel-art charts for the diary: drawn at texel resolution on a canvas (hard edges, no
+// anti-aliasing, no round shapes), shown at T CSS px per texel, with their labels set in the
+// pixel font in the DOM. Stepped bars, stepped lines with square markers, a stepped hypnogram and
+// a segmented stage bar.
 import { useEffect, useRef } from 'preact/hooks';
+import { P } from '../../gfx/palette.ts';
+import type { Stage } from '../../sleep/types.ts';
+import { hexOf, Px, SCORE_TINT } from './art.ts';
 import type { Night } from './stats.ts';
-import { dayMin, eveningMin, scoreInk } from './stats.ts';
-import { BLUE, GRAPHITE, INK, Px, RED } from '../px/bookart.js';
 
 export interface Label { x: number; y: number; text: string; align?: 'l' | 'c' | 'r'; color?: string; small?: boolean; up?: boolean }
 
-const hexc = (h: string) => { const n = parseInt(h.slice(1, 7), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
-const hash = (x: number, y: number) => { let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
-
-/** A texel canvas with pencil tools. */
-export class Ink {
-  p: Px;
-  constructor(public w: number, public h: number) { this.p = new Px(w, h); }
-  dot(x: number, y: number, c: string, a = 255) {
-    x = Math.round(x); y = Math.round(y);
-    if (x < 0 || y < 0 || x >= this.w || y >= this.h) return;
-    const i = (y * this.w + x) * 4, d = this.p.d, k = hexc(c);
-    const sa = a / 255, da = d[i + 3] / 255, oa = sa + da * (1 - sa);
-    if (oa <= 0) return;
-    for (let j = 0; j < 3; j++) d[i + j] = Math.round((k[j] * sa + d[i + j] * da * (1 - sa)) / oa);
-    d[i + 3] = Math.round(oa * 255);
-  }
-  /** a pencil stroke: Bresenham with grain (a few texels skipped or lighter) */
-  line(x0: number, y0: number, x1: number, y1: number, c = GRAPHITE, a = 220, grain = 0.12) {
-    x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
-    const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
-    let e = dx + dy;
-    for (;;) {
-      const g = hash(x0, y0);
-      if (g > grain) this.dot(x0, y0, c, g < grain * 2.5 ? a * 0.55 : a);
-      if (x0 === x1 && y0 === y1) break;
-      const e2 = 2 * e;
-      if (e2 >= dy) { e += dy; x0 += sx; }
-      if (e2 <= dx) { e += dx; y0 += sy; }
-    }
-  }
-  dashed(x0: number, y0: number, x1: number, y1: number, c: string, a = 200, on = 3, off = 2) {
-    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
-    for (let i = 0; i <= n; i++) if (i % (on + off) < on) this.dot(x0 + ((x1 - x0) * i) / Math.max(1, n), y0 + ((y1 - y0) * i) / Math.max(1, n), c, a);
-  }
-  disc(cx: number, cy: number, r: number, c: string, a = 255) { for (let y = Math.floor(cy - r); y <= cy + r; y++) for (let x = Math.floor(cx - r); x <= cx + r; x++) if (Math.hypot(x - cx, y - cy) <= r + 0.15) this.dot(x, y, c, a); }
-  ring(cx: number, cy: number, r: number, c: string, a = 230) { const n = Math.ceil(r * 7); for (let i = 0; i < n; i++) { const t = (i / n) * Math.PI * 2.1 - 0.3, w = 1 + Math.sin(i * 1.7) * 0.06; this.dot(cx + Math.cos(t) * r * w, cy + Math.sin(t) * r * 0.85 * w, c, a); } }
-  /** coloured-pencil hatching inside a rect (diagonal strokes) */
-  hatch(x: number, y: number, w: number, h: number, c: string, a = 150, step = 3) {
-    for (let j = Math.floor(y); j < y + h; j++) for (let i = Math.floor(x); i < x + w; i++) if (((i + j) % step + step) % step === 0 || hash(i, j) < 0.08) this.dot(i, j, c, a);
-  }
-  /** hatch under a polyline down to `base` */
-  hatchUnder(pts: [number, number][], base: number, c: string, a = 110, step = 3) {
-    for (let k = 1; k < pts.length; k++) {
-      const [x0, y0] = pts[k - 1], [x1, y1] = pts[k];
-      for (let x = Math.ceil(x0); x <= x1; x++) {
-        const t = (x - x0) / Math.max(1, x1 - x0), top = y0 + (y1 - y0) * t;
-        for (let y = Math.ceil(top) + 1; y < base; y++) if (((x - y) % step + step) % step === 0) this.dot(x, y, c, a);
-      }
+/** A texel canvas with a few hard-edged tools. */
+export class Ink extends Px {
+  hline(x0: number, x1: number, y: number, c: number) { for (let x = Math.round(Math.min(x0, x1)); x <= Math.round(Math.max(x0, x1)); x++) this.set(x, Math.round(y), c); }
+  vline(x: number, y0: number, y1: number, c: number) { for (let y = Math.round(Math.min(y0, y1)); y <= Math.round(Math.max(y0, y1)); y++) this.set(Math.round(x), y, c); }
+  dashH(x0: number, x1: number, y: number, c: number, on = 2, off = 2) { for (let x = Math.round(x0); x <= x1; x++) if ((x - Math.round(x0)) % (on + off) < on) this.set(x, Math.round(y), c); }
+  box(x: number, y: number, w: number, h: number, c: number) { this.rect(Math.round(x), Math.round(y), Math.round(w), Math.round(h), c); }
+  /** a filled bar with a lit left edge, a shaded right edge and a 1px ink cap */
+  bar(x: number, y: number, w: number, h: number, fill: number, ink: number) {
+    x = Math.round(x); y = Math.round(y); w = Math.round(w); h = Math.round(h);
+    if (h <= 0) return;
+    const lit = mixHex(fill, P.paper, 0.35), dark = mixHex(fill, ink, 0.4);
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+      let c = fill;
+      if (i === 0) c = lit; else if (i === w - 1) c = dark;
+      if ((i + j) % 4 === 0 && i > 0 && i < w - 1) c = mixHex(fill, dark, 0.5);   // a woven texture
+      if (j === 0) c = ink;
+      this.set(x + i, y + j, c);
     }
   }
 }
+const mixHex = (a: number, b: number, t: number) => {
+  const ch = (h: number, s: number) => (h >> s) & 255, m = (s: number) => Math.round(ch(a, s) + (ch(b, s) - ch(a, s)) * t);
+  return (m(16) << 16) | (m(8) << 8) | m(0);
+};
+const INK = P.ink2, FAINT = P.straw, LABEL = hexOf(P.ink3);
 
 /** Mounts an Ink drawing (texel canvas scaled by T) plus its DOM labels. */
 export function Chart(p: { w: number; h: number; T: number; draw: (g: Ink) => Label[]; dep: string; class?: string; label: string }) {
@@ -70,7 +46,7 @@ export function Chart(p: { w: number; h: number; T: number; draw: (g: Ink) => La
     const cv = ref.current;
     if (!cv) return;
     cv.width = tw; cv.height = th;
-    cv.getContext('2d')?.putImageData(new ImageData(g.p.d, tw, th), 0, 0);
+    cv.getContext('2d')?.putImageData(new ImageData(g.d, tw, th), 0, 0);
   }, [p.dep, tw, th]);
   return (
     <div class={'bk-chart ' + (p.class ?? '')} style={{ width: `${tw * p.T}px`, height: `${th * p.T}px` }} role="img" aria-label={p.label}>
@@ -84,109 +60,119 @@ export function Chart(p: { w: number; h: number; T: number; draw: (g: Ink) => La
 
 const shortDate = (t: number) => new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric' });
 
-/** Sleep score over the last nights: pencil line, hatched area, coloured dots, red ring on the latest. */
-export function scoreTrend(nights: Night[]) {
-  return (g: Ink): Label[] => {
-    const L = 14, R = g.w - 6, top = 6, bot = g.h - 9;
-    const list = nights.slice(-21);
-    const lo = Math.max(0, Math.min(50, Math.floor((Math.min(100, ...list.map((n) => n.report.score)) - 12) / 10) * 10));
-    const yOf = (s: number) => bot - ((s - lo) / (100 - lo)) * (bot - top);
-    // axes and guides
-    g.line(L, top - 2, L, bot, GRAPHITE, 170, 0.05);
-    g.line(L, bot, R, bot, GRAPHITE, 170, 0.05);
-    const mid = Math.round((lo + 100) / 20) * 10;
-    for (const s of [mid, 100]) g.dashed(L + 2, yOf(s), R, yOf(s), GRAPHITE, 90, 2, 3);
-    const labels: Label[] = [{ x: L - 2, y: yOf(100), text: '100', align: 'r', small: true, color: '#7a5a3c' }, { x: L - 2, y: yOf(mid), text: String(mid), align: 'r', small: true, color: '#7a5a3c' }, { x: L - 2, y: bot - 4, text: String(lo), align: 'r', small: true, color: '#7a5a3c' }];
-    if (list.length < 2) {
-      g.dashed(L + 4, yOf(60), R - 4, yOf(72), GRAPHITE, 70, 1, 3);
-      labels.push({ x: (L + R) / 2, y: (top + bot) / 2 + 6, text: list.length ? 'one more night to draw a line' : 'a line appears after two nights', align: 'c', small: true, color: '#7a5a3c' });
-      if (list.length) g.disc(L + 6, yOf(list[0].report.score), 1.6, scoreInk(list[0].report.score));
-      return labels;
-    }
-    const xOf = (i: number) => L + 4 + (i / (list.length - 1)) * (R - L - 8);
-    const pts = list.map((n, i) => [Math.round(xOf(i)), Math.round(yOf(n.report.score))] as [number, number]);
-    g.hatchUnder(pts, bot, BLUE, 60, 4);
-    for (let i = 1; i < pts.length; i++) g.line(pts[i - 1][0], pts[i - 1][1], pts[i][0], pts[i][1], INK, 235, 0.06);
-    list.forEach((n, i) => g.disc(pts[i][0], pts[i][1], 1.5, scoreInk(n.report.score)));
-    const [lx, ly] = pts[pts.length - 1];
-    g.ring(lx, ly, 4.2, RED);
-    labels.push({ x: lx, y: ly - 6, text: String(list[list.length - 1].report.score), align: 'c', color: RED, up: true });
-    labels.push({ x: L + 4, y: bot + 1, text: shortDate(list[0].start), small: true, color: '#7a5a3c' });
-    labels.push({ x: R, y: bot + 1, text: shortDate(list[list.length - 1].start), align: 'r', small: true, color: '#7a5a3c' });
-    return labels;
-  };
-}
-
-/** Hours asleep for the last seven days against the goal (dashed red line). */
+/** Hours asleep on each of the last seven days: stepped bars coloured by score, the goal dashed. */
 export function weekBars(week: { day: Date; night?: Night }[], goalMin: number) {
   return (g: Ink): Label[] => {
-    const L = 4, R = g.w - 4, top = 9, bot = g.h - 9, max = 11;
-    const yOf = (h: number) => bot - (h / max) * (bot - top);
-    g.line(L, bot, R, bot, GRAPHITE, 170, 0.05);
+    const most = week.reduce((m, d) => Math.max(m, d.night ? d.night.report.asleep / 3.6e6 : 0), 0);
+    const L = 2, R = g.w - 3, top = 6, bot = g.h - 10, max = Math.ceil(Math.max(goalMin / 60 + 1.5, most + 1));
+    const yOf = (h: number) => Math.round(bot - (h / max) * (bot - top));
+    // faint hour rules every 2 hours
+    for (let h = 2; h < max; h += 2) g.dashH(L, R, yOf(h), FAINT, 1, 3);
+    g.hline(L, R, bot + 1, INK);
     const labels: Label[] = [];
-    const slot = (R - L) / 7, bw = Math.max(4, Math.round(slot * 0.56));
+    const slot = (R - L) / 7, bw = Math.max(5, Math.round(slot * 0.58));
     week.forEach((d, i) => {
       const cx = L + slot * (i + 0.5), x0 = Math.round(cx - bw / 2);
-      const letter = d.day.toLocaleDateString([], { weekday: 'narrow' });
-      labels.push({ x: cx, y: bot + 1, text: letter, align: 'c', small: true, color: '#7a5a3c' });
-      if (!d.night) { g.dashed(x0, bot - 1, x0 + bw - 1, bot - 1, GRAPHITE, 90, 1, 1); return; }
-      const hrs = d.night.report.asleep / 3.6e6, y = Math.round(yOf(Math.min(max, hrs)));
-      const col = scoreInk(d.night.report.score);
-      g.hatch(x0 + 1, y + 1, bw - 2, bot - y - 1, col, 170, 3);
-      g.line(x0, bot, x0, y, INK, 220); g.line(x0, y, x0 + bw - 1, y, INK, 220); g.line(x0 + bw - 1, y, x0 + bw - 1, bot, INK, 220);
-      labels.push({ x: cx, y: y - 1, text: hrs.toFixed(1).replace('.0', ''), align: 'c', small: true, up: true, color: INK });
+      labels.push({ x: cx, y: bot + 2, text: d.day.toLocaleDateString([], { weekday: 'narrow' }), align: 'c', small: true, color: LABEL });
+      if (!d.night) { g.dashH(x0, x0 + bw - 1, bot, P.pebble, 1, 1); return; }
+      const hrs = d.night.report.asleep / 3.6e6, y = yOf(Math.min(max, hrs));
+      // a pencil-hatched wooden bar; only its cap carries the score's colour
+      const [, ink] = SCORE_TINT(d.night.report.score);
+      g.bar(x0, y, bw, bot - y + 1, mixHex(P.linen, P.wood, 0.45), P.ink2);
+      g.hline(x0 + 1, x0 + bw - 2, y + 1, ink); g.hline(x0 + 1, x0 + bw - 2, y + 2, ink);
+      labels.push({ x: cx, y: y + 4, text: hrs.toFixed(1).replace('.0', ''), align: 'c', small: true, color: hexOf(P.ink) });
     });
-    const gy = Math.round(yOf(goalMin / 60));
-    g.dashed(L, gy, R, gy, RED, 210, 4, 2);
-    labels.push({ x: R, y: gy - 1, text: `goal ${Math.round((goalMin / 60) * 10) / 10}h`, align: 'r', small: true, up: true, color: RED });
+    const gy = yOf(goalMin / 60);
+    g.dashH(L, R, gy, P.terracotta, 3, 2);
+    labels.push({ x: R, y: gy - 1, text: `goal ${Math.round((goalMin / 60) * 10) / 10}h`, align: 'r', small: true, up: true, color: hexOf(P.clay) });
     return labels;
   };
 }
 
-const clock = (d: Date, h12: boolean) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: h12 }).replace(':00', '');
-
-/** Each night's bedtime (moons) and wake time (suns) on two pencil strips. */
-export function timeStrips(nights: Night[], h12: boolean) {
+/** Score over recent nights as a stepped line with square markers; the latest gets a bracket. */
+export function scoreSteps(nights: Night[]) {
   return (g: Ink): Label[] => {
-    const L = 30, R = g.w - 6, rows = [Math.round(g.h * 0.3), Math.round(g.h * 0.78)];
-    const labels: Label[] = [{ x: 0, y: rows[0] - 4, text: 'asleep', small: true, color: '#7a5a3c' }, { x: 0, y: rows[1] - 4, text: 'awake', small: true, color: '#7a5a3c' }];
-    const bed = nights.map((n) => eveningMin(n.report.asleepAt)), wake = nights.map((n) => dayMin(n.report.wokeAt));
-    const strip = (vals: number[], row: number, lo: number, hi: number, toDate: (m: number) => Date, col: string) => {
-      g.line(L, row, R, row, GRAPHITE, 150, 0.05);
-      const xOf = (m: number) => L + ((Math.max(lo, Math.min(hi, m)) - lo) / (hi - lo)) * (R - L);
-      for (let m = Math.ceil(lo / 60) * 60; m <= hi; m += 60) { g.line(xOf(m), row - 2, xOf(m), row + 2, GRAPHITE, 150, 0); }
-      labels.push({ x: xOf(lo), y: row + 3, text: clock(toDate(lo), h12), small: true, color: '#7a5a3c' });
-      labels.push({ x: xOf(hi), y: row + 3, text: clock(toDate(hi), h12), align: 'r', small: true, color: '#7a5a3c' });
-      vals.forEach((v) => g.disc(xOf(v), row - 4, 1.6, col, 200));
-      if (vals.length) {
-        const avg = vals.reduce((a, b) => a + b, 0) / vals.length, ax = xOf(avg);
-        g.line(ax, row - 9, ax, row + 1, RED, 230, 0); g.line(ax - 2, row - 3, ax, row + 1, RED, 230, 0); g.line(ax + 2, row - 3, ax, row + 1, RED, 230, 0);
-        labels.push({ x: ax, y: row - 10, text: clock(toDate(avg), h12), align: 'c', small: true, up: true, color: RED });
-      }
-    };
-    const bLo = Math.min(180, ...bed.map((v) => Math.floor(v / 60) * 60)), bHi = Math.max(bLo + 240, ...bed.map((v) => Math.ceil(v / 60) * 60));
-    const wLo = Math.min(360, ...wake.map((v) => Math.floor(v / 60) * 60)), wHi = Math.max(wLo + 240, ...wake.map((v) => Math.ceil(v / 60) * 60));
-    strip(bed, rows[0], bLo, bHi, (m) => { const d = new Date(2020, 0, 1, 18, 0); d.setMinutes(d.getMinutes() + m); return d; }, BLUE);
-    strip(wake, rows[1], wLo, wHi, (m) => new Date(2020, 0, 1, 0, m), '#c07a18');
+    const L = 15, R = g.w - 4, top = 8, bot = g.h - 9;
+    const list = nights.slice(-21);
+    const lo = 30;
+    const yOf = (s: number) => Math.round(bot - ((Math.max(lo, s) - lo) / (100 - lo)) * (bot - top));
+    for (const s of [50, 70, 85]) g.dashH(L, R, yOf(s), FAINT, 1, 2);
+    g.vline(L - 1, top - 2, bot, INK); g.hline(L - 1, R, bot + 1, INK);
+    const labels: Label[] = [100, 70, 50].map((s) => ({ x: L - 3, y: yOf(s) - 3, text: String(s), align: 'r' as const, small: true, color: LABEL }));
+    if (list.length < 2) {
+      labels.push({ x: (L + R) / 2, y: (top + bot) / 2 - 2, text: list.length ? 'one more night to draw a line' : 'a line appears after two nights', align: 'c', small: true, color: LABEL });
+      return labels;
+    }
+    const step = (R - L - 4) / (list.length - 1);
+    const pts = list.map((n, i) => ({ x: Math.round(L + 2 + i * step), y: yOf(n.report.score), s: n.report.score }));
+    // the stepped line: flat until halfway to the next night, then a hard step
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], xa = i ? Math.round((pts[i - 1].x + a.x) / 2) : a.x, xb = i < pts.length - 1 ? Math.round((a.x + pts[i + 1].x) / 2) : a.x;
+      g.hline(xa, xb, a.y, P.ink2);
+      if (i < pts.length - 1) g.vline(xb, a.y, pts[i + 1].y, P.ink2);
+      // pencil stipple under the line
+      for (let x = xa; x <= xb; x++) for (let y = a.y + 2; y <= bot; y++) if ((x + y) % 3 === 0) g.set(x, y, mixHex(P.paper, P.stone, 0.32));
+    }
+    for (const q of pts) { const [, ink] = SCORE_TINT(q.s); g.box(q.x - 1, q.y - 1, 3, 3, P.ink2); g.set(q.x, q.y, ink); }
+    const last = pts[pts.length - 1];
+    g.vline(last.x - 4, last.y - 4, last.y + 4, P.terracotta); g.hline(last.x - 4, last.x - 3, last.y - 4, P.terracotta); g.hline(last.x - 4, last.x - 3, last.y + 4, P.terracotta);
+    labels.push({ x: last.x - 6, y: last.y - 4, text: String(last.s), align: 'r', color: hexOf(P.clay) });
+    labels.push({ x: L + 2, y: bot + 2, text: shortDate(list[0].start), small: true, color: LABEL });
+    labels.push({ x: R, y: bot + 2, text: shortDate(list[list.length - 1].start), align: 'r', small: true, color: LABEL });
     return labels;
   };
 }
 
-export const STAGE_INK = { deep: '#2b3d8f', light: '#5a8ed0', rem: '#7a4cb0', awake: '#d08a2a' };
-/** The night's make-up as one hatched bar. */
+export const STAGE_INK: Record<Stage, number> = { deep: P.slate, light: P.lake, rem: P.plum, awake: P.ochre };
+export const STAGE_NAME: Record<Stage, string> = { deep: 'deep', light: 'light', rem: 'dreaming', awake: 'awake' };
+const STAGE_ROW: Record<Stage, number> = { awake: 0, rem: 1, light: 2, deep: 3 };
+
+/** The night's stages as a stepped hypnogram over four tinted rows, hours marked along the bottom. */
+export function hypnoSteps(s: { stages?: Stage[]; start: number; end?: number }, h12: boolean) {
+  return (g: Ink): Label[] => {
+    const st = s.stages ?? [];
+    const L = 30, R = g.w - 2, top = 2, bot = g.h - 9, rowH = (bot - top) / 4;
+    const labels: Label[] = [];
+    (Object.keys(STAGE_ROW) as Stage[]).forEach((k) => {
+      const y0 = Math.round(top + STAGE_ROW[k] * rowH), y1 = Math.round(top + (STAGE_ROW[k] + 1) * rowH) - 1;
+      for (let y = y0; y <= y1; y++) for (let x = L; x <= R; x++) if ((x + y) % 2 === 0) g.set(x, y, mixHex(P.paper, STAGE_INK[k], 0.14));
+      labels.push({ x: L - 2, y: (y0 + y1) / 2 - 3, text: STAGE_NAME[k], align: 'r', small: true, color: hexOf(STAGE_INK[k]) });
+    });
+    if (!st.length) return labels;
+    const n = st.length, xOf = (i: number) => Math.round(L + (i / n) * (R - L));
+    const yOf = (k: Stage) => Math.round(top + (STAGE_ROW[k] + 0.5) * rowH);
+    for (let i = 0; i < n; i++) {
+      const x0 = xOf(i), x1 = xOf(i + 1), y = yOf(st[i]);
+      // a coloured block under the line for that stage
+      for (let x = x0; x < Math.max(x0 + 1, x1); x++) for (let yy = y - 1; yy <= y + 1; yy++) g.set(x, yy, STAGE_INK[st[i]]);
+      if (i && st[i] !== st[i - 1]) g.vline(x0, yOf(st[i - 1]), y, P.ink);
+    }
+    const start = s.start, end = s.end ?? start + n * 30000;
+    for (let t = Math.ceil(start / 3.6e6) * 3.6e6; t < end; t += 3.6e6) {
+      const x = Math.round(L + ((t - start) / (end - start)) * (R - L));
+      g.vline(x, bot + 1, bot + 2, INK);
+      labels.push({ x, y: bot + 2, text: new Date(t).toLocaleTimeString([], { hour: 'numeric', hour12: h12 }).replace(':00', '').replace(/\s?[AP]M/i, (m) => m.trim().toLowerCase()[0]), align: 'c', small: true, color: LABEL });
+    }
+    g.hline(L, R, bot + 1, INK);
+    return labels;
+  };
+}
+
+/** The make-up of a night (or an average) as one segmented bar. */
 export function stageBar(parts: { deep: number; light: number; rem: number; awake: number }) {
   return (g: Ink): Label[] => {
-    const L = 1, R = g.w - 2, top = 2, bot = g.h - 2;
+    const L = 0, R = g.w - 1, top = 0, bot = g.h - 1;
     const total = parts.deep + parts.light + parts.rem + parts.awake || 1;
-    let x = L;
-    for (const k of ['deep', 'light', 'rem', 'awake'] as const) {
-      const w = Math.round(((parts[k] / total) * (R - L)));
-      if (w <= 0) continue;
-      g.hatch(x, top, w, bot - top, STAGE_INK[k], 190, 2);
-      g.line(x + w, top, x + w, bot, INK, 160, 0);
+    let x = L + 1;
+    const order: Stage[] = ['deep', 'light', 'rem', 'awake'];
+    order.forEach((k, i) => {
+      const w = i === order.length - 1 ? R - x : Math.round((parts[k] / total) * (R - L - 1));
+      if (w <= 0) return;
+      for (let j = top + 1; j < bot; j++) for (let ii = 0; ii < w; ii++) g.set(x + ii, j, j === top + 1 ? mixHex(STAGE_INK[k], P.paper, 0.35) : (ii + j) % 4 === 0 ? mixHex(STAGE_INK[k], P.ink, 0.2) : STAGE_INK[k]);
       x += w;
-    }
-    g.line(L, top, R, top, INK, 220); g.line(L, bot, R, bot, INK, 220); g.line(L, top, L, bot, INK, 220); g.line(R, top, R, bot, INK, 220);
+      if (i < order.length - 1) g.vline(x, top, bot, P.paper);
+    });
+    g.hline(L, R, top, P.ink2); g.hline(L, R, bot, P.ink2); g.vline(L, top, bot, P.ink2); g.vline(R, top, bot, P.ink2);
     return [];
   };
 }
