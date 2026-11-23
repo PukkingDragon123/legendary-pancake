@@ -61,6 +61,18 @@ export class Pix {
     this.d[i] = v[0]; this.d[i + 1] = v[1]; this.d[i + 2] = v[2]; this.d[i + 3] = a;
     return this;
   }
+  /** Write a raw colour (0..255 channels, quantised to steps of 6 like a limited print). */
+  rgb(x: number, y: number, r: number, g: number, b: number, a = 255) {
+    if (x < 0 || y < 0 || x >= this.w || y >= this.h) return;
+    const i = (y * this.w + x) * 4, q = (v: number) => (v < 0 ? 0 : v > 255 ? 255 : Math.round(v / 6) * 6);
+    this.d[i] = q(r); this.d[i + 1] = q(g); this.d[i + 2] = q(b); this.d[i + 3] = a;
+  }
+  /** Add to a texel's colour. */
+  tint(x: number, y: number, dr: number, dg: number, db: number) {
+    if (x < 0 || y < 0 || x >= this.w || y >= this.h) return;
+    const i = (y * this.w + x) * 4;
+    this.rgb(x, y, this.d[i] + dr, this.d[i + 1] + dg, this.d[i + 2] + db, this.d[i + 3]);
+  }
   clear(x: number, y: number) { if (x >= 0 && y >= 0 && x < this.w && y < this.h) this.d[(y * this.w + x) * 4 + 3] = 0; }
   a(x: number, y: number) { return x < 0 || y < 0 || x >= this.w || y >= this.h ? 0 : this.d[(y * this.w + x) * 4 + 3]; }
   get(x: number, y: number): string | null {
@@ -184,6 +196,63 @@ export function woodFill(p: Pix, x0: number, y0: number, w: number, h: number, r
       if (y === y0 + h - 1 || x === x0 + w - 1) t -= 1.2;
     }
     p.set(x, y, step(r, t, x, y, 0.4));
+  }
+}
+
+// ------------------------------------------------------------------ high-resolution, realistic materials
+// One texel per CSS px, painted like a scan of the real thing (in the manner of the owner's game BUSHED's paper and
+// canvas painters): every texel decided by a rule, colours quantised to a limited print, no baked directional light.
+
+const C3 = (c: number): [number, number, number] => [(c >> 16) & 255, (c >> 8) & 255, c & 255];
+
+/** Writing paper: mottled pulp, fibres, foxing, ageing towards the edges. `tone` is the paper colour. */
+export function paperReal(p: Pix, x0: number, y0: number, w: number, h: number, o: { tone?: number; seed?: number; age?: number; fibres?: number } = {}) {
+  const seed = o.seed ?? 3, [br, bg, bb] = C3(o.tone ?? 0xefe7d2), age = o.age ?? 1;
+  for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
+    const e = Math.min(x - x0, y - y0, x0 + w - 1 - x, y0 + h - 1 - y);
+    let n = (fbm(x * 0.012, y * 0.012, seed) - 0.5) * 14 + (fbm(x * 0.07, y * 0.05, seed + 3) - 0.5) * 7 + (hash(x, y, seed) - 0.5) * 6;
+    const ag = e < 16 ? (16 - e) * 0.9 * age * (0.6 + vnoise(x * 0.08, y * 0.08, seed + 5)) : 0;
+    if (fbm(x * 0.05, y * 0.05, seed + 9) > 0.74) n -= 6;
+    p.rgb(x, y, br + n - ag * 0.6, bg + n - ag * 0.9, bb + n - ag * 1.6);
+  }
+  // fibres: short strands a shade lighter or darker, in every direction
+  const nf = Math.round(w * h * 0.004 * (o.fibres ?? 1));
+  for (let k = 0; k < nf; k++) {
+    const x = x0 + Math.floor(hash(k, 1, seed) * w), y = y0 + Math.floor(hash(k, 2, seed) * h);
+    const a = hash(k, 3, seed) * Math.PI, len = 2 + Math.floor(hash(k, 4, seed) * 6), d = hash(k, 5, seed) > 0.45 ? -7 : 6;
+    for (let i = 0; i < len; i++) p.tint(Math.round(x + Math.cos(a) * i), Math.round(y + Math.sin(a) * i), d, d, d * 0.9);
+  }
+  // foxing: a few rusty freckles
+  for (let k = 0; k < Math.round(w * h * 0.00004 * age) + 1; k++) {
+    const cx = x0 + hash(k, 7, seed) * w, cy = y0 + hash(k, 8, seed) * h, r = 1 + hash(k, 9, seed) * 2.5;
+    for (let yy = -3; yy <= 3; yy++) for (let xx = -3; xx <= 3; xx++) if (xx * xx + yy * yy <= r * r) p.tint(Math.round(cx + xx), Math.round(cy + yy), -8, -12, -18);
+  }
+}
+
+/** A hand-ruled ink line: faded, slightly uneven, the odd skip where the nib ran dry. */
+export function inkLine(p: Pix, x0: number, x1: number, y: number, col: number, seed = 1, strength = 1) {
+  const [r, g, b] = C3(col);
+  for (let x = x0; x <= x1; x++) {
+    const k = hash(x >> 2, y, seed);
+    if (k > 0.97) continue;
+    const yy = y + (vnoise(x * 0.02, y, seed) > 0.8 ? 1 : 0);
+    const i = (yy * p.w + x) * 4, f = (0.45 + k * 0.25) * strength;
+    p.rgb(x, yy, p.d[i] + (r - p.d[i]) * f, p.d[i + 1] + (g - p.d[i + 1]) * f, p.d[i + 2] + (b - p.d[i + 2]) * f);
+  }
+}
+
+/** Hardboard: warm brown fibreboard, a fine speckle and streaky fibres, a polished face and lighter worn edges. */
+export function hardboardReal(p: Pix, x0: number, y0: number, w: number, h: number, seed = 4) {
+  const [br, bg, bb] = C3(0x7a5c42);
+  for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
+    const e = Math.min(x - x0, y - y0, x0 + w - 1 - x, y0 + h - 1 - y);
+    let n = (fbm(x * 0.01, y * 0.03, seed) - 0.5) * 18 + (vnoise(x * 0.4, y * 0.04, seed + 1) - 0.5) * 10 + (hash(x, y, seed) - 0.5) * 12;
+    if (hash(x, y, seed + 2) > 0.985) n += 18;
+    if (hash(x >> 1, y >> 1, seed + 3) < 0.01) n -= 22;
+    // the bevelled edge: a dark lip, a light worn arris, then the face
+    if (e === 0) n = -70; else if (e < 3) n += (y - y0 < 3 || x - x0 < 3 ? 34 : -28) + (hash(x, y, 9) - 0.5) * 16;
+    else if (e < 9 && fbm(x * 0.15, y * 0.15, seed + 4) > 0.58) n += 14;
+    p.rgb(x, y, br + n, bg + n * 0.85, bb + n * 0.7);
   }
 }
 

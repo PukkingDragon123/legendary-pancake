@@ -2,45 +2,50 @@
 // speckled hardboard, the spring clip with its slotted screws, ruled paper with fibres, pencil tick boxes,
 // the rubber stamp, a pencil, the ink speckle, stickers, tape, and the 9-slice frames for cards and buttons.
 import { P, hex, mixc } from '../gfx/palette.ts';
-import { art, boardFill, frame9, GRAPHITE, hash, INK, paperFill, Pix, R, screw, step, vnoise, woodFill, type Frame9 } from './pixart.ts';
+import { art, boardFill, frame9, GRAPHITE, hardboardReal, hash, INK, inkLine, paperFill, paperReal, Pix, R, screw, step, vnoise, woodFill, type Frame9 } from './pixart.ts';
+void boardFill;
 
 export { pixelCorners } from './pixart.ts';
 
-/** Hardboard for the clipboard back (w x h CSS px; painted at 1 texel per 2 px). */
+/** Hardboard for the clipboard back (w x h CSS px, one texel per px: detailed and realistic). */
 export function boardURL(w: number, h: number) {
-  const W = Math.ceil(w / 2), H = Math.ceil(h / 2);
+  const W = Math.round(w), H = Math.round(h);
   return art(`board${W}x${H}`, () => {
     const p = new Pix(W, H);
-    boardFill(p, 0, 0, W, H);
-    // the hanging slot under the clip, and a pressed maker's mark in the corner
+    hardboardReal(p, 0, 0, W, H);
+    // the hanging slot under the clip, a pressed maker's stamp, a pencil tally scratched in a corner
     const cx = Math.round(W / 2);
-    for (let x = cx - 9; x <= cx + 9; x++) for (let y = 4; y <= 7; y++) p.set(x, y, (x === cx - 9 || x === cx + 9) && (y === 4 || y === 7) ? null : R.woodDeep[y === 4 ? 0 : 1]);
-    p.hline(cx - 8, cx + 8, 8, R.woodDark[4]);
-    const mx = W - 26, my = H - 10;
-    for (let x = 0; x < 18; x++) { p.set(mx + x, my, R.woodDark[1]); p.set(mx + x, my + 5, R.woodDark[4]); }
-    for (let k = 0; k < 5; k++) p.set(mx + 2 + k * 3, my + 2 + (k % 2), R.woodDark[1]);
-    p.corners(3);
+    for (let x = cx - 18; x <= cx + 18; x++) for (let y = 8; y <= 15; y++) {
+      const corner = (x === cx - 18 || x === cx + 18) && (y === 8 || y === 15);
+      if (!corner) p.rgb(x, y, 40, 30, 24);
+    }
+    for (let x = cx - 17; x <= cx + 17; x++) p.tint(x, 16, 40, 34, 26);
+    const mx = W - 70, my = H - 22;
+    for (let x = 0; x < 50; x++) { p.tint(mx + x, my, -26, -24, -20); p.tint(mx + x, my + 11, 18, 16, 12); }
+    for (let k = 0; k < 9; k++) for (let y = 3; y < 8; y++) if (hash(k, y, 3) > 0.3) p.tint(mx + 4 + k * 5, my + y, -22, -20, -16);
+    for (let k = 0; k < 4; k++) for (let y = 0; y < 9; y++) p.tint(14 + k * 4, H - 24 + y, 26, 24, 20);
+    for (let k = 0; k < 15; k++) p.tint(12 + k, H - 20 + Math.round(k * 0.3), 26, 24, 20);
+    p.corners(4);
     return p;
   });
 }
 
-/** One sheet of ruled paper: fibres, pale blue rules, a berry margin, punched holes and a little foxing. */
+/** One sheet of ruled paper at one texel per px: pulp, fibres, foxing, faded blue rules, a red margin, holes. */
 export function sheetURL(w: number, h: number, seed = 3) {
-  const W = Math.ceil(w / 2), H = Math.ceil(h / 2);
+  const W = Math.round(w), H = Math.round(h);
   return art(`sheet${W}x${H}:${seed}`, () => {
     const p = new Pix(W, H);
-    paperFill(p, 0, 0, W, H, R.paper, seed);
-    const rule = hex(mixc(P.lake, P.paper, 0.45)), rule2 = hex(mixc(P.lake, P.paper, 0.7)), margin = hex(mixc(P.berry, P.paper, 0.35));
-    for (let y = 22; y < H - 4; y += 9) for (let x = 2; x < W - 2; x++) if (hash(x, y, seed) > 0.06) p.set(x, y, hash(x >> 3, y, seed) > 0.2 ? rule : rule2);
-    for (let y = 0; y < H; y++) { p.set(14, y, margin); if (hash(14, y, seed + 1) > 0.3) p.set(15, y, rule2); }
-    // edges: a slightly darker deckle and a soft dog-ear shadow at the bottom right
-    for (let x = 0; x < W; x++) { p.set(x, 0, R.paper[2]); p.set(x, H - 1, R.paper[1]); }
-    for (let y = 0; y < H; y++) { p.set(0, y, R.paper[2]); p.set(W - 1, y, R.paper[1]); }
-    for (let k = 0; k < 6; k++) for (let j = 0; j <= k; j++) p.set(W - 1 - 6 + k, H - 1 - j, k === j ? R.paper[2] : R.oat[3]);
-    // two punched holes near the top
+    paperReal(p, 0, 0, W, H, { seed, tone: seed % 2 ? 0xefe8d6 : 0xf1ead8, age: 0.8 });
+    for (let y = 46; y < H - 8; y += 18) inkLine(p, 4, W - 5, y, 0x8fa6b6, seed + y, 0.9);
+    for (let y = 0; y < H; y++) { const x = 28 + (vnoise(1, y * 0.05, seed) > 0.85 ? 1 : 0); const i = (y * W + x) * 4; p.rgb(x, y, p.d[i] * 0.55 + 0xb8 * 0.45, p.d[i + 1] * 0.55 + 0x78 * 0.45, p.d[i + 2] * 0.55 + 0x78 * 0.45); }
+    // a faint fold across the middle and a dog-eared corner
+    const fy = Math.round(H * 0.52);
+    for (let x = 0; x < W; x++) { p.tint(x, fy, -8, -8, -7); p.tint(x, fy + 1, 6, 6, 5); }
+    for (let k = 0; k < 12; k++) for (let j = 0; j <= k; j++) p.tint(W - 13 + k, H - 1 - j, k === j ? -30 : -12, k === j ? -30 : -14, k === j ? -28 : -18);
+    // two punched holes near the top, their edges a little torn
     for (const hx of [Math.round(W * 0.25), Math.round(W * 0.75)]) {
-      p.disc(hx, 5, 2.6, 2.6, (nx, ny) => (ny < -0.3 ? R.woodDeep[1] : R.woodDark[1]));
-      p.ring(hx, 5, 3.6, 1, R.paper[2]);
+      p.disc(hx, 11, 5.2, 5.2, (nx, ny) => (ny < -0.2 ? '#2a2019' : '#3e3024'));
+      p.ring(hx, 11, 7, 1.6, (nx, ny) => (hash(Math.round(nx * 9), Math.round(ny * 9), seed) > 0.5 ? '#d8cfb8' : null));
     }
     return p;
   });
@@ -169,20 +174,19 @@ export function tapeURL(col = P.sage, seed = 1) {
 
 // ------------------------------------------------------------------ frames
 
-/** A card of thick cream stock: ink outline, lit top bevel, shaded bottom edge, stepped corners. */
-export const cardFrame = (on = false): Frame9 => frame9('card' + on, 18, 6, (p, n) => {
-  const base = on ? R.oat : R.paper, edge = on ? R.straw : R.oat;
-  paperFill(p, 0, 0, n, n, base, on ? 5 : 3, on ? 3.3 : 3.8);
-  const ink2 = hex(mixc(P.ink, P.paper, 0.35));
+/** A card of thick cream stock (one texel per px): pulp and fibres, a hand-inked edge, a shaded underside. */
+export const cardFrame = (on = false): Frame9 => frame9('card' + on, 36, 12, (p, n) => {
+  paperReal(p, 0, 0, n, n, { seed: on ? 5 : 3, tone: on ? 0xe6dcc0 : 0xf2ebda, age: 0.4, fibres: 1.4 });
+  const ink = on ? [74, 70, 58] : [58, 55, 48];
   for (let i = 0; i < n; i++) {
     const g = hash(i, 7, on ? 2 : 1);
-    p.set(i, 0, g > 0.85 ? ink2 : INK); p.set(i, n - 1, INK); p.set(0, i, g < 0.12 ? ink2 : INK); p.set(n - 1, i, INK);
-    p.set(i, 1, base[5]); p.set(1, i, base[5]);
-    p.set(i, n - 2, edge[1]); p.set(i, n - 3, edge[2]); p.set(n - 2, i, edge[2]);
+    if (g < 0.93) { p.rgb(i, 0, ink[0], ink[1], ink[2]); p.rgb(0, i, ink[0], ink[1], ink[2]); }
+    p.rgb(i, n - 1, ink[0], ink[1], ink[2]); p.rgb(n - 1, i, ink[0], ink[1], ink[2]);
+    p.tint(i, 1, 10, 10, 8); p.tint(1, i, 10, 10, 8);
+    p.tint(i, n - 2, -22, -24, -24); p.tint(i, n - 3, -12, -13, -13); p.tint(n - 2, i, -18, -19, -19);
   }
-  if (on) for (let i = 2; i < n - 3; i++) { if (i % 3) p.set(i, 3, GRAPHITE); if (i % 4) p.set(3, i, GRAPHITE); }
+  if (on) for (let i = 4; i < n - 4; i++) { if (hash(i, 1, 4) > 0.2) p.rgb(i, 4, 92, 94, 100); if (hash(i, 2, 4) > 0.25) p.rgb(4, i, 92, 94, 100); }
   p.corners(2);
-  p.set(2, 1, INK); p.set(1, 2, INK); p.set(n - 3, 1, INK); p.set(n - 2, 2, INK); p.set(1, n - 3, INK); p.set(2, n - 2, INK); p.set(n - 2, n - 3, INK); p.set(n - 3, n - 2, INK);
 });
 
 /** Chunky pixel buttons: moss (go), honey (approve), linen (neutral), off (disabled); `down` is pressed. */

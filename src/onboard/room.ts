@@ -129,12 +129,12 @@ export class InterviewRoom implements Stage {
     s.add(this.fx.group, this.props, this.furniture);
 
     // ---- light: warm fill, the desk lamp, the lantern, a candle, daylight (or moonlight) through the window
-    this.hemi = new THREE.HemisphereLight(0xf4ead8, 0x4a392b, 0.75);
+    this.hemi = new THREE.HemisphereLight(0xf4ead8, 0x5b4a3c, 0.95);
     s.add(this.hemi, new THREE.AmbientLight(0x617f8c, 0.22));
     this.lampLight = new THREE.PointLight(PAL.lamp, 3.0, 6, 1.6);
     this.lampLight.position.copy(SPOT.lamp).add(new THREE.Vector3(0.05, 0.55, 0.15));
     s.add(this.lampLight);
-    const front = new THREE.PointLight(0xf4e6d0, 1.25, 14, 1.2);
+    const front = new THREE.PointLight(0xf4e6d0, 1.7, 15, 1.1);
     front.position.set(0.5, 3.2, 3.5);
     s.add(front);
     this.hangLight = new THREE.PointLight(PAL.honey, 1.3, 6, 1.6);
@@ -596,7 +596,7 @@ export class InterviewRoom implements Stage {
     this.sun.intensity = this.sky.lightI * 1.2;
     (this.beam.material as THREE.MeshBasicMaterial).color.copy(this.sky.light);
     (this.beam.material as THREE.MeshBasicMaterial).opacity = 0.05 + this.sky.lightI * 0.07;
-    this.hemi.intensity = 0.6 + this.sky.lightI * 0.18;
+    this.hemi.intensity = 0.8 + this.sky.lightI * 0.18;
     this.lampLight.intensity = 3.0 + Math.sin(this.time * 9) * 0.08 + Math.sin(this.time * 23) * 0.05;
     this.hangLight.intensity = 1.3 + Math.sin(this.time * 5.3) * 0.1;
     const fl = Math.sin(this.time * 17) * 0.5 + Math.sin(this.time * 31 + 1) * 0.5;

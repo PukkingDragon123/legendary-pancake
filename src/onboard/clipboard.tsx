@@ -50,7 +50,7 @@ export function StampInk(p: { onHit: () => void }) {
       sound.play('stamp', { volume: 0.8 });
       haptic(30);
       uiBurstAt(ref.current, 'puff', 12);
-      uiBurstAt(ref.current, 'stars', 10);
+      uiBurstAt(ref.current, 'puff', 8);
       document.querySelector('.obc')?.classList.add('thud');
       p.onHit();
     }, 120);

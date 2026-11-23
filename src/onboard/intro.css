@@ -97,7 +97,7 @@
 .obc-ans small { font-size: 12px; color: var(--ink-3); font-family: var(--font-small); flex: none; }
 .obc-next { flex: none; position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 0 8px 4px; font: inherit; font-size: 19px; color: #f4eedd; text-shadow: 0 2px 0 var(--wood-deep); cursor: pointer; background: none; transition: transform .15s var(--pop); }
 .obc-next:not(:disabled):hover { transform: translateY(-2px) rotate(-1deg); }
-.obc-next:disabled { color: var(--linen); text-shadow: none; cursor: default; }
+.obc-next:disabled { color: var(--ink-3); text-shadow: none; cursor: default; }
 .obc-next:not(:disabled) { animation: obc-wiggle 3s ease-in-out 1.5s infinite; }
 @keyframes obc-wiggle { 0%, 90%, 100% { rotate: 0deg; } 93% { rotate: -3deg; } 96% { rotate: 3deg; } }
 .obc-arrow { width: 8px; height: 10px; background: currentColor; clip-path: polygon(0 0, 50% 0, 50% 20%, 75% 20%, 75% 40%, 100% 40%, 100% 60%, 75% 60%, 75% 80%, 50% 80%, 50% 100%, 0 100%); margin-right: -2px; }
@@ -409,3 +409,10 @@
 @media (prefers-reduced-motion: reduce) {
   .ft-line, .ft-b, .obc-next, .wst-tool, .wbtn.big { animation: none !important; }
 }
+
+/* chosen tapes and mugs get a pencil tick; the rest of the rack sits back a little */
+.wt-tape:not(.on) .wt-shell { filter: saturate(.55) brightness(.97); }
+.wt-tape.on::after, .wu-tag.on::after { content: ''; position: absolute; right: -4px; top: -6px; width: 22px; height: 22px; background: var(--ob-tick) 0 0 / 100% 100% no-repeat; image-rendering: pixelated; }
+.wu-tag { position: relative; }
+.wt-ico { left: 6px; top: 6px; }
+.wt-name { left: 31px; top: 7px; max-height: 22px; overflow: hidden; }

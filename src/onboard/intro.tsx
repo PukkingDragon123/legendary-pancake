@@ -46,11 +46,12 @@ function injectCSS() {
 .wbtn.honey{${frameCSS(buttonFrame('honey'), 2)}}.wbtn.honey:active{${frameCSS(buttonFrame('honey', true), 2)}}
 .wbtn.linen,.wd-btn{${frameCSS(buttonFrame('linen'), 2)}}.wbtn.linen:active,.wd-btn:active{${frameCSS(buttonFrame('linen', true), 2)}}
 .obc-skip{${frameCSS(tagFrame(), 2)}}
-.ws-card .ws-front,.wsg-tab,.wp-spot,.wk-lab,.wx-c,.wu-tag{${frameCSS(cardFrame(), 2)}}
-.ws-card.on .ws-front,.wsg-tab.on,.wp-spot.on,.wk-lab.on,.wx-c.on,.wu-tag.on{${frameCSS(cardFrame(true), 2)}}
+.ws-card .ws-front,.wsg-tab,.wp-spot,.wk-lab,.wx-c,.wu-tag{${frameCSS(cardFrame(), 1)}}
+.ws-card.on .ws-front,.wsg-tab.on,.wp-spot.on,.wk-lab.on,.wx-c.on,.wu-tag.on{${frameCSS(cardFrame(true), 1)}}
 .ws-slot,.wg-board,.wsg-screen,.wp-home{${frameCSS(slotFrame(), 2)}}
-.wn-tag{${frameCSS(cardFrame(), 2)}}
+.wn-tag{${frameCSS(cardFrame(), 1)}}
 .obc-tick{background:url(${boxURL(true)}) 0 0/100% 100% no-repeat}
+.ob{--ob-tick:url(${boxURL(true)})}
 .obc-ink{-webkit-mask:url(${speckURL()}) 0 0/64px 64px;mask:url(${speckURL()}) 0 0/64px 64px}
 .wst-tool{background:url(${stampToolURL()}) 0 0/100% 100% no-repeat}
 .obc-board{clip-path:${pixelCorners(4)}}
@@ -331,6 +332,8 @@ export function Intro() {
     (async () => {
       if (devStep) {
         releaseBoot();
+        // screenshots (?obfast): skip the splash's exit animation
+        if (fast) { const bt = document.getElementById('boot'); if (bt) bt.style.display = 'none'; }
         const i = Math.max(0, STEPS.findIndex((s) => s.id === devStep));
         r.pip.pose = 'stand';
         setSi(i); siRef.current = i;
