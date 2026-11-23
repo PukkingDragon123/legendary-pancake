@@ -216,6 +216,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -293,6 +303,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -370,6 +390,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -447,6 +477,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -524,6 +564,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -1636,22 +1686,22 @@
    ],
    "art": [
     "..................",
-    "..................",
-    "....pppppppppp....",
-    "....pppppppppp....",
-    "..pppppppppppppp..",
-    "..pppppppppppppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..pppppppppppppp..",
-    "..pppppppppppppp..",
-    "....pppppppppp....",
-    "....pppppppppp....",
-    "..................",
+    "........PP........",
+    ".....P..PP..P.....",
+    ".....Pp.pp.pP.....",
+    ".....pp.pp.pp.....",
+    "..PPp.pppppp.pPP..",
+    "...ppp.pccp.ppp...",
+    ".....ppcCccpp.....",
+    ".PPpppcCCcccpppPP.",
+    ".PPpppccccccpppPP.",
+    ".....ppccccpp.....",
+    "...ppp.pccp.ppp...",
+    "..PPp.pppppp.pPP..",
+    ".....pp.pp.pp.....",
+    ".....Pp.pp.pP.....",
+    ".....P..PP..P.....",
+    "........PP........",
     ".................."
    ],
    "plane": "xy",
@@ -1659,7 +1709,9 @@
    "paint": {
     "art_key": {
      "p": "cream:6",
-     "c": "honey:5"
+     "P": "cream:4",
+     "c": "honey:4",
+     "C": "honey:6"
     }
    }
   },
@@ -1678,22 +1730,22 @@
    ],
    "art": [
     "..................",
-    "..................",
-    "....pppppppppp....",
-    "....pppppppppp....",
-    "..pppppppppppppp..",
-    "..pppppppppppppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..ppppccccccpppp..",
-    "..pppppppppppppp..",
-    "..pppppppppppppp..",
-    "....pppppppppp....",
-    "....pppppppppp....",
-    "..................",
+    "........PP........",
+    ".....P..PP..P.....",
+    ".....Pp.pp.pP.....",
+    ".....pp.pp.pp.....",
+    "..PPp.pppppp.pPP..",
+    "...ppp.pccp.ppp...",
+    ".....ppcCccpp.....",
+    ".PPpppcCCcccpppPP.",
+    ".PPpppccccccpppPP.",
+    ".....ppccccpp.....",
+    "...ppp.pccp.ppp...",
+    "..PPp.pppppp.pPP..",
+    ".....pp.pp.pp.....",
+    ".....Pp.pp.pP.....",
+    ".....P..PP..P.....",
+    "........PP........",
     ".................."
    ],
    "plane": "xy",
@@ -1701,7 +1753,9 @@
    "paint": {
     "art_key": {
      "p": "cream:6",
-     "c": "honey:5"
+     "P": "cream:4",
+     "c": "honey:4",
+     "C": "honey:6"
     }
    }
   },

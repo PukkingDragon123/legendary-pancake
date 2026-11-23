@@ -304,6 +304,17 @@ def smooth_sides(n):
     return int(min(24, max(n, round(n * 1.4))))
 
 
+_PH = "art/lowpix/items/_furnc/photos/"
+PHOTO = {  # ramp -> (photo source, px per tile, relief amount); paths resolve from the repo root or lowpix's
+    "oak": (_PH + "wood", 28.0, 0.6), "walnut": (_PH + "wood", 28.0, 0.6), "cherry": (_PH + "wood", 28.0, 0.6),
+    "pale": (_PH + "planks", 30.0, 0.55), "bark": (_PH + "bark", 14.0, 0.7), "stone": (_PH + "stone", 22.0, 0.6),
+    "brass": ("assets/photos/rusty_metal_02", 10.0, 0.18), "gold": ("assets/photos/rusty_metal_02", 10.0, 0.15),
+    "iron": ("assets/photos/rusty_metal_02", 10.0, 0.3), "silver": ("assets/photos/rusty_metal_02", 10.0, 0.15),
+    "pine": ("assets/photos/forest_leaves_02", 8.0, 0.45), "leaf": ("assets/photos/forest_leaves_02", 8.0, 0.4),
+    "moss": (_PH + "moss", 12.0, 0.5), "russet": ("assets/photos/brown_leather", 10.0, 0.3),
+}
+
+
 class Spec:
     """One item. Coordinates are world px (origin bottom-centre, front +z); parts can hang under bones."""
 
@@ -466,6 +477,13 @@ class Spec:
 
     # output ---------------------------------------------------------------
     def spec(self):
+        # photo-bash: real material relief (BUSHED's photo-derived textures, CC0 scans) under the painted ramps
+        for st in self.styles.values():
+            ph = PHOTO.get(st.get("ramp"))
+            if ph and not any(lay.get("op") == "photo" for lay in st.get("layers", [])):
+                src, scale, amount = ph
+                st["layers"] = list(st.get("layers", [])) + [
+                    {"id": "photo", "op": "photo", "src": src, "scale": scale, "amount": amount, "ramps": [st["ramp"]]}]
         used = set()
 
         def scan(o):

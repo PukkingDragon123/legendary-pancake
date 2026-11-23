@@ -242,6 +242,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -319,6 +329,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -396,6 +416,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -473,6 +503,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -550,6 +590,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -627,6 +677,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -704,6 +764,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -781,6 +851,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -858,6 +938,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -935,6 +1025,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -1012,6 +1112,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -1089,6 +1199,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -1215,6 +1335,16 @@
      "length": 0.3,
      "width": 0.5,
      "scale": 1.0
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
     }
    ]
   },
@@ -1245,6 +1375,16 @@
      "length": 0.3,
      "width": 0.5,
      "scale": 1.0
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
     }
    ]
   },
@@ -1322,6 +1462,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -1399,6 +1549,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -1455,6 +1615,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1468,7 +1638,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s22": {
    "ramp": "leaf",
@@ -1480,7 +1662,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s23": {
    "ramp": "leaf",
@@ -1492,7 +1686,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s24": {
    "ramp": "leaf",
@@ -1504,7 +1710,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s25": {
    "ramp": "leaf",
@@ -1516,7 +1734,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s26": {
    "ramp": "leaf",
@@ -1528,7 +1758,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s27": {
    "ramp": "leaf",
@@ -1540,7 +1782,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s28": {
    "ramp": "leaf",
@@ -1555,6 +1809,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.4
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
     }
    ]
   },

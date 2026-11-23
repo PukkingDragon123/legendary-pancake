@@ -243,6 +243,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -320,6 +330,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -397,6 +417,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -474,6 +504,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -551,6 +591,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -595,6 +645,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
     }
    ]
   },
@@ -672,6 +732,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -749,6 +819,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -826,6 +906,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -903,6 +993,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -980,6 +1080,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1057,6 +1167,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1134,6 +1254,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1211,6 +1341,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1288,6 +1428,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1365,6 +1515,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1381,6 +1541,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1397,6 +1567,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1413,6 +1593,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1429,6 +1619,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1445,6 +1645,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1461,6 +1671,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1477,6 +1697,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1493,6 +1723,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1509,6 +1749,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1525,6 +1775,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1541,6 +1801,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1557,6 +1827,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1573,6 +1853,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1589,6 +1879,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1605,6 +1905,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -1621,6 +1931,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },

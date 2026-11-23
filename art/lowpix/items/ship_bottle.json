@@ -255,6 +255,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
     }
    ]
   },
@@ -332,6 +342,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
     }
    ]
   },
@@ -409,6 +429,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
     }
    ]
   },
@@ -467,6 +497,16 @@
      "shift": -1.6,
      "faces": [
       "front"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
      ]
     }
    ]
@@ -612,6 +652,16 @@
      "to": 1.0,
      "ramp": "honey",
      "tone": 4
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
     }
    ]
   },
@@ -659,6 +709,16 @@
      "op": "noise",
      "scale": 2.4,
      "amount": 0.35
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
     }
    ]
   },
@@ -669,7 +729,18 @@
     "light_shift": 1.0,
     "dark_shift": -1.0
    },
-   "layers": []
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
   },
   "s11": {
    "ramp": "cream",
@@ -690,7 +761,18 @@
     "light_shift": 1.0,
     "dark_shift": -1.0
    },
-   "layers": []
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
   },
   "s13": {
    "ramp": "cream",

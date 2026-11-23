@@ -1230,6 +1230,16 @@
       "shadow_ramp": "pine",
       "shadow_tone": 1.2
      }
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
@@ -1293,6 +1303,16 @@
       "shadow_ramp": "pine",
       "shadow_tone": 1.2
      }
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   }

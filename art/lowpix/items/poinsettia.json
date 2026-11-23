@@ -176,6 +176,16 @@
      "width": 0.08,
      "threshold": 0.8,
      "shift": -1.2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
     }
    ]
   },
@@ -226,7 +236,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s5": {
    "ramp": "leaf",
@@ -238,7 +260,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s6": {
    "ramp": "leaf",
@@ -250,7 +284,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s7": {
    "ramp": "leaf",
@@ -262,7 +308,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s8": {
    "ramp": "leaf",
@@ -274,7 +332,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s9": {
    "ramp": "leaf",
@@ -286,7 +356,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s10": {
    "ramp": "leaf",
@@ -298,7 +380,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
   },
   "s11": {
    "ramp": "holly",

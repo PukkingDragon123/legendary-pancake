@@ -211,6 +211,16 @@
       "shadow_ramp": "pine",
       "shadow_tone": 1.2
      }
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
@@ -224,7 +234,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s3": {
    "ramp": "pine",
@@ -236,7 +258,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s4": {
    "ramp": "pine",
@@ -248,7 +282,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s5": {
    "ramp": "pine",
@@ -260,7 +306,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s6": {
    "ramp": "pine",
@@ -272,7 +330,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s7": {
    "ramp": "pine",
@@ -284,7 +354,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s8": {
    "ramp": "pine",
@@ -296,7 +378,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s9": {
    "ramp": "pine",
@@ -308,7 +402,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s10": {
    "ramp": "pine",
@@ -320,7 +426,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s11": {
    "ramp": "pine",
@@ -332,7 +450,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s12": {
    "ramp": "pine",
@@ -344,7 +474,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s13": {
    "ramp": "pine",
@@ -356,7 +498,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s14": {
    "ramp": "pine",
@@ -368,7 +522,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s15": {
    "ramp": "pine",
@@ -380,7 +546,19 @@
    "rim": {
     "light": 0,
     "dark": 0
-   }
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
   },
   "s16": {
    "ramp": "holly",
@@ -573,6 +751,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
     }
    ]
   },
@@ -725,6 +913,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
     }
    ]
   },
@@ -881,6 +1079,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
     }
    ]
   },

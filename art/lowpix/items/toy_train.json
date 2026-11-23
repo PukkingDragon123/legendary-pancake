@@ -267,6 +267,16 @@
       "shadow": 1,
       "highlight": 1
      }
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/stone",
+     "scale": 22.0,
+     "amount": 0.6,
+     "ramps": [
+      "stone"
+     ]
     }
    ]
   },
@@ -298,6 +308,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "silver"
+     ]
     }
    ]
   },
@@ -329,6 +349,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "silver"
+     ]
     }
    ]
   },
@@ -355,6 +385,16 @@
      "faces": [
       "up"
      ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/moss",
+     "scale": 12.0,
+     "amount": 0.5,
+     "ramps": [
+      "moss"
+     ]
     }
    ]
   },
@@ -380,6 +420,16 @@
      "tone": 5,
      "faces": [
       "up"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/moss",
+     "scale": 12.0,
+     "amount": 0.5,
+     "ramps": [
+      "moss"
      ]
     }
    ]
@@ -410,6 +460,16 @@
      "gap": 0.6,
      "highlight": 0.6,
      "shadow": -0.8
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/stone",
+     "scale": 22.0,
+     "amount": 0.6,
+     "ramps": [
+      "stone"
+     ]
     }
    ]
   },
@@ -487,6 +547,16 @@
      "shift": 1.0,
      "density": 0.35,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
     }
    ]
   },
@@ -567,7 +637,18 @@
     "light_shift": 1.0,
     "dark_shift": -1.0
    },
-   "layers": []
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
   },
   "s12": {
    "ramp": "iron",
@@ -597,6 +678,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
+     ]
     }
    ]
   },
@@ -659,6 +750,16 @@
      "op": "noise",
      "scale": 1.4,
      "amount": 0.4
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/bark",
+     "scale": 14.0,
+     "amount": 0.7,
+     "ramps": [
+      "bark"
+     ]
     }
    ]
   },
@@ -705,6 +806,16 @@
      "op": "noise",
      "scale": 0.9,
      "amount": 0.7
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
@@ -830,6 +941,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
     }
    ]
   },
@@ -923,6 +1044,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
     }
    ]
   },
@@ -988,6 +1119,16 @@
      "shift": 1.5,
      "density": 0.55,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
     }
    ]
   },
@@ -1015,6 +1156,16 @@
      "faces": [
       "end",
       "start"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
      ]
     }
    ]
@@ -1044,6 +1195,16 @@
       "end",
       "start"
      ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
+     ]
     }
    ]
   },
@@ -1071,6 +1232,16 @@
      "faces": [
       "end",
       "start"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
      ]
     }
    ]
@@ -1100,6 +1271,16 @@
       "end",
       "start"
      ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
+     ]
     }
    ]
   },
@@ -1128,6 +1309,16 @@
       "end",
       "start"
      ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
+     ]
     }
    ]
   },
@@ -1155,6 +1346,16 @@
      "faces": [
       "end",
       "start"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
      ]
     }
    ]
@@ -1310,6 +1511,16 @@
       "end",
       "start"
      ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
+     ]
     }
    ]
   },
@@ -1337,6 +1548,16 @@
      "faces": [
       "end",
       "start"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
      ]
     }
    ]
@@ -1366,6 +1587,16 @@
       "end",
       "start"
      ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
+     ]
     }
    ]
   },
@@ -1393,6 +1624,16 @@
      "faces": [
       "end",
       "start"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
      ]
     }
    ]
@@ -1487,6 +1728,16 @@
       "end",
       "start"
      ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
+     ]
     }
    ]
   },
@@ -1514,6 +1765,16 @@
      "faces": [
       "end",
       "start"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
      ]
     }
    ]
@@ -1543,6 +1804,16 @@
       "end",
       "start"
      ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
+     ]
     }
    ]
   },
@@ -1570,6 +1841,16 @@
      "faces": [
       "end",
       "start"
+     ]
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.3,
+     "ramps": [
+      "iron"
      ]
     }
    ]

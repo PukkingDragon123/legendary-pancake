@@ -218,6 +218,16 @@
      "shift": 1.4,
      "density": 0.6,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
     }
    ]
   },
@@ -243,6 +253,16 @@
      "shift": 1.4,
      "density": 0.6,
      "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
     }
    ]
   },

@@ -81,7 +81,6 @@ const ROSE = [
 const TOAD = [
   '...rrrrrr...', '..rrwrrrrr..', '.rrrrrrwrrr.', 'rrwrrrrrrrrr', 'rrrrrrrwrrrr', '..dddddddd..',
   '....ssss....', '....ssss....', '....ssSs....', '....ssss....', '.g..ssss..g.', 'gg.gssssg.gg', '.gggggggggg.'];
-const CONE = ['...bb...', '..bBBb..', '.bBbbBb.', '.bbBBbb.', '.bBbbBb.', '..bBBb..', '...bb...', '....s...', '....s...'];
 const MOON = ['..mmm..', '.mm....', 'mm.....', 'mm.....', 'mm.....', '.mm....', '..mmm..'];
 
 // ------------------------------------------------------------------ finishes
@@ -93,7 +92,7 @@ export const DECOR_FINISHES: Finish[] = [
     blurb: 'Little dusty-rose buds with sage leaves on buttermilk paper, like a grandmother’s spare room.',
     swatch: ['#eae0c8', '#d9aca4', '#86a06a'],
     paint: (u, v) => {
-      const { ch } = motif(ROSE, u * 2, v * 2, 30, 34);
+      const { ch } = motif(ROSE, u * 2, v * 2, 24, 26);
       const g = paperT(u, v, 1);
       if (ch === 'r') return ink(P.berry, u, v, 1);
       if (ch === 'R') return tn(P.rose, g * 0.6);
@@ -137,7 +136,7 @@ export const DECOR_FINISHES: Finish[] = [
     blurb: 'Terracotta-capped toadstools and grass tufts in a half-drop repeat, printed on warm paper.',
     swatch: ['#f4eedd', '#c0866a', '#66844f'],
     paint: (u, v) => {
-      const { ch } = motif(TOAD, u * 2, v * 2, 30, 32);
+      const { ch } = motif(TOAD, u * 2, v * 2, 26, 28);
       const g = paperT(u, v, 5);
       if (ch === 'r') return ink(P.terracotta, u, v, 5);
       if (ch === 'w') return tn(P.cream, 0.4);
@@ -238,14 +237,16 @@ export const DECOR_FINISHES: Finish[] = [
         const dx = (sx - lx) / 2.6, dy = (sy - ly) / 1.5;
         if (dx * dx + dy * dy < 1 && Math.abs(Math.sin(sx * 2.4)) > 0.15) leaf = true;
       }
-      const { ch: cone } = motif(CONE, sx * 2 - 34, sy * 2 - 10, 999, 999, false);
-      const { ch: moon } = motif(MOON, (sx - 4) * 2, (sy - 25) * 2, 999, 999, false);
       const hatch = mod(sx + sy, 2) < 0.6;
       if (twig) return ink(P.slate, u, v, 20);
       if (leaf) return hatch ? tn(P.dusk, -0.2) : tn(P.dusk, 0.3);
-      if (cone === 'b' || cone === 'B') return tn(P.slate, cone === 'B' ? 0.4 : -0.2);
-      if (cone === 's') return tn(P.slate, 0);
-      if (moon === 'm') return ink(P.dusk, u, v, 21);
+      // a pine cone hanging under the sprig, and a crescent moon above it
+      const cx = (sx - 22) / 1.7, cy = (sy - 8) / 2.4, cd = Math.hypot(cx, cy);
+      if (cd < 1) return mod(fl(sx * 2 + sy * 2), 3) === 0 ? tn(P.slate, -0.2) : tn(P.dusk, cy > 0 ? 0.3 : -0.1);
+      if (Math.abs(sx - 22) < 0.3 && sy > 9.8 && sy < 12) return tn(P.slate, 0);
+      const md = Math.hypot(sx - 6, sy - 26), mi = Math.hypot(sx - 7.2, sy - 26.8);
+      if (md < 3 && mi > 2.6) return ink(P.dusk, u, v, 21);
+      if (mod(sx * 3 + sy * 7, 23) < 0.4 && h2(u, v, 22) > 0.7) return tn(P.dusk, 0.4);
       return tn(P.oat, g + 0.1);
     },
   },

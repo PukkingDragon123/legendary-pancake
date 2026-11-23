@@ -987,13 +987,16 @@ def hat_rack():
     S.lathe("crown", [(3.5, 0.4), (3.4, 2.4), (2.9, 3.6), (1.8, 4.0)], hc, straw, rot=(78, 0, 0), sides=14)
     S.lathe("ribbon", [(3.55, 0.5), (3.5, 1.3)], hc, plain("berry", tone=3.8, gloss=True), rot=(78, 0, 0), sides=14,
             caps=(False, False), subdiv=0)
-    daisy = Pix(9, 9)
-    for k in range(8):
-        a = k * math.pi / 4
-        daisy.disc(4.5 + math.cos(a) * 2.6, 4.5 + math.sin(a) * 2.6, 1.2, "p")
-    daisy.disc(4.5, 4.5, 1.6, "c")
+    daisy = Pix(18, 18)  # drawn at the final (HD) density: thin petals round a honey heart
+    for k in range(12):
+        a = k * math.pi / 6
+        for t in range(3, 9):
+            daisy.disc(9 + math.cos(a) * t, 9 + math.sin(a) * t, 0.9 if t < 8 else 0.6, "p" if t < 7 else "P")
+    daisy.disc(9, 9, 2.8, "c")
+    daisy.disc(8.4, 8.4, 1.0, "C")
     for k, (x, y) in enumerate([(-3.0, 0.4), (-1.6, -0.6)]):
-        S.card(f"daisy{k}", daisy.rows, (x, y, 5.0), flat("cream"), key={"p": "cream:6", "c": "honey:5"}, rot=(-12, 0, 0))
+        S.card(f"daisy{k}", daisy.rows, (x, y, 5.0), flat("cream"), native=True, rot=(-12, 0, 0),
+               key={"p": "cream:6", "P": "cream:4", "c": "honey:4", "C": "honey:6"})
     # scarf over peg 3: two knitted tails with fringes
     sc = knit("fern", tone=3.8, layers=[
         {"id": "bands", "op": "stripes", "axis": "path", "period": 3.0, "width": 0.3, "ramp": "ochre", "tone": 4.4},
