@@ -1,0 +1,305 @@
+{
+ "name": "iron_lantern_extra",
+ "description": "Lantern flame",
+ "author": "Hoot Hollow (furnB)",
+ "license": "CC0-1.0",
+ "density": 6,
+ "budget": {
+  "tris": 3000,
+  "colors": 400
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.62
+  ],
+  "strength": 0.75,
+  "gradient": 0.35,
+  "ao": 1.1,
+  "ao_height": 3.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.88
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.5,
+  "width": 0.4,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "fm_core": "none",
+   "fm_flame": "none"
+  }
+ },
+ "render": {
+  "background": "#2a3330",
+  "hero": [
+   -34,
+   24
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "fm_core": [
+    "#6e6857",
+    "#a79673",
+    "#f1d39a",
+    "#feeaaa",
+    "#fcf6b7",
+    "#fbf2c0"
+   ],
+   "fm_flame": [
+    "#a66c55",
+    "#c59a52",
+    "#dcb072",
+    "#f3c879",
+    "#f1d39a",
+    "#fbe9c2",
+    "#fff8e8"
+   ]
+  }
+ },
+ "styles": {
+  "glow_core": {
+   "ramp": "fm_core",
+   "tone": 4.6,
+   "light": 0.15,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "heat",
+     "op": "gradient",
+     "axis": "y",
+     "amount": -0.8
+    },
+    {
+     "id": "flick",
+     "op": "noise",
+     "scale": 1.0,
+     "amount": 0.5
+    }
+   ]
+  },
+  "flame": {
+   "ramp": "fm_flame",
+   "tone": 3.0,
+   "light": 0.0,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0
+  }
+ },
+ "parts": [
+  {
+   "id": "glow_core",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.8
+    },
+    {
+     "at": [
+      0.0,
+      0.8,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      1.8,
+      0.0
+     ],
+     "size": 0.6
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    4.2,
+    0.0
+   ],
+   "style": "glow_core",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "glow_flame",
+   "shape": "card",
+   "plane": "xy",
+   "style": "flame",
+   "art": [
+    "..o...",
+    "..oo..",
+    ".oco..",
+    ".occo.",
+    "occwco",
+    "ocwwco",
+    "ocwwco",
+    ".cwwc.",
+    "..oo.."
+   ],
+   "size": [
+    1.9500000000000002,
+    2.9250000000000003
+   ],
+   "pivot": [
+    0.0,
+    4.6,
+    0.0
+   ],
+   "paint": {
+    "art_key": {
+     "o": "fm_flame:2",
+     "c": "fm_flame:4",
+     "w": "fm_flame:6"
+    }
+   },
+   "offset": [
+    0,
+    1.4625000000000001,
+    0
+   ]
+  },
+  {
+   "id": "glow_flame1",
+   "shape": "card",
+   "plane": "xy",
+   "style": "flame",
+   "art": [
+    "..o...",
+    "..oo..",
+    ".oco..",
+    ".occo.",
+    "occwco",
+    "ocwwco",
+    "ocwwco",
+    ".cwwc.",
+    "..oo.."
+   ],
+   "size": [
+    1.9500000000000002,
+    2.9250000000000003
+   ],
+   "pivot": [
+    0.0,
+    4.6,
+    0.0
+   ],
+   "paint": {
+    "art_key": {
+     "o": "fm_flame:2",
+     "c": "fm_flame:4",
+     "w": "fm_flame:6"
+    }
+   },
+   "offset": [
+    0,
+    1.4625000000000001,
+    0
+   ],
+   "rotation": [
+    0,
+    90,
+    0
+   ]
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 2.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "glow_flame",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.1,
+       0.22,
+       0.1
+      ],
+      "cycles": 3,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "glow_flame",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 2,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "glow_flame1",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.1,
+       0.22,
+       0.1
+      ],
+      "cycles": 4,
+      "phase": 0.37
+     }
+    },
+    {
+     "part": "glow_flame1",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 2,
+      "phase": 0.53
+     }
+    },
+    {
+     "part": "glow_core",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.12,
+       0.2,
+       0.12
+      ],
+      "cycles": 3
+     }
+    }
+   ]
+  }
+ }
+}

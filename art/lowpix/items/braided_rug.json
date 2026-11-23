@@ -1,0 +1,353 @@
+{
+ "name": "braided_rug",
+ "description": "Braided Rag Rug",
+ "author": "Hoot Hollow (furnB)",
+ "license": "CC0-1.0",
+ "density": 3,
+ "budget": {
+  "tris": 3000,
+  "colors": 400
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.62
+  ],
+  "strength": 0.75,
+  "gradient": 0.35,
+  "ao": 1.1,
+  "ao_height": 3.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.88
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.5,
+  "width": 0.4,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "ru_b0": "cloth",
+   "ru_b1": "cloth",
+   "ru_b2": "cloth",
+   "ru_b3": "cloth",
+   "ru_b4": "cloth",
+   "ru_b5": "cloth",
+   "ru_b6": "cloth",
+   "ru_b7": "cloth",
+   "ru_b8": "cloth",
+   "ru_b9": "cloth"
+  }
+ },
+ "render": {
+  "background": "#2a3330",
+  "hero": [
+   -30,
+   40
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "ru_b0": [
+    "#606360",
+    "#9b988c",
+    "#eae0c8",
+    "#fcf0d4",
+    "#fdf9de",
+    "#fcf6e5"
+   ],
+   "ru_b1": [
+    "#5b5255",
+    "#907876",
+    "#d9aca4",
+    "#ebbcaf",
+    "#facaba",
+    "#fcd5c2"
+   ],
+   "ru_b2": [
+    "#5f5558",
+    "#997c7c",
+    "#e8b4ae",
+    "#fac4ba",
+    "#fdd1c3",
+    "#fcddcc"
+   ],
+   "ru_b3": [
+    "#5b5445",
+    "#937a57",
+    "#dcb072",
+    "#eebf7d",
+    "#fdce88",
+    "#fcd991"
+   ],
+   "ru_b4": [
+    "#4b564d",
+    "#727f64",
+    "#a7b788",
+    "#b9c793",
+    "#c9d59d",
+    "#d7e0a6"
+   ],
+   "ru_b5": [
+    "#626562",
+    "#9f9c8e",
+    "#f1e6cc",
+    "#fef6d8",
+    "#fdf9e1",
+    "#fcf6e9"
+   ],
+   "ru_b6": [
+    "#524743",
+    "#816152",
+    "#c0866a",
+    "#d29676",
+    "#e2a47f",
+    "#efb089"
+   ],
+   "ru_b7": [
+    "#415159",
+    "#5e767d",
+    "#86a9b0",
+    "#98b9bb",
+    "#a8c7c6",
+    "#b7d2cd"
+   ],
+   "ru_b8": [
+    "#5b5d59",
+    "#938d7d",
+    "#dccfb0",
+    "#eedfbb",
+    "#fdedc6",
+    "#fcf6cd"
+   ],
+   "ru_b9": [
+    "#483a42",
+    "#6c484f",
+    "#9e5f66",
+    "#b06f71",
+    "#c07d7c",
+    "#ce8a85"
+   ]
+  }
+ },
+ "styles": {
+  "braid_side": {
+   "ramp": "ru_b9",
+   "tone": 2.6,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "twist",
+     "op": "stripes",
+     "axis": [
+      1,
+      1,
+      1
+     ],
+     "period": 0.8,
+     "width": 0.5,
+     "shift": -1.0
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "rug",
+   "shape": "prism",
+   "sides": 24,
+   "size": [
+    31.0,
+    30.0,
+    0.8
+   ],
+   "style": "braid_side",
+   "pivot": [
+    0.0,
+    0.4,
+    0.0
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "stamps": [
+     {
+      "face": "front",
+      "at": [
+       0,
+       0
+      ],
+      "art": [
+       ".............................................456.............................................",
+       ".....................................4563333333333333565.....................................",
+       ".................................553335555545555555555533355.................................",
+       "..............................633345555556564565656565455553336..............................",
+       "...........................663354556564565655456565654656555453355...........................",
+       ".........................6335545665565333335554545333336565665555336.........................",
+       ".......................53355456655333545555555555555555533355656555336.......................",
+       "......................5354556653355555545665656465654654555533654655536......................",
+       "....................63555664535555455566553333333335655665545553656555536....................",
+       "...................53556455355556666433npppppppppppppn33554665555354654536...................",
+       ".................634555563545666633nppppppopqpqpqpppppoppn335555555356655536.................",
+       "................5355664335566663nppopqopqpqopqpqpqpqpoqpppppn3554444335654534................",
+       "...............435555635554663pppopqqpqqnnnLLLLLLLnnnppqpqpoppp366644435465435...............",
+       "..............63554433555543pppopqqpnnLNNMNNMNNNMNNNNNLnnpoqpppop36664533565535..............",
+       ".............5355663555663npoppqqnLNNMNNNONNONONONOONNNNNMLnqpoqppn3664553555536.............",
+       "............5355553546563pppqqonLNNNNOONNOONOMLONMONMONNMNNNLnqpqpop3645553654536............",
+       "...........535555355565nppoppnLNNNNNOOOLLbdddddddddbLLNMOOONNNLnpoqppn455553665535...........",
+       "..........534566355653pppqqnLMNNNNNLLbddddcdddddddddddcbLLNNNNNNLnpqppp355553565536..........",
+       "..........35566354543pooppnNNMOONLbdddddedeedededededcddddbLNNNNNNnppqpo35654355553..........",
+       ".........35566355563ppqqqLNNNMOLbdddcdecdebbbbbbbbbdeddeddddbLMMNNNLqpopp36655365453.........",
+       "........63565355563ppppnLNNONMbdddddeebbzBBBBBABBBBAzbbdedcdddbMMNNNLnqppp34555366535........",
+       ".......63555555553ppppnNNNMOLdcdddebbBBBBBBCABCBCBBBBBABbbededddLNNNNNnqppp35654555536.......",
+       ".......3555535553oooqnMNMONLddeeebzBBBBCCCBBCBCBCBCCBBBBBBzbddedcLNNNNNnoqpo3665365453.......",
+       "......6355534566npqqnNNONObcddddbBBBBBBBBzzXXXZXXXzzBCCCBBBBbededdbNOONNnpqpn6455346536......",
+       "......3555555643ppqqLNOMNbddeebBBBBBBBzXZZYZZZZZZZZZZXzBBBBBBBbddddbOOMNLqqpp3555465553......",
+       ".....6355535453ppqpLNNONbddddbBBACBzXYZZZZZ0Z0Z0Z0Z0ZYZZXzBBBBBbedcdbONNNLpqpp3645365535.....",
+       ".....355535566npqpnNNONbddddbBBBACzZZZ0YZ0YZXXXXXZ0Z00ZZZYzBBBBBbcedcbNNNNnpopn655534553.....",
+       "....5356535453pppnNNONLcccczBBCBzXZZ0ZZ0XXtuvvvvvvtXXZ0Z0ZZXzBBBBzdeddLOONNnqpp3564365535....",
+       "....355635566ppqpLNNNLcdeebBABAzYZZZ00XvvvvvvvwvuvvvvvX0ZZZZZzBCBAbddddLMNNLpqpp665536553....",
+       "...6354635553pqqnNNOOcdeebBBBCzZZ00YXvvvvvvwwvwvwvvwvvvvX0ZYZZzCCBBbedcdNNNMnpop3555354534...",
+       "...655565545ppqqLNMNLdeebBBBCzZZZ0XtvvvvvvvtttFtttuwwvvvvtX0ZZZzABBBbcedLOONLoqpp564566555...",
+       "...355535663poqnNNOLcdeezABCzZZZZXvuvvvutFGHHHHHHHHFtvvvvvvX0ZZZzBCBzedddLNNNnppp345535653...",
+       "..535653566nppqLNNNbceebBBCzZZYYXuvvwvtHGHHIHIHIHIHHHHtvvwvvXZ0ZYzCABbeddbNOMLqpon564365435..",
+       "..554635553pppnNNMLdceeBBABXYY0XvvwvwFHHIIHHIHIHIHIHGHHFvwwvvXZYZXCBBBdcddLMNNnopp365536556..",
+       "..355435553pqpnNOOLddebBBCzZY00tvwutFHHGHHFFnpppnFFGIHHHFtwuvt00ZZzBCAbeddLNOMnppp356435453..",
+       "..35553555noqpNNOOdddcBABBXZ00XvvwvFHHIIFnppppoppopnFIHHHFwvvvXZ0ZXCABBdedcOONNoqpn66536653..",
+       ".634655555pponNNOLdddbBBCzZZ0XvvvvFHHHHnppooppqpoqpppnGIHGFvvvvXZYZzBBBbdcdLNNNnppp655455534.",
+       ".655435563pppnNNOLdedzBCCXZZYtvvwtHHHGnpppqqqnnnqqqqppnHIHHtwuvt00ZXCCBzeddLOONnqpo364536555.",
+       ".655535563oqpLNOObdeeBBCCZZZXvuvvHHGInpoqpnhjjjijhnpqponIHHHwvvvXZZZCBBBdcdbONNLpqp345535556.",
+       ".35463466npoqNNOOdddbBBCzZ0ZXvwwtHHGFpopqnjijkikjjjnqqppFIHGtvwvX0ZYzCBBbeddNOMNqpon56536553.",
+       ".35553555npppMMOLcddbBCCXZ00tvwwFHHGnppqnjjkkjkjkjijnoppnHGHFwvvtZ0ZXCBBbdddLMNNpqpn65535653.",
+       ".35663566ppqnNNNLddebAACXZZ0vvwtHHHFpopnjjjjhhbhhkkjjnpppFIHHtvvv0ZYXBCAbeddLNNNnpop56436553.",
+       ".35543466pppnNNOLdddzBBBYZ0XuuutHIIFpqqhjjjhdddddhjkjhqppFGIHtwvvX0ZZCABzdedLONNnqpp64535653.",
+       ".34653555poqnMMMLdcezBCCZZ0XvvvtHHInooojjjjcdeeeddkjijpppnIHHtvvuXZYZBBBzeddLNOMnpop55536553.",
+       ".35543566pppnNNNLdddzBAAYZZXvwwtHIHnpppjjkhccceeddhkjjqqpnGIHtwvvX0ZZCCBzcedLONNnqpp66534653.",
+       ".35663556poonNNNLdddzBBBZZ0XvuvtHHHnpopjjkhddeedddhjjjoppnHHHtvwvXZYZABBzdddLNONnpop45535553.",
+       ".34553565pppnNOMLdeezBCAZZZXvvwtHIInppqjjkkddededdikjipqpnIIHtwuvX0ZYBCBzcedLOMNnqpo56534653.",
+       ".35663556ppqnNNNLdddzBBBZZ0XvvvtHIIFpqqhjjjhdddddhjijhoppFHGHtvvvXZZZCBBzdcdLNNNnppp65535453.",
+       ".35663565pppnNNOLdeebBBCXZ00vvvtHHIFpponjikjhhbhhkjjjnqppFIHHtwuv00ZXBCBbedcLOMNnqpp56536553.",
+       ".35553455npqqNNNLddebBCBXZ00tvwwFHIInpopnjjjjjkjjjjjnqppnHGHFwvvtZ0ZXABBbdddLNNNpopn65535653.",
+       ".35563566npqqMNOOcccbBBBzYY0XvwutHHHFppoonjjjikjjjjnopppFIHHtvwvX0ZZzBBBbeddNOMNqpon56536553.",
+       ".655635453oooLNONbdccBBCCYZ0XvvvvHHIInppqqnhijjjjhnpqopnGIHHwuvvX0ZZCABBdedbONNLpqp365534556.",
+       ".644434563pppnNNNLdcczBCAXZ00tvvvtHHGInppppqqnnnqppqppnHHHHtvwvt0ZZXBCBzeddLNOMnqpp355535455.",
+       ".535555564pppnMNOLdccbBBBzZZZXvuvvFHHIHnpppppqpqpqoppnIHHGFvwvvX0ZZzCBBbeddLONNnqpp645556536.",
+       "..35553545npppNNOOcdeeBABBXZ00XuvvvFHHHIFnpopppppppnFIIHHFwuvvXZYZXABBAedddMNNNqppn55535553..",
+       "..355534553pppnNOMLdedbABBzZZZYtvuutFHHIHHFFnpppnFFIIIHHFtvwvt0ZZZzCCBbeddLOMNnqqp364536553..",
+       "..555535563poonNMNLddddABBBXY0ZXvvwwwFHHGHHGIHGHIHHHIHHFvvwvvX00ZXCBBBddddLNNNnppp355535554..",
+       "..535553564npqqLMNNbdeebBBBzZZ0ZXvvvvvtHHGHIIHIHIIHHHHtvwvvvXZYZZzBBAbedcbNONLqppn565365535..",
+       "...355535453pppnNNNLdddczBBBzZY0ZXvvuwwwtFHHHGHGHHGFtvwwvvuX0ZZZzCABzdeddLONNnppp345535653...",
+       "...454465455pppoLNNOLdeebABBBzZZZ0XtvvvvwwvtttFtttwuvwvvvtX00ZZzCBBBbdcdLNNNLqpop565565555...",
+       "...5356635553oqqnNNOOddcebAAAAzYZ0Z0XvuvvvwvvwvwvwvwvvvvX000ZZzBBBBbedddNONNnqqp3655356536...",
+       "....355535566ppppLNNOLdddebBBCCzZYZ00YXvuvvuvvwvvvvvvvX000ZZZzBCABbceddLMNNLpppp455435453....",
+       "....5355435663ppqnNNNOLdddezBBBBzXZZ00YYXXtvvvvvvvtXX0000ZZXzCCBBzddddLNONNnqpo3665366536....",
+       ".....345635566nppqnNNNNbddedbBBBACzZZZ0000ZZXXXXXZ0YZZ0ZZZzBCBBBbeddcbNONNnoqpn655535553.....",
+       ".....6355535663ppppLNNNNbddedbBBCCBzXZZZZZZY0Z0Z0Z00YZZZXzCABBBbeeddbOMNNLpppp3564365435.....",
+       "......3556555663ppppLMNNNbdddebBBBACCBzXZZZZZZZZZYZZZXzBBCBBABbeeddbMNOMLqqpp3665556553......",
+       "......6355435566npqpnNNOOObddecdbBBBBCCBAzzXXXZXXXzzBCBCABBBbdceddbNOONNnqqpn6555355535......",
+       ".......3456535563ppqpnNNOONLddcdebzABBBCCBCBACBCBCBCABBBBAzbcccddLNONNNnpopp3565366543.......",
+       ".......63546555553poqpnNNNNNLdcddeebbBBBBBBACBCBCBBBBBBBbbeeedddLOMNNMnpppp36455545534.......",
+       "........63556355553pppqnLMNOOObdddeeeebbzBBBBBBBBBBBzbbdeeedddbOONNNLnqqpp36555355535........",
+       ".........35556355553ppopqLNNNNMLbdddeeeddcbbbbbbbbbdeeddddddbLONNNNLoqqpp35555365543.........",
+       "..........35556355663ppqopnNMNONNLbdddddceededcdcdeddeddddbLOONNMNnpoqpp35655346553..........",
+       "..........635556355663ppppqnLNNNOONLLbdcdddcdddddddddddbLLNONNNNLnppopp364553555535..........",
+       "...........635565355555nppqopnLNNNMONNOLLbdddcdcdddbLLNONOONNNLnpppoon565553655435...........",
+       "............5355653546663ppoppqnLNNNMONMONONMNLONOMNMNONNNNNLnppppoo3655553665536............",
+       ".............5355563555553nopppqqnLNNNNNNONONMONONOMNNNNNNLnqqoooon3455453465534.............",
+       "..............63456533554663ppppqqqqnnLMNNNNMNNNNNNNMNLnnppqqpppp36565533545535..............",
+       "...............635456535555563ppppppppoqnnnLLLLLLLnnnppqopppppp364555535554535...............",
+       "................5355655335566553nppppoqqpoqpoqpqpqopqopqpoppn3565645335555436................",
+       ".................635555643555665533nppppppppqpqpqpppppoppn335645555355555434.................",
+       "...................53556455355546556533npppppppppppppn33564565545355555536...................",
+       "....................63555555635554554654653333333335656565545553555555534....................",
+       "......................5354555553355555555656545464545655555533664455536......................",
+       ".......................63355555555333554555545454545455533355566554335.......................",
+       ".........................4335555554666333335545555333335566455555336.........................",
+       "...........................563344556655665665656565665665555453356...........................",
+       "..............................633355555554656545456564555553335..............................",
+       ".................................653335555545555555455533345.................................",
+       ".....................................6563333333333333565.....................................",
+       ".............................................656............................................."
+      ],
+      "key": {
+       "a": "ru_b0:0",
+       "b": "ru_b0:1",
+       "c": "ru_b0:2",
+       "d": "ru_b0:3",
+       "e": "ru_b0:4",
+       "f": "ru_b0:5",
+       "g": "ru_b1:0",
+       "h": "ru_b1:1",
+       "i": "ru_b1:2",
+       "j": "ru_b1:3",
+       "k": "ru_b1:4",
+       "l": "ru_b1:5",
+       "m": "ru_b2:0",
+       "n": "ru_b2:1",
+       "o": "ru_b2:2",
+       "p": "ru_b2:3",
+       "q": "ru_b2:4",
+       "r": "ru_b2:5",
+       "s": "ru_b3:0",
+       "t": "ru_b3:1",
+       "u": "ru_b3:2",
+       "v": "ru_b3:3",
+       "w": "ru_b3:4",
+       "x": "ru_b3:5",
+       "y": "ru_b4:0",
+       "z": "ru_b4:1",
+       "A": "ru_b4:2",
+       "B": "ru_b4:3",
+       "C": "ru_b4:4",
+       "D": "ru_b4:5",
+       "E": "ru_b5:0",
+       "F": "ru_b5:1",
+       "G": "ru_b5:2",
+       "H": "ru_b5:3",
+       "I": "ru_b5:4",
+       "J": "ru_b5:5",
+       "K": "ru_b6:0",
+       "L": "ru_b6:1",
+       "M": "ru_b6:2",
+       "N": "ru_b6:3",
+       "O": "ru_b6:4",
+       "P": "ru_b6:5",
+       "Q": "ru_b7:0",
+       "R": "ru_b7:1",
+       "S": "ru_b7:2",
+       "T": "ru_b7:3",
+       "U": "ru_b7:4",
+       "V": "ru_b7:5",
+       "W": "ru_b8:0",
+       "X": "ru_b8:1",
+       "Y": "ru_b8:2",
+       "Z": "ru_b8:3",
+       "0": "ru_b8:4",
+       "1": "ru_b8:5",
+       "2": "ru_b9:0",
+       "3": "ru_b9:1",
+       "4": "ru_b9:2",
+       "5": "ru_b9:3",
+       "6": "ru_b9:4",
+       "7": "ru_b9:5"
+      }
+     }
+    ]
+   }
+  }
+ ]
+}

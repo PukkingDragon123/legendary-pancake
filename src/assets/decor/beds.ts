@@ -19,7 +19,7 @@ const pillow = (x: number, y: number, z: number, w: number, h: number, d: number
 // ------------------------------------------------------------------ beds
 
 add({
-  id: 'bunk_bed', name: 'Pinewood Bunk Bed', cat: 'beds', price: 680, rarity: 'rare', size: [3, 2],
+  id: 'bunk_bed', model: 'items/bunk_bed.glb', name: 'Pinewood Bunk Bed', cat: 'beds', price: 680, rarity: 'rare', size: [3, 2],
   blurb: 'Top bunk for stargazing, bottom bunk for hiding from Monday.',
   sleep: { x: 2, y: 10, z: 0, rot: 90 },
   build: () => {
@@ -58,7 +58,7 @@ add({
 });
 
 add({
-  id: 'canopy_bed', name: 'Rosewood Canopy Bed', cat: 'beds', price: 0, gems: 120, rarity: 'epic', size: [3, 2],
+  id: 'canopy_bed', model: 'items/canopy_bed.glb', name: 'Rosewood Canopy Bed', cat: 'beds', price: 0, gems: 120, rarity: 'epic', size: [3, 2],
   blurb: 'Draped in dusk-pink voile. Dreams in here come with a soundtrack.',
   sleep: { x: 3, y: 10, z: 0, rot: 90 },
   build: () => {
@@ -121,7 +121,7 @@ add({
 });
 
 add({
-  id: 'hammock_bed', name: 'Woven Hammock Bed', cat: 'beds', price: 540, rarity: 'rare', size: [3, 2],
+  id: 'hammock_bed', model: 'items/hammock_bed.glb', name: 'Woven Hammock Bed', cat: 'beds', price: 540, rarity: 'rare', size: [3, 2],
   blurb: 'Rocks you to sleep in a cradle of macrame and one very soft blanket.',
   sleep: { x: 0, y: 9, z: 0, rot: 90 },
   build: () => {
@@ -158,7 +158,7 @@ add({
 });
 
 add({
-  id: 'basket_nest', name: 'Mossy Basket Nest', cat: 'beds', price: 260, rarity: 'uncommon', size: [2, 2],
+  id: 'basket_nest', model: 'items/basket_nest.glb', name: 'Mossy Basket Nest', cat: 'beds', price: 260, rarity: 'uncommon', size: [2, 2],
   blurb: 'A round wicker basket with a plump cushion. Circle three times, then flop.',
   sleep: { x: 0, y: 6, z: 0 },
   build: () => {
@@ -184,7 +184,7 @@ add({
 });
 
 add({
-  id: 'floor_futon', name: 'Tatami Futon', cat: 'beds', price: 360, rarity: 'uncommon', size: [3, 2],
+  id: 'floor_futon', model: 'items/floor_futon.glb', name: 'Tatami Futon', cat: 'beds', price: 360, rarity: 'uncommon', size: [3, 2],
   blurb: 'Low, quiet and smells faintly of rice straw. Comes with a bedside tea tray.',
   sleep: { x: 2, y: 5, z: 0, rot: 90 },
   build: () => {
@@ -211,7 +211,7 @@ add({
 // ------------------------------------------------------------------ seating
 
 add({
-  id: 'patch_sofa', name: 'Patchwork Sofa', cat: 'seating', price: 620, rarity: 'rare', size: [3, 1],
+  id: 'patch_sofa', model: 'items/patch_sofa.glb', name: 'Patchwork Sofa', cat: 'seating', price: 620, rarity: 'rare', size: [3, 1],
   blurb: 'Three seats, eleven fabrics and one crumb-filled crack nobody talks about.',
   sit: [{ x: -9, y: 9, z: 1 }, { x: 0, y: 9, z: 1 }, { x: 9, y: 9, z: 1 }],
   build: () => {
@@ -235,7 +235,7 @@ add({
 });
 
 add({
-  id: 'beanbag', name: 'Squashy Beanbag', cat: 'seating', price: 180, rarity: 'common', size: [1, 1],
+  id: 'beanbag', model: 'items/beanbag.glb', name: 'Squashy Beanbag', cat: 'seating', price: 180, rarity: 'common', size: [1, 1],
   blurb: 'Swallows you whole, in a nice way.',
   sit: [{ x: 0, y: 6, z: 1 }],
   build: () => {
@@ -257,7 +257,7 @@ add({
 });
 
 add({
-  id: 'rocking_chair', name: 'Grandmother Rocking Chair', cat: 'seating', price: 420, rarity: 'uncommon', size: [1, 2],
+  id: 'rocking_chair', model: 'items/rocking_chair.glb', name: 'Grandmother Rocking Chair', cat: 'seating', price: 420, rarity: 'uncommon', size: [1, 2],
   blurb: 'Creaks in exactly the right rhythm for knitting and for napping.',
   sit: [{ x: 0, y: 9, z: 1 }],
   build: () => {
@@ -296,7 +296,7 @@ add({
 });
 
 add({
-  id: 'window_seat', name: 'Window-Nook Bench', cat: 'seating', price: 460, rarity: 'uncommon', size: [3, 1], surface: 8,
+  id: 'window_seat', model: 'items/window_seat.glb', name: 'Window-Nook Bench', cat: 'seating', price: 460, rarity: 'uncommon', size: [3, 1], surface: 8,
   blurb: 'A cushioned nook with drawers underneath for secret snacks and storm-day books.',
   sit: [{ x: -8, y: 9, z: 1 }, { x: 6, y: 9, z: 1 }],
   build: () => {
@@ -322,7 +322,7 @@ add({
 });
 
 add({
-  id: 'toad_stool', name: 'Toadstool Seat', cat: 'seating', price: 120, rarity: 'common', size: [1, 1], surface: 11,
+  id: 'toad_stool', model: 'items/toad_stool.glb', name: 'Toadstool Seat', cat: 'seating', price: 120, rarity: 'common', size: [1, 1], surface: 11,
   blurb: 'A sturdy mushroom that agreed to be sat on. Spots are hand-painted.',
   sit: [{ x: 0, y: 11, z: 0 }],
   build: () => {
@@ -345,7 +345,7 @@ add({
 });
 
 add({
-  id: 'wingback', name: 'Tartan Wingback', cat: 'seating', price: 520, rarity: 'rare', size: [2, 2],
+  id: 'wingback', model: 'items/wingback.glb', name: 'Tartan Wingback', cat: 'seating', price: 520, rarity: 'rare', size: [2, 2],
   blurb: 'Tall wings keep out draughts, gossip and the sound of alarms. Footstool included.',
   sit: [{ x: 0, y: 8, z: 1 }],
   build: () => {
