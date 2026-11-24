@@ -1,7 +1,9 @@
 // Small life: butterflies drifting between flower drifts, birds that hop and scatter (BUSHED's rigged
 // songbird), koi under the pond surface, dragonflies over it, and the ambient particle emitters.
 import * as THREE from 'three';
-import { box, buildRig, PX, type BoneSpec, type Painter, type Rig } from '../gfx/box.ts';
+import type { Rig } from '../gfx/box.ts';
+import * as K from './critterkit.ts';
+import { Swarm } from './critterkit.ts';
 import { instanceGLB } from '../gfx/glb.ts';
 import { ramp, tone } from '../gfx/color.ts';
 import { smooth, solid } from '../gfx/mats.ts';
@@ -14,35 +16,19 @@ import { SURFACE_Y, surfaceY as groundY } from './terrain.ts';
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T>(a: T[]): T => a[Math.floor(Math.random() * a.length)];
 
-function flyer(body: BoneSpec['boxes'], wing: (side: number) => BoneSpec['boxes'], wy: number, density?: number): Rig {
-  return buildRig([
-    { name: 'root', pivot: [0, 0, 0], boxes: body },
-    { name: 'wingL', parent: 'root', pivot: [-0.5, wy, 0], boxes: wing(-1) },
-    { name: 'wingR', parent: 'root', pivot: [0.5, wy, 0], boxes: wing(1) },
-  ], { density });
-}
-
-/** [world3] A butterfly wing painted as pixel art on a thin cut-out card: a rounded forewing and a
- *  smaller hindwing with a dark border, pale eye-spots and a darker underside. */
-function wingPainter(c: string, side: number): Painter {
-  const r = ramp(c);
-  return (t) => {
-    if (t.face !== 2 && t.face !== 3) return -1;
-    const u = side < 0 ? 1 - t.bx / t.sx : t.bx / t.sx, v = t.bz / t.sz;
-    const f = ((u - 0.08) / 0.98) ** 2 + ((v - 0.66) / 0.38) ** 2, h = ((u - 0.02) / 0.72) ** 2 + ((v - 0.26) / 0.3) ** 2;
-    const fore = f < 1 && v > 0.36, hind = h < 1;
-    if (!fore && !hind) return -1;
-    if (t.face === 3) return tone(r, -1.6);
-    const edge = fore ? f > 0.6 : h > 0.55;
-    if (edge) return (Math.floor(t.bx * 2) + Math.floor(t.bz * 2)) % 5 === 0 ? 0xeae0c8 : tone(r, -2.4);
-    if (fore && Math.abs(u - 0.6) < 0.09 && Math.abs(v - 0.72) < 0.07) return 0xf4eedd;
-    if (hind && Math.abs(u - 0.4) < 0.08 && Math.abs(v - 0.24) < 0.06) return tone(r, -2);
-    return tone(r, 0.9 - u * 0.9 + (u < 0.18 ? -0.8 : 0));
-  };
-}
-
-function butterfly(c: string): Rig {
-  return flyer([box(0, 0, 0, 1, 1, 4, solid('#4b463a', { noise: 0 }))], (s) => [box(s * 3.2, 0.4, 0.2, 6, 0.25, 7, wingPainter(c, s), { cut: true })], 0.5, 4);
+/** [look4] Proxy rigs: invisible nodes the critter logic moves; critterkit's Swarms draw the shaped models there. */
+const proxy = () => new THREE.Group();
+interface Parts { flyBody: THREE.Object3D[]; flyWing: THREE.Object3D[]; wingCols: THREE.Color[]; koiBody: THREE.Object3D[]; koiTail: THREE.Object3D[]; koiCols: [THREE.Color, THREE.Color][]; dfBody: THREE.Object3D[]; dfWing: THREE.Object3D[] }
+function butterfly(c: string, parts: Parts): Rig {
+  const root = proxy(), body = proxy(), wingL = proxy(), wingR = proxy(), l = proxy(), r = proxy();
+  root.scale.setScalar(2.6);
+  root.add(body, wingL, wingR);
+  wingL.position.set(-0.003, 0.004, 0.006); wingR.position.set(0.003, 0.004, 0.006);
+  l.scale.set(-1, 1, 1); wingL.add(l); wingR.add(r);
+  parts.flyBody.push(body); parts.flyWing.push(l, r);
+  const col = new THREE.Color(c);
+  parts.wingCols.push(col, col);
+  return { root, bones: { root, wingL, wingR } } as unknown as Rig;
 }
 /** [world3] BUSHED's rigged songbird (CC BY 4.0 "Robin Bird" by Assets_Animated, rebuilt and repainted by
  *  BUSHED; see docs/credits/world3.md) with its idle, eat, fly and glide clips; odd birds wear the jay coat. */
@@ -80,38 +66,21 @@ function coatTex() {
   coatT.colorSpace = THREE.SRGBColorSpace; coatT.flipY = false;
   return coatT;
 }
-/** Low-poly forms for the small pond life, painted in the calm palette (no boxes). */
-const lam = (c: number, o: THREE.MeshLambertMaterialParameters = {}) => new THREE.MeshLambertMaterial({ color: c, ...o });
-function koiFish(c: number, patch: number): Rig {
-  const root = new THREE.Group(), tailPivot = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 6), lam(c));
-  body.scale.set(0.09, 0.07, 0.26);
-  const spot = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 4), lam(patch));
-  spot.scale.set(0.07, 0.05, 0.09); spot.position.set(0, 0.022, 0.04);
-  const tail = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.1), lam(c, { side: THREE.DoubleSide }));
-  tail.rotation.y = Math.PI / 2; tail.position.z = -0.05;
-  tailPivot.position.z = -0.12; tailPivot.add(tail);
-  root.add(body, spot, tailPivot);
-  return { root, bones: { root, tail: tailPivot }, dispose() { /* small */ } } as unknown as Rig;
+function koiFish(c: number, patch: number, parts: Parts): Rig {
+  const root = proxy(), body = proxy(), tail = proxy();
+  tail.position.z = -0.15;
+  root.add(body, tail);
+  parts.koiBody.push(body); parts.koiTail.push(tail);
+  parts.koiCols.push([new THREE.Color(c), new THREE.Color(patch)]);
+  return { root, bones: { root, tail } } as unknown as Rig;
 }
-function dragonfly(): Rig {
-  const root = new THREE.Group(), wingL = new THREE.Group(), wingR = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.007, 0.3, 5), lam(0x46596a));
-  body.rotation.x = Math.PI / 2;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.022, 6, 4), lam(0x617f8c));
-  head.position.z = 0.16;
-  const wm = new THREE.MeshBasicMaterial({ color: 0xdfe9ea, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false });
-  for (const [g, s] of [[wingL, -1], [wingR, 1]] as const) {
-    for (const dz of [0.04, -0.03]) {
-      const w = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.035), wm);
-      w.rotation.x = -Math.PI / 2; w.position.set(s * 0.09, 0, dz);
-      g.add(w);
-    }
-    root.add(g);
-  }
-  wingL.position.y = wingR.position.y = 0.012;
-  root.add(body, head);
-  return { root, bones: { root, wingL, wingR }, dispose() { /* small */ } } as unknown as Rig;
+function dragonfly(parts: Parts): Rig {
+  const root = proxy(), body = proxy(), wingL = proxy(), wingR = proxy(), l = proxy(), r = proxy();
+  root.add(body, wingL, wingR);
+  wingL.position.set(-0.004, 0.012, 0.01); wingR.position.set(0.004, 0.012, 0.01);
+  l.scale.set(-1, 1, 1); wingL.add(l); wingR.add(r);
+  parts.dfBody.push(body); parts.dfWing.push(l, r);
+  return { root, bones: { root, wingL, wingR } } as unknown as Rig;
 }
 
 interface Flyer { rig: Rig; pos: THREE.Vector3; vel: THREE.Vector3; goal: THREE.Vector3; t: number; flap: number; kind: 'butterfly' | 'bee' }
@@ -136,17 +105,19 @@ export class Critters {
   /** glow-bugs at night (not in winter or rain) */
   fireflies = true;
 
+  private swarms: Swarm[] = [];
+  private proxies = new THREE.Group();
   constructor(private plan: ForestPlan, private fx: Fx, quality: 'low' | 'high', private sound: (id: string, at?: THREE.Vector3) => void) {
+    const parts: Parts = { flyBody: [], flyWing: [], wingCols: [], koiBody: [], koiTail: [], koiCols: [], dfBody: [], dfWing: [] };
     // [world3] calm palette: terracotta, lake, honey, rose, lilac and paper wings
     const cols = ['#c0866a', '#86a9b0', '#dcb072', '#d9aca4', '#b4a9c9', '#f4eedd'];
     const nFly = quality === 'high' ? 7 : 4;
     for (let i = 0; i < nFly; i++) {
       const isBee = false;
-      const rig = butterfly(cols[i % cols.length]);
+      const rig = butterfly(cols[i % cols.length], parts);
       const f = pick(plan.flowers);
       const pos = new THREE.Vector3(f.x + rand(-1, 1), rand(0.8, 1.6), f.z + rand(-1, 1));
-      rig.root.traverse((o) => { o.castShadow = false; });
-      this.group.add(rig.root);
+      this.proxies.add(rig.root);
       this.flyers.push({ rig, pos, vel: new THREE.Vector3(), goal: pos.clone(), t: rand(0, 3), flap: rand(0, 6), kind: isBee ? 'bee' : 'butterfly' });
     }
     plan.perches.slice(0, quality === 'high' ? 4 : 2).forEach((p, i) => {
@@ -164,19 +135,32 @@ export class Critters {
     });
     const koiCols = ['#c0866a', '#dcb072', '#a66c55', '#eae0c8', '#c59a52', '#9e5f66', '#46596a', '#c0866a'];
     for (let i = 0; i < (quality === 'high' ? 8 : 5); i++) {
-      const rig = koiFish(new THREE.Color(koiCols[i]).getHex(), i % 3 ? 0xeae0c8 : 0x2e2b24);
-      rig.root.traverse((o) => { o.castShadow = false; });
-      this.group.add(rig.root);
+      const rig = koiFish(new THREE.Color(koiCols[i]).getHex(), i % 3 ? 0xeae0c8 : 0x2e2b24, parts);
+      this.proxies.add(rig.root);
       this.fish.push({ rig, a: rand(0, 6.28), r: rand(0.25, 0.72), speed: rand(0.22, 0.5) * (i % 2 ? 1 : -1), depth: rand(0.18, 0.42), jump: -1, wait: rand(6, 20) });
     }
     // dragonflies: long thin bodies, glassy wings, darting between hover points over the water
     for (let i = 0; i < (quality === 'high' ? 3 : 2); i++) {
-      const rig = dragonfly();
-      rig.root.traverse((o) => { o.castShadow = false; });
-      this.group.add(rig.root);
+      const rig = dragonfly(parts);
+      this.proxies.add(rig.root);
       const p = new THREE.Vector3(POND.x + rand(-2, 2), SURFACE_Y + rand(0.8, 1.4), POND.z + rand(-1.5, 1.5));
       this.flies.push({ rig, pos: p, goal: p.clone(), t: rand(0, 2), hover: rand(0, 6) });
     }
+    // [look4] the shaped models: one draw call per part for every animal of a kind
+    this.proxies.visible = true;
+    this.group.add(this.proxies);
+    const sw = (geo: THREE.BufferGeometry, mat: THREE.Material, nodes: THREE.Object3D[], name: string) => { const s = new Swarm(geo, mat, nodes, name); this.swarms.push(s); this.group.add(s.mesh); return s; };
+    const wings = sw(K.butterflyWing(), K.butterflyWingMaterial(), parts.flyWing, 'butterfly-wings');
+    parts.wingCols.forEach((c, i) => wings.mesh.setColorAt(i, c));
+    sw(K.butterflyBody(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9 }), parts.flyBody, 'butterflies');
+    const koiMat = K.koiMaterial();
+    const body = sw(K.koiBody(), koiMat, parts.koiBody, 'koi'), tail = sw(K.koiTail(), koiMat, parts.koiTail, 'koi-tails');
+    const patch = new Float32Array(Math.max(1, parts.koiCols.length) * 3);
+    parts.koiCols.forEach(([c, p], i) => { body.mesh.setColorAt(i, c); tail.mesh.setColorAt(i, c); patch.set([p.r, p.g, p.b], i * 3); });
+    body.mesh.geometry.setAttribute('iPatch', new THREE.InstancedBufferAttribute(patch, 3));
+    tail.mesh.geometry.setAttribute('iPatch', new THREE.InstancedBufferAttribute(patch.slice(), 3));
+    sw(K.dragonflyBody(), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35, metalness: 0.25 }), parts.dfBody, 'dragonflies');
+    sw(K.dragonflyWings(), K.dragonflyWingMaterial(), parts.dfWing, 'dragonfly-wings');
   }
 
   /** [world] Seasonal life: autumn leaf fall, spring petals, no butterflies in winter. */
@@ -292,6 +276,10 @@ export class Critters {
       const w = Math.sin(t * 70 + d.hover) * 0.5;
       d.rig.bones.wingL.rotation.z = -w; d.rig.bones.wingR.rotation.z = w;
     }
+
+    // [look4] copy the proxies into the instanced models
+    this.proxies.updateMatrixWorld(true);
+    for (const sw of this.swarms) sw.sync();
 
     // ---- ambient particles
     const fx = this.fx, a = this.acc;

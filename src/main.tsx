@@ -23,8 +23,9 @@ async function boot() {
   try { await document.fonts.load('20px "TBME Body"'); } catch { /* font loads later */ }
   const q = new URLSearchParams(location.search);
   const pref = save.value.settings.quality;
-  const weak = (navigator.hardwareConcurrency ?? 4) < 6 || /Android|iPhone|iPad/i.test(navigator.userAgent) && (devicePixelRatio || 1) > 2.5;
-  const quality = q.get('q') === 'low' || pref === 'low' ? 'low' : pref === 'high' ? 'high' : weak ? 'low' : 'high';
+  // [look4] 'auto' starts phones / small machines on the medium tier and adapts to the frame rate (see Scene.setTier)
+  const qq = q.get('q');
+  const quality = qq === 'low' || pref === 'low' ? 'low' : qq === 'high' || pref === 'high' ? 'high' : qq === 'medium' ? 'medium' : 'auto';
   const canvas = document.getElementById('world') as HTMLCanvasElement;
   const scene = new Scene(canvas, save.value.look, quality);
   sceneRef.current = scene;

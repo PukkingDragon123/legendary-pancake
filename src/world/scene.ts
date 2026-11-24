@@ -26,6 +26,21 @@ import { Vista } from './vista.ts'; // [look4]
 
 export type View = 'home' | 'interior' | 'loft' | 'attic' | 'owl' | 'breathe' | 'sleep' | 'garden' | 'deck' | 'wake';
 export type Quality = 'low' | 'high';
+/** [look4] Cost tier the scene runs at (see Scene.setTier). */
+export type Tier = 'high' | 'medium' | 'low';
+
+const RANK: Record<Tier, number> = { low: 0, medium: 1, high: 2 };
+/** [look4] The tier a device starts on: phones, low-memory and few-core machines start on medium, the rest high. */
+export function deviceTier(): Tier {
+  if (typeof navigator === 'undefined') return 'high';
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const ua = nav.userAgent || '';
+  const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+  const small = typeof screen !== 'undefined' && Math.min(screen.width, screen.height) < 820;
+  const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (touch && small);
+  if (mobile || (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4) return 'medium';
+  return 'high';
+}
 
 export type SceneEvent =
   | { type: 'tapOwl' }
@@ -90,6 +105,7 @@ export class Scene {
   /** [look4] the world beyond the clearing: forest to the horizon, hills and mountains in the haze */
   readonly vista: Vista;
   private pmrem: THREE.PMREMGenerator;
+  private grass: THREE.Group;
   private envScene = new THREE.Scene();
   private envRT: THREE.WebGLRenderTarget | null = null;
   private envT = 0;
@@ -138,18 +154,30 @@ export class Scene {
   readonly tickers = new Set<(dt: number, t: number) => void>();
   private baseFov = 32;
 
-  constructor(canvas: HTMLCanvasElement, look: OwlLook, quality: Quality) {
+  /** [look4] the running cost tier, and whether it adapts to the frame rate ('auto') */
+  tier: Tier;
+  readonly autoTier: boolean;
+  /** the highest tier auto mode may climb back to (the device's starting tier) */
+  private maxTier: Tier = 'high';
+  private perf = { ema: 16.7, slow: 0, fast: 0, warm: 4, lastDown: -1e9, locked: false, frame: 0 };
+  private casterT = 0;
+  constructor(canvas: HTMLCanvasElement, look: OwlLook, quality: Quality | 'medium' | 'auto') {
+    // [look4] 'auto' picks a tier for the device and lets it adapt; the build-time detail follows the starting tier
+    this.autoTier = quality === 'auto';
+    this.tier = quality === 'auto' ? deviceTier() : quality;
+    this.maxTier = this.tier;
+    quality = this.tier === 'high' ? 'high' : 'low';
     this.quality = quality;
     const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', alpha: false }));
     r.setPixelRatio(Math.min(devicePixelRatio || 1, quality === 'high' ? 2 : 1.25));
     r.shadowMap.enabled = true;
     r.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.post = new Post(r, quality); // [world3]
+    this.post = new Post(r, this.tier); // [world3]
     r.outputColorSpace = THREE.SRGBColorSpace;
     r.toneMapping = THREE.NoToneMapping; // [look4] the post chain tone-maps (ACES) after bloom and depth of field
     this.pmrem = new THREE.PMREMGenerator(r);
 
-    this.plan = planForest(quality);
+    this.plan = planForest(this.tier);
     this.sky = new Sky(this.scene, quality === 'high' ? 2048 : 1024, quality); // [world]
     this.terrain = buildTerrain(this.plan.shade);
     this.flora = buildFlora(this.plan, quality); // [world]
@@ -157,8 +185,10 @@ export class Scene {
     this.critters = new Critters(this.plan, this.fx, quality, (id) => this.emit({ type: 'sound', id }));
     this.house = buildHouse();
     this.rooms = new Rooms(this.house);
-    const grass = makeGrass(this.plan.grass);
+    const grass = makeGrass(this.plan.grass, quality === 'high' ? 16 : 24);
+    this.grass = grass;
     this.vista = new Vista(this.plan, quality); // [look4]
+    this.vista.bake(r);
     this.scene.add(this.terrain.group, this.flora.group, grass, this.house.group, this.critters.group, this.fx.group, this.vista.group);
     // [look4] the environment light (reflections on wood, brass, glass, water) is baked from the live sky dome
     this.envScene.add(new THREE.Mesh(this.sky.dome.geometry, this.sky.dome.material));
@@ -197,6 +227,7 @@ export class Scene {
     this.resize();
     this.applySky();
     this.input(canvas);
+    this.applyTier();
   }
 
   on(f: (e: SceneEvent) => void) { this.listeners.push(f); return () => { this.listeners = this.listeners.filter((x) => x !== f); }; }
@@ -487,12 +518,80 @@ export class Scene {
     this.stage?.resize?.(w, h);
   }
 
+  /**
+   * [look4] Set the cost tier: high (full detail), medium (impostor woods, 3 bloom levels, shadows every other frame
+   * from the bigger casters only, 1024 shadow map, no light shafts), low (as medium plus a coarser internal grid, a
+   * quarter-res depth of field, shadows every third frame, a thinner meadow and far wood). Cheap: nothing is rebuilt.
+   */
+  setTier(t: Tier) {
+    if (t === this.tier) return;
+    this.tier = t;
+    this.applyTier();
+  }
+  private applyTier() {
+    const t = this.tier;
+    this.post.setTier(t);
+    this.vista.setTier(t);
+    this.sky.shafts = t === 'high';
+    const size = t === 'high' ? 2048 : 1024, sh = this.sky.sun.shadow;
+    if (sh.mapSize.x !== size) { sh.mapSize.set(size, size); sh.map?.dispose(); sh.map = null; }
+    // the meadow thins out on low
+    for (const c of this.grass.children) {
+      const g = (c as THREE.Mesh).geometry as THREE.InstancedBufferGeometry;
+      g.userData.full ??= g.instanceCount;
+      g.instanceCount = t === 'low' ? Math.floor((g.userData.full as number) * 0.6) : (g.userData.full as number);
+    }
+    this.casterT = 0;
+  }
+  /** [look4] Shadow casters: everything on high; on medium and low only the big things (and Pip) cast. */
+  private cullCasters() {
+    const small = this.tier === 'high' ? 0 : this.tier === 'medium' ? 0.55 : 1.1;
+    const sp = new THREE.Sphere();
+    const owl = this.owl.node;
+    this.scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      if (m.userData.cast0 === undefined) { if (!m.castShadow) return; m.userData.cast0 = true; }
+      if (!small) { m.castShadow = true; return; }
+      let inOwl = false;
+      for (let p: THREE.Object3D | null = m; p; p = p.parent) if (p === owl) { inOwl = true; break; }
+      if (inOwl) { m.castShadow = true; return; }
+      // the woods' crowns cast only on high; shrubs, rocks and logs keep their shadows
+      if ((m as unknown as THREE.InstancedMesh).isInstancedMesh) { m.castShadow = !/:(bark|leaves)$/.test(m.name); return; }
+      if (!m.geometry.boundingSphere) m.geometry.computeBoundingSphere();
+      sp.copy(m.geometry.boundingSphere!).applyMatrix4(m.matrixWorld);
+      m.castShadow = sp.radius >= small;
+    });
+  }
+  /**
+   * [look4] Auto tier: if frames stay slower than ~22 ms for 3 s, step down a tier; after 25 s of smooth frames at a
+   * lower tier, try one step back up (once it has to come down again soon after, it stays down).
+   */
+  private lastMs = 0;
+  private watchFrames(ms: number) {
+    const P = this.perf, raw = this.lastMs ? ms - this.lastMs : 16.7;
+    this.lastMs = ms;
+    if (!this.autoTier || document.hidden || raw > 250) return;
+    if (P.warm > 0) { P.warm -= raw / 1000; return; }
+    P.ema += (raw - P.ema) * 0.08;
+    const now = ms / 1000;
+    if (P.ema > 22) { P.slow += raw / 1000; P.fast = 0; } else { P.slow = Math.max(0, P.slow - raw / 2000); P.fast = P.ema < 18.5 ? P.fast + raw / 1000 : 0; }
+    if (P.slow > 3 && this.tier !== 'low') {
+      if (now - P.lastDown < 40 && P.lastDown > 0) P.locked = true;
+      this.setTier(this.tier === 'high' ? 'medium' : 'low');
+      P.slow = 0; P.fast = 0; P.lastDown = now; P.warm = 2; P.ema = 16.7;
+    } else if (!P.locked && P.fast > 25 && RANK[this.tier] < RANK[this.maxTier]) {
+      this.setTier(this.tier === 'low' ? 'medium' : 'high');
+      P.fast = 0; P.warm = 2; P.ema = 16.7;
+    }
+  }
+
   start() {
     const loop = (ms: number) => {
       this.raf = requestAnimationFrame(loop);
       const t = ms / 1000, dt = Math.min(0.05, this.last ? t - this.last : 0.016);
       this.last = t;
-      if (!this.paused) this.step(dt);
+      if (!this.paused) { this.step(dt); this.watchFrames(ms); }
     };
     this.raf = requestAnimationFrame(loop);
   }
@@ -519,8 +618,8 @@ export class Scene {
         // [house3] the whole oak in frame, crown to roots, porch and limb, with the forest round it; the HUD
         // signs sit over the sky at the top and the big buttons over the meadow at the bottom
         // the open rooms sit about a third of the way up, clear of the big buttons; the crown fills the sky above
-        const d = this.fitDist(portrait ? 23 : 28, portrait ? 42 : 38);
-        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.17, dist: d, target: new THREE.Vector3(0.35, portrait ? 8.4 : 8.6, H.z + 0.6) }; // [look4] a little lower on wide screens: the far hills and the sky show over the woods
+        const d = this.fitDist(portrait ? 23 : 28, portrait ? 42 : 42);
+        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.09, dist: d, target: new THREE.Vector3(0.35, portrait ? 8.4 : 10.8, H.z + 0.6) }; // [look4] wide screens look across the valley: headroom over the crown, the far hills and the clouds
       }
     }
   }
@@ -535,6 +634,7 @@ export class Scene {
     this.time += dt;
     const t = this.time;
     if (this.stage) {
+      this.renderer.shadowMap.autoUpdate = true; // [look4] stages run their own lights
       this.stage.update(dt, t);
       if (draw) this.post.render(this.stage.scene, this.stage.camera, t, this.stage.look ?? {}); // [look4] every stage goes through the chain
       return;
@@ -606,6 +706,13 @@ export class Scene {
     this.vista.update(t, this.camera);
     if ((this.envT -= dt) <= 0) { this.envT = 2; this.bakeEnv(); } // [look4]
     if (!draw) return;
+    // [look4] shadows every frame on high, every other / third frame on medium / low; small casters dropped there
+    {
+      const every = this.tier === 'high' ? 1 : this.tier === 'medium' ? 3 : 4;
+      this.renderer.shadowMap.autoUpdate = every === 1;
+      if (every > 1 && this.perf.frame++ % every === 0) this.renderer.shadowMap.needsUpdate = true;
+      if ((this.casterT -= dt) <= 0) { this.casterT = 3; this.cullCasters(); }
+    }
     this.post.render(this.scene, this.camera, t); // [world3]
   }
 

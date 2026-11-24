@@ -1,6 +1,6 @@
 import { Scene, type View } from '../world/scene.ts';
 const q = new URLSearchParams(location.search);
-const sc = new Scene(document.getElementById('c') as HTMLCanvasElement, { palette: q.get('pal') ?? 'tabby', outfit: q.get('outfit') ? JSON.parse(q.get('outfit')!) : {} }, 'high');
+const sc = new Scene(document.getElementById('c') as HTMLCanvasElement, { palette: q.get('pal') ?? 'tabby', outfit: q.get('outfit') ? JSON.parse(q.get('outfit')!) : {} }, (q.get('tier') as 'high' | 'medium' | 'low' | 'auto' | null) ?? 'high');
 (window as any).sc = sc;
 // [look4] preview the weather and the season: ?wx=clear|clouds|rain|storm|snow|fog&season=spring|summer|autumn|winter
 if (q.get('wx')) sc.weather.set(q.get('wx') as any);
