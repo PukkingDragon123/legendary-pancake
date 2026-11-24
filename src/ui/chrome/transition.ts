@@ -590,12 +590,12 @@ export function clearTransition() { if (cv) { ctx?.clearRect(0, 0, cv.width, cv.
 // ------------------------------------------------------------------ which transition for which change of place
 
 const OPEN: Partial<Record<NonNullable<Panel>, [TransitionKind, TransitionOpts?]>> = {
-  sleep: ['stars'], clock: ['clock'], book: ['page'], build: ['blueprint'], decorate: ['blueprint'], shop: ['snow'], wardrobe: ['curtain'],
+  sleep: ['stars'], clock: ['clock'], book: ['page'], build: ['blueprint'], decorate: ['blueprint'], shop: ['leaves'], wardrobe: ['curtain'],
   map: ['branch', { speed: 1.15 }], quests: ['mosaic', { speed: 1.3 }], settings: ['blinds', { speed: 1.2 }], breathe: ['fireflies'], night: ['stars'],
 };
 const CLOSE: Partial<Record<NonNullable<Panel>, [TransitionKind, TransitionOpts?]>> = {
   sleep: ['stars', { speed: 1.25 }], clock: ['clock', { reverse: true, speed: 1.35 }], book: ['page', { reverse: true, speed: 1.25 }], build: ['blueprint', { speed: 1.3 }], decorate: ['blueprint', { speed: 1.3 }],
-  shop: ['snow', { speed: 1.2 }], wardrobe: ['curtain', { speed: 1.3 }], map: ['leaves', { speed: 1.35 }], quests: ['dither', { speed: 1.4 }], settings: ['blinds', { reverse: true, speed: 1.4 }],
+  shop: ['leaves', { speed: 1.2 }], wardrobe: ['curtain', { speed: 1.3 }], map: ['leaves', { speed: 1.35 }], quests: ['dither', { speed: 1.4 }], settings: ['blinds', { reverse: true, speed: 1.4 }],
   breathe: ['feathers', { speed: 1.2 }], night: ['sunrise'],
 };
 /** The transition (and options) for a change of place, or null for none. */

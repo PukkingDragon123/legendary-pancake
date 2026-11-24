@@ -6,7 +6,6 @@ import * as THREE from 'three';
 import { OwlActor, type OwlAction, type OwlMood, type OwlPose } from '../owl/actor.ts';
 import { defaultEye, type EyeMode, type EyeState } from '../owl/eyes.ts';
 import { buildOwl, type OwlLook, type OwlModel } from '../owl/model.ts';
-import { QUEEN_LOOK } from '../owl/queen.ts';
 import { SPECIES } from '../owl/species.ts';
 import { P } from '../gfx/palette.ts';
 
@@ -40,7 +39,6 @@ if (set === 'skins') entries = [
   { look: { ...sp('tawny'), skin: 'gingerbread' }, label: 'Gingerbread' },
   { look: { ...sp('snowy'), skin: 'snowman' }, label: 'Snowman' },
   { look: { ...sp('eagle'), skin: 'celestial' }, label: 'Celestial' },
-  { look: QUEEN_LOOK, label: 'Queen Neve' },
 ];
 else if (set === 'outfits') entries = [
   { look: sp(q.get('sp') ?? 'tawny', { head: 'nightcap' }), label: 'nightcap' },
@@ -64,7 +62,7 @@ else if (set === 'series') entries = [
 else if (set === 'expr') {
   const id = q.get('sp') ?? 'tawny';
   const modes: [string, Partial<EyeState>][] = [['normal', {}], ['happy', { mode: 'happy' }], ['sleepy', { lid: 0.55, pupil: 6.5 }], ['closed', { mode: 'closed' }], ['heart', { mode: 'heart' }], ['wide', { mode: 'wide', pupil: 3 }], ['star', { mode: 'star' }], ['spiral', { mode: 'spiral' }], ['sparkle', { mode: 'sparkle', pupil: 7 }], ['sad+tear', { tilt: -0.75, lid: 0.3, tear: true }], ['grumpy', { tilt: 0.8, lid: 0.35 }], ['smile', { low: 0.7 }]];
-  entries = modes.map(([label, eye]) => ({ look: id === 'queen' ? QUEEN_LOOK : sp(id), label, eye }));
+  entries = modes.map(([label, eye]) => ({ look: sp(id), label, eye }));
 } else if (set === 'fly') entries = ['tawny', 'barn', 'eagle', 'snowy'].map((id) => ({ look: sp(id), label: id, pose: 'fly' as OwlPose }));
 else if (set === 'actions') {
   const id = q.get('sp') ?? 'tawny';
@@ -79,7 +77,7 @@ if (set === 'stills') {
     const { OWL_RIGS } = await import('../owl/rig.gen.ts');
     const out: Record<string, { face: string; full: string }> = {};
     for (const id of Object.keys(OWL_RIGS)) {
-      const look: OwlLook = id === 'queen' ? { ...QUEEN_LOOK, outfit: {} } : ['gingerbread', 'snowman', 'celestial', 'meowl'].includes(id) ? { ...sp('tawny'), skin: id } : sp(id);
+      const look: OwlLook = ['gingerbread', 'snowman', 'celestial', 'meowl'].includes(id) ? { ...sp('tawny'), skin: id } : sp(id);
       out[id] = { face: await shootOwl(look, 'face'), full: await shootOwl(look, 'full') };
       const im = document.createElement('img'); im.src = out[id].face; im.style.cssText = 'width:96px;image-rendering:pixelated'; document.body.appendChild(im);
     }
@@ -90,7 +88,7 @@ if (set === 'stills') {
 }
 const one = q.get('one');
 if (one) entries = [{
-  look: q.get('look') ? JSON.parse(q.get('look')!) : one === 'queen' ? QUEEN_LOOK : ['gingerbread', 'snowman', 'celestial', 'meowl'].includes(one) ? { ...sp('tawny'), skin: one } : sp(one),
+  look: q.get('look') ? JSON.parse(q.get('look')!) : ['gingerbread', 'snowman', 'celestial', 'meowl'].includes(one) ? { ...sp('tawny'), skin: one } : sp(one),
   label: one, pose: (q.get('pose') as OwlPose) ?? undefined, mood: (q.get('mood') as OwlMood) ?? undefined,
   eye: q.get('expr') ? { mode: q.get('expr') as EyeMode } : undefined,
 }];

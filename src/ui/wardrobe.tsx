@@ -268,7 +268,7 @@ function SkinPlaque(p: { skin: SkinDef2 | null; owned: boolean; wearing: boolean
     <Plaque face={face} title={p.skin ? p.skin.name : 'Natural plumage'} latin={p.skin?.series ? SERIES_NAME[p.skin.series] : undefined} text={p.skin ? p.skin.blurb : 'Pip as nature made them: real feathers, real markings.'}>
       {p.wearing ? <button class="btn soft sm" disabled>Wearing</button>
         : p.owned ? <button class="btn pillow sm" onClick={() => { tap('fabric', 0.6); edit((x) => { x.look.skin = id; }); progressDress(); celebrate('wear'); }}>Wear</button>
-        : <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Boutique</button><span class="note">{p.skin?.series ? 'Pull it from the series banner' : 'Sold in the Snow Queen’s boutique'}</span></>}
+        : <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Store</button><span class="note">{p.skin?.series ? 'Pull it from the series banner' : 'Sold in Barnaby’s lodge store'}</span></>}
     </Plaque>
   );
 }
