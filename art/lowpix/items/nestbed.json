@@ -1,0 +1,1878 @@
+{
+ "name": "nestbed",
+ "description": "Twig Nest Bed",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 5,
+ "grounded": true,
+ "budget": {
+  "tris": 3000,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   32,
+   24
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "bark": [
+    "#180f0d",
+    "#2c1f1a",
+    "#402f27",
+    "#524135",
+    "#715e4c",
+    "#9a8870",
+    "#b8af9f",
+    "#d8d5cd"
+   ],
+   "twig": [
+    "#261612",
+    "#3e281f",
+    "#543b2c",
+    "#6a4f3b",
+    "#7f644a",
+    "#9f8462",
+    "#b1a187",
+    "#c5bdab",
+    "#dbd7cd"
+   ],
+   "linen": [
+    "#2c1d10",
+    "#70502b",
+    "#b38949",
+    "#ceb98e",
+    "#e0d6ba",
+    "#e8e3ce",
+    "#f0eee1",
+    "#f9f9f4"
+   ],
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "rose": [
+    "#2b0e12",
+    "#6f272b",
+    "#b04542",
+    "#cd8a82",
+    "#ddb9b0",
+    "#e5cfc7",
+    "#eee3dd",
+    "#f8f5f2"
+   ],
+   "sage": [
+    "#162010",
+    "#3d522c",
+    "#688249",
+    "#93aa6f",
+    "#b3bf97",
+    "#c9cfb5",
+    "#dee1d2",
+    "#f3f3ee"
+   ],
+   "moss": [
+    "#111a0e",
+    "#2f4425",
+    "#506b3e",
+    "#749059",
+    "#96aa7e",
+    "#b5bfa4",
+    "#d2d6c8",
+    "#eeefea"
+   ],
+   "fern": [
+    "#0c150a",
+    "#22371c",
+    "#3b572f",
+    "#577544",
+    "#7a995e",
+    "#a2b48c",
+    "#c7cfba",
+    "#eaece5"
+   ],
+   "lake": [
+    "#10181e",
+    "#2c424e",
+    "#4a6d7b",
+    "#6e98a3",
+    "#96b4b8",
+    "#b5c9ca",
+    "#d2dddd",
+    "#eef2f1"
+   ],
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ],
+   "ochre": [
+    "#211108",
+    "#563318",
+    "#895a29",
+    "#b9863c",
+    "#cbaa68",
+    "#d7c694",
+    "#e5debe",
+    "#f5f3e7"
+   ],
+   "cream": [
+    "#36210c",
+    "#734b1b",
+    "#af782b",
+    "#d3a353",
+    "#e2c690",
+    "#f1e6cc",
+    "#f6f2e2",
+    "#fdfcf8"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "tw": {
+   "ramp": "twig",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "strand_a",
+     "op": "stripes",
+     "axis": "path",
+     "period": 1.1,
+     "width": 0.42,
+     "shift": 1.0,
+     "wobble": 0.9,
+     "zigzag": [
+      0.9,
+      0.5
+     ],
+     "seed": 0
+    },
+    {
+     "id": "strand_b",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.11,
+     "width": 0.3,
+     "shift": -1.2,
+     "wobble": 0.04,
+     "seed": 1
+    },
+    {
+     "id": "gaps",
+     "op": "stripes",
+     "axis": "path",
+     "period": 0.75,
+     "width": 0.18,
+     "shift": -1.4,
+     "wobble": 1.4,
+     "seed": 2
+    },
+    {
+     "id": "bark",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/bark_brown_02",
+     "scale": 6,
+     "amount": 0.6,
+     "ramps": [
+      "twig"
+     ]
+    },
+    {
+     "id": "moss",
+     "op": "patches",
+     "scale": 1.6,
+     "threshold": 0.8,
+     "ramp": "moss",
+     "tone": 3.5,
+     "seed": 3
+    }
+   ],
+   "brush": {
+    "flow": "path",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "twig": "wood",
+     "moss": "moss"
+    }
+   }
+  },
+  "tw_d": {
+   "ramp": "twig",
+   "tone": 3.3,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "strand_a",
+     "op": "stripes",
+     "axis": "path",
+     "period": 1.1,
+     "width": 0.42,
+     "shift": 1.0,
+     "wobble": 0.9,
+     "zigzag": [
+      0.9,
+      0.5
+     ],
+     "seed": 5
+    },
+    {
+     "id": "strand_b",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.11,
+     "width": 0.3,
+     "shift": -1.2,
+     "wobble": 0.04,
+     "seed": 6
+    },
+    {
+     "id": "gaps",
+     "op": "stripes",
+     "axis": "path",
+     "period": 0.75,
+     "width": 0.18,
+     "shift": -1.4,
+     "wobble": 1.4,
+     "seed": 7
+    },
+    {
+     "id": "bark",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/bark_brown_02",
+     "scale": 6,
+     "amount": 0.6,
+     "ramps": [
+      "twig"
+     ]
+    },
+    {
+     "id": "moss",
+     "op": "patches",
+     "scale": 1.6,
+     "threshold": 0.8,
+     "ramp": "moss",
+     "tone": 3.5,
+     "seed": 8
+    }
+   ],
+   "brush": {
+    "flow": "path",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.5,
+    "textures": {
+     "twig": "wood",
+     "moss": "moss"
+    }
+   }
+  },
+  "quilt": {
+   "ramp": "rose",
+   "tone": 4.4,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "weave_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.12249999999999998,
+     "seed": 0
+    },
+    {
+     "id": "weave_b",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.105,
+     "seed": 1,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "weave_c",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.105,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rough_linen",
+     "scale": 6,
+     "amount": 0.55,
+     "ramps": [
+      "rose"
+     ]
+    },
+    {
+     "id": "patch_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 6.4,
+     "width": 0.5,
+     "ramp": "sage",
+     "tone": 4.6
+    },
+    {
+     "id": "patch_b",
+     "op": "stripes",
+     "axis": "z",
+     "period": 6.4,
+     "width": 0.5,
+     "ramp": "lake",
+     "tone": 4.6,
+     "phase": 1.6
+    },
+    {
+     "id": "patch_c",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      1
+     ],
+     "period": 9.05,
+     "width": 0.25,
+     "ramp": "honey",
+     "tone": 5.0
+    },
+    {
+     "id": "seam_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 3.2,
+     "width": 0.07,
+     "shift": -1.3
+    },
+    {
+     "id": "seam_b",
+     "op": "stripes",
+     "axis": "z",
+     "period": 3.2,
+     "width": 0.07,
+     "shift": -1.3
+    },
+    {
+     "id": "stitch_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 3.2,
+     "width": 0.05,
+     "phase": 0.45,
+     "shift": 1.6,
+     "faces": [
+      "up"
+     ]
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "rose": "cloth"
+    }
+   }
+  },
+  "pil": {
+   "ramp": "linen",
+   "tone": 5.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.6,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "weave_a",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": -0.105,
+     "seed": 0
+    },
+    {
+     "id": "weave_b",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.09,
+     "seed": 1,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "weave_c",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.34,
+     "width": 0.5,
+     "shift": 0.09,
+     "seed": 1,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7,
+     "seed": 2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rough_linen",
+     "scale": 6,
+     "amount": 0.55,
+     "ramps": [
+      "linen"
+     ]
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "linen": "cloth"
+    }
+   }
+  },
+  "tws": {
+   "ramp": "twig",
+   "tone": 4,
+   "light": 0.8,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  },
+  "fea": {
+   "ramp": "cream",
+   "tone": 5,
+   "light": 0.8,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  },
+  "fernc": {
+   "ramp": "fern",
+   "tone": 4,
+   "light": 0.8,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "bowl",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "tw_d",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 15.5
+    },
+    {
+     "at": [
+      0,
+      0.8,
+      0
+     ],
+     "size": 18.4
+    },
+    {
+     "at": [
+      0,
+      2.2,
+      0
+     ],
+     "size": 20.6
+    },
+    {
+     "at": [
+      0,
+      3.8,
+      0
+     ],
+     "size": 21.6
+    },
+    {
+     "at": [
+      0,
+      4.6,
+      0
+     ],
+     "size": 21.0
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    false
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "rim",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    4.9,
+    0.0
+   ],
+   "style": "tw",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0,
+      10.0
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      3.420201433256687,
+      0,
+      9.396926207859085
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      6.4278760968653925,
+      0,
+      7.66044443118978
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      8.660254037844386,
+      0,
+      5.000000000000001
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      9.84807753012208,
+      0,
+      1.7364817766693041
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      9.84807753012208,
+      0,
+      -1.736481776669303
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      8.660254037844387,
+      0,
+      -4.999999999999998
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      6.427876096865395,
+      0,
+      -7.660444431189779
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      3.420201433256689,
+      0,
+      -9.396926207859083
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      1.2246467991473533e-15,
+      0,
+      -10.0
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -3.4202014332566866,
+      0,
+      -9.396926207859085
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -6.427876096865389,
+      0,
+      -7.6604444311897835
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -8.660254037844384,
+      0,
+      -5.000000000000004
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -9.84807753012208,
+      0,
+      -1.7364817766693033
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -9.848077530122081,
+      0,
+      1.7364817766692997
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -8.66025403784439,
+      0,
+      4.999999999999993
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -6.427876096865396,
+      0,
+      7.660444431189778
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -3.420201433256686,
+      0,
+      9.396926207859085
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    },
+    {
+     "at": [
+      -2.4492935982947065e-15,
+      0,
+      10.0
+     ],
+     "size": [
+      4.0,
+      3.6
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    false
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "quilt",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "quilt",
+   "rings": [
+    {
+     "at": [
+      0,
+      3.4,
+      0
+     ],
+     "size": 16.8
+    },
+    {
+     "at": [
+      0,
+      4.6,
+      0
+     ],
+     "size": 17.8
+    },
+    {
+     "at": [
+      0,
+      5.5,
+      0
+     ],
+     "size": 17.2
+    },
+    {
+     "at": [
+      0,
+      6.0,
+      0
+     ],
+     "size": 15.2
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "fold",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    6.2,
+    3.6
+   ],
+   "style": "quilt",
+   "rings": [
+    {
+     "at": [
+      -6.8,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.6,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      -5.6,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.6,
+      1.6
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.3,
+      0.0
+     ],
+     "size": [
+      3.0,
+      1.8
+     ]
+    },
+    {
+     "at": [
+      5.6,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.6,
+      1.6
+     ]
+    },
+    {
+     "at": [
+      6.8,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.6,
+      1.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "pillow",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    7.2,
+    -5.0
+   ],
+   "rotation": [
+    -14.0,
+    0.0,
+    0.0
+   ],
+   "style": "pil",
+   "paint": {
+    "layers": [
+     {
+      "id": "moon",
+      "op": "spots",
+      "centers": [
+       [
+        1.6,
+        1.2,
+        0.6,
+        0.9
+       ]
+      ],
+      "ramp": "honey",
+      "tone": 4.4
+     },
+     {
+      "id": "bite",
+      "op": "spots",
+      "centers": [
+       [
+        2.2,
+        1.35,
+        0.3,
+        0.75
+       ]
+      ],
+      "ramp": "linen",
+      "tone": 5.0
+     },
+     {
+      "id": "dots",
+      "op": "spots",
+      "count": 9,
+      "radius": [
+       0.14,
+       0.2
+      ],
+      "ramp": "lake",
+      "tone": 4.0,
+      "seed": 4,
+      "faces": [
+       "up"
+      ]
+     },
+     {
+      "id": "seam",
+      "op": "band",
+      "axis": "y",
+      "from": -0.1,
+      "to": 0.05,
+      "shift": -0.8
+     }
+    ]
+   },
+   "rings": [
+    {
+     "at": [
+      -4.7,
+      0,
+      0
+     ],
+     "size": [
+      3.7719999999999994,
+      0.616
+     ]
+    },
+    {
+     "at": [
+      -3.948,
+      0,
+      0
+     ],
+     "size": [
+      4.369999999999999,
+      2.016
+     ]
+    },
+    {
+     "at": [
+      -2.35,
+      0,
+      0
+     ],
+     "size": [
+      4.6,
+      2.6599999999999997
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0,
+      0
+     ],
+     "size": [
+      4.6,
+      2.8
+     ]
+    },
+    {
+     "at": [
+      2.35,
+      0,
+      0
+     ],
+     "size": [
+      4.6,
+      2.6599999999999997
+     ]
+    },
+    {
+     "at": [
+      3.948,
+      0,
+      0
+     ],
+     "size": [
+      4.369999999999999,
+      2.016
+     ]
+    },
+    {
+     "at": [
+      4.7,
+      0,
+      0
+     ],
+     "size": [
+      3.7719999999999994,
+      0.616
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 1.9
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "twig0",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    2.4007,
+    5.4,
+    10.3985
+   ],
+   "offset": [
+    -0.0,
+    1.6,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    103.0,
+    22.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........ltd...",
+    "........ltd...",
+    "lttd....ltd...",
+    ".ltd....ltd...",
+    "..lttd..ltd...",
+    "....ltdlttd...",
+    "....lttltd....",
+    "......lttd....",
+    ".......ltd.ltt",
+    ".......ltd.ltd",
+    ".......ltdttd.",
+    ".......lttd...",
+    ".......lttd...",
+    "......lttd....",
+    ".......ltd....",
+    ".......ltd....",
+    "......lttd....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "twig1",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    8.523,
+    5.4,
+    6.4226
+   ],
+   "offset": [
+    0.0,
+    1.6,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    143.0,
+    -38.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "......ltd.....",
+    "......ltd.....",
+    "lttd..ltd.....",
+    ".ltd..ltd.....",
+    "..lttdltd.....",
+    "....ltltd.....",
+    "....ltttd.....",
+    "......ltd.....",
+    "......ltd..ltt",
+    "......ltd..ltd",
+    "......ltdlttd.",
+    "......ltdtd...",
+    "......ltttd...",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "twig2",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    10.6574,
+    5.4,
+    -0.5585
+   ],
+   "offset": [
+    -0.0,
+    1.6,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    183.0,
+    22.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........ltd...",
+    "........ltd...",
+    "lttd....ltd...",
+    ".ltd....ltd...",
+    "..lttd..ltd...",
+    "....ltdlttd...",
+    "....lttltd....",
+    "......lttd....",
+    ".......ltd.ltt",
+    ".......ltd.ltd",
+    ".......ltdttd.",
+    ".......lttd...",
+    ".......lttd...",
+    "......lttd....",
+    ".......ltd....",
+    ".......ltd....",
+    "......lttd....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "twig3",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    7.805,
+    5.4,
+    -7.2783
+   ],
+   "offset": [
+    -0.0,
+    1.6,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    223.0,
+    -38.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........ltd...",
+    "........ltd...",
+    "lttd....ltd...",
+    ".ltd....ltd...",
+    "..lttd..ltd...",
+    "....ltdlttd...",
+    "....lttltd....",
+    "......lttd....",
+    ".......ltd.ltt",
+    ".......ltd.ltd",
+    ".......ltdttd.",
+    ".......lttd...",
+    ".......lttd...",
+    "......lttd....",
+    ".......ltd....",
+    ".......ltd....",
+    "......lttd....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "twig4",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    1.3006,
+    5.4,
+    -10.5925
+   ],
+   "offset": [
+    -0.0,
+    1.6,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    263.0,
+    22.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    ".......ltd....",
+    ".......ltd....",
+    "lttd...ltd....",
+    ".ltd...ltd....",
+    "..lttd.ltd....",
+    "....ltdltd....",
+    "....lttltd....",
+    "......lttd....",
+    ".......ltd.ltt",
+    ".......ltd.ltd",
+    ".......ltdttd.",
+    "......ltdtd...",
+    "......ltttd...",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "twig5",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    -5.8124,
+    5.4,
+    -8.9503
+   ],
+   "offset": [
+    -0.0,
+    1.6,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    303.0,
+    -38.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    ".......ltd....",
+    ".......ltd....",
+    "lttd...ltd....",
+    ".ltd...ltd....",
+    "..lttd.ltd....",
+    "....ltdltd....",
+    "....lttltd....",
+    "......lttd....",
+    ".......ltd.ltt",
+    ".......ltd.ltd",
+    ".......ltdttd.",
+    "......ltdtd...",
+    "......ltttd...",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "twig6",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    -10.2057,
+    5.4,
+    -3.1202
+   ],
+   "offset": [
+    0.0,
+    1.6,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    343.0,
+    22.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "......ltd.....",
+    "......ltd.....",
+    "lttd..ltd.....",
+    ".ltd..ltd.....",
+    "..lttdltd.....",
+    "....ltltd.....",
+    "....ltttd.....",
+    "......ltd.....",
+    "......ltd..ltt",
+    "......ltd..ltd",
+    "......ltdlttd.",
+    "......ltdtd...",
+    "......ltttd...",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "twig7",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    -9.8236,
+    5.4,
+    4.1699
+   ],
+   "offset": [
+    -0.0,
+    1.6,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    383.0,
+    -38.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........ltd...",
+    "........ltd...",
+    "lttd....ltd...",
+    ".ltd....ltd...",
+    "..lttd..ltd...",
+    "....ltdlttd...",
+    "....lttltd....",
+    "......lttd....",
+    ".......ltd.ltt",
+    ".......ltd.ltd",
+    ".......ltdttd.",
+    ".......lttd...",
+    ".......lttd...",
+    "......lttd....",
+    ".......ltd....",
+    ".......ltd....",
+    "......lttd....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "twig8",
+   "shape": "card",
+   "size": [
+    2.6,
+    4.2
+   ],
+   "pivot": [
+    -4.845,
+    5.4,
+    9.5088
+   ],
+   "offset": [
+    0.0,
+    1.6,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    423.0,
+    22.0
+   ],
+   "style": "tws",
+   "paint": {
+    "art_key": {
+     "t": "twig:3",
+     "d": "twig:1",
+     "l": "twig:5"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    ".......ltd....",
+    ".......ltd....",
+    "lttd...ltd....",
+    ".ltd...ltd....",
+    "..lttd.ltd....",
+    "....ltdltd....",
+    "....lttltd....",
+    "......lttd....",
+    ".......ltd.ltt",
+    ".......ltd.ltd",
+    ".......ltdttd.",
+    "......ltdtd...",
+    "......ltttd...",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd.....",
+    "......ltd....."
+   ]
+  },
+  {
+   "id": "feather0",
+   "shape": "card",
+   "size": [
+    1.8,
+    4.6
+   ],
+   "pivot": [
+    -6.526,
+    6.0,
+    8.3529
+   ],
+   "offset": [
+    0.0,
+    2.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    52.0,
+    24.0
+   ],
+   "style": "fea",
+   "paint": {
+    "art_key": {
+     "q": "oat:3",
+     "c": "cream:6",
+     "b": "ochre:3",
+     "s": "cream:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "............",
+    ".....q......",
+    ".....q......",
+    "....cqs.....",
+    "....cqcs....",
+    "...ccqcs....",
+    "..ccbqbcs...",
+    "..ccbqbbss..",
+    ".ccbbqbbbs..",
+    ".cbbbqqbbs..",
+    ".cbbbqqbbbs.",
+    ".bbbcqqcbbb.",
+    "bbbccqqccbb.",
+    "bbbccqqccbbb",
+    "bbcccqqcccbb",
+    "bcccbqqbccsb",
+    "bcccbqqbccsb",
+    "cccbbqqbbcss",
+    "ccbbbqqbbbss",
+    "ccbbbqqcbbbs",
+    ".bbbccqcbbbs",
+    ".bbcccqccbbb",
+    ".bbcccqccsb.",
+    "..cccbqbcss.",
+    "..ccbbqbcss.",
+    "...cbbqbbs..",
+    "...cccqcss..",
+    "....ccqcs...",
+    "......q.....",
+    "......q....."
+   ]
+  },
+  {
+   "id": "feather1",
+   "shape": "card",
+   "size": [
+    1.8,
+    4.6
+   ],
+   "pivot": [
+    -8.3529,
+    6.0,
+    6.526
+   ],
+   "offset": [
+    -0.0,
+    2.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    38.0,
+    -10.0
+   ],
+   "style": "fea",
+   "paint": {
+    "art_key": {
+     "q": "oat:3",
+     "c": "cream:6",
+     "b": "ochre:3",
+     "s": "cream:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "............",
+    ".....q......",
+    ".....q......",
+    "....cqs.....",
+    "....cqcs....",
+    "...ccqcs....",
+    "..ccbqbcs...",
+    "..ccbqbbss..",
+    ".ccbbqbbbs..",
+    ".cbbbqqbbs..",
+    ".cbbbqqbbbs.",
+    ".bbbcqqcbbb.",
+    "bbbccqqccbb.",
+    "bbbccqqccbbb",
+    "bbcccqqcccbb",
+    "bcccbqqbccsb",
+    "bcccbqqbccsb",
+    "cccbbqqbbcss",
+    "ccbbbqqbbbss",
+    "ccbbbqqcbbbs",
+    ".bbbccqcbbbs",
+    ".bbcccqccbbb",
+    ".bbcccqccsb.",
+    "..cccbqbcss.",
+    "..ccbbqbcss.",
+    "...cbbqbbs..",
+    "...cccqcss..",
+    "....ccqcs...",
+    "......q.....",
+    "......q....."
+   ]
+  },
+  {
+   "id": "fern",
+   "shape": "card",
+   "size": [
+    1.6,
+    5.2
+   ],
+   "pivot": [
+    8.2,
+    6.0,
+    -6.2
+   ],
+   "offset": [
+    -0.0,
+    2.4,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    130.0,
+    -30.0
+   ],
+   "style": "fernc",
+   "paint": {
+    "art_key": {
+     "a": "#364722",
+     "b": "#3d5025",
+     "c": "#47592a",
+     "d": "#4c5f2d",
+     "e": "#4d652d",
+     "f": "#566b31",
+     "g": "#5b7334",
+     "h": "#5d7935",
+     "i": "#7a7a40",
+     "j": "#6a853c",
+     "k": "#8b8148",
+     "l": "#729141",
+     "m": "#7c9d48",
+     "n": "#9ba153",
+     "o": "#86a84a",
+     "p": "#8cb44f",
+     "q": "#9ac15b",
+     "r": "#bdd358"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "......l.....",
+    "......fo....",
+    "......gf....",
+    "......gd....",
+    "......ed....",
+    "......gcp...",
+    "......fcj...",
+    "......gfm...",
+    "......jfh...",
+    ".....refo...",
+    "......gcf...",
+    "......hdj...",
+    ".....jeem...",
+    ".....pgdm...",
+    ".....ofdj...",
+    ".....pfdhq..",
+    ".....meel...",
+    ".....lfdl...",
+    ".....mecel..",
+    ".....mfdhp..",
+    ".....gccj...",
+    ".....qhcg...",
+    ".....ghejl..",
+    ".....lgcf...",
+    ".....iidhl..",
+    ".....kdcdk..",
+    ".....lcdj...",
+    "....mjcdo...",
+    "....gdbdlq..",
+    "....qjdbbj..",
+    "....ogccbem.",
+    "....lfcdgjm.",
+    "....jfcgm...",
+    "......jcehn.",
+    "......jfl...",
+    "...gdbch....",
+    "..ehecaacef.",
+    "...pobbcfj..",
+    "...mcabcfl..",
+    ".mcfeaaadlm."
+   ]
+  }
+ ]
+}

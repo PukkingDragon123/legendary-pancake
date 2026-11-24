@@ -1,0 +1,655 @@
+{
+ "name": "starmap",
+ "description": "Star Chart",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 14,
+ "grounded": false,
+ "budget": {
+  "tris": 900,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   24,
+   8
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "walnut": [
+    "#21130f",
+    "#362119",
+    "#4a3124",
+    "#5d4330",
+    "#6f553d",
+    "#937755",
+    "#ad9979",
+    "#c2b7a0",
+    "#d9d4c7"
+   ],
+   "paper": [
+    "#37240f",
+    "#835d25",
+    "#c79844",
+    "#ddc591",
+    "#f4eedd",
+    "#f8f6ec",
+    "#fdfdfa"
+   ],
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "rod": {
+   "ramp": "walnut",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 1,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 8,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 2,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 9,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 4
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "walnut"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.3,
+     "shift": 0.9,
+     "scratches": 0.006
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "x",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "walnut": "wood"
+    }
+   }
+  },
+  "cap": {
+   "ramp": "brass",
+   "tone": 3.4,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "paper": {
+   "ramp": "paper",
+   "tone": 4,
+   "light": 0.4,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  },
+  "cord": {
+   "ramp": "oat",
+   "tone": 3,
+   "light": 0.5,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "rod0",
+   "shape": "prism",
+   "size": [
+    0.9,
+    0.9,
+    9.6
+   ],
+   "pivot": [
+    0.0,
+    10.0,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "rod",
+   "sides": 8
+  },
+  {
+   "id": "cap0-1",
+   "shape": "prism",
+   "size": [
+    1.2,
+    1.2,
+    0.6
+   ],
+   "pivot": [
+    -5.1,
+    10.0,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "cap",
+   "sides": 8
+  },
+  {
+   "id": "cap01",
+   "shape": "prism",
+   "size": [
+    1.2,
+    1.2,
+    0.6
+   ],
+   "pivot": [
+    5.1,
+    10.0,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "cap",
+   "sides": 8
+  },
+  {
+   "id": "rod1",
+   "shape": "prism",
+   "size": [
+    0.9,
+    0.9,
+    9.6
+   ],
+   "pivot": [
+    0.0,
+    0.7,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "rod",
+   "sides": 8
+  },
+  {
+   "id": "cap1-1",
+   "shape": "prism",
+   "size": [
+    1.2,
+    1.2,
+    0.6
+   ],
+   "pivot": [
+    -5.1,
+    0.7,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "cap",
+   "sides": 8
+  },
+  {
+   "id": "cap11",
+   "shape": "prism",
+   "size": [
+    1.2,
+    1.2,
+    0.6
+   ],
+   "pivot": [
+    5.1,
+    0.7,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "cap",
+   "sides": 8
+  },
+  {
+   "id": "chart",
+   "shape": "card",
+   "size": [
+    7.4,
+    9.2
+   ],
+   "pivot": [
+    0.0,
+    5.35,
+    0.42
+   ],
+   "style": "paper",
+   "paint": {
+    "art_key": {
+     "a": "#090505",
+     "b": "#20140a",
+     "c": "#33260e",
+     "d": "#423514",
+     "e": "#534521",
+     "f": "#63542f",
+     "g": "#73643f",
+     "h": "#83744f",
+     "i": "#948560",
+     "j": "#aa9b75",
+     "k": "#bfaf88",
+     "l": "#d2c299",
+     "m": "#e3d3a9",
+     "n": "#f1e0b8",
+     "o": "#f9ecc4",
+     "p": "#fcf8d6"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "onnmmmmmmmmmnoopppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppponnmmmmmmmlmn",
+    "oolllllllllmmmmnmmmmmmmmmmmmmmmmmmmmmmmmmmllmmmmmmmmmmmmmmmlmmmlmmmmmmmmmmmmmmmmmmmmmmmmmmllllkkkkklkkkn",
+    "ppjkkkkkkkkkkkkkkkkkkkkklllllllllllllllllllllllllmmmlmmmmmmllmmlmmmmmmmmmmmmmmmmmllllmllllllllllllkkkkjn",
+    "ppjkkkkkkkklllkllllllllllllllmmlllllmmmmmmlmmmmmmmmmmmmmnnmmmmmmmmmmmmnnmmmnmmmmmmmmmmmmmlllllllllkkkkjn",
+    "ppkkkkkkkkklllllllllllllmmmmmmmmmmlmmmmmmmmmmmmmmmmmmmnnnnnmmmmnnmmmmnmmnnnnnmnmmmmmmmmmmmmmmmmmllllkkjn",
+    "ppkkkkkklkklllllllllllmmmmmmmmmmmmmmmmlmmmnnmnnnmmnmmmmnnnnnnnnnnnnnnnnnnnnnnnnnmmmmmmmmmmmnnmmmmmllkkkn",
+    "ppkklllllllllmmmmmmmmmmmmnnnnnnnmmmmmllmnnnnnnnnnonnnnnnonnnonooonnnnnnnnnnononnnnnmnmnnnnomnmmmmmllkkko",
+    "ppkkllllllmkeimlmmmmmmmmnnnnnkmknnmnmllmnnnnnomnkkonnnoonnnnnooonoonnnnnnnmnommnnnmmnnmmnnlnmmmmmmlllkko",
+    "ppkkllllmmmjhdimmmmnmlmnnnnnmjhkhnmmlmllnlnnnnjhlknmonnnmlnnmjmllmmnjllnlkkmljelljmlkekkjmhmmmmmmllllkko",
+    "ppkkkllmmmlljkadfbicecbccajaaacgbcaaaaaaaadaaebcaagaaabbjacbaaacaaalaaabaaacaaaaaalaaaacabammmmmmlllllko",
+    "ppkkkllmmmmmnieddbdbdbacdafbbdbkhaaaaebcacbcadaabbbdaaabgeaadbacaaakaaabaabbbabaabjababaaaaikmmmmmllllko",
+    "ppkkkllmmmnmmjciihfhchiihilgighkhicjfhighjhkjijiimjjjjkkmlkkljkllllmmmlmkcmmnmmmmmkknnmllllmmmmmmmmmllko",
+    "ppjkljjjjkkkkjjkkkjjejiiiiihhhhghhfggggggfgggfeeeeffeedeeeeeeedddddcccbbbddddecdddddddcddcbbbbbbbbcmmlko",
+    "ppjkjdgggeiiihiiiiiiiijjjjjkkkkklmmmlmmmmnknonnnoooooooooooopooooooooooooooooimlnnnkonnmnnnnnnnnmncmlllp",
+    "ppklhjlmledcfgcemnnmnmmnmnnnnnnnnooooooonolnoooooooooooooopoooooooooonoonoonoebcccegccabcimmmmmmmmdmlllp",
+    "ppklfjlmmlmnnmmmmnnnnnnnnnnnnnoomhhokegooooooooooooooopoooooooooooooooonoooonooooooomkknnmnmmkhmmmdmlllp",
+    "ppkkejlghiihhkjnnnnnnnnnoomfjnnibgiegjkpooooookkjmnooooopoopooooooooooooooooononnnnnnnmnnlgliehinmdmmmkp",
+    "ppkkekikmlhejjinnoljihknnomaikcfnlgjdcgjllijljlkkjjooopopopooooooooooooooooonononnmknnnmmmacdhkljndmmmkp",
+    "ppkkfleklhfeejnnnjhlmmklonndhklongjejkikdijihlkkoklopoopopolfkooooooonooooonoonoojejnnmnnnfbiimkhndmmlkp",
+    "ppkkekcdfkbdejnnmdgjjklkonnjhgpnlgggjhnklkjkkkklooggpojdimodiamoooooooooooionkkjdggnnnmnncecgjgimmdmmllp",
+    "ppklekiacgadeammldgkkjkjnnongkhgjgcghknookkjkknomggjlkmlihojgckoooopooooooihhhmhbbinnnmmbadiggimmmemmllp",
+    "ppllfllabaaedijmifcgkjihooonohjmkebgloonoohjklghikkigfikknopjdlooopoooooonpgjninhcfllnnlbbcahcdmmmemlllp",
+    "ppllflgaaaaacfgkeicfjigmnnnnonmkdibihooooiejhjgkicdfhjjfdfmolajooopopooooongkjniicecbfcaaaaagjkllmdmmllp",
+    "ppkkflcaabbaahdjehjhcimnnnkgnojfkjdjhnonkehcicededcdgaccggdnghkoheglooooooofilijiaaacdaaaaahimgllmemmllp",
+    "ppjkellbbbfcaddciinjemnooojljifjjldjkjhfecfhjbjkngllkffhgfhlgjhkifgiooooooohggfdccbaacabaaagnlgllmdmmllp",
+    "ppkkelmacfjfeabadjkcelljkkjfdglijhdifeiominjkfnoljllkfegcjljfkgjjiijomnnmnmmiebgicnhfaabaaadiiglmmdmmllp",
+    "ppkkfllabhmmicabhjeahjkkmjhbhjhlkgcglomokljmhkooknkfdbflilkijlieihikokiiihiihhikjefaljfibgghjjhkmmemmllp",
+    "ppklglmaaikmkfahiaabkhjjghkigkfhjjhnomjikjlljdlnmmfgmjimhkjjmoomjihnolkkjmjlikjggeeadhehhjmmiihkllenmmlp",
+    "ppklfhiacijikeaheaegihllekkibhkmjijnooikjikjlmihhgdfmekheohipooooihimmnkjhhilmnkelacaadbjjkjhcgkiifmmmlp",
+    "ppklfhgafdiihbejdcgfijnjjmhhgedjdfgjjolhnoihjmnooomgijjgcgignomnmjjlhgoooonkhifafhhjhcabfhiieagkjkemmmlp",
+    "ppklflleeeimfaegaceiihohjiilolcjegkkkkkipoojknjhmolhdjkcejgnpolnnoihokhnlkmoollmnninkgbbabgbigedjjfmmllp",
+    "ppllggfbajcilaeiacaglmfikjjnokikgdhjjodekkoijkkknpokfglmilmhoomjgnnikpmhhkoonoonnnnnoheimfegdgbgdlgmmllp",
+    "ppklebcfakdaljkjacejlmigimiojglkppppjleeefkjgnpoopophpnfjjgkliokdbojilhjhmnnnjonoonpjnleknjdeaccfcclmlmp",
+    "ppllhhdfajfcckmeglijkliggfljhlmfhonphggghffgemojkjjjholijlnigioohbiliehnlhknojnonnonklogholfdjffiacmlmmp",
+    "ppllfedbgihheficihkmkkiicbeaedfejooojkijeceegfollljiflninlkkgjookkinigijnlfljohmoonokjdjgecjikdeedelmlmp",
+    "ppllfkkgeickibfdjlffghkiaakhfchkjkmlokilicgecijnfjibhmmihhljgknplemjjfebbilimjnoooolklfknkhihcgeimdmllmp",
+    "ppllgmmkcjiiiefhjefihikkbcofiedfomienkijhbcigjdnhefkopjfllehidihkiknkkikgegnhjooooojikilkjekajahmmdmllmp",
+    "ppllgmmleighnmkbilginonmgdgdekiimjigilhkjefefgieplpgijghdhgjeihijbejnnfiligjlhooooojoihikkififbemjdmmlmp",
+    "ppllglkgkjifljhijfejnnoogdekplmijkhjgkkdjkefjdilmnmdljileckkllfijaijoolhoolfokilooojojnkjjkbabchgkemlmmp",
+    "ppkljideikmekhimhelinojofchjcilkgjmklmkegnjifchegjelolkcgljjjdlhgehhmpldmloieoiinlmkjjnneijnfbdafhfnmmmp",
+    "pplmiiilklmilhjjbajiijlkebedjimlhhiikhjkjjllihjbcfcmpkjeklieighkgcfkjoogmnliennihmflnjonjmjnnnlnlmfmmmnp",
+    "pplmhjjkijkjjjicfnhmnklogbikiimkkhfmjkkihhjjkdjhjifmpjhhooeegnnmfeejjmpohhidcpokfljnjnnnkkionnnnmndmmlnp",
+    "ppllillklmkbcjdhnlkoonmkkajpilolldgjkgkoliljhfgcigjlifeeljajfmkbcfhflknokhkljopmejkloonohihhlklnmmdmmlnp",
+    "ppllhmmmmmefngfilfnononnjmnoigmllmijmnjlljhggglgfkginpkjiigbbjjclikeiihhokglioookhiooooojjjjlkiglmemmlnp",
+    "pplmhmnmnmemhfdjkkjlknnookmoojggijlfkppmjlfhkekpjlffhkljijilkhgijkjjgjgegkljgpopkkfnmjgeihijjiikinfmmlnp",
+    "ppllgmmmmmjgiifikoghlilonplkoonajdojhkjppijihdjfillkdnfipppjidccjlkkhfnojgjlfopnjigoihnljlonmmlgflenmlnp",
+    "ppllglmmmnkkdgfilkmjlljdooonjomahdnojfgoplihjhjhgihialggkolellellnohlhkmjlfjooomiigjmkglgeknnnokhmemmlnp",
+    "ppllgmiggmkmjghjkikdhokklppoojnfdfjcgmppoohghgbhjiadaeceeldlmkjgmlhiiljmjnigiekjffjfihhgkhfononnnnfmmlnp",
+    "ppllhmfihmnlifggddifgkoiennpoollldfnopooppjgecdjdefidajeienlpohkgilklmnjokjhfeidbffgglagnjimonnnnnemlknp",
+    "pplmhmifgmlijhifgcefckjblooooopmjmoppppppolfijfebiijeaopgjkppphjacgddggehjgefhhgjkfekiaikkhhjlnnnndmlknp",
+    "ppllhmidijjjjmibgijkkneioooooooonknpopppppocjkhhhhfjhbfppkpopplkdiopgjlpfjjeafilfjeghkigjohjginnnndmllop",
+    "ppklfmjdjhmhnohicflnnjeoooopooooookmpooooopmiijgkihjmnknlnpklfjgjkmpmhefjlkidiljcfgniifdnonlknnnnndmllop",
+    "ppllelmdgjhiihgfjienonnooooooooohlplloopoooolpppmhmokjpkmpjhjhhpmhjoopnhjjhfcgjmlkkjlkoiponnonnnnnemlkop",
+    "ppllflhicghjdffgkkhonnoonoooooopjcjpmkpppopkfljkpfleegikkphiflpplilolkggjjdhgbjkkikikhjoononnnnnnndmllop",
+    "pplmgegebkimkcdfeonolooogoopoooikkhelojnpoopjjjlkjliaeiplmppppopbhiklleifdmlcbfkoggigefknponnnnnnndmllpp",
+    "pplmgighdfhilddfgkmmgknonoooooodkflhekpkmpnlpkogljmkmigijjonnopiffpnhihelhhjldbilbijkglgcejonnnnnndmllpp",
+    "pplmfmefddeiiflmghilcmoonolghloejjhgipopmklfpmjdchjhildfeihlkjigeiplcciigjfhjehnjjchhfkhjngknonnnndmllpp",
+    "pplmgmdhebchgfdkjeggcoonlhdbghlbefhelopopnfhmphhdilfkmegeidefhhjlpkokiifikifkllhmlioogdjlhlennnnnnenllpp",
+    "pplmgkeegbhecbbjnongfjjicechccchfgfenoooofkhkgefehkgigfigglfhkmigkdkgddfifegnokfoiiodkemnhainnnnnndmllpp",
+    "pplmfmeglhjnljdmjijikinilhggieihklngloookeoheggiehfpplkicloliljeldfggefejlhbhpfkokloficlonglonnnnndmllpp",
+    "pplmfmfelkjnnnjlnonokmnnnjgfcbciefdajjkjblhjjbgeiilkjhieffmlkkjlkfifhcmdkdglnndnoljhhfdilmgfnnnnnmcmllpp",
+    "ppllemgihkjnnjmggnoolnioooponaeikkghkhphiffjbhiecjilhiijkkjhjlpkhijgigghgmpppmbnmegcficklllelnnnmmcmllpp",
+    "ppllelmfjijnnideghnoopnoooopmahjkjleohkmgiicgggfgbegjieiljhlihlpjjjgiiijopppphhfecgffdejknjgbjkmmlcllkpp",
+    "pplmdmmmjgjnmdbkjdhkfnpnpeeloaeimkpgokhikhmidkfghhifkmoigffggdglnjkjdedjopopoolfebkafhckilhhfdjmnmcllkpp",
+    "ppllelhmmlinkaclfakldnnooegijgoloonhjpmggikhlgjiicidfkldjieciejjmhjgigdcjoppnglhbjhfhkekhmhidhnmmmellkpp",
+    "ppllelkdgkilcbfkilihhmonokcmfljmohkdholkhhllijkccfkbefehfejcbcjglfmnhhjjhkijjjhhgogimghhhecgcdmmmmflkkpp",
+    "pplmelkdhjfjccjhhiidoooooobikjfijkifhflpnijigimdhaggiecdfijhjedflgifgigdjpmponmglkbcabaeaeeeemmmmlelkkpp",
+    "pplmelifgfhegijbdbaioooooonfccbaefhgejfnmoikimhdkjdihfdhcjhghafckikhjhijokopoopkhicggcaailhkllmmmmelkkpp",
+    "pplmfmhiecccglkecghfoooooooogffllnpomekjdkmlidihiacahmifhdcafgjklfghekkiooopolfjjkijfalhnjmgegimnmgllkpp",
+    "pplmgnihjjcgkklndnhfnoonmgjjfjhopopponehjiljfllhjkffchkghgiiolflmdicghikonopognlgjhghclhjgihejgmmmglllpp",
+    "pplmfmnelifgilmmikbemooolcfikigpokmpooiijhppnjfkgjjhijkbifkfmpgimknifnjlljpjoppnlkigkcknkecdekkmnmgmllpp",
+    "pplmfmmckldfffhjheajjkolighehkpppopopoopiipochfidebhhlbblihjljdllgchhjopkpoonnomillljinooibeghlnmnemmkpp",
+    "pplmflmghjggcbeecdffmhjkopooppppopnppppmjijidcgmeajpiegegmeopihmjpooighpmloojhngjijkcmomjjejgknnnmemllpp",
+    "polmelmkbihhfiijjjkkgjooooopoppoopkoppnlmkdjgdiphjgkijbijiipnckjjppkfjgokjpokfnllgjkamehlfgefaenmnfmllpp",
+    "pollelmmdbjihmnmkjkojhloopooppnmpopoppjppjifegkifggghmlkkcmondkpjmolhppkmmkoldlmgmggjjhmilchejdflofmllpp",
+    "pollfmmmklebdjkknonkjjjnoooojoolopoookopmkonihgiegmhmlmobbmojgliojlngnokpokomdjiikeenjjinnkchdhheafmmkpp",
+    "pollfmmmnkijddkmkilhknnjoooonnnppopplmpjhljjgehlihbejmkicfikhejoplnkjloknonkodigjjjbnihnnomhkbemjcbmllpp",
+    "poklfmmmnmomjckghkifgjiioooopoipoppnlpmclkmkcdbfgbefjkjbcfjknibljkmndlpnlookodlhbhdiihkkmlljhfdimicmmlpp",
+    "pnlmgmmmnnnnniinfbhnoihjopooiooopoplppgiklkjgfabbhdgjjpgdfjiidajjnljgllpkoonkflkhlbeefmnjghbfokehlfmllpp",
+    "pnlmfmmmmnnnnifndlojoldfhkophhooopkppppkhmhgngjmdebkjmgfhjkfhklihjlikomkloookomhdbhmgkonnifdonnjeihlllpp",
+    "pnllgmmmmnmnlmgienliihbghdhimgdnpkopoplmhkknifpnjidhikelfllllnpphomflpoojlomnliifbhjhjlnolenoonndigmllpp",
+    "pnlmglmmmnnkegjbilhceffighfdfejnmmoopmjkikmjkfpighcflhgljkpkmolgjjnkggnoohmeagaddbmjlgiiljaoonnnmjfnllpp",
+    "pnlmgkjkjjhldejgcghbbeadmjfccgilkpopnjhmnmlnkgpeinimbijpjiijnidalkiifgfpoklhhljbahmglljhcbdoomnnnnfnmlpp",
+    "pnlmgjhhgffjjijldfhckjicgoljjggcmopplgmpopmfogpiikggknpplijmnlecjmhoibkoomlhfohdhblekiekealnnjjjdlfmmlpp",
+    "pmlmghedbdcbjlgdcaafjkjdhlcjlkihfpooiloppolgjgplhnhgopppjgkkijcekiidheoooojhkkdkkejhkclaemonojgegkenllpp",
+    "pmlmfmnmmihjnolmebbckdbkfgbkjklijkplehopopkjfhppojjempopjedjlkddiikjjhopookggickkkdpjebhglnnnmecbdemmlpp",
+    "pmllflmmcbfdhkbehiicemjgnjcjihjjkjjookooppppljppopjmhkpmjbchkidbfjniiiopopniifhdhmiicglgmigefomnnnenmlpp",
+    "pmllfmmlabgdakgijgeibgjimlejggiijkljjjigioopjklnponknmfgikijolmnliflkjopoopjhjjifjnhfonjknkihifhlnenmlpp",
+    "pmllfmnlaeifbihigkomjajccfddggejhhklgfihfelgfideinomdgiegejhfckmlmjinopooolihmnfffnemljiemoleeiljnfmmlpp",
+    "pmlmflgidadidmnfmnnongajidedgfloolijjijeigbdcgihefpmjjhhdipjkijmlkjlfooplfionjjfilfdhiikiekaejjignenmlpp",
+    "pmlmflfijcaaegmhhhhnnkibiigfaejmnoonkihijfkceehiglkikilmifjognjjpplljglgdfioolfmoljhkloonogcfgjgcjfmlmpp",
+    "pmllflkifaadcdjknnlonnojbhiiieijmopklmjjikcabbegoiclpopppmiijjekgiomfhifjoohookkolhcpooonokabhebemfmklpp",
+    "pmllflmcgbaaeekkjonnonohjiiijjgihkmomjgbgjjhbaahihmgopoppjlikjkiilhpolggnoooooomjkjjpoooondaeegajnemmlpp",
+    "pmllflgdigddigijjimonnnmnmdeijjecgghhgffkhkjeigihnielkppplmmfjhifkiojinnopoopooonkklkkkkkjcaggehcefmllpp",
+    "pmllglgelcflihifiihjnnnonnmjehiiebhigjjielgalholighlcjgffipkhidgecjhdlonoljooooklmmlmkjkkfbedaeejjfmmlpp",
+    "pmklflgfmgdkckjbjehbgonoonkmjafiiijkiijhmldgccjoihppmeaiigojkkfhffdagflfmoooomjmkjjjhhhiibabacbdmmfmmlpp",
+    "pmklfleemmddalfgdedhdkononmonlhgiiilmiiinlablbokgpkglhffhdpljidegfegbjlcfpoomiefkjjjijjifebaaeeblmgmmlpp",
+    "plklfmcfmjdbbfefbedejhjnononlknieeiikiihjjdamnngnieggjibfjnjjieilkkkifklefooijgiklkkjiifefbabefggnemmlpp",
+    "plkleiadihbabadfahaabcioonnponmjfdghgiifijiefokcgfhgajpmnlggkkklkglkfmjilfgohkndlliffhjjdbfbceinemfnmmpp",
+    "plllfgacdcedbaefaagjidmljkkjmooookigijjdhifjjkmgahdagkiifkmilikkklkfljddooomlnjhljkcghhhhfddfblmiifnmlpp",
+    "pllleaaeeijehkhbajkillhjjnnoknooooopmjkkiigfhfikgeiljioolpommllkjjdfopihlooopknjiklmmlcahdafgglnigenmlpp",
+    "plkleaaadgcaaahcdhlljmjfcfljimljilooooonljgkmompjgkppopppppokghfeeehmokffoomjeimfhkklnjbffagjllnefdnmmpp",
+    "plkleaaaaaaaacbaejmlmkkkihgfihklokloooooopnopppppppooopppoopnhjgjiffopohjehgjhjgfhlmkmiaecbelkkkeebnmlpp",
+    "pkklfaaccbaabbbddiljjlhhmollhikllmmoooooooooopopopppopooplnopjjijjelpoonhgghjjggfegjjhaaikifflmffdamllpp",
+    "plkleabdedbbcbgjkbghjhfckieighjlmnoooooooopooopoponoooooojljjekfhfnoopooonnkjiikkgbcccjlkjifajjdkmbnmlpp",
+    "plkleaaaaaabchchhnbfdefhjijjkmooooooooopoppoopppppknoppppkfikjjllnmnopppppnlljigfdabfcfgggdaeifgnkanmlpp",
+    "plklgbcccdcdcbbbbedadccdfghhhhhhggffffeeffggggfeeeffgfffffggggffffefdeeeeffgfggffecbbabaccabacbababnmlpp",
+    "plklkkkklkllllmlmlmmmmmmnnmnnnonmnnnoonooooooooopoopoopppppppppoppppppppppppoooonooooonnnoononnonnnmmlpp",
+    "pkkllllmmmmmmmmmnnnnnnnnoooonnooooooooooooooppoopppopopoopopoopopooopooooooooononnnnnnnnmnmnnnnnnmnnmlpp",
+    "plkllllmmmmmmmmmmmmnnnnnnonnnnoooooooooooooooooooooooooooooooooooooooooooooooonnnnnnnnnnnmmnnnmmmmmmmlpp",
+    "pkkllllmlmmmmmmmmmmmnnnnnnnnnooooooooooooooooooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnmmmmmmmlpp",
+    "pkklllllmmmmmmmmmmnnnnnnnnnnnoonnnoooooooooooooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnmmmmmmlpp",
+    "pkkkllllmmmmmmmmmmnnnnnnnnnnnnnnooooooooooooooooooooooooooooooooooooooooooooonoonnnnnnnnnnnnnnnnmmmmmlpp",
+    "pkkklllllmmmmmmmmmmnnnnnnnnnnnnnooooooonoooooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnmmmnmmmmllpp",
+    "pkklllllllmmmmmmmmmmmnnnnnnnnnnooooooonooooooooooooooooooooooooooooooooooooonnnnnnnnnnnnnnnnnnmmmmmlllpp",
+    "pklllllllmlmmmmmmmmmmmnnnnnnnnnnnnnnnoooooooooooooooooooooooooooooooooonooooonnnnnnnnnnnnnnnnnmmmmmlllpp",
+    "pkkkkllllmmmmmmmmmmmmmnnnnnnnnnnonnnonnnooooooooooooooooooooooooooooooonoooonnnnnnnnnnnnnnnmmmmmmmmmmlpp",
+    "pkkkklllllmmmmmmmmmmmmnnnnmnnnnnnnnnnnooooooooooooooooooonnoooooooooooonnooonnnnnnnnnnnnmnnmmnnmmmmmmlpp",
+    "pjkkkllllllmmmmmmmmmmmnnnmmnnmmnnnnnnnoonnnoooooooooooooonnnooooonooooonooooonnnnnnnnnnnnnnmmmmmmmmmmlpp",
+    "ojllkllllllmllmmmmmmmmmmmmmmnmmnnnnnnooonnnoooooooonnnoooonnooooonnnnnnnnnnnnnnnnnnnnnnnmnnmmmmmmmmmmlpp",
+    "ojlkkklllllllllmmmmmmmmmmmmmnnnnnnnnnnnonnoooonooooononnoonnnoooonnnnnnnnnnnnnnnnnmnnnmmmnnmmmmmmmmmllpp",
+    "okklllllllllllmlllmllmmmmmmmmmmnmnnnnnnnnnnnnnoooooooonnnoonnnnonnnnnnnnnnnnnnnnmmmmnmmmmmmmmmmmmmmlllpp",
+    "okkkkllllllllllllllllllmmmmmmmmnnmmnnnnnnnnnnnnonoononnnnnnnnnnnnnnnnnnnnnnnnnnnnmnnmnmmmmmmmmmmmmmllkpp",
+    "nkkkkllllllllllllllllllllllmmmmnmmmmnnnnnmmmnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnmmmmnmmmmmmmmmmmmmmlllkpp",
+    "ojkkkllklllllllllllllllllllmmmmmmmmmmmmmmmmmmmnnnnnnnnnnnnnnnnnnnmmmmnnmnnnnmmmmmmmmmmmmmmmmmmmmmmlllkpp",
+    "njkkkkkllllllllllllllllllllmmmmmmmlmmmmmmmmmmmmmmnmmmnmmmmnnnmnmmmmnmmmmmmmmmmmmmmmmmmmmmmmmmmmmmllllkpp",
+    "nkkkkkllllllllllllllllllllllmmmmmmmlmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmnmmmmmmmmmmmlmmmmmmmmmllmlllllllkpp",
+    "ppppppppppppppppppppoooooonnnoooooooooooooooooooonnnnnnnnnnmmmmnnnnmmmmmmnnnmmmmmmmnnmmmmmlllllllllllkop",
+    "nnooooooooooooooppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppoopp"
+   ]
+  },
+  {
+   "id": "cord",
+   "shape": "card",
+   "size": [
+    8.4,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    11.2,
+    0.5
+   ],
+   "style": "cord",
+   "paint": {
+    "art_key": {
+     "c": "oat:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    ".................cccccc.................",
+    "...............cccc..cccc...............",
+    ".............cccc......cccc.............",
+    "...........cccc..........cccc...........",
+    ".........cccc..............cccc.........",
+    ".......cccc..................cccc.......",
+    ".....cccc......................cccc.....",
+    "...cccc..........................cccc...",
+    ".cccc..............................cccc.",
+    "ccc..................................ccc"
+   ]
+  }
+ ]
+}
