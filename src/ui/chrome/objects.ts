@@ -463,14 +463,20 @@ export function wallpaperTile(hue: PalRamp = 'emerald', u = 32, k = 2): string {
     const r = new Relief(u, u, 1, k), R = PAL[hue], G = PAL.gold;
     const motif = (x: number, y: number) => {
       // a lozenge lattice; in each cell a sprig of three leaves and a dot
+      // a fleur sprig: a tall teardrop bud, two leaves curling up and out, a stem and a gilt berry;
+      // a fine diamond trellis with gilt studs where its lines cross
       const cx = u / 2, cy = u / 2;
       const dx = Math.abs(x - cx), dy = y - cy;
-      const leafA = ((dx - 3.2) / 3) ** 2 + ((dy + 2) / 1.6) ** 2 < 1 && dx > 0.6;
-      const leafB = (dx / 1.6) ** 2 + ((dy + 5.6) / 3.2) ** 2 < 1;
-      const stem = dx < 0.5 && dy > -4 && dy < 5;
-      const berry = Math.hypot(dx, dy - 5.8) < 1.3;
-      const lat = Math.abs(((x + y) % u) - 0) < 0.5 || Math.abs(((x - y + u * 4) % u) - 0) < 0.5;
-      return leafA || leafB || stem ? 2 : berry ? 3 : lat ? 1 : 0;
+      const bud = (dx / (1.5 - (dy + 6) * 0.12)) ** 2 + ((dy + 5) / 3.6) ** 2 < 1 && dy < -1.4;
+      const lx = dx - 3.4, ly = dy + 1.2 + lx * 0.9;
+      const side = (lx / 3.1) ** 2 + (ly / 1.25) ** 2 < 1 && dx > 0.8;
+      const curl = Math.abs(Math.hypot(dx - 6.2, dy + 3.6) - 1.3) < 0.45 && dy < -2.6;
+      const stem = dx < 0.45 && dy > -2 && dy < 4.6;
+      const berry = Math.hypot(dx, dy - 5.6) < 1.25;
+      const d1 = ((x + y) % u + u) % u, d2 = ((x - y) % u + u) % u;
+      const lat = d1 < 0.45 || d2 < 0.45;
+      const stud = (d1 < 1.1 || d1 > u - 1.1) && (d2 < 1.1 || d2 > u - 1.1);
+      return bud || side || curl || stem ? 2 : berry || stud ? 3 : lat ? 1 : 0;
     };
     r.fill(rect(0, 0, u, u), flat(0), (x, y, mx, my) => {
       const m = motif(x, y);

@@ -181,6 +181,13 @@
 .hh-tkt-body .t { flex: 1; min-width: 0; }
 .hh-tkt-body b.display { display: block; font-size: 19px; font-weight: 400; line-height: 1.05; }
 .hh-tkt-stamp { position: absolute; right: 86px; top: -12px; padding: 1px 5px; font-size: 12px; color: #435262; border: 2px solid #435262; transform: rotate(9deg); opacity: 0.75; pointer-events: none; }
+/* [ui4] narrow phones: keep the bedtime line on one line */
+@media (max-width: 389px) {
+  .hh-tkt-stub { width: 62px; }
+  .hh-tkt-body b.display { font-size: 17px; white-space: nowrap; overflow: hidden; text-overflow: clip; }
+  .hh-tkt-body .small { font-size: 13px; }
+  .hh-tkt-clip { left: 14px; }
+}
 @media (min-width: 900px) {
   .hh-ticket { left: 20px; margin-left: 0; bottom: auto; top: calc(var(--safe-t) + 176px); width: 380px; }
 }
