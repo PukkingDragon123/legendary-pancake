@@ -41,12 +41,12 @@
 .lg-string.short { height: 10px; }
 
 /* paper price tags hanging off the stumps */
-.lg-dealtag .lg-ptag { position: absolute; left: 0; top: 14px; transform-origin: 50% 0; translate: -50% 0; width: 112px; padding: 9px 4px 4px; display: flex; flex-direction: column; align-items: center; gap: 1px; background: var(--lg-pat-linen) 0 0 / 64px 64px; background-clip: padding-box; animation: lgSwing 3.6s ease-in-out infinite, lgTagIn 0.6s var(--pop) both; filter: drop-shadow(0 4px 0 rgba(30, 18, 8, 0.4)); }
+.lg-dealtag .lg-ptag { position: absolute; left: 0; top: 14px; transform-origin: 50% 0; translate: -50% 0; width: 112px; padding: 13px 4px 4px; display: flex; flex-direction: column; align-items: center; gap: 1px; background: var(--lg-pat-linen) 0 0 / 64px 64px; background-clip: padding-box; animation: lgSwing 3.6s ease-in-out infinite, lgTagIn 0.6s var(--pop) both; filter: drop-shadow(0 4px 0 rgba(30, 18, 8, 0.4)); }
 .lg-shop.side .lg-dealtag .lg-ptag { width: 124px; }
 @keyframes lgSwing { 0%, 100% { rotate: -2.2deg; } 50% { rotate: 2.2deg; } }
 @keyframes lgTagIn { from { scale: 0.3; opacity: 0; } }
 .lg-hole { position: absolute; top: -2px; left: 50%; width: 16px; height: 16px; margin-left: -8px; background: var(--lg-eyelet) 0 0 / 16px 16px no-repeat; image-rendering: pixelated; z-index: 2; }
-.lg-ptag-name { font-family: var(--font-display); font-size: 14px; line-height: 1.02; text-align: center; color: #3d2a1c; min-height: 2.04em; display: flex; align-items: center; }
+.lg-ptag-name { padding: 0 6px; font-family: var(--font-display); font-size: 14px; line-height: 1.02; text-align: center; color: #3d2a1c; min-height: 2.04em; display: flex; align-items: center; }
 .lg-ptag-price { display: flex; align-items: baseline; gap: 5px; font-size: 18px; }
 .lg-ptag-price b { font-weight: 400; font-family: var(--font-display); color: #2e2416; }
 /* the old price, struck through in red pencil (a hand-drawn wobbly line) */
@@ -54,7 +54,7 @@
 .lg-was::after { content: ''; position: absolute; left: -4px; right: -4px; top: 50%; height: 10px; margin-top: -5px; background: var(--lg-strike) center / 100% 100% no-repeat; image-rendering: pixelated; }
 .lg-was.big { font-size: 16px; }
 /* the discount: a red sticker slapped on the corner */
-.lg-sticker { position: absolute; right: -18px; top: -16px; width: 60px; height: 44px; display: grid; place-items: center; padding-bottom: 3px; font-family: var(--font-display); font-size: 15px; line-height: 1; color: #fff4dc; text-shadow: 0 2px 0 rgba(60, 10, 8, 0.7); background: var(--lg-seal) 0 0 / 60px 44px no-repeat; image-rendering: pixelated; rotate: 10deg; z-index: 3; }
+.lg-sticker { position: absolute; right: -22px; top: -27px; width: 60px; height: 44px; display: grid; place-items: center; padding-bottom: 3px; font-family: var(--font-display); font-size: 15px; line-height: 1; color: #fff4dc; text-shadow: 0 2px 0 rgba(60, 10, 8, 0.7); background: var(--lg-seal) 0 0 / 60px 44px no-repeat; image-rendering: pixelated; rotate: 10deg; z-index: 3; }
 .lg-sticker.big { width: 80px; height: 60px; font-size: 21px; background-image: var(--lg-seal-big); background-size: 80px 60px; right: -10px; top: -6px; }
 .lg-sticker.left { right: auto; left: -12px; top: -10px; rotate: -10deg; }
 .lg-dealtag.sold .lg-ptag > :not(.lg-stamp-mark):not(.lg-hole) { opacity: 0.5; }
@@ -116,8 +116,10 @@
 .lg-hint > span { font-size: 14px; line-height: 1.15; }
 .lg-hint-time { display: inline-flex; align-items: center; gap: 3px; font-size: 13px !important; color: #6b5844; }
 .lg-hint .lg-pin { top: -10px; }
-@keyframes lgHintIn { from { opacity: 0; translate: 0 -24px; rotate: -8deg; } }
-.lg-shop.side .lg-hint { top: calc(66px + var(--safe-t)); left: 16px; }
+@keyframes lgHintIn { from { opacity: 0; scale: 0.6; rotate: -8deg; } }
+/* phone: low in the middle, over the floorboards; desktop: bottom right, clear of the banners and the signs */
+.lg-shop.top .lg-hint { top: auto; left: 50%; bottom: calc(78px + var(--safe-b)); translate: -50% 0; max-width: 320px; width: max-content; align-items: center; text-align: center; }
+.lg-shop.side .lg-hint { top: auto; left: auto; right: 18px; bottom: calc(18px + var(--safe-b)); max-width: 260px; }
 .lg-cloth-prize { display: inline-flex; align-items: center; gap: 2px; color: #ffe39a; }
 .lg-bubble.notail::after, .lg-bubble.notail::before { display: none; }
 .lg-gnote { margin: 0 8px; padding: 0 4px; font-size: 13px; line-height: 1.2; text-align: center; color: #3d2416; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
@@ -185,7 +187,7 @@
 .lg-gacha > * { pointer-events: auto; }
 .lg-gboard { position: absolute; display: flex; flex-direction: column; background: var(--lg-wood) 0 0 / 256px 128px; background-clip: padding-box; filter: drop-shadow(0 8px 0 rgba(20, 12, 6, 0.45)); }
 .lg-gacha.side .lg-gboard { left: 14px; top: calc(64px + var(--safe-t)); bottom: 14px; width: min(470px, 40vw); animation: lgCardInL 0.6s var(--pop) both; }
-.lg-gacha.tall .lg-gboard { left: 4px; right: 4px; bottom: calc(4px + var(--safe-b)); top: 33%; animation: lgCardInB 0.55s var(--ease) both; }
+.lg-gacha.tall .lg-gboard { left: 4px; right: 4px; bottom: calc(4px + var(--safe-b)); top: max(21%, calc(var(--safe-t) + 168px)); animation: lgCardInB 0.55s var(--ease) both; }
 .lg-gacha.closing .lg-gboard { animation: lgOut 0.3s ease-in both; }
 @keyframes lgOut { to { opacity: 0; translate: 0 60px; } }
 .lg-g-top { display: flex; align-items: center; gap: 6px; padding: 0 0 6px; }
@@ -196,6 +198,9 @@
 .lg-g-gems { display: inline-flex; align-items: center; gap: 4px; padding: 0 3px; color: #fff4dc; font-size: 16px; }
 .lg-plus { color: #ffe39a; font-family: var(--font-display); }
 .lg-g-body { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 2px 2px 6px; display: flex; flex-direction: column; gap: 10px; }
+.lg-g-body > * { flex-shrink: 0; }
+.lg-gacha.side .lg-poster-art { aspect-ratio: 2.7 / 1; }
+.lg-gacha.side .lg-fart { aspect-ratio: auto; height: 70px; }
 .lg-poster { position: relative; margin: 4px 6px 0; padding: 0; background: var(--lg-pat-linen) 0 0 / 64px 64px; background-clip: padding-box; rotate: -0.8deg; }
 .lg-poster-art { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; image-rendering: pixelated; box-shadow: 0 0 0 2px #3d2416; }
 .lg-poster-title { position: absolute; left: 12px; right: 12px; bottom: 10px; padding: 0 4px; background: #4a3020; background-clip: padding-box; color: #fff4dc; }
@@ -209,7 +214,7 @@
 .lg-fart img { width: 100%; height: 100%; object-fit: contain; }
 .lg-fcard b { font-family: var(--font-display); font-weight: 400; font-size: 13px; line-height: 1; }
 .lg-fcard small { font-size: 11px; line-height: 1.05; color: #4b3a2a; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.lg-up { position: absolute; top: -12px; left: -8px; padding: 0 4px; font-family: var(--font-display); font-size: 13px; color: #fff4dc; rotate: -8deg; z-index: 1; }
+.lg-up { position: absolute; top: -9px; right: -7px; padding: 0 2px; font-family: var(--font-display); font-size: 12px; line-height: 1.1; color: #fff4dc; rotate: 9deg; z-index: 1; }
 .lg-stars { display: inline-flex; gap: 1px; }
 .lg-stars.pop > span { animation: lgStarPop 0.45s var(--pop) both; display: inline-block; }
 @keyframes lgStarPop { from { scale: 0; rotate: -90deg; } }
@@ -225,12 +230,17 @@
 .lg-tally i.g5 { width: 17px; }
 .lg-tally i.g5::after { content: ''; position: absolute; left: -3px; right: -3px; top: 6px; height: 2px; background: #ece9dc; rotate: -24deg; }
 .lg-tally em { font-style: normal; opacity: 0.7; }
-.lg-g-links { display: flex; gap: 10px; justify-content: center; }
+.lg-g-slate { position: relative; padding-right: 84px !important; }
+.lg-g-links { position: absolute; right: 2px; top: 50%; translate: 0 -50%; display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+.lg-g-links .lg-ktag.small { font-size: 14px; padding: 3px 6px 1px; rotate: 2deg; }
+.lg-g-links .lg-ktag.small + .lg-ktag.small { rotate: -2deg; }
 .lg-g-wish { display: flex; gap: 10px; justify-content: center; padding: 4px 0 2px; }
 .lg-g-wish .lg-stampbtn { min-width: 0; flex: 1; max-width: 210px; margin: 0; }
 .lg-gacha.tall .lg-g-body { gap: 8px; }
 .lg-gacha.tall .lg-poster-title h2 { font-size: 22px; }
-.lg-gacha.tall .lg-poster-art { aspect-ratio: 2.6 / 1; }
+.lg-gacha.tall .lg-poster-art { aspect-ratio: 3.4 / 1; }
+.lg-gacha.tall .lg-fart { aspect-ratio: auto; height: 54px; }
+.lg-gacha.tall .lg-gnote { font-size: 12px; }
 .lg-gacha.tall .lg-poster-title p { display: none; }
 .lg-gacha.tall .lg-feat { grid-template-columns: 1.15fr 1fr 1fr 1fr; }
 .lg-gacha.tall .lg-fcard small { font-size: 10px; }

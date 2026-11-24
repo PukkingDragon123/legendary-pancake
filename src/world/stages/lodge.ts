@@ -89,6 +89,8 @@ export class Lodge implements Stage {
   private lamps: Lamp[] = [];
   private banners: { id: string; b: Banner; sign: Sign | null }[] = [];
   private signs: Sign[] = [];
+  /** boards hung twice, one per layout: on a phone they hang lower and further left, clear of the purse and the Leave sign */
+  private boards: { side: THREE.Object3D; top: THREE.Object3D }[] = [];
   private board: Slate | null = null;
   private plants: Plant[] = [];
   private herbs: THREE.Group[] = [];
@@ -433,6 +435,11 @@ export class Lodge implements Stage {
     nm.group.position.set((WIN.x0 + WIN.x1) / 2, 3.02, ROOM.back + 0.42);
     this.add(nm.group);
     this.signs.push(nm);
+    const nm2 = hangingSign(1.7, 0.4, "Barnaby's Lodge Store", 'general goods · est. under the old willow', 0.8, 3);
+    nm2.group.position.set((WIN.x0 + WIN.x1) / 2 - 0.76, 2.64, ROOM.back + 0.42);
+    this.add(nm2.group);
+    this.signs.push(nm2);
+    this.boards.push({ side: nm.group, top: nm2.group });
   }
 
   /** the stash: a log-and-plank shelf on the right wall, acorns heaped on the floor before it, gem chests on top */
@@ -460,6 +467,12 @@ export class Lodge implements Stage {
     sign.group.rotation.y = -Math.PI / 2;
     this.add(sign.group);
     this.signs.push(sign);
+    const sign2 = hangingSign(1.1, 0.3, 'Acorns & Moon Gems', '', 1.3, 5);
+    sign2.group.position.set(S.x + 0.05, 1.95, cz - 0.6);
+    sign2.group.rotation.y = -Math.PI / 2;
+    this.add(sign2.group);
+    this.signs.push(sign2);
+    this.boards.push({ side: sign.group, top: sign2.group });
     // acorn packs (on the floor, in front of the shelf, growing toward the front of the store)
     const AX = S.x - 0.5;
     ACORN_SPOTS.forEach((a, i) => {
@@ -640,7 +653,7 @@ export class Lodge implements Stage {
       const c = src.clone(true);
       c.position.set(0, 0, 0); c.rotation.set(0, 0, 0); c.scale.set(1, 1, 1);
       c.updateMatrixWorld(true);
-      const b = new THREE.Box3().setFromObject(c), k = height / Math.max(1e-3, b.max.y - b.min.y), ctr = b.getCenter(new THREE.Vector3());
+      const b = new THREE.Box3().setFromObject(c, true), k = height / Math.max(1e-3, b.max.y - b.min.y), ctr = b.getCenter(new THREE.Vector3());
       c.scale.setScalar(k);
       c.position.set(-ctr.x * k, -b.min.y * k, -ctr.z * k);
       const w = new THREE.Group();
@@ -652,7 +665,8 @@ export class Lodge implements Stage {
     const pivotOf = (root: THREE.Object3D, name: string, parent: THREE.Object3D, hinge: (b: THREE.Box3) => THREE.Vector3) => {
       const part = root.getObjectByName(name);
       if (!part) return null;
-      root.updateMatrixWorld(true);
+      parent.updateWorldMatrix(true, true);
+      root.updateWorldMatrix(true, true);
       const b = new THREE.Box3().setFromObject(part);
       const pv = new THREE.Group();
       parent.add(pv);
@@ -742,7 +756,7 @@ export class Lodge implements Stage {
       const wrap = new THREE.Group();
       wrap.add(c);
       c.updateMatrixWorld(true);
-      const b = new THREE.Box3().setFromObject(c), s = b.getSize(new THREE.Vector3()), ctr = b.getCenter(new THREE.Vector3());
+      const b = new THREE.Box3().setFromObject(c, true), s = b.getSize(new THREE.Vector3()), ctr = b.getCenter(new THREE.Vector3());
       const k = o.h ? o.h / Math.max(1e-3, s.y) : o.w ? o.w / Math.max(1e-3, s.x) : 1;
       c.scale.setScalar(k);
       c.position.set(-ctr.x * k, -b.min.y * k, -ctr.z * k);
@@ -924,6 +938,7 @@ export class Lodge implements Stage {
     });
     const sign = this.signs.find((s) => s.group.userData.deals);
     if (sign) sign.group.position.set(P[1].x, 2.05, 0.85);
+    for (const b of this.boards) { b.side.visible = this.layout === 'side'; b.top.visible = this.layout === 'top'; }
   }
 
   /** Put today's deals on the stumps. */
@@ -1162,10 +1177,10 @@ export class Lodge implements Stage {
     if (B) { B.col.setHex(stars === 5 ? 0xffc94a : stars === 4 ? 0xc79bff : 0x8fd0ff); B.open = Math.max(B.open, 0.8); }
     const r = await displayModel(d, 0.55, 0.55);
     if (!r || this.dead) return;
-    r.obj.position.set(BARREL.x, BARREL.h + 0.2, BARREL.z);
+    r.obj.position.set(BARREL.x, BARREL.h + 0.1, BARREL.z + 0.06);
     this.scene.add(r.obj);
     this.prize = { obj: r.obj, owl: r.owl, t: 0 };
-    this.pop(v3(BARREL.x, BARREL.h + 0.75, BARREL.z), stars === 5 ? 0xffd27a : stars === 4 ? 0xd8b8ff : 0xb8e4ff, stars === 5 ? 26 : 12);
+    this.pop(v3(BARREL.x, BARREL.h + 0.55, BARREL.z), stars === 5 ? 0xffd27a : stars === 4 ? 0xd8b8ff : 0xb8e4ff, stars === 5 ? 26 : 12);
   }
   clearPrize() {
     if (this.barrelParts) this.barrelParts.open = Math.min(this.barrelParts.open, 0.25);
@@ -1261,9 +1276,10 @@ export class Lodge implements Stage {
       const want = B.open;
       const ly = (B.lid.userData.baseY as number | undefined) ?? B.lid.position.y;
       B.lid.userData.baseY = ly;
-      B.lid.userData.lift = THREE.MathUtils.lerp((B.lid.userData.lift as number | undefined) ?? 0, want * 0.45, Math.min(1, dt * 6));
+      // the lid swings up on its back edge and leans open behind the mouth (a hop of lift while it swings)
+      B.lid.userData.lift = THREE.MathUtils.lerp((B.lid.userData.lift as number | undefined) ?? 0, want * 0.025, Math.min(1, dt * 6));
       B.lid.position.y = ly + (B.lid.userData.lift as number);
-      B.lid.rotation.x = THREE.MathUtils.lerp(B.lid.rotation.x, want * -1.1, Math.min(1, dt * 6));
+      B.lid.rotation.x = THREE.MathUtils.lerp(B.lid.rotation.x, Math.min(1, want * 1.25) * -1.92, Math.min(1, dt * 5));
       const bm = B.beam.material as THREE.MeshBasicMaterial;
       bm.color.lerp(B.col, Math.min(1, dt * 4));
       bm.opacity += (want * 0.32 - bm.opacity) * Math.min(1, dt * 4);
@@ -1277,7 +1293,7 @@ export class Lodge implements Stage {
       const p = this.prize;
       p.t += dt;
       const rise = Math.min(1, p.t / 0.9);
-      p.obj.position.y = BARREL.h + 0.2 + ease(rise) * 0.75 + Math.sin(p.t * 1.8) * 0.03;
+      p.obj.position.y = BARREL.h + 0.1 + ease(rise) * 0.42 + Math.sin(p.t * 1.8) * 0.03;
       p.obj.rotation.y += dt * 0.9;
       p.owl?.update(dt);
       (p.obj.userData.animate as ((t: number, dt: number) => void) | undefined)?.(t, dt);
@@ -1320,7 +1336,7 @@ function mulberry(seed: number) {
 /** Scale and lift an object to fit a W x H x D box with its feet at y = 0. */
 function fit(o: THREE.Object3D, W: number, H: number, D = W) {
   o.updateMatrixWorld(true);
-  const b = new THREE.Box3().setFromObject(o), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
+  const b = new THREE.Box3().setFromObject(o, true), s = b.getSize(new THREE.Vector3()), c = b.getCenter(new THREE.Vector3());
   const k = Math.min(W / Math.max(0.01, s.x), H / Math.max(0.01, s.y), D / Math.max(0.01, s.z));
   o.scale.multiplyScalar(k);
   o.position.x -= c.x * k; o.position.z -= c.z * k;

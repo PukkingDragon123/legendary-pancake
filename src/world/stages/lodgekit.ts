@@ -190,7 +190,7 @@ function lathe(prof: [number, number][], segs: number, m: THREE.Material, tileU 
 // ------------------------------------------------------------------ stumps (the deal pedestals)
 
 /** A tube along `curve` whose radius tapers from r0 to r1 (roots, chains of growth, handles). */
-export function taperTube(curve: THREE.Curve<THREE.Vector3>, r0: number, r1: number, segs = 10, radial = 7): THREE.BufferGeometry {
+export function taperTube(curve: THREE.Curve<THREE.Vector3>, r0: number, r1: number, segs = 10, radial = 7, flat = 1): THREE.BufferGeometry {
   const g = new THREE.TubeGeometry(curve, segs, 1, radial, false);
   const pos = g.attributes.position as THREE.BufferAttribute;
   const ring = radial + 1;
@@ -198,7 +198,7 @@ export function taperTube(curve: THREE.Curve<THREE.Vector3>, r0: number, r1: num
     const c = curve.getPointAt(j / segs), k = r0 + (r1 - r0) * Math.pow(j / segs, 0.8);
     for (let i = 0; i < ring; i++) {
       const v = j * ring + i;
-      pos.setXYZ(v, c.x + (pos.getX(v) - c.x) * k, c.y + (pos.getY(v) - c.y) * k, c.z + (pos.getZ(v) - c.z) * k);
+      pos.setXYZ(v, c.x + (pos.getX(v) - c.x) * k, c.y + (pos.getY(v) - c.y) * k * flat, c.z + (pos.getZ(v) - c.z) * k);
     }
   }
   g.computeVertexNormals();
@@ -247,20 +247,21 @@ export function stump(h: number, r: number, seed = 1): THREE.Group {
   top.position.y = h - 0.006;
   g.add(top);
   // a few gnaw marks round the rim: shallow scoops of bare wood
-  // gnarled roots curling out of the buttresses into the floorboards
+  // gnarled roots: flattened, knuckled, curling out of the buttresses and diving back into the floorboards while
+  // still thick (no thin spikes lying on the floor)
   const roots: THREE.BufferGeometry[] = [];
   for (let k = 0; k < 5; k++) {
     const a = -(k / 5) * Math.PI * 2 - ph[0] / 5 + (rr() - 0.5) * 0.3;
     const dir = new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
-    const side2 = new THREE.Vector3(-dir.z, 0, dir.x).multiplyScalar((rr() - 0.5) * r * 0.5);
-    const len = r * (1.0 + rr() * 0.6);
+    const side2 = new THREE.Vector3(-dir.z, 0, dir.x).multiplyScalar((rr() - 0.5) * r * 0.4);
+    const len = r * (0.55 + rr() * 0.35);
     const pts = [
-      dir.clone().multiplyScalar(r * 0.55).setY(h * 0.22),
-      dir.clone().multiplyScalar(r * 1.05).add(side2.clone().multiplyScalar(0.3)).setY(h * 0.07),
-      dir.clone().multiplyScalar(r * 1.0 + len * 0.55).add(side2).setY(0.02),
-      dir.clone().multiplyScalar(r * 1.0 + len).add(side2.clone().multiplyScalar(1.6)).setY(-0.004),
+      dir.clone().multiplyScalar(r * 0.6).setY(h * 0.3),
+      dir.clone().multiplyScalar(r * 1.08).add(side2.clone().multiplyScalar(0.25)).setY(h * 0.1 + 0.012),
+      dir.clone().multiplyScalar(r * 1.0 + len * 0.6).add(side2).setY(0.028 + rr() * 0.01),
+      dir.clone().multiplyScalar(r * 1.0 + len).add(side2.clone().multiplyScalar(1.3)).setY(-0.05),
     ];
-    roots.push(taperTube(new THREE.CatmullRomCurve3(pts), r * 0.26, 0.008, 10, 7));
+    roots.push(taperTube(new THREE.CatmullRomCurve3(pts), r * 0.3, r * 0.1, 12, 8, 0.62));
   }
   g.add(mesh(mergeGeometries(roots.map((x) => x.toNonIndexed()))!, M.bark()));
   for (const x of roots) x.dispose();

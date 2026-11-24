@@ -155,11 +155,31 @@ export function Shop() {
       raf = requestAnimationFrame(loop);
       const st = stageRef.current, el = root.current;
       if (!st || !el) return;
+      // tags follow their things, then nudge sideways until no two overlap and none leaves the screen
+      const tags: { a: HTMLElement; x: number; y: number; l: number; t: number; w: number; h: number }[] = [];
       for (const a of el.querySelectorAll<HTMLElement>('[data-anchor]')) {
         const p = st.anchor(a.dataset.anchor!, +(a.dataset.lift ?? 0));
-        a.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`;
         a.classList.toggle('off', !p.on);
+        const b = a.querySelector<HTMLElement>('button');
+        if (!b || !p.on) { a.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`; continue; }
+        const w = b.offsetWidth * (b.closest('.lg-gifttag') ? 0.86 : 1);
+        tags.push({ a, x: p.x, y: p.y, l: -w / 2, t: b.offsetTop, w, h: b.offsetHeight });
       }
+      const W = innerWidth;
+      for (let it = 0; it < 10; it++) {
+        let moved = false;
+        for (let i = 0; i < tags.length; i++) for (let j = i + 1; j < tags.length; j++) {
+          const A = tags[i], B = tags[j];
+          if (A.y + A.t >= B.y + B.t + B.h || B.y + B.t >= A.y + A.t + A.h) continue;
+          const ov = Math.min(A.x + A.l + A.w, B.x + B.l + B.w) - Math.max(A.x + A.l, B.x + B.l) + 6;
+          if (ov <= 0) continue;
+          const d = A.x <= B.x ? 1 : -1;
+          A.x -= (d * ov) / 2; B.x += (d * ov) / 2; moved = true;
+        }
+        for (const T of tags) T.x = Math.min(W - 6 - T.w - T.l, Math.max(6 - T.l, T.x));
+        if (!moved) break;
+      }
+      for (const T of tags) T.a.style.transform = `translate(${Math.round(T.x)}px, ${Math.round(T.y)}px)`;
       const bub = el.querySelector<HTMLElement>('.lg-bubble');
       if (bub) placeBubble(bub, st);
     };

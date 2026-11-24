@@ -140,6 +140,7 @@ def fbm(p, oct=4, seed=0):
 # ------------------------------------------------------------------ the body: metaballs
 # the visible radius of a lone metaball element is about 0.575 of its radius (stiffness 2, threshold 0.6)
 K = 1 / 0.575
+EAR_AT = (0.136, 0.032, 0.952)
 
 
 def _q_from_x(d):
@@ -194,9 +195,9 @@ def build_body():
     E((0, -0.175, 0.865), (0.088, 0.085, 0.064))     # muzzle
     E((0, -0.228, 0.882), (0.06, 0.044, 0.042))      # nose bulb
     E((0, -0.16, 0.806), (0.052, 0.058, 0.032), stiff=1.6)  # chin
-    # ears: little round leathery cups
+    # ears: little round leathery cups, low on the sides and toward the back of the head
     for sx in (-1, 1):
-        E((sx * 0.128, 0.01, 0.985), (0.034, 0.019, 0.034), stiff=2.6)
+        E((sx * EAR_AT[0], EAR_AT[1], EAR_AT[2]), (0.029, 0.017, 0.029), stiff=2.6)
     # arms (rest: A-pose, out and a little forward), stubby but clear of the body, with five-fingered hands
     for sx in (-1, 1):
         C((sx * 0.15, -0.03, 0.665), (sx * 0.255, -0.075, 0.53), 0.05)
@@ -208,17 +209,20 @@ def build_body():
             base = Vector((sx * (0.303 + math.sin(a) * 0.019), -0.19 - math.cos(a) * 0.012, 0.401))
             ln = 0.03 if k in (1, 2, 3) else 0.022
             C(base, base + d * ln, 0.0088 if k != 0 else 0.0098, stiff=3.2)
+            LM.setdefault('tips', []).append(np.array(base + d * (ln + 0.006)))
     # legs: big haunches, short shins, long flat webbed hind feet with five toes
     for sx in (-1, 1):
         E((sx * 0.135, -0.02, 0.19), (0.105, 0.125, 0.13))
         C((sx * 0.145, -0.05, 0.11), (sx * 0.15, -0.085, 0.04), 0.05)
         E((sx * 0.152, -0.155, 0.024), (0.068, 0.12, 0.024), stiff=2.6)
         for k in range(5):
-            a = (k - 2) * 0.2
-            base = Vector((sx * (0.152 + math.sin(a) * 0.05), -0.22, 0.02))
-            d = Vector((sx * math.sin(a) * 0.5, -1, -0.05)).normalized()
-            C(base, base + d * 0.075, 0.0115, stiff=3.0)
-        E((sx * 0.152, -0.255, 0.014), (0.07, 0.05, 0.008), stiff=3.0)  # the web between the toes
+            a = (k - 2) * 0.3
+            base = Vector((sx * (0.152 + math.sin(a) * 0.062), -0.215, 0.021))
+            d = Vector((sx * math.sin(a) * 0.85, -1, -0.06)).normalized()
+            ln = 0.082 if k in (1, 2, 3) else 0.07
+            C(base, base + d * ln, 0.0102, stiff=3.4)
+            LM.setdefault('toes', []).append(np.array(base + d * (ln + 0.008)))
+        E((sx * 0.152, -0.25, 0.012), (0.066, 0.046, 0.0055), stiff=3.0)  # the web between the toes
     # the furry root of the tail (the scaly paddle is its own sheet)
     C((0, 0.17, 0.16), (0, 0.27, 0.075), 0.06)
 
@@ -279,7 +283,7 @@ def landmarks(body):
         LM['spec_' + k], LM['specn_' + k] = hit((sx * 0.046, -1, 0.906), (sx * 0.046, 0, 0.906))
         LM['temple_' + k], _ = hit((sx * 0.5, -0.07, 0.94), (0, -0.07, 0.94))
         LM['eye_' + k], LM['eyen_' + k] = hit((sx * 0.4, -0.42, 0.95), (sx * 0.0, -0.08, 0.93))
-        LM['ear_' + k] = np.array((sx * 0.128, 0.01, 0.985))
+        LM['ear_' + k] = np.array((sx * EAR_AT[0], EAR_AT[1], EAR_AT[2]))
         LM['palm_' + k] = np.array((sx * 0.303, -0.178, 0.414))
     for k, v in LM.items():
         log('lm', k, np.round(v, 3))
@@ -485,7 +489,7 @@ def props():
     # the incisors: two broad orange teeth under the split lip, and the lower pair on the jaw
     teeth = []
     for sx in (-1, 1):
-        teeth.append(box('tooth_u', (0.0145, 0.008, 0.032), Vector((sx * 0.0078, LM['lip'][1] + 0.004, LM['lip'][2] - 0.009)), Quaternion((1, 0, 0), math.radians(-6)), bevel=0.0025))
+        teeth.append(box('tooth_u', (0.0165, 0.009, 0.043), Vector((sx * 0.0088, LM['lip'][1] + 0.004, LM['lip'][2] - 0.0135)), Quaternion((1, 0, 0), math.radians(-6)), bevel=0.003))
     obs['teeth_u'] = join(teeth, 'teeth_u')
     teeth = []
     for sx in (-1, 1):
@@ -506,7 +510,7 @@ def props():
         for i in range(13):
             a = math.pi + i / 12 * math.pi
             pts.append(c + R @ Vector((math.cos(a) * 0.025, 0, math.sin(a) * 0.017 + 0.005)))
-        parts.append(tube('rim', pts + [pts[0]], 0.0024, n=5, closed=False))
+        parts.append(tube('rim', pts + [pts[0]], 0.0031, n=6, closed=False))
         lens = []
         for i in range(13):
             a = math.pi + i / 12 * math.pi
@@ -517,7 +521,7 @@ def props():
         e = c + R @ Vector((sx * 0.025, 0, 0.005))
         tp = Vector(LM['temple_' + k]) + Vector((sx * 0.006, 0, 0.004))
         ear = Vector(LM['ear_' + k]) + Vector((-sx * 0.012, -0.012, -0.03))
-        parts.append(tube('arm', [e, (e + tp) / 2 + Vector((sx * 0.012, 0, 0)), tp, ear], 0.002, n=4))
+        parts.append(tube('arm', [e, (e + tp) / 2 + Vector((sx * 0.012, 0, 0)), tp, ear], 0.0022, n=4))
     br = Vector(LM['bridge']) + Vector((0, -0.006, 0))
     l0 = Vector(LM['spec_r']) + Vector((-0.006 + 0.02, -0.014, 0.01))
     l1 = Vector(LM['spec_l']) + Vector((0.006 - 0.02, -0.014, 0.01))
@@ -555,7 +559,7 @@ def build_apron(body, tail):
     def half_w(z):  # the apron's outline: a bib on top, flaring to the skirt at the waist
         bib = 0.088 + 0.012 * (z1 - z) / 0.2
         skirt = 0.215 - 0.03 * smoothstep(0.2, 0.45, z)
-        return np.where(z > 0.58, bib, np.where(z > 0.5, bib + (skirt - bib) * smoothstep(0.58, 0.5, z), skirt))
+        return np.where(z > 0.52, bib, np.where(z > 0.42, bib + (skirt - bib) * smoothstep(0.52, 0.42, z), skirt))
 
     V = np.zeros((nz + 1, nx + 1, 3))
     hit_y = np.zeros((nz + 1, nx + 1))
@@ -568,7 +572,7 @@ def build_apron(body, tail):
             hit_y[j, i] = h[0].y if h[0] is not None else 0.0
             V[j, i] = (x, hit_y[j, i], z)
     # hang: going down, the cloth can't tuck back in under the belly faster than a gentle drape
-    off = 0.011
+    off = 0.015
     for i in range(nx + 1):
         prev = None
         for j in range(nz + 1):
@@ -706,8 +710,8 @@ COAT = '#7d4b2a'      # chestnut
 BACK = '#62391f'      # darker along the back and crown
 MUZZLE = '#ab8664'    # pale, a little grey
 NOSE = '#2c2322'
-PAW = '#43332b'       # leathery hands and feet
-CLAW = '#cdb58c'
+PAW = '#36271f'       # leathery hands and feet
+CLAW = '#8a735a'      # horn
 EAR = '#4b3229'
 TAIL = '#3f3a37'      # slate-brown scales
 
@@ -769,11 +773,10 @@ def paint_fur(fur, occluders):
     for k in ('l', 'r'):
         ear |= ell(P, LM['ear_' + k] + [0, -0.012, 0], (0.03, 0.02, 0.03)) < 1 + jit * 0.3
     claw = np.zeros(n, bool)
-    for k in ('l', 'r'):
-        t, lat, L = hand_t[k]
-        claw |= (t > L + 0.03) & (lat < 0.062)
-    toe = (P[:, 2] < 0.03) & (P[:, 1] < -0.318)
-    claw |= toe
+    for tip in LM['tips']:
+        claw |= np.linalg.norm(P - tip, axis=1) < 0.0085 + jit * 0.002
+    for tip in LM['toes']:
+        claw |= np.linalg.norm(P - tip, axis=1) < 0.011 + jit * 0.002
     tail = reg > 0.5
     scaly = tail & (P[:, 1] > 0.3 + jit * 0.03)
 
@@ -813,7 +816,7 @@ def paint_fur(fur, occluders):
         nost = ell(P, LM['nose'] + [sx * 0.018, 0.004, -0.012], (0.009, 0.007, 0.006)) < 1
         col[nost & nose] = pk.hexrgb('#120d0c')
     # paws: leathery skin with creases, pale claws
-    R_paw = pk.ramp(PAW, 7, light=0.3)
+    R_paw = pk.ramp(PAW, 7, light=0.24)
     pidx = 3 + (pk.fbm(P * 260, 3, 9) - 0.5) * 2.4 - (1 - ao) * 4 - np.clip(cav * 1200, 0, 1.5)
     pm = paws > 0.5 + jit * 0.6
     col[pm] = pk.pick(R_paw, pidx[pm])
@@ -1367,7 +1370,7 @@ def main():
     tail = build_tail()
     set_attr(body, 'reg', 0.0)
     set_attr(tail, 'reg', 1.0)
-    PENCIL['ear'] = (np.array((-0.1, 0.07, 1.0)), np.array(Vector((-0.16, -1.0, -0.22)).normalized()))
+    PENCIL['ear'] = (np.array((-0.113, 0.07, 0.984)), np.array(Vector((-0.16, -1.0, -0.22)).normalized()))
     PENCIL['hand'] = (np.array((-0.3, -0.165, 0.425)), np.array(Vector((0.25, -1.0, 0.3)).normalized()))
     P_ = props()
     ap, straps, pocket, stuff = build_apron(body, tail)

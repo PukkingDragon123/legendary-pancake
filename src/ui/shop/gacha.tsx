@@ -115,10 +115,11 @@ export function Gacha(p: { seriesId: string; stage: Lodge | null; say: (t: strin
               <div class="lg-chalk-row"><span>4<Px name="shop_star4" size={12} /> for sure in</span><b>{untilFour(pity)}</b><span>wishes</span></div>
               <div class="lg-chalk-row small"><span>wished since the last 5<Px name="shop_star5" size={10} />:</span><Tally n={pity.five} max={40} />{pity.five > 40 ? <em>+{pity.five - 40}</em> : null}</div>
               {pity.guaranteed && <div class="lg-chalk-row small gold">next 5<Px name="shop_star5" size={10} /> is the featured one!</div>}
-            </div>
-            <div class="lg-g-links">
-              <button class="lg-ktag small" onClick={() => { sound.play('paper_flip', { volume: 0.4 }); setSheet('details'); }}>Rates</button>
-              <button class="lg-ktag small" onClick={() => { sound.play('paper_flip', { volume: 0.4 }); setSheet('history'); }}>History</button>
+              {/* the rates and the history: two kraft tags pinned to the slate's corner */}
+              <div class="lg-g-links">
+                <button class="lg-ktag small" onClick={() => { sound.play('paper_flip', { volume: 0.4 }); setSheet('details'); }}>Rates</button>
+                <button class="lg-ktag small" onClick={() => { sound.play('paper_flip', { volume: 0.4 }); setSheet('history'); }}>History</button>
+              </div>
             </div>
           </div>
           <p class="lg-gnote">1 wish = 1 prize from this series · duplicates become acorns</p>

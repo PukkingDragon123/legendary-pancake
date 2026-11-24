@@ -634,11 +634,11 @@ export function injectLodgeCSS() {
   // the store's things wear their materials: paper tags, kraft labels, brass plates, cloth, planks, the oak board
   const WEAR = {
     '.lg-ptag': 'lg_paper', '.lg-ktag': 'lg_kraft', '.lg-ktag.brass': 'lg_brass', '.lg-cloth.on': 'lg_cloth_red', '.lg-cloth.soon': 'lg_cloth_violet', '.lg-stamp-block': 'lg_stampblock',
-    '.lg-g-tab': 'lg_kraft', '.lg-g-tab.on': 'lg_paper', '.lg-up,.lg-new': 'lg_cloth_red', '.lg-bonus': 'lg_cloth_gold', '.lg-bonus.gem': 'lg_cloth_violet', '.lg-bubble-who': 'lg_cloth_gold', '.lg-hint': 'lg_paper', '.lg-poster': 'lg_paper', '.lg-poster-title': 'lg_chip', '.lg-sum-card': 'lg_paper', '.lg-sum-card.r5': 'lg_kraft', '.lg-gnote': 'lg_kraft',
+    '.lg-g-tab': 'lg_kraft', '.lg-g-tab.on': 'lg_paper', '.lg-new': 'lg_cloth_red', '.lg-up': ['lg_cloth_red', 1], '.lg-bonus': 'lg_cloth_gold', '.lg-bonus.gem': 'lg_cloth_violet', '.lg-bubble-who': 'lg_cloth_gold', '.lg-hint': 'lg_paper', '.lg-poster': 'lg_paper', '.lg-poster-title': 'lg_chip', '.lg-sum-card': 'lg_paper', '.lg-sum-card.r5': 'lg_kraft', '.lg-gnote': ['lg_kraft', 1],
     '.lg-navsign': 'lg_plank', '.lg-navsign:active,.lg-navsign.on': 'lg_plank_down', '.lg-card': 'lg_board', '.lg-ledger': 'lg_paper', '.lg-gtag': 'lg_kraft',
     '.lg-burlap': 'lg_kraft', '.lg-plate': 'lg_brass', '.lg-page': 'lg_paper', '.lg-prize-page': 'lg_paper', '.lg-timer': 'lg_chip',
   };
-  for (const [sel, fr] of Object.entries(WEAR)) css += `${sel}{${lgStyle(fr, 2)}}\n`;
+  for (const [sel, fr] of Object.entries(WEAR)) css += Array.isArray(fr) ? `${sel}{${lgStyle(fr[0], fr[1])}}\n` : `${sel}{${lgStyle(fr, 2)}}\n`;
   css += ':root{';
   for (const p of Object.keys(PAT)) css += `--lg-pat-${p}:url("${patternURL(p, 2)}");`;
   css += `--lg-rays-a:url("${raysURL(0)}");--lg-rays-b:url("${raysURL(1)}");--lg-burst:url("${burstURL()}");--lg-burst-gold:url("${burstURL(128, '#ffd27a')}");--lg-burst-violet:url("${burstURL(128, '#c79bff')}");--lg-burst-blue:url("${burstURL(128, '#8fd0ff')}");--lg-twinkle:url("${spriteURL('shop_twinkle', 2)}");`;
