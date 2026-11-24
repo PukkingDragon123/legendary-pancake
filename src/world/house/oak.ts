@@ -165,6 +165,15 @@ function rope(g: Geo, a: V3, b: V3, sag: number, rad: number, col: V3) {
   g.tube(pts, pts.map(() => rad), 4, { col: () => col });
 }
 
+/** A rounded rectangle shape (w x h, corner radius r), centred on the origin. */
+function roundRect(w: number, h: number, r: number): THREE.Shape {
+  const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
+  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r); s.lineTo(x + w, y + h - r);
+  s.quadraticCurveTo(x + w, y + h, x + w - r, y + h); s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+  return s;
+}
+
 // ------------------------------------------------------------------ painted signs
 
 function plaqueTex(level: number): THREE.CanvasTexture {
@@ -436,16 +445,31 @@ export function buildOak(): Oak {
   ladder('f2', LADDER_A.f2, 58, FLOOR_Y.f2, FLOOR_Y.f3);
   ladder('f3', Math.atan2(30, -38), 50, FLOOR_Y.f3, ROOF_Y);
 
+  /** A hexagonal coach lantern (lathe-turned base and domed cap, tapered glass chimney, corner frames, a candle and
+   * flame inside, a ring on top), centred at c, scale s; `hang` adds a chain of that length above it. */
   const lantern = (band: Band, c: V3, s = 1, hang = 0) => {
-    const ir = S.get(band, 'iron'), gl = S.get(band, 'glow');
+    const ir = S.get(band, 'iron'), gl = S.get(band, 'glow'), pa = S.get(band, 'paint');
     const [x, y, z] = c;
-    box(ir, [x, y + 6 * s, z], [7 * s, 1.2 * s, 7 * s]);
-    cyl(ir, [x, y + 8 * s, z], 0.4 * s, 3.4 * s, [0, 0, 0], [1, 1, 1], 4, 4.6 * s);
-    box(ir, [x, y - 6 * s, z], [6.4 * s, 1.4 * s, 6.4 * s]);
-    for (const [ox, oz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) box(ir, [x + ox * 3 * s, y, z + oz * 3 * s], [0.9 * s, 11 * s, 0.9 * s]);
-    box(gl, [x, y, z], [5 * s, 10 * s, 5 * s]);
+    const lathe = (pts: [number, number][], seg = 6) => new THREE.LatheGeometry(pts.map(([r, h]) => new THREE.Vector2(r * s, h * s)), seg);
+    ir.add(lathe([[0, -6.6], [2.6, -6.6], [3.4, -6.1], [3.6, -5.4], [3.0, -4.9], [2.7, -4.6]]), mat([x, y, z], [0, Math.PI / 6, 0]));
+    ir.add(lathe([[2.9, 4.4], [3.9, 4.7], [3.9, 5.2], [3.1, 6.2], [1.9, 7.4], [1.1, 8.0], [0.9, 8.6], [0, 8.9]]), mat([x, y, z], [0, Math.PI / 6, 0]));
+    ir.add(new THREE.SphereGeometry(0.75 * s, 8, 6), mat([x, y + 9.3 * s, z]));
+    ir.add(new THREE.TorusGeometry(1.2 * s, 0.32 * s, 5, 12), mat([x, y + 10.6 * s, z]));
+    // the glass: a softly glowing tapered hexagonal chimney
+    gl.add(new THREE.CylinderGeometry(2.75 * s, 2.45 * s, 9.0 * s, 6, 1, true), mat([x, y - 0.1 * s, z], [0, Math.PI / 6, 0]));
+    // frame bars on the six corners
+    for (let k = 0; k < 6; k++) {
+      const a = (k / 6) * TAU;
+      beam(ir, [x + Math.sin(a) * 2.5 * s, y - 4.6 * s, z + Math.cos(a) * 2.5 * s], [x + Math.sin(a) * 2.85 * s, y + 4.5 * s, z + Math.cos(a) * 2.85 * s], 0.45 * s);
+    }
+    // candle and flame
+    pa.add(new THREE.CylinderGeometry(0.8 * s, 0.85 * s, 3.4 * s, 8), mat([x, y - 2.8 * s, z]), [0.96, 0.92, 0.82]);
+    gl.add(new THREE.SphereGeometry(0.75 * s, 6, 5), mat([x, y - 0.3 * s, z], [0, 0, 0], [0.8, 1.6, 0.8]));
     if (hang) {
-      for (let k = 0; k < hang; k += 2.4) box(ir, [x, y + 10 * s + k, z], [0.7, 1.6, k % 4.8 < 2.4 ? 0.7 : 1.4]);
+      for (let k = 0; k < hang; k += 2.2) {
+        const link = new THREE.TorusGeometry(0.7, 0.22, 4, 8);
+        ir.add(link, mat([x, y + 11.6 * s + k + 1, z], [0, (Math.floor(k / 2.2) % 2) * (Math.PI / 2), 0], [1, 1.4, 1]));
+      }
     }
   };
   lantern('f2', LAMP_AT.f1, 0.9, FLOOR_Y.f2 - SLAB - LAMP_AT.f1[1] - 9);
@@ -654,7 +678,12 @@ export function buildOak(): Oak {
     const py = fid === 'f2' ? FLOOR_Y.f2 + 40 : FLOOR_Y.f3 + 8;
     const zr = barkR(0, py);
     const plaque = new THREE.Group();
-    const pm = new THREE.Mesh(new THREE.BoxGeometry(16, 10.5, 1.2), [houseMat('brass'), houseMat('brass'), houseMat('brass'), houseMat('brass'), new THREE.MeshStandardMaterial({ map: plaqueTex(level), metalness: 0.3, roughness: 0.38 }), houseMat('brass')]);
+    // a bevelled brass plate, the level engraved on its face
+    const pgeo = new THREE.ExtrudeGeometry(roundRect(16, 10.5, 1.6), { depth: 0.8, bevelEnabled: true, bevelThickness: 0.35, bevelSize: 0.45, bevelSegments: 2, curveSegments: 4 });
+    pgeo.translate(0, 0, -0.6);
+    const puv = pgeo.getAttribute('uv') as THREE.BufferAttribute, pnr = pgeo.getAttribute('normal') as THREE.BufferAttribute;
+    for (let i = 0; i < puv.count; i++) if (Math.abs(pnr.getZ(i)) > 0.9) puv.setXY(i, (puv.getX(i) + 8) / 16, (puv.getY(i) + 5.25) / 10.5);
+    const pm = new THREE.Mesh(pgeo, [new THREE.MeshStandardMaterial({ map: plaqueTex(level), metalness: 0.3, roughness: 0.38 }), houseMat('brass')]);
     pm.scale.setScalar(PX);
     plaque.position.set(0, py * PX, (zr + 1.4) * PX);
     pm.castShadow = true;
@@ -662,7 +691,9 @@ export function buildOak(): Oak {
     const padlock = new THREE.Group();
     {
       const g = new Geo(), ir = new Geo();
-      box(g, [0, 0, 0], [9, 8, 3.2], [0, 0, 0], [1, 1, 1]);
+      const body = new THREE.ExtrudeGeometry(roundRect(9, 8, 2.2), { depth: 2.2, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.5, bevelSegments: 2, curveSegments: 5 });
+      body.translate(0, 0, -1.1);
+      g.add(body);
       ir.add(new THREE.TorusGeometry(3.1, 0.95, 6, 14, Math.PI), mat([0, 4, 0], [0, 0, 0]));
       box(ir, [0, -0.8, 1.65], [1.3, 3, 0.3], [0, 0, 0], [0.2, 0.2, 0.2]);
       ball(ir, [0, 0.9, 1.65], 0.9, [0.2, 0.2, 0.2]);
@@ -883,7 +914,10 @@ export function buildOak(): Oak {
     // welcome mat
     const mt = S.get('f1', 'paint', 'mat');
     extra.set('mat', new THREE.MeshStandardMaterial({ map: matTex(), roughness: 0.95 }));
-    box(mt, P(DOOR_A, top + 0.35, barkR(DOOR_A, top) + 6), [18, 0.7, 9], [0, DOOR_A, 0]);
+    const mg = new THREE.ExtrudeGeometry(roundRect(18, 9, 2), { depth: 0.5, bevelEnabled: true, bevelThickness: 0.15, bevelSize: 0.3, bevelSegments: 1, curveSegments: 4 });
+    const muv = mg.getAttribute('uv') as THREE.BufferAttribute;
+    for (let i = 0; i < muv.count; i++) muv.setXY(i, (muv.getX(i) + 9) / 18, (muv.getY(i) + 4.5) / 9);
+    mt.add(mg, mat(P(DOOR_A, top + 0.15, barkR(DOOR_A, top) + 6), [-Math.PI / 2, DOOR_A, 0]));
     // fairy lights along the top rail
     const fl = S.get('f1', 'glow', 'bulbs'), wire = S.get('f1', 'iron');
     const wp: V3[] = [];
@@ -961,18 +995,33 @@ export function buildOak(): Oak {
     const a = 0.98, r = RO + 52;
     const pl = S.get('f1', 'planks');
     const base = P(a, 0, r);
-    beam(pl, base, [base[0], 17, base[2]], 2.6, [0.78, 0.66, 0.54]);
+    beam(pl, base, [base[0], 17.4, base[2]], 2.6, [0.78, 0.66, 0.54]);
+    box(pl, [base[0], 16.6, base[2]], [5, 1.2, 9], [0, a, 0], [0.7, 0.58, 0.46]);
     const mb = S.get('f1', 'paint');
     const T: V3 = [Math.cos(a), 0, -Math.sin(a)];
-    box(mb, [base[0], 20.5, base[2]], [6, 6, 11], [0, a, 0], [0.62, 0.22, 0.16]);
-    mb.add(new THREE.CylinderGeometry(3, 3, 11, 10, 1, false, Math.PI / 2, Math.PI), mat([base[0], 23.4, base[2]], [Math.PI / 2, a, 0]), [0.66, 0.24, 0.18]);
-    // the flag (up: post for Pip)
-    box(mb, [base[0] + T[0] * 3.4, 25, base[2] + T[2] * 3.4], [0.6, 7, 1], [0, a, 0], [0.3, 0.3, 0.3]);
-    box(mb, [base[0] + T[0] * 3.6, 27.5, base[2] + T[2] * 3.6 + 0], [0.6, 2.6, 3.6], [0, a, 0], [0.95, 0.8, 0.2]);
+    // profile: 6 wide, flat bottom, round top; extruded 11 long with a bevelled edge
+    const prof = new THREE.Shape();
+    prof.moveTo(-3, 0); prof.lineTo(3, 0); prof.lineTo(3, 3.4); prof.absarc(0, 3.4, 3, 0, Math.PI, false); prof.lineTo(-3, 0);
+    const body = new THREE.ExtrudeGeometry(prof, { depth: 11, bevelEnabled: true, bevelThickness: 0.35, bevelSize: 0.3, bevelSegments: 2, curveSegments: 10 });
+    body.translate(0, 0, -5.5);
+    mb.add(body, mat([base[0], 17.2, base[2]], [0, a, 0]), [0.42, 0.11, 0.08]);
+    // the door on the end facing out (a slightly proud panel), its pull, the hinge rod
+    const door = new THREE.ExtrudeGeometry(prof, { depth: 0.4, bevelEnabled: true, bevelThickness: 0.15, bevelSize: 0.2, bevelSegments: 1, curveSegments: 10 });
+    door.scale(0.94, 0.94, 1);
+    mb.add(door, mat([base[0] + Math.sin(a) * 5.9, 17.4, base[2] + Math.cos(a) * 5.9], [0, a, 0]), [0.5, 0.14, 0.1]);
+    const ir2 = S.get('f1', 'iron');
+    ir2.add(new THREE.TorusGeometry(0.7, 0.22, 4, 10, Math.PI), mat([base[0] + Math.sin(a) * 6.6, 22.8, base[2] + Math.cos(a) * 6.6], [0, a, 0]));
+    // the flag up (post for Pip), on a pivoting arm
+    beam(ir2, [base[0] + T[0] * 3.4, 19, base[2] + T[2] * 3.4], [base[0] + T[0] * 3.4 + Math.sin(a) * 1, 27.5, base[2] + T[2] * 3.4 + Math.cos(a) * 1], 0.5);
+    const flag = new THREE.Shape();
+    flag.moveTo(0, 0); flag.lineTo(3.4, 0); flag.lineTo(3.4, 2.2); flag.lineTo(0, 2.2); flag.closePath();
+    const fg = new THREE.ExtrudeGeometry(flag, { depth: 0.3, bevelEnabled: false });
+    mb.add(fg, mat([base[0] + T[0] * 3.6 + Math.sin(a) * 1, 25.6, base[2] + T[2] * 3.6 + Math.cos(a) * 1], [0, a - Math.PI / 2, 0]), [0.95, 0.78, 0.2]);
+    ir2.add(new THREE.SphereGeometry(0.45, 6, 5), mat([base[0] + T[0] * 3.4, 19, base[2] + T[2] * 3.4]));
     const lbl = S.get('f1', 'paint', 'mail');
     extra.set('mail', new THREE.MeshStandardMaterial({ map: mailTex(), roughness: 0.6 }));
-    const lc = [base[0] + T[0] * 3.05, 21.5, base[2] + T[2] * 3.05] as V3;
-    const pg = new THREE.PlaneGeometry(9, 4.5);
+    const lc = [base[0] + T[0] * 3.42, 18.9, base[2] + T[2] * 3.42] as V3;
+    const pg = new THREE.PlaneGeometry(7.5, 2.8);
     lbl.add(pg, mat(lc, [0, a + Math.PI / 2, 0]));
     // signpost
     const sa = 0.5, sr = RO + 64;
@@ -981,7 +1030,12 @@ export function buildOak(): Oak {
     const sg = S.get('f1', 'paint', 'sign');
     extra.set('sign', new THREE.MeshStandardMaterial({ map: signTex(), roughness: 0.8 }));
     const yaw = 0.25;
-    const bx = new THREE.BoxGeometry(30, 9, 1.4);
+    const arrow = new THREE.Shape();
+    arrow.moveTo(-15, -4.5); arrow.lineTo(11, -4.5); arrow.lineTo(15, 0); arrow.lineTo(11, 4.5); arrow.lineTo(-15, 4.5); arrow.closePath();
+    const bx = new THREE.ExtrudeGeometry(arrow, { depth: 1.2, bevelEnabled: true, bevelThickness: 0.25, bevelSize: 0.3, bevelSegments: 1 });
+    // the painted lettering on the faces: shape coordinates -> the sign texture
+    const buv = bx.getAttribute('uv') as THREE.BufferAttribute;
+    for (let i = 0; i < buv.count; i++) buv.setXY(i, (buv.getX(i) + 15) / 30 * 0.98 + 0.01, (buv.getY(i) + 4.5) / 9);
     sg.add(bx, mat([sb[0], 24, sb[2] + 1.2], [0, yaw, -0.04]));
   }
 
@@ -992,8 +1046,14 @@ export function buildOak(): Oak {
       const yy = y + k * 4.5, aa = a + (k - 1) * 0.03;
       const r = barkR(aa, yy) - 1;
       const g = S.get(band, 'paint');
-      const s = 4.5 - k * 0.8;
-      g.add(new THREE.SphereGeometry(s, 9, 4, 0, TAU, 0, Math.PI / 2), mat(P(aa, yy, r + s * 0.3), [0, aa, 0], [1.25, 0.42, 1.1]), [0.86, 0.72 - k * 0.06, 0.5 - k * 0.04]);
+      const sz = 4.6 - k * 0.8;
+      const fan = new THREE.Shape();
+      fan.moveTo(-sz, 0);
+      for (let i = 0; i <= 16; i++) { const t = Math.PI - (i / 16) * Math.PI; const w = 1 + Math.sin(i * 1.9) * 0.06; fan.lineTo(Math.cos(t) * sz * w, Math.sin(t) * sz * 0.8 * w); }
+      fan.closePath();
+      const fg2 = new THREE.ExtrudeGeometry(fan, { depth: 1.1, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.5, bevelSegments: 2 });
+      // lie flat, sticking out of the bark like a bracket
+      g.add(fg2, mat(P(aa, yy, r - 0.6), [Math.PI / 2, aa, 0]), [0.86, 0.72 - k * 0.06, 0.5 - k * 0.04]);
     }
     // a knothole with a dark inside on the left front of the second floor's bark
     const ka = -1.32, ky = 104;
