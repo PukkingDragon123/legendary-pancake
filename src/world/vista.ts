@@ -110,27 +110,37 @@ export class Vista {
   private buildForest(quality: 'low' | 'high') {
     const r = rng(SEED ^ 0x5eed);
     const leaf = leafMaterial();
-    // cheap far trees: a few puffs of big leaf cards, or a short stack of needle tiers, on a plain trunk
-    type Kind = { cells: LeafCell[]; conifer: boolean; geo: THREE.BufferGeometry };
+    // cheap far trees: a few puffs of big leaf cards, or a short stack of needle tiers, on a plain trunk; three levels
+    // of detail by belt (the near belt keeps inner hulls so it never reads see-through)
+    type Kind = { conifer: boolean; geo: THREE.BufferGeometry[] };
     const broad = (cells: LeafCell[], seed: number, tall = 1): Kind => {
-      const puffs = [{ x: 0, y: 4.1 * tall, z: 0, r: 1.9, sy: 0.85 }, { x: 1.1, y: 3.3 * tall, z: 0.4, r: 1.3, sy: 0.8 }, { x: -1.0, y: 3.4 * tall, z: -0.5, r: 1.35, sy: 0.8 }, { x: 0.1, y: 5.0 * tall, z: -0.2, r: 1.2, sy: 0.8 }];
-      return { cells, conifer: false, geo: canopy(puffs, { cells, seed, size: 1.55, cover: 1.35, height: 5.6 * tall, sway: 0.02, depthDark: 0.5 }) };
+      const P = [{ x: 0, y: 4.1 * tall, z: 0, r: 1.95, sy: 0.85 }, { x: 1.15, y: 3.3 * tall, z: 0.4, r: 1.35, sy: 0.8 }, { x: -1.0, y: 3.5 * tall, z: -0.5, r: 1.4, sy: 0.8 }];
+      const o = { cells, seed, height: 5.6 * tall, sway: 0.02, depthDark: 0.5 };
+      return { conifer: false, geo: [
+        canopy(P, { ...o, size: 1.75, cover: 1.5 }),
+        canopy(P, { ...o, size: 2.2, cover: 1.1, core: false }),
+        canopy(P.slice(0, 2), { ...o, size: 2.7, cover: 1.0, core: false }),
+      ] };
     };
-    const cone = (cell: LeafCell, seed: number): Kind => ({ cells: [cell], conifer: true, geo: conifer({ cell, seed, base: 1.2, top: 7.4, radius: 1.9, tiers: 5, detail: 0.45, size: 1.1 }) });
-    const kinds: Kind[] = [
-      broad(['oak', 'oak', 'oakFresh'], 1), broad(['oakFresh', 'oak'], 2, 1.1), broad(['maple'], 3), broad(['birch', 'oakFresh'], 4, 1.15),
-      cone('fir', 5), cone('pine', 6), broad(['oak'], 7, 0.9), cone('fir', 8),
-    ];
+    const cone = (cell: LeafCell, seed: number): Kind => {
+      const o = { cell, seed, base: 1.2, top: 7.4, radius: 1.9 };
+      return { conifer: true, geo: [
+        conifer({ ...o, tiers: 5, detail: 0.45, size: 1.1 }),
+        conifer({ ...o, tiers: 4, detail: 0.32, size: 1.25, core: false }),
+        conifer({ ...o, tiers: 3, detail: 0.26, size: 1.4, core: false }),
+      ] };
+    };
+    const kinds: Kind[] = [broad(['oak', 'oak', 'oakFresh'], 1), broad(['oakFresh', 'oak'], 2, 1.1), broad(['maple', 'oak'], 3), broad(['birch', 'oakFresh'], 4, 1.15), cone('fir', 5), cone('pine', 6)];
     const trunk = new THREE.CylinderGeometry(0.16, 0.26, 3.6, 5, 1, true).translate(0, 1.8, 0);
     const trunkMat = new THREE.MeshStandardMaterial({ map: tex('bark_spruce', { repeat: true }), color: 0x8a7a68, roughness: 1 });
     // three belts: dense near the clearing, sparser and bigger towards the horizon
     const belts = quality === 'high'
-      ? [{ r0: 0, r1: 62, step: 3.4, s: [0.9, 1.25] }, { r0: 62, r1: 135, step: 5.2, s: [1.15, 1.6] }, { r0: 135, r1: 205, step: 8.5, s: [1.6, 2.3] }]
-      : [{ r0: 0, r1: 62, step: 4.2, s: [0.95, 1.3] }, { r0: 62, r1: 135, step: 6.8, s: [1.25, 1.7] }, { r0: 135, r1: 220, step: 11, s: [1.8, 2.5] }];
-    // instances binned by kind and by sector (so off-screen sectors are culled)
-    const SECT = 12;
+      ? [{ r0: 0, r1: 62, step: 3.6, s: [0.9, 1.25] }, { r0: 62, r1: 135, step: 5.6, s: [1.15, 1.6] }, { r0: 135, r1: 205, step: 9, s: [1.6, 2.3] }]
+      : [{ r0: 0, r1: 62, step: 4.4, s: [0.95, 1.3] }, { r0: 62, r1: 135, step: 7.2, s: [1.25, 1.7] }, { r0: 135, r1: 200, step: 12, s: [1.8, 2.5] }];
+    // instances binned by kind, belt and sector (so the sectors off screen are culled)
+    const SECT = 3;
     const bins = new Map<string, { x: number; y: number; z: number; s: number; yaw: number; kind: number }[]>();
-    for (const b of belts) {
+    belts.forEach((b, band) => {
       const lim = b.r1;
       for (let gz = -lim; gz < lim; gz += b.step) for (let gx = -lim; gx < lim; gx += b.step) {
         const x = gx + r.range(0, b.step), z = gz + r.range(0, b.step);
@@ -140,26 +150,23 @@ export class Vista {
         if (inViewWedge(x, z) && d < 75) continue;
         // clearings and glades in the far woods
         if (fbm(x / 26, 3, z / 26, SEED) < 0.3 && d > 40) continue;
-        if (b.r0 === 0 && r.chance(0.08)) continue;
-        const near = d < 45;
+        if (band === 0 && r.chance(0.08)) continue;
         const k = r();
         // conifers climb the valley sides, broadleaves fill the floor
-        const coniferP = 0.25 + Math.min(0.45, d / 400);
-        const kind = k < coniferP ? r.pick([4, 5, 7]) : near ? r.pick([0, 1, 2, 3, 6]) : r.pick([0, 0, 1, 2, 3, 6]);
+        const kind = k < 0.25 + Math.min(0.4, d / 400) ? r.pick([4, 5, 4]) : r.pick([0, 0, 1, 2, 3]);
         const sect = Math.floor(((Math.atan2(z, x) + Math.PI) / (Math.PI * 2)) * SECT) % SECT;
-        const band = d < 62 ? 0 : d < 135 ? 1 : 2;
         const key = `${kind}:${sect}:${band}`;
         if (!bins.has(key)) bins.set(key, []);
         bins.get(key)!.push({ x, y: outerY(x, z) - 0.15, z, s: r.range(b.s[0], b.s[1]), yaw: r.range(0, Math.PI * 2), kind });
       }
-    }
+    });
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), v = new THREE.Vector3(), sv = new THREE.Vector3();
     for (const [key, list] of bins) {
       const kind = kinds[+key.split(':')[0]];
       const band = +key.split(':')[2];
-      const geo = withLeafState(kind.geo, list.length);
+      const geo = withLeafState(kind.geo[band], list.length);
       const mesh = new THREE.InstancedMesh(geo, leaf.mat, list.length);
-      const tm = band < 2 ? new THREE.InstancedMesh(trunk, trunkMat, list.length) : null;
+      const tm = band === 0 ? new THREE.InstancedMesh(trunk, trunkMat, list.length) : null;
       list.forEach((it, i) => {
         q.setFromAxisAngle(up, it.yaw);
         m.compose(v.set(it.x, it.y, it.z), q, sv.set(it.s, it.s * (0.9 + hash(i, 1, 2) * 0.25), it.s));

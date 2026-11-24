@@ -15,3 +15,8 @@ if (q.get('decor')) sc.setDecorating(true);
 sc.snapCamera();
 for (let i = 0; i < 60; i++) sc.step(1 / 30, false);
 sc.start();
+// [look4] preview a stage through the world's post chain: ?stage=shop|office|globe
+const stage = q.get('stage');
+if (stage === 'shop') void import('../world/stages/boutique.ts').then(({ Boutique }) => { const b = new Boutique([]); b.attach(sc.renderer, sc); sc.setStage(b); (window as any).stage = b; });
+if (stage === 'office') void import('../onboard/room.ts').then(({ InterviewRoom }) => { const r = new InterviewRoom({ palette: 'tawny', outfit: {} } as never, 'high', sc); sc.setStage(r); (window as any).stage = r; });
+if (stage === 'globe') void import('../world/globe/stage.ts').then(({ GlobeStage }) => { const g = new GlobeStage(sc.renderer); g.setPlaces([]); sc.setStage(g); (window as any).stage = g; });

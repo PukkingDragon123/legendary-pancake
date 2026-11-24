@@ -492,8 +492,8 @@ export class Sky {
     const isDay = this.hour > 5.6 && this.hour < 19.6;
     const k = isDay ? (this.hour - 5.6) / 14 : 0.35;
     const peak = 0.5 + 0.6 * w.sunHeight;
-    const az = -1.3 + k * 2.6, el = isDay ? 0.2 + Math.sin(k * Math.PI) * (peak - 0.2) : 0.9;
-    this.sunDir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el) * 0.75 + 0.2).normalize();
+    const az = -1.12 + k * 2.24, el = isDay ? 0.3 + Math.sin(k * Math.PI) * (peak - 0.3) : 0.9;
+    this.sunDir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el) * 0.8 + 0.3).normalize();
     if (!isDay) this.sunDir.set(-0.32, 0.78, 0.54).normalize();
     this.sun.position.copy(this.sunDir).multiplyScalar(60);
     this.sun.target.position.set(0, 0, 0);

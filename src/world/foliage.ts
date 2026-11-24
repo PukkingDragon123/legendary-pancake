@@ -272,6 +272,8 @@ export interface ConiferOpts {
   sway?: number;
   /** level of detail: 1 = full, 0.5 = half the cards */
   detail?: number;
+  /** the dark inner cone (default on) */
+  core?: boolean;
 }
 
 /** A fir / spruce / pine crown: drooping tiers of needle sprays radiating from the trunk, plus upright sprays so
@@ -331,23 +333,25 @@ export function conifer(o: ConiferOpts): THREE.BufferGeometry {
     const len = o.radius * 0.7;
     leafCard(mb, v3(0, H - len * 0.4, 0), nrm, 0, len * 0.7, len, rect, axis, o.radius, sy, () => 1.05, [1, 1, 1], wind, i % 2 === 0);
   }
-  // the dark inner cone
-  const segs = 8, rows = 5;
-  const ids: number[][] = [];
-  const [u0, v0, u1, v1] = rect;
-  for (let j = 0; j <= rows; j++) {
-    const k = j / rows, y = o.base + L * k * 0.92, r = o.radius * 0.62 * Math.pow(1 - k, 0.95) + 0.02;
-    const row: number[] = [];
-    for (let i = 0; i <= segs; i++) {
-      const a = (i / segs) * Math.PI * 2;
-      const q = v3(Math.cos(a) * r, y, Math.sin(a) * r);
-      const nn = v3(Math.cos(a), 0.45, Math.sin(a)).normalize();
-      const sh = 0.32 + 0.18 * k;
-      row.push(mb.vert(q, nn, u0 + (u1 - u0) * (0.35 + 0.3 * (i % 2)), v0 + (v1 - v0) * (0.35 + 0.3 * k), [sh, sh, sh], wind(q, false)));
+  if (o.core !== false) {
+    // the dark inner cone
+    const segs = 8, rows = 5;
+    const ids: number[][] = [];
+    const [u0, v0, u1, v1] = rect;
+    for (let j = 0; j <= rows; j++) {
+      const k = j / rows, y = o.base + L * k * 0.92, r = o.radius * 0.62 * Math.pow(1 - k, 0.95) + 0.02;
+      const row: number[] = [];
+      for (let i = 0; i <= segs; i++) {
+        const a = (i / segs) * Math.PI * 2;
+        const q = v3(Math.cos(a) * r, y, Math.sin(a) * r);
+        const nn = v3(Math.cos(a), 0.45, Math.sin(a)).normalize();
+        const sh = 0.32 + 0.18 * k;
+        row.push(mb.vert(q, nn, u0 + (u1 - u0) * (0.35 + 0.3 * (i % 2)), v0 + (v1 - v0) * (0.35 + 0.3 * k), [sh, sh, sh], wind(q, false)));
+      }
+      ids.push(row);
     }
-    ids.push(row);
+    for (let j = 0; j < rows; j++) for (let i = 0; i < segs; i++) mb.quad(ids[j][i], ids[j][i + 1], ids[j + 1][i + 1], ids[j + 1][i]);
   }
-  for (let j = 0; j < rows; j++) for (let i = 0; i < segs; i++) mb.quad(ids[j][i], ids[j][i + 1], ids[j + 1][i + 1], ids[j + 1][i]);
   return mb.build({ moss: false });
 }
 // the in-plane axes leafCard uses for a normal (so a card's spin can point its +v edge along a direction)

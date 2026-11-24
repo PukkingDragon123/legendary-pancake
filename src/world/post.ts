@@ -59,8 +59,8 @@ export function defaultGrade(): Grade {
 
 /** What a Stage gets unless it sets its own `look` (warm, softly bloomed, auto-focused at the centre). */
 export const STAGE_LOOK: Partial<Grade> = {
-  exposure: 1, contrast: 1.05, saturation: 1.1, vibrance: 0.2, warm: 0.1, split: 0.4, vignette: 0.24, grain: 0.016,
-  bloom: 0.5, bloomThreshold: 1.0, focus: 0, focusRange: 1.2, blur: 0.35, cold: 0,
+  exposure: 1.0, contrast: 1.05, saturation: 1.1, vibrance: 0.2, warm: 0.1, split: 0.4, vignette: 0.24, grain: 0.016,
+  bloom: 0.5, bloomThreshold: 1.2, focus: 0, focusRange: 1.5, blur: 0.3, cold: 0,
 };
 
 /** Knobs a Stage may set (any subset of Grade). */
@@ -159,8 +159,21 @@ export class Post {
     const COC = /* glsl */ `
       uniform float uFocus; uniform float uRange; uniform vec2 uFocusAt;
       ${DEPTH}
-      float focusZ() { return uFocus > 0.0 ? uFocus : viewZ(uFocusAt); }
+      // auto focus: the nearest solid thing in a small cross round focusAt (never the sky)
+      float focusZ() {
+        if (uFocus > 0.0) return uFocus;
+        float best = -1.0;
+        for (int i = 0; i < 5; i++) {
+          vec2 o = i == 0 ? vec2(0.0) : vec2(i == 1 ? 0.04 : i == 2 ? -0.04 : 0.0, i == 3 ? 0.05 : i == 4 ? -0.05 : 0.0);
+          vec2 uv = clamp(uFocusAt + o, 0.0, 1.0);
+          if (texture2D(tDepth, uv).x > 0.99999) continue;
+          float z = viewZ(uv);
+          best = best < 0.0 ? z : min(best, z);
+        }
+        return best;
+      }
       float coc(vec2 uv, float fz) {
+        if (fz <= 0.0) return 0.0;
         float d = texture2D(tDepth, uv).x;
         if (d > 0.99999) return 0.0; // the sky stays crisp (stars, the moon, painted clouds)
         float z = viewZ(uv);
