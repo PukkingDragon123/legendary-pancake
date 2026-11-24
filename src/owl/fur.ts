@@ -8,7 +8,36 @@
 // One extra draw call per part; shells cast no shadows.
 import * as THREE from 'three';
 
+/** The most shells a part can draw (its instanced mesh is allocated for this many). */
 export const SHELLS = 8;
+
+/** The shell count before the scene says otherwise (Scene.setTier -> setFurQuality keeps it in step with look4's cost
+ * tier, auto-downgrades included): look4's deviceTier rule, phones and small machines medium (5), the rest high (8). */
+function deviceShells(): number {
+  try {
+    const nav = navigator as Navigator & { deviceMemory?: number };
+    const touch = typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+    const small = typeof screen !== 'undefined' && Math.min(screen.width, screen.height) < 820;
+    const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(nav.userAgent || '') || (touch && small);
+    return mobile || (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4 ? 5 : 8;
+  } catch { return 5; }
+}
+let shellCount = deviceShells();
+const live = new Set<THREE.InstancedMesh>();
+const shellUniform = { value: shellCount };
+/** Set the fur's shell count (1..SHELLS) for every owl now and later, e.g. from the scene's quality tier
+ * ('high' 8, 'medium' 5, 'low' 3). Fewer shells keep the same fluff length, only coarser. */
+export function setFurShells(n: number) {
+  shellCount = Math.max(1, Math.min(SHELLS, Math.round(n)));
+  shellUniform.value = shellCount;
+  for (const im of live) im.count = shellCount;
+}
+export const furShellCount = () => shellCount;
+/** Forget the shells under an owl that is being thrown away (the live set only tracks owls on screen). */
+export function dropFur(root: THREE.Object3D) {
+  root.traverse((o) => { if ((o as THREE.InstancedMesh).isInstancedMesh) live.delete(o as THREE.InstancedMesh); });
+}
+export function setFurQuality(tier: 'low' | 'medium' | 'high') { setFurShells(tier === 'high' ? 8 : tier === 'medium' ? 5 : 3); }
 
 export interface FurUniforms {
   uLen: { value: number };
@@ -50,11 +79,11 @@ export function furMaterial(src: THREE.MeshStandardMaterial, u: FurUniforms): TH
   const m = new THREE.MeshStandardMaterial({ map: src.map, roughness: 0.95, metalness: 0, side: THREE.FrontSide, emissive: 0xffffff, emissiveMap: src.map, emissiveIntensity: 0.07 });
   m.name = 'fur';
   m.onBeforeCompile = (sh) => {
-    Object.assign(sh.uniforms, u);
+    Object.assign(sh.uniforms, u, { uShells: shellUniform });
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nuniform float uLen; uniform vec3 uWind; uniform vec3 uComb; varying float vShell;')
+      .replace('#include <common>', '#include <common>\nuniform float uLen; uniform float uShells; uniform vec3 uWind; uniform vec3 uComb; varying float vShell;')
       .replace('#include <begin_vertex>', `#include <begin_vertex>
-        float shf = (float(gl_InstanceID) + 1.0) / ${SHELLS}.0;
+        float shf = (float(gl_InstanceID) + 1.0) / uShells;
         vec3 fn = normalize(objectNormal);
         vec3 comb = uComb - fn * dot(uComb, fn);
         transformed += fn * (shf * uLen) + comb * (shf * shf * uLen) + uWind * (shf * shf);
@@ -84,6 +113,8 @@ export function furShells(mesh: THREE.Mesh, u: FurUniforms): THREE.InstancedMesh
   im.castShadow = false;
   im.receiveShadow = true;
   im.frustumCulled = false;
+  im.count = shellCount;
+  live.add(im);
   im.position.copy(mesh.position); im.quaternion.copy(mesh.quaternion); im.scale.copy(mesh.scale);
   return im;
 }

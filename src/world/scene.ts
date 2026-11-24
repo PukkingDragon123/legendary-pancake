@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { PX, wind } from '../gfx/box.ts';
 import { ALL_ITEMS, ITEMS } from '../assets/registry.ts';
 import { OwlActor, type OwlFx, type OwlSound } from '../owl/actor.ts';
+import { setFurQuality } from '../owl/fur.ts'; // [owl4]
 import { featherColour, type OwlLook } from '../owl/model.ts';
 import { Critters } from './critters.ts';
 import { Fireflies } from './fireflies.ts';
@@ -536,6 +537,7 @@ export class Scene {
   private applyTier() {
     const t = this.tier;
     this.post.setTier(t);
+    setFurQuality(t); // [owl4] the owl's fluff: 8 shells on high, 5 on medium, 3 on low
     this.vista.setTier(t);
     this.sky.shafts = t === 'high';
     const size = t === 'high' ? 2048 : 1024, sh = this.sky.sun.shadow;

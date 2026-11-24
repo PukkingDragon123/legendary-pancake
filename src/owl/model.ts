@@ -15,7 +15,7 @@ import { loadGLB } from '../gfx/glb.ts';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { Eye, type EyeColours } from './eyes.ts';
 import { geoOf, type Geo } from './geo.ts';
-import { furShells, furUniforms, type FurUniforms } from './fur.ts';
+import { dropFur, furShells, furUniforms, type FurUniforms } from './fur.ts';
 import { dressModel, type Dressing } from './outfits.ts';
 import { OWL_RIGS } from './rig.gen.ts';
 import type { OwlRigData } from './rigtypes.ts';
@@ -276,6 +276,7 @@ export function buildOwl(look: OwlLook): OwlModel {
       disposed = true;
       dressing?.dispose();
       eyeMats.forEach((m) => m.dispose());
+      dropFur(root);
       eyes.forEach((e) => e.tex.dispose());
       root.removeFromParent();
     },

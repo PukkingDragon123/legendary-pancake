@@ -327,7 +327,7 @@ class Owl:
     def build_body(s):
         k = s.k
         circ = 2 * math.pi * max(s.bw, (s.bf + s.bb) / 2)
-        sf = Surf('body', 'body', s.body_fn, 100, 64, circ * 0.92, math.pi * s.bh * 0.52, 'body', wrap=True)
+        sf = Surf('body', 'body', s.body_fn, 60, 40, circ * 0.92, math.pi * s.bh * 0.52, 'body', wrap=True)
         sf.relief = s.body_relief
         s.surfs.append(sf)
         s.bone('body', (0, s.by0 + s.bh * 0.22, s.bzc), 'root')
@@ -417,7 +417,7 @@ class Owl:
     def build_head(s):
         k = s.k
         circ = 2 * math.pi * s.hw
-        sf = Surf('head', 'head', s.head_fn, 104, 68, circ * 0.92, math.pi * (s.hht + s.hhb) * 0.55, 'head', wrap=True)
+        sf = Surf('head', 'head', s.head_fn, 66, 44, circ * 0.92, math.pi * (s.hht + s.hhb) * 0.55, 'head', wrap=True)
         sf.relief = s.head_relief
         s.surfs.append(sf)
         s.bone('head', (0, s.by1 - 1.5 * k, s.hzc - 0.5 * k), 'body')
@@ -438,7 +438,7 @@ class Owl:
             spine = np.array([(0, yb + 1.0 * bk, zb - 0.5 * bk), (0, yb + 0.4 * bk, zb + 1.1 * bk), (0, yb - 0.7 * bk, zb + 1.55 * bk),
                               (0, yb - 1.7 * bk, zb + 1.3 * bk), (0, yb - 2.2 * bk, zb + 0.7 * bk)])
             rad = lambda t: 1.75 * bk * (1 - t) ** 0.85 + 0.04  # noqa: E731
-            s.tube('beak', 'head', spine, rad, 14, 18, squash=(0.86, 1.0), tract='beak', close1=True)
+            s.tube('beak', 'head', spine, rad, 12, 14, squash=(0.86, 1.0), tract='beak', close1=True)
             s.beak_tip = spine[-1]
             jp = (0, yb - 0.4 * bk, zb + 0.4 * bk)
             jspine = np.array([jp, (0, yb - 1.1 * bk, zb + 1.2 * bk), (0, yb - 1.5 * bk, zb + 1.45 * bk)])
@@ -533,7 +533,7 @@ class Owl:
             cap = np.sqrt(np.clip((1 - b) / 0.03, 0, 1))[..., None] * np.sqrt(np.clip(b / 0.03, 0, 1))[..., None]
             return c + cap * (np.cos(th)[..., None] * side * w + np.sin(th)[..., None] * fw * thick * 0.5 * (0.4 + 0.6 * (1 - b[..., None])))
         L = float(np.linalg.norm(np.diff(spine, axis=0), axis=1).sum())
-        sf = Surf(name, joint, fn, 16, 14, 2.2 * float(half(np.array(0.4))) * 2, L, tract, wrap=True, share=share)
+        sf = Surf(name, joint, fn, 10, 10, 2.2 * float(half(np.array(0.4))) * 2, L, tract, wrap=True, share=share)
         sf.mirror = False
         s.surfs.append(sf)
 
@@ -655,7 +655,7 @@ class Owl:
             fn, H = s.wing_folded(sx)
             sp = s.wing_spread(sx, H)
             # (two islands: the outer face a 0..0.5, the inner face 0.5..1; one Surf with a wrapped loop)
-            sf = Surf(nm, nm, fn, 48, 40, 2 * 15.0 * k, H, 'wing', wrap=True, spread=sp, share=None if sx < 0 else 'wing_l')
+            sf = Surf(nm, nm, fn, 30, 24, 2 * 15.0 * k, H, 'wing', wrap=True, spread=sp, share=None if sx < 0 else 'wing_l')
             s.surfs.append(sf)
             s.bone(nm, sh, 'body')
         s.anchors_hold = (s.shoulder(1) + V(1.5 * k, -s.bh * 0.45, 3.0 * k))
@@ -681,7 +681,7 @@ class Owl:
             th = (0.55 * k * (1 - b) + 0.18 * k)
             up = nrm(np.cross(tip - root, V(1, 0, 0)))
             return c + x[..., None] * V(1, 0, 0) + (arch + th * side)[..., None] * up
-        s.surfs.append(Surf('tail', 'tail', fn, 28, 14, 2 * W, L, 'tail', wrap=True))
+        s.surfs.append(Surf('tail', 'tail', fn, 20, 10, 2 * W, L, 'tail', wrap=True))
         s.bone('tail', root, 'body')
 
     # -------------------------------------------------------------- legs and feet
@@ -717,14 +717,14 @@ class Owl:
                 t2 = t0 + d * L + V(0, -0.6 * k + tr * 0.2, 0)
                 t2[1] = max(t2[1], tr * 0.75)
                 t1[1] = max(t1[1], tr * 0.9)
-                s.tube(f'{nm}t{i}', nm, [t0, t1, t2], lambda t, tr=tr: tr * (1.0 - 0.28 * t), 10, 9, tract='toe', share=None if sx < 0 else f'leg_lt{i}')
+                s.tube(f'{nm}t{i}', nm, [t0, t1, t2], lambda t, tr=tr: tr * (1.0 - 0.28 * t), 8, 7, tract='toe', share=None if sx < 0 else f'leg_lt{i}')
                 # the talon: a hooked claw curling down from the toe's end
                 c0 = t2 + d * tr * 0.5 + V(0, 0.1 * k, 0)
                 c1 = c0 + d * 0.9 * k + V(0, 0.05 * k, 0)
                 c2 = c0 + d * 1.5 * k + V(0, -0.55 * k, 0)
                 c3 = c0 + d * 1.6 * k + V(0, -1.05 * k, 0)
                 tl = 0.42 * k * (1.1 if i != 3 else 1.2)
-                s.tube(f'{nm}c{i}', nm, [c0, c1, c2, c3], lambda t, tl=tl: tl * (1 - t) ** 0.9 + 0.01, 8, 8, squash=(0.8, 1.0), tract='talon',
+                s.tube(f'{nm}c{i}', nm, [c0, c1, c2, c3], lambda t, tl=tl: tl * (1 - t) ** 0.9 + 0.01, 6, 6, squash=(0.8, 1.0), tract='talon',
                        share=None if sx < 0 else f'leg_lc{i}', close1=True)
 
     # -------------------------------------------------------------- the special skins' own pieces

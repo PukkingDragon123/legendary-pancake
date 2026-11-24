@@ -157,17 +157,21 @@ def tube(name, mat, spine, radius, n=24, m=10, squash=(1.0, 1.0), up=(0, 1, 0)):
     return Surf(name, 'piece', fn, m, n, 2 * math.pi * rr * max(squash), L, mat, wrap=True)
 
 
-def ball(name, mat, c, r, n=20):
+def ball(name, mat, c, r, n=20, tufts=False, lid=1.0, tilt=0.0):
     c = np.asarray(c, float)
 
     def fn(a, b):
         th = 2 * math.pi * np.asarray(a, float)
-        ph = math.pi * np.asarray(b, float)
+        ph = math.pi * np.asarray(b, float) * lid  # (lid < 1: a cap, an eyelid)
         # (a pompom is a burst of yarn tufts, never a smooth ball: each tuft a lump with its own lift)
         d = np.stack([np.sin(ph) * np.cos(th), np.cos(ph), np.sin(ph) * np.sin(th)], -1)
         tuft = plume.vnoise3(d * 3.0, 0.45, 17) + 0.6 * plume.vnoise3(d * 3.0, 0.2, 23)
-        rr = r * (0.82 + 0.32 * tuft)
-        return c + np.stack([np.sin(ph) * np.cos(th) * rr, np.cos(ph) * rr, np.sin(ph) * np.sin(th) * rr], -1)
+        rr = r * (0.82 + 0.32 * tuft) if tufts else r + 0 * tuft
+        v = np.stack([np.sin(ph) * np.cos(th) * rr, np.cos(ph) * rr, np.sin(ph) * np.sin(th) * rr], -1)
+        if tilt:
+            ct_, st_ = math.cos(tilt), math.sin(tilt)
+            v = np.stack([v[..., 0], v[..., 1] * ct_ - v[..., 2] * st_, v[..., 1] * st_ + v[..., 2] * ct_], -1)
+        return c + v
     return Surf(name, 'piece', fn, n, n, 2 * math.pi * r, math.pi * r, mat, wrap=True)
 
 
@@ -392,7 +396,8 @@ def paint_island(sf, m, size, spec):
     col, h, rough, metal = MATS[kind](T, **kw)
     occ = 1 - 0.55 * (1 - np.clip(AO, 0, 1)) ** 1.2
     col = np.clip(col * occ[..., None], 0, 1)
-    return dict(rgb=col, h=np.asarray(h, np.float32) * np.ones(a.shape), rough=np.full(a.shape, rough, np.float32), metal=np.full(a.shape, metal, np.float32))
+    return dict(rgb=col, h=np.asarray(h, np.float32) * np.ones(a.shape), rough=np.full(a.shape, rough, np.float32), metal=np.full(a.shape, metal, np.float32),
+                fur=np.full(a.shape, 1.0 if kind == 'fur' else 0.0, np.float32))  # (red channel: where the game grows real fluff)
 
 
 # ====================================================================== the pieces
@@ -431,7 +436,7 @@ def nightcap(W):
              rise=11 * k, flop=(9 * k, -3.5 * k, -4.5 * k), tip_r=0.9 * k, slouch=0.6 * k)]
     S.append(ring_tube('cuff', ('fur', dict(c='#f6f1e6')), _brim_pts(W, 0.42, 0.62, 0.9 * k), 1.45 * k, squash=(1.0, 1.25)))
     tip = S[0].fn(np.array(0.5), np.array(1.0))
-    S.append(ball('pom', ('fur', dict(c='#f6f1e6')), tip + np.array([0, -0.6 * k, 0]), 1.9 * k))
+    S.append(ball('pom', ('fur', dict(c='#f6f1e6')), tip + np.array([0, -0.6 * k, 0]), 1.9 * k, n=26, tufts=True))
     return S
 
 
@@ -442,7 +447,7 @@ def santa_hat(W):
              slouch=0.7 * k)]
     S.append(ring_tube('cuff', ('fur', dict(c='#fbf8f2')), _brim_pts(W, 0.42, 0.62, 1.1 * k), 1.8 * k, squash=(1.0, 1.3)))
     tip = S[0].fn(np.array(0.5), np.array(1.0))
-    S.append(ball('pom', ('fur', dict(c='#fbf8f2')), tip + np.array([0, -0.7 * k, 0]), 2.1 * k))
+    S.append(ball('pom', ('fur', dict(c='#fbf8f2')), tip + np.array([0, -0.7 * k, 0]), 2.1 * k, n=26, tufts=True))
     return S
 
 
@@ -452,7 +457,7 @@ def beanie(W):
     S = [hat(W, 'cap', ('knit', dict(c='#5f9a52', c2='#e9d9b2', stripe=5.0)), 0.36, 0.56, 0.35, cut=0.02, slouch=0.9 * k, puff=0.5 * k)]
     S.append(ring_tube('rib', ('knit', dict(c='#e9d9b2', rib=True)), _brim_pts(W, 0.36, 0.56, 0.7 * k), 1.25 * k, squash=(1.0, 1.6)))
     top = W.head_at(0.5, 0.0, 1.3 * k)
-    S.append(ball('pom', ('fur', dict(c='#f3e2bd')), top + np.array([0, 1.5 * k, 0]), 2.2 * k))
+    S.append(ball('pom', ('fur', dict(c='#f3e2bd')), top + np.array([0, 1.5 * k, 0]), 2.2 * k, n=26, tufts=True))
     return S
 
 
@@ -886,9 +891,14 @@ def froghat(W):
     S.append(ring_tube('rib', ('knit', dict(c='#5e9450', rib=True)), _brim_pts(W, 0.36, 0.56, 0.8 * k), 1.0 * k, squash=(1.0, 1.4)))
     for sx in (-1, 1):
         p = W.head_at(0.5 + sx * 0.07, 0.08, 2.2 * k)
-        S.append(ball('eye' + 'lr'[sx > 0], ('knit', dict(c='#6fa65a')), p + np.array([0, 1.4 * k, 0]), 2.2 * k, n=16))
-        S.append(ball('white' + 'lr'[sx > 0], ('felt', dict(c='#f6f2e6')), p + np.array([0, 1.7 * k, 1.6 * k]), 1.2 * k, n=12))
-        S.append(ball('pupil' + 'lr'[sx > 0], ('felt', dict(c='#1e2420')), p + np.array([0, 1.8 * k, 2.6 * k]), 0.55 * k, n=10))
+        # a frog's eye: a knitted socket bulging from the cap, a felt eyeball set in it, a pupil, and a heavy knitted
+        # lid drooping over the top (sleepy and soft)
+        sock = p + np.array([0, 1.2 * k, 0.3 * k])
+        S.append(ball('eye' + 'lr'[sx > 0], ('knit', dict(c='#6fa65a')), sock, 2.0 * k, n=18))
+        eye = sock + np.array([0, 0.5 * k, 1.0 * k])
+        S.append(ball('white' + 'lr'[sx > 0], ('felt', dict(c='#f6f2e6')), eye, 1.45 * k, n=16))
+        S.append(ball('pupil' + 'lr'[sx > 0], ('felt', dict(c='#1e2420')), eye + np.array([0, -0.1 * k, 1.12 * k]), 0.55 * k, n=12))
+        S.append(ball('lid' + 'lr'[sx > 0], ('knit', dict(c='#62994f')), eye, 1.7 * k, n=18, lid=0.42, tilt=0.55))
     return S
 
 
@@ -1027,31 +1037,117 @@ def _bag(name, mat_, c, size, forward):
     return Surf(name, 'piece', fn, 32, 24, 2 * (sx_ + sz_) * 2, 2 * sy_ * 1.5, mat_, wrap=True)
 
 
+def strap_path(W, name, mat_, path, width, lift=0.0, n=40):
+    """A flat leather strap lying over the plumage along a path of body parameters [(a, b), ...] (a: 0 the back's
+    centre, 0.5 the breast; b: 0 the shoulders' top .. 1 the belly), `width` mm wide, with thickness."""
+    sfb = W.body
+    path = np.asarray([(a, b, 0.0) for a, b in path], float)
+    k = W.k
+
+    def fn(a, t):
+        a = np.asarray(a, float)
+        t = np.asarray(t, float)
+        ab = bez(path, t)
+        aa, bb = ab[..., 0], ab[..., 1]
+        P = sfb.eval(aa, bb)
+        N = sfb.normals(aa, bb)
+        ab2 = bez(path, np.clip(t + 2e-3, 0, 1))
+        tg = nrm(sfb.eval(ab2[..., 0], ab2[..., 1]) - P + 1e-7)
+        side = nrm(np.cross(N, tg))
+        loop = 2 * math.pi * a
+        off = FUR + 0.75 * k + lift + 0.22 * k * (0.5 + 0.5 * np.sin(loop))
+        return P + N * off[..., None] + side * (np.sign(np.cos(loop)) * np.minimum(1, np.abs(np.cos(loop)) * 1.6) * width / 2)[..., None]
+    L = 30.0 * k
+    return Surf(name, 'piece', fn, 10, n, width * 2.4, L, mat_, wrap=True)
+
+
+def _sheet(name, mat_, corners, bulge, n=16, m=12):
+    """A soft panel (a flap, a pocket front): a bilinear patch between four corners, bulging out by `bulge` (a vector)
+    in the middle, its corners rounded."""
+    p00, p10, p11, p01 = (np.asarray(c, float) for c in corners)
+    bulge = np.asarray(bulge, float)
+
+    def fn(a, t):
+        a = np.asarray(a, float)
+        t = np.asarray(t, float)
+        loop = 2 * math.pi * a
+        u = 0.5 + 0.5 * np.cos(loop)  # (a thin loop across: the front face and the back face of the panel)
+        side = np.sin(loop)
+        P = ((1 - u) * (1 - t))[..., None] * p00 + (u * (1 - t))[..., None] * p10 + (u * t)[..., None] * p11 + ((1 - u) * t)[..., None] * p01
+        b = np.sin(math.pi * u) * np.sin(math.pi * np.clip(t, 0, 1) * 0.5 + 0.5 * math.pi * 0)
+        # round the bottom corners in
+        rc = ss(0.75, 1.0, t) * (1 - np.sin(math.pi * u)) ** 2
+        P = P + (p00 + p10) * 0 + ((p00 + p10 + p11 + p01) / 4 - P) * (0.25 * rc)[..., None]
+        return P + bulge * (b * 1.0)[..., None] + bulge / max(np.linalg.norm(bulge), 1e-6) * (0.12 * side)[..., None]
+    w = float(np.linalg.norm(p10 - p00))
+    h = float(np.linalg.norm(p01 - p00))
+    return Surf(name, 'piece', fn, n, m, w * 2.1, h, mat_, wrap=True)
+
+
+def _buckle(name, c, normal, w, h, k):
+    """A brass buckle: a rectangular frame with rounded corners and a centre bar."""
+    c = np.asarray(c, float)
+    nn = nrm(np.asarray(normal, float))
+    u = nrm(np.cross([0, 1.0, 0], nn))
+    v = np.cross(nn, u)
+
+    def pts(t):
+        t = np.asarray(t, float)
+        th = 2 * math.pi * t
+        x = np.sign(np.cos(th)) * np.abs(np.cos(th)) ** 0.35 * w / 2
+        y = np.sign(np.sin(th)) * np.abs(np.sin(th)) ** 0.35 * h / 2
+        return c + x[..., None] * u + y[..., None] * v
+    return ring_tube(name, ('metal', dict(c='#d8b45a')), pts, 0.18 * k, n=40, m=6, up=tuple(nn))
+
+
 @piece('backpack', 'anchor_back')
 def backpack(W):
+    """A canvas rucksack: a soft body with gussets, a leather flap with two buckled straps, a front pocket, and two
+    padded straps over the shoulders and down the breast."""
     k = W.k
     y = W.O.by0 + W.O.bh * 0.55
     w, f, bk, zc = W.body_ring(y, 3.0 * k)
-    c = np.array([0, y, zc - bk - 2.6 * k])
-    S = [_bag('pack', ('canvas', dict(c='#8a6a44')), c, (5.2 * k, 6.0 * k, 2.6 * k), (0, 0, -1))]
-    S.append(_bag('pocket', ('canvas', dict(c='#7a5c3a')), c + np.array([0, -1.8, -2.3]) * k, (3.6 * k, 2.4 * k, 1.0 * k), (0, 0, -1)))
-    S.append(_bag('flap', ('leather', dict(c='#6e4a2e')), c + np.array([0, 3.8, -1.2]) * k, (5.0 * k, 1.6 * k, 1.8 * k), (0, 0, -1)))
+    c = np.array([0, y, zc - bk - 2.4 * k])
+    S = [_bag('pack', ('canvas', dict(c='#8a6a44')), c, (5.4 * k, 6.2 * k, 2.4 * k), (0, 0, -1))]
+    back = c[2] - 2.4 * k  # (the outward face, away from the owl)
+    S.append(_sheet('pocket', ('canvas', dict(c='#7a5c3a')), [(-3.4 * k, y - 4.6 * k, back), (3.4 * k, y - 4.6 * k, back), (3.4 * k, y - 0.6 * k, back),
+                                                               (-3.4 * k, y - 0.6 * k, back)], (0, 0, -1.3 * k)))
+    # the flap: from over the top of the pack down the outer face
+    S.append(_sheet('flap', ('leather', dict(c='#6e4a2e')), [(-5.2 * k, y + 5.6 * k, c[2] + 1.6 * k), (5.2 * k, y + 5.6 * k, c[2] + 1.6 * k),
+                                                              (4.8 * k, y + 1.2 * k, back - 0.4 * k), (-4.8 * k, y + 1.2 * k, back - 0.4 * k)], (0, 1.4 * k, -1.4 * k)))
     for sx in (-1, 1):
-        S.append(strap(W, 'strap' + 'lr'[sx > 0], ('leather', dict(c='#6e4a2e')), 0.0 + sx * 0.06, 0.5 + sx * 0.2, 0.08, 0.5, 0.0, 1.2 * k))
-    S.append(ball('buckle', ('metal', dict(c='#d8b45a')), c + np.array([0, 2.6, -3.0]) * k, 0.55 * k, n=8))
+        x = sx * 2.4 * k
+        S.append(tube('tab' + 'lr'[sx > 0], ('leather', dict(c='#5e3e24')), [(x, y + 3.0 * k, back - 1.2 * k), (x, y + 0.4 * k, back - 0.8 * k), (x, y - 1.4 * k, back - 1.5 * k)],
+                      0.55 * k, n=10, m=8, squash=(1.0, 0.25), up=(0, 0, 1)))
+        S.append(_buckle('buckle' + 'lr'[sx > 0], (x, y + 1.0 * k, back - 1.25 * k), (0, 0, -1), 1.4 * k, 1.1 * k, k))
+        # the shoulder strap: from the pack's top over the shoulder, down the breast, round under the wing to its foot
+        # (body parameters: a 0 the back's centre, 0.25 the left flank, 0.5 the breast, 0.75 the right flank)
+        path = [(0.06, 0.3), (0.2, 0.06), (0.36, 0.16), (0.35, 0.5), (0.3, 0.7)]
+        if sx > 0:
+            path = [(1 - a, b) for a, b in path]
+        S.append(strap_path(W, 'strap' + 'lr'[sx > 0], ('leather', dict(c='#6e4a2e')), path, 1.5 * k))
     return S
 
 
 @piece('satchel', 'anchor_back')
 def satchel(W):
+    """A leather satchel at the hip: a stiff body with a rounded flap, a brass buckle on its strap, and a broad strap
+    from the far shoulder across the breast."""
     k = W.k
-    y = W.O.by0 + W.O.bh * 0.3
-    w, f, bk, zc = W.body_ring(y, 2.0 * k)
-    c = np.array([w * 0.75, y, zc - bk * 0.4])
-    S = [_bag('bag', ('leather', dict(c='#7a5232')), c, (2.0 * k, 3.4 * k, 4.2 * k), (1, 0, 0))]
-    S.append(_bag('flap', ('leather', dict(c='#6a4428')), c + np.array([0.6, 2.0, 0]) * k, (1.8 * k, 1.6 * k, 4.0 * k), (1, 0, 0)))
-    S.append(strap(W, 'strap', ('leather', dict(c='#5e3c22')), 0.15, 0.72, 0.06, 0.55, 0.0, 1.0 * k))
-    S.append(ball('buckle', ('metal', dict(c='#d8b45a')), c + np.array([2.2, 1.0, 0]) * k, 0.5 * k, n=8))
+    y = W.O.by0 + W.O.bh * 0.32
+    w, f, bk, zc = W.body_ring(y, 2.2 * k)
+    c = np.array([w * 0.72, y, zc + f * 0.35])
+    out = nrm(np.array([1.0, 0, 0.45]))
+    S = [_bag('bag', ('leather', dict(c='#7a5232')), c, (2.0 * k, 3.6 * k, 4.4 * k), out)]
+    o = c + out * 2.0 * k
+    tg = nrm(np.cross([0, 1.0, 0], out))
+    S.append(_sheet('flap', ('leather', dict(c='#6a4428')), [o + tg * 4.2 * k + np.array([0, 3.7 * k, 0]) - out * 1.8 * k, o - tg * 4.2 * k + np.array([0, 3.7 * k, 0]) - out * 1.8 * k,
+                                                              o - tg * 3.9 * k + np.array([0, 0.2 * k, 0]) + out * 0.3 * k, o + tg * 3.9 * k + np.array([0, 0.2 * k, 0]) + out * 0.3 * k],
+                    out * 0.9 * k + np.array([0, 0.8 * k, 0])))
+    S.append(tube('tab', ('leather', dict(c='#5a3a20')), [o + np.array([0, 1.6 * k, 0]) + out * 0.4 * k, o + np.array([0, -0.6 * k, 0]) + out * 0.5 * k,
+                                                          o + np.array([0, -1.8 * k, 0]) + out * 0.2 * k], 0.6 * k, n=10, m=8, squash=(1.0, 0.25), up=tuple(out)))
+    S.append(_buckle('buckle', o + np.array([0, -0.2 * k, 0]) + out * 0.75 * k, out, 1.4 * k, 1.1 * k, k))
+    S.append(strap_path(W, 'strap', ('leather', dict(c='#5e3c22')), [(0.12, 0.35), (0.22, 0.06), (0.38, 0.15), (0.5, 0.3), (0.62, 0.5), (0.7, 0.6)], 1.7 * k))
     return S
 
 
@@ -1111,7 +1207,7 @@ def cloudcloak(W):
         ang = math.radians(180 - 120 + 240 * i / 8)
         w, f, bk, zc = W.body_ring(y, 3.6 * k)
         p = np.array([math.sin(ang) * w, y + (0.8 if i % 2 else 0) * k, zc + math.cos(ang) * (f if math.cos(ang) > 0 else bk)])
-        S.append(ball(f'puff{i}', ('fur', dict(c='#f2f5f8')), p, (1.9 if i % 2 else 1.5) * k, n=14))
+        S.append(ball(f'puff{i}', ('fur', dict(c='#f2f5f8')), p, (1.9 if i % 2 else 1.5) * k, n=16, tufts=True))
     return S
 
 
@@ -1212,6 +1308,7 @@ def build(pid, W):
     hgt = np.zeros((size, size), np.float32)
     rough = np.full((size, size), 0.9, np.float32)
     metal = np.zeros((size, size), np.float32)
+    fur = np.zeros((size, size), np.float32)
     for sf, m in meshes:
         out = paint_island(sf, m, size, sf.tract)
         g = 4
@@ -1224,6 +1321,7 @@ def build(pid, W):
         hgt[ys, xs] = out['h'][sl]
         rough[ys, xs] = out['rough'][sl]
         metal[ys, xs] = out['metal'][sl]
+        fur[ys, xs] = out['fur'][sl]
     nmap = plume.normal_map(hgt, strength=1.1)
     G = ow.GLB()
     G.J['materials'].append({'name': 'piece_' + pid, 'doubleSided': True, 'pbrMetallicRoughness': {'baseColorTexture': {'index': 0}, 'metallicFactor': 1.0,
@@ -1233,6 +1331,7 @@ def build(pid, W):
     mr = np.zeros((size // 4, size // 4, 3), np.float32)
     mr[..., 1] = plume.downsample(rough[..., None], 4)[..., 0]
     mr[..., 2] = plume.downsample(metal[..., None], 4)[..., 0]
+    mr[..., 0] = plume.downsample(fur[..., None], 4)[..., 0]
     G.image(ow.webp(mr, q=92))
     at, bone, sc = W.O.anchors[anchor]
     sc = np.asarray(sc, float)

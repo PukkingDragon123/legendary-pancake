@@ -14,6 +14,21 @@ import { loadGLB } from '../gfx/glb.ts';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { speciesOf } from './species.ts';
 import { PIECE_MODEL_LIST } from './outfits.gen.ts';
+import { dropFur, furShells, furUniforms } from './fur.ts';
+
+/** The trims that grow real fluff (fur.ts shells, masked by the piece's own map): pompoms, fur cuffs and collars, a
+ * cloud cloak's puffs. */
+const FLUFFY = /_(pom|cuff|puff\d+)$|^(frost_cape|royalcape|cloudcloak)_collar$/;
+/** Fluff a piece's trims (one shared set of uniforms per piece). */
+function fluffPiece(root: THREE.Object3D) {
+  const u = furUniforms(0.75, 3.6);
+  const meshes: THREE.Mesh[] = [];
+  root.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && !(m as THREE.InstancedMesh).isInstancedMesh && FLUFFY.test(m.name)) meshes.push(m); });
+  for (const m of meshes) {
+    const sh = furShells(m, { ...u, uMask: { value: null } });
+    if (sh) m.parent?.add(sh);
+  }
+}
 
 /** The anchors of the owl being dressed right now (dressOwl sets them before each piece). */
 let G: Geo = geoOf(speciesOf('tawny').shape);
@@ -593,6 +608,7 @@ export function dressModel(model: OwlModel, look: OwlLook): Dressing {
       if (dead || !g) return;
       const root = cloneSkinned(g.scene);
       root.name = 'piece:' + id;
+      fluffPiece(root);
       anchor.add(root);
       added.push(root);
     };
@@ -603,7 +619,7 @@ export function dressModel(model: OwlModel, look: OwlLook): Dressing {
   if (hideTufts && model.id !== 'snowman') { model.rig.bones.tuftL.visible = false; model.rig.bones.tuftR.visible = false; }
   return {
     ready: Promise.all(jobs).then(() => undefined),
-    dispose() { dead = true; for (const o of added) o.removeFromParent(); },
+    dispose() { dead = true; for (const o of added) { dropFur(o); o.removeFromParent(); } },
   };
 }
 

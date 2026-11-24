@@ -519,6 +519,10 @@ class Painter:
         throat = ss(-2.0 * k + tw * 2.5 * k, -5.0 * k + tw * 3.5 * k, Pc[:, 1] - O.ey) * ss(0.0 - tw * 0.7, 0.5 - tw * 0.5, T['N'][sel][:, 2])
         base = mix(base, np.broadcast_to(s.col('throat', 'under'), base.shape), throat)
         base = tint(base, (vnoise3(Pc, 4.0 * k, 3) - 0.5) * 0.12)
+        cb = float(s.S.get('crownblend', 0.0))  # (the crown melts into the ruff's pale edge: no helmet round the face)
+        if cb:
+            near = ss(float(s.S.get('blendw', 3.2)) * k, 0.2 * k, dd[sel]) * ss(-0.35, 0.3, T['N'][sel][:, 2])
+            base = mix(base, np.broadcast_to(s.col('ruffLight', 'crown'), base.shape), near * cb)
         mk = s.markfn(s.pat.get('crown', {}), 'up')
 
         def marks(F2, col):
@@ -635,23 +639,16 @@ class Painter:
         base = tint(base, (vnoise3(P[sel], 3.0 * k, 9) - 0.5) * 0.12)
         s.feather_paint(F, base, T, sel, out, var=0.05, barb_k=0.04, soft=0.5, relief=0.5)
         rgb = out['rgb']
-        # whiskers and the mouth: fine ink lines (whisker pads dotted)
-        m = np.zeros(T['shape'], bool)
-        for sx in (-1, 1):
-            for i, dy in enumerate((-0.2, 0.5, 1.2)):
-                x0 = sx * 2.4 * k
-                t_ = (X - x0) * sx
-                yl = -3.4 * k - dy * k * 0.7 + t_ * (0.12 * (i - 1)) - 0.015 * t_ ** 2 / k
-                m |= (t_ > 0) & (t_ < 7.0 * k) & (np.abs(Y - yl) < 0.11 * k) & (T['N'][..., 2] > -0.2)
-        rgb[m] = s.col('whisker')
-        out['h'][m] += 0.1
+        # (the whiskers are real strands now: src geometry; the pads only carry a few soft freckles)
         # the mouth: a little w under the nose
         u = np.abs(X)
         mouth = (T['N'][..., 2] > 0.3) & (np.abs(Y - (-4.7 * k + 0.35 * k * np.sin(np.clip(u / (1.4 * k), 0, 1) * math.pi))) < 0.14 * k) & (u < 1.5 * k)
         mouth |= (T['N'][..., 2] > 0.3) & (u < 0.12 * k) & (Y > -4.6 * k) & (Y < -3.7 * k)
         rgb[mouth] = s.col('mouth', 'stripe')
-        dots = (T['N'][..., 2] > 0.3) & (hsh(np.floor(X / (0.6 * k)), np.floor(Y / (0.6 * k)), 5) > 0.55) & (np.abs(np.abs(X) - 2.0 * k) < 1.0 * k) & (np.abs(Y + 3.5 * k) < 0.9 * k)
-        rgb[dots] = tint(rgb[dots], -0.25)
+        cx, cy = np.round(X / (0.55 * k)), np.round(Y / (0.55 * k))
+        fr = np.hypot(X - cx * 0.55 * k, Y - cy * 0.55 * k) < 0.13 * k
+        dots = (T['N'][..., 2] > 0.3) & fr & (hsh(cx, cy, 5) > 0.5) & (np.abs(np.abs(X) - 2.0 * k) < 0.9 * k) & (np.abs(Y + 3.4 * k) < 0.7 * k)
+        rgb[dots] = tint(rgb[dots], -0.18)
 
     def paint_ear(s, T, out):
         sel = np.ones(T['shape'], bool)
@@ -1021,6 +1018,7 @@ class Painter:
             muzzle = frontish & (np.hypot(X / 1.35, Y + 3.4 * k) < 3.9 * k)
             f = np.where(muzzle, 0.45, f)
             f = np.where(frontish & (np.hypot(X, Y + 2.7 * k) < 1.4 * k), 0.0, f)  # (the nose)
+            f = np.where(frontish & (np.abs(X) < 2.0 * k) & (Y < -3.4 * k) & (Y > -5.4 * k), np.minimum(f, 0.12), f)  # (the mouth stays crisp)
         else:
             dd = O.disc_d(X, Y)
             disc = frontish & (dd < -0.15 * k)

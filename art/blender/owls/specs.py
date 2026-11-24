@@ -57,7 +57,7 @@ SPECIES = {
     # Tyto alba: golden-buff upperparts veiled in grey with fine black-and-white pearls, silky white underparts with a few
     # dark dots, a white heart face edged in a fine golden-brown rim, long feathered legs, bristled toes
     'barn': dict(
-        shape=dict(k=0.98, bw=0.84, bh=1.12, bd=0.88, pear=0.2, hw=0.92, hh=1.02, hd=0.84, hy=-0.6, flat=0.45, leg=7.5, legw=1.7, legx=3.8,
+        shape=dict(k=0.98, bw=0.84, bh=1.12, bd=0.88, pear=0.2, hw=0.92, hh=0.95, hd=0.84, hy=-0.8, flat=0.5, leg=7.5, legw=1.7, legx=3.8,
                    toes='bristled', disc='heart', discr=0.9, ex=0.38, ey=0.12, er=1.25, dish=1.2, wing=1.2, tail=0.75, beak=0.9),
         col=dict(up='#d6a258', upDark='#8a8582', upLight='#f8f4ea', under='#f8f2e6', underLow='#fbf7ef', crown='#d2a060',
                  throat='#f8f2e6', disc='#fbf8f1', discDark='#d6bca0', ruff='#c8904e', ruffLine='#7a4a26', ruffLight='#e2b678',
@@ -76,7 +76,7 @@ SPECIES = {
                  covert={'verm': {'c': '#9c9690', 'f': 9, 'w': 0.5, 'a': 0.75}, 'dot': {'c': '#fbf8f2', 'at': 0.82, 'r': 0.18, 'ring': '#2e2826', 'keep': 0.55}},
                  flight={'bars': {'c': 'wingBar', 'n': 3.0, 'w': 0.18, 'a': 0.7}, 'verm': {'c': '#b0a69a', 'f': 7, 'w': 0.3, 'a': 0.4}},
                  tail={'bars': {'c': 'wingBar', 'n': 3.2, 'w': 0.16, 'a': 0.65}}),
-        eyering=-0.08, eyelid=-0.35, brows=0.0, ruffline=0.95, ruffw=0.95, bristles=0.3, toebristle=0.35, discedge=0.0, plush=0.92, tonal=0.6, throatwrap=1.0),
+        eyering=-0.08, eyelid=-0.35, brows=0.0, ruffline=0.6, ruffw=0.8, bristles=0.3, toebristle=0.35, discedge=0.0, plush=0.92, tonal=0.6, throatwrap=1.0, crownblend=0.9, blendw=5.0),
     # Bubo scandiacus (a lightly marked bird): snow white, scattered dark chevrons and spots on the crown, back and wings,
     # a few bars low on the flanks, small head, heavily feathered 'slippers' over the toes
     'snowy': dict(
@@ -153,10 +153,10 @@ SPECIES = {
     # Strix nebulosa: huge round face of concentric grey rings, a white 'bow tie' with a black chin spot, no tufts, long
     # tail, soft grey plumage finely vermiculated and streaked, small yellow-eyed (here: ink-dot) gaze
     'greatgrey': dict(
-        shape=dict(k=1.16, bw=1.06, bh=1.08, bd=1.02, breast=1.1, hw=1.22, hh=1.02, hd=1.0, flat=0.25, disc='round', discr=0.86, ex=0.34,
+        shape=dict(k=1.16, bw=1.06, bh=1.08, bd=1.02, breast=1.1, hw=1.22, hh=0.94, hd=1.0, flat=0.35, disc='round', discr=0.86, ex=0.34,
                    ey=0.04, er=1.0, dish=0.8, tail=1.45, fluff=0.5, ruffk=1.3),
-        col=dict(up='#7e7c76', upDark='#3a3936', upLight='#d6d4cc', under='#b8b6ae', underLow='#c8c6be', crown='#6c6a64',
-                 throat='#b4b2aa', disc='#c6c4bc', discDark='#55544f', ruff='#3a3936', ruffLine='#1e1d1b', ruffLight='#d6d4cc',
+        col=dict(up='#8c8a84', upDark='#3a3936', upLight='#d6d4cc', under='#b8b6ae', underLow='#c8c6be', crown='#9a9892',
+                 throat='#b4b2aa', disc='#b8b6ae', discDark='#55544f', ruff='#3a3936', ruffLine='#1e1d1b', ruffLight='#a8a6a0',
                  brow='#f2f1ea', bristle='#f2f1ea', wing='#84827c', covert='#8a8882', primary='#7c7a74', wingBar='#3e3d3a',
                  underwing='#cfcdc6', tail='#86847e', leg='#c4c2ba', toe='#9a948c', skin='#9a948c', talon='#2a2828',
                  beak='#d8bc5c', cere='#bca860', gape='#8a6a58', chin='#22211f'),
@@ -167,7 +167,7 @@ SPECIES = {
                  covert={'verm': {'c': '#5a5954', 'f': 10, 'w': 0.4, 'a': 0.7}, 'edgepale': {'c': 'upLight', 'at': 0.7, 'a': 0.6}},
                  flight={'bars': {'c': 'wingBar', 'n': 4.0, 'w': 0.26, 'a': 0.8}},
                  tail={'bars': {'c': 'wingBar', 'n': 4.5, 'w': 0.22, 'a': 0.8}}),
-        eyering=-0.1, eyelid=-0.5, brows=0.95, ruffline=0.95, rings=dict(period=1.05, w=0.2, a=0.75), discedge=0.0, bowtie=True, beaktip=0.0),
+        eyering=-0.1, eyelid=-0.5, brows=0.95, ruffline=0.95, ruffw=0.9, rings=dict(period=1.05, w=0.2, a=0.75), discedge=0.0, bowtie=True, beaktip=0.0, crownblend=0.8, blendw=4.5),
     # Bubo bubo: the biggest, orange-buff and tawny, heavy black streaks down the breast thinning to fine bars on the
     # belly, mottled dark upperparts, long tufts angled out, a tawny face rimmed dark, a pale throat
     'eagle': dict(
