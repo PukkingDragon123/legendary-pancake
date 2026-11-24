@@ -154,7 +154,7 @@ export function wallSlotFree(fid: FloorId, s: number, v0: number, v1: number): b
 export const hasWall = (a: number) => Math.abs(wrapA(a)) >= OPEN_A;
 
 // ------------------------------------------------------------------ the oak's outline and anchors
-// (mirrored in art/lowpix/house/_lib/hx.py and _src/*.py: keep the numbers in step)
+// (the bark itself is shaped in house/oak.ts barkR; trunkR is its smooth base profile)
 
 /** Outer radius of the bark at height y (px): a flared foot, a swelling at the second floor, a waist under the crown. */
 const TRUNK_R: [number, number][] = [[0, RO + 20], [8, RO + 12], [18, RO + 6.5], [30, RO + 3], [46, RO + 1.2], [66, RO + 0.6], [84, RO + 2.2], [102, RO + 1.5],
