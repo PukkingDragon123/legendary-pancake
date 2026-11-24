@@ -21,14 +21,13 @@ import { iconVersion, portrait } from '../portraits.ts';
 import { pixelate } from '../pxfx.tsx';
 import { haptic } from '../kit.tsx';
 import { breathing, panel, say, sceneRef, type Panel } from '../state.ts';
-import { chainTile, ropeTile } from './paint.ts';
 import { framesOf, hold, PxAnim, rep, seq, type Timeline } from './pxanim.tsx';
 import { MagicBar } from './magicbar.tsx';
 import { addSwing, kick, makeSwing, reducedMotion, removeSwing, type Swing } from './swing.ts';
 import { clearTransition, installPanelTransitions, panelTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts'; // [motion3] panelTransition, installPanelTransitions
 import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
-import { alarmClock, alarmHands, board, bezel, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
+import { alarmClock, alarmHands, board, bezel, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
 
@@ -109,7 +108,7 @@ export function Odometer(p: { value: number }) {
 // ------------------------------------------------------------------ HUD
 
 function Ropes(p: { xs: number[]; top: number; len: number; chain?: boolean }) {
-  const tile = p.chain ? chainTile() : ropeTile();
+  const tile = p.chain ? brassChain() : hempRope(); // [ui4] fine twisted hemp and a real brass chain
   const w = p.chain ? 8 : 6;
   return <>{p.xs.map((x) => <i class={'hh-rope' + (p.chain ? ' chain' : '')} style={{ left: px(x - w / 2), top: px(p.top), height: px(p.len), width: px(w), backgroundImage: bg(tile) }} />)}</>;
 }
@@ -302,7 +301,7 @@ export function SideTools() {
   const fresh = save.value.shop.day !== dayKey();
   return (
     <div class={'hh-tools' + (away ? ' away' : '')} aria-label="Tools">
-      <i class="hh-toolrope" style={{ '--rope': bg(ropeTile()) } as Record<string, string>} />
+      <i class="hh-toolrope" style={{ '--rope': bg(hempRope()) } as Record<string, string>} />
       {TOOLS.map((t, i) => <ToolTag key={t.id} t={t} i={i} badge={t.id === 'quests' ? ready : 0} isNew={t.id === 'shop' && fresh} />)}
     </div>
   );

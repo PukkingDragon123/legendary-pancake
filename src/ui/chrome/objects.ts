@@ -496,6 +496,46 @@ export function boardCSS(wPx: number, hPx: number, o: BoardOpts = {}): string {
   return board(W, H, 2, 1, o);
 }
 
+/** A twisted hemp rope tile, 6 x 6 px (1 texel per CSS px), tiling vertically: three strands spiralling, lit from the left. */
+export function hempRope(): string {
+  return cachedRelief('hemp', () => {
+    const W = 6, H = 6, c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d')!, img = g.createImageData(W, H), d = img.data;
+    const R = [hex('#3a2410'), hex('#6a4a24'), hex('#94703c'), hex('#bc9658'), hex('#dcbc80'), hex('#f0d8a4')];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const strand = ((x + y * 1) % 3 + 3) % 3; // diagonal strands
+      const across = x / (W - 1); // cylinder: lit on the left
+      let v = 4.2 - across * 2.6 - (strand === 0 ? 1.4 : strand === 1 ? 0 : 0.5);
+      if (x === 0) v -= 0.6;
+      if (x === W - 1) v = 0.4;
+      const col = R[Math.max(0, Math.min(5, Math.round(v)))];
+      const j = (y * W + x) * 4;
+      d[j] = col[0]; d[j + 1] = col[1]; d[j + 2] = col[2]; d[j + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+    return c.toDataURL('image/png');
+  });
+}
+/** A brass chain tile, 8 x 12 px: one link face on, one edge on, lit from the top left. */
+export function brassChain(): string {
+  return cachedRelief('bchain', () => {
+    const W = 8, H = 12, c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d')!, B = PAL.brass;
+    const put = (x: number, y: number, i: number) => { const col = B[i]; g.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`; g.fillRect(x, y, 1, 1); };
+    const ink = (x: number, y: number) => { g.fillStyle = '#1e1206'; g.fillRect(x, y, 1, 1); };
+    // the face-on link: an open oval 6 wide, 7 tall
+    const ring: [number, number, number][] = [[2, 0, 7], [3, 0, 8], [4, 0, 6], [1, 1, 7], [5, 1, 4], [1, 2, 6], [5, 2, 3], [1, 3, 6], [5, 3, 3], [1, 4, 5], [5, 4, 2], [1, 5, 4], [5, 5, 2], [2, 6, 3], [3, 6, 2], [4, 6, 2]];
+    for (const [x, y, i] of ring) put(x, y, i);
+    for (const [x, y] of [[1, 0], [5, 0], [0, 1], [6, 1], [0, 2], [6, 2], [0, 3], [6, 3], [0, 4], [6, 4], [0, 5], [6, 5], [1, 6], [5, 6], [2, 7], [3, 7], [4, 7]]) ink(x, y);
+    // the edge-on link through it: a bar 2 wide
+    for (let y = 5; y < 12; y++) { put(3, y, y < 8 ? 7 : 5); put(4, y, y < 8 ? 4 : 3); ink(2, y); ink(5, y); }
+    put(3, 11, 6);
+    return c.toDataURL('image/png');
+  });
+}
+
 /** A dithered contact shadow (an ellipse that darkens toward its middle), w x h units. */
 export function contactShadow(w: number, h: number, k = 2): string {
   return cachedRelief(`cshadow:${w}x${h}:${k}`, () => {
