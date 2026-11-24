@@ -4345,6 +4345,8 @@ export function spriteCanvas(name, scale = 1) {
     cv.height = s.h * scale;
     const ctx = cv.getContext('2d', { willReadFrequently: true });
     ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = cv.width < base.width; // [ui4] shrinking a detailed sprite averages its texels (a mipmap) instead of dropping them
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(base, 0, 0, cv.width, cv.height);
   } else if (scale === 1) cv = baseCanvas(s);
   else {

@@ -15,11 +15,13 @@ import { toast } from './ui/kit.tsx';
 import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
 import { installPixelSkin } from './ui/pxskin.ts';
+import { installIconSet } from './ui/chrome/iconset.ts';
 import { Scene } from './world/scene.ts';
 import { bindHome } from './build/home-sync.ts'; // [house]
 
 async function boot() {
   installPixelSkin();
+  installIconSet(); // [ui4] the painted icon family replaces the sprite icons everywhere
   try { await document.fonts.load('20px "TBME Body"'); } catch { /* font loads later */ }
   const q = new URLSearchParams(location.search);
   const pref = save.value.settings.quality;

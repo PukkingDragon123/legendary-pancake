@@ -103,6 +103,17 @@ if (view === 'obj') {
   });
 }
 
+if (view === 'icons') {
+  // [ui4] the painted icon family, at 20, 30 and 40 px
+  void import('../ui/chrome/iconset.ts').then(({ installIconSet, ICON_NAMES }) => {
+    installIconSet();
+    document.body.style.background = q.get('bg') ?? '#efe2c0';
+    const sizes = [20, 30, 40];
+    root.innerHTML = '<div style="padding:8px;display:flex;flex-wrap:wrap;gap:10px">' + ICON_NAMES().map((n) => `<div style="display:flex;flex-direction:column;align-items:center;width:96px;font:10px monospace;color:#3a2410"><div style="display:flex;gap:4px;align-items:flex-end">${sizes.map((s) => `<img src="${spriteURL(n, s / 20)}" style="width:${s}px;height:${s}px;image-rendering:pixelated">`).join('')}</div>${n}</div>`).join('') + '</div>';
+    (window as unknown as { __ready: number }).__ready = 1;
+  });
+}
+
 if (view === 'fx') {
   document.body.style.background = '#3a5a3a';
   const kinds: UiFxKind[] = ['puff', 'sparkle', 'hearts', 'magic', 'coins', 'stars', 'snow', 'leaves', 'confetti'];
