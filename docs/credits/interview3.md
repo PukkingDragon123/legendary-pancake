@@ -35,10 +35,7 @@ BUSHED converted these Poly Haven models with lowpix (re-meshed, re-textured, re
 
 | Game id | Gacha Garage file | Source | Author | Licence |
 |---|---|---|---|---|
-| `g_plant` | `models/lowpix/world/plant_pot2.glb` | [Potted Plant 02](https://polyhaven.com/a/potted_plant_02) | Rico Cilliers | CC0 1.0 |
 | `g_books` | `models/lowpix/world/books_old.glb` | ["Stack Of Old Books"](https://sketchfab.com/3d-models/stack-of-old-books-c6ca6667fd7d4381bd184874dcf44075) | Arjun Perayil | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
-| `g_pothos` | `models/lowpix/world/plant_pothos.glb` | ["Pothos Plant"](https://sketchfab.com/3d-models/pothos-plant-175142c4942b42169455eb20c4033c9d) | Blizzy | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
-| `g_aloe` | `models/lowpix/world/aloe_pot.glb` | ["Potted Aloe Vera"](https://sketchfab.com/3d-models/potted-aloe-vera-98b96bd41a1c4ab7af10c938e280c8c8) | Jubbies | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `g_teapot` | `models/lowpix/world/teapot_enamel.glb` | ["Old Soviet teapot"](https://sketchfab.com/3d-models/old-soviet-teapot-9b087673052446299e6decda222a42da) | Amagitsune | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `g_radio` | `models/lowpix/world/radio_old.glb` | ["Radio"](https://sketchfab.com/3d-models/radio-bb832f8973ad40af8321fb90854be3b6) | ion_omat | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 | `g_gramophone` | `models/lowpix/world/gramophone.glb` | ["Old Gramophone"](https://sketchfab.com/3d-models/old-gramophone-5e892fc786db4ca1b36738ab5e40e64d) | KIFIR | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
@@ -46,6 +43,18 @@ BUSHED converted these Poly Haven models with lowpix (re-meshed, re-textured, re
 CC BY 4.0 attributions: each of the CC BY models above is "based on" the named work by the named author, licensed
 under CC BY 4.0; modified (converted with lowpix by Gacha Garage, then recoloured, re-encoded and rescaled for Hoot
 Hollow).
+
+## Wall art (real artworks, public domain)
+
+Fetched by `art/lowpix/interview/wallart.py` from the Art Institute of Chicago (API data CC0; these images are public
+domain), cropped, downsampled to a small texel grid, graded a little towards the palette, saved as
+`public/models/interview/art/<id>.webp`.
+
+| Game id | Work | Artist | Date | Source |
+|---|---|---|---|---|
+| `mountain_brook` (the painting) | Mountain Brook | Albert Bierstadt | 1863 | [artic.edu/artworks/146701](https://www.artic.edu/artworks/146701) |
+| `nocturne` (cork board print) | Nocturne: Blue and Gold, Southampton Water | James McNeill Whistler | 1872 | [artic.edu/artworks/56905](https://www.artic.edu/artworks/56905) |
+| `cranes` (cork board print) | Cranes on snow-covered pine | Katsushika Hokusai | c. 1834 | [artic.edu/artworks/21720](https://www.artic.edu/artworks/21720) |
 
 ## Photo textures used to paint the hand-made props
 
@@ -55,7 +64,8 @@ painted_plaster_wall, rough_linen, hessian_230, velour_velvet, brown_leather, kn
 
 ## Made for Hoot Hollow
 
-The room shell (heartwood walls, wainscot, floor, ceiling, bark rim), the wall clock with moving hands, the round
+The leaf-card plants (rubber plant, pothos, fern: every leaf a hand-pixelled card), the room shell (heartwood walls,
+wainscot, floor, ceiling, bark rim), the wall clock with moving hands, the round
 window, curtains, cork board, rug, ivy, teacup, papers, inkwell, books, candle, name block, wall shelf, painting,
 globe, Pip's glasses and clipboard, and the vignette props (pillow, sheep, fence, phone, microphone, milk bottle,
 coffee beans, mugs, stove, open book, sunflower) are modelled in lowpix by this project.
