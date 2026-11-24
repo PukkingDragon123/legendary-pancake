@@ -235,6 +235,23 @@ function dustyTex(): THREE.CanvasTexture {
   });
 }
 
+/** A strand of ivy climbing the bark from y0 to y1 near angle a0 (flat leaf cards hugging the surface; off = origin). */
+function ivyStrand(cards: Cards, a0: number, y0: number, y1: number, drift: number, w = 13, off: V3 = [0, 0, 0], proud = 1.2) {
+  const h = 20;
+  const o = (p: V3): V3 => [p[0] - off[0], p[1] - off[1], p[2] - off[2]];
+  for (let y = y0; y < y1; y += h) {
+    const k = (y - y0) / Math.max(1, y1 - y0);
+    const a = a0 + Math.sin(k * 5 + a0) * drift;
+    const a2 = a0 + Math.sin(((y + h - y0) / Math.max(1, y1 - y0)) * 5 + a0) * drift;
+    const r = barkR(a, y) + proud, r2 = barkR(a2, y + h) + proud;
+    const T: V3 = [Math.cos(a), 0, -Math.sin(a)];
+    const bl = P(a, y, r), tl = P(a2, y + h, r2);
+    const n = barkNormal(a, y + h / 2);
+    cards.flat([o([bl[0] - T[0] * w / 2, bl[1], bl[2] - T[2] * w / 2]), o([bl[0] + T[0] * w / 2, bl[1], bl[2] + T[2] * w / 2]), o([tl[0] + T[0] * w / 2, tl[1], tl[2] + T[2] * w / 2]), o([tl[0] - T[0] * w / 2, tl[1], tl[2] - T[2] * w / 2])],
+      CELL.ivy[Math.floor(y / h) % 2], n, [0.9, 0.95, 0.9], 0.15, 0.25);
+  }
+}
+
 // ------------------------------------------------------------------ the oak
 
 let dusty: THREE.MeshStandardMaterial | null = null;
@@ -618,6 +635,10 @@ export function buildOak(): Oak {
         opening(fid, o, { inner: false, glass: 'dusty', shutters: !isRound, box: !isRound, trim: [0.72, 0.58, 0.46] }, piv, hg, sub);
         shutters.push(...shutterOut.splice(0));
       }
+      // ivy creeping up over the shut front
+      for (const [a, y0, y1] of (fid === 'f2' ? [[-0.72, 66, 128], [0.12, 66, 100], [0.7, 80, 136]] : [[-0.55, 138, 196], [0.45, 150, 204]]) as [number, number, number][]) {
+        if ((a < 0) === (side < 0)) ivyStrand(frontCards, a, y0, y1, 0.05, 13, piv, 1.6);
+      }
       const flowers = frontCards;
       sub.flush(tmp, extra);
       if (flowers.size) hg.add(flowers.mesh('front-flowers'));
@@ -968,20 +989,7 @@ export function buildOak(): Oak {
 
   // ---------------------------------------------------------------- ivy climbing the bark, ferns round the foot
   {
-    const strand = (cards: Cards, a0: number, y0: number, y1: number, drift: number, w = 13) => {
-      const h = 20;
-      for (let y = y0; y < y1; y += h) {
-        const k = (y - y0) / Math.max(1, y1 - y0);
-        const a = a0 + Math.sin(k * 5 + a0) * drift;
-        const a2 = a0 + Math.sin(((y + h - y0) / Math.max(1, y1 - y0)) * 5 + a0) * drift;
-        const r = barkR(a, y) + 1.2, r2 = barkR(a2, y + h) + 1.2;
-        const T: V3 = [Math.cos(a), 0, -Math.sin(a)];
-        const bl = P(a, y, r), tl = P(a2, y + h, r2);
-        const n = barkNormal(a, y + h / 2);
-        cards.flat([[bl[0] - T[0] * w / 2, bl[1], bl[2] - T[2] * w / 2], [bl[0] + T[0] * w / 2, bl[1], bl[2] + T[2] * w / 2], [tl[0] + T[0] * w / 2, tl[1], tl[2] + T[2] * w / 2], [tl[0] - T[0] * w / 2, tl[1], tl[2] - T[2] * w / 2]],
-          CELL.ivy[Math.floor(y / h) % 2], n, [0.9, 0.95, 0.9], 0.15, 0.25);
-      }
-    };
+    const strand = (cards: Cards, a0: number, y0: number, y1: number, drift: number) => ivyStrand(cards, a0, y0, y1, drift);
     const bandOf = (y: number): Band => (y < BAND_Y.f2[0] ? 'f1' : y < BAND_Y.f3[0] ? 'f2' : y < ROOF_Y ? 'f3' : 'roof');
     const climb = (a: number, y0: number, y1: number, drift: number) => {
       for (let y = y0; y < y1; y += 20) { const b = bandOf(y + 10); strand(ivyBand[b], a, y, Math.min(y + 20, y1), drift); }

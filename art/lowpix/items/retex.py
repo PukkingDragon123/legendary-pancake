@@ -238,6 +238,89 @@ def chalet(img):
     return dial(img, 44.5, 190.5, 33, roman=False, rim=False, hands=False, enamel=(246, 238, 214))
 
 
+ARTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_furnA', 'art')
+
+
+def painting(img):
+    """The moonlit painting's canvas (it came out a murky green): George Inness, Moonrise (1891, Art Institute of
+    Chicago, public domain), cropped to the canvas, painted in at twice the old texel density with a gentle pixel
+    grade. Atlas scaled 2x: the canvas card spans (0..133, 196..287) of the 256 x 512 atlas."""
+    x0, y0, x1, y1 = 0, 196 * 2, 133 * 2, 287 * 2
+    art = Image.open(os.path.join(ARTS, 'inness_moonrise.jpg')).convert('RGB')
+    w, h = art.size
+    ch = int(w * (y1 - y0) / (x1 - x0))
+    top = int((h - ch) * 0.42)
+    art = art.crop((0, top, w, top + ch)).resize((x1 - x0, y1 - y0), Image.LANCZOS)
+    art = art.quantize(colors=56, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE).convert('RGB')
+    a = np.array(img)
+    a[y0:y1, x0:x1, :3] = np.array(art)
+    return Image.fromarray(a, 'RGBA')
+
+
+def colorize(img, mask, ramp, lo=0.0, hi=1.0, gain=1.0):
+    """Repaint the masked texels with a colour ramp (dark..light sRGB stops) by their luminance (stretched lo..hi)."""
+    a = np.array(img).astype(np.float32)
+    lum = (a[..., :3] * [0.3, 0.59, 0.11]).sum(-1) / 255
+    t = np.clip((lum - lo) / max(1e-3, hi - lo) * gain, 0, 1)
+    stops = np.array(ramp, np.float32)
+    k = t * (len(stops) - 1)
+    i0 = np.clip(np.floor(k).astype(int), 0, len(stops) - 2)
+    f = (k - i0)[..., None]
+    col = stops[i0] * (1 - f) + stops[i0 + 1] * f
+    a[..., :3] = np.where(mask[..., None], col, a[..., :3])
+    return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), 'RGBA')
+
+
+def cushion(img):
+    """A dull purple-black lump becomes a rose velvet floor cushion with a sheen."""
+    a = np.array(img).astype(np.float32) / 255
+    m = a[..., 3] > 0
+    return colorize(img, m, [(70, 30, 34), (128, 52, 54), (176, 82, 74), (214, 122, 104), (236, 170, 146)], 0.05, 0.45)
+
+
+def wardrobe(img):
+    """The painted wardrobe's slate panels become a soft duck-egg paint; the dark boards warm to walnut."""
+    a = np.array(img).astype(np.float32) / 255
+    h, s_, v = rgb2hsv(a[..., :3])
+    blue = (h > 180) & (h < 250) & (s_ > 0.1)
+    out = colorize(img, blue, [(52, 78, 74), (92, 128, 118), (140, 172, 156), (188, 210, 192), (222, 232, 214)], 0.12, 0.6)
+    a2 = np.array(out).astype(np.float32) / 255
+    h2, s2, v2 = rgb2hsv(a2[..., :3])
+    dark = (~blue) & (v2 < 0.42) & (s2 < 0.5)
+    a2[..., :3] = np.where(dark[..., None], a2[..., :3] * np.array([1.35, 1.18, 1.0]) + np.array([0.04, 0.02, 0]), a2[..., :3])
+    return Image.fromarray((np.clip(a2, 0, 1) * 255).astype(np.uint8), 'RGBA')
+
+
+def easel(img):
+    """The quest board's blank slate becomes a cork board with paper quests pinned on it."""
+    a = np.array(img).astype(np.float32) / 255
+    h, s_, v = rgb2hsv(a[..., :3])
+    grey = (s_ < 0.12) & (v > 0.12) & (v < 0.62)
+    rng = np.random.default_rng(7)
+    out = colorize(img, grey, [(96, 62, 34), (142, 96, 56), (176, 126, 76), (204, 156, 100)], 0.1, 0.5)
+    b = np.array(out)
+    speck = grey & (rng.random(grey.shape) > 0.82)
+    b[speck, :3] = (b[speck, :3] * 0.72).astype(np.uint8)
+    # paper notes with scribbled lines and a red pin, inside the board's big face
+    for (x, y, w, hh, col) in ((80, 236, 34, 40, (240, 232, 210)), (128, 250, 30, 30, (236, 222, 160)), (172, 232, 40, 46, (232, 236, 240)), (100, 286, 46, 28, (226, 238, 212))):
+        if y + hh >= b.shape[0] or x + w >= b.shape[1] or not grey[y:y + hh, x:x + w].mean() > 0.8:
+            continue
+        b[y + 2:y + hh + 2, x + 2:x + w + 2, :3] = (b[y + 2:y + hh + 2, x + 2:x + w + 2, :3] * 0.7).astype(np.uint8)
+        b[y:y + hh, x:x + w, :3] = col
+        for ly in range(y + 8, y + hh - 4, 5):
+            b[ly, x + 4:x + w - 4 - (ly * 7 % 9), :3] = (60, 58, 70)
+        b[y + 1:y + 4, x + w // 2 - 1:x + w // 2 + 2, :3] = (190, 40, 30)
+    return Image.fromarray(b, 'RGBA')
+
+
+def cubby(img):
+    """The plain cream cubbies become honey birch."""
+    a = np.array(img).astype(np.float32) / 255
+    h, s_, v = rgb2hsv(a[..., :3])
+    m = (v > 0.45) & (s_ < 0.35)
+    return colorize(img, m, [(120, 76, 40), (170, 116, 66), (206, 156, 96), (230, 192, 132)], 0.45, 1.0)
+
+
 def glass(name, mat_index, alpha=0.2):
     """Turn a material back into clear glass (a borrowed model's dial glass came through opaque)."""
     path = os.path.join(ITEMS, name + '.glb')
@@ -256,6 +339,11 @@ FIXES = {
     'gnome': lambda: retex('gnome', gnome),
     'mantel_clock': lambda: (retex('mantel_clock', mantel, scale=2, mime='image/png'), glass('mantel_clock', 1)),
     'cuckoo': lambda: retex('cuckoo', cuckoo, scale=2),
+    'painting': lambda: retex('painting', painting, scale=2),
+    'cushion': lambda: retex('cushion', cushion),
+    'wardrobe': lambda: retex('wardrobe', wardrobe),
+    'easel': lambda: retex('easel', easel),
+    'cubby_shelf': lambda: retex('cubby_shelf', cubby),
     'chalet_cuckoo': lambda: retex('chalet_cuckoo', chalet, scale=2),
 }
 
