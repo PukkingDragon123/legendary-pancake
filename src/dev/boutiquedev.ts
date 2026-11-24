@@ -85,6 +85,7 @@ async function stage() {
   post.render(b.scene, b.camera, t, b.look);
   (window as unknown as { __ready: number }).__ready = 1;
   (window as unknown as { lodge: Lodge }).lodge = b;
+  (window as unknown as { redraw: () => void }).redraw = () => post.render(b.scene, b.camera, t, b.look);
   if (q.get('still')) return;
   let last = performance.now();
   const loop = (ms: number) => {

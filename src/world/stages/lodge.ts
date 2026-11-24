@@ -227,7 +227,7 @@ export class Lodge implements Stage {
     k.shadow.bias = -0.0004; k.shadow.normalBias = 0.025; k.shadow.radius = 3;
     S.add(k, k.target);
     // daylight (or moonlight) falling through the window into the store
-    this.sun.position.set((WIN.x0 + WIN.x1) / 2, 3.4, WIN.glass - 0.4);
+    this.sun.position.set((WIN.x0 + WIN.x1) / 2, 4.6, WIN.glass - 0.4);
     this.sun.target.position.set((WIN.x0 + WIN.x1) / 2 - 0.3, 0, 0.4);
     S.add(this.sun, this.sun.target);
     this.focusLight.position.set(0, 3.3, 1.5);
@@ -244,7 +244,7 @@ export class Lodge implements Stage {
     this.hemi.groundColor.setHex(n > 0.5 ? 0x2a1a12 : 0x4a2e1c);
     this.key.intensity = L(0.62, 0.3, n);
     this.key.color.setHex(n > 0.5 ? 0xffc48a : 0xffe4bc);
-    this.sun.intensity = L(120, 26, n);
+    this.sun.intensity = L(34, 14, n);
     this.sun.color.setHex(n > 0.5 ? 0x8fa8e8 : 0xeef4ff);
     for (const s of this.shafts) (s.material as THREE.MeshBasicMaterial).color.setHex(n > 0.5 ? 0x1c3058 : 0x6c6450);
     for (const l of this.lamps) l.base = L(4.6, 6.2, n);

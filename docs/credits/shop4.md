@@ -5,10 +5,11 @@
 - **Barnaby Birchbark**, the beaver shopkeeper (`public/models/shop/beaver.glb`): modelled, rigged, painted and
   animated in code for Hoot Hollow (`art/shop/beaver.py` + `art/shop/paintkit.py`, Blender bpy, headless). The coat,
   muzzle, paws, tail scales and the canvas apron are painted per texel in numpy (no photo sources).
-- The lodge itself (peeled-log walls, the stick ceiling, the counter, the deal stumps, the Lucky Barrel, acorn sacks
-  and heaps, the gem chests and moon gems, the brass scales, the gift parcel, the chalk slate, the cloth banners,
-  the carved signs, the rag rug and the wood shavings) is built in code in `src/world/stages/lodgekit.ts` and
-  `src/world/stages/lodge.ts`, dressed in the textures below and in pixel canvases painted in code.
+- The lodge itself (peeled-log walls, the stick ceiling, the counter, the deal stumps with their roots, the Lucky
+  Barrel's cradle and crank, acorn sacks and heaps, the moon gems, the turned brass scales and their chains, the wrapped
+  gift parcel and its bow, the chalk slate, the cloth banners, the carved signs, the rag rug, the herb bundles and the
+  wood shavings) is built in code in `src/world/stages/lodgekit.ts` and `src/world/stages/lodge.ts`, dressed in the
+  textures below and in pixel canvases painted in code. The mantel clock's real-time face and hands are drawn in code.
 - The burlap weave (`public/models/shop/tex/burlap.webp`) is painted in code (`art/shop/textures.py`).
 - The potted fir by the window is built from 2D pixel-art leaf cards (`src/world/stages/shopplants.ts`, round 3).
 
@@ -46,6 +47,16 @@ attributions as the source projects list them.
 | `fedora` | [Fedora](https://sketchfab.com/3d-models/fedora-eb46b3407c67491f98a13df1b86950fa) | Marko Korbun | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage (via round 3) |
 
 The goods on the bookshelf behind the counter are the game's own furniture models (`public/models/items`).
+
+## Models in `public/models/shop/hero.glb`
+
+Fetched from Poly Haven's API, merged by `art/shop/merge.mjs` (one named node each; textures resized, WebP, meshopt).
+
+| node | model | author | licence | used as |
+|---|---|---|---|---|
+| `barrel` | [Wine Barrel 01](https://polyhaven.com/a/wine_barrel_01) | James Ray Cock | CC0 1.0 | the Lucky Barrel (its lid hinged open in code) and two barrels of stock |
+| `chest` | [Treasure Chest](https://polyhaven.com/a/treasure_chest) | Rico Cilliers | CC0 1.0 | the moon gem chests (lids thrown open in code) |
+| `mclock` | [Mantel Clock 01](https://polyhaven.com/a/mantel_clock_01) | Rico Cilliers (modelling, texturing), Yann Kervran (rigging) | CC0 1.0 | the clock on the counter |
 
 ## Textures (`public/models/shop/tex/`)
 
