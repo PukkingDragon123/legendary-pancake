@@ -474,7 +474,7 @@ export class Lodge implements Stage {
       o.rotation.y = -Math.PI / 2 + (i - 1.5) * 0.25;
       this.add(o);
       const sz = [0.3, 0.42, 0.5, 0.8][i];
-      this.spot('acorn:' + a.id, o, this.hitBox(sz, sz + 0.05, sz, v3(AX, sz / 2, a.z)), v3(AX + 0.0, [0.2, 0.52, 0.26, 0.8][i], a.z), (l) => this.stashShot(l, a.z, 0.4));
+      this.spot('acorn:' + a.id, o, this.hitBox(sz, sz + 0.05, sz, v3(AX, sz / 2, a.z)), v3(AX - [0.2, 0.24, 0.26, 0.38][i], 0.03, a.z), (l) => this.stashShot(l, a.z, 0.4));
     });
     // gem packs on the shelf: a pouch, a box, a chest, a big chest
     GEM_SPOTS.forEach((g, i) => {
@@ -550,8 +550,8 @@ export class Lodge implements Stage {
     leak.position.set(B.x, 0.12 + B.h - 0.02, B.z);
     this.add(leak);
     const beamM = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, map: shaftTexture(true), side: THREE.FrontSide, fog: false });
-    const beam = new THREE.Mesh(this.track(new THREE.CylinderGeometry(B.r * 0.75, B.r * 0.6, 3.2, 20, 1, true)), beamM);
-    beam.position.set(B.x, 0.12 + B.h + 1.6, B.z);
+    const beam = new THREE.Mesh(this.track(new THREE.CylinderGeometry(B.r * 0.62, B.r * 0.5, 3.6, 20, 1, true)), beamM);
+    beam.position.set(B.x, 0.12 + B.h + 1.8, B.z);
     beam.renderOrder = 6;
     this.add(beam);
     this.disposables.push(() => beamM.dispose());
@@ -899,7 +899,7 @@ export class Lodge implements Stage {
       ? { target: v3(0.1, 1.15, -0.85), yaw: 0.02, pitch: 0.1, dist: 5.5, fov: 46, cx: 0.5, cy: 0.5 }
       : { target: v3(1.36, 0.78, -0.25), yaw: 0.0, pitch: 0.3, dist: 5.0, fov: 58, cx: 0.5, cy: 0.44 };
     if (name === 'deals') { const p = STUMPS[l][1]; return l === 'side' ? { target: v3(p.x, 0.75, p.z - 0.3), yaw: 0.05, pitch: 0.2, dist: 3.9, fov: 44, cx: 0.5, cy: 0.5 } : this.shot('home'); }
-    if (name === 'stash') return { target: v3(SHELF.x - 0.45, 0.6, (SHELF.z0 + SHELF.z1) / 2 + 0.05), yaw: -1.12, pitch: 0.36, dist: l === 'side' ? 3.5 : 5.6, fov: l === 'side' ? 46 : 52, cx: 0.5, cy: l === 'side' ? 0.5 : 0.45 };
+    if (name === 'stash') return { target: v3(SHELF.x - 0.45, 0.6, (SHELF.z0 + SHELF.z1) / 2 + 0.05), yaw: -1.12, pitch: l === 'side' ? 0.4 : 0.5, dist: l === 'side' ? 3.5 : 5.4, fov: l === 'side' ? 46 : 52, cx: 0.5, cy: l === 'side' ? 0.48 : 0.42 };
     if (name === 'series') return this.barrelShot(l, false);
     if (name === 'barrel') return this.barrelShot(l, true);
     const s = this.spots.get(name);
@@ -1067,6 +1067,7 @@ export class Lodge implements Stage {
     this.pop(v3(BARREL.x, BARREL.h + 0.75, BARREL.z), stars === 5 ? 0xffd27a : stars === 4 ? 0xd8b8ff : 0xb8e4ff, stars === 5 ? 26 : 12);
   }
   clearPrize() {
+    if (this.barrelParts) this.barrelParts.open = Math.min(this.barrelParts.open, 0.25);
     if (!this.prize) return;
     this.prize.obj.removeFromParent();
     this.prize.obj.userData.dispose?.();
@@ -1337,7 +1338,7 @@ function shaftTexture(vertical = false): THREE.Texture {
   for (let y = 0; y < 64; y++) for (let x = 0; x < 32; x++) {
     const u = x / 31, v = y / 63;
     const side = Math.sin(u * Math.PI);
-    const along = vertical ? Math.pow(1 - v, 1.5) * Math.min(1, v * 6 + 0.3) : Math.pow(1 - v, 0.6) * Math.min(1, v * 4 + 0.1);
+    const along = vertical ? Math.pow(1 - v, 0.8) * Math.min(1, v * 2.5 + 0.05) : Math.pow(1 - v, 0.6) * Math.min(1, v * 4 + 0.1);
     const a = side * side * along;
     const i = (y * 32 + x) * 4;
     d.data[i] = d.data[i + 1] = d.data[i + 2] = 255; d.data[i + 3] = Math.round(a * 255);

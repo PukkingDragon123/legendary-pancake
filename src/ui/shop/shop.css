@@ -70,7 +70,7 @@
 .lg-gifttag .lg-ktag { top: 10px; scale: 0.86; }
 .lg-gifttag .lg-ktag b { font-family: var(--font-display); font-weight: 400; font-size: 18px; color: #b0342c; }
 .lg-gifttag .lg-ktag.done { opacity: 0.75; }
-.lg-packtag .lg-ktag { top: -46px; animation: lgBob 3s ease-in-out infinite; }
+.lg-packtag .lg-ktag { top: 4px; transform-origin: 50% 0; animation: lgSwing 4.4s ease-in-out infinite; }
 .lg-packtag.gem .lg-ktag { top: 6px; transform-origin: 50% 0; animation: lgSwing 4s ease-in-out infinite; }
 .lg-packtag.gem .lg-string { height: 8px; }
 .lg-packtag .lg-ktag b, .lg-packtag .lg-ktag span { display: inline-flex; align-items: center; gap: 2px; font-weight: 400; }
@@ -250,6 +250,7 @@
 
 /* ---------------------------------------------------------------- the reveal at the barrel */
 .lg-reveal { position: absolute; inset: 0; z-index: 9; pointer-events: auto; cursor: pointer; }
+.lg-reveal.summary { display: grid; place-items: center; padding: 12px; cursor: default; }
 .lg-flash { position: absolute; inset: 0; pointer-events: none; animation: lgFlash 1.8s steps(6) both 0.9s; }
 .lg-flash.r5 { background: var(--lg-burst-gold) 50% 42% / 140vmax 140vmax no-repeat; }
 .lg-flash.r4 { background: var(--lg-burst-violet) 50% 42% / 120vmax 120vmax no-repeat; }
@@ -258,7 +259,7 @@
 .lg-skip, .lg-count { position: absolute; bottom: calc(16px + var(--safe-b)); right: 16px; font-size: 14px; color: #fff4dc; text-shadow: 0 2px 0 rgba(20, 10, 6, 0.8); pointer-events: none; }
 .lg-count { right: auto; left: 16px; font-family: var(--font-display); font-size: 18px; }
 .lg-plaque-wrap { position: absolute; inset: 0; pointer-events: none; }
-.lg-plaque-wrap .lg-skipall { pointer-events: auto; position: absolute; right: 12px; top: calc(12px + var(--safe-t)); min-height: 38px; padding: 0 8px; font-size: 16px; }
+.lg-plaque-wrap .lg-skipall { pointer-events: auto; position: absolute; left: 12px; top: calc(12px + var(--safe-t)); min-height: 38px; padding: 0 8px; font-size: 16px; }
 .lg-rays { position: absolute; left: 50%; top: 36%; width: min(120vmin, 760px); aspect-ratio: 1; translate: -50% -50%; background: var(--lg-rays-a) center / contain no-repeat; opacity: 0.32; animation: lgSpin 14s linear infinite; mix-blend-mode: screen; }
 .lg-plaque-wrap.r5 .lg-rays { opacity: 0.6; filter: sepia(1) saturate(4) hue-rotate(-12deg); }
 .lg-plaque-wrap.r4 .lg-rays { opacity: 0.45; filter: sepia(1) saturate(3) hue-rotate(220deg); }

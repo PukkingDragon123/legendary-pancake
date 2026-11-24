@@ -309,7 +309,7 @@ export function Shop() {
       <button class="lg-leave lg-btn linen" aria-label="Leave the store" onClick={close}><Px name="arrow_left" size={20} /><span>Leave</span></button>
 
       {/* paper price tags hanging off the stumps */}
-      {showTags && deals.map((d, i) => {
+      {showTags && section !== 'stash' && section !== 'series' && deals.map((d, i) => {
         const sold = isSold(s, d.key);
         return (
           <Anchored at={'deal:' + i} class={'lg-dealtag' + (sold ? ' sold' : '')}>
