@@ -330,7 +330,7 @@ export function buildOak(): Oak {
   const bands = { f1: new THREE.Group(), f2: new THREE.Group(), f3: new THREE.Group(), roof: new THREE.Group() } as Record<Band, THREE.Group>;
   for (const b of BANDS) bands[b].name = 'oakband:' + b;
   const S = new Sets();
-  const extra = new Map<string, THREE.Material>();
+  const extra = new Map<string, THREE.Material>([['signs', signsMaterial()]]);
   const R = rng(1234);
   const ivy = new Cards('flat');
   const ivyBand: Record<Band, Cards> = { f1: ivy, f2: ivy, f3: ivy, roof: ivy };
