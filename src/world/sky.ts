@@ -516,8 +516,11 @@ export class Sky {
     U.uMoonVis.value = (mo ? 1 : THREE.MathUtils.smoothstep(this.night, 0.2, 0.7) * Math.min(1, 0.25 + litFrac * 3)) * this.moonFade;
     this.starMat.uniforms.uNight.value = Math.max(this.starBoost, THREE.MathUtils.smoothstep(this.night, 0.35, 0.95));
     this.starMat.uniforms.uClear.value = (1 - oc) * (1 - w.fog * 0.85);
-    this.envDirty = true;
+    // re-bake the environment light only when the sky has visibly changed
+    const envKey = `${Math.round(this.hour * 4)}|${oc.toFixed(1)}|${w.cloud.toFixed(1)}|${w.fog.toFixed(1)}|${w.cold.toFixed(1)}`;
+    if (envKey !== this.envKey) { this.envKey = envKey; this.envDirty = true; }
   }
+  private envKey = '';
 
   /** Southern hemisphere players see the moon lit from the other side. */
   setHemisphere(south: boolean) { this.domeMat.uniforms.uHemi.value = south ? -1 : 1; }

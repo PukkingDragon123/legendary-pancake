@@ -304,16 +304,20 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
     const set: TreeSet = { kind, foliage: [], idx: [] };
     const mats = treeMaterials(T.species);
     T.seeds.forEach((seed, vi) => {
-      for (const near of [true, false]) {
+      // [look4] three rings: near (full detail), mid (reduced, still casting shadows into the clearing), far (reduced, no
+      // shadow: the sun's shadow map only covers the clearing)
+      for (const ring of [0, 1, 2]) {
         const ids: number[] = [];
-        list.forEach((s, i) => { if (i % T.seeds.length === vi && (quality === 'high' && Math.hypot(s.x, s.z) < 12.8) === near) ids.push(i); });
+        const ringOf = (s: Spot) => { const d = Math.hypot(s.x, s.z); return quality === 'high' && d < 12.8 ? 0 : d < 21 ? 1 : 2; };
+        list.forEach((s, i) => { if (i % T.seeds.length === vi && ringOf(s) === ring) ids.push(i); });
         if (!ids.length) continue;
+        const near = ring === 0, shadow = ring < 2;
         const proto = treeProto(T.species, seed, T.age, near, T.leaves);
         const lod = near ? proto.lod0 : proto.lod1;
         const spots = ids.map((i) => list[i]);
         const sc = (s: Spot): [number, number, number] => { const k = (T.h * s.s) / proto.height; return [k, k, k]; };
-        make(lod.bark, mats.bark, mats.barkDepth, spots, sc, true, `${kind}:${seed}:bark`);
-        if (lod.foliage) { set.foliage.push(make(withLeafState(lod.foliage, spots.length), leaf.mat, leaf.depth, spots, sc, true, `${kind}:${seed}:leaves`, true)); set.idx.push(ids); }
+        make(lod.bark, mats.bark, mats.barkDepth, spots, sc, shadow, `${kind}:${seed}:bark`);
+        if (lod.foliage) { set.foliage.push(make(withLeafState(lod.foliage, spots.length), leaf.mat, leaf.depth, spots, sc, shadow, `${kind}:${seed}:leaves`, true)); set.idx.push(ids); }
         stats.trees += spots.length;
       }
     });

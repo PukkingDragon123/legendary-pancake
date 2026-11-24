@@ -463,7 +463,6 @@ export class Scene {
     this.lantern.intensity = night * 8;
     this.fireflies.alpha = night > 0.4 && (this.weather?.firefliesOk ?? true) ? 1 : 0; // [world] not in winter or rain
     this.scene.environmentIntensity = L(0.4, 0.3, night);
-    this.sky.envDirty = true;
     // furniture lights follow the sky every frame in rooms.update
   }
 

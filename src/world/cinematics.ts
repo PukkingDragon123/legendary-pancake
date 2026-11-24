@@ -444,7 +444,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   owl.setMood('happy', 9);
   scene.weather.hold = { kind: 'clear', intensity: 0.85, source: 'seasonal', temp: 10 };
   scene.weather.snap();
-  const sunDir = V(0.52, 0.16, 0.86).normalize(); // [look4] low over the meadow the arrival looks across
+  const sunDir = V(0.5, 0.3, 0.84).normalize(); // [look4] low over the meadow the arrival looks across
   sky.sunDisc = { dir: sunDir, size: 0.05 };
 
   const M = measure(scene), A = M.all;
