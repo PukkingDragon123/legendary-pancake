@@ -159,7 +159,7 @@ export function Shop() {
     try { b = new Boutique(deals.map((d) => ({ kind: d.kind, id: d.id }))); } catch (e) { console.warn('boutique failed', e); }
     if (b && sc) {
       const st = b;
-      st.attach(sc.renderer);
+      st.attach(sc.renderer, sc);
       void transition('snow', () => { sc.setStage(st); });
       st.greet();
       st.onPick = (i) => { pickDeal(i, true); };
