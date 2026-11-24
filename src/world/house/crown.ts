@@ -1,14 +1,10 @@
-// The oak's leaves: a huge, dense crown of hand-pixelled oak-leaf cluster cards (public/models/house/tex/leaves.webp,
-// made by art/lowpix/house/tex.py), plus the ivy, ferns and sprigs that grow on and round the trunk.
-//
-// Crown cards face the camera (and the sun in the shadow pass, so they cast full dappled shadows) and carry a
-// normal bent outward from the middle of their leaf mass, so the crown lights like one big bushy volume: sunlit
-// tops, a dark heart and underside. Deep shells of darker clusters fill the inside (no sky through the gaps), sprays
-// and twiglets break the outline, everything sways in the shared wind, and leaves glow a little where the light
-// comes through them. Ivy and ferns are flat cards that hug the bark or stand in the moss.
+// The oak's small greenery: hand-pixelled leaf cards (public/models/house/tex/leaves.webp, made by
+// art/lowpix/house/tex.py) for the ivy that climbs the bark, the ferns in the moss round the foot and the sprigs in
+// the flower boxes. Flat cards keep their orientation; camera-facing ('bill') cards are kept for small clumps. They
+// sway in the shared wind and glow a little where the sun comes through them. (The crown itself is built with the
+// forest's shared leaf-card canopy, src/world/foliage.ts, so the oak matches the woods round it.)
 import * as THREE from 'three';
 import { PX, wind } from '../../gfx/box.ts';
-import { rng } from '../../gfx/noise.ts';
 import type { V3 } from './geo.ts';
 import { houseTex, patchCut } from './kit.ts';
 
@@ -171,74 +167,5 @@ export class Cards {
   }
 }
 
-// ------------------------------------------------------------------ the crown
-
-/** a leaf mass: centre and radii (px); a core only gets the deep dark shells that fill the crown's middle */
+/** a leaf mass: centre and radii (px); a core is the crown's dense middle */
 export interface Mass { c: V3; r: V3; core?: boolean; tint?: V3 }
-
-const GREEN_TINTS: V3[] = [[1, 1, 1], [0.92, 1.02, 0.86], [1.06, 1.04, 0.84], [0.86, 0.96, 0.92], [1.1, 1.08, 0.8]];
-
-/**
- * Fill leaf masses (ellipsoids, house px) with cards. Each mass gets: a deep core of dark dense clusters, a middle
- * shell, and an outer skin of clusters, sprays and twiglets; the normals bend out from the crown's centre (k) and
- * the mass's own centre, so the whole canopy reads as a lit volume with lobes.
- */
-export function fillCrown(cards: Cards, masses: Mass[], centre: V3, seed = 3) {
-  const R = rng(seed);
-  const golden = Math.PI * (3 - Math.sqrt(5));
-  for (let mi = 0; mi < masses.length; mi++) {
-    const { c, r } = masses[mi];
-    const area = 4 * Math.PI * Math.pow((Math.pow(r[0] * r[1], 1.6) + Math.pow(r[0] * r[2], 1.6) + Math.pow(r[1] * r[2], 1.6)) / 3, 1 / 1.6);
-    const shells: { k0: number; k1: number; dens: number; cells: number[]; size: [number, number]; ao: number; edge: number }[] = [
-      { k0: 0.35, k1: 0.6, dens: 3000, cells: CELL.deep.concat(CELL.dense), size: [64, 84], ao: 0.42, edge: 0.05 },
-      { k0: 0.66, k1: 0.86, dens: 1500, cells: CELL.dense, size: [56, 72], ao: 0.62, edge: 0.15 },
-      { k0: 0.92, k1: 1.06, dens: 470, cells: CELL.dense.concat(CELL.dense, CELL.spray, CELL.acorn), size: [38, 52], ao: 0.92, edge: 0.6 },
-      { k0: 1.04, k1: 1.16, dens: 2000, cells: CELL.spray.concat(CELL.twig, CELL.hang), size: [36, 46], ao: 1, edge: 0.9 },
-    ];
-    for (let si = 0; si < shells.length; si++) {
-      const sh = shells[si];
-      if (masses[mi].core ? si >= 2 : si === 0) continue;
-      const n = Math.max(6, Math.round(area / sh.dens));
-      for (let i = 0; i < n; i++) {
-        const yy = 1 - (2 * (i + 0.5)) / n;
-        const rr = Math.sqrt(Math.max(0, 1 - yy * yy));
-        const th = golden * i + mi * 1.3 + si * 0.7;
-        let nx = Math.cos(th) * rr, ny = yy, nz = Math.sin(th) * rr;
-        // fewer cards on the underside's outer skin; what hangs there are drooping clusters
-        if (si === 2 && ny < -0.45 && R() < 0.45) continue;
-        const under = si === 3 && ny < -0.35;
-        const k = sh.k0 + (sh.k1 - sh.k0) * R();
-        const jit = 0.12;
-        nx += (R() - 0.5) * jit; ny += (R() - 0.5) * jit; nz += (R() - 0.5) * jit;
-        const p: V3 = [c[0] + nx * r[0] * k, c[1] + ny * r[1] * k, c[2] + nz * r[2] * k];
-        // normal: out of the mass, bent towards out of the whole crown
-        const gx = p[0] - centre[0], gy = (p[1] - centre[1]) * 1.6, gz = p[2] - centre[2];
-        const gl = Math.hypot(gx, gy, gz) || 1;
-        let qx = nx * 0.55 + (gx / gl) * 0.45, qy = ny * 0.55 + (gy / gl) * 0.45 + 0.08, qz = nz * 0.55 + (gz / gl) * 0.45;
-        const ql = Math.hypot(qx, qy, qz) || 1;
-        qx /= ql; qy /= ql; qz /= ql;
-        const cell = under ? CELL.hang[Math.floor(R() * 4)] : sh.cells[Math.floor(R() * sh.cells.length)];
-        const size = sh.size[0] + (sh.size[1] - sh.size[0]) * R();
-        // hanging clusters droop: keep them upright; others roll freely
-        const roll = CELL.hang.includes(cell) || CELL.twig.includes(cell) ? (R() - 0.5) * 0.8 + (CELL.twig.includes(cell) ? Math.atan2(-nx, ny) * 0.6 : 0) : R() * Math.PI * 2;
-        // lower and inner cards darker (ambient occlusion), the sunny top a touch warmer
-        const lowK = Math.min(1, Math.max(0, 0.75 + ny * 0.35));
-        // shade under the lobes above (crevices between lobes read as depth)
-        let occ = 1;
-        for (let mj = 0; mj < masses.length; mj++) {
-          if (mj === mi || masses[mj].core) continue;
-          const o = masses[mj];
-          if (o.c[1] < p[1] + 10) continue;
-          const dx = (p[0] - o.c[0]) / o.r[0], dz = (p[2] - o.c[2]) / o.r[2];
-          const d2 = dx * dx + dz * dz;
-          if (d2 < 1) occ *= 0.82 + 0.18 * d2;
-        }
-        const ao = sh.ao * (0.7 + 0.3 * lowK) * Math.max(0.55, occ);
-        const tint = GREEN_TINTS[Math.floor(R() * GREEN_TINTS.length)], mt = masses[mi].tint ?? [1, 1, 1];
-        const warm = ny > 0.5 && si >= 2 ? 1.08 : 1;
-        if (under) p[1] -= r[1] * 0.18;
-        cards.bill(p, size, cell, roll, [qx, qy, qz], [tint[0] * mt[0] * ao * warm, tint[1] * mt[1] * ao * warm, tint[2] * mt[2] * ao], si >= 2 ? 1 : 0.5, sh.edge * (0.6 + 0.4 * Math.max(0, ny + 0.3)), R() < 0.5);
-      }
-    }
-  }
-}

@@ -13,7 +13,8 @@
 import * as THREE from 'three';
 import { PX } from '../../gfx/box.ts';
 import { fbm, rng } from '../../gfx/noise.ts';
-import { Cards, CELL, fillCrown, type Mass } from './crown.ts';
+import { canopy, leafMaterial, withLeafState, type Puff } from '../foliage.ts';
+import { Cards, CELL, type Mass } from './crown.ts';
 import { Geo, mat, spline, type V3 } from './geo.ts';
 import { canvasTex, houseMat, pixelText, textWidth, woodFill, type HouseMat } from './kit.ts';
 import {
@@ -277,6 +278,9 @@ export interface Oak {
   fronts: Partial<Record<FloorId, LockFront>>;
   /** lantern glow points (world, house-local px) for lights */
   porchLamp: V3;
+  /** the leafy crown (and the great limb's leaves): the forest's shared leaf cards, one instance each so the
+   * seasons can tint them like the woods round them */
+  crown: THREE.InstancedMesh[];
   /** the rope ladder (sways) */
   ladder: THREE.Group;
   dispose(): void;
@@ -707,6 +711,25 @@ export function buildOak(): Oak {
     }
   }
 
+  // the crown's leaves come from the forest's shared leaf-card canopy (src/world/foliage.ts), so the oak matches the
+  // woods: lobes (house px) become puffs in world units round the trunk
+  const crownMeshes: THREE.InstancedMesh[] = [];
+  const leafCrown = (ms: Mass[], centre: V3, seed: number, name: string) => {
+    const puffs: Puff[] = ms.map((l) => { const r = Math.max(l.r[0], l.r[2]); return { x: l.c[0] * PX, y: l.c[1] * PX, z: l.c[2] * PX, r: r * PX, sy: l.r[1] / r }; });
+    const geo = canopy(puffs, { cells: ['oak', 'oak', 'oakFresh'], seed, size: 1.75, cover: 2.1, centre: new THREE.Vector3(centre[0] * PX, centre[1] * PX, centre[2] * PX), height: 27, sway: 0.008, depthDark: 0.36 });
+    geo.computeBoundingSphere();
+    const leaf = leafMaterial();
+    const m = new THREE.InstancedMesh(withLeafState(geo, 1), leaf.mat, 1);
+    m.setMatrixAt(0, new THREE.Matrix4());
+    m.setColorAt(0, new THREE.Color(1, 1, 1));
+    m.customDepthMaterial = leaf.depth;
+    m.castShadow = true;
+    m.receiveShadow = true;
+    m.name = name;
+    crownMeshes.push(m);
+    return m;
+  };
+
   // ---------------------------------------------------------------- limbs and the crown
   // The crown is a cumulus of leaf lobes: a ring of low lobes out at the ends of the great limbs, a ring of higher
   // ones, a few on top, and a dark core filling the middle. Each limb climbs out of the top of the trunk and
@@ -751,11 +774,7 @@ export function buildOak(): Oak {
     lobes.push({ c: [0, 346, -10], r: [170, 84, 132], core: true });
   }
   {
-    const crown = new Cards('bill');
-    fillCrown(crown, lobes, [0, 346, -10]);
-    const m = crown.mesh('crown');
-    if (import.meta.env.DEV) console.warn('crown cards', crown.size);
-    bands.roof.add(m);
+    bands.roof.add(leafCrown(lobes.filter((l) => !l.core), [0, 346, -10], 7, 'crown'));
   }
 
   // ---------------------------------------------------------------- the great limb and its platform (Pip's launch perch)
@@ -766,9 +785,7 @@ export function buildOak(): Oak {
     const pts = spline(ctrl, 26);
     g.tube(pts, pts.map((_, i) => 14 * (1 - (i / 25) * 0.72)), 10, { uRep: 1, vScale: 128, col: (t, _u, n) => [0.6 + 0.4 * clamp(n.y + 0.5), clamp(0.35 + n.y * 0.6), 0.5] });
     const tip = pts[pts.length - 1];
-    const lc = new Cards('bill');
-    fillCrown(lc, [{ c: [pts[17][0], pts[17][1] + 10, pts[17][2]], r: [38, 28, 38] }], [0, 346, -10], 9);
-    bands.f2.add(lc.mesh('limb-leaves'));
+    bands.f2.add(leafCrown([{ c: [pts[17][0], pts[17][1] + 10, pts[17][2]], r: [40, 30, 40] }], [0, 346, -10], 9, 'limb-leaves'));
     // the platform: an octagonal deck on the limb with a railing and the perch
     const dk = S.get('f2', 'deck'), pl = S.get('f2', 'planks');
     const [px, py, pz] = PLATFORM;
@@ -1014,7 +1031,7 @@ export function buildOak(): Oak {
   for (const b of BANDS) if (ivyBand[b].size) bands[b].add(ivyBand[b].mesh('ivy:' + b));
 
   return {
-    bands, fronts, porchLamp, ladder: ladderGroup,
+    bands, fronts, porchLamp, ladder: ladderGroup, crown: crownMeshes,
     dispose() { for (const b of BANDS) bands[b].traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) m.geometry.dispose(); }); },
   };
 }

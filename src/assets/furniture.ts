@@ -89,7 +89,7 @@ const add = (d: ItemDef) => items.push(d);
 // ------------------------------------------------------------------ seating
 
 add({
-  id: 'bench', noStore: true, name: 'Wooden Bench', cat: 'seating', price: 120, blurb: 'Room for two and a snack.',
+  id: 'bench', model: 'items/painted_bench.glb', noStore: true, name: 'Wooden Bench', cat: 'seating', price: 120, blurb: 'Room for two and a snack.',
   sit: [{ x: -5, y: 7, z: 0.5 }, { x: 5, y: 7, z: 0.5 }],
   build: () => [
     box(0, 5, 0, 22, 2, 7, wx(W.oak, 3)),
@@ -163,7 +163,7 @@ add({
 });
 
 add({
-  id: 'picnic', noStore: true, name: 'Picnic Blanket', cat: 'seating', price: 180, blurb: 'Basket included. Ants not included.',
+  id: 'picnic', model: 'items/picnic_blanket.glb', noStore: true, name: 'Picnic Blanket', cat: 'seating', price: 180, blurb: 'Basket included. Ants not included.',
   flatItem: true, sit: [{ x: -7, y: 1, z: 3, rot: 60 }, { x: 5, y: 1, z: 6, rot: -30 }], eat: { x: -1, y: 1, z: 1 },
   build: () => [
     box(0, 0, 0, 28, 1, 22, cloth('#e25555', { check: '#fbf1e6' }), { skip: 'd' }),
@@ -177,7 +177,7 @@ add({
 // ------------------------------------------------------------------ tables
 
 add({
-  id: 'table', name: 'Picnic Table', cat: 'tables', price: 200, size: [1.5, 1], surface: 11, blurb: 'Sturdy enough for group projects.',
+  id: 'table', model: 'items/picnic_table.glb', name: 'Picnic Table', cat: 'tables', price: 200, size: [1.5, 1], surface: 11, blurb: 'Sturdy enough for group projects.',
   eat: { x: 0, y: 0, z: 11, rot: 180 },
   build: () => [
     box(0, 9, 0, 24, 2, 13, wx(W.oak, 3)),
@@ -226,7 +226,7 @@ add({
 // ------------------------------------------------------------------ lights
 
 add({
-  id: 'lanternpost', noStore: true, name: 'Lantern Post', cat: 'lights', price: 150, blurb: 'Glows when the sun clocks off.',
+  id: 'lanternpost', model: 'items/lantern_post.glb', noStore: true, name: 'Lantern Post', cat: 'lights', price: 150, blurb: 'Glows when the sun clocks off.',
   light: { x: 5, y: 13, z: 0, color: 0xffc66b, power: 1.4 },
   build: () => [
     box(0, 0, 0, 5, 2, 5, rock(PAL.stone, { seed: 4, moss: PAL.moss }), { skip: 'd' }), box(0, 2, 0, 2, 18, 2, wy(W.dark)), box(2.5, 18, 0, 8, 2, 2, wx(W.dark, 0)),
@@ -237,7 +237,7 @@ add({
 });
 
 add({
-  id: 'stonelantern', noStore: true, name: 'Stone Lantern', cat: 'lights', price: 280, level: 3, blurb: 'Mossy and wise.',
+  id: 'stonelantern', model: 'items/stone_lantern.glb', noStore: true, name: 'Stone Lantern', cat: 'lights', price: 280, level: 3, blurb: 'Mossy and wise.',
   light: { x: 0, y: 12, z: 0, color: 0xffe2a0, power: 1.2 },
   build: () => {
     const st = rock('#9a9ea8', { seed: 7, moss: PAL.moss });
@@ -264,7 +264,7 @@ add({
 });
 
 add({
-  id: 'campfire', noStore: true, name: 'Campfire', cat: 'lights', price: 240, level: 2, blurb: 'Marshmallows sold separately.',
+  id: 'campfire', model: 'items/fire_pit.glb', noStore: true, name: 'Campfire', cat: 'lights', price: 240, level: 2, blurb: 'Marshmallows sold separately.',
   light: { x: 0, y: 6, z: 0, color: 0xff9a45, power: 2.2 },
   build: () => {
     const out: BoxSpec[] = [];
@@ -333,7 +333,7 @@ add({
 });
 
 add({
-  id: 'mailbox', noStore: true, name: 'Mailbox', cat: 'garden', price: 110, blurb: 'Reminders arrive here first.',
+  id: 'mailbox', model: 'items/post_box.glb', noStore: true, name: 'Mailbox', cat: 'garden', price: 110, blurb: 'Reminders arrive here first.',
   build: () => {
     const rr = R('#d8433f');
     const body: Painter = (t) => {
@@ -349,7 +349,7 @@ add({
 });
 
 add({
-  id: 'well', noStore: true, name: 'Wishing Well', cat: 'garden', price: 480, level: 4, blurb: 'Accepts coins. Returns nothing.',
+  id: 'well', model: 'items/wishing_well.glb', noStore: true, name: 'Wishing Well', cat: 'garden', price: 480, level: 4, blurb: 'Accepts coins. Returns nothing.',
   build: () => {
     const br = bricks('#9aa0ab', { w: 5, h: 3, seed: 3 });
     return [
@@ -363,7 +363,7 @@ add({
 });
 
 add({
-  id: 'birdhouse', noStore: true, name: 'Birdhouse', cat: 'garden', price: 170, blurb: 'Small birds, big opinions.',
+  id: 'birdhouse', model: 'items/bird_feeder.glb', noStore: true, name: 'Birdhouse', cat: 'garden', price: 170, blurb: 'Small birds, big opinions.',
   build: () => {
     const wall: Painter = (t) => (t.face === 4 && Math.hypot(t.u + 0.5 - t.w / 2, t.v - 3) < 1.5 ? 0x2a1c18 : wy('#8fc4e6', 2)(t));
     return [box(0, 0, 0, 2, 18, 2, wy(W.dark)), box(0, 18, 0, 9, 1, 9, wx(W.oak, 3)), box(0, 19, 0, 6, 6, 6, wall), box(0, 20, 3.8, 1, 1, 2, wy(W.dark)),
@@ -602,7 +602,12 @@ add({
   },
 });
 
-export const FURNITURE: ItemDef[] = items;
+/**
+ * Retired: the old garden pieces that only ever existed as stacked boxes (no real model). They are out of the
+ * catalog, the shop, the trip loot and the collection book; saves that still list them simply skip them.
+ */
+export const RETIRED = new Set(['swing', 'fence', 'arch', 'signpost', 'stones', 'banner', 'pumpkin', 'wheelbarrow', 'scarecrow', 'fountain', 'birdbath']);
+export const FURNITURE: ItemDef[] = items.filter((i) => !RETIRED.has(i.id));
 export const ITEM: Record<string, ItemDef> = Object.fromEntries(items.map((i) => [i.id, i]));
 
 // ------------------------------------------------------------------ food

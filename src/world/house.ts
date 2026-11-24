@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { box, buildProp, propMesh, PX, type BoxSpec } from '../gfx/box.ts';
 import { dirt, wood } from '../gfx/mats.ts';
+import type { SeasonInfo } from './astro.ts';
 import type { Fx } from './fx.ts';
 import { HOUSE } from './layout.ts';
 import { LEAF } from './house/crown.ts';
@@ -41,7 +42,7 @@ export interface House {
   roof: THREE.Group;
   /** @deprecated always empty */
   slots: Slot[];
-  /** @deprecated the window glass follows HOUSE_LOOK (house/kit.ts); kept so older callers compile */
+  /** the window glass tint (the scene sets it from the sky by day and the lamps at night; house/kit.ts HOUSE_LOOK) */
   panes: THREE.MeshBasicMaterial;
   /** the ground floor's hanging lantern (world) */
   lampAt: THREE.Vector3;
@@ -65,6 +66,9 @@ export interface House {
   /** the floor a ray hits the locked front of, if any */
   pickLock(ray: THREE.Ray): FloorId | null;
   update(dt: number, t: number, hooks: HouseHooks): void;
+  /** dress the oak's crown for the season (fresh in spring, golden in autumn, frosted but still leafy in winter: it
+   * is a magic home) */
+  setSeason(info: SeasonInfo): void;
   /** @deprecated zones became floors; kept so older callers compile */
   zones: Record<Zone, boolean>;
   setZone(z: Zone, open: boolean): void;
@@ -165,7 +169,7 @@ export function buildHouse(): House {
       // lamps: a soft honey glow by day, bright enough to bloom at night
       HOUSE_LOOK.glow.setRGB(1.05 + n * 2.6, 0.78 + n * 1.5, 0.46 + n * 0.55).multiplyScalar(0.96 + Math.sin(t * 11) * 0.02 + Math.sin(t * 6.3) * 0.02);
       // clear glass: a cool sky sheen by day, the warm lamplit room glowing through it at night
-      HOUSE_LOOK.pane.setRGB(0.62 + n * 0.4, 0.74 + n * 0.02, 0.84 - n * 0.42);
+      HOUSE_LOOK.pane.copy(panes.color); // the scene tints the glass with the sky by day and lamplight at night
       HOUSE_LOOK.paneOpacity = 0.16 + n * 0.16;
       HOUSE_LOOK.sliver.setRGB(1.6 + n * 2.6, 0.95 + n * 1.4, 0.38 + n * 0.4);
       DUSTY().emissiveIntensity = 0.12 + n * 1.6;
@@ -197,6 +201,20 @@ export function buildHouse(): House {
       };
       for (const f of ['f2', 'f3'] as FloorId[]) stepLock(locks[f]!, dt, t, emit);
       void buildFloor;
+    },
+    setSeason(info) {
+      const c = new THREE.Color();
+      for (const m of oak.crown) {
+        const st = m.geometry.getAttribute('iLeaf') as THREE.InstancedBufferAttribute | undefined;
+        let leaf = 0;
+        if (info.season === 'spring') c.setHex(0xe2f0c4);
+        else if (info.season === 'autumn' && info.t > 0.25) { leaf = 1; c.setHex(0xf4e6c8); }
+        else if (info.season === 'winter') c.setHex(0xd6e0dc);
+        else c.setHex(0xffffff);
+        m.setColorAt(0, c);
+        if (m.instanceColor) m.instanceColor.needsUpdate = true;
+        if (st) { st.setX(0, leaf); st.needsUpdate = true; }
+      }
     },
     zones: { loft: false, deck: false, garden: false },
     setZone(z, o) { house.zones[z] = o; },
