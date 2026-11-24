@@ -101,7 +101,7 @@ frames('nav_zz', 8, SLEEP_KEY, (g, f) => {
   for (let k = 0; k < 2; k++) {
     const t = ((f + k * 4) % 8) / 8;
     const size = t < 0.34 ? 3 : t < 0.7 ? 4 : 5;
-    glyph(g, Math.round(20 + t * 4 + Math.sin(t * 6.3) * 1.2), Math.round(13 - t * 11), ZG[size], t > 0.82 ? 'z' : 'Z');
+    glyph(g, Math.round(23 + t * 4 + Math.sin(t * 6.3) * 1.2), Math.round(11 - t * 10), ZG[size], t > 0.82 ? 'z' : 'Z');
   }
 });
 // tapped: the quilt stirs, a big Z puffs out
