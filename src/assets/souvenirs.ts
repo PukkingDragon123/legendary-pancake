@@ -1,9 +1,10 @@
 // Souvenirs: one or two keepsakes from each of the twenty real places on the globe. Pip finds them on
-// night trips to that place (never in the store). Each is a low-poly model with a hand-painted texture in
-// public/models/souvenirs/<id>.glb: most are modelled in art/lowpix/souvenirs (lofts and lathes, painted
-// style), a few are borrowed and restyled (art/lowpix/souvenirs/_kit/borrow.py; credits in
-// docs/credits/globe.md). Every GLB has one root node in world units (16 game px = 1 block), standing
-// bottom-centre on the floor and facing +Z; wall pieces hang with their back on z = 0.
+// night trips to that place (never in the store). Each is a model in public/models/souvenirs/<id>.glb: some are
+// modelled in art/lowpix/souvenirs, some borrowed from Gacha Garage (art/lowpix/souvenirs/_kit/borrow.py), and
+// thirteen are detailed CC BY / CC0 models from Sketchfab and Poly Haven brought in by
+// src/world/globe/tools/souvenir_import.py (credits in docs/credits/globe.md and globe4.md). Every GLB has one
+// root node in world units (16 game px = 1 block), standing bottom-centre on the floor and facing +Z; wall pieces
+// hang with their back on z = 0.
 // [globe] OWNED BY THE GLOBE BUILDER.
 import { box, type BoxSpec } from '../gfx/box.ts';
 import { solid } from '../gfx/mats.ts';
@@ -44,9 +45,9 @@ const S: SouvenirInfo[] = [
   { id: 'sv_macarons', name: 'Macaron Tower', place: 'paris', cat: 'decor', rarity: 'common', size: [1, 1], h: 12, small: true,
     blurb: 'Pistachio, rose, violet and vanilla, stacked on a glass stand. Strictly decorative. Mostly.' },
   { id: 'sv_venicemask', name: 'Venetian Mask', place: 'venice', cat: 'wall', rarity: 'rare', size: [1, 0.5], h: 12, wall: true,
-    blurb: 'Gold leaf, a sweep of feathers and a mysterious smile. For the wall, or very fancy dinners.' },
+    blurb: 'A carnival mask with a long beak, painted in deep red and gold leaf. For the wall, or very fancy dinners.' },
   { id: 'sv_gondola', name: 'Gondola Model', place: 'venice', cat: 'decor', rarity: 'uncommon', size: [2, 1], h: 9, small: true,
-    blurb: 'Black lacquer, a silver prow and a gondolier’s oar, resting on a little wooden cradle.' },
+    blurb: 'Black lacquer, a silver ferro on the prow and a little red seat, just like the real ones on the Grand Canal.' },
   { id: 'sv_bluedome', name: 'Blue-Dome Chapel', place: 'santorini', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 14, small: true,
     blurb: 'A whitewashed chapel with a blue dome and a bell tower. The tiny bell really rings.' },
   { id: 'sv_bust', name: 'Marble Bust', place: 'santorini', cat: 'decor', rarity: 'rare', size: [1, 1], h: 14, small: true,
@@ -56,42 +57,42 @@ const S: SouvenirInfo[] = [
   { id: 'sv_brasslantern', name: 'Moroccan Lantern', place: 'sahara', cat: 'lights', rarity: 'rare', size: [1, 1], h: 18, small: true,
     light: { x: 0, y: 8, z: 0, color: 0xf0c27a, power: 1.4 },
     blurb: 'Pierced brass and coloured glass that scatter little stars of light all over the walls.' },
-  { id: 'sv_canyondiorama', name: 'Canyon Diorama', place: 'grandcanyon', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 10, small: true,
-    blurb: 'Layer upon layer of painted rock on a wooden base, with a silver river right at the bottom.' },
+  { id: 'sv_canyondiorama', name: 'Canyon Diorama', place: 'grandcanyon', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 4, small: true,
+    blurb: 'The real canyon in miniature, cut from a map of the land itself: layer upon layer of red rock, with the river at the bottom.' },
   { id: 'sv_balloon', name: 'Hot-Air Balloon', place: 'cappadocia', cat: 'fun', rarity: 'rare', size: [1, 1], h: 24, small: true,
     blurb: 'A striped balloon tethered over its wicker basket. It bobs gently when nobody is looking.' },
   { id: 'sv_tajmodel', name: 'Marble Taj Mahal', place: 'tajmahal', cat: 'decor', rarity: 'epic', size: [1, 1], h: 14, small: true,
     blurb: 'Carved from milky marble, with inlaid flowers so small you need owl eyes to see them.' },
-  { id: 'sv_puffin', name: 'Puffin Plush', place: 'iceland', cat: 'fun', rarity: 'rare', size: [1, 1], h: 11, small: true,
-    blurb: 'Lundi’s cousin. Orange feet, a stripy beak and a look of mild surprise.' },
+  { id: 'sv_puffin', name: 'Puffin Figurine', place: 'iceland', cat: 'fun', rarity: 'rare', size: [1, 1], h: 11, small: true,
+    blurb: 'Lundi’s cousin, carved and painted: orange feet, a stripy beak and a look of mild surprise.' },
   { id: 'sv_auroraglobe', name: 'Aurora Snow Globe', place: 'iceland', cat: 'lights', rarity: 'epic', size: [1, 1], h: 12, small: true,
     light: { x: 0, y: 8, z: 0, color: 0xa8d8c0, power: 0.9 },
     blurb: 'Shake it and the northern lights swirl over a tiny black-sand beach and a turf cottage.' },
-  { id: 'sv_llama', name: 'Llama Plush', place: 'machupicchu', cat: 'fun', rarity: 'rare', size: [1, 1], h: 16, small: true,
-    blurb: 'Pacha insisted. Woven tassels, a pompom necklace and a very proud neck.' },
+  { id: 'sv_llama', name: 'Ceramic Llama', place: 'machupicchu', cat: 'fun', rarity: 'rare', size: [1, 1], h: 16, small: true,
+    blurb: 'A clay llama in the old Andean style, glazed in earthy reds, with a very proud neck. Pacha insisted.' },
   { id: 'sv_andeanweave', name: 'Andean Weaving', place: 'machupicchu', cat: 'wall', rarity: 'uncommon', size: [2, 0.5], h: 18, wall: true,
     blurb: 'Bright stripes of alpaca wool with diamonds and little condors woven in, hung from a wooden rod.' },
   { id: 'sv_toucan', name: 'Toucan Perch', place: 'amazon', cat: 'decor', rarity: 'rare', size: [1, 1], h: 16, small: true,
-    blurb: 'A carved toucan on a jungle branch, its big beak painted the colours of a sunset.' },
+    blurb: 'A toucan on a jungle branch, its big beak painted the colours of a sunset.' },
   { id: 'sv_elephant', name: 'Elephant Carving', place: 'serengeti', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 12, small: true,
     blurb: 'Carved from one piece of dark wood, trunk raised for luck. The calf in the herd looked just like it.' },
-  { id: 'sv_canoe', name: 'Red Canoe', place: 'banff', cat: 'wall', rarity: 'rare', size: [3, 0.5], h: 8, wall: true,
-    blurb: 'Cedar ribs, a red canvas skin and a paddle, mounted on the wall for dreaming of lakes.' },
+  { id: 'sv_canoe', name: 'Cedar Canoe', place: 'banff', cat: 'decor', rarity: 'rare', size: [3, 1], h: 7,
+    blurb: 'A little cedar canoe with its seats and thwarts, for dreaming of glassy turquoise lakes.' },
   { id: 'sv_sandbottle', name: 'Sand Art Bottle', place: 'petra', cat: 'decor', rarity: 'uncommon', size: [1, 1], h: 12, small: true,
     blurb: 'Seven colours of desert sand poured into a camel and a sunset, grain by grain.' },
   { id: 'sv_lotuslamp', name: 'Lotus Lamp', place: 'angkor', cat: 'lights', rarity: 'uncommon', size: [1, 1], h: 8, small: true,
     light: { x: 0, y: 6, z: 0, color: 0xf1c08a, power: 1.0 },
-    blurb: 'A pink stone lotus on a lily pad, with a little flame floating in the middle.' },
+    blurb: 'Pink petals cupping a little white candle, like the lotus offerings at the temple gates.' },
   { id: 'sv_conch', name: 'Spider Conch Shell', place: 'reef', cat: 'decor', rarity: 'rare', size: [1, 1], h: 4, small: true,
     blurb: 'A spiny pink-lipped shell washed up on a sandy cay. Hold it to your ear: the reef is still in there.' },
   { id: 'sv_sambadrum', name: 'Samba Drum', place: 'rio', cat: 'fun', rarity: 'uncommon', size: [1, 1], h: 13,
-    blurb: 'A surdo drum with painted rims and a pair of mallets. One tap and the whole house wants to dance.' },
+    blurb: 'A deep, rope-tuned drum with a skin head and leather tensioners. One beat and the whole house wants to samba.' },
   { id: 'sv_cavaquinho', name: 'Cavaquinho', place: 'rio', cat: 'wall', rarity: 'rare', size: [1, 0.5], h: 17, wall: true,
     blurb: 'A little four-string guitar for the wall. It remembers every samba it was ever played in.' },
-  { id: 'sv_kiwi', name: 'Kiwi Plush', place: 'milford', cat: 'fun', rarity: 'rare', size: [1, 1], h: 9, small: true,
+  { id: 'sv_kiwi', name: 'Kiwi Figurine', place: 'milford', cat: 'fun', rarity: 'rare', size: [1, 1], h: 9, small: true,
     blurb: 'Round, brown, fluffy and nocturnal, with a long curious beak. Pip’s new best friend.' },
-  { id: 'sv_penguin', name: 'Penguin Plush', place: 'antarctica', cat: 'fun', rarity: 'epic', size: [1, 1], h: 15, small: true,
-    blurb: 'An emperor penguin with a fluffy grey chick tucked on its feet.' },
+  { id: 'sv_penguin', name: 'Emperor Penguin', place: 'antarctica', cat: 'fun', rarity: 'epic', size: [1, 1], h: 15, small: true,
+    blurb: 'A tall emperor penguin, golden ear patches and all, standing proud as if on the ice.' },
 ];
 
 const PRICE: Record<ItemRarity, number> = { common: 180, uncommon: 320, rare: 520, epic: 760, legendary: 980 };
@@ -114,12 +115,3 @@ export const SOUVENIRS: ItemDef[] = S.map((s) => ({
   model: `souvenirs/${s.id}.glb`,
   build: () => parcel(s),
 }));
-
-/** The pixel portraits of every souvenir, one 64 px cell each in SOUVENIRS order, 8 per row (rendered from the
- * GLBs, clear background, ink outline; dev-souvenirs.html). */
-export const SOUVENIR_ICONS = `${import.meta.env.BASE_URL}models/souvenirs/icons.png`;
-/** CSS for a souvenir portrait shown `size` CSS px square (a sprite from the atlas; nearest-neighbour). */
-export function souvenirIconStyle(id: string, size = 64): Record<string, string> {
-  const i = Math.max(0, SOUVENIRS.findIndex((s) => s.id === id)), k = size / 64, rows = Math.ceil(SOUVENIRS.length / 8);
-  return { backgroundImage: `url(${SOUVENIR_ICONS})`, backgroundSize: `${8 * size}px ${rows * size}px`, backgroundPosition: `${-(i % 8) * 64 * k}px ${-Math.floor(i / 8) * 64 * k}px`, width: `${size}px`, height: `${size}px`, imageRendering: 'pixelated', display: 'inline-block' };
-}

@@ -31,6 +31,12 @@ export function subsolar(t = Date.now()): { lat: number; lon: number } {
   return { lat: dec / D, lon };
 }
 
+/** Greenwich mean sidereal time as an angle (radians): how far the Earth has turned under the stars. */
+export function gmst(t = Date.now()): number {
+  const d = t / 86400000 + 2440587.5 - 2451545.0;
+  return ((((18.697374558 + 24.06570982441908 * d) % 24) + 24) % 24) / 24 * Math.PI * 2;
+}
+
 /** Is it night at this place right now? (the sun more than a little below the horizon) */
 export function isNightAt(lat: number, lon: number, t = Date.now()): boolean {
   const s = subsolar(t);

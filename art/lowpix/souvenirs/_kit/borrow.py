@@ -23,7 +23,6 @@ BORROW = {
     "sv_torii": ("public/models/lowpix/world/torii.glb", 26, 90),
     "sv_macarons": ("public/models/lowpix/world/macaron_tower.glb", 13, 0),
     "sv_bust": ("public/models/lowpix/world/bust_marble.glb", 14, 0),
-    "sv_elephant": ("public/models/lowpix/world/elephant.glb", 14, 0),
     "sv_conch": ("public/models/lowpix/world/shell_giant.glb", 12, 0),
     "sv_cavaquinho": ("public/models/lowpix/world/ukulele.glb", 17, 0, True),
 }
