@@ -14,6 +14,7 @@ import { cloth, lamp, lvl, metal, smooth, solid } from '../gfx/mats.ts';
 import { loadGLB } from '../gfx/glb.ts';
 import { SPR } from './fx.ts';
 import type { CamShot, Scene } from './scene.ts';
+import { HOUSE } from './layout.ts';
 
 export interface CineOpts { onDone?: () => void }
 
@@ -236,6 +237,16 @@ function relaxSky(scene: Scene) {
 // ---------------------------------------------------------------- goodnight
 
 /** Goodnight: Pip packs the satchel, waves, and flies off across the night sky. */
+
+/** Offsets relative to a spot on the house, turned to face out from the trunk (x right, y up, z outward). */
+function facing(spot: THREE.Vector3) {
+  const out = spot.clone().sub(new THREE.Vector3(HOUSE.x, spot.y, HOUSE.z)).setY(0);
+  if (out.lengthSq() < 1e-6) out.set(0, 0, 1);
+  out.normalize();
+  const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), out);
+  return (x: number, y: number, z: number) => right.clone().multiplyScalar(x).add(new THREE.Vector3(0, y, 0)).addScaledVector(out, z);
+}
+
 export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   const owl = scene.owl, fx = scene.fx, sky = scene.sky;
   scene.setView('sleep');
@@ -245,14 +256,17 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   owl.setMood('excited', 2.5);
   const H = scene.spot('porch');
   const spots = scene.house.spots as typeof scene.house.spots & { launch?: THREE.Vector3 };
-  const launch = spots.launch ? spots.launch.clone() : H.clone().add(V(0, 0, 0.65));
+  // take off from the porch step: the launch branch sits up in the canopy, where the camera can't follow
+  void spots;
+  const launch = H.clone().add(facing(H)(0, 0, 0.65));
   const L = launch;
+  const rH = facing(H), rL = facing(L);
   setAspect(scene.camera.aspect);
   scene.applySky();
   // a big moon rising over the trees beside the hollow (away from the house) for the sky shot
   const m = V(0.82, 0.52, -0.25).normalize();
   const side = new THREE.Vector3().crossVectors(m, V(0, 1, 0)).normalize(), upv = new THREE.Vector3().crossVectors(side, m).normalize();
-  const C = L.clone().add(V(-3.0, 2.8, 1.6));
+  const C = L.clone().add(rL(-3.0, 2.8, 1.6));
   sky.moonOverride = { dir: m.clone(), size: 0.05 };
   sky.moonFade = 1;
 
@@ -275,7 +289,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   const pops: { m: THREE.Object3D; t: number; s: number }[] = [];
   const pop = (mm: THREE.Object3D, s = mm.scale.x) => { mm.visible = true; pops.push({ m: mm, t: 0, s }); };
   const items = ITEMS.map((f, i) => { const it = mesh('item' + i, f); it.visible = false; scene.scene.add(it); return it; });
-  const itemFrom = items.map((_, i) => H.clone().add(V((i - 1.5) * 0.42 + (i % 2 ? 0.1 : -0.1), 0.02, 0.55 + (i % 2) * 0.18)));
+  const itemFrom = items.map((_, i) => H.clone().add(rH((i - 1.5) * 0.42 + (i % 2 ? 0.1 : -0.1), 0.02, 0.55 + (i % 2) * 0.18)));
   items.forEach((it, i) => { it.position.copy(itemFrom[i]); it.rotation.y = i * 1.3; });
   const hops: { i: number; t: number }[] = [];
   const bagWorld = () => bag.getWorldPosition(new THREE.Vector3()).add(V(0, 0.1, 0));
@@ -286,9 +300,9 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   // the climb passes right over the low camera, so the shot looks up into open sky
   // a side-on view of the take-off from the left of the launch spot; Pip climbs out over the meadow
   // towards the moon and the camera rises after him, turning to the sky
-  const cam0 = L.clone().add(V(-1.5, 1.5, 3.6));
+  const cam0 = L.clone().add(rL(-1.5, 1.5, 3.6));
   const S0 = C.clone().addScaledVector(m, 9).addScaledVector(side, 4.2).addScaledVector(upv, -1.6);
-  const climbPts = () => [L.clone(), L.clone().add(V(0.9, 1.6, 0.25)), L.clone().add(V(3.0, 4.0, 0.9)), S0.clone()];
+  const climbPts = () => [L.clone(), L.clone().add(rL(0.9, 1.6, 0.25)), L.clone().add(rL(3.0, 4.0, 0.9)), S0.clone()];
   const skyAt = (u: number) => C.clone().addScaledVector(m, 9 + u * 22).addScaledVector(side, (4.2 - u * 9.5) * (1 - u * 0.35)).addScaledVector(upv, -1.6 + u * 2.2 + Math.sin(u * Math.PI) * 0.4);
 
   const evs: Ev[] = [
@@ -384,9 +398,9 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   };
 
   const shot = (t: number): CamShot => {
-    const fwd = (x: number, y: number, z: number) => H.clone().add(V(x, y, z));
-    if (t < 5.2) { const k = smooth01(span(t, 0, 5.2)); return look(fwd(-1.6 + k * 2.4, 1.7 - k * 0.2, 5.6 - k * 0.7), H.clone().add(V(0, 0.7, 0)), 30); }
-    if (t < 7.0) { const k = smooth01(span(t, 5.2, 7)); return look(fwd(0.6 - k * 0.3, 1.35, 4.3 - k * 0.4), H.clone().add(V(0, 0.9, 0)), 28); }
+    const fwd = (x: number, y: number, z: number) => H.clone().add(rH(x, y, z));
+    if (t < 5.2) { const k = smooth01(span(t, 0, 5.2)); return look(fwd(-1.6 + k * 2.4, 2.1 - k * 0.2, 5.6 - k * 0.7), H.clone().add(rH(0, 0.7, 0)), 30); }
+    if (t < 7.0) { const k = smooth01(span(t, 5.2, 7)); return look(fwd(0.6 - k * 0.3, 1.8, 4.3 - k * 0.4), H.clone().add(rH(0, 0.9, 0)), 28); }
     if (t < 8.45) { const k = smooth01(span(t, 7, 8.45)); return look(fwd(-0.8, 1.45, 4.8).lerp(cam0, k), launch.clone().add(V(0, 0.7, 0)), 32); }
     if (t < 11.2) {
       // stay low and tilt up as Pip shoots past overhead, then rise with him into the sky
@@ -420,6 +434,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   scene.setView('wake');
   scene.placeOwl('porch');
   const H = scene.spot('porch');
+  const rH = facing(H);
   setAspect(scene.camera.aspect);
   const P = 1;
   owl.node.visible = true;
@@ -436,11 +451,11 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   attach(scene, M.body, pack, V(0, A.min.y - 0.22, A.max.z * 0.25));
   pack.scale.setScalar(0.9);
   let landed = false, dropped = false, dropT = 0, landT = 0, trailT = 0;
-  const dropTo = H.clone().add(V(0.42, 0.02, 0.5));
+  const dropTo = H.clone().add(rH(0.42, 0.02, 0.5));
   let dropFrom = new THREE.Vector3();
-  const pts = [H.clone().add(V(5, 6.5, 44)), H.clone().add(V(3.0, 4.2, 21)), H.clone().add(V(-1.0, 2.5, 7.4)), H.clone().add(V(0.3, 1.2, 1.7)), H.clone()];
+  const pts = [H.clone().add(rH(5, 6.5, 44)), H.clone().add(rH(3.0, 4.2, 21)), H.clone().add(rH(-1.0, 2.5, 7.4)), H.clone().add(rH(0.3, 1.2, 1.7)), H.clone()];
   // (from the left of the path, so the fallen log stays out of the shot)
-  const camFront = () => H.clone().add(V(-1.7 * P, 1.5, 5.4 * P));
+  const camFront = () => H.clone().add(rH(-1.7 * P, 2.0, 5.4 * P));
 
   const evs: Ev[] = [
     [0.2, () => sound.play('wings_flutter', { volume: 0.25 })],
@@ -503,11 +518,11 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
     if (t < 3.2) {
       // from beside the porch, looking out over the meadow at the sunrise
       const k = smooth01(span(t, 0, 3.2));
-      return look(H.clone().add(V(-2.2, 1.0 + k * 0.3, 1.4)), H.clone().add(V(1.6 - k * 0.6, 5.2 - k * 1.2, 30)), 44, t < 0.1);
+      return look(H.clone().add(rH(-2.2, 1.0 + k * 0.3, 1.4)), H.clone().add(rH(1.6 - k * 0.6, 5.2 - k * 1.2, 30)), 44, t < 0.1);
     }
     const k = smooth01(span(t, 3.2, 8.6));
-    const from = camFront().lerp(H.clone().add(V(-0.9 * P, 1.25, 4.0 * P)), k);
-    const at = H.clone().add(V(0, 0.85, 0)).lerp(owl.node.position.clone().add(V(0, 0.8, 0)), landed ? 0 : 0.35);
+    const from = camFront().lerp(H.clone().add(rH(-0.9 * P, 1.7, 4.0 * P)), k);
+    const at = H.clone().add(rH(0, 0.85, 0)).lerp(owl.node.position.clone().add(V(0, 0.8, 0)), landed ? 0 : 0.35);
     return look(from, at, 36, t < 3.25);
   };
 

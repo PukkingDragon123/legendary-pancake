@@ -39,7 +39,7 @@ if (!q.get('still')) cine();
 
 if (q.get('still')) {
   // wait for the hand-made models, then draw a settled frame
-  void Promise.all([sc.flora.ready, preloadCinematics()]).then(() => {
+  void Promise.all([sc.flora.ready, preloadCinematics(), sc.owl.ready, (sc.house as { ready?: Promise<unknown> }).ready]).then(() => {
     cine();
     const ff = +(q.get('cineT') ?? q.get('t') ?? 1.5);
     (w.go as (s: number) => void)(ff);
