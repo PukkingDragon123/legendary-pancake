@@ -642,6 +642,144 @@ export function toolIcon(id: ToolIcon, k = 2, res = 1): string {
   });
 }
 
+// ------------------------------------------------------------------ the nightstand's props (Sleep screen)
+
+const WAX = [hex('#9a7a4a'), hex('#c8a870'), hex('#e6cc98'), hex('#f4e2b8'), hex('#fcf2d8'), hex('#fffaee')];
+/**
+ * A beeswax pillar candle in a brass chamberstick, 18 x 36 units: a melted, uneven crown with a pool and a
+ * charred wick, drips run down its sides, the dish has a rolled rim and a finger ring. `f` picks one of four
+ * flickering flame frames (-1: snuffed, a curl of smoke instead).
+ */
+export function propCandle(f = 0, k = 3): string {
+  return cachedRelief(`pcandle:${f}:${k}`, () => {
+    const r = new Relief(18, 36, 1, k), cx = 9;
+    // the chamberstick: dish, rolled rim, socket, finger ring
+    r.fill(and(ring(15.6, 30.4, 1.4, 2.6), (x) => x > 14.6), torus(15.6, 30.4, 2, 0.6, 1, 2), brass({ base: 0.6, patina: 0.3 }), MAT.brass, { id: 1 });
+    r.fill(ell(cx, 32.6, 8.4, 2.6), (x, y) => 1 + 1.6 * Math.sqrt(Math.max(0, 1 - ((x - cx) / 8.4) ** 2 - ((y - 32.6) / 2.6) ** 2)) + (Math.hypot((x - cx) / 8.4, (y - 32.6) / 2.6) > 0.82 ? 0.9 : 0), brass({ base: 0.62, brush: 'r', cx, cy: 32.6, patina: 0.25 }), MAT.brass, { id: 2, seam: true });
+    r.fill(rect(cx - 3.8, 28.4, 7.6, 3.6), tubeY(cx, 3.8, 2.4), brass({ base: 0.66, brush: 'y' }), MAT.brass, { id: 3, seam: true });
+    r.carve(rect(cx - 3.8, 29.6, 7.6, 0.6), () => -0.8);
+    // the pillar: slightly wider at the foot, a lumpy melted crown
+    const crown = (x: number) => 9.4 + Math.sin((x - cx) * 1.3) * 0.5 + Math.abs(x - cx) * 0.18 + (hash(Math.floor(x * 2), 1, 7) - 0.5) * 0.4;
+    const pillar = Object.assign((x: number, y: number) => y > crown(x) && y < 29 && Math.abs(x - cx) < 3.4 + (y - 10) * 0.012, { bb: [cx - 4, 8, cx + 4, 29] as [number, number, number, number] });
+    r.fill(pillar, (x) => 2.4 + 3.2 * Math.sqrt(Math.max(0, 1 - ((x - cx) / 3.6) ** 2)), (_x, _y, mx, my) => {
+      const glow = Math.max(0, 1 - (my - 9) / 7) * 0.25; // the flame lights the top of the wax from within
+      return rampAt(WAX, clamp(0.62 + glow + (vnoise(mx * 0.6, my * 0.25, 4) - 0.5) * 0.12 - Math.abs(mx - cx) * 0.03));
+    }, { spec: 0.35, shin: 16, bands: 6 }, { id: 4, seam: true });
+    // drips down the sides, each a rounded run with a bead at its foot
+    for (const [x0, len] of [[cx - 3.2, 7.4], [cx + 2.7, 4.6], [cx - 0.6, 3]] as [number, number][]) {
+      const y0 = crown(x0) + 0.2;
+      r.fill(Object.assign((x: number, y: number) => y > y0 && y < y0 + len && Math.abs(x - x0 - Math.sin(y * 0.8) * 0.3) < 0.75, { bb: [x0 - 1.4, y0, x0 + 1.4, y0 + len] as [number, number, number, number] }), flat(6.4), solid(WAX[4]), { spec: 0.6, shin: 30, bands: 6 }, { id: 5, add: false });
+      r.fill(disc(x0 + Math.sin((y0 + len) * 0.8) * 0.3, y0 + len, 1.05), dome(x0, y0 + len, 1.05, 1.05, 1, 6.2), solid(WAX[4]), { spec: 0.6, shin: 30, bands: 6 }, { id: 5 });
+    }
+    // the pool of molten wax and the charred wick
+    r.fill(ell(cx, crown(cx) + 0.8, 2.4, 0.8), flat(5.2), solid(hex('#fff2c8')), { spec: 1, shin: 60, bands: 6 }, { id: 6 });
+    if (f >= 0) r.fill(seg(cx, crown(cx) + 0.4, cx + 0.2, crown(cx) - 1.6, 0.35), flat(6), solid(hex('#2a160c')), MAT.wood, { id: 7 });
+    // the flame: a living teardrop, blue at the root, white-gold core, orange skin
+    if (f >= 0) {
+      const lean = [0, 0.5, -0.4, 0.2][f % 4], tall = [7.2, 6.6, 7.6, 6.9][f % 4];
+      const fy = crown(cx) - 1.4;
+      const flame = Object.assign((x: number, y: number) => { const t = (fy - y) / tall; if (t < 0 || t > 1) return false; const wdt = 2.1 * Math.sin(Math.min(1, t * 1.35) * Math.PI * 0.62) * (1 - t * 0.55); return Math.abs(x - cx - lean * t * t * 2) < Math.max(0.3, wdt); }, { bb: [cx - 3, fy - tall, cx + 3, fy + 0.5] as [number, number, number, number] });
+      r.fill(flame, flat(9), (_x, _y, mx, my) => {
+        const t = (fy - my) / tall, dx = Math.abs(mx - cx - lean * t * t * 2);
+        if (t < 0.14) return hex('#5a8cf0');
+        return rampAt([hex('#e04818'), hex('#f88a20'), hex('#fcc444'), hex('#fff2a8'), hex('#ffffff')], clamp(1 - dx * 0.5 - t * 0.6 + 0.2));
+      }, MAT.glow, { id: 8 });
+    } else {
+      for (let i = 0; i < 5; i++) r.fill(disc(cx + Math.sin(i * 1.3) * 1.2, crown(cx) - 2 - i * 1.6, 0.6 + i * 0.12), flat(8), solid(mix(hex('#b8b0c8'), hex('#e8e4f0'), i / 5)), MAT.glow, { id: 9 });
+    }
+    r.chip = 0.2;
+    return r.url();
+  });
+}
+
+const GLAZE: Record<'tea' | 'coffee', RGB[]> = {
+  tea: [hex('#1d4a40'), hex('#2a6a5a'), hex('#3c8a74'), hex('#5aa88e'), hex('#86c4aa'), hex('#bce0cc')],
+  coffee: [hex('#5a1e18'), hex('#7c2c22'), hex('#a0402e'), hex('#c05a40'), hex('#d8805e'), hex('#ecac8a')],
+};
+/** A hand-thrown stoneware mug, 26 x 26 units: rippled walls, a glaze that pools and runs over bare clay at the foot, speckles, a pulled handle, chamomile or coffee inside. */
+export function propMug(kind: 'tea' | 'coffee', k = 3): string {
+  return cachedRelief(`pmug:${kind}:${k}`, () => {
+    const r = new Relief(26, 26, 1, k), cx = 11, G = GLAZE[kind];
+    const CLAY = [hex('#7a5a3a'), hex('#a07c54'), hex('#c4a076'), hex('#dcc09a')];
+    // the handle, pulled and pressed on
+    r.fill(and(ring(19.2, 15, 2.4, 5), (x) => x > 18), (x, y) => 2 + 2.2 * Math.sqrt(Math.max(0, 1 - ((Math.hypot(x - 19.2, y - 15) - 3.7) / 1.3) ** 2)), solid(G[3]), { spec: 0.8, shin: 30, env: 0.15, bands: 6 }, { id: 1 });
+    // the body: walls ripple where the potter's fingers ran up them; the glaze stops short of the foot
+    const half = (y: number) => 7.6 + (y - 8) * 0.06 + Math.sin(y * 1.1) * 0.25;
+    const body = Object.assign((x: number, y: number) => y > 7 && y < 24 && Math.abs(x - cx) < half(y), { bb: [2, 7, 20, 24] as [number, number, number, number] });
+    r.fill(body, (x, y) => 2 + 6 * Math.sqrt(Math.max(0, 1 - ((x - cx) / half(y)) ** 2)) + Math.sin(y * 2.2) * 0.25, (x, y, mx, my) => {
+      const edge = 20.4 + Math.sin(mx * 1.1) * 0.9 + (hash(Math.floor(mx * 2), 2, 9) > 0.7 ? 0.8 : 0); // the glaze line, with runs
+      if (my > edge) return rampAt(CLAY, clamp(0.55 + (hash(Math.floor(mx * 3), Math.floor(my * 3), 3) - 0.5) * 0.4));
+      const speck = hash(Math.floor(mx * 3), Math.floor(my * 3), 5) > 0.95 ? -0.25 : 0;
+      const pool = my > edge - 2 ? -0.12 : 0; // glaze pools thicker and darker above the line
+      return rampAt(G, clamp(0.56 + speck + pool + (vnoise(mx * 0.4, my * 0.9, 6) - 0.5) * 0.18));
+    }, { spec: 0.8, shin: 34, env: 0.18, bands: 6 }, { id: 2, seam: true });
+    // a brushed leaf on the side, and the rim
+    const leafSh = Object.assign((x: number, y: number) => { const u = x - 8, v = y - 15; return ((u - v * 0.4) / 3.2) ** 2 + (v / 1.4) ** 2 < 1; }, { bb: [4, 13, 12, 17] as [number, number, number, number] });
+    r.paint(leafSh, solid(kind === 'tea' ? hex('#e8d890') : hex('#f4dcb0')));
+    r.fill(ell(cx, 7.6, 7.8, 2.4), (x, y) => 8 + 0.6 * Math.hypot((x - cx) / 7.8, (y - 7.6) / 2.4), solid(G[4]), { spec: 0.9, shin: 40, env: 0.2, bands: 6 }, { id: 3, seam: true });
+    // the drink: chamomile gold or dark coffee with a crema ring
+    r.fill(ell(cx, 7.8, 6.6, 1.7), flat(7.4), (_x, _y, mx, my) => {
+      const d = Math.hypot((mx - cx) / 6.6, (my - 7.8) / 1.7);
+      if (kind === 'tea') return rampAt([hex('#a8701c'), hex('#d4a032'), hex('#ecc860'), hex('#fff0b0')], clamp(0.6 - d * 0.3 + (d < 0.35 && mx < cx ? 0.3 : 0)));
+      return d > 0.78 ? hex('#b88458') : rampAt([hex('#2a1408'), hex('#4a2410'), hex('#6e3a1c')], clamp(0.4 - d * 0.2 + (d < 0.3 && mx < cx ? 0.4 : 0)));
+    }, { spec: 1, shin: 70, env: 0.2, bands: 6 }, { id: 4, seam: true });
+    r.chip = 0.15;
+    return r.url();
+  });
+}
+/** Steam rising from the mug: three soft pixel wisps, frame `f` (0..3), 26 x 14 units, transparent. */
+export function mugSteam(f = 0, k = 3): string {
+  return cachedRelief(`psteam:${f}:${k}`, () => {
+    const W = 26 * k, H = 14 * k, c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d')!;
+    for (let s = 0; s < 3; s++) {
+      const x0 = (7 + s * 4) * k;
+      for (let y = H - 1; y > 0; y -= 1) {
+        const t = 1 - y / H, ph = (f / 4 + s * 0.33) * Math.PI * 2;
+        const x = x0 + Math.sin(t * 6 + ph) * (1 + t * 2.4) * k;
+        const a = Math.sin(Math.PI * clamp((t * 1.3 + f * 0.08 + s * 0.1) % 1)) * 0.55;
+        if (a < 0.05 || hash(Math.floor(x), y, s + f) > 0.85) continue;
+        g.fillStyle = `rgba(250, 246, 240, ${a.toFixed(2)})`;
+        g.fillRect(Math.round(x), y, k > 2 ? 2 : 1, 1);
+      }
+    }
+    return c.toDataURL('image/png');
+  });
+}
+
+/**
+ * The phone, 22 x 34 units: a real handset (rounded aluminium edge, a camera bump, a glass face showing a
+ * moonlit lock screen). Put to bed, it lies under a little knitted blanket with a pom-pom.
+ */
+export function propPhone(bed: boolean, k = 3): string {
+  return cachedRelief(`pphone:${bed}:${k}`, () => {
+    const r = new Relief(22, 34, 1, k), x0 = 3, y0 = 2, w = 16, h = 30;
+    const shell = roundRect(x0, y0, w, h, 3.2);
+    r.fill(shell, slab(x0, y0, w, h, 2.6, 1.6, 1), metal(PAL.iron, { base: 0.46, brush: "y" }), MAT.iron, { id: 1 });
+    const glass = roundRect(x0 + 1.2, y0 + 1.2, w - 2.4, h - 2.4, 2.4);
+    r.fill(glass, flat(3.4), (_x, _y, mx, my) => {
+      const sky = rampAt(PAL.sapphire, clamp(0.3 + (my - y0) * 0.012 + (vnoise(mx * 0.3, my * 0.3, 2) - 0.5) * 0.08));
+      if (Math.hypot(mx - 14, my - 10) < 3 && Math.hypot(mx - 15.2, my - 9.2) > 2.5) return hex('#fbe08a');
+      if (hash(Math.floor(mx * 1.5), Math.floor(my * 1.5), 6) > 0.985) return hex('#e8f0ff');
+      if (my > 16 && my < 18.6 && mx > 6.4 && mx < 15.6) return mix(sky, hex('#ffffff'), 0.55); // the time on the lock screen
+      return sky;
+    }, { spec: 1, shin: 70, env: 0.35, bands: 6 }, { id: 2, seam: true });
+    r.fill(disc(x0 + w / 2, y0 + 2.2, 0.8), flat(4), solid(hex('#0c1020')), MAT.glass ?? MAT.enamel, { id: 3 });
+    if (bed) {
+      // a knitted blanket: cable stripes, a turned-down cuff, a pom-pom
+      const blanket = Object.assign((x: number, y: number) => y > 14 + Math.sin(x * 0.6) * 0.6 && y < 33.6 && x > 1.2 && x < 20.8, { bb: [1, 13, 21, 34] as [number, number, number, number] });
+      r.fill(blanket, (x, y) => 6 + Math.sin(x * 1.6) * 0.5 + (y < 18 ? 0.8 : 0), (_x, _y, mx, my) => {
+        const stripe = my < 18 ? 3 : Math.floor((mx + 0.5) / 3.4) % 2;
+        const knit = ((Math.floor(mx * 3) + Math.floor(my * 1.5)) % 2) ? 0.06 : -0.06;
+        return rampAt(stripe === 3 ? PAL.linen : stripe ? PAL.rose : PAL.plum, clamp(0.52 + knit));
+      }, MAT.cloth, { id: 4, seam: true });
+      r.fill(disc(18.4, 15.4, 2.2), (x, y) => 9 + 1.6 * Math.sqrt(Math.max(0, 1 - ((x - 18.4) ** 2 + (y - 15.4) ** 2) / 4.84)) + (hash(Math.floor(x * 3), Math.floor(y * 3), 8) - 0.5) * 0.8, solid(rampAt(PAL.linen, 0.8)), MAT.cloth, { id: 5, seam: true });
+    }
+    r.chip = 0.12;
+    return r.url();
+  });
+}
+
 // ------------------------------------------------------------------ the morning's gift sack
 
 const BURLAP = [hex('#4a2e14'), hex('#6c4620'), hex('#8e6230'), hex('#ac7e42'), hex('#c49a58'), hex('#d8b474'), hex('#e8cc94')];
