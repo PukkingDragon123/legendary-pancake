@@ -46,13 +46,13 @@ export class BlueprintGrid {
       const inCell = cells.has(cellKey(cx, cz));
       const lx = ((px % CELL) + CELL) % CELL, lz = ((pz % CELL) + CELL) % CELL;
       const onLine = lx < 1 || lz < 1, major = (onLine && ((lx < 1 && ((cx % 2) + 2) % 2 === 0) || (lz < 1 && ((cz % 2) + 2) % 2 === 0)));
-      if (Math.abs(d - (R_IN - 1)) < 0.8) { put(tx, ty, 236, 246, 255, 235); continue; }
+      if (Math.abs(d - (R_IN - 1)) < 0.8) { put(tx, ty, 244, 238, 221, 235); continue; }
       if (d > R_IN - 1) continue;
       if (inCell) {
-        if (onLine) put(tx, ty, 220, 238, 255, major ? 200 : 120);
-        else put(tx, ty, 70, 130, 220, 46);
-      } else if (((tx + ty) % 5) < 1) put(tx, ty, 220, 238, 255, 110);
-      else put(tx, ty, 40, 70, 130, 40);
+        if (onLine) put(tx, ty, 244, 238, 221, major ? 190 : 105);
+        else put(tx, ty, 70, 89, 106, 52);
+      } else if (((tx + ty) % 5) < 1) put(tx, ty, 220, 200, 160, 120);
+      else put(tx, ty, 46, 43, 36, 60);
     }
     this.data.set(b);
     this.tex.needsUpdate = true;
@@ -63,7 +63,7 @@ export class BlueprintGrid {
   footprint(rect: { x: number; z: number; w: number; d: number } | null, ok = true) {
     this.data.set(this.base);
     if (rect) {
-      const [r, g, b] = ok ? [120, 240, 140] : [255, 96, 80];
+      const [r, g, b] = ok ? [167, 196, 120] : [214, 122, 104];
       for (let cz = rect.z; cz < rect.z + rect.d; cz++) for (let cx = rect.x; cx < rect.x + rect.w; cx++) {
         for (let j = 0; j < CELL; j++) for (let i = 0; i < CELL; i++) {
           const px = cx * CELL + i, pz = cz * CELL + j;

@@ -1,17 +1,21 @@
-// Pip's home: a grand hollow oak cut open like a dollhouse, three floors stacked inside the trunk and
-// a brass observatory dome in the canopy. The geometry lives in ./house/* (plan, oak, locks, boxes);
-// this file assembles it into per-floor groups, keeps the window panes and the boarded-up floors, and
-// exposes the spots Pip uses (porch, bed, inside, loft, launch). Furniture is drawn by ./rooms.ts.
+// Pip's home: a grand hollow oak cut open like a dollhouse, three floors stacked inside the trunk and a
+// brass observatory in the crown. The art is a set of hand-made lowpix models (art/lowpix/house, loaded by
+// ./house/models.ts): one per floor band, so build mode can hide what's above the floor it edits. This file
+// assembles them into per-floor groups, keeps the window glass and lamps in step with day and night, runs
+// the boarded-up floors (./house/locks.ts) and exposes the spots Pip uses (porch, bed, inside, loft, launch).
+// Wallpaper, flooring and furniture are drawn by ./rooms.ts.
 import * as THREE from 'three';
 import { box, buildProp, propMesh, PX, type BoxSpec } from '../gfx/box.ts';
 import { dirt, wood } from '../gfx/mats.ts';
 import type { Fx } from './fx.ts';
 import { SPR } from './fx.ts';
 import { HOUSE } from './layout.ts';
-import { CUT, patchCut } from './house/kit.ts';
+import { CUT } from './house/kit.ts';
 import { buildLock, stepLock, type Lock, type LockEvent } from './house/locks.ts';
-import { buildOak } from './house/oak.ts';
-import { FLOOR_IDS, FLOOR_Y, OPEN_A, R_IN, RO, ROOM_H, UNLOCK, WALL_T, type FloorId } from './house/plan.ts';
+import { HOUSE_LOOK, HOUSE_PARTS, HOUSE_PROPS, loadPart, syncLooks, type HousePart } from './house/models.ts';
+import {
+  BALCONY_AT, CHIMNEY_TOP, FLOOR_IDS, FLOOR_Y, LAMP_AT, LAUNCH, OPEN_A, PLATFORM, PORCH_AT, RO, ROOM_H, trunkR, UNLOCK, type FloorId,
+} from './house/plan.ts';
 
 export type Zone = 'loft' | 'deck' | 'garden';
 
@@ -36,7 +40,7 @@ export interface House {
   roof: THREE.Group;
   /** @deprecated always empty */
   slots: Slot[];
-  /** window panes of open floors: day = dark glass, night = warm light */
+  /** window glass of open floors: its colour is the tint (dark by day, warm at night) */
   panes: THREE.MeshBasicMaterial;
   /** the ground floor's hanging lantern (world) */
   lampAt: THREE.Vector3;
@@ -44,6 +48,8 @@ export interface House {
   chimneyTop: THREE.Vector3;
   /** where Pip stands on the porch / sleeps / hangs out / takes off for adventures (world) */
   spots: HouseSpots;
+  /** resolves when every part of the oak has loaded (or failed to) */
+  ready: Promise<void>;
   /** world y of a floor's walking surface */
   floorY(fid: FloorId): number;
   /** house-local px to world */
@@ -65,62 +71,64 @@ export interface House {
 
 export function buildHouse(): House {
   const group = new THREE.Group();
+  group.name = 'house';
   group.position.set(HOUSE.x, 0, HOUSE.z);
-  const oak = buildOak();
   const floors = { f1: new THREE.Group(), f2: new THREE.Group(), f3: new THREE.Group() } as Record<FloorId, THREE.Group>;
   const roof = new THREE.Group();
   FLOOR_IDS.forEach((f) => { floors[f].name = 'floor:' + f; group.add(floors[f]); });
   roof.name = 'roof';
   group.add(roof);
-  const bandMeshes: THREE.Mesh[] = [];
-  oak.bk.b.forEach((boxes, i) => {
-    if (!boxes.length) return;
-    const p = buildProp(boxes, { wind: boxes.some((b) => b.sway) });
-    const m = propMesh(p);
-    m.name = 'band' + i;
-    if (i < 3) { p.mats.forEach(patchCut); floors[FLOOR_IDS[i]].add(m); } else roof.add(m);
-    bandMeshes.push(m);
-  });
-  const canopy = propMesh(buildProp(oak.canopy, { wind: true }));
-  canopy.name = 'canopy';
-  roof.add(canopy);
 
-  // window panes: warm at night on open floors, dark on boarded-up ones
-  const panes = new THREE.MeshBasicMaterial({ color: 0x2a3550, side: THREE.DoubleSide, toneMapped: false });
-  const deadPanes = new THREE.MeshBasicMaterial({ color: 0x1c2230, side: THREE.DoubleSide, toneMapped: false });
-  const paneMeshes: Record<FloorId, THREE.Mesh[]> = { f1: [], f2: [], f3: [] };
-  for (const w of oak.panes) {
-    if (w.floor === 'roof') continue;
-    const m = new THREE.Mesh(new THREE.CircleGeometry(w.r * PX, 18), panes);
-    const rr = R_IN + WALL_T / 2;
-    m.position.set(Math.sin(w.a) * rr * PX, w.y * PX, Math.cos(w.a) * rr * PX);
-    m.rotation.y = w.a;
-    floors[w.floor].add(m);
-    paneMeshes[w.floor].push(m);
-  }
+  // the master pane tint (scene.applySky sets its colour); every part's glass follows it
+  const panes = new THREE.MeshBasicMaterial({ color: 0x3a4a6a, toneMapped: false });
+  const open: Record<FloorId, boolean> = { f1: true, f2: false, f3: false };
+  const parts: Partial<Record<string, HousePart>> = {};
+  const bandOf: Record<string, FloorId | 'roof'> = {};
 
   const toWorld = (x: number, y: number, z: number) => new THREE.Vector3(HOUSE.x + x * PX, y * PX, HOUSE.z + z * PX);
   const toLocal = (v: THREE.Vector3) => new THREE.Vector3((v.x - HOUSE.x) / PX, v.y / PX, (v.z - HOUSE.z) / PX);
   const W = (p: [number, number, number]) => toWorld(p[0], p[1], p[2]);
+  const deadPanes = (f: FloorId | 'roof') => f !== 'roof' && f !== 'f1' && !open[f];
+  const refreshPanes = () => { for (const [id, p] of Object.entries(parts)) for (const r of p!.panes) r.dead = deadPanes(bandOf[id]); };
 
-  // boarded-up floors
+  // boarded-up floors (their boards load with the rest)
   const locks: Partial<Record<FloorId, Lock>> = {};
-  const open: Record<FloorId, boolean> = { f1: true, f2: false, f3: false };
   for (const f of ['f2', 'f3'] as FloorId[]) {
     const L = buildLock(f, UNLOCK[f].level);
     floors[f].add(L.group);
     locks[f] = L;
   }
+
+  const ready = Promise.all(HOUSE_PARTS.map(async ({ id, band, opts }) => {
+    const p = await loadPart(id, opts);
+    if (!p) return;
+    parts[id] = p;
+    bandOf[id] = band;
+    (band === 'roof' ? roof : floors[band]).add(p.root);
+    refreshPanes();
+  })).then(() => undefined);
+  // borrowed nature props round the foot of the trunk (they load in their own time)
+  for (const pr of HOUSE_PROPS) {
+    loadPart(pr.id, { cut: true, nearest: true }).then((p) => {
+      if (!p) return;
+      const r = trunkR(0) + pr.d;
+      p.root.scale.setScalar(PX * pr.s);
+      p.root.position.set(Math.sin(pr.a) * r * PX, -0.04, Math.cos(pr.a) * r * PX);
+      p.root.rotation.y = (pr.yaw * Math.PI) / 180;
+      floors.f1.add(p.root);
+    });
+  }
+
   let moteT = 0;
   let buildFloor: FloorId | null = null;
 
   const house: House = {
-    group, floors, roof, panes, slots: [],
-    lampAt: W(oak.at.lamp.f1),
-    lamps: { f1: W(oak.at.lamp.f1), f2: W(oak.at.lamp.f2), f3: W(oak.at.lamp.f3) },
-    chimneyTop: W(oak.at.chimneyTop),
+    group, floors, roof, panes, slots: [], ready,
+    lampAt: W(LAMP_AT.f1),
+    lamps: { f1: W(LAMP_AT.f1), f2: W(LAMP_AT.f2), f3: W(LAMP_AT.f3) },
+    chimneyTop: W(CHIMNEY_TOP),
     spots: {
-      porch: W(oak.at.porch), balcony: W(oak.at.balcony), platform: W(oak.at.platform), launch: W(oak.at.launch),
+      porch: W(PORCH_AT), balcony: W(BALCONY_AT), platform: W(PLATFORM), launch: W(LAUNCH),
       bed: toWorld(-4, FLOOR_Y.f1 + 6, -50), inside: toWorld(-14, FLOOR_Y.f1, 34), loft: toWorld(-10, FLOOR_Y.f2, 24),
     },
     floorY: (fid) => FLOOR_Y[fid] * PX,
@@ -128,13 +136,13 @@ export function buildHouse(): House {
     isOpen: (fid) => open[fid],
     setFloorOpen(fid, o, animate = false) {
       open[fid] = o;
+      refreshPanes();
       const L = locks[fid];
-      for (const m of paneMeshes[fid]) m.material = o ? panes : deadPanes;
       if (!L) return;
       if (o) {
         if (animate && L.state === 'locked') { L.state = 'opening'; L.t = 0; }
         else if (!animate) { L.state = 'open'; L.group.visible = false; }
-      } else { L.state = 'locked'; L.group.visible = true; }
+      } else { L.state = 'locked'; L.group.visible = true; L.reset(); }
     },
     setBuildView(fid) {
       buildFloor = fid;
@@ -154,11 +162,18 @@ export function buildHouse(): House {
         const z = Math.cos(OPEN_A) * RO + 6, y0 = FLOOR_Y[f], plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -(HOUSE.z + z * PX));
         if (!ray.intersectPlane(plane, loc)) continue;
         const lx = (loc.x - HOUSE.x) / PX, ly = loc.y / PX;
-        if (Math.abs(lx) < Math.sin(OPEN_A) * RO && ly > y0 && ly < y0 + ROOM_H) return f;
+        if (Math.abs(lx) < Math.sin(OPEN_A) * RO + 4 && ly > y0 - 4 && ly < y0 + ROOM_H + 4) return f;
       }
       return null;
     },
     update(dt, t, hooks) {
+      // lamps glow warmer and brighter at night; window glass follows the master tint
+      const n = hooks.night;
+      HOUSE_LOOK.glow.setRGB(0.78 + n * 0.5, 0.74 + n * 0.42, 0.66 + n * 0.3);
+      // clear glass: a cool sheen by day, the warm lamplit room glowing through it at night
+      HOUSE_LOOK.pane.setRGB(0.86 + n * 0.14, 0.9 - n * 0.12, 0.92 - n * 0.4);
+      HOUSE_LOOK.paneOpacity = 0.16 + n * 0.3;
+      syncLooks();
       const emit = (e: LockEvent) => {
         const p = e.at;
         if (e.kind === 'plank') { hooks.sound('wood_knock', 0.55); hooks.fx.burst('dust', p.x, p.y, p.z + 0.3, 8); }
@@ -182,22 +197,32 @@ export function buildHouse(): House {
     zones: { loft: false, deck: false, garden: false },
     setZone(z, o) { house.zones[z] = o; },
   };
-  void bandMeshes;
   return house;
 }
 
-/** Garden plot fence + soil beds, shown when the garden is unlocked; tangled weeds when it is not. */
-export function buildGardenFence(cx: number, cz: number, hw: number, hd: number): THREE.Mesh {
-  const post = wood('#e9e2d2', { axis: 'y' }), rail = wood('#e2d9c4', { axis: 'x', plank: 0 });
+/**
+ * The garden plot's fence. The old voxel picket fence and soil beds don't belong in the realistic woods, so the
+ * plot is just meadow now (the scene still toggles this object and the weeds by the garden zone).
+ */
+export function buildGardenFence(cx: number, cz: number, _hw: number, _hd: number): THREE.Mesh {
+  const m = new THREE.Mesh();
+  m.name = 'garden-plot';
+  m.position.set(cx, 0, cz);
+  return m;
+}
+
+/** @deprecated the voxel picket fence, kept for reference by older dev pages */
+export function buildVoxelGardenFence(cx: number, cz: number, hw: number, hd: number): THREE.Mesh {
+  const post = wood('#d8c8a8', { axis: 'y' }), rail = wood('#cdbb98', { axis: 'x', plank: 0 });
   const out: BoxSpec[] = [];
   const W = hw * 16, D = hd * 16;
   for (let x = -W; x <= W; x += 8) for (const z of [-D, D]) if (!(z > 0 && Math.abs(x) < 9)) out.push(box(x, 0, z, 2, 9, 2, post), box(x, 9, z, 1, 1, 1, post));
   for (let z = -D + 8; z < D; z += 8) for (const x of [-W, W]) out.push(box(x, 0, z, 2, 9, 2, post));
   for (const y of [3, 7]) {
     out.push(box(0, y, -D, W * 2, 1.2, 1, rail), box(-(W + 9) / 2 - 0.5, y, D, W - 9, 1.2, 1, rail), box((W + 9) / 2 + 0.5, y, D, W - 9, 1.2, 1, rail));
-    out.push(box(-W, y, 0, 1, 1.2, D * 2, wood('#e2d9c4', { axis: 'z', plank: 0 })), box(W, y, 0, 1, 1.2, D * 2, wood('#e2d9c4', { axis: 'z', plank: 0 })));
+    out.push(box(-W, y, 0, 1, 1.2, D * 2, wood('#cdbb98', { axis: 'z', plank: 0 })), box(W, y, 0, 1, 1.2, D * 2, wood('#cdbb98', { axis: 'z', plank: 0 })));
   }
-  out.push(box(-W + 10, -0.6, -D + 8, 18, 1.4, 8, dirt('#5c3d2a')), box(W - 10, -0.6, -D + 8, 18, 1.4, 8, dirt('#5c3d2a')));
+  out.push(box(-W + 10, -0.6, -D + 8, 18, 1.4, 8, dirt('#5c4636')), box(W - 10, -0.6, -D + 8, 18, 1.4, 8, dirt('#5c4636')));
   const m = propMesh(buildProp(out));
   m.position.set(cx, 0, cz);
   return m;

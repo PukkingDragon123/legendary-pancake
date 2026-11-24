@@ -463,23 +463,30 @@ export class Scene {
     const L = this.house.spots.launch;
     switch (this.view) {
       // [house] framing for the grand oak: three floors, a canopy above and a launch platform on the limb
-      case 'interior': return { yaw: 0.1, pitch: 0.42, dist: portrait ? 16 : 12, target: new THREE.Vector3(H.x, 1.5, H.z + 0.6) };
-      case 'loft': return { yaw: 0, pitch: 0.16, dist: portrait ? 17 : 12, target: new THREE.Vector3(H.x, 6.6, H.z + 1.2) };
-      case 'attic': return { yaw: 0, pitch: 0.12, dist: portrait ? 17 : 12, target: new THREE.Vector3(H.x, 11.1, H.z + 1.2) };
+      // [house3] one open floor of the dollhouse filling the frame
+      case 'interior': return { yaw: 0.08, pitch: 0.17, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 2.2, H.z + 1.2) };
+      case 'loft': return { yaw: 0.06, pitch: 0.16, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 6.7, H.z + 1.2) }; // [house3]
+      case 'attic': return { yaw: 0.06, pitch: 0.14, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 11.2, H.z + 1.2) }; // [house3]
       case 'owl': return { yaw: -0.15, pitch: 0.12, dist: portrait ? 7.4 : 4.6, target: new THREE.Vector3(o.x, o.y + 0.85, o.z) };
       case 'breathe': return { yaw: 0, pitch: 0.1, dist: portrait ? 9.2 : 5.6, target: new THREE.Vector3(MEADOW.x, portrait ? 1.35 : 1.45, 2.6) };
-      case 'sleep': return { yaw: 0.1, pitch: 0.22, dist: portrait ? 40 : 42, target: new THREE.Vector3(0, portrait ? 9.5 : 8.5, H.z + 1) };
+      // [house3] the whole oak under the night sky
+      case 'sleep': return { yaw: 0.1, pitch: 0.2, dist: this.fitDist(24, 34) * 1.05, target: new THREE.Vector3(0.2, 12.4, H.z + 1) };
       case 'wake': return { yaw: -0.08, pitch: 0.18, dist: portrait ? 24 : 20, target: new THREE.Vector3(1.5, 3.6, H.z + 3) };
       case 'garden': return { yaw: -0.25, pitch: 0.55, dist: portrait ? 15 : 12, target: new THREE.Vector3(GARDEN.x, 0.4, GARDEN.z) };
       case 'deck': return { yaw: 0.55, pitch: 0.16, dist: portrait ? 16 : 12, target: new THREE.Vector3(L.x - 1.5, L.y - 0.6, L.z + 1) };
       default: {
-        // frame the rooms that are open (the boarded-up floors peek in above), not the whole oak
-        const open = (['f1', 'f2', 'f3'] as const).filter((f) => this.house.isOpen(f));
-        const n = Math.max(1, open.length), lo = this.house.floorY('f1'), hi = this.house.floorY(open[n - 1] ?? 'f1') + 4.4;
-        const mid = (lo + hi) / 2;
-        return { yaw: 0.12, pitch: 0.2, dist: (portrait ? 21 : 17) + (n - 1) * (portrait ? 7 : 5), target: new THREE.Vector3(0, mid + (portrait ? -0.2 : 0.4), H.z + 1.2) };
+        // [house3] the whole oak in frame, crown to roots, porch and limb, with the forest round it; the HUD
+        // signs sit over the sky at the top and the big buttons over the meadow at the bottom
+        const d = this.fitDist(portrait ? 21.5 : 26, portrait ? 37 : 33);
+        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.12, dist: d, target: new THREE.Vector3(0.35, portrait ? 11.6 : 12.4, H.z + 0.6) };
       }
     }
+  }
+
+  /** [house3] Camera distance that fits a w x h (world units) frame at the current aspect and field of view. */
+  private fitDist(w: number, h: number): number {
+    const v = (this.baseFov * Math.PI) / 360, hz = Math.atan(Math.tan(v) * this.camera.aspect);
+    return Math.max(h / 2 / Math.tan(v), w / 2 / Math.tan(hz));
   }
 
   step(dt: number, draw = true) {
@@ -536,8 +543,8 @@ export class Scene {
     const drift = !shot && (this.view === 'home' || this.view === 'sleep') ? Math.sin(t * 0.07) * 0.05 : 0;
     this.camera.position.set(c.target.x + Math.sin(c.yaw + drift) * cp * c.dist, c.target.y + Math.sin(c.pitch) * c.dist, c.target.z + Math.cos(c.yaw + drift) * cp * c.dist);
     this.camera.lookAt(c.target);
-    // [house] fog eases back as the camera pulls out to frame the whole oak
-    this.sky.fog.near = Math.max(24, c.dist * 0.8); this.sky.fog.far = this.sky.fog.near + 40;
+    // [house3] fog eases back as the camera pulls out to frame the whole oak (it stays crisp, the far forest hazes)
+    this.sky.fog.near = Math.max(24, c.dist * 1.0); this.sky.fog.far = this.sky.fog.near + 46;
     CUT.uCutCam.value.copy(this.camera.position);
     this.shiftCur += (this.shift - this.shiftCur) * k;
     const w = innerWidth, h = innerHeight;
@@ -612,7 +619,7 @@ export class Scene {
       moved += Math.abs(dx) + Math.abs(dy);
       if (pts.size === 2) {
         const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinch) this.userZoom = Math.max(0.6, Math.min(1.35, this.userZoom * (pinch / d)));
+        if (pinch) this.userZoom = Math.max(0.32, Math.min(1.25, this.userZoom * (pinch / d))); // [house3] pinch right into the rooms
         pinch = d;
         return;
       }
@@ -655,6 +662,6 @@ export class Scene {
     };
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); });
-    el.addEventListener('wheel', (e) => { if (this.interceptor && !this.stage && this.interceptor('wheel', e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e)) { e.preventDefault(); return; } this.userZoom = Math.max(0.6, Math.min(1.35, this.userZoom * (1 + Math.sign(e.deltaY) * 0.06))); e.preventDefault(); }, { passive: false });
+    el.addEventListener('wheel', (e) => { if (this.interceptor && !this.stage && this.interceptor('wheel', e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e)) { e.preventDefault(); return; } this.userZoom = Math.max(0.32, Math.min(1.25, this.userZoom * (1 + Math.sign(e.deltaY) * 0.06))); e.preventDefault(); }, { passive: false }); // [house3]
   }
 }

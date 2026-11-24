@@ -1,19 +1,20 @@
-// Draws what's in each room of the hollow oak from save.home: the wallpaper and flooring (painted
-// from the room's Finish), every placed piece of furniture (with its moving parts and night light),
-// and the moving boxes still waiting to be unpacked. Also: picking for taps, the fly-in arc when a
-// box pops its furniture out, and the glowing outline build mode uses for the selected item.
+// Draws what's in each room of the hollow oak from save.home: the wallpaper and flooring (painted at two texels
+// per px from the room's Finish onto the inner wall and the floor), every placed piece of furniture (its
+// hand-made GLB when it has one, with its animation clips looping; the box model while that loads or when there
+// is none), and the moving boxes still waiting to be unpacked. Also: picking for taps, the fly-in arc when a box
+// pops its furniture out, and the glowing outline build mode uses for the selected item.
 import * as THREE from 'three';
-import { box, buildProp, propMesh, PX, type BoxSpec, type Painter, type Prop } from '../gfx/box.ts';
+import { buildProp, propMesh, PX, type Prop } from '../gfx/box.ts';
+import { instanceGLB } from '../gfx/glb.ts';
 import { FINISH, ITEMS } from '../assets/registry.ts';
+import type { Finish } from '../assets/finishes.ts';
 import type { Save, Placed } from '../game/store.ts';
-import { BOX, kindOf, rotSize } from '../game/home.ts';
+import { BOX, kindOf, rotSize, setModelBounds } from '../game/home.ts';
 import type { Fx } from './fx.ts';
 import type { House } from './house.ts';
 import { buildMovingBox, stepBoxIdle, stepBoxOpen, type BoxAnim, type BoxModel } from './house/boxes.ts';
-import { discStrips, patchCut, swing } from './house/kit.ts';
-import { NSEG } from './house/oak.ts';
-import { HOLES } from './house/oak.ts';
-import { CELL, FLOOR_IDS, FLOOR_Y, OPEN_A, PLANS, R_IN, ROOM_H, wallCenterA, wrapA, type FloorId } from './house/plan.ts';
+import { patchCut } from './house/kit.ts';
+import { CELL, FLOOR_IDS, FLOOR_Y, HOLES, OPEN_A, R_IN, ROOM_H, trunkR, wallCenterA, windowHoles, wrapA, type FloorId } from './house/plan.ts';
 
 type Home = Save['home'];
 const shade = (c: number, k: number) => {
@@ -36,29 +37,194 @@ export function poseOf(fid: FloorId, p: Placed, base: number): { x: number; y: n
   return { x: cx - ox, y: FLOOR_Y[fid] + base, z: cz - oz, yaw };
 }
 
-interface ItemRec { uid: string; id: string; fid: FloorId; mesh: THREE.Mesh; key: string; def: (typeof ITEMS)[string] }
+// ------------------------------------------------------------------ finishes on the walls and floors
+
+/** texels per px of the painted wallpaper and flooring */
+const TEX = 3;
+
+function finishTexture(w: number, h: number, at: (i: number, j: number) => number): THREE.DataTexture {
+  const data = new Uint8Array(w * h * 4);
+  for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+    const c = at(i, j), k = (j * w + i) * 4;
+    data[k] = (c >> 16) & 255; data[k + 1] = (c >> 8) & 255; data[k + 2] = c & 255; data[k + 3] = 255;
+  }
+  const tex = new THREE.DataTexture(data, w, h, THREE.RGBAFormat);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.generateMipmaps = true;
+  tex.anisotropy = 4;
+  tex.needsUpdate = true;
+  return tex;
+}
+
+const ARC = Math.PI * 2 - OPEN_A * 2;
+
+/** The inner wall of a room: the back of the trunk from cut edge to cut edge, facing in, painted with the wallpaper. */
+function wallMesh(fid: FloorId, wf: Finish): THREE.Mesh {
+  const y0 = FLOOR_Y[fid], segs = 72, R = R_IN;
+  const W = Math.round(R * ARC * TEX), H = ROOM_H * TEX;
+  const tex = finishTexture(W, H, (i, j) => {
+    const a = OPEN_A + ((i + 0.5) / W) * ARC;
+    const u = (wrapA(a) + Math.PI) * R, v = (j + 0.5) / TEX;
+    let c = wf.paint(u, v);
+    // a soft painted shadow where the wall meets the floor and the ceiling
+    if (v < 3) c = shade(c, 0.74 + v * 0.07);
+    else if (v > ROOM_H - 5) c = shade(c, 0.8 + (ROOM_H - v) * 0.04);
+    return c;
+  });
+  // the wall is cut into columns, with the window openings left out (the glass in them shows the real world)
+  const holes = windowHoles(fid);
+  const edges = new Set<number>();
+  for (let s = 0; s <= segs; s++) edges.add(OPEN_A + (s / segs) * ARC);
+  const toArc = (a: number) => { let d = a - OPEN_A; while (d < 0) d += Math.PI * 2; return OPEN_A + d; };
+  for (const h of holes) { edges.add(toArc(h.a - h.half)); edges.add(toArc(h.a + h.half)); }
+  const cols = [...edges].filter((a) => a >= OPEN_A - 1e-6 && a <= OPEN_A + ARC + 1e-6).sort((a, b) => a - b);
+  const pos: number[] = [], uv: number[] = [], idx: number[] = [];
+  const quad = (a0: number, a1: number, ya: number, yb: number) => {
+    const k = pos.length / 3;
+    for (const [a, y] of [[a0, ya], [a1, ya], [a0, yb], [a1, yb]]) { pos.push(Math.sin(a) * R * PX, y * PX, Math.cos(a) * R * PX); uv.push((a - OPEN_A) / ARC, (y - y0) / ROOM_H); }
+    idx.push(k, k + 1, k + 2, k + 2, k + 1, k + 3);
+  };
+  for (let i = 0; i < cols.length - 1; i++) {
+    const a0 = cols[i], a1 = cols[i + 1], am = (a0 + a1) / 2;
+    if (a1 - a0 < 1e-5) continue;
+    const h = holes.find((w) => Math.abs(Math.atan2(Math.sin(am - w.a), Math.cos(am - w.a))) < w.half);
+    if (!h) { quad(a0, a1, y0, y0 + ROOM_H); continue; }
+    const hb = Math.max(y0, h.y0), ht = Math.min(y0 + ROOM_H, h.y1);
+    if (hb > y0) quad(a0, a1, y0, hb);
+    if (ht < y0 + ROOM_H) quad(a0, a1, ht, y0 + ROOM_H);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  // normals point at the room
+  const n = g.getAttribute('normal') as THREE.BufferAttribute;
+  for (let i = 0; i < n.count; i++) { const p = new THREE.Vector3().fromBufferAttribute(g.getAttribute('position') as THREE.BufferAttribute, i); const d = new THREE.Vector3(-p.x, 0, -p.z).normalize(); n.setXYZ(i, d.x, d.y, d.z); }
+  const m = new THREE.MeshLambertMaterial({ map: tex, side: THREE.DoubleSide });
+  patchCut(m);
+  const mesh = new THREE.Mesh(g, m);
+  mesh.receiveShadow = true;
+  mesh.name = 'wallpaper:' + fid;
+  return mesh;
+}
+
+/** The floor of a room: a disc reaching the trunk's outline across the cut, painted with the flooring. */
+function floorMesh(fid: FloorId, ff: Finish): THREE.Mesh {
+  const y0 = FLOOR_Y[fid];
+  const Rcut = trunkR(y0) - 0.6, Rin = R_IN + 1, Rs = Rcut + 1;
+  const N = Math.round(Rs * 2 * TEX);
+  const holes = HOLES[fid];
+  const tex = finishTexture(N, N, (i, j) => {
+    const x = (i + 0.5) / TEX - Rs, z = (j + 0.5) / TEX - Rs;
+    for (const [hx, hz, hh] of holes) {
+      const dx = Math.abs(x - hx), dz = Math.abs(z - hz);
+      if (dx < hh && dz < hh) return dx > hh - 1.5 || dz > hh - 1.5 ? 0x4e3a28 : 0x1d1915;
+    }
+    let c = ff.paint(x + R_IN, z + R_IN);
+    // darker towards the walls (ambient occlusion), lighter in the middle of the room
+    const d = Math.hypot(x, z), a = Math.abs(wrapA(Math.atan2(x, z)));
+    if (a > OPEN_A && d > R_IN - 4) c = shade(c, 0.78 + (R_IN - d) * 0.05);
+    else if (a < OPEN_A && d > Rcut - 1.5) c = shade(c, 0.82);
+    return c;
+  });
+  const pos: number[] = [0, y0 * PX, 0], uv: number[] = [0.5, 0.5], idx: number[] = [];
+  const add = (a: number, r: number) => { pos.push(Math.sin(a) * r * PX, y0 * PX, Math.cos(a) * r * PX); uv.push((Math.sin(a) * r + Rs) / (2 * Rs), (Math.cos(a) * r + Rs) / (2 * Rs)); };
+  const segs = 96;
+  // walk the rim from the right cut edge round the back to the left one, then across the open front
+  const ring: [number, number][] = [];
+  for (let s = 0; s <= segs; s++) ring.push([OPEN_A + (s / segs) * ARC, Rin]);
+  const fs = 32;
+  for (let s = 0; s <= fs; s++) ring.push([-OPEN_A + (s / fs) * OPEN_A * 2, Rcut]);
+  ring.forEach(([a, r]) => add(a, r));
+  const n = ring.length;
+  for (let i = 1; i < n; i++) idx.push(0, i, i + 1);
+  idx.push(0, n, 1);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  // wind the triangles so they face up
+  const ix = g.getIndex()!;
+  for (let i = 0; i < ix.count; i += 3) {
+    const a = new THREE.Vector3().fromBufferAttribute(g.getAttribute('position') as THREE.BufferAttribute, ix.getX(i));
+    const b = new THREE.Vector3().fromBufferAttribute(g.getAttribute('position') as THREE.BufferAttribute, ix.getX(i + 1));
+    const c = new THREE.Vector3().fromBufferAttribute(g.getAttribute('position') as THREE.BufferAttribute, ix.getX(i + 2));
+    if (b.sub(a).cross(c.sub(a)).y < 0) { const t = ix.getX(i + 1); ix.setX(i + 1, ix.getX(i + 2)); ix.setX(i + 2, t); }
+  }
+  g.computeVertexNormals();
+  const m = new THREE.MeshLambertMaterial({ map: tex });
+  patchCut(m);
+  const mesh = new THREE.Mesh(g, m);
+  mesh.receiveShadow = true;
+  mesh.name = 'flooring:' + fid;
+  return mesh;
+}
+
+// ------------------------------------------------------------------ furniture models
+
+interface ItemRec { uid: string; id: string; fid: FloorId; obj: THREE.Group; key: string; def: (typeof ITEMS)[string]; glb: boolean; mixer: THREE.AnimationMixer | null }
 interface BoxRec { id: string; fid: FloorId; holder: THREE.Group; model: BoxModel; anim: BoxAnim | null; onBurst?: () => void; phase: number }
 interface Fly { obj: THREE.Object3D; from: THREE.Vector3; to: THREE.Vector3; yaw: number; t: number; dur: number; h: number; landed: boolean }
 export interface RoomHooks { fx: Fx; sound(id: string, volume?: number): void; night: number }
+
+/**
+ * lowpix exports unlit materials (the light is painted in); in the oak the room light, the lamps and the night
+ * should still shade the furniture, so unlit materials become lit Lambert ones (shared per source material).
+ * Materials named like a light source ("glow", "lamp", "emissive", "flame") stay unlit.
+ */
+const litCache = new Map<string, THREE.Material>();
+function lightUp(root: THREE.Object3D) {
+  root.traverse((n) => {
+    const m = n as THREE.Mesh;
+    if (!m.isMesh) return;
+    const swap = (mat: THREE.Material): THREE.Material => {
+      const b = mat as THREE.MeshBasicMaterial;
+      if (!b.isMeshBasicMaterial || /glow|lamp|emissive|flame|light/i.test(b.name)) return mat;
+      let lit = litCache.get(b.uuid);
+      if (!lit) {
+        lit = new THREE.MeshLambertMaterial({ map: b.map, color: b.color, alphaTest: b.alphaTest, transparent: b.transparent, side: b.side, vertexColors: b.vertexColors });
+        lit.name = b.name;
+        litCache.set(b.uuid, lit);
+      }
+      return lit;
+    };
+    m.material = Array.isArray(m.material) ? m.material.map(swap) : swap(m.material);
+    if (!m.geometry.getAttribute('normal')) m.geometry.computeVertexNormals();
+  });
+}
+
+/** How many px one GLB unit is: lowpix furniture is authored in px; guard against models made in blocks. */
+function unitScale(size: THREE.Vector3, id: string): number {
+  const k = kindOf(id);
+  const want = Math.max(k.maxX - k.minX, k.maxY - k.minY, k.maxZ - k.minZ, 1);
+  const have = Math.max(size.x, size.y, size.z, 1e-6);
+  const r = want / have;
+  return r > 6 && r < 40 ? 16 : 1;
+}
 
 export class Rooms {
   private props = new Map<string, Prop>();
   private items = new Map<string, ItemRec>();
   private boxes = new Map<string, BoxRec>();
-  private shells: Partial<Record<FloorId, { key: string; mesh: THREE.Mesh }>> = {};
+  private shells: Partial<Record<FloorId, { key: string; meshes: THREE.Mesh[] }>> = {};
   private flies: Fly[] = [];
   private lights: THREE.PointLight[] = [];
   private lightOwners: (ItemRec | null)[] = [];
-  private outline: THREE.Mesh | null = null;
-  private outlineMat = new THREE.MeshBasicMaterial({ color: 0xfff0a0, side: THREE.BackSide, transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false });
+  private outline: { target: THREE.Object3D; meshes: THREE.Mesh[] } | null = null;
+  private outlineMat = new THREE.MeshBasicMaterial({ color: 0xf1d39a, side: THREE.BackSide, transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false });
   private pending: { kind: 'dust' | 'sparkle' | 'land'; at: THREE.Vector3 }[] = [];
   private home: Home | null = null;
+  /** GLB models that finished loading since the last frame (re-place items whose bounds changed) */
+  private loaded = new Set<string>();
   /** items hidden by build mode (the one being dragged is drawn by the drag ghost) */
   hidden = new Set<string>();
 
   constructor(readonly house: House) {
     for (let i = 0; i < 4; i++) {
-      const l = new THREE.PointLight(0xffd98a, 0, 5.5, 1.6);
+      const l = new THREE.PointLight(0xf1d39a, 0, 5.5, 1.6);
       house.group.add(l);
       this.lights.push(l);
       this.lightOwners.push(null);
@@ -76,14 +242,52 @@ export class Rooms {
     this.props.set(id, p);
     return p;
   }
-  /** A fresh mesh of an item (its moving parts attached), not added anywhere. */
-  makeItem(id: string): THREE.Mesh | null {
-    const p = this.propFor(id), def = ITEMS[id];
-    if (!p || !def) return null;
-    const m = propMesh(p);
-    try { for (const o of def.parts?.() ?? []) m.add(o); } catch (e) { console.warn('item parts failed', id, e); }
-    return m;
+
+  /**
+   * A fresh model of an item, not added anywhere: a group in world units holding the GLB once it loads (the box
+   * model and its moving parts until then, or for good when the item has no GLB).
+   */
+  makeItem(id: string): THREE.Group | null {
+    const def = ITEMS[id];
+    if (!def) return null;
+    const holder = new THREE.Group();
+    holder.name = 'item:' + id;
+    const fallback = new THREE.Group();
+    fallback.name = 'boxmodel';
+    const p = this.propFor(id);
+    if (p) {
+      const m = propMesh(p);
+      fallback.add(m);
+      try { for (const o of def.parts?.() ?? []) m.add(o); } catch (e) { console.warn('item parts failed', id, e); }
+    }
+    holder.add(fallback);
+    holder.userData.anim = fallback.children[0] ?? fallback;
+    if (def.model) {
+      instanceGLB(def.model).then(({ root, clips }) => {
+        lightUp(root);
+        const bb = new THREE.Box3().setFromObject(root);
+        const size = bb.getSize(new THREE.Vector3());
+        const s = unitScale(size, id);
+        const model = new THREE.Group();
+        model.name = 'glb';
+        model.scale.setScalar(PX * s);
+        model.add(root);
+        holder.remove(fallback);
+        holder.add(model);
+        holder.userData.glb = true;
+        if (clips.length) {
+          const mixer = new THREE.AnimationMixer(root);
+          const idle = clips.find((c) => /idle/i.test(c.name));
+          for (const c of idle ? [idle] : clips) mixer.clipAction(c).play();
+          holder.userData.mixer = mixer;
+        }
+        if (setModelBounds(id, { minX: bb.min.x * s, maxX: bb.max.x * s, minY: bb.min.y * s, maxY: bb.max.y * s, minZ: bb.min.z * s, maxZ: bb.max.z * s })) this.loaded.add(id);
+        if (this.outline?.target === holder) this.highlight(holder, this.outlineMat.color.getHex());
+      }).catch((e) => console.warn('item model failed', id, def.model, e));
+    }
+    return holder;
   }
+
   /** Set an object's transform from a placement (house-local, inside its floor group). */
   place(obj: THREE.Object3D, fid: FloorId, p: Placed, base: number) {
     const q = poseOf(fid, p, base);
@@ -93,34 +297,11 @@ export class Rooms {
 
   // ---------------------------------------------------------------- shells (wallpaper + flooring)
 
-  private shell(fid: FloorId, wallId: string, floorId: string): THREE.Mesh {
-    const wf = FINISH[wallId] ?? FINISH.wall_heartwood, ff = FINISH[floorId] ?? FINISH.floor_planks;
-    const y0 = FLOOR_Y[fid];
-    const floorP: Painter = (t) => {
-      const c = ff.paint(t.x + R_IN, t.z + R_IN);
-      return t.face === 2 ? c : shade(c, 0.62);
-    };
-    const out: BoxSpec[] = discStrips(R_IN + 1.5, y0 - 2, y0, floorP, HOLES[fid], 4, { skip: 'd', tag: 'floor' });
-    const step = (Math.PI * 2) / NSEG, segW = (2 * Math.PI * R_IN) / NSEG + 0.5;
-    const wins = PLANS[fid].windows.map((w) => ({ ...w, y: y0 + w.v }));
-    for (let i = 0; i < NSEG; i++) {
-      const a = -Math.PI + (i + 0.5) * step;
-      if (Math.abs(a) < OPEN_A) continue;
-      const near = wins.filter((w) => Math.abs(wrapA(a - w.a)) < step / 2 + (w.r + 1) / R_IN);
-      const p: Painter = (t) => {
-        const ta = Math.atan2(t.x, t.z);
-        if (t.face === 5 || t.face === 4) for (const w of near) if (Math.hypot(wrapA(ta - w.a) * R_IN, t.y - w.y) < w.r) return -1;
-        const u = (wrapA(ta) + Math.PI) * R_IN, v = t.y - y0;
-        const c = wf.paint(u, v);
-        return t.face === 5 ? c : shade(c, 0.55);
-      };
-      out.push(...swing([box(0, y0, R_IN + 0.5, segW, ROOM_H, 1, p, { cut: near.length > 0, tag: 'lining' })], a));
-    }
-    const prop = buildProp(out);
-    prop.mats.forEach(patchCut);
-    const m = propMesh(prop);
-    m.name = 'shell:' + fid;
-    return m;
+  private dropShell(fid: FloorId) {
+    const cur = this.shells[fid];
+    if (!cur) return;
+    for (const m of cur.meshes) { m.parent?.remove(m); m.geometry.dispose(); const mat = m.material as THREE.MeshLambertMaterial; mat.map?.dispose(); mat.dispose(); }
+    delete this.shells[fid];
   }
 
   // ---------------------------------------------------------------- sync with the save
@@ -130,14 +311,16 @@ export class Rooms {
     // shells
     for (const fid of FLOOR_IDS) {
       const r = home.floors[fid];
-      const key = r ? r.wall + '|' + r.floor : '';
+      const on = !!r && home.unlocked.includes(fid);
+      const key = on ? r!.wall + '|' + r!.floor : '';
       const cur = this.shells[fid];
       if (cur && cur.key === key) continue;
-      if (cur) { this.house.floors[fid].remove(cur.mesh); cur.mesh.geometry.dispose(); (cur.mesh.material as THREE.Material[]).forEach((m) => m.dispose()); delete this.shells[fid]; }
-      if (r && home.unlocked.includes(fid)) {
-        const mesh = this.shell(fid, r.wall, r.floor);
-        this.house.floors[fid].add(mesh);
-        this.shells[fid] = { key, mesh };
+      this.dropShell(fid);
+      if (on) {
+        const wf = FINISH[r!.wall] ?? FINISH.wall_heartwood, ff = FINISH[r!.floor] ?? FINISH.floor_planks;
+        const meshes = [wallMesh(fid, wf), floorMesh(fid, ff)];
+        for (const m of meshes) this.house.floors[fid].add(m);
+        this.shells[fid] = { key, meshes };
       }
     }
     // items
@@ -153,16 +336,17 @@ export class Rooms {
         let rec = this.items.get(p.uid);
         if (rec && rec.id !== p.id) { this.dropItem(rec); rec = undefined; }
         if (!rec) {
-          const mesh = this.makeItem(p.id);
-          if (!mesh) continue;
-          mesh.name = 'item:' + p.uid;
-          mesh.userData = { uid: p.uid, fid };
-          rec = { uid: p.uid, id: p.id, fid, mesh, key: '', def: ITEMS[p.id] };
+          const obj = this.makeItem(p.id);
+          if (!obj) continue;
+          obj.name = 'item:' + p.uid;
+          obj.userData.uid = p.uid;
+          obj.userData.fid = fid;
+          rec = { uid: p.uid, id: p.id, fid, obj, key: '', def: ITEMS[p.id], glb: false, mixer: null };
           this.items.set(p.uid, rec);
-          this.house.floors[fid].add(mesh);
+          this.house.floors[fid].add(obj);
         }
-        if (rec.fid !== fid) { this.house.floors[rec.fid].remove(rec.mesh); this.house.floors[fid].add(rec.mesh); rec.fid = fid; rec.mesh.userData.fid = fid; }
-        if (rec.key !== key) { rec.key = key; if (!this.flies.some((f) => f.obj === rec!.mesh)) this.place(rec.mesh, fid, p, base); }
+        if (rec.fid !== fid) { this.house.floors[rec.fid].remove(rec.obj); this.house.floors[fid].add(rec.obj); rec.fid = fid; rec.obj.userData.fid = fid; }
+        if (rec.key !== key) { rec.key = key; if (!this.flies.some((f) => f.obj === rec!.obj)) this.place(rec.obj, fid, p, base); }
       }
     }
     for (const rec of [...this.items.values()]) if (!seen.has(rec.uid)) this.dropItem(rec);
@@ -171,14 +355,13 @@ export class Rooms {
       if (this.boxes.has(id)) continue;
       const b = BOX[id];
       if (!b || !home.unlocked.includes(b.floor)) continue;
-      const model = buildMovingBox(b.label, b.tint, id.length * 7 + b.x * 3);
+      const model = buildMovingBox(id);
       const holder = new THREE.Group();
       holder.add(model.root);
       holder.position.set((b.x + 1) * CELL * PX, FLOOR_Y[b.floor] * PX, (b.z + 1) * CELL * PX);
       holder.rotation.y = (b.rot * Math.PI) / 2 + (((b.x * 7 + b.z * 3) % 5) - 2) * 0.06;
       holder.name = 'box:' + id;
       holder.userData = { box: id, fid: b.floor };
-      model.root.traverse((o) => { o.userData = { box: id, fid: b.floor }; });
       this.house.floors[b.floor].add(holder);
       this.boxes.set(id, { id, fid: b.floor, holder, model, anim: null, phase: (b.x * 1.7 + b.z * 0.9 + 9) % 4.2 });
     }
@@ -187,9 +370,10 @@ export class Rooms {
   }
 
   private dropItem(rec: ItemRec) {
-    rec.mesh.parent?.remove(rec.mesh);
+    rec.obj.parent?.remove(rec.obj);
+    (rec.obj.userData.mixer as THREE.AnimationMixer | undefined)?.stopAllAction();
     this.items.delete(rec.uid);
-    if (this.outline?.parent === rec.mesh) this.outline = null;
+    if (this.outline?.target === rec.obj) this.outline = null;
   }
   private dropBox(rec: BoxRec) { rec.holder.parent?.remove(rec.holder); rec.model.dispose(); this.boxes.delete(rec.id); }
 
@@ -202,17 +386,30 @@ export class Rooms {
   // ---------------------------------------------------------------- per frame
 
   update(dt: number, t: number, hooks: RoomHooks) {
+    // a GLB arrived with different bounds than the box model: re-seat everything of that kind
+    if (this.loaded.size && this.home) {
+      for (const rec of this.items.values()) if (this.loaded.has(rec.id)) rec.key = '';
+      for (const rec of this.items.values()) {
+        const r = this.home.floors[rec.fid];
+        const host = r?.items.find((q) => q.uid === r.items.find((p) => p.uid === rec.uid)?.on);
+        if (host && this.loaded.has(host.id)) rec.key = '';
+      }
+      this.loaded.clear();
+      this.sync(this.home);
+    }
     for (const rec of this.items.values()) {
-      if (rec.def?.animate) try { rec.def.animate(rec.mesh, t, dt); } catch { /* a broken animation shouldn't stop the world */ }
-      rec.mesh.visible = !this.hidden.has(rec.uid);
+      const mixer = rec.obj.userData.mixer as THREE.AnimationMixer | undefined;
+      if (mixer) mixer.update(dt);
+      else if (rec.def?.animate && !rec.obj.userData.glb) try { rec.def.animate(rec.obj.userData.anim ?? rec.obj, t, dt); } catch { /* a broken animation shouldn't stop the world */ }
+      rec.obj.visible = !this.hidden.has(rec.uid);
     }
     // night lights follow their owners
     this.lights.forEach((l, i) => {
       const o = this.lightOwners[i];
-      if (!o || !o.mesh.parent?.visible || !o.mesh.visible) { l.intensity = 0; return; }
+      if (!o || !o.obj.parent?.visible || !o.obj.visible) { l.intensity = 0; return; }
       const L = o.def.light!;
       const v = new THREE.Vector3(L.x * PX, L.y * PX, L.z * PX);
-      o.mesh.localToWorld(v);
+      o.obj.localToWorld(v);
       l.position.copy(this.house.group.worldToLocal(v));
       l.intensity = (0.35 + hooks.night * 3) * L.power * (0.96 + Math.sin(t * 9 + i) * 0.04);
     });
@@ -256,7 +453,7 @@ export class Rooms {
       }
     }
     for (const e of this.pending.splice(0)) hooks.fx.burst(e.kind === 'sparkle' ? 'sparkle' : 'dust', e.at.x, e.at.y, e.at.z, 8);
-    if (this.outline) (this.outline.material as THREE.MeshBasicMaterial).opacity = 0.55 + Math.sin(t * 6) * 0.3;
+    if (this.outline) this.outlineMat.opacity = 0.55 + Math.sin(t * 6) * 0.3;
   }
 
   // ---------------------------------------------------------------- interactions
@@ -277,23 +474,23 @@ export class Rooms {
   flyIn(uid: string, from: THREE.Vector3, delay = 0) {
     const rec = this.items.get(uid);
     if (!rec) return;
-    const to = rec.mesh.position.clone();
-    const local = rec.mesh.parent!.worldToLocal(from.clone());
-    this.flies.push({ obj: rec.mesh, from: local, to, yaw: rec.mesh.rotation.y, t: -delay, dur: 0.75, h: 1.2 + to.distanceTo(local) * 0.25, landed: false });
-    rec.mesh.visible = false;
-    rec.mesh.position.copy(local);
+    const to = rec.obj.position.clone();
+    const local = rec.obj.parent!.worldToLocal(from.clone());
+    this.flies.push({ obj: rec.obj, from: local, to, yaw: rec.obj.rotation.y, t: -delay, dur: 0.75, h: 1.2 + to.distanceTo(local) * 0.25, landed: false });
+    rec.obj.visible = false;
+    rec.obj.position.copy(local);
   }
 
-  meshOf(uid: string) { return this.items.get(uid)?.mesh; }
-  itemsOn(fid: FloorId) { return [...this.items.values()].filter((r) => r.fid === fid); }
+  meshOf(uid: string): THREE.Group | undefined { return this.items.get(uid)?.obj; }
+  itemsOn(fid: FloorId) { return [...this.items.values()].filter((r) => r.fid === fid).map((r) => ({ uid: r.uid, id: r.id, fid: r.fid, mesh: r.obj })); }
 
   /** What's under a ray: an item or a box on a visible floor (optionally only `fid`). */
   pick(ray: THREE.Ray, fid?: FloorId): { kind: 'item' | 'box'; id: string; fid: FloorId; point: THREE.Vector3 } | null {
     const rc = new THREE.Raycaster(ray.origin, ray.direction, 0, 200);
     const objs: THREE.Object3D[] = [];
-    for (const r of this.items.values()) if ((!fid || r.fid === fid) && r.mesh.visible && r.mesh.parent?.visible) objs.push(r.mesh);
+    for (const r of this.items.values()) if ((!fid || r.fid === fid) && r.obj.visible && r.obj.parent?.visible) objs.push(r.obj);
     for (const b of this.boxes.values()) if ((!fid || b.fid === fid) && !b.anim && b.holder.parent?.visible) objs.push(b.holder);
-    const hit = rc.intersectObjects(objs, true)[0];
+    const hit = rc.intersectObjects(objs, true).find((h) => !(h.object as THREE.Mesh).userData.outline);
     if (!hit) return null;
     let o: THREE.Object3D | null = hit.object;
     while (o && !o.userData.uid && !o.userData.box) o = o.parent;
@@ -302,20 +499,30 @@ export class Rooms {
     return { kind: 'item', id: o.userData.uid, fid: o.userData.fid, point: hit.point };
   }
 
-  /** Glow round an object (null clears). */
-  highlight(obj: THREE.Mesh | null, color = 0xfff0a0) {
-    if (this.outline) { this.outline.parent?.remove(this.outline); this.outline = null; }
+  /** A glowing hull round an object and its parts (null clears). */
+  highlight(obj: THREE.Object3D | null, color = 0xf1d39a) {
+    if (this.outline) { for (const m of this.outline.meshes) m.parent?.remove(m); this.outline = null; }
     if (!obj) return;
-    const o = new THREE.Mesh(obj.geometry, this.outlineMat);
     this.outlineMat.color.setHex(color);
-    const bb = obj.geometry.boundingBox ?? (obj.geometry.computeBoundingBox(), obj.geometry.boundingBox!);
-    const size = bb.getSize(new THREE.Vector3()), c = bb.getCenter(new THREE.Vector3());
-    const pad = 0.09;
-    o.scale.set(1 + pad / Math.max(0.1, size.x), 1 + pad / Math.max(0.1, size.y), 1 + pad / Math.max(0.1, size.z));
-    o.position.set(c.x * (1 - o.scale.x), c.y * (1 - o.scale.y), c.z * (1 - o.scale.z));
-    o.renderOrder = -1;
-    obj.add(o);
-    this.outline = o;
+    const meshes: THREE.Mesh[] = [];
+    const src: THREE.Mesh[] = [];
+    obj.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh && !m.userData.outline && !(m as unknown as THREE.SkinnedMesh).isSkinnedMesh) src.push(m); });
+    for (const m of src) {
+      const g = m.geometry;
+      const bb = g.boundingBox ?? (g.computeBoundingBox(), g.boundingBox!);
+      const size = bb.getSize(new THREE.Vector3()), c = bb.getCenter(new THREE.Vector3());
+      const ws = m.getWorldScale(new THREE.Vector3());
+      const pad = 0.07;
+      const o = new THREE.Mesh(g, this.outlineMat);
+      o.userData.outline = true;
+      o.scale.set(1 + pad / Math.max(0.05, size.x * ws.x), 1 + pad / Math.max(0.05, size.y * ws.y), 1 + pad / Math.max(0.05, size.z * ws.z));
+      o.position.set(c.x * (1 - o.scale.x), c.y * (1 - o.scale.y), c.z * (1 - o.scale.z));
+      o.renderOrder = -1;
+      o.raycast = () => {};
+      m.add(o);
+      meshes.push(o);
+    }
+    this.outline = { target: obj, meshes };
   }
   setHighlightColor(color: number) { this.outlineMat.color.setHex(color); }
 
@@ -329,9 +536,9 @@ export class Rooms {
     }
     if (!best) return null;
     const a = best.def.sleep!;
-    best.mesh.updateWorldMatrix(true, false);
-    const at = best.mesh.localToWorld(new THREE.Vector3(a.x * PX, a.y * PX, a.z * PX));
-    return { at, yaw: best.mesh.rotation.y + ((a.rot ?? 0) * Math.PI) / 180, fid: best.fid };
+    best.obj.updateWorldMatrix(true, false);
+    const at = best.obj.localToWorld(new THREE.Vector3(a.x * PX, a.y * PX, a.z * PX));
+    return { at, yaw: best.obj.rotation.y + ((a.rot ?? 0) * Math.PI) / 180, fid: best.fid };
   }
 
   /** A seat anchor Pip can perch on (armchairs, cushions...), world space. */
@@ -339,8 +546,8 @@ export class Rooms {
     const out: { at: THREE.Vector3; yaw: number }[] = [];
     for (const r of this.items.values()) {
       if (r.fid !== fid || !r.def?.sit) continue;
-      r.mesh.updateWorldMatrix(true, false);
-      for (const a of r.def.sit) out.push({ at: r.mesh.localToWorld(new THREE.Vector3(a.x * PX, a.y * PX, a.z * PX)), yaw: r.mesh.rotation.y + ((a.rot ?? 0) * Math.PI) / 180 });
+      r.obj.updateWorldMatrix(true, false);
+      for (const a of r.def.sit) out.push({ at: r.obj.localToWorld(new THREE.Vector3(a.x * PX, a.y * PX, a.z * PX)), yaw: r.obj.rotation.y + ((a.rot ?? 0) * Math.PI) / 180 });
     }
     return out;
   }

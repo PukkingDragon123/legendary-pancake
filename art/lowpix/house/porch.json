@@ -1,0 +1,4832 @@
+{
+ "name": "porch",
+ "description": "Front door in a stone arch, plank porch with railing, steps, lantern post and porch clutter",
+ "license": "CC0-1.0",
+ "density": 2,
+ "budget": {
+  "tris": 60000,
+  "colors": 255
+ },
+ "light": {
+  "dir": [
+   -0.45,
+   1.0,
+   0.65
+  ],
+  "strength": 0.7,
+  "gradient": 0.45,
+  "ao": 0.9,
+  "ao_height": 14
+ },
+ "render": {
+  "background": "#1f2622",
+  "hero": [
+   -30,
+   16
+  ],
+  "shadow": 0.35
+ },
+ "palette": {
+  "ramps": {
+   "bark": {
+    "base": "#5e4c3d",
+    "steps": 9,
+    "hue_shift": 14,
+    "sat_shift": 0.05,
+    "spread": 0.9
+   },
+   "moss": {
+    "base": "#7d9a5e",
+    "steps": 8,
+    "hue_shift": 16,
+    "sat_shift": 0.06,
+    "spread": 0.85
+   },
+   "lichen": {
+    "base": "#b3bf94",
+    "steps": 6,
+    "hue_shift": 10,
+    "sat_shift": 0.04,
+    "spread": 0.6
+   },
+   "heart": {
+    "base": "#b08a62",
+    "steps": 8,
+    "hue_shift": 14,
+    "sat_shift": 0.05,
+    "spread": 0.85
+   },
+   "sap": {
+    "base": "#d4bb93",
+    "steps": 6,
+    "hue_shift": 10,
+    "sat_shift": 0.04,
+    "spread": 0.6
+   },
+   "wood": {
+    "base": "#9c7a56",
+    "steps": 8,
+    "hue_shift": 14,
+    "sat_shift": 0.05,
+    "spread": 0.85
+   },
+   "plank": {
+    "base": "#b39370",
+    "steps": 8,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.85
+   },
+   "dark": {
+    "base": "#5f4835",
+    "steps": 7,
+    "hue_shift": 14,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "stone": {
+    "base": "#938d80",
+    "steps": 8,
+    "hue_shift": 10,
+    "sat_shift": 0.03,
+    "spread": 0.85
+   },
+   "brass": {
+    "base": "#c8a764",
+    "steps": 7,
+    "hue_shift": 16,
+    "sat_shift": 0.05,
+    "spread": 0.85
+   },
+   "iron": {
+    "base": "#56544f",
+    "steps": 6,
+    "hue_shift": 10,
+    "sat_shift": 0.02,
+    "spread": 0.7
+   },
+   "lamp": [
+    "#a8743c",
+    "#d6a35a",
+    "#efc77e",
+    "#f8e0a6",
+    "#fff3d2",
+    "#fffbea"
+   ],
+   "glass": [
+    "#3a4a56",
+    "#4f6470",
+    "#6a828a",
+    "#8ea6a8",
+    "#b7cbc8",
+    "#e4eeea"
+   ],
+   "leaf": {
+    "base": "#5d7a47",
+    "steps": 8,
+    "hue_shift": 18,
+    "sat_shift": 0.06,
+    "spread": 0.9
+   },
+   "fern": {
+    "base": "#6f8c55",
+    "steps": 6,
+    "hue_shift": 14,
+    "sat_shift": 0.05,
+    "spread": 0.7
+   },
+   "cloth": {
+    "base": "#d8cbab",
+    "steps": 6,
+    "hue_shift": 10,
+    "sat_shift": 0.04,
+    "spread": 0.7
+   },
+   "rope": {
+    "base": "#c2ad84",
+    "steps": 6,
+    "hue_shift": 10,
+    "sat_shift": 0.04,
+    "spread": 0.7
+   },
+   "terra": {
+    "base": "#b8826a",
+    "steps": 6,
+    "hue_shift": 14,
+    "sat_shift": 0.05,
+    "spread": 0.7
+   },
+   "red": {
+    "base": "#a86a5c",
+    "steps": 6,
+    "hue_shift": 14,
+    "sat_shift": 0.05,
+    "spread": 0.7
+   },
+   "rose": {
+    "base": "#d4a8a0",
+    "steps": 6,
+    "hue_shift": 10,
+    "sat_shift": 0.04,
+    "spread": 0.6
+   },
+   "ochre": {
+    "base": "#c59a52",
+    "steps": 7,
+    "hue_shift": 14,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "cream": {
+    "base": "#efe4c8",
+    "steps": 5,
+    "hue_shift": 8,
+    "sat_shift": 0.03,
+    "spread": 0.5
+   },
+   "slate": {
+    "base": "#58687a",
+    "steps": 6,
+    "hue_shift": 12,
+    "sat_shift": 0.04,
+    "spread": 0.7
+   },
+   "sky": {
+    "base": "#8fb0b6",
+    "steps": 6,
+    "hue_shift": 10,
+    "sat_shift": 0.04,
+    "spread": 0.7
+   },
+   "lilac": {
+    "base": "#a99ec2",
+    "steps": 6,
+    "hue_shift": 10,
+    "sat_shift": 0.04,
+    "spread": 0.6
+   },
+   "soot": [
+    "#1c1a1d",
+    "#26232a",
+    "#302c33",
+    "#3b363c"
+   ]
+  }
+ },
+ "styles": {
+  "bark": {
+   "ramp": "bark",
+   "tone": 3.9,
+   "rim": {
+    "light_shift": 0.4,
+    "dark_shift": -0.7
+   },
+   "brush": {
+    "length": 5,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "vertical"
+   },
+   "layers": [
+    {
+     "id": "moss",
+     "op": "patches",
+     "scale": 12,
+     "threshold": 0.74,
+     "ramp": "moss",
+     "tone": 3.2,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 0,
+      "shadow_ramp": "bark",
+      "shadow_tone": 1.2
+     }
+    },
+    {
+     "id": "lichen",
+     "op": "spots",
+     "count": 18,
+     "radius": [
+      0.9,
+      2.6
+     ],
+     "roughness": 0.7,
+     "ramp": "lichen",
+     "tone": 3.4
+    },
+    {
+     "op": "photo",
+     "src": "photos/bark_brown_02_s",
+     "scale": 34,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "bark"
+     ],
+     "tint": "bark:6",
+     "tint_amount": 0.45,
+     "shade": 0.12,
+     "relight": 0.55
+    },
+    {
+     "id": "furrows",
+     "op": "spots",
+     "count": 220,
+     "radius": [
+      0.6,
+      1.2
+     ],
+     "stretch": [
+      0.35,
+      6,
+      0.35
+     ],
+     "roughness": 0.6,
+     "shift": -2.4
+    },
+    {
+     "id": "ridges",
+     "op": "spots",
+     "count": 160,
+     "radius": [
+      1.0,
+      2.0
+     ],
+     "stretch": [
+      0.4,
+      4.5,
+      0.4
+     ],
+     "roughness": 0.5,
+     "shift": 1.2
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 11,
+     "amount": 0.8
+    },
+    {
+     "id": "mossfoot",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    }
+   ]
+  },
+  "bark_limb": {
+   "ramp": "bark",
+   "tone": 3.8,
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.7
+   },
+   "brush": {
+    "length": 4,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "path"
+   },
+   "layers": [
+    {
+     "id": "moss",
+     "op": "patches",
+     "scale": 5,
+     "threshold": 0.6,
+     "ramp": "moss",
+     "tone": 3.2,
+     "faces": [
+      "up"
+     ],
+     "bevel": {
+      "shadow": 1,
+      "highlight": 0,
+      "shadow_ramp": "bark",
+      "shadow_tone": 1.2
+     }
+    },
+    {
+     "id": "lichen",
+     "op": "spots",
+     "count": 8,
+     "radius": [
+      0.8,
+      2.2
+     ],
+     "ramp": "lichen",
+     "tone": 3.4
+    },
+    {
+     "op": "photo",
+     "src": "photos/bark_brown_02_s",
+     "scale": 26,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "bark"
+     ],
+     "tint": "bark:6",
+     "tint_amount": 0.45,
+     "shade": 0.12,
+     "relight": 0.55
+    },
+    {
+     "id": "furrows",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.08,
+     "width": 0.22,
+     "shift": -1.8,
+     "wobble": 0.5
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 7,
+     "amount": 0.6
+    }
+   ]
+  },
+  "heart": {
+   "ramp": "heart",
+   "tone": 4.2,
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.6
+   },
+   "brush": {
+    "length": 3,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "vertical"
+   },
+   "layers": [
+    {
+     "op": "photo",
+     "src": "photos/oak_veneer_01_s",
+     "scale": 30,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "heart"
+     ],
+     "tint": "heart:5",
+     "tint_amount": 0.5,
+     "shade": 0.13,
+     "relight": 0.55
+    },
+    {
+     "id": "rings",
+     "op": "stripes",
+     "axis": "x",
+     "period": 1.8,
+     "width": 0.3,
+     "shift": -1.4,
+     "wobble": 0.3
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 6,
+     "amount": 0.5
+    }
+   ]
+  },
+  "plank": {
+   "ramp": "plank",
+   "tone": 4.2,
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.6
+   },
+   "brush": {
+    "length": 6,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "op": "photo",
+     "src": "photos/weathered_planks_s",
+     "scale": 40,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "plank"
+     ],
+     "tint": "plank:5",
+     "tint_amount": 0.5,
+     "shade": 0.13,
+     "relight": 0.55
+    },
+    {
+     "id": "grain",
+     "op": "noise",
+     "scale": 2.5,
+     "amount": 0.5
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.25,
+     "shift": -1.5
+    }
+   ]
+  },
+  "wood": {
+   "ramp": "wood",
+   "tone": 3.8,
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.6
+   },
+   "brush": {
+    "length": 5,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "op": "photo",
+     "src": "photos/oak_veneer_01_s",
+     "scale": 26,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "wood"
+     ],
+     "tint": "wood:5",
+     "tint_amount": 0.5,
+     "shade": 0.13,
+     "relight": 0.55
+    },
+    {
+     "id": "grain",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.5
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.2,
+     "shift": 1.4
+    }
+   ]
+  },
+  "dark": {
+   "ramp": "dark",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.6
+   },
+   "brush": {
+    "length": 5,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "op": "photo",
+     "src": "photos/oak_veneer_01_s",
+     "scale": 22,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "dark"
+     ],
+     "tint": "dark:4",
+     "tint_amount": 0.6,
+     "shade": 0.13,
+     "relight": 0.55
+    },
+    {
+     "id": "grain",
+     "op": "noise",
+     "scale": 2,
+     "amount": 0.45
+    }
+   ]
+  },
+  "stone": {
+   "ramp": "stone",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "length": 3,
+    "width": 0.9,
+    "rough": 0.35,
+    "textures": {
+     "stone": "stone"
+    }
+   },
+   "layers": [
+    {
+     "id": "moss",
+     "op": "patches",
+     "scale": 7,
+     "threshold": 0.7,
+     "ramp": "moss",
+     "tone": 3.2
+    },
+    {
+     "id": "lichen",
+     "op": "spots",
+     "count": 3,
+     "radius": [
+      0.6,
+      1.4
+     ],
+     "ramp": "lichen",
+     "tone": 3.8
+    },
+    {
+     "op": "photo",
+     "src": "photos/rock_face_03_s",
+     "scale": 26,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "stone"
+     ],
+     "tint": "stone:5",
+     "tint_amount": 0.45,
+     "shade": 0.13,
+     "relight": 0.55
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 4,
+     "amount": 0.5
+    }
+   ]
+  },
+  "brass": {
+   "ramp": "brass",
+   "tone": 3.8,
+   "rim": {
+    "light_shift": 1.2,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0,
+   "layers": [
+    {
+     "id": "patina",
+     "op": "patches",
+     "scale": 3,
+     "threshold": 0.66,
+     "ramp": "sky",
+     "tone": 2.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2,
+     "amount": 0.6
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "shift": 1.8
+    }
+   ]
+  },
+  "iron": {
+   "ramp": "iron",
+   "tone": 2.8,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0,
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2,
+     "amount": 0.7
+    },
+    {
+     "id": "rust",
+     "op": "patches",
+     "scale": 2.5,
+     "threshold": 0.72,
+     "ramp": "terra",
+     "tone": 1.6
+    }
+   ]
+  },
+  "lamp": {
+   "ramp": "lamp",
+   "tone": 3.4,
+   "light": 0.15,
+   "rim": {
+    "light_shift": 0.8,
+    "dark_shift": -0.5
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0,
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": -0.8
+    }
+   ]
+  },
+  "glass": {
+   "ramp": "glass",
+   "tone": 2.4,
+   "light": 0.3,
+   "rim": {
+    "light_shift": 1.6,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0,
+   "layers": [
+    {
+     "id": "sheen",
+     "op": "gradient",
+     "axis": [
+      1,
+      1,
+      0
+     ],
+     "amount": 1.2
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "shift": 2.0
+    }
+   ]
+  },
+  "leaf": {
+   "ramp": "leaf",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.8
+   },
+   "brush": {
+    "length": 3,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "vertical",
+    "textures": {
+     "leaf": "organic"
+    }
+   },
+   "layers": [
+    {
+     "op": "photo",
+     "src": "photos/forest_leaves_02_s",
+     "scale": 22,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "leaf"
+     ],
+     "tint": "leaf:5",
+     "tint_amount": 0.45,
+     "shade": 0.13,
+     "relight": 0.55
+    },
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.1
+    }
+   ]
+  },
+  "moss": {
+   "ramp": "moss",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.6
+   },
+   "brush": {
+    "length": 3,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "vertical",
+    "textures": {
+     "moss": "moss"
+    }
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2,
+     "amount": 0.9
+    },
+    {
+     "id": "tufts",
+     "op": "spots",
+     "count": 12,
+     "radius": [
+      0.5,
+      1.2
+     ],
+     "shift": 1.4
+    }
+   ]
+  },
+  "rope": {
+   "ramp": "rope",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.6
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0,
+   "layers": [
+    {
+     "id": "twist",
+     "op": "stripes",
+     "axis": [
+      1,
+      1,
+      1
+     ],
+     "period": 1.4,
+     "width": 0.35,
+     "shift": -1.4
+    }
+   ]
+  },
+  "cloth": {
+   "ramp": "cloth",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.6
+   },
+   "brush": {
+    "length": 3,
+    "width": 0.9,
+    "rough": 0.35,
+    "flow": "vertical",
+    "textures": {
+     "cloth": "cloth"
+    }
+   },
+   "layers": [
+    {
+     "id": "weave",
+     "op": "noise",
+     "scale": 1,
+     "amount": 0.45
+    }
+   ]
+  },
+  "terra": {
+   "ramp": "terra",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0,
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2,
+     "amount": 0.6
+    },
+    {
+     "id": "lip",
+     "op": "band",
+     "axis": "y",
+     "from": 0.6,
+     "to": 1.0,
+     "shift": 0.8
+    },
+    {
+     "id": "moss",
+     "op": "patches",
+     "scale": 3,
+     "threshold": 0.72,
+     "ramp": "moss",
+     "tone": 3.2
+    }
+   ]
+  },
+  "soot": {
+   "ramp": "soot",
+   "tone": 1.5,
+   "light": 0.2,
+   "brush": {
+    "off": true
+   },
+   "dither": 0,
+   "rim": {
+    "light_shift": 0.3,
+    "dark_shift": 0
+   }
+  },
+  "heartcut": {
+   "ramp": "heart",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.7
+   },
+   "brush": {
+    "flow": "vertical",
+    "length": 4,
+    "width": 0.6,
+    "rough": 0.45
+   },
+   "layers": [
+    {
+     "op": "photo",
+     "src": "photos/oak_veneer_01_s",
+     "scale": 36,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "heart"
+     ],
+     "tint": "heart:5",
+     "tint_amount": 0.45,
+     "shade": 0.13,
+     "relight": 0.55
+    },
+    {
+     "id": "rings",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "period": 1.9,
+     "width": 0.3,
+     "shift": -1.0,
+     "wobble": 0.35,
+     "space": "world"
+    },
+    {
+     "id": "rays",
+     "op": "spots",
+     "count": 18,
+     "radius": [
+      0.3,
+      0.6
+     ],
+     "stretch": [
+      6,
+      0.4,
+      6
+     ],
+     "shift": 0.8
+    },
+    {
+     "id": "checks",
+     "op": "cracks",
+     "scale": 5,
+     "width": 0.5,
+     "threshold": 0.7,
+     "shift": -1.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 5,
+     "amount": 0.35
+    }
+   ]
+  },
+  "sapcut": {
+   "ramp": "sap",
+   "tone": 3.2,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.7
+   },
+   "brush": {
+    "flow": "vertical",
+    "length": 3,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "rim",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      0
+     ],
+     "period": 1.6,
+     "width": 0.25,
+     "shift": -0.8,
+     "wobble": 0.3,
+     "space": "world"
+    },
+    {
+     "id": "barkrim",
+     "op": "band",
+     "axis": "x",
+     "from": 0.2,
+     "to": 1.0,
+     "ramp": "bark",
+     "tone": 2.4
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 4,
+     "amount": 0.3
+    }
+   ]
+  },
+  "fungus": {
+   "ramp": "ochre",
+   "tone": 4.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.2
+   },
+   "brush": {
+    "flow": "horizontal",
+    "length": 2,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "zones",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.6,
+     "width": 0.4,
+     "shift": -0.8,
+     "wobble": 0.3,
+     "faces": [
+      "up",
+      "top"
+     ]
+    },
+    {
+     "id": "under",
+     "op": "fill",
+     "faces": [
+      "down",
+      "bottom"
+     ],
+     "ramp": "cream",
+     "tone": 2.6
+    },
+    {
+     "id": "rimlight",
+     "op": "band",
+     "axis": "z",
+     "from": 0.7,
+     "to": 1.0,
+     "ramp": "cream",
+     "tone": 3.4
+    }
+   ]
+  },
+  "ceiling": {
+   "ramp": "plank",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.7
+   },
+   "brush": {
+    "flow": "x",
+    "length": 6,
+    "width": 0.8,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "op": "photo",
+     "src": "photos/weathered_planks_s",
+     "scale": 40,
+     "amount": 0.5
+    },
+    {
+     "id": "boards",
+     "op": "stripes",
+     "axis": "z",
+     "period": 7,
+     "width": 0.12,
+     "shift": -1.4,
+     "space": "world"
+    },
+    {
+     "id": "butts",
+     "op": "spots",
+     "count": 26,
+     "radius": [
+      0.4,
+      0.6
+     ],
+     "stretch": [
+      0.2,
+      1,
+      6
+     ],
+     "shift": -1.4
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 6,
+     "amount": 0.4
+    }
+   ]
+  },
+  "slabedge": {
+   "ramp": "plank",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.7
+   },
+   "brush": {
+    "flow": "horizontal",
+    "length": 4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "boards",
+     "op": "band",
+     "axis": "y",
+     "from": 0.4,
+     "to": 1.0,
+     "ramp": "plank",
+     "tone": 4.8,
+     "faces": [
+      "sides"
+     ],
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1
+     }
+    },
+    {
+     "id": "ends",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.0125,
+     "width": 0.14,
+     "shift": -1.4,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "under",
+     "op": "band",
+     "axis": "y",
+     "from": -1,
+     "to": -0.3,
+     "ramp": "dark",
+     "tone": 3.0,
+     "faces": [
+      "sides"
+     ]
+    },
+    {
+     "id": "ceil",
+     "op": "fill",
+     "faces": [
+      "start"
+     ],
+     "ramp": "plank",
+     "tone": 3.3
+    },
+    {
+     "op": "photo",
+     "src": "photos/weathered_planks_s",
+     "scale": 44,
+     "amount": 0.6,
+     "mode": "colour",
+     "ramps": [
+      "plank"
+     ],
+     "tint": "plank:5",
+     "tint_amount": 0.5,
+     "shade": 0.13,
+     "relight": 0.55,
+     "faces": [
+      "start"
+     ]
+    },
+    {
+     "id": "cboards",
+     "op": "stripes",
+     "axis": "z",
+     "period": 7,
+     "width": 0.13,
+     "shift": -1.5,
+     "space": "world",
+     "faces": [
+      "start"
+     ],
+     "wobble": 0.05
+    },
+    {
+     "id": "cbutts",
+     "op": "stripes",
+     "axis": "x",
+     "period": 41,
+     "width": 0.03,
+     "shift": -1.3,
+     "space": "world",
+     "faces": [
+      "start"
+     ]
+    },
+    {
+     "id": "nails",
+     "op": "spots",
+     "count": 120,
+     "radius": [
+      0.35,
+      0.5
+     ],
+     "shift": -1.8,
+     "faces": [
+      "start"
+     ]
+    },
+    {
+     "id": "stain",
+     "op": "patches",
+     "scale": 14,
+     "threshold": 0.62,
+     "shift": -0.6,
+     "faces": [
+      "start"
+     ]
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 4,
+     "amount": 0.35
+    }
+   ]
+  },
+  "frame": {
+   "ramp": "dark",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long",
+    "length": 3,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "noise",
+     "scale": 1.5,
+     "amount": 0.4
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.25,
+     "ramp": "plank",
+     "tone": 4.6
+    }
+   ]
+  },
+  "doorleaf": {
+   "ramp": "red",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "vertical",
+    "length": 4,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "planks",
+     "op": "stripes",
+     "axis": "x",
+     "period": 4,
+     "width": 0.14,
+     "shift": -1.4,
+     "space": "world"
+    },
+    {
+     "id": "grain",
+     "op": "noise",
+     "scale": 2,
+     "amount": 0.4
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.3,
+     "ramp": "wood",
+     "tone": 3.2
+    },
+    {
+     "id": "foot",
+     "op": "band",
+     "axis": "y",
+     "from": -1,
+     "to": -0.8,
+     "shift": -0.8,
+     "wobble": 0.2
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "porch",
+   "shape": "bone",
+   "size": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    66.463,
+    0.0
+   ]
+  },
+  {
+   "id": "doorleaf",
+   "shape": "box",
+   "size": [
+    16.0,
+    20.0,
+    1.6
+   ],
+   "pivot": [
+    0.0,
+    14.0,
+    95.0
+   ],
+   "parent": "porch",
+   "style": "doorleaf",
+   "hide": [
+    "back"
+   ]
+  },
+  {
+   "id": "doortop",
+   "shape": "prism",
+   "size": [
+    16.0,
+    16.0,
+    1.6
+   ],
+   "pivot": [
+    0.0,
+    24.0,
+    94.95
+   ],
+   "parent": "porch",
+   "style": "doorleaf",
+   "hide": [
+    "back"
+   ],
+   "sides": 14
+  },
+  {
+   "id": "doorstrap",
+   "shape": "box",
+   "size": [
+    12.8,
+    1.3,
+    0.6
+   ],
+   "pivot": [
+    -1.28,
+    8.65,
+    96.0
+   ],
+   "parent": "porch",
+   "style": "iron"
+  },
+  {
+   "id": "doorstrapend",
+   "shape": "prism",
+   "size": [
+    2.0,
+    2.0,
+    0.6
+   ],
+   "pivot": [
+    5.12,
+    8.65,
+    96.0
+   ],
+   "parent": "porch",
+   "style": "iron",
+   "sides": 6
+  },
+  {
+   "id": "doorstrap_1",
+   "shape": "box",
+   "size": [
+    12.8,
+    1.3,
+    0.6
+   ],
+   "pivot": [
+    -1.28,
+    21.65,
+    96.0
+   ],
+   "parent": "porch",
+   "style": "iron"
+  },
+  {
+   "id": "doorstrapend_1",
+   "shape": "prism",
+   "size": [
+    2.0,
+    2.0,
+    0.6
+   ],
+   "pivot": [
+    5.12,
+    21.65,
+    96.0
+   ],
+   "parent": "porch",
+   "style": "iron",
+   "sides": 6
+  },
+  {
+   "id": "doorknob",
+   "shape": "prism",
+   "size": [
+    2.2,
+    2.2,
+    1.6
+   ],
+   "pivot": [
+    4.96,
+    15.0,
+    96.4
+   ],
+   "parent": "porch",
+   "style": "brass",
+   "sides": 8
+  },
+  {
+   "id": "doorknock",
+   "shape": "prism",
+   "size": [
+    3.6,
+    3.6,
+    0.7
+   ],
+   "pivot": [
+    0.0,
+    18.4,
+    96.2
+   ],
+   "parent": "porch",
+   "style": "brass",
+   "hide": [
+    "back"
+   ],
+   "sides": 10
+  },
+  {
+   "id": "doorwinrim",
+   "shape": "prism",
+   "size": [
+    5.6,
+    5.6,
+    0.8
+   ],
+   "pivot": [
+    0.0,
+    25.2,
+    95.9
+   ],
+   "parent": "porch",
+   "style": "brass",
+   "hide": [
+    "back"
+   ],
+   "sides": 10
+  },
+  {
+   "id": "doorwin",
+   "shape": "prism",
+   "size": [
+    4.0,
+    4.0,
+    0.6
+   ],
+   "pivot": [
+    0.0,
+    25.2,
+    96.2
+   ],
+   "parent": "porch",
+   "style": "glass",
+   "hide": [
+    "back"
+   ],
+   "sides": 10
+  },
+  {
+   "id": "doorwinbar",
+   "shape": "box",
+   "size": [
+    0.6,
+    4.0,
+    0.4
+   ],
+   "pivot": [
+    0.0,
+    25.2,
+    96.5
+   ],
+   "parent": "porch",
+   "style": "iron"
+  },
+  {
+   "id": "doorjamb",
+   "shape": "box",
+   "size": [
+    5.0,
+    4.748,
+    14.0
+   ],
+   "pivot": [
+    -10.5,
+    6.374,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 3.7055944217471515
+   }
+  },
+  {
+   "id": "doorjamb_1",
+   "shape": "box",
+   "size": [
+    5.0,
+    5.402,
+    14.0
+   ],
+   "pivot": [
+    -10.5,
+    11.849,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 3.65070540066728
+   }
+  },
+  {
+   "id": "doorjamb_2",
+   "shape": "box",
+   "size": [
+    5.0,
+    5.172,
+    14.0
+   ],
+   "pivot": [
+    -10.5,
+    17.535,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 3.85598224183881
+   }
+  },
+  {
+   "id": "doorjamb_3",
+   "shape": "box",
+   "size": [
+    5.0,
+    3.079,
+    14.0
+   ],
+   "pivot": [
+    -10.5,
+    22.061,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 3.9552050132325944
+   }
+  },
+  {
+   "id": "doorjamb_4",
+   "shape": "box",
+   "size": [
+    5.0,
+    4.175,
+    14.0
+   ],
+   "pivot": [
+    10.5,
+    6.087,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 3.9035519785636703
+   }
+  },
+  {
+   "id": "doorjamb_5",
+   "shape": "box",
+   "size": [
+    5.0,
+    4.24,
+    14.0
+   ],
+   "pivot": [
+    10.5,
+    10.695,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 3.6634991093407057
+   }
+  },
+  {
+   "id": "doorjamb_6",
+   "shape": "box",
+   "size": [
+    5.0,
+    4.949,
+    14.0
+   ],
+   "pivot": [
+    10.5,
+    15.689,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 4.178796487270427
+   }
+  },
+  {
+   "id": "doorjamb_7",
+   "shape": "box",
+   "size": [
+    5.0,
+    4.348,
+    14.0
+   ],
+   "pivot": [
+    10.5,
+    20.738,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 3.75626727522491
+   }
+  },
+  {
+   "id": "doorjamb_8",
+   "shape": "box",
+   "size": [
+    5.0,
+    0.289,
+    14.0
+   ],
+   "pivot": [
+    10.5,
+    23.456,
+    91.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.7,
+   "style": "stone",
+   "paint": {
+    "tone": 4.263396259719904
+   }
+  },
+  {
+   "id": "doorvous",
+   "shape": "box",
+   "size": [
+    3.281,
+    5.4,
+    14.0
+   ],
+   "pivot": [
+    -10.439,
+    25.841,
+    91.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    0.0,
+    -80.0
+   ],
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 3.961682358893999
+   }
+  },
+  {
+   "id": "doorvous_1",
+   "shape": "box",
+   "size": [
+    3.281,
+    5.4,
+    14.0
+   ],
+   "pivot": [
+    -9.18,
+    29.3,
+    91.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    0.0,
+    -60.0
+   ],
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 3.817344379720624
+   }
+  },
+  {
+   "id": "doorvous_2",
+   "shape": "box",
+   "size": [
+    3.281,
+    5.4,
+    14.0
+   ],
+   "pivot": [
+    -6.814,
+    32.12,
+    91.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    0.0,
+    -40.0
+   ],
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 4.281004084474336
+   }
+  },
+  {
+   "id": "doorvous_3",
+   "shape": "box",
+   "size": [
+    3.281,
+    5.4,
+    14.0
+   ],
+   "pivot": [
+    -3.625,
+    33.961,
+    91.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    0.0,
+    -20.0
+   ],
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 3.537266144494205
+   }
+  },
+  {
+   "id": "doorvous_4",
+   "shape": "box",
+   "size": [
+    3.281,
+    7.0,
+    15.0
+   ],
+   "pivot": [
+    -0.0,
+    35.4,
+    91.5
+   ],
+   "parent": "porch",
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 4.186774767238944
+   }
+  },
+  {
+   "id": "doorvous_5",
+   "shape": "box",
+   "size": [
+    3.281,
+    5.4,
+    14.0
+   ],
+   "pivot": [
+    3.625,
+    33.961,
+    91.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    0.0,
+    20.0
+   ],
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 3.731687429065341
+   }
+  },
+  {
+   "id": "doorvous_6",
+   "shape": "box",
+   "size": [
+    3.281,
+    5.4,
+    14.0
+   ],
+   "pivot": [
+    6.814,
+    32.12,
+    91.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    0.0,
+    40.0
+   ],
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 3.61540406668595
+   }
+  },
+  {
+   "id": "doorvous_7",
+   "shape": "box",
+   "size": [
+    3.281,
+    5.4,
+    14.0
+   ],
+   "pivot": [
+    9.18,
+    29.3,
+    91.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    0.0,
+    60.0
+   ],
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 3.594233790462695
+   }
+  },
+  {
+   "id": "doorvous_8",
+   "shape": "box",
+   "size": [
+    3.281,
+    5.4,
+    14.0
+   ],
+   "pivot": [
+    10.439,
+    25.841,
+    91.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    0.0,
+    80.0
+   ],
+   "chamfer": 0.6,
+   "style": "stone",
+   "paint": {
+    "tone": 3.7467854592815475
+   }
+  },
+  {
+   "id": "doorsill",
+   "shape": "box",
+   "size": [
+    26.0,
+    1.6,
+    16.0
+   ],
+   "pivot": [
+    0.0,
+    3.2,
+    92.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.4,
+   "style": "stone"
+  },
+  {
+   "id": "plaque",
+   "shape": "box",
+   "size": [
+    14.0,
+    4.4,
+    1.2
+   ],
+   "pivot": [
+    0.0,
+    38.2,
+    98.4
+   ],
+   "parent": "porch",
+   "chamfer": 0.4,
+   "style": "wood",
+   "paint": {
+    "stamps": [
+     {
+      "face": "front",
+      "at": "center",
+      "art": [
+       "tt..ttt.tt..",
+       "tst..tsstst.",
+       "tt.s.ts.tt.s",
+       "tss..ts.tss.",
+       "ts..ttt.ts..",
+       ".s...sss.s.."
+      ],
+      "key": {
+       "t": "dark:1",
+       "s": "plank:5"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "id": "pjoist",
+   "shape": "box",
+   "size": [
+    3.0,
+    2.6,
+    38.0
+   ],
+   "pivot": [
+    -18.0,
+    1.1,
+    107.0
+   ],
+   "parent": "porch",
+   "style": "dark"
+  },
+  {
+   "id": "pjoist_1",
+   "shape": "box",
+   "size": [
+    3.0,
+    2.6,
+    38.0
+   ],
+   "pivot": [
+    -6.0,
+    1.1,
+    107.0
+   ],
+   "parent": "porch",
+   "style": "dark"
+  },
+  {
+   "id": "pjoist_2",
+   "shape": "box",
+   "size": [
+    3.0,
+    2.6,
+    38.0
+   ],
+   "pivot": [
+    6.0,
+    1.1,
+    107.0
+   ],
+   "parent": "porch",
+   "style": "dark"
+  },
+  {
+   "id": "pjoist_3",
+   "shape": "box",
+   "size": [
+    3.0,
+    2.6,
+    38.0
+   ],
+   "pivot": [
+    18.0,
+    1.1,
+    107.0
+   ],
+   "parent": "porch",
+   "style": "dark"
+  },
+  {
+   "id": "board",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    38.246
+   ],
+   "pivot": [
+    -18.667,
+    3.2,
+    107.29
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 4.236154852452557
+   }
+  },
+  {
+   "id": "board_1",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    38.885
+   ],
+   "pivot": [
+    -14.0,
+    3.2,
+    107.288
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 4.337859997332334
+   }
+  },
+  {
+   "id": "board_2",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    37.058
+   ],
+   "pivot": [
+    -9.333,
+    3.2,
+    106.959
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 4.354685373598651
+   }
+  },
+  {
+   "id": "board_3",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    38.298
+   ],
+   "pivot": [
+    -4.667,
+    3.2,
+    107.481
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 3.6905647717225154
+   }
+  },
+  {
+   "id": "board_4",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    37.938
+   ],
+   "pivot": [
+    0.0,
+    3.2,
+    106.696
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 4.0350086873887445
+   }
+  },
+  {
+   "id": "board_5",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    38.148
+   ],
+   "pivot": [
+    4.667,
+    3.2,
+    106.416
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 3.7733838403710784
+   }
+  },
+  {
+   "id": "board_6",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    37.559
+   ],
+   "pivot": [
+    9.333,
+    3.2,
+    107.5
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 4.2125803613033135
+   }
+  },
+  {
+   "id": "board_7",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    37.319
+   ],
+   "pivot": [
+    14.0,
+    3.2,
+    107.357
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 3.7110139347191224
+   }
+  },
+  {
+   "id": "board_8",
+   "shape": "box",
+   "size": [
+    4.317,
+    1.6,
+    38.235
+   ],
+   "pivot": [
+    18.667,
+    3.2,
+    106.552
+   ],
+   "parent": "porch",
+   "style": "plank",
+   "paint": {
+    "tone": 3.6014198897620275
+   }
+  },
+  {
+   "id": "fascia",
+   "shape": "box",
+   "size": [
+    44.0,
+    3.2,
+    1.6
+   ],
+   "pivot": [
+    0.0,
+    1.2,
+    126.6
+   ],
+   "parent": "porch",
+   "style": "wood"
+  },
+  {
+   "id": "mat",
+   "shape": "box",
+   "size": [
+    13.0,
+    0.5,
+    7.0
+   ],
+   "pivot": [
+    0.0,
+    4.25,
+    104.0
+   ],
+   "parent": "porch",
+   "paint": {
+    "ramp": "red",
+    "tone": 3.2,
+    "layers": [
+     {
+      "id": "weave",
+      "op": "stripes",
+      "axis": "x",
+      "period": 1.4,
+      "width": 0.4,
+      "shift": -0.7
+     },
+     {
+      "id": "border",
+      "op": "panel",
+      "inset": 2,
+      "shift": 0.8,
+      "faces": [
+       "top"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "ppost",
+   "shape": "box",
+   "size": [
+    2.4,
+    13.0,
+    2.4
+   ],
+   "pivot": [
+    -20.5,
+    10.5,
+    100.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.4,
+   "style": "dark"
+  },
+  {
+   "id": "pfin",
+   "shape": "prism",
+   "size": [
+    2.6,
+    2.6,
+    2.2
+   ],
+   "pivot": [
+    -20.5,
+    18.0,
+    100.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brass",
+   "sides": 6
+  },
+  {
+   "id": "ppost_1",
+   "shape": "box",
+   "size": [
+    2.4,
+    13.0,
+    2.4
+   ],
+   "pivot": [
+    -20.5,
+    10.5,
+    113.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.4,
+   "style": "dark"
+  },
+  {
+   "id": "pfin_1",
+   "shape": "prism",
+   "size": [
+    2.6,
+    2.6,
+    2.2
+   ],
+   "pivot": [
+    -20.5,
+    18.0,
+    113.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brass",
+   "sides": 6
+  },
+  {
+   "id": "ppost_2",
+   "shape": "box",
+   "size": [
+    2.4,
+    13.0,
+    2.4
+   ],
+   "pivot": [
+    -20.5,
+    10.5,
+    125.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.4,
+   "style": "dark"
+  },
+  {
+   "id": "pfin_2",
+   "shape": "prism",
+   "size": [
+    2.6,
+    2.6,
+    2.2
+   ],
+   "pivot": [
+    -20.5,
+    18.0,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brass",
+   "sides": 6
+  },
+  {
+   "id": "prail",
+   "shape": "box",
+   "size": [
+    1.8,
+    1.6,
+    27.0
+   ],
+   "pivot": [
+    -20.5,
+    15.8,
+    112.5
+   ],
+   "parent": "porch",
+   "style": "wood"
+  },
+  {
+   "id": "pbal",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    -20.5,
+    10.0,
+    102.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_1",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    -20.5,
+    10.0,
+    106.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_2",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    -20.5,
+    10.0,
+    110.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_3",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    -20.5,
+    10.0,
+    114.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_4",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    -20.5,
+    10.0,
+    118.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_5",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    -20.5,
+    10.0,
+    122.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "prail2",
+   "shape": "box",
+   "size": [
+    1.2,
+    1.2,
+    27.0
+   ],
+   "pivot": [
+    -20.5,
+    5.8,
+    112.5
+   ],
+   "parent": "porch",
+   "style": "wood"
+  },
+  {
+   "id": "ppost_3",
+   "shape": "box",
+   "size": [
+    2.4,
+    13.0,
+    2.4
+   ],
+   "pivot": [
+    20.5,
+    10.5,
+    100.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.4,
+   "style": "dark"
+  },
+  {
+   "id": "pfin_3",
+   "shape": "prism",
+   "size": [
+    2.6,
+    2.6,
+    2.2
+   ],
+   "pivot": [
+    20.5,
+    18.0,
+    100.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brass",
+   "sides": 6
+  },
+  {
+   "id": "ppost_4",
+   "shape": "box",
+   "size": [
+    2.4,
+    13.0,
+    2.4
+   ],
+   "pivot": [
+    20.5,
+    10.5,
+    113.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.4,
+   "style": "dark"
+  },
+  {
+   "id": "pfin_4",
+   "shape": "prism",
+   "size": [
+    2.6,
+    2.6,
+    2.2
+   ],
+   "pivot": [
+    20.5,
+    18.0,
+    113.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brass",
+   "sides": 6
+  },
+  {
+   "id": "ppost_5",
+   "shape": "box",
+   "size": [
+    2.4,
+    13.0,
+    2.4
+   ],
+   "pivot": [
+    20.5,
+    10.5,
+    125.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.4,
+   "style": "dark"
+  },
+  {
+   "id": "pfin_5",
+   "shape": "prism",
+   "size": [
+    2.6,
+    2.6,
+    2.2
+   ],
+   "pivot": [
+    20.5,
+    18.0,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brass",
+   "sides": 6
+  },
+  {
+   "id": "prail_1",
+   "shape": "box",
+   "size": [
+    1.8,
+    1.6,
+    27.0
+   ],
+   "pivot": [
+    20.5,
+    15.8,
+    112.5
+   ],
+   "parent": "porch",
+   "style": "wood"
+  },
+  {
+   "id": "pbal_6",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    20.5,
+    10.0,
+    102.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_7",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    20.5,
+    10.0,
+    106.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_8",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    20.5,
+    10.0,
+    110.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_9",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    20.5,
+    10.0,
+    114.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_10",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    20.5,
+    10.0,
+    118.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "pbal_11",
+   "shape": "box",
+   "size": [
+    1.0,
+    10.0,
+    1.0
+   ],
+   "pivot": [
+    20.5,
+    10.0,
+    122.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "tone": 3.4
+   }
+  },
+  {
+   "id": "prail2_1",
+   "shape": "box",
+   "size": [
+    1.2,
+    1.2,
+    27.0
+   ],
+   "pivot": [
+    20.5,
+    5.8,
+    112.5
+   ],
+   "parent": "porch",
+   "style": "wood"
+  },
+  {
+   "id": "frail",
+   "shape": "box",
+   "size": [
+    13.0,
+    1.6,
+    1.8
+   ],
+   "pivot": [
+    -15.12,
+    15.8,
+    125.0
+   ],
+   "parent": "porch",
+   "style": "wood"
+  },
+  {
+   "id": "frail_1",
+   "shape": "box",
+   "size": [
+    13.0,
+    1.6,
+    1.8
+   ],
+   "pivot": [
+    15.12,
+    15.8,
+    125.0
+   ],
+   "parent": "porch",
+   "style": "wood"
+  },
+  {
+   "id": "step1",
+   "shape": "box",
+   "size": [
+    22.0,
+    2.4,
+    6.0
+   ],
+   "pivot": [
+    0.0,
+    1.2,
+    130.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.6,
+   "style": "stone"
+  },
+  {
+   "id": "step2",
+   "shape": "box",
+   "size": [
+    18.0,
+    1.2,
+    5.0
+   ],
+   "pivot": [
+    0.0,
+    0.6,
+    135.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    4.0,
+    0.0
+   ],
+   "chamfer": 0.5,
+   "style": "stone"
+  },
+  {
+   "id": "lpost",
+   "shape": "box",
+   "size": [
+    2.8,
+    30.0,
+    2.8
+   ],
+   "pivot": [
+    -24.0,
+    15.0,
+    125.0
+   ],
+   "parent": "porch",
+   "chamfer": 0.5,
+   "style": "dark"
+  },
+  {
+   "id": "larm",
+   "shape": "box",
+   "size": [
+    9.0,
+    1.6,
+    1.6
+   ],
+   "pivot": [
+    -20.0,
+    29.2,
+    125.0
+   ],
+   "parent": "porch",
+   "style": "dark"
+  },
+  {
+   "id": "lbrace",
+   "shape": "box",
+   "size": [
+    1.2,
+    1.2,
+    8.439
+   ],
+   "pivot": [
+    -20.25,
+    25.2,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -49.325,
+    90.0,
+    0.0
+   ],
+   "style": "dark"
+  },
+  {
+   "id": "chain",
+   "shape": "prism",
+   "size": [
+    0.8,
+    0.8,
+    2.0
+   ],
+   "pivot": [
+    -16.5,
+    27.2,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    90.0,
+    0.0,
+    0.0
+   ],
+   "style": "iron",
+   "sides": 4
+  },
+  {
+   "id": "lcap",
+   "shape": "taper",
+   "size": [
+    7.0,
+    7.0,
+    3.0
+   ],
+   "pivot": [
+    -16.5,
+    24.7,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "iron",
+   "front_scale": [
+    0.35,
+    0.35
+   ]
+  },
+  {
+   "id": "lring",
+   "shape": "prism",
+   "size": [
+    2.4,
+    2.4,
+    1.4
+   ],
+   "pivot": [
+    -16.5,
+    26.7,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brass",
+   "sides": 6
+  },
+  {
+   "id": "porchlamp",
+   "shape": "prism",
+   "size": [
+    4.8,
+    4.8,
+    6.5
+   ],
+   "pivot": [
+    -16.5,
+    19.95,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "lamp",
+   "sides": 6
+  },
+  {
+   "id": "lpost_1",
+   "shape": "box",
+   "size": [
+    0.8,
+    7.0,
+    0.8
+   ],
+   "pivot": [
+    -19.1,
+    19.7,
+    122.4
+   ],
+   "parent": "porch",
+   "style": "iron"
+  },
+  {
+   "id": "lpost_2",
+   "shape": "box",
+   "size": [
+    0.8,
+    7.0,
+    0.8
+   ],
+   "pivot": [
+    -13.9,
+    19.7,
+    122.4
+   ],
+   "parent": "porch",
+   "style": "iron"
+  },
+  {
+   "id": "lpost_3",
+   "shape": "box",
+   "size": [
+    0.8,
+    7.0,
+    0.8
+   ],
+   "pivot": [
+    -19.1,
+    19.7,
+    127.6
+   ],
+   "parent": "porch",
+   "style": "iron"
+  },
+  {
+   "id": "lpost_4",
+   "shape": "box",
+   "size": [
+    0.8,
+    7.0,
+    0.8
+   ],
+   "pivot": [
+    -13.9,
+    19.7,
+    127.6
+   ],
+   "parent": "porch",
+   "style": "iron"
+  },
+  {
+   "id": "ltray",
+   "shape": "prism",
+   "size": [
+    7.2,
+    7.2,
+    1.4
+   ],
+   "pivot": [
+    -16.5,
+    15.9,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "iron",
+   "sides": 6
+  },
+  {
+   "id": "lfin",
+   "shape": "prism",
+   "size": [
+    1.8,
+    1.8,
+    1.6
+   ],
+   "pivot": [
+    -16.5,
+    14.4,
+    125.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "brass",
+   "sides": 6
+  },
+  {
+   "id": "pot",
+   "shape": "prism",
+   "size": [
+    6.4,
+    6.4,
+    5.0
+   ],
+   "pivot": [
+    14.0,
+    6.5,
+    101.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "terra",
+   "sides": 9,
+   "back_scale": [
+    0.78,
+    0.78
+   ]
+  },
+  {
+   "id": "potlip",
+   "shape": "prism",
+   "size": [
+    7.4,
+    7.4,
+    1.2
+   ],
+   "pivot": [
+    14.0,
+    8.6,
+    101.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "terra",
+   "sides": 9
+  },
+  {
+   "id": "soil",
+   "shape": "prism",
+   "size": [
+    5.8,
+    5.8,
+    0.7
+   ],
+   "pivot": [
+    14.0,
+    8.75,
+    101.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "dark",
+    "tone": 1.3
+   },
+   "sides": 9
+  },
+  {
+   "id": "pplant",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    13.561,
+    13.2,
+    101.417
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    6.331,
+    -2.449
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "rose:3",
+     "P": "rose:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "..............",
+    "..............",
+    "..............",
+    "......P.......",
+    ".....pPP......",
+    "....pPcPP.....",
+    "....lpppd.....",
+    ".....lsm......",
+    "......s.......",
+    "....l.s.d.....",
+    ".....lsm......",
+    "......s.......",
+    ".....l.s.d....",
+    "......lsm.....",
+    ".......s......",
+    ".....l.s.d....",
+    "......lsm....."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pplant_1",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    13.995,
+    13.2,
+    100.939
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    63.638,
+    2.887
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "rose:3",
+     "P": "rose:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "..............",
+    ".....P........",
+    "....pPP.......",
+    "...pPcPP......",
+    "....ppp.......",
+    "....P.s.......",
+    "...pPPs.d.....",
+    "..pPcPPm......",
+    "...ppps.......",
+    "..l.s.s.d.....",
+    "...lslsm......",
+    ".....ss.......",
+    "..l.s.s.d.....",
+    "...lslsm......",
+    "....s.s.......",
+    "..l.s.s.d.....",
+    "...lslsm......"
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pplant_2",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    13.513,
+    13.2,
+    100.434
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    128.058,
+    -0.672
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "rose:3",
+     "P": "rose:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "..............",
+    "..............",
+    "........P.....",
+    ".......pPP....",
+    "......pPcPP...",
+    ".......ppp....",
+    ".....l.s.d....",
+    "......lsm.....",
+    "........s.....",
+    "......l.s.d...",
+    ".......lsm....",
+    "........s.....",
+    "......l.s.d...",
+    ".......lsm....",
+    "........s.....",
+    "......l.s.d...",
+    ".......lsm...."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pot_1",
+   "shape": "prism",
+   "size": [
+    5.6,
+    5.6,
+    4.5
+   ],
+   "pivot": [
+    -14.0,
+    6.25,
+    102.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "terra",
+   "sides": 9,
+   "back_scale": [
+    0.78,
+    0.78
+   ]
+  },
+  {
+   "id": "potlip_1",
+   "shape": "prism",
+   "size": [
+    6.6,
+    6.6,
+    1.2
+   ],
+   "pivot": [
+    -14.0,
+    8.1,
+    102.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "terra",
+   "sides": 9
+  },
+  {
+   "id": "soil_1",
+   "shape": "prism",
+   "size": [
+    5.0,
+    5.0,
+    0.7
+   ],
+   "pivot": [
+    -14.0,
+    8.25,
+    102.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "dark",
+    "tone": 1.3
+   },
+   "sides": 9
+  },
+  {
+   "id": "pplant_3",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    -13.453,
+    12.7,
+    102.537
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    -10.643,
+    -4.151
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "cream:3",
+     "P": "cream:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "..............",
+    ".....P........",
+    "....pPP.......",
+    "...pPcPP......",
+    "....ppp.......",
+    ".....s........",
+    "...l.s.d......",
+    "....lsm.......",
+    ".....s........",
+    "...l.s.d......",
+    "....lsm.......",
+    ".....s........",
+    "...l.s.d......",
+    "....lsm.......",
+    ".....s........",
+    "...l.s.d......",
+    "....lsm......."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pplant_4",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    -13.597,
+    12.7,
+    102.283
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    64.074,
+    -1.919
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "cream:3",
+     "P": "cream:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "..............",
+    ".......P......",
+    "......pPP.....",
+    ".....pPcPP....",
+    ".....Pppp.....",
+    "....pPP.......",
+    "...pPcPPd.....",
+    "....pppm......",
+    ".....s.s......",
+    "...llssdd.....",
+    "....lssm......",
+    ".....s.s......",
+    "...llssdd.....",
+    "....lssm......",
+    ".....ss.......",
+    "...llssdd.....",
+    "....lssm......"
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pplant_5",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    -13.873,
+    12.7,
+    102.128
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    121.949,
+    -3.416
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "cream:3",
+     "P": "cream:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "..............",
+    "......P.......",
+    ".....pPP......",
+    "....pPcPP.....",
+    ".....ppp..P...",
+    "......s..pPP..",
+    "....l.s.pPcPP.",
+    ".....lsm.ppp..",
+    "......s...s...",
+    ".....ls.lds.d.",
+    "......lsmlsm..",
+    ".......s..s...",
+    ".....l.slds.d.",
+    "......lsmlsm..",
+    ".......s..s...",
+    ".....l.slds.d.",
+    "......lsmlsm.."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pot_2",
+   "shape": "prism",
+   "size": [
+    4.8,
+    4.8,
+    4.0
+   ],
+   "pivot": [
+    15.5,
+    6.0,
+    118.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "terra",
+   "sides": 9,
+   "back_scale": [
+    0.78,
+    0.78
+   ]
+  },
+  {
+   "id": "potlip_2",
+   "shape": "prism",
+   "size": [
+    5.8,
+    5.8,
+    1.2
+   ],
+   "pivot": [
+    15.5,
+    7.6,
+    118.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "terra",
+   "sides": 9
+  },
+  {
+   "id": "soil_2",
+   "shape": "prism",
+   "size": [
+    4.2,
+    4.2,
+    0.7
+   ],
+   "pivot": [
+    15.5,
+    7.75,
+    118.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "dark",
+    "tone": 1.3
+   },
+   "sides": 9
+  },
+  {
+   "id": "pplant_6",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    15.186,
+    12.2,
+    118.053
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    -3.121,
+    1.039
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "lilac:3",
+     "P": "lilac:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "..............",
+    "..............",
+    "..............",
+    ".......P......",
+    "......pPP..P..",
+    ".....pPcPPpPP.",
+    ".....lppppPcPP",
+    "......lsm.ppp.",
+    ".......s...s..",
+    ".....l.s.d.s.d",
+    "......lsm.lsm.",
+    ".......s...s..",
+    ".....l.sld.sd.",
+    "......lsmlsm..",
+    ".......s..s...",
+    "....l.s.d.s.d.",
+    ".....lsm.lsm.."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pplant_7",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    15.651,
+    12.2,
+    117.479
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    48.316,
+    3.375
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "lilac:3",
+     "P": "lilac:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "......P.......",
+    ".....pPP......",
+    "....pPcPP.....",
+    "....lpppd.....",
+    ".....lsm......",
+    "......s.......",
+    "....lPs.d.....",
+    "....pPPm......",
+    "...pPcPP......",
+    "...lpppdd.....",
+    "....lssm......",
+    ".....ss.......",
+    "..l.sls..d....",
+    "...lsmlsm.....",
+    "....s.s.......",
+    "..l.s.s.d.....",
+    "...lslsm......"
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pplant_8",
+   "shape": "card",
+   "size": [
+    7.0,
+    9.0
+   ],
+   "pivot": [
+    15.211,
+    12.2,
+    117.681
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    131.895,
+    -0.297
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "lilac:3",
+     "P": "lilac:4",
+     "c": "ochre:5"
+    }
+   },
+   "art": [
+    "..............",
+    "......P.......",
+    ".....pPP......",
+    "....pPcPP.....",
+    "....lpppd.....",
+    ".....lsm......",
+    "......s.......",
+    "....l.s.d.....",
+    ".....lsm......",
+    "......s.......",
+    "....l.s.d.....",
+    ".....lsm......",
+    ".......s......",
+    "....l.s.d.....",
+    ".....lsm......",
+    ".......s......",
+    ".....l.s.d....",
+    "......lsm....."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "log",
+   "shape": "prism",
+   "size": [
+    5.2,
+    5.2,
+    9.0
+   ],
+   "pivot": [
+    -15.0,
+    6.6,
+    92.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "layers": [
+     {
+      "id": "ends",
+      "op": "fill",
+      "faces": [
+       "front",
+       "back"
+      ],
+      "ramp": "heart",
+      "tone": 4.6
+     },
+     {
+      "id": "rings",
+      "op": "stripes",
+      "axis": [
+       1,
+       1,
+       0
+      ],
+      "period": 1.0,
+      "width": 0.3,
+      "shift": -0.8,
+      "faces": [
+       "front",
+       "back"
+      ]
+     },
+     {
+      "id": "barkside",
+      "op": "fill",
+      "faces": [
+       "sides"
+      ],
+      "ramp": "bark",
+      "tone": 3.4
+     }
+    ]
+   },
+   "sides": 8
+  },
+  {
+   "id": "log_1",
+   "shape": "prism",
+   "size": [
+    5.2,
+    5.2,
+    9.0
+   ],
+   "pivot": [
+    -9.5,
+    6.6,
+    92.6
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "layers": [
+     {
+      "id": "ends",
+      "op": "fill",
+      "faces": [
+       "front",
+       "back"
+      ],
+      "ramp": "heart",
+      "tone": 4.6
+     },
+     {
+      "id": "rings",
+      "op": "stripes",
+      "axis": [
+       1,
+       1,
+       0
+      ],
+      "period": 1.0,
+      "width": 0.3,
+      "shift": -0.8,
+      "faces": [
+       "front",
+       "back"
+      ]
+     },
+     {
+      "id": "barkside",
+      "op": "fill",
+      "faces": [
+       "sides"
+      ],
+      "ramp": "bark",
+      "tone": 3.4
+     }
+    ]
+   },
+   "sides": 8
+  },
+  {
+   "id": "log_2",
+   "shape": "prism",
+   "size": [
+    5.2,
+    5.2,
+    9.0
+   ],
+   "pivot": [
+    -12.2,
+    10.9,
+    92.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "layers": [
+     {
+      "id": "ends",
+      "op": "fill",
+      "faces": [
+       "front",
+       "back"
+      ],
+      "ramp": "heart",
+      "tone": 4.6
+     },
+     {
+      "id": "rings",
+      "op": "stripes",
+      "axis": [
+       1,
+       1,
+       0
+      ],
+      "period": 1.0,
+      "width": 0.3,
+      "shift": -0.8,
+      "faces": [
+       "front",
+       "back"
+      ]
+     },
+     {
+      "id": "barkside",
+      "op": "fill",
+      "faces": [
+       "sides"
+      ],
+      "ramp": "bark",
+      "tone": 3.4
+     }
+    ]
+   },
+   "sides": 8
+  },
+  {
+   "id": "log_3",
+   "shape": "prism",
+   "size": [
+    5.2,
+    5.2,
+    9.0
+   ],
+   "pivot": [
+    -17.8,
+    10.9,
+    92.6
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "layers": [
+     {
+      "id": "ends",
+      "op": "fill",
+      "faces": [
+       "front",
+       "back"
+      ],
+      "ramp": "heart",
+      "tone": 4.6
+     },
+     {
+      "id": "rings",
+      "op": "stripes",
+      "axis": [
+       1,
+       1,
+       0
+      ],
+      "period": 1.0,
+      "width": 0.3,
+      "shift": -0.8,
+      "faces": [
+       "front",
+       "back"
+      ]
+     },
+     {
+      "id": "barkside",
+      "op": "fill",
+      "faces": [
+       "sides"
+      ],
+      "ramp": "bark",
+      "tone": 3.4
+     }
+    ]
+   },
+   "sides": 8
+  },
+  {
+   "id": "log_4",
+   "shape": "prism",
+   "size": [
+    5.2,
+    5.2,
+    9.0
+   ],
+   "pivot": [
+    -6.8,
+    10.9,
+    92.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "layers": [
+     {
+      "id": "ends",
+      "op": "fill",
+      "faces": [
+       "front",
+       "back"
+      ],
+      "ramp": "heart",
+      "tone": 4.6
+     },
+     {
+      "id": "rings",
+      "op": "stripes",
+      "axis": [
+       1,
+       1,
+       0
+      ],
+      "period": 1.0,
+      "width": 0.3,
+      "shift": -0.8,
+      "faces": [
+       "front",
+       "back"
+      ]
+     },
+     {
+      "id": "barkside",
+      "op": "fill",
+      "faces": [
+       "sides"
+      ],
+      "ramp": "bark",
+      "tone": 3.4
+     }
+    ]
+   },
+   "sides": 8
+  },
+  {
+   "id": "log_5",
+   "shape": "prism",
+   "size": [
+    5.2,
+    5.2,
+    9.0
+   ],
+   "pivot": [
+    -15.0,
+    15.2,
+    92.6
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "layers": [
+     {
+      "id": "ends",
+      "op": "fill",
+      "faces": [
+       "front",
+       "back"
+      ],
+      "ramp": "heart",
+      "tone": 4.6
+     },
+     {
+      "id": "rings",
+      "op": "stripes",
+      "axis": [
+       1,
+       1,
+       0
+      ],
+      "period": 1.0,
+      "width": 0.3,
+      "shift": -0.8,
+      "faces": [
+       "front",
+       "back"
+      ]
+     },
+     {
+      "id": "barkside",
+      "op": "fill",
+      "faces": [
+       "sides"
+      ],
+      "ramp": "bark",
+      "tone": 3.4
+     }
+    ]
+   },
+   "sides": 8
+  },
+  {
+   "id": "log_6",
+   "shape": "prism",
+   "size": [
+    5.2,
+    5.2,
+    9.0
+   ],
+   "pivot": [
+    -9.5,
+    15.2,
+    92.0
+   ],
+   "parent": "porch",
+   "style": "wood",
+   "paint": {
+    "layers": [
+     {
+      "id": "ends",
+      "op": "fill",
+      "faces": [
+       "front",
+       "back"
+      ],
+      "ramp": "heart",
+      "tone": 4.6
+     },
+     {
+      "id": "rings",
+      "op": "stripes",
+      "axis": [
+       1,
+       1,
+       0
+      ],
+      "period": 1.0,
+      "width": 0.3,
+      "shift": -0.8,
+      "faces": [
+       "front",
+       "back"
+      ]
+     },
+     {
+      "id": "barkside",
+      "op": "fill",
+      "faces": [
+       "sides"
+      ],
+      "ramp": "bark",
+      "tone": 3.4
+     }
+    ]
+   },
+   "sides": 8
+  },
+  {
+   "id": "can",
+   "shape": "prism",
+   "size": [
+    4.6,
+    4.6,
+    5.0
+   ],
+   "pivot": [
+    8.0,
+    6.5,
+    121.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "sky",
+    "tone": 3.2,
+    "rim": {
+     "light_shift": 1.2,
+     "dark_shift": -1.0
+    }
+   },
+   "sides": 10
+  },
+  {
+   "id": "spout",
+   "shape": "prism",
+   "size": [
+    1.2,
+    1.2,
+    5.381
+   ],
+   "pivot": [
+    12.0,
+    7.8,
+    121.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -41.987,
+    90.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "sky",
+    "tone": 3.0
+   },
+   "sides": 5
+  },
+  {
+   "id": "handle",
+   "shape": "box",
+   "size": [
+    0.8,
+    0.8,
+    3.2
+   ],
+   "pivot": [
+    8.0,
+    9.4,
+    121.0
+   ],
+   "parent": "porch",
+   "rotation": [
+    -0.0,
+    90.0,
+    0.0
+   ],
+   "paint": {
+    "ramp": "sky",
+    "tone": 2.6
+   }
+  },
+  {
+   "id": "boot",
+   "shape": "box",
+   "size": [
+    2.4,
+    4.6,
+    3.0
+   ],
+   "pivot": [
+    3.4,
+    6.3,
+    104.0
+   ],
+   "parent": "porch",
+   "paint": {
+    "ramp": "red",
+    "tone": 2.4
+   }
+  },
+  {
+   "id": "toe",
+   "shape": "box",
+   "size": [
+    2.4,
+    1.8,
+    2.4
+   ],
+   "pivot": [
+    3.4,
+    4.9,
+    106.4
+   ],
+   "parent": "porch",
+   "paint": {
+    "ramp": "red",
+    "tone": 2.4
+   }
+  },
+  {
+   "id": "boot_1",
+   "shape": "box",
+   "size": [
+    2.4,
+    4.6,
+    3.0
+   ],
+   "pivot": [
+    6.2,
+    6.3,
+    104.0
+   ],
+   "parent": "porch",
+   "paint": {
+    "ramp": "red",
+    "tone": 2.4
+   }
+  },
+  {
+   "id": "toe_1",
+   "shape": "box",
+   "size": [
+    2.4,
+    1.8,
+    2.4
+   ],
+   "pivot": [
+    6.2,
+    4.9,
+    106.4
+   ],
+   "parent": "porch",
+   "paint": {
+    "ramp": "red",
+    "tone": 2.4
+   }
+  },
+  {
+   "id": "mpost",
+   "shape": "box",
+   "size": [
+    1.8,
+    15.0,
+    1.8
+   ],
+   "pivot": [
+    18.0,
+    7.5,
+    133.0
+   ],
+   "parent": "porch",
+   "style": "dark"
+  },
+  {
+   "id": "mbox",
+   "shape": "box",
+   "size": [
+    6.0,
+    4.6,
+    8.0
+   ],
+   "pivot": [
+    18.0,
+    17.3,
+    133.0
+   ],
+   "parent": "porch",
+   "paint": {
+    "ramp": "slate",
+    "tone": 3.2,
+    "rim": {
+     "light_shift": 1.0,
+     "dark_shift": -1.0
+    }
+   }
+  },
+  {
+   "id": "mtop",
+   "shape": "prism",
+   "size": [
+    6.0,
+    6.0,
+    8.0
+   ],
+   "pivot": [
+    18.0,
+    19.6,
+    133.0
+   ],
+   "parent": "porch",
+   "paint": {
+    "ramp": "slate",
+    "tone": 3.4
+   },
+   "sides": 12
+  },
+  {
+   "id": "mflag",
+   "shape": "box",
+   "size": [
+    0.6,
+    5.0,
+    1.4
+   ],
+   "pivot": [
+    21.3,
+    18.5,
+    132.0
+   ],
+   "parent": "porch",
+   "paint": {
+    "ramp": "red",
+    "tone": 3.6
+   }
+  },
+  {
+   "id": "pgrass",
+   "shape": "card",
+   "size": [
+    6.5,
+    8.0
+   ],
+   "pivot": [
+    -14.932,
+    3.7,
+    129.37
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    48.242,
+    0.0
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "fern:2",
+     "m": "fern:3",
+     "l": "fern:4"
+    }
+   },
+   "art": [
+    "......s......",
+    ".mll..s..mmd.",
+    "....llsmm....",
+    "..ml..s..md..",
+    "....llsmm....",
+    "..ml..s..md..",
+    "....llsmm....",
+    "...m..s..d...",
+    "....llsmm....",
+    "......s......",
+    "....mlsmd....",
+    "......s......",
+    "....mlsmd....",
+    "......s......",
+    ".....msd.....",
+    "......s......"
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pgrass_1",
+   "shape": "card",
+   "size": [
+    5.0,
+    6.0
+   ],
+   "pivot": [
+    -16.05,
+    2.7,
+    137.576
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    20.768,
+    0.0
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "fern:2",
+     "m": "fern:3",
+     "l": "fern:4"
+    }
+   },
+   "art": [
+    "..l.......",
+    "..l.......",
+    "..l.......",
+    "..l.......",
+    "..ml......",
+    ".lmml.l..l",
+    ".lmmll...l",
+    ".mm.mm...m",
+    ".mdmmm...m",
+    ".m.d.d..d.",
+    ".d.d.d..d.",
+    ".ddd.d..d."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pgrass_2",
+   "shape": "card",
+   "size": [
+    5.0,
+    6.0
+   ],
+   "pivot": [
+    -16.339,
+    2.7,
+    136.004
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    -31.908,
+    0.0
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "fern:2",
+     "m": "fern:3",
+     "l": "fern:4"
+    }
+   },
+   "art": [
+    "..........",
+    "....l..l..",
+    "...l.lll..",
+    "...l.lll..",
+    "...l.lll..",
+    "...ml.mm..",
+    "...mm.mm..",
+    "...mm.mm..",
+    "...mm.mm..",
+    "...dd.dd..",
+    "...dd.dd..",
+    "....d..dd."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pgrass_3",
+   "shape": "card",
+   "size": [
+    6.5,
+    8.0
+   ],
+   "pivot": [
+    -13.666,
+    3.7,
+    129.707
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    31.949,
+    0.0
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "fern:2",
+     "m": "fern:3",
+     "l": "fern:4"
+    }
+   },
+   "art": [
+    "......s......",
+    ".mll..s..mmd.",
+    "....llsmm....",
+    "..ml..s..md..",
+    "....llsmm....",
+    "..ml..s..md..",
+    "....llsmm....",
+    "...m..s..d...",
+    "....llsmm....",
+    "......s......",
+    "....mlsmd....",
+    "......s......",
+    "....mlsmd....",
+    "......s......",
+    ".....msd.....",
+    "......s......"
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pgrass_4",
+   "shape": "card",
+   "size": [
+    5.0,
+    6.0
+   ],
+   "pivot": [
+    16.821,
+    2.7,
+    130.903
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    -19.383,
+    0.0
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "fern:2",
+     "m": "fern:3",
+     "l": "fern:4"
+    }
+   },
+   "art": [
+    "..........",
+    "......l...",
+    "......l...",
+    ".......l..",
+    "...ll..l..",
+    "...ll.lm..",
+    "...llllm..",
+    "..m.mllm..",
+    "..m.mmmm..",
+    "..d..dmd..",
+    "..d..d.d..",
+    "..d..d.d.."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pgrass_5",
+   "shape": "card",
+   "size": [
+    5.0,
+    6.0
+   ],
+   "pivot": [
+    -20.775,
+    2.7,
+    134.932
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    -29.294,
+    0.0
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "fern:2",
+     "m": "fern:3",
+     "l": "fern:4"
+    }
+   },
+   "art": [
+    ".l........",
+    ".l.ll.....",
+    ".l.lll....",
+    ".l.lll.l..",
+    ".m.lll.l..",
+    ".m.mmm.l..",
+    ".m.mm.m...",
+    ".m.m.mm...",
+    ".dmm.mm...",
+    ".ddd.ddd..",
+    ".ddd.d.d..",
+    ".d.d.ddd.."
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pgrass_6",
+   "shape": "card",
+   "size": [
+    6.5,
+    8.0
+   ],
+   "pivot": [
+    -20.826,
+    3.7,
+    135.668
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    -39.337,
+    0.0
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "fern:2",
+     "m": "fern:3",
+     "l": "fern:4"
+    }
+   },
+   "art": [
+    "......s......",
+    ".mll..s..mmd.",
+    "....llsmm....",
+    "..ml..s..md..",
+    "....llsmm....",
+    "..ml..s..md..",
+    "....llsmm....",
+    "...m..s..d...",
+    "....llsmm....",
+    "......s......",
+    "....mlsmd....",
+    "......s......",
+    "....mlsmd....",
+    "......s......",
+    ".....msd.....",
+    "......s......"
+   ],
+   "plane": "xy"
+  },
+  {
+   "id": "pgrass_7",
+   "shape": "card",
+   "size": [
+    5.0,
+    6.0
+   ],
+   "pivot": [
+    17.222,
+    2.7,
+    127.646
+   ],
+   "parent": "porch",
+   "rotation": [
+    0.0,
+    43.714,
+    0.0
+   ],
+   "paint": {
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "fern:2",
+     "m": "fern:3",
+     "l": "fern:4"
+    }
+   },
+   "art": [
+    "....l.....",
+    ".....l....",
+    "..l..l....",
+    "..ll.l....",
+    "..ll.m...l",
+    "..ml..m..l",
+    "...mm.m.lm",
+    "...mm.m.mm",
+    "...mm.d.mm",
+    "...dd..ddd",
+    "....d..dd.",
+    "....d..dd."
+   ],
+   "plane": "xy"
+  }
+ ],
+ "brush": {
+  "length": 3,
+  "width": 0.9,
+  "rough": 0.35,
+  "overshoot": 0.2,
+  "flow": "horizontal",
+  "flows": {
+   "moss": "vertical",
+   "bark": "vertical"
+  },
+  "textures": {
+   "stone": "stone",
+   "wood": "wood",
+   "plank": "wood",
+   "dark": "wood",
+   "heart": "wood",
+   "moss": "moss",
+   "leaf": "organic",
+   "bark": "wood",
+   "cloth": "cloth",
+   "iron": "metal",
+   "brass": "metal"
+  }
+ }
+}

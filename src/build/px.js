@@ -1,9 +1,23 @@
 // Pixel icons for build mode's blueprint drawer, drawn with the BME sprite kit (20x20 grids keyed to
 // hue-shifted material ramps; the kit shades and outlines them). Names start with bp_.
-import { Grid, icon } from '../ui/px/sprites.js';
+import { Grid, icon, RAMPS } from '../ui/px/sprites.js';
+
+// calm "Moss & Moonlight" ramps (src/gfx/palette.ts) for the build icons, dark to light
+Object.assign(RAMPS, {
+  hhhoney: ['#5e4428', '#8e6a3c', '#b88c52', '#dcb072', '#ecd09a', '#f8ecc8'],
+  hhrose: ['#5a3438', '#80505a', '#a87478', '#d9aca4', '#e8c8c0', '#f6e6e0'],
+  hhplum: ['#2e2430', '#4a3a4a', '#6e5266', '#8e7488', '#b4a0b0', '#dcd0d8'],
+  hhmist: ['#34464e', '#4e6670', '#6e8a92', '#aec8cc', '#d3e0dc', '#eef4f0'],
+  hhdusk: ['#1f2a34', '#2e3e4c', '#46596a', '#617f8c', '#86a9b0', '#bcd0d0'],
+  hhterra: ['#4a2a20', '#704030', '#9a5c46', '#c0866a', '#dcaa8e', '#f0d4bc'],
+  hhberry: ['#3a2028', '#5a3038', '#7e4650', '#9e5f66', '#c08088', '#e0b0b4'],
+  hhleaf: ['#1e2c20', '#2c4030', '#3f5a3b', '#557343', '#86a06a', '#c4cfa3'],
+  hhslate: ['#151b22', '#1f2830', '#2e3a46', '#46596a', '#617f8c', '#8ea6b0'],
+  hhlake: ['#24343c', '#365058', '#4e7078', '#86a9b0', '#aec8cc', '#dfe9ea'],
+});
 
 // a nest bed with a patchwork quilt and pillow
-icon('bp_bed', { T: 'wood.R@nest', t: 'wood:1', Q: 'pink.R@quilt', q: 'cream:4', B: 'sky.r@q2', P: 'white.R@pil' }, () => {
+icon('bp_bed', { T: 'wood.R@nest', t: 'wood:1', Q: 'hhrose.R@quilt', q: 'cream:4', B: 'hhmist.r@q2', P: 'bone.R@pil' }, () => {
   const g = new Grid(20, 20);
   g.ellipse(10, 13, 9, 4.6, 'T');
   g.rect(3, 9, 14, 4, 'Q');
@@ -13,7 +27,7 @@ icon('bp_bed', { T: 'wood.R@nest', t: 'wood:1', Q: 'pink.R@quilt', q: 'cream:4',
   return g.rows();
 });
 // a squashy armchair
-icon('bp_chair', { V: 'purple.R@seat', v: 'purple:1', Y: 'yellow.r@cush', L: 'dwood.x@leg' }, () => {
+icon('bp_chair', { V: 'hhplum.R@seat', v: 'hhplum:1', Y: 'hhhoney.r@cush', L: 'dwood.x@leg' }, () => {
   const g = new Grid(20, 20);
   g.rect(4, 3, 12, 9, 'V');
   g.rect(2, 8, 4, 8, 'V').rect(14, 8, 4, 8, 'V');
@@ -24,7 +38,7 @@ icon('bp_chair', { V: 'purple.R@seat', v: 'purple:1', Y: 'yellow.r@cush', L: 'dw
   return g.rows();
 });
 // a round side table with a cup
-icon('bp_table', { W: 'lwood.y@top', w: 'lwood:2', L: 'wood.x@leg', C: 'white.r@cup', T: 'red:3' }, () => {
+icon('bp_table', { W: 'lwood.y@top', w: 'lwood:2', L: 'wood.x@leg', C: 'bone.r@cup', T: 'hhberry:3' }, () => {
   const g = new Grid(20, 20);
   g.ellipse(10, 9, 8.4, 2.8, 'W');
   g.line(3, 10, 17, 10, 'w');
@@ -34,7 +48,7 @@ icon('bp_table', { W: 'lwood.y@top', w: 'lwood:2', L: 'wood.x@leg', C: 'white.r@
   return g.rows();
 });
 // a little chest of drawers
-icon('bp_shelf', { W: 'wood.R@body', w: 'wood:1', D: 'lwood.f@dr', G: 'gold:4' }, () => {
+icon('bp_shelf', { W: 'wood.R@body', w: 'wood:1', D: 'lwood.f@dr', G: 'brass:4' }, () => {
   const g = new Grid(20, 20);
   g.rect(3, 3, 14, 15, 'W');
   for (const y of [5, 9, 13]) { g.rect(5, y, 10, 3, 'D'); g.set(9, y + 1, 'G').set(10, y + 1, 'G'); }
@@ -42,7 +56,7 @@ icon('bp_shelf', { W: 'wood.R@body', w: 'wood:1', D: 'lwood.f@dr', G: 'gold:4' }
   return g.rows();
 });
 // a lamp with a warm shade and glow
-icon('bp_lamp', { S: 'yellow.R@shade', s: 'yellow:5', B: 'brass.x@base', L: 'fire:5!' }, () => {
+icon('bp_lamp', { S: 'hhhoney.R@shade', s: 'hhhoney:5', B: 'brass.x@base', L: 'fire:5!' }, () => {
   const g = new Grid(20, 20);
   g.poly([[6, 3], [14, 3], [17, 10], [3, 10]], 'S');
   g.line(5, 9, 15, 9, 's');
@@ -52,7 +66,7 @@ icon('bp_lamp', { S: 'yellow.R@shade', s: 'yellow:5', B: 'brass.x@base', L: 'fir
   return g.rows();
 });
 // a vase of flowers
-icon('bp_decor', { V: 'sky.R@vase', v: 'sky:1', F: 'pink.r@f1', f: 'yellow.r@f2', S: 'leaf.x@st' }, () => {
+icon('bp_decor', { V: 'hhmist.R@vase', v: 'hhmist:1', F: 'hhrose.r@f1', f: 'hhhoney.r@f2', S: 'hhleaf.x@st' }, () => {
   const g = new Grid(20, 20);
   g.line(10, 6, 10, 11, 'S').line(7, 7, 9, 11, 'S').line(13, 7, 11, 11, 'S');
   g.ellipse(7, 5.5, 2.2, 2, 'F'); g.ellipse(13, 5.5, 2.2, 2, 'f'); g.ellipse(10, 3.4, 2.2, 2, 'F');
@@ -61,7 +75,7 @@ icon('bp_decor', { V: 'sky.R@vase', v: 'sky:1', F: 'pink.r@f1', f: 'yellow.r@f2'
   return g.rows();
 });
 // a fern in a terracotta pot
-icon('bp_plant', { L: 'leaf.R@lf', l: 'leaf:5', P: 'orange.R@pot', p: 'orange:1' }, () => {
+icon('bp_plant', { L: 'hhleaf.R@lf', l: 'hhleaf:5', P: 'hhterra.R@pot', p: 'hhterra:1' }, () => {
   const g = new Grid(20, 20);
   g.ellipse(10, 7, 7, 5, 'L');
   g.ellipse(5, 9, 3.4, 2.2, 'L'); g.ellipse(15, 9, 3.4, 2.2, 'L');
@@ -71,7 +85,7 @@ icon('bp_plant', { L: 'leaf.R@lf', l: 'leaf:5', P: 'orange.R@pot', p: 'orange:1'
   return g.rows();
 });
 // a round woven rug, seen at an angle
-icon('bp_rug', { B: 'blue.R@rug', Y: 'yellow:4', C: 'cream:4', b: 'blue:1' }, () => {
+icon('bp_rug', { B: 'hhdusk.R@rug', Y: 'hhhoney:4', C: 'cream:4', b: 'hhdusk:1' }, () => {
   const g = new Grid(20, 20);
   g.ellipse(10, 11, 9.4, 6, 'B');
   g.ellipse(10, 11, 7, 4.4, 'C');
@@ -81,7 +95,7 @@ icon('bp_rug', { B: 'blue.R@rug', Y: 'yellow:4', C: 'cream:4', b: 'blue:1' }, ()
   return g.rows();
 });
 // a framed picture on a nail
-icon('bp_wall', { F: 'gold.R@fr', S: 'sky.f@sky', H: 'leaf:3', M: 'yellow:5', N: 'iron:3' }, () => {
+icon('bp_wall', { F: 'brass.R@fr', S: 'hhmist.f@sky', H: 'hhleaf:3', M: 'hhhoney:5', N: 'iron:3' }, () => {
   const g = new Grid(20, 20);
   g.line(10, 2, 4, 6, 'N').line(10, 2, 16, 6, 'N');
   g.rect(2, 6, 16, 12, 'F');
@@ -91,7 +105,7 @@ icon('bp_wall', { F: 'gold.R@fr', S: 'sky.f@sky', H: 'leaf:3', M: 'yellow:5', N:
   return g.rows();
 });
 // a goldfish bowl
-icon('bp_fun', { G: 'glass.r@bowl', W: 'water.r@w', O: 'orange.R@fish', o: 'orange:5', w: 'white:5', S: 'sand:3' }, () => {
+icon('bp_fun', { G: 'glass.r@bowl', W: 'hhlake.r@w', O: 'hhterra.R@fish', o: 'hhterra:5', w: 'bone:5', S: 'sand:3' }, () => {
   const g = new Grid(20, 20);
   g.ellipse(10, 11, 8, 7.4, 'G');
   g.ellipse(10, 12.6, 7, 5.2, 'W');
@@ -103,7 +117,7 @@ icon('bp_fun', { G: 'glass.r@bowl', W: 'water.r@w', O: 'orange.R@fish', o: 'oran
   return g.rows();
 });
 // a roll of wallpaper unrolling
-icon('bp_wallpaper', { P: 'pink.f@paper', p: 'pink:2', R: 'cream.x@roll', r: 'cream:2' }, () => {
+icon('bp_wallpaper', { P: 'hhrose.f@paper', p: 'hhrose:2', R: 'cream.x@roll', r: 'cream:2' }, () => {
   const g = new Grid(20, 20);
   g.rect(3, 6, 10, 12, 'P');
   for (let y = 7; y < 18; y += 3) for (let x = 4; x < 13; x += 3) g.set(x + (y % 2), y, 'p');
@@ -120,7 +134,7 @@ icon('bp_floor', { W: 'lwood.f@pl', w: 'wood:1', D: 'wood.f@pl2' }, () => {
   return g.rows();
 });
 // a gift with a ribbon (seasonal)
-icon('bp_season', { B: 'red.R@box', b: 'red:1', R: 'gold.x@rib', S: 'white:5' }, () => {
+icon('bp_season', { B: 'hhberry.R@box', b: 'hhberry:1', R: 'brass.x@rib', S: 'bone:5' }, () => {
   const g = new Grid(20, 20);
   g.rect(3, 8, 14, 10, 'B');
   g.rect(2, 6, 16, 3, 'B');
@@ -140,7 +154,7 @@ icon('bp_box', { C: 'tan.R@box', c: 'tan:1', T: 'straw:4', L: 'cream:5' }, () =>
   return g.rows();
 });
 // four-way move arrows
-icon('bp_move', { A: 'sky.R@ar', a: 'sky:5' }, () => {
+icon('bp_move', { A: 'hhmist.R@ar', a: 'hhmist:5' }, () => {
   const g = new Grid(20, 20);
   g.rect(9, 4, 2, 12, 'A'); g.rect(4, 9, 12, 2, 'A');
   g.poly([[10, 0.5], [14, 5], [6, 5]], 'A'); g.poly([[10, 19.5], [14, 15], [6, 15]], 'A');
@@ -149,7 +163,7 @@ icon('bp_move', { A: 'sky.R@ar', a: 'sky:5' }, () => {
   return g.rows();
 });
 // a price tag with a plus (buy another)
-icon('bp_buy', { T: 'yellow.R@tag', t: 'yellow:1', P: 'leaf.f@plus', S: 'straw:3' }, () => {
+icon('bp_buy', { T: 'hhhoney.R@tag', t: 'hhhoney:1', P: 'hhleaf.f@plus', S: 'straw:3' }, () => {
   const g = new Grid(20, 20);
   g.poly([[2, 10], [7, 4], [18, 4], [18, 16], [7, 16]], 'T');
   g.ellipse(6, 10, 1.2, 1.2, 'K');
@@ -158,7 +172,7 @@ icon('bp_buy', { T: 'yellow.R@tag', t: 'yellow:1', P: 'leaf.f@plus', S: 'straw:3
   return g.rows();
 });
 // tilt: a grid seen from above vs at an angle
-icon('bp_tilt', { B: 'sky.f@bp', b: 'white:5', A: 'yellow.R@ar' }, () => {
+icon('bp_tilt', { B: 'hhmist.f@bp', b: 'bone:5', A: 'hhhoney.R@ar' }, () => {
   const g = new Grid(20, 20);
   g.poly([[1, 17], [19, 17], [15, 8], [5, 8]], 'B');
   g.line(10, 8, 10, 17, 'b').line(3, 12.5, 17, 12.5, 'b').line(7.5, 8, 5.5, 17, 'b').line(12.5, 8, 14.5, 17, 'b');
@@ -167,7 +181,7 @@ icon('bp_tilt', { B: 'sky.f@bp', b: 'white:5', A: 'yellow.R@ar' }, () => {
   return g.rows();
 });
 // an eye on a pinned blueprint (top-down view)
-icon('bp_top', { B: 'sky.f@bp', b: 'white:5', E: 'white.r@eye', P: 'navy:2' }, () => {
+icon('bp_top', { B: 'hhmist.f@bp', b: 'bone:5', E: 'bone.r@eye', P: 'hhslate:2' }, () => {
   const g = new Grid(20, 20);
   g.rect(2, 2, 16, 16, 'B');
   for (let i = 5; i < 18; i += 4) { g.line(i, 2, i, 17, 'b'); g.line(2, i, 17, i, 'b'); }

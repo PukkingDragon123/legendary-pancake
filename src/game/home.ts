@@ -53,14 +53,30 @@ export function boundsOf(boxes: BoxSpec[]) {
 }
 
 const kinds = new Map<string, ItemKind>();
+export type Bounds = ReturnType<typeof boundsOf>;
+/** bounds of the hand-made GLB models (px, model space), registered by the renderer as they load */
+const modelBounds = new Map<string, Bounds>();
+/**
+ * The renderer measured an item's GLB model (px, model space): from now on its build-grid metrics (centring on
+ * the footprint, wall heights, the height things stack at) follow the model. Returns true if anything changed.
+ */
+export function setModelBounds(id: string, b: Bounds): boolean {
+  const old = modelBounds.get(id);
+  if (old && (['minX', 'maxX', 'minY', 'maxY', 'minZ', 'maxZ'] as const).every((k) => Math.abs(old[k] - b[k]) < 0.05)) return false;
+  modelBounds.set(id, b);
+  kinds.delete(id);
+  return true;
+}
 const FUN_CATS = new Set(['lights', 'plants', 'decor', 'fun', 'play', 'seasonal', 'tables', 'storage']);
 /** Build-grid metrics for an item, from its ItemDef fields or, where missing, its model bounds. */
 export function kindOf(id: string): ItemKind {
   let k = kinds.get(id);
   if (k) return k;
   const def: ItemDef | undefined = ITEMS[id];
-  const b = def ? boundsOf(def.build()) : boundsOf([]);
-  const pw = b.maxX - b.minX, pd = b.maxZ - b.minZ, h = b.maxY;
+  const fb = def ? boundsOf(def.build()) : boundsOf([]);
+  const b = modelBounds.get(id) ?? fb;
+  // the footprint always comes from the box model (or `size`), so saves stay valid when a GLB arrives
+  const pw = fb.maxX - fb.minX, pd = fb.maxZ - fb.minZ, h = b.maxY;
   const wall = def ? def.wall ?? def.cat === 'wall' : false;
   const cells = (px: number) => Math.max(1, Math.round((px - 0.5) / CELL));
   // `size` is in blocks (16 px) like the content packs use; the build grid is CELL px
