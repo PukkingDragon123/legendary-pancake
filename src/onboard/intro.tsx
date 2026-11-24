@@ -74,9 +74,9 @@ export function Intro() {
     sc.post.enabled = false; // the office draws its own HD-2D picture (look.ts)
     sc.setStage(office);
     const speech = new Speech();
-    speech.px = Math.max(2, office.look.px);
-    office.look.overlay.add(speech.group);
-    office.tickers.add((dt) => { speech.px = Math.max(2, office.look.px); speech.update(dt, office.camera); });
+    speech.px = Math.max(2, office.pic.px);
+    office.pic.overlay.add(speech.group);
+    office.tickers.add((dt) => { speech.px = Math.max(2, office.pic.px); speech.update(dt, office.camera); });
     speech.onTalk = () => office.talk();
     const reactTo = dioramas(office);
     office.pip.pose = 'stand';
@@ -328,7 +328,7 @@ export function Intro() {
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (phase === 'ask') void file(); else onTap(); }
     };
     addEventListener('keydown', onKey);
-    const onResize = () => { speech.px = Math.max(2, office.look.px); U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); bump(); window.setTimeout(frameAsk, 50); };
+    const onResize = () => { speech.px = Math.max(2, office.pic.px); U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); bump(); window.setTimeout(frameAsk, 50); };
     addEventListener('resize', onResize);
     (window as unknown as { hhIntro: unknown }).hhIntro = { office, speech, overlay: ov, a: () => U.a, file: () => void file(), act: () => actions.current, phase: () => phase, step: () => U.si, skip: () => void finishAll(true) };
 

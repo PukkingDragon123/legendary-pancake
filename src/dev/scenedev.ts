@@ -18,5 +18,5 @@ sc.start();
 // [look4] preview a stage through the world's post chain: ?stage=shop|office|globe
 const stage = q.get('stage');
 if (stage === 'shop') void import('../world/stages/lodge.ts').then(({ Lodge }) => { const b = new Lodge([]); b.attach(sc.renderer, sc as never); sc.setStage(b); (window as any).stage = b; }); // [shop4] the lodge store
-if (stage === 'office') void import('../onboard/room.ts').then(({ InterviewRoom }) => { const r = new InterviewRoom({ palette: 'tawny', outfit: {} } as never, 'high', sc); sc.setStage(r); (window as any).stage = r; });
+if (stage === 'office') void import('../onboard/office.ts').then(({ Office }) => { const r = new Office({ palette: 'tawny', outfit: {} } as never, sc.renderer, 'high', null); sc.setStage(r); (window as any).stage = r; }); // [intro4] the Hollow & Co. office
 if (stage === 'globe') void import('../world/globe/stage.ts').then(({ GlobeStage }) => { const g = new GlobeStage(sc.renderer); g.setPlaces([]); sc.setStage(g); (window as any).stage = g; });

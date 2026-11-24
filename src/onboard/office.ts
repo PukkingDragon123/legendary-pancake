@@ -68,7 +68,7 @@ export class Office implements Stage {
   readonly scene: THREE.Scene;
   readonly room = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(40, 1, 0.03, 40);
-  readonly look: Look;
+  readonly pic: Look;
   readonly fx = new Fx(900);
   readonly sky = new SkyView();
   readonly mats: OfficeMats;
@@ -132,8 +132,8 @@ export class Office implements Stage {
   constructor(look: OwlLook, private renderer: THREE.WebGLRenderer, quality: 'low' | 'high' = 'high', world: WorldView | null = null) {
     this.quality = quality;
     this.world = world;
-    this.look = new Look(renderer, quality);
-    this.scene = this.look.present;
+    this.pic = new Look(renderer, quality);
+    this.scene = this.pic.present;
     const s = this.room;
     s.background = new THREE.Color(0x120c08);
     this.fx.setLight(new THREE.Color(1, 0.95, 0.88));
@@ -585,7 +585,7 @@ export class Office implements Stage {
     this.vfov = w < h ? 58 : 38;
     this.camera.fov = this.vfov;
     this.camera.updateProjectionMatrix();
-    this.look.resize(w, h);
+    this.pic.resize(w, h);
     if (this.shot) this.shot = this.shots(this.shotName);
   }
 
@@ -599,7 +599,7 @@ export class Office implements Stage {
       if (Math.abs(cam.fov - this.vfov) > 0.01) cam.fov = this.vfov;
       this.offAxis(r.ax ?? 0, r.ay ?? 0);
       const fd = cam.position.distanceTo(r.look);
-      this.look.grade.focus = fd; this.look.grade.range = Math.max(0.5, fd * 0.6);
+      this.pic.grade.focus = fd; this.pic.grade.range = Math.max(0.5, fd * 0.6);
       return;
     }
     if (Math.abs(cam.fov - this.vfov) > 0.01) { cam.fov += (this.vfov - cam.fov) * Math.min(1, dt * 4); cam.updateProjectionMatrix(); }
@@ -622,9 +622,9 @@ export class Office implements Stage {
     void ox; void oz;
     // depth of field: focus on the subject, the far wall goes soft
     const fd = cam.position.distanceTo(tg);
-    this.look.grade.focus = fd;
-    this.look.grade.range = Math.max(0.9, fd * 0.75);
-    this.look.grade.dof = fd < 1.2 ? 0.6 : 1;
+    this.pic.grade.focus = fd;
+    this.pic.grade.range = Math.max(0.9, fd * 0.75);
+    this.pic.grade.dof = fd < 1.2 ? 0.6 : 1;
     if (this.shake > 0.001) {
       cam.position.y -= Math.sin(t * 60) * this.shake * 0.004;
       this.shake *= Math.exp(-dt * 9);
@@ -677,8 +677,8 @@ export class Office implements Stage {
     for (const l of this.sconceLights) l.intensity = 0.35 + night * 0.6 + flick * 0.5;
     const u = this.shaftMat.uniforms;
     u.uCol.value.copy(s.col); u.uAmt.value = (0.05 + (1 - night) * 0.09) * (this.quality === 'high' ? 1 : 0.8); u.uTime.value = this.time;
-    this.look.grade.exposure = 1.0 + night * 0.2;
-    this.look.grade.warm = 0.35 + (1 - night) * 0.1;
+    this.pic.grade.exposure = 1.0 + night * 0.2;
+    this.pic.grade.warm = 0.35 + (1 - night) * 0.1;
   }
   private stepWindow(dt: number) {
     if (!this.world || !this.winRT) return;
@@ -691,7 +691,7 @@ export class Office implements Stage {
 
   update(dt: number, t: number) {
     this.step(dt, t);
-    this.look.render(this.room, this.camera, this.time);
+    this.pic.render(this.room, this.camera, this.time);
   }
   /** advance everything one tick without drawing (dev pages fast-forward with it) */
   step(dt: number, t: number) {
@@ -735,7 +735,7 @@ export class Office implements Stage {
     for (const d of this.disposers) d?.();
     for (const a of this.actors.values()) a.dispose();
     this.sky.dispose();
-    this.look.dispose();
+    this.pic.dispose();
     this.pmrem?.dispose();
     this.room.traverse((o) => {
       const m = o as THREE.Mesh;
