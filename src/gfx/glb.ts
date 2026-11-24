@@ -10,6 +10,9 @@ import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js
 const loader = new GLTFLoader();
 loader.setMeshoptDecoder(MeshoptDecoder);
 const cache = new Map<string, Promise<GLTF>>();
+// The artifact host doesn't serve .glb, so that build ships each model as <name>.glb.json
+// (scripts/glb2json.mjs: the same glTF with its binary embedded).
+const GLB_SUFFIX = import.meta.env.MODE === 'artifact' ? '.json' : '';
 
 /** URL of a model under public/models (works with the relative base of the artifact build). */
 export const modelUrl = (path: string) => `${import.meta.env.BASE_URL}models/${path.replace(/^\//, '')}`;
@@ -40,7 +43,7 @@ function tune(root: THREE.Object3D, o: { shadows: boolean }) {
 export function loadGLB(path: string): Promise<GLTF> {
   let p = cache.get(path);
   if (!p) {
-    p = loader.loadAsync(modelUrl(path)).then((g) => { tune(g.scene, { shadows: true }); return g; });
+    p = loader.loadAsync(modelUrl(path) + GLB_SUFFIX).then((g) => { tune(g.scene, { shadows: true }); return g; });
     cache.set(path, p);
   }
   return p;

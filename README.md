@@ -1,6 +1,6 @@
 # Hoot Hollow
 
-A cozy, gamified sleep tracker. **Pip the owl** lives in a hollow oak at the edge of a voxel forest.
+A cozy, gamified sleep tracker. **Pip the owl** lives in a hollow oak at the edge of a hand-painted pixel-art forest.
 While you sleep, Pip flies off on adventures and comes home in the morning with treasures,
 furniture and outfits. The better you sleep, the fuller the satchel.
 
@@ -26,27 +26,30 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Optional premium**: moonstones and a Hoot Hollow Plus subscription. The bundled store is a
   clearly labelled demo (`src/ui/market.tsx`, `PurchaseProvider`): nothing is charged.
 
-## What's new in the big hollow update
+## What's new in the hand-made update
 
-- **Loading screen and interview**: Pip sleeps on a moonlit branch while the app loads; tap to wake him,
-  then answer his questions in a little office in the oak. His lines float as 3D pixel text and each answer
-  is acted out live (a cozy bed for "sleep better", sheep for "fall asleep faster"...). Answers are pencilled
-  onto a clipboard and stamped into your sleep plan. Settings > Replay the interview shows it again.
-- **Realistic species owls**: ten real owls in detailed voxels (Tawny, Barn, Snowy, Burrowing, Saw-whet,
-  Little, Great Horned, Long-eared, Great Grey, Eurasian Eagle-Owl), plus Gingerbread, Snowman, Celestial and
-  Meowl skins, in a pixel dressing room.
-- **A grand hollow oak**: three floors (Living Room open, Bedroom at Lv 3, Attic Observatory at Lv 6, boarded
-  up until repaired), moving boxes to unpack for free furniture, and a top-down blueprint build mode with
-  free camera, move/turn/store, stacking, wall items, wallpaper and flooring.
-- **Sleep, Clock, Book**: a bedtime ritual on the nightstand (personalised wind-down, breathing, hold to sleep,
-  can't-sleep help and a phone lock), a cuckoo clock with a routine clipboard and sticker calendar, and a big
-  flippable book of stats, nights, collection, achievements and adventures.
-- **Queen Neve's boutique**: daily deals on stands, a free gift, acorn piles, and weekly series wish banners
-  (Frostlight Festival, Starfall Dreams) with pity and a shooting-star reveal.
-- **The world**: real sunrise/sunset, moon phase and season; weather (rain, storms, snow that settles, fog);
-  a bushier forest of pixel-art leaves; Pip packs up and flies off across the night sky, and comes home at
-  dawn with presents (furniture and outfits).
-- **Hanging wooden signs** with a magic level bar, animated main buttons, pixel UI particles and transitions.
+- **A new art style**: calm "Moss & Moonlight" colours, hand-painted low-poly models with pixel-art
+  textures, and a soft low-res pixel finish on every scene (grade, dither, grain). Nothing is voxel or blocky
+  any more. Art direction: [`docs/ART-STYLE.md`](docs/ART-STYLE.md).
+- **Owls**: eight real species (Tawny, Barn, Snowy, Burrowing, Saw-whet, Great Horned, Great Grey,
+  Eurasian Eagle-Owl) plus the Gingerbread, Snowman, Celestial and Meowl skins. They are faceted,
+  hand-painted toy figures with tiny dot eyes, and 39 outfits fit every one of them.
+- **The hollow oak**: a big three-floor tree with a painted bark trunk, porch, roots and leaf canopy. The
+  windows show the real forest outside, and the wall art is real public-domain paintings. There are 130+
+  furniture models, and moving boxes to unpack.
+- **Forest**: trees and bushes built from 2D pixel-art leaf cards; ground, rocks and stumps.
+- **Loading clock**: a pixel-art clock that just ticks while the game loads, then strikes midnight. Its
+  door swings open and the camera dives through the dial.
+- **Transitions**: 15 of them.
+- **Interview**: in Pip's office, with a desk, a real view out of the window, office props and hands-on
+  widgets.
+- **The boutique**: Queen Neve's cosy shop, with a counter and till, stands, real paintings and a street
+  view.
+- **Book**: a simpler diary of your stats.
+- **Explore the world**: a hand-painted globe with 20 real places, each with a real photo, a souvenir
+  model to collect and a passport stamp.
+- **Sound**: 166 sounds (UI, owl, home, nature, weather, magic, sleep beds and music), all from the web and
+  credited in Settings > Credits.
 
 ## Run it
 
@@ -71,7 +74,8 @@ Other scripts: `npm test` (44 sleep-engine tests), `npm run typecheck`. Dev-only
 ### As a claude.ai Artifact
 
 `npm run build:artifact` builds a relative-path bundle into `dist-artifact/` for publishing as a
-claude.ai Artifact. In that mode the service worker is skipped, nights are tracked by time (the
+claude.ai Artifact. The host doesn't serve `.glb`, so that build turns every model into a self-contained
+glTF `.glb.json` (`scripts/glb2json.mjs`). In that mode the service worker is skipped, nights are tracked by time (the
 artifact frame has no microphone), the adventure story can be read aloud through the host's `tts`
 capability, and the journal export goes through the host's `downloads` capability. Linking to
 `#breathe` opens the breathing exercise.
@@ -84,11 +88,12 @@ Load `extension/` as an unpacked extension (Chrome/Edge/Brave: `chrome://extensi
 
 ## How it's built
 
-TypeScript, Preact + signals, three.js, Vite. No art files: every model, texture and icon is drawn in code.
+TypeScript, Preact + signals, three.js, Vite. Models are GLBs in `public/models/` (owls from Blender scripts in
+`art/blender`, furniture, house and props from lowpix sources in `art/lowpix`, plus credited CC0/CC BY assets),
+loaded by `src/gfx/glb.ts`.
 
 ```
-src/owl/      Pip: rounded voxel model, hand-painted feather painters, live pixel eyes, spring-driven
-              animation and moods, outfits, coats (owl and Meowl skins)
+src/owl/      Pip: hand-painted species models, spring-driven animation and moods, outfits, skins
 src/world/    the diorama: sky and day/night, terrain, flora, Moleforge pixel grass, the cut-away tree
               house with unlockable rooms and furniture slots, fireflies, particles, critters
 src/sleep/    microphone analyzer, sleep staging and score, smart alarm, reminders, IndexedDB clips,
@@ -109,11 +114,13 @@ extension/    MV3 browser extension (declarativeNetRequest blocking, bedtime pag
   frames (`src/ui/px/frames.js`) and the TBME Goofy / Galmuri pixel fonts. Hoot Hollow's own icons are
   drawn with the same kit (`src/ui/px/hollow.js`).
 
-### Sounds
+### Sounds and art credits
 
-All sounds are real recordings or music from the web, CC0 or public domain (OpenGameArt.org
-contributors and the U.S. National Park Service). Every file, its source, author and licence evidence
-is listed in [`docs/AUDIO-CREDITS.md`](docs/AUDIO-CREDITS.md) and `public/sfx/credits.json`.
+All sounds are real recordings or music from the web, CC0 or public domain (BigSoundBank,
+OpenGameArt.org contributors, the U.S. National Park Service and the Internet Archive). Every file, its source, author and licence evidence
+is listed in [`docs/AUDIO-CREDITS.md`](docs/AUDIO-CREDITS.md) and `public/sfx/credits.json`. Borrowed models,
+textures, paintings and place photos (CC0, CC BY and public domain) are credited in [`docs/credits/`](docs/credits);
+all credits are gathered into `CREDITS.txt` at build time and shown in Settings > Credits.
 
 ## Honest limitations
 
