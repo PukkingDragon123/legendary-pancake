@@ -26,7 +26,26 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Optional premium**: moonstones and a Hoot Hollow Plus subscription. The bundled store is a
   clearly labelled demo (`src/ui/market.tsx`, `PurchaseProvider`): nothing is charged.
 
-## What's new in the hand-made update
+## What's new in the golden diorama update (v4)
+
+- **Light and colour**: realistic lighting (filmic tone mapping, sun and sky fill, reflections) with bloom,
+  tilt-shift depth of field and a warm grade; blue days, golden evenings, deep blue nights. Bushy forests of
+  hand-painted leaves that turn with the real season, a sunny glade, and woods and mountains to the horizon.
+  Quality adapts to the device.
+- **The hollow oak**: a gnarled living oak with bark, moss, ivy, carved windows, a porch and balcony; locked
+  floors are shuttered with brass plaques; warm rooms with real lamp light. Every clock shows the real time.
+- **Fluffy owls**: eight realistic, hand-painted species and four skins with soft downy plumage; 39 remodelled
+  cosmetics.
+- **Intro and interview**: a hand-painted loading clock showing the real time, then the Hollow & Co. office,
+  where Pip interviews you with a 2D paper form, live 3D answer cards, a fountain pen and a rubber stamp.
+- **Barnaby's Lodge Store**: a beaver shopkeeper in a log-cabin general store; price tags, packs, banners and
+  the Lucky Barrel wishes are all physical objects.
+- **The Earth**: NASA imagery with city lights, clouds, relief and a real-time terminator; fly down to 20 real
+  places with photos, facts and their souvenirs.
+- **UI as objects**: a walnut, brass and leather HUD, a moon lamp, alarm clock and journal as the main buttons,
+  a carved cuckoo clock, about 80 new organic pixel-art icons.
+
+## Earlier: the hand-made update
 
 - **A new art style**: calm "Moss & Moonlight" colours, hand-painted low-poly models with pixel-art
   textures, and a soft low-res pixel finish on every scene (grade, dither, grain). Nothing is voxel or blocky
@@ -71,11 +90,16 @@ Other scripts: `npm test` (44 sleep-engine tests), `npm run typecheck`. Dev-only
 `/dev-owl.html` (owl coats/outfits/expressions sheet), `/dev-scene.html?hour=22&view=home`
 (scene views and times of day), `/dev-px.html` (every pixel icon and UI frame).
 
+### On itch.io
+
+`npm run build:itch` makes `hoot-hollow-itch.zip` (relative paths, no service worker, `index.html` at the
+zip's root). Upload it on itch.io as an HTML5 game ("This file will be played in the browser").
+
 ### As a claude.ai Artifact
 
 `npm run build:artifact` builds a relative-path bundle into `dist-artifact/` for publishing as a
-claude.ai Artifact. The host doesn't serve `.glb`, so that build turns every model into a self-contained
-glTF `.glb.json` (`scripts/glb2json.mjs`). In that mode the service worker is skipped, nights are tracked by time (the
+claude.ai Artifact. The host doesn't serve `.glb` and its frame may block wasm and data:/blob: fetches, so that build wraps
+every model as `<name>.glb.json` (`scripts/glb2json.mjs`), which `src/gfx/glb.ts` decodes itself. In that mode the service worker is skipped, nights are tracked by time (the
 artifact frame has no microphone), the adventure story can be read aloud through the host's `tts`
 capability, and the journal export goes through the host's `downloads` capability. Linking to
 `#breathe` opens the breathing exercise.
