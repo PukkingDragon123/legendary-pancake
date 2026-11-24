@@ -1,6 +1,6 @@
 # Credits: the globe (The Wide World), postcards and souvenirs
 
-Everything not listed here (stamps, pins, the souvenirs modelled in lowpix) was made for Hoot Hollow. Twelve souvenirs
+Everything not listed here (stamps, pins, the souvenirs modelled in lowpix) was made for Hoot Hollow. Thirteen souvenirs
 were replaced in round 4 by detailed borrowed models (see `docs/credits/globe4.md`).
 
 ## Earlier globe pieces

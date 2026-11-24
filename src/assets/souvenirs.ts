@@ -1,7 +1,7 @@
 // Souvenirs: one or two keepsakes from each of the twenty real places on the globe. Pip finds them on
 // night trips to that place (never in the store). Each is a model in public/models/souvenirs/<id>.glb: some are
 // modelled in art/lowpix/souvenirs, some borrowed from Gacha Garage (art/lowpix/souvenirs/_kit/borrow.py), and
-// eleven are detailed CC BY / CC0 models from Sketchfab and Poly Haven brought in by
+// thirteen are detailed CC BY / CC0 models from Sketchfab and Poly Haven brought in by
 // src/world/globe/tools/souvenir_import.py (credits in docs/credits/globe.md and globe4.md). Every GLB has one
 // root node in world units (16 game px = 1 block), standing bottom-centre on the floor and facing +Z; wall pieces
 // hang with their back on z = 0.
@@ -86,7 +86,7 @@ const S: SouvenirInfo[] = [
   { id: 'sv_conch', name: 'Spider Conch Shell', place: 'reef', cat: 'decor', rarity: 'rare', size: [1, 1], h: 4, small: true,
     blurb: 'A spiny pink-lipped shell washed up on a sandy cay. Hold it to your ear: the reef is still in there.' },
   { id: 'sv_sambadrum', name: 'Samba Drum', place: 'rio', cat: 'fun', rarity: 'uncommon', size: [1, 1], h: 13,
-    blurb: 'A surdo drum with painted rims and a pair of mallets. One tap and the whole house wants to dance.' },
+    blurb: 'A deep, rope-tuned drum with a skin head and leather tensioners. One beat and the whole house wants to samba.' },
   { id: 'sv_cavaquinho', name: 'Cavaquinho', place: 'rio', cat: 'wall', rarity: 'rare', size: [1, 0.5], h: 17, wall: true,
     blurb: 'A little four-string guitar for the wall. It remembers every samba it was ever played in.' },
   { id: 'sv_kiwi', name: 'Kiwi Figurine', place: 'milford', cat: 'fun', rarity: 'rare', size: [1, 1], h: 9, small: true,

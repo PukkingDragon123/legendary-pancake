@@ -94,7 +94,7 @@ void main() {
 
   // clouds over this spot (for shadows, the glint and dimming the town lights)
   vec2 cuv = vec2(vUv.x + uCloudU, 0.5 + vUv.y * 0.5);
-  float clear = 1.0 - uClear * smoothstep(0.16, 0.05, distance(n0, uTarget));
+  float clear = 1.0 - uClear * smoothstep(0.3, 0.04, distance(n0, uTarget));
   float cover = smoothstep(0.12, 0.8, texture2D(tCL, cuv).r) * uCloudAmt * clear;
   vec3 sT = uSun - n0 * mu0;
   vec2 sh = vec2(dot(sT, east) / (2.0 * PI * cl), dot(sT, north) / PI) * 0.010;
@@ -107,7 +107,7 @@ void main() {
   // so the relief shows)
   vec3 M = normalize(n0 * 0.75 + north * 0.45 - east * 0.35);
   float moon = (1.0 - lit) * (0.35 + 0.65 * max(dot(n, M), 0.0));
-  col += alb * vec3(0.012, 0.019, 0.04) * (1.0 + 7.0 * uNear * moon);
+  col += alb * vec3(0.014, 0.02, 0.038) * (1.0 + 7.0 * uNear * moon) * (1.0 + 1.6 * (1.0 - water) * uNear);
   // the sea: a sharp sun glint and a broad sheen, dimmed under clouds
   vec3 H = normalize(uSun + V);
   float NdH = max(dot(n0, H), 0.0), VdH = max(dot(V, H), 0.0);
@@ -132,7 +132,7 @@ void main() {
   vec3 n0 = normalize(vP);
   vec3 V = normalize(cameraPosition - vP);
   float c = texture2D(tCL, vec2(vUv.x + uCloudU, 0.5 + vUv.y * 0.5)).r;
-  float clear = 1.0 - uClear * smoothstep(0.16, 0.05, distance(n0, uTarget));
+  float clear = 1.0 - uClear * smoothstep(0.3, 0.04, distance(n0, uTarget));
   float a = smoothstep(0.12, 0.8, c) * uCloudAmt * clear;
   if (a < 0.004) discard;
   float mu0 = dot(n0, uSun);

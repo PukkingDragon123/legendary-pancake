@@ -115,6 +115,7 @@ https://creativecommons.org/licenses/by/4.0/ (the models were simplified, rescal
 | `sv_canyondiorama` Canyon Diorama | [Grand Canyon & Little Colorado River Confluence](https://sketchfab.com/3d-models/grand-canyon-little-colorado-river-confluence-87a2367f943a497983e1395da52d660a) | Nate Loper  🗺️ ⛏🏺 | CC BY 4.0 |
 | `sv_venicemask` Venetian Mask | [Carnival mask - Venice](https://sketchfab.com/3d-models/carnival-mask-venice-beff6e12e86e4842999a955ca233f0cf) | alexander.ros | CC BY 4.0 |
 | `sv_lotuslamp` Lotus Lamp | [Prop Modelling: Candleholder](https://sketchfab.com/3d-models/prop-modelling-candleholder-f0b55af43c8b48e5b9f3e0fae392dcc3) | ZoeChuiYan | CC BY 4.0 |
+| `sv_sambadrum` Samba Drum | [East Kent Local Militia Bass Drum](https://sketchfab.com/3d-models/east-kent-local-militia-bass-drum-acc19a79473b4e15a4875f583fb12762) | artfletch | CC BY 4.0 |
 | `sv_elephant` Elephant Carving | [Carved Wooden Elephant](https://polyhaven.com/a/carved_wooden_elephant) | Greg Zaal (Poly Haven) | CC0 1.0 |
 
 The other souvenirs are as credited in `docs/credits/globe.md`.
