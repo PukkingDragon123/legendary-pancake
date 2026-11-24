@@ -1,0 +1,1100 @@
+{
+ "name": "mint_typewriter",
+ "description": "A sage-green enamel typewriter with worn edges: cream round keys, a black platen with brass knobs, a sheet of dream-journal paper and a chrome return lever.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 3.0,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": true,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "berry": [
+    "#37353d",
+    "#483a42",
+    "#5e434a",
+    "#7c4f56",
+    "#9e5f66",
+    "#b67475",
+    "#ca8683",
+    "#dc978d"
+   ],
+   "brass": [
+    "#434035",
+    "#5b4131",
+    "#82673c",
+    "#b08c4b",
+    "#c6a05b",
+    "#d0aa69",
+    "#e1b97c",
+    "#f1d6a2",
+    "#f4eedd"
+   ],
+   "cream": [
+    "#444a4e",
+    "#626562",
+    "#88877e",
+    "#b9b2a1",
+    "#f1e6cc",
+    "#fefbdc",
+    "#fcf7e7",
+    "#fbf2e2"
+   ],
+   "ink": [
+    "#1b222d",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856",
+    "#6a655c"
+   ],
+   "iron": [
+    "#1b222d",
+    "#362e2a",
+    "#2c3139",
+    "#45484c",
+    "#625f59",
+    "#757066",
+    "#969083",
+    "#b9b2a4"
+   ],
+   "paper": [
+    "#756f5d",
+    "#bbab85",
+    "#d6c7a4",
+    "#e3d8bc",
+    "#ede5cf",
+    "#f5f0e0",
+    "#fcf7ed"
+   ],
+   "sage": [
+    "#394343",
+    "#4b564d",
+    "#636f5b",
+    "#82906f",
+    "#a7b788",
+    "#bfcc97",
+    "#d3dea4",
+    "#e4ebad"
+   ],
+   "silver": [
+    "#46596a",
+    "#617f8c",
+    "#6a655c",
+    "#908a7e",
+    "#b9b2a4",
+    "#d3e0dc",
+    "#dfe9ea",
+    "#f5f7f2"
+   ],
+   "soot": [
+    "#231f1b",
+    "#352d26",
+    "#332d26",
+    "#3a362d",
+    "#524d40",
+    "#6f6856"
+   ],
+   "verd": [
+    "#364246",
+    "#4c5b58",
+    "#6c8075",
+    "#96b09c",
+    "#b8ceb2",
+    "#d4e4c1"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "sage",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.2,
+     "ramp": "iron",
+     "tone": 3
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "soot",
+   "tone": 2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s3": {
+   "ramp": "soot",
+   "tone": 2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s4": {
+   "ramp": "soot",
+   "tone": 2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s5": {
+   "ramp": "soot",
+   "tone": 2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s6": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s7": {
+   "ramp": "cream",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s8": {
+   "ramp": "soot",
+   "tone": 1.8,
+   "rim": {
+    "light_shift": 0.8,
+    "dark_shift": -0.6
+   },
+   "layers": [
+    {
+     "id": "bars",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.5,
+     "width": 0.3,
+     "ramp": "silver",
+     "tone": 3.6
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "soot",
+   "tone": 2.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s10": {
+   "ramp": "brass",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s11": {
+   "ramp": "brass",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s12": {
+   "ramp": "paper",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s13": {
+   "ramp": "silver",
+   "tone": 5,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s14": {
+   "ramp": "silver",
+   "tone": 5,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  },
+  "s15": {
+   "ramp": "berry",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.3
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "berry",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.3
+    }
+   ]
+  },
+  "s17": {
+   "ramp": "brass",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "body",
+   "shape": "taper",
+   "pivot": [
+    0.0,
+    2.8,
+    -0.6
+   ],
+   "size": [
+    15.0,
+    5.2,
+    9.0
+   ],
+   "style": "s1",
+   "front_scale": [
+    1.0,
+    0.55
+   ],
+   "chamfer": 0.6,
+   "front_shift": [
+    0,
+    -1.15
+   ]
+  },
+  {
+   "id": "foot00",
+   "shape": "box",
+   "pivot": [
+    -6.6,
+    0.2,
+    3.2
+   ],
+   "size": [
+    1.4,
+    0.4,
+    1.4
+   ],
+   "style": "s2"
+  },
+  {
+   "id": "foot01",
+   "shape": "box",
+   "pivot": [
+    -6.6,
+    0.2,
+    -4.4
+   ],
+   "size": [
+    1.4,
+    0.4,
+    1.4
+   ],
+   "style": "s3"
+  },
+  {
+   "id": "foot10",
+   "shape": "box",
+   "pivot": [
+    6.6,
+    0.2,
+    3.2
+   ],
+   "size": [
+    1.4,
+    0.4,
+    1.4
+   ],
+   "style": "s4"
+  },
+  {
+   "id": "foot11",
+   "shape": "box",
+   "pivot": [
+    6.6,
+    0.2,
+    -4.4
+   ],
+   "size": [
+    1.4,
+    0.4,
+    1.4
+   ],
+   "style": "s5"
+  },
+  {
+   "id": "keys",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    3.15,
+    3.6
+   ],
+   "rotation": [
+    -16.0,
+    0.0,
+    0.0
+   ],
+   "art": [
+    "..rrr..rr..rr..rr..rr..rrr..rr..rr..rr..",
+    ".rhkkrrhkrrhkrrhkrrhkrrhkkrrhkrrhkrrhkr.",
+    ".rkckrkkkrkkkrrkkkrkckrkkkrkkkrkkkrrkck.",
+    ".rkkkrrkkrrkkrrkkrrkkrrkkkrrkkrrkkrrkkr.",
+    "..rrr..rr..rr..rr..rr..rrr..rr..rr..rr..",
+    "...rrkrrrkr.rkr.rkrrrkrrrrkrrrkr.rkr.rkr",
+    "...rhkkrhkkrhkkrkckrkkkrrhkkrhkkrhckrkkk",
+    "...rkkrrkkkrkkkrkkkrrkkrrkkrrkkkrkkkrkkk",
+    "...rrrr.rrr.rrr.rrr.rrrrrrrr.rrr.rrr.rrr",
+    ".....rrr.rrr..rrr.rrr.rrr.rrr.rrr..rrr..",
+    ".....khkrrhkrrhkrrhkkrhkkrkhkrrhkrrhkr..",
+    "....rkkkrkkkrrkckrkkkrkkkrkkkrkckrrkkk..",
+    ".....rkkrrkkrrkkrrkkr.rkr.rkkrrkkrrkkr..",
+    "......r...rr..rr...r...r...r...rr..rr..."
+   ],
+   "plane": "xz",
+   "style": "s6",
+   "paint": {
+    "art_key": {
+     "k": "cream:5",
+     "r": "soot:1",
+     "h": "cream:6",
+     "c": "ink:2"
+    }
+   }
+  },
+  {
+   "id": "spacebar",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    1.5,
+    4.6
+   ],
+   "size": [
+    7.0,
+    0.5,
+    0.9
+   ],
+   "style": "s7",
+   "chamfer": 0.15
+  },
+  {
+   "id": "basket",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    5.4,
+    -1.2
+   ],
+   "size": [
+    11.0,
+    1.2,
+    2.2
+   ],
+   "style": "s8"
+  },
+  {
+   "id": "platen",
+   "shape": "loft",
+   "pivot": [
+    -8.2,
+    6.6,
+    -3.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.7,
+      2.7
+     ]
+    },
+    {
+     "at": [
+      16.4,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.7,
+      2.7
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s9"
+  },
+  {
+   "id": "pknob0",
+   "shape": "loft",
+   "pivot": [
+    -8.37,
+    6.6,
+    -3.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -1.17,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.8,
+      1.8
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s10"
+  },
+  {
+   "id": "pknob1",
+   "shape": "loft",
+   "pivot": [
+    8.37,
+    6.6,
+    -3.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      1.17,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.8,
+      1.8
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s11"
+  },
+  {
+   "id": "paper",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    10.6,
+    -3.6
+   ],
+   "rotation": [
+    -12.0,
+    0.0,
+    0.0
+   ],
+   "art": [
+    "pppppppppppppppppppppppppp",
+    "pppppppppppppppppppppppppp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiippppppp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiiiiiippp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiiiiiippp",
+    "pppppppppppppppppppppppppp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiippppppp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiiiiiippp",
+    "pppppppppppppppppppppppppp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiiiippppp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiiiiiippp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiiiippppp",
+    "pppppppppppppppppppppppppp",
+    "pppppppppppppppppppppppppp",
+    "pppiiiiiiiiiiiiiiiiiiiiipp",
+    "pppppppppppppppppppppppppp",
+    "pppppppppppppppppppppppppp",
+    "..pppppp.p..p.pp.pppppp.pp"
+   ],
+   "plane": "xy",
+   "style": "s12",
+   "paint": {
+    "art_key": {
+     "p": "paper:5",
+     "i": "ink:2"
+    }
+   }
+  },
+  {
+   "id": "bail",
+   "shape": "loft",
+   "pivot": [
+    -6.0,
+    7.9,
+    -1.8
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      12.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s13"
+  },
+  {
+   "id": "lever",
+   "shape": "loft",
+   "pivot": [
+    -7.6,
+    7.4,
+    -2.2
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "at": [
+      -1.4,
+      1.0,
+      1.4
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    },
+    {
+     "at": [
+      -2.2,
+      1.2,
+      3.4
+     ],
+     "size": [
+      0.5,
+      0.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 5,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s14"
+  },
+  {
+   "id": "spool0",
+   "shape": "loft",
+   "pivot": [
+    -4.8,
+    5.4,
+    -1.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      2.6,
+      2.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7,
+      0
+     ],
+     "size": [
+      2.6,
+      2.6
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s15",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "spool1",
+   "shape": "loft",
+   "pivot": [
+    4.8,
+    5.4,
+    -1.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      2.6,
+      2.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7,
+      0
+     ],
+     "size": [
+      2.6,
+      2.6
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s16",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "badge",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    2.0,
+    4.0
+   ],
+   "rotation": [
+    -28.0,
+    0.0,
+    0.0
+   ],
+   "size": [
+    2.4,
+    0.7,
+    0.2
+   ],
+   "style": "s17"
+  }
+ ]
+}

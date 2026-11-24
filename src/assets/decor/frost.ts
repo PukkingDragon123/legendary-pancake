@@ -8,6 +8,8 @@ import { fbm, hash } from '../../gfx/noise.ts';
 import type { ItemDef } from '../furniture.ts';
 import type { Finish } from '../finishes.ts';
 import { ball, chain, chainXY, disc, fab, fluff, glassP, joinery, knit, MET, ownMats, part, phase, pixBoxes, PX, ring8, sag, setBright, turn, waxP, WD, wx, wy, wz } from './kit.ts';
+import { cells, fb, fl, grainT, h2, mod, paperT, strokesT, tn } from './finishes.ts';
+import { P, mixc } from '../../gfx/palette.ts';
 
 const SERIES = 'frostlight';
 const items: ItemDef[] = [];
@@ -41,7 +43,7 @@ const TREE_TIERS: [number, number, number][] = [[6, 9, 15], [14, 8, 12.6], [21, 
 const coneR = (y: number) => { for (const [y0, h, r] of TREE_TIERS) if (y >= y0 && y < y0 + h) return r * (1 - ((y - y0) / h) * 0.45); return 1; };
 
 add({
-  id: 'xmas_tree', name: 'Frostlight Fir', cat: 'seasonal', rarity: 'epic', size: [2, 2],
+  id: 'xmas_tree', model: 'items/xmas_tree.glb', name: 'Frostlight Fir', cat: 'seasonal', rarity: 'epic', size: [2, 2],
   blurb: 'A snow-dusted fir with glass baubles, a ribbon of gold tinsel and lights that twinkle all night.',
   light: { x: 0, y: 26, z: 6, color: 0xffd9a0, power: 2 },
   build: () => {
@@ -107,7 +109,7 @@ add({
 // ------------------------------------------------------------------ gingerbread house
 
 add({
-  id: 'gingerbread_house', name: 'Gingerbread Cottage', cat: 'seasonal', rarity: 'epic', size: [2, 2], small: true,
+  id: 'gingerbread_house', model: 'items/gingerbread_house.glb', name: 'Gingerbread Cottage', cat: 'seasonal', rarity: 'epic', size: [2, 2], small: true,
   blurb: 'Iced walls, a peppermint roof and a warm glow inside. Smells like cinnamon. Do not eat the door.',
   light: { x: 0, y: 6, z: 6, color: 0xffb86a, power: 1.1 },
   build: () => {
@@ -157,7 +159,7 @@ add({
 
 const GLOBE: [number, number, number][] = [[0, 2, 5], [2, 2, 6.4], [4, 2, 7], [6, 2, 6.8], [8, 2, 6], [10, 1.6, 4.6], [11.6, 1.2, 2.8]];
 add({
-  id: 'snow_globe', name: 'Hollow Snow Globe', cat: 'seasonal', rarity: 'epic', size: [1, 1], small: true,
+  id: 'snow_globe', model: 'items/snow_globe.glb', name: 'Hollow Snow Globe', cat: 'seasonal', rarity: 'epic', size: [1, 1], small: true,
   blurb: 'A tiny hollow tree under glass, lit from within. Snow swirls round it forever.',
   light: { x: 0, y: 8, z: 0, color: 0xcfe8ff, power: 0.9 },
   build: () => {
@@ -193,7 +195,7 @@ add({
 // ------------------------------------------------------------------ sleigh bed
 
 add({
-  id: 'sleigh_bed', name: 'Sleigh Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
+  id: 'sleigh_bed', model: 'items/sleigh_bed.glb', name: 'Sleigh Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
   blurb: 'Red lacquer, gold scrollwork and sleigh bells. Dreams depart nightly for the North.',
   sleep: { x: 2, y: 10, z: 0, rot: 90 },
   build: () => {
@@ -241,7 +243,7 @@ add({
 // ------------------------------------------------------------------ nutcracker
 
 add({
-  id: 'nutcracker', name: 'Captain Nutcracker', cat: 'seasonal', rarity: 'epic', size: [1, 1],
+  id: 'nutcracker', model: 'items/nutcracker.glb', name: 'Captain Nutcracker', cat: 'seasonal', rarity: 'epic', size: [1, 1],
   blurb: 'Stands guard over the hollow all December. Clacks his jaw at anyone who looks at him.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -282,7 +284,7 @@ add({
 // ------------------------------------------------------------------ candy cane
 
 add({
-  id: 'candy_cane', name: 'Giant Candy Cane', cat: 'seasonal', rarity: 'rare', size: [1, 1],
+  id: 'candy_cane', model: 'items/candy_cane.glb', name: 'Giant Candy Cane', cat: 'seasonal', rarity: 'rare', size: [1, 1],
   blurb: 'Peppermint-striped, taller than Pip and tied with a velvet bow.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -303,7 +305,7 @@ add({
 // ------------------------------------------------------------------ cocoa mug
 
 add({
-  id: 'cocoa_mug', name: 'Marshmallow Cocoa', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
+  id: 'cocoa_mug', model: 'items/cocoa_mug.glb', name: 'Marshmallow Cocoa', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
   blurb: 'A snowflake mug of cocoa, piled with cream and marshmallows. Still steaming, somehow, forever.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -343,7 +345,7 @@ add({
 // ------------------------------------------------------------------ wreath
 
 add({
-  id: 'wreath', name: 'Holly Wreath', cat: 'seasonal', rarity: 'rare', size: [1, 1], wall: true,
+  id: 'wreath', model: 'items/wreath.glb', name: 'Holly Wreath', cat: 'seasonal', rarity: 'rare', size: [1, 1], wall: true,
   blurb: 'Fir, holly berries, pine cones and two little brass bells that ring when the door opens.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -373,7 +375,7 @@ add({
 // ------------------------------------------------------------------ poinsettia
 
 add({
-  id: 'poinsettia', name: 'Frostlight Poinsettia', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
+  id: 'poinsettia', model: 'items/poinsettia.glb', name: 'Frostlight Poinsettia', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
   blurb: 'Crimson star-leaves in a gold-foil pot. Turns a whole windowsill into a celebration.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -402,7 +404,7 @@ add({
 // ------------------------------------------------------------------ present pile
 
 add({
-  id: 'present_pile', name: 'Pile of Presents', cat: 'seasonal', rarity: 'rare', size: [2, 1],
+  id: 'present_pile', model: 'items/present_pile.glb', name: 'Pile of Presents', cat: 'seasonal', rarity: 'rare', size: [2, 1],
   blurb: 'Stripes, spots and stars, all tied with bows. The little one keeps wriggling.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -443,7 +445,7 @@ add({
 // ------------------------------------------------------------------ stockings
 
 add({
-  id: 'stockings', name: 'Knitted Stockings', cat: 'seasonal', rarity: 'rare', size: [2, 1], wall: true,
+  id: 'stockings', model: 'items/stockings.glb', name: 'Knitted Stockings', cat: 'seasonal', rarity: 'rare', size: [2, 1], wall: true,
   blurb: 'Three hand-knitted stockings on a garland: one for Pip, one for you, one for whoever turns up.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -476,7 +478,7 @@ add({
 // ------------------------------------------------------------------ snowflake rug
 
 add({
-  id: 'snowflake_rug', name: 'Snowflake Rug', cat: 'seasonal', rarity: 'rare', size: [2, 2], rug: true, flatItem: true,
+  id: 'snowflake_rug', model: 'items/snowflake_rug.glb', name: 'Snowflake Rug', cat: 'seasonal', rarity: 'rare', size: [2, 2], rug: true, flatItem: true,
   blurb: 'An icy-blue round rug with a six-armed snowflake that never melts, edged with snowball pom-poms.',
   sit: [{ x: 0, y: 1, z: 0 }],
   build: () => {
@@ -506,7 +508,7 @@ add({
 // ------------------------------------------------------------------ icicle lights
 
 add({
-  id: 'icicle_lights', name: 'Icicle Lights', cat: 'seasonal', rarity: 'rare', size: [3, 1], wall: true,
+  id: 'icicle_lights', model: 'items/icicle_lights.glb', name: 'Icicle Lights', cat: 'seasonal', rarity: 'rare', size: [3, 1], wall: true,
   blurb: 'Glass icicles that drip with cold blue light, one after another, all along the wall.',
   light: { x: 0, y: -5, z: 3, color: 0xbfe4ff, power: 1.3 },
   build: () => {
@@ -536,43 +538,47 @@ export const FROST_ITEMS: ItemDef[] = items;
 // ------------------------------------------------------------------ finishes
 
 const hsh = (x: number, y: number, s = 0) => hash(Math.floor(x), Math.floor(y), 0, s);
-const rp = (c: string) => R(c);
-const RED = rp('#d8283a'), CREAM = rp('#fbf2e8'), MINT = rp('#5ab88a'), GB = rp('#b8743a'), FROST = rp('#c8dcec'), FDARK = rp('#8aa4bc');
 
 export const FROST_FINISHES: Finish[] = [
   {
     id: 'wall_candy_stripe', name: 'Candy-Stripe Paper', kind: 'wallpaper', price: 0, rarity: 'epic', series: SERIES, noStore: true,
-    blurb: 'Peppermint stripes above a gingerbread dado piped with icing.',
-    swatch: ['#fbf2e8', '#d8283a', '#b8743a'],
+    blurb: 'Hand-printed peppermint stripes above a gingerbread dado piped with icing and studded with sugar buttons.',
+    swatch: ['#f5f7f2', '#9e5f66', '#a87652'],
     paint: (u, v) => {
+      const g = paperT(u, v, 81);
       if (v < 15) {
-        if (v > 13.5 - (Math.floor(u) % 3 === 1 ? 1 : 0)) return tone(CREAM, 0.6);
-        const panel = Math.floor(u / 12), pu = u - panel * 12;
-        if (pu < 1 || v < 1 || (pu > 2 && pu < 3 && v > 2 && v < 12) || (pu > 9 && pu < 10 && v > 2 && v < 12)) return tone(GB, -1);
-        if (Math.abs(pu - 6) < 0.6 && Math.abs(v - 7) < 0.6) return tone(RED, 0.4);
-        return tone(GB, (hsh(u * 2, v * 2, 3) - 0.5) * 0.8 + (hsh(u, v, 4) > 0.92 ? -0.8 : 0));
+        // the gingerbread dado: baked panels with piped icing frames and a button in each
+        const panel = fl(u / 12), pu = mod(u, 12);
+        const bake = (fb(u, v, 2, 82, 3) - 0.5) * 0.7 + (h2(u * 2, v * 2, 83) > 0.93 ? -0.45 : 0) + (h2(panel, 0, 84) - 0.5) * 0.3;
+        if (v > 13.4 - (mod(fl(u * 2), 3) === 1 ? 0.8 : 0)) return tn(P.snow, -0.1 + (v > 14.4 ? 0.2 : 0));
+        if (pu < 0.8 || v < 0.8) return tn(P.russet, -0.6);
+        const frame = (Math.abs(pu - 2) < 0.4 || Math.abs(pu - 10) < 0.4) && v > 2 && v < 12 || (Math.abs(v - 2) < 0.4 || Math.abs(v - 12) < 0.4) && pu > 2 && pu < 10;
+        if (frame) return tn(P.snow, mod(fl(u * 2) + fl(v * 2), 2) ? 0 : -0.25);
+        const bd = Math.hypot(pu - 6, v - 7);
+        if (bd < 1.3) return tn([P.berry, P.sage, P.lake][panel % 3], bd < 0.6 ? 0.45 : 0);
+        return tn(P.tawny, bake);
       }
-      if (v < 17) return tone(RED, v < 16 ? -0.6 : 0.6);
-      const s = Math.floor((u + 400) / 4) % 4;
-      const pin = Math.abs(((u + 400) % 16) - 8) < 0.5;
-      if (pin) return tone(MINT, 0.2);
-      const base = s === 0 || s === 2 ? tone(RED, s === 2 ? -0.3 : 0.1) : tone(CREAM, (hsh(u, v, 2) - 0.5) * 0.3);
-      return hsh(u * 3, v * 3, 7) > 0.985 ? 0xffffff : base;
+      if (v < 17) return tn(P.berry, v < 16 ? -0.5 : 0.35);
+      const wob = (fb(u, v, 18, 85, 1) - 0.5) * 0.8;
+      const s = mod(u + wob + 400, 16);
+      if (Math.abs(s - 12) < 0.35) return tn(P.sage, -0.1);
+      if (s < 4 || (s > 8 && s < 9)) return tn(P.berry, g + strokesT(u, v, 86, 'v', 10, 1) + (s < 0.7 ? -0.3 : 0));
+      return tn(P.snow, g + (h2(u * 3, v * 3, 87) > 0.992 ? 0.6 : 0) - 0.05);
     },
   },
   {
     id: 'floor_frosty_planks', name: 'Frosty Planks', kind: 'flooring', price: 0, rarity: 'rare', series: SERIES, noStore: true,
-    blurb: 'Pale, silvered boards with frost feathering out from every seam.',
-    swatch: ['#e4eef6', '#c8dcec', '#8aa4bc'],
+    blurb: 'Pale, silvered boards with frost feathering out from every seam and nail head.',
+    swatch: ['#f5f7f2', '#bcd6dc', '#617f8c'],
     paint: (u, v) => {
-      const row = Math.floor(v / 6), off = (row % 4) * 11, plank = Math.floor((u + off) / 30);
-      const pu = (u + off) % 30, pv = v % 6;
-      if (pv < 0.9 || pu < 0.9) return tone(FDARK, -0.6);
-      // frost crystals near the seams
-      const near = Math.min(pv, 6 - pv, pu, 30 - pu);
-      if (near < 2.2 && hsh(u * 2, v * 2, 9) > 0.55 - near * 0.15) return tone(rp('#f4faff'), 0.6);
-      const grain = Math.sin(u * 0.35 + plank * 3 + Math.sin(v * 1.7) * 0.8) * 0.3;
-      return tone(FROST, (hsh(plank, row, 1) - 0.5) * 0.7 + grain + (hsh(u, v, 5) > 0.97 ? -0.6 : 0));
+      const bw = 6, row = fl(v / bw), off = h2(row, 0, 88) * 30, len = 26 + h2(row, 1, 88) * 14;
+      const seg = fl((u + off) / len), pu = mod(u + off, len), pv = mod(v, bw), id = row * 19 + seg;
+      if (pv < 0.45 || pu < 0.4) return tn(P.dusk, -0.4);
+      const near = Math.min(pv, bw - pv, pu, len - pu);
+      const feather = Math.abs(Math.sin((u + v) * 1.7) * Math.sin((u - v) * 1.3));
+      if (near < 2.0 && feather > 0.45 + near * 0.25 && h2(u * 2, v * 2, 89) > 0.35) return tn(P.snow, 0.15 - near * 0.1);
+      if (Math.min(Math.hypot(pu - 1, pv - 1.5), Math.hypot(len - pu - 1, pv - 1.5)) < 0.36) return tn(P.stone, 0.1);
+      return tn(h2(id, 2, 88) > 0.5 ? P.ice : mixc(P.ice, P.mist, 0.5), grainT(pu, pv, id, 90) * 0.7 + (h2(id, 3, 88) - 0.5) * 0.35);
     },
   },
 ];

@@ -1,0 +1,1335 @@
+{
+ "name": "dream_catcher",
+ "description": "A leather-wrapped willow hoop strung with a cream moonthread web and glass beads, a moonstone at its heart, and three soft feathers swaying on beaded strings.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 6.4,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": false,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "buff": [
+    "#414444",
+    "#5b5850",
+    "#7d7361",
+    "#a79677",
+    "#d9bf93",
+    "#f1d4a2",
+    "#fce5af",
+    "#fbf2b8"
+   ],
+   "cream": [
+    "#444a4e",
+    "#626562",
+    "#88877e",
+    "#b9b2a1",
+    "#f1e6cc",
+    "#fefbdc",
+    "#fcf7e7",
+    "#fbf2e2"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "lake": [
+    "#334149",
+    "#415159",
+    "#536870",
+    "#6a868c",
+    "#86a9b0",
+    "#9ebec0",
+    "#b3cfcb",
+    "#c5ddd4"
+   ],
+   "moonglow": [
+    "#b4a9c9",
+    "#d3cce0",
+    "#dfe9ea",
+    "#f4eedd",
+    "#fffdf6"
+   ],
+   "rose": [
+    "#414147",
+    "#5b5255",
+    "#7d6a69",
+    "#a78883",
+    "#d9aca4",
+    "#f1c1b3",
+    "#fcd2bf",
+    "#fbe0c8"
+   ],
+   "tawny": [
+    "#39393a",
+    "#4b413b",
+    "#644f3f",
+    "#836047",
+    "#a87652",
+    "#c08b61",
+    "#d49d6e",
+    "#e5ac7a"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "tawny",
+   "tone": 3.8,
+   "rim": {
+    "light_shift": 0.8,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "wrap",
+     "op": "stripes",
+     "axis": "path",
+     "period": 0.7,
+     "width": 0.4,
+     "shift": -1.0
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s3": {
+   "ramp": "tawny",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s5": {
+   "ramp": "lake",
+   "tone": 4.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "buff",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s7": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s8": {
+   "ramp": "honey",
+   "tone": 4.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "tawny",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s10": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s11": {
+   "ramp": "rose",
+   "tone": 4.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s12": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "hoop",
+   "shape": "loft",
+   "pivot": [
+    5.0,
+    14.6,
+    0.8
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -0.3015,
+      1.7101,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -1.1698,
+      3.2139,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -2.5,
+      4.3301,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -4.1318,
+      4.924,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -5.8682,
+      4.924,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -7.5,
+      4.3301,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -8.8302,
+      3.2139,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -9.6985,
+      1.7101,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -10.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -9.6985,
+      -1.7101,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -8.8302,
+      -3.2139,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -7.5,
+      -4.3301,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -5.8682,
+      -4.924,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -4.1318,
+      -4.924,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -2.5,
+      -4.3301,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -1.1698,
+      -3.2139,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -0.3015,
+      -1.7101,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -0.3015,
+      1.7101,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s1"
+  },
+  {
+   "id": "web",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    14.6,
+    0.8
+   ],
+   "art": [
+    "............................................................",
+    "............................................................",
+    "..............................wwwwWW........................",
+    "..............................wwwwWW........................",
+    "..............WW....wwwwwwwwwwww..WWwwww....................",
+    "..............WW....wwwwwwwwwwww..WWwwww....................",
+    "..............wwWWww..............WW..wwww..................",
+    "..............wwWWww..............WW..wwww..................",
+    "..............wwWWWW............WW........wwww..............",
+    "..............wwWWWW............WW........wwww..............",
+    "............ww....WW....wwwwwwwwWWww..........wwww..........",
+    "............ww....WW....wwwwwwwwWWww..........wwww..........",
+    "..........ww......WWWWww........WW..wwwwww......WWWW........",
+    "..........ww......WWWWww........WW..wwwwww......WWWW........",
+    "........wwww....wwwwWW..........WW......wwww..WWWWww........",
+    "........wwww....wwwwWW..........WW......wwww..WWWWww........",
+    "....bbbbww....wwww....WW..wwwwwwWW........wwWWWW....ww......",
+    "....bbbbww....wwww....WW..wwwwwwWW........wwWWWW....ww......",
+    "....wwww....wwww......WWWWww..WWWWwwww....WWww......ww......",
+    "....wwww....wwww......WWWWww..WWWWwwww....WWww......ww......",
+    "..WWWWWW....ww......ww..WW....WW......wwWW....ww....ww......",
+    "..WWWWWW....ww......ww..WW....WW......wwWW....ww....ww......",
+    "....ww..WWWWWW....wwww..WWWWwwWWww..WWWWww....wwww....ww....",
+    "....ww..WWWWWW....wwww..WWWWwwWWww..WWWWww....wwww....ww....",
+    "....ww....wwwwWWWWWW....wwww......WWWW..ww......ww....ww....",
+    "....ww....wwwwWWWWWW....wwww......WWWW..ww......ww....ww....",
+    "....ww....ww....wwWWWWWWww..mmmm..wwww..wwww....ww....ww....",
+    "....ww....ww....wwWWWWWWww..mmmm..wwww..wwww....ww....ww....",
+    "....ww....ww....ww....ww..mmMMmmmm..ww....ww....ww......ww..",
+    "....ww....ww....ww....ww..mmMMmmmm..ww....ww....ww......ww..",
+    "....ww....ww....ww....ww..mmmmmmmm..WWWWWWWWWWWWWWWWWWWWWWWW",
+    "....ww....ww....ww....ww..mmmmmmmm..WWWWWWWWWWWWWWWWWWWWWWWW",
+    "....ww....ww....wwWWWWWWww..mmmm..wwww..wwww....ww....ww....",
+    "....ww....ww....wwWWWWWWww..mmmm..wwww..wwww....ww....ww....",
+    "....ww....wwwwWWWWWW....wwww......WWWW..ww......bbbb..ww....",
+    "....ww....wwwwWWWWWW....wwww......WWWW..ww......bbbb..ww....",
+    "....ww..WWWWWW....wwww..WWWWwwWWww..WWWWww....wwww....ww....",
+    "....ww..WWWWWW....wwww..WWWWwwWWww..WWWWww....wwww....ww....",
+    "..WWWWWW....ww......ww..WW....WW......wwWW....ww....ww......",
+    "..WWWWWW....ww......ww..WW....WW......wwWW....ww....ww......",
+    "....wwww....wwww......WWBBww..WWWWwwww....WWww......ww......",
+    "....wwww....wwww......WWBBww..WWWWwwww....WWww......ww......",
+    "......wwww....wwww....WWBBwwwwwwWW........wwWWWW....ww......",
+    "......wwww....wwww....WWBBwwwwwwWW........wwWWWW....ww......",
+    "........wwww....wwwwWW..........WW......wwww..WWWWww........",
+    "........wwww....wwwwWW..........WW......wwww..WWWWww........",
+    "..........ww......WWWWww........WW..wwwwww......WWWW........",
+    "..........ww......WWWWww........WW..wwwwww......WWWW........",
+    "............ww....WW....wwwwwwwwWWww..........wwww..........",
+    "............ww....WW....wwwwwwwwWWww..........wwww..........",
+    "..............wwWWWW............WW........wwww..............",
+    "..............wwWWWW............WW........wwww..............",
+    "..............wwWWww..............WW..wwww..................",
+    "..............wwWWww..............WW..wwww..................",
+    "................WW..wwwwwwwwwwww..WWwwww....................",
+    "................WW..wwwwwwwwwwww..WWwwww....................",
+    "..............................wwwwWW........................",
+    "..............................wwwwWW........................",
+    "............................................................",
+    "............................................................"
+   ],
+   "plane": "xy",
+   "style": "s2",
+   "paint": {
+    "art_key": {
+     "w": "cream:5",
+     "W": "cream:4",
+     "b": "lake:4",
+     "B": "honey:5",
+     "m": "moonglow:2",
+     "M": "moonglow:4"
+    }
+   }
+  },
+  {
+   "id": "loop",
+   "shape": "loft",
+   "pivot": [
+    0.9,
+    20.5,
+    0.8
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      -0.2636,
+      0.6364,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      -0.9,
+      0.9,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      -1.5364,
+      0.6364,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      -1.8,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      -1.5364,
+      -0.6364,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      -0.9,
+      -0.9,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      -0.2636,
+      -0.6364,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    },
+    {
+     "at": [
+      -0.2636,
+      0.6364,
+      0.0
+     ],
+     "size": [
+      0.28,
+      0.28
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s3"
+  },
+  {
+   "id": "f0j",
+   "shape": "bone",
+   "pivot": [
+    -3.2,
+    10.9581,
+    0.8
+   ]
+  },
+  {
+   "id": "f0_string",
+   "shape": "box",
+   "parent": "f0j",
+   "pivot": [
+    0.0,
+    -2.0,
+    0.0
+   ],
+   "size": [
+    0.15,
+    4.0,
+    0.15
+   ],
+   "style": "s4"
+  },
+  {
+   "id": "f0_bead",
+   "shape": "loft",
+   "parent": "f0j",
+   "pivot": [
+    0.0,
+    -2.3,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.14644660940672627,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s5",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "f0_feather",
+   "shape": "card",
+   "parent": "f0j",
+   "pivot": [
+    0.0,
+    -7.4,
+    0.02
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -6.0
+   ],
+   "art": [
+    "....bbssaa....",
+    "....bbssaa....",
+    "....aassaa....",
+    "....aassaa....",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "....aassbb....",
+    "....aassbb....",
+    "....bbssaa....",
+    "....bbssaa....",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......"
+   ],
+   "plane": "xy",
+   "style": "s6",
+   "paint": {
+    "art_key": {
+     "a": "buff:5",
+     "b": "buff:3",
+     "s": "buff:1"
+    }
+   }
+  },
+  {
+   "id": "f1j",
+   "shape": "bone",
+   "pivot": [
+    0.0,
+    9.8,
+    0.8
+   ]
+  },
+  {
+   "id": "f1_string",
+   "shape": "box",
+   "parent": "f1j",
+   "pivot": [
+    0.0,
+    -3.0,
+    0.0
+   ],
+   "size": [
+    0.15,
+    6.0,
+    0.15
+   ],
+   "style": "s7"
+  },
+  {
+   "id": "f1_bead",
+   "shape": "loft",
+   "parent": "f1j",
+   "pivot": [
+    0.0,
+    -3.2,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.14644660940672627,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s8",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "f1_feather",
+   "shape": "card",
+   "parent": "f1j",
+   "pivot": [
+    0.0,
+    -9.4,
+    0.02
+   ],
+   "art": [
+    "....bbssaa....",
+    "....bbssaa....",
+    "....aassaa....",
+    "....aassaa....",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "....aassbb....",
+    "....aassbb....",
+    "....bbssaa....",
+    "....bbssaa....",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......"
+   ],
+   "plane": "xy",
+   "style": "s9",
+   "paint": {
+    "art_key": {
+     "a": "tawny:5",
+     "b": "tawny:3",
+     "s": "tawny:1"
+    }
+   }
+  },
+  {
+   "id": "f2j",
+   "shape": "bone",
+   "pivot": [
+    3.2,
+    10.9581,
+    0.8
+   ]
+  },
+  {
+   "id": "f2_string",
+   "shape": "box",
+   "parent": "f2j",
+   "pivot": [
+    0.0,
+    -2.0,
+    0.0
+   ],
+   "size": [
+    0.15,
+    4.0,
+    0.15
+   ],
+   "style": "s10"
+  },
+  {
+   "id": "f2_bead",
+   "shape": "loft",
+   "parent": "f2j",
+   "pivot": [
+    0.0,
+    -2.3,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.14644660940672627,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s11",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "f2_feather",
+   "shape": "card",
+   "parent": "f2j",
+   "pivot": [
+    0.0,
+    -7.4,
+    0.02
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    6.0
+   ],
+   "art": [
+    "....bbssaa....",
+    "....bbssaa....",
+    "....aassaa....",
+    "....aassaa....",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassaaaaaa",
+    "aaaaaassbbbbbb",
+    "aaaaaassbbbbbb",
+    "bbbbbbssaaaaaa",
+    "bbbbbbssaaaaaa",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassbbbb..",
+    "..aaaassbbbb..",
+    "..bbbbssaaaa..",
+    "..bbbbssaaaa..",
+    "..aaaassaaaa..",
+    "..aaaassaaaa..",
+    "....aassbb....",
+    "....aassbb....",
+    "....bbssaa....",
+    "....bbssaa....",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......",
+    "......ss......"
+   ],
+   "plane": "xy",
+   "style": "s12",
+   "paint": {
+    "art_key": {
+     "a": "cream:5",
+     "b": "cream:3",
+     "s": "cream:1"
+    }
+   }
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 4.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "f0j",
+     "osc": {
+      "axis": "z",
+      "amp": 6,
+      "cycles": 1,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "f1j",
+     "osc": {
+      "axis": "z",
+      "amp": 6,
+      "cycles": 1,
+      "phase": 0.3
+     }
+    },
+    {
+     "part": "f2j",
+     "osc": {
+      "axis": "z",
+      "amp": 6,
+      "cycles": 1,
+      "phase": 0.6
+     }
+    }
+   ]
+  }
+ }
+}
