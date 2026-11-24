@@ -443,6 +443,53 @@ export function clip(k = 2, res = 1): string {
   });
 }
 
+/** A big nickel-and-brass clipboard clip: a pressed plate, a rolled lever and two rivets, w units wide. */
+export function clipboardClip(w = 60, k = 2, res = 1): string {
+  return cachedRelief(`cbclip:${w}:${k}:${res}`, () => {
+    const h = 20, r = new Relief(w, h, res, k), cx = w / 2;
+    r.fill(ring(cx, 5, 4.2, 6.4), torus(cx, 5, 5.3, 1.1, 2, 4), metal(PAL.iron, { base: 0.7 }), MAT.iron, { id: 1 });
+    r.cut(rect(cx - 7, 5.4, 14, 3));
+    r.fill(poly([[6, 8], [w - 6, 8], [w - 1, 19], [1, 19]]), (x, y) => 3 + (y - 8) * 0.2 + 1.2 * Math.sin(clamp((x - 1) / (w - 2)) * Math.PI), brass({ base: 0.64, brush: 'x', patina: 0.15 }), MAT.brass, { id: 2, seam: true });
+    r.fill(rect(4, 15, w - 8, 3), tubeX(16.5, 1.5, 6), brass({ base: 0.7 }), MAT.brass, { id: 3, seam: true });
+    for (const x of [10, w - 10]) { r.fill(disc(x, 11.4, 1.6), dome(x, 11.4, 1.6, 1.6, 1.4, 6), metal(PAL.iron, { base: 0.72 }), MAT.iron, { id: 4, seam: true }); }
+    r.carve(rect(cx - 9, 11, 18, 0.7), () => -0.6);
+    return r.url();
+  });
+}
+
+/** A tile of printed damask wallpaper (u x u units): a deep ground, a lighter leafy motif, fine paper grain. */
+export function wallpaperTile(hue: PalRamp = 'emerald', u = 32, k = 2): string {
+  return cachedRelief(`wall:${hue}:${u}:${k}`, () => {
+    const r = new Relief(u, u, 1, k), R = PAL[hue], G = PAL.gold;
+    const motif = (x: number, y: number) => {
+      // a lozenge lattice; in each cell a sprig of three leaves and a dot
+      const cx = u / 2, cy = u / 2;
+      const dx = Math.abs(x - cx), dy = y - cy;
+      const leafA = ((dx - 3.2) / 3) ** 2 + ((dy + 2) / 1.6) ** 2 < 1 && dx > 0.6;
+      const leafB = (dx / 1.6) ** 2 + ((dy + 5.6) / 3.2) ** 2 < 1;
+      const stem = dx < 0.5 && dy > -4 && dy < 5;
+      const berry = Math.hypot(dx, dy - 5.8) < 1.3;
+      const lat = Math.abs(((x + y) % u) - 0) < 0.5 || Math.abs(((x - y + u * 4) % u) - 0) < 0.5;
+      return leafA || leafB || stem ? 2 : berry ? 3 : lat ? 1 : 0;
+    };
+    r.fill(rect(0, 0, u, u), flat(0), (x, y, mx, my) => {
+      const m = motif(x, y);
+      const grain = (vnoise(mx * 0.7, my * 0.7, 5) - 0.5) * 0.06 + (hash(Math.floor(mx * k), Math.floor(my * k), 2) - 0.5) * 0.04;
+      if (m === 2) return rampAt(R, 0.5 + grain);
+      if (m === 3) return rampAt(G, 0.55 + grain);
+      if (m === 1) return rampAt(R, 0.36 + grain);
+      return rampAt(R, 0.3 + grain);
+    }, { spec: 0, shin: 1, emit: 1 }, { id: 1 });
+    return r.url({ outline: false });
+  });
+}
+
+/** A varnished board of any size in CSS px (1 art px per CSS px): for clipboards and panels. */
+export function boardCSS(wPx: number, hPx: number, o: BoardOpts = {}): string {
+  const W = Math.max(8, Math.round(wPx / 2)), H = Math.max(8, Math.round(hPx / 2));
+  return board(W, H, 2, 1, o);
+}
+
 /** A dithered contact shadow (an ellipse that darkens toward its middle), w x h units. */
 export function contactShadow(w: number, h: number, k = 2): string {
   return cachedRelief(`cshadow:${w}x${h}:${k}`, () => {

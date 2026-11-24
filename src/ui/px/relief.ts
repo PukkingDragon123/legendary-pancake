@@ -122,7 +122,10 @@ function envAt(rx: number, ry: number, _rz: number): number {
 
 // ------------------------------------------------------------------ the canvas
 
-export type Shape = (x: number, y: number) => boolean;
+/** a point test in design units, optionally carrying its bounding box [x0, y0, x1, y1] so painting skips the rest */
+export type Shape = ((x: number, y: number) => boolean) & { bb?: [number, number, number, number] };
+/** attach a bounding box to a shape */
+export const withBB = (f: (x: number, y: number) => boolean, bb?: [number, number, number, number]): Shape => { const g = f as Shape; if (bb) g.bb = bb; return g; };
 /** height above the base at art coords (x, y); NaN = leave the pixel alone */
 export type HFn = (x: number, y: number) => number;
 /** albedo at art coords (x, y) and texel-precise micro coords (mx, my) in art px */
@@ -169,6 +172,12 @@ export class Relief {
     this.hgt = new Float32Array(n); this.alb = new Float32Array(n * 3); this.mat = new Uint8Array(n);
     this.id = new Uint16Array(n); this.seam = new Uint8Array(n); this.solid = new Uint8Array(n); this.fnIdx = new Int16Array(n).fill(-1);
   }
+  /** art-pixel loop range for a shape (its bounding box, or the whole canvas) */
+  private range(sh: Shape): [number, number, number, number] {
+    const k = this.k, b = sh.bb;
+    if (!b) return [0, 0, this.w, this.h];
+    return [Math.max(0, Math.floor(b[0] * k) - 1), Math.max(0, Math.floor(b[1] * k) - 1), Math.min(this.w, Math.ceil(b[2] * k) + 1), Math.min(this.h, Math.ceil(b[3] * k) + 1)];
+  }
   private matIndex(m: Mat) { let i = this.mats.indexOf(m); if (i < 0) { this.mats.push(m); i = this.mats.length - 1; } return i; }
   /**
    * Paint a part: for every art pixel inside `shape`, set its height (h(x, y)) and material, and remember the
@@ -177,8 +186,8 @@ export class Relief {
   fill(shape: Shape, h: HFn, albedo: AFn, m: Mat, o: FillOpts = {}) {
     const mi = this.matIndex(m);
     this.fns.push(albedo);
-    const fi = this.fns.length - 1, k = this.k;
-    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+    const fi = this.fns.length - 1, k = this.k, [rx0, ry0, rx1, ry1] = this.range(shape);
+    for (let y = ry0; y < ry1; y++) for (let x = rx0; x < rx1; x++) {
       const cx = (x + 0.5) / k, cy = (y + 0.5) / k;
       if (!shape(cx, cy)) continue;
       const i = y * this.w + x;
@@ -195,8 +204,8 @@ export class Relief {
   }
   /** change the height of painted pixels (carve grooves, emboss) without touching the material */
   carve(shape: Shape, dh: HFn) {
-    const k = this.k;
-    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+    const k = this.k, [rx0, ry0, rx1, ry1] = this.range(shape);
+    for (let y = ry0; y < ry1; y++) for (let x = rx0; x < rx1; x++) {
       const i = y * this.w + x, cx = (x + 0.5) / k, cy = (y + 0.5) / k;
       if (!this.solid[i] || !shape(cx, cy)) continue;
       const v = dh(cx, cy);
@@ -206,15 +215,15 @@ export class Relief {
   }
   /** erase pixels */
   cut(shape: Shape) {
-    const k = this.k;
-    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) if (shape((x + 0.5) / k, (y + 0.5) / k)) this.solid[y * this.w + x] = 0;
+    const k = this.k, [rx0, ry0, rx1, ry1] = this.range(shape);
+    for (let y = ry0; y < ry1; y++) for (let x = rx0; x < rx1; x++) if (shape((x + 0.5) / k, (y + 0.5) / k)) this.solid[y * this.w + x] = 0;
     return this;
   }
   /** recolour painted pixels inside `shape` (paint over: gilding, stains, painted numerals) keeping height */
   paint(shape: Shape, albedo: AFn, m?: Mat) {
     this.fns.push(albedo);
-    const fi = this.fns.length - 1, k = this.k, mi = m ? this.matIndex(m) : -1;
-    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+    const fi = this.fns.length - 1, k = this.k, mi = m ? this.matIndex(m) : -1, [rx0, ry0, rx1, ry1] = this.range(shape);
+    for (let y = ry0; y < ry1; y++) for (let x = rx0; x < rx1; x++) {
       const i = y * this.w + x, cx = (x + 0.5) / k, cy = (y + 0.5) / k;
       if (!this.solid[i] || !shape(cx, cy)) continue;
       this.fnIdx[i] = fi; if (mi >= 0) this.mat[i] = mi;
@@ -362,40 +371,45 @@ export class Relief {
 
 // ------------------------------------------------------------------ shapes (art px)
 export const all: Shape = () => true;
-export const rect = (x0: number, y0: number, w: number, h: number): Shape => (x, y) => x >= x0 && y >= y0 && x < x0 + w && y < y0 + h;
+export const rect = (x0: number, y0: number, w: number, h: number): Shape => withBB((x, y) => x >= x0 && y >= y0 && x < x0 + w && y < y0 + h, [x0, y0, x0 + w, y0 + h]);
 /** a rectangle with cut (chamfered) corners of size c */
-export const rrect = (x0: number, y0: number, w: number, h: number, c: number): Shape => (x, y) => {
+export const rrect = (x0: number, y0: number, w: number, h: number, c: number): Shape => withBB((x, y) => {
   if (x < x0 || y < y0 || x >= x0 + w || y >= y0 + h) return false;
   const dx = Math.min(x - x0, x0 + w - x), dy = Math.min(y - y0, y0 + h - y);
   return dx + dy >= c;
-};
+}, [x0, y0, x0 + w, y0 + h]);
 /** a rectangle with round corners of radius r (stepped) */
-export const roundRect = (x0: number, y0: number, w: number, h: number, r: number): Shape => (x, y) => {
+export const roundRect = (x0: number, y0: number, w: number, h: number, r: number): Shape => withBB((x, y) => {
   if (x < x0 || y < y0 || x >= x0 + w || y >= y0 + h) return false;
   const dx = Math.max(0, r - Math.min(x - x0, x0 + w - x)), dy = Math.max(0, r - Math.min(y - y0, y0 + h - y));
   return dx * dx + dy * dy <= r * r;
-};
-export const ell = (cx: number, cy: number, rx: number, ry: number): Shape => (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+}, [x0, y0, x0 + w, y0 + h]);
+export const ell = (cx: number, cy: number, rx: number, ry: number): Shape => withBB((x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1, [cx - rx, cy - ry, cx + rx, cy + ry]);
 export const disc = (cx: number, cy: number, r: number): Shape => ell(cx, cy, r, r);
-export const ring = (cx: number, cy: number, r0: number, r1: number): Shape => (x, y) => { const d = Math.hypot(x - cx, y - cy); return d >= r0 && d <= r1; };
+export const ring = (cx: number, cy: number, r0: number, r1: number): Shape => withBB((x, y) => { const d = Math.hypot(x - cx, y - cy); return d >= r0 && d <= r1; }, [cx - r1, cy - r1, cx + r1, cy + r1]);
 export function poly(pts: [number, number][]): Shape {
-  return (px, py) => {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y] of pts) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  return withBB((px, py) => {
+    if (px < x0 || px > x1 || py < y0 || py > y1) return false;
     let inside = false;
     for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
       const [xi, yi] = pts[i], [xj, yj] = pts[j];
       if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
     }
     return inside;
-  };
+  }, [x0, y0, x1, y1]);
 }
-export const and = (...s: Shape[]): Shape => (x, y) => s.every((f) => f(x, y));
-export const or = (...s: Shape[]): Shape => (x, y) => s.some((f) => f(x, y));
+const bbAnd = (s: Shape[]) => { let b: [number, number, number, number] | undefined; for (const f of s) if (f.bb) b = b ? [Math.max(b[0], f.bb[0]), Math.max(b[1], f.bb[1]), Math.min(b[2], f.bb[2]), Math.min(b[3], f.bb[3])] : [...f.bb]; return b; };
+const bbOr = (s: Shape[]) => { if (s.some((f) => !f.bb)) return undefined; return s.reduce((b, f) => [Math.min(b[0], f.bb![0]), Math.min(b[1], f.bb![1]), Math.max(b[2], f.bb![2]), Math.max(b[3], f.bb![3])] as [number, number, number, number], [Infinity, Infinity, -Infinity, -Infinity] as [number, number, number, number]); };
+export const and = (...s: Shape[]): Shape => withBB((x, y) => s.every((f) => f(x, y)), bbAnd(s));
+export const or = (...s: Shape[]): Shape => withBB((x, y) => s.some((f) => f(x, y)), bbOr(s));
 export const not = (s: Shape): Shape => (x, y) => !s(x, y);
 /** a thick line segment */
-export const seg = (x0: number, y0: number, x1: number, y1: number, r: number): Shape => (x, y) => {
+export const seg = (x0: number, y0: number, x1: number, y1: number, r: number): Shape => withBB((x, y) => {
   const dx = x1 - x0, dy = y1 - y0, t = clamp(((x - x0) * dx + (y - y0) * dy) / (dx * dx + dy * dy || 1));
   return Math.hypot(x - x0 - dx * t, y - y0 - dy * t) <= r;
-};
+}, [Math.min(x0, x1) - r, Math.min(y0, y1) - r, Math.max(x0, x1) + r, Math.max(y0, y1) + r]);
 
 // ------------------------------------------------------------------ height profiles
 export const flat = (v = 0): HFn => () => v;

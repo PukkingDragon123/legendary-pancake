@@ -14,11 +14,12 @@ import { Px } from './icons.tsx';
 import { fmtDur, fmtHM, tap, toast } from './kit.tsx';
 import { NightReport } from './morning.tsx';
 import { Art, dtone, hash, tone } from './px/sleepart.ts';
-import { CH, CW, DOOR, DROP_MAX, FACE, FINISHES, paintCuckoo, PIVOT, WEIGHTS } from './px/cuckoo.ts';
+import { CH, CK, CW, DOOR, DROP_MAX, FACE, FINISHES, paintCuckoo, PIVOT, WEIGHTS } from './px/cuckoo.ts';
 import { stickerURL } from './px/sleepprops.ts';
 import { ArtCanvas, injectSleepFrames, nowT, Paper, sparkleAt } from './sleepkit.tsx';
 import { panel } from './state.ts';
 import { uiBurstAt } from './chrome/uifx.ts';
+import { boardCSS, clipboardClip, wallpaperTile, type BoardOpts } from './chrome/objects.ts';
 import './clockscreen.css';
 
 // ------------------------------------------------------------------ the cuckoo clock
@@ -118,7 +119,7 @@ function CuckooClock(p: { k: number }) {
     if (full) sound.play('clock_wind', { volume: 0.5, rate: 1.2 });
   };
   return (
-    <ArtCanvas w={CW} h={CH} k={p.k} fps={12} deps={[prefs.finish, prefs.mute, prefs.wound.join()]} class="cuckoo" label="A carved cuckoo clock. Tap the door for the songbird, pull a weight's chain to wind it, tap the roof moon to change the wood."
+    <ArtCanvas w={CW * CK} h={CH * CK} k={p.k / CK} fps={12} deps={[prefs.finish, prefs.mute, prefs.wound.join()]} class="cuckoo" label="A carved cuckoo clock. Tap the door for the songbird, pull a weight's chain to wind it, tap the roof moon to change the wood."
       draw={draw} onPointerDown={down} onPointerMove={move} onPointerUp={up} />
   );
 }
@@ -195,11 +196,12 @@ function RoutineBoard() {
     setTimeout(() => setStamp(null), 1800);
   };
   const hours = [20, 22, 0, 2, 4, 6, 8, 10, 12];
+  const board = useBoardBg({ wood: 'oak', seed: 13, bevel: 3, screws: [] });
 
   return (
     <div class="clipboard">
-      <div class="cb-board" />
-      <div class="cb-clip"><i /><b /></div>
+      <div class="cb-board" ref={board} />
+      <img class="cb-clip" src={clipboardClip(60, 2, 1)} alt="" draggable={false} />
       <Paper kind="graph" opts={{ edge: 0.15 }} class="cb-paper">
         <h3 class="cb-title">My sleep week</h3>
         <div class="cb-chart-wrap" onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
@@ -317,16 +319,28 @@ function MonthCalendar(p: { onOpen: (n: SleepSession) => void }) {
 
 // ------------------------------------------------------------------ the wall
 
-let wallU = '';
-function wallpaper() {
-  if (wallU) return wallU;
-  const a = new Art(20, 20);
-  a.rect(0, 0, 20, 20, (x, y) => dtone('moss', 2.4 + (hash(x, y, 9) - 0.5) * 0.35, x, y));
-  const fl = (cx: number, cy: number) => { a.px(cx, cy, tone('sand', 4)); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) a.px(cx + dx, cy + dy, tone('moss', 4)); };
-  fl(5, 5); fl(15, 15);
-  a.px(15, 5, tone('moss', 3)); a.px(5, 15, tone('moss', 3));
-  wallU = a.url(3);
-  return wallU;
+// [ui4] the wall: printed emerald damask wallpaper (a relief-painted tile, 1 art px per CSS px)
+const wallpaper = () => wallpaperTile('emerald', 32, 2);
+
+/** [ui4] paint a varnished board to an element's size (the clipboard's hardboard) */
+function useBoardBg(o: BoardOpts) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let w0 = 0, h0 = 0;
+    const apply = () => {
+      const w = el.offsetWidth, h = el.offsetHeight;
+      if (!w || !h || (Math.abs(w - w0) < 8 && Math.abs(h - h0) < 8)) return;
+      w0 = w; h0 = h;
+      el.style.backgroundImage = `url("${boardCSS(w, h, o)}")`;
+    };
+    apply();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(apply) : null;
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, []);
+  return ref;
 }
 
 export function ClockScreen() {
@@ -346,7 +360,7 @@ export function ClockScreen() {
   return (
     <div class={'cs' + (leaving ? ' leaving' : '')} role="dialog" aria-label="Clock">
       <button class="sf-back" aria-label="Back to the hollow" onClick={close}><Px name="arrow_left" size={30} /></button>
-      <div class="cs-scroll" style={{ backgroundImage: `url(${wallpaper()})` }}>
+      <div class="cs-scroll" style={{ backgroundImage: `url(${wallpaper()})`, backgroundSize: '64px 64px' }}>
         <div class="cs-sign hh-wood-sm"><span>Clock</span></div>
         <div class={'cs-layout' + (wide ? ' wide' : '')}>
           <div class="cs-center">
