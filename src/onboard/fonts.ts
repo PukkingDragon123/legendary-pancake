@@ -1,5 +1,5 @@
 // The office's typefaces, loaded once before any paper is printed. Pixel fonts drawn at their native sizes
-// (or whole multiples), alpha-snapped, so print on the 3D paper is crisp pixel type:
+// (or whole multiples), alpha-snapped, so print on the forms is crisp pixel type:
 //   DISPLAY  TBME Body (the game's hand-lettered face): Pip's handwriting, signatures, big titles
 //   BODY     m6x11plus (Daniel Linssen): the forms' printed text
 //   SMALL    m5x7 (Daniel Linssen): fine print

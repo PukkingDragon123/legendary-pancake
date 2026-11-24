@@ -467,11 +467,11 @@ export class Office implements Stage {
       case 'establish': return { target: V(P ? -0.1 : -0.45, 1.3, -1.6), yaw: P ? 0.2 : 0.36, pitch: 0.1, fit: P ? [2.0, 3.4] : [5.2, 2.8], anchor: [0, P ? -0.05 : 0] };
       case 'wide': return { target: V(-0.4, 1.2, -1.3), yaw: -0.28, pitch: 0.12, fit: P ? [2.0, 3.2] : [4.8, 2.6] };
       case 'open': return { target: V(0, 1.28, -1.7), yaw: 0.0, pitch: 0.06, fit: P ? [2.4, 2.9] : [4.4, 2.5], anchor: [0, P ? -0.04 : 0] };
-      case 'pip': return { target: H.clone().add(V(0, -0.12, 0.3)), yaw: 0.0, pitch: 0.14, fit: P ? [1.05, 1.5] : [2.4, 1.2], anchor: [0, P ? 0.12 : 0.05] };
-      case 'pipL': return { target: H.clone().add(V(-0.05, -0.14, 0.3)), yaw: -0.42, pitch: 0.12, fit: P ? [1.1, 1.6] : [2.6, 1.3], anchor: [P ? 0 : 0.15, P ? 0.12 : 0.05] };
-      case 'pipR': return { target: H.clone().add(V(0.05, -0.12, 0.3)), yaw: 0.4, pitch: 0.12, fit: P ? [1.1, 1.6] : [2.6, 1.3], anchor: [P ? 0 : -0.15, P ? 0.12 : 0.05] };
-      case 'close': return { target: H.clone().add(V(0, -0.02, 0.1)), yaw: 0.06, pitch: 0.1, fit: P ? [0.62, 0.9] : [1.4, 0.7], anchor: [0, P ? 0.1 : 0.05] };
-      case 'low': return { target: H.clone().add(V(0, -0.2, 0.3)), yaw: -0.15, pitch: -0.08, fit: P ? [1.3, 1.9] : [2.8, 1.4], anchor: [0, P ? 0.15 : 0.05] };
+      case 'pip': return { target: H.clone().add(V(0, -0.12, 0.3)), yaw: 0.0, pitch: P ? 0.22 : 0.14, fit: P ? [1.05, 1.5] : [2.4, 1.2], anchor: [0, P ? -0.04 : 0.05] };
+      case 'pipL': return { target: H.clone().add(V(-0.05, -0.14, 0.3)), yaw: -0.42, pitch: P ? 0.2 : 0.12, fit: P ? [1.1, 1.6] : [2.6, 1.3], anchor: [P ? 0 : 0.15, P ? -0.04 : 0.05] };
+      case 'pipR': return { target: H.clone().add(V(0.05, -0.12, 0.3)), yaw: 0.4, pitch: P ? 0.2 : 0.12, fit: P ? [1.1, 1.6] : [2.6, 1.3], anchor: [P ? 0 : -0.15, P ? -0.04 : 0.05] };
+      case 'close': return { target: H.clone().add(V(0, -0.02, 0.1)), yaw: 0.06, pitch: 0.1, fit: P ? [0.62, 0.9] : [1.4, 0.7], anchor: [0, P ? -0.02 : 0.05] };
+      case 'low': return { target: H.clone().add(V(0, -0.2, 0.3)), yaw: -0.15, pitch: -0.08, fit: P ? [1.3, 1.9] : [2.8, 1.4], anchor: [0, P ? -0.1 : 0.05] };
       case 'desk': return { target: V(0.05, DESK_TOP + 0.1, -0.95), yaw: 0.15, pitch: 0.55, fit: P ? [1.2, 1.8] : [2.4, 1.3], anchor: [0, P ? 0.1 : 0] };
       case 'tray': case 'bed': case 'floor': case 'tower': return { target: V(-0.62, DESK_TOP + 0.14, -0.95), yaw: -0.25, pitch: 0.32, fit: P ? [0.75, 1.1] : [1.7, 0.95], anchor: [0, P ? 0.05 : 0] };
       case 'window': return { target: V(L.x0 + 0.4, 1.6, L.window.z), yaw: -0.85, pitch: 0.05, fit: P ? [1.7, 2.6] : [3.4, 2.0] };
@@ -480,7 +480,7 @@ export class Office implements Stage {
       case 'board': return { target: V(L.x1 - 0.2, 1.8, -0.3), yaw: 0.85, pitch: 0.05, fit: P ? [1.6, 2.2] : [3.4, 1.9] };
       case 'ask': {
         // Pip framed in the part of the screen the form leaves free (askArea)
-        const A = this.askArea, sub: [number, number] = P ? [1.55, 0.82] : [1.4, 0.9];
+        const A = this.askArea, sub: [number, number] = P ? [1.55, 0.82] : [1.8, 1.1];
         return { target: H.clone().add(V(0, -0.06, 0.25)), yaw: 0.06, pitch: 0.12, fit: [sub[0] / Math.max(0.2, A.w), sub[1] / Math.max(0.2, A.h)], anchor: [A.cx, A.cy] };
       }
       case 'form': case 'formClock': case 'stamp': return this.shots('ask');
@@ -545,6 +545,11 @@ export class Office implements Stage {
     const d = Math.max(0.06, (0.003 * innerHeight) / (2 * tan * Math.max(0.5, from.px)));
     this.rig = () => ({ pos: dial.clone().add(V(0, 0, d)), look: dial.clone(), ax: (from.x / innerWidth) * 2 - 1, ay: -((from.y / innerHeight) * 2 - 1) });
   }
+  /** Resolves once `sec` seconds of the office's own time have passed (stays in step with its camera moves). */
+  after(sec: number): Promise<void> {
+    const end = this.time + sec;
+    return new Promise((done) => { const tick = () => { if (this.time >= end) { this.tickers.delete(tick); done(); } }; this.tickers.add(tick); });
+  }
   /** Recompute the current shot (after askArea or the screen changed). */
   reframe() { this.shot = this.shots(this.shotName); }
   /** The client folder on the desk, on screen (CSS px). */
@@ -563,7 +568,7 @@ export class Office implements Stage {
       f.cover.rotation.z = Math.sin(Math.min(1, Math.max(0, k)) * Math.PI) * 2.6;
       if (k > 0.5 && !f.stack.visible) { f.stack.visible = true; }
       f.stack.scale.y = 0.0012 * n; f.stack.position.y = 0.0015 + f.stack.scale.y / 2;
-      if (k >= 1) { f.cover.rotation.z = 0; f.cover.position.y = 0.003 + f.stack.scale.y; this.tickers.delete(tick); try { sound.play('files', { volume: 0.35, gap: 60 }); } catch { /* */ } }
+      if (k >= 1) { f.cover.rotation.z = 0; f.cover.position.y = 0.003 + f.stack.scale.y; this.tickers.delete(tick); try { sound.play('paper_rustle', { volume: 0.3, rate: 0.8, gap: 60 }); } catch { /* */ } }
     };
     this.tickers.add(tick);
   }

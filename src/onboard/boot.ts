@@ -1,8 +1,10 @@
 // The loading clock (#boot in index.html, painted by src/onboard/tools/bootart.mjs) and its handoff.
-// Before any script runs the clock already animates in pure CSS: the minute and hour hands sweep with the
-// (estimated) loading progress, the moon rises in the arch, the seconds tick and the pendulum swings.
-// Once main.tsx marks the splash `gone`, this module takes over:
-//   1. strike  the hands swing round to the real time and the clock chimes with a little shudder
+// Before any module runs the clock already keeps the real time: the hands are CSS animations at clock speed,
+// started at the current time by a tiny inline script (negative delays), the moon rises in the arch with the
+// (estimated) loading progress and the pendulum swings. Once main.tsx marks the splash `gone`, this module
+// takes over:
+//   1. strike  the minute hand winds once round (landing back on the real time), the moon rises full and the
+//              clock chimes with a little shudder; then the hands go on keeping time
 //   2. dive    a returning player: the clock zooms into its dial while a stepped pixel iris opens through it
 //              onto the world; a new player (`hold`): the clock waits for one tap (which also unlocks audio),
 //              then zooms nose to the dial, where the 3D office's own clock (the same painting) takes over and
@@ -27,7 +29,14 @@ const FREEZE = (() => { try { if (!import.meta.env.DEV) return null; const v = n
 let state: 'loading' | 'striking' | 'struck' | 'leaving' | 'gone' = 'loading';
 let struck: Promise<void> | null = null;
 let leaving: Promise<void> | null = null;
-let secTimer = 0;
+
+/** Start the hands' clock-speed animations at the current time (seconds into the minute, hour and 12 hours). */
+function syncTime(b: HTMLElement) {
+  const d = new Date(), s = d.getSeconds() + d.getMilliseconds() / 1000, m = d.getMinutes() * 60 + s;
+  b.style.setProperty('--ts', s.toFixed(2));
+  b.style.setProperty('--tm', m.toFixed(1));
+  b.style.setProperty('--th', ((d.getHours() % 12) * 3600 + m).toFixed(1));
+}
 
 // ------------------------------------------------------------------ 1. strike the real time
 
@@ -45,29 +54,20 @@ function strike(): Promise<void> {
     if (!b) return;
     const k = parseFloat(getComputedStyle(b).fontSize) || 2;
     const mh = b.querySelector<HTMLElement>('.bt-mh'), hh = b.querySelector<HTMLElement>('.bt-hh'), mo = b.querySelector<HTMLElement>('.bt-moon'), sh = b.querySelector<HTMLElement>('.bt-sh');
-    const now = new Date(), mins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
-    const mT = Math.round(((mins % 60) / 60) * ART.mn) % ART.mn, hT = Math.round((((mins / 60) % 12) / 12) * ART.hn) % ART.hn;
-    // the seconds hand now keeps real time
-    if (sh) {
-      sh.style.animation = 'none';
-      const tick = () => { setFrame(sh, Math.floor((new Date().getSeconds() / 60) * ART.sn) % ART.sn, ART.fr); };
-      tick();
-      secTimer = window.setInterval(tick, 1000);
-    }
+    void sh;
+    syncTime(b);
     if (mh && hh && mo) {
-      const m0 = frameOf(mh, ART.fr, k), h0 = frameOf(hh, ART.fr, k), o0 = frameOf(mo, ART.mw, k);
-      for (const n of [mh, hh, mo]) n.style.animation = 'none';
+      const m0 = frameOf(mh, ART.fr, k), o0 = frameOf(mo, ART.mw, k);
+      mo.style.animation = 'none';
       if (!reduced()) {
-        // the hands race round (always forwards, at least a quarter turn) and settle on the time
-        let dm = (mT - m0 + ART.mn) % ART.mn;
-        if (dm < ART.mn / 4) dm += ART.mn;
-        const dh = (hT - h0 + ART.hn) % ART.hn, dur = 760, t0 = performance.now();
+        // the minute hand winds once round, landing back on the real time, while the moon rises full
+        mh.style.animation = 'none';
+        const dur = 900, t0 = performance.now();
         play('clock_wind', 0.26, 1.25);
         await new Promise<void>((done) => {
           const step = () => {
             const t = Math.min(1, (performance.now() - t0) / dur), e = 1 - (1 - t) ** 3;
-            setFrame(mh, (m0 + Math.round(dm * e)) % ART.mn, ART.fr);
-            setFrame(hh, (h0 + Math.round(dh * e)) % ART.hn, ART.fr);
+            setFrame(mh, (m0 + Math.round(ART.mn * e)) % ART.mn, ART.fr);
             setFrame(mo, Math.round(o0 + (ART.mf - 1 - o0) * e), ART.mw);
             if (t >= 1) { done(); return; }
             requestAnimationFrame(step);
@@ -75,8 +75,11 @@ function strike(): Promise<void> {
           requestAnimationFrame(step);
           setTimeout(done, dur + 400);
         });
+        // back to keeping time
+        mh.style.animation = ''; mh.style.backgroundPosition = '';
+        syncTime(b);
       }
-      setFrame(mh, mT, ART.fr); setFrame(hh, hT, ART.fr); setFrame(mo, ART.mf - 1, ART.mw);
+      setFrame(mo, ART.mf - 1, ART.mw);
     }
     b.classList.add('done');
     play('clock_chime', 0.42);
@@ -177,7 +180,6 @@ async function fadeOut(b: HTMLElement, ms = 320) {
 function hide() {
   const b = el();
   state = 'gone';
-  clearInterval(secTimer);
   if (!b) return;
   b.classList.add('gone');
   b.classList.remove('hold');
@@ -199,6 +201,7 @@ function check() {
   const b = el();
   if (!b || typeof MutationObserver === 'undefined') return;
   b.classList.add('js');
+  syncTime(b);
   new MutationObserver(check).observe(b, { attributes: true, attributeFilter: ['class'] });
   check();
 })();

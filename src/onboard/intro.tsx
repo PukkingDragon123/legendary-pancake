@@ -74,9 +74,9 @@ export function Intro() {
     sc.post.enabled = false; // the office draws its own HD-2D picture (look.ts)
     sc.setStage(office);
     const speech = new Speech();
-    speech.px = office.look.px;
+    speech.px = Math.max(2, office.look.px);
     office.look.overlay.add(speech.group);
-    office.tickers.add((dt) => { speech.px = office.look.px; speech.update(dt, office.camera); });
+    office.tickers.add((dt) => { speech.px = Math.max(2, office.look.px); speech.update(dt, office.camera); });
     speech.onTalk = () => office.talk();
     const reactTo = dioramas(office);
     office.pip.pose = 'stand';
@@ -133,6 +133,7 @@ export function Intro() {
       speech.say(null);
       const s = STEPS[i];
       if (s.kind === 'dial') { cards.clockAt = toMin(U.a.wake); office.window(toMin(U.a.wake) / 60); }
+      cards.nightOwl = U.a.species;
       bump();
       play('paper_rustle', 0.45, 1.05);
       office.go('ask', false, 2.2);
@@ -143,7 +144,8 @@ export function Intro() {
     };
     const startStep = (i: number, react: Beat | null) => {
       U.si = i;
-      const list = [...(react ? [react] : []), ...STEPS[i].say(U.a, { artifact: ARTIFACT }).map((b) => beatOf(b)!)];
+      // the reaction is said to camera once the form has gone (the camera leaves the form's framing)
+      const list = [...(react ? [{ ...react, shot: react.shot ?? 'pip' }] : []), ...STEPS[i].say(U.a, { artifact: ARTIFACT }).map((b) => beatOf(b)!)];
       talk(list, () => void enterAsk(i));
     };
 
@@ -151,11 +153,12 @@ export function Intro() {
     let penBusy = 0;
     const penTo = (el: Element | null) => {
       if (!el) return;
-      const b = el.getBoundingClientRect(), x = b.left + b.width * 0.4, y = b.top + b.height * 0.5;
       const s = Math.min(innerWidth, innerHeight) * 0.9;
       const id = ++penBusy;
       ov.play(pen, 0.62, (k, o) => {
         if (id !== penBusy) { o.visible = false; return; }
+        // follow the box (the form may still be settling)
+        const b = el.getBoundingClientRect(), x = b.left + b.width * 0.4, y = b.top + b.height * 0.5;
         const inK = Math.min(1, k / 0.35), outK = Math.max(0, (k - 0.72) / 0.28);
         const e = 1 - (1 - inK) ** 3;
         const sx = x + 160 * (1 - e) + outK * 200, sy = y - 120 * (1 - e) + outK * 20;
@@ -183,10 +186,8 @@ export function Intro() {
     const stampOn = (text: string) => new Promise<void>((done) => {
       const box = panelEl.current?.querySelector('.qp-box');
       if (!box) { U.stamped = text; bump(); done(); return; }
-      const b = box.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
-      const s = b.width * 10;
       let hit = false;
-      const onHit = () => {
+      const onHit = (x: number, y: number) => {
         U.stamped = text; bump();
         play('stamp', 0.85); haptic(30);
         office.bump(1);
@@ -194,11 +195,12 @@ export function Intro() {
       };
       play('pickup_item', 0.4, 0.9);
       ov.play(stamp, 1.05, (k, o) => {
-        // swing in from the top right, hover, slam down, lift away
+        // swing in from the top right, hover, slam down, lift away (following the box while the form settles)
+        const b = box.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2, s = b.width * 10;
         const p1 = Math.min(1, k / 0.38), e1 = 1 - (1 - p1) ** 3;
         let px = x + (1 - e1) * 220, py = y - 140 - (1 - e1) * 160;
         if (k > 0.38 && k < 0.52) { const d = (k - 0.38) / 0.14; py = y - 140 + d * d * 136; px = x; }
-        else if (k >= 0.52 && k < 0.66) { py = y - 4; px = x; if (!hit) { hit = true; onHit(); } }
+        else if (k >= 0.52 && k < 0.66) { py = y - 4; px = x; if (!hit) { hit = true; onHit(x, y); } }
         else if (k >= 0.66) { const d = (k - 0.66) / 0.34; py = y - 4 - d * 220; px = x + d * 160; }
         o.position.set(px, -py, 300);
         o.scale.setScalar(s);
@@ -326,7 +328,7 @@ export function Intro() {
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (phase === 'ask') void file(); else onTap(); }
     };
     addEventListener('keydown', onKey);
-    const onResize = () => { speech.px = office.look.px; U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); bump(); window.setTimeout(frameAsk, 50); };
+    const onResize = () => { speech.px = Math.max(2, office.look.px); U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); bump(); window.setTimeout(frameAsk, 50); };
     addEventListener('resize', onResize);
     (window as unknown as { hhIntro: unknown }).hhIntro = { office, speech, overlay: ov, a: () => U.a, file: () => void file(), act: () => actions.current, phase: () => phase, step: () => U.si, skip: () => void finishAll(true) };
 
@@ -354,6 +356,7 @@ export function Intro() {
         if (q.has('obstamp')) window.setTimeout(() => void file(), 1500);
         return;
       }
+      let pulled: Promise<void> = Promise.resolve();
       if (bootShowing()) {
         await bootReady();
         if (!alive) return;
@@ -367,20 +370,21 @@ export function Intro() {
         if (!alive) return;
         if (DEV && q.get('obhold')) await wait(Number(q.get('obhold')));
         play('amb_room', 0.2);
-        void office.pullBack(m, 'open', 4.8);
+        pulled = office.pullBack(m, 'open', 4.8);
       } else office.cut('open');
       phase = 'open';
-      // the lamp clicks on as the camera pulls back; Pip looks up from his paperwork
-      await wait(1500);
+      // the lamp clicks on as the camera pulls back; Pip looks up from his paperwork (timed in the office's own
+      // time, so a slow device keeps the beats in step with the camera)
+      await office.after(1.5);
       if (!alive) return;
       office.lampOn(true);
       play('tick_brass', 0.45, 0.8);
-      await wait(1700);
+      await office.after(1.7);
       if (!alive) return;
       office.pip.lookAt = office.camera.position;
       office.pip.setMood('surprised', 1.0);
       office.pip.play('stretch');
-      await wait(1400);
+      await Promise.all([office.after(1.4), pulled]);
       if (!alive) return;
       startStep(0, null);
     })();

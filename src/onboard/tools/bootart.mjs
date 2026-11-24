@@ -40,6 +40,7 @@ const R = {
   moss: rampOf([0x0e2010, 0x1a3a1a, 0x28562a, 0x3c7438, 0x5a9446, 0x86b45a, 0xb8d47a], 9),
   dark: rampOf([0x050305, 0x0e0808, 0x1a100c, 0x2a1a12], 5),
   red: rampOf([0x3a0808, 0x6a1010, 0x9a1c18, 0xc83828, 0xf06a48], 6),
+  patina: rampOf([0x0c140c, 0x1c2a16, 0x34401e, 0x4e5a2a, 0x6a7436, 0x8a8a44], 8),
 };
 
 // ------------------------------------------------------------------ noise
@@ -105,7 +106,7 @@ function crc32(b) { let c = -1; for (const x of b) c = CRC[(c ^ x) & 255] ^ (c >
 
 // ------------------------------------------------------------------ the relief painter
 
-const M = { none: 0, wood: 1, woodDark: 2, brass: 3, enamel: 4, steel: 5, ink: 6, sky: 7, moon: 8, moss: 9, dark: 10, red: 11 };
+const M = { none: 0, wood: 1, woodDark: 2, brass: 3, enamel: 4, steel: 5, ink: 6, sky: 7, moon: 8, moss: 9, dark: 10, red: 11, patina: 12 };
 class Relief {
   constructor(w, h) { this.w = w; this.h = h; this.m = new Uint8Array(w * h); this.hgt = new Float32Array(w * h); this.alb = new Float32Array(w * h); this.flat = new Uint8Array(w * h); this.gloss = new Float32Array(w * h).fill(1); }
   in(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
@@ -123,6 +124,46 @@ class Relief {
     }
   }
   mat(x, y) { return this.in(x, y) ? this.m[y * this.w + x] : 0; }
+  /**
+   * Age the piece: wood arrises rubbed pale where hands touch them, little nicks out of the edges, fine scratches
+   * and dents in the veneer; verdigris settling in the brass's hollows and its high points rubbed bright.
+   * `keep(x, y)` protects regions that must stay exact (windows other sprites are fitted into).
+   */
+  wear(seed, keep = () => false) {
+    const { w, h } = this, isWood = (m) => m === M.wood || m === M.woodDark;
+    const hg = Float32Array.from(this.hgt), mt = Uint8Array.from(this.m);
+    const at = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? -9 : mt[y * w + x] ? hg[y * w + x] : -9);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const i = y * w + x, m = mt[i];
+      if (!m || keep(x, y)) continue;
+      const here = hg[i];
+      let drop = 0, avg = 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) drop = Math.max(drop, here - at(x + dx, y + dy));
+      for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2], [-2, -2], [2, 2], [2, -2], [-2, 2]]) avg += Math.max(-2, at(x + dx, y + dy));
+      avg /= 8;
+      const n = vnoise(x * 0.1, y * 0.1, seed), n2 = vnoise(x * 0.5, y * 0.5, seed + 3);
+      if (isWood(m)) {
+        // the edge of a step: rubbed pale in long patches, nicked here and there
+        if (drop > 1.2 && n > 0.56) this.alb[i] += 0.05 + (n - 0.56) * 0.35;
+        if (drop > 1.2 && hash(x, y, seed + 5) > 0.97 && n2 > 0.5) { this.hgt[i] -= 1.6; this.alb[i] -= 0.1; }
+        if (hash(x, y, seed + 9) > 0.996) { this.hgt[i] -= 0.9; for (const [dx, dy] of [[1, 0], [0, 1]]) { const j = (y + dy) * w + x + dx; if (x + dx < w && y + dy < h && isWood(this.m[j])) this.hgt[j] -= 0.5; } }
+      } else if (m === M.brass) {
+        if (here < avg - 0.7 && n > 0.42 && hash(x, y, seed + 11) > 0.25) this.m[i] = M.patina;
+        else if (here > avg + 0.5 && n2 > 0.5) this.alb[i] += 0.08;
+        else this.alb[i] += (n - 0.5) * 0.12;
+      }
+    }
+    // fine scratches across the veneer, light where they catch the lamp
+    for (let k = 0; k < Math.round((w * h) / 900); k++) {
+      const x0 = hash(k, 1, seed + 21) * w, y0 = hash(k, 2, seed + 21) * h, a = hash(k, 3, seed + 21) * Math.PI, len = 3 + hash(k, 4, seed + 21) * 7;
+      for (let t = 0; t < len; t++) {
+        const x = Math.floor(x0 + Math.cos(a) * t), y = Math.floor(y0 + Math.sin(a) * t * 0.6);
+        if (!this.in(x, y) || keep(x, y) || !isWood(this.m[y * w + x])) continue;
+        this.alb[y * w + x] += t === 0 || t > len - 2 ? 0.05 : 0.1;
+      }
+    }
+    return this;
+  }
   H(x, y) { x = clamp(x, 0, this.w - 1); y = clamp(y, 0, this.h - 1); const i = y * this.w + x; return this.m[i] ? this.hgt[i] : this.hgt[i] - 4; }
   /** shade into a Buf */
   render(o = {}) {
@@ -150,6 +191,7 @@ class Relief {
       switch (mat) {
         case M.wood: case M.woodDark: t = 0.04 + dif * 0.48 + fil * 0.8 + alb - occ + spec * 0.7 + env * 0.05; break;
         case M.brass: t = env * 0.5 + dif * 0.46 + spec * 0.75 + alb - occ * 1.2; break;
+        case M.patina: t = 0.2 + dif * 0.4 + alb - occ; break;
         case M.enamel: t = 0.42 + dif * 0.45 + alb - occ * 0.8 + spec * 0.2; break;
         case M.steel: t = env * 0.45 + spec * 0.9 + dif * 0.15 + alb - occ; break;
         case M.dark: t = 0.15 + dif * 0.25 + alb - occ; break;
@@ -157,20 +199,54 @@ class Relief {
       }
       out.set(x, y, pick(rampFor(mat), clamp(t), x, y));
     }
-    if (o.outline) {
-      const ol = o.outline;
-      const src = new Buf(this.w, this.h); src.d.set(out.d);
-      for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
-        if (src.a(x, y)) continue;
-        if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => src.a(x + dx, y + dy) > 200)) out.set(x, y, ol);
-      }
-    }
+    if (o.outline) organicEdge(out, o.seed ?? 1, o.keep ?? (() => false));
     return out;
+  }
+}
+/**
+ * Hand-drawn edges for a painted sprite: the silhouette wobbles in and out by a pixel along its length (never a
+ * ruler-straight line or a compass-perfect curve), then gets a selective outline: on the shadow side (below,
+ * right) a dark, cool, purple-leaning version of the colour it borders; on the lit side (above, left) a warmer,
+ * softer one, broken where the light catches the edge. Regions `keep` marks stay exactly as painted.
+ */
+function organicEdge(out, seed, keep) {
+  const { w, h } = out;
+  const src = new Buf(w, h); src.d.set(out.d);
+  const solid = (x, y) => src.a(x, y) > 200;
+  const col = (x, y) => { const i = (y * w + x) * 4; return [src.d[i], src.d[i + 1], src.d[i + 2]]; };
+  const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  // 1. the silhouette breathes: low-frequency noise nibbles or grows the edge by one pixel
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (keep(x, y)) continue;
+    // long, slow undulations (a hand's wobble), never single-pixel noise
+    const n = vnoise(x * 0.07, y * 0.07, seed) * 0.85 + vnoise(x * 0.2, y * 0.2, seed + 1) * 0.15;
+    if (solid(x, y)) {
+      const open = N4.filter(([dx, dy]) => !solid(x + dx, y + dy)).length;
+      if (open === 1 && n > 0.7) out.set(x, y, [0, 0, 0], 0);
+    } else {
+      const nb = N4.find(([dx, dy]) => solid(x + dx, y + dy));
+      if (nb && n < 0.27) { const c = col(x + nb[0], y + nb[1]); out.set(x, y, c.map((v) => Math.round(v * 0.82))); }
+    }
+  }
+  // 2. selective outline round the new silhouette
+  const s2 = new Buf(w, h); s2.d.set(out.d);
+  const solid2 = (x, y) => s2.a(x, y) > 200;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (solid2(x, y)) continue;
+    const nb = N4.find(([dx, dy]) => solid2(x + dx, y + dy));
+    if (!nb) continue;
+    const i = ((y + nb[1]) * w + x + nb[0]) * 4, c = [s2.d[i], s2.d[i + 1], s2.d[i + 2]];
+    const lit = nb[0] > 0 || nb[1] > 0; // the outline sits on the object's upper or left side
+    if (lit && vnoise(x * 0.3, y * 0.3, seed + 7) > 0.62) continue; // lost in the light
+    const o = lit
+      ? [c[0] * 0.55 + 10, c[1] * 0.42 + 4, c[2] * 0.4 + 4]
+      : [c[0] * 0.26 + 8, c[1] * 0.16 + 3, c[2] * 0.26 + 12];
+    out.set(x, y, o.map((v) => Math.round(Math.min(255, v))));
   }
 }
 const norm = (v) => { const l = Math.hypot(...v) || 1; return v.map((c) => c / l); };
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-function rampFor(m) { return m === M.wood ? R.wood : m === M.woodDark ? R.woodDark : m === M.brass ? R.brass : m === M.enamel ? R.enamel : m === M.steel ? R.steel : m === M.ink ? R.ink : m === M.sky ? R.sky : m === M.moon ? R.moon : m === M.moss ? R.moss : m === M.red ? R.red : R.dark; }
+function rampFor(m) { return m === M.patina ? R.patina : m === M.wood ? R.wood : m === M.woodDark ? R.woodDark : m === M.brass ? R.brass : m === M.enamel ? R.enamel : m === M.steel ? R.steel : m === M.ink ? R.ink : m === M.sky ? R.sky : m === M.moon ? R.moon : m === M.moss ? R.moss : m === M.red ? R.red : R.dark; }
 
 /** flame-mahogany veneer figure as an albedo offset (dir: 'v' vertical boards, 'h' rails, 'f' flame from a centre) */
 function veneer(x, y, dir = 'v', seed = 0, cx = 0) {
@@ -293,8 +369,15 @@ function paintClock() {
     if (Math.abs(vnoise(x * 0.3, y * 0.3, 62) - 0.5) < 0.014 && hash(x, y, 63) > 0.4) a -= 0.16;
     if (d < 20.5) a += (Math.sin(d * 2.6) > 0.3 ? 0.025 : -0.025);
     if (d > RD - 1.2) a -= 0.15;
+    a -= Math.pow(d / RD, 5) * 0.08; // yellowed toward the rim
     return a;
   });
+  // an old chip out of the enamel by the IIII, the dark ground showing through
+  for (let y = DY + 10; y < DY + 22; y++) for (let x = CX + 22; x < CX + 34; x++) {
+    const d = dist(x, y, CX + 27.5, DY + 15.5) + (vnoise(x * 0.7, y * 0.7, 66) - 0.5) * 2.2;
+    if (d < 2.1 && dist(x, y, CX, DY) < RD - 0.5) r.put(x, y, M.dark, 6.6, 0.1);
+    else if (d < 3 && dist(x, y, CX, DY) < RD) r.alb[y * W + x] -= 0.12;
+  }
   for (let y = DY - RD; y < DY + RD; y++) for (let x = CX - RD; x < CX + RD; x++) {
     const d = dist(x, y, CX, DY);
     if (Math.abs(d - 32.6) < 0.5 || Math.abs(d - 29.4) < 0.5) ink(x, y);
@@ -564,15 +647,19 @@ function bracket() {
   const prof = [9, 11, 12, 12, 11, 9, 8, 9, 10, 9];
   r.fill(0, 0, BR.w, 10, (x, y) => Math.abs(x + 0.5 - cx) < 84 - (y > 6 ? (y - 6) * 2 : 0), M.wood, (x, y) => prof[y], (x, y) => veneer(x, y, 'h', 93));
   r.fill(0, 3, BR.w, 4, (x, y) => Math.abs(x + 0.5 - cx) < 83, M.brass, () => 12.5);
-  return r.render({ outline: [10, 4, 6] });
+  return r.wear(19).render({ outline: true, seed: 5 });
 }
 /** A pool of warm lamplight on the wall, in hard stepped bands with ordered dither. */
 function lampPool() {
   const w = 220, h = 280, b = new Buf(w, h), cx = w / 2, cy = h * 0.45;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const nx = (x + 0.5 - cx) / (w / 2), ny = (y + 0.5 - cy) / (h / 2), d = Math.sqrt(nx * nx + ny * ny);
+    const nx = (x + 0.5 - cx) / (w / 2), ny = (y + 0.5 - cy) / (h / 2), a = Math.atan2(ny, nx);
+    // the rim wanders (a shade's uneven edge, the wall's texture), the light leans up and left
+    const rag = 1 + (fbm(Math.cos(a) * 1.6 + 3, Math.sin(a) * 1.6 + 3, 8) - 0.5) * 0.34 + (vnoise(x * 0.09, y * 0.09, 9) - 0.5) * 0.1;
+    const d = Math.sqrt(nx * nx + ny * ny) / rag;
     if (d >= 1) continue;
-    const lv = (1 - d) * 6, band = Math.floor(lv), frac = lv - band;
+    const lean = clamp(1 - (nx * 0.25 + ny * 0.3) * 0.4, 0.7, 1.15);
+    const lv = (1 - d) * 6 * lean, band = Math.floor(lv), frac = lv - band;
     const k = band + (frac > bayer(x, y) ? 1 : 0);
     if (k <= 0) continue;
     b.set(x, y, [255, 178, 92], Math.min(6, k) * 11);
@@ -610,7 +697,9 @@ function sparkle() {
 // ------------------------------------------------------------------ assemble
 
 const relief = paintClock();
-const caseB = relief.render({ outline: [12, 5, 6] });
+const keepClock = (x, y) => dist(x, y, CX, DY) < RD + 1 || (y < AY + 1 && dist(x, y, CX, AY) < MOON.r + 2) || sdAp(x, y) < 2;
+relief.wear(7, keepClock);
+const caseB = relief.render({ outline: true, seed: 3, keep: keepClock });
 const glass = paintGlass();
 const HN = 120, MN = 120, SN = 60;
 const hourS = handStrip(HOUR, HN), minS = handStrip(MINUTE, MN), secS = handStrip(SECOND, SN, true);
@@ -650,7 +739,7 @@ export const CLOCK_ART = ${JSON.stringify({
   writeFileSync(fileURLToPath(new URL('../clockart.gen.ts', import.meta.url)), gen);
 }
 
-// ---- progress timing: the minute hand sweeps most of a turn while loading (fast at first, then a crawl)
+// ---- progress timing: the moon rises in the arch with the (estimated) loading progress, fast at first, then a crawl
 const LOAD_S = 26;
 const prog = (t) => { const a = Math.min(1, t / 7); return 0.9 * (1 - (1 - a) ** 2.4) + 0.07 * Math.max(0, (t - 7) / (LOAD_S - 7)); };
 const invProg = (p) => { let lo = 0, hi = LOAD_S; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (prog(m) < p) lo = m; else hi = m; } return hi; };
@@ -663,8 +752,6 @@ function progFrames(name, frames, fw) {
   }
   return `@keyframes ${name}{${out.join('')}}`;
 }
-const minFrames = Array.from({ length: Math.round(MN * prog(LOAD_S)) + 1 }, (_, i) => i);
-const hourFrames = Array.from({ length: 11 }, (_, i) => 110 + i);
 const moonFrames = Array.from({ length: MOON_N - 4 }, (_, i) => i);
 const SH = H + BR.h - 2; // the clock and its bracket
 
@@ -689,9 +776,9 @@ background:#020504 url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-
 #boot .bt-glass{left:0;top:0;width:${W}em;height:${H}em}
 #boot .bt-pend{left:${APB.x0}em;top:${APB.y0}em;width:${APB.w}em;height:${APB.h}em;background:url(${pend.url()}) 0 0/${APB.w * PEND_N}em ${APB.h}em;animation:bt-pend .55s steps(${PEND_N - 1},jump-none) infinite alternate}
 #boot .bt-h{left:${HO.x}em;top:${HO.y}em;width:${FR}em;height:${FR}em}
-#boot .bt-hh{background:url(${hourS.url()}) -${hourFrames[0] * FR}em 0/${FR * HN}em ${FR}em;animation:bt-hh ${LOAD_S}s steps(1,end) forwards}
-#boot .bt-mh{background:url(${minS.url()}) 0 0/${FR * MN}em ${FR}em;animation:bt-mh ${LOAD_S}s steps(1,end) forwards}
-#boot .bt-sh{background:url(${secS.url()}) 0 0/${FR * SN}em ${FR}em;animation:bt-sh 60s steps(${SN}) infinite}
+#boot .bt-hh{background:url(${hourS.url()}) 0 0/${FR * HN}em ${FR}em;animation:bt-hh 43200s steps(${HN}) calc(var(--th, 0) * -1s) infinite}
+#boot .bt-mh{background:url(${minS.url()}) 0 0/${FR * MN}em ${FR}em;animation:bt-mh 3600s steps(${MN}) calc(var(--tm, 0) * -1s) infinite}
+#boot .bt-sh{background:url(${secS.url()}) 0 0/${FR * SN}em ${FR}em;animation:bt-sh 60s steps(${SN}) calc(var(--ts, 0) * -1s) infinite}
 #boot .bt-boss{left:${CX - 4}em;top:${DY - 4}em;width:8em;height:8em}
 #boot .bt-tap{left:${CX + 26}em;top:${DY + 24}em;width:${ptr.fw}em;height:${ptr.fh}em;background:url(${ptr.url}) 0 0/${ptr.fw * 2}em ${ptr.fh}em;opacity:0}
 #boot .bt-spark{width:7em;height:7em;opacity:0}
@@ -707,14 +794,14 @@ background:#020504 url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-
 @keyframes bt-mote{0%{opacity:0;transform:translate(0,0)}15%{opacity:.7}50%{transform:translate(6em,-14em)}85%{opacity:.5}100%{opacity:0;transform:translate(2em,-28em)}}
 @keyframes bt-sh{to{background-position:-${SN * FR}em 0}}
 @keyframes bt-pend{to{background-position:-${(PEND_N - 1) * APB.w}em 0}}
-${progFrames('bt-mh', minFrames, FR)}
-${progFrames('bt-hh', hourFrames, FR)}
+@keyframes bt-mh{to{background-position:-${MN * FR}em 0}}
+@keyframes bt-hh{to{background-position:-${HN * FR}em 0}}
 ${progFrames('bt-moon', moonFrames, MW.w)}
 @keyframes bt-tap{0%{background-position:0 0}50%{background-position:-${ptr.fw}em 0}}
 @keyframes bt-invite{0%,100%{transform:none}84%{transform:translateY(-1em)}88%{transform:translateY(0)}92%{transform:translateY(-.5em)}96%{transform:none}}
 @keyframes bt-chime{0%{transform:rotate(0)}10%{transform:rotate(-1deg)}22%{transform:rotate(.9deg)}34%{transform:rotate(-.6deg)}46%{transform:rotate(.4deg)}58%{transform:rotate(-.2deg)}70%,100%{transform:none}}
 @keyframes bt-spark{0%{opacity:1;transform:translate(0,0) scale(.4)}60%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1)}}
-@media (prefers-reduced-motion:reduce){#boot *{animation-duration:0s!important;animation-iteration-count:1!important}}
+@media (prefers-reduced-motion:reduce){#boot *:not(.bt-h){animation-duration:0s!important;animation-iteration-count:1!important}}
 `.trim().replace(/\n+/g, '\n');
 
 const motes = [[-48, 30, 0], [44, 10, -2.1], [-22, -40, -4.4], [56, -56, -6.2], [-62, -8, -1.3], [14, 62, -3.6], [32, -70, -7.7], [-36, 70, -5.1]];
@@ -737,6 +824,7 @@ const html = `<!-- boot:begin (generated by src/onboard/tools/bootart.mjs; edit 
         </div>
       </div>
     </div>
+    <script>(function(){try{var d=new Date(),s=d.getSeconds()+d.getMilliseconds()/1e3,m=d.getMinutes()*60+s,b=document.getElementById('boot').style;b.setProperty('--ts',s.toFixed(2));b.setProperty('--tm',m.toFixed(1));b.setProperty('--th',((d.getHours()%12)*3600+m).toFixed(1))}catch(e){}})()</script>
     <!-- boot:end -->`;
 
 const file = fileURLToPath(new URL('../../../index.html', import.meta.url));

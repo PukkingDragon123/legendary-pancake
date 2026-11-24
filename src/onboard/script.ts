@@ -203,7 +203,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 'hours', title: 'Hours of sleep', kind: 'hours', field: 'hours', shot: 'tower', vignettes: true,
-    say: () => [{ text: 'And how much sleep would you like? Slide the brass knob. One pillow per hour, obviously.', mood: 'happy', shot: 'tower', cut: true }],
+    say: () => [{ text: 'And how much sleep would you like? Slide the brass marker. One pillow per hour, obviously.', mood: 'happy', shot: 'tower', cut: true }],
     react: (a) => (a.hours < 7 ? { text: 'Hmm, a little short. Most people need seven to nine hours. We can nudge it later.', mood: 'worried' } : a.hours >= 9 ? { text: 'A champion sleeper! Respect.', mood: 'love' } : { text: 'Perfect. Right in the sweet spot.', mood: 'joy', act: 'nod' }),
   },
   {

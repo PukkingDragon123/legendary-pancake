@@ -46,7 +46,7 @@ function css() {
 .qp-do{font:calc(16 * var(--u)) "HH m5x7",monospace;line-height:calc(9 * var(--u));color:#8a5a14;margin-bottom:calc(3 * var(--u));display:flex;gap:calc(3 * var(--u));align-items:center}
 .qp-do b{font-weight:normal;color:#b33a1a}
 .qp-grid{display:grid;gap:calc(3 * var(--u));margin-bottom:calc(3 * var(--u))}
-.qp-card{position:relative;background-size:100% 100%;cursor:pointer;padding:calc(3 * var(--u)) calc(3 * var(--u)) calc(2 * var(--u));border:0;background-color:transparent;text-align:center;font:calc(16 * var(--u)) "HH m5x7",monospace;line-height:calc(8 * var(--u));color:#17130f;transition:transform .12s steps(2)}
+.qp-card{position:relative;background-size:100% 100%;cursor:pointer;padding:calc(3 * var(--u)) calc(3 * var(--u)) calc(4 * var(--u));border:0;background-color:transparent;text-align:center;font:calc(16 * var(--u)) "HH m5x7",monospace;line-height:calc(8 * var(--u));color:#17130f;transition:transform .12s steps(2)}
 .qp-card:active{transform:translateY(var(--u))}
 .qp-card.on{transform:translateY(calc(-1 * var(--u)))}
 .qp-win{display:block;width:100%;margin-bottom:calc(2 * var(--u))}
@@ -109,6 +109,26 @@ function css() {
 }
 
 /** measure an element (texture sizes follow the layout) */
+/**
+ * Register a window's live model with the 3D layer while mounted. The model packs may still be loading on the
+ * first render: keep asking until the model is there.
+ */
+function useSlot(overlay: Overlay3D | null, model: ModelFor, id: string, key: string | null, el: { current: HTMLElement | null }) {
+  useEffect(() => {
+    const o = overlay;
+    if (!o || !key) return undefined;
+    let timer = 0, set = false;
+    const tryIt = () => {
+      const w = el.current, m = w ? model(key) : null;
+      if (!w || !m) { timer = window.setTimeout(tryIt, 250); return; }
+      o.setSlot(id, w, m.obj, m.opts);
+      set = true;
+    };
+    tryIt();
+    return () => { clearTimeout(timer); if (set) o.removeSlot(id); };
+  }, [overlay, id, key]);
+}
+
 function useSize(ref: { current: HTMLElement | null }, k: number, dep: unknown) {
   const [s, set] = useState({ w: 0, h: 0 });
   useLayoutEffect(() => {
@@ -127,14 +147,7 @@ function useSize(ref: { current: HTMLElement | null }, k: number, dep: unknown) 
 function Card(p: { id: string; label: string; on: boolean; seed: number; win: number; lines?: number; overlay: Overlay3D | null; model: ModelFor; mkey: string; k: number; onPick: () => void; multi?: boolean; children?: ComponentChildren }) {
   const win = useRef<HTMLElement>(null), el = useRef<HTMLButtonElement>(null);
   const sz = useSize(el, p.k, p.on);
-  useEffect(() => {
-    const o = p.overlay, w = win.current;
-    if (!o || !w) return undefined;
-    const m = p.model(p.mkey);
-    if (!m) return undefined;
-    o.setSlot(p.id, w, m.obj, m.opts);
-    return () => o.removeSlot(p.id);
-  }, [p.overlay, p.mkey]);
+  useSlot(p.overlay, p.model, p.id, p.mkey, win);
   useEffect(() => { if (p.on) p.overlay?.pick(p.id); }, [p.on]);
   return (
     <button type="button" ref={el} data-v={p.id} class={'qp-card' + (p.on ? ' on' : '')} aria-pressed={p.on} onClick={p.onPick}
@@ -156,14 +169,7 @@ function Tick(p: { on: boolean; seed: number }) {
 function ClockWindow(p: { overlay: Overlay3D | null; model: ModelFor; onTurn: (min12: number) => void; h: number }) {
   const win = useRef<HTMLDivElement>(null);
   const drag = useRef(false), last = useRef(-1);
-  useEffect(() => {
-    const o = p.overlay, w = win.current;
-    if (!o || !w) return undefined;
-    const m = p.model('clock');
-    if (!m) return undefined;
-    o.setSlot('clock', w, m.obj, m.opts);
-    return () => o.removeSlot('clock');
-  }, [p.overlay]);
+  useSlot(p.overlay, p.model, 'clock', 'clock', win);
   const turn = (e: PointerEvent) => {
     const b = win.current!.getBoundingClientRect();
     let a = Math.atan2(e.clientX - (b.left + b.width / 2), -(e.clientY - (b.top + b.height * 0.5)));
@@ -225,7 +231,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
       const cur = st.kind === 'multi' ? (a[st.field as 'goals' | 'relax'] as string[]) : [];
       const val = st.id === 'mic' ? (a.mic ? 'yes' : 'no') : String(a[st.field!]);
       const n = opts.length, cols = n > 6 ? 3 : n === 4 || n === 2 ? 2 : 3;
-      const winH = n > 6 ? 24 : n === 6 ? 34 : n === 4 ? 30 : 40;
+      const winH = n > 6 ? 28 : n === 6 ? 34 : n === 4 ? 30 : 40;
       const lines = n === 4 || n === 2 ? 1 : 2;
       body = (<>
         {doLine(st.kind === 'multi' ? 'Tick all that fit you.' : 'Tick the one that fits you.')}
@@ -297,15 +303,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
     }
   }
   // the hours page's pillow tower lives in its own window
-  useEffect(() => {
-    if (st.kind !== 'hours') return undefined;
-    const o = p.overlay, w = winRef.current;
-    if (!o || !w) return undefined;
-    const m = p.model('pillows:' + Math.round(a.hours));
-    if (!m) return undefined;
-    o.setSlot('pillows', w, m.obj, m.opts);
-    return () => o.removeSlot('pillows');
-  }, [p.overlay, st.kind, Math.round(a.hours)]);
+  useSlot(p.overlay, p.model, 'pillows', st.kind === 'hours' ? 'pillows:' + Math.round(a.hours) : null, winRef);
 
   const isPlan = st.kind === 'plan';
   const label = isPlan ? (s.signed ? 'STAMP TO APPROVE' : 'SIGN FIRST') : s.ready ? 'STAMP IT' : st.kind === 'choice' ? 'TICK ONE FIRST' : 'STAMP IT';
@@ -324,9 +322,9 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
         <div class="qp-foot">
           <div class="qp-fine">{isPlan ? 'Sign, then Pip stamps it.' : 'Hollow & Co. keeps your answers on this device only.'}</div>
           <button type="button" class={'qp-box' + (s.ready && !s.stamped ? ' ready' : '')} onClick={act.stamp} aria-label={label}>
-            <span>FOR OFFICE USE</span>
+            {!s.stamped && <span>FOR OFFICE USE</span>}
             {!s.stamped && <b>{label}</b>}
-            {s.stamped && <i class="qp-impr" style={`background-image:url(${stampURL(s.stamped, '')})`} />}
+            {s.stamped && <i class="qp-impr" style={`background-image:url(${stampURL(s.stamped, 'HOLLOW & CO.')})`} />}
           </button>
         </div>
         {!isPlan && (

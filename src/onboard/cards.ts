@@ -1,7 +1,7 @@
 // The live 3D models in the interview's answer cards: properly modelled props (borrowed CC0 / CC BY models, see
 // docs/credits/intro4.md, packed into public/models/interview/cards_*.glb by tools/packglb.mjs), the game's own
-// owls for the species page, the office's bracket clock (with real hands) for the wake-up page, and a tower of
-// pillows that grows with your hours of sleep. Each comes framed for its card and gently alive.
+// owls for the species page and the night-owl card, the office's bracket clock (with real hands) for the wake-up
+// page, and a heap of pillows, one per hour of sleep. Each comes framed for its card and gently alive.
 import * as THREE from 'three';
 import { loadGLB } from '../gfx/glb.ts';
 import { OwlActor } from '../owl/actor.ts';
@@ -32,7 +32,7 @@ const MAP: Record<string, { node: string; o?: SlotOpts; tint?: number; glow?: bo
   'caffeine:late': { node: 'teapot', o: { pitch: 0.35 } },
   'mic:yes': { node: 'headphones', o: { pitch: 0.35 } },
   'mic:no': { node: 'pillows', o: { pitch: 0.35 } },
-  'relax:rain': { node: 'umbrellas', o: { pitch: 0.25 } },
+  'relax:rain': { node: 'umbrellas', o: { pitch: 0.6 } },
   'relax:waves': { node: 'shell', o: { pitch: 0.5 } },
   'relax:forest': { node: 'pine', o: { pitch: 0.1 } },
   'relax:fire': { node: 'firepit', o: { pitch: 0.55 } },
@@ -52,6 +52,8 @@ export class CardModels {
   readonly ready: Promise<void>;
   /** the wake page's clock shows this many minutes after midnight */
   clockAt = 7 * 60;
+  /** the night owl card shows the player's own owl */
+  nightOwl = 'tawny';
   constructor(private mats: OfficeMats, private look: (species: string) => OwlLook) {
     this.ready = Promise.all(PACKS.map((p) => loadGLB(p).then((g) => {
       for (const c of g.scene.children) this.nodes.set(c.name, c);
@@ -65,9 +67,12 @@ export class CardModels {
     const c = src.clone(true);
     c.position.set(0, 0, 0); c.rotation.set(0, 0, 0); c.scale.set(1, 1, 1);
     c.updateMatrixWorld(true);
-    const b = new THREE.Box3().setFromObject(c), ctr = b.getCenter(new THREE.Vector3());
+    // every model comes in at the same size (its largest side one unit), standing on its base at the origin
+    const b = new THREE.Box3().setFromObject(c), ctr = b.getCenter(new THREE.Vector3()), sz = b.getSize(new THREE.Vector3());
+    const k = 1 / Math.max(1e-6, sz.x, sz.y, sz.z);
     const g = new THREE.Group();
-    c.position.set(-ctr.x, -b.min.y, -ctr.z);
+    c.scale.setScalar(k);
+    c.position.set(-ctr.x * k, -b.min.y * k, -ctr.z * k);
     g.add(c);
     c.traverse((o) => {
       const m = o as THREE.Mesh;
@@ -82,6 +87,7 @@ export class CardModels {
 
   /** The model for a card key: '<step>:<value>', 'owl:<species>', 'clock', 'pillows:<n>'. */
   model = (key: string): { obj: THREE.Object3D; opts?: SlotOpts } | null => {
+    if (key === 'chrono:owl') key = 'owl:' + this.nightOwl;
     if (key.startsWith('owl:')) {
       const sp = key.slice(4);
       let a = this.owls.get(sp);
@@ -108,15 +114,20 @@ export class CardModels {
       const g = new THREE.Group();
       const one = this.clone('pillows');
       if (!one) return null;
+      // a heap of pillows, one per hour: rows of up to four, each row a little narrower than the one below
       const h = new THREE.Box3().setFromObject(one).getSize(new THREE.Vector3()).y;
-      for (let i = 0; i < n; i++) {
-        const p = i ? this.clone('pillows')! : one;
-        p.position.y = i * h * 0.55;
-        p.rotation.y = Math.sin(i * 1.9) * 0.5;
-        p.scale.setScalar(1 - i * 0.015);
-        g.add(p);
-      }
-      return { obj: g, opts: { pitch: 0.25, spin: 0.3, yaw: 0.4 } };
+      const rows: number[] = [];
+      for (let left = n, cap = 4; left > 0; cap = Math.max(1, cap - 1)) { const r = Math.min(cap, left); rows.push(r); left -= r; }
+      let i = 0;
+      rows.forEach((count, row) => {
+        for (let j = 0; j < count; j++, i++) {
+          const p = i ? this.clone('pillows')! : one;
+          p.position.set((j - (count - 1) / 2) * 0.92 + Math.sin(i * 2.3) * 0.05, row * h * 0.78, Math.sin(i * 1.7) * 0.08);
+          p.rotation.y = Math.sin(i * 1.9) * 0.35;
+          g.add(p);
+        }
+      });
+      return { obj: g, opts: { pitch: 0.3, spin: 0.25, yaw: 0.25, zoom: 1.05, box: true } };
     }
     const m = MAP[key];
     if (!m) return null;

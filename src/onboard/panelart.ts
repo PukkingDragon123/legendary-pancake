@@ -3,7 +3,8 @@
 // the leather folio is creased, scuffed at the corners and stitched with uneven thread; brass is hue-shifted (warm
 // lights, cool olive shadows) with rubbed highlights; ink boxes and ticks wobble like a hand drew them; outlines are
 // selective (a darker hue of what they surround, never flat black).
-import { fbm, hash, rgb, Tex, vnoise, mix3, mul3, type RGB } from './tex.ts';
+import { crispText, fbm, hash, rgb, Tex, vnoise, mix3, mul3, type RGB } from './tex.ts';
+import { F } from './fonts.ts';
 
 const cache = new Map<string, string>();
 const art = (key: string, paint: () => Tex) => { let u = cache.get(key); if (!u) { u = paint().canvas(64).toDataURL(); cache.set(key, u); } return u; };
@@ -202,12 +203,24 @@ export function stampURL(word: string, sub: string, color = 0xb3232b, seed = 3) 
     const w = 96, h = 40, t = new Tex(w, h);
     for (let i = 0; i < t.a.length; i++) t.a[i] = 0;
     const c = rgb(color), dk = mul3(c, 0.75);
-    const ink = (x: number, y: number) => {
-      if (vnoise(x * 0.3, y * 0.3, seed) > 0.74 || hash(x, y, seed) > 0.9) return; // where the rubber missed
+    const ink = (x: number, y: number, miss = 0.74) => {
+      if (vnoise(x * 0.3, y * 0.3, seed) > miss || hash(x, y, seed) > 0.9 + (miss - 0.74) * 0.6) return; // where the rubber missed
       t.set(x, y, hash(x, y, seed + 1) > 0.6 ? dk : c); t.alpha(x, y, 0.9);
     };
     for (let i = 0; i < w; i++) for (const [y, ww] of [[1, 2], [h - 3, 2], [5, 1], [h - 6, 1]] as [number, number][]) for (let k = 0; k < ww; k++) ink(i, y + k + Math.round((vnoise(i * 0.1, y, seed) - 0.5)));
     for (let j = 1; j < h - 1; j++) for (const x of [1, 2, w - 3, w - 2, 5, w - 6]) if (x !== 5 && x !== w - 6 ? true : j > 4 && j < h - 5) ink(x, j);
+    // the word, set in rubber type: printed through the same uneven ink
+    const print = (text: string, y: number, font: string, bold: boolean) => {
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      const g = cv.getContext('2d');
+      if (!g) return;
+      crispText(g, text, w / 2, y, font, '#000', { align: 'center', spacing: bold ? 1 : 0 });
+      const d = g.getImageData(0, 0, w, h).data;
+      for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) if (d[(j * w + i) * 4 + 3] > 128) { ink(i, j, 0.86); if (bold) ink(i, j + 1, 0.86); }
+    };
+    print(word, sub ? 22 : 25, F.body(18), true);
+    if (sub) print(sub, 32, F.small(16), false);
     return t;
   });
 }

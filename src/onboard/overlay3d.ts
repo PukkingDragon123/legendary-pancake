@@ -1,12 +1,12 @@
 // The 3D elements of the interview's 2D form layer: a transparent WebGL layer above the form that draws live 3D
 // models inside the answer cards (slowly turning, hopping when picked), and the 3D moments that play over the
 // paper: the fountain pen swooping in to tick a box, the rubber stamp slamming onto the office box. It renders at
-// the form's pixel scale, so the models are crisp pixel art that matches the painted paper.
+// half the form's pixel scale, so the models are crisp pixel art a step finer than the painted paper.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
-export interface SlotOpts { spin?: number; pitch?: number; zoom?: number; yaw?: number; lift?: number; focus?: { c: THREE.Vector3; r: number }; tick?: (o: THREE.Object3D, t: number, dt: number) => void }
-interface Slot { el: HTMLElement; obj: THREE.Object3D; cam: THREE.PerspectiveCamera; r: number; c: THREE.Vector3; o: SlotOpts; sel: number; selV: number; born: number; home: THREE.Vector3; fits: number }
+export interface SlotOpts { spin?: number; pitch?: number; zoom?: number; yaw?: number; lift?: number; box?: boolean; focus?: { c: THREE.Vector3; r: number }; tick?: (o: THREE.Object3D, t: number, dt: number) => void }
+interface Slot { el: HTMLElement; obj: THREE.Object3D; cam: THREE.PerspectiveCamera; r: number; c: THREE.Vector3; bw: number; bh: number; o: SlotOpts; sel: number; selV: number; born: number; home: THREE.Vector3; fits: number }
 interface Moment { obj: THREE.Object3D; t: number; dur: number; f: (k: number, o: THREE.Object3D) => void; done?: () => void }
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
@@ -23,6 +23,12 @@ export class Overlay3D {
   /** CSS px per pixel of this layer (the form's pixel scale) */
   k = 2;
   private w = 1; private h = 1;
+  /** time scale of the moments (1; the dev harness slows them down to look at them) */
+  pace = 1;
+  /** hold every moment at this point of its play (dev harness), or null */
+  freeze: number | null = null;
+  /** CSS px per pixel actually drawn: half the form's pixel, so small models stay legible (never below 1) */
+  private get q() { return Math.max(1, Math.round(this.k / 2)); }
 
   constructor() {
     const c = this.canvas;
@@ -43,7 +49,7 @@ export class Overlay3D {
   }
 
   resize() {
-    this.w = Math.max(16, Math.ceil(innerWidth / this.k)); this.h = Math.max(16, Math.ceil(innerHeight / this.k));
+    this.w = Math.max(16, Math.ceil(innerWidth / this.q)); this.h = Math.max(16, Math.ceil(innerHeight / this.q));
     this.R.setSize(this.w, this.h, false);
     // a screen-space camera in CSS px (x right, y down)
     Object.assign(this.screen, { left: 0, right: innerWidth, top: 0, bottom: -innerHeight });
@@ -58,7 +64,7 @@ export class Overlay3D {
     obj.position.add(home);
     this.scene.add(obj);
     const cam = new THREE.PerspectiveCamera(26, 1, 0.01, 200);
-    const s: Slot = { el, obj, cam, r: 0, c: home.clone(), o, sel: 0, selV: 0, born: this.t, home, fits: 0 };
+    const s: Slot = { el, obj, cam, r: 0, c: home.clone(), bw: 0, bh: 0, o, sel: 0, selV: 0, born: this.t, home, fits: 0 };
     this.fit(s);
     this.slots.set(id, s);
   }
@@ -71,8 +77,8 @@ export class Overlay3D {
     const box = new THREE.Box3().setFromObject(s.obj);
     s.obj.rotation.y = rot; s.obj.scale.setScalar(sc); s.obj.position.y = py;
     if (box.isEmpty()) return;
-    const sph = box.getBoundingSphere(new THREE.Sphere());
-    s.r = sph.radius; s.c.copy(sph.center);
+    const sph = box.getBoundingSphere(new THREE.Sphere()), sz = box.getSize(V(0, 0, 0));
+    s.r = sph.radius; s.c.copy(sph.center); s.bw = Math.max(sz.x, sz.z); s.bh = sz.y;
   }
   removeSlot(id: string) { const s = this.slots.get(id); if (!s) return; this.scene.remove(s.obj); this.slots.delete(id); }
   clearSlots() { for (const id of [...this.slots.keys()]) this.removeSlot(id); }
@@ -106,14 +112,17 @@ export class Overlay3D {
       s.obj.position.y = s.home.y + s.sel * s.r * 0.25;
       s.obj.scale.setScalar(Math.max(0.001, pop));
       s.o.tick?.(s.obj, this.t, dt);
-      const x = Math.floor(b.left / this.k), y = Math.floor((innerHeight - b.bottom) / this.k), w = Math.ceil(b.width / this.k), h = Math.ceil(b.height / this.k);
+      const q = this.q, x = Math.floor(b.left / q), y = Math.floor((innerHeight - b.bottom) / q), w = Math.ceil(b.width / q), h = Math.ceil(b.height / q);
       const cam = s.cam;
       cam.aspect = w / h;
       const fit = Math.max(1, 1 / Math.min(1, cam.aspect));
-      const dist = (s.r * (s.o.zoom ?? 1.0) * fit) / Math.tan((cam.fov * Math.PI) / 360);
+      const tv = Math.tan((cam.fov * Math.PI) / 360);
+      // a sphere fit for compact things; wide heaps fit their box to the window
+      const dist = s.o.box ? (s.o.zoom ?? 1) * Math.max(s.bh / 2 / tv, s.bw / 2 / (tv * cam.aspect)) + s.bw / 2 : (s.r * (s.o.zoom ?? 1.0) * fit) / tv;
       const pitch = s.o.pitch ?? 0.32;
       const c = s.c.clone().add(V(0, s.r * (s.o.lift ?? 0), 0));
       cam.position.set(c.x, c.y + Math.sin(pitch) * dist, c.z + Math.cos(pitch) * dist);
+      cam.near = Math.max(1e-3, dist - s.r * 3); cam.far = dist + s.r * 3;
       cam.lookAt(c);
       cam.updateProjectionMatrix();
       R.setViewport(x, y, w, h);
@@ -129,8 +138,8 @@ export class Overlay3D {
       R.setViewport(0, 0, this.w, this.h);
       R.setScissor(0, 0, this.w, this.h);
       for (const m of [...this.moments]) {
-        m.t += dt;
-        const k = Math.min(1, m.t / m.dur);
+        m.t += dt * this.pace;
+        const k = this.freeze ?? Math.min(1, m.t / m.dur);
         m.obj.visible = true;
         m.f(k, m.obj);
         if (k >= 1) { this.scene.remove(m.obj); this.moments.splice(this.moments.indexOf(m), 1); m.done?.(); }
