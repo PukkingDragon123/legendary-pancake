@@ -37,8 +37,4 @@ BORROW = {
                               url="https://sketchfab.com/3d-models/wooden-floor-lamp-4766a03aa796440598426f8d5e975fec",
                               grade=dict(recolour=[dict(hue=[0, 1], sat=[0, 0.2], val=[0.55, 1], to=P["honey"], amount=1.0, keep_sat=0.55)])),
     "iron_lantern": dict(src=GG + "lantern.glb", title="Lantern 01", author="Rajil Jose Macatangay", lic=CC0, url="https://polyhaven.com/a/Lantern_01"),
-    # ---- plants
-    "monstera": dict(src=GG + "plant_monstera.glb", title="Monstera Deliciosa Potted Mid-Century plant", author="Giora", lic=CCBY,
-                     url="https://sketchfab.com/3d-models/monstera-deliciosa-potted-mid-century-plant-1ab9bf841df04c07b1819be596327629"),
-
 }

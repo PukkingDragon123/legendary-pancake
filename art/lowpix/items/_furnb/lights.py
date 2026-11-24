@@ -195,6 +195,14 @@ def toadstool_lamp():
     it = Item("toadstool_lamp", "Toadstool Cottage Lamp", density=4)
     ms = moss(it, "base", P["moss"], bloom=P["cream"])
     it.loft("base", [(0, 0, 0, 14.0), (0, 0.8, 0, 13.4), (0, 1.4, 0, 11.0)], ms, sides=12, up=[0, 0, 1])
+    import foliage as F
+    gr = [F.leaf_ramp(it, "lf_grass", P["fern"]), F.leaf_ramp(it, "lf_grass2", P["moss"]), F.leaf_ramp(it, "lf_clover", P["sage"])]
+    for k in range(9):
+        a = k / 9 * 2 * math.pi + 0.3
+        if 0.9 < a < 1.9:
+            continue  # keep the path to the door clear
+        cv = F.cluster(20, 16, F.lanceolate(), 7, 9, 2.6, None, 0, seed=k, ramps=[0, 1], fan=0.7) if k % 3 else F.cluster(16, 14, F.heartlet(), 4, 6, 6, F.midrib(0.08), 0, seed=k, ramps=[2, 0], fan=1.3)
+        F.add(it, "grass", cv, gr, (math.sin(a) * 5.6, 1.1, math.cos(a) * 5.6), rotation=(-10, math.degrees(a) + 90, 0))
     stem = plain(it, "stem", 0xeadfc6, tone=3.6, layers=[{"id": "fibre", "op": "stripes", "axis": "around", "period": 0.05, "width": 0.25, "shift": -0.5}])
     it.ramp("wd_door", P["woodDark"], n=6)
     it.loft("stem", [(0, 0, 0, 5.6), (0, 3.0, 0, 5.0), (0, 6.6, 0, 4.8), (0, 7.8, 0, 5.4)], stem, sides=10, pivot=(0, 1.4, 0), up=[0, 0, 1])
@@ -241,9 +249,12 @@ def firefly_jar():
     for (x, z, h, a) in ((-2.2, 2.4, 6.4, 0), (-3.0, 1.0, 4.0, 0)):
         it.card("glint", (x * 1.18, 1.8 + h / 2, z * 1.18), gl, size=(0.45, h), rotation=[0, -40, 0], paint={"light": 0, "tone": 5.0, "layers": []})
     it.cyl("moss", (0, 0.4, 0), 3.4, 1.4, moss(it, "jar", P["moss"]), sides=10)
-    lf = leafy(it, "sprig", P["fern"])
-    for (x, z, h, a) in ((-1.4, 0.6, 3.6, -10), (1.6, -1.0, 2.8, 14), (0.4, 1.6, 2.0, 4)):
-        it.loft("sprig", [(0, 0, 0, 0.4), (0, h * 0.6, 0, 0.5), (0, h, 0, 0.9), (0, h + 0.6, 0, 0.3)], lf, sides=5, pivot=(x, 1.8, z), rot=(0, 0, a), up=[0, 0, 1])
+    import foliage as F
+    fr = [F.leaf_ramp(it, "lf_sprig", P["fern"]), F.leaf_ramp(it, "lf_sprig2", P["moss"])]
+    for k, (x, z, a) in enumerate(((-1.4, 0.6, -10), (1.6, -1.0, 14), (0.4, 1.6, 4))):
+        cv = F.cluster(16, 22 - k * 3, F.lanceolate(), 6, 7, 3.2, F.midrib(0.08), 0, seed=k, ramps=[0, 1], fan=0.8)
+        for rot in (0, 90):
+            F.add(it, "sprig", cv, fr, (x, 1.8, z), rotation=(0, rot + k * 30, a))
     pew = metal(it, "pewter")
     it.cyl("lid", (0, 9.8, 0), 3.6, 1.2, pew, sides=10, paint={"layers": [{"id": "thread", "op": "stripes", "axis": "y", "period": 0.4, "width": 0.4, "shift": -0.9, "faces": ["sides"]},
                                                                        {"id": "holes", "op": "spots", "centers": [[x, 0, 0.6, 0.25] for x in (-1.2, 0, 1.2)], "shift": -2.4, "faces": ["front"]}]})
