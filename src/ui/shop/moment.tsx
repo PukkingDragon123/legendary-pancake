@@ -71,7 +71,8 @@ function MomentView(p: { m: Moment; onDone: () => void }) {
   const size = Math.min(200, innerWidth * 0.42);
   return (
     <div class={'nv-moment s' + stage + ' ' + m.kind} onClick={() => setStage(2)}>
-      <div class="nv-moment-rays" />
+      <div class="nv-rays" />
+      <div class="nv-moment-burst" />
       <div class="nv-moment-art"><AnimPx name={big} size={size} fps={10} /></div>
       <div class="nv-moment-shower">
         {Array.from({ length: 16 }, (_, i) => {
@@ -127,7 +128,7 @@ function PrizeView() {
   return (
     <div class="nv-modal-back" onClick={close}>
       <div class="nv-modal nv-prize if-ice_panel_gold" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <div class="nv-prize-rays" />
+        <div class="nv-rays" />
         <div class="nv-modal-title if-ice_ribbon_gold">{p.title}</div>
         <div class="nv-modal-art nv-pop">{p.art}</div>
         <b class="nv-prize-name">{p.name}</b>

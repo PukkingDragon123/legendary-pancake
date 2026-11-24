@@ -12,6 +12,8 @@ import { wind } from '../gfx/box.ts';
 import { hash } from '../gfx/noise.ts';
 import { moonPhase, seasonOf, type Season, type SeasonInfo } from './astro.ts';
 import { SPR } from './fx.ts';
+import { Ambience } from './ambience.ts';
+import { SURFACE_Y, surfaceY } from './terrain.ts';
 import { GRASS } from './grass.ts';
 import { groundY, HALF, N, POND, pondD, WATER_Y } from './layout.ts';
 import { place, setPlace, today } from './sky.ts';
@@ -373,8 +375,11 @@ export class Weather {
   hold: WeatherState | null = null;
   /** dev / previews: force the aurora on or off (null = natural) */
   auroraForce: boolean | null = null;
+  /** [world3] the small life of the air: motes, pollen, dew, mist, moths, embers, drips, snow puffs, Pip's puffs */
+  private amb: Ambience;
   constructor(private sc: Scene) {
     const q = sc.quality === 'high';
+    this.amb = new Ambience(sc);
     this.rain = new Precip(q ? 2400 : 1000, false);
     this.snowP = new Precip(q ? 1700 : 800, true);
     const bm = new THREE.MeshBasicMaterial({ color: 0xeef4ff, fog: false, transparent: true, depthWrite: false });
@@ -452,14 +457,14 @@ export class Weather {
     this.lastSeason = key;
     this.sc.flora.setSeason(s);
     this.sc.critters.setSeason(s.season, s.t);
-    const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.06, 0.92], summer: [1, 1, 1], autumn: [1.14, 0.94, 0.64], winter: [0.9, 0.9, 0.86] };
+    const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.04, 0.94], summer: [1, 1, 1], autumn: [1.08, 0.96, 0.78], winter: [0.9, 0.91, 0.9] }; // [world3] calm
     GRASS.uTint.value.setRGB(...tint[s.season]);
     const late = s.season === 'autumn' ? Math.max(0, (s.t - 0.45) / 0.55) : 0;
     GRASS.uBloom.value = s.season === 'winter' ? 0 : s.season === 'autumn' ? 0.3 * (1 - late) : 1;
     GRASS.uLitter.value = s.season === 'autumn' ? 0.35 + late * 0.5 : s.season === 'winter' ? 0.25 : 0;
     // the painted ground follows along: golden leaf litter in autumn, faded in winter
     const ground = this.sc.terrain.group.getObjectByName('ground') as THREE.Mesh | undefined;
-    const gt: Record<Season, number> = { spring: 0xf4fff0, summer: 0xffffff, autumn: 0xffe6c4, winter: 0xe8ece6 };
+    const gt: Record<Season, number> = { spring: 0xf6fbf0, summer: 0xffffff, autumn: 0xf6e6cc, winter: 0xe6eae6 };
     if (ground) (ground.material as THREE.MeshLambertMaterial).color.setHex(gt[s.season]);
   }
 
@@ -523,6 +528,7 @@ export class Weather {
       u.uTime.value = t; u.uCenter.value.copy(ctr); u.uRes.value.set(size.x * pr, size.y * pr); u.uPx.value = Math.max(1, Math.round(pr));
       u.uDrift.value.set(wx, wz).multiplyScalar(p === this.rain ? 1.5 + v.wind * 3 : 0.4 + v.wind * 1.2);
     }
+    this.amb.tick(dt, { rain: v.rain, snow: v.snow, fog: v.fog, wet: v.wet, cover: v.cover, wind: v.wind, season: info.season });
     sc.critters.shelter = v.rain > 0.25 || v.snow > 0.3 || v.storm > 0.2;
     sc.critters.fireflies = this.firefliesOk;
     this.rain.amount = v.rain * (sc.stage ? 0 : 1);
@@ -539,13 +545,13 @@ export class Weather {
       while (this.splashT >= 1) {
         this.splashT -= 1;
         const x = gx + (Math.random() - 0.5) * 18, z = gz + (Math.random() - 0.5) * 14;
-        if (pondD(x, z) < 0.95) { sc.fx.ripple(x, WATER_Y, z); continue; }
+        if (pondD(x, z) < 0.95) { sc.fx.ripple(x, SURFACE_Y, z); continue; }
         if (Math.abs(x) > HALF - 1 || Math.abs(z) > HALF - 1) continue;
-        const y = groundY(x, z);
+        const y = surfaceY(x, z);
         sc.fx.emit({ x, y: y + 0.03, z, life: 0.28, frame: SPR.splat1, frames: 3, fps: 11, color: 0xd8e8ff, size: 0.26 });
         if (Math.random() < 0.18) sc.fx.emit({ x, y: y + 0.02, z, life: 0.8, frame: SPR.ring, color: 0xc9dcf0, size: 0.18, grow: 2.2, fadeOut: 0.5, flat: true });
       }
-      if (Math.random() < dt * v.rain * 10) sc.fx.ripple(POND.x + (Math.random() - 0.5) * POND.rx * 1.4, WATER_Y, POND.z + (Math.random() - 0.5) * POND.rz * 1.3);
+      if (Math.random() < dt * v.rain * 10) sc.fx.ripple(POND.x + (Math.random() - 0.5) * POND.rx * 1.4, SURFACE_Y, POND.z + (Math.random() - 0.5) * POND.rz * 1.3); // [world3] on the raised surface
     }
 
     // a quiet rain ambience while the hollow is in view during the day
