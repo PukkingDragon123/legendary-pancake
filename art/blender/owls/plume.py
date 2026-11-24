@@ -31,14 +31,19 @@ def ss(e0, e1, x):
 
 
 def hsh(*a):
-    """A float hash in [0, 1) of integer arrays (vectorised)."""
-    h = np.uint64(1469598103934665603)
-    out = np.full(np.broadcast(*a).shape, h, np.uint64)
-    for i, v in enumerate(a):
-        v = np.asarray(v).astype(np.int64).astype(np.uint64)
-        out = (out ^ (v + np.uint64(0x9E3779B97F4A7C15) + np.uint64(i * 7919))) * np.uint64(1099511628211)
-        out ^= out >> np.uint64(29)
-    return ((out >> np.uint64(11)) & np.uint64((1 << 53) - 1)).astype(np.float64) / float(1 << 53)
+    """A float hash in [0, 1) of integer arrays (vectorised): each component folded in through the splitmix64
+    finaliser, so neighbouring inputs give unrelated outputs (no rows, no streaks in the jitter)."""
+    out = np.full(np.broadcast(*a).shape, np.uint64(0x9E3779B97F4A7C15), np.uint64)
+    with np.errstate(over='ignore'):
+        for i, v in enumerate(a):
+            v = np.asarray(v).astype(np.int64).astype(np.uint64)
+            out = out ^ (v * np.uint64(0xD6E8FEB86659FD93) + np.uint64((i + 1) * 0x632BE59BD9B4E019 % (1 << 64)))
+            out = out ^ (out >> np.uint64(30))
+            out = out * np.uint64(0xBF58476D1CE4E5B9)
+            out = out ^ (out >> np.uint64(27))
+            out = out * np.uint64(0x94D049BB133111EB)
+            out = out ^ (out >> np.uint64(31))
+    return (out >> np.uint64(11)).astype(np.float64) / float(1 << 53)
 
 
 def vnoise(x, y, seed=0):
@@ -102,7 +107,7 @@ def normal_map(h, strength=1.0):
 
 
 # ====================================================================== the shingle
-def shingle(S, A, C, rows, wrap=True, seed=1, shape=2.3, fray=0.0, jit=0.46, sjit=0.6, lvar=0.28, wvar=0.28, slant=0.0):
+def shingle(S, A, C, rows, wrap=True, seed=1, shape=2.3, fray=0.0, jit=0.46, sjit=0.6, lvar=0.28, wvar=0.28, slant=0.0, extra=0):
     """Lay a tract of feathers and find, per texel, the feather on top.
     S: (N,) mm along the flow (downstream +).  A: (N,) across: a fraction 0..1 of the row (wrap) or mm (no wrap).
     C: (N,) mm per unit of A at the texel (the row's circumference for wrap, 1 otherwise).
@@ -123,7 +128,7 @@ def shingle(S, A, C, rows, wrap=True, seed=1, shape=2.3, fray=0.0, jit=0.46, sji
     K = min(K, 6)
     p = shape
     dS = np.diff(S0, append=S0[-1] + (S0[-1] - S0[-2] if R > 1 else 1.0))
-    for dr in range(-1, K):
+    for dr in range(-1 - extra, K + extra):
         r = np.clip(r0 - dr, 0, R - 1)
         n = nr[r]
         off = 0.5 * (r % 2) + 0.31 * (r % 3 == 2)
@@ -266,6 +271,7 @@ class Painter:
         fn = getattr(s, 'paint_' + sf.tract, None) or s.paint_plain
         if not s.skin_dispatch(T, out, sf.tract):
             fn(T, out)
+        out['fur'] = s.fur_len(T, sf.tract).astype(np.float32)
         # cavity: the surface's occlusion (never a directional light)
         k_ao = float(s.S.get('ao', 0.62))
         occ = 1 - k_ao * (1 - np.clip(T['ao'], 0, 1)) ** 1.3
@@ -342,7 +348,7 @@ class Painter:
                           W=lambda x: (0.98 + 0.45 * ss(0.5 * Smax, 0.95 * Smax, x)) * k * fl)
         Sw, Aw = s.warp(T, sel, S, A, Cc, 1.15, 3.6, 1)
         Sw, Aw = s.warp(T, sel, Sw, Aw, Cc, 0.35, 1.1, 7)
-        F = shingle(Sw, Aw, Cc, rows, wrap=True, seed=11, fray=0.6, sjit=0.85)
+        F = shingle(Sw, Aw, Cc, rows, wrap=True, seed=11, fray=0.6, sjit=2.0, extra=2)
         # which tract each feather belongs to: decided at the texel, softened by a per-feather jitter
         front = np.cos(2 * math.pi * A + math.pi)  # +1 the breast, -1 the back
         thr = -0.3 + 0.75 * ss(0.32, 0.04, S / Smax)  # (the upperparts wrap further round the shoulders)
@@ -390,6 +396,10 @@ class Painter:
                 a = a * ss(L.get('lo', 0) - 0.08, L.get('lo', 0) + 0.08, sn) * ss(L.get('hi', 1) + 0.08, L.get('hi', 1) - 0.08, sn)
             c = s.C[L['c']] if L['c'] in s.C else hexrgb(L['c'])
             c = tint(np.broadcast_to(c, rgb.shape), (F['id'][:, None] - 0.5) * 0.15)
+            if L.get('ring'):  # (a pearl: a pale spot inside a fine dark ring)
+                rc = s.C[L['ring']] if L['ring'] in s.C else hexrgb(L['ring'])
+                ring = (F['edge'] > 0.42)
+                c = np.where(ring[:, None], np.broadcast_to(rc, c.shape), c)
             rgb = mix(rgb, c, np.clip(a, 0, 1))
             if L.get('glow') and 'emit' in out:  # (stars that shine in the dark: the emissive map)
                 em = out['emit'][idx]
@@ -406,6 +416,15 @@ class Painter:
         # broad tonal variation (a painter's wash): darker mantle, a warmer breast band
         wash = (vnoise3(P, 7.0 * s.k, 5) - 0.5) * 0.14 + (vnoise3(P, 2.2 * s.k, 6) - 0.5) * 0.06
         base = tint(base, wash)
+        # warm and cool in the same colour, the way paint dries: creamy where the light would sit, cool grey toward the
+        # flanks, the belly and the hollows (strongest on pale plumage)
+        tk_ = float(s.S.get('tonal', 0.35))
+        nw = vnoise3(P, 5.0 * s.k, 31)
+        warm = base * np.array([1.04, 1.0, 0.9], np.float32)
+        cool = base * np.array([0.9, 0.95, 1.04], np.float32)
+        side = 1 - np.abs(np.cos(2 * math.pi * T['a'][sel] + math.pi))
+        base = mix(base, warm, np.clip((nw - 0.35) * 1.6, 0, 1) * tk_)
+        base = mix(base, cool, np.clip(0.6 * side + 0.7 * hem - 0.5 * nw + 0.6 * (1 - np.clip(T['ao'][sel], 0, 1)), 0, 1) * tk_)
         # the throat: the bib under the face runs a little way down the breast (the head and body meet in it)
         front = np.cos(2 * math.pi * T['a'][sel] + math.pi)
         bibw = ss(0.24, 0.07, sn) * ss(0.15, 0.7, front) * float(s.S.get('bib', 0.7))
@@ -492,11 +511,12 @@ class Painter:
         rows = s.rows_for(T, ds=0.72 * k, du=0.95 * k, L=2.0 * k, W=0.7 * k)
         sel = crown
         Sw, Aw = s.warp(T, sel, T['S'][sel], T['a'][sel], T['C'][sel], 0.4, 2.6, 2)
-        F = shingle(Sw, Aw, T['C'][sel], rows, wrap=True, seed=21, fray=0.4)
+        F = shingle(Sw, Aw, T['C'][sel], rows, wrap=True, seed=21, fray=0.4, sjit=2.0, extra=2)
         Pc = P[sel]
         base = np.broadcast_to(s.col('crown', 'up'), F['fa'].shape + (3,))
         # the throat and chin under the disc: the underparts' colour (a white bib on some)
-        throat = ss(-2.0 * k, -5.0 * k, Pc[:, 1] - O.ey) * ss(0.0, 0.5, T['N'][sel][:, 2])
+        tw = float(s.S.get('throatwrap', 0.0))  # (a barn owl: pale round the sides of the lower face, the buff only on the crown)
+        throat = ss(-2.0 * k + tw * 2.5 * k, -5.0 * k + tw * 3.5 * k, Pc[:, 1] - O.ey) * ss(0.0 - tw * 0.7, 0.5 - tw * 0.5, T['N'][sel][:, 2])
         base = mix(base, np.broadcast_to(s.col('throat', 'under'), base.shape), throat)
         base = tint(base, (vnoise3(Pc, 4.0 * k, 3) - 0.5) * 0.12)
         mk = s.markfn(s.pat.get('crown', {}), 'up')
@@ -683,7 +703,7 @@ class Painter:
         rows = make_rows(-0.5, H + 2, lambda x: 1.4 * k, lambda x: 1.0 / (1.4 * k), lambda x: 4.0 * k, lambda x: 0.95 * k)
         F = shingle(S[sel], (1 - cf[sel]) * chord, np.ones(sel.sum()), rows, wrap=False, seed=53, shape=2.4, jit=0.15)
         base = np.broadcast_to(s.col('underwing', 'under'), F['fa'].shape + (3,)).copy()
-        base = mix(base, tint(np.broadcast_to(s.col('primary', 'wing'), base.shape), 0.12), ss(0.5 * H, 0.75 * H, S[sel]) * 0.85)
+        base = mix(base, tint(np.broadcast_to(s.col('primary', 'wing'), base.shape), -0.05), ss(0.4 * H, 0.6 * H, S[sel]))
         mk = s.markfn({'bars': {'c': 'wingBar', 'n': 3, 'w': 0.22, 'a': 0.55}} if s.pat.get('flight') else {}, 'under')
         s.feather_paint(F, base, T, sel, out, marks=mk, var=0.05, barb_k=0.06, relief=0.8)
 
@@ -780,9 +800,19 @@ class Painter:
         out['rough'][:] = 0.45
 
     def paint_nose(s, T, out):
-        b = T['b']
-        out['rgb'][:] = tint(np.broadcast_to(s.col('nose'), b.shape + (3,)), 0.15 * np.sin(2 * math.pi * T['a']))
-        out['rough'][:] = 0.4
+        """A kitten's nose leather: soft pink, a paler top, two little nostril commas and the philtrum line below."""
+        b, a = T['b'], T['a']
+        top = np.sin(2 * math.pi * a)
+        col = tint(np.broadcast_to(s.col('nose'), b.shape + (3,)), 0.14 * top + 0.08 * ss(0.5, 0.1, b))
+        P = T['P']
+        X = P[..., 0]
+        nost = (np.abs(np.abs(X) - 0.4 * s.k) < 0.17 * s.k) & (b > 0.5) & (b < 0.72) & (top > 0.2)
+        col = np.where(nost[..., None], tint(col, -0.45), col)
+        phil = (np.abs(X) < 0.07 * s.k) & (b > 0.72)
+        col = np.where(phil[..., None], tint(col, -0.3), col)
+        out['rgb'][:] = col
+        out['h'][:] = 0.05 * (hsh(np.floor(a * 60), np.floor(b * 40), 3) - 0.5)
+        out['rough'][:] = 0.42
 
     def paint_tuft(s, T, out):
         """An ear tuft: a few long feathers, dark centred with buff edges, barred on some."""
@@ -960,3 +990,51 @@ class Painter:
         out['rgb'][:] = col
         out['h'][:] = np.where(loop, 0.4, 0.0)
         out['rough'][:] = 0.92
+
+    # ====================================================================== fur length (the shells' mask)
+    def fur_len(s, T, tract):
+        """How long the downy fluff stands off the surface here (0..1 of the part's shell length): full on the body and
+        the trousers, a little shorter on the crown, short and fine on the facial disc, none round the eyes, on the bill,
+        the talons, the scaled toes or the stiff flight feathers. Baked into the roughness map's red channel."""
+        O, k = s.O, s.k
+        sid = s.S['id']
+        shape = T['shape']
+        if sid in ('gingerbread', 'snowman'):
+            return np.zeros(shape)
+        P, N = T['P'], T['N']
+        if tract == 'body':
+            Sn = T['S'] / T['S_of_b'][1][-1]
+            return np.clip(0.55 + 0.45 * ss(0.05, 0.3, Sn) + 0.15 * ss(0.6, 0.95, Sn), 0, 1)
+        if tract == 'trousers':
+            return np.full(shape, 0.9)
+        if tract == 'toe':
+            return np.full(shape, 0.55 if O.toes == 'feathered' else 0.0)
+        if tract == 'ear':
+            return np.full(shape, 0.5)
+        if tract != 'head':
+            return np.zeros(shape)
+        X, Y = P[..., 0], P[..., 1] - O.ey
+        f = np.full(shape, 0.8)
+        frontish = (N[..., 2] > -0.15) & (P[..., 2] > O.hzc)
+        eye = np.minimum(np.hypot(X - O.ex, Y), np.hypot(X + O.ex, Y))
+        if O.cat:
+            muzzle = frontish & (np.hypot(X / 1.35, Y + 3.4 * k) < 3.9 * k)
+            f = np.where(muzzle, 0.45, f)
+            f = np.where(frontish & (np.hypot(X, Y + 2.7 * k) < 1.4 * k), 0.0, f)  # (the nose)
+        else:
+            dd = O.disc_d(X, Y)
+            disc = frontish & (dd < -0.15 * k)
+            ruff = frontish & (dd >= -0.15 * k) & (dd < 1.5 * k)
+            f = np.where(disc, 0.3, f)
+            f = np.where(ruff, 0.65, f)
+            bill = frontish & (np.abs(X) < 1.6 * k) & (Y < 0.5 * k) & (Y > -4.0 * k)
+            f = np.where(bill, np.minimum(f, 0.12), f)
+        # the eyes stay clear (the ink dots sit on bare little rings)
+        f = f * ss(O.er * 1.6, O.er * 3.2, eye)
+        return f
+
+    def paint_whisker(s, T, out):
+        """A whisker: a fine translucent-white strand, a touch darker at its root."""
+        b = T['b']
+        out['rgb'][:] = tint(np.broadcast_to(s.col('whisker', 'brow'), b.shape + (3,)), -0.12 * ss(0.25, 0.0, b))
+        out['rough'][:] = 0.45

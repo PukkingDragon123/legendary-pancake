@@ -323,6 +323,19 @@ export class OwlActor {
     B.jaw.rotation.x = Math.min(0.75, mo * 0.55);
     B.tail.rotation.x = s.tail.x;
     this.model.rig.root.position.y = this.air;
+    // the down stirs: a breeze through the fluff, a lift with each breath, swept back in flight, ruffled up by a shake
+    const fur = this.model.fur;
+    if (fur) {
+      const ruffle = this.action === 'ruffle' || this.action === 'shiver' ? 1 : 0;
+      for (const u of [fur.body, fur.head]) {
+        const L = u.uLen.value;
+        u.uWind.value.set(
+          (Math.sin(t * 1.7) * 0.12 + Math.sin(t * 23) * 0.25 * ruffle) * L,
+          (0.06 * idleBreath - 0.04 + 0.2 * ruffle) * L,
+          (Math.cos(t * 1.1) * 0.1 - (this.pose === 'fly' ? 0.9 : 0)) * L,
+        );
+      }
+    }
 
     this.eye.lid = THREE.MathUtils.clamp(s.lid.x, 0, 1);
     this.eye.low = THREE.MathUtils.clamp(s.low.x, 0, 1);
