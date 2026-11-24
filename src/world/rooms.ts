@@ -282,6 +282,12 @@ export class Rooms {
         const bb = new THREE.Box3().setFromObject(root);
         const size = bb.getSize(new THREE.Vector3());
         const s = unitScale(size, id);
+        // everything stands on what it stands on: a model that hovers or sinks a little is set down on its base
+        // (rugs keep a hair of lift so they never flicker into the floorboards)
+        if (!def.wall) {
+          const want = def.rug ? 0.12 : 0, lift = bb.min.y * s;
+          if (Math.abs(lift - want) < 4 && Math.abs(lift - want) > 0.05) { root.position.y += (want - lift) / s; bb.min.y += (want - lift) / s; bb.max.y += (want - lift) / s; }
+        }
         const model = new THREE.Group();
         model.name = 'glb';
         model.scale.setScalar(PX * s);

@@ -115,7 +115,7 @@ function patchBark(m: THREE.MeshStandardMaterial) {
   float n0 = hhNoise(q * 7.0) * 0.55 + hhNoise(q * 19.0 + 3.1) * 0.3 + hhNoise(q * 61.0 + 7.7) * 0.15;
   float m = step(0.5, vColor.g * 1.25 + (n0 - 0.5) * 1.2 + (lum - 0.1) * 2.4 - 0.7);
   vec3 mossC = texture2D(uMossMap, vMapUv * 2.5).rgb;
-  float l = step(1.02, hhNoise(q * 9.0 + 11.0) * 0.55 + hhNoise(q * 37.0) * 0.45 + vColor.b * 0.3 + (lum - 0.1) * 2.0);
+  float l = step(1.12, hhNoise(q * 9.0 + 11.0) * 0.55 + hhNoise(q * 37.0) * 0.45 + vColor.b * 0.3 + (lum - 0.1) * 2.0);
   vec3 lichen = vec3(0.5, 0.56, 0.42) * (0.7 + lum * 2.5);
   bk = mix(bk, lichen, l * 0.85);
   bk = mix(bk, mossC * (0.62 + lum * 1.2), m);

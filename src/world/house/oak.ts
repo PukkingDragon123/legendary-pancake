@@ -470,24 +470,24 @@ export function buildOak(): Oak {
       // face
       const a = fr.vert(at(p0[i][0], p0[i][1], zf[i]), [u0, 0], trim), b = fr.vert(at(p1[i][0], p1[i][1], zf[i] - 0.3), [u0, 0.12], trim);
       const c = fr.vert(at(p1[j][0], p1[j][1], zf[j] - 0.3), [u1, 0.12], trim), d = fr.vert(at(p0[j][0], p0[j][1], zf[j]), [u1, 0], trim);
-      fr.quad(a, d, c, b);
+      fr.quad(a, b, c, d);
       // outer side, sinking into the bark
       const e = fr.vert(at(p1[i][0], p1[i][1], zf[i] - 0.3), [u0, 0.12], [trim[0] * 0.7, trim[1] * 0.7, trim[2] * 0.7]), f = fr.vert(at(p1[j][0], p1[j][1], zf[j] - 0.3), [u1, 0.12], [trim[0] * 0.7, trim[1] * 0.7, trim[2] * 0.7]);
       const zb1 = zBark(p1[i][0], p1[i][1]) - 3, zb2 = zBark(p1[j][0], p1[j][1]) - 3;
       const g2 = fr.vert(at(p1[j][0], p1[j][1], zb2), [u1, 0.22], [0.5, 0.45, 0.4]), h = fr.vert(at(p1[i][0], p1[i][1], zb1), [u0, 0.22], [0.5, 0.45, 0.4]);
-      fr.quad(e, f, g2, h);
+      fr.quad(e, h, g2, f);
       // tunnel lining through the wall
       const zi1 = st.inner ? zIn(p0[i][0]) : zf[i] - 6, zi2 = st.inner ? zIn(p0[j][0]) : zf[j] - 6;
       const t0 = fr.vert(at(p0[i][0], p0[i][1], zf[i]), [u0, 0.3], [0.8, 0.72, 0.62]), t1 = fr.vert(at(p0[j][0], p0[j][1], zf[j]), [u1, 0.3], [0.8, 0.72, 0.62]);
       const t2 = fr.vert(at(p0[j][0], p0[j][1], zi2), [u1, 0.6], [0.55, 0.48, 0.42]), t3 = fr.vert(at(p0[i][0], p0[i][1], zi1), [u0, 0.6], [0.55, 0.48, 0.42]);
-      fr.quad(t0, t3, t2, t1);
+      fr.quad(t0, t1, t2, t3);
       if (st.inner) {
         // the inner architrave on the room side
         const q1 = openingOutline(o, nReq, 4.5);
         const za = (x: number) => Math.sqrt(Math.max(1, (R_IN - 1.1) ** 2 - x * x));
         const ia = fr.vert(at(p0[i][0], p0[i][1], za(p0[i][0])), [u0, 0.7], [0.78, 0.68, 0.58]), ib = fr.vert(at(q1[i][0], q1[i][1], za(q1[i][0])), [u0, 0.8], [0.7, 0.6, 0.5]);
         const ic = fr.vert(at(q1[j][0], q1[j][1], za(q1[j][0])), [u1, 0.8], [0.7, 0.6, 0.5]), id = fr.vert(at(p0[j][0], p0[j][1], za(p0[j][0])), [u1, 0.7], [0.78, 0.68, 0.58]);
-        fr.quad(ia, ib, ic, id);
+        fr.quad(ia, id, ic, ib);
       }
     }
     const zMid = (x: number, y: number) => (st.inner ? (zIn(x) + zBark(x, y)) / 2 : zBark(x, y) - 2.5);
