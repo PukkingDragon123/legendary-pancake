@@ -23,15 +23,26 @@ https://creativecommons.org/licenses/by-sa/4.0/ (and the other versions named be
 <!-- photos -->
 | place | photograph | author | licence |
 |---|---|---|---|
+| highlands | [Eilean_Donan_Castle,_Scotland_-_Jan_2011.jpg](https://commons.wikimedia.org/wiki/File:Eilean_Donan_Castle%2C_Scotland_-_Jan_2011.jpg) | Diliff | CC BY-SA 3.0 |
 | kyoto | [Torii path with lantern at Fushimi Inari Taisha Shrine, Kyoto, Japan.jpg](https://commons.wikimedia.org/wiki/File%3ATorii_path_with_lantern_at_Fushimi_Inari_Taisha_Shrine%2C_Kyoto%2C_Japan.jpg) | Basile Morin | CC BY-SA 4.0 |
+| paris | [La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2).jpg](https://commons.wikimedia.org/wiki/File:La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques%2C_Paris_ao%C3%BBt_2014_%282%29.jpg) | Yann Caradec from Paris, France | CC BY-SA 2.0 |
 | venice | [Gondola_Ride.jpg](https://commons.wikimedia.org/wiki/File:Gondola_Ride.jpg) | Njsmith3 | CC BY-SA 4.0 |
+| santorini | [Oia_sunset_-_panoramio_(2).jpg](https://commons.wikimedia.org/wiki/File:Oia_sunset_-_panoramio_%282%29.jpg) | TomasEE | CC BY 3.0 |
 | sahara | [Merzouga_Dunes_2011.jpg](https://commons.wikimedia.org/wiki/File:Merzouga_Dunes_2011.jpg) | Bjørn Christian Tørrissen | CC BY-SA 3.0 |
 | grandcanyon | [Canyon_River_Tree_(165872763).jpeg](https://commons.wikimedia.org/wiki/File:Canyon_River_Tree_%28165872763%29.jpeg) | Lennart Sikkema | CC BY 3.0 |
+| cappadocia | [Cappadocia_balloon_trip,_Ortahisar_Castle_(11893715185).jpg](https://commons.wikimedia.org/wiki/File:Cappadocia_balloon_trip%2C_Ortahisar_Castle_%2811893715185%29.jpg) | Arian Zwegers from Brussels, Belgium | CC BY 2.0 |
 | tajmahal | [Taj_Mahal_(Edited).jpeg](https://commons.wikimedia.org/wiki/File:Taj_Mahal_%28Edited%29.jpeg) | Yann ; edited by Jim Carter | CC BY-SA 4.0 |
+| amazon | [Amazon17_(5641020319).jpg](https://commons.wikimedia.org/wiki/File:Amazon17_%285641020319%29.jpg) | CIAT | CC BY-SA 2.0 |
+| iceland | [Kirkjufell_in_Iceland.jpg](https://commons.wikimedia.org/wiki/File:Kirkjufell_in_Iceland.jpg) | Anjali Kiggal | CC BY-SA 4.0 |
+| machupicchu | [Machu_Picchu,_2023_(012).jpg](https://commons.wikimedia.org/wiki/File:Machu_Picchu%2C_2023_%28012%29.jpg) | Draceane | CC BY-SA 4.0 |
+| serengeti | [Serengeti-Landscape-2012.JPG](https://commons.wikimedia.org/wiki/File:Serengeti-Landscape-2012.JPG) | Bjørn Christian Tørrissen | CC BY-SA 3.0 |
 | banff | [Moraine_Lake_17092005.jpg](https://commons.wikimedia.org/wiki/File:Moraine_Lake_17092005.jpg) | Gorgo | Public domain |
+| petra | [Al_khazneh.jpg](https://commons.wikimedia.org/wiki/File:Al_khazneh.jpg) | Susanahajer | CC BY-SA 3.0 |
 | angkor | [Angkor_Wat.jpg](https://commons.wikimedia.org/wiki/File:Angkor_Wat.jpg) | Bjørn Christian Tørrissen | CC BY-SA 4.0 |
 | reef | [ISS-45_StoryOfWater,_Great_Barrier_Reef,_Australia.jpg](https://commons.wikimedia.org/wiki/File:ISS-45_StoryOfWater%2C_Great_Barrier_Reef%2C_Australia.jpg) | NASA/Kjell Lindgren | Public domain |
 | rio | [Cidade_Maravilhosa.jpg](https://commons.wikimedia.org/wiki/File:Cidade_Maravilhosa.jpg) | Rafael Rabello de Barros | CC BY-SA 3.0 |
+| milford | [Milford_Sound_(New_Zealand).JPG](https://commons.wikimedia.org/wiki/File:Milford_Sound_%28New_Zealand%29.JPG) | Maros M r a z ( Maros ) | CC BY-SA 3.0 |
+| antarctica | [Paradise_Harbour,_Antarctica_(6087257019).jpg](https://commons.wikimedia.org/wiki/File:Paradise_Harbour%2C_Antarctica_%286087257019%29.jpg) | Liam Quinn from Canada | CC BY-SA 2.0 |
 <!-- /photos -->
 
 ## Borrowed souvenir models

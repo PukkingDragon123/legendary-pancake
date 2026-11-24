@@ -4,13 +4,24 @@ export interface PhotoCredit { title: string; author: string; licence: string; u
 export const PHOTO_ATLAS = { src: 'img/places/places.webp', w: 720, h: 540, tw: 180, th: 108, cols: 4 };
 export const PHOTO_ORDER: string[] = ["highlands", "kyoto", "paris", "venice", "santorini", "sahara", "grandcanyon", "cappadocia", "tajmahal", "amazon", "iceland", "machupicchu", "serengeti", "banff", "petra", "angkor", "reef", "rio", "milford", "antarctica"];
 export const PHOTO_CREDIT: Record<string, PhotoCredit> = {
+  highlands: {"title": "Eilean_Donan_Castle,_Scotland_-_Jan_2011", "author": "Diliff", "licence": "CC BY-SA 3.0", "url": "https://commons.wikimedia.org/wiki/File:Eilean_Donan_Castle%2C_Scotland_-_Jan_2011.jpg"},
   kyoto: {"title": "Torii path with lantern at Fushimi Inari Taisha Shrine, Kyoto, Japan", "author": "Basile Morin", "licence": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File%3ATorii_path_with_lantern_at_Fushimi_Inari_Taisha_Shrine%2C_Kyoto%2C_Japan.jpg"},
+  paris: {"title": "La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques,_Paris_août_2014_(2)", "author": "Yann Caradec from Paris, France", "licence": "CC BY-SA 2.0", "url": "https://commons.wikimedia.org/wiki/File:La_Tour_Eiffel_vue_de_la_Tour_Saint-Jacques%2C_Paris_ao%C3%BBt_2014_%282%29.jpg"},
   venice: {"title": "Gondola_Ride", "author": "Njsmith3", "licence": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Gondola_Ride.jpg"},
+  santorini: {"title": "Oia_sunset_-_panoramio_(2)", "author": "TomasEE", "licence": "CC BY 3.0", "url": "https://commons.wikimedia.org/wiki/File:Oia_sunset_-_panoramio_%282%29.jpg"},
   sahara: {"title": "Merzouga_Dunes_2011", "author": "Bjørn Christian Tørrissen", "licence": "CC BY-SA 3.0", "url": "https://commons.wikimedia.org/wiki/File:Merzouga_Dunes_2011.jpg"},
   grandcanyon: {"title": "Canyon_River_Tree_(165872763)", "author": "Lennart Sikkema", "licence": "CC BY 3.0", "url": "https://commons.wikimedia.org/wiki/File:Canyon_River_Tree_%28165872763%29.jpeg"},
+  cappadocia: {"title": "Cappadocia_balloon_trip,_Ortahisar_Castle_(11893715185)", "author": "Arian Zwegers from Brussels, Belgium", "licence": "CC BY 2.0", "url": "https://commons.wikimedia.org/wiki/File:Cappadocia_balloon_trip%2C_Ortahisar_Castle_%2811893715185%29.jpg"},
   tajmahal: {"title": "Taj_Mahal_(Edited)", "author": "Yann ; edited by Jim Carter", "licence": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Taj_Mahal_%28Edited%29.jpeg"},
+  amazon: {"title": "Amazon17_(5641020319)", "author": "CIAT", "licence": "CC BY-SA 2.0", "url": "https://commons.wikimedia.org/wiki/File:Amazon17_%285641020319%29.jpg"},
+  iceland: {"title": "Kirkjufell_in_Iceland", "author": "Anjali Kiggal", "licence": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Kirkjufell_in_Iceland.jpg"},
+  machupicchu: {"title": "Machu_Picchu,_2023_(012)", "author": "Draceane", "licence": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Machu_Picchu%2C_2023_%28012%29.jpg"},
+  serengeti: {"title": "Serengeti-Landscape-2012", "author": "Bjørn Christian Tørrissen", "licence": "CC BY-SA 3.0", "url": "https://commons.wikimedia.org/wiki/File:Serengeti-Landscape-2012.JPG"},
   banff: {"title": "Moraine_Lake_17092005", "author": "Gorgo", "licence": "Public domain", "url": "https://commons.wikimedia.org/wiki/File:Moraine_Lake_17092005.jpg"},
+  petra: {"title": "Al_khazneh", "author": "Susanahajer", "licence": "CC BY-SA 3.0", "url": "https://commons.wikimedia.org/wiki/File:Al_khazneh.jpg"},
   angkor: {"title": "Angkor_Wat", "author": "Bjørn Christian Tørrissen", "licence": "CC BY-SA 4.0", "url": "https://commons.wikimedia.org/wiki/File:Angkor_Wat.jpg"},
   reef: {"title": "ISS-45_StoryOfWater,_Great_Barrier_Reef,_Australia", "author": "NASA/Kjell Lindgren", "licence": "Public domain", "url": "https://commons.wikimedia.org/wiki/File:ISS-45_StoryOfWater%2C_Great_Barrier_Reef%2C_Australia.jpg"},
   rio: {"title": "Cidade_Maravilhosa", "author": "Rafael Rabello de Barros", "licence": "CC BY-SA 3.0", "url": "https://commons.wikimedia.org/wiki/File:Cidade_Maravilhosa.jpg"},
+  milford: {"title": "Milford_Sound_(New_Zealand)", "author": "Maros M r a z ( Maros )", "licence": "CC BY-SA 3.0", "url": "https://commons.wikimedia.org/wiki/File:Milford_Sound_%28New_Zealand%29.JPG"},
+  antarctica: {"title": "Paradise_Harbour,_Antarctica_(6087257019)", "author": "Liam Quinn from Canada", "licence": "CC BY-SA 2.0", "url": "https://commons.wikimedia.org/wiki/File:Paradise_Harbour%2C_Antarctica_%286087257019%29.jpg"},
 };

@@ -76,7 +76,7 @@ void main(){
   if (k > 1.1) col = day;
   else if (k > 0.15) col = day * vec3(0.86, 0.85, 0.87);
   else if (k > -0.6) col = mix(day * 0.62, vec3(0.62, 0.42, 0.42), 0.22);   // the warm dusk band
-  else col = night * 1.3 + vec3(0.01, 0.015, 0.03);
+  else col = max(night * 1.3, day * vec3(0.42, 0.48, 0.62)) + vec3(0.01, 0.015, 0.03); // moonlit: the land still reads
   // the round form: a stepped darker rim towards the limb
   vec3 vn = normalize(vVN);
   float rim = vn.z;

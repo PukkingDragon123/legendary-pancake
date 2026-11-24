@@ -14,6 +14,7 @@ import re
 import sys
 import time
 import urllib.parse
+import urllib.error
 import urllib.request
 
 UA = "HootHollowAssetScript/1.0 (offline game build; keeps photo credits)"
@@ -38,7 +39,12 @@ def get(url, raw=False):
                 data = r.read()
             time.sleep(6.0)
             return data if raw else json.loads(data)
-        except Exception as e:  # rate limit or a hiccup: back off
+        except urllib.error.HTTPError as e:  # a missing page is final; a rate limit backs off
+            if e.code == 404:
+                raise
+            err = e
+            time.sleep(45 + attempt * 60)
+        except Exception as e:  # a hiccup: back off
             err = e
             time.sleep(45 + attempt * 60)
     raise err
@@ -76,7 +82,8 @@ def choose(place):
             continue
         if th["width"] < th["height"] * 1.2:
             continue
-        fname = urllib.parse.unquote(orig["source"].split("?")[0].split("/")[-1])
+        parts = orig["source"].split("?")[0].split("/")
+        fname = urllib.parse.unquote(parts[-2] if "/thumb/" in orig["source"] else parts[-1])   # big originals come as a thumb path
         if not fname.lower().endswith((".jpg", ".jpeg")):   # photographs only (no maps or diagrams)
             continue
         try:
