@@ -11,7 +11,7 @@ const { resolve } = require('node:path');
   const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
   const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
   await page.goto(base + '/dev-owl.html?set=stills', { waitUntil: 'load', timeout: 300000 });
-  await page.waitForFunction(() => window.__ready === true, null, { timeout: 600000 });
+  await page.waitForFunction(() => window.__ready === true, null, { timeout: 2400000 });
   const stills = await page.evaluate(async () => {
     const out = {};
     for (const [id, v] of Object.entries(window.__stills)) {

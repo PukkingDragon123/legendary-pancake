@@ -12,9 +12,12 @@ Eurasian Eagle-Owl); no field-guide artwork was copied.
 
 The Queen's model and stills (`queen.*`) are untouched (owl3).
 
+The downy fluff is drawn at runtime by `src/owl/fur.ts` (instanced shells; a strand field generated in code).
+
 ## Outfits (`public/models/outfits/*.glb`)
 
-The 39 pieces keep their owl3 geometry (owl3's own pieces and the ten borrowed from Gacha Garage's wearables, credited
-in `docs/credits/owl3.md`, CC BY 4.0, attribution kept there). `art/blender/owls/outfits.py --finish` refinished them
-in place: smooth normals, repainted atlases with procedural material detail (knit, weave, felt, fur, metal, glass,
-leather, wood), a normal map and a roughness / metalness map. No new third-party assets.
+All 39 pieces were remodelled from scratch for Hoot Hollow by `art/blender/owls/garments.py` (parametric garments
+fitted to the v4 tawny, painted procedurally: knit, felt, velvet with embroidery, satin, cotton prints, fur trims,
+engraved metal, gems, glass, leather, wood, petals and leaves). They no longer use any owl3 or Gacha Garage geometry,
+so the CC BY attributions in `docs/credits/owl3.md` now cover only the history of those files. No new third-party
+assets.

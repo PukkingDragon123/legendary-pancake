@@ -142,6 +142,7 @@ function prepare(scene: THREE.Object3D) {
       mat.metalness = 0;
       if (mat.normalMap) mat.normalMap.magFilter = THREE.LinearFilter;
       if (mat.emissiveMap) mat.emissiveMap.magFilter = THREE.NearestFilter; // (the celestial owl's stars)
+      else { mat.emissive = new THREE.Color(0xffffff); mat.emissiveMap = mat.map; mat.emissiveIntensity = 0.07; } // (a whisper of fill: the face stays readable against a lamp at night)
       mat.needsUpdate = true;
     }
   });

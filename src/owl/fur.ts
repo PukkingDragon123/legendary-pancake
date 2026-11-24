@@ -47,7 +47,7 @@ function strands(): THREE.DataTexture {
 
 /** The shell material for a painted part (its atlas and its fur mask), sharing `u` (the owl's fur uniforms). */
 export function furMaterial(src: THREE.MeshStandardMaterial, u: FurUniforms): THREE.MeshStandardMaterial {
-  const m = new THREE.MeshStandardMaterial({ map: src.map, roughness: 0.95, metalness: 0, side: THREE.FrontSide });
+  const m = new THREE.MeshStandardMaterial({ map: src.map, roughness: 0.95, metalness: 0, side: THREE.FrontSide, emissive: 0xffffff, emissiveMap: src.map, emissiveIntensity: 0.07 });
   m.name = 'fur';
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
