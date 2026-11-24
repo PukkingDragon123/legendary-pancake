@@ -1,4 +1,4 @@
-// Limited series for the gacha banners in the Snow Queen's boutique. This file is the contract
+// Limited series for the banners over the Lucky Barrel in Barnaby's lodge store. This file is the contract
 // between content and shop: every id here must exist in its registry (furniture / finishes in
 // src/assets/seasonal.ts, outfit pieces in src/owl/outfits.ts, skins in src/owl/skins.ts).
 export type Stars = 3 | 4 | 5;

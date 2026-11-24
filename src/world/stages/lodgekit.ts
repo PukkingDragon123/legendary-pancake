@@ -38,9 +38,11 @@ export function mat(key: string, make: () => THREE.Material): THREE.Material {
 export function disposeMats() { for (const m of mats.values()) m.dispose(); mats.clear(); }
 
 export const M = {
-  log: () => mat('log', () => new THREE.MeshStandardMaterial({ map: tex('log'), color: 0xd6d4d0, normalMap: tex('log_n', false), normalScale: new THREE.Vector2(1.0, 1.0), roughness: 0.86 })),
+  log: () => mat('log', () => new THREE.MeshStandardMaterial({ map: tex('log'), color: 0xe4ddd2, vertexColors: true, normalMap: tex('log_n', false), normalScale: new THREE.Vector2(1.0, 1.0), roughness: 0.86 })),
   end: () => mat('end', () => new THREE.MeshStandardMaterial({ map: tex('end'), roughness: 0.9 })),
   bark: () => mat('bark', () => new THREE.MeshStandardMaterial({ map: tex('bark'), normalMap: tex('bark_n', false), normalScale: new THREE.Vector2(1.1, 1.1), roughness: 0.95 })),
+  /** bark for logGeo sticks (tinted per stick) */
+  barkLog: () => mat('barkLog', () => new THREE.MeshStandardMaterial({ map: tex('bark'), vertexColors: true, normalMap: tex('bark_n', false), normalScale: new THREE.Vector2(1.1, 1.1), roughness: 0.95 })),
   chink: () => mat('chink', () => new THREE.MeshStandardMaterial({ map: tex('chink'), roughness: 1 })),
   floor: () => mat('floor', () => new THREE.MeshStandardMaterial({ map: tex('floor'), normalMap: tex('floor_n', false), normalScale: new THREE.Vector2(0.8, 0.8), roughness: 0.82 })),
   board: () => mat('board', () => new THREE.MeshStandardMaterial({ map: tex('board'), roughness: 0.78 })),
@@ -133,6 +135,10 @@ export function logGeo(len: number, r: number, seed = 1, segs = 12, ends = false
   const g = new THREE.CylinderGeometry(r, r, len, segs, lseg, !ends);
   const pos = g.attributes.position as THREE.BufferAttribute, uv = g.attributes.uv as THREE.BufferAttribute;
   const wob = [rr(), rr(), rr()];
+  const side = (segs + 1) * (lseg + 1);
+  // each log its own shade of honey (a vertex tint), darker toward its underside where the light doesn't reach
+  const tone = 0.8 + rr() * 0.26, warm = (rr() - 0.5) * 0.08;
+  const col = new Float32Array(pos.count * 3);
   for (let i = 0; i < pos.count; i++) {
     const y = pos.getY(i), x = pos.getX(i), z = pos.getZ(i);
     const rad = Math.hypot(x, z);
@@ -142,8 +148,13 @@ export function logGeo(len: number, r: number, seed = 1, segs = 12, ends = false
       pos.setX(i, x * k);
       pos.setZ(i, z * k + Math.sin((y / len) * Math.PI) * 0.015 * (wob[2] - 0.5));
     }
-    if (uv.getY(i) > 0 && uv.getY(i) < 1) uv.setXY(i, (y + len / 2) / 2 + wob[0] * 3, uv.getX(i) * 2 * Math.PI * r + wob[1]);
+    if (i < side) uv.setXY(i, (y + len / 2) / 2 + wob[0] * 3, uv.getX(i) * 2 * Math.PI * r + wob[1]);
+    // (before the turn the cylinder's x is what becomes "up": x < 0 faces down)
+    const under = Math.max(0, -x / r);
+    const k = tone * (1 - under * 0.28);
+    col[i * 3] = k * (1 + warm); col[i * 3 + 1] = k; col[i * 3 + 2] = k * (1 - warm * 1.5);
   }
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
   g.rotateZ(Math.PI / 2);
   g.computeVertexNormals();
   return g;
@@ -547,6 +558,41 @@ function pixelText(g: CanvasRenderingContext2D, text: string, x: number, y: numb
   if (o.outline) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, 1], [-1, 1], [1, -1]]) paint(dx, dy, o.outline);
   if (o.shadow) paint(0, 2, o.shadow);
   paint(0, 0, col);
+}
+
+// ------------------------------------------------------------------ dried herbs hung from the beams
+
+/** A bundle of herbs hung upside down to dry: a fan of leafy sprigs tied with twine, on a string `drop` metres long. */
+export function herbBundle(seed: number, drop = 0.3): THREE.Group {
+  const g = new THREE.Group();
+  const rr = rng(seed);
+  const cols = [0x6f9a3e, 0x86a84a, 0xa09040, 0x5c8a3a, 0xb8843c, 0x7d9c5a];
+  const col = cols[Math.floor(rr() * cols.length)];
+  const leaf = mat('herb' + col, () => new THREE.MeshStandardMaterial({ color: col, roughness: 0.95, flatShading: true }));
+  const n = 6 + Math.floor(rr() * 3);
+  const parts: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
+  for (let k = 0; k < n; k++) {
+    const len = 0.2 + rr() * 0.1;
+    const c = new THREE.ConeGeometry(0.042 + rr() * 0.02, len * 1.3, 5);
+    c.translate(0, -len * 0.65, 0);
+    const a = (k / n) * Math.PI * 2, tilt = 0.18 + rr() * 0.22;
+    parts.push({ geo: c, m: new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.cos(a) * tilt, a, Math.sin(a) * tilt)) });
+  }
+  const sprigs = mesh(merged(parts), leaf);
+  sprigs.position.y = -0.06;
+  g.add(sprigs);
+  const stems = mesh(new THREE.CylinderGeometry(0.018, 0.024, 0.08, 6), mat('stems', () => new THREE.MeshStandardMaterial({ color: 0x6a5232, roughness: 1 })));
+  stems.position.y = -0.02;
+  g.add(stems);
+  const tie = mesh(new THREE.TorusGeometry(0.024, 0.006, 4, 10), M.rope(), false, false);
+  tie.rotation.x = Math.PI / 2;
+  tie.position.y = -0.04;
+  g.add(tie);
+  const str = mesh(new THREE.CylinderGeometry(0.004, 0.004, drop, 4), M.rope(), false, false);
+  str.position.y = drop / 2;
+  g.add(str);
+  g.userData.phase = rr() * 6;
+  return g;
 }
 
 /** Wood-plank backing painted per pixel: grain lines, knots, chamfered lit edges, nail heads. */

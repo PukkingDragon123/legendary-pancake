@@ -752,10 +752,18 @@ def paint_fur(fur, occluders):
     nose = (ell(P, LM['nose'] + [0, 0.02, 0.002], (0.047, 0.036, 0.03)) < 1 + jit * 0.4) & (P[:, 1] < LM['nose'][1] + 0.05)
     muz = 1 - smoothstep(0.8, 1.05, ell(P, (0, LM['lip'][1] + 0.045, LM['lip'][2] + 0.012), (0.085, 0.07, 0.058)) + jit * 0.25)
     muz = np.maximum(muz, 1 - smoothstep(0.8, 1.05, ell(P, (0, LM['lip'][1] + 0.06, LM['lip'][2] - 0.02), (0.06, 0.06, 0.04)) + jit * 0.25))
+    # paws: only past the wrist along the forearm (so the hands' paint never lands on the body beside them)
     paws = np.zeros(n)
-    for k in ('l', 'r'):
+    hand_t = {}
+    for k, sx in (('l', 1), ('r', -1)):
+        E = np.array((sx * 0.255, -0.075, 0.53))
         c = LM['palm_' + k]
-        paws = np.maximum(paws, 1 - smoothstep(0.85, 1.2, ell(P, c + [0, -0.012, -0.008], (0.052, 0.058, 0.05)) + jit * 0.6))
+        dvec = (c - E) / np.linalg.norm(c - E)
+        t = (P - E) @ dvec
+        lat = np.linalg.norm((P - E) - t[:, None] * dvec, axis=1)
+        hand_t[k] = (t, lat, np.linalg.norm(c - E))
+        on = smoothstep(0.112, 0.128, t + jit * 0.02) * (lat < 0.062)
+        paws = np.maximum(paws, on)
     feet = 1 - smoothstep(0.045, 0.07, P[:, 2] + jit * 0.03)
     paws = np.maximum(paws, feet)
     ear = np.zeros(n, bool)
@@ -763,10 +771,9 @@ def paint_fur(fur, occluders):
         ear |= ell(P, LM['ear_' + k] + [0, -0.012, 0], (0.03, 0.02, 0.03)) < 1 + jit * 0.3
     claw = np.zeros(n, bool)
     for k in ('l', 'r'):
-        c = LM['palm_' + k]
-        d = np.linalg.norm(P - (c + [0, -0.012, -0.01]), axis=1)
-        claw |= (d > 0.046) & (d < 0.065) & (P[:, 2] < c[2] - 0.004) & (ell(P, c, (0.08, 0.08, 0.08)) < 1)
-    toe = (P[:, 2] < 0.03) & (P[:, 1] < -0.285)
+        t, lat, L = hand_t[k]
+        claw |= (t > L + 0.03) & (lat < 0.062)
+    toe = (P[:, 2] < 0.03) & (P[:, 1] < -0.318)
     claw |= toe
     tail = reg > 0.5
     scaly = tail & (P[:, 1] > 0.3 + jit * 0.03)
@@ -1387,8 +1394,14 @@ def main():
     rig = build_rig()
     names = [b.name for b in rig.data.bones]
     Wf = skin_fur(fur, rig, names)
+    # the apron follows the trunk and legs, never the arms (or a raised paw would drag its hem up with it)
+    arms = [names.index(n) for n in names if n.startswith(('upper_arm', 'forearm', 'hand'))]
+    ci = names.index('chest')
     for o in [ap, pocket] + straps + stuff:
-        write_weights(o, names, transfer_weights(fur, Wf, o, names))
+        W = transfer_weights(fur, Wf, o, names)
+        W[:, ci] += W[:, arms].sum(1)
+        W[:, arms] = 0
+        write_weights(o, names, W)
     write_weights(P_['teeth_u'], names, rigid(P_['teeth_u'], names, 'head'))
     write_weights(P_['teeth_d'], names, rigid(P_['teeth_d'], names, 'jaw'))
     write_weights(P_['specs'], names, rigid(P_['specs'], names, 'head'))

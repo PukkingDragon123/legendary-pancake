@@ -43,8 +43,8 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Transitions**: 15 of them.
 - **Interview**: in Pip's office, with a desk, a real view out of the window, office props and hands-on
   widgets.
-- **The boutique**: Queen Neve's cosy shop, with a counter and till, stands, real paintings and a street
-  view.
+- **The lodge store**: Barnaby Birchbark, a hand-painted beaver, keeps a general store in his log lodge: deals on gnawed stumps, acorn sacks and gem chests, a gift parcel, series banners over the Lucky Barrel, and a
+  window onto the real forest.
 - **Book**: a simpler diary of your stats.
 - **Explore the world**: a hand-painted globe with 20 real places, each with a real photo, a souvenir
   model to collect and a passport stamp.

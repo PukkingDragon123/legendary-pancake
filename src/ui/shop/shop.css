@@ -114,7 +114,7 @@
 
 /* ---------------------------------------------------------------- detail cards: a ledger page pinned to an oak board, a gift tag, a burlap label, a brass plate */
 .lg-card { position: absolute; z-index: 6; display: flex; flex-direction: column; background: var(--lg-wood) 0 0 / 256px 128px; background-clip: padding-box; filter: drop-shadow(0 8px 0 rgba(20, 12, 6, 0.45)); pointer-events: auto; }
-.lg-card.side { left: 16px; top: calc(70px + var(--safe-t)); width: min(400px, 38vw); max-height: calc(100% - 100px); animation: lgCardInL 0.55s var(--pop) both; transform-origin: 50% 0; }
+.lg-card.side { left: 16px; top: calc(70px + var(--safe-t)); width: min(400px, 38vw); max-height: calc(100% - 170px); animation: lgCardInL 0.55s var(--pop) both; transform-origin: 50% 0; }
 .lg-card.top { left: 8px; right: 8px; bottom: calc(8px + var(--safe-b)); max-height: 56%; animation: lgCardInB 0.5s var(--ease) both; }
 @keyframes lgCardInL { 0% { translate: -120% 0; rotate: -6deg; } 70% { translate: 6px 0; rotate: 1deg; } }
 @keyframes lgCardInB { 0% { translate: 0 110%; } 70% { translate: 0 -6px; } }

@@ -24,7 +24,7 @@ import type { Stage } from '../scene.ts';
 import { HOUSE, groundY } from '../layout.ts';
 import { Beaver, type BeaverClip } from './beaver.ts';
 import {
-  M, acornHeap, banner, barrel, chest, contactShadow, disposeMats, disposeTextures, gem, hangingSign, logGeo, merged, mtx, parcel, sack, scales,
+  M, acornHeap, banner, barrel, chest, contactShadow, disposeMats, disposeTextures, gem, hangingSign, herbBundle, logGeo, merged, mtx, parcel, sack, scales,
   shavings, slate, stump, tex, type Banner, type Sign, type Slate,
 } from './lodgekit.ts';
 import { pottedFir, swayPlants, type Plant } from './shopplants.ts';
@@ -54,7 +54,7 @@ const SHELF = { x: 4.12, z0: -0.55, z1: 1.75, y: 0.92, d: 0.56 };
 /** the deal stumps: spread across the floor on a wide screen, gathered in front of Barnaby on a tall one */
 const STUMPS: Record<LodgeLayout, { x: number; z: number; h: number }[]> = {
   side: [{ x: -2.25, z: 0.2, h: 0.5 }, { x: -1.3, z: 0.5, h: 0.6 }, { x: -0.35, z: 0.2, h: 0.5 }],
-  top: [{ x: 0.5, z: 0.5, h: 0.5 }, { x: 1.36, z: 1.25, h: 0.36 }, { x: 2.22, z: 0.5, h: 0.5 }],
+  top: [{ x: 0.6, z: 0.45, h: 0.5 }, { x: 1.36, z: 1.15, h: 0.36 }, { x: 2.12, z: 0.45, h: 0.5 }],
 };
 /** acorn packs on the floor before the shelf (ids from ACORN_PACKS), gem packs on the shelf (GEM_PACKS) */
 const ACORN_SPOTS = [{ id: 'handful', z: -0.25 }, { id: 'sack', z: 0.3 }, { id: 'basket', z: 0.88 }, { id: 'mountain', z: 1.5 }];
@@ -89,6 +89,7 @@ export class Lodge implements Stage {
   private signs: Sign[] = [];
   private board: Slate | null = null;
   private plants: Plant[] = [];
+  private herbs: THREE.Group[] = [];
   private gift: THREE.Group | null = null;
   private giftOpen = 0;
   private scalesObj: THREE.Group | null = null;
@@ -153,7 +154,7 @@ export class Lodge implements Stage {
     S.add(b);
     b.add(contactShadow(0.9, 0.8, 0.55));
     this.beaver.onEvent = (e) => this.beaverEvent(e);
-    this.spot('beaver', b, this.hitBox(0.6, 1.2, 0.5, v3(BEAVER.x, 0.6, BEAVER.z)), v3(BEAVER.x, 1.38, BEAVER.z), (l) => ({ target: v3(BEAVER.x - 0.05, 0.86, BEAVER.z), yaw: -0.18, pitch: 0.06, dist: l === 'side' ? 3.0 : 3.6, fov: 40, cx: l === 'side' ? 0.66 : 0.5, cy: l === 'side' ? 0.52 : 0.4 }));
+    this.spot('beaver', b, this.hitBox(0.6, 1.2, 0.5, v3(BEAVER.x, 0.6, BEAVER.z)), v3(BEAVER.x, 1.38, BEAVER.z), (l) => ({ target: v3(BEAVER.x - 0.04, 0.98, BEAVER.z), yaw: -0.22, pitch: 0.05, dist: l === 'side' ? 2.3 : 2.6, fov: 40, cx: l === 'side' ? 0.62 : 0.5, cy: l === 'side' ? 0.5 : 0.42 }));
     this.layout = innerWidth >= innerHeight * 1.05 && innerWidth >= 640 ? 'side' : 'top';
     for (let i = 0; i < 3; i++) this.deals.push(this.makeStump(i));
     this.cur = this.shot('home');
@@ -236,15 +237,15 @@ export class Lodge implements Stage {
     const n = this.world?.sky?.night ?? nightNow();
     this.night = n;
     const L = THREE.MathUtils.lerp;
-    this.hemi.intensity = L(0.5, 0.26, n);
+    this.hemi.intensity = L(0.4, 0.24, n);
     this.hemi.color.setHex(n > 0.5 ? 0x8a9ac8 : 0xdde6f2);
     this.hemi.groundColor.setHex(n > 0.5 ? 0x2a1a12 : 0x4a2e1c);
-    this.key.intensity = L(0.95, 0.7, n);
+    this.key.intensity = L(0.62, 0.5, n);
     this.key.color.setHex(n > 0.5 ? 0xffc48a : 0xffe4bc);
     this.sun.intensity = L(120, 26, n);
     this.sun.color.setHex(n > 0.5 ? 0x8fa8e8 : 0xeef4ff);
     for (const s of this.shafts) (s.material as THREE.MeshBasicMaterial).color.setHex(n > 0.5 ? 0x1c3058 : 0x6c6450);
-    for (const l of this.lamps) l.base = L(3.4, 5.2, n);
+    for (const l of this.lamps) l.base = L(4.6, 6.2, n);
     if (!this.viewRT) this.outside.color.setHex(n > 0.5 ? 0x3a4a78 : 0xffffff);
   }
 
@@ -322,7 +323,7 @@ export class Lodge implements Stage {
       const rad = 0.026 + rr() * 0.018;
       sticks.push({ geo: logGeo(R.front - R.back, rad, Math.floor(rr() * 999), 6), m: mtx(x + (rr() - 0.5) * 0.03, R.h + rad - 0.02 + (rr() - 0.5) * 0.02, (R.front + R.back) / 2, Math.PI / 2 + (rr() - 0.5) * 0.02) });
     }
-    const st = this.meshOf(merged(sticks), M.bark());
+    const st = this.meshOf(merged(sticks), M.barkLog());
     st.castShadow = false;
     this.add(st);
     // a dark mud roof over the sticks (no light leaks)
@@ -331,7 +332,7 @@ export class Lodge implements Stage {
     roof.position.set(0, R.h + 0.08, (R.front + R.back) / 2);
     this.add(roof);
     // wood shavings: by the counter, round the stumps, under the tool wall, by the barrel
-    this.add(shavings([{ x: 1.05, z: -0.55, r: 0.35, n: 12 }, { x: -1.3, z: 0.35, r: 0.55, n: 10 }, { x: -4.05, z: -0.75, r: 0.45, n: 18 }, { x: -3.6, z: -0.2, r: 0.3, n: 8 }, { x: -2.3, z: -1.25, r: 0.3, n: 8 }]));
+    this.add(shavings([{ x: -4.05, z: -0.85, r: 0.42, n: 22 }, { x: -3.7, z: -0.25, r: 0.28, n: 9 }, { x: 0.15, z: -2.25, r: 0.3, n: 8 }]));
     // a braided rug before the counter
     this.add(ragRug(2.1, 1.25, v3(1.2, 0.006, 0.0)));
   }
@@ -563,16 +564,25 @@ export class Lodge implements Stage {
 
   private barrelShot(l: LodgeLayout, close = false): Shot {
     const B = BARREL;
+    // close: the reveal (the barrel and the prize rising out of it, centred); otherwise the series board is open
+    // beside it (desktop: the board on the left) or below it (phone: the barrel and banners in the top third)
     return close
-      ? { target: v3(B.x, B.h + 0.55, B.z), yaw: 0.12, pitch: 0.1, dist: l === 'side' ? 3.3 : 4.4, fov: 44, cx: 0.5, cy: l === 'side' ? 0.46 : 0.42 }
-      : { target: v3(B.x + 0.05, 1.45, B.z - 0.2), yaw: 0.1, pitch: 0.1, dist: l === 'side' ? 4.3 : 5.6, fov: 44, cx: l === 'side' ? 0.68 : 0.5, cy: l === 'side' ? 0.5 : 0.36 };
+      ? { target: v3(B.x, B.h + 0.62, B.z), yaw: 0.12, pitch: 0.12, dist: l === 'side' ? 3.4 : 4.6, fov: 44, cx: 0.5, cy: l === 'side' ? 0.44 : 0.4 }
+      : { target: v3(B.x + 0.15, l === 'side' ? 1.5 : 1.75, B.z - 0.25), yaw: 0.1, pitch: 0.1, dist: l === 'side' ? 4.2 : 5.4, fov: 46, cx: l === 'side' ? 0.7 : 0.5, cy: l === 'side' ? 0.5 : 0.17 };
   }
 
   /** lanterns, goods, tools, crates and a plant (models from props.glb, placed once it's in) */
   private buildDecor() {
     this.lamp(v3(-1.25, 2.65, 1.45), true);
     this.lamp(v3(2.95, 2.5, -1.25), true);
-    this.lamp(v3(-0.4, 2.9, 2.6), true);
+    // bundles of herbs drying under the beams
+    const beamY = ROOM.h - 0.18 - 0.14;
+    for (const [k, [x, z, drop]] of ([[-1.12, -2.35, 0.34], [-0.82, -2.35, 0.5], [-0.5, -2.35, 0.3], [-0.2, -2.35, 0.44], [2.95, -0.75, 0.36], [3.3, -0.75, 0.5], [3.7, 0.85, 0.4], [4.0, 0.85, 0.3], [-3.2, 0.85, 0.42], [-2.9, 0.85, 0.3]] as [number, number, number][]).entries()) {
+      const hb = herbBundle(k * 13 + 5, drop);
+      hb.position.set(x, beamY - drop, z);
+      this.add(hb);
+      this.herbs.push(hb);
+    }
     const fir = pottedFir(1.5);
     fir.group.position.set(-0.2, 0, ROOM.back + 0.45);
     this.add(fir.group);
@@ -874,10 +884,10 @@ export class Lodge implements Stage {
     const l = this.layout;
     if (name === 'home') return l === 'side'
       ? { target: v3(0.1, 1.15, -0.85), yaw: 0.02, pitch: 0.1, dist: 5.5, fov: 46, cx: 0.5, cy: 0.5 }
-      : { target: v3(1.36, 0.88, -0.35), yaw: 0.0, pitch: 0.2, dist: 5.5, fov: 58, cx: 0.5, cy: 0.44 };
+      : { target: v3(1.36, 0.84, -0.3), yaw: 0.0, pitch: 0.2, dist: 4.9, fov: 58, cx: 0.5, cy: 0.44 };
     if (name === 'deals') { const p = STUMPS[l][1]; return l === 'side' ? { target: v3(p.x, 0.75, p.z - 0.3), yaw: 0.05, pitch: 0.2, dist: 3.9, fov: 44, cx: 0.5, cy: 0.5 } : this.shot('home'); }
     if (name === 'stash') return { target: v3(SHELF.x - 0.45, 0.62, (SHELF.z0 + SHELF.z1) / 2 + 0.05), yaw: -1.08, pitch: 0.2, dist: l === 'side' ? 3.6 : 4.9, fov: 46, cx: 0.5, cy: l === 'side' ? 0.5 : 0.45 };
-    if (name === 'series') return this.barrelShot(l, true);
+    if (name === 'series') return this.barrelShot(l, false);
     if (name === 'barrel') return this.barrelShot(l, true);
     const s = this.spots.get(name);
     if (s) return s.focus(l);
@@ -927,10 +937,8 @@ export class Lodge implements Stage {
   resize(w: number, h: number) {
     this.w = w; this.h = h;
     const side = w >= h * 1.05 && w >= 640;
-    const was = this.layout;
     this.layout = side ? 'side' : 'top';
-    // a narrow portrait needs a little more lens to keep the shop in frame
-    if (was !== this.layout || !this.deals[0]?.def) this.placeStumps();
+    // the stumps stand where this layout's camera wants them
     this.placeStumps();
     const to = this.shot(this.shotName);
     this.cur = { ...to, target: to.target.clone() };
@@ -1079,6 +1087,7 @@ export class Lodge implements Stage {
     }
     this.focusLight.intensity += ((this.focusOn ? 9 : 0) - this.focusLight.intensity) * Math.min(1, dt * 3);
     for (const b of this.banners) b.b.sway(t, 1);
+    for (const h of this.herbs) { const ph = h.userData.phase as number; h.rotation.z = Math.sin(t * 0.8 + ph) * 0.04; h.rotation.x = Math.sin(t * 0.6 + ph * 1.7) * 0.03; }
     swayPlants(t);
 
     // Barnaby: idle moments, looking around

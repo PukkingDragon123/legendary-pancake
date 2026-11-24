@@ -226,7 +226,7 @@ export function BuildMode() {
     if (have > 0) err = ctl.startPlacing(d.id, 'inv');
     else if (isSeasonal(d) || d.noStore) {
       const sr = d.series ? SERIES_BY_ID[d.series] : undefined;
-      return nope('i-' + d.id, sr ? `From the ${sr.name} banner in the boutique` : 'Pip finds these on adventures');
+      return nope('i-' + d.id, sr ? `From the ${sr.name} at the Lucky Barrel` : 'Pip finds these on adventures');
     } else if (d.level && lv < d.level) return nope('i-' + d.id, `Unlocks at level ${d.level}`);
     else {
       const pr = priceOfItem(d.id);
@@ -332,7 +332,7 @@ export function BuildMode() {
             );
           })}
           {tab === 'stored' && cards.length === 0 && <div class="bm-empty"><Px name="bp_box" size={44} /><span>Storage is empty. Store furniture with the <b>Store</b> button, or buy something from the tabs.</span></div>}
-          {tab === 'seasonal' && cards.length === 0 && <div class="bm-empty"><Px name="bp_season" size={44} /><span>Limited series pieces from the boutique banners land here.</span></div>}
+          {tab === 'seasonal' && cards.length === 0 && <div class="bm-empty"><Px name="bp_season" size={44} /><span>Limited series pieces from the Lucky Barrel land here.</span></div>}
         </div>
       </section>
     </div>
