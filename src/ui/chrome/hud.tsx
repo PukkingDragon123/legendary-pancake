@@ -422,7 +422,7 @@ function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
       <img class="hh-cshadow" src={contactShadow(p.m.id === 'book' ? 40 : 34, 6, p.k)} alt="" draggable={false} />
       <span class="hh-pic">
         {p.m.id === 'sleep' ? <LampArt k={p.k} act={act} /> : p.m.id === 'clock' ? <AlarmArt k={p.k} act={act} /> : <BookArt k={p.k} act={act} />}
-        {p.m.id === 'sleep' && <PxAnim tl={seq('nav_zz', 8, 220)} size={64} class="hh-zz" offset={p.i * 300} />}
+        {p.m.id === 'sleep' && <><i class="hh-twinkle moon1" /><i class="hh-twinkle moon2" /></>}
       </span>
       <span class="hh-plate" style={{ backgroundImage: bg(plate(44, 9, p.k, 1)) }}>{p.m.label}</span>
       {p.rec && <><i class="hh-twinkle a" /><i class="hh-twinkle b" /><i class="hh-twinkle c" /></>}

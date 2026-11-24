@@ -97,6 +97,8 @@
   .hh-tool { width: 56px; height: 66px; }
   .hh-toolhang { width: 56px; transform-origin: 28px 4px; }
   .hh-toollabel { display: none; }
+  /* [ui4] in two columns the shop's NEW flag sits on its own tile, clear of Build */
+  .hh-new { left: auto; right: -2px; top: -8px; transform: rotate(10deg); animation: none; }
   .hh-toolrope { left: 25px; width: 62px; bottom: 50px; background-image: var(--rope), var(--rope) !important; background-position: 0 0, 56px 0; background-repeat: repeat-y; box-shadow: none; }
 }
 
@@ -136,7 +138,9 @@
 @keyframes hhTwinkle { 0% { background-image: var(--hh-spark0); } 20% { background-image: var(--hh-spark1); } 40% { background-image: var(--hh-spark2); } 60%, 100% { background-image: none; } }
 @keyframes hhTwinkleSlow { 0% { background-image: var(--hh-spark0); } 6% { background-image: var(--hh-spark1); } 12% { background-image: var(--hh-spark2); } 18%, 100% { background-image: none; } }
 .hh-shelf { position: relative; display: block; width: 352px; height: 32px; margin: 0 auto; image-rendering: pixelated; filter: drop-shadow(2px 4px 0 rgba(26, 14, 8, 0.45)); }
-.hh-zz { position: absolute; left: 44px; top: -18px; pointer-events: none; }
+/* little stars wink round the moon lamp's glass */
+.hh-twinkle.moon1 { left: 10px; top: 14px; animation: hhTwinkleSlow 4.4s steps(1) infinite 0.8s; }
+.hh-twinkle.moon2 { left: 80px; top: 34px; animation: hhTwinkleSlow 5.6s steps(1) infinite 2.6s; }
 
 /* ------------------------------------------------------------ toasts: a parchment scroll that unrolls */
 .hh-toasts { position: absolute; top: calc(var(--safe-t) + 124px); left: 50%; width: min(360px, calc(100% - 24px)); transform: translateX(-50%); z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 8px; }
