@@ -11,8 +11,6 @@ upstream attributions from BUSHED's `CREDITS.md`:
 | File | Source | Author | Licence |
 |---|---|---|---|
 | `boulder_01.glb` | [Boulder 01](https://polyhaven.com/a/boulder_01) | Rico Cilliers | CC0 1.0 |
-| `bark_debris_01.glb` | [Bark Debris 01](https://polyhaven.com/a/bark_debris_01) | Greg Zaal, Jenelle van Heerden | CC0 1.0 |
-| `rock_07.glb`, `rock_09.glb` | [Rock 07](https://polyhaven.com/a/rock_07), [Rock 09](https://polyhaven.com/a/rock_09) | Jenelle van Heerden | CC0 1.0 |
+| `rock_07.glb` | [Rock 07](https://polyhaven.com/a/rock_07) | Jenelle van Heerden | CC0 1.0 |
 | `stone_01.glb` | [Stone 01](https://polyhaven.com/a/stone_01) | Dario Barresi, Rico Cilliers | CC0 1.0 |
 | `tree_stump_01.glb` | [Tree Stump 01](https://polyhaven.com/a/tree_stump_01) | Rob Tuytel | CC0 1.0 |
-| `dry_branches_medium_01.glb` | [Dry Branches Medium 01](https://polyhaven.com/a/dry_branches_medium_01) | Rico Cilliers | CC0 1.0 |

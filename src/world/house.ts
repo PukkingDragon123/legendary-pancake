@@ -66,6 +66,8 @@ export interface House {
   /** the floor a ray hits the locked front of, if any */
   pickLock(ray: THREE.Ray): FloorId | null;
   update(dt: number, t: number, hooks: HouseHooks): void;
+  /** cost tier (src/world/scene.ts): low drops the rocks round the foot and the extra lamp lights */
+  setTier(t: 'high' | 'medium' | 'low'): void;
   /** dress the oak's crown for the season (fresh in spring, golden in autumn, frosted but still leafy in winter: it
    * is a magic home) */
   setSeason(info: SeasonInfo): void;
@@ -112,6 +114,8 @@ export function buildHouse(): House {
   }
 
   // borrowed nature props round the foot of the trunk (they load in their own time)
+  let tier: 'high' | 'medium' | 'low' = 'high';
+  const propRoots: THREE.Object3D[] = [];
   const props = HOUSE_PROPS.map(async (pr) => {
     const p = await loadPart(pr.id, { cut: true });
     if (!p) return;
@@ -119,6 +123,8 @@ export function buildHouse(): House {
     p.root.scale.setScalar(PX * pr.s);
     p.root.position.set(Math.sin(pr.a) * r * PX, -0.06, Math.cos(pr.a) * r * PX);
     p.root.rotation.y = (pr.yaw * Math.PI) / 180;
+    p.root.visible = tier !== 'low';
+    propRoots.push(p.root);
     floors.f1.add(p.root);
   });
   const ready = Promise.all([texturesReady(), ...props]).then(() => undefined);
@@ -156,6 +162,7 @@ export function buildHouse(): House {
       roof.visible = !fid;
       CUT.uCutOn.value = fid ? 1 : 0;
       if (fid) { CUT.uCutY.value = (FLOOR_Y[fid] + 3) * PX; CUT.uCutCenter.value.set(HOUSE.x, 0, HOUSE.z); }
+      CUT.uCutTop.value = fid ? (FLOOR_Y[fid] + 34) * PX : 999;
       for (const f of ['f2', 'f3'] as FloorId[]) { const L = locks[f]!; if (L.state !== 'open') L.group.visible = !fid || f !== fid; }
     },
     pickLock(ray) {
@@ -178,11 +185,10 @@ export function buildHouse(): House {
       HOUSE_LOOK.sliver.setRGB(1.6 + n * 2.6, 0.95 + n * 1.4, 0.38 + n * 0.4);
       DUSTY().emissiveIntensity = 0.12 + n * 1.6;
       syncLooks();
-      porch.intensity = n * 22 * (0.94 + Math.sin(t * 9.1) * 0.04 + Math.sin(t * 13.7) * 0.03);
-      spill.intensity = n * 46;
-      for (const f of ['f2', 'f3'] as FloorId[]) upper[f]!.intensity = open[f] ? 3 + n * 16 : 0;
-      oak.ladder.rotation.z = Math.sin(t * 0.8) * 0.012;
-      oak.ladder.rotation.x = Math.sin(t * 0.63 + 1) * 0.01;
+      const lamps = tier === 'low' ? 0 : 1;
+      porch.intensity = lamps * n * 22 * (0.94 + Math.sin(t * 9.1) * 0.04 + Math.sin(t * 13.7) * 0.03);
+      spill.intensity = lamps * n * 46;
+      for (const f of ['f2', 'f3'] as FloorId[]) upper[f]!.intensity = open[f] && tier !== 'low' ? 3 + n * 16 : 0;
       // the leaves glow where the sun comes through them
       if (!sunLight && (sunSearched -= dt) <= 0) {
         sunSearched = 2;
@@ -206,6 +212,10 @@ export function buildHouse(): House {
       };
       for (const f of ['f2', 'f3'] as FloorId[]) stepLock(locks[f]!, dt, t, emit);
       void buildFloor;
+    },
+    setTier(t) {
+      tier = t;
+      for (const r of propRoots) r.visible = t !== 'low';
     },
     setSeason(info) {
       const c = new THREE.Color();

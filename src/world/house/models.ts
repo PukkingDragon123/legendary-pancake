@@ -73,12 +73,7 @@ export async function loadPart(id: string, o: PartOpts = {}): Promise<HousePart 
 export const HOUSE_PROPS: { id: string; a: number; d: number; s: number; yaw: number }[] = [
   { id: 'props/boulder_01', a: -1.26, d: 34, s: 15, yaw: 30 },
   { id: 'props/stone_01', a: -1.4, d: 56, s: 60, yaw: 70 },
-  { id: 'props/bark_debris_01', a: -1.84, d: 26, s: 15, yaw: -20 },
   { id: 'props/tree_stump_01', a: 2.12, d: 60, s: 14, yaw: 15 },
   { id: 'props/rock_07', a: 2.28, d: 30, s: 46, yaw: 110 },
-  { id: 'props/dry_branches_medium_01', a: -2.74, d: 30, s: 17, yaw: 40 },
   { id: 'props/boulder_01', a: 2.72, d: 26, s: 10, yaw: -60 },
-  { id: 'props/rock_09', a: -1.12, d: 64, s: 60, yaw: 10 },
-  { id: 'props/stone_01', a: 1.78, d: 56, s: 52, yaw: -35 },
-  { id: 'props/rock_07', a: -2.26, d: 46, s: 40, yaw: 200 },
 ];

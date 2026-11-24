@@ -538,6 +538,7 @@ export class Scene {
     this.post.setTier(t);
     this.vista.setTier(t);
     this.sky.shafts = t === 'high';
+    this.house.setTier(t); // [house4] the oak drops its foot rocks and extra lamps on low
     const size = t === 'high' ? 2048 : 1024, sh = this.sky.sun.shadow;
     if (sh.mapSize.x !== size) { sh.mapSize.set(size, size); sh.map?.dispose(); sh.map = null; }
     // the meadow thins out on low

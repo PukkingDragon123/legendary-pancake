@@ -99,26 +99,43 @@ function barkCol(a: number, y: number, r: number): V3 {
 
 // ------------------------------------------------------------------ sets of meshes by material
 
+/** Solids that differ only in colour share one vertex-coloured material (one draw): their tint (linear). */
+const FOLD: Partial<Record<HouseMat, { to: HouseMat; tint: V3 }>> = {
+  iron: { to: 'paint', tint: [0.065, 0.056, 0.048] }, brass: { to: 'paint', tint: [0.64, 0.4, 0.1] }, dark: { to: 'paint', tint: [0.012, 0.009, 0.007] },
+  sliver: { to: 'glow', tint: [1.0, 0.82, 0.55] },
+};
+/** material keys that stay separate meshes (their own textures); every other key folds into its material */
+const KEEP = new Set(['dusty', 'signs']);
+
+/**
+ * Geometry collected by material: the whole oak becomes one mesh per material (about ten draws), not one per part.
+ * (Build mode no longer hides floor bands: the see-through-walls shader dissolves everything above the edited floor.)
+ */
 class Sets {
   private g = new Map<string, Geo>();
-  get(band: Band, m: HouseMat, key = ''): Geo {
-    const k = band + '|' + m + '|' + key;
+  get(_band: Band | null, m: HouseMat, key = ''): Geo {
+    const f = FOLD[m];
+    const k = (f ? f.to : m) + '|' + (KEEP.has(key) ? key : '');
     let g = this.g.get(k);
     if (!g) { g = new Geo(); this.g.set(k, g); }
-    return g;
+    if (!f) return g;
+    // a view that writes into the same arrays with its colours tinted
+    const t = Object.create(g) as Geo;
+    t.vert = (p, uv, c = [1, 1, 1], n) => Geo.prototype.vert.call(t, p, uv, [c[0] * f.tint[0], c[1] * f.tint[1], c[2] * f.tint[2]], n);
+    return t;
   }
-  /** turn every collected geometry into meshes under the band groups (scaled px -> world) */
-  flush(groups: Record<Band, THREE.Group>, extra: Map<string, THREE.Material> = new Map()) {
+  /** turn every collected geometry into meshes under `target` (scaled px -> world) */
+  flush(target: THREE.Group, extra: Map<string, THREE.Material> = new Map()) {
     for (const [k, g] of this.g) {
       if (!g.idx.length) continue;
-      const [band, m, key] = k.split('|') as [Band, HouseMat, string];
+      const [m, key] = k.split('|') as [HouseMat, string];
       const mesh = new THREE.Mesh(g.build(), extra.get(key) ?? houseMat(m));
-      mesh.name = `oak:${band}:${m}${key ? ':' + key : ''}`;
+      mesh.name = `oak:${m}${key ? ':' + key : ''}`;
       mesh.scale.setScalar(PX);
-      const glassy = m === 'glow' || m === 'pane' || m === 'sliver';
+      const glassy = m === 'glow' || m === 'pane';
       mesh.castShadow = !glassy;
       mesh.receiveShadow = !glassy;
-      groups[band].add(mesh);
+      target.add(mesh);
     }
     this.g.clear();
   }
@@ -176,52 +193,57 @@ function roundRect(w: number, h: number, r: number): THREE.Shape {
 
 // ------------------------------------------------------------------ painted signs
 
-function plaqueTex(level: number): THREE.CanvasTexture {
-  return canvasTex(48, 32, (g) => {
-    // brass plate with a bevelled rim, rivets and the level engraved
-    g.fillStyle = '#5a3c16'; g.fillRect(0, 0, 48, 32);
-    g.fillStyle = '#b98a3c'; g.fillRect(1, 1, 46, 30);
-    g.fillStyle = '#e8c477'; g.fillRect(1, 1, 46, 2); g.fillRect(1, 1, 2, 30);
-    g.fillStyle = '#7c5520'; g.fillRect(1, 29, 46, 2); g.fillRect(45, 1, 2, 30);
-    g.fillStyle = '#d7a957'; g.fillRect(4, 4, 40, 24);
-    for (let i = 0; i < 40; i += 3) { g.fillStyle = i % 2 ? '#ddb262' : '#cfa04e'; g.fillRect(4 + i, 4, 1, 24); }
-    g.fillStyle = '#8a5f22'; for (const [x, y] of [[3, 3], [43, 3], [3, 27], [43, 27]]) g.fillRect(x, y, 2, 2);
-    const t = 'LV ' + level, w = textWidth(t, 1) * 2;
-    pixelText(g, t, Math.round(24 - w / 2), 9, 2, '#4a2e0e', '#f6dc98');
-  });
+/** The painted signs share one canvas (one material): regions [x, y, w, h] in its pixels. */
+const SIGNS = { W: 160, H: 96, sign: [0, 0, 96, 28], mail: [96, 0, 32, 16], mat: [96, 16, 32, 16], lv: [[0, 32, 48, 32], [48, 32, 48, 32]], brass: [100, 40, 8, 8] } as const;
+/** uv (0..1 within a region) -> uv in the signs atlas */
+function signUV(r: readonly number[], u: number, v: number): [number, number] {
+  return [(r[0] + u * r[2]) / SIGNS.W, 1 - (r[1] + (1 - v) * r[3]) / SIGNS.H];
 }
 
-function signTex(): THREE.CanvasTexture {
-  return canvasTex(96, 28, (g) => {
-    g.fillStyle = '#3c2614'; g.fillRect(0, 0, 96, 28);
-    woodFill(g, 1, 1, 94, 26, [176, 122, 70], 3);
-    g.fillStyle = '#5c3a1c'; g.fillRect(1, 13, 94, 1);
-    g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(1, 24, 94, 3);
-    const t = 'HOOT HOLLOW';
-    pixelText(g, t, Math.round(48 - textWidth(t, 1) / 2), 4, 1, '#f3e6c4', '#3a2410');
-    const t2 = 'PIP';
-    pixelText(g, t2, Math.round(48 - textWidth(t2, 1) / 2), 15, 1, '#f3e6c4', '#3a2410');
+let signsMat: THREE.MeshStandardMaterial | null = null;
+function signsMaterial(): THREE.MeshStandardMaterial {
+  if (signsMat) return signsMat;
+  const t = canvasTex(SIGNS.W, SIGNS.H, (g) => {
+    const at = (r: readonly number[], f: () => void) => { g.save(); g.translate(r[0], r[1]); f(); g.restore(); };
+    at(SIGNS.sign, () => {
+      g.fillStyle = '#3c2614'; g.fillRect(0, 0, 96, 28);
+      woodFill(g, 1, 1, 94, 26, [176, 122, 70], 3);
+      g.fillStyle = '#5c3a1c'; g.fillRect(1, 13, 94, 1);
+      g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(1, 24, 94, 3);
+      pixelText(g, 'HOOT HOLLOW', Math.round(48 - textWidth('HOOT HOLLOW', 1) / 2), 4, 1, '#f3e6c4', '#3a2410');
+      pixelText(g, 'PIP', Math.round(48 - textWidth('PIP', 1) / 2), 15, 1, '#f3e6c4', '#3a2410');
+    });
+    at(SIGNS.mail, () => {
+      g.fillStyle = '#9c3a2a'; g.fillRect(0, 0, 32, 16);
+      for (let i = 0; i < 32; i++) { g.fillStyle = i % 5 === 0 ? '#8c3224' : '#a6402e'; g.fillRect(i, 0, 1, 16); }
+      pixelText(g, 'PIP', 8, 5, 1, '#f4e8cc', '#5a1e14');
+    });
+    at(SIGNS.mat, () => {
+      for (let j = 0; j < 16; j++) for (let i = 0; i < 32; i++) {
+        const weave = ((i >> 1) + (j >> 1)) % 2;
+        g.fillStyle = weave ? '#b48a52' : '#9c7442';
+        if (i < 2 || j < 2 || i > 29 || j > 13) g.fillStyle = weave ? '#6e4a2a' : '#5e3e22';
+        g.fillRect(i, j, 1, 1);
+      }
+      pixelText(g, 'HOOT', 5, 5, 1, '#5a3a1a');
+    });
+    [UNLOCK.f2.level, UNLOCK.f3.level].forEach((level, k) => at(SIGNS.lv[k], () => {
+      // brass plate with a bevelled rim, rivets and the level engraved
+      g.fillStyle = '#5a3c16'; g.fillRect(0, 0, 48, 32);
+      g.fillStyle = '#b98a3c'; g.fillRect(1, 1, 46, 30);
+      g.fillStyle = '#e8c477'; g.fillRect(1, 1, 46, 2); g.fillRect(1, 1, 2, 30);
+      g.fillStyle = '#7c5520'; g.fillRect(1, 29, 46, 2); g.fillRect(45, 1, 2, 30);
+      g.fillStyle = '#d7a957'; g.fillRect(4, 4, 40, 24);
+      for (let i = 0; i < 40; i += 3) { g.fillStyle = i % 2 ? '#ddb262' : '#cfa04e'; g.fillRect(4 + i, 4, 1, 24); }
+      g.fillStyle = '#8a5f22'; for (const [x, y] of [[3, 3], [43, 3], [3, 27], [43, 27]]) g.fillRect(x, y, 2, 2);
+      const t2 = 'LV ' + level, w = textWidth(t2, 1) * 2;
+      pixelText(g, t2, Math.round(24 - w / 2), 9, 2, '#4a2e0e', '#f6dc98');
+    }));
+    at(SIGNS.brass, () => { g.fillStyle = '#c99a4c'; g.fillRect(0, 0, 8, 8); });
   });
-}
-
-function mailTex(): THREE.CanvasTexture {
-  return canvasTex(32, 16, (g) => {
-    g.fillStyle = '#9c3a2a'; g.fillRect(0, 0, 32, 16);
-    for (let i = 0; i < 32; i++) { g.fillStyle = i % 5 === 0 ? '#8c3224' : '#a6402e'; g.fillRect(i, 0, 1, 16); }
-    pixelText(g, 'PIP', 8, 5, 1, '#f4e8cc', '#5a1e14');
-  });
-}
-
-function matTex(): THREE.CanvasTexture {
-  return canvasTex(32, 16, (g) => {
-    for (let j = 0; j < 16; j++) for (let i = 0; i < 32; i++) {
-      const weave = ((i >> 1) + (j >> 1)) % 2;
-      g.fillStyle = weave ? '#b48a52' : '#9c7442';
-      if (i < 2 || j < 2 || i > 29 || j > 13) g.fillStyle = weave ? '#6e4a2a' : '#5e3e22';
-      g.fillRect(i, j, 1, 1);
-    }
-    pixelText(g, 'HOOT', 5, 5, 1, '#5a3a1a');
-  });
+  signsMat = new THREE.MeshStandardMaterial({ map: t, roughness: 0.6, metalness: 0.15 });
+  signsMat.name = 'house:signs';
+  return signsMat;
 }
 
 /** dusty dark glass: a dim room behind, a cobweb in the corner, a warm glow low down */
@@ -271,15 +293,15 @@ export function DUSTY(): THREE.MeshStandardMaterial {
   return dusty;
 }
 
-export interface FrontHalf { group: THREE.Group; hinge: number; side: -1 | 1 }
 export interface LockFront {
   fid: FloorId;
   group: THREE.Group;
-  halves: FrontHalf[];
-  shutters: { obj: THREE.Object3D; side: -1 | 1 }[];
+  /** the shut front itself, pivoting on its bottom edge */
+  front: THREE.Group;
+  /** a marker on each shuttered window (where the unlock show puffs dust) */
+  shutters: THREE.Object3D[];
   padlock: THREE.Group;
   plaque: THREE.Object3D;
-  sliver: THREE.Object3D[];
 }
 
 export interface Oak {
@@ -290,8 +312,6 @@ export interface Oak {
   /** the leafy crown (and the great limb's leaves): the forest's shared leaf cards, one instance each so the
    * seasons can tint them like the woods round them */
   crown: THREE.InstancedMesh[];
-  /** the rope ladder (sways) */
-  ladder: THREE.Group;
   dispose(): void;
 }
 
@@ -304,7 +324,7 @@ export function buildOak(): Oak {
   const extra = new Map<string, THREE.Material>();
   const R = rng(1234);
   const ivy = new Cards('flat');
-  const ivyBand: Record<Band, Cards> = { f1: ivy, f2: new Cards('flat'), f3: new Cards('flat'), roof: new Cards('flat') };
+  const ivyBand: Record<Band, Cards> = { f1: ivy, f2: ivy, f3: ivy, roof: ivy };
 
   // ---------------------------------------------------------------- bark shells
   const NA = 144, DA = TAU / NA;
@@ -548,8 +568,8 @@ export function buildOak(): Oak {
       for (const s of [-1, 1]) beam(hd, at(s * (o.hw + 3), hy - 6, zt - 1), at(s * (o.hw + 3), hy + 1, zt + 10), 1.6, [0.7, 0.58, 0.46]);
     } else if (st.glass !== 'none') {
       const gm: HouseMat = st.glass === 'clear' ? 'pane' : 'paint';
-      const gg = SS.get(band, gm, st.glass === 'dusty' ? 'dusty' + key : key);
-      if (st.glass === 'dusty' && !extra.has('dusty' + key)) extra.set('dusty' + key, DUSTY());
+      const gg = SS.get(band, gm, st.glass === 'dusty' ? 'dusty' : key);
+      if (st.glass === 'dusty' && !extra.has('dusty')) extra.set('dusty', DUSTY());
       const zc = zMid(0, cy);
       const c0 = gg.vert(at(0, cy, zc), [0.5, 0.5]);
       const rim = p0.map(([x, y]) => gg.vert(at(x, y, zMid(x, y)), [x / (o.hw * 2) + 0.5, (y - o.y0) / (o.y1 - o.y0)]));
@@ -587,53 +607,38 @@ export function buildOak(): Oak {
       }
     }
     if (st.shutters) {
-      // two closed shutter leaves meeting in the middle, a Z brace on each, a sliver of light between
-      const sh = new THREE.Group();
+      // two closed shutter leaves meeting in the middle, battens and iron straps on each, a sliver of light between
       const zs = Math.max(...zf) + 0.4;
       const tint: V3 = [0.5, 0.74, 0.68];
+      const pg = SS.get(band, 'painted'), ir = SS.get(band, 'iron'), gl = SS.get(band, 'glow');
       for (const side of [-1, 1] as const) {
-        const leaf = new THREE.Group();
-        const hingeX = side * (o.hw + 1.2);
-        const piv = at(hingeX, 0, zs);
-        leaf.position.set(piv[0] * PX, piv[1] * PX, piv[2] * PX);
-        const lg = new Geo();
-        const lw = o.hw + 1.2 - 1.3, top = o.kind === 'round' ? o.y1 + 1 : o.y1 + 1, bot = o.y0 - 1;
-        const loc = (x: number, y: number, dz: number): V3 => { const p = at(x, y, zs + dz); return [p[0] - piv[0], p[1] - piv[1], p[2] - piv[2]]; };
-        // boards (planks texture), the arch head clipped by the outline
+        const lw = o.hw + 1.2 - 1.3, top = o.y1 + 1, bot = o.y0 - 1;
+        const loc = (x: number, y: number, dz: number): V3 => at(x, y, zs + dz);
         const cols = 4;
         for (let k = 0; k < cols; k++) {
           const xa = side * (lw - (k * lw) / cols), xb = side * (lw - ((k + 1) * lw) / cols);
           const headY = (x: number) => { const cy2 = o.y1 - o.hw; const r = o.hw + 1; return o.kind === 'round' ? top : cy2 + Math.sqrt(Math.max(0, r * r - x * x)); };
           const hA = headY(xa), hB = headY(xb);
-          const v0 = lg.vert(loc(xa, bot, 0), [k / cols, 0], tint), v1 = lg.vert(loc(xb, bot, 0), [(k + 1) / cols, 0], tint);
-          const v2 = lg.vert(loc(xb, hB, 0), [(k + 1) / cols, (hB - bot) / 40], tint), v3 = lg.vert(loc(xa, hA, 0), [k / cols, (hA - bot) / 40], tint);
-          if (side > 0) lg.quad(v1, v0, v3, v2); else lg.quad(v0, v1, v2, v3);
+          const v0 = pg.vert(loc(xa, bot, 0), [k / cols, 0], tint), v1 = pg.vert(loc(xb, bot, 0), [(k + 1) / cols, 0], tint);
+          const v2 = pg.vert(loc(xb, hB, 0), [(k + 1) / cols, (hB - bot) / 40], tint), v3 = pg.vert(loc(xa, hA, 0), [k / cols, (hA - bot) / 40], tint);
+          if (side > 0) pg.quad(v1, v0, v3, v2); else pg.quad(v0, v1, v2, v3);
         }
-        // battens
-        for (const y of [bot + 4, (bot + top) / 2 - 2]) box(lg, loc(side * lw / 2, y, 0.8), [lw - 1, 2.2, 1.2], [0, o.a, 0], [tint[0] * 0.8, tint[1] * 0.8, tint[2] * 0.8]);
-        const ir = new Geo();
+        for (const y of [bot + 4, (bot + top) / 2 - 2]) box(pg, loc(side * lw / 2, y, 0.8), [lw - 1, 2.2, 1.2], [0, o.a, 0], [tint[0] * 0.8, tint[1] * 0.8, tint[2] * 0.8]);
         for (const y of [bot + 4, (bot + top) / 2 - 2]) box(ir, loc(side * (lw - 2.5), y, 1.6), [5, 1, 0.6], [0, o.a, 0]);
-        const m1 = new THREE.Mesh(lg.build(), houseMat('painted')), m2 = new THREE.Mesh(ir.build(), houseMat('iron'));
-        for (const m of [m1, m2]) { m.scale.setScalar(PX); m.castShadow = true; m.receiveShadow = true; leaf.add(m); }
-        sh.add(leaf);
-        shutterOut.push({ obj: leaf, side });
       }
-      // the sliver of warm light between the closed shutters
-      const sl = new Geo();
-      box(sl, at(0, (o.y0 + o.y1) / 2 - 1, zs - 0.5), [2.6, o.y1 - o.y0 - 4, 0.4], [0, o.a, 0]);
-      box(sl, at(0, o.y0 + 1.2, zs - 0.5), [o.hw * 1.6, 1.2, 0.4], [0, o.a, 0]);
-      const slm = new THREE.Mesh(sl.build(), houseMat('sliver'));
-      slm.scale.setScalar(PX);
-      sh.add(slm);
-      sliverOut.push(slm);
-      (target ?? bands[band]).add(sh);
+      box(gl, at(0, (o.y0 + o.y1) / 2 - 1, zs - 0.5), [2.6, o.y1 - o.y0 - 4, 0.4], [0, o.a, 0]);
+      box(gl, at(0, o.y0 + 1.2, zs - 0.5), [o.hw * 1.6, 1.2, 0.4], [0, o.a, 0]);
+      const marker = new THREE.Object3D();
+      const mp = at(0, (o.y0 + o.y1) / 2, zs + 2);
+      marker.position.set(mp[0] * PX, mp[1] * PX, mp[2] * PX);
+      (target ?? bands[band]).add(marker);
+      shutterOut.push(marker);
     }
   };
 
   // windows and doors in the walls of every floor (they go through to the room)
   let frontCards = new Cards('flat');
-  const shutterOut: { obj: THREE.Object3D; side: -1 | 1 }[] = [];
-  const sliverOut: THREE.Object3D[] = [];
+  const shutterOut: THREE.Object3D[] = [];
   for (const fid of FLOOR_IDS) for (const o of openings(fid)) opening(fid, o, { inner: true, glass: 'clear', box: o.kind === 'arch' && Math.abs(o.a) < 2.2 });
 
   // ---------------------------------------------------------------- the locked fronts (whole bark, shuttered)
@@ -642,73 +647,64 @@ export function buildOak(): Oak {
     const [y0, y1] = BAND_Y[fid];
     const group = new THREE.Group();
     group.name = 'front:' + fid;
-    const halves: FrontHalf[] = [];
-    shutterOut.length = 0; sliverOut.length = 0;
-    const shutters: { obj: THREE.Object3D; side: -1 | 1 }[] = [];
-    for (const side of [-1, 1] as const) {
-      const hingeA = side * OPEN_A;
-      const hy = (y0 + y1) / 2;
-      const piv = P(hingeA, hy, barkR(hingeA, hy));
-      const hg = new THREE.Group();
-      hg.position.set(piv[0] * PX, piv[1] * PX, piv[2] * PX);
-      const sub = new Sets();
-      const g = sub.get(fid, 'bark');
-      const as = side < 0 ? angleCols(-OPEN_A, 0) : angleCols(0, OPEN_A);
-      shell(g, as, rows(y0, y1), frontWins[fid], piv, 0.35);
-      // everything on this half is built relative to its hinge, so the half can swing open like a dollhouse front
-      const tmp = { f1: new THREE.Group(), f2: hg, f3: hg, roof: new THREE.Group() } as Record<Band, THREE.Group>;
-      frontCards = new Cards('flat');
-      for (const o of frontWins[fid]) if ((o.a < 0) === (side < 0) || (o.a === 0 && side > 0)) {
-        const isRound = o.kind === 'round';
-        opening(fid, o, { inner: false, glass: 'dusty', shutters: !isRound, box: !isRound, trim: [0.72, 0.58, 0.46] }, piv, hg, sub);
-        shutters.push(...shutterOut.splice(0));
-      }
-      // ivy creeping up over the shut front
-      for (const [a, y0, y1] of (fid === 'f2' ? [[-0.72, 66, 128], [0.12, 66, 100], [0.7, 80, 136]] : [[-0.55, 138, 196], [0.45, 150, 204]]) as [number, number, number][]) {
-        if ((a < 0) === (side < 0)) ivyStrand(frontCards, a, y0, y1, 0.05, 13, piv, 1.6);
-      }
-      const flowers = frontCards;
-      sub.flush(tmp, extra);
-      if (flowers.size) hg.add(flowers.mesh('front-flowers'));
-      group.add(hg);
-      halves.push({ group: hg, hinge: hingeA, side });
+    shutterOut.length = 0;
+    // the shut front, built relative to its bottom edge so it can tip forward and away when the floor opens
+    const piv = P(0, y0, barkR(0, y0));
+    const front = new THREE.Group();
+    front.position.set(piv[0] * PX, piv[1] * PX, piv[2] * PX);
+    const sub = new Sets();
+    shell(sub.get(fid, 'bark'), angleCols(-OPEN_A, OPEN_A), rows(y0, y1), frontWins[fid], piv, 0.35);
+    frontCards = new Cards('flat');
+    for (const o of frontWins[fid]) {
+      const isRound = o.kind === 'round';
+      opening(fid, o, { inner: false, glass: 'dusty', shutters: !isRound, box: !isRound, trim: [0.72, 0.58, 0.46] }, piv, front, sub);
     }
+    const shutters = [...shutterOut];
+    // ivy creeping up over the shut front
+    for (const [a, ya, yb] of (fid === 'f2' ? [[-0.72, 66, 128], [0.12, 66, 100], [0.7, 80, 136]] : [[-0.55, 138, 196], [0.45, 150, 204]]) as [number, number, number][]) ivyStrand(frontCards, a, ya, yb, 0.05, 13, piv, 1.6);
+    sub.flush(front, extra);
+    if (frontCards.size) front.add(frontCards.mesh('front-flowers'));
+    group.add(front);
     // the plaque and padlock in the middle
-    const level = UNLOCK[fid].level;
     const py = fid === 'f2' ? FLOOR_Y.f2 + 40 : FLOOR_Y.f3 + 8;
     const zr = barkR(0, py);
     const plaque = new THREE.Group();
-    // a bevelled brass plate, the level engraved on its face
     const pgeo = new THREE.ExtrudeGeometry(roundRect(16, 10.5, 1.6), { depth: 0.8, bevelEnabled: true, bevelThickness: 0.35, bevelSize: 0.45, bevelSegments: 2, curveSegments: 4 });
     pgeo.translate(0, 0, -0.6);
     const puv = pgeo.getAttribute('uv') as THREE.BufferAttribute, pnr = pgeo.getAttribute('normal') as THREE.BufferAttribute;
-    for (let i = 0; i < puv.count; i++) if (Math.abs(pnr.getZ(i)) > 0.9) puv.setXY(i, (puv.getX(i) + 8) / 16, (puv.getY(i) + 5.25) / 10.5);
-    const pm = new THREE.Mesh(pgeo, [new THREE.MeshStandardMaterial({ map: plaqueTex(level), metalness: 0.3, roughness: 0.38 }), houseMat('brass')]);
+    const lv = SIGNS.lv[fid === 'f2' ? 0 : 1];
+    for (let i = 0; i < puv.count; i++) {
+      if (Math.abs(pnr.getZ(i)) > 0.9) puv.setXY(i, ...signUV(lv, Math.min(1, Math.max(0, (puv.getX(i) + 8) / 16)), Math.min(1, Math.max(0, (puv.getY(i) + 5.25) / 10.5))));
+      else puv.setXY(i, ...signUV(SIGNS.brass, 0.5, 0.5));
+    }
+    pgeo.clearGroups();
+    const pg2 = new Geo();
+    pg2.add(pgeo);
+    box(pg2, [0, -6.8, -1], [2.6, 4.2, 1.2]);
+    const puv2 = pg2.uv;
+    for (let i = puv2.length - 48; i < puv2.length; i += 2) { const [u, v] = signUV(SIGNS.brass, 0.5, 0.5); puv2[i] = u; puv2[i + 1] = v; }
+    const pm = new THREE.Mesh(pg2.build(), signsMaterial());
     pm.scale.setScalar(PX);
-    plaque.position.set(0, py * PX, (zr + 1.4) * PX);
     pm.castShadow = true;
     plaque.add(pm);
+    plaque.position.set(0, py * PX, (zr + 1.4) * PX);
     const padlock = new THREE.Group();
     {
-      const g = new Geo(), ir = new Geo();
+      const g = new Geo();
       const body = new THREE.ExtrudeGeometry(roundRect(9, 8, 2.2), { depth: 2.2, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.5, bevelSegments: 2, curveSegments: 5 });
       body.translate(0, 0, -1.1);
-      g.add(body);
-      ir.add(new THREE.TorusGeometry(3.1, 0.95, 6, 14, Math.PI), mat([0, 4, 0], [0, 0, 0]));
-      box(ir, [0, -0.8, 1.65], [1.3, 3, 0.3], [0, 0, 0], [0.2, 0.2, 0.2]);
-      ball(ir, [0, 0.9, 1.65], 0.9, [0.2, 0.2, 0.2]);
-      const m1 = new THREE.Mesh(g.build(), houseMat('brass')), m2 = new THREE.Mesh(ir.build(), houseMat('iron'));
-      for (const m of [m1, m2]) { m.scale.setScalar(PX); m.castShadow = true; padlock.add(m); }
+      g.add(body, undefined, FOLD.brass!.tint);
+      g.add(new THREE.TorusGeometry(3.1, 0.95, 6, 14, Math.PI), mat([0, 4, 0]), FOLD.iron!.tint);
+      box(g, [0, -0.8, 1.65], [1.3, 3, 0.3], [0, 0, 0], [0.01, 0.01, 0.01]);
+      ball(g, [0, 0.9, 1.65], 0.9, [0.01, 0.01, 0.01]);
+      const m1 = new THREE.Mesh(g.build(), houseMat('paint'));
+      m1.scale.setScalar(PX);
+      m1.castShadow = true;
+      padlock.add(m1);
       padlock.position.set(0, (py - 13) * PX, (zr + 2.8) * PX);
-      // the hasp it hangs from
-      const hasp = new Geo();
-      box(hasp, [0, -6.8, -0.4], [2.6, 4.2, 1.2]);
-      const hm = new THREE.Mesh(hasp.build(), houseMat('iron'));
-      hm.scale.setScalar(PX);
-      plaque.add(hm);
     }
     group.add(plaque, padlock);
-    fronts[fid] = { fid, group, halves, shutters, padlock, plaque, sliver: [...sliverOut] };
+    fronts[fid] = { fid, group, front, shutters, padlock, plaque };
     bands[fid].add(group);
   }
 
@@ -805,7 +801,7 @@ export function buildOak(): Oak {
     lobes.push({ c: [0, 346, -10], r: [170, 84, 132], core: true });
   }
   {
-    bands.roof.add(leafCrown(lobes.filter((l) => !l.core), [0, 346, -10], 7, 'crown'));
+    // (built once the great limb has added its own lobe, below)
   }
 
   // ---------------------------------------------------------------- the great limb and its platform (Pip's launch perch)
@@ -816,7 +812,8 @@ export function buildOak(): Oak {
     const pts = spline(ctrl, 26);
     g.tube(pts, pts.map((_, i) => 14 * (1 - (i / 25) * 0.72)), 10, { uRep: 1, vScale: 128, col: (t, _u, n) => [0.6 + 0.4 * clamp(n.y + 0.5), clamp(0.35 + n.y * 0.6), 0.5] });
     const tip = pts[pts.length - 1];
-    bands.f2.add(leafCrown([{ c: [pts[17][0], pts[17][1] + 10, pts[17][2]], r: [40, 30, 40] }], [0, 346, -10], 9, 'limb-leaves'));
+    lobes.push({ c: [pts[17][0], pts[17][1] + 10, pts[17][2]], r: [40, 30, 40] });
+    bands.roof.add(leafCrown(lobes.filter((l) => !l.core), [0, 346, -10], 7, 'crown'));
     // the platform: an octagonal deck on the limb with a railing and the perch
     const dk = S.get('f2', 'deck'), pl = S.get('f2', 'planks');
     const [px, py, pz] = PLATFORM;
@@ -851,21 +848,16 @@ export function buildOak(): Oak {
   }
 
   // ---------------------------------------------------------------- the rope ladder from the platform to the ground
-  const ladderGroup = new THREE.Group();
   {
     const [px, py, pz] = PLATFORM;
     const out = 17, a = 1.3;
     const top: V3 = [px + Math.sin(a) * out, py - 1, pz + Math.cos(a) * out];
-    ladderGroup.position.set(top[0] * PX, top[1] * PX, top[2] * PX);
-    const g = new Geo();
+    const g = S.get('f2', 'paint'), w = S.get('f2', 'planks');
     const t: V3 = [Math.cos(a), 0, -Math.sin(a)];
     const len = py + 2;
-    for (const s of [-1, 1]) g.tube([[t[0] * 5 * s, 0, t[2] * 5 * s], [t[0] * 5 * s, -len * 0.5, t[2] * 5 * s], [t[0] * 5 * s, -len, t[2] * 5 * s]], [0.6, 0.6, 0.6], 4, { col: () => [0.82, 0.72, 0.5] });
-    const w = new Geo();
-    for (let y = -7; y > -len + 2; y -= 7) beam(w, [-t[0] * 6, y, -t[2] * 6], [t[0] * 6, y, t[2] * 6], 1.5, [0.9, 0.78, 0.6]);
-    const m1 = new THREE.Mesh(g.build(), houseMat('paint')), m2 = new THREE.Mesh(w.build(), houseMat('planks'));
-    for (const m of [m1, m2]) { m.scale.setScalar(PX); m.castShadow = true; m.receiveShadow = true; ladderGroup.add(m); }
-    bands.f2.add(ladderGroup);
+    const o = (x: number, y: number, z: number): V3 => [top[0] + x, top[1] + y, top[2] + z];
+    for (const sd of [-1, 1]) g.tube([o(t[0] * 5 * sd, 0, t[2] * 5 * sd), o(t[0] * 5 * sd + 0.4, -len * 0.5, t[2] * 5 * sd), o(t[0] * 5 * sd, -len, t[2] * 5 * sd)], [0.6, 0.6, 0.6], 5, { col: () => [0.5, 0.4, 0.24] });
+    for (let y = -7; y > -len + 2; y -= 7) beam(w, o(-t[0] * 6, y, -t[2] * 6), o(t[0] * 6, y, t[2] * 6), 1.5, [0.9, 0.78, 0.6]);
   }
 
   // ---------------------------------------------------------------- porch
@@ -912,19 +904,17 @@ export function buildOak(): Oak {
     beam(ir, P(DOOR_A - 0.2, 42, barkR(DOOR_A - 0.2, 42) + 7.5), P(DOOR_A - 0.2, 40, barkR(DOOR_A - 0.2, 42) + 7.5), 0.8);
     lantern('f1', dl, 0.55);
     // welcome mat
-    const mt = S.get('f1', 'paint', 'mat');
-    extra.set('mat', new THREE.MeshStandardMaterial({ map: matTex(), roughness: 0.95 }));
+    const mt = S.get('f1', 'paint', 'signs');
     const mg = new THREE.ExtrudeGeometry(roundRect(18, 9, 2), { depth: 0.5, bevelEnabled: true, bevelThickness: 0.15, bevelSize: 0.3, bevelSegments: 1, curveSegments: 4 });
     const muv = mg.getAttribute('uv') as THREE.BufferAttribute;
-    for (let i = 0; i < muv.count; i++) muv.setXY(i, (muv.getX(i) + 9) / 18, (muv.getY(i) + 4.5) / 9);
+    for (let i = 0; i < muv.count; i++) muv.setXY(i, ...signUV(SIGNS.mat, Math.min(1, Math.max(0, (muv.getX(i) + 9) / 18)), Math.min(1, Math.max(0, (muv.getY(i) + 4.5) / 9))));
     mt.add(mg, mat(P(DOOR_A, top + 0.15, barkR(DOOR_A, top) + 6), [-Math.PI / 2, DOOR_A, 0]));
     // fairy lights along the top rail
-    const fl = S.get('f1', 'glow', 'bulbs'), wire = S.get('f1', 'iron');
+    const fl = S.get('f1', 'glow'), wire = S.get('f1', 'iron');
     const wp: V3[] = [];
     for (let k = 0; k <= 40; k++) { const a = a0 + 0.02 + (a1 - a0 - 0.04) * (k / 40); const sag = Math.abs(Math.sin(k / 40 * Math.PI * 7)) * 2.2; wp.push(P(a, top + 14 - sag, rOut(a) - 1)); }
     wire.tube(wp, wp.map(() => 0.25), 3);
     for (let k = 1; k < 40; k += 2) ball(fl, wp[k], 0.75, [1, 1, 1], [1, 1, 1], 4);
-    extra.set('bulbs', new THREE.MeshBasicMaterial({ color: 0xffd38a, toneMapped: false }));
   }
 
   // ---------------------------------------------------------------- balcony on the second floor
@@ -1018,24 +1008,24 @@ export function buildOak(): Oak {
     const fg = new THREE.ExtrudeGeometry(flag, { depth: 0.3, bevelEnabled: false });
     mb.add(fg, mat([base[0] + T[0] * 3.6 + Math.sin(a) * 1, 25.6, base[2] + T[2] * 3.6 + Math.cos(a) * 1], [0, a - Math.PI / 2, 0]), [0.95, 0.78, 0.2]);
     ir2.add(new THREE.SphereGeometry(0.45, 6, 5), mat([base[0] + T[0] * 3.4, 19, base[2] + T[2] * 3.4]));
-    const lbl = S.get('f1', 'paint', 'mail');
-    extra.set('mail', new THREE.MeshStandardMaterial({ map: mailTex(), roughness: 0.6 }));
+    const lbl = S.get('f1', 'paint', 'signs');
     const lc = [base[0] + T[0] * 3.42, 18.9, base[2] + T[2] * 3.42] as V3;
     const pg = new THREE.PlaneGeometry(7.5, 2.8);
+    const luv = pg.getAttribute('uv') as THREE.BufferAttribute;
+    for (let i = 0; i < luv.count; i++) luv.setXY(i, ...signUV(SIGNS.mail, luv.getX(i), luv.getY(i)));
     lbl.add(pg, mat(lc, [0, a + Math.PI / 2, 0]));
     // signpost
     const sa = 0.5, sr = RO + 64;
     const sb = P(sa, 0, sr);
     beam(pl, sb, [sb[0], 30, sb[2]], 2.6, [0.7, 0.58, 0.46]);
-    const sg = S.get('f1', 'paint', 'sign');
-    extra.set('sign', new THREE.MeshStandardMaterial({ map: signTex(), roughness: 0.8 }));
+    const sg = S.get('f1', 'paint', 'signs');
     const yaw = 0.25;
     const arrow = new THREE.Shape();
     arrow.moveTo(-15, -4.5); arrow.lineTo(11, -4.5); arrow.lineTo(15, 0); arrow.lineTo(11, 4.5); arrow.lineTo(-15, 4.5); arrow.closePath();
     const bx = new THREE.ExtrudeGeometry(arrow, { depth: 1.2, bevelEnabled: true, bevelThickness: 0.25, bevelSize: 0.3, bevelSegments: 1 });
     // the painted lettering on the faces: shape coordinates -> the sign texture
     const buv = bx.getAttribute('uv') as THREE.BufferAttribute;
-    for (let i = 0; i < buv.count; i++) buv.setXY(i, (buv.getX(i) + 15) / 30 * 0.98 + 0.01, (buv.getY(i) + 4.5) / 9);
+    for (let i = 0; i < buv.count; i++) buv.setXY(i, ...signUV(SIGNS.sign, (buv.getX(i) + 15) / 30 * 0.98 + 0.01, (buv.getY(i) + 4.5) / 9));
     sg.add(bx, mat([sb[0], 24, sb[2] + 1.2], [0, yaw, -0.04]));
   }
 
@@ -1087,11 +1077,15 @@ export function buildOak(): Oak {
     for (const [a, d, s] of [[-1.25, 6, 9], [-1.75, 14, 10], [-2.3, 8, 10], [-2.8, 10, 10], [2.75, 6, 10], [2.25, 12, 11], [1.8, 4, 8], [-0.98, 18, 8], [-0.7, 30, 7]] as const) fernAt(a, d, s);
   }
 
-  S.flush(bands, extra);
-  for (const b of BANDS) if (ivyBand[b].size) bands[b].add(ivyBand[b].mesh('ivy:' + b));
+  // everything static is one set of meshes (in the ground floor's group, which build mode never hides)
+  const stat = new THREE.Group();
+  stat.name = 'oak:static';
+  S.flush(stat, extra);
+  if (ivy.size) stat.add(ivy.mesh('ivy'));
+  bands.f1.add(stat);
 
   return {
-    bands, fronts, porchLamp, ladder: ladderGroup, crown: crownMeshes,
+    bands, fronts, porchLamp, crown: crownMeshes,
     dispose() { for (const b of BANDS) bands[b].traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) m.geometry.dispose(); }); },
   };
 }

@@ -180,11 +180,11 @@ export function houseMat(k: HouseMat): THREE.Material {
     case 'brass': m = std({ color: 0xd4a656, metalness: 0.4, roughness: 0.34 }); break;
     case 'paint': m = std({ roughness: 0.66 }); break;
     case 'dark': m = std({ color: 0x1c1612, roughness: 1 }); break;
-    case 'glow': m = new THREE.MeshBasicMaterial({ color: HOUSE_LOOK.glow, toneMapped: false }); break;
+    case 'glow': m = new THREE.MeshBasicMaterial({ color: HOUSE_LOOK.glow, toneMapped: false, vertexColors: true }); break;
     case 'sliver': m = new THREE.MeshBasicMaterial({ color: HOUSE_LOOK.sliver, toneMapped: false }); break;
     case 'pane': m = new THREE.MeshBasicMaterial({ color: HOUSE_LOOK.pane, transparent: true, opacity: HOUSE_LOOK.paneOpacity, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }); break;
   }
-  if (k !== 'glow' && k !== 'sliver' && k !== 'pane') patchCut(m!);
+  patchCut(m!);
   m!.name = 'house:' + k;
   mats.set(k, m!);
   return m!;
