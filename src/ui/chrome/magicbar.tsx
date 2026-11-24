@@ -5,7 +5,7 @@
 // [ui4] painted per texel at k texels per design unit (2 on phones, 3 on desktop, 4 for the big one), so it
 // shares the fine pixel grid of the other v4 objects; lit from the top left like everything else.
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { vnoise } from './paint.ts';
+import { vnoise } from '../px/relief.ts';
 import { clockNow } from './pxanim.tsx';
 import { uiBurst } from './uifx.ts';
 import { DESK_HUD, kFor } from './objects.ts';
