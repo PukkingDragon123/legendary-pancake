@@ -13,7 +13,7 @@ const float RA = 1.065;
 const float HR = 0.0125;
 const float HM = 0.0055;
 const vec3 BR = vec3(3.6, 8.6, 21.0);
-const float BM = 3.2;
+const float BM = 1.7;
 const float SUN_I = 22.0;
 float chH(float X, float h, float mu) {
   float c = sqrt(X + h);
@@ -60,7 +60,7 @@ void main() { vUv = uv; vP = position; gl_Position = projectionMatrix * modelVie
 export const earthFS = /* glsl */ `
 uniform sampler2D tDay; uniform sampler2D tCL; uniform sampler2D tTopo; uniform sampler2D tTile;
 uniform vec4 uTileBox; uniform float uTileMix;
-uniform vec3 uSun; uniform float uCloudU; uniform float uCloudAmt; uniform float uBump; uniform vec3 uTarget; uniform float uClear;
+uniform vec3 uSun; uniform float uCloudU; uniform float uCloudAmt; uniform float uBump; uniform vec3 uTarget; uniform float uClear; uniform float uNear;
 varying vec2 vUv; varying vec3 vP;
 ${ATMO}
 void main() {
@@ -100,10 +100,14 @@ void main() {
   vec2 sh = vec2(dot(sT, east) / (2.0 * PI * cl), dot(sT, north) / PI) * 0.010;
   float shade = smoothstep(0.12, 0.8, texture2D(tCL, cuv + sh).r) * uCloudAmt * clear;
 
-  vec3 sunL = Tsun * SUN_I * 0.11;
+  vec3 sunL = Tsun * SUN_I * 0.16;
   vec3 col = alb * sunL * NdL * lit * (1.0 - 0.55 * shade);
   col += alb * vec3(0.10, 0.16, 0.28) * 0.35 * smoothstep(-0.25, 0.4, mu0);          // blue sky light
-  col += alb * vec3(0.010, 0.016, 0.034);                                             // moonlight: the night land still reads
+  // moonlight: the night land still reads, more so down in the close view (a low moon from the north-west
+  // so the relief shows)
+  vec3 M = normalize(n0 * 0.75 + north * 0.45 - east * 0.35);
+  float moon = (1.0 - lit) * (0.35 + 0.65 * max(dot(n, M), 0.0));
+  col += alb * vec3(0.012, 0.019, 0.04) * (1.0 + 7.0 * uNear * moon);
   // the sea: a sharp sun glint and a broad sheen, dimmed under clouds
   vec3 H = normalize(uSun + V);
   float NdH = max(dot(n0, H), 0.0), VdH = max(dot(V, H), 0.0);
@@ -114,7 +118,7 @@ void main() {
   // town lights after dusk
   float L = texture2D(tCL, vec2(vUv.x, vUv.y * 0.5)).r;
   float night = 1.0 - smoothstep(-0.12, 0.05, mu0);
-  col += pow(L, 1.35) * vec3(1.0, 0.64, 0.32) * 3.2 * night * (1.0 - cover * 0.75);
+  col += pow(L, 1.7) * vec3(1.0, 0.62, 0.3) * 2.4 * (1.0 - 0.78 * uNear) * night * (1.0 - cover * 0.75);
   // looking down through the air: extinction (the shell adds the in-scattered light on top)
   col *= exp(-odTo(0.0, NdV));
   gl_FragColor = vec4(col, 1.0);
@@ -155,9 +159,13 @@ void main() {
   vec2 a = hitSphere(ro, rd, RA);
   if (a.y <= 0.0) discard;
   vec2 g = hitSphere(ro, rd, RP);
-  float t0 = max(a.x, 0.0), t1 = g.x > 0.0 && g.x < 1e8 ? g.x : a.y;
+  bool ground = g.x > 0.0 && g.x < 1e8;
+  float t0 = max(a.x, 0.0), t1 = ground ? g.x : a.y;
   if (t1 <= t0) discard;
-  vec3 col = scatter(ro, rd, t0, t1, uSun) * uGain;
+  // looking straight down the haze is thin (as in the Blue Marble photographs); towards the limb it thickens
+  float k = 1.0;
+  if (ground) { vec3 n = normalize(ro + rd * g.x); k = mix(1.0, 0.24, smoothstep(0.12, 0.65, dot(n, -rd))); }
+  vec3 col = scatter(ro, rd, t0, t1, uSun) * uGain * k;
   gl_FragColor = vec4(col, 1.0);
 }`;
 
@@ -221,10 +229,10 @@ void main() {
 }`;
 
 export const lineVS = /* glsl */ `
-uniform vec3 uCam; varying float vFace;
+uniform vec3 uCam; uniform vec3 uSun; varying float vFace;
 void main() {
   vec3 n = normalize(position);
-  vFace = smoothstep(0.02, 0.3, dot(n, normalize(uCam - position)));
+  vFace = smoothstep(0.02, 0.3, dot(n, normalize(uCam - position))) * (0.35 + 0.65 * smoothstep(-0.15, 0.1, dot(n, uSun)));
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }`;
 export const lineFS = /* glsl */ `
@@ -308,7 +316,7 @@ void main() {
   float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
   // the Golden Diorama grade, gently: warm highlights, sapphire shadows, a little more colour
   col += vec3(0.035, 0.016, -0.02) * smoothstep(0.35, 0.95, l);
-  col += vec3(-0.006, 0.0, 0.016) * (1.0 - smoothstep(0.0, 0.3, l));
+  col += vec3(-0.002, 0.0, 0.005) * (1.0 - smoothstep(0.0, 0.3, l));
   float sat = max(col.r, max(col.g, col.b)) - min(col.r, min(col.g, col.b));
   col = max(mix(vec3(l), col, 1.1 + 0.12 * (1.0 - sat)), 0.0);
   vec2 cc = vUv - 0.5;

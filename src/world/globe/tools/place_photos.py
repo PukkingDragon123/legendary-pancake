@@ -86,28 +86,40 @@ def search(work, places):
             continue
         cands = {}
         for kind, q in PLACES[p][2]:
-            url = ("https://api.openverse.org/v1/images/?" + urllib.parse.urlencode({
-                "q": q, "license": "by,cc0,pdm", "page_size": 20, "mature": "false", "source": "flickr"}))
-            d = get(url)
-            keep = []
-            for r in d.get("results", []):
-                w, h = r.get("width") or 0, r.get("height") or 0
-                if w < 1000 or w < h * 1.3 or "staticflickr.com" not in r.get("url", ""):
-                    continue
-                keep.append({k: r.get(k) for k in ("id", "title", "creator", "creator_url", "license", "license_version",
-                                                    "license_url", "url", "foreign_landing_url", "width", "height")})
-                if len(keep) >= 8:
-                    break
-            cands[kind] = keep
+            cands[kind] = query(q)
             time.sleep(4)
         json.dump(cands, open(out, "w"), indent=1, ensure_ascii=False)
-        contact(work, p, cands)
+        contact(work, p, cands, [k for k, _ in PLACES[p][2]])
         print(p, {k: len(v) for k, v in cands.items()}, flush=True)
 
 
-def contact(work, p, cands):
+def query(q):
+    url = ("https://api.openverse.org/v1/images/?" + urllib.parse.urlencode({
+        "q": q, "license": "by,cc0,pdm", "page_size": 20, "mature": "false", "source": "flickr"}))
+    keep = []
+    for r in get(url).get("results", []):
+        w, h = r.get("width") or 0, r.get("height") or 0
+        if w < 1000 or w < h * 1.3 or "staticflickr.com" not in r.get("url", ""):
+            continue
+        keep.append({k: r.get(k) for k in ("id", "title", "creator", "creator_url", "license", "license_version",
+                                            "license_url", "url", "foreign_landing_url", "width", "height")})
+        if len(keep) >= 8:
+            break
+    return keep
+
+
+def extra(work, p, kind, q):
+    """Another query for a place: candidates under `kind` (e.g. x1), contact sheet <place>_<kind>.jpg."""
+    f = os.path.join(work, "cand", f"{p}.json")
+    cands = json.load(open(f))
+    cands[kind] = query(q)
+    json.dump(cands, open(f, "w"), indent=1, ensure_ascii=False)
+    contact(work, p, cands, [kind], f"{p}_{kind}")
+    print(p, kind, len(cands[kind]), flush=True)
+
+
+def contact(work, p, cands, kinds, name=None):
     TW, TH = 240, 160
-    kinds = [k for k, _ in PLACES[p][2]]
     sheet = Image.new("RGB", (8 * TW, len(kinds) * (TH + 18)), (20, 20, 24))
     dr = ImageDraw.Draw(sheet)
     for row, kind in enumerate(kinds):
@@ -121,7 +133,7 @@ def contact(work, p, cands):
             sheet.paste(im, (i * TW, row * (TH + 18) + 18))
             dr.text((i * TW + 4, row * (TH + 18) + 3), f"{kind[:4]} {i} {c['license']}{c['license_version'] or ''}", fill=(255, 255, 160))
             time.sleep(0.3)
-    sheet.save(os.path.join(work, "cand", f"{p}.jpg"), quality=82)
+    sheet.save(os.path.join(work, "cand", f"{name or p}.jpg"), quality=82)
 
 
 def crop32(im, fx, fy):
@@ -135,14 +147,22 @@ def crop32(im, fx, fy):
     return im.crop((x0, y0, x0 + cw, y0 + ch)).resize((CW, CH), Image.LANCZOS)
 
 
+# ground shown across the globe's close view of each place (km; the same numbers as src/game/places.ts)
+SPAN = {"highlands": 560, "kyoto": 700, "paris": 720, "venice": 620, "santorini": 520, "sahara": 1000, "grandcanyon": 760,
+        "cappadocia": 760, "tajmahal": 900, "iceland": 720, "machupicchu": 820, "amazon": 1300, "serengeti": 900, "banff": 640,
+        "petra": 760, "angkor": 800, "reef": 1000, "rio": 640, "milford": 640, "antarctica": 1100}
+
+
 def satellite(lat, lon, work, p):
     """The Blue Marble close-up of a place: land from Blue Marble Next Generation, sea from the bathymetry version
-    (NASA GIBS, public domain), 1024 x 683 px round the place (about 16 x 10.7 degrees of latitude-scaled span)."""
-    span_lat = 10.7
-    span_lon = 16.0 / max(0.35, np.cos(np.radians(lat)))
-    s, n = lat - span_lat / 2, lat + span_lat / 2
+    (NASA GIBS, public domain), 1024 x 683 px round the place, about 1.7 times as wide as the close view and a
+    little further north (the camera looks north, over the place, towards the horizon)."""
+    km = SPAN[p] * 1.7
+    span_lon = km / 111.32 / max(0.3, np.cos(np.radians(lat)))
+    span_lat = km * CH / CW / 110.57
+    s, n = lat - span_lat * 0.42, lat + span_lat * 0.58
     w, e = lon - span_lon / 2, lon + span_lon / 2
-    cache = os.path.join(work, "sat")
+    cache = os.path.join(work, "sat2")
     os.makedirs(cache, exist_ok=True)
     W, H = CW * 2, CH * 2
     layers = {}
@@ -200,12 +220,27 @@ def build(work, places):
         lat, lon = PLACES[p][0], PLACES[p][1]
         sat, box = satellite(lat, lon, work, p)
         sheet.paste(sat, (CW, CH))
-        sheet.save(os.path.join(out_dir, f"{p}.webp"), quality=80, method=6)
+        sheet.save(os.path.join(out_dir, f"{p}.webp"), quality=74, method=6)
         meta[p] = {"photos": photos, "sat": box}
         json.dump(meta, open(mpath, "w"), indent=1, ensure_ascii=False)
         print(p, os.path.getsize(os.path.join(out_dir, f"{p}.webp")) // 1024, "KB", flush=True)
+    thumbs(out_dir)
     write_ts(meta)
     write_credits(meta)
+
+
+TW_, TH_ = 192, 128
+
+
+def thumbs(out_dir):
+    """public/img/places/places.webp: the first photo of every place, small (passport stamps, lists), 5 x 4."""
+    at = Image.new("RGB", (5 * TW_, 4 * TH_), (0, 0, 0))
+    for i, p in enumerate(PLACES):
+        f = os.path.join(out_dir, f"{p}.webp")
+        if os.path.exists(f):
+            im = Image.open(f).convert("RGB").crop((0, 0, CW, CH)).resize((TW_, TH_), Image.LANCZOS)
+            at.paste(im, ((i % 5) * TW_, (i // 5) * TH_))
+    at.save(os.path.join(out_dir, "places.webp"), quality=82, method=6)
 
 
 def write_ts(meta):
@@ -220,6 +255,8 @@ def write_ts(meta):
         "export interface SatBox { s: number; n: number; w: number; e: number }",
         "export const SHEET = { w: 2048, h: 1366, cw: 1024, ch: 683 };",
         "export const sheetUrl = (id: string) => `${import.meta.env.BASE_URL}img/places/${id}.webp`;",
+        "/** the first photo of every place, small, in PLACES order (5 x 4 cells of 192 x 128) */",
+        "export const THUMBS = { src: 'img/places/places.webp', tw: %d, th: %d, cols: 5, order: %s };" % (TW_, TH_, json.dumps(list(PLACES))),
         "export const PLACE_PHOTOS: Record<string, PlacePhoto[]> = {",
     ]
     for p in order:
@@ -249,5 +286,8 @@ def write_credits(meta):
 if __name__ == "__main__":
     sys.path.insert(0, HERE)
     mode, work = sys.argv[1], sys.argv[2]
-    pl = sys.argv[3:] or list(PLACES)
-    (search if mode == "search" else build)(work, pl)
+    if mode == "extra":
+        extra(work, sys.argv[3], sys.argv[4], " ".join(sys.argv[5:]))
+    else:
+        pl = sys.argv[3:] or list(PLACES)
+        (search if mode == "search" else build)(work, pl)
