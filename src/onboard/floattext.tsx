@@ -1,6 +1,7 @@
-// Pip's lines as 3D floating text: chunky pixel letters extruded with stacked layers, each popping
-// in on a springy wave, bobbing and turning gently in 3D, with a soft glow, a drop shadow and a
-// little voice blip per letter (pitched by the letter). Tap to finish a line, tap again to go on.
+// Pip's lines as 3D floating text: chunky pixel letters with a crisp stepped extrusion (hard text-shadows,
+// no blur), a 2px ink outline and a two-tone face, set on a tilted plane in 3D. Each letter pops in on a
+// springy wave with a voice blip (pitched by the letter), then bobs gently; the old line lifts away as the
+// new one arrives. A translucent stepped slab sits behind the words so they read over any shot.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 
@@ -21,8 +22,6 @@ function parse(text: string): Ch[][] {
 }
 const plain = (text: string) => text.replace(/\*/g, '');
 const VOICES = ['voice_a', 'voice_b', 'voice_c', 'voice_d', 'voice_e'];
-/** extrusion layers (fewer on low-quality devices) */
-const LAYERS = { high: [0, 1, 2, 3, 4, 5], low: [1, 3, 5] };
 
 /** Delay before the next letter: a beat after punctuation. */
 const pause = (c: string) => (c === '.' || c === '!' || c === '?' ? 210 : c === ',' || c === ':' ? 110 : 0);
@@ -35,7 +34,7 @@ export function FloatText(p: { line: Line | null; onTalk?: () => void; fast?: bo
   const words = useMemo(() => (line ? parse(line.text) : []), [line?.id]);
   const total = line ? plain(line.text).length : 0;
 
-  // the old line blows away while the new one pops in
+  // the old line lifts away while the new one pops in
   useEffect(() => {
     if (last.current && last.current.id !== line?.id) {
       setPrev(last.current);
@@ -75,36 +74,28 @@ export function FloatText(p: { line: Line | null; onTalk?: () => void; fast?: bo
 
   const complete = !!line && shown >= total;
   return (
-    <div class="ft-wrap" aria-live="polite">
-      {prev && <Words key={'p' + prev.id} words={parse(prev.text)} shown={1e9} out who={prev.who} layers={p.low ? LAYERS.low : LAYERS.high} />}
-      {line && <Words key={line.id} words={words} shown={shown} who={line.who} layers={p.low ? LAYERS.low : LAYERS.high} />}
+    <div class={'ft-wrap' + (p.low ? ' low' : '')} aria-live="polite">
+      {prev && <Words key={'p' + prev.id} words={parse(prev.text)} shown={1e9} out who={prev.who} />}
+      {line && <Words key={line.id} words={words} shown={shown} who={line.who} />}
       {line && <span class="sr-only">{plain(line.text)}</span>}
       {complete && <i class="ft-next" key={'n' + line.id} />}
     </div>
   );
 }
 
-function Words(p: { words: Ch[][]; shown: number; out?: boolean; who?: string; layers: number[] }) {
+function Words(p: { words: Ch[][]; shown: number; out?: boolean; who?: string }) {
   return (
     <div class={'ft-line' + (p.out ? ' out' : '')} aria-hidden="true">
+      <i class="ft-slab" />
       {p.who && <span class="ft-who"><b>{p.who}</b></span>}
       <div class="ft-text">
         {p.words.map((w, wi) => (
           <span class="ft-w" key={wi}>
-            {w.map((c) => {
-              const on = c.i < p.shown;
-              return (
-                <span class={'ft-c' + (on ? ' in' : '') + (c.em ? ' em' : '')} style={`--i:${c.i}`} key={c.i}>
-                  <span class="ft-b">
-                    <i class="ft-s">{c.ch}</i>
-                    {p.layers.map((k) => <i class={'ft-d d' + k} key={k}>{c.ch}</i>)}
-                    <i class="ft-o">{c.ch}</i>
-                    <i class="ft-g">{c.ch}</i>
-                    <b class="ft-f">{c.ch}</b>
-                  </span>
-                </span>
-              );
-            })}
+            {w.map((c) => (
+              <span class={'ft-c' + (c.i < p.shown ? ' in' : '') + (c.em ? ' em' : '')} style={`--i:${c.i}`} key={c.i}>
+                <span class="ft-b"><i class="ft-x">{c.ch}</i><b class="ft-f">{c.ch}</b></span>
+              </span>
+            ))}
           </span>
         ))}
       </div>
