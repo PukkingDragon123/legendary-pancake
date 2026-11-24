@@ -101,6 +101,7 @@ export function Settings() {
           {perm === 'default' && <button class="btn soft sm" onClick={async () => { tap(); const r = await requestNotifications(); setPerm(r); syncReminders(); }}>Allow</button>}
         </Setting>
         <Setting title="12-hour clock"><Toggle on={st.hour12} onChange={(v) => edit((x) => { x.settings.hour12 = v; })} label="12-hour clock" /></Setting>
+        <Setting title="Calm motion" sub="Fewer swings, sparkles and wobbles"><Toggle on={!!st.reduceMotion} onChange={(v) => edit((x) => { x.settings.reduceMotion = v; })} label="Calm motion" /></Setting>
         <Setting title="Graphics" sub="Lower detail saves battery on older phones">
           <Tags value={st.quality} onChange={(v) => { edit((x) => { x.settings.quality = v; }); toast('Applies next time the app opens'); }} options={[{ v: 'auto', label: 'Auto' }, { v: 'low', label: 'Low' }, { v: 'high', label: 'High' }]} />
         </Setting>

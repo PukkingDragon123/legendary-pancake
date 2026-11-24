@@ -104,6 +104,8 @@ function Bubble() {
 
 export function App() {
   const s = save.value;
+  // [ui4] the in-app "Calm motion" setting quiets every CSS animation, like the system setting does
+  useEffect(() => { try { document.documentElement.classList.toggle('hh-still', !!s.settings.reduceMotion); } catch { /* no DOM */ } }, [s.settings.reduceMotion]);
   const ph = phase.value;
   const night = nightOpen.value ? s.nights.find((n) => n.id === nightOpen.value) : null;
   return (

@@ -117,6 +117,11 @@ export function MagicBar(p: { level: number; into: number; need: number; w?: num
           } else {
             // empty glass: dark and cool, with the far wall's faint reflection
             set(x, y, cyl < 0.2 ? [30, 38, 74] : cyl > 0.8 ? [10, 12, 30] : GLASS_IN);
+            // a faint wisp of moonlight drifts through the empty glass, so the tube always looks alive
+            if (cyl > 0.15 && cyl < 0.85) {
+              const wisp = Math.sin((x / k) * 0.35 - t * 1.6 + Math.sin((y / k) * 0.8 + t * 0.9) * 1.4) * 0.5 + 0.5;
+              if (wisp > 0.78) blend(x, y, LIQ[3], (wisp - 0.78) * 1.6);
+            }
             if (x - xm < 2 * k && xf > x0) blend(x, y, LIQ[4], 0.3 * (1 - (x - xm) / (2 * k)));
             if ((x - x0) % Math.max(4, Math.round(len / 5)) === 0 && cyl > 0.55) set(x, y, [62, 74, 120]);
           }
