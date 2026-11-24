@@ -100,7 +100,9 @@ export class OwlActor {
   }
 
   get height() { return this.model.height; }
-  get headWorld(): THREE.Vector3 { return this.model.rig.bones.head.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 6 * PX * this.node.scale.y, 0)); }
+  get headWorld(): THREE.Vector3 { return this.model.rig.bones.head.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, this.model.headUp * PX * this.node.scale.y, 0)); }
+  /** resolves when the painted toy model is in (and its outfit is on) */
+  get ready(): Promise<void> { return this.model.ready; }
 
   rebuild(look: OwlLook) {
     const old = this.model;
@@ -287,11 +289,11 @@ export class OwlActor {
     if (this.blinkT >= 0) s.lid.x = lid;
 
     // ---------------- apply to bones
-    const body = B.body, head = B.head, g = this.model.g, PV = this.model.pivots;
+    const body = B.body, head = B.head, g = this.model.g, RV = this.model.rest;
     body.scale.set(s.sxz.x, s.sy.x, s.sxz.x);
     body.rotation.x = s.lean.x;
     const neckH = (g.neckY - g.bodyY) * PX;
-    head.position.set(PV.head[0] * PX, PV.head[1] * PX + neckH * (s.sy.x - 1) + Math.sin(s.lean.x) * 0.02, PV.head[2] * PX + Math.sin(s.lean.x) * neckH);
+    head.position.set(RV.head[0] * PX, RV.head[1] * PX + Math.sin(s.lean.x) * 0.02, RV.head[2] * PX + Math.sin(s.lean.x) * neckH * 0.3);
     head.rotation.set(s.pitch.x, s.yaw.x, s.roll.x, 'YXZ');
     B.wingL.rotation.set(0, 0, -s.wingL.x);
     B.wingR.rotation.set(0, 0, s.wingR.x);
@@ -305,14 +307,13 @@ export class OwlActor {
     B.legR.rotation.x = B.legL.rotation.x;
     B.tuftL.rotation.set(-Math.max(0, -s.tuftL.x) * 0.25, 0, -s.tuftL.x * 0.32 + Math.max(0, -s.tuftL.x) * 0.55);
     B.tuftR.rotation.set(-Math.max(0, -s.tuftR.x) * 0.25, 0, s.tuftR.x * 0.32 - Math.max(0, -s.tuftR.x) * 0.55);
-    B.browL.position.y = (PV.browL[1] - PV.head[1]) * PX + s.brow.x * 0.6 * PX;
-    B.browR.position.y = (PV.browR[1] - PV.head[1]) * PX + s.brow.x * 0.6 * PX;
+    B.browL.position.y = RV.browL[1] * PX + s.brow.x * 0.6 * PX;
+    B.browR.position.y = RV.browR[1] * PX + s.brow.x * 0.6 * PX;
     B.browL.rotation.z = -s.browTilt.x * 0.35;
     B.browR.rotation.z = s.browTilt.x * 0.35;
     const mo = Math.max(0, s.jaw.x);
     B.jaw.visible = mo > 0.06;
-    if (this.model.look.skin === 'meowl') B.jaw.scale.set(0.7 + mo * 0.4, Math.max(0.05, mo * 1.2), 1);
-    else B.jaw.rotation.x = Math.min(0.75, mo * 0.55);
+    B.jaw.rotation.x = Math.min(0.75, mo * 0.55);
     B.tail.rotation.x = s.tail.x;
     this.model.rig.root.position.y = this.air;
 
@@ -332,8 +333,8 @@ export class OwlActor {
     const [l, r] = this.model.eyes;
     if (force) { l.draw({ ...this.eye, lid: this.eye.lid + 0.0001 }); r.draw({ ...this.eye, lid: this.eye.lid + 0.0001 }); }
     l.draw(this.eye);
-    // a subtle asymmetry makes the face feel less mechanical
-    r.draw({ ...this.eye, lx: this.eye.lx, lid: Math.min(1, this.eye.lid + (this.eye.mode === 'normal' ? 0.02 : 0)) });
+    // a subtle asymmetry makes the face feel less mechanical (the dots themselves are never a matched pair)
+    r.draw({ ...this.eye, lx: this.eye.lx, lid: Math.min(1, this.eye.lid + (this.eye.mode === 'normal' ? 0.03 : 0)) });
   }
 
   /** Snap all springs to their targets (for the first frame and screenshots). */

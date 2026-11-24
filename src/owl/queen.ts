@@ -1,6 +1,7 @@
-// Neve, the Snow Queen who runs the cosmetics boutique: a snowy owl in the cleaner, nearly pure
-// white plumage, with long lashes and a soft blush (look.feminine), a crown of ice crystals, a frost
-// cape embroidered with snowflakes and trimmed in white fur, and a little ice scepter under her wing.
+// Neve, the Snow Queen who runs the cosmetics boutique: an elegant snowy-owl lady toy (public/models/owls/queen.glb,
+// art/blender/owls/owl.py) with her regalia built in: a crown of ice crystals, a frost-blue cape with a fur collar and
+// a snowflake clasp, and a little ice scepter under her right wing; her ink-dot eyes carry lash ticks. Any look with
+// `feminine: true` shows her model (the ice crown and frost cape in the outfit are part of it, not extra pieces).
 // The shop builds her with `new OwlActor(QUEEN_LOOK, ...)` and can pose her with QUEEN_POSE.
 import type { OwlLook } from './model.ts';
 
