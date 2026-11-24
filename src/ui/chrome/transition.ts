@@ -502,10 +502,11 @@ function blueprintMask(W: number, H: number): Uint8Array {
 
 // ------------------------------------------------------------------ running
 
+// [audio3] soft hand-made whooshes and real foley (sfx sprites): cloth, leaves, pages, paper, chimes
 const SOUND: Partial<Record<TransitionKind, [string, number, number?]>> = {
-  iris: ['tp_out', 0.3], dither: ['tp_shimmer', 0.18, 0.8], fade: ['tp_shimmer', 0.15, 0.8], leaves: ['rustle_bush', 0.45], feathers: ['wings_flutter', 0.3, 0.8], snow: ['tp_shimmer', 0.4],
-  fireflies: ['sparkle', 0.3, 0.7], page: ['paper_flip', 0.55], blinds: ['drawer', 0.3, 1.3], mosaic: ['ui_tab', 0.3, 0.8], branch: ['rustle_grass', 0.45], clock: ['clock_wind', 0.35, 1.2],
-  curtain: ['fabric', 0.5], blueprint: ['paper_flip', 0.45, 0.8], stars: ['sparkle', 0.35, 0.8], sunrise: ['bird_chirp', 0.3],
+  iris: ['whoosh_soft', 0.4], dither: ['whoosh_soft', 0.25, 0.9], fade: ['whoosh_soft', 0.2, 0.85], leaves: ['leaf_rustle', 0.5], feathers: ['feather_ruffle', 0.4, 0.85], snow: ['star_shimmer', 0.3, 0.9],
+  fireflies: ['sparkle_fizz', 0.3], page: ['page_turn', 0.55], blinds: ['whoosh_cloth', 0.35, 1.2], mosaic: ['tick_paper', 0.45], branch: ['leaf_rustle', 0.5, 0.85], clock: ['clock_wind', 0.35, 1.2],
+  curtain: ['whoosh_cloth', 0.5], blueprint: ['paper_rustle', 0.45], stars: ['chime_sweep', 0.25, 0.9], sunrise: ['bird_song', 0.3],
 };
 const DUR: Record<TransitionKind, [number, number]> = {
   iris: [0.5, 0.55], dither: [0.4, 0.45], fade: [0.35, 0.4], leaves: [0.6, 0.7], feathers: [0.6, 0.7], snow: [0.6, 0.65], fireflies: [0.6, 0.7], page: [0.55, 0.55],

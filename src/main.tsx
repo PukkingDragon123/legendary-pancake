@@ -3,6 +3,7 @@
 import { effect } from '@preact/signals';
 import { render } from 'preact';
 import { sceneSound, sound } from './audio/sound.ts';
+import { installAudioWiring } from './audio/wiring.ts'; // [audio3]
 import { connectBlocker, notePeek, phase, pushBlockerConfig, resumeNight, setupReminders, snooze, endNight } from './game/night.ts';
 import { dayKey, edit, save, zones } from './game/store.ts';
 import { consumeLaunchAction, onSWMessage, registerSW } from './sleep/index.ts';
@@ -41,6 +42,7 @@ async function boot() {
   await sound.init();
   const st = save.value.settings;
   sound.volumes({ sfx: st.sfx, music: st.music, amb: st.ambience });
+  installAudioWiring(scene); // [audio3] ambience by hour/weather/view, hops by surface, owl calls by species, build/shop/book/globe sounds
   scene.on((e) => {
     if (e.type === 'sound') sceneSound(e.id);
     if (e.type === 'catch') {
