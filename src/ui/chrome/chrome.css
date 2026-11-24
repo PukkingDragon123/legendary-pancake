@@ -31,22 +31,23 @@
 /* ------------------------------------------------------------ name sign */
 .hh-namehang { left: 16px; top: 28px; width: 192px; height: 72px; transform-origin: 96px -26px; }
 .hh-nameboard { width: 192px; height: 72px; }
-.hh-portrait { position: absolute; left: -14px; top: -6px; width: 64px; height: 64px; }
-.hh-face { position: absolute; left: 7px; top: 7px; width: 50px; height: 50px; clip-path: var(--px-circle); object-fit: cover; image-rendering: pixelated; background: var(--hh-sky-day) 0 0 / 100% 100%; }
+.hh-portrait { position: absolute; left: -14px; top: -6px; width: 64px; height: 64px; filter: drop-shadow(2px 3px 0 rgba(26, 14, 8, 0.45)); }
+.hh-face { position: absolute; left: 8px; top: 8px; width: 48px; height: 48px; clip-path: var(--px-circle); object-fit: cover; image-rendering: pixelated; background: var(--hh-sky-day) 0 0 / 100% 100%; }
 .hh-portrait.night .hh-face { background-image: var(--hh-sky-night); }
-.hh-ring { position: absolute; left: 0; top: 0; }
-.hh-name { position: absolute; left: 54px; right: 10px; top: 10px; font-family: var(--font-display); font-size: 27px; line-height: 1; color: #ebe5da; white-space: nowrap; overflow: hidden; text-overflow: clip; text-shadow: 2px 2px 0 #312821, -1px 0 0 #312821, 0 -1px 0 #312821, 1px 0 0 #312821; }
-.hh-name.long { font-size: 19px; top: 13px; }
-.hh-rank { position: absolute; right: 10px; top: 15px; font-family: var(--font-display); font-size: 13px; line-height: 1; color: #e8d0af; text-shadow: 1px 1px 0 #312821, -1px 0 0 #312821, 0 -1px 0 #312821; opacity: 0.9; }
+.hh-ring { position: absolute; left: 0; top: 0; width: 64px; height: 64px; image-rendering: pixelated; pointer-events: none; }
+/* [ui4] gilt lettering on the varnished board */
+.hh-name { position: absolute; left: 54px; right: 12px; top: 11px; font-family: var(--font-display); font-size: 26px; line-height: 1; color: #fbe3a0; white-space: nowrap; overflow: hidden; text-overflow: clip; text-shadow: 0 -1px 0 #fff6d6, 2px 2px 0 #2a1209, -1px 0 0 #2a1209, 0 1px 0 #2a1209, 1px 0 0 #2a1209, 0 -2px 0 #2a1209; }
+.hh-name.long { font-size: 19px; top: 14px; }
+.hh-rank { position: absolute; right: 12px; top: 16px; font-family: var(--font-display); font-size: 13px; line-height: 1; color: #f0cf96; text-shadow: 1px 1px 0 #2a1209, -1px 0 0 #2a1209, 0 -1px 0 #2a1209; }
 .hh-lvl { position: absolute; left: 72px; top: 38px; width: 112px; height: 24px; filter: drop-shadow(0 2px 0 rgba(34, 38, 40, 0.45)); }
 .hh-magicbar { display: block; image-rendering: pixelated; }
 .hh-xp { position: absolute; inset: 0 6px; display: grid; place-items: center; font-family: var(--font-small); font-size: 11px; font-weight: 700; color: #faf5e9; text-shadow: 1px 0 0 #282636, -1px 0 0 #282636, 0 1px 0 #282636, 0 -1px 0 #282636; opacity: 0; transform: translateY(4px); transition: opacity 0.2s, transform 0.3s var(--pop); pointer-events: none; }
 .hh-xp.on { opacity: 1; transform: none; }
-.hh-rune { position: absolute; left: 32px; top: 30px; width: 48px; height: 48px; display: grid; place-items: center; animation: hhRuneIn 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) both; filter: drop-shadow(0 3px 0 rgba(40, 34, 27, 0.5)); }
-.hh-rune > img { position: absolute; left: 0; top: 0; }
-.hh-rune b { position: relative; font-family: var(--font-display); font-weight: 400; font-size: 22px; line-height: 1; color: #f1f5f2; margin-top: -1px; text-shadow: 2px 2px 0 #27313f, -1px 0 0 #27313f, 0 -1px 0 #27313f, 1px 0 0 #27313f; animation: hhRuneGlow 1.8s steps(2) infinite; }
+.hh-rune { position: absolute; left: 30px; top: 30px; width: 48px; height: 48px; display: grid; place-items: center; animation: hhRuneIn 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) both; filter: drop-shadow(2px 3px 0 rgba(26, 14, 8, 0.5)); }
+.hh-rune > img { position: absolute; left: 0; top: 0; width: 48px; height: 48px; image-rendering: pixelated; }
+.hh-rune b { position: relative; font-family: var(--font-display); font-weight: 400; font-size: 22px; line-height: 1; color: #fff3c8; margin-top: -1px; text-shadow: 2px 2px 0 #0b1434, -1px 0 0 #0b1434, 0 -1px 0 #0b1434, 1px 0 0 #0b1434; animation: hhRuneGlow 1.8s steps(2) infinite; }
 @keyframes hhRuneIn { 0% { transform: scale(0.3) rotate(-90deg); } 60% { transform: scale(1.25) rotate(8deg); } 100% { transform: none; } }
-@keyframes hhRuneGlow { 50% { color: #f1d39a; } }
+@keyframes hhRuneGlow { 50% { color: #ffd97a; } }
 
 /* ------------------------------------------------------------ currency signs */
 .hh-curhang { width: 124px; height: 40px; }
@@ -60,10 +61,10 @@
 .hh-cur-ico.bump > img { animation: hhCoinBump 0.32s steps(4); }
 .hh-cur-ico.gem.bump > img { animation: hhCoinBump 0.32s steps(4); }
 @keyframes hhCoinBump { 0% { transform: scale(1); } 30% { transform: scale(1.35, 0.8) translateY(2px); } 60% { transform: scale(0.88, 1.2) translateY(-3px); } 100% { transform: scale(1); } }
-.hh-num { position: absolute; left: 28px; right: 34px; top: 0; bottom: 2px; display: flex; align-items: center; justify-content: flex-end; font-family: var(--font-display); font-size: 22px; color: #f7f1e6; text-shadow: 2px 2px 0 #312821, -1px 0 0 #312821, 0 -1px 0 #312821; }
-.hh-plus { position: absolute; right: 5px; top: 6px; width: 28px; height: 28px; background: var(--hh-plus) no-repeat center / 28px 28px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(40, 34, 27, 0.5)); transition: transform 0.25s var(--pop); }
+.hh-num { position: absolute; left: 28px; right: 34px; top: 1px; bottom: 1px; display: flex; align-items: center; justify-content: flex-end; font-family: var(--font-display); font-size: 22px; color: #fff4dc; text-shadow: 2px 2px 0 #2a1209, -1px 0 0 #2a1209, 0 -1px 0 #2a1209, 1px 0 0 #2a1209; }
+.hh-plus { position: absolute; right: 5px; top: 6px; width: 28px; height: 28px; background: var(--plus) no-repeat center / 28px 28px; image-rendering: pixelated; filter: drop-shadow(1px 2px 0 rgba(26, 14, 8, 0.5)); transition: transform 0.25s var(--pop); }
 .hh-plus:hover { transform: rotate(90deg) scale(1.08); }
-.hh-plus:active { background-image: var(--hh-plus-dn); transform: translateY(2px) scale(0.94); filter: none; }
+.hh-plus:active { background-image: var(--plus-dn); transform: translateY(1px) scale(0.96); filter: none; }
 
 /* rolling digit wheels */
 .hh-odo { display: inline-flex; align-items: center; height: 1em; overflow: visible; }
@@ -78,10 +79,11 @@
 .hh-toolrope { position: absolute; left: 27px; top: -150px; bottom: 40px; width: 6px; background-image: var(--rope); background-repeat: repeat-y; background-size: 6px 6px; z-index: -1; box-shadow: 2px 0 0 rgba(40, 34, 27, 0.25); }
 .hh-tool { position: relative; width: 60px; height: 78px; }
 .hh-toolhang { position: absolute; left: 0; top: 0; width: 60px; display: flex; flex-direction: column; align-items: center; transform-origin: 30px 4px; will-change: transform; }
-.hh-tag { position: relative; width: 52px; height: 62px; background-size: 100% 100%; background-repeat: no-repeat; display: grid; place-items: center; padding-top: 10px; filter: drop-shadow(0 3px 0 rgba(40, 34, 27, 0.45)); transition: scale 0.15s; }
+.hh-tag { position: relative; width: 52px; height: 60px; background-size: 100% 100%; background-repeat: no-repeat; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 rgba(26, 14, 8, 0.45)); transition: scale 0.15s; }
+.hh-tag > .hh-ticon { position: absolute; left: 4px; top: 13px; }
 .hh-tag:hover > img { animation: hhWiggle 0.45s steps(4); }
 .hh-tag:active { scale: 0.92 1.04; }
-.hh-toollabel { margin-top: 0; padding: 1px 4px 2px; font-family: var(--font-display); font-size: 13px; line-height: 1; white-space: nowrap; color: #382c22; background: #ebe2d3; box-shadow: inset 0 -2px 0 #dfc9a4, 0 0 0 2px #312821, 0 4px 0 2px rgba(44, 36, 29, 0.35); pointer-events: none; }
+.hh-toollabel { margin-top: 1px; padding: 2px 5px 2px; font-family: var(--font-display); font-size: 13px; line-height: 1; white-space: nowrap; color: #2a1a10; background: #f6ead0; box-shadow: inset 0 2px 0 #fffaf0, inset 0 -2px 0 #dcc497, 0 0 0 2px #3a2414, 2px 4px 0 2px rgba(26, 14, 8, 0.35); pointer-events: none; }
 .hh-badge { position: absolute; right: -8px; top: 6px; width: 28px; height: 28px; display: grid; place-items: center; animation: hhBadge 1.2s steps(3) infinite; pointer-events: none; }
 .hh-badge > img { position: absolute; left: 0; top: 0; }
 .hh-badge b { position: relative; font-family: var(--font-display); font-weight: 400; font-size: 15px; color: #f8f1e6; text-shadow: 1px 1px 0 #3c2a27; }
@@ -98,30 +100,43 @@
   .hh-toolrope { left: 25px; width: 62px; bottom: 50px; background-image: var(--rope), var(--rope) !important; background-position: 0 0, 56px 0; background-repeat: repeat-y; box-shadow: none; }
 }
 
-/* ------------------------------------------------------------ main plaques */
+/* ------------------------------------------------------------ main objects on the shelf [ui4] */
 .hh-nav { position: absolute; left: 50%; bottom: calc(2px + var(--safe-b)); width: 352px; margin-left: -176px; z-index: 9; transition: transform 0.6s cubic-bezier(0.3, 1.4, 0.5, 1); }
-.hh-nav.away { transform: translateY(200px); transition: transform 0.4s cubic-bezier(0.55, -0.3, 0.75, 0.4); pointer-events: none; }
-.hh-plaques { position: relative; z-index: 1; display: flex; justify-content: center; gap: 10px; margin-bottom: -8px; }
-.hh-plaque { position: relative; width: 104px; height: 116px; background-size: 100% 100%; background-repeat: no-repeat; transform-origin: 50% 100%; filter: drop-shadow(0 4px 0 rgba(40, 34, 27, 0.5)); transition: scale 0.09s ease-out; animation: hhRise 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both; animation-delay: calc(var(--i) * 80ms + 0.15s); }
-.hh-nav.away .hh-plaque { animation: none; }
+.hh-nav.away { transform: translateY(220px); transition: transform 0.4s cubic-bezier(0.55, -0.3, 0.75, 0.4); pointer-events: none; }
+.hh-plaques { position: relative; z-index: 1; display: flex; justify-content: center; gap: 12px; margin-bottom: -8px; }
+.hh-mobj { position: relative; width: 104px; height: 108px; transform-origin: 50% 100%; transition: scale 0.09s ease-out; animation: hhRise 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both; animation-delay: calc(var(--i) * 80ms + 0.15s); }
+.hh-nav.away .hh-mobj { animation: none; }
 @keyframes hhRise { from { translate: 0 120px; } to { translate: 0 0; } }
-.hh-pic { position: absolute; left: 20px; top: 16px; width: 64px; height: 64px; transform-origin: 50% 90%; }
-.hh-plaque:hover .hh-pic { animation: hhWiggle 0.5s steps(5); }
-.hh-plaque.press { scale: 1.07 0.88; }
-.hh-plaque.pop { animation: hhPop 0.52s cubic-bezier(0.3, 1.8, 0.5, 1); }
-@keyframes hhPop { 0% { scale: 1.07 0.88; } 35% { scale: 0.92 1.12; } 65% { scale: 1.04 0.97; } 100% { scale: 1 1; } }
-.hh-plaque.pop .hh-pic { animation: hhHop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1); }
-@keyframes hhHop { 40% { transform: translateY(-10px) scale(1.08); } }
-.hh-plate { position: absolute; left: 14px; right: 14px; top: 94px; height: 16px; font-family: var(--font-display); font-size: 16px; line-height: 17px; text-align: center; color: #382c22; text-shadow: 0 1px 0 rgba(246, 241, 229, 0.7); pointer-events: none; }
-.hh-plaque.rec { animation: hhRise 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both, hhRec 1.6s steps(6) infinite; }
-.hh-plaque.rec.pop { animation: hhPop 0.52s cubic-bezier(0.3, 1.8, 0.5, 1); }
-@keyframes hhRec { 0%, 100% { filter: drop-shadow(0 4px 0 rgba(34, 38, 40, 0.5)); } 50% { filter: drop-shadow(0 4px 0 rgba(34, 38, 40, 0.5)) drop-shadow(0 -3px 0 rgba(241, 211, 154, 0.85)); } }
+.hh-cshadow { position: absolute; left: 50%; bottom: -5px; translate: -50% 0; image-rendering: pixelated; pointer-events: none; width: 68px; height: 12px; }
+.hh-mobj.book .hh-cshadow { width: 80px; translate: -46% 0; }
+.hh-pic { position: absolute; left: 0; top: 0; width: 104px; height: 108px; transform-origin: 50% 100%; filter: drop-shadow(2px 2px 0 rgba(26, 14, 8, 0.35)); }
+.hh-obj { position: absolute; left: 0; top: 0; width: 104px; height: 108px; image-rendering: pixelated; pointer-events: none; }
+.hh-halo { position: absolute; left: 0; top: 0; width: 104px; height: 108px; image-rendering: pixelated; pointer-events: none; transition: opacity 0.5s steps(3); }
+.hh-mobj:hover .hh-pic { animation: hhLift 0.6s cubic-bezier(0.3, 1.6, 0.5, 1); }
+@keyframes hhLift { 40% { transform: translateY(-5px); } }
+.hh-mobj.press { scale: 1.05 0.9; }
+.hh-mobj.pop { animation: hhPop 0.56s cubic-bezier(0.3, 1.8, 0.5, 1); }
+@keyframes hhPop { 0% { scale: 1.05 0.9; } 35% { scale: 0.94 1.1; } 65% { scale: 1.03 0.98; } 100% { scale: 1 1; } }
+.hh-mobj.pop .hh-pic { animation: hhHop 0.56s cubic-bezier(0.3, 1.6, 0.5, 1); }
+.hh-mobj.clock.pop .hh-pic { animation: hhHop 0.56s cubic-bezier(0.3, 1.6, 0.5, 1), hhRing 0.09s steps(2) 7; }
+@keyframes hhHop { 40% { transform: translateY(-12px); } }
+@keyframes hhRing { 50% { translate: 2px 0; } }
+.hh-mobj.sleep .hh-pic { animation: hhBreathe 4.2s steps(8) infinite; }
+.hh-mobj.sleep.pop .hh-pic { animation: hhHop 0.56s cubic-bezier(0.3, 1.6, 0.5, 1); }
+@keyframes hhBreathe { 0%, 100% { transform: none; } 50% { transform: translateY(-2px); } }
+.hh-plate { position: absolute; left: 8px; top: 108px; width: 88px; height: 18px; background-size: 100% 100%; image-rendering: pixelated; font-family: var(--font-display); font-size: 14px; line-height: 18px; text-align: center; color: #3a1f06; text-shadow: 0 1px 0 rgba(255, 241, 189, 0.75), 0 -1px 0 rgba(58, 31, 6, 0.35); pointer-events: none; filter: drop-shadow(1px 2px 0 rgba(26, 14, 8, 0.45)); }
+.hh-mobj.rec { animation: hhRise 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both, hhRec 1.6s steps(6) infinite; }
+.hh-mobj.rec.pop { animation: hhPop 0.56s cubic-bezier(0.3, 1.8, 0.5, 1); }
+@keyframes hhRec { 0%, 100% { filter: none; } 50% { filter: drop-shadow(0 -3px 0 rgba(255, 220, 140, 0.85)); } }
 .hh-twinkle { position: absolute; width: 14px; height: 14px; background: var(--hh-spark1) no-repeat center / 14px 14px; image-rendering: pixelated; pointer-events: none; animation: hhTwinkle 1.8s steps(1) infinite; }
-.hh-twinkle.a { left: -6px; top: 10px; }
-.hh-twinkle.b { right: -6px; top: 38px; animation-delay: 0.6s; }
-.hh-twinkle.c { left: 46px; top: -10px; animation-delay: 1.2s; }
+.hh-twinkle.a { left: 0; top: 10px; }
+.hh-twinkle.b { right: 0; top: 38px; animation-delay: 0.6s; }
+.hh-twinkle.c { left: 46px; top: -8px; animation-delay: 1.2s; }
+.hh-twinkle.gilt { left: 40px; top: 46px; animation: hhTwinkleSlow 5.2s steps(1) infinite 1.4s; }
 @keyframes hhTwinkle { 0% { background-image: var(--hh-spark0); } 20% { background-image: var(--hh-spark1); } 40% { background-image: var(--hh-spark2); } 60%, 100% { background-image: none; } }
-.hh-shelf { position: relative; display: block; width: 352px; height: 24px; margin: 0 auto; image-rendering: pixelated; filter: drop-shadow(0 4px 0 rgba(40, 34, 27, 0.45)); }
+@keyframes hhTwinkleSlow { 0% { background-image: var(--hh-spark0); } 6% { background-image: var(--hh-spark1); } 12% { background-image: var(--hh-spark2); } 18%, 100% { background-image: none; } }
+.hh-shelf { position: relative; display: block; width: 352px; height: 32px; margin: 0 auto; image-rendering: pixelated; filter: drop-shadow(2px 4px 0 rgba(26, 14, 8, 0.45)); }
+.hh-zz { position: absolute; left: 44px; top: -18px; pointer-events: none; }
 
 /* ------------------------------------------------------------ toasts: a parchment scroll that unrolls */
 .hh-toasts { position: absolute; top: calc(var(--safe-t) + 124px); left: 50%; width: min(360px, calc(100% - 24px)); transform: translateX(-50%); z-index: 30; display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -155,6 +170,7 @@
 .hh-ticket { position: absolute; left: 50%; bottom: calc(140px + var(--safe-b)); width: min(380px, calc(100% - 20px)); margin-left: calc(min(380px, calc(100% - 20px)) / -2); z-index: 4; display: flex; align-items: stretch; filter: drop-shadow(0 4px 0 rgba(40, 34, 27, 0.5)); transition: opacity 0.35s, translate 0.5s var(--ease); animation: hhTicketIn 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) 0.3s both; }
 .hh-ticket.away { opacity: 0; translate: 0 40px; pointer-events: none; }
 @keyframes hhTicketIn { from { translate: 0 60px; opacity: 0; } }
+.hh-tkt-clip { position: absolute; left: 22px; top: -14px; width: 44px; height: 26px; z-index: 3; image-rendering: pixelated; pointer-events: none; filter: drop-shadow(1px 2px 0 rgba(26, 14, 8, 0.45)); }
 .hh-tkt-stub { position: relative; width: 74px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; text-align: center; }
 .hh-tkt-stub small { font-size: 13px; color: var(--ink-3); line-height: 1; }
 .hh-tkt-stub b { font-family: var(--font-display); font-weight: 400; font-size: 20px; line-height: 1; color: var(--ink); }
@@ -206,11 +222,7 @@
 }
 
 /* [ui3] baked pixel-art icons (real props rendered to art pixels): 1 texel per CSS px, gentle idle sway, a hop when tapped */
-.hh-micon { position: absolute; left: 2px; top: 2px; width: 60px; height: 60px; image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(34, 38, 40, 0.5)); animation: hhIdle 3.2s steps(8) infinite; transform-origin: 50% 90%; }
-.hh-plaque:nth-child(2) .hh-micon { animation-delay: -1.1s; }
-.hh-plaque:nth-child(3) .hh-micon { animation-delay: -2.2s; }
-.hh-zz { position: absolute; left: 0; top: 0; pointer-events: none; }
-.hh-ticon { image-rendering: pixelated; filter: drop-shadow(0 2px 0 rgba(34, 38, 40, 0.5)); animation: hhIdle 3.6s steps(8) infinite; animation-delay: calc(var(--i) * -0.7s); transform-origin: 50% 85%; }
+.hh-ticon { image-rendering: pixelated; filter: drop-shadow(1px 2px 0 rgba(20, 10, 6, 0.55)); animation: hhIdle 3.6s steps(8) infinite; animation-delay: calc(var(--i) * -0.7s); transform-origin: 50% 85%; }
 .hh-ticon.tap { animation: hhTapIcon 0.5s steps(6); }
 .hh-ticon.tap2 { animation: hhTapIcon2 0.5s steps(6); }
 @keyframes hhTapIcon2 { 0% { transform: scale(1); } 30% { transform: scale(1.2, 0.82) translateY(3px); } 60% { transform: scale(0.9, 1.14) translateY(-5px); } 100% { transform: scale(1); } }

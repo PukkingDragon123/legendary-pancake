@@ -78,10 +78,11 @@ function rivet(b, res, cx, cy, rad = 1.25) {
 }
 
 // ---------------------------------------------------------------- palettes (graded once)
-const WOOD = ramp('#3a2d22', '#4f3d2d', '#665039', '#7d6446', '#957a57', '#ab9068', '#c2a77d', '#d6be97');
-const WOODD = ramp('#1f1813', '#2c221a', '#3a2e23', '#4a3b2d', '#5b4938', '#6d5943', '#806a50', '#937b5d');
-const INK = C('#2e2a24'), INK2 = C('#4a3e31'), INKW = C('#211b16'), INKP = C('#5a4733');
-const LEATHER = ramp('#1e1613', '#2c201a', '#3b2b21', '#4b382a', '#5c4634', '#6e5440', '#82654d');
+// [ui4] v4: honey walnut, deep walnut, oxblood leather wells; warm ink outlines
+const WOOD = ramp('#3a1d0e', '#55290f', '#6e3818', '#874a22', '#a05e2d', '#b8763c', '#cc8f50', '#dea866');
+const WOODD = ramp('#1c0d06', '#2b140a', '#3c1d0f', '#4e2715', '#61321c', '#753f24', '#8a4e2e', '#9e5f3a');
+const INK = C('#2a160c'), INK2 = C('#4a2c18'), INKW = C('#1a0c06'), INKP = C('#5a3a20');
+const LEATHER = ramp('#1d0608', '#2e0a0f', '#421016', '#58161e', '#6e1e27', '#842a31', '#9a383c');
 
 export const HI = {};
 
@@ -164,15 +165,15 @@ function cloth(R, down = false, stitchHex = null) {
   });
 }
 const BTN = {
-  green: ramp('#3c4a35', '#4f5e45', '#64735a', '#7a876c', '#8f9a80', '#a5ae95', '#bcc3ad'),
-  greenH: ramp('#465540', '#5b6a50', '#707f63', '#879377', '#9ca68b', '#b1b9a0', '#c8cdb8'),
-  red: ramp('#4a3634', '#5e4542', '#745752', '#8a6a63', '#9f7e76', '#b4948b', '#c9aca3'),
-  gold: ramp('#6b5a40', '#85704f', '#9e8862', '#b6a079', '#cab792', '#dccbaa', '#ece0c4'),
+  green: ramp('#0e3220', '#15452b', '#1d5a37', '#287045', '#358755', '#4a9e68', '#68b882'),
+  greenH: ramp('#123a26', '#1a4f32', '#236640', '#2f7d4e', '#3d9660', '#55ae74', '#76c690'),
+  red: ramp('#4a0f16', '#62161f', '#7c202a', '#962c35', '#ae3c42', '#c45452', '#d87468'),
+  gold: ramp('#6b4410', '#8a5a16', '#a8721f', '#c48c2c', '#dca640', '#ecc260', '#f8dc8c'),
   grey: ramp('#4c4842', '#625d55', '#78736a', '#8f8a80', '#a6a196', '#bcb7ad', '#d2cec5'),
-  night: ramp('#2a323a', '#38424b', '#48535d', '#59666f', '#6c7983', '#808d96', '#97a3aa'),
-  cream: ramp('#8a7c62', '#a49678', '#bdb091', '#d1c6a9', '#e0d7be', '#ece5d2', '#f6f1e4'),
+  night: ramp('#0e1840', '#16245a', '#203474', '#2c468e', '#3c5ca8', '#5276c0', '#7096d4'),
+  cream: ramp('#8a6c46', '#a8885c', '#c4a678', '#dbc298', '#ead8b4', '#f4e8cc', '#fcf6e6'),
 };
-const STITCH = { green: '#d4d8c4', greenH: '#dfe2d2', red: '#e4d3cb', gold: '#f6eedb', grey: '#d6d1c6', night: '#c2c9cb', cream: '#9a8a6c' };
+const STITCH = { green: '#d8f0dc', greenH: '#e4f6e8', red: '#f8dcd4', gold: '#fff6dc', grey: '#d6d1c6', night: '#d4e0f8', cream: '#9a7a52' };
 for (const [k, R] of Object.entries(BTN)) {
   const n = k === 'green' ? 'button_green' : k === 'greenH' ? 'button_green_hover' : k === 'red' ? 'button_red' : k === 'gold' ? 'button_gold' : k === 'grey' ? 'button_disabled' : k === 'night' ? 'button_night' : 'button_cream';
   HI[n] = cloth(R, false, STITCH[k]);
