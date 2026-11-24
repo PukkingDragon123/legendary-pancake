@@ -15,6 +15,7 @@ import { loadGLB } from '../gfx/glb.ts';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { Eye, type EyeColours } from './eyes.ts';
 import { geoOf, type Geo } from './geo.ts';
+import { furShells, furUniforms, type FurUniforms } from './fur.ts';
 import { dressModel, type Dressing } from './outfits.ts';
 import { OWL_RIGS } from './rig.gen.ts';
 import type { OwlRigData } from './rigtypes.ts';
@@ -90,6 +91,8 @@ export interface OwlModel {
   loaded: boolean;
   /** the wing meshes (left, right) whose 'spread' morph target opens the folded wing to its full span */
   spread: [THREE.Mesh[], THREE.Mesh[]];
+  /** the downy fluff's shells (src/owl/fur.ts): body and legs, head; the actor sways them */
+  fur: { body: FurUniforms; head: FurUniforms } | null;
   dispose(): void;
 }
 
@@ -103,6 +106,10 @@ export function modelIdOf(look: Pick<OwlLook, 'skin' | 'species' | 'palette' | '
 }
 
 export const owlPath = (id: string) => `owls/${id}.glb`;
+/** models without downy fluff (baked dough, packed snow, the old faceted queen) */
+const NO_FUR = new Set(['gingerbread', 'snowman', 'queen']);
+/** the painted parts that grow fluff: the body, the head, the feathered legs, a kitten's ears */
+const FURRY = /^(body|head|leg_[lr]k?|tuft_[lr])_mesh$/;
 
 // ------------------------------------------------------------------ loading
 type GLTFLike = { scene: THREE.Object3D };
@@ -263,7 +270,7 @@ export function buildOwl(look: OwlLook): OwlModel {
     id, rig: { root, bones, height: (r?.height ?? 44) * MM_WORLD, dispose: () => model.dispose() }, eyes, eyeMeshes, look,
     height: (r?.height ?? 44) * MM_WORLD, g, pivots: piv, rest,
     headUp: r ? (r.dims.headZ - (r.pivots.head?.[1] ?? r.dims.headZ)) * MM : 5,
-    species, anchors, ready: Promise.resolve(), loaded: false, spread: [[], []],
+    species, anchors, ready: Promise.resolve(), loaded: false, spread: [[], []], fur: null,
     dispose() {
       disposed = true;
       dressing?.dispose();
@@ -296,6 +303,25 @@ export function buildOwl(look: OwlLook): OwlModel {
           const mm = o as THREE.Mesh;
           if (mm.isMesh && mm.morphTargetInfluences?.length && (b === 'wingL' || b === 'wingR')) model.spread[b === 'wingL' ? 0 : 1].push(mm);
         });
+      }
+    }
+    // the downy fluff: shells over the body, the feathered legs and the head (none on the dough or snow skins); shorter
+    // under a garment or a hat, so a piece sits on the fluff rather than through it
+    if (!NO_FUR.has(id) && r) {
+      const s = (r.dims.bodyW / 26) * 0.7;
+      const o = look.outfit ?? {};
+      const fb = furUniforms(s * (o.neck || o.body || o.back ? 0.32 : 1), 11), fh = furUniforms(s * (o.head ? 0.3 : o.face ? 0.7 : 0.8), 11);
+      model.fur = { body: fb, head: fh };
+      for (const [b, u] of [['body', fb], ['legL', fb], ['legR', fb], ['head', fh], ['tuftL', fh], ['tuftR', fh]] as const) {
+        for (const c of [...frames[b].children]) {
+          if (!FURRY.test(c.name)) continue;
+          c.traverse((o2) => {
+            const mm = o2 as THREE.Mesh;
+            if (!mm.isMesh || (mm as THREE.InstancedMesh).isInstancedMesh) return;
+            const sh = furShells(mm, u);
+            if (sh) mm.parent?.add(sh);
+          });
+        }
       }
     }
     model.loaded = true;
