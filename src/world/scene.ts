@@ -549,6 +549,26 @@ export class Scene {
     this.post.render(this.scene, this.camera, t); // [world3]
   }
 
+  /**
+   * [world3] Render the real forest (sky, weather, season, time of day) from `camera` into `target`, e.g. for the
+   * window of a stage (the shop, the interview office). Call it once when the stage opens and then every few frames;
+   * the world keeps its clock and wind moving while a stage is up. Use viewTarget() for a suitable target.
+   */
+  renderView(camera: THREE.Camera, target: THREE.WebGLRenderTarget) {
+    const r = this.renderer, prev = r.getRenderTarget();
+    wind.uTime.value = this.time; GRASS.uTime.value = this.time;
+    this.sky.update(this.time, camera);
+    r.setRenderTarget(target);
+    r.clear();
+    r.render(this.scene, camera);
+    r.setRenderTarget(prev);
+    this.sky.update(this.time, this.camera);
+  }
+  /** [world3] A render target for renderView (linear HDR colour; use its .texture as a map). */
+  viewTarget(w: number, h: number): THREE.WebGLRenderTarget {
+    return new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, depthBuffer: true });
+  }
+
   snapCamera() { const g = this.goal(); this.cur.yaw = g.yaw; this.cur.pitch = g.pitch; this.cur.dist = g.dist; this.cur.target.copy(g.target); }
 
   /** Screen position (CSS px) of a world point, for anchoring speech bubbles. */

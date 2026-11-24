@@ -310,7 +310,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
       flyFrom = climbPts();
     }],
     [9.6, () => sound.play('wings_flutter', { volume: 0.5, rate: 0.9 })],
-    [11.2, () => { silhouette(scene, true); scene.weather.hold = { kind: 'clear', intensity: 0.1, source: 'seasonal', temp: 10 }; }],
+    [11.2, () => { silhouette(scene, true); scene.weather.hold = { kind: 'clear', intensity: 0.1, source: 'seasonal', temp: 10 }; scene.weather.snap(); }], // [world3] a clear sky for the moon shot, at once
     [11.9, () => sky.shootingStar(m.clone().addScaledVector(side, -0.42).addScaledVector(upv, 0.3), m.clone().addScaledVector(side, 0.25).addScaledVector(upv, 0.06), 1.1)],
     [12.6, () => sound.play('owl_hoot', { volume: 0.25, rate: 1.1 })],
     [12.8, () => sound.play('sparkle', { volume: 0.2 })],

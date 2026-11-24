@@ -191,7 +191,7 @@ export function makeGrass(items: GrassItem[], cell = 10): THREE.Group {
   const grp = new THREE.Group();
   if (!tex) {
     const t = vegStrip();
-    t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+    t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
     tex = t;
   }
   if (!GRASS.uCloud.value) GRASS.uCloud.value = noiseTexture();

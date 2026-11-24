@@ -212,7 +212,7 @@ export function planForest(quality: 'low' | 'high'): ForestPlan {
 
   // grass: the instanced field. Lush meadow in the clearing (with wildflowers), woodland plants in the
   // shade, reeds round the pond, short tufts along the paths.
-  const want = quality === 'high' ? 8000 : 3400;
+  const want = quality === 'high' ? 14000 : 6000;
   const meadowCells = [FG.short, FG.mid, FG.mid, FG.tall, FG.short, FG.mid, FG.clover, FG.daisy, FG.buttercup, FG.forgetme, FG.campion, FG.seed, FG.sorrel];
   const woodCells = [FG.shade, FG.shade, FG.mid, FG.fern, FG.bracken, FG.moss, FG.litter, FG.woodrush, FG.violet, FG.primrose, FG.garlic, FG.bluebell, FG.anemone, FG.strawberry];
   for (let i = 0, placed = 0; i < want * 4 && placed < want; i++) {
