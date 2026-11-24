@@ -19,6 +19,7 @@ import { panel, sceneRef } from '../state.ts';
 import { agedPaper, homeSprite, inkFrame, leatherFrame, moonIcon, padlock, paperFrame, paperTile, passportCover, passportTile, PIN_H, PIN_W, pinSheet, postageStamp, postmark, ringSheet, stampArt, type PinState } from './art.ts';
 import './globe.css';
 import { devScale } from './pix.ts';
+import { b9, brassPlate, leatherFrame as reliefLeather, signBoard } from '../chrome/surfaces.ts';
 import { postcardArt } from './postcards.ts';
 import { loadPhotos, photoCredit, photosReady, photoStamp, photoURL } from './placephoto.ts';
 import { nightsAt, startTravel, travelOf } from './travel.ts';
@@ -37,6 +38,16 @@ function injectCSS() {
 .gb-page{border-style:solid;border-width:30px;border-image:url("${leatherFrame(2 * k)}") ${15 * 2 * k} / 30px stretch;background:url("${passportTile(2 * k)}") 0 0/64px 64px,#e9e3cf;background-clip:padding-box}
 .gb-page::before{content:'';position:absolute;inset:0;pointer-events:none;background:url("${agedPaper(2 * k, 0xe9e3cf)}") 0 0/192px 192px;opacity:.55;mix-blend-mode:multiply}
 .gb-cover{background-image:url("${passportCover(3 * k)}")}
+/* [ui4] physical pieces: a carved walnut title sign with gilt letters, a brass plate for tonight's trip,
+   brass arrow keys, and the passport bound in pebbled green leather with a stitched, gilt-tooled edge */
+.gb .gb-title.gb-board{${b9(signBoard('walnut'), true)};background:none;color:#fbe3a0}
+.gb .gb-title.gb-board b{text-shadow:2px 2px 0 #2a1209,-1px 0 0 #2a1209,0 -1px 0 #2a1209,1px 0 0 #2a1209}
+.gb .gb-title.gb-board small{color:#f0d9b0;text-shadow:1px 1px 0 #2a1209}
+.gb .gb-tonight.gb-board{${b9(brassPlate(), true)};background:none;color:#2a1606}
+.gb .gb-tonight.gb-board small{color:#5a3a10}
+.gb .btn.soft.gb-arrow{${b9(brassPlate(), true)};background:none;filter:drop-shadow(2px 3px 0 rgba(10,16,30,.6))}
+.gb .btn.soft.gb-arrow:active{transform:translateY(2px);filter:none}
+.gb-page.gb-page{${b9(reliefLeather('emerald', 22))};background:url("${passportTile(2 * k)}") 0 0/64px 64px,#e9e3cf;background-clip:padding-box}
 `;
   document.head.appendChild(el);
 }

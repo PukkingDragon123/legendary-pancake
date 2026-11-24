@@ -1,7 +1,7 @@
 // Dev page for the UI chrome. ?view=
 //   sheet   every animated icon's frame sheet (and the HUD/particle/transition sprites); &only=regex &s=scale
 //   anim    the main-button and tool animations playing at their real size and timing
-//   parts   the procedurally painted boards, plaques, tags, branch, rope and chain
+//   parts   the relief-painted boards, tool tile, name plate, shelf, rope and chain (see also ?view=obj)
 //   fx      one burst of every UI particle kind, frozen mid-flight
 //   trans   one transition frame: &kind=iris|leaves|snow|page|blueprint|stars|fade &p=0.5 &phase=in|out
 import { render } from 'preact';
@@ -9,7 +9,7 @@ import { SPRITES, spriteURL } from '../ui/px/sprites.js';
 import '../ui/px/chromeart.js';
 import { CHROME_TIMELINES } from '../ui/chrome/hud.tsx';
 import { PxAnim } from '../ui/chrome/pxanim.tsx';
-import { branch, chainTile, plank, plaque, ropeTile, shelf, tag } from '../ui/chrome/paint.ts';
+import { board, brassChain, hempRope, plate, shelfBoard, toolTile } from '../ui/chrome/objects.ts';
 import { uiAdvance, uiBurst, type UiFxKind } from '../ui/chrome/uifx.ts';
 import { previewTransition, type TransitionKind } from '../ui/chrome/transition.ts';
 import { MagicBar } from '../ui/chrome/magicbar.tsx';
@@ -55,17 +55,14 @@ if (view === 'parts') {
   const img = (src: string, w: number, h: number, t: string) => <div style="display:flex;flex-direction:column;gap:2px"><img src={src} style={`width:${w}px;height:${h}px;image-rendering:pixelated`} /><span style={label}>{t}</span></div>;
   render(
     <div style="padding:12px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
-      {img(plank(96, 36, { seed: 4, nails: [[26, 4], [71, 4]], carve: true }), 288, 108, 'name board')}
-      {img(plank(62, 20, { seed: 7, nails: [[11, 3], [51, 3]] }), 186, 60, 'acorn board')}
-      {img(plank(62, 20, { seed: 9, nails: [[11, 3], [51, 3]], tone: 'dwood' }), 186, 60, 'gem board')}
-      {img(plaque(52, 58, 'night', 5, 12), 156, 174, 'sleep plaque')}
-      {img(plaque(52, 58, 'paper', 6, 12), 156, 174, 'clock plaque')}
-      {img(plaque(52, 58, 'velvet', 7, 12), 156, 174, 'book plaque')}
-      {img(tag(26, 26, 2), 78, 93, 'tool tag')}
-      {img(branch(124, 18, 'left', 3), 372, 54, 'branch')}
-      {img(shelf(176), 528, 36, 'shelf')}
-      <div style={`width:18px;height:120px;background:url(${ropeTile()}) 0 0/18px 18px repeat-y;image-rendering:pixelated`} />
-      <div style={`width:24px;height:120px;background:url(${chainTile()}) 0 0/24px 36px repeat-y;image-rendering:pixelated`} />
+      {img(board(96, 36, 2, 1, { seed: 4, hooks: [26, 71], brackets: true }), 288, 108, 'name board')}
+      {img(board(62, 20, 2, 1, { seed: 7, wood: 'oak', hooks: [11, 51], screws: [[27, 11.5]], bevel: 2 }), 186, 60, 'acorn board')}
+      {img(board(62, 20, 2, 1, { seed: 9, hooks: [11, 51], screws: [[27, 11.5]], bevel: 2 }), 186, 60, 'gem board')}
+      {img(toolTile(26, 'sapphire', 2, 1, 1), 78, 90, 'tool tile')}
+      {img(plate(44, 9), 132, 27, 'name plate')}
+      {img(shelfBoard(176), 528, 48, 'shelf')}
+      <div style={`width:18px;height:120px;background:url(${hempRope()}) 0 0/18px 18px repeat-y;image-rendering:pixelated`} />
+      <div style={`width:24px;height:120px;background:url(${brassChain()}) 0 0/24px 36px repeat-y;image-rendering:pixelated`} />
     </div>,
     root,
   );
@@ -102,6 +99,17 @@ if (view === 'obj') {
     const cv = document.getElementById('alarm') as HTMLCanvasElement, im = new Image();
     im.onload = () => { cv.width = im.width; cv.height = im.height; cv.style.width = `${104 * s * 2}px`; cv.style.imageRendering = 'pixelated'; const g = cv.getContext('2d')!; g.drawImage(im, 0, 0); O.alarmHands(g, 2, 1, new Date(2026, 1, 1, 10, 9, 37), 7 * 60); };
     im.src = O.alarmClock(2, 1, 0);
+    (window as unknown as { __ready: number }).__ready = 1;
+  });
+}
+
+if (view === 'icons') {
+  // [ui4] the painted icon family, at 20, 30 and 40 px
+  void import('../ui/chrome/iconset.ts').then(({ installIconSet, ICON_NAMES }) => {
+    installIconSet();
+    document.body.style.background = q.get('bg') ?? '#efe2c0';
+    const sizes = [20, 30, 40];
+    root.innerHTML = '<div style="padding:8px;display:flex;flex-wrap:wrap;gap:10px">' + ICON_NAMES().map((n) => `<div style="display:flex;flex-direction:column;align-items:center;width:96px;font:10px monospace;color:#3a2410"><div style="display:flex;gap:4px;align-items:flex-end">${sizes.map((s) => `<img src="${spriteURL(n, s / 20)}" style="width:${s}px;height:${s}px;image-rendering:pixelated">`).join('')}</div>${n}</div>`).join('') + '</div>';
     (window as unknown as { __ready: number }).__ready = 1;
   });
 }

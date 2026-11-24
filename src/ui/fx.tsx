@@ -164,7 +164,7 @@ export function QuestBoard() {
   void save.value;
   const left = Math.max(0, Math.ceil((new Date().setHours(24, 0, 0, 0) - Date.now()) / 3.6e6));
   return (
-    <Sheet class="short" title={<span class="row" style="gap:6px"><Px name="clipboard" size={40} />Today's quests</span>} sub={`New quests in ${left}h`} onClose={() => { if (panel.value === 'quests') panel.value = null; }}>
+    <Sheet class="short qb" title={<span class="row" style="gap:6px"><Px name="clipboard" size={40} />Today's quests</span>} sub={`New quests in ${left}h`} onClose={() => { if (panel.value === 'quests') panel.value = null; }}>
       <div class="col" style="gap:8px">
         {list.map((q) => {
           const d = questDef(q.kind), done = q.prog >= d.goal;

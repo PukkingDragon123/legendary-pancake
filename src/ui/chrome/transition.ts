@@ -28,7 +28,10 @@ import { phase } from '../../game/night.ts';
 import { level, save } from '../../game/store.ts';
 import type { CamShot, Scene } from '../../world/scene.ts';
 import { panel, sceneRef, type Panel } from '../state.ts';
-import { bayer, hash, vnoise } from './paint.ts';
+import { hash, vnoise } from '../px/relief.ts';
+const BAYER01 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
+/** ordered dither threshold in (0, 1) */
+const bayer = (x: number, y: number) => BAYER01[((y & 3) << 2) | (x & 3)];
 import { reducedMotion } from './swing.ts';
 
 export type TransitionKind = 'iris' | 'dither' | 'fade' | 'leaves' | 'feathers' | 'snow' | 'fireflies' | 'page' | 'blinds' | 'mosaic' | 'branch' | 'clock' | 'curtain' | 'blueprint' | 'stars' | 'sunrise';

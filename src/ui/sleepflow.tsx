@@ -11,6 +11,8 @@ import { dayKey, edit, save, type Profile } from '../game/store.ts';
 import { DAY_NAME, setNight, toMin } from '../game/routine.ts';
 import { BreathePicker } from './breathe.tsx';
 import { WoodClock } from './clock.tsx';
+import { mugSteam, propCandle, propMug, propPhone } from './chrome/objects.ts';
+import { reducedMotion } from './chrome/swing.ts';
 import { Px } from './icons.tsx';
 import { fmtDur, fmtHM, Tags, tap, toast, Toggle } from './kit.tsx';
 import { Art, dtone, hash, tone } from './px/sleepart.ts';
@@ -83,25 +85,39 @@ function wallpaper(): string {
 
 // ------------------------------------------------------------------ props on the table
 
+/** [ui4] a frame counter for a little looping animation (stays on frame 0 with calm motion) */
+function useFrames(n: number, ms: number) {
+  const [f, setF] = useState(0);
+  useEffect(() => {
+    if (reducedMotion()) return;
+    const id = setInterval(() => { if (!document.hidden) setF((v) => (v + 1) % n); }, ms);
+    return () => clearInterval(id);
+  }, [n, ms]);
+  return f;
+}
+// [ui4] the props are detailed relief-painted objects (src/ui/chrome/objects.ts), one art px per CSS px
 function CandleProp(p: { dim: boolean; onTap: () => void }) {
+  const f = useFrames(4, 130);
   return (
     <button class={'prop prop-candle' + (p.dim ? ' dim' : '')} aria-label="Candle: dim the lights" onClick={p.onTap}>
       <span class="halo" />
-      <ArtCanvas w={18} h={36} k={3} fps={8} draw={(a, t, f) => candle(a, 0, 0, f, true)} />
+      <img class="px" src={propCandle(f, 3)} width={54} height={108} alt="" draggable={false} />
     </button>
   );
 }
 function MugProp(p: { tea: boolean; onTap: () => void }) {
+  const f = useFrames(4, 260);
   return (
     <button class="prop prop-mug" aria-label={p.tea ? 'A mug of chamomile tea' : 'Coffee: swap it for tea'} onClick={p.onTap}>
-      <ArtCanvas w={26} h={26} k={3} fps={5} deps={[p.tea]} draw={(a, t, f) => mug(a, 0, 0, f, p.tea ? 'tea' : 'coffee')} />
+      <img class="px steam" src={mugSteam(f, 3)} width={78} height={42} alt="" draggable={false} />
+      <img class="px" src={propMug(p.tea ? 'tea' : 'coffee', 3)} width={78} height={78} alt="" draggable={false} />
     </button>
   );
 }
 function PhoneProp(p: { bed: boolean; onTap: () => void }) {
   return (
     <button class={'prop prop-phone' + (p.bed ? ' tucked' : '')} aria-label={p.bed ? 'The phone is tucked in for the night' : 'Put the phone to bed'} onClick={p.onTap}>
-      <ArtCanvas w={22} h={34} k={3} fps={0} deps={[p.bed]} draw={(a) => phone(a, 0, 0, p.bed)} />
+      <img class="px" src={propPhone(p.bed, 3)} width={66} height={102} alt="" draggable={false} />
       {p.bed && <span class="zz">z<small>z</small></span>}
     </button>
   );
