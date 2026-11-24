@@ -5,14 +5,52 @@
 import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { MeshoptDecoder as MeshoptReference } from './meshopt_ref.js';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 
+// The artifact host shows the game in a locked-down frame: it doesn't serve .glb, and it may refuse
+// fetches of data:/blob: URLs and WebAssembly compilation. So the artifact build ships each model as
+// <name>.glb.json ({"glb": base64}, scripts/glb2json.mjs) that we decode here, textures are read
+// through <img> rather than fetch, and meshopt geometry falls back to a pure-JS decoder if wasm fails.
+const ARTIFACT = import.meta.env.MODE === 'artifact';
+
+let wasmOk = true;
+const meshopt = {
+  supported: true,
+  ready: MeshoptDecoder.ready.then(() => undefined, () => { wasmOk = false; }),
+  decodeGltfBuffer(target: Uint8Array, count: number, size: number, source: Uint8Array, mode: string, filter?: string) {
+    if (wasmOk) {
+      try { MeshoptDecoder.decodeGltfBuffer(target, count, size, source, mode, filter); return; } catch { wasmOk = false; }
+    }
+    MeshoptReference.decodeGltfBuffer(target, count, size, source, mode, filter);
+  },
+};
+
 const loader = new GLTFLoader();
-loader.setMeshoptDecoder(MeshoptDecoder);
+loader.setMeshoptDecoder(meshopt as unknown as typeof MeshoptDecoder);
+if (ARTIFACT) {
+  // read embedded textures through an <img> (blob: URL) instead of fetch()
+  loader.register((parser) => {
+    parser.textureLoader = new THREE.TextureLoader(parser.options.manager);
+    return { name: 'hh_img_textures' } as never;
+  });
+}
 const cache = new Map<string, Promise<GLTF>>();
-// The artifact host doesn't serve .glb, so that build ships each model as <name>.glb.json
-// (scripts/glb2json.mjs: the same glTF with its binary embedded).
-const GLB_SUFFIX = import.meta.env.MODE === 'artifact' ? '.json' : '';
+
+function fromBase64(b64: string): ArrayBuffer {
+  const s = atob(b64);
+  const out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out.buffer;
+}
+
+async function fetchGLTF(url: string): Promise<GLTF> {
+  if (!ARTIFACT) return loader.loadAsync(url);
+  const r = await fetch(`${url}.json`);
+  if (!r.ok) throw new Error(`model ${url}: HTTP ${r.status}`);
+  const { glb } = (await r.json()) as { glb: string };
+  return loader.parseAsync(fromBase64(glb), url.slice(0, url.lastIndexOf('/') + 1));
+}
 
 /** URL of a model under public/models (works with the relative base of the artifact build). */
 export const modelUrl = (path: string) => `${import.meta.env.BASE_URL}models/${path.replace(/^\//, '')}`;
@@ -43,7 +81,7 @@ function tune(root: THREE.Object3D, o: { shadows: boolean }) {
 export function loadGLB(path: string): Promise<GLTF> {
   let p = cache.get(path);
   if (!p) {
-    p = loader.loadAsync(modelUrl(path) + GLB_SUFFIX).then((g) => { tune(g.scene, { shadows: true }); return g; });
+    p = fetchGLTF(modelUrl(path)).then((g) => { tune(g.scene, { shadows: true }); return g; });
     cache.set(path, p);
   }
   return p;
