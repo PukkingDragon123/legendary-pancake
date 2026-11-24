@@ -240,7 +240,7 @@ function dustyTex(): THREE.CanvasTexture {
 let dusty: THREE.MeshStandardMaterial | null = null;
 /** the dusty dark glass of a locked floor's windows (it glows a little warmer at night: see house.ts) */
 export function DUSTY(): THREE.MeshStandardMaterial {
-  if (!dusty) { const t = dustyTex(); dusty = new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, roughness: 0.22, metalness: 0.15, emissive: 0xffb060, emissiveIntensity: 0.1 }); dusty.name = 'house:dusty'; }
+  if (!dusty) { const t = dustyTex(); dusty = new THREE.MeshStandardMaterial({ map: t, emissiveMap: t, roughness: 0.5, metalness: 0, emissive: 0xffb060, emissiveIntensity: 0.1 }); dusty.name = 'house:dusty'; }
   return dusty;
 }
 
@@ -286,9 +286,9 @@ export function buildOak(): Oak {
     if (Math.cos(d) < 0.6) return false;
     return inOpening(o, r * Math.sin(d), y, m);
   });
-  const shell = (g: Geo, as: number[], ys: number[], hs: Opening[], off: V3 = [0, 0, 0]) => {
+  const shell = (g: Geo, as: number[], ys: number[], hs: Opening[], off: V3 = [0, 0, 0], proud = 0) => {
     g.grid(0, 0, (a, y) => {
-      const r = barkR(a, y);
+      const r = barkR(a, y) + proud;
       const p = P(a, y, r);
       return { p: [p[0] - off[0], p[1] - off[1], p[2] - off[2]], uv: [(a / TAU) * 4, y / 128], c: barkCol(a, y, r), n: barkNormal(a, y) };
     }, { us: as, vs: ys, skip: (a0, a1, y0, y1) => { const am = (a0 + a1) / 2, ym = (y0 + y1) / 2; return inHole(hs, am, ym, barkR(am, ym), 1.5); } });
@@ -336,14 +336,14 @@ export function buildOak(): Oak {
     const fas = S.get(fid, 'planks');
     fas.grid(24, 2, (u, v) => {
       const a = -OPEN_A + u * 2 * OPEN_A, y = fy0 + (fy1 - fy0) * v;
-      const r = barkR(a, y) - 0.5;
+      const r = barkR(a, y) - 0.9;
       return { p: P(a, y, r), uv: [v * 0.25, (a * r) / 40], c: [0.82 + v * 0.18, 0.78 + v * 0.16, 0.72 + v * 0.12] };
     });
     // a moulded lip on top of the beam
     fas.grid(24, 1, (u, v) => {
       const a = -OPEN_A + u * 2 * OPEN_A, y = fy1 - 0.2 + v * 0.01;
-      const r = barkR(a, fy1) - 0.5 + 1.6 * (1 - v);
-      return { p: P(a, fy1 - 1.6 + v * 1.6, r + 0.6 * v), uv: [0.02, (a * r) / 40], c: [1.05, 1, 0.92] };
+      const r = barkR(a, fy1) - 0.9 - 1.4 * v;
+      return { p: P(a, fy1 + 0.4 * (1 - v), r), uv: [0.02, (a * r) / 40], c: [1.05, 1, 0.92] };
     });
   }
   // ceilings (the underside of the floor above): planks, radial beams, a hub where the lantern hangs, the hatch
@@ -466,7 +466,7 @@ export function buildOak(): Oak {
       fr.quad(t0, t3, t2, t1);
       if (st.inner) {
         // the inner architrave on the room side
-        const q1 = openingOutline(o, nReq, 3);
+        const q1 = openingOutline(o, nReq, 4.5);
         const za = (x: number) => Math.sqrt(Math.max(1, (R_IN - 1.1) ** 2 - x * x));
         const ia = fr.vert(at(p0[i][0], p0[i][1], za(p0[i][0])), [u0, 0.7], [0.78, 0.68, 0.58]), ib = fr.vert(at(q1[i][0], q1[i][1], za(q1[i][0])), [u0, 0.8], [0.7, 0.6, 0.5]);
         const ic = fr.vert(at(q1[j][0], q1[j][1], za(q1[j][0])), [u1, 0.8], [0.7, 0.6, 0.5]), id = fr.vert(at(p0[j][0], p0[j][1], za(p0[j][0])), [u1, 0.7], [0.78, 0.68, 0.58]);
@@ -532,10 +532,10 @@ export function buildOak(): Oak {
         // a flower box under the sill
         box(sg, at(0, sy - 6.5, zs + 3.5), [o.hw * 2 + 6, 5, 6], [0, o.a, 0], [0.64, 0.82, 0.7]);
         const cards = target ? frontCards : ivyBand[band];
-        for (let k = 0; k < 5; k++) {
-          const x = -o.hw - 1 + (k / 4) * (o.hw * 2 + 2);
-          const base = at(x, sy - 4.5, zs + 3.5), top = at(x, sy + 4.5, zs + 3.5);
-          const tw = 5;
+        for (let k = 0; k < 6; k++) {
+          const x = -o.hw - 1 + (k / 5) * (o.hw * 2 + 2);
+          const base = at(x, sy - 5, zs + 4.2), top = at(x, sy + 8, zs + 4.6);
+          const tw = 5.5;
           const q: [V3, V3, V3, V3] = [[base[0] - L[0] * tw, base[1], base[2] - L[2] * tw], [base[0] + L[0] * tw, base[1], base[2] + L[2] * tw], [top[0] + L[0] * tw, top[1], top[2] + L[2] * tw], [top[0] - L[0] * tw, top[1], top[2] - L[2] * tw]];
           cards.flat(q, k % 2 ? CELL.acorn[k % 4] : CELL.fern[k % 2], D, [1, 1, 1], 0.6, 0.4, 0, 0.75);
         }
@@ -553,7 +553,7 @@ export function buildOak(): Oak {
         leaf.position.set(piv[0] * PX, piv[1] * PX, piv[2] * PX);
         const lg = new Geo();
         const lw = o.hw + 1.2 - 0.8, top = o.kind === 'round' ? o.y1 + 1 : o.y1 + 1, bot = o.y0 - 1;
-        const loc = (x: number, y: number, z: number): V3 => { const p = at(x, y, z); return [p[0] - piv[0], p[1] - piv[1], p[2] - piv[2]]; };
+        const loc = (x: number, y: number, dz: number): V3 => { const p = at(x, y, zs + dz); return [p[0] - piv[0], p[1] - piv[1], p[2] - piv[2]]; };
         // boards (planks texture), the arch head clipped by the outline
         const cols = 4;
         for (let k = 0; k < cols; k++) {
@@ -609,7 +609,7 @@ export function buildOak(): Oak {
       const sub = new Sets();
       const g = sub.get(fid, 'bark');
       const as = side < 0 ? angleCols(-OPEN_A, 0) : angleCols(0, OPEN_A);
-      shell(g, as, rows(y0, y1), frontWins[fid], piv);
+      shell(g, as, rows(y0, y1), frontWins[fid], piv, 0.35);
       // everything on this half is built relative to its hinge, so the half can swing open like a dollhouse front
       const tmp = { f1: new THREE.Group(), f2: hg, f3: hg, roof: new THREE.Group() } as Record<Band, THREE.Group>;
       frontCards = new Cards('flat');
@@ -629,7 +629,7 @@ export function buildOak(): Oak {
     const py = fid === 'f2' ? FLOOR_Y.f2 + 40 : FLOOR_Y.f3 + 8;
     const zr = barkR(0, py);
     const plaque = new THREE.Group();
-    const pm = new THREE.Mesh(new THREE.BoxGeometry(16, 10.5, 1.2), [houseMat('brass'), houseMat('brass'), houseMat('brass'), houseMat('brass'), new THREE.MeshStandardMaterial({ map: plaqueTex(level), metalness: 0.55, roughness: 0.38 }), houseMat('brass')]);
+    const pm = new THREE.Mesh(new THREE.BoxGeometry(16, 10.5, 1.2), [houseMat('brass'), houseMat('brass'), houseMat('brass'), houseMat('brass'), new THREE.MeshStandardMaterial({ map: plaqueTex(level), metalness: 0.3, roughness: 0.38 }), houseMat('brass')]);
     pm.scale.setScalar(PX);
     plaque.position.set(0, py * PX, (zr + 1.4) * PX);
     pm.castShadow = true;
@@ -697,7 +697,7 @@ export function buildOak(): Oak {
     const base = 8;
     for (let k = 0; k < base; k++) {
       const a = (k / base) * TAU + 0.35 + (R() - 0.5) * 0.25;
-      const rr = 168 + R() * 34, ly = (k % 2 ? 262 : 292) + R() * 22;
+      const rr = 168 + R() * 34, ly = (k % 2 ? 286 : 310) + R() * 18;
       const c = P(a, ly, rr);
       lobes.push({ c: [c[0], c[1], c[2] * 0.82 - 8], r: [86 + R() * 22, 58 + R() * 16, 80 + R() * 18], tint: LOBE_TINTS[k % LOBE_TINTS.length] });
       // the limb under it
@@ -713,15 +713,25 @@ export function buildOak(): Oak {
     }
     for (let k = 0; k < 5; k++) {
       const a = (k / 5) * TAU + 1.0 + (R() - 0.5) * 0.3;
-      const c = P(a, 348 + R() * 22, 96 + R() * 24);
+      const c = P(a, 366 + R() * 22, 96 + R() * 24);
       lobes.push({ c: [c[0], c[1], c[2] * 0.85 - 8], r: [88 + R() * 16, 60 + R() * 10, 82 + R() * 14], tint: LOBE_TINTS[(k + 3) % LOBE_TINTS.length] });
     }
-    lobes.push({ c: [14, 404, -12], r: [96, 50, 80] }, { c: [-70, 392, 30], r: [72, 44, 62] }, { c: [80, 386, 26], r: [70, 44, 60] });
-    lobes.push({ c: [0, 330, -10], r: [170, 84, 132], core: true });
+    lobes.push({ c: [14, 420, -12], r: [96, 50, 80] }, { c: [-70, 408, 30], r: [72, 44, 62] }, { c: [80, 402, 26], r: [70, 44, 60] });
+    // the skirts: lobes drooping low at the sides on the ends of long limbs, framing the trunk like an old oak's
+    for (const [a, ly] of [[-1.72, 262], [-1.22, 278], [1.28, 272], [1.86, 256], [2.6, 268], [-2.55, 270]] as const) {
+      const rr = 214 + R() * 20;
+      const c = P(a, ly, rr);
+      lobes.push({ c: [c[0], c[1], c[2] * 0.85 - 8], r: [70 + R() * 14, 48 + R() * 10, 64 + R() * 12], tint: LOBE_TINTS[Math.floor(R() * LOBE_TINTS.length)] });
+      const y0 = 226 + R() * 12;
+      const ctrl: V3[] = [P(a, y0 - 14, 40), P(a + 0.02, y0 + 4, barkR(a, y0) - 3), P(a + 0.05, ly + 8, rr * 0.55), P(a + 0.06, ly - 6, rr * 0.92)];
+      const pts = spline(ctrl, 14);
+      S.get('roof', 'bark').tube(pts.map((p) => [p[0], p[1], p[2] * 0.88 - 6] as V3), pts.map((_, i) => 12 * (1 - (i / 13) * 0.7)), 8, { uRep: 1, vScale: 128, col: (t, _u, n) => [0.55 + 0.45 * clamp(n.y + 0.5), clamp(0.3 + n.y * 0.5 + t * 0.15), 0.62] });
+    }
+    lobes.push({ c: [0, 346, -10], r: [170, 84, 132], core: true });
   }
   {
     const crown = new Cards('bill');
-    fillCrown(crown, lobes, [0, 330, -10]);
+    fillCrown(crown, lobes, [0, 346, -10]);
     const m = crown.mesh('crown');
     if (import.meta.env.DEV) console.warn('crown cards', crown.size);
     bands.roof.add(m);
@@ -731,12 +741,12 @@ export function buildOak(): Oak {
   {
     const g = S.get('f2', 'bark');
     // the great limb sweeps out under the platform and climbs into the crown's lower right lobes
-    const ctrl: V3[] = [P(LIMB_A, 50, 50), P(LIMB_A, 60, barkR(LIMB_A, 60) - 2), P(LIMB_A + 0.02, 70, 128), P(LIMB_A + 0.03, 75, 168), P(LIMB_A + 0.06, 100, 210), P(LIMB_A + 0.1, 160, 240), P(LIMB_A + 0.14, 232, 252)];
+    const ctrl: V3[] = [P(LIMB_A, 52, barkR(LIMB_A, 52) - 7), P(LIMB_A, 60, barkR(LIMB_A, 60) - 2), P(LIMB_A + 0.02, 70, 128), P(LIMB_A + 0.03, 75, 168), P(LIMB_A + 0.06, 100, 206), P(LIMB_A + 0.12, 160, 228), P(LIMB_A + 0.22, 236, 226)];
     const pts = spline(ctrl, 26);
     g.tube(pts, pts.map((_, i) => 14 * (1 - (i / 25) * 0.72)), 10, { uRep: 1, vScale: 128, col: (t, _u, n) => [0.6 + 0.4 * clamp(n.y + 0.5), clamp(0.35 + n.y * 0.6), 0.5] });
     const tip = pts[pts.length - 1];
     const lc = new Cards('bill');
-    fillCrown(lc, [{ c: [tip[0], tip[1] + 22, tip[2]], r: [70, 46, 66] }, { c: [pts[18][0], pts[18][1] + 8, pts[18][2]], r: [40, 30, 40] }], [0, 330, -10], 9);
+    fillCrown(lc, [{ c: [pts[17][0], pts[17][1] + 10, pts[17][2]], r: [38, 28, 38] }], [0, 346, -10], 9);
     bands.f2.add(lc.mesh('limb-leaves'));
     // the platform: an octagonal deck on the limb with a railing and the perch
     const dk = S.get('f2', 'deck'), pl = S.get('f2', 'planks');

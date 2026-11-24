@@ -118,7 +118,7 @@ function patchBark(m: THREE.MeshStandardMaterial) {
   float l = step(1.02, hhNoise(q * 9.0 + 11.0) * 0.55 + hhNoise(q * 37.0) * 0.45 + vColor.b * 0.3 + (lum - 0.1) * 2.0);
   vec3 lichen = vec3(0.5, 0.56, 0.42) * (0.7 + lum * 2.5);
   bk = mix(bk, lichen, l * 0.85);
-  bk = mix(bk, mossC * (0.85 + lum * 1.5), m);
+  bk = mix(bk, mossC * (0.62 + lum * 1.2), m);
   diffuseColor.rgb = bk * vColor.r;
 }`);
   });
@@ -142,10 +142,10 @@ function patchLip(m: THREE.MeshStandardMaterial) {
   else if (r > 0.8) c = vec3(0.5, 0.36, 0.2) * (0.92 + hhNoise(vec2(r * 30.0, y)) * 0.12);
   else {
     float ring = fract(r * 9.0 + hhNoise(vec2(y * 0.05, 2.0)) * 0.35);
-    c = vec3(0.34, 0.17, 0.07) * (ring < 0.22 ? 0.66 : 1.0) * (0.9 + hhNoise(vec2(r * 60.0, y * 0.5)) * 0.18);
+    c = vec3(0.34, 0.17, 0.07) * (ring < 0.3 ? 0.58 : 1.0) * (0.9 + hhNoise(vec2(r * 60.0, y * 0.5)) * 0.18);
     c = mix(c, vec3(0.36, 0.2, 0.09), smoothstep(0.25, 0.0, r));
   }
-  diffuseColor.rgb = c * vColor.r;
+  diffuseColor.rgb = c * vColor.r * 0.82;
 }`);
   });
 }
@@ -176,8 +176,8 @@ export function houseMat(k: HouseMat): THREE.Material {
       m = p;
       break;
     }
-    case 'iron': m = std({ color: 0x3b3633, metalness: 0.55, roughness: 0.48 }); break;
-    case 'brass': m = std({ color: 0xc89a4e, metalness: 0.75, roughness: 0.3 }); break;
+    case 'iron': m = std({ color: 0x45403b, metalness: 0.35, roughness: 0.5 }); break;
+    case 'brass': m = std({ color: 0xd4a656, metalness: 0.4, roughness: 0.34 }); break;
     case 'paint': m = std({ roughness: 0.66 }); break;
     case 'dark': m = std({ color: 0x1c1612, roughness: 1 }); break;
     case 'glow': m = new THREE.MeshBasicMaterial({ color: HOUSE_LOOK.glow, toneMapped: false }); break;

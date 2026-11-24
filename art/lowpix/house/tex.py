@@ -75,7 +75,14 @@ def bark():
     brown = lum * np.array([1.12, 0.96, 0.8])
     d = d * (1 - green) + brown * green
     d = d * (0.45 + 0.55 * ao ** 1.4)
-    d = hsv_grade(d, sat=1.05, val=1.0, warm=0.55, contrast=1.18)
+    # the scan's pale lichen crusts read as birch-white streaks on our oak: compress the highlights, warm them
+    lum = (d * [0.3, 0.59, 0.11]).sum(-1, keepdims=True)
+    knee = 0.36
+    k = np.where(lum > knee, (knee + (lum - knee) * 0.35) / np.maximum(lum, 1e-4), 1.0)
+    d = d * k
+    hi = np.clip((lum - knee) * 3, 0, 1)
+    d = d * (1 - hi * 0.25) + hi * 0.25 * d.mean(-1, keepdims=True) * np.array([1.1, 0.98, 0.86])
+    d = hsv_grade(d, sat=1.08, val=1.0, warm=0.55, contrast=1.16)
     # slight local contrast (ridges pop against the furrows)
     im = Image.fromarray((d * 255).astype(np.uint8))
     im = im.filter(ImageFilter.UnsharpMask(radius=2, percent=60, threshold=2))

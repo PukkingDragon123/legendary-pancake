@@ -108,7 +108,7 @@ function wallMesh(fid: FloorId, wf: Finish): THREE.Mesh {
   }
   for (let j = 0; j < rowsN; j++) for (let i = 0; i < segs; i++) {
     const am = OPEN_A + ((i + 0.5) / segs) * ARC, ym = y0 + ((j + 0.5) / rowsN) * ROOM_H;
-    if (holes.some((o) => { const d = wrapA(am - o.a); return Math.cos(d) > 0.6 && inOpening(o, R * Math.sin(d), ym, 1.2); })) continue;
+    if (holes.some((o) => { const d = wrapA(am - o.a); return Math.cos(d) > 0.6 && inOpening(o, R * Math.sin(d), ym, 0.8); })) continue;
     const k = j * (segs + 1) + i;
     idx.push(k, k + segs + 1, k + 1, k + 1, k + segs + 1, k + segs + 2);
   }
