@@ -4,7 +4,7 @@
 // Everything is drawn into a small render target (one texel per "art pixel", 2-3 CSS px) and blown up with
 // nearest filtering, so the planet's outline, the ring, the stars and the atmosphere are real pixel art with
 // stepped edges, never smooth circles. Light is banded and Bayer-dithered per art pixel. The planet uses a
-// hand-made mip chain (earth_day/night_<W>.png, each painted at its own size by tools/paint_earth.py), the
+// hand-made mip chain (earth.webp: each level painted at its own size by tools/paint_earth.py), the
 // real sun position for the day/night terminator (warm town lights on the night side), drifting procedural
 // clouds with cloud shadows, wave marks that twinkle and a glint of sun on the sea.
 // [globe] OWNED BY THE GLOBE BUILDER.
@@ -210,21 +210,34 @@ void main(){
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
 }
-/** A texture from the hand-painted mip levels (1024 down to 128) plus box-shrunk tiny levels down to 1x1. */
+/** Where each hand-painted level sits in public/models/globe/earth.webp (tools/paint_earth.py LAYOUT). */
+const LAYOUT: Record<string, [number, number]> = {
+  'day:1024': [0, 0], 'night:1024': [0, 512], 'day:512': [0, 1024], 'night:512': [512, 1024],
+  'day:256': [0, 1280], 'night:256': [256, 1280], 'day:128': [512, 1280], 'night:128': [640, 1280],
+};
+let earthImg: Promise<HTMLImageElement> | null = null;
+/** A texture from the hand-painted mip levels (1024 down to 128, sliced from the one packed image) plus
+ * box-shrunk tiny levels down to 1x1. */
 async function mipTexture(kind: 'day' | 'night'): Promise<THREE.Texture> {
-  const sizes = [1024, 512, 256, 128];
-  const ims = await Promise.all(sizes.map((w) => loadImage(`${BASE}models/globe/earth_${kind}_${w}.png`)));
-  const levels: (HTMLImageElement | HTMLCanvasElement)[] = [...ims];
+  earthImg ??= loadImage(`${BASE}models/globe/earth.webp`);
+  const im = await earthImg;
+  const levels: HTMLCanvasElement[] = [];
+  for (const w of [1024, 512, 256, 128]) {
+    const [x, y] = LAYOUT[`${kind}:${w}`];
+    const c = document.createElement('canvas');
+    c.width = w; c.height = w / 2;
+    c.getContext('2d')!.drawImage(im, x, y, w, w / 2, 0, 0, w, w / 2);
+    levels.push(c);
+  }
   let w = 64;
   while (w >= 1) {
     const c = document.createElement('canvas');
     c.width = w; c.height = Math.max(1, w / 2);
-    const g = c.getContext('2d')!;
-    g.drawImage(ims[3], 0, 0, c.width, c.height);
+    c.getContext('2d')!.drawImage(levels[3], 0, 0, c.width, c.height);
     levels.push(c);
     w /= 2;
   }
-  const t = new THREE.Texture(ims[0]);
+  const t = new THREE.Texture(levels[0]);
   t.mipmaps = levels as unknown as THREE.Texture['mipmaps'];
   t.generateMipmaps = false;
   t.magFilter = THREE.NearestFilter;

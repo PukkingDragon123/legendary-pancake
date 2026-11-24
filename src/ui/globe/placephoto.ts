@@ -65,9 +65,9 @@ export function photoStamp(a: Area, o: { state: 'visited' | 'open' | 'locked'; d
   for (let x = 0; x < W; x += 2) { p.clear(x, 0); p.clear(x, H - 1); }
   for (let y = 0; y < H; y += 2) { p.clear(0, y); p.clear(W - 1, y); }
   // the photo crop, centre of the card, as a two-tone print (ink on cream) with a tiny ordered dither
-  const cw = W - 8, ch = H - 13, sx = (d.width - cw * 2.6) / 2, sy = (d.height - ch * 2.6) / 2;
+  const Z = 3.2, cw = W - 8, ch = H - 13, sx = (d.width - cw * Z) / 2, sy = (d.height - ch * Z) / 2;
   for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
-    const ix = Math.floor(sx + x * 2.6), iy = Math.floor(sy + y * 2.6), k = (iy * d.width + ix) * 4;
+    const ix = Math.floor(sx + x * Z), iy = Math.floor(sy + y * Z), k = (iy * d.width + ix) * 4;
     const l = (d.data[k] * 0.3 + d.data[k + 1] * 0.59 + d.data[k + 2] * 0.11) / 255;
     const b = ((x & 1) * 2 + (y & 1)) / 4 - 0.375;
     const t = Math.max(0, Math.min(1, l + b * 0.22));
@@ -82,13 +82,13 @@ export function photoStamp(a: Area, o: { state: 'visited' | 'open' | 'locked'; d
   p.text(Math.round(W / 2 - Pix.textWidth(t, gap) / 2), H - 7, t, o.state === 'locked' ? 0xb9b2a4 : ink, gap);
   if (o.state === 'visited') {
     // the cancellation: a stepped ring off to one side with the date, a few wavy lines
-    const cx = W - 13 + Math.round(hash(o.seed, 1) * 4), cy = 12 + Math.round(hash(o.seed, 2) * 6), mk = 0x4a4458;
+    const cx = W - 9 - Math.round(hash(o.seed, 1) * 3), cy = 9 + Math.round(hash(o.seed, 2) * 3), mk = 0x4a4458;
     for (let y = -10; y <= 10; y++) for (let x = -10; x <= 10; x++) {
       const r = Math.sqrt(x * x + y * y);
-      if ((Math.abs(r - 9) < 0.55 || Math.abs(r - 7.5) < 0.45) && hash(x, y, o.seed) > 0.2) p.set(cx + x, cy + y, mk);
+      if ((Math.abs(r - 7.5) < 0.5 || Math.abs(r - 6.2) < 0.4) && hash(x, y, o.seed) > 0.25) p.set(cx + x, cy + y, mk);
     }
-    if (o.date) { const dt = new Date(o.date); const ds = `${dt.getDate()}.${dt.getMonth() + 1}`; p.text(Math.round(cx - Pix.textWidth(ds) / 2), cy - 2, ds, mk); }
-    for (let k = 0; k < 3; k++) for (let x = 2; x < cx - 10; x++) if (hash(x, k, o.seed) > 0.25) p.set(x, Math.round(cy - 4 + k * 4 + Math.sin(x * 0.6) * 1.2), mk);
+    if (o.date) { const dt = new Date(o.date); const ds = `${dt.getDate()}`; p.text(Math.round(cx - Pix.textWidth(ds) / 2), cy - 2, ds, mk); }
+    for (let k = 0; k < 2; k++) for (let x = cx - 22; x < cx - 8; x++) if (hash(x, k, o.seed) > 0.25) p.set(x, Math.round(cy - 4 + k * 4 + Math.sin(x * 0.6) * 1.2), mk);
   }
   const url = p.url(scale);
   cache.set(key, url);

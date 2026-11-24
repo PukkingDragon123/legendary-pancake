@@ -7,6 +7,8 @@
 W = 1024, 512, 256, 128. Each level is painted at its own size (not averaged from the one above), so the globe
 stays crisp pixel art at every zoom: the runtime loads them as a hand-made mip chain.
 
+Everything is packed into one image, public/models/globe/earth.webp (see LAYOUT).
+
 Day texture: calm "Moss & Moonlight" colours, biomes (forests drawn as little trees, dunes as wind-combed
 stripes, mountains with a north-west hillshade and snow caps, ice with cracks), rivers, stepped ocean depth with
 surf on the coasts and wave marks. Its alpha channel flags water for the shader (255 land, 240 water, 224/208 wave
@@ -520,17 +522,24 @@ def paint_level(mask4k, W):
     return day, ngt
 
 
+# where each painted level sits in the one packed image (x, y); the stage slices them back into a mip chain
+LAYOUT = {("day", 1024): (0, 0), ("night", 1024): (0, 512), ("day", 512): (0, 1024), ("night", 512): (512, 1024),
+          ("day", 256): (0, 1280), ("night", 256): (256, 1280), ("day", 128): (512, 1280), ("night", 128): (640, 1280)}
+
+
 def main():
     src = sys.argv[1]
     out = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "public", "models", "globe")
     os.makedirs(out, exist_ok=True)
     mask = land_mask(decode_topo(src))
+    atlas = Image.new("RGBA", (1024, 1408), (0, 0, 0, 0))
     for W in (1024, 512, 256, 128):
         day, night = paint_level(mask, W)
-        Image.fromarray(day, "RGBA").save(os.path.join(out, f"earth_day_{W}.png"), optimize=True)
-        Image.fromarray(night, "RGBA").save(os.path.join(out, f"earth_night_{W}.png"), optimize=True)
-        print(W, os.path.getsize(os.path.join(out, f"earth_day_{W}.png")) // 1024, "KB day,",
-              os.path.getsize(os.path.join(out, f"earth_night_{W}.png")) // 1024, "KB night", flush=True)
+        atlas.paste(Image.fromarray(day, "RGBA"), LAYOUT[("day", W)])
+        atlas.paste(Image.fromarray(night, "RGBA"), LAYOUT[("night", W)])
+        print(W, "painted", flush=True)
+    atlas.save(os.path.join(out, "earth.webp"), lossless=True, method=6, exact=True)   # exact: keep the colour under the water flags
+    print("earth.webp", os.path.getsize(os.path.join(out, "earth.webp")) // 1024, "KB")
 
 
 if __name__ == "__main__":

@@ -98,6 +98,20 @@ async function run() {
     Object.assign(im.style, { position: 'absolute', left: `${cx + CELL - 68}px`, top: `${cy + CELL - 68}px`, width: '64px', height: '64px', imageRendering: 'pixelated' });
     ctx2.append(im);
   }
+  // one atlas for every portrait, in SOUVENIRS order (8 per row): public/models/souvenirs/icons.png
+  if (!q.get('only')) {
+    const A = document.createElement('canvas');
+    A.width = 8 * ICON; A.height = Math.ceil(SOUVENIRS.length / 8) * ICON;
+    const g = A.getContext('2d')!;
+    const loads = SOUVENIRS.map((s, i) => new Promise<void>((res) => {
+      if (!icons[s.id]) { res(); return; }
+      const im = new Image();
+      im.onload = () => { g.drawImage(im, (i % 8) * ICON, Math.floor(i / 8) * ICON); res(); };
+      im.src = icons[s.id];
+    }));
+    await Promise.all(loads);
+    (window as unknown as { __atlas: string }).__atlas = A.toDataURL('image/png');
+  }
   (window as unknown as { __done: boolean }).__done = true;
 }
 void run();

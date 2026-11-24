@@ -9,7 +9,7 @@ import { AREA, AREAS, ITEM_BY_ID, type Area } from '../../game/catalog.ts';
 import { areaOpen, edit, level, save } from '../../game/store.ts';
 import { homeGuess, isNightAt, localTime } from '../../world/globe/earth.ts';
 import { GlobeStage, type PinView } from '../../world/globe/stage.ts';
-import { souvenirIcon, SOUVENIR_INFO } from '../../assets/souvenirs.ts';
+import { souvenirIconStyle, SOUVENIR_INFO } from '../../assets/souvenirs.ts';
 import { transition } from '../chrome/transition.ts';
 import { uiBurst, uiBurstAt } from '../chrome/uifx.ts';
 import { Px } from '../icons.tsx';
@@ -290,7 +290,7 @@ function Postcard(p: { a: Area; px: number; onClose: () => void; onStep: (d: num
             <div class="gb-slots">
               {souv.map((x) => (
                 <button class={'gb-slot ' + x.rarity + (x.have ? ' have' : '')} onClick={() => { tap('ui_tap', 0.4); setPeek(peek === x.id ? null : x.id); }}>
-                  <img src={souvenirIcon(x.id)} alt="" draggable={false} />
+                  <i class="gb-sv" style={souvenirIconStyle(x.id, 56)} />
                   {!x.have && <i class="gb-q">?</i>}
                 </button>
               ))}

@@ -78,8 +78,8 @@
 .gb-souv { flex: 1.25; min-width: 0; }
 .gb-slots { display: flex; gap: 6px; }
 .gb-slot { position: relative; width: 64px; height: 64px; padding: 0; border: 0; background: #eae0c8; box-shadow: inset 0 0 0 2px #c9b78d, inset 0 3px 0 2px #dccfb0, 0 3px 0 #b9a77d; display: grid; place-items: center; }
-.gb-slot img { width: 56px; height: 56px; filter: brightness(0) opacity(0.28); }
-.gb-slot.have img { filter: none; }
+.gb-slot .gb-sv { filter: brightness(0) opacity(0.28); }
+.gb-slot.have .gb-sv { filter: none; }
 .gb-slot.have { background: #f4eedd; }
 .gb-slot.have.rare { box-shadow: inset 0 0 0 2px #86a9b0, inset 0 3px 0 2px #d3e0dc, 0 3px 0 #617f8c; }
 .gb-slot.have.epic { box-shadow: inset 0 0 0 2px #b4a9c9, inset 0 3px 0 2px #d3cce0, 0 3px 0 #6e5266; }

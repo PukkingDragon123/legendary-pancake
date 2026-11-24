@@ -115,5 +115,11 @@ export const SOUVENIRS: ItemDef[] = S.map((s) => ({
   build: () => parcel(s),
 }));
 
-/** Small pixel-art portrait of a souvenir (rendered by lowpix at build time, transparent background). */
-export const souvenirIcon = (id: string) => `${import.meta.env.BASE_URL}models/souvenirs/${id}.png`;
+/** The pixel portraits of every souvenir, one 64 px cell each in SOUVENIRS order, 8 per row (rendered from the
+ * GLBs, clear background, ink outline; dev-souvenirs.html). */
+export const SOUVENIR_ICONS = `${import.meta.env.BASE_URL}models/souvenirs/icons.png`;
+/** CSS for a souvenir portrait shown `size` CSS px square (a sprite from the atlas; nearest-neighbour). */
+export function souvenirIconStyle(id: string, size = 64): Record<string, string> {
+  const i = Math.max(0, SOUVENIRS.findIndex((s) => s.id === id)), k = size / 64, rows = Math.ceil(SOUVENIRS.length / 8);
+  return { backgroundImage: `url(${SOUVENIR_ICONS})`, backgroundSize: `${8 * size}px ${rows * size}px`, backgroundPosition: `${-(i % 8) * 64 * k}px ${-Math.floor(i / 8) * 64 * k}px`, width: `${size}px`, height: `${size}px`, imageRendering: 'pixelated', display: 'inline-block' };
+}

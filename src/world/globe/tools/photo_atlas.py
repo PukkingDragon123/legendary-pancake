@@ -35,7 +35,7 @@ def treat(im, focus=(0.5, 0.5)):
     im = im.crop((x0, y0, x0 + cw, y0 + ch)).resize((TW, TH), Image.LANCZOS)
     a = np.asarray(im.convert("RGB"), np.float64) / 255
     l = a @ np.array([0.2126, 0.7152, 0.0722])
-    a = l[..., None] + (a - l[..., None]) * 0.82                                   # a little faded
+    a = l[..., None] + (a - l[..., None]) * 0.74                                   # a little faded
     a += np.array([0.05, 0.025, -0.03]) * np.clip((l[..., None] - 0.4) / 0.5, 0, 1)    # lamp-warm highlights
     a += np.array([-0.015, 0.005, 0.03]) * np.clip(1 - l[..., None] / 0.35, 0, 1)     # slate shadows
     a = 0.045 + a * 0.93                                                              # never pure black or white
@@ -78,6 +78,16 @@ def main():
             ts.append(f"  {p}: {json.dumps({'title': c['title'][5:].rsplit('.', 1)[0], 'author': c['author'], 'licence': c['licence'], 'url': c['url']}, ensure_ascii=False)},")
     ts.append("};")
     open(os.path.join(ROOT, "src", "ui", "globe", "photos.ts"), "w").write("\n".join(ts) + "\n")
+    # the credits table in docs/credits/globe.md, between the photo markers
+    md = ["| place | photograph | author | licence |", "|---|---|---|---|"]
+    for p in ORDER:
+        c = credits.get(p)
+        if c:
+            md.append(f"| {p} | [{c['title'][5:]}]({c['url']}) | {c['author'].replace('|', '/')} | {c['licence']} |")
+    doc = os.path.join(ROOT, "docs", "credits", "globe.md")
+    d = open(doc).read()
+    a, b = d.index("<!-- photos -->"), d.index("<!-- /photos -->")
+    open(doc, "w").write(d[:a] + "<!-- photos -->\n" + "\n".join(md) + "\n" + d[b:])
 
 
 if __name__ == "__main__":
