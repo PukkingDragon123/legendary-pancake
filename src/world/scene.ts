@@ -418,7 +418,7 @@ export class Scene {
       const golden = Math.max(THREE.MathUtils.smoothstep(hr, 16.4, 18.2) * (1 - THREE.MathUtils.smoothstep(hr, 19.0, 19.8)), THREE.MathUtils.smoothstep(hr, 5.6, 6.4) * (1 - THREE.MathUtils.smoothstep(hr, 7.4, 8.4)));
       g.warm = L(0.18, -0.6, night) + golden * 0.25;
       g.saturation = L(1.0, 0.84, night);
-      g.exposure = L(1.0, 1.4, night);
+      g.exposure = L(1.0, 1.7, night); // moonlit nights stay readable
       g.bloom = L(0.28, 0.55, night);
       g.vignette = L(0.28, 0.4, night);
       g.cold = (this.weather?.vis.cold ?? 0) * 0.6;
@@ -429,7 +429,8 @@ export class Scene {
     GRASS.uSunDir.value.copy(this.sky.sunDir);
     GRASS.uDapple.value = night > 0.5 ? 0.25 : 1;
     this.house.panes.color.set(night > 0.4 ? 0xf1c88a : 0x46596a); // [world3] lamp-gold / slate
-    this.room.intensity = 1.2 + night * 3.5;
+    this.room.intensity = 1.4 + night * 7; // the open rooms glow warm at night
+    this.room.distance = 16;
     this.lantern.intensity = night * 6;
     this.fireflies.alpha = night > 0.4 && (this.weather?.firefliesOk ?? true) ? 1 : 0; // [world] not in winter or rain
     // furniture lights follow the sky every frame in rooms.update
@@ -477,8 +478,9 @@ export class Scene {
       default: {
         // [house3] the whole oak in frame, crown to roots, porch and limb, with the forest round it; the HUD
         // signs sit over the sky at the top and the big buttons over the meadow at the bottom
-        const d = this.fitDist(portrait ? 21.5 : 26, portrait ? 37 : 33);
-        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.12, dist: d, target: new THREE.Vector3(0.35, portrait ? 11.6 : 12.4, H.z + 0.6) };
+        // the open rooms sit about a third of the way up, clear of the big buttons; the crown fills the sky above
+        const d = this.fitDist(portrait ? 23 : 28, portrait ? 42 : 38);
+        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.24, dist: d, target: new THREE.Vector3(0.35, portrait ? 8.4 : 8.2, H.z + 0.6) };
       }
     }
   }
