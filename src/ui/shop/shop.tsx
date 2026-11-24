@@ -12,10 +12,11 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
 import { PIECE } from '../../owl/outfits.ts';
 import {
-  ACORN_PACKS, buyAcorns, buyDeal, claimGift, dailyDeals, dailyGift, ensureDay, fmtLeft, GEM_PACKS, giftClaimed, grantGems,
-  isSold, msToMidnight, msToWeek, nameOf, seriesActive, SERIES, type AcornPack, type Deal, type GemPack,
+  ACORN_PACKS, buyAcorns, buyDeal, buyFrame, claimGift, dailyDeals, dailyGift, ensureDay, fmtLeft, frameWall, GEM_PACKS, giftClaimed, grantGems,
+  isSold, msToMidnight, msToWeek, nameOf, seriesActive, SERIES, type AcornPack, type Deal, type FrameOffer, type GemPack,
 } from '../../game/shop.ts';
-import { save } from '../../game/store.ts';
+import { level, ownsEntry, save } from '../../game/store.ts';
+import { OwlPortrait } from '../chrome/livepip.tsx';
 import { Lodge } from '../../world/stages/lodge.ts';
 import { BEAVER_NAME } from '../../world/stages/beaver.ts';
 import { transition } from '../chrome/transition.ts';
@@ -32,7 +33,7 @@ import './shop.css';
 const fmt = (n: number) => n.toLocaleString('en-US');
 const isSide = () => innerWidth >= innerHeight * 1.05 && innerWidth >= 640;
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-type Section = 'home' | 'deals' | 'stash' | 'series';
+type Section = 'home' | 'deals' | 'stash' | 'series' | 'frames';
 
 // ------------------------------------------------------------------ Barnaby's voice
 
@@ -58,6 +59,8 @@ export const LINES = {
   gems: ['Moon gems, fresh from the riverbed. Shiny!', 'Mind the glow, those gems are full of moonlight.'],
   pack: ['Weighed them myself on the brass scales.', 'Every acorn counted twice. Well, once and a half.'],
   stash: ['Acorns and moon gems, right this way.', 'The good stuff\'s by the shelf. Help yourself to a look.'],
+  frames: ['Portrait frames! I carve the wooden ones myself.', 'A good frame makes a good owl look even better.', 'Try one on, see how your owl likes it.'],
+  frame: [(n: string) => `The ${n}? Your owl looks very distinguished in it.`, (n: string) => `Ah, the ${n}. Hangs straight, never squeaks.`],
   series: ['The weekly series is in! Wishes go in the barrel.', 'The Lucky Barrel! Give it a whirl, see what tumbles out.'],
   wish: ['Here we go, here we go!', 'Round and round she goes...', 'Every tenth wish brings something special. Beaver\'s promise.'],
   sold: ['That one\'s spoken for until tomorrow. New stock at midnight!'],
@@ -190,9 +193,10 @@ export function Shop() {
   const go = (sec: Section) => {
     setCard(null);
     setSection(sec);
-    stageRef.current?.focus(sec === 'deals' && !isSide() ? 'home' : sec);
+    stageRef.current?.focus((sec === 'deals' && !isSide()) || sec === 'frames' ? 'home' : sec);
     sound.play('step_wood', { volume: 0.35, gap: 100 });
     if (sec === 'stash') say(pick(LINES.stash));
+    if (sec === 'frames') say(pick(LINES.frames));
     if (sec === 'series') { say(pick(LINES.series)); stageRef.current?.act('present', 'barrel'); }
   };
 
@@ -207,7 +211,7 @@ export function Shop() {
     if (!card) return;
     sound.play('ui_back', { volume: 0.35 });
     setCard(null);
-    stageRef.current?.focus(section === 'deals' && !isSide() ? 'home' : section);
+    stageRef.current?.focus((section === 'deals' && !isSide()) || section === 'frames' ? 'home' : section);
   };
 
   function onPick(id: string) {
@@ -319,6 +323,23 @@ export function Shop() {
     say(pick(LINES.series));
   }
 
+  // [ui5] the frame wall: every frame Barnaby stocks, one marked down today
+  const wall = frameWall(s, undefined, level.value.level);
+  const buyFrameOffer = (o: FrameOffer) => {
+    const have = o.cur === 'gems' ? s.gems : s.coins;
+    if (o.locked) { sound.play('ui_error', { volume: 0.5 }); say(`That one's for owls of level ${o.locked} and up, friend.`); return; }
+    if (have < o.price) { sound.play('ui_error', { volume: 0.5 }); say(pick(LINES.poor)); stageRef.current?.act('think'); toast(o.cur === 'gems' ? 'Not enough moon gems' : 'Not enough acorns'); return; }
+    const err = buyFrame(o);
+    if (err) { sound.play('ui_error', { volume: 0.5 }); toast(err); return; }
+    setStamped('frame:' + o.frame.id);
+    sound.play('stamp', { volume: 0.6 });
+    setTimeout(() => { sound.play('ui_buy', { volume: 0.55 }); sound.play('reward_unlock', { volume: 0.4 }); }, 260);
+    haptic(20);
+    stageRef.current?.act('hop');
+    say(pick(LINES.bought));
+  };
+  const openFrame = (id: string) => { openCard('frame:' + id); const f = wall.find((o) => o.frame.id === id); if (f) say(pick(LINES.frame)(f.frame.name)); };
+
   const claimed = giftClaimed(s), g = dailyGift();
   const sel = card ? card : null;
   const showTags = !gacha && !sel;
@@ -329,7 +350,7 @@ export function Shop() {
       <button class="lg-leave lg-btn linen" aria-label="Leave the store" onClick={close}><Px name="arrow_left" size={20} /><span>Leave</span></button>
 
       {/* paper price tags hanging off the stumps */}
-      {showTags && section !== 'stash' && section !== 'series' && deals.map((d, i) => {
+      {showTags && section !== 'stash' && section !== 'series' && section !== 'frames' && deals.map((d, i) => {
         const sold = isSold(s, d.key);
         return (
           <Anchored at={'deal:' + i} class={'lg-dealtag' + (sold ? ' sold' : '')}>
@@ -387,18 +408,21 @@ export function Shop() {
         );
       })}
 
+      {/* [ui5] the frame wall: frames hanging on pegs, a paper price tag on each */}
+      {!sel && !gacha && section === 'frames' && <FrameWall offers={wall} layout={layout} onPick={openFrame} />}
+
       {/* Barnaby's speech */}
       {line && !gacha && <Bubble line={line} />}
 
       {/* the detail card of whatever's in focus */}
       {sel && !gacha && <DetailCard id={sel} deals={deals} layout={layout} stamped={stamped} onClose={closeCard}
-        onBuy={buy} onGift={gift} onPack={buyPack} onGems={buyGems} art={art} giftInfo={{ claimed, g }} />}
+        onBuy={buy} onGift={gift} onPack={buyPack} onGems={buyGems} art={art} giftInfo={{ claimed, g }} frames={wall} onFrame={buyFrameOffer} />}
 
       {/* moving about the store: wooden signs on a rope */}
       {!gacha && (
         <nav class="lg-nav" aria-label="Store sections">
           <i class="lg-rope" />
-          {([['deals', 'Deals', 'shop_tag'], ['stash', 'Stash', 'owlcoin'], ['series', 'Wishes', 'shop_star5']] as [Section, string, string][]).map(([k, label, ic], n) => (
+          {([['deals', 'Deals', 'shop_tag'], ['stash', 'Stash', 'owlcoin'], ['frames', 'Frames', 'wd_frame'], ['series', 'Wishes', 'shop_star5']] as [Section, string, string][]).map(([k, label, ic], n) => (
             <button class={'lg-navsign' + ((section === k || (k === 'deals' && section === 'home')) && !sel ? ' on' : '')} style={{ animationDelay: `${n * 0.09}s` }} onClick={() => go(k)}>
               <i class="lg-navhook" /><Px name={ic} size={20} /><span>{label}</span>
             </button>
@@ -499,7 +523,7 @@ function Bubble(p: { line: Line }) {
 // ------------------------------------------------------------------ detail cards (objects, not panels)
 
 interface CardProps {
-  id: string; deals: Deal[]; layout: 'side' | 'top'; stamped: string | null; onClose: () => void;
+  id: string; deals: Deal[]; layout: 'side' | 'top'; stamped: string | null; onClose: () => void; frames: FrameOffer[]; onFrame: (o: FrameOffer) => void;
   onBuy: (d: Deal, i: number) => void; onGift: () => void; onPack: (p: AcornPack) => void; onGems: (p: GemPack) => void;
   art: (d: { kind: Deal['kind']; id: string }) => string; giftInfo: { claimed: boolean; g: { coins?: number; gems?: number } };
 }
@@ -526,6 +550,27 @@ function DetailCard(p: CardProps) {
         {(sold || stamped) && <span class={'lg-stamp-mark' + (stamped ? ' fresh' : '')}>{stamped ? 'SOLD · THANK YOU' : 'SOLD'}</span>}
         {!sold && <Stamp label="Buy" cost={<Cost cur={d.cur} n={d.price} size={20} />} short={have < d.price} onPress={() => p.onBuy(d, i)} />}
         {sold && !stamped && <p class="lg-note">Spoken for until tomorrow. New stock at midnight.</p>}
+      </div>
+    );
+  } else if (id.startsWith('frame:')) {
+    // [ui5] a frame from the wall: your owl, live, in it
+    const o = p.frames.find((x) => 'frame:' + x.frame.id === id);
+    if (!o) return null;
+    const own = ownsEntry(s, { kind: 'frame', id: o.frame.id }), stamped = p.stamped === id, have = o.cur === 'gems' ? s.gems : s.coins;
+    body = (
+      <div class="lg-ledger">
+        <span class="lg-pin" />
+        <div class="lg-ledger-art lg-fw-art"><OwlPortrait size={p.layout === 'top' ? 104 : 124} frame={o.frame.id} tappable />{o.off > 0 && !own && <span class="lg-sticker big left">-{o.off}%</span>}</div>
+        <div class="lg-ledger-text">
+          <span class="lg-kind">Portrait frame</span>
+          <h3>{o.frame.name}</h3>
+          <p class="lg-blurb">{o.frame.blurb}</p>
+          {!own && <div class="lg-prices">{o.off > 0 && <s class="lg-was big"><Cost cur={o.cur} n={o.base} size={18} /></s>}<b class="lg-now"><Cost cur={o.cur} n={o.price} size={26} /></b></div>}
+        </div>
+        {stamped && <span class="lg-stamp-mark fresh">SOLD · THANK YOU</span>}
+        {own ? <p class="lg-note">{s.frame === o.frame.id ? 'On your name sign now. Change frames in the Dressing Room.' : 'Yours! Put it on in the Dressing Room.'}</p>
+          : o.locked ? <p class="lg-note">Barnaby keeps this one for owls of level {o.locked} and up.</p>
+          : <Stamp label="Buy" cost={<Cost cur={o.cur} n={o.price} size={20} />} short={have < o.price} onPress={() => p.onFrame(o)} />}
       </div>
     );
   } else if (id === 'gift') {
@@ -578,6 +623,33 @@ function DetailCard(p: CardProps) {
     <div class={`lg-card ${p.layout} ${kind}`} role="dialog" aria-modal="false">
       <button class="lg-card-close lg-btn linen" aria-label="Back" onClick={p.onClose}><Px name="arrow_left" size={18} /></button>
       {body}
+    </div>
+  );
+}
+
+/** [ui5] The frame wall: a board of frames on pegs, each with your owl's still inside and a paper price tag. */
+function FrameWall(p: { offers: FrameOffer[]; layout: 'side' | 'top'; onPick: (id: string) => void }) {
+  const s = save.value;
+  return (
+    <div class={'lg-framewall ' + p.layout} role="list" aria-label="Portrait frames">
+      <div class="lg-fw-head"><b>Portrait Frames</b><span>for the owl on your name sign</span></div>
+      <div class="lg-fw-grid">
+        {p.offers.map((o, i) => {
+          const own = ownsEntry(s, { kind: 'frame', id: o.frame.id }), on = s.frame === o.frame.id;
+          return (
+            <button role="listitem" class={'lg-fw-item' + (own ? ' own' : '') + (o.locked ? ' locked' : '')} style={{ animationDelay: `${i * 0.05}s` }} onClick={() => p.onPick(o.frame.id)} aria-label={`${o.frame.name}: ${own ? 'owned' : o.locked ? `level ${o.locked}` : `${o.price} ${o.cur === 'gems' ? 'moon gems' : 'acorns'}`}`}>
+              <i class="lg-fw-peg" />
+              <OwlPortrait size={64} frame={o.frame.id} live={false} />
+              <span class="lg-fw-tag">
+                {own ? <em>{on ? 'Wearing' : 'Owned'}</em>
+                  : o.locked ? <em class="lock"><Px name="lock" size={14} />Lv {o.locked}</em>
+                  : <>{o.off > 0 && <s class="lg-was">{fmt(o.base)}</s>}<Cost cur={o.cur} n={o.price} size={16} /></>}
+              </span>
+              {o.off > 0 && !own && <span class="lg-sticker">-{o.off}%</span>}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

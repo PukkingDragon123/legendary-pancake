@@ -6,7 +6,10 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { AREAS } from '../game/catalog.ts';
-import { edit, grant, level, save, wear } from '../game/store.ts';
+import { edit, grant, level, ownsEntry, save, setFrame, wear } from '../game/store.ts';
+import { FRAMES, type FrameDef } from '../assets/frames.ts';
+import { buyFrame, frameWall } from '../game/shop.ts';
+import { OwlPortrait } from './chrome/livepip.tsx'; // [ui5] the live owl in its frame
 import type { OutfitSlot, OwlLook } from '../owl/model.ts';
 import { PIECES, type PieceDef } from '../owl/outfits.ts';
 import { SPECIAL_SKINS, type SkinDef2 } from '../owl/skins.ts';
@@ -22,7 +25,7 @@ import { Price, Sheet, tap, toast } from './kit.tsx';
 import { useOwlIcon, usePieceIcon } from './portraits.ts';
 import { panel, sceneRef } from './state.ts';
 
-type Tab = 'species' | 'skins' | OutfitSlot;
+type Tab = 'species' | 'skins' | 'frames' | OutfitSlot;
 const TABS: { v: Tab; label: string; icon: string }[] = [
   { v: 'species', label: 'Owls', icon: 'wd_feather' },
   { v: 'skins', label: 'Skins', icon: 'sparkle' },
@@ -31,6 +34,7 @@ const TABS: { v: Tab; label: string; icon: string }[] = [
   { v: 'neck', label: 'Neck', icon: 'wd_scarf' },
   { v: 'body', label: 'Clothes', icon: 'wd_sweater' },
   { v: 'back', label: 'Back', icon: 'wd_cape' },
+  { v: 'frames', label: 'Frames', icon: 'wd_frame' }, // [ui5] portrait frames for the name sign
 ];
 const SERIES_NAME: Record<string, string> = { frostlight: 'Frostlight Festival', starfall: 'Starfall Dreams' };
 
@@ -103,6 +107,9 @@ function installStyles() {
 .wd-plaque .face .glass::after{content:'';position:absolute;left:18%;top:12%;width:4px;height:12px;background:var(--snow);opacity:.7;box-shadow:6px 4px 0 -1px var(--snow)}
 .wd-plaque .face img{width:100%;height:100%;object-fit:contain;animation:wdBob 3s steps(6) infinite}
 .wd-plaque .face .rim{position:absolute;inset:0;pointer-events:none}
+.wd-plaque .face.lpface{width:86px;height:86px}
+.wd-plaque .face.lpface img,.wd-fcard .pic img{animation:none;max-width:none;max-height:none}
+.wd-fcard .pic{height:80px}
 .wd-plaque .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;color:var(--paper);padding:2px 0}
 .wd-plaque h3{margin:0;font-size:17px;color:var(--lamp);text-shadow:1px 2px 0 var(--ink);line-height:1}
 .wd-plaque .lat{font-size:12px;font-style:italic;color:var(--straw);font-family:var(--font-small);line-height:1.1}
@@ -220,6 +227,56 @@ function PieceCard(p: { piece: PieceDef; look: OwlLook; on: boolean; wearing: bo
   );
 }
 
+// [ui5] a portrait frame: your owl's still in it, and whether it's yours
+function frameState(f: FrameDef) {
+  const s = save.value, own = ownsEntry(s, { kind: 'frame', id: f.id });
+  const offer = frameWall(s, undefined, level.value.level).find((o) => o.frame.id === f.id);
+  return { own, on: s.frame === f.id, offer };
+}
+function FrameCard(p: { f: FrameDef; on: boolean; onPick: (e: MouseEvent) => void; i: number }) {
+  const st = frameState(p.f);
+  const locked = !st.own && (!!p.f.series || !!st.offer?.locked);
+  return (
+    <button class={'wd-card wd-fcard' + (p.on ? ' on' : '') + (locked ? ' locked' : '')} style={{ animationDelay: `${p.i * 30}ms` }} onClick={p.onPick}>
+      <Px name="wd_hanger" size={34} class="hook" />
+      {p.f.series ? <span class="ribbon red">{p.f.series === 'frostlight' ? 'Frostlight' : 'Starfall'}</span> : st.offer?.off && !st.own ? <span class="ribbon gold">-{st.offer.off}%</span> : p.f.starter ? <span class="ribbon gold">Free</span> : null}
+      <div class="pic"><OwlPortrait size={72} frame={p.f.id} live={false} /></div>
+      <div class="nm">{p.f.name}</div>
+      {st.on ? <span class="st wear">Wearing</span>
+        : st.own ? <span class="st own">Owned</span>
+        : p.f.series ? <span class="st muted">Series banner</span>
+        : st.offer?.locked ? <span class="st lock"><Px name="lock" size={18} /> Level {st.offer.locked}</span>
+        : st.offer ? <Price {...(st.offer.cur === 'gems' ? { gems: st.offer.price } : { coins: st.offer.price })} /> : null}
+    </button>
+  );
+}
+function FramePlaque(p: { f: FrameDef }) {
+  const st = frameState(p.f), o = st.offer;
+  const buy = () => {
+    if (!o) return;
+    const err = buyFrame(o);
+    if (err) { tap('ui_error'); toast(err); return; }
+    sound.play('ui_buy', { volume: 0.6 }); celebrate('buy'); toast(`${p.f.name} is on your name sign`, IcoHanger);
+  };
+  return (
+    <div class="wd-plaque" key={'f:' + p.f.id}>
+      <div class="face lpface"><OwlPortrait size={86} frame={p.f.id} tappable /></div>
+      <div class="txt">
+        <h3>{p.f.name}</h3>
+        <span class="lat">{p.f.series ? SERIES_NAME[p.f.series] : 'Portrait frame'}</span>
+        <p>{p.f.blurb}</p>
+      </div>
+      <div class="act">
+        {st.on ? <button class="btn soft sm" disabled>Wearing</button>
+          : st.own ? <button class="btn pillow sm" onClick={() => { tap('wood_knock', 0.5); setFrame(p.f.id); celebrate('wear'); }}>Wear</button>
+          : p.f.series ? <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Banner</button><span class="note">From the {SERIES_NAME[p.f.series]}</span></>
+          : o?.locked ? <><button class="btn pillow sm" disabled>Locked</button><span class="note">Reach level {o.locked}</span></>
+          : o ? <><button class="btn pillow honey sm" onClick={buy}>Buy <Price {...(o.cur === 'gems' ? { gems: o.price } : { coins: o.price })} /></button>{o.off > 0 && <span class="note">{o.off}% off today</span>}</> : null}
+      </div>
+    </div>
+  );
+}
+
 // ------------------------------------------------------------------ plaques
 
 function Plaque(p: { face: string; title: string; latin?: string; text: string; fact?: string; children: preact.ComponentChildren }) {
@@ -320,6 +377,7 @@ export function Wardrobe() {
     if (!pick) return l;
     if (tab === 'species') { l.species = pick; l.palette = pick; if (l.skin !== 'meowl') l.skin = 'owl'; }
     else if (tab === 'skins') l.skin = pick;
+    else if (tab === 'frames') return l;
     else if (pick === '__none') delete l.outfit[tab];
     else l.outfit[tab] = pick;
     return l;
@@ -333,7 +391,7 @@ export function Wardrobe() {
 
   const choose = (id: string, e?: MouseEvent) => {
     tap('ui_tap', 0.5); sound.play('fabric', { volume: 0.35, gap: 60 }); setPick(id);
-    sceneRef.current?.owl.play(tab === 'head' ? 'hop' : tab === 'species' ? 'spin' : 'ruffle');
+    sceneRef.current?.owl.play(tab === 'head' ? 'hop' : tab === 'species' ? 'spin' : tab === 'frames' ? 'nod' : 'ruffle');
     if (e?.currentTarget) uiBurstAt(e.currentTarget as Element, tab === 'skins' ? 'magic' : 'sparkle', 7);
   };
   const switchTab = (t: Tab) => { setTab(t); setPick(null); };
@@ -359,6 +417,12 @@ export function Wardrobe() {
     shelf = list.map((k, i) => { const id = k?.id ?? 'owl'; return <SkinCard key={id} skin={k} i={i} owned={owns(id)} species={curSpecies} on={(pick ?? curSkin) === id} wearing={curSkin === id} onPick={(e) => choose(id, e)} />; });
     const sel = pick ?? curSkin, k = SPECIAL_SKINS.find((x) => x.id === sel) ?? null;
     plaque = <SkinPlaque skin={k} owned={owns(sel)} wearing={sel === curSkin} species={curSpecies} />;
+  } else if (tab === 'frames') {
+    hint = 'A frame for your owl on the name sign. Tap one to try it.';
+    const cur = s.frame;
+    shelf = FRAMES.map((f, i) => <FrameCard key={f.id} f={f} i={i} on={(pick ?? cur) === f.id} onPick={(e) => choose(f.id, e)} />);
+    const f = FRAMES.find((x) => x.id === (pick ?? cur)) ?? FRAMES[0];
+    plaque = <FramePlaque f={f} />;
   } else {
     const slot = tab, worn = look.outfit[slot];
     const list = visiblePieces(slot);
