@@ -1,0 +1,3251 @@
+{
+ "generated": "2026-11-10",
+ "note": "License fields below were extracted from the HTML of each source page as downloaded on 2026-11-10. sha256 values identify the exact page copy and the exact downloaded source files that were read/used. Entries with \"checked\": \"2026-11-20\" (and \"rechecked\" blocks) were added on 2026-11-20 from pages downloaded that day.",
+ "sources": {
+  "archive_bowls": {
+   "title": "Singing Bowl Improvisation",
+   "author": "luke jones",
+   "source": "Internet Archive (archive.org)",
+   "sourceUrl": "https://archive.org/details/SingingBowlImprovisation",
+   "license": "Public domain (Creative Commons Copyright-Only Dedication / Public Domain Certification 1.0 US)",
+   "licenseUrl": "https://creativecommons.org/publicdomain/certification/1.0/us/",
+   "evidenceRead": "archive.org item metadata: licenseurl http://creativecommons.org/licenses/publicdomain/ (redirects to the CC 'Copyright-Only Dedication (based on United States law) or Public Domain Certification 1.0' deed), creator 'luke jones', description 'Short back garden singing bowl improv.', added 2008-07-08",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "bowl.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "bowls.mp3",
+     "sha256": "f0ad9e9035337e26de66808077a1ac8f8a19f35579607d2d1a3bab608d5a0a31"
+    }
+   ],
+   "page": {
+    "itemPage": "https://archive.org/details/SingingBowlImprovisation",
+    "itemPageSha256": "d1505604ee279a6d04685ce7ee46c75fa885c58160236b47b1ee1f2d86fa75e5",
+    "metadataUrl": "https://archive.org/metadata/SingingBowlImprovisation",
+    "metadataSha256": "fdd65e80ad55f017d78cfb7b0afa2ce30c9aad5d8c79b6d9ff534bef82e52d81",
+    "creator": "luke jones",
+    "title": "Singing Bowl Improvisation",
+    "description": "Short back garden singing bowl improv.",
+    "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+    "addeddate": "2008-07-08 13:42:44",
+    "deedPage": "https://creativecommons.org/publicdomain/certification/1.0/us/",
+    "deedPageSha256": "d47040209c4dc8791c6e15cd743714f91cc6f9ae48d170cf8fa038265e935857"
+   },
+   "archivesDownloaded": []
+  },
+  "aureolus_musicbox": {
+   "title": "4 Music Box Tracks",
+   "author": "Aureolus_Omicron",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/4-music-box-tracks",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "alarm_musicbox.mp3",
+    "music_lullaby.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "musicbox4_happy_polka.ogg",
+     "sha256": "ad3de461ba5cce5daeba8b020282ecb8a90e78dfd9ea855eb0ab548323103422"
+    },
+    {
+     "path": "musicbox2_cute_tune.ogg",
+     "sha256": "97d15ea36eec88637a991766ea41c7abe5748fc2750525de9e834a70158e1eaa"
+    }
+   ],
+   "page": {
+    "sha256": "f2cfe349568965388ca73f5e990ef07c157a4775d752737bf5ba24befb996eac",
+    "titleOnPage": "4 Music Box Tracks",
+    "authorOnPage": "Aureolus_Omicron",
+    "postedOn": "Saturday, March 5, 2022 - 10:21",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "CC0. No credit required.",
+    "filesListedOnPage": [
+     "4_music_box_tracks_ogg.zip",
+     "4_music_box_tracks_mid.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "4_music_box_tracks_ogg.zip",
+     "sha256": "93b451f01ea4d530ee41b2239ae23f9be7d5a3b55354bb9893c736a4bd193b2f"
+    }
+   ]
+  },
+  "bart_ticks": {
+   "title": "Ticking clock.",
+   "author": "bart",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/ticking-clock",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "clock_tick_1.mp3",
+    "clock_tick_2.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "ticking clock - tick3.wav",
+     "sha256": "7e03ee2529ab6df50ab742267417cbf5ab76da419522593189fe944d6cd9fb04"
+    },
+    {
+     "path": "ticking clock - tick4.wav",
+     "sha256": "183aaed08a3836e34e4e9acce926f64055b0380899e8c8cc3b4951a6e95dd215"
+    }
+   ],
+   "page": {
+    "sha256": "f858aef22500f0d6f35a7c174291e62df67ff972488f301598d0c8ec8bd74318",
+    "titleOnPage": "Ticking clock.",
+    "authorOnPage": "bart",
+    "postedOn": "Sunday, May 1, 2011 - 08:36",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "ticking_clock.wav",
+     "ticks.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "ticks.zip",
+     "sha256": "7a5f8820848b21ebc665c9b2d90e41b4c98d953585558b00aa44bebcea56e414"
+    }
+   ]
+  },
+  "bmaczero_wind": {
+   "title": "Clock Wind Sounds",
+   "author": "BMacZero (Brian MacIntosh)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/clock-wind-sounds",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "clock_wind.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "multiwind2.wav",
+     "sha256": "85a4b2fdc7e31a8d429969de4936bc34829a1f18e8d9de33ad58843dba55fbb7"
+    }
+   ],
+   "page": {
+    "sha256": "ac9c021502eeb9719d00a42b84750b47ef1f9dd25cbde014201ac24005321e58",
+    "titleOnPage": "Clock Wind Sounds",
+    "authorOnPage": "BMacZero",
+    "postedOn": "Sunday, October 4, 2020 - 17:40",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Optionally credit Brian MacIntosh.",
+    "filesListedOnPage": [
+     "singlewind3.wav",
+     "singlewind2.wav",
+     "singlewind1.wav",
+     "multiwind2.wav",
+     "multiwind1.wav",
+     "tickloop-amp.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "cogitollc_cucumber": {
+   "title": "Crunch sounds (cucumber)",
+   "author": "cogitollc",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/crunch-sounds-cucumber",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "eat_crunch_1.mp3",
+    "eat_crunch_2.mp3",
+    "eat_crunch_3.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "crunch_2_0.ogg",
+     "sha256": "22da4073f8922e5eb35ed7b6fc579f2ecdb98601af5f81ad5f330ee555294651"
+    },
+    {
+     "path": "crunch_4_0.ogg",
+     "sha256": "4ba4aa6df1b73658dbe5f650971e0581fa7299c055b927153e3e90115a1d7cd5"
+    },
+    {
+     "path": "crunch_5_0.ogg",
+     "sha256": "388541f8bbc54e63bc577810e2d617da5f8c3a9c5b86ed695454b32d265e6e5d"
+    }
+   ],
+   "page": {
+    "sha256": "57ade608e85a2de59a19de670ba55d5876a9ad930a236208baa16347a92eb4cf",
+    "titleOnPage": "Crunch sounds (cucumber)",
+    "authorOnPage": "cogitollc",
+    "postedOn": "Tuesday, July 12, 2022 - 08:48",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "crunch_1.ogg",
+     "crunch_2.ogg",
+     "crunch_3.ogg",
+     "crunch_4.ogg",
+     "crunch_5.ogg",
+     "crunch_6.ogg"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "cogitollc_pops": {
+   "title": "Pop sounds",
+   "author": "cogitollc",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/pop-sounds",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "pickup_item.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "pop5.ogg",
+     "sha256": "0433b2f016b2521df36a7e0dde006c0839af4fb97df7ca626f5fb7a4c4eb561e"
+    }
+   ],
+   "page": {
+    "sha256": "1653c07664877173fd9d580921ad0303e9ecf73d8dccebcac4779789a62a453e",
+    "titleOnPage": "Pop sounds",
+    "authorOnPage": "cogitollc",
+    "postedOn": "Thursday, July 14, 2022 - 06:41",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "pop1.ogg",
+     "pop2.ogg",
+     "pop3.ogg",
+     "pop4.ogg",
+     "pop5.ogg",
+     "pop6.ogg",
+     "pop7.ogg",
+     "pop8.ogg",
+     "pop9.ogg",
+     "pop10.ogg"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "cynic": {
+   "title": "Bell Arpeggio 24",
+   "author": "cynicmusic (The Cynic Project)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/bell-arpeggio-24",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "timer_done.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "24.wav",
+     "sha256": "130ccfeca4cea5edd7998fa1124a28ec0d03e3e3a985e745118e67bde47d90f1"
+    }
+   ],
+   "page": {
+    "sha256": "7f57036f0620ea086b345ee38c836ff1d7c92bc984f25ceb052c01ae96250157",
+    "titleOnPage": "Bell Arpeggio 24",
+    "authorOnPage": "cynicmusic",
+    "postedOn": "Wednesday, December 6, 2017 - 17:58",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "OPTIONAL ATTRIBUTION: The Cynic Project / cynicmusic.com / pixelsphere.org",
+    "filesListedOnPage": [
+     "24.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "cynic_lullaby": {
+   "title": "Happy Lullaby (song17)",
+   "author": "cynicmusic (The Cynic Project)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/happy-lullaby-song17",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "alarm_bells.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "song17.mp3",
+     "sha256": "9fa0b0e96860eace536fa36f4e9c2c1284db894a8df3cdaa19ddae429b1bfd42"
+    }
+   ],
+   "page": {
+    "sha256": "8c4301525db82eedacaaa9801579f1261c268396c31483db19c88a88b5ad536b",
+    "titleOnPage": "Happy Lullaby (song17)",
+    "authorOnPage": "cynicmusic",
+    "postedOn": "Sunday, December 15, 2013 - 13:23",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "The Cynic Project / cynicmusic.com / pixelsphere.org",
+    "filesListedOnPage": [
+     "song17.mp3"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "extenz_kalimba": {
+   "title": "Short kalimba loop",
+   "author": "extenz",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/short-kalimba-loop",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "alarm_kalimba.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "Kalimba.ogg",
+     "sha256": "aecf078cbbdbb5d0a069c6ca7242557aedae26c3f4e2cf9e48ff089d1c442a92"
+    }
+   ],
+   "page": {
+    "sha256": "6ccb4380a54f9dc3bc945941ed1f6ed6a983f5f135b87bcb8599938285e87ebf",
+    "titleOnPage": "Short kalimba loop",
+    "authorOnPage": "extenz",
+    "postedOn": "Wednesday, July 26, 2017 - 12:14",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "Kalimba.wav",
+     "Kalimba.ogg",
+     "Kalimba.mp3"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "fantozzi": {
+   "title": "Fantozzi's Footsteps (Grass/Sand & Stone)",
+   "author": "Fantozzi (submitted to OpenGameArt by qubodup)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/fantozzis-footsteps-grasssand-stone",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0); page text says the steps come from Fantozzi's Freesound pack 10338 'under CC0' (Freesound itself was not reachable to re-check)",
+   "outputFiles": [
+    "step_grass_1.mp3",
+    "step_grass_2.mp3",
+    "step_grass_3.mp3",
+    "step_grass_4.mp3",
+    "step_grass_5.mp3",
+    "step_stone_1.mp3",
+    "step_stone_2.mp3",
+    "step_stone_3.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "Fantozzi-SandL1.flac",
+     "sha256": "93a2630579a82507e3c6ceab9b012f71a50cf8922f4beadb14057dcc0636b099"
+    },
+    {
+     "path": "Fantozzi-SandL2.flac",
+     "sha256": "9bb57478cc96e1410cae27d926aa8d77d5f2d368d9776822f63cf0b37c6d2faf"
+    },
+    {
+     "path": "Fantozzi-SandL3.flac",
+     "sha256": "042820e65cc947d8bb8adf18524ffff7cdf5fc310f9412cbf8bdf7a139984c21"
+    },
+    {
+     "path": "Fantozzi-SandR1.flac",
+     "sha256": "3514d12f3369297233e915814364ed02902003d4103b010371c2ac15c2aa48fe"
+    },
+    {
+     "path": "Fantozzi-SandR3.flac",
+     "sha256": "7535306b6ff3b9e071256f12789eb53fb90769a913ff7e00b271298727e0f521"
+    },
+    {
+     "path": "Fantozzi-StoneL1.flac",
+     "sha256": "7cfa4a2f500ae2bd19a961022296611d837c34ca2e556fe68deb692388f49971"
+    },
+    {
+     "path": "Fantozzi-StoneL2.flac",
+     "sha256": "dcbd6be44af4b3206daa36c5398035ca527bb057c51ce00482b9ca6356be2468"
+    },
+    {
+     "path": "Fantozzi-StoneR2.flac",
+     "sha256": "d66330b4a32e93b0dfdcb8c53667654de8702a0fa48b2d06c48d94dc66b3e1cc"
+    }
+   ],
+   "page": {
+    "sha256": "e11d26b22d3b99a47bf41865dc0dd66ce1e82b35f75543caeb80ff93fe972abf",
+    "titleOnPage": "Fantozzi's Footsteps (Grass/Sand & Stone)",
+    "authorOnPage": "Fantozzi (Submitted by qubodup )",
+    "postedOn": "Thursday, February 20, 2014 - 16:55",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "Fantozzi-footsteps.7z"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "Fantozzi-footsteps.7z",
+     "sha256": "415d360e0911c1c1c5355ee94023b772e6f4044f59b9b580610e7dbffd1840fd"
+    }
+   ]
+  },
+  "fupi_win": {
+   "title": "Win Jingle",
+   "author": "Fupi",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/win-jingle",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "reward_levelup.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "WinSteelDrums.wav",
+     "sha256": "c73512293b5900c403abeec6575b753608db90f46010c076f5dd23913fb5a3f2"
+    }
+   ],
+   "page": {
+    "sha256": "69729e9e740db03899671247885bbdaeb84794459f2353120627fcf14b5384bf",
+    "titleOnPage": "Win Jingle",
+    "authorOnPage": "Fupi",
+    "postedOn": "Monday, June 8, 2020 - 10:07",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "winfretless.ogg",
+     "winjingle.zip",
+     "winjingle.mid"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "winjingle.zip",
+     "sha256": "fef26adc010e7e7d6f2ab586f400188831152530f8f3adcd179f26435d69ce6b"
+    }
+   ]
+  },
+  "fvcalderan_ding": {
+   "title": "Elevator ding",
+   "author": "fvcalderan",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/elevator-ding",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "notify_reminder.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "elevatording_0.ogg",
+     "sha256": "04b9e67aa1e5a4e71d1b038bfefd2db4d64f223a17749f0a2faeaf193b48a7b6"
+    }
+   ],
+   "page": {
+    "sha256": "34f47b074949b1759f4ab99bab045d8146fb54b6d26861acc1179101a42e60f6",
+    "titleOnPage": "Elevator ding",
+    "authorOnPage": "fvcalderan",
+    "postedOn": "Tuesday, January 28, 2025 - 16:57",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "elevatording.ogg"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "isaiah658": {
+   "title": "Ambient Bird Sounds",
+   "author": "isaiah658",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/ambient-bird-sounds",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "amb_birds.mp3",
+    "bird_chirp_1.mp3",
+    "bird_chirp_2.mp3",
+    "bird_chirp_3.mp3",
+    "bird_chirp_4.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "birds-isaiah658_0.ogg",
+     "sha256": "359e4e3f9da9d75aac64cede511c7e3ef8b461f9d9f8c230f8f80e44c4b3e35f"
+    }
+   ],
+   "page": {
+    "sha256": "b7082b660f5d63d298ebb441f328963fa93dd23940c37fddb22360c6f5d52ea6",
+    "titleOnPage": "Ambient Bird Sounds",
+    "authorOnPage": "isaiah658",
+    "postedOn": "Friday, April 14, 2017 - 07:10",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Credit to isaiah658 is not needed but is appreciated.",
+    "filesListedOnPage": [
+     "birds-isaiah658.ogg"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "isaiah658_heavenly": {
+   "title": "Heavenly Loop",
+   "author": "isaiah658",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/heavenly-loop",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "music_breath.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "Heavenly Loop.ogg",
+     "sha256": "a842e9e054019132cacc8fd352e7b31c000ebb51e0b227a2511e1bccb4eb166e"
+    }
+   ],
+   "page": {
+    "sha256": "e8f86bd9cca35c62d40c764c04771cca9caef2ae6a3a262ac5775e16a5cb8677",
+    "titleOnPage": "Heavenly Loop",
+    "authorOnPage": "isaiah658",
+    "postedOn": "Friday, August 11, 2017 - 17:59",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Credit to isaiah658 is not need but is appreciated.",
+    "filesListedOnPage": [
+     "Heavenly Loop.ogg",
+     "Heavenly Loop.flac"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "jaggedstone": {
+   "title": "Magic Spell SFX",
+   "author": "JaggedStone",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/magic-spell-sfx",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "tp_out.mp3",
+    "tp_in.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "magical_1_0.ogg",
+     "sha256": "119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f"
+    },
+    {
+     "path": "magical_6_0.ogg",
+     "sha256": "0a18ee3460cf3fd79c3771bbf94c20c26d34b65ab60d0b0e15694ffcad815955"
+    }
+   ],
+   "page": {
+    "sha256": "e02403004140a4dad2096182f791694e26835f1a5b1ba5fd1bbb35a17ca20810",
+    "titleOnPage": "Magic Spell SFX",
+    "authorOnPage": "JaggedStone",
+    "postedOn": "Friday, October 17, 2014 - 21:15",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "None needed",
+    "filesListedOnPage": [
+     "magical_1.ogg",
+     "magical_2.ogg",
+     "magical_3.ogg",
+     "magical_4.ogg",
+     "magical_5.ogg",
+     "magical_6.ogg",
+     "magical_7.ogg"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "kenney_interface": {
+   "title": "Interface Sounds",
+   "author": "Kenney (www.kenney.nl)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/interface-sounds",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "License.txt inside kenney_interfaceSounds.zip (CC0) + OpenGameArt page license field (CC0)",
+   "outputFiles": [
+    "ui_tap_1.mp3",
+    "ui_tap_2.mp3",
+    "ui_back.mp3",
+    "ui_open.mp3",
+    "ui_close.mp3",
+    "ui_tab.mp3",
+    "ui_toggle.mp3",
+    "ui_error.mp3",
+    "ui_confirm.mp3",
+    "ui_type.mp3",
+    "ui_check.mp3",
+    "ui_drag.mp3",
+    "ui_drop.mp3",
+    "voice_a.mp3",
+    "rotate_item.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "back_002.ogg",
+     "sha256": "61581c58194e3f19f531072edabbc344204c7e0a2887b8ededce4357bcf09195"
+    },
+    {
+     "path": "click_002.ogg",
+     "sha256": "adcd1f4adc35f1b41bc1b5bbefeff7aa44f2f3f0d96d3199b544140c7c1e761c"
+    },
+    {
+     "path": "confirmation_001.ogg",
+     "sha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a"
+    },
+    {
+     "path": "confirmation_002.ogg",
+     "sha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c"
+    },
+    {
+     "path": "drop_003.ogg",
+     "sha256": "43d086d50f90493a98cd2e09aa6dbf150d164f1578e1ec768d21cb185571ad87"
+    },
+    {
+     "path": "maximize_009.ogg",
+     "sha256": "b4d56386258b3cc1c8f6e5a22465f8cd65de3d4309e022664050f43151e466cd"
+    },
+    {
+     "path": "minimize_009.ogg",
+     "sha256": "885c20fc8b5b52226288794842a403821cd16e9800ec1d76be7a2f1655542eb8"
+    },
+    {
+     "path": "pluck_001.ogg",
+     "sha256": "be97ec4893a02d6eccfb678daa76c83e34cb2583b834ec2593d2641def739fa4"
+    },
+    {
+     "path": "pluck_002.ogg",
+     "sha256": "c977fe249ff42d1c93a552b33abc13a8399df3879fa510475426e5c4bbac1da9"
+    },
+    {
+     "path": "question_004.ogg",
+     "sha256": "585ecb58b529dc49b5c5ce5ba93427bf73b7052bae55e49c43ba8f169c93ac99"
+    },
+    {
+     "path": "select_002.ogg",
+     "sha256": "4cc6ac5341b9b2c86fef80c347de028e9ab9f2e037586ac7d9fa59a403a1c012"
+    },
+    {
+     "path": "select_007.ogg",
+     "sha256": "cd4390dd2b24f09016a5fa1be63334fa0f1859811f4cf29c02e8e2750f6a2cd0"
+    },
+    {
+     "path": "switch_002.ogg",
+     "sha256": "6fc395be2ad1f99ce318a5d28f98fb76dbeb676d83a0b28239d8c1fb90736180"
+    },
+    {
+     "path": "tick_002.ogg",
+     "sha256": "869442f54214be902ec7437f79e400dc91c1bfd90d18a6dd2d5b7e41ffbf457b"
+    },
+    {
+     "path": "toggle_001.ogg",
+     "sha256": "ca1d2dde5f0b286abac4f070e23edab8f30927c8a533665cdf2ac6492a415e49"
+    }
+   ],
+   "page": {
+    "sha256": "5ee7a35988dd901cbc503fe44c6b86e17eab411465a186ce84ac7dbf213ef408",
+    "titleOnPage": "Interface Sounds",
+    "authorOnPage": "Kenney",
+    "postedOn": "Wednesday, February 26, 2020 - 02:53",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Credit \"Kenney.nl\" or \"www.kenney.nl\", this is not mandatory.",
+    "filesListedOnPage": [
+     "kenney_interfaceSounds.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "kenney_interfaceSounds.zip",
+     "sha256": "f2193d072726d6758a5f7871b2dcc54dcce0d5c35c6f0a62f92549b327c81232"
+    }
+   ]
+  },
+  "kenney_jingles": {
+   "title": "Music Jingles (\"85 Short music jingles\")",
+   "author": "Kenney (www.kenney.nl)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/85-short-music-jingles",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "license.txt inside jingleSounds_Kenney.zip (CC0) + OpenGameArt page license field (CC0)",
+   "outputFiles": [
+    "reward_quest.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "jingles_STEEL10.ogg",
+     "sha256": "88a6645658b15dc327a2377ca7354e364625f081cd6ff9fda0b46dc54f664b71"
+    }
+   ],
+   "page": {
+    "sha256": "9b991da7ed9ed0bb79c0298c3622f65ac21f6ef7679b9b7e613b9660cf0394e6",
+    "titleOnPage": "85 Short music jingles",
+    "authorOnPage": "Kenney",
+    "postedOn": "Monday, March 17, 2014 - 05:17",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Attribution Instructions: Credit \"Kenney.nl\" or \"www.kenney.nl\", this is not mandatory.",
+    "filesListedOnPage": [
+     "jingleSounds_Kenney.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "jingleSounds_Kenney.zip",
+     "sha256": "be324b6cf26e35c95c2a344569a2470512819d0246cc81328bef3499de3682e5"
+    }
+   ]
+  },
+  "kenney_rpg": {
+   "title": "RPG Audio (\"50 RPG sound effects\")",
+   "author": "Kenney (www.kenney.nl)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/50-rpg-sound-effects",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "license.txt inside RPGsounds_Kenney.zip (CC0) + OpenGameArt page license field (CC0)",
+   "outputFiles": [
+    "ui_page.mp3",
+    "ui_buy.mp3",
+    "step_wood_1.mp3",
+    "step_wood_2.mp3",
+    "step_wood_3.mp3",
+    "place_item.mp3",
+    "door_creak.mp3",
+    "wings_flutter_1.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "bookFlip2.ogg",
+     "sha256": "3409042acbfaebc24c1a6327dc073e36f9250841712e96c5040da566a97df73c"
+    },
+    {
+     "path": "bookPlace1.ogg",
+     "sha256": "26f3ce60fbde85b678b0ad7f6624d80535fe540d88232ad1e38e47a96662d977"
+    },
+    {
+     "path": "footstep00.ogg",
+     "sha256": "6fe61ef1fc3bcf0e253bf2eb64759db6cb69e2fe452f4d88cc597ecf78a3d601"
+    },
+    {
+     "path": "footstep07.ogg",
+     "sha256": "42924cdbf998d5b3db180a339fd74afc94c570d594a536687e337ef1bdfdb346"
+    },
+    {
+     "path": "footstep08.ogg",
+     "sha256": "668f14dc1254d0d0f33025e9c7dbcdf2c2f00462ed0e07fb8f099c1d711c1337"
+    },
+    {
+     "path": "handleCoins.ogg",
+     "sha256": "8a91f969e932df709df80ee124d86a51389eed9b67f22e5e716bc2bbf60d8dab"
+    },
+    {
+     "path": "creak2.ogg",
+     "sha256": "8a990afdc03aebb91d528f5385e2f95582dbfa8e2c12c71098ab01be9142294a"
+    },
+    {
+     "path": "cloth1.ogg",
+     "sha256": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d"
+    }
+   ],
+   "page": {
+    "sha256": "7e10cb857dafc08f93b2a6687a005ed840b118e75bc372fb60e8f411e46b4e11",
+    "titleOnPage": "50 RPG sound effects",
+    "authorOnPage": "Kenney",
+    "postedOn": "Monday, March 17, 2014 - 05:17",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Attribution Instructions: Credit \"Kenney.nl\" or \"www.kenney.nl\", this is not mandatory.",
+    "filesListedOnPage": [
+     "RPGsounds_Kenney.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "RPGsounds_Kenney.zip",
+     "sha256": "3ae398ad63e293f9c450bda22d5d81c3af69c74df66fc1400f33c012c0bbc231"
+    }
+   ],
+   "rechecked": [
+    {
+     "date": "2026-11-20",
+     "pageSha256": "9afe28a681940a019416b51c74de50a2939394694b73691eabb6178e1797f3a0",
+     "licenseFieldOnPage": [
+      {
+       "label": "CC0",
+       "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+      }
+     ],
+     "note": "license field re-read when door_creak.mp3, wings_flutter_1.mp3 were added"
+    }
+   ]
+  },
+  "kerzoven": {
+   "title": "Cat Purr & Meow",
+   "author": "Kerzoven",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/cat-purr-meow",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "pet_purr.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "cat_purractive_loop.wav",
+     "sha256": "5b41fbabf4a43e526face6922a74a1fa2d1930d0901e0df590989bf7d68cc97a"
+    }
+   ],
+   "page": {
+    "sha256": "2706ed688c005cba6222daade4bdfc6a7728a2544b31640ce3d8a82a76b8f431",
+    "titleOnPage": "Cat Purr & Meow",
+    "authorOnPage": "Kerzoven",
+    "postedOn": "Saturday, April 16, 2022 - 10:06",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "cat_purrsleepy_loop.wav",
+     "cat_purractive_loop.wav",
+     "cat_mewfood.wav",
+     "cat_mewpurr.wav",
+     "cat_mewpurr2.wav",
+     "cat_softmew.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "kresiek_rain": {
+   "title": "AMB Rain Loop 2",
+   "author": "Kresiek The Furry",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/amb-rain-loop-2",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "amb_rain.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "amb_rain2.flac",
+     "sha256": "c33d833842c88e9559882b35f6f149c3a96bbf236eb34491e36ea4cae8879985"
+    }
+   ],
+   "page": {
+    "sha256": "5ed81c447c16a223615aad1a5fadb37a5e5e0671efc46cff44f2c60ebceaf986",
+    "titleOnPage": "AMB Rain Loop 2",
+    "authorOnPage": "Kresiek The Furry",
+    "postedOn": "Monday, November 17, 2025 - 03:36",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "amb_rain2.flac",
+     "amb_rain2.ogg",
+     "amb_rain2.mp3"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "laleksic_various": {
+   "title": "Various Sound Effects",
+   "author": "laleksic",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/various-sound-effects",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "drawer.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "drawer_open.wav",
+     "sha256": "0f1a31835c07e0722e9b506f1f38b726d4ed9579a947721b8e633125c46f3586"
+    }
+   ],
+   "page": {
+    "sha256": "b9e15bc5fd7488d79ba1718b2f55f0b34d818581a252058e0db1ce572752a0ea",
+    "titleOnPage": "Various Sound Effects",
+    "authorOnPage": "laleksic",
+    "postedOn": "Tuesday, October 18, 2022 - 11:09",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "sounds.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "sounds.zip",
+     "sha256": "82c945e5f3c97e4d38dbf18fa27bcea78dbed73b4078c5bbafc04ad89b4096db"
+    }
+   ]
+  },
+  "mousebyte": {
+   "title": "Chimey UI Sounds",
+   "author": "MouseBYTE",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/chimey-ui-sounds",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "notify_urgent.mp3",
+    "breath_in.mp3",
+    "breath_out.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "Chime_Confirm.mp3",
+     "sha256": "a5747d13cbe7741db35a23f912e7806f2f9885cd11a5ae0ad08bb696e96592b5"
+    },
+    {
+     "path": "Chime_Load.mp3",
+     "sha256": "689249a4696b6d1de84c6de4782d9116ebdb53db0f2abb0c43ff7352fec97fce"
+    },
+    {
+     "path": "Chime_Exit.mp3",
+     "sha256": "d07515ee4a785161c85415c7fe3d69705450072fe3eb04fab75f046be41a5308"
+    }
+   ],
+   "page": {
+    "sha256": "c8e49d97a44da76ce2d9720da5e2d12529142b106d78d9f2481889710e249703",
+    "titleOnPage": "Chimey UI Sounds",
+    "authorOnPage": "MouseBYTE",
+    "postedOn": "Friday, July 26, 2024 - 18:37",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "No rights reserved, no credit needed.",
+    "filesListedOnPage": [
+     "mousebyte_chimeyui.7z"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "mousebyte_chimeyui.7z",
+     "sha256": "6272bac49c8f3e9aa251a8c9e974a2e7f5756119657d0414197baeb129b0c549"
+    }
+   ],
+   "rechecked": [
+    {
+     "date": "2026-11-20",
+     "pageSha256": "ba294368781b2638789905ae5dc3931d3cb02d4bb50b8c88ddf4b034229075e7",
+     "licenseFieldOnPage": [
+      {
+       "label": "CC0",
+       "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+      }
+     ],
+     "note": "license field re-read when breath_in.mp3, breath_out.mp3 were added"
+    }
+   ]
+  },
+  "nps_bee": {
+   "title": "Bee (Yosemite National Park)",
+   "author": "National Park Service",
+   "source": "NPS Natural Sounds - Sound Gallery (nps.gov)",
+   "sourceUrl": "https://www.nps.gov/subjects/sound/sounds-bee.htm",
+   "license": "Public domain (U.S. National Park Service; credit requested)",
+   "licenseUrl": "https://www.nps.gov/subjects/sound/gallery.htm",
+   "evidenceRead": "Statement on the library page https://www.nps.gov/subjects/sound/gallery.htm: 'The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.' + the recording's own page (credit line and description)",
+   "outputFiles": [
+    "bee_buzz.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "nri-BeeYOSE.mp3",
+     "sha256": "7d3df8c563645cb602002d17bf01246b6ff1152a058617bc6f90e38a88dcbc98"
+    }
+   ],
+   "page": {
+    "libraryPage": "https://www.nps.gov/subjects/sound/gallery.htm",
+    "libraryPageSha256": "303e7303577f49559fdebeedd93785da90ebd612316e8db13593e0212142ffb3",
+    "statementOnLibraryPage": "The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.",
+    "soundPage": "https://www.nps.gov/subjects/sound/sounds-bee.htm",
+    "soundPageSha256": "ae045f18ede7d9590887221ce366e0e9d5787ad0524ce2f58df1c4f0fff7d00a",
+    "entryOnSoundPage": "Sound recording of a bee, Yosemite National Park, California. Credit / Author: NPS"
+   }
+  },
+  "nps_dawnchorus": {
+   "title": "Dawn Chorus (Yellowstone National Park)",
+   "author": "National Park Service (NPS / Jennifer Jerrett)",
+   "source": "Yellowstone National Park Sound Library (nps.gov)",
+   "sourceUrl": "https://www.nps.gov/yell/learn/photosmultimedia/sounds-dawnchorus.htm",
+   "license": "Public domain (U.S. National Park Service; credit requested)",
+   "licenseUrl": "https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm",
+   "evidenceRead": "Statement on the library page https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm: 'The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the \"National Park Service\" where appropriate.' + the recording's own page (credit line and description)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "alarm_birds.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "yell-YELLDawnChorus.mp3",
+     "sha256": "e730f8ccfa978ff0c714a82dd94134d60fcb268ee2bf0e66a0691f1f84e3d7aa"
+    }
+   ],
+   "page": {
+    "libraryPage": "https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm",
+    "libraryPageSha256": "2f4464cc6dc09fc4d54bddbe0b105b900caaee08b2107630cea86bcffd9511a7",
+    "statementOnLibraryPage": "The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the \"National Park Service\" where appropriate.",
+    "soundPage": "https://www.nps.gov/yell/learn/photosmultimedia/sounds-dawnchorus.htm",
+    "soundPageSha256": "3bc39dc3b16e29b9338e6415b327078b176992901256db5774506772e02f7fcf"
+   },
+   "archivesDownloaded": []
+  },
+  "nps_frog": {
+   "title": "Pig Frog (Everglades National Park)",
+   "author": "National Park Service",
+   "source": "NPS Natural Sounds - Sound Gallery (nps.gov)",
+   "sourceUrl": "https://www.nps.gov/subjects/sound/sounds-pigfrog.htm",
+   "license": "Public domain (U.S. National Park Service; credit requested)",
+   "licenseUrl": "https://www.nps.gov/subjects/sound/gallery.htm",
+   "evidenceRead": "Statement on the library page https://www.nps.gov/subjects/sound/gallery.htm: 'The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.' + the recording's own page (credit line and description)",
+   "outputFiles": [
+    "frog_croak.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "nri-PigFrogEvergladesNP.mp3",
+     "sha256": "3b97ec3c01371f690dd4a54376fe0626ee2ad42d1fcc6f7e37e6f6241892f342"
+    }
+   ],
+   "page": {
+    "libraryPage": "https://www.nps.gov/subjects/sound/gallery.htm",
+    "libraryPageSha256": "303e7303577f49559fdebeedd93785da90ebd612316e8db13593e0212142ffb3",
+    "statementOnLibraryPage": "The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.",
+    "soundPage": "https://www.nps.gov/subjects/sound/sounds-pigfrog.htm",
+    "soundPageSha256": "e177acb1b92527b547c8ab3e4d8d06a2171c32be5b9c8fb42d9fb00c9e5c6b06",
+    "entryOnSoundPage": "Audio recording of a pig frog, Everglades National Park, Florida. Credit / Author: NPS"
+   }
+  },
+  "nps_hurricane": {
+   "title": "Hurricane Vent (Yellowstone National Park)",
+   "author": "National Park Service (NPS / Peter Comley)",
+   "source": "Yellowstone National Park Sound Library (nps.gov)",
+   "sourceUrl": "https://www.nps.gov/yell/learn/photosmultimedia/sounds-hurricanevent.htm",
+   "license": "Public domain (U.S. National Park Service; credit requested)",
+   "licenseUrl": "https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm",
+   "evidenceRead": "Statement on the library page https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm: 'The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the \"National Park Service\" where appropriate.' + the recording's own page (credit line and description)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "amb_brown.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "yell-050101NorrisGeyserBasinPorcelainBasinOverlookingHurricaneVentBinaural0101.mp3",
+     "sha256": "ed29c2bd600d4eb5a54daec910eabf46b97056647071a490b7425db556363dcf"
+    }
+   ],
+   "page": {
+    "libraryPage": "https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm",
+    "libraryPageSha256": "2f4464cc6dc09fc4d54bddbe0b105b900caaee08b2107630cea86bcffd9511a7",
+    "statementOnLibraryPage": "The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the \"National Park Service\" where appropriate.",
+    "soundPage": "https://www.nps.gov/yell/learn/photosmultimedia/sounds-hurricanevent.htm",
+    "soundPageSha256": "dae3be27c08917dac0cf1946e690635b4e8f6963cbb248289473c59b09141c92"
+   },
+   "archivesDownloaded": []
+  },
+  "nps_owl": {
+   "title": "Spotted Owl (Yosemite National Park)",
+   "author": "National Park Service",
+   "source": "NPS Natural Sounds - Sound Gallery (nps.gov)",
+   "sourceUrl": "https://www.nps.gov/subjects/sound/sounds-spotted-owl.htm",
+   "license": "Public domain (U.S. National Park Service; credit requested)",
+   "licenseUrl": "https://www.nps.gov/subjects/sound/gallery.htm",
+   "evidenceRead": "Statement on the library page https://www.nps.gov/subjects/sound/gallery.htm: 'The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.' + the recording's own page (credit line and description)",
+   "outputFiles": [
+    "owl_hoot.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "nri-SpottedOwlYOSE.mp3",
+     "sha256": "72451e56c402534c790520f066dd2392ee151e438eef9487b798ddd03d3f07d2"
+    }
+   ],
+   "page": {
+    "libraryPage": "https://www.nps.gov/subjects/sound/gallery.htm",
+    "libraryPageSha256": "303e7303577f49559fdebeedd93785da90ebd612316e8db13593e0212142ffb3",
+    "statementOnLibraryPage": "The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.",
+    "soundPage": "https://www.nps.gov/subjects/sound/sounds-spotted-owl.htm",
+    "soundPageSha256": "d31213cbef6cb17d83d4070613d12ad709369ce3e4c5368a4cfcc8bd149f971c",
+    "entryOnSoundPage": "Sound recording of spotted owl, Yosemite National Park, California. Credit / Author: NPS"
+   }
+  },
+  "nps_safr_waves": {
+   "title": "Early Morning Summer Sounds (San Francisco Maritime National Historical Park)",
+   "author": "National Park Service (NPS / Kristal Ip)",
+   "source": "NPS multimedia library (nps.gov)",
+   "sourceUrl": "https://www.nps.gov/nps-audiovideo/legacy/mp3/pwr/avElement/safr-130718-084230-AquaticParkWavesCloseUpedit1min.mp3",
+   "license": "Public domain (U.S. National Park Service; credit requested)",
+   "licenseUrl": "https://www.nps.gov/aboutus/disclaimer.htm",
+   "evidenceRead": "NPS media record A6B0C5D8-741A-422C-95E4-E368204DB46C (developer.nps.gov audio API): credit 'NPS, Kristal Ip'; NPS website disclaimer https://www.nps.gov/aboutus/disclaimer.htm: 'material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain.'",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "amb_waves.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "safr-130718-084230-AquaticParkWavesCloseUpedit1min.mp3",
+     "sha256": "721114d04ea76bd4f86516357c6ac9094844f535fbc0b5dc83b8f313318324ac"
+    }
+   ],
+   "page": {
+    "apiRecordId": "A6B0C5D8-741A-422C-95E4-E368204DB46C",
+    "apiQuery": "https://developer.nps.gov/api/v1/multimedia/audio?q=...",
+    "titleInRecord": "Early Morning Summer Sounds",
+    "creditInRecord": "NPS, Kristal Ip",
+    "descriptionInRecord": "Early morning summer sounds of gentle waves washing over rocks at Aquatic Park beach.",
+    "relatedParks": [
+     "San Francisco Maritime National Historical Park"
+    ],
+    "fileUrl": "https://www.nps.gov/nps-audiovideo/legacy/mp3/pwr/avElement/safr-130718-084230-AquaticParkWavesCloseUpedit1min.mp3",
+    "durationMs": 64000,
+    "disclaimerPage": "https://www.nps.gov/aboutus/disclaimer.htm",
+    "disclaimerPageSha256": "580872bf9e5105f3ccd03902bd778212d7cef3fb9b50fa63abeebae94f444ceb",
+    "statementOnDisclaimerPage": "Copyright law does not protect “any work of the U.S. Government” where “a work prepared by an officer or employee of the U.S. Government as part of that person's official duties” (See, 17 U.S.C. §§ 101, 105). Thus, material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain."
+   },
+   "archivesDownloaded": []
+  },
+  "nps_wefa_owl": {
+   "title": "Barred Owl (Weir Farm National Historical Park)",
+   "author": "National Park Service (NPS Natural Sounds and Night Skies Division / Emma Brown)",
+   "source": "NPS multimedia library (nps.gov)",
+   "sourceUrl": "https://www.nps.gov/nps-audiovideo/audiovideo/5170e4f6-aeca-430d-b8ef-bdf9e28622b3.mp3",
+   "license": "Public domain (U.S. National Park Service; credit requested)",
+   "licenseUrl": "https://www.nps.gov/aboutus/disclaimer.htm",
+   "evidenceRead": "NPS media record B4535041-73BC-457B-97B7-EF2C537AF032 (developer.nps.gov audio API): credit 'NSNSD / Emma Brown'; NPS website disclaimer https://www.nps.gov/aboutus/disclaimer.htm: 'material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain.'",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "amb_forest_night.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "5170e4f6-aeca-430d-b8ef-bdf9e28622b3.mp3",
+     "sha256": "c7a6adccc049f50a467e773a79ce1928cde36e29f878785b264fdd5c237af66e"
+    }
+   ],
+   "page": {
+    "apiRecordId": "B4535041-73BC-457B-97B7-EF2C537AF032",
+    "apiQuery": "https://developer.nps.gov/api/v1/multimedia/audio?q=...",
+    "titleInRecord": "Barred Owl",
+    "creditInRecord": "NSNSD / Emma Brown",
+    "descriptionInRecord": "The sound of Peepers and a Barred Owl hooting at Weir Farm National Historical Park.",
+    "relatedParks": [
+     "Weir Farm National Historical Park"
+    ],
+    "fileUrl": "https://www.nps.gov/nps-audiovideo/audiovideo/5170e4f6-aeca-430d-b8ef-bdf9e28622b3.mp3",
+    "durationMs": 182088,
+    "disclaimerPage": "https://www.nps.gov/aboutus/disclaimer.htm",
+    "disclaimerPageSha256": "580872bf9e5105f3ccd03902bd778212d7cef3fb9b50fa63abeebae94f444ceb",
+    "statementOnDisclaimerPage": "Copyright law does not protect “any work of the U.S. Government” where “a work prepared by an officer or employee of the U.S. Government as part of that person's official duties” (See, 17 U.S.C. §§ 101, 105). Thus, material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain."
+   },
+   "archivesDownloaded": []
+  },
+  "nps_wind": {
+   "title": "Soundscape - Lower Geyser Basin (Strong Wind)",
+   "author": "National Park Service (NPS / Peter Comley)",
+   "source": "Yellowstone National Park Sound Library (nps.gov)",
+   "sourceUrl": "https://www.nps.gov/yell/learn/photosmultimedia/sounds-soundscapes.htm",
+   "license": "Public domain (U.S. National Park Service; credit requested)",
+   "licenseUrl": "https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm",
+   "evidenceRead": "Statement on the library page https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm: 'The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the \"National Park Service\" where appropriate.' + the recording's own page (credit line and description)",
+   "outputFiles": [
+    "amb_wind.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "yell-040201LowerGeyserBasinWindInTreesBinaural01011.mp3",
+     "sha256": "99c01be96dea5aa960175cad7ce7ac7f0d232a6d8a6fe9c03f88e3f73fb95146"
+    }
+   ],
+   "page": {
+    "libraryPage": "https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm",
+    "libraryPageSha256": "2f4464cc6dc09fc4d54bddbe0b105b900caaee08b2107630cea86bcffd9511a7",
+    "statementOnLibraryPage": "The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the \"National Park Service\" where appropriate.",
+    "soundPage": "https://www.nps.gov/yell/learn/photosmultimedia/sounds-soundscapes.htm",
+    "soundPageSha256": "8602eb8afce47d2ee93ea223dd4dc2fe3df4fa7b8ec439edc64eeef46bc78ec8",
+    "entryOnSoundPage": "Soundscape - Lower Geyser Basin (Strong Wind) A strong wind blows in the trees around the boardwalks of Lower Geyser Basin. Binaural recording, best heard through headphones. Credit / Author: NPS/Peter Comley Date created: 03/21/2015"
+   }
+  },
+  "oiboo": {
+   "title": "open chest SFX",
+   "author": "Oiboo",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/open-chest-sfx",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "reward_unlock.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "open chest_0.wav",
+     "sha256": "8dd9b56a66ee38fdf4be52ce1491032430ac3b7c4ea6bc170b0937df45827dba"
+    }
+   ],
+   "page": {
+    "sha256": "406ce50ce2ce4b522cf23f79b4b0e125a6ef06592f8d3680e0ab5edc67e0ed03",
+    "titleOnPage": "open chest SFX",
+    "authorOnPage": "Oiboo",
+    "postedOn": "Tuesday, September 24, 2019 - 01:42",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "open chest.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "owlish_more": {
+   "title": "202 More Sound Effects",
+   "author": "OwlishMedia",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/202-more-sound-effects",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "stamp.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "Stationery_17.wav",
+     "sha256": "1c4b45047551de350ce1c098e6faface720de30ec8b4922ff14cf6b0a24c3462"
+    }
+   ],
+   "page": {
+    "sha256": "872167eb54f3f9b8f36838a19eb6b3aff359fca32aa5d9d9c2425df64f9a6bc4",
+    "titleOnPage": "202 More Sound Effects",
+    "authorOnPage": "OwlishMedia",
+    "postedOn": "Tuesday, August 7, 2018 - 09:08",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "MoreSounds.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "MoreSounds.zip",
+     "sha256": "9428c1437137d9ea06ba94e13da12488d4c57990a1c32d83db9e7707e69fb3af"
+    }
+   ]
+  },
+  "owlish_pack": {
+   "title": "Sound Effects Pack",
+   "author": "OwlishMedia",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/sound-effects-pack",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link); the two blanket recordings are also OwlStorm's own Freesound uploads 320142/320144, whose Freesound pages say 'Creative Commons 0' (checked 2026-11-20)",
+   "outputFiles": [
+    "eat_gulp_1.mp3",
+    "eat_gulp_2.mp3",
+    "pencil.mp3",
+    "fabric_1.mp3",
+    "fabric_2.mp3",
+    "wings_flutter_2.mp3",
+    "yawn.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "gulp1.wav",
+     "sha256": "9c36ba09d54d471803d9470fdeff3b3356d6414aea25b64b5a14e8f5543b2903"
+    },
+    {
+     "path": "gulp2.wav",
+     "sha256": "0b0d178953af3662cb27d7b0a5e543e554eb459d879c229392cc336aa93b6769"
+    },
+    {
+     "path": "pencil-scratch-1.wav",
+     "sha256": "391d6c6bd63d4b0de754278993eca2bf0b2ece366c10d22cdcb22480b2ea2ad4"
+    },
+    {
+     "path": "320144__owlstorm__blanket-movement-6.wav",
+     "sha256": "a082018a475c403f0168521c2bb6a443766f42a6da410a2e8a22cc3047d59ffb"
+    },
+    {
+     "path": "320142__owlstorm__blanket-movement-4.wav",
+     "sha256": "9b3c97b7ada8ee6ba2c05df379e4d89a6f4ba715cc90cdf11d4849f3aa0e05b0"
+    },
+    {
+     "path": "flip.wav",
+     "sha256": "6417ec2df1c35cc59b4da67af03b854d015165721e434e3afe2fb23db65cebd5"
+    },
+    {
+     "path": "yawn1.wav",
+     "sha256": "3dca8bcd4f732999e984a8b97af783c0902550b58790d2c3fe67802c4324176e"
+    }
+   ],
+   "page": {
+    "sha256": "5433dbff15435ddc68f9bf9f01b9e7a3f44da3626cba5843d3c6df8c203b9f50",
+    "titleOnPage": "Sound Effects Pack",
+    "authorOnPage": "OwlishMedia",
+    "postedOn": "Wednesday, July 25, 2018 - 06:42",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "Owlish Media Sound Effects.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "Owlish Media Sound Effects.zip",
+     "sha256": "57d7059fe2c0ea5f47c7554ace22a538ea22ab40bfc0906b71aa259afffd3d18"
+    }
+   ],
+   "rechecked": [
+    {
+     "date": "2026-11-20",
+     "pageSha256": "d92d78e62ff302bf7a8ceac965d3ce85f62450df22bf9c38e0bd82b8797e9b67",
+     "licenseFieldOnPage": [
+      {
+       "label": "CC0",
+       "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+      }
+     ],
+     "note": "license field re-read when pencil.mp3, fabric_1.mp3, fabric_2.mp3, wings_flutter_2.mp3, yawn.mp3 were added"
+    }
+   ]
+  },
+  "pagdev": {
+   "title": "Fireplace Sound loop",
+   "author": "PagDev",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/fireplace-sound-loop",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "amb_fire.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "fire.wav",
+     "sha256": "85ca0cc60d0c037fff8b185e31ad1fcdbda6ce45eee17c3ee1318d1b8f59e330"
+    }
+   ],
+   "page": {
+    "sha256": "f1ffaf06689cb4db2683ede4ef1548570b58deed0a685b9f61bc12448376bde5",
+    "titleOnPage": "Fireplace Sound loop",
+    "authorOnPage": "PagDev",
+    "postedOn": "Saturday, March 13, 2021 - 10:15",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Credit is not required, but it is always appreciated.",
+    "filesListedOnPage": [
+     "fire.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "pwl": {
+   "title": "Bell dings/chimes",
+   "author": "PWL",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/bell-dingschimes",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "timer_start.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "bell_ding1.wav",
+     "sha256": "8ce40f49cd211125303df59db0da4fe911e8b2f34d3847011b15137c6b5850de"
+    }
+   ],
+   "page": {
+    "sha256": "5503d8e6280e9ab55e470a967a46df928e05b674b06ee772a4037e10f61ca59e",
+    "titleOnPage": "Bell dings/chimes",
+    "authorOnPage": "PWL",
+    "postedOn": "Thursday, January 21, 2016 - 10:03",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Releasing as public domain.",
+    "filesListedOnPage": [
+     "bell_ding1.wav",
+     "bell_ding2.wav",
+     "bell_ding3.wav",
+     "bell_ding4.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "qubodup_rat": {
+   "title": "Squeaky Rat",
+   "author": "qubodup (Iwan Gabovitch)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/squeaky-rat",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "notes.txt inside qubodupSqueakyRat.7z ('released under CC0'; based on Freesound sounds that 'were under CC0 at the time of creation') + OpenGameArt page license field (CC0)",
+   "outputFiles": [
+    "voice_d.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "qubodupSqueakyRatPain.flac",
+     "sha256": "fdeeb112b90b1c5ea366692411bef33e49a60ab5d8b6d9bc6c458c5470e73201"
+    }
+   ],
+   "page": {
+    "sha256": "aa700cced3cce40de6407834da0e5ed3e4b49492b3fc020ed88110fff17f46fb",
+    "titleOnPage": "Squeaky Rat",
+    "authorOnPage": "qubodup",
+    "postedOn": "Sunday, September 22, 2013 - 06:43",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Attribution Instructions: Squeaky Rat by Iwan 'qubodup' Gabovitch http://opengameart.org/users/qubodup",
+    "filesListedOnPage": [
+     "qubodupSqueakyRat.7z"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "qubodupSqueakyRat.7z",
+     "sha256": "966649ba0e136ec2d473623e15d11710b7fcc8f73a30897758453e8d43bb75a7"
+    }
+   ]
+  },
+  "qubodup_rustles": {
+   "title": "20 Rustles of dry leaves",
+   "author": "qubodup (Iwan Gabovitch)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/20-rustles-dry-leaves",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "rustle_grass_1.mp3",
+    "rustle_grass_2.mp3",
+    "rustle_grass_3.mp3",
+    "rustle_bush_1.mp3",
+    "rustle_bush_2.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "rustle06.flac",
+     "sha256": "46c0feab3ea03f2be11596a1f3badf5113eb126989e9da50f8a687c6f38e807d"
+    },
+    {
+     "path": "rustle09.flac",
+     "sha256": "efa9b55ed26bc570da99c4348f2f6fbdf4b8be098029581bef27db8a1d0065e3"
+    },
+    {
+     "path": "rustle10.flac",
+     "sha256": "7a6d0b9d170e59e571ac7560133a8c860527ab0f045c08b375591b81bcb59b1f"
+    },
+    {
+     "path": "rustle17.flac",
+     "sha256": "ccb7094917e95098c12965c9a73384ccd3bbf7add2cb949237c8adff80367ad1"
+    },
+    {
+     "path": "rustle20.flac",
+     "sha256": "3c141f622a6a2595d507b00af2cd932afa5b33139b256ddfd1ed7fc86eb9d64c"
+    }
+   ],
+   "page": {
+    "sha256": "fb384deca0cb430efa51ae1fea642119b65c4f3cf966ab6232b44e9cea7981c3",
+    "titleOnPage": "20 Rustles of dry leaves",
+    "authorOnPage": "qubodup",
+    "postedOn": "Wednesday, May 19, 2010 - 10:03",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "qubodup-rustle.7z"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "qubodup-rustle.7z",
+     "sha256": "c5d7458085e9b208009388b832184bddc0045482f6fa67a1eb6ea09335bb7a43"
+    }
+   ]
+  },
+  "railkill": {
+   "title": "Kalimba Two-Notes",
+   "author": "railkill",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/kalimba-two-notes",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "notify_message.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "kalimba.wav",
+     "sha256": "6ab4a504576a0ed66a0a2b7a73d6407e2c916f2ae62f5b04c77d369462cdfe25"
+    }
+   ],
+   "page": {
+    "sha256": "6c656ad326eb92fe336b57d5729794e2ed3abb4400e1e3d738808eebd42f985b",
+    "titleOnPage": "Kalimba Two-Notes",
+    "authorOnPage": "railkill",
+    "postedOn": "Saturday, August 31, 2024 - 14:43",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "kalimba.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "robinlamb": {
+   "title": "UI Sound Effects (Button Clicks, User Feedback, Notifications)",
+   "author": "Robin Lamb",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0); page says the sounds come from the public-domain sample libraries VCSL and VSCO 2 CE",
+   "outputFiles": [
+    "tp_shimmer.mp3",
+    "voice_b.mp3",
+    "breath_hold.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "chimes.wav",
+     "sha256": "8d2a772df3931b0b341e6f2a956becf1699a7607ad5b6919e06e33b475626083"
+    },
+    {
+     "path": "click_3.wav",
+     "sha256": "dd5c50fdd795088ae350cc2d8fd5861a2f7419084766e02a33a55d79a5d9bfac"
+    },
+    {
+     "path": "Ding.wav",
+     "sha256": "4e48a181a9b537689e7e0a5958ddfe9952f4b6eef915ab8286228241ee32658d"
+    }
+   ],
+   "page": {
+    "sha256": "8fca0aff90802e95d7bf88f7ccc7f81d3b1d4d55dcf4cc0dd5dc4b7807540b21",
+    "titleOnPage": "UI Sound Effects (Button Clicks, User Feedback, Notifications)",
+    "authorOnPage": "Robin Lamb",
+    "postedOn": "Saturday, July 23, 2022 - 23:48",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "ui_ogg.zip",
+     "ui_wav.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "ui_wav.zip",
+     "sha256": "8e4e23dd4ec501776dab1428c5f1e405b5065e296518feb04816f2892d163053"
+    }
+   ],
+   "rechecked": [
+    {
+     "date": "2026-11-20",
+     "pageSha256": "6d9475d4fe967a9203f489c6cab29c70128f51d65350efdcedfa5529b8d9f0d3",
+     "licenseFieldOnPage": [
+      {
+       "label": "CC0",
+       "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+      }
+     ],
+     "note": "license field re-read when breath_hold.mp3 were added"
+    }
+   ]
+  },
+  "rubberduck_creature": {
+   "title": "80 CC0 creature SFX",
+   "author": "rubberduck",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/80-cc0-creature-sfx",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "pet_happy_1.mp3",
+    "pet_happy_2.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "cute_05.ogg",
+     "sha256": "41d1b63ad4f006c09dbc65a686c022633825b01aa20e400b6dce0c6a22970c7c"
+    },
+    {
+     "path": "cute_08.ogg",
+     "sha256": "1776b641f37d0de4d51cf067c4a4b2c170ae582fc75a83c7abd42f13acdb1ce3"
+    }
+   ],
+   "page": {
+    "sha256": "749cfc1aa19362266b1d58da066bc69110f255be3084c3067a296e46a4996652",
+    "titleOnPage": "80 CC0 creature SFX",
+    "authorOnPage": "rubberduck",
+    "postedOn": "Sunday, July 1, 2018 - 02:48",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "80-CC0-creature-SFX.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "80-CC0-creature-SFX_0.zip",
+     "sha256": "5d4002eea42f278e76543bb36e8ddd2cb978588a13271984191d8228f5d26768"
+    }
+   ]
+  },
+  "rubberduck_creature2": {
+   "title": "80 CC0 creture SFX #2",
+   "author": "rubberduck",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/80-cc0-creture-sfx-2",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "pet_snore.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "snore_02.ogg",
+     "sha256": "e698d3da0896172ec75034ec9886e40f9ed9519780119e31e4031b8fc9948c29"
+    }
+   ],
+   "page": {
+    "sha256": "39f7f13666d49b39412b59fef887d8285cc2d1cfa5be17170b4bbb9bc807be7b",
+    "titleOnPage": "80 CC0 creture SFX #2",
+    "authorOnPage": "rubberduck",
+    "postedOn": "Thursday, August 2, 2018 - 12:43",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "80-CC0-creature-sfx-2.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "80-CC0-creature-sfx-2.zip",
+     "sha256": "6d251aeaaaa9c2fffed8fc2f64bab3104725ceabf9259a8441994e7a20cfe22f"
+    }
+   ]
+  },
+  "rubberduck_rpg": {
+   "title": "80 CC0 RPG SFX",
+   "author": "rubberduck",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/80-cc0-rpg-sfx",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "reward_coin_1.mp3",
+    "reward_coin_2.mp3",
+    "reward_coin_3.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "item_coins_01.ogg",
+     "sha256": "4e701b281a4f88768beccbe87af4574d13ac5a4bc5cab6c522f0e79823d6e428"
+    },
+    {
+     "path": "item_coins_02.ogg",
+     "sha256": "c1124868c928ef06e9b95fd9bd314eb3aa9a2869cbfde7f5aadcc341fe3edca0"
+    },
+    {
+     "path": "item_coins_03.ogg",
+     "sha256": "cd89cae2221ab5e911f93c208e8b905290f695eea3b1830bc9012cc46f6c047b"
+    }
+   ],
+   "page": {
+    "sha256": "51065b28d5f42f80061366667ed704c87e21cdf7ac622d09f0307bd5e9bdf6f2",
+    "titleOnPage": "80 CC0 RPG SFX",
+    "authorOnPage": "rubberduck",
+    "postedOn": "Sunday, July 8, 2018 - 11:08",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "80-CC0-RPG-SFX.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "80-CC0-RPG-SFX_0.zip",
+     "sha256": "1c2f06ff4e8563b5b8b745b23cf213c1474142a69bb82bd8f5e10d9b3f7a7bbd"
+    }
+   ]
+  },
+  "rubberduck_woodmetal": {
+   "title": "100 CC0 metal and wood SFX",
+   "author": "rubberduck",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/100-cc0-metal-and-wood-sfx",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "wood_knock_1.mp3",
+    "wood_knock_2.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "wood_hit_05.ogg",
+     "sha256": "a6e1a4cfb65c4fc46248b3db84666275d466c2434c283028c7f0ce70035e75de"
+    },
+    {
+     "path": "wood_hit_09.ogg",
+     "sha256": "7e90e5834792ea302ef767235b92862045b4075021c73bc2e0ee3f352bc5cdc1"
+    }
+   ],
+   "page": {
+    "sha256": "1f824210bf576eddbb69be4b92cfddd5f2d05ca6a32f3d89bff3d6c77bce49e0",
+    "titleOnPage": "100 CC0 metal and wood SFX",
+    "authorOnPage": "rubberduck",
+    "postedOn": "Wednesday, July 4, 2018 - 06:34",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "100-CC0-wood-metal-SFX.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "100-CC0-wood-metal-SFX.zip",
+     "sha256": "be6eba63b03409ac0c77787a956b1503a7c186403d04aef9725c52644a4b7878"
+    }
+   ]
+  },
+  "springspring_bell": {
+   "title": "Pleasing Bell Sound Effect",
+   "author": "Spring Spring (Julie Damsgaard)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/pleasing-bell-sound-effect",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "notify_soft.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "pleasing-bell.wav",
+     "sha256": "3c851939ccf9146e49c1be0272386fdca1b1442bb034a5e6dcdfb3e0e144a411"
+    }
+   ],
+   "page": {
+    "sha256": "c0601e93335169ba163bc2e2b1ea94330d44a46d5e08e9ebc0ea5c0ebe82778e",
+    "titleOnPage": "Pleasing Bell Sound Effect",
+    "authorOnPage": "Spring Spring",
+    "postedOn": "Saturday, July 14, 2018 - 00:47",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Produced by Julie Damsgaard/Spring Spring/Spring Enterprises @ https://spring-enterprises.neocities.org",
+    "filesListedOnPage": [
+     "pleasing-bell.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "springspring_powerup": {
+   "title": "Power-Up Sound Effects",
+   "author": "Spring Spring (Julie Damsgaard)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/power-up-sound-effects",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "reward_streak.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "power_up_sound_v1_0.ogg",
+     "sha256": "111ce73c362601bd04002cf1f00003016019dcacc03bf5f7175aa960756cb44a"
+    }
+   ],
+   "page": {
+    "sha256": "25a5effdf0074576cf0d32966bba3065ad526880795ed9b83d93f38052861115",
+    "titleOnPage": "Power-Up Sound Effects",
+    "authorOnPage": "Spring Spring",
+    "postedOn": "Saturday, December 28, 2024 - 15:01",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Produced by Julie Damsgaard/Spring Spring/Spring Enterprises @ https://spring-enterprises.neocities.org",
+    "filesListedOnPage": [
+     "power_up_sound_v1.ogg",
+     "power_up_sound_v2.ogg",
+     "power_up_sound_v3.ogg"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "springspring_various": {
+   "title": "Various Sound Effects",
+   "author": "Spring Spring (Julie Damsgaard)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/various-sound-effects-0",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "reward_gem.mp3",
+    "bird_flap_1.mp3",
+    "bird_flap_2.mp3",
+    "pet_jump.mp3",
+    "voice_c.mp3",
+    "voice_e.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "big_amber.wav",
+     "sha256": "b343b1083945978cc8a18c05dc1d716ce0d37e735fa8b028006563adcc358dc9"
+    },
+    {
+     "path": "bup.wav",
+     "sha256": "3bd0359256440db93837a56ad9c4bf089be480dd3a89bab506b415003f7bf92f"
+    },
+    {
+     "path": "snd_batwings.wav",
+     "sha256": "1d7a132a1466eaae7969262b744125918c7676026d0269bfdfec95598290bbe4"
+    },
+    {
+     "path": "snd_flap.wav",
+     "sha256": "2d57819560d4eb6e2e2578422964acf9248f641732e9ccb9d332a16edb01b434"
+    },
+    {
+     "path": "snd_npc_message.wav",
+     "sha256": "9ebbb14eaaeb80a14fc61717d36a01a45b9c0ece67911a6fcf53d950a495a677"
+    },
+    {
+     "path": "snd_sproing.wav",
+     "sha256": "e07d188b8e94e32291d130a8a363e164078186d97a1beee81bd9427e8fd01fd7"
+    }
+   ],
+   "page": {
+    "sha256": "5da46503bcd54ef3666d13313bb0804be7a61f95dd203dbc7761466924d4a789",
+    "titleOnPage": "Various Sound Effects",
+    "authorOnPage": "Spring Spring",
+    "postedOn": "Sunday, October 6, 2024 - 23:48",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Produced by Julie Damsgaard/Spring Spring/Spring Enterprises @ https://spring-enterprises.neocities.org",
+    "filesListedOnPage": [
+     "bangs.wav",
+     "beep1.wav",
+     "big_amber.wav",
+     "break_stone.wav",
+     "bup.wav",
+     "cannonball_tap.wav",
+     "click.wav",
+     "crush.wav",
+     "death.wav",
+     "dull_explosion.wav",
+     "fall.wav",
+     "get_important_item.wav",
+     "glug.wav",
+     "moan.wav",
+     "nom.wav",
+     "player_hit.wav",
+     "pop.wav",
+     "powered_door.wav",
+     "rustling_of_the_weeds.wav",
+     "scooter_p.wav",
+     "small_amber.wav",
+     "small_rock_impact.wav",
+     "spear.wav",
+     "steal.wav",
+     "swim.wav",
+     "tap_stone.wav",
+     "teleport.wav",
+     "tick.wav",
+     "uff.wav",
+     "snd_ambient_impact1.wav",
+     "snd_batwings.wav",
+     "snd_death1.wav",
+     "snd_death2.wav",
+     "snd_fillenergy.wav",
+     "snd_footsteps1.wav",
+     "snd_fox_footstep.wav",
+     "snd_getpowerup.wav",
+     "snd_menu_move.wav",
+     "snd_menu_select.wav",
+     "snd_npc_message.wav",
+     "snd_slip_on_ice.wav",
+     "snd_splathit.wav",
+     "snd_splat.wav",
+     "snd_splurt.wav",
+     "snd_sproing.wav",
+     "snd_throw1.wav",
+     "snd_treasure.wav",
+     "snd_warp_in.wav",
+     "snd_warp_out.wav",
+     "snd_yoghurtblast.wav",
+     "snd_birdcrash.wav",
+     "snd_birdscream.wav",
+     "snd_bulletcrackle.wav",
+     "snd_enemyjump.wav",
+     "snd_bullethit.wav",
+     "snd_enemyland.wav",
+     "snd_enemyscream.wav",
+     "snd_enemysword.wav",
+     "snd_flap.wav",
+     "snd_gunshot1.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "thimras": {
+   "title": "Park ambiences",
+   "author": "Thimras",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/park-ambiences",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "amb_stream.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "park_ambience_river.wav",
+     "sha256": "da0c0c9b1249a83a1611cc116d5737b0864a8db9f45f1ae8dcc079d0f7c0bbbf"
+    }
+   ],
+   "page": {
+    "sha256": "6c85db1f1b06359440b52fc6f3a6aa3b6fdd9dbb49bd558a92572aa402359168",
+    "titleOnPage": "Park ambiences",
+    "authorOnPage": "Thimras",
+    "postedOn": "Monday, July 25, 2022 - 04:11",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "park_ambience_birds.wav",
+     "park_ambience_river.wav",
+     "park_ambience_wind.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "tinyworlds_steps": {
+   "title": "Different steps on wood, stone, leaves, gravel and mud",
+   "author": "TinyWorlds",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "plant_dig.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "gravel.ogg",
+     "sha256": "34e6057ec1581b5cb8802e4942952b00b1dac235bfcb0ed8cff0ceb15a3ebbbf"
+    }
+   ],
+   "page": {
+    "sha256": "e502f4692dc51150c5dea788bb99cb338f6a8b4148819d7158664718a33c2e3c",
+    "titleOnPage": "Different steps on wood, stone, leaves, gravel and mud",
+    "authorOnPage": "TinyWorlds",
+    "postedOn": "Wednesday, August 3, 2011 - 10:03",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "[kdd]DifferentSteps.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "[kdd]DifferentSteps_0.zip",
+     "sha256": "987d072b7deaa65177e005ddd8185f2351be7c9a76cd7575dea560549c39b33b"
+    }
+   ]
+  },
+  "trex0n_fire": {
+   "title": "A Small Fire Will Do (Calming Loop)",
+   "author": "Trex0n (Cal McEachern)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/a-small-fire-will-do-calming-loop",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "music_cozy.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "a_small_fire_will_do.wav",
+     "sha256": "1cb42057e724224d6047f651b95598f5c094caaaba47f6430dd5d540c09c4414"
+    }
+   ],
+   "page": {
+    "sha256": "85aadc6b3ecb74b0e7c2061e5d84a6450cd480bd0d0c356588d71f05b9151e0f",
+    "titleOnPage": "A Small Fire Will Do (Calming Loop)",
+    "authorOnPage": "Trex0n",
+    "postedOn": "Thursday, June 24, 2021 - 17:32",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "Credit would be appreciated (Cal McEachern) as well as a link to what you've created with my work.",
+    "filesListedOnPage": [
+     "a_small_fire_will_do.wav"
+    ]
+   },
+   "archivesDownloaded": []
+  },
+  "vehicle": {
+   "title": "Fantasy Sound Effects (Tinysized SFX)",
+   "author": "Vehicle (Jan Schupke)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "readme.txt inside tinysized.zip ('Distributed under Creative Commons Zero') + OpenGameArt page license field (CC0)",
+   "outputFiles": [
+    "step_dirt_1.mp3",
+    "step_dirt_2.mp3",
+    "step_dirt_3.mp3",
+    "water_plop_1.mp3",
+    "water_plop_2.mp3",
+    "pet_land.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "boots-leather-jump-01.wav",
+     "sha256": "9b8b6e3ac1f0263df49c60c1e571974b421bfe12c576f26328397ee644bb3ac4"
+    },
+    {
+     "path": "mud-steps-04.wav",
+     "sha256": "40abdbe1ac170bbe429decd656cab7939939a87a3102672db2f67a2a5a10b839"
+    },
+    {
+     "path": "soil-steps-01.wav",
+     "sha256": "f776fc8c849646faa6b1058652326845d6a69393bc8447354f80b201c4c7e4ce"
+    },
+    {
+     "path": "water-drop-01.wav",
+     "sha256": "999b0667e48503ff8e5e6effbcacc49f1fc88e64f05c96b37f66ae166b2c7238"
+    },
+    {
+     "path": "water-drop-02.wav",
+     "sha256": "6dfd259c7375e7df9756f019b05182af72fff418295dd65c3a35223e8e20093e"
+    }
+   ],
+   "page": {
+    "sha256": "bba116731d18d459435246a83288aa0e7d583da5260dc4cf39563778299e08dd",
+    "titleOnPage": "Fantasy Sound Effects (Tinysized SFX)",
+    "authorOnPage": "Vehicle",
+    "postedOn": "Wednesday, August 12, 2015 - 16:52",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "CC0. https://creativecommons.org/publicdomain/zero/1.0/",
+    "filesListedOnPage": [
+     "tinysized.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "tinysized.zip",
+     "sha256": "7f00e2b1dae15e68db0e1d6096767f03755e9e7c247128afc3e935e63774d7db"
+    }
+   ]
+  },
+  "vehicle_accessory": {
+   "title": "Fantasy Accessory SFX Library",
+   "author": "Vehicle (Jan Schupke)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/fantasy-accessory-sfx-library",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "readme.txt inside accessory.zip ('Distributed under Creative Commons Zero') + OpenGameArt page license field (CC0)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "sparkle_1.mp3",
+    "sparkle_2.mp3",
+    "sparkle_3.mp3",
+    "coin_purse.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "vials-glass-rattle-01.wav",
+     "sha256": "3ba1ecb9db1a823b68e11faab14f6a39375da1309f47504ad5796be356c396aa"
+    },
+    {
+     "path": "vials-glass-rattle-02.wav",
+     "sha256": "9a61d013aa5567bfd328967f23dd605e498805c6567b979a9e27090c924dd0d7"
+    },
+    {
+     "path": "vials-glass-rattle-03.wav",
+     "sha256": "99fcfcce72676e35d8b283575bb1b76c6db80c5d355d19ceae19372772a4e830"
+    },
+    {
+     "path": "coins-shake-02.wav",
+     "sha256": "a37bac4d4a9eba05c030b3214e3d7b7fab817c0f6d06cad213d39933e2b9baed"
+    }
+   ],
+   "page": {
+    "sha256": "f91e094654a79a797199d0fe46a6d458c7e704a562193466dbae0d40fb6059cd",
+    "titleOnPage": "Fantasy Accessory SFX Library",
+    "authorOnPage": "Vehicle",
+    "postedOn": "Thursday, August 13, 2015 - 18:09",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "CC0. https://creativecommons.org/publicdomain/zero/1.0/",
+    "filesListedOnPage": [
+     "accessory.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "accessory.zip",
+     "sha256": "1d1166b2469be771d8894cd77ffcd6d500bcb676e2b6cb1c9cecacf97e957217"
+    }
+   ]
+  },
+  "voltiment_bookflip": {
+   "title": "Book Flip Sounds",
+   "author": "Voltiment555",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/book-flip-sounds",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "checked": "2026-11-20",
+   "outputFiles": [
+    "paper_flip_1.mp3",
+    "paper_flip_2.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "BookFlip2.wav",
+     "sha256": "27e8f82128642df83e8dfb7fd170c2575080eadb5c65e8d2aecd94cd0a67f3fd"
+    },
+    {
+     "path": "BookFlip12.wav",
+     "sha256": "6fb6363219c4dfda014e70ff72e091f6dffb4bc50767a1a62df39ee9c3c4af65"
+    }
+   ],
+   "page": {
+    "sha256": "74a80373e2adf59460fd116ac7b1c0b76c632b10946452da47f09983179e2439",
+    "titleOnPage": "Book Flip Sounds",
+    "authorOnPage": "Voltiment555",
+    "postedOn": "Tuesday, April 11, 2017 - 16:03",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "",
+    "filesListedOnPage": [
+     "BookFlip_SFX.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "BookFlip_SFX.zip",
+     "sha256": "aa59a4f7a1f0aa1d1cbcb9561cf1120f2cc66a07ff49b7cc7dc8810ccb9646fe"
+    }
+   ]
+  },
+  "wobbleboxx": {
+   "title": "Level up, power up, Coin get (13 Sounds)",
+   "author": "wobbleboxx (WobbleBoxx Workshop)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/level-up-power-up-coin-get-13-sounds",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "reward_xp.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "Rise03.aif",
+     "sha256": "611b15521416e5b331f37ce78e5a2c6e0b90e19d9c0ee4a3ed0098d8fd2bfbb5"
+    }
+   ],
+   "page": {
+    "sha256": "2a3f791a3142d17c13988c7613d9bb2fbe34359306b0d17a5b90b42138ca1d1c",
+    "titleOnPage": "Level up, power up, Coin get (13 Sounds)",
+    "authorOnPage": "wobbleboxx",
+    "postedOn": "Sunday, November 16, 2014 - 08:49",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "This pack is released under the public domain CC0 license. If you want to give credit (not required): \"WobbleBoxx Workshop\"",
+    "filesListedOnPage": [
+     "SoundPack01.zip"
+    ]
+   },
+   "archivesDownloaded": [
+    {
+     "name": "SoundPack01.zip",
+     "sha256": "b3405c1c98f5223c101fdbfd445903c0b558ebb325b85306964d64a34ef82db3"
+    }
+   ]
+  },
+  "wolfgang": {
+   "title": "Crickets Ambient Noise - loopable",
+   "author": "Wolfgang_ (Ted Kerr)",
+   "source": "OpenGameArt.org",
+   "sourceUrl": "https://opengameart.org/content/crickets-ambient-noise-loopable",
+   "license": "CC0 1.0 Universal",
+   "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "evidenceRead": "OpenGameArt page license field (CC0 link)",
+   "outputFiles": [
+    "amb_night.mp3"
+   ],
+   "sourceFilesUsed": [
+    {
+     "path": "crickets_1.mp3",
+     "sha256": "5b5bd1f744087888c5623543c3ff80be9c2ce106093993e7c8a8492b0280b2c0"
+    }
+   ],
+   "page": {
+    "sha256": "3b269e30519ed7be5affd418c55a5f25adc67b742d4edec003d43db36f35cf15",
+    "titleOnPage": "Crickets Ambient Noise - loopable",
+    "authorOnPage": "Wolfgang_",
+    "postedOn": "Friday, September 3, 2021 - 22:53",
+    "licenseFieldOnPage": [
+     {
+      "label": "CC0",
+      "link": "http://creativecommons.org/publicdomain/zero/1.0/"
+     }
+    ],
+    "copyrightOrAttributionNoticeOnPage": "(optional) Ted Kerr",
+    "filesListedOnPage": [
+     "crickets.mp3"
+    ]
+   },
+   "archivesDownloaded": []
+  }
+ },
+ "audio3": {
+  "checked": "2026-11-24",
+  "note": "BigSoundBank pages and files downloaded and read on 2026-11-24; the BUSHED clips carry their upstream sources in credits.json.",
+  "sources": {
+   "bsb_1763": {
+    "title": "Tawny Owl #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/tawny-owl-1-s1763.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1763.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Tawny Owl or Brown Owls who hoots (Strix aluco). To learn more, go to Wiki: https://en.wikipedia.org/wiki/Tawny_owl",
+    "sha256": "ce99e108db46331f94a4b3618b8641d94897f780d89f93f348c8e6c36b9d9323",
+    "pageSha256": "21872332f262d581143a9bd7e72af2a8196facbb1f11276aea28b676c3cea54a"
+   },
+   "bsb_1764": {
+    "title": "Tawny Owl #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/tawny-owl-2-s1764.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1764.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Tawny Owl or Brown Owls who hoots (Strix aluco). To learn more, go to Wiki: https://en.wikipedia.org/wiki/Tawny_owl",
+    "sha256": "7793bfcb77962fe2652c6272c38118f9a28f93e7830a38834d5617681c7c5a11",
+    "pageSha256": "149a76f93eb83b9b6e0df13ae18e8b52ad966f57f587f65f0408c46b9c8637e4"
+   },
+   "bsb_3459": {
+    "title": "Tawny Owl #3",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/tawny-owl-3-s3459.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/3459.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Song of a tawny owl, a nocturnal raptor. The silent intervals between two successive phrases are most often on the order of 10 to 30 seconds in a bird that is actively singing.",
+    "sha256": "21ba36881a836f15f2f55c3e2c118a6856502162ea8ec1eeb4f210be3c9731bd",
+    "pageSha256": "5d5d2ff5518e38f5cea40f7d7565a025c9a672fb0aaf76b307c33c677116f86d"
+   },
+   "bsb_3460": {
+    "title": "Tawny Owl #4",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/tawny-owl-4-s3460.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/3460.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Song of a tawny owl, a nocturnal raptor. The silent intervals between two successive phrases are most often on the order of 10 to 30 seconds in a bird that is actively singing.",
+    "sha256": "ce0886fcb199a42e1814d582c88bf5870ca0674e23dacd06ae85ee2920f3dcb6",
+    "pageSha256": "79d4711c1c45790e6f55674c7b23d98e9fcbebca6d34056046b00692ba5ba577"
+   },
+   "bsb_1400": {
+    "title": "Barn Owl #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/barn-owl-s1400.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1400.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Four territorial hisses of a male barn owl ( Tyto alba ). It is also referred to as the common barn owl. To learn more, go to Wiki: https://en.wikipedia.org/wiki/Barn_owl",
+    "sha256": "1f4e12e6b0542d6b353c2191d1008002161e0b0f4ea7650233f596d44d7f8a2e",
+    "pageSha256": "a3cfcf829a73de5c0723f5446b377561f2ad9a5e3224461e7298bc7da6b7cc03"
+   },
+   "bsb_1403": {
+    "title": "Barn owl #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/barn-owl-2-s1403.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1403.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Territorial hisses of a male barn owl ( Tyto alba ). It is also referred to as the common barn owl. Recorded from inside the occupied barn. To learn more, go to Wiki: https://en.wikipedia.org/wiki/Barn_owl",
+    "sha256": "7c5dfa2e995bb52d0473297648fa91e6647df387e5f63a2344bb444b19ed4e88",
+    "pageSha256": "9660f64fbe1c2c81c560d3a6b469a420b388a85ea0c6d5f01dc82e7fc1240e05"
+   },
+   "bsb_2476": {
+    "title": "Barn owl #3",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/barn-owl-3-s2476.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2476.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Hisses of a barn owl ( Tyto alba ). It is also referred to as the common barn owl. To learn more, go to Wiki: https://en.wikipedia.org/wiki/Barn_owl",
+    "sha256": "acb5a5ffdf5ded85029a7ef6603c4c733807ad4b4d5910aac235b7431dbc2325",
+    "pageSha256": "2630a8156c4fb6c9507d0f2e76769194b97ccc967a637cb4676baa7fa53b95ec"
+   },
+   "bsb_2477": {
+    "title": "Barn owl #4",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/barn-owl-4-s2477.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2477.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Hisses of a barn owl ( Tyto alba ). It is also referred to as the common barn owl. To learn more, go to Wiki: https://en.wikipedia.org/wiki/Barn_owl",
+    "sha256": "4c51852af96ed95fa793ad19dc63b8288a495cacdfd64222c8d54355b864340a",
+    "pageSha256": "fe320ac5c611ee515fc82469ac97f6818a1a0901214e3127668f26b04d8c5b24"
+   },
+   "bsb_0936": {
+    "title": "Long-Eared Owl #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/long-eared-owl-1-s0936.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/0936.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Song of the Long-eared owl ( Asio otus ). To learn more, go to Wiki: https://en.wikipedia.org/wiki/Long-eared_owl",
+    "sha256": "f2261c89d852cb8ec517c676eb1691cc2b993d4dc9ab32f98d310cefabca60b3",
+    "pageSha256": "b54b3f474dad89eaa8cb75d4598146d14bfca7c8a253197263f503fe141e1e44"
+   },
+   "bsb_0937": {
+    "title": "Long-eared owl #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/long-eared-owl-2-s0937.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/0937.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Song of the Long-eared owl ( Asio otus ) to 10 or 15 meters. To learn more, go to Wiki: https://en.wikipedia.org/wiki/Long-eared_owl",
+    "sha256": "a9ed5b7ea3257120a6ce1fa952115e41f761a44063eb369da785531f40d9c7b8",
+    "pageSha256": "5bc3bd4cbd2f769a09d606d24b343fe545a23c8767751f50e344825cbcbf91b1"
+   },
+   "bsb_0429": {
+    "title": "Tawny Owls",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/owls-s0429.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0429.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Two Tawny Owls or Brown Owls (Strix aluco) that answer each other. A male who hoots and a female who screams. To learn more, go to Wiki: https://en.wikipedia.org/wiki/Tawny_owl",
+    "sha256": "a51a6287745337b48dcb5a164855907434beb7024593c9772ba00ca292774f00",
+    "pageSha256": "fa6b614f09b762fe904681d0de4dc2420ce8fc3b6f9137686bd3bb402243a73c"
+   },
+   "bsb_0297": {
+    "title": "Adhesive tape #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/adhesive-tape-1-s0297.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0297.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Sound of adhesive tape being unrolled (gaffer tape). The sound is long, shifting from higher-pitched to lower-pitched.",
+    "sha256": "1f025c416d3eb2d856b855bd0f18d491532ac14e99ae37902c0ef7ee4f4850c2",
+    "pageSha256": "0e76b07833fbf3693fde4a2cba29659c47d2c68e145bbaec0a9bf4e86271586e"
+   },
+   "bsb_0298": {
+    "title": "Adhesive tape #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/adhesive-tape-2-s0298.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0298.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Sound of adhesive tape being unrolled. The sound isn’t too long, shifting from higher-pitched to lower-pitched.",
+    "sha256": "352f3004650bf0a7aa31ab1c5ffe0cf25c4af6434070a9f68b219da406695d32",
+    "pageSha256": "4ad821aa1cd9ed33621af02dada52c8fe698e061a1d5cd12c2726950c9b1a49e"
+   },
+   "bsb_0299": {
+    "title": "Adhesive tape #3",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/adhesive-tape-3-s0299.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0299.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Sound of adhesive tape being unrolled. The sound is short, shifting from higher-pitched to lower-pitched.",
+    "sha256": "84e5c140ffe095dadfa49190ffc0346ce3b20e74c365163c80c40b7c236eff31",
+    "pageSha256": "e04f0b9f4457cff4e04d242b5f134ebe03ccb99807fa68eb0ad05d539049d71e"
+   },
+   "bsb_0018": {
+    "title": "Torn Paper #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/torn-paper-s0018.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0018.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Paper: Tear long (x2), short tear (x2).",
+    "sha256": "5702e2d0c2abec1ed38dc722434e732ab5c12248b536f4f8999a527a8b88348f",
+    "pageSha256": "0889542f64d5f37dd870e295e3d9055fd6d8027b9fac6a40112120462b3cfbf4"
+   },
+   "bsb_3239": {
+    "title": "Torn paper #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/torn-paper-2-s3239.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/3239.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "I tear off a sheet of paper.",
+    "sha256": "cbfecc737e2270c91dca9641b27b7b5c10cd3d8789cdbef872b024012f26f17a",
+    "pageSha256": "a5f8121eb1308e4d00de99da5134eb6fec1ad78408b859abe4872003633cb068"
+   },
+   "bsb_0670": {
+    "title": "Newspaper ball",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/newspaper-ball-s0670.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0670.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Noise of newspaper that is rolled into a ball.",
+    "sha256": "bf5f79a2e0c2d48839038772948e681558f361150739690661389c42726ab53e",
+    "pageSha256": "d53245a57118f266389d1b5ca55cb0ffef8455edd4b82f6494ec24ef2a216daa"
+   },
+   "bsb_0785": {
+    "title": "Paper",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/paper-s0785.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0785.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Handling a paper.",
+    "sha256": "d39ec62e16243b1b9ccb1f0f7f1176449900061cb0a0b48de4957d063cac7599",
+    "pageSha256": "cd18e58407d3ae09866a60c8adfd66a751c6525d930151f219ccd383bd988329"
+   },
+   "bsb_1410": {
+    "title": "Closed book #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/closed-book-1-s1410.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1410.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "A book that closes.",
+    "sha256": "a7886e5c0736bca3d28c84eec4919f182d15295ddcedb5f9fe45125f08cbe7f9",
+    "pageSha256": "5d1b1b2358488988a2d0e18f606b0679d97204096889490396c4310c7725c8c4"
+   },
+   "bsb_1411": {
+    "title": "Closed book #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/closed-book-2-s1411.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1411.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "A book that closes.",
+    "sha256": "249061b3e1e00cc39ab664e60c947a3ea899ba4ab7375eb11c5f31fcd1dc083d",
+    "pageSha256": "ca887e5c1fcb9856524d0bdc03a15ccb21acdfc96bc0f3128f79a31fb4621e5e"
+   },
+   "bsb_1412": {
+    "title": "Closed book #3",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/closed-book-3-s1412.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1412.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "A book that closes.",
+    "sha256": "1938ff5cd6e29c2d35f80830d882fb7a8060f52159bfef3dd37f172c7fe35a01",
+    "pageSha256": "76d29c126a44e8036d2acd53c43f791a7e76497319bf6f4388c4266569a80102"
+   },
+   "bsb_2079": {
+    "title": "Chimes \"Dream\" #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/chimes-dream-1-s2079.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2079.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Cluster chimes of a dream hook.",
+    "sha256": "1257cc546b69523e2b320f6e1cf05f302e3c253368634639dfcbb98afccc0499",
+    "pageSha256": "b20ddae41cb5899d4bf2e86853d42519f472971e9d5aaf9278a578d9b2e54e69"
+   },
+   "bsb_2080": {
+    "title": "Chimes \"dream\" #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/chimes-dream-2-s2080.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2080.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Cluster chimes of a dream hook.",
+    "sha256": "57db1358f017943a6f474686f02f6026547baa241d657b0d14902d14a9f0f74f",
+    "pageSha256": "207e254d6f5209b08607f403bb08f1a0f9c008fa88b90c63b559b5dc20068722"
+   },
+   "bsb_2087": {
+    "title": "Chimes \"butterfly\" #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/chimes-butterfly-1-s2087.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2087.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Decorative small chimes cluster.",
+    "sha256": "58fa4b221490611084df79c7a8881c56811ae5817265f647ee3974afb725cf55",
+    "pageSha256": "9007badc48f0dc6681c4eb7273e16c38b0b0cdcb1cea690e686f4f2f13f0cce9"
+   },
+   "bsb_2687": {
+    "title": "Cluster Chimes #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/cluster-chimes-1-s2687.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2687.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The sound of chimes in the wind.",
+    "sha256": "443e31bc6df057c05aea27d7a5edabc9e58ecf4c643923b9f69d7a583596c4e9",
+    "pageSha256": "4c45a5bd8e671b334a36cb9164b461517f449d220c6096b5e3fd696aaa94499e"
+   },
+   "bsb_0040": {
+    "title": "Dreamcatcher",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/dreamcatcher-s0040.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0040.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Dreamcatcher cluster chimes.",
+    "sha256": "356d41027ba62e647ab2bc0722a6b70e4b7b9a093abc6eae0be6acd35089b790",
+    "pageSha256": "06ea8dce58b0c6cfbabc3093dd67795939399c93e13de990a8ec240d2fd78ae0"
+   },
+   "bsb_0920": {
+    "title": "Glockenspiel",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/glockenspiel-s0920.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0920.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Slipped up on a glockenspiel.",
+    "sha256": "6b12efb3fd465d97a94112e8561a066efb51b20cbd1bf0a3ee4bd857e8c14a84",
+    "pageSha256": "5b6de4b3ee1a07b96af03a02b8f37c5c53c7537dbf0b615531ae8decbe49ef85"
+   },
+   "bsb_1398": {
+    "title": "Idea #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/idea-1-s1398.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1398.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Noise of an idea in the cartoons. This is the note \"Sol\" of a metallophone.",
+    "sha256": "5b7221c59e53f5cd08390dc3c71d2aeccaad1236efb8833d9951a2e7200c4115",
+    "pageSha256": "579464257a2a63f0fc75c73d52168d9da0104e82a1700af277fbfebbab2cf070"
+   },
+   "bsb_1399": {
+    "title": "Idea #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/idea-2-s1399.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1399.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Noise of an idea in the cartoons. This is the note \"Sol\" of a metallophone.",
+    "sha256": "fe40a8703100e28c0831f7c07ad5075e8ed94f0eba9d9f35a7eeea9d5f63418e",
+    "pageSha256": "7b22a3edce94f98bb5ee8a745150506d9a9eaab28bb7adbe4216279580c8eefc"
+   },
+   "bsb_1865": {
+    "title": "Music box, G# #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/music-box-gd-1-s1865.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1865.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The \"Sol#\" of a music box.",
+    "sha256": "6a5156b1eccf31faff6616d8accb0c75f0aeb7362609c7be4d5216ae5709939f",
+    "pageSha256": "f8f51ff277c8521c6b676c0de5d247a4361fb3170cec229fa39baf10e1327c36"
+   },
+   "bsb_1866": {
+    "title": "Music box, A# #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/music-box-ad-1-s1866.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1866.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The \"la#\" of a music box.",
+    "sha256": "5b02908fc74bde0c92efe050bc7cfeb1681c0524cd07767936ca8c0bb7066616",
+    "pageSha256": "50454864b08d881ea02fb5d2912050df703c5fc89d228619376c3e02ca3d854a"
+   },
+   "bsb_1867": {
+    "title": "Music box, C #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/music-box-c-1-s1867.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1867.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The \"do\" of a music box.",
+    "sha256": "bb0f90cde3dd215b41d884cdcdb3f51c81c0cd85d32ec91d7f724cbe6dd2048e",
+    "pageSha256": "137049b91ccd58ab905b3a85f4b174aaedd4b1b6490b5981cd72e300630f5221"
+   },
+   "bsb_1868": {
+    "title": "Music box, C# #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/music-box-cd-1-s1868.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1868.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The \"do#\" of a music box.",
+    "sha256": "45847dfeab09e7ddc6e384d63eca506ce8b99d2b1a51066d2ade8ad9a31509df",
+    "pageSha256": "ba05c43fdd182e917c1fd70fdc1fd71cfe09d9277975e5ba40fcf116a4890ce6"
+   },
+   "bsb_1870": {
+    "title": "Music box, F #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/music-box-f-1-s1870.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1870.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The \"fa\" of a music box.",
+    "sha256": "12ee7ca317ece7a01f8c11eabb3c37267d9b05a3fe173e6f2f963289f93d167b",
+    "pageSha256": "5c455b2c0ad770ece97133e744998e8899469d3c074a02775dffab301fe3d4c0"
+   },
+   "bsb_1871": {
+    "title": "Music box, G #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/music-box-g-1-s1871.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1871.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The \"sol\" of a music box.",
+    "sha256": "95251372b15e2bdb7ab0aee64a4ed11c1eda6cb20765b7caad770c7f9d3ab8a4",
+    "pageSha256": "8fe5b58e8d2369cc31c5cdfaa290950f8b95cf08d93591be70f8167fbac7da44"
+   },
+   "bsb_1687": {
+    "title": "Triangle #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/triangle-1-s1687.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1687.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Triangle of 15 cm.",
+    "sha256": "64b528bc349871b41e22d07e675d30c1400a3d818f6e2c31de62dc66e3191cac",
+    "pageSha256": "db8e5bedf44519b92b9af796f0550bdfb212a4953d28af818520a6c2ea9d9c89"
+   },
+   "bsb_3588": {
+    "title": "Shop doorbell chime",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/shop-doorbell-chime-s3588.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/3588.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Chime of a small doorbell found on a shop entrance.",
+    "sha256": "3f545bf8435205f7866ad9b6c7985ab801c24efd63826bf40568b98fcaf02677",
+    "pageSha256": "3f68603438aaf26fc71c438531d53c571388a8cb011c6dce8c25eb2ec4ffbe1b"
+   },
+   "bsb_0479": {
+    "title": "Counter bell #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/counter-bell-s0479.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/0479.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "An all-metal counter bell ringing, such as one finds in hotels or bars.",
+    "sha256": "0c33233c122b4faf03caad07b432aa9728b886a5bef8cb39bf28db0a606b4cdb",
+    "pageSha256": "598a70f0a8dc5a2240d2bf119037beb083128d6a400a1a64724a9f92917109cb"
+   },
+   "bsb_3360": {
+    "title": "1 pendulum chime",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/1-pendulum-chime-s3360.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/3360.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "A single pendulum bell.",
+    "sha256": "0b9d1a8eabcb38a6271bf327c4aa95c0fd71f87342ba14474516071a82b75dbc",
+    "pageSha256": "dadd4a0255e089baddfe8b9cc71b74fc36ebb2d83b930452c9322eb56c9f216f"
+   },
+   "bsb_0572": {
+    "title": "Whoosh #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/whoosh-1-s0572.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0572.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Whoosh of a sword that cuts through the air. Learn how to make this sound effects: https://lasonotheque.org/dossiers/techniques-bruitage-f112.html#22",
+    "sha256": "ff06c297efb8cf1c9438473ed558d5ba0063638b0727687b8ab78fd6e9733769",
+    "pageSha256": "bb0160960eb2f539d20023d87b9a5013cd557de62b17828d3306416285448c52"
+   },
+   "bsb_0573": {
+    "title": "Whoosh #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/whoosh-2-s0573.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/0573.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Whoosh of a sword or an arrow through the air. Learn how to make this sound effects: https://lasonotheque.org/dossiers/techniques-bruitage-f112.html#22",
+    "sha256": "4e497f50507f42b78c72db9f611366a83f90eea54a4adbb9ffce4b705849b068",
+    "pageSha256": "15683c384ba9bda012cb231eb71833086c7f82531c9140185528c6069f501b64"
+   },
+   "bsb_1795": {
+    "title": "Whoosh #3",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/whoosh-3-s1795.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1795.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Whoosh made with a long rope.",
+    "sha256": "b2e41d0320f6d54bb2462cf8b06552564fac60496b58553cbdcd561a6278958f",
+    "pageSha256": "fced37891ee032b7226b83684a9a6e6e9607cc463ad236eec9d4efa304dbb57c"
+   },
+   "bsb_1798": {
+    "title": "Whoosh #10",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/whoosh-10-s1798.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1798.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Whoosh made with a large bamboo stick.",
+    "sha256": "a2bce5665468d1adf5880287a068eb5d82fa0405d61792df663838e58e4a16a6",
+    "pageSha256": "bab9ed1ce84e070dbd02c0b9e0f6efa92633e35f47998fbf2c679194b9599c73"
+   },
+   "bsb_1799": {
+    "title": "Whoosh #6",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/whoosh-6-s1799.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1799.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Whoosh made with a wooden sheet.",
+    "sha256": "5694af91c0959ca100da768a1b2f1c695f5e2c57451ae94ee74fc80c14a2e318",
+    "pageSha256": "46dfbb757bb79139b7fae7a76e541b301c379b448c894ccf030aea3b0a642d4e"
+   },
+   "bsb_1802": {
+    "title": "Whoosh #9",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/whoosh-9-s1802.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1802.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Whoosh made with a wooden sheet.",
+    "sha256": "53fe3adb80b3709c7ff53cc4fc03fccb95b9ab81c2f61f5730c5b7cd34ddf3ce",
+    "pageSha256": "89151724a5772d910a1997c86ee51794687b601d19321d6a47bf4354f04de1fd"
+   },
+   "bsb_0648": {
+    "title": "Champagne cork #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/champagne-cork-2-s0648.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0648.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Champagne cork that pops.",
+    "sha256": "59176d6d503e2f0a0064ca8455f206821aa2c6f0047e0be5f3caa56f5d0fe81c",
+    "pageSha256": "f01aa8d6df2dc16231b3c1996d761d0d8b1ea05200f2cdded4df7e4cfa531d55"
+   },
+   "bsb_1278": {
+    "title": "Sparkling Candle #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/sparkling-candle-1-s1278.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1278.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "A sparkling candle that burns.",
+    "sha256": "5b79cb541681dfa772425e2b7cef6a8e6c31a38dd3eb94630c136026a936fba5",
+    "pageSha256": "e04554dd1f4c052338c2035ce74b50b95c562e89db9ce4a13a3e166ea61f40e1"
+   },
+   "bsb_1204": {
+    "title": "Glass, Placed on Table",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/glass-placed-on-table-s1204.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1204.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Glass placed and then taken several times from a wooden table.",
+    "sha256": "e8fcbab49c48a4b9fa55ec26f7be5e6c405bccbd90d7bd857e154592dcf67e19",
+    "pageSha256": "01f906128b05b22eb924e1edb622e36c35e423c0c2fb2b9d9179cd50a40627fc"
+   },
+   "bsb_0627": {
+    "title": "Cup on a table",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/cup-on-a-table-s0627.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0627.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Bouncing a cup on a table.",
+    "sha256": "4ec1310420b0acdf6e927ded8d1de496ccabb8efb859b913b37e1628d55df214",
+    "pageSha256": "9b496675365830708f2d8b0f84f3dfb6ccdc8931b463459f215bd7e62eb47f94"
+   },
+   "bsb_1195": {
+    "title": "Teaspoon, placed on table",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/teaspoon-placed-on-a-table-s1195.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1195.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "A teaspoon placed and then removed several times from a table.",
+    "sha256": "c9901aa88f6da7a99ffb9c37cc9d83c64931a2e65beb57959662de92c39ae122",
+    "pageSha256": "7f009f5adc2f16e0256bd31a15709b31f188b49b16a9a50beff69e72bb2e00ab"
+   },
+   "bsb_0087": {
+    "title": "Key placed on wooden table",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/key-placed-on-wooden-table-s0087.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0087.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Key placed on wooden table (x6).",
+    "sha256": "294c38cff9d9a2c6aac88b350a7f80375c7e975d50bbf13fb899415021949055",
+    "pageSha256": "36c5648f26f1933adb55b979ce6aff15e0ceb62d3189ee2879be9b60980df9aa"
+   },
+   "bsb_1588": {
+    "title": "Gavel, 1 blow",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/gavel-1-blow-s1588.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1588.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "A wooden hammer and his pile. The judges use it.",
+    "sha256": "101835eaaf9f5e4d966dcfef9e4d70acaee1cb196a4ee77b2d76b487739874e5",
+    "pageSha256": "2dde4ad1043830cd3f391a62121b1e4a731a89243e1459c62feca50c67b2e37f"
+   },
+   "bsb_1489": {
+    "title": "Drumsticks #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/drumsticks-2-s1489.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1489.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Four shocks between two wooden drumsticks. Like before a piece of rock music. Tempo of 120 bpm.",
+    "sha256": "b0e1ef3fe4e7f92aef035dc7d604645aab33b136ba5b8286ed5952ac7c4aec95",
+    "pageSha256": "b17dd8f34493fb5da5c7163cce233cd006227f42ab8bf84a547b2ff5532faa80"
+   },
+   "bsb_0581": {
+    "title": "Two dice on wooden table",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/two-dice-on-wooden-table-s0581.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0581.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Two dice are thrown on a wooden table.",
+    "sha256": "1d4a867a45c07ff951688196c9b1d7ccd4934bd146d370baf1ebb0c5c52a0ea2",
+    "pageSha256": "a9c4f9f3068ea4232299cf7c0ce4301da1aef4cec18fb1ce61fd25a21b0a3957"
+   },
+   "bsb_0666": {
+    "title": "Chair",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/chair-s0666.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0666.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Moving a chair on the tile.",
+    "sha256": "13abaf29fc0e189d760b9307a465a2f2f59ac898efa3693561d2bd1d65512988",
+    "pageSha256": "0453c6bba39314652c45e0f0a5f17e0c6621e735fcefbc20eb3dc51a07705e58"
+   },
+   "bsb_0576": {
+    "title": "Canvas bag on floor",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/canvas-bag-on-floor-s0576.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0576.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "A canvas bag thrown on the floor. 9x.",
+    "sha256": "90ee960a18cc96ca29bc97ad9ca724fd81cb13189e3483e8b587a0a8e82ef8a9",
+    "pageSha256": "d45d862ad9907990c1ee94d2556b5940a6c291f543b561d3584f5ef52f816307"
+   },
+   "bsb_0013": {
+    "title": "Cloth",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/cloth-s0013.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0013.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Cloth: Short tear (x2), tearing along (x2).",
+    "sha256": "7427de6e911d52a966c8a1106c160358f8703e71689637b7e86add909a8ff91e",
+    "pageSha256": "95bbf1100fce8a7a944c9c3b15f4b3d7042d0a91c6fe2e87f03b47ec88eb9186"
+   },
+   "bsb_1580": {
+    "title": "Stapler on wood",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/stapler-on-wood-s1580.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1580.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Noise from a DIY stapler on wood.",
+    "sha256": "53152508dd34c8fce5a89bdb5ccfea5404a8f3bb25ee81d247305801810b9fd9",
+    "pageSha256": "d2a4281e3f5e5ca8bd759b61fa72451475277e5be78fd3dadb44d83cc9f9052b"
+   },
+   "bsb_0305": {
+    "title": "Creaking closet door",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/creaking-closet-door-s0305.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0305.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Sound of a door creaking wood (type closet). Learn how to make a squeaking sound effects: https://www.libertivi.com/lelabodubruiteur_46",
+    "sha256": "8fc215ecdd15d6547c0a7d1920b77f1f91e7b63c40a3a88df5009318a9e03c73",
+    "pageSha256": "7f9046faf4f233ee1209ee22ab62eac6a1b8805c668187431303600178aeab94"
+   },
+   "bsb_0140": {
+    "title": "Bicycle Rear Wheel",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/bicycle-rear-wheel-s0140.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0140.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Bicycle wheel rolling.",
+    "sha256": "8176acf0c3e850a5ad21289ec092fa41acf638de52b84217487121c9d53499f8",
+    "pageSha256": "2e8ca2a4bbdbed42e720cf67a085ac5b14653fac1104387ae63bcdbdc022383c"
+   },
+   "bsb_2891": {
+    "title": "Flight Bird #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/flight-bird-1-s2891.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2891.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The sound of a bird's wings taking flight. Produced with a sound effect technique: https://lasonotheque.org/dossiers/techniques-bruitage-f112.html#1",
+    "sha256": "be13c11a27800cbaac579a38a54f8731271cd871160a8e8b9c46f7309512741e",
+    "pageSha256": "5a84a8830344c2470af68b0da3ea3488ce8f4ef1212a107616678bd734632d18"
+   },
+   "bsb_2892": {
+    "title": "Flight bird #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/flight-bird-2-s2892.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2892.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The sound of a bird's wings taking flight. Produced with a sound effect technique: https://lasonotheque.org/dossiers/techniques-bruitage-f112.html#1",
+    "sha256": "4d1f264ac003d5d80adb3db6a7bfcedc7a1587d3b79c1ffd35e1715b42d60371",
+    "pageSha256": "e8b9d4fe2ffa9b129ebf9f110626ca6bed6a69f4e321f4f4ef1abbad6d5bc4a6"
+   },
+   "bsb_0476": {
+    "title": "Flight of a pigeon",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/flight-of-a-pigeon-s0476.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0476.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Sound effect of the flight of a pigeon type bird (x3). This is not a natural sound recording, but a sound effect, which I detail in video here: https://www.libertivi.com/lelabodubruiteur_41",
+    "sha256": "bc6f3e3c1c8f56fee7f0dcffb8a9870e091b5fb6e9d35d07038ceb2bacbb4e3d",
+    "pageSha256": "70a3bd51fb198d2a059762bc9b60491697ce86605c18edac24d696a5e1b2894e"
+   },
+   "bsb_1839": {
+    "title": "Jumping on Grass #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/jumping-on-grass-1-s1839.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1839.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Human jumping with feet together on a grassy ground.",
+    "sha256": "bb9ea27d2ced8e77b5cfcdf6a048a7f99bab7f3d0ab94699b49993afac6bd97e",
+    "pageSha256": "cd1646b5775cda4b95521aba765d091954544dceec278410da8c38a8f2c7bd2a"
+   },
+   "bsb_1840": {
+    "title": "Jumping on grass #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/jumping-on-grass-2-s1840.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1840.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Human jumping with feet together on a grassy ground.",
+    "sha256": "dad39beeeea838e472df3f9278a67095deafd40138142f6d7de11045232bf8d3",
+    "pageSha256": "7a6f32419973925650048fb7520c3b197a77786b9a56c34935207fafa0251aad"
+   },
+   "bsb_1841": {
+    "title": "Jumping on wooden pontoon #1",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/jumping-on-wooden-pontoon-1-s1841.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1841.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Human jumping with feet together on a wooden pontoon.",
+    "sha256": "77e69a06965907452b70afafc84f72b5b3f8bb846ba6f8283e77771c9a99810f",
+    "pageSha256": "aa23524392030d31f2d606dcddb7ea37e76dac42933106994dc5b0ed9a8c8ef8"
+   },
+   "bsb_1842": {
+    "title": "Jumping on wooden pontoon #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/jumping-on-wooden-pontoon-2-s1842.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/1842.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Human jumping with feet together on a wooden pontoon.",
+    "sha256": "1d679d7654d2d84aa3e625c5bd134e1d84052974c9e139e764decebbdc5a147b",
+    "pageSha256": "2bca8fedd5f4f613c6a52cc6447f53bd6911a6964b3c0b7e01026b710e944439"
+   },
+   "bsb_2890": {
+    "title": "Footstep in the Snow #2",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/footstep-in-the-snow-2-s2890.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/2890.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Human footsteps in the snow. Easy to loop. Made with a sound effect technique: https://lasonotheque.org/dossiers/techniques-bruitage-f112.html#2",
+    "sha256": "5d812b4cba4141a325cc2bde33f2a04316bd0e62fd3eff5051860396b7c73208",
+    "pageSha256": "31cd698c43292a200eabb16f172eb26a9aa253efdc2bacd821242f0c09fa7c04"
+   },
+   "bsb_0854": {
+    "title": "Steps in the short grass",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/steps-in-the-short-grass-s0854.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0854.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Several steps in the short grass.",
+    "sha256": "cc34d25dda9c0cba1cb881bba0ab837e3cdb12d0aef1fcbeeb51705af7d0353d",
+    "pageSha256": "6f7466ace455b23f623d748cc9ef5abf2e8c0835eb9564d0a752f8132a95aa24"
+   },
+   "bsb_0908": {
+    "title": "Wind in Tall Grass",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/wind-in-tall-grass-s0908.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0908.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Sound of wind in the tall grass of a field.",
+    "sha256": "e45986e15436ea41af289fb929524df889c1f3204e263fd6b1231d4140b11da1",
+    "pageSha256": "2f0a4b2f4e6489cd4ee145b5b4d39e5c674f14c8181e127d4c02059da3cf118a"
+   },
+   "bsb_0659": {
+    "title": "Wind in a Tree",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/wind-in-a-tree-s0659.html",
+    "url": "https://bigsoundbank.com/UPLOAD/flac/0659.flac",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "Wind noise in a tree. Some birdsong.",
+    "sha256": "3f8e19b5af975b175f5884423c175c5b53bd5db774006fd7dd3f28c1735ee196",
+    "pageSha256": "ebf9101d0b5a0336a599c4839af42fe6b8a42f59e95e0ba5648e02f08ba3f1bf"
+   },
+   "bsb_0904": {
+    "title": "Wind in the Trees",
+    "author": "Joseph Sardin",
+    "page": "https://bigsoundbank.com/forest-wind-in-the-trees-s0904.html",
+    "url": "https://bigsoundbank.com/UPLOAD/bwf-en/0904.wav",
+    "license": "CC0 1.0 Universal",
+    "evidence": "BigSoundBank page states: \"License CC0 (public domain): Free and royalty-free\"",
+    "desc": "The microphones are directed to the sky, to the trees in the forest of Rambouiller (France). Discover \" Atmosphere \": unique soundscapes for relaxation , focus , or meditation . Create a soothing atmosphere with our natural sounds and explore guided meditations to find calm and serenity. Customize the length and intensity for a sound experience tailored to your needs... Find it here →",
+    "sha256": "0977950ade4efe3c1a975c4c7c983b1487bfeb4adb456895e4d0b637ba81373b",
+    "pageSha256": "3ba6ce1c4d8e8e042cf902f7b64b6e054cd299a84597039406ff9c247051736d"
+   }
+  }
+ }
+}
