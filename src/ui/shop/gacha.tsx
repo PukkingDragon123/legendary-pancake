@@ -218,7 +218,7 @@ export function PullShow(p: { prizes: Prize[]; motif: 'snow' | 'stars'; onDone: 
           {Array.from({ length: shoot }, (_, k) => (
             <div class={'nv-shoot' + (k === 0 ? ' lead' : '')} style={{ top: `${(k === 0 ? 20 : 8 + k * 11)}%`, animationDelay: `${0.25 + k * 0.22}s`, '--len': `${k === 0 ? 46 : 26}vmax`, '--img': `url("${shootURL(STAR_COL[k === 0 ? best : (Math.max(3, Math.min(best, 4) - (k % 2)) as Stars)], 72)}")` } as unknown as string} />
           ))}
-          <div class={'nv-sky-flash r' + best} style={{ '--flash': `url("${burstURL(64, STAR_COL[best])}")` } as unknown as string} />
+          <div class={'nv-sky-flash r' + best} style={{ '--flash': `url("${burstURL(128, STAR_COL[best])}")` } as unknown as string} />
           <span class="nv-skip">Tap to skip</span>
         </div>
       )}

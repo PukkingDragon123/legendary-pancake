@@ -338,11 +338,31 @@ export function iceStyle(name, scale = 2) {
 
 // ------------------------------------------------------------------ tiling surface patterns
 
+/** Realistic paper, the way BUSHED paints its notes: a warm base with soft mottling, short fibres and a few
+ * flecks of foxing, lightly quantised. Tileable (the mottling uses whole periods of the tile). */
+function paperTile(N, base, seed, o = {}) {
+  const [br, bg, bb] = rgb(base), px = new Array(N * N);
+  const T = (a, b, ph) => Math.sin(((a * 0) + ph)) * 0, TAU = Math.PI * 2; void T;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const n = Math.sin(TAU * (x * 1 + y * 2) / N + seed) * 2.2 + Math.sin(TAU * (x * 3 - y * 1) / N + seed * 2) * 1.6 + Math.sin(TAU * (x * 5 + y * 4) / N + seed * 3) * 0.9 + (hn(x, y, seed) - 0.5) * (o.grain ?? 6);
+    px[y * N + x] = n;
+  }
+  // fibres: short streaks, mostly along x
+  for (let k = 0; k < N * N * 0.012; k++) {
+    const x0 = Math.floor(hn(k, 1, seed) * N), y0 = Math.floor(hn(k, 2, seed) * N), len = 2 + Math.floor(hn(k, 3, seed) * 5), d = hn(k, 4, seed) > 0.5 ? 5 : -4;
+    for (let i = 0; i < len; i++) px[((y0 + (i > 2 && hn(k, 5, seed) > 0.6 ? 1 : 0)) % N) * N + ((x0 + i) % N)] += d;
+  }
+  // foxing flecks
+  for (let k = 0; k < (o.fox ?? 6); k++) { const x0 = Math.floor(hn(k, 7, seed) * N), y0 = Math.floor(hn(k, 8, seed) * N); px[y0 * N + x0] -= 14; px[y0 * N + ((x0 + 1) % N)] -= 8; }
+  return (x, y) => { const n = px[(y % N) * N + (x % N)]; const q = (v) => Math.max(0, Math.min(255, Math.round((v + n) / 4) * 4)); return '#' + [q(br), q(bg - 0.2 * Math.abs(n)), q(bb - 0.5 * Math.abs(n))].map((v) => v.toString(16).padStart(2, '0')).join(''); };
+}
+const PAPER_TILE = paperTile(64, '#efe6d0', 3);
+const KRAFT_TILE = paperTile(64, '#cdb48c', 9, { grain: 9, fox: 3 });
 const PAT = {
-  /** woven linen: the panel's inside */
-  linen: [16, 16, (x, y) => { const w = (x + (y >> 1)) % 2 === 0, f = hn(x, y, 2); return f > 0.96 ? C.linen : w ? (y % 2 ? '#efe7d4' : C.paper) : (x % 4 === 0 ? '#e9e0ca' : '#f1eada'); }],
+  /** the board's inside: realistic warm paper */
+  linen: [64, 64, PAPER_TILE],
   /** kraft paper */
-  kraft: [16, 16, (x, y) => { const f = hn(x, y, 5); return f > 0.9 ? '#c9ad84' : f > 0.82 ? '#e2cba3' : (x + y * 3) % 11 === 0 ? '#cdb28a' : '#d8bf96'; }],
+  kraft: [64, 64, KRAFT_TILE],
   /** dusk velvet */
   velvet: [8, 8, (x, y) => ((x + y) % 4 === 0 ? '#2f3b4a' : (x - y + 8) % 4 === 0 ? '#222b37' : C.night)],
   /** oak planks running sideways */
@@ -383,7 +403,7 @@ export function patternURL(name, scale = 2) { const key = 'pat:' + name + scale;
 
 function toURL(b) { const c = document.createElement('canvas'); c.width = b.w; c.height = b.h; c.getContext('2d').putImageData(new ImageData(b.d, b.w, b.h), 0, 0); return c.toDataURL('image/png'); }
 /** A pixel sunburst: hard-edged rays in two alpha steps, dithered out with distance. `off` shifts the rays by half a gap. */
-export function raysURL(off = 0, n = 14, size = 96) {
+export function raysURL(off = 0, n = 18, size = 256) {
   const key = 'rays:' + off + ':' + n + ':' + size;
   if (urls.has(key)) return urls.get(key);
   const b = new Buf(size, size), c = size / 2;
@@ -392,15 +412,15 @@ export function raysURL(off = 0, n = 14, size = 96) {
     if (r > 1 || r < 0.08) continue;
     const a = ((Math.atan2(dy, dx) / Math.PI / 2 + 1) * n + off * 0.5) % 1;
     if (a > 0.42) continue;
-    const fade = r > 0.75 ? ((x + y) % 2 ? 0 : 1) : r > 0.55 ? ((x * 3 + y) % 4 ? 1 : 0) : 1;
-    if (!fade) continue;
-    b.set(x, y, [255, 255, 255, a < 0.08 || a > 0.34 ? 120 : 200]);
+    const core = a > 0.08 && a < 0.34;
+    const alpha = (core ? 190 : 110) * (r > 0.8 ? 0.35 : r > 0.6 ? 0.6 : 1);
+    b.set(x, y, [255, 255, 255, Math.round(alpha)]);
   }
   urls.set(key, toURL(b));
   return urls.get(key);
 }
 /** A pixel burst: concentric stepped rings and a 4-point star, white (tint with a filter or mix-blend) */
-export function burstURL(size = 64, col = '#ffffff') {
+export function burstURL(size = 128, col = '#ffffff') {
   const key = 'burst:' + size + col, k = CC(col), W = (a) => [k[0], k[1], k[2], a];
   if (urls.has(key)) return urls.get(key);
   const b = new Buf(size, size), c = size / 2;
@@ -445,7 +465,10 @@ export function injectIceCSS() {
   for (const k of Object.keys(BTN)) css += `.nv-btn.${k}{${iceStyle(`ice_btn_${k}`, 2)}}\n.nv-btn.${k}:active:not(.off),.nv-btn.${k}.down{${iceStyle(`ice_btn_${k}_down`, 2)}}\n`;
   css += ':root{';
   for (const p of Object.keys(PAT)) css += `--nv-pat-${p}:url("${patternURL(p, 2)}");`;
-  css += `--nv-rays-a:url("${raysURL(0)}");--nv-rays-b:url("${raysURL(1)}");--nv-burst:url("${burstURL()}");--nv-burst-lamp:url("${burstURL(64, C.lamp)}");--nv-burst-lilac:url("${burstURL(64, '#c6bdd6')}");--nv-burst-lake:url("${burstURL(64, C.sky)}");--nv-twinkle:url("${spriteURL('shop_twinkle', 2)}");`;
+  css += `--nv-rays-a:url("${raysURL(0)}");--nv-rays-b:url("${raysURL(1)}");--nv-burst:url("${burstURL()}");--nv-burst-lamp:url("${burstURL(128, C.lamp)}");--nv-burst-lilac:url("${burstURL(128, '#c6bdd6')}");--nv-burst-lake:url("${burstURL(128, C.sky)}");--nv-twinkle:url("${spriteURL('shop_twinkle', 2)}");`;
+  // the shop's own materials (BUSHED pixel textures, restyled): real oak for signs, the boutique's wallpaper
+  const base = (import.meta.env && import.meta.env.BASE_URL) || '/';
+  css += `--nv-wood:url("${base}models/shop/tex/beams.png");--nv-paper:url("${base}models/shop/tex/paper.png");`;
   css += '}\n';
   const st = document.createElement('style');
   st.id = 'hh-ice-frames';

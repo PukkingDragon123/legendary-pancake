@@ -191,6 +191,7 @@ const PROPS: Place[] = [
   { id: 'spinning_wheel', h: 1.05, at: [-3.45, 0, 0.75], yaw: 0.7 },
   { id: 'suitcase', h: 0.5, at: [-2.75, 0, 1.55], yaw: 0.35 },
   { id: 'suitcase', h: 0.42, at: [-2.73, 0.5, 1.53], yaw: 0.6 },
+  { id: 'lantern', h: 0.3, at: [-2.7, 0.92, 1.5], yaw: 0.3 },
   // back wall, right of the window: the vintage hutch, a pothos, a potted fir in the corner
   { id: 'gg_cabinet_vintage', h: 2.25, at: [2.6, 0, -2.45] },
   { id: 'gg_plant_pothos', h: 0.45, at: [2.2, 2.25, -2.5] },
@@ -275,7 +276,7 @@ export class Boutique implements Stage {
   private rt: THREE.WebGLRenderTarget | null = null;
   private post = new THREE.ShaderMaterial({
     vertexShader: POST_VS, fragmentShader: POST_FS, depthTest: false, depthWrite: false,
-    uniforms: { tColor: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uTime: { value: 0 }, uGrain: { value: 0.035 }, uQuant: { value: 48 }, uVig: { value: 0.32 }, uSat: { value: 0.92 }, uWarm: { value: 1.0 }, uContrast: { value: 1.05 }, uExposure: { value: 1.25 } },
+    uniforms: { tColor: { value: null }, uRes: { value: new THREE.Vector2(1, 1) }, uTime: { value: 0 }, uGrain: { value: 0.035 }, uQuant: { value: 48 }, uVig: { value: 0.32 }, uSat: { value: 0.92 }, uWarm: { value: 1.0 }, uContrast: { value: 1.05 }, uExposure: { value: 1.4 } },
   });
   /** screen (CSS) pixels per internal pixel */
   pixel = 1.6;

@@ -106,7 +106,6 @@ function frostlight(w: number, h: number): Pix {
   for (let i = 0; i < 6; i++) { const x = r() * w, y = r() * hor * 0.5; p.set(x, y, K.snow); p.set(x - 1, y, K.ice); p.set(x + 1, y, K.ice); p.set(x, y - 1, K.ice); p.set(x, y + 1, K.ice); }
   // a big pale moon with stepped halo rings
   const mx = w * 0.82, my = h * 0.16, mr = Math.max(5, h * 0.07);
-  p.halo(mx, my, mr * 3, K.sky, 0.3);
   p.circle(mx, my, mr, K.snow); p.circle(mx + mr * 0.3, my - mr * 0.2, mr * 0.28, K.mist); p.circle(mx - mr * 0.35, my + mr * 0.35, mr * 0.18, K.frost);
   // mountains with snowcaps
   for (let x = 0; x < w; x++) {
@@ -123,7 +122,6 @@ function frostlight(w: number, h: number): Pix {
   }
   // the gingerbread cottage: honey walls with icing trim, berry sweets, lamplit windows
   const cx = w * 0.64, cb = hor + h * 0.05, cw = Math.max(18, w * 0.13), ch = cw * 0.55;
-  p.halo(cx, cb - ch * 0.4, cw * 1.3, K.lamp, 0.22);
   for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) p.set(cx - cw / 2 + x, cb - ch + y, y % 4 === 0 ? K.clay : x % 5 === 0 ? K.terracotta : K.ochre);
   for (let x = 0; x < cw; x += 3) p.set(cx - cw / 2 + x, cb - ch + ch * 0.45, K.snow);
   for (let y = 0; y < ch * 0.8; y++) { const half = cw * 0.62 * (y / (ch * 0.8)); for (let x = -half; x <= half; x++) p.set(cx + x, cb - ch - ch * 0.8 + y, y > ch * 0.8 - 3 || r() < 0.06 ? K.snow : y < 2 ? K.snow : K.frost); }
@@ -161,12 +159,10 @@ function starfall(w: number, h: number): Pix {
   const p = new Pix(w, h), r = rng(strSeed('starfall' + w + 'x' + h));
   p.grad(0, h, [K.deepNight, K.plumNight, K.plumDeep, K.plum, '#93798f', K.lilac, K.lavender]);
   // stepped haze patches
-  for (let i = 0; i < 5; i++) p.halo(w * (0.2 + r() * 0.6), h * (0.2 + r() * 0.35), h * (0.16 + r() * 0.12), [K.lilac, K.rose, K.lake][i % 3], 0.18);
   for (let i = 0; i < w * h * 0.02; i++) { const x = r() * w, y = r() * h * 0.8; p.set(x, y, r() < 0.3 ? K.lamp : K.lavender, 0.4 + r() * 0.6); }
   for (let i = 0; i < 10; i++) { const x = r() * w, y = r() * h * 0.6; p.set(x, y, '#fffaee'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) p.set(x + dx, y + dy, K.lamp, 0.8); }
   // a big crescent moon
   const mx = w * 0.18, my = h * 0.22, mr = Math.max(6, h * 0.1);
-  p.halo(mx, my, mr * 2.6, K.lamp, 0.22);
   for (let y = Math.floor(my - mr); y <= my + mr; y++) for (let x = Math.floor(mx - mr); x <= mx + mr; x++) {
     const inMoon = (x + 0.5 - mx) ** 2 + (y + 0.5 - my) ** 2 <= mr * mr, inBite = (x + 0.5 - mx - mr * 0.45) ** 2 + (y + 0.5 - my + mr * 0.3) ** 2 <= (mr * 0.88) ** 2;
     if (inMoon && !inBite) p.set(x, y, (x + y) % 7 === 0 ? K.honey : K.lamp);
@@ -186,7 +182,7 @@ function starfall(w: number, h: number): Pix {
   // a little observatory on a cloud
   const ox = w * 0.78, oy = h * 0.74, ow = Math.max(10, w * 0.07);
   p.rect(ox - ow / 2, oy - ow * 0.9, ow, ow * 0.9, K.plumDeep); p.circle(ox, oy - ow * 0.9, ow / 2, K.plum);
-  p.rect(ox + ow * 0.05, oy - ow * 1.3, ow * 0.5, 2, K.lavender); p.rect(ox - ow * 0.15, oy - ow * 0.55, ow * 0.3, ow * 0.3, K.lamp); p.halo(ox, oy - ow * 0.4, ow, K.lamp, 0.2);
+  p.rect(ox + ow * 0.05, oy - ow * 1.3, ow * 0.5, 2, K.lavender); p.rect(ox - ow * 0.15, oy - ow * 0.55, ow * 0.3, ow * 0.3, K.lamp);
   // strings of hanging stars along the top
   for (let i = 0; i < 9; i++) {
     const x = (i + 0.5) * (w / 9) + (r() - 0.5) * 6, len = h * (0.06 + r() * 0.16);
@@ -205,7 +201,6 @@ function nightSky(w: number, h: number, motif: 'snow' | 'stars'): Pix {
     const y0 = h * (0.18 + k * 0.07) + Math.sin(x * 0.05 + k * 2) * h * 0.05 + Math.sin(x * 0.13 + k) * h * 0.015;
     for (let y = Math.floor(y0); y < y0 + h * 0.12; y++) { const f = 1 - (y - y0) / (h * 0.12); if (bay(x, y) < f * 0.55) p.set(x, y, k === 1 ? K.sage : K.lake, 0.22 * f + 0.06); }
   }
-  else for (let i = 0; i < 4; i++) p.halo(w * (0.2 + r() * 0.6), h * (0.2 + r() * 0.3), h * 0.2, [K.lilac, K.rose][i % 2], 0.16);
   for (let i = 0; i < w * h * 0.01; i++) p.set(r() * w, r() * h * 0.8, r() < 0.2 ? K.lamp : K.frost, 0.3 + r() * 0.7);
   for (let i = 0; i < 14; i++) { const x = r() * w, y = r() * h * 0.6; p.set(x, y, '#fffaee'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) p.set(x + dx, y + dy, K.ice, 0.7); }
   const hor = h * 0.8;

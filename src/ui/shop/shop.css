@@ -35,7 +35,7 @@
 @keyframes nvGlint { from { transform: translateX(-60px); } }
 
 /* ---------------------------------------------------------------- the board */
-.nv-panel { position: absolute; z-index: 4; display: flex; flex-direction: column; pointer-events: auto; background: var(--nv-pat-linen) 0 0 / 32px 32px repeat; background-clip: padding-box; box-shadow: 0 6px 0 rgba(27, 34, 45, 0.45); animation: nvPanelIn 0.7s var(--ease) both; }
+.nv-panel { position: absolute; z-index: 4; display: flex; flex-direction: column; pointer-events: auto; background: var(--nv-pat-linen) 0 0 / 128px 128px repeat; background-clip: padding-box; box-shadow: 0 6px 0 rgba(27, 34, 45, 0.45); animation: nvPanelIn 0.7s var(--ease) both; }
 .nv-panel::before { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 4px 0 rgba(74, 57, 43, 0.18), inset 0 2px 0 rgba(74, 57, 43, 0.25); z-index: 1; }
 .nv-shop.side .nv-panel { left: 10px; top: calc(70px + var(--safe-t)); bottom: 8px; width: min(48vw, 610px); }
 .nv-shop.top .nv-panel { left: -6px; right: -6px; bottom: -14px; top: 41%; transition: top 0.55s var(--ease); animation-name: nvSheetIn; }
@@ -50,7 +50,7 @@
 /* header: a hanging oak signboard, a kraft tag of a timer */
 .nv-head { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; padding: 0 2px 6px; }
 .nv-close { width: 48px; flex: none; }
-.nv-title { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 5px 8px 6px; background: var(--nv-pat-planks) 0 0 / 64px 24px repeat; box-shadow: 0 0 0 2px #2e2b24, inset 0 2px 0 #bf9d74, inset 0 -3px 0 #4a392b, 0 5px 0 2px rgba(27, 34, 45, 0.35); animation: nvSign 4.5s ease-in-out infinite; transform-origin: 50% -10px; }
+.nv-title { position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 5px 8px 6px; background: var(--nv-wood) 0 0 / 512px 256px repeat; box-shadow: 0 0 0 2px #2e2b24, inset 0 2px 0 #bf9d74, inset 0 -3px 0 #4a392b, 0 5px 0 2px rgba(27, 34, 45, 0.35); animation: nvSign 4.5s ease-in-out infinite; transform-origin: 50% -10px; }
 @keyframes nvSign { 0%, 100% { transform: rotate(-0.6deg); } 50% { transform: rotate(0.6deg); } }
 .nv-title::before, .nv-title::after { content: ''; position: absolute; top: -12px; width: 2px; height: 12px; background: repeating-linear-gradient(#8e7440 0 2px, #e6d09c 2px 4px); }
 .nv-title::before { left: 18%; } .nv-title::after { right: 18%; }
@@ -93,7 +93,7 @@
 .nv-deal.focus .nv-deal-card::after { content: ''; position: absolute; inset: -9px; border: 2px dashed #c59a52; animation: nvBlink 1s steps(2) infinite; pointer-events: none; }
 @keyframes nvBlink { 50% { opacity: 0.25; } }
 /* the art sits in a little shop-window niche: striped paper, an oak shelf, a brass lamp strip */
-.nv-deal-art { position: relative; width: 100%; aspect-ratio: 1 / 0.92; display: grid; place-items: center; background: linear-gradient(#e6d09c 0 2px, #8e7440 2px 4px, transparent 4px) top / 100% 4px no-repeat, linear-gradient(transparent calc(100% - 10px), #bf9d74 calc(100% - 10px) calc(100% - 8px), #9c7a56 calc(100% - 8px) calc(100% - 3px), #6f553d calc(100% - 3px)) , var(--nv-pat-stripe) 0 0 / 16px 16px; box-shadow: inset 0 0 0 2px #6f6856, inset 0 6px 0 rgba(27, 34, 45, 0.12); overflow: hidden; }
+.nv-deal-art { position: relative; width: 100%; aspect-ratio: 1 / 0.92; display: grid; place-items: center; background: linear-gradient(#e6d09c 0 2px, #8e7440 2px 4px, transparent 4px) top / 100% 4px no-repeat, linear-gradient(transparent calc(100% - 10px), #bf9d74 calc(100% - 10px) calc(100% - 8px), #9c7a56 calc(100% - 8px) calc(100% - 3px), #6f553d calc(100% - 3px)) , var(--nv-paper) 0 0 / 256px 256px; box-shadow: inset 0 0 0 2px #6f6856, inset 0 6px 0 rgba(27, 34, 45, 0.12); overflow: hidden; }
 .nv-deal-art img { width: 104%; height: 104%; object-fit: contain; filter: drop-shadow(0 4px 0 rgba(27, 34, 45, 0.25)); position: relative; z-index: 1; }
 .nv-deal.stand .nv-deal-art img { width: 90%; height: 90%; margin-bottom: 12px; }
 .nv-deal-art::after { content: ''; position: absolute; left: 0; right: 0; bottom: 10px; height: 6px; background: linear-gradient(90deg, transparent 18%, rgba(27, 34, 45, 0.18) 18% 82%, transparent 82%); z-index: 0; }
@@ -113,8 +113,8 @@
 .nv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 16px 8px; padding-top: 10px; }
 .nv-offer { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; min-width: 0; transition: transform 0.2s var(--pop); }
 .nv-offer:hover { transform: translateY(-2px); }
-.nv-offer-art { position: relative; width: 100%; height: 88px; display: grid; place-items: center; margin-bottom: 2px; background: linear-gradient(transparent calc(100% - 8px), #bf9d74 calc(100% - 8px) calc(100% - 6px), #9c7a56 calc(100% - 6px) calc(100% - 2px), #6f553d calc(100% - 2px)), var(--nv-pat-stripe) 0 0 / 16px 16px; box-shadow: inset 0 0 0 2px #6f6856, inset 0 6px 0 rgba(27, 34, 45, 0.12); }
-.nv-offer.gift .nv-offer-art { background: linear-gradient(transparent calc(100% - 8px), #bf9d74 calc(100% - 8px) calc(100% - 6px), #9c7a56 calc(100% - 6px) calc(100% - 2px), #6f553d calc(100% - 2px)), var(--nv-pat-kraft) 0 0 / 32px 32px; }
+.nv-offer-art { position: relative; width: 100%; height: 88px; display: grid; place-items: center; margin-bottom: 2px; background: linear-gradient(transparent calc(100% - 8px), #bf9d74 calc(100% - 8px) calc(100% - 6px), #9c7a56 calc(100% - 6px) calc(100% - 2px), #6f553d calc(100% - 2px)), var(--nv-paper) 0 0 / 256px 256px; box-shadow: inset 0 0 0 2px #6f6856, inset 0 6px 0 rgba(27, 34, 45, 0.12); }
+.nv-offer.gift .nv-offer-art { background: linear-gradient(transparent calc(100% - 8px), #bf9d74 calc(100% - 8px) calc(100% - 6px), #9c7a56 calc(100% - 6px) calc(100% - 2px), #6f553d calc(100% - 2px)), var(--nv-pat-kraft) 0 0 / 128px 128px; }
 .nv-offer.gem .nv-offer-art { background: linear-gradient(transparent calc(100% - 8px), #8e7440 calc(100% - 8px) calc(100% - 6px), #4a392b calc(100% - 6px)), var(--nv-pat-velvet) 0 0 / 16px 16px; box-shadow: inset 0 0 0 2px #8e7440, inset 0 6px 0 rgba(0, 0, 0, 0.2); }
 .nv-offer-art .px { filter: drop-shadow(0 3px 0 rgba(27, 34, 45, 0.25)); }
 .nv-offer-amt { font-family: var(--font-display); font-weight: 400; font-size: 22px; line-height: 1; margin-top: 2px; }
@@ -157,7 +157,7 @@
 .nv-series-name { font-family: var(--font-display); font-weight: 400; font-size: 26px; line-height: 0.95; color: #f4eedd; text-shadow: 2px 0 0 var(--c2), -2px 0 0 var(--c2), 0 2px 0 var(--c2), 0 -2px 0 var(--c2), 2px 2px 0 var(--c2), -2px 2px 0 var(--c2), 2px -2px 0 var(--c2), -2px -2px 0 var(--c2), 0 4px 0 rgba(27, 34, 45, 0.45); }
 .nv-series-tag { font-size: 12px; line-height: 1.15; color: #f4eedd; text-shadow: 1px 1px 0 #1b222d, -1px 1px 0 #1b222d, 1px -1px 0 #1b222d, -1px -1px 0 #1b222d; }
 .nv-series-feat { display: flex; align-items: flex-end; gap: 5px; margin-top: auto; }
-.nv-feat4 { width: 40px; height: 40px; display: grid; place-items: center; background: var(--nv-pat-linen) 0 0 / 16px 16px; box-shadow: 0 0 0 2px #c8a764, 0 0 0 4px #2e2b24, 0 4px 0 3px rgba(27, 34, 45, 0.3); }
+.nv-feat4 { width: 40px; height: 40px; display: grid; place-items: center; background: var(--nv-pat-linen) 0 0 / 128px 128px; box-shadow: 0 0 0 2px #c8a764, 0 0 0 4px #2e2b24, 0 4px 0 3px rgba(27, 34, 45, 0.3); }
 .nv-feat4 img { width: 100%; height: 100%; object-fit: contain; }
 .nv-feat4 b { font-family: var(--font-display); font-size: 22px; color: #6e5266; }
 .nv-series-cta { margin-left: 6px; min-height: 38px; font-size: 16px; }
@@ -191,7 +191,7 @@
 #hh-moments > * { pointer-events: auto; }
 .nv-modal-back { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: var(--nv-pat-dim) 0 0 / 4px 4px; animation: nvFade 0.25s steps(3) both; }
 @keyframes nvFade { from { opacity: 0; } }
-.nv-modal { position: relative; width: min(380px, 94vw); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; background: var(--nv-pat-linen) 0 0 / 32px 32px; background-clip: padding-box; animation: nvModalIn 0.45s var(--pop) both; filter: drop-shadow(0 8px 0 rgba(27, 34, 45, 0.5)); }
+.nv-modal { position: relative; width: min(380px, 94vw); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; background: var(--nv-pat-linen) 0 0 / 128px 128px; background-clip: padding-box; animation: nvModalIn 0.45s var(--pop) both; filter: drop-shadow(0 8px 0 rgba(27, 34, 45, 0.5)); }
 @keyframes nvModalIn { 0% { transform: scale(0.6) translateY(40px) rotate(-4deg); opacity: 0; } 60% { transform: scale(1.04) rotate(1deg); opacity: 1; } }
 .nv-modal-title { margin-top: -40px; padding: 0 8px; min-width: 200px; font-family: var(--font-display); font-size: 22px; line-height: 1; color: #f4eedd; text-shadow: 0 2px 0 rgba(27, 34, 45, 0.55); z-index: 2; }
 .nv-modal-title.if-ice_ribbon_gold { color: #3d3229; text-shadow: 0 2px 0 rgba(248, 234, 208, 0.7); }
@@ -256,7 +256,7 @@
 .nv-moment-label { display: flex; flex-direction: column; align-items: center; margin-top: 12px; animation: nvPop 0.5s var(--pop) both 0.55s; }
 .nv-moment-label b { font-family: var(--font-display); font-weight: 400; font-size: 46px; line-height: 1; color: #f1d39a; text-shadow: 3px 0 0 #4a392b, -3px 0 0 #4a392b, 0 3px 0 #4a392b, 0 -3px 0 #4a392b, 3px 3px 0 #4a392b, -3px 3px 0 #4a392b, 3px -3px 0 #4a392b, -3px -3px 0 #4a392b, 0 7px 0 rgba(27, 34, 45, 0.45); }
 .nv-moment.gem .nv-moment-label b { color: #e9e5ef; text-shadow: 3px 0 0 #3f3144, -3px 0 0 #3f3144, 0 3px 0 #3f3144, 0 -3px 0 #3f3144, 3px 3px 0 #3f3144, -3px 3px 0 #3f3144, 3px -3px 0 #3f3144, -3px -3px 0 #3f3144, 0 7px 0 rgba(27, 34, 45, 0.45); }
-.nv-moment-label span { margin-top: 6px; padding: 2px 10px; font-family: var(--font-display); font-size: 18px; color: #3d3229; background: var(--nv-pat-kraft) 0 0 / 32px 32px; box-shadow: 0 0 0 2px #4a392b, 0 4px 0 2px rgba(27, 34, 45, 0.35); }
+.nv-moment-label span { margin-top: 6px; padding: 2px 10px; font-family: var(--font-display); font-size: 18px; color: #3d3229; background: var(--nv-pat-kraft) 0 0 / 128px 128px; box-shadow: 0 0 0 2px #4a392b, 0 4px 0 2px rgba(27, 34, 45, 0.35); }
 
 /* ================================================================ the gacha banner */
 .nv-gacha { position: absolute; inset: 0; z-index: 8; pointer-events: auto; overflow: hidden; display: grid; color: #f4eedd; background: var(--c2); animation: nvGachaIn 0.55s var(--ease) both; }
@@ -303,7 +303,7 @@
 
 .nv-g-head { grid-area: head; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding-top: 10px; }
 .nv-gacha.tall .nv-g-head { align-items: center; text-align: center; padding-top: 6px; }
-.nv-g-kicker { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; font-family: var(--font-display); font-size: 14px; letter-spacing: 2px; color: #3d3229; background: var(--nv-pat-kraft) 0 0 / 32px 32px; box-shadow: 0 0 0 2px #4a392b, 0 4px 0 2px rgba(27, 34, 45, 0.35); text-transform: uppercase; transform: rotate(-1.5deg); }
+.nv-g-kicker { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; font-family: var(--font-display); font-size: 14px; letter-spacing: 2px; color: #3d3229; background: var(--nv-pat-kraft) 0 0 / 128px 128px; box-shadow: 0 0 0 2px #4a392b, 0 4px 0 2px rgba(27, 34, 45, 0.35); text-transform: uppercase; transform: rotate(-1.5deg); }
 .nv-g-title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(38px, 5.6vw, 72px); line-height: 0.92; letter-spacing: 1px; background: linear-gradient(180deg, #fffaee 0 38%, var(--c0) 38% 58%, var(--c1) 58% 100%); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(3px 0 0 var(--c2)) drop-shadow(-3px 0 0 var(--c2)) drop-shadow(0 3px 0 var(--c2)) drop-shadow(0 -3px 0 var(--c2)) drop-shadow(0 6px 0 rgba(27, 34, 45, 0.5)); animation: nvTitle 3s steps(3) infinite; }
 .nv-gacha.tall .nv-g-title { font-size: clamp(36px, 10.5vw, 60px); }
 @keyframes nvTitle { 50% { transform: translateY(-2px); } }
@@ -387,7 +387,7 @@
 .nv-sum-card.r5 { --sa: #b98c4c; --sb: #86693a; --sl: #f1d39a; }
 .nv-sum-card.r5::before { content: ''; position: absolute; inset: -8px; border: 2px solid #f1d39a; animation: nvBest 1s steps(2) infinite; pointer-events: none; }
 @keyframes nvCardIn { from { transform: rotateY(90deg) scale(0.6); opacity: 0; } }
-.nv-sum-art { width: 100%; aspect-ratio: 1; display: grid; place-items: center; background: var(--nv-pat-linen) 0 0 / 16px 16px; box-shadow: inset 0 0 0 2px rgba(27, 34, 45, 0.3); }
+.nv-sum-art { width: 100%; aspect-ratio: 1; display: grid; place-items: center; background: var(--nv-pat-linen) 0 0 / 128px 128px; box-shadow: inset 0 0 0 2px rgba(27, 34, 45, 0.3); }
 .nv-sum-art img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 0 rgba(27, 34, 45, 0.3)); }
 .nv-sum-card small { font-size: 11px; line-height: 1.05; min-height: 2.1em; display: flex; align-items: center; color: #fffaee; }
 .nv-sum-card .nv-new, .nv-sum-card .nv-dupe { position: absolute; top: -6px; right: -6px; transform: rotate(6deg); }
