@@ -88,6 +88,8 @@ export interface OwlModel {
   /** resolves once the painted model is in place (and the outfit pieces that exist are on) */
   ready: Promise<void>;
   loaded: boolean;
+  /** the wing meshes (left, right) whose 'spread' morph target opens the folded wing to its full span */
+  spread: [THREE.Mesh[], THREE.Mesh[]];
   dispose(): void;
 }
 
@@ -116,22 +118,23 @@ function fetchOwl(id: string): Promise<GLTFLike | null> {
   return p;
 }
 
-/** The owl atlas keeps a whisper of self-light (the hollow's dusky evenings) and the eye decals never cast shadows. */
+/** The owls are lit like everything else (v4: ACES, sun, sky fill, an environment map): a matte feathered coat whose
+ * roughness map makes the bill and talons glossy, and whose normal map (the painted feathers' relief) catches the light.
+ * The eye decals never cast shadows. (An old faceted toy shipped without normals is still shaded flat.) */
 function prepare(scene: THREE.Object3D) {
   scene.traverse((n) => {
     const m = n as THREE.Mesh;
     if (!m.isMesh) return;
     if (m.name.startsWith('eye_')) { m.castShadow = false; m.receiveShadow = false; return; }
     const mat = m.material as THREE.MeshStandardMaterial;
-    // the faceted toys ship without normals (art/blender/owls/pack.py): every facet is shaded flat
     if (mat && !m.geometry.attributes.normal && !mat.flatShading) { mat.flatShading = true; mat.needsUpdate = true; }
     if (mat && mat.map && !mat.userData.owl) {
       mat.userData.owl = true;
-      mat.emissive = new THREE.Color(0xffffff);
-      mat.emissiveMap = mat.map;
-      mat.emissiveIntensity = 0.1;
-      mat.roughness = Math.max(mat.roughness ?? 1, 0.72);
+      if (mat.roughnessMap) { mat.roughness = 1; mat.roughnessMap.magFilter = THREE.LinearFilter; } // (feathers ~0.86, bill and talons ~0.35)
+      else mat.roughness = Math.max(mat.roughness ?? 1, 0.72);
       mat.metalness = 0;
+      if (mat.normalMap) mat.normalMap.magFilter = THREE.LinearFilter;
+      if (mat.emissiveMap) mat.emissiveMap.magFilter = THREE.NearestFilter; // (the celestial owl's stars)
       mat.needsUpdate = true;
     }
   });
@@ -157,7 +160,8 @@ export function geoFor(id: string, species: SpeciesDef = speciesOf(id)): Geo {
   const r = rigOf(id);
   if (!r) return g;
   const d = r.dims;
-  const headY = (d.headZ - d.headH * 0.48) * MM, headTop = (d.headZ + d.headH * 0.52) * MM;
+  // (v4 heads sink deep into the shoulders: what shows of the head starts at the chin)
+  const headY = (d.chin ?? d.headZ - d.headH * 0.48) * MM, headTop = (d.headZ + d.headH * 0.52) * MM;
   const disc = d.faceY * MM;
   Object.assign(g, {
     bodyY: d.bodyZ0 * MM, bodyH: (d.bodyZ1 - d.bodyZ0) * MM, bodyTop: d.bodyZ1 * MM, bodyW: d.bodyW * MM, bodyD: d.bodyD * MM,
@@ -232,9 +236,11 @@ export function buildOwl(look: OwlLook): OwlModel {
 
   const cols = eyeColoursFor(id, look);
   const eyes: [Eye, Eye] = [new Eye(-1, cols, id.length * 7 + 3), new Eye(1, cols, id.length * 7 + 3)];
-  const eyeMats = eyes.map((e) => new THREE.MeshLambertMaterial({
-    map: e.tex, alphaTest: 0.5, transparent: false, emissive: 0xffffff, emissiveMap: e.tex, emissiveIntensity: cols.glow ? 0.9 : 0.16,
-    polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3, flatShading: true,
+  // small, glossy, ink-dark eyes: a painted glint in the dot, the environment's own gleam on the wet surface
+  const eyeMats = eyes.map((e) => new THREE.MeshStandardMaterial({
+    map: e.tex, alphaTest: 0.5, transparent: false, roughness: 0.14, metalness: 0, envMapIntensity: 1.8,
+    emissive: cols.glow ? 0xffffff : 0x000000, emissiveMap: cols.glow ? e.tex : null, emissiveIntensity: cols.glow ? 0.9 : 0,
+    polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3,
   }));
   // the eye decals: positioned now (from the rig sheet), their facets arrive with the GLB
   const eyeMeshes = (['eye_l', 'eye_r'] as const).map((nm, i) => {
@@ -257,7 +263,7 @@ export function buildOwl(look: OwlLook): OwlModel {
     id, rig: { root, bones, height: (r?.height ?? 44) * MM_WORLD, dispose: () => model.dispose() }, eyes, eyeMeshes, look,
     height: (r?.height ?? 44) * MM_WORLD, g, pivots: piv, rest,
     headUp: r ? (r.dims.headZ - (r.pivots.head?.[1] ?? r.dims.headZ)) * MM : 5,
-    species, anchors, ready: Promise.resolve(), loaded: false,
+    species, anchors, ready: Promise.resolve(), loaded: false, spread: [[], []],
     dispose() {
       disposed = true;
       dressing?.dispose();
@@ -285,6 +291,11 @@ export function buildOwl(look: OwlLook): OwlModel {
         }
         frames[b].add(c);
         if (c.name.startsWith('anchor_')) anchors[c.name as AnchorName] = c;
+        // the wings open through their 'spread' morph target (the actor drives it)
+        c.traverse((o) => {
+          const mm = o as THREE.Mesh;
+          if (mm.isMesh && mm.morphTargetInfluences?.length && (b === 'wingL' || b === 'wingR')) model.spread[b === 'wingL' ? 0 : 1].push(mm);
+        });
       }
     }
     model.loaded = true;

@@ -175,6 +175,13 @@ export class Eye {
         }
         P(x, y, ink);
       }
+      // a tiny glint up and to the left: the eye is glossy and alive (a few texels, gone when the lid is half down)
+      if (lid < 0.5 && !this.cols.glow) {
+        const gx = ox - rx * 0.36, gy = oy + ry * 0.38 * (1 - lid), gr = Math.max(1.2, R0 * 0.2);
+        for (let y = -Math.ceil(gr); y <= Math.ceil(gr); y++) for (let x = -Math.ceil(gr); x <= Math.ceil(gr); x++) {
+          if (x * x + y * y <= gr * gr) P(gx + x, gy + y, 0xf3efe6);
+        }
+      }
     } else if (mode === 'closed') {
       // a gentle downward arc: asleep, or the bottom of a blink
       stroke(arc(0, R0 * 0.35, R0 * 1.05, R0 * 0.62, Math.PI * 1.08, Math.PI * 1.92), W, ink);

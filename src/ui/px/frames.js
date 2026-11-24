@@ -165,20 +165,21 @@ const hn = (x, y, s = 0) => {
 // ---------------------------------------------------------------- palettes
 // Hoot Hollow's "Moss & Moonlight" palette (src/gfx/palette.ts): oat paper, muted warm woods,
 // mossy greens, honey and lamp-gold, berry, dusk blues, brass. Outlines are warm ink, never black.
+// [ui4] v4: rich, warm materials (cream paper, honey walnut, emerald felt, oxblood, brass gold, sapphire)
 const PAL = {
-  parch: { ol2: '#6b5a45', ol: '#5a4733', hi: '#f6f1e2', base: '#eae0c8', base2: '#e4d9be', sh: '#dccfb0', sh2: '#c9b78d', fib: '#f2ebd8', fib2: '#d8cba9', fleck: '#c7b58e', stain: '#e0d2b2' },
-  parchD: { ol2: '#625140', ol: '#4f3e2d', hi: '#eee5cf', base: '#dccfb0', base2: '#d5c7a6', sh: '#cdbd98', sh2: '#b5a27c', fib: '#e6dbc0', fib2: '#c8b892', fleck: '#b9a780', stain: '#d0c09d' },
-  wood: { ol2: '#40352a', ol: '#2f261e', hi: '#d8bf98', lt: '#bf9d74', base: '#9c7a56', b2: '#a48160', sh: '#86684a', dk: '#6f553d', grain: '#8b6b4b', grain2: '#7a5d42', knot: '#4a392b', fill: '#6f553d', fillHi: '#7d6047' },
-  woodD: { ol2: '#2f271f', ol: '#1f1a15', hi: '#9c7a56', lt: '#86684a', base: '#6f553d', b2: '#765b42', sh: '#5d4734', dk: '#4a392b', grain: '#624b37', grain2: '#56412f', knot: '#2f261e', fill: '#4a392b', fillHi: '#55422f' },
-  green: { ol: '#33402f', hi: '#cfd3bb', lt: '#aab394', base: '#8a9776', sh: '#717e60', dk: '#556049', st: '#c9ceb3' },
-  greenH: { ol: '#33402f', hi: '#dadecb', lt: '#b8c0a3', base: '#98a484', sh: '#7d8a6b', dk: '#5e6a51', st: '#d6dac4' },
-  red: { ol: '#3e2d2b', hi: '#e3cdc4', lt: '#c4a29a', base: '#a9837b', sh: '#8d6b65', dk: '#6c514d', st: '#dcc4bb' },
-  gold: { ol: '#4a3d2e', hi: '#f6eedb', lt: '#eadbb8', base: '#d9c49a', sh: '#bfa77b', dk: '#8e7a56', st: '#f4ead2' },
+  parch: { ol2: '#6e4f2e', ol: '#4e3420', hi: '#fffaf0', base: '#f4e8cc', base2: '#efe1c2', sh: '#e4d2ad', sh2: '#cfb688', fib: '#fbf3e0', fib2: '#e0cba2', fleck: '#c9ad7c', stain: '#ead8b4' },
+  parchD: { ol2: '#5e432a', ol: '#45301e', hi: '#f4e8cc', base: '#e4d2ad', base2: '#dcc8a0', sh: '#d2bc90', sh2: '#bb9e6c', fib: '#ecdcbc', fib2: '#ceb486', fleck: '#b89a68', stain: '#dcc69c' },
+  wood: { ol2: '#3e200e', ol: '#2a1408', hi: '#e8b878', lt: '#cf9150', base: '#a86a34', b2: '#b4763c', sh: '#8a5228', dk: '#6c3c1c', grain: '#8e5426', grain2: '#7a461f', knot: '#45220e', fill: '#6c3c1c', fillHi: '#7c4822' },
+  woodD: { ol2: '#2a1408', ol: '#1a0c05', hi: '#a86a34', lt: '#8a5228', base: '#6c3c1c', b2: '#744222', sh: '#5a3016', dk: '#45220e', grain: '#5e3418', grain2: '#522c14', knot: '#2a1408', fill: '#45220e', fillHi: '#522a12' },
+  green: { ol: '#0c2a18', hi: '#a8dcb4', lt: '#62b07c', base: '#348a54', sh: '#236c40', dk: '#17502e', st: '#cdeed4' },
+  greenH: { ol: '#0c2a18', hi: '#bce8c6', lt: '#76c08e', base: '#409a62', sh: '#2c7a4a', dk: '#1c5c36', st: '#dcf6e2' },
+  red: { ol: '#3a0c12', hi: '#f0b8b0', lt: '#d47a72', base: '#b04848', sh: '#8e3236', dk: '#6a2028', st: '#f6d4cc' },
+  gold: { ol: '#4a2c08', hi: '#fff0c0', lt: '#f4d27e', base: '#e0b04a', sh: '#c08c2c', dk: '#8a6018', st: '#fff6d8' },
   grey: { ol: '#3f3c37', hi: '#d8d2c5', lt: '#bdb6a8', base: '#a39c8e', sh: '#857f73', dk: '#6a655c', st: '#c6c0b3' },
-  brass: { ol: '#33291a', hi: '#f1d39a', lt: '#d6b876', base: '#c8a764', sh: '#a88a4e', dk: '#7b6538' },
-  iron: { ol: '#23221f', hi: '#959189', lt: '#75726b', base: '#5c5a56', sh: '#4a4844', dk: '#383633' },
-  night: { ol: '#1f252d', hi: '#bcc6c6', lt: '#97a4a8', base: '#6f7e84', sh: '#5a676e', dk: '#424d56', st: '#a9b5b7' },
-  cream: { ol: '#5a4733', hi: '#fbf7ec', lt: '#f4eedd', base: '#eae0c8', sh: '#dccfb0', dk: '#c9b78d', st: '#bba98a' },
+  brass: { ol: '#2e1c06', hi: '#fff1bd', lt: '#f0cc5c', base: '#d4a432', sh: '#a87a1e', dk: '#704c10' },
+  iron: { ol: '#16171b', hi: '#b8bcc4', lt: '#8a9098', base: '#646a74', sh: '#4c5058', dk: '#363a42' },
+  night: { ol: '#0a1030', hi: '#a8c0ec', lt: '#6a8ed2', base: '#3c5ca8', sh: '#2c468a', dk: '#1e3268', st: '#c8d8f4' },
+  cream: { ol: '#5a3e22', hi: '#fffcf2', lt: '#faf1dc', base: '#f2e4c4', sh: '#e2cfa6', dk: '#c8ad7e', st: '#b8976a' },
 };
 const SHADOW = [34, 38, 40]; // slate-ink drop shadow
 // every frame colour goes through the same calm grade as the sprites (quiet, mostly neutral)

@@ -102,8 +102,9 @@ export function paperAt(x, y, W, H, o = {}) {
   const age = (o.age ?? 0) * 0.35;
   return rampAt(R, base + mott * 0.22 + fibre + grain + fox - age, x, y, 0.7);
 }
-export const PAPER = ramp('#8e7c5e', '#b3a07e', '#cbbb98', '#dccfb0', '#e6dcc2', '#eee6d1', '#f5efe0');
-export const PAPER_DARK = ramp('#7a6a50', '#9c8a6a', '#b6a482', '#cbbb98', '#d8caa8', '#e2d6b9', '#ebe2ca');
+// [ui4] warmer, creamier paper
+export const PAPER = ramp('#957650', '#b99868', '#d4b98a', '#e6d2a8', '#f0e2c0', '#f6ecd4', '#fcf6e6');
+export const PAPER_DARK = ramp('#806244', '#a2825a', '#bea074', '#d4b98a', '#e2cca0', '#ead8b4', '#f2e6cc');
 
 /** brushed, worn brass with engraved lines and a breath of verdigris in the hollows */
 export function brassAt(x, y, v, o = {}) {
@@ -113,12 +114,12 @@ export function brassAt(x, y, v, o = {}) {
   if (o.patina && pnoise(x / 5, y / 5, 64, 64, 13) > 0.72) return mixRGB(c, VERDI, 0.35);
   return c;
 }
-export const BRASS = ramp('#2f2614', '#4e3f22', '#6e5a33', '#8e7650', '#ab9163', '#c4ab7a', '#dcc79a', '#efe2bf');
+export const BRASS = ramp('#2b1a06', '#4a300b', '#6e4a12', '#94661a', '#b88524', '#d4a432', '#ecc860', '#fff1bd');
 const VERDI = calmRGB(hexRGB('#6f8c78'));
 
 /** a texel of BUSHED's worn floor boards (grain runs along x), toned (lift about -0.5..0.5), darker for walnut */
 export function woodPx(x, y, lift = 0, dark = false) {
   const c = sample('boards', x, y);
-  const k = (dark ? 0.62 : 1.02) * (1 + lift);
-  return [c[0] * k, c[1] * k * 0.99, c[2] * k * 0.97];
+  const k = (dark ? 0.6 : 1.0) * (1 + lift);
+  return [c[0] * k * 1.1, c[1] * k * 0.94, c[2] * k * 0.78]; // [ui4] warmer: honey and walnut, not grey
 }

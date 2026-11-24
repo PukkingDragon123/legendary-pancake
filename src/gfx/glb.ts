@@ -55,7 +55,11 @@ async function fetchGLTF(url: string): Promise<GLTF> {
 /** URL of a model under public/models (works with the relative base of the artifact build). */
 export const modelUrl = (path: string) => `${import.meta.env.BASE_URL}models/${path.replace(/^\//, '')}`;
 
-/** Crisp pixel-art texels up close, no shimmer far away; a soft painted sheen, never a white flash. */
+/**
+ * Crisp pixel-art texels up close, no shimmer far away. [look4] Materials keep their own response to light (polished
+ * wood, brass, glass and ceramics catch the environment's highlights); only the extremes are tamed: no mirror-smooth
+ * surfaces flashing white, and painted (non-metal) maps never read as chrome.
+ */
 function tune(root: THREE.Object3D, o: { shadows: boolean }) {
   root.traverse((n) => {
     const m = n as THREE.Mesh;
@@ -71,8 +75,10 @@ function tune(root: THREE.Object3D, o: { shadows: boolean }) {
         mat.map.anisotropy = 4;
         mat.map.needsUpdate = true;
       }
-      if ('roughness' in mat) mat.roughness = Math.max(mat.roughness ?? 1, 0.6);
-      if ('metalness' in mat) mat.metalness = Math.min(mat.metalness ?? 0, 0.5);
+      if (mat.emissiveMap) { mat.emissiveMap.magFilter = THREE.NearestFilter; mat.emissiveMap.needsUpdate = true; }
+      const metal = !!mat.metalnessMap || (mat.metalness ?? 0) > 0.5;
+      if ('roughness' in mat) mat.roughness = Math.max(mat.roughness ?? 1, metal ? 0.22 : 0.32);
+      if ('metalness' in mat && !mat.metalnessMap) mat.metalness = Math.min(mat.metalness ?? 0, 0.85);
     }
   });
 }

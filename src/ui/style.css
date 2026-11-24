@@ -92,7 +92,7 @@ code { font-family: var(--font-small); font-size: 14px; background: rgba(56, 44,
 .dock-item:active .ico { transform: translateY(2px) scale(0.92); }
 
 /* ------------------------------------------------------------ sheets */
-.sheet { position: absolute; left: 50%; bottom: 0; width: min(560px, 100%); transform: translate(-50%, 0); max-height: min(calc(100% - 64px - var(--safe-t)), 76%); display: flex; flex-direction: column; z-index: 7; animation: sheetIn 0.5s var(--ease); padding-bottom: calc(92px + var(--safe-b)); filter: drop-shadow(0 -4px 0 rgba(40, 34, 27, 0.35)); }
+.sheet { position: absolute; left: 50%; bottom: 0; width: min(560px, 100%); transform: translate(-50%, 0); max-height: min(calc(100% - 64px - var(--safe-t)), 76%); display: flex; flex-direction: column; z-index: 7; animation: sheetIn 0.5s var(--ease); padding-bottom: calc(14px + var(--safe-b)); filter: drop-shadow(0 -4px 0 rgba(26, 14, 8, 0.4)); } /* [ui4] the main buttons hide while a sheet is open: no dock gap */
 .sheet.full { padding-bottom: var(--safe-b); }
 .sheet.short { max-height: 52%; padding-bottom: calc(14px + var(--safe-b)); }
 .sheet .grab { width: 48px; height: 6px; margin: 0 auto; background: #b19782; box-shadow: 0 2px 0 #4b382b, 0 -2px 0 #ebe2d5; flex: none; }
@@ -301,6 +301,8 @@ input[type='time'].field { font-family: var(--font-small); font-size: 16px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
+/* [ui4] the in-app "Calm motion" setting */
+.hh-still *, .hh-still *::before, .hh-still *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 @media (min-width: 900px) {
   .sheet { left: auto; right: 20px; bottom: 20px; transform: none; width: 460px; max-height: calc(100% - 110px); padding-bottom: 12px; animation: sheetInSide 0.5s var(--ease); }
   .sheet.closing { animation: sheetOutSide 0.3s var(--ease) forwards; }

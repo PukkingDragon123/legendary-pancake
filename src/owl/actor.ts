@@ -176,8 +176,9 @@ export class OwlActor {
       sy += idleBreath * 0.022; sxz += idleBreath * 0.012;
     }
     if (this.pose === 'fly') {
-      const f = Math.sin(t * 15);
-      wingL = wingR = 1.15 + f * 0.95; lean = 0.42; tuftL -= 0.4; tuftR -= 0.4; tail = 0.3;
+      // a real wingbeat: open wings sweeping from well above the back to below the body, the downstroke quicker
+      const ph = t * 9.5, f = Math.sin(ph + 0.35 * Math.sin(ph));
+      wingL = wingR = 1.5 + f * 0.72; lean = 0.62; pitch -= 0.38; tuftL -= 0.5; tuftR -= 0.5; tail = 0.35;
       if (f > 0.97 && Math.random() < 0.5) this.hooks.sound?.('flap');
     }
 
@@ -297,10 +298,16 @@ export class OwlActor {
     head.rotation.set(s.pitch.x, s.yaw.x, s.roll.x, 'YXZ');
     B.wingL.rotation.set(0, 0, -s.wingL.x);
     B.wingR.rotation.set(0, 0, s.wingR.x);
-    // the hand unfolds as the wing lifts, swinging the primaries out to the full span
-    const spreadL = THREE.MathUtils.clamp(s.wingL.x / 1.4, 0, 1.2), spreadR = THREE.MathUtils.clamp(s.wingR.x / 1.4, 0, 1.2);
-    if (B.handL) B.handL.rotation.set(-spreadL * 0.85, 0, 0);
-    if (B.handR) B.handR.rotation.set(-spreadR * 0.85, 0, 0);
+    // the folded wing opens (its 'spread' morph target) as it lifts: fully spread in flight, the hand folding in a
+    // touch on each upstroke; a stretch or a flap opens it as far as it rises
+    const fly = this.pose === 'fly';
+    const open = (w: number) => (fly ? 0.9 + 0.1 * Math.sin(t * 9.5 - 1.2) : THREE.MathUtils.smoothstep(w, 0.08, 1.15));
+    const spreadL = open(s.wingL.x), spreadR = open(s.wingR.x);
+    for (const m of this.model.spread[0]) if (m.morphTargetInfluences) m.morphTargetInfluences[0] = spreadL;
+    for (const m of this.model.spread[1]) if (m.morphTargetInfluences) m.morphTargetInfluences[0] = spreadR;
+    // (models with hand joints swing their primaries out instead)
+    if (B.handL) B.handL.rotation.set(-THREE.MathUtils.clamp(s.wingL.x / 1.4, 0, 1.2) * 0.85 * (this.model.spread[0].length ? 0 : 1), 0, 0);
+    if (B.handR) B.handR.rotation.set(-THREE.MathUtils.clamp(s.wingR.x / 1.4, 0, 1.2) * 0.85 * (this.model.spread[1].length ? 0 : 1), 0, 0);
     // feet tuck back in flight
     const tuck = this.pose === 'fly' ? 0.9 : 0;
     B.legL.rotation.x += (tuck - B.legL.rotation.x) * Math.min(1, dt * 8);

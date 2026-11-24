@@ -1,7 +1,7 @@
 /* The clock wall: cuckoo clock, number tags, routine clipboard, tear-off calendar. */
-.cs { position: absolute; inset: 0; z-index: 12; display: flex; flex-direction: column; background: #2e3928; color: var(--ink); animation: sfIn 0.55s var(--ease); overflow: hidden; }
+.cs { position: absolute; inset: 0; z-index: 12; display: flex; flex-direction: column; background: #0b2918; color: var(--ink); animation: sfIn 0.55s var(--ease); overflow: hidden; }
 .cs.leaving { animation: sfOut 0.28s var(--ease) forwards; }
-.cs-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; background-size: 60px 60px; image-rendering: pixelated; padding: calc(10px + var(--safe-t)) 8px calc(30px + var(--safe-b)); position: relative; }
+.cs-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; background-size: 64px 64px; image-rendering: pixelated; padding: calc(10px + var(--safe-t)) 8px calc(30px + var(--safe-b)); position: relative; }
 .cs-scroll::-webkit-scrollbar { display: none; }
 .cs-scroll::before { content: ''; position: absolute; inset: 0; background: var(--px-vignette-warm) 0 0 / 100% 100% no-repeat; image-rendering: pixelated; opacity: 0.7; pointer-events: none; }
 .cs-sign { position: absolute; right: 12px; top: calc(14px + var(--safe-t)); z-index: 3; padding: 0 12px 2px; font-size: 22px; color: #eee9de; text-shadow: 2px 2px 0 #312821; transform: rotate(-3deg); animation: signSwing 6s ease-in-out infinite; }
@@ -29,11 +29,8 @@
 
 /* the routine clipboard */
 .clipboard { position: relative; padding: 30px 12px 14px; transform: rotate(-0.8deg); }
-.cb-board { position: absolute; inset: 0; background: linear-gradient(135deg, #947b66, #7a614d 60%, #6c523f); box-shadow: inset 3px 3px 0 #b29983, inset -3px -3px 0 #4e3a2c, 0 0 0 3px #312821, 0 6px 0 3px rgba(36, 32, 25, 0.45); }
-.cb-board::after { content: ''; position: absolute; inset: 0; background: var(--px-peg) 0 0 / 14px 18px repeat; image-rendering: pixelated; }
-.cb-clip { position: absolute; top: -10px; left: 50%; width: 120px; height: 40px; margin-left: -60px; z-index: 3; }
-.cb-clip i { position: absolute; inset: 8px 0 0; background: linear-gradient(180deg, #ece7dd, #93a3b4 60%, #647384); box-shadow: inset 0 3px 0 #faf5e9, inset 0 -4px 0 #465262, 0 0 0 3px #312821, 0 4px 0 3px rgba(24, 22, 16, 0.35); clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 100%, 0 100%); }
-.cb-clip b { position: absolute; left: 50%; top: 0; width: 34px; height: 18px; margin-left: -17px; border: 4px solid #8695a6; border-bottom: 0; box-shadow: 0 0 0 2px #312821; }
+.cb-board { position: absolute; inset: 0; background: #8a5226 0 0 / 100% 100% no-repeat; image-rendering: pixelated; filter: drop-shadow(3px 6px 0 rgba(20, 12, 6, 0.45)); }
+.cb-clip { position: absolute; top: -14px; left: 50%; width: 120px; height: 40px; margin-left: -60px; z-index: 3; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 rgba(20, 12, 6, 0.45)); pointer-events: none; }
 .cb-paper { position: relative; padding: 18px 10px 12px; display: flex; flex-direction: column; gap: 8px; }
 .cb-title { font-size: 24px; color: #2b3142; text-align: center; }
 .cb-chart-wrap { display: flex; gap: 2px; touch-action: none; }
@@ -72,9 +69,9 @@
 .cb-check .box { position: relative; width: 24px; height: 24px; flex: none; box-shadow: inset 0 0 0 2px #384456; background: rgba(250, 245, 233, 0.4); }
 .cb-check .box svg { position: absolute; left: -1px; top: -8px; }
 .cb-stamps { display: flex; gap: 8px; flex-wrap: wrap; }
-.rstamp { display: flex; align-items: center; gap: 6px; padding: 4px 10px 6px 6px; text-align: left; font-size: 16px; line-height: 1.05; color: #f8f1e9; background: linear-gradient(180deg, #966f66, #724d45); box-shadow: inset 0 3px 0 #b78e84, inset 0 -4px 0 #4c342d, 0 0 0 2px #312821, 0 4px 0 2px rgba(24, 22, 16, 0.35); transition: transform 0.12s var(--pop); }
+.rstamp { display: flex; align-items: center; gap: 6px; padding: 4px 10px 6px 6px; text-align: left; font-size: 16px; line-height: 1.05; color: #f8f1e9; background: #8e3236; box-shadow: inset 0 3px 0 #c45452, inset 0 -4px 0 #5a1820, 0 0 0 2px #312821, 0 4px 0 2px rgba(24, 22, 16, 0.35); transition: transform 0.12s var(--pop); }
 .rstamp small { display: block; font-size: 12px; color: #f3d4c9; }
-.rstamp.alt { background: linear-gradient(180deg, #667687, #435263); box-shadow: inset 0 3px 0 #8898ab, inset 0 -4px 0 #263340, 0 0 0 2px #312821, 0 4px 0 2px rgba(24, 22, 16, 0.35); }
+.rstamp.alt { background: #2c468e; box-shadow: inset 0 3px 0 #5276c0, inset 0 -4px 0 #16245a, 0 0 0 2px #312821, 0 4px 0 2px rgba(24, 22, 16, 0.35); }
 .rstamp:active { transform: translateY(4px) scale(0.97); }
 .ink-stamp { position: absolute; right: 10px; top: 4px; padding: 2px 8px; font-size: 22px; color: #8b655c; border: 3px solid #8b655c; transform: rotate(-12deg); opacity: 0.85; animation: stamp 0.35s var(--pop); pointer-events: none; mix-blend-mode: multiply; }
 .cb-hint { font-size: 13px; color: #898aa1; text-align: center; }
@@ -91,11 +88,11 @@
 .tc-page.back { animation: tearBack 0.5s var(--ease); }
 @keyframes tearOff { 0% { transform: none; } 45% { transform: translate(40px, 60px) rotate(16deg); opacity: 0; } 46% { transform: translateY(-30px); opacity: 0; } 100% { transform: none; opacity: 1; } }
 @keyframes tearBack { from { transform: translateY(-40px) rotate(-4deg); opacity: 0; } }
-.tc-band { position: relative; margin: 0 -8px; padding: 18px 10px 6px; display: flex; align-items: baseline; justify-content: center; gap: 8px; background: linear-gradient(180deg, #966f66, #7c564f); box-shadow: inset 0 -4px 0 #593c35, inset 0 3px 0 #b78e84; color: #f8f1e7; }
+.tc-band { position: relative; margin: 0 -8px; padding: 18px 10px 6px; display: flex; align-items: baseline; justify-content: center; gap: 8px; background: #8e3236; box-shadow: inset 0 -4px 0 #5a1820, inset 0 3px 0 #c45452; color: #f8f1e7; }
 .tc-band b { font-family: var(--font-display); font-weight: 400; font-size: 26px; text-shadow: 2px 2px 0 #3e2c26; }
 .tc-band small { font-size: 18px; color: #f3d4c9; }
 .tc-rings { position: absolute; top: -8px; left: 0; right: 0; display: flex; justify-content: space-evenly; }
-.tc-rings i { width: 8px; height: 18px; background: linear-gradient(90deg, #647384, #ece7dd, #8695a6); box-shadow: 0 0 0 2px #312821; }
+.tc-rings i { width: 8px; height: 18px; background: linear-gradient(90deg, #646a74 0 2px, #eef0f2 2px 4px, #a4aab2 4px 6px, #6e747e 6px); box-shadow: 0 0 0 2px #312821; }
 .tc-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
 .tc-h { text-align: center; font-size: 14px; color: #644d3a; padding: 2px 0; }
 .tc-h.we { color: #815a55; }

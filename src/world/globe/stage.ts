@@ -76,7 +76,7 @@ void main(){
   if (k > 1.1) col = day;
   else if (k > 0.15) col = day * vec3(0.86, 0.85, 0.87);
   else if (k > -0.6) col = mix(day * 0.62, vec3(0.62, 0.42, 0.42), 0.22);   // the warm dusk band
-  else col = max(night * 1.3, day * vec3(0.42, 0.48, 0.62)) + vec3(0.01, 0.015, 0.03); // moonlit: the land still reads
+  else col = max(night * 1.45, day * vec3(0.46, 0.55, 0.78)) + vec3(0.01, 0.018, 0.045); // [look4] sapphire moonlight: the land still reads
   // the round form: a stepped darker rim towards the limb
   vec3 vn = normalize(vVN);
   float rim = vn.z;
@@ -178,9 +178,9 @@ void main(){ float s = fract(vT * 34.0 - uTime * 0.9); if (s > 0.55 || vT > uFad
 
 const blitVS = /* glsl */ `uniform vec2 uCover; varying vec2 vUv;
 void main(){ vUv = uv; gl_Position = vec4(-1.0 + (position.x + 1.0) * uCover.x, 1.0 - (1.0 - position.y) * uCover.y, 0.0, 1.0); }`;
-// The grade, after BUSHED's renderer (the user's lumberjack game): the low-res frame is lifted and split-toned
-// (warm lamplight highs, cool slate shadows), a touch desaturated, vignetted, given a living film grain per art
-// pixel, then ordered-dithered and quantised so gradients band like hand-placed pixel art.
+// The grade, after BUSHED's renderer (the user's lumberjack game), retuned for the Golden Diorama look [look4]: the
+// low-res frame is lifted and split-toned (warm highs, sapphire shadows), a touch more saturated, vignetted, given
+// a living film grain per art pixel and an 8-bit ordered dither.
 const blitFS = /* glsl */ `uniform sampler2D uTex; uniform vec2 uArt; uniform float uTime; varying vec2 vUv;
 float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
 float bayer4(vec2 p){ vec2 q = mod(floor(p), 4.0);
@@ -190,18 +190,21 @@ float bayer4(vec2 p){ vec2 q = mod(floor(p), 4.0);
           : (q.y == 0.0 ? 10.0 : q.y == 1.0 ? 6.0 : q.y == 2.0 ? 9.0 : 5.0);
   return (b + 0.5) / 16.0; }
 void main(){
+  // [look4] the Golden Diorama grade, modestly: warm honey highlights, cool sapphire shadows, a little more colour,
+  // a gentle vignette, living grain per art pixel and an ordered dither only against banding (no posterising)
   vec2 px = floor(vUv * uArt);
   vec3 col = texture2D(uTex, vUv).rgb;
   float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-  col += vec3(0.045, 0.02, -0.03) * smoothstep(0.35, 0.9, l);          // warm highlights
-  col += vec3(-0.012, 0.004, 0.02) * (1.0 - smoothstep(0.0, 0.35, l)); // slate shadows
-  col = mix(vec3(l), col, 0.9);
-  col = col * 1.03 + vec3(0.006, 0.008, 0.014);                          // a gentle lift
+  col += vec3(0.05, 0.024, -0.035) * smoothstep(0.35, 0.9, l);          // warm highlights
+  col += vec3(-0.014, 0.004, 0.03) * (1.0 - smoothstep(0.0, 0.35, l));  // sapphire shadows
+  float sat = max(col.r, max(col.g, col.b)) - min(col.r, min(col.g, col.b));
+  col = mix(vec3(l), col, 1.1 + 0.15 * (1.0 - sat));
+  col = col * 1.04 + vec3(0.004, 0.006, 0.016);                          // a gentle lift
   vec2 cc = vUv - 0.5;
-  col *= 1.0 - 0.28 * smoothstep(0.18, 0.75, dot(cc, cc) * 1.6);         // vignette
+  col *= 1.0 - 0.26 * smoothstep(0.18, 0.75, dot(cc, cc) * 1.6);         // vignette
   float g = hash(px + floor(uTime * 12.0) * 17.0) - 0.5;
-  col += g * 0.035 * (1.15 - l);                                          // grain per art pixel
-  col = floor(col * 40.0 + 0.5 + (bayer4(px) - 0.5) * 0.9) / 40.0;      // ordered dither + quantise
+  col += g * 0.022 * (1.15 - l);                                          // grain per art pixel
+  col += (bayer4(px) - 0.5) / 255.0;                                      // 8-bit ordered dither
   gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
 }`;
 
@@ -600,7 +603,7 @@ export class GlobeStage implements Stage {
     // render the pixel world
     const r = this.renderer, prev = r.getRenderTarget();
     r.setRenderTarget(this.rt);
-    r.setClearColor(0x1b222d, 1);
+    r.setClearColor(0x0a1636, 1); // [look4] deep sapphire
     r.clear();
     r.render(this.world, this.cam);
     r.setRenderTarget(prev);
