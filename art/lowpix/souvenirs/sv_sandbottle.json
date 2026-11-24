@@ -1,0 +1,587 @@
+{
+ "name": "sv_sandbottle",
+ "description": "Sand Art Bottle",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 900,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   14
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "oakl": [
+    "#4d2b1c",
+    "#70452b",
+    "#92613c",
+    "#b27f4e",
+    "#bf9d74",
+    "#c7b08d",
+    "#d1c2a5",
+    "#dbd2bd",
+    "#e6e2d3"
+   ],
+   "rose": [
+    "#2b0e12",
+    "#6f272b",
+    "#b04542",
+    "#cd8a82",
+    "#ddb9b0",
+    "#e5cfc7",
+    "#eee3dd",
+    "#f8f5f2"
+   ],
+   "lake": [
+    "#10181e",
+    "#2c424e",
+    "#4a6d7b",
+    "#6e98a3",
+    "#96b4b8",
+    "#b5c9ca",
+    "#d2dddd",
+    "#eef2f1"
+   ],
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ],
+   "ochre": [
+    "#211108",
+    "#563318",
+    "#895a29",
+    "#b9863c",
+    "#cbaa68",
+    "#d7c694",
+    "#e5debe",
+    "#f5f3e7"
+   ],
+   "terra": [
+    "#220c0b",
+    "#56261f",
+    "#894634",
+    "#b76d4f",
+    "#c6987d",
+    "#d4b9a3",
+    "#e3d6c7",
+    "#f4f0ea"
+   ],
+   "clay": [
+    "#1b0b0b",
+    "#45221e",
+    "#6d3d33",
+    "#935b49",
+    "#b0816a",
+    "#c4a896",
+    "#d9cbbf",
+    "#f0ece7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "sand": [
+    "#2a190c",
+    "#6d4720",
+    "#ad7b37",
+    "#ceab6e",
+    "#dcc99d",
+    "#e5dbb9",
+    "#eeead5",
+    "#f8f7ef"
+   ],
+   "glass": [
+    "#4f6a74",
+    "#62808a",
+    "#7a98a0",
+    "#94b2b8",
+    "#b0cacb",
+    "#cadedd",
+    "#e2eeeb",
+    "#f6faf7"
+   ],
+   "soot": [
+    "#060404",
+    "#211915",
+    "#3a3029",
+    "#645549",
+    "#8d7c6a",
+    "#aca295",
+    "#ccc7bf",
+    "#ecebe9"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "sand": {
+   "ramp": "sand",
+   "tone": 4.6,
+   "light": 0.7,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.0,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "l1",
+     "op": "band",
+     "axis": "y",
+     "from": -1.0,
+     "to": -0.62,
+     "wobble": 0.4,
+     "wobble_scale": 1.5,
+     "ramp": "clay",
+     "tone": 3.6
+    },
+    {
+     "id": "l2",
+     "op": "band",
+     "axis": "y",
+     "from": -0.62,
+     "to": -0.4,
+     "wobble": 0.5,
+     "wobble_scale": 1.8,
+     "ramp": "ochre",
+     "tone": 4.6
+    },
+    {
+     "id": "l3",
+     "op": "band",
+     "axis": "y",
+     "from": -0.4,
+     "to": -0.22,
+     "wobble": 0.4,
+     "wobble_scale": 2.0,
+     "ramp": "terra",
+     "tone": 4.4
+    },
+    {
+     "id": "l4",
+     "op": "band",
+     "axis": "y",
+     "from": -0.22,
+     "to": 0.0,
+     "wobble": 0.5,
+     "wobble_scale": 1.6,
+     "ramp": "honey",
+     "tone": 5.2
+    },
+    {
+     "id": "l5",
+     "op": "band",
+     "axis": "y",
+     "from": 0.0,
+     "to": 0.2,
+     "wobble": 0.4,
+     "ramp": "rose",
+     "tone": 4.6
+    },
+    {
+     "id": "l6",
+     "op": "band",
+     "axis": "y",
+     "from": 0.2,
+     "to": 0.45,
+     "wobble": 0.3,
+     "ramp": "lake",
+     "tone": 4.8
+    },
+    {
+     "id": "grain",
+     "op": "noise",
+     "scale": 0.4,
+     "amount": 0.5
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 2.6,
+     "density": 1.0,
+     "post": true
+    }
+   ],
+   "stamps": [
+    {
+     "faces": [
+      "s2_0"
+     ],
+     "at": "center",
+     "art": [
+      "......cc.",
+      ".....cccc",
+      "cc...cc..",
+      "ccccccc..",
+      "cccccc...",
+      ".c.c.c...",
+      ".c.c.c..."
+     ],
+     "key": {
+      "c": "soot:2"
+     }
+    },
+    {
+     "faces": [
+      "s3_0"
+     ],
+     "at": "center",
+     "art": [
+      ".ss.",
+      "ssss",
+      ".ss."
+     ],
+     "key": {
+      "s": "honey:6"
+     }
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "glass": {
+   "ramp": "glass",
+   "tone": 4.6,
+   "light": 0.7,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.0,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "tint",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.0
+    },
+    {
+     "id": "streak",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.6,
+      0.6
+     ],
+     "period": 3.0,
+     "width": 0.12,
+     "shift": 2.0,
+     "seed": 0
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 2.4,
+     "density": 1.0,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "cork": {
+   "ramp": "oakl",
+   "tone": 4.4,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.7,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 7,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 1,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 8,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/souvenirs/_kit/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.0,
+     "ramps": [
+      "oakl"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.45,
+     "shift": 0.9,
+     "scratches": 0.006
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "y",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "oakl": "wood"
+    }
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "bottle",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "sand",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 4.6
+    },
+    {
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "size": 5.2
+    },
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": 5.6
+    },
+    {
+     "at": [
+      0,
+      5.0,
+      0
+     ],
+     "size": 5.6
+    },
+    {
+     "at": [
+      0,
+      7.4,
+      0
+     ],
+     "size": 5.0
+    },
+    {
+     "at": [
+      0,
+      8.6,
+      0
+     ],
+     "size": 3.4
+    },
+    {
+     "at": [
+      0,
+      9.4,
+      0
+     ],
+     "size": 2.2
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "neck",
+   "shape": "prism",
+   "size": [
+    2.2,
+    2.2,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    9.4,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.9
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "glass",
+   "sides": 8
+  },
+  {
+   "id": "cork",
+   "shape": "prism",
+   "size": [
+    2.0,
+    2.0,
+    1.8
+   ],
+   "pivot": [
+    0.0,
+    10.8,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.9
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "cork",
+   "sides": 8,
+   "front_scale": [
+    1.1,
+    1.1
+   ]
+  }
+ ]
+}

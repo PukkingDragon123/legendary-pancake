@@ -1,0 +1,706 @@
+{
+ "name": "sv_brasslantern",
+ "description": "Moroccan Lantern",
+ "author": "Hoot Hollow (globe souvenirs, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 7,
+ "grounded": true,
+ "budget": {
+  "tris": 1600,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   16
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "flame": [
+    "#a8643c",
+    "#d58a4a",
+    "#e9ad5f",
+    "#f4cd84",
+    "#fbe5b0",
+    "#fff6df"
+   ],
+   "glow": [
+    "#241304",
+    "#c27917",
+    "#f1d39a",
+    "#f3dfb1",
+    "#f6eac8",
+    "#faf4df",
+    "#fdfcf5"
+   ],
+   "teal": [
+    "#0a1517",
+    "#1c3a3b",
+    "#2f5e5d",
+    "#447f79",
+    "#5ea397",
+    "#8dbaae",
+    "#bad3cb",
+    "#e5edea"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "br": {
+   "ramp": "brass",
+   "tone": 3.6,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "pierced": {
+   "ramp": "brass",
+   "tone": 3.4,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    },
+    {
+     "id": "holes",
+     "op": "spots",
+     "count": 70,
+     "radius": [
+      0.16,
+      0.26
+     ],
+     "ramp": "glow",
+     "tone": 5.2,
+     "min_gap": 0.5
+    },
+    {
+     "id": "stars",
+     "op": "spots",
+     "count": 14,
+     "radius": [
+      0.35,
+      0.45
+     ],
+     "ramp": "flame",
+     "tone": 4.0,
+     "min_gap": 1.2
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "pane": {
+   "ramp": "flame",
+   "tone": 3.6,
+   "light": 0.3,
+   "rim": {
+    "light": 1,
+    "dark": 0,
+    "light_shift": 0.8,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "lead",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.8,
+     "width": 0.12,
+     "ramp": "brass",
+     "tone": 2
+    },
+    {
+     "id": "tint",
+     "op": "patches",
+     "scale": 1.0,
+     "threshold": 0.55,
+     "ramp": "teal",
+     "tone": 4
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "foot",
+   "shape": "prism",
+   "size": [
+    6.4,
+    6.4,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.5
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "br",
+   "sides": 10,
+   "front_scale": [
+    0.85,
+    0.85
+   ]
+  },
+  {
+   "id": "neck",
+   "shape": "prism",
+   "size": [
+    3.0,
+    3.0,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.5
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "br",
+   "sides": 10
+  },
+  {
+   "id": "glow_body",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "pane",
+   "rings": [
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": 4.0
+    },
+    {
+     "at": [
+      0,
+      3.2,
+      0
+     ],
+     "size": 6.4
+    },
+    {
+     "at": [
+      0,
+      5.0,
+      0
+     ],
+     "size": 7.6
+    },
+    {
+     "at": [
+      0,
+      7.0,
+      0
+     ],
+     "size": 7.4
+    },
+    {
+     "at": [
+      0,
+      8.8,
+      0
+     ],
+     "size": 6.2
+    },
+    {
+     "at": [
+      0,
+      10.2,
+      0
+     ],
+     "size": 4.4
+    },
+    {
+     "at": [
+      0,
+      11.0,
+      0
+     ],
+     "size": 3.4
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "cage",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "pierced",
+   "paint": {
+    "layers": [
+     {
+      "id": "windows",
+      "op": "stripes",
+      "axis": "around",
+      "period": 0.25,
+      "width": 0.4,
+      "ramp": "flame",
+      "tone": 3.8,
+      "range": [
+       0.3,
+       0.7
+      ]
+     }
+    ]
+   },
+   "rings": [
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": 4.2
+    },
+    {
+     "at": [
+      0,
+      3.2,
+      0
+     ],
+     "size": 6.6
+    },
+    {
+     "at": [
+      0,
+      5.0,
+      0
+     ],
+     "size": 7.8
+    },
+    {
+     "at": [
+      0,
+      7.0,
+      0
+     ],
+     "size": 7.6
+    },
+    {
+     "at": [
+      0,
+      8.8,
+      0
+     ],
+     "size": 6.4
+    },
+    {
+     "at": [
+      0,
+      10.2,
+      0
+     ],
+     "size": 4.6
+    },
+    {
+     "at": [
+      0,
+      11.0,
+      0
+     ],
+     "size": 3.6
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "dome",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "pierced",
+   "rings": [
+    {
+     "at": [
+      0,
+      11.0,
+      0
+     ],
+     "size": 4.0
+    },
+    {
+     "at": [
+      0,
+      12.0,
+      0
+     ],
+     "size": 4.4
+    },
+    {
+     "at": [
+      0,
+      13.2,
+      0
+     ],
+     "size": 3.4
+    },
+    {
+     "at": [
+      0,
+      14.4,
+      0
+     ],
+     "size": 1.8
+    },
+    {
+     "at": [
+      0,
+      15.4,
+      0
+     ],
+     "size": 0.6
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "finial",
+   "shape": "prism",
+   "size": [
+    0.8,
+    0.8,
+    1.6
+   ],
+   "pivot": [
+    0.0,
+    15.2,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.8
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "br",
+   "sides": 6,
+   "front_scale": [
+    0.4,
+    0.4
+   ]
+  },
+  {
+   "id": "ball",
+   "shape": "prism",
+   "size": [
+    1.2,
+    1.2,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    16.6,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    0.5
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "br",
+   "sides": 6
+  }
+ ]
+}
