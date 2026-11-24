@@ -6,6 +6,7 @@ from lib import Spec, bezier, circle, rotz, cloth, glass, glaze, glow, hsh, knit
 from pix import Pix, star_pts
 
 ITEMS = {}
+ART = __import__("os").path.join(__import__("os").path.dirname(__import__("os").path.abspath(__file__)), "artworks") + "/"
 
 
 def item(f):
@@ -455,54 +456,32 @@ def landscape_art(w, h):
 @item
 def photo_frames():
     S = Spec("photo_frames", "Family Picture Wall", density=3.0, wall=True,
-             desc="A wall of frames on twine and brass pins: a big oak-framed sunset over the far hills, a gilt oval "
-                  "moonlit branch, a pressed rosebud under linen and a little round pinecone sketch.")
+             desc="A wall of frames on twine and brass pins holding real public-domain paintings and prints (Art "
+                  "Institute of Chicago): Monet's Stacks of Wheat (End of Summer) in oak, Hiroshige's cuckoo and full moon in a "
+                  "gilt oval, Fantin-Latour's Roses in a Bowl and a little round Monet still life.")
     oak = wood("oak", tone=4.6, grain="x")
     gilt = metal("gold", tone=4.6)
 
-    def rect_frame(id, cx, cy, w, h, style, art, key, depth=1.2, bar=1.1):
-        S.box(f"{id}_back", (w - 0.4, h - 0.4, 0.4), (cx, cy, 0.2), plain("woodDark" if False else "walnut", tone=2.0, noise=0.2))
-        S.card(f"{id}_pic", art, (cx, cy, 0.45), flat(next(iter(key.values())).split(":")[0]), key=key)
+    def rect_frame(id, cx, cy, w, h, style, image, depth=1.2, bar=1.1, crop=None):
+        S.box(f"{id}_back", (w - 0.4, h - 0.4, 0.4), (cx, cy, 0.2), plain("walnut", tone=2.0, noise=0.2))
+        S.art_card(f"{id}_pic", ART + image, w - 2 * bar + 0.2, h - 2 * bar + 0.2, (cx, cy, 0.45), crop=crop)
         S.box(f"{id}_t", (w, bar, depth), (cx, cy + h / 2 - bar / 2, depth / 2), style, chamfer=0.25)
         S.box(f"{id}_b", (w, bar, depth), (cx, cy - h / 2 + bar / 2, depth / 2), style, chamfer=0.25)
         S.box(f"{id}_l", (bar, h - 2 * bar, depth), (cx - w / 2 + bar / 2, cy, depth / 2), style, chamfer=0.25)
         S.box(f"{id}_r", (bar, h - 2 * bar, depth), (cx + w / 2 - bar / 2, cy, depth / 2), style, chamfer=0.25)
 
-    rect_frame("sunset", -7.0, 9.0, 15.0, 11.0, oak, landscape_art(39, 27),
-               {"1": "lilac:4", "2": "rose:5", "3": "blush:5", "4": "honey:5", "s": "lamp:6" if False else "honey:7",
-                "h": "sage:4", "H": "fern:4", "g": "pine:4", "p": "buff:5", "t": "pine:2"})
-    # oval: a moonlit branch, in a gilt oval ring
-    ov = Pix(19, 25)
-    ov.disc(9.5, 12.5, 9.5, "n", ry=12.5)
-    ov.disc(12.5, 7.5, 2.6, "m")
-    ov.disc(13.4, 6.8, 2.2, "n")
-    ov.map(lambda x, y, c: ("N" if c == "n" and (y < 8) and hsh(x, y) > 0.8 else "*" if c == "n" and hsh(x, y, 2) > 0.965 else c))
-    ov.path([(0, 18), (5, 16), (9, 16.5), (14, 14), (19, 13)], "b", 1.6)
-    for x, y in [(4, 15), (8, 15.5), (12, 14), (6, 17.5), (11, 16)]:
-        ov.disc(x, y - 1, 1.3, "l", ry=0.8)
-    S.card("oval_pic", ov.rows, (7.4, 11.0, 0.45), flat("night"),
-           key={"n": "night:3", "N": "night:4", "*": "star:3", "m": "moonglow:3", "b": "bark:2", "l": "sage:3"})
+    def oval(x, y, c, r):
+        return ((x + 0.5 - c / 2) / (c / 2)) ** 2 + ((y + 0.5 - r / 2) / (r / 2)) ** 2 <= 1.0
+
+    rect_frame("sunset", -7.0, 9.0, 15.0, 11.0, oak, "monet_wheat.jpg")
+    # gilt oval: Hiroshige's cuckoo, pine branch and full moon (the moon and bird part of the tall print)
+    S.art_card("oval_pic", ART + "cuckoo_moon.jpg", 6.6, 8.7, (7.4, 11.0, 0.45), crop=(0.0, 0.0, 1.0, 0.42), mask=oval)
     S.tube("oval_ring", [(7.4 + math.cos(a) * 3.4, 11.0 + math.sin(a) * 4.45, 0.7)
                          for a in [i * 2 * math.pi / 16 for i in range(18)]], 0.6, gilt, sides=6, caps=(False, False))
     S.box("oval_back", (6.4, 8.6, 0.4), (7.4, 11.0, 0.2), plain("walnut", tone=2.0, noise=0.2))
-    # small square: a pressed rosebud on linen
-    rb = Pix(14, 14)
-    rb.rect(0, 0, 13, 13, "c")
-    rb.map(lambda x, y, c: "C" if (x + y) % 3 == 0 else c)
-    rb.line(7, 12, 6, 5, "s")
-    rb.disc(6, 4, 2.2, "r", ry=2.6)
-    rb.disc(5.5, 3.5, 1.0, "R")
-    rb.disc(8.5, 8.5, 1.4, "l", ry=0.8)
-    rb.disc(4.5, 9.5, 1.2, "l", ry=0.7)
-    rect_frame("rose", 14.0, 4.4, 6.4, 6.4, wood("pale", tone=5.0, grain="x"), rb.rows,
-               {"c": "linen:5", "C": "linen:4", "s": "leaf:3", "r": "rose:3", "R": "berry:3", "l": "sage:3"}, bar=0.8)
-    # little round frame: a pinecone sketch
-    pc = Pix(12, 12)
-    pc.disc(6, 6, 6, "p")
-    for k in range(5):
-        pc.line(6 - (3 - abs(k - 2)), 3 + k * 1.4, 6 + (3 - abs(k - 2)), 3 + k * 1.4, "i")
-    pc.line(6, 2, 6, 10, "i")
-    S.card("cone_pic", pc.rows, (14.0, 13.6, 0.45), flat("parch"), key={"p": "parch:6", "i": "ink:3"})
+    rect_frame("rose", 14.0, 4.4, 6.4, 6.4, wood("pale", tone=5.0, grain="x"), "roses_bowl.jpg", bar=0.8)
+    # little round frame: Monet's Apples and Grapes
+    S.art_card("cone_pic", ART + "monet_apples.jpg", 4.2, 4.2, (14.0, 13.6, 0.45), mask=oval)
     S.tube("cone_ring", circle((14.0, 13.6, 0.65), 2.2, 12, "xy"), 0.45, gilt, sides=5, caps=(False, False))
     S.lathe("cone_back", [(2.1, 0), (2.1, 0.4)], (14.0, 13.6, 0.0), plain("walnut", tone=2, noise=0), rot=(90, 0, 0),
             sides=10, subdiv=0)
@@ -552,8 +531,8 @@ def sunburst_mirror():
 @item
 def owl_tapestry():
     S = Spec("owl_tapestry", "Owl Crest Tapestry", density=3.0, wall=True,
-             desc="A pine-green woven banner on a walnut rod with turned finials: a gold-stitched border, the hollow's "
-                  "crest of an owl under a crescent moon and seven stars, and gold tassels on its swallowtail.")
+             desc="A pine-green woven hanging on a walnut rod with turned finials: a gold-stitched border, Hiroshige's "
+                  "woodblock print Owl on Pine Branch woven in at its heart, and gold tassels on its swallowtail.")
     w, h = 15.0, 23.0
     cols, rows = int(w * 3), int(h * 3)
     p = Pix(cols, rows)
@@ -575,35 +554,17 @@ def owl_tapestry():
     for x in range(2, cols - 2):
         p.set(x, 3, "g" if x % 3 else "G")
     p.outline("e")
-    # crest: crescent moon, seven stars on an arc, the owl emblem
-    cx, cy = cols / 2, rows * 0.48
-    p.disc(cx, cy - 13, 5.2, "m")
-    p.disc(cx + 2.4, cy - 14.2, 4.6, "a")
-    for k in range(7):
-        a = math.radians(200 + k * 23.3)
-        p.star(cx + math.cos(a) * 15, cy - 2 + math.sin(a) * 15, 1.7, "s", inner=0.4)
-    # the owl: round body, ear tufts, wings, dot eyes, a little beak, on a branch
-    p.disc(cx, cy + 4, 6.6, "o", ry=7.4)
-    p.poly([(cx - 6, cy - 3.5), (cx - 4.4, cy - 7.5), (cx - 2.4, cy - 3)], "o")
-    p.poly([(cx + 6, cy - 3.5), (cx + 4.4, cy - 7.5), (cx + 2.4, cy - 3)], "o")
-    p.disc(cx, cy + 6, 4.2, "c", ry=4.6)
-    for k in range(3):
-        for dx in (-2, 0, 2):
-            p.set(cx + dx + (k % 2), cy + 4.5 + k * 1.8, "O")
-    p.disc(cx - 2.6, cy - 0.2, 1.9, "c")
-    p.disc(cx + 2.6, cy - 0.2, 1.9, "c")
-    p.disc(cx - 2.6, cy - 0.2, 0.9, "k")
-    p.disc(cx + 2.6, cy - 0.2, 0.9, "k")
-    p.poly([(cx - 0.8, cy + 1.2), (cx + 0.8, cy + 1.2), (cx, cy + 2.8)], "y")
-    p.path([(cx - 10, cy + 12.2), (cx, cy + 11.6), (cx + 10, cy + 12.4)], "w", 1.4)
-    for dx in (-2.5, 2.5):
-        p.line(cx + dx - 1, cy + 11, cx + dx + 1, cy + 11, "y")
-    for k, dx in enumerate((-7, 7)):
-        p.disc(cx + dx, cy + 10.6, 1.3, "l", ry=0.8)
+    # a gold-stitched mount where the woven-in print sits (the print itself is a real artwork, below)
+    cx, cy = cols / 2, rows * 0.42
+    pw, ph = 13.0 * 3 / 2, 9.4 * 3 / 2
+    for y in range(int(cy - ph - 2), int(cy + ph + 2)):
+        for x in range(int(cx - pw - 2), int(cx + pw + 2)):
+            edge = abs(x + 0.5 - cx) > pw + 0.5 or abs(y + 0.5 - cy) > ph + 0.5
+            p.set(x, y, ("G" if (x + y) % 2 else "g") if edge else "d")
     S.card("banner", p.rows, (0, 3.0 - h / 2, 0.8), flat("pine", light=0.7),
-           key={"a": "pine:3", "b": "pine:4", "d": "pine:2", "e": "pine:1", "g": "honey:5", "G": "honey:3",
-                "m": "cream:5", "s": "honey:6", "o": "tawny:4", "O": "tawny:2", "c": "cream:4", "k": "soot:0",
-                "y": "honey:4", "w": "bark:3", "l": "sage:4"})
+           key={"a": "pine:3", "b": "pine:4", "d": "pine:2", "e": "pine:1", "g": "honey:5", "G": "honey:3"})
+    # Hiroshige's Owl on Pine Branch (1830s, Art Institute of Chicago, public domain), woven into the hanging
+    S.art_card("print", ART + "owl_pine.jpg", 13.0, 9.4, (0, 3.0 - h / 2 + h * 0.08, 0.86))
     wd = wood("walnut", tone=4.4, grain="x")
     S.tube("rod", [(-9.0, 3.4, 0.9), (9.0, 3.4, 0.9)], 0.55, wd, sides=8)
     for k, s in enumerate((-1, 1)):
@@ -837,23 +798,16 @@ def map_art(cols, rows):
 
 @item
 def hollow_map():
-    S = Spec("hollow_map", "Map of the Hollow", density=3.0, wall=True,
-             desc="A parchment map of every path Pip has flown, hung between two walnut dowels: the great oak, the "
-                  "winding river and lake, a little forest, dashed paths, a compass rose and an X at the best "
-                  "blueberry bush.")
-    w, h = 27.0, 17.0
-    S.card("map", map_art(int(w * 3), int(h * 3)), (0, 9.4, 0.6), flat("parch", light=0.7),
-           key={"p": "parch:5", "q": "parch:6", "P": "parch:4", "i": "ink:2", "j": "ochre:3", "r": "lake:4",
-                "R": "lake:5", "h": "fern:3", "t": "pine:4", "w": "bark:3", "T": "leaf:4", "d": "soot:0",
-                "b": "dusk:3", "x": "berry:3", "c": "berry:4"})
+    S = Spec("hollow_map", "Embroidered Map Sampler", density=3.0, wall=True,
+             desc="A real embroidered map sampler (England, about 1800, Art Institute of Chicago, public domain), hung "
+                  "like a scroll between two walnut dowels with turned knobs and a honey cord.")
+    S.art_card("map", ART + "map_sampler.jpg", 16.2, 18.0, (0, 9.5, 0.6), colours=48, crop=(0.05, 0.04, 0.95, 0.96))
     wd = wood("walnut", tone=4.4, grain="x", knots=False)
-    for k, y in enumerate((18.2, 0.6)):
-        S.tube(f"dowel{k}", [(-14.4, y, 0.7), (14.4, y, 0.7)], 0.7, wd, sides=8)
-        S.tube(f"roll{k}", [(-13.6, y + (-0.5 if k == 0 else 0.5), 0.55), (13.6, y + (-0.5 if k == 0 else 0.5), 0.55)],
-               0.55, paper("parch", tone=4.6), sides=8)
+    for k, y in enumerate((18.8, 0.2)):
+        S.tube(f"dowel{k}", [(-9.4, y, 0.75), (9.4, y, 0.75)], 0.7, wd, sides=8)
         for s in (-1, 1):
-            S.ball(f"knob{k}{s}", 0.9, (s * 15.0, y, 0.7), wd, sides=8, rings=4)
-    S.tube("cord", [(-13.0, 18.6, 0.7), (-6.0, 19.4, 0.5), (0, 19.8, 0.3), (6.0, 19.4, 0.5), (13.0, 18.6, 0.7)], 0.14,
+            S.ball(f"knob{k}{s}", 0.9, (s * 10.0, y, 0.75), wd, sides=8, rings=4)
+    S.tube("cord", [(-8.4, 19.2, 0.7), (-4.0, 20.0, 0.5), (0, 20.4, 0.3), (4.0, 20.0, 0.5), (8.4, 19.2, 0.7)], 0.14,
            plain("honey", tone=3.4, noise=0.2), sides=4)
     return S
 

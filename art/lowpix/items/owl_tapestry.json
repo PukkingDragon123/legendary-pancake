@@ -1,6 +1,6 @@
 {
  "name": "owl_tapestry",
- "description": "A pine-green woven banner on a walnut rod with turned finials: a gold-stitched border, the hollow's crest of an owl under a crescent moon and seven stars, and gold tassels on its swallowtail.",
+ "description": "A pine-green woven hanging on a walnut rod with turned finials: a gold-stitched border, Hiroshige's woodblock print Owl on Pine Branch woven in at its heart, and gold tassels on its swallowtail.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
  "density": 6.0,
@@ -59,25 +59,6 @@
  },
  "palette": {
   "ramps": {
-   "bark": [
-    "#2b2c2d",
-    "#3a312a",
-    "#514236",
-    "#65503c",
-    "#6d5a47",
-    "#706b62",
-    "#908a7e"
-   ],
-   "cream": [
-    "#444a4e",
-    "#626562",
-    "#88877e",
-    "#b9b2a1",
-    "#f1e6cc",
-    "#fefbdc",
-    "#fcf7e7",
-    "#fbf2e2"
-   ],
    "gold": [
     "#8a5a3c",
     "#8d703f",
@@ -98,6 +79,15 @@
     "#fcd68e",
     "#fbe499"
    ],
+   "paper": [
+    "#756f5d",
+    "#bbab85",
+    "#d6c7a4",
+    "#e3d8bc",
+    "#ede5cf",
+    "#f5f0e0",
+    "#fcf7ed"
+   ],
    "pine": [
     "#25332f",
     "#2b3e30",
@@ -107,34 +97,6 @@
     "#6f8c57",
     "#8ba36e",
     "#a7b788"
-   ],
-   "sage": [
-    "#394343",
-    "#4b564d",
-    "#636f5b",
-    "#82906f",
-    "#a7b788",
-    "#bfcc97",
-    "#d3dea4",
-    "#e4ebad"
-   ],
-   "soot": [
-    "#231f1b",
-    "#352d26",
-    "#332d26",
-    "#3a362d",
-    "#524d40",
-    "#6f6856"
-   ],
-   "tawny": [
-    "#39393a",
-    "#4b413b",
-    "#644f3f",
-    "#836047",
-    "#a87652",
-    "#c08b61",
-    "#d49d6e",
-    "#e5ac7a"
    ],
    "verd": [
     "#364246",
@@ -182,91 +144,16 @@
    ]
   },
   "s2": {
-   "ramp": "walnut",
-   "tone": 4.4,
-   "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
-   },
+   "ramp": "paper",
+   "tone": 4,
+   "light": 0.0,
    "brush": {
-    "flow": "long"
+    "off": true
    },
-   "layers": [
-    {
-     "id": "grain",
-     "op": "stripes",
-     "axis": [
-      0,
-      1,
-      0.71
-     ],
-     "period": 0.7,
-     "width": 0.32,
-     "shift": -0.75,
-     "wobble": 0.45,
-     "wobble_scale": 2.5
-    },
-    {
-     "id": "grain2",
-     "op": "stripes",
-     "axis": [
-      0,
-      1,
-      0.71
-     ],
-     "period": 1.9,
-     "width": 0.18,
-     "shift": -0.55,
-     "wobble": 0.9,
-     "wobble_scale": 4
-    },
-    {
-     "id": "figure",
-     "op": "noise",
-     "scale": 2.4,
-     "amount": 0.35
-    },
-    {
-     "id": "knots",
-     "op": "spots",
-     "count": 2,
-     "radius": [
-      0.35,
-      0.6
-     ],
-     "stretch": [
-      1,
-      1.6,
-      1
-     ],
-     "shift": -1.6,
-     "bevel": {
-      "shadow": 1,
-      "highlight": 1,
-      "shadow_shift": -0.6,
-      "highlight_shift": 0.8
-     }
-    },
-    {
-     "id": "polish",
-     "op": "gloss",
-     "dash": true,
-     "length": 3,
-     "shift": 1.0,
-     "density": 0.35,
-     "post": true
-    },
-    {
-     "id": "photo",
-     "op": "photo",
-     "src": "art/lowpix/items/_furnc/photos/wood",
-     "scale": 28.0,
-     "amount": 0.6,
-     "ramps": [
-      "walnut"
-     ]
-    }
-   ]
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
   },
   "s3": {
    "ramp": "walnut",
@@ -443,6 +330,93 @@
    ]
   },
   "s5": {
+   "ramp": "walnut",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s6": {
    "ramp": "honey",
    "tone": 3.6,
    "rim": {
@@ -458,7 +432,7 @@
     }
    ]
   },
-  "s6": {
+  "s7": {
    "ramp": "gold",
    "tone": 4.6,
    "rim": {
@@ -512,7 +486,7 @@
     }
    ]
   },
-  "s7": {
+  "s8": {
    "ramp": "honey",
    "tone": 4.0,
    "rim": {
@@ -536,7 +510,7 @@
     }
    ]
   },
-  "s8": {
+  "s9": {
    "ramp": "gold",
    "tone": 4.6,
    "rim": {
@@ -590,7 +564,7 @@
     }
    ]
   },
-  "s9": {
+  "s10": {
    "ramp": "honey",
    "tone": 4.0,
    "rim": {
@@ -649,74 +623,74 @@
     "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
     "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
     "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
-    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
-    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbssaaaaaaaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
-    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbssaaaaaaaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
-    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbmmmmssaaaaaaaaaabbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
-    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbmmmmssaaaaaaaaaabbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbssaabbmmmmaassaaaaaaaaaassaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbssaabbmmmmaassaaaaaaaaaassaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaassbbmmmmmmaaaaaaaaaaaaaassbbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaassbbmmmmmmaaaaaaaaaaaaaassbbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmaaaaaaaaaaaaaassaabbaaaabbbbaaaabbbbaaaabbbbGGaabb",
-    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmaaaaaaaaaaaaaassaabbaaaabbbbaaaabbbbaaaabbbbGGaabb",
-    "bbaaggbbbbaaaabbbbaaaassbbaaaabbbbmmmmmmaaaaaaaaaaaaaaaaaaaaaabbbbssaabbbbaaaabbbbaaggbbbb",
-    "bbaaggbbbbaaaabbbbaaaassbbaaaabbbbmmmmmmaaaaaaaaaaaaaaaaaaaaaabbbbssaabbbbaaaabbbbaaggbbbb",
-    "aaaaggbbaaaabbbbaaaassssssaabbbbaammmmmmmmaaaaaaaaaaaaaaaaaabbbbssssssbbaaaabbbbaaaaggbbaa",
-    "aaaaggbbaaaabbbbaaaassssssaabbbbaammmmmmmmaaaaaaaaaaaaaaaaaabbbbssssssbbaaaabbbbaaaaggbbaa",
-    "aabbGGaaaabbbbaaaabbbbssaabbbbaaaammmmmmmmaaaaaaaaaaaaaaaabbbbaaaassbbaaaabbbbaaaabbGGaaaa",
-    "aabbGGaaaabbbbaaaabbbbssaabbbbaaaammmmmmmmaaaaaaaaaaaaaaaabbbbaaaassbbaaaabbbbaaaabbGGaaaa",
-    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmmmmmaaaaaaaaaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
-    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmmmmmaaaaaaaaaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
-    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaammmmmmmmmmaammaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
-    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaammmmmmmmmmaammaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
-    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmmmmmmmaabbbbaaaabbbbaaaabbbbssaabbbbaaaaGGbbaa",
-    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbmmmmmmmmmmaabbbbaaaabbbbaaaabbbbssaabbbbaaaaGGbbaa",
-    "aabbggaaaabbbbssssssbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbssssssbbaaaabbggaaaa",
-    "aabbggaaaabbbbssssssbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbssssssbbaaaabbggaaaa",
-    "bbbbggaabbbbaaaassbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaassbbaaaabbbbggaabb",
-    "bbbbggaabbbbaaaassbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaassbbaaaabbbbggaabb",
-    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbboooobbbbaaaabbbbaaoooobbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
-    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbboooobbbbaaaabbbbaaoooobbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaoooobbaaaabbbbaaaaooooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaoooobbaaaabbbbaaaaooooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaaooooooaabbbbaaaaooooooaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaaooooooaabbbbaaaaooooooaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaoooooooooobbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
-    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaoooooooooobbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
-    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaooccccooooooccccoobbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
-    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaooccccooooooccccoobbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaoocckkkkccoocckkkkccooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaoocckkkkccoocckkkkccooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaaoocckkkkccoocckkkkccooaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
-    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaaoocckkkkccoocckkkkccooaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
-    "bbbbggaabbbbaaaabbbbaaaabbbbaaaaooooooccccooyyooccccoooooobbaaaabbbbaaaabbbbaaaabbbbggaabb",
-    "bbbbggaabbbbaaaabbbbaaaabbbbaaaaooooooccccooyyooccccoooooobbaaaabbbbaaaabbbbaaaabbbbggaabb",
-    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbooooooooccccyyccccooooooooaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
-    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbooooooooccccyyccccooooooooaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
-    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbooooooccccccccccccccooooooaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
-    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbooooooccccccccccccccooooooaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaaooooooccOOccOOccOOccoooooobbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaaooooooccOOccOOccOOccoooooobbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "bbbbggaabbbbaaaabbbbaaaabbbbaaaaooooccccccccccccccccccoooobbaaaabbbbaaaabbbbaaaabbbbggaabb",
-    "bbbbggaabbbbaaaabbbbaaaabbbbaaaaooooccccccccccccccccccoooobbaaaabbbbaaaabbbbaaaabbbbggaabb",
-    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbooooccccccOOccOOccOOccooooaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
-    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbooooccccccOOccOOccOOccooooaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaooccccccccccccccccccooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaooccccccccccccccccccooaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaaooooccOOccOOccOOccooooaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaaooooccOOccOOccOOccooooaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
-    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbooooccccccccccooooaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
-    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbooooccccccccccooooaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
-    "bbaaggbbbbaaaabbbbaaaabbbbaallllllaaaaooooccccccooooaabbllllllbbbbaaaabbbbaaaabbbbaaggbbbb",
-    "bbaaggbbbbaaaabbbbaaaabbbbaallllllaaaaooooccccccooooaabbllllllbbbbaaaabbbbaaaabbbbaaggbbbb",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbllwwwwwwyyyyyywwwwyyyyyywwaallbbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aaaaggbbaaaabbbbaaaabbbbaaaabbllwwwwwwyyyyyywwwwyyyyyywwaallbbbbaaaabbbbaaaabbbbaaaaggbbaa",
-    "aabbGGaaaabbbbaaaabbbbaawwwwwwwwwwwwwwwwwwbbbbaawwwwwwwwwwwwwwwwwwbbbbaaaabbbbaaaabbGGaaaa",
-    "aabbGGaaaabbbbaaaabbbbaawwwwwwwwwwwwwwwwwwbbbbaawwwwwwwwwwwwwwwwwwbbbbaaaabbbbaaaabbGGaaaa",
+    "aaGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGaa",
+    "aaGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGaa",
+    "aaggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggaa",
+    "aaggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGaa",
+    "aaGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
     "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
     "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
     "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
@@ -773,16 +747,124 @@
      "d": "pine:2",
      "e": "pine:1",
      "g": "honey:5",
-     "G": "honey:3",
-     "m": "cream:5",
-     "s": "honey:6",
-     "o": "tawny:4",
-     "O": "tawny:2",
-     "c": "cream:4",
-     "k": "soot:0",
-     "y": "honey:4",
-     "w": "bark:3",
-     "l": "sage:4"
+     "G": "honey:3"
+    }
+   }
+  },
+  {
+   "id": "print",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    -6.66,
+    0.86
+   ],
+   "art": [
+    "gllgdbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaabbaaaabbbbabbbbbbbb",
+    "HQPPONNNHHHNHHGGGHHHGEEEEvvtqkkkkgggggdbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "HPOOOOOOPPOOOPPPOOOOOOOPOOOOOOPPPOOOPPOOOOONNNNNHHHHHGGEwAppzpgggdggdddddbbgbb",
+    "HPPOOPPOOOOOPOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOPPOPQQRRRRRRRRRRRRRQQQQPLzo",
+    "HOONNOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOQRQQQRRRRRRRRRRRRRRRRRRQQHzB",
+    "GNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNONNOOOOOOOOOOQRRRRRRRRRRRRRRRRRRRQQQRRRBDz",
+    "FHHHHHHHHNNHNNHNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNOMMMMMRQPQQQQQQQRRRQRRRRRRKBJy",
+    "AGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGHHHHNMIMzKLLLLMQLLOOMRRRRRRRRQDJDo",
+    "sFFFEHHGEEEEEEGEEGEEGEEEEEEEEExEExuvxEEEEEGAppAFFMKKCRRMGHLLHLHLLMRRMMQMQMBJzi",
+    "sEAwFLLFwwEEEEEEEEEEEEEEEEExvvxxvvttwuwEEFynheehnCGsJMLFFEGFEHFFKQMRRRQMMDDJpo",
+    "swssHLLFwEEEEExxExxEExxExxxvuttuuttttuvvwoeeeceehzADCFEExEwrwEwsFMMMRMMLMKJBio",
+    "swswEGHGEEEEExxxxxxxEEExvvvutrrrrrrrtttwpceeeccccnynBzsxEwrrqqsAHKLKQMKLMJJBoo",
+    "sEwEEFFGxxExuvvxuuxvxvvutrruEttmrmqrtutAheeececceheeeefoAxtqqqlAKKKKMLMKJJDBoo",
+    "svwwFLLFxxxxxxxxxvxvutvvrturvwtrmmrmrmvpeeeefnhhecceeceejstqqlAKHKKKLKMJDMMyno",
+    "stwEEHLxEvvxvxxxxxuuuvvvvutuwwtrmmmmrmwhecehheeheceeeeeehzwtskALKHKKKMMJJJCiio",
+    "qEEEEHLxExuxxvExxuxxExvtvrtuurrrmmkmrrsecceecccyDeeeceeeeyFtqlsFKKKHMQMJMJznoz",
+    "rEEEGGHExEvxvuxxvvxxvvvuvttttrmqqqlmmrlecchecccDJceeccceecyAqsFFKMMKQRMJJJniiz",
+    "EGEGEFHEuvvvvvxxxuvvvuvuurrutrqmkllkmmsheenehneDnccccceeeenAllHKMMMMKKJJzniiBB",
+    "wxxEvHMwvuvvvvxxxxvvuutttrrturrrqkkkmmvAeeeyhyDhceecccceccepklHMMMMDCMIyyyinDo",
+    "wEEEvFLwtwwvxxxvxxvvuuvumtrrtrmmqmkmmmmvzechDJnccccceeeeeceolmALLMMJIDCyBnioID",
+    "wvxExEFwvvvvvxxxxxxvvruttutrrrrrmmkqmmrrwACCDJhceceecccceehnltsELMJDJJBiiiBDJI",
+    "wEEGGEHwExExxxEExxvuuuuuuumtutrrmmmrmmmqmmrsCnececcccccccceissrwKJBDBoiifzJDID",
+    "EEEGEGGEEwxvExxxxxrrvutruurtrmmmmkmkkkkkklkFzneccccceccecccnsuFKDzDzfiiioJDDDD",
+    "EEEGEGGExxvwvFHEFEEwttrrrmmmmmmmkkkkkkkkkgFRzheceeecccceeheBAlpJJDnfiifiDDyIBD",
+    "EEEEEzIAxvxvEHLFHHHGErrrrqkkmrmkkkkkkkkgkKRMoeececeeecccccnDyyBCoffiiiizyiBDDB",
+    "ExxEzIIBEvEwFLLKHLHHHwmmqqkkkmkkkkkkkkkglRMAoenyhceeecenhyBBDyffffffffiByCDCDo",
+    "ExxEBIIIwuwHHKMLLMMLKHwkqmkkmkkkkkkkkkkgHQAkzeheecccceyIBBoCBddfffffozBCCBDCCn",
+    "xvEEzIIIwxwKMMMMMMMMMKskrrkkskqqsskkkkkFMAgkpyhcchyDyJJzCoioddfdfiooDyoBCMJIBi",
+    "vvEEzBIIDFFKMMMMMMMQMHHvmvwwAFFAHFgsFlMMAglkAByhBBMDMMBpDyddffddyzoCyiDJJMDoif",
+    "vxExBBBIKLHLMMMMRMQMMMLErtwFKLFAHHFHlsMFkllkAyhBzozoICnoyfdfddnBDDJBBDDJMJyiif",
+    "xuEEAIIILKMMMMQQRQRMLLHFEEFHKKKFHFHAAMMgkllkwDJoiJIBiiyifdfdfyDBnyozCBDDDIzoii",
+    "uuxEEKMKMLMMLMQMRQMMMKLLHKMKKKLKKKKFMLlklmqAKJidzDnffffffBDnhizzyynzypBBCynoni",
+    "tvxEHLLMMMMMMQMMRQMMMLMMKHKKHKMMRLKHKHFsrrlMDiipoyffffiifBIDfoIDzJIDJMCDJCoonn",
+    "vvxEHLLMMMMMMLMQRMKMQMMMLKLHFKLRMKFHKFLwmsADznCzBoffdoDzyzifiDDJJMzJJDIJDzoono",
+    "wwxEHMMMMMMMRRMMRRLMQRMMLHHFHKMKMKHKKAFmFCJniDDzfdfddzBynnBCpCDJMDpDJDooiioono",
+    "wEExHLLMMMMQRQLKMMMKMRRLKHAHFMQMDAHKFkmACoffyIzyffdfCzyBCKCsglAMMMJRDBCyononoo",
+    "EEEGLMMMMMMMLLMLMKMMQMLKKKMKLHFAFkAAstApfinnCBifffiCJJHFLHggggzDCMMICICoinoono",
+    "FEGHLLLMMLMMKMMMMMKRMHLLMMMMFklAFklkmFzfiynoCBoffyDIJzsksggADCCCMBzCyCniiooozo",
+    "FEGLLMMMLLLMMQQMMQKMQLLLQLFFFqqsFmrtwAiiiyozDyiifnJDhokkkgAJJDDCMzByiiiiiooDBi",
+    "FHLLMMMMLMRRMQMMKLMMLLLMMwuuutrwwrtwCifinoyyyiifDIfnhzkkkgLMJDCCDBozzoononDIii",
+    "FGHLMMMQMRRMMMRRMLLFtrwLFxEvutwtmtwFiiiooyzyioiyJzchypmlFHMMpoCDyoDIDzninCJCjp",
+    "EGHHHLQRMRRMLRQHwrmtutwwuvuurstvtwKpiniiyoiiiinCAgenyskKKMJzfzDIDDoyoiozBJJBAA",
+    "EGHHLMMQRMMLLLwrtuvrtqtwtrrrttrrmLBinizzyiiioiiDEFonAkAMJiooiBDICyyozBJMDJIpCl",
+    "FGHLLQQMQMLMLFvvtwtvvwwmttswvxuEKBinioyooiiiiiFwrtsAmlKMBiCozJBnfyDDoJMJDKJKsk",
+    "EHHLLLMMMLMHqFwrtwtvuuvqrkrvwxxLJfiiiioBoiioyCFrsmwqFKBozDDBJDionoCMDMKDDKFlkk",
+    "FGHLHHLMLFsFwrrsqrttvvvmqstuwxFCfiiiifoiiiiyDAmmrmmkDzfBCJJJJDConDJMMKMKFlkggg",
+    "FEwFHLLLHEwvEtrtrttmqrtttwtxuFBhiiiiiifiiiizAmmmmkkqDioJMMRCyooiCJMJJHFrmqlkgk",
+    "EEwwFLFHFFwuuwwsswmqqrmruwwvFCiiiiiiiifiiiiArmklkkkFBfCJJMDipDBIMJKKHwrrqllkgg",
+    "wEwEwEEFEEwvvtwqswqrrsqrssuwCoiihiinnfiinnAsmmklkgACyDBJzJJDDBBMMMHuurmkllkkkg",
+    "wEEwwwwwwwwwvwssqqqrtsqsswEFpniiiiiiiiinipAmmmklkACiJJDDDJDofiCDDKEttmklllklll",
+    "AEEEwwssqqssssssqlqqqsqrwtHziiiiiiiiiiiipAmqlkkksDDyBDCyoBCoyBCDDFmrkmmrqqkkls",
+    "AwwwssqqlqsssssllqqqqqtwuFCoonniioiihhipAqmllkkkCzzDDiozCDCoBIJMskmrmrrtwwqqsl",
+    "sllssssslsssssllllllqqqtACooooonoyiiiiAAmmklllgAzByDBBCCCfiioDDKkrrrrruuvwssql",
+    "AsssssssssssssslllllssssAooyooooyonnopsmmkgkkglzoCIJDDBiiiniizKAmltuuvxEwwwsll",
+    "pjjjjjjjjjjjllllllllslpppoooooooyyoozAmmkkkkkgpzyDJDBBzBCzfijAskkkrrrttwswslll",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdddddbbbbbbbbgizoBziiznzzddhgkgggkkkkkkkkkgggg"
+   ],
+   "plane": "xy",
+   "style": "s2",
+   "paint": {
+    "art_key": {
+     "a": "#f0e8d3",
+     "b": "#e2ddc7",
+     "c": "#e4cfa5",
+     "d": "#d7cdae",
+     "e": "#dec59b",
+     "f": "#d0c4a5",
+     "g": "#b6c1b0",
+     "h": "#cbbc9b",
+     "i": "#c4bb9e",
+     "j": "#b9baa3",
+     "k": "#a2bcb0",
+     "l": "#a1b8ac",
+     "m": "#9ab9af",
+     "n": "#c0b496",
+     "o": "#bbb296",
+     "p": "#b0b098",
+     "q": "#9bb5ac",
+     "r": "#96b5ae",
+     "s": "#98b1a6",
+     "t": "#93b3ac",
+     "u": "#8fb2ac",
+     "v": "#8eafaa",
+     "w": "#8fada6",
+     "x": "#89ada9",
+     "y": "#b2a88b",
+     "z": "#aba389",
+     "A": "#96a697",
+     "B": "#a49a7f",
+     "C": "#99967e",
+     "D": "#948b72",
+     "E": "#86a9a5",
+     "F": "#859d95",
+     "G": "#779d9c",
+     "H": "#6b8b8b",
+     "I": "#977f69",
+     "J": "#7f7964",
+     "K": "#70776a",
+     "L": "#63746d",
+     "M": "#5f645b",
+     "N": "#3c778a",
+     "O": "#366575",
+     "P": "#365d6c",
+     "Q": "#39535b",
+     "R": "#353e40"
     }
    }
   },
@@ -827,7 +909,7 @@
     true,
     true
    ],
-   "style": "s2"
+   "style": "s3"
   },
   {
    "id": "finial0",
@@ -909,7 +991,7 @@
     false,
     true
    ],
-   "style": "s3",
+   "style": "s4",
    "up": [
     0,
     0,
@@ -997,7 +1079,7 @@
     false,
     true
    ],
-   "style": "s4",
+   "style": "s5",
    "up": [
     0,
     0,
@@ -1079,7 +1161,7 @@
     true,
     true
    ],
-   "style": "s5"
+   "style": "s6"
   },
   {
    "id": "tassel_knot0",
@@ -1155,7 +1237,7 @@
     false,
     false
    ],
-   "style": "s6",
+   "style": "s7",
    "up": [
     0,
     0,
@@ -1215,7 +1297,7 @@
     false,
     true
    ],
-   "style": "s7",
+   "style": "s8",
    "up": [
     0,
     0,
@@ -1297,7 +1379,7 @@
     false,
     false
    ],
-   "style": "s8",
+   "style": "s9",
    "up": [
     0,
     0,
@@ -1357,7 +1439,7 @@
     false,
     true
    ],
-   "style": "s9",
+   "style": "s10",
    "up": [
     0,
     0,

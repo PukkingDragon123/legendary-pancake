@@ -507,64 +507,17 @@
   },
   "s7": {
    "ramp": "leaf",
-   "tone": 3.8,
+   "tone": 2.2,
    "rim": {
     "light_shift": 1.0,
-    "dark_shift": -1.2
-   },
-   "brush": {
-    "flow": "vertical",
-    "rough": 0.75
+    "dark_shift": -1.0
    },
    "layers": [
     {
-     "id": "needles",
-     "op": "stripes",
-     "axis": [
-      1,
-      0,
-      0.7
-     ],
-     "period": 0.55,
-     "width": 0.4,
-     "shift": -0.8,
-     "wobble": 0.6
-    },
-    {
-     "id": "clumps",
-     "op": "patches",
-     "scale": 1.3,
-     "threshold": 0.55,
-     "shift": 0.9,
-     "bevel": {
-      "shadow": 1,
-      "highlight": 1,
-      "shadow_shift": -1.2,
-      "highlight_shift": 0.6
-     }
-    },
-    {
-     "id": "depth",
+     "id": "mottle",
      "op": "noise",
-     "scale": 0.9,
-     "amount": 0.7
-    },
-    {
-     "id": "snow",
-     "op": "patches",
-     "scale": 1.0,
-     "threshold": 0.7,
-     "ramp": "snow",
-     "tone": 5.4,
-     "faces": [
-      "up"
-     ],
-     "bevel": {
-      "shadow": 1,
-      "highlight": 0,
-      "shadow_ramp": "leaf",
-      "shadow_tone": 1.2
-     }
+     "scale": 1.4,
+     "amount": 0.6
     },
     {
      "id": "photo",
@@ -580,65 +533,16 @@
   },
   "s8": {
    "ramp": "leaf",
-   "tone": 3.8,
-   "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.2
-   },
+   "tone": 4,
+   "light": 0.75,
    "brush": {
-    "flow": "vertical",
-    "rough": 0.75
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
    },
    "layers": [
-    {
-     "id": "needles",
-     "op": "stripes",
-     "axis": [
-      1,
-      0,
-      0.7
-     ],
-     "period": 0.55,
-     "width": 0.4,
-     "shift": -0.8,
-     "wobble": 0.6
-    },
-    {
-     "id": "clumps",
-     "op": "patches",
-     "scale": 1.3,
-     "threshold": 0.55,
-     "shift": 0.9,
-     "bevel": {
-      "shadow": 1,
-      "highlight": 1,
-      "shadow_shift": -1.2,
-      "highlight_shift": 0.6
-     }
-    },
-    {
-     "id": "depth",
-     "op": "noise",
-     "scale": 0.9,
-     "amount": 0.7
-    },
-    {
-     "id": "snow",
-     "op": "patches",
-     "scale": 1.0,
-     "threshold": 0.7,
-     "ramp": "snow",
-     "tone": 5.4,
-     "faces": [
-      "up"
-     ],
-     "bevel": {
-      "shadow": 1,
-      "highlight": 0,
-      "shadow_ramp": "leaf",
-      "shadow_tone": 1.2
-     }
-    },
     {
      "id": "photo",
      "op": "photo",
@@ -653,65 +557,16 @@
   },
   "s9": {
    "ramp": "leaf",
-   "tone": 3.8,
-   "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.2
-   },
+   "tone": 4,
+   "light": 0.75,
    "brush": {
-    "flow": "vertical",
-    "rough": 0.75
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
    },
    "layers": [
-    {
-     "id": "needles",
-     "op": "stripes",
-     "axis": [
-      1,
-      0,
-      0.7
-     ],
-     "period": 0.55,
-     "width": 0.4,
-     "shift": -0.8,
-     "wobble": 0.6
-    },
-    {
-     "id": "clumps",
-     "op": "patches",
-     "scale": 1.3,
-     "threshold": 0.55,
-     "shift": 0.9,
-     "bevel": {
-      "shadow": 1,
-      "highlight": 1,
-      "shadow_shift": -1.2,
-      "highlight_shift": 0.6
-     }
-    },
-    {
-     "id": "depth",
-     "op": "noise",
-     "scale": 0.9,
-     "amount": 0.7
-    },
-    {
-     "id": "snow",
-     "op": "patches",
-     "scale": 1.0,
-     "threshold": 0.7,
-     "ramp": "snow",
-     "tone": 5.4,
-     "faces": [
-      "up"
-     ],
-     "bevel": {
-      "shadow": 1,
-      "highlight": 0,
-      "shadow_ramp": "leaf",
-      "shadow_tone": 1.2
-     }
-    },
     {
      "id": "photo",
      "op": "photo",
@@ -726,65 +581,16 @@
   },
   "s10": {
    "ramp": "leaf",
-   "tone": 3.8,
-   "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.2
-   },
+   "tone": 4,
+   "light": 0.75,
    "brush": {
-    "flow": "vertical",
-    "rough": 0.75
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
    },
    "layers": [
-    {
-     "id": "needles",
-     "op": "stripes",
-     "axis": [
-      1,
-      0,
-      0.7
-     ],
-     "period": 0.55,
-     "width": 0.4,
-     "shift": -0.8,
-     "wobble": 0.6
-    },
-    {
-     "id": "clumps",
-     "op": "patches",
-     "scale": 1.3,
-     "threshold": 0.55,
-     "shift": 0.9,
-     "bevel": {
-      "shadow": 1,
-      "highlight": 1,
-      "shadow_shift": -1.2,
-      "highlight_shift": 0.6
-     }
-    },
-    {
-     "id": "depth",
-     "op": "noise",
-     "scale": 0.9,
-     "amount": 0.7
-    },
-    {
-     "id": "snow",
-     "op": "patches",
-     "scale": 1.0,
-     "threshold": 0.7,
-     "ramp": "snow",
-     "tone": 5.4,
-     "faces": [
-      "up"
-     ],
-     "bevel": {
-      "shadow": 1,
-      "highlight": 0,
-      "shadow_ramp": "leaf",
-      "shadow_tone": 1.2
-     }
-    },
     {
      "id": "photo",
      "op": "photo",
@@ -798,27 +604,660 @@
    ]
   },
   "s11": {
-   "ramp": "flame",
-   "tone": 4.0,
-   "light": 0.25,
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
    "brush": {
     "off": true
    },
    "rim": {
-    "light_shift": 1.0,
-    "dark": 0,
-    "light": 1
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "core",
-     "op": "gradient",
-     "axis": "y",
-     "amount": 0.5
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
     }
    ]
   },
   "s12": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s13": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s14": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s15": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s17": {
+   "ramp": "leaf",
+   "tone": 2.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.6
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s18": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s19": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s20": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s21": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s22": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s23": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s24": {
+   "ramp": "leaf",
+   "tone": 2.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.6
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s25": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s26": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s27": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s28": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s29": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s30": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s31": {
+   "ramp": "leaf",
+   "tone": 2.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.6
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s32": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s33": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s34": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s35": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s36": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s37": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s38": {
    "ramp": "flame",
    "tone": 4.0,
    "light": 0.25,
@@ -839,9 +1278,30 @@
     }
    ]
   },
-  "s13": {
+  "s39": {
+   "ramp": "flame",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s40": {
    "ramp": "pine",
-   "tone": 4.6,
+   "tone": 2.4,
    "rim": {
     "light_shift": 1.0,
     "dark_shift": -1.2
@@ -884,22 +1344,29 @@
      "amount": 0.7
     },
     {
-     "id": "snow",
-     "op": "patches",
-     "scale": 1.0,
-     "threshold": 0.7,
-     "ramp": "snow",
-     "tone": 5.4,
-     "faces": [
-      "up"
-     ],
-     "bevel": {
-      "shadow": 1,
-      "highlight": 0,
-      "shadow_ramp": "pine",
-      "shadow_tone": 1.2
-     }
-    },
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s41": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
     {
      "id": "photo",
      "op": "photo",
@@ -912,7 +1379,439 @@
     }
    ]
   },
-  "s14": {
+  "s42": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s43": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s44": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s45": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s46": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s47": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s48": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s49": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s50": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s51": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s52": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s53": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s54": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s55": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s56": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s57": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s58": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s59": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.75,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s60": {
    "ramp": "cream",
    "tone": 4.6,
    "rim": {
@@ -928,7 +1827,7 @@
     }
    ]
   },
-  "s15": {
+  "s61": {
    "ramp": "holly",
    "tone": 4.4,
    "rim": {
@@ -964,7 +1863,7 @@
     }
    ]
   },
-  "s16": {
+  "s62": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -973,7 +1872,7 @@
    },
    "layers": []
   },
-  "s17": {
+  "s63": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -982,7 +1881,7 @@
    },
    "layers": []
   },
-  "s18": {
+  "s64": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -991,7 +1890,7 @@
    },
    "layers": []
   },
-  "s19": {
+  "s65": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1000,7 +1899,7 @@
    },
    "layers": []
   },
-  "s20": {
+  "s66": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1009,7 +1908,7 @@
    },
    "layers": []
   },
-  "s21": {
+  "s67": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1018,7 +1917,7 @@
    },
    "layers": []
   },
-  "s22": {
+  "s68": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1027,7 +1926,7 @@
    },
    "layers": []
   },
-  "s23": {
+  "s69": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1036,7 +1935,7 @@
    },
    "layers": []
   },
-  "s24": {
+  "s70": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1045,7 +1944,7 @@
    },
    "layers": []
   },
-  "s25": {
+  "s71": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1054,7 +1953,7 @@
    },
    "layers": []
   },
-  "s26": {
+  "s72": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1063,7 +1962,7 @@
    },
    "layers": []
   },
-  "s27": {
+  "s73": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1072,7 +1971,7 @@
    },
    "layers": []
   },
-  "s28": {
+  "s74": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1081,7 +1980,7 @@
    },
    "layers": []
   },
-  "s29": {
+  "s75": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1090,7 +1989,7 @@
    },
    "layers": []
   },
-  "s30": {
+  "s76": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1099,7 +1998,7 @@
    },
    "layers": []
   },
-  "s31": {
+  "s77": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1108,7 +2007,7 @@
    },
    "layers": []
   },
-  "s32": {
+  "s78": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1117,7 +2016,7 @@
    },
    "layers": []
   },
-  "s33": {
+  "s79": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1126,7 +2025,7 @@
    },
    "layers": []
   },
-  "s34": {
+  "s80": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1135,7 +2034,7 @@
    },
    "layers": []
   },
-  "s35": {
+  "s81": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1144,7 +2043,7 @@
    },
    "layers": []
   },
-  "s36": {
+  "s82": {
    "ramp": "snow",
    "tone": 6.4,
    "rim": {
@@ -1153,7 +2052,7 @@
    },
    "layers": []
   },
-  "s37": {
+  "s83": {
    "ramp": "glass",
    "tone": 3.0,
    "light": 0.45,
@@ -1561,11 +2460,11 @@
    "smooth": true
   },
   {
-   "id": "crown0",
+   "id": "crown0_core",
    "shape": "loft",
    "pivot": [
     -0.6,
-    9.4,
+    10.674,
     -0.8
    ],
    "rings": [
@@ -1583,73 +2482,51 @@
     {
      "at": [
       0,
-      0.25748094345371025,
+      0.25324346545881965,
       0
      ],
      "size": [
-      2.2562,
-      2.2562
+      1.8339,
+      1.8339
      ]
     },
     {
      "at": [
       0,
-      0.978926515167293,
+      0.9162434654588196,
       0
      ],
      "size": [
-      4.0655,
-      4.0655
+      2.9673,
+      2.9673
      ]
     },
     {
      "at": [
       0,
-      2.0214455717135826,
+      1.7357565345411803,
       0
      ],
      "size": [
-      5.0696,
-      5.0696
+      2.9673,
+      2.9673
      ]
     },
     {
      "at": [
       0,
-      3.1785544282864175,
+      2.3987565345411803,
       0
      ],
      "size": [
-      5.0696,
-      5.0696
+      1.8339,
+      1.8339
      ]
     },
     {
      "at": [
       0,
-      4.221073484832707,
-      0
-     ],
-     "size": [
-      4.0655,
-      4.0655
-     ]
-    },
-    {
-     "at": [
-      0,
-      4.942519056546289,
-      0
-     ],
-     "size": [
-      2.2562,
-      2.2562
-     ]
-    },
-    {
-     "at": [
-      0,
-      5.2,
+      2.652,
       0
      ],
      "size": [
@@ -1659,7 +2536,7 @@
     }
    ],
    "profile": {
-    "sides": 11,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1675,11 +2552,461 @@
    ]
   },
   {
-   "id": "crown1",
+   "id": "crown0_c0",
+   "shape": "card",
+   "pivot": [
+    0.2576,
+    13.4144,
+    -0.8
+   ],
+   "rotation": [
+    -50.187,
+    90.0,
+    0.0
+   ],
+   "art": [
+    ".......dd..........",
+    ".......mvnd........",
+    "......dmvnnd.......",
+    ".....vddmvnd.......",
+    "....dlvnddnd.......",
+    "....dlvnndn........",
+    "....dllvnd.........",
+    "....ddlvn..........",
+    "......ddd..........",
+    "............ddnn...",
+    ".......nllvdvvmmn..",
+    "......nllvnvnlvvn..",
+    "...dmmnlvvnvmnlvv..",
+    "...dmvnvnvmnmnnnn..",
+    "...mmvndnhvnmn.....",
+    "...dvnndnhvnv......",
+    "...vddd...v........",
+    "...................",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s8",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown0_c1",
+   "shape": "card",
+   "pivot": [
+    -1.6289,
+    13.0608,
+    0.1425
+   ],
+   "rotation": [
+    -33.448,
+    -47.508,
+    0.0
+   ],
+   "art": [
+    "...................",
+    "...................",
+    ".....dddd..ddnvd...",
+    ".....vvnnd.nnlnd...",
+    ".....dmvnddnlvnn...",
+    ".....dmmvddnlvnn...",
+    "...vdddddd.nvnnn...",
+    "..dnnnnn....nn.....",
+    "..nhvvnlv..........",
+    "..vvmnlvm..........",
+    "...nnnvmmvn........",
+    "....vmmmnvmn.......",
+    "...dmnnnllmm.vn....",
+    "...mmvndnhvnnvmn...",
+    "...mvvnd.nvnnlvn...",
+    "...dvndd....nlvn...",
+    "...vdd........v....",
+    "...................",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s9",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown0_c2",
+   "shape": "card",
+   "pivot": [
+    -0.4534,
+    12.7072,
+    -2.4705
+   ],
+   "rotation": [
+    -21.11,
+    174.984,
+    0.0
+   ],
+   "art": [
+    "...................",
+    "...................",
+    "......n............",
+    "......vmn..........",
+    "......hvmn....dd...",
+    "..dvnnlvmn.dvddmd..",
+    "..dmvnnlvnnllnnlvd.",
+    "..dmmv.nndllvvvnm..",
+    "...ddd...nvvmmmmn..",
+    "..........nmmnnn...",
+    ".....nn....nnn.....",
+    "....nlvn...........",
+    "...nlvmnv..........",
+    "....lvmnd..........",
+    "....nvnnd..........",
+    ".....vdd...........",
+    "...................",
+    "...................",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s10",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown0_c3",
+   "shape": "card",
+   "pivot": [
+    0.5105,
+    12.3536,
+    0.6485
+   ],
+   "rotation": [
+    -10.272,
+    37.477,
+    0.0
+   ],
+   "art": [
+    "............d......",
+    "...........dvd.....",
+    "..........dmvd.....",
+    ".......vdnnmvnd....",
+    ".......nlvnvnnd....",
+    "......nllvnvnd.....",
+    "......nlvnnnddd....",
+    "......nlvnndnnnd...",
+    "...ddddnnndnnmnnd..",
+    "...dmvd....mmmmn...",
+    ".ddmvnd...nvvvvvv..",
+    "dmmvndd....lllhhn..",
+    "dmvvd.....lnllnnn..",
+    "dvnnd.nnnnlvnnvn...",
+    "vnndd.nlvnhvnnnn...",
+    "......lvmnnvn......",
+    "......vnn..v.......",
+    "...................",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s11",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown0_c4",
+   "shape": "card",
+   "pivot": [
+    -2.4434,
+    12.0,
+    -1.1261
+   ],
+   "rotation": [
+    -0.0,
+    -100.031,
+    0.0
+   ],
+   "art": [
+    "...................",
+    "...................",
+    "...............dd..",
+    ".............dmmv..",
+    "...........nnnnnnd.",
+    "...ddd....nlhhvnnd.",
+    "..vnnnd...nlvvmmn..",
+    "..dvvvv...vvmmnnd..",
+    "...dmd.....nnnn....",
+    "....d.......nnn....",
+    "...........nvmmndd.",
+    "......nnnn.nllvvnn.",
+    "......nlvn.dnnnvvnd",
+    "......hvmndlvnmmmvv",
+    "......vmmndlvddmdd.",
+    "......vnn..dv......",
+    "...................",
+    "...................",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s12",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown0_c5",
+   "shape": "card",
+   "pivot": [
+    0.94,
+    11.6464,
+    -1.7796
+   ],
+   "rotation": [
+    10.272,
+    122.461,
+    0.0
+   ],
+   "art": [
+    "...................",
+    "...................",
+    "...................",
+    "...................",
+    "...................",
+    "...vmnnnnd.........",
+    "..nhvmnmnn.........",
+    ".nlnlvnmnn.........",
+    "nllnnvlvnd.........",
+    "vvmmnlllnn.........",
+    "nnmmnnhvvn.........",
+    "vvnnnvvmmn.........",
+    "nnnnnnmmn..........",
+    "..n.dmvnd..........",
+    "....dmvnd..........",
+    ".....dvd...........",
+    "...................",
+    "...................",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s13",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown0_c6",
+   "shape": "card",
+   "pivot": [
+    -1.0353,
+    11.2928,
+    0.8195
+   ],
+   "rotation": [
+    21.11,
+    -15.047,
+    0.0
+   ],
+   "art": [
+    "...................",
+    "...................",
+    "...................",
+    "........v..ddnvn...",
+    ".dddd..nvmnmnhvm...",
+    ".vvnnmnnhvmnnlvmn..",
+    ".dmvvvvllvmnnnvn...",
+    ".dmmlllnlvmnd......",
+    "..ddnnnnnvm........",
+    "....dllvvd.........",
+    ".....dddvd.....nn..",
+    ".......dvnd...vmmn.",
+    ".......nmvd...nvvn.",
+    ".....nlvnvd...nnhv.",
+    ".....nlvmn.........",
+    ".....nlmn..........",
+    "......vnn..........",
+    "......n............",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s14",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown0_c7",
+   "shape": "card",
+   "pivot": [
+    -1.2431,
+    10.9392,
+    -2.0383
+   ],
+   "rotation": [
+    33.448,
+    -152.554,
+    0.0
+   ],
+   "art": [
+    "...................",
+    "............nnn....",
+    "............llhhv..",
+    "..........nnllvvn..",
+    "..........lnvvmmn..",
+    "..........lnmmmn...",
+    ".........dvmmnn....",
+    ".........dmvnddd...",
+    ".nnlln...dmvddmmvd.",
+    ".nllvmnnn.dd.mvvn..",
+    ".nlvmnlvm..nnvnnd..",
+    ".nvmmnhvmnnvnnvdv..",
+    ".vmmnvvmndnlnnmmd..",
+    "...nlvnnndnlvn.....",
+    "...nlvmmnddnvd.....",
+    "....lvmnn.dmnd.....",
+    "....nvnvd.dmnd.....",
+    ".......d...dd......",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s15",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown0_c8",
+   "shape": "card",
+   "pivot": [
+    0.2056,
+    10.5856,
+    -0.5058
+   ],
+   "rotation": [
+    50.187,
+    69.938,
+    0.0
+   ],
+   "art": [
+    "...................",
+    "...................",
+    "...................",
+    ".............nnnn..",
+    "..dvndd...dvnnnvn..",
+    "..dvvnd..dmdnlhvn..",
+    "..dmvnn..dmnllvmn..",
+    "..dmmvd..dmnlvmmn..",
+    "...dddd..dmdlvmmnd.",
+    "..........ddnnnnnd.",
+    ".............nmmnv.",
+    "............nvvvvv.",
+    "............nllhhn.",
+    "............lnnnn..",
+    "............nlvn...",
+    ".............nv....",
+    "...................",
+    "...................",
+    "..................."
+   ],
+   "plane": "xy",
+   "style": "s16",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown1_core",
    "shape": "loft",
    "pivot": [
     -2.2,
-    9.3,
+    10.133,
     -0.2
    ],
    "rings": [
@@ -1697,73 +3024,51 @@
     {
      "at": [
       0,
-      0.16835292456588744,
+      0.16558226587692057,
       0
      ],
      "size": [
-      1.4752,
-      1.4752
+      1.1991,
+      1.1991
      ]
     },
     {
      "at": [
       0,
-      0.640067336840153,
+      0.5990822658769205,
       0
      ],
      "size": [
-      2.6582,
-      2.6582
+      1.9402,
+      1.9402
      ]
     },
     {
      "at": [
       0,
-      1.3217144122742657,
+      1.1349177341230794,
       0
      ],
      "size": [
-      3.3148,
-      3.3148
+      1.9402,
+      1.9402
      ]
     },
     {
      "at": [
       0,
-      2.0782855877257345,
+      1.5684177341230794,
       0
      ],
      "size": [
-      3.3148,
-      3.3148
+      1.1991,
+      1.1991
      ]
     },
     {
      "at": [
       0,
-      2.7599326631598466,
-      0
-     ],
-     "size": [
-      2.6582,
-      2.6582
-     ]
-    },
-    {
-     "at": [
-      0,
-      3.2316470754341124,
-      0
-     ],
-     "size": [
-      1.4752,
-      1.4752
-     ]
-    },
-    {
-     "at": [
-      0,
-      3.4,
+      1.734,
       0
      ],
      "size": [
@@ -1773,7 +3078,7 @@
     }
    ],
    "profile": {
-    "sides": 11,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1781,7 +3086,7 @@
     false,
     false
    ],
-   "style": "s8",
+   "style": "s17",
    "up": [
     0,
     0,
@@ -1789,11 +3094,275 @@
    ]
   },
   {
-   "id": "crown2",
+   "id": "crown1_c0",
+   "shape": "card",
+   "pivot": [
+    -1.8344,
+    11.867,
+    0.3693
+   ],
+   "rotation": [
+    -45.154,
+    32.704,
+    0.0
+   ],
+   "art": [
+    ".............",
+    "........v....",
+    ".......dvd...",
+    ".....dvvnd...",
+    "..vnnnmnv....",
+    "..nvvnvvn....",
+    "..vnnnvnn....",
+    "....dvvvmn...",
+    "...dmvnlvv...",
+    "...dvndn.....",
+    "...dvd.......",
+    ".............",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s18",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown1_c1",
+   "shape": "card",
+   "pivot": [
+    -3.2248,
+    11.5202,
+    -0.4708
+   ],
+   "rotation": [
+    -24.0,
+    -104.804,
+    0.0
+   ],
+   "art": [
+    ".............",
+    ".........nn..",
+    ".....dvnnvn..",
+    ".....nvnvvn..",
+    ".ddd.nvnnnd..",
+    ".vvvd.nvmnmvv",
+    "..dd..nvnnvd.",
+    ".......vnv...",
+    "......nvmn...",
+    "......nvmn...",
+    "......dnv....",
+    ".......vd....",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s19",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown1_c2",
+   "shape": "card",
+   "pivot": [
+    -1.1313,
+    11.1734,
+    -0.7608
+   ],
+   "rotation": [
+    -7.675,
+    117.689,
+    0.0
+   ],
+   "art": [
+    "......nv.....",
+    ".....nhv.....",
+    ".....nvmnn...",
+    "....vdvnvnnn.",
+    "..ddvdvnvvvv.",
+    ".dmdmvv.nnn..",
+    ".vdddmv......",
+    ".dnnvvd......",
+    ".dnvmnvn.....",
+    ".vnvnnvn.....",
+    ".....vnn.....",
+    ".............",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s20",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown1_c3",
+   "shape": "card",
+   "pivot": [
+    -2.6092,
+    10.8266,
+    0.9354
+   ],
+   "rotation": [
+    7.675,
+    -19.819,
+    0.0
+   ],
+   "art": [
+    ".............",
+    "........v....",
+    "......vdvd...",
+    "...vmnvdmnd..",
+    "...nvvdvdv...",
+    "dnnnn.mvn....",
+    "vvvvn.dnn....",
+    "mvnnnnvvvv...",
+    "d.dmnvnvn....",
+    "...vnvnvm....",
+    "...vnvmvn....",
+    "....vnnn.....",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s21",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown1_c4",
+   "shape": "card",
+   "pivot": [
+    -2.6086,
+    10.4798,
+    -1.1781
+   ],
+   "rotation": [
+    24.0,
+    -157.327,
+    0.0
+   ],
+   "art": [
+    ".............",
+    ".......nvn...",
+    ".......nvn...",
+    ".vnd...nn....",
+    ".nlvd........",
+    ".vmnd...dd...",
+    "..nvv..vvvv..",
+    ".dlvd..dddvnn",
+    ".dvnvn....lvn",
+    ".vdnvn....nvv",
+    "...nvn.......",
+    ".............",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s22",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown1_c5",
+   "shape": "card",
+   "pivot": [
+    -1.586,
+    10.133,
+    0.0842
+   ],
+   "rotation": [
+    45.154,
+    65.165,
+    0.0
+   ],
+   "art": [
+    ".............",
+    "....v........",
+    "...nvnn......",
+    "...hvmnn.nn..",
+    "...nvnnnnlvvn",
+    "....nvnvnmmn.",
+    "...nlvdddnnvd",
+    "...hvm....ddv",
+    "...vmn.dn....",
+    ".......dv....",
+    "........v....",
+    ".............",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s23",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown2_core",
    "shape": "loft",
    "pivot": [
     1.0,
-    9.6,
+    10.482,
     -1.2
    ],
    "rings": [
@@ -1811,73 +3380,51 @@
     {
      "at": [
       0,
-      0.17825603777564555,
+      0.17532239916379824,
       0
      ],
      "size": [
-      1.562,
-      1.562
+      1.2696,
+      1.2696
      ]
     },
     {
      "at": [
       0,
-      0.6777183566542797,
+      0.6343223991637983,
       0
      ],
      "size": [
-      2.8146,
-      2.8146
+      2.0543,
+      2.0543
      ]
     },
     {
      "at": [
       0,
-      1.3994623188786341,
+      1.2016776008362018,
       0
      ],
      "size": [
-      3.5097,
-      3.5097
+      2.0543,
+      2.0543
      ]
     },
     {
      "at": [
       0,
-      2.2005376811213657,
+      1.6606776008362019,
       0
      ],
      "size": [
-      3.5097,
-      3.5097
+      1.2696,
+      1.2696
      ]
     },
     {
      "at": [
       0,
-      2.92228164334572,
-      0
-     ],
-     "size": [
-      2.8146,
-      2.8146
-     ]
-    },
-    {
-     "at": [
-      0,
-      3.421743962224354,
-      0
-     ],
-     "size": [
-      1.562,
-      1.562
-     ]
-    },
-    {
-     "at": [
-      0,
-      3.6,
+      1.836,
       0
      ],
      "size": [
@@ -1887,7 +3434,7 @@
     }
    ],
    "profile": {
-    "sides": 11,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -1895,7 +3442,7 @@
     false,
     false
    ],
-   "style": "s9",
+   "style": "s24",
    "up": [
     0,
     0,
@@ -1903,11 +3450,275 @@
    ]
   },
   {
-   "id": "crown3",
+   "id": "crown2_c0",
+   "shape": "card",
+   "pivot": [
+    0.7019,
+    12.318,
+    -0.5486
+   ],
+   "rotation": [
+    -45.154,
+    -24.592,
+    0.0
+   ],
+   "art": [
+    ".............",
+    ".............",
+    "......nv.....",
+    ".....nlvn....",
+    ".....nvmnd...",
+    ".....nvmnv...",
+    "...dvddvndvnn",
+    "..dmvd.ddnlvm",
+    "..ddvdvn..nhv",
+    "..ddmvnv.....",
+    "..ddvndv.....",
+    "...vvd.......",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s25",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown2_c1",
+   "shape": "card",
+   "pivot": [
+    0.655,
+    11.9508,
+    -2.268
+   ],
+   "rotation": [
+    -24.0,
+    -162.099,
+    0.0
+   ],
+   "art": [
+    ".............",
+    "...v.........",
+    "..dvndvvn....",
+    "..dmndnvmn...",
+    "..ddddnlvn...",
+    "dvvvmndnnnv..",
+    ".ddhvn..vm...",
+    "..nnnn...n...",
+    ".nvv.........",
+    ".hvm.nn......",
+    ".vnnnvn......",
+    "....vnn......",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s26",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown2_c2",
+   "shape": "card",
+   "pivot": [
+    2.111,
+    11.5836,
+    -0.5687
+   ],
+   "rotation": [
+    -7.675,
+    60.393,
+    0.0
+   ],
+   "art": [
+    ".............",
+    ".............",
+    "......v......",
+    ".nmnddvnv....",
+    "nvvvmnnvnd...",
+    "vnnnvnnvnd...",
+    "nvvv...vdd...",
+    "nnnv.........",
+    ".nn....vd....",
+    "......dvn....",
+    ".......dd....",
+    ".............",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s27",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown2_c3",
+   "shape": "card",
+   "pivot": [
+    -0.2457,
+    11.2164,
+    -0.915
+   ],
+   "rotation": [
+    7.675,
+    -77.115,
+    0.0
+   ],
+   "art": [
+    ".............",
+    "........v....",
+    ".v.d...dvdn..",
+    "nvnnd.ddvnvn.",
+    "nlvvv.dnvnvn.",
+    ".dnmd.vnvn...",
+    ".vvn.n.vn....",
+    ".nnvnvmn.....",
+    "...nnvmn.....",
+    "...vnhvnd....",
+    ".....dvvd....",
+    "......dv.....",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s28",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown2_c4",
+   "shape": "card",
+   "pivot": [
+    1.6377,
+    10.8492,
+    -2.1236
+   ],
+   "rotation": [
+    24.0,
+    145.377,
+    0.0
+   ],
+   "art": [
+    ".............",
+    ".............",
+    ".......v.....",
+    ".....nhv.....",
+    ".....nvmn....",
+    ".....nvnddv..",
+    ".......nnvd..",
+    ".....nnvmn...",
+    "....dnnlvn...",
+    "..dvdvvnn....",
+    "..dvnd..n....",
+    "...vd........",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s29",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown2_c5",
+   "shape": "card",
+   "pivot": [
+    1.0981,
+    10.482,
+    -0.4904
+   ],
+   "rotation": [
+    45.154,
+    7.87,
+    0.0
+   ],
+   "art": [
+    ".............",
+    "....nvn.ddv..",
+    "....nvndmvd..",
+    "....nvndvdmnd",
+    ".......nnvvvv",
+    "...nn..nvmnnn",
+    "..vvv..nvn...",
+    "..nnn....vd..",
+    "...nvmn.dmv..",
+    "...nvmn...v..",
+    "...nvmn......",
+    "....vn.......",
+    "............."
+   ],
+   "plane": "xy",
+   "style": "s30",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown3_core",
    "shape": "loft",
    "pivot": [
     -0.4,
-    11.8,
+    12.584,
     -1.4
    ],
    "rings": [
@@ -1925,73 +3736,51 @@
     {
      "at": [
       0,
-      0.15844981135612937,
+      0.15584213259004287,
       0
      ],
      "size": [
-      1.3884,
-      1.3884
+      1.1285,
+      1.1285
      ]
     },
     {
      "at": [
       0,
-      0.6024163170260265,
+      0.5638421325900428,
       0
      ],
      "size": [
-      2.5019,
-      2.5019
+      1.826,
+      1.826
      ]
     },
     {
      "at": [
       0,
-      1.2439665056698972,
+      1.068157867409957,
       0
      ],
      "size": [
-      3.1198,
-      3.1198
+      1.826,
+      1.826
      ]
     },
     {
      "at": [
       0,
-      1.956033494330103,
+      1.476157867409957,
       0
      ],
      "size": [
-      3.1198,
-      3.1198
+      1.1285,
+      1.1285
      ]
     },
     {
      "at": [
       0,
-      2.5975836829739736,
-      0
-     ],
-     "size": [
-      2.5019,
-      2.5019
-     ]
-    },
-    {
-     "at": [
-      0,
-      3.0415501886438707,
-      0
-     ],
-     "size": [
-      1.3884,
-      1.3884
-     ]
-    },
-    {
-     "at": [
-      0,
-      3.2,
+      1.632,
       0
      ],
      "size": [
@@ -2001,7 +3790,7 @@
     }
    ],
    "profile": {
-    "sides": 11,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 0,
@@ -2009,12 +3798,270 @@
     false,
     false
    ],
-   "style": "s10",
+   "style": "s31",
    "up": [
     0,
     0,
     1
    ]
+  },
+  {
+   "id": "crown3_c0",
+   "shape": "card",
+   "pivot": [
+    -1.0304,
+    14.216,
+    -1.3101
+   ],
+   "rotation": [
+    -45.154,
+    -81.887,
+    0.0
+   ],
+   "art": [
+    "............",
+    "..vd........",
+    "..mvd....ddv",
+    ".dmvd....mvd",
+    ".dddd....vdd",
+    ".dvnv.......",
+    "..nnn.dd....",
+    "..nnvvnv....",
+    "..vvmnnnd...",
+    "....nnvn....",
+    ".....nhv....",
+    "......nv...."
+   ],
+   "plane": "xy",
+   "style": "s32",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown3_c1",
+   "shape": "card",
+   "pivot": [
+    0.2332,
+    13.8896,
+    -2.171
+   ],
+   "rotation": [
+    -24.0,
+    140.605,
+    0.0
+   ],
+   "art": [
+    "............",
+    "............",
+    ".....vn.....",
+    "....dvvn.nv.",
+    "....ddvnvvn.",
+    ".dmd..nvnvv.",
+    "dvvd..nvnd..",
+    "vdd...nnvn..",
+    "......dnvn..",
+    "......ddvd..",
+    "............",
+    "............"
+   ],
+   "plane": "xy",
+   "style": "s33",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown3_c2",
+   "shape": "card",
+   "pivot": [
+    -0.3386,
+    13.5632,
+    -0.2658
+   ],
+   "rotation": [
+    -7.675,
+    3.097,
+    0.0
+   ],
+   "art": [
+    "............",
+    "............",
+    ".vmn.....nn.",
+    ".lvn...dnvvv",
+    ".nlnnn.vvnn.",
+    "..vvvv.vdddd",
+    ".vnnnn...dvv",
+    "..ddd.vnvndd",
+    ".....nnlvn..",
+    "......nnvn..",
+    "........n...",
+    "............"
+   ],
+   "plane": "xy",
+   "style": "s34",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown3_c3",
+   "shape": "card",
+   "pivot": [
+    -1.2114,
+    13.2368,
+    -2.1949
+   ],
+   "rotation": [
+    7.675,
+    -134.411,
+    0.0
+   ],
+   "art": [
+    "......d.....",
+    "...ddvvd....",
+    ".nnnnvnd....",
+    ".nvvlvnddddd",
+    "..nnnvvvvvvv",
+    ".....nvddddd",
+    "..nvlmvn....",
+    "..vnvnlvn...",
+    "..vnvnnnn...",
+    "............",
+    "............",
+    "............"
+   ],
+   "plane": "xy",
+   "style": "s35",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown3_c4",
+   "shape": "card",
+   "pivot": [
+    0.5971,
+    12.9104,
+    -1.3666
+   ],
+   "rotation": [
+    24.0,
+    88.082,
+    0.0
+   ],
+   "art": [
+    "............",
+    "............",
+    "......v.....",
+    "..vddnvn....",
+    "..dvvvnvv...",
+    "...dvdvnndd.",
+    "...n..vddlvv",
+    "..nvndnvnvnd",
+    "..nvndnvn.d.",
+    "..vn...nv...",
+    "............",
+    "............"
+   ],
+   "plane": "xy",
+   "style": "s36",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "crown3_c5",
+   "shape": "card",
+   "pivot": [
+    -0.8837,
+    12.584,
+    -0.9858
+   ],
+   "rotation": [
+    45.154,
+    -49.426,
+    0.0
+   ],
+   "art": [
+    "............",
+    "...nn.......",
+    "...vvn..dd..",
+    ".nvnvn.dvvvd",
+    "nllnnn.dnnd.",
+    "vvmnnv...d..",
+    ".nvnd.......",
+    ".vmn....vvd.",
+    "..n.....dmv.",
+    ".....nvn.dd.",
+    ".....nvn....",
+    "......n....."
+   ],
+   "plane": "xy",
+   "style": "s37",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
   },
   {
    "id": "glow_door",
@@ -2037,7 +4084,7 @@
     "wwwwwwww"
    ],
    "plane": "xy",
-   "style": "s11",
+   "style": "s38",
    "paint": {
     "art_key": {
      "w": "flame:4",
@@ -2065,7 +4112,7 @@
     "wwww"
    ],
    "plane": "xy",
-   "style": "s12",
+   "style": "s39",
    "paint": {
     "art_key": {
      "w": "flame:5"
@@ -2073,51 +4120,40 @@
    }
   },
   {
-   "id": "fir",
+   "id": "fir_core",
    "shape": "loft",
    "pivot": [
     2.6,
-    0.0,
+    6.0,
     0.6
    ],
    "rings": [
     {
      "at": [
       0,
-      6.0,
+      0,
       0
      ],
      "size": [
-      2.8,
-      2.8
+      1.44,
+      1.44
      ]
     },
     {
      "at": [
       0,
-      7.6,
+      1.71,
       0
      ],
      "size": [
-      1.2,
-      1.2
+      0.96,
+      0.96
      ]
     },
     {
      "at": [
       0,
-      7.6,
-      0
-     ],
-     "size": [
-      2.0,
-      2.0
-     ]
-    },
-    {
-     "at": [
-      0,
-      9.6,
+      3.61,
       0
      ],
      "size": [
@@ -2127,22 +4163,1077 @@
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 8,
     "round": 2.0,
     "angle": 0.0
    },
    "subdiv": 0,
    "caps": [
-    false,
-    true
+    true,
+    false
    ],
-   "style": "s13",
+   "style": "s40",
    "up": [
     0,
     0,
     1
    ],
    "smooth": true
+  },
+  {
+   "id": "fir_j0",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    6.456,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -51.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b0",
+   "shape": "card",
+   "parent": "fir_j0",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    1.0,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -24.0
+   ],
+   "art": [
+    ".............",
+    ".............",
+    "...SsSSsh....",
+    "lnmSSsllnn...",
+    "vvvvvvvvvvvnh",
+    "mmnmmmmmmmhvn",
+    "mmnmmmmmmm...",
+    "......m......",
+    "............."
+   ],
+   "plane": "xz",
+   "style": "s41",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j1",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    6.456,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -102.429,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b1",
+   "shape": "card",
+   "parent": "fir_j1",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    1.0,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -24.0
+   ],
+   "art": [
+    ".............",
+    ".............",
+    "...Ss.Ssm....",
+    "SSSslSsSSs...",
+    "vvvvvvvvvvvsh",
+    "mmnmmnmnmmnvh",
+    "mmdmmmnmmm...",
+    ".............",
+    "............."
+   ],
+   "plane": "xz",
+   "style": "s42",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j2",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    6.456,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -153.857,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b2",
+   "shape": "card",
+   "parent": "fir_j2",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -24.0
+   ],
+   "art": [
+    ".............",
+    ".............",
+    "...SSsSsn....",
+    "SnSsSsnSSs...",
+    "vvvvvvvvvvvhn",
+    "mmmmmnmnnnnvm",
+    "mmmmmmdmdd...",
+    ".............",
+    "............."
+   ],
+   "plane": "xz",
+   "style": "s43",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j3",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    6.456,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -205.286,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b3",
+   "shape": "card",
+   "parent": "fir_j3",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    1.0,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -24.0
+   ],
+   "art": [
+    ".............",
+    "...n.........",
+    ".llvlhvnm....",
+    "SSslSsmnSs...",
+    "vvvvvvvvvvvhm",
+    "mnmnmmmnmmhvh",
+    "mdmmdmmmmm...",
+    ".............",
+    "............."
+   ],
+   "plane": "xz",
+   "style": "s44",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j4",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    6.456,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -256.714,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b4",
+   "shape": "card",
+   "parent": "fir_j4",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -24.0
+   ],
+   "art": [
+    ".............",
+    ".Ssn.........",
+    "SslvSsv......",
+    "nSSSSsSSsl...",
+    "vvvvvvvvvvvSs",
+    "mmmmmnnmnnmvh",
+    "mmmmmmndnd...",
+    ".............",
+    "............."
+   ],
+   "plane": "xz",
+   "style": "s45",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j5",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    6.456,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -308.143,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b5",
+   "shape": "card",
+   "parent": "fir_j5",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    1.0,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -24.0
+   ],
+   "art": [
+    ".............",
+    ".............",
+    ".lv..........",
+    "nSsSSSSsln...",
+    "vvvvvvvvvvvsn",
+    "mmnmmmmnmnhvh",
+    "mmnmmmmmmd...",
+    ".............",
+    "............."
+   ],
+   "plane": "xz",
+   "style": "s46",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j6",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    6.456,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -359.571,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b6",
+   "shape": "card",
+   "parent": "fir_j6",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    1.0,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -24.0
+   ],
+   "art": [
+    ".............",
+    ".............",
+    "SSsv...ll....",
+    "SlnSsSsnSs...",
+    "vvvvvvvvvvvSs",
+    "mmmmmnmmmnmvn",
+    "mmmnmmdmmd...",
+    "......m......",
+    "............."
+   ],
+   "plane": "xz",
+   "style": "s47",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j7",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    7.938,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -82.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b7",
+   "shape": "card",
+   "parent": "fir_j7",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.7,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -28.0
+   ],
+   "art": [
+    ".........",
+    ".lvhSs...",
+    "llnSSSSs.",
+    "vvvvvvvvh",
+    "nmmmmm...",
+    "........."
+   ],
+   "plane": "xz",
+   "style": "s48",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j8",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    7.938,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -142.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b8",
+   "shape": "card",
+   "parent": "fir_j8",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.7,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -28.0
+   ],
+   "art": [
+    ".........",
+    "SSvSs....",
+    "SSSSsSSs.",
+    "vvvvvvvvh",
+    "mnnmmn...",
+    "........."
+   ],
+   "plane": "xz",
+   "style": "s49",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j9",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    7.938,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -202.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b9",
+   "shape": "card",
+   "parent": "fir_j9",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.7,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -28.0
+   ],
+   "art": [
+    ".........",
+    ".nvnSs...",
+    "snnnlSsm.",
+    "vvvvvvvvh",
+    "mmnmnn...",
+    "........."
+   ],
+   "plane": "xz",
+   "style": "s50",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j10",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    7.938,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -262.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b10",
+   "shape": "card",
+   "parent": "fir_j10",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.7,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -28.0
+   ],
+   "art": [
+    ".........",
+    "..v.Ss...",
+    "lnSsSSsn.",
+    "vvvvvvvvh",
+    "mmmmnm...",
+    "........."
+   ],
+   "plane": "xz",
+   "style": "s51",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j11",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    7.938,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -322.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b11",
+   "shape": "card",
+   "parent": "fir_j11",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.7,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -28.0
+   ],
+   "art": [
+    ".........",
+    ".lv......",
+    "nlSsSsSs.",
+    "vvvvvvvvn",
+    "mmmnmm...",
+    "........."
+   ],
+   "plane": "xz",
+   "style": "s52",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j12",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    7.938,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -382.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b12",
+   "shape": "card",
+   "parent": "fir_j12",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.7,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -28.0
+   ],
+   "art": [
+    ".........",
+    ".....n...",
+    "nSSsSsSs.",
+    "vvvvvvvvn",
+    "nmnmnm...",
+    "........."
+   ],
+   "plane": "xz",
+   "style": "s53",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j13",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    9.42,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -113.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b13",
+   "shape": "card",
+   "parent": "fir_j13",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.4,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -32.0
+   ],
+   "art": [
+    "......",
+    "sllnSs",
+    "vvvvvh",
+    "...m.."
+   ],
+   "plane": "xz",
+   "style": "s54",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j14",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    9.42,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -185.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b14",
+   "shape": "card",
+   "parent": "fir_j14",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.4,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -32.0
+   ],
+   "art": [
+    ".h....",
+    "nlnnSs",
+    "vvvvvh",
+    "m..m.."
+   ],
+   "plane": "xz",
+   "style": "s55",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j15",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    9.42,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -257.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b15",
+   "shape": "card",
+   "parent": "fir_j15",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.4,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -32.0
+   ],
+   "art": [
+    "......",
+    "nSsnmn",
+    "vvvvvn",
+    ".m.m.."
+   ],
+   "plane": "xz",
+   "style": "s56",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j16",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    9.42,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -329.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b16",
+   "shape": "card",
+   "parent": "fir_j16",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.4,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -32.0
+   ],
+   "art": [
+    "......",
+    "snlSsn",
+    "vvvvvh",
+    "n....."
+   ],
+   "plane": "xz",
+   "style": "s57",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_j17",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    9.42,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    -401.0,
+    0.0
+   ]
+  },
+  {
+   "id": "fir_b17",
+   "shape": "card",
+   "parent": "fir_j17",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.4,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -32.0
+   ],
+   "art": [
+    "......",
+    "lnlnhm",
+    "vvvvvm",
+    "...n.."
+   ],
+   "plane": "xz",
+   "style": "s58",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "fir_top",
+   "shape": "card",
+   "pivot": [
+    2.6,
+    9.496,
+    0.6
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    90.0
+   ],
+   "art": [
+    ".......",
+    "Ss..h..",
+    "SSSSSSs",
+    "vvvvvvh",
+    "Sv.m...",
+    "......."
+   ],
+   "plane": "xy",
+   "style": "s59",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
   },
   {
    "id": "stalk",
@@ -2186,7 +5277,7 @@
     false,
     true
    ],
-   "style": "s14",
+   "style": "s60",
    "up": [
     0,
     0,
@@ -2247,7 +5338,7 @@
     false,
     true
    ],
-   "style": "s15",
+   "style": "s61",
    "up": [
     0,
     0,
@@ -2283,7 +5374,7 @@
     0.35,
     0.35
    ],
-   "style": "s16"
+   "style": "s62"
   },
   {
    "id": "flake0_1",
@@ -2304,7 +5395,7 @@
     0.35,
     0.35
    ],
-   "style": "s17"
+   "style": "s63"
   },
   {
    "id": "flake0_2",
@@ -2325,7 +5416,7 @@
     0.35,
     0.35
    ],
-   "style": "s18"
+   "style": "s64"
   },
   {
    "id": "flake0_3",
@@ -2346,7 +5437,7 @@
     0.35,
     0.35
    ],
-   "style": "s19"
+   "style": "s65"
   },
   {
    "id": "flake0_4",
@@ -2367,7 +5458,7 @@
     0.35,
     0.35
    ],
-   "style": "s20"
+   "style": "s66"
   },
   {
    "id": "flake0_5",
@@ -2388,7 +5479,7 @@
     0.35,
     0.35
    ],
-   "style": "s21"
+   "style": "s67"
   },
   {
    "id": "flake0_6",
@@ -2409,7 +5500,7 @@
     0.35,
     0.35
    ],
-   "style": "s22"
+   "style": "s68"
   },
   {
    "id": "flurry1",
@@ -2439,7 +5530,7 @@
     0.35,
     0.35
    ],
-   "style": "s23"
+   "style": "s69"
   },
   {
    "id": "flake1_1",
@@ -2460,7 +5551,7 @@
     0.35,
     0.35
    ],
-   "style": "s24"
+   "style": "s70"
   },
   {
    "id": "flake1_2",
@@ -2481,7 +5572,7 @@
     0.35,
     0.35
    ],
-   "style": "s25"
+   "style": "s71"
   },
   {
    "id": "flake1_3",
@@ -2502,7 +5593,7 @@
     0.35,
     0.35
    ],
-   "style": "s26"
+   "style": "s72"
   },
   {
    "id": "flake1_4",
@@ -2523,7 +5614,7 @@
     0.35,
     0.35
    ],
-   "style": "s27"
+   "style": "s73"
   },
   {
    "id": "flake1_5",
@@ -2544,7 +5635,7 @@
     0.35,
     0.35
    ],
-   "style": "s28"
+   "style": "s74"
   },
   {
    "id": "flake1_6",
@@ -2565,7 +5656,7 @@
     0.35,
     0.35
    ],
-   "style": "s29"
+   "style": "s75"
   },
   {
    "id": "flurry2",
@@ -2595,7 +5686,7 @@
     0.35,
     0.35
    ],
-   "style": "s30"
+   "style": "s76"
   },
   {
    "id": "flake2_1",
@@ -2616,7 +5707,7 @@
     0.35,
     0.35
    ],
-   "style": "s31"
+   "style": "s77"
   },
   {
    "id": "flake2_2",
@@ -2637,7 +5728,7 @@
     0.35,
     0.35
    ],
-   "style": "s32"
+   "style": "s78"
   },
   {
    "id": "flake2_3",
@@ -2658,7 +5749,7 @@
     0.35,
     0.35
    ],
-   "style": "s33"
+   "style": "s79"
   },
   {
    "id": "flake2_4",
@@ -2679,7 +5770,7 @@
     0.35,
     0.35
    ],
-   "style": "s34"
+   "style": "s80"
   },
   {
    "id": "flake2_5",
@@ -2700,7 +5791,7 @@
     0.35,
     0.35
    ],
-   "style": "s35"
+   "style": "s81"
   },
   {
    "id": "flake2_6",
@@ -2721,7 +5812,7 @@
     0.35,
     0.35
    ],
-   "style": "s36"
+   "style": "s82"
   },
   {
    "id": "glass_globe",
@@ -2885,7 +5976,7 @@
     false,
     false
    ],
-   "style": "s37",
+   "style": "s83",
    "up": [
     0,
     0,
