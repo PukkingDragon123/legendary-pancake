@@ -14,7 +14,8 @@ import type { Fx } from './fx.ts';
 import type { House } from './house.ts';
 import { buildMovingBox, stepBoxIdle, stepBoxOpen, type BoxAnim, type BoxModel } from './house/boxes.ts';
 import { patchCut } from './house/kit.ts';
-import { CELL, FLOOR_IDS, FLOOR_Y, HOLES, OPEN_A, R_IN, ROOM_H, trunkR, wallCenterA, windowHoles, wrapA, type FloorId } from './house/plan.ts';
+import { barkR } from './house/oak.ts';
+import { CELL, FLOOR_IDS, FLOOR_Y, HOLES, inOpening, OPEN_A, openings, R_IN, ROOM_H, wallCenterA, wrapA, type FloorId } from './house/plan.ts';
 
 type Home = Save['home'];
 const shade = (c: number, k: number) => {
@@ -60,50 +61,63 @@ function finishTexture(w: number, h: number, at: (i: number, j: number) => numbe
 
 const ARC = Math.PI * 2 - OPEN_A * 2;
 
-/** The inner wall of a room: the back of the trunk from cut edge to cut edge, facing in, painted with the wallpaper. */
+/** wallpapers that paint their own dado or are a natural surface (no oak wainscot under them) */
+const NO_WAINSCOT = new Set(['wall_wainscot', 'wall_pine_panelling', 'wall_living_bark', 'wall_moss_stone']);
+/** height of the oak wainscot (px above the floor); the chair rail (oak.ts) caps it */
+const DADO = 18;
+
+/** Raised oak panels with a grooved frame: the wainscot round the bottom of every papered room. */
+function wainscot(u: number, v: number): number {
+  const pw = 15, pu = ((u % pw) + pw) % pw, id = Math.floor(u / pw);
+  const grain = Math.sin(u * 0.9 + Math.sin(v * 0.35 + id) * 2.2) * 0.06 + (((Math.floor(u * 2) * 7 + Math.floor(v * 2) * 13 + id) % 23) === 0 ? -0.08 : 0);
+  let k = 1 + grain;
+  const inPanel = pu > 2.2 && pu < pw - 2.2 && v > 5 && v < DADO - 2.5;
+  if (inPanel) {
+    // the raised field, its bevel catching a little light all round
+    const e = Math.min(pu - 2.2, pw - 2.2 - pu, v - 5, DADO - 2.5 - v);
+    k *= e < 0.7 ? 0.7 : e < 1.6 ? 1.12 : 1.02;
+  } else if (Math.abs(pu - 2.2) < 0.5 || Math.abs(pu - (pw - 2.2)) < 0.5 || Math.abs(v - 5) < 0.5 || Math.abs(v - (DADO - 2.5)) < 0.5) k *= 0.72;
+  if (v < 3.4) k *= 0.8;
+  return shade(0x8c5a32, k);
+}
+
+/** The inner wall of a room: the back of the trunk from cut edge to cut edge, facing in, painted with the wallpaper
+ * over an oak wainscot, with the window and door openings cut out (the glass in them shows the real world). */
 function wallMesh(fid: FloorId, wf: Finish): THREE.Mesh {
-  const y0 = FLOOR_Y[fid], segs = 72, R = R_IN;
+  const y0 = FLOOR_Y[fid], R = R_IN;
   const W = Math.round(R * ARC * TEX), H = ROOM_H * TEX;
+  const dado = !NO_WAINSCOT.has(wf.id);
   const tex = finishTexture(W, H, (i, j) => {
     const a = OPEN_A + ((i + 0.5) / W) * ARC;
     const u = (wrapA(a) + Math.PI) * R, v = (j + 0.5) / TEX;
-    let c = wf.paint(u, v);
-    // a soft painted shadow where the wall meets the floor and the ceiling
+    let c = dado && v < DADO ? wainscot(u, v) : wf.paint(u, v);
+    // a soft painted shadow where the wall meets the floor and the ceiling, and under the chair rail
     if (v < 3) c = shade(c, 0.74 + v * 0.07);
     else if (v > ROOM_H - 5) c = shade(c, 0.8 + (ROOM_H - v) * 0.04);
+    else if (dado && v > DADO && v < DADO + 3.5) c = shade(c, 0.8 + (v - DADO) * 0.055);
     return c;
   });
-  // the wall is cut into columns, with the window openings left out (the glass in them shows the real world)
-  const holes = windowHoles(fid);
-  const edges = new Set<number>();
-  for (let s = 0; s <= segs; s++) edges.add(OPEN_A + (s / segs) * ARC);
-  const toArc = (a: number) => { let d = a - OPEN_A; while (d < 0) d += Math.PI * 2; return OPEN_A + d; };
-  for (const h of holes) { edges.add(toArc(h.a - h.half)); edges.add(toArc(h.a + h.half)); }
-  const cols = [...edges].filter((a) => a >= OPEN_A - 1e-6 && a <= OPEN_A + ARC + 1e-6).sort((a, b) => a - b);
-  const pos: number[] = [], uv: number[] = [], idx: number[] = [];
-  const quad = (a0: number, a1: number, ya: number, yb: number) => {
-    const k = pos.length / 3;
-    for (const [a, y] of [[a0, ya], [a1, ya], [a0, yb], [a1, yb]]) { pos.push(Math.sin(a) * R * PX, y * PX, Math.cos(a) * R * PX); uv.push((a - OPEN_A) / ARC, (y - y0) / ROOM_H); }
-    idx.push(k, k + 1, k + 2, k + 2, k + 1, k + 3);
-  };
-  for (let i = 0; i < cols.length - 1; i++) {
-    const a0 = cols[i], a1 = cols[i + 1], am = (a0 + a1) / 2;
-    if (a1 - a0 < 1e-5) continue;
-    const h = holes.find((w) => Math.abs(Math.atan2(Math.sin(am - w.a), Math.cos(am - w.a))) < w.half);
-    if (!h) { quad(a0, a1, y0, y0 + ROOM_H); continue; }
-    const hb = Math.max(y0, h.y0), ht = Math.min(y0 + ROOM_H, h.y1);
-    if (hb > y0) quad(a0, a1, y0, hb);
-    if (ht < y0 + ROOM_H) quad(a0, a1, ht, y0 + ROOM_H);
+  const holes = openings(fid);
+  const segs = 160, rowsN = Math.round(ROOM_H / 2);
+  const pos: number[] = [], uv: number[] = [], nor: number[] = [], idx: number[] = [];
+  for (let j = 0; j <= rowsN; j++) for (let i = 0; i <= segs; i++) {
+    const a = OPEN_A + (i / segs) * ARC, y = y0 + (j / rowsN) * ROOM_H;
+    pos.push(Math.sin(a) * R * PX, y * PX, Math.cos(a) * R * PX);
+    uv.push(i / segs, j / rowsN);
+    nor.push(-Math.sin(a), 0, -Math.cos(a));
+  }
+  for (let j = 0; j < rowsN; j++) for (let i = 0; i < segs; i++) {
+    const am = OPEN_A + ((i + 0.5) / segs) * ARC, ym = y0 + ((j + 0.5) / rowsN) * ROOM_H;
+    if (holes.some((o) => { const d = wrapA(am - o.a); return Math.cos(d) > 0.6 && inOpening(o, R * Math.sin(d), ym, 1.2); })) continue;
+    const k = j * (segs + 1) + i;
+    idx.push(k, k + segs + 1, k + 1, k + 1, k + segs + 1, k + segs + 2);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
   g.setIndex(idx);
-  g.computeVertexNormals();
-  // normals point at the room
-  const n = g.getAttribute('normal') as THREE.BufferAttribute;
-  for (let i = 0; i < n.count; i++) { const p = new THREE.Vector3().fromBufferAttribute(g.getAttribute('position') as THREE.BufferAttribute, i); const d = new THREE.Vector3(-p.x, 0, -p.z).normalize(); n.setXYZ(i, d.x, d.y, d.z); }
-  const m = new THREE.MeshLambertMaterial({ map: tex, side: THREE.DoubleSide });
+  const m = new THREE.MeshStandardMaterial({ map: tex, side: THREE.DoubleSide, roughness: 0.86, metalness: 0 });
   patchCut(m);
   const mesh = new THREE.Mesh(g, m);
   mesh.receiveShadow = true;
@@ -114,7 +128,7 @@ function wallMesh(fid: FloorId, wf: Finish): THREE.Mesh {
 /** The floor of a room: a disc reaching the trunk's outline across the cut, painted with the flooring. */
 function floorMesh(fid: FloorId, ff: Finish): THREE.Mesh {
   const y0 = FLOOR_Y[fid];
-  const Rcut = trunkR(y0) - 0.6, Rin = R_IN + 1, Rs = Rcut + 1;
+  const Rcut = Math.max(...Array.from({ length: 33 }, (_, i) => barkR(-OPEN_A + (i / 32) * OPEN_A * 2, y0))) - 0.6, Rin = R_IN + 1, Rs = Rcut + 1;
   const N = Math.round(Rs * 2 * TEX);
   const holes = HOLES[fid];
   const tex = finishTexture(N, N, (i, j) => {
@@ -137,7 +151,7 @@ function floorMesh(fid: FloorId, ff: Finish): THREE.Mesh {
   const ring: [number, number][] = [];
   for (let s = 0; s <= segs; s++) ring.push([OPEN_A + (s / segs) * ARC, Rin]);
   const fs = 32;
-  for (let s = 0; s <= fs; s++) ring.push([-OPEN_A + (s / fs) * OPEN_A * 2, Rcut]);
+  for (let s = 0; s <= fs; s++) { const a = -OPEN_A + (s / fs) * OPEN_A * 2; ring.push([a, barkR(a, y0) - 0.6]); }
   ring.forEach(([a, r]) => add(a, r));
   const n = ring.length;
   for (let i = 1; i < n; i++) idx.push(0, i, i + 1);
@@ -155,7 +169,7 @@ function floorMesh(fid: FloorId, ff: Finish): THREE.Mesh {
     if (b.sub(a).cross(c.sub(a)).y < 0) { const t = ix.getX(i + 1); ix.setX(i + 1, ix.getX(i + 2)); ix.setX(i + 2, t); }
   }
   g.computeVertexNormals();
-  const m = new THREE.MeshLambertMaterial({ map: tex });
+  const m = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.74, metalness: 0 });
   patchCut(m);
   const mesh = new THREE.Mesh(g, m);
   mesh.receiveShadow = true;
@@ -185,7 +199,7 @@ function lightUp(root: THREE.Object3D) {
       if (!b.isMeshBasicMaterial || /glow|lamp|emissive|flame|light/i.test(b.name)) return mat;
       let lit = litCache.get(b.uuid);
       if (!lit) {
-        lit = new THREE.MeshLambertMaterial({ map: b.map, color: b.color, alphaTest: b.alphaTest, transparent: b.transparent, side: b.side, vertexColors: b.vertexColors });
+        lit = new THREE.MeshStandardMaterial({ map: b.map, color: b.color, alphaTest: b.alphaTest, transparent: b.transparent, side: b.side, vertexColors: b.vertexColors, roughness: 0.82, metalness: 0 });
         lit.name = b.name;
         litCache.set(b.uuid, lit);
       }

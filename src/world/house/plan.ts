@@ -42,14 +42,15 @@ export const polar = (a: number, r: number): [number, number] => [Math.sin(a) * 
 export interface Fixture { kind: 'ladder' | 'hatch' | 'door' | 'window'; a: number; r: number; size: number; y?: number }
 /** Where walls are broken (windows, doors, ladders) so nothing hangs there: [angle, half-width in rad]. */
 export interface WallGap { a: number; half: number; from: number; to: number }
+/** A window: angle round the trunk, centre height above the floor, radius (px); arched (default) or round. */
+export interface Win { a: number; v: number; r: number; kind?: 'arch' | 'round' }
 
 export interface RoomPlan {
   id: FloorId;
   y: number;
   fixtures: Fixture[];
   gaps: WallGap[];
-  /** windows: angle and the height of the window centre above the floor */
-  windows: { a: number; v: number; r: number }[];
+  windows: Win[];
 }
 
 // Ladders hug the wall near the cut so you can see Pip climb; each floor's hatch sits above the ladder
@@ -63,7 +64,7 @@ export const PLANS: Record<FloorId, RoomPlan> = {
       { kind: 'ladder', a: LADDER_A.f1, r: 64, size: 9 },
       { kind: 'door', a: DOOR_A, r: 64, size: 12 },
     ],
-    windows: [{ a: FACE * 19, v: 34, r: 9 }, { a: -FACE * 18, v: 34, r: 9 }],
+    windows: [{ a: FACE * 19, v: 32, r: 9 }, { a: -FACE * 18, v: 32, r: 9 }, { a: -1.05, v: 30, r: 6, kind: 'round' }],
     gaps: [],
   },
   f2: {
@@ -73,13 +74,13 @@ export const PLANS: Record<FloorId, RoomPlan> = {
       { kind: 'ladder', a: LADDER_A.f2, r: 64, size: 9 },
       { kind: 'door', a: DOOR_A, r: 64, size: 12 },
     ],
-    windows: [{ a: -FACE * 18, v: 34, r: 9 }, { a: FACE * 23, v: 38, r: 7 }],
+    windows: [{ a: -FACE * 18, v: 32, r: 9 }, { a: FACE * 23, v: 36, r: 7, kind: 'round' }, { a: -1.05, v: 34, r: 7, kind: 'round' }],
     gaps: [],
   },
   f3: {
     id: 'f3', y: FLOOR_Y.f3,
     fixtures: [{ kind: 'hatch', a: LADDER_A.f2, r: 60, size: 13 }, { kind: 'ladder', a: Math.atan2(30, -38), r: 54, size: 9 }],
-    windows: [{ a: Math.PI, v: 32, r: 15 }, { a: -FACE * 13, v: 32, r: 8 }, { a: FACE * 13, v: 32, r: 8 }],
+    windows: [{ a: Math.PI, v: 30, r: 15, kind: 'round' }, { a: -FACE * 13, v: 30, r: 8 }, { a: FACE * 13, v: 30, r: 8 }],
     gaps: [],
   },
 };
@@ -168,7 +169,7 @@ export function trunkR(y: number): number {
 /** A point built facing the front, swung round the trunk axis to angle a (house px). */
 export const swingPt = (x: number, y: number, z: number, a: number): [number, number, number] => [x * Math.cos(a) + z * Math.sin(a), y, -x * Math.sin(a) + z * Math.cos(a)];
 export const LIMB_A = 2.28;
-export const CHIMNEY_A = -2.02;
+export const CHIMNEY_A = -1.74;
 /** the platform on the great limb (its deck centre) and the perch Pip launches from */
 export const PLATFORM: [number, number, number] = swingPt(0, FLOOR_Y.f2 + 6, RO + 66, LIMB_A);
 export const LAUNCH: [number, number, number] = swingPt(0, FLOOR_Y.f2 + 6 + 22, RO + 66 + 15, LIMB_A);
@@ -176,23 +177,44 @@ export const LAUNCH: [number, number, number] = swingPt(0, FLOOR_Y.f2 + 6 + 22, 
 export const LAMP_AT: Record<FloorId, [number, number, number]> = { f1: [0, FLOOR_Y.f2 - SLAB - 26, -6], f2: [0, FLOOR_Y.f3 - SLAB - 26, -6], f3: [0, ROOF_Y - 26, -6] };
 export const PORCH_AT: [number, number, number] = swingPt(0, FLOOR_Y.f1, RO + 26, DOOR_A);
 export const BALCONY_AT: [number, number, number] = swingPt(0, FLOOR_Y.f2, RO + 15, DOOR_A);
-export const CHIMNEY_TOP: [number, number, number] = swingPt(0, ROOF_Y + 70, RO + 10, CHIMNEY_A);
-/** the bark loft's ring heights in a floor band (art/lowpix/house/_src/trunk.py ring_ys) */
-export function bandRings(fid: FloorId): number[] {
-  const y0 = fid === 'f1' ? 0 : FLOOR_Y[fid] - SLAB, y1 = fid === 'f3' ? ROOF_Y : FLOOR_Y[fid === 'f1' ? 'f2' : 'f3'] - SLAB;
-  const n = Math.max(2, Math.round((y1 - y0) / 12));
-  return Array.from({ length: n + 1 }, (_, i) => y0 + ((y1 - y0) * i) / n);
+export const CHIMNEY_TOP: [number, number, number] = swingPt(0, FLOOR_Y.f3 + 22, RO + 30, CHIMNEY_A);
+/**
+ * An opening through the trunk wall (a window or a door), in its own upright frame: x runs across it (px, 0 on the
+ * centre line at angle a), y is world height (px). Arches have a semicircular head of radius hw; round ones are
+ * circles of radius hw. The bark, the wallpaper and the frames all cut and trim the same shape.
+ */
+export interface Opening { a: number; hw: number; y0: number; y1: number; kind: 'arch' | 'round' | 'door' }
+export function openings(fid: FloorId): Opening[] {
+  const y = FLOOR_Y[fid];
+  const out: Opening[] = PLANS[fid].windows.map((w) => w.kind === 'round'
+    ? { a: w.a, hw: w.r, y0: y + w.v - w.r, y1: y + w.v + w.r, kind: 'round' as const }
+    : { a: w.a, hw: w.r, y0: y + w.v - w.r * 1.15, y1: y + w.v + w.r, kind: 'arch' as const });
+  if (PLANS[fid].fixtures.some((f) => f.kind === 'door')) out.push({ a: DOOR_A, hw: 11, y0: y, y1: y + 40, kind: 'door' });
+  return out;
 }
-/** The real openings cut through the trunk for a floor's windows (whole bark faces): angle, half-angle, y range (px). */
-export function windowHoles(fid: FloorId): { a: number; half: number; y0: number; y1: number }[] {
-  const ys = bandRings(fid);
-  return PLANS[fid].windows.map((w) => {
-    const half = Math.ceil((w.r + 2) / (RO * FACE)) * FACE;
-    const y = FLOOR_Y[fid] + w.v;
-    let y0 = Infinity, y1 = -Infinity;
-    for (let i = 0; i < ys.length - 1; i++) if (ys[i + 1] > y - w.r - 1 + 0.5 && ys[i] < y + w.r + 1 - 0.5) { y0 = Math.min(y0, ys[i]); y1 = Math.max(y1, ys[i + 1]); }
-    return { a: w.a, half, y0, y1 };
-  });
+/** Is the point (x across, y up; px in the opening's frame) inside the opening grown by m px? */
+export function inOpening(o: Opening, x: number, y: number, m = 0): boolean {
+  if (o.kind === 'round') { const cy = (o.y0 + o.y1) / 2; return x * x + (y - cy) * (y - cy) < (o.hw + m) * (o.hw + m); }
+  if (Math.abs(x) > o.hw + m || y < o.y0 - m || y > o.y1 + m) return false;
+  const cy = o.y1 - o.hw;
+  return y <= cy || x * x + (y - cy) * (y - cy) < (o.hw + m) * (o.hw + m);
+}
+/** The opening's outline (counter-clockwise seen from outside: x across, y up), about n points, grown by m px. */
+export function openingOutline(o: Opening, n: number, m = 0): [number, number][] {
+  const pts: [number, number][] = [];
+  const hw = o.hw + m;
+  if (o.kind === 'round') {
+    const cy = (o.y0 + o.y1) / 2;
+    for (let i = 0; i < n; i++) { const t = -Math.PI / 2 + (i / n) * Math.PI * 2; pts.push([Math.cos(t) * hw, cy + Math.sin(t) * hw]); }
+    return pts;
+  }
+  const y0 = o.y0 - m, cy = o.y1 - o.hw;
+  const arc = Math.max(8, Math.round(n * 0.5)), side = Math.max(2, Math.round((n - arc) / 4));
+  for (let i = 0; i < side; i++) pts.push([-hw + (2 * hw * i) / side, y0]);
+  for (let i = 0; i < side; i++) pts.push([hw, y0 + ((cy - y0) * i) / side]);
+  for (let i = 0; i < arc; i++) { const t = (i / arc) * Math.PI; pts.push([Math.cos(t) * hw, cy + Math.sin(t) * hw]); }
+  for (let i = 0; i < side; i++) pts.push([-hw, cy - ((cy - y0) * i) / side]);
+  return pts;
 }
 /** hatch holes in the floors: each floor's hatch sits above the ladder from the floor below: [x, z, half] */
 export const HOLES: Record<FloorId, [number, number, number][]> = {
