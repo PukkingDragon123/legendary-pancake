@@ -1,5 +1,35 @@
 # Credits: the Earth and the places (globe, round 4)
 
+Everything listed here is public domain, CC0 or CC BY. The globe stage, its shaders, the place view and the
+tools in `src/world/globe/tools/` were made for Hoot Hollow.
+
+## The Earth (`public/models/globe/`, built by `src/world/globe/tools/earth_textures.py` and `borders.py`)
+
+- **Day map**: NASA Blue Marble Next Generation (land) and Blue Marble with shaded bathymetry (seas), NASA Earth
+  Observatory / NASA Goddard (Reto Stöckli), public domain, fetched from NASA GIBS
+  (https://gibs.earthdata.nasa.gov, layers `BlueMarble_NextGeneration`, `BlueMarble_ShadedRelief_Bathymetry`).
+- **Land / water mask**: NASA MODIS land-water mask 2015 (GIBS `MODIS_Terra_L3_Land_Water_Mask`), public domain.
+- **City lights**: NASA Earth Observatory / NOAA NGDC, VIIRS city lights 2012 (Black Marble), public domain
+  (GIBS `VIIRS_CityLights_2012`).
+- **Relief (bump and sea mask)**: NOAA NCEI ETOPO1 global relief, ice surface (Amante and Eakins 2009), public
+  domain, via NOAA CoastWatch ERDDAP (https://coastwatch.pfeg.noaa.gov/erddap/griddap/etopo180.html).
+- **Clouds**: Solar System Scope, "8k Earth Clouds" (https://www.solarsystemscope.com/textures/), based on NASA
+  imagery, CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Shrunk to 4096 x 2048 and levelled.
+- **The Milky Way**: ESO / S. Brunier, "The Milky Way panorama" (https://www.eso.org/public/images/eso0932a/),
+  CC BY 4.0. Shrunk to 2048 x 1024.
+- **Borders and country outlines**: Natural Earth 1:50m admin-0 boundary lines and map units, v5.1.2
+  (https://www.naturalearthdata.com), public domain, via https://github.com/nvkelso/natural-earth-vector.
+- **Close-ups of each place** (the satellite tile in each place's sheet): NASA Blue Marble Next Generation and its
+  bathymetry version with the MODIS land-water mask, from NASA GIBS, public domain.
+
+## Photographs of the places (`public/img/places/<place>.webp`, `places.webp`)
+
+Three photographs per place, found through Openverse (https://openverse.org, licence filter CC0 / public domain /
+CC BY) and downloaded from Flickr at 1024 px; cropped to 3:2 (`src/world/globe/tools/place_photos.py`, choices in
+`photo_picks.py`). Shown in the place view with their captions and an in-app credit line. CC BY 2.0:
+https://creativecommons.org/licenses/by/2.0/ (the photos were cropped and resized). CC0:
+https://creativecommons.org/publicdomain/zero/1.0/.
+
 <!-- photos -->
 | place | photo | title | author | licence |
 |---|---|---|---|---|
@@ -64,3 +94,31 @@
 | antarctica | A blue iceberg | [Blue Ice](https://www.flickr.com/photos/79721788@N00/52049204965) | D-Stanley | CC BY 2.0 |
 | antarctica | Gentoo penguins | [Gentoo Penguins](https://www.flickr.com/photos/79721788@N00/16054445089) | D-Stanley | CC BY 2.0 |
 <!-- /photos -->
+
+## Souvenir models (`public/models/souvenirs/`)
+
+Brought in with Blender (`src/world/globe/tools/souvenir_import.py`: joined, simplified, textures shrunk to WebP,
+rescaled and stood on the floor) and compressed with glTF-Transform (meshopt). CC BY 4.0:
+https://creativecommons.org/licenses/by/4.0/ (the models were simplified, rescaled and recompressed).
+
+| souvenir | model | author | licence |
+|---|---|---|---|
+| `sv_highlandcow` Highland Cow Plush | [Highland Cow](https://sketchfab.com/3d-models/highland-cow-63b31445ac7249d3a02e1242d0a9be15) | JessSwynn | CC BY 4.0 |
+| `sv_gondola` Gondola Model | [Gondola](https://sketchfab.com/3d-models/gondola-9f2a7e32570641269d2550bfc7421181) | mrTorch | CC BY 4.0 |
+| `sv_puffin` Puffin Figurine | [Atlantic Puffin - Low poly](https://sketchfab.com/3d-models/atlantic-puffin-low-poly-00c3f6de0c5b494bbf2885ff99ee6b96) | Troels BP | CC BY 4.0 |
+| `sv_llama` Ceramic Llama | [Llama peruana en cerámica low poly](https://sketchfab.com/3d-models/llama-peruana-en-ceramica-low-poly-1b53690dc6aa4941bcdcc3a0225efb28) | José Somolinos | CC BY 4.0 |
+| `sv_toucan` Toucan Perch | [TAUCAN](https://sketchfab.com/3d-models/taucan-8addf94744fe40ba9b3d635996c1ecfd) | wasis007 | CC BY 4.0 |
+| `sv_canoe` Cedar Canoe | [Canoe](https://sketchfab.com/3d-models/canoe-3a695cf8eb1948debddd803ec25f869e) | Little._.Ting | CC BY 4.0 |
+| `sv_kiwi` Kiwi Figurine | [Low Poly Kiwi Run](https://sketchfab.com/3d-models/low-poly-kiwi-run-c76188eb5b954ef3b88293ab21b9093d) | naomimoore | CC BY 4.0 |
+| `sv_penguin` Emperor Penguin | [Emperor penguin (Пингвин императорский)](https://sketchfab.com/3d-models/emperor-penguin-c698d3e3f4564103a7bbf1ce4b9fdf3e) | darwinmuseum.ru | CC BY 4.0 |
+| `sv_tajmodel` Marble Taj Mahal | [taj mahal](https://sketchfab.com/3d-models/taj-mahal-f72ea2449b6d4564b0f2615e65b57444) | yongtun | CC BY 4.0 |
+| `sv_canyondiorama` Canyon Diorama | [Grand Canyon & Little Colorado River Confluence](https://sketchfab.com/3d-models/grand-canyon-little-colorado-river-confluence-87a2367f943a497983e1395da52d660a) | Nate Loper  🗺️ ⛏🏺 | CC BY 4.0 |
+| `sv_venicemask` Venetian Mask | [Carnival mask - Venice](https://sketchfab.com/3d-models/carnival-mask-venice-beff6e12e86e4842999a955ca233f0cf) | alexander.ros | CC BY 4.0 |
+| `sv_lotuslamp` Lotus Lamp | [Prop Modelling: Candleholder](https://sketchfab.com/3d-models/prop-modelling-candleholder-f0b55af43c8b48e5b9f3e0fae392dcc3) | ZoeChuiYan | CC BY 4.0 |
+| `sv_elephant` Elephant Carving | [Carved Wooden Elephant](https://polyhaven.com/a/carved_wooden_elephant) | Greg Zaal (Poly Haven) | CC0 1.0 |
+
+The other souvenirs are as credited in `docs/credits/globe.md`.
+
+## Tools
+
+- glTF-Transform (MIT, Don McCurdy) for meshopt compression, at build time only.

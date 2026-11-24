@@ -98,7 +98,7 @@ async function run() {
     Object.assign(im.style, { position: 'absolute', left: `${cx + CELL - 68}px`, top: `${cy + CELL - 68}px`, width: '64px', height: '64px', imageRendering: 'pixelated' });
     ctx2.append(im);
   }
-  // one atlas for every portrait, in SOUVENIRS order (8 per row): public/models/souvenirs/icons.png
+  // one preview atlas of every portrait, in SOUVENIRS order (8 per row)
   if (!q.get('only')) {
     const A = document.createElement('canvas');
     A.width = 8 * ICON; A.height = Math.ceil(SOUVENIRS.length / 8) * ICON;

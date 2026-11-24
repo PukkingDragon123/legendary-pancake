@@ -4,6 +4,8 @@ import { SOUVENIR_INFO, SOUVENIRS } from '../assets/souvenirs.ts';
 import { rollAdventure } from './adventure.ts';
 import { AREA, AREA_ALIAS, AREAS, ITEM_BY_ID, lootTable, placeId, SOUVENIR_PLACE, souvenirLoot } from './catalog.ts';
 import type { SleepReport } from '../sleep/types.ts';
+import { PLACE_INFO } from './places.ts';
+import { PLACE_PHOTOS, PLACE_SAT, THUMBS } from '../ui/globe/photos.ts';
 
 const report = (score: number, hours: number) => ({ score, asleep: hours * 3.6e6 }) as unknown as SleepReport;
 
@@ -47,6 +49,31 @@ describe('places', () => {
       expect(t.some((e) => SOUVENIR_PLACE[e.id])).toBe(false);
       expect(souvenirLoot(a.id).every((e) => e.souvenir)).toBe(true);
     }
+  });
+});
+
+describe('the place view', () => {
+  it('has facts, a language and a close-view span for every place', () => {
+    for (const a of AREAS) {
+      const info = PLACE_INFO[a.id];
+      expect(info, a.id).toBeTruthy();
+      expect(info.facts.length).toBeGreaterThanOrEqual(3);
+      expect(info.lang.length).toBeGreaterThan(2);
+      expect(info.span).toBeGreaterThan(300);
+    }
+  });
+  it('has three credited free-licence photos and a satellite close-up round every place', () => {
+    for (const a of AREAS) {
+      const ph = PLACE_PHOTOS[a.id];
+      expect(ph?.length, a.id).toBe(3);
+      for (const p of ph) {
+        expect(p.licence).toMatch(/^(CC0|Public domain|CC BY [0-9.]+)$/);
+        expect(p.author.length && p.caption.length && p.url.startsWith('https://')).toBeTruthy();
+      }
+      const b = PLACE_SAT[a.id];
+      expect(b.s < a.lat && a.lat < b.n && b.w < a.lon && a.lon < b.e).toBe(true);
+    }
+    expect([...THUMBS.order].sort()).toEqual(AREAS.map((a) => a.id).sort());
   });
 });
 
