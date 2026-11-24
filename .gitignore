@@ -4,3 +4,5 @@ dist-artifact
 *.log
 .DS_Store
 .claude/worktrees/
+art/blender/owls/__pycache__/
+art/blender/lib/__pycache__/

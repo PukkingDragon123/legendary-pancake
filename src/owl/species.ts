@@ -172,23 +172,6 @@ export const SPECIES: SpeciesDef[] = [
     },
   },
   {
-    id: 'little', name: 'Little Owl', latin: 'Athene noctua', eye: '#f5c518', starter: false, price: 1200, level: 2,
-    blurb: 'A frowning little sage with a speckled crown.',
-    fact: 'The owl of Athena: it has stared out from ancient Greek coins for 2,500 years.',
-    shape: sh({ legH: 2.2, legW: 1.9, legX: 2.3, bodyW: 12, bodyD: 11, bodyH: 10.2, breast: 0.6, headW: 13.2, headH: 9.2, headD: 11, flat: 0.85, neck: 1.8, discR: 0.29, eyeS: 4.0, eyeX: 2.85, eyeV: 0.53, wingDrop: 0.5, wingBack: 1.6, tailLen: 1.8, toes: 'bristled' }),
-    plumage: {
-      up: '#7c6550', upDark: '#4a3a2c', upLight: '#f3ece0',
-      under: '#efe8dc', underMark: '#7a634e', underLow: '#f7f2ea',
-      disc: '#bfae98', discDark: '#8a7660', rim: '#5c4a3a', rimLight: '#e6dccd',
-      brow: '#fbf8f2', chin: '#fbf8f2',
-      wing: '#77604b', wingBar: '#46372a', wingLight: '#efe6d6',
-      tail: '#715b47', tailBar: '#efe6d6',
-      leg: '#ece4d6', toe: '#a79c8e', talon: '#2a2523', beak: '#cdd08a', cere: '#a8a874',
-      lidRim: '#1a1614', iris: '#f5c518',
-      upper: 'spotted', underPat: 'streaked', discPat: 'little',
-    },
-  },
-  {
     id: 'horned', name: 'Great Horned Owl', latin: 'Bubo virginianus', eye: '#f3a712', starter: false, price: 2400, level: 4,
     blurb: 'Tall ear tufts, a white collar and a very serious stare.',
     fact: 'One of the few animals that will happily hunt skunks. It has almost no sense of smell.',
@@ -203,23 +186,6 @@ export const SPECIES: SpeciesDef[] = [
       leg: '#d8c4a2', toe: '#d2be9c', talon: '#1f1b1a', beak: '#2e2c2c', cere: '#454040',
       lidRim: '#141010', iris: '#f3a712', tuft: '#3a2e24',
       upper: 'mottled', underPat: 'finebar', discPat: 'horned',
-    },
-  },
-  {
-    id: 'longeared', name: 'Long-eared Owl', latin: 'Asio otus', eye: '#f08a12', starter: false, price: 2400, level: 5,
-    blurb: 'Orange-faced and slender, with tufts like raised eyebrows.',
-    fact: 'When alarmed it stretches tall and thin, tufts up, pretending to be a broken branch.',
-    shape: sh({ legH: 1, legW: 2.4, legX: 2.3, bodyW: 11.6, bodyD: 10.4, bodyH: 14.2, breast: 0.6, headW: 12.6, headH: 10.6, headD: 11, flat: 0.35, neck: 2, discR: 0.32, eyeS: 3.9, eyeX: 2.75, eyeV: 0.5, tuft: { len: 6.6, w: 2, x: 2.9, lean: 6, n: 4 }, wingDrop: 1, wingBack: 3, tailLen: 2.8 }),
-    plumage: {
-      up: '#b08354', upDark: '#3a271a', upLight: '#e9d3ad',
-      under: '#d9b27c', underMark: '#3f2a1b', underLow: '#ead2a8',
-      disc: '#dc8432', discDark: '#3a2416', rim: '#2a1c12', rimLight: '#efe2c8',
-      brow: '#f3ece0', chin: '#f3ece0',
-      wing: '#a87c4e', wingBar: '#3a271a', wingLight: '#e2c89c',
-      tail: '#b28a5c', tailBar: '#3a271a',
-      leg: '#e3bf88', toe: '#dfbb84', talon: '#1f1b1a', beak: '#1d1a19', cere: '#33302e',
-      lidRim: '#141010', iris: '#f08a12', tuft: '#2e2016',
-      upper: 'mottled', underPat: 'longeared', discPat: 'longeared',
     },
   },
   {
@@ -262,8 +228,10 @@ export const speciesOf = (id?: string) => SPECIES_BY_ID[id ?? ''] ?? SPECIES[0];
 
 /** Legacy owl coats (save v1 palettes) and the species each now maps to. */
 const PALETTE_SPECIES: Record<string, string> = {
-  tawny: 'tawny', snowy: 'snowy', barn: 'barn', mossy: 'little', rosy: 'barn',
-  midnight_owl: 'greatgrey', ember_owl: 'eagle', aurora_owl: 'longeared',
+  tawny: 'tawny', snowy: 'snowy', barn: 'barn', mossy: 'burrowing', rosy: 'barn',
+  midnight_owl: 'greatgrey', ember_owl: 'eagle', aurora_owl: 'horned',
+  // retired species (the owl line is eight birds now)
+  little: 'burrowing', longeared: 'horned',
 };
 
 /**
@@ -271,8 +239,17 @@ const PALETTE_SPECIES: Record<string, string> = {
  * default but whose legacy palette names a different owl (an old save) shows that owl instead.
  */
 export function resolveSpecies(look: { species?: string; palette?: string }): SpeciesDef {
-  const sp = look.species && SPECIES_BY_ID[look.species] ? look.species : undefined;
+  const sp = look.species && SPECIES_BY_ID[look.species] ? look.species : look.species && RETIRED_SPECIES[look.species] ? RETIRED_SPECIES[look.species] : undefined;
   const fromPal = look.palette ? (SPECIES_BY_ID[look.palette] ? look.palette : PALETTE_SPECIES[look.palette]) : undefined;
   if (sp && sp !== 'tawny') return SPECIES_BY_ID[sp];
   return speciesOf(fromPal ?? sp ?? 'tawny');
+}
+
+/** Species retired from the line, and the owl each old save becomes (Little Owl -> Burrowing, Long-eared -> Great Horned). */
+export const RETIRED_SPECIES: Record<string, string> = { little: 'burrowing', longeared: 'horned' };
+/** Move an old save's look and owned owls off retired species (store.ts calls this when a save loads). */
+export function migrateSpecies(s: { look?: { species?: string; palette?: string }; owned?: { species?: string[] } }) {
+  const m = (id?: string) => (id && RETIRED_SPECIES[id]) || id;
+  if (s.look) { s.look.species = m(s.look.species); if (s.look.palette && RETIRED_SPECIES[s.look.palette]) s.look.palette = m(s.look.palette); }
+  if (s.owned?.species) s.owned.species = [...new Set(s.owned.species.map((x) => m(x) ?? x))];
 }

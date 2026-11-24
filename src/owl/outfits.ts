@@ -7,8 +7,13 @@ import { col, mix, ramp, tone } from '../gfx/color.ts';
 import { cloth, lamp, leaves, lvl, metal, R, smooth, solid, type Tint } from '../gfx/mats.ts';
 import { fbm, hash } from '../gfx/noise.ts';
 import { bodyDepth, bodyHalfW, geoOf, type Geo } from './geo.ts';
-import type { BoneName, OutfitSlot, OwlParts } from './model.ts';
+import type { OwlParts } from './legacy.ts';
+import type { AnchorName, BoneName, OutfitSlot, OwlLook, OwlModel } from './model.ts';
+import * as THREE from 'three';
+import { loadGLB } from '../gfx/glb.ts';
+import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
 import { speciesOf } from './species.ts';
+import { PIECE_MODEL_LIST } from './outfits.gen.ts';
 
 /** The anchors of the owl being dressed right now (dressOwl sets them before each piece). */
 let G: Geo = geoOf(speciesOf('tawny').shape);
@@ -514,3 +519,90 @@ export function holdItem(P: OwlParts, id: string) {
 export const SLOT_ORDER: OutfitSlot[] = ['head', 'face', 'neck', 'body', 'back'];
 export const SLOT_NAME: Record<OutfitSlot, string> = { head: 'Hats', face: 'Face', neck: 'Neck', body: 'Clothes', back: 'Back' };
 export { mix };
+
+// ====================================================================== the toy outfit pieces (Blender, GLB)
+// Each remade piece is a small hand-painted faceted accessory (art/blender/owls/outfits.py) in
+// public/models/outfits/<id>.glb, modelled round its anchor on a tawny; every owl carries the anchors
+// (anchor_head, anchor_face, anchor_neck, anchor_chest, anchor_back), scaled to its own size, so one piece fits
+// a little owl and a great grey alike. Pieces not remade yet are simply not shown.
+
+export interface PieceModel {
+  /** the anchor it hangs on */
+  anchor: AnchorName;
+  /** a hat that sits where ear tufts would be: the tufts fold away under it */
+  hidesTufts?: boolean;
+}
+/** The pieces that exist as toy GLBs (src/owl/outfits.gen.ts). */
+export const PIECE_MODELS: Record<string, PieceModel> = { ...PIECE_MODEL_LIST };
+const SLOT_ANCHOR: Record<OutfitSlot, AnchorName> = { head: 'anchor_head', face: 'anchor_face', neck: 'anchor_neck', body: 'anchor_chest', back: 'anchor_back' };
+export const pieceAnchor = (id: string): AnchorName | undefined => PIECE_MODELS[id]?.anchor ?? (PIECE[id] ? SLOT_ANCHOR[PIECE[id].slot] : undefined);
+export const piecePath = (id: string) => `outfits/${id}.glb`;
+/** Is this piece wearable on the toy owls yet? */
+export const hasPieceModel = (id: string) => !!PIECE_MODELS[id];
+
+export interface Dressing { ready: Promise<void>; dispose(): void }
+
+type Loaded = { scene: THREE.Object3D };
+const loadedPieces = new Map<string, Loaded>();
+const loadingPieces = new Map<string, Promise<Loaded | null>>();
+function fetchPiece(id: string): Promise<Loaded | null> {
+  let p = loadingPieces.get(id);
+  if (!p) {
+    p = loadGLB(piecePath(id)).then((g) => { flatten(g.scene); loadedPieces.set(id, g); return g; }, () => null);
+    loadingPieces.set(id, p);
+  }
+  return p;
+}
+/** Faceted toy pieces ship without normals (art/blender/owls/pack.py): shade their facets flat. */
+function flatten(root: THREE.Object3D) {
+  root.traverse((n) => {
+    const m = n as THREE.Mesh;
+    if (!m.isMesh || m.geometry.attributes.normal) return;
+    for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) { mat.flatShading = true; mat.needsUpdate = true; }
+  });
+}
+const wornIds = (look: OwlLook) => SLOT_ORDER.map((s) => look.outfit?.[s]).filter((id): id is string => !!id && !!PIECE_MODELS[id]);
+/** Resolves when every remade piece of this look's outfit has loaded. */
+export const piecesReady = (look: OwlLook) => Promise.all(wornIds(look).map(fetchPiece)).then(() => undefined);
+/** Are this look's remade pieces all loaded already? */
+export const piecesLoaded = (look: OwlLook) => wornIds(look).every((id) => loadedPieces.has(id));
+
+/** Put a look's outfit on a loaded owl model: each piece that exists as a GLB hangs on its anchor. */
+export function dressModel(model: OwlModel, look: OwlLook): Dressing {
+  const added: THREE.Object3D[] = [];
+  let dead = false;
+  const jobs: Promise<void>[] = [];
+  let hideTufts = false;
+  for (const slot of SLOT_ORDER) {
+    const id = look.outfit?.[slot];
+    if (!id) continue;
+    if (model.id === 'queen' && (id === 'ice_crown' || id === 'frost_cape')) continue; // (part of her own model)
+    const pm = PIECE_MODELS[id];
+    if (!pm) continue;
+    if (pm.hidesTufts) hideTufts = true;
+    const anchor = model.anchors[pm.anchor];
+    if (!anchor) continue;
+    const put = (g: Loaded | null) => {
+      if (dead || !g) return;
+      const root = cloneSkinned(g.scene);
+      root.name = 'piece:' + id;
+      anchor.add(root);
+      added.push(root);
+    };
+    const have = loadedPieces.get(id);
+    if (have) put(have);
+    else jobs.push(fetchPiece(id).then(put));
+  }
+  if (hideTufts && model.id !== 'snowman') { model.rig.bones.tuftL.visible = false; model.rig.bones.tuftR.visible = false; }
+  return {
+    ready: Promise.all(jobs).then(() => undefined),
+    dispose() { dead = true; for (const o of added) o.removeFromParent(); },
+  };
+}
+
+/** A piece on its own (shop stands, icons): the GLB at the tawny's size, in toy millimetres; null when not remade yet. */
+export async function pieceModel(id: string): Promise<THREE.Object3D | null> {
+  if (!PIECE_MODELS[id]) return null;
+  const g = await fetchPiece(id);
+  return g ? cloneSkinned(g.scene) : null;
+}

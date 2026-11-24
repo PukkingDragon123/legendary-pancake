@@ -1,0 +1,2731 @@
+{
+ "name": "photo_frames",
+ "description": "A wall of frames on twine and brass pins: a big oak-framed sunset over the far hills, a gilt oval moonlit branch, a pressed rosebud under linen and a little round pinecone sketch.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 6.0,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": false,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "bark": [
+    "#2b2c2d",
+    "#3a312a",
+    "#514236",
+    "#65503c",
+    "#6d5a47",
+    "#706b62",
+    "#908a7e"
+   ],
+   "berry": [
+    "#37353d",
+    "#483a42",
+    "#5e434a",
+    "#7c4f56",
+    "#9e5f66",
+    "#b67475",
+    "#ca8683",
+    "#dc978d"
+   ],
+   "blush": [
+    "#434249",
+    "#5f5558",
+    "#846e6e",
+    "#b18e8b",
+    "#e8b4ae",
+    "#fec9bd",
+    "#fcdaca",
+    "#fbe8d2"
+   ],
+   "brass": [
+    "#434035",
+    "#5b4131",
+    "#82673c",
+    "#b08c4b",
+    "#c6a05b",
+    "#d0aa69",
+    "#e1b97c",
+    "#f1d6a2",
+    "#f4eedd"
+   ],
+   "buff": [
+    "#414444",
+    "#5b5850",
+    "#7d7361",
+    "#a79677",
+    "#d9bf93",
+    "#f1d4a2",
+    "#fce5af",
+    "#fbf2b8"
+   ],
+   "fern": [
+    "#2e3b39",
+    "#36463a",
+    "#42553f",
+    "#536a45",
+    "#66844f",
+    "#7d995e",
+    "#93aa6c",
+    "#a6ba77"
+   ],
+   "gold": [
+    "#8a5a3c",
+    "#8d703f",
+    "#b58f4d",
+    "#d2a764",
+    "#d3ac6c",
+    "#d4b473",
+    "#f3d89f",
+    "#fcf4bb"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "ink": [
+    "#1b222d",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856",
+    "#6a655c"
+   ],
+   "leaf": [
+    "#2c4030",
+    "#3c5639",
+    "#4f6c41",
+    "#5f7d4a",
+    "#74905b",
+    "#8fa773",
+    "#abba8c",
+    "#c4cfa3"
+   ],
+   "lilac": [
+    "#3a414d",
+    "#4f5160",
+    "#6a687c",
+    "#8c869f",
+    "#b4a9c9",
+    "#ccbed8",
+    "#e0cfe5",
+    "#f0dde2"
+   ],
+   "linen": [
+    "#414749",
+    "#5b5d59",
+    "#7e7b70",
+    "#a8a18c",
+    "#dccfb0",
+    "#f4e4c0",
+    "#fcf5cb",
+    "#fbf2d4"
+   ],
+   "moonglow": [
+    "#b4a9c9",
+    "#d3cce0",
+    "#dfe9ea",
+    "#f4eedd",
+    "#fffdf6"
+   ],
+   "night": [
+    "#1c232c",
+    "#1b222d",
+    "#232c39",
+    "#364554",
+    "#4f6675",
+    "#678692",
+    "#86a9b0"
+   ],
+   "oak": [
+    "#342f2c",
+    "#47382b",
+    "#644d38",
+    "#896a4b",
+    "#ab8963",
+    "#c6a77e",
+    "#ddc39b",
+    "#fcdeaf"
+   ],
+   "pale": [
+    "#6f553d",
+    "#967552",
+    "#b5936b",
+    "#cdb089",
+    "#d2bc93",
+    "#d2c39e",
+    "#ebe2cb",
+    "#f4eedd"
+   ],
+   "parch": [
+    "#8a5a3c",
+    "#bd914f",
+    "#c8af7c",
+    "#d2bc90",
+    "#dac69f",
+    "#e0d4b7",
+    "#ebe2cb",
+    "#f4eedd"
+   ],
+   "pine": [
+    "#25332f",
+    "#2b3e30",
+    "#3a5338",
+    "#4c6840",
+    "#5c7a48",
+    "#6f8c57",
+    "#8ba36e",
+    "#a7b788"
+   ],
+   "rose": [
+    "#414147",
+    "#5b5255",
+    "#7d6a69",
+    "#a78883",
+    "#d9aca4",
+    "#f1c1b3",
+    "#fcd2bf",
+    "#fbe0c8"
+   ],
+   "sage": [
+    "#394343",
+    "#4b564d",
+    "#636f5b",
+    "#82906f",
+    "#a7b788",
+    "#bfcc97",
+    "#d3dea4",
+    "#e4ebad"
+   ],
+   "star": [
+    "#c59a52",
+    "#dcb072",
+    "#f1d39a",
+    "#f9e9c2",
+    "#fff8e6"
+   ],
+   "straw": [
+    "#3e4343",
+    "#55564e",
+    "#756f5d",
+    "#9b9073",
+    "#c9b78d",
+    "#e1cc9d",
+    "#f5dea9",
+    "#fbebb2"
+   ],
+   "verd": [
+    "#364246",
+    "#4c5b58",
+    "#6c8075",
+    "#96b09c",
+    "#b8ceb2",
+    "#d4e4c1"
+   ],
+   "walnut": [
+    "#2b2c2d",
+    "#3a312a",
+    "#46372a",
+    "#553e2e",
+    "#654a36",
+    "#7c6044",
+    "#a17f5a",
+    "#bf9d74"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "walnut",
+   "tone": 2.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "lilac",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s3": {
+   "ramp": "oak",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "oak",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "oak",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "oak",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "oak"
+     ]
+    }
+   ]
+  },
+  "s7": {
+   "ramp": "night",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s8": {
+   "ramp": "gold",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "walnut",
+   "tone": 2.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s10": {
+   "ramp": "walnut",
+   "tone": 2.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s11": {
+   "ramp": "linen",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s12": {
+   "ramp": "pale",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
+    }
+   ]
+  },
+  "s13": {
+   "ramp": "pale",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
+    }
+   ]
+  },
+  "s14": {
+   "ramp": "pale",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
+    }
+   ]
+  },
+  "s15": {
+   "ramp": "pale",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/planks",
+     "scale": 30.0,
+     "amount": 0.55,
+     "ramps": [
+      "pale"
+     ]
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "parch",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s17": {
+   "ramp": "gold",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
+    }
+   ]
+  },
+  "s18": {
+   "ramp": "walnut",
+   "tone": 2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s19": {
+   "ramp": "brass",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
+    }
+   ]
+  },
+  "s20": {
+   "ramp": "straw",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.3
+    }
+   ]
+  },
+  "s21": {
+   "ramp": "brass",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
+    }
+   ]
+  },
+  "s22": {
+   "ramp": "straw",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.3
+    }
+   ]
+  },
+  "s23": {
+   "ramp": "brass",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
+    }
+   ]
+  },
+  "s24": {
+   "ramp": "straw",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.3
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "sunset_back",
+   "shape": "box",
+   "pivot": [
+    -7.0,
+    9.0,
+    0.2
+   ],
+   "size": [
+    14.6,
+    10.6,
+    0.4
+   ],
+   "style": "s1"
+  },
+  {
+   "id": "sunset_pic",
+   "shape": "card",
+   "pivot": [
+    -7.0,
+    9.0,
+    0.45
+   ],
+   "art": [
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111111111111111111111111111111111111111111111111111111111111111111111111",
+    "111111111122111111111111221111111111112211111111111122111111111111221111111111",
+    "111111111122111111111111221111111111112211111111111122111111111111221111111111",
+    "111122111111111111221111111111112211111111111122111111111111221111111111112211",
+    "111122111111111111221111111111112211111111111122111111111111221111111111112211",
+    "222222222222332222222222223322222222222233222222222222332222222222223322222222",
+    "222222222222332222222222223322222222222233222222222222332222222222223322222222",
+    "222222332222222222223322222222222233222222222222332222222222223322222222222233",
+    "222222332222222222223322222222222233222222222222332222222222223322222222222233",
+    "332222222222223322222222222233222222222222332222222222223322222222222233222222",
+    "332222222222223322222222222233222222222222332222222222223322222222222233222222",
+    "222222223322222222222233222222222222332222222222ssssssssss22222233222222222222",
+    "222222223322222222222233222222222222332222222222ssssssssss22222233222222222222",
+    "3344333333333333443333333333334433333333333344ssssssssssssss333333333333443333",
+    "3344333333333333443333333333334433333333333344ssssssssssssss333333333333443333",
+    "3333333333443333333333334433333333333344333333ssssssssssssss333333443333333333",
+    "3333333333443333333333334433333333333344333333ssssssssssssss333333443333333333",
+    "3333443333333333334433333333333344333333333333ssssssssssssss443333333333334433",
+    "3333443333333333334433333333333344333333333333ssssssssssssss443333333333334433",
+    "44444444444444444444444444444444444444hhhhhhhhssssssssssssss444444444444444444",
+    "44444444444444444444444444444444444444hhhhhhhhssssssssssssss444444444444444444",
+    "444444444444444444444444444444hhhhhhhhhhhhhhhhhhhhhhssssssss444444444444444444",
+    "444444444444444444444444444444hhhhhhhhhhhhhhhhhhhhhhssssssss444444444444444444",
+    "4444444444444444hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhss44444444444444444444",
+    "4444444444444444hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhss44444444444444444444",
+    "44hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh444444444444444444",
+    "44hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh444444444444444444",
+    "hhhhhhHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "hhhhhhHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHpppppppppppppppppppphhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHpppppppppppppppppppphhhhhhhhhhhhhhhhhhhhhhhhhh",
+    "HHHHHHttHHHHttHHHHttHHHHttppppttpppppppppppppppppppppppppppphhhhhhhhhhhhHHHHHH",
+    "HHHHHHttHHHHttHHHHttHHHHttppppttpppppppppppppppppppppppppppphhhhhhhhhhhhHHHHHH",
+    "ggggttttggttttHHttttppttttppttttHHHHHHHHHHHHHHHHHHHHpppppppppppphhHHHHHHHHHHgg",
+    "ggggttttggttttHHttttppttttppttttHHHHHHHHHHHHHHHHHHHHpppppppppppphhHHHHHHHHHHgg",
+    "ggttttttttttttttttttttttttttttttttHHHHHHHHHHHHHHHHHHHHHHHHHHppppHHHHHHHHgggggg",
+    "ggttttttttttttttttttttttttttttttttHHHHHHHHHHHHHHHHHHHHHHHHHHppppHHHHHHHHgggggg",
+    "ggttttttttttttttttttttttttttttttttHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHgggggggggg",
+    "ggttttttttttttttttttttttttttttttttHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHgggggggggg",
+    "ggggggggggggggggggggggggggggggggggggggggggggggggggggHHHHHHHHHHgggggggggggggggg",
+    "ggggggggggggggggggggggggggggggggggggggggggggggggggggHHHHHHHHHHgggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+    "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg"
+   ],
+   "plane": "xy",
+   "style": "s2",
+   "paint": {
+    "art_key": {
+     "1": "lilac:4",
+     "2": "rose:5",
+     "3": "blush:5",
+     "4": "honey:5",
+     "s": "honey:7",
+     "h": "sage:4",
+     "H": "fern:4",
+     "g": "pine:4",
+     "p": "buff:5",
+     "t": "pine:2"
+    }
+   }
+  },
+  {
+   "id": "sunset_t",
+   "shape": "box",
+   "pivot": [
+    -7.0,
+    13.95,
+    0.6
+   ],
+   "size": [
+    15.0,
+    1.1,
+    1.2
+   ],
+   "style": "s3",
+   "chamfer": 0.25
+  },
+  {
+   "id": "sunset_b",
+   "shape": "box",
+   "pivot": [
+    -7.0,
+    4.05,
+    0.6
+   ],
+   "size": [
+    15.0,
+    1.1,
+    1.2
+   ],
+   "style": "s4",
+   "chamfer": 0.25
+  },
+  {
+   "id": "sunset_l",
+   "shape": "box",
+   "pivot": [
+    -13.95,
+    9.0,
+    0.6
+   ],
+   "size": [
+    1.1,
+    8.8,
+    1.2
+   ],
+   "style": "s5",
+   "chamfer": 0.25
+  },
+  {
+   "id": "sunset_r",
+   "shape": "box",
+   "pivot": [
+    -0.05,
+    9.0,
+    0.6
+   ],
+   "size": [
+    1.1,
+    8.8,
+    1.2
+   ],
+   "style": "s6",
+   "chamfer": 0.25
+  },
+  {
+   "id": "oval_pic",
+   "shape": "card",
+   "pivot": [
+    7.4,
+    11.0,
+    0.45
+   ],
+   "art": [
+    "..............NNNNnnnnnn..............",
+    "..............NNNNnnnnnn..............",
+    "..........nnNNnnNNnnnnnnnnnn..........",
+    "..........nnNNnnNNnnnnnnnnnn..........",
+    "........nnnnnnnnnnnnnnnnNNNNnn........",
+    "........nnnnnnnnnnnnnnnnNNNNnn........",
+    "......NNnnnnnnnnnnnnNNNNNNNNNNnn......",
+    "......NNnnnnnnnnnnnnNNNNNNNNNNnn......",
+    "....NNnnNNnnnnNNnnnnNNnnnnnnnnnnNN....",
+    "....NNnnNNnnnnNNnnnnNNnnnnnnnnnnNN....",
+    "....nnnnnnnnnnnnnnNNNNmmnnnnnnnnnn....",
+    "....nnnnnnnnnnnnnnNNNNmmnnnnnnnnnn....",
+    "..nnNNnnnnnnnnNNNNnnmmnnNNnnnnnnNNNN..",
+    "..nnNNnnnnnnnnNNNNnnmmnnNNnnnnnnNNNN..",
+    "..nnnnnnNNnnNNnnNN**mmnnnnnnnnnnnnNN..",
+    "..nnnnnnNNnnNNnnNN**mmnnnnnnnnnnnnNN..",
+    "nnnnnnnnnnnnnnnnnnnnmmmmnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnnnnmmmmnnnnnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnnnnnnmmmmmmnnnnnnnnnn",
+    "nnnnnnnnnnnnnnnnnnnnnnmmmmmmnnnnnnnnnn",
+    "nnnnnn**nnnnnnnnnnnn**nnnnnnnnnnnnnnnn",
+    "nnnnnn**nnnnnnnnnnnn**nnnnnnnnnnnnnnnn",
+    "nnnnnn**nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+    "nnnnnn**nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+    "****nnnnnnnnnnnnnnnnnnllllnnnnnnnnbbbb",
+    "****nnnnnnnnnnnnnnnnnnllllnnnnnnnnbbbb",
+    "nnnnnnllllnnnnnnnnnnnnllllbbbbbbbbbbbb",
+    "nnnnnnllllnnnnnnnnnnnnllllbbbbbbbbbbbb",
+    "nnnnnnllllnnnnllllnnllllbbbbbbbbnnnnnn",
+    "nnnnnnllllnnnnllllnnllllbbbbbbbbnnnnnn",
+    "nnnnnnnnbbbbbbnnnnbbllllbbnnnnnnnnnnnn",
+    "nnnnnnnnbbbbbbnnnnbbllllbbnnnnnnnnnnnn",
+    "nnnnbbbbbbllllbbbbbbbbnnnnnnnnnnnnnnnn",
+    "nnnnbbbbbbllllbbbbbbbbnnnnnnnnnnnnnnnn",
+    "bbbbbbnnnnnnnnnnnnnnnnnn**nnnnnnnnnn..",
+    "bbbbbbnnnnnnnnnnnnnnnnnn**nnnnnnnnnn..",
+    "bbnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn..",
+    "bbnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn..",
+    "....nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn....",
+    "....nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn....",
+    "....nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn....",
+    "....nnnnnnnnnnnnnnnnnnnnnnnnnnnnnn....",
+    "......nnnnnnnnnnnnnnnnnnnnnnnnnn......",
+    "......nnnnnnnnnnnnnnnnnnnnnnnnnn......",
+    "........nnnnnn**nnnnnnnnnnnnnn........",
+    "........nnnnnn**nnnnnnnnnnnnnn........",
+    "..........nnnnnnnnnnnnnnnnnn..........",
+    "..........nnnnnnnnnnnnnnnnnn..........",
+    "..............nnnnnnnnnn..............",
+    "..............nnnnnnnnnn.............."
+   ],
+   "plane": "xy",
+   "style": "s7",
+   "paint": {
+    "art_key": {
+     "n": "night:3",
+     "N": "night:4",
+     "*": "star:3",
+     "m": "moonglow:3",
+     "b": "bark:2",
+     "l": "sage:3"
+    }
+   }
+  },
+  {
+   "id": "oval_ring",
+   "shape": "loft",
+   "pivot": [
+    10.8,
+    11.0,
+    0.7
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -0.2588,
+      1.7029,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -0.9958,
+      3.1466,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -2.0989,
+      4.1113,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -3.4,
+      4.45,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -4.7011,
+      4.1113,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -5.8042,
+      3.1466,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -6.5412,
+      1.7029,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -6.8,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -6.5412,
+      -1.7029,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -5.8042,
+      -3.1466,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -4.7011,
+      -4.1113,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -3.4,
+      -4.45,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -2.0989,
+      -4.1113,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -0.9958,
+      -3.1466,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -0.2588,
+      -1.7029,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      -0.0,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      -0.2588,
+      1.7029,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s8"
+  },
+  {
+   "id": "oval_back",
+   "shape": "box",
+   "pivot": [
+    7.4,
+    11.0,
+    0.2
+   ],
+   "size": [
+    6.4,
+    8.6,
+    0.4
+   ],
+   "style": "s9"
+  },
+  {
+   "id": "rose_back",
+   "shape": "box",
+   "pivot": [
+    14.0,
+    4.4,
+    0.2
+   ],
+   "size": [
+    6.0,
+    6.0,
+    0.4
+   ],
+   "style": "s10"
+  },
+  {
+   "id": "rose_pic",
+   "shape": "card",
+   "pivot": [
+    14.0,
+    4.4,
+    0.45
+   ],
+   "art": [
+    "CCccccCCccccCCccccCCccccCCcc",
+    "CCccccCCccccCCccccCCccccCCcc",
+    "ccccCCccccrrrrccCCccccCCcccc",
+    "ccccCCccccrrrrccCCccccCCcccc",
+    "ccCCccccrrRRrrrrccccCCccccCC",
+    "ccCCccccrrRRrrrrccccCCccccCC",
+    "CCccccCCRRRRRRrrccCCccccCCcc",
+    "CCccccCCRRRRRRrrccCCccccCCcc",
+    "ccccCCccrrRRrrrrCCccccCCcccc",
+    "ccccCCccrrRRrrrrCCccccCCcccc",
+    "ccCCccccrrrrrrrrccccCCccccCC",
+    "ccCCccccrrrrrrrrccccCCccccCC",
+    "CCccccCCccrrrrccccCCccccCCcc",
+    "CCccccCCccrrrrccccCCccccCCcc",
+    "ccccCCccccCCssccCCccccCCcccc",
+    "ccccCCccccCCssccCCccccCCcccc",
+    "ccCCccccCCccssllllllCCccccCC",
+    "ccCCccccCCccssllllllCCccccCC",
+    "CCccccllllllssccccCCccccCCcc",
+    "CCccccllllllssccccCCccccCCcc",
+    "ccccCCccccCCssccCCccccCCcccc",
+    "ccccCCccccCCssccCCccccCCcccc",
+    "ccCCccccCCccssCCccccCCccccCC",
+    "ccCCccccCCccssCCccccCCccccCC",
+    "CCccccCCccccCCssccCCccccCCcc",
+    "CCccccCCccccCCssccCCccccCCcc",
+    "ccccCCccccCCccccCCccccCCcccc",
+    "ccccCCccccCCccccCCccccCCcccc"
+   ],
+   "plane": "xy",
+   "style": "s11",
+   "paint": {
+    "art_key": {
+     "c": "linen:5",
+     "C": "linen:4",
+     "s": "leaf:3",
+     "r": "rose:3",
+     "R": "berry:3",
+     "l": "sage:3"
+    }
+   }
+  },
+  {
+   "id": "rose_t",
+   "shape": "box",
+   "pivot": [
+    14.0,
+    7.2,
+    0.6
+   ],
+   "size": [
+    6.4,
+    0.8,
+    1.2
+   ],
+   "style": "s12",
+   "chamfer": 0.25
+  },
+  {
+   "id": "rose_b",
+   "shape": "box",
+   "pivot": [
+    14.0,
+    1.6,
+    0.6
+   ],
+   "size": [
+    6.4,
+    0.8,
+    1.2
+   ],
+   "style": "s13",
+   "chamfer": 0.25
+  },
+  {
+   "id": "rose_l",
+   "shape": "box",
+   "pivot": [
+    11.2,
+    4.4,
+    0.6
+   ],
+   "size": [
+    0.8,
+    4.8,
+    1.2
+   ],
+   "style": "s14",
+   "chamfer": 0.25
+  },
+  {
+   "id": "rose_r",
+   "shape": "box",
+   "pivot": [
+    16.8,
+    4.4,
+    0.6
+   ],
+   "size": [
+    0.8,
+    4.8,
+    1.2
+   ],
+   "style": "s15",
+   "chamfer": 0.25
+  },
+  {
+   "id": "cone_pic",
+   "shape": "card",
+   "pivot": [
+    14.0,
+    13.6,
+    0.45
+   ],
+   "art": [
+    "........pppppppp........",
+    "........pppppppp........",
+    "....pppppppppppppppp....",
+    "....pppppppppppppppp....",
+    "..ppppppppppiipppppppp..",
+    "..ppppppppppiipppppppp..",
+    "..ppppppppiiiiiipppppp..",
+    "..ppppppppiiiiiipppppp..",
+    "ppppppppiiiiiiiiiipppppp",
+    "ppppppppiiiiiiiiiipppppp",
+    "ppppppiiiiiiiiiiiiiipppp",
+    "ppppppiiiiiiiiiiiiiipppp",
+    "ppppppppppppiipppppppppp",
+    "ppppppppppppiipppppppppp",
+    "ppppppppiiiiiiiiiipppppp",
+    "ppppppppiiiiiiiiiipppppp",
+    "..ppppppppiiiiiipppppp..",
+    "..ppppppppiiiiiipppppp..",
+    "..ppppppppppiipppppppp..",
+    "..ppppppppppiipppppppp..",
+    "....ppppppppiipppppp....",
+    "....ppppppppiipppppp....",
+    "........pppppppp........",
+    "........pppppppp........"
+   ],
+   "plane": "xy",
+   "style": "s16",
+   "paint": {
+    "art_key": {
+     "p": "parch:6",
+     "i": "ink:3"
+    }
+   }
+  },
+  {
+   "id": "cone_ring",
+   "shape": "loft",
+   "pivot": [
+    16.2,
+    13.6,
+    0.65
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -0.2947,
+      1.1,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -1.1,
+      1.9053,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -2.2,
+      2.2,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -3.3,
+      1.9053,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -4.1053,
+      1.1,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -4.4,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -4.1053,
+      -1.1,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -3.3,
+      -1.9053,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -2.2,
+      -2.2,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -1.1,
+      -1.9053,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -0.2947,
+      -1.1,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      -0.2947,
+      1.1,
+      0.0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 7,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s17"
+  },
+  {
+   "id": "cone_back",
+   "shape": "loft",
+   "pivot": [
+    14.0,
+    13.6,
+    0.0
+   ],
+   "rotation": [
+    90.0,
+    0.0,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      4.2,
+      4.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "size": [
+      4.2,
+      4.2
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s18",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "pin0",
+   "shape": "loft",
+   "pivot": [
+    -7.0,
+    18.15,
+    0.5
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.13180194846605364,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.45,
+      0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7681980515339464,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s19",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "twine0",
+   "shape": "loft",
+   "pivot": [
+    -11.5,
+    14.5,
+    0.3
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    },
+    {
+     "at": [
+      4.5,
+      3.8,
+      0.15
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    },
+    {
+     "at": [
+      9.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s20"
+  },
+  {
+   "id": "pin1",
+   "shape": "loft",
+   "pivot": [
+    7.4,
+    18.15,
+    0.5
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.13180194846605364,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.45,
+      0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7681980515339464,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s21",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "twine1",
+   "shape": "loft",
+   "pivot": [
+    5.2,
+    14.6,
+    0.3
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    },
+    {
+     "at": [
+      2.2,
+      3.7,
+      0.15
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    },
+    {
+     "at": [
+      4.4,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s22"
+  },
+  {
+   "id": "pin2",
+   "shape": "loft",
+   "pivot": [
+    14.0,
+    17.15,
+    0.5
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.13180194846605364,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.45,
+      0
+     ],
+     "size": [
+      0.9,
+      0.9
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7681980515339464,
+      0
+     ],
+     "size": [
+      0.6364,
+      0.6364
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s23",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "twine2",
+   "shape": "loft",
+   "pivot": [
+    13.0,
+    15.4,
+    0.3
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    },
+    {
+     "at": [
+      1.0,
+      1.9,
+      0.15
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    },
+    {
+     "at": [
+      2.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.24,
+      0.24
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s24"
+  }
+ ]
+}
