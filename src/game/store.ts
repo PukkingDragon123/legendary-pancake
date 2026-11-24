@@ -7,6 +7,7 @@ import { migrateSpecies } from '../owl/species.ts'; // [owl3]
 import { PALETTE, type Skin } from '../owl/palette.ts';
 import type { SleepSession } from '../sleep/types.ts';
 import { defaultBlockConfig, type BlockConfig } from './blocker.ts';
+import { DEFAULT_FRAME, FRAME_BY_ID, STARTER_FRAMES } from '../assets/frames.ts';
 import { AREAS, ITEM_BY_ID, levelOf, TRINKET, ZONE_LEVEL, type LootEntry } from './catalog.ts';
 import type { AdventureResult } from './adventure.ts';
 
@@ -85,7 +86,9 @@ export interface Save {
   streak: number;
   bestStreak: number;
   lastNightKey?: string;
-  owned: { items: string[]; pieces: string[]; palettes: string[]; skins: string[]; species: string[]; finishes: string[] };
+  owned: { items: string[]; pieces: string[]; palettes: string[]; skins: string[]; species: string[]; finishes: string[]; /** [ui5] portrait frames */ frames: string[] };
+  /** [ui5] the frame round the live owl portrait on the name sign (catalog FRAMES) */
+  frame: string;
   /** extra copies of furniture the player owns beyond those placed (inventory counts) */
   furniture: Record<string, string>;
   collection: Record<string, number>;
@@ -117,7 +120,8 @@ export function freshSave(): Save {
     routine: [0, 1, 2, 3, 4, 5, 6].map((d) => ({ on: true, bed: d === 5 || d === 6 ? '23:30' : '23:00', wake: d === 0 || d === 6 ? '08:00' : '07:00' })),
     shop: { day: '', bought: [], free: false, pity: {} },
     coins: 250, gems: 20, xp: 0, streak: 0, bestStreak: 0,
-    owned: { items: ['nestbed', 'moonlamp', 'roundrug', 'fernpot', 'candles', 'stool'], pieces: ['nightcap', 'sprout', 'satchel'], palettes: ['tawny'], skins: ['owl'], species: ['tawny'], finishes: ['wall_heartwood', 'floor_planks'] },
+    owned: { items: ['nestbed', 'moonlamp', 'roundrug', 'fernpot', 'candles', 'stool'], pieces: ['nightcap', 'sprout', 'satchel'], palettes: ['tawny'], skins: ['owl'], species: ['tawny'], finishes: ['wall_heartwood', 'floor_planks'], frames: [...STARTER_FRAMES] },
+    frame: DEFAULT_FRAME,
     furniture: { g_back: 'nestbed', g_left: 'moonlamp', g_mid: 'roundrug', g_frontL: 'fernpot' },
     collection: {}, area: 'woods',
     sleep: { goalMin: 480, wake: '07:00', days: [1, 2, 3, 4, 5], smartMin: 20, alarmSound: 'alarm_musicbox', alarmOn: true, reminders: true, windDownMin: 30, mic: true, clips: false, sensitivity: 0.5, soundscape: 'amb_rain', soundscapeMin: 30, soundscapeVol: 0.6 },
@@ -144,10 +148,19 @@ function load(): Save {
       s.v = 2;
       migrateSpecies(s); // [owl3] the owl line is eight species: retired ones move to their nearest relative
       // shallow-merge new fields into older saves
-      return { ...f, ...s, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker } };
+      return migrateFrames({ ...f, ...s, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker } });
     }
   } catch { /* ignore */ }
   return freshSave();
+}
+
+/** [ui5] Saves from before portrait frames: the starter frames are always owned, and the chosen frame must exist and be owned. */
+export function migrateFrames(s: Save): Save {
+  const have = Array.isArray(s.owned.frames) ? s.owned.frames.filter((id) => FRAME_BY_ID[id]) : [];
+  for (const id of STARTER_FRAMES) if (!have.includes(id)) have.push(id);
+  s.owned = { ...s.owned, frames: have };
+  if (typeof s.frame !== 'string' || !FRAME_BY_ID[s.frame] || !have.includes(s.frame)) s.frame = DEFAULT_FRAME;
+  return s;
 }
 
 export const save = signal<Save>(load());
@@ -187,6 +200,7 @@ export function ownsEntry(s: Save, e: Pick<LootEntry, 'kind' | 'id'>): boolean {
   if (e.kind === 'species') return s.owned.species.includes(e.id);
   if (e.kind === 'piece') return s.owned.pieces.includes(e.id);
   if (e.kind === 'palette') return s.owned.palettes.includes(e.id);
+  if (e.kind === 'frame') return (s.owned.frames ?? []).includes(e.id); // [ui5]
   return (s.collection[e.id] ?? 0) > 0;
 }
 
@@ -198,6 +212,7 @@ export function grant(s: Save, e: Pick<LootEntry, 'kind' | 'id'>) {
   if (e.kind === 'finish' && !s.owned.finishes.includes(e.id)) s.owned.finishes.push(e.id);
   if (e.kind === 'skin' && !s.owned.skins.includes(e.id)) s.owned.skins.push(e.id);
   if (e.kind === 'species' && !s.owned.species.includes(e.id)) s.owned.species.push(e.id);
+  if (e.kind === 'frame' && FRAME_BY_ID[e.id]) { s.owned.frames ??= []; if (!s.owned.frames.includes(e.id)) s.owned.frames.push(e.id); } // [ui5]
 }
 
 export type Buyable = { kind: 'item' | 'piece' | 'palette'; id: string };
@@ -222,6 +237,12 @@ export function buy(b: Buyable): string | null {
 export function wear(slot: OutfitSlot, id: string | null) {
   edit((s) => { if (id) s.look.outfit[slot] = id; else delete s.look.outfit[slot]; });
   void import('./quests.ts').then((q) => q.progress('dress'));
+}
+/** [ui5] Put a frame round the owl portrait (only one you own). Returns false when it isn't yours. */
+export function setFrame(id: string): boolean {
+  if (!FRAME_BY_ID[id] || !ownsEntry(save.value, { kind: 'frame', id })) return false;
+  if (save.value.frame !== id) { edit((s) => { s.frame = id; }); void import('./quests.ts').then((q) => q.progress('dress')); }
+  return true;
 }
 export function setCoat(id: string) { edit((s) => { s.look.palette = id; }); void import('./quests.ts').then((q) => q.progress('dress')); }
 

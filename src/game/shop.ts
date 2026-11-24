@@ -6,6 +6,7 @@ import { rng as seededRng, strSeed } from '../gfx/noise.ts';
 import { PIECE, PIECES } from '../owl/outfits.ts';
 import { SPECIAL_SKIN } from '../owl/skins.ts';
 import { SPECIES, SPECIES_BY_ID } from '../owl/species.ts';
+import { FRAME_BY_ID, STORE_FRAMES, type FrameDef } from '../assets/frames.ts';
 import { freshPity, pull, type Pity, type PullResult, type Rng } from './gacha.ts';
 import { PULL_COST, SERIES, SERIES_BY_ID, type RewardKind, type Series, type SeriesEntry, type Stars } from './series.ts';
 import { dayKey, edit, grant, ownsEntry, save, type Save } from './store.ts';
@@ -20,6 +21,7 @@ export function nameOf(kind: RewardKind | 'species', id: string): string {
   if (kind === 'skin') return SPECIAL_SKIN[id]?.name ?? titleCase(id);
   if (kind === 'finish') return FINISH[id]?.name ?? titleCase(id);
   if (kind === 'species') return SPECIES_BY_ID[id]?.name ?? titleCase(id);
+  if (kind === 'frame') return FRAME_BY_ID[id]?.name ?? titleCase(id);
   return titleCase(id);
 }
 export function blurbOf(kind: RewardKind | 'species', id: string): string {
@@ -28,6 +30,7 @@ export function blurbOf(kind: RewardKind | 'species', id: string): string {
   if (kind === 'skin') return SPECIAL_SKIN[id]?.blurb ?? '';
   if (kind === 'finish') return FINISH[id]?.blurb ?? '';
   if (kind === 'species') return SPECIES_BY_ID[id]?.blurb ?? '';
+  if (kind === 'frame') return FRAME_BY_ID[id]?.blurb ?? '';
   return '';
 }
 /** Whether the registry already has this id (other content may still be on its way). */
@@ -37,9 +40,10 @@ export function exists(kind: RewardKind | 'species', id: string): boolean {
   if (kind === 'skin') return !!SPECIAL_SKIN[id];
   if (kind === 'finish') return !!FINISH[id];
   if (kind === 'species') return !!SPECIES_BY_ID[id];
+  if (kind === 'frame') return !!FRAME_BY_ID[id];
   return false;
 }
-export const KIND_LABEL: Record<RewardKind, string> = { item: 'Furniture', piece: 'Outfit', skin: 'Owl skin', finish: 'Wall & floor', species: 'Plumage' };
+export const KIND_LABEL: Record<RewardKind, string> = { item: 'Furniture', piece: 'Outfit', skin: 'Owl skin', finish: 'Wall & floor', species: 'Plumage', frame: 'Portrait frame' };
 
 // ------------------------------------------------------------------ time
 
@@ -143,6 +147,41 @@ export function buyDeal(d: Deal): string | null {
     if (d.cur === 'gems') x.gems -= d.price; else x.coins -= d.price;
     grant(x, d);
     x.shop.bought.push(d.key);
+  });
+  return null;
+}
+
+// ------------------------------------------------------------------ portrait frames [ui5]
+
+/** A frame on the store's frame wall: its price today (one frame a day is marked down). */
+export interface FrameOffer { frame: FrameDef; cur: 'coins' | 'gems'; base: number; price: number; off: number; key: string; locked: number }
+const frameKey = (id: string) => `frame:${id}`;
+/** The frame wall: every frame Barnaby stocks, the frame of the day marked down 25..40%, and those the player's level
+ * hasn't reached yet (locked = the level needed). Stable for the day. */
+export function frameWall(s: Save, day = dayKey(), lv = 99): FrameOffer[] {
+  const r = seededRng(strSeed('frames:' + day));
+  const open = STORE_FRAMES.filter((f) => !ownsEntry(s, { kind: 'frame', id: f.id }) && (f.level ?? 0) <= lv);
+  const pick = open.length ? open[Math.floor(r() * open.length)].id : '';
+  const off = 25 + Math.floor(r() * 4) * 5;
+  return STORE_FRAMES.map((f) => {
+    const sale = f.id === pick;
+    const raw = f.price * (1 - (sale ? off : 0) / 100);
+    const price = !sale ? f.price : f.cur === 'gems' ? Math.max(1, Math.round(raw)) : Math.max(5, Math.round(raw / 5) * 5);
+    return { frame: f, cur: f.cur, base: f.price, price, off: sale ? off : 0, key: frameKey(f.id), locked: (f.level ?? 0) > lv ? f.level ?? 0 : 0 };
+  });
+}
+/** Buy a frame from the wall (and put it on). Returns an error, or null when it went through. */
+export function buyFrame(o: FrameOffer, wearIt = true): string | null {
+  const s = save.value;
+  if (ownsEntry(s, { kind: 'frame', id: o.frame.id })) return 'You already have this frame';
+  if (o.locked) return `Reach level ${o.locked} first`;
+  if (o.cur === 'gems' ? s.gems < o.price : s.coins < o.price) return o.cur === 'gems' ? 'Not enough moon gems' : 'Not enough acorns';
+  edit((x) => {
+    rollDay(x);
+    if (o.cur === 'gems') x.gems -= o.price; else x.coins -= o.price;
+    grant(x, { kind: 'frame', id: o.frame.id });
+    if (wearIt) x.frame = o.frame.id;
+    x.shop.bought.push(o.key);
   });
   return null;
 }

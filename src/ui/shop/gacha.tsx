@@ -200,7 +200,8 @@ export function Reveal(p: { prizes: Prize[]; stage: Lodge | null; say: (t: strin
   useEffect(() => {
     if (phase !== 'reveal') return;
     const pr = order[i];
-    void p.stage?.showPrize({ kind: pr.entry.kind, id: pr.entry.id }, pr.stars);
+    // [ui5] a portrait frame comes out of the barrel as a wrapped parcel (the plaque shows the frame itself)
+    void p.stage?.showPrize(pr.entry.kind === 'frame' ? { kind: 'item', id: 'frame:' + pr.entry.id } : { kind: pr.entry.kind, id: pr.entry.id }, pr.stars);
     sound.play(pr.stars === 5 ? 'reward_levelup' : pr.stars === 4 ? 'reward_unlock' : 'ui_page', { volume: pr.stars === 3 ? 0.5 : 0.6 });
     haptic(pr.stars === 5 ? 30 : 10);
     if (pr.stars === 5) p.say(pick(['TIMBER! Would you look at that!', 'Gnaw me a log, a five-star!', 'Oh my whiskers, the big one!']), 2600);

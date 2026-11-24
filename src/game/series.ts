@@ -2,7 +2,7 @@
 // between content and shop: every id here must exist in its registry (furniture / finishes in
 // src/assets/seasonal.ts, outfit pieces in src/owl/outfits.ts, skins in src/owl/skins.ts).
 export type Stars = 3 | 4 | 5;
-export type RewardKind = 'item' | 'piece' | 'skin' | 'finish' | 'species';
+export type RewardKind = 'item' | 'piece' | 'skin' | 'finish' | 'species' | 'frame'; // [ui5] frame: a portrait frame (catalog FRAMES)
 export interface SeriesEntry { kind: RewardKind; id: string; stars: Stars; featured?: boolean }
 export interface Series {
   id: string;
@@ -32,6 +32,7 @@ export const FROSTLIGHT: Series = {
     { kind: 'item', id: 'sleigh_bed', stars: 4 },
     { kind: 'item', id: 'nutcracker', stars: 4 },
     { kind: 'finish', id: 'wall_candy_stripe', stars: 4 },
+    { kind: 'frame', id: 'gingerbread', stars: 4 }, // [ui5]
     { kind: 'item', id: 'candy_cane', stars: 3 },
     { kind: 'item', id: 'cocoa_mug', stars: 3 },
     { kind: 'item', id: 'wreath', stars: 3 },
@@ -55,6 +56,7 @@ export const STARFALL: Series = {
     { kind: 'item', id: 'moon_bed', stars: 4 },
     { kind: 'item', id: 'telescope_brass', stars: 4 },
     { kind: 'finish', id: 'wall_night_sky', stars: 4 },
+    { kind: 'frame', id: 'starry', stars: 4 }, // [ui5]
     { kind: 'item', id: 'star_jar', stars: 3 },
     { kind: 'item', id: 'planet_mobile', stars: 3 },
     { kind: 'item', id: 'cloud_pouf', stars: 3 },
