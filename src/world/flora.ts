@@ -14,7 +14,8 @@ import { clearing, groundY, HALF, houseD, inGarden, pathD, POND, pondD, SEED, ty
 import { FG, grassReady, type GrassItem } from './grass.ts';
 import { LT, Litter, litterReady, type LitterItem } from './litter.ts';
 import { SURFACE_Y, surfaceY } from './terrain.ts';
-import { mossMat, treeMaterials, treeProto, vegMat, vegProto, type VegKind } from './woods.ts';
+import { mossMat, shrubProto, treeMaterials, treeProto, vegMat, vegProto, type ShrubKind, type VegKind } from './woods.ts';
+import { leafMaterial, leavesReady, withLeafState, type LeafCell } from './foliage.ts';
 import type { SpeciesId } from './bushed/species.ts';
 
 interface Spot { x: number; y: number; z: number; yaw: number; s: number; tint?: number }
@@ -35,19 +36,23 @@ export interface ForestPlan {
   litter: LitterItem[];
 }
 
-/** [world3] tree kinds: species, prototype seeds, age (shape) and the base height in blocks. */
-const TREES: Record<string, { species: SpeciesId; seeds: number[]; age: number; h: number }> = {
-  oak1: { species: 'oak', seeds: [5, 9], age: 0.55, h: 5.6 }, oak2: { species: 'oak', seeds: [14, 23], age: 0.6, h: 6.0 }, oak3: { species: 'oak', seeds: [31], age: 0.5, h: 5.2 },
-  maple: { species: 'oak', seeds: [21], age: 0.5, h: 5.0 },
-  birch1: { species: 'birch', seeds: [3, 7], age: 0.5, h: 6.4 }, birch2: { species: 'birch', seeds: [11], age: 0.45, h: 5.8 },
-  blossom: { species: 'birch', seeds: [17], age: 0.4, h: 5.0 },
-  pine1: { species: 'spruce', seeds: [2, 6], age: 0.45, h: 7.4 }, pine2: { species: 'fir', seeds: [4, 8], age: 0.5, h: 6.8 },
-  sapling: { species: 'fir', seeds: [30], age: 0.16, h: 2.4 },
+/** [world3] tree kinds: species, prototype seeds, age (shape), the base height in blocks and [look4] the leaf cells
+ * their bushy crowns are made of (foliage.ts). */
+const TREES: Record<string, { species: SpeciesId; seeds: number[]; age: number; h: number; leaves: LeafCell[] }> = {
+  oak1: { species: 'oak', seeds: [5, 9], age: 0.55, h: 5.6, leaves: ['oak', 'oak', 'oakFresh'] },
+  oak2: { species: 'oak', seeds: [14, 23], age: 0.6, h: 6.0, leaves: ['oakFresh', 'oakFresh', 'oak'] },
+  oak3: { species: 'oak', seeds: [31], age: 0.5, h: 5.2, leaves: ['oak'] },
+  maple: { species: 'oak', seeds: [21], age: 0.5, h: 5.0, leaves: ['maple'] },
+  birch1: { species: 'birch', seeds: [3, 7], age: 0.5, h: 6.4, leaves: ['birch'] }, birch2: { species: 'birch', seeds: [11], age: 0.45, h: 5.8, leaves: ['birch', 'oakFresh'] },
+  blossom: { species: 'birch', seeds: [17], age: 0.4, h: 5.0, leaves: ['blossom'] },
+  pine1: { species: 'spruce', seeds: [2, 6], age: 0.45, h: 7.4, leaves: ['fir'] }, pine2: { species: 'fir', seeds: [4, 8], age: 0.5, h: 6.8, leaves: ['pine'] },
+  sapling: { species: 'fir', seeds: [30], age: 0.16, h: 2.4, leaves: ['fir'] },
 };
-/** [world3] everything else that is instanced: a veg prototype or a model, and its metres-to-blocks scale. */
-const SMALL: Record<string, { veg?: VegKind; model?: string; seeds?: number[]; scale: number; shadow?: boolean }> = {
-  bush: { veg: 'alder', seeds: [1, 2], scale: 1.1, shadow: true }, bushBerry: { veg: 'blueberry', seeds: [3, 4], scale: 2.3 }, bushFlower: { veg: 'raspberry', seeds: [5], scale: 2.0 },
-  fern: { veg: 'swordFern', seeds: [1, 2], scale: 1.35 }, ostrich: { veg: 'ostrich', seeds: [3], scale: 1.2 }, bracken: { veg: 'bracken', seeds: [4], scale: 1.4 },
+/** [world3] everything else that is instanced: a veg prototype or a model, and its metres-to-blocks scale. [look4] Bushes
+ * and ferns are leaf-card shrubs (`shrub`, one kind per seed slot). */
+const SMALL: Record<string, { veg?: VegKind; shrub?: ShrubKind[]; model?: string; seeds?: number[]; scale: number; shadow?: boolean }> = {
+  bush: { shrub: ['round', 'hedge'], seeds: [1, 2], scale: 1.05, shadow: true }, bushBerry: { shrub: ['holly'], seeds: [3, 4], scale: 1.0, shadow: true }, bushFlower: { shrub: ['elder', 'lilac'], seeds: [5, 6], scale: 1.0, shadow: true },
+  fern: { shrub: ['fern'], seeds: [1, 2], scale: 1.0 }, ostrich: { shrub: ['fern'], seeds: [3], scale: 1.25 }, bracken: { shrub: ['bracken'], seeds: [4], scale: 1.0 },
   cattails: { veg: 'cattails', seeds: [1, 2], scale: 0.8 }, lilies: { veg: 'lilies', seeds: [1, 2, 3], scale: 2.2 },
   toadstool: { veg: 'agaric', seeds: [1, 2], scale: 3.2 }, bolete: { veg: 'bolete', seeds: [3], scale: 3.2 }, chanterelle: { veg: 'chanterelle', seeds: [4], scale: 3.6 },
   glow: { veg: 'puffball', seeds: [5], scale: 3.4 }, honey: { veg: 'honey', seeds: [6], scale: 3.4 }, cones: { veg: 'cones', seeds: [7], scale: 3.0 },
@@ -260,7 +265,7 @@ const SEASON_TINT: Record<string, { spring: number; summer: number; autumn: numb
   blossom: { spring: 0xf6d6d4, summer: 0xffffff, autumn: [0xe8b874, 0xdc9e66], winter: null },
   spruce: { spring: 0xf0fff0, summer: 0xffffff, autumn: [0xf2f2e6], winter: 0xd8e2e0 },
   fir: { spring: 0xf0fff0, summer: 0xffffff, autumn: [0xf2f2e6], winter: 0xd8e2e0 },
-  bush: { spring: 0xe8f6d0, summer: 0xffffff, autumn: [0xe8b070, 0xf0cc80, 0xd89a68], winter: 0xbcae98 },
+  bush: { spring: 0xf0ffe0, summer: 0xffffff, autumn: [0xfff4dc, 0xfce8c8, 0xffffff], winter: 0xd8dcd0 },
 };
 const tintKey = (kind: string) => (kind === 'maple' ? 'maple' : kind === 'blossom' ? 'blossom' : kind.startsWith('oak') ? 'oak' : kind.startsWith('birch') ? 'birch' : kind === 'pine1' ? 'spruce' : kind === 'pine2' || kind === 'sapling' ? 'fir' : 'bush');
 const DECIDUOUS = new Set(['oak1', 'oak2', 'oak3', 'maple', 'birch1', 'birch2', 'blossom']);
@@ -292,6 +297,7 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
 
   // ---- trees: per kind and prototype seed, the near ones in full detail and the rest at the reduced LOD
   const sets: TreeSet[] = [];
+  const leaf = leafMaterial();
   for (const [kind, list] of plan.lists) {
     const T = TREES[kind];
     if (!T) continue;
@@ -302,12 +308,12 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
         const ids: number[] = [];
         list.forEach((s, i) => { if (i % T.seeds.length === vi && (quality === 'high' && Math.hypot(s.x, s.z) < 12.8) === near) ids.push(i); });
         if (!ids.length) continue;
-        const proto = treeProto(T.species, seed, T.age, near);
+        const proto = treeProto(T.species, seed, T.age, near, T.leaves);
         const lod = near ? proto.lod0 : proto.lod1;
         const spots = ids.map((i) => list[i]);
         const sc = (s: Spot): [number, number, number] => { const k = (T.h * s.s) / proto.height; return [k, k, k]; };
         make(lod.bark, mats.bark, mats.barkDepth, spots, sc, true, `${kind}:${seed}:bark`);
-        if (lod.foliage) { set.foliage.push(make(lod.foliage, mats.foliage, mats.foliageDepth, spots, sc, true, `${kind}:${seed}:leaves`, true)); set.idx.push(ids); }
+        if (lod.foliage) { set.foliage.push(make(withLeafState(lod.foliage, spots.length), leaf.mat, leaf.depth, spots, sc, true, `${kind}:${seed}:leaves`, true)); set.idx.push(ids); }
         stats.trees += spots.length;
       }
     });
@@ -317,6 +323,21 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
   // ---- shrubs, ferns, cattails, lily pads, mushrooms, moss: BUSHED ground-cover prototypes on the veg atlas
   const veg = vegMat(), small = new Map<string, THREE.InstancedMesh[]>(), shrubs: THREE.InstancedMesh[] = [];
   const glows: THREE.MeshStandardMaterial[] = [];
+  for (const [kind, list] of plan.lists) {
+    const S = SMALL[kind];
+    if (!S?.shrub) continue;
+    const seeds = S.seeds ?? [1];
+    seeds.forEach((seed, vi) => {
+      const spots = list.filter((_, i) => i % seeds.length === vi);
+      if (!spots.length) return;
+      const geo = shrubProto(S.shrub![vi % S.shrub!.length], seed);
+      const sc = (s: Spot): [number, number, number] => [S.scale * s.s, S.scale * s.s * (0.85 + (s.yaw % 0.3)), S.scale * s.s];
+      const mesh = make(geo, leaf.mat, leaf.depth, spots, sc, !!S.shadow, `${kind}:${seed}`, true);
+      if (!small.has(kind)) small.set(kind, []);
+      small.get(kind)!.push(mesh);
+      shrubs.push(mesh);
+    });
+  }
   for (const [kind, list] of plan.lists) {
     const S = SMALL[kind];
     if (!S?.veg) continue;
@@ -353,34 +374,40 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
 
   const litter = new Litter(plan.litter);
   group.add(litter.group);
-  const ready = Promise.allSettled([...jobs, grassReady, litterReady]).then((res) => { for (const x of res) if (x.status === 'rejected') console.warn('[world] forest model failed', x.reason); });
+  const ready = Promise.allSettled([...jobs, grassReady, litterReady, leavesReady]).then((res) => { for (const x of res) if (x.status === 'rejected') console.warn('[world] forest model failed', x.reason); });
 
   function setSeason(info: SeasonInfo) {
-    const s = info.season, late = s === 'autumn' ? Math.max(0, (info.t - 0.45) / 0.55) : 0, early = s === 'autumn' ? Math.max(0, 1 - info.t / 0.3) : 0;
+    // [look4] autumn turns a share of the broadleaves to amber, copper, crimson and gold (more as it goes on), the
+    // rest stay green; winter leaves the broadleaves bare and frosts the conifers; spring is a fresher green
+    const s = info.season, turned = s === 'autumn' ? 0.3 + 0.35 * info.t : 0;
     for (const set of sets) {
       const T = SEASON_TINT[tintKey(set.kind)];
-      const bare = DECIDUOUS.has(set.kind) && s === 'winter';
+      const deciduous = DECIDUOUS.has(set.kind);
       set.foliage.forEach((mesh, mi) => {
-        mesh.visible = !bare;
+        mesh.visible = true;
+        const state = mesh.geometry.getAttribute('iLeaf') as THREE.InstancedBufferAttribute | undefined;
         set.idx[mi].forEach((gi, i) => {
-          let tint: number;
+          let tint = 0xffffff, leafState = 0;
           if (s === 'spring') tint = T.spring;
-          else if (s === 'summer') tint = T.summer;
-          else if (s === 'autumn') {
-            const green = H(gi, set.kind.length) < early * 0.7;
-            tint = green ? T.summer : T.autumn[Math.floor(H(gi, 7) * T.autumn.length)];
-            if (late > 0 && !green) tint = new THREE.Color(tint).lerp(new THREE.Color(0xb08a68), late * 0.4 * H(gi, 9)).getHex();
-          } else tint = T.winter ?? 0xffffff;
+          else if (s === 'winter') { if (deciduous) leafState = -1; else tint = T.winter ?? 0xffffff; }
+          else if (s === 'autumn' && deciduous && set.kind !== 'blossom') {
+            if (H(gi, set.kind.length + 11) < turned) leafState = 1;
+            else tint = 0xf8fae8;
+          }
           // a little per-tree variety keeps the forest from looking cloned
-          c.setHex(tint).multiplyScalar(0.93 + H(gi, 3) * 0.12);
+          const hv = H(gi, 21) - 0.5;
+          c.setHex(tint).multiplyScalar(0.86 + H(gi, 3) * 0.2);
+          c.r *= 1 + hv * 0.14; c.b *= 1 - hv * 0.1;
           mesh.setColorAt(i, c);
+          if (state) state.setX(i, leafState);
         });
         if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+        if (state) state.needsUpdate = true;
       });
     }
     const B = SEASON_TINT.bush;
     for (const mesh of shrubs) {
-      for (let i = 0; i < mesh.count; i++) mesh.setColorAt(i, c.setHex(s === 'spring' ? B.spring : s === 'summer' ? B.summer : s === 'autumn' ? B.autumn[Math.floor(H(i, 5) * B.autumn.length)] : B.winter!));
+      for (let i = 0; i < mesh.count; i++) mesh.setColorAt(i, c.setHex(s === 'spring' ? B.spring : s === 'summer' ? B.summer : s === 'autumn' ? B.autumn[Math.floor(H(i, 5) * B.autumn.length)] : B.winter!).multiplyScalar(0.94 + H(i, 8) * 0.1));
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     }
     litter.setSeason(info);

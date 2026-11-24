@@ -2,6 +2,9 @@ import { Scene, type View } from '../world/scene.ts';
 const q = new URLSearchParams(location.search);
 const sc = new Scene(document.getElementById('c') as HTMLCanvasElement, { palette: q.get('pal') ?? 'tabby', outfit: q.get('outfit') ? JSON.parse(q.get('outfit')!) : {} }, 'high');
 (window as any).sc = sc;
+// [look4] preview the weather and the season: ?wx=clear|clouds|rain|storm|snow|fog&season=spring|summer|autumn|winter
+if (q.get('wx')) sc.weather.set(q.get('wx') as any);
+if (q.get('season')) sc.weather.setSeason(q.get('season') as any, +(q.get('st') ?? 0.5));
 if (q.get('hour')) sc.setHour(+q.get('hour')!);
 sc.setZones({ loft: !!q.get('loft'), deck: !!q.get('deck'), garden: !!q.get('garden') });
 sc.setFurniture({ g_back: 'nestbed', g_left: 'moonlamp', g_right: 'bookshelf', g_mid: 'roundrug', w_back: 'cuckoo', g_frontL: 'fernpot', l_left: 'armchair', l_right: 'telescope' });

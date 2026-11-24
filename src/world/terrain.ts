@@ -36,10 +36,31 @@ export function surfaceY(x: number, z: number): number {
   // a gentle roll under the trees (the clearing and the house stay level)
   const keep = Math.max(clearing(x, z), 1 - Math.min(1, Math.max(0, houseD(x, z) - 1) / 3));
   h += (fbm(x / 5, 3, z / 5, SEED) - 0.5) * 0.7 * (1 - keep);
+  // [look4] the bank in front of the default cameras slopes away gently (no dark wall across the foreground)
+  if (z > 8) {
+    const half = (z - 7) * 1.25 + 11, w = Math.max(0, Math.min(1, (half - Math.abs(x)) / 6));
+    h *= 1 - Math.min(1, (z - 8) / 7) * w * 0.8;
+  }
   // the pond's bowl
   const pd = pondD(x, z);
   if (pd < 1) h -= 0.85 * sm(Math.min(1, (1 - pd) / 0.45));
   return h;
+}
+
+/**
+ * [look4] The ground everywhere, also beyond the clearing's 48 x 48 blocks: the clearing's own surface, then the valley
+ * floor rolling on to the horizon and slowly rising into the hills at the valley's sides. Matches surfaceY() exactly on
+ * the clearing's border, so the vista's ground (vista.ts) meets the terrain without a seam.
+ */
+export function outerY(x: number, z: number): number {
+  const h = surfaceY(x, z);
+  const d = Math.max(Math.abs(x), Math.abs(z)) - HALF;
+  if (d <= 0) return h;
+  const k = Math.min(1, d / 70), k2 = Math.min(1, d / 18);
+  const roll = (fbm(x / 22, 11, z / 22, SEED) - 0.5) * 9 + (fbm(x / 7, 13, z / 7, SEED) - 0.5) * 2.2;
+  // the valley opens out towards the camera: a low meadow there, the hills rise at the sides and behind
+  const front = z > 0 ? Math.max(0, Math.min(1, ((z - 7) * 1.25 + 14 - Math.abs(x)) / 12)) * Math.min(1, z / 30) : 0;
+  return h + (k2 * roll * (0.35 + 0.65 * k) + k * k * 6) * (1 - front * 0.75);
 }
 
 /** Splat weights (r earth, g moss, b rock, a sand) and a tint map, painted at 8 texels a block. */
@@ -64,30 +85,35 @@ function paintMaps(shade: Collider[]): { splat: THREE.DataTexture; tint: THREE.D
       const slope = Math.hypot(surfaceY(x + 0.25, z) - surfaceY(x - 0.25, z), surfaceY(x, z + 0.25) - surfaceY(x, z - 0.25)) * 2;
       const n1 = fbm(x / 2.4, 2, z / 2.4, SEED), n2 = fbm(x / 1.2, 9, z / 1.2, SEED);
       let earth = 0, moss = 0, rock = 0, sand = 0;
-      // tint (1 = as scanned): meadow greener and lighter, shade darker and cooler, path warm
+      // [look4] tint (1 = as painted): a lush green meadow in the clearing, mossy green shade under the trees
       let tr = 1, tg = 1, tb = 1;
-      const meadow = clamp01(open * 1.2);
-      tr = 0.98 - meadow * 0.1; tg = 1.06 + meadow * 0.2; tb = 0.88 - meadow * 0.1;
-      const dark = 1 - sh * 0.28;
-      tr *= dark; tg *= dark; tb *= dark * 1.04;
+      const meadow = clamp01(open * 1.25);
+      tr = 0.96 - meadow * 0.06; tg = 1.08 + meadow * 0.12; tb = 0.86 - meadow * 0.08;
+      const dark = 1 - sh * 0.22;
+      tr *= dark; tg *= dark; tb *= dark * 1.05;
       // trodden path with a lighter middle, grass creeping in at the edge
       earth = Math.max(earth, clamp01((0.95 - p) / 0.3));
       if (p < 0.2) { tr *= 1.08; tg *= 1.06; tb *= 1.03; }
-      // bare soil and leaf litter under the trees
-      if (open < 0.35) earth = Math.max(earth, clamp01((n1 - 0.52 - open) * 3) * 0.8);
+      // a little bare soil and leaf litter deep under the trees
+      if (open < 0.25) earth = Math.max(earth, clamp01((n1 - 0.62 - open) * 3) * 0.6);
       // moss cushions in the shade and on the hills
-      moss = clamp01((n2 - 0.55) * 4) * clamp01(sh * 1.5 + (1 - open) * 0.4);
+      moss = clamp01((n2 - 0.48) * 4) * clamp01(sh * 1.6 + (1 - open) * 0.6);
       // steep banks show mossy stone
-      rock = clamp01((slope - 0.45) * 2.5);
+      rock = clamp01((slope - 0.9) * 2.5);
       // the pond: a sandy, pebbly shore and a dark bed
       if (pd < 1.2) { sand = clamp01((1.2 - pd) / 0.1); earth = Math.max(earth, sand * 0.4); }
       if (pd < 1.0) { tr *= 0.62; tg *= 0.7; tb *= 0.72; }
       if (inGarden(x, z, 0.2)) { const st = Math.floor((x + z) * 0.8 + 40) % 2 ? 1.06 : 0.97; tr *= st; tg *= st * 1.04; tb *= st; earth *= 0.2; moss = 0; }
+      // the lawn: where the meadow grows thick (not on paths, shores or rocks)
+      // the meadow also runs out in front of the default cameras (the foreground is lawn and flowers, not bare earth)
+      const frontLawn = z > 6 ? clamp01(((z - 7) * 1.25 + 9 - Math.abs(x)) / 5) * clamp01((z - 6) / 4) : 0;
+      const lawn = clamp01(Math.max(meadow, frontLawn) * 1.2 - earth * 1.2 - sand - rock) * (0.75 + n2 * 0.5);
+      if (frontLawn > 0) { tr = THREE.MathUtils.lerp(tr, 0.92, frontLawn); tg = THREE.MathUtils.lerp(tg, 1.16, frontLawn); tb = THREE.MathUtils.lerp(tb, 0.8, frontLawn); }
       // a little hand-painted variety
       const v = 0.94 + hash(px >> 1, 3, pz >> 1, SEED) * 0.08;
       const k = (pz * S + px) * 4;
       sp[k] = Math.round(clamp01(earth) * 255); sp[k + 1] = Math.round(clamp01(moss) * 255); sp[k + 2] = Math.round(clamp01(rock) * 255); sp[k + 3] = Math.round(clamp01(sand) * 255);
-      tn[k] = Math.round(clamp01(tr * v * 0.5) * 255); tn[k + 1] = Math.round(clamp01(tg * v * 0.5) * 255); tn[k + 2] = Math.round(clamp01(tb * v * 0.5) * 255); tn[k + 3] = 255;
+      tn[k] = Math.round(clamp01(tr * v * 0.5) * 255); tn[k + 1] = Math.round(clamp01(tg * v * 0.5) * 255); tn[k + 2] = Math.round(clamp01(tb * v * 0.5) * 255); tn[k + 3] = Math.round(clamp01(lawn) * 255);
     }
   }
   const mk = (d: Uint8Array<ArrayBuffer>) => {
@@ -117,11 +143,15 @@ const GROUND_MAP = /* glsl */ `
   vec3 m = texture2D(uMoss, wp / 1.6).rgb;
   vec3 r = texture2D(uRock, wp / 3.0).rgb;
   vec3 s = e * vec3(1.32, 1.28, 1.16);
+  vec4 tn = texture2D(map, vMapUv);
+  // [look4] the clearing's lawn: the moss scan worn as close-cropped grass and clover, a fresh spring green
+  vec3 g = texture2D(uMoss, wp / 2.6).rgb * vec3(1.02, 1.16, 0.74);
+  c = mix(c, g, gBlend(tn.a, c, g));
   c = mix(c, e, gBlend(sp.r, c, e));
   c = mix(c, m, gBlend(sp.g, c, m));
   c = mix(c, r, gBlend(sp.b, c, r));
   c = mix(c, s, gBlend(sp.a, c, s));
-  diffuseColor.rgb = c * texture2D(map, vMapUv).rgb * 2.0;
+  diffuseColor.rgb = c * tn.rgb * 2.0;
 }
 `;
 

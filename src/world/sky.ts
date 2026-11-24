@@ -6,22 +6,26 @@
 import * as THREE from 'three';
 import { guessPlace, moonPhase, skyHour, sunDay, type Place, type SunDay } from './astro.ts';
 
-interface Key { h: number; sun: number; sunI: number; top: number; hor: number; sky: number; ground: number; fog: number; hemiI: number; night: number; rays: number }
-// [world3] Calm, natural skies from the "Moss & Moonlight" palette: misty sage-blue days, honey and
-// rose at the ends of the day, lilac dusk, and slate-blue moonlit nights (never pure black).
+interface Key { h: number; sun: number; sunI: number; top: number; hor: number; sky: number; ground: number; fog: number; hemiI: number; night: number; rays: number; glow: number; belt: number }
+// [look4] "Golden Diorama" skies: clear cerulean days, honey-gold mornings and evenings with a rose belt
+// opposite the sun, violet dusk, and deep sapphire moonlit nights (never grey, never black). `glow` is the warm
+// horizon glow towards the sun, `belt` the pink band on the far side of the sky at the ends of the day.
+const NIGHT: Omit<Key, 'h'> = { sun: 0x9db8f0, sunI: 0.95, top: 0x040c26, hor: 0x1c3468, sky: 0x4466aa, ground: 0x1a2236, fog: 0x1a2d5c, hemiI: 0.95, night: 1, rays: 0, glow: 0, belt: 0 };
 const KEYS: Key[] = [
-  { h: 0, sun: 0x8ea2bc, sunI: 0.6, top: 0x141a26, hor: 0x2e3a4c, sky: 0x4c5e78, ground: 0x1a2028, fog: 0x222c3a, hemiI: 0.9, night: 1, rays: 0 },
-  { h: 4.6, sun: 0x8ea2bc, sunI: 0.6, top: 0x171e2c, hor: 0x34405a, sky: 0x506480, ground: 0x1a2028, fog: 0x263043, hemiI: 0.9, night: 1, rays: 0 },
-  { h: 5.5, sun: 0xb8a8c0, sunI: 0.85, top: 0x262f45, hor: 0x8a7f96, sky: 0x8a8fae, ground: 0x34323e, fog: 0x5e5a6e, hemiI: 1.0, night: 0.62, rays: 0.15 },
-  { h: 6.2, sun: 0xf0c29a, sunI: 1.25, top: 0x4f6580, hor: 0xe6b9a0, sky: 0xc8bec6, ground: 0x55505a, fog: 0xc9afa4, hemiI: 1.02, night: 0.25, rays: 0.8 },
-  { h: 7.2, sun: 0xf6d8ae, sunI: 1.8, top: 0x7c9aae, hor: 0xecdcc0, sky: 0xd2d8d6, ground: 0x6c7456, fog: 0xddd4c0, hemiI: 0.98, night: 0.04, rays: 0.9 },
-  { h: 8.5, sun: 0xfaecd2, sunI: 2.35, top: 0x86a8b6, hor: 0xd4e0d8, sky: 0xd2e0dc, ground: 0x7c8e60, fog: 0xcddbd4, hemiI: 0.94, night: 0, rays: 0.65 },
-  { h: 13, sun: 0xfdf2de, sunI: 2.55, top: 0x82a6b6, hor: 0xd8e4dc, sky: 0xd8e6e0, ground: 0x84966a, fog: 0xd2dfd8, hemiI: 0.95, night: 0, rays: 0.5 },
-  { h: 16.8, sun: 0xf6d6a4, sunI: 2.4, top: 0x8aa4b0, hor: 0xeadcbc, sky: 0xe6dcc6, ground: 0x80805c, fog: 0xe4d6b6, hemiI: 0.86, night: 0, rays: 0.95 },
-  { h: 18.8, sun: 0xeaa87e, sunI: 1.35, top: 0x56688a, hor: 0xdca68e, sky: 0xc0a6aa, ground: 0x4e4252, fog: 0xbe9a92, hemiI: 0.98, night: 0.3, rays: 0.8 },
-  { h: 19.6, sun: 0xa898c0, sunI: 0.88, top: 0x26304a, hor: 0x7a6886, sky: 0x7e7ca6, ground: 0x2a2a3c, fog: 0x4a4660, hemiI: 0.98, night: 0.7, rays: 0.1 },
-  { h: 20.4, sun: 0x8ea2bc, sunI: 0.6, top: 0x161d2b, hor: 0x323e54, sky: 0x506480, ground: 0x1a2028, fog: 0x253042, hemiI: 0.9, night: 1, rays: 0 },
-  { h: 24, sun: 0x8ea2bc, sunI: 0.6, top: 0x141a26, hor: 0x2e3a4c, sky: 0x4c5e78, ground: 0x1a2028, fog: 0x222c3a, hemiI: 0.9, night: 1, rays: 0 },
+  { h: 0, ...NIGHT },
+  { h: 4.7, ...NIGHT, top: 0x061030, hor: 0x22386e },
+  { h: 5.5, sun: 0xc4a8e0, sunI: 0.9, top: 0x16245a, hor: 0x9a6e9c, sky: 0x7a80c0, ground: 0x2e2a40, fog: 0x7a5e8e, hemiI: 0.95, night: 0.6, rays: 0.1, glow: 0.4, belt: 0.3 },
+  { h: 6.2, sun: 0xffa868, sunI: 1.9, top: 0x3460aa, hor: 0xffb27c, sky: 0xb4a8d0, ground: 0x5c4c44, fog: 0xf0b08a, hemiI: 1.0, night: 0.2, rays: 0.9, glow: 1, belt: 0.8 },
+  { h: 7.2, sun: 0xffd29c, sunI: 2.7, top: 0x2f78cc, hor: 0xf4d8b4, sky: 0x9cc4ee, ground: 0x6a7044, fog: 0xd6dcd8, hemiI: 0.85, night: 0.02, rays: 0.9, glow: 0.5, belt: 0.25 },
+  { h: 8.6, sun: 0xfff0d6, sunI: 3.0, top: 0x2370d2, hor: 0xa6d6f6, sky: 0x9ccaf4, ground: 0x6c7c46, fog: 0xb2d8f4, hemiI: 0.82, night: 0, rays: 0.65, glow: 0.15, belt: 0 },
+  { h: 13, sun: 0xfff6e8, sunI: 3.1, top: 0x1f6ad0, hor: 0xa0d2f6, sky: 0x98c8f4, ground: 0x708248, fog: 0xacd4f4, hemiI: 0.8, night: 0, rays: 0.5, glow: 0.1, belt: 0 },
+  { h: 16.6, sun: 0xffe6bc, sunI: 3.0, top: 0x2670cc, hor: 0xbcdcf0, sky: 0xa2c8ee, ground: 0x768248, fog: 0xc4dcec, hemiI: 0.82, night: 0, rays: 0.9, glow: 0.3, belt: 0.05 },
+  { h: 17.8, sun: 0xffcc8e, sunI: 2.8, top: 0x3a6cbe, hor: 0xffcc8c, sky: 0x9cb0d8, ground: 0x6e6448, fog: 0xf2c8a0, hemiI: 0.9, night: 0, rays: 1, glow: 0.85, belt: 0.5 },
+  { h: 18.6, sun: 0xffac6c, sunI: 2.3, top: 0x34509e, hor: 0xffa66e, sky: 0x9a98c8, ground: 0x5a4a48, fog: 0xe8a48c, hemiI: 0.95, night: 0.12, rays: 1, glow: 1, belt: 0.9 },
+  { h: 19.2, sun: 0xe88070, sunI: 1.3, top: 0x22306e, hor: 0xd8707a, sky: 0x8a74a8, ground: 0x3a2c40, fog: 0xb86a80, hemiI: 0.98, night: 0.45, rays: 0.3, glow: 0.7, belt: 0.6 },
+  { h: 19.8, sun: 0x9c98e0, sunI: 1.0, top: 0x0e1848, hor: 0x5a4a8a, sky: 0x5260a6, ground: 0x22243e, fog: 0x3c3a74, hemiI: 0.96, night: 0.8, rays: 0, glow: 0.25, belt: 0.15 },
+  { h: 20.6, ...NIGHT },
+  { h: 24, ...NIGHT },
 ];
 
 /** What the weather asks of the sky. All 0..1. */
@@ -61,13 +65,17 @@ vec3 skyPixel(vec3 d, float s) {
   float azq = (floor(az / 6.2832 * n) + 0.5) / n * 6.2832;
   return vec3(cos(azq) * cos(elq), sin(elq), sin(azq) * cos(elq));
 }
-// the cloud layer as seen along a direction: blocky pixel clouds on a flat ceiling
+// the cloud layer as seen along a direction: painted billows on a flat ceiling
 vec2 cloudUv(vec3 d) { return d.xz / (d.y + 0.06) * 0.85 + vec2(uTime * 0.011, uTime * 0.0045); }
-float cloudN(vec2 uv) { return fbm2(uv * 1.25) + (vn(uv * 5.0) - 0.5) * 0.12; }
+float cloudDensity(vec2 uv) {
+  vec2 w = vec2(fbm2(uv * 0.55 + 3.1), fbm2(uv * 0.55 + 7.7)) - 0.5;
+  vec2 q = uv + w * 0.9;
+  return fbm2(q * 1.05) * 0.85 + fbm2(q * 3.4 + 11.0) * 0.22;
+}
 float cloudAt(vec3 d) {
   if (d.y <= 0.0 || uCloud <= 0.001) return 0.0;
-  float th = mix(0.78, 0.22, uCloud);
-  return step(th, cloudN(cloudUv(skyPixel(d, 0.0056)))) * smoothstep(0.015, 0.09, d.y);
+  float th = mix(0.74, 0.3, uCloud);
+  return smoothstep(th, th + 0.1, cloudDensity(cloudUv(d))) * smoothstep(0.004, 0.06, d.y);
 }
 `;
 
@@ -76,118 +84,127 @@ const SKY_FS = /* glsl */ `
 uniform vec3 uTop; uniform vec3 uHor; uniform vec3 uSunDir; uniform vec3 uSunDisc; uniform vec3 uSunCol; uniform float uNight; uniform float uDay;
 uniform vec3 uMoonDir; uniform float uMoonPhase; uniform float uMoonSize; uniform float uMoonVis; uniform float uHemi;
 uniform float uSunSize; uniform float uOvercast; uniform float uFlash; uniform float uAurora; uniform float uMilky;
-uniform vec3 uCloudLit; uniform vec3 uCloudDark; uniform vec3 uFogCol; uniform float uHaze; uniform vec3 uMilkyN;
+uniform vec3 uCloudLit; uniform vec3 uCloudDark; uniform vec3 uCloudRim; uniform vec3 uFogCol; uniform float uHaze; uniform vec3 uMilkyN;
+uniform vec3 uGlowCol; uniform float uGlow; uniform vec3 uBeltCol; uniform float uBelt;
 varying vec3 vDir;
 ${NOISE}
+// [look4] painted cumulus (cloudDensity above), lit from the sun's side with a silver rim, toned in a few painted
+// steps with a fine ordered dither between them (crisp at the internal pixel grid)
 void main() {
   vec3 d = normalize(vDir);
-  vec3 dq = skyPixel(d, 0.0042);
-  // banded gradient: soft flat steps with an ordered-dither seam between them, like a painted pixel sky
-  vec2 skyCell = vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0042;
-  float t = clamp(pow(clamp(d.y * 1.45 + 0.1, 0.0, 1.0), 0.8), 0.0, 1.0);
-  t = floor(t * 18.0 + bayer4(skyCell) * 0.999) / 18.0;
-  vec3 col = mix(uHor, uTop, t);
+  float px = bayer4(gl_FragCoord.xy);
+  // the base gradient: a deep zenith down to a luminous horizon, with soft painted streaks
+  float t = pow(clamp(d.y * 1.25 + 0.04, 0.0, 1.0), 0.55);
+  float streak = (fbm2(vec2(atan(d.z, d.x) * 2.0, d.y * 14.0)) - 0.5) * 0.06 * (1.0 - t);
+  vec3 col = mix(uHor, uTop, clamp(t + streak, 0.0, 1.0));
+  vec2 dh = normalize(d.xz + 1e-5), sh = normalize(uSunDir.xz + 1e-5);
+  float toSun = dot(dh, sh);
+  float low = 1.0 - smoothstep(-0.02, 0.42, d.y);
+  // golden glow towards the sun, a rose belt on the far side of the sky (ends of the day)
+  col = mix(col, uGlowCol, uGlow * pow(max(toSun, 0.0), 2.2) * low * 0.85);
+  float belt = smoothstep(0.0, 0.07, d.y) * (1.0 - smoothstep(0.1, 0.32, d.y));
+  col = mix(col, uBeltCol, uBelt * belt * smoothstep(0.1, -0.6, toSun) * 0.7);
+  col *= 1.0 + 0.12 * (1.0 - uNight) * low;
 
-  // a dense dust of faint one-pixel stars on the sky grid, thicker along the milky way
+  // a dense dust of faint one-pixel stars, thicker along the milky way
+  vec3 dq = skyPixel(d, 0.0021);
   if (uNight > 0.3 && dq.y > -0.02) {
-    vec2 cell = vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0042;
+    vec2 cell = vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0021;
     float x = dot(dq, uMilkyN);
-    float p = 0.011 + 0.026 * exp(-x * x / 0.02) * uMilky;
+    float p = 0.004 + 0.016 * exp(-x * x / 0.02) * uMilky;
     float hs = h21(floor(cell) + 0.5);
     if (hs < p) {
       float tw = 0.55 + 0.45 * sin(uTime * (1.0 + hs * 90.0) + hs * 300.0);
-      col += vec3(0.62, 0.64, 0.7) * (0.18 + 0.4 * h21(floor(cell) + 7.5)) * tw * smoothstep(0.3, 0.9, uNight) * (1.0 - uOvercast) * smoothstep(-0.02, 0.04, dq.y);
+      col += vec3(0.7, 0.75, 0.9) * (0.2 + 0.5 * h21(floor(cell) + 7.5)) * tw * smoothstep(0.3, 0.9, uNight) * (1.0 - uOvercast) * smoothstep(-0.02, 0.04, dq.y);
     }
   }
-  // milky way: a dusty band of light with a dark lane, dithered to a few levels
-  if (uMilky > 0.01 && dq.y > -0.05) {
-    float x = dot(dq, uMilkyN);
-    float core = exp(-x * x / 0.024) * (0.55 + 0.8 * fbm2(vec2(atan(dq.z, dq.x) * 3.0, x * 9.0)));
-    float lane = exp(-pow((x + 0.018) / 0.035, 2.0)) * smoothstep(0.35, 0.75, fbm2(vec2(atan(dq.z, dq.x) * 6.0, 3.0)));
-    float g = max(0.0, core - lane * 0.7) * uMilky * smoothstep(-0.06, 0.06, dq.y);
-    vec2 cell = vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0042;
-    g = floor(g * 5.0 + bayer4(cell) * 0.95) / 5.0;
-    col += mix(vec3(0.08, 0.1, 0.15), vec3(0.3, 0.3, 0.38), clamp(g, 0.0, 1.0)) * g * 0.36;
+  // milky way: a dusty band of blue-violet light with a dark lane
+  if (uMilky > 0.01 && d.y > -0.05) {
+    float x = dot(d, uMilkyN);
+    float core = exp(-x * x / 0.03) * (0.5 + 0.9 * fbm2(vec2(atan(d.z, d.x) * 3.0, x * 9.0)));
+    float lane = exp(-pow((x + 0.018) / 0.035, 2.0)) * smoothstep(0.35, 0.75, fbm2(vec2(atan(d.z, d.x) * 6.0, 3.0)));
+    float g = max(0.0, core - lane * 0.7) * uMilky * smoothstep(-0.06, 0.06, d.y);
+    col += mix(vec3(0.12, 0.14, 0.32), vec3(0.42, 0.4, 0.62), clamp(g, 0.0, 1.0)) * g * 0.42;
   }
-
   // aurora: green curtains with violet tops, rippling slowly over the north
-  if (uAurora > 0.01 && dq.y > 0.03) {
-    vec2 a = dq.xz / (dq.y + 0.3);
+  if (uAurora > 0.01 && d.y > 0.03) {
+    vec2 a = d.xz / (d.y + 0.3);
     float x = a.x * 1.4 + sin(a.y * 2.1 + uTime * 0.13) * 0.7 + uTime * 0.02;
     float curtain = pow(0.5 + 0.5 * sin(x * 2.6 + sin(x * 1.3 + uTime * 0.17) * 2.2), 2.5);
-    float rays = 0.55 + 0.45 * sin(atan(dq.z, dq.x) * 260.0 + sin(uTime * 0.6 + x) * 2.0);
-    float band = smoothstep(0.06, 0.2, dq.y) * (1.0 - smoothstep(0.3, 0.7, dq.y)) * smoothstep(0.35, -0.5, dq.z);
+    float rays = 0.55 + 0.45 * sin(atan(d.z, d.x) * 260.0 + sin(uTime * 0.6 + x) * 2.0);
+    float band = smoothstep(0.06, 0.2, d.y) * (1.0 - smoothstep(0.3, 0.7, d.y)) * smoothstep(0.35, -0.5, d.z);
     float A = curtain * rays * band * uAurora;
-    A = floor(A * 5.0 + bayer4(vec2(atan(dq.z, dq.x), asin(dq.y)) / 0.0042) * 0.9) / 5.0;
-    vec3 ac = mix(vec3(0.34, 0.6, 0.44), vec3(0.5, 0.42, 0.66), smoothstep(0.18, 0.5, dq.y));
-    col += ac * A * 0.45;
+    vec3 ac = mix(vec3(0.25, 0.85, 0.5), vec3(0.6, 0.38, 0.85), smoothstep(0.18, 0.5, d.y));
+    col += ac * A * 0.6;
   }
 
-  // the sun: a round pixel disc with stepped halo rings
+  // the sun: a hot pixel disc in a soft glow (the bloom spreads it)
   vec3 s = normalize(uSunDisc);
-  if (uDay > 0.01 && dot(d, s) > 0.0) {
+  float sd = dot(d, s);
+  if (uDay > 0.01) {
+    float vis = uDay * (1.0 - uOvercast * 0.9);
     vec3 r = normalize(cross(vec3(0.0, 1.0, 0.0), s)), u = cross(s, r);
     vec2 p = vec2(dot(d, r), dot(d, u)) / uSunSize;
-    vec2 q = (floor(p * 7.0) + 0.5) / 7.0;
-    float disc = step(length(q), 1.0);
-    float halo = floor((1.0 - smoothstep(1.0, 7.0, length(p))) * 4.0) / 4.0;
-    float vis = uDay * (1.0 - uOvercast * 0.9);
-    col = mix(col, mix(uSunCol, vec3(0.95, 0.88, 0.7), 0.55), disc * vis) + uSunCol * halo * 0.14 * vis;
+    vec2 q = (floor(p * 9.0) + 0.5) / 9.0;
+    float disc = step(length(q), 1.0) * step(0.0, sd);
+    float halo = exp(-max(length(p) - 1.0, 0.0) * 0.9) * step(0.0, sd);
+    float mie = pow(max(sd, 0.0), 24.0);
+    col += uSunCol * (halo * 0.55 + mie * 0.35) * vis;
+    col = mix(col, uSunCol * 7.0 + vec3(1.2, 1.1, 0.9), disc * vis);
   }
 
-  // the moon in its real phase: pixel sphere, maria and craters, earthshine on the dark side
+  // the moon in its real phase: pixel sphere, maria and craters, earthshine on the dark side, a silver halo
   vec3 m = normalize(uMoonDir);
-  float moonCover = 0.0;
   if (uMoonVis > 0.01 && dot(d, m) > 0.0) {
     vec3 r = normalize(cross(vec3(0.0, 1.0, 0.0), m)), u = cross(m, r);
     vec2 p = vec2(dot(d, r), dot(d, u)) / uMoonSize;
-    float px = 13.0 + uMoonSize * 40.0;
-    vec2 q = (floor(p * px) + 0.5) / px;
+    float mpx = 15.0 + uMoonSize * 40.0;
+    vec2 q = (floor(p * mpx) + 0.5) / mpx;
     float rr = length(q);
-    float halo = 1.0 - smoothstep(uMoonSize, uMoonSize + 0.17, length(p) * uMoonSize);
     float lit = 0.5 - 0.5 * cos(uMoonPhase * 6.2832);
-    col += vec3(0.42, 0.5, 0.62) * floor(halo * 4.0) / 4.0 * 0.22 * uMoonVis * (0.25 + lit);
+    float halo = exp(-max(length(p) - 1.0, 0.0) * 1.1);
+    col += vec3(0.45, 0.58, 0.9) * halo * 0.5 * uMoonVis * (0.3 + lit);
     if (rr < 1.0) {
       vec3 n = vec3(q, sqrt(1.0 - rr * rr));
       float ang = uMoonPhase * 6.2832;
       vec3 L = vec3(sin(ang) * uHemi, 0.0, -cos(ang));
       float lt = dot(n, L);
       float maria = fbm2(q * 2.3 + 4.0);
-      float crater = step(0.86, h21(floor(q * px) + 3.0)) * step(rr, 0.85);
-      vec3 bright = mix(vec3(0.93, 0.89, 0.78), vec3(0.7, 0.71, 0.72), smoothstep(0.5, 0.66, maria)) - crater * 0.1;
-      bright *= 0.86 + 0.14 * n.z;
-      vec3 dark = mix(uTop, vec3(0.14, 0.17, 0.24), 0.7) * (1.0 + 0.25 * (1.0 - smoothstep(0.5, 0.66, maria)));
+      float crater = step(0.86, h21(floor(q * mpx) + 3.0)) * step(rr, 0.85);
+      vec3 bright = mix(vec3(1.0, 0.97, 0.88), vec3(0.78, 0.8, 0.84), smoothstep(0.5, 0.66, maria)) - crater * 0.1;
+      bright *= (0.86 + 0.14 * n.z) * 2.6;
+      vec3 dark = mix(uTop, vec3(0.16, 0.2, 0.32), 0.7) * (1.0 + 0.25 * (1.0 - smoothstep(0.5, 0.66, maria)));
       vec3 mc = lt > 0.02 ? bright : lt > -0.06 ? mix(dark, bright, 0.35) : dark;
-      if (rr > 0.9) mc *= 0.88;
+      if (rr > 0.9) mc *= 0.86;
       col = mix(col, mc, uMoonVis);
-      moonCover = 1.0;
     }
   }
 
-  // drifting pixel cloud layer, lit from the sun/moon side with a stepped rim
+  // painted clouds
   if (uCloud > 0.001 && d.y > 0.0) {
-    // sampled on the sky pixel grid, so cloud pixels are the same size everywhere you look
-    vec2 uv = cloudUv(skyPixel(d, 0.0056));
-    float th = mix(0.78, 0.22, uCloud);
-    float n = cloudN(uv);
-    if (n > th) {
-      vec2 sd = normalize(uSunDir.xz + 0.0001) * 0.09;
-      float shade = clamp((n - cloudN(uv - sd)) * 6.0 + 0.5, 0.0, 1.0);
-      float thick = smoothstep(th, th + 0.22, n);
-      float lvl = floor(clamp(shade * 0.8 + (1.0 - thick) * 0.45, 0.0, 1.0) * 3.0) / 3.0;
+    vec2 uv = cloudUv(d);
+    float th = mix(0.74, 0.3, uCloud);
+    float n = cloudDensity(uv);
+    float dens = smoothstep(th, th + 0.16, n);
+    if (dens > 0.0) {
+      vec2 sdir = normalize(uSunDir.xz + 1e-4) * 0.16;
+      float n2 = cloudDensity(uv + sdir);
+      float lit = clamp(0.55 + (n - n2) * 4.5, 0.0, 1.0);
+      float shade = clamp(lit * 0.8 + (1.0 - dens) * 0.3 + (uSunDir.y > 0.0 ? 0.05 : 0.0), 0.0, 1.0);
+      float lvl = floor(shade * 4.0 + px * 0.999) / 4.0;
       vec3 cc = mix(uCloudDark, uCloudLit, lvl);
-      float edge = smoothstep(0.015, 0.09, d.y);
-      col = mix(col, cc, edge * (0.82 + 0.18 * uCloud));
+      // a silver lining where the cloud thins on the sun's side
+      float rim = (1.0 - smoothstep(0.0, 0.45, dens)) * smoothstep(0.45, 0.9, lit);
+      cc += uCloudRim * rim;
+      // far clouds sink into the horizon haze
+      cc = mix(cc, col, (1.0 - smoothstep(0.02, 0.3, d.y)) * 0.55);
+      float a = step(px, dens * 1.6) * smoothstep(0.004, 0.06, d.y);
+      col = mix(col, cc, a * (0.85 + 0.15 * uCloud));
     }
   }
-  // [world3] soft distant hills in the mist, like a painted backdrop
-  {
-    float az = atan(dq.z, dq.x);
-    float hill = 0.022 + 0.026 * fbm2(vec2(az * 1.6, 3.1)) + 0.008 * vn(vec2(az * 5.0, 1.7));
-    float hill2 = 0.012 + 0.018 * fbm2(vec2(az * 2.7 + 4.0, 7.3));
-    if (dq.y < hill) col = mix(col, mix(uFogCol, uHor, 0.45) * 0.96, 0.85);
-    if (dq.y < hill2) col = mix(col, mix(uFogCol, uTop, 0.18) * 0.88, 0.9);
-  }
+  // the horizon melts into the aerial haze the far hills sit in
+  col = mix(col, uFogCol, (1.0 - smoothstep(-0.03, 0.09, d.y)) * 0.6);
+  if (d.y < 0.0) col = mix(col, uFogCol, smoothstep(0.0, -0.08, d.y));
   // haze in the distance (fog weather)
   col = mix(col, uFogCol, uHaze * (1.0 - smoothstep(0.0, 0.5, d.y)));
   col += uFlash * vec3(0.62, 0.66, 0.78) * (0.6 + 0.4 * step(0.0, d.y));
@@ -262,7 +279,7 @@ const tmpA = new THREE.Color(), tmpB = new THREE.Color();
 export class Sky {
   readonly sun = new THREE.DirectionalLight(0xffffff, 2);
   readonly hemi = new THREE.HemisphereLight(0xffffff, 0x888888, 1);
-  readonly fog = new THREE.Fog(0xcfe9f1, 24, 62);
+  readonly fog = new THREE.Fog(0xcfe9f1, 90, 320);
   readonly dome: THREE.Mesh;
   readonly stars: THREE.Points;
   private shoot: THREE.Points;
@@ -293,7 +310,12 @@ export class Sky {
   moonFade = 1;
   /** cinematics: draw the sun disc somewhere visible (the light keeps its own direction) */
   sunDisc: { dir: THREE.Vector3; size: number } | null = null;
-  private baseFogNear = 24; private baseFogFar = 62;
+  /** [look4] world distance where the far haze starts and where it is complete (the scene sets them per view) */
+  baseFogNear = 90; baseFogFar = 320;
+  /** [look4] the horizon colour (the vista and the fog lean on it) */
+  readonly horizon = new THREE.Color();
+  /** [look4] set when the sky changed enough to re-bake the environment light */
+  envDirty = true;
 
   constructor(scene: THREE.Scene, shadowSize: number, quality: 'low' | 'high' = 'high') {
     scene.fog = this.fog;
@@ -314,7 +336,8 @@ export class Sky {
         uTop: { value: new THREE.Color() }, uHor: { value: new THREE.Color() }, uSunDir: { value: this.sunDir }, uSunDisc: { value: new THREE.Vector3(0, 1, 0) }, uSunCol: { value: new THREE.Color() },
         uNight: { value: 0 }, uDay: { value: 1 }, uMoonDir: { value: new THREE.Vector3().copy(this.moonDir) }, uMoonPhase: { value: this.moonPhase }, uMoonSize: { value: 0.05 },
         uMoonVis: { value: 0 }, uHemi: { value: 1 }, uSunSize: { value: 0.04 }, uOvercast: { value: 0 }, uFlash: { value: 0 }, uAurora: { value: 0 }, uMilky: { value: 0 },
-        uCloudLit: { value: new THREE.Color() }, uCloudDark: { value: new THREE.Color() }, uFogCol: { value: new THREE.Color() }, uHaze: { value: 0 },
+        uCloudLit: { value: new THREE.Color() }, uCloudDark: { value: new THREE.Color() }, uCloudRim: { value: new THREE.Color() }, uFogCol: { value: new THREE.Color() }, uHaze: { value: 0 },
+        uGlowCol: { value: new THREE.Color() }, uGlow: { value: 0 }, uBeltCol: { value: new THREE.Color() }, uBelt: { value: 0 },
         // the band rises from the trees left of the house and arcs up past where the cinematic moon hangs
         uMilkyN: { value: new THREE.Vector3(-0.474, 0.852, 0.217).normalize() },
       },
@@ -413,26 +436,30 @@ export class Sky {
     const w = this.wx, U = this.domeMat.uniforms;
     this.night = num(a.night, b.night);
     const day = 1 - this.night;
-    // grey everything towards an overcast sky, cool it for snow
-    const grey = (c: THREE.Color, k: number, dark = 1) => { const l = c.r * 0.3 + c.g * 0.55 + c.b * 0.15; return c.lerp(tmpA.setRGB(l * dark * 0.95, l * dark, l * dark * 1.08), k); };
+    // grey towards an overcast sky (keeping some of the hue: rain clouds are blue-grey, not concrete), cool it for snow
+    const grey = (c: THREE.Color, k: number, dark = 1) => { const l = c.r * 0.3 + c.g * 0.55 + c.b * 0.15; return c.lerp(tmpA.setRGB(l * dark * 0.93, l * dark * 0.98, l * dark * 1.1), k * 0.85); };
     const cold = (c: THREE.Color) => c.lerp(tmpB.setRGB(c.r * 0.86, c.g * 0.95, Math.min(1, c.b * 1.12 + 0.03)), w.cold);
     const oc = w.overcast;
     this.rayPower = num(a.rays, b.rays) * (1 - Math.max(oc, w.fog * 0.7, w.cloud * 0.5));
-    this.sun.color.copy(cold(grey(mix(a.sun, b.sun), oc * 0.8)));
-    const seasonal = 0.82 + 0.18 * w.sunHeight;
-    this.sun.intensity = num(a.sunI, b.sunI) * (1 - oc * 0.8 - w.fog * 0.25) * (this.night > 0.5 ? 1 : seasonal) + w.flash * 4;
-    this.hemi.color.copy(cold(grey(mix(a.sky, b.sky), oc * 0.6)));
-    this.hemi.groundColor.copy(cold(grey(mix(a.ground, b.ground), oc * 0.4, 0.9)));
-    this.hemi.intensity = num(a.hemiI, b.hemiI) * (1 - oc * 0.24) + w.flash * 1.5;
-    const fogC = cold(grey(mix(a.fog, b.fog), oc * 0.65));
-    fogC.lerp(tmpA.setRGB(0.74, 0.78, 0.82).multiplyScalar(0.22 + 0.7 * day + 0.08), w.fog * 0.7);
+    this.sun.color.copy(cold(grey(mix(a.sun, b.sun), oc * 0.7)));
+    const seasonal = 0.86 + 0.14 * w.sunHeight;
+    this.sun.intensity = num(a.sunI, b.sunI) * (1 - oc * 0.7 - w.fog * 0.25) * (this.night > 0.5 ? 1 : seasonal) + w.flash * 4;
+    this.hemi.color.copy(cold(grey(mix(a.sky, b.sky), oc * 0.5)));
+    this.hemi.groundColor.copy(cold(grey(mix(a.ground, b.ground), oc * 0.3, 0.9)));
+    this.hemi.intensity = num(a.hemiI, b.hemiI) * (1 + oc * 0.25) + w.flash * 1.5;
+    const top = cold(grey(mix(a.top, b.top), oc * 0.7, 0.85 + day * 0.2));
+    const hor = cold(grey(mix(a.hor, b.hor), oc * 0.6, 0.95));
+    // the fog is the colour of the horizon the far woods melt into (never a grey veil)
+    const fogC = cold(grey(mix(a.fog, b.fog), oc * 0.6)).lerp(hor, 0.35);
+    fogC.lerp(tmpA.setRGB(0.78, 0.82, 0.86).multiplyScalar(0.2 + 0.8 * day), w.fog * 0.6);
     this.fog.color.copy(fogC);
-    // mist hangs between the trees but the hollow itself stays readable
-    this.fog.near = this.baseFogNear * (1 - w.fog * 0.62) * (1 - oc * 0.15);
-    this.fog.far = this.baseFogFar * (1 - w.fog * 0.3) * (1 - oc * 0.1);
-    U.uTop.value.copy(cold(grey(mix(a.top, b.top), oc * 0.75, 0.82 + day * 0.2)));
-    U.uHor.value.copy(cold(grey(mix(a.hor, b.hor), oc * 0.6, 0.9)));
-    U.uSunCol.value.copy(this.sun.color).lerp(tmpA.set(0xffffff), 0.5);
+    this.horizon.copy(hor);
+    // the fog only reaches the far woods and hills; mist weather pulls it in a little
+    this.fog.near = this.baseFogNear * (1 - w.fog * 0.55) * (1 - oc * 0.2);
+    this.fog.far = this.baseFogFar * (1 - w.fog * 0.45) * (1 - oc * 0.15);
+    U.uTop.value.copy(top);
+    U.uHor.value.copy(hor);
+    U.uSunCol.value.copy(this.sun.color).lerp(tmpA.set(0xffffff), 0.25);
     U.uNight.value = this.night;
     U.uDay.value = Math.max(0, 1 - this.night * 1.6);
     U.uOvercast.value = oc;
@@ -441,43 +468,55 @@ export class Sky {
     U.uAurora.value = w.aurora * this.night * (1 - oc);
     U.uMilky.value = Math.max(this.starBoost, this.night * (1 - oc) * (1 - w.fog * 0.8)) * (1 - Math.max(w.cloud - 0.5, 0) * 1.6);
     U.uHaze.value = w.fog;
-    U.uFogCol.value.copy(this.fog.color);
-    // clouds: lit sides follow the sun colour, shadowed sides the sky; dark and heavy when overcast
-    const litC = new THREE.Color().copy(U.uSunCol.value).lerp(tmpA.setRGB(1, 1, 1), 0.35).multiplyScalar(0.75 + day * 0.3);
-    if (this.night > 0.5) litC.copy(U.uHor.value).lerp(tmpA.setRGB(0.3, 0.35, 0.44), 0.4).multiplyScalar(0.62); // [world3] slate clouds with a moonlit side
-    const darkC = new THREE.Color().copy(U.uHor.value).lerp(U.uTop.value, 0.4).multiplyScalar(0.72);
-    U.uCloudLit.value.copy(grey(litC, oc * 0.5, 0.85 - oc * 0.15)).multiplyScalar(1 - oc * 0.25);
-    U.uCloudDark.value.copy(grey(darkC, oc * 0.5, 0.85)).multiplyScalar(1 - oc * 0.3);
+    U.uFogCol.value.copy(this.fog.color).lerp(hor, 0.5);
+    const clear = 1 - Math.max(oc, w.fog * 0.6);
+    U.uGlow.value = num(a.glow, b.glow) * clear;
+    U.uGlowCol.value.copy(this.sun.color).lerp(tmpA.setRGB(1, 0.78, 0.45), 0.4).multiplyScalar(1.15);
+    U.uBelt.value = num(a.belt, b.belt) * clear;
+    U.uBeltCol.value.setRGB(0.98, 0.64, 0.7);
+    // clouds: sun-tinted lit sides, sky-tinted shadow sides (lavender by day, rose-violet at dusk, ink-blue at night)
+    const litC = new THREE.Color().copy(this.sun.color).lerp(tmpA.setRGB(1, 1, 1), 0.45 - num(a.glow, b.glow) * 0.25).multiplyScalar(0.95 + day * 0.25);
+    const darkC = new THREE.Color().copy(this.hemi.color).lerp(top, 0.25).lerp(tmpA.setRGB(0.7, 0.62, 0.78), 0.25 * day).multiplyScalar(0.7 + day * 0.25);
+    if (this.night > 0.5) {
+      const k = THREE.MathUtils.smoothstep(this.night, 0.5, 1);
+      litC.lerp(tmpA.setRGB(0.36, 0.45, 0.7), k);
+      darkC.lerp(tmpA.setRGB(0.07, 0.1, 0.22), k);
+    }
+    U.uCloudLit.value.copy(grey(litC, oc * 0.7, 0.78)).multiplyScalar(1 - oc * 0.2);
+    U.uCloudDark.value.copy(grey(darkC, oc * 0.6, 0.78)).multiplyScalar(1 - oc * 0.25);
+    U.uCloudRim.value.copy(this.sun.color).multiplyScalar((0.35 + num(a.glow, b.glow) * 0.6) * clear * (this.night > 0.5 ? 0.4 : 1));
     if (w.flash > 0) { (U.uCloudLit.value as THREE.Color).lerp(tmpA.setRGB(0.95, 0.96, 1), w.flash); (U.uCloudDark.value as THREE.Color).lerp(tmpA.setRGB(0.6, 0.62, 0.75), w.flash); }
 
-    // the sun arcs from one side of the clearing to the other (higher in summer); at night the
-    // light comes from a fixed moonlit angle in front of the house
+    // the sun arcs from one side of the clearing to the other, low and golden at the ends of the day (higher in
+    // summer); at night the light comes from a fixed moonlit angle in front of the house
     const isDay = this.hour > 5.6 && this.hour < 19.6;
     const k = isDay ? (this.hour - 5.6) / 14 : 0.35;
-    const peak = 0.38 + 0.72 * w.sunHeight;
-    const az = -1.25 + k * 2.5, el = isDay ? 0.45 + Math.sin(k * Math.PI) * (peak - 0.45 + 0.1) : 0.95;
-    this.sunDir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el) * 0.8 + 0.25).normalize();
-    this.sun.position.copy(this.sunDir).multiplyScalar(42);
+    const peak = 0.5 + 0.6 * w.sunHeight;
+    const az = -1.3 + k * 2.6, el = isDay ? 0.2 + Math.sin(k * Math.PI) * (peak - 0.2) : 0.9;
+    this.sunDir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el) * 0.75 + 0.2).normalize();
+    if (!isDay) this.sunDir.set(-0.32, 0.78, 0.54).normalize();
+    this.sun.position.copy(this.sunDir).multiplyScalar(60);
     this.sun.target.position.set(0, 0, 0);
     this.ambient.copy(this.hemi.color).multiplyScalar(0.45 * this.hemi.intensity).add(this.sun.color.clone().multiplyScalar(0.22 * this.sun.intensity));
     U.uSunDisc.value.copy(this.sunDisc ? this.sunDisc.dir : this.sunDir).normalize();
-    U.uSunSize.value = this.sunDisc ? this.sunDisc.size : 0.04;
+    U.uSunSize.value = this.sunDisc ? this.sunDisc.size : 0.035;
 
     // the visible moon drifts across the sky in front of the clearing through the night
     const nh = this.hour < 12 ? this.hour + 24 : this.hour;
     const nk = THREE.MathUtils.clamp((nh - 18) / 13, 0, 1);
     // kept low and to the right of the tree house, where the home and sleep views can see it
-    const maz = 0.3 - nk * 0.6, mel = 0.1 + Math.sin(nk * Math.PI) * 0.09;
+    const maz = 0.34 - nk * 0.6, mel = 0.13 + Math.sin(nk * Math.PI) * 0.1;
     this.moonDir.set(Math.sin(maz) * Math.cos(mel), Math.sin(mel), -Math.cos(maz) * Math.cos(mel)).normalize();
     const mo = this.moonOverride;
     U.uMoonDir.value.copy(mo ? mo.dir : this.moonDir).normalize();
-    U.uMoonSize.value = mo ? mo.size : 0.05;
+    U.uMoonSize.value = mo ? mo.size : 0.055;
     U.uMoonPhase.value = this.moonPhase;
     // a new moon is (nearly) invisible; the cinematic moon always shows
     const litFrac = 0.5 - 0.5 * Math.cos(this.moonPhase * Math.PI * 2);
     U.uMoonVis.value = (mo ? 1 : THREE.MathUtils.smoothstep(this.night, 0.2, 0.7) * Math.min(1, 0.25 + litFrac * 3)) * this.moonFade;
     this.starMat.uniforms.uNight.value = Math.max(this.starBoost, THREE.MathUtils.smoothstep(this.night, 0.35, 0.95));
     this.starMat.uniforms.uClear.value = (1 - oc) * (1 - w.fog * 0.85);
+    this.envDirty = true;
   }
 
   /** Southern hemisphere players see the moon lit from the other side. */
@@ -521,7 +560,7 @@ export class Sky {
     const axis = this.sunDir, toCam = new THREE.Vector3(), x = new THREE.Vector3(), zv = new THREE.Vector3(), m = new THREE.Matrix4();
     this.rays.forEach((r, i) => {
       const flick = 0.75 + 0.25 * Math.sin(time * 0.35 + i * 2.1);
-      r.mat.uniforms.uAlpha.value = this.rayPower * 0.14 * flick; // [world3] soft beams under the post grade
+      r.mat.uniforms.uAlpha.value = this.rayPower * 0.06 * flick; // [world3] soft beams under the post grade
       r.mat.uniforms.uTime.value = time;
       r.mat.uniforms.uCol.value.copy(this.sun.color);
       r.mesh.visible = this.rayPower > 0.02;

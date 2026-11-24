@@ -1,27 +1,70 @@
-// [world3] BUSHED's look for Hoot Hollow (ported from the owner's lumberjack game, src/gfx/renderer.ts, and cut
-// down for phones): the world is drawn into a low internal-resolution HDR target, then
-//   1. a soft-knee bloom at quarter resolution (lantern windows, the moon, fireflies glow a little),
-//   2. a composite at internal resolution: exposure, contrast around mid grey, a gentle filmic shoulder, the
-//      grade (lift / gamma / gain, split toning: warm lights and cool shadows by day, blue nights), saturation,
-//      vignette, per-pixel animated grain and an ordered dither + quantise,
-//   3. a nearest-neighbour upscale to the canvas.
-// Every pass snaps to the internal pixel grid, so the picture reads as crisp, high-resolution pixel art while the
-// DOM UI above it stays sharp. Stages (the interview room, the shop...) go through the same chain.
+// [look4] "Golden Diorama": the HD-2D-style picture for every scene the app draws (the forest and every Stage:
+// the shop, the interview office...). The world is drawn into a modest internal-resolution HDR target (crisp
+// pixel texels, never chunky: the short side of the picture is about 560 internal px), then
+//   1. bloom: a soft-knee bright pass and a five-level down/up mip chain (lamp windows, the sun and its glints,
+//      the moon, fireflies and lanterns glow with a wide, clean halo),
+//   2. tilt-shift depth of field from the depth buffer: a sharp band round the focus distance, the far woods and
+//      the near grass softly out of focus (colour weighted by circle of confusion, so sharp things never smear),
+//   3. a composite at internal resolution: exposure, white balance, ACES filmic tone mapping, a grade that adds
+//      warmth, vibrance and saturation, warm-light / cool-shadow split toning, lift/gamma/gain, a gentle vignette,
+//      very light film grain and an 8-bit ordered dither (only against banding, no posterising),
+//   4. a nearest-neighbour upscale to the canvas, so the picture reads as crisp hi-res pixel art and the DOM UI
+//      above it stays sharp.
+// Knobs: `post.grade` (the world's live values, driven by the scene from the sky) and `Stage.look` (see
+// scene.ts): a stage sets any subset of Grade and the rest falls back to STAGE_LOOK.
 import * as THREE from 'three';
 
 export interface Grade {
-  exposure: number; contrast: number; saturation: number; warm: number;
+  /** linear exposure before tone mapping */
+  exposure: number;
+  /** contrast around mid grey (1 = neutral) */
+  contrast: number;
+  /** global saturation (1 = neutral) */
+  saturation: number;
+  /** extra saturation for the less saturated colours (0 = off) */
+  vibrance: number;
+  /** white balance: + warm (amber), - cool (blue) */
+  warm: number;
   lift: THREE.Vector3; gamma: THREE.Vector3; gain: THREE.Vector3;
-  vignette: number; grain: number; bloom: number; quant: number; cold: number;
+  /** split toning strength: warm highlights, cool shadows */
+  split: number;
+  vignette: number;
+  grain: number;
+  /** bloom strength (0 = off) */
+  bloom: number;
+  /** linear brightness where bloom starts (soft knee below it) */
+  bloomThreshold: number;
+  /** depth of field: focus distance in world units along the view; <= 0 focuses on whatever is at `focusAt` */
+  focus: number;
+  /** half-width of the sharp band (world units) */
+  focusRange: number;
+  /** depth-of-field strength 0..1 (0 = everything sharp) */
+  blur: number;
+  /** where auto focus looks (uv, 0..1) */
+  focusAt: THREE.Vector2;
+  /** cold weather cast (snow), 0..1 */
+  cold: number;
+  /** @deprecated kept for older callers; the picture is no longer posterised */
+  quant: number;
 }
 
 export function defaultGrade(): Grade {
   return {
-    exposure: 0.92, contrast: 1.04, saturation: 0.94, warm: 0.2,
-    lift: new THREE.Vector3(0.0, 0.004, 0.012), gamma: new THREE.Vector3(1, 1, 1), gain: new THREE.Vector3(1, 1, 1),
-    vignette: 0.3, grain: 0.035, bloom: 0.35, quant: 48, cold: 0,
+    exposure: 1, contrast: 1.06, saturation: 1.12, vibrance: 0.25, warm: 0.12,
+    lift: new THREE.Vector3(0, 0, 0), gamma: new THREE.Vector3(1, 1, 1), gain: new THREE.Vector3(1, 1, 1),
+    split: 0.5, vignette: 0.22, grain: 0.018, bloom: 0.55, bloomThreshold: 1.0,
+    focus: 0, focusRange: 6, blur: 0.6, focusAt: new THREE.Vector2(0.5, 0.5), cold: 0, quant: 255,
   };
 }
+
+/** What a Stage gets unless it sets its own `look` (warm, softly bloomed, auto-focused at the centre). */
+export const STAGE_LOOK: Partial<Grade> = {
+  exposure: 1, contrast: 1.05, saturation: 1.1, vibrance: 0.2, warm: 0.1, split: 0.4, vignette: 0.24, grain: 0.016,
+  bloom: 0.5, bloomThreshold: 1.0, focus: 0, focusRange: 1.2, blur: 0.35, cold: 0,
+};
+
+/** Knobs a Stage may set (any subset of Grade). */
+export type Look = Partial<Omit<Grade, 'lift' | 'gamma' | 'gain' | 'focusAt'>> & { focusAt?: [number, number] };
 
 const VERT = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
 const BAYER = /* glsl */ `
@@ -29,7 +72,13 @@ float bayer4(vec2 p) {
   vec2 q = mod(floor(p), 4.0);
   int i = int(q.x) + int(q.y) * 4;
   float m[16] = float[16](0.,8.,2.,10.,12.,4.,14.,6.,3.,11.,1.,9.,15.,7.,13.,5.);
-  return m[i] / 16.0;
+  return (m[i] + 0.5) / 16.0;
+}`;
+const DEPTH = /* glsl */ `
+uniform sampler2D tDepth; uniform float uNear; uniform float uFar;
+float viewZ(vec2 uv) {
+  float d = texture2D(tDepth, uv).x;
+  return (uNear * uFar) / ((uFar - uNear) * d - uFar) * -1.0;
 }`;
 
 function quad(mat: THREE.Material) {
@@ -40,110 +89,181 @@ function quad(mat: THREE.Material) {
   m.frustumCulled = false;
   return m;
 }
+const shader = (fragmentShader: string, uniforms: Record<string, THREE.IUniform>) =>
+  new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader, uniforms, depthTest: false, depthWrite: false });
+
+/** The internal pixel size (CSS px per internal px): the short side of the picture lands near 560 px. */
+export function pixelFor(w: number, h: number): number {
+  return Math.max(1, Math.min(2.25, Math.min(w, h) / 560));
+}
 
 export class Post {
   /** CSS pixels per internal pixel */
   pixel: number;
+  /** the world's grade (the scene drives it from the sky every frame) */
   grade = defaultGrade();
+  private stageGrade = defaultGrade();
   enabled = true;
   private rt!: THREE.WebGLRenderTarget;
   private ldr!: THREE.WebGLRenderTarget;
-  private qA!: THREE.WebGLRenderTarget;
-  private qB!: THREE.WebGLRenderTarget;
-  private eA!: THREE.WebGLRenderTarget;
-  private eB!: THREE.WebGLRenderTarget;
+  private bloomRT: THREE.WebGLRenderTarget[] = [];
+  private dofA!: THREE.WebGLRenderTarget;
+  private dofB!: THREE.WebGLRenderTarget;
   private cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   private scene = new THREE.Scene();
   private quadMesh: THREE.Mesh;
   private mBright: THREE.ShaderMaterial;
-  private mBlur: THREE.ShaderMaterial;
+  private mDown: THREE.ShaderMaterial;
+  private mCoc: THREE.ShaderMaterial;
+  private mDofBlur: THREE.ShaderMaterial;
   private mComp: THREE.ShaderMaterial;
   private mBlit: THREE.ShaderMaterial;
   private w = 1; private h = 1; private frame = 0;
-  private bloomOn: boolean;
+  private levels: number;
+  private fixedPixel: number | null = null;
 
-  constructor(private gl: THREE.WebGLRenderer, quality: 'low' | 'high') {
-    this.bloomOn = quality === 'high';
-    // phones get a slightly finer grid so small things stay readable; big screens the full BUSHED chunk
-    this.pixel = Math.min(innerWidth, innerHeight) < 600 ? 1.5 : 2;
-    this.mBright = new THREE.ShaderMaterial({
-      vertexShader: VERT, depthTest: false, depthWrite: false,
-      uniforms: { tSrc: { value: null }, uThresh: { value: 0.9 }, uTexel: { value: new THREE.Vector2() } },
-      fragmentShader: /* glsl */ `
-        uniform sampler2D tSrc; uniform float uThresh; uniform vec2 uTexel; varying vec2 vUv;
-        vec3 tap(vec2 o) { return min(texture2D(tSrc, vUv + o * uTexel).rgb, vec3(40.0)); }
-        void main() {
-          vec3 c = (tap(vec2(-1.0, -1.0)) + tap(vec2(1.0, -1.0)) + tap(vec2(-1.0, 1.0)) + tap(vec2(1.0, 1.0))) * 0.25;
-          float l = max(c.r, max(c.g, c.b));
-          float k = uThresh * 0.5;
-          float s = clamp(l - uThresh + k, 0.0, 2.0 * k);
-          s = s * s / (4.0 * k + 1e-4);
-          gl_FragColor = vec4(c * (max(s, l - uThresh) / max(l, 1e-4)), 1.0);
-        }`,
+  constructor(private gl: THREE.WebGLRenderer, private quality: 'low' | 'high') {
+    this.levels = quality === 'high' ? 5 : 4;
+    this.pixel = pixelFor(innerWidth, innerHeight);
+    this.mBright = shader(/* glsl */ `
+      uniform sampler2D tSrc; uniform float uThresh; uniform vec2 uTexel; varying vec2 vUv;
+      vec3 tap(vec2 o) { return min(texture2D(tSrc, vUv + o * uTexel).rgb, vec3(64.0)); }
+      float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+      void main() {
+        // 4 taps with a Karis average, so single hot pixels don't flicker
+        vec3 a = tap(vec2(-0.5, -0.5)), b = tap(vec2(0.5, -0.5)), c = tap(vec2(-0.5, 0.5)), d = tap(vec2(0.5, 0.5));
+        float wa = 1.0 / (1.0 + luma(a)), wb = 1.0 / (1.0 + luma(b)), wc = 1.0 / (1.0 + luma(c)), wd = 1.0 / (1.0 + luma(d));
+        vec3 col = (a * wa + b * wb + c * wc + d * wd) / (wa + wb + wc + wd);
+        float l = max(col.r, max(col.g, col.b));
+        float knee = uThresh * 0.6;
+        float s = clamp(l - uThresh + knee, 0.0, 2.0 * knee);
+        s = s * s / (4.0 * knee + 1e-4);
+        gl_FragColor = vec4(col * max(s, l - uThresh) / max(l, 1e-4), 1.0);
+      }`, { tSrc: { value: null }, uThresh: { value: 1 }, uTexel: { value: new THREE.Vector2() } });
+    // 13-tap downsample (Jimenez 2014); the 9-tap tent upsample is mUpAdd
+    this.mDown = shader(/* glsl */ `
+      uniform sampler2D tSrc; uniform vec2 uTexel; varying vec2 vUv;
+      vec3 s(vec2 o) { return texture2D(tSrc, vUv + o * uTexel).rgb; }
+      void main() {
+        vec3 c = s(vec2(0.0)) * 0.125;
+        c += (s(vec2(-1.0, -1.0)) + s(vec2(1.0, -1.0)) + s(vec2(-1.0, 1.0)) + s(vec2(1.0, 1.0))) * 0.125;
+        c += (s(vec2(-2.0, -2.0)) + s(vec2(2.0, -2.0)) + s(vec2(-2.0, 2.0)) + s(vec2(2.0, 2.0))) * 0.03125;
+        c += (s(vec2(-2.0, 0.0)) + s(vec2(2.0, 0.0)) + s(vec2(0.0, -2.0)) + s(vec2(0.0, 2.0))) * 0.0625;
+        gl_FragColor = vec4(c, 1.0);
+      }`, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() } });
+    // circle of confusion and the CoC-weighted half-resolution colour for the depth of field
+    const dofU = () => ({
+      uFocus: { value: 10 }, uRange: { value: 4 }, uNear: { value: 0.1 }, uFar: { value: 100 }, uFocusAt: { value: new THREE.Vector2(0.5, 0.5) },
+      tDepth: { value: null as THREE.Texture | null },
     });
-    this.mBlur = new THREE.ShaderMaterial({
-      vertexShader: VERT, depthTest: false, depthWrite: false,
-      uniforms: { tSrc: { value: null }, uDir: { value: new THREE.Vector2() } },
-      fragmentShader: /* glsl */ `
-        uniform sampler2D tSrc; uniform vec2 uDir; varying vec2 vUv;
-        void main() {
-          vec3 s = texture2D(tSrc, vUv).rgb * 0.227;
-          s += (texture2D(tSrc, vUv + uDir * 1.385).rgb + texture2D(tSrc, vUv - uDir * 1.385).rgb) * 0.316;
-          s += (texture2D(tSrc, vUv + uDir * 3.23).rgb + texture2D(tSrc, vUv - uDir * 3.23).rgb) * 0.070;
-          gl_FragColor = vec4(s, 1.0);
-        }`,
+    const COC = /* glsl */ `
+      uniform float uFocus; uniform float uRange; uniform vec2 uFocusAt;
+      ${DEPTH}
+      float focusZ() { return uFocus > 0.0 ? uFocus : viewZ(uFocusAt); }
+      float coc(vec2 uv, float fz) {
+        float d = texture2D(tDepth, uv).x;
+        if (d > 0.99999) return 0.0; // the sky stays crisp (stars, the moon, painted clouds)
+        float z = viewZ(uv);
+        float dz = z - fz;
+        float far = clamp((dz - uRange) / (fz * 1.6 + uRange), 0.0, 1.0);
+        float near = clamp((-dz - uRange) / (fz * 0.6 + uRange * 0.5), 0.0, 1.0);
+        return max(far, near * 0.6);
+      }`;
+    this.mCoc = shader(/* glsl */ `
+      uniform sampler2D tSrc; uniform vec2 uTexel; varying vec2 vUv;
+      ${COC}
+      void main() {
+        float fz = focusZ();
+        vec4 acc = vec4(0.0);
+        for (int i = 0; i < 4; i++) {
+          vec2 o = vec2(float(i - (i / 2) * 2), float(i / 2)) - 0.5;
+          vec2 uv = vUv + o * uTexel;
+          float k = coc(uv, fz);
+          float w = 0.02 + k;
+          acc += vec4(min(texture2D(tSrc, uv).rgb, vec3(16.0)) * w, w);
+        }
+        gl_FragColor = acc * 0.25;
+      }`, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() }, ...dofU() });
+    this.mDofBlur = shader(/* glsl */ `
+      uniform sampler2D tSrc; uniform vec2 uDir; varying vec2 vUv;
+      void main() {
+        vec4 s = texture2D(tSrc, vUv) * 0.2;
+        s += (texture2D(tSrc, vUv + uDir * 1.0) + texture2D(tSrc, vUv - uDir * 1.0)) * 0.17;
+        s += (texture2D(tSrc, vUv + uDir * 2.0) + texture2D(tSrc, vUv - uDir * 2.0)) * 0.12;
+        s += (texture2D(tSrc, vUv + uDir * 3.0) + texture2D(tSrc, vUv - uDir * 3.0)) * 0.07;
+        s += (texture2D(tSrc, vUv + uDir * 4.0) + texture2D(tSrc, vUv - uDir * 4.0)) * 0.04;
+        gl_FragColor = s;
+      }`, { tSrc: { value: null }, uDir: { value: new THREE.Vector2() } });
+    this.mComp = shader(/* glsl */ `
+      uniform sampler2D tColor; uniform sampler2D tBloom; uniform sampler2D tDof;
+      uniform float uBloomOn; uniform float uDofOn; uniform float uBlur;
+      uniform vec2 uRes; uniform float uFrame; uniform float uTime;
+      uniform float uExposure; uniform float uCon; uniform float uSat; uniform float uVib; uniform float uWarm; uniform float uSplit;
+      uniform vec3 uLift; uniform vec3 uGamma; uniform vec3 uGain;
+      uniform float uVig; uniform float uGrain; uniform float uBloom; uniform float uCold;
+      varying vec2 vUv;
+      ${COC}
+      ${BAYER}
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + uFrame * 0.618) * 43758.5453); }
+      // ACES filmic (Hill's RRT + ODT fit), as three.js does it
+      vec3 rrt(vec3 v) { vec3 a = v * (v + 0.0245786) - 0.000090537; vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081; return a / b; }
+      vec3 aces(vec3 c) {
+        const mat3 IN = mat3(vec3(0.59719, 0.07600, 0.02840), vec3(0.35458, 0.90834, 0.13383), vec3(0.04823, 0.01566, 0.83777));
+        const mat3 OUT = mat3(vec3(1.60475, -0.10208, -0.00327), vec3(-0.53108, 1.10813, -0.07276), vec3(-0.07367, -0.00605, 1.07602));
+        c = IN * (c / 0.6);
+        c = OUT * rrt(c);
+        return clamp(c, 0.0, 1.0);
+      }
+      vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
+      float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+      void main() {
+        vec2 px = floor(vUv * uRes);
+        vec2 uv = (px + 0.5) / uRes;
+        vec3 col = texture2D(tColor, uv).rgb;
+        if (uDofOn > 0.5) {
+          float k = coc(uv, focusZ()) * uBlur;
+          vec4 d = texture2D(tDof, uv);
+          vec3 soft = d.rgb / max(d.a, 1e-4);
+          col = mix(col, soft, smoothstep(0.0, 0.55, k) * step(1e-3, d.a));
+        }
+        if (uBloomOn > 0.5) col += texture2D(tBloom, uv).rgb * uBloom;
+        col *= uExposure;
+        // white balance: warm days and lamplight, cool when negative
+        col *= vec3(1.0 + uWarm * 0.16, 1.0 + uWarm * 0.03, 1.0 - uWarm * 0.16);
+        col = 0.18 * pow(max(col, vec3(1e-6)) / 0.18, vec3(uCon));
+        col = aces(col);
+        // grade in display space: lift / gamma / gain
+        col = pow(max(col, 0.0), 1.0 / uGamma);
+        col = col * uGain + uLift * (1.0 - col);
+        float l = luma(col);
+        // split toning: warm honey in the lights, a cool blue-green in the shadows (adds colour, never greys)
+        col += uSplit * vec3(0.045, 0.02, -0.04) * smoothstep(0.35, 0.95, l);
+        col += uSplit * vec3(-0.025, 0.004, 0.03) * (1.0 - smoothstep(0.02, 0.4, l)) * smoothstep(0.0, 0.08, l);
+        col = max(col, 0.0);
+        // vibrance then saturation
+        l = luma(col);
+        float sat = max(col.r, max(col.g, col.b)) - min(col.r, min(col.g, col.b));
+        col = mix(vec3(l), col, 1.0 + uVib * (1.0 - sat) * (1.0 - smoothstep(0.85, 1.0, l)));
+        col = mix(vec3(l), col, uSat);
+        vec2 cc = vUv - 0.5;
+        float r2 = dot(cc * vec2(uRes.x / uRes.y, 1.0), cc * vec2(uRes.x / uRes.y, 1.0)) / max(1.0, uRes.x / uRes.y);
+        col = mix(col, mix(vec3(l), col, 0.75) * vec3(0.94, 0.98, 1.05), uCold * 0.6);
+        col *= 1.0 - uVig * smoothstep(0.1, 0.62, r2);
+        col = toSRGB(clamp(col, 0.0, 1.0));
+        float g = hash(px + floor(uTime * 24.0) * 17.0) - 0.5;
+        col += g * uGrain * (1.1 - l);
+        // 8-bit ordered dither: smooth skies without banding
+        col += (bayer4(px) - 0.5) / 255.0;
+        gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
+      }`, {
+      tColor: { value: null }, tBloom: { value: null }, tDof: { value: null }, uBloomOn: { value: 0 }, uDofOn: { value: 0 }, uBlur: { value: 0 },
+      uRes: { value: new THREE.Vector2() }, uFrame: { value: 0 }, uTime: { value: 0 },
+      uExposure: { value: 1 }, uCon: { value: 1 }, uSat: { value: 1 }, uVib: { value: 0 }, uWarm: { value: 0 }, uSplit: { value: 0 },
+      uLift: { value: new THREE.Vector3() }, uGamma: { value: new THREE.Vector3(1, 1, 1) }, uGain: { value: new THREE.Vector3(1, 1, 1) },
+      uVig: { value: 0 }, uGrain: { value: 0 }, uBloom: { value: 0 }, uCold: { value: 0 },
+      ...dofU(),
     });
-    this.mComp = new THREE.ShaderMaterial({
-      vertexShader: VERT, depthTest: false, depthWrite: false,
-      uniforms: {
-        tColor: { value: null }, tBloom: { value: null }, tBloom2: { value: null }, uBloomOn: { value: 0 },
-        uRes: { value: new THREE.Vector2() }, uFrame: { value: 0 }, uTime: { value: 0 },
-        uExposure: { value: 1 }, uCon: { value: 1 }, uSat: { value: 1 }, uWarm: { value: 0 }, uLift: { value: new THREE.Vector3() }, uGamma: { value: new THREE.Vector3(1, 1, 1) },
-        uGain: { value: new THREE.Vector3(1, 1, 1) }, uVig: { value: 0 }, uGrain: { value: 0 }, uBloom: { value: 0 }, uQuant: { value: 48 }, uCold: { value: 0 },
-      },
-      fragmentShader: /* glsl */ `
-        uniform sampler2D tColor; uniform sampler2D tBloom; uniform sampler2D tBloom2; uniform float uBloomOn;
-        uniform vec2 uRes; uniform float uFrame; uniform float uTime;
-        uniform float uExposure; uniform float uCon; uniform float uSat; uniform float uWarm; uniform vec3 uLift; uniform vec3 uGamma; uniform vec3 uGain;
-        uniform float uVig; uniform float uGrain; uniform float uBloom; uniform float uQuant; uniform float uCold;
-        varying vec2 vUv;
-        ${BAYER}
-        float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + uFrame * 0.618) * 43758.5453); }
-        vec3 filmic(vec3 x) { x *= 0.9; return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
-        vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
-        void main() {
-          vec2 px = floor(vUv * uRes);
-          vec2 uv = (px + 0.5) / uRes;
-          vec3 col = texture2D(tColor, uv).rgb;
-          if (uBloomOn > 0.5) col += (texture2D(tBloom, uv).rgb * 0.6 + texture2D(tBloom2, uv).rgb * 0.8) * uBloom;
-          col *= uExposure;
-          col = 0.18 * pow(max(col, vec3(1e-5)) / 0.18, vec3(uCon));
-          col = filmic(col);
-          col = pow(max(col, 0.0), 1.0 / uGamma);
-          col = col * uGain + uLift * (1.0 - col);
-          float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-          // split toning: warm highlights / cool shadows by day, blue shadows at night (lamplight stays warm)
-          col += max(uWarm, 0.0) * vec3(0.05, 0.02, -0.035) * smoothstep(0.25, 0.85, l);
-          col += (0.35 + max(-uWarm, 0.0)) * vec3(-0.010, 0.003, 0.016) * (1.0 - smoothstep(0.0, 0.32, l));
-          col = max(col, 0.0);
-          l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-          col = mix(vec3(l), col, uSat);
-          vec2 cc = vUv - 0.5;
-          float r2 = dot(cc, cc);
-          col = mix(col, mix(vec3(l), col, 0.6) * vec3(0.9, 0.96, 1.06), uCold * smoothstep(0.05, 0.4, r2));
-          col *= 1.0 - uVig * smoothstep(0.12, 0.7, r2 * 1.3);
-          col = toSRGB(clamp(col, 0.0, 1.0));
-          float g = hash(px + floor(uTime * 24.0) * 17.0) - 0.5;
-          col += g * uGrain * (1.2 - l);
-          col = floor(col * uQuant + 0.5 + (bayer4(px) - 0.5) * 0.9) / uQuant;
-          gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
-        }`,
-    });
-    this.mBlit = new THREE.ShaderMaterial({
-      vertexShader: VERT, depthTest: false, depthWrite: false,
-      uniforms: { tSrc: { value: null } },
-      fragmentShader: 'uniform sampler2D tSrc; varying vec2 vUv; void main() { gl_FragColor = texture2D(tSrc, vUv); }',
-    });
+    this.mBlit = shader('uniform sampler2D tSrc; varying vec2 vUv; void main() { gl_FragColor = texture2D(tSrc, vUv); }', { tSrc: { value: null } });
     this.quadMesh = quad(this.mComp);
     this.scene.add(this.quadMesh);
     this.resize(innerWidth, innerHeight);
@@ -152,17 +272,31 @@ export class Post {
   /** Internal resolution (for anything that needs to snap to the pixel grid). */
   get size(): [number, number] { return [this.w, this.h]; }
 
+  /** Force a pixel size (CSS px per internal px); null returns to the automatic size. */
+  setPixel(p: number | null) {
+    if (p === this.fixedPixel) return;
+    this.fixedPixel = p;
+    this.resize(this.cssW, this.cssH);
+  }
+
+  private cssW = 1; private cssH = 1;
   resize(W: number, H: number) {
-    this.w = Math.max(64, Math.round(W / this.pixel));
-    this.h = Math.max(64, Math.round(H / this.pixel));
-    for (const t of [this.rt, this.ldr, this.qA, this.qB, this.eA, this.eB]) t?.dispose();
-    const depth = new THREE.DepthTexture(this.w, this.h);
+    this.cssW = W; this.cssH = H;
+    this.pixel = this.fixedPixel ?? pixelFor(W, H);
+    const w = Math.max(64, Math.round(W / this.pixel)), h = Math.max(64, Math.round(H / this.pixel));
+    if (this.rt && w === this.w && h === this.h) return;
+    this.w = w; this.h = h;
+    for (const t of [this.rt, this.ldr, this.dofA, this.dofB, ...this.bloomRT]) t?.dispose();
+    const depth = new THREE.DepthTexture(w, h);
     depth.type = THREE.UnsignedIntType;
-    this.rt = new THREE.WebGLRenderTarget(this.w, this.h, { type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthTexture: depth, samples: 0 });
-    this.ldr = new THREE.WebGLRenderTarget(this.w, this.h, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: false });
-    const mk = (w: number, h: number) => new THREE.WebGLRenderTarget(Math.max(8, w), Math.max(8, h), { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
-    this.qA = mk(this.w >> 2, this.h >> 2); this.qB = mk(this.w >> 2, this.h >> 2);
-    this.eA = mk(this.w >> 3, this.h >> 3); this.eB = mk(this.w >> 3, this.h >> 3);
+    depth.minFilter = depth.magFilter = THREE.NearestFilter;
+    this.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthTexture: depth, samples: 0 });
+    this.ldr = new THREE.WebGLRenderTarget(w, h, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: false });
+    const mk = (a: number, b: number) => new THREE.WebGLRenderTarget(Math.max(4, a), Math.max(4, b), { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
+    this.bloomRT = [];
+    for (let i = 1; i <= this.levels; i++) this.bloomRT.push(mk(w >> i, h >> i));
+    const dd = this.quality === 'high' ? 1 : 2;
+    this.dofA = mk(w >> dd, h >> dd); this.dofB = mk(w >> dd, h >> dd);
   }
 
   private pass(mat: THREE.ShaderMaterial, target: THREE.WebGLRenderTarget | null) {
@@ -171,38 +305,98 @@ export class Post {
     this.gl.render(this.scene, this.cam);
   }
 
-  /** Draw a scene through the chain onto the canvas. */
-  render(scene: THREE.Scene, camera: THREE.Camera, time: number) {
+  /** Draw a scene through the chain onto the canvas. `look` overrides the world grade (stages). */
+  render(scene: THREE.Scene, camera: THREE.Camera, time: number, look?: Look | null) {
     const gl = this.gl;
     if (!this.enabled) { gl.setRenderTarget(null); gl.render(scene, camera); return; }
     this.frame++;
+    const g = look ? resolveLook(look, this.stageGrade) : this.grade;
     gl.setRenderTarget(this.rt);
     gl.clear();
     gl.render(scene, camera);
-    const g = this.grade, u = this.mComp.uniforms;
-    if (this.bloomOn && g.bloom > 0.01) {
+    const u = this.mComp.uniforms;
+    // ---- bloom
+    if (g.bloom > 0.001) {
+      const B = this.bloomRT;
       this.mBright.uniforms.tSrc.value = this.rt.texture;
       this.mBright.uniforms.uTexel.value.set(1 / this.w, 1 / this.h);
-      this.pass(this.mBright, this.qA);
-      const blur = (a: THREE.WebGLRenderTarget, b: THREE.WebGLRenderTarget) => {
-        this.mBlur.uniforms.tSrc.value = a.texture; this.mBlur.uniforms.uDir.value.set(1 / a.width, 0); this.pass(this.mBlur, b);
-        this.mBlur.uniforms.tSrc.value = b.texture; this.mBlur.uniforms.uDir.value.set(0, 1 / a.height); this.pass(this.mBlur, a);
-      };
-      blur(this.qA, this.qB);
-      this.mBlit.uniforms.tSrc.value = this.qA.texture;
-      this.pass(this.mBlit, this.eA);
-      blur(this.eA, this.eB);
-      u.tBloom.value = this.qA.texture; u.tBloom2.value = this.eA.texture; u.uBloomOn.value = 1;
+      this.mBright.uniforms.uThresh.value = g.bloomThreshold;
+      this.pass(this.mBright, B[0]);
+      for (let i = 1; i < B.length; i++) {
+        this.mDown.uniforms.tSrc.value = B[i - 1].texture;
+        this.mDown.uniforms.uTexel.value.set(1 / B[i - 1].width, 1 / B[i - 1].height);
+        this.pass(this.mDown, B[i]);
+      }
+      // upsample: each level adds its tent-filtered wider neighbour, from the smallest up
+      for (let i = B.length - 1; i > 0; i--) this.mUpAdd(B[i], B[i - 1]);
+      u.tBloom.value = B[0].texture; u.uBloomOn.value = 1;
     } else u.uBloomOn.value = 0;
+    // ---- depth of field
+    const cam = camera as THREE.PerspectiveCamera;
+    const dofOn = g.blur > 0.01 && cam.isPerspectiveCamera;
+    for (const m of [this.mCoc, this.mComp]) {
+      const cu = m.uniforms;
+      cu.tDepth.value = this.rt.depthTexture;
+      cu.uNear.value = cam.near ?? 0.1; cu.uFar.value = cam.far ?? 100;
+      cu.uFocus.value = g.focus; cu.uRange.value = g.focusRange; cu.uFocusAt.value.copy(g.focusAt);
+    }
+    if (dofOn) {
+      this.mCoc.uniforms.tSrc.value = this.rt.texture;
+      this.mCoc.uniforms.uTexel.value.set(1 / this.w, 1 / this.h);
+      this.pass(this.mCoc, this.dofA);
+      const step = 0.6 + g.blur * 1.1;
+      this.mDofBlur.uniforms.tSrc.value = this.dofA.texture; this.mDofBlur.uniforms.uDir.value.set(step / this.dofA.width, 0); this.pass(this.mDofBlur, this.dofB);
+      this.mDofBlur.uniforms.tSrc.value = this.dofB.texture; this.mDofBlur.uniforms.uDir.value.set(0, step / this.dofA.height); this.pass(this.mDofBlur, this.dofA);
+      u.tDof.value = this.dofA.texture;
+    }
+    u.uDofOn.value = dofOn ? 1 : 0; u.uBlur.value = Math.min(1, g.blur) * 1.4;
+    // ---- composite
     u.tColor.value = this.rt.texture;
     u.uRes.value.set(this.w, this.h); u.uFrame.value = this.frame % 1000; u.uTime.value = time;
-    u.uExposure.value = g.exposure; u.uCon.value = g.contrast; u.uSat.value = g.saturation; u.uWarm.value = g.warm;
+    u.uExposure.value = g.exposure; u.uCon.value = g.contrast; u.uSat.value = g.saturation; u.uVib.value = g.vibrance; u.uWarm.value = g.warm; u.uSplit.value = g.split;
     u.uLift.value.copy(g.lift); u.uGamma.value.copy(g.gamma); u.uGain.value.copy(g.gain);
-    u.uVig.value = g.vignette; u.uGrain.value = g.grain; u.uBloom.value = g.bloom; u.uQuant.value = g.quant; u.uCold.value = g.cold;
+    u.uVig.value = g.vignette; u.uGrain.value = g.grain; u.uBloom.value = g.bloom * 0.12; u.uCold.value = g.cold;
     this.pass(this.mComp, this.ldr);
     this.mBlit.uniforms.tSrc.value = this.ldr.texture;
     this.pass(this.mBlit, null);
   }
 
-  dispose() { for (const t of [this.rt, this.ldr, this.qA, this.qB, this.eA, this.eB]) t.dispose(); }
+  private upAdd: THREE.ShaderMaterial | null = null;
+  /** add the tent-upsampled `src` onto `dst` (additive blending, so no read/write of the same target) */
+  private mUpAdd(src: THREE.WebGLRenderTarget, dst: THREE.WebGLRenderTarget) {
+    if (!this.upAdd) {
+      this.upAdd = shader(/* glsl */ `
+        uniform sampler2D tSrc; uniform vec2 uTexel; varying vec2 vUv;
+        vec3 s(vec2 o) { return texture2D(tSrc, vUv + o * uTexel).rgb; }
+        void main() {
+          vec3 c = s(vec2(0.0)) * 4.0;
+          c += (s(vec2(-1.0, 0.0)) + s(vec2(1.0, 0.0)) + s(vec2(0.0, -1.0)) + s(vec2(0.0, 1.0))) * 2.0;
+          c += s(vec2(-1.0, -1.0)) + s(vec2(1.0, -1.0)) + s(vec2(-1.0, 1.0)) + s(vec2(1.0, 1.0));
+          gl_FragColor = vec4(c / 16.0, 1.0);
+        }`, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() } });
+      this.upAdd.blending = THREE.AdditiveBlending;
+      this.upAdd.transparent = true;
+    }
+    this.upAdd.uniforms.tSrc.value = src.texture;
+    this.upAdd.uniforms.uTexel.value.set(1 / src.width, 1 / src.height);
+    const ac = this.gl.autoClear;
+    this.gl.autoClear = false;
+    this.pass(this.upAdd, dst);
+    this.gl.autoClear = ac;
+  }
+
+  dispose() { for (const t of [this.rt, this.ldr, this.dofA, this.dofB, ...this.bloomRT]) t.dispose(); }
+}
+
+/** A stage's look over the stage defaults (lift/gamma/gain stay neutral). */
+const NEUTRAL = defaultGrade();
+function resolveLook(look: Look, g: Grade): Grade {
+  Object.assign(g, NEUTRAL, STAGE_LOOK, { lift: g.lift.copy(NEUTRAL.lift), gamma: g.gamma.copy(NEUTRAL.gamma), gain: g.gain.copy(NEUTRAL.gain), focusAt: g.focusAt.copy(NEUTRAL.focusAt) });
+  for (const [k, v] of Object.entries(look)) {
+    if (v === undefined || k === 'focusAt') continue;
+    (g as unknown as Record<string, unknown>)[k] = v;
+  }
+  if (look.focusAt) g.focusAt.set(look.focusAt[0], look.focusAt[1]);
+  g.cold = look.cold ?? 0;
+  return g;
 }

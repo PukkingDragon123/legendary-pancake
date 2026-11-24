@@ -456,6 +456,7 @@ export class Weather {
     if (key === this.lastSeason) return;
     this.lastSeason = key;
     this.sc.flora.setSeason(s);
+    this.sc.vista?.setSeason(s); // [look4] the far woods too
     this.sc.critters.setSeason(s.season, s.t);
     const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.04, 0.94], summer: [1, 1, 1], autumn: [1.08, 0.96, 0.78], winter: [0.9, 0.91, 0.9] }; // [world3] calm
     GRASS.uTint.value.setRGB(...tint[s.season]);

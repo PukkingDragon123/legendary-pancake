@@ -21,7 +21,8 @@ import type { Save } from '../game/store.ts';
 import { hourFor, Sky, type SkyMode } from './sky.ts';
 import { buildTerrain, type Terrain } from './terrain.ts';
 import { Weather } from './weather.ts'; // [world]
-import { Post } from './post.ts'; // [world3]
+import { Post, type Look } from './post.ts'; // [world3]
+import { Vista } from './vista.ts'; // [look4]
 
 export type View = 'home' | 'interior' | 'loft' | 'attic' | 'owl' | 'breathe' | 'sleep' | 'garden' | 'deck' | 'wake';
 export type Quality = 'low' | 'high';
@@ -53,6 +54,13 @@ export interface Stage {
   /** pointer input in CSS px with a ray through the stage camera; return true when handled */
   pointer?(type: 'down' | 'move' | 'up', x: number, y: number, ray: THREE.Ray, e: PointerEvent): boolean;
   dispose?(): void;
+  /**
+   * [look4] Post-processing knobs for this stage (read every frame; any subset, the rest come from STAGE_LOOK in
+   * post.ts): exposure, contrast, saturation, vibrance, warm, split, vignette, grain, bloom, bloomThreshold,
+   * focus (world units from the camera; 0 = auto-focus on whatever is at focusAt), focusRange, blur (0 = no depth
+   * of field .. 1 strong), focusAt ([u, v], default the centre), cold.
+   */
+  look?: Look;
 }
 /** A camera shot for directors (cinematics, build mode). */
 export interface CamShot { yaw: number; pitch: number; dist: number; target: THREE.Vector3; fov?: number; snap?: boolean }
@@ -63,7 +71,7 @@ interface Trip { from: THREE.Vector3; to: THREE.Vector3; t: number; dur: number;
 export class Scene {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
-  readonly camera = new THREE.PerspectiveCamera(32, 1, 0.3, 400);
+  readonly camera = new THREE.PerspectiveCamera(32, 1, 0.3, 900);
   readonly sky: Sky;
   readonly plan: ForestPlan;
   readonly terrain: Terrain;
@@ -76,8 +84,15 @@ export class Scene {
   /** [world] real-world weather and seasons (see weather.ts) */
   readonly weather: Weather;
   readonly quality: Quality;
-  /** [world3] BUSHED-style post chain: low internal resolution, grade, dither, grain (post.enabled = false to bypass) */
+  /** [look4] "Golden Diorama" post chain: modest internal resolution, bloom, tilt-shift depth of field, ACES and a
+   * warm grade (post.enabled = false to bypass; post.grade holds the world's live knobs, Stage.look a stage's) */
   readonly post: Post;
+  /** [look4] the world beyond the clearing: forest to the horizon, hills and mountains in the haze */
+  readonly vista: Vista;
+  private pmrem: THREE.PMREMGenerator;
+  private envScene = new THREE.Scene();
+  private envRT: THREE.WebGLRenderTarget | null = null;
+  private envT = 0;
   view: View = 'home';
   skyMode: SkyMode | 'dawn' = 'clock';
   paused = false;
@@ -131,6 +146,8 @@ export class Scene {
     r.shadowMap.type = THREE.PCFSoftShadowMap;
     this.post = new Post(r, quality); // [world3]
     r.outputColorSpace = THREE.SRGBColorSpace;
+    r.toneMapping = THREE.NoToneMapping; // [look4] the post chain tone-maps (ACES) after bloom and depth of field
+    this.pmrem = new THREE.PMREMGenerator(r);
 
     this.plan = planForest(quality);
     this.sky = new Sky(this.scene, quality === 'high' ? 2048 : 1024, quality); // [world]
@@ -141,7 +158,10 @@ export class Scene {
     this.house = buildHouse();
     this.rooms = new Rooms(this.house);
     const grass = makeGrass(this.plan.grass);
-    this.scene.add(this.terrain.group, this.flora.group, grass, this.house.group, this.critters.group, this.fx.group);
+    this.vista = new Vista(this.plan, quality); // [look4]
+    this.scene.add(this.terrain.group, this.flora.group, grass, this.house.group, this.critters.group, this.fx.group, this.vista.group);
+    // [look4] the environment light (reflections on wood, brass, glass, water) is baked from the live sky dome
+    this.envScene.add(new THREE.Mesh(this.sky.dome.geometry, this.sky.dome.material));
 
     // garden: a tidy fenced plot once unlocked, a tangle of weeds before that
     this.gardenFence = buildGardenFence(GARDEN.x, GARDEN.z, GARDEN.hw, GARDEN.hd);
@@ -406,21 +426,28 @@ export class Scene {
   applySky() {
     const h = this.hourOverride ?? (this.skyMode === 'dawn' ? 6.5 : hourFor(this.skyMode as SkyMode));
     this.sky.setHour(h);
-    (this.terrain.water.uniforms.uLight.value as THREE.Color).copy(this.sky.ambient).multiplyScalar(1.15);
-    (this.terrain.water.uniforms.uDeep.value as THREE.Color).set(this.sky.night > 0.5 ? 0x1c2a38 : 0x3f6670); // [world3] calm palette
-    (this.terrain.water.uniforms.uSky.value as THREE.Color).copy(this.sky.fog.color); // [world3] the pond mirrors the misty sky
+    const night = this.sky.night, L = THREE.MathUtils.lerp, sm = THREE.MathUtils.smoothstep;
+    // [look4] the pond mirrors the real sky: blue by day, gold at the ends of the day, sapphire at night
+    (this.terrain.water.uniforms.uLight.value as THREE.Color).copy(this.sky.ambient).multiplyScalar(1.25);
+    (this.terrain.water.uniforms.uDeep.value as THREE.Color).copy(this.sky.hemi.color).lerp(new THREE.Color(0x0e3a4a), 0.7).multiplyScalar(night > 0.5 ? 0.5 : 0.9);
+    (this.terrain.water.uniforms.uSky.value as THREE.Color).copy(this.sky.horizon).lerp(this.sky.hemi.color, 0.4);
     this.fx.setLight(this.sky.ambient);
-    const night = this.sky.night;
-    this.flora.setNight(THREE.MathUtils.smoothstep(night, 0.35, 0.9)); // [world3] moonglow caps
-    // [world3] the grade follows the light: warm calm days, honeyed evenings, cool blue moonlit nights
+    this.flora.setNight(sm(night, 0.35, 0.9)); // [world3] moonglow caps
+    this.vista.setSky(this.sky);
+    // [look4] the grade follows the light: bright warm days, honey-gold evenings, sapphire moonlit nights
     {
-      const g = this.post.grade, hr = this.sky.hour, L = THREE.MathUtils.lerp;
-      const golden = Math.max(THREE.MathUtils.smoothstep(hr, 16.4, 18.2) * (1 - THREE.MathUtils.smoothstep(hr, 19.0, 19.8)), THREE.MathUtils.smoothstep(hr, 5.6, 6.4) * (1 - THREE.MathUtils.smoothstep(hr, 7.4, 8.4)));
-      g.warm = L(0.18, -0.6, night) + golden * 0.25;
-      g.saturation = L(1.0, 0.84, night);
-      g.exposure = L(1.0, 1.7, night); // moonlit nights stay readable
-      g.bloom = L(0.28, 0.55, night);
-      g.vignette = L(0.28, 0.4, night);
+      const g = this.post.grade, hr = this.sky.hour;
+      const golden = Math.max(sm(hr, 16.6, 18.2) * (1 - sm(hr, 19.0, 19.8)), sm(hr, 5.6, 6.4) * (1 - sm(hr, 7.4, 8.6)));
+      g.exposure = L(1.0, 1.45, night) * (1 + (this.weather?.vis.overcast ?? 0) * 0.25);
+      g.warm = L(0.08, -0.06, night) + golden * 0.08;
+      g.saturation = L(1.1, 0.9, night);
+      g.vibrance = L(0.22, 0.1, night);
+      g.contrast = L(1.06, 1.1, night);
+      g.split = L(0.5, 0.75, night);
+      g.bloom = L(0.5, 0.95, night) + golden * 0.15;
+      g.bloomThreshold = L(1.05, 0.7, night);
+      g.vignette = L(0.2, 0.32, night);
+      g.lift.set(0, 0.004, 0.016).multiplyScalar(1 + night);
       g.cold = (this.weather?.vis.cold ?? 0) * 0.6;
     }
     GRASS.uKey.value.copy(this.sky.sun.color).multiplyScalar(this.sky.sun.intensity * 0.42);
@@ -428,12 +455,26 @@ export class Scene {
     GRASS.uGround.value.copy(this.sky.hemi.groundColor).multiplyScalar(this.sky.hemi.intensity);
     GRASS.uSunDir.value.copy(this.sky.sunDir);
     GRASS.uDapple.value = night > 0.5 ? 0.25 : 1;
-    this.house.panes.color.set(night > 0.4 ? 0xf1c88a : 0x46596a); // [world3] lamp-gold / slate
-    this.room.intensity = 1.4 + night * 7; // the open rooms glow warm at night
+    // [look4] lamp-gold windows bloom at night; by day the glass holds a little of the sky
+    if (night > 0.4) this.house.panes.color.setRGB(3.4, 2.0, 0.8).multiplyScalar(L(0.6, 1, sm(night, 0.4, 0.9)));
+    else this.house.panes.color.copy(this.sky.hemi.color).multiplyScalar(0.42).lerp(new THREE.Color(0x2a3a4a), 0.4);
+    this.room.intensity = 1.4 + night * 9; // the open rooms glow warm at night
     this.room.distance = 16;
-    this.lantern.intensity = night * 6;
+    this.lantern.intensity = night * 8;
     this.fireflies.alpha = night > 0.4 && (this.weather?.firefliesOk ?? true) ? 1 : 0; // [world] not in winter or rain
+    this.scene.environmentIntensity = L(0.4, 0.3, night);
+    this.sky.envDirty = true;
     // furniture lights follow the sky every frame in rooms.update
+  }
+
+  /** [look4] Re-bake the environment light from the live sky dome (cheap; only when the sky has changed). */
+  private bakeEnv() {
+    if (!this.sky.envDirty) return;
+    this.sky.envDirty = false;
+    const rt = this.pmrem.fromScene(this.envScene, 0, 1, 400);
+    this.envRT?.dispose();
+    this.envRT = rt;
+    this.scene.environment = rt.texture;
   }
 
   resize() {
@@ -480,7 +521,7 @@ export class Scene {
         // signs sit over the sky at the top and the big buttons over the meadow at the bottom
         // the open rooms sit about a third of the way up, clear of the big buttons; the crown fills the sky above
         const d = this.fitDist(portrait ? 23 : 28, portrait ? 42 : 38);
-        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.24, dist: d, target: new THREE.Vector3(0.35, portrait ? 8.4 : 8.2, H.z + 0.6) };
+        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.17, dist: d, target: new THREE.Vector3(0.35, portrait ? 8.4 : 8.6, H.z + 0.6) }; // [look4] a little lower on wide screens: the far hills and the sky show over the woods
       }
     }
   }
@@ -496,7 +537,7 @@ export class Scene {
     const t = this.time;
     if (this.stage) {
       this.stage.update(dt, t);
-      if (draw) this.post.render(this.stage.scene, this.stage.camera, t); // [world3]
+      if (draw) this.post.render(this.stage.scene, this.stage.camera, t, this.stage.look ?? {}); // [look4] every stage goes through the chain
       return;
     }
     wind.uTime.value = t;
@@ -545,8 +586,17 @@ export class Scene {
     const drift = !shot && (this.view === 'home' || this.view === 'sleep') ? Math.sin(t * 0.07) * 0.05 : 0;
     this.camera.position.set(c.target.x + Math.sin(c.yaw + drift) * cp * c.dist, c.target.y + Math.sin(c.pitch) * c.dist, c.target.z + Math.cos(c.yaw + drift) * cp * c.dist);
     this.camera.lookAt(c.target);
-    // [house3] fog eases back as the camera pulls out to frame the whole oak (it stays crisp, the far forest hazes)
-    this.sky.fog.near = Math.max(24, c.dist * 1.0); this.sky.fog.far = this.sky.fog.near + 46;
+    // [look4] aerial perspective only beyond the subject: the oak and the clearing stay clear, the far forest and the
+    // hills melt into the horizon colour (mist weather pulls it in)
+    {
+      const wf = this.weather?.vis.fog ?? 0, oc = this.weather?.vis.overcast ?? 0;
+      this.sky.fog.near = (c.dist + 18) * (1 - wf * 0.5) * (1 - oc * 0.15);
+      this.sky.fog.far = (c.dist + 480) * (1 - wf * 0.6) * (1 - oc * 0.25);
+      // focus the depth of field on the subject the camera looks at
+      this.post.grade.focus = c.dist;
+      this.post.grade.focusRange = Math.max(3, c.dist * 0.3);
+      this.post.grade.blur = this.view === 'home' || this.view === 'sleep' || this.view === 'wake' ? 0.6 : 0.45;
+    }
     CUT.uCutCam.value.copy(this.camera.position);
     this.shiftCur += (this.shift - this.shiftCur) * k;
     const w = innerWidth, h = innerHeight;
@@ -554,6 +604,8 @@ export class Scene {
 
     this.sky.setViewport(innerWidth, innerHeight, this.renderer.getPixelRatio()); // [world]
     this.sky.update(t, this.camera, dt);
+    this.vista.update(t, this.camera);
+    if ((this.envT -= dt) <= 0) { this.envT = 2; this.bakeEnv(); } // [look4]
     if (!draw) return;
     this.post.render(this.scene, this.camera, t); // [world3]
   }
