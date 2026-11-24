@@ -17,6 +17,27 @@ import { ask } from './fx.tsx';
 import { Px } from './icons.tsx';
 import { haptic, toast } from './kit.tsx';
 import { iconVersion, itemIcon } from './portraits.ts';
+import { blueprintTile, tape, thumbtack } from './chrome/surfaces.ts';
+
+// [ui4] the blueprint is real cyanotype paper (its chalk grid printed in), taped down with masking tape and
+// brass drawing pins, all painted with the relief painter
+let bpStyled = false;
+function installBlueprint() {
+  if (bpStyled || typeof document === 'undefined') return;
+  bpStyled = true;
+  const st = document.createElement('style');
+  st.id = 'hh-blueprint';
+  st.textContent = `
+.bm-drawer{background-color:#1f4a78;background-image:url("${blueprintTile()}");background-size:64px 64px;image-rendering:pixelated}
+.bm-floors{background:url("${blueprintTile()}") 0 0/64px 64px}
+.bm-note{background:url("${blueprintTile()}") 0 0/64px 64px}
+.bm-drawer::before,.bm-drawer::after{width:52px;height:14px;top:-9px;background:url("${tape(52)}") 0 0/52px 14px;clip-path:none;box-shadow:none;filter:drop-shadow(2px 2px 0 rgba(12,34,64,.4))}
+.bm-pin{width:16px;height:16px;top:-6px;background:url("${thumbtack()}") 0 0/16px 16px;image-rendering:pixelated}
+.bm-pin > *{display:none}
+`;
+  document.head.appendChild(st);
+}
+
 import { panel, sceneRef } from './state.ts';
 import './build.css';
 
@@ -144,6 +165,7 @@ function ActionBubble(p: { onMsg: (m: string | null) => void }) {
 // ------------------------------------------------------------------ build mode
 
 export function BuildMode() {
+  installBlueprint();
   const sc = sceneRef.current;
   const [tab, setTab] = useState<TabId>(() => (Object.values(save.value.inventory).some((n) => n > 0) ? 'stored' : 'beds'));
   const [closing, setClosing] = useState(false);

@@ -27,11 +27,13 @@ import { addSwing, kick, makeSwing, reducedMotion, removeSwing, type Swing } fro
 import { clearTransition, installPanelTransitions, panelTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts'; // [motion3] panelTransition, installPanelTransitions
 import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
+import { installSurfaces } from './surfaces.ts';
 import { alarmClock, alarmHands, board, bezel, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
 
 installChromeSkin();
+installSurfaces(); // [ui4] panels as physical objects: walnut cabinet sheets, the cork quest board, carved signs
 installUiFxAuto(); // [ui3] small pixel bursts on every press, toggle, slider, tab, sheet, dialog and toast
 installPanelTransitions(); // [motion3] every open, close and switch of a place plays a pixel transition
 

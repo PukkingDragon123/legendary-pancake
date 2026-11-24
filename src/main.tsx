@@ -30,6 +30,7 @@ async function boot() {
   sceneRef.current = scene;
   (window as unknown as { hh: unknown }).hh = { scene, save, phase, tab, panel };
   bindHome(scene); // [house] rooms, moving boxes and boarded-up floors follow save.home
+  if (import.meta.env.DEV && q.get('hour')) scene.setHour(+q.get('hour')!); // [ui4] dev only: ?hour=22 to check the HUD at night
   scene.setZones(zones.value);
   if (phase.value === 'sleeping') scene.placeOwl('away');
   // settle springs, particles and the camera before the first visible frame

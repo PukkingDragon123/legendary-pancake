@@ -642,6 +642,67 @@ export function toolIcon(id: ToolIcon, k = 2, res = 1): string {
   });
 }
 
+// ------------------------------------------------------------------ the morning's gift sack
+
+const BURLAP = [hex('#4a2e14'), hex('#6c4620'), hex('#8e6230'), hex('#ac7e42'), hex('#c49a58'), hex('#d8b474'), hex('#e8cc94')];
+/**
+ * Pip's gift sack, 56 x 58 units: a plump burlap sack stuffed with lumpy presents, its neck gathered and
+ * tied with a twisted rope, a sapphire patch with a gilt moon stitched on the front. `open` 0..1 loosens
+ * the neck and lets the warm light of the presents spill out.
+ */
+export function giftSack(open = 0, k = 2): string {
+  return cachedRelief(`sack:${open.toFixed(2)}:${k}`, () => {
+    const W = 56, H = 58, r = new Relief(W, H, 1, k), cx = 28;
+    const burlap: AFn = (_x, _y, mx, my) => {
+      const X = Math.floor(mx * 1.6), Y = Math.floor(my * 1.6), over = ((X + Y) & 1) ? 0.07 : -0.07;
+      const slub = hash(Y, 1, 5) > 0.82 ? 0.06 : hash(X, 2, 5) > 0.86 ? -0.06 : 0;
+      return rampAt(BURLAP, clamp(0.52 + over + slub + (fbm(mx * 0.08, my * 0.08, 3) - 0.5) * 0.18));
+    };
+    // ---- the body: bottom-heavy, lumpy with the presents inside
+    const body = (x: number, y: number) => { const u = (x - cx) / (22.5 - Math.max(0, 40 - y) * 0.12), v = (y - 39) / 17.5; return u * u + Math.max(v, -1.2) ** 2 * (v > 0 ? 1.15 : 0.62) <= 1 && y < 56; };
+    r.fill(Object.assign(body, { bb: [2, 18, 54, 57] as [number, number, number, number] }), (x, y) => {
+      const u = (x - cx) / 23, v = (y - 39) / 18, base = Math.max(0, 1 - u * u - v * v);
+      const lumps = (fbm(x * 0.09, y * 0.09, 11) - 0.5) * 6 + Math.sin(x * 0.35 + y * 0.12) * 0.6;
+      return 3 + 11 * Math.sqrt(base) + lumps * Math.sqrt(base);
+    }, burlap, MAT.cloth, { id: 1 });
+    // gathers running up into the neck
+    r.carve(Object.assign((x: number, y: number) => y < 34 && y > 18, { bb: [10, 18, 46, 34] as [number, number, number, number] }), (x, y) => Math.sin((x - cx) * 0.9) * 0.9 * (34 - y) / 16);
+    // ---- the neck and its ruffled mouth
+    const neckW = 7 + open * 6, mouthW = 13 + open * 7;
+    r.fill(Object.assign((x: number, y: number) => y >= 9 && y < 22 && Math.abs(x - cx) < neckW + (22 - y) * (mouthW - neckW) / 13 * (y < 14 ? 1 : 0.4), { bb: [cx - 22, 9, cx + 22, 22] as [number, number, number, number] }), (x) => 9 + Math.sin((x - cx) * 1.1) * 1.1, burlap, MAT.cloth, { id: 2, seam: true });
+    // tied shut, the cloth above the rope bunches up into a ruffle of little peaks
+    if (open < 0.05) {
+      // soft, uneven peaks of bunched cloth, flaring out over the rope
+      const top = (x: number) => { const u = (x - cx + 40) / 3.1, i = Math.floor(u), f = u - i; return 3.4 + hash(i, 7, 3) * 2.6 + (1 - Math.sin(f * Math.PI)) * 2.4 + Math.abs(x - cx) * 0.16; };
+      r.fill(Object.assign((x: number, y: number) => Math.abs(x - cx) < mouthW && y >= top(x) && y < 12, { bb: [cx - mouthW, 3, cx + mouthW, 12] as [number, number, number, number] }),
+        (x, y) => 9.5 + Math.sin((x - cx) * 1.85) * 1.4 - (12 - y) * 0.1, burlap, MAT.cloth, { id: 3, seam: true });
+      r.carve(Object.assign((x: number, y: number) => y < 12, { bb: [cx - mouthW, 3, cx + mouthW, 12] as [number, number, number, number] }), (x) => (((x - cx + 40) % 3.1) < 0.45 ? -1.4 : 0));
+    }
+    // opening: dark inside, the presents' light spilling out
+    const mouth = ell(cx, 10, mouthW * 0.95, 2.2 + open * 3.6);
+    if (open >= 0.05) r.fill(mouth, flat(8), (_x, _y, mx, my) => {
+      const d = Math.hypot((mx - cx) / (mouthW * 0.95), (my - 10) / (2.2 + open * 3.6));
+      if (open < 0.05) return hex('#2a1608');
+      return rampAt([hex('#3a1e08'), hex('#b8701e'), hex('#f2c050'), hex('#fff0b0'), hex('#ffffff')], clamp(open * 1.1 - d * 0.7 + 0.15));
+    }, open > 0.05 ? MAT.glow : MAT.cloth, { id: 3, seam: true });
+    // ---- the rope: twisted, round the neck, with a looped bow and two tails
+    const ropeA: AFn = (_x, _y, mx, my) => rampAt([hex('#5a3818'), hex('#8a6030'), hex('#b88c4c'), hex('#dcb878'), hex('#f0d8a4')], clamp(0.62 + (((Math.floor(mx * 1.4 - my * 1.4) % 3) + 3) % 3 - 1) * 0.16));
+    r.fill(rect(cx - neckW - 2.5, 20.5, (neckW + 2.5) * 2, 3.6), tubeX(22.3, 1.8, 10), ropeA, MAT.cloth, { id: 4, seam: true });
+    r.fill(and(ring(cx + 6, 25, 2.4, 4.2), (_x, y) => y > 21), torus(cx + 6, 25, 3.3, 0.9, 1.6, 11), ropeA, MAT.cloth, { id: 5, seam: true });
+    r.fill(or(seg(cx + 3, 23, cx + 1, 32, 0.9), seg(cx + 5, 23, cx + 8, 33, 0.9)), flat(11), ropeA, MAT.cloth, { id: 5, seam: true });
+    // ---- the patch: sapphire cloth, a running stitch, a gilt crescent and two stars
+    const patch = rrect(cx - 8.5, 33, 17, 15, 1.4);
+    r.fill(patch, (x, y) => 3 + 11 * Math.sqrt(Math.max(0, 1 - ((x - cx) / 23) ** 2 - ((y - 39) / 18) ** 2)) + 0.8, weave(PAL.sapphire, { base: 0.46 }), MAT.cloth, { id: 6, seam: true });
+    r.carve(and(patch, not(rrect(cx - 7.4, 34.1, 14.8, 12.8, 1))), () => -0.3);
+    r.paint(and(patch, not(rrect(cx - 7.6, 33.9, 15.2, 13.2, 1)), (x, y) => (Math.floor(x * 2) + Math.floor(y * 2)) % 3 === 0), solid(hex('#f0dca8')));
+    const moon = and(disc(cx - 0.6, 40.5, 4.6), not(disc(cx + 1.6, 39.2, 3.8)));
+    r.paint(moon, metal(PAL.gold, { base: 0.66 }), MAT.brass); r.carve(moon, () => 0.6);
+    for (const [sx, sy] of [[cx + 4, 37], [cx + 3, 44]]) { const st = or(rect(sx - 0.4, sy - 1.2, 0.8, 2.4), rect(sx - 1.2, sy - 0.4, 2.4, 0.8)); r.paint(st, metal(PAL.gold, { base: 0.78 }), MAT.brass); }
+    r.shadow = null;
+    return r.url();
+  });
+}
+
 /** Detail level for a HUD part: 2 art px per unit on phones, 3 where the HUD is shown 1.5x (desktop). */
 export const DESK_HUD = '(min-width: 900px) and (min-height: 640px)';
 export const DESK_NAV = '(min-width: 900px) and (min-height: 760px)';

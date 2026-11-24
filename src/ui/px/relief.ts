@@ -273,7 +273,7 @@ export class Relief {
       else {
         const ndl = shade[i * 6], ndh = shade[i * 6 + 1], ao = shade[i * 6 + 2];
         const nx = shade[i * 6 + 3], ny = shade[i * 6 + 4], nz = shade[i * 6 + 5];
-        const bands = (m.bands ?? 6) / 1.5;
+        const bands = Math.max(2, Math.round((m.bands ?? 6) / 1.5)); // an integer, so a flat face never dithers
         // stepped diffuse relative to a flat face (1 = facing you), with a dithered edge between bands
         // (art-pixel dither, so it stays chunky); a flat face sits exactly on a band so it never dithers
         const f = Math.max(0, ndl) / LZ;

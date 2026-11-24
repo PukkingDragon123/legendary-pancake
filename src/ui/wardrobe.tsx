@@ -15,6 +15,7 @@ import { frameStyle } from './px/frames.js';
 import { spriteURL } from './px/sprites.js';
 import { CSS_TOKENS } from '../gfx/palette.ts';
 import { uiBurstAt } from './chrome/uifx.ts';
+import { b9, linenTile, railTile, signBoard, thinFrame, velvetTile } from './chrome/surfaces.ts';
 import './px/wardrobe.js';
 import { IcoClose, IcoHanger, Px } from './icons.tsx';
 import { Price, Sheet, tap, toast } from './kit.tsx';
@@ -60,44 +61,43 @@ function installStyles() {
 .wd-purse .price .ico{margin:-5px -1px}
 .wd-rail{position:relative;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:12px 4px 4px;margin:0 -4px;flex:none}
 .wd-rail::-webkit-scrollbar{display:none}
-.wd-rail::before{content:'';position:absolute;left:0;right:0;top:4px;height:6px;min-width:100%;background:var(--wood);box-shadow:0 2px 0 var(--wood-deep),0 -2px 0 var(--wood-light),inset 0 2px 0 var(--wood-pale),inset 0 -2px 0 var(--wood-dark)}
-.wd-rail::after{content:'';position:absolute;left:6px;right:6px;top:4px;height:6px;background:repeating-linear-gradient(90deg,transparent 0 22px,var(--wood-dark) 22px 24px,transparent 24px 46px);pointer-events:none}
-.wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:54px;height:60px;${frameStyle('tab', 2)};color:var(--ink);font-size:12px;line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1);filter:saturate(.7)}
-.wd-tag::before{content:'';position:absolute;top:-12px;left:50%;width:2px;height:9px;margin-left:-1px;background:var(--wood-deep);box-shadow:1px 0 0 var(--wood)}
+.wd-rail::before{content:'';position:absolute;left:0;right:0;top:1px;height:12px;min-width:100%;background:url("${railTile()}") 0 0/16px 12px repeat-x;image-rendering:pixelated}
+.wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:54px;height:60px;${frameStyle('tab', 2)};color:var(--ink);font-size:12px;line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.wd-tag::before{content:'';position:absolute;top:-10px;left:50%;width:2px;height:8px;margin-left:-1px;background:#e8d8b0;box-shadow:1px 0 0 #6e4a12}
 .wd-tag .ico{margin:-4px 0 -2px}
 .wd-tag span{text-shadow:0 1px 0 var(--paper);white-space:nowrap}
-.wd-tag.on{${frameStyle('button_gold', 2)};transform:translateY(3px) rotate(-3deg);color:var(--ink);filter:saturate(.62) brightness(1.04);animation:wdSway 2.4s steps(8) infinite}
+.wd-tag.on{${frameStyle('button_gold', 2)};transform:translateY(3px) rotate(-3deg);color:var(--ink);animation:wdSway 2.4s steps(8) infinite}
 .wd-tag:active{transform:rotate(6deg)}
 .wd-tag .dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--berry);box-shadow:0 0 0 2px var(--ink)}
 .wd-hint{font-size:14px;color:var(--ink-2);text-align:center;margin:-2px 0 0}
-.wd-room{position:relative;margin:0 -6px;padding:12px 6px 8px;background:url(${paper}) 0 0/32px 32px repeat,var(--oat);image-rendering:pixelated;box-shadow:inset 0 4px 0 var(--wood-dark),inset 0 6px 0 rgba(46,43,36,.25),inset 0 -4px 0 var(--wood-dark)}
-.wd-room::before{content:'';position:absolute;left:0;right:0;top:4px;height:4px;background:repeating-linear-gradient(90deg,var(--wood-light) 0 8px,var(--wood) 8px 16px)}
+.wd-room{position:relative;margin:0 -6px;padding:20px 6px 8px;background:url("${velvetTile('plum')}") 0 0/96px 96px repeat;image-rendering:pixelated;box-shadow:inset 0 6px 0 rgba(20,8,24,.45),inset 0 10px 0 rgba(20,8,24,.2),inset 0 -6px 0 rgba(20,8,24,.35)}
+.wd-room::before{content:'';position:absolute;left:0;right:0;top:4px;height:12px;background:url("${railTile()}") 0 0/16px 12px repeat-x;image-rendering:pixelated;z-index:1}
 .wd-shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:14px 4px;padding-top:6px}
-.wd-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0;padding:0 2px 2px;color:var(--paper);text-align:center;filter:var(--drop);transition:transform .15s var(--pop);animation:wdIn .35s var(--ease) both;transform-origin:50% -10px}
-.wd-card::before{content:'';position:absolute;inset:0;${frameStyle('slot_brass', 2)};filter:saturate(.62) brightness(.98);z-index:-1;pointer-events:none}
+.wd-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0;padding:2px 4px 4px;color:#2a1a10;text-align:center;filter:drop-shadow(2px 4px 0 rgba(20,8,24,.5));transition:transform .15s var(--pop);animation:wdIn .35s var(--ease) both;transform-origin:50% -10px}
+.wd-card::before{content:'';position:absolute;inset:0;${b9(thinFrame('oak', 7))};background:url("${linenTile()}") 0 0/32px 32px;background-clip:padding-box;z-index:-1;pointer-events:none}
 .wd-card:active{transform:translateY(2px) scale(.97)}
 .wd-card.on{animation:wdIn .35s var(--ease) both,wdSway 2.6s steps(10) .35s infinite}
-.wd-card.on::before{${frameStyle('slot_gold_active', 2)};filter:saturate(.6) brightness(1.03)}
-.wd-card.locked::before{${frameStyle('slot_locked', 2)};filter:saturate(.5)}
-.wd-card .hook{position:absolute;top:-13px;left:50%;margin-left:-17px;pointer-events:none}
+.wd-card.on::before{${b9(thinFrame('brass', 7))};background:url("${linenTile()}") 0 0/32px 32px;background-clip:padding-box}
+.wd-card.locked::before{${b9(thinFrame('iron', 7))};background:url("${linenTile()}") 0 0/32px 32px;background-clip:padding-box;filter:brightness(.8)}
+.wd-card .hook{position:absolute;top:-17px;left:50%;margin-left:-17px;pointer-events:none;z-index:2}
 .wd-card .pic{position:relative;width:86px;height:78px;display:grid;place-items:center;overflow:hidden;margin-top:3px}
 .wd-card .pic img{max-width:100%;max-height:100%;transition:transform .3s var(--pop)}
 .wd-card.on .pic img{transform:scale(1.06)}
 .wd-card.locked .pic img{filter:brightness(.42) saturate(.35) contrast(1.1)}
 .wd-card .pic .spin{width:22px;height:22px;opacity:.6;animation:wdSpin 1s steps(8) infinite}
-.wd-card .nm{font-size:14px;line-height:1.05;min-height:30px;display:grid;place-items:center;text-shadow:1px 1px 0 var(--ink)}
-.wd-card .st{font-size:13px;display:flex;align-items:center;gap:2px;min-height:20px;text-shadow:1px 1px 0 var(--ink)}
-.wd-card .st.own{color:var(--sage-light)}
-.wd-card .st.wear{color:var(--lamp)}
-.wd-card .st.lock{color:var(--rose)}
-.wd-card .st.muted{color:var(--linen);font-size:12px}
-.wd-card .price{display:flex;align-items:center;gap:2px;font-size:16px;color:var(--lamp)}
+.wd-card .nm{font-size:14px;line-height:1.05;min-height:30px;display:grid;place-items:center;color:#2a1a10}
+.wd-card .st{font-size:13px;display:flex;align-items:center;gap:2px;min-height:20px}
+.wd-card .st.own{color:#1a5432}
+.wd-card .st.wear{color:#86580b}
+.wd-card .st.lock{color:#7c2530}
+.wd-card .st.muted{color:#5e4a34;font-size:12px}
+.wd-card .price{display:flex;align-items:center;gap:2px;font-size:16px;color:#5a3a06}
 .wd-card .price .ico{margin:-6px -2px}
 .wd-card .ribbon{position:absolute;top:-4px;left:-6px;padding:1px 5px;font-size:11px;color:var(--paper);background:var(--dusk);box-shadow:0 0 0 2px var(--slate),0 2px 0 rgba(46,43,36,.4);z-index:2}
 .wd-card .ribbon.gold{background:var(--ochre);box-shadow:0 0 0 2px var(--wood-deep),0 2px 0 rgba(46,43,36,.4)}
 .wd-card .ribbon.red{background:var(--berry);box-shadow:0 0 0 2px var(--plum),0 2px 0 rgba(46,43,36,.4)}
 .wd-card .check{position:absolute;top:2px;right:2px}
-.wd-plaque{position:sticky;top:0;margin:0 -2px;padding:0 2px;${frameStyle('wood_dark', 2)};background:var(--wood-deep);display:flex;gap:6px;align-items:center;z-index:3;animation:wdUp .3s var(--ease) both;flex:none}
+.wd-plaque{position:sticky;top:0;margin:0 -2px;padding:0 2px;${b9(signBoard('walnut'), true)};background:none;display:flex;gap:6px;align-items:center;z-index:3;animation:wdUp .3s var(--ease) both;flex:none}
 .wd-plaque .face{position:relative;flex:none;width:76px;height:76px;display:grid;place-items:center}
 .wd-plaque .face .glass{position:absolute;inset:5px 6px;clip-path:${oval};background:linear-gradient(180deg,var(--mist) 0 48%,var(--sky) 48% 74%,var(--lake) 74%);display:grid;place-items:center;overflow:hidden}
 .wd-plaque .face .glass::after{content:'';position:absolute;left:18%;top:12%;width:4px;height:12px;background:var(--snow);opacity:.7;box-shadow:6px 4px 0 -1px var(--snow)}
