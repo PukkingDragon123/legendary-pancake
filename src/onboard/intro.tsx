@@ -317,7 +317,7 @@ export function Intro() {
     injectCSS();
     const sc = sceneRef.current;
     let r: InterviewRoom | null = null;
-    try { if (sc) r = new InterviewRoom(lookFor(aRef.current.species), sc.quality); } catch (e) { console.error('interview room failed', e); }
+    try { if (sc) r = new InterviewRoom(lookFor(aRef.current.species), sc.quality, typeof sc.renderView === 'function' ? sc : null); } catch (e) { console.error('interview room failed', e); }
     if (!sc || !r) { releaseBoot(); return undefined; }
     room.current = r;
     sc.setStage(r);

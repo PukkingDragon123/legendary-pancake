@@ -15,6 +15,15 @@ import { Fx, SPR } from '../world/fx.ts';
 import type { Stage } from '../world/scene.ts';
 import { DESK, loadModels, model, onWall, release, ROOM, type ModelId } from './props.ts';
 import { SkyView, type Weather } from './skyview.ts';
+import { HOUSE } from '../world/layout.ts';
+import { modelUrl } from '../gfx/glb.ts';
+
+/** The live world, for the real view through the window (world/scene.ts Scene). */
+export interface WorldView {
+  renderView(camera: THREE.Camera, target: THREE.WebGLRenderTarget): void;
+  viewTarget(w: number, h: number): THREE.WebGLRenderTarget;
+  setHour(h: number | null): void;
+}
 
 export type ShotName = 'establish' | 'pip' | 'pipL' | 'pipR' | 'close' | 'desk' | 'window' | 'clock' | 'clockwin' | 'board' | 'floor' | 'bed' | 'low' | 'wide' | 'tower';
 interface Shot { target: THREE.Vector3; yaw: number; pitch: number; dist: number; fov?: number; /** distance on a portrait screen */ pd?: number }
@@ -116,10 +125,20 @@ export class InterviewRoom implements Stage {
   private glassesOn = true;
   private boardOn = true;
   private loaded = false;
+  private sway: { o: THREE.Object3D; ph: number }[] = [];
   /** world-space point the camera looks at, for anchoring UI */
   readonly focus = new THREE.Vector3();
 
-  constructor(look: OwlLook, quality: 'low' | 'high' = 'high') {
+  /** the real forest seen through the window */
+  private world: WorldView | null;
+  private winRT: THREE.WebGLRenderTarget | null = null;
+  private winCam = new THREE.PerspectiveCamera(52, 1, 0.3, 400);
+  private winT = 0;
+  private winHour: number | null = null;
+  private rainT = 0;
+
+  constructor(look: OwlLook, quality: 'low' | 'high' = 'high', world: WorldView | null = null) {
+    this.world = world;
     this.quality = quality;
     const s = this.scene;
     const bg = new THREE.Color(0x1d1813);
@@ -154,7 +173,18 @@ export class InterviewRoom implements Stage {
     s.add(this.sun, this.sun.target);
 
     // the window: the painted sky behind the frame (a 16-gon to match the frame), and a beam of light
-    const skyMat = new THREE.MeshBasicMaterial({ map: this.sky.tex, toneMapped: false });
+    // the window shows the real forest outside the oak (sky, weather, season and time of day), rendered from a camera
+    // at the trunk looking out; without the world (dev pages) it falls back to the little painted view
+    let skyMat: THREE.MeshBasicMaterial;
+    if (world) {
+      this.winRT = world.viewTarget(quality === 'high' ? 176 : 112, quality === 'high' ? 176 : 112);
+      const d = new THREE.Vector3(-0.62, 0, 1).normalize();
+      this.winCam.position.set(HOUSE.x + d.x * (HOUSE.r + 0.6), 5.4, HOUSE.z + d.z * (HOUSE.r + 0.6));
+      this.winCam.lookAt(this.winCam.position.clone().addScaledVector(d, 10).add(new THREE.Vector3(0, -1.6, 0)));
+      this.winCam.updateMatrixWorld();
+      skyMat = new THREE.MeshBasicMaterial({ map: this.winRT.texture });
+      this.disposers.push(() => { this.winRT?.dispose(); this.world?.setHour(null); });
+    } else skyMat = new THREE.MeshBasicMaterial({ map: this.sky.tex, toneMapped: false });
     const skyMesh = new THREE.Mesh(new THREE.CircleGeometry(0.96, 16), skyMat);
     const n = new THREE.Vector3(-Math.sin(WIN_A), 0, Math.cos(WIN_A));
     skyMesh.position.copy(SPOT.window).addScaledVector(n, -0.09);
@@ -225,8 +255,11 @@ export class InterviewRoom implements Stage {
     this.onWall('curtains', WIN_A, U(50), U(4));
     const cab = onWall(WIN_A, 0, 0.42);
     this.put('b_cabinet', cab.x, 0, cab.z, -WIN_A, 1.12);
-    this.put('g_pothos', cab.x + 0.15, 1.32, cab.z + 0.12, 0.5, 0.48);
-    this.onWall('corkboard', BOARD_A, 2.35, 0.06);
+    this.put('plant_pothos', cab.x + 0.18, 1.32, cab.z + 0.1, 0.5, 1.0);
+    const cork = this.onWall('corkboard', BOARD_A, 2.35, 0.06);
+    // real art pinned to the board: a print of Whistler's nocturne and Hokusai's cranes (public domain, AIC)
+    this.art(cork, 'nocturne', 0.56, 0.36, 0.06, 1.1, 0.081, 3);
+    this.art(cork, 'cranes', 0.34, 0.33, -0.16 + Math.sin((7 * Math.PI) / 180) * 0.04, 0.5, 0.087, -7);
     const bc = onWall(1.22, 0, 0.45), bk = 1.35;
     const shelf = this.put('b_bookcase', bc.x, 0, bc.z, -1.22, bk);
     // fill the bookcase: rows of books, a stack of old ones, the jug, a bowl, the mantel clock on top
@@ -236,17 +269,19 @@ export class InterviewRoom implements Stage {
       ['b_mantelclock', 0.0, 2.06, 0.02, 1.3],
     ];
     for (const [id, x, y, z, k] of fill) this.put(id, x, y, z, 0, k / bk, shelf);
-    this.onWall('painting', -0.25, 1.95, 0.04);
+    const paint = this.onWall('painting', -0.25, 1.95, 0.04);
+    // the painting is a real one: Albert Bierstadt's Mountain Brook (1863, public domain, AIC)
+    this.art(paint, 'mountain_brook', 1.05, 0.78, 0, 0.47, 0.043, 0);
     this.onWall('wallshelf', 0.3, 3.2, 0.02);
     const clock = this.onWall('clock', 0, SPOT.clock.y, 0.02);
     this.hourHand = clock.getObjectByName('hand_h') ?? null;
     this.minHand = clock.getObjectByName('hand_m') ?? null;
     this.pend = clock.getObjectByName('pendulum') ?? null;
     // the floor: a big plant, the globe, a side table with an aloe, a basket of books, a suitcase with books on it
-    this.put('g_plant', Math.sin(-1.2) * 4.4, 0, -Math.cos(-1.2) * 4.4, 0.4, 1.35);
+    this.put('plant_floor', Math.sin(-1.2) * 4.4, 0, -Math.cos(-1.2) * 4.4, 0.4, 1.1);
     this.put('globe', -3.25, 0, -0.45, 0.6);
     this.put('b_sidetable', -2.55, 0, 1.0, 0.3, 1.8);
-    this.put('g_aloe', -2.55, 0.42 * 1.8, 1.0, 0.2, 3.2);
+    this.put('plant_fern', -2.55, 0.42 * 1.8, 1.0, 0.2, 1.1);
     this.put('b_basket', 1.45, 0, -1.75, 0.5, 1.6);
     this.put('g_books', 1.45, 0.06, -1.75, 0.9, 1.2);
     this.put('b_suitcase', 3.3, 0, 0.2, -0.5, 1.45);
@@ -260,12 +295,26 @@ export class InterviewRoom implements Stage {
     this.furniture.add(chain);
     this.disposers.push(() => { chain.geometry.dispose(); (chain.material as THREE.Material).dispose(); });
     this.flame = this.furniture.getObjectByName('flame') ?? null;
+    // the leaves of every plant sway a little, each at its own pace
+    let k = 0;
+    this.furniture.traverse((o) => { if (o.name === 'leaves') this.sway.push({ o, ph: k++ * 1.7 }); });
     // the drawer that slides out for the phone (hidden in the chest until it opens)
     const dr = model('desk_drawer');
     dr.scale.setScalar(0.62);
     this.drawerObj.add(dr);
     this.drawerObj.visible = false;
     this.dress();
+  }
+
+  /** A real artwork (public domain, pixel-graded by art/lowpix/interview/wallart.py) on a plane over a frame or print. */
+  private art(on: THREE.Object3D, id: string, w: number, h: number, x: number, y: number, z: number, rotDeg: number) {
+    const tex = new THREE.TextureLoader().load(modelUrl(`interview/art/${id}.webp`));
+    tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.colorSpace = THREE.SRGBColorSpace;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, roughness: 1, metalness: 0 }));
+    m.position.set(x, y, z); m.rotation.z = (rotDeg * Math.PI) / 180;
+    m.receiveShadow = true;
+    on.add(m);
+    this.disposers.push(() => { m.geometry.dispose(); (m.material as THREE.Material).dispose(); tex.dispose(); });
   }
 
   // ---------------------------------------------------------------- Pip's look
@@ -562,8 +611,18 @@ export class InterviewRoom implements Stage {
     if (id && make) this.vig = make(this);
   }
 
-  /** Weather and hour shown through the window. */
-  window(hour: number | null, w: Weather = 'clear') { this.sky.set(hour, w); }
+  /** Hour (and weather) shown through the window: the real world's sky follows the previewed hour. */
+  window(hour: number | null, w: Weather = 'clear') {
+    this.sky.set(hour, w);
+    if (this.world && hour !== this.winHour) { this.winHour = hour; this.world.setHour(hour); this.winT = 0; }
+  }
+  /** Redraw the real view through the window (a few times a second). */
+  private stepWindow(dt: number) {
+    if (!this.world || !this.winRT) return;
+    if ((this.winT -= dt) > 0) return;
+    this.winT = this.quality === 'high' ? 0.2 : 0.5;
+    this.world.renderView(this.winCam, this.winRT);
+  }
 
   // ---------------------------------------------------------------- frame
 
@@ -602,7 +661,17 @@ export class InterviewRoom implements Stage {
     const fl = Math.sin(this.time * 17) * 0.5 + Math.sin(this.time * 31 + 1) * 0.5;
     this.candleLight.intensity = 0.5 + fl * 0.08;
     if (this.flame) { this.flame.scale.set(1 - fl * 0.08, 1 + fl * 0.15, 1); this.flame.rotation.z = fl * 0.06; }
+    for (const { o, ph } of this.sway) { o.rotation.z = Math.sin(this.time * 0.8 + ph) * 0.025; o.rotation.x = Math.sin(this.time * 0.6 + ph * 1.3) * 0.02; }
 
+    this.stepWindow(dt);
+    // rain on the glass when a vignette calls for it
+    if (this.sky.weather === 'rain' && (this.rainT -= dt) <= 0) {
+      this.rainT = 0.05;
+      const n = new THREE.Vector3(-Math.sin(WIN_A), 0, Math.cos(WIN_A)), side = new THREE.Vector3(Math.cos(WIN_A), 0, Math.sin(WIN_A));
+      const p = SPOT.window.clone().addScaledVector(side, (Math.random() - 0.5) * 1.7).addScaledVector(n, -0.05);
+      p.y += 0.85;
+      this.fx.emit({ x: p.x, y: p.y, z: p.z, vx: 0, vy: -1.6 - Math.random(), vz: 0, life: 1.0, frame: SPR.mote, color: 0xd3e0dc, size: 0.06, fadeOut: 0.3 });
+    }
     this.stepTrip(dt);
     if (this.talkT > 0) this.talkT -= dt;
     this.pip.dark = this.sky.night * 0.4;

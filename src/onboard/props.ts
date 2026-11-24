@@ -9,8 +9,9 @@ import { loadGLB } from '../gfx/glb.ts';
  * g_ from Gacha Garage; see art/lowpix/interview/borrow.py and docs/credits/interview3.md). */
 export const ROOM_MODELS = ['room', 'desk_drawer', 'clock', 'window', 'curtains', 'corkboard', 'rug', 'ivy', 'teacup', 'papers', 'inkwell', 'books_stack', 'books_row',
   'candle', 'nameplate', 'wallshelf', 'painting', 'globe', 'glasses', 'clipboard_small',
+  'plant_floor', 'plant_pothos', 'plant_fern',
   'b_desk', 'b_chair', 'b_bookcase', 'b_oillamp', 'b_lantern', 'b_mantelclock', 'b_sidetable', 'b_cabinet', 'b_basket', 'b_suitcase', 'b_jug', 'b_bowl',
-  'g_books', 'g_pothos', 'g_plant', 'g_aloe'] as const;
+  'g_books'] as const;
 /** Props that pop in while Pip acts out your answers. */
 export const PROP_MODELS = ['b_daybed', 'pillow', 'sheep', 'fence', 'phone', 'microphone', 'milk', 'g_teapot', 'beans', 'g_radio', 'g_gramophone', 'stove', 'book_open', 'sunflower',
   'mug_sun', 'mug_moon'] as const;
@@ -42,24 +43,26 @@ export function loadModels(): Promise<void> {
 export const modelsReady = () => templates.size > 0;
 
 /** Joints the game animates stay separate; everything else in a model is merged into one mesh per material. */
-const KEEP = new Set(['hand_h', 'hand_m', 'pendulum', 'flame', 'screen', 'dial', 'star', 'fire']);
+const KEEP = new Set(['hand_h', 'hand_m', 'pendulum', 'flame', 'screen', 'dial', 'star', 'fire', 'leaves']);
 
 /** Merge a lowpix model's many part meshes (one node per part) into a draw call per material. */
 function flatten(root: THREE.Object3D): THREE.Object3D {
   root.updateMatrixWorld(true);
-  const inv = root.matrixWorld.clone().invert();
-  const groups = new Map<THREE.Material, THREE.BufferGeometry[]>();
+  // meshes merge into the space of their nearest animated joint (or the model's root), one mesh per material there
+  const groups = new Map<string, { at: THREE.Object3D; mat: THREE.Material; list: THREE.BufferGeometry[] }>();
   const merged: THREE.Mesh[] = [];
   root.traverse((o) => {
     const m = o as THREE.Mesh;
     if (!m.isMesh) return;
-    for (let p: THREE.Object3D | null = m; p && p !== root; p = p.parent) if (KEEP.has(p.name)) return;
+    let at: THREE.Object3D = root;
+    for (let p: THREE.Object3D | null = m; p && p !== root; p = p.parent) if (KEEP.has(p.name)) { if (p === m) return; at = p; break; }
+    const inv = at.matrixWorld.clone().invert();
     let g = m.geometry.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld));
     if (g.index) g = g.toNonIndexed();
     for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal' && k !== 'uv') g.deleteAttribute(k);
-    const mat = m.material as THREE.Material;
-    if (!groups.has(mat)) groups.set(mat, []);
-    groups.get(mat)!.push(g);
+    const mat = m.material as THREE.Material, key = at.uuid + mat.uuid;
+    if (!groups.has(key)) groups.set(key, { at, mat, list: [] });
+    groups.get(key)!.list.push(g);
     merged.push(m);
   });
   // the merged meshes' nodes become plain groups (their kept children ride along)
@@ -70,13 +73,13 @@ function flatten(root: THREE.Object3D): THREE.Object3D {
     m.parent?.add(g);
     m.parent?.remove(m);
   }
-  for (const [mat, list] of groups) {
+  for (const { at, mat, list } of groups.values()) {
     const geo = mergeGeometries(list, false);
     list.forEach((x) => x.dispose());
     if (!geo) continue;
     const mesh = new THREE.Mesh(geo, mat);
     mesh.castShadow = true; mesh.receiveShadow = true;
-    root.add(mesh);
+    at.add(mesh);
   }
   return root;
 }

@@ -120,9 +120,9 @@ def plant_floor():
             t = 0.25 + 0.75 * k / n
             a = k * 2.4 + s
             x, y, z = sx + sx * 1.5 * t, top * t, sz + sz * 1.5 * t
-            art = leaf_art('rubber', 14, 30, seed=s * 50 + k, bend=rnd.uniform(-0.3, 0.3))
+            art = leaf_art('rubber', 18, 36, seed=s * 50 + k, bend=rnd.uniform(-0.3, 0.3))
             S.card('leaf', art, [x, y, z], plane='xy', parent='leaves', style=lf, double_sided=True,
-                   rot=[-rnd.uniform(25, 60), math.degrees(a), rnd.uniform(-12, 12)], offset=[0, 15 / 90, 0])
+                   rot=[-rnd.uniform(35, 70), math.degrees(a), rnd.uniform(-12, 12)], offset=[0, 18 / 90, 0])
     return S
 
 
@@ -136,11 +136,11 @@ def plant_pothos():
     S.cyl('soil', 0.18, 0.02, 0, 0.3, 0, sides=10, style='soil')
     S.bone('leaves', [0, 0.3, 0])
     rnd = random.Random(4)
-    for k in range(26):
+    for k in range(40):
         a = rnd.uniform(0, math.tau)
-        r = rnd.uniform(0.0, 0.16)
-        S.card('leaf', leaf_art('pothos', 20, 22, seed=k, bend=rnd.uniform(-0.25, 0.25)), [math.sin(a) * r, rnd.uniform(0.0, 0.2), math.cos(a) * r],
-               plane='xy', parent='leaves', style=lf, double_sided=True, rot=[-rnd.uniform(20, 70), math.degrees(a), rnd.uniform(-20, 20)], offset=[0, 0.1, 0])
+        r = rnd.uniform(0.03, 0.19)
+        S.card('leaf', leaf_art('pothos', 20, 22, seed=k, bend=rnd.uniform(-0.25, 0.25)), [math.sin(a) * r, rnd.uniform(0.0, 0.14), math.cos(a) * r],
+               plane='xy', parent='leaves', style=lf, double_sided=True, rot=[-rnd.uniform(40, 85), math.degrees(a), rnd.uniform(-20, 20)], offset=[0, 0.1, 0])
     for v in range(4):
         a = v / 4 * math.tau + 0.4
         x0, z0 = math.sin(a) * 0.19, math.cos(a) * 0.19
