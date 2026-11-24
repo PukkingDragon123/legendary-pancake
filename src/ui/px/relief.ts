@@ -154,6 +154,15 @@ export class Relief {
   readonly fns: (AFn | null)[] = [];
   readonly fnIdx: Int16Array;
   outlineK = 0.42;
+  /**
+   * Hand-drawn wobble: every shape is tested through a gentle noise warp of this many units, so nothing is a
+   * perfect circle or a ruler-straight edge (0 turns it off). `chip` (0..1) knocks small chips out of edges.
+   */
+  wobble = 0.45;
+  chip = 0.5;
+  /** the warped point a shape is tested at (a smooth, low-frequency field shared by every part) */
+  private wx(x: number, y: number) { return x + (vnoise(x * 0.28 + 3.1, y * 0.28, 71) - 0.5) * 2 * this.wobble; }
+  private wy(x: number, y: number) { return y + (vnoise(x * 0.28, y * 0.28 + 5.7, 73) - 0.5) * 2 * this.wobble; }
   /** soft cast shadow drawn under the object (art px offset, alpha) */
   shadow: { dx: number; dy: number; a: number } | null = null;
   /** art pixels per design unit (shapes, heights and albedos are given in units) */
@@ -174,9 +183,9 @@ export class Relief {
   }
   /** art-pixel loop range for a shape (its bounding box, or the whole canvas) */
   private range(sh: Shape): [number, number, number, number] {
-    const k = this.k, b = sh.bb;
+    const k = this.k, b = sh.bb, m = Math.ceil(this.wobble * k) + 1;
     if (!b) return [0, 0, this.w, this.h];
-    return [Math.max(0, Math.floor(b[0] * k) - 1), Math.max(0, Math.floor(b[1] * k) - 1), Math.min(this.w, Math.ceil(b[2] * k) + 1), Math.min(this.h, Math.ceil(b[3] * k) + 1)];
+    return [Math.max(0, Math.floor(b[0] * k) - m), Math.max(0, Math.floor(b[1] * k) - m), Math.min(this.w, Math.ceil(b[2] * k) + m), Math.min(this.h, Math.ceil(b[3] * k) + m)];
   }
   private matIndex(m: Mat) { let i = this.mats.indexOf(m); if (i < 0) { this.mats.push(m); i = this.mats.length - 1; } return i; }
   /**
@@ -188,11 +197,11 @@ export class Relief {
     this.fns.push(albedo);
     const fi = this.fns.length - 1, k = this.k, [rx0, ry0, rx1, ry1] = this.range(shape);
     for (let y = ry0; y < ry1; y++) for (let x = rx0; x < rx1; x++) {
-      const cx = (x + 0.5) / k, cy = (y + 0.5) / k;
-      if (!shape(cx, cy)) continue;
+      const cx = (x + 0.5) / k, cy = (y + 0.5) / k, sx = this.wx(cx, cy), sy = this.wy(cx, cy);
+      if (!shape(sx, sy)) continue;
       const i = y * this.w + x;
       if (o.onTop && !this.solid[i]) continue;
-      const hv = h(cx, cy) * k;
+      const hv = h(sx, sy) * k;
       if (Number.isNaN(hv)) continue;
       this.hgt[i] = o.add && this.solid[i] ? this.hgt[i] + hv : hv;
       this.mat[i] = mi; this.fnIdx[i] = fi; this.solid[i] = 1;
@@ -206,9 +215,9 @@ export class Relief {
   carve(shape: Shape, dh: HFn) {
     const k = this.k, [rx0, ry0, rx1, ry1] = this.range(shape);
     for (let y = ry0; y < ry1; y++) for (let x = rx0; x < rx1; x++) {
-      const i = y * this.w + x, cx = (x + 0.5) / k, cy = (y + 0.5) / k;
-      if (!this.solid[i] || !shape(cx, cy)) continue;
-      const v = dh(cx, cy);
+      const i = y * this.w + x, cx = (x + 0.5) / k, cy = (y + 0.5) / k, sx = this.wx(cx, cy), sy = this.wy(cx, cy);
+      if (!this.solid[i] || !shape(sx, sy)) continue;
+      const v = dh(sx, sy);
       if (!Number.isNaN(v)) this.hgt[i] += v * k;
     }
     return this;
@@ -216,7 +225,7 @@ export class Relief {
   /** erase pixels */
   cut(shape: Shape) {
     const k = this.k, [rx0, ry0, rx1, ry1] = this.range(shape);
-    for (let y = ry0; y < ry1; y++) for (let x = rx0; x < rx1; x++) if (shape((x + 0.5) / k, (y + 0.5) / k)) this.solid[y * this.w + x] = 0;
+    for (let y = ry0; y < ry1; y++) for (let x = rx0; x < rx1; x++) { const cx = (x + 0.5) / k, cy = (y + 0.5) / k; if (shape(this.wx(cx, cy), this.wy(cx, cy))) this.solid[y * this.w + x] = 0; }
     return this;
   }
   /** recolour painted pixels inside `shape` (paint over: gilding, stains, painted numerals) keeping height */
@@ -239,6 +248,19 @@ export class Relief {
     const { w, h, res, W, H } = this;
     const out = new Uint8ClampedArray(W * H * 4);
     const amb0 = o.ambient ?? 0.35, kd = o.light ?? 1;
+    // worn, chipped edges: little bites out of the silhouette (clustered, never on glass or light)
+    if (this.chip > 0) {
+      const kill: number[] = [];
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const i = y * w + x;
+        if (!this.solid[i]) continue;
+        const m = this.mats[this.mat[i]];
+        if (m.emit || (m.env ?? 0) > 0.5 && m.shin > 50) continue;
+        const edge = (x > 0 && !this.solid[i - 1]) || (x < w - 1 && !this.solid[i + 1]) || (y > 0 && !this.solid[i - w]) || (y < h - 1 && !this.solid[i + w]);
+        if (edge && vnoise(x * 0.55, y * 0.55, 17) > 1 - this.chip * 0.36 && hash(x, y, 29) > 0.35) kill.push(i);
+      }
+      for (const i of kill) this.solid[i] = 0;
+    }
     // per art pixel: normal, ao, lighting terms
     const shade = new Float32Array(w * h * 6);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
@@ -303,6 +325,15 @@ export class Relief {
           if (sq) { const tint = m.env && m.env > 0.5 ? 0.55 : 0.1; r += (255 * (1 - tint) + a[0] * tint * 1.4) * sq * 0.85; g += (250 * (1 - tint) + a[1] * tint * 1.4) * sq * 0.85; b += (232 * (1 - tint) + a[2] * tint * 1.2) * sq * 0.85; }
         }
       }
+      if (!m.emit) {
+        // organic colour: clustered variation in value and hue, shadows leaning violet-blue, lights leaning gold
+        const v = (vnoise(x * 0.42, y * 0.42, 23) - 0.5) * 0.16 + (hash(x, y, 31) - 0.5) * 0.04;
+        r *= 1 + v; g *= 1 + v * 0.9; b *= 1 + v * 0.7;
+        r += v * 14; b -= v * 14;
+        const lum = (r * 0.3 + g * 0.55 + b * 0.15) / Math.max(1, a[0] * 0.3 + a[1] * 0.55 + a[2] * 0.15);
+        if (lum < 0.72) { const t = Math.min(1, (0.72 - lum) * 1.6); r *= 1 - t * 0.2; g *= 1 - t * 0.14; b = b * (1 + t * 0.28) + t * 10; }
+        else if (lum > 1.08) { const t = Math.min(1, (lum - 1.08) * 1.4); r *= 1 + t * 0.06; g *= 1 + t * 0.03; b *= 1 - t * 0.16; }
+      }
       out[j] = r; out[j + 1] = g; out[j + 2] = b; out[j + 3] = 255;
     }
     // seams between parts: the lower side of a part boundary gets an inked line
@@ -320,20 +351,27 @@ export class Relief {
       if (line) this.paintArt(out, x, y, (c) => [c[0] * 0.38 + 8, c[1] * 0.34 + 5, c[2] * 0.34 + 4]);
     }
     if (o.outline !== false) {
-      // a coloured outline: the darkest neighbour, darkened
+      // a selective, coloured outline: deep and cool (violet-brown) on the shadow side, lighter and warm on
+      // the lit side, where it also breaks up the way a pixel artist lets light eat the line
       const add: [number, number, RGB][] = [];
       for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
         if (this.solid[y * w + x]) continue;
-        let best: RGB | null = null;
+        let best: RGB | null = null, litSide = false, shadowSide = false;
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
           const X = x + dx, Y = y + dy;
           if (X < 0 || Y < 0 || X >= w || Y >= h || !this.solid[Y * w + X]) continue;
+          if (dx > 0 || dy > 0) litSide = true; else shadowSide = true;
           const k = Y * w + X, c: RGB = [this.alb[k * 3], this.alb[k * 3 + 1], this.alb[k * 3 + 2]];
           const lk = this.mats[this.mat[k]].line ?? this.outlineK;
-          const d: RGB = [c[0] * lk * 0.62 + 6, c[1] * lk * 0.55 + 4, c[2] * lk * 0.55 + 4];
+          const d: RGB = [c[0] * lk * 0.6 + 8, c[1] * lk * 0.5 + 4, c[2] * lk * 0.62 + 14];
           if (!best || d[0] + d[1] + d[2] < best[0] + best[1] + best[2]) best = d;
         }
-        if (best) add.push([x, y, best]);
+        if (!best) continue;
+        if (litSide && !shadowSide) {
+          if (vnoise(x * 0.5, y * 0.5, 41) > 0.68) continue; // the light eats the line
+          best = [best[0] * 1.5 + 18, best[1] * 1.42 + 12, best[2] * 1.12 + 2];
+        }
+        add.push([x, y, best]);
       }
       for (const [x, y, c] of add) this.paintArt(out, x, y, () => c, 255);
     }

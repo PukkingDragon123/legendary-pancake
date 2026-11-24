@@ -94,9 +94,9 @@
 /* short screens: the tags hang in two strings */
 @media (max-height: 740px) {
   .hh-tools { width: 116px; flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
-  .hh-tool { width: 56px; height: 66px; }
+  .hh-tool { width: 56px; height: 80px; }
   .hh-toolhang { width: 56px; transform-origin: 28px 4px; }
-  .hh-toollabel { display: none; }
+  .hh-toollabel { font-size: 12px; padding: 1px 3px 2px; } /* [ui4] every icon keeps its label */
   /* [ui4] in two columns the shop's NEW flag sits on its own tile, clear of Build */
   .hh-new { left: auto; right: -2px; top: -8px; transform: rotate(10deg); animation: none; }
   .hh-toolrope { left: 25px; width: 62px; bottom: 50px; background-image: var(--rope), var(--rope) !important; background-position: 0 0, 56px 0; background-repeat: repeat-y; box-shadow: none; }
@@ -126,7 +126,7 @@
 .hh-mobj.sleep .hh-pic { animation: hhBreathe 4.2s steps(8) infinite; }
 .hh-mobj.sleep.pop .hh-pic { animation: hhHop 0.56s cubic-bezier(0.3, 1.6, 0.5, 1); }
 @keyframes hhBreathe { 0%, 100% { transform: none; } 50% { transform: translateY(-2px); } }
-.hh-plate { position: absolute; left: 8px; top: 108px; width: 88px; height: 18px; background-size: 100% 100%; image-rendering: pixelated; font-family: var(--font-display); font-size: 14px; line-height: 18px; text-align: center; color: #3a1f06; text-shadow: 0 1px 0 rgba(255, 241, 189, 0.75), 0 -1px 0 rgba(58, 31, 6, 0.35); pointer-events: none; filter: drop-shadow(1px 2px 0 rgba(26, 14, 8, 0.45)); }
+.hh-plate { position: absolute; left: 8px; top: 108px; width: 88px; height: 18px; background-size: 100% 100%; image-rendering: pixelated; font-family: var(--font-display); font-size: 15px; line-height: 18px; text-align: center; color: #3a1f06; text-shadow: 0 1px 0 rgba(255, 241, 189, 0.75), 0 -1px 0 rgba(58, 31, 6, 0.35); pointer-events: none; filter: drop-shadow(1px 2px 0 rgba(26, 14, 8, 0.45)); }
 .hh-mobj.rec { animation: hhRise 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both, hhRec 1.6s steps(6) infinite; }
 .hh-mobj.rec.pop { animation: hhPop 0.56s cubic-bezier(0.3, 1.8, 0.5, 1); }
 @keyframes hhRec { 0%, 100% { filter: none; } 50% { filter: drop-shadow(0 -3px 0 rgba(255, 220, 140, 0.85)); } }

@@ -157,7 +157,7 @@
   position: relative; flex: 0 0 auto; width: 54px; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 2px 0 0; cursor: pointer;
   background: rgba(12, 34, 64, 0.45); border: 2px dashed var(--chalk-d); color: var(--chalk); transition: transform 0.12s steps(3), background 0.12s steps(2);
 }
-.bm-tab span { font-size: 11px; line-height: 1.2; font-family: var(--font-small); letter-spacing: 0.2px; }
+.bm-tab span { font-size: 13px; line-height: 1.1; font-family: var(--font-body); white-space: nowrap; } /* [ui4] readable labels */
 .bm-tab img { filter: drop-shadow(2px 2px 0 var(--bp-dd)); }
 .bm-tab:hover { transform: translateY(-3px); }
 .bm-tab.on { background: var(--paper); border: 2px solid var(--paper); color: var(--bp-dd); box-shadow: 0 3px 0 var(--bp-dd), inset 0 -3px 0 var(--oat); transform: translateY(-3px); }

@@ -62,7 +62,7 @@ function installStyles() {
 .wd-rail{position:relative;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:12px 4px 4px;margin:0 -4px;flex:none}
 .wd-rail::-webkit-scrollbar{display:none}
 .wd-rail::before{content:'';position:absolute;left:0;right:0;top:1px;height:12px;min-width:100%;background:url("${railTile()}") 0 0/16px 12px repeat-x;image-rendering:pixelated}
-.wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:54px;height:60px;${frameStyle('tab', 2)};color:var(--ink);font-size:12px;line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:56px;height:62px;${frameStyle('tab', 2)};color:var(--ink);font-size:13px;line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
 .wd-tag::before{content:'';position:absolute;top:-10px;left:50%;width:2px;height:8px;margin-left:-1px;background:#e8d8b0;box-shadow:1px 0 0 #6e4a12}
 .wd-tag .ico{margin:-4px 0 -2px}
 .wd-tag span{text-shadow:0 1px 0 var(--paper);white-space:nowrap}
