@@ -95,6 +95,15 @@ function drawSleep(g, f) {
   }
 }
 frames('nav_sleep', 8, SLEEP_KEY, drawSleep);
+// [ui3] over the baked bed icon: stars twinkling and Zzz drifting up (transparent, 32x32)
+frames('nav_zz', 8, SLEEP_KEY, (g, f) => {
+  [[4, 3], [11, 2], [27, 4], [3, 9], [29, 12], [20, 1]].forEach(([x, y], i) => twinkle(g, x, y, f + i * 3));
+  for (let k = 0; k < 2; k++) {
+    const t = ((f + k * 4) % 8) / 8;
+    const size = t < 0.34 ? 3 : t < 0.7 ? 4 : 5;
+    glyph(g, Math.round(20 + t * 4 + Math.sin(t * 6.3) * 1.2), Math.round(13 - t * 11), ZG[size], t > 0.82 ? 'z' : 'Z');
+  }
+});
 // tapped: the quilt stirs, a big Z puffs out
 frames('nav_sleep_tap', 3, SLEEP_KEY, (g, f) => {
   drawSleep(g, f * 2 + 2);

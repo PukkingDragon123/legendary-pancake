@@ -11,7 +11,7 @@ import { IcoAcorn, IcoStar, Px } from './icons.tsx';
 import { spriteURL } from './px/sprites.js';
 import { haptic, Sheet, tap } from './kit.tsx';
 import { panel, sceneRef } from './state.ts';
-import { owlFull } from './portraits.ts';
+import { owlIconAsync } from './portraits.ts';
 import { RuneCircle } from './chrome/lvup.tsx';
 import { openPanel } from './chrome/hud.tsx';
 import { MagicBar } from './chrome/magicbar.tsx';
@@ -145,9 +145,8 @@ export function Ceremony() {
 function CeremonyOwl() {
   const [url, setUrl] = useState('');
   useEffect(() => {
-    let live = true, src = '';
-    try { src = owlFull(save.value.look); } catch { /* no WebGL */ }
-    if (src) void pixelate(src, 60).then((u) => { if (live) setUrl(u); });
+    let live = true;
+    void owlIconAsync(save.value.look, 'full').then((src) => (src ? pixelate(src, 60) : '')).then((u) => { if (live && u) setUrl(u); }).catch(() => { /* no WebGL */ });
     return () => { live = false; };
   }, []);
   return <div class="lvup-owl">{url && <img src={url} alt="" />}</div>;

@@ -475,13 +475,23 @@ const CHARS = (() => {
 
 const GRADE = new Map();
 function gradePix(p) {
-  const d = p.d;
-  for (let i = 0; i < d.length; i += 4) {
+  const d = p.d, w = p.w;
+  const flat = new Uint8Array(p.w * p.h);
+  // [ui3] interior pixels of a flat area (same colour as all four neighbours) get a faint hand-made grain
+  for (let y = 1; y < p.h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = (y * w + x) * 4;
+    if (!d[i + 3]) continue;
+    const same = (j) => d[j] === d[i] && d[j + 1] === d[i + 1] && d[j + 2] === d[i + 2] && d[j + 3];
+    if (same(i - 4) && same(i + 4) && same(i - w * 4) && same(i + w * 4)) flat[y * w + x] = 1;
+  }
+  for (let i = 0, n = 0; i < d.length; i += 4, n++) {
     if (!d[i + 3]) continue;
     const k = (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
     let c = GRADE.get(k);
     if (!c) { c = calmRGB([d[i], d[i + 1], d[i + 2]]); GRADE.set(k, c); }
-    d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2];
+    let f = 1;
+    if (flat[n]) { const x = n % w, y = (n / w) | 0, h = (((x * 374761393) ^ (y * 668265263)) >>> 0) % 7; f = h === 0 ? 0.95 : h === 1 ? 1.04 : 1; }
+    d[i] = c[0] * f; d[i + 1] = c[1] * f; d[i + 2] = c[2] * f;
   }
 }
 function finalize(p) {
@@ -4271,7 +4281,17 @@ function getSprite(name) {
 
 // dev helpers (used by the preview page)
 export const __dev = { BUILD_WARN, RAMPS, Grid, Pix, render, finalize };
-export { Grid, Pix, render, T, icon, draw, RAMPS, RAMPS_SRC };
+/**
+ * [ui3] Register a detailed sprite: `tw` x `th` texels shown as `tw/res` x `th/res` art pixels (so it takes the
+ * place of an ordinary icon of that size, with `res` x the detail). `px` is RGBA texel data (already graded).
+ * It replaces any sprite of the same name.
+ */
+function hires(name, tw, th, res, px) {
+  const hi = { w: tw, h: th, rows: [], pal: {}, px: { d: px } };
+  Object.defineProperty(SPRITES, name, { value: { w: Math.round(tw / res), h: Math.round(th / res), rows: [], pal: {}, hi, res }, enumerable: true, configurable: true, writable: false });
+  BUILDERS.set(name, () => null);
+}
+export { Grid, Pix, render, T, icon, draw, RAMPS, RAMPS_SRC, hires };
 
 const canvasCache = new Map();
 const urlCache = new Map();
@@ -4317,7 +4337,16 @@ export function spriteCanvas(name, scale = 1) {
   if (hit) return hit;
   const s = getSprite(name);
   let cv;
-  if (scale === 1) cv = baseCanvas(s);
+  if (s.hi) {
+    // [ui3] a detailed sprite with `res` texels per art pixel (baked from a 3D prop): drawn at scale / res
+    const base = baseCanvas(s.hi);
+    cv = document.createElement('canvas');
+    cv.width = s.w * scale;
+    cv.height = s.h * scale;
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(base, 0, 0, cv.width, cv.height);
+  } else if (scale === 1) cv = baseCanvas(s);
   else {
     const base = spriteCanvas(name, 1);
     cv = document.createElement('canvas');
