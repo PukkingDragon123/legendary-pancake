@@ -453,7 +453,7 @@ export class Office implements Stage {
     const P = this.camera.aspect < 0.9;
     const H = HEAD.clone(), paper = DESK.paper.clone().add(V(0, 0.01, 0));
     switch (name) {
-      case 'establish': return { target: V(-0.1, 1.3, -1.6), yaw: 0.2, pitch: 0.1, fit: P ? [2.0, 3.4] : [5.0, 2.7], anchor: [0, P ? -0.05 : 0] };
+      case 'establish': return { target: V(P ? -0.1 : -0.45, 1.3, -1.6), yaw: P ? 0.2 : 0.36, pitch: 0.1, fit: P ? [2.0, 3.4] : [5.2, 2.8], anchor: [0, P ? -0.05 : 0] };
       case 'wide': return { target: V(-0.4, 1.2, -1.3), yaw: -0.28, pitch: 0.12, fit: P ? [2.0, 3.2] : [4.8, 2.6] };
       case 'open': return { target: V(0, 1.28, -1.7), yaw: 0.0, pitch: 0.06, fit: P ? [2.4, 2.9] : [4.4, 2.5], anchor: [0, P ? -0.04 : 0] };
       case 'pip': return { target: H.clone().add(V(0, -0.12, 0.3)), yaw: 0.0, pitch: 0.14, fit: P ? [1.05, 1.5] : [2.4, 1.2], anchor: [0, P ? 0.12 : 0.05] };
@@ -469,13 +469,13 @@ export class Office implements Stage {
       case 'board': return { target: V(L.x1 - 0.2, 1.8, -0.3), yaw: 0.85, pitch: 0.05, fit: P ? [1.6, 2.2] : [3.4, 1.9] };
       case 'form': return P
         ? { target: paper.clone().add(V(0, 0.01, 0)), yaw: 0, pitch: 0.6, fit: [0.31, 0.2], anchor: [0, -0.36] }
-        : { target: paper.clone().add(V(0, 0.02, 0)), yaw: 0, pitch: 0.42, fit: [0.62, 0.42], anchor: [0, -0.22] };
+        : { target: paper.clone().add(V(0, 0.02, 0)), yaw: 0, pitch: 0.4, fit: [0.6, 0.54], anchor: [0, -0.24] };
       case 'formClock': return P
-        ? { target: paper.clone().add(V(-0.1, 0, -0.04)), yaw: 0.06, pitch: 0.6, fit: [0.46, 0.3], anchor: [0, -0.3] }
-        : { target: paper.clone().add(V(-0.08, 0.02, 0)), yaw: 0.05, pitch: 0.44, fit: [0.74, 0.44], anchor: [0, -0.2] };
+        ? { target: paper.clone().add(V(-0.09, 0, -0.03)), yaw: 0.06, pitch: 0.6, fit: [0.42, 0.3], anchor: [0, -0.3] }
+        : { target: paper.clone().add(V(-0.08, 0.02, 0)), yaw: 0.05, pitch: 0.42, fit: [0.74, 0.56], anchor: [0, -0.22] };
       case 'stamp': return P
         ? { target: paper.clone().add(V(0.05, 0, 0)), yaw: -0.04, pitch: 0.62, fit: [0.4, 0.3], anchor: [0, -0.3] }
-        : { target: paper.clone().add(V(0.1, 0.02, 0)), yaw: -0.05, pitch: 0.46, fit: [0.74, 0.44], anchor: [0, -0.2] };
+        : { target: paper.clone().add(V(0.1, 0.02, 0)), yaw: -0.05, pitch: 0.44, fit: [0.74, 0.56], anchor: [0, -0.22] };
     }
   }
 
@@ -589,6 +589,7 @@ export class Office implements Stage {
     const fd = cam.position.distanceTo(tg);
     this.look.grade.focus = fd;
     this.look.grade.range = Math.max(0.9, fd * 0.75);
+    this.look.grade.dof = fd < 1.2 ? 0.6 : 1;
     if (this.shake > 0.001) {
       cam.position.y -= Math.sin(t * 60) * this.shake * 0.004;
       this.shake *= Math.exp(-dt * 9);
@@ -630,7 +631,7 @@ export class Office implements Stage {
     this.hourNow = (this.hourNow + d * Math.min(1, dt * 1.6) + 24) % 24;
     const s = sunAt(this.hourNow), night = s.night;
     this.sun.color.copy(s.col);
-    this.sun.intensity = s.i * 1.1;
+    this.sun.intensity = s.i * 0.8;
     this.hemi.color.copy(s.sky); this.hemi.intensity = 0.25 + (1 - night) * 0.35;
     const flick = Math.sin(this.time * 9) * 0.02 + Math.sin(this.time * 23) * 0.012;
     this.lampK += (this.lampWant - this.lampK) * Math.min(1, dt * 9);

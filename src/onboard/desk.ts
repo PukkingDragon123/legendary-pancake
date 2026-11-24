@@ -466,7 +466,7 @@ export function deskPhone(m: OfficeMats): THREE.Group {
 
 /** A mahogany writing slope (a sloped writing box): a tooled-leather incline the forms rest on, a flat shelf at
  * the top with a brass pen groove. Its local origin is the front-bottom centre on the desk. */
-export const SLOPE = { w: 0.34, front: 0.025, run: 0.34, shelf: 0.1, angle: 0.42, z: -0.46 };
+export const SLOPE = { w: 0.34, front: 0.025, run: 0.34, shelf: 0.1, angle: 0.42, z: -0.55 };
 const slopeTop = SLOPE.front + SLOPE.run * Math.tan(SLOPE.angle);
 export function writingSlope(m: OfficeMats): THREE.Group {
   const g = new THREE.Group();
@@ -512,7 +512,7 @@ export const DESK = {
   paper: PAPER_POSE.pos,
   stamp: new THREE.Vector3(0.36, T, -0.6),
   folder: new THREE.Vector3(0.58, T, -0.66),
-  clock: new THREE.Vector3(-0.3, T, -0.9),
+  clock: new THREE.Vector3(-0.245, T, -0.86),
   sticky: new THREE.Vector3(-0.09, T + slopeTop + 0.006, SLOPE.z - SLOPE.run - SLOPE.shelf / 2),
   work: new THREE.Vector3(0.04, T, -1.28),
   pen: new THREE.Vector3(0.1, T + slopeTop + 0.012, SLOPE.z - SLOPE.run - SLOPE.shelf / 2),

@@ -59,6 +59,7 @@ export function Intro() {
     const picked: Record<string, boolean> = {};
     let remind = true, signed = false;
     const photos: Record<string, string> = {};
+    let photosIn: Promise<unknown> = Promise.resolve();
 
     // ---- the office, the desk work, Pip's words
     let office: Office;
@@ -194,7 +195,7 @@ export function Intro() {
       phase = 'ask';
       speech.say(null);
       office.go(s.kind === 'dial' ? 'formClock' : 'form', false, 2.4);
-      if (s.kind === 'species') await Promise.race([Promise.all(s.opts!.map((o) => photos[o.v] ? Promise.resolve() : undefined)), wait(10)]);
+      if (s.kind === 'species') await Promise.race([photosIn, wait(7000)]);
       const form = printForm(s, i, STEPS.length, ctx());
       desk.setRider(s.kind === 'hours');
       if (s.kind === 'hours') { desk.hoursValue = a.hours; dio.show('hours:tower'); dio.param(a.hours); }
@@ -284,9 +285,14 @@ export function Intro() {
 
     // the owl photographs for the species form (rendered from the 3D models), the printed pictograms
     void preloadIcons(ICONS);
-    for (const o of STEPS.find((s) => s.kind === 'species')?.opts ?? []) {
-      void owlIconAsync({ ...lookFor(o.v), outfit: {} }, 'face').then(async (u) => { if (u) { await preload([u]); photos[o.v] = u; } }).catch(() => undefined);
-    }
+    photosIn = Promise.all((STEPS.find((s) => s.kind === 'species')?.opts ?? []).map((o) =>
+      owlIconAsync({ ...lookFor(o.v), outfit: {} }, 'face').then(async (u) => {
+        if (!u) return;
+        await preload([u]);
+        photos[o.v] = u;
+        // a photo that arrives late is pasted onto the page that is already on the desk
+        if (alive && desk?.page && st().kind === 'species') desk.reprint(printForm(st(), si, STEPS.length, ctx()));
+      }).catch(() => undefined)));
     (window as unknown as { hhIntro: unknown }).hhIntro = { office, desk: () => desk, speech, a: () => a, file: () => void file(), region: (id: string) => { const r = desk?.page?.form.region(id); if (r) onRegion(r); }, phase: () => phase, step: () => si };
 
     // ---------------------------------------------------------------- the opening

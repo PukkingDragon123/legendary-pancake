@@ -37,7 +37,7 @@ function tri() {
 export interface LookGrade { exposure: number; warm: number; sat: number; contrast: number; vignette: number; grain: number; bloom: number; dof: number; focus: number; range: number; nearBlur: number }
 
 export class Look {
-  grade: LookGrade = { exposure: 1.0, warm: 0.35, sat: 1.12, contrast: 1.06, vignette: 0.32, grain: 0.03, bloom: 0.55, dof: 1, focus: 3, range: 2, nearBlur: 0 };
+  grade: LookGrade = { exposure: 1.0, warm: 0.35, sat: 1.12, contrast: 1.06, vignette: 0.32, grain: 0.03, bloom: 0.38, dof: 1, focus: 3, range: 2, nearBlur: 0 };
   /** CSS px per internal texel */
   px = 1;
   w = 2; h = 2;
@@ -65,7 +65,7 @@ export class Look {
     this.hA = mk(); this.hB = mk(); this.qA = mk(); this.qB = mk(); this.eA = mk(); this.eB = mk();
     const base = { vertexShader: VERT, depthTest: false, depthWrite: false };
     this.mBright = new THREE.ShaderMaterial({
-      ...base, uniforms: { tSrc: { value: null }, uThresh: { value: 1.0 }, uTexel: { value: new THREE.Vector2() } },
+      ...base, uniforms: { tSrc: { value: null }, uThresh: { value: 1.35 }, uTexel: { value: new THREE.Vector2() } },
       fragmentShader: /* glsl */ `uniform sampler2D tSrc; uniform float uThresh; uniform vec2 uTexel; varying vec2 vUv;
         vec3 tap(vec2 o) { return min(texture2D(tSrc, vUv + o * uTexel).rgb, vec3(30.0)); }
         void main() {

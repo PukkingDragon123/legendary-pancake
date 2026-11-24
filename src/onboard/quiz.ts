@@ -124,6 +124,20 @@ export class Desk {
   private paperYaw = 0.015;
   private paperAt() { return PAPER_POSE.pos.clone(); }
 
+  /** Replace the print of the page on the desk (its ink is redrawn from the answers by the new form). */
+  reprint(form: Form) {
+    const p = this.page;
+    if (!p) return;
+    for (const m of form.marks) m.t = 1;
+    form.hover = p.form.hover; form.hint = p.form.hint;
+    const mat = p.mesh.material as THREE.MeshStandardMaterial;
+    const old = p.form.texture;
+    p.form = form;
+    mat.map = form.texture; mat.emissiveMap = form.texture; mat.needsUpdate = true;
+    form.render();
+    old.dispose();
+  }
+
   /** Stamp the page, then file it into the folder. */
   async stampAndFile(text = 'RECEIVED', sub?: string): Promise<void> {
     const p = this.page;
