@@ -4,7 +4,7 @@
 import { Scene, type View } from '../world/scene.ts';
 import { FINISH, FINISHES, ITEMS, type Finish } from '../assets/registry.ts';
 import { freshSave } from '../game/store.ts';
-import { openBox, putItem, seedHome, unlockFloor } from '../game/home.ts';
+import { findSpot, openBox, putItem, seedHome, unlockFloor } from '../game/home.ts';
 import type { FloorId } from '../world/house/plan.ts';
 import * as THREE from 'three';
 
@@ -31,6 +31,8 @@ const open = q.get('open');
 if (open) for (const id of open === 'all' ? [...s.home.boxes] : open.split(',')) openBox(s, id);
 if (q.get('wall') && s.home.floors.f1) s.home.floors.f1.wall = q.get('wall')!;
 if (q.get('floor') && s.home.floors.f1) s.home.floors.f1.floor = q.get('floor')!;
+// `put=canopy_bed,candelabra,...` places those items wherever they fit on `pf` (default f1), stacking small ones
+for (const id of (q.get('put') ?? '').split(',').filter(Boolean)) { const f = (q.get('pf') ?? 'f1') as FloorId; const p = findSpot(s, f, id, undefined, true); if (p) putItem(s, f, p); }
 if (q.get('extra')) for (const [id, x, z, r] of [['cuckoo', 26, 0, 0], ['painting', 31, 0, 0], ['fireplace', -2, -8, 0]] as const) putItem(s, 'f1', { id, x, z, rot: r, wall: id === 'fireplace' ? undefined : 30 });
 const sc = new Scene(document.getElementById('c') as HTMLCanvasElement, { species: 'tawny', palette: 'tawny', outfit: {} } as never, (q.get('q') as 'low') ?? 'high');
 const w = window as unknown as Record<string, unknown>;

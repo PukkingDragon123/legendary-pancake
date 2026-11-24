@@ -51,7 +51,7 @@ def bend(a, b, sag, n=4, wob=0.0, rng=None):
 
 
 def specs():
-    S = Spec('roof', density=2, desc='The crown of the oak: attic ceiling, observation deck, brass observatory dome, chimney top, boughs, lanterns')
+    S = Spec('roof', density=1.5, desc='The crown of the oak: attic ceiling, observation deck, brass observatory dome, chimney top, boughs, lanterns')
     trunk_styles(S)
     rng = random.Random(11)
     # ---------------------------------------------------------------- the attic ceiling and the crown closing over it

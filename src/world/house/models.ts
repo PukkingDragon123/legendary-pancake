@@ -79,7 +79,7 @@ export interface HousePart {
  * house space (triplanar: they wrap the round trunk, the roots and the boughs without UVs), modulated by the
  * model's own painted atlas, which carries the moss, lichen, wear and painted light. House px per repeat:
  */
-const TILE_SCALE: Record<string, number> = { bark: 72, wood: 34, boards: 60, stone: 42, grey: 46 };
+const TILE_SCALE: Record<string, number> = { bark: 100, wood: 38, boards: 64, stone: 46, grey: 50 };
 const tileTex = new Map<string, THREE.Texture>();
 const texLoader = new THREE.TextureLoader();
 function tileTexture(kind: string): THREE.Texture {

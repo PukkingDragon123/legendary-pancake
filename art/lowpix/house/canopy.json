@@ -924,9 +924,9 @@
      "ramps": [
       "leaf"
      ],
-     "tint": "leaf:3",
-     "tint_amount": 0.5,
-     "shade": 0.16,
+     "tint": "leaf:1",
+     "tint_amount": 0.85,
+     "shade": 0.2,
      "relight": 0.55,
      "id": "ph"
     },

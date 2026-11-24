@@ -445,9 +445,10 @@ export class Scene {
     const L = this.house.spots.launch;
     switch (this.view) {
       // [house] framing for the grand oak: three floors, a canopy above and a launch platform on the limb
-      case 'interior': return { yaw: 0.1, pitch: 0.42, dist: portrait ? 16 : 12, target: new THREE.Vector3(H.x, 1.5, H.z + 0.6) };
-      case 'loft': return { yaw: 0, pitch: 0.16, dist: portrait ? 17 : 12, target: new THREE.Vector3(H.x, 6.6, H.z + 1.2) };
-      case 'attic': return { yaw: 0, pitch: 0.12, dist: portrait ? 17 : 12, target: new THREE.Vector3(H.x, 11.1, H.z + 1.2) };
+      // [house3] one open floor of the dollhouse filling the frame
+      case 'interior': return { yaw: 0.08, pitch: 0.17, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 2.2, H.z + 1.2) };
+      case 'loft': return { yaw: 0.06, pitch: 0.16, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 6.7, H.z + 1.2) }; // [house3]
+      case 'attic': return { yaw: 0.06, pitch: 0.14, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 11.2, H.z + 1.2) }; // [house3]
       case 'owl': return { yaw: -0.15, pitch: 0.12, dist: portrait ? 7.4 : 4.6, target: new THREE.Vector3(o.x, o.y + 0.85, o.z) };
       case 'breathe': return { yaw: 0, pitch: 0.1, dist: portrait ? 9.2 : 5.6, target: new THREE.Vector3(MEADOW.x, portrait ? 1.35 : 1.45, 2.6) };
       // [house3] the whole oak under the night sky

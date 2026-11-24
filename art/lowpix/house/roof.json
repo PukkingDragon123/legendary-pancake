@@ -2,7 +2,7 @@
  "name": "roof",
  "description": "The crown of the oak: attic ceiling, observation deck, brass observatory dome, chimney top, boughs, lanterns",
  "license": "CC0-1.0",
- "density": 2,
+ "density": 1.5,
  "budget": {
   "tris": 60000,
   "colors": 255
