@@ -114,6 +114,34 @@ if (view === 'icons') {
   });
 }
 
+if (view === 'frames') {
+  // [ui5] the portrait frames, over the day and night sky, at 48 / 64 / 96 CSS px
+  void import('../ui/chrome/frameart.ts').then(({ FRAME_ART_IDS, frameArt, portraitSky, frameSkyOf }) => {
+    document.body.style.background = q.get('bg') ?? '#efe2c0';
+    const cell = (id: string, css: number, night: boolean) => {
+      const sky = portraitSky(night || frameSkyOf(id) === 'night', 40);
+      return `<div style="position:relative;width:${css}px;height:${css}px"><img src="${sky}" style="position:absolute;inset:16%;width:68%;height:68%;image-rendering:pixelated;clip-path:circle(50%)"><img src="${frameArt(id, Math.round(css / 1.33))}" style="position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated"></div>`;
+    };
+    root.innerHTML = '<div style="padding:8px;display:flex;flex-wrap:wrap;gap:14px">' + FRAME_ART_IDS.map((id) => `<div style="display:flex;flex-direction:column;align-items:center;font:11px monospace;color:#3a2410"><div style="display:flex;gap:6px;align-items:flex-end">${cell(id, 48, false)}${cell(id, 76, false)}${cell(id, 96, true)}</div>${id}</div>`).join('') + '</div>';
+    (window as unknown as { __ready: number }).__ready = 1;
+  });
+}
+
+if (view === 'pip') {
+  // [ui5] the live owl portrait: big and at HUD size, in a few frames (one is live at a time; the rest show the still)
+  void import('../ui/chrome/livepip.tsx').then(({ OwlPortrait }) => {
+    document.body.style.background = q.get('bg') ?? '#7a5a3a';
+    if (q.get('hour')) (window as unknown as { __pipHour: number }).__pipHour = +q.get('hour')!;
+    if (q.get('art')) (window as unknown as { __pipArt: number }).__pipArt = +q.get('art')!;
+    const frames = (q.get('frames') ?? 'porthole,walnut,moss,celestial').split(',');
+    const look = { skin: q.get('skin') ?? 'owl', species: q.get('species') ?? 'tawny', palette: q.get('species') ?? 'tawny', outfit: q.get('hat') ? { head: q.get('hat')! } : {} };
+    render(<div style="padding:12px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+      {frames.map((f, i) => <OwlPortrait size={i ? 78 : +(q.get('s') ?? 234)} frame={f} look={look} live={i === 0} tappable />)}
+    </div>, root);
+    (window as unknown as { __ready: number }).__ready = 1;
+  });
+}
+
 if (view === 'fx') {
   document.body.style.background = '#3a5a3a';
   const kinds: UiFxKind[] = ['puff', 'sparkle', 'hearts', 'magic', 'coins', 'stars', 'snow', 'leaves', 'confetti'];

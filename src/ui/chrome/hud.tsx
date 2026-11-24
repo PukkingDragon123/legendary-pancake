@@ -17,8 +17,7 @@ import { sound } from '../../audio/sound.ts';
 import { bedtimeOf, phase } from '../../game/night.ts';
 import { claimable, todaysQuests } from '../../game/quests.ts';
 import { dayKey, level, save } from '../../game/store.ts';
-import { iconVersion, portrait } from '../portraits.ts';
-import { pixelate } from '../pxfx.tsx';
+import { OwlPortrait } from './livepip.tsx'; // [ui5] the live 3D owl in its frame
 import { haptic } from '../kit.tsx';
 import { breathing, panel, say, sceneRef, type Panel } from '../state.ts';
 import { framesOf, hold, PxAnim, rep, seq, type Timeline } from './pxanim.tsx';
@@ -28,7 +27,7 @@ import { clearTransition, installPanelTransitions, panelTransition, previewTrans
 import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
 import { installSurfaces } from './surfaces.ts';
-import { alarmClock, alarmHands, board, bezel, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
+import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
 
@@ -124,18 +123,10 @@ function NameSign() {
   const k = useK(DESK_HUD);
   const [ref, sw] = useSwing({ amp: 0.7, rate: 0.8 });
   const [xp, setXp] = useState(false);
+  const [poke, setPoke] = useState(0);
   const tm = useRef(0);
-  // Pip's face is a tiny render of the 3D model, re-sampled to art pixels so it sits in the porthole
-  const [pic, setPic] = useState('');
-  const ver = iconVersion.value; // [ui3] re-render when the hand-painted owl model has loaded
-  useEffect(() => {
-    let live = true, url = '';
-    try { url = portrait(s.look); } catch { url = ''; }
-    if (url) void pixelate(url, 25).then((u) => { if (live) setPic(u); });
-    return () => { live = false; };
-  }, [JSON.stringify(s.look), ver]);
-  const night = (sceneRef.current?.sky.night ?? 0) > 0.5;
   const tapSign = () => {
+    setPoke((n) => n + 1); // [ui5] the owl in the portrait reacts
     kick(sw, 70);
     sound.play('door_creak', { volume: 0.12, rate: 1.15 + Math.random() * 0.3, gap: 300 });
     sound.play('wood_knock', { volume: 0.35, gap: 80 });
@@ -143,23 +134,20 @@ function NameSign() {
     setXp(true); clearTimeout(tm.current); tm.current = window.setTimeout(() => setXp(false), 2600);
   };
   const long = s.name.length > 8;
-  const rank = rankOf(lv.level), fits = s.name.length * (long ? 11 : 14) + rank.length * 7 + 8 < 120;
+  const rank = rankOf(lv.level), fits = s.name.length * (long ? 11 : 14) + rank.length * 7 + 8 < 114;
   return (
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={40} />
       <button class="hh-board hh-nameboard" style={{ backgroundImage: bg(board(96, 36, k, 1, { seed: 4, hooks: [26, 71], brackets: true })) }} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
-        <span class={'hh-portrait' + (night ? ' night' : '')}>
-          {pic ? <img class="hh-face" src={pic} alt="" draggable={false} /> : <span class="hh-face" />}
-          <img class="hh-ring" src={bezel(32, k, 1)} alt="" draggable={false} />
-        </span>
+        <span class="hh-portrait"><OwlPortrait size={78} frame={s.frame} pokeKey={poke} /></span>
         <span class={'hh-name' + (long ? ' long' : '')}>{s.name}</span>
         {fits && <span class="hh-rank">{rank}</span>}
         <span class="hh-lvl">
-          <MagicBar level={lv.level} into={lv.into} need={lv.need} w={56} />
+          <MagicBar level={lv.level} into={lv.into} need={lv.need} w={52} />
           <span class={'hh-xp' + (xp ? ' on' : '')}>{lv.into} / {lv.need} XP</span>
         </span>
         <span class="hh-rune" key={lv.level}>
-          <img src={medallion(24, k, 1, 'sapphire')} alt="" draggable={false} />
+          <img src={medallion(22, k, 1, 'sapphire')} alt="" draggable={false} />
           <b>{lv.level}</b>
         </span>
       </button>
