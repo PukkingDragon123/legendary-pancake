@@ -2,7 +2,8 @@
 
     cd <repo>; ~/.cache/lowpix-venv/bin/python art/lowpix/items/_furnA/build.py [ids...] [--out DIR] [--jobs N] [--specs-only]
 
-1. Runs every item function in items_*.py and writes art/lowpix/items/<id>.json.
+1. Runs every item function in items_*.py and writes art/lowpix/items/<id>.json (ids that borrow.py makes from
+   borrowed models, borrow.BORROWED, are skipped; EXTRAS are parts it merges into those, written to _furnA/extras/).
 2. Builds each spec with lowpix (GLB, sheet, hero) into --out (default: $FURNA_OUT or /tmp/furnA).
 3. Post-processes the GLB for the game and writes public/models/items/<id>.glb:
    * a root node named <id>, scaled 1/16, so the model is in world units (16 px = 1 block) like the box props;

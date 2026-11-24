@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 from kit import (Spec, wood, painted_wood, cloth, velvet, brass, iron, glaze, clay, stone, wax, leafy, glow, soil, flat, UP,
-                 pillow, lace_art, torus, arc_points, grid_art, flame_art, frond_art)
+                 pillow, lace_art, torus, arc_points, grid_art, flame_art, frond_art, image_art)
 from items_start import flame, star_art, book_styles, book, twig_art, twig_style
 
 ITEMS = {}
@@ -36,6 +36,11 @@ def grass_art(n=14, blades=(0.2, 0.42, 0.6, 0.8)):
                 return "g" if c < 0.5 else "l"
         return "."
     return grid_art(n, n, f)
+
+
+def grass_img(k):
+    """A tuft of 2D pixel-art grass blades: BUSHED's vegetation atlas (one of three clumps, mirrored on odd k)."""
+    return image_art("grass.png", 18, 18, colours=16, crop=((k % 3) / 3, 0, (k % 3 + 1) / 3, 1), flip=k % 2 == 1, seed=k)
 
 
 def tulip(s, id, base, h, rmp, lean=0.0, yaw=0.0):
@@ -366,7 +371,7 @@ def mushroomlamp():
     s.lathe("glow_gill", [(0, 12.0), (0.2, 3.0)], s.style("gill", gill), base=(0, 8.55, 0), sides=14, caps=(False, True), rot=(180, 0, 0))
     gr = card_style(s, "grass", "fern", 4)
     for k, (x, z, a) in enumerate([(3.0, 2.6, 10), (-3.2, 1.8, 60), (1.0, -3.2, 120)]):
-        cross_card(s, f"tuft{k}", grass_art(), gr, (x, 1.2, z), [1.8, 1.8], {"g": "fern:3", "l": "moss:5"}, yaw=a)
+        cross_card(s, f"tuft{k}", *grass_img(k)[:1], gr, (x, 1.2, z), [1.8, 1.8], grass_img(k)[1], yaw=a)
     s.anim("idle", 3.0, [{"part": "glow_cap", "channel": "scale", "osc": {"amp": [0.015, 0.03, 0.015], "cycles": 1}}])
     return s
 
@@ -731,9 +736,33 @@ def bonsai():
                           {"id": "tips", "op": "spots", "count": 30, "radius": [0.15, 0.25], "ramp": "moss", "tone": 5, "seed": 3, "faces": ["up"]},
                           {"id": "under", "op": "gradient", "axis": "y", "amount": 1.4}],
                "brush": {"flow": "horizontal", "length": 0.7, "width": 0.3, "rough": 0.5, "textures": {"pine": "fur"}}}
+    foliage["tone"] = 2.6          # the pads are only a dark core now; the foliage itself is sprig cards
+    foliage["layers"] = [l for l in foliage["layers"] if l["id"] != "tips"]
     fo = s.style("foliage", foliage)
+    # 2D pixel-art foliage: juniper sprigs from BUSHED's vegetation atlas (from Poly Haven's Fir Tree 01 twig maps, CC0),
+    # many crossed cards per cloud pad, fanned out and tilted, over a small dark core
+    sprig = card_style(s, "sprig", "pine", 4, light=0.9)
+    arts = [image_art("juniper.png", 40, 17, colours=20, flip=bool(j % 2), seed=j) for j in range(2)]
+    rng = np.random.default_rng(5)
+    tracks = []
     for k, (x, y, z, w, h) in enumerate([(5.0, 9.6, 0.8, 5.4, 2.0), (-4.8, 11.8, -0.6, 4.8, 1.8), (0.2, 13.8, 0.0, 5.6, 2.4), (2.6, 11.2, -1.4, 3.4, 1.4)]):
-        s.lathe(f"pad{k}", [(0, [w * 0.7, w * 0.55]), (h * 0.4, [w, w * 0.8]), (h * 0.8, [w * 0.8, w * 0.65]), (h, [w * 0.3, w * 0.25])], fo, base=(x, y, z), sides=9)
+        s.lathe(f"pad{k}", [(0, [w * 0.45, w * 0.35]), (h * 0.5, [w * 0.6, w * 0.45]), (h * 0.85, [w * 0.3, w * 0.25])], fo, base=(x, y + 0.2, z), sides=7)
+        s.bone(f"padb{k}", at=(x, y + h * 0.45, z))
+        n = int(5 + w * 1.4)
+        for j in range(n):
+            ang = j * 360 / n + float(rng.uniform(-14, 14))
+            art, key = arts[j % 2]
+            r = w * 0.18
+            ra = math.radians(ang)
+            s.card(f"sprig{k}_{j}", art, sprig, parent=f"padb{k}", rel=(math.sin(ra) * r, float(rng.uniform(-0.3, 0.5)) * h, math.cos(ra) * r),
+                   rot=(float(rng.uniform(-35, -5)), ang + 90, float(rng.uniform(-12, 12))), plane="xy", off=(w * 0.28, 0, 0),
+                   size=[w * 0.62, w * 0.62 * 17 / 40], key=key)
+        for j in range(3):   # a few lying flat on top so the pad reads from above
+            art, key = arts[j % 2]
+            s.card(f"sprigtop{k}_{j}", art, sprig, parent=f"padb{k}", rel=(0, h * 0.55, 0), rot=(0, j * 60 + 15, 0), plane="xz",
+                   size=[w * 0.9, w * 0.38], key=key)
+        tracks.append({"part": f"padb{k}", "osc": {"axis": "z", "amp": 1.5, "cycles": 1, "phase": k * 0.23}})
+    s.anim("idle", 5.0, tracks)
     s.lathe("pebble", [(0, 1.4), (0.5, 1.6), (0.8, 0.8)], s.style("peb", stone("pebble", 4.4, seed=7)), base=(3.6, 3.0, 2.2), sides=6)
     lant = s.style("lant", stone("stone", 4.4, seed=8))
     s.box("lbase", [1.0, 0.4, 1.0], lant, (-4.0, 3.3, 2.4))
@@ -785,7 +814,7 @@ def planter():
         cross_card(s, f"lav{k}", grid_art(12, 30, spike), lav, (x, y0, z), [1.6, 4.4], {"s": "fern:3", "p": "lilac:5", "q": "lilac:3"}, yaw=k * 33)
     gr = card_style(s, "grass", "fern", 4)
     for k, (x, z) in enumerate([(-8.0, -2.0), (-1.4, 2.4), (3.8, 2.2), (8.0, -1.8), (-5.0, 2.2)]):
-        cross_card(s, f"tuft{k}", grass_art(), gr, (x, y0, z), [2.0, 2.0], {"g": "fern:3", "l": "moss:5"}, yaw=k * 47)
+        cross_card(s, f"tuft{k}", *grass_img(k)[:1], gr, (x, y0, z), [2.0, 2.0], grass_img(k)[1], yaw=k * 47)
     return s
 
 
@@ -859,5 +888,5 @@ def planter_flowers():
         cross_card(s, f"lav{k}", grid_art(12, 30, spike), lav, (x, 0, z), [1.6, 4.6], {"s": "fern:3", "p": "lilac:5", "q": "lilac:3"}, yaw=k * 33)
     gr = card_style(s, "grass", "fern", 4)
     for k, (x, z) in enumerate([(-7.2, -1.6), (-2.0, 2.0), (3.6, 1.8), (7.4, 0.6), (-5.0, -1.8), (0.0, -2.2)]):
-        cross_card(s, f"tuft{k}", grass_art(), gr, (x, 0, z), [2.2, 2.2], {"g": "fern:3", "l": "moss:5"}, yaw=k * 47)
+        cross_card(s, f"tuft{k}", *grass_img(k)[:1], gr, (x, 0, z), [2.4, 2.4], grass_img(k)[1], yaw=k * 47)
     return s

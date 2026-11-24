@@ -896,18 +896,10 @@
     {
      "at": [
       0,
-      6.1,
+      6.0,
       0
      ],
-     "size": 14.0
-    },
-    {
-     "at": [
-      0,
-      6.3,
-      0
-     ],
-     "size": 6.0
+     "size": 15.2
     }
    ],
    "profile": {
@@ -1797,8 +1789,8 @@
    "id": "fern",
    "shape": "card",
    "size": [
-    3.0,
-    5.0
+    1.6,
+    5.2
    ],
    "pivot": [
     8.2,
@@ -1806,8 +1798,8 @@
     -6.2
    ],
    "offset": [
-    0.0,
-    2.2,
+    -0.0,
+    2.4,
     -0.0
    ],
    "rotation": [
@@ -1818,44 +1810,68 @@
    "style": "fernc",
    "paint": {
     "art_key": {
-     "s": "fern:2",
-     "l": "fern:4",
-     "d": "fern:2",
-     "h": "fern:6"
+     "a": "#364722",
+     "b": "#3d5025",
+     "c": "#47592a",
+     "d": "#4c5f2d",
+     "e": "#4d652d",
+     "f": "#566b31",
+     "g": "#5b7334",
+     "h": "#5d7935",
+     "i": "#7a7a40",
+     "j": "#6a853c",
+     "k": "#8b8148",
+     "l": "#729141",
+     "m": "#7c9d48",
+     "n": "#9ba153",
+     "o": "#86a84a",
+     "p": "#8cb44f",
+     "q": "#9ac15b",
+     "r": "#bdd358"
     }
    },
    "plane": "xy",
    "art": [
-    "........ss........",
-    "........ss........",
-    "......llssll......",
-    ".......hssl.......",
-    ".....lllsslll.....",
-    "......hhssll......",
-    "....llllssllll....",
-    "..lld.hlssll.dll..",
-    "...lllllsslllll...",
-    ".llld.hlssll.dlll.",
-    "...lllllsslllll...",
-    ".llldhhlssllldlll.",
-    "..llllllssllllll..",
-    "llld.hllsslll.dlll",
-    "..llllldssdlllll..",
-    "llld.hllsslll.dlll",
-    "..llllldssdlllll..",
-    "lll..hllsslll..lll",
-    "..llllldssdlllll..",
-    "....hlllssllll....",
-    "..llllddssddllll..",
-    "....hlllssllll....",
-    "..lllldhssldllll..",
-    ".....lllsslll.....",
-    "....lldhssldll....",
-    ".....lllsslll.....",
-    ".......hssl.......",
-    "......llssll......",
-    ".......hssl.......",
-    "........ss........"
+    "......l.....",
+    "......fo....",
+    "......gf....",
+    "......gd....",
+    "......ed....",
+    "......gcp...",
+    "......fcj...",
+    "......gfm...",
+    "......jfh...",
+    ".....refo...",
+    "......gcf...",
+    "......hdj...",
+    ".....jeem...",
+    ".....pgdm...",
+    ".....ofdj...",
+    ".....pfdhq..",
+    ".....meel...",
+    ".....lfdl...",
+    ".....mecel..",
+    ".....mfdhp..",
+    ".....gccj...",
+    ".....qhcg...",
+    ".....ghejl..",
+    ".....lgcf...",
+    ".....iidhl..",
+    ".....kdcdk..",
+    ".....lcdj...",
+    "....mjcdo...",
+    "....gdbdlq..",
+    "....qjdbbj..",
+    "....ogccbem.",
+    "....lfcdgjm.",
+    "....jfcgm...",
+    "......jcehn.",
+    "......jfl...",
+    "...gdbch....",
+    "..ehecaacef.",
+    "...pobbcfj..",
+    "...mcabcfl..",
+    ".mcfeaaadlm."
    ]
   }
  ]

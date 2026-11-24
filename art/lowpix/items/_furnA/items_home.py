@@ -1,10 +1,11 @@
 """Home items (src/assets/home.ts): cuckoo, painting, fireplace, wardrobe, record, mushlamp, teaset, starmap, toybox,
 mushpot. Units px, origin bottom-centre, facing +Z; wall items hang with their back on z = 0."""
 import math
+import os
 
 import numpy as np
 
-from kit import (Spec, wood, painted_wood, cloth, velvet, brass, iron, glaze, clay, stone, wax, leafy, glow, soil, flat, UP,
+from kit import (ARTS, image_art, Spec, wood, painted_wood, cloth, velvet, brass, iron, glaze, clay, stone, wax, leafy, glow, soil, flat, UP,
                  pillow, lace_art, torus, arc_points, grid_art, flame_art, frond_art)
 from items_start import flame, star_art, book_styles, book, twig_art
 
@@ -173,9 +174,9 @@ def moonlit_lake(W, H, seed=1):
 
 @item
 def painting():
-    """Moonlit painting: a tiny oil landscape of the lake under a full moon (painted pixel art: pines, moon path on the
-    water, reeds) in a carved, rubbed-gilt frame with a brass name plate. Wall item, back on z = 0, 14 x 10 px."""
-    s = Spec("painting", "Moonlit Painting", density=8, tris=600, hero=(24, 8), grounded=False)
+    """Moonlit painting: a real nocturne (Whistler's moonrise over Southampton Water, 1872, public domain), pixel-graded,
+    in a carved, rubbed-gilt frame with a brass name plate. Wall item, back on z = 0, 14 x 10 px."""
+    s = Spec("painting", "Moonlit Painting", density=12, tris=600, hero=(24, 8), grounded=False)
     gilt = s.style("gilt", brass(tone=3.8))
     gilt_d = s.style("gilt_d", brass(tone=3.0, seed=3))
     for k, (cx, cy, w, h) in enumerate([(0, 9.4, 14.0, 1.2), (0, 0.6, 14.0, 1.2), (-6.4, 5.0, 1.2, 7.6), (6.4, 5.0, 1.2, 7.6)]):
@@ -184,8 +185,9 @@ def painting():
                                  "faces": ["front"], "range": [-0.2, 0.2]}]})
     s.box("liner", [11.8, 8.0, 0.4], gilt_d, (0, 5.0, 0.35))
     canvas = s.style("canvas", {"ramp": "night", "tone": 3, "light": 0.35, "rim": {"outline": "none"}, "layers": []})
-    art, key = moonlit_lake(88, 60)
-    s.card("canvas", art, canvas, at=(0, 5.0, 0.62), size=[11.0, 7.5], key=key)
+    # real art: James McNeill Whistler, Nocturne: Blue and Gold - Southampton Water (1872), Art Institute of Chicago
+    art, key = image_art(os.path.join(ARTS, "whistler_nocturne_southampton.jpg"), 132, 89, colours=40, sat=1.1, light=0.05, shadow=0.04, contrast=1.0)
+    s.card("canvas", art, canvas, at=(0, 5.0, 0.62), size=[11.0, 7.4], key=key)
     s.box("plate", [2.6, 0.6, 0.2], gilt, (0, 0.6, 1.08))
     return s
 
@@ -247,27 +249,28 @@ def star_chart(W, H):
 
 @item
 def starmap():
-    """Star chart: a hanging scroll of night-blue paper painted with Pip's constellations (an owl, the Great Moth),
-    a crescent and a compass rose, between two turned walnut rods with brass end caps on a cord. Wall item, 16 x 11."""
-    s = Spec("starmap", "Star Chart", density=8, tris=900, hero=(24, 8), grounded=False)
+    """Star chart: a real 1515 woodcut star chart (Duerer's Northern Sky, public domain) mounted as a hanging scroll
+    between two turned walnut rods with brass end caps, on a cord. Wall item, back on z = 0, ~11 px tall."""
+    s = Spec("starmap", "Star Chart", density=14, tris=900, hero=(24, 8), grounded=False)
     rod = s.style("rod", wood("walnut", 4.2, grain="x", knots=0, wear=0.3, seed=1))
     cap = s.style("cap", brass())
-    for k, y in enumerate([10.2, 0.8]):
-        s.add(f"rod{k}", "prism", [1.2, 1.2, 15.6], rod, centre=(0, y, 0.7), rot=(0, 90, 0), sides=8)
+    for k, y in enumerate([10.0, 0.7]):
+        s.add(f"rod{k}", "prism", [0.9, 0.9, 9.6], rod, centre=(0, y, 0.6), rot=(0, 90, 0), sides=8)
         for sx in (-1, 1):
-            s.lathe(f"cap{k}{sx}", [(0, 1.5), (0.3, 1.6), (0.7, 0.8)], cap, base=(sx * 7.9, y - 0.35, 0.7), sides=8, rot=(0, 0, -sx * 90)) if False else \
-                s.add(f"cap{k}{sx}", "prism", [1.6, 1.6, 0.8], cap, centre=(sx * 8.1, y, 0.7), rot=(0, 90, 0), sides=8)
-    paper = s.style("paper", {"ramp": "night", "tone": 3, "light": 0.4, "rim": {"outline": "none"}, "layers": []})
-    art, key = star_chart(112, 70)
-    s.card("chart", art, paper, at=(0, 5.5, 0.45), size=[14.6, 9.0], key=key)
+            s.add(f"cap{k}{sx}", "prism", [1.2, 1.2, 0.6], cap, centre=(sx * 5.1, y, 0.6), rot=(0, 90, 0), sides=8)
+    # real art: Albrecht Duerer, Celestial Map of the Northern Sky with the Twelve Zodiac Signs (1515), woodcut,
+    # Art Institute of Chicago (public domain)
+    paper = s.style("paper", {"ramp": "paper", "tone": 4, "light": 0.4, "rim": {"outline": "none"}, "layers": []})
+    art, key = image_art(os.path.join(ARTS, "durer_celestial_north.jpg"), 104, 129, colours=16, sat=0.7, light=0.04, shadow=0.1, contrast=1.0)
+    s.card("chart", art, paper, at=(0, 5.35, 0.42), size=[7.4, 9.2], key=key)
     cord = s.style("cord", {"ramp": "oat", "tone": 3, "light": 0.5, "rim": {"outline": "none"}, "layers": []})
 
     def cord_art(x, y):
         yy = 1 - y
         cxl = 0.5 - 0.5 * (1 - yy)
         cxr = 0.5 + 0.5 * (1 - yy)
-        return "c" if abs(x - cxl) < 0.03 or abs(x - cxr) < 0.03 else "."
-    s.card("cord", grid_art(60, 14, cord_art), cord, at=(0, 12.0, 0.6), size=[13, 2.8], key={"c": "oat:3"})
+        return "c" if abs(x - cxl) < 0.04 or abs(x - cxr) < 0.04 else "."
+    s.card("cord", grid_art(40, 10, cord_art), cord, at=(0, 11.2, 0.5), size=[8.4, 1.8], key={"c": "oat:3"})
     return s
 
 
@@ -469,8 +472,9 @@ def mushpot():
         return "."
     for k, (x, z, a) in enumerate([(-3.2, 2.2, 20), (3.4, -1.8, -30), (2.6, 2.4, 70)]):
         for j, r in enumerate((0, 90)):
-            s.card(f"tuft{k}_{j}", grid_art(14, 14, tuft), gr, at=(x, 4.1, z), rot=(0, a + r, 0), off=(0, 0.9, 0), size=[1.8, 1.8],
-                   key={"g": "fern:3", "l": "moss:5"})
+            ga, gk = image_art("grass.png", 18, 18, colours=16, crop=((k % 3) / 3, 0, (k % 3 + 1) / 3, 1), flip=j == 1, seed=k)
+            s.card(f"tuft{k}_{j}", ga, gr, at=(x, 4.1, z), rot=(0, a + r, 0), off=(0, 0.9, 0), size=[1.8, 1.8],
+                   key=gk)
     return s
 
 

@@ -7,7 +7,7 @@
  "grounded": true,
  "budget": {
   "tris": 2600,
-  "colors": 200
+  "colors": 480
  },
  "light": {
   "dir": [
@@ -341,7 +341,7 @@
   },
   "foliage": {
    "ramp": "pine",
-   "tone": 4.2,
+   "tone": 2.6,
    "rim": {
     "light": 1,
     "dark": 1,
@@ -365,21 +365,6 @@
      "jitter": 0.9
     },
     {
-     "id": "tips",
-     "op": "spots",
-     "count": 30,
-     "radius": [
-      0.15,
-      0.25
-     ],
-     "ramp": "moss",
-     "tone": 5,
-     "seed": 3,
-     "faces": [
-      "up"
-     ]
-    },
-    {
      "id": "under",
      "op": "gradient",
      "axis": "y",
@@ -395,6 +380,15 @@
      "pine": "fur"
     }
    }
+  },
+  "sprig": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.9,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
   },
   "peb": {
    "ramp": "pebble",
@@ -769,7 +763,7 @@
    "shape": "loft",
    "pivot": [
     5.0,
-    9.6,
+    9.8,
     0.8
    ],
    "style": "foliage",
@@ -781,36 +775,25 @@
       0
      ],
      "size": [
-      3.78,
-      2.9700000000000006
+      2.43,
+      1.89
      ]
     },
     {
      "at": [
       0,
-      0.8,
+      1.0,
       0
      ],
      "size": [
-      5.4,
-      4.32
+      3.24,
+      2.43
      ]
     },
     {
      "at": [
       0,
-      1.6,
-      0
-     ],
-     "size": [
-      4.32,
-      3.5100000000000002
-     ]
-    },
-    {
-     "at": [
-      0,
-      2.0,
+      1.7,
       0
      ],
      "size": [
@@ -820,7 +803,7 @@
     }
    ],
    "profile": {
-    "sides": 9,
+    "sides": 7,
     "round": 2.0
    },
    "caps": [
@@ -835,11 +818,1043 @@
    "subdiv": 0
   },
   {
+   "id": "padb0",
+   "shape": "bone",
+   "pivot": [
+    5.0,
+    10.5,
+    0.8
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "sprig0_0",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    0.1443,
+    0.6927,
+    0.9612
+   ],
+   "offset": [
+    1.512,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    -19.54023316873574,
+    98.54008186487064,
+    -5.140766877884602
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_1",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    0.2924,
+    0.0134,
+    0.927
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -22.74580383740004,
+    107.51005966668637,
+    -10.913395346341316
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_2",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    0.7151,
+    0.9987,
+    0.6584
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    -15.428926652360367,
+    137.3652159003607,
+    -6.371755159924225
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_3",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    0.9715,
+    0.9587,
+    0.0309
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -8.069671756743535,
+    178.17853146230397,
+    8.261544902609785
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_4",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    0.8662,
+    0.1888,
+    -0.4411
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -14.699319445068017,
+    206.9873306013738,
+    -10.540734889006654
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_5",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    0.463,
+    -0.1657,
+    -0.8547
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    -8.610464799952336,
+    241.55669127378025,
+    -10.458853504507417
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_6",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    -0.085,
+    0.7921,
+    -0.9683
+   ],
+   "offset": [
+    1.512,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    -28.180444245172758,
+    275.0170829245982,
+    9.490757745939025
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_7",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    -0.6302,
+    -0.5704,
+    -0.74
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -13.775132979884681,
+    310.42147310468135,
+    -11.971207593916112
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_8",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    -0.8426,
+    0.0987,
+    -0.4846
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -28.902414916563057,
+    330.0941910355026,
+    -4.201376530185454
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_9",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    -0.9611,
+    -0.0937,
+    0.1449
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -30.528842493993324,
+    368.5740292687572,
+    4.764287767639459
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_10",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    -0.8537,
+    0.6783,
+    0.4647
+   ],
+   "offset": [
+    1.512,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -27.93450628081486,
+    388.55923482129054,
+    -4.325168296361129
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig0_11",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    3.348,
+    1.4229
+   ],
+   "pivot": [
+    -0.3579,
+    0.2113,
+    0.9037
+   ],
+   "offset": [
+    1.512,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -19.80844995735287,
+    428.3966267295387,
+    -6.331340918499276
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop0_0",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    4.86,
+    2.052
+   ],
+   "pivot": [
+    0.0,
+    1.1,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    15.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop0_1",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    4.86,
+    2.052
+   ],
+   "pivot": [
+    0.0,
+    1.1,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    75.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop0_2",
+   "shape": "card",
+   "parent": "padb0",
+   "size": [
+    4.86,
+    2.052
+   ],
+   "pivot": [
+    0.0,
+    1.1,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    135.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
    "id": "pad1",
    "shape": "loft",
    "pivot": [
     -4.8,
-    11.8,
+    12.0,
     -0.6
    ],
    "style": "foliage",
@@ -851,36 +1866,25 @@
       0
      ],
      "size": [
-      3.36,
-      2.64
+      2.16,
+      1.68
      ]
     },
     {
      "at": [
       0,
-      0.7200000000000001,
+      0.9,
       0
      ],
      "size": [
-      4.8,
-      3.84
+      2.88,
+      2.16
      ]
     },
     {
      "at": [
       0,
-      1.4400000000000002,
-      0
-     ],
-     "size": [
-      3.84,
-      3.12
-     ]
-    },
-    {
-     "at": [
-      0,
-      1.8,
+      1.53,
       0
      ],
      "size": [
@@ -890,7 +1894,7 @@
     }
    ],
    "profile": {
-    "sides": 9,
+    "sides": 7,
     "round": 2.0
    },
    "caps": [
@@ -905,11 +1909,974 @@
    "subdiv": 0
   },
   {
+   "id": "padb1",
+   "shape": "bone",
+   "pivot": [
+    -4.8,
+    12.61,
+    -0.6
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "sprig1_0",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    -0.2031,
+    0.8038,
+    0.8398
+   ],
+   "offset": [
+    1.344,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -32.425226267395104,
+    76.40701585018677,
+    8.278243235366638
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_1",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    0.4192,
+    0.8295,
+    0.7555
+   ],
+   "offset": [
+    1.344,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    -23.01724215263581,
+    119.0279334167952,
+    10.474609484208074
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_2",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    0.7955,
+    -0.1942,
+    0.3372
+   ],
+   "offset": [
+    1.344,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -12.757349899165618,
+    157.02701916949457,
+    4.185353157282307
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_3",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    0.8407,
+    0.1279,
+    -0.1993
+   ],
+   "offset": [
+    1.344,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -28.34334322506636,
+    193.33956412858694,
+    3.382563395551463
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_4",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    0.7489,
+    0.4568,
+    -0.4308
+   ],
+   "offset": [
+    1.344,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -15.938396003278676,
+    209.90759680093493,
+    -2.963699385895387
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_5",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    0.1203,
+    -0.2606,
+    -0.8556
+   ],
+   "offset": [
+    1.344,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -23.28623258606835,
+    261.9950173189346,
+    7.150413266328503
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_6",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    -0.1946,
+    0.4871,
+    -0.8418
+   ],
+   "offset": [
+    1.344,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -16.624465875040645,
+    283.01694674164946,
+    10.584023405822442
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_7",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    -0.7689,
+    0.5021,
+    -0.3942
+   ],
+   "offset": [
+    1.344,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -10.734685728959903,
+    332.85785716663463,
+    -8.33123944450385
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_8",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    -0.8634,
+    0.6806,
+    -0.0335
+   ],
+   "offset": [
+    1.344,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -22.963227560221057,
+    357.77910917004573,
+    1.2780009550449822
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_9",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    -0.7895,
+    0.8403,
+    0.351
+   ],
+   "offset": [
+    1.344,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -25.481664791698527,
+    383.9711115947587,
+    -2.3499713534936184
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig1_10",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    2.976,
+    1.2648
+   ],
+   "pivot": [
+    -0.6288,
+    0.0651,
+    0.5925
+   ],
+   "offset": [
+    1.344,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -16.056916816031297,
+    403.29848136783147,
+    10.439066260479606
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop1_0",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    4.32,
+    1.824
+   ],
+   "pivot": [
+    0.0,
+    0.99,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    15.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop1_1",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    4.32,
+    1.824
+   ],
+   "pivot": [
+    0.0,
+    0.99,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    75.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop1_2",
+   "shape": "card",
+   "parent": "padb1",
+   "size": [
+    4.32,
+    1.824
+   ],
+   "pivot": [
+    0.0,
+    0.99,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    135.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
    "id": "pad2",
    "shape": "loft",
    "pivot": [
     0.2,
-    13.8,
+    14.0,
     0.0
    ],
    "style": "foliage",
@@ -921,36 +2888,25 @@
       0
      ],
      "size": [
-      3.9199999999999995,
-      3.08
+      2.52,
+      1.9599999999999997
      ]
     },
     {
      "at": [
       0,
-      0.96,
+      1.2,
       0
      ],
      "size": [
-      5.6,
-      4.4799999999999995
+      3.36,
+      2.52
      ]
     },
     {
      "at": [
       0,
-      1.92,
-      0
-     ],
-     "size": [
-      4.4799999999999995,
-      3.6399999999999997
-     ]
-    },
-    {
-     "at": [
-      0,
-      2.4,
+      2.04,
       0
      ],
      "size": [
@@ -960,7 +2916,7 @@
     }
    ],
    "profile": {
-    "sides": 9,
+    "sides": 7,
     "round": 2.0
    },
    "caps": [
@@ -975,11 +2931,1043 @@
    "subdiv": 0
   },
   {
+   "id": "padb2",
+   "shape": "bone",
+   "pivot": [
+    0.2,
+    14.88,
+    0.0
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "sprig2_0",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    0.2072,
+    -0.0915,
+    0.9865
+   ],
+   "offset": [
+    1.568,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -5.334169231429424,
+    101.86294437321658,
+    -7.495801434371549
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_1",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    0.6351,
+    -0.4181,
+    0.7828
+   ],
+   "offset": [
+    1.568,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    -22.847040414165214,
+    129.0510565050089,
+    -10.23664051662534
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_2",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    0.9474,
+    0.8713,
+    0.3443
+   ],
+   "offset": [
+    1.568,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -30.806321043718512,
+    160.0250900735445,
+    0.6505554373699809
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_3",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    1.001,
+    0.2242,
+    0.1189
+   ],
+   "offset": [
+    1.568,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -18.403819821522536,
+    173.22796191365657,
+    -9.449710771229828
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_4",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    0.7699,
+    -0.1849,
+    -0.6507
+   ],
+   "offset": [
+    1.568,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -21.586300352768802,
+    220.2025157668317,
+    -10.625793678822031
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_5",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    0.6992,
+    -0.3453,
+    -0.726
+   ],
+   "offset": [
+    1.568,
+    0.0,
+    -0.0
+   ],
+   "rotation": [
+    -24.74974447644978,
+    226.07686577943065,
+    10.27472210434977
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_6",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    -0.1908,
+    0.2026,
+    -0.9898
+   ],
+   "offset": [
+    1.568,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -21.357205442522563,
+    280.9123920782673,
+    4.007833052493137
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_7",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    -0.6485,
+    -0.0724,
+    -0.7717
+   ],
+   "offset": [
+    1.568,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    -11.190364167240318,
+    310.0451372688759,
+    -2.424305925886948
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_8",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    -0.8952,
+    0.6959,
+    -0.4634
+   ],
+   "offset": [
+    1.568,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -19.959283867486214,
+    332.6335087068558,
+    4.578618508960787
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_9",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    -1.0033,
+    -0.709,
+    0.097
+   ],
+   "offset": [
+    1.568,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -33.828034002325566,
+    365.5247775060464,
+    -8.423080540426811
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_10",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    -0.9347,
+    -0.3298,
+    0.3773
+   ],
+   "offset": [
+    1.568,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -33.53103254741151,
+    381.9817837617785,
+    -6.786926346005283
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig2_11",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    3.472,
+    1.4756
+   ],
+   "pivot": [
+    -0.4603,
+    0.9813,
+    0.8967
+   ],
+   "offset": [
+    1.568,
+    -0.0,
+    0.0
+   ],
+   "rotation": [
+    -24.514885769815066,
+    422.82652634320834,
+    -3.2062848262468258
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop2_0",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    5.04,
+    2.128
+   ],
+   "pivot": [
+    0.0,
+    1.32,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    15.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop2_1",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    5.04,
+    2.128
+   ],
+   "pivot": [
+    0.0,
+    1.32,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    75.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop2_2",
+   "shape": "card",
+   "parent": "padb2",
+   "size": [
+    5.04,
+    2.128
+   ],
+   "pivot": [
+    0.0,
+    1.32,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    135.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
    "id": "pad3",
    "shape": "loft",
    "pivot": [
     2.6,
-    11.2,
+    11.4,
     -1.4
    ],
    "style": "foliage",
@@ -991,36 +3979,25 @@
       0
      ],
      "size": [
-      2.38,
-      1.87
+      1.53,
+      1.19
      ]
     },
     {
      "at": [
       0,
-      0.5599999999999999,
+      0.7,
       0
      ],
      "size": [
-      3.4,
-      2.72
+      2.04,
+      1.53
      ]
     },
     {
      "at": [
       0,
-      1.1199999999999999,
-      0
-     ],
-     "size": [
-      2.72,
-      2.21
-     ]
-    },
-    {
-     "at": [
-      0,
-      1.4,
+      1.19,
       0
      ],
      "size": [
@@ -1030,7 +4007,7 @@
     }
    ],
    "profile": {
-    "sides": 9,
+    "sides": 7,
     "round": 2.0
    },
    "caps": [
@@ -1043,6 +4020,831 @@
     1
    ],
    "subdiv": 0
+  },
+  {
+   "id": "padb3",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    11.83,
+    -1.4
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "sprig3_0",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    -0.0249,
+    0.342,
+    0.6115
+   ],
+   "offset": [
+    0.952,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -11.441781433735645,
+    87.66876852805353,
+    10.582993975430263
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig3_1",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    0.3642,
+    0.3716,
+    0.4918
+   ],
+   "offset": [
+    0.952,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -24.750979700774902,
+    126.51960116143192,
+    7.776043167428227
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig3_2",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    0.5835,
+    0.5555,
+    0.1845
+   ],
+   "offset": [
+    0.952,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -19.846842406988834,
+    162.4581693046875,
+    5.408256760051142
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig3_3",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    0.5247,
+    -0.0659,
+    -0.315
+   ],
+   "offset": [
+    0.952,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -20.1709430228464,
+    210.97980441293583,
+    -10.789190072207496
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig3_4",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    0.3315,
+    0.1736,
+    -0.5144
+   ],
+   "offset": [
+    0.952,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -20.684765722915532,
+    237.20379181732918,
+    7.995295828394681
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig3_5",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    -0.07,
+    0.2037,
+    -0.608
+   ],
+   "offset": [
+    0.952,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -20.280886869545526,
+    276.5634333015517,
+    2.3519313012157816
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig3_6",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    -0.5609,
+    0.1677,
+    -0.2447
+   ],
+   "offset": [
+    0.952,
+    -0.0,
+    -0.0
+   ],
+   "rotation": [
+    -18.108853389308848,
+    336.4282014755763,
+    -0.19718688939680007
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig3_7",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    -0.5958,
+    -0.1421,
+    0.14
+   ],
+   "offset": [
+    0.952,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -18.421597126654095,
+    373.22579596949413,
+    4.137283641870692
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprig3_8",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    2.108,
+    0.8959
+   ],
+   "pivot": [
+    -0.4594,
+    0.6892,
+    0.4043
+   ],
+   "offset": [
+    0.952,
+    0.0,
+    0.0
+   ],
+   "rotation": [
+    -12.60621562011329,
+    401.35115786527666,
+    10.92795040324511
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop3_0",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    3.06,
+    1.292
+   ],
+   "pivot": [
+    0.0,
+    0.77,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    15.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop3_1",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    3.06,
+    1.292
+   ],
+   "pivot": [
+    0.0,
+    0.77,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    75.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532a",
+     "d": "#495a2f",
+     "e": "#4f6132",
+     "f": "#546735",
+     "g": "#5a6e38",
+     "h": "#5f743a",
+     "i": "#627a3d",
+     "j": "#688041",
+     "k": "#6c8444",
+     "l": "#728d46",
+     "m": "#7a964e",
+     "n": "#819f52",
+     "o": "#89a856",
+     "p": "#98b760",
+     "q": "#a6c66b",
+     "r": "#b2d974",
+     "s": "#cfea84",
+     "t": "#dbf68e"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    ".............................hfp........",
+    ".............i.............o.iceh.......",
+    "tm.q..on....kdg......p....oh.i.cdd......",
+    ".siio.pe.....dbg...ijgo...qdklo.de......",
+    "...nffmh.non.dcc..fecfefgrhcc.kmfbc.....",
+    "....qhglmohkldn.kn.de.fefgfdfoecbb......",
+    ".....rkeffglpkh.kgjgfffdfhffm..ibg......",
+    "....plfggo..gfl..ghgeefccdeefm.fcg......",
+    "....mgeij...iddei.lfedechefdeffkbh......",
+    "..pkjg.....qnfddibbdkfdcoejphgbbb.......",
+    "...ihhgdl.mfhgibbeciedecco...gba........",
+    "..prpnnjpmmpnn.ci...ehdcfn.jgbbal.......",
+    "......o....q.m.g.....mdl.f...bc.e.......",
+    "..................l..oh..e..ibe.d.......",
+    "......................p.....i...h.......",
+    "........................................"
+   ]
+  },
+  {
+   "id": "sprigtop3_2",
+   "shape": "card",
+   "parent": "padb3",
+   "size": [
+    3.06,
+    1.292
+   ],
+   "pivot": [
+    0.0,
+    0.77,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    135.0,
+    0.0
+   ],
+   "style": "sprig",
+   "paint": {
+    "art_key": {
+     "a": "#304020",
+     "b": "#3a4b26",
+     "c": "#43532b",
+     "d": "#495a2f",
+     "e": "#4e6031",
+     "f": "#526434",
+     "g": "#556836",
+     "h": "#5a6e38",
+     "i": "#5f743a",
+     "j": "#637a3d",
+     "k": "#6a8343",
+     "l": "#718c45",
+     "m": "#78934c",
+     "n": "#7d994f",
+     "o": "#82a052",
+     "p": "#89a856",
+     "q": "#96b65e",
+     "r": "#a3c269",
+     "s": "#b1d674",
+     "t": "#d5f089"
+    }
+   },
+   "plane": "xz",
+   "art": [
+    "........................................",
+    "........qgi.............................",
+    ".......iecj.p.............j.............",
+    "......ddc.j.ip....q......hdk....op..r.nt",
+    "......ed.pmkdr...phli...hbd.....eq.pjjt.",
+    ".....cbfmk.ccishgfgcdg..ccd.opo.inggo...",
+    "......bbcepfdfhfeg.gc.nk.odlkipmlhis....",
+    "......hbj..mfgifdfgfhkhk.ikqlhfgfks.....",
+    "......hcg.ngefdccgfehih..lfg..phhglq....",
+    "......ibkgfedgficedegl.jfedj...kjehm....",
+    ".......bbbhiqkepcdfkebbjddgor.....hkkr..",
+    "........abh...pccfdeicfbbjhigm.ldhiij...",
+    ".......labbhk.ogcdid...jc.nornmqkooqsq..",
+    ".......e.cb...g.ldn.l...h.n.r....p......",
+    ".......d.ebj..e..ip..l..................",
+    ".......i...j.....q......................",
+    "........................................"
+   ]
   },
   {
    "id": "pebble",
@@ -1163,5 +4965,49 @@
     0.2
    ]
   }
- ]
+ ],
+ "animations": {
+  "idle": {
+   "length": 5.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "padb0",
+     "osc": {
+      "axis": "z",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "padb1",
+     "osc": {
+      "axis": "z",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.23
+     }
+    },
+    {
+     "part": "padb2",
+     "osc": {
+      "axis": "z",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.46
+     }
+    },
+    {
+     "part": "padb3",
+     "osc": {
+      "axis": "z",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.6900000000000001
+     }
+    }
+   ]
+  }
+ }
 }

@@ -174,5 +174,48 @@ async function liveOne(id: string) {
   tick();
 }
 
-if (q.get('one')) void liveOne(q.get('one')!);
+/** ?src=/path/a.glb,/path/b.glb : any GLBs (e.g. borrow candidates), same lighting, labelled with size in px. */
+async function sources(urls: string[]) {
+  const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+  const { MeshoptDecoder } = await import('three/examples/jsm/libs/meshopt_decoder.module.js');
+  const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  grid.style.setProperty('--cell', CELL + 'px');
+  document.body.append(grid);
+  const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true });
+  renderer.setSize(CELL * 2, CELL * 2);
+  renderer.shadowMap.enabled = true;
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const cam = new THREE.OrthographicCamera();
+  for (const url of urls) {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const cv = document.createElement('canvas');
+    cv.width = CELL * 2; cv.height = CELL * 2;
+    cell.append(cv);
+    grid.append(cell);
+    try {
+      const g = await loader.loadAsync(url);
+      g.scene.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) { m.castShadow = m.receiveShadow = true; const mt = m.material as THREE.MeshStandardMaterial; if (mt.map) { mt.map.magFilter = THREE.NearestFilter; mt.map.needsUpdate = true; } } });
+      const { scene, sun } = stage(NIGHT);
+      scene.add(g.scene);
+      g.scene.updateMatrixWorld(true);
+      const b = new THREE.Box3().setFromObject(g.scene);
+      sun.target.position.copy(b.getCenter(new THREE.Vector3()));
+      frame(cam, b, YAW, PITCH);
+      renderer.render(scene, cam);
+      cv.getContext('2d')!.drawImage(renderer.domElement, 0, 0);
+      const s = b.getSize(new THREE.Vector3());
+      cell.insertAdjacentHTML('beforeend', `<div class="nm">${url.split('/').pop()}</div><div class="meta">${fmt(s.x)} x ${fmt(s.y)} x ${fmt(s.z)}</div>`);
+    } catch (e) {
+      cell.insertAdjacentHTML('beforeend', `<div class="nm warn">${url}: ${String(e)}</div>`);
+    }
+  }
+  document.body.dataset.ready = '1';
+}
+
+if (q.get('src')) void sources(q.get('src')!.split(','));
+else if (q.get('one')) void liveOne(q.get('one')!);
 else void sheet();

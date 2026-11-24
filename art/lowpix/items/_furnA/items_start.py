@@ -5,7 +5,7 @@ import math
 import numpy as np
 
 from kit import (Spec, wood, painted_wood, cloth, velvet, brass, iron, glaze, clay, stone, wax, leafy, glow, soil, flat, UP,
-                 pillow, lace_art, torus, arc_points, grid_art, flame_art, frond_art)
+                 pillow, lace_art, torus, arc_points, grid_art, flame_art, frond_art, image_art)
 
 ITEMS = {}
 
@@ -225,8 +225,8 @@ def nestbed():
         s.card(f"feather{k}", feather_art(12, 30), fea, at=(x, 6.0, z), rot=(0, a + 90, tilt), size=[1.8, 4.6], off=(0, 2.0, 0),
                key={"q": "oat:3", "c": "cream:6", "b": "ochre:3", "s": "cream:3"})
     fernc = s.style("fernc", {"ramp": "fern", "tone": 4, "light": 0.8, "rim": {"outline": "none"}, "layers": []})
-    s.card("fern", frond_art(18, 30, lean=0.4, seed=2), fernc, at=(8.2, 6.0, -6.2), rot=(0, 130, -30), size=[3.0, 5.0], off=(0, 2.2, 0),
-           key={"s": "fern:2", "l": "fern:4", "d": "fern:2", "h": "fern:6"})
+    fa, fk = image_art("fern_frond.png", 12, 40, colours=18, crop=(0, 0, 1, 0.62))
+    s.card("fern", fa, fernc, at=(8.2, 6.0, -6.2), rot=(0, 130, -30), size=[1.6, 5.2], off=(0, 2.4, 0), key=fk)
     return s
 
 
@@ -505,20 +505,45 @@ def fernpot():
     s.lathe("soil", [(0, 6.0), (0.2, 5.4)], s.style("soil", soil()), base=(0, 4.95, 0), sides=12, caps=(False, True),
             paint={"layers": [{"id": "moss", "op": "patches", "scale": 1.0, "threshold": 0.55, "ramp": "moss", "tone": 4.0}]})
     fr = s.style("fr", {"ramp": "fern", "tone": 4, "light": 0.9, "rim": {"outline": "none"}, "layers": []})
-    key = {"s": "fern:2", "l": "fern:5", "d": "fern:3", "h": "moss:5"}
     tracks = []
-    for k in range(9):
-        a = k * 40 + (k % 2) * 12
-        L = 4.6 + (k % 3) * 0.8
-        art = frond_art(22, 40, lean=0.0, seed=k, leaflets=8)
-        half = len(art) // 2
-        tip, base = art[:half], art[half:]
+    # 2D pixel-art fronds: the sword-fern sprites of BUSHED's vegetation atlas (from Poly Haven's Fern 02, CC0), each
+    # frond cut into a base and a tip card so it can arch and sway
+    for k in range(10):
+        a = k * 36 + (k % 2) * 12
+        L = 4.4 + (k % 3) * 0.7
+        src, flip = ("fern_frond.png", k % 2 == 1) if k % 3 else ("fern_frond2.png", k % 2 == 0)
+        base, kb = image_art(src, 16, 36, colours=20, crop=(0, 0.5, 1, 1), flip=flip, seed=k)
+        tip, kt = image_art(src, 16, 36, colours=20, crop=(0, 0.0, 1, 0.5), flip=flip, seed=k)
         s.bone(f"fb{k}", at=(0, 5.2, 0), rot=(0, a, 0))
-        s.card(f"frond{k}", base, fr, parent=f"fb{k}", rel=(0, 0, 0), rot=(48 + (k % 3) * 8, 0, 0), plane="xz",
-               off=(0, 0, -L / 2), size=[3.6, L], key=key)
-        s.card(f"frondtip{k}", tip, fr, parent=f"frond{k}", rel=(0, 0, -L), rot=(-40, 0, 0), plane="xz",
-               off=(0, 0, -L / 2), size=[3.6, L], key=key)
+        s.card(f"frond{k}", base, fr, parent=f"fb{k}", rel=(0, 0, 0), rot=(46 + (k % 3) * 9, 0, 0), plane="xz",
+               off=(0, 0, -L / 2), size=[2.0, L], key=kb)
+        s.card(f"frondtip{k}", tip, fr, parent=f"frond{k}", rel=(0, 0, -L), rot=(-38, 0, 0), plane="xz",
+               off=(0, 0, -L / 2), size=[2.0, L], key=kt)
         tracks.append({"part": f"frond{k}", "osc": {"axis": "x", "amp": 3, "cycles": 1, "phase": k * 0.13}})
         tracks.append({"part": f"frondtip{k}", "osc": {"axis": "x", "amp": 5, "cycles": 1, "phase": k * 0.13 + 0.15}})
     s.anim("idle", 4.0, tracks)
+    return s
+
+
+# ------------------------------------------------------------------------------------------------ extras
+EXTRAS = {}
+
+# where borrow.py stands the three BUSHED candlesticks (x, z, height px); flames sit on their wicks
+CANDLESTICKS = [(1.1, -0.9, 9.4), (-2.4, 0.8, 7.4), (2.4, 2.2, 5.4)]
+
+
+def extra(fn):
+    EXTRAS[fn.__name__] = fn
+    return fn
+
+
+@extra
+def candles_flames():
+    """Three flickering flames (glowing crossed cards, clip 'idle') for the borrowed candlesticks of `candles`."""
+    s = Spec("candles_flames", "Candle flames", density=9, tris=200, hero=(30, 20), grounded=False)
+    fl = s.style("fl", glow("flame", 4.2))
+    tracks = []
+    for k, (x, z, h) in enumerate(CANDLESTICKS):
+        tracks += flame(s, k, (x, h - 0.1, z), fl, h=2.4, w=1.3, phase=k * 0.31)
+    s.anim("idle", 2.0, tracks)
     return s

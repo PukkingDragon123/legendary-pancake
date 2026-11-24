@@ -298,7 +298,7 @@ UP = (-90, 0, 0)   # rotation that stands a prism (or a Z-running loft) upright:
 class Spec:
     """Collects parts in world coordinates (px) and writes a lowpix spec."""
 
-    def __init__(self, id, name, density=6.0, tris=3000, colors=200, hero=(32, 24), light=None, grounded=True, desc=""):
+    def __init__(self, id, name, density=6.0, tris=3000, colors=480, hero=(32, 24), light=None, grounded=True, desc=""):
         self.id, self.name, self.density = id, name, density
         self.parts, self.frames, self.styles, self.anims = [], {}, {}, {}
         self.tris, self.colors, self.hero, self.grounded, self.desc = tris, colors, hero, grounded, desc
@@ -554,6 +554,51 @@ def frond_art_old(w, h, lean=0.0, seed=1, leaflets=9):
                     if 0 <= xi < w and 0 <= yy < h and grid[yy][xi] == ".":
                         grid[yy][xi] = "h" if d == 0 and side < 0 else ("d" if d == thick - 1 else "l")
     return ["".join(r) for r in grid]
+
+
+ART_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*+=?@^~!:;<>/|"
+LEAVES = os.path.join(HERE, "leaves")     # 2D pixel leaf sprites borrowed from BUSHED's veg atlas
+ARTS = os.path.join(HERE, "art")          # real public-domain artworks (Art Institute of Chicago)
+
+
+def image_art(src, w, h, colours=24, sat=0.85, crop=None, flip=False, seed=1, light=0.12, shadow=0.18, contrast=0.0):
+    """Card art (rows + "#rrggbb" key) from a real image: a borrowed pixel-art leaf sprite or a public-domain
+    artwork. Area-downsampled to w x h texels, alpha cut at 50 %, calmed (less chroma, slate shadows, lamp-warm
+    lights) and quantised onto a k-means palette (BUSHED's pix.py) so it stays crisp pixel art."""
+    from PIL import Image
+    from pix import kmeans, quantize
+    im = Image.open(src if os.path.isabs(src) else os.path.join(LEAVES, src)).convert("RGBA")
+    if crop:
+        W0, H0 = im.size
+        im = im.crop((int(crop[0] * W0), int(crop[1] * H0), int(crop[2] * W0), int(crop[3] * H0)))
+    if flip:
+        im = im.transpose(Image.FLIP_LEFT_RIGHT)
+    a = np.asarray(im).astype(np.float32) / 255.0
+    pm = np.concatenate([a[..., :3] * a[..., 3:], a[..., 3:]], -1)          # premultiplied, so edges stay clean
+    small = np.asarray(Image.fromarray((pm * 255 + 0.5).astype(np.uint8), "RGBA").resize((w, h), Image.BOX)).astype(np.float32) / 255
+    al = small[..., 3:]
+    rgb = np.where(al > 1e-3, small[..., :3] / np.maximum(al, 1e-3), 0)
+    if contrast:   # stretch the value range (2 %..98 %): dark old paintings read at a glance
+        L0 = rgb @ np.array([0.3, 0.59, 0.11])
+        lo_, hi_ = np.percentile(L0[al[..., 0] > 0.5], [2, 98]) if (al > 0.5).any() else (0, 1)
+        k = contrast
+        rgb = np.clip(rgb * (1 - k) + ((rgb - lo_) / max(hi_ - lo_, 1e-3)) * k, 0, 1)
+    L = (rgb @ np.array([0.3, 0.59, 0.11]))[..., None]
+    rgb = L + (rgb - L) * sat
+    slate, lamp = np.array([0x46, 0x59, 0x6a]) / 255, np.array([0xf1, 0xd3, 0x9a]) / 255
+    sh = np.clip(1 - L / 0.4, 0, 1) * shadow
+    hl = np.clip((L - 0.6) / 0.4, 0, 1) * light
+    rgb = np.clip(rgb * (1 - sh) + slate * sh * (L + 0.4) + 0 * hl, 0, 1)
+    rgb = rgb * (1 - hl) + lamp * hl
+    mask = al[..., 0] > 0.5
+    px = rgb[mask] if mask.any() else rgb.reshape(-1, 3)
+    uniq = np.unique(np.round(px * 255).astype(int), axis=0)
+    pal = uniq / 255.0 if len(uniq) <= colours else kmeans(px, colours, seed=seed)
+    _, idx = quantize(rgb, pal)
+    rows = ["".join(ART_CHARS[idx[y, x]] if mask[y, x] else "." for x in range(w)) for y in range(h)]
+    key = {ART_CHARS[i]: "#%02x%02x%02x" % tuple(int(round(c * 255)) for c in np.clip(pal[i], 0, 1)) for i in range(len(pal))}
+    used = set("".join(rows))
+    return rows, {k: v for k, v in key.items() if k in used}
 
 
 def lace_art(cols, rows, holes=True, scallop=3.0, half=True):
