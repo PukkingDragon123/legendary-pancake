@@ -56,11 +56,11 @@ def tulip(s, id, base, h, rmp, lean=0.0, yaw=0.0):
             double_sided=True)
     lf = card_style(s, f"{id}_lf", "fern", 4)
 
-    def strap(u, v):
-        half = 0.42 * math.sin(min(1.0, (1 - v) * 1.1) * math.pi) ** 0.6
-        return ("h" if u < 0.5 else "l") if abs(u - 0.5) < half else "."
-    s.card(f"{id}_leaf", grid_art(8, 24, strap), lf, at=(x, y, z), rot=(0, yaw, 18), off=(0, h * 0.3, 0), size=[1.2, h * 0.6],
-           key={"l": "fern:4", "h": "moss:5"})
+    # strap leaves: 2D pixel-art blades from BUSHED's vegetation atlas, two crossed cards
+    k = sum(map(ord, id))
+    for j, (ry, rz) in enumerate(((0, 16), (100, -14))):
+        art, key = image_art("grass.png", 12, 28, colours=14, crop=((k + j) % 3 / 3, 0, ((k + j) % 3 + 1) / 3, 1), flip=bool(j), seed=k + j)
+        s.card(f"{id}_leaf{j}", art, lf, at=(x, y, z), rot=(0, yaw + ry, rz), off=(0, h * 0.32, 0), size=[1.6, h * 0.64], key=key)
 
 
 def daisy(s, id, base, h, petal="paper", eye="honey", yaw=0.0):

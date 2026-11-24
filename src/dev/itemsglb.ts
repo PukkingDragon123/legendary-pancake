@@ -91,7 +91,7 @@ function boundsText(def: ItemDef, b: THREE.Box3) {
 }
 
 async function sheet() {
-  document.body.insertAdjacentHTML('beforeend', `<h1>Furniture models</h1><div class="sub">${items.length} lowpix models · ${NIGHT ? 'night' : 'day'} · ?one=&lt;id&gt; for a live turntable</div>`);
+  document.body.insertAdjacentHTML('beforeend', `<h1>Furniture models</h1><div class="sub">${items.length} furniture models (lowpix + borrowed) · ${NIGHT ? 'night' : 'day'} · ?one=&lt;id&gt; for a live turntable</div>`);
   const grid = document.createElement('div');
   grid.className = 'grid';
   grid.style.setProperty('--cell', CELL + 'px');
