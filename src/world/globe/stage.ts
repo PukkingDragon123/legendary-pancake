@@ -204,7 +204,7 @@ export class GlobeStage implements Stage {
     const clouds = new THREE.Mesh(new THREE.SphereGeometry(1.006, 256, 128), this.cloudMat);
     clouds.renderOrder = 2;
     this.world.add(clouds);
-    this.atmoMat = new THREE.ShaderMaterial({ vertexShader: S.atmoVS, fragmentShader: S.atmoFS, uniforms: { uSun: shared.uSun, uGain: { value: 0.9 } }, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending });
+    this.atmoMat = new THREE.ShaderMaterial({ vertexShader: S.atmoVS, fragmentShader: S.atmoFS, uniforms: { uSun: shared.uSun, uGain: { value: 0.78 } }, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending });
     const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.065, 128, 64), this.atmoMat);
     atmo.renderOrder = 5;
     this.world.add(atmo);

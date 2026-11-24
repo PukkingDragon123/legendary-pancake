@@ -72,6 +72,7 @@ export function GlobePanel() {
   const [leaving, setLeaving] = useState(false);
   const stageRef = useRef<GlobeStage | null>(null);
   const pinEls = useRef(new Map<string, HTMLElement>());
+  const lblW = useRef(new Map<string, number>()).current;
   const countryRef = useRef<HTMLDivElement>(null);
   const selRef = useRef<string | null>(null);
   const sheetRef = useRef(false);
@@ -152,8 +153,11 @@ export function GlobePanel() {
     const st = stageRef.current!;
     const selId = selRef.current, near = st.closeness;
     if (selId && !sheetRef.current && near > 0.55 && st.flightT > 0.62) { sheetRef.current = true; setSheet(true); }
-    const taken: [number, number, number, number][] = [];
+    type Box = [number, number, number, number];
+    const hit = (a: Box, b: Box) => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1];
     const order = [...pins].sort((a, b) => rank(b.id) - rank(a.id) || a.depth - b.depth);
+    // every visible flag first (a name tag never hides under another place's flag) ...
+    const flags = new Map<string, Box>();
     for (const p of order) {
       const el = pinEls.current.get(p.id);
       if (!el) continue;
@@ -162,16 +166,25 @@ export function GlobePanel() {
       el.style.opacity = String(Math.min(1, (p.facing - 0.04) * 8));
       el.style.transform = `translate(${Math.round(p.x - 3.5 * px)}px,${Math.round(p.y - (PIN_H - 0.5) * px)}px)`;
       el.style.zIndex = String(p.id === selId ? 999 : Math.round((1 - p.depth) * 500));
-      const lbl = el.lastElementChild as HTMLElement | null;
-      if (lbl) {
-        const name = AREA[p.id]?.title.replace(/^The /, '') ?? '';
-        const w = name.length * 7.5 + 22, x0 = p.x - w / 2, y0 = p.y + 2;
-        const box: [number, number, number, number] = [x0, y0, x0 + w, y0 + 20];
-        const free = p.id === selId || (!taken.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1]) && p.facing > 0.18);
-        lbl.style.visibility = free ? 'visible' : 'hidden';
-        if (free) taken.push(box);
-        taken.push([p.x - 8, p.y - PIN_H * px, p.x + 18, p.y]);
-      }
+      flags.set(p.id, [p.x - 8, p.y - PIN_H * px, p.x + 18, p.y]);
+    }
+    // ... then the name tags, most important first, kept on screen, only where they fit
+    const taken: Box[] = [];
+    for (const p of order) {
+      const el = pinEls.current.get(p.id), lbl = el?.lastElementChild as HTMLElement | null;
+      if (!el || !lbl || !flags.has(p.id)) continue;
+      let lw = lblW.get(p.id);
+      if (!lw) { lw = lbl.offsetWidth; if (lw) lblW.set(p.id, lw); }
+      const w = (lw || 80) + 4;
+      let x0 = p.x - w / 2;
+      const shift = Math.max(4 - x0, 0) + Math.min(innerWidth - 4 - (x0 + w), 0);
+      x0 += shift;
+      const box: Box = [x0, p.y + 2, x0 + w, p.y + 24];
+      let free = p.id === selId;
+      if (!free && p.facing > 0.18) free = !taken.some((b) => hit(box, b)) && ![...flags].some(([id, b]) => id !== p.id && hit(box, b));
+      lbl.style.visibility = free ? 'visible' : 'hidden';
+      lbl.style.marginLeft = `${Math.round(shift)}px`;
+      if (free) taken.push(box);
     }
     // the country's name floats over it in the close view
     const c = countryRef.current;

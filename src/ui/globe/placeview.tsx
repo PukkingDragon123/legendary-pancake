@@ -127,7 +127,7 @@ export function PlaceView(p: { a: Area; shown: boolean; side: boolean; onBack: (
             <div class="gb-souv">
               <h4>Souvenir{souv.length > 1 ? 's' : ''} from here</h4>
               <div class="gb-souvrow">
-                <div class="gb-case"><canvas ref={canvas} /><i class="gb-glass" />{!cur.have && <i class="gb-q">?</i>}</div>
+                <div class="gb-case"><canvas ref={canvas} /><i class="gb-glass" /><i class={'gb-tag' + (cur.have ? ' have' : '')}>{cur.have ? 'Found' : 'Not found yet'}</i></div>
                 <div class="gb-souvtxt">
                   <b>{cur.name}</b>
                   <span class={'gb-rar ' + (cur.info?.rarity ?? 'common')}>{RARITY[cur.info?.rarity ?? 'common']}</span>
@@ -139,7 +139,7 @@ export function PlaceView(p: { a: Area; shown: boolean; side: boolean; onBack: (
                   )}
                 </div>
               </div>
-              {!cur.have && <p class="gb-turn">The model turns in its case: drag it to look around.</p>}
+              <p class="gb-turn">Drag the souvenir to turn it round.</p>
             </div>
           )}
 

@@ -1,6 +1,6 @@
 // A souvenir on a little turntable, in its own small canvas (the place view's display case): the real GLB from
 // public/models/souvenirs, lit like a museum case (warm key, cool rim, a room environment for the glints),
-// turning slowly; drag to spin it. Not found yet: the same model as a dark silhouette with a glint of rim light.
+// turning slowly; drag to spin it.
 // [globe] OWNED BY THE GLOBE BUILDER.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
@@ -77,7 +77,7 @@ export class SouvenirView {
     if (this.obj) this.frame();
   }
 
-  /** Show a souvenir (found: in full colour; not yet: a dark silhouette). */
+  /** Show a souvenir (found or not: the card says which). */
   async show(id: string, found: boolean) {
     if (id === this.id && found === !this.dark) return;
     this.id = id;
@@ -86,11 +86,6 @@ export class SouvenirView {
       const { root } = await instanceGLB(`souvenirs/${id}.glb`);
       if (this.id !== id) return;
       if (this.obj) this.pivot.remove(this.obj);
-      if (!found) root.traverse((o) => {
-        const m = o as THREE.Mesh;
-        if (!m.isMesh) return;
-        m.material = new THREE.MeshStandardMaterial({ color: 0x2a2f3c, roughness: 0.55, metalness: 0.1, envMapIntensity: 0.6 });
-      });
       root.traverse((o) => { o.castShadow = o.receiveShadow = false; });
       this.obj = root;
       this.pivot.add(root);

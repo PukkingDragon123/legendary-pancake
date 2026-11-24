@@ -112,13 +112,13 @@ void main() {
   vec3 H = normalize(uSun + V);
   float NdH = max(dot(n0, H), 0.0), VdH = max(dot(V, H), 0.0);
   float F = 0.02 + 0.98 * pow(1.0 - VdH, 5.0);
-  float a2 = 0.018, D = a2 / (PI * pow(NdH * NdH * (a2 - 1.0) + 1.0, 2.0));
+  float a2 = 0.009, D = a2 / (PI * pow(NdH * NdH * (a2 - 1.0) + 1.0, 2.0));
   float b2 = 0.16, D2 = b2 / (PI * pow(NdH * NdH * (b2 - 1.0) + 1.0, 2.0));
-  col += water * sunL * (D * 0.9 + D2 * 0.35) * F * max(mu0, 0.0) / (4.0 * NdV) * (1.0 - cover) * lit;
+  col += water * sunL * (D * 1.4 + D2 * 0.12) * F * max(mu0, 0.0) / (4.0 * NdV) * (1.0 - cover) * lit;
   // town lights after dusk
-  float L = texture2D(tCL, vec2(vUv.x, vUv.y * 0.5)).r;
+  float L = texture2D(tCL, vec2(vUv.x, vUv.y * 0.5), uNear * 1.8).r;
   float night = 1.0 - smoothstep(-0.12, 0.05, mu0);
-  col += pow(L, 1.7) * vec3(1.0, 0.62, 0.3) * 2.4 * (1.0 - 0.78 * uNear) * night * (1.0 - cover * 0.75);
+  col += pow(L, 1.7) * vec3(1.0, 0.62, 0.3) * 2.4 * (1.0 - 0.96 * uNear) * night * (1.0 - cover * 0.75);
   // looking down through the air: extinction (the shell adds the in-scattered light on top)
   col *= exp(-odTo(0.0, NdV));
   gl_FragColor = vec4(col, 1.0);
@@ -247,7 +247,7 @@ varying vec2 vUv;
 void main() {
   float r = length(vUv - 0.5) * 2.0;
   float core = smoothstep(0.075, 0.06, r) * 60.0;
-  float glow = exp(-r * 7.0) * 3.5 + exp(-r * 2.2) * 0.35;
+  float glow = (exp(-r * 7.0) * 3.5 + exp(-r * 2.2) * 0.35) * smoothstep(1.0, 0.55, r);
   gl_FragColor = vec4(vec3(1.0, 0.92, 0.8) * (core + glow), 1.0);
 }`;
 
