@@ -23,7 +23,9 @@
 .sf-props { display: flex; align-items: flex-end; justify-content: center; gap: 6px; padding: 6px 0 2px; min-height: 150px; }
 .prop { position: relative; display: block; transition: transform 0.18s var(--pop); filter: drop-shadow(0 4px 0 rgba(40, 34, 27, 0.45)); }
 .prop:active { transform: translateY(3px) scale(0.96); }
-.prop canvas { display: block; }
+.prop canvas, .prop > img { display: block; image-rendering: pixelated; }
+.prop-mug { padding-top: 0; }
+.prop-mug .steam { position: absolute; left: 0; top: -34px; pointer-events: none; }
 .prop::after { content: ''; position: absolute; left: 10%; right: 10%; bottom: -6px; height: 8px; background: var(--px-shadow) center / 100% 100% no-repeat; image-rendering: pixelated; z-index: -1; }
 .prop-candle .halo { position: absolute; left: 50%; top: -6px; width: 150px; height: 150px; margin-left: -75px; background: var(--px-glow-lamp) center / 100% 100% no-repeat; image-rendering: pixelated; pointer-events: none; animation: flick 2.2s steps(5) infinite; mix-blend-mode: screen; }
 @keyframes flick { 0% { opacity: 0.85; transform: scale(1); } 30% { opacity: 1; transform: scale(1.04); } 55% { opacity: 0.8; transform: scale(0.98); } 80% { opacity: 0.95; transform: scale(1.02); } }

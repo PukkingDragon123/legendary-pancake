@@ -5,17 +5,16 @@
 // [ui4] painted per texel at k texels per design unit (2 on phones, 3 on desktop, 4 for the big one), so it
 // shares the fine pixel grid of the other v4 objects; lit from the top left like everything else.
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { vnoise } from './paint.ts';
+import { vnoise } from '../px/relief.ts';
 import { clockNow } from './pxanim.tsx';
 import { uiBurst } from './uifx.ts';
-import { DESK_HUD, kFor } from './objects.ts';
+import { DESK_HUD, kFor, tubeCap } from './objects.ts';
 import { reducedMotion } from './swing.ts';
 
 type C3 = [number, number, number];
 const hx = (h: string): C3 => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 const LIQ = ['#140c3a', '#24206e', '#2f3fa8', '#3a6ed6', '#4fa3ea', '#86d4f6', '#c8f2ff', '#ffffff'].map(hx);
 const GOLD = ['#5a3608', '#9a6410', '#d49a1e', '#f2c440', '#ffe27a', '#fff3c0', '#ffffff', '#ffffff'].map(hx);
-const BRASS = ['#2b1a06', '#4a300b', '#6e4a12', '#94661a', '#b88524', '#d4a432', '#e8c24e', '#f6dc7f', '#fff1bd'].map(hx);
 const INK: C3 = [26, 14, 8];
 const GLASS_IN: C3 = [16, 20, 44];
 
@@ -53,6 +52,7 @@ export function MagicBar(p: { level: number; into: number; need: number; w?: num
     cv.width = TW; cv.height = TH;
     const g = cv.getContext('2d')!;
     const img = g.createImageData(TW, TH), d = img.data;
+    const capL = tubeCap(k);
     let raf = 0, lastPaint = 0, lastT = clockNow();
     const set = (x: number, y: number, c: C3, a = 255) => { if (x < 0 || y < 0 || x >= TW || y >= TH) return; const i = (y * TW + x) * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = a; };
     const blend = (x: number, y: number, c: C3, t: number) => { if (x < 0 || y < 0 || x >= TW || y >= TH) return; const i = (y * TW + x) * 4; d[i] += (c[0] - d[i]) * t; d[i + 1] += (c[1] - d[i + 1]) * t; d[i + 2] += (c[2] - d[i + 2]) * t; };
@@ -87,19 +87,8 @@ export function MagicBar(p: { level: number; into: number; need: number; w?: num
       for (let y = 0; y < TH; y++) {
         const cyl = (y - ty0 + 0.5) / th; // 0 top .. 1 bottom inside the glass
         for (let x = 0; x < TW; x++) {
-          // ---- brass caps: turned, lit from the top left, a groove ring, inked ends
-          if (x < cap || x >= TW - cap) {
-            const left = x < cap, cx = left ? x : TW - 1 - x;
-            const yy = y / (TH - 1);
-            if (cx === 0 || y === 0 || y === TH - 1) { if (!(cx === 0 && (y < k || y >= TH - k))) set(x, y, INK); continue; }
-            if (cx === 0 + 1 && (y < k || y >= TH - k)) continue;
-            let v = 0.82 - yy * 0.72 + (left ? 0.06 : -0.06) - (cx === cap - 1 ? 0.25 : 0);
-            if (Math.abs(cx - cap * 0.5) < k * 0.35) v -= 0.32; // groove
-            if (yy < 0.18) v += 0.2;
-            const bi = Math.max(0, Math.min(8, Math.round(v * 8 + ((x + y) % 2 ? 0.25 : -0.25))));
-            set(x, y, BRASS[bi]);
-            continue;
-          }
+          // ---- the brass caps are relief-painted parts, drawn over the ends after the glass (tubeCap)
+          if (x < cap || x >= TW - cap) continue;
           // ---- glass walls
           if (y < ty0 || y >= ty1) { set(x, y, INK); continue; }
           if (y === ty0 || y === ty1 - 1) { set(x, y, [40, 46, 84]); continue; }
@@ -143,6 +132,8 @@ export function MagicBar(p: { level: number; into: number; need: number; w?: num
         if (Math.floor(t * 6 + i) % 3 === 0) { set(sx, sy, [255, 255, 255]); set(sx + 1, sy, [200, 240, 255]); set(sx - 1, sy, [200, 240, 255]); }
       }
       g.putImageData(img, 0, 0);
+      g.drawImage(capL, 0, 0);
+      g.save(); g.translate(TW, 0); g.scale(-1, 1); g.drawImage(capL, 0, 0); g.restore();
     };
     raf = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(raf);

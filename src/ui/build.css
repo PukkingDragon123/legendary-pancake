@@ -3,9 +3,10 @@
    blurred shapes), in the calm "Moss & Moonlight" palette (src/gfx/palette.ts). */
 .bm {
   position: absolute; inset: 0; z-index: 12; pointer-events: none !important; font-family: var(--font-body); color: #f4eedd;
-  --bp: #46596a; --bp-l: #58687a; --bp-d: #34424f; --bp-dd: #232c36; --chalk: #f4eedd; --chalk-d: #c9c3ae; --line: rgba(244, 238, 221, 0.16);
-  --ink: #2e2b24; --paper: #f4eedd; --oat: #eae0c8; --honey: #dcb072; --lamp: #f1d39a; --moss: #86a06a; --fern: #66844f; --pine: #3f5a3b;
-  --terra: #c0866a; --berry: #9e5f66; --brass: #c8a764; --brass-d: #8e7440; --wood: #9c7a56; --wood-d: #6f553d; --lilac: #b4a9c9;
+  /* [ui4] v4: real cyanotype blue, chalk white, brass and emerald */
+  --bp: #1f4a78; --bp-l: #2e6498; --bp-d: #173a60; --bp-dd: #0c2240; --chalk: #f2f6f8; --chalk-d: #c4d4e0; --line: rgba(232, 240, 244, 0.16);
+  --ink: #2a160c; --paper: #fbf3e0; --oat: #ecdcbc; --honey: #e0b04a; --lamp: #f6dc8a; --moss: #3d9660; --fern: #2c7a4a; --pine: #1a5432;
+  --terra: #c4583c; --berry: #ae3c42; --brass: #d4a432; --brass-d: #94661a; --wood: #a86a34; --wood-d: #6c3c1c; --lilac: #bc8acb;
 }
 .bm > * { pointer-events: auto; }
 .bm .px { image-rendering: pixelated; }
@@ -14,16 +15,16 @@
 .bm-wash {
   position: absolute; inset: 0; pointer-events: none !important;
   background:
-    linear-gradient(rgba(35, 44, 54, 0.5) 0 6px, rgba(35, 44, 54, 0.34) 6px 12px, rgba(35, 44, 54, 0.2) 12px 18px, rgba(35, 44, 54, 0.1) 18px 24px, transparent 24px) top / 100% 24px no-repeat,
-    linear-gradient(to top, rgba(35, 44, 54, 0.5) 0 6px, rgba(35, 44, 54, 0.34) 6px 12px, rgba(35, 44, 54, 0.2) 12px 18px, rgba(35, 44, 54, 0.1) 18px 24px, transparent 24px) bottom / 100% 24px no-repeat,
-    linear-gradient(to right, rgba(35, 44, 54, 0.5) 0 6px, rgba(35, 44, 54, 0.34) 6px 12px, rgba(35, 44, 54, 0.2) 12px 18px, rgba(35, 44, 54, 0.1) 18px 24px, transparent 24px) left / 24px 100% no-repeat,
-    linear-gradient(to left, rgba(35, 44, 54, 0.5) 0 6px, rgba(35, 44, 54, 0.34) 6px 12px, rgba(35, 44, 54, 0.2) 12px 18px, rgba(35, 44, 54, 0.1) 18px 24px, transparent 24px) right / 24px 100% no-repeat,
+    linear-gradient(rgba(12, 34, 64, 0.5) 0 6px, rgba(12, 34, 64, 0.34) 6px 12px, rgba(12, 34, 64, 0.2) 12px 18px, rgba(12, 34, 64, 0.1) 18px 24px, transparent 24px) top / 100% 24px no-repeat,
+    linear-gradient(to top, rgba(12, 34, 64, 0.5) 0 6px, rgba(12, 34, 64, 0.34) 6px 12px, rgba(12, 34, 64, 0.2) 12px 18px, rgba(12, 34, 64, 0.1) 18px 24px, transparent 24px) bottom / 100% 24px no-repeat,
+    linear-gradient(to right, rgba(12, 34, 64, 0.5) 0 6px, rgba(12, 34, 64, 0.34) 6px 12px, rgba(12, 34, 64, 0.2) 12px 18px, rgba(12, 34, 64, 0.1) 18px 24px, transparent 24px) left / 24px 100% no-repeat,
+    linear-gradient(to left, rgba(12, 34, 64, 0.5) 0 6px, rgba(12, 34, 64, 0.34) 6px 12px, rgba(12, 34, 64, 0.2) 12px 18px, rgba(12, 34, 64, 0.1) 18px 24px, transparent 24px) right / 24px 100% no-repeat,
     linear-gradient(var(--line) 2px, transparent 2px) 0 0 / 32px 32px,
     linear-gradient(90deg, var(--line) 2px, transparent 2px) 0 0 / 32px 32px;
   opacity: 0.85;
   animation: bm-wash 0.7s steps(7) both;
 }
-@keyframes bm-wash { 0% { opacity: 0; } 30% { opacity: 1; background-color: rgba(70, 89, 106, 0.3); } 100% { opacity: 0.85; background-color: transparent; } }
+@keyframes bm-wash { 0% { opacity: 0; } 30% { opacity: 1; background-color: rgba(31, 74, 120, 0.3); } 100% { opacity: 0.85; background-color: transparent; } }
 .bm.out .bm-wash { animation: bm-fade 0.3s steps(4) both; }
 @keyframes bm-fade { to { opacity: 0; } }
 
@@ -57,7 +58,7 @@
 .bm-floor:hover { transform: translateY(-2px); }
 .bm-floor.on { background: var(--paper); border: 2px solid var(--paper); color: var(--bp-dd); box-shadow: 0 3px 0 var(--bp-dd), inset 0 -3px 0 var(--oat); transform: translateY(-2px); }
 .bm-floor.on b { text-shadow: 2px 2px 0 var(--oat); }
-.bm-floor.locked { border-color: rgba(201, 195, 174, 0.5); color: #a4acb4; background: repeating-linear-gradient(135deg, rgba(35, 44, 54, 0.45) 0 4px, transparent 4px 8px); }
+.bm-floor.locked { border-color: rgba(201, 195, 174, 0.5); color: #a4acb4; background: repeating-linear-gradient(135deg, rgba(12, 34, 64, 0.45) 0 4px, transparent 4px 8px); }
 .bm-floor.shake, .bm-card.shake { animation: bm-shake 0.35s steps(6); }
 @keyframes bm-shake { 20% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 80% { transform: translateX(-3px); } }
 
@@ -75,7 +76,7 @@
 .bm-note {
   position: absolute; left: 50%; top: calc(74px + var(--safe-t)); transform: translateX(-50%); max-width: calc(100% - 120px);
   padding: 4px 12px 6px; font-size: 17px; line-height: 1.15; text-align: center; color: var(--paper); pointer-events: none !important;
-  background: var(--bp-d); box-shadow: 0 0 0 2px var(--chalk-d), 0 0 0 4px var(--bp-dd), 4px 6px 0 4px rgba(35, 44, 54, 0.6);
+  background: var(--bp-d); box-shadow: 0 0 0 2px var(--chalk-d), 0 0 0 4px var(--bp-dd), 4px 6px 0 4px rgba(12, 34, 64, 0.6);
   animation: bm-pop 0.3s steps(5) both;
 }
 @keyframes bm-pop { from { transform: translateX(-50%) scale(0.4); opacity: 0; } }
@@ -127,7 +128,7 @@
     linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px),
     linear-gradient(rgba(255, 250, 240, 0.06) 0 12px, transparent 12px);
   background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px, 100% 100%;
-  box-shadow: 0 0 0 3px var(--chalk-d), 0 0 0 6px var(--bp-dd), 6px 9px 0 6px rgba(35, 44, 54, 0.7), inset 0 0 0 3px var(--bp-l), inset 0 -6px 0 var(--bp-d);
+  box-shadow: 0 0 0 3px var(--chalk-d), 0 0 0 6px var(--bp-dd), 6px 9px 0 6px rgba(12, 34, 64, 0.7), inset 0 0 0 3px var(--bp-l), inset 0 -6px 0 var(--bp-d);
   animation: bm-up 0.45s var(--pop) both; transition: transform 0.35s var(--ease);
 }
 .bm.out .bm-drawer { animation: bm-down 0.3s ease-in both; }
@@ -136,16 +137,16 @@
 @keyframes bm-up { from { transform: translate(-50%, 115%); } }
 @keyframes bm-down { to { transform: translate(-50%, 130%); } }
 /* masking tape on the corners */
-.bm-drawer::before, .bm-drawer::after { content: ''; position: absolute; top: -11px; width: 52px; height: 16px; background: rgba(234, 224, 200, 0.9); box-shadow: 2px 2px 0 rgba(35, 44, 54, 0.35); left: 44px; background-image: repeating-linear-gradient(90deg, transparent 0 5px, rgba(201, 183, 141, 0.45) 5px 6px); clip-path: polygon(0 2px, 4px 2px, 4px 0, 100% 0, 100% 14px, calc(100% - 4px) 14px, calc(100% - 4px) 16px, 0 16px); }
+.bm-drawer::before, .bm-drawer::after { content: ''; position: absolute; top: -11px; width: 52px; height: 16px; background: rgba(234, 224, 200, 0.9); box-shadow: 2px 2px 0 rgba(12, 34, 64, 0.35); left: 44px; background-image: repeating-linear-gradient(90deg, transparent 0 5px, rgba(201, 183, 141, 0.45) 5px 6px); clip-path: polygon(0 2px, 4px 2px, 4px 0, 100% 0, 100% 14px, calc(100% - 4px) 14px, calc(100% - 4px) 16px, 0 16px); }
 .bm-drawer::after { left: auto; right: 44px; }
-.bm-pin { position: absolute; top: -9px; z-index: 2; filter: drop-shadow(2px 2px 0 rgba(35, 44, 54, 0.7)); pointer-events: none; }
+.bm-pin { position: absolute; top: -9px; z-index: 2; filter: drop-shadow(2px 2px 0 rgba(12, 34, 64, 0.7)); pointer-events: none; }
 .bm-pin.a { left: 6px; } .bm-pin.b { right: 6px; }
 .bm-drawer.low .bm-items { display: none; }
 
 .bm-head { display: flex; align-items: center; gap: 8px; margin: 0 4px 6px 26px; }
 .bm-label {
   font-family: var(--font-display); font-size: 18px; color: var(--ink); padding: 1px 10px 2px; background: var(--paper);
-  box-shadow: 3px 3px 0 rgba(35, 44, 54, 0.6), inset 0 -3px 0 var(--oat); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 58%;
+  box-shadow: 3px 3px 0 rgba(12, 34, 64, 0.6), inset 0 -3px 0 var(--oat); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 58%;
 }
 .bm-purse { margin-left: auto; display: flex; align-items: center; gap: 3px; font-family: var(--font-display); font-size: 17px; color: var(--lamp); text-shadow: 2px 2px 0 var(--bp-dd); white-space: nowrap; }
 .bm-fold { width: 30px; height: 26px; display: grid; place-items: center; padding: 0; cursor: pointer; background: var(--bp-d); border: 2px dashed var(--chalk-d); margin-right: 22px; }
@@ -154,9 +155,9 @@
 .bm-tabs::-webkit-scrollbar { display: none; }
 .bm-tab {
   position: relative; flex: 0 0 auto; width: 54px; height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding: 2px 0 0; cursor: pointer;
-  background: rgba(35, 44, 54, 0.45); border: 2px dashed var(--chalk-d); color: var(--chalk); transition: transform 0.12s steps(3), background 0.12s steps(2);
+  background: rgba(12, 34, 64, 0.45); border: 2px dashed var(--chalk-d); color: var(--chalk); transition: transform 0.12s steps(3), background 0.12s steps(2);
 }
-.bm-tab span { font-size: 11px; line-height: 1.2; font-family: var(--font-small); letter-spacing: 0.2px; }
+.bm-tab span { font-size: 13px; line-height: 1.1; font-family: var(--font-body); white-space: nowrap; } /* [ui4] readable labels */
 .bm-tab img { filter: drop-shadow(2px 2px 0 var(--bp-dd)); }
 .bm-tab:hover { transform: translateY(-3px); }
 .bm-tab.on { background: var(--paper); border: 2px solid var(--paper); color: var(--bp-dd); box-shadow: 0 3px 0 var(--bp-dd), inset 0 -3px 0 var(--oat); transform: translateY(-3px); }
@@ -169,12 +170,12 @@
 .bm-card {
   position: relative; flex: 0 0 auto; width: 98px; height: 128px; display: flex; flex-direction: column; align-items: center; padding: 4px 3px 5px; cursor: pointer; scroll-snap-align: start;
   background: rgba(244, 238, 221, 0.08); border: 2px solid var(--chalk-d); color: var(--chalk);
-  box-shadow: 4px 4px 0 rgba(35, 44, 54, 0.5), inset 0 -3px 0 rgba(35, 44, 54, 0.25);
+  box-shadow: 4px 4px 0 rgba(12, 34, 64, 0.5), inset 0 -3px 0 rgba(12, 34, 64, 0.25);
   animation: bm-card 0.3s steps(5) both; transition: transform 0.12s steps(3), background 0.12s steps(2);
 }
 .bm-card:hover { transform: translateY(-4px); background: rgba(244, 238, 221, 0.16); }
 .bm-card:active { transform: translateY(1px); }
-.bm-card.on { background: rgba(241, 211, 154, 0.22); border: 3px solid var(--paper); box-shadow: 0 0 0 3px var(--honey), 4px 4px 0 3px rgba(35, 44, 54, 0.5); }
+.bm-card.on { background: rgba(241, 211, 154, 0.22); border: 3px solid var(--paper); box-shadow: 0 0 0 3px var(--honey), 4px 4px 0 3px rgba(12, 34, 64, 0.5); }
 .bm-card.locked { opacity: 0.62; filter: saturate(0.4); }
 @keyframes bm-card { from { transform: translateY(18px); opacity: 0; } }
 /* a chalk frame with crosshair corners behind each render, a pale ground patch under the piece */
@@ -183,20 +184,20 @@
 .bm-art::before, .bm-art::after { content: ''; position: absolute; width: 10px; height: 10px; border: 2px solid rgba(244, 238, 221, 0.45); }
 .bm-art::before { left: 0; top: 0; border-right: 0; border-bottom: 0; }
 .bm-art::after { right: 0; bottom: 0; border-left: 0; border-top: 0; }
-.bm-img { max-width: 80px; max-height: 64px; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 rgba(35, 44, 54, 0.6)); }
+.bm-img { max-width: 80px; max-height: 64px; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 rgba(12, 34, 64, 0.6)); }
 .bm-sketch { width: 40px; height: 40px; border: 2px dashed rgba(244, 238, 221, 0.5); animation: bm-bob 0.8s steps(2) infinite; }
-.bm-swatch { width: 60px; height: 52px; image-rendering: pixelated; box-shadow: 0 0 0 2px var(--chalk), 4px 4px 0 2px rgba(35, 44, 54, 0.6); }
+.bm-swatch { width: 60px; height: 52px; image-rendering: pixelated; box-shadow: 0 0 0 2px var(--chalk), 4px 4px 0 2px rgba(12, 34, 64, 0.6); }
 .bm-name { font-size: 14px; line-height: 1.05; text-align: center; height: 30px; display: flex; align-items: center; color: var(--paper); text-shadow: 2px 2px 0 var(--bp-dd); overflow: hidden; }
 .bm-tag {
   display: inline-flex; align-items: center; gap: 2px; padding: 1px 6px 2px 4px; margin-top: auto; font-family: var(--font-display); font-size: 16px; color: var(--ink);
-  background: var(--lamp); box-shadow: 0 0 0 2px var(--wood-d), 3px 3px 0 2px rgba(35, 44, 54, 0.5), inset 0 -2px 0 var(--honey);
+  background: var(--lamp); box-shadow: 0 0 0 2px var(--wood-d), 3px 3px 0 2px rgba(12, 34, 64, 0.5), inset 0 -2px 0 var(--honey);
 }
-.bm-tag.gem { background: #d3cce0; color: #4a3f5c; box-shadow: 0 0 0 2px #6e5266, 3px 3px 0 2px rgba(35, 44, 54, 0.5), inset 0 -2px 0 var(--lilac); }
-.bm-tag.free { background: #c4cfa3; color: var(--pine); box-shadow: 0 0 0 2px var(--pine), 3px 3px 0 2px rgba(35, 44, 54, 0.5), inset 0 -2px 0 #a7b788; }
-.bm-have { display: inline-flex; align-items: center; gap: 2px; margin-top: auto; font-family: var(--font-display); font-size: 15px; padding: 1px 6px; color: var(--paper); background: var(--fern); box-shadow: 0 0 0 2px var(--paper), 3px 3px 0 2px rgba(35, 44, 54, 0.4); }
+.bm-tag.gem { background: #d3cce0; color: #4a3f5c; box-shadow: 0 0 0 2px #6e5266, 3px 3px 0 2px rgba(12, 34, 64, 0.5), inset 0 -2px 0 var(--lilac); }
+.bm-tag.free { background: #c4cfa3; color: var(--pine); box-shadow: 0 0 0 2px var(--pine), 3px 3px 0 2px rgba(12, 34, 64, 0.5), inset 0 -2px 0 #a7b788; }
+.bm-have { display: inline-flex; align-items: center; gap: 2px; margin-top: auto; font-family: var(--font-display); font-size: 15px; padding: 1px 6px; color: var(--paper); background: var(--fern); box-shadow: 0 0 0 2px var(--paper), 3px 3px 0 2px rgba(12, 34, 64, 0.4); }
 .bm-have.on { background: var(--lamp); color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
 .bm-have.lock { background: var(--bp-dd); color: var(--chalk-d); }
-.bm-lock { position: absolute; top: 34px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; padding: 1px 6px; font-family: var(--font-display); font-size: 15px; color: var(--paper); background: #6e5266; box-shadow: 0 0 0 2px var(--paper), 3px 3px 0 2px rgba(35, 44, 54, 0.5); }
+.bm-lock { position: absolute; top: 34px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; padding: 1px 6px; font-family: var(--font-display); font-size: 15px; color: var(--paper); background: #6e5266; box-shadow: 0 0 0 2px var(--paper), 3px 3px 0 2px rgba(12, 34, 64, 0.5); }
 .bm-new { position: absolute; top: -9px; left: -6px; font-style: normal; font-size: 13px; padding: 1px 5px; color: var(--paper); background: var(--terra); box-shadow: 0 0 0 2px var(--paper), 2px 2px 0 2px var(--bp-dd); animation: bm-bob 1s steps(2) infinite; }
 .bm-series { position: absolute; top: -8px; right: -6px; font-style: normal; padding: 1px 2px; background: #6e5266; box-shadow: 0 0 0 2px var(--paper); }
 .bm-owned { position: absolute; top: 4px; right: 4px; font-style: normal; font-size: 11px; color: #c4cfa3; font-family: var(--font-small); }
