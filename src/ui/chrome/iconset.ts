@@ -287,9 +287,12 @@ Object.assign(ICONS, {
     r.fill(ell(10, 9, 4.6, 6.2), flat(2.4), (_x, _y, mx, my) => mix(hex('#a8c8e0'), hex('#ffffff'), clamp(0.2 + (Math.abs((mx - 10) + (my - 9) * 0.5 + 1.6) < 1 ? 0.6 : 0))), GLASS, { id: 2, seam: true });
     r.fill(rect(9, 16.6, 2, 2.4), flat(1.6), gold(0.6), MAT.brass, { id: 3 });
   },
+  // the fitting mirror's oval gilt frame: it rims a portrait, so its middle stays open
   wd_frame: (r) => {
-    r.fill(rect(2, 2, 16, 16), slab(2, 2, 16, 16, 2.4, 2.4, 1), gold(0.62), MAT.brass, { id: 1 });
-    r.fill(rect(5, 5, 10, 10), flat(1.4), en(PAL.sky, 0.7), MAT.paper, { id: 2, seam: true });
+    const outer = ell(10, 10, 9.4, 9.6), inner = ell(10, 10, 7.4, 7.8);
+    r.fill(and(outer, not(inner)), (x, y) => { const q = Math.hypot((x - 10) / 9.4, (y - 10) / 9.6), t = clamp((q - 0.79) / 0.21); return 1 + 2.4 * Math.sin(t * Math.PI); }, gold(0.64), MAT.brass, { id: 1 });
+    r.carve(and(outer, not(inner)), (x, y) => { const a = Math.atan2(y - 10, x - 10); return Math.sin(a * 18) > 0.6 ? -0.6 : 0; }); // beaded moulding
+    for (const [x, y] of [[10, 0.9], [10, 19.1]] as [number, number][]) blob(r, ell(x, y, 2.2, 1.3), gold(0.72), MAT.brass, 1.4, 1, 3.4, 2);
   },
   // ---------------------------------------------------------------- the build tabs
   bp_box: (r) => {
