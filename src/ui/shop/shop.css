@@ -37,7 +37,7 @@
 /* ---------------------------------------------------------------- the board */
 .nv-panel { position: absolute; z-index: 4; display: flex; flex-direction: column; pointer-events: auto; background: var(--nv-pat-linen) 0 0 / 128px 128px repeat; background-clip: padding-box; box-shadow: 0 6px 0 rgba(27, 34, 45, 0.45); animation: nvPanelIn 0.7s var(--ease) both; }
 .nv-panel::before { content: ''; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 4px 0 rgba(74, 57, 43, 0.18), inset 0 2px 0 rgba(74, 57, 43, 0.25); z-index: 1; }
-.nv-shop.side .nv-panel { left: 10px; top: calc(70px + var(--safe-t)); bottom: 8px; width: min(48vw, 610px); }
+.nv-shop.side .nv-panel { left: 10px; top: calc(70px + var(--safe-t)); bottom: 8px; width: min(42vw, 540px); }
 .nv-shop.top .nv-panel { left: -6px; right: -6px; bottom: -14px; top: 41%; transition: top 0.55s var(--ease); animation-name: nvSheetIn; }
 .nv-shop.top.raised .nv-panel { top: calc(128px + var(--safe-t)); }
 .nv-shop.leaving .nv-panel { animation: nvPanelOut 0.5s var(--ease) both; }

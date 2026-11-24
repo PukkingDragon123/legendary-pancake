@@ -25,7 +25,15 @@ import { pottedFir, pottedMonstera, swayPlants, trailingPothos, type Plant } fro
 import { HOUSE, groundY } from '../layout.ts';
 
 /** The real world the window looks out on (the app's Scene: its scene graph and weather). */
-export interface WorldView { scene: THREE.Scene; weather?: { vis: { snow: number } } }
+export interface WorldView {
+  scene: THREE.Scene;
+  weather?: { vis: { snow: number } };
+  /** the app's own live-world renderer for stage windows (sky, weather, season, time) */
+  renderView?(camera: THREE.Camera, target: THREE.WebGLRenderTarget): void;
+  viewTarget?(w: number, h: number): THREE.WebGLRenderTarget;
+  /** present when the app already grades stages (BUSHED-style post chain): the stage then skips its own */
+  post?: unknown;
+}
 
 // real public-domain paintings from the Art Institute of Chicago (credits in docs/credits/shop3.md)
 interface Art { file: string; w: number; h: number; at: [number, number, number]; yaw: number }
@@ -228,9 +236,9 @@ const PROPS: Place[] = [
 // display spots: two round display tables on the floor, one on the counter
 interface SpotDef { x: number; y: number; z: number; floor: boolean }
 const SPOTS: SpotDef[] = [
-  { x: -1.86, y: 0, z: 0.16, floor: true },
+  { x: -1.58, y: 0, z: 0.26, floor: true },
   { x: -0.52, y: COUNTER_TOP, z: -0.74, floor: false },
-  { x: 1.86, y: 0, z: 0.16, floor: true },
+  { x: 1.58, y: 0, z: 0.26, floor: true },
 ];
 const TABLE_H = 0.62;
 
@@ -285,6 +293,7 @@ export class Boutique implements Stage {
   get scene(): THREE.Scene { return this.gl ? this.screen : this.room; }
   private screen = new THREE.Scene();
   private gl: THREE.WebGLRenderer | null = null;
+  private viewGl: THREE.WebGLRenderer | null = null;
   private rt: THREE.WebGLRenderTarget | null = null;
   private post = new THREE.ShaderMaterial({
     vertexShader: POST_VS, fragmentShader: POST_FS, depthTest: false, depthWrite: false,
@@ -395,17 +404,31 @@ export class Boutique implements Stage {
 
   /** Draw through this renderer: the room goes to a low-resolution target, then is graded onto the screen. */
   attach(renderer: THREE.WebGLRenderer, world?: WorldView) {
-    this.gl = renderer;
+    // the app's post chain grades every stage; only grade here when nobody else does (dev page)
+    this.gl = world?.post ? null : renderer;
+    this.viewGl = renderer;
     if (world && !this.world) {
       this.world = world;
       // look out from the tree house porch across the clearing, at an owl's eye height
       const x = HOUSE.x + 1.5, z = HOUSE.z + 8.5;
       this.viewCam.position.set(x, groundY(x, z) + 1.7, z);
       this.viewCam.lookAt(x + 3, groundY(x, z) + 2.6, z + 12);
-      this.viewRT = new THREE.WebGLRenderTarget(288, 208, { type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
+      this.viewRT = world.viewTarget ? world.viewTarget(288, 208) : new THREE.WebGLRenderTarget(288, 208, { type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
+      this.viewFrame = 0;
       if (this.outside) { this.outside.map = this.viewRT.texture; this.outside.needsUpdate = true; }
       this.disposables.push(() => this.viewRT?.dispose());
     }
+  }
+
+  /** the real forest outside the window: drawn when the shop opens, then every few frames */
+  private renderOutside() {
+    const w = this.world, rt = this.viewRT;
+    if (!w || !rt || this.viewFrame++ % 3 !== 0) return;
+    if (w.renderView) { w.renderView(this.viewCam, rt); return; }
+    const gl = this.viewGl;
+    if (!gl) return;
+    const prev = gl.getRenderTarget();
+    gl.setRenderTarget(rt); gl.clear(); gl.render(w.scene, this.viewCam); gl.setRenderTarget(prev);
   }
 
   private renderRoom(t: number) {
@@ -420,11 +443,6 @@ export class Boutique implements Stage {
     const u = this.post.uniforms;
     u.tColor.value = this.rt.texture; u.uRes.value.set(w, h); u.uTime.value = t;
     const prev = gl.getRenderTarget();
-    // the real forest outside the window, refreshed every few frames
-    if (this.world && this.viewRT && this.viewFrame++ % 3 === 0) {
-      gl.setRenderTarget(this.viewRT);
-      gl.render(this.world.scene, this.viewCam);
-    }
     gl.setRenderTarget(this.rt);
     gl.render(this.room, this.camera);
     gl.setRenderTarget(prev);
@@ -770,13 +788,14 @@ export class Boutique implements Stage {
     // camera's axis on the shop's centre: an off-centre window into a wider frustum
     const th = Math.tan(THREE.MathUtils.degToRad((side ? 50 : 54) / 2));
     if (side) {
-      const fx = Math.min(0.75, 0.5 + Math.max(0.2, Math.min(0.25, 470 / w)));
+      // the shop board covers the left (see shop.css: 10px + min(42vw, 540px)); centre the shop in the rest
+      const panelR = 10 + Math.min(0.42 * w, 540), fx = (panelR + w) / 2 / w;
       const dx = (fx - 0.5) * w, fullW = w + 2 * dx, free = 2 * (1 - fx) * w;
       c.aspect = fullW / h;
       c.setViewOffset(fullW, h, 0, 0, w, h);
       c.fov = THREE.MathUtils.radToDeg(2 * Math.atan((th * fullW) / free / c.aspect));
       this.focus = { x: fx, y: 0.5 };
-      this.place(6.3 / (2 * th), 0.12, 1.68);
+      this.place(5.3 / (2 * th), 0.1, 1.72);
     } else {
       // portrait: the boutique fills the top of the screen above the shop sheet
       const fy = 0.235, dy = 0.3 * h, fullH = h + 2 * dy, y0 = h / 2 + dy - fy * h;
@@ -784,7 +803,7 @@ export class Boutique implements Stage {
       c.setViewOffset(w, fullH, 0, Math.max(0, Math.min(2 * dy, y0)), w, h);
       c.fov = THREE.MathUtils.radToDeg(2 * Math.atan(th / c.aspect));
       this.focus = { x: 0.5, y: fy };
-      this.place(6.0 / (2 * th), 0.08, 1.62);
+      this.place(5.5 / (2 * th), 0.08, 1.62);
     }
     c.updateProjectionMatrix();
   }
@@ -871,6 +890,7 @@ export class Boutique implements Stage {
       this.fx.emit({ x: (Math.random() - 0.5) * 5, y: 1.2 + Math.random() * 2, z: -1.8 + Math.random() * 2.4, vx: (Math.random() - 0.5) * 0.05, vy: 0.02 + Math.random() * 0.04, life: 6, frame: SPR.mote, color: P.lamp, size: 0.03 + Math.random() * 0.02, flutter: 0.15, fadeIn: 1.5, fadeOut: 2 });
     }
     this.fx.update(dt, t);
+    this.renderOutside();
     this.renderRoom(t);
   }
 
