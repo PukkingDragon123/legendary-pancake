@@ -1,0 +1,826 @@
+# Hoot Hollow credits
+
+Models, textures, artworks, photos and sounds by their authors, used under their licences (CC0, public domain, CC BY). Thank you.
+
+
+---
+
+# furnA credits
+
+Furniture models in `public/models/items/` for furnA's ids (`src/assets/home.ts` and the indoor pieces of
+`src/assets/furniture.ts`).
+
+## Borrowed models
+
+Taken from the owner's games BUSHED and Gacha Garage (which keep their own upstream credits, repeated here) or
+converted from Poly Haven with lowpix, then restyled for Hoot Hollow by `art/lowpix/items/_furnA/borrow.py`:
+calm re-grade, k-means pixel palette (BUSHED's `tools/forest/pix.py`, copied as `_furnA/pix.py`), lit matte
+material, fitted to the item's size and composed with other parts.
+
+| Item(s) | Source | Author(s) | Licence |
+|---|---|---|---|
+| `bookshelf` | BUSHED `public/assets/models/wooden_bookshelf_worn.glb` ← [Wooden Bookshelf Worn](https://polyhaven.com/a/wooden_bookshelf_worn) | Ulan Cabanilla | CC0 1.0 |
+| `candles` | BUSHED `public/assets/models/wooden_candlestick.glb` ← [Wooden Candlestick](https://polyhaven.com/a/wooden_candlestick) | Josh Dean | CC0 1.0 |
+| `stool` | BUSHED `public/assets/models/wooden_stool_01.glb` ← [Wooden Stool 01](https://polyhaven.com/a/wooden_stool_01) | Kuutti Siitonen | CC0 1.0 |
+| `books` | Gacha Garage `public/models/lowpix/world/books_stack.glb` ← [Stack of Books](https://sketchfab.com/3d-models/stack-of-books-83d623341f164753b825d1050be009d9) | AJH2 | CC BY 4.0 |
+| `armchair` | Gacha Garage `public/models/lowpix/world/chair_green.glb` ← [Green Chair 01](https://polyhaven.com/a/GreenChair_01) | Kirill Sannikov | CC0 1.0 |
+| `chair` | Gacha Garage `public/models/lowpix/world/chair_painted.glb` ← [Painted Wooden Chair 01](https://polyhaven.com/a/painted_wooden_chair_01) | Kuutti Siitonen | CC0 1.0 |
+| `easel` | Gacha Garage `public/models/lowpix/world/chalkboard.glb` ← [Standing Chalkboard 01](https://polyhaven.com/a/standing_chalkboard_01) | ParzivalCG | CC0 1.0 |
+| `record` | Gacha Garage `public/models/lowpix/world/gramophone.glb` ← [Old Gramophone](https://sketchfab.com/3d-models/old-gramophone-5e892fc786db4ca1b36738ab5e40e64d) | KIFIR | CC BY 4.0 |
+| `paperlantern` | Gacha Garage `public/models/lowpix/world/lantern_paper.glb` ← [Japanese paper lantern](https://sketchfab.com/3d-models/japanese-paper-lantern-99a3c92192d04d088c9241d1cab3e765) | patrakeevasveta | CC BY 4.0 |
+| `cushion` | Gacha Garage `public/models/lowpix/world/mk_zabuton.glb` ← [Zafu and zabuton](https://sketchfab.com/3d-models/zafu-and-zabuton-1e2b4dc9efe348548b681a1fe0a1343b) | Thomas Deneuville | CC BY 4.0 |
+| `nightstand` | Gacha Garage `public/models/lowpix/world/nightstand.glb` ← [Classic Nightstand 01](https://polyhaven.com/a/ClassicNightstand_01) | Kirill Sannikov | CC0 1.0 |
+| `planter` | Gacha Garage `public/models/lowpix/world/planter_box.glb` ← [Planter Box 01](https://polyhaven.com/a/planter_box_01) | James Ray Cock | CC0 1.0 |
+| `bookshelf`, `desk` | [Book Encyclopedia Set 01](https://polyhaven.com/a/book_encyclopedia_set_01) (converted here) | John Malcolm | CC0 1.0 |
+| `teatable` | [Chinese Tea Table](https://polyhaven.com/a/chinese_tea_table) (converted here) | Kirill Sannikov | CC0 1.0 |
+| `desk` | [Desk Lamp Arm 01](https://polyhaven.com/a/desk_lamp_arm_01) (converted here) | Yann Kervran, Kuutti Siitonen | CC0 1.0 |
+| `gnome` | [Garden Gnome](https://polyhaven.com/a/garden_gnome) (converted here) | Bhargav Kubal | CC0 1.0 |
+| `wardrobe` | [Painted Wooden Cabinet 02](https://polyhaven.com/a/painted_wooden_cabinet_02) (converted here) | Kirill Sannikov | CC0 1.0 |
+| `cactus` | [Potted Plant 04](https://polyhaven.com/a/potted_plant_04) (converted here) | James Ray Cock | CC0 1.0 |
+| `teaset` | [Round Wooden Table 01](https://polyhaven.com/a/round_wooden_table_01) (converted here) | Ulan Cabanilla | CC0 1.0 |
+| `teaset`, `teatable` | [Tea Set 01](https://polyhaven.com/a/tea_set_01) (converted here) | James Ray Cock, Rico Cilliers, Jurita Burger | CC0 1.0 |
+| `chest` | [Treasure Chest](https://polyhaven.com/a/treasure_chest) (converted here) | Rico Cilliers | CC0 1.0 |
+| `desk` | [Wooden Table 02](https://polyhaven.com/a/wooden_table_02) (converted here) | Serhii Khromov | CC0 1.0 |
+
+Sketchfab models are CC BY 4.0: credit the author as listed when the game is shared.
+
+## Real artworks on the walls (public domain, Art Institute of Chicago)
+
+Pixel-graded (calm grade, k-means palette) onto the canvas card of the item; source copies (<= 256 px) in
+`art/lowpix/items/_furnA/art/`. Image data via the Art Institute of Chicago API (CC0 metadata, public-domain images).
+
+| Item | Artwork | Artist | Date | Source |
+|---|---|---|---|---|
+| `painting` | Nocturne: Blue and Gold—Southampton Water | James McNeill Whistler (American, 1834–1903) | 1872 | [artic.edu/artworks/56905](https://www.artic.edu/artworks/56905) |
+| `starmap` | Celestial Map of the Northern Sky with the Twelve Zodiac Signs | Albrecht Dürer | 1515 | [artic.edu/artworks/106550](https://www.artic.edu/artworks/106550) |
+
+## 2D pixel-art leaves (borrowed from BUSHED)
+
+The foliage of furnA's plants is made of 2D pixel-art leaf cards cut from BUSHED's vegetation atlas
+(`public/assets/textures/veg/veg_atlas.png`, crops in `art/lowpix/items/_furnA/leaves/`), which BUSHED made from
+Poly Haven CC0 sources: sword fern fronds and bracken from [Fern 02](https://polyhaven.com/a/fern_02) (Rob Tuytel,
+Rico Cilliers); juniper sprigs from [Fir Tree 01](https://polyhaven.com/a/fir_tree_01) twig maps (Rob Tuytel, Rico
+Cilliers); grass blades procedural (BUSHED). Used in `fernpot`, `bonsai`, `nestbed`, `mushpot`, `mushroomlamp` and
+the flowers of `planter`.
+
+## Made for Hoot Hollow (lowpix specs, CC0)
+
+Every other furnA item (`art/lowpix/items/<id>.json`, generated by `art/lowpix/items/_furnA/items_*.py`) was
+modelled and hand-painted from scratch with lowpix, as were the parts merged into borrowed items (candle
+flames, the planter's flowers). Photo detail in their textures comes from CC0 Poly Haven textures
+(`art/lowpix/items/_furnA/photos/`: oak_veneer_01, wood_table_001, rough_linen, hessian_230, velour_velvet,
+knitted_fleece, brown_leather, clay_floor_001, metal_plate_02, jersey_melange, bark_brown_02, rock_face_03,
+forest_leaves_02).
+
+
+---
+
+# furnB credits: beds, seating, tables, storage, lights, plants and rugs
+
+Models in `public/models/items/` for the item ids in `src/assets/decor/{beds,tables,lights,green}.ts`.
+
+## Borrowed models
+
+Each was taken from Gacha Garage's world props (`public/models/lowpix/world/<file>`, the user's own game, where it was
+made low-poly with a hand-painted 512 px atlas from the source below), then restyled for Hoot Hollow by
+`art/lowpix/items/_furnb/borrow.py` (recipe in `borrowed.py`): texture re-graded to the calm palette (less saturation,
+slate shadows, lamp-gold highlights, per-item recolours), lit matte material, fitted to the item's footprint. Glowing
+bulbs and flames on the two lamps are our own lowpix parts (`art/lowpix/items/_extra/`).
+
+| item id | model | author | licence | source | Gacha Garage file |
+|---|---|---|---|---|---|
+| `floor_futon` | Japanese futon/bed | nicolas_solo | CC BY 4.0 | https://sketchfab.com/3d-models/japanese-futonbed-0d5590d1d2184aa98797c3d6382afd7e | `futon_set.glb` |
+| `patch_sofa` | Sofa 03 | Fran Calvente | CC0 1.0 | https://polyhaven.com/a/sofa_03 | `sofa_03.glb` |
+| `rocking_chair` | Rockingchair 01 | Jorge Camacho | CC0 1.0 | https://polyhaven.com/a/Rockingchair_01 | `chair_rocking.glb` |
+| `window_seat` | Painted Wooden Sofa | Kirill Sannikov | CC0 1.0 | https://polyhaven.com/a/painted_wooden_sofa | `sofa_wood.glb` |
+| `wingback` | Arm Chair 01 | Kirill Sannikov | CC0 1.0 | https://polyhaven.com/a/ArmChair_01 | `armchair.glb` |
+| `writing_desk` | Japanese Study Desk | AFX/CGMotion 3DModel Maker | CC BY 4.0 | https://sketchfab.com/3d-models/japanese-study-desk-18da6abd259441aea570168cc86bc0ef | `room_desk.glb` |
+| `round_table` | Round Wooden Table 01 | Ulan Cabanilla | CC0 1.0 | https://polyhaven.com/a/round_wooden_table_01 | `table_round.glb` |
+| `bobbin_side_table` | Side Table 01 | James Ray Cock | CC0 1.0 | https://polyhaven.com/a/side_table_01 | `table_side.glb` |
+| `toy_chest` | Toy box | Wyme | CC BY 4.0 | https://sketchfab.com/3d-models/toy-box-e12493a7481548129179d926b9a15b35 | `toy_box2.glb` |
+| `cubby_shelf` | LP Furniture - Cube Shelf Sq | c0ntra5t | CC BY 4.0 | https://sketchfab.com/3d-models/lp-furniture-cube-shelf-sq-109368adc245432e93fbf8e0a2f86bda | `room_bookshelf.glb` |
+| `fringe_floor_lamp` | Wooden Floor Lamp | Atalaya22 | CC BY 4.0 | https://sketchfab.com/3d-models/wooden-floor-lamp-4766a03aa796440598426f8d5e975fec | `floor_lamp.glb` |
+| `iron_lantern` | Lantern 01 | Rajil Jose Macatangay | CC0 1.0 | https://polyhaven.com/a/Lantern_01 | `lantern.glb` |
+
+CC BY 4.0 licence text: https://creativecommons.org/licenses/by/4.0/ . CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
+
+## Our own models
+
+Every other id (monstera, bunk bed, canopy bed, hammock bed, basket nest, beanbag, toadstool seat, vanity, workbench, painted
+dresser, library bookcase, armoire, apothecary, old-oak coffee table, fairy lights, candelabra, toadstool lamp, firefly
+jar, cactus trio, trailing ivy, maple bonsai, window box, terrarium, fiddle-leaf fig and the five rugs) is modelled from
+scratch as a lowpix spec (`art/lowpix/items/<id>.json`, generated by `art/lowpix/items/_furnb/*.py`), with
+hand-painted textures. Every leafy plant (monstera, fiddle-leaf fig, trailing ivy, maple bonsai, geranium
+window box, terrarium moss and ferns, the moss on the basket nest, the shelf plants) is built from 2D pixel-art leaf
+cards that we hand-pixelled in code (`_furnb/foliage.py`). Some wood, bark, stone and leaf surfaces mix in relief from CC0 Poly Haven photo textures that
+ship with lowpix (`assets/photos/`: bark_brown_02, rock_face_03, forest_leaves_02; https://polyhaven.com, CC0).
+
+
+---
+
+# furnC credits: decor, wall, fun, Frostlight and Starfall items
+
+Models in `public/models/items/` for the item ids in `src/assets/decor/{trinkets,fun,frost,starfall}.ts`, built by
+`art/lowpix/items/_furnc/build.py`.
+
+## Borrowed models
+
+Taken from the user's own games (Gacha Garage world props and BUSHED props, where each was made low-poly with a
+hand-painted atlas from the source below), then restyled for Hoot Hollow by `art/lowpix/items/_furnc/compose.py`
+(recipes in `borrow.py`): meshopt unpacked, texture re-graded to the calm palette (less saturation, slate shadows,
+lamp-gold highlights, hue bands mapped onto palette ramps, the typewriter's black enamel repainted sage), lit matte
+material, pieces re-laid (the tea set) and fitted to the item's footprint.
+
+| item id | model | author | licence | source | taken from |
+|---|---|---|---|---|---|
+| `vase_trio` | Antique Ceramic Vase 01 | James Ray Cock | CC0 1.0 | https://polyhaven.com/a/antique_ceramic_vase_01 | Gacha Garage `models/lowpix/world/vase_ceramic.glb` |
+| `vase_trio` | Brass Vase 01 | Rico Cilliers | CC0 1.0 | https://polyhaven.com/a/brass_vase_01 | Gacha Garage `models/lowpix/world/vase_brass.glb` |
+| `vase_trio` | Jug 01 | Kuutti Siitonen | CC0 1.0 | https://polyhaven.com/a/jug_01 | BUSHED `public/assets/models/jug_01.glb` |
+| `reading_pile` | Stack of Books | AJH2 | CC BY 4.0 | https://sketchfab.com/3d-models/stack-of-books-83d623341f164753b825d1050be009d9 | Gacha Garage `models/lowpix/world/books_stack.glb` |
+| `reading_pile` | Black Glasses | nazarchi091 | CC BY 4.0 | https://sketchfab.com/3d-models/black-glasses-8425ebedb9334fc3a1e6d7a72f5612b4 | Gacha Garage `models/lowpix/world/wear_frames.glb` |
+| `mantel_clock` | Mantel Clock 01 | Yann Kervran, Rico Cilliers | CC0 1.0 | https://polyhaven.com/a/mantel_clock_01 | BUSHED `public/assets/models/mantel_clock_01.glb` |
+| `mint_typewriter` | 1930s style typewriter - w/o branding | Kuba "Volant" Wójcik | CC BY 4.0 | https://sketchfab.com/3d-models/1930s-style-typewriter-wo-branding-1d6009449fe84fd79454c4081eb743bf | Gacha Garage `models/lowpix/world/typewriter.glb` |
+| `rose_tea_set` | Tea Set 01 | James Ray Cock, Rico Cilliers, Jurita Burger | CC0 1.0 | https://polyhaven.com/a/tea_set_01 | Gacha Garage `models/lowpix/world/tea_set.glb` |
+
+## Wall art: real public-domain artworks
+
+Every picture shown by a wall-art item is a real artwork from the Art Institute of Chicago's open collection
+(public-domain images, CC0 data, fetched from `api.artic.edu` / `www.artic.edu/iiif`). The images are kept small in
+`art/lowpix/items/_furnc/artworks/` (≤ 256 px JPEG) and pixel-graded onto each item's texel grid by `Spec.art_card` in
+`lib.py`: cropped to the frame, resampled, slightly desaturated and warmed toward the calm palette, quantised to
+44-48 colours. Nothing in them is drawn by us.
+
+| item id | where | artwork | artist | date | source |
+|---|---|---|---|---|---|
+| `photo_frames` | big oak frame | Stacks of Wheat (End of Summer) | Claude Monet | 1890–91 | https://www.artic.edu/artworks/64818 |
+| `photo_frames` | gilt oval (upper part of the print) | Cuckoo, pine branch, and full moon | Utagawa Hiroshige | c. 1843/47 | https://www.artic.edu/artworks/47547 |
+| `photo_frames` | small square frame | Roses in a Bowl | Henri Fantin-Latour | 1881 | https://www.artic.edu/artworks/20534 |
+| `photo_frames` | little round frame | Apples and Grapes | Claude Monet | 1880 | https://www.artic.edu/artworks/16549 |
+| `owl_tapestry` | woven into the hanging | Owl on pine branch | Utagawa Hiroshige | 1830s | https://www.artic.edu/artworks/47662 |
+| `hollow_map` | the whole scroll | Sampler (Map) | England (unknown maker) | c. 1800 | https://www.artic.edu/artworks/15132 |
+
+## Foliage
+
+Every leafy thing of mine is built from 2D hand-pixelled leaf cards (alpha-cut quads, many per plant), drawn
+procedurally needle by needle and leaf by leaf in `art/lowpix/items/_furnc/foliage.py` (fir sprigs, leaf clusters,
+single leaves): the Frostlight fir, wreath, stocking garland, poinsettia, the firs on the gingerbread cottage, in the
+snow globe and by the toy train, the snow globe's oak crown and the bird feeder's ivy. Our own work, CC0.
+
+## Photo textures (material relief under the painted ramps)
+
+The lowpix-modelled items photo-bash real material relief (lowpix `photo` op, `detail` mode: the colours stay on our
+palette ramps). Sources in `art/lowpix/items/_furnc/photos/` were copied from BUSHED's pixel-art texture set
+(`public/assets/textures/`, made by BUSHED's `tools/make_textures.py` from Poly Haven scans); three more ship with
+lowpix (`assets/photos/`).
+
+| folder | BUSHED texture | Poly Haven scan | author | licence |
+|---|---|---|---|---|
+| `photos/wood` | `building/floor_boards` | https://polyhaven.com/a/wood_floor_worn | Dimitrios Savva | CC0 1.0 |
+| `photos/planks` | `building/rough_planks` | https://polyhaven.com/a/weathered_planks | Dario Barresi, Dimitrios Savva | CC0 1.0 |
+| `photos/stone` | `building/fieldstone` | https://polyhaven.com/a/stone_wall | Dario Barresi, Charlotte Baglioni | CC0 1.0 |
+| `photos/granite` | `terrain/granite` | https://polyhaven.com/a/rock_08 | Poly Haven | CC0 1.0 |
+| `photos/moss` | `terrain/moss` | https://polyhaven.com/a/sparse_grass | Poly Haven | CC0 1.0 |
+| `photos/bark` | `trees/bark_pine` | Poly Haven bark scan (see BUSHED `CREDITS.md`) | Poly Haven | CC0 1.0 |
+| lowpix `assets/photos/forest_leaves_02`, `rusty_metal_02`, `brown_leather` | (lowpix) | https://polyhaven.com | Poly Haven | CC0 1.0 |
+
+## Our own models
+
+Everything else (the Frostlight and Starfall prizes, the fun items, the wall pieces, the floor globe, record player,
+ship in a bottle and the rest of the trinkets) is modelled from scratch as lowpix specs written by
+`art/lowpix/items/_furnc/{trinkets,fun,frost,starfall}.py` (`art/lowpix/items/<id>.json`): low-poly lofts, turned
+lathes and chamfered boxes with hand-painted texture layers, painted pixel-art cards (dials, maps, tapestry, rugs,
+branches, leaves) and animation clips. CC0.
+
+CC BY 4.0 licence text: https://creativecommons.org/licenses/by/4.0/ . CC0 1.0: https://creativecommons.org/publicdomain/zero/1.0/
+
+
+---
+
+# Credits: Pip's hollow oak (house, rooms, moving boxes, build mode)
+
+The oak and its fittings are modelled for Hoot Hollow with **lowpix** (the owner's own tool, `symmetrical-goggles`):
+specs in `art/lowpix/house/*.json`, generated by `art/lowpix/house/_src/*.py`, built by `art/lowpix/house/make.py`
+into `public/models/house/*.glb`. Their textures are painted from the CC0 photo scans below (pulled towards the
+"Moss & Moonlight" palette, shaded by painted light) plus procedural paint layers; the leaf clusters, ivy, ferns,
+lettering and cobwebs are generated pixel art (`_src/leafart.py`, `_lib/hx.py`). The wallpaper and flooring are
+painted at runtime from the room's finish (`src/assets/finishes.ts`).
+
+## Photo scans (Poly Haven, CC0 1.0) in `art/lowpix/house/photos/`
+
+| Photo | Source | Author | Licence | Used for |
+|---|---|---|---|---|
+| `bark_brown_02` | [Bark Brown 02](https://polyhaven.com/a/bark_brown_02) (vendored copy from lowpix `assets/photos`) | Poly Haven | CC0 1.0 | trunk, roots, limbs, boughs |
+| `oak_veneer_01` | [Oak Veneer 01](https://polyhaven.com/a/oak_veneer_01) (vendored copy from Gacha Garage `art/lowpix/photos`) | Poly Haven | CC0 1.0 | heartwood cut faces, beams, frames |
+| `weathered_planks` | [Weathered Planks](https://polyhaven.com/a/weathered_planks) (vendored copy from Gacha Garage `art/lowpix/world_arch/photos`) | Poly Haven | CC0 1.0 | floors, ceilings, decks, boards |
+| `rock_face_03` | [Rock Face 03](https://polyhaven.com/a/rock_face_03) (vendored copy from lowpix `assets/photos`) | Poly Haven | CC0 1.0 | stone arches, sills, chimney |
+| `forest_leaves_02` | [Forest Leaves 02](https://polyhaven.com/a/forest_leaves_02) (vendored copy from lowpix `assets/photos`) | Poly Haven | CC0 1.0 | the crown's inner leaf masses |
+| `japanese_zelkova_bark` | [Japanese Zelkova Bark](https://polyhaven.com/a/japanese_zelkova_bark) (vendored copy from Gacha Garage) | Poly Haven | CC0 1.0 | spare bark scan |
+
+`photos/<id>_s/` are 160 px downscales made by `photos/make_small.py`.
+
+## Models (Poly Haven, CC0 1.0, as converted for BUSHED) in `public/models/house/props/`
+
+Borrowed from the owner's game BUSHED (`games/bushed/public/assets/models/nature/`, converted there with lowpix);
+upstream attributions from BUSHED's `CREDITS.md`:
+
+| File | Source | Author | Licence |
+|---|---|---|---|
+| `boulder_01.glb` | [Boulder 01](https://polyhaven.com/a/boulder_01) | Rico Cilliers | CC0 1.0 |
+| `bark_debris_01.glb` | [Bark Debris 01](https://polyhaven.com/a/bark_debris_01) | Greg Zaal, Jenelle van Heerden | CC0 1.0 |
+| `rock_07.glb`, `rock_09.glb` | [Rock 07](https://polyhaven.com/a/rock_07), [Rock 09](https://polyhaven.com/a/rock_09) | Jenelle van Heerden | CC0 1.0 |
+| `stone_01.glb` | [Stone 01](https://polyhaven.com/a/stone_01) | Dario Barresi, Rico Cilliers | CC0 1.0 |
+| `tree_stump_01.glb` | [Tree Stump 01](https://polyhaven.com/a/tree_stump_01) | Rob Tuytel | CC0 1.0 |
+| `dry_branches_medium_01.glb` | [Dry Branches Medium 01](https://polyhaven.com/a/dry_branches_medium_01) | Rico Cilliers | CC0 1.0 |
+
+## Techniques studied
+
+Gacha Garage's `art/lowpix/world_arch` (spec generators in metres, photo-bashed materials, sprig-card crowns over
+dark leaf cores) and BUSHED's `src/trees` (fluted trunks, root flare, alpha leaf cards) informed the oak's
+construction; no code from them is copied.
+
+
+---
+
+# Credits: the interview office (builder interview3)
+
+Pip's office (`public/models/interview/`) mixes props borrowed from the owner's other games and restyled for Hoot
+Hollow, with props hand-modelled for this game in lowpix (specs in `art/lowpix/interview/`).
+
+## Borrowed and restyled props
+
+`art/lowpix/interview/borrow.py` copies each source model and restyles it: the colour atlas is graded to the calm
+palette (desaturated a touch, pulled towards the nearest palette colour, slate shadows, lamp-gold lights), the finish
+made matte (no metal, rough), normal/roughness/occlusion maps dropped, the atlas downsized and re-encoded as WebP.
+Changes were made to every model listed here.
+
+### From BUSHED (the owner's lumberjack game), originally Poly Haven models (CC0 1.0)
+
+BUSHED converted these Poly Haven models with lowpix (re-meshed, re-textured, rescaled).
+
+| Game id | BUSHED file | Source | Author(s) | Licence |
+|---|---|---|---|---|
+| `b_desk` | `vintage_wooden_drawer_01.glb` | [vintage_wooden_drawer_01](https://polyhaven.com/a/vintage_wooden_drawer_01) | James Ray Cock | CC0 1.0 |
+| `b_chair` | `WoodenChair_01.glb` | [WoodenChair_01](https://polyhaven.com/a/WoodenChair_01) | Jake Mobley | CC0 1.0 |
+| `b_bookcase` | `wooden_bookshelf_worn.glb` | [wooden_bookshelf_worn](https://polyhaven.com/a/wooden_bookshelf_worn) | Ulan Cabanilla | CC0 1.0 |
+| `b_oillamp` | `vintage_oil_lamp.glb` | [vintage_oil_lamp](https://polyhaven.com/a/vintage_oil_lamp) | Monsta3D | CC0 1.0 |
+| `b_candlestick` | `wooden_candlestick.glb` | [wooden_candlestick](https://polyhaven.com/a/wooden_candlestick) | Josh Dean | CC0 1.0 |
+| `b_lantern` | `Lantern_01.glb` | [Lantern_01](https://polyhaven.com/a/Lantern_01) | Rajil Jose Macatangay | CC0 1.0 |
+| `b_mantelclock` | `mantel_clock_01.glb` | [mantel_clock_01](https://polyhaven.com/a/mantel_clock_01) | Yann Kervran, Rico Cilliers | CC0 1.0 |
+| `b_daybed` | `vintage_day_bed.glb` | [vintage_day_bed](https://polyhaven.com/a/vintage_day_bed) | Aron Łyczek | CC0 1.0 |
+| `b_sidetable` | `WoodenTable_02.glb` | [WoodenTable_02](https://polyhaven.com/a/WoodenTable_02) | Fran Calvente | CC0 1.0 |
+| `b_cabinet` | `painted_wooden_cabinet.glb` | [painted_wooden_cabinet](https://polyhaven.com/a/painted_wooden_cabinet) | Kirill Sannikov | CC0 1.0 |
+| `b_basket` | `wicker_basket_01.glb` | [wicker_basket_01](https://polyhaven.com/a/wicker_basket_01) | Kuutti Siitonen | CC0 1.0 |
+| `b_suitcase` | `vintage_suitcase.glb` | [vintage_suitcase](https://polyhaven.com/a/vintage_suitcase) | Maximilian Schuster | CC0 1.0 |
+| `b_jug` | `jug_01.glb` | [jug_01](https://polyhaven.com/a/jug_01) | Kuutti Siitonen | CC0 1.0 |
+| `b_bowl` | `wooden_bowl_01.glb` | [wooden_bowl_01](https://polyhaven.com/a/wooden_bowl_01) | Oliver Harries | CC0 1.0 |
+
+### From Gacha Garage (the owner's gashapon game), converted with lowpix
+
+| Game id | Gacha Garage file | Source | Author | Licence |
+|---|---|---|---|---|
+| `g_books` | `models/lowpix/world/books_old.glb` | ["Stack Of Old Books"](https://sketchfab.com/3d-models/stack-of-old-books-c6ca6667fd7d4381bd184874dcf44075) | Arjun Perayil | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `g_teapot` | `models/lowpix/world/teapot_enamel.glb` | ["Old Soviet teapot"](https://sketchfab.com/3d-models/old-soviet-teapot-9b087673052446299e6decda222a42da) | Amagitsune | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `g_radio` | `models/lowpix/world/radio_old.glb` | ["Radio"](https://sketchfab.com/3d-models/radio-bb832f8973ad40af8321fb90854be3b6) | ion_omat | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+| `g_gramophone` | `models/lowpix/world/gramophone.glb` | ["Old Gramophone"](https://sketchfab.com/3d-models/old-gramophone-5e892fc786db4ca1b36738ab5e40e64d) | KIFIR | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
+
+CC BY 4.0 attributions: each of the CC BY models above is "based on" the named work by the named author, licensed
+under CC BY 4.0; modified (converted with lowpix by Gacha Garage, then recoloured, re-encoded and rescaled for Hoot
+Hollow).
+
+## Wall art (real artworks, public domain)
+
+Fetched by `art/lowpix/interview/wallart.py` from the Art Institute of Chicago (API data CC0; these images are public
+domain), cropped, downsampled to a small texel grid, graded a little towards the palette, saved as
+`public/models/interview/art/<id>.webp`.
+
+| Game id | Work | Artist | Date | Source |
+|---|---|---|---|---|
+| `mountain_brook` (the painting) | Mountain Brook | Albert Bierstadt | 1863 | [artic.edu/artworks/146701](https://www.artic.edu/artworks/146701) |
+| `nocturne` (cork board print) | Nocturne: Blue and Gold, Southampton Water | James McNeill Whistler | 1872 | [artic.edu/artworks/56905](https://www.artic.edu/artworks/56905) |
+| `cranes` (cork board print) | Cranes on snow-covered pine | Katsushika Hokusai | c. 1834 | [artic.edu/artworks/21720](https://www.artic.edu/artworks/21720) |
+
+## Photo textures used to paint the hand-made props
+
+The lowpix specs in `art/lowpix/interview/` photo-bash these Poly Haven textures (CC0 1.0; downscaled copies in
+`art/lowpix/interview/photos/`, each with a `source.json`): oak_veneer_01, wood_table_001, weathered_planks,
+painted_plaster_wall, rough_linen, hessian_230, velour_velvet, brown_leather, knitted_fleece, bark_brown_02.
+
+## Made for Hoot Hollow
+
+The leaf-card plants (rubber plant, pothos, fern: every leaf a hand-pixelled card), the room shell (heartwood walls,
+wainscot, floor, ceiling, bark rim), the wall clock with moving hands, the round
+window, curtains, cork board, rug, ivy, teacup, papers, inkwell, books, candle, name block, wall shelf, painting,
+globe, Pip's glasses and clipboard, and the vignette props (pillow, sheep, fence, phone, microphone, milk bottle,
+coffee beans, mugs, stove, open book, sunflower) are modelled in lowpix by this project.
+
+
+---
+
+# Credits: the toy owls and their outfits (builder owl3)
+
+## Toy library
+
+`art/blender/lib/` (tk.py, facet.py, paint.py, face.py, fig.py, rig.py, parts.py, kit.py, _bz.py) is the owner's own
+Blender toy library from **Gacha Garage** (`art/blender/toys/lib`, `sabaku/_bz.py`), copied with its comments; only its
+paths were adapted. The owls, the Queen and the remade outfit pieces (`art/blender/owls/owl.py`, `outfits.py`) are
+modelled and hand-painted with it for Hoot Hollow.
+
+## Photo-bash fields (`art/blender/lib/photos/*.npz`, from Gacha Garage's `lib/photos/make.py`)
+
+The painter lays a little real-surface detail under its brush strokes (feathers on every owl, fur on the Meowl,
+pebbled skin on the gingerbread and snowman owls, scales on bare legs):
+
+- `feather`: "Black Swan" by Marko Knuutila, https://www.flickr.com/photos/markoknuutila/14395362290, CC BY 2.0
+  (Open Images ID 2343212ab72aafb2).
+- `fur`: "Black bear fur skin (2)", Wikimedia Commons, https://commons.wikimedia.org/wiki/File:Black_bear_fur_skin_(2).jpg
+  (licence as listed on Commons; credited in Gacha Garage's CREDITS.md "Toy textures").
+- `tortoise`: "Aldabra giant tortoise (8455424676)", Wikimedia Commons,
+  https://commons.wikimedia.org/wiki/File:Aldabra_giant_tortoise_(8455424676).jpg (licence as listed on Commons).
+- `scales`: "Lizard at Manchester Museum" by Gidzy, https://www.flickr.com/photos/gidzy/20694739329, CC BY 2.0
+  (Open Images ID 67dd52b7190e9f19).
+- (also copied, unused by the owls: scute, crab, frog, flipper; see `art/blender/lib/photos/make.py` for sources.)
+
+## Outfit pieces borrowed from Gacha Garage's wearables (`public/models/outfits/`)
+
+Fitted onto the owls' anchors and toned to the calm palette by `art/blender/owls/borrow.py` from Gacha Garage's
+hand-painted restyles (`public/models/lowpix/world/wear_*.glb`) of these CC BY 4.0 models
+(https://creativecommons.org/licenses/by/4.0/):
+
+- `beanie.glb`: "Beanie With Pom-Pom" by lord cabal, https://sketchfab.com/3d-models/beanie-with-pom-pom-16569f9d12da457aa20884fb8ea97080
+- `bow.glb`: "Hair Bow, Hair Ribbon" by Rauschkugel, https://sketchfab.com/3d-models/hair-bow-hair-ribbon-388dc49d323d42fdbd08e53021c10e82
+- `crown.glb`: "Crown rich (gold)" by Mister-Smash, https://sketchfab.com/3d-models/crown-rich-gold-a01505c752944647956037757a1a93f7
+- `stargoggles.glb`: "Steampunk Glasses" by Loïc, https://sketchfab.com/3d-models/steampunk-glasses-841202d9bbe440648184305d9680b108
+- `satchel.glb`: "A Backpack For An Adventure" by Thomas Lean, https://sketchfab.com/3d-models/a-backpack-for-an-adventure-2ad86321197a49feb54b7726743d7fd0
+- `backpack.glb`: "Backpack low-poly" by dimaponomar2019, https://sketchfab.com/3d-models/backpack-low-poly-d7225bdd1d6c42d992485d72438cab28
+- `beret.glb`: "Headwear" by noyou, https://sketchfab.com/3d-models/headwear-b174a13ed4b048828919006fe489440f
+- `froghat.glb`: "Frog Plush" by Ida Ailes, https://sketchfab.com/3d-models/frog-plush-472d646ce4a8402695ce79ae5cfff82a
+- `explorer.glb`: "NVA PITH HELMET - Mũ Cối Sao Vàng" by Long Nguyễn, https://sketchfab.com/3d-models/nva-pith-helmet-mu-coi-sao-vang-7ccc0bdff4ba4af8afcde410758e017d
+- `flowercrown.glb`: "Flower Hair Clip" by leman0312, https://sketchfab.com/3d-models/flower-hair-clip-2c3e3299e0ca41af924a23b7c46f90fb
+
+Everything else in `public/models/owls/` and `public/models/outfits/` is modelled and painted for Hoot Hollow.
+
+
+---
+
+# Credits: Queen Neve's boutique (shop builder)
+
+Every model below was borrowed and restyled for Hoot Hollow: textures reduced to a single matte base colour
+(normal, roughness and AO maps dropped), base colour downsized to 512 px or less, gently desaturated and tinted
+towards the calm "Moss & Moonlight" palette, mesh welded and simplified towards a triangle budget, WebP + meshopt
+compressed (`gltf-transform`, script kept in the builder's scratchpad: `pack.mjs`). Files live in
+`public/models/shop/`. Upstream attributions are kept as the source projects list them.
+
+## Models
+
+| file | model | author | licence | via |
+|---|---|---|---|---|
+| `stove.glb` | [Scandinavian Masonry Heater](https://polyhaven.com/a/scandinavian_masonry_heater) | Kuutti Siitonen | CC0 1.0 | Poly Haven |
+| `mirror.glb` | [Ornate Mirror 01](https://polyhaven.com/a/ornate_mirror_01) | James Ray Cock | CC0 1.0 | Poly Haven |
+| `spinning_wheel.glb` | [Spinning Wheel 01](https://polyhaven.com/a/spinning_wheel_01) | Sofia Pahaoja | CC0 1.0 | Poly Haven |
+| `tea_set.glb` | [Tea Set 01](https://polyhaven.com/a/tea_set_01) | James Ray Cock, Rico Cilliers, Jurita Burger | CC0 1.0 | Poly Haven |
+| `bust.glb` | [Marble Bust 01](https://polyhaven.com/a/marble_bust_01) | Rico Cilliers | CC0 1.0 | Poly Haven |
+| `lantern_chandelier.glb` | [Lantern Chandelier 01](https://polyhaven.com/a/lantern_chandelier_01) | Kirill Sannikov | CC0 1.0 | Poly Haven |
+| `pillows.glb` | [Throw Pillows 01](https://polyhaven.com/a/throw_pillows_01) | Serhii Khromov | CC0 1.0 | Poly Haven |
+| `clock.glb` | [Vintage Grandfather Clock 01](https://polyhaven.com/a/vintage_grandfather_clock_01) | Yann Kervran, James Ray Cock | CC0 1.0 | Poly Haven |
+| `till.glb` | [CashRegister_01](https://polyhaven.com/a/CashRegister_01) | Joe Seabuhr | CC0 1.0 | BUSHED (`public/assets/models/CashRegister_01.glb`) |
+| `lantern.glb` | [Lantern_01](https://polyhaven.com/a/Lantern_01) | Rajil Jose Macatangay | CC0 1.0 | BUSHED |
+| `cupboard.glb` | [painted_wooden_cabinet](https://polyhaven.com/a/painted_wooden_cabinet) | Kirill Sannikov | CC0 1.0 | BUSHED |
+| `suitcase.glb` | [vintage_suitcase](https://polyhaven.com/a/vintage_suitcase) | Maximilian Schuster | CC0 1.0 | BUSHED |
+| `wood_lantern.glb` | [wooden_lantern_01](https://polyhaven.com/a/wooden_lantern_01) | James Ray Cock | CC0 1.0 | BUSHED |
+| `mantel_clock.glb` | [mantel_clock_01](https://polyhaven.com/a/mantel_clock_01) | Yann Kervran, Rico Cilliers | CC0 1.0 | BUSHED |
+| `oil_lamp.glb` | [vintage_oil_lamp](https://polyhaven.com/a/vintage_oil_lamp) | Monsta3D | CC0 1.0 | BUSHED |
+| `candlestick.glb` | [wooden_candlestick](https://polyhaven.com/a/wooden_candlestick) | Josh Dean | CC0 1.0 | BUSHED |
+| `basket.glb` | [wicker_basket_01](https://polyhaven.com/a/wicker_basket_01) | Kuutti Siitonen | CC0 1.0 | BUSHED |
+| `gg_showcase.glb` | shop counter (made for Gacha Garage) | Gacha Garage | CC0 1.0 | Gacha Garage (`models/lowpix/world/showcase.glb`) |
+| `gg_call_bell_p.glb` | [Reception Bell. Wood, shiny copper](https://sketchfab.com/3d-models/reception-bell-wood-shiny-copper-5d754602e590417b889e500a06b67146) | Rylae Shylna | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_armchair.glb` | [Arm Chair 01](https://polyhaven.com/a/ArmChair_01) | Kirill Sannikov | CC0 1.0 | Gacha Garage |
+| `gg_floor_lamp.glb` | [Wooden Floor Lamp](https://sketchfab.com/3d-models/wooden-floor-lamp-4766a03aa796440598426f8d5e975fec) | Atalaya22 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_lamp_pendant.glb` | [Lamp_02 lowpoly](https://sketchfab.com/3d-models/lamp-02-lowpoly-0f5519beb6644e5ea714055382c20d5f) | chris_models | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_wall_shelf_jars.glb` | [Jar Shelf](https://sketchfab.com/3d-models/jar-shelf-373ad4d8e5bb4783b6e76dbdf7732788) | djcarson | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_table_round.glb` | [Round Wooden Table 01](https://polyhaven.com/a/round_wooden_table_01) | Ulan Cabanilla | CC0 1.0 | Gacha Garage |
+| `gg_table_side.glb` | [Side Table 01](https://polyhaven.com/a/side_table_01) | James Ray Cock | CC0 1.0 | Gacha Garage |
+| `gg_vase_ceramic.glb` | [Antique Ceramic Vase 01](https://polyhaven.com/a/antique_ceramic_vase_01) | James Ray Cock | CC0 1.0 | Gacha Garage |
+| `gg_teddy.glb` | [Teddy Bear](https://sketchfab.com/3d-models/teddy-bear-dae9249342744328ad6da4182e6010f7) | theacidrose | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_cabinet_vintage.glb` | [Vintage Cabinet 01](https://polyhaven.com/a/vintage_cabinet_01) | Rico Cilliers | CC0 1.0 | Gacha Garage |
+| `gg_bookshelf.glb` | [Wooden Bookshelf Worn](https://polyhaven.com/a/wooden_bookshelf_worn) | Ulan Cabanilla | CC0 1.0 | Gacha Garage |
+| `gg_books_stack.glb` | [Stack of Books](https://sketchfab.com/3d-models/stack-of-books-83d623341f164753b825d1050be009d9) | AJH2 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_wear_beanie_pom.glb` | [Beanie With Pom-Pom](https://sketchfab.com/3d-models/beanie-with-pom-pom-16569f9d12da457aa20884fb8ea97080) | lord cabal | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_wear_beret.glb` | [Headwear](https://sketchfab.com/3d-models/headwear-b174a13ed4b048828919006fe489440f) | noyou | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_wear_boater.glb` | [straw boater hat w/ black silk ribbon](https://sketchfab.com/3d-models/straw-boater-hat-w-black-silk-ribbon-cd78d72dca1748048c7badfbb2f4e06c) | clairenicole22 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `gg_wear_fedora.glb` | [Fedora](https://sketchfab.com/3d-models/fedora-eb46b3407c67491f98a13df1b86950fa) | Marko Korbun | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+
+## Room textures (`public/models/shop/tex/`)
+
+Borrowed from BUSHED's pixel-art PBR set (`public/assets/textures/places`, palette-quantised tiles at 256 px/m made
+from CC0 Poly Haven scans by BUSHED's `tools/make_textures.py`), recoloured by `src/world/stages/shoptex.py`.
+
+| file | BUSHED texture | source scan | author | licence |
+|---|---|---|---|---|
+| `floor.png`, `floor_n.png` | `floor` | [Old Wood Floor](https://polyhaven.com/a/old_wood_floor) | Guillaume Monsergent | CC0 1.0 |
+| `panels.png`, `panels_n.png` | `boards_green` | [Weathered Planks](https://polyhaven.com/a/weathered_planks) | Dario Barresi, Dimitrios Savva | CC0 1.0 |
+| `walls.png`, `walls_n.png` | `trim_cream` | [Weathered Planks](https://polyhaven.com/a/weathered_planks) | Dario Barresi, Dimitrios Savva | CC0 1.0 |
+| `beams.png`, `beams_n.png` | `board_warm` | [Fine Grained Wood](https://polyhaven.com/a/fine_grained_wood), [Wood Table Worn](https://polyhaven.com/a/wood_table_worn) | Rob Tuytel; Dimitrios Savva, Rico Cilliers | CC0 1.0 |
+| `paper.png` | `ticking` | painted for BUSHED | BUSHED | made for the owner's game |
+| `rug.png` | `rug` | painted for BUSHED | BUSHED | made for the owner's game |
+
+## Wall art (`public/models/shop/art/`)
+
+Real public-domain artworks from the [Art Institute of Chicago](https://www.artic.edu/) (images in the public domain,
+API data CC0), downsized to <= 240 px and pixel-graded (calmed, ordered-dithered) by `src/world/stages/shopart.py`.
+
+| file | artwork | artist | date | source |
+|---|---|---|---|---|
+| `monet_sandvika.png` | Sandvika, Norway | Claude Monet (French, 1840–1926) | 1895 | https://www.artic.edu/artworks/86998 |
+| `hokusai_cranes.png` | Cranes on snow-covered pine | Katsushika Hokusai | c. 1834 | https://www.artic.edu/artworks/21720 |
+| `fantin_flowers.png` | Still Life with Flowers | Henri Fantin-Latour (French, 1836–1904) | 1881 | https://www.artic.edu/artworks/72180 |
+| `twachtman_icebound.png` | Icebound | John Henry Twachtman (American, 1853–1902) | c. 1889 | https://www.artic.edu/artworks/72801 |
+
+## Made for the game
+
+- The potted fir, the monstera and the trailing pothos are built from 2D pixel-art leaf cards painted in code
+  (`src/world/stages/shopplants.ts`), with lathe pots.
+- The view through the bay window is the live game world, rendered by the app's `Scene.renderView()`.
+
+## Also borrowed
+
+- The stage's picture treatment (low internal resolution, grade, split toning, ordered dither + quantise, grain)
+  follows BUSHED's `src/gfx/renderer.ts` (the owner's game), simplified.
+- The realistic paper surface in the shop UI follows BUSHED's `src/ui/paper.ts` (mottling, fibres, light
+  quantisation).
+
+
+---
+
+# Credits: interface (builder ui3)
+
+Everything below was borrowed from the owner's own games and restyled for Hoot Hollow (graded into the calm,
+quiet palette by `src/ui/px/calm.js`, re-sampled to pixel art). Upstream credits are kept.
+
+## Material textures (`src/ui/px/textiles.js`, made by `art/ui/make_textiles.py`)
+
+Small tiles cut from BUSHED's photo-derived, palette-quantised pixel textures
+(`refs4/lpx-bushed/games/bushed/public/assets/textures`, see BUSHED's `CREDITS.md`):
+
+| Tile | BUSHED texture | Source scan | Author | Licence |
+|---|---|---|---|---|
+| `boards` | `building/floor_boards` | [Wood Floor Worn](https://polyhaven.com/a/wood_floor_worn) | Dimitrios Savva | CC0 1.0 |
+| `leather` | `places/leather` | [Brown Leather](https://polyhaven.com/a/brown_leather) | Rob Tuytel | CC0 1.0 |
+| `wool` | `places/wool_grey` | [Poly Wool Herringbone](https://polyhaven.com/a/poly_wool_herringbone) | colormass, Rico Cilliers | CC0 1.0 |
+| `canvas` | `places/canvas` | BUSHED's procedural duck canvas | BUSHED (the owner) | own work |
+
+Paper and brass are painted procedurally in the manner of BUSHED's `src/ui/paper.ts` and the Book of Cryptids
+textures (`src/ui/bookofcryptids/textures.ts`).
+
+## Icons baked from 3D props (`public/ui/icons/*.png`, `src/ui/px/baked.js`, made by `src/dev/iconbake.ts`)
+
+| Icon(s) | Model | Source | Author | Licence |
+|---|---|---|---|---|
+| `nav_sleep` | `items/canopy_bed.glb` | Hoot Hollow decor | Hoot Hollow | own work |
+| `nest`, `jar` | `items/basket_nest.glb`, `items/firefly_jar.glb` | Hoot Hollow decor | Hoot Hollow | own work |
+| `nav_clock`, `clock` | BUSHED `wall_clock.glb` | Poly Haven (via BUSHED `CREDITS.md`) | see BUSHED credits | CC0 1.0 |
+| `nav_alarm`, `alarm` | Gacha Garage `lowpix/world/clock_alarm.glb` | [Alarm Clock 01](https://polyhaven.com/a/alarm_clock_01) | Yann Kervran, James Ray Cock | CC0 1.0 |
+| `nav_book`, `book` | Gacha Garage `lowpix/world/books_stack.glb` | [Stack of Books](https://sketchfab.com/3d-models/stack-of-books-83d623341f164753b825d1050be009d9) | AJH2 | CC BY 4.0 |
+| `tool_build` | BUSHED `hand_plane_no4.glb` | Poly Haven (via BUSHED `CREDITS.md`) | see BUSHED credits | CC0 1.0 |
+| `tool_toolbox` | Gacha Garage `lowpix/world/toolbox.glb` | [Metal Toolbox](https://polyhaven.com/a/metal_toolbox) | Mateusz Sadek | CC0 1.0 |
+| `tool_shop`, `shop` | Gacha Garage `lowpix/world/cash_register.glb` | [Cash Register 01](https://polyhaven.com/a/CashRegister_01) | Joe Seabuhr | CC0 1.0 |
+| `tool_dress` | `items/vanity.glb` | Hoot Hollow decor | Hoot Hollow | own work |
+| `tool_quests`, `clipboard` | Gacha Garage `lowpix/world/chalkboard.glb` | [Standing Chalkboard 01](https://polyhaven.com/a/standing_chalkboard_01) | ParzivalCG | CC0 1.0 |
+| `tool_map` | BUSHED `seadogs_compass.glb` | Poly Haven (via BUSHED `CREDITS.md`) | see BUSHED credits | CC0 1.0 |
+| `bell` | Gacha Garage `lowpix/world/call_bell_p.glb` | [Reception Bell](https://sketchfab.com/3d-models/reception-bell-wood-shiny-copper-5d754602e590417b889e500a06b67146) | Rylae Shylna | CC BY 4.0 |
+| `lantern` | BUSHED `wooden_lantern_01.glb` | Poly Haven (via BUSHED `CREDITS.md`) | see BUSHED credits | CC0 1.0 |
+| `camera` | Gacha Garage `lowpix/world/camera_vintage.glb` | [Vintage Camera](https://sketchfab.com/3d-models/vintage-camera-dd2608dcbd3e4944b4614b2f2de4c73b) | EricKos | CC BY 4.0 |
+| `bench` | BUSHED `painted_wooden_bench.glb` | Poly Haven (via BUSHED `CREDITS.md`) | see BUSHED credits | CC0 1.0 |
+
+To re-bake: copy the models above into `public/models/uibake/` (they are not committed), open
+`/dev-iconbake.html` (main icons) or `/dev-iconbake.html?sprites=1` (sprite replacements) and save
+`window.__icons` / `window.__sprites`.
+
+## Frame kit
+
+The 9-slice frames, sprites and fonts come from the owner's game The Bear Must Eat (as before); this round
+repainted them in Hoot Hollow's palette with BUSHED-style materials.
+
+
+---
+
+# Credits: the world (builder world3)
+
+The woods, the ground and the look of the renderer are borrowed from **BUSHED**, the owner's lumberjack game
+(`lpx-bushed/games/bushed`), and restyled for Hoot Hollow's calm "Moss & Moonlight" palette (textures
+desaturated and nudged towards sage, re-encoded as WebP; tints per season in `src/world/flora.ts`).
+BUSHED's own sources are **CC0 1.0** scans from [Poly Haven](https://polyhaven.com), re-made by BUSHED's
+`tools/forest/*.py` as high-resolution pixel art; its models were converted with lowpix.
+
+## Code (adapted)
+
+| Hoot Hollow | From BUSHED | Notes |
+|---|---|---|
+| `src/world/bushed/build.ts`, `geom.ts`, `species.ts`, `rng.ts`, `noise.ts` | `src/trees/build.ts`, `src/trees/geom.ts`, `src/trees/species.ts`, `src/core/rng.ts`, `src/core/noise.ts` | procedural trees; an `oak` species added (broadleaf path, birch leaves, spruce bark) |
+| `src/world/bushed/protos.ts`, `atlas.ts` | `src/world/veg/protos.ts`, `src/world/veg/atlas.ts` | ground-cover prototypes (ferns, shrubs, cattails, lily pads, mushrooms, moss, cones) |
+| `src/world/bushed/materials.ts`, `textures.ts` | `src/trees/materials.ts`, `src/trees/textures.ts`, `src/gfx/tex.ts` | wind / translucency / moss patches re-wired to our wind and sky |
+| `src/world/post.ts` | `src/gfx/renderer.ts` | low internal resolution, bloom, filmic grade, split toning, vignette, grain, ordered dither, nearest upscale (atmosphere, shafts, lake and motion blur passes left out for phones) |
+
+## Textures (`public/textures/bushed/`)
+
+| File | Source | Author | Licence |
+|---|---|---|---|
+| `bark_spruce` (+ `_n`; also the oak's bark) | [Bark Platanus](https://polyhaven.com/a/bark_platanus) | Dimitrios Savva | CC0 |
+| `bark_fir` (+ `_n`) | [Chinese Hackberry Bark](https://polyhaven.com/a/chinese_hackberry_bark) | Charlotte Baglioni | CC0 |
+| `bark_pine` (+ `_n`) | [Pine Bark](https://polyhaven.com/a/pine_bark) | Dimitrios Savva | CC0 |
+| `bark_cedar` (+ `_n`) | [Metasequoia Bark](https://polyhaven.com/a/metasequoia_bark) | Charlotte Baglioni | CC0 |
+| `bark_birch` (+ `_n`) | procedural, detail from [Japanese Sycamore](https://polyhaven.com/a/japanese_sycamore) | Charlotte Baglioni | CC0 |
+| `foliage_spruce`, `foliage_fir`, juniper in `veg_atlas` | [Fir Tree 01](https://polyhaven.com/a/fir_tree_01) twig maps | Rob Tuytel, Rico Cilliers | CC0 |
+| `foliage_pine` | [Pine Tree 01](https://polyhaven.com/a/pine_tree_01) twig maps | Rob Tuytel, Rico Cilliers | CC0 |
+| `foliage_birch` (birches and oaks) | [Shrub 01](https://polyhaven.com/a/shrub_01) | Rico Cilliers | CC0 |
+| `veg_atlas` (ferns) | [Fern 02](https://polyhaven.com/a/fern_02) | Rob Tuytel, Rico Cilliers | CC0 |
+| `veg_atlas` (alder, blueberry, raspberry, sarsaparilla) | [Shrub 03](https://polyhaven.com/a/shrub_03), [Shrub 04](https://polyhaven.com/a/shrub_04) | Rico Cilliers | CC0 |
+| `veg_atlas` (grasses, wildflowers, mushrooms, lily pads, litter) | BUSHED `tools/forest/veg.py`, `veg_flora.py` (procedural / hand-painted) | BUSHED | owner's project |
+| `moss` | [Concrete Moss](https://polyhaven.com/a/concrete_moss) (+ procedural cushions) | Rob Tuytel | CC0 |
+| `forest_floor` | [Forest Leaves 02](https://polyhaven.com/a/forest_leaves_02) | Rob Tuytel | CC0 |
+| `mossy_rock` | [Mossy Rock](https://polyhaven.com/a/mossy_rock) | Rob Tuytel | CC0 |
+| `earth` | [Forrest Ground 03](https://polyhaven.com/a/forrest_ground_03) | Rob Tuytel | CC0 |
+
+## Models (`public/models/world/`)
+
+| File | Source | Author | Licence |
+|---|---|---|---|
+| `tree_stump_01.glb`, `tree_stump_02.glb` | [Tree Stump 01](https://polyhaven.com/a/tree_stump_01), [02](https://polyhaven.com/a/tree_stump_02) via BUSHED | Rob Tuytel | CC0 |
+| `dead_tree_trunk.glb` | [Dead Tree Trunk](https://polyhaven.com/a/dead_tree_trunk) via BUSHED | Rob Tuytel | CC0 |
+| `bark_debris_01.glb` | [Bark Debris 01](https://polyhaven.com/a/bark_debris_01) via BUSHED | Greg Zaal, Jenelle van Heerden | CC0 |
+| `boulder_01.glb` | [Boulder 01](https://polyhaven.com/a/boulder_01) via BUSHED | Rico Cilliers | CC0 |
+| `rock_07.glb` | [Rock 07](https://polyhaven.com/a/rock_07) via BUSHED | Jenelle van Heerden | CC0 |
+| `songbird.glb` (+ `textures/bushed/coat_jay.webp`) | ["Robin_ Bird"](https://sketchfab.com/3d-models/robin--bird-ec1c6e2250824c3987cde64ea29ccd52) by [Assets_Animated](https://sketchfab.com/Assets_Animated), rebuilt as BUSHED's small-bird rig and repainted as chickadee / Canada jay coats by BUSHED; here slimmed (idle, eat, fly, glide clips; feather bones rigid; 384 px coats, desaturated; meshopt) | Assets_Animated, BUSHED | CC BY 4.0 |
+| `props_*.glb` | made for Hoot Hollow with lowpix (`art/lowpix/world/props.py`) | Hoot Hollow | project |
+
+## Also kept
+
+- `src/world/grassAtlas.js` (cell layout only now): Moleforge / Burrowsmith (`curly-enigma`), the owner's project.
+
+
+---
+
+# Audio credits
+
+Sound effects, ambience loops and music shipped in `public/sfx/` (123 MP3 files, 91 sound ids, 10.25 MB). The first 88 files were checked on **2026-11-10**; 35 files (28 new sound ids, 6.94 MB: alarms, breathing cues, sleep soundscapes, music loops and physical-UI foley) were added and checked on **2026-11-20**.
+
+Every file is an edit (cut, fade, gain, EQ, mono/stereo fold, loop crossfade, one pitch shift, MP3 encode) of an existing third-party recording, music track or sound-design asset. Nothing was synthesised in code and nothing was produced with an AI audio generator by this project. Machine-readable versions of this page: `public/sfx/credits.json` (per file) and `public/sfx/manifest.json` (ids the app can play).
+
+## Licenses at a glance
+
+| License | Files | Attribution required? |
+|---|---|---|
+| CC0 1.0 Universal | 114 | No. CC0 waives it; several authors say a credit is appreciated |
+| Public domain (U.S. National Park Service; credit requested) | 8 | Not a legal condition, but NPS asks: please credit the "National Park Service" where appropriate |
+| Public domain (Creative Commons Copyright-Only Dedication / Public Domain Certification 1.0 US) | 1 | No. The creator dedicated the recording to the public domain (`bowl.mp3`, by luke jones, via archive.org) |
+
+No file uses CC-BY, CC-BY-SA, NC, ND, GPL or a custom "royalty-free" license.
+
+### Suggested credits line (optional, courtesy)
+
+> Sound effects and music by Aureolus_Omicron, bart, BMacZero (Brian MacIntosh), cogitollc, cynicmusic (The Cynic Project), extenz, Fantozzi (submitted to OpenGameArt by qubodup), Fupi, fvcalderan, isaiah658, JaggedStone, Kenney (www.kenney.nl), Kerzoven, Kresiek The Furry, laleksic, MouseBYTE, Oiboo, OwlishMedia, PagDev, PWL, qubodup (Iwan Gabovitch), railkill, Robin Lamb, rubberduck, Spring Spring (Julie Damsgaard), Thimras, TinyWorlds, Trex0n (Cal McEachern), Vehicle (Jan Schupke), Voltiment555, wobbleboxx (WobbleBoxx Workshop), Wolfgang_ (Ted Kerr) (all CC0, via OpenGameArt.org); singing bowl by luke jones (public domain, via archive.org); wind, owl, bee, frog, dawn chorus, steam vent, ocean and night forest recordings courtesy of the National Park Service (public domain).
+
+## Sources
+
+| Source | Author | License | Evidence read (on 2026-11-10 unless marked 2026-11-20) | Output files |
+|---|---|---|---|---|
+| [100 CC0 metal and wood SFX](https://opengameart.org/content/100-cc0-metal-and-wood-sfx) (OpenGameArt.org) | rubberduck | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `wood_knock_1.mp3`, `wood_knock_2.mp3` |
+| [20 Rustles of dry leaves](https://opengameart.org/content/20-rustles-dry-leaves) (OpenGameArt.org) | qubodup (Iwan Gabovitch) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `rustle_grass_1.mp3`, `rustle_grass_2.mp3`, `rustle_grass_3.mp3`, `rustle_bush_1.mp3`, `rustle_bush_2.mp3` |
+| [202 More Sound Effects](https://opengameart.org/content/202-more-sound-effects) (OpenGameArt.org) | OwlishMedia | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `stamp.mp3` |
+| [4 Music Box Tracks](https://opengameart.org/content/4-music-box-tracks) (OpenGameArt.org) | Aureolus_Omicron | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `alarm_musicbox.mp3`, `music_lullaby.mp3` |
+| [80 CC0 creature SFX](https://opengameart.org/content/80-cc0-creature-sfx) (OpenGameArt.org) | rubberduck | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `pet_happy_1.mp3`, `pet_happy_2.mp3` |
+| [80 CC0 creture SFX #2](https://opengameart.org/content/80-cc0-creture-sfx-2) (OpenGameArt.org) | rubberduck | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `pet_snore.mp3` |
+| [80 CC0 RPG SFX](https://opengameart.org/content/80-cc0-rpg-sfx) (OpenGameArt.org) | rubberduck | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `reward_coin_1.mp3`, `reward_coin_2.mp3`, `reward_coin_3.mp3` |
+| [A Small Fire Will Do (Calming Loop)](https://opengameart.org/content/a-small-fire-will-do-calming-loop) (OpenGameArt.org) | Trex0n (Cal McEachern) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `music_cozy.mp3` |
+| [AMB Rain Loop 2](https://opengameart.org/content/amb-rain-loop-2) (OpenGameArt.org) | Kresiek The Furry | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `amb_rain.mp3` |
+| [Ambient Bird Sounds](https://opengameart.org/content/ambient-bird-sounds) (OpenGameArt.org) | isaiah658 | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `amb_birds.mp3`, `bird_chirp_1.mp3`, `bird_chirp_2.mp3`, `bird_chirp_3.mp3`, `bird_chirp_4.mp3` |
+| [Barred Owl (Weir Farm National Historical Park)](https://www.nps.gov/nps-audiovideo/audiovideo/5170e4f6-aeca-430d-b8ef-bdf9e28622b3.mp3) (NPS multimedia library (nps.gov)) | National Park Service (NPS Natural Sounds and Night Skies Division / Emma Brown) | [Public domain (U.S. National Park Service; credit requested)](https://www.nps.gov/aboutus/disclaimer.htm) | (2026-11-20) NPS media record B4535041-73BC-457B-97B7-EF2C537AF032 (developer.nps.gov audio API): credit 'NSNSD / Emma Brown'; NPS website disclaimer https://www.nps.gov/aboutus/disclaimer.htm: 'material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain.' | `amb_forest_night.mp3` |
+| [Bee (Yosemite National Park)](https://www.nps.gov/subjects/sound/sounds-bee.htm) (NPS Natural Sounds - Sound Gallery (nps.gov)) | National Park Service | [Public domain (U.S. National Park Service; credit requested)](https://www.nps.gov/subjects/sound/gallery.htm) | Statement on the library page https://www.nps.gov/subjects/sound/gallery.htm: 'The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.' + the recording's own page (credit line and description) | `bee_buzz.mp3` |
+| [Bell Arpeggio 24](https://opengameart.org/content/bell-arpeggio-24) (OpenGameArt.org) | cynicmusic (The Cynic Project) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `timer_done.mp3` |
+| [Bell dings/chimes](https://opengameart.org/content/bell-dingschimes) (OpenGameArt.org) | PWL | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `timer_start.mp3` |
+| [Book Flip Sounds](https://opengameart.org/content/book-flip-sounds) (OpenGameArt.org) | Voltiment555 | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `paper_flip_1.mp3`, `paper_flip_2.mp3` |
+| [Cat Purr & Meow](https://opengameart.org/content/cat-purr-meow) (OpenGameArt.org) | Kerzoven | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `pet_purr.mp3` |
+| [Chimey UI Sounds](https://opengameart.org/content/chimey-ui-sounds) (OpenGameArt.org) | MouseBYTE | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `notify_urgent.mp3`, `breath_in.mp3`, `breath_out.mp3` (added 2026-11-20) |
+| [Clock Wind Sounds](https://opengameart.org/content/clock-wind-sounds) (OpenGameArt.org) | BMacZero (Brian MacIntosh) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `clock_wind.mp3` |
+| [Crickets Ambient Noise - loopable](https://opengameart.org/content/crickets-ambient-noise-loopable) (OpenGameArt.org) | Wolfgang_ (Ted Kerr) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `amb_night.mp3` |
+| [Crunch sounds (cucumber)](https://opengameart.org/content/crunch-sounds-cucumber) (OpenGameArt.org) | cogitollc | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `eat_crunch_1.mp3`, `eat_crunch_2.mp3`, `eat_crunch_3.mp3` |
+| [Dawn Chorus (Yellowstone National Park)](https://www.nps.gov/yell/learn/photosmultimedia/sounds-dawnchorus.htm) (Yellowstone National Park Sound Library (nps.gov)) | National Park Service (NPS / Jennifer Jerrett) | [Public domain (U.S. National Park Service; credit requested)](https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm) | (2026-11-20) Statement on the library page https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm: 'The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the "National Park Service" where appropriate.' + the recording's own page (credit line and description) | `alarm_birds.mp3` |
+| [Different steps on wood, stone, leaves, gravel and mud](https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud) (OpenGameArt.org) | TinyWorlds | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `plant_dig.mp3` |
+| [Early Morning Summer Sounds (San Francisco Maritime National Historical Park)](https://www.nps.gov/nps-audiovideo/legacy/mp3/pwr/avElement/safr-130718-084230-AquaticParkWavesCloseUpedit1min.mp3) (NPS multimedia library (nps.gov)) | National Park Service (NPS / Kristal Ip) | [Public domain (U.S. National Park Service; credit requested)](https://www.nps.gov/aboutus/disclaimer.htm) | (2026-11-20) NPS media record A6B0C5D8-741A-422C-95E4-E368204DB46C (developer.nps.gov audio API): credit 'NPS, Kristal Ip'; NPS website disclaimer https://www.nps.gov/aboutus/disclaimer.htm: 'material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain.' | `amb_waves.mp3` |
+| [Elevator ding](https://opengameart.org/content/elevator-ding) (OpenGameArt.org) | fvcalderan | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `notify_reminder.mp3` |
+| [Fantasy Accessory SFX Library](https://opengameart.org/content/fantasy-accessory-sfx-library) (OpenGameArt.org) | Vehicle (Jan Schupke) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) readme.txt inside accessory.zip ('Distributed under Creative Commons Zero') + OpenGameArt page license field (CC0) | `sparkle_1.mp3`, `sparkle_2.mp3`, `sparkle_3.mp3`, `coin_purse.mp3` |
+| [Fantasy Sound Effects (Tinysized SFX)](https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx) (OpenGameArt.org) | Vehicle (Jan Schupke) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | readme.txt inside tinysized.zip ('Distributed under Creative Commons Zero') + OpenGameArt page license field (CC0) | `step_dirt_1.mp3`, `step_dirt_2.mp3`, `step_dirt_3.mp3`, `water_plop_1.mp3`, `water_plop_2.mp3`, `pet_land.mp3` |
+| [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) (OpenGameArt.org) | Fantozzi (submitted to OpenGameArt by qubodup) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0); page text says the steps come from Fantozzi's Freesound pack 10338 'under CC0' (Freesound itself was not reachable to re-check) | `step_grass_1.mp3`, `step_grass_2.mp3`, `step_grass_3.mp3`, `step_grass_4.mp3`, `step_grass_5.mp3`, `step_stone_1.mp3`, `step_stone_2.mp3`, `step_stone_3.mp3` |
+| [Fireplace Sound loop](https://opengameart.org/content/fireplace-sound-loop) (OpenGameArt.org) | PagDev | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `amb_fire.mp3` |
+| [Happy Lullaby (song17)](https://opengameart.org/content/happy-lullaby-song17) (OpenGameArt.org) | cynicmusic (The Cynic Project) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `alarm_bells.mp3` |
+| [Heavenly Loop](https://opengameart.org/content/heavenly-loop) (OpenGameArt.org) | isaiah658 | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `music_breath.mp3` |
+| [Hurricane Vent (Yellowstone National Park)](https://www.nps.gov/yell/learn/photosmultimedia/sounds-hurricanevent.htm) (Yellowstone National Park Sound Library (nps.gov)) | National Park Service (NPS / Peter Comley) | [Public domain (U.S. National Park Service; credit requested)](https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm) | (2026-11-20) Statement on the library page https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm: 'The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the "National Park Service" where appropriate.' + the recording's own page (credit line and description) | `amb_brown.mp3` |
+| [Interface Sounds](https://opengameart.org/content/interface-sounds) (OpenGameArt.org) | Kenney (www.kenney.nl) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | License.txt inside kenney_interfaceSounds.zip (CC0) + OpenGameArt page license field (CC0) | `ui_tap_1.mp3`, `ui_tap_2.mp3`, `ui_back.mp3`, `ui_open.mp3`, `ui_close.mp3`, `ui_tab.mp3`, `ui_toggle.mp3`, `ui_error.mp3`, `ui_confirm.mp3`, `ui_type.mp3`, `ui_check.mp3`, `ui_drag.mp3`, `ui_drop.mp3`, `voice_a.mp3`, `rotate_item.mp3` |
+| [Kalimba Two-Notes](https://opengameart.org/content/kalimba-two-notes) (OpenGameArt.org) | railkill | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `notify_message.mp3` |
+| [Level up, power up, Coin get (13 Sounds)](https://opengameart.org/content/level-up-power-up-coin-get-13-sounds) (OpenGameArt.org) | wobbleboxx (WobbleBoxx Workshop) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `reward_xp.mp3` |
+| [Magic Spell SFX](https://opengameart.org/content/magic-spell-sfx) (OpenGameArt.org) | JaggedStone | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `tp_out.mp3`, `tp_in.mp3` |
+| [Music Jingles ("85 Short music jingles")](https://opengameart.org/content/85-short-music-jingles) (OpenGameArt.org) | Kenney (www.kenney.nl) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | license.txt inside jingleSounds_Kenney.zip (CC0) + OpenGameArt page license field (CC0) | `reward_quest.mp3` |
+| [open chest SFX](https://opengameart.org/content/open-chest-sfx) (OpenGameArt.org) | Oiboo | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `reward_unlock.mp3` |
+| [Park ambiences](https://opengameart.org/content/park-ambiences) (OpenGameArt.org) | Thimras | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `amb_stream.mp3` |
+| [Pig Frog (Everglades National Park)](https://www.nps.gov/subjects/sound/sounds-pigfrog.htm) (NPS Natural Sounds - Sound Gallery (nps.gov)) | National Park Service | [Public domain (U.S. National Park Service; credit requested)](https://www.nps.gov/subjects/sound/gallery.htm) | Statement on the library page https://www.nps.gov/subjects/sound/gallery.htm: 'The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.' + the recording's own page (credit line and description) | `frog_croak.mp3` |
+| [Pleasing Bell Sound Effect](https://opengameart.org/content/pleasing-bell-sound-effect) (OpenGameArt.org) | Spring Spring (Julie Damsgaard) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `notify_soft.mp3` |
+| [Pop sounds](https://opengameart.org/content/pop-sounds) (OpenGameArt.org) | cogitollc | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `pickup_item.mp3` |
+| [Power-Up Sound Effects](https://opengameart.org/content/power-up-sound-effects) (OpenGameArt.org) | Spring Spring (Julie Damsgaard) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `reward_streak.mp3` |
+| [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) (OpenGameArt.org) | Kenney (www.kenney.nl) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | license.txt inside RPGsounds_Kenney.zip (CC0) + OpenGameArt page license field (CC0) | `ui_page.mp3`, `ui_buy.mp3`, `step_wood_1.mp3`, `step_wood_2.mp3`, `step_wood_3.mp3`, `place_item.mp3`, `door_creak.mp3`, `wings_flutter_1.mp3` (added 2026-11-20) |
+| [Short kalimba loop](https://opengameart.org/content/short-kalimba-loop) (OpenGameArt.org) | extenz | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `alarm_kalimba.mp3` |
+| [Singing Bowl Improvisation](https://archive.org/details/SingingBowlImprovisation) (Internet Archive (archive.org)) | luke jones | [Public domain (Creative Commons Copyright-Only Dedication / Public Domain Certification 1.0 US)](https://creativecommons.org/publicdomain/certification/1.0/us/) | (2026-11-20) archive.org item metadata: licenseurl http://creativecommons.org/licenses/publicdomain/ (redirects to the CC 'Copyright-Only Dedication (based on United States law) or Public Domain Certification 1.0' deed), creator 'luke jones', description 'Short back garden singing bowl improv.', added 2008-07-08 | `bowl.mp3` |
+| [Sound Effects Pack](https://opengameart.org/content/sound-effects-pack) (OpenGameArt.org) | OwlishMedia | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `eat_gulp_1.mp3`, `eat_gulp_2.mp3`, `pencil.mp3`, `fabric_1.mp3`, `fabric_2.mp3`, `wings_flutter_2.mp3`, `yawn.mp3` (added 2026-11-20) |
+| [Soundscape - Lower Geyser Basin (Strong Wind)](https://www.nps.gov/yell/learn/photosmultimedia/sounds-soundscapes.htm) (Yellowstone National Park Sound Library (nps.gov)) | National Park Service (NPS / Peter Comley) | [Public domain (U.S. National Park Service; credit requested)](https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm) | Statement on the library page https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm: 'The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the "National Park Service" where appropriate.' + the recording's own page (credit line and description) | `amb_wind.mp3` |
+| [Spotted Owl (Yosemite National Park)](https://www.nps.gov/subjects/sound/sounds-spotted-owl.htm) (NPS Natural Sounds - Sound Gallery (nps.gov)) | National Park Service | [Public domain (U.S. National Park Service; credit requested)](https://www.nps.gov/subjects/sound/gallery.htm) | Statement on the library page https://www.nps.gov/subjects/sound/gallery.htm: 'The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit.' + the recording's own page (credit line and description) | `owl_hoot.mp3` |
+| [Squeaky Rat](https://opengameart.org/content/squeaky-rat) (OpenGameArt.org) | qubodup (Iwan Gabovitch) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | notes.txt inside qubodupSqueakyRat.7z ('released under CC0'; based on Freesound sounds that 'were under CC0 at the time of creation') + OpenGameArt page license field (CC0) | `voice_d.mp3` |
+| [Ticking clock.](https://opengameart.org/content/ticking-clock) (OpenGameArt.org) | bart | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `clock_tick_1.mp3`, `clock_tick_2.mp3` |
+| [UI Sound Effects (Button Clicks, User Feedback, Notifications)](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications) (OpenGameArt.org) | Robin Lamb | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0); page says the sounds come from the public-domain sample libraries VCSL and VSCO 2 CE | `tp_shimmer.mp3`, `voice_b.mp3`, `breath_hold.mp3` (added 2026-11-20) |
+| [Various Sound Effects](https://opengameart.org/content/various-sound-effects-0) (OpenGameArt.org) | Spring Spring (Julie Damsgaard) | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `reward_gem.mp3`, `bird_flap_1.mp3`, `bird_flap_2.mp3`, `pet_jump.mp3`, `voice_c.mp3`, `voice_e.mp3` |
+| [Various Sound Effects](https://opengameart.org/content/various-sound-effects) (OpenGameArt.org) | laleksic | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | (2026-11-20) OpenGameArt page license field (CC0 link) | `drawer.mp3` |
+| [Win Jingle](https://opengameart.org/content/win-jingle) (OpenGameArt.org) | Fupi | [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) | OpenGameArt page license field (CC0 link) | `reward_levelup.mp3` |
+
+## File by file
+
+| File | Id | Category | Loop | Source title | Author | License | Original file | Edits |
+|---|---|---|---|---|---|---|---|---|
+| `ui_tap_1.mp3` | `ui_tap` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `select_002.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 10 ms fade-out; peak-normalised to -3 dBFS (-5.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_tap_2.mp3` | `ui_tap` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `select_007.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 15 ms fade-out; peak-normalised to -3 dBFS (-1.5 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_back.mp3` | `ui_back` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `back_002.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 23 ms fade-out; peak-normalised to -3 dBFS (-2.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_open.mp3` | `ui_open` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `maximize_009.ogg` | mono, 44.1 kHz; leading silence trimmed (1 ms removed), tail trimmed with 55 ms fade-out; peak-normalised to -3 dBFS (-2.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_close.mp3` | `ui_close` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `minimize_009.ogg` | mono, 44.1 kHz; leading silence trimmed (54 ms removed), tail trimmed with 12 ms fade-out; peak-normalised to -3 dBFS (-2.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_tab.mp3` | `ui_tab` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `switch_002.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 40 ms fade-out; peak-normalised to -3 dBFS (-5.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_toggle.mp3` | `ui_toggle` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `toggle_001.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 31 ms fade-out; peak-normalised to -3 dBFS (-2.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_error.mp3` | `ui_error` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `question_004.ogg` | mono, 44.1 kHz; leading silence trimmed (2 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-2.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_confirm.mp3` | `ui_confirm` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `confirmation_001.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 72 ms fade-out; peak-normalised to -3 dBFS (-2.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_type.mp3` | `ui_type` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `click_002.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 8 ms fade-out; peak-normalised to -8 dBFS (-1.9 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_page.mp3` | `ui_page` | ui | no | [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `bookFlip2.ogg` | mono, 44.1 kHz; leading silence trimmed (37 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+3.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_check.mp3` | `ui_check` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `confirmation_002.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-2.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_buy.mp3` | `ui_buy` | ui | no | [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `handleCoins.ogg` | mono, 44.1 kHz; leading silence trimmed (54 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-6.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_drag.mp3` | `ui_drag` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `pluck_002.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 35 ms fade-out; peak-normalised to -3 dBFS (-5.5 dB gain); encoded to MP3 (112 kbps mono) |
+| `ui_drop.mp3` | `ui_drop` | ui | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `drop_003.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 34 ms fade-out; peak-normalised to -3 dBFS (-3.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `notify_soft.mp3` | `notify_soft` | notify | no | [Pleasing Bell Sound Effect](https://opengameart.org/content/pleasing-bell-sound-effect) | Spring Spring (Julie Damsgaard) | CC0 1.0 Universal | `pleasing-bell.wav` | mono, 44.1 kHz; leading silence trimmed (3 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+19.4 dB gain); encoded to MP3 (112 kbps mono) |
+| `notify_reminder.mp3` | `notify_reminder` | notify | no | [Elevator ding](https://opengameart.org/content/elevator-ding) | fvcalderan | CC0 1.0 Universal | `elevatording.ogg` | mono, 44.1 kHz; leading silence trimmed (17 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-1.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `notify_urgent.mp3` | `notify_urgent` | notify | no | [Chimey UI Sounds](https://opengameart.org/content/chimey-ui-sounds) | MouseBYTE | CC0 1.0 Universal | `Chime_Confirm.mp3` | mono, 44.1 kHz; leading silence trimmed (155 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-0.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `notify_message.mp3` | `notify_message` | notify | no | [Kalimba Two-Notes](https://opengameart.org/content/kalimba-two-notes) | railkill | CC0 1.0 Universal | `kalimba.wav` | mono, 44.1 kHz; leading silence trimmed (4 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-5.5 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_coin_1.mp3` | `reward_coin` | reward | no | [80 CC0 RPG SFX](https://opengameart.org/content/80-cc0-rpg-sfx) | rubberduck | CC0 1.0 Universal | `item_coins_01.ogg` | mono, 44.1 kHz; leading silence trimmed (9 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-6.4 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_coin_2.mp3` | `reward_coin` | reward | no | [80 CC0 RPG SFX](https://opengameart.org/content/80-cc0-rpg-sfx) | rubberduck | CC0 1.0 Universal | `item_coins_02.ogg` | mono, 44.1 kHz; leading silence trimmed (9 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-5.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_coin_3.mp3` | `reward_coin` | reward | no | [80 CC0 RPG SFX](https://opengameart.org/content/80-cc0-rpg-sfx) | rubberduck | CC0 1.0 Universal | `item_coins_03.ogg` | mono, 44.1 kHz; leading silence trimmed (11 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-4.5 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_gem.mp3` | `reward_gem` | reward | no | [Various Sound Effects](https://opengameart.org/content/various-sound-effects-0) | Spring Spring (Julie Damsgaard) | CC0 1.0 Universal | `big_amber.wav` | mono, 44.1 kHz; leading silence trimmed (3 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-5.3 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_xp.mp3` | `reward_xp` | reward | no | [Level up, power up, Coin get (13 Sounds)](https://opengameart.org/content/level-up-power-up-coin-get-13-sounds) | wobbleboxx (WobbleBoxx Workshop) | CC0 1.0 Universal | `Rise03.aif` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-1.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_levelup.mp3` | `reward_levelup` | reward | no | [Win Jingle](https://opengameart.org/content/win-jingle) | Fupi | CC0 1.0 Universal | `WinSteelDrums.wav` | mono, 44.1 kHz; leading silence trimmed (3 ms removed), tail trimmed with 250 ms fade-out; peak-normalised to -3 dBFS (+1.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_quest.mp3` | `reward_quest` | reward | no | [Music Jingles ("85 Short music jingles")](https://opengameart.org/content/85-short-music-jingles) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `jingles_STEEL10.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-4.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_unlock.mp3` | `reward_unlock` | reward | no | [open chest SFX](https://opengameart.org/content/open-chest-sfx) | Oiboo | CC0 1.0 Universal | `open chest.wav` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 200 ms fade-out; peak-normalised to -3 dBFS (+16.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `reward_streak.mp3` | `reward_streak` | reward | no | [Power-Up Sound Effects](https://opengameart.org/content/power-up-sound-effects) | Spring Spring (Julie Damsgaard) | CC0 1.0 Universal | `power_up_sound_v1.ogg` | mono, 44.1 kHz; leading silence trimmed (8 ms removed), tail trimmed with 250 ms fade-out; peak-normalised to -3 dBFS (+0.5 dB gain); encoded to MP3 (112 kbps mono) |
+| `tp_out.mp3` | `tp_out` | teleport | no | [Magic Spell SFX](https://opengameart.org/content/magic-spell-sfx) | JaggedStone | CC0 1.0 Universal | `magical_1.ogg` | mono, 44.1 kHz; leading silence trimmed (22 ms removed), tail trimmed with 200 ms fade-out; peak-normalised to -3 dBFS (+5.9 dB gain); encoded to MP3 (112 kbps mono) |
+| `tp_in.mp3` | `tp_in` | teleport | no | [Magic Spell SFX](https://opengameart.org/content/magic-spell-sfx) | JaggedStone | CC0 1.0 Universal | `magical_6.ogg` | mono, 44.1 kHz; leading silence trimmed (1 ms removed), tail trimmed with 200 ms fade-out; peak-normalised to -3 dBFS (+19.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `tp_shimmer.mp3` | `tp_shimmer` | teleport | no | [UI Sound Effects (Button Clicks, User Feedback, Notifications)](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications) | Robin Lamb | CC0 1.0 Universal | `chimes.wav` | mono, 44.1 kHz; leading silence trimmed (1 ms removed), tail trimmed with 300 ms fade-out; peak-normalised to -3 dBFS (+7.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_grass_1.mp3` | `step_grass` | step | no | [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) | Fantozzi (submitted to OpenGameArt by qubodup) | CC0 1.0 Universal | `Fantozzi-SandL1.flac` | mono, 44.1 kHz; leading silence trimmed (3 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-5.4 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_grass_2.mp3` | `step_grass` | step | no | [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) | Fantozzi (submitted to OpenGameArt by qubodup) | CC0 1.0 Universal | `Fantozzi-SandL2.flac` | mono, 44.1 kHz; leading silence trimmed (8 ms removed), tail trimmed with 78 ms fade-out; peak-normalised to -3 dBFS (-5.9 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_grass_3.mp3` | `step_grass` | step | no | [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) | Fantozzi (submitted to OpenGameArt by qubodup) | CC0 1.0 Universal | `Fantozzi-SandL3.flac` | mono, 44.1 kHz; leading silence trimmed (6 ms removed), tail trimmed with 73 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_grass_4.mp3` | `step_grass` | step | no | [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) | Fantozzi (submitted to OpenGameArt by qubodup) | CC0 1.0 Universal | `Fantozzi-SandR1.flac` | mono, 44.1 kHz; leading silence trimmed (16 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_grass_5.mp3` | `step_grass` | step | no | [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) | Fantozzi (submitted to OpenGameArt by qubodup) | CC0 1.0 Universal | `Fantozzi-SandR3.flac` | mono, 44.1 kHz; leading silence trimmed (8 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-5.9 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_dirt_1.mp3` | `step_dirt` | step | no | [Fantasy Sound Effects (Tinysized SFX)](https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `soil-steps-01.wav` | cut 0.100-0.520 s of the source; mono, 44.1 kHz; leading silence trimmed (70 ms removed), tail trimmed with 61 ms fade-out; peak-normalised to -3 dBFS (-0.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_dirt_2.mp3` | `step_dirt` | step | no | [Fantasy Sound Effects (Tinysized SFX)](https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `soil-steps-01.wav` | cut 0.700-1.200 s of the source; mono, 44.1 kHz; leading silence trimmed (107 ms removed), tail trimmed with 51 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_dirt_3.mp3` | `step_dirt` | step | no | [Fantasy Sound Effects (Tinysized SFX)](https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `mud-steps-04.wav` | cut 0.140-0.460 s of the source; mono, 44.1 kHz; leading silence trimmed (64 ms removed), tail trimmed with 48 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_wood_1.mp3` | `step_wood` | step | no | [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `footstep00.ogg` | mono, 44.1 kHz; leading silence trimmed (28 ms removed), tail trimmed with 55 ms fade-out; peak-normalised to -3 dBFS (-5.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_wood_2.mp3` | `step_wood` | step | no | [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `footstep07.ogg` | mono, 44.1 kHz; leading silence trimmed (26 ms removed), tail trimmed with 55 ms fade-out; peak-normalised to -3 dBFS (-5.4 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_wood_3.mp3` | `step_wood` | step | no | [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `footstep08.ogg` | mono, 44.1 kHz; leading silence trimmed (9 ms removed), tail trimmed with 58 ms fade-out; peak-normalised to -3 dBFS (-6.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_stone_1.mp3` | `step_stone` | step | no | [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) | Fantozzi (submitted to OpenGameArt by qubodup) | CC0 1.0 Universal | `Fantozzi-StoneL1.flac` | mono, 44.1 kHz; leading silence trimmed (3 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-4.8 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_stone_2.mp3` | `step_stone` | step | no | [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) | Fantozzi (submitted to OpenGameArt by qubodup) | CC0 1.0 Universal | `Fantozzi-StoneL2.flac` | mono, 44.1 kHz; leading silence trimmed (7 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `step_stone_3.mp3` | `step_stone` | step | no | [Fantozzi's Footsteps (Grass/Sand & Stone)](https://opengameart.org/content/fantozzis-footsteps-grasssand-stone) | Fantozzi (submitted to OpenGameArt by qubodup) | CC0 1.0 Universal | `Fantozzi-StoneR2.flac` | mono, 44.1 kHz; leading silence trimmed (16 ms removed), tail trimmed with 77 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `rustle_grass_1.mp3` | `rustle_grass` | foliage | no | [20 Rustles of dry leaves](https://opengameart.org/content/20-rustles-dry-leaves) | qubodup (Iwan Gabovitch) | CC0 1.0 Universal | `rustle10.flac` | filter: highshelf=g=-4:f=6000; mono, 44.1 kHz; leading silence trimmed (9 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+2.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `rustle_grass_2.mp3` | `rustle_grass` | foliage | no | [20 Rustles of dry leaves](https://opengameart.org/content/20-rustles-dry-leaves) | qubodup (Iwan Gabovitch) | CC0 1.0 Universal | `rustle17.flac` | filter: highshelf=g=-4:f=6000; mono, 44.1 kHz; leading silence trimmed (93 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+1.8 dB gain); encoded to MP3 (112 kbps mono) |
+| `rustle_grass_3.mp3` | `rustle_grass` | foliage | no | [20 Rustles of dry leaves](https://opengameart.org/content/20-rustles-dry-leaves) | qubodup (Iwan Gabovitch) | CC0 1.0 Universal | `rustle09.flac` | filter: highshelf=g=-4:f=6000; mono, 44.1 kHz; leading silence trimmed (57 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-1.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `rustle_bush_1.mp3` | `rustle_bush` | foliage | no | [20 Rustles of dry leaves](https://opengameart.org/content/20-rustles-dry-leaves) | qubodup (Iwan Gabovitch) | CC0 1.0 Universal | `rustle06.flac` | filter: highshelf=g=-4:f=6000; mono, 44.1 kHz; leading silence trimmed (17 ms removed), tail trimmed with 250 ms fade-out; peak-normalised to -3 dBFS (+7.8 dB gain); shortened to 1.10 s; encoded to MP3 (112 kbps mono) |
+| `rustle_bush_2.mp3` | `rustle_bush` | foliage | no | [20 Rustles of dry leaves](https://opengameart.org/content/20-rustles-dry-leaves) | qubodup (Iwan Gabovitch) | CC0 1.0 Universal | `rustle20.flac` | filter: highshelf=g=-4:f=6000; mono, 44.1 kHz; leading silence trimmed (17 ms removed), tail trimmed with 200 ms fade-out; peak-normalised to -3 dBFS (+6.9 dB gain); encoded to MP3 (112 kbps mono) |
+| `amb_wind.mp3` | `amb_wind` | ambience | yes | [Soundscape - Lower Geyser Basin (Strong Wind)](https://www.nps.gov/yell/learn/photosmultimedia/sounds-soundscapes.htm) | National Park Service (NPS / Peter Comley) | Public domain | `yell-040201LowerGeyserBasinWindInTreesBinaural01011.mp3` | cut 97.0-133.0 s of the source; filter: highpass=f=120; stereo, 44.1 kHz; loudness-normalised from -24.6 to -20.0 LUFS (+4.6 dB gain); 0.5 s fade in/out; encoded to MP3 (128 kbps stereo) |
+| `amb_birds.mp3` | `amb_birds` | ambience | yes | [Ambient Bird Sounds](https://opengameart.org/content/ambient-bird-sounds) | isaiah658 | CC0 1.0 Universal | `birds-isaiah658.ogg` | cut 0.7-30.6 s of the source; stereo, 44.1 kHz; loudness-normalised from -23.1 to -19.9 LUFS (+3.1 dB gain); 0.5 s fade in/out; encoded to MP3 (128 kbps stereo) |
+| `amb_night.mp3` | `amb_night` | ambience | yes | [Crickets Ambient Noise - loopable](https://opengameart.org/content/crickets-ambient-noise-loopable) | Wolfgang_ (Ted Kerr) | CC0 1.0 Universal | `crickets.mp3` | cut 0.0-end s of the source; source loop repeated x3 with 20 ms crossfades at the joins; stereo, 44.1 kHz; loudness-normalised from -27.5 to -20.1 LUFS (+7.5 dB gain); 0.5 s fade in/out; encoded to MP3 (128 kbps stereo) |
+| `amb_stream.mp3` | `amb_stream` | ambience | yes | [Park ambiences](https://opengameart.org/content/park-ambiences) | Thimras | CC0 1.0 Universal | `park_ambience_river.wav` | cut 127.0-163.0 s of the source; filter: highpass=f=120; stereo, 44.1 kHz; loudness-normalised from -38.7 to -20.1 LUFS (+18.7 dB gain); 0.5 s fade in/out; encoded to MP3 (128 kbps stereo) |
+| `amb_fire.mp3` | `amb_fire` | ambience | yes | [Fireplace Sound loop](https://opengameart.org/content/fireplace-sound-loop) | PagDev | CC0 1.0 Universal | `fire.wav` | cut 0.5-28.5 s of the source; filter: highpass=f=120,highshelf=g=5:f=2000; stereo, 44.1 kHz; loudness-normalised from -40.9 to -20.7 LUFS (+20.9 dB gain, 2442 sample peaks soft-limited to -6.8 dBFS); 0.5 s fade in/out; encoded to MP3 (128 kbps stereo) |
+| `bird_chirp_1.mp3` | `bird_chirp` | nature | no | [Ambient Bird Sounds](https://opengameart.org/content/ambient-bird-sounds) | isaiah658 | CC0 1.0 Universal | `birds-isaiah658.ogg` | cut 14.895-15.300 s of the source; mono, 44.1 kHz; leading silence trimmed (25 ms removed), tail trimmed with 77 ms fade-out; peak-normalised to -3 dBFS (+2.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `bird_chirp_2.mp3` | `bird_chirp` | nature | no | [Ambient Bird Sounds](https://opengameart.org/content/ambient-bird-sounds) | isaiah658 | CC0 1.0 Universal | `birds-isaiah658.ogg` | cut 21.580-22.160 s of the source; mono, 44.1 kHz; leading silence trimmed (8 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+5.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `bird_chirp_3.mp3` | `bird_chirp` | nature | no | [Ambient Bird Sounds](https://opengameart.org/content/ambient-bird-sounds) | isaiah658 | CC0 1.0 Universal | `birds-isaiah658.ogg` | cut 5.020-5.560 s of the source; mono, 44.1 kHz; leading silence trimmed (46 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+12.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `bird_chirp_4.mp3` | `bird_chirp` | nature | no | [Ambient Bird Sounds](https://opengameart.org/content/ambient-bird-sounds) | isaiah658 | CC0 1.0 Universal | `birds-isaiah658.ogg` | cut 3.550-4.335 s of the source; mono, 44.1 kHz; leading silence trimmed (40 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+3.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `bird_flap_1.mp3` | `bird_flap` | nature | no | [Various Sound Effects](https://opengameart.org/content/various-sound-effects-0) | Spring Spring (Julie Damsgaard) | CC0 1.0 Universal | `snd_flap.wav` | mono, 44.1 kHz; leading silence trimmed (169 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-5.6 dB gain); encoded to MP3 (112 kbps mono) |
+| `bird_flap_2.mp3` | `bird_flap` | nature | no | [Various Sound Effects](https://opengameart.org/content/various-sound-effects-0) | Spring Spring (Julie Damsgaard) | CC0 1.0 Universal | `snd_batwings.wav` | mono, 44.1 kHz; leading silence trimmed (29 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `owl_hoot.mp3` | `owl_hoot` | nature | no | [Spotted Owl (Yosemite National Park)](https://www.nps.gov/subjects/sound/sounds-spotted-owl.htm) | National Park Service | Public domain | `nri-SpottedOwlYOSE.mp3` | cut 0.120-end s of the source; mono, 44.1 kHz; leading silence trimmed (68 ms removed), tail trimmed with 500 ms fade-out; peak-normalised to -3 dBFS (-3.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `frog_croak.mp3` | `frog_croak` | nature | no | [Pig Frog (Everglades National Park)](https://www.nps.gov/subjects/sound/sounds-pigfrog.htm) | National Park Service | Public domain | `nri-PigFrogEvergladesNP.mp3` | cut 0.600-1.400 s of the source; mono, 44.1 kHz; leading silence trimmed (113 ms removed), tail trimmed with 150 ms fade-out; peak-normalised to -3 dBFS (-3.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `bee_buzz.mp3` | `bee_buzz` | nature | no | [Bee (Yosemite National Park)](https://www.nps.gov/subjects/sound/sounds-bee.htm) | National Park Service | Public domain | `nri-BeeYOSE.mp3` | mono, 44.1 kHz; leading silence trimmed (70 ms removed), tail trimmed with 300 ms fade-out; peak-normalised to -3 dBFS (-2.8 dB gain); encoded to MP3 (112 kbps mono) |
+| `water_plop_1.mp3` | `water_plop` | nature | no | [Fantasy Sound Effects (Tinysized SFX)](https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `water-drop-01.wav` | mono, 44.1 kHz; leading silence trimmed (24 ms removed), tail trimmed with 39 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `water_plop_2.mp3` | `water_plop` | nature | no | [Fantasy Sound Effects (Tinysized SFX)](https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `water-drop-02.wav` | mono, 44.1 kHz; leading silence trimmed (40 ms removed), tail trimmed with 73 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `eat_crunch_1.mp3` | `eat_crunch` | pet | no | [Crunch sounds (cucumber)](https://opengameart.org/content/crunch-sounds-cucumber) | cogitollc | CC0 1.0 Universal | `crunch_4.ogg` | mono, 44.1 kHz; leading silence trimmed (30 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+9.9 dB gain); shortened to 0.52 s; encoded to MP3 (112 kbps mono) |
+| `eat_crunch_2.mp3` | `eat_crunch` | pet | no | [Crunch sounds (cucumber)](https://opengameart.org/content/crunch-sounds-cucumber) | cogitollc | CC0 1.0 Universal | `crunch_5.ogg` | mono, 44.1 kHz; leading silence trimmed (157 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+9.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `eat_crunch_3.mp3` | `eat_crunch` | pet | no | [Crunch sounds (cucumber)](https://opengameart.org/content/crunch-sounds-cucumber) | cogitollc | CC0 1.0 Universal | `crunch_2.ogg` | cut 0.180-end s of the source; mono, 44.1 kHz; leading silence trimmed (96 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-0.1 dB gain); shortened to 0.52 s; encoded to MP3 (112 kbps mono) |
+| `eat_gulp_1.mp3` | `eat_gulp` | pet | no | [Sound Effects Pack](https://opengameart.org/content/sound-effects-pack) | OwlishMedia | CC0 1.0 Universal | `gulp1.wav` | mono, 44.1 kHz; leading silence trimmed (108 ms removed), tail trimmed with 68 ms fade-out; peak-normalised to -3 dBFS (+8.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `eat_gulp_2.mp3` | `eat_gulp` | pet | no | [Sound Effects Pack](https://opengameart.org/content/sound-effects-pack) | OwlishMedia | CC0 1.0 Universal | `gulp2.wav` | mono, 44.1 kHz; leading silence trimmed (37 ms removed), tail trimmed with 56 ms fade-out; peak-normalised to -3 dBFS (+5.5 dB gain); encoded to MP3 (112 kbps mono) |
+| `pet_jump.mp3` | `pet_jump` | pet | no | [Various Sound Effects](https://opengameart.org/content/various-sound-effects-0) | Spring Spring (Julie Damsgaard) | CC0 1.0 Universal | `snd_sproing.wav` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 160 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); shortened to 0.56 s; encoded to MP3 (112 kbps mono) |
+| `pet_land.mp3` | `pet_land` | pet | no | [Fantasy Sound Effects (Tinysized SFX)](https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `boots-leather-jump-01.wav` | mono, 44.1 kHz; leading silence trimmed (31 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `pet_happy_1.mp3` | `pet_happy` | pet | no | [80 CC0 creature SFX](https://opengameart.org/content/80-cc0-creature-sfx) | rubberduck | CC0 1.0 Universal | `cute_08.ogg` | mono, 44.1 kHz; leading silence trimmed (35 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+5.4 dB gain); encoded to MP3 (112 kbps mono) |
+| `pet_happy_2.mp3` | `pet_happy` | pet | no | [80 CC0 creature SFX](https://opengameart.org/content/80-cc0-creature-sfx) | rubberduck | CC0 1.0 Universal | `cute_05.ogg` | mono, 44.1 kHz; leading silence trimmed (30 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+2.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `pet_purr.mp3` | `pet_purr` | pet | no | [Cat Purr & Meow](https://opengameart.org/content/cat-purr-meow) | Kerzoven | CC0 1.0 Universal | `cat_purractive_loop.wav` | cut 1.000-4.200 s of the source; filter: highpass=f=30; mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 350 ms fade-out; peak-normalised to -3 dBFS (+1.2 dB gain); shortened to 3.00 s; encoded to MP3 (112 kbps mono) |
+| `pet_snore.mp3` | `pet_snore` | pet | no | [80 CC0 creture SFX #2](https://opengameart.org/content/80-cc0-creture-sfx-2) | rubberduck | CC0 1.0 Universal | `snore_02.ogg` | mono, 44.1 kHz; leading silence trimmed (40 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-0.3 dB gain); encoded to MP3 (112 kbps mono) |
+| `voice_a.mp3` | `voice_a` | voice | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `pluck_001.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 25 ms fade-out; peak-normalised to -8 dBFS (-11.4 dB gain); encoded to MP3 (112 kbps mono) |
+| `voice_b.mp3` | `voice_b` | voice | no | [UI Sound Effects (Button Clicks, User Feedback, Notifications)](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications) | Robin Lamb | CC0 1.0 Universal | `click_3.wav` | mono, 44.1 kHz; leading silence trimmed (20 ms removed), tail trimmed with 40 ms fade-out; peak-normalised to -8 dBFS (-7.4 dB gain); shortened to 0.12 s; encoded to MP3 (112 kbps mono) |
+| `voice_c.mp3` | `voice_c` | voice | no | [Various Sound Effects](https://opengameart.org/content/various-sound-effects-0) | Spring Spring (Julie Damsgaard) | CC0 1.0 Universal | `snd_npc_message.wav` | mono, 44.1 kHz; leading silence trimmed (1 ms removed), tail trimmed with 20 ms fade-out; peak-normalised to -8 dBFS (-10.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `voice_d.mp3` | `voice_d` | voice | no | [Squeaky Rat](https://opengameart.org/content/squeaky-rat) | qubodup (Iwan Gabovitch) | CC0 1.0 Universal | `qubodupSqueakyRatPain.flac` | mono, 44.1 kHz; leading silence trimmed (2 ms removed), tail trimmed with 30 ms fade-out; peak-normalised to -8 dBFS (-7.5 dB gain); shortened to 0.12 s; encoded to MP3 (112 kbps mono) |
+| `voice_e.mp3` | `voice_e` | voice | no | [Various Sound Effects](https://opengameart.org/content/various-sound-effects-0) | Spring Spring (Julie Damsgaard) | CC0 1.0 Universal | `bup.wav` | mono, 44.1 kHz; leading silence trimmed (6 ms removed), tail trimmed with 40 ms fade-out; peak-normalised to -8 dBFS (-6.4 dB gain); shortened to 0.12 s; encoded to MP3 (112 kbps mono) |
+| `place_item.mp3` | `place_item` | garden | no | [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `bookPlace1.ogg` | mono, 44.1 kHz; leading silence trimmed (26 ms removed), tail trimmed with 52 ms fade-out; peak-normalised to -3 dBFS (-6.3 dB gain); encoded to MP3 (112 kbps mono) |
+| `pickup_item.mp3` | `pickup_item` | garden | no | [Pop sounds](https://opengameart.org/content/pop-sounds) | cogitollc | CC0 1.0 Universal | `pop5.ogg` | mono, 44.1 kHz; leading silence trimmed (6 ms removed), tail trimmed with 37 ms fade-out; peak-normalised to -3 dBFS (-4.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `rotate_item.mp3` | `rotate_item` | garden | no | [Interface Sounds](https://opengameart.org/content/interface-sounds) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `tick_002.ogg` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 8 ms fade-out; peak-normalised to -3 dBFS (-0.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `plant_dig.mp3` | `plant_dig` | garden | no | [Different steps on wood, stone, leaves, gravel and mud](https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud) | TinyWorlds | CC0 1.0 Universal | `gravel.ogg` | mono, 44.1 kHz; leading silence trimmed (6 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+10.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `timer_start.mp3` | `timer_start` | timer | no | [Bell dings/chimes](https://opengameart.org/content/bell-dingschimes) | PWL | CC0 1.0 Universal | `bell_ding1.wav` | mono, 44.1 kHz; leading silence trimmed (37 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-5.3 dB gain); encoded to MP3 (112 kbps mono) |
+| `timer_done.mp3` | `timer_done` | timer | no | [Bell Arpeggio 24](https://opengameart.org/content/bell-arpeggio-24) | cynicmusic (The Cynic Project) | CC0 1.0 Universal | `24.wav` | mono, 44.1 kHz; leading silence trimmed (2 ms removed), tail trimmed with 300 ms fade-out; peak-normalised to -3 dBFS (-5.5 dB gain); encoded to MP3 (112 kbps mono) |
+| `alarm_musicbox.mp3` | `alarm_musicbox` | alarm | yes | [4 Music Box Tracks](https://opengameart.org/content/4-music-box-tracks) | Aureolus_Omicron | CC0 1.0 Universal | `musicbox4_happy_polka.ogg` | cut 0.00-8.63 s of the source; first 4 bars (112 BPM, 4/4; bar length from the MIDI file in the same submission); stereo, 44.1 kHz; seamless loop: the last 0.06 s of the cut were crossfaded (equal-power, ffmpeg acrossfade c1=c2=qsin) into its first 0.06 s, giving a 8.57 s loop with no fade-in/out; peak-normalised to -3 dBFS (+6.1 dB gain); encoded to MP3 (128 kbps stereo) |
+| `alarm_kalimba.mp3` | `alarm_kalimba` | alarm | yes | [Short kalimba loop](https://opengameart.org/content/short-kalimba-loop) | extenz | CC0 1.0 Universal | `Kalimba.ogg` | cut 0.00-11.77 s of the source; first 4 bars (the 46.84 s file is the 8-bar, 23.42 s phrase played twice); stereo, 44.1 kHz; seamless loop: the last 0.06 s of the cut were crossfaded (equal-power, ffmpeg acrossfade c1=c2=qsin) into its first 0.06 s, giving a 11.71 s loop with no fade-in/out; peak-normalised to -3 dBFS (-0.6 dB gain); encoded to MP3 (128 kbps stereo) |
+| `alarm_birds.mp3` | `alarm_birds` | alarm | yes | [Dawn Chorus (Yellowstone National Park)](https://www.nps.gov/yell/learn/photosmultimedia/sounds-dawnchorus.htm) | National Park Service (NPS / Jennifer Jerrett) | Public domain | `yell-YELLDawnChorus.mp3` | cut 43.25-58.25 s of the source; filter: highpass=f=150; mono, 44.1 kHz; seamless loop: the last 1 s of the cut were crossfaded (equal-power, ffmpeg acrossfade c1=c2=qsin) into its first 1 s, giving a 14.00 s loop with no fade-in/out; peak-normalised to -3 dBFS (+11.3 dB gain); encoded to MP3 (112 kbps mono) |
+| `alarm_bells.mp3` | `alarm_bells` | alarm | yes | [Happy Lullaby (song17)](https://opengameart.org/content/happy-lullaby-song17) | cynicmusic (The Cynic Project) | CC0 1.0 Universal | `song17.mp3` | cut 0.00-9.66 s of the source; first 4 bars (100 BPM); stereo, 44.1 kHz; seamless loop: the last 0.06 s of the cut were crossfaded (equal-power, ffmpeg acrossfade c1=c2=qsin) into its first 0.06 s, giving a 9.60 s loop with no fade-in/out; peak-normalised to -3 dBFS (-0.9 dB gain); encoded to MP3 (128 kbps stereo) |
+| `breath_in.mp3` | `breath_in` | breath | no | [Chimey UI Sounds](https://opengameart.org/content/chimey-ui-sounds) | MouseBYTE | CC0 1.0 Universal | `Chime_Load.mp3` | mono, 44.1 kHz; leading silence trimmed (70 ms removed), tail trimmed with 250 ms fade-out; peak-normalised to -3 dBFS (+0.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `breath_out.mp3` | `breath_out` | breath | no | [Chimey UI Sounds](https://opengameart.org/content/chimey-ui-sounds) | MouseBYTE | CC0 1.0 Universal | `Chime_Exit.mp3` | mono, 44.1 kHz; leading silence trimmed (165 ms removed), tail trimmed with 300 ms fade-out; peak-normalised to -3 dBFS (+2.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `breath_hold.mp3` | `breath_hold` | breath | no | [UI Sound Effects (Button Clicks, User Feedback, Notifications)](https://opengameart.org/content/ui-sound-effects-button-clicks-user-feedback-notifications) | Robin Lamb | CC0 1.0 Universal | `Ding.wav` | filter: lowpass=f=7000; mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 150 ms fade-out; peak-normalised to -3 dBFS (+9.9 dB gain); encoded to MP3 (112 kbps mono) |
+| `bowl.mp3` | `bowl` | breath | no | [Singing Bowl Improvisation](https://archive.org/details/SingingBowlImprovisation) | luke jones | Public domain | `bowls.mp3` | cut 70.21-79.76 s of the source; mono, 44.1 kHz; leading silence trimmed (8 ms removed), tail trimmed with 2500 ms fade-out; peak-normalised to -3 dBFS (+18.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `amb_rain.mp3` | `amb_rain` | ambient | yes | [AMB Rain Loop 2](https://opengameart.org/content/amb-rain-loop-2) | Kresiek The Furry | CC0 1.0 Universal | `amb_rain2.flac` | cut 624.00-687.00 s of the source; filter: highpass=f=60; stereo, 44.1 kHz; seamless loop: the last 3 s of the cut were crossfaded (equal-power, ffmpeg acrossfade c1=c2=qsin) into its first 3 s, giving a 60.00 s loop with no fade-in/out; loudness-normalised from -22.7 to -20.0 LUFS (+2.7 dB gain); encoded to MP3 (128 kbps stereo) |
+| `amb_waves.mp3` | `amb_waves` | ambient | yes | [Early Morning Summer Sounds (San Francisco Maritime National Historical Park)](https://www.nps.gov/nps-audiovideo/legacy/mp3/pwr/avElement/safr-130718-084230-AquaticParkWavesCloseUpedit1min.mp3) | National Park Service (NPS / Kristal Ip) | Public domain | `safr-130718-084230-AquaticParkWavesCloseUpedit1min.mp3` | cut 3.75-62.75 s of the source; filter: highpass=f=150,highpass=f=150; stereo, 44.1 kHz; seamless loop: the last 3 s of the cut were crossfaded (equal-power, ffmpeg acrossfade c1=c2=qsin) into its first 3 s, giving a 56.00 s loop with no fade-in/out; loudness-normalised from -27.6 to -24.7 LUFS (+2.9 dB gain, limited by the -3 dBFS peak ceiling); encoded to MP3 (128 kbps stereo) |
+| `amb_brown.mp3` | `amb_brown` | ambient | yes | [Hurricane Vent (Yellowstone National Park)](https://www.nps.gov/yell/learn/photosmultimedia/sounds-hurricanevent.htm) | National Park Service (NPS / Peter Comley) | Public domain | `yell-050101NorrisGeyserBasinPorcelainBasinOverlookingHurricaneVentBinaural0101.mp3` | cut 10.00-73.00 s of the source; filter: highpass=f=30,lowpass=f=4000; stereo, 44.1 kHz; seamless loop: the last 3 s of the cut were crossfaded (equal-power, ffmpeg acrossfade c1=c2=qsin) into its first 3 s, giving a 60.00 s loop with no fade-in/out; loudness-normalised from -29.6 to -20.0 LUFS (+9.6 dB gain); encoded to MP3 (128 kbps stereo) |
+| `amb_forest_night.mp3` | `amb_forest_night` | ambient | yes | [Barred Owl (Weir Farm National Historical Park)](https://www.nps.gov/nps-audiovideo/audiovideo/5170e4f6-aeca-430d-b8ef-bdf9e28622b3.mp3) | National Park Service (NPS Natural Sounds and Night Skies Division / Emma Brown) | Public domain | `5170e4f6-aeca-430d-b8ef-bdf9e28622b3.mp3` | cut 80.25-143.25 s of the source; filter: highpass=f=200; mono, 44.1 kHz; seamless loop: the last 3 s of the cut were crossfaded (equal-power, ffmpeg acrossfade c1=c2=qsin) into its first 3 s, giving a 60.00 s loop with no fade-in/out; loudness-normalised from -44.3 to -22.0 LUFS (+22.3 dB gain); encoded to MP3 (96 kbps mono) |
+| `music_lullaby.mp3` | `music_lullaby` | music | yes | [4 Music Box Tracks](https://opengameart.org/content/4-music-box-tracks) | Aureolus_Omicron | CC0 1.0 Universal | `musicbox2_cute_tune.ogg` | cut 68.57 s-end of the source; second half of the file = one full 32-bar pass of the tune (the looping OGG plays it twice); stereo, 44.1 kHz; kept as the author's seamless loop (68.57 s, no fades added); peak-normalised to -6 dBFS (-4.5 dB gain; -19.5 LUFS); encoded to MP3 (128 kbps stereo) |
+| `music_cozy.mp3` | `music_cozy` | music | yes | [A Small Fire Will Do (Calming Loop)](https://opengameart.org/content/a-small-fire-will-do-calming-loop) | Trex0n (Cal McEachern) | CC0 1.0 Universal | `a_small_fire_will_do.wav` | whole track; stereo, 44.1 kHz; kept as the author's seamless loop (64.00 s, no fades added); peak-normalised to -6 dBFS (+1.3 dB gain; -20.8 LUFS); encoded to MP3 (128 kbps stereo) |
+| `music_breath.mp3` | `music_breath` | music | yes | [Heavenly Loop](https://opengameart.org/content/heavenly-loop) | isaiah658 | CC0 1.0 Universal | `Heavenly Loop.ogg` | whole track; stereo, 44.1 kHz; kept as the author's seamless loop (33.65 s, no fades added); normalised to -18.0 LUFS (+5.9 dB gain; peak -6.0 dBFS); encoded to MP3 (128 kbps stereo) |
+| `clock_tick_1.mp3` | `clock_tick` | foley | no | [Ticking clock.](https://opengameart.org/content/ticking-clock) | bart | CC0 1.0 Universal | `ticking clock - tick3.wav` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 30 ms fade-out; peak-normalised to -3 dBFS (+7.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `clock_tick_2.mp3` | `clock_tick` | foley | no | [Ticking clock.](https://opengameart.org/content/ticking-clock) | bart | CC0 1.0 Universal | `ticking clock - tick4.wav` | mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 30 ms fade-out; peak-normalised to -3 dBFS (+5.2 dB gain); encoded to MP3 (112 kbps mono) |
+| `clock_wind.mp3` | `clock_wind` | foley | no | [Clock Wind Sounds](https://opengameart.org/content/clock-wind-sounds) | BMacZero (Brian MacIntosh) | CC0 1.0 Universal | `multiwind2.wav` | filter: highpass=f=200; mono, 44.1 kHz; leading silence trimmed (29 ms removed), tail trimmed with 50 ms fade-out; peak-normalised to -3 dBFS (+8.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `paper_flip_1.mp3` | `paper_flip` | foley | no | [Book Flip Sounds](https://opengameart.org/content/book-flip-sounds) | Voltiment555 | CC0 1.0 Universal | `BookFlip2.wav` | filter: highpass=f=120; mono, 44.1 kHz; leading silence trimmed (8 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-1.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `paper_flip_2.mp3` | `paper_flip` | foley | no | [Book Flip Sounds](https://opengameart.org/content/book-flip-sounds) | Voltiment555 | CC0 1.0 Universal | `BookFlip12.wav` | filter: highpass=f=120; mono, 44.1 kHz; leading silence trimmed (38 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-2.4 dB gain); encoded to MP3 (112 kbps mono) |
+| `pencil.mp3` | `pencil` | foley | no | [Sound Effects Pack](https://opengameart.org/content/sound-effects-pack) | OwlishMedia | CC0 1.0 Universal | `pencil-scratch-1.wav` | cut 1.50-2.35 s of the source; filter: highpass=f=300; mono, 44.1 kHz; leading silence trimmed (140 ms removed), tail trimmed with 120 ms fade-out; peak-normalised to -3 dBFS (+13.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `stamp.mp3` | `stamp` | foley | no | [202 More Sound Effects](https://opengameart.org/content/202-more-sound-effects) | OwlishMedia | CC0 1.0 Universal | `Stationery_17.wav` | mono, 44.1 kHz; leading silence trimmed (17 ms removed), tail trimmed with 50 ms fade-out; peak-normalised to -3 dBFS (+3.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `drawer.mp3` | `drawer` | foley | no | [Various Sound Effects](https://opengameart.org/content/various-sound-effects) | laleksic | CC0 1.0 Universal | `drawer_open.wav` | filter: highpass=f=60; mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+12.6 dB gain); encoded to MP3 (112 kbps mono) |
+| `fabric_1.mp3` | `fabric` | foley | no | [Sound Effects Pack](https://opengameart.org/content/sound-effects-pack) | OwlishMedia | CC0 1.0 Universal | `320144__owlstorm__blanket-movement-6.wav` | filter: highpass=f=100; mono, 44.1 kHz; leading silence trimmed (41 ms removed), tail trimmed with 100 ms fade-out; peak-normalised to -3 dBFS (+15.6 dB gain); encoded to MP3 (112 kbps mono) |
+| `fabric_2.mp3` | `fabric` | foley | no | [Sound Effects Pack](https://opengameart.org/content/sound-effects-pack) | OwlishMedia | CC0 1.0 Universal | `320142__owlstorm__blanket-movement-4.wav` | cut 0.15-1.75 s of the source; filter: highpass=f=100; mono, 44.1 kHz; leading silence trimmed (0 ms removed), tail trimmed with 250 ms fade-out; peak-normalised to -3 dBFS (+14.4 dB gain); encoded to MP3 (112 kbps mono) |
+| `wood_knock_1.mp3` | `wood_knock` | foley | no | [100 CC0 metal and wood SFX](https://opengameart.org/content/100-cc0-metal-and-wood-sfx) | rubberduck | CC0 1.0 Universal | `wood_hit_05.ogg` | mono, 44.1 kHz; leading silence trimmed (51 ms removed), tail trimmed with 40 ms fade-out; peak-normalised to -3 dBFS (-5.5 dB gain); encoded to MP3 (112 kbps mono) |
+| `wood_knock_2.mp3` | `wood_knock` | foley | no | [100 CC0 metal and wood SFX](https://opengameart.org/content/100-cc0-metal-and-wood-sfx) | rubberduck | CC0 1.0 Universal | `wood_hit_09.ogg` | mono, 44.1 kHz; leading silence trimmed (17 ms removed), tail trimmed with 40 ms fade-out; peak-normalised to -3 dBFS (-6.1 dB gain); encoded to MP3 (112 kbps mono) |
+| `door_creak.mp3` | `door_creak` | foley | no | [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `creak2.ogg` | mono, 44.1 kHz; leading silence trimmed (4 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (+2.6 dB gain); encoded to MP3 (112 kbps mono) |
+| `sparkle_1.mp3` | `sparkle` | reward | no | [Fantasy Accessory SFX Library](https://opengameart.org/content/fantasy-accessory-sfx-library) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `vials-glass-rattle-01.wav` | filter: highpass=f=1000; mono, 44.1 kHz; leading silence trimmed (51 ms removed), tail trimmed with 150 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `sparkle_2.mp3` | `sparkle` | reward | no | [Fantasy Accessory SFX Library](https://opengameart.org/content/fantasy-accessory-sfx-library) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `vials-glass-rattle-02.wav` | filter: highpass=f=1000; mono, 44.1 kHz; leading silence trimmed (45 ms removed), tail trimmed with 150 ms fade-out; peak-normalised to -3 dBFS (-5.3 dB gain); encoded to MP3 (112 kbps mono) |
+| `sparkle_3.mp3` | `sparkle` | reward | no | [Fantasy Accessory SFX Library](https://opengameart.org/content/fantasy-accessory-sfx-library) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `vials-glass-rattle-03.wav` | filter: highpass=f=1000; mono, 44.1 kHz; leading silence trimmed (15 ms removed), tail trimmed with 150 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `wings_flutter_1.mp3` | `wings_flutter` | foley | no | [RPG Audio ("50 RPG sound effects")](https://opengameart.org/content/50-rpg-sound-effects) | Kenney (www.kenney.nl) | CC0 1.0 Universal | `cloth1.ogg` | mono, 44.1 kHz; leading silence trimmed (29 ms removed), tail trimmed with 80 ms fade-out; peak-normalised to -3 dBFS (-2.0 dB gain); encoded to MP3 (112 kbps mono) |
+| `wings_flutter_2.mp3` | `wings_flutter` | foley | no | [Sound Effects Pack](https://opengameart.org/content/sound-effects-pack) | OwlishMedia | CC0 1.0 Universal | `flip.wav` | filter: highpass=f=120; mono, 44.1 kHz; leading silence trimmed (326 ms removed), tail trimmed with 100 ms fade-out; peak-normalised to -3 dBFS (+5.7 dB gain); encoded to MP3 (112 kbps mono) |
+| `yawn.mp3` | `yawn` | foley | no | [Sound Effects Pack](https://opengameart.org/content/sound-effects-pack) | OwlishMedia | CC0 1.0 Universal | `yawn1.wav` | pitch raised 4 semitones by resampling (asetrate, also 26% faster); mono, 44.1 kHz; leading silence trimmed (92 ms removed), tail trimmed with 200 ms fade-out; peak-normalised to -3 dBFS (+20.3 dB gain); encoded to MP3 (112 kbps mono) |
+| `coin_purse.mp3` | `coin_purse` | foley | no | [Fantasy Accessory SFX Library](https://opengameart.org/content/fantasy-accessory-sfx-library) | Vehicle (Jan Schupke) | CC0 1.0 Universal | `coins-shake-02.wav` | mono, 44.1 kHz; leading silence trimmed (57 ms removed), tail trimmed with 100 ms fade-out; peak-normalised to -3 dBFS (-6.0 dB gain); encoded to MP3 (112 kbps mono) |
+
+## How licenses were verified
+
+All checks were made on **2026-11-10** (first 88 files) and **2026-11-20** (35 added files) from the build environment, by downloading each source page and each archive and reading them directly. Nothing below relies on a search-result filter or on a third-party summary.
+
+### OpenGameArt.org submissions (CC0)
+
+- For every submission used, the submission page itself was downloaded and its **`License(s)`** field was read. A source was accepted only when that field lists **CC0 and nothing else**, with the label linking to `http://creativecommons.org/publicdomain/zero/1.0/`. Submissions offering several licenses, or CC-BY / OGA-BY / CC-BY-SA / GPL, were not used.
+- The exact field found on each page (label and link), the page's own "Copyright/Attribution Notice", the posting date, and sha256 hashes of the page copy and of the downloaded source files are recorded in `public/sfx/licenses/source-license-evidence.json`. The generator of this document refuses to run if any of those pages lists a license other than CC0.
+- Where an archive ships its own license file, that file was read too and is copied verbatim into `public/sfx/licenses/`:
+  - **Kenney** – *Interface Sounds* `License.txt`: "License: (Creative Commons Zero, CC0) … This content is free to use in personal, educational and commercial projects. Support us by crediting Kenney or www.kenney.nl (this is not mandatory)". *RPG Audio* and *Music Jingles* `license.txt`: "License (CC0) … You may use these graphics in personal and commercial projects. Credit (Kenney or www.kenney.nl) would be nice but is not mandatory."
+  - **Vehicle** – *Tinysized SFX* `readme.txt`: "Distributed under Creative Commons Zero".
+  - **qubodup** – *Squeaky Rat* `notes.txt`: "released under CC0. The sounds used to create these were under CC0 at the time of creation."
+  - **Vehicle** – *Fantasy Accessory SFX Library* `readme.txt` (added 2026-11-20): "Distributed under Creative Commons Zero".
+- The Kenney packs were taken from Kenney's own uploads on OpenGameArt (author account "Kenney"), because `kenney.nl` answered HTTP 403 to this environment. They are the same packs, with Kenney's license file inside each zip.
+
+### U.S. National Park Service recordings (public domain)
+
+- Eight recordings come from nps.gov: `amb_wind.mp3`, `owl_hoot.mp3`, `bee_buzz.mp3`, `frog_croak.mp3` (2026-11-10) and `alarm_birds.mp3`, `amb_brown.mp3`, `amb_waves.mp3`, `amb_forest_night.mp3` (2026-11-20). They are **public domain, not CC0**.
+- Yellowstone Sound Library page (`https://www.nps.gov/yell/learn/photosmultimedia/soundlibrary.htm`) states: "The files available here were recorded in the park and are in the public domain. They may be downloaded and used without limitation; however, please credit the "National Park Service" where appropriate."
+- NPS Natural Sounds – Sound Gallery page (`https://www.nps.gov/subjects/sound/gallery.htm`) states: "The files are in the public domain and may be downloaded. Enjoy, and please give the appropriate credit."
+- Each recording's own page was read for its credit line (wind: "NPS/Peter Comley"; owl, bee, pig frog: "NPS"). The statements and page entries are quoted in `public/sfx/licenses/nps_*_public-domain-statement.txt`.
+- **Requested credit:** "National Park Service". It is a courtesy request, not a license condition; the suggested credits line above includes it.
+- 2026-11-20: `alarm_birds.mp3` (Dawn Chorus, credit "NPS/Jennifer Jerrett") and `amb_brown.mp3` (Hurricane Vent, credit "NPS/Peter Comley") come from the same Yellowstone Sound Library, whose statement was re-read that day (page unchanged).
+- 2026-11-20: `amb_waves.mp3` and `amb_forest_night.mp3` come from the NPS multimedia library, found through the NPS audio API (`developer.nps.gov/api/v1/multimedia/audio`). They are not on a library page with its own public-domain statement, so they were accepted only because their media records credit the NPS itself ("NPS, Kristal Ip", San Francisco Maritime NHP; "NSNSD / Emma Brown", Weir Farm NHP, NSNSD being the NPS Natural Sounds and Night Skies Division), and the NPS website disclaimer (`https://www.nps.gov/aboutus/disclaimer.htm`) states: "material created by the National Park Service and presented on this website, unless otherwise indicated, is generally considered in the public domain." The records and the disclaimer are quoted in `public/sfx/licenses/nps_multimedia-library_public-domain-statement.txt`. Recordings in that library credited to outside people (e.g. university or private recordists) were not used.
+
+### Internet Archive recording (public-domain dedication)
+
+- `bowl.mp3` is cut from *Singing Bowl Improvisation* (`https://archive.org/details/SingingBowlImprovisation`, creator "luke jones", added 2008-07-08, description "Short back garden singing bowl improv."). The item's `licenseurl` is `http://creativecommons.org/licenses/publicdomain/`, which resolves to the Creative Commons "Copyright-Only Dedication (based on United States law) or Public Domain Certification 1.0" deed. That is a public-domain dedication, not CC0; Creative Commons retired the tool in 2010 but dedications made with it still apply. The metadata and a deed excerpt are in `public/sfx/licenses/archive-org_singing-bowl-improvisation_public-domain-dedication.txt`.
+
+### What could not be checked
+
+- `kenney.nl`, `freesound.org` and `cdn.freesound.org` returned HTTP 403 from the sites themselves, so no file was taken from them and no page on them was read.
+- Two OpenGameArt submissions say they are derived from Freesound uploads: *Fantozzi's Footsteps* (page text: taken from Fantozzi's Freesound pack 10338 "under CC0") and *Squeaky Rat* (`notes.txt`: based on Freesound sounds that "were under CC0 at the time of creation"). The CC0 grant read here is the one on the OpenGameArt page / in the archive; the original Freesound pages could not be re-checked.
+- *UI Sound Effects* by Robin Lamb says its sounds come from the public-domain sample libraries VCSL and VSCO 2 CE; those libraries' own pages were not read. The CC0 grant read is the OpenGameArt one.
+- 2026-11-20: `freesound.org` pages loaded (downloads still need a login), so the upstream pages of the two OwlStorm blanket recordings used for `fabric_1/2` were read (Freesound 320144 and 320142: "Creative Commons 0").
+- `archive.org` licences are set by the uploader and are not reviewed by the site, the same trust model as OpenGameArt. Only one archive.org item is used (`bowl.mp3`). `commons.wikimedia.org` answered HTTP 429 and was not used.
+- `freesound.org`, `kenney.nl` and `pixabay.com` files were not downloaded (login wall / HTTP 403).
+
+### Origin of the sounds
+
+- Nothing in this set was generated with an AI model or synthesised in code by this project.
+- The sources are a mix of field/foley recordings (footsteps, rustles, water, crunches, birds, stream, fire, crickets, owl, bee, frog, cat, coins, paper) and human-made sound design with instruments or synthesizers (Kenney's interface tones and jingles, the chimes, the win jingle, the magic and power-up sounds), as described by their authors on the source pages.
+- Whether an uploader used generative tools cannot be proven from a web page. Of the 32 OpenGameArt submissions used, 27 were posted between 2010 and 2022. The five newer ones are *Chimey UI Sounds* (2024, "I decided to make my own"), *Kalimba Two-Notes* (2024, "two notes played on a kalimba"), *Various Sound Effects* (2024, "scraps from various old unfinished projects") and *Power-Up Sound Effects* (2024) by Spring Spring, and *Elevator ding* (2025, "made using some synth in Garage Band"). The four NPS files are field recordings.
+- 2026-11-20 additions. Field recordings: rain (*AMB Rain Loop 2*, "Recorded on a GoPro Hero 12 Black", 2025) and the four NPS recordings. Acoustic instrument recording: the singing bowl (2008). Foley recordings: clock ticks (2011), clock winding (2020), book pages (2017), pencil, blankets, cloth flip, yawn (OwlishMedia, 2018), stationery thump (2018), drawer ("recorded on my phone", 2022), wood knocks (2018), door creak and cloth flap (Kenney, 2014), glass vials and coins ("All sounds are organic and unprocessed", 2015). Music: *Happy Lullaby* (2013), *Heavenly Loop* ("made using only ZynAddSubFX in LMMS", 2017), *Short kalimba loop* (2017), *A Small Fire Will Do* (2021), *4 Music Box Tracks* (2022, published by the author as MIDI files plus looping OGG renders; tags "music box", "celesta"). Sound design: *Chimey UI Sounds* (2024, "I decided to make my own") for `breath_in`/`breath_out`; the VCSL-derived `Ding.wav` (Robin Lamb) for `breath_hold`.
+- Of the 2026-11-20 sources, two OpenGameArt submissions were posted after 2022: *Chimey UI Sounds* (2024) and *AMB Rain Loop 2* (2025, a GoPro field recording). Nothing was generated or synthesised by this project.
+
+## Notes for maintainers
+
+- Sounds were chosen by reading file names and descriptions and by measuring duration, envelope, pitch contour and spectrum. They were **not auditioned by ear**, so a listening pass is worth doing; `manifest.json` gains are suggestions derived from measured loudness.
+- One-shots: mono, 44.1 kHz, 112 kbps MP3, leading silence trimmed, peak about -3 dBFS (`ui_type` and `voice_*` about -8 dBFS). Loops: stereo, 44.1 kHz, 128 kbps MP3, about -20 LUFS, 0.5 s fade in and out (the app is expected to crossfade).
+- `pet_purr.mp3` is a real cat purr with almost all of its energy below 300 Hz; it is quiet on phone speakers.
+- `amb_night.mp3` is an 11.5 s seamless cricket loop repeated three times; `amb_birds.mp3` contains natural pauses between calls.
+- Some slots reuse a pack sound under a different role than its file name suggests (for example `ui_error` is Kenney's `question_004`, `plant_dig` is a gravel step, `voice_d` is a short rat squeak). The table above lists every original file.
+- 2026-11-20 additions: categories `alarm`, `breath`, `ambient`, `music`, `foley` and `reward` (sparkle). The new soundscapes use `ambient` as requested; the older `amb_*` ids still use `ambience`, so code that filters by category should accept both (or rename one of them).
+- Loops (`alarm_*`, new `amb_*`, `music_*`) have `loop: true` and **no fade-in/out**. Soundscapes and `alarm_birds` were made seamless by crossfading the last 1-3 s of the cut into its first 1-3 s (equal-power, ffmpeg `acrossfade`); `alarm_musicbox`, `alarm_kalimba` and `alarm_bells` are cut to whole bars (4 bars) with a 60 ms crossfade; `music_*` are the authors' own loops, kept whole. MP3 adds ~25 ms of encoder delay/padding: Chrome and Firefox remove it using the LAME header written by ffmpeg, Safari may not; if a gap is audible, play the decoded buffer with `loop = true` and `loopEnd` set to the length given in the edits column, or crossfade two players.
+- Loudness: soundscapes about -20 LUFS (`amb_forest_night` -22 LUFS; `amb_waves` only reaches -24.7 LUFS under the -3 dBFS peak ceiling because of wave splashes, so its manifest gain is higher, 0.55); music peaks at -6 dBFS (about -19 to -21 LUFS, `music_breath` -18 LUFS); alarms and one-shots peak at -3 dBFS. `breath_hold` is meant to be very soft (gain 0.22).
+- `yawn.mp3` is a human yawn (OwlishMedia) raised 4 semitones so it reads as a small creature; the only CC0 creature yawn found (`as_d_yawn.wav` in *NHFEA: Sound*) is low and growly by measurement, so it was not used. `sparkle_1..3` are glass vials clinking (Vehicle), high-passed at 1 kHz. `wings_flutter_1/2` are cloth flaps (Kenney `cloth1`, OwlishMedia `flip`), chosen because they are softer than the existing `bird_flap`. `stamp.mp3` is an unlabelled thump from OwlishMedia's stationery set (`Stationery_17.wav`).
+- `music_lullaby` (*cute tune*) and `alarm_musicbox` (*happy polka*) are different tracks from the same music-box pack, so the bedtime tune is never the wake-up tune.
