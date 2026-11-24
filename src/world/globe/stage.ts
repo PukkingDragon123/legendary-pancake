@@ -198,14 +198,14 @@ export class GlobeStage implements Stage {
       vertexShader: S.earthVS, fragmentShader: S.earthFS,
       uniforms: { ...shared, tDay: { value: sea }, tTopo: { value: black }, tTile: { value: black }, uTileBox: { value: new THREE.Vector4(0, 0, 1, 1) }, uTileMix: { value: 0 }, uBump: { value: 0.0065 }, uNear: { value: 0 } },
     });
-    const earth = new THREE.Mesh(new THREE.SphereGeometry(1, 384, 192), this.earthMat);
+    const earth = new THREE.Mesh(new THREE.SphereGeometry(1, 288, 144), this.earthMat);
     this.world.add(earth);
     this.cloudMat = new THREE.ShaderMaterial({ vertexShader: S.earthVS, fragmentShader: S.cloudFS, uniforms: shared, transparent: true, depthWrite: false });
-    const clouds = new THREE.Mesh(new THREE.SphereGeometry(1.006, 256, 128), this.cloudMat);
+    const clouds = new THREE.Mesh(new THREE.SphereGeometry(1.006, 192, 96), this.cloudMat);
     clouds.renderOrder = 2;
     this.world.add(clouds);
     this.atmoMat = new THREE.ShaderMaterial({ vertexShader: S.atmoVS, fragmentShader: S.atmoFS, uniforms: { uSun: shared.uSun, uGain: { value: 0.78 } }, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending });
-    const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.065, 128, 64), this.atmoMat);
+    const atmo = new THREE.Mesh(new THREE.SphereGeometry(1.065, 96, 48), this.atmoMat);
     atmo.renderOrder = 5;
     this.world.add(atmo);
 

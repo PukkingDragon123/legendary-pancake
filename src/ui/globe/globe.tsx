@@ -175,16 +175,21 @@ export function GlobePanel() {
       if (!el || !lbl || !flags.has(p.id)) continue;
       let lw = lblW.get(p.id);
       if (!lw) { lw = lbl.offsetWidth; if (lw) lblW.set(p.id, lw); }
-      const w = (lw || 80) + 4;
-      let x0 = p.x - w / 2;
-      const shift = Math.max(4 - x0, 0) + Math.min(innerWidth - 4 - (x0 + w), 0);
-      x0 += shift;
-      const box: Box = [x0, p.y + 2, x0 + w, p.y + 24];
-      let free = p.id === selId;
-      if (!free && p.facing > 0.18) free = !taken.some((b) => hit(box, b)) && ![...flags].some(([id, b]) => id !== p.id && hit(box, b));
-      lbl.style.visibility = free ? 'visible' : 'hidden';
-      lbl.style.marginLeft = `${Math.round(shift)}px`;
-      if (free) taken.push(box);
+      const w = (lw || 80) + 2, h = 20;
+      // under the flag, else beside it (right, then left), kept on screen
+      const fits = (b: Box) => !taken.some((t) => hit(b, t)) && ![...flags].some(([id, f]) => id !== p.id && hit(b, f));
+      const cands: Box[] = [[p.x - w / 2, p.y + 2], [p.x + 13, p.y - 26], [p.x - 9 - w, p.y - 26]].map(([x, y]) => {
+        const s = Math.max(4 - x, 0) + Math.min(innerWidth - 4 - (x + w), 0);
+        return [x + s, y, x + s + w, y + h] as Box;
+      });
+      let box: Box | undefined = p.facing > 0.18 ? cands.find(fits) : undefined;
+      if (!box && p.id === selId) box = cands[0];
+      lbl.style.visibility = box ? 'visible' : 'hidden';
+      if (box) {
+        lbl.style.left = `${Math.round(box[0] - (p.x - 3.5 * px))}px`;
+        lbl.style.top = `${Math.round(box[1] - (p.y - (PIN_H - 0.5) * px))}px`;
+        taken.push(box);
+      }
     }
     // the country's name floats over it in the close view
     const c = countryRef.current;
