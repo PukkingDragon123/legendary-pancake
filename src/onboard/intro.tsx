@@ -1,40 +1,41 @@
-// The first-run experience, all in 3D: the loading clock dives into its dial, the camera pulls back out of the very
-// same clock on the wall of Hollow & Co.'s executive office (lamps coming up, dust in the light through the blinds),
-// and Pip, Head of Sleep, looks up from his paperwork. His words float in the room. Each question is a printed form
-// that slides out of the in-tray onto the desk: you tick boxes with the fountain pen, write your name by hand, turn
-// the brass desk clock, slide the brass marker; Pip acts your answers out in little dioramas; every page gets the
-// rubber stamp and goes into the client folder; the last page is a sleep-plan agreement you sign and Pip approves.
-// The answers land in the save exactly as before (script.ts). The DOM holds only a hidden input for typing.
-import { useEffect, useRef } from 'preact/hooks';
+// The first-run experience: the loading clock dives into its dial, the camera pulls back out of the very same clock
+// on the wall of Hollow & Co.'s executive office (the lamp clicks on, dust drifts in the light through the blinds)
+// and Pip, Head of Sleep, looks up from his paperwork. His words float in the room. Each question is a clear 2D
+// form (panel.tsx) clipped to a leather folio in front of the office, with live 3D models in its answer cards and
+// 3D moments over the paper (the fountain pen ticks, the rubber stamp thumps RECEIVED); Pip stays in view above it
+// and reacts to every answer. A stamped form flies into the client folder on his desk. The last page is a sleep
+// plan you sign and Pip approves. The answers land in the save exactly as before (script.ts).
+import { useEffect, useRef, useState } from 'preact/hooks';
 import * as THREE from 'three';
 import { sound } from '../audio/sound.ts';
 import { syncReminders, requestNotifications } from '../game/night.ts';
 import { edit, save } from '../game/store.ts';
 import type { OwlLook } from '../owl/model.ts';
-import { owlIconAsync } from '../ui/portraits.ts';
 import { sceneRef, say } from '../ui/state.ts';
 import { bootDial, bootReady, bootShowing, releaseBoot, wakeBoot } from './boot.ts';
+import { CardModels } from './cards.ts';
+import { fountainPen, rubberStamp } from './desk.ts';
 import { dioramas } from './dioramas.ts';
-import { printForm, syncForm, type FormCtx } from './forms.ts';
 import { iris } from './iris.ts';
 import { Office, type ShotName, type WorldView } from './office.ts';
-import { preload, preloadIcons, type Region } from './paper.ts';
-import { Desk } from './quiz.ts';
-import { answersFrom, applyAnswers, GOALS, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat, type Step } from './script.ts';
+import { Overlay3D } from './overlay3d.ts';
+import { Panel, panelScale, type PanelActions } from './panel.tsx';
+import { answersFrom, applyAnswers, hm, OUTRO, planOf, STEPS, toMin, type Answers, type Beat } from './script.ts';
 import { Speech } from './speech.ts';
 
 const ARTIFACT = import.meta.env.MODE === 'artifact';
 const DEV = import.meta.env.DEV;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const play = (id: string, volume = 0.5, rate = 1) => { try { sound.play(id, { volume, rate, gap: 40 }); } catch { /* */ } };
+const haptic = (ms = 12) => { try { navigator.vibrate?.(ms); } catch { /* */ } };
 type Phase = 'boot' | 'open' | 'talk' | 'ask' | 'file' | 'outro' | 'done';
+const isWide = () => innerWidth >= 860 && innerWidth > innerHeight;
 
 /** Pip as a given species (species and palette both carry the id, as the owl model expects) */
 const lookFor = (species: string): OwlLook => ({ ...save.value.look, skin: 'owl', species, palette: species });
 const beatOf = (b: Beat | string | null | undefined): Beat | null => (b == null ? null : typeof b === 'string' ? { text: b } : b);
-const ICONS = ['bed', 'sheep', 'sunrise', 'clock', 'phonedrawer', 'mic', 'rain', 'waves', 'forest', 'fire', 'stream', 'wind', 'radio', 'lullaby', 'cricket', 'breath', 'book', 'milkglass', 'mugsun', 'mugmoon', 'drawer', 'nightstand', 'pillowbed', 'sun', 'moon', 'star', 'pillow'];
 /** script shot names -> the office's shots */
-const SHOT: Partial<Record<ShotName, ShotName>> = { board: 'pipR', floor: 'tray', bed: 'tray', tower: 'tray', clockwin: 'window' };
+const SHOT: Partial<Record<ShotName, ShotName>> = { board: 'pipR', floor: 'pip', bed: 'pip', tower: 'pip', clockwin: 'window', desk: 'pip' };
 
 async function askMic(): Promise<boolean> {
   try {
@@ -44,28 +45,30 @@ async function askMic(): Promise<boolean> {
   } catch { return false; }
 }
 
+interface UI { show: boolean; leaving: boolean; si: number; a: Answers; picked: Record<string, boolean>; remind: boolean; signed: boolean; stamped: string | null; skipAsk: boolean; k: number; wide: boolean }
+
 export function Intro() {
-  const input = useRef<HTMLInputElement>(null);
+  const [, setV] = useState(0);
+  const bump = () => setV((v) => v + 1);
+  const ui = useRef<UI>({ show: false, leaving: false, si: 0, a: answersFrom(save.value), picked: {}, remind: true, signed: false, stamped: null, skipAsk: false, k: panelScale(), wide: isWide() });
+  const overlay = useRef<Overlay3D | null>(null);
+  const models = useRef<CardModels | null>(null);
+  const actions = useRef<PanelActions | null>(null);
+  const panelEl = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const sc = sceneRef.current;
     if (!sc) { releaseBoot(); return undefined; }
+    const U = ui.current;
     const q = DEV ? new URLSearchParams(location.search) : new URLSearchParams();
     const fast = DEV && q.has('obfast');
-    const hour12 = save.value.settings.hour12;
-    let alive = true;
-    let a: Answers = answersFrom(save.value);
-    let si = 0, phase: Phase = 'boot';
-    const picked: Record<string, boolean> = {};
-    let remind = true, signed = false;
-    const photos: Record<string, string> = {};
-    let photosIn: Promise<unknown> = Promise.resolve();
+    let alive = true, phase: Phase = 'boot';
 
-    // ---- the office, the desk work, Pip's words
+    // ---- the office, Pip's words, the 3D layer over the form, the card models
     let office: Office;
     try {
       const world = typeof (sc as unknown as WorldView).renderView === 'function' ? (sc as unknown as WorldView) : null;
-      office = new Office(lookFor(a.species), sc.renderer, sc.quality, world);
+      office = new Office(lookFor(U.a.species), sc.renderer, sc.quality, world);
     } catch (e) { console.error('interview office failed', e); releaseBoot(); return undefined; }
     const postWas = sc.post.enabled;
     sc.post.enabled = false; // the office draws its own HD-2D picture (look.ts)
@@ -75,12 +78,17 @@ export function Intro() {
     office.look.overlay.add(speech.group);
     office.tickers.add((dt) => { speech.px = office.look.px; speech.update(dt, office.camera); });
     speech.onTalk = () => office.talk();
-    const dio = dioramas(office);
+    const reactTo = dioramas(office);
     office.pip.pose = 'stand';
-    office.setNameplate(a.name || 'Pip');
-
-    const ctx = (): FormCtx => ({ a, hour12, artifact: ARTIFACT, plan: planOf(a), photos, remind, signed, picked });
-    const st = () => STEPS[si];
+    office.setNameplate(U.a.name || 'Pip');
+    const ov = new Overlay3D();
+    ov.setScale(U.k);
+    overlay.current = ov;
+    const cards = new CardModels(office.mats, lookFor);
+    models.current = cards;
+    office.tickers.add((dt) => ov.update(dt));
+    const pen = fountainPen(office.mats), stamp = rubberStamp(office.mats);
+    const st = () => STEPS[U.si];
 
     // ---------------------------------------------------------------- talking
     let beats: Beat[] = [], bi = 0, after: (() => void) | null = null, autoT = 0;
@@ -88,7 +96,7 @@ export function Intro() {
       const b = beats[k];
       if (!b) return;
       clearTimeout(autoT);
-      speech.say(b.text, `${(a.name.trim() || 'Pip').toUpperCase()} · HEAD OF SLEEP`, fast);
+      speech.say(b.text, `${(U.a.name.trim() || 'Pip').toUpperCase()} · HEAD OF SLEEP`, fast);
       if (b.shot) office.go(SHOT[b.shot] ?? b.shot, b.cut);
       if (b.mood) office.pip.setMood(b.mood);
       if (b.act) office.pip.play(b.act);
@@ -99,152 +107,151 @@ export function Intro() {
       if (bi < beats.length - 1) { bi++; show(bi); return; }
       const f = after; after = null; f?.();
     };
-    const talk = (list: Beat[], then: () => void) => { beats = list; bi = 0; after = then; phase = phase === 'outro' ? 'outro' : 'talk'; if (desk) desk.enabled = false; show(0); };
+    const talk = (list: Beat[], then: () => void) => { beats = list; bi = 0; after = then; phase = phase === 'outro' ? 'outro' : 'talk'; show(0); };
     speech.onDone = () => {
       if (phase !== 'talk' && phase !== 'outro') return;
       const last = bi >= beats.length - 1, txt = beats[bi]?.text ?? '';
-      autoT = window.setTimeout(advance, fast ? 30 : last ? 700 : 1500 + txt.length * 26);
+      autoT = window.setTimeout(advance, fast ? 30 : last ? 650 : 1500 + txt.length * 26);
     };
 
-    // ---------------------------------------------------------------- the desk (made once the office is built)
-    let desk!: Desk;
-    const makeDesk = () => new Desk(office, {
-      region: (r) => onRegion(r),
-      hours: (v) => { if (st().kind !== 'hours' || phase !== 'ask') return; if (v !== a.hours) { a = { ...a, hours: v }; play('tick_brass', 0.3, 0.8 + (v - 5) * 0.08); dio.param(v); } desk.hoursValue = v; refresh(); },
-      clock: (min12) => {
-        if (st().kind !== 'dial' || phase !== 'ask') return;
-        const pm = toMin(a.wake) >= 720, v = hm(min12 + (pm ? 720 : 0));
-        if (v !== a.wake) { a = { ...a, wake: v }; play('tick_brass', 0.3, 1.1 + Math.random() * 0.2); onWake(); }
-      },
-      file: () => void file(),
-      skip: () => void finishAll(true),
-      tap: () => onTap(),
-    });
-    const refresh = (instant = false) => { const p = desk?.page; if (p) { syncForm(p.form, st(), ctx(), instant); } };
-    const onWake = () => {
-      const m = toMin(a.wake);
-      office.deskClock.set(m);
-      office.window(m / 60);
-      refresh();
+    // ---------------------------------------------------------------- the form
+    const canFile = () => { const s = st(); return s.kind === 'plan' ? U.signed : s.kind !== 'choice' || !!U.picked[s.id]; };
+    const set = (a: Answers) => { U.a = a; bump(); };
+    /** frame Pip in whatever part of the screen the form leaves free */
+    const frameAsk = () => {
+      const el = panelEl.current;
+      if (!el) return;
+      // where the form rests once it has slid in (its box, not its animated transform)
+      const u = U.k;
+      if (U.wide) { const left = innerWidth - 18 * u - el.offsetWidth; const w = Math.max(0.3, (left - 10) / innerWidth); office.askArea = { w, h: 1, cx: w - 1, cy: 0 }; }
+      else { const top = innerHeight - 4 * u - el.offsetHeight; const h = Math.max(0.18, (top + 8) / innerHeight); office.askArea = { w: 1, h, cx: 0, cy: 1 - h }; }
+      office.reframe();
     };
-    const canFile = () => { const s = st(); return s.kind !== 'choice' || !!picked[s.id]; };
-    const updateReady = () => desk?.setReady(phase === 'ask' && canFile() && (st().kind !== 'plan' || signed));
-
-    const onRegion = (r: Region) => {
-      if (phase !== 'ask') return;
-      const s = st();
-      if (r.kind === 'field') { focusInput(); return; }
-      if (r.kind === 'minus' || r.kind === 'plus') { a = { ...a, wake: hm(toMin(a.wake) + (r.kind === 'plus' ? 15 : -15)) }; play('tick_paper', 0.4); onWake(); return; }
-      if (r.kind === 'ampm') { const m = toMin(a.wake) % 720; a = { ...a, wake: hm(m + (r.v === 'pm' ? 720 : 0)) }; play('pencil', 0.35); onWake(); return; }
-      if (r.kind === 'remind') { remind = !remind; play('pencil', 0.35); refresh(); return; }
-      if (r.kind === 'sign') {
-        if (signed) return;
-        signed = true; play('scribble', 0.5);
-        refresh();
-        office.pip.play('nod');
-        window.setTimeout(updateReady, 1200);
-        return;
-      }
-      if (r.kind === 'card' && r.v) {
-        if (a.species !== r.v) { a = { ...a, species: r.v }; office.setLook(lookFor(r.v)); play('paper_flip', 0.35); }
-        picked[s.id] = true; refresh(); updateReady();
-        return;
-      }
-      if (r.kind === 'tick' && r.v !== undefined) {
-        const v = r.v;
-        if (s.kind === 'text' && s.field === 'name') { a = { ...a, name: v }; office.setNameplate(v); office.sparkle(office.head, 4); if (input.current) input.current.value = v; }
-        else if (s.kind === 'multi') {
-          const f = s.field as 'goals' | 'relax', cur = a[f], on = !cur.includes(v);
-          a = { ...a, [f]: on ? [...cur, v] : cur.filter((x) => x !== v) };
-          if (on) { dio.show(`${s.id}:${v}`); office.pip.play('nod'); } else dio.show(null);
-        } else if (s.kind === 'choice') {
-          a = { ...a, [s.field!]: s.id === 'mic' ? v === 'yes' : v } as Answers;
-          picked[s.id] = true;
-          dio.show(`${s.id}:${v}`);
-        }
-        play('pencil', 0.4, 0.9 + Math.random() * 0.2);
-        refresh(); updateReady();
-      }
-    };
-
-    // ---------------------------------------------------------------- typing (a hidden input; the pen writes)
-    const focusInput = () => {
-      const el = input.current, s = st();
-      if (!el || s.kind !== 'text') return;
-      el.value = a[s.field as 'you' | 'name'];
-      el.focus({ preventScroll: true });
-      const up = () => { el.focus({ preventScroll: true }); removeEventListener('pointerup', up); };
-      addEventListener('pointerup', up);
-    };
-    const onInput = () => {
-      const el = input.current, s = st();
-      if (!el || s.kind !== 'text' || phase !== 'ask') return;
-      const v = el.value.slice(0, 16);
-      a = { ...a, [s.field as 'you' | 'name']: v };
-      if (s.field === 'name') office.setNameplate(v.trim() || 'Pip');
-      play('scribble', 0.22, 0.9 + Math.random() * 0.4);
-      refresh();
-    };
-    const onInputKey = (e: KeyboardEvent) => { if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); void file(); } };
-    input.current?.addEventListener('input', onInput);
-    input.current?.addEventListener('keydown', onInputKey);
-
-    // ---------------------------------------------------------------- steps
     const enterAsk = async (i: number) => {
-      const s = STEPS[i];
+      U.si = i; U.show = true; U.leaving = false; U.stamped = null; U.skipAsk = false;
       phase = 'ask';
       speech.say(null);
-      office.go(s.kind === 'dial' ? 'formClock' : 'form', false, 2.4);
-      if (s.kind === 'species') await Promise.race([photosIn, wait(7000)]);
-      const form = printForm(s, i, STEPS.length, ctx());
-      desk.setRider(s.kind === 'hours');
-      if (s.kind === 'hours') { desk.hoursValue = a.hours; dio.show('hours:tower'); dio.param(a.hours); }
-      if (s.kind === 'dial') { office.deskClock.set(toMin(a.wake)); office.window(toMin(a.wake) / 60); }
-      await desk.present(form, { sticky: s.kind !== 'plan' });
-      if (!alive) return;
-      desk.enabled = true;
-      office.pip.lookAt = desk.page ? desk.texelWorld(180, 240) : null;
+      const s = STEPS[i];
+      if (s.kind === 'dial') { cards.clockAt = toMin(U.a.wake); office.window(toMin(U.a.wake) / 60); }
+      bump();
+      play('paper_rustle', 0.45, 1.05);
+      office.go('ask', false, 2.2);
+      await wait(30);
+      frameAsk();
+      office.pip.lookAt = office.camera.position;
       office.pip.setMood('curious');
-      updateReady();
     };
     const startStep = (i: number, react: Beat | null) => {
-      si = i;
-      const list = [...(react ? [react] : []), ...STEPS[i].say(a, { artifact: ARTIFACT }).map((b) => beatOf(b)!)];
+      U.si = i;
+      const list = [...(react ? [react] : []), ...STEPS[i].say(U.a, { artifact: ARTIFACT }).map((b) => beatOf(b)!)];
       talk(list, () => void enterAsk(i));
     };
+
+    // ---- 3D moments over the paper: the pen ticking a box, the stamp thumping the office box
+    let penBusy = 0;
+    const penTo = (el: Element | null) => {
+      if (!el) return;
+      const b = el.getBoundingClientRect(), x = b.left + b.width * 0.4, y = b.top + b.height * 0.5;
+      const s = Math.min(innerWidth, innerHeight) * 0.9;
+      const id = ++penBusy;
+      ov.play(pen, 0.62, (k, o) => {
+        if (id !== penBusy) { o.visible = false; return; }
+        const inK = Math.min(1, k / 0.35), outK = Math.max(0, (k - 0.72) / 0.28);
+        const e = 1 - (1 - inK) ** 3;
+        const sx = x + 160 * (1 - e) + outK * 200, sy = y - 120 * (1 - e) + outK * 20;
+        const scribble = k > 0.35 && k < 0.72 ? Math.sin(k * 60) * 4 : 0;
+        o.position.set(sx + scribble, -(sy - Math.abs(scribble) * 0.5), 200);
+        o.scale.setScalar(s);
+        o.rotation.set(0.5, -0.4, 0.95);
+      });
+      play('scribble', 0.4, 1 + Math.random() * 0.2);
+    };
+    const splat = new THREE.Group();
+    const inkSplat = (x: number, y: number) => {
+      const mat = new THREE.MeshBasicMaterial({ color: 0xa01a1e });
+      const bits: { m: THREE.Mesh; vx: number; vy: number }[] = [];
+      for (let i = 0; i < 14; i++) {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(U.k * 1.6, U.k * 1.6), mat);
+        const a = Math.random() * Math.PI * 2, v = 60 + Math.random() * 120;
+        bits.push({ m, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6 - 60 });
+        splat.add(m);
+      }
+      ov.play(splat, 0.45, (k) => {
+        for (const b of bits) { b.m.position.set(x + b.vx * k, -(y + b.vy * k + 260 * k * k), 400); b.m.scale.setScalar(1 - k * 0.6); }
+      }, () => { for (const b of bits) { splat.remove(b.m); b.m.geometry.dispose(); } mat.dispose(); });
+    };
+    const stampOn = (text: string) => new Promise<void>((done) => {
+      const box = panelEl.current?.querySelector('.qp-box');
+      if (!box) { U.stamped = text; bump(); done(); return; }
+      const b = box.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2;
+      const s = b.width * 10;
+      let hit = false;
+      const onHit = () => {
+        U.stamped = text; bump();
+        play('stamp', 0.85); haptic(30);
+        office.bump(1);
+        inkSplat(x, y);
+      };
+      play('pickup_item', 0.4, 0.9);
+      ov.play(stamp, 1.05, (k, o) => {
+        // swing in from the top right, hover, slam down, lift away
+        const p1 = Math.min(1, k / 0.38), e1 = 1 - (1 - p1) ** 3;
+        let px = x + (1 - e1) * 220, py = y - 140 - (1 - e1) * 160;
+        if (k > 0.38 && k < 0.52) { const d = (k - 0.38) / 0.14; py = y - 140 + d * d * 136; px = x; }
+        else if (k >= 0.52 && k < 0.66) { py = y - 4; px = x; if (!hit) { hit = true; onHit(); } }
+        else if (k >= 0.66) { const d = (k - 0.66) / 0.34; py = y - 4 - d * 220; px = x + d * 160; }
+        o.position.set(px, -py, 300);
+        o.scale.setScalar(s);
+        o.rotation.set(0.55, -0.3 + k * 0.2, 0);
+      }, done);
+    });
+    /** the stamped form flies into the folder on Pip's desk */
+    const fileAway = () => new Promise<void>((done) => {
+      const el = panelEl.current;
+      if (!el) { done(); return; }
+      const r = el.getBoundingClientRect(), f = office.folderScreen();
+      const dx = f.x - (r.left + r.width / 2), dy = f.y - (r.top + r.height / 2);
+      play('whoosh_soft', 0.35, 1.2);
+      el.classList.remove('in');
+      el.classList.add('qp-fly');
+      el.style.transform = `translate(${U.wide ? '0' : '-50%'}, ${U.wide ? '50%' : '0'}) translate(${dx}px, ${dy}px) scale(0.06) rotate(-10deg)`;
+      el.style.opacity = '0';
+      window.setTimeout(() => { U.show = false; bump(); office.fileFlap(); done(); }, 520);
+    });
+
     const file = async () => {
-      if (phase !== 'ask' || !canFile()) return;
+      if (phase !== 'ask') return;
       const s = st();
-      if (s.kind === 'plan') { if (signed) void approve(); return; }
-      let x = a;
-      if (s.id === 'mic' && x.mic && !ARTIFACT) { const ok = await askMic(); if (!ok) { x = { ...x, mic: false }; a = x; refresh(); } }
+      if (!canFile()) { play('ui_error', 0.3); (panelEl.current?.querySelector('.qp-box') as HTMLElement | null)?.animate?.([{ transform: 'translateX(-3px)' }, { transform: 'translateX(3px)' }, { transform: 'none' }], { duration: 240, easing: 'steps(4)' }); return; }
+      if (s.kind === 'plan') { void approve(); return; }
+      let a = U.a;
+      if (s.id === 'mic' && a.mic && !ARTIFACT) { const ok = await askMic(); if (!ok) { a = { ...a, mic: false }; set(a); } }
       phase = 'file';
-      desk.enabled = false;
-      input.current?.blur();
-      office.go('stamp', false, 2.6);
-      await desk.stampAndFile('RECEIVED', `page ${si + 1}`);
+      (document.activeElement as HTMLElement | null)?.blur?.();
+      await stampOn('RECEIVED');
       if (!alive) return;
-      dio.show(null);
-      desk.setRider(false);
-      office.window(null);
+      await wait(220);
+      reactTo.show(null);
       office.pip.play('peck');
-      const react = beatOf(s.react?.(a));
-      startStep(si + 1, react);
+      await fileAway();
+      if (!alive) return;
+      office.window(null);
+      startStep(U.si + 1, beatOf(s.react?.(U.a)));
     };
     const approve = async () => {
       phase = 'file';
-      desk.enabled = false;
-      if (remind && !ARTIFACT) void requestNotifications();
-      office.go('stamp', false, 2.4);
+      if (U.remind && !ARTIFACT) void requestNotifications();
       office.pip.play('peck');
-      await desk.stampOnly('APPROVED', 'Head of Sleep');
+      await stampOn('APPROVED');
       if (!alive) return;
       const h = office.head;
       office.pip.setMood('joy', 2);
       office.sparkle(h, 10);
       office.burst('stars', h, 8);
       play('reward_quest', 0.5);
-      await wait(900);
+      await wait(1100);
+      await fileAway();
+      if (!alive) return;
       phase = 'outro';
       play('wings_flutter', 0.45);
       talk(OUTRO, () => void finishAll());
@@ -254,19 +261,55 @@ export function Intro() {
       if (phase === 'done') return;
       phase = 'done';
       clearTimeout(autoT);
-      if (desk) desk.enabled = false;
-      dio.show(null);
-      const x = a;
+      reactTo.show(null);
+      U.show = false; bump();
+      const x = U.a;
       await iris(() => (alive ? office.headScreen() : { x: innerWidth / 2, y: innerHeight / 2 }), async () => {
         edit((s) => applyAnswers(s, x));
         syncReminders();
         if (sc.stage === office) { sc.setStage(null); sc.setView('home'); sc.snapCamera(); }
         sc.post.enabled = postWas;
+        ov.dispose(); overlay.current = null;
         releaseBoot();
       });
       sceneRef.current?.owl.play(skipped ? 'wave' : 'present');
       say(skipped ? `Welcome home! Let's unpack!` : `Let's unpack! Tap the boxes, ${x.you.trim() || 'friend'}!`, 4200);
       window.dispatchEvent(new CustomEvent('hh:intro-done', { detail: { skipped } }));
+    };
+
+    // ---------------------------------------------------------------- what the form can do
+    const panelQ = (sel: string) => panelEl.current?.querySelector(sel) ?? null;
+    actions.current = {
+      pick: (v) => {
+        if (phase !== 'ask') return;
+        const s = st(), a = U.a;
+        if (s.kind === 'text') { set({ ...a, name: v }); office.setNameplate(v); office.sparkle(office.head, 4); play('pencil', 0.4); window.requestAnimationFrame(() => penTo(panelQ(`[data-v="${v}"] .qp-tickbox`))); return; }
+        if (s.kind === 'species') {
+          if (a.species !== v) { set({ ...a, species: v }); office.setLook(lookFor(v)); play('paper_flip', 0.35); }
+          U.picked[s.id] = true; bump();
+        } else if (s.kind === 'multi') {
+          const f = s.field as 'goals' | 'relax', cur = a[f], on = !cur.includes(v);
+          set({ ...a, [f]: on ? [...cur, v] : cur.filter((x) => x !== v) });
+          if (on) { reactTo.show(`${s.id}:${v}`); office.pip.play('nod'); } else { reactTo.show(null); play('ui_back', 0.3); return; }
+        } else if (s.kind === 'choice') {
+          set({ ...a, [s.field!]: s.id === 'mic' ? v === 'yes' : v } as Answers);
+          U.picked[s.id] = true;
+          reactTo.show(`${s.id}:${v}`);
+        }
+        haptic();
+        window.requestAnimationFrame(() => penTo(panelQ(`[data-v="${v}"] .qp-tickbox`)));
+      },
+      text: (v) => { if (phase !== 'ask') return; const f = st().field as 'you' | 'name'; set({ ...U.a, [f]: v.slice(0, 16) }); if (f === 'name') office.setNameplate(v.trim() || 'Pip'); play('scribble', 0.2, 0.9 + Math.random() * 0.4); },
+      enter: () => void file(),
+      nudge: (d) => { const w = hm(toMin(U.a.wake) + d); set({ ...U.a, wake: w }); cards.clockAt = toMin(w); office.window(toMin(w) / 60); play('tick_brass', 0.4); },
+      ampm: (pm) => { const m = (toMin(U.a.wake) % 720) + (pm ? 720 : 0); set({ ...U.a, wake: hm(m) }); cards.clockAt = m; office.window(m / 60); play('pencil', 0.35); penTo(panelQ(pm ? '.qp-ampm .qp-check:last-child .qp-tickbox' : '.qp-ampm .qp-check .qp-tickbox')); },
+      clock: (m12) => { const pm = toMin(U.a.wake) >= 720, m = m12 + (pm ? 720 : 0); if (hm(m) === U.a.wake) return; set({ ...U.a, wake: hm(m) }); cards.clockAt = m; office.window(m / 60); play('tick_brass', 0.3, 1.1 + Math.random() * 0.2); },
+      hours: (v) => { if (v === U.a.hours) return; set({ ...U.a, hours: v }); play('tick_brass', 0.3, 0.8 + (v - 5) * 0.08); office.pip.setMood(v < 7 ? 'worried' : v >= 9 ? 'love' : 'happy', 1.5); },
+      sign: () => { if (U.signed) return; U.signed = true; bump(); play('scribble', 0.5); office.pip.play('nod'); penTo(panelQ('.qp-sign button')); },
+      remind: () => { U.remind = !U.remind; bump(); play('pencil', 0.35); },
+      stamp: () => void file(),
+      skip: (ask) => { U.skipAsk = ask; bump(); play('paper_flip', 0.35, 1.3); },
+      skipYes: () => { play('ui_confirm', 0.4); void finishAll(true); },
     };
 
     const onTap = () => {
@@ -277,47 +320,38 @@ export function Intro() {
       }
       if (phase === 'ask') office.pip.play('nod');
     };
+    office.onPointer = (type) => { if (type === 'down') onTap(); return true; };
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
-      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (phase === 'ask' && desk?.isReady) void file(); else onTap(); }
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (phase === 'ask') void file(); else onTap(); }
     };
     addEventListener('keydown', onKey);
-
-    // the owl photographs for the species form (rendered from the 3D models), the printed pictograms
-    void preloadIcons(ICONS);
-    photosIn = Promise.all((STEPS.find((s) => s.kind === 'species')?.opts ?? []).map((o) =>
-      owlIconAsync({ ...lookFor(o.v), outfit: {} }, 'face').then(async (u) => {
-        if (!u) return;
-        await preload([u]);
-        photos[o.v] = u;
-        // a photo that arrives late is pasted onto the page that is already on the desk
-        if (alive && desk?.page && st().kind === 'species') desk.reprint(printForm(st(), si, STEPS.length, ctx()));
-      }).catch(() => undefined)));
-    (window as unknown as { hhIntro: unknown }).hhIntro = { office, desk: () => desk, speech, a: () => a, file: () => void file(), region: (id: string) => { const r = desk?.page?.form.region(id); if (r) onRegion(r); }, phase: () => phase, step: () => si };
+    const onResize = () => { speech.px = office.look.px; U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); bump(); window.setTimeout(frameAsk, 50); };
+    addEventListener('resize', onResize);
+    (window as unknown as { hhIntro: unknown }).hhIntro = { office, speech, overlay: ov, a: () => U.a, file: () => void file(), act: () => actions.current, phase: () => phase, step: () => U.si, skip: () => void finishAll(true) };
 
     // ---------------------------------------------------------------- the opening
     (async () => {
       await office.ready;
       if (!alive) return;
-      desk = makeDesk();
       const devStep = DEV ? q.get('ob') : null;
       if (devStep) {
         releaseBoot();
         { const bt = document.getElementById('boot'); if (bt) bt.style.display = 'none'; }
         const i = Math.max(0, STEPS.findIndex((s) => s.id === devStep));
-        si = i;
+        U.si = i;
         const sel = q.get('obsel');
         if (sel) {
           const s = STEPS[i], f = s.field;
-          if (f) a = { ...a, [f]: s.kind === 'multi' ? sel.split(',') : s.kind === 'hours' ? Number(sel) : f === 'mic' ? sel === 'yes' : sel } as Answers;
-          picked[s.id] = true;
+          if (f) U.a = { ...U.a, [f]: s.kind === 'multi' ? sel.split(',') : s.kind === 'hours' ? Number(sel) : f === 'mic' ? sel === 'yes' : sel } as Answers;
+          U.picked[s.id] = true;
           if (s.kind === 'species') office.setLook(lookFor(sel), false);
         }
-        if (q.has('obtalk')) { const s = STEPS[i]; talk(q.get('obline') ? [{ text: q.get('obline')!, shot: s.shot }] : s.say(a, { artifact: ARTIFACT }).map((b) => beatOf(b)!), () => void enterAsk(i)); office.cut(SHOT[s.shot] ?? s.shot); return; }
-        if (q.has('obsigned')) signed = true;
+        if (q.has('obsigned')) U.signed = true;
+        if (q.has('obtalk')) { const s = STEPS[i]; talk(q.get('obline') ? [{ text: q.get('obline')!, shot: s.shot }] : s.say(U.a, { artifact: ARTIFACT }).map((b) => beatOf(b)!), () => void enterAsk(i)); office.cut(SHOT[s.shot] ?? s.shot); return; }
         await enterAsk(i);
-        office.cut(STEPS[i].kind === 'dial' ? 'formClock' : 'form');
-        if (q.has('obstamp')) window.setTimeout(() => void (STEPS[i].kind === 'plan' ? approve() : file()), 600);
+        office.cut('ask');
+        if (q.has('obstamp')) window.setTimeout(() => void file(), 1500);
         return;
       }
       if (bootShowing()) {
@@ -327,18 +361,16 @@ export function Intro() {
         const m = bootDial();
         office.holdOnDial(m);
         office.pip.pose = 'stand';
-        office.pip.lookAt = new THREE.Vector3(0.06, 0.8, -1.2);
+        office.pip.lookAt = new THREE.Vector3(0.3, 0.8, -1.2);
         office.lampOn(false);
         await wakeBoot();
         if (!alive) return;
         if (DEV && q.get('obhold')) await wait(Number(q.get('obhold')));
         play('amb_room', 0.2);
         void office.pullBack(m, 'open', 4.8);
-      } else {
-        office.cut('open');
-      }
+      } else office.cut('open');
       phase = 'open';
-      // the lights come up as the camera pulls back; Pip looks up from his paperwork
+      // the lamp clicks on as the camera pulls back; Pip looks up from his paperwork
       await wait(1500);
       if (!alive) return;
       office.lampOn(true);
@@ -353,30 +385,31 @@ export function Intro() {
       startStep(0, null);
     })();
 
-    const onResize = () => { speech.px = office.look.px; };
-    addEventListener('resize', onResize);
     return () => {
       alive = false;
       removeEventListener('keydown', onKey);
       removeEventListener('resize', onResize);
-      input.current?.removeEventListener('input', onInput);
-      input.current?.removeEventListener('keydown', onInputKey);
       clearTimeout(autoT);
-      dio.show(null);
-      desk?.dispose();
+      reactTo.show(null);
       speech.dispose();
+      cards.dispose();
+      overlay.current?.dispose(); overlay.current = null;
       if (sc.stage === office) sc.setStage(null);
       sc.post.enabled = postWas;
       releaseBoot();
     };
   }, []);
 
+  const U = ui.current;
+  const st = STEPS[U.si];
+  const ready = st ? (st.kind === 'plan' ? U.signed : st.kind !== 'choice' || !!U.picked[st.id]) : false;
   return (
-    <div class="ob" style="position:fixed;inset:0;pointer-events:none;z-index:40">
-      <input ref={input} class="ob-type" type="text" maxLength={16} autocomplete="off" autocapitalize="words" spellcheck={false} aria-label="Your answer"
-        style="position:fixed;left:8vw;top:55vh;width:84vw;height:44px;font-size:16px;opacity:0;border:0;background:transparent;color:transparent;caret-color:transparent;pointer-events:none" />
+    <div class="ob">
+      {U.show && st && overlay.current && models.current && actions.current && (
+        <Panel key={st.id} step={st} index={U.si} total={STEPS.length} overlay={overlay.current} model={models.current.model} k={U.k} wide={U.wide} leaving={U.leaving} sheetRef={panelEl}
+          act={actions.current}
+          s={{ a: U.a, picked: U.picked, remind: U.remind, signed: U.signed, stamped: U.stamped, ready, hour12: save.value.settings.hour12, artifact: ARTIFACT, plan: planOf(U.a), skipAsk: U.skipAsk }} />
+      )}
     </div>
   );
 }
-export { GOALS, RELAX };
-export type { Step };

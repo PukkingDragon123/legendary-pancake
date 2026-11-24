@@ -16,8 +16,9 @@ import { HOUSE } from '../world/layout.ts';
 import { modelUrl } from '../gfx/glb.ts';
 import { Look } from './look.ts';
 import { officeMats, type OfficeMats } from './mats.ts';
-import { buildCabinets, buildChair, buildCredenza, buildDesk, buildRoom, buildShelves, buildWindow, certificate, DESK_TOP, frame, L, spineAtlas, type WindowParts } from './furnish.ts';
-import { bankersLamp, carafeSet, carriageClock, DESK, deskPhone, fountainPen, folder, inkPad, inOutTrays, nameplate, paperwork, pottedFig, rubberStamp, sconce, stickyNote, writingSlope, type Lamp } from './desk.ts';
+import { buildCabinets, buildCredenza, buildDesk, buildRoom, buildShelves, buildWindow, certificate, DESK_TOP, frame, L, spineAtlas, type WindowParts } from './furnish.ts';
+import { bankersLamp, carafeSet, DESK, fountainPen, folder, inkPad, nameplate, paperwork, pottedFig, rubberStamp, sconce, type Lamp } from './desk.ts';
+import { loadGLB } from '../gfx/glb.ts';
 import { WallClock } from './wallclock.ts';
 import { SkyView, type Weather } from './skyview.ts';
 import { fontsReady } from './fonts.ts';
@@ -29,7 +30,7 @@ export interface WorldView {
   setHour(h: number | null): void;
 }
 
-export type ShotName = 'establish' | 'pip' | 'pipL' | 'pipR' | 'close' | 'desk' | 'window' | 'clock' | 'clockwin' | 'board' | 'floor' | 'bed' | 'low' | 'wide' | 'tower' | 'form' | 'formClock' | 'stamp' | 'tray' | 'open';
+export type ShotName = 'establish' | 'pip' | 'pipL' | 'pipR' | 'close' | 'desk' | 'window' | 'clock' | 'clockwin' | 'board' | 'floor' | 'bed' | 'low' | 'wide' | 'tower' | 'form' | 'formClock' | 'stamp' | 'tray' | 'open' | 'ask';
 /** A camera shot: look at `target` from direction (yaw, pitch), far enough to fit `fit` (w x h metres), with the
  * target placed at `anchor` on screen (NDC, off-axis), optionally a fixed distance. */
 export interface Shot { target: THREE.Vector3; yaw: number; pitch: number; fit: [number, number]; anchor?: [number, number]; dist?: number; roll?: number; drift?: number }
@@ -83,6 +84,8 @@ export class Office implements Stage {
 
   // camera
   private shotName: ShotName = 'establish';
+  /** the free part of the screen while the form is up (fractions of width/height, centre in NDC) */
+  askArea = { w: 1, h: 0.36, cx: 0, cy: 0.64 };
   private shot!: Shot;
   private cur!: { target: THREE.Vector3; yaw: number; pitch: number; dist: number; ax: number; ay: number; roll: number };
   private shotAt = 0;
@@ -110,14 +113,11 @@ export class Office implements Stage {
   win!: WindowParts;
   lamp!: Lamp;
   clock!: WallClock;
-  deskClock!: ReturnType<typeof carriageClock>;
   plate!: ReturnType<typeof nameplate>;
   pen!: THREE.Group;
   stamp!: THREE.Group;
   pad!: THREE.Group;
   folder!: ReturnType<typeof folder>;
-  sticky!: ReturnType<typeof stickyNote>;
-  trays!: ReturnType<typeof inOutTrays>;
   private sway: { o: THREE.Object3D; ph: number }[] = [];
   private world: WorldView | null;
   private winRT: THREE.WebGLRenderTarget | null = null;
@@ -217,9 +217,31 @@ export class Office implements Stage {
     const desk = buildDesk(m);
     desk.position.set(L.desk.x, 0, L.desk.z);
     s.add(desk);
-    const chair = buildChair(m);
-    chair.position.set(L.chair.x, 0, L.chair.z);
-    s.add(chair);
+    // borrowed, properly modelled props (public/models/interview/office.glb): Pip's armchair, the telephone, a typewriter
+    const pack = await loadGLB('interview/office.glb').catch((e) => { console.warn('office props failed', e); return null; });
+    const place = (name: string, at: THREE.Vector3, ry: number, size: number, o: { axis?: 'x' | 'y'; tint?: number } = {}) => {
+      const src = pack?.scene.getObjectByName(name);
+      if (!src) return null;
+      const c = src.clone(true);
+      c.position.set(0, 0, 0); c.rotation.set(0, 0, 0); c.scale.setScalar(1);
+      c.updateMatrixWorld(true);
+      const b = new THREE.Box3().setFromObject(c), sz = b.getSize(V(0, 0, 0)), ctr = b.getCenter(V(0, 0, 0));
+      const k = size / (o.axis === 'y' ? sz.y : Math.max(sz.x, sz.z));
+      const g = new THREE.Group();
+      c.scale.setScalar(k);
+      c.position.set(-ctr.x * k, -b.min.y * k, -ctr.z * k);
+      c.traverse((n) => {
+        const me = n as THREE.Mesh;
+        if (!me.isMesh) return;
+        me.castShadow = true; me.receiveShadow = true;
+        if (o.tint !== undefined) { const mt = (me.material as THREE.MeshStandardMaterial).clone(); mt.color.setHex(o.tint); me.material = mt; }
+      });
+      g.add(c);
+      g.position.copy(at); g.rotation.y = ry;
+      s.add(g);
+      return g;
+    };
+    place('armchair', V(L.chair.x, 0, L.chair.z), 0, 1.12, { axis: 'y', tint: 0xa44a3a });
     const cred = buildCredenza(m);
     cred.position.set(L.cred.x, 0, L.cred.z);
     s.add(cred);
@@ -269,23 +291,16 @@ export class Office implements Stage {
     this.lamp = bankersLamp(m);
     this.lamp.group.position.copy(DESK.lamp); this.lamp.group.rotation.y = 0.35;
     s.add(this.lamp.group);
-    const ph = deskPhone(m);
-    ph.position.copy(DESK.phone); ph.rotation.y = -0.45;
-    s.add(ph);
-    this.trays = inOutTrays(m);
-    this.trays.group.position.copy(DESK.trays); this.trays.group.rotation.y = -0.12;
-    s.add(this.trays.group);
+    place('phone', DESK.phone, -0.5, 0.24);
+    place('typewriter', DESK.typewriter, -0.35, 0.36);
     this.plate = nameplate(m, 'Pip', 'HEAD OF SLEEP');
     this.plate.group.position.copy(DESK.nameplate); this.plate.group.rotation.y = 0.18;
     s.add(this.plate.group);
     const work = paperwork(m);
-    work.position.copy(DESK.work); work.rotation.y = 0.1;
+    work.position.copy(DESK.work); work.rotation.y = 0.25;
     s.add(work);
-    const slope = writingSlope(m);
-    slope.position.copy(DESK.slope);
-    s.add(slope);
     this.pen = fountainPen(m);
-    this.pen.position.copy(DESK.pen).add(V(-0.13, 0, 0)); this.pen.rotation.y = 0.04;
+    this.pen.position.copy(DESK.pen); this.pen.rotation.y = 0.6;
     s.add(this.pen);
     this.pad = inkPad(m);
     this.pad.position.copy(DESK.stamp).add(V(0.0, 0, -0.02)); this.pad.rotation.y = -0.2;
@@ -293,14 +308,10 @@ export class Office implements Stage {
     this.stamp = rubberStamp(m);
     this.stamp.position.copy(this.pad.position).add(V(0, 0.018, 0)); this.stamp.rotation.order = 'YXZ'; this.stamp.rotation.y = -0.2;
     s.add(this.stamp);
+    // the client folder, in front of Pip: each stamped form is filed into it
     this.folder = folder();
-    this.folder.group.position.copy(DESK.folder); this.folder.group.rotation.y = -0.08;
+    this.folder.group.position.copy(DESK.folder); this.folder.group.rotation.y = -0.06;
     s.add(this.folder.group);
-    this.deskClock = carriageClock(m);
-    this.deskClock.group.position.copy(DESK.clock); this.deskClock.group.rotation.y = 0.3;
-    s.add(this.deskClock.group);
-    // the skip note travels stuck to the corner of each form (see quiz.ts)
-    this.sticky = stickyNote();
     const car = carafeSet(m);
     car.position.set(-0.5, L.cred.h, L.cred.z + 0.02);
     s.add(car);
@@ -451,7 +462,7 @@ export class Office implements Stage {
 
   private shots(name: ShotName): Shot {
     const P = this.camera.aspect < 0.9;
-    const H = HEAD.clone(), paper = DESK.paper.clone().add(V(0, 0.01, 0));
+    const H = HEAD.clone();
     switch (name) {
       case 'establish': return { target: V(P ? -0.1 : -0.45, 1.3, -1.6), yaw: P ? 0.2 : 0.36, pitch: 0.1, fit: P ? [2.0, 3.4] : [5.2, 2.8], anchor: [0, P ? -0.05 : 0] };
       case 'wide': return { target: V(-0.4, 1.2, -1.3), yaw: -0.28, pitch: 0.12, fit: P ? [2.0, 3.2] : [4.8, 2.6] };
@@ -467,15 +478,12 @@ export class Office implements Stage {
       case 'clock': return { target: V(L.clock.x, L.clock.y + 0.05, L.z0 + 0.1), yaw: 0, pitch: 0.0, fit: P ? [0.8, 1.2] : [1.8, 0.95] };
       case 'clockwin': return { target: V(-0.6, 1.6, -1.8), yaw: -0.5, pitch: 0.06, fit: P ? [2.2, 3.0] : [4.2, 2.4] };
       case 'board': return { target: V(L.x1 - 0.2, 1.8, -0.3), yaw: 0.85, pitch: 0.05, fit: P ? [1.6, 2.2] : [3.4, 1.9] };
-      case 'form': return P
-        ? { target: paper.clone().add(V(0, 0.01, 0)), yaw: 0, pitch: 0.6, fit: [0.31, 0.2], anchor: [0, -0.36] }
-        : { target: paper.clone().add(V(0, 0.02, 0)), yaw: 0, pitch: 0.4, fit: [0.6, 0.54], anchor: [0, -0.24] };
-      case 'formClock': return P
-        ? { target: paper.clone().add(V(-0.09, 0, -0.03)), yaw: 0.06, pitch: 0.6, fit: [0.42, 0.3], anchor: [0, -0.3] }
-        : { target: paper.clone().add(V(-0.08, 0.02, 0)), yaw: 0.05, pitch: 0.42, fit: [0.74, 0.56], anchor: [0, -0.22] };
-      case 'stamp': return P
-        ? { target: paper.clone().add(V(0.05, 0, 0)), yaw: -0.04, pitch: 0.62, fit: [0.4, 0.3], anchor: [0, -0.3] }
-        : { target: paper.clone().add(V(0.1, 0.02, 0)), yaw: -0.05, pitch: 0.44, fit: [0.74, 0.56], anchor: [0, -0.22] };
+      case 'ask': {
+        // Pip framed in the part of the screen the form leaves free (askArea)
+        const A = this.askArea, sub: [number, number] = P ? [1.55, 0.82] : [1.4, 0.9];
+        return { target: H.clone().add(V(0, -0.06, 0.25)), yaw: 0.06, pitch: 0.12, fit: [sub[0] / Math.max(0.2, A.w), sub[1] / Math.max(0.2, A.h)], anchor: [A.cx, A.cy] };
+      }
+      case 'form': case 'formClock': case 'stamp': return this.shots('ask');
     }
   }
 
@@ -536,6 +544,28 @@ export class Office implements Stage {
     const dial = this.dialWorld, tan = Math.tan((this.vfov * Math.PI) / 360);
     const d = Math.max(0.06, (0.003 * innerHeight) / (2 * tan * Math.max(0.5, from.px)));
     this.rig = () => ({ pos: dial.clone().add(V(0, 0, d)), look: dial.clone(), ax: (from.x / innerWidth) * 2 - 1, ay: -((from.y / innerHeight) * 2 - 1) });
+  }
+  /** Recompute the current shot (after askArea or the screen changed). */
+  reframe() { this.shot = this.shots(this.shotName); }
+  /** The client folder on the desk, on screen (CSS px). */
+  folderScreen() { const p = this.folder ? this.folder.group.getWorldPosition(V(0, 0, 0)).add(V(0, 0.02, 0)) : V(0, DESK_TOP, -1.1); return this.screenOf(p); }
+  private filed = 0;
+  /** A form lands in the folder: the cover swings open, closes on it, the stack grows. */
+  fileFlap() {
+    const f = this.folder;
+    if (!f) return;
+    const t0 = this.time;
+    this.filed++;
+    const n = this.filed;
+    try { sound.play('paper_flip', { volume: 0.35, rate: 1.2, gap: 60 }); } catch { /* */ }
+    const tick = () => {
+      const k = (this.time - t0) / 0.6;
+      f.cover.rotation.z = Math.sin(Math.min(1, Math.max(0, k)) * Math.PI) * 2.6;
+      if (k > 0.5 && !f.stack.visible) { f.stack.visible = true; }
+      f.stack.scale.y = 0.0012 * n; f.stack.position.y = 0.0015 + f.stack.scale.y / 2;
+      if (k >= 1) { f.cover.rotation.z = 0; f.cover.position.y = 0.003 + f.stack.scale.y; this.tickers.delete(tick); try { sound.play('files', { volume: 0.35, gap: 60 }); } catch { /* */ } }
+    };
+    this.tickers.add(tick);
   }
   /** Switch the banker's lamp (the pull chain tugs). */
   lampOn(on: boolean) {
@@ -713,4 +743,4 @@ export class Office implements Stage {
 export { DESK, L, DESK_TOP };
 export const OFFICE_HEAD = HEAD;
 export function soundOf(id: string, v = 0.5) { try { sound.play(id, { volume: v, gap: 40 }); } catch { /* */ } }
-export const _unused = { carriageClock, mat: null as unknown as THREE.Material, OwlActor };
+

@@ -94,27 +94,6 @@ export function nameplate(m: OfficeMats, name: string, title: string): { group: 
 
 // ------------------------------------------------------------------ trays, carafe, pen, stamp, folder, clock
 
-export function inOutTrays(m: OfficeMats): { group: THREE.Group; inTop: number } {
-  const g = new THREE.Group();
-  g.name = 'trays';
-  const b = new Batch();
-  const w = 0.3, d = 0.38, h = 0.06, gap = 0.1;
-  for (let k = 0; k < 2; k++) {
-    const y = k * (h + gap);
-    b.add(m.walnut, at(bbox(w, 0.008, d, { r: 0.002 }), 0, y, 0));
-    for (const sx of [-1, 1]) b.add(m.walnut, at(bbox(0.012, h, d, { r: 0.003 }), sx * (w / 2 - 0.006), y, 0));
-    b.add(m.walnut, at(bbox(w, h * 0.6, 0.012, { r: 0.003 }), 0, y, -d / 2 + 0.006));
-    b.add(m.walnut, at(bbox(w, h * 0.45, 0.012, { r: 0.003 }), 0, y, d / 2 - 0.006));
-    b.add(m.brass, at(bbox(0.07, 0.022, 0.004, { r: 0.001 }), 0, y + 0.012, d / 2 + 0.002));
-    // paper inside
-    b.add(m.paperStack, at(bbox(w - 0.04, 0.012 + k * 0.012, d - 0.06, { r: 0 }), 0, y + 0.008, 0.005));
-  }
-  // brass posts between the tiers
-  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) b.add(m.brass, at(cyl(0.006, gap, 8), sx * (w / 2 - 0.01), h, sz * (d / 2 - 0.02)));
-  g.add(b.build('trays'));
-  return { group: g, inTop: h + gap + 0.03 };
-}
-
 export function carafeSet(m: OfficeMats): THREE.Group {
   const g = new THREE.Group();
   g.name = 'carafe';
@@ -218,95 +197,6 @@ export function folder(): { group: THREE.Group; cover: THREE.Object3D; stack: TH
   cover.position.set(-W / 2, 0.003, 0.005);
   g.add(back, tab, stack, cover);
   return { group: g, cover, stack, label };
-}
-
-/** A brass carriage clock whose hands turn (for the wake-up question). Faces +z. */
-export function carriageClock(m: OfficeMats): { group: THREE.Group; hour: THREE.Object3D; minute: THREE.Object3D; face: THREE.Mesh; knob: THREE.Object3D; set(min: number): void } {
-  const g = new THREE.Group();
-  g.name = 'deskclock';
-  const b = new Batch();
-  const w = 0.1, h = 0.13, d = 0.07;
-  b.add(m.brass, at(bbox(w + 0.016, 0.012, d + 0.016, { r: 0.003 }), 0, 0, 0));
-  b.add(m.brass, at(bbox(w + 0.008, 0.008, d + 0.008, { r: 0.002 }), 0, h - 0.004, 0));
-  for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) b.add(m.brass, at(bbox(0.012, h - 0.01, 0.012, { r: 0.003 }), sx * (w / 2), 0.008, sz * (d / 2)));
-  b.add(m.glass, at(bbox(w, h - 0.012, d, { r: 0 }), 0, 0.008, 0));
-  // the carrying handle
-  const handle = new THREE.TorusGeometry(0.035, 0.004, 6, 16, Math.PI);
-  b.add(m.brass, at(handle, 0, h + 0.004, 0));
-  g.add(b.build('clockcase'));
-  // the enamel dial with painted numerals
-  const S = 128, t = new Tex(S, S);
-  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
-    const r = Math.hypot(x + 0.5 - S / 2, y + 0.5 - S / 2) / (S / 2);
-    t.set(x, y, r > 0.98 ? lerpRamp(C.brass, 0.5) : r > 0.9 ? lerpRamp(C.brass, 0.75 - r * 0.2) : mix3(rgb(0xf6efde), rgb(0xe8dcc0), r * 0.6 + (hash(x, y, 2) - 0.5) * 0.06));
-  }
-  for (let i = 0; i < 60; i++) {
-    const a = (i / 60) * Math.PI * 2, r0 = i % 5 ? 0.82 : 0.76;
-    for (let r = r0; r < 0.86; r += 0.01) t.set(S / 2 + Math.sin(a) * r * S / 2, S / 2 - Math.cos(a) * r * S / 2, rgb(0x1a1814));
-  }
-  const c = t.canvas(64), cg = c.getContext('2d')!;
-  for (let i = 1; i <= 12; i++) {
-    const a = (i / 12) * Math.PI * 2;
-    crispText(cg, String(i), S / 2 + Math.sin(a) * S * 0.31, S / 2 - Math.cos(a) * S * 0.31 + 1, F.caps(12), '#1a1814', { align: 'center', base: 'middle' });
-  }
-  crispText(cg, 'HOLLOW & CO.', S / 2, S * 0.66, F.small(16), '#5a2a1a', { align: 'center' });
-  const ft = new THREE.CanvasTexture(c); ft.colorSpace = THREE.SRGBColorSpace; ft.magFilter = THREE.NearestFilter; ft.minFilter = THREE.LinearMipmapLinearFilter; ft.anisotropy = 4;
-  const face = new THREE.Mesh(new THREE.CircleGeometry(0.044, 32), mat({ map: ft, roughness: 0.35 }));
-  face.position.set(0, 0.008 + (h - 0.012) / 2, d / 2 - 0.004);
-  g.add(face);
-  const handMat = mat({ color: 0x1b2440, metalness: 0.6, roughness: 0.35 });
-  const mk = (len: number, wd: number) => {
-    const p = new THREE.Group();
-    const s = new THREE.Shape();
-    s.moveTo(-wd, -len * 0.18); s.lineTo(wd, -len * 0.18); s.lineTo(wd * 0.5, len * 0.85); s.lineTo(0, len); s.lineTo(-wd * 0.5, len * 0.85); s.closePath();
-    const hm = new THREE.Mesh(new THREE.ShapeGeometry(s), handMat);
-    p.add(hm);
-    p.position.copy(face.position).add(new THREE.Vector3(0, 0, 0.002));
-    return p;
-  };
-  const hour = mk(0.024, 0.0035), minute = mk(0.036, 0.0025);
-  minute.position.z += 0.001;
-  const boss = new THREE.Mesh(new THREE.CircleGeometry(0.004, 10), m.brass);
-  boss.position.copy(face.position).add(new THREE.Vector3(0, 0, 0.004));
-  // a winding knob on top (you turn it)
-  const knob = new THREE.Mesh(lathe([[0, 0], [0.012, 0], [0.013, 0.012], [0.008, 0.016], [0, 0.016]], 12), m.brass);
-  knob.position.set(0.03, h + 0.002, 0);
-  g.add(hour, minute, boss, knob);
-  const set = (min: number) => {
-    const mm = ((min % 720) + 720) % 720;
-    hour.rotation.z = -(mm / 720) * Math.PI * 2;
-    minute.rotation.z = -((mm % 60) / 60) * Math.PI * 2;
-  };
-  set(7 * 60);
-  return { group: g, hour, minute, face, knob, set };
-}
-
-/** A square yellow sticky note (canvas texture you can redraw). */
-export function stickyNote(): { mesh: THREE.Mesh; draw(lines: { t: string; y: number; font?: string; color?: string; box?: boolean }[]): void; canvas: HTMLCanvasElement } {
-  const S = 96;
-  const cv = document.createElement('canvas'); cv.width = S; cv.height = S;
-  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.anisotropy = 4;
-  const geo = new THREE.PlaneGeometry(0.06, 0.06, 4, 4);
-  // a little curl at the bottom edge
-  const p = geo.attributes.position as THREE.BufferAttribute;
-  for (let i = 0; i < p.count; i++) { const y = p.getY(i); if (y < 0) p.setZ(i, (y / -0.03) ** 2 * 0.004); }
-  geo.computeVertexNormals();
-  const mesh = new THREE.Mesh(geo, mat({ map: tex, roughness: 0.9 }));
-  mesh.rotation.x = -Math.PI / 2;
-  mesh.receiveShadow = true; mesh.castShadow = true;
-  const draw = (lines: { t: string; y: number; font?: string; color?: string; box?: boolean }[]) => {
-    const t = new Tex(S, S);
-    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) t.set(x, y, mix3(rgb(0xf2d65a), rgb(0xf8e78a), vnoise(x * 0.05, y * 0.05, 2) * 0.6 + (y < 14 ? -0.25 : 0)));
-    for (let x = 0; x < S; x++) for (let y = 0; y < 3; y++) t.shade(x, y, 0.92);
-    const c = t.canvas(64), g = c.getContext('2d')!;
-    for (const l of lines) {
-      if (l.box) { g.fillStyle = l.color ?? '#1c2340'; g.fillRect(10, l.y - 13, S - 20, 1); g.fillRect(10, l.y + 4, S - 20, 1); g.fillRect(10, l.y - 13, 1, 18); g.fillRect(S - 11, l.y - 13, 1, 18); }
-      crispText(g, l.t, S / 2, l.y, l.font ?? F.hand(12), l.color ?? '#1c2340', { align: 'center' });
-    }
-    const g2 = cv.getContext('2d')!; g2.clearRect(0, 0, S, S); g2.drawImage(c, 0, 0);
-    tex.needsUpdate = true;
-  };
-  return { mesh, draw, canvas: cv };
 }
 
 /** Pip's own paperwork: a slightly messy stack and a letter he's reading. */
@@ -430,91 +320,14 @@ function mergeAll(gs: THREE.BufferGeometry[]): THREE.BufferGeometry {
   return out;
 }
 
-// ------------------------------------------------------------------ a desk phone (a candlestick-era rotary set, modelled)
-
-export function deskPhone(m: OfficeMats): THREE.Group {
-  const g = new THREE.Group();
-  g.name = 'phone';
-  const b = new Batch();
-  const bak = m.blackLacquer;
-  // the body: a sloped base
-  const base = new THREE.Shape();
-  base.moveTo(-0.11, 0); base.lineTo(0.11, 0); base.lineTo(0.09, 0.07); base.lineTo(-0.09, 0.07); base.closePath();
-  const bg = new THREE.ExtrudeGeometry(base, { depth: 0.2, bevelEnabled: true, bevelThickness: 0.008, bevelSize: 0.008, bevelSegments: 2 });
-  bg.translate(0, 0, -0.1);
-  b.add(bak, bg);
-  // the dial: a chrome ring with finger holes over a white card
-  b.add(m.ivory, at(cyl(0.05, 0.004, 24), 0, 0, 0, -0.55, 0, 0).translate(0, 0.07, 0.07));
-  const dial = new THREE.TorusGeometry(0.042, 0.006, 6, 24);
-  b.add(m.chrome, at(dial, 0, 0.077, 0.072, -0.55 - Math.PI / 2, 0, 0));
-  b.add(m.chrome, at(cyl(0.012, 0.008, 12), 0, 0.072, 0.074, -0.55, 0, 0));
-  // cradle prongs and the handset across them
-  for (const sx of [-1, 1]) b.add(bak, at(bbox(0.02, 0.05, 0.03, { r: 0.008 }), sx * 0.085, 0.07, -0.05));
-  const hs = new THREE.Group();
-  b.add(bak, at(cyl(0.014, 0.18, 10), -0.09, 0.125, -0.05, 0, 0, -Math.PI / 2));
-  for (const sx of [-1, 1]) b.add(bak, at(lathe([[0, 0], [0.03, 0], [0.034, 0.02], [0.02, 0.04], [0, 0.042]], 14), sx * 0.1, 0.11, -0.05, 0, 0, sx * 0.3 + Math.PI));
-  void hs;
-  // the curly cord
-  const pts: THREE.Vector3[] = [];
-  for (let i = 0; i <= 60; i++) { const k = i / 60; pts.push(new THREE.Vector3(-0.12 - k * 0.06 + Math.cos(i * 1.6) * 0.008, 0.1 - k * 0.09 + Math.sin(i * 1.6) * 0.008, -0.05 + k * 0.08)); }
-  b.add(bak, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 120, 0.0025, 4));
-  g.add(b.build('phone'));
-  return g;
-}
-
-// ------------------------------------------------------------------ the writing slope the forms rest on
-
-/** A mahogany writing slope (a sloped writing box): a tooled-leather incline the forms rest on, a flat shelf at
- * the top with a brass pen groove. Its local origin is the front-bottom centre on the desk. */
-export const SLOPE = { w: 0.34, front: 0.025, run: 0.34, shelf: 0.1, angle: 0.42, z: -0.55 };
-const slopeTop = SLOPE.front + SLOPE.run * Math.tan(SLOPE.angle);
-export function writingSlope(m: OfficeMats): THREE.Group {
-  const g = new THREE.Group();
-  g.name = 'slope';
-  const { w, front, run, shelf, angle } = SLOPE;
-  const prof = new THREE.Shape();
-  prof.moveTo(0, 0); prof.lineTo(0, front); prof.lineTo(-run, slopeTop); prof.lineTo(-run - shelf, slopeTop); prof.lineTo(-run - shelf, 0); prof.closePath();
-  const body = new THREE.ExtrudeGeometry(prof, { depth: w, bevelEnabled: true, bevelSize: 0.004, bevelThickness: 0.004, bevelSegments: 1 });
-  // shape x is depth (towards -z), y is height; extrude along +z -> rotate so the extrusion runs along x
-  body.rotateY(Math.PI / 2);
-  body.translate(-w / 2, 0, 0);
-  const uv = body.attributes.uv as THREE.BufferAttribute;
-  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 0.5 + 0.3, uv.getY(i) * 0.5);
-  const b = new Batch();
-  b.add(m.mahogany, body);
-  // brass corner mounts and the paper ledge along the front
-  b.add(m.brass, at(bbox(w + 0.006, 0.006, 0.006, { r: 0.002 }), 0, front - 0.001, -0.004));
-  for (const sx of [-1, 1]) b.add(m.brass, at(bbox(0.012, 0.03, 0.012, { r: 0.002 }), sx * (w / 2 + 0.002), 0, -0.004));
-  // the pen groove on the shelf
-  b.add(m.brassDark, at(bbox(0.2, 0.006, 0.024, { r: 0.004 }), 0.06, slopeTop, -run - shelf / 2));
-  g.add(b.build('slope'));
-  // the tooled leather on the incline
-  const leatherGeo = new THREE.PlaneGeometry(w - 0.03, run / Math.cos(angle) - 0.03);
-  const lm = new THREE.Mesh(leatherGeo, m.deskLeather);
-  lm.rotation.x = -Math.PI / 2 + angle;
-  lm.position.set(0, (front + slopeTop) / 2 + 0.0045, -run / 2);
-  lm.receiveShadow = true;
-  g.add(lm);
-  return g;
-}
-/** the pose of a form lying on the slope */
-export const PAPER_POSE = {
-  pos: new THREE.Vector3(0, T + SLOPE.front + (SLOPE.run / 2) * Math.tan(SLOPE.angle) + 0.0062, SLOPE.z - SLOPE.run / 2 + 0.006),
-  rotX: SLOPE.angle,
-};
-
 export const DESK = {
   lamp: new THREE.Vector3(-0.68, T, -1.22),
-  phone: new THREE.Vector3(0.66, T, -1.2),
-  trays: new THREE.Vector3(0.74, T, -0.82),
+  phone: new THREE.Vector3(0.66, T, -1.22),
+  typewriter: new THREE.Vector3(0.6, T, -0.76),
   nameplate: new THREE.Vector3(-0.58, T, -0.62),
-  slope: new THREE.Vector3(0, T, SLOPE.z),
-  paper: PAPER_POSE.pos,
-  stamp: new THREE.Vector3(0.36, T, -0.6),
-  folder: new THREE.Vector3(0.58, T, -0.66),
-  clock: new THREE.Vector3(-0.245, T, -0.86),
-  sticky: new THREE.Vector3(-0.09, T + slopeTop + 0.006, SLOPE.z - SLOPE.run - SLOPE.shelf / 2),
-  work: new THREE.Vector3(0.04, T, -1.28),
-  pen: new THREE.Vector3(0.1, T + slopeTop + 0.012, SLOPE.z - SLOPE.run - SLOPE.shelf / 2),
+  stamp: new THREE.Vector3(0.22, T, -0.62),
+  folder: new THREE.Vector3(0.04, T, -1.12),
+  work: new THREE.Vector3(0.32, T, -1.2),
+  pen: new THREE.Vector3(-0.22, T + 0.007, -1.06),
 };
 export { mul3, hexCSS };
