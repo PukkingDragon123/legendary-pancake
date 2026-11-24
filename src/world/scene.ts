@@ -540,6 +540,7 @@ export class Scene {
     setFurQuality(t); // [owl4] the owl's fluff: 8 shells on high, 5 on medium, 3 on low
     this.vista.setTier(t);
     this.sky.shafts = t === 'high';
+    this.house.setTier(t); // [house4] the oak drops its foot rocks and extra lamps on low
     const size = t === 'high' ? 2048 : 1024, sh = this.sky.sun.shadow;
     if (sh.mapSize.x !== size) { sh.mapSize.set(size, size); sh.map?.dispose(); sh.map = null; }
     // the meadow thins out on low

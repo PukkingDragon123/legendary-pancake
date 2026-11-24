@@ -11,6 +11,7 @@ import type { ItemDef } from '../assets/furniture.ts';
 import { buildProp, propMesh, PX } from '../gfx/box.ts';
 import { boundsOf } from '../game/home.ts';
 import { instanceGLB } from '../gfx/glb.ts';
+import { liveClock } from '../assets/clocks.ts';
 
 const q = new URLSearchParams(location.search);
 const CELL = +(q.get('cell') ?? 220);
@@ -74,6 +75,7 @@ function lightFor(def: ItemDef, night: boolean): THREE.PointLight | null {
 
 async function load(def: ItemDef) {
   const { root, clips } = await instanceGLB(def.model!);
+  liveClock(root, def.id)?.(new Date());
   const mixer = new THREE.AnimationMixer(root);
   const clip = clips.find((c) => c.name === 'idle') ?? clips[0];
   if (clip) mixer.clipAction(clip).play();
