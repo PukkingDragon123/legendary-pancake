@@ -332,8 +332,8 @@ export function Intro() {
     (async () => {
       if (devStep) {
         releaseBoot();
-        // screenshots (?obfast): skip the splash's exit animation
-        if (fast) { const bt = document.getElementById('boot'); if (bt) bt.style.display = 'none'; }
+        // dev pages: skip the splash's exit animation
+        { const bt = document.getElementById('boot'); if (bt) bt.style.display = 'none'; }
         const i = Math.max(0, STEPS.findIndex((s) => s.id === devStep));
         r.pip.pose = 'stand';
         setSi(i); siRef.current = i;
