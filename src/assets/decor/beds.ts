@@ -184,8 +184,8 @@ add({
 });
 
 add({
-  id: 'floor_futon', model: 'items/floor_futon.glb', name: 'Tatami Futon', cat: 'beds', price: 360, rarity: 'uncommon', size: [3, 2],
-  blurb: 'Low, quiet and smells faintly of rice straw. Comes with a bedside tea tray.',
+  id: 'floor_futon', model: 'items/floor_futon.glb', name: 'Floor Futon', cat: 'beds', price: 360, rarity: 'uncommon', size: [3, 2],
+  blurb: 'Low, quiet and smells faintly of rice straw. Roll it up by day, unroll it by moonlight.',
   sleep: { x: 2, y: 5, z: 0, rot: 90 },
   build: () => {
     const out: BoxSpec[] = [];
@@ -211,8 +211,8 @@ add({
 // ------------------------------------------------------------------ seating
 
 add({
-  id: 'patch_sofa', model: 'items/patch_sofa.glb', name: 'Patchwork Sofa', cat: 'seating', price: 620, rarity: 'rare', size: [3, 1],
-  blurb: 'Three seats, eleven fabrics and one crumb-filled crack nobody talks about.',
+  id: 'patch_sofa', model: 'items/patch_sofa.glb', name: 'Floral Sofa', cat: 'seating', price: 620, rarity: 'rare', size: [3, 1],
+  blurb: 'Three faded-rose seats and one crumb-filled crack nobody talks about.',
   sit: [{ x: -9, y: 9, z: 1 }, { x: 0, y: 9, z: 1 }, { x: 9, y: 9, z: 1 }],
   build: () => {
     const out: BoxSpec[] = [];
@@ -345,8 +345,8 @@ add({
 });
 
 add({
-  id: 'wingback', model: 'items/wingback.glb', name: 'Tartan Wingback', cat: 'seating', price: 520, rarity: 'rare', size: [2, 2],
-  blurb: 'Tall wings keep out draughts, gossip and the sound of alarms. Footstool included.',
+  id: 'wingback', model: 'items/wingback.glb', name: 'Rose Wingback', cat: 'seating', price: 520, rarity: 'rare', size: [2, 2],
+  blurb: 'Tall wings keep out draughts, gossip and the sound of alarms.',
   sit: [{ x: 0, y: 8, z: 1 }],
   build: () => {
     const out: BoxSpec[] = [];

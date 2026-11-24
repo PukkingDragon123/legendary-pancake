@@ -29,8 +29,8 @@ const jar = (x: number, y: number, z: number, h: number, fill: string, lid = MET
 // ------------------------------------------------------------------ tables
 
 add({
-  id: 'writing_desk', model: 'items/writing_desk.glb', name: 'Roll-Top Writing Desk', cat: 'tables', price: 640, rarity: 'rare', size: [2, 1], surface: 13,
-  blurb: 'Eleven cubbyholes, one secret drawer and a quill that only writes kind letters.',
+  id: 'writing_desk', model: 'items/writing_desk.glb', name: 'Schoolroom Desk', cat: 'tables', price: 640, rarity: 'rare', size: [2, 1], surface: 13,
+  blurb: 'A desk, a chair and a satchel, ready for letters home and very late homework.',
   sit: [{ x: 0, y: 0, z: 10, rot: 180 }],
   build: () => {
     const out: BoxSpec[] = [];
@@ -276,8 +276,8 @@ add({
 });
 
 add({
-  id: 'toy_chest', model: 'items/toy_chest.glb', name: 'Starry Toy Chest', cat: 'storage', price: 340, rarity: 'uncommon', size: [2, 1],
-  blurb: 'Lid open, toys spilling out. The teddy says it was like this when he got here.',
+  id: 'toy_chest', model: 'items/toy_chest.glb', name: 'Pine Toy Chest', cat: 'storage', price: 340, rarity: 'uncommon', size: [2, 1],
+  blurb: 'A sturdy pine box for toys, blankets and anything that needs hiding before guests arrive.',
   build: () => {
     const out: BoxSpec[] = [];
     const c = '#3f5a9a';
@@ -354,7 +354,7 @@ add({
 
 add({
   id: 'cubby_shelf', model: 'items/cubby_shelf.glb', name: 'Cubby Shelf', cat: 'storage', price: 380, rarity: 'uncommon', size: [2, 1], surface: 25,
-  blurb: 'Nine little rooms for nine little treasures. Baskets keep the mess polite.',
+  blurb: 'Nine little rooms waiting for nine little treasures.',
   build: () => {
     const out: BoxSpec[] = [];
     const c = WD.birch, fr = joinery(c, { axis: 'y' }), sh = joinery(c, { axis: 'x' });
