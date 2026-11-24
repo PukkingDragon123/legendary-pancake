@@ -85,9 +85,15 @@ export function moonLamp(k = 1, res = 2, glow = 0.6, lit = 1): string {
       const md = Math.hypot(mx - moonC[0] - 1, my - moonC[1]) / GR;
       const halo = Math.max(0, 1 - md * 1.25) * (0.45 + g * 0.55) * lit;
       const sky = rampAt(PAL.sapphire, clamp(0.62 - d * 0.42 + (dy / GR) * 0.1 + halo * 0.45 + (fbm(mx * 0.12, my * 0.12, 9) - 0.5) * 0.14 - (1 - lit) * 0.25));
-      const warm = mix(sky, hex('#f6d995'), halo * halo * 0.55);
+      // [ui4] a night nebula drifts inside the glass: violet and teal veils, hue-shifted, never a flat fill
+      const neb = fbm(mx * 0.16 + 3, my * 0.2, 31, 3), veil = fbm(mx * 0.1, my * 0.14 + 7, 33, 2);
+      let warm = mix(sky, hex('#f6d995'), halo * halo * 0.55);
+      if (neb > 0.56) warm = mix(warm, hex('#7a4aa8'), Math.min(0.45, (neb - 0.56) * 2.2) * lit);
+      if (veil > 0.6) warm = mix(warm, hex('#2a8a9a'), Math.min(0.35, (veil - 0.6) * 2) * lit);
+      // tiny seed bubbles caught in the blown glass
+      if (hash(Math.floor(mx * 2), Math.floor(my * 2), 51) > 0.993) warm = mix(warm, hex('#dff2ff'), 0.6);
       // the glass edge: a thin darker refracting band, then a pale rim
-      if (d > 0.9) return mix(warm, hex('#0a1230'), (d - 0.9) * 5);
+      if (d > 0.9) return mix(warm, hex('#120a30'), (d - 0.9) * 5);
       return warm;
     };
     r.fill(disc(cx, gy, GR), (x, y) => 5 + 9 * Math.sqrt(Math.max(0, 1 - ((x - cx) ** 2 + (y - gy) ** 2) / (GR * GR))), night, { spec: 0, shin: 1, emit: 1 }, { id: 5 });
@@ -158,6 +164,7 @@ export function alarmClock(k = 1, res = 2, ringF = 0): string {
       const loc = (x: number, y: number) => [(x - bx) * ca + (y - by) * sa, -(x - bx) * sa + (y - by) * ca];
       const bell: Shape = (x, y) => { const [u, v] = loc(x, y); return v <= 2.2 && (u / 8) ** 2 + ((v - 2.2) / 8.4) ** 2 <= 1; };
       r.fill(bell, (x, y) => { const [u, v] = loc(x, y); return 3 + 6 * Math.sqrt(Math.max(0, 1 - (u / 8) ** 2 - ((v - 2.2) / 8.4) ** 2)) + (v > 0.8 ? 0.8 : 0); }, brass({ base: 0.66, brush: 'r', cx: bx, cy: by + 2 }), MAT.brass, { id: 12 + (sd > 0 ? 1 : 0), seam: true });
+      r.carve(bell, (x, y) => (vnoise(x * 1.25 + sd * 7, y * 1.25, 61) - 0.5) * 1.1); // hammered by hand: soft dimples
       const [sx, sy] = [bx + sa * 7.6, by - ca * 7.6];
       r.fill(disc(sx, sy, 1.5), dome(sx, sy, 1.5, 1.5, 1.5, 8), brass({ base: 0.7 }), MAT.brass, { id: 14, seam: true });
     }
@@ -171,7 +178,9 @@ export function alarmClock(k = 1, res = 2, ringF = 0): string {
     r.fill(ring(cx, cy, dial + 0.2, 16.4), torus(cx, cy, 14.6, 2.1, 2.6, 5), brass({ base: 0.68, brush: 'r', cx, cy }), MAT.brass, { id: 22 });
     r.fill(disc(cx, cy, dial + 0.3), (x, y) => 5.2 - 0.6 * (((x - cx) ** 2 + (y - cy) ** 2) / (dial * dial)), (x, y, mx, my) => {
       const d = Math.hypot(mx - cx, my - cy) / dial;
-      const c = rampAt(PAL.enamel, 0.78 - d * 0.18 + (vnoise(mx * 0.7, my * 0.7, 3) - 0.5) * 0.05);
+      let c = rampAt(PAL.enamel, 0.78 - d * 0.18 + (vnoise(mx * 0.7, my * 0.7, 3) - 0.5) * 0.05);
+      c = mix(c, hex('#e8cc8a'), clamp((d - 0.55) * 0.7) * 0.5);
+      if (Math.abs(fbm(mx * 0.5, my * 0.5, 13) - 0.5) < 0.012) c = mul(c, 0.84); // crazing in the old enamel
       return d > 0.93 ? mul(c, 0.86) : c;
     }, MAT.enamel, { id: 23, seam: true });
     // ---- dial printing: a minute track, bold hour bars, numerals at the quarters, a sky-blue moon
@@ -364,6 +373,8 @@ export function bezel(d: number, k = 2, res = 1, inner = 0.76): string {
     const r = new Relief(d, d, res, k), c = d / 2, ri = (d / 2) * inner;
     r.fill(ring(c, c, ri, d / 2 - 0.2), torus(c, c, (ri + d / 2) / 2, (d / 2 - ri) / 2 + 0.2, 3.4, 2), brass({ base: 0.62, brush: 'r', cx: c, cy: c }), MAT.brass, { id: 1 });
     r.carve(ring(c, c, ri + 0.2, ri + 0.9), () => -0.8);
+    r.carve(ring(c, c, ri + 1, d / 2 - 0.6), (x, y) => { const a = Math.atan2(y - c, x - c), rr = Math.hypot(x - c, y - c); return Math.sin(a * 26 + rr * 1.6) > 0.55 ? -0.7 : 0; }); // rope twist
+    r.carve(ring(c, c, ri, d / 2), (x, y) => (vnoise(x * 0.9, y * 0.9, 63) > 0.74 ? -0.6 : 0)); // knocks and dents
     for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + (i * Math.PI) / 2, rr = (ri + d / 2) / 2; screw(r, c + Math.cos(a) * rr, c + Math.sin(a) * rr, 0.9, a); }
     return r.url();
   });
@@ -374,7 +385,13 @@ export function medallion(d: number, k = 2, res = 1, hue: PalRamp = 'sapphire'):
   return cachedRelief(`medal:${d}:${k}:${res}:${hue}`, () => {
     const r = new Relief(d, d, res, k), c = d / 2, R = PAL[hue];
     r.fill(disc(c, c, d / 2 - 0.1), torus(c, c, d / 2 - 1.6, 1.7, 2.6, 2), brass({ base: 0.64, brush: 'r', cx: c, cy: c }), MAT.brass, { id: 1 });
-    r.fill(disc(c, c, d / 2 - 3), dome(c, c, d / 2 - 3, d / 2 - 3, 2.6, 2.2), (_x, _y, mx, my) => rampAt(R, clamp(0.5 + (fbm(mx * 0.3, my * 0.3, 4) - 0.5) * 0.18 - Math.hypot(mx - c, my - c) / d * 0.3)), MAT.enamel, { id: 2, seam: true });
+    r.fill(disc(c, c, d / 2 - 3), dome(c, c, d / 2 - 3, d / 2 - 3, 2.6, 2.2), (_x, _y, mx, my) => {
+      // guilloché: a wavy sunburst cut into the metal shows through the glassy enamel
+      const a = Math.atan2(my - c, mx - c), rr = Math.hypot(mx - c, my - c);
+      const cut = Math.sin(a * 14 + Math.sin(rr * 1.4) * 1.6) > 0.3 ? 0.07 : -0.03;
+      const v = clamp(0.5 + cut + (fbm(mx * 0.3, my * 0.3, 4) - 0.5) * 0.14 - rr / d * 0.3);
+      return mix(rampAt(R, v), hex('#6a3aa0'), clamp(0.18 - v * 0.2));
+    }, MAT.enamel, { id: 2, seam: true });
     for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2, rr = d / 2 - 4.4; r.paint(disc(c + Math.cos(a) * rr, c + Math.sin(a) * rr, 0.45), gold(0.7), MAT.brass); }
     return r.url();
   });
@@ -385,7 +402,7 @@ export function plusButton(d: number, k = 2, res = 1, down = false): string {
   return cachedRelief(`plus:${d}:${k}:${res}:${down}`, () => {
     const r = new Relief(d, d, res, k), c = d / 2;
     r.fill(disc(c, c, d / 2 - 0.1), torus(c, c, d / 2 - 1.3, 1.4, 2, 1), brass({ base: 0.62 }), MAT.brass, { id: 1 });
-    r.fill(disc(c, c, d / 2 - 2.4), dome(c, c, d / 2 - 2.4, d / 2 - 2.4, down ? 0.8 : 2.4, down ? 1 : 2), weave(PAL.emerald, { base: down ? 0.45 : 0.55 }), MAT.enamel, { id: 2, seam: true });
+    r.fill(disc(c, c, d / 2 - 2.4), dome(c, c, d / 2 - 2.4, d / 2 - 2.4, down ? 0.8 : 2.4, down ? 1 : 2), (_x, _y, mx, my) => { const v = clamp((down ? 0.45 : 0.56) + (vnoise(mx * 0.8, my * 0.8, 7) - 0.5) * 0.14); const crack = Math.abs(fbm(mx * 0.6, my * 0.6, 19) - 0.5) < 0.016; return crack ? rampAt(PAL.emerald, 0.24) : mix(rampAt(PAL.emerald, v), hex('#2a8a9a'), 0.12); }, MAT.enamel, { id: 2, seam: true });
     const pl = or(rect(c - 3, c - 0.9, 6, 1.8), rect(c - 0.9, c - 3, 1.8, 6));
     r.paint(pl, solid(hex('#fff4d6')), MAT.enamel); r.carve(pl, () => 1);
     return r.url();
@@ -640,6 +657,20 @@ export function toolIcon(id: ToolIcon, k = 2, res = 1): string {
     }
     return r.url();
   });
+}
+
+/**
+ * An end cap for the glass level tube, 5 x 12 units: a turned brass ferrule with a knurled band, a domed end
+ * and a little leaf collar where it grips the glass (drawn for the left end; mirror it for the right).
+ */
+export function tubeCap(k = 2): HTMLCanvasElement {
+  const r = new Relief(5, 12, 1, k);
+  r.fill(rect(1.4, 0.4, 3.6, 11.2), tubeX(6, 5.6, 1), brass({ base: 0.62, brush: 'x', patina: 0.3 }), MAT.brass, { id: 1 });
+  r.carve(rect(2.2, 0.4, 1.2, 11.2), (x, y) => (Math.floor(y * 2.2 + x) % 2 ? -0.5 : 0.2)); // knurling
+  r.fill(ell(1.4, 6, 1.4, 5.2), dome(1.4, 6, 1.4, 5.2, 1.4, 4), brass({ base: 0.68 }), MAT.brass, { id: 2, seam: true });
+  for (const [y, s] of [[2.2, -1], [9.8, 1]] as [number, number][]) r.fill(poly([[3.8, y], [5, y + s * 0.4], [5, y + s * 2.2], [4.2, y + s * 1.2]]), flat(5), brass({ base: 0.74 }), MAT.brass, { id: 3, seam: true });
+  r.chip = 0;
+  return r.canvas();
 }
 
 // ------------------------------------------------------------------ the nightstand's props (Sleep screen)
