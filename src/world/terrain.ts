@@ -189,7 +189,7 @@ void main() {
   float foam = step(0.975 + 0.015 * sin(uTime * 1.4 + a * 9.0), pd);
   col = mix(col, uFoam, foam * 0.45);
   float sp = step(0.99, h21(q * 16.0 + floor(uTime * 2.5) * 7.0)) * (1.0 - foam) * (1.0 - bank);
-  col = col * uLight + sp * uFoam * 0.45;
+  col = col * uLight + sp * uFoam * (0.5 + 2.2 * min(1.0, dot(uLight, vec3(0.45)))); // [look4] HDR glints the bloom catches
   float alpha = 0.86 + foam * 0.12 + sp * 0.1;
   // [world] frozen pond: pale blue ice with white cracks and frosted rim
   if (uIce > 0.01) {

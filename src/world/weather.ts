@@ -458,10 +458,10 @@ export class Weather {
     this.sc.flora.setSeason(s);
     this.sc.vista?.setSeason(s); // [look4] the far woods too
     this.sc.critters.setSeason(s.season, s.t);
-    const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.04, 0.94], summer: [1, 1, 1], autumn: [1.08, 0.96, 0.78], winter: [0.9, 0.91, 0.9] }; // [world3] calm
+    const tint: Record<Season, [number, number, number]> = { spring: [0.98, 1.06, 0.92], summer: [1, 1.02, 0.98], autumn: [1.05, 1.0, 0.86], winter: [0.9, 0.91, 0.9] }; // [look4] stays green into autumn
     GRASS.uTint.value.setRGB(...tint[s.season]);
     const late = s.season === 'autumn' ? Math.max(0, (s.t - 0.45) / 0.55) : 0;
-    GRASS.uBloom.value = s.season === 'winter' ? 0 : s.season === 'autumn' ? 0.3 * (1 - late) : 1;
+    GRASS.uBloom.value = s.season === 'winter' ? 0 : s.season === 'autumn' ? 0.6 - 0.2 * late : 1; // [look4] autumn asters and late flowers keep the meadow colourful
     GRASS.uLitter.value = s.season === 'autumn' ? 0.35 + late * 0.5 : s.season === 'winter' ? 0.25 : 0;
     // the painted ground follows along: golden leaf litter in autumn, faded in winter
     const ground = this.sc.terrain.group.getObjectByName('ground') as THREE.Mesh | undefined;

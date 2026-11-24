@@ -170,6 +170,20 @@ export function planForest(quality: 'low' | 'high'): ForestPlan {
     const a = r.range(0, Math.PI * 2), d = r.range(9.5, 17);
     drift(r.pick(driftKinds), Math.cos(a) * d, Math.sin(a) * d, quality === 'high' ? 16 : 9, 1.6);
   }
+  // [look4] the foreground meadow nearest the camera is thick with wildflowers (its own generator, so the rest of the
+  // forest's planting stays exactly where it was)
+  {
+    const fr = rng(SEED ^ 0xf10);
+    const kinds = ['buttercup', 'campion', 'forgetme', 'daisy', 'violet', 'foxglove', 'primrose', 'campion', 'buttercup'];
+    for (let i = 0; i < 14; i++) {
+      const cx = fr.range(-12, 12), cz = fr.range(7.5, 19.5), cells = DRIFT_CELLS[kinds[i % kinds.length]];
+      flowers.push({ x: cx, z: cz });
+      for (let k = 0; k < (quality === 'high' ? 30 : 16); k++) {
+        const a = fr.range(0, Math.PI * 2), d = Math.sqrt(fr()) * 2.1, x = cx + Math.cos(a) * d, z = cz + Math.sin(a) * d;
+        if (dry(x, z, 1.18, 0.75) && groundY(x, z) >= 0 && !inGarden(x, z, 0.4)) grass.push({ x, y: surfaceY(x, z), z, rot: fr.range(0, Math.PI), size: fr.range(0.8, 1.2), cell: cells[k % cells.length], tint: fr.range(0.94, 1.1) });
+      }
+    }
+  }
 
   // ferns in the shade round the trunks, moss cushions, bark debris and fallen cones
   for (let i = 0; i < (quality === 'high' ? 70 : 40); i++) {

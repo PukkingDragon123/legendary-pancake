@@ -191,14 +191,14 @@ void main() {
       float n2 = cloudDensity(uv + sdir);
       float lit = clamp(0.55 + (n - n2) * 4.5, 0.0, 1.0);
       float shade = clamp(lit * 0.8 + (1.0 - dens) * 0.3 + (uSunDir.y > 0.0 ? 0.05 : 0.0), 0.0, 1.0);
-      float lvl = floor(shade * 4.0 + px * 0.999) / 4.0;
+      float lvl = floor(shade * 4.0 + 0.3 + px * 0.4) / 4.0;
       vec3 cc = mix(uCloudDark, uCloudLit, lvl);
       // a silver lining where the cloud thins on the sun's side
       float rim = (1.0 - smoothstep(0.0, 0.45, dens)) * smoothstep(0.45, 0.9, lit);
       cc += uCloudRim * rim;
       // far clouds sink into the horizon haze
       cc = mix(cc, col, (1.0 - smoothstep(0.02, 0.3, d.y)) * 0.55);
-      float a = step(px, dens * 1.6) * smoothstep(0.004, 0.06, d.y);
+      float a = step(0.3 + px * 0.25, dens) * smoothstep(0.004, 0.06, d.y);
       col = mix(col, cc, a * (0.85 + 0.15 * uCloud));
     }
   }
