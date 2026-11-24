@@ -3211,429 +3211,160 @@
    "sides": 9
   },
   {
-   "id": "stalk",
-   "shape": "prism",
+   "id": "pplant",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    5.671
+    7.0,
+    9.0
    ],
    "pivot": [
-    14.273,
-    11.771,
-    103.022
+    13.561,
+    13.2,
+    101.417
    ],
    "parent": "porch",
    "rotation": [
-    -77.783,
-    7.699,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    14.3,
-    11.771,
-    103.22
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    7.699,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    14.354,
-    15.142,
-    103.616
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    6.331,
+    -2.449
    ],
    "paint": {
-    "ramp": "rose",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "rose:3",
+     "P": "rose:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
+   "art": [
+    "..............",
+    "..............",
+    "..............",
+    "..............",
+    "......P.......",
+    ".....pPP......",
+    "....pPcPP.....",
+    "....lpppd.....",
+    ".....lsm......",
+    "......s.......",
+    "....l.s.d.....",
+    ".....lsm......",
+    "......s.......",
+    ".....l.s.d....",
+    "......lsm.....",
+    ".......s......",
+    ".....l.s.d....",
+    "......lsm....."
+   ],
+   "plane": "xy"
   },
   {
-   "id": "stalk_1",
-   "shape": "prism",
+   "id": "pplant_1",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    3.952
+    7.0,
+    9.0
    ],
    "pivot": [
-    15.837,
-    10.883,
-    100.113
+    13.995,
+    13.2,
+    100.939
    ],
    "parent": "porch",
    "rotation": [
-    -72.323,
-    115.761,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_1",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    16.017,
-    10.883,
-    100.026
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    115.761,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_1",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    16.378,
-    13.365,
-    99.853
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    63.638,
+    2.887
    ],
    "paint": {
-    "ramp": "rose",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "rose:3",
+     "P": "rose:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
+   "art": [
+    "..............",
+    "..............",
+    ".....P........",
+    "....pPP.......",
+    "...pPcPP......",
+    "....ppp.......",
+    "....P.s.......",
+    "...pPPs.d.....",
+    "..pPcPPm......",
+    "...ppps.......",
+    "..l.s.s.d.....",
+    "...lslsm......",
+    ".....ss.......",
+    "..l.s.s.d.....",
+    "...lslsm......",
+    "....s.s.......",
+    "..l.s.s.d.....",
+    "...lslsm......"
+   ],
+   "plane": "xy"
   },
   {
-   "id": "stalk_2",
-   "shape": "prism",
+   "id": "pplant_2",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    4.511
+    7.0,
+    9.0
    ],
    "pivot": [
-    14.27,
-    11.174,
-    98.978
+    13.513,
+    13.2,
+    100.434
    ],
    "parent": "porch",
    "rotation": [
-    -74.573,
-    172.386,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_2",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    14.297,
-    11.174,
-    98.78
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    172.386,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_2",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    14.35,
-    13.948,
-    98.383
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    128.058,
+    -0.672
    ],
    "paint": {
-    "ramp": "rose",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "rose:3",
+     "P": "rose:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
-  },
-  {
-   "id": "stalk_3",
-   "shape": "prism",
-   "size": [
-    0.7,
-    0.7,
-    5.499
+   "art": [
+    "..............",
+    "..............",
+    "..............",
+    "........P.....",
+    ".......pPP....",
+    "......pPcPP...",
+    ".......ppp....",
+    ".....l.s.d....",
+    "......lsm.....",
+    "........s.....",
+    "......l.s.d...",
+    ".......lsm....",
+    "........s.....",
+    "......l.s.d...",
+    ".......lsm....",
+    "........s.....",
+    "......l.s.d...",
+    ".......lsm...."
    ],
-   "pivot": [
-    12.046,
-    11.683,
-    100.415
-   ],
-   "parent": "porch",
-   "rotation": [
-    -77.395,
-    -106.666,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_3",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    11.854,
-    11.683,
-    100.358
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    253.334,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_3",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    11.471,
-    14.966,
-    100.243
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
-    0.0,
-    0.0
-   ],
-   "paint": {
-    "ramp": "rose",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
-   },
-   "sides": 6
-  },
-  {
-   "id": "stalk_4",
-   "shape": "prism",
-   "size": [
-    0.7,
-    0.7,
-    3.31
-   ],
-   "pivot": [
-    12.127,
-    10.543,
-    101.809
-   ],
-   "parent": "porch",
-   "rotation": [
-    -68.745,
-    -66.622,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_4",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    11.944,
-    10.543,
-    101.889
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    293.378,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_4",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    11.577,
-    12.685,
-    102.048
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
-    0.0,
-    0.0
-   ],
-   "paint": {
-    "ramp": "rose",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
-   },
-   "sides": 6
+   "plane": "xy"
   },
   {
    "id": "pot_1",
@@ -3709,429 +3440,160 @@
    "sides": 9
   },
   {
-   "id": "stalk_5",
-   "shape": "prism",
+   "id": "pplant_3",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    5.965
+    7.0,
+    9.0
    ],
    "pivot": [
-    -12.481,
-    11.422,
-    103.073
+    -13.453,
+    12.7,
+    102.537
    ],
    "parent": "porch",
    "rotation": [
-    -78.395,
-    54.777,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_5",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    -12.317,
-    11.422,
-    103.188
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    54.777,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_5",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    -11.99,
-    14.943,
-    103.419
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    -10.643,
+    -4.151
    ],
    "paint": {
-    "ramp": "cream",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "cream:3",
+     "P": "cream:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
+   "art": [
+    "..............",
+    "..............",
+    ".....P........",
+    "....pPP.......",
+    "...pPcPP......",
+    "....ppp.......",
+    ".....s........",
+    "...l.s.d......",
+    "....lsm.......",
+    ".....s........",
+    "...l.s.d......",
+    "....lsm.......",
+    ".....s........",
+    "...l.s.d......",
+    "....lsm.......",
+    ".....s........",
+    "...l.s.d......",
+    "....lsm......."
+   ],
+   "plane": "xy"
   },
   {
-   "id": "stalk_6",
-   "shape": "prism",
+   "id": "pplant_4",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    3.469
+    7.0,
+    9.0
    ],
    "pivot": [
-    -12.201,
-    10.127,
-    102.474
+    -13.597,
+    12.7,
+    102.283
    ],
    "parent": "porch",
    "rotation": [
-    -69.761,
-    75.24,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_6",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    -12.008,
-    10.127,
-    102.525
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    75.24,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_6",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    -11.621,
-    12.355,
-    102.627
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    64.074,
+    -1.919
    ],
    "paint": {
-    "ramp": "cream",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "cream:3",
+     "P": "cream:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
+   "art": [
+    "..............",
+    "..............",
+    ".......P......",
+    "......pPP.....",
+    ".....pPcPP....",
+    ".....Pppp.....",
+    "....pPP.......",
+    "...pPcPPd.....",
+    "....pppm......",
+    ".....s.s......",
+    "...llssdd.....",
+    "....lssm......",
+    ".....s.s......",
+    "...llssdd.....",
+    "....lssm......",
+    ".....ss.......",
+    "...llssdd.....",
+    "....lssm......"
+   ],
+   "plane": "xy"
   },
   {
-   "id": "stalk_7",
-   "shape": "prism",
+   "id": "pplant_5",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    5.344
+    7.0,
+    9.0
    ],
    "pivot": [
-    -14.383,
-    11.104,
-    100.18
+    -13.873,
+    12.7,
+    102.128
    ],
    "parent": "porch",
    "rotation": [
-    -77.024,
-    -168.129,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_7",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    -14.424,
-    11.104,
-    99.984
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    191.871,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_7",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    -14.506,
-    14.308,
-    99.593
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    121.949,
+    -3.416
    ],
    "paint": {
-    "ramp": "cream",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "cream:3",
+     "P": "cream:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
-  },
-  {
-   "id": "stalk_8",
-   "shape": "prism",
-   "size": [
-    0.7,
-    0.7,
-    4.104
+   "art": [
+    "..............",
+    "..............",
+    "......P.......",
+    ".....pPP......",
+    "....pPcPP.....",
+    ".....ppp..P...",
+    "......s..pPP..",
+    "....l.s.pPcPP.",
+    ".....lsm.ppp..",
+    "......s...s...",
+    ".....ls.lds.d.",
+    "......lsmlsm..",
+    ".......s..s...",
+    ".....l.slds.d.",
+    "......lsmlsm..",
+    ".......s..s...",
+    ".....l.slds.d.",
+    "......lsmlsm.."
    ],
-   "pivot": [
-    -15.791,
-    10.462,
-    101.499
-   ],
-   "parent": "porch",
-   "rotation": [
-    -72.997,
-    -105.627,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_8",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    -15.984,
-    10.462,
-    101.445
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    254.373,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_8",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    -16.369,
-    13.024,
-    101.337
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
-    0.0,
-    0.0
-   ],
-   "paint": {
-    "ramp": "cream",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
-   },
-   "sides": 6
-  },
-  {
-   "id": "stalk_9",
-   "shape": "prism",
-   "size": [
-    0.7,
-    0.7,
-    4.968
-   ],
-   "pivot": [
-    -15.127,
-    10.91,
-    103.48
-   ],
-   "parent": "porch",
-   "rotation": [
-    -76.021,
-    -37.282,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_9",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    -15.248,
-    10.91,
-    103.639
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    322.718,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_9",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    -15.49,
-    13.92,
-    103.957
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
-    0.0,
-    0.0
-   ],
-   "paint": {
-    "ramp": "cream",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
-   },
-   "sides": 6
+   "plane": "xy"
   },
   {
    "id": "pot_2",
@@ -4207,429 +3669,160 @@
    "sides": 9
   },
   {
-   "id": "stalk_10",
-   "shape": "prism",
+   "id": "pplant_6",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    4.786
+    7.0,
+    9.0
    ],
    "pivot": [
-    15.896,
-    10.316,
-    119.633
+    15.186,
+    12.2,
+    118.053
    ],
    "parent": "porch",
    "rotation": [
-    -75.478,
-    13.634,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_10",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    15.943,
-    10.316,
-    119.827
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    13.634,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_10",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    16.037,
-    13.233,
-    120.216
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    -3.121,
+    1.039
    ],
    "paint": {
-    "ramp": "lilac",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "lilac:3",
+     "P": "lilac:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
+   "art": [
+    "..............",
+    "..............",
+    "..............",
+    "..............",
+    ".......P......",
+    "......pPP..P..",
+    ".....pPcPPpPP.",
+    ".....lppppPcPP",
+    "......lsm.ppp.",
+    ".......s...s..",
+    ".....l.s.d.s.d",
+    "......lsm.lsm.",
+    ".......s...s..",
+    ".....l.sld.sd.",
+    "......lsmlsm..",
+    ".......s..s...",
+    "....l.s.d.s.d.",
+    ".....lsm.lsm.."
+   ],
+   "plane": "xy"
   },
   {
-   "id": "stalk_11",
-   "shape": "prism",
+   "id": "pplant_7",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    4.959
+    7.0,
+    9.0
    ],
    "pivot": [
-    17.177,
-    10.406,
-    117.906
+    15.651,
+    12.2,
+    117.479
    ],
    "parent": "porch",
    "rotation": [
-    -75.997,
-    93.197,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_11",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    17.377,
-    10.406,
-    117.895
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    93.197,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_11",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    17.776,
-    13.412,
-    117.873
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    48.316,
+    3.375
    ],
    "paint": {
-    "ramp": "lilac",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "lilac:3",
+     "P": "lilac:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
+   "art": [
+    "..............",
+    "......P.......",
+    ".....pPP......",
+    "....pPcPP.....",
+    "....lpppd.....",
+    ".....lsm......",
+    "......s.......",
+    "....lPs.d.....",
+    "....pPPm......",
+    "...pPcPP......",
+    "...lpppdd.....",
+    "....lssm......",
+    ".....ss.......",
+    "..l.sls..d....",
+    "...lsmlsm.....",
+    "....s.s.......",
+    "..l.s.s.d.....",
+    "...lslsm......"
+   ],
+   "plane": "xy"
   },
   {
-   "id": "stalk_12",
-   "shape": "prism",
+   "id": "pplant_8",
+   "shape": "card",
    "size": [
-    0.7,
-    0.7,
-    3.414
+    7.0,
+    9.0
    ],
    "pivot": [
-    15.504,
-    9.598,
-    116.32
+    15.211,
+    12.2,
+    117.681
    ],
    "parent": "porch",
    "rotation": [
-    -69.424,
-    179.851,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_12",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    15.505,
-    9.598,
-    116.12
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    179.851,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_12",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    15.506,
-    11.797,
-    115.72
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
     0.0,
-    0.0
+    131.895,
+    -0.297
    ],
    "paint": {
-    "ramp": "lilac",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
+    "ramp": "leaf",
+    "art_key": {
+     "s": "fern:1",
+     "d": "leaf:2",
+     "m": "leaf:3",
+     "l": "leaf:5",
+     "p": "lilac:3",
+     "P": "lilac:4",
+     "c": "ochre:5"
+    }
    },
-   "sides": 6
-  },
-  {
-   "id": "stalk_13",
-   "shape": "prism",
-   "size": [
-    0.7,
-    0.7,
-    5.642
+   "art": [
+    "..............",
+    "......P.......",
+    ".....pPP......",
+    "....pPcPP.....",
+    "....lpppd.....",
+    ".....lsm......",
+    "......s.......",
+    "....l.s.d.....",
+    ".....lsm......",
+    "......s.......",
+    "....l.s.d.....",
+    ".....lsm......",
+    ".......s......",
+    "....l.s.d.....",
+    ".....lsm......",
+    ".......s......",
+    ".....l.s.d....",
+    "......lsm....."
    ],
-   "pivot": [
-    14.495,
-    10.756,
-    116.654
-   ],
-   "parent": "porch",
-   "rotation": [
-    -77.719,
-    -143.246,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_13",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    14.375,
-    10.756,
-    116.494
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    216.754,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_13",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    14.136,
-    14.112,
-    116.173
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
-    0.0,
-    0.0
-   ],
-   "paint": {
-    "ramp": "lilac",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
-   },
-   "sides": 6
-  },
-  {
-   "id": "stalk_14",
-   "shape": "prism",
-   "size": [
-    0.7,
-    0.7,
-    3.893
-   ],
-   "pivot": [
-    14.089,
-    9.851,
-    118.912
-   ],
-   "parent": "porch",
-   "rotation": [
-    -72.044,
-    -57.14,
-    0.0
-   ],
-   "paint": {
-    "ramp": "fern",
-    "tone": 2.4
-   },
-   "sides": 4
-  },
-  {
-   "id": "pleaf_14",
-   "shape": "prism",
-   "size": [
-    2.6,
-    1.2,
-    2.6
-   ],
-   "pivot": [
-    13.921,
-    9.851,
-    119.02
-   ],
-   "parent": "porch",
-   "rotation": [
-    -70.0,
-    302.86,
-    0.0
-   ],
-   "style": "leaf",
-   "sides": 5
-  },
-  {
-   "id": "bloom_14",
-   "shape": "prism",
-   "size": [
-    2.4,
-    2.4,
-    1.4
-   ],
-   "pivot": [
-    13.585,
-    12.303,
-    119.237
-   ],
-   "parent": "porch",
-   "rotation": [
-    -90.0,
-    0.0,
-    0.0
-   ],
-   "paint": {
-    "ramp": "lilac",
-    "tone": 4.0,
-    "layers": [
-     {
-      "id": "eye",
-      "op": "spots",
-      "count": 1,
-      "radius": [
-       0.5,
-       0.6
-      ],
-      "ramp": "ochre",
-      "tone": 4.5
-     }
-    ]
-   },
-   "sides": 6
+   "plane": "xy"
   },
   {
    "id": "log",

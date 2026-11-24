@@ -128,7 +128,8 @@ def pack(model, meta, path):
     for inst in model.instances:
         for f in inst.faces:
             x, y = f.rect
-            img = src[y:y + f.H, x:x + f.W]
+            img = src[y:y + f.H, x:x + f.W].copy()
+            img[img[..., 3] == 0, :3] = 0  # cut-out texels: their hidden paint must not keep copies apart
             key = (f.W, f.H, hash(img.tobytes()))
             if key not in uniq:
                 uniq[key] = img
