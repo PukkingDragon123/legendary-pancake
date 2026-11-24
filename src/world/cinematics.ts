@@ -8,9 +8,7 @@
 // function. They drive the camera through scene.director and Pip through scene.owl.
 import * as THREE from 'three';
 import { sound } from '../audio/sound.ts';
-import { box, buildProp, propMesh, PX, type BoxSpec, type Painter } from '../gfx/box.ts';
-import { ramp, tone } from '../gfx/color.ts';
-import { cloth, lamp, lvl, metal, smooth, solid } from '../gfx/mats.ts';
+import { PX } from '../gfx/box.ts';
 import { loadGLB } from '../gfx/glb.ts';
 import { SPR } from './fx.ts';
 import type { CamShot, Scene } from './scene.ts';
@@ -44,95 +42,81 @@ function path(pts: THREE.Vector3[], k: number): THREE.Vector3 {
 }
 
 // ---------------------------------------------------------------- props
+// [look4] Pip's travel things are properly shaped models (no blocks): a leather adventurer's satchel and brass
+// steampunk goggles, a cord-tied cloth bundle of presents, and the four things that hop into the satchel: a brass
+// sea compass, a jar of raspberry jam, a wooden lantern and a cupcake (Gacha Garage and BUSHED conversions, see
+// docs/credits/look4.md), each normalised to the old prop's size (16 units = 1 block, origin at the bottom centre).
+// The strap is a stitched leather band, built here.
 
-const leather = (c: string): Painter => { const r = ramp(c); return (t) => tone(r, lvl(t, { noise: 0.45, scale: 1.6, rim: 0.8 }) + (t.u % 5 === 0 && t.face >= 4 ? -0.5 : 0)); };
-
-function satchel(): BoxSpec[] {
-  // [world3] calm palette: muted saddle leather, oat stitching, brass buckle
-  const body = leather('#8c6448'), flap = leather('#6f553d');
-  const stitch: Painter = (t) => (t.u % 2 === 0 && (t.v === 0 || t.v === t.h - 1) ? 0xeae0c8 : flap(t));
-  return [
-    box(0, 0, 0, 7, 5, 3, body),
-    box(0, 2.6, 0.2, 7.4, 2.8, 3.6, stitch),
-    box(0, 2.4, 1.95, 1.8, 1.8, 0.5, metal('#c8a764')),
-    box(0, 2.9, 2.2, 0.8, 0.8, 0.3, solid('#4a392b', { noise: 0 })),
-    box(-3.6, 0.5, 0, 0.5, 3.6, 2.4, flap), box(3.6, 0.5, 0, 0.5, 3.6, 2.4, flap),
-  ];
-}
-function strap(): BoxSpec[] { return [box(0, 0, 0, 1.2, 16, 0.8, leather('#5b4a3c'))]; }
-function goggles(): BoxSpec[] {
-  const brass = metal('#c8a764');
-  const glass: Painter = (t) => { const r = ramp('#86a9b0'); return tone(r, (t.u + t.v) % 4 === 0 ? 2 : t.face === 4 ? 0.4 : -0.6); };
-  const band = cloth('#4a392b', { stripe: '#6f553d', stripeEvery: 2 });
-  return [
-    box(0, 0.4, -1, 17, 1.6, 1, band),
-    box(-2.6, 0, 0, 4.2, 4.2, 1.2, brass), box(2.6, 0, 0, 4.2, 4.2, 1.2, brass),
-    box(-2.6, 0.7, 0.4, 2.8, 2.8, 1, glass, { glow: true }), box(2.6, 0.7, 0.4, 2.8, 2.8, 1, glass, { glow: true }),
-    box(0, 1.6, 0.2, 1.4, 0.8, 0.8, brass),
-  ];
-}
-const ITEMS: (() => BoxSpec[])[] = [
-  // a rolled map with a red ribbon
-  () => [box(0, 0, 0, 5, 2, 2, solid('#eae0c8', { noise: 0.3 })), box(0, -0.1, 0, 1, 2.2, 2.2, solid('#a8505c', { noise: 0 }))],
-  // an acorn
-  () => [box(0, 0, 0, 3, 3, 3, smooth('#bf9d74')), box(0, 2.4, 0, 3.6, 1.4, 3.6, solid('#6f553d', { noise: 0.8, scale: 0.8 })), box(0, 3.6, 0, 0.8, 1, 0.8, solid('#4a392b'))],
-  // a tiny lantern
-  () => [box(0, 0, 0, 2.6, 0.6, 2.6, metal('#46596a')), box(0, 0.6, 0, 2, 2.4, 2, lamp('#f1d39a'), { glow: true }), box(0, 3, 0, 2.6, 0.6, 2.6, metal('#46596a')), box(0, 3.6, 0, 1, 0.8, 0.4, metal('#46596a'))],
-  // a star-shaped cookie
-  () => {
-    const r = ramp('#dcb072');
-    const p: Painter = (t) => { const dx = t.bx - 2, dz = t.bz - 2; const a = Math.atan2(dz, dx), d = Math.hypot(dx, dz); return d > 1.3 + 0.9 * Math.abs(Math.cos(a * 2.5)) ? -1 : tone(r, t.face === 2 ? (d < 0.8 ? 1.4 : 0.6) : -0.6); };
-    return [box(0, 0, 0, 4, 1, 4, p, { cut: true })];
-  },
-];
-function bundle(): BoxSpec[] {
-  const c = cloth('#c0866a', { check: '#eae0c8', seed: 3 });
-  return [
-    box(0, 0, 0, 8, 6, 8, c), box(0, 1, 0, 9, 3, 9, c), box(0, 6, 0, 4, 2, 4, c),
-    { ...box(-2, 7, 0, 3, 2.4, 1.2, c), rot: [0, 0, 35] }, { ...box(2, 7, 0, 3, 2.4, 1.2, c), rot: [0, 0, -35] },
-    box(3.2, 3, 4.4, 2.4, 2.4, 0.4, metal('#c8a764')),
-  ];
-}
-
-// [world3] The hand-made lowpix props (art/lowpix/world/props.py -> public/models/world/props_*.glb)
-// load in the background; until they are in, the old voxel props stand in.
-const KIT_PROPS = ['satchel', 'strap', 'goggles', 'bundle', 'item0', 'item1', 'item2', 'item3'];
+/** prop id -> the largest dimension it is scaled to (in 1/16-block units) */
+const KIT_SIZE: Record<string, number> = { satchel: 7.8, goggles: 15, bundle: 9.5, item0: 4.6, item1: 4.4, item2: 5.0, item3: 4.2 };
+const KIT_PROPS = Object.keys(KIT_SIZE);
+const ITEM_COUNT = 4;
 const kitProps = new Map<string, THREE.Object3D>();
 let kitLoading: Promise<unknown> | null = null;
 /** Load Pip's travel things early (the sleep screen calls this; it is also kicked off on first use). */
 export function preloadCinematics(): Promise<unknown> {
   kitLoading ??= Promise.allSettled(KIT_PROPS.map((id) => loadGLB(`world/props_${id}.glb`).then((g) => {
-    g.scene.traverse((o) => {
+    const root = g.scene.clone(true);
+    root.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(root), size = box.getSize(new THREE.Vector3());
+    const k = KIT_SIZE[id] / Math.max(1e-6, size.x, size.y, size.z);
+    const holder = new THREE.Group();
+    root.position.set(-(box.min.x + size.x / 2), -box.min.y, -(box.min.z + size.z / 2));
+    holder.add(root);
+    holder.scale.setScalar(k);
+    holder.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;
       m.castShadow = true;
-      // the lantern glass glows
-      if (/glow/.test(m.name) || /glow/.test(m.parent?.name ?? '')) {
-        const src = m.material as THREE.MeshStandardMaterial;
-        m.material = new THREE.MeshBasicMaterial({ map: src.map, toneMapped: false });
+      // the lantern's glass glows warm
+      const mat = m.material as THREE.MeshStandardMaterial;
+      if (id === 'item2' && mat && (mat.transparent || /glass/i.test(mat.name + m.name))) {
+        m.material = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.4, 1.6, 0.7), transparent: true, opacity: 0.85 });
       }
     });
-    kitProps.set(id, g.scene);
+    const wrap = new THREE.Group();
+    wrap.add(holder);
+    kitProps.set(id, wrap);
   })));
   return kitLoading;
 }
 
-const propCache = new Map<string, ReturnType<typeof buildProp>>();
-function mesh(key: string, boxes: () => BoxSpec[]): THREE.Object3D {
-  void preloadCinematics();
-  const kit = kitProps.get(key);
-  if (kit) {
-    // wrapped, so the cinematic can pop and squash the outer node freely
-    const g = new THREE.Group(), inner = kit.clone(true);
-    inner.scale.setScalar(PX);
-    g.add(inner);
-    return g;
+let strapGeo: THREE.BufferGeometry | null = null;
+/** A leather band 1 block long (along +y), oval in section, with stitched edges painted in. */
+function strapMesh(): THREE.Mesh {
+  if (!strapGeo) {
+    const pos: number[] = [], col: number[] = [], idx: number[] = [], sides = 10, rows = 8;
+    const W = 0.04, T = 0.022;
+    const leather = new THREE.Color(0x6a4a34), stitch = new THREE.Color(0xe8dcc0), c = new THREE.Color();
+    for (let i = 0; i <= rows; i++) for (let j = 0; j <= sides; j++) {
+      const a = (j / sides) * Math.PI * 2, y = i / rows;
+      pos.push(Math.cos(a) * W, y, Math.sin(a) * T);
+      const edge = Math.abs(Math.cos(a)) > 0.8 && Math.abs(Math.sin(a)) > 0.3;
+      c.copy(edge && i % 2 === 0 ? stitch : leather).multiplyScalar(0.85 + 0.15 * Math.sin(a));
+      col.push(c.r, c.g, c.b);
+      if (i < rows && j < sides) { const p0 = i * (sides + 1) + j, p1 = p0 + sides + 1; idx.push(p0, p1, p0 + 1, p1, p1 + 1, p0 + 1); }
+    }
+    strapGeo = new THREE.BufferGeometry();
+    strapGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    strapGeo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    strapGeo.setIndex(idx);
+    strapGeo.computeVertexNormals();
   }
-  let p = propCache.get(key);
-  if (!p) { p = buildProp(boxes(), { wind: false }); propCache.set(key, p); }
-  const m = propMesh(p);
+  const m = new THREE.Mesh(strapGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6 }));
   m.castShadow = true;
   return m;
+}
+
+/** A prop for the cinematic: its model once loaded (it pops in the moment it arrives if it wasn't ready yet). */
+function mesh(key: string): THREE.Object3D {
+  if (key === 'strap') { const g = new THREE.Group(); g.add(strapMesh()); return g; }
+  void preloadCinematics();
+  const g = new THREE.Group();
+  const fill = () => { const kit = kitProps.get(key); if (kit && !g.children.length) { const inner = kit.clone(true); inner.scale.setScalar(PX); g.add(inner); } };
+  fill();
+  if (!g.children.length) void kitLoading?.then(fill);
+  return g;
 }
 
 /** Pip's measurements in his own space, whatever the model looks like. */
@@ -273,7 +257,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
 
   // props
   const M = measure(scene), A = M.all, hgt = A.max.y - A.min.y;
-  const bag = mesh('satchel', satchel), band = mesh('strap', strap), gog = mesh('goggles', goggles);
+  const bag = mesh('satchel'), band = mesh('strap'), gog = mesh('goggles');
   const hip = V(A.max.x * 0.82, A.min.y + hgt * 0.26, A.max.z * 0.15);
   attach(scene, M.body, bag, hip);
   bag.rotation.set(0, 0.25, -0.1);
@@ -289,7 +273,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   for (const p of [bag, band, gog]) p.visible = false;
   const pops: { m: THREE.Object3D; t: number; s: number }[] = [];
   const pop = (mm: THREE.Object3D, s = mm.scale.x) => { mm.visible = true; pops.push({ m: mm, t: 0, s }); };
-  const items = ITEMS.map((f, i) => { const it = mesh('item' + i, f); it.visible = false; scene.scene.add(it); return it; });
+  const items = Array.from({ length: ITEM_COUNT }, (_, i) => { const it = mesh('item' + i); it.visible = false; scene.scene.add(it); return it; });
   const itemFrom = items.map((_, i) => H.clone().add(rH((i - 1.5) * 0.42 + (i % 2 ? 0.1 : -0.1), 0.02, 0.55 + (i % 2) * 0.18)));
   items.forEach((it, i) => { it.position.copy(itemFrom[i]); it.rotation.y = i * 1.3; });
   const hops: { i: number; t: number }[] = [];
@@ -448,7 +432,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   sky.sunDisc = { dir: sunDir, size: 0.05 };
 
   const M = measure(scene), A = M.all;
-  const pack = mesh('bundle', bundle);
+  const pack = mesh('bundle');
   attach(scene, M.body, pack, V(0, A.min.y - 0.22, A.max.z * 0.25));
   pack.scale.setScalar(0.9);
   let landed = false, dropped = false, dropT = 0, landT = 0, trailT = 0;

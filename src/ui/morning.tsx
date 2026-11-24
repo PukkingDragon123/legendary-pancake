@@ -7,6 +7,7 @@ import type { JSX } from 'preact';
 import { sound } from '../audio/sound.ts';
 import { AREA, ITEM_BY_ID, RARITY_COLOR as RARITY_RAW, RARITY_NAME, TRINKET, trinketUrl, type Rarity } from '../game/catalog.ts';
 import { calm } from './px/calm.js';
+import { giftSack } from './chrome/objects.ts'; // [ui4] the burlap gift sack, relief-painted
 import { pxGlowURL, PxBurst } from './pxfx.tsx';
 // [ui3] rarity colours graded into the calm palette, and their stepped pixel glows
 const RARITY_COLOR = Object.fromEntries(Object.entries(RARITY_RAW).map(([k, v]) => [k, calm(v as string)])) as typeof RARITY_RAW;
@@ -312,7 +313,7 @@ export function Morning() {
           <div class="mr-sign hh-wood"><h2>{finds.length ? `${save.value.name} brought presents!` : `${save.value.name} is home!`}</h2></div>
           <p class="mr-sub">{finds.length ? `${finds.length} ${finds.length === 1 ? 'gift' : 'gifts'} from ${area?.name ?? 'the woods'}` : 'A short trip this time. Sleep 5 hours or more and the sack comes home full.'}</p>
           <button class={'mr-sack' + (sackOpen > 0 ? ' opening' : '')} onClick={openSack} aria-label="Open Pip's gift sack">
-            <ArtCanvas w={56} h={58} k={4} fps={8} deps={[Math.round(sackOpen * 10)]} draw={(a, t, fr) => sack(a, 0, 0, sackOpen, fr)} />
+            <img class="px mr-sackimg" src={giftSack(Math.round(sackOpen * 4) / 4, 4)} width={224} height={232} alt="" draggable={false} />
           </button>
           <p class="mr-hint"><Px name="cursor_hand" size={30} />Tap the sack</p>
         </div>

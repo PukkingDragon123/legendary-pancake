@@ -314,6 +314,8 @@ export class Sky {
   baseFogNear = 90; baseFogFar = 320;
   /** [look4] the horizon colour (the vista and the fog lean on it) */
   readonly horizon = new THREE.Color();
+  /** [look4] light shafts through the canopy (off on the cheaper tiers) */
+  shafts = true;
   /** [look4] set when the sky changed enough to re-bake the environment light */
   envDirty = true;
 
@@ -496,6 +498,8 @@ export class Sky {
     this.sunDir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el) * 0.8 + 0.3).normalize();
     if (!isDay) this.sunDir.set(-0.32, 0.78, 0.54).normalize();
     this.sun.position.copy(this.sunDir).multiplyScalar(60);
+    // [look4] long low-sun shadows stay soft and luminous (the glade never goes murky at golden hour)
+    this.sun.shadow.intensity = isDay ? THREE.MathUtils.lerp(0.62, 0.85, THREE.MathUtils.smoothstep(this.sunDir.y, 0.35, 0.75)) : 0.7;
     this.sun.target.position.set(0, 0, 0);
     this.ambient.copy(this.hemi.color).multiplyScalar(0.45 * this.hemi.intensity).add(this.sun.color.clone().multiplyScalar(0.22 * this.sun.intensity));
     U.uSunDisc.value.copy(this.sunDisc ? this.sunDisc.dir : this.sunDir).normalize();
@@ -515,6 +519,7 @@ export class Sky {
     const litFrac = 0.5 - 0.5 * Math.cos(this.moonPhase * Math.PI * 2);
     U.uMoonVis.value = (mo ? 1 : THREE.MathUtils.smoothstep(this.night, 0.2, 0.7) * Math.min(1, 0.25 + litFrac * 3)) * this.moonFade;
     this.starMat.uniforms.uNight.value = Math.max(this.starBoost, THREE.MathUtils.smoothstep(this.night, 0.35, 0.95));
+    this.stars.visible = (this.starMat.uniforms.uNight.value as number) > 0.001; // [look4] no draw by day
     this.starMat.uniforms.uClear.value = (1 - oc) * (1 - w.fog * 0.85);
     // re-bake the environment light only when the sky has visibly changed
     const envKey = `${Math.round(this.hour * 4)}|${oc.toFixed(1)}|${w.cloud.toFixed(1)}|${w.fog.toFixed(1)}|${w.cold.toFixed(1)}`;
@@ -566,7 +571,7 @@ export class Sky {
       r.mat.uniforms.uAlpha.value = this.rayPower * 0.06 * flick; // [world3] soft beams under the post grade
       r.mat.uniforms.uTime.value = time;
       r.mat.uniforms.uCol.value.copy(this.sun.color);
-      r.mesh.visible = this.rayPower > 0.02;
+      r.mesh.visible = this.shafts && this.rayPower > 0.02;
       // stand the plane along the sun direction and swivel it to face the camera
       toCam.copy(camera.position).sub(r.base);
       x.crossVectors(axis, toCam).normalize();

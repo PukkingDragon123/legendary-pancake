@@ -15,21 +15,25 @@ import { toast } from './ui/kit.tsx';
 import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
 import { installPixelSkin } from './ui/pxskin.ts';
+import { installIconSet } from './ui/chrome/iconset.ts';
 import { Scene } from './world/scene.ts';
 import { bindHome } from './build/home-sync.ts'; // [house]
 
 async function boot() {
   installPixelSkin();
+  installIconSet(); // [ui4] the painted icon family replaces the sprite icons everywhere
   try { await document.fonts.load('20px "TBME Body"'); } catch { /* font loads later */ }
   const q = new URLSearchParams(location.search);
   const pref = save.value.settings.quality;
-  const weak = (navigator.hardwareConcurrency ?? 4) < 6 || /Android|iPhone|iPad/i.test(navigator.userAgent) && (devicePixelRatio || 1) > 2.5;
-  const quality = q.get('q') === 'low' || pref === 'low' ? 'low' : pref === 'high' ? 'high' : weak ? 'low' : 'high';
+  // [look4] 'auto' starts phones / small machines on the medium tier and adapts to the frame rate (see Scene.setTier)
+  const qq = q.get('q');
+  const quality = qq === 'low' || pref === 'low' ? 'low' : qq === 'high' || pref === 'high' ? 'high' : qq === 'medium' ? 'medium' : 'auto';
   const canvas = document.getElementById('world') as HTMLCanvasElement;
   const scene = new Scene(canvas, save.value.look, quality);
   sceneRef.current = scene;
   (window as unknown as { hh: unknown }).hh = { scene, save, phase, tab, panel };
   bindHome(scene); // [house] rooms, moving boxes and boarded-up floors follow save.home
+  if (import.meta.env.DEV && q.get('hour')) scene.setHour(+q.get('hour')!); // [ui4] dev only: ?hour=22 to check the HUD at night
   scene.setZones(zones.value);
   if (phase.value === 'sleeping') scene.placeOwl('away');
   // settle springs, particles and the camera before the first visible frame

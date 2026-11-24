@@ -54,7 +54,8 @@ export interface TreeModel {
   /** full-detail standalone object: children 'trunk', 'branch_<id>' (wood + foliage), 'crown_misc' */
   object(): THREE.Group;
   /** instancing geometry for a LOD level (0 full, 1 reduced). Cached. */
-  lod(level: 0 | 1): TreeLod;
+  /** 0 full, 1 reduced, 2 [look4] trunk and main limbs only (for crowns that hide the rest) */
+  lod(level: 0 | 1 | 2): TreeLod;
   /** the scale this model was built/scaled at (1 for buildTree) */
   scale: number;
 }
@@ -828,14 +829,14 @@ function skeleton(species: SpeciesId, seed: number, opts: TreeOpts): Skeleton {
 }
 
 // ----------------------------------------------------------------------------------------------- emit geometry
-interface EmitOpts { lod: 0 | 1; perPart: boolean }
+interface EmitOpts { lod: 0 | 1 | 2; perPart: boolean }
 
-function emitTrunk(sk: Skeleton, mb: MeshBuilder, lod: 0 | 1): void {
+function emitTrunk(sk: Skeleton, mb: MeshBuilder, lod: 0 | 1 | 2): void {
   const sp = sk.sp;
   const N = lod === 0 ? sk.sides : Math.max(5, Math.round(sk.sides / 3));
   const step = Math.max(1, Math.round(sk.sides / N));
   let ringIdx = sk.rings.map((_, i) => i);
-  if (lod === 1) ringIdx = ringIdx.filter((i) => i === 0 || i === sk.rings.length - 1 || i % 2 === 1);
+  if (lod >= 1) ringIdx = ringIdx.filter((i) => i === 0 || i === sk.rings.length - 1 || i % 2 === 1);
   // arc length along the centreline (v coordinate)
   const len: number[] = [0];
   for (let i = 1; i < sk.rings.length; i++) {
@@ -901,7 +902,7 @@ function emitTrunk(sk: Skeleton, mb: MeshBuilder, lod: 0 | 1): void {
   for (let j = 0; j < N; j++) mb.tri(prevRow![j], prevRow![j + 1], cap);
 }
 
-function emitTube(b: Br, mb: MeshBuilder, sp: Species, lod: 0 | 1): void {
+function emitTube(b: Br, mb: MeshBuilder, sp: Species, lod: 0 | 1 | 2): void {
   const r0 = b.radii[0];
   let sides = r0 > 0.07 ? 8 : r0 > 0.04 ? 6 : r0 > 0.016 ? 4 : 3;
   let pts = b.pts, radii = b.radii;
@@ -910,7 +911,7 @@ function emitTube(b: Br, mb: MeshBuilder, sp: Species, lod: 0 | 1): void {
     pts = keep.map((i) => b.pts[i]);
     radii = keep.map((i) => b.radii[i]);
   }
-  if (lod === 1) {
+  if (lod >= 1) {
     sides = r0 > 0.08 ? 5 : 3;
     if (pts.length > 4) {
       const keep = pts.map((_, i) => i).filter((i) => i % 2 === 0 || i === pts.length - 1);
@@ -944,8 +945,8 @@ function emitAll(sk: Skeleton, o: EmitOpts): { wood: MeshBuilder[]; leaves: Mesh
   const P = (part: number) => (o.perPart ? part : 0);
   emitTrunk(sk, wood[0], o.lod);
   for (const r of sk.roots) {
-    if (o.lod === 1 && r.radii[0] < 0.06) continue;
-    tube(wood[0], o.lod === 1 ? r.pts.filter((_, i) => i % 2 === 0) : r.pts, o.lod === 1 ? r.radii.filter((_, i) => i % 2 === 0) : r.radii, {
+    if (o.lod >= 1 && r.radii[0] < (o.lod === 2 ? 0.1 : 0.06)) continue;
+    tube(wood[0], o.lod >= 1 ? r.pts.filter((_, i) => i % 2 === 0) : r.pts, o.lod >= 1 ? r.radii.filter((_, i) => i % 2 === 0) : r.radii, {
       sides: o.lod === 0 ? 7 : 4, tile: sk.sp.barkTile, wraps: 1,
       col: (i, s) => { const k = 0.62 + 0.25 * s; return [k, k, k]; },
       wind: () => [0, 0, 0, 0], moss: (i, s) => r.moss * (0.7 + 0.3 * s), rough: 0.1, roughSeed: r.len * 7,
@@ -953,6 +954,7 @@ function emitAll(sk: Skeleton, o: EmitOpts): { wood: MeshBuilder[]; leaves: Mesh
   }
   for (const b of sk.branches) {
     if (o.lod === 1 && (b.radii[0] < 0.02 || (b.level > 0 && b.radii[0] < 0.03))) continue;
+    if (o.lod === 2 && (b.radii[0] < 0.07 || b.level > 0 || b.dead)) continue;
     if (b.radii[0] < 0.0055 && !b.dead) continue;
     emitTube(b, wood[P(b.part)], sk.sp, o.lod);
   }
@@ -961,7 +963,7 @@ function emitAll(sk: Skeleton, o: EmitOpts): { wood: MeshBuilder[]; leaves: Mesh
   sk.cards.forEach((c, i) => { if (c.keep1 && ((i * 2654435761) >>> 0) % 100 < 72) kept++; });
   const s1 = Math.min(1.95, Math.sqrt(sk.cards.length / Math.max(1, kept)));
   sk.cards.forEach((c, i) => {
-    if (o.lod === 1) {
+    if (o.lod >= 1) {
       if (!c.keep1 || ((i * 2654435761) >>> 0) % 100 >= 72) return;
       emitCard(c, leaves[P(c.part)], s1, true);
     } else emitCard(c, leaves[P(c.part)]);
@@ -1014,7 +1016,7 @@ function makeModel(species: SpeciesId, seed: number, opts: TreeOpts, sk: Skeleto
       const t = clamp((yy - a.y) / Math.max(1e-6, b.y - a.y), 0, 1);
       return a.pts.map((p, j) => [lerp(p[0], b.pts[j][0], t) * S, lerp(p[1], b.pts[j][1], t) * S] as [number, number]);
     },
-    lod(level: 0 | 1): TreeLod {
+    lod(level: 0 | 1 | 2): TreeLod {
       let l = lods[level];
       if (!l) {
         const { wood, leaves } = emitAll(sk, { lod: level, perPart: false });

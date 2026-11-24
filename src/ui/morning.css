@@ -57,7 +57,7 @@
 .haul-item small { position: relative; font-size: 13px; color: var(--rc); text-shadow: 1px 1px 0 #2d251e; }
 .haul-item .hh-btn-cream { height: 38px; font-size: 15px; margin-top: 4px; }
 .haul-none { font-size: 16px; color: #dec8a8; text-align: center; padding: 10px; }
-.haul-rewards { display: flex; justify-content: center; gap: 16px; padding: 4px 0 2px; border-top: 2px dashed rgba(238, 232, 222, 0.25); }
+.haul-rewards { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 12px; padding: 4px 0 2px; border-top: 2px dashed rgba(238, 232, 222, 0.25); } /* [ui4] wraps instead of running off the board */
 .haul-rewards span { display: flex; align-items: center; gap: 2px; font-size: 22px; color: #eee9de; text-shadow: 2px 2px 0 #2d251e; }
 .haul-rewards small { font-size: 14px; color: #dec8a8; margin-left: 4px; }
 .haul-rewards .ico { margin: -8px 0; }

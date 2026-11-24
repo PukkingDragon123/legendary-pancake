@@ -134,6 +134,23 @@ def mesh_of(s):
         s.sgn = -1.0
         N = -N
     nb, na = A.shape
+    relief = getattr(s, 'relief', None)
+    if relief is not None:
+        # feathers in the silhouette: the mesh itself is pushed out into clumps of plumage (the paint stays on the
+        # smooth surface's parameters, so nothing slides), and its normals are taken from the displaced grid
+        d = relief(s, A, B, P, N)
+        P = P + N * d[..., None]
+        if s.wrap:
+            Pe = np.concatenate([P[:, -2:-1], P, P[:, 1:2]], 1)
+            dA = Pe[:, 2:] - Pe[:, :-2]
+        else:
+            dA = np.gradient(P, axis=1)
+        dB = np.gradient(P, axis=0)
+        N2 = np.cross(dA, dB)
+        ln = np.linalg.norm(N2, axis=-1, keepdims=True)
+        N2 = np.where(ln > 1e-9, N2 / np.maximum(ln, 1e-12), N)
+        N2 = np.where(((N2 * N).sum(-1) < 0)[..., None], -N2, N2)
+        N = N2
     idx = np.arange(na * nb).reshape(nb, na)
     q0, q1, q2, q3 = idx[:-1, :-1], idx[:-1, 1:], idx[1:, 1:], idx[1:, :-1]
     T = np.concatenate([np.stack([q0, q1, q2], -1).reshape(-1, 3), np.stack([q0, q2, q3], -1).reshape(-1, 3)])
@@ -197,7 +214,7 @@ class Owl:
         s.ey = s.hyc + g('ey', 0.06) * s.hht
         s.er = g('er', 1.3) * k                 # the ink dot's toy radius (the decal is 2.1x)
         s.dish = g('dish', 1.0)
-        s.beak = g('beak', 1.0) * 0.72 * k
+        s.beak = g('beak', 1.0) * 0.6 * k
         s.tufts = g('tufts', None)
         s.toes = g('toes', 'feathered')
         s.legw = g('legw', 2.0) * k
@@ -256,10 +273,63 @@ class Owl:
         r = np.clip(np.abs(z - zc) / np.maximum(dep, 1e-3), 0, 0.999)
         return w * (1 - r ** (2 / 0.92)) ** (0.92 / 2)
 
+    def clumps(s, sf, A, B, P, ds, du, L, W, amp, seed, fray=1.2):
+        """A field of feather clumps over a surface's grid (the shingle at a coarse scale): each clump lifts toward its
+        tip and drops at its edge onto the next, so the outline breaks into feathers. Returns the lift (0..1)."""
+        import plume
+        bb = np.linspace(0, 1, 257)
+        Pm = sf.eval(np.full_like(bb, 0.5), bb)
+        Sb = np.concatenate([[0], np.cumsum(np.linalg.norm(np.diff(Pm, axis=0), axis=1))])
+        aa = np.linspace(0, 1, 129)
+        Cb = np.array([max(np.linalg.norm(np.diff(sf.eval(aa, np.full_like(aa, v)), axis=0), axis=1).sum(), 0.05) for v in bb])
+        S = np.interp(B, bb, Sb)
+        C = np.interp(B, bb, Cb)
+        Smax = float(Sb[-1])
+        f = lambda v: v if callable(v) else (lambda x, v=v: v)  # noqa: E731
+        ds, du, L, W = f(ds), f(du), f(L), f(W)
+        rows = plume.make_rows(-1.0, Smax + 1.0, lambda x: ds(x / Smax) * s.k, lambda x: max(5, round(float(np.interp(x, Sb, Cb)) / (du(x / Smax) * s.k))),
+                               lambda x: L(x / Smax) * s.k, lambda x: W(x / Smax) * s.k)
+        n1 = plume.vnoise3(P, 3.0 * s.k, seed + 1) - 0.5
+        n2 = plume.vnoise3(P, 3.0 * s.k, seed + 2) - 0.5
+        S2 = (S + n1 * 1.6 * s.k).reshape(-1)
+        A2 = (A + n2 * 1.6 * s.k / np.maximum(C, 0.3)).reshape(-1)
+        F = plume.shingle(S2, A2, C.reshape(-1), rows, wrap=True, seed=seed, fray=fray, sjit=2.2, extra=2)
+        lift = ss(0.0, 0.8, F['fa']) * (1 - ss(0.78, 1.0, F['edge'])) * (0.55 + 0.9 * F['id'])
+        return (lift * F['hit']).reshape(A.shape)
+
+    def body_relief(s, sf, A, B, P, N):
+        """The body's plumage in the silhouette: soft clumps on the breast and flanks, ragged fluff toward the belly."""
+        k = s.k
+        lift = s.clumps(sf, A, B, P, lambda t: 1.9 + 0.9 * ss(0.5, 0.95, t), lambda t: 2.3 + 0.9 * ss(0.5, 0.95, t),
+                        lambda t: 4.6 + 1.6 * ss(0.5, 0.95, t), lambda t: 1.35 + 0.5 * ss(0.5, 0.95, t), 1.0, 61)
+        th = math.pi + 2 * math.pi * A
+        front = 0.5 + 0.5 * np.cos(th)
+        amp = (0.28 + 0.32 * front + 0.45 * ss(0.45, 0.9, B)) * k * (1 + 0.8 * s.fluff) * s.g('plushgeo', 1.0)
+        return lift * amp * ss(0.06, 0.2, B)
+
+    def head_relief(s, sf, A, B, P, N):
+        """The head's plumage in the silhouette: small crown clumps, the ruff's serrated rim standing off the disc."""
+        k = s.k
+        lift = s.clumps(sf, A, B, P, 1.3, 1.6, 3.4, 0.95, 1.0, 71)
+        X, Y = P[..., 0], P[..., 1] - s.ey
+        th = math.pi + 2 * math.pi * A
+        front = ss(0.15, 0.6, np.cos(th))
+        if s.cat:
+            return lift * 0.18 * k * (1 - 0.7 * front)
+        dd = s.disc_d(X, Y)
+        disc = ss(0.2 * k, -0.8 * k, dd) * front
+        ang = np.arctan2(Y + 0.25 * s.discr * s.hw, X)
+        serr = 0.5 + 0.5 * np.sin(ang * 34 + 2.0 * np.sin(ang * 7))
+        rim = gauss(dd - 0.9 * k, 1.1 * k) * front
+        d = lift * 0.26 * k * (1 - disc) + rim * serr * 0.45 * k * s.g('ruffk', 1.0)
+        return d * ss(0.02, 0.1, B)
+
     def build_body(s):
         k = s.k
         circ = 2 * math.pi * max(s.bw, (s.bf + s.bb) / 2)
-        s.surfs.append(Surf('body', 'body', s.body_fn, 64, 40, circ * 0.92, math.pi * s.bh * 0.52, 'body', wrap=True))
+        sf = Surf('body', 'body', s.body_fn, 100, 64, circ * 0.92, math.pi * s.bh * 0.52, 'body', wrap=True)
+        sf.relief = s.body_relief
+        s.surfs.append(sf)
         s.bone('body', (0, s.by0 + s.bh * 0.22, s.bzc), 'root')
 
     # -------------------------------------------------------------- head
@@ -275,7 +345,7 @@ class Owl:
             half = t ** 0.8 * (ex * 0.8 + r * 0.98)
             d2 = (dx - half) * 0.9
             d = np.where((Y < 0) & (Y > tip), np.minimum(d1, d2), d1)
-            return np.maximum(d, Y - r * 1.08)
+            return d  # (the two lobes over the eyes meet in a notch above the bill: a true heart)
         if s.disc == 'round':
             r = s.discr * hw * 1.05
             return np.hypot(X, (Y + r * 0.16) / 0.98) - r
@@ -314,9 +384,9 @@ class Owl:
         bowl = sum(np.exp(-((X - sx * s.ex) ** 2 + (Y * 1.1) ** 2) / (2 * (s.discr * s.hw * 0.62) ** 2)) for sx in (1, -1))
         dz = -1.1 * k * s.dish * inside * (0.55 + 0.45 * np.clip(bowl, 0, 1))
         # the ruff: a rim of stiff feathers standing proud round the disc
-        dz += 1.0 * k * gauss(dd - 0.55 * k, 1.05 * k) * (1 - 0.4 * ss(-2, -6, Y))
+        dz += 1.55 * k * s.g('ruffk', 1.0) * gauss(dd - 0.75 * k, 0.95 * k) * (1 - 0.35 * ss(-2, -6, Y))
         # the ridge of feathers between the eyes down to the bill, and the brows over the eyes
-        dz += 0.9 * k * gauss(X, 1.5 * k) * ss(-3.5 * k, 0.5 * k, Y) * ss(4.5 * k, 1.0 * k, Y)
+        dz += 1.25 * k * gauss(X, 1.4 * k) * ss(-3.0 * k, 0.0 * k, Y) * ss(4.5 * k, 1.0 * k, Y)  # (the bristled ridge: it hides the bill's base)
         dz += 0.45 * k * sum(gauss(X - sx * s.ex * 0.9, 2.6 * k) for sx in (1, -1)) * gauss(Y - 2.4 * k, 1.0 * k) * inside
         P = P.copy()
         P[..., 2] = P[..., 2] + dz * front
@@ -331,17 +401,25 @@ class Owl:
         k = s.k
         X, Y = P[..., 0], P[..., 1] - s.ey
         front = ss(0.2, 0.7, np.cos(th)) * ss(0.1, 0.35, np.sin(phi))
-        dz = 1.1 * k * sum(np.exp(-(((X - sx * 1.5 * k) / (2.1 * k)) ** 2 + ((Y + 3.6 * k) / (1.7 * k)) ** 2)) for sx in (1, -1))
-        dz += 0.7 * k * gauss(X, 1.4 * k) * gauss(Y + 1.6 * k, 1.8 * k)
-        dz -= 0.4 * k * sum(gauss(X - sx * s.ex, 2.0 * k) * gauss(Y, 1.6 * k) for sx in (1, -1))
+        # the whisker pads: two plump puffs either side under the nose, a little chin below them
+        dz = 1.35 * k * sum(np.exp(-(((X - sx * 1.55 * k) / (1.9 * k)) ** 2 + ((Y + 3.5 * k) / (1.45 * k)) ** 2)) for sx in (1, -1))
+        dz += 0.55 * k * gauss(X, 1.2 * k) * gauss(Y + 5.3 * k, 0.9 * k)
+        # the short nose bridge up to the brow, a soft stop between the eyes
+        dz += 0.75 * k * gauss(X, 1.25 * k) * gauss(Y + 1.7 * k, 1.5 * k)
+        dz -= 0.35 * k * sum(gauss(X - sx * s.ex, 2.0 * k) * gauss(Y, 1.6 * k) for sx in (1, -1))
         P = P.copy()
         P[..., 2] = P[..., 2] + dz * front
+        # full kitten cheeks: the jowls puff out sideways below the eyes
+        cheek = ss(0.1, 0.5, np.sin(phi)) * gauss(Y + 3.2 * k, 3.0 * k) * ss(-0.3, 0.4, np.cos(th))
+        P[..., 0] = P[..., 0] * (1 + 0.09 * cheek)
         return P
 
     def build_head(s):
         k = s.k
         circ = 2 * math.pi * s.hw
-        s.surfs.append(Surf('head', 'head', s.head_fn, 72, 50, circ * 0.92, math.pi * (s.hht + s.hhb) * 0.55, 'head', wrap=True))
+        sf = Surf('head', 'head', s.head_fn, 104, 68, circ * 0.92, math.pi * (s.hht + s.hhb) * 0.55, 'head', wrap=True)
+        sf.relief = s.head_relief
+        s.surfs.append(sf)
         s.bone('head', (0, s.by1 - 1.5 * k, s.hzc - 0.5 * k), 'body')
         s.face_z = float(s.head_fn(np.array(0.5), np.array(0.5))[2])
         # ---- the beak: a little hooked bill half buried in bristles; the lower mandible on its own joint
@@ -367,10 +445,13 @@ class Owl:
             s.tube('jaw', 'jaw', jspine, lambda t: 0.8 * bk * (1 - t) ** 0.7 + 0.05, 10, 8, squash=(0.85, 0.55), tract='gape', close1=True)
             s.bone('jaw', jp, 'head')
         else:
-            yb = s.ey - 2.6 * k
-            zb = float(s.head_fn(np.array(0.5), np.array(_b_at(s, yb)))[..., 2]) - 0.25 * k
-            spine = np.array([(0, yb + 0.5 * k, zb - 0.2 * k), (0, yb, zb + 0.55 * k), (0, yb - 0.5 * k, zb + 0.4 * k)])
-            s.tube('beak', 'head', spine, lambda t: 1.0 * k * np.sin(math.pi * np.clip(t, 0.02, 0.98)) ** 0.5 + 0.02, 12, 8, squash=(1.35, 0.7), tract='nose')
+            # the nose: a small soft pink pad, wider on top (a rounded triangle), sitting on the bridge
+            yb = s.ey - 2.4 * k
+            zb = float(s.head_fn(np.array(0.5), np.array(_b_at(s, yb)))[..., 2]) - 0.3 * k
+            spine = np.array([(0, yb + 0.45 * k, zb - 0.1 * k), (0, yb, zb + 0.42 * k), (0, yb - 0.45 * k, zb + 0.22 * k)])
+            s.tube('beak', 'head', spine, lambda t: 0.85 * k * np.sin(math.pi * np.clip(t, 0.02, 0.98)) ** 0.45 * (1.15 - 0.45 * t) + 0.02, 12, 8,
+                   squash=(1.25, 0.6), tract='nose')
+            s.whiskers()
             jp = (0, yb - 2.2 * k, zb - 0.6 * k)
             jspine = np.array([jp, (0, yb - 2.6 * k, zb - 0.1 * k), (0, yb - 2.9 * k, zb - 0.4 * k)])
             s.tube('jaw', 'jaw', jspine, lambda t: 0.9 * k * (1 - t) ** 0.7 + 0.05, 10, 8, squash=(1.0, 0.55), tract='gape', close1=True)
@@ -456,15 +537,30 @@ class Owl:
         sf.mirror = False
         s.surfs.append(sf)
 
+    def whiskers(s):
+        """A kitten's whiskers: three fine white strands from each pad, sweeping out and a little down."""
+        k = s.k
+        for sx in (-1, 1):
+            for i, (dy, ang) in enumerate(((0.35, 8.0), (-0.15, -4.0), (-0.65, -16.0))):
+                y0 = s.ey - 3.4 * k + dy * k
+                z0 = float(s.head_fn(np.array(0.5 + sx * 0.05), np.array(_b_at(s, y0)))[..., 2]) - 0.3 * k
+                p0 = V(sx * 2.0 * k, y0, z0)
+                a = math.radians(ang)
+                p2 = p0 + V(sx * math.cos(a) * 8.6 * k, math.sin(a) * 8.6 * k - 0.6 * k, -0.4 * k)
+                p1 = p0 + (p2 - p0) * 0.5 + V(0, 0.5 * k, 0.9 * k)
+                side = 'l' if sx < 0 else 'r'
+                s.tube(f'whisk{i}{side}', 'head', [p0, p1, p2], lambda t: 0.1 * k * (1 - 0.6 * t) + 0.012, 5, 10, tract='whisker',
+                       share=None if sx < 0 else f'whisk{i}l')
+
     def ear(s, nm, b0, sx):
         """A kitten's ear on the tuft joint: a rounded cone, cupped to the front."""
         k = s.k
 
         def fn(a, b, b0=b0, sx=sx):
             th = 2 * math.pi * a
-            tip = b0 + V(sx * 2.6 * k, 6.4 * k, -0.4 * k)
+            tip = b0 + V(sx * 2.9 * k, 7.6 * k, -0.6 * k)
             c = b0 + (tip - b0) * b[..., None]
-            r = 3.6 * k * (1 - b) ** 0.95 + 0.05
+            r = 4.2 * k * (1 - b) ** 0.9 * (1 - 0.15 * b) + 0.18 * k * (1 - b) + 0.04
             cup = 1 - 0.55 * np.clip(np.cos(th), 0, 1)  # (the front is cupped in)
             side = V(math.cos(math.radians(-sx * 20)), math.sin(math.radians(-sx * 20)) * 0, 0)
             side = nrm(np.cross(nrm(tip - b0), V(0, 0, 1)))
@@ -490,23 +586,33 @@ class Owl:
             zf = sh[2] + 4.6 * k * np.sin(math.pi * np.clip(b / 0.85, 0, 1)) ** 0.8 - 2.5 * k * b ** 2
             zb = sh[2] - 6.2 * k - 4.0 * k * b ** 1.2 * wk + 1.2 * k * ss(0.8, 1.0, b)
             zb = np.minimum(zb, zf - 0.6 * k)
-            tip = ss(0.86, 1.0, b)
+            tip = ss(0.82, 1.0, b)
+            # the long primaries run on down and back past the body, crossing over the tail
+            zb = zb - 2.6 * k * ss(0.7, 1.0, b) * wk
             z = lerp(zf, zb, cf)
-            z = lerp(z, (zf + zb) / 2 - 1.5 * k, tip * 0.7)
-            # the trailing edge's scallops (the feather tips)
-            sc = 0.45 * k * np.abs(np.sin(b * 11.0 * math.pi)) ** 0.5 * ss(0.5, 1.0, cf) * ss(0.3, 0.6, b)
-            y = y - sc * ss(0.7, 1.0, b)
+            z = lerp(z, (zf + zb) / 2 - 2.6 * k, tip * 0.75)
+            # the secondaries' tips stand out along the trailing edge, one notch per feather
+            sec = np.abs(np.sin(b * 8.0 * math.pi + 0.4)) ** 0.55
+            z = z - 0.85 * k * sec * ss(0.62, 1.0, cf) * ss(0.22, 0.4, b) * (1 - tip)
+            # the primaries' tips: separate points along the bottom edge
+            prim = np.abs(np.sin(cf * 3.6 * math.pi)) ** 0.6
+            y = y - 0.9 * k * prim * ss(0.86, 1.0, b)
             # hug the flank (the body's surface + a standoff growing toward the tips)
             yw, zw = y + 0.0, z + 0.0
             xb = s.body_x(np.clip(yw, s.by0 + 0.3, s.by1 - 0.3), zw)
-            thick = (1.25 * k * (1 - cf) ** 0.6 + 0.22 * k) * (1 - 0.6 * tip)
-            off = 0.15 * k + 1.0 * k * ss(0.35, 1.0, b) + 0.5 * k * gauss(b - 0.45, 0.25) * (1 - cf)
-            # the leading edge and the shoulder tuck in under the flank and scapular feathers (no plate edge shows)
-            off = off - 1.5 * k * (1 - ss(0.0, 0.32, cf)) * (1 - ss(0.7, 0.92, b)) - 1.2 * k * ss(0.16, 0.0, b)
-            x = xb + off + thick * (0.5 + 0.5 * side)
-            # the tips come in a little behind the body (they cross over the tail)
-            x = x - 2.4 * k * ss(0.75, 1.0, b) * ss(0.4, 1.0, cf)
-            x = np.maximum(x, 1.2 * k + thick * (0.5 + 0.5 * side))
+            thick = (1.3 * k * (1 - cf) ** 0.6 + 0.24 * k) * (1 - 0.6 * tip)
+            off = 0.25 * k + 1.0 * k * ss(0.35, 1.0, b) + 0.5 * k * gauss(b - 0.45, 0.25) * (1 - cf)
+            # only the shoulder tucks in under the scapulars; the wing's front edge lies over the flank
+            off = off - 0.5 * k * (1 - ss(0.0, 0.2, cf)) * (1 - ss(0.5, 0.8, b)) - 1.2 * k * ss(0.16, 0.0, b)
+            # layered: the coverts lie proud of the flight feathers, their scalloped tips stepping down onto them
+            cl = 0.42 + 0.06 * cf - 0.025 * np.abs(np.sin(cf * 5.0 * math.pi))
+            cov = ss(cl + 0.03, cl - 0.005, b)
+            lesser = ss(0.24, 0.2, b)
+            x = xb + off + thick * (0.5 + 0.5 * side) + (0.5 * cov + 0.25 * lesser) * k * (0.5 + 0.5 * side)
+            # the tips cross behind the body, over the tail
+            cross = ss(0.7, 1.0, b) * ss(0.3, 1.0, cf)
+            x = x * (1 - 0.9 * cross) - (0.55 if sx < 0 else 0.25) * k * cross  # (the left tips lie just under the right)
+            z = z - (0.35 * k if sx < 0 else 0.0) * cross
             P = np.stack([sx * x, y, z], -1)
             return P
         return fn, H
@@ -549,7 +655,7 @@ class Owl:
             fn, H = s.wing_folded(sx)
             sp = s.wing_spread(sx, H)
             # (two islands: the outer face a 0..0.5, the inner face 0.5..1; one Surf with a wrapped loop)
-            sf = Surf(nm, nm, fn, 40, 30, 2 * 15.0 * k, H, 'wing', wrap=True, spread=sp, share=None if sx < 0 else 'wing_l')
+            sf = Surf(nm, nm, fn, 48, 40, 2 * 15.0 * k, H, 'wing', wrap=True, spread=sp, share=None if sx < 0 else 'wing_l')
             s.surfs.append(sf)
             s.bone(nm, sh, 'body')
         s.anchors_hold = (s.shoulder(1) + V(1.5 * k, -s.bh * 0.45, 3.0 * k))
@@ -557,9 +663,9 @@ class Owl:
     # -------------------------------------------------------------- tail
     def build_tail(s):
         k = s.k
-        L, W = 7.2 * k * s.tailk, 9.0 * k * (0.8 + 0.2 * s.tailk)
+        L, W = 8.6 * k * s.tailk, 9.0 * k * (0.8 + 0.2 * s.tailk)
         root = V(0, s.by0 + 3.6 * k, s.bzc - s.bb * 0.62)
-        tip = root + V(0, -L * 0.74, -L * 0.66)
+        tip = root + V(0, -L * 0.68, -L * 0.73)
 
         def fn(a, b):
             ph = 2 * math.pi * a
@@ -799,9 +905,9 @@ def vertex_ao(O, meshes, rays=40, dist=None):
     k = O.k
     dist = dist or 7.0 * k
     groups = {
-        'body': ('body', 'head', 'leg_l', 'leg_r', 'tail', 'ground'),
+        'body': ('body', 'head', 'leg_l', 'leg_r', 'tail', 'wing_l', 'wing_r', 'ground'),
         'head': ('head', 'body'),
-        'wing': ('wing_l', 'wing_r'),
+        'wing': ('wing_l', 'wing_r', 'body'),
         'tail': ('tail', 'body', 'ground'),
         'leg': ('leg_l', 'leg_r', 'body', 'ground'),
         'tuft': ('head', 'tuft_l', 'tuft_r'),
@@ -1034,6 +1140,7 @@ def build(mid):
     rgb = np.zeros((size, size, 3), np.float32)
     hgt = np.zeros((size, size), np.float32)
     rough = np.full((size, size), 0.86, np.float32)
+    fur = np.zeros((size, size), np.float32)
     emit = np.zeros((size, size, 3), np.float32) if spec.get('emissive') else None
     done = set()
     P = plume.Painter(O, spec)
@@ -1051,6 +1158,7 @@ def build(mid):
         rgb[ys, xs] = out['rgb'][sl]
         hgt[ys, xs] = out['h'][sl]
         rough[ys, xs] = out['rough'][sl]
+        fur[ys, xs] = out['fur'][sl]
         if emit is not None and 'emit' in out:
             emit[ys, xs] = out['emit'][sl]
     log('painted')
@@ -1071,6 +1179,7 @@ def build(mid):
     G.image(webp(nm_small * 0.5 + 0.5, q=92))
     mr = np.zeros((size // 4, size // 4, 3), np.float32)
     mr[..., 1] = plume.downsample(rough[..., None], 4)[..., 0]
+    mr[..., 0] = plume.downsample(fur[..., None], 4)[..., 0]  # (red: the fur shells' length, src/owl/fur.ts)
     G.image(webp(mr, q=90))
     if emit is not None:
         G.image(webp(plume.downsample(emit, 2), q=90))

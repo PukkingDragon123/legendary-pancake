@@ -27,11 +27,13 @@ import { addSwing, kick, makeSwing, reducedMotion, removeSwing, type Swing } fro
 import { clearTransition, installPanelTransitions, panelTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts'; // [motion3] panelTransition, installPanelTransitions
 import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
+import { installSurfaces } from './surfaces.ts';
 import { alarmClock, alarmHands, board, bezel, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
 
 installChromeSkin();
+installSurfaces(); // [ui4] panels as physical objects: walnut cabinet sheets, the cork quest board, carved signs
 installUiFxAuto(); // [ui3] small pixel bursts on every press, toggle, slider, tab, sheet, dialog and toast
 installPanelTransitions(); // [motion3] every open, close and switch of a place plays a pixel transition
 
@@ -420,7 +422,7 @@ function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
       <img class="hh-cshadow" src={contactShadow(p.m.id === 'book' ? 40 : 34, 6, p.k)} alt="" draggable={false} />
       <span class="hh-pic">
         {p.m.id === 'sleep' ? <LampArt k={p.k} act={act} /> : p.m.id === 'clock' ? <AlarmArt k={p.k} act={act} /> : <BookArt k={p.k} act={act} />}
-        {p.m.id === 'sleep' && <PxAnim tl={seq('nav_zz', 8, 220)} size={64} class="hh-zz" offset={p.i * 300} />}
+        {p.m.id === 'sleep' && <><i class="hh-twinkle moon1" /><i class="hh-twinkle moon2" /></>}
       </span>
       <span class="hh-plate" style={{ backgroundImage: bg(plate(44, 9, p.k, 1)) }}>{p.m.label}</span>
       {p.rec && <><i class="hh-twinkle a" /><i class="hh-twinkle b" /><i class="hh-twinkle c" /></>}
