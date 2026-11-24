@@ -102,7 +102,7 @@ def normal_map(h, strength=1.0):
 
 
 # ====================================================================== the shingle
-def shingle(S, A, C, rows, wrap=True, seed=1, shape=2.3, fray=0.0, jit=0.46, sjit=0.6):
+def shingle(S, A, C, rows, wrap=True, seed=1, shape=2.3, fray=0.0, jit=0.46, sjit=0.6, lvar=0.28, wvar=0.28, slant=0.0):
     """Lay a tract of feathers and find, per texel, the feather on top.
     S: (N,) mm along the flow (downstream +).  A: (N,) across: a fraction 0..1 of the row (wrap) or mm (no wrap).
     C: (N,) mm per unit of A at the texel (the row's circumference for wrap, 1 otherwise).
@@ -139,10 +139,12 @@ def shingle(S, A, C, rows, wrap=True, seed=1, shape=2.3, fray=0.0, jit=0.46, sji
             if wrap:
                 dA = dA - np.round(dA)
             c = dA * C
-            L = Lr[r] * (0.86 + 0.28 * h2)
-            W = Wr[r] * (0.86 + 0.28 * h3)
+            L = Lr[r] * (1 - lvar / 2 + lvar * h2)
+            W = Wr[r] * (1 - wvar / 2 + wvar * h3)
             root = S0[r] + (h2 - 0.5) * dS[r] * sjit
             a = S - root
+            if slant:  # (each mark leaning its own way)
+                c = c - (a - L * 0.5) * (h3 - 0.5) * 2 * slant
             # a feather: a rounded blade from its root to its tip, widest past the middle
             u = (a - L * 0.52) / (L * 0.5)
             q = np.abs(u) ** p + np.abs(c / W) ** p
@@ -305,7 +307,7 @@ class Painter:
             fcol = fringe_col if fringe_col is not None else tint(col, 0.35)
             col = mix(col, fcol, e * fringe)
         if 'shadow' in s.C:  # (white plumage: the shadows between feathers go a cool grey, not a darker white)
-            col = mix(col, np.broadcast_to(s.C['shadow'], col.shape), np.clip(F['shade'] * 0.5 * (1 - 0.5 * soft), 0, 1))
+            col = mix(col, np.broadcast_to(s.C['shadow'], col.shape), np.clip(F['shade'] * 0.34 * (1 - 0.5 * soft), 0, 1))
         else:
             col = tint(col, -0.17 * F['shade'] * (1 - 0.5 * soft))
         idx = np.nonzero(sel)
@@ -338,9 +340,9 @@ class Painter:
                           du=lambda x: (1.02 + 0.5 * ss(0.55 * Smax, 0.95 * Smax, x)) * k * fl,
                           L=lambda x: (2.3 + 1.5 * ss(0.5 * Smax, 0.95 * Smax, x)) * k * fl,
                           W=lambda x: (0.98 + 0.45 * ss(0.5 * Smax, 0.95 * Smax, x)) * k * fl)
-        Sw, Aw = s.warp(T, sel, S, A, Cc, 0.75, 2.6, 1)
+        Sw, Aw = s.warp(T, sel, S, A, Cc, 1.15, 3.6, 1)
         Sw, Aw = s.warp(T, sel, Sw, Aw, Cc, 0.35, 1.1, 7)
-        F = shingle(Sw, Aw, Cc, rows, wrap=True, seed=11, fray=0.6)
+        F = shingle(Sw, Aw, Cc, rows, wrap=True, seed=11, fray=0.6, sjit=0.85)
         # which tract each feather belongs to: decided at the texel, softened by a per-feather jitter
         front = np.cos(2 * math.pi * A + math.pi)  # +1 the breast, -1 the back
         thr = -0.3 + 0.75 * ss(0.32, 0.04, S / Smax)  # (the upperparts wrap further round the shoulders)
@@ -348,7 +350,8 @@ class Painter:
         hem = ss(0.55, 0.85, S / Smax).astype(np.float32)
         s.body_colour(T, out, sel, F, P, under, hem, S / Smax)
         # the painter's markings over the plumage: long streaks, bars and vermiculation following the flow
-        Sw2, Aw2 = s.warp(T, sel, S, A, Cc, 0.5, 2.0, 13)
+        Sw2, Aw2 = s.warp(T, sel, S, A, Cc, 0.8, 1.6, 13)
+        Sw2, Aw2 = s.warp(T, sel, Sw2, Aw2, Cc, 0.3, 0.7, 17)
         s.stroke_layers(T, out, sel, Sw2, Aw2, Cc, 'upper', 1 - under, wrap=True)
         s.stroke_layers(T, out, sel, Sw2, Aw2, Cc, 'under', under, wrap=True)
 
@@ -362,14 +365,21 @@ class Painter:
         rgb = out['rgb'][idx]
         hh = out['h'][idx]
         k = s.k
-        for i, L in enumerate(layers):
-            rows = make_rows(float(S.min()) - 3, float(S.max()) + 3, lambda x, v=L['ds'] * k: v,
+        exp = []  # (round flecks: three sparse fields at offset row phases, so no rows of dots line up)
+        for L in layers:
+            if L.get('shape', 2.0) == 2.0 and L['L'] <= 2.05 * L['W']:
+                exp += [dict(L, keep=L['keep'] / 3 * 1.1, ph=ph) for ph in (0.0, 0.33, 0.67)]
+            else:
+                exp.append(L)
+        for i, L in enumerate(exp):
+            rows = make_rows(float(S.min()) - 3 + L.get('ph', 0.0) * L['ds'] * k, float(S.max()) + 3, lambda x, v=L['ds'] * k: v,
                              (lambda x, v=L['du'] * k: max(3, round(float(np.median(C)) / v))) if wrap else (lambda x, v=L['du'] * k: 1.0 / v),
                              lambda x, v=L['L'] * k: v, lambda x, v=L['W'] * k: v)
             if wrap:  # (per-row feather counts from each row's own circumference)
                 Sb, Cb = T['S_of_b'][1], T['C_of_b'][1]
                 rows['n'] = np.array([max(3, round(float(np.interp(x, Sb, Cb)) / (L['du'] * k))) for x in rows['S0']])
-            F = shingle(S, A, C, rows, wrap=wrap, seed=300 + i * 17, shape=L.get('shape', 2.0), jit=0.5, sjit=0.9)
+            F = shingle(S, A, C, rows, wrap=wrap, seed=300 + i * 17, shape=L.get('shape', 2.0), jit=0.5, sjit=0.95, lvar=0.8, wvar=0.6,
+                        slant=0.35 if L.get('shape', 2.0) > 2.2 else 0.12)
             keep = F['hit'] & (((F['id'] * 7.77) % 1.0) < L.get('keep', 0.6))
             # a brush mark: full in the middle, tapering to both ends, a ragged edge
             taper = ss(0.0, 0.25, F['fa']) * ss(1.0, 0.7, F['fa'])
@@ -505,8 +515,8 @@ class Painter:
         rad = np.hypot(dx, dy)
         ang = (np.arctan2(dy, dx * sx) / (2 * math.pi)) % 1.0
         rmax = float(np.max(rad)) + 1.0
-        rows = make_rows(O.er * 0.9, rmax, lambda r: 0.42 * k, lambda r: max(6, round(2 * math.pi * max(r, 0.6) / (0.5 * k))), lambda r: 1.6 * k, lambda r: 0.3 * k)
-        F = shingle(rad, ang, 2 * math.pi * np.maximum(rad, 0.3), rows, wrap=True, seed=31, shape=2.0, fray=0.8)
+        rows = make_rows(O.er * 0.9, rmax, lambda r: 0.3 * k, lambda r: max(8, round(2 * math.pi * max(r, 0.6) / (0.3 * k))), lambda r: 1.5 * k, lambda r: 0.19 * k)
+        F = shingle(rad, ang, 2 * math.pi * np.maximum(rad, 0.3), rows, wrap=True, seed=31, shape=2.0, fray=1.0, sjit=0.8)
         base = np.broadcast_to(s.col('disc'), F['fa'].shape + (3,)).copy()
         # the disc darkens (or pales) toward the eye and its rim; concentric rings on some
         eyek = float(s.S.get('eyering', -0.3))
@@ -518,7 +528,7 @@ class Painter:
             ringm = (rr < rings['w']) & (rad > O.er * 2.2)
             base = np.where(ringm[:, None], mix(base, s.col('discDark'), rings.get('a', 0.6)), base)
         mk = s.markfn(s.pat.get('disc', {}), 'disc')
-        s.feather_paint(F, base, T, sel, out, marks=mk, var=0.05, barb_k=0.05, soft=0.3, relief=0.6)
+        s.feather_paint(F, base, T, sel, out, marks=mk, var=0.07, barb_k=0.04, soft=0.55, relief=0.5)
         s.face_details(T, out, disc, ruff, crown, dd)
         # ---- the ruff: short stiff feathers round the rim, a dark edge line
         sel = ruff
@@ -561,8 +571,9 @@ class Painter:
         if bk:
             for sx in (-1, 1):
                 u = X - sx * O.ex
-                arc = O.er * 2.1 + 0.9 * k - 0.07 * u * u / k - 0.22 * sx * u
-                wd = (0.5 * k) * (1 - ss(0.0, 3.4 * k, np.abs(u)) * 0.55) * (0.75 + 0.5 * vnoise(X * 3 / k, Y * 3 / k, 9))
+                arc = O.er * 1.9 + 0.7 * k - 0.05 * u * u / k + 0.26 * sx * u
+                inner = ss(0.5 * k, -2.0 * k, sx * u)
+                wd = (0.42 * k + 0.35 * k * inner) * (1 - ss(0.0, 3.4 * k, np.abs(u)) * 0.5) * (0.75 + 0.5 * vnoise(X * 3 / k, Y * 3 / k, 9))
                 m = front & (np.abs(Y - arc) < wd) & (np.abs(u) < 3.4 * k)
                 hair = np.mod((u * 4.2 / k) - (Y - arc) * 1.5 / k, 1.0) < 0.62
                 rgb[m & hair] = mix(rgb[m & hair], s.col('brow'), bk)
@@ -746,7 +757,7 @@ class Painter:
         b, a = T['b'], T['a']
         c = s.col('beak')
         top = np.sin(2 * math.pi * a)
-        col = tint(np.broadcast_to(c, b.shape + (3,)), 0.12 * top - 0.28 * ss(0.55, 1.0, b) * float(s.S.get('beaktip', 1.0)))
+        col = tint(np.broadcast_to(c, b.shape + (3,)), 0.07 * top - 0.3 * ss(0.55, 1.0, b) * float(s.S.get('beaktip', 1.0)) - 0.12 * ss(0.4, 0.15, b))
         cere = b < 0.22
         col = np.where(cere[..., None], s.col('cere', 'beak'), col)
         # fine growth lines along the horn
