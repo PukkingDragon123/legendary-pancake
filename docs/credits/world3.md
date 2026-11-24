@@ -44,7 +44,8 @@ BUSHED's own sources are **CC0 1.0** scans from [Poly Haven](https://polyhaven.c
 | `bark_debris_01.glb` | [Bark Debris 01](https://polyhaven.com/a/bark_debris_01) via BUSHED | Greg Zaal, Jenelle van Heerden | CC0 |
 | `boulder_01.glb` | [Boulder 01](https://polyhaven.com/a/boulder_01) via BUSHED | Rico Cilliers | CC0 |
 | `rock_07.glb` | [Rock 07](https://polyhaven.com/a/rock_07) via BUSHED | Jenelle van Heerden | CC0 |
-| `props_*.glb`, `bird_*.glb` | made for Hoot Hollow with lowpix (`art/lowpix/world/props.py`) | Hoot Hollow | project |
+| `songbird.glb` (+ `textures/bushed/coat_jay.webp`) | ["Robin_ Bird"](https://sketchfab.com/3d-models/robin--bird-ec1c6e2250824c3987cde64ea29ccd52) by [Assets_Animated](https://sketchfab.com/Assets_Animated), rebuilt as BUSHED's small-bird rig and repainted as chickadee / Canada jay coats by BUSHED; here slimmed (idle, eat, fly, glide clips; feather bones rigid; 384 px coats, desaturated; meshopt) | Assets_Animated, BUSHED | CC BY 4.0 |
+| `props_*.glb` | made for Hoot Hollow with lowpix (`art/lowpix/world/props.py`) | Hoot Hollow | project |
 
 ## Also kept
 

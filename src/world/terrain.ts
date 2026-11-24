@@ -152,12 +152,12 @@ void main() {
   float band = floor((n * 0.4 + 0.5) * 4.0) / 4.0;
   vec3 col = mix(uDeep, uShallow, clamp(smoothstep(0.25, 1.0, pd) * 0.7 + band * 0.25, 0.0, 1.0));
   // [world3] the misty sky mirrored in the middle, the dark banks and reeds reflected round the edge
-  float mirror = (1.0 - smoothstep(0.15, 0.75, pd)) * (0.55 + 0.45 * step(0.5, fract(q.y * 2.0 + floor(q.x * 4.0) * 0.37 + uTime * 0.05)));
+  float mirror = (1.0 - smoothstep(0.15, 0.8, pd)) * (0.7 + 0.3 * sin(q.x * 2.3 + q.y * 1.7 + uTime * 0.3));
   col = mix(col, uSky, mirror * 0.32);
   float bank = step(0.78 + 0.05 * sin(a * 11.0 + 1.7) + 0.03 * sin(a * 23.0), pd);
   col = mix(col, uDeep * 0.7, bank * 0.5);
-  float foam = step(0.95 + 0.02 * sin(uTime * 1.4 + a * 9.0), pd);
-  col = mix(col, uFoam, foam * 0.7);
+  float foam = step(0.975 + 0.015 * sin(uTime * 1.4 + a * 9.0), pd);
+  col = mix(col, uFoam, foam * 0.45);
   float sp = step(0.99, h21(q * 16.0 + floor(uTime * 2.5) * 7.0)) * (1.0 - foam) * (1.0 - bank);
   col = col * uLight + sp * uFoam * 0.45;
   float alpha = 0.86 + foam * 0.12 + sp * 0.1;

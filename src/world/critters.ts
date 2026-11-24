@@ -1,8 +1,8 @@
-// Small life: butterflies drifting between flower drifts, bees, birds that hop and scatter,
-// koi under the pond surface, ladybirds on the log, and the ambient particle emitters.
+// Small life: butterflies drifting between flower drifts, birds that hop and scatter (BUSHED's rigged
+// songbird), koi under the pond surface, dragonflies over it, and the ambient particle emitters.
 import * as THREE from 'three';
 import { box, buildRig, PX, type BoneSpec, type Painter, type Rig } from '../gfx/box.ts';
-import { loadGLB } from '../gfx/glb.ts';
+import { instanceGLB } from '../gfx/glb.ts';
 import { ramp, tone } from '../gfx/color.ts';
 import { smooth, solid } from '../gfx/mats.ts';
 import type { Fx } from './fx.ts';
@@ -44,40 +44,78 @@ function wingPainter(c: string, side: number): Painter {
 function butterfly(c: string): Rig {
   return flyer([box(0, 0, 0, 1, 1, 4, solid('#4b463a', { noise: 0 }))], (s) => [box(s * 3.2, 0.4, 0.2, 6, 0.25, 7, wingPainter(c, s), { cut: true })], 0.5, 4);
 }
-function bee(): Rig {
-  const stripes: Painter = (t) => (Math.floor(t.bz) % 2 ? 0x2e2b24 : 0xdcb072);
-  return flyer([box(0, 0, 0, 2, 2, 3, stripes), box(0, 0.4, 1.8, 1, 1, 1, solid('#2e2b24', { noise: 0 }))], (s) => [box(s * 1.5, 1.6, 0, 2, 0.4, 2, smooth('#dfe9ea'))], 1.8);
-}
-function bird(c: string, chest: string): Rig {
-  const b = smooth(c, { noise: 0.6, scale: 1.5 }), ch = ramp(chest);
-  const body: Painter = (t) => (t.face === 4 || (t.face === 3) || (t.face < 2 && t.bz > t.sz - 2 && t.by < 2) ? tone(ch, t.face === 3 ? -1 : 0.3) : b(t));
-  return flyer([
-    box(0, 2, 0, 4, 4, 5, body), box(0, 5, 2, 3, 3, 3, b), box(0, 6, 3.8, 1, 1, 1, smooth('#dcb072')), box(-1, 6.6, 3.4, 0.6, 0.8, 0.4, solid('#231f1b', { noise: 0 })), box(1, 6.6, 3.4, 0.6, 0.8, 0.4, solid('#231f1b', { noise: 0 })),
-    { ...box(0, 3, -3.4, 2, 1, 3, b), rot: [20, 0, 0] }, box(-1, 0, 0.5, 1, 2, 1, smooth('#bf9d74')), box(1, 0, 0.5, 1, 2, 1, smooth('#bf9d74')),
-  ], (s) => [box(s * 2.3, 2.6, -0.2, 1, 3, 4, b)], 5.4);
-}
-/** [world3] Lowpix songbirds (art/lowpix/world/props.py): robin, blue tit, finch. */
-const BIRD_KIT = ['bird_robin', 'bird_tit', 'bird_finch'];
-async function kitBird(id: string): Promise<Rig | null> {
+/** [world3] BUSHED's rigged songbird (CC BY 4.0 "Robin Bird" by Assets_Animated, rebuilt and repainted by
+ *  BUSHED; see docs/credits/world3.md) with its idle, eat, fly and glide clips; odd birds wear the jay coat. */
+interface SongBird { rig: Rig; mixer: THREE.AnimationMixer; act: Record<string, THREE.AnimationAction>; cur: string }
+async function songbird(coat: number): Promise<SongBird | null> {
   try {
-    const g = await loadGLB(`world/${id}.glb`);
-    const inner = g.scene.clone(true);
-    inner.scale.setScalar(PX);
+    const { root: model, clips } = await instanceGLB('world/songbird.glb');
+    const box = new THREE.Box3().setFromObject(model), size = box.getSize(new THREE.Vector3());
+    const k = 0.42 / Math.max(size.x, size.y, size.z);
+    model.scale.multiplyScalar(k);
+    model.position.y -= box.min.y * k;
+    model.traverse((o) => {
+      const m = o as THREE.SkinnedMesh;
+      if (!m.isMesh) return;
+      m.castShadow = true; m.frustumCulled = false;
+      const mat = (m.material as THREE.MeshStandardMaterial).clone();
+      mat.transparent = false; mat.alphaTest = 0.5; mat.depthWrite = true;
+      if (coat) { const t = coatTex(); mat.map = t; }
+      m.material = mat;
+    });
     const root = new THREE.Group();
-    root.add(inner);
-    // the wing joints sit at the shoulders: +x is the bird's right wing, the mirrored copy its left
-    const wingR = inner.getObjectByName('wing') ?? new THREE.Group(), wingL = inner.getObjectByName('wing_mirror') ?? new THREE.Group();
-    return { root, bones: { root, wingL, wingR }, dispose() { /* shared GLB, nothing to free */ } } as unknown as Rig;
+    root.add(model);
+    const mixer = new THREE.AnimationMixer(model), act: Record<string, THREE.AnimationAction> = {};
+    for (const c of clips) act[c.name] = mixer.clipAction(c);
+    const dummy = new THREE.Group();
+    const rig = { root, bones: { root, wingL: dummy, wingR: dummy.clone() }, dispose() { mixer.stopAllAction(); } } as unknown as Rig;
+    act.idle2?.play();
+    return { rig, mixer, act, cur: 'idle2' };
   } catch { return null; }
 }
-function koi(c: string): Rig {
-  const base = ramp(c), w = ramp('#eae0c8');
-  const p: Painter = (t) => ((Math.floor(t.z + 30) + Math.floor(t.x + 30)) % 3 === 0 ? tone(w, 0) : tone(base, t.face === 2 ? 0.6 : -0.4));
-  return buildRig([{ name: 'root', pivot: [0, 0, 0], boxes: [box(0, 0, 0, 2, 2, 5, p), box(0, 0.4, 3, 1.4, 1.2, 1, p)] }, { name: 'tail', parent: 'root', pivot: [0, 1, -2.5], boxes: [box(0, 0, -3.6, 1, 2, 3, p)] }]);
+let coatT: THREE.Texture | null = null;
+function coatTex() {
+  if (coatT) return coatT;
+  coatT = new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}textures/bushed/coat_jay.webp`);
+  coatT.colorSpace = THREE.SRGBColorSpace; coatT.flipY = false;
+  return coatT;
+}
+/** Low-poly forms for the small pond life, painted in the calm palette (no boxes). */
+const lam = (c: number, o: THREE.MeshLambertMaterialParameters = {}) => new THREE.MeshLambertMaterial({ color: c, ...o });
+function koiFish(c: number, patch: number): Rig {
+  const root = new THREE.Group(), tailPivot = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 6), lam(c));
+  body.scale.set(0.09, 0.07, 0.26);
+  const spot = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 4), lam(patch));
+  spot.scale.set(0.07, 0.05, 0.09); spot.position.set(0, 0.022, 0.04);
+  const tail = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.1), lam(c, { side: THREE.DoubleSide }));
+  tail.rotation.y = Math.PI / 2; tail.position.z = -0.05;
+  tailPivot.position.z = -0.12; tailPivot.add(tail);
+  root.add(body, spot, tailPivot);
+  return { root, bones: { root, tail: tailPivot }, dispose() { /* small */ } } as unknown as Rig;
+}
+function dragonfly(): Rig {
+  const root = new THREE.Group(), wingL = new THREE.Group(), wingR = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.007, 0.3, 5), lam(0x46596a));
+  body.rotation.x = Math.PI / 2;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.022, 6, 4), lam(0x617f8c));
+  head.position.z = 0.16;
+  const wm = new THREE.MeshBasicMaterial({ color: 0xdfe9ea, transparent: true, opacity: 0.55, side: THREE.DoubleSide, depthWrite: false });
+  for (const [g, s] of [[wingL, -1], [wingR, 1]] as const) {
+    for (const dz of [0.04, -0.03]) {
+      const w = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.035), wm);
+      w.rotation.x = -Math.PI / 2; w.position.set(s * 0.09, 0, dz);
+      g.add(w);
+    }
+    root.add(g);
+  }
+  wingL.position.y = wingR.position.y = 0.012;
+  root.add(body, head);
+  return { root, bones: { root, wingL, wingR }, dispose() { /* small */ } } as unknown as Rig;
 }
 
 interface Flyer { rig: Rig; pos: THREE.Vector3; vel: THREE.Vector3; goal: THREE.Vector3; t: number; flap: number; kind: 'butterfly' | 'bee' }
-interface Bird { rig: Rig; pos: THREE.Vector3; home: THREE.Vector3; state: 'perch' | 'flee' | 'away' | 'return'; t: number; from: THREE.Vector3; to: THREE.Vector3; yaw: number; hop: number }
+interface Bird { rig: Rig; pos: THREE.Vector3; home: THREE.Vector3; state: 'perch' | 'flee' | 'away' | 'return'; t: number; from: THREE.Vector3; to: THREE.Vector3; yaw: number; hop: number; song?: SongBird }
 
 export class Critters {
   readonly group = new THREE.Group();
@@ -102,53 +140,42 @@ export class Critters {
     // [world3] calm palette: terracotta, lake, honey, rose, lilac and paper wings
     const cols = ['#c0866a', '#86a9b0', '#dcb072', '#d9aca4', '#b4a9c9', '#f4eedd'];
     const nFly = quality === 'high' ? 7 : 4;
-    for (let i = 0; i < nFly + 3; i++) {
-      const isBee = i >= nFly;
-      const rig = isBee ? bee() : butterfly(cols[i % cols.length]);
+    for (let i = 0; i < nFly; i++) {
+      const isBee = false;
+      const rig = butterfly(cols[i % cols.length]);
       const f = pick(plan.flowers);
       const pos = new THREE.Vector3(f.x + rand(-1, 1), rand(0.8, 1.6), f.z + rand(-1, 1));
       rig.root.traverse((o) => { o.castShadow = false; });
       this.group.add(rig.root);
       this.flyers.push({ rig, pos, vel: new THREE.Vector3(), goal: pos.clone(), t: rand(0, 3), flap: rand(0, 6), kind: isBee ? 'bee' : 'butterfly' });
     }
-    const looks: [string, string][] = [['#6f553d', '#c0866a'], ['#617f8c', '#eae0c8'], ['#a68a52', '#eae0c8']];
     plan.perches.slice(0, quality === 'high' ? 4 : 2).forEach((p, i) => {
-      const rig = bird(...looks[i % looks.length]);
-      this.group.add(rig.root);
+      // [world3] BUSHED's rigged songbird; nothing shows until it has loaded
+      const holder = new THREE.Group(), dummy = new THREE.Group();
+      const rig = { root: holder, bones: { root: holder, wingL: dummy, wingR: dummy }, dispose() { /* empty */ } } as unknown as Rig;
       const b: Bird = { rig, pos: p.clone(), home: p.clone(), state: 'perch', t: rand(1, 4), from: p.clone(), to: p.clone(), yaw: rand(0, 6.28), hop: 0 };
       this.birds.push(b);
-      // [world3] the hand-made lowpix songbird takes over from the voxel stand-in once it has loaded
-      kitBird(BIRD_KIT[i % BIRD_KIT.length]).then((kit) => {
-        if (!kit) return;
-        kit.root.position.copy(b.rig.root.position); kit.root.rotation.copy(b.rig.root.rotation); kit.root.visible = b.rig.root.visible;
-        this.group.remove(b.rig.root); b.rig.dispose();
-        b.rig = kit;
-        this.group.add(kit.root);
+      void songbird(i % 2).then((sb) => {
+        if (!sb) return;
+        sb.rig.root.position.copy(holder.position); sb.rig.root.rotation.copy(holder.rotation);
+        b.rig = sb.rig; b.song = sb;
+        this.group.add(sb.rig.root);
       });
     });
     const koiCols = ['#c0866a', '#dcb072', '#a66c55', '#eae0c8', '#c59a52', '#9e5f66', '#46596a', '#c0866a'];
     for (let i = 0; i < (quality === 'high' ? 8 : 5); i++) {
-      const rig = koi(koiCols[i]);
+      const rig = koiFish(new THREE.Color(koiCols[i]).getHex(), i % 3 ? 0xeae0c8 : 0x2e2b24);
       rig.root.traverse((o) => { o.castShadow = false; });
       this.group.add(rig.root);
       this.fish.push({ rig, a: rand(0, 6.28), r: rand(0.25, 0.72), speed: rand(0.22, 0.5) * (i % 2 ? 1 : -1), depth: rand(0.18, 0.42), jump: -1, wait: rand(6, 20) });
     }
     // dragonflies: long thin bodies, glassy wings, darting between hover points over the water
     for (let i = 0; i < (quality === 'high' ? 3 : 2); i++) {
-      const body: Painter = (t) => (Math.floor(t.bz) % 2 ? 0x46596a : 0x86a9b0);
-      const wing: Painter = (t) => (t.bx < 0.6 || t.bx > t.sx - 0.6 ? 0xbcd6dc : 0xdfe9ea);
-      const rig = flyer([box(0, 0, 0, 1, 1, 7, body), box(0, 0.2, 3.6, 1.6, 1.4, 1.4, solid('#46596a', { noise: 0 }))], (sd) => [box(sd * 3, 0.8, 1.2, 6, 0.3, 1.4, wing), box(sd * 2.6, 0.8, -0.4, 5, 0.3, 1.2, wing)], 0.8);
+      const rig = dragonfly();
       rig.root.traverse((o) => { o.castShadow = false; });
       this.group.add(rig.root);
       const p = new THREE.Vector3(POND.x + rand(-2, 2), SURFACE_Y + rand(0.8, 1.4), POND.z + rand(-1.5, 1.5));
       this.flies.push({ rig, pos: p, goal: p.clone(), t: rand(0, 2), hover: rand(0, 6) });
-    }
-    // ladybirds strolling along the fallen log
-    for (let i = 0; i < 2; i++) {
-      const dots: Painter = (t) => (t.face === 2 && (Math.floor(t.bx) + Math.floor(t.bz)) % 2 === 0 ? 0x2e2b24 : 0xa8505c);
-      const rig = buildRig([{ name: 'root', pivot: [0, 0, 0], boxes: [box(0, 0, 0, 2, 1, 2, dots), box(0, 0, 1.3, 1, 1, 1, solid('#2e2b24', { noise: 0 }))] }]);
-      this.group.add(rig.root);
-      this.bugs.push({ mesh: rig.root, a: i * 3 });
     }
   }
 
@@ -158,6 +185,16 @@ export class Critters {
     this.petals = s === 'spring';
     this.leafRate = s === 'autumn' ? 2.6 + t * 1.6 : s === 'spring' ? 0.9 : s === 'summer' ? 0.45 : 0;
     this.leafCols = s === 'autumn' ? [0xc59a52, 0xb0703f, 0xd0a860, 0x9c6a42, 0xa66c55, 0x8a8a4a] : s === 'spring' ? [0xe8b4ae, 0xf4eedd, 0xd9aca4, 0xa7b788] : null;
+  }
+
+  /** [world3] Cross-fade a songbird to a clip. */
+  private clip(sb: SongBird, name: string) {
+    if (sb.cur === name || !sb.act[name]) return;
+    const next = sb.act[name], prev = sb.act[sb.cur];
+    next.reset().play();
+    if (name === 'eat') { next.setLoop(THREE.LoopOnce, 1); next.clampWhenFinished = true; }
+    if (prev) next.crossFadeFrom(prev, 0.25, false);
+    sb.cur = name;
   }
 
   /** The nearest butterfly, for animals that feel like chasing one. */
@@ -205,6 +242,8 @@ export class Critters {
         b.hop = Math.max(0, b.hop - dt);
         b.rig.root.position.set(b.pos.x, b.pos.y + Math.sin((b.hop / 0.25) * Math.PI) * 0.14, b.pos.z);
         b.rig.bones.wingL.rotation.z = b.rig.bones.wingR.rotation.z = 0;
+        if (b.song && b.hop > 0.2 && Math.random() < 0.4) this.clip(b.song, 'eat');
+        else if (b.song && b.song.cur !== 'eat') this.clip(b.song, 'idle2');
       } else if (b.state === 'flee' || b.state === 'return') {
         const len = b.state === 'flee' ? 1.6 : 2.2, k = 1 - Math.max(0, b.t) / len, e = k * k * (3 - 2 * k);
         b.pos.lerpVectors(b.from, b.to, e); b.pos.y += Math.sin(k * Math.PI) * 1.6;
@@ -212,10 +251,12 @@ export class Critters {
         const w = Math.sin(t * 28) * 1.1;
         b.rig.bones.wingL.rotation.z = -w - 0.3; b.rig.bones.wingR.rotation.z = w + 0.3;
         b.rig.root.position.copy(b.pos);
+        if (b.song) this.clip(b.song, k > 0.8 && b.state === 'return' ? 'glide' : 'fly');
         if (b.t <= 0) { if (b.state === 'flee') { b.state = 'away'; b.t = rand(6, 14); } else { b.state = 'perch'; b.t = 2; b.pos.copy(b.home); } }
       } else if (b.t <= 0 && !animals.some((a) => a.distanceTo(b.home) < 2.5)) { b.state = 'return'; b.t = 2.2; b.from.copy(b.pos); b.to.copy(b.home); }
       b.rig.root.rotation.y = b.yaw;
       b.rig.root.visible = b.state !== 'away';
+      if (b.song) { b.song.mixer.update(dt); if (b.song.cur === 'eat' && (b.song.act.eat?.time ?? 0) > (b.song.act.eat?.getClip().duration ?? 1) * 0.95) this.clip(b.song, 'idle2'); }
     }
 
     for (const f of this.fish) {
@@ -251,12 +292,6 @@ export class Critters {
       const w = Math.sin(t * 70 + d.hover) * 0.5;
       d.rig.bones.wingL.rotation.z = -w; d.rig.bones.wingR.rotation.z = w;
     }
-    this.bugs.forEach((b, i) => {
-      b.a += dt * 0.12 * (i ? -1 : 1);
-      const u = Math.sin(b.a) * 0.9;
-      b.mesh.position.set(3.4 + u * Math.cos(0.25) + 0.1, 0.66, -7.0 + u * Math.sin(0.25) * -1 + (i ? 0.12 : -0.1));
-      b.mesh.rotation.y = -0.25 + (Math.cos(b.a) * (i ? -1 : 1) > 0 ? Math.PI / 2 : -Math.PI / 2);
-    });
 
     // ---- ambient particles
     const fx = this.fx, a = this.acc;

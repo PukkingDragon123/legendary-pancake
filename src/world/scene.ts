@@ -418,7 +418,7 @@ export class Scene {
       const golden = Math.max(THREE.MathUtils.smoothstep(hr, 16.4, 18.2) * (1 - THREE.MathUtils.smoothstep(hr, 19.0, 19.8)), THREE.MathUtils.smoothstep(hr, 5.6, 6.4) * (1 - THREE.MathUtils.smoothstep(hr, 7.4, 8.4)));
       g.warm = L(0.18, -0.6, night) + golden * 0.25;
       g.saturation = L(1.0, 0.84, night);
-      g.exposure = L(1.0, 1.1, night);
+      g.exposure = L(1.0, 1.4, night);
       g.bloom = L(0.28, 0.55, night);
       g.vignette = L(0.28, 0.4, night);
       g.cold = (this.weather?.vis.cold ?? 0) * 0.6;
