@@ -199,8 +199,12 @@ export function GlobePanel() {
         const q = st.project(info.lat, info.lon, 1.01);
         c.style.display = q.facing > 0 ? '' : 'none';
         c.style.opacity = String(Math.min(1, (near - 0.45) * 4));
-        c.style.transform = `translate(${Math.round(q.x)}px,${Math.round(q.y)}px) translate(-50%,-50%)`;
         if (c.textContent !== info.name) c.textContent = info.name;
+        // kept inside the clear part of the screen (never under the card or the header)
+        const W = innerWidth, H = innerHeight, cw = c.offsetWidth, ch = c.offsetHeight;
+        const right = isSide() ? W - Math.min(460, W * 0.4) - 28 : W, bottom = isSide() ? H : H * 0.41;
+        const x = Math.max(cw / 2 + 8, Math.min(right - cw / 2 - 8, q.x)), y = Math.max(70 + ch / 2, Math.min(bottom - ch / 2 - 8, q.y));
+        c.style.transform = `translate(${Math.round(x - cw / 2)}px,${Math.round(y - ch / 2)}px)`;
       } else c.style.display = 'none';
     }
   }

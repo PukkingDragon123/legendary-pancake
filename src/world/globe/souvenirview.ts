@@ -28,14 +28,15 @@ export class SouvenirView {
     this.r.setPixelRatio(Math.min(2, devicePixelRatio || 1));
     this.r.outputColorSpace = THREE.SRGBColorSpace;
     this.r.toneMapping = THREE.ACESFilmicToneMapping;
-    this.r.toneMappingExposure = 1.05;
+    this.r.toneMappingExposure = 0.95;
     this.r.setClearColor(0x000000, 0);
     const pm = new THREE.PMREMGenerator(this.r);
     this.env = pm.fromScene(new RoomEnvironment(), 0.04).texture;
     pm.dispose();
     this.scene.environment = this.env;
-    this.scene.add(new THREE.HemisphereLight(0xfff2dc, 0x3a2c22, 0.9));
-    const key = new THREE.DirectionalLight(0xffe6c4, 2.6);
+    this.scene.environmentIntensity = 0.55;
+    this.scene.add(new THREE.HemisphereLight(0xfff2dc, 0x3a2c22, 0.6));
+    const key = new THREE.DirectionalLight(0xffe6c4, 2.2);
     key.position.set(-2.5, 4, 3.5);
     const rim = new THREE.DirectionalLight(0x9fc4ff, 1.6);
     rim.position.set(3, 2.5, -3.5);

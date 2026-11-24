@@ -115,6 +115,21 @@ if "relief" in OPT:
     bpy.ops.object.mode_set(mode="EDIT")
     bpy.ops.mesh.fill()
     bpy.ops.object.mode_set(mode="OBJECT")
+    # the sides and the base are a varnished walnut plinth
+    wood = bpy.data.materials.new("plinth")
+    wood.use_nodes = True
+    bs = next(n for n in wood.node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    bs.inputs["Base Color"].default_value = (0.13, 0.065, 0.03, 1)
+    bs.inputs["Roughness"].default_value = 0.42
+    ob.data.materials.append(wood)
+    k = len(ob.data.materials) - 1
+    cut = min(zs) - depth * 0.5
+    n = 0
+    for f in ob.data.polygons:
+        if any(ob.data.vertices[i].co.z < cut for i in f.vertices):
+            f.material_index = k
+            n += 1
+    print("plinth faces", n, "of", len(ob.data.polygons))
 vs = [ob.matrix_world @ v.co for v in ob.data.vertices]
 lo = Vector((min(v.x for v in vs), min(v.y for v in vs), min(v.z for v in vs)))
 hi = Vector((max(v.x for v in vs), max(v.y for v in vs), max(v.z for v in vs)))
