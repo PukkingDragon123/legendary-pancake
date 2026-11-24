@@ -13,7 +13,7 @@ import { loadKit } from './forestkit.ts';
 import { clearing, groundY, HALF, houseD, inGarden, pathD, POND, pondD, SEED, type Collider } from './layout.ts';
 import { FG, grassReady, type GrassItem } from './grass.ts';
 import { LT, Litter, litterReady, type LitterItem } from './litter.ts';
-import { SURFACE_Y, surfaceY } from './terrain.ts';
+import { gladeD, SURFACE_Y, surfaceY } from './terrain.ts';
 import { mossMat, shrubProto, treeMaterials, treeProto, vegMat, vegProto, type ShrubKind, type VegKind } from './woods.ts';
 import { leafMaterial, leavesReady, withLeafState, type LeafCell } from './foliage.ts';
 import type { SpeciesId } from './bushed/species.ts';
@@ -72,7 +72,12 @@ const DRIFT_CELLS: Record<string, number[]> = {
   garlic: [FG.garlic, FG.garlic, FG.shade],
 };
 
-export function planForest(quality: 'low' | 'high'): ForestPlan {
+/** [look4] The sunny glade round the oak (lawn, flowers, the path, the pond): no tall trees inside it. */
+export const inGlade = (x: number, z: number) => gladeD(x, z) < 1;
+
+export function planForest(tier: 'low' | 'medium' | 'high'): ForestPlan {
+  // [look4] medium plants as densely as high where you look closely (the meadow), lighter elsewhere
+  const quality: 'low' | 'high' = tier === 'high' ? 'high' : 'low';
   const r = rng(SEED);
   const lists = new Map<string, Spot[]>();
   const put = (kind: string, x: number, z: number, s = 1, yaw = r.range(0, Math.PI * 2), y = surfaceY(x, z), tint?: number) => {
@@ -100,10 +105,12 @@ export function planForest(quality: 'low' | 'high'): ForestPlan {
   };
 
   // feature trees around the clearing, then the forest proper on a jittered grid
-  tree('oak1', -9.4, -6.8, 1.3); tree('blossom', 10.6, -10.8, 1.2); tree('birch1', -12.6, 1.2, 1.1); tree('oak3', 11.8, -2.6, 1.2); tree('maple', -6.2, -11.2, 1.1); tree('oak2', 14.6, 6.4, 1.2); tree('birch2', -14.2, 7.2, 1.1); tree('pine1', 5.2, -12.4, 1.2); // [look4] the blossom stands clear of the porch and Pip's flights
+  // [look4] a sunny glade round the oak: the feature trees frame it from the glade's rim, nothing tall stands inside it
+  tree('oak1', -19, -10, 1.3); tree('blossom', 13.5, -16.5, 1.2); tree('birch1', -19, 3, 1.1); tree('oak3', 19.5, -4, 1.2); tree('maple', -12, -17, 1.15); tree('oak2', 19.5, 9, 1.2); tree('birch2', -19.5, 10, 1.1); tree('pine1', 5, -19.5, 1.25);
   for (let gz = -23; gz < 23; gz += 3) for (let gx = -23; gx < 23; gx += 3) {
     const x = gx + r.range(0.2, 2.6), z = gz + r.range(0.2, 2.6);
     if (clearing(x, z) > 0.04 || !dry(x, z, 1.5, 1.6) || nearTrunk(x, z, 2.6) || r.chance(0.08)) continue;
+    if (inGlade(x, z)) continue;
     // keep the wedge between the camera and the clearing free of tall trees
     if (z > 7 && Math.abs(x) < (z - 7) * 1.25 + 9) continue;
     const far = Math.hypot(x, z) > 16.5, k = r();
@@ -144,7 +151,9 @@ export function planForest(quality: 'low' | 'high'): ForestPlan {
 
   // mushrooms cluster in the shade near trunks, on moss; a fairy ring of toadstools in the open
   for (let i = 0; i < 26; i++) {
-    const t = r.pick(trunks.filter((t) => Math.hypot(t.x, t.z) < 17));
+    const near = trunks.filter((t) => Math.hypot(t.x, t.z) < 24);
+    if (!near.length) break;
+    const t = r.pick(near);
     const a = r.range(0, Math.PI * 2), d = r.range(0.9, 1.6), cx = t.x + Math.cos(a) * d, cz = t.z + Math.sin(a) * d;
     if (!dry(cx, cz, 1.2, 0.9) || groundY(cx, cz) < 0) continue;
     const kind = r.pick(['toadstool', 'toadstool', 'bolete', 'chanterelle', 'honey', 'bolete', 'glow']);
@@ -231,7 +240,7 @@ export function planForest(quality: 'low' | 'high'): ForestPlan {
 
   // grass: the instanced field. Lush meadow in the clearing (with wildflowers), woodland plants in the
   // shade, reeds round the pond, short tufts along the paths.
-  const want = quality === 'high' ? 14000 : 6000;
+  const want = tier === 'high' ? 14000 : tier === 'medium' ? 10000 : 6000;
   const meadowCells = [FG.short, FG.mid, FG.mid, FG.tall, FG.short, FG.mid, FG.clover, FG.daisy, FG.buttercup, FG.forgetme, FG.campion, FG.seed, FG.sorrel];
   const woodCells = [FG.shade, FG.shade, FG.mid, FG.fern, FG.bracken, FG.moss, FG.litter, FG.woodrush, FG.violet, FG.primrose, FG.garlic, FG.bluebell, FG.anemone, FG.strawberry];
   for (let i = 0, placed = 0; i < want * 4 && placed < want; i++) {
@@ -317,16 +326,18 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
     if (!T) continue;
     const set: TreeSet = { kind, foliage: [], idx: [] };
     const mats = treeMaterials(T.species);
-    T.seeds.forEach((seed, vi) => {
-      // [look4] three rings: near (full detail), mid (reduced, still casting shadows into the clearing), far (reduced, no
-      // shadow: the sun's shadow map only covers the clearing)
+    // [look4] the lighter build uses one variant per kind (half the draw calls); the high one keeps them all
+    const seedsT = quality === 'high' ? T.seeds : T.seeds.slice(0, 1);
+    seedsT.forEach((seed, vi) => {
+      // [look4] rings: near (full detail), mid (reduced, still casting shadows into the clearing), far (reduced, no
+      // shadow: the sun's shadow map only covers the clearing); the lighter build folds mid and far together
       for (const ring of [0, 1, 2]) {
         const ids: number[] = [];
-        const ringOf = (s: Spot) => { const d = Math.hypot(s.x, s.z); return quality === 'high' && d < 12.8 ? 0 : d < 21 ? 1 : 2; };
-        list.forEach((s, i) => { if (i % T.seeds.length === vi && ringOf(s) === ring) ids.push(i); });
+        const ringOf = (s: Spot) => { const d = Math.hypot(s.x, s.z); return quality === 'high' && d < 12.8 ? 0 : quality === 'high' && d < 21 ? 1 : 2; };
+        list.forEach((s, i) => { if (i % seedsT.length === vi && ringOf(s) === ring) ids.push(i); });
         if (!ids.length) continue;
         const near = ring === 0, shadow = ring < 2;
-        const proto = treeProto(T.species, seed, T.age, near, T.leaves);
+        const proto = treeProto(T.species, seed, T.age, near, T.leaves, quality === 'high' ? 0.6 : 0.45);
         const lod = near ? proto.lod0 : proto.lod1;
         const spots = ids.map((i) => list[i]);
         const sc = (s: Spot): [number, number, number] => { const k = (T.h * s.s) / proto.height; return [k, k, k]; };
@@ -344,7 +355,7 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
   for (const [kind, list] of plan.lists) {
     const S = SMALL[kind];
     if (!S?.shrub) continue;
-    const seeds = S.seeds ?? [1];
+    const seeds = quality === 'high' ? S.seeds ?? [1] : (S.seeds ?? [1]).slice(0, 1); // [look4] one variant on the lighter build
     seeds.forEach((seed, vi) => {
       const spots = list.filter((_, i) => i % seeds.length === vi);
       if (!spots.length) return;
@@ -359,7 +370,7 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
   for (const [kind, list] of plan.lists) {
     const S = SMALL[kind];
     if (!S?.veg) continue;
-    const seeds = S.seeds ?? [1];
+    const seeds = quality === 'high' ? S.seeds ?? [1] : (S.seeds ?? [1]).slice(0, 1); // [look4] one variant on the lighter build
     seeds.forEach((seed, vi) => {
       const spots = list.filter((_, i) => i % seeds.length === vi);
       if (!spots.length) return;
@@ -390,14 +401,14 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
     }));
   }
 
-  const litter = new Litter(plan.litter);
+  const litter = new Litter(plan.litter, 24); // [look4] a few big chunks: fewer draw calls
   group.add(litter.group);
   const ready = Promise.allSettled([...jobs, grassReady, litterReady, leavesReady]).then((res) => { for (const x of res) if (x.status === 'rejected') console.warn('[world] forest model failed', x.reason); });
 
   function setSeason(info: SeasonInfo) {
     // [look4] autumn turns a share of the broadleaves to amber, copper, crimson and gold (more as it goes on), the
     // rest stay green; winter leaves the broadleaves bare and frosts the conifers; spring is a fresher green
-    const s = info.season, turned = s === 'autumn' ? 0.3 + 0.35 * info.t : 0;
+    const s = info.season, turned = s === 'autumn' ? 0.22 + 0.26 * info.t : 0;
     for (const set of sets) {
       const T = SEASON_TINT[tintKey(set.kind)];
       const deciduous = DECIDUOUS.has(set.kind);
@@ -407,7 +418,8 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
         set.idx[mi].forEach((gi, i) => {
           let tint = 0xffffff, leafState = 0;
           if (s === 'spring') tint = T.spring;
-          else if (s === 'winter') { if (deciduous) leafState = -1; else tint = T.winter ?? 0xffffff; }
+          // winter: oaks and maples hold their dry russet leaves under the snow (marcescence), birches go bare
+          else if (s === 'winter') { if (deciduous) { if (set.kind.startsWith('birch') || set.kind === 'blossom') leafState = -1; else { leafState = 1; tint = 0xb89070; } } else tint = T.winter ?? 0xffffff; }
           else if (s === 'autumn' && deciduous && set.kind !== 'blossom') {
             if (H(gi, set.kind.length + 11) < turned) leafState = 1;
             else tint = 0xf8fae8;

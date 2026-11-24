@@ -19,12 +19,13 @@ const treeCache = new Map<string, TreeProto>();
  * A tree prototype (both levels of detail), cached by species, seed, age and leaves. [look4] The trunk and limbs are
  * BUSHED's; the crown is Hoot Hollow's bushy leaf-card canopy (foliage.ts) grown where BUSHED put its leaves.
  */
-export function treeProto(species: SpeciesId, seed: number, age: number, near = true, leaves: LeafCell[] = ['oak']): TreeProto {
-  const key = `${species}:${seed}:${age}:${near}:${leaves.join('+')}`;
+export function treeProto(species: SpeciesId, seed: number, age: number, near = true, leaves: LeafCell[] = ['oak'], farDetail = 0.6): TreeProto {
+  const key = `${species}:${seed}:${age}:${near}:${leaves.join('+')}:${farDetail}`;
   let t = treeCache.get(key);
   if (!t) {
     const m = buildTree(species, seed, { age, moss: species === 'oak' ? 0.4 : 0.15 });
-    const l1 = m.lod(1);
+    // [look4] far trees wear the trunk and main limbs only: their crowns hide the rest
+    const l1 = m.lod(2);
     const l0 = near ? m.lod(0) : l1;
     const pts = leafPoints(m);
     const crown = (detail: number) => {
@@ -39,7 +40,7 @@ export function treeProto(species: SpeciesId, seed: number, age: number, near = 
         .map((p) => ({ ...p, sy: 0.85 }));
       return canopy(puffs, { cells: leaves, seed, size: R * (detail < 1 ? 0.44 : 0.36), cover: detail < 1 ? 1.6 : 2.4, height: m.height, sway: 0.025, core: true, depthDark: 0.34 });
     };
-    const foliage = crown(near ? 1 : 0.6);
+    const foliage = crown(near ? 1 : farDetail);
     t = { species, height: m.height, crown: m.crownRadius, lod0: { bark: l0.bark, foliage }, lod1: { bark: l1.bark, foliage } };
     treeCache.set(key, t);
   }

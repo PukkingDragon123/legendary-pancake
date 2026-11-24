@@ -122,8 +122,16 @@ export class Post {
   private levels: number;
   private fixedPixel: number | null = null;
 
-  constructor(private gl: THREE.WebGLRenderer, private quality: 'low' | 'high') {
-    this.levels = quality === 'high' ? 5 : 4;
+  /** [look4] cost tier: high (5 bloom levels, half-res depth of field), medium (3 levels, half-res), low (2 levels,
+   * quarter-res, a coarser internal grid) */
+  private tier: 'high' | 'medium' | 'low';
+  private dofShift = 1;
+  private pixelScale = 1;
+  constructor(private gl: THREE.WebGLRenderer, quality: 'low' | 'high' | 'medium') {
+    this.tier = quality;
+    this.levels = quality === 'high' ? 5 : quality === 'medium' ? 3 : 2;
+    this.dofShift = quality === 'low' ? 2 : 1;
+    this.pixelScale = quality === 'low' ? 1.25 : 1;
     this.pixel = pixelFor(innerWidth, innerHeight);
     this.mBright = shader(/* glsl */ `
       uniform sampler2D tSrc; uniform float uThresh; uniform vec2 uTexel; varying vec2 vUv;
@@ -285,6 +293,17 @@ export class Post {
   /** Internal resolution (for anything that needs to snap to the pixel grid). */
   get size(): [number, number] { return [this.w, this.h]; }
 
+  /** [look4] Change the cost tier at runtime (re-allocates the small targets; cheap). */
+  setTier(t: 'high' | 'medium' | 'low') {
+    if (t === this.tier) return;
+    this.tier = t;
+    this.levels = t === 'high' ? 5 : t === 'medium' ? 3 : 2;
+    this.dofShift = t === 'low' ? 2 : 1;
+    this.pixelScale = t === 'low' ? 1.25 : 1;
+    this.w = -1;
+    this.resize(this.cssW, this.cssH);
+  }
+
   /** Force a pixel size (CSS px per internal px); null returns to the automatic size. */
   setPixel(p: number | null) {
     if (p === this.fixedPixel) return;
@@ -295,7 +314,7 @@ export class Post {
   private cssW = 1; private cssH = 1;
   resize(W: number, H: number) {
     this.cssW = W; this.cssH = H;
-    this.pixel = this.fixedPixel ?? pixelFor(W, H);
+    this.pixel = this.fixedPixel ?? pixelFor(W, H) * this.pixelScale;
     const w = Math.max(64, Math.round(W / this.pixel)), h = Math.max(64, Math.round(H / this.pixel));
     if (this.rt && w === this.w && h === this.h) return;
     this.w = w; this.h = h;
@@ -308,7 +327,7 @@ export class Post {
     const mk = (a: number, b: number) => new THREE.WebGLRenderTarget(Math.max(4, a), Math.max(4, b), { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
     this.bloomRT = [];
     for (let i = 1; i <= this.levels; i++) this.bloomRT.push(mk(w >> i, h >> i));
-    const dd = this.quality === 'high' ? 1 : 2;
+    const dd = this.dofShift;
     this.dofA = mk(w >> dd, h >> dd); this.dofB = mk(w >> dd, h >> dd);
   }
 

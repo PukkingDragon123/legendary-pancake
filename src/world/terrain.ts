@@ -47,6 +47,9 @@ export function surfaceY(x: number, z: number): number {
   return h;
 }
 
+/** [look4] The sunny glade round the oak (< 1 inside): lawn, flowers, the path and the pond, no tall trees. */
+export const gladeD = (x: number, z: number) => Math.sqrt((x / 18) ** 2 + ((z + 3) / (z > -3 ? 22 : 13.5)) ** 2);
+
 /**
  * [look4] The ground everywhere, also beyond the clearing's 48 x 48 blocks: the clearing's own surface, then the valley
  * floor rolling on to the horizon and slowly rising into the hills at the valley's sides. Matches surfaceY() exactly on
@@ -107,7 +110,11 @@ function paintMaps(shade: Collider[]): { splat: THREE.DataTexture; tint: THREE.D
       // the lawn: where the meadow grows thick (not on paths, shores or rocks)
       // the meadow also runs out in front of the default cameras (the foreground is lawn and flowers, not bare earth)
       const frontLawn = z > 6 ? clamp01(((z - 7) * 1.25 + 9 - Math.abs(x)) / 5) * clamp01((z - 6) / 4) : 0;
-      const lawn = clamp01(Math.max(meadow, frontLawn) * 1.2 - earth * 1.2 - sand - rock) * (0.75 + n2 * 0.5);
+      // and over the whole sunny glade round the oak, fraying into moss and leaf litter at its rim
+      const glade = clamp01((1.02 - gladeD(x, z) + (n1 - 0.5) * 0.16) / 0.14);
+      if (glade > 0) earth *= 1 - glade * 0.85;
+      const lawn = clamp01(Math.max(meadow, frontLawn, glade) * 1.2 - earth * 1.2 - sand - rock) * (0.75 + n2 * 0.5);
+      if (glade > 0) { tr = THREE.MathUtils.lerp(tr, 0.93, glade * 0.7); tg = THREE.MathUtils.lerp(tg, 1.14, glade * 0.7); tb = THREE.MathUtils.lerp(tb, 0.82, glade * 0.7); }
       if (frontLawn > 0) { tr = THREE.MathUtils.lerp(tr, 0.92, frontLawn); tg = THREE.MathUtils.lerp(tg, 1.16, frontLawn); tb = THREE.MathUtils.lerp(tb, 0.8, frontLawn); }
       // a little hand-painted variety
       const v = 0.94 + hash(px >> 1, 3, pz >> 1, SEED) * 0.08;
