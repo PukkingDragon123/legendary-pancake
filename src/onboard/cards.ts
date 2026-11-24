@@ -11,7 +11,7 @@ import type { SlotOpts } from './overlay3d.ts';
 import { WallClock } from './wallclock.ts';
 
 /** answer -> packed model node (and how to show it) */
-const MAP: Record<string, { node: string; o?: SlotOpts; tint?: number; glow?: boolean }> = {
+const MAP: Record<string, { node: string; o?: SlotOpts; tint?: number; glow?: boolean; paint?: (m: THREE.Mesh) => void }> = {
   'goals:sleep_better': { node: 'daybed', o: { pitch: 0.4 } },
   'goals:fall_asleep': { node: 'sheep', o: { pitch: 0.2 } },
   'goals:wake_refreshed': { node: 'alarm', o: { pitch: 0.2, yaw: 0.3 } },
@@ -32,7 +32,7 @@ const MAP: Record<string, { node: string; o?: SlotOpts; tint?: number; glow?: bo
   'caffeine:late': { node: 'teapot', o: { pitch: 0.35 } },
   'mic:yes': { node: 'headphones', o: { pitch: 0.35 } },
   'mic:no': { node: 'pillows', o: { pitch: 0.35 } },
-  'relax:rain': { node: 'umbrellas', o: { pitch: 0.6 } },
+  'relax:rain': { node: 'umbrella', o: { pitch: 0.12, zoom: 0.85 }, paint: umbrella },
   'relax:waves': { node: 'shell', o: { pitch: 0.5 } },
   'relax:forest': { node: 'pine', o: { pitch: 0.1 } },
   'relax:fire': { node: 'firepit', o: { pitch: 0.55 } },
@@ -45,6 +45,24 @@ const MAP: Record<string, { node: string; o?: SlotOpts; tint?: number; glow?: bo
   'relax:reading': { node: 'books', o: { pitch: 0.3 } },
 };
 const PACKS = ['interview/cards_a.glb', 'interview/cards_b.glb'];
+
+/**
+ * The umbrella comes as shape and shading only: colour it per vertex, a red canopy in alternating panels, a
+ * turned wooden crook and shaft, a brass ferrule on top.
+ */
+function umbrella(me: THREE.Mesh) {
+  const g = me.geometry.clone(), p = g.getAttribute('position'), col = new Float32Array(p.count * 3), c = new THREE.Color();
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), r = Math.hypot(x, z);
+    if (r > 0.9 && y > 6) c.setHex(Math.floor(((Math.atan2(z, x) + Math.PI) / (Math.PI * 2)) * 8) % 2 ? 0xa02a34 : 0x86202c);
+    else if (y > 21) c.setHex(0xd8b04a);
+    else c.setHex(0x74421f);
+    col.set([c.r, c.g, c.b], i * 3);
+  }
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  me.geometry = g;
+  (me.material as THREE.MeshStandardMaterial).vertexColors = true;
+}
 
 export class CardModels {
   private nodes = new Map<string, THREE.Object3D>();
@@ -61,7 +79,7 @@ export class CardModels {
   }
 
   /** A fresh copy of a packed model, centred on its base. */
-  private clone(node: string, tint?: number): THREE.Object3D | null {
+  private clone(node: string, tint?: number, paint?: (m: THREE.Mesh) => void): THREE.Object3D | null {
     const src = this.nodes.get(node);
     if (!src) return null;
     const c = src.clone(true);
@@ -81,6 +99,7 @@ export class CardModels {
       if ('roughness' in mat) { mat.roughness = Math.max(0.45, mat.roughness ?? 0.7); mat.metalness = Math.min(0.3, mat.metalness ?? 0); }
       if (tint !== undefined) mat.color.setHex(tint);
       m.material = mat;
+      paint?.(m);
     });
     return g;
   }
@@ -131,8 +150,9 @@ export class CardModels {
     }
     const m = MAP[key];
     if (!m) return null;
-    const obj = this.clone(m.node, m.tint);
+    const obj = this.clone(m.node, m.tint, m.paint);
     if (!obj) return null;
+    if (m.node === 'umbrella') obj.children[0].rotation.z = 0.45; // held at a jaunty angle, crook showing
     let tick: SlotOpts['tick'];
     if (m.glow) {
       // the phone's screen lights up blue now and then (a notification at night)

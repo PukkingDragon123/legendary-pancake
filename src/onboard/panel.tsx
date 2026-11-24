@@ -63,7 +63,7 @@ function css() {
 .qp-box{position:relative;width:calc(92 * var(--u));height:calc(34 * var(--u));border:0;background:transparent;cursor:pointer;font:calc(16 * var(--u) / 2) "HH m5x7",monospace;color:#5a5f80;padding:0;flex:none}
 .qp-box::before{content:'';position:absolute;inset:0;border:var(--u) dashed #6a6f8a}
 .qp-box span{position:relative;display:block;margin-top:calc(2 * var(--u))}
-.qp-box b{position:relative;display:block;font:calc(18 * var(--u)) "HH m6x11",monospace;color:#9a9ab0;margin-top:calc(2 * var(--u))}
+.qp-box b{position:relative;display:block;font:calc(18 * var(--u)) "HH m6x11",monospace;color:#9a9ab0;margin-top:calc(2 * var(--u));white-space:nowrap}
 .qp-box.ready::before{border:calc(2 * var(--u)) solid #b33a1a;animation:qp-pulse 1s steps(2) infinite}
 .qp-box.ready b{color:#b33a1a}
 @keyframes qp-pulse{50%{border-color:#e07a2a}}
@@ -306,7 +306,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
   useSlot(p.overlay, p.model, 'pillows', st.kind === 'hours' ? 'pillows:' + Math.round(a.hours) : null, winRef);
 
   const isPlan = st.kind === 'plan';
-  const label = isPlan ? (s.signed ? 'STAMP TO APPROVE' : 'SIGN FIRST') : s.ready ? 'STAMP IT' : st.kind === 'choice' ? 'TICK ONE FIRST' : 'STAMP IT';
+  const label = isPlan ? (s.signed ? 'APPROVE' : 'SIGN FIRST') : s.ready ? 'STAMP IT' : st.kind === 'choice' ? 'TICK ONE' : 'STAMP IT';
   const acorns = Array.from({ length: p.total }, (_, i) => (i < p.index ? 'done' : i === p.index ? 'now' : 'todo') as 'done' | 'now' | 'todo');
   return (
     <div ref={(el) => { root.current = el; if (p.sheetRef) p.sheetRef.current = el; }} class={'qp' + (p.wide ? ' wide' : '') + (p.leaving ? '' : ' in')} style={`--k:${k}`} data-step={st.id}>
@@ -328,8 +328,8 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
           </button>
         </div>
         {!isPlan && (
-          <div class="qp-sticky" role="button" tabIndex={0} style={`background-image:url(${stickyURL(62, s.skipAsk ? 48 : 34)})`} onClick={() => act.skip(!s.skipAsk)}>
-            {!s.skipAsk ? <>Been here before?<b>SKIP &gt;</b></> : <>Skip the forms? Pip picks cozy defaults.<span class="qp-yes"><span onClick={(e) => { e.stopPropagation(); act.skipYes(); }}>YES</span><span>NO</span></span></>}
+          <div class="qp-sticky" role="button" tabIndex={0} style={`background-image:url(${stickyURL(62, s.skipAsk ? 40 : 34)})`} onClick={() => act.skip(!s.skipAsk)}>
+            {!s.skipAsk ? <>Been here before?<b>SKIP &gt;</b></> : <>Skip the forms?<span class="qp-yes"><span onClick={(e) => { e.stopPropagation(); act.skipYes(); }}>YES</span><span>NO</span></span></>}
           </div>
         )}
       </div>

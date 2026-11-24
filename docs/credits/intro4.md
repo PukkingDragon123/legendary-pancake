@@ -30,7 +30,7 @@ ship these models with the same credits). All were rescaled, re-encoded and pack
 | `mug` | cards_a | ["Cup"](https://sketchfab.com/3d-models/cup-7d450bb714034fceaa7b59a0e564f46b) | Dmytro Nikonov | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | lowpix |
 | `teapot` | cards_a | ["Old Soviet teapot"](https://sketchfab.com/3d-models/old-soviet-teapot-9b087673052446299e6decda222a42da) | Amagitsune | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
 | `pillows` | cards_b | [Throw Pillows 01](https://polyhaven.com/a/throw_pillows_01) (Poly Haven) | Serhii Khromov | CC0 1.0 | lowpix |
-| `umbrellas` | cards_b | ["Umbrellas holder with umbrellas"](https://sketchfab.com/3d-models/umbrellas-holder-with-umbrellas-c14e9d5759a74916bcc4596512cda902) | MCStevebrine12 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
+| `umbrella` | cards_b | ["Elegant umbrella"](https://sketchfab.com/3d-models/elegant-umbrella-ca9bb8c8ffc640c6a9be8ad5f341c9c4) | Araon | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | lowpix (recoloured in code) |
 | `shell` | cards_b | [Lambis Shell](https://polyhaven.com/a/lambis_shell) (Poly Haven) | Kuutti Siitonen | CC0 1.0 | Gacha Garage |
 | `pine` | cards_b | garden pine, made for Gacha Garage (bark from [Pine Bark](https://polyhaven.com/a/pine_bark), Poly Haven) | Gacha Garage | CC0 1.0 | Gacha Garage |
 | `firepit` | cards_b | [Stone Fire Pit](https://polyhaven.com/a/stone_fire_pit) (Poly Haven) | Sebastian Platen | CC0 1.0 | BUSHED, lowpix |
