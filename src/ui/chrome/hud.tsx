@@ -23,12 +23,13 @@ import { framesOf, hold, PxAnim, rep, seq, type Timeline } from './pxanim.tsx';
 import { MagicBar } from './magicbar.tsx';
 import { addSwing, kick, makeSwing, removeSwing, type Swing } from './swing.ts';
 import { clearTransition, installPanelTransitions, panelTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts'; // [motion3] panelTransition, installPanelTransitions
-import { lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
+import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
 import './chrome.css';
 import '../px/currency.js';
 
 installChromeSkin();
+installUiFxAuto(); // [ui3] small pixel bursts on every press, toggle, slider, tab, sheet, dialog and toast
 installPanelTransitions(); // [motion3] every open, close and switch of a place plays a pixel transition
 
 /**
