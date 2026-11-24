@@ -1063,6 +1063,13 @@ function makeModel(species: SpeciesId, seed: number, opts: TreeOpts, sk: Skeleto
   return model;
 }
 
+/** [look4] Where the tree's leaves are (card centres, model units): the canopy builder clusters them into puffs. */
+export function leafPoints(m: TreeModel): THREE.Vector3[] {
+  const sk = (m as TreeModel & { _sk: Skeleton })._sk;
+  const dead = new Set([...CELLS[m.species].dead, ...CELLS[m.species].lichen]);
+  return sk.cards.filter((c) => !dead.has(c.cell)).map((c) => c.p.clone().addScaledVector(c.d, c.len * 0.5).multiplyScalar(m.scale));
+}
+
 /** the same tree uniformly scaled (instances in the forest carry a scale): geometry is regenerated at that scale */
 export function scaledModel(m: TreeModel, s: number): TreeModel {
   if (Math.abs(s - 1) < 1e-4) return m;

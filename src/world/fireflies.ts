@@ -29,7 +29,7 @@ void main() {
   float crossV = step(abs(q.x + 0.5), 0.5) * step(abs(q.y + 0.5), 2.0);
   float arm = max(crossH, crossV) * (1.0 - core);
   vec3 warm = mix(vec3(0.95, 0.84, 0.55), vec3(0.78, 0.9, 0.62), vHue);
-  vec3 col = warm * (core * 1.25 + arm * 0.55);
+  vec3 col = warm * (core * 4.0 + arm * 1.4); // [look4] HDR: the post chain's bloom gives them a soft glow
   float a = (core + arm * 0.6) * vBlink;
   if (a < 0.05) discard;
   gl_FragColor = vec4(col * a, 1.0);
