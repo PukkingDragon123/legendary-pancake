@@ -98,7 +98,6 @@ export interface OwlModel {
 
 /** Which GLB a look shows: the queen, a special skin, or the species (falling back to the tawny while a model is missing). */
 export function modelIdOf(look: Pick<OwlLook, 'skin' | 'species' | 'palette' | 'feminine'>): string {
-  if (look.feminine && OWL_RIGS.queen) return 'queen';
   const skin = look.skin && look.skin !== 'owl' ? look.skin : null;
   if (skin && OWL_RIGS[skin]) return skin;
   const sp = resolveSpecies(look).id;
@@ -106,8 +105,8 @@ export function modelIdOf(look: Pick<OwlLook, 'skin' | 'species' | 'palette' | '
 }
 
 export const owlPath = (id: string) => `owls/${id}.glb`;
-/** models without downy fluff (baked dough, packed snow, the old faceted queen) */
-const NO_FUR = new Set(['gingerbread', 'snowman', 'queen']);
+/** models without downy fluff (baked dough, packed snow) */
+const NO_FUR = new Set(['gingerbread', 'snowman']);
 /** the painted parts that grow fluff: the body, the head, the feathered legs, a kitten's ears */
 const FURRY = /^(body|head|leg_[lr]k?|tuft_[lr])_mesh$/;
 

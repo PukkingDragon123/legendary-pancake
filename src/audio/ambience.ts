@@ -56,7 +56,7 @@ export function bedLevels(s: AmbState): Record<Bed, number> {
       bed_wind: out.bed_wind * 0.5, amb_snow: out.amb_snow * 0.4,
     });
   }
-  if (s.mode === 'shop') return Object.assign(L, { amb_room: 0.45, amb_snow: 0.35 });   // the Snow Queen's icy boutique
+  if (s.mode === 'shop') return Object.assign(L, { amb_room: 0.45, amb_fire: 0.22 });   // Barnaby's lodge store: a warm room by the stove
   if (s.mode === 'globe') return Object.assign(L, { amb_room: 0.35, bed_wind: 0.12 });
   return Object.assign(L, { amb_room: 0.5, amb_day: out.amb_day * 0.25, amb_peepers: out.amb_peepers * 0.25, amb_rain_roof: out.bed_rain * 0.5 });
 }

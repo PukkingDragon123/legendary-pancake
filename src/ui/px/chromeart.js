@@ -271,7 +271,7 @@ frames('tool_build', HAMMER.length, BUILD_KEY, (g, f) => {
   if (spark) { [[11, 10], [18, 10], [10, 12], [19, 12]].forEach(([x, y], i) => g.set(x, y, i % 2 ? 'y' : '*')); g.set(12, 9, 'y').set(17, 9, '*'); }
 }, 22, 22);
 
-// Shop: the Snow Queen's icy boutique, a twinkling crown above, snow drifting down
+// Shop (legacy sprite; the live icon comes from chrome/iconset.ts): a boutique, a twinkling crown above, snow drifting down
 const SHOP_KEY = { I: 'ice.x@wall', R: 'sky.y@roof', A: 'white.s@aw', a: 'sky:3', G: 'glass.r@win', D: 'blue.f@door', y: 'gold:4', C: 'gold.R@crown', c: 'blue:4', w: 'white:5', '*': '#ffffff!', s: '#dff4ff!' };
 frames('tool_shop', 6, SHOP_KEY, (g, f) => {
   g.rect(3, 10, 16, 11, 'I');

@@ -1,7 +1,7 @@
 // Hoot Hollow's money, drawn with the BME sprite kit in the calm "Moss & Moonlight" palette: golden
 // ACORNS with a dark oak cap (the everyday currency; the save field is still `coins` and the sprite
 // keeps its old name `owlcoin`), glowing lilac MOON GEMS with a lamp-gold crescent inside (premium),
-// and the piles of acorns sold in the Snow Queen's boutique. Halos are stepped pixel rings.
+// and the piles of acorns sold in Barnaby's lodge store. Halos are stepped pixel rings.
 // OWNED BY THE SHOP BUILDER. Others use the names: owlcoin, moongem (+ `_f0`..`_f7` idle frames),
 // coin_pouch, coin_sack, coin_chest, coin_vault (+ `coin_vault_f0`..`_f3`), acorn_big (the large
 // "artifact" acorn for reward moments) and gem_big.

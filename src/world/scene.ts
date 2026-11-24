@@ -60,7 +60,7 @@ interface Cam { yaw: number; pitch: number; dist: number; target: THREE.Vector3 
 
 /**
  * A self-contained set the renderer can show instead of the forest (the interview room, the Snow
- * Queen's boutique...). The world keeps its state but stops updating while a stage is up.
+ * Barnaby's lodge store...). The world keeps its state but stops updating while a stage is up.
  */
 export interface Stage {
   readonly scene: THREE.Scene;

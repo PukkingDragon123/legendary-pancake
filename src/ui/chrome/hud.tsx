@@ -47,7 +47,7 @@ const hidden = () => phase.value !== 'day' || !!breathing.value || !save.value.o
 
 /** How each place is entered. */
 export const VIA: Partial<Record<NonNullable<Panel>, TransitionKind>> = {
-  sleep: 'stars', clock: 'iris', book: 'page', build: 'blueprint', decorate: 'blueprint', shop: 'snow', wardrobe: 'iris', map: 'leaves', quests: 'leaves',
+  sleep: 'stars', clock: 'iris', book: 'page', build: 'blueprint', decorate: 'blueprint', shop: 'leaves', wardrobe: 'iris', map: 'leaves', quests: 'leaves',
 };
 /** Open a place with its transition (and the screen point to centre an iris on). */
 export function openPanel(id: Panel, o: TransitionOpts = {}) {

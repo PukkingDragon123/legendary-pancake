@@ -145,7 +145,7 @@ function pieceState(p: PieceDef) {
   const owned = s.owned.pieces.includes(p.id);
   return { owned, series: !owned && p.series ? p.series : '', area: !owned && p.area ? p.area : '', price: p.premium ? { gems: p.price } : { coins: p.price } };
 }
-/** Pieces anyone can see in the wardrobe (Queen Neve's own regalia stays with her). */
+/** Pieces anyone can see in the wardrobe (hidden, never-sold pieces stay out). */
 const visiblePieces = (slot: OutfitSlot) => PIECES.filter((p) => p.slot === slot && !(p.noStore && !p.series));
 
 function afford(price: { coins?: number; gems?: number }): string | null {
