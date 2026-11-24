@@ -275,16 +275,25 @@ def basket_nest():
             paint={"layers": [{"id": "tufts", "op": "spots", "centers": [[x, 3.0, z, rr] for x, _, z, rr in tufts], "shift": -1.6, "bevel": TUFT_BEVEL},
                               {"id": "piping", "op": "band", "axis": "y", "from": 0.1, "to": 0.25, "shift": 1.0}]})
     # moss creeping over the rim, with tiny white flowers and clover
-    ms = moss(it, "rim", P["moss"], bloom=P["snow"])
-    for k in range(7):
-        a = k / 7 * 2 * math.pi + 0.9
+    import foliage as F
+    mr = [F.leaf_ramp(it, "lf_moss", P["moss"]), F.leaf_ramp(it, "lf_moss2", P["fern"]), F.leaf_ramp(it, "lf_clover", P["sage"]), F.leaf_ramp(it, "fl_star", P["snow"])]
+    import random as _r
+    rr = _r.Random(8)
+    for k in range(11):
+        a = k / 11 * 2 * math.pi + 0.9
         r = 11.9
-        w = 3.6 + 1.6 * (k % 3)
-        # flat cushions of moss draped over the rim, spilling a little down the outside
-        it.loft("moss", [(0, 0, -0.4, (w, 3.4)), (0, 0.7, -0.2, (w * 0.92, 3.0)), (0, 1.1, 0, (w * 0.6, 1.8))], ms, sides=8, round_=2.6,
-                pivot=(math.sin(a) * r, 7.3, math.cos(a) * r), rot=(0, math.degrees(a), 0), up=[0, 0, 1])
-        it.loft("mossdrip", [(0, 0, 0, (w * 0.6, 1.0)), (0, -1.4, 0.3, (w * 0.45, 0.8)), (0, -2.2, 0.3, (w * 0.2, 0.5))], ms, sides=6, round_=2.4,
-                pivot=(math.sin(a) * (r + 1.3), 7.6, math.cos(a) * (r + 1.3)), rot=(0, math.degrees(a), 0), up=[0, 0, 1])
+        # tufts of moss and clover hugging the rim, a few tiny white stars among them
+        cv = F.cluster(26, 18, F.lanceolate(), 10, 7, 3.4, None, 0, seed=k, ramps=[0, 1, 2], fan=1.5)
+        if k % 2 == 0:
+            for j in range(3):
+                fx, fy = rr.randint(4, 21), rr.randint(2, 9)
+                for p in range(5):
+                    cv.leaf(fx, fy, 2.2, 2.0, p / 5 * 2 * math.pi, F.ovate(0.6), 3, 6.0, None, seed=k * 30 + j * 5 + p, fold=False, rim=False)
+                cv.dot(fx, fy, 0, 8)
+        for rot in (0, 90):
+            F.add(it, "moss", cv, mr, (math.sin(a) * r, 7.0, math.cos(a) * r), rotation=(rr.uniform(-25, 25), math.degrees(a) + rot, 0))
+        cl = F.cluster(18, 16, F.heartlet(), 4, 7, 7, F.midrib(0.08), 0, seed=50 + k, ramps=[2, 1], fan=1.3)
+        F.add(it, "clover", cl, mr, (math.sin(a) * (r + 1.2), 4.6, math.cos(a) * (r + 1.2)), rotation=(25, math.degrees(a), 0))
     # a knitted blanket over the front rim and a little plush mouse curled up asleep on the cushion
     k = knit(it, "blanket", P["honey"], stripe=P["cream"], every=2.0)
     it.box("blanket", (5.6, 7.7, 6.8), (7.4, 1.0, 6.4), k, rot=(0, 40, 0))

@@ -25,10 +25,13 @@ def jar(it, pid, x, y, z, h, fill, lid="copper", r=1.3):
 
 
 def sprig(it, pid, x, y, z, pot_col, leaf_col=None, seed=1, s=1.0):
-    """A little potted plant for shelves: a glazed pot and a leafy mound with a few trailing leaves."""
+    """A little potted plant for shelves: a glazed pot and crossed pixel-art leaf sprays."""
+    import foliage as F
     it.loft(pid + "_pot", [(0, 0, 0, 2.4 * s), (0, 2.2 * s, 0, 3.0 * s), (0, 2.8 * s, 0, 3.3 * s)], glaze(it, f"pot{pot_col:x}", pot_col), sides=8, pivot=(x, y, z), up=[0, 0, 1])
-    lf = leafy(it, f"sprig{seed}", leaf_col or P["fern"])
-    it.loft(pid + "_leaves", [(0, 0, 0, (3.4 * s, 3.0 * s)), (0, 1.4 * s, 0, (4.2 * s, 3.8 * s)), (0, 2.6 * s, 0, (2.6 * s, 2.4 * s)), (0, 3.2 * s, 0, 0.8)], lf, sides=8, pivot=(x, y + 2.6 * s, z), up=[0, 0, 1])
+    fr = [F.leaf_ramp(it, f"lf_sprig{seed}", leaf_col or P["fern"]), F.leaf_ramp(it, "lf_sprigdk", P["leaf"])]
+    cv = F.cluster(int(22 * s), int(22 * s), F.ovate(), 7, 8 * s, 5 * s, F.midrib(0.07), 0, seed=seed, ramps=[0, 1], fan=1.3)
+    for rot in (0, 60, 120):
+        F.add(it, pid + "_leaves", cv, fr, (x, y + 2.4 * s, z), rotation=(0, rot, 0))
 
 
 # ------------------------------------------------------------------ tables
@@ -493,8 +496,15 @@ def library_case():
         it.box("owlear", (1.2 + sx * 0.8, 17.0, 1.0), (0.5, 0.8, 0.5), owl, rot=(0, 0, sx * -15))
     it.box("owlbeak", (1.2, 14.9, 2.4), (0.4, 0.5, 0.3), plain(it, "beak", P["ochre"], tone=3))
     sprig(it, "plant", -6.0, 20.8, 1.0, P["dusk"], seed=3)
-    ivy = leafy(it, "ivy", P["leaf"])
-    it.loft("trail", [(0, 0, 0, 1.2), (-0.4, -2.6, 0.6, 1.4), (0.2, -5.4, 0.8, 1.2), (-0.2, -7.6, 0.6, 0.8)], ivy, sides=6, pivot=(-7.2, 21.4, 3.6), up=[0, 0, 1])
+    import foliage as F
+    ir = [F.leaf_ramp(it, "lf_trail", P["leaf"]), F.leaf_ramp(it, "lf_trail2", P["fern"])]
+    cv = F.Canvas(14, 34)
+    for y in range(34):
+        cv.dot(7 + int(math.sin(y * 0.4) * 2), y, 0, 3)
+    for k, y in enumerate(range(2, 33, 4)):
+        cv.leaf(7 + int(math.sin(y * 0.4) * 2), y, 6, 5.5, (1.3 if k % 2 else -1.3) + math.pi, F.palmate(3, 0.35, 0.8), k % 2, 4.0, F.midrib(0.08), seed=k)
+    for rot in (0, 70):
+        F.add(it, "trail", cv, ir, (-7.0, 21.6, 3.6), rotation=(-6, rot, 0), offset=[0, -34 / it.density / 2, 0])
     globe = plain(it, "sea", P["lake"], tone=3.2, layers=[{"id": "land", "op": "patches", "scale": 1.0, "threshold": 0.55, "ramp": it.ramp("pa_land", P["sage"], n=6), "tone": 3.2, "bevel": True}])
     it.loft("globe", [(0, 0, 0, 1.0), (0, 0.8, 0, 3.4), (0, 2.0, 0, 4.2), (0, 3.2, 0, 3.4), (0, 4.0, 0, 1.0)], globe, sides=10, pivot=(6.6, 31.6, 0.6), up=[0, 0, 1])
     it.cyl("globestand", (6.6, 30.2, 0.6), 1.5, 1.4, metal(it, "brass"), sides=8)

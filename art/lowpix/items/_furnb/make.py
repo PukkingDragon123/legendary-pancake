@@ -25,9 +25,9 @@ sys.path.insert(0, HERE)
 
 
 def recipes() -> dict:
-    import beds, green, lights, tables  # noqa: E401
+    import beds, green, green_cards, lights, tables  # noqa: E401
     out = {}
-    for mod in (beds, tables, lights, green):
+    for mod in (beds, tables, lights, green, green_cards):
         out.update(mod.ITEMS)
     return out
 
