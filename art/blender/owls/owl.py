@@ -195,9 +195,9 @@ class Owl:
         s.discr = g('discr', 0.42)              # disc lobe radius as a share of the half width
         s.ex = g('ex', 0.43) * s.hw             # eye half spacing
         s.ey = s.hyc + g('ey', 0.06) * s.hht
-        s.er = g('er', 1.45) * k                 # the ink dot's toy radius (the decal is 2.1x)
+        s.er = g('er', 1.3) * k                 # the ink dot's toy radius (the decal is 2.1x)
         s.dish = g('dish', 1.0)
-        s.beak = g('beak', 1.0) * 0.82 * k
+        s.beak = g('beak', 1.0) * 0.72 * k
         s.tufts = g('tufts', None)
         s.toes = g('toes', 'feathered')
         s.legw = g('legw', 2.0) * k
@@ -357,9 +357,9 @@ class Owl:
             bk = s.beak
             yb = s.ey - 1.6 * k
             zb = float(s.head_fn(np.array(0.5), np.array(_b_at(s, yb)))[..., 2]) - 0.9 * bk
-            spine = np.array([(0, yb + 1.0 * bk, zb - 0.5 * bk), (0, yb + 0.3 * bk, zb + 1.0 * bk), (0, yb - 0.8 * bk, zb + 1.6 * bk),
-                              (0, yb - 1.9 * bk, zb + 1.45 * bk), (0, yb - 2.5 * bk, zb + 0.8 * bk)])
-            rad = lambda t: 1.3 * bk * (1 - t) ** 0.72 + 0.04  # noqa: E731
+            spine = np.array([(0, yb + 1.0 * bk, zb - 0.5 * bk), (0, yb + 0.4 * bk, zb + 1.1 * bk), (0, yb - 0.7 * bk, zb + 1.55 * bk),
+                              (0, yb - 1.7 * bk, zb + 1.3 * bk), (0, yb - 2.2 * bk, zb + 0.7 * bk)])
+            rad = lambda t: 1.75 * bk * (1 - t) ** 0.85 + 0.04  # noqa: E731
             s.tube('beak', 'head', spine, rad, 14, 18, squash=(0.86, 1.0), tract='beak', close1=True)
             s.beak_tip = spine[-1]
             jp = (0, yb - 0.4 * bk, zb + 0.4 * bk)
@@ -622,6 +622,17 @@ class Owl:
                        share=None if sx < 0 else f'leg_lc{i}', close1=True)
 
     # -------------------------------------------------------------- the special skins' own pieces
+    def chin(s):
+        """The height where the face meets the breast (the bottom of the facial disc, or the kitten's chin)."""
+        k = s.k
+        if s.cat:
+            y_chin = s.ey - 5.4 * k
+        else:
+            ys = np.linspace(s.ey - 0.5 * k, s.ey - 3 * s.hw, 300)
+            dd = s.disc_d(np.zeros_like(ys), ys - s.ey)
+            y_chin = float(ys[np.argmax(dd > 0)]) if (dd > 0).any() else s.ey - 1.5 * s.discr * s.hw
+        return min(y_chin - 0.4 * k, s.by1 - 2.6 * k)
+
     def front_at(s, y, x=0.0):
         """The body's front surface point at height y (and across x)."""
         bs = np.linspace(0, 1, 400)
@@ -653,7 +664,7 @@ class Owl:
                          dome=0.9 if sid == 'gingerbread' else 0.55)
         if sid == 'snowman':
             # the scarf: a knitted ring round the neck where the head meets the shoulders, one end hanging down the chest
-            y0 = s.by1 - 2.6 * k
+            y0 = s.chin() - 0.2 * k
 
             def ring(a, b, y0=y0):
                 th = 2 * math.pi * a
@@ -711,16 +722,28 @@ class Owl:
         s.anchor('head', s.anchor_head, 'head', (hs[0] * 1.03, hs[1] * 1.03, hs[2] * 1.06))
         fs = 2 * s.ex / (2 * 0.222 * 28.4)
         s.anchor('face', s.anchor_face, 'head', (fs * 1.03, fs * 1.03, fs * 1.03))
-        yn = s.by1 - 3.6 * k
-        hw_n = float(s.body_x(np.array(yn), np.array(s.bzc)))
-        bsec = s.body_sec(np.array(math.pi * 0.5))
+        # the garments (neck, chest, back) were modelled on the v3 toy's body between its belly (3.76 mm) and its neck
+        # line (20.16 mm, where the head met the body): map that span onto this bird's, from its belly to its chin
+        yt = s.chin()
+        sy = (yt - s.by0) / (20.16 - 3.76)
+        Y = lambda yo: s.by0 + (yo - 3.76) * sy  # noqa: E731
+
+        def sec(y):
+            bs = np.linspace(0, 1, 400)
+            bq = float(np.interp(y, s.body_sec(bs)[3][::-1], bs[::-1]))
+            return [float(v) for v in s.body_sec(np.array(bq))]
+        w_n, f_n, b_n, _, zc_n = sec(yt)
+        s.anchor('neck', (0, yt, zc_n + f_n * 0.55), 'body', (w_n / 10.6, sy, (f_n + b_n) / 18.1))
+        yc_ = Y(14.54)
+        w_c, f_c, b_c, _, zc_c = sec(yc_)
         bsx = s.bw / 12.0
         bsz = (s.bf + s.bb) / (21.6 * 0.97)
-        s.anchor('neck', (0, yn, s.bzc + s.bf * 0.62), 'body', (hw_n / 10.2, s.bh / 24.0, bsz))
-        s.anchor('chest', (0, s.by0 + s.bh * 0.55, s.bzc + s.bf + 0.5 * k), 'body', (bsx, s.bh / 22.0, bsz))
-        s.anchor('back', (0, s.by0 + s.bh * 0.62, s.bzc - s.bb - 0.4 * k), 'body', (bsx, s.bh / 22.0, bsz))
+        s.anchor('chest', (0, yc_, zc_c + f_c + 0.2 * k), 'body', (bsx, sy, bsz))
+        yb_ = Y(15.91)
+        w_b, f_b, b_b, _, zc_b = sec(yb_)
+        s.anchor('back', (0, yb_, zc_b - b_b - 0.2 * k), 'body', (bsx, sy, bsz))
         s.anchor('hold', s.anchors_hold, 'wing_r', (1.0, 1.0, 1.0))
-        del bsec
+        s.y_chin = yt
 
 
 def _b_at(O, y):
@@ -1101,7 +1124,8 @@ def build(mid):
         'height': round(float(Pall[:, 1].max()), 3),
         'dims': {'bodyZ0': round(O.by0, 3), 'bodyZ1': round(O.by1, 3), 'bodyW': round(2 * O.bw, 3), 'bodyD': round(O.bf + O.bb, 3),
                  'headZ': round(O.hyc, 3), 'headW': round(2 * O.hw, 3), 'headH': round(O.hht + O.hhb, 3), 'headD': round(O.hdf + O.hdb, 3),
-                 'faceY': round(O.face_z, 3), 'eyeX': round(O.ex, 3), 'eyeZ': round(O.ey, 3), 'tuftTop': round(float(Pall[:, 1].max()), 3)},
+                 'faceY': round(O.face_z, 3), 'eyeX': round(O.ex, 3), 'eyeZ': round(O.ey, 3), 'tuftTop': round(float(Pall[:, 1].max()), 3),
+                 'chin': round(O.chin(), 3)},
     }
     json.dump(meta, open(os.path.join(BUILD, mid + '.rig.json'), 'w'), indent=1)
     return dst

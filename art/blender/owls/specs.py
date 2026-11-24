@@ -42,7 +42,7 @@ SPECIES = {
                  throat='#cfa982', disc='#b98a5e', discDark='#7a5232', ruff='#5a3820', ruffLine='#2e1c12', ruffLight='#a8784e',
                  brow='#ecdcbc', bristle='#e6d4b2', wing='#86522e', covert='#8f5631', primary='#7a4c2c', wingBar='#3a2214',
                  underwing='#e2cfae', tail='#82502e', leg='#d9bf98', toe='#b8a090', skin='#b8a090', talon='#3a3230',
-                 beak='#d8c690', cere='#a89470', gape='#9a6a58'),
+                 beak='#c4b47c', cere='#8a8064', gape='#9a6a58'),
         pat=dict(upper={'spots': {'c': 'upLight', 'at': 0.7, 'x': 0.6, 'r': 0.28, 'keep': 0.16}},
                  under={},
                  crown={},
@@ -57,7 +57,7 @@ SPECIES = {
     # Tyto alba: golden-buff upperparts veiled in grey with fine black-and-white pearls, silky white underparts with a few
     # dark dots, a white heart face edged in a fine golden-brown rim, long feathered legs, bristled toes
     'barn': dict(
-        shape=dict(k=0.98, bw=0.84, bh=1.12, bd=0.88, pear=0.2, hw=0.92, hh=1.02, hd=0.84, hy=-0.6, flat=0.45, leg=7.5, legw=1.45, legx=3.8,
+        shape=dict(k=0.98, bw=0.84, bh=1.12, bd=0.88, pear=0.2, hw=0.92, hh=1.02, hd=0.84, hy=-0.6, flat=0.45, leg=7.5, legw=1.7, legx=3.8,
                    toes='bristled', disc='heart', discr=0.6, ex=0.4, ey=0.12, er=1.3, dish=1.2, wing=1.2, tail=0.75, beak=0.95),
         col=dict(up='#cf9b56', upDark='#8a8582', upLight='#f8f4ea', under='#f6efe2', underLow='#faf6ee', crown='#cfa060',
                  throat='#f6f0e4', disc='#f7f2e8', discDark='#d8c0a6', ruff='#d0a266', ruffLine='#8a5a34', ruffLight='#e8c690',
@@ -150,7 +150,7 @@ SPECIES = {
     # tail, soft grey plumage finely vermiculated and streaked, small yellow-eyed (here: ink-dot) gaze
     'greatgrey': dict(
         shape=dict(k=1.16, bw=1.06, bh=1.08, bd=1.02, breast=1.1, hw=1.22, hh=1.12, hd=1.0, flat=0.15, disc='round', discr=0.74, ex=0.34,
-                   ey=0.04, er=1.1, dish=1.1, tail=1.45, fluff=0.5),
+                   ey=0.04, er=1.0, dish=0.6, tail=1.45, fluff=0.5),
         col=dict(up='#8a8882', upDark='#3e3d3a', upLight='#d6d4cc', under='#b8b6ae', underLow='#c8c6be', crown='#878580',
                  throat='#b4b2aa', disc='#a8a69e', discDark='#4e4d48', ruff='#4a4945', ruffLine='#2e2d2a', ruffLight='#bcbab2',
                  brow='#f2f1ea', bristle='#f2f1ea', wing='#84827c', covert='#8a8882', primary='#7c7a74', wingBar='#3e3d3a',
@@ -163,7 +163,7 @@ SPECIES = {
                  covert={'verm': {'c': '#5a5954', 'f': 10, 'w': 0.4, 'a': 0.7}, 'edgepale': {'c': 'upLight', 'at': 0.7, 'a': 0.6}},
                  flight={'bars': {'c': 'wingBar', 'n': 4.0, 'w': 0.26, 'a': 0.8}},
                  tail={'bars': {'c': 'wingBar', 'n': 4.5, 'w': 0.22, 'a': 0.8}}),
-        eyering=-0.1, eyelid=-0.5, brows=0.95, ruffline=0.85, rings=dict(period=1.05, w=0.2, a=0.75), discedge=0.0, bowtie=True, beaktip=0.0),
+        eyering=-0.1, eyelid=-0.5, brows=0.95, ruffline=0.55, rings=dict(period=1.05, w=0.2, a=0.75), discedge=0.0, bowtie=True, beaktip=0.0),
     # Bubo bubo: the biggest, orange-buff and tawny, heavy black streaks down the breast thinning to fine bars on the
     # belly, mottled dark upperparts, long tufts angled out, a tawny face rimmed dark, a pale throat
     'eagle': dict(
@@ -213,9 +213,9 @@ SKINS = {
                       eyering=0.15, eyelid=0.2, brows=0.7, rings=dict(period=1.15, w=0.14, a=0.4), emissive=True, beaktip=0.0),
     # a kitten's face on an owl's body: ginger tabby fur, a cream muzzle and bib, striped wings and tail
     'meowl': dict(base='tawny', shape=dict(k=1.0, cat=True, toes='feathered', hw=1.04, hh=0.98, hd=0.98),
-                  col=dict(fur='#d08c50', stripe='#8a4c28', muzzle='#f6ead6', ear='#eaa8a0', nose='#d8847c', belly='#f2e2c8',
+                  col=dict(fur='#d08c50', stripe='#8a4c28', muzzle='#f6ead6', ear='#eaa8a0', nose='#c8645e', belly='#ecd6b4',
                            paw='#f2dfc4', talon='#5a3e2c', whisker='#fbf6ee', mouth='#6a3a2a',
-                           up='#d08c50', upDark='#8a4c28', upLight='#f6ead6', under='#f2e2c8', underLow='#f6eadb', crown='#d08c50',
+                           up='#d08c50', upDark='#8a4c28', upLight='#f6ead6', under='#ecd6b4', underLow='#f2e2cc', crown='#d08c50',
                            throat='#f6ead6', wing='#c07e48', covert='#d08c50', primary='#b87444', wingBar='#8a4c28', underwing='#f2e2c8',
                            tail='#c07e48', leg='#f2dfc4', toe='#f2dfc4', skin='#e0a49a', tuft='#d08c50'),
                   pat=dict(upper={}, under={}, crown={},
