@@ -3,7 +3,7 @@
 import type { OwlAction, OwlMood } from '../owl/actor.ts';
 import { SPECIES, speciesOf } from '../owl/species.ts';
 import type { Profile, Save } from '../game/store.ts';
-import type { ShotName } from './room.ts';
+import type { ShotName } from './office.ts';
 
 export interface Answers {
   you: string;
@@ -146,9 +146,9 @@ export const STEPS: Step[] = [
     say: () => [
       { text: 'Hoo! Oh! A *visitor!*', mood: 'surprised', shot: 'close', cut: true },
       { text: 'Sorry, I was resting my eyes. Very important owl business.', mood: 'sleepy', act: 'yawn', shot: 'pip' },
-      { text: 'Welcome to *Hoot Hollow!* I’m the Hollow’s sleep keeper.', mood: 'happy', act: 'wave', shot: 'establish' },
-      { text: 'Before we move in, I have a few questions. For science! And snacks.', mood: 'proud', act: 'nod', shot: 'pipL' },
-      { text: 'First things first. What should I call you?', mood: 'curious', shot: 'pip' },
+      { text: 'Welcome to *Hoot Hollow!* I’m head of sleep here at Hollow & Co.', mood: 'happy', act: 'wave', shot: 'establish' },
+      { text: 'Before we move in, a few quick forms. Answer, then *stamp* each one.', mood: 'proud', act: 'nod', shot: 'pipL' },
+      { text: 'First things first. Write your name on the line!', mood: 'curious', shot: 'pip' },
     ],
     react: (a) => (a.you.trim() ? { text: `*${a.you.trim()}!* Lovely. I’ll write it in my best handwriting.`, mood: 'joy', act: 'nod' } : { text: 'A mysterious stranger! Very owl of you.', mood: 'curious' }),
     written: (a) => a.you.trim() || 'Mysterious stranger',
@@ -157,7 +157,7 @@ export const STEPS: Step[] = [
     id: 'species', title: 'Choose your owl', kind: 'species', field: 'species', shot: 'pipR',
     say: () => [
       { text: 'Now, a secret: I can be *any* owl I like.', mood: 'excited', act: 'ruffle', shot: 'pipR', cut: true },
-      { text: 'Which owl should I be? Pick a card and I’ll try it on!', mood: 'happy', shot: 'close' },
+      { text: 'Which owl should I be? Tap one and I’ll try it on!', mood: 'happy', shot: 'close' },
     ],
     opts: SPECIES_OPTS,
     react: (a) => ({ text: `A *${speciesOf(a.species).name}!* I feel extra ${ADJ[a.species] ?? 'fluffy'} already.`, mood: 'proud', act: 'present' }),
@@ -165,7 +165,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 'name', title: 'Name your owl', kind: 'text', field: 'name', shot: 'desk',
-    say: () => [{ text: 'Every owl needs a name. Mine’s Pip... but you can pick a new one!', mood: 'curious', shot: 'desk', cut: true }],
+    say: () => [{ text: 'Every owl needs a name. Mine’s Pip... but you can write a new one!', mood: 'curious', shot: 'desk', cut: true }],
     react: (a) => (a.name.trim() === '' || a.name.trim() === 'Pip' ? { text: 'Pip it is! Classic. Timeless. Fluffy.', mood: 'joy', act: 'hop' } : { text: `*${a.name.trim()}!* It fits like a nightcap.`, mood: 'love', act: 'dance' }),
     written: (a) => a.name.trim() || 'Pip',
   },
@@ -173,7 +173,7 @@ export const STEPS: Step[] = [
     id: 'goals', title: 'Your sleep goals', kind: 'multi', field: 'goals', shot: 'wide', vignettes: true,
     say: () => [
       { text: 'Okay. The *big* question!', mood: 'excited', shot: 'low', cut: true },
-      { text: 'What would you like help with? Peel off as many stickers as you like.', mood: 'curious', shot: 'wide' },
+      { text: 'What would you like help with? Tick as many as you like.', mood: 'curious', shot: 'wide' },
     ],
     opts: GOALS,
     react: (a) => {
@@ -192,7 +192,7 @@ export const STEPS: Step[] = [
     id: 'wake', title: 'Usual wake-up time', kind: 'dial', field: 'wake', shot: 'clockwin',
     say: () => [
       { text: 'When do you usually wake up?', mood: 'curious', shot: 'clockwin', cut: true },
-      { text: 'Drag the sun round the dial. I’ll move the clock and the sky. I’m very powerful.', mood: 'proud' },
+      { text: 'Turn the hands on my clock. I’ll move the sky to match. I’m very powerful.', mood: 'proud' },
     ],
     react: (a) => {
       const m = toMin(a.wake);
@@ -203,14 +203,14 @@ export const STEPS: Step[] = [
   },
   {
     id: 'hours', title: 'Hours of sleep', kind: 'hours', field: 'hours', shot: 'tower', vignettes: true,
-    say: () => [{ text: 'And how much sleep would you like? Slide the moons. One pillow per hour, obviously.', mood: 'happy', shot: 'tower', cut: true }],
+    say: () => [{ text: 'And how much sleep would you like? Slide the brass marker. One pillow per hour, obviously.', mood: 'happy', shot: 'tower', cut: true }],
     react: (a) => (a.hours < 7 ? { text: 'Hmm, a little short. Most people need seven to nine hours. We can nudge it later.', mood: 'worried' } : a.hours >= 9 ? { text: 'A champion sleeper! Respect.', mood: 'love' } : { text: 'Perfect. Right in the sweet spot.', mood: 'joy', act: 'nod' }),
   },
   {
     id: 'latency', title: 'Falling asleep takes...', kind: 'choice', field: 'latency', shot: 'bed', vignettes: true,
     say: () => [
       { text: 'When the lights go out, how long until you’re asleep?', mood: 'sleepy', shot: 'wide', cut: true },
-      { text: 'Let’s find out! Count my sheep and tap *Zzz* when you’d usually drift off.', mood: 'excited', shot: 'pip' },
+      { text: 'Tick the one that sounds most like you.', mood: 'excited', shot: 'pip' },
     ],
     opts: [
       { v: 'quick', label: 'Minutes', sub: 'out like a candle', icon: 'pillow' },
@@ -224,7 +224,7 @@ export const STEPS: Step[] = [
     id: 'phone', title: 'Phone in bed?', kind: 'choice', field: 'phone', shot: 'desk', vignettes: true,
     say: () => [
       { text: 'Be honest, I won’t tell the other owls...', mood: 'curious', shot: 'close', cut: true },
-      { text: 'Where does your phone sleep at night? Drag it there.', mood: 'curious', shot: 'desk' },
+      { text: 'Where does your phone sleep at night? Tick one.', mood: 'curious', shot: 'desk' },
     ],
     opts: [
       { v: 'never', label: 'Never', sub: 'it sleeps elsewhere', icon: 'drawer' },
@@ -237,7 +237,7 @@ export const STEPS: Step[] = [
     id: 'chrono', title: 'Early bird or night owl?', kind: 'choice', field: 'chrono', shot: 'window', vignettes: true,
     say: () => [
       { text: 'Are you an early bird or a night owl?', mood: 'curious', shot: 'window', cut: true },
-      { text: '(No pressure. I am *literally* a night owl.) Pull the lever!', mood: 'proud', shot: 'pipL' },
+      { text: '(No pressure. I am *literally* a night owl.) Tick one!', mood: 'proud', shot: 'pipL' },
     ],
     opts: [
       { v: 'lark', label: 'Early bird', sub: 'up with the sun', icon: 'sun' },
@@ -248,7 +248,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 'caffeine', title: 'Caffeine', kind: 'choice', field: 'caffeine', shot: 'desk', vignettes: true,
-    say: () => [{ text: 'Coffee, tea, fizzy drinks... pick the mug that’s most like you.', mood: 'curious', shot: 'pipR', cut: true }],
+    say: () => [{ text: 'Coffee, tea, fizzy drinks... when do you have your last one?', mood: 'curious', shot: 'pipR', cut: true }],
     opts: [
       { v: 'none', label: 'None', sub: 'warm milk gang', icon: 'milkglass' },
       { v: 'morning', label: 'Mornings only', sub: 'before noon', icon: 'mugsun' },
@@ -258,7 +258,7 @@ export const STEPS: Step[] = [
   },
   {
     id: 'relax', title: 'What helps you relax?', kind: 'multi', field: 'relax', shot: 'window', vignettes: true,
-    say: () => [{ text: 'What helps you relax? Pop in a few tapes and I’ll play a little.', mood: 'calm', shot: 'pipL', cut: true }],
+    say: () => [{ text: 'What helps you relax? Tick a few and I’ll play a little.', mood: 'calm', shot: 'pipL', cut: true }],
     opts: RELAX,
     react: (a) => ({ text: `Lovely. I’ll play ${SOUND_NAME[planOf(a).soundscape] ?? 'gentle rain'} when you go to sleep.`, mood: 'calm' }),
     written: (a) => a.relax.map((r) => RELAX.find((x) => x.v === r)?.label).filter(Boolean).join(', ') || 'Gentle rain',
@@ -267,7 +267,7 @@ export const STEPS: Step[] = [
     id: 'mic', title: 'Sleep sound tracking', kind: 'choice', field: 'mic', shot: 'desk', vignettes: true,
     say: (_a, o) => [
       { text: 'One more! At night I can listen for snoring and sleep-talking with your microphone.', mood: 'curious', shot: 'desk', cut: true },
-      { text: 'Everything stays on your device. Nothing is sent anywhere. Flip the switch either way!', mood: 'proud', act: 'nod', shot: 'pip' },
+      { text: 'Everything stays on your device. Nothing is sent anywhere. Tick yes or no!', mood: 'proud', act: 'nod', shot: 'pip' },
       ...(o.artifact ? [{ text: '(In this little preview I can’t use the microphone, but it works in the full app.)', mood: 'happy' as OwlMood }] : []),
     ],
     opts: [
@@ -280,7 +280,7 @@ export const STEPS: Step[] = [
     id: 'plan', title: 'Your sleep plan', kind: 'plan', shot: 'pip',
     say: () => [
       { text: 'All done! Let me put it all together...', mood: 'excited', act: 'ruffle', shot: 'close', cut: true },
-      { text: 'Here’s your *sleep plan.* Press my stamp to approve it!', mood: 'proud', shot: 'pip' },
+      { text: 'Here’s your *sleep plan.* Sign it, then stamp it to approve!', mood: 'proud', shot: 'pip' },
     ],
   },
 ];

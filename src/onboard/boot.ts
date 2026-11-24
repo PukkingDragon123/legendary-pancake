@@ -1,82 +1,103 @@
-// The loading clock (#boot in index.html, drawn by src/onboard/tools/bootart.mjs) and its handoff.
-// Before any script runs, the clock already animates in pure CSS: the minute and hour hands sweep
-// with the (estimated) loading progress, the moon rises in the arch, the second hand ticks and the
-// pendulum swings. Once main.tsx marks the splash `gone`, this module takes over:
-//   1. strike  the hands race round to midnight, the clock chimes with a little shudder
-//   2. open    the glass door over the dial swings open on its hinge
-//   3. dive    the clock zooms in on the dial while a stepped pixel iris opens through the dial
-//              (its steps are the zoomed clock's own pixels), revealing the world behind
-// A new player keeps the splash (`hold`): the clock strikes and waits, a tiny pixel hand pointer
-// bobs over the dial, and one tap on the clock (which also unlocks audio) starts the dive into
-// Pip's office for the interview.
+// The loading clock (#boot in index.html, painted by src/onboard/tools/bootart.mjs) and its handoff.
+// Before any module runs the clock already keeps the real time: the hands are CSS animations at clock speed,
+// started at the current time by a tiny inline script (negative delays), the moon rises in the arch with the
+// (estimated) loading progress and the pendulum swings. Once main.tsx marks the splash `gone`, this module
+// takes over:
+//   1. strike  the minute hand winds once round (landing back on the real time), the moon rises full and the
+//              clock chimes with a little shudder; then the hands go on keeping time
+//   2. dive    a returning player: the clock zooms into its dial while a stepped pixel iris opens through it
+//              onto the world; a new player (`hold`): the clock waits for one tap (which also unlocks audio),
+//              then zooms nose to the dial, where the 3D office's own clock (the same painting) takes over and
+//              the camera pulls back into Pip's office (see Office.pullBack).
 //
-// Public (kept for intro.tsx and src/ui/intro.tsx): holdBoot, bootShowing, bootReady, wakeBoot,
+// Public (for intro.tsx and src/ui/intro.tsx): holdBoot, bootShowing, bootReady, bootDial, wakeBoot,
 // releaseBoot. The `gone` class contract with main.tsx is unchanged.
 import { sound } from '../audio/sound.ts';
 
 const el = () => document.getElementById('boot');
-type Art = { fr: number; fn: number; mw: number; mn: number; cx: number; dy: number; rd: number };
-const ART: Art = (() => { try { return JSON.parse(el()?.dataset.art ?? ''); } catch { return { fr: 72, fn: 60, mw: 30, mn: 18, cx: 56, dy: 88, rd: 31 }; } })();
+type Art = { fr: number; mn: number; hn: number; sn: number; mw: number; mf: number; cx: number; dy: number; rd: number; w: number; sh: number; bw: number };
+const ART: Art = (() => { try { return JSON.parse(el()?.dataset.art ?? ''); } catch { return { fr: 70, mn: 120, hn: 120, sn: 60, mw: 48, mf: 40, cx: 80, dy: 150, rd: 34, w: 160, sh: 296, bw: 172 }; } })();
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const play = (id: string, volume: number, rate = 1) => { try { sound.play(id, { volume, rate, gap: 60 }); } catch { /* audio not ready */ } };
 const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; } };
+/** how far the dive zooms into the dial before the office takes over */
+export const DIVE_ZOOM = 6;
 
-// dev: freeze the handoff for screenshots (?bootdive=open:0.5 | dive:0.4)
+// dev: freeze the handoff for screenshots (?bootdive=zoom:0.5 | iris:0.4)
 const FREEZE = (() => { try { if (!import.meta.env.DEV) return null; const v = new URLSearchParams(location.search).get('bootdive'); if (!v) return null; const [k, t] = v.split(':'); return { k, t: +(t ?? 0.5) }; } catch { return null; } })();
 
 let state: 'loading' | 'striking' | 'struck' | 'leaving' | 'gone' = 'loading';
 let struck: Promise<void> | null = null;
 let leaving: Promise<void> | null = null;
 
-// ------------------------------------------------------------------ 1. strike midnight
+/** Start the hands' clock-speed animations at the current time (seconds into the minute, hour and 12 hours). */
+function syncTime(b: HTMLElement) {
+  const d = new Date(), s = d.getSeconds() + d.getMilliseconds() / 1000, m = d.getMinutes() * 60 + s;
+  b.style.setProperty('--ts', s.toFixed(2));
+  b.style.setProperty('--tm', m.toFixed(1));
+  b.style.setProperty('--th', ((d.getHours() % 12) * 3600 + m).toFixed(1));
+}
+
+// ------------------------------------------------------------------ 1. strike the real time
 
 /** Current frame of a stepped sprite strip (from its computed background position). */
 function frameOf(node: HTMLElement, fw: number, k: number): number {
   const px = parseFloat(getComputedStyle(node).backgroundPositionX) || 0;
   return Math.round(-px / (fw * k));
 }
+const setFrame = (n: HTMLElement, f: number, fw: number) => { n.style.backgroundPosition = `-${f * fw}em 0`; };
 function strike(): Promise<void> {
   if (struck) return struck;
   state = 'striking';
   struck = (async () => {
     const b = el();
     if (!b) return;
-    const k = parseFloat(getComputedStyle(b).fontSize) || 3;
-    const mh = b.querySelector<HTMLElement>('.bt-mh'), hh = b.querySelector<HTMLElement>('.bt-hh'), mo = b.querySelector<HTMLElement>('.bt-moon');
-    if (mh && hh && mo && !reduced()) {
-      const m0 = frameOf(mh, ART.fr, k), h0 = frameOf(hh, ART.fr, k), o0 = frameOf(mo, ART.mw, k);
-      for (const n of [mh, hh, mo]) n.style.animation = 'none';
-      const steps = Math.max(1, ART.fn - m0), dt = Math.min(34, 520 / steps);
-      play('clock_wind', 0.28, 1.3);
-      for (let i = 1; i <= steps; i++) {
-        const f = m0 + i, t = i / steps;
-        mh.style.backgroundPosition = `-${(f % ART.fn) * ART.fr}em 0`;
-        hh.style.backgroundPosition = `-${(Math.round(h0 + (ART.fn - h0) * t) % ART.fn) * ART.fr}em 0`;
-        mo.style.backgroundPosition = `-${Math.round(o0 + (ART.mn - 1 - o0) * t) * ART.mw}em 0`;
-        await wait(dt);
+    const k = parseFloat(getComputedStyle(b).fontSize) || 2;
+    const mh = b.querySelector<HTMLElement>('.bt-mh'), hh = b.querySelector<HTMLElement>('.bt-hh'), mo = b.querySelector<HTMLElement>('.bt-moon'), sh = b.querySelector<HTMLElement>('.bt-sh');
+    void sh;
+    syncTime(b);
+    if (mh && hh && mo) {
+      const m0 = frameOf(mh, ART.fr, k), o0 = frameOf(mo, ART.mw, k);
+      mo.style.animation = 'none';
+      if (!reduced()) {
+        // the minute hand winds once round, landing back on the real time, while the moon rises full
+        mh.style.animation = 'none';
+        const dur = 900, t0 = performance.now();
+        play('clock_wind', 0.26, 1.25);
+        await new Promise<void>((done) => {
+          const step = () => {
+            const t = Math.min(1, (performance.now() - t0) / dur), e = 1 - (1 - t) ** 3;
+            setFrame(mh, (m0 + Math.round(ART.mn * e)) % ART.mn, ART.fr);
+            setFrame(mo, Math.round(o0 + (ART.mf - 1 - o0) * e), ART.mw);
+            if (t >= 1) { done(); return; }
+            requestAnimationFrame(step);
+          };
+          requestAnimationFrame(step);
+          setTimeout(done, dur + 400);
+        });
+        // back to keeping time
+        mh.style.animation = ''; mh.style.backgroundPosition = '';
+        syncTime(b);
       }
-    } else if (mh && hh && mo) {
-      for (const n of [mh, hh, mo]) n.style.animation = 'none';
-      mh.style.backgroundPosition = hh.style.backgroundPosition = '0 0';
-      mo.style.backgroundPosition = `-${(ART.mn - 1) * ART.mw}em 0`;
+      setFrame(mo, ART.mf - 1, ART.mw);
     }
     b.classList.add('done');
-    play('clock_tick', 0.45, 0.8);
-    play('sparkle', 0.22, 0.9);
+    play('clock_chime', 0.42);
+    play('sparkle', 0.16, 0.9);
     state = 'struck';
-    await wait(380);
+    await wait(420);
   })();
   return struck;
 }
 
-// ------------------------------------------------------------------ 2 + 3. open the door and dive through the dial
+// ------------------------------------------------------------------ 2. the dive
 
 /** A stepped pixel circle as a polygon contour (clockwise), cell size s, around (cx, cy). */
 function pixelCircle(cx: number, cy: number, r: number, s: number): string[] {
   const right: string[] = [], left: string[] = [];
   const n = Math.max(1, Math.ceil(r / s));
   for (let i = -n; i < n; i++) {
-    const y0 = cy + i * s, y1 = y0 + s, ym = Math.min(Math.abs(i), Math.abs(i + 1)) * s; // the band's widest row
+    const y0 = cy + i * s, y1 = y0 + s, ym = Math.min(Math.abs(i), Math.abs(i + 1)) * s;
     const hw = Math.floor(Math.sqrt(Math.max(0, r * r - ym * ym)) / s) * s;
     if (hw <= 0) continue;
     right.push(`${(cx + hw).toFixed(1)}px ${y0.toFixed(1)}px`, `${(cx + hw).toFixed(1)}px ${y1.toFixed(1)}px`);
@@ -88,10 +109,45 @@ function irisClip(cx: number, cy: number, r: number, s: number): string {
   const W = innerWidth, H = innerHeight;
   const hole = r > 0.5 ? pixelCircle(cx, cy, r, s) : [];
   if (!hole.length) return 'none';
-  // evenodd: the outer rectangle, then the hole (connected through the top-left corner)
   return `polygon(evenodd, 0px 0px, ${W}px 0px, ${W}px ${H}px, 0px ${H}px, 0px 0px, ${hole.join(', ')}, ${hole[0]}, 0px 0px)`;
 }
 
+/** Where the dial centre is on screen and how big one art pixel is (CSS px), at a given zoom of the dive. */
+export function bootDial(zoom = DIVE_ZOOM): { x: number; y: number; px: number } {
+  const b = el(), stage = b?.querySelector<HTMLElement>('.bt-stage');
+  if (!b || !stage) return { x: innerWidth / 2, y: innerHeight / 2, px: 2 * zoom };
+  const k = parseFloat(getComputedStyle(b).fontSize) || 2;
+  const prev = stage.style.transform;
+  stage.style.transform = 'none';
+  const r = stage.getBoundingClientRect();
+  stage.style.transform = prev;
+  return { x: r.left + (ART.bw / 2) * k, y: r.top + ART.dy * k, px: k * zoom };
+}
+
+/** zoom the stage towards the dial over `dur` ms (ease in: a slow lean, then the plunge); onFrame sees 0..1 */
+function zoomIn(dur: number, to: number, onFrame?: (t: number, z: number) => void): Promise<void> {
+  const b = el(), stage = b?.querySelector<HTMLElement>('.bt-stage');
+  if (!b || !stage) return Promise.resolve();
+  return new Promise<void>((done) => {
+    const t0 = performance.now();
+    let over = false;
+    const frame = (now: number) => {
+      if (over) return;
+      const t = FREEZE ? FREEZE.t : Math.min(1, (now - t0) / dur);
+      const e = t * t * (3 - 2 * t) * 0.35 + t * t * t * 0.65;
+      const z = 1 + e * (to - 1);
+      stage.style.transform = `scale(${z.toFixed(4)})`;
+      onFrame?.(t, z);
+      if (FREEZE) return;
+      if (t >= 1) { over = true; done(); return; }
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+    if (!FREEZE) setTimeout(() => { if (!over) { over = true; done(); } }, dur + 600);
+  });
+}
+
+/** a returning player: dive through the dial into the world (a pixel iris opens inside the zooming dial) */
 function leave(): Promise<void> {
   if (leaving) return leaving;
   leaving = (async () => {
@@ -99,52 +155,26 @@ function leave(): Promise<void> {
     if (!b) return;
     await strike();
     state = 'leaving';
-    if (reduced()) {
-      b.style.transition = 'opacity .35s steps(5)';
-      b.style.opacity = '0';
-      await wait(380);
-      hide();
-      return;
-    }
-    // the glass door swings open
-    b.classList.add('open');
-    play('door_creak', 0.18, 1.6);
-    if (FREEZE?.k === 'open') { const d = b.querySelector<HTMLElement>('.bt-door'); if (d) { d.style.animationDelay = `${-0.46 * FREEZE.t}s`; d.style.animationPlayState = 'paused'; } return; }
-    await wait(360);
-    // the dive
+    if (reduced()) { await fadeOut(b); hide(); return; }
     b.classList.add('zoom');
-    play('tp_shimmer', 0.3);
-    play('wings_flutter', 0.15, 1.2);
-    const stage = b.querySelector<HTMLElement>('.bt-stage');
-    const k = parseFloat(getComputedStyle(b).fontSize) || 3;
-    const r0 = stage?.getBoundingClientRect();
-    const cx = r0 ? r0.left + ART.cx * k : innerWidth / 2, cy = r0 ? r0.top + ART.dy * k : innerHeight / 2;
+    play('whoosh_soft', 0.3);
+    const k = parseFloat(getComputedStyle(b).fontSize) || 2;
+    const { x: cx, y: cy } = bootDial(1);
     const reach = Math.hypot(Math.max(cx, innerWidth - cx), Math.max(cy, innerHeight - cy));
-    const DUR = 1000;
-    await new Promise<void>((done) => {
-      const t0 = performance.now();
-      let over = false;
-      const frame = (now: number) => {
-        if (over) return;
-        const t = FREEZE ? FREEZE.t : Math.min(1, (now - t0) / DUR);
-        const e = t * t * t;                                  // ease in: a slow lean, then the plunge
-        const z = 1 + e * 13;
-        if (stage) stage.style.transform = `scale(${z.toFixed(4)})`;
-        // the hole grows inside the zooming dial, then outruns the screen
-        const g = Math.max(0, (t - 0.12) / 0.88);
-        const r = Math.min(ART.rd * k * z * 0.96, ART.rd * k * z * (0.15 + g * 1.1) * Math.min(1, g * 3)) + (t > 0.85 ? (t - 0.85) * reach * 6 : 0);
-        b.style.clipPath = irisClip(cx, cy, r, Math.max(3, k * z * (z > 6 ? 1 : 2)));
-        if (FREEZE) return;
-        if (t >= 1 || r > reach * 1.05) { over = true; done(); return; }
-        requestAnimationFrame(frame);
-      };
-      requestAnimationFrame(frame);
-      // frames stall in background tabs: never let the app wait on them
-      if (!FREEZE) setTimeout(() => { if (!over) { over = true; done(); } }, DUR + 600);
+    await zoomIn(1000, 13, (t, z) => {
+      const g = Math.max(0, (t - 0.12) / 0.88);
+      const r = Math.min(ART.rd * k * z * 0.96, ART.rd * k * z * (0.15 + g * 1.1) * Math.min(1, g * 3)) + (t > 0.85 ? (t - 0.85) * reach * 6 : 0);
+      b.style.clipPath = irisClip(cx, cy, r, Math.max(3, k * z * (z > 6 ? 1 : 2)));
     });
     hide();
   })();
   return leaving;
+}
+
+async function fadeOut(b: HTMLElement, ms = 320) {
+  b.style.transition = `opacity ${ms}ms steps(6)`;
+  b.style.opacity = '0';
+  await wait(ms + 40);
 }
 
 function hide() {
@@ -171,6 +201,7 @@ function check() {
   const b = el();
   if (!b || typeof MutationObserver === 'undefined') return;
   b.classList.add('js');
+  syncTime(b);
   new MutationObserver(check).observe(b, { attributes: true, attributeFilter: ['class'] });
   check();
 })();
@@ -199,12 +230,27 @@ export function bootReady(): Promise<void> {
   });
 }
 
-/** The door opens and the camera dives through the dial; resolves when the splash is gone. */
+/**
+ * A new player's dive: the clock zooms nose to its dial (the office's own clock is waiting underneath at the same
+ * framing, see bootDial), then the painting dissolves into the 3D room. Resolves when the splash is gone.
+ */
 export function wakeBoot(): Promise<void> {
   const b = el();
-  if (!b) return Promise.resolve();
+  if (!b || state === 'gone') return Promise.resolve();
   b.classList.remove('ready');
-  return leave();
+  if (leaving) return leaving;
+  leaving = (async () => {
+    await strike();
+    state = 'leaving';
+    b.classList.add('zoom');
+    if (reduced()) { await fadeOut(b, 400); hide(); return; }
+    play('whoosh_soft', 0.32, 0.9);
+    await zoomIn(1100, DIVE_ZOOM);
+    if (FREEZE) return;
+    await fadeOut(b, 300);
+    hide();
+  })();
+  return leaving;
 }
 
 /** Let go of the splash for good (dives through the dial if it is still showing). */
