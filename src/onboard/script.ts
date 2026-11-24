@@ -3,7 +3,7 @@
 import type { OwlAction, OwlMood } from '../owl/actor.ts';
 import { SPECIES, speciesOf } from '../owl/species.ts';
 import type { Profile, Save } from '../game/store.ts';
-import type { ShotName } from './room.ts';
+import type { ShotName } from './office.ts';
 
 export interface Answers {
   you: string;

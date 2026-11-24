@@ -1,70 +1,40 @@
-// The first-run experience: the sleeping-owl splash hands over to Pip's office, where he wakes up, pops on
-// his reading glasses and interviews you with a clipboard. His lines float in crisp extruded pixel letters,
-// every question is its own little toy on the page (a name tag, trading cards of the owls, a sticker sheet,
-// a brass dial, a slider of moons, a sheep-counting game, a phone to put to bed, a sky lever, mugs, cassette
-// tapes, a microphone switch), Pip acts your answers out with props, the pencil writes each answer down, pages
-// flip over the clip, and the plan gets the rubber stamp before a pixel iris takes you home to unpack.
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
+// The first-run experience, all in 3D: the loading clock dives into its dial, the camera pulls back out of the very
+// same clock on the wall of Hollow & Co.'s executive office (lamps coming up, dust in the light through the blinds),
+// and Pip, Head of Sleep, looks up from his paperwork. His words float in the room. Each question is a printed form
+// that slides out of the in-tray onto the desk: you tick boxes with the fountain pen, write your name by hand, turn
+// the brass desk clock, slide the brass marker; Pip acts your answers out in little dioramas; every page gets the
+// rubber stamp and goes into the client folder; the last page is a sleep-plan agreement you sign and Pip approves.
+// The answers land in the save exactly as before (script.ts). The DOM holds only a hidden input for typing.
+import { useEffect, useRef } from 'preact/hooks';
+import * as THREE from 'three';
 import { sound } from '../audio/sound.ts';
 import { syncReminders, requestNotifications } from '../game/night.ts';
 import { edit, save } from '../game/store.ts';
-import { CSS_TOKENS } from '../gfx/palette.ts';
 import type { OwlLook } from '../owl/model.ts';
-import { questionTransition, type TransitionKind } from '../ui/chrome/transition.ts';
+import { owlIconAsync } from '../ui/portraits.ts';
 import { sceneRef, say } from '../ui/state.ts';
-import { bootReady, releaseBoot, wakeBoot } from './boot.ts';
-import { boardURL, boxURL, buttonFrame, cardFrame, clipURL, plaqueFrame, sheetURL, slotFrame, speckURL, stampToolURL, tagFrame, vignetteURL } from './cbart.ts';
-import { Hand, Row, StampInk, tapSound } from './clipboard.tsx';
-import { FloatText, type Line } from './floattext.tsx';
-import { cutWipe, iris } from './iris.ts';
-import { frameCSS, pixelCorners } from './pixart.ts';
-import { InterviewRoom } from './room.ts';
-import { ALARM_NAME, answersFrom, applyAnswers, fmt, GOALS, OUTRO, planOf, RELAX, SOUND_NAME, STEPS, toMin, type Answers, type Beat, type Step } from './script.ts';
-import { VIGNETTES } from './vignettes.ts';
-import { Ico, MicSwitch, MoonSlider, MugShelf, NameTag, PhoneSort, SheepGame, SkyLever, SpeciesDeck, StampPress, StickerSheet, TapeRack, WakeDial } from './widgets.tsx';
-import './intro.css';
+import { bootDial, bootReady, bootShowing, releaseBoot, wakeBoot } from './boot.ts';
+import { dioramas } from './dioramas.ts';
+import { printForm, syncForm, type FormCtx } from './forms.ts';
+import { iris } from './iris.ts';
+import { Office, type ShotName, type WorldView } from './office.ts';
+import { preload, preloadIcons, type Region } from './paper.ts';
+import { Desk } from './quiz.ts';
+import { answersFrom, applyAnswers, GOALS, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat, type Step } from './script.ts';
+import { Speech } from './speech.ts';
 
 const ARTIFACT = import.meta.env.MODE === 'artifact';
 const DEV = import.meta.env.DEV;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-type Phase = 'boot' | 'wake' | 'talk' | 'ask' | 'write' | 'stamp' | 'outro' | 'done';
-/** Some pages arrive with a pixel transition over the clipboard that suits them; the rest flip over the clip. */
-const PAGE_FX: Record<string, TransitionKind> = { species: 'feathers', goals: 'mosaic', wake: 'clock', hours: 'stars', latency: 'fireflies', chrono: 'sunrise', relax: 'leaves', plan: 'page' };
-
-let cssDone = false;
-function injectCSS() {
-  if (cssDone) return;
-  cssDone = true;
-  const css = CSS_TOKENS.replace(':root', '.ob,.ob-iris') + `
-.ob .ob-tap{background:url(${vignetteURL()}) 0 0/100% 100% no-repeat;image-rendering:pixelated}
-.obc-clip{background:url(${clipURL()}) 0 0/100% 100% no-repeat}
-.ft-who b{${frameCSS(plaqueFrame(), 2)}}
-.obc-next{${frameCSS(buttonFrame('moss'), 2)}}
-.obc-next:active:not(:disabled){${frameCSS(buttonFrame('moss', true), 2)}}
-.obc-next:disabled{${frameCSS(buttonFrame('off'), 2)}}
-.wbtn.moss{${frameCSS(buttonFrame('moss'), 2)}}.wbtn.moss:active{${frameCSS(buttonFrame('moss', true), 2)}}
-.wbtn.honey{${frameCSS(buttonFrame('honey'), 2)}}.wbtn.honey:active{${frameCSS(buttonFrame('honey', true), 2)}}
-.wbtn.linen,.wd-btn{${frameCSS(buttonFrame('linen'), 2)}}.wbtn.linen:active,.wd-btn:active{${frameCSS(buttonFrame('linen', true), 2)}}
-.obc-skip{${frameCSS(tagFrame(), 2)}}
-.ws-card .ws-front,.wsg-tab,.wp-spot,.wk-lab,.wx-c,.wu-tag{${frameCSS(cardFrame(), 1)}}
-.ws-card.on .ws-front,.wsg-tab.on,.wp-spot.on,.wk-lab.on,.wx-c.on,.wu-tag.on{${frameCSS(cardFrame(true), 1)}}
-.ws-slot,.wg-board,.wsg-screen,.wp-home{${frameCSS(slotFrame(), 2)}}
-.wn-tag{${frameCSS(cardFrame(), 1)}}
-.obc-tick{background:url(${boxURL(true)}) 0 0/100% 100% no-repeat}
-.ob{--ob-tick:url(${boxURL(true)})}
-.obc-ink{-webkit-mask:url(${speckURL()}) 0 0/64px 64px;mask:url(${speckURL()}) 0 0/64px 64px}
-.wst-tool{background:url(${stampToolURL()}) 0 0/100% 100% no-repeat}
-.obc-board{clip-path:${pixelCorners(4)}}
-`;
-  const st = document.createElement('style');
-  st.id = 'ob-css';
-  st.textContent = css;
-  document.head.appendChild(st);
-}
+const play = (id: string, volume = 0.5, rate = 1) => { try { sound.play(id, { volume, rate, gap: 40 }); } catch { /* */ } };
+type Phase = 'boot' | 'open' | 'talk' | 'ask' | 'file' | 'outro' | 'done';
 
 /** Pip as a given species (species and palette both carry the id, as the owl model expects) */
 const lookFor = (species: string): OwlLook => ({ ...save.value.look, skin: 'owl', species, palette: species });
 const beatOf = (b: Beat | string | null | undefined): Beat | null => (b == null ? null : typeof b === 'string' ? { text: b } : b);
+const ICONS = ['bed', 'sheep', 'sunrise', 'clock', 'phonedrawer', 'mic', 'rain', 'waves', 'forest', 'fire', 'stream', 'wind', 'radio', 'lullaby', 'cricket', 'breath', 'book', 'milkglass', 'mugsun', 'mugmoon', 'drawer', 'nightstand', 'pillowbed', 'sun', 'moon', 'star', 'pillow'];
+/** script shot names -> the office's shots */
+const SHOT: Partial<Record<ShotName, ShotName>> = { board: 'pipR', floor: 'tray', bed: 'tray', tower: 'tray', clockwin: 'window' };
 
 async function askMic(): Promise<boolean> {
   try {
@@ -74,456 +44,333 @@ async function askMic(): Promise<boolean> {
   } catch { return false; }
 }
 
-/** A faint pencil doodle to fill a quiet corner of a page (never an owl: Pip is always the 3D one). */
-function Doodle(p: { kind: string }) {
-  const icon = p.kind === 'you' ? 'star' : p.kind === 'name' ? 'moon' : 'pillow';
-  const note = p.kind === 'you' ? 'hello!' : p.kind === 'name' ? 'hoo?' : 'zzz';
-  return <span class="obc-doodle"><Ico n={icon} k={2} /><small>{note}</small></span>;
-}
-
-/** The size of an element, kept up to date (the clipboard's painted textures are made to measure). */
-function useBox(ref: { current: HTMLElement | null }, dep: unknown) {
-  const [s, setS] = useState({ w: 0, h: 0 });
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const up = () => setS({ w: Math.round(el.offsetWidth), h: Math.round(el.offsetHeight) });
-    up();
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(up) : null;
-    ro?.observe(el);
-    return () => ro?.disconnect();
-  }, [dep]);
-  return s;
-}
-
 export function Intro() {
-  const room = useRef<InterviewRoom | null>(null);
-  const [a, setA] = useState<Answers>(() => answersFrom(save.value));
-  const aRef = useRef(a);
-  aRef.current = a;
-  const [si, setSi] = useState(0);
-  const siRef = useRef(0);
-  siRef.current = si;
-  const [phase, setPhase] = useState<Phase>('boot');
-  const phaseRef = useRef<Phase>('boot');
-  phaseRef.current = phase;
-  const [line, setLine] = useState<Line | null>(null);
-  const [lineDone, setLineDone] = useState(false);
-  const [finish, setFinish] = useState(0);
-  const [flipFrom, setFlipFrom] = useState<number | null>(null);
-  const [picked, setPicked] = useState<Record<string, boolean>>({});
-  const [written, setWritten] = useState<Record<number, string>>({});
-  const [stamped, setStamped] = useState(false);
-  const [skipOpen, setSkipOpen] = useState(false);
-  const [wide, setWide] = useState(() => innerWidth >= 860 && innerWidth > innerHeight);
-  const [fast] = useState(() => DEV && new URLSearchParams(location.search).has('obfast'));
-  const [remind, setRemind] = useState(true);
-  const beats = useRef<Beat[]>([]);
-  const bi = useRef(0);
-  const after = useRef<(() => void) | null>(null);
-  const lid = useRef(0);
-  const sel = useRef<string | null>(null);
-  const autoT = useRef(0);
-  const wipe = useRef<HTMLCanvasElement>(null);
-  const board = useRef<HTMLDivElement>(null);
-  const paper = useRef<HTMLDivElement>(null);
-  const hour12 = save.value.settings.hour12;
-
-  // ---------------------------------------------------------------- talking
-
-  const show = (k: number) => {
-    const b = beats.current[k], r = room.current;
-    if (!b) return;
-    clearTimeout(autoT.current);
-    setLine({ id: ++lid.current, text: b.text, who: (aRef.current.name || 'Pip').toUpperCase() });
-    setLineDone(false);
-    if (!r) return;
-    if (b.shot) { if (b.cut && !fast) cutWipe(wipe.current); r.go(b.shot, b.cut); }
-    if (b.mood) r.pip.setMood(b.mood);
-    if (b.act) r.pip.play(b.act);
-    if (!r.vigId) r.pip.lookAt = r.camera.position;
-  };
-  const advance = () => {
-    clearTimeout(autoT.current);
-    if (bi.current < beats.current.length - 1) { bi.current++; show(bi.current); return; }
-    const f = after.current;
-    after.current = null;
-    f?.();
-  };
-  const talk = (list: Beat[], then: () => void) => {
-    beats.current = list; bi.current = 0; after.current = then;
-    setPhase('talk');
-    show(0);
-  };
-  const onLineDone = (id: number) => {
-    if (id !== lid.current) return;
-    setLineDone(true);
-    const last = bi.current >= beats.current.length - 1;
-    const txt = beats.current[bi.current]?.text ?? '';
-    if (phaseRef.current !== 'talk' && phaseRef.current !== 'outro') return;
-    // keep the story moving: the question brings the clipboard up by itself
-    autoT.current = window.setTimeout(advance, last ? 380 : 1500 + txt.length * 24);
-  };
-
-  // ---------------------------------------------------------------- steps
-
-  const enterAsk = (i: number) => {
-    const st = STEPS[i], r = room.current;
-    setPhase('ask');
-    sound.play('wood_knock', { volume: 0.25, rate: 1.3 });
-    if (!r) return;
-    r.go(st.shot);
-    const x = aRef.current;
-    if (st.kind === 'dial') { r.ticking = true; r.clockAt = toMin(x.wake); r.window(toMin(x.wake) / 60); }
-    if (st.kind === 'hours') { r.setVignette('hours:tower', VIGNETTES['hours:tower']); r.param(x.hours); }
-    if (st.kind === 'plan') { r.props3({ board: true }); r.go('pip'); }
-  };
-  const leaveAsk = (i: number) => {
-    const st = STEPS[i], r = room.current;
-    if (!r) return;
-    r.ticking = false; r.clockAt = null; r.window(null);
-    r.setVignette(null);
-    sel.current = null;
-    if (st.vignettes && r.pipSpot !== 'desk') r.pipTo('desk');
-  };
-  const startStep = (i: number, react: Beat | null) => {
-    const st = STEPS[i];
-    const list = [...(react ? [react] : []), ...st.say(aRef.current, { artifact: ARTIFACT }).map((b) => beatOf(b)!)];
-    talk(list, () => enterAsk(i));
-  };
-
-  const vig = (id: string | null) => {
-    const r = room.current;
-    if (!r) return;
-    if (!id) { r.setVignette(null); return; }
-    const make = VIGNETTES[id];
-    if (make) r.setVignette(id, make);
-  };
-  const peek = (st: Step, v: string | null) => {
-    if (st.kind === 'species') { if (v) room.current?.setLook(lookFor(v)); else room.current?.setLook(lookFor(aRef.current.species), false); return; }
-    if (!st.vignettes) return;
-    vig(v ? `${st.id}:${v}` : sel.current);
-  };
-  const pick = (st: Step, v: string) => {
-    const f = st.field!, r = room.current;
-    setPicked((p) => ({ ...p, [st.id]: true }));
-    if (st.kind === 'species') {
-      setA((x) => ({ ...x, species: v }));
-      r?.setLook(lookFor(v));
-      r?.pip.play('hop');
-      return;
-    }
-    if (st.kind === 'multi') {
-      const cur = aRef.current[f] as string[];
-      const on = !cur.includes(v);
-      setA((x) => ({ ...x, [f]: on ? [...cur, v] : cur.filter((q) => q !== v) }));
-      if (on) { sel.current = `${st.id}:${v}`; vig(sel.current); r?.pip.play('nod'); }
-      else if (sel.current === `${st.id}:${v}`) { sel.current = null; vig(null); }
-      return;
-    }
-    setA((x) => ({ ...x, [f]: st.id === 'mic' ? v === 'yes' : v }));
-    sel.current = `${st.id}:${v}`;
-    vig(sel.current);
-  };
-
-  const next = async () => {
-    if (phaseRef.current !== 'ask') return;
-    const i = siRef.current, st = STEPS[i];
-    if (st.kind === 'plan') { approve(); return; }
-    tapSound('ui_confirm', 0.5);
-    let x = aRef.current;
-    if (st.id === 'mic' && x.mic && !ARTIFACT) {
-      const ok = await askMic();
-      if (!ok) { x = { ...x, mic: false }; setA(x); }
-    }
-    setPhase('write');
-    leaveAsk(i);
-    const text = st.written?.(x) ?? (st.kind === 'dial' ? fmt(x.wake, hour12) : st.kind === 'hours' ? `${x.hours} hours` : st.opts?.find((o) => o.v === String(st.id === 'mic' ? (x.mic ? 'yes' : 'no') : x[st.field!]))?.label ?? '');
-    setWritten((w) => ({ ...w, [i]: text }));
-    room.current?.pip.play('peck');
-  };
-  const holdWrite = useRef(false);
-  const afterWrite = () => {
-    if (phaseRef.current !== 'write' || holdWrite.current) return;
-    const i = siRef.current, st = STEPS[i];
-    const react = beatOf(st.react?.(aRef.current));
-    const fx = fast ? undefined : PAGE_FX[STEPS[i + 1]?.id ?? ''];
-    const el = board.current;
-    if (fx && el) {
-      // a pixel transition sweeps over the clipboard and the new page is under it
-      void questionTransition(() => { setSi(i + 1); }, { rect: el.getBoundingClientRect(), kind: fx, speed: 1.8 });
-      window.setTimeout(() => { if (phaseRef.current === 'write') startStep(i + 1, react); }, 700);
-      return;
-    }
-    sound.play('paper_flip', { volume: 0.55 });
-    setFlipFrom(i);
-    setSi(i + 1);
-    // the page flips over the clip, the clip snaps shut, then the board dips while Pip reacts
-    window.setTimeout(() => { setFlipFrom(null); sound.play('wood_knock', { volume: 0.35, rate: 1.1 }); }, 760);
-    window.setTimeout(() => { if (phaseRef.current === 'write') startStep(i + 1, react); }, fast ? 0 : 620);
-  };
-
-  const approve = () => {
-    if (phaseRef.current !== 'ask') return;
-    const r = room.current;
-    setPhase('stamp');
-    r?.pip.play('peck');
-    r?.go('close');
-    if (remind && !ARTIFACT) void requestNotifications();
-  };
-  const onStamp = () => {
-    setStamped(true);
-    const r = room.current;
-    if (r) { r.pip.setMood('joy', 2); r.sparkle(r.pip.headWorld, 10); r.fx.burst('stars', r.pip.headWorld.x, r.pip.headWorld.y, r.pip.headWorld.z, 8); }
-    sound.play('reward_quest', { volume: 0.5 });
-    window.setTimeout(() => {
-      setPhase('outro');
-      sound.play('wings_flutter', { volume: 0.45 });
-      talk(OUTRO, () => void finishAll());
-      setPhase('outro');
-    }, 1400);
-  };
-
-  const finishAll = async (skipped = false) => {
-    if (phaseRef.current === 'done') return;
-    setPhase('done');
-    phaseRef.current = 'done';
-    clearTimeout(autoT.current);
-    const r = room.current, sc = sceneRef.current;
-    const x = aRef.current;
-    await iris(() => (r ? r.headScreen() : { x: innerWidth / 2, y: innerHeight / 2 }), async () => {
-      r?.setVignette(null);
-      edit((s) => applyAnswers(s, x));
-      syncReminders();
-      if (sc && sc.stage === r) { sc.setStage(null); sc.setView('home'); sc.snapCamera(); }
-      room.current = null;
-      releaseBoot();
-    });
-    const sc2 = sceneRef.current;
-    sc2?.owl.play(skipped ? 'wave' : 'present');
-    say(skipped ? `Welcome home! Let's unpack!` : `Let's unpack! Tap the boxes, ${x.you.trim() || 'friend'}!`, 4200);
-    window.dispatchEvent(new CustomEvent('hh:intro-done', { detail: { skipped } }));
-  };
-  const skip = () => {
-    tapSound('ui_confirm');
-    room.current?.setVignette(null);
-    setSkipOpen(false);
-    void finishAll(true);
-  };
-
-  // ---------------------------------------------------------------- mount: build the office, wait for the tap
+  const input = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    injectCSS();
     const sc = sceneRef.current;
-    let r: InterviewRoom | null = null;
-    try { if (sc) r = new InterviewRoom(lookFor(aRef.current.species), sc.quality, typeof sc.renderView === 'function' ? sc : null); } catch (e) { console.error('interview room failed', e); }
-    if (!sc || !r) { releaseBoot(); return undefined; }
-    room.current = r;
-    sc.setStage(r);
-    r.setNameplate(aRef.current.name || 'Pip');
-    r.pip.pose = 'sleep';
-    r.cut('close');
-    for (let i = 0; i < 30; i++) r.update(1 / 30, 0);
-    const q = new URLSearchParams(location.search);
-    const devStep = DEV ? q.get('ob') : null;
-    (window as unknown as { hhIntro: unknown }).hhIntro = { room: r, a: () => aRef.current, next: () => void next(), flip: () => { holdWrite.current = false; afterWrite(); }, approve: () => approve() };
+    if (!sc) { releaseBoot(); return undefined; }
+    const q = DEV ? new URLSearchParams(location.search) : new URLSearchParams();
+    const fast = DEV && q.has('obfast');
+    const hour12 = save.value.settings.hour12;
     let alive = true;
-    (async () => {
-      if (devStep) {
-        releaseBoot();
-        // dev pages: skip the splash's exit animation
-        { const bt = document.getElementById('boot'); if (bt) bt.style.display = 'none'; }
-        const i = Math.max(0, STEPS.findIndex((s) => s.id === devStep));
-        r.pip.pose = 'stand';
-        setSi(i); siRef.current = i;
-        const selv = q.get('obsel');
-        if (selv) {
-          const st = STEPS[i], f = st.field;
-          if (f) setA((x) => { const v = st.kind === 'multi' ? selv.split(',') : st.kind === 'hours' ? Number(selv) : f === 'mic' ? selv === 'yes' : selv; const y = { ...x, [f]: v }; aRef.current = y; return y; });
-          setPicked((p) => ({ ...p, [st.id]: true }));
-          if (st.kind === 'species') r.setLook(lookFor(selv), false);
-        }
-        if (q.has('obtalk')) {
-          const list = q.get('obline') ? [{ text: q.get('obline')!, shot: STEPS[i].shot }] : STEPS[i].say(aRef.current, { artifact: ARTIFACT }).map((b) => beatOf(b)!);
-          talk(list, () => enterAsk(i));
-          r.cut(list[0].shot ?? STEPS[i].shot);
-          return;
-        }
-        if (q.get('obline')) { beats.current = [{ text: q.get('obline')! }]; show(0); }
-        enterAsk(i);
-        r.cut(STEPS[i].shot);
-        const v = q.get('obvig');
-        if (v) { sel.current = v; vig(v); }
-        if (q.has('obwrite')) { holdWrite.current = true; setPhase('write'); setWritten((w) => ({ ...w, [i]: STEPS[i].written?.(aRef.current) ?? q.get('obwrite') ?? '' })); }
-        if (q.has('obstamp')) window.setTimeout(() => { approve(); }, 400);
+    let a: Answers = answersFrom(save.value);
+    let si = 0, phase: Phase = 'boot';
+    const picked: Record<string, boolean> = {};
+    let remind = true, signed = false;
+    const photos: Record<string, string> = {};
+
+    // ---- the office, the desk work, Pip's words
+    let office: Office;
+    try {
+      const world = typeof (sc as unknown as WorldView).renderView === 'function' ? (sc as unknown as WorldView) : null;
+      office = new Office(lookFor(a.species), sc.renderer, sc.quality, world);
+    } catch (e) { console.error('interview office failed', e); releaseBoot(); return undefined; }
+    const postWas = sc.post.enabled;
+    sc.post.enabled = false; // the office draws its own HD-2D picture (look.ts)
+    sc.setStage(office);
+    const speech = new Speech();
+    speech.px = office.look.px;
+    office.look.overlay.add(speech.group);
+    office.tickers.add((dt) => { speech.px = office.look.px; speech.update(dt, office.camera); });
+    speech.onTalk = () => office.talk();
+    const dio = dioramas(office);
+    office.pip.pose = 'stand';
+    office.setNameplate(a.name || 'Pip');
+
+    const ctx = (): FormCtx => ({ a, hour12, artifact: ARTIFACT, plan: planOf(a), photos, remind, signed, picked });
+    const st = () => STEPS[si];
+
+    // ---------------------------------------------------------------- talking
+    let beats: Beat[] = [], bi = 0, after: (() => void) | null = null, autoT = 0;
+    const show = (k: number) => {
+      const b = beats[k];
+      if (!b) return;
+      clearTimeout(autoT);
+      speech.say(b.text, `${(a.name.trim() || 'Pip').toUpperCase()} · HEAD OF SLEEP`, fast);
+      if (b.shot) office.go(SHOT[b.shot] ?? b.shot, b.cut);
+      if (b.mood) office.pip.setMood(b.mood);
+      if (b.act) office.pip.play(b.act);
+      office.pip.lookAt = office.camera.position;
+    };
+    const advance = () => {
+      clearTimeout(autoT);
+      if (bi < beats.length - 1) { bi++; show(bi); return; }
+      const f = after; after = null; f?.();
+    };
+    const talk = (list: Beat[], then: () => void) => { beats = list; bi = 0; after = then; phase = phase === 'outro' ? 'outro' : 'talk'; if (desk) desk.enabled = false; show(0); };
+    speech.onDone = () => {
+      if (phase !== 'talk' && phase !== 'outro') return;
+      const last = bi >= beats.length - 1, txt = beats[bi]?.text ?? '';
+      autoT = window.setTimeout(advance, fast ? 30 : last ? 700 : 1500 + txt.length * 26);
+    };
+
+    // ---------------------------------------------------------------- the desk (made once the office is built)
+    let desk!: Desk;
+    const makeDesk = () => new Desk(office, {
+      region: (r) => onRegion(r),
+      hours: (v) => { if (st().kind !== 'hours' || phase !== 'ask') return; if (v !== a.hours) { a = { ...a, hours: v }; play('tick_brass', 0.3, 0.8 + (v - 5) * 0.08); dio.param(v); } desk.hoursValue = v; refresh(); },
+      clock: (min12) => {
+        if (st().kind !== 'dial' || phase !== 'ask') return;
+        const pm = toMin(a.wake) >= 720, v = hm(min12 + (pm ? 720 : 0));
+        if (v !== a.wake) { a = { ...a, wake: v }; play('tick_brass', 0.3, 1.1 + Math.random() * 0.2); onWake(); }
+      },
+      file: () => void file(),
+      skip: () => void finishAll(true),
+      tap: () => onTap(),
+    });
+    const refresh = (instant = false) => { const p = desk?.page; if (p) { syncForm(p.form, st(), ctx(), instant); } };
+    const onWake = () => {
+      const m = toMin(a.wake);
+      office.deskClock.set(m);
+      office.window(m / 60);
+      refresh();
+    };
+    const canFile = () => { const s = st(); return s.kind !== 'choice' || !!picked[s.id]; };
+    const updateReady = () => desk?.setReady(phase === 'ask' && canFile() && (st().kind !== 'plan' || signed));
+
+    const onRegion = (r: Region) => {
+      if (phase !== 'ask') return;
+      const s = st();
+      if (r.kind === 'field') { focusInput(); return; }
+      if (r.kind === 'minus' || r.kind === 'plus') { a = { ...a, wake: hm(toMin(a.wake) + (r.kind === 'plus' ? 15 : -15)) }; play('tick_paper', 0.4); onWake(); return; }
+      if (r.kind === 'ampm') { const m = toMin(a.wake) % 720; a = { ...a, wake: hm(m + (r.v === 'pm' ? 720 : 0)) }; play('pencil', 0.35); onWake(); return; }
+      if (r.kind === 'remind') { remind = !remind; play('pencil', 0.35); refresh(); return; }
+      if (r.kind === 'sign') {
+        if (signed) return;
+        signed = true; play('scribble', 0.5);
+        refresh();
+        office.pip.play('nod');
+        window.setTimeout(updateReady, 1200);
         return;
       }
-      await bootReady();
+      if (r.kind === 'card' && r.v) {
+        if (a.species !== r.v) { a = { ...a, species: r.v }; office.setLook(lookFor(r.v)); play('paper_flip', 0.35); }
+        picked[s.id] = true; refresh(); updateReady();
+        return;
+      }
+      if (r.kind === 'tick' && r.v !== undefined) {
+        const v = r.v;
+        if (s.kind === 'text' && s.field === 'name') { a = { ...a, name: v }; office.setNameplate(v); office.sparkle(office.head, 4); if (input.current) input.current.value = v; }
+        else if (s.kind === 'multi') {
+          const f = s.field as 'goals' | 'relax', cur = a[f], on = !cur.includes(v);
+          a = { ...a, [f]: on ? [...cur, v] : cur.filter((x) => x !== v) };
+          if (on) { dio.show(`${s.id}:${v}`); office.pip.play('nod'); } else dio.show(null);
+        } else if (s.kind === 'choice') {
+          a = { ...a, [s.field!]: s.id === 'mic' ? v === 'yes' : v } as Answers;
+          picked[s.id] = true;
+          dio.show(`${s.id}:${v}`);
+        }
+        play('pencil', 0.4, 0.9 + Math.random() * 0.2);
+        refresh(); updateReady();
+      }
+    };
+
+    // ---------------------------------------------------------------- typing (a hidden input; the pen writes)
+    const focusInput = () => {
+      const el = input.current, s = st();
+      if (!el || s.kind !== 'text') return;
+      el.value = a[s.field as 'you' | 'name'];
+      el.focus({ preventScroll: true });
+      const up = () => { el.focus({ preventScroll: true }); removeEventListener('pointerup', up); };
+      addEventListener('pointerup', up);
+    };
+    const onInput = () => {
+      const el = input.current, s = st();
+      if (!el || s.kind !== 'text' || phase !== 'ask') return;
+      const v = el.value.slice(0, 16);
+      a = { ...a, [s.field as 'you' | 'name']: v };
+      if (s.field === 'name') office.setNameplate(v.trim() || 'Pip');
+      play('scribble', 0.22, 0.9 + Math.random() * 0.4);
+      refresh();
+    };
+    const onInputKey = (e: KeyboardEvent) => { if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); void file(); } };
+    input.current?.addEventListener('input', onInput);
+    input.current?.addEventListener('keydown', onInputKey);
+
+    // ---------------------------------------------------------------- steps
+    const enterAsk = async (i: number) => {
+      const s = STEPS[i];
+      phase = 'ask';
+      speech.say(null);
+      office.go(s.kind === 'dial' ? 'formClock' : 'form', false, 2.4);
+      if (s.kind === 'species') await Promise.race([Promise.all(s.opts!.map((o) => photos[o.v] ? Promise.resolve() : undefined)), wait(10)]);
+      const form = printForm(s, i, STEPS.length, ctx());
+      desk.setRider(s.kind === 'hours');
+      if (s.kind === 'hours') { desk.hoursValue = a.hours; dio.show('hours:tower'); dio.param(a.hours); }
+      if (s.kind === 'dial') { office.deskClock.set(toMin(a.wake)); office.window(toMin(a.wake) / 60); }
+      await desk.present(form, { sticky: s.kind !== 'plan' });
       if (!alive) return;
-      setPhase('wake');
-      void wakeBoot();
-      await wait(1100);
+      desk.enabled = true;
+      office.pip.lookAt = desk.page ? desk.texelWorld(180, 240) : null;
+      office.pip.setMood('curious');
+      updateReady();
+    };
+    const startStep = (i: number, react: Beat | null) => {
+      si = i;
+      const list = [...(react ? [react] : []), ...STEPS[i].say(a, { artifact: ARTIFACT }).map((b) => beatOf(b)!)];
+      talk(list, () => void enterAsk(i));
+    };
+    const file = async () => {
+      if (phase !== 'ask' || !canFile()) return;
+      const s = st();
+      if (s.kind === 'plan') { if (signed) void approve(); return; }
+      let x = a;
+      if (s.id === 'mic' && x.mic && !ARTIFACT) { const ok = await askMic(); if (!ok) { x = { ...x, mic: false }; a = x; refresh(); } }
+      phase = 'file';
+      desk.enabled = false;
+      input.current?.blur();
+      office.go('stamp', false, 2.6);
+      await desk.stampAndFile('RECEIVED', `page ${si + 1}`);
       if (!alive) return;
-      // Pip wakes up with a start, a stretch and an enormous yawn
-      r.pip.pose = 'stand';
-      r.pip.setMood('surprised', 1.0);
-      r.pip.play('stretch');
-      sound.play('yawn', { volume: 0.5 });
+      dio.show(null);
+      desk.setRider(false);
+      office.window(null);
+      office.pip.play('peck');
+      const react = beatOf(s.react?.(a));
+      startStep(si + 1, react);
+    };
+    const approve = async () => {
+      phase = 'file';
+      desk.enabled = false;
+      if (remind && !ARTIFACT) void requestNotifications();
+      office.go('stamp', false, 2.4);
+      office.pip.play('peck');
+      await desk.stampOnly('APPROVED', 'Head of Sleep');
+      if (!alive) return;
+      const h = office.head;
+      office.pip.setMood('joy', 2);
+      office.sparkle(h, 10);
+      office.burst('stars', h, 8);
+      play('reward_quest', 0.5);
+      await wait(900);
+      phase = 'outro';
+      play('wings_flutter', 0.45);
+      talk(OUTRO, () => void finishAll());
+    };
+
+    const finishAll = async (skipped = false) => {
+      if (phase === 'done') return;
+      phase = 'done';
+      clearTimeout(autoT);
+      if (desk) desk.enabled = false;
+      dio.show(null);
+      const x = a;
+      await iris(() => (alive ? office.headScreen() : { x: innerWidth / 2, y: innerHeight / 2 }), async () => {
+        edit((s) => applyAnswers(s, x));
+        syncReminders();
+        if (sc.stage === office) { sc.setStage(null); sc.setView('home'); sc.snapCamera(); }
+        sc.post.enabled = postWas;
+        releaseBoot();
+      });
+      sceneRef.current?.owl.play(skipped ? 'wave' : 'present');
+      say(skipped ? `Welcome home! Let's unpack!` : `Let's unpack! Tap the boxes, ${x.you.trim() || 'friend'}!`, 4200);
+      window.dispatchEvent(new CustomEvent('hh:intro-done', { detail: { skipped } }));
+    };
+
+    const onTap = () => {
+      if (phase === 'talk' || phase === 'outro') {
+        if (speech.typing) { speech.finish(); return; }
+        play('ui_tap', 0.25); advance();
+        return;
+      }
+      if (phase === 'ask') office.pip.play('nod');
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement) return;
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (phase === 'ask' && desk?.isReady) void file(); else onTap(); }
+    };
+    addEventListener('keydown', onKey);
+
+    // the owl photographs for the species form (rendered from the 3D models), the printed pictograms
+    void preloadIcons(ICONS);
+    for (const o of STEPS.find((s) => s.kind === 'species')?.opts ?? []) {
+      void owlIconAsync({ ...lookFor(o.v), outfit: {} }, 'face').then(async (u) => { if (u) { await preload([u]); photos[o.v] = u; } }).catch(() => undefined);
+    }
+    (window as unknown as { hhIntro: unknown }).hhIntro = { office, desk: () => desk, speech, a: () => a, file: () => void file(), region: (id: string) => { const r = desk?.page?.form.region(id); if (r) onRegion(r); }, phase: () => phase, step: () => si };
+
+    // ---------------------------------------------------------------- the opening
+    (async () => {
+      await office.ready;
+      if (!alive) return;
+      desk = makeDesk();
+      const devStep = DEV ? q.get('ob') : null;
+      if (devStep) {
+        releaseBoot();
+        { const bt = document.getElementById('boot'); if (bt) bt.style.display = 'none'; }
+        const i = Math.max(0, STEPS.findIndex((s) => s.id === devStep));
+        si = i;
+        const sel = q.get('obsel');
+        if (sel) {
+          const s = STEPS[i], f = s.field;
+          if (f) a = { ...a, [f]: s.kind === 'multi' ? sel.split(',') : s.kind === 'hours' ? Number(sel) : f === 'mic' ? sel === 'yes' : sel } as Answers;
+          picked[s.id] = true;
+          if (s.kind === 'species') office.setLook(lookFor(sel), false);
+        }
+        if (q.has('obtalk')) { const s = STEPS[i]; talk(q.get('obline') ? [{ text: q.get('obline')!, shot: s.shot }] : s.say(a, { artifact: ARTIFACT }).map((b) => beatOf(b)!), () => void enterAsk(i)); office.cut(SHOT[s.shot] ?? s.shot); return; }
+        if (q.has('obsigned')) signed = true;
+        await enterAsk(i);
+        office.cut(STEPS[i].kind === 'dial' ? 'formClock' : 'form');
+        if (q.has('obstamp')) window.setTimeout(() => void (STEPS[i].kind === 'plan' ? approve() : file()), 600);
+        return;
+      }
+      if (bootShowing()) {
+        await bootReady();
+        if (!alive) return;
+        // the office waits nose to its clock's dial, exactly where the loading clock will leave the eye
+        const m = bootDial();
+        office.holdOnDial(m);
+        office.pip.pose = 'stand';
+        office.pip.lookAt = new THREE.Vector3(0.06, 0.8, -1.2);
+        office.lampOn(false);
+        await wakeBoot();
+        if (!alive) return;
+        if (DEV && q.get('obhold')) await wait(Number(q.get('obhold')));
+        play('amb_room', 0.2);
+        void office.pullBack(m, 'open', 4.8);
+      } else {
+        office.cut('open');
+      }
+      phase = 'open';
+      // the lights come up as the camera pulls back; Pip looks up from his paperwork
       await wait(1500);
       if (!alive) return;
-      r.pip.play('yawn');
+      office.lampOn(true);
+      play('tick_brass', 0.45, 0.8);
+      await wait(1700);
+      if (!alive) return;
+      office.pip.lookAt = office.camera.position;
+      office.pip.setMood('surprised', 1.0);
+      office.pip.play('stretch');
+      await wait(1400);
+      if (!alive) return;
       startStep(0, null);
     })();
-    const onResize = () => setWide(innerWidth >= 860 && innerWidth > innerHeight);
+
+    const onResize = () => { speech.px = office.look.px; };
     addEventListener('resize', onResize);
-    // space / enter moves the conversation on (unless you're typing)
-    const onKey = (e: KeyboardEvent) => { if ((e.key === ' ' || e.key === 'Enter') && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLButtonElement)) { e.preventDefault(); tapRef.current(); } };
-    addEventListener('keydown', onKey);
     return () => {
       alive = false;
-      removeEventListener('resize', onResize);
       removeEventListener('keydown', onKey);
-      clearTimeout(autoT.current);
-      const rr = room.current;
-      if (rr) { rr.setVignette(null); if (sc.stage === rr) sc.setStage(null); }
+      removeEventListener('resize', onResize);
+      input.current?.removeEventListener('input', onInput);
+      input.current?.removeEventListener('keydown', onInputKey);
+      clearTimeout(autoT);
+      dio.show(null);
+      desk?.dispose();
+      speech.dispose();
+      if (sc.stage === office) sc.setStage(null);
+      sc.post.enabled = postWas;
       releaseBoot();
     };
   }, []);
 
-  // frame the 3D shot around the clipboard
-  useEffect(() => {
-    const r = room.current;
-    if (!r) return;
-    const up = phase === 'ask' || phase === 'write' || phase === 'stamp';
-    const brd = up || phase === 'talk';
-    r.frame = wide ? { x: brd ? 0.17 : 0, y: 0 } : { x: 0, y: up ? 0.27 : phase === 'talk' ? 0.12 : 0.05 };
-  }, [phase, wide, room.current]);
-
-  // live answers into the room
-  useEffect(() => { room.current?.setNameplate(a.name.trim() || 'Pip'); }, [a.name]);
-  useEffect(() => { const r = room.current; if (r && STEPS[si]?.kind === 'dial' && phase === 'ask') { r.clockAt = toMin(a.wake); r.window(toMin(a.wake) / 60); } }, [a.wake]);
-  useEffect(() => { if (STEPS[si]?.kind === 'hours' && phase === 'ask') room.current?.param(a.hours); }, [a.hours]);
-
-  // the beak flaps while the text talks
-  const onTalk = () => room.current?.talk();
-
-  const onTap = () => {
-    if (phase === 'boot' || phase === 'wake' || phase === 'done') return;
-    if (!lineDone) { setFinish((f) => f + 1); return; }
-    if (phase === 'talk' || phase === 'outro') { tapSound('ui_tap', 0.25); advance(); return; }
-    if (phase === 'ask') room.current?.pip.poke();
-  };
-
-  const tapRef = useRef(onTap);
-  tapRef.current = onTap;
-  const st = STEPS[si];
-  const plan = useMemo(() => planOf(a), [a]);
-  const canNext = !st || st.kind !== 'choice' || !!picked[st.id] || !!written[si];
-  const showBoard = phase !== 'boot' && phase !== 'wake' && phase !== 'done';
-  const bsz = useBox(board, showBoard);
-  const psz = useBox(paper, showBoard);
-
-  const pageOf = (i: number, live: boolean) => {
-    const s = STEPS[i];
-    if (!s) return null;
-    return (
-      <div class={'obc-page' + (live ? '' : ' out') + ' pg-' + s.id} key={'pg' + i} style={psz.w ? `background-image:url(${sheetURL(psz.w, psz.h, 3 + i)})` : ''}>
-        <div class="obc-head">
-          <span class="obc-no">No. {String(i + 1).padStart(2, '0')}<small>/{STEPS.length}</small></span>
-          <span class="obc-prog">{STEPS.map((_, k) => <i key={k} class={k < i ? 'done' : k === i ? 'now' : ''} />)}</span>
-        </div>
-        <h2 class="obc-title">{s.title}</h2>
-        <div class="obc-body">{body(s, i, live)}</div>
-        {s.kind === 'text' && <Doodle kind={s.id} />}
-        {s.kind !== 'plan' && (
-          <div class="obc-foot">
-            <span class={'obc-ans' + ((written[i]?.length ?? 0) > 40 ? ' longer' : (written[i]?.length ?? 0) > 22 ? ' long' : '')}><small>Answer:</small>{written[i] && <Hand key={written[i]} text={written[i]} fast={!live || fast} onDone={live ? afterWrite : undefined} />}</span>
-            {live && <button type="button" class="obc-next" disabled={phase !== 'ask' || !canNext} onClick={() => void next()}>{canNext ? 'Next' : 'Pick one'}<i class="obc-arrow" /></button>}
-          </div>
-        )}
-        {s.kind === 'plan' && live && (
-          <div class="obc-foot plan">
-            <label class="obc-check" onClick={() => { setRemind(!remind); tapSound('ui_toggle', 0.4); }}><img src={boxURL(remind)} alt="" />Remind me to wind down</label>
-            <StampPress disabled={phase !== 'ask'} onStamp={approve} />
-          </div>
-        )}
-        {s.kind === 'plan' && (phase === 'stamp' || stamped) && live && <StampInk onHit={onStamp} />}
-      </div>
-    );
-  };
-
-  const body = (s: Step, i: number, live: boolean) => {
-    const set = <K extends keyof Answers>(k: K, v: Answers[K]) => { setA((x) => ({ ...x, [k]: v })); setPicked((p) => ({ ...p, [s.id]: true })); };
-    const interactive = live && phase === 'ask';
-    const onPick = (v: string) => interactive && pick(s, v);
-    const onPeek = (v: string | null) => interactive && peek(s, v);
-    const chosen = (f: keyof Answers) => (picked[s.id] || written[i] ? String(a[f]) : null);
-    switch (s.id) {
-      case 'you': case 'name': {
-        const k = s.field as 'you' | 'name';
-        return (
-          <NameTag kind={k} value={a[k]} placeholder={k === 'you' ? 'write here...' : 'Pip'} disabled={!interactive} chips={k === 'name' ? ['Pip', 'Hoot', 'Mochi', 'Biscuit', 'Luna', 'Juniper'] : undefined}
-            onInput={(v) => { set(k, v); room.current?.pip.play('peck'); }} onEnter={() => void next()}
-            onChip={(n) => { set('name', n); room.current?.sparkle(room.current.pip.headWorld, 4); }} />
-        );
-      }
-      case 'species': return <SpeciesDeck opts={s.opts!} value={a.species} look={(id) => ({ ...lookFor(id), outfit: {} })} onPick={(v) => { if (interactive) pick(s, v); }} onPeek={(v) => { if (interactive) peek(s, v); }} interactive={interactive} />;
-      case 'goals': return <StickerSheet opts={GOALS} value={a.goals} onToggle={(v) => { if (interactive) pick(s, v); }} onPeek={(v) => { if (interactive) peek(s, v); }} interactive={interactive} />;
-      case 'wake': return <WakeDial value={a.wake} hour12={hour12} interactive={interactive} onChange={(v) => interactive && set('wake', v)} />;
-      case 'hours': return <MoonSlider value={a.hours} interactive={interactive} onChange={(v) => interactive && set('hours', v)} />;
-      case 'latency': return <SheepGame value={chosen('latency')} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive} />;
-      case 'phone': return <PhoneSort value={chosen('phone')} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive} />;
-      case 'chrono': return <SkyLever value={chosen('chrono')} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive} />;
-      case 'caffeine': return <MugShelf value={chosen('caffeine')} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive} />;
-      case 'relax': return <TapeRack opts={RELAX} value={a.relax} onToggle={(v) => { if (interactive) pick(s, v); }} onPeek={(v) => { if (interactive) peek(s, v); }} interactive={interactive} />;
-      case 'mic': return (
-        <MicSwitch value={picked.mic || written[i] ? a.mic : null} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive}
-          note={`Pip listens on this device only. ${ARTIFACT ? 'This preview can’t use the microphone; the full app can.' : 'You can change it any time in Settings.'}`} />
-      );
-      case 'plan': {
-        const d = (k: number) => (fast ? 0 : 300 + k * 650);
-        return (
-          <div class="obc-plan">
-            <Row icon="moon" label="Bedtime"><Hand text={fmt(plan.bed, hour12)} delay={d(0)} fast={!live || fast} /></Row>
-            <Row icon="candle" label="Wind down"><Hand text={`${fmt(plan.windDown, hour12)}`} delay={d(1)} fast={!live || fast} /></Row>
-            <Row icon="alarm" label="Wake up"><Hand text={`${fmt(plan.wake, hour12)}`} delay={d(2)} fast={!live || fast} /></Row>
-            <Row icon="note" label="Alarm"><Hand text={ALARM_NAME[plan.alarm] ?? 'Music box'} delay={d(3)} fast={!live || fast} /></Row>
-            <Row icon={RELAX.find((r) => r.sound === plan.soundscape)?.art ?? 'rain'} label="Sleep sound"><Hand text={SOUND_NAME[plan.soundscape] ?? 'rain'} delay={d(4)} fast={!live || fast} /></Row>
-            {plan.blocker && <Row icon="shield" label="Bedtime Blocker"><Hand text={a.phone === 'nightly' ? 'On' : 'Ready'} delay={d(5)} fast={!live || fast} /></Row>}
-            {plan.tips.length > 0 && <div class="obc-tips">{plan.tips.map((t, k) => <span key={t} class="obc-tip"><Hand text={'~ ' + t} delay={d(6 + k)} fast={!live || fast} /></span>)}</div>}
-          </div>
-        );
-      }
-    }
-    return null;
-  };
-
   return (
-    <div class={'ob' + (wide ? ' wide' : '') + (fast ? ' ob-fast' : '') + (st ? ' at-' + st.id : '')} data-phase={phase}>
-      <canvas class="ob-wipe" ref={wipe} />
-      <div class="ob-tap" onPointerDown={onTap} />
-      <div class="ob-ft">
-        <FloatText line={phase === 'boot' || phase === 'wake' ? null : line} onTalk={onTalk} done={onLineDone} finish={finish} fast={fast} low={sceneRef.current?.quality === 'low'} />
-      </div>
-      {showBoard && (
-        <div class={'obc' + (flipFrom !== null ? ' lift' : '') + (phase === 'outro' ? ' fly' : '')} onAnimationEnd={(e) => { if ((e as AnimationEvent).animationName === 'obc-thud') (e.currentTarget as HTMLElement).classList.remove('thud'); }}>
-          <div class="obc-board" ref={board} style={bsz.w ? `background-image:url(${boardURL(bsz.w, bsz.h)})` : ''} />
-          <div class="obc-paper" ref={paper}>
-            <div class="obc-under u2" style={psz.w ? `background-image:url(${sheetURL(psz.w, psz.h, 9)})` : ''} />
-            <div class="obc-under" style={psz.w ? `background-image:url(${sheetURL(psz.w, psz.h, 7)})` : ''} />
-            {pageOf(si, true)}
-            {flipFrom !== null && pageOf(flipFrom, false)}
-          </div>
-          <div class="obc-clip" />
-          {STEPS[si]?.kind !== 'plan' && (
-            <div class={'obc-skip' + (skipOpen ? ' open' : '')}>
-              {!skipOpen ? <button type="button" onClick={() => { setSkipOpen(true); tapSound('paper_flip', 0.4); }}>Skip<small>been here before?</small></button>
-                : <span>Skip it? Pip picks cozy defaults.<span class="obc-skip-row"><button type="button" onClick={skip}>Yes</button><button type="button" onClick={() => { setSkipOpen(false); tapSound('ui_back', 0.4); }}>No</button></span></span>}
-            </div>
-          )}
-        </div>
-      )}
+    <div class="ob" style="position:fixed;inset:0;pointer-events:none;z-index:40">
+      <input ref={input} class="ob-type" type="text" maxLength={16} autocomplete="off" autocapitalize="words" spellcheck={false} aria-label="Your answer"
+        style="position:fixed;left:8vw;top:55vh;width:84vw;height:44px;font-size:16px;opacity:0;border:0;background:transparent;color:transparent;caret-color:transparent;pointer-events:none" />
     </div>
   );
 }
+export { GOALS, RELAX };
+export type { Step };

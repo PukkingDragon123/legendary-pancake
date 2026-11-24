@@ -1,60 +1,48 @@
-// Generates the loading screen (the `#boot` block in index.html): one carved walnut mantel clock,
-// alone on a calm, softly painted moonlit wall. Nothing else: no title, no captions. The minute and
-// hour hands sweep as the app loads, the moon rises over two mossy hills in the arch, the second
-// hand ticks and the pendulum swings behind its little window. Every moving part is pre-drawn as
-// pixel-art frames (60 hand angles, cosine-spaced pendulum frames) and played with CSS steps(), so
-// the clock is pixel perfect at every angle and animates before any script has loaded.
-// src/onboard/boot.ts takes over once the app is ready (the hands strike midnight, the glass door
-// swings open and the camera dives through the dial into the world).
+// Generates the loading screen (the `#boot` block in index.html) and the office clock's painting
+// (public/models/interview/clock.png + src/onboard/clockart.gen.ts): one Regency bracket clock in polished
+// flame mahogany on a carved wall bracket, alone on a dark emerald wall in a pool of lamplight. No text.
 //
-//   node src/onboard/tools/bootart.mjs        rewrites the block between the boot markers
+// The clock is painted as a 2.5D relief: every texel gets a material, a height and an albedo offset; a key
+// light from the top left, a soft fill, cavity occlusion, polished highlights and (for brass and steel) a
+// reflected environment shade it; the shade is then mapped onto hand-picked, hue-shifted ramps with ordered
+// dither, so the result is crisp pixel art that reads as real walnut, cast brass, enamel and blued steel.
+// Images are written as indexed PNGs (small enough to inline before any script loads).
 //
-// Colours come from src/gfx/palette.ts. Not part of the app bundle.
+// Moving parts are pre-drawn frames played with CSS steps(): 120 minute and hour hand angles, 60 for the
+// seconds, a cosine-spaced pendulum swing and a moon disc that rises in the arch as the app loads.
+// src/onboard/boot.ts takes over once the app is ready (the hands swing round to the real time, the clock
+// chimes; a tap dives into the dial, where the 3D office's own clock takes over and the camera pulls back).
+//
+//   node src/onboard/tools/bootart.mjs [--preview out.png]
 import { deflateSync } from 'node:zlib';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-// ------------------------------------------------------------------ palette (parsed from palette.ts)
+// ------------------------------------------------------------------ colour helpers
 
-const palSrc = readFileSync(fileURLToPath(new URL('../../gfx/palette.ts', import.meta.url)), 'utf8');
-const PAL = {};
-for (const m of palSrc.matchAll(/(\w+):\s*0x([0-9a-fA-F]{6})/g)) PAL[m[1]] = [parseInt(m[2].slice(0, 2), 16), parseInt(m[2].slice(2, 4), 16), parseInt(m[2].slice(4, 6), 16)];
-const C = (k) => { if (!PAL[k]) throw new Error('palette: ' + k); return PAL[k]; };
+const hex = (h) => [(h >> 16) & 255, (h >> 8) & 255, h & 255];
 const mix = (a, b, t) => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * t));
-const mul = (c, f) => c.map((v) => Math.max(0, Math.min(255, Math.round(v * f))));
-const shadow = (c, k = 0.3) => mix(mul(c, 1 - k * 0.6), C('slate'), k * 0.35);
-const light = (c, k = 0.3) => mix(mul(c, 1 + k * 0.35), C('lamp'), k * 0.3);
 const css = (c) => '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
+const clamp = (v, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
+/** a ramp through key colours, n steps */
+function rampOf(keys, n) { const out = []; for (let i = 0; i < n; i++) { const f = (i / (n - 1)) * (keys.length - 1), k = Math.min(keys.length - 2, Math.floor(f)); out.push(mix(hex(keys[k]), hex(keys[k + 1]), f - k)); } return out; }
 
-// ------------------------------------------------------------------ tiny RGBA canvas + PNG
+// hue-shifted ramps: shadows lean cool/purple, lights lean warm/gold
+const R = {
+  wood: rampOf([0x0e0408, 0x22090a, 0x3c120e, 0x561c12, 0x702816, 0x8c381c, 0xa84c26, 0xc66a36, 0xe8985a, 0xffd2a0], 14),
+  woodDark: rampOf([0x0c0508, 0x1e0a0a, 0x34120e, 0x4c1c12, 0x642616, 0x80361e], 8),
+  brass: rampOf([0x1a0e06, 0x3a2210, 0x6a4414, 0x9a6c1c, 0xc4942a, 0xe2b840, 0xf6d666, 0xfff0aa, 0xffffff], 14),
+  enamel: rampOf([0x6e6252, 0x9a8a70, 0xc4b494, 0xdfd2b4, 0xefe6d0, 0xfaf5e8, 0xffffff], 10),
+  steel: rampOf([0x06081a, 0x0e1634, 0x18265a, 0x263e84, 0x3a5cae, 0x6a8ed6, 0xb0ccf4, 0xf0f8ff], 10),
+  ink: rampOf([0x0e0a08, 0x241c16, 0x4a3e32], 3),
+  sky: rampOf([0x050a1e, 0x0c1638, 0x142456, 0x1e3676, 0x2c4c94, 0x4468b0], 8),
+  moon: rampOf([0x6a5a38, 0xa8946a, 0xd8c896, 0xf4e8c0, 0xfffaf0], 7),
+  moss: rampOf([0x0e2010, 0x1a3a1a, 0x28562a, 0x3c7438, 0x5a9446, 0x86b45a, 0xb8d47a], 9),
+  dark: rampOf([0x050305, 0x0e0808, 0x1a100c, 0x2a1a12], 5),
+  red: rampOf([0x3a0808, 0x6a1010, 0x9a1c18, 0xc83828, 0xf06a48], 6),
+};
 
-class Buf {
-  constructor(w, h) { this.w = w; this.h = h; this.d = new Uint8ClampedArray(w * h * 4); }
-  in(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
-  set(x, y, c, a = 255) {
-    x = Math.floor(x); y = Math.floor(y);
-    if (!this.in(x, y) || !c) return;
-    const i = (y * this.w + x) * 4;
-    if (a >= 255 || this.d[i + 3] === 0) { this.d[i] = c[0]; this.d[i + 1] = c[1]; this.d[i + 2] = c[2]; this.d[i + 3] = a; return; }
-    const t = a / 255;
-    for (let k = 0; k < 3; k++) this.d[i + k] = Math.round(this.d[i + k] * (1 - t) + c[k] * t);
-    this.d[i + 3] = Math.max(this.d[i + 3], a);
-  }
-  get(x, y) { if (!this.in(x, y)) return null; const i = (y * this.w + x) * 4; return this.d[i + 3] ? [this.d[i], this.d[i + 1], this.d[i + 2], this.d[i + 3]] : null; }
-  a(x, y) { return this.in(x, y) ? this.d[(y * this.w + x) * 4 + 3] : 0; }
-  clear(x, y) { if (this.in(x, y)) { const i = (y * this.w + x) * 4; this.d[i] = this.d[i + 1] = this.d[i + 2] = this.d[i + 3] = 0; } }
-  blit(src, ox, oy) { for (let y = 0; y < src.h; y++) for (let x = 0; x < src.w; x++) { const c = src.get(x, y); if (c) this.set(ox + x, oy + y, c, c[3]); } }
-  png() {
-    const raw = Buffer.alloc((this.w * 4 + 1) * this.h);
-    for (let y = 0; y < this.h; y++) { raw[y * (this.w * 4 + 1)] = 0; Buffer.from(this.d.buffer, y * this.w * 4, this.w * 4).copy(raw, y * (this.w * 4 + 1) + 1); }
-    const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type), data]); const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td) >>> 0); return Buffer.concat([len, td, crc]); };
-    const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(this.w, 0); ihdr.writeUInt32BE(this.h, 4); ihdr[8] = 8; ihdr[9] = 6;
-    return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw, { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
-  }
-  url() { return 'data:image/png;base64,' + this.png().toString('base64'); }
-}
-const CRC = new Int32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c; });
-function crc32(b) { let c = -1; for (const x of b) c = CRC[(c ^ x) & 255] ^ (c >>> 8); return c ^ -1; }
+// ------------------------------------------------------------------ noise
 
 const hash = (x, y, s = 0) => { let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 982451653)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 function vnoise(x, y, s = 0) {
@@ -65,409 +53,344 @@ function vnoise(x, y, s = 0) {
 const fbm = (x, y, s = 0) => vnoise(x, y, s) * 0.55 + vnoise(x * 2.1, y * 2.1, s + 7) * 0.3 + vnoise(x * 4.3, y * 4.3, s + 13) * 0.15;
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 const bayer = (x, y) => BAYER[((y & 3) << 2) | (x & 3)];
-const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
-/** pick from a ramp with ordered dithering between steps (t: 0 dark .. 1 light) */
-const pick = (ramp, t, x, y, d = 1) => ramp[clamp(Math.floor(t * (ramp.length - 1) + (bayer(x, y) - 0.5) * d + 0.5), 0, ramp.length - 1)];
-/** distance from a pixel centre to a point */
+const pick = (ramp, t, x, y, d = 0.85) => ramp[clamp(Math.floor(t * (ramp.length - 1) + (bayer(x, y) - 0.5) * d + 0.5), 0, ramp.length - 1)];
 const dist = (x, y, cx, cy) => Math.hypot(x + 0.5 - cx, y + 0.5 - cy);
-/** A relief carved or cast from a mask: lit edges face the lamp (top-left), shadowed edges and a
- *  1px cast shadow fall bottom-right. paint(x, y, t) gives the material at a lit value t. */
-function emboss(b, mask, x0, y0, w, h, paint, base = 0.55) {
-  const M = (x, y) => x >= x0 && y >= y0 && x < x0 + w && y < y0 + h && mask(x, y);
-  for (let y = y0; y < y0 + h + 1; y++) for (let x = x0; x < x0 + w + 1; x++) {
-    if (!M(x, y)) { if (M(x - 1, y - 1) && b.a(x, y)) { const c = b.get(x, y); b.set(x, y, mix(c, C('deepNight'), 0.38)); } continue; }
-    const tl = !M(x - 1, y) || !M(x, y - 1), br = !M(x + 1, y) || !M(x, y + 1);
-    const t = tl && !br ? base + 0.3 : br && !tl ? base - 0.26 : base + (hash(x, y, 77) - 0.5) * 0.08;
-    b.set(x, y, paint(x, y, t));
+
+// ------------------------------------------------------------------ RGBA buffer + (indexed) PNG
+
+class Buf {
+  constructor(w, h) { this.w = w; this.h = h; this.d = new Uint8ClampedArray(w * h * 4); }
+  in(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
+  set(x, y, c, a = 255) {
+    x = Math.floor(x); y = Math.floor(y);
+    if (!this.in(x, y) || !c) return;
+    const i = (y * this.w + x) * 4;
+    this.d[i] = c[0]; this.d[i + 1] = c[1]; this.d[i + 2] = c[2]; this.d[i + 3] = a;
+  }
+  get(x, y) { if (!this.in(x, y)) return null; const i = (y * this.w + x) * 4; return this.d[i + 3] ? [this.d[i], this.d[i + 1], this.d[i + 2], this.d[i + 3]] : null; }
+  a(x, y) { return this.in(x, y) ? this.d[(y * this.w + x) * 4 + 3] : 0; }
+  clear(x, y) { if (this.in(x, y)) this.d.fill(0, (y * this.w + x) * 4, (y * this.w + x) * 4 + 4); }
+  blit(src, ox, oy) { for (let y = 0; y < src.h; y++) for (let x = 0; x < src.w; x++) { const c = src.get(x, y); if (c) this.set(ox + x, oy + y, c, c[3]); } }
+  png() {
+    const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type), data]); const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td) >>> 0); return Buffer.concat([len, td, crc]); };
+    // indexed when the picture has 256 colours or fewer
+    const pal = new Map();
+    for (let i = 0; i < this.w * this.h && pal.size <= 256; i++) {
+      const a = this.d[i * 4 + 3], key = a ? (this.d[i * 4] << 24 | this.d[i * 4 + 1] << 16 | this.d[i * 4 + 2] << 8 | a) >>> 0 : 0;
+      if (!pal.has(key)) pal.set(key, pal.size);
+    }
+    const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(this.w, 0); ihdr.writeUInt32BE(this.h, 4); ihdr[8] = 8;
+    let raw, extra = [];
+    if (pal.size <= 256) {
+      ihdr[9] = 3;
+      raw = Buffer.alloc((this.w + 1) * this.h);
+      for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+        const i = (y * this.w + x) * 4, a = this.d[i + 3], key = a ? (this.d[i] << 24 | this.d[i + 1] << 16 | this.d[i + 2] << 8 | a) >>> 0 : 0;
+        raw[y * (this.w + 1) + 1 + x] = pal.get(key);
+      }
+      const plte = Buffer.alloc(pal.size * 3), trns = Buffer.alloc(pal.size);
+      for (const [k, i] of pal) { plte[i * 3] = k >>> 24; plte[i * 3 + 1] = (k >>> 16) & 255; plte[i * 3 + 2] = (k >>> 8) & 255; trns[i] = k & 255; }
+      extra = [chunk('PLTE', plte), chunk('tRNS', trns)];
+    } else {
+      ihdr[9] = 6;
+      raw = Buffer.alloc((this.w * 4 + 1) * this.h);
+      for (let y = 0; y < this.h; y++) Buffer.from(this.d.buffer, y * this.w * 4, this.w * 4).copy(raw, y * (this.w * 4 + 1) + 1);
+    }
+    return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', ihdr), ...extra, chunk('IDAT', deflateSync(raw, { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
+  }
+  url() { return 'data:image/png;base64,' + this.png().toString('base64'); }
+}
+const CRC = new Int32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c; });
+function crc32(b) { let c = -1; for (const x of b) c = CRC[(c ^ x) & 255] ^ (c >>> 8); return c ^ -1; }
+
+// ------------------------------------------------------------------ the relief painter
+
+const M = { none: 0, wood: 1, woodDark: 2, brass: 3, enamel: 4, steel: 5, ink: 6, sky: 7, moon: 8, moss: 9, dark: 10, red: 11 };
+class Relief {
+  constructor(w, h) { this.w = w; this.h = h; this.m = new Uint8Array(w * h); this.hgt = new Float32Array(w * h); this.alb = new Float32Array(w * h); this.flat = new Uint8Array(w * h); this.gloss = new Float32Array(w * h).fill(1); }
+  in(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
+  put(x, y, mat, h, alb = 0, o = {}) {
+    x = Math.floor(x); y = Math.floor(y);
+    if (!this.in(x, y)) return;
+    const i = y * this.w + x;
+    this.m[i] = mat; this.hgt[i] = h; this.alb[i] = alb; this.flat[i] = o.flat ? 1 : 0; this.gloss[i] = o.gloss ?? 1;
+  }
+  /** fill where mask(x, y) is true; h(x, y) and alb(x, y) give height and albedo offset */
+  fill(x0, y0, x1, y1, mask, mat, h, alb = () => 0, o = {}) {
+    for (let y = Math.max(0, Math.floor(y0)); y < Math.min(this.h, Math.ceil(y1)); y++) for (let x = Math.max(0, Math.floor(x0)); x < Math.min(this.w, Math.ceil(x1)); x++) {
+      if (!mask(x, y)) continue;
+      this.put(x, y, typeof mat === 'function' ? mat(x, y) : mat, h(x, y), alb(x, y), o);
+    }
+  }
+  mat(x, y) { return this.in(x, y) ? this.m[y * this.w + x] : 0; }
+  H(x, y) { x = clamp(x, 0, this.w - 1); y = clamp(y, 0, this.h - 1); const i = y * this.w + x; return this.m[i] ? this.hgt[i] : this.hgt[i] - 4; }
+  /** shade into a Buf */
+  render(o = {}) {
+    const out = new Buf(this.w, this.h);
+    const L = norm([-0.55, -0.72, 0.72]), Fl = norm([0.6, 0.2, 0.75]);
+    const Hh = norm([L[0], L[1], L[2] + 1]);
+    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+      const i = y * this.w + x, mat = this.m[i];
+      if (!mat) continue;
+      const alb = this.alb[i];
+      if (this.flat[i]) { out.set(x, y, pick(rampFor(mat), clamp(0.5 + alb), x, y)); continue; }
+      // the normal from the height field (clamped so steps read as bevels, not black)
+      const gx = clamp((this.H(x + 1, y) - this.H(x - 1, y)) * 0.5, -3, 3), gy = clamp((this.H(x, y + 1) - this.H(x, y - 1)) * 0.5, -3, 3);
+      const N = norm([-gx * 0.55, -gy * 0.55, 1]);
+      const dif = Math.max(0, dot(N, L)), fil = Math.max(0, dot(N, Fl)) * 0.25;
+      // cavity: lower than the neighbourhood -> darker
+      let avg = 0;
+      for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2], [-2, -2], [2, 2], [2, -2], [-2, 2]]) avg += this.H(x + dx, y + dy);
+      const occ = clamp((avg / 8 - this.hgt[i]) * 0.09, 0, 0.35);
+      const spec = Math.pow(Math.max(0, dot(N, Hh)), 26) * this.gloss[i];
+      // reflection of a simple room: a bright window up-left, warm ceiling, dark floor
+      const Rf = [2 * N[2] * N[0], 2 * N[2] * N[1], 2 * N[2] * N[2] - 1];
+      const env = clamp(0.45 - Rf[1] * 0.55 + (Rf[0] < -0.15 && Rf[1] < -0.1 ? 0.35 : 0) - (Rf[1] > 0.35 ? 0.25 : 0), 0, 1);
+      let t;
+      switch (mat) {
+        case M.wood: case M.woodDark: t = 0.04 + dif * 0.48 + fil * 0.8 + alb - occ + spec * 0.7 + env * 0.05; break;
+        case M.brass: t = env * 0.5 + dif * 0.46 + spec * 0.75 + alb - occ * 1.2; break;
+        case M.enamel: t = 0.42 + dif * 0.45 + alb - occ * 0.8 + spec * 0.2; break;
+        case M.steel: t = env * 0.45 + spec * 0.9 + dif * 0.15 + alb - occ; break;
+        case M.dark: t = 0.15 + dif * 0.25 + alb - occ; break;
+        default: t = 0.3 + dif * 0.5 + alb - occ; break;
+      }
+      out.set(x, y, pick(rampFor(mat), clamp(t), x, y));
+    }
+    if (o.outline) {
+      const ol = o.outline;
+      const src = new Buf(this.w, this.h); src.d.set(out.d);
+      for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
+        if (src.a(x, y)) continue;
+        if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => src.a(x + dx, y + dy) > 200)) out.set(x, y, ol);
+      }
+    }
+    return out;
   }
 }
-/** lens-shaped leaf mask from (ax, ay) along angle a */
-const leafMask = (ax, ay, a, len, wid) => (x, y) => {
-  const px = x + 0.5 - ax, py = y + 0.5 - ay, u = px * Math.cos(a) + py * Math.sin(a), v = -px * Math.sin(a) + py * Math.cos(a);
-  return u >= 0 && u <= len && Math.abs(v) <= Math.sin((u / len) * Math.PI) * wid;
-};
+const norm = (v) => { const l = Math.hypot(...v) || 1; return v.map((c) => c / l); };
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+function rampFor(m) { return m === M.wood ? R.wood : m === M.woodDark ? R.woodDark : m === M.brass ? R.brass : m === M.enamel ? R.enamel : m === M.steel ? R.steel : m === M.ink ? R.ink : m === M.sky ? R.sky : m === M.moon ? R.moon : m === M.moss ? R.moss : m === M.red ? R.red : R.dark; }
 
-// ------------------------------------------------------------------ ramps
-
-const WOOD = [shadow(C('barkDark'), 0.6), C('barkDark'), C('woodDeep'), mix(C('woodDeep'), C('woodDark'), 0.5), C('woodDark'), mix(C('woodDark'), C('wood'), 0.55), C('wood'), light(C('wood'), 0.35), C('woodLight'), light(C('woodLight'), 0.5)];
-const BRASS = [shadow(C('brassDark'), 0.7), mix(C('brassDark'), C('woodDeep'), 0.3), C('brassDark'), mix(C('brassDark'), C('brass'), 0.5), C('brass'), mix(C('brass'), C('honey'), 0.5), light(C('brass'), 0.6), C('lamp'), light(C('lamp'), 0.8)];
-const ENAMEL = [C('straw'), mix(C('straw'), C('linen'), 0.5), C('linen'), mix(C('linen'), C('oat'), 0.5), C('oat'), mix(C('oat'), C('paper'), 0.5), C('paper'), mix(C('paper'), C('snow'), 0.5)];
-const STEEL = [mix(C('ink'), C('deepNight'), 0.5), C('ink'), mix(C('ink'), C('iron'), 0.5), C('iron'), C('stoneDark'), C('stone'), C('pebble')];
-const MOSS = [C('forest'), C('pine'), C('leaf'), C('fern'), C('moss'), C('sage'), C('sageLight')];
-const INK = C('ink'), INK2 = C('ink2');
-const OUT = mix(shadow(C('barkDark'), 0.8), C('deepNight'), 0.4); // outline ink: deep slate-brown
-
-// ------------------------------------------------------------------ the clock: geometry
-
-const W = 112, H = 180, CX = 56;
-const DY = 88;               // dial centre (a pixel corner, so the hands rotate symmetrically)
-const R_DIAL = 31, R_BEZ = 35;
-const ARCH = { cx: 56, cy: 52, r: 38 };       // the wooden arch
-const PLATE = { x0: 20, x1: 92, y0: 52, y1: 124, r: 33 }; // the brass break-arch dial plate
-const MOONW = { cx: 56, cy: 52, r: 15 };      // the moon window in the plate arch
-const BODY = { x0: 12, x1: 100, y0: 50, y1: 152 };
-const PIL = 8;                                  // pilaster width
-const WIN = { x0: 44, x1: 68, y0: 128, y1: 148, cx: 56, cy: 140, r: 12 }; // pendulum window
-const PIVOT = { x: 56, y: 116 }, PEND_LEN = 26, PEND_R = 5;
-const PLINTH = { x0: 6, x1: 106, y0: 152, y1: 164 };
-const FEET = [[10, 26], [86, 102]], FOOT_Y0 = 164, FOOT_Y1 = 172;
-
-const inArch = (x, y) => y < ARCH.cy && dist(x, y, ARCH.cx, ARCH.cy) < ARCH.r;
-const inPlate = (x, y) => (x >= PLATE.x0 && x < PLATE.x1 && y >= PLATE.y0 && y < PLATE.y1) || (y < PLATE.y0 && dist(x, y, CX, PLATE.y0) < PLATE.r);
-const inMoonWin = (x, y) => y < MOONW.cy && dist(x, y, MOONW.cx, MOONW.cy) < MOONW.r && !(dist(x, y, 48.5, 52.5) < 7.6 || dist(x, y, 63.5, 52.5) < 7.6);
-const inWin = (x, y) => x >= WIN.x0 && x < WIN.x1 && y < WIN.y1 && (y >= WIN.cy || dist(x, y, WIN.cx, WIN.cy) < WIN.r);
-
-// ------------------------------------------------------------------ painters
-
-/** Walnut with flowing grain. dir: 'v' vertical boards, 'h' horizontal rails, 'a' follows the arch. */
-function wood(x, y, t, dir = 'v', seed = 0) {
+/** flame-mahogany veneer figure as an albedo offset (dir: 'v' vertical boards, 'h' rails, 'f' flame from a centre) */
+function veneer(x, y, dir = 'v', seed = 0, cx = 0) {
   let u, v;
-  if (dir === 'h') { u = y; v = x; }
-  else if (dir === 'a') { u = dist(x, y, ARCH.cx, ARCH.cy) * 1.0; v = Math.atan2(y - ARCH.cy, x - ARCH.cx) * 30; }
-  else { u = x; v = y; }
-  // grain: wavy lines across u, distorted by low-frequency noise along v
-  const warp = (vnoise(u * 0.06, v * 0.025, 3 + seed) - 0.5) * 9 + Math.sin(v * 0.05 + u * 0.08 + seed) * 1.6;
-  const g = u + warp;
-  const band = ((g / 3.4) % 1 + 1) % 1;
-  const figure = fbm(u * 0.09, v * 0.02, 11 + seed) - 0.5; // broad light/dark figure
-  let k = t + figure * 0.28;
-  if (band < 0.2 && hash(Math.floor(g * 2), Math.floor(v / 3), 5 + seed) > 0.2) k -= 0.13; // a dark grain line
-  else if (band > 0.55 && band < 0.7) k += 0.04;
-  // rare pores
-  if (hash(x, y, 9 + seed) > 0.985) k -= 0.12;
-  return pick(WOOD, clamp(k, 0, 1), x, y, 0.9);
+  if (dir === 'h') { u = y; v = x; } else if (dir === 'f') { u = Math.abs(x - cx); v = y; } else { u = x; v = y; }
+  const warp = (vnoise(v * 0.04, u * 0.15, seed) - 0.5) * 6 + (dir === 'f' ? -Math.pow(u * 0.35, 1.3) : 0);
+  const g = (dir === 'f' ? v + warp * 1.5 + u * 0.6 : u + warp);
+  const band = (((g / 3.2) % 1) + 1) % 1;
+  const fig = (fbm(u * 0.06, v * 0.03, seed + 4) - 0.5) * 0.22;
+  const flame = dir === 'f' ? Math.sin(g * 0.9 + vnoise(u * 0.2, v * 0.05, seed) * 3) * 0.06 : 0;
+  return fig + flame + (band < 0.2 ? -0.07 : band > 0.55 && band < 0.65 ? 0.03 : 0);
 }
-/** Brass: lit top-left, rubbed bright on the high spots. */
-const brass = (x, y, t) => pick(BRASS, clamp(t + (hash(x, y, 21) - 0.5) * 0.08, 0, 1), x, y, 0.8);
-/** global light: warm lamplight from the front-left-top */
-const lit = (x, y) => 0.08 * (1 - y / H) + 0.06 * (1 - x / W) - 0.03;
 
-// ------------------------------------------------------------------ the case (body, arch, plinth, feet, crest)
+// ------------------------------------------------------------------ the clock: geometry (art px, y down)
 
-function paintCase() {
-  const b = new Buf(W, H);
-  // ground shadow (behind everything): a dithered pixel ellipse
-  for (let y = 166; y < 180; y++) for (let x = 0; x < W; x++) {
-    const nx = (x + 0.5 - CX) / 54, ny = (y + 0.5 - 172) / 6.2, d = nx * nx + ny * ny;
-    if (d < 1) { const a = d < 0.45 ? 0.62 : d < 0.75 ? 0.4 : 0.22; if (bayer(x, y) < a + 0.2) b.set(x, y, mul(mix(C('ink'), C('deepNight'), 0.4), 0.62), 255); }
-  }
-  // bun feet: turned wood with a brass collar
-  for (const [x0, x1] of FEET) {
-    const fc = (x0 + x1) / 2, fr = (x1 - x0) / 2;
-    for (let y = FOOT_Y0; y < FOOT_Y1; y++) for (let x = x0; x < x1; x++) {
-      const nx = (x + 0.5 - fc) / fr, ny = (y + 0.5 - FOOT_Y0) / (FOOT_Y1 - FOOT_Y0);
-      const prof = Math.sqrt(Math.max(0, 1 - (ny * 1.15 - 0.15) ** 2)); // a squashed bun
-      if (Math.abs(nx) > prof * 1.02) continue;
-      const t = 0.52 - nx * 0.32 - ny * 0.3 + lit(x, y);
-      b.set(x, y, y < FOOT_Y0 + 2 ? brass(x, y, 0.62 - nx * 0.35 - (y - FOOT_Y0) * 0.2) : wood(x, y, t, 'h', 4));
-    }
-  }
-  // plinth: an ogee moulding with a carved acorn garland and a little brass keyhole
-  for (let y = PLINTH.y0; y < PLINTH.y1; y++) {
-    const r = y - PLINTH.y0;
-    const inset = r < 2 ? 2 : r < 3 ? 1 : 0;
-    for (let x = PLINTH.x0 + inset; x < PLINTH.x1 - inset; x++) {
-      // profile: lip (light), cove (shadow to light), torus (round), base fillet
-      const prof = [0.82, 0.6, 0.28, 0.36, 0.5, 0.62, 0.72, 0.66, 0.52, 0.36, 0.56, 0.3][r];
-      let t = prof + lit(x, y) + (x < PLINTH.x0 + 4 ? 0.06 : x > PLINTH.x1 - 5 ? -0.12 : 0);
-      if (x === PLINTH.x0 + inset) t += 0.1; if (x === PLINTH.x1 - inset - 1) t -= 0.18;
-      // rubbed corners
-      if ((x < PLINTH.x0 + 3 || x > PLINTH.x1 - 4) && r >= 5 && r <= 8 && hash(x, y, 3) > 0.55) t += 0.16;
-      b.set(x, y, wood(x, y, t, 'h', 2));
-    }
-  }
-  // a carved band of little leaves along the torus, running out from the keyhole
-  {
-    const parts = [];
-    for (let i = 0; i < 9; i++) for (const sd of [-1, 1]) {
-      const lx = CX + sd * (8 + i * 5), ly = PLINTH.y0 + 7;
-      parts.push(leafMask(lx, ly, sd < 0 ? Math.PI + (i % 2 ? 0.45 : -0.45) : (i % 2 ? -0.45 : 0.45), 6, 1.6));
-    }
-    emboss(b, (x, y) => parts.some((m) => m(x, y)) && x > PLINTH.x0 + 3 && x < PLINTH.x1 - 4, PLINTH.x0, PLINTH.y0 + 3, PLINTH.x1 - PLINTH.x0, 8, (x, y, t) => wood(x, y, t + 0.05, 'h', 2), 0.52);
-  }
-  // brass keyhole escutcheon
-  for (let y = PLINTH.y0 + 3; y < PLINTH.y0 + 10; y++) for (let x = CX - 4; x < CX + 4; x++) {
-    const nx = Math.abs(x + 0.5 - CX) / 4, ny = (y - PLINTH.y0 - 3) / 7;
-    if (nx > 1 - Math.abs(ny - 0.5) * 0.6) continue;
-    b.set(x, y, brass(x, y, 0.75 - ny * 0.5 - (x - CX) * 0.04));
-  }
-  b.set(CX - 1, PLINTH.y0 + 5, INK); b.set(CX, PLINTH.y0 + 5, INK); b.set(CX - 1, PLINTH.y0 + 6, INK); b.set(CX, PLINTH.y0 + 6, INK); b.set(CX - 1, PLINTH.y0 + 7, INK2); b.set(CX, PLINTH.y0 + 7, INK);
+const W = 160, H = 258, CX = 80;
+const DY = 150, RD = 34;              // dial centre (a pixel corner) and enamel radius
+const AY = 114, AR = 42;              // the break arch of the door opening: centre height and radius
+const OPEN = { x0: CX - AR, x1: CX + AR, y1: 188 };
+const MOON = { cx: CX, cy: AY, r: 24, dcy: AY + 6, dr: 30 };
+const AP = { cx: CX, cy: 212, r: 13, y1: 231 }; // the pendulum aperture
+const PIVOT = { x: CX, y: 203 }, PEND_LEN = 18, PEND_R = 6;
+const bellY0 = 20, bellY1 = 58;
+const bellHW = (y) => { const t = clamp((y - bellY0) / (bellY1 - bellY0)); return 28 + 32 * (t < 0.3 ? 0.18 * Math.sin((t / 0.3) * Math.PI / 2) : 0.18 + 0.82 * Math.pow((t - 0.3) / 0.7, 1.7)); };
+/** signed distance (px) to the door opening: < 0 inside */
+const sdOpen = (x, y) => (y + 0.5 < AY ? dist(x, y, CX, AY) - AR : Math.max(Math.abs(x + 0.5 - CX) - AR, y + 0.5 - OPEN.y1));
+const inMoonWin = (x, y) => y + 0.5 < AY && dist(x, y, CX, AY) < MOON.r && dist(x, y, CX - 12, AY) >= 12 && dist(x, y, CX + 12, AY) >= 12;
+const sdAp = (x, y) => (y + 0.5 < AP.cy ? dist(x, y, AP.cx, AP.cy) - AP.r : Math.max(Math.abs(x + 0.5 - AP.cx) - AP.r, y + 0.5 - AP.y1));
 
-  // the body: vertical boards between the pilasters, a cornice on the shoulders
-  for (let y = BODY.y0; y < BODY.y1; y++) for (let x = BODY.x0; x < BODY.x1; x++) {
-    let t = 0.5 + lit(x, y);
-    const pilL = x < BODY.x0 + PIL, pilR = x >= BODY.x1 - PIL;
-    if (pilL || pilR) {
-      // fluted pilaster: three grooves, rounded edges, brass capital and base
-      const px = pilL ? x - BODY.x0 : x - (BODY.x1 - PIL);
-      const cap = y >= BODY.y0 + 2 && y < BODY.y0 + 7, base = y >= BODY.y1 - 9 && y < BODY.y1 - 5;
-      if (cap || base) {
-        const ry = cap ? y - BODY.y0 - 2 : y - (BODY.y1 - 9);
-        const tt = [0.85, 0.62, 0.4, 0.7, 0.5][ry] ?? 0.5;
-        b.set(x, y, brass(x, y, tt - (px - 3.5) * 0.05 + (pilR ? -0.08 : 0)));
-        continue;
-      }
-      const flute = px === 2 || px === 4 || px === 6;
-      t = 0.58 - Math.abs(px - 3.5) * 0.05 + (px === 0 ? 0.2 : 0) + (px === PIL - 1 ? -0.22 : 0) + (pilR ? -0.1 : 0.02) + lit(x, y);
-      if (flute) t -= 0.24;
-      if (flute && hash(x, y >> 1, 4) > 0.8) t += 0.08;
-      b.set(x, y, wood(x, y, t, 'v', pilL ? 1 : 5));
-      continue;
-    }
-    // the lower panel below the dial: a recessed field with a bevelled frame
-    if (y >= PLATE.y1) {
-      const fy0 = PLATE.y1 + 2, fy1 = BODY.y1 - 2;
-      const inField = y >= fy0 && y < fy1 && x >= BODY.x0 + PIL + 2 && x < BODY.x1 - PIL - 2;
-      if (!inField) t = y < fy0 ? 0.66 : y >= fy1 ? 0.3 : x < CX ? 0.6 : 0.36;
-      else {
-        t = 0.44;
-        if (y === fy0) t = 0.2; if (x === BODY.x0 + PIL + 2) t = 0.26;
-        if (y === fy1 - 1) t = 0.62; if (x === BODY.x1 - PIL - 3) t = 0.6;
-      }
-      b.set(x, y, wood(x, y, t + lit(x, y), inField ? 'v' : 'h', 7));
-      continue;
-    }
-    // shoulders (outside the arch, above the plate) and the stiles beside the plate
-    if (y < BODY.y0 + 3) t = [0.86, 0.66, 0.3][y - BODY.y0];
-    b.set(x, y, wood(x, y, t + lit(x, y), y < BODY.y0 + 3 ? 'h' : 'v', 3));
-  }
-  // cornice overhang on the shoulders
-  for (let y = BODY.y0 - 2; y < BODY.y0 + 1; y++) for (const [x0, x1] of [[BODY.x0 - 2, 22], [90, BODY.x1 + 2]]) for (let x = x0; x < x1; x++) {
-    if (inArch(x, y)) continue;
-    const t = [0.78, 0.6, 0.34][y - BODY.y0 + 2] + lit(x, y) + (x === x0 ? 0.1 : 0) - (x === x1 - 1 ? 0.15 : 0);
-    b.set(x, y, wood(x, y, t, 'h', 8));
-  }
-  // the arch: a moulded semicircle above the shoulders (outer bead, cove, inner fillet)
-  for (let y = 0; y < ARCH.cy + 1; y++) for (let x = 0; x < W; x++) {
-    if (!inArch(x, y)) continue;
-    const d = dist(x, y, ARCH.cx, ARCH.cy), ring = ARCH.r - d; // 0 at the outer edge
-    const ang = Math.atan2(y + 0.5 - ARCH.cy, x + 0.5 - ARCH.cx); // -pi..0 across the top
-    const facing = -Math.cos(ang + Math.PI * 0.75); // light from the top-left
-    let t;
-    if (ring < 1.2) t = 0.5 + facing * 0.32;            // outer bead edge
-    else if (ring < 2.4) t = 0.72 + facing * 0.2;        // bead highlight
-    else if (ring < 3.6) t = 0.36 + facing * 0.12;       // cove in shadow
-    else t = 0.55 + facing * 0.1;                        // the broad arch face
-    b.set(x, y, wood(x, y, t + lit(x, y), 'a', 6));
-  }
-  // carved crest on top of the arch: two leafy scrolls and the plinth of the brass acorn finial
-  const leaf = (lx, ly, dx, dy, len, s) => {
-    for (let i = 0; i < len; i++) {
-      const w = Math.sin((i / len) * Math.PI) * 2.2;
-      for (let j = -Math.ceil(w); j <= Math.ceil(w); j++) {
-        if (Math.abs(j) > w + 0.2) continue;
-        const x = Math.round(lx + dx * i - dy * j * 0.6), y = Math.round(ly + dy * i + dx * j * 0.6);
-        const t = 0.62 - j * 0.12 * s - i / len * 0.15;
-        b.set(x, y, wood(x, y, Math.abs(j) < 0.5 && i > 1 && i < len - 1 ? t - 0.22 : t, 'v', 9));
-      }
-    }
+/** tiny 3x5 capitals for the dial signature */
+const TINY = { H: ['#.#', '#.#', '###', '#.#', '#.#'], O: ['###', '#.#', '#.#', '#.#', '###'], L: ['#..', '#..', '#..', '#..', '###'], W: ['#.#', '#.#', '#.#', '###', '#.#'], C: ['###', '#..', '#..', '#..', '###'], '&': ['.#.', '#.#', '.#.', '#.#', '.##'], '.': ['.', '.', '.', '.', '#'], ' ': ['.', '.', '.', '.', '.'] };
+/** roman numeral glyphs, 7 px tall, with serifs */
+const ROM = {
+  I: ['###', '.#.', '.#.', '.#.', '.#.', '.#.', '###'],
+  V: ['##.##', '.#.#.', '.#.#.', '.#.#.', '.#.#.', '..#..', '..#..'],
+  X: ['##.##', '.#.#.', '.#.#.', '..#..', '.#.#.', '.#.#.', '##.##'],
+};
+const NUMS = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+
+function leafMask(ax, ay, a, len, wid) {
+  return (x, y) => {
+    const px = x + 0.5 - ax, py = y + 0.5 - ay, u = px * Math.cos(a) + py * Math.sin(a), v = -px * Math.sin(a) + py * Math.cos(a);
+    return u >= 0 && u <= len && Math.abs(v) <= Math.sin((u / len) * Math.PI) * wid;
   };
-  leaf(52, 15, -0.92, -0.38, 9, 1); leaf(48, 13, -0.6, 0.8, 6, 1); leaf(60, 15, 0.92, -0.38, 9, -1); leaf(64, 13, 0.6, 0.8, 6, -1);
-  leaf(43, 12, -0.95, 0.3, 6, 1); leaf(69, 12, 0.95, 0.3, 6, -1);
-  for (let y = 9; y < 14; y++) for (let x = CX - 5; x < CX + 5; x++) {
-    const r = y - 9;
-    if (r < 2 && (x < CX - 4 + (1 - r) || x >= CX + 4 - (1 - r))) continue;
-    b.set(x, y, wood(x, y, [0.8, 0.62, 0.42, 0.56, 0.36][r] + (x < CX ? 0.06 : -0.08), 'h', 10));
-  }
-  // brass acorn finial: a cup with a cross-hatched rim, a nut and a stalk
-  for (let y = 0; y < 10; y++) for (let x = CX - 5; x < CX + 5; x++) {
-    const nx = (x + 0.5 - CX);
-    if (y < 2) { if (Math.abs(nx) < 1) b.set(x, y, brass(x, y, 0.6 - nx * 0.2)); continue; }
-    if (y < 5) { // the cup
-      if (Math.abs(nx) > 4.2 - (y === 2 ? 1 : 0)) continue;
-      const hatch = (x + y) % 2 === 0;
-      b.set(x, y, brass(x, y, 0.5 - nx * 0.08 + (hatch ? 0.12 : -0.08) - (y - 2) * 0.06));
-      continue;
-    }
-    const w = [3.6, 3.4, 3.0, 2.2, 1.2][y - 5];
-    if (Math.abs(nx) > w) continue;
-    b.set(x, y, brass(x, y, 0.78 - nx * 0.14 - (y - 5) * 0.08));
-  }
-  // shoulder finials: brass balls on little plinths
-  for (const fx of [16, 96]) {
-    for (let y = BODY.y0 - 5; y < BODY.y0 - 2; y++) for (let x = fx - 2; x < fx + 2; x++) b.set(x, y, wood(x, y, 0.6 - (x - fx) * 0.08 - (y - BODY.y0 + 5) * 0.1, 'h', 12));
-    for (let y = BODY.y0 - 11; y < BODY.y0 - 5; y++) for (let x = fx - 3; x < fx + 3; x++) {
-      const d = dist(x, y, fx, BODY.y0 - 8);
-      if (d > 3) continue;
-      const nx = (x + 0.5 - fx) / 3, ny = (y + 0.5 - (BODY.y0 - 8)) / 3;
-      b.set(x, y, brass(x, y, 0.55 - nx * 0.3 - ny * 0.35 + (nx < -0.2 && ny < -0.2 ? 0.25 : 0)));
-    }
-    b.set(fx, BODY.y0 - 12, BRASS[5]);
-  }
-  return b;
 }
 
-// ------------------------------------------------------------------ the dial plate: brass arch with the moon window, spandrels, enamel dial
+function paintClock() {
+  const r = new Relief(W, H);
+  const ink = (x, y) => r.put(x, y, M.ink, 8.5, 0, { flat: true });
 
-const INLAY = [mix(C('woodLight'), C('woodDark'), 0.35), C('woodLight'), C('woodPale'), light(C('woodPale'), 0.3)];
-function paintPlate(b) {
-  for (let y = 0; y < PLATE.y1; y++) for (let x = PLATE.x0; x < PLATE.x1; x++) {
-    if (!inPlate(x, y)) continue;
-    const dArch = y < PLATE.y0 ? PLATE.r - dist(x, y, CX, PLATE.y0) : 99;
-    const edge = Math.min(x - PLATE.x0, PLATE.x1 - 1 - x, PLATE.y1 - 1 - y, dArch);
-    // a burr-walnut veneer: swirling figure with little dark eyes, warmer where the lamp falls
-    const w = fbm(x * 0.07, y * 0.07, 61);
-    const swirl = Math.sin(fbm(x * 0.13 + w * 2.2, y * 0.13 - w * 2.2, 62) * 22) * 0.5 + 0.5;
-    const eye = vnoise(x * 0.45, y * 0.45, 63) > 0.86 ? -0.16 : 0;
-    let t = 0.3 + swirl * 0.2 + eye + lit(x, y) * 1.8 - Math.max(0, dist(x, y, CX, DY) - 44) * 0.01;
-    if (edge < 1) { b.set(x, y, x < CX && y < DY ? BRASS[6] : BRASS[2]); continue; }  // a thin brass bead
-    if (edge < 2) t = 0.1;                                                           // shadow line
-    else if (edge < 3) { b.set(x, y, pick(INLAY, 0.6 + (x < CX ? 0.2 : -0.1), x, y)); continue; } // boxwood stringing
-    else if (edge < 4) t = 0.14;
-    b.set(x, y, pick(WOOD, clamp(t, 0, 0.7), x, y, 1));
-  }
-  // marquetry in the arch around the moon window: a light-wood vine with leaves
-  for (let y = 18; y < PLATE.y0; y++) for (let x = PLATE.x0; x < PLATE.x1; x++) {
-    if (!inPlate(x, y)) continue;
-    const d = dist(x, y, CX, PLATE.y0);
-    if (d < MOONW.r + 2 || d > PLATE.r - 3.5) continue;
-    const a = Math.atan2(y + 0.5 - PLATE.y0, x + 0.5 - CX);
-    const rr = 24.5 + Math.sin(a * 8) * 1.8, off = d - rr;
-    if (Math.abs(off) < 0.6) b.set(x, y, INLAY[x < CX ? 2 : 1]);
-    else if (Math.sin(a * 8) > 0.55 && off > 0.6 && off < 2.6 && Math.cos(a * 8) * (x < CX ? 1 : -1) > -0.2) b.set(x, y, off < 1.6 ? INLAY[2] : INLAY[0]);
-    else if (Math.sin(a * 8) < -0.55 && off < -0.6 && off > -2.6) b.set(x, y, off > -1.6 ? INLAY[2] : INLAY[0]);
-  }
-  // a few brass pins for stars
-  for (const [sx, sy] of [[29, 45], [83, 45], [42, 25], [70, 25], [56, 21]]) { b.set(sx, sy, BRASS[6]); b.set(sx + 1, sy + 1, BRASS[2]); }
-  // moon window rim and the two painted hills (the humps)
-  for (let y = 30; y < PLATE.y0 + 1; y++) for (let x = 36; x < 76; x++) {
-    const d = dist(x, y, MOONW.cx, MOONW.cy);
-    if (y < MOONW.cy && d >= MOONW.r && d < MOONW.r + 1.3) b.set(x, y, x < CX ? BRASS[7] : BRASS[2]);
-    for (const hx of [48.5, 63.5]) {
-      const dh = dist(x, y, hx, 52.5);
-      if (y < 52 && dh < 7.6 && dist(x, y, MOONW.cx, MOONW.cy) < MOONW.r) {
-        // a mossy hill with tiny pines, lit from the left
-        const nx = (x + 0.5 - hx) / 7.6, ny = (y + 0.5 - 52.5) / 7.6;
-        let c = pick(MOSS, clamp(0.55 - nx * 0.35 - ny * 0.15 + (hash(x, y, 8) - 0.5) * 0.25, 0, 1), x, y, 0.9);
-        if (dh > 6.8) c = MOSS[0];
-        b.set(x, y, c);
-      }
+  // ---- the bun feet (brass) and the base moulding
+  for (const fx of [32, 128]) r.fill(fx - 11, 246, fx + 11, 258, (x, y) => { const nx = (x + 0.5 - fx) / 10.5, ny = (y + 0.5 - 251) / 7; return nx * nx + ny * ny < 1; }, M.brass, (x, y) => 6 + 5 * Math.sqrt(Math.max(0, 1 - ((x + 0.5 - fx) / 10.5) ** 2 - ((y + 0.5 - 251) / 7) ** 2)));
+  const baseProf = [11, 13, 14, 13, 11, 9, 10, 12, 13, 13, 12, 10];
+  r.fill(0, 236, W, 248, (x, y) => Math.abs(x + 0.5 - CX) < 60 + Math.min(6, (y - 236) * 0.7), M.wood, (x, y) => baseProf[y - 236] + (Math.abs(x + 0.5 - CX) > 60 + (y - 236) * 0.7 - 1.5 ? -2 : 0), (x, y) => veneer(x, y, 'h', 3));
+  r.fill(0, 236, W, 238, (x, y) => Math.abs(x + 0.5 - CX) < 61, M.brass, (x, y) => 14 - (y - 236) * 1.5);
+
+  // ---- the case body (lower part and door section), pilasters
+  const bodyW = 60;
+  r.fill(CX - bodyW, 194, CX + bodyW, 236, () => true, M.wood, (x, y) => {
+    const fx = Math.abs(x + 0.5 - CX), inField = fx < bodyW - 16 && y >= 203 && y < 232;
+    if (!inField) return 11;
+    const e = Math.min(bodyW - 16 - fx, y - 203, 232 - y);
+    return 9 + Math.min(1.5, e * 0.5);
+  }, (x, y) => {
+    const fx = Math.abs(x + 0.5 - CX);
+    const string = (Math.abs(fx - (bodyW - 19)) < 0.6 && y > 205 && y < 230) || ((Math.abs(y - 205.5) < 0.6 || Math.abs(y - 229.5) < 0.6) && fx < bodyW - 19);
+    return string ? 0.3 : veneer(x, y, 'f', 11, CX) * 1.4;
+  });
+  const midProf = [12, 13.5, 13, 11, 12];
+  r.fill(CX - bodyW - 1, 194, CX + bodyW + 1, 199, () => true, M.wood, (x, y) => midProf[y - 194], (x, y) => veneer(x, y, 'h', 5));
+  r.fill(CX - bodyW, 68, CX + bodyW, 194, () => true, M.wood, (x, y) => {
+    const fx = x + 0.5 - CX, ax = Math.abs(fx);
+    if (ax > bodyW - 12) {
+      const c = (bodyW - 6) * Math.sign(fx), u = (fx - c) / 6;
+      let h = 11 + 2.6 * Math.sqrt(Math.max(0, 1 - u * u));
+      if ([-3, 0, 3].some((k) => Math.abs(fx - c - k) < 0.7) && y > 78 && y < 184) h -= 1.4;
+      return h;
     }
+    const d = sdOpen(x, y);
+    return 11 + Math.min(1.2, Math.max(0, d - 4) * 0.4);
+  }, (x, y) => (Math.abs(x + 0.5 - CX) > bodyW - 12 ? veneer(x, y, 'v', 7) : y < 76 || y > 188 ? veneer(x, y, 'h', 9) : veneer(x, y, 'v', 13)));
+  for (const sx of [-1, 1]) {
+    const c = CX + sx * (bodyW - 6);
+    const capProf = [13, 14.5, 13.5, 12.5, 13.5, 14.5, 13.5];
+    r.fill(c - 7, 68, c + 7, 75, () => true, M.brass, (x, y) => capProf[y - 68] + 1.5 * Math.sqrt(Math.max(0, 1 - ((x + 0.5 - c) / 7) ** 2)));
+    r.fill(c - 7, 186, c + 7, 194, () => true, M.brass, (x, y) => [12.5, 13.5, 14.5, 13.5, 12.5, 13.5, 14.5, 13][y - 186] + 1.5 * Math.sqrt(Math.max(0, 1 - ((x + 0.5 - c) / 7) ** 2)));
   }
-  for (const [tx, ty, hgt] of [[45, 47, 4], [50, 46, 5], [61, 47, 4], [66, 46, 5], [53, 49, 3]]) {
-    for (let k = 0; k < hgt; k++) for (let j = -Math.floor(k / 2); j <= Math.floor(k / 2); j++) b.set(tx + j, ty + k, k === hgt - 1 && j === 0 ? C('bark') : j < 0 ? MOSS[2] : MOSS[1]);
+
+  // ---- the opening: dial plate, moon arch, spandrels, the enamel dial
+  r.fill(OPEN.x0 - 4, AY - AR - 4, OPEN.x1 + 4, OPEN.y1 + 4, (x, y) => sdOpen(x, y) < 0, M.brass, () => 6, (x, y) => (hash(x, y, 31) - 0.5) * 0.12 + (vnoise(x * 0.3, y * 0.3, 2) - 0.5) * 0.08, { gloss: 0.3 });
+  r.fill(CX - AR, AY - AR, CX + AR, AY, (x, y) => sdOpen(x, y) < -2 && dist(x, y, CX, AY) > MOON.r + 2.5 && y + 0.5 < AY, M.brass, () => 6, (x, y) => {
+    const a = Math.atan2(y + 0.5 - AY, x + 0.5 - CX), d = dist(x, y, CX, AY);
+    const rr = 33 + Math.sin(a * 7) * 3.2;
+    const line = Math.abs(d - rr) < 0.6 || (Math.sin(a * 7) > 0.6 && Math.abs(d - rr - 3) < 0.5) || (Math.sin(a * 7) < -0.6 && Math.abs(d - rr + 3) < 0.5);
+    return line ? -0.32 : (hash(x, y, 33) - 0.5) * 0.12;
+  }, { gloss: 0.3 });
+  for (const [sx, sy] of [[CX - 32, AY - 8], [CX + 31, AY - 8], [CX - 20, AY - 30], [CX + 19, AY - 30], [CX, AY - 37]]) for (let k = -1; k <= 1; k++) { r.put(sx + k, sy, M.brass, 8); r.put(sx, sy + k, M.brass, 8); }
+  r.fill(CX - MOON.r - 3, AY - MOON.r - 3, CX + MOON.r + 3, AY, (x, y) => { const d = dist(x, y, CX, AY); return d >= MOON.r && d < MOON.r + 2 && y + 0.5 < AY; }, M.brass, (x, y) => 7 + (1 - Math.abs(dist(x, y, CX, AY) - MOON.r - 1)) * 1.6);
+  for (const hx of [CX - 12, CX + 12]) {
+    r.fill(hx - 12, AY - 12, hx + 12, AY, (x, y) => dist(x, y, hx, AY) < 12 && dist(x, y, CX, AY) < MOON.r && y + 0.5 < AY, M.moss, (x, y) => 7 + Math.sqrt(Math.max(0, 144 - (x + 0.5 - hx) ** 2 - (y + 0.5 - AY) ** 2)) * 0.35, (x, y) => (hash(x, y, 41) - 0.5) * 0.25 + (vnoise(x * 0.4, y * 0.4, 4) - 0.5) * 0.2);
   }
-  // cast spandrels in the four corners: three acanthus leaves fanning from a curl, in relief
+  for (const [tx, ty, hh] of [[CX - 17, AY - 9, 5], [CX - 12, AY - 12, 6], [CX - 7, AY - 9, 4], [CX + 8, AY - 10, 5], [CX + 13, AY - 12, 6], [CX + 18, AY - 8, 4]]) {
+    for (let k = 0; k < hh; k++) for (let j = -Math.floor(k / 2); j <= Math.floor(k / 2); j++) r.put(tx + j, ty + k, M.moss, 9 + (hh - k) * 0.3, j < 0 ? 0.1 : -0.25);
+    r.put(tx, ty + hh, M.woodDark, 8.5, 0);
+  }
+  // an engraved ring round the dial, and in each corner a cast rosette with four leaves and a scroll
+  r.fill(OPEN.x0, AY, OPEN.x1, OPEN.y1, (x, y) => Math.abs(dist(x, y, CX, DY) - (RD + 2.6)) < 0.55 && sdOpen(x, y) < -1, M.brass, () => 5.4, () => -0.3);
   for (const [qx, qy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const ox = qx < 0 ? PLATE.x0 + 3 : PLATE.x1 - 3, oy = qy < 0 ? PLATE.y0 + 2 : PLATE.y1 - 3;
-    const dir = (deg) => Math.atan2(-qy * Math.sin((deg * Math.PI) / 180), -qx * Math.cos((deg * Math.PI) / 180));
-    const leaves = [leafMask(ox, oy, dir(14), 17, 2.6), leafMask(ox, oy, dir(45), 15, 3.4), leafMask(ox, oy, dir(76), 17, 2.6)];
-    const curl = (x, y) => { const d = dist(x, y, ox - qx * 2.5, oy - qy * 2.5); return d < 3.2 && !(d < 1.3); };
-    const mask = (x, y) => dist(x, y, CX, DY) > R_BEZ + 0.8 && inPlate(x, y) && (curl(x, y) || leaves.some((m) => m(x, y)));
-    emboss(b, mask, Math.min(ox, ox - qx * 18) - 1, Math.min(oy, oy - qy * 18) - 1, 21, 21, (x, y, t) => brass(x, y, t + 0.06), 0.56);
-    // midribs
-    for (const deg of [14, 45, 76]) { const a = dir(deg); for (let u = 3; u < 13; u++) { const x = Math.floor(ox + 0.5 + Math.cos(a) * u), y = Math.floor(oy + 0.5 + Math.sin(a) * u); if (mask(x, y)) b.set(x, y, BRASS[2]); } }
+    const rx = CX + qx * (AR - 9), ry = (qy < 0 ? AY + 8 : OPEN.y1 - 8);
+    r.fill(rx - 9, ry - 9, rx + 9, ry + 9, (x, y) => sdOpen(x, y) < -1 && dist(x, y, CX, DY) > RD + 3.5, M.brass, (x, y) => {
+      const d = dist(x, y, rx, ry), a = Math.atan2(y + 0.5 - ry, x + 0.5 - rx);
+      const petal = d < 3.6 + Math.cos(a * 6) * 0.9;
+      const leaf = d < 8 && Math.abs(Math.sin(a * 2 + Math.PI / 4)) < 0.28 * (1 - d / 9) + 0.06 && d > 3;
+      return petal ? 7.6 + (3.6 - d) * 0.5 : leaf ? 7 - d * 0.08 : 6;
+    }, (x, y) => (dist(x, y, rx, ry) < 1.2 ? 0.15 : 0));
   }
-  // the enamel dial
-  for (let y = DY - R_DIAL - 1; y < DY + R_DIAL + 1; y++) for (let x = CX - R_DIAL - 1; x < CX + R_DIAL + 1; x++) {
+  r.fill(CX - RD, DY - RD, CX + RD, DY + RD, (x, y) => dist(x, y, CX, DY) < RD, M.enamel, (x, y) => { const d = dist(x, y, CX, DY) / RD; return 7.5 + 1.8 * (1 - d * d); }, (x, y) => {
     const d = dist(x, y, CX, DY);
-    if (d >= R_DIAL) continue;
-    const nx = (x + 0.5 - CX) / R_DIAL, ny = (y + 0.5 - DY) / R_DIAL;
-    // a slightly domed enamel: brighter in the middle and top-left, cooler at the bottom-right rim
-    let t = 0.74 - (nx * 0.18 + ny * 0.22) - Math.max(0, d / R_DIAL - 0.82) * 1.1;
-    // crazing: a fine network of hairline cracks in the old enamel
-    const cr = Math.abs(vnoise(x * 0.32, y * 0.32, 41) - 0.5);
-    if (cr < 0.018 && hash(x, y, 2) > 0.3) t -= 0.22;
-    // foxing: a few warm age spots
-    if (fbm(x * 0.2, y * 0.2, 44) > 0.72) t -= 0.12;
-    b.set(x, y, pick(ENAMEL, clamp(t, 0, 1), x, y, 0.8));
-  }
-  // chapter ring: two hairlines with minute ticks between and bold five-minute marks
-  const ink = INK, ink2 = mix(INK2, C('linen'), 0.25);
-  for (let y = DY - R_DIAL; y < DY + R_DIAL; y++) for (let x = CX - R_DIAL; x < CX + R_DIAL; x++) {
+    let a = (vnoise(x * 0.15, y * 0.15, 61) - 0.5) * 0.06;
+    if (Math.abs(vnoise(x * 0.3, y * 0.3, 62) - 0.5) < 0.014 && hash(x, y, 63) > 0.4) a -= 0.16;
+    if (d < 20.5) a += (Math.sin(d * 2.6) > 0.3 ? 0.025 : -0.025);
+    if (d > RD - 1.2) a -= 0.15;
+    return a;
+  });
+  for (let y = DY - RD; y < DY + RD; y++) for (let x = CX - RD; x < CX + RD; x++) {
     const d = dist(x, y, CX, DY);
-    if (d >= 29.0 && d < 29.9) b.set(x, y, ink2);
-    if (d >= 24.4 && d < 25.3) b.set(x, y, ink2);
+    if (Math.abs(d - 32.6) < 0.5 || Math.abs(d - 29.4) < 0.5) ink(x, y);
   }
   for (let m = 0; m < 60; m++) {
-    const a = (m / 60) * Math.PI * 2 - Math.PI / 2, five = m % 5 === 0;
-    for (let r = five ? 25.4 : 26.6; r < 29; r += 0.35) b.set(Math.floor(CX + Math.cos(a) * r), Math.floor(DY + Math.sin(a) * r), five ? ink : ink2);
-    if (five) for (let r = 26; r < 28.6; r += 0.4) { const p = a + 0.035 * (r > 27 ? 1 : 0); b.set(Math.floor(CX + Math.cos(p) * r), Math.floor(DY + Math.sin(p) * r), ink); }
+    // a dot for every minute on the track, a bold bar across it every five
+    const a = (m / 60) * Math.PI * 2 - Math.PI / 2;
+    if (m % 5 === 0) for (let rr = 29.6; rr < 32.6; rr += 0.25) ink(Math.floor(CX + Math.cos(a) * rr), Math.floor(DY + Math.sin(a) * rr));
+    else ink(Math.floor(CX + Math.cos(a) * 31), Math.floor(DY + Math.sin(a) * 31));
   }
-  // roman numerals (IIII, as old clocks write it), upright, centred on a circle
-  const G = { I: ['#', '#', '#', '#', '#'], V: ['#.#', '#.#', '#.#', '#.#', '.#.'], X: ['#.#', '#.#', '.#.', '#.#', '#.#'] };
-  const NUM = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
-  NUM.forEach((s, h) => {
+  NUMS.forEach((s, h) => {
     const a = (h / 12) * Math.PI * 2 - Math.PI / 2;
-    const glyphs = [...s].map((c) => G[c]);
-    const w = glyphs.reduce((acc, g) => acc + g[0].length, 0) + glyphs.length - 1;
-    const r = 19.6 + Math.abs(Math.cos(a)) * 0.9;
-    const x0 = Math.round(CX + Math.cos(a) * r - w / 2), y0 = Math.round(DY + Math.sin(a) * r - 2.5);
+    const glyphs = [...s].map((c) => ROM[c]);
+    const w = glyphs.reduce((acc, g) => acc + g[0].length, 0);
+    const rr = 24.4 + Math.abs(Math.cos(a)) * (w > 9 ? 1.4 : 0.5);
+    const x0 = Math.round(CX + Math.cos(a) * rr - w / 2), y0 = Math.round(DY + Math.sin(a) * rr - 3.5);
     let xx = x0;
-    for (const g of glyphs) {
-      g.forEach((row, yy) => [...row].forEach((ch, k) => { if (ch === '#') { b.set(xx + k, y0 + yy, ink); if (yy === 0 || yy === 4) { if (g === G.I) { b.set(xx + k - 1, y0 + yy, mix(ink, C('linen'), 0.45)); b.set(xx + k + 1, y0 + yy, mix(ink, C('linen'), 0.45)); } } } }));
-      xx += g[0].length + 1;
-    }
+    for (const g of glyphs) { g.forEach((row, yy) => [...row].forEach((ch, k) => { if (ch === '#') ink(xx + k, y0 + yy); })); xx += g[0].length; }
   });
-  // winding holes at 4 and 8 o'clock, with brass collars and a glint of the arbor
+  const tiny = (str, cx, y) => { let w = -1; for (const c of str) w += (TINY[c]?.[0].length ?? 3) + 1; let x = Math.round(cx - w / 2); for (const c of str) { const g = TINY[c] ?? TINY[' ']; g.forEach((row, yy) => [...row].forEach((ch, k) => { if (ch === '#') ink(x + k, y + yy); })); x += g[0].length + 1; } };
+  tiny('HOLLOW', CX, DY - 14);
+  tiny('& CO.', CX, DY + 9);
   for (const sx of [-1, 1]) {
-    const hx = Math.round(CX + sx * 11) - (sx < 0 ? 1 : 0), hy = DY + 7;
-    for (let y = hy - 2; y < hy + 2; y++) for (let x = hx - 2; x < hx + 2; x++) {
-      const e = x === hx - 2 || x === hx + 1 || y === hy - 2 || y === hy + 1;
-      const corner = (x === hx - 2 || x === hx + 1) && (y === hy - 2 || y === hy + 1);
-      if (corner) continue;
-      b.set(x, y, e ? (y === hy - 2 || x === hx - 2 ? BRASS[6] : BRASS[2]) : C('deepNight'));
-    }
-    b.set(hx - 1, hy - 1, C('iron')); b.set(hx, hy, C('night'));
+    const hx = CX + sx * 12, hy = DY + 5;
+    r.fill(hx - 3, hy - 3, hx + 3, hy + 3, (x, y) => dist(x, y, hx, hy) < 2.6, M.brass, (x, y) => 8.6 - dist(x, y, hx, hy) * 0.3);
+    r.fill(hx - 2, hy - 2, hx + 2, hy + 2, (x, y) => dist(x, y, hx, hy) < 1.4, M.dark, () => 6);
   }
-  // maker's punch marks on the plate below the dial: three tiny stars
-  for (const sx of [-6, 0, 6]) { const x = CX + sx, y = PLATE.y1 - 6; b.set(x, y, BRASS[1]); b.set(x - 1, y, BRASS[3]); b.set(x + 1, y, BRASS[3]); b.set(x, y - 1, BRASS[3]); }
+  for (let y = AY - MOON.r; y < AY; y++) for (let x = CX - MOON.r; x < CX + MOON.r; x++) if (inMoonWin(x, y)) r.put(x, y, M.none, 0);
+
+  // ---- the brass bezel round the opening (a bead between two fillets)
+  r.fill(OPEN.x0 - 5, AY - AR - 5, OPEN.x1 + 5, OPEN.y1 + 5, (x, y) => { const d = sdOpen(x, y); return d >= 0 && d < 4; }, M.brass, (x, y) => [12.6, 14.2, 15, 14.2, 12.8][Math.min(4, Math.floor(sdOpen(x, y) * 1.25))]);
+
+  // ---- the pendulum aperture: brass bezel, dark interior with the back board, the beat plate
+  r.fill(AP.cx - AP.r - 4, AP.cy - AP.r - 4, AP.cx + AP.r + 4, AP.y1 + 4, (x, y) => sdAp(x, y) < 3 && sdAp(x, y) >= 0, M.brass, (x, y) => [12.5, 14, 14.6, 13][Math.min(3, Math.floor(sdAp(x, y) * 1.4))]);
+  r.fill(AP.cx - AP.r, AP.cy - AP.r, AP.cx + AP.r, AP.y1, (x, y) => sdAp(x, y) < 0, M.woodDark, (x, y) => 2 + (y - AP.cy + AP.r) * 0.04, (x, y) => veneer(x, y, 'v', 17) * 0.6 - 0.2);
+  r.fill(CX - 4, PIVOT.y - 1, CX + 4, PIVOT.y + 2, (x, y) => sdAp(x, y) < 0, M.brass, () => 4);
+
+  // ---- cornice, bell top, fret, finials, handle
+  const corProf = [11, 13, 14.5, 15, 14.5, 13, 11, 10, 11, 12];
+  const corHW = [60, 62, 64, 65, 65, 64, 63, 62, 61, 61];
+  r.fill(0, 58, W, 68, (x, y) => Math.abs(x + 0.5 - CX) < corHW[y - 58], M.wood, (x, y) => corProf[y - 58] - (Math.abs(x + 0.5 - CX) > corHW[y - 58] - 1.5 ? 1.5 : 0), (x, y) => veneer(x, y, 'h', 21));
+  r.fill(0, 64, W, 65, (x, y) => Math.abs(x + 0.5 - CX) < 63, M.brass, () => 12.5);
+  r.fill(0, bellY0, W, bellY1, (x, y) => Math.abs(x + 0.5 - CX) < bellHW(y), M.wood, (x, y) => {
+    const hw = bellHW(y), bc = (hw - 28) / 32, dx = (x + 0.5 - CX) / hw;
+    return 3 + bc * 9 + 4 * Math.sqrt(Math.max(0, 1 - dx * dx));
+  }, (x, y) => veneer(x, y, 'f', 23, CX) * 1.3);
+  const fcx = CX, fcy = 41;
+  const inF = (x, y) => ((x + 0.5 - fcx) / 18) ** 2 + ((y + 0.5 - fcy) / 8) ** 2 < 1;
+  const fretMat = (x, y) => {
+    const e = 1 - ((x + 0.5 - fcx) / 18) ** 2 - ((y + 0.5 - fcy) / 8) ** 2;
+    if (e < 0.14) return M.brass;
+    const gx = (((x + 0.5 - fcx) % 6) + 6) % 6 - 3, gy = (((y + 0.5 - fcy + 3) % 6) + 6) % 6 - 3, d = Math.hypot(gx, gy);
+    return Math.abs(d - 2.4) < 0.75 ? M.brass : M.dark;
+  };
+  r.fill(fcx - 19, fcy - 9, fcx + 19, fcy + 9, inF, fretMat, (x, y) => (fretMat(x, y) === M.dark ? 2 : 11.5));
+  r.fill(0, 15, W, 21, (x, y) => Math.abs(x + 0.5 - CX) < [20, 22, 23, 23, 22, 21][y - 15], M.wood, (x, y) => [10, 12, 13, 12.5, 11.5, 10][y - 15], (x, y) => veneer(x, y, 'h', 25));
+  for (const sx of [-1, 1]) r.fill(CX + sx * 22 - 4, 14, CX + sx * 22 + 4, 22, (x, y) => dist(x, y, CX + sx * 22, 18) < 3.4, M.brass, (x, y) => 13 + Math.sqrt(Math.max(0, 11.6 - dist(x, y, CX + sx * 22, 18) ** 2)));
+  const pts = [];
+  for (let i = 0; i <= 200; i++) { const th = -Math.PI / 2 + (i / 200) * Math.PI; pts.push([CX + 22 * Math.sin(th), 17 - 13.5 * Math.cos(th)]); }
+  const near = (x, y) => { let best = 9; for (const [px, py] of pts) best = Math.min(best, Math.hypot(x + 0.5 - px, y + 0.5 - py)); return best; };
+  r.fill(CX - 26, 1, CX + 26, 18, (x, y) => near(x, y) < (y < 6 ? 2.1 : 1.6) && y < 16, M.brass, (x, y) => 14 + Math.sqrt(Math.max(0, 4 - near(x, y) ** 2)) * 1.5);
+  for (const sx of [-1, 1]) {
+    const fx = CX + sx * 56;
+    r.fill(fx - 6, 52, fx + 6, 58, (x, y) => Math.abs(x + 0.5 - fx) < [4, 5, 5, 6, 6, 6][y - 52], M.wood, (x, y) => [11, 12, 12.5, 12, 11.5, 11][y - 52], (x, y) => veneer(x, y, 'h', 27));
+    r.fill(fx - 6, 40, fx + 6, 53, (x, y) => dist(x, y, fx, 47) < 5.4, M.brass, (x, y) => 12 + Math.sqrt(Math.max(0, 29 - dist(x, y, fx, 47) ** 2)) * 1.1);
+    r.fill(fx - 2, 37, fx + 2, 42, (x, y) => Math.abs(x + 0.5 - fx) < (y < 39 ? 0.8 : 1.6), M.brass, () => 15);
+  }
+  return r;
 }
 
-// ------------------------------------------------------------------ lower panel: carved vines around the pendulum window
-
-function paintWindowAndCarving(b) {
-  // carved vines with leaves and acorns on both sides of the window, in relief
-  for (const side of [-1, 1]) {
-    const xs = side < 0 ? 23 : 70, xe = side < 0 ? 42 : 89;
-    const stemY = (x) => 139 + Math.sin((side < 0 ? x - xs : xe - x) * 0.42) * 3.2;
-    const parts = [(x, y) => x >= xs && x < xe && Math.abs(y + 0.5 - stemY(x)) < 1.0];
-    for (let i = 0; i < 4; i++) {
-      const lx = side < 0 ? xs + 2 + i * 5 : xe - 3 - i * 5, ly = stemY(lx), up = i % 2 === 0;
-      parts.push(leafMask(lx, ly, (up ? -1 : 1) * (Math.PI / 2 - 0.5) + (side < 0 ? 0 : (up ? -1 : 1) * 1.0) + (side < 0 ? 0 : 0), 7, 2.2));
-    }
-    const ax = side < 0 ? xe - 3 : xs + 2, ay = stemY(ax) + 3;
-    parts.push((x, y) => dist(x, y, ax, ay + 1.5) < 2.1 || (Math.abs(x + 0.5 - ax) < 2.6 && y >= ay - 1 && y < ay + 1));
-    emboss(b, (x, y) => parts.some((m) => m(x, y)), xs - 2, 128, xe - xs + 4, 20, (x, y, t) => wood(x, y, t, 'v', 13), 0.5);
-  }
-  // the window: brass frame, the dark inside of the case and the pendulum's suspension
-  for (let y = WIN.y0 - 2; y < WIN.y1 + 2; y++) for (let x = WIN.x0 - 2; x < WIN.x1 + 2; x++) {
-    const inside = inWin(x, y);
-    const near = !inside && (inWin(x + 1, y) || inWin(x - 1, y) || inWin(x, y + 1) || inWin(x, y - 1) || inWin(x + 2, y) || inWin(x - 2, y) || inWin(x, y + 2) || inWin(x, y - 2));
-    if (inside) {
-      // the inside of the case: deep shadow, the back board's grain catching a little light
-      const t = 0.12 + (y - WIN.y0) / 20 * 0.1 + (hash(x >> 1, y, 3) - 0.5) * 0.1;
-      b.set(x, y, pick(WOOD, clamp(t, 0, 0.4), x, y));
-    } else if (near) {
-      const lt = (x < CX ? 0.2 : -0.15) + (y < WIN.cy ? 0.15 : -0.1);
-      const ring = inWin(x + 1, y) || inWin(x - 1, y) || inWin(x, y + 1) || inWin(x, y - 1);
-      b.set(x, y, brass(x, y, (ring ? 0.42 : 0.66) + lt));
+/** the glass over the dial and the aperture: reflections only (alpha) */
+function paintGlass() {
+  const b = new Buf(W, H);
+  const white = [255, 252, 240], warm = [255, 236, 200];
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const dOpen = sdOpen(x, y), dAp = sdAp(x, y);
+    if (dOpen < 0) {
+      // the convex glass: a crescent of window light along the upper-left of the arch, a soft broad sheen, a glint
+      const d = dist(x, y, CX + 6, AY + 8), ang = Math.atan2(y + 0.5 - (AY + 8), x + 0.5 - (CX + 6));
+      const upLeft = ang < -1.6 && ang > -2.9;
+      if (upLeft && d > AR - 5.5 && d < AR - 3.6) b.set(x, y, white, 70);
+      else if (upLeft && d > AR - 9 && d < AR - 5.5 && bayer(x, y) < 0.25) b.set(x, y, white, 40);
+      if ((x === CX - 19 && y >= DY - 25 && y <= DY - 23) || (y === DY - 24 && x >= CX - 20 && x <= CX - 18)) b.set(x, y, white, 200);
+      const lowR = dist(x, y, CX - 10, DY - 14);
+      if (lowR > RD + 4 && lowR < RD + 6.5 && x > CX + 8 && y > DY + 8 && bayer(x, y) < 0.45) b.set(x, y, warm, 50);
+    } else if (dAp < 0) {
+      const u = (x - (AP.cx - AP.r)) + (y - (AP.cy - AP.r));
+      if (u > 5 && u < 8) b.set(x, y, white, 80);
+      if (u > 11 && u < 12) b.set(x, y, white, 55);
     }
   }
-  // beat plate and a brass crutch slot visible at the top of the window
-  for (let x = CX - 4; x < CX + 4; x++) b.set(x, WIN.y0 + 2, x === CX - 4 || x === CX + 3 ? BRASS[2] : BRASS[4]);
-  for (let k = -3; k <= 3; k += 3) b.set(CX + k, WIN.y0 + 3, BRASS[1]);
+  return b;
 }
 
 // ------------------------------------------------------------------ moving parts
 
-/** rasterise a hand polygon (hand space: +y from centre to tip) at an angle, coverage by centre sample */
-function handFrame(shape, ang, size) {
-  const b = new Buf(size, size), c = size / 2;
-  const ca = Math.cos(ang), sa = Math.sin(ang);
-  const minY = shape.reduce((m, p) => Math.min(m, p.poly ? Math.min(...p.poly.map((q) => q[1])) : -99), 99);
-  void minY;
-  for (const part of shape) for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-    // pixel centre into hand space: hand points to 12 at ang 0 (up is -y on screen)
-    const px = x + 0.5 - c, py = y + 0.5 - c;
-    const hx = px * ca + py * sa, hy = -(-px * sa + py * ca); // hy along the hand towards the tip
-    if (part.poly ? inPoly(hx, hy, part.poly) : Math.hypot(hx - part.cx, hy - part.cy) < part.r) {
-      const lit = part.lit ? part.lit(hx, hy, ang) : 0.5;
-      b.set(x, y, typeof part.col === 'function' ? part.col(lit, x, y) : part.col);
-    }
-  }
-  return b;
-}
 function inPoly(x, y, pts) {
   let inside = false;
   for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
@@ -476,350 +399,343 @@ function inPoly(x, y, pts) {
   }
   return inside;
 }
-/** 1px outline around opaque pixels */
-function outline(b, col, onlyBelow = false) {
-  const o = new Buf(b.w, b.h); o.d.set(b.d);
-  for (let y = 0; y < b.h; y++) for (let x = 0; x < b.w; x++) {
+// hands in hand space (+y from the centre towards the tip), blued steel spade hands and a gilt seconds hand
+const HOUR = [
+  { poly: [[-1.2, -5], [1.2, -5], [1.0, 11], [-1.0, 11]] },
+  { poly: [[0, 9], [3.6, 11.5], [3.8, 14.5], [1.2, 16.5], [1.1, 18.5], [0, 21.5], [-1.1, 18.5], [-1.2, 16.5], [-3.8, 14.5], [-3.6, 11.5]] },
+  { c: [0, -6.4], r: 2.4 },
+];
+const MINUTE = [
+  { poly: [[-1.0, -7], [1.0, -7], [0.7, 23], [-0.7, 23]] },
+  { poly: [[0, 19.5], [2.3, 23.5], [0, 31.5], [-2.3, 23.5]] },
+  { c: [0, -8.2], r: 2.2 },
+];
+const SECOND = [{ poly: [[-0.55, -11], [0.55, -11], [0.45, 32.5], [-0.45, 32.5]] }, { c: [0, -10], r: 2.4 }];
+const HUB = [{ c: [0, 0], r: 2.6 }];
+const FR = 70;
+/** rasterise a hand at an angle: lit edge facing the lamp, a dark outline; `gilt` for the seconds */
+function handFrame(shape, ang, gilt = false) {
+  const b = new Buf(FR, FR), c = FR / 2, ca = Math.cos(ang), sa = Math.sin(ang);
+  const ramp = gilt ? R.brass : R.steel;
+  const inside = (px, py) => {
+    const hx = px * ca + py * sa, hy = -(-px * sa + py * ca);
+    return shape.some((p) => (p.poly ? inPoly(hx, hy, p.poly) : Math.hypot(hx - p.c[0], hy - p.c[1]) < p.r));
+  };
+  for (let y = 0; y < FR; y++) for (let x = 0; x < FR; x++) {
+    const px = x + 0.5 - c, py = y + 0.5 - c;
+    if (!inside(px, py)) continue;
+    // a bevelled hand: the face toward the top-left light is bright, the other side darker, a glint on top
+    const tl = !inside(px - 1, py) || !inside(px, py - 1), br = !inside(px + 1, py) || !inside(px, py + 1);
+    let t = 0.42 + (tl && !br ? 0.38 : br && !tl ? -0.2 : 0);
+    if (!tl && !br) t += 0.08;
+    b.set(x, y, pick(ramp, clamp(t), x, y, 0.5));
+  }
+  // outline
+  const o = new Buf(FR, FR); o.d.set(b.d);
+  for (let y = 0; y < FR; y++) for (let x = 0; x < FR; x++) {
     if (b.a(x, y)) continue;
-    const n = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => b.a(x + dx, y + dy) > 200);
-    if (n && (!onlyBelow || b.a(x, y - 1) > 200 || b.a(x - 1, y) > 200)) o.set(x, y, col);
+    if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => b.a(x + dx, y + dy) > 200)) o.set(x, y, gilt ? [42, 22, 8] : [4, 4, 12]);
   }
   return o;
 }
-/** steel colour from a lit value: highlight on the edge facing the lamp */
-const steel = (t, x, y) => pick(STEEL, clamp(t, 0, 1), x, y, 0.6);
-const sideLit = (hx, hy, ang) => {
-  // the edge of the hand facing up-left catches the light
-  const nx = Math.cos(ang), ny = Math.sin(ang); // hand-space +x direction on screen
-  const face = -(nx * 0.7 + ny * 0.7);
-  return 0.42 + (hx > 0.1 ? face : hx < -0.1 ? -face : 0) * 0.32;
-};
-const HOUR = [
-  { poly: [[-1.1, -4], [1.1, -4], [1.1, 9], [-1.1, 9]], col: steel, lit: sideLit },                                    // shaft and tail
-  { poly: [[0, 7.5], [3.4, 10.5], [3.2, 13.5], [0.9, 15.2], [1.0, 17.8], [0, 20.5], [-1.0, 17.8], [-0.9, 15.2], [-3.2, 13.5], [-3.4, 10.5]], col: steel, lit: sideLit }, // the spade
-  { poly: [[-2.3, -6.4], [2.3, -6.4], [1.4, -3.4], [-1.4, -3.4]], col: steel, lit: sideLit },                            // tail boss
-];
-const MINUTE = [
-  { poly: [[-0.95, -6], [0.95, -6], [0.75, 22], [-0.75, 22]], col: steel, lit: sideLit },
-  { poly: [[0, 18.5], [2.2, 22], [0, 30.2], [-2.2, 22]], col: steel, lit: sideLit },                                    // the leaf tip
-  { poly: [[-2, -8.2], [2, -8.2], [1.2, -5], [-1.2, -5]], col: steel, lit: sideLit },
-];
-const SECOND = [
-  { poly: [[-0.5, -9], [0.5, -9], [0.5, 30.5], [-0.5, 30.5]], col: C('clay') },
-  { poly: [[-1.6, -11.5], [1.6, -11.5], [1.6, -7.5], [-1.6, -7.5]], col: C('clay') },                                    // counterweight
-];
-const FR = 72, FN = 60;
-function handStrip(shape, outlineCol) {
-  const strip = new Buf(FR * FN, FR);
-  for (let i = 0; i < FN; i++) {
-    let f = handFrame(shape, (i / FN) * Math.PI * 2, FR);
-    if (outlineCol) f = outline(f, outlineCol);
-    strip.blit(f, i * FR, 0);
+function handStrip(shape, n, gilt = false) {
+  const strip = new Buf(FR * n, FR);
+  for (let i = 0; i < n; i++) strip.blit(handFrame(shape, (i / n) * Math.PI * 2, gilt), i * FR, 0);
+  return strip;
+}
+/** the brass centre boss over the hands */
+function boss() {
+  const b = new Buf(8, 8);
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    const d = dist(x, y, 4, 4);
+    if (d > 3.3) continue;
+    b.set(x, y, d > 2.6 ? [36, 22, 8] : pick(R.brass, clamp(0.75 - (x - 3.5) * 0.14 - (y - 3.5) * 0.14 - (d < 1 ? 0.3 : 0)), x, y));
+  }
+  return b;
+}
+
+// the pendulum: a brass rod with a lenticular bob, clipped to the aperture; cosine-spaced swing frames
+const PEND_N = 11, PEND_A = 0.2;
+const APB = { x0: AP.cx - AP.r, y0: AP.cy - AP.r, w: AP.r * 2, h: AP.y1 - (AP.cy - AP.r) };
+function pendulumFrame(a, clip = true) {
+  const f = new Buf(APB.w, APB.h);
+  const bx = PIVOT.x + Math.sin(a) * PEND_LEN, by = PIVOT.y + Math.cos(a) * PEND_LEN;
+  for (let y = 0; y < APB.h; y++) for (let x = 0; x < APB.w; x++) {
+    const X = x + APB.x0, Y = y + APB.y0;
+    if (clip && sdAp(X, Y) >= 0) continue;
+    const t = clamp(((X + 0.5 - PIVOT.x) * (bx - PIVOT.x) + (Y + 0.5 - PIVOT.y) * (by - PIVOT.y)) / (PEND_LEN * PEND_LEN));
+    const qx = PIVOT.x + (bx - PIVOT.x) * t, qy = PIVOT.y + (by - PIVOT.y) * t;
+    const dr = Math.hypot(X + 0.5 - qx, Y + 0.5 - qy), db = dist(X, Y, bx, by);
+    if (db < PEND_R) {
+      const nx = (X + 0.5 - bx) / PEND_R, ny = (Y + 0.5 - by) / PEND_R;
+      let tt = 0.5 - nx * 0.28 - ny * 0.3;
+      if (db > PEND_R - 1) tt -= 0.25;
+      if (Math.abs(db - 3.4) < 0.5) tt -= 0.15;
+      if (Math.hypot(nx + 0.35, ny + 0.35) < 0.28) tt += 0.4;
+      f.set(x, y, pick(R.brass, clamp(tt), X, Y));
+    } else if (dr < 0.8 && t < 0.99) f.set(x, y, pick(R.brass, (X + Y) % 3 ? 0.5 : 0.7, X, Y));
+  }
+  return f;
+}
+function pendulumStrip() {
+  const strip = new Buf(APB.w * PEND_N, APB.h);
+  for (let j = 0; j < PEND_N; j++) strip.blit(pendulumFrame(PEND_A * Math.cos((Math.PI * j) / (PEND_N - 1))), j * APB.w, 0);
+  return strip;
+}
+
+// the moon disc behind the arch: deep blue with stars and two painted moons, turning on (CX, dcy)
+const MDS = MOON.dr * 2 + 2;
+function moonDisc(rot) {
+  const b = new Buf(MDS, MDS), c = MDS / 2;
+  for (let y = 0; y < MDS; y++) for (let x = 0; x < MDS; x++) {
+    const px = x + 0.5 - c, py = y + 0.5 - c, d = Math.hypot(px, py);
+    if (d > MOON.dr) continue;
+    // disc space (unrotated)
+    const ca = Math.cos(-rot), sa = Math.sin(-rot), ux = px * ca - py * sa, uy = px * sa + py * ca;
+    let col = pick(R.sky, clamp(0.35 + (1 - d / MOON.dr) * 0.45 + (vnoise(ux * 0.2, uy * 0.2, 81) - 0.5) * 0.25), x, y, 0.9);
+    const sx = Math.floor(ux + 100), sy = Math.floor(uy + 100);
+    if (hash(sx, sy, 82) > 0.955) col = hash(sx, sy, 83) > 0.5 ? [255, 236, 170] : [210, 228, 255];
+    for (const sgn of [-1, 1]) {
+      const mx = 0, my = sgn * -19, md = Math.hypot(ux - mx, uy - my);
+      if (md < 6.2) {
+        const nx = (ux - mx) / 6.2, ny = (uy - my) / 6.2;
+        let t = 0.68 - (nx * Math.cos(rot) - ny * Math.sin(rot)) * 0.3 - (nx * Math.sin(rot) + ny * Math.cos(rot)) * 0.25;
+        if (Math.hypot(nx - 0.3, ny + 0.2) < 0.25 || Math.hypot(nx + 0.25, ny - 0.35) < 0.2 || Math.hypot(nx + 0.1, ny + 0.45) < 0.12) t -= 0.18;
+        col = pick(R.moon, clamp(t), x, y, 0.7);
+      } else if (md < 7.6 && bayer(x, y) < 0.4) col = mix(col, [255, 226, 150], 0.35);
+    }
+    b.set(x, y, col);
+  }
+  return b;
+}
+/** the moon seen through the window at N disc angles (rising from behind the left hill to the top) */
+const MOON_N = 40;
+const MW = { x0: CX - MOON.r, y0: AY - MOON.r, w: MOON.r * 2, h: MOON.r };
+function moonStrip() {
+  const strip = new Buf(MW.w * MOON_N, MW.h);
+  for (let j = 0; j < MOON_N; j++) {
+    const rot = -Math.PI * 0.62 + (j / (MOON_N - 1)) * Math.PI * 0.62; // the upper moon from low left to the top
+    const disc = moonDisc(rot), dx = CX - MDS / 2, dy = MOON.dcy - MDS / 2;
+    for (let y = 0; y < MW.h; y++) for (let x = 0; x < MW.w; x++) {
+      const X = x + MW.x0, Y = y + MW.y0;
+      if (!inMoonWin(X, Y)) continue;
+      const c = disc.get(X - dx, Y - dy);
+      if (c) strip.set(j * MW.w + x, y, c);
+    }
   }
   return strip;
 }
 
-/** the pendulum, clipped to the window: cosine-spaced angles so uniform CSS steps give a natural swing */
-const PEND_N = 9, PEND_A = 0.16;
-function pendulumStrip() {
-  const fw = WIN.x1 - WIN.x0, fh = WIN.y1 - WIN.y0;
-  const strip = new Buf(fw * PEND_N, fh);
-  for (let j = 0; j < PEND_N; j++) {
-    const a = PEND_A * Math.cos((Math.PI * j) / (PEND_N - 1));
-    const f = new Buf(fw, fh);
-    const bx = PIVOT.x + Math.sin(a) * PEND_LEN, by = PIVOT.y + Math.cos(a) * PEND_LEN;
-    for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) {
-      const X = x + WIN.x0, Y = y + WIN.y0;
-      if (!inWin(X, Y)) continue;
-      // rod: distance to the segment pivot -> bob
-      const t = clamp(((X + 0.5 - PIVOT.x) * (bx - PIVOT.x) + (Y + 0.5 - PIVOT.y) * (by - PIVOT.y)) / (PEND_LEN * PEND_LEN), 0, 1);
-      const qx = PIVOT.x + (bx - PIVOT.x) * t, qy = PIVOT.y + (by - PIVOT.y) * t;
-      const dr = Math.hypot(X + 0.5 - qx, Y + 0.5 - qy);
-      const db = dist(X, Y, bx, by);
-      if (db < PEND_R) {
-        const nx = (X + 0.5 - bx) / PEND_R, ny = (Y + 0.5 - by) / PEND_R;
-        let tt = 0.55 - nx * 0.3 - ny * 0.35;
-        if (db > PEND_R - 1) tt -= 0.2;
-        if (Math.abs(db - 2.6) < 0.5) tt -= 0.18;          // engraved ring
-        if (nx < -0.1 && nx > -0.6 && ny < -0.1 && ny > -0.6) tt += 0.3; // glint
-        f.set(x, y, brass(X, Y, tt));
-      } else if (dr < 0.75 && t < 0.98) f.set(x, y, (X + Y) % 3 ? BRASS[4] : BRASS[6]);
-    }
-    strip.blit(f, j * fw, 0);
-  }
-  return { url: strip.url(), w: fw, h: fh };
-}
+// ------------------------------------------------------------------ the boot scene: wall, bracket, light
 
-/** the sky behind the moon window, with the moon at N heights (it rises as the app loads) */
-const MOON_N = 18;
-function moonStrip() {
-  const x0 = MOONW.cx - MOONW.r, y0 = MOONW.cy - MOONW.r, fw = MOONW.r * 2, fh = MOONW.r;
-  const strip = new Buf(fw * MOON_N, fh);
-  const SKY = [C('deepNight'), C('night'), mix(C('night'), C('slate'), 0.5), C('slate'), C('dusk')];
-  const MOONR = [C('straw'), C('linen'), C('oat'), C('paper'), C('snow')];
-  for (let j = 0; j < MOON_N; j++) {
-    const k = j / (MOON_N - 1);
-    const mx = MOONW.cx - 2 + k * 4, my = MOONW.cy + 6 - k * 14; // from behind the hills up to the top
-    for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) {
-      const X = x + x0, Y = y + y0;
-      if (!inMoonWin(X, Y)) continue;
-      let c = pick(SKY, clamp(0.15 + (y / fh) * 0.65 + k * 0.15, 0, 1), X, Y, 1);
-      if (hash(X, Y, 71) > 0.94 && y < fh - 4) c = hash(X, Y, 72) > 0.5 ? C('lamp') : C('frost');
-      const d = dist(X, Y, mx, my);
-      if (d < 4.6) {
-        const nx = (X + 0.5 - mx) / 4.6, ny = (Y + 0.5 - my) / 4.6;
-        c = pick(MOONR, clamp(0.7 - nx * 0.35 - ny * 0.3, 0, 1), X, Y, 0.8);
-        if (Math.hypot(nx - 0.25, ny + 0.1) < 0.28 || Math.hypot(nx + 0.3, ny - 0.35) < 0.2) c = MOONR[1];
-      } else if (d < 5.8 && bayer(X, Y) < 0.35) c = mix(c, C('lamp'), 0.35);
-      strip.set(j * fw + x, y, c);
-    }
-  }
-  return { url: strip.url(), w: fw, h: fh, x0, y0 };
-}
-
-/** the glass door: the bevelled brass bezel with beads, a hinge and a latch, and the glass highlights */
-function door() {
-  const S = R_BEZ * 2 + 6, c = S / 2, b = new Buf(S, S);
-  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
-    const d = dist(x, y, c, c);
-    const ang = Math.atan2(y + 0.5 - c, x + 0.5 - c);
-    const facing = -Math.cos(ang + Math.PI * 0.75); // +1 facing the top-left light
-    if (d >= R_DIAL - 0.3 && d < R_BEZ) {
-      const ring = d - (R_DIAL - 0.3); // 0 inner .. 4.3 outer
-      let t;
-      if (ring < 1) t = 0.3 - facing * 0.15;             // inner bevel, in shadow on the lit side
-      else if (ring < 2.2) t = 0.6 + facing * 0.28;      // the rounded bead
-      else if (ring < 3) t = 0.32 + facing * 0.12;       // groove
-      else t = 0.5 + facing * 0.3;                       // outer chamfer
-      // beads every few degrees on the bead ring
-      const beads = ring >= 1 && ring < 2.2 && Math.sin(ang * 36) > 0.65;
-      if (beads) t += 0.18;
-      b.set(x, y, brass(x, y, t));
-    } else if (d < R_DIAL - 0.3) {
-      // glass: two highlight streaks across the top-left, a faint sheen at the bottom-right rim
-      const u = (x - c) + (y - c); // diagonal coordinate
-      if (u > -27 && u < -24 && d < R_DIAL - 2) b.set(x, y, C('snow'), 110);
-      else if (u > -21 && u < -20 && d < R_DIAL - 3) b.set(x, y, C('snow'), 70);
-      else if (d > R_DIAL - 2.2 && facing < -0.6) b.set(x, y, C('frost'), 55);
-    }
-  }
-  // hinge knuckles at 9 o'clock and a latch knob at 3 o'clock
-  for (const ky of [c - 9, c + 6]) for (let y = ky; y < ky + 4; y++) for (let x = 0; x < 3; x++) b.set(x, y, brass(x, y, 0.75 - x * 0.18 - (y - ky) * 0.08));
-  for (let y = c - 2; y < c + 2; y++) for (let x = S - 4; x < S; x++) b.set(x, y, brass(x, y, 0.7 - (x - S + 4) * 0.15 - (y - c + 2) * 0.1));
-  return { url: b.url(), S };
-}
-
-/** glass over the pendulum window: two pixel streaks of reflected lamplight */
-function winGlass() {
-  const fw = WIN.x1 - WIN.x0, fh = WIN.y1 - WIN.y0, b = new Buf(fw, fh);
-  for (let y = 0; y < fh; y++) for (let x = 0; x < fw; x++) {
-    if (!inWin(x + WIN.x0, y + WIN.y0)) continue;
-    const u = x + y;
-    if (u >= 7 && u <= 9) b.set(x, y, C('snow'), 46);
-    else if (u === 12) b.set(x, y, C('snow'), 30);
-    else if (u >= 33 && u <= 34) b.set(x, y, C('lamp'), 26);
-  }
-  return b.url();
-}
-
-/** the brass centre boss over the hands */
-function boss() {
-  const b = new Buf(6, 6);
-  for (let y = 0; y < 6; y++) for (let x = 0; x < 6; x++) {
-    const d = dist(x, y, 3, 3);
-    if (d > 2.9) continue;
-    b.set(x, y, d < 1.2 ? C('clay') : brass(x, y, 0.6 - (x - 2.5) * 0.12 - (y - 2.5) * 0.12));
-  }
-  return b.url();
-}
-
-/** a tiny pixel hand pointer (2 frames: up, pressed) for "tap the clock" */
-function pointer() {
-  const rows = [
-    '..##........',
-    '.#oo#.......',
-    '.#oo#.......',
-    '.#oo###.....',
-    '.#oo#oo##...',
-    '.#oo#oo#o#..',
-    '##oooooooo#.',
-    '#o#ooooooo#.',
-    '#ooooooooo#.',
-    '.#oooooooo#.',
-    '..#ooooooo#.',
-    '...#ssssss#.',
-    '...########.',
-  ];
-  const fw = 14, fh = 16, b = new Buf(fw * 2, fh);
-  for (let f = 0; f < 2; f++) {
-    const oy = f ? 2 : 0, ox = f ? 1 : 0;
-    rows.forEach((r, y) => [...r].forEach((ch, x) => {
-      const c = ch === '#' ? INK : ch === 'o' ? (x < 4 ? C('snow') : x > 8 || y > 8 ? C('linen') : C('paper')) : ch === 's' ? C('straw') : null;
-      if (c) b.set(f * fw + ox + x + 1, oy + y + 1, c);
-    }));
-    if (f) for (const [dx, dy] of [[0, 0], [-2, 1], [4, -1]]) b.set(f * fw + 2 + dx, 1 + dy, C('lamp'));
-  }
-  return { url: b.url(), fw, fh };
-}
-
-/** 4-point pixel sparkle */
-function sparkle() {
-  const b = new Buf(7, 7);
-  for (let k = -3; k <= 3; k++) { b.set(3 + k, 3, Math.abs(k) < 2 ? C('snow') : C('lamp')); b.set(3, 3 + k, Math.abs(k) < 2 ? C('snow') : C('lamp')); }
-  return b.url();
-}
-
-// ------------------------------------------------------------------ the wall behind: a calm painted night, and a pool of lamplight
-
+/** a dark emerald regency-stripe wall (the office's own wallpaper, in the dark), 64 px tile */
 function wallTile() {
-  const N = 128, b = new Buf(N, N);
-  const RAMPW = [mix(C('ink'), C('deepNight'), 0.6), mix(C('ink'), C('deepNight'), 0.3), C('ink'), mix(C('ink'), C('barkDark'), 0.5), mix(C('ink'), C('stoneDark'), 0.4)];
+  const N = 64, b = new Buf(N, N);
+  const G = rampOf([0x020605, 0x06120e, 0x0b1e17, 0x112a20], 6);
+  const gold = rampOf([0x1a1306, 0x2e220c], 3);
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-    // tileable noise: wrap coordinates on a torus
-    const tx = (x / N) * Math.PI * 2, ty = (y / N) * Math.PI * 2;
-    const n1 = vnoise(3 + Math.cos(tx) * 2.6, 3 + Math.sin(tx) * 2.6 + Math.cos(ty) * 1.8, 5);
-    const n2 = vnoise(9 + Math.cos(ty) * 4.5, 9 + Math.sin(ty) * 4.5 + Math.sin(tx) * 1.6, 6);
-    const n3 = vnoise(20 + Math.cos(tx) * 9 + Math.sin(ty) * 3, 20 + Math.sin(tx) * 9 + Math.cos(ty) * 9, 7);
-    // soft painted strokes: horizontal-ish streaks of plaster
-    const stroke = Math.sin(y * 0.3 + n1 * 5 + n3 * 2) * 0.5 + 0.5;
-    const t = 0.44 + (n1 - 0.5) * 0.26 + (n2 - 0.5) * 0.22 + (n3 - 0.5) * 0.18 + (stroke - 0.5) * 0.1;
-    b.set(x, y, pick(RAMPW, clamp(t, 0, 1), x, y, 1.1));
+    const sx = x % 32;
+    const n = (vnoise((x % N) * 0.12, y * 0.12, 5) - 0.5) * 0.2;
+    if (sx === 20 || sx === 31) { b.set(x, y, pick(gold, 0.5 + n, x, y)); continue; }
+    const satin = sx < 20;
+    const dia = satin && Math.abs(Math.abs((sx % 20) - 10) + Math.abs((y % 16) - 8) - 7) < 0.8;
+    b.set(x, y, pick(G, clamp((satin ? 0.62 : 0.32) + n + (dia ? 0.12 : 0) + ((x + y) & 1 ? 0.02 : -0.02)), x, y, 1));
   }
   return { url: b.url(), N };
 }
-
-/** A dithered shadow strip for the screen edges (vignette), dark at x = 0 fading over `n` texels. */
+/** the carved mahogany wall bracket the clock stands on, with the clock's soft shadow */
+const BR = { w: 172, h: 40 };
+function bracket() {
+  const r = new Relief(BR.w, BR.h), cx = BR.w / 2;
+  // two carved scroll corbels: an S-curve with a volute at the top and a smaller one at the foot
+  for (const sx of [-1, 1]) {
+    const bx = cx + sx * 52;
+    r.fill(bx - 14, 8, bx + 14, BR.h, (x, y) => {
+      const t = (y - 8) / (BR.h - 8), w = 7 - t * 3, off = Math.sin(t * Math.PI) * 4 * -sx;
+      return Math.abs(x + 0.5 - bx - off) < w || dist(x, y, bx - sx * 2, 13) < 6 || dist(x, y, bx + sx * 1, BR.h - 4) < 3.6;
+    }, M.wood, (x, y) => {
+      const t = (y - 8) / (BR.h - 8), off = Math.sin(t * Math.PI) * 4 * -sx, u = (x + 0.5 - bx - off) / (7 - t * 3);
+      const vol = dist(x, y, bx - sx * 2, 13);
+      if (vol < 6) return 8 + (Math.sin(vol * 1.4 + Math.atan2(y - 13, x - bx) * sx) > 0 ? 2 : 0.5);
+      return 6 + 3 * Math.sqrt(Math.max(0, 1 - u * u));
+    }, (x, y) => veneer(x, y, 'v', 91));
+  }
+  // the shelf: a moulded top board with a brass-edged lip
+  const prof = [9, 11, 12, 12, 11, 9, 8, 9, 10, 9];
+  r.fill(0, 0, BR.w, 10, (x, y) => Math.abs(x + 0.5 - cx) < 84 - (y > 6 ? (y - 6) * 2 : 0), M.wood, (x, y) => prof[y], (x, y) => veneer(x, y, 'h', 93));
+  r.fill(0, 3, BR.w, 4, (x, y) => Math.abs(x + 0.5 - cx) < 83, M.brass, () => 12.5);
+  return r.render({ outline: [10, 4, 6] });
+}
+/** A pool of warm lamplight on the wall, in hard stepped bands with ordered dither. */
+function lampPool() {
+  const w = 220, h = 280, b = new Buf(w, h), cx = w / 2, cy = h * 0.45;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const nx = (x + 0.5 - cx) / (w / 2), ny = (y + 0.5 - cy) / (h / 2), d = Math.sqrt(nx * nx + ny * ny);
+    if (d >= 1) continue;
+    const lv = (1 - d) * 6, band = Math.floor(lv), frac = lv - band;
+    const k = band + (frac > bayer(x, y) ? 1 : 0);
+    if (k <= 0) continue;
+    b.set(x, y, [255, 178, 92], Math.min(6, k) * 11);
+  }
+  return { url: b.url(), w, h };
+}
 function edgeShade(n, vertical) {
   const b = vertical ? new Buf(4, n) : new Buf(n, 4);
   for (let k = 0; k < n; k++) for (let j = 0; j < 4; j++) {
     const x = vertical ? j : k, y = vertical ? k : j, f = 1 - k / n;
-    if (bayer(x, y) < f * f * 0.9) b.set(x, y, mix(C('ink'), C('deepNight'), 0.6), 150);
+    if (bayer(x, y) < f * f * 0.9) b.set(x, y, [2, 4, 4], 170);
   }
   return b.url();
 }
-
-/** A pool of warm lamplight behind the clock, in hard stepped bands with ordered dither between them. */
-function lampPool() {
-  const w = 200, h = 240, b = new Buf(w, h), cx = w / 2, cy = h * 0.47;
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const nx = (x + 0.5 - cx) / (w / 2), ny = (y + 0.5 - cy) / (h / 2), d = Math.sqrt(nx * nx + ny * ny);
-    if (d >= 1) continue;
-    const lv = (1 - d) * 5.4, band = Math.floor(lv), frac = lv - band;
-    const k = band + (frac > bayer(x, y) * 1.0 + 0.0 && frac > 0.72 ? 1 : 0);
-    if (k <= 0) continue;
-    b.set(x, y, mix(C('honey'), C('lamp'), 0.45), Math.min(5, k) * 12);
+/** a tiny pixel hand pointer (2 frames: up, pressed) for "tap the clock" */
+function pointer() {
+  const rows = ['..##........', '.#oo#.......', '.#oo#.......', '.#oo###.....', '.#oo#oo##...', '.#oo#oo#o#..', '##oooooooo#.', '#o#ooooooo#.', '#ooooooooo#.', '.#oooooooo#.', '..#ooooooo#.', '...#ssssss#.', '...########.'];
+  const fw = 14, fh = 16, b = new Buf(fw * 2, fh);
+  for (let f = 0; f < 2; f++) {
+    const oy = f ? 2 : 0, ox = f ? 1 : 0;
+    rows.forEach((r, y) => [...r].forEach((ch, x) => {
+      const c = ch === '#' ? [26, 18, 12] : ch === 'o' ? (x < 4 ? [255, 250, 238] : x > 8 || y > 8 ? [222, 206, 176] : [244, 236, 218]) : ch === 's' ? [190, 168, 120] : null;
+      if (c) b.set(f * fw + ox + x + 1, oy + y + 1, c);
+    }));
+    if (f) for (const [dx, dy] of [[0, 0], [-2, 1], [4, -1]]) b.set(f * fw + 2 + dx, 1 + dy, [255, 214, 120]);
   }
-  return { url: b.url(), w, h };
+  return { url: b.url(), fw, fh };
+}
+function sparkle() {
+  const b = new Buf(7, 7);
+  for (let k = -3; k <= 3; k++) { b.set(3 + k, 3, Math.abs(k) < 2 ? [255, 252, 240] : [255, 210, 120]); b.set(3, 3 + k, Math.abs(k) < 2 ? [255, 252, 240] : [255, 210, 120]); }
+  return b.url();
 }
 
 // ------------------------------------------------------------------ assemble
 
-const caseB = paintCase();
-paintPlate(caseB);
-paintWindowAndCarving(caseB);
-// punch the moon window (the sky strip shows through from behind)
-for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (inMoonWin(x, y)) caseB.clear(x, y);
-// the case outline (not around the ground shadow)
-const caseOut = (() => {
-  const o = new Buf(W, H); o.d.set(caseB.d);
-  for (let y = 0; y < 168; y++) for (let x = 0; x < W; x++) {
-    if (caseB.a(x, y) || inMoonWin(x, y)) continue;
-    const n = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => caseB.a(x + dx, y + dy) > 200 && !inMoonWin(x + dx, y + dy) && y + dy < 168);
-    if (n) o.set(x, y, OUT);
+const relief = paintClock();
+const caseB = relief.render({ outline: [12, 5, 6] });
+const glass = paintGlass();
+const HN = 120, MN = 120, SN = 60;
+const hourS = handStrip(HOUR, HN), minS = handStrip(MINUTE, MN), secS = handStrip(SECOND, SN, true);
+const pend = pendulumStrip(), moon = moonStrip(), ptr = pointer(), wall = wallTile(), pool = lampPool(), brk = bracket(), bossB = boss();
+const EDGE = 44, edgeH = edgeShade(EDGE, false), edgeV = edgeShade(EDGE, true);
+const HO = { x: CX - FR / 2, y: DY - FR / 2 };
+
+// ---- the 3D office's copy of the clock: one atlas + its layout
+{
+  const AW = W * 2 + FR * 3 + 4, AH = H;
+  const atlas = new Buf(AW, AH);
+  atlas.blit(caseB, 0, 0);
+  atlas.blit(glass, W, 0);
+  const hx = W * 2;
+  atlas.blit(handFrame(HOUR, 0), hx, 0);
+  atlas.blit(handFrame(MINUTE, 0), hx + FR, 0);
+  atlas.blit(handFrame(SECOND, 0, true), hx + FR * 2, 0);
+  atlas.blit(moonDisc(0), hx, FR);
+  const pf = pendulumFrame(0, false);
+  atlas.blit(pf, hx + MDS + 2, FR);
+  atlas.blit(bossB, hx + MDS + 2 + APB.w + 2, FR);
+  writeFileSync(fileURLToPath(new URL('../../../public/models/interview/clock.png', import.meta.url)), atlas.png());
+  // the case outline per row (for the 3D case walls): [y, x0, x1]
+  const rows = [];
+  for (let y = 14; y < H; y += 2) {
+    let x0 = -1, x1 = -1;
+    for (let x = 0; x < W; x++) if (caseB.a(x, y)) { if (x0 < 0) x0 = x; x1 = x + 1; }
+    if (x0 >= 0) rows.push([y, x0, x1]);
   }
-  return o;
-})();
+  const gen = `// Generated by src/onboard/tools/bootart.mjs: the layout of public/models/interview/clock.png (art px).
+export const CLOCK_ART = ${JSON.stringify({
+    W, H, CX, DY, RD, atlas: [AW, AH], case: [0, 0, W, H], glass: [W, 0, W, H], hour: [hx, 0, FR, FR], minute: [hx + FR, 0, FR, FR], second: [hx + FR * 2, 0, FR, FR],
+    moon: [hx, FR, MDS, MDS], moonAt: [CX, MOON.dcy], pend: [hx + MDS + 2, FR, APB.w, APB.h], pendBox: [APB.x0, APB.y0], pivot: [PIVOT.x, PIVOT.y], boss: [hx + MDS + 2 + APB.w + 2, FR, 8, 8],
+    rows,
+  })} as const;
+`;
+  writeFileSync(fileURLToPath(new URL('../clockart.gen.ts', import.meta.url)), gen);
+}
 
-const hourS = handStrip(HOUR, mix(INK, C('deepNight'), 0.3)), minS = handStrip(MINUTE, mix(INK, C('deepNight'), 0.3)), secS = handStrip(SECOND, null);
-const pend = pendulumStrip(), moon = moonStrip(), dr = door(), ptr = pointer(), wall = wallTile(), pool = lampPool();
-const EDGE = 40, edgeH = edgeShade(EDGE, false), edgeV = edgeShade(EDGE, true);
-const HO = { x: CX - FR / 2, y: DY - FR / 2 }; // hand frame offset in the clock
-
-// ---- progress timing: the minute hand sweeps 0..~55 of 60 while loading (fast at first, then a crawl)
-const LOAD_S = 26;                            // the whole fake-progress animation
+// ---- progress timing: the minute hand sweeps most of a turn while loading (fast at first, then a crawl)
+const LOAD_S = 26;
 const prog = (t) => { const a = Math.min(1, t / 7); return 0.9 * (1 - (1 - a) ** 2.4) + 0.07 * Math.max(0, (t - 7) / (LOAD_S - 7)); };
 const invProg = (p) => { let lo = 0, hi = LOAD_S; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (prog(m) < p) lo = m; else hi = m; } return hi; };
-/** keyframes stepping through frames `from..to` (inclusive) as the progress goes 0..max */
-function progFrames(name, frames, fw, axis = 'x') {
-  const out = [];
-  const n = frames.length;
+function progFrames(name, frames, fw) {
+  const out = [], n = frames.length;
   for (let i = 0; i < n; i++) {
     const p = (i / (n - 1)) * prog(LOAD_S);
     const pct = i === 0 ? 0 : (invProg(p) / LOAD_S) * 100;
-    out.push(`${pct.toFixed(2)}%{background-position:${axis === 'x' ? `-${frames[i] * fw}em 0` : `0 -${frames[i] * fw}em`}}`);
+    out.push(`${pct.toFixed(2)}%{background-position:-${frames[i] * fw}em 0}`);
   }
   return `@keyframes ${name}{${out.join('')}}`;
 }
-const minFrames = Array.from({ length: Math.round(60 * prog(LOAD_S)) + 1 }, (_, i) => i);   // 0..58
-const hourFrames = Array.from({ length: 5 }, (_, i) => 55 + i);                              // 11 o'clock creeping up
-const moonFrames = Array.from({ length: MOON_N - 2 }, (_, i) => i);                          // rises most of the way
+const minFrames = Array.from({ length: Math.round(MN * prog(LOAD_S)) + 1 }, (_, i) => i);
+const hourFrames = Array.from({ length: 11 }, (_, i) => 110 + i);
+const moonFrames = Array.from({ length: MOON_N - 4 }, (_, i) => i);
+const SH = H + BR.h - 2; // the clock and its bracket
 
-const CSS = `
-#boot{--k:min(calc(88vw / ${W}),calc(66vh / ${H}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
-background:${css(C('ink'))} url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s steps(6)}
-@supports (width:round(nearest,1px,1px)){#boot{--k:max(1px,min(round(nearest,min(calc(88vw / ${W}),calc(66vh / ${H})),1px),round(down,min(calc(98vw / ${W}),calc(90vh / ${H})),1px)))}}
+const CSSTXT = `
+#boot{--k:min(calc(86vw / ${BR.w}),calc(72vh / ${SH}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
+background:#020504 url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s steps(6)}
+@supports (width:round(nearest,1px,1px)){#boot{--k:max(1px,min(round(nearest,min(calc(86vw / ${BR.w}),calc(72vh / ${SH})),1px),round(down,min(calc(98vw / ${BR.w}),calc(92vh / ${SH})),1px)))}}
 #boot.gone:not(.hold):not(.js){opacity:0;pointer-events:none}
 #boot *{position:absolute;display:block;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;pointer-events:none}
 #boot .bt-edge{left:0;top:0;width:${EDGE}em;height:100%;background:url(${edgeH}) 0 0/${EDGE}em 4em repeat-y}
 #boot .bt-edge.r{left:auto;right:0;transform:scaleX(-1)}
 #boot .bt-edge.t{width:100%;height:${EDGE}em;background:url(${edgeV}) 0 0/4em ${EDGE}em repeat-x}
 #boot .bt-edge.b{top:auto;bottom:0;width:100%;height:${EDGE}em;background:url(${edgeV}) 0 0/4em ${EDGE}em repeat-x;transform:scaleY(-1)}
-#boot .bt-pool{width:${pool.w}em;height:${pool.h}em;left:50%;top:50%;margin:-${(pool.h * 0.47 + 6).toFixed(1)}em 0 0 -${pool.w / 2}em;background:url(${pool.url}) 0 0/100% 100%;animation:bt-flick 3.2s steps(1) infinite}
-#boot .bt-mote{width:1em;height:1em;background:${css(C('lamp'))};opacity:0;animation:bt-mote 9s steps(36) infinite}
-#boot .bt-stage{position:relative;width:${W}em;height:${H}em;flex:none;margin-top:-4em;transform-origin:50% ${((DY / H) * 100).toFixed(3)}%}
-#boot .bt-clock{inset:0;transform-origin:50% 93%}
-#boot .bt-moon{left:${moon.x0}em;top:${moon.y0}em;width:${moon.w}em;height:${moon.h}em;background:url(${moon.url}) 0 0/${moon.w * MOON_N}em ${moon.h}em;animation:bt-moon ${LOAD_S}s steps(1,end) forwards}
+#boot .bt-pool{width:${pool.w}em;height:${pool.h}em;left:50%;top:50%;margin:-${(pool.h * 0.47).toFixed(1)}em 0 0 -${pool.w / 2}em;background:url(${pool.url}) 0 0/100% 100%;animation:bt-flick 3.2s steps(1) infinite}
+#boot .bt-mote{width:1em;height:1em;background:#ffd890;opacity:0;animation:bt-mote 9s steps(36) infinite}
+#boot .bt-stage{position:relative;width:${BR.w}em;height:${SH}em;flex:none;transform-origin:50% ${((DY / SH) * 100).toFixed(3)}%}
+#boot .bt-clock{left:${(BR.w - W) / 2}em;top:0;width:${W}em;height:${H}em;transform-origin:50% 96%}
+#boot .bt-brk{left:0;top:${H - 2}em;width:${BR.w}em;height:${BR.h}em}
+#boot .bt-shadow{left:${(BR.w - W) / 2 + 14}em;top:${H - 6}em;width:${W - 22}em;height:6em;background:repeating-linear-gradient(90deg,rgba(0,0,0,.55) 0 1em,rgba(0,0,0,.25) 1em 2em)}
+#boot .bt-moon{left:${MW.x0}em;top:${MW.y0}em;width:${MW.w}em;height:${MW.h}em;background:url(${moon.url()}) 0 0/${MW.w * MOON_N}em ${MW.h}em;animation:bt-moon ${LOAD_S}s steps(1,end) forwards}
 #boot .bt-case{left:0;top:0;width:${W}em;height:${H}em}
-#boot .bt-pend{left:${WIN.x0}em;top:${WIN.y0}em;width:${pend.w}em;height:${pend.h}em;background:url(${pend.url}) 0 0/${pend.w * PEND_N}em ${pend.h}em;animation:bt-pend .5s steps(${PEND_N - 1},jump-none) infinite alternate}
-#boot .bt-wglass{left:${WIN.x0}em;top:${WIN.y0}em;width:${WIN.x1 - WIN.x0}em;height:${WIN.y1 - WIN.y0}em;background:url(${winGlass()}) 0 0/100% 100%}
-#boot .bt-h{left:${HO.x}em;top:${HO.y}em;width:${FR}em;height:${FR}em;background-size:${FR * FN}em ${FR}em}
-#boot .bt-hh{background-image:url(${hourS.url()});background-position:-${55 * FR}em 0;animation:bt-hh ${LOAD_S}s steps(1,end) forwards}
-#boot .bt-mh{background-image:url(${minS.url()});animation:bt-mh ${LOAD_S}s steps(1,end) forwards}
-#boot .bt-sh{background-image:url(${secS.url()});animation:bt-sh 30s steps(60) infinite}
-#boot .bt-boss{left:${CX - 3}em;top:${DY - 3}em;width:6em;height:6em}
-#boot .bt-door{left:${CX - dr.S / 2}em;top:${DY - dr.S / 2}em;width:${dr.S}em;height:${dr.S}em;transform-origin:1.5em 50%}
-#boot .bt-tap{left:${CX + 22}em;top:${DY + 20}em;width:${ptr.fw}em;height:${ptr.fh}em;background:url(${ptr.url}) 0 0/${ptr.fw * 2}em ${ptr.fh}em;opacity:0}
+#boot .bt-glass{left:0;top:0;width:${W}em;height:${H}em}
+#boot .bt-pend{left:${APB.x0}em;top:${APB.y0}em;width:${APB.w}em;height:${APB.h}em;background:url(${pend.url()}) 0 0/${APB.w * PEND_N}em ${APB.h}em;animation:bt-pend .55s steps(${PEND_N - 1},jump-none) infinite alternate}
+#boot .bt-h{left:${HO.x}em;top:${HO.y}em;width:${FR}em;height:${FR}em}
+#boot .bt-hh{background:url(${hourS.url()}) -${hourFrames[0] * FR}em 0/${FR * HN}em ${FR}em;animation:bt-hh ${LOAD_S}s steps(1,end) forwards}
+#boot .bt-mh{background:url(${minS.url()}) 0 0/${FR * MN}em ${FR}em;animation:bt-mh ${LOAD_S}s steps(1,end) forwards}
+#boot .bt-sh{background:url(${secS.url()}) 0 0/${FR * SN}em ${FR}em;animation:bt-sh 60s steps(${SN}) infinite}
+#boot .bt-boss{left:${CX - 4}em;top:${DY - 4}em;width:8em;height:8em}
+#boot .bt-tap{left:${CX + 26}em;top:${DY + 24}em;width:${ptr.fw}em;height:${ptr.fh}em;background:url(${ptr.url}) 0 0/${ptr.fw * 2}em ${ptr.fh}em;opacity:0}
 #boot .bt-spark{width:7em;height:7em;opacity:0}
 #boot.ready{cursor:pointer}
 #boot.ready *{pointer-events:none}
 #boot.ready .bt-tap{opacity:1;animation:bt-tap 1s steps(1) infinite}
-#boot.ready .bt-clock{animation:bt-invite 2.4s steps(1) infinite}
+#boot.ready .bt-clock{animation:bt-invite 2.6s steps(1) infinite}
 #boot.done .bt-clock{animation:bt-chime .9s steps(1)}
-#boot.done.ready .bt-clock{animation:bt-chime .9s steps(1),bt-invite 2.4s steps(1) .9s infinite}
+#boot.done.ready .bt-clock{animation:bt-chime .9s steps(1),bt-invite 2.6s steps(1) .9s infinite}
 #boot.done .bt-spark{animation:bt-spark .8s steps(4) forwards}
-#boot.open .bt-door{animation:bt-door .46s steps(7) forwards}
-#boot.open .bt-tap{opacity:0;animation:none}
+#boot.zoom .bt-tap{opacity:0;animation:none}
 @keyframes bt-flick{0%,100%{opacity:1}31%{opacity:.9}36%{opacity:1}70%{opacity:.94}}
 @keyframes bt-mote{0%{opacity:0;transform:translate(0,0)}15%{opacity:.7}50%{transform:translate(6em,-14em)}85%{opacity:.5}100%{opacity:0;transform:translate(2em,-28em)}}
-@keyframes bt-sh{to{background-position:-${FN * FR}em 0}}
-@keyframes bt-pend{to{background-position:-${(PEND_N - 1) * pend.w}em 0}}
+@keyframes bt-sh{to{background-position:-${SN * FR}em 0}}
+@keyframes bt-pend{to{background-position:-${(PEND_N - 1) * APB.w}em 0}}
 ${progFrames('bt-mh', minFrames, FR)}
 ${progFrames('bt-hh', hourFrames, FR)}
-${progFrames('bt-moon', moonFrames, moon.w)}
+${progFrames('bt-moon', moonFrames, MW.w)}
 @keyframes bt-tap{0%{background-position:0 0}50%{background-position:-${ptr.fw}em 0}}
 @keyframes bt-invite{0%,100%{transform:none}84%{transform:translateY(-1em)}88%{transform:translateY(0)}92%{transform:translateY(-.5em)}96%{transform:none}}
-@keyframes bt-chime{0%{transform:rotate(0)}10%{transform:rotate(-1.2deg)}22%{transform:rotate(1.1deg)}34%{transform:rotate(-.8deg)}46%{transform:rotate(.6deg)}58%{transform:rotate(-.3deg)}70%,100%{transform:none}}
+@keyframes bt-chime{0%{transform:rotate(0)}10%{transform:rotate(-1deg)}22%{transform:rotate(.9deg)}34%{transform:rotate(-.6deg)}46%{transform:rotate(.4deg)}58%{transform:rotate(-.2deg)}70%,100%{transform:none}}
 @keyframes bt-spark{0%{opacity:1;transform:translate(0,0) scale(.4)}60%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1)}}
-@keyframes bt-door{0%{transform:perspective(420em) rotateY(0)}100%{transform:perspective(420em) rotateY(-118deg)}}
 @media (prefers-reduced-motion:reduce){#boot *{animation-duration:0s!important;animation-iteration-count:1!important}}
 `.trim().replace(/\n+/g, '\n');
 
-const motes = [[-44, 30, 0], [40, 10, -2.1], [-20, -30, -4.4], [52, -46, -6.2], [-58, -8, -1.3], [12, 52, -3.6], [30, -60, -7.7]];
-const sparks = [[CX - 20, 18, -10, -12], [CX + 14, 14, 12, -14], [CX - 3, 2, -2, -16], [CX + 30, 34, 16, -6], [CX - 36, 36, -16, -6]];
+const motes = [[-48, 30, 0], [44, 10, -2.1], [-22, -40, -4.4], [56, -56, -6.2], [-62, -8, -1.3], [14, 62, -3.6], [32, -70, -7.7], [-36, 70, -5.1]];
+const sparks = [[CX - 22, 20, -10, -12], [CX + 16, 16, 12, -14], [CX - 3, 4, -2, -16], [CX + 34, 40, 16, -6], [CX - 40, 40, -16, -6]];
 const html = `<!-- boot:begin (generated by src/onboard/tools/bootart.mjs; edit the generator, not this block) -->
-    <style>${CSS}</style>
-    <div id="boot" role="progressbar" aria-label="Loading" data-art='${JSON.stringify({ fr: FR, fn: FN, mw: moon.w, mn: MOON_N, cx: CX, dy: DY, rd: R_DIAL })}'>
+    <style>${CSSTXT}</style>
+    <div id="boot" role="progressbar" aria-label="Loading" data-art='${JSON.stringify({ fr: FR, mn: MN, hn: HN, sn: SN, mw: MW.w, mf: MOON_N, cx: CX, dy: DY, rd: RD, w: W, sh: SH, bw: BR.w })}'>
       <i class="bt-edge"></i><i class="bt-edge r"></i><i class="bt-edge t"></i><i class="bt-edge b"></i><i class="bt-pool"></i>${motes.map(([x, y, d]) => `<i class="bt-mote" style="left:calc(50% + ${x}em);top:calc(50% + ${y}em);animation-delay:${d}s"></i>`).join('')}
-      <div class="bt-stage"><div class="bt-clock">
-        <i class="bt-moon"></i>
-        <img class="bt-case" src="${caseOut.url()}" alt="" />
-        <i class="bt-pend"></i><i class="bt-wglass"></i>
-        <i class="bt-h bt-hh"></i><i class="bt-h bt-mh"></i><i class="bt-h bt-sh"></i>
-        <img class="bt-boss" src="${boss()}" alt="" />
-        <img class="bt-door" src="${dr.url}" alt="" />
-        <i class="bt-tap"></i>
-        ${sparks.map(([x, y, dx, dy]) => `<img class="bt-spark" style="left:${x}em;top:${y}em;--dx:${dx}em;--dy:${dy}em" src="${sparkle()}" alt="" />`).join('')}
-      </div></div>
+      <div class="bt-stage">
+        <img class="bt-brk" src="${brk.url()}" alt="" /><i class="bt-shadow"></i>
+        <div class="bt-clock">
+          <i class="bt-moon"></i>
+          <img class="bt-case" src="${caseB.url()}" alt="" />
+          <i class="bt-pend"></i>
+          <i class="bt-h bt-hh"></i><i class="bt-h bt-mh"></i><i class="bt-h bt-sh"></i>
+          <img class="bt-boss" src="${bossB.url()}" alt="" />
+          <img class="bt-glass" src="${glass.url()}" alt="" />
+          <i class="bt-tap"></i>
+          ${sparks.map(([x, y, dx, dy]) => `<img class="bt-spark" style="left:${x}em;top:${y}em;--dx:${dx}em;--dy:${dy}em" src="${sparkle()}" alt="" />`).join('')}
+        </div>
+      </div>
     </div>
     <!-- boot:end -->`;
 
@@ -828,12 +744,20 @@ const src = readFileSync(file, 'utf8');
 const a = src.indexOf('<!-- boot:begin'), z = src.indexOf('<!-- boot:end -->');
 if (a < 0 || z < 0) throw new Error('boot markers missing in index.html');
 writeFileSync(file, src.slice(0, a) + html + src.slice(z + '<!-- boot:end -->'.length));
-// a preview of the art pieces for checking by eye
 if (process.argv.includes('--preview')) {
   const out = process.argv[process.argv.indexOf('--preview') + 1];
-  const P = new Buf(W * 2 + 20, H);
-  P.blit(caseOut, 0, 0);
+  const P = new Buf(W * 2 + 8 + BR.w, SH);
+  P.blit(caseB, 0, 0);
+  P.blit(handFrame(HOUR, (10 / 12) * Math.PI * 2 + 0.2), HO.x, HO.y);
+  P.blit(handFrame(MINUTE, (10 / 60) * Math.PI * 2), HO.x, HO.y);
+  P.blit(bossB, CX - 4, DY - 4);
+  P.blit(glass, 0, 0);
+  P.blit(brk, (W - BR.w) / 2, H - 2);
+  const md = moonDisc(-0.2);
+  for (let y = 0; y < MW.h; y++) for (let x = 0; x < MW.w; x++) { const X = x + MW.x0, Y = y + MW.y0; if (inMoonWin(X, Y)) { const c = md.get(X - (CX - MDS / 2), Y - (MOON.dcy - MDS / 2)); if (c) P.set(X, Y, c); } }
+  P.blit(pendulumFrame(0.12), APB.x0, APB.y0);
+  P.blit(caseB, W + 8, 0);
   writeFileSync(out, P.png());
 }
-export const BOOT = { W, H, CX, DY, FR, FN, HO, R_DIAL, R_BEZ };
 console.log('boot block written:', (html.length / 1024).toFixed(1), 'KB');
+
