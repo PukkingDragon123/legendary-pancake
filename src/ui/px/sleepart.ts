@@ -1,9 +1,11 @@
 // A tiny pixel painter for the sleep, clock and morning screens: an RGBA texel buffer with
 // discs, ellipses, polygons, lines, lit material ramps (BME's hue-shifted ramps), dithering and
 // an automatic warm-ink outline. Art is drawn at pixel resolution and shown scaled up crisp.
-import { RAMPS } from './sprites.js';
+import { RAMPS, RAMPS_SRC } from './sprites.js';
+import { calm } from './calm.js';
 
 export { RAMPS };
+// [ui3] every colour that enters an Art buffer is graded into the calm palette (calm.js) once, here
 export const INK = '#2a1a14';
 export type Col = string | number | null;
 export type Fill = Col | ((x: number, y: number) => Col);
@@ -13,7 +15,7 @@ const packCache = new Map<string, number>();
 export function pack(c: string): number {
   let v = packCache.get(c);
   if (v === undefined) {
-    let s = c.replace('#', '');
+    let s = calm(c).replace('#', '');
     if (s.length === 3) s = s.split('').map((k) => k + k).join('');
     const n = parseInt(s.slice(0, 6), 16), a = s.length >= 8 ? parseInt(s.slice(6, 8), 16) : 255;
     v = ((a << 24) | ((n & 255) << 16) | (n & 0xff00) | ((n >> 16) & 255)) >>> 0;
@@ -22,7 +24,7 @@ export function pack(c: string): number {
   return v;
 }
 /** tone k (0 dark .. 5 light) of a named ramp, clamped */
-export const tone = (ramp: string, k: number) => { const r = RAMPS[ramp] ?? RAMPS.wood; return r[Math.max(0, Math.min(r.length - 1, Math.round(k)))]; };
+export const tone = (ramp: string, k: number) => { const r = RAMPS_SRC[ramp] ?? RAMPS_SRC.wood; return r[Math.max(0, Math.min(r.length - 1, Math.round(k)))]; };
 /** 4x4 ordered dither threshold */
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 export const bayer = (x: number, y: number) => BAYER[((y & 3) << 2) | (x & 3)];

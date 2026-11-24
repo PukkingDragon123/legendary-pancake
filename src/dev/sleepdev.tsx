@@ -8,7 +8,7 @@ import { render } from 'preact';
 import '../ui/style.css';
 import { installPixelSkin } from '../ui/pxskin.ts';
 import { Art } from '../ui/px/sleepart.ts';
-import { candle, GIFT_LOOK, moon, mug, nightWindow, owl, phone, present, sack, stickerURL } from '../ui/px/sleepprops.ts';
+import { candle, GIFT_LOOK, moon, mug, nest, nightWindow, phone, present, sack, songbird, stickerURL } from '../ui/px/sleepprops.ts';
 import { CH, CW, FINISHES, paintCuckoo } from '../ui/px/cuckoo.ts';
 import { edit, save } from '../game/store.ts';
 import { demoNight } from '../sleep/index.ts';
@@ -32,7 +32,7 @@ function ArtGallery() {
   const now = 10 * 60 + 9 + 31 / 60;
   return <div style="overflow:auto;height:100%;padding:8px;box-sizing:border-box">
     {FINISHES.slice(0, 2).map((f, i) => <Canvas w={CW} h={CH} k={3} label={f.name} draw={(a) => paintCuckoo(a, { now, swing: i ? -0.2 : 0.12, cuckoo: i ? 1 : 0, hoot: !!i, drop: [8, 22], finish: f })} />)}
-    <Canvas w={60} h={40} k={3} label="owls" draw={(a) => { owl(a, 14, 20, 1, { eyes: 'open', cap: true }); owl(a, 44, 20, 1, { eyes: 'closed', cap: true, blush: true }); }} />
+    <Canvas w={60} h={40} k={3} label="bird and nest" draw={(a) => { songbird(a, 12, 20, 1, { beak: 'open', wing: 1 }); nest(a, 40, 22, 0.9, 0); }} />
     <Canvas w={70} h={44} k={3} label="props" draw={(a) => { candle(a, 0, 4, 1); mug(a, 20, 18, 2, 'coffee'); mug(a, 44, 18, 2, 'tea'); }} />
     <Canvas w={50} h={36} k={3} label="phone" draw={(a) => { phone(a, 0, 0, false); phone(a, 26, 0, true); }} />
     <Canvas w={100} h={60} k={3} label="moons" draw={(a) => { moon(a, 16, 20, 12, { phase: 0.5, face: 'sleep' }); moon(a, 50, 20, 10, { phase: 0.3 }); moon(a, 80, 20, 10, { phase: 0.8 }); }} />

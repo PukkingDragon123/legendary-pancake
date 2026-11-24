@@ -1,7 +1,8 @@
-// Hoot Hollow's own pixel icons, drawn with The Bear Must Eat's sprite kit (sprites.js): 20x20
-// rows or Grid drawings keyed to hue-shifted material ramps, shaded from the top-left with an
-// automatic dark outline. They sit alongside BME's ~170 icons and look like one set.
+// Hoot Hollow's own pixel icons, drawn with the sprite kit (sprites.js): 20x20 rows or Grid
+// drawings keyed to hue-shifted material ramps, shaded from the top-left with an automatic dark
+// outline, and graded into the calm "Moss & Moonlight" palette when built. No 2D owls.
 import { Grid, icon } from './sprites.js';
+import { installBaked } from './baked.js';
 
 icon('acorn', { C: 'wood.R@cap', c: 'wood:1', N: 'lwood.R@nut', n: 'lwood:5', S: 'dwood.x@stem' }, () => {
   const g = new Grid(20, 20);
@@ -250,44 +251,39 @@ icon('phone_off', { P: 'navy.f@phone', S: 'sky.r@screen', R: 'red.x@x', K: '#2a1
   '....................',
 ]);
 
-icon('owl', { B: 'wood.R@body', D: 'cream.r@disc', E: '#2a1a14', e: 'white:5', K: 'honey.y@beak', T: 'wood:2', W: 'pink:4' }, () => {
+// 'owl' is Pip's token wherever the old 2D owl face was used: a soft barred tawny feather with a
+// quill and a glint. (Pip himself only ever appears as the 3D model.)
+icon('owl', { F: 'cinnamon.x@vane', f: 'cinnamon:1', c: 'cream:4', Q: 'bone.x@quill', q: 'bone:2', S: '#fff8d0!' }, () => {
   const g = new Grid(20, 20);
-  g.ellipse(10, 11, 8, 8, 'B');
-  g.poly([[3, 2], [6.5, 5], [3.5, 6.5]], 'T');
-  g.poly([[17, 2], [13.5, 5], [16.5, 6.5]], 'T');
-  g.ellipse(6.8, 10.4, 3.6, 3.6, 'D');
-  g.ellipse(13.2, 10.4, 3.6, 3.6, 'D');
-  g.rect(9, 12, 2, 3, 'D');
-  g.set(7, 10, 'E').set(13, 10, 'E').set(7, 9, 'e').set(13, 9, 'e');
-  g.set(9, 12, 'K').set(10, 12, 'K').set(9, 13, 'K').set(10, 13, 'K');
-  g.set(4, 13, 'W').set(16, 13, 'W');
+  // the vane, a long leaf shape leaning to the right
+  g.poly([[15.5, 1.5], [17.6, 3.6], [16.8, 8.5], [13, 13.4], [8.6, 15.6], [6.6, 14.2], [7.4, 10], [10.6, 5.4]], 'F');
+  // dark bars across the vane and pale downy tips
+  for (const [x0, y0] of [[9, 12], [11, 9], [13, 6.4], [15, 4]]) g.line(x0 - 1.5, y0 + 1.2, x0 + 2.4, y0 - 1.4, 'f');
+  g.set(7, 14, 'c').set(8, 15, 'c').set(6, 13, 'c').set(16, 2, 'c').set(17, 3, 'c');
+  // the quill down the middle and out of the bottom
+  g.line(16.6, 2.6, 7.4, 14.6, 'Q');
+  g.line(7.4, 14.6, 3.6, 18.4, 'Q').set(3, 19, 'q').set(4, 18, 'q');
+  g.set(13, 2, 'S').set(12, 3, 'S').set(14, 3, 'S').set(13, 4, 'S');
   return g.rows();
 });
 
-// five little owl faces for "how do you feel?"
-const MOOD_MOUTH = [
-  ['......', '.kkkk.', 'k....k'],
-  ['......', '.kkkk.', '......'],
-  ['......', 'k....k', '.kkkk.'],
-  ['k....k', '.k..k.', '..kk..'],
-  ['k....k', 'kRRRRk', '.kkkk.'],
-];
-for (let i = 0; i < 5; i++) {
-  const body = ['wood', 'lwood', 'honey', 'orange', 'fox'][i];
-  icon('mood' + i, { B: body + '.R@b', D: 'cream.r@d', E: '#2a1a14', e: 'white:5', K: 'honey:4', R: 'red:4', W: 'pink:4', k: 'line', Z: '#2a1a14' }, () => {
-    const g = new Grid(20, 20);
-    g.ellipse(10, 10.6, 8.6, 8.4, 'B');
-    g.ellipse(6.6, 9.4, 3.8, 3.8, 'D');
-    g.ellipse(13.4, 9.4, 3.8, 3.8, 'D');
-    g.ellipse(10, 14, 4.2, 3, 'D');
-    if (i === 0) { for (const x of [5, 6, 7, 8]) g.set(x, 9, 'Z'); for (const x of [12, 13, 14, 15]) g.set(x, 9, 'Z'); }
-    else { g.set(7, 9, 'E').set(13, 9, 'E').set(7, 10, 'E').set(13, 10, 'E'); if (i > 1) g.set(6, 8, 'e').set(12, 8, 'e'); }
-    g.set(9, 11, 'K').set(10, 11, 'K');
-    g.stamp(7, 13, MOOD_MOUTH[i].map((r) => r.replace(/k/g, 'Z')));
-    if (i >= 3) g.set(4, 12, 'W').set(16, 12, 'W');
-    return g.rows();
-  });
+// five little night skies for "how did you sleep?": a stormy cloud, a grey cloud, a half moon
+// peeping from a cloud, a smiling crescent with stars, and a bright morning sun. Dot eyes only.
+const MOOD_KEY = { C: 'white.r@cloud', c: 'white:2', D: 'slate.r@storm', d: 'slate:1', M: 'yellow.R@moon', m: 'yellow:5', U: 'yellow.R@sun', u: 'orange:4', R: 'water:4', L: 'yellow:5', E: '#2a1a14', W: 'pink:4', S: '#fff8d0!' };
+function cloud(g, cx, cy, ch, w = 1) {
+  g.ellipse(cx - 3.4 * w, cy + 1, 3.2 * w, 2.8, ch);
+  g.ellipse(cx + 0.2, cy - 1.2, 4.2 * w, 3.8, ch);
+  g.ellipse(cx + 4 * w, cy + 1.2, 3 * w, 2.6, ch);
+  g.rect(Math.round(cx - 6 * w), Math.round(cy + 1), Math.round(12 * w), 3, ch);
 }
+const MOODS = [
+  (g) => { cloud(g, 10, 8, 'D', 1.05); for (const [x, y] of [[5, 15], [8, 17], [12, 15], [15, 17]]) g.set(x, y, 'R').set(x, y + 1, 'R'); g.line(11, 12, 9, 15, 'L').line(9, 15, 11, 15, 'L').line(11, 15, 9, 18, 'L'); g.set(8, 8, 'E').set(12, 8, 'E'); g.line(9, 10, 11, 10, 'E'); },
+  (g) => { cloud(g, 10, 10, 'C', 1.1); g.line(4, 14, 16, 14, 'c'); g.set(8, 10, 'E').set(12, 10, 'E'); g.line(9, 12, 11, 12, 'E'); },
+  (g) => { g.ellipse(11.5, 7, 4.8, 4.8, 'M'); g.rect(12, 1, 6, 12, '.'); g.set(9, 6, 'E'); g.set(8, 3, 'm'); cloud(g, 11, 13, 'C', 0.9); g.set(9, 13, 'E').set(13, 13, 'E'); g.set(10, 15, 'E').set(11, 15, 'E').set(12, 15, 'E'); },
+  (g) => { g.ellipse(9.5, 10, 7, 7, 'M'); g.ellipse(13.5, 7.6, 6.2, 6.2, '.'); g.set(6, 9, 'E').set(5, 12, 'E').set(6, 13, 'E').set(7, 13, 'E').set(4, 11, 'W'); g.set(3, 7, 'm').set(4, 5, 'm'); for (const [x, y] of [[15, 4], [17, 12], [13, 16]]) g.set(x, y, 'S').set(x - 1, y, 'S').set(x + 1, y, 'S').set(x, y - 1, 'S').set(x, y + 1, 'S'); },
+  (g) => { for (let k = 0; k < 8; k++) { const a = (k * Math.PI) / 4; g.line(10 + Math.cos(a) * 6.4, 10 + Math.sin(a) * 6.4, 10 + Math.cos(a) * 8.8, 10 + Math.sin(a) * 8.8, 'u'); } g.ellipse(10, 10, 5.6, 5.6, 'U'); g.set(8, 9, 'E').set(12, 9, 'E'); g.set(8, 12, 'E').set(9, 13, 'E').set(10, 13, 'E').set(11, 13, 'E').set(12, 12, 'E'); g.set(6, 11, 'W').set(14, 11, 'W'); g.set(17, 2, 'S').set(2, 17, 'S'); },
+];
+for (let i = 0; i < 5; i++) icon('mood' + i, MOOD_KEY, () => { const g = new Grid(20, 20); MOODS[i](g); return g.rows(); });
 
 // pixel toggle switch: a brass knob in a wooden groove
 for (const on of [false, true]) {
@@ -300,3 +296,7 @@ for (const on of [false, true]) {
 }
 
 export const HOLLOW_ICONS = ['acorn', 'moonstone', 'candle', 'jar', 'treehouse', 'mic', 'rain', 'waves', 'wind', 'leaf', 'hanger', 'brush', 'satchel', 'nest', 'phone_off', 'owl', 'mood0', 'mood1', 'mood2', 'mood3', 'mood4', 'switch_on', 'switch_off'];
+
+// [ui3] detailed icons baked from real 3D props replace the drawn ones of the same name (bell, lantern, alarm,
+// clock, book, nest, jar, camera, bench, shop, clipboard); see src/dev/iconbake.ts
+installBaked();

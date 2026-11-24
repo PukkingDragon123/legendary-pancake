@@ -1,13 +1,18 @@
-// Procedural pixel painting for the chrome: carved wooden boards, ropes, chains, leafy branches,
-// the carved plaques of the main buttons, the hanging tool tags and the shelf. Everything is
+// Procedural pixel painting for the chrome: carved wooden boards (with moss cushions and ivy),
+// ropes, chains, leafy branches, the carved plaques of the main buttons, the hanging tool tags and
+// the shelf, all graded into the calm "Moss & Moonlight" palette. Everything is
 // painted at art-pixel resolution (1 texel = 2 CSS px on screen) into a small RGBA buffer,
 // cached as a data URL, and shown with `image-rendering: pixelated`.
-import { RAMPS } from '../px/sprites.js';
+import { RAMPS_SRC } from '../px/sprites.js';
+import { calm } from '../px/calm.js';
+import { woodPx } from '../px/materials.js';
 
 type C = [number, number, number];
-const hexc = (h: string): C => { const n = parseInt(h.replace('#', '').slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
-const RAMP = (name: string): C[] => (RAMPS[name] ?? RAMPS.wood).map(hexc);
-export const INK: C = [42, 26, 20];
+// [ui3] colours are graded into the calm palette (calm.js) as they are read
+const hexc = (h: string): C => { const n = parseInt(calm(h).replace('#', '').slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const RAMP = (name: string): C[] => (RAMPS_SRC[name] ?? RAMPS_SRC.wood).map(hexc);
+export const INK: C = [46, 43, 36];
+const INK2: C = [74, 62, 50];
 const mix = (a: C, b: C, t: number): C => [Math.round(a[0] + (b[0] - a[0]) * t), Math.round(a[1] + (b[1] - a[1]) * t), Math.round(a[2] + (b[2] - a[2]) * t)];
 
 export function hash(x: number, y: number, s = 0): number {
@@ -27,13 +32,21 @@ export const bayer = (x: number, y: number) => BAYER[((y & 3) << 2) | (x & 3)];
 
 export class Buf {
   d: Uint8ClampedArray<ArrayBuffer>;
-  constructor(public w: number, public h: number) { this.d = new Uint8ClampedArray(new ArrayBuffer(w * h * 4)); }
+  /** per art pixel: -1, or the tone (0..5) of a wood-material pixel that is re-painted with real boards at hi-res */
+  m: Int8Array;
+  /** wood options for the hi-res pass */
+  woodDark = false;
+  woodSeed = 0;
+  constructor(public w: number, public h: number) { this.d = new Uint8ClampedArray(new ArrayBuffer(w * h * 4)); this.m = new Int8Array(w * h).fill(-1); }
+  /** a wood-material pixel of tone t (the low-res colour R[t] stands in until the hi-res pass) */
+  wood(x: number, y: number, t: number, R: C[]) { this.set(x, y, R[t]); if (this.in(x, y)) this.m[y * this.w + x] = t; return this; }
   in(x: number, y: number) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
   a(x: number, y: number) { return this.in(x, y) ? this.d[(y * this.w + x) * 4 + 3] : 0; }
   set(x: number, y: number, c: C, a = 255) {
     x = Math.round(x); y = Math.round(y);
     if (!this.in(x, y)) return this;
     const i = (y * this.w + x) * 4;
+    this.m[y * this.w + x] = -1;
     if (a >= 255 || !this.d[i + 3]) { this.d[i] = c[0]; this.d[i + 1] = c[1]; this.d[i + 2] = c[2]; this.d[i + 3] = a; return this; }
     const t = a / 255;
     this.d[i] = this.d[i] + (c[0] - this.d[i]) * t; this.d[i + 1] = this.d[i + 1] + (c[1] - this.d[i + 1]) * t; this.d[i + 2] = this.d[i + 2] + (c[2] - this.d[i + 2]) * t;
@@ -59,13 +72,32 @@ export class Buf {
     return cv;
   }
   url() { return this.canvas().toDataURL('image/png'); }
+  /**
+   * The hi-res version, `res` texels per art pixel: wood pixels are re-painted texel by texel with BUSHED's
+   * worn floor boards (grain along x), toned by their art-pixel tone; everything else (ink, brass, moss, ivy,
+   * the painted windows) keeps its chunky art pixels.
+   */
+  hi(res = 2): Buf {
+    const o = new Buf(this.w * res, this.h * res);
+    for (let ty = 0; ty < o.h; ty++) for (let tx = 0; tx < o.w; tx++) {
+      const x = (tx / res) | 0, y = (ty / res) | 0, i = y * this.w + x, j = (ty * o.w + tx) * 4;
+      const t = this.m[i];
+      if (t >= 0 && this.d[i * 4 + 3]) {
+        const c = woodPx(tx + this.woodSeed * 53, ty + this.woodSeed * 29, (t - 3) * 0.13, this.woodDark);
+        o.d[j] = c[0]; o.d[j + 1] = c[1]; o.d[j + 2] = c[2]; o.d[j + 3] = 255;
+      } else { o.d[j] = this.d[i * 4]; o.d[j + 1] = this.d[i * 4 + 1]; o.d[j + 2] = this.d[i * 4 + 2]; o.d[j + 3] = this.d[i * 4 + 3]; }
+    }
+    return o;
+  }
 }
 
 const urls = new Map<string, string>();
+/** texels per art pixel for the chrome's wood (the boards are shown 2 CSS px per art pixel: 1 texel per CSS px) */
+export const HIRES = 2;
 export function cached(key: string, make: () => Buf): string {
   let u = urls.get(key);
   if (u === undefined) {
-    try { u = typeof document === 'undefined' ? '' : make().url(); } catch (e) { console.warn('paint failed', key, e); u = ''; }
+    try { u = typeof document === 'undefined' ? '' : make().hi(HIRES).url(); } catch (e) { console.warn('paint failed', key, e); u = ''; }
     urls.set(key, u);
   }
   return u;
@@ -81,20 +113,21 @@ function woodTone(x: number, y: number, seed: number, plank: number): number {
   return t;
 }
 
-export interface PlankOpts { tone?: string; seed?: number; planks?: number; carve?: boolean; nails?: [number, number][]; notch?: number }
+export interface PlankOpts { tone?: string; seed?: number; planks?: number; carve?: boolean; nails?: [number, number][]; notch?: number; moss?: [number, number][]; ivy?: [number, number, number][] }
 /** A carved wooden board: grain, knots, bevelled edges, plank seams, an engraved inner border and brass nails. */
 export function plank(w: number, h: number, o: PlankOpts = {}): string {
   const key = `plank:${w}x${h}:${JSON.stringify(o)}`;
   return cached(key, () => {
     const R = RAMP(o.tone ?? 'wood'), B = RAMP('brass'), seed = o.seed ?? 1, n = o.notch ?? 2, planks = o.planks ?? 1;
     const b = new Buf(w, h);
+    b.woodDark = o.tone === 'dwood'; b.woodSeed = seed;
     const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && !(x + y < n || w - 1 - x + y < n || x + h - 1 - y < n || w - 1 - x + h - 1 - y < n);
     const ph = (h - 2) / planks;
     const knots: [number, number][] = [];
     for (let i = 0; i < Math.max(1, Math.round(w / 40)); i++) knots.push([6 + hash(i, 1, seed) * (w - 12), 3 + hash(i, 2, seed) * (h - 6)]);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       if (!inside(x, y)) continue;
-      if (!inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1)) { b.set(x, y, INK); continue; }
+      if (!inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1)) { b.set(x, y, hash(x, y, seed + 31) > 0.84 ? INK2 : INK); continue; } // a hand-inked, uneven edge
       const pi = Math.min(planks - 1, Math.floor((y - 1) / ph));
       let t = woodTone(x, y, seed, pi);
       for (const [kx, ky] of knots) { const d = Math.hypot((x - kx) / 2.6, (y - ky) / 1.3); if (d < 1) t = d < 0.5 ? 1 : 2; else if (d < 1.5 && t > 2) t = 3; }
@@ -112,9 +145,16 @@ export function plank(w: number, h: number, o: PlankOpts = {}): string {
         else if ((y === gy0 + 1 && x > gx0 && x < gx1) || (x === gx0 + 1 && y > gy0 && y < gy1)) t = Math.min(t, 2);
         else if ((y === gy1 + 1 && x >= gx0 && x <= gx1 + 1) || (x === gx1 + 1 && y >= gy0 && y <= gy1 + 1)) t = 5;
       }
-      b.set(x, y, R[t]);
+      b.wood(x, y, t, R);
     }
     for (const [nx, ny] of o.nails ?? []) rivet(b, nx, ny, B);
+    // worn corners: a few lighter scuffs along the edges, dark tool marks
+    for (let i = 0; i < Math.round(w / 14); i++) {
+      const x = 4 + Math.floor(hash(i, 3, seed) * (w - 8)), y = hash(i, 4, seed) > 0.5 ? 2 : h - 3;
+      if (b.a(x, y)) b.set(x, y, R[5]);
+    }
+    for (const [x0, x1] of o.moss ?? []) moss(b, x0, x1, 0, seed + x0);
+    for (const [x, y, len] of o.ivy ?? []) ivy(b, x, y, len, x < w / 2 ? 1 : -1, seed + x);
     return b;
   });
 }
@@ -122,6 +162,46 @@ function rivet(b: Buf, x: number, y: number, B: C[]) {
   b.set(x - 1, y - 1, B[4]).set(x, y - 1, B[3]).set(x + 1, y - 1, B[2]);
   b.set(x - 1, y, B[3]).set(x, y, B[5]).set(x + 1, y, B[1]);
   b.set(x - 1, y + 1, B[2]).set(x, y + 1, B[1]).set(x + 1, y + 1, INK);
+}
+
+/**
+ * A clump of moss growing over a board's top edge between x0 and x1 (the edge row is y0): a
+ * cushion of stippled moss tones, a few fronds poking up, little drips hanging over the face.
+ */
+export function moss(b: Buf, x0: number, x1: number, y0: number, seed = 1) {
+  const M = RAMP('moss'), L = RAMP('leaf');
+  for (let x = x0; x <= x1; x++) {
+    const t = (x - x0) / Math.max(1, x1 - x0), hump = Math.sin(t * Math.PI);
+    const top = y0 - Math.round(hump * 1.6 + hash(x, 1, seed) * 0.9), bot = y0 + 1 + Math.round(hump * 1.2 + hash(x, 2, seed) * 1.4);
+    for (let y = top; y <= bot; y++) {
+      if (!b.in(x, y)) continue;
+      const k = (y - top) / Math.max(1, bot - top);
+      let tone = k < 0.25 ? 5 : k < 0.55 ? 4 : k < 0.8 ? 3 : 2;
+      if (hash(x, y, seed + 3) > 0.72) tone = Math.max(1, tone - 1);
+      if (hash(x, y, seed + 4) > 0.93) tone = 5;
+      b.set(x, y, M[tone]);
+    }
+    if (b.in(x, top - 1)) b.set(x, top - 1, M[1]); // dark rim on the cushion's top
+    // drips over the board face
+    if (hash(x, 5, seed) > 0.78) { for (let j = 1; j <= 1 + Math.round(hash(x, 6, seed) * 2); j++) if (b.in(x, bot + j)) b.set(x, bot + j, M[j === 1 ? 3 : 2]); }
+    // fronds poking up
+    if (hash(x, 7, seed) > 0.82 && b.in(x, top - 2)) { b.set(x, top - 2, L[4]); if (b.in(x, top - 3)) b.set(x, top - 3, L[5]); }
+  }
+}
+
+/** A little sprig of ivy hanging from (x, y): a stem and a few three-pixel leaves. */
+export function ivy(b: Buf, x: number, y: number, len = 6, dir = 1, seed = 2) {
+  const L = RAMP('leaf'), S = RAMP('moss');
+  let cx = x;
+  for (let j = 0; j < len; j++) {
+    const yy = y + j;
+    if (j % 2 === 1) cx += hash(j, 1, seed) > 0.5 ? dir : 0;
+    if (b.in(cx, yy)) b.set(cx, yy, S[2]);
+    if (j % 2 === 0 && j > 0) {
+      const side = (j / 2) % 2 ? 1 : -1, lx = cx + side;
+      for (const [dx, dy, t] of [[0, 0, 4], [side, 0, 3], [0, 1, 2], [side, -1, 5]] as [number, number, number][]) if (b.in(lx + dx, yy + dy)) b.set(lx + dx, yy + dy, L[t]);
+    }
+  }
 }
 
 /** A twisted rope, 3 texels wide, tiling vertically. */
@@ -201,6 +281,7 @@ export type Inner = 'night' | 'paper' | 'velvet';
 export function plaque(w: number, h: number, inner: Inner, seed = 5, plateH = 12): string {
   return cached(`plaque:${w}x${h}:${inner}:${seed}:${plateH}`, () => {
     const b = new Buf(w, h), R = RAMP('wood'), D = RAMP('dwood'), B = RAMP('brass');
+    b.woodSeed = seed;
     const n = 3, fw = 5, wy1 = h - plateH - 1;
     const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && !(x + y < n || w - 1 - x + y < n || x + h - 1 - y < n || w - 1 - x + h - 1 - y < n);
     const win = (x: number, y: number) => x >= fw && x < w - fw && y >= fw && y < wy1;
@@ -219,7 +300,7 @@ export function plaque(w: number, h: number, inner: Inner, seed = 5, plateH = 12
       if (((y === gy0 || y === gy1) && x >= gx0 && x <= gx1) || ((x === gx0 || x === gx1) && y >= gy0 && y <= gy1)) t = 1;
       // bevel towards the window
       if (win(x - 1, y) || win(x, y - 1)) t = 5;
-      b.set(x, y, R[t]);
+      b.wood(x, y, t, R);
     }
     // the window's inner shadow (top and left)
     for (let x = fw; x < w - fw; x++) { b.set(x, fw, [0, 0, 0], 70); b.set(x, fw + 1, [0, 0, 0], 35); }
@@ -242,6 +323,10 @@ export function plaque(w: number, h: number, inner: Inner, seed = 5, plateH = 12
       for (let j = 0; j < 4; j++) for (let i = 0; i < 4 - j; i++) { const x = cx + i * sx, y = cy + j * sy; if (inside(x, y) && b.a(x, y)) b.set(x, y, B[j === 0 || i === 0 ? 4 : 3]); }
       rivet(b, cx + sx * 1, cy + sy * 1, B);
     }
+    // a cushion of moss on the top rail and a sprig of ivy down one side (each plaque differs)
+    const m0 = 8 + Math.floor(hash(seed, 1) * (w - 30));
+    moss(b, m0, m0 + 12 + Math.floor(hash(seed, 2) * 6), 0, seed);
+    if (seed % 2) ivy(b, w - 3, 6, 9, -1, seed); else ivy(b, 2, 8, 7, 1, seed);
     return b;
   });
 }
@@ -255,11 +340,15 @@ function windowPx(inner: Inner, x: number, y: number, w: number, h: number, seed
     return pal[i];
   }
   if (inner === 'paper') {
-    const base = hexc('#ecd3a0'), stripe = hexc('#e0c18a'), dot = hexc('#c99a6a');
-    let c = (x % 6 === 0 || x % 6 === 1) ? stripe : base;
-    if (x % 6 === 3 && y % 6 === 2) c = dot;
-    if (k > 0.85) c = mix(c, hexc('#8b5a2b'), 0.35);
-    return mix(c, hexc('#a06a36'), Math.max(0, (k - 0.55) * 0.4 + (bayer(x, y) - 0.5) * 0.06));
+    // sage wallpaper: pale stripes and tiny leaf sprigs in a half-drop repeat, a warm lamp glow
+    const base = hexc('#d9dcbc'), stripe = hexc('#cfd3ae'), leaf = hexc('#9aac78'), stem = hexc('#86986a'), bud = hexc('#e7c98e');
+    let c = (x % 8 === 0) ? stripe : base;
+    const ox = (x + (Math.floor(y / 7) % 2) * 4) % 8, oy = y % 7;
+    if ((ox === 3 && oy === 2) || (ox === 4 && oy === 3) || (ox === 2 && oy === 3)) c = leaf;
+    else if (ox === 3 && oy === 3) c = stem;
+    else if (ox === 3 && oy === 1 && (Math.floor(x / 8) + Math.floor(y / 7)) % 3 === 0) c = bud;
+    if (k > 0.85) c = mix(c, hexc('#6f553d'), 0.3);
+    return mix(c, hexc('#7d6a4a'), Math.max(0, (k - 0.5) * 0.35 + (bayer(x, y) - 0.5) * 0.06));
   }
   // velvet: deep teal with a diamond lattice and gold studs
   const base = hexc('#1f3e3a'), dark = hexc('#16302d'), lite = hexc('#2a514a'), gold = hexc('#d9ad4a');
@@ -275,6 +364,8 @@ export function shelf(w: number): string {
   return cached(`shelf:${w}`, () => {
     const h = 12, b = new Buf(w, h), top = plankBuf(w, 6, 'lwood', 9), I = RAMP('iron');
     b.d.set(top.d.subarray(0, w * 6 * 4), 0);
+    b.m.set(top.m.subarray(0, w * 6), 0);
+    b.woodSeed = 9;
     for (const bx of [8, w - 16]) {
       for (let y = 6; y < h; y++) for (let x = bx; x < bx + 8; x++) {
         const k = x - bx, j = y - 6;
@@ -283,6 +374,8 @@ export function shelf(w: number): string {
       }
     }
     b.outline();
+    moss(b, 20, 34, 0, 5); moss(b, w - 52, w - 40, 0, 9);
+    ivy(b, 26, 6, 5, 1, 3);
     return b;
   });
 }
@@ -293,7 +386,7 @@ function plankBuf(w: number, h: number, tone: string, seed: number): Buf {
     if (x === 0 || y === 0 || x === w - 1 || y === h - 1) { b.set(x, y, INK); continue; }
     let t = woodTone(x, y, seed, 0);
     if (y === 1) t = 5; else if (y === h - 2) t = 1; else if (y === h - 3) t = 2;
-    b.set(x, y, R[t]);
+    b.wood(x, y, t, R);
   }
   return b;
 }
@@ -302,6 +395,7 @@ function plankBuf(w: number, h: number, tone: string, seed: number): Buf {
 export function tag(w: number, h: number, seed = 2): string {
   return cached(`tag:${w}x${h}:${seed}`, () => {
     const ring = 5, b = new Buf(w, h + ring), R = RAMP('wood'), B = RAMP('brass');
+    b.woodSeed = seed + 3;
     const n = 3;
     const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && !(x + y < n || w - 1 - x + y < n || x + h - 1 - y < n || w - 1 - x + h - 1 - y < n);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
@@ -319,9 +413,10 @@ export function tag(w: number, h: number, seed = 2): string {
         if (y === p || x === p) t = 1;
         if (y === h - p - 1 || x === w - p - 1) t = 4;
       }
-      b.set(x, Y, R[t]);
+      b.wood(x, Y, t, R);
     }
     for (const [x, y] of [[2, 2], [w - 3, 2], [2, h - 3], [w - 3, h - 3]]) { b.set(x, y + ring, B[5]); b.set(x + 1, y + ring + 1, B[1]); }
+    if (seed % 2 === 0) moss(b, 2, 8, ring, seed); else moss(b, w - 9, w - 3, ring, seed);
     // eyelet ring
     const cx = (w - 1) / 2;
     for (let y = 0; y < ring + 3; y++) for (let x = 0; x < w; x++) {

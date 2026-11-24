@@ -20,6 +20,7 @@
 // Everything is plain data until a sprite is first read; canvases are built
 // on first render and cached. Importing this module never touches the DOM.
 import { FACE3D } from './faceHook.js'; // [v26 faces3d] character faces are 3D renders (src/ui/faces3d.js)
+import { calm, calmRGB } from './calm.js'; // [ui3] every sprite is graded into Hoot Hollow's calm palette
 
 // ===========================================================================
 // COLOUR
@@ -42,7 +43,7 @@ const lum = (c) => 0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2];
 
 // Hue-shifted ramps, dark -> light. Tone 3 is the base colour, 1..5 are used
 // by automatic shading, tone 0 is the deepest shade (inner lines).
-const RAMPS = {
+const RAMPS_SRC = {
   gold: ['#7a4a12', '#b0661a', '#e5a320', '#ffd23f', '#ffe98a', '#fffbe0'],
   brass: ['#3a2610', '#5c4219', '#8d6c32', '#b8924c', '#dcbd72', '#f6e6ac'],
   copper: ['#4a1e14', '#74301e', '#a04a2a', '#c86a3a', '#e8945a', '#fcc490'],
@@ -103,11 +104,15 @@ const RAMPS = {
   furw: ['#5e4e4c', '#a0928e', '#cfc5bf', '#efe8e2', '#faf6f2', '#ffffff'],
   denim: ['#1a2440', '#26365e', '#344c80', '#4866a2', '#6a88c0', '#9cb4dc'],
 };
+// [ui3] The sprite renderer works in the source ramps and every finished sprite is graded once
+// (finalize); RAMPS, for modules that paint with the ramps directly, holds the graded colours.
+const RAMPS = {};
+for (const k of Object.keys(RAMPS_SRC)) RAMPS[k] = RAMPS_SRC[k].map((c) => calm(c));
 const RAMP_RGB = {};
 function ramp(name) {
   let r = RAMP_RGB[name];
   if (!r) {
-    const src = RAMPS[name];
+    const src = RAMPS_SRC[name] || RAMPS[name];
     if (!src) throw new Error('unknown ramp ' + name);
     r = RAMP_RGB[name] = src.map(rgb);
   }
@@ -439,7 +444,8 @@ function render(g, key = {}, opt = {}) {
           if (X < 0 || Y < 0 || X >= W || Y >= H) continue;
           const j = Y * W + X, sj = spec[j];
           if (!sj || sj.noOl || !col[j]) continue;
-          const c = ol === 'ink' ? INK : sj.kind === 'line' ? mix(col[j], INK, 0.45) : darkOf(sj, col[j], 0.8);
+          // [ui3] a softer, coloured outline (the darkest tone of the shape, not black ink): hand-painted, not blocky
+          const c = ol === 'ink' ? INK : sj.kind === 'line' ? mix(col[j], INK, 0.4) : darkOf(sj, col[j], 0.6);
           if (!best || lum(c) < lum(best)) best = c;
         }
         if (best) add.push([i, typeof ol === 'string' && ol[0] === '#' ? rgb(ol) : best]);
@@ -467,7 +473,29 @@ const CHARS = (() => {
   return s;
 })();
 
+const GRADE = new Map();
+function gradePix(p) {
+  const d = p.d, w = p.w;
+  const flat = new Uint8Array(p.w * p.h);
+  // [ui3] interior pixels of a flat area (same colour as all four neighbours) get a faint hand-made grain
+  for (let y = 1; y < p.h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = (y * w + x) * 4;
+    if (!d[i + 3]) continue;
+    const same = (j) => d[j] === d[i] && d[j + 1] === d[i + 1] && d[j + 2] === d[i + 2] && d[j + 3];
+    if (same(i - 4) && same(i + 4) && same(i - w * 4) && same(i + w * 4)) flat[y * w + x] = 1;
+  }
+  for (let i = 0, n = 0; i < d.length; i += 4, n++) {
+    if (!d[i + 3]) continue;
+    const k = (d[i] << 16) | (d[i + 1] << 8) | d[i + 2];
+    let c = GRADE.get(k);
+    if (!c) { c = calmRGB([d[i], d[i + 1], d[i + 2]]); GRADE.set(k, c); }
+    let f = 1;
+    if (flat[n]) { const x = n % w, y = (n / w) | 0, h = (((x * 374761393) ^ (y * 668265263)) >>> 0) % 7; f = h === 0 ? 0.95 : h === 1 ? 1.04 : 1; }
+    d[i] = c[0] * f; d[i + 1] = c[1] * f; d[i + 2] = c[2] * f;
+  }
+}
 function finalize(p) {
+  if (!p.raw) gradePix(p); // [ui3] the calm grade
   const { w, h, d } = p;
   const map = new Map();
   const pal = {};
@@ -4253,7 +4281,17 @@ function getSprite(name) {
 
 // dev helpers (used by the preview page)
 export const __dev = { BUILD_WARN, RAMPS, Grid, Pix, render, finalize };
-export { Grid, Pix, render, T, icon, draw, RAMPS };
+/**
+ * [ui3] Register a detailed sprite: `tw` x `th` texels shown as `tw/res` x `th/res` art pixels (so it takes the
+ * place of an ordinary icon of that size, with `res` x the detail). `px` is RGBA texel data (already graded).
+ * It replaces any sprite of the same name.
+ */
+function hires(name, tw, th, res, px) {
+  const hi = { w: tw, h: th, rows: [], pal: {}, px: { d: px } };
+  Object.defineProperty(SPRITES, name, { value: { w: Math.round(tw / res), h: Math.round(th / res), rows: [], pal: {}, hi, res }, enumerable: true, configurable: true, writable: false });
+  BUILDERS.set(name, () => null);
+}
+export { Grid, Pix, render, T, icon, draw, RAMPS, RAMPS_SRC, hires };
 
 const canvasCache = new Map();
 const urlCache = new Map();
@@ -4299,7 +4337,16 @@ export function spriteCanvas(name, scale = 1) {
   if (hit) return hit;
   const s = getSprite(name);
   let cv;
-  if (scale === 1) cv = baseCanvas(s);
+  if (s.hi) {
+    // [ui3] a detailed sprite with `res` texels per art pixel (baked from a 3D prop): drawn at scale / res
+    const base = baseCanvas(s.hi);
+    cv = document.createElement('canvas');
+    cv.width = s.w * scale;
+    cv.height = s.h * scale;
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(base, 0, 0, cv.width, cv.height);
+  } else if (scale === 1) cv = baseCanvas(s);
   else {
     const base = spriteCanvas(name, 1);
     cv = document.createElement('canvas');
