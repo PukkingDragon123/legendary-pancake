@@ -1,4 +1,4 @@
-// The Snow Queen's boutique: three discounted daily deals rolled from the day's date, a free daily
+// Barnaby's Lodge Store (the beaver's general store): three discounted daily deals rolled from the day's date, a free daily
 // gift, acorn piles bought with moon gems, moon gem packs (a demo store here), and wishes on the
 // weekly series. Rules that only read a save are pure; the actions change the save via `edit`.
 import { ALL_ITEMS, FINISH, ITEMS } from '../assets/registry.ts';
@@ -87,7 +87,7 @@ export interface Deal {
 }
 
 interface Cand { kind: DealKind; id: string; base: number; cur: 'coins' | 'gems' }
-/** Everything the boutique may put on a stand: sold normally, not a starter, not series-only. */
+/** Everything the store may put on a stump: sold normally, not a starter, not series-only. */
 export function candidates(): { pieces: Cand[]; items: Cand[]; species: Cand[] } {
   const pieces = PIECES.filter((p) => p.price > 0 && !p.area).map((p): Cand => ({ kind: 'piece', id: p.id, base: p.price, cur: p.premium ? 'gems' : 'coins' }));
   const items = ALL_ITEMS.filter((i) => !i.series && !i.noStore && (i.price > 0 || (i.gems ?? 0) > 0)).map((i): Cand => ({ kind: 'item', id: i.id, base: i.gems ?? i.price, cur: i.gems ? 'gems' : 'coins' }));
@@ -99,12 +99,12 @@ const dealKey = (c: { kind: string; id: string }) => `deal:${c.kind}:${c.id}`;
 const shuffled = <T,>(a: T[], r: () => number) => { const o = a.slice(); for (let i = o.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; };
 
 /**
- * Today's three deals: an outfit on the hanger, a plumage or rare piece on the mannequin, and a
- * piece of furniture on the pedestal. Seeded by the day so they stay put until midnight; things
+ * Today's three deals, one per stump: an outfit, a plumage or another outfit, and a piece of
+ * furniture. Seeded by the day so they stay put until midnight; things
  * the player already owns are skipped unless they were bought here today.
  */
 export function dailyDeals(s: Save, day = dayKey()): Deal[] {
-  const r = seededRng(strSeed('neve:' + day));
+  const r = seededRng(strSeed('neve:' + day)); // (the seed's old name keeps today's deals where they were)
   const { pieces, items, species } = candidates();
   const bought = s.shop.day === day ? s.shop.bought : [];
   const free = (c: Cand) => !ownsEntry(s, c) || bought.includes(dealKey(c));
@@ -170,7 +170,7 @@ export interface AcornPack { id: string; sprite: string; name: string; blurb: st
 export const ACORN_PACKS: AcornPack[] = [
   { id: 'handful', sprite: 'coin_pouch', name: 'Handful of Acorns', blurb: 'A pocketful, picked this morning.', gems: 60, coins: 600 },
   { id: 'sack', sprite: 'coin_sack', name: 'Sack of Acorns', blurb: 'Burlap, bulging, slightly leaky.', gems: 150, coins: 1650, bonus: 10 },
-  { id: 'basket', sprite: 'coin_chest', name: 'Basket of Acorns', blurb: 'Heaped high by the squirrels of the Hollow.', gems: 300, coins: 3600, bonus: 20, tag: 'Popular' },
+  { id: 'basket', sprite: 'coin_chest', name: 'Bucket of Acorns', blurb: 'An oak pail heaped high by the squirrels of the Hollow.', gems: 300, coins: 3600, bonus: 20, tag: 'Popular' },
   { id: 'mountain', sprite: 'coin_vault', name: 'Acorn Mountain', blurb: 'A whole autumn of golden acorns, and a few gems hiding inside.', gems: 640, coins: 8400, bonus: 30, tag: 'Best value' },
 ];
 export function buyAcorns(p: AcornPack): string | null {

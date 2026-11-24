@@ -1,4 +1,4 @@
-// Painted art for the boutique UI, in the calm "Moss & Moonlight" palette: the gacha banner backdrops
+// Painted art for the lodge store's UI: the series banner backdrops (printed on the cloth banners in the lodge)
 // (Frostlight: an evening of first snow over a pine wood, a gingerbread cottage with lamplit windows,
 // garlands and baubles; Starfall: a dusky plum sky of falling stars over cloud banks and a little
 // observatory), the night sky of the wish cinematic, big 3D portraits of the featured owls, finish
@@ -293,7 +293,7 @@ export function finishSwatch(id: string, n = 48): string {
   return u;
 }
 
-/** Thumbnail for anything the boutique sells or a wish gives; '' when its model has not arrived. */
+/** Thumbnail for anything the store sells or a wish gives; '' when its model has not arrived. */
 export function prizeArt(kind: RewardKind | 'species', id: string, look: OwlLook): string {
   if (kind === 'item') return ITEMS[id] ? itemIcon(id) : '';
   if (kind === 'piece') return PIECE[id] ? pieceIcon(id, PIECE[id].slot, { ...look, outfit: {} }) : '';

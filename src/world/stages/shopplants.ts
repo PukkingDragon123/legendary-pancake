@@ -1,7 +1,7 @@
-// The boutique's greenery, built the way the forest is: from 2D detailed pixel-art leaf cards. A small
+// The lodge store's greenery, built the way the forest is: from 2D detailed pixel-art leaf cards. A small
 // hand-pixelled atlas (fir sprigs, a split monstera leaf, a young monstera leaf, a variegated pothos
 // vine) is cut out on alpha-tested quads, many per plant, lit by the shop's lamps, and the whole plant
-// stirs a little in the stove's warm draught. Pots are low-poly lathes with a pixel terracotta glaze.
+// stirs a little in the lanterns' warm draught. Pots are low-poly lathes with a pixel terracotta glaze.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { P } from '../../gfx/palette.ts';

@@ -1,11 +1,10 @@
-// The boutique's own pixel art, in the calm "Moss & Moonlight" palette: 9-slice frames that feel like
-// the shop's real materials (an oak shop board capped with snow and fixed with brass brackets, linen
-// and kraft price cards with stitched edges, a dusk-velvet card, cloth ribbons, honey / berry / plum /
-// lake / sage / linen buttons with a hard lip, cloth price tags, a paper speech bubble, a dark oak
-// plaque), tiling surface patterns (linen weave, kraft, velvet, planks, a screen-door dim), and the
-// shop's sprites (snowflakes, a wooden hanger, a wrapped gift, rarity stars, an hourglass, holly,
-// a fairy-light bulb, a mystery parcel, shooting stars, pixel sunbursts). Painted procedurally on
-// first use and shown crisp at whole-pixel scales. No smooth circles, no soft glows.
+// The lodge store's own pixel art (Barnaby's general store): 9-slice frames that feel like the store's real things (an
+// oak board with brass corner brackets, cream and kraft paper with stitched edges, a ruled ledger page, a chalk slate in
+// a wooden frame, a screwed brass plate, cloth ribbons, honey / moss / berry / plum / linen buttons with a hard lip,
+// cloth price tags with an eyelet, a paper speech bubble, a dark oak plaque), tiling surface patterns (paper, kraft,
+// planks, a ruled ledger, a screen-door dim), and the store's sprites (rarity stars, an hourglass, a parcel, a bell,
+// a twinkle, a price tag). Painted procedurally on first use and shown crisp at whole-pixel scales. No smooth circles,
+// no soft glows. OWNED BY THE SHOP BUILDER.
 import { Grid, icon, draw, render, RAMPS, spriteURL } from '../px/sprites.js';
 
 // ------------------------------------------------------------------ palette (src/gfx/palette.ts)
@@ -107,10 +106,10 @@ const hn = (x, y, s = 0) => { let h = (x * 374761393 + y * 668265263 + s * 22468
 
 // ------------------------------------------------------------------ frames
 
-export const ICE_FRAMES = {};
+export const LG_FRAMES = {};
 const BUILD = {};
 function def(name, spec, build) {
-  ICE_FRAMES[name] = { w: spec.w, h: spec.h, slice: spec.slice, fill: spec.fill !== false, repeat: spec.repeat || 'stretch' };
+  LG_FRAMES[name] = { w: spec.w, h: spec.h, slice: spec.slice, fill: spec.fill !== false, repeat: spec.repeat || 'stretch' };
   BUILD[name] = () => build(new Buf(spec.w, spec.h), spec);
 }
 
@@ -136,18 +135,7 @@ const BRACKET = [
   'kbbk.....',
   'kkk......',
 ];
-// a few lumps of snow sitting on the top edge (tiles every 16 px)
-function snowCap(b, y0, x0, x1, seed = 0) {
-  for (let x = x0; x < x1; x++) {
-    const ph = ((x - x0) % 16);
-    const hgt = [3, 4, 4, 5, 5, 5, 4, 3, 3, 2, 3, 4, 4, 3, 2, 2][ph];
-    for (let k = 0; k < hgt; k++) b.set(x, y0 - k, k === hgt - 1 ? C.ink3 : k === hgt - 2 ? C.snow : k === 0 ? C.ice : C.frost);
-    if (ph === 6 || ph === 13) { b.set(x, y0 + 1, C.frost); b.set(x, y0 + 2, C.ice); if (ph === 6) b.set(x, y0 + 3, C.sky); }
-  }
-  void seed;
-}
-
-// the shop board: an oak frame with a groove, brass brackets and snow on its top rail; linen shows inside
+// the store's board: an oak frame with a groove and brass corner brackets; paper or cloth shows inside
 function board(P, o = {}) {
   return (b) => {
     const W = b.w, H = b.h, T = o.top ?? 6;
@@ -161,14 +149,13 @@ function board(P, o = {}) {
       if (d === 8) return o.trim ? o.trim.base : null;
       return null;
     });
-    if (o.snow !== false) snowCap(b, T - 4, 2, W - 2);
     b.corners(BRACKET, { k: C.ink, h: BRASS.hi, l: BRASS.lt, b: BRASS.base, r: C.ink }, 1);
     return b;
   };
 }
-def('ice_panel', { w: 48, h: 48, slice: [16, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK));
-def('ice_panel_gold', { w: 48, h: 48, slice: [16, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK, { trim: BRASS }));
-def('ice_panel_dark', { w: 48, h: 48, slice: [16, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK_DARK));
+def('lg_board', { w: 48, h: 48, slice: [12, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK));
+def('lg_board_gold', { w: 48, h: 48, slice: [12, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK, { trim: BRASS }));
+def('lg_board_dark', { w: 48, h: 48, slice: [12, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK_DARK));
 
 // paper cards with a stitched border (fill painted flat so it stretches cleanly)
 const inked = (c, x, y) => (hn(x, y, 21) > 0.82 ? mixHex(c, '#8a7f68', 0.45) : c);
@@ -192,12 +179,12 @@ function card(P, o = {}) {
 const PAPER = { ol: C.ink2, sh: C.straw, base: C.oat, hi: '#fbf8ef', fill: C.paper, st: C.linen, gr: '#ebe3cf' };
 const KRAFT = { ol: C.woodDark, sh: '#bfa67e', base: '#ddcaa6', hi: '#f2e8d2', fill: '#e8dcc0', st: '#b8a27a', gr: '#dccdab' };
 const VELVET = { ol: '#1f2329', sh: '#2a2f36', base: '#4a5157', hi: '#646b70', fill: '#363c42', st: '#8a7652', gr: '#3c4248' };
-def('ice_card', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(PAPER));
-def('ice_card_gold', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(KRAFT, { corner: '#a89068' }));
-def('ice_card_dark', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(VELVET, { corner: '#8a7652' }));
+def('lg_paper', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(PAPER));
+def('lg_kraft', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(KRAFT, { corner: '#a89068' }));
+def('lg_velvet', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(VELVET, { corner: '#8a7652' }));
 
 // a recessed slot (art wells, tables)
-def('ice_slot', { w: 18, h: 18, slice: [6, 6, 6, 6] }, (b) => {
+def('lg_slot', { w: 18, h: 18, slice: [6, 6, 6, 6] }, (b) => {
   bevel(b, chamfer(0, 0, b.w, b.h, 2), (d, l, x, y) => {
     if (d === 0) return C.woodDark;
     if (d === 1) return l > 0 ? C.straw : C.paper;
@@ -231,24 +218,24 @@ function ribbon(P) {
 }
 // quiet, slightly greyed cloth colours: colour is an accent, the UI is mostly paper, wood and ink
 const CLOTH = {
-  sage: { ol: '#2b3329', dk: '#4a5646', sh: '#5f6b58', base: '#7a8670', lt: '#9da690', hi: '#cfd3c0' },
-  honey: { ol: C.woodDeep, dk: '#8a7652', sh: '#ac9468', base: '#c9b183', lt: '#dfcda4', hi: '#f2e8d2' },
-  berry: { ol: '#352628', dk: '#5e4446', sh: '#765a5a', base: '#8f7270', lt: '#b19a94', hi: '#e2d4cc' },
-  plum: { ol: '#25212a', dk: '#433c48', sh: '#57505c', base: '#6d6572', lt: '#918a95', hi: '#d6d0d8' },
+  sage: { ol: '#1f2a1c', dk: '#3a5233', sh: '#4d6b40', base: '#64844f', lt: '#86a46a', hi: '#c9d9a8' },
+  honey: { ol: C.woodDeep, dk: '#8a6a34', sh: '#b08638', base: '#d4a34a', lt: '#e8c374', hi: '#f8e6b4' },
+  berry: { ol: '#2e1416', dk: '#6e2a2c', sh: '#8e3634', base: '#b0443e', lt: '#cc6a5c', hi: '#f0c0aa' },
+  plum: { ol: '#1e1628', dk: '#3e2c56', sh: '#55407a', base: '#6e5498', lt: '#9580bc', hi: '#d8ccec' },
 };
-def('ice_ribbon', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.sage));
-def('ice_ribbon_gold', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.honey));
-def('ice_ribbon_berry', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.berry));
-def('ice_ribbon_violet', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.plum));
+def('lg_ribbon', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.sage));
+def('lg_ribbon_gold', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.honey));
+def('lg_ribbon_berry', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.berry));
+def('lg_ribbon_violet', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.plum));
 
 // chunky buttons with a hard lip; tones keep their old class names (gold, berry, violet, ice, frost, sage)
 const BTN = {
-  gold: { ol: C.woodDeep, dk: '#9a8662', sh: '#b8a27a', base: '#d4c19a', lt: '#e6d8b8', hi: '#f6efdf' },
+  gold: CLOTH.honey,
   berry: CLOTH.berry,
   violet: CLOTH.plum,
-  ice: { ol: '#262e33', dk: '#4b5a60', sh: '#5f7075', base: '#788a8e', lt: '#9fadb0', hi: '#dce3e2' },
-  frost: { ol: C.woodDeep, dk: '#9b8f78', sh: '#bdb299', base: '#dcd3bd', lt: '#ebe5d4', hi: '#faf6ea' },
   sage: CLOTH.sage,
+  linen: { ol: C.woodDeep, dk: '#9b8f78', sh: '#bdb299', base: '#dcd3bd', lt: '#ebe5d4', hi: '#faf6ea' },
+  slate: { ol: '#14181a', dk: '#2a3236', sh: '#38434a', base: '#4a5860', lt: '#66767e', hi: '#a8b6bc' },
 };
 function button(P, down = false) {
   return (b) => {
@@ -268,7 +255,7 @@ function button(P, down = false) {
   };
 }
 const BT = { w: 18, h: 18, slice: [6, 6, 7, 6] };
-for (const k of Object.keys(BTN)) { def(`ice_btn_${k}`, BT, button(BTN[k])); def(`ice_btn_${k}_down`, BT, button(BTN[k], true)); }
+for (const k of Object.keys(BTN)) { def(`lg_btn_${k}`, BT, button(BTN[k])); def(`lg_btn_${k}_down`, BT, button(BTN[k], true)); }
 
 // a cloth price tag with a punched eyelet on the left and stitching
 function tag(P) {
@@ -282,23 +269,218 @@ function tag(P) {
     return b;
   };
 }
-def('ice_tag_berry', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.berry));
-def('ice_tag_gold', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.honey));
-def('ice_tag_ice', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(BTN.ice));
-def('ice_tag_sage', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.sage));
+def('lg_tag_red', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.berry));
+def('lg_tag_gold', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.honey));
+def('lg_tag_slate', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(BTN.slate));
+def('lg_tag_moss', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.sage));
 
-// the queen's speech bubble: paper with an ink outline and cut corners
-def('ice_bubble', { w: 16, h: 16, slice: [5, 5, 5, 5] }, (b) => {
+// Barnaby's speech bubble: paper with an ink outline and cut corners
+def('lg_bubble', { w: 16, h: 16, slice: [5, 5, 5, 5] }, (b) => {
   bevel(b, chamfer(0, 0, b.w, b.h, 3), (d, l) => (d === 0 ? C.ink : d === 1 ? (l > 0 ? '#fffdf6' : C.linen) : C.paper));
   return b;
 });
 
 // a small dark oak plaque with a brass rim for counters and chips
-def('ice_chip', { w: 16, h: 14, slice: [5, 6, 6, 6] }, (b) => {
+def('lg_chip', { w: 16, h: 14, slice: [5, 6, 6, 6] }, (b) => {
   bevel(b, chamfer(0, 0, b.w, b.h - 1, 2), (d, l, x, y) => (d === 0 ? C.ink : d === 1 ? (l > 0 ? BRASS.lt : BRASS.dk) : d === 2 ? (l > 0 ? C.bark : '#241d19') : grain(x, y, true, OAK_DARK)));
   for (let x = 2; x < b.w - 2; x++) b.set(x, b.h - 1, [20, 24, 30, 110]);
   return b;
 });
+
+// a chalk slate in a pine frame: dark slate with chalk smudges, a lit frame edge, corner nails
+def('lg_slate', { w: 32, h: 32, slice: [9, 9, 9, 9], repeat: 'round' }, (b) => {
+  bevel(b, chamfer(0, 0, b.w, b.h - 1, 2), (d, l, x, y) => {
+    if (d === 0) return C.ink;
+    if (d <= 5) { const g = grain(x, y, y < 6 || y > b.h - 8, OAK); return d === 1 ? (l > 0 ? OAK.hi : OAK.dk) : d === 5 ? (l > 0 ? OAK.dk : OAK.lt) : g; }
+    if (d === 6) return '#1a2023';
+    const v = hn(x, y, 31);
+    return v > 0.94 ? '#4a565c' : v < 0.06 ? '#283034' : '#323c41';
+  });
+  for (const [x, y] of [[2, 2], [b.w - 4, 2], [2, b.h - 5], [b.w - 4, b.h - 5]]) b.set(x, y, C.iron).set(x + 1, y, '#8a8680');
+  for (let x = 2; x < b.w - 2; x++) b.set(x, b.h - 1, [27, 34, 45, 110]);
+  return b;
+});
+// a brass plate with four screws and a rubbed shine
+def('lg_brass', { w: 24, h: 18, slice: [6, 6, 7, 6], repeat: 'round' }, (b) => {
+  bevel(b, chamfer(0, 0, b.w, b.h - 1, 2), (d, l, x, y) => {
+    if (d === 0) return '#3d2e16';
+    if (d === 1) return l > 0 ? BRASS.hi : BRASS.dk;
+    if (d === 2) return l > 0 ? BRASS.lt : '#a3864c';
+    return hn(x, y, 41) > 0.9 ? BRASS.lt : (x + y) % 9 === 0 ? '#bf9c58' : BRASS.base;
+  });
+  for (const [x, y] of [[3, 3], [b.w - 5, 3], [3, b.h - 6], [b.w - 5, b.h - 6]]) { b.set(x, y, BRASS.dk).set(x + 1, y + 1, BRASS.dk).set(x + 1, y, BRASS.hi); }
+  for (let x = 2; x < b.w - 2; x++) b.set(x, b.h - 1, [27, 34, 45, 110]);
+  return b;
+});
+
+// a small carved plank for signs: grain along it, a lit top edge, two nail heads
+def('lg_plank', { w: 28, h: 18, slice: [6, 7, 7, 7], repeat: 'stretch' }, (b) => {
+  bevel(b, chamfer(0, 0, b.w, b.h - 2, 2), (d, l, x, y) => {
+    if (d === 0) return inked(C.ink, x, y);
+    if (d === 1) return l > 0 ? '#e8c890' : '#5a3d24';
+    const g = grain(x, y, true, { ol: C.ink, dk: '#5a3d24', sh: '#7d5634', base: '#a2723f', lt: '#bf8f55', hi: '#e0b57a' });
+    return y >= b.h - 5 ? (g === '#a2723f' ? '#8d6236' : '#6f4c2c') : g;
+  });
+  for (const x of [4, b.w - 5]) b.set(x, 4, '#3a3029').set(x, 5, '#6a5e50').set(x + 1, 4, '#b0a08a');
+  for (let x = 2; x < b.w - 2; x++) { b.set(x, b.h - 2, [27, 20, 12, 120]); b.set(x, b.h - 1, [27, 20, 12, 60]); }
+  return b;
+});
+def('lg_plank_down', { w: 28, h: 18, slice: [6, 7, 7, 7], repeat: 'stretch' }, (b) => {
+  bevel(b, chamfer(0, 2, b.w, b.h - 2, 2), (d, l, x, y) => {
+    if (d === 0) return inked(C.ink, x, y);
+    if (d === 1) return l > 0 ? '#c9a46c' : '#4a3220';
+    return grain(x, y, true, { ol: C.ink, dk: '#4a3220', sh: '#6a4a2c', base: '#8a6236', lt: '#a7784a', hi: '#c49a64' });
+  });
+  for (const x of [4, b.w - 5]) b.set(x, 6, '#3a3029').set(x + 1, 6, '#9a8a74');
+  return b;
+});
+
+
+// ------------------------------------------------------------------ organic frames
+// Hand-made, not geometric: every frame's silhouette wobbles (a slow noise along each edge, corners knocked off by
+// different amounts), its fill carries the material's own noise (paper fibres and foxing, wood grain and knots, cloth
+// weave, brass patina), shading runs along hue-shifted ramps (warm, pale lights up and left; cool, saturated shadows
+// down and right), and the outline is selective: a dark, cool line on the shadow sides that breaks into a lit tone
+// on the lit sides.
+
+/** a hue-shifted ramp of n tones (dark -> light) around a base colour */
+function hramp(base, n = 7, dark = 0.55, light = 0.5) {
+  const [r, g, b] = rgb(base).map((v) => v / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  let h = 0, sat = 0;
+  if (d > 1e-6) { sat = d / (1 - Math.abs(2 * l - 1)); h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; if (h < 0) h += 1; }
+  const out = [], mid = (n - 1) * 0.55;
+  const toward = (h0, t, k) => { let dd = ((t - h0 + 1.5) % 1) - 0.5; return (h0 + dd * k + 1) % 1; };
+  for (let i = 0; i < n; i++) {
+    const t = i < mid ? -(mid - i) / mid : (i - mid) / (n - 1 - mid);
+    const hh = t < 0 ? toward(h, 0.7, 0.12 * -t) : toward(h, 0.13, 0.1 * t);
+    const ss = Math.min(1, Math.max(0, t < 0 ? sat * (1 + 0.25 * -t) : sat * (1 - 0.35 * t)));
+    const ll = Math.min(0.97, Math.max(0.03, t < 0 ? l * (1 - dark * -t) : l + (1 - l) * light * t));
+    const q = (p, q2, tt) => { if (tt < 0) tt += 1; if (tt > 1) tt -= 1; return tt < 1 / 6 ? p + (q2 - p) * 6 * tt : tt < 1 / 2 ? q2 : tt < 2 / 3 ? p + (q2 - p) * (2 / 3 - tt) * 6 : p; };
+    const q2 = ll < 0.5 ? ll * (1 + ss) : ll + ss - ll * ss, p = 2 * ll - q2;
+    const c = [q(p, q2, hh + 1 / 3), q(p, q2, hh), q(p, q2, hh - 1 / 3)].map((v) => Math.round(v * 255));
+    out.push('#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''));
+  }
+  return out;
+}
+/** smooth 1D value noise in -1..1 */
+const n1 = (x, s) => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return (hn(i, 7, s) * (1 - u) + hn(i + 1, 7, s) * u) * 2 - 1; };
+/** materials: a tone offset per pixel (in ramp steps) */
+const MAT = {
+  paper: (x, y, s) => (hn(x, y, s) > 0.93 ? -1 : 0) + (hn(x >> 2, y >> 1, s + 3) > 0.9 ? -0.6 : 0) + ((x * 3 + y) % 11 === 0 && hn(x, y, s + 1) > 0.5 ? 0.5 : 0),
+  kraft: (x, y, s) => (hn(x, y, s) > 0.9 ? -1 : hn(x, y, s + 9) > 0.92 ? 0.7 : 0) + (n1(y * 0.7 + x * 0.05, s) > 0.6 ? -0.5 : 0),
+  wood: (x, y, s) => { const g = Math.sin(x * 0.55 + n1(y * 0.25, s) * 2.5 + n1(x * 0.08, s + 2) * 3); return (g > 0.82 ? -1.2 : g < -0.9 ? 0.6 : 0) + (hn(Math.floor(x / 7), Math.floor(y / 5), s) > 0.95 ? -1.5 : 0); },
+  cloth: (x, y) => ((x + y) % 2 ? -0.35 : 0.25) + (x % 4 === 0 ? -0.3 : 0),
+  brass: (x, y, s) => (hn(x, y, s) > 0.9 ? 0.8 : 0) + (n1(x * 0.3 + y * 0.2, s) > 0.55 ? -1.0 : 0) + (hn(x >> 1, y >> 1, s + 4) > 0.94 ? -1.6 : 0),
+  slate: (x, y, s) => (hn(x, y, s) > 0.93 ? 0.9 : 0) + (n1(x * 0.2 - y * 0.1, s) > 0.6 ? 0.5 : 0),
+  plain: () => 0,
+};
+/**
+ * Paint an organic frame into b. o: { pal: base hex, mat, seed, wob (edge wobble px), cut (corner px), out (outline hex),
+ * notch (ribbon tails), base (ramp index of the fill), down (pressed) }
+ */
+function organic(o) {
+  return (b) => {
+    const W = b.w, H = b.h - 2, seed = o.seed ?? 3, wob = o.wob ?? 1, cut = o.cut ?? 3;
+    const R = hramp(o.pal, 7, o.dark ?? 0.5, o.light ?? 0.45);
+    const out = o.out ?? hramp(o.pal, 7, 0.82, 0.3)[0];
+    const top = [], bot = [], lef = [], rig = [];
+    for (let x = 0; x < W; x++) { top[x] = Math.max(0, Math.round((n1(x * 0.35, seed) * 0.5 + 0.5) * wob)); bot[x] = Math.max(0, Math.round((n1(x * 0.3, seed + 5) * 0.5 + 0.5) * wob)); }
+    for (let y = 0; y < H; y++) { lef[y] = Math.max(0, Math.round((n1(y * 0.35, seed + 9) * 0.5 + 0.5) * wob)); rig[y] = Math.max(0, Math.round((n1(y * 0.3, seed + 13) * 0.5 + 0.5) * wob)); }
+    const cuts = [cut + Math.round(hn(1, 1, seed) * 2), cut + Math.round(hn(2, 1, seed) * 2), cut + Math.round(hn(3, 1, seed) * 2), cut + Math.round(hn(4, 1, seed) * 2)];
+    const notch = o.notch ?? 0, top0 = o.down ? 2 : 0;
+    const inside = (x, y) => {
+      if (x < 0 || y < top0 || x >= W || y >= H) return false;
+      if (y < top0 + top[x] || y >= H - bot[x] || x < lef[y] || x >= W - rig[y]) return false;
+      const yy = y - top0, hh = H - top0;
+      if (x + yy < cuts[0] || (W - 1 - x) + yy < cuts[1] || x + (hh - 1 - yy) < cuts[2] || (W - 1 - x) + (hh - 1 - yy) < cuts[3]) return false;
+      if (notch) { const mid = (hh - 1) / 2, dd = notch - Math.round(Math.abs(yy - mid) * (notch / mid)); if (x < dd || W - 1 - x < dd) return false; }
+      return true;
+    };
+    bevel(b, inside, (d, l, x, y) => {
+      const mt = (MAT[o.mat ?? 'plain'] || MAT.plain)(x, y, seed);
+      if (d === 0) {
+        // selective outline: the lit sides break into a lit tone, the shadow sides stay dark and cool
+        if (l > 0) return hn(x, y, seed + 21) > 0.45 ? R[2] : out;
+        return out;
+      }
+      const base = o.base ?? 4;
+      let t = base + mt;
+      if (d === 1) t += l > 0 ? 1.6 : l < 0 ? -1.6 : 0;
+      else if (d === 2) t += l > 0 ? 0.6 : l < 0 ? -0.8 : 0;
+      // a soft light from the top left across the whole face
+      t += (1 - (x / W + y / b.h)) * 0.5 - 0.1;
+      if (o.down) t -= 0.5;
+      return R[Math.max(0, Math.min(R.length - 1, Math.round(t)))];
+    });
+    // a hard drop shadow under it (unless pressed)
+    if (!o.down) for (let x = 2; x < W - 2; x++) { b.set(x, H, [24, 16, 10, 120]); b.set(x, H + 1, [24, 16, 10, 55]); }
+    // wear: a few rubbed, paler pixels along the lit edges
+    for (let k = 0; k < (o.wear ?? 6); k++) { const x = 2 + Math.floor(hn(k, 3, seed) * (W - 4)); for (let y = 0; y < H; y++) if (inside(x, y)) { b.set(x, y + 1, R[R.length - 1]); break; } }
+    return b;
+  };
+}
+def('lg_paper', { w: 32, h: 32, slice: [8, 8, 10, 8], repeat: 'round' }, organic({ pal: '#efe3c6', mat: 'paper', seed: 4, wob: 1, cut: 2, base: 4 }));
+def('lg_kraft', { w: 32, h: 32, slice: [8, 8, 10, 8], repeat: 'round' }, organic({ pal: '#c99a62', mat: 'kraft', seed: 7, wob: 1, cut: 2, base: 4 }));
+def('lg_board', { w: 48, h: 48, slice: [12, 12, 14, 12], repeat: 'round', fill: false }, organic({ pal: '#9a6a3c', mat: 'wood', seed: 11, wob: 1, cut: 3, base: 3, wear: 10 }));
+def('lg_board_gold', { w: 48, h: 48, slice: [12, 12, 14, 12], repeat: 'round', fill: false }, organic({ pal: '#b98a48', mat: 'wood', seed: 12, wob: 1, cut: 3, base: 3, wear: 10, out: '#3a2410' }));
+def('lg_plank', { w: 32, h: 22, slice: [7, 8, 9, 8], repeat: 'stretch' }, organic({ pal: '#a06a3a', mat: 'wood', seed: 16, wob: 1, cut: 3, base: 4 }));
+def('lg_plank_down', { w: 32, h: 22, slice: [7, 8, 9, 8], repeat: 'stretch' }, organic({ pal: '#8a5a30', mat: 'wood', seed: 16, wob: 1, cut: 3, base: 3, down: true }));
+def('lg_brass', { w: 32, h: 24, slice: [8, 8, 9, 8], repeat: 'round' }, organic({ pal: '#c99c4c', mat: 'brass', seed: 19, wob: 0, cut: 2, base: 4, light: 0.6 }));
+def('lg_chip', { w: 20, h: 18, slice: [6, 6, 8, 6], repeat: 'round' }, organic({ pal: '#4a3020', mat: 'wood', seed: 23, wob: 1, cut: 2, base: 3 }));
+def('lg_bubble', { w: 24, h: 24, slice: [7, 7, 8, 7], repeat: 'round' }, organic({ pal: '#f7ecd2', mat: 'paper', seed: 29, wob: 1, cut: 4, base: 5, out: '#3a2a1c' }));
+def('lg_cloth_red', { w: 48, h: 22, slice: [6, 12, 8, 12] }, organic({ pal: '#b4383a', mat: 'cloth', seed: 31, wob: 0, cut: 1, base: 4, notch: 5 }));
+def('lg_cloth_violet', { w: 48, h: 22, slice: [6, 12, 8, 12] }, organic({ pal: '#6e4ea0', mat: 'cloth', seed: 37, wob: 0, cut: 1, base: 4, notch: 5 }));
+def('lg_cloth_gold', { w: 48, h: 22, slice: [6, 12, 8, 12] }, organic({ pal: '#d8a444', mat: 'cloth', seed: 41, wob: 0, cut: 1, base: 4, notch: 5 }));
+def('lg_slate2', { w: 32, h: 32, slice: [9, 9, 10, 9], repeat: 'round' }, organic({ pal: '#3c474c', mat: 'slate', seed: 43, wob: 1, cut: 3, base: 3, out: '#151a1c' }));
+def('lg_stampblock', { w: 32, h: 26, slice: [8, 9, 12, 9], repeat: 'stretch' }, (b) => {
+  organic({ pal: '#7a4a26', mat: 'wood', seed: 47, wob: 1, cut: 3, base: 3 })(b);
+  // the red rubber face along the bottom
+  for (let x = 3; x < b.w - 3; x++) for (let y = b.h - 7; y < b.h - 3; y++) b.set(x, y, y === b.h - 7 ? '#e0705a' : y === b.h - 4 ? '#6e1a16' : (x + y) % 5 === 0 ? '#a82c26' : '#c23a32');
+  return b;
+});
+const OBTN = { gold: '#d4a24a', berry: '#b84440', violet: '#6e52a0', sage: '#5f8a4a', linen: '#e3d6b8', slate: '#4a5860' };
+for (const [k, c] of Object.entries(OBTN)) {
+  def(`lg_btn_${k}`, { w: 22, h: 22, slice: [7, 7, 9, 7] }, organic({ pal: c, mat: k === 'linen' ? 'paper' : 'cloth', seed: 50 + k.length, wob: 0, cut: 3, base: 4 }));
+  def(`lg_btn_${k}_down`, { w: 22, h: 22, slice: [7, 7, 9, 7] }, organic({ pal: c, mat: k === 'linen' ? 'paper' : 'cloth', seed: 50 + k.length, wob: 0, cut: 3, base: 4, down: true }));
+}
+
+// ------------------------------------------------------------------ organic sprites: seal, pin, eyelet, stamp handle, rope, string
+function spriteBuf(w, h, fn) { const b = new Buf(w, h); fn(b); return toURL(b); }
+/** a red paper seal with a scalloped, hand-cut edge (stepped, a little lopsided), a darker rim, a highlight */
+function sealURL(w, h, seed) {
+  return spriteBuf(w, h, (b) => {
+    const R = hramp('#c23a32', 7, 0.55, 0.45), cx = (w - 1) / 2, cy = (h - 2) / 2;
+    for (let y = 0; y < h - 1; y++) for (let x = 0; x < w; x++) {
+      const dx = (x - cx) / (w / 2 - 0.5), dy = (y - cy) / ((h - 1) / 2 - 0.5), a = Math.atan2(dy, dx);
+      const rr = 0.86 + Math.sin(a * 9 + seed) * 0.08 + n1(a * 3, seed) * 0.04;
+      const d = Math.hypot(dx, dy);
+      if (d > rr) continue;
+      let t = 4 + (dx < 0 && dy < 0 ? 0.6 : 0) - (dx + dy) * 0.6 + (hn(x, y, seed) > 0.9 ? -1 : 0);
+      if (d > rr - 0.14) t = dx + dy < 0 ? 2 : 0;
+      b.set(x, y, R[Math.max(0, Math.min(6, Math.round(t)))]);
+    }
+    for (let x = 2; x < w - 2; x++) b.set(x, h - 1, [30, 10, 6, 90]);
+  });
+}
+/** a red-headed pushpin seen from the front-left, with its shadow */
+const PIN = ['..ooo..', '.oHhho.', 'oHhhhmo', 'ohhhmmo', 'ohmmmmo', '.ommmo.', '..ooo..', '...s...', '...s...'];
+function pinURL() { return spriteBuf(7, 10, (b) => { b.rows(0, 0, PIN, { o: '#5a1410', H: '#f4a08a', h: '#d0463c', m: '#9a2a24', s: '#8a8a80' }); b.set(4, 9, [30, 10, 6, 100]); b.set(5, 8, [30, 10, 6, 70]); }); }
+/** a brass eyelet punched in a tag: a stepped ring, lit top-left */
+function eyeletURL() { return spriteBuf(8, 8, (b) => { for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const d = Math.hypot(x - 3.5, y - 3.5); if (d < 1.6) b.set(x, y, '#2a1e12'); else if (d < 3.6) b.set(x, y, x + y < 6 ? '#f0d48a' : x + y > 8 ? '#7a5a26' : '#c8a050'); } }); }
+/** the stamp's turned wooden handle: a knob, a neck, a collar */
+function handleURL() {
+  return spriteBuf(26, 16, (b) => {
+    const R = hramp('#9a6638', 7, 0.55, 0.5);
+    const prof = [5, 6, 7, 7, 6, 4, 3, 3, 3, 4, 7, 9, 10, 11, 11, 12];
+    for (let y = 0; y < 16; y++) { const half = prof[y]; for (let x = 13 - half; x < 13 + half; x++) { const t = 4 - ((x - (13 - half)) / (2 * half)) * 3.2 + (y < 6 ? 0.6 : 0) + (hn(x, y, 61) > 0.9 ? -1 : 0); b.set(x, y, (x === 13 - half || x === 12 + half) ? R[0] : R[Math.max(0, Math.min(6, Math.round(t)))]); } }
+  });
+}
+/** a twisted rope (tiles along x) and a thin twisted string (tiles along y) */
+function ropeURL() { return spriteBuf(8, 6, (b) => { for (let x = 0; x < 8; x++) for (let y = 0; y < 5; y++) { const s = (x + y) % 4; b.set(x, y, y === 0 || y === 4 ? '#5e4424' : s === 0 ? '#e0c88e' : s === 1 ? '#c9a868' : s === 2 ? '#a8854c' : '#8a6a3a'); } for (let x = 0; x < 8; x++) b.set(x, 5, [30, 20, 10, 80]); }); }
+/** a hasty red-pencil strike: a wobbly double stroke that thickens in the middle */
+function strikeURL() { return spriteBuf(40, 7, (b) => { for (let x = 0; x < 40; x++) { const y = 3 + Math.round(n1(x * 0.25, 71) * 1.2 - (x - 20) * 0.08); const th = x > 4 && x < 36 ? 2 : 1; for (let k = 0; k < th; k++) b.set(x, y + k, k ? '#8e1c18' : '#d0362e'); if (hn(x, 3, 71) > 0.8) b.set(x, y - 1, '#e0605a'); } }); }
+function stringURL() { return spriteBuf(2, 4, (b) => { b.set(0, 0, '#e8d6a8').set(1, 0, '#b89a64').set(0, 1, '#c9ab74').set(1, 1, '#9c7c4c').set(0, 2, '#b89a64').set(1, 2, '#e8d6a8').set(0, 3, '#9c7c4c').set(1, 3, '#c9ab74'); }); }
 
 // ------------------------------------------------------------------ CSS
 
@@ -307,7 +489,7 @@ const normScale = (s) => Math.max(1, Math.min(12, Math.round(s)));
 function frameCanvas(name, scale) {
   const key = name + '@' + scale;
   if (cv.has(key)) return cv.get(key);
-  const f = ICE_FRAMES[name];
+  const f = LG_FRAMES[name];
   let c;
   if (scale === 1) {
     const b = BUILD[name]();
@@ -321,7 +503,7 @@ function frameCanvas(name, scale) {
   cv.set(key, c);
   return c;
 }
-export function iceURL(name, scale = 2) {
+export function lgURL(name, scale = 2) {
   scale = normScale(scale);
   const key = name + '@' + scale;
   if (!urls.has(key)) urls.set(key, frameCanvas(name, scale).toDataURL('image/png'));
@@ -329,9 +511,9 @@ export function iceURL(name, scale = 2) {
 }
 const devK = () => { const r = (typeof window !== 'undefined' && window.devicePixelRatio) || 1, k = Math.round(r); return k >= 2 && k <= 4 && Math.abs(r - k) < 0.01 ? k : 1; };
 /** CSS declarations that make an element wear a frame (border-image 9-slice). */
-export function iceStyle(name, scale = 2) {
+export function lgStyle(name, scale = 2) {
   scale = normScale(scale);
-  const f = ICE_FRAMES[name], k = devK(), url = iceURL(name, scale * k);
+  const f = LG_FRAMES[name], k = devK(), url = lgURL(name, scale * k);
   const [t, r, b, l] = f.slice.map((v) => v * scale), [st, sr, sb, sl] = f.slice.map((v) => v * scale * k);
   return `border-style:solid;border-width:${t}px ${r}px ${b}px ${l}px;border-image-source:url("${url}");border-image-slice:${st} ${sr} ${sb} ${sl}${f.fill ? ' fill' : ''};border-image-width:${t}px ${r}px ${b}px ${l}px;border-image-repeat:${f.repeat};image-rendering:pixelated`;
 }
@@ -363,6 +545,8 @@ const PAT = {
   linen: [64, 64, PAPER_TILE],
   /** kraft paper */
   kraft: [64, 64, KRAFT_TILE],
+  /** a ruled ledger page: cream paper, blue rules every 8 px, a red margin line */
+  ledger: [64, 64, (x, y) => (x === 9 || x === 11 ? '#c0504a' : y % 8 === 7 ? '#a9bcc8' : PAPER_TILE(x, y))],
   /** dusk velvet */
   velvet: [8, 8, (x, y) => ((x + y) % 4 === 0 ? '#2f3b4a' : (x - y + 8) % 4 === 0 ? '#222b37' : C.night)],
   /** oak planks running sideways */
@@ -371,24 +555,7 @@ const PAT = {
   dim: [2, 2, (x, y) => ((x + y) % 2 ? '#1b222dcc' : '#1b222d99')],
   /** sage wallpaper stripes for the gacha frame */
   stripe: [8, 8, (x, y) => (x < 4 ? (hn(x, y, 1) > 0.9 ? '#d6ddb6' : C.sageLight) : x === 6 ? C.sage : (hn(x, y, 7) > 0.92 ? '#e2d6b8' : C.oat))],
-  /** a pine garland with berries and fairy bulbs (two frames: the bulbs take turns) */
-  garland: [32, 8, (x, y) => garlandPx(x, y, 0)],
-  garland2: [32, 8, (x, y) => garlandPx(x, y, 1)],
 };
-function garlandPx(x, y, f) {
-  const bulbs = [[4, C.lamp, '#a37c45'], [12, C.rose, '#86585a'], [20, C.sageLight, '#5f7d4c'], [28, C.ice, '#4d6a78']];
-  for (const [bx, on, off] of bulbs) {
-    const lit = ((bx >> 3) + f) % 2 === 0;
-    if (y === 6 && x === bx) return C.ink2;
-    if (y === 7 && (x === bx || x === bx + 1)) return lit ? on : off;
-    if (y === 6 && x === bx + 1) return lit ? '#fffaee' : off;
-  }
-  const top = 1 + Math.round(hn(x, 0, 3) * 1.2), bot = 5 - Math.round(hn(x, 1, 5) * 1.2);
-  if (y < top || y > bot) return null;
-  if (hn(x, y, 11) > 0.9 && y > top) return C.berry;
-  if (y === top) return (x % 3) ? C.moss : C.sage;
-  return (x + y) % 3 === 0 ? C.forest : (x * 7 + y) % 5 === 0 ? C.leaf : C.pine;
-}
 function patCanvas(name, scale) {
   const [w, h, fn] = PAT[name];
   const b = new Buf(w * scale, h * scale);
@@ -456,60 +623,38 @@ export function shootURL(col, len = 64) {
 }
 
 let injected = false;
-/** Injects `.if-<name>` (2x) and `.if3-<name>` (3x) classes for every frame, buttons, and pattern variables, once. */
-export function injectIceCSS() {
+/** Injects `.lf-<name>` (2x) and `.lf3-<name>` (3x) classes for every frame, `.lg-btn.<tone>` buttons, and pattern
+ * variables (--lg-pat-*, --lg-wood, --lg-burlap ...), once. */
+export function injectLodgeCSS() {
   if (injected || typeof document === 'undefined') return;
   injected = true;
   let css = '';
-  for (const n of Object.keys(ICE_FRAMES)) css += `.if-${n}{${iceStyle(n, 2)};background-color:transparent}\n.if3-${n}{${iceStyle(n, 3)};background-color:transparent}\n`;
-  for (const k of Object.keys(BTN)) css += `.nv-btn.${k}{${iceStyle(`ice_btn_${k}`, 2)}}\n.nv-btn.${k}:active:not(.off),.nv-btn.${k}.down{${iceStyle(`ice_btn_${k}_down`, 2)}}\n`;
+  for (const n of Object.keys(LG_FRAMES)) css += `.lf-${n}{${lgStyle(n, 2)};background-color:transparent}\n.lf3-${n}{${lgStyle(n, 3)};background-color:transparent}\n`;
+  for (const k of Object.keys(BTN)) css += `.lg-btn.${k}{${lgStyle(`lg_btn_${k}`, 2)}}\n.lg-btn.${k}:active:not(.off),.lg-btn.${k}.down{${lgStyle(`lg_btn_${k}_down`, 2)}}\n`;
+  // the store's things wear their materials: paper tags, kraft labels, brass plates, cloth, planks, the oak board
+  const WEAR = {
+    '.lg-ptag': 'lg_paper', '.lg-ktag': 'lg_kraft', '.lg-ktag.brass': 'lg_brass', '.lg-cloth.on': 'lg_cloth_red', '.lg-cloth.soon': 'lg_cloth_violet', '.lg-stamp-block': 'lg_stampblock',
+    '.lg-g-tab': 'lg_kraft', '.lg-g-tab.on': 'lg_paper', '.lg-new': 'lg_cloth_red', '.lg-up': ['lg_cloth_red', 1], '.lg-bonus': 'lg_cloth_gold', '.lg-bonus.gem': 'lg_cloth_violet', '.lg-bubble-who': 'lg_cloth_gold', '.lg-hint': 'lg_paper', '.lg-poster': 'lg_paper', '.lg-poster-title': 'lg_chip', '.lg-sum-card': 'lg_paper', '.lg-sum-card.r5': 'lg_kraft', '.lg-gnote': ['lg_kraft', 1],
+    '.lg-navsign': 'lg_plank', '.lg-navsign:active,.lg-navsign.on': 'lg_plank_down', '.lg-card': 'lg_board', '.lg-ledger': 'lg_paper', '.lg-gtag': 'lg_kraft',
+    '.lg-burlap': 'lg_kraft', '.lg-plate': 'lg_brass', '.lg-page': 'lg_paper', '.lg-prize-page': 'lg_paper', '.lg-timer': 'lg_chip',
+  };
+  for (const [sel, fr] of Object.entries(WEAR)) css += Array.isArray(fr) ? `${sel}{${lgStyle(fr[0], fr[1])}}\n` : `${sel}{${lgStyle(fr, 2)}}\n`;
   css += ':root{';
-  for (const p of Object.keys(PAT)) css += `--nv-pat-${p}:url("${patternURL(p, 2)}");`;
-  css += `--nv-rays-a:url("${raysURL(0)}");--nv-rays-b:url("${raysURL(1)}");--nv-burst:url("${burstURL()}");--nv-burst-lamp:url("${burstURL(128, C.lamp)}");--nv-burst-lilac:url("${burstURL(128, '#c6bdd6')}");--nv-burst-lake:url("${burstURL(128, C.sky)}");--nv-twinkle:url("${spriteURL('shop_twinkle', 2)}");`;
-  // the shop's own materials (BUSHED pixel textures, restyled): real oak for signs, the boutique's wallpaper
+  for (const p of Object.keys(PAT)) css += `--lg-pat-${p}:url("${patternURL(p, 2)}");`;
+  css += `--lg-rays-a:url("${raysURL(0)}");--lg-rays-b:url("${raysURL(1)}");--lg-burst:url("${burstURL()}");--lg-burst-gold:url("${burstURL(128, '#ffd27a')}");--lg-burst-violet:url("${burstURL(128, '#c79bff')}");--lg-burst-blue:url("${burstURL(128, '#8fd0ff')}");--lg-twinkle:url("${spriteURL('shop_twinkle', 2)}");`;
+  // the store's own materials (BUSHED's photo-based pixel textures, restyled): warm boards, burlap
   const base = (import.meta.env && import.meta.env.BASE_URL) || '/';
-  css += `--nv-wood:url("${base}models/shop/tex/beams.png");--nv-paper:url("${base}models/shop/tex/paper.png");`;
+  css += `--lg-seal:url("${sealURL(30, 22, 2)}");--lg-seal-big:url("${sealURL(40, 30, 5)}");--lg-pin:url("${pinURL()}");--lg-eyelet:url("${eyeletURL()}");--lg-handle:url("${handleURL()}");--lg-rope-img:url("${ropeURL()}");--lg-string-img:url("${stringURL()}");--lg-strike:url("${strikeURL()}");`;
+  css += `--lg-wood:url("${base}models/shop/tex/board.webp");--lg-burlap:url("${base}models/shop/tex/burlap.webp");--lg-log:url("${base}models/shop/tex/log.webp");`;
   css += '}\n';
   const st = document.createElement('style');
-  st.id = 'hh-ice-frames';
+  st.id = 'hh-lodge-frames';
   st.textContent = css;
   document.head.appendChild(st);
 }
 
 // ------------------------------------------------------------------ sprites
 
-icon('ice_flake', { W: 'nfrost:5', B: 'nlake.r@f', b: 'nlake:3', G: 'nbrass:4' }, [
-  '.....W.....',
-  '...W.B.W...',
-  '....BBB....',
-  '.W..bBb..W.',
-  '..BB.B.BB..',
-  'WBbBBGBBbBW',
-  '..BB.B.BB..',
-  '.W..bBb..W.',
-  '....BBB....',
-  '...W.B.W...',
-  '.....W.....',
-]);
-icon('ice_flake_s', { W: 'nfrost:5!', B: 'nfrost:3' }, ['..W..', '.WBW.', 'WBBBW', '.WBW.', '..W..']);
-// icicles that tile along a ledge (16 px period)
-draw('ice_icicles', () => {
-  const g = new Grid(16, 10);
-  const drips = [[1, 4], [4, 8], [7, 3], [10, 6], [13, 9], [15, 3]];
-  g.rect(0, 0, 16, 2, 'I');
-  for (const [x, h] of drips) { for (let y = 1; y < h; y++) { const w = y < h * 0.45 ? 2 : 1; g.rect(x - (w > 1 ? 1 : 0), y, w, 1, 'I'); } g.set(x, h - 1, 'w'); }
-  return render(g, { I: 'nfrost.x@ice', w: 'nfrost:5' }, { ol: C.dusk });
-});
-// a wooden coat hanger with a brass hook
-icon('shop_hanger', { S: 'nbrass.r@hook', s: 'nbrass:5', W: 'nwood.y@bar', w: 'nwood:5' }, () => {
-  const g = new Grid(22, 14);
-  g.set(11, 0, 'S').set(12, 0, 'S').set(13, 1, 'S').set(13, 2, 'S').set(12, 3, 'S').set(11, 4, 'S');
-  g.set(11, 5, 'S');
-  g.line(11, 6, 1, 11, 'W').line(11, 6, 21, 11, 'W').line(12, 6, 2, 11, 'W').line(10, 6, 20, 11, 'W');
-  g.rect(1, 11, 21, 2, 'W'); g.line(2, 11, 20, 11, 'w');
-  g.set(12, 0, 's');
-  return g.rows();
-});
 // the free daily gift: a linen-wrapped box with a berry satin bow and a holly sprig
 icon('shop_gift', { B: 'nlinen.r@box', b: 'nlinen:2', R: 'nberry.y@rib', r: 'nberry:5', D: 'nberry:1', G: 'npine.r@h', g: 'npine:4', y: 'nberry:4' }, () => {
   const g = new Grid(24, 24);
@@ -560,17 +705,6 @@ icon('shop_mystery', { B: 'nkraft.r@box', b: 'nkraft:2', D: 'nkraft:1', R: 'nlin
   g.set(21, 2, '*').set(20, 3, 'w').set(22, 3, 'w').set(21, 4, 'w');
   return g.rows();
 });
-// a holly sprig (two leaves and three berries) for section corners
-icon('shop_holly', { L: 'npine.r@l1', M: 'npine.r@l2', v: 'npine:5', B: 'nberry.R@b', b: 'nberry:5' }, [
-  '.LL.......MM.',
-  'LLLL.....MMMM',
-  '.LLLL...MMMM.',
-  'LLvLLL.MMvMMM',
-  '.LLLvLBMvMMM.',
-  '..LLLBBBMMM..',
-  '....BBbBB....',
-  '.....BBB.....',
-]);
 // a brass shop bell
 icon('shop_bell', { B: 'nbrass.R@bell', b: 'nbrass:5', K: 'nwood.f@base', k: 'nwood:1' }, [
   '.....b.....',
@@ -582,10 +716,6 @@ icon('shop_bell', { B: 'nbrass.R@bell', b: 'nbrass:5', K: 'nwood.f@base', k: 'nw
   'KKKKKKKKKKK',
   '.kkkkkkkkk.',
 ]);
-// a fairy-light bulb, tinted per colour
-for (const [n, m] of [['shop_bulb_a', 'nlamp'], ['shop_bulb_b', 'nrose'], ['shop_bulb_c', 'nsage'], ['shop_bulb_d', 'nfrost']]) {
-  icon(n, { G: `${m}.R@g`, w: '#ffffff', k: 'nink:3' }, ['..k..', '.kkk.', '.GGG.', 'GGwGG', 'GGGGG', '.GGG.', '..G..']);
-}
 // a twinkle (four-point star) in three sizes for sparkles
 icon('shop_twinkle', { W: 'nfrost:5!', Y: 'nlamp:4!' }, ['...Y...', '...W...', '..YWY..', 'YWWWWWY', '..YWY..', '...W...', '...Y...']);
 icon('shop_twinkle_s', { W: 'nfrost:5!', Y: 'nlamp:4!' }, ['.Y.', 'YWY', '.Y.']);
