@@ -160,7 +160,8 @@ export function geoFor(id: string, species: SpeciesDef = speciesOf(id)): Geo {
   const r = rigOf(id);
   if (!r) return g;
   const d = r.dims;
-  const headY = (d.headZ - d.headH * 0.48) * MM, headTop = (d.headZ + d.headH * 0.52) * MM;
+  // (v4 heads sink deep into the shoulders: what shows of the head starts at the chin)
+  const headY = (d.chin ?? d.headZ - d.headH * 0.48) * MM, headTop = (d.headZ + d.headH * 0.52) * MM;
   const disc = d.faceY * MM;
   Object.assign(g, {
     bodyY: d.bodyZ0 * MM, bodyH: (d.bodyZ1 - d.bodyZ0) * MM, bodyTop: d.bodyZ1 * MM, bodyW: d.bodyW * MM, bodyD: d.bodyD * MM,
