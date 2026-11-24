@@ -21,6 +21,28 @@ import { sceneSound, sound } from '../../audio/sound.ts';
 import { Fx, SPR } from '../fx.ts';
 import type { Stage } from '../scene.ts';
 import { bulbTexture, frostTexture, haloTexture, outdoorTexture, poolTexture } from './shopart.ts';
+import { pottedFir, pottedMonstera, swayPlants, trailingPothos, type Plant } from './shopplants.ts';
+import { HOUSE, groundY } from '../layout.ts';
+
+/** The real world the window looks out on (the app's Scene: its scene graph and weather). */
+export interface WorldView {
+  scene: THREE.Scene;
+  weather?: { vis: { snow: number } };
+  /** the app's own live-world renderer for stage windows (sky, weather, season, time) */
+  renderView?(camera: THREE.Camera, target: THREE.WebGLRenderTarget): void;
+  viewTarget?(w: number, h: number): THREE.WebGLRenderTarget;
+  /** present when the app already grades stages (BUSHED-style post chain): the stage then skips its own */
+  post?: unknown;
+}
+
+// real public-domain paintings from the Art Institute of Chicago (credits in docs/credits/shop3.md)
+interface Art { file: string; w: number; h: number; at: [number, number, number]; yaw: number }
+const ART: Art[] = [
+  { file: 'monet_sandvika', w: 1.0, h: 0.78, at: [-2.55, 2.98, -2.79], yaw: 0 },
+  { file: 'hokusai_cranes', w: 0.4, h: 0.87, at: [3.3, 3.08, -2.79], yaw: 0 },
+  { file: 'fantin_flowers', w: 0.85, h: 0.69, at: [-4.24, 2.12, -0.95], yaw: Math.PI / 2 },
+  { file: 'twachtman_icebound', w: 0.95, h: 0.79, at: [4.24, 2.05, 0.55], yaw: -Math.PI / 2 },
+];
 
 export interface DisplayItem { kind: 'item' | 'piece' | 'species' | 'skin' | 'finish'; id: string }
 export type BoutiqueLayout = 'side' | 'top';
@@ -111,6 +133,7 @@ function roomTex(name: string, srgb = true): THREE.Texture {
   return t;
 }
 const pbr = (name: string, normal = true): THREE.MeshStandardMaterialParameters => ({ map: roomTex(name), ...(normal ? { normalMap: roomTex(name + '_n', false), normalScale: new THREE.Vector2(0.8, 0.8) } : {}) });
+const pbrBeams = () => pbr('beams');
 /** A flat rectangle whose texture tiles in world units (`tile` metres per repeat). */
 function panel(w: number, h: number, mat: THREE.Material, tile: number, at: [number, number, number], rotY = 0, rotX = 0): THREE.Mesh {
   const geo = new THREE.PlaneGeometry(w, h);
@@ -178,7 +201,6 @@ const PROPS: Place[] = [
   // back wall, left of the window: painted shelves, a grandfather clock, a monstera, a hat table
   { id: 'gg_bookshelf', h: 2.2, at: [-2.55, 0, -2.5], width: 1.6, tag: 'stock' },
   { id: 'clock', h: 2.1, at: [-3.82, 0, -2.42] },
-  { id: 'gg_plant_monstera', h: 1.25, at: [-1.48, 0, -2.42] },
   { id: 'gg_table_round', h: 0.72, at: [-2.2, 0, -1.55], width: 0.95 },
   { id: 'gg_wear_boater', h: 0.11, at: [-2.42, 0.72, -1.62], yaw: 0.4 },
   { id: 'gg_wear_beanie_pom', h: 0.2, at: [-2.0, 0.72, -1.4], yaw: -0.3 },
@@ -194,8 +216,6 @@ const PROPS: Place[] = [
   { id: 'lantern', h: 0.3, at: [-2.7, 0.92, 1.5], yaw: 0.3 },
   // back wall, right of the window: the vintage hutch, a pothos, a potted fir in the corner
   { id: 'gg_cabinet_vintage', h: 2.25, at: [2.6, 0, -2.45] },
-  { id: 'gg_plant_pothos', h: 0.45, at: [2.2, 2.25, -2.5] },
-  { id: 'fir', h: 1.9, at: [3.95, 0, -2.45] },
   // right wall: the tiled stove, an armchair with a floor lamp, a tea table, a jar shelf
   { id: 'stove', h: 1.75, at: [3.85, 0, -1.25], yaw: -Math.PI / 2 },
   { id: 'gg_armchair', h: 1.0, at: [3.3, 0, 0.5], yaw: -0.85 },
@@ -216,9 +236,9 @@ const PROPS: Place[] = [
 // display spots: two round display tables on the floor, one on the counter
 interface SpotDef { x: number; y: number; z: number; floor: boolean }
 const SPOTS: SpotDef[] = [
-  { x: -1.86, y: 0, z: 0.16, floor: true },
+  { x: -1.58, y: 0, z: 0.26, floor: true },
   { x: -0.52, y: COUNTER_TOP, z: -0.74, floor: false },
-  { x: 1.86, y: 0, z: 0.16, floor: true },
+  { x: 1.58, y: 0, z: 0.26, floor: true },
 ];
 const TABLE_H = 0.62;
 
@@ -273,6 +293,7 @@ export class Boutique implements Stage {
   get scene(): THREE.Scene { return this.gl ? this.screen : this.room; }
   private screen = new THREE.Scene();
   private gl: THREE.WebGLRenderer | null = null;
+  private viewGl: THREE.WebGLRenderer | null = null;
   private rt: THREE.WebGLRenderTarget | null = null;
   private post = new THREE.ShaderMaterial({
     vertexShader: POST_VS, fragmentShader: POST_FS, depthTest: false, depthWrite: false,
@@ -299,6 +320,12 @@ export class Boutique implements Stage {
   private stoveLight = new THREE.PointLight(0xefb85a, 2.2, 3.5, 1.6);
   private focusLight = new THREE.SpotLight(0xf9e9c4, 0, 7, 0.32, 0.6, 1.2);
   private bell: THREE.Object3D | null = null;
+  private plants: Plant[] = [];
+  private world: WorldView | null = null;
+  private viewCam = new THREE.PerspectiveCamera(46, 1.4, 0.1, 400);
+  private viewRT: THREE.WebGLRenderTarget | null = null;
+  private viewFrame = 0;
+  private outside: THREE.MeshBasicMaterial | null = null;
   private bellT = 0;
   private disposables: (() => void)[] = [];
   private time = 0;
@@ -356,9 +383,16 @@ export class Boutique implements Stage {
 
     // Queen Neve on a little step behind her counter
     this.queen = new OwlActor(QUEEN_LOOK, { fx: (k, at, n) => this.owlFx(k, at, n), sound: (id) => sceneSound('owl_' + id) });
-    this.queen.node.scale.setScalar(1.28);
     this.queen.setMood('happy');
-    this.queenRig.position.set(0.1, 0.42, -1.66);
+    this.queenRig.position.set(0.1, 0.62, -1.66);
+    // once her hand-painted model is in, size her so she stands a head and shoulders above the counter
+    void this.queen.model.ready.then(() => {
+      if (this.dead) return;
+      this.queen.node.scale.setScalar(1);
+      this.queen.node.updateMatrixWorld(true);
+      const hgt = new THREE.Box3().setFromObject(this.queen.node).getSize(new THREE.Vector3()).y;
+      if (hgt > 0.05) this.queen.node.scale.setScalar(Math.min(2, 1.6 / hgt));
+    });
     this.queenRig.add(this.queen.node);
     S.add(this.queenRig);
     S.add(this.fx.group);
@@ -366,6 +400,8 @@ export class Boutique implements Stage {
 
     this.buildRoom();
     this.buildWindow();
+    this.buildArt();
+    this.buildPlants();
     this.buildBulbs();
     SPOTS.forEach((d, i) => this.stands.push(this.makeStand(i, d)));
     this.ready = this.loadProps();
@@ -374,7 +410,33 @@ export class Boutique implements Stage {
   }
 
   /** Draw through this renderer: the room goes to a low-resolution target, then is graded onto the screen. */
-  attach(renderer: THREE.WebGLRenderer) { this.gl = renderer; }
+  attach(renderer: THREE.WebGLRenderer, world?: WorldView) {
+    // the app's post chain grades every stage; only grade here when nobody else does (dev page)
+    this.gl = world?.post ? null : renderer;
+    this.viewGl = renderer;
+    if (world && !this.world) {
+      this.world = world;
+      // look out from the tree house porch across the clearing, at an owl's eye height
+      const x = HOUSE.x + 1.5, z = HOUSE.z + 8.5;
+      this.viewCam.position.set(x, groundY(x, z) + 1.7, z);
+      this.viewCam.lookAt(x + 3, groundY(x, z) + 2.6, z + 12);
+      this.viewRT = world.viewTarget ? world.viewTarget(288, 208) : new THREE.WebGLRenderTarget(288, 208, { type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
+      this.viewFrame = 0;
+      if (this.outside) { this.outside.map = this.viewRT.texture; this.outside.needsUpdate = true; }
+      this.disposables.push(() => this.viewRT?.dispose());
+    }
+  }
+
+  /** the real forest outside the window: drawn when the shop opens, then every few frames */
+  private renderOutside() {
+    const w = this.world, rt = this.viewRT;
+    if (!w || !rt || this.viewFrame++ % 3 !== 0) return;
+    if (w.renderView) { w.renderView(this.viewCam, rt); return; }
+    const gl = this.viewGl;
+    if (!gl) return;
+    const prev = gl.getRenderTarget();
+    gl.setRenderTarget(rt); gl.clear(); gl.render(w.scene, this.viewCam); gl.setRenderTarget(prev);
+  }
 
   private renderRoom(t: number) {
     const gl = this.gl;
@@ -473,13 +535,45 @@ export class Boutique implements Stage {
     }
     // the snowy evening outside and frost on the glass
     const out = outdoorTexture();
-    const bg = add(new THREE.Mesh(new THREE.PlaneGeometry(4.6, 3.3), new THREE.MeshBasicMaterial({ map: out, fog: false })));
+    // outside: the real world once attached (a render of the forest), a painted stand-in until then
+    this.outside = new THREE.MeshBasicMaterial({ map: this.viewRT?.texture ?? out, fog: false });
+    const bg = add(new THREE.Mesh(new THREE.PlaneGeometry(4.2, 3.0), this.outside));
     bg.position.set(0, 2.05, g - 0.95);
     const fr = frostTexture([0, 1 / 3, 2 / 3, 1], [0, 0.38, 1]);
     const frost = add(new THREE.Mesh(new THREE.PlaneGeometry(2 * WIN.x, H), new THREE.MeshBasicMaterial({ map: fr, transparent: true, depthWrite: false })));
     frost.position.set(0, (WIN.y0 + WIN.y1) / 2, g + 0.045);
     frost.renderOrder = 2;
     this.disposables.push(() => { for (const gg of geoms) gg.dispose(); lt.dispose(); out.dispose(); fr.dispose(); (bg.material as THREE.Material).dispose(); (frost.material as THREE.Material).dispose(); });
+  }
+
+  /** real paintings in simple gilded oak frames */
+  private buildArt() {
+    const frameMat = this.mat({ ...pbrBeams(), color: 0xd9bf86 });
+    for (const a of ART) {
+      const g = new THREE.Group();
+      const tex = loader.load(modelUrl(`shop/art/${a.file}.png`));
+      tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearMipmapLinearFilter;
+      const canvasMat = this.mat({ map: tex, roughness: 0.95 });
+      const pic = new THREE.Mesh(new THREE.PlaneGeometry(a.w, a.h), canvasMat);
+      pic.position.z = 0.025;
+      g.add(pic);
+      const t = 0.06, d = 0.05;
+      g.add(beam([a.w + 2 * t, t, d], [0, a.h / 2 + t / 2, d / 2], frameMat, 0.6), beam([a.w + 2 * t, t, d], [0, -a.h / 2 - t / 2, d / 2], frameMat, 0.6));
+      g.add(beam([t, a.h, d], [-a.w / 2 - t / 2, 0, d / 2], frameMat, 0.6), beam([t, a.h, d], [a.w / 2 + t / 2, 0, d / 2], frameMat, 0.6));
+      g.position.set(...a.at);
+      g.rotation.y = a.yaw;
+      this.room.add(g);
+      this.disposables.push(() => g.traverse((n) => (n as THREE.Mesh).geometry?.dispose()));
+    }
+  }
+
+  /** greenery built from pixel-art leaf cards */
+  private buildPlants() {
+    const put = (p: Plant, at: [number, number, number], yaw = 0) => { p.group.position.set(...at); p.group.rotation.y = yaw; this.room.add(p.group); this.plants.push(p); };
+    put(pottedFir(1.9), [3.92, 0, -2.42], 0.3);
+    put(pottedMonstera(1.25), [-1.46, 0, -2.4], 0.4);
+    put(trailingPothos(0.75), [2.15, 2.25, -2.32]);
+    this.disposables.push(() => this.plants.forEach((p) => p.dispose()));
   }
 
   private async loadProps() {
@@ -620,9 +714,10 @@ export class Boutique implements Stage {
         owl.setMood('happy');
         const g = new THREE.Group();
         g.add(owl.node);
+        await owl.model.ready; // the hand-painted owl and its outfit arrive as GLBs
+        if (token !== this.dealToken || this.dead) { owl.model.dispose(); return; }
         for (let k = 0; k < 20; k++) owl.update(1 / 30);
         fit(g, floor ? 0.8 : 0.42, floor ? 1.0 : 0.5, floor ? 0.8 : 0.42);
-        if (token !== this.dealToken || this.dead) { owl.model.dispose(); return; }
         s.holder.add(g);
         s.owl = owl; s.model = g;
         return;
@@ -701,13 +796,14 @@ export class Boutique implements Stage {
     // camera's axis on the shop's centre: an off-centre window into a wider frustum
     const th = Math.tan(THREE.MathUtils.degToRad((side ? 50 : 54) / 2));
     if (side) {
-      const fx = Math.min(0.75, 0.5 + Math.max(0.2, Math.min(0.25, 470 / w)));
+      // the shop board covers the left (see shop.css: 10px + min(42vw, 540px)); centre the shop in the rest
+      const panelR = 10 + Math.min(0.42 * w, 540), fx = (panelR + w) / 2 / w;
       const dx = (fx - 0.5) * w, fullW = w + 2 * dx, free = 2 * (1 - fx) * w;
       c.aspect = fullW / h;
       c.setViewOffset(fullW, h, 0, 0, w, h);
       c.fov = THREE.MathUtils.radToDeg(2 * Math.atan((th * fullW) / free / c.aspect));
       this.focus = { x: fx, y: 0.5 };
-      this.place(6.3 / (2 * th), 0.12, 1.68);
+      this.place(5.3 / (2 * th), 0.1, 1.72);
     } else {
       // portrait: the boutique fills the top of the screen above the shop sheet
       const fy = 0.235, dy = 0.3 * h, fullH = h + 2 * dy, y0 = h / 2 + dy - fy * h;
@@ -715,7 +811,7 @@ export class Boutique implements Stage {
       c.setViewOffset(w, fullH, 0, Math.max(0, Math.min(2 * dy, y0)), w, h);
       c.fov = THREE.MathUtils.radToDeg(2 * Math.atan(th / c.aspect));
       this.focus = { x: 0.5, y: fy };
-      this.place(6.0 / (2 * th), 0.08, 1.62);
+      this.place(5.5 / (2 * th), 0.08, 1.62);
     }
     c.updateProjectionMatrix();
   }
@@ -788,9 +884,11 @@ export class Boutique implements Stage {
     this.focusLight.intensity += (fwant - this.focusLight.intensity) * Math.min(1, dt * 4);
     if (lit) { const p = this.standTop(lit); this.focusLight.position.set(p.x * 0.6, 4.1, p.z + 1.6); this.focusLight.target.position.copy(p); }
 
-    // snow falling past the window, and a few warm motes drifting in the lamplight
+    swayPlants(t);
+    // snow falling past the window (when it really snows outside), and warm motes drifting in the lamplight
+    const snowing = !this.world || (this.world.weather?.vis.snow ?? 0) > 0.12;
     this.snowT -= dt;
-    while (this.snowT <= 0) {
+    while (snowing && this.snowT <= 0) {
       this.snowT += 0.05;
       this.fx.emit({ x: (Math.random() - 0.5) * 3.2, y: 3.4 + Math.random() * 0.2, z: WIN.glass - 0.15 - Math.random() * 0.6, vx: 0.06 + Math.random() * 0.1, vy: -0.32 - Math.random() * 0.2, life: 8, frame: Math.random() < 0.2 ? SPR.flake : SPR.mote, color: P.snow, size: 0.05 + Math.random() * 0.05, flutter: 0.25, fadeIn: 0.4, fadeOut: 0.8 });
     }
@@ -800,6 +898,7 @@ export class Boutique implements Stage {
       this.fx.emit({ x: (Math.random() - 0.5) * 5, y: 1.2 + Math.random() * 2, z: -1.8 + Math.random() * 2.4, vx: (Math.random() - 0.5) * 0.05, vy: 0.02 + Math.random() * 0.04, life: 6, frame: SPR.mote, color: P.lamp, size: 0.03 + Math.random() * 0.02, flutter: 0.15, fadeIn: 1.5, fadeOut: 2 });
     }
     this.fx.update(dt, t);
+    this.renderOutside();
     this.renderRoom(t);
   }
 

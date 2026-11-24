@@ -12,7 +12,6 @@ compressed (`gltf-transform`, script kept in the builder's scratchpad: `pack.mjs
 |---|---|---|---|---|
 | `stove.glb` | [Scandinavian Masonry Heater](https://polyhaven.com/a/scandinavian_masonry_heater) | Kuutti Siitonen | CC0 1.0 | Poly Haven |
 | `mirror.glb` | [Ornate Mirror 01](https://polyhaven.com/a/ornate_mirror_01) | James Ray Cock | CC0 1.0 | Poly Haven |
-| `fir.glb` | [Fir Sapling](https://polyhaven.com/a/fir_sapling) | Rob Tuytel, Rico Cilliers | CC0 1.0 | Poly Haven |
 | `spinning_wheel.glb` | [Spinning Wheel 01](https://polyhaven.com/a/spinning_wheel_01) | Sofia Pahaoja | CC0 1.0 | Poly Haven |
 | `tea_set.glb` | [Tea Set 01](https://polyhaven.com/a/tea_set_01) | James Ray Cock, Rico Cilliers, Jurita Burger | CC0 1.0 | Poly Haven |
 | `bust.glb` | [Marble Bust 01](https://polyhaven.com/a/marble_bust_01) | Rico Cilliers | CC0 1.0 | Poly Haven |
@@ -33,8 +32,6 @@ compressed (`gltf-transform`, script kept in the builder's scratchpad: `pack.mjs
 | `gg_armchair.glb` | [Arm Chair 01](https://polyhaven.com/a/ArmChair_01) | Kirill Sannikov | CC0 1.0 | Gacha Garage |
 | `gg_floor_lamp.glb` | [Wooden Floor Lamp](https://sketchfab.com/3d-models/wooden-floor-lamp-4766a03aa796440598426f8d5e975fec) | Atalaya22 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
 | `gg_lamp_pendant.glb` | [Lamp_02 lowpoly](https://sketchfab.com/3d-models/lamp-02-lowpoly-0f5519beb6644e5ea714055382c20d5f) | chris_models | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
-| `gg_plant_monstera.glb` | [Monstera Deliciosa Potted Mid-Century plant](https://sketchfab.com/3d-models/monstera-deliciosa-potted-mid-century-plant-1ab9bf841df04c07b1819be596327629) | Giora | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
-| `gg_plant_pothos.glb` | [Pothos Plant](https://sketchfab.com/3d-models/pothos-plant-175142c4942b42169455eb20c4033c9d) | Blizzy | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
 | `gg_wall_shelf_jars.glb` | [Jar Shelf](https://sketchfab.com/3d-models/jar-shelf-373ad4d8e5bb4783b6e76dbdf7732788) | djcarson | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage |
 | `gg_table_round.glb` | [Round Wooden Table 01](https://polyhaven.com/a/round_wooden_table_01) | Ulan Cabanilla | CC0 1.0 | Gacha Garage |
 | `gg_table_side.glb` | [Side Table 01](https://polyhaven.com/a/side_table_01) | James Ray Cock | CC0 1.0 | Gacha Garage |
@@ -61,6 +58,24 @@ from CC0 Poly Haven scans by BUSHED's `tools/make_textures.py`), recoloured by `
 | `beams.png`, `beams_n.png` | `board_warm` | [Fine Grained Wood](https://polyhaven.com/a/fine_grained_wood), [Wood Table Worn](https://polyhaven.com/a/wood_table_worn) | Rob Tuytel; Dimitrios Savva, Rico Cilliers | CC0 1.0 |
 | `paper.png` | `ticking` | painted for BUSHED | BUSHED | made for the owner's game |
 | `rug.png` | `rug` | painted for BUSHED | BUSHED | made for the owner's game |
+
+## Wall art (`public/models/shop/art/`)
+
+Real public-domain artworks from the [Art Institute of Chicago](https://www.artic.edu/) (images in the public domain,
+API data CC0), downsized to <= 240 px and pixel-graded (calmed, ordered-dithered) by `src/world/stages/shopart.py`.
+
+| file | artwork | artist | date | source |
+|---|---|---|---|---|
+| `monet_sandvika.png` | Sandvika, Norway | Claude Monet (French, 1840–1926) | 1895 | https://www.artic.edu/artworks/86998 |
+| `hokusai_cranes.png` | Cranes on snow-covered pine | Katsushika Hokusai | c. 1834 | https://www.artic.edu/artworks/21720 |
+| `fantin_flowers.png` | Still Life with Flowers | Henri Fantin-Latour (French, 1836–1904) | 1881 | https://www.artic.edu/artworks/72180 |
+| `twachtman_icebound.png` | Icebound | John Henry Twachtman (American, 1853–1902) | c. 1889 | https://www.artic.edu/artworks/72801 |
+
+## Made for the game
+
+- The potted fir, the monstera and the trailing pothos are built from 2D pixel-art leaf cards painted in code
+  (`src/world/stages/shopplants.ts`), with lathe pots.
+- The view through the bay window is the live game world, rendered by the app's `Scene.renderView()`.
 
 ## Also borrowed
 
