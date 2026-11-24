@@ -20,6 +20,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(HERE, '_src'))
 SCRATCH = '/tmp/claude-0/-home-user-legendary-pancake/851d0ed8-3347-5091-8559-bf562820e20b/scratchpad'
 LOWPIX = os.environ.get('LOWPIX', os.path.join(SCRATCH, 'refs2/symmetrical-goggles'))
 PY = os.environ.get('LOWPIX_PY', os.path.expanduser('~/.cache/lowpix-venv/bin/python'))

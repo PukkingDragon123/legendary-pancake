@@ -7,6 +7,7 @@ import math
 import random
 
 from _kit import Spec, wood, metal, cloth, flat, glaze, paper, leafy, glow, photo
+from plants import KEYS, leaf_art
 
 BOOK_RAMPS = ['berry', 'pine', 'dusk', 'ochre', 'plum', 'clay', 'slate', 'moss', 'walnut', 'lake', 'terracotta', 'sage']
 
@@ -281,8 +282,9 @@ def window():
         S.taper('bracket', [0.08, 0.28, 0.3], [sx * 0.9, -1.48, 0.08], style='frame', front_scale=[1, 0.2])
     S.cyl('pot', 0.13, 0.18, -0.85, -1.28, 0.2, sides=8, style='pot', back_scale=[0.8, 0.8])
     S.cyl('soil', 0.11, 0.02, -0.85, -1.11, 0.2, sides=8, style='soil')
-    for k in range(6):
-        S.taper('leaf', [0.07, 0.04, 0.2], [-0.85, -1.06, 0.2], rot=[-40, k / 6 * 360, 0], offset=[0, 0, 0.08], style='succ', front_scale=[0.2, 0.5])
+    S.style('succ_leaf', dict(ramp='sage', brush={'off': True}, art_key=KEYS['succ']))
+    for k in range(9):
+        S.card('succ', leaf_art('succ', 9, 16, seed=70 + k), [-0.85, -1.1, 0.2], plane='xy', rot=[-(35 + (k % 3) * 15), k / 9 * 360, 0], offset=[0, 0.08, 0], style='succ_leaf', double_sided=True)
     S.cyl('pot2', 0.1, 0.14, 0.9, -1.28, 0.22, sides=8, style='pot2')
     S.cyl('cactus', 0.06, 0.2, 0.9, -1.14, 0.22, sides=6, style='succ2')
     S.cyl('cactus2', 0.035, 0.1, 0.97, -1.04, 0.22, sides=6, style='succ2', rot=[-90, 0, -30])
@@ -411,9 +413,9 @@ def fern():
 def ivy():
     """Hanging ivy: strands of leaf cards dropping from the ceiling. Origin at the top."""
     S = Spec('ivy', density=48)
-    leaf = ['..LL..', '.LLLL.', 'LLlLLL', 'LLlLLL', '.LlLL.', '..s...']
-    S.style('leaf', dict(ramp='leaf', brush={'off': True}, art_key={'L': 'leaf:4', 'l': 'moss:5', 's': 'pine:2'}))
-    S.style('leaf2', dict(ramp='leaf', brush={'off': True}, art_key={'L': 'fern:3', 'l': 'sage:4', 's': 'pine:2'}))
+    leaves = [leaf_art('ivy', 13, 14, seed=k, bend=(k % 3 - 1) * 0.3) for k in range(8)]
+    S.style('leaf', dict(ramp='leaf', brush={'off': True}, art_key=KEYS['ivy']))
+    S.style('leaf2', dict(ramp='leaf', brush={'off': True}, art_key=KEYS['pothos']))
     S.style('vine', flat('pine', 2.4))
     rnd = random.Random(5)
     for s in range(6):
@@ -423,8 +425,8 @@ def ivy():
         S.rod('vine', [x, 0, z], [x + rnd.uniform(-0.1, 0.1), -L, z], 0.01, sides=4, style='vine')
         y = -0.08
         while y > -L:
-            S.card('leaf', leaf, [x + rnd.uniform(-0.04, 0.04), y, z], plane='xy', rot=[rnd.uniform(-30, 30), rnd.uniform(0, 360), rnd.uniform(-40, 40)],
-                   style=rnd.choice(['leaf', 'leaf2']), double_sided=True)
+            S.card('leaf', rnd.choice(leaves), [x + rnd.uniform(-0.04, 0.04), y, z], plane='xy', rot=[rnd.uniform(-30, 30), rnd.uniform(0, 360), rnd.uniform(150, 210)],
+                   style=rnd.choice(['leaf', 'leaf', 'leaf2']), double_sided=True)
             y -= rnd.uniform(0.09, 0.15)
     return S
 
@@ -551,7 +553,7 @@ def wallshelf():
     S = Spec('wallshelf', density=64)
     S.styles(plank=wood('oak', 3.4), bracket=wood('walnut', 3.2, ph='wood_table_001'), jar=glaze('glass', 3.6), jar2=glaze('mist', 3.4),
              herb=leafy('sage', 3.0), herb2=leafy('moss', 3.2), cork=flat('cork', 3.4), honey=glaze('honey', 3.4), pot=glaze('clay', 3.0),
-             leaf=dict(ramp='leaf', brush={'off': True}, art_key={'L': 'fern:4', 'l': 'sage:4', 's': 'pine:2'}))
+             leaf=dict(ramp='leaf', brush={'off': True}, art_key=KEYS['pothos']))
     S.box('plank', 1.5, 0.06, 0.36, 0, 0, 0.18, style='plank', chamfer=0.012)
     for sx in (-1, 1):
         S.taper('bracket', [0.06, 0.26, 0.3], [sx * 0.56, -0.14, 0.15], style='bracket', front_scale=[1, 0.25])
@@ -562,12 +564,12 @@ def wallshelf():
     S.cyl('honey', 0.1, 0.16, 0.06, 0.06, 0.18, sides=8, style='honey', back_scale=[0.85, 0.85])
     S.cyl('honeylid', 0.08, 0.04, 0.06, 0.22, 0.18, sides=8, style='cork')
     S.cyl('pot', 0.11, 0.14, 0.46, 0.06, 0.18, sides=8, style='pot', back_scale=[0.85, 0.85])
-    leaf = ['.LL.', 'LLlL', 'LlLL', '.s..']
+    leaves = [leaf_art('pothos', 11, 12, seed=40 + k) for k in range(6)]
     rnd = random.Random(2)
     for k in range(14):
         y = 0.24 - k * 0.07 if k > 4 else 0.24 + rnd.uniform(-0.02, 0.06)
         x = 0.46 + rnd.uniform(-0.12, 0.14) + (0.1 if k > 4 else 0)
-        S.card('leaf', leaf, [x, y, 0.3], rot=[rnd.uniform(-20, 20), rnd.uniform(0, 360), 0], style='leaf', double_sided=True)
+        S.card('leaf', rnd.choice(leaves), [x, y, 0.3], rot=[rnd.uniform(-20, 20), rnd.uniform(0, 360), 180 if k > 4 else 0], style='leaf', double_sided=True)
     return S
 
 
