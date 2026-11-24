@@ -224,7 +224,7 @@ def gnome(img):
 
 def mantel(img):
     # atlas scaled 2x (512): the dial sits at (117, 58) r 16 in the 256 atlas
-    return dial(img, 117 * 2 + 1, 59 * 2, 33, roman=True)
+    return dial(img, 117 * 2 + 1, 59 * 2, 33, roman=True, hands=False)
 
 
 def cuckoo(img):

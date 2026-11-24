@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { buildProp, propMesh, PX, type Prop } from '../gfx/box.ts';
 import { instanceGLB } from '../gfx/glb.ts';
 import { FINISH, ITEMS } from '../assets/registry.ts';
+import { liveClock } from '../assets/clocks.ts';
 import type { Finish } from '../assets/finishes.ts';
 import type { Save, Placed } from '../game/store.ts';
 import { BOX, kindOf, rotSize, setModelBounds } from '../game/home.ts';
@@ -295,6 +296,9 @@ export class Rooms {
         holder.remove(fallback);
         holder.add(model);
         holder.userData.glb = true;
+        // clocks keep the real time
+        const tick = liveClock(root, id);
+        if (tick) { tick(new Date()); holder.userData.clock = tick; }
         if (clips.length) {
           const mixer = new THREE.AnimationMixer(root);
           const idle = clips.find((c) => /idle/i.test(c.name));
@@ -417,7 +421,9 @@ export class Rooms {
       this.loaded.clear();
       this.sync(this.home);
     }
+    const now = new Date();
     for (const rec of this.items.values()) {
+      (rec.obj.userData.clock as ((d: Date) => void) | undefined)?.(now);
       const mixer = rec.obj.userData.mixer as THREE.AnimationMixer | undefined;
       if (mixer) mixer.update(dt);
       else if (rec.def?.animate && !rec.obj.userData.glb) try { rec.def.animate(rec.obj.userData.anim ?? rec.obj, t, dt); } catch { /* a broken animation shouldn't stop the world */ }
