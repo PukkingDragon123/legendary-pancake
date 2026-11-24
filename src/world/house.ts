@@ -98,6 +98,10 @@ export function buildHouse(): House {
   const porch = new THREE.PointLight(0xffb866, 0, 7, 1.6);
   porch.position.set(oak.porchLamp[0] * PX, oak.porchLamp[1] * PX, (oak.porchLamp[2] + 6) * PX);
   group.add(porch);
+  // the glow of the windows and lanterns spilling onto the bark at night, so the oak reads as a lamplit home
+  const spill = new THREE.PointLight(0xffb070, 0, 14, 1.4);
+  spill.position.set(0, 6.2, 9.5);
+  group.add(spill);
   const upper: Partial<Record<FloorId, THREE.PointLight>> = {};
   for (const f of ['f2', 'f3'] as FloorId[]) {
     const l = new THREE.PointLight(0xffc27a, 0, 9, 1.5);
@@ -174,7 +178,8 @@ export function buildHouse(): House {
       HOUSE_LOOK.sliver.setRGB(1.6 + n * 2.6, 0.95 + n * 1.4, 0.38 + n * 0.4);
       DUSTY().emissiveIntensity = 0.12 + n * 1.6;
       syncLooks();
-      porch.intensity = n * 4.2 * (0.94 + Math.sin(t * 9.1) * 0.04 + Math.sin(t * 13.7) * 0.03);
+      porch.intensity = n * 6 * (0.94 + Math.sin(t * 9.1) * 0.04 + Math.sin(t * 13.7) * 0.03);
+      spill.intensity = n * 2.2;
       for (const f of ['f2', 'f3'] as FloorId[]) upper[f]!.intensity = open[f] ? 0.8 + n * 5 : 0;
       oak.ladder.rotation.z = Math.sin(t * 0.8) * 0.012;
       oak.ladder.rotation.x = Math.sin(t * 0.63 + 1) * 0.01;

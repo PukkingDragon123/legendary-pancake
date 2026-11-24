@@ -597,7 +597,7 @@ export function buildOak(): Oak {
         const piv = at(hingeX, 0, zs);
         leaf.position.set(piv[0] * PX, piv[1] * PX, piv[2] * PX);
         const lg = new Geo();
-        const lw = o.hw + 1.2 - 0.8, top = o.kind === 'round' ? o.y1 + 1 : o.y1 + 1, bot = o.y0 - 1;
+        const lw = o.hw + 1.2 - 1.3, top = o.kind === 'round' ? o.y1 + 1 : o.y1 + 1, bot = o.y0 - 1;
         const loc = (x: number, y: number, dz: number): V3 => { const p = at(x, y, zs + dz); return [p[0] - piv[0], p[1] - piv[1], p[2] - piv[2]]; };
         // boards (planks texture), the arch head clipped by the outline
         const cols = 4;
@@ -620,7 +620,7 @@ export function buildOak(): Oak {
       }
       // the sliver of warm light between the closed shutters
       const sl = new Geo();
-      box(sl, at(0, (o.y0 + o.y1) / 2 - 1, zs - 0.5), [1.8, o.y1 - o.y0 - 4, 0.4], [0, o.a, 0]);
+      box(sl, at(0, (o.y0 + o.y1) / 2 - 1, zs - 0.5), [2.6, o.y1 - o.y0 - 4, 0.4], [0, o.a, 0]);
       box(sl, at(0, o.y0 + 1.2, zs - 0.5), [o.hw * 1.6, 1.2, 0.4], [0, o.a, 0]);
       const slm = new THREE.Mesh(sl.build(), houseMat('sliver'));
       slm.scale.setScalar(PX);

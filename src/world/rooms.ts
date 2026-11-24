@@ -276,6 +276,9 @@ export class Rooms {
       try { for (const o of def.parts?.() ?? []) m.add(o); } catch (e) { console.warn('item parts failed', id, e); }
     }
     holder.add(fallback);
+    // an item with a real model never shows the old stacked-box stand-in: it only keeps its place (and its tap
+    // target) until the model arrives
+    if (def.model) fallback.visible = false;
     holder.userData.anim = fallback.children[0] ?? fallback;
     if (def.model) {
       instanceGLB(def.model).then(({ root, clips }) => {
