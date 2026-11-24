@@ -170,7 +170,9 @@ export function buildHouse(): House {
       // lamps glow warmer and brighter at night; window glass follows the master tint
       const n = hooks.night;
       HOUSE_LOOK.glow.setRGB(0.78 + n * 0.5, 0.74 + n * 0.42, 0.66 + n * 0.3);
-      HOUSE_LOOK.pane.copy(panes.color);
+      // clear glass: a cool sheen by day, the warm lamplit room glowing through it at night
+      HOUSE_LOOK.pane.setRGB(0.86 + n * 0.14, 0.9 - n * 0.12, 0.92 - n * 0.4);
+      HOUSE_LOOK.paneOpacity = 0.16 + n * 0.3;
       syncLooks();
       const emit = (e: LockEvent) => {
         const p = e.at;
@@ -198,8 +200,19 @@ export function buildHouse(): House {
   return house;
 }
 
-/** Garden plot fence + soil beds, shown when the garden is unlocked; tangled weeds when it is not. */
-export function buildGardenFence(cx: number, cz: number, hw: number, hd: number): THREE.Mesh {
+/**
+ * The garden plot's fence. The old voxel picket fence and soil beds don't belong in the realistic woods, so the
+ * plot is just meadow now (the scene still toggles this object and the weeds by the garden zone).
+ */
+export function buildGardenFence(cx: number, cz: number, _hw: number, _hd: number): THREE.Mesh {
+  const m = new THREE.Mesh();
+  m.name = 'garden-plot';
+  m.position.set(cx, 0, cz);
+  return m;
+}
+
+/** @deprecated the voxel picket fence, kept for reference by older dev pages */
+export function buildVoxelGardenFence(cx: number, cz: number, hw: number, hd: number): THREE.Mesh {
   const post = wood('#d8c8a8', { axis: 'y' }), rail = wood('#cdbb98', { axis: 'x', plank: 0 });
   const out: BoxSpec[] = [];
   const W = hw * 16, D = hd * 16;

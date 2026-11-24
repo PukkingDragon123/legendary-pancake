@@ -17,6 +17,8 @@ export const HOUSE_LOOK = {
   pane: new THREE.Color(0x3a4a6a),
   /** window glass on boarded-up floors */
   dead: new THREE.Color(0x1c2230),
+  /** how much the clear glass shows (it is see-through: the real world lies behind it) */
+  paneOpacity: 0.2,
 };
 
 const glowMats = new Set<THREE.MeshBasicMaterial>();
@@ -25,7 +27,7 @@ const paneMats = new Set<{ m: THREE.MeshBasicMaterial; dead: boolean }>();
 /** Copy the shared looks into every live material (call once a frame). */
 export function syncLooks() {
   for (const m of glowMats) m.color.copy(HOUSE_LOOK.glow);
-  for (const p of paneMats) p.m.color.copy(p.dead ? HOUSE_LOOK.dead : HOUSE_LOOK.pane);
+  for (const p of paneMats) { p.m.color.copy(p.dead ? HOUSE_LOOK.dead : HOUSE_LOOK.pane); p.m.opacity = p.dead ? 0.94 : HOUSE_LOOK.paneOpacity; }
 }
 
 /** Leaves sway in the shared wind (box.ts uniforms): tips move more than the stems. */
@@ -148,7 +150,7 @@ function convert(root: THREE.Object3D, o: PartOpts, part: HousePart) {
         glowMats.add(g);
         m = g;
       } else if (cls === 'pane') {
-        const p = new THREE.MeshBasicMaterial({ map, toneMapped: false, side: THREE.DoubleSide });
+        const p = new THREE.MeshBasicMaterial({ map, toneMapped: false, side: THREE.DoubleSide, transparent: true, depthWrite: false, opacity: 0.2 });
         const rec = { m: p, dead: !!o.dead };
         paneMats.add(rec);
         part.panes.push(rec);
@@ -214,7 +216,6 @@ export const HOUSE_PARTS: { id: string; band: 'f1' | 'f2' | 'f3' | 'roof'; opts:
   { id: 'trunk_f3', band: 'f3', opts: { cut: true } },
   { id: 'room_f3', band: 'f3', opts: { cut: true } },
   { id: 'roof', band: 'roof', opts: { sway: 0.5 } },
-  { id: 'canopy', band: 'roof', opts: { swaySolid: 0.25 } },
   { id: 'leaves', band: 'roof', opts: { sway: 0.9, swaySolid: 0.25 } },
 ];
 

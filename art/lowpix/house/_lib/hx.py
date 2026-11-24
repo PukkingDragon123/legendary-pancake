@@ -33,10 +33,12 @@ DOOR_A = 1.16
 LADDER_A = {'f1': -1.32, 'f2': 2.05}
 LIMB_A = 2.28
 CHIMNEY_A = -2.02
+# windows sit on the bark loft's face boundaries (FACE = one of its 48 faces) so their openings are whole faces
+FACE = 2 * math.pi / 48
 WINDOWS = {
-    'f1': [(2.5, 34, 9), (-2.36, 34, 9)],
-    'f2': [(-2.3, 34, 9), (2.95, 38, 7)],
-    'f3': [(math.pi, 32, 15), (-1.75, 32, 8), (1.75, 32, 8)],
+    'f1': [(FACE * 19, 34, 9), (-FACE * 18, 34, 9)],
+    'f2': [(-FACE * 18, 34, 9), (FACE * 23, 38, 7)],
+    'f3': [(math.pi, 32, 15), (-FACE * 13, 32, 8), (FACE * 13, 32, 8)],
 }
 BANDS = {'f1': (0, FLOOR_Y['f2'] - SLAB), 'f2': (FLOOR_Y['f2'] - SLAB, FLOOR_Y['f3'] - SLAB), 'f3': (FLOOR_Y['f3'] - SLAB, ROOF_Y)}
 

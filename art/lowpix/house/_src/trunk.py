@@ -105,9 +105,34 @@ def bark_shell(S, fid, y0, y1, moss_foot=False):
     paint['layers'].append({'id': 'northmoss', 'op': 'spots', 'count': 7, 'radius': [2.5, 7], 'roughness': 0.8, 'rough_scale': 3,
                             'where': {'around': [0.35, 0.65]}, 'ramp': 'moss', 'tone': 3.2,
                             'bevel': {'shadow': 1, 'highlight': 1, 'shadow_ramp': 'bark', 'shadow_tone': 1.0}})
+    # the window openings are whole faces of the shell left out (src/world/house/plan.ts windowHoles mirrors this)
+    hide = cut_faces(len(ys) - 1)
+    for h in window_holes(fid):
+        for i in range(len(ys) - 1):
+            if ys[i] < h['y0'] - 0.1 or ys[i + 1] > h['y1'] + 0.1:
+                continue
+            for k in range(NSIDES):
+                mid = 2 * math.pi * (23.5 - k) / 48
+                if abs(math.remainder(mid - h['a'], 2 * math.pi)) < h['half']:
+                    hide.append(f's{i}_{k}')
     S.loft('bark', rings, sides=NSIDES, rnd=2.0, style='bark', caps=(False, False), subdiv=0, angle=3.75,
-           hide=cut_faces(len(ys) - 1), paint=paint)
+           hide=hide, paint=paint)
     return ys
+
+
+def window_holes(fid):
+    """Openings through the trunk for a floor's windows: whole bark faces round each window (angle a, half-angle,
+    y0..y1 on the shell's ring heights)."""
+    from hx import FACE
+    y0, y1 = BANDS[fid]
+    ys = ring_ys(y0, y1)
+    out = []
+    for a, v, r in WINDOWS[fid]:
+        half = math.ceil((r + 2) / (RO * FACE)) * FACE
+        y = FLOOR_Y[fid] + v
+        hit = [i for i in range(len(ys) - 1) if ys[i + 1] > y - r - 1 + 0.5 and ys[i] < y + r + 1 - 0.5]
+        out.append({'a': a, 'half': half, 'y0': ys[hit[0]], 'y1': ys[hit[-1] + 1], 'v': v, 'r': r})
+    return out
 
 
 def cut_lips(S, ys, deep=False):
@@ -246,44 +271,60 @@ def lantern(S, x, ytop, z, chain=8, s=1.0, name='lamp'):
 
 
 # ------------------------------------------------------------------------------------------------ windows
-def window(S, fid, a, v, r, flowers=True, idx=0):
-    """A round window: a stone sill and wooden frame outside with crossed glazing bars, glass that glows at night,
-    a flower box on brackets; inside a deep frame and the same glass."""
-    y = FLOOR_Y[fid] + v
+def window(S, fid, hole, flowers=True, idx=0):
+    """A cottage window through the real opening in the trunk: a wooden casing lining the hole from the bark to the
+    room (head, sill and jambs following the wall's wedge), clear glass in the middle of the wall with glazing bars
+    (the game sees the world through it), trim round both faces, a stone sill and a flower box of pixel-leaf
+    plants outside, a ledge for a candle inside."""
+    from leafart import flower_sprig, FLOWER_KEY
+    a, th = hole['a'], hole['half']
+    yb, yt = hole['y0'], hole['y1']
     rng = random.Random(idx * 31 + int(a * 100))
+    ro = max(R_of(yb), R_of(yt)) + 0.4
+    ri = R_IN - 0.6
+    depth = ro - ri
+    zm = (ro + ri) / 2
+    sn, cs = math.sin(th), math.cos(th)
     with S.around(a, name='win'):
-        zo = R_of(y) + 0.6
-        S.part('wframe', 'prism', [2 * r + 6, 2 * r + 6, 3.2], [0, y, zo - 0.6], sides=16, style='frame', hide=['back'])
-        S.part('wglass', 'prism', [2 * r, 2 * r, 1], [0, y, zo + 0.9], sides=16, style='glass', pane=True, hide=['back'])
-        S.box('wbarV', 1.4, 2 * r, 1.2, 0, y - r, zo + 1.4, style='frame')
-        S.box('wbarH', 2 * r, 1.4, 1.2, 0, y - 0.7, zo + 1.4, style='frame')
-        if r >= 12:
-            S.part('wring', 'prism', [r + 1, r + 1, 1.2], [0, y, zo + 1.5], sides=12, style='frame', hide=['back'])
-        # keystones round the frame
-        for k in range(12):
-            t = k / 12 * 2 * math.pi
-            S.part('wstone', 'box', [3.4, 2.6, 2.2], [math.sin(t) * (r + 3.6), y + math.cos(t) * (r + 3.6), zo + 0.8], rot=[0, 0, -math.degrees(t)],
-                   style='stone', chamfer=0.5, paint={'tone': 3.6 + rng.random() * 0.8})
-        S.box('wsill', 2 * r + 8, 2.4, 6, 0, y - r - 5.2, zo + 1.6, style='stone', chamfer=0.6)
-        if flowers:
-            S.box('wbox', 2 * r + 2, 4.4, 4.6, 0, y - r - 10, zo + 2.6, style='wood', chamfer=0.4)
-            S.box('wsoil', 2 * r + 1, 0.6, 3.6, 0, y - r - 5.8, zo + 2.6, paint={'ramp': 'dark', 'tone': 1.4})
+        # the casing: head and sill are wedges (wider at the bark than at the room), the jambs lie along the radii
+        for name, yy in (('whead', yt - 1.2), ('wsillin', yb)):
+            S.part(name, 'taper', [2 * ro * sn + 2.6, 2.4, depth + 1], [0, yy + 1.2 - (0 if name == 'whead' else 0), zm], back_scale=[(ri / ro) * 0.98, 1], style='frame')
+        for sx in (-1, 1):
+            S.part('wjamb', 'box', [2.4, yt - yb, depth + 1], [sx * zm * sn - sx * 1.0, (yb + yt) / 2, zm * cs], rot=[0, sx * math.degrees(th), 0], style='frame')
+        # glass in the middle of the wall, with glazing bars
+        gw = 2 * zm * math.tan(th) - 3.2
+        gh = yt - yb - 4.4
+        gy = (yb + yt) / 2
+        S.cbox('wglass', [gw, gh, 0.5], [0, gy, zm], style='glass', pane=True)
+        nv = 2 if gw > 26 else 1
+        for k in range(1, nv + 1):
+            S.cbox('wmullion', [1.2, gh, 1.4], [-gw / 2 + gw * k / (nv + 1), gy, zm], style='frame')
+        for k in (1, 2) if gh > 26 else (1,):
+            S.cbox('wtransom', [gw, 1.2, 1.4], [0, gy - gh / 2 + gh * k / (3 if gh > 26 else 2), zm], style='frame')
+        # trim round the opening on the bark and on the room side
+        for z, w in ((ro + 0.5, 2 * ro * sn), (ri - 0.4, 2 * ri * sn)):
+            S.cbox('wtrimT', [w + 5, 2.4, 1.2], [0, yt + 0.6, z], style='frame')
+            S.cbox('wtrimB', [w + 5, 2.4, 1.2], [0, yb - 0.6, z], style='frame')
             for sx in (-1, 1):
-                S.slab('wbracket', [sx * (r - 1), y - r - 14, zo], [sx * (r - 1), y - r - 10.2, zo + 3.6], 1.4, 1.4, style='iron')
+                S.cbox('wtrimS', [2.4, yt - yb + 3.6, 1.2], [sx * (w / 2 + 1.2), (yb + yt) / 2, z], style='frame')
+        # outside: a stone sill and a flower box on iron brackets
+        w2 = 2 * ro * sn
+        S.box('wsill', w2 + 8, 2.4, 6, 0, yb - 3.6, ro + 2, style='stone', chamfer=0.6)
+        if flowers:
+            S.box('wbox', w2 + 2, 4.4, 4.6, 0, yb - 8.4, ro + 3, style='wood', chamfer=0.4)
+            S.box('wsoil', w2 + 1, 0.6, 3.6, 0, yb - 4.2, ro + 3, paint={'ramp': 'dark', 'tone': 1.4})
+            for sx in (-1, 1):
+                S.slab('wbracket', [sx * (w2 / 2 - 2), yb - 12.4, ro], [sx * (w2 / 2 - 2), yb - 8.6, ro + 3.6], 1.4, 1.4, style='iron')
             cols = ['rose', 'cream', 'lilac', 'ochre', 'rose']
-            for k in range(5):
-                fx = -r + 2 + k * (2 * r - 4) / 4
-                S.part('wleaf', 'prism', [2.8, 2.2, 2.8], [fx, y - r - 4.2, zo + 2.6], sides=5, rot=[-90, rng.random() * 60, 0], style='leaf')
-                S.part('wbloom', 'prism', [2, 1.6, 2], [fx + rng.uniform(-0.6, 0.6), y - r - 2.4 + rng.random(), zo + 2.4], sides=5, rot=[-90, 0, 0],
-                       paint={'ramp': cols[(k + idx) % 5], 'tone': 4})
-        # inside: a deep frame and the glass, a ledge to stand a candle on
-        zi = R_IN - 0.4
-        S.part('wiframe', 'prism', [2 * r + 5, 2 * r + 5, 2.4], [0, y, zi - 0.8], sides=16, style='frame', hide=['back'], rot=[0, 180, 0])
-        S.part('wiglass', 'prism', [2 * r, 2 * r, 1], [0, y, zi - 1.8], sides=16, style='glass', pane=True, rot=[0, 180, 0], hide=['back'])
-        S.box('wibarV', 1.4, 2 * r, 1, 0, y - r, zi - 2.6, style='frame')
-        S.box('wibarH', 2 * r, 1.4, 1, 0, y - 0.7, zi - 2.6, style='frame')
-        S.box('wiledge', 2 * r + 4, 1.6, 4, 0, y - r - 2.4, zi - 2.2, style='wood', chamfer=0.4)
-    return y
+            n = max(3, int(w2 / 4.5))
+            for k in range(n):
+                fx = -w2 / 2 + 2 + k * (w2 - 4) / max(1, n - 1)
+                art = flower_sprig(idx * 11 + k, cols[(k + idx) % 5] != 'cream')
+                for t in (0, 1):
+                    S.card('wplant', art, [fx, yb - 3.8 + len(art) / 4, ro + 3 + (t - 0.5) * 0.6], plane='xy', key=FLOWER_KEY[cols[(k + idx) % 5]],
+                           rot=[0, (t * 70 - 35) + rng.uniform(-10, 10), rng.uniform(-6, 6)])
+        S.box('wiledge', 2 * ri * sn + 4, 1.4, 3.6, 0, yb - 1.4, ri - 1.6, style='wood', chamfer=0.4)
+    return (yb + yt) / 2
 
 
 # ------------------------------------------------------------------------------------------------ bark details
@@ -372,8 +413,8 @@ def band(fid):
     cut_lips(S, ys)
     holes = {'f1': [], 'f2': [(*[pol(LADDER_A['f1'], 60)[0], pol(LADDER_A['f1'], 60)[2]], 10)], 'f3': [(*[pol(LADDER_A['f2'], 60)[0], pol(LADDER_A['f2'], 60)[2]], 10)]}[fid]
     slab(S, fid, holes)
-    for i, (a, v, r) in enumerate(WINDOWS[fid]):
-        window(S, fid, a, v, r, flowers=(fid != 'f3'), idx=i + FIDS.index(fid) * 3)
+    for i, hole in enumerate(window_holes(fid)):
+        window(S, fid, hole, flowers=(fid != 'f3'), idx=i + FIDS.index(fid) * 3)
     chimney(S, y0, y1)
     flutes(S, y0, y1)
     rng = random.Random(7 + FIDS.index(fid))
@@ -381,7 +422,7 @@ def band(fid):
         fungus(S, -1.9, 50, 1.1, 3, 1)
         fungus(S, 2.75, 40, 0.8, 2, 2)
         burl(S, -1.45, 24, 22, 18)
-        burl(S, 2.6, 18, 18, 14)
+        burl(S, 2.78, 18, 18, 14)
         burl(S, -2.9, 36, 16, 20)
         ivy(S, -1.05, 4, 14, 1)
         ivy(S, 1.75, 6, 12, 2)
@@ -402,7 +443,7 @@ def band(fid):
         burl(S, -2.4, 160, 18, 16)
         burl(S, 1.35, 150, 14, 20)
         ivy(S, -1.05, 138, 14, 7)
-        ivy(S, 1.6, 140, 12, 8)
+        ivy(S, 1.42, 140, 12, 8)
     return S
 
 

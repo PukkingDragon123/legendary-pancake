@@ -50,11 +50,12 @@ def specs():
         # flower box on the front rail
         S.box('bfbox', 20, 4, 4.4, -6, y1 + 12, BZ1 - 0.6, style='wood', chamfer=0.4)
         cols = ['rose', 'cream', 'lilac', 'rose', 'ochre', 'cream']
+        from leafart import flower_sprig, FLOWER_KEY
         for k in range(6):
             fx = -14.5 + k * 3.4
-            S.part('bfleaf', 'prism', [3, 2, 3], [fx, y1 + 16.4, BZ1 - 0.6], sides=5, rot=[-90, rng.random() * 60, 0], style='leaf')
-            S.part('bfbloom', 'prism', [2.2, 1.8, 2.2], [fx + rng.uniform(-0.5, 0.5), y1 + 18 + rng.random(), BZ1 - 0.8], sides=5, rot=[-90, 0, 0],
-                   paint={'ramp': cols[k], 'tone': 4.0})
+            art = flower_sprig(40 + k, True, 12, 16)
+            for t in (0, 1):
+                S.card('bfplant', art, [fx, y1 + 16 + len(art) / 4, BZ1 - 0.6], plane='xy', key=FLOWER_KEY[cols[k]], rot=[0, t * 70 - 35 + rng.uniform(-8, 8), 0])
         pot(S, 12, y1, BZ0 + 5, 2.8, 4.5, 'lilac', 7)
         # lantern on a bracket by the door
         S.box('blarm', 1.6, 1.6, 8, -13, y1 + 28, R_of(y1 + 28) + 3, style='iron')

@@ -14,7 +14,7 @@ import type { Fx } from './fx.ts';
 import type { House } from './house.ts';
 import { buildMovingBox, stepBoxIdle, stepBoxOpen, type BoxAnim, type BoxModel } from './house/boxes.ts';
 import { patchCut } from './house/kit.ts';
-import { CELL, FLOOR_IDS, FLOOR_Y, HOLES, OPEN_A, R_IN, ROOM_H, trunkR, wallCenterA, wrapA, type FloorId } from './house/plan.ts';
+import { CELL, FLOOR_IDS, FLOOR_Y, HOLES, OPEN_A, R_IN, ROOM_H, trunkR, wallCenterA, windowHoles, wrapA, type FloorId } from './house/plan.ts';
 
 type Home = Save['home'];
 const shade = (c: number, k: number) => {
@@ -73,11 +73,27 @@ function wallMesh(fid: FloorId, wf: Finish): THREE.Mesh {
     else if (v > ROOM_H - 5) c = shade(c, 0.8 + (ROOM_H - v) * 0.04);
     return c;
   });
+  // the wall is cut into columns, with the window openings left out (the glass in them shows the real world)
+  const holes = windowHoles(fid);
+  const edges = new Set<number>();
+  for (let s = 0; s <= segs; s++) edges.add(OPEN_A + (s / segs) * ARC);
+  const toArc = (a: number) => { let d = a - OPEN_A; while (d < 0) d += Math.PI * 2; return OPEN_A + d; };
+  for (const h of holes) { edges.add(toArc(h.a - h.half)); edges.add(toArc(h.a + h.half)); }
+  const cols = [...edges].filter((a) => a >= OPEN_A - 1e-6 && a <= OPEN_A + ARC + 1e-6).sort((a, b) => a - b);
   const pos: number[] = [], uv: number[] = [], idx: number[] = [];
-  for (let s = 0; s <= segs; s++) {
-    const t = s / segs, a = OPEN_A + t * ARC;
-    for (const [v, y] of [[0, y0], [1, y0 + ROOM_H]] as const) { pos.push(Math.sin(a) * R * PX, y * PX, Math.cos(a) * R * PX); uv.push(t, v); }
-    if (s < segs) { const k = s * 2; idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
+  const quad = (a0: number, a1: number, ya: number, yb: number) => {
+    const k = pos.length / 3;
+    for (const [a, y] of [[a0, ya], [a1, ya], [a0, yb], [a1, yb]]) { pos.push(Math.sin(a) * R * PX, y * PX, Math.cos(a) * R * PX); uv.push((a - OPEN_A) / ARC, (y - y0) / ROOM_H); }
+    idx.push(k, k + 1, k + 2, k + 2, k + 1, k + 3);
+  };
+  for (let i = 0; i < cols.length - 1; i++) {
+    const a0 = cols[i], a1 = cols[i + 1], am = (a0 + a1) / 2;
+    if (a1 - a0 < 1e-5) continue;
+    const h = holes.find((w) => Math.abs(Math.atan2(Math.sin(am - w.a), Math.cos(am - w.a))) < w.half);
+    if (!h) { quad(a0, a1, y0, y0 + ROOM_H); continue; }
+    const hb = Math.max(y0, h.y0), ht = Math.min(y0 + ROOM_H, h.y1);
+    if (hb > y0) quad(a0, a1, y0, hb);
+    if (ht < y0 + ROOM_H) quad(a0, a1, ht, y0 + ROOM_H);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));

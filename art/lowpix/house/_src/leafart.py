@@ -86,6 +86,49 @@ def strand(seed, h=30):
     return [''.join(r) for r in grid]
 
 
+def flower_sprig(seed, bloom=True, w=12, h=16):
+    """A potted-plant sprig: a stem or two with paired pointed leaves and (optionally) a five-petal bloom on top
+    (s stem, d/m/l leaf shades, p/P petals, c centre)."""
+    rng = random.Random(seed)
+    g = [['.'] * w for _ in range(h)]
+    stems = [w // 2 + rng.choice((-2, -1, 0, 1))] + ([w // 2 + rng.choice((2, 3)) * rng.choice((-1, 1))] if rng.random() < 0.6 else [])
+    tops = []
+    for si, x0 in enumerate(stems):
+        top = rng.randint(3, 6) + si * 3
+        x = float(x0)
+        for y in range(h - 1, top - 1, -1):
+            xi = int(round(x))
+            if 0 <= xi < w:
+                g[y][xi] = 's'
+                if (h - y) % 3 == 1 and y > top + 1:
+                    for side in (-1, 1):
+                        for k in (1, 2):
+                            xx = xi + side * k
+                            yy = y - (k - 1)
+                            if 0 <= xx < w and g[yy][xx] == '.':
+                                g[yy][xx] = 'l' if side < 0 else ('m' if k == 1 else 'd')
+            x += rng.uniform(-0.35, 0.35)
+        tops.append((int(round(x)), top))
+    if bloom:
+        for (x, y) in tops:
+            for dx, dy, ch in ((0, -2, 'P'), (-1, -1, 'p'), (1, -1, 'P'), (-2, 0, 'p'), (2, 0, 'P'), (-1, 1, 'p'), (1, 1, 'p'), (0, 0, 'c'),
+                               (-1, 0, 'P'), (1, 0, 'P'), (0, -1, 'P'), (0, 1, 'p')):
+                xx, yy = x + dx, y + dy
+                if 0 <= xx < w and 0 <= yy < h:
+                    g[yy][xx] = ch
+    else:
+        for (x, y) in tops:
+            for dx, dy in ((-1, 0), (1, 0), (0, -1), (-1, -1), (1, -1), (0, -2)):
+                xx, yy = x + dx, y + dy
+                if 0 <= xx < w and 0 <= yy < h:
+                    g[yy][xx] = 'l' if dx <= 0 else 'm'
+    return [''.join(r) for r in g]
+
+
+FLOWER_KEY = {c: {'s': 'fern:1', 'd': 'leaf:2', 'm': 'leaf:3', 'l': 'leaf:5', 'p': c + ':3', 'P': c + ':4', 'c': 'ochre:5'}
+              for c in ('rose', 'cream', 'lilac', 'ochre', 'red', 'sky')}
+
+
 KEYS = {
     # crown top in the light
     'lit': {'o': 'leaf:2', 'd': 'leaf:3', 'm': 'leaf:4', 'l': 'leaf:5', 'h': 'leaf:6', 'v': 'leaf:6', 's': 'dark:2', 'a': 'ochre:3', 'c': 'dark:2'},

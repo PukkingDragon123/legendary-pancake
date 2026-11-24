@@ -68,16 +68,12 @@ def pot(S, x, y, z, r, h, bloom, seed):
     S.part('pot', 'prism', [2 * r, 2 * r, h], [x, y + h / 2, z], sides=9, rot=[-90, 0, 0], back_scale=[0.78, 0.78], style='terra')
     S.disc('potlip', r + 0.5, y + h - 1.0, y + h + 0.2, x, z, sides=9, style='terra')
     S.disc('soil', r - 0.3, y + h - 0.6, y + h + 0.1, x, z, sides=9, paint={'ramp': 'dark', 'tone': 1.3})
-    for k in range(5):
-        a = k / 5 * 2 * math.pi + rng.random()
-        lx, lz = x + math.sin(a) * r * 0.45, z + math.cos(a) * r * 0.45
-        hh = rng.uniform(3, 6)
-        S.rod('stalk', [lx, y + h, lz], [lx + math.sin(a) * 1.2, y + h + hh, lz + math.cos(a) * 1.2], 0.35, sides=4, paint={'ramp': 'fern', 'tone': 2.4})
-        S.part('pleaf', 'prism', [2.6, 1.2, 2.6], [lx + math.sin(a) * 0.8, y + h + hh * 0.5, lz + math.cos(a) * 0.8], sides=5, rot=[-70, math.degrees(a), 0], style='leaf')
-        if bloom:
-            S.part('bloom', 'prism', [2.4, 2.4, 1.4], [lx + math.sin(a) * 1.2, y + h + hh + 0.6, lz + math.cos(a) * 1.2], sides=6, rot=[-90, 0, 0],
-                   paint={'ramp': bloom, 'tone': 4.0, 'layers': [{'id': 'eye', 'op': 'spots', 'count': 1, 'radius': [0.5, 0.6], 'ramp': 'ochre', 'tone': 4.5}]})
-
+    # the plant: crossed cards of hand-pixelled leaves and blooms
+    from leafart import flower_sprig, FLOWER_KEY
+    for k in range(3):
+        art = flower_sprig(seed * 7 + k, bloom is not None, 14, 18)
+        S.card('pplant', art, [x + rng.uniform(-0.6, 0.6), y + h - 0.3 + len(art) / 4, z + rng.uniform(-0.6, 0.6)], plane='xy',
+               key=FLOWER_KEY[bloom or 'sky'], rot=[0, k * 60 + rng.uniform(-12, 12), rng.uniform(-5, 5)])
 
 def specs():
     S = Spec('porch', density=2, desc='Front door in a stone arch, plank porch with railing, steps, lantern post and porch clutter')
