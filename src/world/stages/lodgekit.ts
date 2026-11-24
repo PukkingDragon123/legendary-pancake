@@ -5,6 +5,7 @@
 // in pixel canvases painted in code. Real light does the shading. OWNED BY THE SHOP BUILDER.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { modelUrl } from '../../gfx/glb.ts';
 import { rng } from '../../gfx/noise.ts';
 
@@ -188,77 +189,84 @@ function lathe(prof: [number, number][], segs: number, m: THREE.Material, tileU 
 
 // ------------------------------------------------------------------ stumps (the deal pedestals)
 
-/** A tree stump the beaver felled and sanded flat: bark sides, flared roots, an end-grain top with tooth marks. */
-export function stump(h: number, r: number, seed = 1): THREE.Group {
-  const g = new THREE.Group();
-  const rr = rng(seed);
-  const prof: [number, number][] = [];
-  for (let i = 0; i <= 10; i++) {
-    const t = i / 10, y = t * (h - 0.02);
-    const flare = Math.pow(1 - t, 3) * 0.32 * r;
-    prof.push([r * (1 + Math.sin(t * 9 + seed) * 0.015) + flare, y]);
+/** A tube along `curve` whose radius tapers from r0 to r1 (roots, chains of growth, handles). */
+export function taperTube(curve: THREE.Curve<THREE.Vector3>, r0: number, r1: number, segs = 10, radial = 7): THREE.BufferGeometry {
+  const g = new THREE.TubeGeometry(curve, segs, 1, radial, false);
+  const pos = g.attributes.position as THREE.BufferAttribute;
+  const ring = radial + 1;
+  for (let j = 0; j <= segs; j++) {
+    const c = curve.getPointAt(j / segs), k = r0 + (r1 - r0) * Math.pow(j / segs, 0.8);
+    for (let i = 0; i < ring; i++) {
+      const v = j * ring + i;
+      pos.setXYZ(v, c.x + (pos.getX(v) - c.x) * k, c.y + (pos.getY(v) - c.y) * k, c.z + (pos.getZ(v) - c.z) * k);
+    }
   }
-  prof.unshift([r * 1.3, -0.01]);
-  const side = lathe(prof, 18, M.bark(), 1.5, 1.5);
-  g.add(side);
-  // the top: end grain (one of the four caps in the texture), a little proud of the bark
-  const topG = new THREE.CircleGeometry(r * 0.97, 22);
-  const uv = topG.attributes.uv as THREE.BufferAttribute;
-  const q = Math.floor(rr() * 2) * 0.5 + 0.5;  // fresh caps sit in the right-hand column
-  const row = Math.floor(rr() * 2) * 0.5;
-  for (let i = 0; i < uv.count; i++) uv.setXY(i, (q === 0.5 ? 0.5 : 0) + 0.02 + uv.getX(i) * 0.46, row + 0.02 + uv.getY(i) * 0.46);
-  const top = mesh(topG, M.end(), false, true);
-  top.rotation.x = -Math.PI / 2;
-  top.position.y = h - 0.018;
-  g.add(top);
-  const rim = mesh(new THREE.TorusGeometry(r * 0.985, 0.018, 5, 22), M.bark());
-  rim.rotation.x = Math.PI / 2;
-  rim.position.y = h - 0.02;
-  g.add(rim);
-  // roots running out into the floor
-  const roots: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
-  const n = 5;
-  for (let k = 0; k < n; k++) {
-    const a = (k / n) * Math.PI * 2 + rr() * 0.6;
-    const len = r * (0.9 + rr() * 0.6);
-    const geo = new THREE.CylinderGeometry(0.012, r * 0.22, len, 6, 1);
-    geo.translate(0, len / 2, 0);
-    geo.rotateZ(-Math.PI / 2 + 0.28);
-    const m = new THREE.Matrix4().makeRotationY(-a).premultiply(new THREE.Matrix4().makeTranslation(Math.cos(a) * r * 0.75, 0.0, Math.sin(a) * r * 0.75));
-    roots.push({ geo, m });
-  }
-  const rt = mesh(merged(roots), M.bark());
-  g.add(rt);
-  g.add(contactShadow(r * 4.2, r * 4.2, 0.55));
-  g.userData.top = h;
+  g.computeVertexNormals();
   return g;
 }
 
-// ------------------------------------------------------------------ barrels
-
-/** A coopered barrel: staves (warm boards), iron or brass hoops, a lid. Returns the group and its lid. */
-export function barrel(h: number, r: number, o: { brass?: boolean; lid?: boolean } = {}): { group: THREE.Group; lid: THREE.Object3D; body: THREE.Mesh } {
+/** A tree stump the beaver felled and sanded flat: a lumpy, ridged bark trunk that swells into its roots, gnarled
+ * roots curling out into the floor, a slightly uneven end-grain top with a band of bark round it. */
+export function stump(h: number, r: number, seed = 1): THREE.Group {
   const g = new THREE.Group();
-  const prof: [number, number][] = [];
-  for (let i = 0; i <= 12; i++) { const t = i / 12; prof.push([r * (0.84 + Math.sin(t * Math.PI) * 0.16), t * h]); }
-  const body = lathe(prof, 24, M.board(), 0.9, 1.0);
-  // stave seams: darken every other face by a subtle vertex colour
-  g.add(body);
-  const hoopM = o.brass ? M.brass() : M.iron();
-  for (const t of [0.07, 0.24, 0.76, 0.93]) {
-    const rr = r * (0.84 + Math.sin(t * Math.PI) * 0.16) + 0.006;
-    const hoop = mesh(new THREE.CylinderGeometry(rr, rr, h * 0.045, 24, 1, true), hoopM);
-    hoop.position.y = t * h;
-    g.add(hoop);
+  const rr = rng(seed);
+  const SEG = 28, RINGS = 14;
+  const ph = [rr() * 6, rr() * 6, rr() * 6];
+  // the bark trunk: a lathe pushed out of round by ridges and lumps, swelling into root buttresses at the foot
+  const prof: [number, number][] = [[r * 1.42, -0.01]];
+  for (let i = 0; i <= RINGS; i++) { const t = i / RINGS; prof.push([r * (1 + Math.pow(1 - t, 3.2) * 0.38), t * (h - 0.012)]); }
+  const side = lathe(prof, SEG, M.bark(), 1.2, 1.2);
+  const pos = side.geometry.attributes.position as THREE.BufferAttribute;
+  const buttress = (a: number) => Math.pow(Math.max(0, Math.cos(a * 5 + ph[0])), 3);
+  const radAt = (a: number, y: number) => {
+    const t = Math.min(1, Math.max(0, y / h));
+    const ridge = Math.sin(a * 13 + Math.sin(y * 9 + ph[1]) * 0.8) * 0.025 + Math.sin(a * 29 + ph[2]) * 0.012;
+    const lump = Math.sin(a * 3 + ph[0]) * 0.04 + Math.sin(a * 2 + y * 4 + ph[2]) * 0.03;
+    return 1 + ridge + lump * (0.6 + t * 0.4) + buttress(a) * Math.pow(1 - t, 2.4) * 0.34;
+  };
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), z = pos.getZ(i), y = pos.getY(i), a = Math.atan2(z, x);
+    const k = radAt(a, y);
+    pos.setX(i, x * k); pos.setZ(i, z * k);
   }
-  const lid = new THREE.Group();
-  const top = mesh(new THREE.CylinderGeometry(r * 0.83, r * 0.83, 0.025, 24), M.boardDark());
-  top.position.y = 0;
-  lid.add(top);
-  lid.position.y = h - 0.03;
-  if (o.lid !== false) g.add(lid);
-  g.add(contactShadow(r * 3.2, r * 3.2, 0.6));
-  return { group: g, lid, body };
+  side.geometry.computeVertexNormals();
+  g.add(side);
+  // the sawn top: end grain on an outline that follows the trunk's own wobble, a little proud of the bark
+  const outline = new THREE.Shape();
+  for (let k = 0; k <= SEG; k++) {
+    const a = (k / SEG) * Math.PI * 2, rad = r * radAt(a, h) * 0.96;
+    const x = Math.cos(a) * rad, y = -Math.sin(a) * rad;
+    if (k === 0) outline.moveTo(x, y); else outline.lineTo(x, y);
+  }
+  const topG = new THREE.ShapeGeometry(outline, 1);
+  const uv = topG.attributes.uv as THREE.BufferAttribute, tp = topG.attributes.position as THREE.BufferAttribute;
+  const col = Math.floor(rr() * 2), row = Math.floor(rr() * 2);
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, col * 0.5 + 0.25 + (tp.getX(i) / (r * 1.4)) * 0.23, row * 0.5 + 0.25 + (tp.getY(i) / (r * 1.4)) * 0.23);
+  const top = mesh(topG, M.end(), false, true);
+  top.rotation.x = -Math.PI / 2;
+  top.position.y = h - 0.006;
+  g.add(top);
+  // a few gnaw marks round the rim: shallow scoops of bare wood
+  // gnarled roots curling out of the buttresses into the floorboards
+  const roots: THREE.BufferGeometry[] = [];
+  for (let k = 0; k < 5; k++) {
+    const a = -(k / 5) * Math.PI * 2 - ph[0] / 5 + (rr() - 0.5) * 0.3;
+    const dir = new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
+    const side2 = new THREE.Vector3(-dir.z, 0, dir.x).multiplyScalar((rr() - 0.5) * r * 0.5);
+    const len = r * (1.0 + rr() * 0.6);
+    const pts = [
+      dir.clone().multiplyScalar(r * 0.55).setY(h * 0.22),
+      dir.clone().multiplyScalar(r * 1.05).add(side2.clone().multiplyScalar(0.3)).setY(h * 0.07),
+      dir.clone().multiplyScalar(r * 1.0 + len * 0.55).add(side2).setY(0.02),
+      dir.clone().multiplyScalar(r * 1.0 + len).add(side2.clone().multiplyScalar(1.6)).setY(-0.004),
+    ];
+    roots.push(taperTube(new THREE.CatmullRomCurve3(pts), r * 0.26, 0.008, 10, 7));
+  }
+  g.add(mesh(mergeGeometries(roots.map((x) => x.toNonIndexed()))!, M.bark()));
+  for (const x of roots) x.dispose();
+  g.add(contactShadow(r * 4.4, r * 4.4, 0.55));
+  g.userData.top = h;
+  return g;
 }
 
 // ------------------------------------------------------------------ acorns, sacks and baskets
@@ -350,8 +358,8 @@ let gemGeo: THREE.BufferGeometry | null = null;
 function gemGeometry(): THREE.BufferGeometry {
   if (gemGeo) return gemGeo;
   // a brilliant-ish cut: crown, girdle and pavilion
-  const prof = [new THREE.Vector2(0.001, -0.62), new THREE.Vector2(0.5, 0.0), new THREE.Vector2(0.5, 0.08), new THREE.Vector2(0.3, 0.3), new THREE.Vector2(0.001, 0.3)];
-  gemGeo = new THREE.LatheGeometry(prof, 8).toNonIndexed();
+  const prof = [new THREE.Vector2(0.001, -0.6), new THREE.Vector2(0.24, -0.34), new THREE.Vector2(0.5, -0.02), new THREE.Vector2(0.5, 0.04), new THREE.Vector2(0.42, 0.16), new THREE.Vector2(0.3, 0.26), new THREE.Vector2(0.001, 0.27)];
+  gemGeo = new THREE.LatheGeometry(prof, 10).toNonIndexed();
   gemGeo.computeVertexNormals();
   return gemGeo;
 }
@@ -377,109 +385,80 @@ export function gemHeap(n: number, w: number, d: number, s: number, seed = 5): T
   return g;
 }
 
-/** A small wooden chest with brass corner bands, its lid thrown open, moon gems heaped inside. */
-export function chest(w: number, h: number, d: number, seed = 1, gems = 9): THREE.Group {
-  const g = new THREE.Group();
-  const t = 0.022;
-  const parts: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
-  const box = (sx: number, sy: number, sz: number, x: number, y: number, z: number) => {
-    const b = new THREE.BoxGeometry(sx, sy, sz);
-    const uv = b.attributes.uv as THREE.BufferAttribute;
-    for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * Math.max(sx, sz) * 0.5, uv.getY(i) * sy * 0.5 + seed * 0.13);
-    parts.push({ geo: b, m: mtx(x, y, z) });
-  };
-  box(w, t, d, 0, t / 2, 0);
-  box(w, h, t, 0, h / 2, d / 2 - t / 2);
-  box(w, h, t, 0, h / 2, -d / 2 + t / 2);
-  box(t, h, d - 2 * t, w / 2 - t / 2, h / 2, 0);
-  box(t, h, d - 2 * t, -w / 2 + t / 2, h / 2, 0);
-  g.add(mesh(merged(parts), M.board()));
-  // brass bands round the corners and the rim
-  const bands: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
-  const bt = 0.008, bw = Math.min(w, d) * 0.12;
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    bands.push({ geo: new THREE.BoxGeometry(bw, h + 0.004, bt), m: mtx(sx * (w / 2 - bw / 2), h / 2, sz * (d / 2 + bt / 2 - 0.001)) });
-    bands.push({ geo: new THREE.BoxGeometry(bt, h + 0.004, bw), m: mtx(sx * (w / 2 + bt / 2 - 0.001), h / 2, sz * (d / 2 - bw / 2)) });
-  }
-  bands.push({ geo: new THREE.BoxGeometry(w + 0.01, 0.014, d + 0.01), m: mtx(0, h - 0.007, 0) });
-  // a hasp on the front
-  bands.push({ geo: new THREE.BoxGeometry(0.03, 0.045, 0.012), m: mtx(0, h - 0.03, d / 2 + 0.006) });
-  g.add(mesh(merged(bands), M.brass()));
-  // the lid, hinged at the back and thrown open
-  const lid = new THREE.Group();
-  const lidG = new THREE.CylinderGeometry(d / 2, d / 2, w, 10, 1, false, 0, Math.PI);
-  lidG.rotateZ(Math.PI / 2);
-  lidG.rotateX(-Math.PI / 2);
-  const lidM = mesh(lidG, M.boardDark());
-  lidM.scale.set(1, 0.55, 1);
-  lidM.position.set(0, 0, d / 2);
-  lid.add(lidM);
-  const lb = mesh(new THREE.BoxGeometry(w + 0.012, 0.012, 0.012), M.brass());
-  lb.position.set(0, 0, d);
-  lid.add(lb);
-  lid.position.set(0, h, -d / 2);
-  lid.rotation.x = -1.95;
-  g.add(lid);
-  if (gems > 0) {
-    const heap = gemHeap(gems, w * 0.66, d * 0.56, Math.min(w, d) * 0.26, seed + 2);
-    heap.position.y = h * 0.82;
-    // the gems' own glow over the open chest
-    const glow = new THREE.Sprite(mat('gemglow', () => new THREE.SpriteMaterial({ color: 0xb9a6ff, map: blobTexture(), blending: THREE.AdditiveBlending, transparent: true, opacity: 0.5, depthWrite: false, fog: false })) as THREE.SpriteMaterial);
-    glow.scale.setScalar(Math.max(w, d) * 1.5);
-    glow.position.y = h + 0.03;
-    glow.renderOrder = 6;
-    g.add(glow);
-    g.add(heap);
-  }
-  g.add(contactShadow(w * 1.8, d * 2.0, 0.55));
-  g.userData.lid = lid;
-  return g;
-}
-
 // ------------------------------------------------------------------ brass scales
 
+const v2 = (x: number, y: number) => new THREE.Vector2(x, y);
+/** A lathe from (radius, height) pairs, smooth-shaded, in brass. */
+function turned(pts: [number, number][], segs = 20, m: THREE.Material = M.brass()): THREE.Mesh {
+  const g = new THREE.LatheGeometry(pts.map(([r, y]) => v2(Math.max(0.0005, r), y)), segs);
+  g.computeVertexNormals();
+  return mesh(g, m);
+}
+/** A chain of little oval links from a to b (instanced: one draw call). */
+function chain(a: THREE.Vector3, b: THREE.Vector3, link = 0.012): THREE.InstancedMesh {
+  const n = Math.max(2, Math.round(a.distanceTo(b) / (link * 1.5)));
+  const geo = new THREE.TorusGeometry(link * 0.5, link * 0.13, 4, 8);
+  geo.scale(1, 1.7, 1);
+  const im = new THREE.InstancedMesh(geo, M.brassDark(), n);
+  const dir = b.clone().sub(a).normalize();
+  const q0 = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+  const twist = new THREE.Quaternion().setFromAxisAngle(dir, Math.PI / 2);
+  const m = new THREE.Matrix4();
+  for (let i = 0; i < n; i++) {
+    const p = a.clone().lerp(b, (i + 0.5) / n);
+    m.compose(p, i % 2 ? twist.clone().multiply(q0) : q0, new THREE.Vector3(1, 1, 1));
+    im.setMatrixAt(i, m);
+  }
+  im.castShadow = true;
+  return im;
+}
+
+/** Brass balance scales: a moulded foot, a turned pillar with collars and a finial, an arched beam with a pointer,
+ * two dished pans on chains, an acorn weighed against a brass weight. */
 export function scales(): THREE.Group {
   const g = new THREE.Group();
-  const B = M.brass();
-  const base = new THREE.LatheGeometry([new THREE.Vector2(0.001, 0), new THREE.Vector2(0.09, 0), new THREE.Vector2(0.095, 0.012), new THREE.Vector2(0.07, 0.03), new THREE.Vector2(0.03, 0.04), new THREE.Vector2(0.018, 0.05), new THREE.Vector2(0.001, 0.05)], 16);
-  g.add(mesh(base, M.brassDark()));
-  const col = mesh(new THREE.CylinderGeometry(0.012, 0.015, 0.3, 8), B);
-  col.position.y = 0.2;
-  g.add(col);
-  const knob = mesh(new THREE.SphereGeometry(0.02, 8, 6), B);
-  knob.position.y = 0.37;
-  g.add(knob);
+  g.add(turned([[0.001, 0], [0.1, 0], [0.104, 0.008], [0.098, 0.014], [0.086, 0.018], [0.08, 0.026], [0.06, 0.034], [0.042, 0.038], [0.036, 0.046], [0.024, 0.05], [0.001, 0.05]], 24, M.brassDark()));
+  g.add(turned([[0.001, 0.05], [0.018, 0.05], [0.022, 0.06], [0.016, 0.068], [0.012, 0.09], [0.011, 0.2], [0.016, 0.21], [0.022, 0.22], [0.016, 0.232], [0.011, 0.24], [0.01, 0.31], [0.018, 0.322], [0.012, 0.334], [0.001, 0.336]]));
+  const fin = turned([[0.001, 0], [0.012, 0.004], [0.016, 0.014], [0.01, 0.024], [0.004, 0.034], [0.001, 0.04]]);
+  fin.position.y = 0.36;
+  g.add(fin);
+  // the beam: a shallow arch with acorn-shaped finials and a pointer hanging over a little scale plate
   const beam = new THREE.Group();
-  beam.position.y = 0.35;
-  beam.add(mesh(new THREE.BoxGeometry(0.36, 0.012, 0.016), B));
+  beam.position.y = 0.345;
+  const arch = new THREE.CatmullRomCurve3([new THREE.Vector3(-0.19, -0.012, 0), new THREE.Vector3(-0.1, 0.004, 0), new THREE.Vector3(0, 0.012, 0), new THREE.Vector3(0.1, 0.004, 0), new THREE.Vector3(0.19, -0.012, 0)]);
+  beam.add(mesh(taperTube(arch, 0.0065, 0.0065, 24, 6), M.brass()));
+  for (const sx of [-1, 1]) {
+    const k = turned([[0.001, -0.016], [0.009, -0.01], [0.011, 0], [0.006, 0.008], [0.001, 0.012]], 10);
+    k.position.set(sx * 0.19, -0.012, 0);
+    beam.add(k);
+  }
+  const pointer = mesh(taperTube(new THREE.LineCurve3(new THREE.Vector3(0, 0, 0.012), new THREE.Vector3(0, -0.12, 0.012)), 0.004, 0.0012, 4, 5), M.brassDark());
+  beam.add(pointer);
   g.add(beam);
+  const plate = turned([[0.001, 0], [0.03, 0], [0.032, 0.004], [0.001, 0.004]], 14, M.brassDark());
+  plate.rotation.x = Math.PI / 2;
+  plate.position.set(0, 0.235, 0.014);
+  g.add(plate);
+  // pans on chains
   const pans: THREE.Group[] = [];
   for (const sx of [-1, 1]) {
     const p = new THREE.Group();
-    p.position.set(sx * 0.17, 0, 0);
-    const pan = new THREE.LatheGeometry([new THREE.Vector2(0.001, 0), new THREE.Vector2(0.05, 0.004), new THREE.Vector2(0.085, 0.022), new THREE.Vector2(0.088, 0.026)], 16);
-    const pm = mesh(pan, B);
-    pm.position.y = -0.2;
-    p.add(pm);
-    // three chains to the beam end
+    p.position.set(sx * 0.19, -0.012, 0);
+    const pan = turned([[0.001, 0], [0.04, 0.002], [0.07, 0.012], [0.086, 0.026], [0.09, 0.03], [0.086, 0.031], [0.068, 0.017], [0.04, 0.008], [0.001, 0.006]], 24);
+    pan.position.y = -0.21;
+    p.add(pan);
     for (let k = 0; k < 3; k++) {
-      const a = (k / 3) * Math.PI * 2;
-      const from = new THREE.Vector3(Math.cos(a) * 0.075, -0.18, Math.sin(a) * 0.075), to = new THREE.Vector3(0, 0, 0);
-      const len = from.distanceTo(to);
-      const ch = mesh(new THREE.CylinderGeometry(0.0022, 0.0022, len, 4), M.brassDark(), false, false);
-      ch.position.copy(from).add(to).multiplyScalar(0.5);
-      ch.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), to.clone().sub(from).normalize());
-      p.add(ch);
+      const a = (k / 3) * Math.PI * 2 + 0.5;
+      p.add(chain(new THREE.Vector3(0, -0.004, 0), new THREE.Vector3(Math.cos(a) * 0.08, -0.182, Math.sin(a) * 0.08), 0.011));
     }
     beam.add(p);
     pans.push(p);
   }
-  // an acorn weighed against a little brass weight
-  const w8 = mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.03, 8), M.brassDark());
-  w8.position.set(0, -0.17, 0);
+  const w8 = turned([[0.001, 0], [0.02, 0], [0.022, 0.004], [0.018, 0.02], [0.012, 0.024], [0.006, 0.03], [0.009, 0.036], [0.001, 0.04]], 14, M.brassDark());
+  w8.position.y = -0.203;
   pans[1].add(w8);
   const a = acornHeap(3, 0.03, 0.02, 0.022, 9);
-  a.position.set(0, -0.185, 0);
+  a.position.set(0, -0.2, 0);
   pans[0].add(a);
   g.userData.beam = beam;
   g.userData.pans = pans;
@@ -489,31 +468,73 @@ export function scales(): THREE.Group {
 
 // ------------------------------------------------------------------ the gift parcel
 
+/** A flat ribbon (width x thickness) swept along a curve, its face turned toward `up`. */
+function ribbonAlong(curve: THREE.Curve<THREE.Vector3>, width: number, thick: number, segs: number, up = new THREE.Vector3(0, 1, 0), twist = 0): THREE.BufferGeometry {
+  const V: number[] = [], I: number[] = [], U: number[] = [];
+  for (let j = 0; j <= segs; j++) {
+    const t = j / segs, p = curve.getPointAt(t), tan = curve.getTangentAt(t).normalize();
+    let side = new THREE.Vector3().crossVectors(tan, up);
+    if (side.lengthSq() < 1e-6) side = new THREE.Vector3(1, 0, 0);
+    side.normalize().applyAxisAngle(tan, twist * t);
+    const nrm = new THREE.Vector3().crossVectors(side, tan).normalize();
+    for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const q = p.clone().addScaledVector(side, (a * width) / 2).addScaledVector(nrm, (b * thick) / 2);
+      V.push(q.x, q.y, q.z);
+      U.push((a + 1) / 2, t);
+    }
+    if (j < segs) for (let k = 0; k < 4; k++) { const a0 = j * 4 + k, a1 = j * 4 + ((k + 1) % 4); I.push(a0, a1, a1 + 4, a0, a1 + 4, a0 + 4); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(V, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+  g.setIndex(I);
+  g.computeVertexNormals();
+  return g;
+}
+
+/** A wrapped parcel: a soft-cornered box in printed kraft paper, a satin ribbon round it both ways, a full bow with
+ * two loops and forked tails, and a paper tag on a string. */
 export function parcel(s = 0.26): THREE.Group {
   const g = new THREE.Group();
-  const paper = mat('kraft', () => new THREE.MeshStandardMaterial({ map: kraftTexture(), roughness: 0.9 }));
-  const ribbonM = mat('ribbon', () => new THREE.MeshStandardMaterial({ color: 0xc0383e, roughness: 0.5, envMapIntensity: 0.8 }));
-  const box = mesh(new THREE.BoxGeometry(s, s * 0.78, s * 0.86), paper);
-  box.position.y = s * 0.39;
+  const paper = mat('kraft', () => new THREE.MeshStandardMaterial({ map: kraftTexture(), roughness: 0.88 }));
+  const satin = mat('ribbon', () => new THREE.MeshStandardMaterial({ color: 0xc0383e, roughness: 0.38, envMapIntensity: 1.0 }));
+  const W = s, H = s * 0.74, D = s * 0.86;
+  const box = mesh(new RoundedBoxGeometry(W, H, D, 3, s * 0.035), paper);
+  box.position.y = H / 2;
   g.add(box);
-  const rw = s * 0.14;
-  const r1 = mesh(new THREE.BoxGeometry(rw, s * 0.79, s * 0.87), ribbonM);
-  r1.position.y = s * 0.39;
-  const r2 = mesh(new THREE.BoxGeometry(s * 1.01, s * 0.79, rw), ribbonM);
-  r2.position.y = s * 0.39;
-  g.add(r1, r2);
+  const rw = s * 0.13, rt = 0.004;
+  const band1 = mesh(new RoundedBoxGeometry(rw, H + rt * 2, D + rt * 2, 2, s * 0.03), satin);
+  band1.position.y = H / 2;
+  const band2 = mesh(new RoundedBoxGeometry(W + rt * 2, H + rt * 2, rw, 2, s * 0.03), satin);
+  band2.position.y = H / 2;
+  g.add(band1, band2);
+  // the bow: two loops swept from the knot, two forked tails trailing over the lid
   const bow = new THREE.Group();
+  const loops: THREE.BufferGeometry[] = [];
   for (const sx of [-1, 1]) {
-    const loop = mesh(new THREE.TorusGeometry(s * 0.16, s * 0.035, 6, 12), ribbonM);
-    loop.scale.set(1, 0.65, 0.5);
-    loop.position.set(sx * s * 0.15, s * 0.07, 0);
-    loop.rotation.set(0, sx * 0.4, sx * 0.5);
-    bow.add(loop);
+    const pts = [new THREE.Vector3(0, 0.004, 0), new THREE.Vector3(sx * s * 0.08, s * 0.1, -s * 0.02), new THREE.Vector3(sx * s * 0.2, s * 0.08, 0), new THREE.Vector3(sx * s * 0.16, s * 0.01, s * 0.03), new THREE.Vector3(0, 0.004, 0.002)];
+    loops.push(ribbonAlong(new THREE.CatmullRomCurve3(pts, false, 'centripetal'), rw * 0.95, 0.004, 24, new THREE.Vector3(0, 0, 1), 0));
+    const tail = [new THREE.Vector3(0, 0.002, 0), new THREE.Vector3(sx * s * 0.07, -0.004, s * 0.09), new THREE.Vector3(sx * s * 0.12, -0.002, s * 0.2), new THREE.Vector3(sx * s * 0.11, -s * 0.05, s * 0.29)];
+    loops.push(ribbonAlong(new THREE.CatmullRomCurve3(tail), rw * 0.8, 0.003, 16, new THREE.Vector3(0, 1, 0), sx * 0.5));
   }
-  const knot = mesh(new THREE.SphereGeometry(s * 0.06, 8, 6), ribbonM);
+  bow.add(mesh(mergeGeometries(loops.map((x) => x.toNonIndexed()))!, satin));
+  for (const x of loops) x.dispose();
+  const knot = mesh(new RoundedBoxGeometry(rw * 0.9, s * 0.06, rw * 0.8, 2, s * 0.02), satin);
+  knot.position.y = s * 0.025;
   bow.add(knot);
-  bow.position.y = s * 0.79;
+  bow.position.y = H + rt;
   g.add(bow);
+  // a paper tag tied to the bow
+  const tagShape = new THREE.Shape();
+  const tw = s * 0.22, th = s * 0.14;
+  tagShape.moveTo(-tw / 2 + th * 0.3, th / 2); tagShape.lineTo(tw / 2, th / 2); tagShape.lineTo(tw / 2, -th / 2); tagShape.lineTo(-tw / 2 + th * 0.3, -th / 2); tagShape.lineTo(-tw / 2, 0); tagShape.closePath();
+  const hole = new THREE.Path(); hole.absarc(-tw / 2 + th * 0.32, 0, th * 0.12, 0, Math.PI * 2, true); tagShape.holes.push(hole);
+  const tag = mesh(new THREE.ExtrudeGeometry(tagShape, { depth: 0.002, bevelEnabled: false }), mat('tagpaper', () => new THREE.MeshStandardMaterial({ color: 0xf2e6c8, roughness: 0.95 })));
+  tag.position.set(s * 0.26, H * 0.62, D / 2 + 0.004);
+  tag.rotation.set(0, 0, -0.5);
+  g.add(tag);
+  const str = mesh(taperTube(new THREE.CatmullRomCurve3([new THREE.Vector3(0, H + 0.01, 0.01), new THREE.Vector3(s * 0.14, H * 0.95, D / 2 + 0.01), new THREE.Vector3(s * 0.18, H * 0.75, D / 2 + 0.006)]), 0.0016, 0.0016, 10, 4), M.rope(), false, false);
+  g.add(str);
   g.add(contactShadow(s * 2, s * 2, 0.5));
   g.userData.bow = bow;
   g.userData.box = box;
@@ -569,34 +590,62 @@ function pixelText(g: CanvasRenderingContext2D, text: string, x: number, y: numb
 
 // ------------------------------------------------------------------ dried herbs hung from the beams
 
-/** A bundle of herbs hung upside down to dry: a fan of leafy sprigs tied with twine, on a string `drop` metres long. */
+/** Hand-pixelled bunches of drying herbs (stems gathered at the top, sprays of leaves and a few flower heads), one per
+ * column of a small atlas: sage, lavender, yarrow, rosemary. Alpha-cut, nearest-filtered. */
+let herbTex: THREE.Texture | null = null;
+function herbAtlas(): THREE.Texture {
+  if (herbTex) return herbTex;
+  const CW = 40, CH = 64, N = 4;
+  const [c, g] = canvas(CW * N, CH);
+  const kinds = [
+    { stem: ['#5a6b3a', '#6f8248'], leaf: ['#5f7d46', '#7e9c5c', '#9cb878', '#c2d39a'], flower: null as string[] | null },
+    { stem: ['#5b6a44', '#71824f'], leaf: ['#5d7550', '#768f62'], flower: ['#6e5498', '#8f72bc', '#b49ddc'] },
+    { stem: ['#6a6a3c', '#86844c'], leaf: ['#7a8a4a', '#98a65c'], flower: ['#e8dcae', '#f6eccb', '#d8c48a'] },
+    { stem: ['#4f5f36', '#62744a'], leaf: ['#3f5a3b', '#557343', '#6f8f52'], flower: null },
+  ];
+  for (let k = 0; k < N; k++) {
+    const r = rng(31 + k * 7), K = kinds[k], ox = k * CW;
+    const px = (x: number, y: number, col: string) => { if (x >= 0 && x < CW && y >= 0 && y < CH) { g.fillStyle = col; g.fillRect(ox + Math.round(x), Math.round(y), 1, 1); } };
+    // stems fan out from the tie at the top
+    const stems = 9 + Math.floor(r() * 4);
+    for (let i = 0; i < stems; i++) {
+      const ang = (i / (stems - 1) - 0.5) * 0.9 + (r() - 0.5) * 0.15, len = 40 + r() * 20;
+      for (let t = 0; t < len; t++) {
+        const x = CW / 2 + Math.sin(ang) * t + Math.sin(t * 0.2 + i) * 0.6, y = 4 + Math.cos(ang) * t;
+        px(x, y, K.stem[(t + i) % 2]);
+        if (t > 8 && t % 3 === 0) {
+          for (const sd of [-1, 1]) {
+            const ll = 2 + Math.floor(r() * 3);
+            for (let q = 1; q <= ll; q++) px(x + sd * q, y + q * 0.6 + (q > 1 ? 1 : 0), K.leaf[Math.min(K.leaf.length - 1, Math.floor(r() * K.leaf.length))]);
+          }
+        }
+        if (K.flower && t > len - 8) { px(x, y + 1, K.flower[Math.floor(r() * K.flower.length)]); px(x + 1, y + 2, K.flower[Math.floor(r() * K.flower.length)]); px(x - 1, y + 2, K.flower[0]); }
+      }
+    }
+    // the twine tie
+    for (let x = -3; x <= 3; x++) { px(CW / 2 + x, 4, '#c9ab74'); px(CW / 2 + x, 5, '#9c7c4c'); }
+  }
+  herbTex = canvasTex(c);
+  herbTex.minFilter = THREE.NearestMipmapLinearFilter;
+  return herbTex;
+}
+/** A bunch of herbs hung upside down to dry: crossed leaf cards from the atlas under a twine tie, on a string. */
 export function herbBundle(seed: number, drop = 0.3): THREE.Group {
   const g = new THREE.Group();
   const rr = rng(seed);
-  const cols = [0x6f9a3e, 0x86a84a, 0xa09040, 0x5c8a3a, 0xb8843c, 0x7d9c5a];
-  const col = cols[Math.floor(rr() * cols.length)];
-  const leaf = mat('herb' + col, () => new THREE.MeshStandardMaterial({ color: col, roughness: 0.95, flatShading: true }));
-  const n = 10 + Math.floor(rr() * 4);
-  const parts: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
-  for (let k = 0; k < n; k++) {
-    const len = 0.24 + rr() * 0.14;
-    const c = new THREE.ConeGeometry(0.022 + rr() * 0.014, len, 4);
-    c.translate(0, -len * 0.65, 0);
-    const a = (k / n) * Math.PI * 2 + rr() * 0.4, tilt = 0.08 + rr() * 0.26;
-    parts.push({ geo: c, m: new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.cos(a) * tilt, a, Math.sin(a) * tilt)) });
+  const kind = Math.floor(rr() * 4);
+  const m = mat('herb' + kind, () => new THREE.MeshStandardMaterial({ map: herbAtlas(), alphaTest: 0.5, side: THREE.DoubleSide, roughness: 0.95 }));
+  const w = 0.2, h = 0.32;
+  for (let k = 0; k < 3; k++) {
+    const geo = new THREE.PlaneGeometry(w, h);
+    const uv = geo.attributes.uv as THREE.BufferAttribute;
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, (kind + uv.getX(i)) / 4, uv.getY(i));
+    const card = mesh(geo, m, true, false);
+    card.position.y = -h / 2 + 0.01;
+    card.rotation.y = (k / 3) * Math.PI + rr() * 0.2;
+    g.add(card);
   }
-  const sprigs = mesh(merged(parts), leaf);
-  sprigs.position.y = -0.06;
-  g.add(sprigs);
-  const stems = mesh(new THREE.CylinderGeometry(0.018, 0.024, 0.08, 6), mat('stems', () => new THREE.MeshStandardMaterial({ color: 0x6a5232, roughness: 1 })));
-  stems.position.y = -0.02;
-  g.add(stems);
-  const tie = mesh(new THREE.TorusGeometry(0.024, 0.006, 4, 10), M.rope(), false, false);
-  tie.rotation.x = Math.PI / 2;
-  tie.position.y = -0.04;
-  g.add(tie);
-  const str = mesh(new THREE.CylinderGeometry(0.004, 0.004, drop, 4), M.rope(), false, false);
-  str.position.y = drop / 2;
+  const str = mesh(taperTube(new THREE.LineCurve3(new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, drop, 0)), 0.0035, 0.0035, 2, 4), M.rope(), false, false);
   g.add(str);
   g.userData.phase = rr() * 6;
   return g;
@@ -642,13 +691,25 @@ export function hangingSign(w: number, h: number, text: string, sub = '', ropeTo
   draw(text, sub);
   void lodgeFont().then(() => draw(text, sub));
   const face = new THREE.MeshStandardMaterial({ map: t, roughness: 0.8 });
-  const edge = M.boardDark();
-  const board = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.04), [edge, edge, edge, edge, face, edge]);
+  // the board's outline: a sawn plank, corners knocked off, the edges a little wavy
+  const rr = rng(seed + 50);
+  const shape = new THREE.Shape();
+  const ch2 = Math.min(w, h) * 0.12, pts: [number, number][] = [];
+  const edgePts = (x0: number, y0: number, x1: number, y1: number, n: number) => { for (let i = 0; i < n; i++) { const t = i / n; pts.push([x0 + (x1 - x0) * t + (rr() - 0.5) * 0.004, y0 + (y1 - y0) * t + (rr() - 0.5) * 0.006]); } };
+  edgePts(-w / 2 + ch2, h / 2, w / 2 - ch2 * 0.6, h / 2, 6);
+  edgePts(w / 2, h / 2 - ch2 * 0.6, w / 2, -h / 2 + ch2, 3);
+  edgePts(w / 2 - ch2, -h / 2, -w / 2 + ch2 * 0.7, -h / 2, 6);
+  edgePts(-w / 2, -h / 2 + ch2 * 0.7, -w / 2, h / 2 - ch2, 3);
+  pts.forEach(([x, y], i) => (i ? shape.lineTo(x, y) : shape.moveTo(x, y)));
+  shape.closePath();
+  const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.03, bevelEnabled: true, bevelThickness: 0.006, bevelSize: 0.008, bevelSegments: 2, curveSegments: 4 });
+  geo.translate(0, 0, -0.015);
+  t.repeat.set(1 / w, 1 / h); t.offset.set(0.5, 0.5); t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  const board = new THREE.Mesh(geo, [face, M.boardDark()]);
   board.castShadow = true; board.receiveShadow = true;
   g.add(board);
   for (const sx of [-1, 1]) {
-    const rope = mesh(new THREE.CylinderGeometry(0.006, 0.006, ropeTo, 5), M.rope(), false, false);
-    rope.position.set(sx * w * 0.36, h / 2 + ropeTo / 2, 0);
+    const rope = mesh(taperTube(new THREE.LineCurve3(new THREE.Vector3(sx * w * 0.36, h / 2 - 0.01, 0), new THREE.Vector3(sx * w * 0.33, h / 2 + ropeTo, 0)), 0.006, 0.006, 2, 5), M.rope(), false, false);
     g.add(rope);
     const ring = mesh(new THREE.TorusGeometry(0.014, 0.004, 5, 10), M.iron(), false, false);
     ring.position.set(sx * w * 0.36, h / 2 - 0.002, 0.022);
@@ -695,11 +756,11 @@ export function slate(w: number, h: number): Slate {
   g.add(board);
   const fw = 0.045;
   const frame = merged([
-    { geo: new THREE.BoxGeometry(w + 2 * fw, fw, 0.035), m: mtx(0, h / 2 + fw / 2, 0.012) },
-    { geo: new THREE.BoxGeometry(w + 2 * fw, fw, 0.035), m: mtx(0, -h / 2 - fw / 2, 0.012) },
-    { geo: new THREE.BoxGeometry(fw, h, 0.035), m: mtx(-w / 2 - fw / 2, 0, 0.012) },
-    { geo: new THREE.BoxGeometry(fw, h, 0.035), m: mtx(w / 2 + fw / 2, 0, 0.012) },
-    { geo: new THREE.BoxGeometry(w, h, 0.012), m: mtx(0, 0, 0.0) },
+    { geo: new RoundedBoxGeometry(w + 2 * fw, fw, 0.035, 2, 0.01), m: mtx(0, h / 2 + fw / 2, 0.012) },
+    { geo: new RoundedBoxGeometry(w + 2 * fw, fw, 0.035, 2, 0.01), m: mtx(0, -h / 2 - fw / 2, 0.012) },
+    { geo: new RoundedBoxGeometry(fw, h + fw, 0.035, 2, 0.01), m: mtx(-w / 2 - fw / 2, 0, 0.012) },
+    { geo: new RoundedBoxGeometry(fw, h + fw, 0.035, 2, 0.01), m: mtx(w / 2 + fw / 2, 0, 0.012) },
+    { geo: new RoundedBoxGeometry(w, h, 0.012, 1, 0.004), m: mtx(0, 0, 0.0) },
   ]);
   g.add(mesh(frame, fm));
   return { group: g, draw, dispose: () => { t.dispose(); face.dispose(); board.geometry.dispose(); frame.dispose(); } };
@@ -718,23 +779,25 @@ export function banner(w: number, h: number, edge: number, seed = 1): Banner {
   const cloth = mesh(geo, clothMat);
   g.add(cloth);
   // dowels top and bottom with brass end caps, a cord up to the beam
-  const dw = mesh(new THREE.CylinderGeometry(0.02, 0.02, w + 0.14, 8), M.boardDark());
-  dw.rotation.z = Math.PI / 2;
-  g.add(dw);
-  const db = dw.clone();
-  db.position.y = -h - 0.005;
-  g.add(db);
-  for (const sx of [-1, 1]) for (const y of [0, -h - 0.005]) {
-    const cap = mesh(new THREE.SphereGeometry(0.03, 8, 6), M.brass());
-    cap.position.set(sx * (w / 2 + 0.07), y, 0);
-    g.add(cap);
-  }
-  // tassels hang from the bottom dowel
+  const dowel = (y: number) => {
+    const d = mesh(taperTube(new THREE.LineCurve3(new THREE.Vector3(-w / 2 - 0.05, y, 0), new THREE.Vector3(w / 2 + 0.05, y, 0)), 0.018, 0.018, 4, 8), M.boardDark());
+    g.add(d);
+    for (const sx of [-1, 1]) {
+      const f = turned([[0.001, 0], [0.016, 0.004], [0.02, 0.016], [0.012, 0.026], [0.022, 0.042], [0.026, 0.058], [0.018, 0.072], [0.006, 0.08], [0.001, 0.082]], 10);
+      f.rotation.z = -sx * Math.PI / 2;
+      f.position.set(sx * (w / 2 + 0.05), y, 0);
+      g.add(f);
+    }
+  };
+  dowel(0); dowel(-h - 0.005);
+  // tassels: a knotted head, a collar, a skirt of threads
   const tasselM = mat('tassel' + edge, () => new THREE.MeshStandardMaterial({ color: edge, roughness: 0.9 }));
   for (const sx of [-0.33, 0, 0.33]) {
-    const ts = mesh(new THREE.ConeGeometry(0.03, 0.12, 6), tasselM);
-    ts.rotation.x = Math.PI;
-    ts.position.set(sx * w, -h - 0.08, 0);
+    const ts = turned([[0.001, 0], [0.012, -0.004], [0.016, -0.016], [0.008, -0.026], [0.011, -0.03], [0.008, -0.034], [0.014, -0.06], [0.022, -0.11], [0.026, -0.128], [0.001, -0.13]], 12, tasselM);
+    const pos = ts.geometry.attributes.position as THREE.BufferAttribute;
+    for (let i = 0; i < pos.count; i++) { const y = pos.getY(i); if (y < -0.04) { const a = Math.atan2(pos.getZ(i), pos.getX(i)); const k = 1 + Math.sin(a * 9) * 0.12; pos.setX(i, pos.getX(i) * k); pos.setZ(i, pos.getZ(i) * k); } }
+    ts.geometry.computeVertexNormals();
+    ts.position.set(sx * w, -h - 0.02, 0);
     g.add(ts);
   }
   let artTex: THREE.Texture | null = null;

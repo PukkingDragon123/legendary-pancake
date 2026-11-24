@@ -12,6 +12,7 @@
 // key, the window's daylight or moonlight, an environment map for brass and glass; the app's post chain grades it.
 // OWNED BY THE SHOP BUILDER.
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { instanceGLB, loadGLB } from '../../gfx/glb.ts';
 import { ITEMS, FINISH } from '../../assets/registry.ts';
@@ -21,10 +22,11 @@ import { PIECE } from '../../owl/outfits.ts';
 import { sound } from '../../audio/sound.ts';
 import { Fx, SPR } from '../fx.ts';
 import type { Stage } from '../scene.ts';
+import type { Look } from '../post.ts';
 import { HOUSE, groundY } from '../layout.ts';
 import { Beaver, type BeaverClip } from './beaver.ts';
 import {
-  M, acornHeap, banner, barrel, chest, contactShadow, disposeMats, disposeTextures, gem, hangingSign, herbBundle, logGeo, merged, mtx, parcel, sack, scales,
+  M, acornHeap, banner, contactShadow, disposeMats, disposeTextures, gem, gemHeap, hangingSign, herbBundle, logGeo, merged, mtx, parcel, sack, scales, taperTube,
   shavings, slate, stump, tex, type Banner, type Sign, type Slate,
 } from './lodgekit.ts';
 import { pottedFir, swayPlants, type Plant } from './shopplants.ts';
@@ -37,8 +39,6 @@ export interface WorldView {
   sky?: { night: number; hour: number };
   renderView?(camera: THREE.Camera, target: THREE.WebGLRenderTarget): void;
   viewTarget?(w: number, h: number): THREE.WebGLRenderTarget;
-  /** the app's post chain (its grade is set for the store while it's open, and put back after) */
-  post?: { grade: Record<string, unknown> };
 }
 export interface DisplayItem { kind: 'item' | 'piece' | 'species' | 'skin' | 'finish'; id: string }
 export type LodgeLayout = 'side' | 'top';
@@ -71,7 +71,9 @@ const v3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 /** The store's own grade over the app's post chain: warm, rich, a little bloom on the lanterns. */
-const GRADE = { exposure: 1.04, contrast: 1.14, saturation: 1.04, warm: 0.08, vignette: 0.38, bloom: 0.6, grain: 0.03, cold: 0 };
+/** The store's look on the app's post chain (src/world/post.ts): warm and rich, bloom on the lanterns, a tilt-shift
+ * depth of field focused on whatever the camera is looking at (set every frame in update). */
+const LOOK: Look = { exposure: 1.02, contrast: 1.08, saturation: 1.06, vibrance: 0.2, warm: 0.06, split: 0.45, vignette: 0.3, grain: 0.016, bloom: 0.55, bloomThreshold: 1.1, focus: 6, focusRange: 2.2, blur: 0.4, cold: 0 };
 
 export class Lodge implements Stage {
   readonly scene = new THREE.Scene();
@@ -90,6 +92,7 @@ export class Lodge implements Stage {
   private board: Slate | null = null;
   private plants: Plant[] = [];
   private herbs: THREE.Group[] = [];
+  private clock: { group: THREE.Group; set(d: Date): void; dispose(): void } | null = null;
   private gift: THREE.Group | null = null;
   private giftOpen = 0;
   private scalesObj: THREE.Group | null = null;
@@ -101,7 +104,8 @@ export class Lodge implements Stage {
   private viewRT: THREE.WebGLRenderTarget | null = null;
   private outside: THREE.MeshBasicMaterial;
   private viewFrame = 0;
-  private savedGrade: Record<string, unknown> | null = null;
+  /** post knobs for the app's chain (read every frame) */
+  readonly look: Look = { ...LOOK };
   private hemi = new THREE.HemisphereLight(0xffe4bc, 0x5a3a24, 1.0);
   private key = new THREE.DirectionalLight(0xffd9a0, 1.6);
   private sun = new THREE.SpotLight(0xfff0d0, 0, 9, 0.62, 0.7, 1.2);
@@ -192,12 +196,6 @@ export class Lodge implements Stage {
       this.outside.color.set(0xffffff);
       this.outside.needsUpdate = true;
       this.disposables.push(() => this.viewRT?.dispose());
-      if (world.post) {
-        const g = world.post.grade;
-        this.savedGrade = {};
-        for (const k of Object.keys(GRADE)) this.savedGrade[k] = g[k];
-        Object.assign(g, GRADE);
-      }
     }
     this.applyLight();
   }
@@ -350,7 +348,7 @@ export class Lodge implements Stage {
   private buildWindow() {
     const W = WIN, z = ROOM.back;
     const parts: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
-    const bx = (sx: number, sy: number, sz: number, x: number, y: number, zz: number) => parts.push({ geo: new THREE.BoxGeometry(sx, sy, sz), m: mtx(x, y, zz) });
+    const bx = (sx: number, sy: number, sz: number, x: number, y: number, zz: number) => parts.push({ geo: new RoundedBoxGeometry(sx, sy, sz, 2, Math.min(sx, sy, sz) * 0.22), m: mtx(x, y, zz) });
     const cx = (W.x0 + W.x1) / 2, cy = (W.y0 + W.y1) / 2, dep = z - W.glass + 0.12;
     bx(0.12, W.y1 - W.y0 + 0.24, dep, W.x0 - 0.06, cy, z - dep / 2 + 0.12);
     bx(0.12, W.y1 - W.y0 + 0.24, dep, W.x1 + 0.06, cy, z - dep / 2 + 0.12);
@@ -400,7 +398,7 @@ export class Lodge implements Stage {
       fronts.push({ geo: g, m: mtx(x, (C.h - 0.06) / 2, C.z + dz) });
     }
     this.add(this.meshOf(merged(fronts), M.log()));
-    const topG = this.track(new THREE.BoxGeometry(len + 0.16, 0.07, C.d + 0.1));
+    const topG = this.track(new RoundedBoxGeometry(len + 0.16, 0.07, C.d + 0.1, 3, 0.02));
     const tu = topG.attributes.uv as THREE.BufferAttribute;
     for (let i = 0; i < tu.count; i++) tu.setXY(i, tu.getX(i) * (len / 2), tu.getY(i) * 0.4);
     const top = new THREE.Mesh(topG, M.board());
@@ -443,7 +441,7 @@ export class Lodge implements Stage {
     const parts: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
     // two plank shelves on short log legs
     for (const y of [0.42, S.y]) {
-      const b = new THREE.BoxGeometry(S.d, 0.05, len);
+      const b = new RoundedBoxGeometry(S.d, 0.05, len, 2, 0.012);
       const u = b.attributes.uv as THREE.BufferAttribute;
       for (let i = 0; i < u.count; i++) u.setXY(i, u.getX(i) * len * 0.5, u.getY(i) * 0.3 + y);
       parts.push({ geo: b, m: mtx(S.x, y - 0.025, cz) });
@@ -480,7 +478,7 @@ export class Lodge implements Stage {
     GEM_SPOTS.forEach((g, i) => {
       let o: THREE.Group;
       if (i === 0) { o = new THREE.Group(); const pouch = sack(0.13, 0.06, 41, 0); pouch.scale.set(1, 1, 1); o.add(pouch); const gm = gem(0.05, 0xb9a6ff); gm.position.set(0, 0.16, 0); o.add(gm); }
-      else o = chest([0.3, 0.38, 0.5][i - 1], [0.15, 0.18, 0.23][i - 1], [0.24, 0.28, 0.34][i - 1], 5 + i, [8, 13, 20][i - 1]);
+      else { o = new THREE.Group(); o.userData.chest = { w: [0.3, 0.38, 0.5][i - 1], gems: [8, 13, 20][i - 1], seed: 5 + i }; }
       o.position.set(S.x - 0.03, S.y, g.z);
       o.rotation.y = -Math.PI / 2;
       this.add(o);
@@ -511,23 +509,34 @@ export class Lodge implements Stage {
     }
     // the Lucky Barrel: a fat oak barrel with brass hoops on a cradle, a crank on its side, light leaking from inside
     const B = BARREL;
-    const { group, lid } = barrel(B.h, B.r, { brass: true });
+    const group = new THREE.Group();
     group.position.set(B.x, 0.12, B.z);
     this.add(group);
+    const lid = new THREE.Group();
+    // two chocks shaped to the barrel's belly, pegged together
+    const chock = new THREE.Shape();
+    const cw = B.r * 1.15;
+    chock.moveTo(-cw, 0); chock.lineTo(cw, 0); chock.lineTo(cw, 0.13); chock.lineTo(cw * 0.78, 0.15);
+    chock.absarc(0, B.r * 1.05 + 0.01, B.r * 1.02, -Math.PI * 0.2, -Math.PI * 0.8, true);
+    chock.lineTo(-cw, 0.13); chock.closePath();
     const cradle: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
-    for (const dz of [-0.26, 0.26]) cradle.push({ geo: new THREE.BoxGeometry(B.r * 2.3, 0.12, 0.1), m: mtx(B.x, 0.06, B.z + dz) });
+    for (const dz of [-0.26, 0.26]) { const cg = new THREE.ExtrudeGeometry(chock, { depth: 0.08, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.008, bevelSegments: 2, curveSegments: 10 }); cg.translate(0, 0, -0.04); cradle.push({ geo: cg, m: mtx(B.x, 0, B.z + dz) }); }
     this.add(this.meshOf(merged(cradle), M.boardDark()));
-    // the crank
+    // the crank: a turned boss, a forged arm with rounded ends, a turned wooden handle
     const crank = new THREE.Group();
-    const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.16, 8), M.brassDark());
-    axle.rotation.z = Math.PI / 2;
-    axle.position.x = 0.08;
-    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.22, 0.03), M.brass());
-    arm.position.set(0.16, -0.1, 0);
-    const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.12, 8), M.boardDark());
-    handle.rotation.z = Math.PI / 2;
-    handle.position.set(0.21, -0.2, 0);
-    crank.add(axle, arm, handle);
+    const boss = new THREE.Mesh(new THREE.LatheGeometry([[0.001, 0], [0.034, 0], [0.036, 0.012], [0.026, 0.03], [0.02, 0.07], [0.026, 0.08], [0.001, 0.082]].map(([x, y]) => new THREE.Vector2(x, y)), 14), M.brassDark());
+    boss.rotation.z = -Math.PI / 2;
+    const armShape = new THREE.Shape();
+    armShape.absarc(0, 0, 0.026, Math.PI / 2, Math.PI * 1.5, false); armShape.lineTo(0, -0.026); armShape.lineTo(0.0, -0.026);
+    armShape.absarc(0, -0.22, 0.02, Math.PI, 0, false); armShape.lineTo(0.02, -0.0); armShape.absarc(0, 0, 0.026, -Math.PI / 2, Math.PI / 2, false);
+    const armG = new THREE.ExtrudeGeometry(armShape, { depth: 0.014, bevelEnabled: true, bevelSize: 0.004, bevelThickness: 0.004, bevelSegments: 2, curveSegments: 8 });
+    armG.rotateY(Math.PI / 2);
+    const arm = new THREE.Mesh(armG, M.brass());
+    arm.position.x = 0.08;
+    const handle = new THREE.Mesh(new THREE.LatheGeometry([[0.001, 0], [0.014, 0], [0.02, 0.02], [0.024, 0.06], [0.02, 0.1], [0.022, 0.11], [0.001, 0.116]].map(([x, y]) => new THREE.Vector2(x, y)), 12), M.boardDark());
+    handle.rotation.z = -Math.PI / 2;
+    handle.position.set(0.09, -0.22, 0);
+    crank.add(boss, arm, handle);
     crank.position.set(B.x + B.r * 0.98, 0.12 + B.h * 0.55, B.z);
     crank.traverse((n) => { (n as THREE.Mesh).castShadow = true; });
     this.add(crank);
@@ -577,13 +586,7 @@ export class Lodge implements Stage {
   private buildDecor() {
     this.lamp(v3(-1.25, 2.65, 1.45), true);
     this.lamp(v3(2.95, 2.5, -1.25), true);
-    // two plain barrels of stock: behind the counter, and by the door with a sack leaning on it
-    for (const [x, z, h, r] of [[4.22, -2.42, 0.86, 0.3], [-3.95, 1.4, 0.78, 0.28]]) {
-      const b = barrel(h, r);
-      b.group.position.set(x, 0, z);
-      b.group.rotation.y = x;
-      this.add(b.group);
-    }
+    // (two barrels of stock come with hero.glb, in loadProps)
     const lean = sack(0.4, 0.16, 11, 22);
     lean.position.set(-3.55, 0, 1.55);
     lean.rotation.set(0, 0.6, 0.08);
@@ -626,7 +629,105 @@ export class Lodge implements Stage {
     this.add(l.swing);
   }
 
+  /** Poly Haven's wine barrel, treasure chest and mantel clock (public/models/shop/hero.glb). */
+  private async loadHero() {
+    let h: THREE.Object3D;
+    try { h = (await loadGLB('shop/hero.glb')).scene; } catch (e) { console.warn('lodge hero props missing', e); return; }
+    if (this.dead) return;
+    const grab = (name: string, height: number) => {
+      const src = h.getObjectByName(name);
+      if (!src) return null;
+      const c = src.clone(true);
+      c.position.set(0, 0, 0); c.rotation.set(0, 0, 0); c.scale.set(1, 1, 1);
+      c.updateMatrixWorld(true);
+      const b = new THREE.Box3().setFromObject(c), k = height / Math.max(1e-3, b.max.y - b.min.y), ctr = b.getCenter(new THREE.Vector3());
+      c.scale.setScalar(k);
+      c.position.set(-ctr.x * k, -b.min.y * k, -ctr.z * k);
+      const w = new THREE.Group();
+      w.add(c);
+      w.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+      return w;
+    };
+    /** take a part out of a model into a pivot at `hinge` (world), so it can swing about it */
+    const pivotOf = (root: THREE.Object3D, name: string, parent: THREE.Object3D, hinge: (b: THREE.Box3) => THREE.Vector3) => {
+      const part = root.getObjectByName(name);
+      if (!part) return null;
+      root.updateMatrixWorld(true);
+      const b = new THREE.Box3().setFromObject(part);
+      const pv = new THREE.Group();
+      parent.add(pv);
+      parent.updateMatrixWorld(true);
+      pv.position.copy(parent.worldToLocal(hinge(b)));
+      pv.updateMatrixWorld(true);
+      pv.attach(part);
+      return pv;
+    };
+    // the Lucky Barrel, its lid free to pop
+    const B = this.barrelParts;
+    const lb = grab('barrel', BARREL.h);
+    if (lb && B) {
+      B.group.add(lb);
+      const lid = pivotOf(lb, 'wine_barrel_01_Lid', B.group, (b) => new THREE.Vector3((b.min.x + b.max.x) / 2, b.min.y, b.min.z));
+      if (lid) B.lid = lid;
+    }
+    // two plain barrels of stock: behind the counter, and by the door with a sack leaning on it
+    for (const [x, z, hh, yaw] of [[4.22, -2.42, 0.86, 2.1], [-3.95, 1.4, 0.78, 0.7]]) {
+      const b = grab('barrel', hh);
+      if (!b) continue;
+      b.position.set(x, 0, z);
+      b.rotation.y = yaw;
+      this.add(b);
+      this.add(contactShadow(0.85, 0.85, 0.55)).position.set(x, 0.004, z);
+    }
+    // the gem chests on the stash shelf, lids thrown open on heaps of moon gems
+    for (const g of GEM_SPOTS) {
+      const sp = this.spots.get('gem:' + g.id);
+      const spec = sp?.obj.userData.chest as { w: number; gems: number; seed: number } | undefined;
+      if (!sp || !spec) continue;
+      const c = grab('chest', spec.w * 0.65);
+      if (!c) continue;
+      sp.obj.add(c);
+      sp.obj.updateMatrixWorld(true);
+      const lid = pivotOf(c, 'treasure_chest_lid', sp.obj, (b) => new THREE.Vector3((b.min.x + b.max.x) / 2, (b.min.y + b.max.y) / 2 - (b.max.y - b.min.y) * 0.2, 0).setZ(b.min.z));
+      if (lid) lid.rotation.x = -1.75;
+      const body = c.getObjectByName('treasure_chest_bottom');
+      const bb = new THREE.Box3().setFromObject(body ?? c);
+      const top = sp.obj.worldToLocal(new THREE.Vector3(0, bb.max.y, 0)).y;
+      const heap = gemHeap(spec.gems, spec.w * 0.62, spec.w * 0.34, spec.w * 0.11, spec.seed);
+      heap.position.y = top - spec.w * 0.04;
+      sp.obj.add(heap);
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xb9a6ff, map: haloTexture(), blending: THREE.AdditiveBlending, transparent: true, opacity: 0.55, depthWrite: false, fog: false }));
+      glow.scale.setScalar(spec.w * 1.4);
+      glow.position.y = top + 0.04;
+      glow.renderOrder = 6;
+      sp.obj.add(glow);
+      this.disposables.push(() => (glow.material as THREE.Material).dispose());
+      sp.obj.add(contactShadow(spec.w * 1.3, spec.w * 0.9, 0.5));
+    }
+    // the mantel clock on the counter, its hands set to the real time
+    const C = COUNTER;
+    const mc = grab('mclock', 0.3);
+    if (mc) {
+      mc.position.set(C.x0 + 0.78, C.h, C.z - 0.18);
+      mc.rotation.y = -0.15;
+      this.add(mc);
+      const glass = mc.getObjectByName('mantel_clock_01_glass');
+      if (glass) {
+        mc.updateMatrixWorld(true);
+        const gb = new THREE.Box3().setFromObject(glass);
+        const ctr = gb.getCenter(new THREE.Vector3()), rad = Math.min(gb.max.x - gb.min.x, gb.max.y - gb.min.y) / 2;
+        this.clock = clockFace(rad * 0.94);
+        mc.add(this.clock.group);
+        this.clock.group.position.copy(mc.worldToLocal(ctr.clone()));
+        this.clock.group.position.z -= (gb.max.z - gb.min.z) * 0.35;
+        (glass as THREE.Mesh).renderOrder = 3;
+        this.disposables.push(() => this.clock?.dispose());
+      }
+    }
+  }
+
   private async loadProps() {
+    void this.loadHero();
     let g: THREE.Object3D;
     try { g = (await loadGLB('shop/props.glb')).scene; } catch (e) { console.warn('lodge props missing', e); return; }
     if (this.dead) return;
@@ -656,7 +757,7 @@ export class Lodge implements Stage {
     // the till on the counter, a lantern and a candle
     const till = put('register', v3(C.x1 - 0.42, C.h, C.z - 0.08), { h: 0.42, yaw: -0.18 });
     if (till) this.spot('till', till, this.hitBox(0.5, 0.45, 0.45, v3(C.x1 - 0.42, C.h + 0.22, C.z - 0.08)), v3(C.x1 - 0.42, C.h + 0.48, C.z - 0.08));
-    put('candle', v3(C.x0 + 0.72, C.h, C.z - 0.22), { h: 0.24 });
+    put('candle', v3(C.x1 - 0.12, C.h, C.z + 0.2), { h: 0.22 });
     put('books', v3(C.x0 + 1.25, C.h, C.z - 0.2), { h: 0.14, yaw: 0.5 });
     // behind the counter: the stocked bookshelf with a ladder, a crate of goods
     const shelf = put('bookshelf', v3(3.45, 0, ROOM.back + 0.36), { h: 2.15, shadow: 0.5 });
@@ -665,13 +766,13 @@ export class Lodge implements Stage {
     // the hat pegs between the window and the banners
     // the hat shelf between the window and the banners: planks on log brackets, the hats sat on them
     for (const y of [1.58, 2.12]) {
-      const sh = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.04, 0.3), M.board());
+      const sh = new THREE.Mesh(new RoundedBoxGeometry(1.0, 0.04, 0.3, 2, 0.01), M.board());
       sh.position.set(-0.78, y, ROOM.back + 0.3);
       sh.castShadow = sh.receiveShadow = true;
       this.add(sh);
       for (const x of [-1.15, -0.41]) {
-        const br = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.14, 0.2), M.boardDark());
-        br.position.set(x, y - 0.09, ROOM.back + 0.26);
+        const br = new THREE.Mesh(bracketGeo(), M.boardDark());
+        br.position.set(x, y - 0.02, ROOM.back + 0.15);
         br.castShadow = true;
         this.add(br);
       }
@@ -1097,6 +1198,9 @@ export class Lodge implements Stage {
     const breathe = Math.sin(t * 0.21) * 0.035;
     this.cur = { ...s, dist: s.dist + (1 - e) * 1.6, yaw: s.yaw + breathe * 0.4, pitch: s.pitch + (1 - e) * 0.08 };
     this.applyCamera();
+    this.look.focus = s.dist;
+    this.look.focusRange = THREE.MathUtils.clamp(s.dist * 0.34, 0.7, 2.6);
+    this.look.blur = s.dist < 4 ? 0.55 : 0.38;
     this.cur = s;
 
     // lanterns sway and flicker
@@ -1144,6 +1248,7 @@ export class Lodge implements Stage {
       this.gift.scale.setScalar(1 + Math.sin(this.giftOpen * Math.PI) * 0.15);
       if (this.giftOpen >= 1) this.gift.visible = false;
     }
+    this.clock?.set(new Date());
     // the scales see-saw gently
     if (this.scalesObj) (this.scalesObj.userData.beam as THREE.Object3D).rotation.z = Math.sin(t * 0.9) * 0.05;
     // the barrel
@@ -1154,7 +1259,10 @@ export class Lodge implements Stage {
       B.group.rotation.z = sh;
       B.group.position.y = 0.12 + (B.shake > 0 ? Math.abs(Math.sin(t * 19)) * 0.02 * B.shake : 0);
       const want = B.open;
-      B.lid.position.y = THREE.MathUtils.lerp(B.lid.position.y, BARREL.h - 0.03 + want * 0.5, Math.min(1, dt * 6));
+      const ly = (B.lid.userData.baseY as number | undefined) ?? B.lid.position.y;
+      B.lid.userData.baseY = ly;
+      B.lid.userData.lift = THREE.MathUtils.lerp((B.lid.userData.lift as number | undefined) ?? 0, want * 0.45, Math.min(1, dt * 6));
+      B.lid.position.y = ly + (B.lid.userData.lift as number);
       B.lid.rotation.x = THREE.MathUtils.lerp(B.lid.rotation.x, want * -1.1, Math.min(1, dt * 6));
       const bm = B.beam.material as THREE.MeshBasicMaterial;
       bm.color.lerp(B.col, Math.min(1, dt * 4));
@@ -1186,7 +1294,6 @@ export class Lodge implements Stage {
 
   dispose() {
     this.dead = true;
-    if (this.world?.post && this.savedGrade) Object.assign(this.world.post.grade, this.savedGrade);
     for (const d of this.deals) { d.owl?.model.dispose(); for (const c of d.holder.children) c.userData.dispose?.(); }
     this.clearPrize();
     this.beaver.dispose();
@@ -1248,7 +1355,7 @@ export async function displayModel(d: DisplayItem, w: number, h: number): Promis
       const t = new THREE.CanvasTexture(c);
       t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter;
       const face = new THREE.MeshStandardMaterial({ map: t, roughness: 0.8 });
-      const board = new THREE.Mesh(new THREE.BoxGeometry(w * 0.8, h * 0.8, 0.04), [M.boardDark(), M.boardDark(), M.boardDark(), M.boardDark(), face, M.boardDark()]);
+      const board = new THREE.Mesh(new RoundedBoxGeometry(w * 0.8, h * 0.8, 0.04, 2, 0.01), face);
       board.position.y = h * 0.4;
       board.rotation.x = -0.15;
       board.castShadow = true;
@@ -1288,6 +1395,71 @@ export async function displayModel(d: DisplayItem, w: number, h: number): Promis
     const p = parcel(Math.min(w, h) * 0.7);
     return { obj: p, owl: null };
   } catch (e) { console.warn('display failed', d, e); return null; }
+}
+
+/** A shelf bracket: a carved quarter-curve of wood (extruded, bevelled), its back against the wall. */
+let bracket: THREE.BufferGeometry | null = null;
+function bracketGeo(): THREE.BufferGeometry {
+  if (bracket) return bracket;
+  const s = new THREE.Shape();
+  s.moveTo(0, 0); s.lineTo(0.2, 0); s.lineTo(0.2, -0.03);
+  s.bezierCurveTo(0.12, -0.04, 0.05, -0.08, 0.03, -0.16);
+  s.lineTo(0, -0.17); s.closePath();
+  bracket = new THREE.ExtrudeGeometry(s, { depth: 0.04, bevelEnabled: true, bevelSize: 0.005, bevelThickness: 0.005, bevelSegments: 2, curveSegments: 8 });
+  bracket.translate(0, 0, -0.02);
+  bracket.rotateY(-Math.PI / 2);
+  return bracket;
+}
+
+/** A clock face set to the real time: a painted enamel dial with roman numerals, blued-steel spade hands. */
+function clockFace(r: number): { group: THREE.Group; set(d: Date): void; dispose(): void } {
+  const g = new THREE.Group();
+  const N = 96;
+  const c = document.createElement('canvas');
+  c.width = c.height = N;
+  const x = c.getContext('2d')!;
+  x.fillStyle = '#efe4c8'; x.fillRect(0, 0, N, N);
+  const rr = mulberry(9);
+  for (let i = 0; i < 400; i++) { x.fillStyle = rr() < 0.5 ? 'rgba(180,150,100,0.12)' : 'rgba(255,250,235,0.25)'; x.fillRect(Math.floor(rr() * N), Math.floor(rr() * N), 1, 1); }
+  x.strokeStyle = '#4a3a2a'; x.lineWidth = 2;
+  x.beginPath(); x.arc(N / 2, N / 2, N / 2 - 3, 0, Math.PI * 2); x.stroke();
+  x.fillStyle = '#2e2416'; x.font = 'bold 11px serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  const R = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+  for (let h = 0; h < 12; h++) {
+    const a = (h / 12) * Math.PI * 2;
+    x.fillText(R[h], N / 2 + Math.sin(a) * N * 0.36, N / 2 - Math.cos(a) * N * 0.36);
+    for (let m = 0; m < 5; m++) { const b = a + (m / 5) * (Math.PI / 6); x.fillRect(Math.round(N / 2 + Math.sin(b) * N * 0.45), Math.round(N / 2 - Math.cos(b) * N * 0.45), 1, 1); }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  const dialM = new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 });
+  const dial = new THREE.Mesh(new THREE.CircleGeometry(r, 32), dialM);
+  g.add(dial);
+  const steel = new THREE.MeshStandardMaterial({ color: 0x1e2636, metalness: 0.6, roughness: 0.35 });
+  const hand = (len: number, w: number) => {
+    const s = new THREE.Shape();
+    s.moveTo(-w * 0.35, -len * 0.18); s.lineTo(w * 0.35, -len * 0.18); s.lineTo(w * 0.3, len * 0.6);
+    s.lineTo(w, len * 0.72); s.lineTo(0, len); s.lineTo(-w, len * 0.72); s.lineTo(-w * 0.3, len * 0.6); s.closePath();
+    const m = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: r * 0.02, bevelEnabled: false }), steel);
+    const pv = new THREE.Group();
+    pv.add(m);
+    g.add(pv);
+    return pv;
+  };
+  const hh = hand(r * 0.55, r * 0.07), mh = hand(r * 0.82, r * 0.05);
+  hh.position.z = r * 0.02; mh.position.z = r * 0.05;
+  const cap = new THREE.Mesh(new THREE.CircleGeometry(r * 0.06, 12), new THREE.MeshStandardMaterial({ color: 0xc8a764, metalness: 0.8, roughness: 0.3 }));
+  cap.position.z = r * 0.09;
+  g.add(cap);
+  return {
+    group: g,
+    set(d: Date) {
+      const m = d.getMinutes() + d.getSeconds() / 60, h = (d.getHours() % 12) + m / 60;
+      mh.rotation.z = -(m / 60) * Math.PI * 2;
+      hh.rotation.z = -(h / 12) * Math.PI * 2;
+    },
+    dispose() { t.dispose(); dialM.dispose(); steel.dispose(); },
+  };
 }
 
 // ------------------------------------------------------------------ painted sprites

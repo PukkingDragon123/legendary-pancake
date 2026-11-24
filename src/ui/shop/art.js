@@ -335,6 +335,153 @@ def('lg_plank_down', { w: 28, h: 18, slice: [6, 7, 7, 7], repeat: 'stretch' }, (
   return b;
 });
 
+
+// ------------------------------------------------------------------ organic frames
+// Hand-made, not geometric: every frame's silhouette wobbles (a slow noise along each edge, corners knocked off by
+// different amounts), its fill carries the material's own noise (paper fibres and foxing, wood grain and knots, cloth
+// weave, brass patina), shading runs along hue-shifted ramps (warm, pale lights up and left; cool, saturated shadows
+// down and right), and the outline is selective: a dark, cool line on the shadow sides that breaks into a lit tone
+// on the lit sides.
+
+/** a hue-shifted ramp of n tones (dark -> light) around a base colour */
+function hramp(base, n = 7, dark = 0.55, light = 0.5) {
+  const [r, g, b] = rgb(base).map((v) => v / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  let h = 0, sat = 0;
+  if (d > 1e-6) { sat = d / (1 - Math.abs(2 * l - 1)); h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h /= 6; if (h < 0) h += 1; }
+  const out = [], mid = (n - 1) * 0.55;
+  const toward = (h0, t, k) => { let dd = ((t - h0 + 1.5) % 1) - 0.5; return (h0 + dd * k + 1) % 1; };
+  for (let i = 0; i < n; i++) {
+    const t = i < mid ? -(mid - i) / mid : (i - mid) / (n - 1 - mid);
+    const hh = t < 0 ? toward(h, 0.7, 0.12 * -t) : toward(h, 0.13, 0.1 * t);
+    const ss = Math.min(1, Math.max(0, t < 0 ? sat * (1 + 0.25 * -t) : sat * (1 - 0.35 * t)));
+    const ll = Math.min(0.97, Math.max(0.03, t < 0 ? l * (1 - dark * -t) : l + (1 - l) * light * t));
+    const q = (p, q2, tt) => { if (tt < 0) tt += 1; if (tt > 1) tt -= 1; return tt < 1 / 6 ? p + (q2 - p) * 6 * tt : tt < 1 / 2 ? q2 : tt < 2 / 3 ? p + (q2 - p) * (2 / 3 - tt) * 6 : p; };
+    const q2 = ll < 0.5 ? ll * (1 + ss) : ll + ss - ll * ss, p = 2 * ll - q2;
+    const c = [q(p, q2, hh + 1 / 3), q(p, q2, hh), q(p, q2, hh - 1 / 3)].map((v) => Math.round(v * 255));
+    out.push('#' + c.map((v) => v.toString(16).padStart(2, '0')).join(''));
+  }
+  return out;
+}
+/** smooth 1D value noise in -1..1 */
+const n1 = (x, s) => { const i = Math.floor(x), f = x - i, u = f * f * (3 - 2 * f); return (hn(i, 7, s) * (1 - u) + hn(i + 1, 7, s) * u) * 2 - 1; };
+/** materials: a tone offset per pixel (in ramp steps) */
+const MAT = {
+  paper: (x, y, s) => (hn(x, y, s) > 0.93 ? -1 : 0) + (hn(x >> 2, y >> 1, s + 3) > 0.9 ? -0.6 : 0) + ((x * 3 + y) % 11 === 0 && hn(x, y, s + 1) > 0.5 ? 0.5 : 0),
+  kraft: (x, y, s) => (hn(x, y, s) > 0.9 ? -1 : hn(x, y, s + 9) > 0.92 ? 0.7 : 0) + (n1(y * 0.7 + x * 0.05, s) > 0.6 ? -0.5 : 0),
+  wood: (x, y, s) => { const g = Math.sin(x * 0.55 + n1(y * 0.25, s) * 2.5 + n1(x * 0.08, s + 2) * 3); return (g > 0.82 ? -1.2 : g < -0.9 ? 0.6 : 0) + (hn(Math.floor(x / 7), Math.floor(y / 5), s) > 0.95 ? -1.5 : 0); },
+  cloth: (x, y) => ((x + y) % 2 ? -0.35 : 0.25) + (x % 4 === 0 ? -0.3 : 0),
+  brass: (x, y, s) => (hn(x, y, s) > 0.9 ? 0.8 : 0) + (n1(x * 0.3 + y * 0.2, s) > 0.55 ? -1.0 : 0) + (hn(x >> 1, y >> 1, s + 4) > 0.94 ? -1.6 : 0),
+  slate: (x, y, s) => (hn(x, y, s) > 0.93 ? 0.9 : 0) + (n1(x * 0.2 - y * 0.1, s) > 0.6 ? 0.5 : 0),
+  plain: () => 0,
+};
+/**
+ * Paint an organic frame into b. o: { pal: base hex, mat, seed, wob (edge wobble px), cut (corner px), out (outline hex),
+ * notch (ribbon tails), base (ramp index of the fill), down (pressed) }
+ */
+function organic(o) {
+  return (b) => {
+    const W = b.w, H = b.h - 2, seed = o.seed ?? 3, wob = o.wob ?? 1, cut = o.cut ?? 3;
+    const R = hramp(o.pal, 7, o.dark ?? 0.5, o.light ?? 0.45);
+    const out = o.out ?? hramp(o.pal, 7, 0.82, 0.3)[0];
+    const top = [], bot = [], lef = [], rig = [];
+    for (let x = 0; x < W; x++) { top[x] = Math.max(0, Math.round((n1(x * 0.35, seed) * 0.5 + 0.5) * wob)); bot[x] = Math.max(0, Math.round((n1(x * 0.3, seed + 5) * 0.5 + 0.5) * wob)); }
+    for (let y = 0; y < H; y++) { lef[y] = Math.max(0, Math.round((n1(y * 0.35, seed + 9) * 0.5 + 0.5) * wob)); rig[y] = Math.max(0, Math.round((n1(y * 0.3, seed + 13) * 0.5 + 0.5) * wob)); }
+    const cuts = [cut + Math.round(hn(1, 1, seed) * 2), cut + Math.round(hn(2, 1, seed) * 2), cut + Math.round(hn(3, 1, seed) * 2), cut + Math.round(hn(4, 1, seed) * 2)];
+    const notch = o.notch ?? 0, top0 = o.down ? 2 : 0;
+    const inside = (x, y) => {
+      if (x < 0 || y < top0 || x >= W || y >= H) return false;
+      if (y < top0 + top[x] || y >= H - bot[x] || x < lef[y] || x >= W - rig[y]) return false;
+      const yy = y - top0, hh = H - top0;
+      if (x + yy < cuts[0] || (W - 1 - x) + yy < cuts[1] || x + (hh - 1 - yy) < cuts[2] || (W - 1 - x) + (hh - 1 - yy) < cuts[3]) return false;
+      if (notch) { const mid = (hh - 1) / 2, dd = notch - Math.round(Math.abs(yy - mid) * (notch / mid)); if (x < dd || W - 1 - x < dd) return false; }
+      return true;
+    };
+    bevel(b, inside, (d, l, x, y) => {
+      const mt = (MAT[o.mat ?? 'plain'] || MAT.plain)(x, y, seed);
+      if (d === 0) {
+        // selective outline: the lit sides break into a lit tone, the shadow sides stay dark and cool
+        if (l > 0) return hn(x, y, seed + 21) > 0.45 ? R[2] : out;
+        return out;
+      }
+      const base = o.base ?? 4;
+      let t = base + mt;
+      if (d === 1) t += l > 0 ? 1.6 : l < 0 ? -1.6 : 0;
+      else if (d === 2) t += l > 0 ? 0.6 : l < 0 ? -0.8 : 0;
+      // a soft light from the top left across the whole face
+      t += (1 - (x / W + y / b.h)) * 0.5 - 0.1;
+      if (o.down) t -= 0.5;
+      return R[Math.max(0, Math.min(R.length - 1, Math.round(t)))];
+    });
+    // a hard drop shadow under it (unless pressed)
+    if (!o.down) for (let x = 2; x < W - 2; x++) { b.set(x, H, [24, 16, 10, 120]); b.set(x, H + 1, [24, 16, 10, 55]); }
+    // wear: a few rubbed, paler pixels along the lit edges
+    for (let k = 0; k < (o.wear ?? 6); k++) { const x = 2 + Math.floor(hn(k, 3, seed) * (W - 4)); for (let y = 0; y < H; y++) if (inside(x, y)) { b.set(x, y + 1, R[R.length - 1]); break; } }
+    return b;
+  };
+}
+def('lg_paper', { w: 32, h: 32, slice: [8, 8, 10, 8], repeat: 'round' }, organic({ pal: '#efe3c6', mat: 'paper', seed: 4, wob: 1, cut: 2, base: 4 }));
+def('lg_kraft', { w: 32, h: 32, slice: [8, 8, 10, 8], repeat: 'round' }, organic({ pal: '#c99a62', mat: 'kraft', seed: 7, wob: 1, cut: 2, base: 4 }));
+def('lg_board', { w: 48, h: 48, slice: [12, 12, 14, 12], repeat: 'round', fill: false }, organic({ pal: '#9a6a3c', mat: 'wood', seed: 11, wob: 1, cut: 3, base: 3, wear: 10 }));
+def('lg_board_gold', { w: 48, h: 48, slice: [12, 12, 14, 12], repeat: 'round', fill: false }, organic({ pal: '#b98a48', mat: 'wood', seed: 12, wob: 1, cut: 3, base: 3, wear: 10, out: '#3a2410' }));
+def('lg_plank', { w: 32, h: 22, slice: [7, 8, 9, 8], repeat: 'stretch' }, organic({ pal: '#a06a3a', mat: 'wood', seed: 16, wob: 1, cut: 3, base: 4 }));
+def('lg_plank_down', { w: 32, h: 22, slice: [7, 8, 9, 8], repeat: 'stretch' }, organic({ pal: '#8a5a30', mat: 'wood', seed: 16, wob: 1, cut: 3, base: 3, down: true }));
+def('lg_brass', { w: 32, h: 24, slice: [8, 8, 9, 8], repeat: 'round' }, organic({ pal: '#c99c4c', mat: 'brass', seed: 19, wob: 0, cut: 2, base: 4, light: 0.6 }));
+def('lg_chip', { w: 20, h: 18, slice: [6, 6, 8, 6], repeat: 'round' }, organic({ pal: '#4a3020', mat: 'wood', seed: 23, wob: 1, cut: 2, base: 3 }));
+def('lg_bubble', { w: 24, h: 24, slice: [7, 7, 8, 7], repeat: 'round' }, organic({ pal: '#f7ecd2', mat: 'paper', seed: 29, wob: 1, cut: 4, base: 5, out: '#3a2a1c' }));
+def('lg_cloth_red', { w: 48, h: 22, slice: [6, 12, 8, 12] }, organic({ pal: '#b4383a', mat: 'cloth', seed: 31, wob: 0, cut: 1, base: 4, notch: 5 }));
+def('lg_cloth_violet', { w: 48, h: 22, slice: [6, 12, 8, 12] }, organic({ pal: '#6e4ea0', mat: 'cloth', seed: 37, wob: 0, cut: 1, base: 4, notch: 5 }));
+def('lg_cloth_gold', { w: 48, h: 22, slice: [6, 12, 8, 12] }, organic({ pal: '#d8a444', mat: 'cloth', seed: 41, wob: 0, cut: 1, base: 4, notch: 5 }));
+def('lg_slate2', { w: 32, h: 32, slice: [9, 9, 10, 9], repeat: 'round' }, organic({ pal: '#3c474c', mat: 'slate', seed: 43, wob: 1, cut: 3, base: 3, out: '#151a1c' }));
+def('lg_stampblock', { w: 32, h: 26, slice: [8, 9, 12, 9], repeat: 'stretch' }, (b) => {
+  organic({ pal: '#7a4a26', mat: 'wood', seed: 47, wob: 1, cut: 3, base: 3 })(b);
+  // the red rubber face along the bottom
+  for (let x = 3; x < b.w - 3; x++) for (let y = b.h - 7; y < b.h - 3; y++) b.set(x, y, y === b.h - 7 ? '#e0705a' : y === b.h - 4 ? '#6e1a16' : (x + y) % 5 === 0 ? '#a82c26' : '#c23a32');
+  return b;
+});
+const OBTN = { gold: '#d4a24a', berry: '#b84440', violet: '#6e52a0', sage: '#5f8a4a', linen: '#e3d6b8', slate: '#4a5860' };
+for (const [k, c] of Object.entries(OBTN)) {
+  def(`lg_btn_${k}`, { w: 22, h: 22, slice: [7, 7, 9, 7] }, organic({ pal: c, mat: k === 'linen' ? 'paper' : 'cloth', seed: 50 + k.length, wob: 0, cut: 3, base: 4 }));
+  def(`lg_btn_${k}_down`, { w: 22, h: 22, slice: [7, 7, 9, 7] }, organic({ pal: c, mat: k === 'linen' ? 'paper' : 'cloth', seed: 50 + k.length, wob: 0, cut: 3, base: 4, down: true }));
+}
+
+// ------------------------------------------------------------------ organic sprites: seal, pin, eyelet, stamp handle, rope, string
+function spriteBuf(w, h, fn) { const b = new Buf(w, h); fn(b); return toURL(b); }
+/** a red paper seal with a scalloped, hand-cut edge (stepped, a little lopsided), a darker rim, a highlight */
+function sealURL(w, h, seed) {
+  return spriteBuf(w, h, (b) => {
+    const R = hramp('#c23a32', 7, 0.55, 0.45), cx = (w - 1) / 2, cy = (h - 2) / 2;
+    for (let y = 0; y < h - 1; y++) for (let x = 0; x < w; x++) {
+      const dx = (x - cx) / (w / 2 - 0.5), dy = (y - cy) / ((h - 1) / 2 - 0.5), a = Math.atan2(dy, dx);
+      const rr = 0.86 + Math.sin(a * 9 + seed) * 0.08 + n1(a * 3, seed) * 0.04;
+      const d = Math.hypot(dx, dy);
+      if (d > rr) continue;
+      let t = 4 + (dx < 0 && dy < 0 ? 0.6 : 0) - (dx + dy) * 0.6 + (hn(x, y, seed) > 0.9 ? -1 : 0);
+      if (d > rr - 0.14) t = dx + dy < 0 ? 2 : 0;
+      b.set(x, y, R[Math.max(0, Math.min(6, Math.round(t)))]);
+    }
+    for (let x = 2; x < w - 2; x++) b.set(x, h - 1, [30, 10, 6, 90]);
+  });
+}
+/** a red-headed pushpin seen from the front-left, with its shadow */
+const PIN = ['..ooo..', '.oHhho.', 'oHhhhmo', 'ohhhmmo', 'ohmmmmo', '.ommmo.', '..ooo..', '...s...', '...s...'];
+function pinURL() { return spriteBuf(7, 10, (b) => { b.rows(0, 0, PIN, { o: '#5a1410', H: '#f4a08a', h: '#d0463c', m: '#9a2a24', s: '#8a8a80' }); b.set(4, 9, [30, 10, 6, 100]); b.set(5, 8, [30, 10, 6, 70]); }); }
+/** a brass eyelet punched in a tag: a stepped ring, lit top-left */
+function eyeletURL() { return spriteBuf(8, 8, (b) => { for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const d = Math.hypot(x - 3.5, y - 3.5); if (d < 1.6) b.set(x, y, '#2a1e12'); else if (d < 3.6) b.set(x, y, x + y < 6 ? '#f0d48a' : x + y > 8 ? '#7a5a26' : '#c8a050'); } }); }
+/** the stamp's turned wooden handle: a knob, a neck, a collar */
+function handleURL() {
+  return spriteBuf(26, 16, (b) => {
+    const R = hramp('#9a6638', 7, 0.55, 0.5);
+    const prof = [5, 6, 7, 7, 6, 4, 3, 3, 3, 4, 7, 9, 10, 11, 11, 12];
+    for (let y = 0; y < 16; y++) { const half = prof[y]; for (let x = 13 - half; x < 13 + half; x++) { const t = 4 - ((x - (13 - half)) / (2 * half)) * 3.2 + (y < 6 ? 0.6 : 0) + (hn(x, y, 61) > 0.9 ? -1 : 0); b.set(x, y, (x === 13 - half || x === 12 + half) ? R[0] : R[Math.max(0, Math.min(6, Math.round(t)))]); } }
+  });
+}
+/** a twisted rope (tiles along x) and a thin twisted string (tiles along y) */
+function ropeURL() { return spriteBuf(8, 6, (b) => { for (let x = 0; x < 8; x++) for (let y = 0; y < 5; y++) { const s = (x + y) % 4; b.set(x, y, y === 0 || y === 4 ? '#5e4424' : s === 0 ? '#e0c88e' : s === 1 ? '#c9a868' : s === 2 ? '#a8854c' : '#8a6a3a'); } for (let x = 0; x < 8; x++) b.set(x, 5, [30, 20, 10, 80]); }); }
+/** a hasty red-pencil strike: a wobbly double stroke that thickens in the middle */
+function strikeURL() { return spriteBuf(40, 7, (b) => { for (let x = 0; x < 40; x++) { const y = 3 + Math.round(n1(x * 0.25, 71) * 1.2 - (x - 20) * 0.08); const th = x > 4 && x < 36 ? 2 : 1; for (let k = 0; k < th; k++) b.set(x, y + k, k ? '#8e1c18' : '#d0362e'); if (hn(x, 3, 71) > 0.8) b.set(x, y - 1, '#e0605a'); } }); }
+function stringURL() { return spriteBuf(2, 4, (b) => { b.set(0, 0, '#e8d6a8').set(1, 0, '#b89a64').set(0, 1, '#c9ab74').set(1, 1, '#9c7c4c').set(0, 2, '#b89a64').set(1, 2, '#e8d6a8').set(0, 3, '#9c7c4c').set(1, 3, '#c9ab74'); }); }
+
 // ------------------------------------------------------------------ CSS
 
 const cv = new Map(), urls = new Map();
@@ -486,7 +633,8 @@ export function injectLodgeCSS() {
   for (const k of Object.keys(BTN)) css += `.lg-btn.${k}{${lgStyle(`lg_btn_${k}`, 2)}}\n.lg-btn.${k}:active:not(.off),.lg-btn.${k}.down{${lgStyle(`lg_btn_${k}_down`, 2)}}\n`;
   // the store's things wear their materials: paper tags, kraft labels, brass plates, cloth, planks, the oak board
   const WEAR = {
-    '.lg-ptag': 'lg_paper', '.lg-ktag': 'lg_kraft', '.lg-ktag.brass': 'lg_brass', '.lg-cloth.on': 'lg_ribbon_berry', '.lg-cloth.soon': 'lg_ribbon_violet',
+    '.lg-ptag': 'lg_paper', '.lg-ktag': 'lg_kraft', '.lg-ktag.brass': 'lg_brass', '.lg-cloth.on': 'lg_cloth_red', '.lg-cloth.soon': 'lg_cloth_violet', '.lg-stamp-block': 'lg_stampblock',
+    '.lg-g-tab': 'lg_kraft', '.lg-g-tab.on': 'lg_paper', '.lg-up,.lg-new': 'lg_cloth_red', '.lg-bonus': 'lg_cloth_gold', '.lg-bonus.gem': 'lg_cloth_violet', '.lg-bubble-who': 'lg_cloth_gold', '.lg-hint': 'lg_paper', '.lg-poster': 'lg_paper', '.lg-poster-title': 'lg_chip', '.lg-sum-card': 'lg_paper', '.lg-sum-card.r5': 'lg_kraft', '.lg-gnote': 'lg_kraft',
     '.lg-navsign': 'lg_plank', '.lg-navsign:active,.lg-navsign.on': 'lg_plank_down', '.lg-card': 'lg_board', '.lg-ledger': 'lg_paper', '.lg-gtag': 'lg_kraft',
     '.lg-burlap': 'lg_kraft', '.lg-plate': 'lg_brass', '.lg-page': 'lg_paper', '.lg-prize-page': 'lg_paper', '.lg-timer': 'lg_chip',
   };
@@ -496,6 +644,7 @@ export function injectLodgeCSS() {
   css += `--lg-rays-a:url("${raysURL(0)}");--lg-rays-b:url("${raysURL(1)}");--lg-burst:url("${burstURL()}");--lg-burst-gold:url("${burstURL(128, '#ffd27a')}");--lg-burst-violet:url("${burstURL(128, '#c79bff')}");--lg-burst-blue:url("${burstURL(128, '#8fd0ff')}");--lg-twinkle:url("${spriteURL('shop_twinkle', 2)}");`;
   // the store's own materials (BUSHED's photo-based pixel textures, restyled): warm boards, burlap
   const base = (import.meta.env && import.meta.env.BASE_URL) || '/';
+  css += `--lg-seal:url("${sealURL(30, 22, 2)}");--lg-seal-big:url("${sealURL(40, 30, 5)}");--lg-pin:url("${pinURL()}");--lg-eyelet:url("${eyeletURL()}");--lg-handle:url("${handleURL()}");--lg-rope-img:url("${ropeURL()}");--lg-string-img:url("${stringURL()}");--lg-strike:url("${strikeURL()}");`;
   css += `--lg-wood:url("${base}models/shop/tex/board.webp");--lg-burlap:url("${base}models/shop/tex/burlap.webp");--lg-log:url("${base}models/shop/tex/log.webp");`;
   css += '}\n';
   const st = document.createElement('style');

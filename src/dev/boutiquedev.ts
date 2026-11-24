@@ -68,7 +68,7 @@ async function stage() {
   const b = new Lodge(deals);
   const post = new Post(r, 'high');
   const sky = { night: q.get('night') ? 1 : 0, hour: q.get('night') ? 22 : 14 };
-  b.attach(r, { scene: new THREE.Scene(), sky, post: post as unknown as { grade: Record<string, unknown> } });
+  b.attach(r, { scene: new THREE.Scene(), sky });
   b.setSeries(SERIES.map((s, k) => ({ id: s.id, art: bannerArt(s, 120, 156), on: k === 0 })));
   b.chalk([{ text: "Today's deals", size: 26 }, { text: 'new stock in 11h 22m', size: 18, col: '#f1d39a' }]);
   const size = () => { r.setSize(innerWidth, innerHeight, false); post.resize(innerWidth, innerHeight); b.resize(innerWidth, innerHeight); };
@@ -82,7 +82,7 @@ async function stage() {
   if (q.get('clip')) { b.beaver.play(q.get('clip') as BeaverClip, 0.01); step(Math.round(+(q.get('at') ?? 0.6) * 30)); }
   if (q.get('wish')) { void b.wish(+q.get('wish')! as 3 | 4 | 5); step(70); if (deals[0]) await b.showPrize(deals[0], +q.get('wish')! as 3 | 4 | 5); step(40); }
   if (q.get('sold')) b.setSold(+q.get('sold')!, true);
-  post.render(b.scene, b.camera, t);
+  post.render(b.scene, b.camera, t, b.look);
   (window as unknown as { __ready: number }).__ready = 1;
   (window as unknown as { lodge: Lodge }).lodge = b;
   if (q.get('still')) return;
@@ -92,7 +92,7 @@ async function stage() {
     const dt = Math.min(0.05, (ms - last) / 1000);
     last = ms; t += dt;
     b.update(dt, t);
-    post.render(b.scene, b.camera, t);
+    post.render(b.scene, b.camera, t, b.look);
   };
   requestAnimationFrame(loop);
 }

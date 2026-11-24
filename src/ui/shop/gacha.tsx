@@ -121,6 +121,7 @@ export function Gacha(p: { seriesId: string; stage: Lodge | null; say: (t: strin
               <button class="lg-ktag small" onClick={() => { sound.play('paper_flip', { volume: 0.4 }); setSheet('history'); }}>History</button>
             </div>
           </div>
+          <p class="lg-gnote">1 wish = 1 prize from this series · duplicates become acorns</p>
           <footer class="lg-g-wish">
             <Stamp label="Wish ×1" cost={<span class="lg-cost"><Px name="moongem" size={18} />{PULL_COST}</span>} short={!on || sv.gems < PULL_COST} onPress={() => doWish(1)} />
             <Stamp label="Wish ×10" cost={<span class="lg-cost"><Px name="moongem" size={18} />{fmt(PULL_COST * 10)}</span>} short={!on || sv.gems < PULL_COST * 10} onPress={() => doWish(10)} />

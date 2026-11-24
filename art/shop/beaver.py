@@ -669,10 +669,9 @@ def build_apron(body, tail):
     # things in the pocket: a folding rule on the left, a pencil stub and a notebook on the right
     pz = V[jz[0], (i0 + i1) // 2, 2]
     py = V[jz[0], (i0 + i1) // 2, 1]
-    stuff = [box('rule', (0.016, 0.004, 0.07), Vector((0.07, py - 0.0045, pz - 0.006)), Quaternion((0, 1, 0), math.radians(-12))),
-             box('book', (0.045, 0.005, 0.06), Vector((-0.06, py - 0.0045, pz - 0.014)), Quaternion((0, 1, 0), math.radians(8)))]
-    stuff[0]['col'] = 'rule'
-    stuff[1]['col'] = 'book'
+    # two pencil stubs poking out of the pocket (sharpened, eraser ends up)
+    stuff = [pencil('stub_a', Vector((0.075, py - 0.004, pz + 0.035)), Vector((-0.12, 0.0, -1.0)), length=0.065, r=0.0048),
+             pencil('stub_b', Vector((-0.055, py - 0.004, pz + 0.028)), Vector((0.2, 0.0, -1.0)), length=0.055, r=0.0048)]
     return ap, straps, pocket, stuff
 
 
@@ -929,7 +928,15 @@ def kit_uvs(P_, straps, stuff):
     for s in straps:
         swatch(s, 'strap')
     for o in stuff:
-        swatch(o, o['col'], 2)
+        me = o.data
+        if not me.uv_layers:
+            me.uv_layers.new(name='UVMap')
+        uv = me.uv_layers.active
+        cols = o['cols']
+        for pi, poly in enumerate(me.polygons):
+            cu, cv, w = SW[cols[pi] if pi < len(cols) else 'yellow']
+            for k, li in enumerate(poly.loop_indices):
+                uv.data[li].uv = (cu + (k % 2 - 0.5) * w * 0.5, cv + ((pi % 6) / 6 - 0.5) * w * 0.7)
     swatch(P_['teeth_u'], 'tooth', 2)
     swatch(P_['teeth_d'], 'tooth2', 2)
     swatch(P_['specs'], 'wire')

@@ -13,7 +13,7 @@ import { sound } from '../../audio/sound.ts';
 import { PIECE } from '../../owl/outfits.ts';
 import {
   ACORN_PACKS, buyAcorns, buyDeal, claimGift, dailyDeals, dailyGift, ensureDay, fmtLeft, GEM_PACKS, giftClaimed, grantGems,
-  isSold, msToMidnight, msToWeek, seriesActive, SERIES, type AcornPack, type Deal, type GemPack,
+  isSold, msToMidnight, msToWeek, nameOf, seriesActive, SERIES, type AcornPack, type Deal, type GemPack,
 } from '../../game/shop.ts';
 import { save } from '../../game/store.ts';
 import { Lodge } from '../../world/stages/lodge.ts';
@@ -129,7 +129,7 @@ export function Shop() {
       stageRef.current = st;
       setTimeout(() => st.act('wave'), 900);
     }
-    const t = setTimeout(() => say(pick(LINES.hello)), 1100);
+    const t = setTimeout(() => say(firstVisit() ? 'Welcome, friend! Tap a price tag to look closer, then stamp it to buy. Wishes are by the barrel!' : pick(LINES.hello), 6000), 1100);
     const onResize = () => setLayout(isSide() ? 'side' : 'top');
     addEventListener('resize', onResize);
     if (import.meta.env.DEV) (window as unknown as { hhShop: unknown }).hhShop = { stage: b, open: (id: string) => openSeries(id), say, moment: rewardMoment, card: (c: string) => openCard(c), section: (x: Section) => go(x) };
@@ -333,7 +333,7 @@ export function Shop() {
           <i class="lg-string short" />
           <button class={'lg-ktag' + (claimed ? ' done' : '')} onClick={() => onPick('gift')}>
             <span class="lg-hole" />
-            {claimed ? <span>See you tomorrow</span> : <><b>FREE</b><span>today's gift</span></>}
+            {claimed ? <span>See you tomorrow</span> : <><b>FREE gift</b><span>tap to open</span></>}
           </button>
         </Anchored>
       )}
@@ -359,8 +359,9 @@ export function Shop() {
         return (
           <Anchored at={'series:' + x.id} class="lg-bannertag">
             <button class={'lg-cloth ' + (on ? 'on' : 'soon')} onClick={() => openSeries(x.id)}>
-              <span>{on ? 'Wish!' : 'Next week'}</span>
-              <small>{on ? `ends in ${fmtLeft(msToWeek())}` : `in ${fmtLeft(msToWeek())}`}</small>
+              <span>{on ? 'Make a wish' : 'Next week'}</span>
+              <small class="lg-cloth-prize"><Px name="shop_star5" size={10} />{featuredName(x.id)}</small>
+              <small>{on ? `ends in ${fmtLeft(msToWeek())}` : `arrives in ${fmtLeft(msToWeek())}`}</small>
             </button>
           </Anchored>
         );
@@ -384,7 +385,14 @@ export function Shop() {
           ))}
         </nav>
       )}
-      {section === 'home' && !sel && !gacha && <div class="lg-resets"><Timer ms={reset} label="New stock in " /></div>}
+      {!sel && !gacha && (section === 'home' || section === 'deals' || section === 'stash') && (
+        <div class="lg-hint" key={section}>
+          <span class="lg-pin" />
+          <b>{section === 'stash' ? 'Acorns & Moon Gems' : "Today's Deals"}</b>
+          <span>{section === 'stash' ? 'Tap a sack or a chest to trade' : 'Tap a price tag, then stamp to buy'}</span>
+          {section !== 'stash' && <span class="lg-hint-time"><Px name="shop_timer" size={14} />new stock in {fmtLeft(reset)}</span>}
+        </div>
+      )}
 
       {gacha && <Gacha seriesId={gacha} stage={stage} say={say} onSeries={(id) => setGacha(id)}
         onClose={() => { setGacha(null); setSection(isSide() ? 'home' : 'home'); stageRef.current?.closeBarrel(); stageRef.current?.focus('home'); stageRef.current?.act('wave'); }}
@@ -409,10 +417,36 @@ function placeBubble(el: HTMLElement, st: Lodge) {
     top = side ? 92 : 70;
     tail = -100;
   }
+  // keep clear of the open card, the hanging HUD signs (top right) and the signs along the bottom
+  const blocks: DOMRect[] = [];
+  for (const sel of ['.lg-card', '.lg-hint', '.hud-top .cur, .hud-cur, .hh-cur']) { const b = document.querySelector(sel); if (b) blocks.push(b.getBoundingClientRect()); }
+  blocks.push(new DOMRect(innerWidth - 170, 0, 170, 120));
+  const navTop = (document.querySelector('.lg-nav')?.getBoundingClientRect().top ?? innerHeight) - 8;
+  const hits = (l: number, t: number) => blocks.some((b) => l < b.right && l + w > b.left && t < b.bottom && t + h > b.top) || t + h > navTop;
+  if (hits(left, top)) {
+    const tries: [number, number][] = [[left, top - 40], [8, 70], [innerWidth - w - 8, 130], [8, 130]];
+    const card = document.querySelector('.lg-card')?.getBoundingClientRect();
+    if (card) tries.unshift([left, card.top - h - 16]);
+    const ok = tries.find(([l, t]) => t >= 60 && !hits(l, t));
+    if (ok) { [left, top] = ok; tail = -100; below = false; } else el.style.opacity = '0';
+  } else el.style.opacity = '';
   el.style.left = `${Math.round(left)}px`;
   el.style.top = `${Math.round(top)}px`;
   el.style.setProperty('--tail', `${Math.round(tail)}px`);
   el.classList.toggle('below', below);
+  el.classList.toggle('notail', tail < 0);
+}
+
+/** The featured five-star of a series, by name (what a wish there can give). */
+function featuredName(id: string): string {
+  const s = SERIES.find((x) => x.id === id);
+  const f5 = s?.pool.find((e) => e.stars === 5 && e.featured) ?? s?.pool.find((e) => e.stars === 5);
+  return f5 ? nameOf(f5.kind, f5.id) : '';
+}
+
+/** True the first time the store opens on this device (Barnaby explains how it works). */
+function firstVisit(): boolean {
+  try { if (localStorage.getItem('hoot-hollow:lodge-seen')) return false; localStorage.setItem('hoot-hollow:lodge-seen', '1'); return true; } catch { return false; }
 }
 
 function Bubble(p: { line: Line }) {
