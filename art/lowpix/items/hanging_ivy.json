@@ -1,0 +1,3374 @@
+{
+ "name": "hanging_ivy",
+ "description": "Trailing Ivy Pot",
+ "author": "Hoot Hollow (furnB)",
+ "license": "CC0-1.0",
+ "density": 4,
+ "budget": {
+  "tris": 3000,
+  "colors": 400
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.62
+  ],
+  "strength": 0.75,
+  "gradient": 0.35,
+  "ao": 1.1,
+  "ao_height": 3.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.88
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.5,
+  "width": 0.4,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "ir_iron": "metal",
+   "ir_rust": "metal",
+   "pa_cord": "none",
+   "cer_pot": "none",
+   "cer_pot_dp": "none",
+   "lf_ivy": "organic",
+   "pa_vine": "none",
+   "lf_ivyleaf": "organic",
+   "lf_ivyleaf2": "organic"
+  }
+ },
+ "render": {
+  "background": "#2a3330",
+  "hero": [
+   -30,
+   10
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "ir_iron": [
+    "#2e353b",
+    "#353a3d",
+    "#404243",
+    "#4c4c4b",
+    "#5c5a56",
+    "#756f66",
+    "#8b8374",
+    "#9f957f"
+   ],
+   "ir_rust": [
+    "#544139",
+    "#8a5a44",
+    "#9d6a50",
+    "#ae7a5b"
+   ],
+   "pa_cord": [
+    "#5b5e5d",
+    "#808078",
+    "#b1ab9c",
+    "#eae0c8",
+    "#fef5d7",
+    "#fcf7e2",
+    "#fbf3e4"
+   ],
+   "cer_pot": [
+    "#5d605e",
+    "#83837a",
+    "#b5af9e",
+    "#f1e6cc",
+    "#fefbdc",
+    "#fcf7e7",
+    "#fbf2e2"
+   ],
+   "cer_pot_dp": [
+    "#2a3834",
+    "#324635",
+    "#3f5a3b",
+    "#536b48",
+    "#667c53",
+    "#778a5f"
+   ],
+   "lf_ivy": [
+    "#2d3c37",
+    "#344537",
+    "#3c5139",
+    "#48603d",
+    "#557343",
+    "#6c8852",
+    "#829960",
+    "#95aa6c"
+   ],
+   "pa_vine": [
+    "#35443a",
+    "#41543e",
+    "#526945",
+    "#66844f",
+    "#7d985d",
+    "#90a96a",
+    "#a3b876"
+   ],
+   "lf_ivyleaf": [
+    "#2d3c37",
+    "#344537",
+    "#3c5139",
+    "#48603d",
+    "#557343",
+    "#6c8852",
+    "#829960",
+    "#95aa6c"
+   ],
+   "lf_ivyleaf2": [
+    "#324039",
+    "#3a4b3c",
+    "#465a40",
+    "#556d47",
+    "#66844f",
+    "#7d995e",
+    "#93aa6c",
+    "#a6ba77"
+   ]
+  }
+ },
+ "styles": {
+  "metal_iron": {
+   "ramp": "ir_iron",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.5,
+    "dark_shift": -1.3
+   },
+   "brush": {
+    "flow": "long",
+    "length": 1.2,
+    "rough": 0.4
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.6,
+     "amount": 0.55
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.2,
+     "threshold": 0.74,
+     "ramp": "ir_rust",
+     "tone": 1.6,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "shine",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.6,
+     "density": 0.5,
+     "post": true
+    }
+   ]
+  },
+  "plain_cord": {
+   "ramp": "pa_cord",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "twist",
+     "op": "stripes",
+     "axis": [
+      1,
+      1,
+      0.3
+     ],
+     "period": 0.7,
+     "width": 0.4,
+     "shift": -1.0
+    }
+   ],
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0
+  },
+  "glaze_pot": {
+   "ramp": "cer_pot",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.2,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0,
+   "layers": [
+    {
+     "id": "pool",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3
+    },
+    {
+     "id": "crackle",
+     "op": "cracks",
+     "scale": 2.4,
+     "width": 0.02,
+     "threshold": 0.5,
+     "shift": -0.6
+    },
+    {
+     "id": "dip",
+     "op": "drip",
+     "ramp": "cer_pot_dp",
+     "tone": 3.0,
+     "depth": 1.2,
+     "length": 1.6,
+     "width": 0.8,
+     "scale": 2.0,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 0
+     }
+    },
+    {
+     "id": "wet",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.2,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "leafy_ivy": {
+   "ramp": "lf_ivy",
+   "tone": 3.4,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "vertical",
+    "length": 1.0,
+    "rough": 0.7
+   },
+   "layers": [
+    {
+     "id": "clumps",
+     "op": "noise",
+     "scale": 1.6,
+     "amount": 0.8
+    },
+    {
+     "id": "leaves",
+     "op": "scales",
+     "along": "x",
+     "size": [
+      1.6,
+      1.3
+     ],
+     "shape": "round",
+     "gradient": 1.4,
+     "rim": -1.0,
+     "shadow": -1.4,
+     "jitter": 0.6
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 6.0,
+     "amount": 0.4,
+     "ramps": [
+      "lf_ivy"
+     ]
+    }
+   ]
+  },
+  "plain_vine": {
+   "ramp": "pa_vine",
+   "tone": 3.0,
+   "rim": {
+    "light_shift": 0.9,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35
+    }
+   ],
+   "brush": {
+    "off": true
+   },
+   "dither": 0.0
+  },
+  "leaf_ivyleaf": {
+   "ramp": "lf_ivyleaf",
+   "tone": 4.0,
+   "light": 0.3,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "flow": "long",
+    "length": 1.0,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.8,
+     "amount": 0.6
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 7.0,
+     "amount": 0.3,
+     "ramps": [
+      "lf_ivyleaf"
+     ]
+    }
+   ]
+  },
+  "leaf_ivyleaf2": {
+   "ramp": "lf_ivyleaf2",
+   "tone": 4.0,
+   "light": 0.3,
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "brush": {
+    "flow": "long",
+    "length": 1.0,
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.8,
+     "amount": 0.6
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 7.0,
+     "amount": 0.3,
+     "ramps": [
+      "lf_ivyleaf2"
+     ]
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "plate",
+   "shape": "box",
+   "size": [
+    2.6,
+    3.4,
+    0.6
+   ],
+   "style": "metal_iron",
+   "pivot": [
+    0.0,
+    21.0,
+    0.3
+   ],
+   "chamfer": 0.3
+  },
+  {
+   "id": "bracket",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.7
+    },
+    {
+     "at": [
+      0.0,
+      0.2,
+      1.6
+     ],
+     "size": 0.7
+    },
+    {
+     "at": [
+      0.0,
+      -0.3,
+      2.8
+     ],
+     "size": 0.6
+    },
+    {
+     "at": [
+      0.0,
+      -1.0,
+      3.0
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    20.4,
+    0.4
+   ],
+   "style": "metal_iron"
+  },
+  {
+   "id": "cord",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      19.2,
+      3.0
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      14.0,
+      4.4
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      10.6,
+      5.4
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      0.0,
+      5.4,
+      6.4
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_cord"
+  },
+  {
+   "id": "cord1",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      19.2,
+      3.0
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      1.2124355652982142,
+      14.0,
+      2.3000000000000003
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      2.078460969082653,
+      10.6,
+      1.8000000000000005
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      2.9444863728670914,
+      5.4,
+      1.3000000000000007
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_cord"
+  },
+  {
+   "id": "cord2",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      19.2,
+      3.0
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      -1.2124355652982137,
+      14.0,
+      2.2999999999999994
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      -2.078460969082652,
+      10.6,
+      1.799999999999999
+     ],
+     "size": 0.5
+    },
+    {
+     "at": [
+      -2.9444863728670905,
+      5.4,
+      1.2999999999999985
+     ],
+     "size": 0.5
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_cord"
+  },
+  {
+   "id": "knot",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 1.0
+    },
+    {
+     "at": [
+      0.0,
+      0.8,
+      0.0
+     ],
+     "size": 1.6
+    },
+    {
+     "at": [
+      0.0,
+      1.6,
+      0.0
+     ],
+     "size": 0.8
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    13.0,
+    3.0
+   ],
+   "style": "plain_cord",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "tassel",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 0.8
+    },
+    {
+     "at": [
+      0.0,
+      -2.0,
+      0.0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0.0,
+      -2.6,
+      0.0
+     ],
+     "size": 1.0
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 0,
+   "pivot": [
+    0.0,
+    0.0,
+    3.0
+   ],
+   "style": "plain_cord",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pot",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 4.6
+    },
+    {
+     "at": [
+      0.0,
+      1.0,
+      0.0
+     ],
+     "size": 6.2
+    },
+    {
+     "at": [
+      0.0,
+      4.6,
+      0.0
+     ],
+     "size": 7.4
+    },
+    {
+     "at": [
+      0.0,
+      6.0,
+      0.0
+     ],
+     "size": 7.2
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 0,
+   "pivot": [
+    0.0,
+    0.6,
+    3.0
+   ],
+   "style": "glaze_pot",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "mound",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": 7.0
+    },
+    {
+     "at": [
+      0.0,
+      1.4,
+      0.0
+     ],
+     "size": 7.4
+    },
+    {
+     "at": [
+      0.0,
+      2.6,
+      0.0
+     ],
+     "size": 5.0
+    },
+    {
+     "at": [
+      0.0,
+      3.2,
+      0.0
+     ],
+     "size": 2.0
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    6.0,
+    3.0
+   ],
+   "style": "leafy_ivy",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "strand",
+   "shape": "bone",
+   "pivot": [
+    -3.0,
+    6.4,
+    3.6
+   ],
+   "paint": {
+    "ramp": "ir_iron"
+   }
+  },
+  {
+   "id": "vine",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.0,
+      -0.0,
+      0.5
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.4549942186647351,
+      -2.6666666666666665,
+      0.38242109364224425
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.37646286779037563,
+      -5.333333333333333,
+      0.08498357145012052
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.3653581077895532,
+      -8.0,
+      -0.25242305229992856
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -1.3982683989653673,
+      -10.666666666666666,
+      -0.47111117033432903
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -2.1297771058985875,
+      -13.333333333333334,
+      -0.46822834364539817
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -2.1954880388003883,
+      -16.0,
+      -0.2451304106703501
+     ],
+     "size": 0.45
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_vine",
+   "parent": "strand"
+  },
+  {
+   "id": "ivy",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.14500578133526487,
+    -2.6666666666666665,
+    0.6824210936422442
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    -35,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy1",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    1.054994218664735,
+    -2.6666666666666665,
+    0.6824210936422442
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    35,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy2",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.9764628677903756,
+    -5.333333333333333,
+    0.3849835714501205
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    35,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy3",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.9653581077895532,
+    -8.0,
+    0.047576947700071426
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    -35,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy4",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.2346418922104468,
+    -8.0,
+    0.047576947700071426
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    35,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy5",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.7982683989653673,
+    -10.666666666666666,
+    -0.17111117033432904
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    35,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy6",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -2.7297771058985876,
+    -13.333333333333334,
+    -0.16822834364539818
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    -35,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy7",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -1.5297771058985874,
+    -13.333333333333334,
+    -0.16822834364539818
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    35,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy8",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -1.5954880388003883,
+    -16.0,
+    0.05486958932964989
+   ],
+   "parent": "strand",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    35,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "strand1",
+   "shape": "bone",
+   "pivot": [
+    2.6,
+    6.4,
+    5.6
+   ],
+   "paint": {
+    "ramp": "ir_iron"
+   }
+  },
+  {
+   "id": "vine1",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.7573238863271069,
+      -0.0,
+      0.5
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      1.101670078918673,
+      -3.6666666666666665,
+      0.38242109364224425
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.8014893351403146,
+      -7.333333333333333,
+      0.08498357145012052
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.27314747318235594,
+      -11.0,
+      -0.25242305229992856
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.10567809672988204,
+      -14.666666666666666,
+      -0.47111117033432903
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.6150137069866473,
+      -18.333333333333336,
+      -0.46822834364539817
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      1.6048942843654443,
+      -22.0,
+      -0.2451304106703501
+     ],
+     "size": 0.45
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_vine",
+   "parent": "strand1"
+  },
+  {
+   "id": "ivy9",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.5016700789186731,
+    -3.6666666666666665,
+    0.6824210936422442
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    -15,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy10",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    1.701670078918673,
+    -3.6666666666666665,
+    0.6824210936422442
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    55,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy11",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    1.4014893351403146,
+    -7.333333333333333,
+    0.3849835714501205
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    55,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy12",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.32685252681764404,
+    -11.0,
+    0.047576947700071426
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    -15,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy13",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.8731474731823559,
+    -11.0,
+    0.047576947700071426
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    55,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy14",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.705678096729882,
+    -14.666666666666666,
+    -0.17111117033432904
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    55,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy15",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.01501370698664728,
+    -18.333333333333336,
+    -0.16822834364539818
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    -15,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy16",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    1.2150137069866473,
+    -18.333333333333336,
+    -0.16822834364539818
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    55,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy17",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    2.2048942843654444,
+    -22.0,
+    0.05486958932964989
+   ],
+   "parent": "strand1",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    55,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "strand2",
+   "shape": "bone",
+   "pivot": [
+    3.4,
+    6.4,
+    1.8
+   ],
+   "paint": {
+    "ramp": "ir_iron"
+   }
+  },
+  {
+   "id": "vine2",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.8183676841431136,
+      -0.0,
+      0.5
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.46532439629258415,
+      -2.0,
+      0.38242109364224425
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.05067210184844706,
+      -4.0,
+      0.08498357145012052
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.1499309318076908,
+      -6.0,
+      -0.25242305229992856
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      0.4318600259149106,
+      -8.0,
+      -0.47111117033432903
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      1.4436079892790339,
+      -10.0,
+      -0.46822834364539817
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      2.3088372862304642,
+      -12.0,
+      -0.2451304106703501
+     ],
+     "size": 0.45
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_vine",
+   "parent": "strand2"
+  },
+  {
+   "id": "ivy18",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.13467560370741583,
+    -2.0,
+    0.6824210936422442
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    5,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy19",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    1.065324396292584,
+    -2.0,
+    0.6824210936422442
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    75,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy20",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.5493278981515529,
+    -4.0,
+    0.3849835714501205
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    75,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy21",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.7499309318076908,
+    -6.0,
+    0.047576947700071426
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    5,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy22",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.4500690681923092,
+    -6.0,
+    0.047576947700071426
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    75,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy23",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    1.0318600259149107,
+    -8.0,
+    -0.17111117033432904
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    75,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy24",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.8436079892790339,
+    -10.0,
+    -0.16822834364539818
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    5,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy25",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    2.043607989279034,
+    -10.0,
+    -0.16822834364539818
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    75,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy26",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    2.9088372862304643,
+    -12.0,
+    0.05486958932964989
+   ],
+   "parent": "strand2",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    75,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "strand3",
+   "shape": "bone",
+   "pivot": [
+    -1.4,
+    6.4,
+    6.2
+   ],
+   "paint": {
+    "ramp": "ir_iron"
+   }
+  },
+  {
+   "id": "vine3",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      0.1270080072538805,
+      -0.0,
+      0.5
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.8689895432655764,
+      -3.1666666666666665,
+      0.38242109364224425
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -1.3965481479522568,
+      -6.333333333333333,
+      0.08498357145012052
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -1.2456169883378738,
+      -9.5,
+      -0.25242305229992856
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.71961277283796,
+      -12.666666666666666,
+      -0.47111117033432903
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.4058000209027349,
+      -15.833333333333334,
+      -0.46822834364539817
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.7308609827205476,
+      -19.0,
+      -0.2451304106703501
+     ],
+     "size": 0.45
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_vine",
+   "parent": "strand3"
+  },
+  {
+   "id": "ivy27",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -1.4689895432655764,
+    -3.1666666666666665,
+    0.6824210936422442
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    25,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy28",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.26898954326557645,
+    -3.1666666666666665,
+    0.6824210936422442
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    95,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy29",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.7965481479522568,
+    -6.333333333333333,
+    0.3849835714501205
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    95,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy30",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -1.845616988337874,
+    -9.5,
+    0.047576947700071426
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    25,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy31",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.6456169883378738,
+    -9.5,
+    0.047576947700071426
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    95,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy32",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.11961277283796001,
+    -12.666666666666666,
+    -0.17111117033432904
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    95,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy33",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -1.005800020902735,
+    -15.833333333333334,
+    -0.16822834364539818
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    25,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy34",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.19419997909726505,
+    -15.833333333333334,
+    -0.16822834364539818
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    95,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy35",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.13086098272054758,
+    -19.0,
+    0.05486958932964989
+   ],
+   "parent": "strand3",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    95,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "strand4",
+   "shape": "bone",
+   "pivot": [
+    -3.6,
+    6.4,
+    1.2
+   ],
+   "paint": {
+    "ramp": "ir_iron"
+   }
+  },
+  {
+   "id": "vine4",
+   "shape": "loft",
+   "rings": [
+    {
+     "at": [
+      -0.6811222457771354,
+      -0.0,
+      0.5
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -1.134207351361899,
+      -1.5,
+      0.38242109364224425
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.9181419614723816,
+      -3.0,
+      0.08498357145012052
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.38563507144506154,
+      -4.5,
+      -0.25242305229992856
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.12887229517166232,
+      -6.0,
+      -0.47111117033432903
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -0.5313615986388588,
+      -7.5,
+      -0.46822834364539817
+     ],
+     "size": 0.45
+    },
+    {
+     "at": [
+      -1.477702117091978,
+      -9.0,
+      -0.2451304106703501
+     ],
+     "size": 0.45
+    }
+   ],
+   "profile": {
+    "sides": 4,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1,
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "plain_vine",
+   "parent": "strand4"
+  },
+  {
+   "id": "ivy36",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -1.7342073513618992,
+    -1.5,
+    0.6824210936422442
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    45,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy37",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.5342073513618991,
+    -1.5,
+    0.6824210936422442
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    115,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy38",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.3181419614723816,
+    -3.0,
+    0.3849835714501205
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    115,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy39",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.9856350714450615,
+    -4.5,
+    0.047576947700071426
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    45,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy40",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.21436492855493844,
+    -4.5,
+    0.047576947700071426
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    115,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy41",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.47112770482833766,
+    -6.0,
+    -0.17111117033432904
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    115,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy42",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -1.1313615986388588,
+    -7.5,
+    -0.16822834364539818
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    45,
+    -30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy43",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    0.06863840136114119,
+    -7.5,
+    -0.16822834364539818
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf:2",
+     "v": "lf_ivyleaf:5",
+     "h": "lf_ivyleaf:6"
+    }
+   },
+   "rotation": [
+    20,
+    115,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  },
+  {
+   "id": "ivy44",
+   "shape": "card",
+   "plane": "xy",
+   "style": "leaf_ivyleaf2",
+   "art": [
+    ".........",
+    "...eee...",
+    "..e#v#e..",
+    "..e#v#e..",
+    "ee##v##ee",
+    "e###v###e",
+    "e##eve##e",
+    ".ee.e.ee.",
+    "....e...."
+   ],
+   "size": [
+    2.2,
+    2.2
+   ],
+   "pivot": [
+    -0.877702117091978,
+    -9.0,
+    0.05486958932964989
+   ],
+   "parent": "strand4",
+   "paint": {
+    "art_key": {
+     "e": "lf_ivyleaf2:2",
+     "v": "lf_ivyleaf2:5",
+     "h": "lf_ivyleaf2:6"
+    }
+   },
+   "rotation": [
+    20,
+    115,
+    30
+   ],
+   "offset": [
+    0,
+    -1.0,
+    0
+   ]
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 5.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "strand",
+     "osc": {
+      "axis": "z",
+      "amp": 2.5,
+      "cycles": 1,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "strand",
+     "osc": {
+      "axis": "x",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.25
+     }
+    },
+    {
+     "part": "strand1",
+     "osc": {
+      "axis": "z",
+      "amp": 2.5,
+      "cycles": 1,
+      "phase": 0.21
+     }
+    },
+    {
+     "part": "strand1",
+     "osc": {
+      "axis": "x",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.38
+     }
+    },
+    {
+     "part": "strand2",
+     "osc": {
+      "axis": "z",
+      "amp": 2.5,
+      "cycles": 1,
+      "phase": 0.42
+     }
+    },
+    {
+     "part": "strand2",
+     "osc": {
+      "axis": "x",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.51
+     }
+    },
+    {
+     "part": "strand3",
+     "osc": {
+      "axis": "z",
+      "amp": 2.5,
+      "cycles": 1,
+      "phase": 0.63
+     }
+    },
+    {
+     "part": "strand3",
+     "osc": {
+      "axis": "x",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.64
+     }
+    },
+    {
+     "part": "strand4",
+     "osc": {
+      "axis": "z",
+      "amp": 2.5,
+      "cycles": 1,
+      "phase": 0.84
+     }
+    },
+    {
+     "part": "strand4",
+     "osc": {
+      "axis": "x",
+      "amp": 1.5,
+      "cycles": 1,
+      "phase": 0.77
+     }
+    }
+   ]
+  }
+ }
+}

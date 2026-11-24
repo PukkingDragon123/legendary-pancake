@@ -20,8 +20,8 @@ const framed = (x: number, y: number, w: number, h: number, art: Painter, frame:
 // ------------------------------------------------------------------ decor
 
 add({
-  id: 'vase_trio', name: 'Glazed Vase Trio', cat: 'decor', price: 160, rarity: 'common', size: [1, 1], small: true,
-  blurb: 'Celadon, cornflower and terracotta, with lavender that never needs water.',
+  id: 'vase_trio', model: 'items/vase_trio.glb', name: 'Painted Vase Trio', cat: 'decor', price: 160, rarity: 'common', size: [1, 1], small: true,
+  blurb: 'A blue-and-white painted vase, a glazed cream jug and a slender brass bud vase. Pip insists they are a family.',
   build: () => {
     const out: BoxSpec[] = [];
     const cel = glaze('#8fbfa4', { dip: '#e8e0c8', dipH: 3, seed: 1 });
@@ -40,8 +40,8 @@ add({
 });
 
 add({
-  id: 'reading_pile', name: 'Bedtime Reading Pile', cat: 'decor', price: 90, rarity: 'common', size: [1, 1], small: true,
-  blurb: 'Five books, one pair of round spectacles and a ribbon marking “just one more chapter”.',
+  id: 'reading_pile', model: 'items/reading_pile.glb', name: 'Bedtime Reading Pile', cat: 'decor', price: 90, rarity: 'common', size: [1, 1], small: true,
+  blurb: 'Five cloth-bound books and a pair of round spectacles, folded on top for “just one more chapter”.',
   build: () => {
     const out: BoxSpec[] = [];
     const cols = ['#3f6fb4', '#b8433a', '#4f8a4a', '#d9a33a', '#7a4fa8'];
@@ -69,7 +69,7 @@ add({
 });
 
 add({
-  id: 'floor_globe', name: 'Explorer’s Floor Globe', cat: 'decor', price: 480, rarity: 'rare', size: [1, 1],
+  id: 'floor_globe', model: 'items/floor_globe.glb', name: 'Explorer’s Floor Globe', cat: 'decor', price: 480, rarity: 'rare', size: [1, 1],
   blurb: 'Turns slowly on its brass meridian. Pip has circled the hollow in ink.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -103,7 +103,7 @@ add({
 });
 
 add({
-  id: 'mantel_clock', name: 'Pendulum Mantel Clock', cat: 'decor', price: 240, rarity: 'uncommon', size: [1, 1], small: true,
+  id: 'mantel_clock', model: 'items/mantel_clock.glb', name: 'Walnut Mantel Clock', cat: 'decor', price: 240, rarity: 'uncommon', size: [1, 1], small: true,
   blurb: 'Tocks softly. Strikes nine for bedtime and absolutely nothing before ten in the morning.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -131,7 +131,7 @@ add({
 });
 
 add({
-  id: 'record_player', name: 'Suitcase Record Player', cat: 'decor', price: 380, rarity: 'rare', size: [1, 1], small: true,
+  id: 'record_player', model: 'items/record_player.glb', name: 'Suitcase Record Player', cat: 'decor', price: 380, rarity: 'rare', size: [1, 1], small: true,
   blurb: 'Plays crackly lullabies at 33 and a third. The record really spins.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -164,8 +164,8 @@ add({
 });
 
 add({
-  id: 'rose_tea_set', name: 'Rose Tea Service', cat: 'decor', price: 210, rarity: 'uncommon', size: [1, 1], small: true,
-  blurb: 'A rosebud teapot, two cups and shortbread. Chamomile is already steeping.',
+  id: 'rose_tea_set', model: 'items/rose_tea_set.glb', name: 'Rose Tea Service', cat: 'decor', price: 210, rarity: 'uncommon', size: [1, 1], small: true,
+  blurb: 'A rosebud teapot, two cups on saucers and the sugar bowl on its plate. Chamomile is already steeping.',
   build: () => {
     const out: BoxSpec[] = [];
     const china: Painter = (t) => {
@@ -192,7 +192,7 @@ add({
 });
 
 add({
-  id: 'ship_bottle', name: 'Ship in a Bottle', cat: 'decor', price: 300, rarity: 'rare', size: [1, 1], small: true,
+  id: 'ship_bottle', model: 'items/ship_bottle.glb', name: 'Ship in a Bottle', cat: 'decor', price: 300, rarity: 'rare', size: [1, 1], small: true,
   blurb: 'The good ship Hootenanny, sailing a painted sea on the windowsill.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -213,7 +213,7 @@ add({
 });
 
 add({
-  id: 'mint_typewriter', name: 'Mint Typewriter', cat: 'decor', price: 330, rarity: 'uncommon', size: [1, 1], small: true,
+  id: 'mint_typewriter', model: 'items/mint_typewriter.glb', name: 'Mint Typewriter', cat: 'decor', price: 330, rarity: 'uncommon', size: [1, 1], small: true,
   blurb: 'For dream journals. Clacks quietly, dings politely at the end of each line.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -257,7 +257,7 @@ const FLOWER = ['cccccc', 'ccppcc', 'cpyypc', 'ccppcc', 'cccgcc', 'ccgggc', 'ccc
 const FLOWER_PAL = { c: 0xf4ead0, p: 0xe8708a, y: 0xf6d04a, g: 0x5f9a52 };
 
 add({
-  id: 'photo_frames', name: 'Family Picture Wall', cat: 'decor', price: 220, rarity: 'uncommon', size: [2, 1], wall: true,
+  id: 'photo_frames', model: 'items/photo_frames.glb', name: 'Family Picture Wall', cat: 'decor', price: 220, rarity: 'uncommon', size: [2, 1], wall: true,
   blurb: 'A portrait of Pip on a branch, a sunset over the far hills and one pressed rosebud.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -271,7 +271,7 @@ add({
 });
 
 add({
-  id: 'sunburst_mirror', name: 'Sunburst Mirror', cat: 'decor', price: 360, rarity: 'rare', size: [2, 1], wall: true,
+  id: 'sunburst_mirror', model: 'items/sunburst_mirror.glb', name: 'Sunburst Mirror', cat: 'decor', price: 360, rarity: 'rare', size: [2, 1], wall: true,
   blurb: 'Gilded rays around a round looking-glass. Mornings look brighter in it, somehow.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -295,7 +295,7 @@ add({
 });
 
 add({
-  id: 'owl_tapestry', name: 'Owl Crest Tapestry', cat: 'decor', price: 280, rarity: 'uncommon', size: [1, 1], wall: true,
+  id: 'owl_tapestry', model: 'items/owl_tapestry.glb', name: 'Owl Crest Tapestry', cat: 'decor', price: 280, rarity: 'uncommon', size: [1, 1], wall: true,
   blurb: 'Hand-stitched with the hollow’s crest: an owl, a moon and seven sleepy stars.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -333,7 +333,7 @@ add({
 });
 
 add({
-  id: 'patch_bunting', name: 'Patchwork Bunting', cat: 'decor', price: 110, rarity: 'common', size: [3, 1], wall: true,
+  id: 'patch_bunting', model: 'items/patch_bunting.glb', name: 'Patchwork Bunting', cat: 'decor', price: 110, rarity: 'common', size: [3, 1], wall: true,
   blurb: 'Nine little flags cut from old pyjamas. Every day is a small celebration.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -353,7 +353,7 @@ add({
 // ------------------------------------------------------------------ wall
 
 add({
-  id: 'bracket_shelf', name: 'Bracket Shelf', cat: 'wall', price: 120, rarity: 'common', size: [2, 1], wall: true, surface: 10,
+  id: 'bracket_shelf', model: 'items/bracket_shelf.glb', name: 'Bracket Shelf', cat: 'wall', price: 120, rarity: 'common', size: [2, 1], wall: true, surface: 10,
   blurb: 'A plank on two curly iron brackets, with room in the middle for your favourite things.',
   build: () => {
     const out: BoxSpec[] = [box(0, 8.6, 2.6, 26, 1.4, 6.4, joinery(WD.oak, { axis: 'x', plank: 3 }))];
@@ -366,7 +366,7 @@ add({
 });
 
 add({
-  id: 'chalet_cuckoo', name: 'Chalet Cuckoo Clock', cat: 'wall', price: 520, rarity: 'rare', size: [1, 1], wall: true,
+  id: 'chalet_cuckoo', model: 'items/chalet_cuckoo.glb', name: 'Chalet Cuckoo Clock', cat: 'wall', price: 520, rarity: 'rare', size: [1, 1], wall: true,
   blurb: 'Carved leaves, a pinecone weight on each chain and a wooden owlet who hoots the hour.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -405,7 +405,7 @@ add({
 });
 
 add({
-  id: 'hollow_map', name: 'Map of the Hollow', cat: 'wall', price: 260, rarity: 'uncommon', size: [2, 1], wall: true,
+  id: 'hollow_map', model: 'items/hollow_map.glb', name: 'Map of the Hollow', cat: 'wall', price: 260, rarity: 'uncommon', size: [2, 1], wall: true,
   blurb: 'Every path Pip has flown, inked on parchment. X marks the best blueberry bush.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -438,7 +438,7 @@ add({
 });
 
 add({
-  id: 'dream_catcher', name: 'Moonthread Dream Catcher', cat: 'wall', price: 240, rarity: 'uncommon', size: [1, 1], wall: true,
+  id: 'dream_catcher', model: 'items/dream_catcher.glb', name: 'Moonthread Dream Catcher', cat: 'wall', price: 240, rarity: 'uncommon', size: [1, 1], wall: true,
   blurb: 'Bad dreams get tangled in the web; good ones slide down the feathers to you.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -470,7 +470,7 @@ add({
 });
 
 add({
-  id: 'star_garland', name: 'Paper Star Garland', cat: 'wall', price: 180, rarity: 'uncommon', size: [3, 1], wall: true,
+  id: 'star_garland', model: 'items/star_garland.glb', name: 'Paper Star Garland', cat: 'wall', price: 180, rarity: 'uncommon', size: [3, 1], wall: true,
   blurb: 'Folded paper stars on a string; the golden ones glow when the lamps go down.',
   light: { x: 0, y: -8, z: 3, color: 0xffe2a0, power: 0.9 },
   build: () => {
@@ -489,7 +489,7 @@ add({
 });
 
 add({
-  id: 'hat_rack', name: 'Peg Rail with Hats', cat: 'wall', price: 190, rarity: 'common', size: [2, 1], wall: true,
+  id: 'hat_rack', model: 'items/hat_rack.glb', name: 'Peg Rail with Hats', cat: 'wall', price: 190, rarity: 'common', size: [2, 1], wall: true,
   blurb: 'Pip’s nightcap, a sunhat for picnics and a scarf that is mostly holes and love.',
   build: () => {
     const out: BoxSpec[] = [box(0, 0, 0, 26, 3, 1, joinery('#6f9a8a', { axis: 'x' })), box(0, 3, 0.2, 27, 0.8, 1.6, wx(WD.light, 0))];

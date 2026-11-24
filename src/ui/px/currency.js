@@ -1,10 +1,30 @@
-// Hoot Hollow's money, drawn with the BME sprite kit: golden ACORNS (the everyday currency; the
-// save field is still `coins` and the sprite keeps its old name `owlcoin`), glowing MOON GEMS
-// (premium), and the piles of acorns sold in the Snow Queen's boutique.
+// Hoot Hollow's money, drawn with the BME sprite kit in the calm "Moss & Moonlight" palette: golden
+// ACORNS with a dark oak cap (the everyday currency; the save field is still `coins` and the sprite
+// keeps its old name `owlcoin`), glowing lilac MOON GEMS with a lamp-gold crescent inside (premium),
+// and the piles of acorns sold in the Snow Queen's boutique. Halos are stepped pixel rings.
 // OWNED BY THE SHOP BUILDER. Others use the names: owlcoin, moongem (+ `_f0`..`_f7` idle frames),
 // coin_pouch, coin_sack, coin_chest, coin_vault (+ `coin_vault_f0`..`_f3`), acorn_big (the large
 // "artifact" acorn for reward moments) and gem_big.
-import { draw, Grid, render } from './sprites.js';
+import { draw, Grid, render, RAMPS } from './sprites.js';
+
+// calm-palette ramps (dark -> light) for the money; registered here so the HUD can draw them at boot
+Object.assign(RAMPS, {
+  nacorn: ['#5a4126', '#8e6a3a', '#b98c4c', '#dcb072', '#ecca8f', '#faf0d2'],
+  ngold: ['#6b5532', '#a3844a', '#c8a764', '#e6c987', '#f4e2b0', '#fffaee'],
+  ncap: ['#2f2620', '#4a392b', '#5b4a3c', '#6f553d', '#8a6a4a', '#a8865e'],
+  nwood: ['#2f2620', '#4a392b', '#6f553d', '#9c7a56', '#bf9d74', '#d8bf98'],
+  nfrost: ['#617f8c', '#86a9b0', '#aec8cc', '#d3e0dc', '#eef3ef', '#ffffff'],
+  nlake: ['#1e2a33', '#3a5160', '#5d7b88', '#86a9b0', '#aec8cc', '#dfe9ea'],
+  nlilac: ['#4a4458', '#6a6280', '#8d84a6', '#b4a9c9', '#d3cce0', '#eeeaf4'],
+  nplum: ['#211a24', '#3f3144', '#55405a', '#6e5266', '#93798f', '#c4b2c2'],
+  nlamp: ['#8a6532', '#c59a52', '#dcb072', '#f1d39a', '#f9e9c4', '#fffaee'],
+  nkraft: ['#4a3826', '#7d5f40', '#96744f', '#b99a6e', '#d1b48e', '#e6d3b4'],
+  nberry: ['#3a2228', '#5e3a44', '#7d4b54', '#9e5f66', '#c08a88', '#e6c2b8'],
+  nrose: ['#7d4b54', '#a8706e', '#c48e88', '#d9aca4', '#e8c4bc', '#f6e4dc'],
+  nsage: ['#24352a', '#3f5a3b', '#557343', '#86a06a', '#a7b788', '#d4dfb8'],
+  nbrass: ['#3d3229', '#6b5532', '#8e7440', '#c8a764', '#e0c987', '#f4ead0'],
+});
+const LAMP = [241, 211, 154], LILAC = [198, 189, 214];
 
 // ------------------------------------------------------------------ post-processing helpers
 
@@ -35,7 +55,7 @@ function lift(p, x, y, k, col = WHITE) {
   p.put(x, y, [c[0] + (col[0] - c[0]) * k, c[1] + (col[1] - c[1]) * k, c[2] + (col[2] - c[2]) * k].map(Math.round), c[3]);
 }
 /** A four-point twinkle: bright core, softer arms. size 0 = a single pixel, 1..3 = arm length. */
-function twinkle(p, cx, cy, size, core = [255, 255, 255], arm = [255, 240, 170]) {
+function twinkle(p, cx, cy, size, core = [255, 250, 238], arm = [249, 233, 196]) {
   p.over(cx, cy, core, 255);
   for (let k = 1; k <= size; k++) {
     const a = k === size ? 150 : 230;
@@ -47,9 +67,9 @@ function twinkle(p, cx, cy, size, core = [255, 255, 255], arm = [255, 240, 170])
 // ------------------------------------------------------------------ the acorn
 
 const ACORN_KEY = {
-  N: 'honey.R@nut', n: 'honey:2', t: 'syrup:2', s: 'honey:5',
-  C: 'cinnamon.r@cap', c: 'wood:1', h: 'cinnamon:5', m: 'cinnamon:4', r: 'wood.y@rim', q: 'wood:4',
-  S: 'dwood.x@stem', u: 'dwood:4',
+  N: 'nacorn.R@nut', n: 'nacorn:2', t: 'nacorn:1', s: 'nacorn:5',
+  C: 'ncap.r@cap', c: 'ncap:1', h: 'ncap:5', m: 'ncap:4', r: 'nwood.y@rim', q: 'nwood:4',
+  S: 'ncap.x@stem', u: 'ncap:4',
 };
 /**
  * A detailed acorn on a W x H grid: glossy golden nut with a pointed tip, a textured cap of
@@ -107,11 +127,11 @@ function acornFrame(f, size = 24) {
       if (d < 0.6 * k + 0.4) lift(p, x, y, 0.62); else if (d < 1.6 * k) lift(p, x, y, 0.28);
     }
   }
-  halo(p, [255, 196, 84], [86, 96, 108, 118, 108, 96, 86, 78][f], [34, 40, 46, 52, 46, 40, 34, 30][f], size > 30 ? 18 : 0);
+  halo(p, LAMP, [96, 104, 116, 128, 116, 104, 96, 90][f], [40, 46, 52, 60, 52, 46, 40, 36][f], size > 30 ? 20 : 0);
   // sparkles
   const sp = [[0, 0], [0, 0], [0, 0], [1, 0], [2, 0], [3, 0], [1, 1], [0, 1]][f];
   if (sp[0]) twinkle(p, Math.round(19 * k), Math.round(5 * k + dy), sp[0] - (sp[0] === 3 ? 1 : 0) + (k > 1.4 ? 1 : 0));
-  if (f === 6 || f === 7 || f === 0) twinkle(p, Math.round(4.5 * k), Math.round(18 * k), f === 7 ? 1 : 0, [255, 255, 240], [255, 220, 140]);
+  if (f === 6 || f === 7 || f === 0) twinkle(p, Math.round(4.5 * k), Math.round(18 * k), f === 7 ? 1 : 0, [255, 250, 238], [241, 211, 154]);
   return p;
 }
 for (let f = 0; f < 8; f++) draw('owlcoin_f' + f, () => acornFrame(f));
@@ -120,14 +140,14 @@ draw('owlcoin', () => acornFrame(0));
 for (let f = 0; f < 8; f++) draw('acorn_big_f' + f, () => acornFrame(f, 40));
 draw('acorn_big', () => acornFrame(0, 40));
 // a plain small acorn for showers and price tags
-draw('acorn_tiny', () => halo(render(acornGrid(new Grid(12, 13), 6, 7.2, 3.4, { gloss: true }), ACORN_KEY), [255, 196, 84], 60, 0));
+draw('acorn_tiny', () => halo(render(acornGrid(new Grid(12, 13), 6, 7.2, 3.4, { gloss: true }), ACORN_KEY), LAMP, 70, 0));
 
 // ------------------------------------------------------------------ the moon gem
 
 const GEM_KEY = {
-  a: 'ice:5', b: 'ice:4', c: 'ice:3', d: 'sky:3', e: 'sky:2',
-  p: 'lilac:5', q: 'lilac:4', r: 'lilac:3', s: 'purple:3', t: 'purple:2', u: 'purple:1',
-  M: 'yellow:5', m: 'yellow:4', w: '#ffffff', g: 'ice:5!',
+  a: 'nfrost:5', b: 'nfrost:4', c: 'nlake:4', d: 'nlake:3', e: 'nlake:2',
+  p: 'nlilac:5', q: 'nlilac:4', r: 'nlilac:3', s: 'nplum:4', t: 'nplum:3', u: 'nplum:2',
+  M: 'nlamp:5', m: 'nlamp:4', w: '#fffaee', g: 'nfrost:5!',
 };
 /** A faceted crystal: ice-blue crown, violet pavilion, a crescent moon glowing inside. */
 function gemGrid(W, H, k = 1, ox = 0, oy = 0) {
@@ -169,37 +189,37 @@ function gemFrame(f, size = 24) {
   const mx = 11.6 * k * 0.92 + size * 0.04, my = 13.2 * k * 0.92 + size * 0.02 + 0.5;
   for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
     const d = Math.hypot(x + 0.5 - mx, y + 0.5 - my) / k;
-    if (d < 7 && 'pqrstab'.includes(g.get(x, y))) lift(p, x, y, pulse * (1 - d / 7), [255, 250, 220]);
+    if (d < 7 && 'pqrstab'.includes(g.get(x, y))) lift(p, x, y, pulse * (d < 3.5 ? 1 : 0.5), [255, 246, 222]);
   }
   // a facet flash travelling across the crown
   const fx = [8, 10, 12, 14, 16, -1, -1, -1][f];
   if (fx > 0) for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (Math.abs(x - fx * k) < 0.8 * k && 'abcd'.includes(g.get(x, y))) lift(p, x, y, 0.55);
   // glow halo, pulsing
-  halo(p, [176, 150, 255], [70, 92, 112, 128, 112, 92, 70, 60][f], [26, 38, 50, 60, 50, 38, 26, 20][f], size > 30 ? [10, 16, 22, 28, 22, 16, 10, 8][f] : 0);
+  halo(p, LILAC, [80, 96, 112, 128, 112, 96, 80, 70][f], [32, 42, 52, 60, 52, 42, 32, 28][f], size > 30 ? [12, 18, 24, 30, 24, 18, 12, 10][f] : 0);
   // a twinkle circling the gem, and a smaller one opposite
   const ang = (f / 8) * Math.PI * 2 - Math.PI / 2, R = 10.4 * k;
   const cx = size / 2, cy = size / 2;
-  twinkle(p, Math.round(cx + Math.cos(ang) * R), Math.round(cy + Math.sin(ang) * R), [2, 1, 2, 1, 2, 1, 2, 1][f] + (k > 1.4 ? 1 : 0), [255, 255, 255], [214, 226, 255]);
-  if (f % 2 === 0) twinkle(p, Math.round(cx - Math.cos(ang) * R * 0.85), Math.round(cy - Math.sin(ang) * R * 0.85), 0, [240, 230, 255], [200, 180, 255]);
+  twinkle(p, Math.round(cx + Math.cos(ang) * R), Math.round(cy + Math.sin(ang) * R), [2, 1, 2, 1, 2, 1, 2, 1][f] + (k > 1.4 ? 1 : 0), [255, 250, 238], [223, 233, 234]);
+  if (f % 2 === 0) twinkle(p, Math.round(cx - Math.cos(ang) * R * 0.85), Math.round(cy - Math.sin(ang) * R * 0.85), 0, [238, 234, 244], [211, 204, 224]);
   return p;
 }
 for (let f = 0; f < 8; f++) draw('moongem_f' + f, () => gemFrame(f));
 draw('moongem', () => gemFrame(0));
 for (let f = 0; f < 8; f++) draw('gem_big_f' + f, () => gemFrame(f, 40));
 draw('gem_big', () => gemFrame(0, 40));
-draw('gem_tiny', () => halo(render(gemGrid(12, 12, 0.48, 0.4, 0.4), GEM_KEY), [176, 150, 255], 70, 0));
+draw('gem_tiny', () => halo(render(gemGrid(12, 12, 0.48, 0.4, 0.4), GEM_KEY), LILAC, 76, 0));
 
 // ------------------------------------------------------------------ piles of acorns
 
 // small acorns for heaps: alternate shading groups so neighbours read as separate nuts
 const PILE_KEY = {
   ...ACORN_KEY,
-  N: 'honey.R@n0', O: 'honey.R@n1', P: 'honey.R@n2',
-  C: 'cinnamon.r@c0', D: 'cinnamon.r@c1', E: 'cinnamon.r@c2',
-  G: 'gold.R@g0', H: 'gold.R@g1', I: 'gold.R@g2',
-  B: 'straw.r@sack', b: 'straw:2', v: 'straw:4', y: 'red.x@rope', Y: 'red:4',
-  W: 'lwood.y@wick', w: 'lwood:2', x: 'lwood:5', L: 'leaf.r@leaf', l: 'leaf:4', j: 'leaf:1',
-  V: 'lilac.R@gem1', U: 'sky.R@gem2', T: 'rose.R@gem3', Q: 'mint.R@gem4',
+  N: 'nacorn.R@n0', O: 'nacorn.R@n1', P: 'nacorn.R@n2',
+  C: 'ncap.r@c0', D: 'ncap.r@c1', E: 'ncap.r@c2',
+  G: 'ngold.R@g0', H: 'ngold.R@g1', I: 'ngold.R@g2',
+  B: 'nkraft.r@sack', b: 'nkraft:2', v: 'nkraft:4', y: 'nberry.x@rope', Y: 'nberry:4',
+  W: 'nwood.y@wick', w: 'nwood:2', x: 'nwood:5', L: 'nsage.r@leaf', l: 'nsage:4', j: 'nsage:1',
+  V: 'nlilac.R@gem1', U: 'nlake.R@gem2', T: 'nrose.R@gem3', Q: 'nsage.R@gem4',
 };
 const NUTS = ['N', 'O', 'P'], CAPS = ['C', 'D', 'E'], GOLDS = ['G', 'H', 'I'];
 let nutN = 0;
@@ -234,7 +254,7 @@ function handful(withGlint = 0) {
   nut(g, 16, 8, { r: 3.4 });
   const p = render(g, PILE_KEY);
   if (withGlint) twinkle(p, 21, 5, 2);
-  return halo(p, [255, 196, 84], 48, 16);
+  return halo(p, LAMP, 56, 20);
 }
 draw('coin_pouch', () => handful(1));
 
@@ -257,7 +277,7 @@ draw('coin_sack', () => {
   nut(g, 27, 26, { tilt: 2 }); nut(g, 4, 28, { r: 2.7, tilt: -2 }); nut(g, 25, 29, { r: 2.6 });
   const p = render(g, PILE_KEY);
   twinkle(p, 18, 2, 1);
-  return halo(p, [255, 196, 84], 44, 14);
+  return halo(p, LAMP, 52, 18);
 });
 
 // coin_chest: a woven basket heaped with acorns
@@ -279,7 +299,7 @@ draw('coin_chest', () => {
   g.rect(5, 29, 23, 1, 'w');
   const p = render(g, PILE_KEY);
   twinkle(p, 15, 2, 2);
-  return halo(p, [255, 196, 84], 50, 18);
+  return halo(p, LAMP, 58, 22);
 });
 
 // coin_vault: a mountain of golden acorns with gems hiding in it
@@ -298,7 +318,7 @@ function mountain(f) {
   const [sx, sy, ss] = spots[f % 4];
   twinkle(p, sx, sy, ss);
   twinkle(p, spots[(f + 2) % 4][0], spots[(f + 2) % 4][1], 0);
-  return halo(p, [255, 205, 96], [70, 84, 96, 84][f % 4], [26, 32, 38, 32][f % 4]);
+  return halo(p, LAMP, [78, 92, 104, 92][f % 4], [30, 38, 44, 38][f % 4]);
 }
 for (let f = 0; f < 4; f++) draw('coin_vault_f' + f, () => mountain(f));
 draw('coin_vault', () => mountain(0));
@@ -323,8 +343,8 @@ function gemPack(n) {
     put(0.42, 11, 8); put(0.32, 1, 12); put(0.32, 21, 12);
     for (let x = 5; x < 28; x += 5) g.set(x, 28, 'w');
   }
-  const p = render(g, { ...GEM_KEY, m: 'gold.r@crown', M: 'gold.y@band', o: 'stone.r@rock', n: 'stone:2', O: 'plum:1' });
-  twinkle(p, 25, 5, 2, [255, 255, 255], [214, 226, 255]);
-  return halo(p, [176, 150, 255], 64, 24);
+  const p = render(g, { ...GEM_KEY, m: 'nbrass.r@crown', M: 'nbrass.y@band', o: 'stone.r@rock', n: 'stone:2', O: 'nplum:1' });
+  twinkle(p, 25, 5, 2, [255, 250, 238], [223, 233, 234]);
+  return halo(p, LILAC, 70, 28);
 }
 for (const n of [1, 2, 3, 4]) draw('gem_pack_' + n, () => gemPack(n));

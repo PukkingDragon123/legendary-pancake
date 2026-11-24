@@ -7,6 +7,8 @@ import { fbm, hash } from '../../gfx/noise.ts';
 import type { ItemDef } from '../furniture.ts';
 import type { Finish } from '../finishes.ts';
 import { ball, chain, disc, fab, fluff, glassP, joinery, MET, ownMats, paper, part, phase, pixBoxes, PX, ring8, setBright, WD, wx, wy, wz } from './kit.ts';
+import { cells, fb, fl, grainT, h2, mod, paperT, strokesT, tn } from './finishes.ts';
+import { P, mixc } from '../../gfx/palette.ts';
 
 const SERIES = 'starfall';
 const items: ItemDef[] = [];
@@ -30,7 +32,7 @@ const starry = (base = '#2a2a6a', o: { tuft?: number; seed?: number } = {}): Pai
 // ------------------------------------------------------------------ star projector
 
 add({
-  id: 'star_projector', name: 'Orrery Star Projector', cat: 'seasonal', rarity: 'epic', size: [1, 1], small: true,
+  id: 'star_projector', model: 'items/star_projector.glb', name: 'Orrery Star Projector', cat: 'seasonal', rarity: 'epic', size: [1, 1], small: true,
   blurb: 'A pierced brass dome turns slowly over a candle-bright core, sprinkling the walls with constellations.',
   light: { x: 0, y: 12, z: 0, color: 0xc8b0ff, power: 2 },
   build: () => {
@@ -86,7 +88,7 @@ function crescentRows(): string[] {
 }
 
 add({
-  id: 'moon_bed', name: 'Crescent Moon Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
+  id: 'moon_bed', model: 'items/moon_bed.glb', name: 'Crescent Moon Bed', cat: 'seasonal', rarity: 'epic', size: [3, 2],
   blurb: 'Curl up in the curve of the moon under a quilt of stars, with three wishes dangling from the tip.',
   sleep: { x: 2, y: 14, z: 0, rot: 90 },
   light: { x: -14, y: 18, z: 4, color: 0xfff0b8, power: 1 },
@@ -126,7 +128,7 @@ add({
 // ------------------------------------------------------------------ brass telescope
 
 add({
-  id: 'telescope_brass', name: 'Stargazer’s Brass Telescope', cat: 'seasonal', rarity: 'epic', size: [2, 2],
+  id: 'telescope_brass', model: 'items/telescope_brass.glb', name: 'Stargazer’s Brass Telescope', cat: 'seasonal', rarity: 'epic', size: [2, 2],
   blurb: 'Polished brass, leather grips and a finder scope. It drifts slowly across the sky, looking for wishes.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -163,7 +165,7 @@ add({
 // ------------------------------------------------------------------ star jar
 
 add({
-  id: 'star_jar', name: 'Jar of Fallen Stars', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
+  id: 'star_jar', model: 'items/star_jar.glb', name: 'Jar of Fallen Stars', cat: 'seasonal', rarity: 'rare', size: [1, 1], small: true,
   blurb: 'Collected one by one from the meadow after the meteor shower. They hum very quietly.',
   light: { x: 0, y: 6, z: 0, color: 0xffe9a0, power: 1.4 },
   build: () => {
@@ -200,7 +202,7 @@ const PLANETS: { r: number; c: string; arm: number; ang: number; drop: number; r
 ];
 
 add({
-  id: 'planet_mobile', name: 'Planetarium Mobile', cat: 'seasonal', rarity: 'rare', size: [1, 1], wall: true,
+  id: 'planet_mobile', model: 'items/planet_mobile.glb', name: 'Planetarium Mobile', cat: 'seasonal', rarity: 'rare', size: [1, 1], wall: true,
   blurb: 'A little sun and four planets on brass arms, turning slowly from a curly wall bracket.',
   light: { x: 0, y: -4, z: 12, color: 0xffc86a, power: 0.8 },
   build: () => {
@@ -229,7 +231,7 @@ add({
 // ------------------------------------------------------------------ cloud pouf
 
 add({
-  id: 'cloud_pouf', name: 'Sleepy Cloud Pouf', cat: 'seasonal', rarity: 'rare', size: [2, 1],
+  id: 'cloud_pouf', model: 'items/cloud_pouf.glb', name: 'Sleepy Cloud Pouf', cat: 'seasonal', rarity: 'rare', size: [2, 1],
   blurb: 'A plump little cloud that drifted in and dozed off. Very comfortable. Do not wake it.',
   sit: [{ x: 0, y: 11, z: 1 }],
   build: () => {
@@ -250,7 +252,7 @@ add({
 // ------------------------------------------------------------------ comet rug
 
 add({
-  id: 'comet_rug', name: 'Comet Rug', cat: 'seasonal', rarity: 'rare', size: [3, 2], rug: true, flatItem: true,
+  id: 'comet_rug', model: 'items/comet_rug.glb', name: 'Comet Rug', cat: 'seasonal', rarity: 'rare', size: [3, 2], rug: true, flatItem: true,
   blurb: 'A golden star streaking across the floor with a long, soft tail of dusk colours.',
   build: () => {
     const head = R('#f6c84a'), cols = ['#f6e0a0', '#f2a0c8', '#b88ae8', '#6a6ad8', '#3a3a8a'].map((c) => R(c));
@@ -278,38 +280,39 @@ export const STARFALL_ITEMS: ItemDef[] = items;
 // ------------------------------------------------------------------ finishes
 
 const hsh = (x: number, y: number, s = 0) => hash(Math.floor(x), Math.floor(y), 0, s);
-const NAVY = R('#1e2058'), INDIGO = R('#2e2a78'), GOLDR = R('#f2c84a'), TILE = R('#24306a');
 
 export const STARFALL_FINISHES: Finish[] = [
   {
     id: 'wall_night_sky', name: 'Midnight Sky Paper', kind: 'wallpaper', price: 0, rarity: 'epic', series: SERIES, noStore: true,
-    blurb: 'Deep indigo fading to midnight, scattered with stars, soft nebulae and the odd crescent moon.',
-    swatch: ['#f6e6a8', '#2e2a78', '#141640'],
+    blurb: 'Brushy dusk-to-midnight paper scattered with lamp-gold stars, soft lilac nebulae and the odd crescent moon.',
+    swatch: ['#f1d39a', '#46596a', '#1b222d'],
     paint: (u, v) => {
-      // a crescent moon every so often
-      const mu = ((u % 96) + 96) % 96 - 70, mv = v - 46;
-      if (Math.hypot(mu, mv) < 5 && Math.hypot(mu - 2, mv + 1.4) > 4.4) return tone(R('#f6e6a8'), 0.6);
-      const cx = Math.floor(u / 6), cy = Math.floor(v / 6), h = hsh(cx, cy, 3);
-      const sx = cx * 6 + 1 + Math.floor(hsh(cx, cy, 4) * 4), sy = cy * 6 + 1 + Math.floor(hsh(cx, cy, 5) * 4);
-      const fu = Math.floor(u), fv = Math.floor(v);
-      if (h > 0.55 && fu === sx && fv === sy) return h > 0.9 ? 0xffffff : h > 0.75 ? 0xfff2c0 : 0xc8c8ff;
-      if (h > 0.9 && ((fu === sx && Math.abs(fv - sy) === 1) || (fv === sy && Math.abs(fu - sx) === 1))) return 0xd8d0ff;
-      const neb = fbm(u / 18, v / 14, 0.5, 7);
-      const L = (v / 64) * 1.4 - 1.2 + (neb > 0.6 ? (neb - 0.6) * 4 : 0) + (hsh(u, v, 2) - 0.5) * 0.25;
-      return tone(neb > 0.62 ? INDIGO : NAVY, L);
+      const sky = strokesT(u, v, 91, 'u', 18, 3) + (v / 64) * 0.6 - 0.55;
+      const neb = fb(u, v, 16, 92, 3);
+      const mu = mod(u, 96) - 70, mv = v - 46;
+      if (Math.hypot(mu, mv) < 4.6 && Math.hypot(mu - 1.8, mv + 1.2) > 4.1) return tn(P.lamp, Math.hypot(mu, mv) > 4 ? -0.3 : 0.1);
+      const c = cells(u, v, 5, 93, 0.9);
+      if (h2(c.id, 0, 94) > 0.55) {
+        const dx = Math.abs(u - c.cx), dy = Math.abs(v - c.cy), big = h2(c.id, 1, 94) > 0.85;
+        if (dx < 0.5 && dy < 0.5) return tn(h2(c.id, 2, 94) > 0.6 ? P.lamp : P.frost, 0.3);
+        if (big && ((dx < 0.4 && dy < 1.6) || (dy < 0.4 && dx < 1.6))) return tn(P.lamp, -0.2);
+      }
+      if (neb > 0.6) return tn(neb > 0.68 ? P.plum : mixc(P.night, P.plum, 0.5), sky + (neb - 0.6) * 2);
+      return tn(neb < 0.4 ? P.deepNight : P.night, sky + (h2(u * 2, v * 2, 95) - 0.5) * 0.15);
     },
   },
   {
     id: 'floor_starry_tiles', name: 'Starry Tiles', kind: 'flooring', price: 0, rarity: 'rare', series: SERIES, noStore: true,
-    blurb: 'Glossy midnight-blue tiles with a little gold star inlaid at every corner.',
-    swatch: ['#f2c84a', '#24306a', '#141a40'],
+    blurb: 'Glazed midnight tiles with a little brass star inlaid at every corner and a soft sheen on each.',
+    swatch: ['#c8a764', '#46596a', '#27313f'],
     paint: (u, v) => {
-      const tu = ((u % 12) + 12) % 12, tv = ((v % 12) + 12) % 12;
-      const cu = Math.min(tu, 12 - tu), cv = Math.min(tv, 12 - tv);
-      if ((cu < 0.6 && cv < 2.2) || (cv < 0.6 && cu < 2.2) || (cu < 1.2 && cv < 1.2)) return tone(GOLDR, cu + cv < 1 ? 1 : 0.2);
-      if (tu < 0.6 || tv < 0.6) return tone(R('#141a40'), 0);
-      const gloss = Math.abs((tu - tv) - 3) < 0.8 ? 0.7 : 0;
-      return tone(TILE, (hsh(Math.floor(u / 12), Math.floor(v / 12), 2) - 0.5) * 0.6 + gloss + (hsh(u, v, 6) > 0.985 ? 1.4 : 0));
+      const T = 12, tu = mod(u, T), tv = mod(v, T), i = fl(u / T), j = fl(v / T);
+      const cu = Math.min(tu, T - tu), cv = Math.min(tv, T - tv);
+      if ((cu < 0.5 && cv < 2.2) || (cv < 0.5 && cu < 2.2) || (cu < 1.1 && cv < 1.1)) return tn(P.brass, cu + cv < 0.9 ? 0.5 : 0);
+      if (tu < 0.45 || tv < 0.45) return tn(P.deepNight, 0);
+      const pool = Math.hypot(tu - T / 2, tv - T / 2) / (T / 2);
+      const gloss = Math.abs(tu - tv - 2) < 0.6 && tu > 3 && tu < 9 ? 0.45 : 0;
+      return tn(h2(i, j, 96) > 0.5 ? P.slate : mixc(P.slate, P.night, 0.5), (h2(i, j, 97) - 0.5) * 0.35 - pool * 0.3 + gloss + (fb(u, v, 2, 98, 2) - 0.5) * 0.2);
     },
   },
 ];

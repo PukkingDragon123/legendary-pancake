@@ -13,12 +13,15 @@ import { SPECIAL_SKIN } from '../../owl/skins.ts';
 import { Px } from '../icons.tsx';
 import { haptic, Rolling, toast, useTick } from '../kit.tsx';
 import { panel } from '../state.ts';
+import { burstURL, shootURL } from './art.js';
 import { AnimPx, rewardMoment } from './moment.tsx';
-import { bannerArt, bigOwl, prizeArt, skinLook, skyArt } from './paint.ts';
+import { bannerArt, bigOwl, prizeArt, seriesColors, skinLook, skyArt } from './paint.ts';
 
 const fmt = (n: number) => n.toLocaleString('en-US');
 const isSide = () => innerWidth >= innerHeight * 1.05 && innerWidth >= 640;
 const STAR_NAME: Record<Stars, string> = { 3: 'shop_star3', 4: 'shop_star4', 5: 'shop_star5' };
+/** shooting-star colours per rarity: lake (3), lilac (4), lamp-gold (5) */
+const STAR_COL: Record<Stars, string> = { 3: '#aec8cc', 4: '#c6bdd6', 5: '#f1d39a' };
 /** dev only: keep the wish cinematic on its current phase (for screenshots) */
 const debug = { hold: false };
 
@@ -52,7 +55,7 @@ export function Gacha(p: { seriesId: string; onClose: () => void; onBuyGems: () 
   const sv = save.value, pity = pityOf(sv, s.id), on = seriesActive(s);
   const f5 = s.pool.find((e) => e.stars === 5 && e.featured) ?? s.pool.find((e) => e.stars === 5)!;
   const f4 = s.pool.filter((e) => e.stars === 4 && e.featured);
-  const bg = bannerArt(s, side ? 320 : 180, side ? 180 : 320);
+  const bg = bannerArt(s, side ? 320 : 180, side ? 180 : 320), sc = seriesColors(s);
 
   const close = () => { sound.play('ui_close', { volume: 0.5 }); setClosing(true); setTimeout(p.onClose, 320); };
   function doWish(n: 1 | 10, force = false) {
@@ -71,9 +74,9 @@ export function Gacha(p: { seriesId: string; onClose: () => void; onBuyGems: () 
   }
 
   return (
-    <div class={'nv-gacha ' + s.motif + (side ? ' side' : ' tall') + (closing ? ' closing' : '')} style={{ '--c0': s.colors[0], '--c1': s.colors[1], '--c2': s.colors[2], '--c3': s.colors[3] } as unknown as string}>
+    <div class={'nv-gacha ' + s.motif + (side ? ' side' : ' tall') + (closing ? ' closing' : '')} style={{ '--c0': sc[0], '--c1': sc[1], '--c2': sc[2], '--c3': sc[3] } as unknown as string}>
       <img class="nv-g-bg" src={bg} alt="" />
-      <div class="nv-g-fall" aria-hidden="true">{Array.from({ length: 28 }, (_, i) => <i style={{ left: `${(i * 41) % 100}%`, animationDelay: `${-(i * 0.73) % 9}s`, animationDuration: `${(s.motif === 'stars' ? 3.5 : 7) + (i % 5)}s` }} />)}</div>
+      <div class="nv-g-fall" aria-hidden="true" style={s.motif === 'stars' ? { '--shoot': `url("${shootURL('#f1d39a', 40)}")` } as unknown as string : undefined}>{Array.from({ length: s.motif === 'stars' ? 9 : 28 }, (_, i) => <i style={{ left: `${(i * 41) % 100}%`, top: s.motif === 'stars' ? `${(i * 23) % 50}%` : undefined, animationDelay: `${-(i * 0.73) % 9}s`, animationDuration: `${(s.motif === 'stars' ? 3.5 : 7) + (i % 5)}s` }} />)}</div>
       <div class="nv-g-vignette" />
 
       <header class="nv-g-top">
@@ -213,9 +216,9 @@ export function PullShow(p: { prizes: Prize[]; motif: 'snow' | 'stars'; onDone: 
         <div class="nv-sky">
           <img class="nv-sky-art" src={skyArt(p.motif, isSide() ? 320 : 180, isSide() ? 180 : 320)} alt="" />
           {Array.from({ length: shoot }, (_, k) => (
-            <div class={'nv-shoot r' + (k === 0 ? best : Math.min(best, 4) - (k % 2)) + (k === 0 ? ' lead' : '')} style={{ top: `${(k === 0 ? 20 : 8 + k * 11)}%`, animationDelay: `${0.25 + k * 0.22}s`, '--len': `${k === 0 ? 52 : 30}vmax` } as unknown as string}><i /><b /></div>
+            <div class={'nv-shoot' + (k === 0 ? ' lead' : '')} style={{ top: `${(k === 0 ? 20 : 8 + k * 11)}%`, animationDelay: `${0.25 + k * 0.22}s`, '--len': `${k === 0 ? 46 : 26}vmax`, '--img': `url("${shootURL(STAR_COL[k === 0 ? best : (Math.max(3, Math.min(best, 4) - (k % 2)) as Stars)], 72)}")` } as unknown as string} />
           ))}
-          <div class={'nv-sky-flash r' + best} />
+          <div class={'nv-sky-flash r' + best} style={{ '--flash': `url("${burstURL(128, STAR_COL[best])}")` } as unknown as string} />
           <span class="nv-skip">Tap to skip</span>
         </div>
       )}
