@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { wind } from '../../gfx/box.ts';
 import { tex } from './textures.ts';
+import { leafTexture } from '../foliage.ts';
 import type { SpeciesId } from './species.ts';
 
 const COMMON_V = /* glsl */ `
@@ -131,9 +132,8 @@ const FOLIAGE_OPTS: Record<SpeciesId, { translucency: number; backTint?: THREE.C
   cedar: { translucency: 0.55, backTint: new THREE.Color(1.05, 1.08, 1.0) },
   oak: { translucency: 0.6, backTint: new THREE.Color(1.05, 1.08, 0.95) },
 };
-/** which painted textures each species wears (the oak borrows birch leaves and spruce bark) */
-const FOLIAGE_TEX: Partial<Record<SpeciesId, SpeciesId>> = { oak: 'birch' };
-const BARK_TEX: Partial<Record<SpeciesId, SpeciesId>> = { oak: 'spruce' };
+/** which bark each species wears (the oak, pine and cedar borrow the spruce's) */
+const BARK_TEX: Partial<Record<SpeciesId, SpeciesId>> = { oak: 'spruce', pine: 'spruce', cedar: 'spruce' };
 
 export interface TreeMaterialSet { bark: THREE.MeshStandardMaterial; foliage: THREE.MeshStandardMaterial; barkDepth: THREE.MeshDepthMaterial; foliageDepth: THREE.MeshDepthMaterial; uniforms: TreeUniforms }
 
@@ -146,7 +146,9 @@ export function createTreeMaterials(species: SpeciesId, barkSpecies: SpeciesId =
   });
   bark.name = `bark_${barkSpecies}`;
   patchBushed(bark, 'bark', u);
-  const ftex = tex(`foliage_${FOLIAGE_TEX[species] ?? species}`);
+  // [look4] the forest's crowns are leaf-card canopies on Hoot Hollow's own leaf atlas (foliage.ts); a standalone
+  // BUSHED tree (object()) wears the same atlas
+  const ftex = leafTexture();
   const foliage = new THREE.MeshStandardMaterial({ map: ftex, alphaTest: 0.5, side: THREE.DoubleSide, vertexColors: true, roughness: 1, metalness: 0 });
   foliage.name = `foliage_${species}`;
   patchBushed(foliage, 'foliage', u, FOLIAGE_OPTS[species]);
