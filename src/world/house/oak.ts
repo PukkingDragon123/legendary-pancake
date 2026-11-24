@@ -16,7 +16,7 @@ import { fbm, rng } from '../../gfx/noise.ts';
 import { canopy, leafMaterial, withLeafState, type Puff } from '../foliage.ts';
 import { Cards, CELL, type Mass } from './crown.ts';
 import { Geo, mat, spline, type V3 } from './geo.ts';
-import { canvasTex, houseMat, pixelText, textWidth, woodFill, type HouseMat } from './kit.ts';
+import { canvasTex, houseMat, patchCut, pixelText, textWidth, woodFill, type HouseMat } from './kit.ts';
 import {
   CHIMNEY_A, CHIMNEY_TOP, DOOR_A, FLOOR_IDS, FLOOR_Y, HOLES, inOpening, LADDER_A, LAMP_AT, LAUNCH, LIMB_A, OPEN_A, openingOutline, openings, PLATFORM,
   R_IN, ROOF_Y, RO, SLAB, trunkR, UNLOCK, wrapA, type FloorId, type Opening,
@@ -99,6 +99,13 @@ function barkCol(a: number, y: number, r: number): V3 {
 
 // ------------------------------------------------------------------ sets of meshes by material
 
+let cutDepthMat: THREE.MeshDepthMaterial | null = null;
+/** The shadow-pass material for the oak's solids: it honours build mode's see-through cut. */
+function cutDepth(): THREE.MeshDepthMaterial {
+  if (!cutDepthMat) { cutDepthMat = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking }); patchCut(cutDepthMat); }
+  return cutDepthMat;
+}
+
 /** Solids that differ only in colour share one vertex-coloured material (one draw): their tint (linear). */
 const FOLD: Partial<Record<HouseMat, { to: HouseMat; tint: V3 }>> = {
   iron: { to: 'paint', tint: [0.065, 0.056, 0.048] }, brass: { to: 'paint', tint: [0.64, 0.4, 0.1] }, dark: { to: 'paint', tint: [0.012, 0.009, 0.007] },
@@ -135,6 +142,8 @@ class Sets {
       const glassy = m === 'glow' || m === 'pane';
       mesh.castShadow = !glassy;
       mesh.receiveShadow = !glassy;
+      // in build mode the floors above dissolve: their shadows too
+      if (!glassy) mesh.customDepthMaterial = cutDepth();
       target.add(mesh);
     }
     this.g.clear();
