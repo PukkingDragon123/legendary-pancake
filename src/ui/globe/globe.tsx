@@ -88,6 +88,9 @@ export function GlobePanel() {
     if (tonight) { st.spin = spinFor(st, tonight); st.setRoute(home, tonight); st.tonight = { id: tonight.id, lat: tonight.lat, lon: tonight.lon }; }
     loadPhotos();
     st.sparks.onMeteor = () => sound.play('sparkle', { volume: 0.12, rate: 1.3 + Math.random() * 0.4, gap: 2000 });
+    // the globe does its own low-res pixel render and BUSHED-style grade, so the world's post chain steps aside
+    const postWas = sc.post.enabled;
+    sc.post.enabled = false;
     sc.setStage(st);
     setPx(st.px);
     st.onFrame = (pins) => placePins(pins, st!.px);
@@ -107,6 +110,7 @@ export function GlobePanel() {
       removeEventListener('resize', onResize);
       removeEventListener('keydown', onKey);
       if (sc.stage === st) sc.setStage(null);
+      sc.post.enabled = postWas;
     };
   }, []);
 
@@ -176,7 +180,7 @@ export function GlobePanel() {
     if (leaving) return;
     setLeaving(true);
     tap('ui_close', 0.5);
-    void transition('stars', () => { const st = stageRef.current; if (sc && st && sc.stage === st) sc.setStage(null); panel.value = null; }, { speed: 1.3 });
+    void transition('stars', () => { const st = stageRef.current; if (sc && st && sc.stage === st) { sc.setStage(null); sc.post.enabled = true; } panel.value = null; }, { speed: 1.3 });
   }
 
   const a = sel ? AREA[sel] : null;
