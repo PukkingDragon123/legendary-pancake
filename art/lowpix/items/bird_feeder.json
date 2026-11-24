@@ -87,6 +87,16 @@
     "#e3ecec",
     "#f5f7f2"
    ],
+   "holly": [
+    "#483a42",
+    "#865661",
+    "#9a5e66",
+    "#a06361",
+    "#a4695a",
+    "#ad735b",
+    "#c68d74",
+    "#e8b4ae"
+   ],
    "leaf": [
     "#2c4030",
     "#3c5639",
@@ -136,6 +146,16 @@
     "#d2c39e",
     "#ebe2cb",
     "#f4eedd"
+   ],
+   "snow": [
+    "#7a8c9e",
+    "#84a5ad",
+    "#adc9cf",
+    "#c9dcdc",
+    "#d8e4e2",
+    "#e5edec",
+    "#f6f8f3",
+    "#fbfcf8"
    ],
    "soot": [
     "#231f1b",
@@ -1630,8 +1650,8 @@
   },
   "s21": {
    "ramp": "leaf",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -1654,8 +1674,8 @@
   },
   "s22": {
    "ramp": "leaf",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -1678,8 +1698,8 @@
   },
   "s23": {
    "ramp": "leaf",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -1702,8 +1722,8 @@
   },
   "s24": {
    "ramp": "leaf",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -1726,8 +1746,8 @@
   },
   "s25": {
    "ramp": "leaf",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -1750,8 +1770,8 @@
   },
   "s26": {
    "ramp": "leaf",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -1774,8 +1794,8 @@
   },
   "s27": {
    "ramp": "leaf",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -1797,6 +1817,54 @@
    ]
   },
   "s28": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s29": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s30": {
    "ramp": "leaf",
    "tone": 2.8,
    "rim": {
@@ -1822,7 +1890,7 @@
     }
    ]
   },
-  "s29": {
+  "s31": {
    "ramp": "dusk",
    "tone": 4.6,
    "rim": {
@@ -1848,7 +1916,7 @@
     }
    ]
   },
-  "s30": {
+  "s32": {
    "ramp": "dusk",
    "tone": 4.8,
    "rim": {
@@ -1885,7 +1953,7 @@
     }
    ]
   },
-  "s31": {
+  "s33": {
    "ramp": "ochre",
    "tone": 3.4,
    "rim": {
@@ -1901,31 +1969,31 @@
     }
    ]
   },
-  "s32": {
-   "ramp": "dusk",
-   "tone": 4.0,
-   "light": 0.6,
-   "brush": {
-    "off": true
-   },
-   "rim": {
-    "light": 0,
-    "dark": 0
-   }
-  },
-  "s33": {
-   "ramp": "dusk",
-   "tone": 4.0,
-   "light": 0.6,
-   "brush": {
-    "off": true
-   },
-   "rim": {
-    "light": 0,
-    "dark": 0
-   }
-  },
   "s34": {
+   "ramp": "dusk",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s35": {
+   "ramp": "dusk",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s36": {
    "ramp": "dusk",
    "tone": 4.0,
    "light": 0.6,
@@ -2325,30 +2393,43 @@
    "shape": "card",
    "pivot": [
     -1.05,
-    3.0,
+    2.6,
     0.95
    ],
    "rotation": [
     0.0,
     -90.0,
-    -20.0
+    0.0
    ],
    "art": [
-    "..aaaa..",
-    "..aaaa..",
-    "aaaaaabb",
-    "aaaaaabb",
-    "aaaabbbb",
-    "aaaabbbb",
-    "..aabb..",
-    "..aabb.."
+    ".....vd.......",
+    ".....dvdd.....",
+    "....vnvnd.....",
+    "...nvmnvd.....",
+    "...nhvnd......",
+    "...nlvn.......",
+    "..............",
+    "........nmmn..",
+    "........nvvm..",
+    "..dmvd...nlvn.",
+    "..dvnd........",
+    "..dvdd........",
+    "..dd..........",
+    ".............."
    ],
    "plane": "xy",
    "style": "s21",
    "paint": {
     "art_key": {
-     "a": "leaf:5",
-     "b": "leaf:3"
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
     }
    }
   },
@@ -2357,30 +2438,43 @@
    "shape": "card",
    "pivot": [
     1.05,
-    5.8,
+    4.8,
     0.45
    ],
    "rotation": [
     0.0,
     90.0,
-    20.0
+    0.0
    ],
    "art": [
-    "..aaaa..",
-    "..aaaa..",
-    "aaaaaabb",
-    "aaaaaabb",
-    "aaaabbbb",
-    "aaaabbbb",
-    "..aabb..",
-    "..aabb.."
+    "..............",
+    "........nn....",
+    "....vnd.nlv...",
+    "....dvn.vvn...",
+    "..vndmv.nnn...",
+    "..vmn.........",
+    "..nvn.........",
+    "..............",
+    "....d.........",
+    "..dmvd........",
+    "..dvnd........",
+    "..dvdd........",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s22",
    "paint": {
     "art_key": {
-     "a": "leaf:5",
-     "b": "leaf:3"
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
     }
    }
   },
@@ -2389,30 +2483,43 @@
    "shape": "card",
    "pivot": [
     -1.05,
-    8.6,
+    7.0,
     -0.05
    ],
    "rotation": [
     0.0,
     -90.0,
-    -20.0
+    0.0
    ],
    "art": [
-    "..aaaa..",
-    "..aaaa..",
-    "aaaaaabb",
-    "aaaaaabb",
-    "aaaabbbb",
-    "aaaabbbb",
-    "..aabb..",
-    "..aabb.."
+    "..............",
+    "..............",
+    "..............",
+    "..dd......dd..",
+    "..vnd....nvvv.",
+    "..dvd...nvnd..",
+    "........nvn...",
+    "..............",
+    "....nn........",
+    "...nvvn.......",
+    "...vvm........",
+    "..............",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s23",
    "paint": {
     "art_key": {
-     "a": "leaf:5",
-     "b": "leaf:3"
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
     }
    }
   },
@@ -2421,30 +2528,43 @@
    "shape": "card",
    "pivot": [
     1.05,
-    11.4,
+    9.2,
     0.95
    ],
    "rotation": [
     0.0,
     90.0,
-    20.0
+    0.0
    ],
    "art": [
-    "..aaaa..",
-    "..aaaa..",
-    "aaaaaabb",
-    "aaaaaabb",
-    "aaaabbbb",
-    "aaaabbbb",
-    "..aabb..",
-    "..aabb.."
+    "..............",
+    ".......nhn....",
+    ".....v.nvmn...",
+    ".....vnnvmn...",
+    ".....dvdnd....",
+    ".....dd.dnnd..",
+    "........vvvv..",
+    "........dmdd..",
+    "nlvn..........",
+    "nvvn..........",
+    "vmnn..........",
+    "..............",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s24",
    "paint": {
     "art_key": {
-     "a": "leaf:5",
-     "b": "leaf:3"
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
     }
    }
   },
@@ -2453,30 +2573,43 @@
    "shape": "card",
    "pivot": [
     -1.05,
-    14.2,
+    11.4,
     0.45
    ],
    "rotation": [
     0.0,
     -90.0,
-    -20.0
+    0.0
    ],
    "art": [
-    "..aaaa..",
-    "..aaaa..",
-    "aaaaaabb",
-    "aaaaaabb",
-    "aaaabbbb",
-    "aaaabbbb",
-    "..aabb..",
-    "..aabb.."
+    "..............",
+    "..............",
+    ".........ddmv.",
+    ".........dmvd.",
+    "..nmn....dvnd.",
+    ".vvvv....ddd..",
+    "..nn..........",
+    "..........ddd.",
+    ".........dvnnd",
+    "........nvmvvd",
+    "........nvnddv",
+    "........nv....",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s25",
    "paint": {
     "art_key": {
-     "a": "leaf:5",
-     "b": "leaf:3"
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
     }
    }
   },
@@ -2485,30 +2618,43 @@
    "shape": "card",
    "pivot": [
     1.05,
-    17.0,
+    13.6,
     -0.05
    ],
    "rotation": [
     0.0,
     90.0,
-    20.0
+    0.0
    ],
    "art": [
-    "..aaaa..",
-    "..aaaa..",
-    "aaaaaabb",
-    "aaaaaabb",
-    "aaaabbbb",
-    "aaaabbbb",
-    "..aabb..",
-    "..aabb.."
+    "..............",
+    "..............",
+    "..............",
+    ".....v........",
+    "....nnnd......",
+    "...vvvvd......",
+    "nnn.nnv.......",
+    "vvv...........",
+    ".nn.dv........",
+    "...dmnd.......",
+    "...dvnd.......",
+    "....vd........",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s26",
    "paint": {
     "art_key": {
-     "a": "leaf:5",
-     "b": "leaf:3"
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
     }
    }
   },
@@ -2517,30 +2663,133 @@
    "shape": "card",
    "pivot": [
     -1.05,
-    19.8,
+    15.8,
     0.95
    ],
    "rotation": [
     0.0,
     -90.0,
-    -20.0
+    0.0
    ],
    "art": [
-    "..aaaa..",
-    "..aaaa..",
-    "aaaaaabb",
-    "aaaaaabb",
-    "aaaabbbb",
-    "aaaabbbb",
-    "..aabb..",
-    "..aabb.."
+    "..............",
+    "..............",
+    "..............",
+    ".vnn...dmv....",
+    ".vvmnvdmvd....",
+    ".nlvnvnvdd....",
+    "..nndvn.......",
+    ".....vn.......",
+    ".....nvn......",
+    ".....nvn......",
+    "......nv......",
+    "..............",
+    "..............",
+    ".............."
    ],
    "plane": "xy",
    "style": "s27",
    "paint": {
     "art_key": {
-     "a": "leaf:5",
-     "b": "leaf:3"
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "ivy7",
+   "shape": "card",
+   "pivot": [
+    1.05,
+    18.0,
+    0.45
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "art": [
+    "..............",
+    "..............",
+    "..............",
+    "........v.....",
+    ".......dvd....",
+    ".......mvd....",
+    ".......dvd....",
+    "..........dd..",
+    "....nvn..dvvv.",
+    "...nlvm...dd..",
+    "...nhvm.vn....",
+    "....nvnnvmn...",
+    ".....v..vn....",
+    ".............."
+   ],
+   "plane": "xy",
+   "style": "s28",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "ivy8",
+   "shape": "card",
+   "pivot": [
+    -1.05,
+    20.2,
+    -0.05
+   ],
+   "rotation": [
+    0.0,
+    -90.0,
+    0.0
+   ],
+   "art": [
+    "..............",
+    "..............",
+    "..............",
+    "..vnn..dvdd...",
+    "..lvm..mdmmvd.",
+    "..nvv.dmvvnd..",
+    "...n...dvdvvn.",
+    "..........nvv.",
+    "...........nn.",
+    "..............",
+    "..............",
+    "..............",
+    "..............",
+    ".............."
+   ],
+   "plane": "xy",
+   "style": "s29",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
     }
    }
   },
@@ -2618,7 +2867,7 @@
     true,
     true
    ],
-   "style": "s28"
+   "style": "s30"
   },
   {
    "id": "bird",
@@ -2747,7 +2996,7 @@
     false,
     false
    ],
-   "style": "s29",
+   "style": "s31",
    "up": [
     0,
     0,
@@ -2840,7 +3089,7 @@
     false,
     false
    ],
-   "style": "s30",
+   "style": "s32",
    "up": [
     0,
     0,
@@ -2866,7 +3115,7 @@
     0.4,
     0.9
    ],
-   "style": "s31",
+   "style": "s33",
    "front_scale": [
     0.2,
     0.2
@@ -2897,7 +3146,7 @@
     "....aabb"
    ],
    "plane": "xy",
-   "style": "s32",
+   "style": "s34",
    "paint": {
     "art_key": {
      "a": "dusk:3",
@@ -2923,7 +3172,7 @@
     "....aabbbb"
    ],
    "plane": "xy",
-   "style": "s33",
+   "style": "s35",
    "paint": {
     "art_key": {
      "a": "dusk:5",
@@ -2949,7 +3198,7 @@
     "....aabbbb"
    ],
    "plane": "xy",
-   "style": "s34",
+   "style": "s36",
    "paint": {
     "art_key": {
      "a": "dusk:5",

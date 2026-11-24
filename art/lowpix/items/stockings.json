@@ -59,6 +59,15 @@
  },
  "palette": {
   "ramps": {
+   "bark": [
+    "#2b2c2d",
+    "#3a312a",
+    "#514236",
+    "#65503c",
+    "#6d5a47",
+    "#706b62",
+    "#908a7e"
+   ],
    "brass": [
     "#434035",
     "#5b4131",
@@ -152,82 +161,35 @@
  },
  "styles": {
   "s1": {
-   "ramp": "pine",
-   "tone": 4.2,
+   "ramp": "bark",
+   "tone": 2.6,
    "rim": {
     "light_shift": 1.0,
-    "dark_shift": -1.2
-   },
-   "brush": {
-    "flow": "vertical",
-    "rough": 0.75
+    "dark_shift": -1.0
    },
    "layers": [
     {
-     "id": "needles",
-     "op": "stripes",
-     "axis": [
-      1,
-      0,
-      0.7
-     ],
-     "period": 0.55,
-     "width": 0.4,
-     "shift": -0.8,
-     "wobble": 0.6
-    },
-    {
-     "id": "clumps",
-     "op": "patches",
-     "scale": 1.3,
-     "threshold": 0.55,
-     "shift": 0.9,
-     "bevel": {
-      "shadow": 1,
-      "highlight": 1,
-      "shadow_shift": -1.2,
-      "highlight_shift": 0.6
-     }
-    },
-    {
-     "id": "depth",
+     "id": "mottle",
      "op": "noise",
-     "scale": 0.9,
-     "amount": 0.7
-    },
-    {
-     "id": "snow",
-     "op": "patches",
-     "scale": 1.0,
-     "threshold": 0.7,
-     "ramp": "snow",
-     "tone": 5.4,
-     "faces": [
-      "up"
-     ],
-     "bevel": {
-      "shadow": 1,
-      "highlight": 0,
-      "shadow_ramp": "pine",
-      "shadow_tone": 1.2
-     }
+     "scale": 1.4,
+     "amount": 0.6
     },
     {
      "id": "photo",
      "op": "photo",
-     "src": "assets/photos/forest_leaves_02",
-     "scale": 8.0,
-     "amount": 0.45,
+     "src": "art/lowpix/items/_furnc/photos/bark",
+     "scale": 14.0,
+     "amount": 0.7,
      "ramps": [
-      "pine"
+      "bark"
      ]
     }
    ]
   },
   "s2": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -250,8 +212,8 @@
   },
   "s3": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -274,8 +236,8 @@
   },
   "s4": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -298,8 +260,8 @@
   },
   "s5": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -322,8 +284,8 @@
   },
   "s6": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -346,8 +308,8 @@
   },
   "s7": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -370,8 +332,8 @@
   },
   "s8": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -394,8 +356,8 @@
   },
   "s9": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -418,8 +380,8 @@
   },
   "s10": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -442,8 +404,8 @@
   },
   "s11": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -466,8 +428,8 @@
   },
   "s12": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -490,8 +452,8 @@
   },
   "s13": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -514,8 +476,8 @@
   },
   "s14": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -538,8 +500,8 @@
   },
   "s15": {
    "ramp": "pine",
-   "tone": 4.0,
-   "light": 0.6,
+   "tone": 4,
+   "light": 0.8,
    "brush": {
     "off": true
    },
@@ -561,480 +523,344 @@
    ]
   },
   "s16": {
-   "ramp": "holly",
-   "tone": 4.4,
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
    "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "mottle",
-     "op": "noise",
-     "scale": 1.4,
-     "amount": 0.4
-    },
-    {
-     "id": "gloss",
-     "op": "gloss",
-     "dash": true,
-     "length": 2,
-     "shift": 1.4,
-     "density": 0.6,
-     "post": true
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
   "s17": {
-   "ramp": "holly",
-   "tone": 4.4,
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
    "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "mottle",
-     "op": "noise",
-     "scale": 1.4,
-     "amount": 0.4
-    },
-    {
-     "id": "gloss",
-     "op": "gloss",
-     "dash": true,
-     "length": 2,
-     "shift": 1.4,
-     "density": 0.6,
-     "post": true
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
   "s18": {
-   "ramp": "holly",
-   "tone": 4.4,
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
    "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "mottle",
-     "op": "noise",
-     "scale": 1.4,
-     "amount": 0.4
-    },
-    {
-     "id": "gloss",
-     "op": "gloss",
-     "dash": true,
-     "length": 2,
-     "shift": 1.4,
-     "density": 0.6,
-     "post": true
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
   "s19": {
-   "ramp": "holly",
-   "tone": 4.4,
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
    "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "mottle",
-     "op": "noise",
-     "scale": 1.4,
-     "amount": 0.4
-    },
-    {
-     "id": "gloss",
-     "op": "gloss",
-     "dash": true,
-     "length": 2,
-     "shift": 1.4,
-     "density": 0.6,
-     "post": true
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
   "s20": {
-   "ramp": "holly",
-   "tone": 4.4,
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
    "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "mottle",
-     "op": "noise",
-     "scale": 1.4,
-     "amount": 0.4
-    },
-    {
-     "id": "gloss",
-     "op": "gloss",
-     "dash": true,
-     "length": 2,
-     "shift": 1.4,
-     "density": 0.6,
-     "post": true
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
   "s21": {
-   "ramp": "holly",
-   "tone": 4.4,
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
    "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "mottle",
-     "op": "noise",
-     "scale": 1.4,
-     "amount": 0.4
-    },
-    {
-     "id": "gloss",
-     "op": "gloss",
-     "dash": true,
-     "length": 2,
-     "shift": 1.4,
-     "density": 0.6,
-     "post": true
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
   "s22": {
-   "ramp": "brass",
-   "tone": 4.8,
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
    "rim": {
-    "light_shift": 1.4,
-    "dark_shift": -1.2
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "under",
-     "op": "gradient",
-     "axis": "y",
-     "amount": 0.6
-    },
-    {
-     "id": "mottle",
-     "op": "noise",
-     "scale": 1.2,
-     "amount": 0.5
-    },
-    {
-     "id": "tarnish",
-     "op": "patches",
-     "scale": 1.1,
-     "threshold": 0.78,
-     "ramp": "verd",
-     "tone": 2.2,
-     "faces": [
-      "sides",
-      "bottom",
-      "-up"
-     ]
-    },
-    {
-     "id": "polish",
-     "op": "gloss",
-     "dash": true,
-     "length": 2,
-     "shift": 1.5,
-     "density": 0.55,
-     "post": true
-    },
-    {
      "id": "photo",
      "op": "photo",
-     "src": "assets/photos/rusty_metal_02",
-     "scale": 10.0,
-     "amount": 0.18,
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
      "ramps": [
-      "brass"
+      "pine"
      ]
     }
    ]
   },
   "s23": {
-   "ramp": "holly",
-   "tone": 3.8,
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
    "rim": {
-    "light_shift": 0.6,
-    "dark_shift": -0.9
+    "light": 0,
+    "dark": 0
    },
    "layers": [
     {
-     "id": "stitch",
-     "op": "scales",
-     "shape": "round",
-     "along": "x",
-     "size": [
-      0.9,
-      0.7
-     ],
-     "gap": 0.6,
-     "highlight": 0.7,
-     "shadow": -0.9,
-     "gradient": 0.2,
-     "jitter": 0.3
-    },
-    {
-     "id": "fuzz",
-     "op": "noise",
-     "scale": 0.8,
-     "amount": 0.5
-    },
-    {
-     "id": "stripes",
-     "op": "stripes",
-     "axis": "path",
-     "period": 2.4,
-     "width": 0.35,
-     "ramp": "cream",
-     "tone": 5
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
     }
    ]
   },
   "s24": {
-   "ramp": "cream",
-   "tone": 4.8,
+   "ramp": "holly",
+   "tone": 4.4,
    "rim": {
-    "light_shift": 0.6,
-    "dark_shift": -0.9
+    "light_shift": 1.0,
+    "dark_shift": -1.0
    },
    "layers": [
     {
-     "id": "stitch",
-     "op": "scales",
-     "shape": "round",
-     "along": "x",
-     "size": [
-      0.9,
-      0.7
-     ],
-     "gap": 0.6,
-     "highlight": 0.7,
-     "shadow": -0.9,
-     "gradient": 0.2,
-     "jitter": 0.3
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
     },
     {
-     "id": "fuzz",
-     "op": "noise",
-     "scale": 0.8,
-     "amount": 0.5
-    },
-    {
-     "id": "fluff",
-     "op": "noise",
-     "scale": 0.5,
-     "amount": 0.9
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
     }
    ]
   },
   "s25": {
-   "ramp": "cream",
-   "tone": 4.6,
+   "ramp": "holly",
+   "tone": 4.4,
    "rim": {
-    "light_shift": 0.6,
-    "dark_shift": -0.9
+    "light_shift": 1.0,
+    "dark_shift": -1.0
    },
    "layers": [
     {
-     "id": "stitch",
-     "op": "scales",
-     "shape": "round",
-     "along": "x",
-     "size": [
-      0.9,
-      0.7
-     ],
-     "gap": 0.6,
-     "highlight": 0.7,
-     "shadow": -0.9,
-     "gradient": 0.2,
-     "jitter": 0.3
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
     },
     {
-     "id": "fuzz",
-     "op": "noise",
-     "scale": 0.8,
-     "amount": 0.5
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
     }
    ]
   },
   "s26": {
-   "ramp": "brass",
-   "tone": 4.8,
+   "ramp": "holly",
+   "tone": 4.4,
    "rim": {
-    "light_shift": 1.4,
-    "dark_shift": -1.2
+    "light_shift": 1.0,
+    "dark_shift": -1.0
    },
    "layers": [
     {
-     "id": "under",
-     "op": "gradient",
-     "axis": "y",
-     "amount": 0.6
-    },
-    {
      "id": "mottle",
      "op": "noise",
-     "scale": 1.2,
-     "amount": 0.5
+     "scale": 1.4,
+     "amount": 0.4
     },
     {
-     "id": "tarnish",
-     "op": "patches",
-     "scale": 1.1,
-     "threshold": 0.78,
-     "ramp": "verd",
-     "tone": 2.2,
-     "faces": [
-      "sides",
-      "bottom",
-      "-up"
-     ]
-    },
-    {
-     "id": "polish",
+     "id": "gloss",
      "op": "gloss",
      "dash": true,
      "length": 2,
-     "shift": 1.5,
-     "density": 0.55,
+     "shift": 1.4,
+     "density": 0.6,
      "post": true
-    },
-    {
-     "id": "photo",
-     "op": "photo",
-     "src": "assets/photos/rusty_metal_02",
-     "scale": 10.0,
-     "amount": 0.18,
-     "ramps": [
-      "brass"
-     ]
     }
    ]
   },
   "s27": {
-   "ramp": "sage",
-   "tone": 4.0,
+   "ramp": "holly",
+   "tone": 4.4,
    "rim": {
-    "light_shift": 0.6,
-    "dark_shift": -0.9
+    "light_shift": 1.0,
+    "dark_shift": -1.0
    },
    "layers": [
     {
-     "id": "stitch",
-     "op": "scales",
-     "shape": "round",
-     "along": "x",
-     "size": [
-      0.9,
-      0.7
-     ],
-     "gap": 0.6,
-     "highlight": 0.7,
-     "shadow": -0.9,
-     "gradient": 0.2,
-     "jitter": 0.3
-    },
-    {
-     "id": "fuzz",
+     "id": "mottle",
      "op": "noise",
-     "scale": 0.8,
-     "amount": 0.5
+     "scale": 1.4,
+     "amount": 0.4
     },
     {
-     "id": "flakes",
-     "op": "spots",
-     "count": 10,
-     "radius": [
-      0.3,
-      0.45
-     ],
-     "ramp": "cream",
-     "tone": 5.5,
-     "roughness": 0.9,
-     "rough_scale": 0.25
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
     }
    ]
   },
   "s28": {
-   "ramp": "cream",
-   "tone": 4.8,
+   "ramp": "holly",
+   "tone": 4.4,
    "rim": {
-    "light_shift": 0.6,
-    "dark_shift": -0.9
+    "light_shift": 1.0,
+    "dark_shift": -1.0
    },
    "layers": [
     {
-     "id": "stitch",
-     "op": "scales",
-     "shape": "round",
-     "along": "x",
-     "size": [
-      0.9,
-      0.7
-     ],
-     "gap": 0.6,
-     "highlight": 0.7,
-     "shadow": -0.9,
-     "gradient": 0.2,
-     "jitter": 0.3
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
     },
     {
-     "id": "fuzz",
-     "op": "noise",
-     "scale": 0.8,
-     "amount": 0.5
-    },
-    {
-     "id": "fluff",
-     "op": "noise",
-     "scale": 0.5,
-     "amount": 0.9
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
     }
    ]
   },
   "s29": {
-   "ramp": "cream",
-   "tone": 4.6,
+   "ramp": "holly",
+   "tone": 4.4,
    "rim": {
-    "light_shift": 0.6,
-    "dark_shift": -0.9
+    "light_shift": 1.0,
+    "dark_shift": -1.0
    },
    "layers": [
     {
-     "id": "stitch",
-     "op": "scales",
-     "shape": "round",
-     "along": "x",
-     "size": [
-      0.9,
-      0.7
-     ],
-     "gap": 0.6,
-     "highlight": 0.7,
-     "shadow": -0.9,
-     "gradient": 0.2,
-     "jitter": 0.3
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
     },
     {
-     "id": "fuzz",
-     "op": "noise",
-     "scale": 0.8,
-     "amount": 0.5
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
     }
    ]
   },
@@ -1093,8 +919,8 @@
    ]
   },
   "s31": {
-   "ramp": "honey",
-   "tone": 4.2,
+   "ramp": "holly",
+   "tone": 3.8,
    "rim": {
     "light_shift": 0.6,
     "dark_shift": -0.9
@@ -1122,13 +948,13 @@
      "amount": 0.5
     },
     {
-     "id": "cable",
+     "id": "stripes",
      "op": "stripes",
      "axis": "path",
-     "period": 6.0,
-     "width": 0.2,
-     "ramp": "russet",
-     "tone": 3.6
+     "period": 2.4,
+     "width": 0.35,
+     "ramp": "cream",
+     "tone": 5
     }
    ]
   },
@@ -1201,6 +1027,334 @@
    ]
   },
   "s34": {
+   "ramp": "brass",
+   "tone": 4.8,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
+    }
+   ]
+  },
+  "s35": {
+   "ramp": "sage",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    },
+    {
+     "id": "flakes",
+     "op": "spots",
+     "count": 10,
+     "radius": [
+      0.3,
+      0.45
+     ],
+     "ramp": "cream",
+     "tone": 5.5,
+     "roughness": 0.9,
+     "rough_scale": 0.25
+    }
+   ]
+  },
+  "s36": {
+   "ramp": "cream",
+   "tone": 4.8,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    },
+    {
+     "id": "fluff",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.9
+    }
+   ]
+  },
+  "s37": {
+   "ramp": "cream",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s38": {
+   "ramp": "brass",
+   "tone": 4.8,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
+    }
+   ]
+  },
+  "s39": {
+   "ramp": "honey",
+   "tone": 4.2,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    },
+    {
+     "id": "cable",
+     "op": "stripes",
+     "axis": "path",
+     "period": 6.0,
+     "width": 0.2,
+     "ramp": "russet",
+     "tone": 3.6
+    }
+   ]
+  },
+  "s40": {
+   "ramp": "cream",
+   "tone": 4.8,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    },
+    {
+     "id": "fluff",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.9
+    }
+   ]
+  },
+  "s41": {
+   "ramp": "cream",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 0.6,
+    "dark_shift": -0.9
+   },
+   "layers": [
+    {
+     "id": "stitch",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.9,
+      0.7
+     ],
+     "gap": 0.6,
+     "highlight": 0.7,
+     "shadow": -0.9,
+     "gradient": 0.2,
+     "jitter": 0.3
+    },
+    {
+     "id": "fuzz",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.5
+    }
+   ]
+  },
+  "s42": {
    "ramp": "snow",
    "tone": 6.0,
    "rim": {
@@ -1269,8 +1423,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1280,8 +1434,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1291,8 +1445,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1302,8 +1456,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1313,8 +1467,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1324,8 +1478,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1335,8 +1489,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1346,8 +1500,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1357,8 +1511,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1368,8 +1522,8 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     },
     {
@@ -1379,13 +1533,13 @@
       0.0
      ],
      "size": [
-      2.6,
-      2.6
+      1.2,
+      1.2
      ]
     }
    ],
    "profile": {
-    "sides": 10,
+    "sides": 8,
     "round": 2.0
    },
    "subdiv": 1,
@@ -1396,478 +1550,1036 @@
    "style": "s1"
   },
   {
-   "id": "needle0",
+   "id": "sprig0",
    "shape": "card",
    "pivot": [
-    -14.0,
-    -0.0804,
-    2.6
+    -14.6,
+    0.0263,
+    1.9
    ],
    "rotation": [
     0.0,
     0.0,
-    50.0
+    -10.626
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    ".......n................",
+    "..Snnllh..nnllh.SSs.....",
+    ".llnnlmSlnlnlllnllln....",
+    "llnnnlmlllnnllnlSsnSSs..",
+    "vvvvvvvvvvvvvvvvvnnhhnhl",
+    "mmmmmnmmmmnnmnmmmvvvvvvn",
+    ".mmnmmdmmmndmmdmmmhnnhnn",
+    ".mmmdmmmmmmdnmmdmmmh....",
+    "...mmdmdmmn.m.mmdm......",
+    "........................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s2",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle1",
+   "id": "sprig1",
    "shape": "card",
    "pivot": [
-    -11.85,
-    0.7737,
-    2.6
+    -13.2,
+    0.2842,
+    2.4
    ],
    "rotation": [
     0.0,
     0.0,
-    90.0
+    197.257
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "....Sshn................",
+    "..SsllShn...............",
+    ".llllnllnlh...lnSSsh....",
+    ".lnlSnnnSnSSsllnlllvh...",
+    "lnlllnnnlnllllnlnllSsh..",
+    "vvvvvvvvvvvvvvvvvlhhhhlh",
+    "mnmmnmnmmmmnmmmnmvvvvvvm",
+    ".mdmmnmdmmmmdmmmdmmnhnhm",
+    ".mnmmmddmmmmddmmdmdmm...",
+    "...dmmdmdds.mmmmmmmm....",
+    "........dm..............",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s3",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle2",
+   "id": "sprig2",
    "shape": "card",
    "pivot": [
-    -9.7,
-    -0.7146,
-    2.6
+    -11.8,
+    0.5664,
+    1.9
    ],
    "rotation": [
     0.0,
     0.0,
-    130.0
+    17.883
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    ".......Ssh..............",
+    "...lSsnlhlln............",
+    ".SmlllnlllSslhllSl......",
+    ".mlllnllmnSsnlnnnlh.....",
+    "mllllnlnmnllnnnlSslnSs..",
+    "vvvvvvvvvvvvvvvvvlnnhShh",
+    "mmmmmnmnmnmnnnmnmvvvvvvh",
+    ".mmmmmdmdmmmmndmnmmhhhhh",
+    ".mmmmmmmdmdmnmndnmmm....",
+    "...mmmmmmmndmn...md.....",
+    "........................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s4",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle3",
+   "id": "sprig3",
    "shape": "card",
    "pivot": [
-    -7.55,
-    0.2547,
-    2.6
+    -10.4,
+    -0.627,
+    2.4
    ],
    "rotation": [
     0.0,
     0.0,
-    50.0
+    178.252
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "....lnSs................",
+    "..Sslnvlh....lh.........",
+    ".nSllsln..lSsllSnn......",
+    ".mllllSsSSnlnllllnSs....",
+    "mlllnllllnllnllSllmhSs..",
+    "vvvvvvvvvvvvvvvvvmhhhnmh",
+    "mmnmnmmmmnmnmmmnnvvvvvvh",
+    ".mmnmdmmmmmmmmmmdnhhhhhh",
+    ".mmnnmdmmmdmdmmmddnhm...",
+    "...mmnnmdmm.mmn..mmm....",
+    "......m.................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s5",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle4",
+   "id": "sprig4",
    "shape": "card",
    "pivot": [
-    -5.4,
-    -1.1186,
-    2.6
+    -9.0,
+    -0.296,
+    1.9
    ],
    "rotation": [
     0.0,
     0.0,
-    90.0
+    19.383
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    ".....nh.................",
+    "...SsnnSSsl..ln.........",
+    "SsnlnnnlSSsSsSslSSsh....",
+    ".nllSSlSllllllllsllh....",
+    "nllnllllllllllllnllnhm..",
+    "vvvvvvvvvvvvvvvvvlnhmhnh",
+    "mmmmmmmmmnnnmnnmmvvvvvvh",
+    ".mmmmmmmmmdnmmdnmmhhmhmh",
+    ".mmmmmmmmmdndmmnmmdh....",
+    "...mmmmmmmm...mm.mmm....",
+    "....mmmnmm..............",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s6",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle5",
+   "id": "sprig5",
    "shape": "card",
    "pivot": [
-    -3.25,
-    -0.0343,
-    2.6
+    -7.6,
+    0.0594,
+    2.4
    ],
    "rotation": [
     0.0,
     0.0,
-    130.0
+    177.468
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    ".............hh.........",
+    "..Ssl....Ssllhnnll......",
+    ".mnllnllllnmnSslnln.....",
+    "mnlllnlnlnmmnllSllnnnh..",
+    "vvvvvvvvvvvvvvvvvnnnhhnh",
+    "mmmmmnmmmnnmnmmmmvvvvvvn",
+    ".mmdmmdmmmndndmmmmhhhhhn",
+    ".mmmnmmmmmdnmdnmmmdh....",
+    "...nmnmmmdmmmmmmmm......",
+    "........................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s7",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle6",
+   "id": "sprig6",
    "shape": "card",
    "pivot": [
-    -1.1,
-    -1.2925,
-    2.6
+    -6.2,
+    -1.0608,
+    1.9
    ],
    "rotation": [
     0.0,
     0.0,
-    50.0
+    3.77
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    "...nnnSsnh..mSsl........",
+    ".llnnsllnnSsmlvvhSs.....",
+    ".llnnnlllmnSSsSslnlm....",
+    "llnnlnlnlnnnlnlSnllhhn..",
+    "vvvvvvvvvvvvvvvvvlhhnnnn",
+    "mmmmnmmmmmmmmmnmmvvvvvvh",
+    ".mmdmnmmmmmmmmmnmmhhnhhh",
+    ".mmmnmdmmmmmmmmmmmmhm...",
+    "...nddmdmddmmmnmdmdm....",
+    "........md..............",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s8",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle7",
+   "id": "sprig7",
    "shape": "card",
    "pivot": [
-    1.05,
-    -0.0931,
-    2.6
+    -4.8,
+    -0.6566,
+    2.4
    ],
    "rotation": [
     0.0,
     0.0,
-    90.0
+    204.697
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "....llSsmn..............",
+    "..SsllllmlSm............",
+    "SslllmllnllSsSsl.nnnn...",
+    ".lnllSSsllSSsmlnnnnvvh..",
+    "lnlllllnllllllnSSSsmnh..",
+    "vvvvvvvvvvvvvvvvvlmnhhSl",
+    "mmmmmmmnnmmmmmmmnvvvvvvn",
+    ".mmdmmmmndmmmmmmmnnnhhhn",
+    ".mmmnmmmdnmmmmmmmdmd....",
+    "...mmdnmmmmdmmmm.m......",
+    ".....nm.................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s9",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle8",
+   "id": "sprig8",
    "shape": "card",
    "pivot": [
-    3.2,
-    -1.2363,
-    2.6
+    -3.4,
+    -0.2281,
+    1.9
    ],
    "rotation": [
     0.0,
     0.0,
-    130.0
+    -18.369
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    "...lnnlSSsnhSsn.........",
+    ".lSslslllllllhnSnSSsh...",
+    ".nllllnnmllllnlnlllvvn..",
+    "nlllllnlmlllllnllllnhh..",
+    "vvvvvvvvvvvvvvvvvlnhhhhn",
+    "mnmmnmmmnnmmmmnnnvvvvvvh",
+    ".mdmmdmmmdmmmmmdnnhhhhhh",
+    ".mdmmmdmmddmmmmmndnh....",
+    "...dmmmmnnmmmnmmd.......",
+    "........................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s10",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle9",
+   "id": "sprig9",
    "shape": "card",
    "pivot": [
-    5.35,
-    0.0781,
-    2.6
+    -2.0,
+    -1.2751,
+    2.4
    ],
    "rotation": [
     0.0,
     0.0,
-    50.0
+    183.233
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "........ln..............",
+    "...nSsSslv..............",
+    "Ssnlllllvhllnn...lln....",
+    ".nmlSSSsllmlnlnlsllv....",
+    "nmlllllnlmllnnlllSsnnh..",
+    "vvvvvvvvvvvvvvvvvlnnhhSs",
+    "mmmmmnmmmmmmmmmmmvvvvvvh",
+    ".mmmmmnmmmmmmmmmmmhhhnhh",
+    ".mmmmmmmmmmmmmmmmmnh....",
+    "...mmmmmmmmn..mmmmm.....",
+    "......d.................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s11",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle10",
+   "id": "sprig10",
    "shape": "card",
    "pivot": [
-    7.5,
-    -0.95,
-    2.6
+    -0.6,
+    -0.7978,
+    1.9
    ],
    "rotation": [
     0.0,
     0.0,
-    90.0
+    21.711
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "........lh..............",
+    "...nnnnlSslhSsn.........",
+    ".nSSslSsllllnSsSs.......",
+    ".llnlmllSmSllnnnvh......",
+    "llnlnmlllllllnnlnSSsSs..",
+    "vvvvvvvvvvvvvvvvvlhnhhSh",
+    "mmmmmmmmnmnnmmmmnvvvvvvh",
+    ".mmmmmmmmddnmmmmmnhhhnnh",
+    ".mmmmmmmmdmndmmmmnmh....",
+    "...mmdmmdmdmmmmm.m......",
+    "....mnmm...mm...........",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s12",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle11",
+   "id": "sprig11",
    "shape": "card",
    "pivot": [
-    9.65,
-    0.4794,
-    2.6
+    0.8,
+    -0.296,
+    2.4
    ],
    "rotation": [
     0.0,
     0.0,
-    130.0
+    193.582
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    "...mnSshn...Ssh.........",
+    ".nSslsllSSslnSSshSslm...",
+    ".nnllllllllSslSsnllvvn..",
+    "nnlllllllllllllnSmmnSs..",
+    "vvvvvvvvvvvvvvvvvmnnhShn",
+    "nmmmmmnmmmmnnnnmmvvvvvvm",
+    ".nmmmmmdmmmmmdddmmhhhhhm",
+    ".dmmmmmdmmmmdmndmmmhvm..",
+    "...mdmvvmnm.d.mm.mmmd...",
+    "....mmmn................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s13",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle12",
+   "id": "sprig12",
    "shape": "card",
    "pivot": [
-    11.8,
-    -0.4336,
-    2.6
+    2.2,
+    -1.2699,
+    1.9
    ],
    "rotation": [
     0.0,
     0.0,
-    50.0
+    1.488
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    "......lln..Ssnhm........",
+    "..lnlnllvSsnlnnlnnlh....",
+    ".llnlSlSlSlnlnmllnlh....",
+    "llnlnlllllnnlmllnlnSsn..",
+    "vvvvvvvvvvvvvvvvvnhhnhmn",
+    "mmmnmnmnmnmnmnnnmvvvvvvm",
+    ".mmmnmnmdmmmmmdddmnhnhhm",
+    ".mmmmdmmdmnmdmmddmmd....",
+    "...mnddmddmdmmm..nmm....",
+    ".....dn...mnm...........",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s14",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
   {
-   "id": "needle13",
+   "id": "sprig13",
    "shape": "card",
    "pivot": [
-    13.95,
-    1.1109,
-    2.6
+    3.6,
+    -0.7194,
+    2.4
    ],
    "rotation": [
     0.0,
     0.0,
-    90.0
+    161.177
    ],
    "art": [
-    "....aaaabb",
-    "....aaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "aaaaaaaabb",
-    "aaaaaaaabb",
-    "..aaaaaabb",
-    "..aaaaaabb",
-    "....aaaabb",
-    "....aaaabb"
+    "........................",
+    "........................",
+    "........................",
+    ".....Ss.lh..............",
+    "...SnnSslSnh............",
+    ".SmllsSsnnlmSsn..lnnn...",
+    ".mnllnSslSmlmSSsllnvvh..",
+    "mnlllnlllmllmlllSslnnh..",
+    "vvvvvvvvvvvvvvvvvlnnhnnn",
+    "mmmmmmnmmnmmnnnmmvvvvvvh",
+    ".mmmmmmdmmmmmdddmmhnnhnh",
+    ".mmmmmmdmmdmmmdnmmmhm...",
+    "...dnd...dmmmmmnmmmm....",
+    "........................",
+    "........................",
+    "........................",
+    "........................"
    ],
    "plane": "xy",
    "style": "s15",
    "paint": {
     "art_key": {
-     "a": "pine:4",
-     "b": "pine:2"
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig14",
+   "shape": "card",
+   "pivot": [
+    5.0,
+    -0.1444,
+    1.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    1.213
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    "..nnl...................",
+    ".nnnlllllnSSsnnn........",
+    "nnnllllnllnnlnnmSsSshh..",
+    "vvvvvvvvvvvvvvvvvnhhhhSs",
+    "mmmmmmmmmnmmmmnmmvvvvvvm",
+    ".mmmmmmmmmmmmmmnmmnhhnhm",
+    ".mmmmmmmmmdmmmmmmmmnm...",
+    "...mnmnmn.....md.mmm....",
+    ".....mmm................",
+    "........................",
+    "........................",
+    "........................"
+   ],
+   "plane": "xy",
+   "style": "s16",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig15",
+   "shape": "card",
+   "pivot": [
+    6.4,
+    -1.0451,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    169.609
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "........................",
+    ".........h..............",
+    "...SsnnnmSSs............",
+    ".lnnllSsnnlnmnnlhlln....",
+    ".nlnSlnSSlSSsnlnnllv....",
+    "nlnlllnlllnnllnSlSSSsn..",
+    "vvvvvvvvvvvvvvvvvlhhnhSn",
+    "nmmmnnmnmnnnmnmnmvvvvvvn",
+    ".dmnmndmnmdnmmdmdmhhhnhn",
+    ".dmmnmnmdmdndmmdnmmh....",
+    "...mdnmnndmdm.mmddmm....",
+    "....ndmd................",
+    "........................",
+    "........................",
+    "........................"
+   ],
+   "plane": "xy",
+   "style": "s17",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig16",
+   "shape": "card",
+   "pivot": [
+    7.8,
+    -0.4214,
+    1.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    22.641
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "........................",
+    "........hh..............",
+    "......Sshvh.............",
+    "..SsllSsnlllSsnSsnnh....",
+    ".lnllSllSnnlllnmsnnh....",
+    "lnllnllnlnlllnmSmllSsh..",
+    "vvvvvvvvvvvvvvvvvlhhhnSs",
+    "mmmmnmmnnmnnmmmmnvvvvvvh",
+    ".mmnmdmmndnnnmmmmnhhmhnh",
+    ".mmmdmnmdnmnnnmmmdmh....",
+    "...nmmmmm...mdm..mmm....",
+    "........................",
+    "........................",
+    "........................",
+    "........................"
+   ],
+   "plane": "xy",
+   "style": "s18",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig17",
+   "shape": "card",
+   "pivot": [
+    9.2,
+    0.2266,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    169.883
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "........................",
+    ".........m..............",
+    "...llSslSslmShn.........",
+    ".mSllnSSsllSshlSsmnSs...",
+    ".nllllllnlSsnSSsmmnvvn..",
+    "nlllnlllnnllnlllnlSshh..",
+    "vvvvvvvvvvvvvvvvvlhhhhmn",
+    "mnmnmmmmmmmnmmnmmvvvvvvh",
+    ".mdddmmmmmmmdmmnmmhhmnhh",
+    ".mnmddmmmmmmdnmmmmmhm...",
+    "...dmm...mmmm.mdndmm....",
+    "...........mm...........",
+    "........................",
+    "........................",
+    "........................"
+   ],
+   "plane": "xy",
+   "style": "s19",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig18",
+   "shape": "card",
+   "pivot": [
+    10.6,
+    -0.6009,
+    1.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -21.54
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "........................",
+    ".......SSs..............",
+    "...SsSslSSsnnhh.........",
+    ".SlSsnSslSsSshSsmlnh....",
+    ".lllllllnllllnlnnlnh....",
+    "llllnllnnlllllnnSnlnSs..",
+    "vvvvvvvvvvvvvvvvvlnhhnhm",
+    "mmnmnnnmnmmmmmnmnvvvvvvn",
+    ".mmmmnndmdmmmmmdmnhhnmhn",
+    ".mmdmmndmdmmmmmmmdmh....",
+    "......mmdmdmmmmmn.......",
+    "...........nd.mm........",
+    "........................",
+    "........................",
+    "........................"
+   ],
+   "plane": "xy",
+   "style": "s20",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig19",
+   "shape": "card",
+   "pivot": [
+    12.0,
+    0.096,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    162.659
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "........................",
+    ".....Sn.................",
+    "...Ssnvh.nSs............",
+    "SsnSsvSslnnSsnSs.lnn....",
+    ".nnllnmmnSSSsnllslnn....",
+    "nnllnnmnnlllllllllSshh..",
+    "vvvvvvvvvvvvvvvvvnhhhnSs",
+    "mmmmmmnnnmmmmnnmmvvvvvvm",
+    ".mmnmmmndnmmmmdnmmnhnhnm",
+    ".mmmnmmddnmmmmmdmmnn....",
+    "...mmmmmmmmdmm..........",
+    ".....mn.................",
+    "........................",
+    "........................",
+    "........................"
+   ],
+   "plane": "xy",
+   "style": "s21",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig20",
+   "shape": "card",
+   "pivot": [
+    13.4,
+    0.8173,
+    1.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    10.71
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "........................",
+    "....Ssh.................",
+    "...lnlvh................",
+    "SslnmmSs.SsSSsSsSsn.....",
+    ".llnmnSsSnllmnSsllnn....",
+    "llnmnnllllllmllnnlSsnn..",
+    "vvvvvvvvvvvvvvvvvlhnnhnh",
+    "nnmmnnmmmmmmmmnmmvvvvvvh",
+    ".nddmdnmmmmmmmmdmmhhhmhh",
+    ".ndmdmdmmmmmmmmmmmmh....",
+    "...mmddmmv..m...........",
+    ".....dm.md..............",
+    "........................",
+    "........................",
+    "........................"
+   ],
+   "plane": "xy",
+   "style": "s22",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig21",
+   "shape": "card",
+   "pivot": [
+    14.8,
+    0.0629,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    161.489
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    "...ShSsnhnmhllh.........",
+    ".SSsnllllnSsllnlnnm.....",
+    ".lllnlnnnlSmlnnllnSs....",
+    "lllnnlnlnlmmlnllnlSsnh..",
+    "vvvvvvvvvvvvvvvvvlhnhnnm",
+    "mmnnmmmmmmmmmmmmnvvvvvvn",
+    ".mmnnmmmmmmmmmmmmnhhhnnn",
+    ".mmnddmmmmmmmmmmmnmh....",
+    "...mdmd.......mmmm......",
+    "........................",
+    "........................",
+    "........................",
+    "........................"
+   ],
+   "plane": "xy",
+   "style": "s23",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
     }
    }
   },
@@ -1945,7 +2657,7 @@
     false,
     false
    ],
-   "style": "s16",
+   "style": "s24",
    "up": [
     0,
     0,
@@ -2026,7 +2738,7 @@
     false,
     false
    ],
-   "style": "s17",
+   "style": "s25",
    "up": [
     0,
     0,
@@ -2107,7 +2819,7 @@
     false,
     false
    ],
-   "style": "s18",
+   "style": "s26",
    "up": [
     0,
     0,
@@ -2188,7 +2900,7 @@
     false,
     false
    ],
-   "style": "s19",
+   "style": "s27",
    "up": [
     0,
     0,
@@ -2269,7 +2981,7 @@
     false,
     false
    ],
-   "style": "s20",
+   "style": "s28",
    "up": [
     0,
     0,
@@ -2350,7 +3062,7 @@
     false,
     false
    ],
-   "style": "s21",
+   "style": "s29",
    "up": [
     0,
     0,
@@ -2370,7 +3082,7 @@
     1.6,
     0.5
    ],
-   "style": "s22"
+   "style": "s30"
   },
   {
    "id": "st0",
@@ -2467,7 +3179,7 @@
     true,
     true
    ],
-   "style": "s23",
+   "style": "s31",
    "up": [
     0,
     0,
@@ -2539,7 +3251,7 @@
     false,
     true
    ],
-   "style": "s24",
+   "style": "s32",
    "up": [
     0,
     0,
@@ -2622,7 +3334,7 @@
     false,
     false
    ],
-   "style": "s25",
+   "style": "s33",
    "up": [
     0,
     0,
@@ -2642,7 +3354,7 @@
     1.6,
     0.5
    ],
-   "style": "s26"
+   "style": "s34"
   },
   {
    "id": "st1",
@@ -2739,7 +3451,7 @@
     true,
     true
    ],
-   "style": "s27",
+   "style": "s35",
    "up": [
     0,
     0,
@@ -2811,7 +3523,7 @@
     false,
     true
    ],
-   "style": "s28",
+   "style": "s36",
    "up": [
     0,
     0,
@@ -2894,7 +3606,7 @@
     false,
     false
    ],
-   "style": "s29",
+   "style": "s37",
    "up": [
     0,
     0,
@@ -2914,7 +3626,7 @@
     1.6,
     0.5
    ],
-   "style": "s30"
+   "style": "s38"
   },
   {
    "id": "st2",
@@ -3011,7 +3723,7 @@
     true,
     true
    ],
-   "style": "s31",
+   "style": "s39",
    "up": [
     0,
     0,
@@ -3083,7 +3795,7 @@
     false,
     true
    ],
-   "style": "s32",
+   "style": "s40",
    "up": [
     0,
     0,
@@ -3166,7 +3878,7 @@
     false,
     false
    ],
-   "style": "s33",
+   "style": "s41",
    "up": [
     0,
     0,
@@ -3237,7 +3949,7 @@
     true,
     true
    ],
-   "style": "s34"
+   "style": "s42"
   }
  ],
  "animations": {

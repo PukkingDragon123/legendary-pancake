@@ -22,6 +22,30 @@ material, pieces re-laid (the tea set) and fitted to the item's footprint.
 | `mint_typewriter` | 1930s style typewriter - w/o branding | Kuba "Volant" Wójcik | CC BY 4.0 | https://sketchfab.com/3d-models/1930s-style-typewriter-wo-branding-1d6009449fe84fd79454c4081eb743bf | Gacha Garage `models/lowpix/world/typewriter.glb` |
 | `rose_tea_set` | Tea Set 01 | James Ray Cock, Rico Cilliers, Jurita Burger | CC0 1.0 | https://polyhaven.com/a/tea_set_01 | Gacha Garage `models/lowpix/world/tea_set.glb` |
 
+## Wall art: real public-domain artworks
+
+Every picture shown by a wall-art item is a real artwork from the Art Institute of Chicago's open collection
+(public-domain images, CC0 data, fetched from `api.artic.edu` / `www.artic.edu/iiif`). The images are kept small in
+`art/lowpix/items/_furnc/artworks/` (≤ 256 px JPEG) and pixel-graded onto each item's texel grid by `Spec.art_card` in
+`lib.py`: cropped to the frame, resampled, slightly desaturated and warmed toward the calm palette, quantised to
+44-48 colours. Nothing in them is drawn by us.
+
+| item id | where | artwork | artist | date | source |
+|---|---|---|---|---|---|
+| `photo_frames` | big oak frame | Stacks of Wheat (End of Summer) | Claude Monet | 1890–91 | https://www.artic.edu/artworks/64818 |
+| `photo_frames` | gilt oval (upper part of the print) | Cuckoo, pine branch, and full moon | Utagawa Hiroshige | c. 1843/47 | https://www.artic.edu/artworks/47547 |
+| `photo_frames` | small square frame | Roses in a Bowl | Henri Fantin-Latour | 1881 | https://www.artic.edu/artworks/20534 |
+| `photo_frames` | little round frame | Apples and Grapes | Claude Monet | 1880 | https://www.artic.edu/artworks/16549 |
+| `owl_tapestry` | woven into the hanging | Owl on pine branch | Utagawa Hiroshige | 1830s | https://www.artic.edu/artworks/47662 |
+| `hollow_map` | the whole scroll | Sampler (Map) | England (unknown maker) | c. 1800 | https://www.artic.edu/artworks/15132 |
+
+## Foliage
+
+Every leafy thing of mine is built from 2D hand-pixelled leaf cards (alpha-cut quads, many per plant), drawn
+procedurally needle by needle and leaf by leaf in `art/lowpix/items/_furnc/foliage.py` (fir sprigs, leaf clusters,
+single leaves): the Frostlight fir, wreath, stocking garland, poinsettia, the firs on the gingerbread cottage, in the
+snow globe and by the toy train, the snow globe's oak crown and the bird feeder's ivy. Our own work, CC0.
+
 ## Photo textures (material relief under the painted ramps)
 
 The lowpix-modelled items photo-bash real material relief (lowpix `photo` op, `detail` mode: the colours stay on our

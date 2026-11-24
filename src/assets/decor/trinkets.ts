@@ -258,7 +258,7 @@ const FLOWER_PAL = { c: 0xf4ead0, p: 0xe8708a, y: 0xf6d04a, g: 0x5f9a52 };
 
 add({
   id: 'photo_frames', model: 'items/photo_frames.glb', name: 'Family Picture Wall', cat: 'decor', price: 220, rarity: 'uncommon', size: [2, 1], wall: true,
-  blurb: 'A portrait of Pip on a branch, a sunset over the far hills and one pressed rosebud.',
+  blurb: 'Real paintings and prints on twine: Monet’s wheat stacks, Hiroshige’s cuckoo and full moon, Fantin-Latour’s roses and a little Monet still life.',
   build: () => {
     const out: BoxSpec[] = [];
     out.push(...framed(0, 0, 16, 16, pix(PIP, PIP_PAL, solid('#8fb8e0')), MET.gold, 1.4));
@@ -295,8 +295,8 @@ add({
 });
 
 add({
-  id: 'owl_tapestry', model: 'items/owl_tapestry.glb', name: 'Owl Crest Tapestry', cat: 'decor', price: 280, rarity: 'uncommon', size: [1, 1], wall: true,
-  blurb: 'Hand-stitched with the hollow’s crest: an owl, a moon and seven sleepy stars.',
+  id: 'owl_tapestry', model: 'items/owl_tapestry.glb', name: 'Owl & Pine Wall Hanging', cat: 'decor', price: 280, rarity: 'uncommon', size: [1, 1], wall: true,
+  blurb: 'Hiroshige’s woodblock print Owl on Pine Branch, woven into a pine-green hanging with gold stitching and tassels.',
   build: () => {
     const out: BoxSpec[] = [];
     const crest = [
@@ -405,8 +405,8 @@ add({
 });
 
 add({
-  id: 'hollow_map', model: 'items/hollow_map.glb', name: 'Map of the Hollow', cat: 'wall', price: 260, rarity: 'uncommon', size: [2, 1], wall: true,
-  blurb: 'Every path Pip has flown, inked on parchment. X marks the best blueberry bush.',
+  id: 'hollow_map', model: 'items/hollow_map.glb', name: 'Embroidered Map Sampler', cat: 'wall', price: 260, rarity: 'uncommon', size: [2, 1], wall: true,
+  blurb: 'A real silk-stitched map sampler from about 1800, hung like a scroll between two walnut dowels.',
   build: () => {
     const out: BoxSpec[] = [];
     const map: Painter = (t) => {

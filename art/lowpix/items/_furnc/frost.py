@@ -3,7 +3,8 @@ lights, gingerbread cottage, snow globe, sleigh bed, nutcracker, candy cane, coc
 stockings, snowflake rug and icicle lights."""
 import math
 
-from lib import Spec, bezier, circle, cycle_keys, cloth, glass, glaze, glow, hsh, knit, leafy, metal, paper, plain, rotz, snowy, wood
+from foliage import FIR_KEY, LEAF_KEY, bush, card_style, fir, fir_sprig, leaf_cluster, single_leaf
+from lib import HD, Spec, bezier, circle, cycle_keys, cloth, glass, glaze, glow, hsh, knit, leafy, metal, paper, plain, rotz, snowy, wood
 from pix import Pix, star_pts
 
 ITEMS = {}
@@ -85,25 +86,7 @@ def xmas_tree():
     S.lathe("body", [(6.8, 8.4), (5.4, 14.0), (3.8, 22.0), (2.0, 30.0), (0.2, 38.0)], (0, 0, 0),
             leafy("pine", tone=2.6), sides=10, caps=(True, False), subdiv=0)
 
-    def branch_art(x, y, cols, rows):
-        u, v = (x + 0.5) / cols, (y + 0.5) / rows * 2 - 1        # u along the branch, v across it
-        half = 0.95 * (1 - u ** 1.6) ** 0.5 * (0.75 + 0.25 * math.sin(u * 3.1))
-        rib = abs(v) < 0.08 and u < 0.92
-        side = abs(abs(v) - (u * 0.0 + ((u * 7.0) % 1.0) * 0.9)) < 0.1 and u > 0.08
-        if abs(v) > half + 0.12 * math.sin(x * 2.1 + y * 1.3):
-            return "."
-        if rib:
-            return "d"
-        n = hsh(x // 2, y // 2, 7)
-        tip = u > 0.84 or abs(v) > half - 0.12
-        if tip and v < 0 and n > 0.55:
-            return "s"
-        if side:
-            return "d"
-        if tip:
-            return "c" if n > 0.4 else "b"
-        return "a" if (x + y) % 3 else ("b" if n > 0.5 else "d")
-
+    d = S.density * HD
     n = 0
     for k, (r, y, h) in enumerate(tiers):
         cnt = max(6, 13 - k)
@@ -112,21 +95,21 @@ def xmas_tree():
             L = r * (1.02 + (hsh(j, k, 3) - 0.5) * 0.2)
             S.bone(f"bj{n}", (0, y + 0.4, 0), rot=(0, -a, 0))
             droop = 22 + k * 3 + (hsh(k, j, 5) - 0.5) * 10
-            S.pcard(f"branch{n}", L, max(2.6, L * 0.8), branch_art,
-                    {"a": "pine:4", "b": "pine:5", "c": "pine:6", "d": "pine:2", "w": "bark:3", "s": "snow:6"},
-                    S.at(f"bj{n}", (L / 2 * math.cos(math.radians(droop)), -L / 2 * math.sin(math.radians(droop)), 0)),
-                    style=flat("pine", light=0.8), parent=f"bj{n}", plane="xz", rot=(0, 0, -droop),
-                    pivot=S.at(f"bj{n}", (0, 0, 0)))
+            art = fir_sprig(max(8, round(L * d)), max(6, round(L * 0.8 * d)), seed=n, snow=0.22, droop=0.35)
+            S.card(f"branch{n}", art,
+                   S.at(f"bj{n}", (L / 2 * math.cos(math.radians(droop)), -L / 2 * math.sin(math.radians(droop)), 0)),
+                   card_style("pine", 0.8), parent=f"bj{n}", plane="xz", rot=(0, 0, -droop),
+                   pivot=S.at(f"bj{n}", (0, 0, 0)), key=FIR_KEY, native=True)
             n += 1
         # a second, upturned layer between the whorls fills the gaps
         for j in range(max(3, cnt - 3)):
             a = (j + 0.5) * 360 / max(3, cnt - 3) + k * 23
             L = r * 0.8
             S.bone(f"bu{n}", (0, y + h * 0.45, 0), rot=(0, -a, 0))
-            S.pcard(f"branch{n}", L, max(2.2, L * 0.6), branch_art,
-                    {"a": "pine:5", "b": "pine:4", "c": "pine:6", "d": "pine:3", "w": "bark:3", "s": "snow:6"},
-                    S.at(f"bu{n}", (L / 2 * 0.94, -L / 2 * 0.34, 0)), style=flat("pine", light=0.8), parent=f"bu{n}",
-                    plane="xz", rot=(0, 0, -20), pivot=S.at(f"bu{n}", (0, 0, 0)))
+            art = fir_sprig(max(8, round(L * d)), max(6, round(L * 0.65 * d)), seed=n + 500, snow=0.15, droop=0.2)
+            S.card(f"branch{n}", art, S.at(f"bu{n}", (L / 2 * 0.94, -L / 2 * 0.34, 0)), card_style("pine", 0.8),
+                   parent=f"bu{n}", plane="xz", rot=(0, 0, -20), pivot=S.at(f"bu{n}", (0, 0, 0)), key=FIR_KEY,
+                   native=True)
             n += 1
     # gold tinsel spiral
     helix = []
@@ -290,8 +273,7 @@ def gingerbread_house():
     S.card("owlman", om.rows, (-6.4, 4.4, 8.4), flat("ginger"), rot=(0, 20, 0),
            key={"g": "ginger:4", "i": "icing:5", "k": "soot:0", "b": "holly:4"})
     for k, (x, z, h) in enumerate([(7.6, 7.6, 6.0), (-8.6, 4.0, 4.8)]):
-        S.lathe(f"fir{k}", [(2.2, 0), (1.0, h * 0.45), (1.6, h * 0.45), (0.1, h)], (x, 1.6, z), leafy("pine", tone=4.6, snow=True),
-                sides=8, subdiv=0)
+        fir(S, f"fir{k}", (x, 1.6, z), h, 2.4, tiers=4, snow=0.45, seed=k)
     return S
 
 
@@ -317,12 +299,11 @@ def snow_globe():
     S.lathe("oak", [(1.8, 5.6), (1.4, 7.0), (1.2, 9.4), (1.5, 10.4)], (-0.6, 0, -0.8), bark, sides=9)
     for k, (x, y, z, r) in enumerate([(-0.6, 12.0, -0.8, 2.6), (-2.2, 11.0, -0.2, 1.7), (1.0, 11.4, -1.2, 1.8),
                                       (-0.4, 13.4, -1.4, 1.6)]):
-        S.ball(f"crown{k}", r, (x, y, z), leafy("leaf", tone=3.8, snow=True), sides=8, rings=5)
+        bush(S, f"crown{k}", (x, y, z), r, ramp="leaf", cards=9 if r > 2 else 6, seed=k, squash=(1, 0.85, 1))
     S.card("glow_door", [".ww.", "wwww", "wwww", "wwWw", "wwww"], (-0.6, 6.6, 0.95), glow("flame"),
            key={"w": "flame:4", "W": "flame:2"})
     S.card("glow_window", ["ww", "ww"], (0.2, 8.8, 0.62), glow("flame"), key={"w": "flame:5"}, rot=(0, 20, 0))
-    S.lathe("fir", [(1.4, 6.0), (0.6, 7.6), (1.0, 7.6), (0.1, 9.6)], (2.6, 0, 0.6), leafy("pine", tone=4.6, snow=True),
-            sides=7, subdiv=0)
+    fir(S, "fir", (2.6, 6.0, 0.6), 3.8, 1.6, tiers=3, snow=0.4, seed=3)
     S.cyl("stalk", 0.3, 0.8, (-2.4, 6.0, 2.0), plain("cream", tone=4.6), sides=5)
     S.lathe("toad", [(0.9, 0), (0.75, 0.4), (0.1, 0.7)], (-2.4, 6.8, 2.0), plain("holly", tone=4.4, gloss=True, layers=[
         {"id": "dots", "op": "spots", "count": 4, "radius": [0.12, 0.16], "ramp": "cream", "tone": 6}]), sides=7, subdiv=0)
@@ -577,27 +558,23 @@ def wreath():
              desc="A full fir wreath dusted with snow: holly sprigs with glossy berries, pine cones, a velvet berry bow "
                   "with long tails and two little brass bells that swing.")
     cy = 10.0
-    S.tube("ring", circle((0, cy, 1.6), 7.4, 16, "xy"), [2.3] * 18, leafy("pine", tone=4.0, snow=True), sides=8,
+    # a willow hoop bound with three rings of overlapping fir sprigs (pixel-art cards, needle by needle)
+    S.tube("ring", circle((0, cy, 1.2), 7.4, 16, "xy"), [1.0] * 18, plain("bark", tone=2.6, noise=0.6), sides=6,
            caps=(False, False))
-    tip = Pix(9, 5)
-    tip.poly([(0, 2.5), (8.5, 0.3), (9, 2.5), (8.5, 4.7)], "a")
-    tip.line(0, 2.5, 8, 2.5, "b")
-    tip.set(7, 1, "s"), tip.set(8, 1, "s")
-    for j in range(24):
-        a = j * 15 + (j % 2) * 6
-        rr = 7.4 + (2.0 if j % 2 else -2.0)
-        ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
-        S.card(f"needles{j}", tip.rows, (ca * rr, cy + sa * rr, 2.4 + (j % 3) * 0.5), flat("pine"),
-               rot=(0, 0, a + (90 if j % 2 else -90) * 0.4), key={"a": "pine:4", "b": "pine:2", "s": "snow:6"})
-    holly = Pix(12, 7)
-    holly.poly([(0, 3.5), (2, 1), (4, 2.2), (6, 0), (8, 2.2), (10, 1), (12, 3.5), (10, 6), (8, 4.8), (6, 7), (4, 4.8), (2, 6)], "a")
-    holly.line(0, 3.5, 12, 3.5, "b")
+    d = S.density * HD
+    for ring, (rr, z, cnt, L) in enumerate([(5.6, 1.6, 14, 4.8), (7.4, 2.4, 18, 5.6), (9.0, 1.8, 18, 4.8)]):
+        for j in range(cnt):
+            a = j * 360 / cnt + ring * 9
+            ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
+            art = fir_sprig(max(8, round(L * d)), max(6, round(L * 0.7 * d)), seed=ring * 40 + j, snow=0.18, droop=0.2)
+            S.card(f"sprig{ring}_{j}", art, (ca * rr, cy + sa * rr, z + (j % 2) * 0.3), card_style("pine", 0.8),
+                   rot=(10 * (ring - 1), 0, a + 100 + (hsh(ring, j) - 0.5) * 30), key=FIR_KEY, native=True)
     for j, a in enumerate((20, 140, 250)):
         ca, sa = math.cos(math.radians(a)), math.sin(math.radians(a))
         x, y = ca * 7.6, cy + sa * 7.6
-        for m in range(3):
-            S.card(f"holly{j}_{m}", holly.rows, (x + math.cos(m * 2.1) * 1.3, y + math.sin(m * 2.1) * 1.3, 3.9),
-                   flat("pine"), rot=(0, 0, m * 120 + a), key={"a": "leaf:3", "b": "leaf:5"})
+        hk = dict(LEAF_KEY)
+        S.card(f"holly{j}", leaf_cluster(round(5.0 * d), round(5.0 * d), seed=j * 7, leaves=6, shape="holly"),
+               (x, y, 3.9), card_style("leaf", 0.8), rot=(0, 0, a), key=hk, native=True)
         for m in range(4):
             S.ball(f"berry{j}_{m}", 0.55, (x + (m % 2 - 0.5) * 1.0, y + (m // 2 - 0.5) * 0.9, 4.4), plain("holly", tone=4.4,
                    gloss=True), sides=6, rings=3)
@@ -649,31 +626,24 @@ def poinsettia():
     bw.poly([(0, 0), (5, 2.5), (0, 6)], "a"), bw.poly([(10, 0), (5, 2.5), (10, 6)], "a")
     bw.disc(5, 3, 1.2, "b")
     S.card("bow", bw.rows, (0, 4.0, 3.9), flat("holly"), key={"a": "holly:4", "b": "holly:2"}, rot=(-14, 0, 0))
-    leaf = Pix(7, 14)
-    leaf.poly([(3.5, 0), (6.5, 4), (5.5, 10), (3.5, 14), (1.5, 10), (0.5, 4)], "a")
-    leaf.line(3.5, 1, 3.5, 13, "v")
-    for k in range(3):
-        leaf.line(3.5, 5 + k * 3, 1.5, 3.5 + k * 3, "v"), leaf.line(3.5, 5 + k * 3, 5.5, 3.5 + k * 3, "v")
-    bract = Pix(10, 14)
-    bract.poly([(5, 0), (9, 3), (9.8, 6.5), (7.5, 11), (5, 14), (2.5, 11), (0.2, 6.5), (1, 3)], "a")
-    bract.line(5, 1, 5, 13, "v")
-    for k in range(3):
-        bract.line(5, 4 + k * 3, 2.2, 2.6 + k * 3, "v"), bract.line(5, 4 + k * 3, 7.8, 2.6 + k * 3, "v")
-    bract.map(lambda x, y, c: ("f" if c == "a" and y < 3 else c))
-    # green leaves underneath, then two rosettes of red bracts with golden buds
+    # green leaves underneath, then rosettes of crimson bracts frosted at the tips: each leaf a hand-pixelled card
+    d = S.density * HD
+    bract_key = {"d": "berry:1", "n": "berry:2", "m": "berry:4", "l": "berry:5", "h": "berry:6", "v": "berry:3",
+                 "s": "snow:6", "S": "snow:5"}
     for j in range(7):
         a = j * 360 / 7 + 10
-        S.card(f"leaf{j}", leaf.rows, (math.cos(math.radians(a)) * 3.6, 6.6, math.sin(math.radians(a)) * 3.6), flat("leaf"),
+        S.card(f"leaf{j}", single_leaf(round(2.4 * d), round(4.6 * d), shape="ovate", seed=j),
+               (math.cos(math.radians(a)) * 3.6, 6.6, math.sin(math.radians(a)) * 3.6), card_style("leaf", 0.8),
                pivot=(math.cos(math.radians(a)) * 1.4, 6.0, math.sin(math.radians(a)) * 1.4), rot=(72, 90 - a, 0),
-               key={"a": "leaf:3", "v": "leaf:5"})
+               key=LEAF_KEY, native=True)
     centres = [(0.0, 9.2, 0.0, 7), (-1.8, 8.2, 1.6, 5), (1.9, 8.0, -1.2, 5)]
     for c, (cx, cy, cz, n) in enumerate(centres):
         for j in range(n):
             a = j * 360 / n + c * 30
             r = 2.4 if c == 0 else 1.8
-            S.card(f"bract{c}_{j}", bract.rows, (cx + math.cos(math.radians(a)) * r, cy + 0.4, cz + math.sin(math.radians(a)) * r),
-                   flat("holly"), pivot=(cx, cy, cz), rot=(64 + c * 6, 90 - a, 0),
-                   key={"a": "berry:5", "v": "berry:3", "f": "snow:6"})
+            S.card(f"bract{c}_{j}", single_leaf(round(3.2 * d), round(4.6 * d), shape="ovate", seed=c * 10 + j, frost=True),
+                   (cx + math.cos(math.radians(a)) * r, cy + 0.4, cz + math.sin(math.radians(a)) * r),
+                   card_style("berry", 0.85), pivot=(cx, cy, cz), rot=(64 + c * 6, 90 - a, 0), key=bract_key, native=True)
         for m in range(3):
             S.ball(f"bud{c}_{m}", 0.35, (cx + (m - 1) * 0.45, cy + 0.6, cz + (m % 2) * 0.3), plain("honey", tone=5, gloss=True),
                    sides=6, rings=3)
@@ -747,12 +717,14 @@ def stockings():
                   "stripes, sage with snowflake dots and honey with a cable band, fluffy cuffs, and a candy cane "
                   "poking out of one.")
     pts = [(-15.0 + 30.0 * i / 10, 0.6 - 1.4 * (1 - ((i / 10) * 2 - 1) ** 2), 1.6) for i in range(11)]
-    S.tube("garland", pts, 1.3, leafy("pine", tone=4.2, snow=True), sides=7)
-    tip = ["..aab", ".aaab", "aaaab", ".aaab", "..aab"]
-    for j in range(14):
-        x = -14.0 + j * 2.15
-        S.card(f"needle{j}", tip, (x, pts[0][1] - 0.5 - 1.4 * (1 - (x / 15) ** 2) + (j % 2) * 1.2, 2.6), flat("pine"),
-               rot=(0, 0, 90 + (j % 3 - 1) * 40), key={"a": "pine:4", "b": "pine:2"})
+    S.tube("garland", pts, 0.6, plain("bark", tone=2.6, noise=0.6), sides=6)
+    d = S.density * HD
+    for j in range(22):
+        x = -14.6 + j * 1.4
+        y = 0.6 - 1.4 * (1 - (x / 15) ** 2) + ((j % 3) - 1) * 0.5
+        art = fir_sprig(round(4.2 * d), round(3.0 * d), seed=j, snow=0.2, droop=0.2)
+        S.card(f"sprig{j}", art, (x, y, 1.9 + (j % 2) * 0.5), card_style("pine", 0.8),
+               rot=(0, 0, (180 if j % 2 else 0) + (hsh(j, 4) - 0.5) * 50), key=FIR_KEY, native=True)
     for j in range(6):
         x = -12.5 + j * 5.0
         S.ball(f"berry{j}", 0.55, (x, 0.2 - 1.4 * (1 - (x / 15) ** 2) + 1.0, 3.0), plain("holly", tone=4.4, gloss=True),

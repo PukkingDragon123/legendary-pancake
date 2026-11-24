@@ -458,6 +458,44 @@ class Spec:
                        "rim": {"light": 0, "dark": 0}}
         return self.card(id, a, centre, st, parent=parent, rot=rot, plane=plane, pivot=pivot, key=key, native=True, **kw)
 
+    def art_card(self, id, image, w, h, centre, parent=None, rot=None, plane="xy", pivot=None, crop=None, colours=44,
+                 mask=None, sat=0.9, warm=0.08, ramp="paper"):
+        """A real artwork (a public-domain image file) as a pixel-graded card of w x h px: cropped to fit, resampled
+        to the item's texel grid, gently graded toward the calm palette and quantised to a small palette.
+        mask(x, y, cols, rows) -> False punches a texel out (oval and round frames)."""
+        from PIL import Image
+        d = self.density * HD
+        cols, rows = max(2, round(w * d)), max(2, round(h * d))
+        im = Image.open(image).convert("RGB")
+        W, H = im.size
+        if crop:
+            im = im.crop((int(crop[0] * W), int(crop[1] * H), int(crop[2] * W), int(crop[3] * H)))
+            W, H = im.size
+        want = cols / rows
+        if W / H > want:
+            nw = int(H * want)
+            im = im.crop(((W - nw) // 2, 0, (W - nw) // 2 + nw, H))
+        else:
+            nh = int(W / want)
+            im = im.crop((0, (H - nh) // 2, W, (H - nh) // 2 + nh))
+        im = im.resize((cols, rows), Image.LANCZOS)
+        a = np.asarray(im).astype(np.float32) / 255.0
+        lum = (a @ np.array([0.3, 0.55, 0.15], np.float32))[..., None]
+        a = lum + (a - lum) * sat
+        lamp = np.array([(P["lamp"] >> 16) & 255, (P["lamp"] >> 8) & 255, P["lamp"] & 255], np.float32) / 255.0
+        a = a * (1 - warm * lum) + lamp * warm * lum
+        im = Image.fromarray(np.clip(a * 255, 0, 255).astype(np.uint8), "RGB")
+        q = im.quantize(colors=colours, method=Image.Quantize.MEDIANCUT, dither=Image.Dither.NONE)
+        pal = q.getpalette()
+        chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        idx = np.asarray(q)
+        key = {chars[i]: "#%02x%02x%02x" % tuple(pal[i * 3:i * 3 + 3]) for i in range(min(colours, len(chars))) if (idx == i).any()}
+        art = []
+        for y in range(rows):
+            art.append("".join(chars[idx[y, x]] if (mask is None or mask(x, y, cols, rows)) else "." for x in range(cols)))
+        st = {"ramp": ramp, "tone": 4, "light": 0.0, "brush": {"off": True}, "rim": {"light": 0, "dark": 0}}
+        return self.card(id, art, centre, st, parent=parent, rot=rot, plane=plane, pivot=pivot, key=key, native=True)
+
     def paint(self, id, **kw):
         """Per-part paint overrides (layers append, stamps append)."""
         for p in self.parts:

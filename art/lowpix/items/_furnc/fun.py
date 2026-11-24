@@ -1,7 +1,8 @@
 """Fun things that move: goldfish bowl, aquarium, clockwork train, rocking horse, music box, arcade, wheel, feeder."""
 import math
 
-from lib import Spec, bezier, circle, cloth, glass, glaze, glow, hsh, knit, leafy, metal, paper, plain, wood
+from foliage import FIR_KEY, LEAF_KEY, bush, card_style, fir, fir_sprig, leaf_cluster, single_leaf
+from lib import HD, Spec, bezier, circle, cloth, glass, glaze, glow, hsh, knit, leafy, metal, paper, plain, wood
 from pix import Pix, star_pts
 
 ITEMS = {}
@@ -305,8 +306,7 @@ def toy_train():
         {"id": "band", "op": "band", "axis": "x", "from": 0.3, "to": 0.6, "ramp": "cream", "tone": 5}]), rot=(0, 0, 20))
     S.ball("glow_signal", 0.45, (6.6, 5.2, 4.5), glow("ember", tone=4.0), sides=6, rings=3)
     S.cyl("trunk", 0.5, 2.0, (5.0, 0.3, -3.6), plain("bark", tone=3.4), sides=6)
-    S.lathe("fir", [(3.0, 1.6), (1.6, 3.6), (2.4, 3.6), (1.2, 5.6), (1.8, 5.6), (0.1, 8.2)], (5.0, 0.3, -3.6),
-            leafy("pine", tone=4.2), sides=8, subdiv=0)
+    fir(S, "fir", (5.0, 1.6, -3.6), 6.8, 3.0, tiers=4, snow=0.0, seed=1)
     # the train: engine, tender and passenger car, each riding its own joint round the loop
     berry = plain("berry", tone=4.0, gloss=True, layers=[
         {"id": "chips", "op": "wear", "width": 1, "density": 0.15, "ramp": "iron", "tone": 3}])
@@ -698,12 +698,13 @@ def bird_feeder():
     S.box("gable_b", (5.0, 2.6, 0.4), (0, 31.4, -4.6), oak)
     S.tube("perch", [(-6.0, 24.6, 3.6), (6.0, 24.6, 3.6)], 0.25, wood("pale", tone=4.6, knots=False), sides=5)
     # ivy up the post
-    leaf = [".aa.", "aaab", "aabb", ".ab."]
-    for k in range(7):
-        y = 3.0 + k * 2.8
+    d = S.density * HD
+    for k in range(9):
+        y = 2.6 + k * 2.2
         s = 1 if k % 2 else -1
-        S.card(f"ivy{k}", leaf, (s * 1.05, y, 0.95 - (k % 3) * 0.5), flat("leaf"), key={"a": "leaf:5", "b": "leaf:3"},
-               rot=(0, 90 * s, 20 * s))
+        S.card(f"ivy{k}", leaf_cluster(round(2.4 * d), round(2.4 * d), seed=k, leaves=4, shape="round"),
+               (s * 1.05, y, 0.95 - (k % 3) * 0.5), card_style("leaf", 0.8), key=LEAF_KEY, native=True,
+               rot=(0, 90 * s, 0))
     S.tube("ivy_vine", [(0.95, 2.0, 0.95), (-0.95, 6.0, 0.6), (0.95, 10.0, 0.0), (-0.95, 14.0, -0.5), (0.95, 19.0, 0.4)],
            0.12, plain("leaf", tone=2.8), sides=3)
     # Sid the bluebird on the tray edge: body, head, beak, tail, wings

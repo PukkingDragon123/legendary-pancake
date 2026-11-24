@@ -1,6 +1,6 @@
 {
  "name": "hollow_map",
- "description": "A parchment map of every path Pip has flown, hung between two walnut dowels: the great oak, the winding river and lake, a little forest, dashed paths, a compass rose and an X at the best blueberry bush.",
+ "description": "A real embroidered map sampler (England, about 1800, Art Institute of Chicago, public domain), hung like a scroll between two walnut dowels with turned knobs and a honey cord.",
  "author": "Hoot Hollow (furnC lowpix kit)",
  "license": "CC0-1.0",
  "density": 6.0,
@@ -59,45 +59,6 @@
  },
  "palette": {
   "ramps": {
-   "bark": [
-    "#2b2c2d",
-    "#3a312a",
-    "#514236",
-    "#65503c",
-    "#6d5a47",
-    "#706b62",
-    "#908a7e"
-   ],
-   "berry": [
-    "#37353d",
-    "#483a42",
-    "#5e434a",
-    "#7c4f56",
-    "#9e5f66",
-    "#b67475",
-    "#ca8683",
-    "#dc978d"
-   ],
-   "dusk": [
-    "#2d3a43",
-    "#35444d",
-    "#40535d",
-    "#4f6672",
-    "#617f8c",
-    "#79949c",
-    "#8ea6a8",
-    "#a1b5b2"
-   ],
-   "fern": [
-    "#2e3b39",
-    "#36463a",
-    "#42553f",
-    "#536a45",
-    "#66844f",
-    "#7d995e",
-    "#93aa6c",
-    "#a6ba77"
-   ],
    "honey": [
     "#41423f",
     "#5b5445",
@@ -108,70 +69,14 @@
     "#fcd68e",
     "#fbe499"
    ],
-   "ink": [
-    "#1b222d",
-    "#2e2b24",
-    "#4b463a",
-    "#6f6856",
-    "#6a655c"
-   ],
-   "lake": [
-    "#334149",
-    "#415159",
-    "#536870",
-    "#6a868c",
-    "#86a9b0",
-    "#9ebec0",
-    "#b3cfcb",
-    "#c5ddd4"
-   ],
-   "leaf": [
-    "#2c4030",
-    "#3c5639",
-    "#4f6c41",
-    "#5f7d4a",
-    "#74905b",
-    "#8fa773",
-    "#abba8c",
-    "#c4cfa3"
-   ],
-   "ochre": [
-    "#3d3e3a",
-    "#544d3b",
-    "#72613f",
-    "#987a47",
-    "#c59a52",
-    "#ddaf61",
-    "#f1c06e",
-    "#fbcf7a"
-   ],
-   "parch": [
-    "#8a5a3c",
-    "#bd914f",
-    "#c8af7c",
-    "#d2bc90",
-    "#dac69f",
-    "#e0d4b7",
-    "#ebe2cb",
-    "#f4eedd"
-   ],
-   "pine": [
-    "#25332f",
-    "#2b3e30",
-    "#3a5338",
-    "#4c6840",
-    "#5c7a48",
-    "#6f8c57",
-    "#8ba36e",
-    "#a7b788"
-   ],
-   "soot": [
-    "#231f1b",
-    "#352d26",
-    "#332d26",
-    "#3a362d",
-    "#524d40",
-    "#6f6856"
+   "paper": [
+    "#756f5d",
+    "#bbab85",
+    "#d6c7a4",
+    "#e3d8bc",
+    "#ede5cf",
+    "#f5f0e0",
+    "#fcf7ed"
    ],
    "walnut": [
     "#2b2c2d",
@@ -187,9 +92,9 @@
  },
  "styles": {
   "s1": {
-   "ramp": "parch",
-   "tone": 4.0,
-   "light": 0.7,
+   "ramp": "paper",
+   "tone": 4,
+   "light": 0.0,
    "brush": {
     "off": true
    },
@@ -265,25 +170,68 @@
    ]
   },
   "s3": {
-   "ramp": "parch",
-   "tone": 4.6,
+   "ramp": "walnut",
+   "tone": 4.4,
    "rim": {
-    "light_shift": 0.6,
-    "dark_shift": -0.8
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
    },
    "layers": [
     {
-     "id": "fibre",
-     "op": "noise",
-     "scale": 1.0,
-     "amount": 0.45
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
     },
     {
-     "id": "foxing",
-     "op": "patches",
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
      "scale": 2.4,
-     "threshold": 0.78,
-     "shift": -0.6
+     "amount": 0.35
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
     }
    ]
   },
@@ -486,161 +434,72 @@
    ]
   },
   "s7": {
-   "ramp": "parch",
-   "tone": 4.6,
+   "ramp": "walnut",
+   "tone": 4.4,
    "rim": {
-    "light_shift": 0.6,
-    "dark_shift": -0.8
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
    },
    "layers": [
     {
-     "id": "fibre",
-     "op": "noise",
-     "scale": 1.0,
-     "amount": 0.45
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
     },
     {
-     "id": "foxing",
-     "op": "patches",
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
      "scale": 2.4,
-     "threshold": 0.78,
-     "shift": -0.6
+     "amount": 0.35
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
     }
    ]
   },
   "s8": {
-   "ramp": "walnut",
-   "tone": 4.4,
-   "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
-   },
-   "brush": {
-    "flow": "long"
-   },
-   "layers": [
-    {
-     "id": "grain",
-     "op": "stripes",
-     "axis": [
-      0,
-      1,
-      0.71
-     ],
-     "period": 0.7,
-     "width": 0.32,
-     "shift": -0.75,
-     "wobble": 0.45,
-     "wobble_scale": 2.5
-    },
-    {
-     "id": "grain2",
-     "op": "stripes",
-     "axis": [
-      0,
-      1,
-      0.71
-     ],
-     "period": 1.9,
-     "width": 0.18,
-     "shift": -0.55,
-     "wobble": 0.9,
-     "wobble_scale": 4
-    },
-    {
-     "id": "figure",
-     "op": "noise",
-     "scale": 2.4,
-     "amount": 0.35
-    },
-    {
-     "id": "polish",
-     "op": "gloss",
-     "dash": true,
-     "length": 3,
-     "shift": 1.0,
-     "density": 0.35,
-     "post": true
-    },
-    {
-     "id": "photo",
-     "op": "photo",
-     "src": "art/lowpix/items/_furnc/photos/wood",
-     "scale": 28.0,
-     "amount": 0.6,
-     "ramps": [
-      "walnut"
-     ]
-    }
-   ]
-  },
-  "s9": {
-   "ramp": "walnut",
-   "tone": 4.4,
-   "rim": {
-    "light_shift": 1.0,
-    "dark_shift": -1.0
-   },
-   "brush": {
-    "flow": "long"
-   },
-   "layers": [
-    {
-     "id": "grain",
-     "op": "stripes",
-     "axis": [
-      0,
-      1,
-      0.71
-     ],
-     "period": 0.7,
-     "width": 0.32,
-     "shift": -0.75,
-     "wobble": 0.45,
-     "wobble_scale": 2.5
-    },
-    {
-     "id": "grain2",
-     "op": "stripes",
-     "axis": [
-      0,
-      1,
-      0.71
-     ],
-     "period": 1.9,
-     "width": 0.18,
-     "shift": -0.55,
-     "wobble": 0.9,
-     "wobble_scale": 4
-    },
-    {
-     "id": "figure",
-     "op": "noise",
-     "scale": 2.4,
-     "amount": 0.35
-    },
-    {
-     "id": "polish",
-     "op": "gloss",
-     "dash": true,
-     "length": 3,
-     "shift": 1.0,
-     "density": 0.35,
-     "post": true
-    },
-    {
-     "id": "photo",
-     "op": "photo",
-     "src": "art/lowpix/items/_furnc/photos/wood",
-     "scale": 28.0,
-     "amount": 0.6,
-     "ramps": [
-      "walnut"
-     ]
-    }
-   ]
-  },
-  "s10": {
    "ramp": "honey",
    "tone": 3.4,
    "rim": {
@@ -663,132 +522,171 @@
    "shape": "card",
    "pivot": [
     0.0,
-    9.4,
+    9.5,
     0.6
    ],
    "art": [
-    "ppiippppppppppppppppppppppppppppqqppppppppppppppppppppppppppqqppppppppppppppppppppppppppppqqppppppppqqqqppqqppppppppppppppppPPppPPppppppppppppppPPppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppqqppppppppppppppppppppppppppqqppppppppppppppppppppppppppppqqppppppppqqqqppqqppppppppppppppppPPppPPppppppppppppppPPppppppppppppiipp",
-    "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
-    "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
-    "ppiiPPppppppppppppppppppppppppppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppqqqqqqppppppppppppppPPPPppppppppppppppppppppppppppppppppppiipp",
-    "ppiiPPppppppppppppppppppppppppppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppqqqqqqppppppppppppppPPPPppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppjjppjjppjjppjjppjjPPjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjPPjjppjjppjjqqjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppppiipp",
-    "ppiippppjjppjjppjjppjjppjjPPjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjPPjjppjjppjjqqjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppppiipp",
-    "ppiippppppppppppppppppppppppppppppppqqqqqqppppppppppppppppppppppppppppppppppppppppppppppppppppppPPppppppppppqqppppppppppppppPPppppppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppppppqqqqqqppppppppppppppppppppppppppppppppppppppppppppppppppppppPPppppppppppqqppppppppppppppPPppppppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppiippiiiiiiiiiiiippiippiiiiiiiippiiiiiiiippppppppppppppppppppppppppppppppppppppppppppPPppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppiippiiiiiiiiiiiippiippiiiiiiiippiiiiiiiippppppppppppppppppppppppppppppppppppppppppppPPppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppiipp",
-    "PPiippppppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppttppppppppPPppppppqqqqppppppppppppppppppppppppppppppppppppppppiipp",
-    "PPiippppppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppttppppppppPPppppppqqqqppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppppttppppppPPppppttppppppppppppppppppqqqqppppppqqppqqppPPPPppppppppppppppppppppiipp",
-    "ppiippppppppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppppttppppppPPppppttppppppppppppppppppqqqqppppppqqppqqppPPPPppppppppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppqqppppppppppppppppppppppppppppppppppttppppppppppppppppttttppppPPppppttttppppttttppppppqqqqppppppppppppqqppPPppppppppppppppPPppppppiipp",
-    "ppiippppppppppppppppppppppppqqppppppppppppppppppppppppppppppppppttppppppppppppppppttttppppPPppppttttppppttttppppppqqqqppppppppppppqqppPPppppppppppppppPPppppppiipp",
-    "ppiippppppppppppppppppppqqppppppppppPPPPPPppppppppppppppppppppppttppppppppppppppttwwttppppppppttwwppppppttttppppppppppppppppppppqqqqqqqqppppppppppppqqppppppppiipp",
-    "ppiippppppppppppppppppppqqppppppppppPPPPPPppppppppppppppppppppppttppppppppppppppttwwttppppppppttwwppppppttttppppppppppppppppppppqqqqqqqqppppppppppppqqppppppppiipp",
-    "ppiippppppppqqppppppppppppppppppppppppPPppppppppppppppppppppppttttppppppppppppppppttttttttppqqttttppppppttwwttppppppppppppppppppppqqppppqqppppppppppppppppppppiipp",
-    "ppiippppppppqqppppppppppppppppppppppppPPppppppppppppppppppppppttttppppppppppppppppttttttttppqqttttppppppttwwttppppppppppppppppppppqqppppqqppppppppppppppppppppiipp",
-    "ppiippppppppppppqqppppppppppqqppppppppppppppppppppppppppppppppppwwppPPppppppppppppppwwttttttttwwttppppttppppppppppppppppppppppppqqqqppqqppppppppppppppppppPPppiipp",
-    "ppiippppppppppppqqppppppppppqqppppppppppppppppppppppppppppppppppwwppPPppppppppppppppwwttttttttwwttppppttppppppppppppppppppppppppqqqqppqqppppppppppppppppppPPppiipp",
-    "ppiipprrRRppppppppppppppppqqppppppppqqppppqqppqqppppppppqqqqppppppppppppppppppppppppppppwwttppppppppppttttppttppqqppppppppqqppxxppqqxxppppppppppppppppppppppppiipp",
-    "ppiipprrRRppppppppppppppppqqppppppppqqppppqqppqqppppppppqqqqppppppppppppppppppppppppppppwwttppppppppppttttppttppqqppppppppqqppxxppqqxxppppppppppppppppppppppppiipp",
-    "ppiipprrRRRRrrppppppppppppTTTTTTTTTTTTppppqqppqqPPPPPPqqqqppppppppppppppppppttppppppppppttwwttppttttppttttttttppppppppppppppppxxxxxxppppppppppppppppppppppppppiipp",
-    "ppiipprrRRRRrrppppppppppppTTTTTTTTTTTTppppqqppqqPPPPPPqqqqppppppppppppppppppttppppppppppttwwttppttttppttttttttppppppppppppppppxxxxxxppppppppppppppppppppppppppiipp",
-    "ppiippppppRRRRrrppppppppTTTTTTTTTTTTTTTTppqqqqqqppPPppppqqppppppppppttppppppttttppppppttppqqppqqttttttwwttttwwttppppppppppppppppxxxxbbbbbbppppppppppppppppppppiipp",
-    "ppiippppppRRRRrrppppppppTTTTTTTTTTTTTTTTppqqqqqqppPPppppqqppppppppppttppppppttttppppppttppqqppqqttttttwwttttwwttppppppppppppppppxxxxbbbbbbppppppppppppppppppppiipp",
-    "ppiippPPppppRRRRrrppppppTTTTTTTTTTTTTTTTTTppppppppppppppppppppppppttttppppppttttppppttttppppppppttwwttttttwwttppppppqqppppppppxxppxxxxbbbbqqppqqPPPPppPPppppPPiipp",
-    "ppiippPPppppRRRRrrppppppTTTTTTTTTTTTTTTTTTppppppppppppppppppppppppttttppppppttttppppttttppppppppttwwttttttwwttppppppqqppppppppxxppxxxxbbbbqqppqqPPPPppPPppppPPiipp",
-    "ppiippppPPpppprrRRRRppppTTTTTTTTTTTTTTTTTTppppppppppppppppppPPppppttwwttppppwwppppppttttppppppppttppttttttttppppppppppppppppiippppppppbbbbppppppppPPppppppppppiipp",
-    "ppiippppPPpppprrRRRRppppTTTTTTTTTTTTTTTTTTppppppppppppppppppPPppppttwwttppppwwppppppttttppppppppttppttttttttppppppppppppppppiippppppppbbbbppppppppPPppppppppppiipp",
-    "ppiippPPpppppppprrRRRRrrTTTTTTTTTTTTTTTTTTppppppppppppppppppppppppppPPppppppppppppppttwwppppppttttttwwttttttppppppppppppppiippppppppppPPPPppqqppppppppppPPppppiipp",
-    "ppiippPPpppppppprrRRRRrrTTTTTTTTTTTTTTTTTTppppppppppppppppppppppppppPPppppppppppppppttwwppppppttttttwwttttttppppppppppppppiippppppppppPPPPppqqppppppppppPPppppiipp",
-    "ppiipppppppppppppprrRRRRRRTTTTTTTTTTTTTTppppppppppppppppppPPppppppppppppqqppppppppppttttppppppttttppppppttwwttppppppppiippppppppppppppppqqppppppppppqqppppppPPiipp",
-    "ppiipppppppppppppprrRRRRRRTTTTTTTTTTTTTTppppppppppppppppppPPppppppppppppqqppppppppppttttppppppttttppppppttwwttppppppppiippppppppppppppppqqppppppppppqqppppppPPiipp",
-    "ppiipppppppppppppppppprrRRRRTTwwwwwwppqqppppppppppqqqqPPppppppqqppqqppppppqqppttppttwwttppppppttttppppppppppppppppppiippppppppppppqqppppppppppppppppppppppppPPiipp",
-    "ppiipppppppppppppppppprrRRRRTTwwwwwwppqqppppppppppqqqqPPppppppqqppqqppppppqqppttppttwwttppppppttttppppppppppppppppppiippppppppppppqqppppppppppppppppppppppppPPiipp",
-    "ppiippppppppppppPPpppppppprrRRwwwwwwppqqqqppppppppqqppppppPPrrrrrrrrrrrrrrttttttppPPppppppppppttwwttppppppppppppiiiippppppppppppqqppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppPPpppppppprrRRwwwwwwppqqqqppppppppqqppppppPPrrrrrrrrrrrrrrttttttppPPppppppppppttwwttppppppppppppiiiippppppppppppqqppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppppppPPppppppppwwddwwRRRRRRRRrrrrrrrrRRRRRRRRRRRRRRRRRRRRRRttttwwttrrrrrrppppppppppppqqppppppiippppppppqqppppppppppPPppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppppppPPppppppppwwddwwRRRRRRRRrrrrrrrrRRRRRRRRRRRRRRRRRRRRRRttttwwttrrrrrrppppppppppppqqppppppiippppppppqqppppppppppPPppppppppppppppppppppppppppiipp",
-    "qqiippppppppppppppppPPppppppppwwwwwwrrrrrrrrRRRRRRRRRRrrrrrrrrrrppppqqppttttwwttrrRRRRRRRRrrppppppppqqppppiippppppqqppppppppppPPPPPPppppppppppppppppppppppppppiipp",
-    "qqiippppppppppppppppPPppppppppwwwwwwrrrrrrrrRRRRRRRRRRrrrrrrrrrrppppqqppttttwwttrrRRRRRRRRrrppppppppqqppppiippppppqqppppppppppPPPPPPppppppppppppppppppppppppppiipp",
-    "ppiiqqppppppppppppppppPPppppppwwiiiippqqppppqqppppppppPPppppppppppqqppppttwwttppPPpppprrRRRRrrppppppppiiiippppppppppppppppppppppppPPppppppppqqqqppppppppppppppiipp",
-    "ppiiqqppppppppppppppppPPppppppwwiiiippqqppppqqppppppppPPppppppppppqqppppttwwttppPPpppprrRRRRrrppppppppiiiippppppppppppppppppppppppPPppppppppqqqqppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppppppiippqqppppqqppppppppppppppppppppppppppppppppPPpppppppprrRRRRrriippppppppppppppqqqqppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppppppiippqqppppqqppppppppppppppppppppppppppppppppPPpppppppprrRRRRrriippppppppppppppqqqqppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppPPppppppppiipppppppppppppppppppppppppppppppppppppppppppppppppppprriiiiRRppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppPPppppppppiipppppppppppppppppppppppppppppppppppppppppppppppppppprriiiiRRppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppppppppppppiippppppppppppppppppppppppppppppppppppppppppppppiipppprrRRRRrrppppppppppqqppppqqppppppppppppppppppppppppppPPppppppppiipp",
-    "ppiippppppppppppppppppppppppppppppppppppppiippppppppppppppppppppppppppppppppppppppppppppppiipppprrRRRRrrppppppppppqqppppqqppppppppppppppppppppppppppPPppppppppiipp",
-    "qqiippppppppppppppppppppppppppppppppppppppppiippppppppppppppppppPPqqppppppqqqqppppppppppiipppppppprrRRRRrrppppppppppppppppppqqppppppppppppPPppppppqqqqppppqqppiipp",
-    "qqiippppppppppppppppppppppppppppppppppppppppiippppppppppppppppppPPqqppppppqqqqppppppppppiipppppppprrRRRRrrppppppppppppppppppqqppppppppppppPPppppppqqqqppppqqppiipp",
-    "ppiippppppppppppppppppppppppppPPppppppppppppppppiiiippiippppppppppqqppppppppqqppppppiippppppppppppppppRRRRrrppppppppppppqqqqppppppppppppppPPppppqqppppqqppqqppiipp",
-    "ppiippppppppppppppppppppppppppPPppppppppppppppppiiiippiippppppppppqqppppppppqqppppppiippppppppppppppppRRRRrrppppppppppppqqqqppppppppppppppPPppppqqppppqqppqqppiipp",
-    "ppiiqqpppppppppppppppppphhpppppppppppppppppppppphhhhhhhhiippiippppppppqqppppppppiipppppppppppppppppppppprrRRRRppppppppppqqppqqppppppppqqqqPPPPPPqqppppppppppppiipp",
-    "ppiiqqpppppppppppppppppphhpppppppppppppppppppppphhhhhhhhiippiippppppppqqppppppppiipppppppppppppppppppppprrRRRRppppppppppqqppqqppppppppqqqqPPPPPPqqppppppppppppiipp",
-    "ppiippppppPPpppppppphhhhhhhhppppppppppppppppPPhhhhpppphhhhppppiippiippppPPppppiipppppppppppppppppppppppppprrRRRRrrppPPPPppppppppppppPPppppppppppppqqppppppppppiipp",
-    "ppiippppppPPpppppppphhhhhhhhppppppppppppppppPPhhhhpppphhhhppppiippiippppPPppppiipppppppppppppppppppppppppprrRRRRrrppPPPPppppppppppppPPppppppppppppqqppppppppppiipp",
-    "ppiipppppppppppppphhhhpppphhhhpppppppppppppphhhhpppppppphhhhppppppppiippiiiipppppppppppppppppppppppppppppppprrRRrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppiipp",
-    "ppiipppppppppppppphhhhpppphhhhpppppppppppppphhhhpppppppphhhhppppppppiippiiiipppppppppppppppppppppppppppppppprrRRrrrrrrrrrrrrrrrrppppppppppppppppppppppppppppppiipp",
-    "ppiipppppppppppppphhpppppppphhhhpppppppppphhhhpppppppppppphhpppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppiipp",
-    "ppiipppppppppppppphhpppppppphhhhpppppppppphhhhpppppppppppphhpppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrrrrrrrrrrrrrrrppppppppppppppppppppppppppiipp",
-    "ppiippppppqqpppphhpppppppppppphhhhhhppqqpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrRRRRRRRRrrrrrrrrrrppppppppiippqqppppppppPPiiPP",
-    "ppiippppppqqpppphhpppppppppppphhhhhhppqqpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrrrRRRRRRRRrrrrrrrrrrppppppppiippqqppppppppPPiiPP",
-    "ppiippqqpppppppppppppppppppppppphhhhhhppppppppppppppppqqqqpppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrRRRRRRRRRRRRRRRRrrrrrrppppppppppqqppppppppPPppiipp",
-    "ppiippqqpppppppppppppppppppppppphhhhhhppppppppppppppppqqqqpppppppppppppppppppppppppppppppppppppppppppppprrrrrrrrRRRRRRRRRRRRRRRRrrrrrrppppppppppqqppppppppPPppiipp",
-    "ppiippppppqqppppppppppPPpppppphhhhpppphhhhppppppppppppqqppppppppppppppppppppppppppppppppPPpppppppppppppprrrrrrRRRRRRRRRRRRRRRRRRRRrrrrrrppppppppppqqppppppppppiipp",
-    "ppiippppppqqppppppppppPPpppppphhhhpppphhhhppppppppppppqqppppppppppppppppppppppppppppppppPPpppppppppppppprrrrrrRRRRRRRRRRRRRRRRRRRRrrrrrrppppppppppqqppppppppppiipp",
-    "ppiippppppppPPppppppPPpppppphhhhppppqqqqhhpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrRRRRRRRRRRRRRRRRRRRRrrrrrrppppPPccppqqppppppppppiipp",
-    "ppiippppppppPPppppppPPpppppphhhhppppqqqqhhpppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppprrrrrrRRRRRRRRRRRRRRRRRRRRrrrrrrppppPPccppqqppppppppppiipp",
-    "ppiippqqpppppppppppppppppphhhhpppppppppppphhppppppppppppppppppppppppqqpppppppppppppppppppppppppppppppppprrrrrrRRRRRRRRRRRRRRRRRRRRrrrrrrppppppccppppppppppppppiipp",
-    "ppiippqqpppppppppppppppppphhhhpppppppppppphhppppppppppppppppppppppppqqpppppppppppppppppppppppppppppppppprrrrrrRRRRRRRRRRRRRRRRRRRRrrrrrrppppppccppppppppppppppiipp",
-    "ppiippppqqqqppppPPppppppppppppppppppppppppppppppppppppppppppqqppppppqqpppppppppppppppppppppppppppppppppprrrrrrrrRRRRRRRRRRRRRRRRrrrrrrrrrrrrccccppqqppppppppppiipp",
-    "ppiippppqqqqppppPPppppppppppppppppppppppppppppppppppppppppppqqppppppqqpppppppppppppppppppppppppppppppppprrrrrrrrRRRRRRRRRRRRRRRRrrrrrrrrrrrrccccppqqppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppqqqqqqppPPrrrrrrrrRRRRRRRRRRRRrrrrrrrrccccccccccccccccRRRRrrppiipp",
-    "ppiippppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppqqqqqqppPPrrrrrrrrRRRRRRRRRRRRrrrrrrrrccccccccccccccccRRRRrrppiipp",
-    "ppiippppppppppppppppppppppppppppppppppppqqppppppppppppppPPppqqppppppppppppppppppppppppppppppppppqqppqqpppppprrrrrrrrrrrrrrrrrrrrrrrrppppppccccccccrrrrrrrrrrqqiipp",
-    "ppiippppppppppppppppppppppppppppppppppppqqppppppppppppppPPppqqppppppppppppppppppppppppppppppppppqqppqqpppppprrrrrrrrrrrrrrrrrrrrrrrrppppppccccccccrrrrrrrrrrqqiipp",
-    "ppiippppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppqqqqppppppppppppqqpppppppprrrrrrrrrrrrrrrrrrrrppppppppppccccppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppqqqqppppppppppppqqpppppppprrrrrrrrrrrrrrrrrrrrppppppppppccccppppppppppppppiipp",
-    "qqiiqqppppppppppppppppppppppppppppPPppppppppqqppqqqqqqppppppppppppppppppppppPPppppppppppqqpppppppppppppppppppppppprrrrrrrrrrrrppppppppppppppppccppppppppppppppiipp",
-    "qqiiqqppppppppppppppppppppppppppppPPppppppppqqppqqqqqqppppppppppppppppppppppPPppppppppppqqpppppppppppppppppppppppprrrrrrrrrrrrppppppppppppppppccppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppPPppppppppqqppppppppppppppppppppppppppppppppppqqppppppppqqppppppqqppppppppppppppppppppppppppqqppppppppppppppppccppppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppPPppppppppqqppppppppppppppppppppppppppppppppppqqppppppppqqppppppqqppppppppppppppppppppppppppqqppppppppppppppppccppppppppppppppiipp",
-    "ppiiqqppppppppppppppppppppppppPPPPppppppppppqqppppppppppppppppppppppppppPPppppppppppppppppppppppppppppppppppppqqqqppppppppqqqqppppppppppppppppppppppppppppppppiipp",
-    "ppiiqqppppppppppppppppppppppppPPPPppppppppppqqppppppppppppppppppppppppppPPppppppppppppppppppppppppppppppppppppqqqqppppppppqqqqppppppppppppppppppppppppppppppppiipp",
-    "ppiippPPppppppppppppppppppppppppppppppppppppppppppppppqqppqqppqqppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippPPppppppppppppppppppppppppppppppppppppppppppppppqqppqqppqqppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppPPppppppppppppppppppppppppppqqppqqppppppppppppppppppqqppqqppqqqqqqppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppPPppppppppppppppppppppppppppqqppqqppppppppppppppppppqqppqqppqqqqqqppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppiipp",
-    "ppiippppjjppjjppjjppjjppjjPPjjppjjppjjppjjPPjjppjjppjjqqjjqqjjppjjqqjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjPPjjppjjppjjppppiipp",
-    "ppiippppjjppjjppjjppjjppjjPPjjppjjppjjppjjPPjjppjjppjjqqjjqqjjppjjqqjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjppjjPPjjppjjppjjppppiipp",
-    "ppiippppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppPPPPppppppppppppiipp",
-    "ppiippppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppqqppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppPPPPppppppppppppiipp",
-    "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
-    "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
-    "ppiippppppppppppppppppPPppppppppppppppppppppppqqppppppppppppppppppqqppppppppppppppppppppppppppppppPPppppppppppppPPppppppppppppppppppppppppppppppppPPppppppppqqiiqq",
-    "ppiippppppppppppppppppPPppppppppppppppppppppppqqppppppppppppppppppqqppppppppppppppppppppppppppppppPPppppppppppppPPppppppppppppppppppppppppppppppppPPppppppppqqiiqq"
+    "eebbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeebbeebeebeebbeeeeebbbeeeebeeeeeeebbbeebbb",
+    "eebbebeebebeeeeeeeeeeeeebeebbbbeeeeeeeeeeeeeeeeeeeeebbbffefeebfeeefebeeffeeeefefbeebbeebeebeeeeee",
+    "eeeebbbffbffffbfbbfffffffbfafffbbbbbbbbbbbbbbbbbbeeebbbbbbbebbbbbbbbeebebebbbebeeebbbbbebeebbeeee",
+    "eeebdvGKCvCHHCvvKGuzvvmuuGvkkvKvmmvvvvmvmmmmmmmvmmdmmddvmmmmmmmmmmvmmdmmddmdmdddddmmmmdmmfaddbbeb",
+    "eeefvJLNyBBQJBBBJJsyBLFyyNsnnFSxyERJFJJNIFLSJHJToLRBEAySJryyLAsAyEREyLNqNNEBAJJAyrEEEEJHIzCMHvdbb",
+    "eeefCAEEEABByyryEsrEEFFytFrnnrrjnyEEEEEEEBJJByBtrELyrryssrrrynjnrrAyAEArAyryrEBsnnjrABBzxFLFFCvfb",
+    "eebmMEJNPJIURULJQQPNNPRQPQNLLLLJLNNLLLLLJLNLJLJJLJJPJFJJJJILPFIFIIJINNIJIIJIJNJHDDDFEILFBBBEALvfb",
+    "eebmxALMDlCICMQuFVVvQKSVQMFJJJJFJIFJJLJJJJJEEEEEEFLRHFJJFJLJJJJJLJLLLLLLLNNLLLNNNNLLJJIIJLNJAFvfe",
+    "eebmgALJwgCQciPBiKUzUIKULSrAAAAEEEEEEEEAEAAAAArrrArENBBEErAAArArrrrArrrrrwAArryBwytqollooxPLrivfe",
+    "eebmiANLqAKHOJJjjOQPTUTqLUBAEEAAEEEEEAAAAAAAArrAAyqBRNIEEAAAAAArrryyAstwwwysstyyqsqqqnnqntJFyimbf",
+    "eebmkAJLqBQOTTpljPUTTGTEjPVEEEAAAEEAAAArAAAAAArrAnDQqSCqArrywrrrrryAAAytsyrrqqqqonoonjlonwLFqjmeb",
+    "eebdGEJLyjCHJNgojUTTTKTQDlUJyEEAAEAAAAArAAAAArEJrtRpgJUqrrrAAAyywAAEBAABtqqooooqnjoojjloowIJngmbf",
+    "ebbfCFJJwwjgginonUMSSSULyqUNrAAAAAAAAAAAAAAArqELrQFjwiQSqwABByBByABAEABEywxxoqqqjjjnjjnqlxLFncdef",
+    "ebbfvBIJyyrnjnqsjOTUCSVwqyVJrAAAAAAAAAAAAAAALJqrwRIqorqRTpyABABBBBBAEEBBBDxzyywwojjjjjnqlyJFsjdeb",
+    "bebmkyNLwyqjjjqtjSVUilpArPSqEEEAAyyAyAyrAAAyJEyysqRNjAytUItAEBBBAEEEEEELEBvzByyAwqnojjlllwFIsjmbb",
+    "bbbmkrJJooljjjqtpMPuwByAnRNrEAAAyrryyrrrrJNyrrrrwNLFAEEASStAEAEEEEEEEEENELPGwywABttogloliBIFyjmbf",
+    "eebdirBJpjiignqFLGFFJJyrJVBAEAAAyyyryrJEyEAAAryERLtBEAEENSsAEEEEEAEEAEENJPQLAAABBywoglolixJFscmef",
+    "eebdhrAHhcccgjrAwyyAABwJVJsEEABAyyyLFqFLAArrnLPNFzEEEEEFNSyAAEBAEEEEEEENNNNNEBEEEAyollnjlxIFncdee",
+    "eebdFAqpxNNPPlssyAAAAyzULoLEELEyNNtLEyyAAAsEQRMNRQRRRTSRLULrAEABEEEEEEELEQUNJEEEEEAqqonnlFNFnjdee",
+    "eebdPEsLPwBDQJjwABEABFRRsIPEENEAEEBBAAAAArJULSNJRLNLJKKJFSNrABBBEEEEEEEELNNLLEEEEEEsqqqnoDJIncfee",
+    "eebdpAyDccccuSDorAAABVVQyEEEBtEAArAArsqqsBUFiJTPFJLPRPPQKUPsByyyyAAyBEELArNNLLAEEEAqqonnnDJJjcdee",
+    "bbbmcnJFiggigJRtrABAFVVRnyBBLNwyArAyNSPRSSNILLESJIFFJJJJHKUFyByyyBBBEENNrJNRNNNREEAnqqnnoDNIscdbb",
+    "bbbdpjJLjjijnjJQtyByRSCJSLqDVVQInABySLJFDSLsAEJQJRPQLFPVUTVIyByyBABBBJErENELNRRREEArwqnnnzJIygmeb",
+    "bbbmtjnInnljnqpRtwAAJVGTRVLqRLUVRiRUStwITRwrrJLQAJJIHPTHGHTNtByByyBBBEEjEELNRRNTPEAyyqnqlDRJojmbb",
+    "bbbmHnjLtlonryqRNtBEALVSlLVDTzKVVTUFwyUUUuqnEJNRLKvMTTMOOHQUwDyyAAEEEEEJJJNNNELSTJEEBysqnHIFncdbb",
+    "ebbmGnyIyLqqqwjISpyEEwVVHyNVUxDAQMByqRSzILJLPNQUUTSQKCJKKIHUNDDBEEAELQNNJRNNEENPRNyswqqjiFFIjcdbb",
+    "eebmCnrCBLqoqsNPOUJyBwPVFAyLIyArrtAwLSzFEIILNLPSQRUMOQNNPLxNUDFBFJJSVVVUNRRLNNNLLSNEwqnjgFJDncdeb",
+    "eebmCrjJwnoolNJOUQRqyBBIAAEyyAAAAAByUIqAtlzUUUUPSTQRPLJJJJDHVUURITVVVVVVUVVVUUUUUVVUFwtnjDFBqofef",
+    "bbbdInnIwtqqoNRTSQTwyyBwAABBBwsyAAwJTxBArBUPFNLHTVUTULDDpxFSSMKVRIRRSVVVVVVVVVVVVVREywtngFJDjjdbb",
+    "bbbdCnrItojqtFLDTUVBtLyNEJDJDINBsyqLQqArqUSLRRRSQRVPCUTSRLTLipxIUTFjqBIFIJNPNQNNNNErqwrniDJBjnmeb",
+    "bbbdknALBIwnwynpPQVFwLBNJJFLBJNBwyyFUzwBTNHNNNNSUUVMIIHIPUJlqqyyCRVFwBytyqwqtBBEEEEtsqonjxBDicdbb",
+    "bbbdgrEFFPwqrAAtJSIqywBwyAByEBwytwAqRLpSQKPNELVSNNFIRNNKKxqBtqrtBCSRwByyByBEEEEEJEBtssnjjDIBgndbf",
+    "bbbdgyFNytqqsyspOVCoyyBAAEBzTRqywwyqNPKRjBFEEESEnqwyyyAByByBBywsBFMUHDAyyqyJEJJJLEErrqrnizFDlDdbf",
+    "eebdsyFJyywyBsJUUFoqwwAAAEwPPSFsryAtJSQLBILNEDUQyBxxyyBEEEyyFDDtwFHTRDDBwlDJJJJJLFFtoornjDFFnymbf",
+    "eebayBDFywwBzuSQlnssrrwyAAJRuRRqqrsywUVCwCJLNUTSNPRRQLxBFNPNPQQDsDFIUHCFDFQQQSPRPMLJxqwtnFLFqImbe",
+    "ebfdnwFLyFBwxkURnyAArAEBByRLGQRtsyAAtIUCSTUUUFKRFLLLNJyyFJIIHIJzwEFFPURLDLSQRTRTRSRRDqyAqDFBntmbe",
+    "ebmmjnCLDNyNOQMlsrrrrryByLSzNSztqyyyslJUSTUyrnLRowqttttyyzGHDltttBEFxSUHFxCCCDIFHIIFFyAAqFJzjgmef",
+    "ebfmiqLNqxuTTIuyAArnjgjqnLPxUJowrwwrrqwFGTPJLENSnoqwtrrqwyIJIottpyEFxTvDFyyytzDyBDByByywqIJzjivbb",
+    "befmgyFLDKUKVNwEEEAyyyyroKUCSDsyywyrrrAAFUPNNNVJJPDqtqqqsqollqtqpxBFxRMHFEwotDFFDBywttwwqDRPjJGbb",
+    "ebfvcyCNJITzhoyBEBBAABABwSVUNlyyywrrrqyLPUQFJIUUVUVNntqstwwqqqwwzFIKCOUHIFBLPOOOMKIIDyyypDRLjymbb",
+    "fffmrsIKnkPGptyEEBBAABEAwFHLBtytyywyrrsTVSPQQQPUSKUQnttywwwtqoryBIKMKIUTIJFTUTUUTSTNIDyyqHLIicmbb",
+    "ebfmcAFFAJMQltABABBAryBAnqplqsrrrsrrnrnPTPRSRQQPQUVRyDFDzxxtoosoBLLMOIKUTKHHCCCCHCDDxpqtpILFncmbf",
+    "ebbmiyFIADMIlqyABBAAAyENjNLJEqsrrrqrnqnJUUUNOMKIFGVItFNNLLLDpyCQVUUTUUUTVQKDztpppilllpoqlIJBjcmbf",
+    "ebfdcFFLrpQzqyBEyAyAAAEBqEEEBswwwtssqqnxSUNLPNPNICSLlyxzyyytwyIVHDDMVUUQVVIDyqollljlppoqpHIFqimef",
+    "eeemlBHIsxQDowBBBEAsswsqqrrrrrrrqsqnqqqURBEEDyEEJGSNgiooqtqsBDTSoBDxDJVKMSIxqooonnnoppqwqLNIyLmbf",
+    "bbedcBDMwkNLlwyBBBBwwwsqqrrysqqoqqnnqqoRRBNEIIBFJMUUHHpooqtyzOUxFIFFBxPSkGDxqoooooopupwyqILFogdbf",
+    "ebfdctDKIJHLowyBBByttssqqrrqnoqoqqnnnqlHUQLFFINNQUSVUVTpyFFFMVVKKQOPIHKUOzDyxqonnpppplqtpILIyndeb",
+    "beakhjwIDFzNiwywwysswrqnolLQIonnllnjokGVTTTVTRQRSHRQMHUUCDFKVVVQGHJIKMHKVKuDFxtoppuuupqqpJNLLJmbb",
+    "bfacprgKtlvSIqsqqqqqrqqnoPQFJLxlTKuNUUTTUUTRLDwxxxSOMQGVVRUVUUTUPRRQMPOISUvDDtqooppppuwwtJLIBgfbb",
+    "bemcoroGtCOUSqyyswstwsqqoOSGGTOQVVTVMMUTURLxqBDDzxPSGRKHUUQRTOPTTIIGKMIzvUIDDolloiilllotxLLFBgfeb",
+    "bemciroKoRUMxqtrnjnjjjilqlIMITVVUOCuQGKVTTMLLLLNNIGUMKPCxCvRQMHMTIDDOMEDvTMzxplllipopppqpJIJJJdbb",
+    "bbmacswMpGIPxlqqnnnnwLJIJNFLTSGGTGHIHSMSVUIDJJKNQIKUUHONIIRTMOCGSLLPMHylHUCxpkuGDxkluuwtxHGFBDmeb",
+    "ebdahwFKFQkOFlsqqtwtwyywwtylQGIITCcDMMRPQUIIIFDCCOVOUTHJIPVPQPPSSIQRPJwHVKHQOQUVUURHuuqtuKJFicmeb",
+    "ebfdkqJOpCzSxqywsqqqqqqqoqiLTGKUTQRUVTOMOMUQOPOOOSMKIUJLJSMOMDGRHzFDywpUOvVSQQKGzCOUQxxwuIKFgcmbb",
+    "ebfdcwxIokHQiqqqqqDqqqqoolHTUVUVOQLNKITRPVUUVVOQSRIKOUDNPQPOHQUUHKLNNDPUkOUPMCCzxukvUTHFzJUNFNmeb",
+    "ebfdcpzKolCQlsrqoDIqqnnooxUTVKOVHHJFNNSUVVUVUDCzQQOPSVRENTVQUQQTMQOPMHUCGVKCCGCuulpplOUICLNIyldee",
+    "beeugpCOokKMiqsqtLxoqqqqnFVUxllQRxzzCTUOTVMJCFJDMOCORNVRSUUUMMQUHzyzCUOzVUMPSPPPPKOIClSQCMJFqcfbb",
+    "ebfdcxxKyIQGiqqoDJqqtssqqnxpiEFuUIHhDRDIMVPFILLLITIPNPIVVJIKPPGUVJyCUTkSPOOPRPPQQPPICyJUHOMFyvfbe",
+    "ebfdcuxMpGQkptwpIFqttsqqqqopoLwDQuDHRLIIOQUuCCCHCSQPINUVUKQQMHSTTRCPUOTVPuCzDFGGzzuxzyKUOMNJFRmbe",
+    "ebfkiuxMlHPktyqDIqstwsqqqqwqwFiCSvRVUDJQPSVRQRQQOPUOMUPUUQQOOTVQSVUVVTMzTRDBBFDCNNLNLDOTPMMJoGmbe",
+    "ebfhquxMpKPiqtqBHqwttqqqosqoJBpiRVKkpDLJMVUKOOMOKSVITUHTVTOPMTQQTSUVTKLuuUSHGCGGMNJIDNSOSONJikmbf",
+    "ebfdcpuKCSultttJxqsqqqqoqonIIoqiSPGKlLLILVLIKQQSHUSPVVPMSVVOQUVQQUTPUJDuCTVTUTQPQMHMSTCMQILJszmfe",
+    "bbfaculGKQglpptFtttooonqqqJIjqjDRcHSvzLDUUDJJFIIKVUVQUKMMMUVVVQQTTPPTUDzOQVHHQTUTUUSHtlQOKNIJPfee",
+    "bbfdcuuMTvllppPDqytoqqnqDLDinicQHCCKTPKSOUVMMQMQSTTSVOIOPOKVTPSQPTSQQVJQMOVMzxDHCCDxxylSOGNJBHmee",
+    "bbfcguuKOHiqppLyyyyyywwtFxukuMPUGzuzUKMPPPVVVVVULOKUUORQQQOVOQPHKTKKPUNRCkUSHKHGGGIIIBzUCGLJtzmee",
+    "bbfccxuKMKiqpIwwwtswrwqiguVTUPOHuqGVTvILJFULJDNPIPzKUHIOPMTTQOHKTTQPTSPNLHRVSQQSQRRRLuLSuINIwJmee",
+    "bbfcgxuOMpoqqIDotsosqluSQUSMGvHGuMURPUOKMQTIMIQOQLxzQUIMPKUPOMOSPGMQVQILJxUVKMHGHKKJDkPTpHJJpGmbf",
+    "bbfujxxKupqtqqqqwtqtpKVQLzuPOTQQUKUFgITUMUPMMMTQIDCGKVVFCSVPMMQSGIJIUURSTSVUUTRGMPJLpCVIlHLzlumbe",
+    "bbfkjuIQujqoqqqqyBwqHVQvDxOQGKHGGCULpzIQTMOQQQTUNNTUVSSVSSPVMMUQQNNLPULKSUMxtkPUMQOHIUKkhxJughmbe",
+    "ebfuoxzMxlopppssyywtHRUGuuQxhCKHCuSIzlDLSPLHLQTRVTPOPKSVxCPOVTKMSMMITMMSIROCxvuMSUSVUMxlgkMGchdbf",
+    "ebfcizpHwlppMzotwwtwiIVQvCSMKGCvNTVCHxxPUOSUQSKvxuFNHzVQtILOQTMMRQKSUPOzvROzCHMKPHCUGlqjguKzgpfef",
+    "ebfcjtlKyltpuzqswywxpQVUQMVQTUPSVUQQTUTSKMMOUGMVOOPHKPVRMMKKOTHMPOTTRIxzKTTKQQPHKOGVOpnjguxpgcfeb",
+    "bbfkiquHykpCIpqopqqqplvVVUzhhHVUuuxpuGTKOPPMVUTVQKzzPISUGMVUMTTIOMUPMMMIOUMGCuuCVUVSzxljguDlggdef",
+    "ebfhixxHtkpCPxstwywstwpFJpjopUUPPSKIlkUHLMKUSTUSCuGMQQUVUVTVHPUOCMQTQPUSTPGGGJHGVOKxxxnjguGqgcmef",
+    "ebfkjxuKtlqxupssqttqnrtnjqnnnFQLMSPlLxRQPTVOTUIvGSTQQOUVPIIVRGMTKKOVVVVQSOKIKKTVTHCDFxqiguCwgcfef",
+    "ebfunqxItupLHlqqpqqojnjnljiiljigclSPHHMUUUMOUHCMVTKGIKVRPMHNVSPVUOKVMMKMUChhiGUVVMMDqxpighuwccfeb",
+    "ebfhjpxKtuuxxpqsqwtqootqpppntyqyBtuRTQTTHHTVOHHSSGMLMOMVOPPGQVVQGTUVMMQUVURPQVVTQMClppigckzwcgmef",
+    "ebfcgwuKspuQKlppqwtqopLJIGHDFFxLLJJFDILCMUMMTTSVCuxzDHHRVMQPPSSIHOUUPTCOVIUUVGvOVOCMMKHuguDxipdef",
+    "ebfhgyuHquuGCppqxByywqlllqliDplllpjnjjqDULDIJMQSKLLNLOKPSQGIIGCIKOQOQHkkVUCGGGkdKVTPQSSPkMHxpFfef",
+    "eefccxuKsluMFkpqqtsqojjnqytDLziluluijgcLSDFDyxxRGDFFFIIMHSRQPQQQTPMIKOPMOVHzvvvvvKxchgIPvOxxllfef",
+    "fefccwuIskuMFllnoqnnjjiijjliCURQQVTQkCHRLFJIBpFPillotxGCOPGICGGGSGGCCukhkVzGHCGKzGliigUvvKIwllfef",
+    "fefhotvMopxxllonoqqnjjjijhkcTMuxvVvKUSMDqwttyqLJuFDDDDGITPKMPQHMMvzvzGKMPTChhckkvxpppcLKKHHwgldbf",
+    "eemcgzuKnuuQHioqqqojjjijgOUSUCuzuSOuIzxFJNLNJIQKFILJJIDIRIIIKKzMGCOPQQOOMOQTQGhczzxuxhOQGvGzggfef",
+    "ebmcgCzKnuuuulloqqnjggigDVTCqjjihzUDzDBDIJILIHUSUKuzDzCHTOMKOKuCTSKzvKGGCvhuKTSGkccGTTTKuxJxicmbf",
+    "ebmvlxKPquxNxinlooljgjjgMOQijonjliTQccggyJJDqPOzKTTQRONQMGCCKChIQcCzvGKGMvHvdhSTQkdVGhGHlpIFgcdbf",
+    "ebdciDvKppuIxptqooljjjihSIUlijjnlluUTKzcxLJFNPzCFCKMCTQCCIUPOGkQQvMHGKOCGvGIchMKVTTQhCJxpzQKigmef",
+    "eefcwDCMplxplljjiiigcccSPcULiqqqqwxuKTUSOONRJILLIDDIIQOKIRVUKQVVGPTTTSUPvdaduQSTPOQCKGlilSJzpcmbf",
+    "ebmhpCHPxuGJkiiiijgcccPNcxVLCFBDDFDDixuTTCOLPLFzwwwFCOUTUUIQUQKQTTGvGvvHSPKvQGvzkhcxxcgcNQCFpcmef",
+    "ebmmiFCGuzzLuiiiiggcuQShlpSSilooukywzuhcQTKKFDIFHJJFIVQMOMGMOvkGOvhhddddkHMPChhkkkklgcccSKIDpxmef",
+    "ebfOCxvKuuuuxlliiggIUKupCxiQJgllonzzpxGGOVRUNzHSPKCvTPvISRKKOTukchhhhhhddddhhkkhkkiicccySCHFlhmef",
+    "eefKxpvHukkkkkiilcMTGcluDqgzUpjjjjlcOURQKulzURUPNUSQSzIIJPQMOKKIIGGCkhcchhhhkkhhhkiicccySCKzicdef",
+    "eebCCvvGkkkhhcchgCThhCJCljjgSJgjijkkUGggglljlJJxquOQuyBDDDIMCCCCGGGvkhcchcchhhhcchiiccciTHHzihfef",
+    "eeevxvvKkkhchcccuTkhIxiooggcRNCuyFkQMinjjljiigjyBwlioqwxxyxluuuuukkkkhhhhchhhhhhhhiiccccTKCCicfef",
+    "bbeCxvvGkhccccavTzxlkckhlHzkUHhkllcKOgigiigggggiottqopuptwwxuuuuuuuukhkhhhchhhhhhhhgccccRGHxgamef",
+    "bffCukuGcccaacKSGphcaGVPSTQTUUkchhPVGhiliiiigggggilpppxppxyqpuukukkkukkuvhzzcxkhhghgccccRGzzicfef",
+    "bffvluuKcackCRKukCGkMTMHCkuukKUzcMQvkhihhhhcgccccccpixkxDxwxIxzOCkOzGOkGMcGGcGuccgccccccNGCxicfef",
+    "eefHzukvcvQOMvhccOVVQMkhhippphGUcKKchhczDhkIikzcDxgChHhGFkllziuGkkzuuvuukkhgccccccccccccROzxicmbf",
+    "ebfGDkkvhSdzzkkhhOMKchkiigilpukOSQChgggzzhkFikucliccccccccggcccccccccchhccccccccccccccaCUQvxicfef",
+    "ebfIBhhvvTKOTQuhOKhkkkihikihhippuuhgggghchhcgcccccccccckhhiggicghhgccchcccccccccaaaacapTKMGClcmef",
+    "ebfkiiCHkKKkhGThQCilkikkkkkkhigqphhggggghhhggcgcccccckuGIzIzCGzGCuchhchhcccccccccaaaagROKKzzocdfe",
+    "ebmmgizHdccccaKQOvhkhhhhhhkhhcghliggggccggcccccccccccuuzzuHuIxKGChgggghhggccccccaccELSIGCkKFncmfe",
+    "ebmhijhzzppuuCGQHCCCCzGCCGCvuvuvCCzuuupullliliiiiiiiigiplppllglgiijiiikkkigcccccBJNRFKkcakHzqhmfe",
+    "ebmGkkhhkkCGvvvuCCCzHKGzzzzuuuuKxxCCzxxuGIxxxuuuuxxKCvGGGCGCzHGzxzCCCGGHICxxuuxxNGCGkukkxuhuocmfe",
+    "ebmOkhkhckukkkuuuuukuvuuuuukukkucgippiiikuhkhkkkkhhxukkkukkkkxukkkkkkukzxkkkkkhhckucchkiichxlkmbe",
+    "efmCCkkxukippliggcglicggghcccghcccccghcccccccccccccccccccgggggcggggggggggggggcccccccchiligiuuvmfb",
+    "eefmvGGvvmmGvmdddhMGvCGGCzlLCpwFukkkzkhhggliiiiiiigcpciihihccgiiigggijgnogigiicccgigcglchiilCvmmb",
+    "eeeeeffaffffffffbbfffffffffmmddmmdmdddadaaadddddmmdammmmdddddddddddddhchkdhmuukkkvzvkukhkuzuvvdbf",
+    "eeeeebeeeeeeeeeeeebeebbeeeebbebbbbbbbeeeeefbebbbbbffbfbbfffffffffffffffffffffffffffffffmmddmmfbfe"
    ],
    "plane": "xy",
    "style": "s1",
    "paint": {
     "art_key": {
-     "p": "parch:5",
-     "q": "parch:6",
-     "P": "parch:4",
-     "i": "ink:2",
-     "j": "ochre:3",
-     "r": "lake:4",
-     "R": "lake:5",
-     "h": "fern:3",
-     "t": "pine:4",
-     "w": "bark:3",
-     "T": "leaf:4",
-     "d": "soot:0",
-     "b": "dusk:3",
-     "x": "berry:3",
-     "c": "berry:4"
+     "a": "#bdb09f",
+     "b": "#b0afad",
+     "c": "#c4a884",
+     "d": "#b8a791",
+     "e": "#afaead",
+     "f": "#aeaba8",
+     "g": "#c0a27d",
+     "h": "#bba27f",
+     "i": "#bb9e7a",
+     "j": "#bb9c73",
+     "k": "#b69e7c",
+     "l": "#b79b74",
+     "m": "#ae9e8a",
+     "n": "#b89870",
+     "o": "#b59770",
+     "p": "#b39772",
+     "q": "#b3966c",
+     "r": "#b59268",
+     "s": "#b29269",
+     "t": "#b19269",
+     "u": "#ae9674",
+     "v": "#a89376",
+     "w": "#af9168",
+     "x": "#aa916b",
+     "y": "#ae8e66",
+     "z": "#a78e6b",
+     "A": "#ae8b61",
+     "B": "#aa8a62",
+     "C": "#a48a6a",
+     "D": "#a58963",
+     "E": "#a8845c",
+     "F": "#a18460",
+     "G": "#9c8665",
+     "H": "#9b8261",
+     "I": "#997f5d",
+     "J": "#987b58",
+     "K": "#917a5b",
+     "L": "#937652",
+     "M": "#8c7556",
+     "N": "#8f6f4d",
+     "O": "#866f52",
+     "P": "#836b4c",
+     "Q": "#7f6648",
+     "R": "#7d6041",
+     "S": "#765d3f",
+     "T": "#705a3e",
+     "U": "#6a5235",
+     "V": "#5b4227"
     }
    }
   },
@@ -796,9 +694,9 @@
    "id": "dowel0",
    "shape": "loft",
    "pivot": [
-    -14.4,
-    18.2,
-    0.7
+    -9.4,
+    18.8,
+    0.75
    ],
    "rings": [
     {
@@ -814,7 +712,7 @@
     },
     {
      "at": [
-      28.8,
+      18.8,
       0.0,
       0.0
      ],
@@ -836,34 +734,78 @@
    "style": "s2"
   },
   {
-   "id": "roll0",
+   "id": "knob0-1",
    "shape": "loft",
    "pivot": [
-    -13.6,
-    17.7,
-    0.55
+    -10.0,
+    17.9,
+    0.75
    ],
    "rings": [
     {
      "at": [
+      0,
       0.0,
-      0.0,
-      0.0
+      0
      ],
      "size": [
-      1.1,
-      1.1
+      0.0,
+      0.0
      ]
     },
     {
      "at": [
-      27.2,
-      0.0,
-      0.0
+      0,
+      0.1718847050625473,
+      0
      ],
      "size": [
-      1.1,
-      1.1
+      1.058,
+      1.058
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6218847050625473,
+      0
+     ],
+     "size": [
+      1.7119,
+      1.7119
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1781152949374527,
+      0
+     ],
+     "size": [
+      1.7119,
+      1.7119
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.6281152949374527,
+      0
+     ],
+     "size": [
+      1.058,
+      1.058
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
      ]
     }
    ],
@@ -871,20 +813,25 @@
     "sides": 11,
     "round": 2.0
    },
-   "subdiv": 1,
+   "subdiv": 0,
    "caps": [
-    true,
-    true
+    false,
+    false
    ],
-   "style": "s3"
+   "style": "s3",
+   "up": [
+    0,
+    0,
+    1
+   ]
   },
   {
-   "id": "knob0-1",
+   "id": "knob01",
    "shape": "loft",
    "pivot": [
-    -15.0,
-    17.3,
-    0.7
+    10.0,
+    17.9,
+    0.75
    ],
    "rings": [
     {
@@ -971,104 +918,12 @@
    ]
   },
   {
-   "id": "knob01",
-   "shape": "loft",
-   "pivot": [
-    15.0,
-    17.3,
-    0.7
-   ],
-   "rings": [
-    {
-     "at": [
-      0,
-      0.0,
-      0
-     ],
-     "size": [
-      0.0,
-      0.0
-     ]
-    },
-    {
-     "at": [
-      0,
-      0.1718847050625473,
-      0
-     ],
-     "size": [
-      1.058,
-      1.058
-     ]
-    },
-    {
-     "at": [
-      0,
-      0.6218847050625473,
-      0
-     ],
-     "size": [
-      1.7119,
-      1.7119
-     ]
-    },
-    {
-     "at": [
-      0,
-      1.1781152949374527,
-      0
-     ],
-     "size": [
-      1.7119,
-      1.7119
-     ]
-    },
-    {
-     "at": [
-      0,
-      1.6281152949374527,
-      0
-     ],
-     "size": [
-      1.058,
-      1.058
-     ]
-    },
-    {
-     "at": [
-      0,
-      1.8,
-      0
-     ],
-     "size": [
-      0.0,
-      0.0
-     ]
-    }
-   ],
-   "profile": {
-    "sides": 11,
-    "round": 2.0
-   },
-   "subdiv": 0,
-   "caps": [
-    false,
-    false
-   ],
-   "style": "s5",
-   "up": [
-    0,
-    0,
-    1
-   ]
-  },
-  {
    "id": "dowel1",
    "shape": "loft",
    "pivot": [
-    -14.4,
-    0.6,
-    0.7
+    -9.4,
+    0.2,
+    0.75
    ],
    "rings": [
     {
@@ -1084,7 +939,7 @@
     },
     {
      "at": [
-      28.8,
+      18.8,
       0.0,
       0.0
      ],
@@ -1103,58 +958,15 @@
     true,
     true
    ],
-   "style": "s6"
-  },
-  {
-   "id": "roll1",
-   "shape": "loft",
-   "pivot": [
-    -13.6,
-    1.1,
-    0.55
-   ],
-   "rings": [
-    {
-     "at": [
-      0.0,
-      0.0,
-      0.0
-     ],
-     "size": [
-      1.1,
-      1.1
-     ]
-    },
-    {
-     "at": [
-      27.2,
-      0.0,
-      0.0
-     ],
-     "size": [
-      1.1,
-      1.1
-     ]
-    }
-   ],
-   "profile": {
-    "sides": 11,
-    "round": 2.0
-   },
-   "subdiv": 1,
-   "caps": [
-    true,
-    true
-   ],
-   "style": "s7"
+   "style": "s5"
   },
   {
    "id": "knob1-1",
    "shape": "loft",
    "pivot": [
-    -15.0,
-    -0.3,
-    0.7
+    -10.0,
+    -0.7,
+    0.75
    ],
    "rings": [
     {
@@ -1233,7 +1045,7 @@
     false,
     false
    ],
-   "style": "s8",
+   "style": "s6",
    "up": [
     0,
     0,
@@ -1244,9 +1056,9 @@
    "id": "knob11",
    "shape": "loft",
    "pivot": [
-    15.0,
-    -0.3,
-    0.7
+    10.0,
+    -0.7,
+    0.75
    ],
    "rings": [
     {
@@ -1325,7 +1137,7 @@
     false,
     false
    ],
-   "style": "s9",
+   "style": "s7",
    "up": [
     0,
     0,
@@ -1336,8 +1148,8 @@
    "id": "cord",
    "shape": "loft",
    "pivot": [
-    -13.0,
-    18.6,
+    -8.4,
+    19.2,
     0.7
    ],
    "rings": [
@@ -1354,7 +1166,7 @@
     },
     {
      "at": [
-      7.0,
+      4.4,
       0.8,
       -0.2
      ],
@@ -1365,7 +1177,7 @@
     },
     {
      "at": [
-      13.0,
+      8.4,
       1.2,
       -0.4
      ],
@@ -1376,7 +1188,7 @@
     },
     {
      "at": [
-      19.0,
+      12.4,
       0.8,
       -0.2
      ],
@@ -1387,7 +1199,7 @@
     },
     {
      "at": [
-      26.0,
+      16.8,
       0.0,
       0.0
      ],
@@ -1406,7 +1218,7 @@
     true,
     true
    ],
-   "style": "s10"
+   "style": "s8"
   }
  ]
 }
