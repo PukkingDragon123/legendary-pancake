@@ -308,38 +308,39 @@ export function acornHeap(n: number, r: number, h: number, s = 0.028, seed = 3):
 export function sack(h: number, r: number, seed = 1, acorns = 40): THREE.Group {
   const g = new THREE.Group();
   const rr = rng(seed);
-  const prof: [number, number][] = [];
-  for (let i = 0; i <= 12; i++) {
-    const t = i / 12;
-    const bulge = Math.sin(Math.min(1, t * 1.15) * Math.PI * 0.62 + 0.25) * r;
-    prof.push([Math.max(0.01, bulge * (t > 0.85 ? 0.92 + (rr() - 0.5) * 0.06 : 1)), t * h]);
-  }
-  prof.unshift([r * 0.62, 0]);
-  prof.unshift([0.001, 0]);
-  const body = lathe(prof, 28, M.burlap(), 0.18, 0.18);
-  // slumped, lumpy: squash the lathe a little out of round
+  // a heavy sack slumped on its round bottom, gathered in at the neck and tied with twine, the mouth turned down
+  const P: [number, number][] = [[0.001, 0], [0.7, 0], [0.95, 0.06], [1.06, 0.2], [1.08, 0.36], [1.0, 0.52], [0.86, 0.64], [0.7, 0.74], [0.66, 0.78], [0.74, 0.84], [0.88, 0.9], [0.92, 0.95]];
+  const prof = P.map(([k, t]): [number, number] => [Math.max(0.001, k * r), t * h]);
+  const body = lathe(prof, 32, M.burlap(), 0.22, 0.22);
   const pos = body.geometry.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i), z = pos.getZ(i), y = pos.getY(i), a = Math.atan2(z, x);
-    const fold = Math.pow(Math.abs(Math.sin(a * 4 + seed + y * 2.5)), 6) * 0.08 * Math.min(1, y / (h * 0.5));
-    const k = 1 + Math.sin(a * 3 + seed) * 0.05 + Math.sin(a * 5 + y * 9) * 0.03 - fold;
-    const slump = 1 + Math.max(0, 0.25 - y / h) * 0.3;
-    pos.setX(i, x * k * 1.06 * slump); pos.setZ(i, z * k * 0.94 * slump);
+    const x = pos.getX(i), z = pos.getZ(i), y = pos.getY(i), a = Math.atan2(z, x), t = y / h;
+    // gathered folds bunch up at the neck and fan out below it; the body sags out of round
+    const neck = Math.exp(-(((t - 0.76) / 0.12) ** 2));
+    const fold = Math.pow(Math.abs(Math.sin(a * 5 + seed + t * 1.5)), 3) * (0.05 + neck * 0.16);
+    const k = 1 + Math.sin(a * 2 + seed) * 0.06 + Math.sin(a * 3 + t * 6 + seed) * 0.03 - fold;
+    pos.setX(i, x * k * 1.05); pos.setZ(i, z * k * 0.95);
   }
   body.geometry.computeVertexNormals();
   g.add(body);
-  // the rolled-down mouth
-  const lip = mesh(new THREE.TorusGeometry(prof[prof.length - 1][0] * 1.02, 0.025 + r * 0.04, 6, 20), M.burlap());
+  // twine round the neck, the turned-down mouth
+  const tie = mesh(new THREE.TorusGeometry(r * 0.64, 0.012 + r * 0.02, 5, 22), M.rope());
+  tie.rotation.x = Math.PI / 2;
+  tie.scale.set(1.05, 0.95, 1);
+  tie.position.y = h * 0.76;
+  g.add(tie);
+  const lip = mesh(new THREE.TorusGeometry(r * 0.9, 0.02 + r * 0.05, 6, 22), M.burlap());
   lip.rotation.x = Math.PI / 2;
-  lip.scale.set(1.06, 0.94, 1);
-  lip.position.y = h - 0.01;
+  lip.scale.set(1.05, 0.95, 1);
+  lip.position.y = h * 0.93;
   g.add(lip);
   if (acorns > 0) {
-    const heap = acornHeap(acorns, prof[prof.length - 1][0] * 0.95, r * 0.45, Math.max(0.022, r * 0.16), seed + 4);
-    heap.position.y = h - r * 0.12;
+    const heap = acornHeap(acorns, r * 0.86, r * 0.5, Math.max(0.024, r * 0.15), seed + 4);
+    heap.position.y = h * 0.86;
     g.add(heap);
   }
   g.add(contactShadow(r * 3.4, r * 3.0, 0.55));
+  void rr;
   return g;
 }
 
@@ -356,7 +357,7 @@ function gemGeometry(): THREE.BufferGeometry {
 }
 const GEM_COLS = [0xb9a6ff, 0x9fd8ff, 0xf4e7ff, 0xc8b4ff, 0xa3f0e4];
 export function gemMat(col: number): THREE.MeshPhysicalMaterial {
-  return mat('gem' + col, () => new THREE.MeshPhysicalMaterial({ color: col, emissive: col, emissiveIntensity: 0.55, roughness: 0.08, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 2.2, flatShading: true })) as THREE.MeshPhysicalMaterial;
+  return mat('gem' + col, () => new THREE.MeshPhysicalMaterial({ color: col, emissive: col, emissiveIntensity: 1.1, roughness: 0.08, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 2.2, flatShading: true })) as THREE.MeshPhysicalMaterial;
 }
 export function gem(size: number, col = GEM_COLS[0]): THREE.Mesh {
   const m = mesh(gemGeometry(), gemMat(col), true, false);
@@ -420,8 +421,14 @@ export function chest(w: number, h: number, d: number, seed = 1, gems = 9): THRE
   lid.rotation.x = -1.95;
   g.add(lid);
   if (gems > 0) {
-    const heap = gemHeap(gems, w * 0.7, d * 0.6, Math.min(w, d) * 0.16, seed + 2);
-    heap.position.y = h * 0.78;
+    const heap = gemHeap(gems, w * 0.66, d * 0.56, Math.min(w, d) * 0.26, seed + 2);
+    heap.position.y = h * 0.82;
+    // the gems' own glow over the open chest
+    const glow = new THREE.Sprite(mat('gemglow', () => new THREE.SpriteMaterial({ color: 0xb9a6ff, map: blobTexture(), blending: THREE.AdditiveBlending, transparent: true, opacity: 0.5, depthWrite: false, fog: false })) as THREE.SpriteMaterial);
+    glow.scale.setScalar(Math.max(w, d) * 1.5);
+    glow.position.y = h + 0.03;
+    glow.renderOrder = 6;
+    g.add(glow);
     g.add(heap);
   }
   g.add(contactShadow(w * 1.8, d * 2.0, 0.55));
@@ -569,13 +576,13 @@ export function herbBundle(seed: number, drop = 0.3): THREE.Group {
   const cols = [0x6f9a3e, 0x86a84a, 0xa09040, 0x5c8a3a, 0xb8843c, 0x7d9c5a];
   const col = cols[Math.floor(rr() * cols.length)];
   const leaf = mat('herb' + col, () => new THREE.MeshStandardMaterial({ color: col, roughness: 0.95, flatShading: true }));
-  const n = 6 + Math.floor(rr() * 3);
+  const n = 10 + Math.floor(rr() * 4);
   const parts: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
   for (let k = 0; k < n; k++) {
-    const len = 0.2 + rr() * 0.1;
-    const c = new THREE.ConeGeometry(0.042 + rr() * 0.02, len * 1.3, 5);
+    const len = 0.24 + rr() * 0.14;
+    const c = new THREE.ConeGeometry(0.022 + rr() * 0.014, len, 4);
     c.translate(0, -len * 0.65, 0);
-    const a = (k / n) * Math.PI * 2, tilt = 0.18 + rr() * 0.22;
+    const a = (k / n) * Math.PI * 2 + rr() * 0.4, tilt = 0.08 + rr() * 0.26;
     parts.push({ geo: c, m: new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(Math.cos(a) * tilt, a, Math.sin(a) * tilt)) });
   }
   const sprigs = mesh(merged(parts), leaf);

@@ -132,7 +132,7 @@ export function Shop() {
     const t = setTimeout(() => say(pick(LINES.hello)), 1100);
     const onResize = () => setLayout(isSide() ? 'side' : 'top');
     addEventListener('resize', onResize);
-    if (import.meta.env.DEV) (window as unknown as { hhShop: unknown }).hhShop = { stage: b, open: (id: string) => setGacha(id), say, moment: rewardMoment, card: (c: string) => openCard(c), section: (x: Section) => go(x) };
+    if (import.meta.env.DEV) (window as unknown as { hhShop: unknown }).hhShop = { stage: b, open: (id: string) => openSeries(id), say, moment: rewardMoment, card: (c: string) => openCard(c), section: (x: Section) => go(x) };
     return () => {
       clearTimeout(t);
       removeEventListener('resize', onResize);
@@ -289,7 +289,7 @@ export function Shop() {
     setTimeout(() => rewardMoment('gem', p.gems + p.bonus, p.name), 500);
   };
 
-  const openSeries = (id: string) => {
+  function openSeries(id: string) {
     sound.play('ui_open', { volume: 0.5 });
     setCard(null);
     setSection('series');
@@ -297,7 +297,7 @@ export function Shop() {
     stageRef.current?.focus('series');
     stageRef.current?.act('present', 'barrel');
     say(pick(LINES.series));
-  };
+  }
 
   const claimed = giftClaimed(s), g = dailyGift();
   const sel = card ? card : null;
@@ -347,6 +347,7 @@ export function Shop() {
       ))}
       {showTags && section === 'stash' && GEM_PACKS.map((p) => (
         <Anchored at={'gem:' + p.id} class="lg-packtag gem">
+          <i class="lg-string" />
           <button class="lg-ktag brass" onClick={() => onPick('gem:' + p.id)}>
             <b><Px name="moongem" size={16} />{fmt(p.gems + p.bonus)}</b>
             <span>{p.price}</span>
@@ -369,7 +370,7 @@ export function Shop() {
       {line && !gacha && <Bubble line={line} />}
 
       {/* the detail card of whatever's in focus */}
-      {sel && <DetailCard id={sel} deals={deals} layout={layout} stamped={stamped} onClose={closeCard}
+      {sel && !gacha && <DetailCard id={sel} deals={deals} layout={layout} stamped={stamped} onClose={closeCard}
         onBuy={buy} onGift={gift} onPack={buyPack} onGems={buyGems} art={art} giftInfo={{ claimed, g }} />}
 
       {/* moving about the store: wooden signs on a rope */}

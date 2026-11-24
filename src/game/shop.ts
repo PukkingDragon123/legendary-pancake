@@ -170,7 +170,7 @@ export interface AcornPack { id: string; sprite: string; name: string; blurb: st
 export const ACORN_PACKS: AcornPack[] = [
   { id: 'handful', sprite: 'coin_pouch', name: 'Handful of Acorns', blurb: 'A pocketful, picked this morning.', gems: 60, coins: 600 },
   { id: 'sack', sprite: 'coin_sack', name: 'Sack of Acorns', blurb: 'Burlap, bulging, slightly leaky.', gems: 150, coins: 1650, bonus: 10 },
-  { id: 'basket', sprite: 'coin_chest', name: 'Basket of Acorns', blurb: 'Heaped high by the squirrels of the Hollow.', gems: 300, coins: 3600, bonus: 20, tag: 'Popular' },
+  { id: 'basket', sprite: 'coin_chest', name: 'Bucket of Acorns', blurb: 'An oak pail heaped high by the squirrels of the Hollow.', gems: 300, coins: 3600, bonus: 20, tag: 'Popular' },
   { id: 'mountain', sprite: 'coin_vault', name: 'Acorn Mountain', blurb: 'A whole autumn of golden acorns, and a few gems hiding inside.', gems: 640, coins: 8400, bonus: 30, tag: 'Best value' },
 ];
 export function buyAcorns(p: AcornPack): string | null {

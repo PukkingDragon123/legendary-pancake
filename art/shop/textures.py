@@ -59,17 +59,17 @@ save(load('places/floor_n.png'), 'floor_n')
 save(grade(load('places/board_warm.png'), mul=(1.04, 0.98, 0.9), sat=1.1), 'board')
 
 # burlap for the acorn sacks: an open basket weave of hairy jute threads, painted per pixel
-N = 128
+N = 96
 yy, xx = np.mgrid[0:N, 0:N]
-cell = 4
+cell = 6
 u, v = xx % cell, yy % cell
 over = ((xx // cell + yy // cell) % 2) == 0
-warp = (u >= 1) & (u <= 2)
-weft = (v >= 1) & (v <= 2)
+warp = (u >= 1) & (u <= 4)
+weft = (v >= 1) & (v <= 4)
 ramp = np.array([[0.36, 0.26, 0.16], [0.5, 0.37, 0.22], [0.62, 0.47, 0.29], [0.72, 0.57, 0.36], [0.82, 0.68, 0.46]])
 idx = np.full((N, N), 0.0)
-idx = np.where(warp & (~weft | over), 2.6 + (v == 1) * 0.6 - (v == 3) * 0.6, idx)
-idx = np.where(weft & (~warp | ~over), 2.4 + (u == 1) * 0.6 - (u == 3) * 0.6, idx)
+idx = np.where(warp & (~weft | over), 2.6 + (u == 1) * 0.7 - (u == 4) * 0.8, idx)
+idx = np.where(weft & (~warp | ~over), 2.4 + (v == 1) * 0.7 - (v == 4) * 0.8, idx)
 idx = np.where(~warp & ~weft, 0.4, idx)
 noise = rng.random((N, N))
 idx += (noise - 0.5) * 0.9

@@ -54,7 +54,7 @@ const SHELF = { x: 4.12, z0: -0.55, z1: 1.75, y: 0.92, d: 0.56 };
 /** the deal stumps: spread across the floor on a wide screen, gathered in front of Barnaby on a tall one */
 const STUMPS: Record<LodgeLayout, { x: number; z: number; h: number }[]> = {
   side: [{ x: -2.25, z: 0.2, h: 0.5 }, { x: -1.3, z: 0.5, h: 0.6 }, { x: -0.35, z: 0.2, h: 0.5 }],
-  top: [{ x: 0.6, z: 0.45, h: 0.5 }, { x: 1.36, z: 1.15, h: 0.36 }, { x: 2.12, z: 0.45, h: 0.5 }],
+  top: [{ x: 0.68, z: 0.45, h: 0.5 }, { x: 1.36, z: 1.15, h: 0.34 }, { x: 2.04, z: 0.45, h: 0.5 }],
 };
 /** acorn packs on the floor before the shelf (ids from ACORN_PACKS), gem packs on the shelf (GEM_PACKS) */
 const ACORN_SPOTS = [{ id: 'handful', z: -0.25 }, { id: 'sack', z: 0.3 }, { id: 'basket', z: 0.88 }, { id: 'mountain', z: 1.5 }];
@@ -114,6 +114,8 @@ export class Lodge implements Stage {
   private from: Shot;
   private to: Shot;
   private camT = 1;
+  /** when the current camera move started (wall clock: a slow device still arrives on time) */
+  private camStart = 0;
   private camDur = 1;
   private shotName = 'home';
   private section: Section = 'home';
@@ -237,10 +239,10 @@ export class Lodge implements Stage {
     const n = this.world?.sky?.night ?? nightNow();
     this.night = n;
     const L = THREE.MathUtils.lerp;
-    this.hemi.intensity = L(0.4, 0.24, n);
+    this.hemi.intensity = L(0.4, 0.16, n);
     this.hemi.color.setHex(n > 0.5 ? 0x8a9ac8 : 0xdde6f2);
     this.hemi.groundColor.setHex(n > 0.5 ? 0x2a1a12 : 0x4a2e1c);
-    this.key.intensity = L(0.62, 0.5, n);
+    this.key.intensity = L(0.62, 0.3, n);
     this.key.color.setHex(n > 0.5 ? 0xffc48a : 0xffe4bc);
     this.sun.intensity = L(120, 26, n);
     this.sun.color.setHex(n > 0.5 ? 0x8fa8e8 : 0xeef4ff);
@@ -419,7 +421,7 @@ export class Lodge implements Stage {
     this.add(gift);
     this.gift = gift;
     this.spot('gift', gift, this.hitBox(0.36, 0.34, 0.36, v3(C.x0 + 0.3, C.h + 0.16, C.z + 0.12)), v3(C.x0 + 0.3, C.h + 0.36, C.z + 0.12),
-      (l) => ({ target: v3(C.x0 + 0.3, C.h + 0.15, C.z + 0.1), yaw: -0.1, pitch: 0.32, dist: l === 'side' ? 1.9 : 2.3, fov: 40, cx: l === 'side' ? 0.68 : 0.5, cy: l === 'side' ? 0.5 : 0.3 }));
+      (l) => ({ target: v3(C.x0 - 0.18, C.h + (l === 'side' ? 0.02 : 0.12), C.z + 0.25), yaw: 0.62, pitch: 0.2, dist: l === 'side' ? 2.7 : 3.7, fov: 42, cx: l === 'side' ? 0.66 : 0.5, cy: l === 'side' ? 0.5 : 0.3 }));
     // the chalk slate leaning on the counter front: today's deals and when they change
     const sl = slate(0.62, 0.44);
     sl.group.position.set(C.x1 - 0.55, 0.3, C.z + C.d / 2 + 0.06);
@@ -466,7 +468,7 @@ export class Lodge implements Stage {
       let o: THREE.Group;
       if (a.id === 'handful') { o = new THREE.Group(); const heap = acornHeap(18, 0.1, 0.05, 0.026, 21); heap.position.y = 0.1; o.add(heap); o.userData.bowl = true; }
       else if (a.id === 'sack') o = sack(0.42, 0.17, 3, 34);
-      else if (a.id === 'basket') { o = new THREE.Group(); const heap = acornHeap(46, 0.2, 0.1, 0.03, 23); heap.position.y = 0.11; o.add(heap); o.userData.wicker = true; }
+      else if (a.id === 'basket') { o = new THREE.Group(); const heap = acornHeap(40, 0.15, 0.1, 0.028, 23); heap.position.y = 0.34; o.add(heap); }
       else { o = sack(0.66, 0.27, 7, 60); const spill = acornHeap(40, 0.34, 0.08, 0.03, 29); spill.position.set(-0.2, 0, 0.12); o.add(spill); }
       o.position.set(AX - (i === 3 ? 0.12 : 0), 0, a.z);
       o.rotation.y = -Math.PI / 2 + (i - 1.5) * 0.25;
@@ -478,20 +480,20 @@ export class Lodge implements Stage {
     GEM_SPOTS.forEach((g, i) => {
       let o: THREE.Group;
       if (i === 0) { o = new THREE.Group(); const pouch = sack(0.13, 0.06, 41, 0); pouch.scale.set(1, 1, 1); o.add(pouch); const gm = gem(0.05, 0xb9a6ff); gm.position.set(0, 0.16, 0); o.add(gm); }
-      else o = chest([0.26, 0.34, 0.46][i - 1], [0.14, 0.17, 0.22][i - 1], [0.2, 0.24, 0.3][i - 1], 5 + i, [6, 10, 16][i - 1]);
+      else o = chest([0.3, 0.38, 0.5][i - 1], [0.15, 0.18, 0.23][i - 1], [0.24, 0.28, 0.34][i - 1], 5 + i, [8, 13, 20][i - 1]);
       o.position.set(S.x - 0.03, S.y, g.z);
       o.rotation.y = -Math.PI / 2;
       this.add(o);
       if (i === 3) { const crown = gem(0.07, 0xf4e7ff); crown.position.set(0, 0.36, 0); o.add(crown); o.userData.crown = crown; }
       const sz = [0.2, 0.3, 0.36, 0.48][i];
-      this.spot('gem:' + g.id, o, this.hitBox(sz, sz, sz, v3(S.x - 0.03, S.y + sz / 2, g.z)), v3(S.x - 0.1, S.y + sz + 0.04, g.z), (l) => this.stashShot(l, g.z, 0.95));
+      this.spot('gem:' + g.id, o, this.hitBox(sz, sz, sz, v3(S.x - 0.03, S.y + sz / 2, g.z)), v3(S.x - S.d / 2 - 0.01, S.y - 0.03, g.z), (l) => this.stashShot(l, g.z, 0.95));
     });
     // a lantern over the stash
     this.lamp(v3(S.x - 0.6, 2.55, cz - 0.1), true);
   }
 
   private stashShot(l: LodgeLayout, z: number, y: number): Shot {
-    return { target: v3(SHELF.x - 0.35, y, z), yaw: -1.15, pitch: 0.2, dist: l === 'side' ? 2.3 : 2.9, fov: 42, cx: l === 'side' ? 0.68 : 0.5, cy: l === 'side' ? 0.5 : 0.3 };
+    return { target: v3(SHELF.x - 0.3, y, z), yaw: -1.2, pitch: 0.42, dist: l === 'side' ? 2.2 : 2.8, fov: 42, cx: l === 'side' ? 0.68 : 0.5, cy: l === 'side' ? 0.5 : 0.3 };
   }
 
   /** the weekly series: cloth banners on the back wall, the Lucky Barrel before them */
@@ -547,7 +549,7 @@ export class Lodge implements Stage {
     leak.rotation.x = Math.PI / 2;
     leak.position.set(B.x, 0.12 + B.h - 0.02, B.z);
     this.add(leak);
-    const beamM = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, map: shaftTexture(true), side: THREE.DoubleSide, fog: false });
+    const beamM = new THREE.MeshBasicMaterial({ color: 0xffd27a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, map: shaftTexture(true), side: THREE.FrontSide, fog: false });
     const beam = new THREE.Mesh(this.track(new THREE.CylinderGeometry(B.r * 0.75, B.r * 0.6, 3.2, 20, 1, true)), beamM);
     beam.position.set(B.x, 0.12 + B.h + 1.6, B.z);
     beam.renderOrder = 6;
@@ -567,7 +569,7 @@ export class Lodge implements Stage {
     // close: the reveal (the barrel and the prize rising out of it, centred); otherwise the series board is open
     // beside it (desktop: the board on the left) or below it (phone: the barrel and banners in the top third)
     return close
-      ? { target: v3(B.x, B.h + 0.62, B.z), yaw: 0.12, pitch: 0.12, dist: l === 'side' ? 3.4 : 4.6, fov: 44, cx: 0.5, cy: l === 'side' ? 0.44 : 0.4 }
+      ? { target: v3(B.x, B.h + 0.62, B.z), yaw: 0.12, pitch: 0.12, dist: l === 'side' ? 3.4 : 4.6, fov: 44, cx: 0.5, cy: l === 'side' ? 0.36 : 0.34 }
       : { target: v3(B.x + 0.15, l === 'side' ? 1.5 : 1.75, B.z - 0.25), yaw: 0.1, pitch: 0.1, dist: l === 'side' ? 4.2 : 5.4, fov: 46, cx: l === 'side' ? 0.7 : 0.5, cy: l === 'side' ? 0.5 : 0.17 };
   }
 
@@ -575,9 +577,20 @@ export class Lodge implements Stage {
   private buildDecor() {
     this.lamp(v3(-1.25, 2.65, 1.45), true);
     this.lamp(v3(2.95, 2.5, -1.25), true);
+    // two plain barrels of stock: behind the counter, and by the door with a sack leaning on it
+    for (const [x, z, h, r] of [[4.22, -2.42, 0.86, 0.3], [-3.95, 1.4, 0.78, 0.28]]) {
+      const b = barrel(h, r);
+      b.group.position.set(x, 0, z);
+      b.group.rotation.y = x;
+      this.add(b.group);
+    }
+    const lean = sack(0.4, 0.16, 11, 22);
+    lean.position.set(-3.55, 0, 1.55);
+    lean.rotation.set(0, 0.6, 0.08);
+    this.add(lean);
     // bundles of herbs drying under the beams
     const beamY = ROOM.h - 0.18 - 0.14;
-    for (const [k, [x, z, drop]] of ([[-1.12, -2.35, 0.34], [-0.82, -2.35, 0.5], [-0.5, -2.35, 0.3], [-0.2, -2.35, 0.44], [2.95, -0.75, 0.36], [3.3, -0.75, 0.5], [3.7, 0.85, 0.4], [4.0, 0.85, 0.3], [-3.2, 0.85, 0.42], [-2.9, 0.85, 0.3]] as [number, number, number][]).entries()) {
+    for (const [k, [x, z, drop]] of ([[-1.12, -2.35, 0.34], [-0.82, -2.35, 0.5], [-0.5, -2.35, 0.3], [-0.2, -2.35, 0.44], [2.95, -0.75, 0.36], [3.3, -0.75, 0.5], [-3.9, -0.75, 0.4], [-3.6, -0.75, 0.3]] as [number, number, number][]).entries()) {
       const hb = herbBundle(k * 13 + 5, drop);
       hb.position.set(x, beamY - drop, z);
       this.add(hb);
@@ -688,8 +701,8 @@ export class Lodge implements Stage {
     // the stash's bowl and wicker basket
     const bowl = this.spots.get('acorn:handful');
     if (bowl) put('bowl', v3(0, 0, 0), { w: 0.3, parent: bowl.obj });
-    const wick = this.spots.get('acorn:basket');
-    if (wick) put('wicker', v3(0, 0, 0), { w: 0.5, parent: wick.obj });
+    const pail = this.spots.get('acorn:basket');
+    if (pail) put('bucket', v3(0, 0, 0), { h: 0.38, parent: pail.obj });
     // lanterns: brass hurricane lamps hung under the light points, a wooden one on the window sill
     for (const l of this.lamps) {
       const hang = l.swing!;
@@ -884,9 +897,9 @@ export class Lodge implements Stage {
     const l = this.layout;
     if (name === 'home') return l === 'side'
       ? { target: v3(0.1, 1.15, -0.85), yaw: 0.02, pitch: 0.1, dist: 5.5, fov: 46, cx: 0.5, cy: 0.5 }
-      : { target: v3(1.36, 0.84, -0.3), yaw: 0.0, pitch: 0.2, dist: 4.9, fov: 58, cx: 0.5, cy: 0.44 };
+      : { target: v3(1.36, 0.78, -0.25), yaw: 0.0, pitch: 0.3, dist: 5.0, fov: 58, cx: 0.5, cy: 0.44 };
     if (name === 'deals') { const p = STUMPS[l][1]; return l === 'side' ? { target: v3(p.x, 0.75, p.z - 0.3), yaw: 0.05, pitch: 0.2, dist: 3.9, fov: 44, cx: 0.5, cy: 0.5 } : this.shot('home'); }
-    if (name === 'stash') return { target: v3(SHELF.x - 0.45, 0.62, (SHELF.z0 + SHELF.z1) / 2 + 0.05), yaw: -1.08, pitch: 0.2, dist: l === 'side' ? 3.6 : 4.9, fov: 46, cx: 0.5, cy: l === 'side' ? 0.5 : 0.45 };
+    if (name === 'stash') return { target: v3(SHELF.x - 0.45, 0.6, (SHELF.z0 + SHELF.z1) / 2 + 0.05), yaw: -1.12, pitch: 0.36, dist: l === 'side' ? 3.5 : 5.6, fov: l === 'side' ? 46 : 52, cx: 0.5, cy: l === 'side' ? 0.5 : 0.45 };
     if (name === 'series') return this.barrelShot(l, false);
     if (name === 'barrel') return this.barrelShot(l, true);
     const s = this.spots.get(name);
@@ -906,6 +919,7 @@ export class Lodge implements Stage {
     this.from = { ...this.cur, target: this.cur.target.clone() };
     this.to = to;
     this.camT = instant ? 1 : 0;
+    this.camStart = performance.now();
     const d = this.from.target.distanceTo(to.target) + Math.abs(this.from.yaw - to.yaw) * 2;
     this.camDur = THREE.MathUtils.clamp(0.7 + d * 0.16, 0.8, 1.6);
     if (instant) this.cur = { ...to, target: to.target.clone() };
@@ -1002,8 +1016,15 @@ export class Lodge implements Stage {
     if (!claimed) { this.giftOpen = 0; const bow = this.gift.userData.bow as THREE.Object3D; bow.position.y = 0.3 * 0.79; bow.rotation.set(0, 0, 0); bow.visible = true; }
   }
 
+  /** a ring of small glittering sparks flying out from a point */
+  private pop(p: THREE.Vector3, col: number, n: number) {
+    for (let k = 0; k < n; k++) {
+      const a = (k / n) * Math.PI * 2 + Math.random() * 0.3, s = 0.8 + Math.random() * 1.4;
+      this.fx.emit({ x: p.x, y: p.y, z: p.z, vx: Math.cos(a) * s, vy: 0.6 + Math.random() * 1.6, vz: Math.sin(a) * s * 0.6, life: 0.9 + Math.random() * 0.6, frame: SPR.spark1, frames: 3, fps: 10, color: k % 3 ? col : 0xffffff, size: 0.05 + Math.random() * 0.06, add: true, gravity: 1.6, drag: 1.4, delay: k * 0.008 });
+    }
+  }
   private sparkleRain(x: number, y: number, z: number, n: number) {
-    for (let k = 0; k < n; k++) this.fx.emit({ x: x + (Math.random() - 0.5) * 1.2, y: y + Math.random() * 0.4, z: z + (Math.random() - 0.5) * 0.6, vy: -0.3 - Math.random() * 0.4, life: 1 + Math.random() * 0.8, frame: SPR.spark1, frames: 3, fps: 8, color: k % 3 ? 0xfff0c0 : 0xf1d39a, size: 0.14 + Math.random() * 0.1, add: true, delay: k * 0.03, flutter: 0.3 });
+    for (let k = 0; k < n; k++) this.fx.emit({ x: x + (Math.random() - 0.5) * 1.2, y: y + Math.random() * 0.4, z: z + (Math.random() - 0.5) * 0.6, vy: -0.3 - Math.random() * 0.4, life: 1 + Math.random() * 0.8, frame: SPR.spark1, frames: 3, fps: 8, color: k % 3 ? 0xfff0c0 : 0xf1d39a, size: 0.06 + Math.random() * 0.06, add: true, delay: k * 0.03, flutter: 0.3 });
   }
 
   // ---------------------------------------------------------------- the Lucky Barrel
@@ -1026,9 +1047,8 @@ export class Lodge implements Stage {
         if (this.dead) return res();
         B.open = 1;
         const p = v3(BARREL.x, BARREL.h + 0.3, BARREL.z);
-        this.fx.burst('stars', p.x, p.y, p.z, best === 5 ? 26 : 16);
-        this.fx.burst('confetti', p.x, p.y + 0.2, p.z, best === 5 ? 30 : 12);
-        this.sparkleRain(p.x, p.y + 1.4, p.z, best === 5 ? 34 : 18);
+        this.pop(p, B.col.getHex(), best === 5 ? 46 : best === 4 ? 30 : 18);
+        this.sparkleRain(p.x, p.y + 1.6, p.z, best === 5 ? 24 : 10);
         sound.play(best === 5 ? 'reward_levelup' : best === 4 ? 'reward_unlock' : 'sparkle', { volume: 0.6 });
         res();
       }, best === 5 ? 1700 : 1300);
@@ -1044,7 +1064,7 @@ export class Lodge implements Stage {
     r.obj.position.set(BARREL.x, BARREL.h + 0.2, BARREL.z);
     this.scene.add(r.obj);
     this.prize = { obj: r.obj, owl: r.owl, t: 0 };
-    this.fx.burst('sparkle', BARREL.x, BARREL.h + 0.8, BARREL.z, 10);
+    this.pop(v3(BARREL.x, BARREL.h + 0.75, BARREL.z), stars === 5 ? 0xffd27a : stars === 4 ? 0xd8b8ff : 0xb8e4ff, stars === 5 ? 26 : 12);
   }
   clearPrize() {
     if (!this.prize) return;
@@ -1064,7 +1084,7 @@ export class Lodge implements Stage {
     if ((Math.floor(this.time * 2) !== Math.floor((this.time - dt) * 2))) this.applyLight();
     // camera
     if (this.camT < 1) {
-      this.camT = Math.min(1, this.camT + dt / this.camDur);
+      this.camT = Math.min(1, Math.max(this.camT + Math.min(dt, 0.05) / this.camDur, (performance.now() - this.camStart) / 1000 / this.camDur));
       const k = ease(this.camT), a = this.from, b = this.to;
       this.cur = {
         target: a.target.clone().lerp(b.target, k), yaw: a.yaw + (b.yaw - a.yaw) * k, pitch: a.pitch + (b.pitch - a.pitch) * k,
@@ -1137,12 +1157,12 @@ export class Lodge implements Stage {
       B.lid.rotation.x = THREE.MathUtils.lerp(B.lid.rotation.x, want * -1.1, Math.min(1, dt * 6));
       const bm = B.beam.material as THREE.MeshBasicMaterial;
       bm.color.lerp(B.col, Math.min(1, dt * 4));
-      bm.opacity += (want * 0.55 - bm.opacity) * Math.min(1, dt * 4);
+      bm.opacity += (want * 0.32 - bm.opacity) * Math.min(1, dt * 4);
       B.beam.visible = bm.opacity > 0.01;
       B.glow.color.lerp(B.col, Math.min(1, dt * 4));
       B.glow.intensity = 0.8 + want * 9 + B.shake * 3 + Math.sin(t * 3) * 0.2;
       // sparkles always drift from the barrel's lid
-      if (Math.random() < dt * (2 + want * 30)) this.fx.emit({ x: BARREL.x + (Math.random() - 0.5) * 0.5, y: BARREL.h + 0.15, z: BARREL.z + (Math.random() - 0.5) * 0.5, vy: 0.5 + Math.random() * (0.5 + want * 1.5), life: 1.4, frame: SPR.spark1, frames: 3, fps: 8, color: want > 0 ? B.col.getHex() : 0xffe09a, size: 0.1 + Math.random() * 0.08, add: true, flutter: 0.3 });
+      if (Math.random() < dt * (2 + want * 9)) this.fx.emit({ x: BARREL.x + (Math.random() - 0.5) * 0.5, y: BARREL.h + 0.15, z: BARREL.z + (Math.random() - 0.5) * 0.5, vy: 0.5 + Math.random() * (0.5 + want * 1.5), life: 1.4, frame: SPR.spark1, frames: 3, fps: 8, color: want > 0 ? B.col.getHex() : 0xffe09a, size: 0.06 + Math.random() * 0.05, add: true, flutter: 0.3 });
     }
     if (this.prize) {
       const p = this.prize;

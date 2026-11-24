@@ -23,7 +23,6 @@ attributions as the source projects list them.
 | `lantern` | [Lantern_01](https://polyhaven.com/a/Lantern_01) | Rajil Jose Macatangay | CC0 1.0 | BUSHED |
 | `wlantern` | [wooden_lantern_01](https://polyhaven.com/a/wooden_lantern_01) | James Ray Cock | CC0 1.0 | BUSHED |
 | `bucket` | [wooden_bucket_01](https://polyhaven.com/a/wooden_bucket_01) | James Ray Cock | CC0 1.0 | BUSHED |
-| `wicker` | [wicker_basket_01](https://polyhaven.com/a/wicker_basket_01) | Kuutti Siitonen | CC0 1.0 | BUSHED |
 | `plane` | [hand_plane_no4](https://polyhaven.com/a/hand_plane_no4) | Satyaki Mandal | CC0 1.0 | BUSHED |
 | `saw` | [handsaw_wood](https://polyhaven.com/a/handsaw_wood) | Konrad Szałankiewicz | CC0 1.0 | BUSHED |
 | `hatchet` | [hatchet](https://polyhaven.com/a/hatchet) | James Ray Cock, Ulan Cabanilla | CC0 1.0 | BUSHED |
@@ -38,12 +37,9 @@ attributions as the source projects list them.
 | `crate1` | [wooden_crate_01](https://polyhaven.com/a/wooden_crate_01) | James Ray Cock | CC0 1.0 | BUSHED |
 | `crate2` | [wooden_crate_02](https://polyhaven.com/a/wooden_crate_02) | James Ray Cock, Jurita Burger | CC0 1.0 | BUSHED |
 | `milcrate` | [wooden_military_crate](https://polyhaven.com/a/wooden_military_crate) | Prabhjinder Singh | CC0 1.0 | BUSHED |
-| `mclock` | [mantel_clock_01](https://polyhaven.com/a/mantel_clock_01) | Yann Kervran, Rico Cilliers | CC0 1.0 | BUSHED (via round 3) |
 | `candle` | [wooden_candlestick](https://polyhaven.com/a/wooden_candlestick) | Josh Dean | CC0 1.0 | BUSHED (via round 3) |
-| `tea` | [Tea Set 01](https://polyhaven.com/a/tea_set_01) | James Ray Cock, Rico Cilliers, Jurita Burger | CC0 1.0 | Poly Haven (via round 3) |
 | `vase` | [Antique Ceramic Vase 01](https://polyhaven.com/a/antique_ceramic_vase_01) | James Ray Cock | CC0 1.0 | Gacha Garage (via round 3) |
 | `books` | [Stack of Books](https://sketchfab.com/3d-models/stack-of-books-83d623341f164753b825d1050be009d9) | AJH2 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage (via round 3) |
-| `teddy` | [Teddy Bear](https://sketchfab.com/3d-models/teddy-bear-dae9249342744328ad6da4182e6010f7) | theacidrose | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage (via round 3) |
 | `beanie` | [Beanie With Pom-Pom](https://sketchfab.com/3d-models/beanie-with-pom-pom-16569f9d12da457aa20884fb8ea97080) | lord cabal | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage (via round 3) |
 | `beret` | [Headwear](https://sketchfab.com/3d-models/headwear-b174a13ed4b048828919006fe489440f) | noyou | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage (via round 3) |
 | `boater` | [straw boater hat w/ black silk ribbon](https://sketchfab.com/3d-models/straw-boater-hat-w-black-silk-ribbon-cd78d72dca1748048c7badfbb2f4e06c) | clairenicole22 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Gacha Garage (via round 3) |
