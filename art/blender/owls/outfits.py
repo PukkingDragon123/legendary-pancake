@@ -6,7 +6,12 @@ Every piece is modelled on the tawny (art/blender/owls/owl.py's Owl, the same me
 hangs on (anchor_head / face / neck / chest / back), and exported with its origin at that anchor, so in the game it
 drops onto any owl's anchor, which carries that owl's size. Writes public/models/outfits/<id>.glb (a 1024 px
 brush-painted WebP atlas) and art/blender/_build/outfits/<id>.piece.json (its anchor, whether it hides ear tufts).
+
+v4: `--finish all` refinishes every shipped piece to the realistic owls' standard (see finish() at the end). (The
+toy builds above were measured on the v3 owl; the v4 owl.py is a different builder, so they are kept as the record of
+how the pieces were first made and are not re-run.)
 """
+import io
 import json
 import math
 import os
@@ -845,7 +850,300 @@ def build(pid):
     F.log('exported', pid, F.tris(), 'tris')
 
 
+# ====================================================================== v4: the refinish (realistic hand-painted)
+# --finish takes each shipped piece (public/models/outfits/<id>.glb, modelled here or borrowed by borrow.py) and
+# refinishes it in place to the v4 owls' standard:
+#   - smooth, crease-aware normals (soft cloth and fur; brims, crown points and rims keep their edges)
+#   - its painted atlas repainted texel by texel with the real material under the colour: hand-knit V stitches in
+#     vertical columns, a fabric's weave, felt and fleece fibres, fur strands on the trims, brushed and worn metal,
+#     clear glass and ice, leather grain, wood grain, waxy caps and veined leaves; a ray-traced cavity
+#   - a normal map from that relief and a roughness / metalness map (metal shines, glass gleams, wool stays matte).
+# Rules per piece: its main material, and colour rules for its other parts (gold-ish -> metal, white trims -> fur ...).
+FINISH = {
+    'nightcap': ('cloth', {'white': 'fur'}), 'santa_hat': ('felt', {'white': 'fur'}), 'beanie': ('knit', {}),
+    'wizard': ('felt', {'gold': 'metal'}), 'star_crown': ('metal', {}), 'ice_crown': ('ice', {'grey': 'silver'}),
+    'reindeer_antlers': ('bone', {'red': 'cloth', 'dark': 'cloth'}), 'candy_scarf': ('knit', {}), 'scarf': ('knit', {}),
+    'holiday_sweater': ('knit', {}), 'sweater': ('knit', {}), 'cardigan': ('knit', {'dark': 'wood'}), 'pajamas': ('cloth', {}),
+    'raincoat': ('rubber', {'gold': 'metal'}), 'moon_cape': ('velvet', {'gold': 'metal', 'white': 'thread'}),
+    'frost_cape': ('velvet', {'white': 'fur'}), 'royalcape': ('velvet', {'white': 'fur', 'gold': 'metal'}),
+    'cloudcloak': ('fleece', {}), 'glasses': ('metal', {'pale': 'glass'}), 'monocle': ('metal', {'pale': 'glass'}),
+    'bowtie': ('satin', {}), 'bandana': ('cloth', {}), 'bell': ('metal', {'red': 'satin'}), 'moonpendant': ('silver', {'pale': 'glass'}),
+    'sleepmask': ('satin', {'gold': 'thread'}), 'acorn': ('wood', {}), 'toadstool': ('wax', {}), 'sprout': ('leaf', {}),
+    'lantern': ('metal', {'pale': 'glass'}), 'fairywings': ('glass', {}), 'backpack': ('canvas', {'dark': 'leather', 'gold': 'metal'}),
+    'satchel': ('leather', {'gold': 'metal'}), 'beret': ('felt', {}), 'bow': ('satin', {}), 'crown': ('metal', {'red': 'glass', 'blue': 'glass'}),
+    'stargoggles': ('leather', {'gold': 'metal', 'pale': 'glass', 'grey': 'metal'}), 'froghat': ('fleece', {}),
+    'explorer': ('canvas', {'dark': 'leather'}), 'flowercrown': ('wax', {'green': 'leaf'}),
+}
+# material: (roughness, metalness, relief, albedo modulation)
+MAT = {'cloth': (0.9, 0, 0.6, 0.08), 'felt': (0.95, 0, 0.5, 0.12), 'knit': (0.95, 0, 1.0, 0.22), 'fur': (0.95, 0, 0.9, 0.2),
+       'fleece': (0.95, 0, 0.8, 0.16), 'velvet': (0.8, 0, 0.4, 0.12), 'satin': (0.45, 0, 0.3, 0.06), 'thread': (0.5, 0, 0.5, 0.1),
+       'metal': (0.36, 0.62, 0.4, 0.14), 'silver': (0.32, 0.58, 0.4, 0.12), 'glass': (0.1, 0, 0.0, 0.0), 'ice': (0.16, 0, 0.3, 0.08),
+       'rubber': (0.5, 0, 0.3, 0.06), 'leather': (0.62, 0, 0.6, 0.12), 'canvas': (0.92, 0, 0.6, 0.1), 'wood': (0.8, 0, 0.8, 0.2),
+       'bone': (0.7, 0, 0.6, 0.12), 'wax': (0.5, 0, 0.3, 0.06), 'leaf': (0.6, 0, 0.5, 0.14)}
+
+
+def _hsv(rgb):
+    mx, mn = rgb.max(-1), rgb.min(-1)
+    sat = np.where(mx > 1e-4, (mx - mn) / np.maximum(mx, 1e-4), 0)
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
+    d = np.maximum(mx - mn, 1e-4)
+    h = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) / 6.0
+    return h, sat, mx
+
+
+def _classify(pid, rgb):
+    """Per texel material index from the piece's rules and the painted colour under it."""
+    base, rules = FINISH.get(pid, ('cloth', {}))
+    names = list(MAT)
+    out = np.full(rgb.shape[:2], names.index(base), np.int32)
+    h, sat, v = _hsv(rgb)
+    tests = {
+        'white': (sat < 0.16) & (v > 0.72), 'pale': (sat < 0.28) & (v > 0.6), 'grey': (sat < 0.12) & (v > 0.35) & (v < 0.8),
+        'gold': (h > 0.08) & (h < 0.17) & (sat > 0.35) & (v > 0.5), 'red': ((h < 0.04) | (h > 0.93)) & (sat > 0.35),
+        'blue': (h > 0.5) & (h < 0.72) & (sat > 0.3), 'green': (h > 0.2) & (h < 0.45) & (sat > 0.2), 'dark': v < 0.3,
+    }
+    for key, mat in rules.items():
+        out[tests[key]] = names.index(mat)
+    return out
+
+
+def _raster(P, N, UV, T, hw):
+    """Per texel: its triangle, 3D position and normal (barycentric), from the UV layout."""
+    H, W = hw
+    fid = np.full((H, W), -1, np.int32)
+    pos = np.zeros((H, W, 3), np.float32)
+    nor = np.zeros((H, W, 3), np.float32)
+    uv = UV * np.array([W, H]) - 0.5
+    for t, (i, j, k_) in enumerate(T):
+        a, b, c = uv[i], uv[j], uv[k_]
+        x0, x1 = int(max(0, np.floor(min(a[0], b[0], c[0])))), int(min(W - 1, np.ceil(max(a[0], b[0], c[0]))))
+        y0, y1 = int(max(0, np.floor(min(a[1], b[1], c[1])))), int(min(H - 1, np.ceil(max(a[1], b[1], c[1]))))
+        if x1 < x0 or y1 < y0:
+            continue
+        xs, ys = np.meshgrid(np.arange(x0, x1 + 1), np.arange(y0, y1 + 1))
+        den = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+        if abs(den) < 1e-12:
+            continue
+        w0 = ((b[1] - c[1]) * (xs - c[0]) + (c[0] - b[0]) * (ys - c[1])) / den
+        w1 = ((c[1] - a[1]) * (xs - c[0]) + (a[0] - c[0]) * (ys - c[1])) / den
+        w2 = 1 - w0 - w1
+        m = (w0 >= -0.02) & (w1 >= -0.02) & (w2 >= -0.02)
+        if not m.any():
+            continue
+        yy, xx = ys[m], xs[m]
+        Wb = np.stack([w0[m], w1[m], w2[m]], 1)
+        fid[yy, xx] = t
+        pos[yy, xx] = Wb[:, :1] * P[i] + Wb[:, 1:2] * P[j] + Wb[:, 2:] * P[k_]
+        nn = Wb[:, :1] * N[i] + Wb[:, 1:2] * N[j] + Wb[:, 2:] * N[k_]
+        nor[yy, xx] = nn / np.maximum(np.linalg.norm(nn, axis=1, keepdims=True), 1e-6)
+    return fid, pos, nor
+
+
+def _smooth_normals(P, T, crease=52.0):
+    """Area-weighted vertex normals over the faces that share its position, unless they turn more than `crease`."""
+    fn = np.cross(P[T[:, 1]] - P[T[:, 0]], P[T[:, 2]] - P[T[:, 0]])
+    fu = fn / np.maximum(np.linalg.norm(fn, axis=1, keepdims=True), 1e-12)
+    _, inv = np.unique(np.round(P, 3), axis=0, return_inverse=True)
+    inv = inv.reshape(-1)
+    at = {}
+    for t, tri in enumerate(T):
+        for v in tri:
+            at.setdefault(int(inv[v]), []).append(t)
+    own = {}
+    for t, tri in enumerate(T):
+        for v in tri:
+            own.setdefault(int(v), []).append(t)
+    cos_c = math.cos(math.radians(crease))
+    N = np.zeros_like(P)
+    for v in range(len(P)):
+        mine = own.get(v)
+        if not mine:
+            N[v] = (0, 1, 0)
+            continue
+        ref = fu[mine].sum(0)
+        ref /= max(np.linalg.norm(ref), 1e-9)
+        grp = np.array(at[int(inv[v])])
+        ok = grp[(fu[grp] @ ref) > cos_c]
+        n = fn[ok].sum(0) if len(ok) else fn[mine].sum(0)
+        N[v] = n / max(np.linalg.norm(n), 1e-9)
+    return N
+
+
+def _relief(mat, pos, nor, seed):
+    """Per-material relief at each texel (about -1..1): a tri-planar pattern blended by the normal."""
+    import plume
+
+    def knit(u, v):  # V stitches in vertical columns
+        fu, fv = np.mod(u / 0.62, 1.0), np.mod(v / 0.5, 1.0)
+        vee = np.abs(np.abs(fu - 0.5) * 2 - (1 - fv) * 0.85)
+        return np.clip(1 - vee * 2.2, 0, 1) - 0.35 * (np.abs(fu - 0.5) < 0.06)
+
+    def weave(u, v):
+        fu, fv = np.mod(u / 0.22, 1.0), np.mod(v / 0.22, 1.0)
+        over = (np.floor(u / 0.22) + np.floor(v / 0.22)) % 2
+        return np.where(over > 0, np.sin(fu * math.pi), np.sin(fv * math.pi)) * 0.8
+
+    def fibres(u, v):
+        return plume.fbm(u * 3.2, v * 3.2, seed, 3) - 0.5 + 0.35 * (plume.hsh(np.floor(u * 9), np.floor(v * 9), seed) - 0.5)
+
+    def strands(u, v):
+        return np.sin(u * 7.0 + plume.fbm(u * 1.2, v * 1.2, seed + 3, 2) * 9) * 0.5 + (plume.hsh(np.floor(u * 12), np.floor(v * 4), seed) - 0.5) * 0.6
+
+    def brushed(u, v):
+        return (plume.hsh(np.floor(u * 2), np.floor(v * 30), seed) - 0.5) * 0.5 + 0.6 * (plume.hsh(np.floor(u * 14), np.floor(v * 14), seed + 5) > 0.985)
+
+    def grain(u, v):
+        return np.sin(v * 3.0 + plume.fbm(u * 0.8, v * 0.25, seed, 3) * 10) * 0.5 + (plume.fbm(u * 6, v * 2, seed + 1, 2) - 0.5)
+
+    def pebble(u, v):
+        return plume.fbm(u * 4.5, v * 4.5, seed + 2, 2) - 0.5
+
+    def veins(u, v):
+        return -0.6 * (np.abs(np.mod(u * 1.4 + v * 0.6, 1.0) - 0.5) < 0.05) + (plume.fbm(u * 2, v * 2, seed, 2) - 0.5) * 0.4
+
+    pat = {'knit': knit, 'cloth': weave, 'canvas': weave, 'felt': fibres, 'fleece': fibres, 'fur': strands, 'velvet': fibres, 'satin': fibres,
+           'thread': weave, 'metal': brushed, 'silver': brushed, 'leather': pebble, 'rubber': pebble, 'wood': grain, 'bone': grain,
+           'wax': pebble, 'leaf': veins, 'glass': None, 'ice': pebble}[mat]
+    if pat is None:
+        return np.zeros(len(pos), np.float32)
+    w = np.abs(nor) ** 4
+    w /= np.maximum(w.sum(-1, keepdims=True), 1e-6)
+    X, Y, Z = pos[:, 0], pos[:, 1], pos[:, 2]
+    return (w[:, 2] * pat(X, Y) + w[:, 0] * pat(Z, Y) + w[:, 1] * pat(X, Z)).astype(np.float32)
+
+
+def _resize(a, f):
+    """Downsize a float image (H, W, C) by about f (box filter, any size)."""
+    from PIL import Image
+    h, w = a.shape[:2]
+    nh, nw = max(8, h // f), max(8, w // f)
+    chans = [np.asarray(Image.fromarray(a[..., c].astype(np.float32), 'F').resize((nw, nh), Image.BOX)) for c in range(a.shape[2])]
+    return np.stack(chans, -1)
+
+
+def _bleed(a, inside, px=6):
+    a = a.copy()
+    good = inside.copy()
+    for _ in range(px):
+        acc = np.zeros(a.shape, np.float64)
+        cnt = np.zeros(a.shape[:2], np.float64)
+        for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            g = np.roll(good, (dy, dx), (0, 1))
+            v = np.roll(a, (dy, dx), (0, 1))
+            acc[g] += v[g]
+            cnt += g
+        new = ~good & (cnt > 0)
+        a[new] = (acc[new] / cnt[new][:, None]).astype(a.dtype)
+        good |= new
+    return a
+
+
+def finish(pid):
+    import plume
+    import pack as pk
+    from PIL import Image
+    from mathutils import Vector
+    from mathutils.bvhtree import BVHTree
+    src = os.path.join(OUT, pid + '.glb')
+    J, BIN = pk.read_glb(src)
+    if any(m.get('name') == 'piece_' + pid for m in J.get('materials', [])):
+        print(f'[finish] {pid}: already finished', flush=True)
+        return
+    prim = J['meshes'][0]['primitives'][0]
+
+    def arr(i, comps):
+        a = J['accessors'][i]
+        v = J['bufferViews'][a['bufferView']]
+        ct = {5126: np.float32, 5123: np.uint16, 5125: np.uint32, 5121: np.uint8}[a['componentType']]
+        off = v.get('byteOffset', 0) + a.get('byteOffset', 0)
+        out = np.frombuffer(BIN, ct, a['count'] * comps, off).reshape(a['count'], comps)
+        return out.astype(np.float64) if ct == np.float32 else out.astype(np.int64)
+    P = arr(prim['attributes']['POSITION'], 3)
+    UV = arr(prim['attributes']['TEXCOORD_0'], 2)
+    T = arr(prim['indices'], 1).reshape(-1, 3)
+    tex = J['textures'][J['materials'][prim['material']]['pbrMetallicRoughness']['baseColorTexture']['index']]
+    img_i = tex.get('source', tex.get('extensions', {}).get('EXT_texture_webp', {}).get('source'))
+    iv = J['bufferViews'][J['images'][img_i]['bufferView']]
+    old = np.asarray(Image.open(io.BytesIO(BIN[iv.get('byteOffset', 0):iv.get('byteOffset', 0) + iv['byteLength']])).convert('RGB'), np.float32) / 255.0
+    size = old.shape[:2]
+    N = _smooth_normals(P, T)
+    fid, pos, nor = _raster(P, N, UV, T, size)
+    inside = fid >= 0
+    # the colour under the old facet brushwork: a gentle blur within the islands
+    acc = old.copy()
+    for _ in range(2):
+        acc = (acc + np.roll(acc, 1, 0) + np.roll(acc, -1, 0) + np.roll(acc, 1, 1) + np.roll(acc, -1, 1)) / 5
+    col = np.where(inside[..., None], old * 0.45 + acc * 0.55, old)
+    mats = _classify(pid, acc)
+    hgt = np.zeros(size, np.float32)
+    rough = np.full(size, 0.9, np.float32)
+    metal = np.zeros(size, np.float32)
+    for mi, name in enumerate(MAT):
+        sel = inside & (mats == mi)
+        if not sel.any():
+            continue
+        rr, mm, kk, ka = MAT[name]
+        r = _relief(name, pos[sel], nor[sel], 7 + mi)
+        hgt[sel] = r * kk
+        c = plume.tint(col[sel], r * ka)
+        if name in ('metal', 'silver'):  # (worn: the upward faces catch a little more)
+            c = plume.tint(c, 0.12 * np.clip(nor[sel][:, 1], 0, 1))
+        col[sel] = c
+        rough[sel] = rr
+        metal[sel] = mm
+    # cavity: the piece's own occlusion, ray traced per vertex, carried to the texels
+    bvh = BVHTree.FromPolygons([tuple(v) for v in P], [tuple(int(i) for i in t) for t in T], all_triangles=True)
+    D = np.random.default_rng(5).normal(size=(28, 3))
+    D /= np.linalg.norm(D, axis=1, keepdims=True)
+    vao = np.ones(len(P))
+    for i in range(len(P)):
+        n = N[i]
+        o = Vector(tuple(P[i] + n * 0.05))
+        dd = [d for d in D if d @ n > 0.05]
+        hit = sum(bvh.ray_cast(o, Vector(tuple(d)), 3.0)[0] is not None for d in dd)
+        vao[i] = 1 - hit / max(len(dd), 1)
+    ao = np.ones(size, np.float32)
+    ys, xs = np.nonzero(inside)
+    tri = T[fid[ys, xs]]
+    w = 1 / np.maximum(np.linalg.norm(P[tri] - pos[ys, xs][:, None, :], axis=2), 0.05)
+    ao[ys, xs] = (vao[tri] * w).sum(1) / w.sum(1)
+    col = col * (1 - 0.5 * (1 - ao[..., None]) ** 1.2)
+    col = _bleed(np.clip(col, 0, 1), inside)
+    hgt = _bleed(hgt[..., None], inside)[..., 0]
+    rough = _bleed(rough[..., None], inside)[..., 0]
+    metal = _bleed(metal[..., None], inside)[..., 0]
+    nmap = plume.normal_map(hgt, strength=0.9)
+    from owl import GLB, webp, png
+    os.makedirs(os.path.join(ROOT, 'art', 'blender', '_build', 'outfits'), exist_ok=True)
+    png(col, os.path.join(ROOT, 'art', 'blender', '_build', 'outfits', pid + '_v4.png'))
+    G = GLB()
+    G.J['materials'].append({'name': 'piece_' + pid, 'pbrMetallicRoughness': {'baseColorTexture': {'index': 0}, 'metallicFactor': 1.0,
+                             'roughnessFactor': 1.0, 'metallicRoughnessTexture': {'index': 2}}, 'normalTexture': {'index': 1, 'scale': 1.0}})
+    G.image(webp(col, q=90))
+    G.image(webp(_resize(nmap * 0.5 + 0.5, 2), q=92))
+    mr = np.zeros(_resize(rough[..., None], 4).shape[:2] + (3,), np.float32)
+    mr[..., 1] = _resize(rough[..., None], 4)[..., 0]
+    mr[..., 2] = _resize(metal[..., None], 4)[..., 0]
+    G.image(webp(mr, q=92))
+    mi = G.mesh(pid, P, N, UV, T, 0)
+    for n in J['nodes']:  # (the same hierarchy: the piece's root > its mesh)
+        nn = {k: v for k, v in n.items() if k != 'mesh'}
+        if 'mesh' in n:
+            nn['mesh'] = mi
+        G.J['nodes'].append(nn)
+    G.J['scenes'] = J['scenes']
+    G.J['scene'] = J.get('scene', 0)
+    G.save(src)
+    print(f'[finish] {pid}: {len(T)} tris, {os.path.getsize(src) // 1024} KB', flush=True)
+
+
 if __name__ == '__main__':
-    ids = list(PIECES) if ARGS and ARGS[0] == 'all' else ARGS
-    for i in ids:
-        build(i)
+    if '--finish' in FLAGS:
+        import glob as _g
+        ids = sorted(os.path.basename(f)[:-4] for f in _g.glob(os.path.join(OUT, '*.glb'))) if ARGS and ARGS[0] == 'all' else ARGS
+        for i in ids:
+            finish(i)
+    else:
+        ids = list(PIECES) if ARGS and ARGS[0] == 'all' else ARGS
+        for i in ids:
+            build(i)

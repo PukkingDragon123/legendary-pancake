@@ -553,12 +553,19 @@ function fetchPiece(id: string): Promise<Loaded | null> {
   }
   return p;
 }
-/** Faceted toy pieces ship without normals (art/blender/owls/pack.py): shade their facets flat. */
+/** v4 pieces (art/blender/owls/outfits.py --finish) carry smooth normals, a normal map and a roughness / metalness map:
+ * the map decides (wool stays matte, brass and silver shine, glass gleams). An old faceted piece without normals is
+ * still shaded flat. */
 function flatten(root: THREE.Object3D) {
   root.traverse((n) => {
     const m = n as THREE.Mesh;
-    if (!m.isMesh || m.geometry.attributes.normal) return;
-    for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) { mat.flatShading = true; mat.needsUpdate = true; }
+    if (!m.isMesh) return;
+    for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) {
+      if (!m.geometry.attributes.normal) mat.flatShading = true;
+      if (mat.roughnessMap) { mat.roughness = 1; mat.metalness = 1; mat.roughnessMap.magFilter = THREE.LinearFilter; }
+      if (mat.normalMap) mat.normalMap.magFilter = THREE.LinearFilter;
+      mat.needsUpdate = true;
+    }
   });
 }
 const wornIds = (look: OwlLook) => SLOT_ORDER.map((s) => look.outfit?.[s]).filter((id): id is string => !!id && !!PIECE_MODELS[id]);

@@ -8,7 +8,7 @@ import { defaultEye, type EyeMode, type EyeState } from '../owl/eyes.ts';
 import { buildOwl, type OwlLook, type OwlModel } from '../owl/model.ts';
 import { QUEEN_LOOK } from '../owl/queen.ts';
 import { SPECIES } from '../owl/species.ts';
-import { P } from '../gfx/palette.ts';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 const q = new URLSearchParams(location.search);
 const canvas = document.getElementById('c') as HTMLCanvasElement;
@@ -18,17 +18,25 @@ r.setSize(innerWidth, innerHeight, false);
 r.shadowMap.enabled = true;
 r.shadowMap.type = THREE.PCFSoftShadowMap;
 r.outputColorSpace = THREE.SRGBColorSpace;
+// the v4 look: ACES, a warm golden-hour sun with soft shadows, a sky / meadow fill and an environment map for the
+// glossy bits (beak, talons, eyes); ?night=1 for moonlight and a warm lamp
+r.toneMapping = THREE.ACESFilmicToneMapping;
+r.toneMappingExposure = +(q.get('exposure') ?? 1.0);
+const night = q.get('night') === '1';
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(q.get('bg') ? parseInt(q.get('bg')!, 16) : P.dusk);
+scene.background = new THREE.Color(q.get('bg') ? parseInt(q.get('bg')!, 16) : night ? 0x1c2a4a : 0x8fc0dc);
+const pm = new THREE.PMREMGenerator(r);
+scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = night ? 0.12 : 0.35;
 const cam = new THREE.PerspectiveCamera(24, innerWidth / innerHeight, 0.1, 200);
-const sun = new THREE.DirectionalLight(0xfff0d8, 2.3);
-sun.position.set(-4, 9, 8); sun.castShadow = true;
+const sun = new THREE.DirectionalLight(night ? 0xa8c0ff : 0xffe2b8, night ? 0.9 : 3.2);
+sun.position.set(-5, 8, 7); sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
 Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14 });
-const rimL = new THREE.DirectionalLight(0xb8cad8, 0.8);
-rimL.position.set(6, 4, -6);
-scene.add(sun, rimL, new THREE.HemisphereLight(0xfff4e0, 0x5a5444, 1.3));
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshLambertMaterial({ color: P.moss }));
+scene.add(sun, new THREE.HemisphereLight(night ? 0x4a5a90 : 0xbfe0ff, night ? 0x1a2018 : 0x6a7a3a, night ? 0.5 : 1.1));
+if (night) { const lamp = new THREE.PointLight(0xffa850, 18, 12, 1.6); lamp.position.set(2.5, 2.2, 2.5); scene.add(lamp); }
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ color: night ? 0x2a3a2a : 0x6f9a3e, roughness: 0.95 }));
 ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
 
 type Entry = { look: OwlLook; label: string; eye?: Partial<EyeState>; pose?: OwlPose; mood?: OwlMood; action?: OwlAction; at?: number };

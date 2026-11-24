@@ -3,7 +3,7 @@
 // moment before a model's GLB has loaded, so a portrait is never blank. Needs the dev server and playwright:
 //   NODE_PATH=$(npm root -g) node art/blender/owls/stills.cjs http://localhost:5211
 // then python3 -I art/blender/owls/rigdata.py (it lists the stills in src/owl/rig.gen.ts).
-const { chromium } = require('playwright');
+const { chromium } = require(process.env.PLAYWRIGHT || 'playwright');
 const { writeFileSync } = require('node:fs');
 const { resolve } = require('node:path');
 (async () => {
@@ -15,6 +15,7 @@ const { resolve } = require('node:path');
   const stills = await page.evaluate(async () => {
     const out = {};
     for (const [id, v] of Object.entries(window.__stills)) {
+      if (id === 'queen') continue; // (her stills stay as they are: she is being retired)
       out[id] = {};
       for (const [shot, url] of Object.entries(v)) {
         if (!url) continue;
