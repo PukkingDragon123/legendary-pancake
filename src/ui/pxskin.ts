@@ -7,48 +7,44 @@
 import { CSS_TOKENS } from '../gfx/palette.ts';
 import { frameStyle, frameURL } from './px/frames.js';
 import { installPxFx } from './pxfx.tsx';
+import { paperAt, PAPER, PAPER_DARK } from './px/materials.js';
 
 const noFill = (name: string, scale: number) => frameStyle(name, scale).replace(/ fill(?=;|$)/, '');
 const devK = () => Math.min(4, Math.max(1, Math.round(devicePixelRatio || 1)));
 const fixedBg = (name: string, scale: number) => `url("${frameURL(name, scale * devK())}")`;
 
-const hash = (x: number, y: number, s = 0) => { let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 982451653)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
 
 /**
- * A tileable paper texture at pixel resolution: oat ground, faint cloudy mottling, hair-thin
- * fibres in two tones, a few flecks of bark and one tiny sage thread. `n` texels square.
+ * A tileable sheet of oat paper in the manner of BUSHED's paper.ts: fibres, cloudy mottling, foxing and a grain
+ * of single texels, painted at one texel per CSS px (so it reads as fine, real paper). `n` texels square.
  */
-function paperTile(base = '#eae0c8', tones = ['#e4d9be', '#f2ebd8', '#d8cba9', '#c7b58e', '#b9c39a'], n = 32, seed = 3): string {
-  const k = devK() * 3;
+function paperTile(dark = false, n = 128, seed = 3): string {
+  const k = devK();
+  const t = document.createElement('canvas');
+  t.width = t.height = n;
+  const tg = t.getContext('2d')!;
+  const img = tg.createImageData(n, n);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+    const col = paperAt(x, y, n, n, { ramp: dark ? PAPER_DARK : PAPER, seed, base: dark ? 0.58 : 0.66 });
+    const i = (y * n + x) * 4;
+    img.data[i] = col[0]; img.data[i + 1] = col[1]; img.data[i + 2] = col[2]; img.data[i + 3] = 255;
+  }
+  tg.putImageData(img, 0, 0);
   const c = document.createElement('canvas');
   c.width = c.height = n * k;
   const g = c.getContext('2d')!;
-  g.fillStyle = base; g.fillRect(0, 0, c.width, c.height);
-  const px = (x: number, y: number, col: string) => { g.fillStyle = col; g.fillRect((((x % n) + n) % n) * k, (((y % n) + n) % n) * k, k, k); };
-  // mottling: soft clouds made of single darker pixels (periodic)
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    const v = Math.sin((x / n) * Math.PI * 2 * 2 + seed) + Math.cos((y / n) * Math.PI * 2 * 3 + seed * 2) + Math.sin(((x + y) / n) * Math.PI * 2);
-    if (v > 1.6 && hash(x, y, seed) > 0.45) px(x, y, tones[0]);
-  }
-  // fibres
-  for (let i = 0; i < 26; i++) {
-    const x = Math.floor(hash(i, 1, seed) * n), y = Math.floor(hash(i, 2, seed) * n), a = (hash(i, 3, seed) - 0.5) * 1.5, len = 2 + Math.floor(hash(i, 4, seed) * 4);
-    const col = hash(i, 5, seed) < 0.55 ? tones[1] : tones[2];
-    for (let j = 0; j < len; j++) px(Math.round(x + Math.cos(a) * j), Math.round(y + Math.sin(a) * j * 0.6), col);
-  }
-  // flecks and one sage thread
-  for (let i = 0; i < 7; i++) px(Math.floor(hash(i, 8, seed) * n), Math.floor(hash(i, 9, seed) * n), tones[3]);
-  for (let j = 0; j < 3; j++) px(5 + j, 21 + (j >> 1), tones[4]);
+  g.imageSmoothingEnabled = false;
+  g.drawImage(t, 0, 0, n * k, n * k);
   return `url("${c.toDataURL()}")`;
 }
 
 export function installPixelSkin() {
   installPxFx();
-  const tile = paperTile();
-  const tileD = paperTile('#dccfb0', ['#d5c7a6', '#e6dbc0', '#c8b892', '#b9a780', '#a7b788'], 32, 7);
+  const tile = paperTile(false, 128, 3);
+  const tileD = paperTile(true, 128, 7);
   const css = `${CSS_TOKENS}
-:root{--parch-tile:${tile};--parch-tile-dark:${tileD};--paper-bg:var(--parch-tile) 0 0/96px 96px,#eae0c8}
-.sheet{${noFill('wood', 3)};background:var(--parch-tile) 0 0/96px 96px,#eae0c8;background-clip:padding-box}
+:root{--parch-tile:${tile};--parch-tile-dark:${tileD};--paper-bg:var(--parch-tile) 0 0/128px 128px,#e6dcc2}
+.sheet{${noFill('wood', 3)};background:var(--parch-tile) 0 0/128px 128px,#e6dcc2;background-clip:padding-box}
 .card{${frameStyle('parchment', 2)}}
 .card.sunk{${frameStyle('parchment_dark', 2)}}
 .card.night{${frameStyle('wood_dark', 2)}}
@@ -101,7 +97,7 @@ export function installPixelSkin() {
 .seal{background:${fixedBg('medallion', 3)} no-repeat 0 0/100% 100%}
 .title-ribbon{${frameStyle('ribbon_green', 2)}}
 .plaque{${frameStyle('plaque', 2)}}
-.modal{${noFill('parchment', 3)};background:var(--parch-tile) 0 0/96px 96px,#eae0c8;background-clip:padding-box}
+.modal{${noFill('parchment', 3)};background:var(--parch-tile) 0 0/128px 128px,#e6dcc2;background-clip:padding-box}
 .quest.ready{${frameStyle('sticky_note', 2)}}
 .quest.claimed{${frameStyle('parchment_dark', 2)}}
 .qbar{${frameStyle('bar_track', 2)}}

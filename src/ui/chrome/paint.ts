@@ -5,6 +5,7 @@
 // cached as a data URL, and shown with `image-rendering: pixelated`.
 import { RAMPS_SRC } from '../px/sprites.js';
 import { calm } from '../px/calm.js';
+import { woodPx } from '../px/materials.js';
 
 type C = [number, number, number];
 // [ui3] colours are graded into the calm palette (calm.js) as they are read
@@ -31,13 +32,21 @@ export const bayer = (x: number, y: number) => BAYER[((y & 3) << 2) | (x & 3)];
 
 export class Buf {
   d: Uint8ClampedArray<ArrayBuffer>;
-  constructor(public w: number, public h: number) { this.d = new Uint8ClampedArray(new ArrayBuffer(w * h * 4)); }
+  /** per art pixel: -1, or the tone (0..5) of a wood-material pixel that is re-painted with real boards at hi-res */
+  m: Int8Array;
+  /** wood options for the hi-res pass */
+  woodDark = false;
+  woodSeed = 0;
+  constructor(public w: number, public h: number) { this.d = new Uint8ClampedArray(new ArrayBuffer(w * h * 4)); this.m = new Int8Array(w * h).fill(-1); }
+  /** a wood-material pixel of tone t (the low-res colour R[t] stands in until the hi-res pass) */
+  wood(x: number, y: number, t: number, R: C[]) { this.set(x, y, R[t]); if (this.in(x, y)) this.m[y * this.w + x] = t; return this; }
   in(x: number, y: number) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
   a(x: number, y: number) { return this.in(x, y) ? this.d[(y * this.w + x) * 4 + 3] : 0; }
   set(x: number, y: number, c: C, a = 255) {
     x = Math.round(x); y = Math.round(y);
     if (!this.in(x, y)) return this;
     const i = (y * this.w + x) * 4;
+    this.m[y * this.w + x] = -1;
     if (a >= 255 || !this.d[i + 3]) { this.d[i] = c[0]; this.d[i + 1] = c[1]; this.d[i + 2] = c[2]; this.d[i + 3] = a; return this; }
     const t = a / 255;
     this.d[i] = this.d[i] + (c[0] - this.d[i]) * t; this.d[i + 1] = this.d[i + 1] + (c[1] - this.d[i + 1]) * t; this.d[i + 2] = this.d[i + 2] + (c[2] - this.d[i + 2]) * t;
@@ -63,13 +72,32 @@ export class Buf {
     return cv;
   }
   url() { return this.canvas().toDataURL('image/png'); }
+  /**
+   * The hi-res version, `res` texels per art pixel: wood pixels are re-painted texel by texel with BUSHED's
+   * worn floor boards (grain along x), toned by their art-pixel tone; everything else (ink, brass, moss, ivy,
+   * the painted windows) keeps its chunky art pixels.
+   */
+  hi(res = 2): Buf {
+    const o = new Buf(this.w * res, this.h * res);
+    for (let ty = 0; ty < o.h; ty++) for (let tx = 0; tx < o.w; tx++) {
+      const x = (tx / res) | 0, y = (ty / res) | 0, i = y * this.w + x, j = (ty * o.w + tx) * 4;
+      const t = this.m[i];
+      if (t >= 0 && this.d[i * 4 + 3]) {
+        const c = woodPx(tx + this.woodSeed * 53, ty + this.woodSeed * 29, (t - 3) * 0.13, this.woodDark);
+        o.d[j] = c[0]; o.d[j + 1] = c[1]; o.d[j + 2] = c[2]; o.d[j + 3] = 255;
+      } else { o.d[j] = this.d[i * 4]; o.d[j + 1] = this.d[i * 4 + 1]; o.d[j + 2] = this.d[i * 4 + 2]; o.d[j + 3] = this.d[i * 4 + 3]; }
+    }
+    return o;
+  }
 }
 
 const urls = new Map<string, string>();
+/** texels per art pixel for the chrome's wood (the boards are shown 2 CSS px per art pixel: 1 texel per CSS px) */
+export const HIRES = 2;
 export function cached(key: string, make: () => Buf): string {
   let u = urls.get(key);
   if (u === undefined) {
-    try { u = typeof document === 'undefined' ? '' : make().url(); } catch (e) { console.warn('paint failed', key, e); u = ''; }
+    try { u = typeof document === 'undefined' ? '' : make().hi(HIRES).url(); } catch (e) { console.warn('paint failed', key, e); u = ''; }
     urls.set(key, u);
   }
   return u;
@@ -92,6 +120,7 @@ export function plank(w: number, h: number, o: PlankOpts = {}): string {
   return cached(key, () => {
     const R = RAMP(o.tone ?? 'wood'), B = RAMP('brass'), seed = o.seed ?? 1, n = o.notch ?? 2, planks = o.planks ?? 1;
     const b = new Buf(w, h);
+    b.woodDark = o.tone === 'dwood'; b.woodSeed = seed;
     const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && !(x + y < n || w - 1 - x + y < n || x + h - 1 - y < n || w - 1 - x + h - 1 - y < n);
     const ph = (h - 2) / planks;
     const knots: [number, number][] = [];
@@ -116,7 +145,7 @@ export function plank(w: number, h: number, o: PlankOpts = {}): string {
         else if ((y === gy0 + 1 && x > gx0 && x < gx1) || (x === gx0 + 1 && y > gy0 && y < gy1)) t = Math.min(t, 2);
         else if ((y === gy1 + 1 && x >= gx0 && x <= gx1 + 1) || (x === gx1 + 1 && y >= gy0 && y <= gy1 + 1)) t = 5;
       }
-      b.set(x, y, R[t]);
+      b.wood(x, y, t, R);
     }
     for (const [nx, ny] of o.nails ?? []) rivet(b, nx, ny, B);
     // worn corners: a few lighter scuffs along the edges, dark tool marks
@@ -252,6 +281,7 @@ export type Inner = 'night' | 'paper' | 'velvet';
 export function plaque(w: number, h: number, inner: Inner, seed = 5, plateH = 12): string {
   return cached(`plaque:${w}x${h}:${inner}:${seed}:${plateH}`, () => {
     const b = new Buf(w, h), R = RAMP('wood'), D = RAMP('dwood'), B = RAMP('brass');
+    b.woodSeed = seed;
     const n = 3, fw = 5, wy1 = h - plateH - 1;
     const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && !(x + y < n || w - 1 - x + y < n || x + h - 1 - y < n || w - 1 - x + h - 1 - y < n);
     const win = (x: number, y: number) => x >= fw && x < w - fw && y >= fw && y < wy1;
@@ -270,7 +300,7 @@ export function plaque(w: number, h: number, inner: Inner, seed = 5, plateH = 12
       if (((y === gy0 || y === gy1) && x >= gx0 && x <= gx1) || ((x === gx0 || x === gx1) && y >= gy0 && y <= gy1)) t = 1;
       // bevel towards the window
       if (win(x - 1, y) || win(x, y - 1)) t = 5;
-      b.set(x, y, R[t]);
+      b.wood(x, y, t, R);
     }
     // the window's inner shadow (top and left)
     for (let x = fw; x < w - fw; x++) { b.set(x, fw, [0, 0, 0], 70); b.set(x, fw + 1, [0, 0, 0], 35); }
@@ -334,6 +364,8 @@ export function shelf(w: number): string {
   return cached(`shelf:${w}`, () => {
     const h = 12, b = new Buf(w, h), top = plankBuf(w, 6, 'lwood', 9), I = RAMP('iron');
     b.d.set(top.d.subarray(0, w * 6 * 4), 0);
+    b.m.set(top.m.subarray(0, w * 6), 0);
+    b.woodSeed = 9;
     for (const bx of [8, w - 16]) {
       for (let y = 6; y < h; y++) for (let x = bx; x < bx + 8; x++) {
         const k = x - bx, j = y - 6;
@@ -354,7 +386,7 @@ function plankBuf(w: number, h: number, tone: string, seed: number): Buf {
     if (x === 0 || y === 0 || x === w - 1 || y === h - 1) { b.set(x, y, INK); continue; }
     let t = woodTone(x, y, seed, 0);
     if (y === 1) t = 5; else if (y === h - 2) t = 1; else if (y === h - 3) t = 2;
-    b.set(x, y, R[t]);
+    b.wood(x, y, t, R);
   }
   return b;
 }
@@ -363,6 +395,7 @@ function plankBuf(w: number, h: number, tone: string, seed: number): Buf {
 export function tag(w: number, h: number, seed = 2): string {
   return cached(`tag:${w}x${h}:${seed}`, () => {
     const ring = 5, b = new Buf(w, h + ring), R = RAMP('wood'), B = RAMP('brass');
+    b.woodSeed = seed + 3;
     const n = 3;
     const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < w && y < h && !(x + y < n || w - 1 - x + y < n || x + h - 1 - y < n || w - 1 - x + h - 1 - y < n);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
@@ -380,7 +413,7 @@ export function tag(w: number, h: number, seed = 2): string {
         if (y === p || x === p) t = 1;
         if (y === h - p - 1 || x === w - p - 1) t = 4;
       }
-      b.set(x, Y, R[t]);
+      b.wood(x, Y, t, R);
     }
     for (const [x, y] of [[2, 2], [w - 3, 2], [2, h - 3], [w - 3, h - 3]]) { b.set(x, y + ring, B[5]); b.set(x + 1, y + ring + 1, B[1]); }
     if (seed % 2 === 0) moss(b, 2, 8, ring, seed); else moss(b, w - 9, w - 3, ring, seed);

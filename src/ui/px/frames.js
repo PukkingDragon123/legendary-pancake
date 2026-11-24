@@ -16,6 +16,7 @@
 // slice [0, 0, 0, 0]; frameStyle() returns a background for those.
 
 import { calm } from './calm.js';
+import { HI } from './framehi.js'; // [ui3] high-resolution material frames (BUSHED-style)
 
 // ---------------------------------------------------------------- colour
 function rgb(h) {
@@ -639,6 +640,9 @@ def('plaque', { w: 24, h: 16, slice: [5, 8, 6, 8] }, (b) => {
   return b;
 });
 
+// [ui3] the high-resolution frames tile their middles (one whole texture period), never stretch
+for (const n of Object.keys(HI)) if (FRAMES[n]) FRAMES[n].repeat = 'repeat';
+
 // ---------------------------------------------------------------- API
 const canvasCache = new Map();
 const urlCache = new Map();
@@ -649,6 +653,11 @@ function getFrame(name) {
   return f;
 }
 
+// [ui3] texels per art pixel for a high-resolution frame shown at `S` device px per art px: about one texel per
+// CSS px (1x screens) or two device px (retina), always a whole divisor of S so every texel is square.
+const pickRes = (S) => { if (S <= 3) return S; let best = 1; for (let d = 1; d <= Math.min(4, S / 2); d++) if (S % d === 0) best = d; return best; };
+const hiCache = new Map();
+
 export function frameCanvas(name, scale = 2) {
   scale = normScale(scale);
   const key = name + '@' + scale;
@@ -656,7 +665,27 @@ export function frameCanvas(name, scale = 2) {
   if (hit) return hit;
   const f = getFrame(name);
   let cv;
-  if (scale === 1) {
+  if (HI[name] && !f.fixed) {
+    // [ui3] painted with real materials at `res` texels per art pixel, then scaled up whole
+    const res = pickRes(scale), hk = name + '#' + res;
+    let base = hiCache.get(hk);
+    if (!base) {
+      const b = HI[name](res);
+      base = document.createElement('canvas');
+      base.width = b.w; base.height = b.h;
+      base.getContext('2d', { willReadFrequently: true }).putImageData(new ImageData(b.d, b.w, b.h), 0, 0);
+      hiCache.set(hk, base);
+    }
+    const k = scale / res;
+    if (k === 1) cv = base;
+    else {
+      cv = document.createElement('canvas');
+      cv.width = base.width * k; cv.height = base.height * k;
+      const ctx = cv.getContext('2d', { willReadFrequently: true });
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(base, 0, 0, cv.width, cv.height);
+    }
+  } else if (scale === 1) {
     const b = BUILD[name]();
     cv = document.createElement('canvas');
     cv.width = f.w;
