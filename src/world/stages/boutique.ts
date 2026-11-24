@@ -383,9 +383,16 @@ export class Boutique implements Stage {
 
     // Queen Neve on a little step behind her counter
     this.queen = new OwlActor(QUEEN_LOOK, { fx: (k, at, n) => this.owlFx(k, at, n), sound: (id) => sceneSound('owl_' + id) });
-    this.queen.node.scale.setScalar(1.28);
     this.queen.setMood('happy');
-    this.queenRig.position.set(0.1, 0.42, -1.66);
+    this.queenRig.position.set(0.1, 0.62, -1.66);
+    // once her hand-painted model is in, size her so she stands a head and shoulders above the counter
+    void this.queen.model.ready.then(() => {
+      if (this.dead) return;
+      this.queen.node.scale.setScalar(1);
+      this.queen.node.updateMatrixWorld(true);
+      const hgt = new THREE.Box3().setFromObject(this.queen.node).getSize(new THREE.Vector3()).y;
+      if (hgt > 0.05) this.queen.node.scale.setScalar(Math.min(2, 1.6 / hgt));
+    });
     this.queenRig.add(this.queen.node);
     S.add(this.queenRig);
     S.add(this.fx.group);
@@ -707,9 +714,10 @@ export class Boutique implements Stage {
         owl.setMood('happy');
         const g = new THREE.Group();
         g.add(owl.node);
+        await owl.model.ready; // the hand-painted owl and its outfit arrive as GLBs
+        if (token !== this.dealToken || this.dead) { owl.model.dispose(); return; }
         for (let k = 0; k < 20; k++) owl.update(1 / 30);
         fit(g, floor ? 0.8 : 0.42, floor ? 1.0 : 0.5, floor ? 0.8 : 0.42);
-        if (token !== this.dealToken || this.dead) { owl.model.dispose(); return; }
         s.holder.add(g);
         s.owl = owl; s.model = g;
         return;

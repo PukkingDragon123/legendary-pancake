@@ -7,13 +7,13 @@
 import * as THREE from 'three';
 import { FINISH } from '../../assets/registry.ts';
 import { rng, strSeed } from '../../gfx/noise.ts';
-import { buildOwl, type OwlLook } from '../../owl/model.ts';
-import { PIECE } from '../../owl/outfits.ts';
+import { buildOwl, owlReady, type OwlLook } from '../../owl/model.ts';
+import { PIECE, piecesReady } from '../../owl/outfits.ts';
 import { SPECIAL_SKIN } from '../../owl/skins.ts';
 import { SPECIES_BY_ID } from '../../owl/species.ts';
 import type { RewardKind, Series } from '../../game/series.ts';
 import { ITEMS } from '../../assets/registry.ts';
-import { itemIcon, owlFull, pieceIcon } from '../portraits.ts';
+import { iconVersion, itemIcon, owlFull, pieceIcon } from '../portraits.ts';
 
 // ------------------------------------------------------------------ a pixel canvas
 
@@ -234,9 +234,19 @@ let R: THREE.WebGLRenderer | null = null, scene: THREE.Scene, cam: THREE.Orthogr
 const bigCache = new Map<string, string>();
 /** A large render of an owl look (the featured 5-star), lit like a shop window. */
 export function bigOwl(look: OwlLook, size = 384): string {
+  void iconVersion.value; // re-render the caller when the picture lands
   const key = JSON.stringify(look) + size;
   const hit = bigCache.get(key);
   if (hit !== undefined) return hit;
+  if (!bigPending.has(key)) {
+    bigPending.add(key);
+    // the hand-painted owl and its outfit load as GLBs: shoot only once they are in
+    void Promise.all([owlReady(look), piecesReady(look)]).catch(() => undefined).then(() => shootBig(look, size)).then((url) => { bigCache.set(key, url); bigPending.delete(key); iconVersion.value++; });
+  }
+  return '';
+}
+const bigPending = new Set<string>();
+async function shootBig(look: OwlLook, size: number): Promise<string> {
   let url = '';
   try {
     if (!R) {
@@ -244,16 +254,14 @@ export function bigOwl(look: OwlLook, size = 384): string {
       R = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: true, preserveDrawingBuffer: true });
       R.setClearColor(0, 0); R.outputColorSpace = THREE.SRGBColorSpace;
       scene = new THREE.Scene();
-      scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6a6a9a, 1.5));
-      const k = new THREE.DirectionalLight(0xfff0d8, 2.1); k.position.set(-3, 6, 7); scene.add(k);
-      const rim = new THREE.DirectionalLight(0xbfd8ff, 1.6); rim.position.set(5, 3, -4); scene.add(rim);
+      scene.add(new THREE.HemisphereLight(0xf4ecd8, 0x5b4a3c, 1.5));
+      const k = new THREE.DirectionalLight(0xf6e2b4, 2.0); k.position.set(-3, 6, 7); scene.add(k);
+      const rim = new THREE.DirectionalLight(0xaec8cc, 1.2); rim.position.set(5, 3, -4); scene.add(rim);
       cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
     }
-    R.setSize(size, size, false);
     const o = buildOwl(look);
-    o.eyes.forEach((e) => e.draw({ lid: 0, low: 0.22, tilt: 0, lx: 0.15, ly: 0, pupil: 5.6, mode: 'normal', tear: false }));
-    o.rig.bones.jaw.visible = false;
-    o.rig.bones.head.rotation.set(0, 0.12, 0.06);
+    await o.ready;
+    R.setSize(size, size, false);
     const root = o.rig.root;
     scene.add(root);
     root.updateMatrixWorld(true);
@@ -266,7 +274,6 @@ export function bigOwl(look: OwlLook, size = 384): string {
     url = R.domElement.toDataURL('image/png');
     scene.remove(root); o.dispose();
   } catch (e) { console.warn('big owl render failed', e); }
-  bigCache.set(key, url);
   return url;
 }
 
