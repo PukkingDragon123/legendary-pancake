@@ -56,7 +56,7 @@ export function leafTexture(): THREE.Texture {
   return (texture = t);
 }
 
-export interface LeafMaterial { mat: THREE.MeshStandardMaterial; depth: THREE.MeshDepthMaterial; uniforms: TreeUniforms & { uRim: { value: number } } }
+export interface LeafMaterial { mat: THREE.MeshStandardMaterial; depth: THREE.MeshDepthMaterial; uniforms: TreeUniforms & { uRim: { value: number }; uNearFade: { value: number } } }
 let shared: LeafMaterial | null = null;
 
 /** The shared foliage material: BUSHED's wind and translucency, plus alpha that holds up in the far mips, a sun rim
@@ -64,7 +64,8 @@ let shared: LeafMaterial | null = null;
 export function leafMaterial(): LeafMaterial {
   if (shared) return shared;
   const map = leafTexture();
-  const uniforms = { uWindAmt: { value: 1 }, uRim: { value: 0.55 } };
+  // uNearFade: leaves closer to the camera than this dissolve (a camera flying past a crown never sees the inside of it)
+  const uniforms = { uWindAmt: { value: 1 }, uRim: { value: 0.55 }, uNearFade: { value: 3.2 } };
   const mat = new THREE.MeshStandardMaterial({ map, alphaTest: 0.5, side: THREE.DoubleSide, vertexColors: true, roughness: 0.82, metalness: 0, envMapIntensity: 0.6 });
   mat.name = 'leaves';
   patchBushed(mat, 'foliage', uniforms, { translucency: 0.7, backTint: new THREE.Color(1.05, 1.1, 0.9) });
@@ -72,8 +73,10 @@ export function leafMaterial(): LeafMaterial {
   mat.onBeforeCompile = (sh, r) => {
     base.call(mat, sh, r);
     sh.uniforms.uRim = uniforms.uRim;
+    sh.uniforms.uNearFade = uniforms.uNearFade;
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float iLeaf;')
+      .replace('#include <common>', '#include <common>\nattribute float iLeaf;\nvarying float vLfCam;')
+      .replace('#include <fog_vertex>', '#include <fog_vertex>\nvLfCam = -mvPosition.z;')
       .replace('#include <uv_vertex>', `#include <uv_vertex>
         #ifdef USE_MAP
         if (iLeaf > 0.5 && vMapUv.y > 0.75) vMapUv.y -= 0.25;
@@ -81,7 +84,13 @@ export function leafMaterial(): LeafMaterial {
       .replace('#include <project_vertex>', `#include <project_vertex>
         if (iLeaf < -0.5) gl_Position = vec4(0.0, 0.0, 2.0, 1.0);`);
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform float uRim;')
+      .replace('#include <common>', '#include <common>\nuniform float uRim;\nuniform float uNearFade;\nvarying float vLfCam;')
+      .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
+        {
+          vec2 lfP = floor(gl_FragCoord.xy);
+          float lfB = fract(dot(lfP, vec2(0.5, 0.25)) + 0.125 * mod(lfP.x, 2.0));
+          if (vLfCam < uNearFade + lfB * 1.6) discard;
+        }`)
       // keep the far mips as full as the near ones: boost alpha by the mip level the texel lands on
       .replace('#include <alphatest_fragment>', `
         #ifdef USE_MAP

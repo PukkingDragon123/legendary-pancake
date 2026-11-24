@@ -74,7 +74,7 @@ float cloudDensity(vec2 uv) {
 }
 float cloudAt(vec3 d) {
   if (d.y <= 0.0 || uCloud <= 0.001) return 0.0;
-  float th = mix(0.74, 0.3, uCloud);
+  float th = mix(0.64, 0.28, uCloud);
   return smoothstep(th, th + 0.1, cloudDensity(cloudUv(d))) * smoothstep(0.004, 0.06, d.y);
 }
 `;
@@ -183,7 +183,7 @@ void main() {
   // painted clouds
   if (uCloud > 0.001 && d.y > 0.0) {
     vec2 uv = cloudUv(d);
-    float th = mix(0.74, 0.3, uCloud);
+    float th = mix(0.64, 0.28, uCloud);
     float n = cloudDensity(uv);
     float dens = smoothstep(th, th + 0.16, n);
     if (dens > 0.0) {
@@ -492,7 +492,7 @@ export class Sky {
     const isDay = this.hour > 5.6 && this.hour < 19.6;
     const k = isDay ? (this.hour - 5.6) / 14 : 0.35;
     const peak = 0.5 + 0.6 * w.sunHeight;
-    const az = -1.12 + k * 2.24, el = isDay ? 0.3 + Math.sin(k * Math.PI) * (peak - 0.3) : 0.9;
+    const az = -0.9 + k * 1.8, el = isDay ? 0.4 + Math.sin(k * Math.PI) * (peak - 0.4) : 0.9;
     this.sunDir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el) * 0.8 + 0.3).normalize();
     if (!isDay) this.sunDir.set(-0.32, 0.78, 0.54).normalize();
     this.sun.position.copy(this.sunDir).multiplyScalar(60);

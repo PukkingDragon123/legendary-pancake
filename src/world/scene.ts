@@ -438,7 +438,7 @@ export class Scene {
     {
       const g = this.post.grade, hr = this.sky.hour;
       const golden = Math.max(sm(hr, 16.6, 18.2) * (1 - sm(hr, 19.0, 19.8)), sm(hr, 5.6, 6.4) * (1 - sm(hr, 7.4, 8.6)));
-      g.exposure = L(1.0, 1.45, night) * (1 + (this.weather?.vis.overcast ?? 0) * 0.25);
+      g.exposure = (L(1.0, 1.45, night) + golden * 0.18) * (1 + (this.weather?.vis.overcast ?? 0) * 0.25);
       g.warm = L(0.08, -0.06, night) + golden * 0.08;
       g.saturation = L(1.1, 0.9, night);
       g.vibrance = L(0.22, 0.1, night);

@@ -56,14 +56,14 @@ export class Ambience {
       fx.burst('dew', x, surfaceY(x, z) + 0.12, z, 1);
     }
     // mist wisps over the pond (and the meadow on foggy mornings)
-    if ((dawn || dusk || a.fog > 0.2 || night > 0.6) && (acc.mist -= dt) <= 0) {
+    if (a.fog > 0.35 && (acc.mist -= dt) <= 0) { // [look4] only in real fog: little curls, not blocks
       acc.mist = (0.7 - a.fog * 0.4) / k;
       const onPond = Math.random() < 0.7;
       const an = R(0, Math.PI * 2), rr = Math.sqrt(Math.random()) * 0.85;
       const x = onPond ? POND.x + Math.cos(an) * POND.rx * rr : R(-9, 9), z = onPond ? POND.z + Math.sin(an) * POND.rz * rr : R(-6, 9);
       const y = onPond ? SURFACE_Y + R(0.05, 0.3) : surfaceY(x, z) + R(0.1, 0.5);
       const col = new THREE.Color(sky.fog.color).lerp(new THREE.Color(0xdfe9ea), night > 0.5 ? 0.25 : 0.55).getHex();
-      fx.emit({ x, y, z, vx: R(0.03, 0.1), vy: R(0.0, 0.04), life: R(6, 9), frame: Math.random() < 0.5 ? SPR.wisp : SPR.wisp2, size: R(0.7, 1.3), grow: 0.5, color: col, wind: 0.08, fadeIn: 2.2, fadeOut: 2.6 });
+      fx.emit({ x, y, z, vx: R(0.03, 0.1), vy: R(0.0, 0.04), life: R(6, 9), frame: Math.random() < 0.5 ? SPR.wisp : SPR.wisp2, size: R(0.32, 0.55), grow: 0.4, color: col, wind: 0.08, fadeIn: 2.2, fadeOut: 2.6 });
     }
     // moths round the lit lanterns, embers out of the chimney
     if (night > 0.5 && a.rain < 0.2 && a.season !== 'winter' && (acc.moth -= dt) <= 0) {

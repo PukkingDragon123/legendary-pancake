@@ -35,7 +35,7 @@ export function treeProto(species: SpeciesId, seed: number, age: number, near = 
         return conifer({ cell: leaves[0], seed, base: Math.max(m.height * 0.12, base), top: Math.max(top, m.height * 0.98), radius: rad * 0.95, detail, size: species === 'pine' ? 0.9 : 1 });
       }
       const R = Math.max(1, m.crownRadius);
-      const puffs: Puff[] = puffsFromPoints(pts, { cell: R * (species === 'birch' ? 0.5 : 0.6), grow: 0.82, max: species === 'birch' ? 12 : 16, minR: R * 0.28 })
+      const puffs: Puff[] = puffsFromPoints(pts, { cell: R * (species === 'birch' ? 0.55 : 0.6), grow: 0.88, max: 22, minR: R * 0.34 })
         .map((p) => ({ ...p, sy: 0.85 }));
       return canopy(puffs, { cells: leaves, seed, size: R * (detail < 1 ? 0.44 : 0.36), cover: detail < 1 ? 1.6 : 2.4, height: m.height, sway: 0.025, core: true, depthDark: 0.34 });
     };

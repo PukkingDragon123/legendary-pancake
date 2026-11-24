@@ -263,8 +263,9 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   const rH = facing(H), rL = facing(L);
   setAspect(scene.camera.aspect);
   scene.applySky();
-  // a big moon rising over the trees beside the hollow (away from the house) for the sky shot
-  const m = V(0.82, 0.52, -0.25).normalize();
+  // a big moon rising over the open meadow in front of the hollow for the sky shot [look4: the woods round the
+  // clearing are dense now, so Pip climbs out over the clear side of the valley]
+  const m = V(0.42, 0.5, 0.76).normalize();
   const side = new THREE.Vector3().crossVectors(m, V(0, 1, 0)).normalize(), upv = new THREE.Vector3().crossVectors(side, m).normalize();
   const C = L.clone().add(rL(-3.0, 2.8, 1.6));
   sky.moonOverride = { dir: m.clone(), size: 0.05 };
@@ -302,7 +303,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   // towards the moon and the camera rises after him, turning to the sky
   const cam0 = L.clone().add(rL(-1.5, 1.5, 3.6));
   const S0 = C.clone().addScaledVector(m, 9).addScaledVector(side, 4.2).addScaledVector(upv, -1.6);
-  const climbPts = () => [L.clone(), L.clone().add(rL(0.9, 1.6, 0.25)), L.clone().add(rL(3.0, 4.0, 0.9)), S0.clone()];
+  const climbPts = () => [L.clone(), L.clone().add(rL(0.3, 1.6, 0.9)), L.clone().add(rL(0.8, 4.0, 3.0)), S0.clone()];
   const skyAt = (u: number) => C.clone().addScaledVector(m, 9 + u * 22).addScaledVector(side, (4.2 - u * 9.5) * (1 - u * 0.35)).addScaledVector(upv, -1.6 + u * 2.2 + Math.sin(u * Math.PI) * 0.4);
 
   const evs: Ev[] = [
@@ -443,7 +444,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   owl.setMood('happy', 9);
   scene.weather.hold = { kind: 'clear', intensity: 0.85, source: 'seasonal', temp: 10 };
   scene.weather.snap();
-  const sunDir = V(0.28, 0.17, 1).normalize();
+  const sunDir = V(0.52, 0.16, 0.86).normalize(); // [look4] low over the meadow the arrival looks across
   sky.sunDisc = { dir: sunDir, size: 0.05 };
 
   const M = measure(scene), A = M.all;
@@ -453,7 +454,10 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   let landed = false, dropped = false, dropT = 0, landT = 0, trailT = 0;
   const dropTo = H.clone().add(rH(0.42, 0.02, 0.5));
   let dropFrom = new THREE.Vector3();
-  const pts = [H.clone().add(rH(5, 6.5, 44)), H.clone().add(rH(3.0, 4.2, 21)), H.clone().add(rH(-1.0, 2.5, 7.4)), H.clone().add(rH(0.3, 1.2, 1.7)), H.clone()];
+  // [look4] Pip flies home over the pond and the open meadow in front of the oak (nothing between him and the camera)
+  const dirA = V(0.45, 0, 0.9).normalize(), rightA = new THREE.Vector3().crossVectors(V(0, 1, 0), dirA);
+  const fA = (x: number, y: number, z: number) => rightA.clone().multiplyScalar(x).add(V(0, y, 0)).addScaledVector(dirA, z);
+  const pts = [H.clone().add(fA(5, 7.5, 44)), H.clone().add(fA(3.0, 5.0, 21)), H.clone().add(fA(-1.0, 2.8, 7.4)), H.clone().add(rH(0.3, 1.2, 1.7)), H.clone()];
   // (from the left of the path, so the fallen log stays out of the shot)
   const camFront = () => H.clone().add(rH(-1.7 * P, 2.0, 5.4 * P));
 
@@ -516,9 +520,9 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
 
   const shot = (t: number): CamShot => {
     if (t < 3.2) {
-      // from beside the porch, looking out over the meadow at the sunrise
+      // from beside the porch, looking out over the pond and the meadow at the sunrise
       const k = smooth01(span(t, 0, 3.2));
-      return look(H.clone().add(rH(-2.2, 1.0 + k * 0.3, 1.4)), H.clone().add(rH(1.6 - k * 0.6, 5.2 - k * 1.2, 30)), 44, t < 0.1);
+      return look(H.clone().add(fA(-2.2, 1.4 + k * 0.3, 1.0)), H.clone().add(fA(1.6 - k * 0.6, 6.4 - k * 1.6, 30)), 44, t < 0.1);
     }
     const k = smooth01(span(t, 3.2, 8.6));
     const from = camFront().lerp(H.clone().add(rH(-0.9 * P, 1.7, 4.0 * P)), k);

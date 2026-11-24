@@ -100,7 +100,7 @@ export function planForest(quality: 'low' | 'high'): ForestPlan {
   };
 
   // feature trees around the clearing, then the forest proper on a jittered grid
-  tree('oak1', -9.4, -6.8, 1.3); tree('blossom', 8.2, -7.2, 1.15); tree('birch1', -12.6, 1.2, 1.1); tree('oak3', 11.8, -2.6, 1.2); tree('maple', -6.2, -11.2, 1.1); tree('oak2', 14.6, 6.4, 1.2); tree('birch2', -14.2, 7.2, 1.1); tree('pine1', 5.2, -12.4, 1.2);
+  tree('oak1', -9.4, -6.8, 1.3); tree('blossom', 10.6, -10.8, 1.2); tree('birch1', -12.6, 1.2, 1.1); tree('oak3', 11.8, -2.6, 1.2); tree('maple', -6.2, -11.2, 1.1); tree('oak2', 14.6, 6.4, 1.2); tree('birch2', -14.2, 7.2, 1.1); tree('pine1', 5.2, -12.4, 1.2); // [look4] the blossom stands clear of the porch and Pip's flights
   for (let gz = -23; gz < 23; gz += 3) for (let gx = -23; gx < 23; gx += 3) {
     const x = gx + r.range(0.2, 2.6), z = gz + r.range(0.2, 2.6);
     if (clearing(x, z) > 0.04 || !dry(x, z, 1.5, 1.6) || nearTrunk(x, z, 2.6) || r.chance(0.08)) continue;
