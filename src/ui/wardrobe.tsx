@@ -72,8 +72,8 @@ function installStyles() {
 .wd-hint{font-size:14px;color:var(--ink-2);text-align:center;margin:-2px 0 0}
 .wd-room{position:relative;margin:0 -6px;padding:20px 6px 8px;background:url("${velvetTile('plum')}") 0 0/96px 96px repeat;image-rendering:pixelated;box-shadow:inset 0 6px 0 rgba(20,8,24,.45),inset 0 10px 0 rgba(20,8,24,.2),inset 0 -6px 0 rgba(20,8,24,.35)}
 .wd-room::before{content:'';position:absolute;left:0;right:0;top:4px;height:12px;background:url("${railTile()}") 0 0/16px 12px repeat-x;image-rendering:pixelated;z-index:1}
-.wd-shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:14px 4px;padding-top:6px}
-.wd-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0;padding:2px 4px 4px;color:#2a1a10;text-align:center;filter:drop-shadow(2px 4px 0 rgba(20,8,24,.5));transition:transform .15s var(--pop);animation:wdIn .35s var(--ease) both;transform-origin:50% -10px}
+.wd-shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:16px 6px;padding-top:6px}
+.wd-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0;padding:8px 8px 9px;color:#2a1a10;text-align:center;filter:drop-shadow(2px 4px 0 rgba(20,8,24,.5));transition:transform .15s var(--pop);animation:wdIn .35s var(--ease) both;transform-origin:50% -10px}
 .wd-card::before{content:'';position:absolute;inset:0;${b9(thinFrame('oak', 7))};background:url("${linenTile()}") 0 0/32px 32px;background-clip:padding-box;z-index:-1;pointer-events:none}
 .wd-card:active{transform:translateY(2px) scale(.97)}
 .wd-card.on{animation:wdIn .35s var(--ease) both,wdSway 2.6s steps(10) .35s infinite}

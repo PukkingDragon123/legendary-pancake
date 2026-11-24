@@ -332,6 +332,8 @@ export function installSurfaces() {
 .sheet.qb .quest.card:nth-child(3n)::before{background-image:url("${pushpin('emerald')}")}
 .sheet.qb > .sheet-body > p{color:#fff4dc;text-shadow:1px 1px 0 #2a1408,-1px 0 0 #2a1408}
 .sheet.qb .quest.claimed{${b9(paperNote('yellow', 5), true, 'round')}}
+/* on wide screens the side cabinets can stand taller: the owl stays in view on the left */
+@media (min-width: 900px) { .sheet.short.wd, .sheet.short.qb { max-height: calc(100% - 120px); } }
 /* a brass plate (labels, small panels) */
 .hh-brass-plate{${b9(plate, true)};background:none}
 `;
