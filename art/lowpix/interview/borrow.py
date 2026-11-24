@@ -109,8 +109,8 @@ def write_glb(path, js, bin_):
         f.write(struct.pack('<II', len(bin_), 0x004E4942) + bin_)
 
 
-def borrow(id):
-    src_dir, name, size, warm = BORROW[id]
+def borrow(id, entry=None, regrade=True):
+    src_dir, name, size, warm = entry or BORROW[id]
     js, bin_ = read_glb(os.path.join(src_dir, name + '.glb'))
     views = js['bufferViews']
     # new image bytes per bufferView
@@ -146,9 +146,10 @@ def borrow(id):
         if max(img.size) > size:
             k = size / max(img.size)
             img = img.resize((max(1, round(img.width * k)), max(1, round(img.height * k))), Image.LANCZOS)
-        img = grade(img, warm)
+        if regrade:
+            img = grade(img, warm)
         buf = io.BytesIO()
-        img.save(buf, 'WEBP', quality=88, method=6)
+        img.save(buf, 'WEBP', quality=90, method=6)
         repl[im['bufferView']] = buf.getvalue()
         im['mimeType'] = 'image/webp'
     # textures point at WebP images now
@@ -187,6 +188,11 @@ def borrow(id):
 
 
 if __name__ == '__main__':
+    if sys.argv[1:2] == ['--webp']:
+        # re-encode the atlas of our own big lowpix builds as WebP (same pixels, a fraction of the size)
+        for id in sys.argv[2:]:
+            print(id, borrow(id, (DEST, id, 2048, 0), regrade=False), 'KB', flush=True)
+        sys.exit()
     ids = sys.argv[1:] or list(BORROW)
     for id in ids:
         print(id, borrow(id), 'KB', flush=True)

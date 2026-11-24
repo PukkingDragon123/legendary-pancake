@@ -5,6 +5,7 @@
 1. each module in _src/ has `specs()` returning {id: Spec} (see _kit.py); they are written to art/lowpix/interview/<id>.json,
 2. built with lowpix (`python -m lowpix build`) into $OUT (default: the session scratch dir or /tmp/lowpix-interview),
 3. the .glb is copied to public/models/interview/<id>.glb; look at $OUT/<id>/<id>_sheet.png.
+4. big atlases are then re-encoded as WebP: `python borrow.py --webp room window clock desk_drawer`.
 
 Needs the lowpix checkout on LOWPIX (default: the shared refs copy) and its venv python on LOWPIX_PY.
 """
