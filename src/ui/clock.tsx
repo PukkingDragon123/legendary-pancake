@@ -8,12 +8,12 @@ import { haptic, useTick } from './kit.tsx';
 
 const W = 64, H = 72, CX = 32, CY = 39;
 const R = {
-  wood: ['#3b2414', '#55331a', '#6b4220', '#8b5a2b', '#a86d38', '#c98f55'],
-  gold: ['#7a4a12', '#b0661a', '#e5a320', '#ffd23f', '#ffe98a', '#fffbe0'],
-  cream: ['#a88a6a', '#d4b894', '#eedcbc', '#f9efdc', '#fffaf0', '#ffffff'],
-  night: ['#141a3a', '#26307a', '#36449a', '#4a5cb8', '#7f93e6', '#c8d4ff'],
+  wood: ['#382c22', '#4b382b', '#604736', '#7a614d', '#917662', '#b19782'],
+  gold: ['#69523e', '#907561', '#c4ad8e', '#e9d5ae', '#ede8dd', '#f8f3e7'],
+  cream: ['#a28c76', '#d0b99e', '#ebdcc6', '#f6efe5', '#f9f3e8', '#faf5e9'],
+  night: ['#1f2b38', '#2e3c4a', '#415060', '#586878', '#8a9bad', '#c7d8ea'],
 };
-const INK = '#2a1a14';
+const INK = '#312821';
 const GLYPH: Record<string, string[]> = {
   '0': ['###', '#.#', '#.#', '#.#', '###'], '1': ['.#.', '##.', '.#.', '.#.', '###'], '2': ['###', '..#', '###', '#..', '###'],
   '3': ['###', '..#', '.##', '..#', '###'], '6': ['###', '#..', '###', '#.#', '###'], '9': ['###', '#.#', '###', '..#', '###'],
@@ -99,7 +99,7 @@ function paint(g: CanvasRenderingContext2D, o: { now: number; wake: number; bed:
   };
   glyphs('12', CX - 3, CY - 18, INK); glyphs('3', CX + 15, CY - 2, INK); glyphs('6', CX - 1, CY + 13, INK); glyphs('9', CX - 17, CY - 2, INK);
   // AM/PM plate
-  g.fillStyle = '#3b2414'; g.fillRect(CX - 5, CY + 5, 11, 7);
+  g.fillStyle = '#382c22'; g.fillRect(CX - 5, CY + 5, 11, 7);
   glyphs(o.wake >= 720 ? 'PM' : 'AM', CX - 3, CY + 6, R.gold[4]);
   // hands
   const ha = angOf(o.now), ma = ((o.now % 60) / 60) * Math.PI * 2, wa = angOf(o.wake);
@@ -152,7 +152,7 @@ export function WoodClock(p: { wake: string; bedtime: string; onChange?: (hhmm: 
   return (
     <div class={p.ringing ? 'shake' : ''} style={{ display: 'flex', justifyContent: 'center', touchAction: 'none' }}>
       <canvas ref={cv} width={W} height={H} class="px" role="img" aria-label={`Alarm set for ${label}. Drag the golden hand to change it.`}
-        style={{ width: `${W * k}px`, height: `${H * k}px`, maxWidth: '100%', filter: 'drop-shadow(0 4px 0 rgba(20,10,4,.45))', cursor: p.onChange ? 'grab' : 'default' }}
+        style={{ width: `${W * k}px`, height: `${H * k}px`, maxWidth: '100%', filter: 'drop-shadow(0 4px 0 rgba(40, 34, 27,.45))', cursor: p.onChange ? 'grab' : 'default' }}
         onPointerDown={(e) => { if (!p.onChange) return; drag.current.on = true; drag.current.last = wake; (e.currentTarget as Element).setPointerCapture(e.pointerId); setFromPointer(e); }}
         onPointerMove={(e) => { if (drag.current.on) setFromPointer(e); }}
         onPointerUp={() => { drag.current.on = false; }}

@@ -21,6 +21,7 @@ import type { Save } from '../game/store.ts';
 import { hourFor, Sky, type SkyMode } from './sky.ts';
 import { buildTerrain, type Terrain } from './terrain.ts';
 import { Weather } from './weather.ts'; // [world]
+import { Post } from './post.ts'; // [world3]
 
 export type View = 'home' | 'interior' | 'loft' | 'attic' | 'owl' | 'breathe' | 'sleep' | 'garden' | 'deck' | 'wake';
 export type Quality = 'low' | 'high';
@@ -75,6 +76,8 @@ export class Scene {
   /** [world] real-world weather and seasons (see weather.ts) */
   readonly weather: Weather;
   readonly quality: Quality;
+  /** [world3] BUSHED-style post chain: low internal resolution, grade, dither, grain (post.enabled = false to bypass) */
+  readonly post: Post;
   view: View = 'home';
   skyMode: SkyMode | 'dawn' = 'clock';
   paused = false;
@@ -126,6 +129,7 @@ export class Scene {
     r.setPixelRatio(Math.min(devicePixelRatio || 1, quality === 'high' ? 2 : 1.25));
     r.shadowMap.enabled = true;
     r.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.post = new Post(r, quality); // [world3]
     r.outputColorSpace = THREE.SRGBColorSpace;
 
     this.plan = planForest(quality);
@@ -403,16 +407,30 @@ export class Scene {
     const h = this.hourOverride ?? (this.skyMode === 'dawn' ? 6.5 : hourFor(this.skyMode as SkyMode));
     this.sky.setHour(h);
     (this.terrain.water.uniforms.uLight.value as THREE.Color).copy(this.sky.ambient).multiplyScalar(1.15);
-    (this.terrain.water.uniforms.uDeep.value as THREE.Color).set(this.sky.night > 0.5 ? 0x1c3a6a : 0x2f7fa8);
+    (this.terrain.water.uniforms.uDeep.value as THREE.Color).set(this.sky.night > 0.5 ? 0x1c2a38 : 0x3f6670); // [world3] calm palette
+    (this.terrain.water.uniforms.uSky.value as THREE.Color).copy(this.sky.fog.color); // [world3] the pond mirrors the misty sky
     this.fx.setLight(this.sky.ambient);
     const night = this.sky.night;
+    this.flora.setNight(THREE.MathUtils.smoothstep(night, 0.35, 0.9)); // [world3] moonglow caps
+    // [world3] the grade follows the light: warm calm days, honeyed evenings, cool blue moonlit nights
+    {
+      const g = this.post.grade, hr = this.sky.hour, L = THREE.MathUtils.lerp;
+      const golden = Math.max(THREE.MathUtils.smoothstep(hr, 16.4, 18.2) * (1 - THREE.MathUtils.smoothstep(hr, 19.0, 19.8)), THREE.MathUtils.smoothstep(hr, 5.6, 6.4) * (1 - THREE.MathUtils.smoothstep(hr, 7.4, 8.4)));
+      g.warm = L(0.18, -0.6, night) + golden * 0.25;
+      g.saturation = L(1.0, 0.84, night);
+      g.exposure = L(1.0, 1.7, night); // moonlit nights stay readable
+      g.bloom = L(0.28, 0.55, night);
+      g.vignette = L(0.28, 0.4, night);
+      g.cold = (this.weather?.vis.cold ?? 0) * 0.6;
+    }
     GRASS.uKey.value.copy(this.sky.sun.color).multiplyScalar(this.sky.sun.intensity * 0.42);
     GRASS.uSky.value.copy(this.sky.hemi.color).multiplyScalar(this.sky.hemi.intensity * 0.85);
     GRASS.uGround.value.copy(this.sky.hemi.groundColor).multiplyScalar(this.sky.hemi.intensity);
     GRASS.uSunDir.value.copy(this.sky.sunDir);
     GRASS.uDapple.value = night > 0.5 ? 0.25 : 1;
-    this.house.panes.color.set(night > 0.4 ? 0xffc86a : 0x3a4a6a);
-    this.room.intensity = 1.2 + night * 3.5;
+    this.house.panes.color.set(night > 0.4 ? 0xf1c88a : 0x46596a); // [world3] lamp-gold / slate
+    this.room.intensity = 1.4 + night * 7; // the open rooms glow warm at night
+    this.room.distance = 16;
     this.lantern.intensity = night * 6;
     this.fireflies.alpha = night > 0.4 && (this.weather?.firefliesOk ?? true) ? 1 : 0; // [world] not in winter or rain
     // furniture lights follow the sky every frame in rooms.update
@@ -425,6 +443,7 @@ export class Scene {
     const hf = (30 * Math.PI) / 180;
     this.camera.fov = this.baseFov = Math.min(56, Math.max(30, (2 * Math.atan(Math.tan(hf / 2) / Math.min(1, this.camera.aspect)) * 180) / Math.PI));
     this.camera.updateProjectionMatrix();
+    this.post?.resize(w, h); // [world3]
     this.stage?.resize?.(w, h);
   }
 
@@ -445,23 +464,31 @@ export class Scene {
     const L = this.house.spots.launch;
     switch (this.view) {
       // [house] framing for the grand oak: three floors, a canopy above and a launch platform on the limb
-      case 'interior': return { yaw: 0.1, pitch: 0.42, dist: portrait ? 16 : 12, target: new THREE.Vector3(H.x, 1.5, H.z + 0.6) };
-      case 'loft': return { yaw: 0, pitch: 0.16, dist: portrait ? 17 : 12, target: new THREE.Vector3(H.x, 6.6, H.z + 1.2) };
-      case 'attic': return { yaw: 0, pitch: 0.12, dist: portrait ? 17 : 12, target: new THREE.Vector3(H.x, 11.1, H.z + 1.2) };
+      // [house3] one open floor of the dollhouse filling the frame
+      case 'interior': return { yaw: 0.08, pitch: 0.17, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 2.2, H.z + 1.2) };
+      case 'loft': return { yaw: 0.06, pitch: 0.16, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 6.7, H.z + 1.2) }; // [house3]
+      case 'attic': return { yaw: 0.06, pitch: 0.14, dist: this.fitDist(portrait ? 8.6 : 11, 6.4), target: new THREE.Vector3(H.x + 0.1, 11.2, H.z + 1.2) }; // [house3]
       case 'owl': return { yaw: -0.15, pitch: 0.12, dist: portrait ? 7.4 : 4.6, target: new THREE.Vector3(o.x, o.y + 0.85, o.z) };
       case 'breathe': return { yaw: 0, pitch: 0.1, dist: portrait ? 9.2 : 5.6, target: new THREE.Vector3(MEADOW.x, portrait ? 1.35 : 1.45, 2.6) };
-      case 'sleep': return { yaw: 0.1, pitch: 0.22, dist: portrait ? 40 : 42, target: new THREE.Vector3(0, portrait ? 9.5 : 8.5, H.z + 1) };
+      // [house3] the whole oak under the night sky
+      case 'sleep': return { yaw: 0.1, pitch: 0.2, dist: this.fitDist(24, 34) * 1.05, target: new THREE.Vector3(0.2, 12.4, H.z + 1) };
       case 'wake': return { yaw: -0.08, pitch: 0.18, dist: portrait ? 24 : 20, target: new THREE.Vector3(1.5, 3.6, H.z + 3) };
       case 'garden': return { yaw: -0.25, pitch: 0.55, dist: portrait ? 15 : 12, target: new THREE.Vector3(GARDEN.x, 0.4, GARDEN.z) };
       case 'deck': return { yaw: 0.55, pitch: 0.16, dist: portrait ? 16 : 12, target: new THREE.Vector3(L.x - 1.5, L.y - 0.6, L.z + 1) };
       default: {
-        // frame the rooms that are open (the boarded-up floors peek in above), not the whole oak
-        const open = (['f1', 'f2', 'f3'] as const).filter((f) => this.house.isOpen(f));
-        const n = Math.max(1, open.length), lo = this.house.floorY('f1'), hi = this.house.floorY(open[n - 1] ?? 'f1') + 4.4;
-        const mid = (lo + hi) / 2;
-        return { yaw: 0.12, pitch: 0.2, dist: (portrait ? 21 : 17) + (n - 1) * (portrait ? 7 : 5), target: new THREE.Vector3(0, mid + (portrait ? -0.2 : 0.4), H.z + 1.2) };
+        // [house3] the whole oak in frame, crown to roots, porch and limb, with the forest round it; the HUD
+        // signs sit over the sky at the top and the big buttons over the meadow at the bottom
+        // the open rooms sit about a third of the way up, clear of the big buttons; the crown fills the sky above
+        const d = this.fitDist(portrait ? 23 : 28, portrait ? 42 : 38);
+        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.24, dist: d, target: new THREE.Vector3(0.35, portrait ? 8.4 : 8.2, H.z + 0.6) };
       }
     }
+  }
+
+  /** [house3] Camera distance that fits a w x h (world units) frame at the current aspect and field of view. */
+  private fitDist(w: number, h: number): number {
+    const v = (this.baseFov * Math.PI) / 360, hz = Math.atan(Math.tan(v) * this.camera.aspect);
+    return Math.max(h / 2 / Math.tan(v), w / 2 / Math.tan(hz));
   }
 
   step(dt: number, draw = true) {
@@ -469,7 +496,7 @@ export class Scene {
     const t = this.time;
     if (this.stage) {
       this.stage.update(dt, t);
-      if (draw) this.renderer.render(this.stage.scene, this.stage.camera);
+      if (draw) this.post.render(this.stage.scene, this.stage.camera, t); // [world3]
       return;
     }
     wind.uTime.value = t;
@@ -518,8 +545,8 @@ export class Scene {
     const drift = !shot && (this.view === 'home' || this.view === 'sleep') ? Math.sin(t * 0.07) * 0.05 : 0;
     this.camera.position.set(c.target.x + Math.sin(c.yaw + drift) * cp * c.dist, c.target.y + Math.sin(c.pitch) * c.dist, c.target.z + Math.cos(c.yaw + drift) * cp * c.dist);
     this.camera.lookAt(c.target);
-    // [house] fog eases back as the camera pulls out to frame the whole oak
-    this.sky.fog.near = Math.max(24, c.dist * 0.8); this.sky.fog.far = this.sky.fog.near + 40;
+    // [house3] fog eases back as the camera pulls out to frame the whole oak (it stays crisp, the far forest hazes)
+    this.sky.fog.near = Math.max(24, c.dist * 1.0); this.sky.fog.far = this.sky.fog.near + 46;
     CUT.uCutCam.value.copy(this.camera.position);
     this.shiftCur += (this.shift - this.shiftCur) * k;
     const w = innerWidth, h = innerHeight;
@@ -528,7 +555,27 @@ export class Scene {
     this.sky.setViewport(innerWidth, innerHeight, this.renderer.getPixelRatio()); // [world]
     this.sky.update(t, this.camera, dt);
     if (!draw) return;
-    this.renderer.render(this.scene, this.camera);
+    this.post.render(this.scene, this.camera, t); // [world3]
+  }
+
+  /**
+   * [world3] Render the real forest (sky, weather, season, time of day) from `camera` into `target`, e.g. for the
+   * window of a stage (the shop, the interview office). Call it once when the stage opens and then every few frames;
+   * the world keeps its clock and wind moving while a stage is up. Use viewTarget() for a suitable target.
+   */
+  renderView(camera: THREE.Camera, target: THREE.WebGLRenderTarget) {
+    const r = this.renderer, prev = r.getRenderTarget();
+    wind.uTime.value = this.time; GRASS.uTime.value = this.time;
+    this.sky.update(this.time, camera);
+    r.setRenderTarget(target);
+    r.clear();
+    r.render(this.scene, camera);
+    r.setRenderTarget(prev);
+    this.sky.update(this.time, this.camera);
+  }
+  /** [world3] A render target for renderView (linear HDR colour; use its .texture as a map). */
+  viewTarget(w: number, h: number): THREE.WebGLRenderTarget {
+    return new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, depthBuffer: true });
   }
 
   snapCamera() { const g = this.goal(); this.cur.yaw = g.yaw; this.cur.pitch = g.pitch; this.cur.dist = g.dist; this.cur.target.copy(g.target); }
@@ -574,7 +621,7 @@ export class Scene {
       moved += Math.abs(dx) + Math.abs(dy);
       if (pts.size === 2) {
         const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinch) this.userZoom = Math.max(0.6, Math.min(1.35, this.userZoom * (pinch / d)));
+        if (pinch) this.userZoom = Math.max(0.32, Math.min(1.25, this.userZoom * (pinch / d))); // [house3] pinch right into the rooms
         pinch = d;
         return;
       }
@@ -617,6 +664,6 @@ export class Scene {
     };
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); });
-    el.addEventListener('wheel', (e) => { if (this.interceptor && !this.stage && this.interceptor('wheel', e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e)) { e.preventDefault(); return; } this.userZoom = Math.max(0.6, Math.min(1.35, this.userZoom * (1 + Math.sign(e.deltaY) * 0.06))); e.preventDefault(); }, { passive: false });
+    el.addEventListener('wheel', (e) => { if (this.interceptor && !this.stage && this.interceptor('wheel', e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e)) { e.preventDefault(); return; } this.userZoom = Math.max(0.32, Math.min(1.25, this.userZoom * (1 + Math.sign(e.deltaY) * 0.06))); e.preventDefault(); }, { passive: false }); // [house3]
   }
 }

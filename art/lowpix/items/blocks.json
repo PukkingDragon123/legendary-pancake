@@ -1,0 +1,1071 @@
+{
+ "name": "blocks",
+ "description": "ABC Blocks",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 900,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   22
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "oakl": [
+    "#4d2b1c",
+    "#70452b",
+    "#92613c",
+    "#b27f4e",
+    "#bf9d74",
+    "#c7b08d",
+    "#d1c2a5",
+    "#dbd2bd",
+    "#e6e2d3"
+   ],
+   "berry": [
+    "#1a0c12",
+    "#42222c",
+    "#683944",
+    "#8c525b",
+    "#a97477",
+    "#be9d9c",
+    "#d5c5c4",
+    "#efeae9"
+   ],
+   "sage": [
+    "#162010",
+    "#3d522c",
+    "#688249",
+    "#93aa6f",
+    "#b3bf97",
+    "#c9cfb5",
+    "#dee1d2",
+    "#f3f3ee"
+   ],
+   "lake": [
+    "#10181e",
+    "#2c424e",
+    "#4a6d7b",
+    "#6e98a3",
+    "#96b4b8",
+    "#b5c9ca",
+    "#d2dddd",
+    "#eef2f1"
+   ],
+   "cream": [
+    "#36210c",
+    "#734b1b",
+    "#af782b",
+    "#d3a353",
+    "#e2c690",
+    "#f1e6cc",
+    "#f6f2e2",
+    "#fdfcf8"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "blk0": {
+   "ramp": "berry",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.9,
+     "width": 0.25,
+     "shift": -0.45,
+     "wobble": 1.0,
+     "seed": 0,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.9,
+     "width": 0.25,
+     "shift": -0.45,
+     "wobble": 1.0,
+     "seed": 1,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "brushy",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.45,
+     "seed": 3
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/wood_table_001",
+     "scale": 16,
+     "amount": 0.25,
+     "ramps": [
+      "berry"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 2,
+     "density": 0.35,
+     "ramp": "oakl",
+     "tone": 4.5,
+     "scratches": 0.008
+    },
+    {
+     "id": "border",
+     "op": "panel",
+     "inset": 4,
+     "shift": 0,
+     "highlight": 1,
+     "shadow": 1
+    },
+    {
+     "id": "frame",
+     "op": "rect",
+     "rect": [
+      0.1,
+      0.1,
+      0.9,
+      0.9
+     ],
+     "ramp": "cream",
+     "tone": 5.0,
+     "bevel": true
+    },
+    {
+     "id": "inner",
+     "op": "rect",
+     "rect": [
+      0.17,
+      0.17,
+      0.83,
+      0.83
+     ],
+     "ramp": "berry",
+     "tone": 4.0
+    }
+   ],
+   "brush": {
+    "flow": "y",
+    "length": 2.5,
+    "width": 0.6,
+    "rough": 0.5,
+    "textures": {
+     "berry": "wood"
+    }
+   }
+  },
+  "blk1": {
+   "ramp": "lake",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.9,
+     "width": 0.25,
+     "shift": -0.45,
+     "wobble": 1.0,
+     "seed": 1,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.9,
+     "width": 0.25,
+     "shift": -0.45,
+     "wobble": 1.0,
+     "seed": 2,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "brushy",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.45,
+     "seed": 4
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/wood_table_001",
+     "scale": 16,
+     "amount": 0.25,
+     "ramps": [
+      "lake"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 2,
+     "density": 0.35,
+     "ramp": "oakl",
+     "tone": 4.5,
+     "scratches": 0.008
+    },
+    {
+     "id": "border",
+     "op": "panel",
+     "inset": 4,
+     "shift": 0,
+     "highlight": 1,
+     "shadow": 1
+    },
+    {
+     "id": "frame",
+     "op": "rect",
+     "rect": [
+      0.1,
+      0.1,
+      0.9,
+      0.9
+     ],
+     "ramp": "cream",
+     "tone": 5.0,
+     "bevel": true
+    },
+    {
+     "id": "inner",
+     "op": "rect",
+     "rect": [
+      0.17,
+      0.17,
+      0.83,
+      0.83
+     ],
+     "ramp": "lake",
+     "tone": 4.0
+    }
+   ],
+   "brush": {
+    "flow": "y",
+    "length": 2.5,
+    "width": 0.6,
+    "rough": 0.5,
+    "textures": {
+     "lake": "wood"
+    }
+   }
+  },
+  "blk2": {
+   "ramp": "sage",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "x",
+     "period": 0.9,
+     "width": 0.25,
+     "shift": -0.45,
+     "wobble": 1.0,
+     "seed": 2,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.9,
+     "width": 0.25,
+     "shift": -0.45,
+     "wobble": 1.0,
+     "seed": 3,
+     "faces": [
+      "left",
+      "right"
+     ]
+    },
+    {
+     "id": "brushy",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.45,
+     "seed": 5
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/wood_table_001",
+     "scale": 16,
+     "amount": 0.25,
+     "ramps": [
+      "sage"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 2,
+     "density": 0.35,
+     "ramp": "oakl",
+     "tone": 4.5,
+     "scratches": 0.008
+    },
+    {
+     "id": "border",
+     "op": "panel",
+     "inset": 4,
+     "shift": 0,
+     "highlight": 1,
+     "shadow": 1
+    },
+    {
+     "id": "frame",
+     "op": "rect",
+     "rect": [
+      0.1,
+      0.1,
+      0.9,
+      0.9
+     ],
+     "ramp": "cream",
+     "tone": 5.0,
+     "bevel": true
+    },
+    {
+     "id": "inner",
+     "op": "rect",
+     "rect": [
+      0.17,
+      0.17,
+      0.83,
+      0.83
+     ],
+     "ramp": "sage",
+     "tone": 4.0
+    }
+   ],
+   "brush": {
+    "flow": "y",
+    "length": 2.5,
+    "width": 0.6,
+    "rough": 0.5,
+    "textures": {
+     "sage": "wood"
+    }
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "block0",
+   "shape": "box",
+   "size": [
+    6.6,
+    6.6,
+    6.6
+   ],
+   "pivot": [
+    -3.7,
+    3.3,
+    0.2
+   ],
+   "rotation": [
+    0.0,
+    8.0,
+    0.0
+   ],
+   "style": "blk0",
+   "paint": {
+    "stamps": [
+     {
+      "face": "front",
+      "at": "center",
+      "art": [
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "back",
+      "at": "center",
+      "art": [
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "left",
+      "at": "center",
+      "art": [
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "right",
+      "at": "center",
+      "art": [
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "top",
+      "at": "center",
+      "art": [
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     }
+    ]
+   },
+   "chamfer": 0.35
+  },
+  {
+   "id": "block1",
+   "shape": "box",
+   "size": [
+    6.6,
+    6.6,
+    6.6
+   ],
+   "pivot": [
+    3.6,
+    3.3,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    -14.0,
+    0.0
+   ],
+   "style": "blk1",
+   "paint": {
+    "stamps": [
+     {
+      "face": "front",
+      "at": "center",
+      "art": [
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL...."
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "back",
+      "at": "center",
+      "art": [
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLL....LLLLLLLL",
+       "LLLLLLLL....LLLLLLLL",
+       "LLLLLLLL....LLLLLLLL",
+       "LLLLLLLL....LLLLLLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "left",
+      "at": "center",
+      "art": [
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL...."
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "right",
+      "at": "center",
+      "art": [
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLL....LLLLLLLL",
+       "LLLLLLLL....LLLLLLLL",
+       "LLLLLLLL....LLLLLLLL",
+       "LLLLLLLL....LLLLLLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "top",
+      "at": "center",
+      "art": [
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLL...."
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     }
+    ]
+   },
+   "chamfer": 0.35
+  },
+  {
+   "id": "block2",
+   "shape": "box",
+   "size": [
+    6.6,
+    6.6,
+    6.6
+   ],
+   "pivot": [
+    0.0,
+    9.9,
+    0.3
+   ],
+   "rotation": [
+    0.0,
+    24.0,
+    0.0
+   ],
+   "style": "blk2",
+   "paint": {
+    "stamps": [
+     {
+      "face": "front",
+      "at": "center",
+      "art": [
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL...."
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "back",
+      "at": "center",
+      "art": [
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "left",
+      "at": "center",
+      "art": [
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL...."
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "right",
+      "at": "center",
+      "art": [
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "LLLLLLLLLLLLLLLLLLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "LLLL....LLLL....LLLL",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........",
+       "........LLLL........"
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     },
+     {
+      "face": "top",
+      "at": "center",
+      "art": [
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL................",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "LLLL............LLLL",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL....",
+       "....LLLLLLLLLLLL...."
+      ],
+      "key": {
+       "L": "cream:6"
+      }
+     }
+    ]
+   },
+   "chamfer": 0.35
+  }
+ ]
+}

@@ -12,6 +12,9 @@ import { PIECES, type PieceDef } from '../owl/outfits.ts';
 import { SPECIAL_SKINS, type SkinDef2 } from '../owl/skins.ts';
 import { resolveSpecies, SPECIES, type SpeciesDef } from '../owl/species.ts';
 import { frameStyle } from './px/frames.js';
+import { spriteURL } from './px/sprites.js';
+import { CSS_TOKENS } from '../gfx/palette.ts';
+import { uiBurstAt } from './chrome/uifx.ts';
 import './px/wardrobe.js';
 import { IcoClose, IcoHanger, Px } from './icons.tsx';
 import { Price, Sheet, tap, toast } from './kit.tsx';
@@ -36,64 +39,87 @@ let styled = false;
 function installStyles() {
   if (styled || typeof document === 'undefined') return;
   styled = true;
-  const css = `
+  const paper = spriteURL('wd_paper', 2);
+  // a stepped pixel oval (no smooth circles): the fitting mirror's opening
+  const oval = (() => {
+    const L: string[] = [], R: string[] = [], n = 18;
+    for (let i = 0; i <= n; i++) {
+      const y = Math.round((i / n) * 100), w = Math.round(Math.sqrt(Math.max(0, 1 - ((y - 50) / 50) ** 2)) * 47);
+      const y2 = Math.round(((i + 1) / n) * 100);
+      L.push(`${50 - w}% ${y}%`, `${50 - w}% ${Math.min(100, y2)}%`);
+      R.unshift(`${50 + w}% ${y}%`, `${50 + w}% ${Math.min(100, y2)}%`);
+    }
+    return `polygon(${[...L, ...R].join(',')})`;
+  })();
+  const css = `${CSS_TOKENS}
 .wd .sheet-body{gap:6px;padding-top:0}
 .wd .sheet-head h2{font-size:21px;white-space:nowrap}
 .wd .sheet-head h2 .ico{margin:-6px 0}
 .wd-purse{display:flex;flex-direction:column;gap:0;align-items:flex-end}
-.wd-purse .price{display:flex;align-items:center;gap:1px;font-size:15px;color:#4a2c16;line-height:1;text-shadow:0 1px 0 #fbf0d0}
+.wd-purse .price{display:flex;align-items:center;gap:1px;font-size:15px;color:var(--ink);line-height:1;text-shadow:0 1px 0 var(--paper)}
 .wd-purse .price .ico{margin:-5px -1px}
 .wd-rail{position:relative;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:12px 4px 4px;margin:0 -4px;flex:none}
 .wd-rail::-webkit-scrollbar{display:none}
-.wd-rail::before{content:'';position:absolute;left:0;right:0;top:4px;height:6px;background:#8b5a2b;box-shadow:0 2px 0 #3b2414,0 -2px 0 #c98f55,inset 0 2px 0 #a86d38;min-width:100%}
-.wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:54px;height:60px;${frameStyle('tab', 2)};color:#5a3418;font-size:12px;line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
-.wd-tag::before{content:'';position:absolute;top:-12px;left:50%;width:2px;height:9px;margin-left:-1px;background:#3b2414;box-shadow:1px 0 0 #8b5a2b}
+.wd-rail::before{content:'';position:absolute;left:0;right:0;top:4px;height:6px;min-width:100%;background:var(--wood);box-shadow:0 2px 0 var(--wood-deep),0 -2px 0 var(--wood-light),inset 0 2px 0 var(--wood-pale),inset 0 -2px 0 var(--wood-dark)}
+.wd-rail::after{content:'';position:absolute;left:6px;right:6px;top:4px;height:6px;background:repeating-linear-gradient(90deg,transparent 0 22px,var(--wood-dark) 22px 24px,transparent 24px 46px);pointer-events:none}
+.wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:54px;height:60px;${frameStyle('tab', 2)};color:var(--ink);font-size:12px;line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1);filter:saturate(.7)}
+.wd-tag::before{content:'';position:absolute;top:-12px;left:50%;width:2px;height:9px;margin-left:-1px;background:var(--wood-deep);box-shadow:1px 0 0 var(--wood)}
 .wd-tag .ico{margin:-4px 0 -2px}
-.wd-tag span{text-shadow:0 1px 0 #fbf0d0;white-space:nowrap}
-.wd-tag.on{${frameStyle('button_gold', 2)};transform:translateY(3px) rotate(-3deg);color:#4a2400}
+.wd-tag span{text-shadow:0 1px 0 var(--paper);white-space:nowrap}
+.wd-tag.on{${frameStyle('button_gold', 2)};transform:translateY(3px) rotate(-3deg);color:var(--ink);filter:saturate(.62) brightness(1.04);animation:wdSway 2.4s steps(8) infinite}
 .wd-tag:active{transform:rotate(6deg)}
-.wd-tag .dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:#d9453b;box-shadow:0 0 0 2px #4e1422}
-.wd-hint{font-size:14px;color:#7a5634;text-align:center;margin:-2px 0 0}
-.wd-shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:4px}
-.wd-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;padding:0 2px 2px;${frameStyle('slot_brass', 2)};color:#fbe9c8;text-align:center;filter:var(--drop);transition:transform .15s var(--pop);animation:wdIn .35s var(--ease) both}
+.wd-tag .dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--berry);box-shadow:0 0 0 2px var(--ink)}
+.wd-hint{font-size:14px;color:var(--ink-2);text-align:center;margin:-2px 0 0}
+.wd-room{position:relative;margin:0 -6px;padding:12px 6px 8px;background:url(${paper}) 0 0/32px 32px repeat,var(--oat);image-rendering:pixelated;box-shadow:inset 0 4px 0 var(--wood-dark),inset 0 6px 0 rgba(46,43,36,.25),inset 0 -4px 0 var(--wood-dark)}
+.wd-room::before{content:'';position:absolute;left:0;right:0;top:4px;height:4px;background:repeating-linear-gradient(90deg,var(--wood-light) 0 8px,var(--wood) 8px 16px)}
+.wd-shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:14px 4px;padding-top:6px}
+.wd-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0;padding:0 2px 2px;color:var(--paper);text-align:center;filter:var(--drop);transition:transform .15s var(--pop);animation:wdIn .35s var(--ease) both;transform-origin:50% -10px}
+.wd-card::before{content:'';position:absolute;inset:0;${frameStyle('slot_brass', 2)};filter:saturate(.62) brightness(.98);z-index:-1;pointer-events:none}
 .wd-card:active{transform:translateY(2px) scale(.97)}
-.wd-card.on{${frameStyle('slot_gold_active', 2)}}
-.wd-card.locked{${frameStyle('slot_locked', 2)}}
-.wd-card .pic{position:relative;width:86px;height:78px;display:grid;place-items:center;overflow:hidden}
+.wd-card.on{animation:wdIn .35s var(--ease) both,wdSway 2.6s steps(10) .35s infinite}
+.wd-card.on::before{${frameStyle('slot_gold_active', 2)};filter:saturate(.6) brightness(1.03)}
+.wd-card.locked::before{${frameStyle('slot_locked', 2)};filter:saturate(.5)}
+.wd-card .hook{position:absolute;top:-13px;left:50%;margin-left:-17px;pointer-events:none}
+.wd-card .pic{position:relative;width:86px;height:78px;display:grid;place-items:center;overflow:hidden;margin-top:3px}
 .wd-card .pic img{max-width:100%;max-height:100%;transition:transform .3s var(--pop)}
 .wd-card.on .pic img{transform:scale(1.06)}
-.wd-card.locked .pic img{filter:brightness(.38) saturate(.4) contrast(1.1)}
+.wd-card.locked .pic img{filter:brightness(.42) saturate(.35) contrast(1.1)}
 .wd-card .pic .spin{width:22px;height:22px;opacity:.6;animation:wdSpin 1s steps(8) infinite}
-.wd-card .nm{font-size:14px;line-height:1.05;min-height:30px;display:grid;place-items:center;text-shadow:1px 1px 0 #1f120b}
-.wd-card .st{font-size:13px;display:flex;align-items:center;gap:2px;min-height:20px;text-shadow:1px 1px 0 #1f120b}
-.wd-card .st.own{color:#b8f0a0}
-.wd-card .st.wear{color:#ffe17a}
-.wd-card .st.lock{color:#e8c0a0}
-.wd-card .st.muted{color:#e8d0a8;font-size:12px}
-.wd-card .price{display:flex;align-items:center;gap:2px;font-size:16px;color:#ffe9a0}
+.wd-card .nm{font-size:14px;line-height:1.05;min-height:30px;display:grid;place-items:center;text-shadow:1px 1px 0 var(--ink)}
+.wd-card .st{font-size:13px;display:flex;align-items:center;gap:2px;min-height:20px;text-shadow:1px 1px 0 var(--ink)}
+.wd-card .st.own{color:var(--sage-light)}
+.wd-card .st.wear{color:var(--lamp)}
+.wd-card .st.lock{color:var(--rose)}
+.wd-card .st.muted{color:var(--linen);font-size:12px}
+.wd-card .price{display:flex;align-items:center;gap:2px;font-size:16px;color:var(--lamp)}
 .wd-card .price .ico{margin:-6px -2px}
-.wd-card .ribbon{position:absolute;top:-6px;left:-6px;padding:1px 5px;font-size:11px;color:#fff;background:#3c88d8;box-shadow:0 0 0 2px #1a2658,0 2px 0 rgba(30,16,8,.4);z-index:2}
-.wd-card .ribbon.gold{background:#e5a320;box-shadow:0 0 0 2px #7a4a12,0 2px 0 rgba(30,16,8,.4)}
-.wd-card .ribbon.red{background:#d9453b;box-shadow:0 0 0 2px #4e1422,0 2px 0 rgba(30,16,8,.4)}
+.wd-card .ribbon{position:absolute;top:-4px;left:-6px;padding:1px 5px;font-size:11px;color:var(--paper);background:var(--dusk);box-shadow:0 0 0 2px var(--slate),0 2px 0 rgba(46,43,36,.4);z-index:2}
+.wd-card .ribbon.gold{background:var(--ochre);box-shadow:0 0 0 2px var(--wood-deep),0 2px 0 rgba(46,43,36,.4)}
+.wd-card .ribbon.red{background:var(--berry);box-shadow:0 0 0 2px var(--plum),0 2px 0 rgba(46,43,36,.4)}
 .wd-card .check{position:absolute;top:2px;right:2px}
-.wd-plaque{position:sticky;top:0;margin:0 -2px;padding:0 2px;${frameStyle('wood_dark', 2)};background:#2e1b10;display:flex;gap:6px;align-items:center;z-index:3;animation:wdUp .3s var(--ease) both;flex:none}
-.wd-plaque .face{flex:none;width:70px;height:70px;display:grid;place-items:center;background:radial-gradient(circle at 50% 42%,#f6e4b8 0,#d9b77a 54%,#8b5a2b 55%,#5a3418 63%,transparent 65%)}
-.wd-plaque .face img{width:62px;height:62px;border-radius:50%}
-.wd-plaque .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;color:#fbe9c8;padding:2px 0}
-.wd-plaque h3{margin:0;font-size:17px;color:#ffe9a0;text-shadow:1px 2px 0 #1f120b;line-height:1}
-.wd-plaque .lat{font-size:12px;font-style:italic;color:#d8b88a;font-family:var(--font-small);line-height:1.1}
-.wd-plaque p{margin:0;font-size:13px;line-height:1.12;color:#f3dcb4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.wd-plaque .fact{display:none;font-size:12px;color:#b9d8f0;gap:4px;align-items:flex-start;line-height:1.1}
+.wd-plaque{position:sticky;top:0;margin:0 -2px;padding:0 2px;${frameStyle('wood_dark', 2)};background:var(--wood-deep);display:flex;gap:6px;align-items:center;z-index:3;animation:wdUp .3s var(--ease) both;flex:none}
+.wd-plaque .face{position:relative;flex:none;width:76px;height:76px;display:grid;place-items:center}
+.wd-plaque .face .glass{position:absolute;inset:5px 6px;clip-path:${oval};background:linear-gradient(180deg,var(--mist) 0 48%,var(--sky) 48% 74%,var(--lake) 74%);display:grid;place-items:center;overflow:hidden}
+.wd-plaque .face .glass::after{content:'';position:absolute;left:18%;top:12%;width:4px;height:12px;background:var(--snow);opacity:.7;box-shadow:6px 4px 0 -1px var(--snow)}
+.wd-plaque .face img{width:100%;height:100%;object-fit:contain;animation:wdBob 3s steps(6) infinite}
+.wd-plaque .face .rim{position:absolute;inset:0;pointer-events:none}
+.wd-plaque .txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;color:var(--paper);padding:2px 0}
+.wd-plaque h3{margin:0;font-size:17px;color:var(--lamp);text-shadow:1px 2px 0 var(--ink);line-height:1}
+.wd-plaque .lat{font-size:12px;font-style:italic;color:var(--straw);font-family:var(--font-small);line-height:1.1}
+.wd-plaque p{margin:0;font-size:13px;line-height:1.12;color:var(--oat);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wd-plaque .fact{display:none;font-size:12px;color:var(--ice);gap:4px;align-items:flex-start;line-height:1.1}
 .wd-plaque .fact .ico{flex:none;margin:-4px 0}
 .wd-plaque .act{display:flex;flex-direction:column;gap:2px;justify-content:center;align-items:center;flex:none}
 .wd-plaque .act .btn{min-width:84px;font-size:15px;white-space:nowrap;padding-left:6px;padding-right:6px}
 .wd-plaque .act .btn .price{color:inherit}
-.wd-plaque .act .note{font-size:11px;color:#e8c0a0;text-align:center;max-width:92px;line-height:1.05}
-@media (min-width:420px){.wd-plaque .fact{display:flex}.wd-plaque .face{width:84px;height:84px}.wd-plaque .face img{width:76px;height:76px}}
-@keyframes wdIn{from{opacity:0;transform:translateY(8px) scale(.94)}}
+.wd-plaque .act .note{font-size:11px;color:var(--rose);text-align:center;max-width:92px;line-height:1.05}
+@media (min-width:420px){.wd-plaque .fact{display:flex}.wd-plaque .face{width:90px;height:90px}}
+@keyframes wdIn{from{opacity:0;transform:translateY(-10px) rotate(-4deg)}}
 @keyframes wdUp{from{opacity:0;transform:translateY(16px)}}
 @keyframes wdSpin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.wd-card,.wd-plaque{animation:none}}
+@keyframes wdSway{0%,100%{transform:rotate(0)}25%{transform:rotate(1.6deg)}75%{transform:rotate(-1.6deg)}}
+@keyframes wdBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){.wd-card,.wd-plaque,.wd-card.on,.wd-tag.on,.wd-plaque .face img{animation:none}}
 `;
   const st = document.createElement('style');
   st.id = 'hh-wardrobe';
@@ -143,11 +169,12 @@ function celebrate(kind: 'buy' | 'wear') {
 
 function Spinner() { return <Px name="sparkle" size={22} class="spin" />; }
 
-function SpeciesCard(p: { sp: SpeciesDef; on: boolean; wearing: boolean; onPick: () => void; i: number }) {
+function SpeciesCard(p: { sp: SpeciesDef; on: boolean; wearing: boolean; onPick: (e: MouseEvent) => void; i: number }) {
   const st = speciesState(p.sp);
   const url = useOwlIcon({ skin: 'owl', species: p.sp.id, palette: p.sp.id, outfit: {} }, 'face');
   return (
     <button class={'wd-card' + (p.on ? ' on' : '') + (st.lockedAt ? ' locked' : '')} style={{ animationDelay: `${p.i * 30}ms` }} onClick={p.onPick}>
+      <Px name="wd_hanger" size={34} class="hook" />
       {p.sp.gems && !st.owned ? <span class="ribbon">Rare</span> : st.free ? <span class="ribbon gold">Free</span> : null}
       <div class="pic">{url ? <img src={url} alt="" /> : <Spinner />}</div>
       <div class="nm">{p.sp.name}</div>
@@ -160,11 +187,12 @@ function SpeciesCard(p: { sp: SpeciesDef; on: boolean; wearing: boolean; onPick:
   );
 }
 
-function SkinCard(p: { skin: SkinDef2 | null; on: boolean; wearing: boolean; owned: boolean; species: string; onPick: () => void; i: number }) {
+function SkinCard(p: { skin: SkinDef2 | null; on: boolean; wearing: boolean; owned: boolean; species: string; onPick: (e: MouseEvent) => void; i: number }) {
   const id = p.skin?.id ?? 'owl';
   const url = useOwlIcon({ skin: id, species: p.species, palette: id === 'meowl' ? 'tabby' : p.species, outfit: {} }, 'face');
   return (
     <button class={'wd-card' + (p.on ? ' on' : '') + (p.owned ? '' : ' locked')} style={{ animationDelay: `${p.i * 30}ms` }} onClick={p.onPick}>
+      <Px name="wd_hanger" size={34} class="hook" />
       {p.skin?.series && <span class="ribbon red">{p.skin.series === 'frostlight' ? 'Frostlight' : 'Starfall'}</span>}
       <div class="pic">{url ? <img src={url} alt="" /> : <Spinner />}</div>
       <div class="nm">{p.skin ? p.skin.name : 'Natural plumage'}</div>
@@ -173,12 +201,13 @@ function SkinCard(p: { skin: SkinDef2 | null; on: boolean; wearing: boolean; own
   );
 }
 
-function PieceCard(p: { piece: PieceDef; look: OwlLook; on: boolean; wearing: boolean; onPick: () => void; i: number }) {
+function PieceCard(p: { piece: PieceDef; look: OwlLook; on: boolean; wearing: boolean; onPick: (e: MouseEvent) => void; i: number }) {
   const st = pieceState(p.piece);
   const url = usePieceIcon(p.piece.id, p.piece.slot, p.look);
   const locked = !st.owned && (st.series || st.area);
   return (
     <button class={'wd-card' + (p.on ? ' on' : '') + (locked ? ' locked' : '')} style={{ animationDelay: `${p.i * 25}ms` }} onClick={p.onPick}>
+      <Px name="wd_hanger" size={34} class="hook" />
       {p.piece.series ? <span class="ribbon red">{p.piece.series === 'frostlight' ? 'Frostlight' : 'Starfall'}</span> : p.piece.premium && !st.owned ? <span class="ribbon">Premium</span> : null}
       <div class="pic">{url ? <img src={url} alt="" /> : <Spinner />}</div>
       <div class="nm">{p.piece.name}</div>
@@ -196,7 +225,7 @@ function PieceCard(p: { piece: PieceDef; look: OwlLook; on: boolean; wearing: bo
 function Plaque(p: { face: string; title: string; latin?: string; text: string; fact?: string; children: preact.ComponentChildren }) {
   return (
     <div class="wd-plaque" key={p.title}>
-      <div class="face">{p.face ? <img src={p.face} alt="" /> : <Spinner />}</div>
+      <div class="face"><div class="glass">{p.face ? <img src={p.face} alt="" /> : <Spinner />}</div><Px name="wd_frame" size={90} class="rim" /></div>
       <div class="txt">
         <h3>{p.title}</h3>
         {p.latin && <span class="lat">{p.latin}</span>}
@@ -302,7 +331,11 @@ export function Wardrobe() {
     sceneRef.current?.setLook(preview);
   }, [preview]);
 
-  const choose = (id: string) => { tap('ui_tap', 0.5); sound.play('fabric', { volume: 0.35, gap: 60 }); setPick(id); sceneRef.current?.owl.play(tab === 'head' ? 'hop' : 'ruffle'); };
+  const choose = (id: string, e?: MouseEvent) => {
+    tap('ui_tap', 0.5); sound.play('fabric', { volume: 0.35, gap: 60 }); setPick(id);
+    sceneRef.current?.owl.play(tab === 'head' ? 'hop' : tab === 'species' ? 'spin' : 'ruffle');
+    if (e?.currentTarget) uiBurstAt(e.currentTarget as Element, tab === 'skins' ? 'magic' : 'sparkle', 7);
+  };
   const switchTab = (t: Tab) => { setTab(t); setPick(null); };
   const pieceLook: OwlLook = { skin: curSkin, species: curSpecies, palette: curSpecies, outfit: {} };
 
@@ -316,14 +349,14 @@ export function Wardrobe() {
   let shelf: preact.ComponentChildren, plaque: preact.ComponentChildren = null, hint = '';
   if (tab === 'species') {
     hint = 'Real owls from around the world. Tap one to try it on.';
-    shelf = SPECIES.map((sp, i) => <SpeciesCard key={sp.id} sp={sp} i={i} on={(pick ?? curSpecies) === sp.id} wearing={curSpecies === sp.id} onPick={() => choose(sp.id)} />);
+    shelf = SPECIES.map((sp, i) => <SpeciesCard key={sp.id} sp={sp} i={i} on={(pick ?? curSpecies) === sp.id} wearing={curSpecies === sp.id} onPick={(e) => choose(sp.id, e)} />);
     const sp = SPECIES.find((x) => x.id === (pick ?? curSpecies))!;
     plaque = <SpeciesPlaque sp={sp} wearing={sp.id === curSpecies} />;
   } else if (tab === 'skins') {
     hint = 'Special skins replace the feathers but keep your owl’s shape.';
     const list: (SkinDef2 | null)[] = [null, ...SPECIAL_SKINS];
     const owns = (id: string) => id === 'owl' || s.owned.skins.includes(id);
-    shelf = list.map((k, i) => { const id = k?.id ?? 'owl'; return <SkinCard key={id} skin={k} i={i} owned={owns(id)} species={curSpecies} on={(pick ?? curSkin) === id} wearing={curSkin === id} onPick={() => choose(id)} />; });
+    shelf = list.map((k, i) => { const id = k?.id ?? 'owl'; return <SkinCard key={id} skin={k} i={i} owned={owns(id)} species={curSpecies} on={(pick ?? curSkin) === id} wearing={curSkin === id} onPick={(e) => choose(id, e)} />; });
     const sel = pick ?? curSkin, k = SPECIAL_SKINS.find((x) => x.id === sel) ?? null;
     plaque = <SkinPlaque skin={k} owned={owns(sel)} wearing={sel === curSkin} species={curSpecies} />;
   } else {
@@ -333,7 +366,7 @@ export function Wardrobe() {
       <button key="none" class={'wd-card' + ((pick ?? worn ?? '__none') === '__none' ? ' on' : '')} onClick={() => { tap('ui_tap', 0.5); setPick('__none'); if (worn) wear(slot, null); }}>
         <div class="pic"><IcoClose size={40} /></div><div class="nm">Nothing</div><span class="st muted">{worn ? 'Take off' : 'Bare feathers'}</span>
       </button>,
-      ...list.map((pc, i) => <PieceCard key={pc.id} piece={pc} look={pieceLook} i={i + 1} on={(pick ?? worn) === pc.id} wearing={worn === pc.id} onPick={() => choose(pc.id)} />),
+      ...list.map((pc, i) => <PieceCard key={pc.id} piece={pc} look={pieceLook} i={i + 1} on={(pick ?? worn) === pc.id} wearing={worn === pc.id} onPick={(e) => choose(pc.id, e)} />),
     ];
     const sel = pick && pick !== '__none' ? list.find((x) => x.id === pick) : worn ? list.find((x) => x.id === worn) : undefined;
     if (sel) plaque = <PiecePlaque piece={sel} look={pieceLook} wearing={worn === sel.id} />;
@@ -350,7 +383,7 @@ export function Wardrobe() {
       </div>
       {plaque}
       {!plaque && hint && <p class="wd-hint">{hint}</p>}
-      <div class="wd-shelf" key={tab}>{shelf}</div>
+      <div class="wd-room"><div class="wd-shelf" key={tab}>{shelf}</div></div>
     </Sheet>
   );
 }

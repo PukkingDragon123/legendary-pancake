@@ -1,9 +1,10 @@
 // The big cuckoo clock, painted at pixel resolution: a carved Black-Forest chalet with a shingled
-// roof, leaf bargeboards and a carved owl on the ridge, a little cuckoo door (an owl pops out),
-// a brass-bezelled bone dial with live hands, carved oak leaves and acorns, a carved owl under the
-// dial, a scalloped apron, a swinging leaf pendulum and two pine-cone weights on brass chains.
+// roof, leaf bargeboards and a carved crescent moon on the ridge, a little cuckoo door (a songbird
+// pops out and sings), a brass-bezelled bone dial with live hands, carved oak leaves and acorns, a
+// carved moon under the dial, a scalloped apron, a swinging leaf pendulum and two pine-cone weights
+// on brass chains.
 import { Art, ballShade, dtone, hash, INK, lit, text3, text3w, tone } from './sleepart.ts';
-import { owl } from './sleepprops.ts';
+import { crescentOrnament, songbird } from './sleepprops.ts';
 
 export const CW = 100, CH = 196;
 export const PIVOT = { x: 50, y: 125 };
@@ -107,14 +108,13 @@ function body(fin: Finish): Art {
   // ridge cap
   a.rect(47, 11, 6, 4, (x, y) => dtone(K, 4 - (y - 11) * 0.6, x, y));
 
-  // ---- the carved owl on the ridge and its branch
+  // ---- the carved crescent moon on the ridge and its branch
   const fo = new Art(CW, 30);
-  owl(fo, 50, 10, 0.62, { eyes: 'open', look: 0 });
-  const carvedOwl = carve(fo, K, 0.2);
-  a.stamp(carvedOwl, 0, -1);
+  crescentOrnament(fo, 50, 9, 7.5, 'wood');
+  a.stamp(carve(fo, K, 0.2), 0, -1);
   oakLeaf(a, 50, 15, Math.PI - 0.2, 10, 3.4, K, 3.4); oakLeaf(a, 50, 15, 0.2, 10, 3.4, K, 3.4);
 
-  // ---- carved leaf garland around the dial, acorns, and an owl under it
+  // ---- carved leaf garland around the dial, acorns, and a moon under it
   for (const sd of [-1, 1]) {
     oakLeaf(a, 50 + sd * 18, 57, sd > 0 ? -0.9 : Math.PI + 0.9, 14, 4.2, K, 3.3);
     oakLeaf(a, 50 + sd * 22, 62, sd > 0 ? -0.2 : Math.PI + 0.2, 13, 4, K, 3);
@@ -123,7 +123,8 @@ function body(fin: Finish): Art {
     acorn(a, 50 + sd * 30, 58, K); acorn(a, 50 + sd * 33, 102, K);
   }
   const bo = new Art(CW, 26);
-  owl(bo, 50, 12, 0.5, { eyes: 'closed' });
+  crescentOrnament(bo, 50, 12, 6, 'wood');
+  for (const sd of [-1, 1]) for (let i = 0; i < 3; i++) bo.px(50 + sd * (9 + i * 2), 10 + i, tone('wood', 4));
   a.stamp(carve(bo, K, -0.2), 0, 103);
 
   // ---- the dial: brass bezel, bone face, numerals, minute track
@@ -212,7 +213,7 @@ export function paintCuckoo(a: Art, s: ClockState) {
   }
   // ---- the case
   a.stamp(body(s.finish), 0, 0);
-  // ---- the cuckoo door and the owl
+  // ---- the cuckoo door and the songbird
   const D = DOOR;
   const doorOpen = Math.min(1, s.cuckoo / 0.3), out = Math.max(0, (s.cuckoo - 0.3) / 0.7);
   if (doorOpen > 0) {
@@ -220,7 +221,7 @@ export function paintCuckoo(a: Art, s: ClockState) {
     a.ell(D.x + D.w / 2, D.y + 3, D.w / 2, 4, (x, y) => (y <= D.y + 3 ? tone('dwood', 0) : null));
     if (out > 0) {
       const o = new Art(40, 40);
-      owl(o, 20, 22 - out * 4, 0.42 + out * 0.2, { eyes: s.hoot ? 'happy' : 'open', beak: s.hoot ? 'open' : 'closed', wing: s.hoot ? 1 : 0, cap: true });
+      songbird(o, 20, 24 - out * 4, 0.55 + out * 0.25, { beak: s.hoot ? 'open' : 'closed', wing: s.hoot ? 1 : 0 });
       // clip to the doorway (plus a little lean out over the perch)
       for (let y = 0; y < 40; y++) for (let x = 0; x < 40; x++) {
         const v = o.d[y * 40 + x];

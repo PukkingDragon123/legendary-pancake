@@ -9,3 +9,7 @@ export declare function T(r: string, chars?: string, g?: string): Record<string,
 export declare function icon(name: string, key: Record<string, string>, rows: string[] | (() => string[]), opt?: any): void;
 export declare function draw(name: string, fn: () => any): void;
 export declare const RAMPS: Record<string, string[]>;
+/** The original (ungraded) ramps; the sprite renderer grades every sprite once when it is built. */
+export declare const RAMPS_SRC: Record<string, string[]>;
+/** Register a detailed sprite (tw x th texels shown as tw/res x th/res art px). */
+export declare function hires(name: string, tw: number, th: number, res: number, px: Uint8ClampedArray | number[]): void;

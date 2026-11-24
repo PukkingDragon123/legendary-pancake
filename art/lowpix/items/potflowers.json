@@ -1,0 +1,1455 @@
+{
+ "name": "potflowers",
+ "description": "Tulip Pot",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 1800,
+  "colors": 480
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   18
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "rose": [
+    "#2b0e12",
+    "#6f272b",
+    "#b04542",
+    "#cd8a82",
+    "#ddb9b0",
+    "#e5cfc7",
+    "#eee3dd",
+    "#f8f5f2"
+   ],
+   "fern": [
+    "#0c150a",
+    "#22371c",
+    "#3b572f",
+    "#577544",
+    "#7a995e",
+    "#a2b48c",
+    "#c7cfba",
+    "#eaece5"
+   ],
+   "honey": [
+    "#2b1307",
+    "#6e3815",
+    "#af6626",
+    "#d59950",
+    "#dfbd84",
+    "#e6d4a8",
+    "#efe7ca",
+    "#f8f6eb"
+   ],
+   "terra": [
+    "#220c0b",
+    "#56261f",
+    "#894634",
+    "#b76d4f",
+    "#c6987d",
+    "#d4b9a3",
+    "#e3d6c7",
+    "#f4f0ea"
+   ],
+   "cream": [
+    "#36210c",
+    "#734b1b",
+    "#af782b",
+    "#d3a353",
+    "#e2c690",
+    "#f1e6cc",
+    "#f6f2e2",
+    "#fdfcf8"
+   ],
+   "stone": [
+    "#171412",
+    "#3b352f",
+    "#5e574d",
+    "#81796d",
+    "#9d988f",
+    "#b6b5af",
+    "#d1d1ce",
+    "#ededed"
+   ],
+   "soil": [
+    "#130b09",
+    "#2c1c16",
+    "#432f23",
+    "#5a4432",
+    "#967958",
+    "#bdad95",
+    "#e2ddd2"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "pot": {
+   "ramp": "terra",
+   "tone": 4.2,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "rings",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.8,
+     "width": 0.25,
+     "shift": -0.5,
+     "wobble": 0.3,
+     "seed": 0
+    },
+    {
+     "id": "dust",
+     "op": "noise",
+     "scale": 1.3,
+     "amount": 0.6,
+     "seed": 1
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/clay_floor_001",
+     "scale": 10,
+     "amount": 0.5,
+     "ramps": [
+      "terra"
+     ]
+    },
+    {
+     "id": "bloom",
+     "op": "patches",
+     "scale": 1.2,
+     "threshold": 0.7,
+     "shift": 1.0,
+     "seed": 2
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.25,
+     "shift": -1.2
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.5,
+    "rough": 0.55,
+    "textures": {
+     "terra": "stone"
+    }
+   }
+  },
+  "soil": {
+   "ramp": "soil",
+   "tone": 3.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "crumbs",
+     "op": "spots",
+     "count": 30,
+     "radius": [
+      0.12,
+      0.3
+     ],
+     "shift": 1.3,
+     "seed": 2
+    },
+    {
+     "id": "dark",
+     "op": "spots",
+     "count": 20,
+     "radius": [
+      0.12,
+      0.25
+     ],
+     "shift": -1.3,
+     "seed": 3
+    },
+    {
+     "id": "clumps",
+     "op": "noise",
+     "scale": 0.8,
+     "amount": 0.8
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.8,
+    "textures": {
+     "soil": "stone"
+    }
+   }
+  },
+  "tulip0_stem": {
+   "ramp": "fern",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "tone",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.8,
+     "seed": 0
+    },
+    {
+     "id": "tips",
+     "op": "gradient",
+     "axis": "path",
+     "amount": 1.2
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.6,
+    "textures": {
+     "fern": "organic"
+    }
+   }
+  },
+  "tulip0_head": {
+   "ramp": "rose",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.2,
+    "dark_shift": -1.0,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.6,
+     "seed": 6
+    },
+    {
+     "id": "crush",
+     "op": "patches",
+     "scale": 2.5,
+     "threshold": 0.62,
+     "shift": -0.8,
+     "seed": 7
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/velour_velvet",
+     "scale": 9,
+     "amount": 0.6,
+     "ramps": [
+      "rose"
+     ]
+    },
+    {
+     "id": "crown",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 0.9,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "petal",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.333,
+     "width": 0.1,
+     "shift": -1.2
+    },
+    {
+     "id": "flush",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.4
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "rose": "cloth"
+    }
+   }
+  },
+  "tulip0_lf": {
+   "ramp": "fern",
+   "tone": 4,
+   "light": 0.8,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  },
+  "tulip1_stem": {
+   "ramp": "fern",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "tone",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.8,
+     "seed": 0
+    },
+    {
+     "id": "tips",
+     "op": "gradient",
+     "axis": "path",
+     "amount": 1.2
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.6,
+    "textures": {
+     "fern": "organic"
+    }
+   }
+  },
+  "tulip1_head": {
+   "ramp": "honey",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.2,
+    "dark_shift": -1.0,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.6,
+     "seed": 6
+    },
+    {
+     "id": "crush",
+     "op": "patches",
+     "scale": 2.5,
+     "threshold": 0.62,
+     "shift": -0.8,
+     "seed": 7
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/velour_velvet",
+     "scale": 9,
+     "amount": 0.6,
+     "ramps": [
+      "honey"
+     ]
+    },
+    {
+     "id": "crown",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 0.9,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "petal",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.333,
+     "width": 0.1,
+     "shift": -1.2
+    },
+    {
+     "id": "flush",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.4
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "honey": "cloth"
+    }
+   }
+  },
+  "tulip1_lf": {
+   "ramp": "fern",
+   "tone": 4,
+   "light": 0.8,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  },
+  "tulip2_stem": {
+   "ramp": "fern",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "none",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "tone",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.8,
+     "seed": 0
+    },
+    {
+     "id": "tips",
+     "op": "gradient",
+     "axis": "path",
+     "amount": 1.2
+    }
+   ],
+   "brush": {
+    "flow": "long",
+    "length": 1.6,
+    "width": 0.4,
+    "rough": 0.6,
+    "textures": {
+     "fern": "organic"
+    }
+   }
+  },
+  "tulip2_head": {
+   "ramp": "cream",
+   "tone": 3.8,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.2,
+    "dark_shift": -1.0,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.6,
+     "seed": 6
+    },
+    {
+     "id": "crush",
+     "op": "patches",
+     "scale": 2.5,
+     "threshold": 0.62,
+     "shift": -0.8,
+     "seed": 7
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/velour_velvet",
+     "scale": 9,
+     "amount": 0.6,
+     "ramps": [
+      "cream"
+     ]
+    },
+    {
+     "id": "crown",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 0.9,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "petal",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.333,
+     "width": 0.1,
+     "shift": -1.2
+    },
+    {
+     "id": "flush",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.4
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 1.0,
+    "width": 0.4,
+    "rough": 0.4,
+    "textures": {
+     "cream": "cloth"
+    }
+   }
+  },
+  "tulip2_lf": {
+   "ramp": "fern",
+   "tone": 4,
+   "light": 0.8,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "pot",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "pot",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 4.6
+    },
+    {
+     "at": [
+      0,
+      0.3,
+      0
+     ],
+     "size": 5.2
+    },
+    {
+     "at": [
+      0,
+      4.0,
+      0
+     ],
+     "size": 6.4
+    },
+    {
+     "at": [
+      0,
+      4.1,
+      0
+     ],
+     "size": 7.0
+    },
+    {
+     "at": [
+      0,
+      5.2,
+      0
+     ],
+     "size": 7.2
+    },
+    {
+     "at": [
+      0,
+      5.3,
+      0
+     ],
+     "size": 6.6
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "soil",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    5.0,
+    0.0
+   ],
+   "style": "soil",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 6.4
+    },
+    {
+     "at": [
+      0,
+      0.2,
+      0
+     ],
+     "size": 5.4
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "tulip0_stem",
+   "shape": "prism",
+   "size": [
+    0.35,
+    0.35,
+    5.2
+   ],
+   "pivot": [
+    -1.4,
+    5.1,
+    0.4
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    2.6
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "tulip0_stem",
+   "sides": 4
+  },
+  {
+   "id": "tulip0_head",
+   "shape": "loft",
+   "pivot": [
+    -1.4,
+    10.1,
+    0.4
+   ],
+   "style": "tulip0_head",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 0.4
+    },
+    {
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "size": 1.3
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": 1.9
+    },
+    {
+     "at": [
+      0,
+      2.5,
+      0
+     ],
+     "size": 1.2
+    },
+    {
+     "at": [
+      0,
+      2.8,
+      0
+     ],
+     "size": 1.6
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    false
+   ],
+   "double_sided": true,
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "tulip0_leaf0",
+   "shape": "card",
+   "size": [
+    1.6,
+    3.328
+   ],
+   "pivot": [
+    -1.4,
+    5.1,
+    0.4
+   ],
+   "offset": [
+    -0.0,
+    1.664,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    20.0,
+    16.0
+   ],
+   "style": "tulip0_lf",
+   "paint": {
+    "art_key": {
+     "a": "#53742e",
+     "b": "#5a7c31",
+     "c": "#618334",
+     "d": "#678c38",
+     "e": "#6d953b",
+     "f": "#759d3f",
+     "g": "#75a541",
+     "h": "#80b245",
+     "i": "#91c24f",
+     "j": "#a1d358",
+     "k": "#aae15a",
+     "l": "#b8e964",
+     "m": "#c0f36a",
+     "n": "#dffa7a"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "..g.........",
+    "g...........",
+    "b..h...h....",
+    "a..d...d....",
+    "a..c...c....",
+    "d..g...f....",
+    "f...j..i....",
+    "ii..e...i...",
+    ".e..b...f...",
+    ".c..a...c...",
+    ".a..b...a...",
+    ".b..d...a...",
+    ".b..gk..c...",
+    ".b..jh..d...",
+    ".c..mf..f...",
+    ".cn..e..h...",
+    ".cn..c..hm..",
+    ".dn..c..jm..",
+    ".fl..d..lj..",
+    ".fl..d..mi..",
+    ".fl..d...i..",
+    ".gm..d...i.."
+   ]
+  },
+  {
+   "id": "tulip0_leaf1",
+   "shape": "card",
+   "size": [
+    1.6,
+    3.328
+   ],
+   "pivot": [
+    -1.4,
+    5.1,
+    0.4
+   ],
+   "offset": [
+    -0.0,
+    1.664,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    120.0,
+    -14.0
+   ],
+   "style": "tulip0_lf",
+   "paint": {
+    "art_key": {
+     "a": "#51762d",
+     "b": "#5c7f32",
+     "c": "#638636",
+     "d": "#69903a",
+     "e": "#6e9e3d",
+     "f": "#7e9c45",
+     "g": "#7fab46",
+     "h": "#9eaa58",
+     "i": "#7cb945",
+     "j": "#a8b65d",
+     "k": "#9dcd55",
+     "l": "#c8d770",
+     "m": "#c4f46c",
+     "n": "#f1f98b"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    ".......b....",
+    ".......c....",
+    ".......ge...",
+    ".......dd...",
+    ".......ei...",
+    ".......e.k..",
+    "..j....e.d..",
+    "..f....c.a..",
+    "..f....b.b..",
+    "..j....b.em.",
+    "..l....b.kg.",
+    "..n....c..b.",
+    "..nn...c..b.",
+    "n..l...c..b.",
+    "n..j...c..b.",
+    "l..j...d..cm",
+    "l..h...d..cm",
+    "l..h...d..fk",
+    "l..h...d..gk",
+    "l..h...f..kg",
+    "l..j...f..mf",
+    "l..j...f..mg",
+    "l..j...f..mg"
+   ]
+  },
+  {
+   "id": "tulip1_stem",
+   "shape": "prism",
+   "size": [
+    0.35,
+    0.35,
+    6.4
+   ],
+   "pivot": [
+    1.5,
+    5.1,
+    -0.4
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    3.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "tulip1_stem",
+   "sides": 4
+  },
+  {
+   "id": "tulip1_head",
+   "shape": "loft",
+   "pivot": [
+    1.5,
+    11.3,
+    -0.4
+   ],
+   "style": "tulip1_head",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 0.4
+    },
+    {
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "size": 1.3
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": 1.9
+    },
+    {
+     "at": [
+      0,
+      2.5,
+      0
+     ],
+     "size": 1.2
+    },
+    {
+     "at": [
+      0,
+      2.8,
+      0
+     ],
+     "size": 1.6
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    false
+   ],
+   "double_sided": true,
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "tulip1_leaf0",
+   "shape": "card",
+   "size": [
+    1.6,
+    4.096
+   ],
+   "pivot": [
+    1.5,
+    5.1,
+    -0.4
+   ],
+   "offset": [
+    0.0,
+    2.048,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    140.0,
+    16.0
+   ],
+   "style": "tulip1_lf",
+   "paint": {
+    "art_key": {
+     "a": "#577a2f",
+     "b": "#608334",
+     "c": "#6a903a",
+     "d": "#759e41",
+     "e": "#7fae46",
+     "f": "#9eaa58",
+     "g": "#84b848",
+     "h": "#a8b75d",
+     "i": "#92c84e",
+     "j": "#9fcc56",
+     "k": "#c2d16d",
+     "l": "#cede72",
+     "m": "#c1f669",
+     "n": "#e3f87f"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "....b.......",
+    "....b.......",
+    "...de.......",
+    "...cc.......",
+    "...gd.......",
+    "..e.d....l..",
+    "..a.d....h..",
+    "..a.b....h..",
+    "..b.a....h..",
+    ".ie.a....k..",
+    ".cm.b....n..",
+    ".b..b.......",
+    ".a..b...n...",
+    ".b..b...k..n",
+    ".b..c...h..n",
+    "nc..c...h..l",
+    "md..c...f..k",
+    "jg..c...f..k",
+    "jj..c...f..k",
+    "em..d...f..l",
+    "dn..d...h..l",
+    "dn..d...h..l",
+    "en..d...h..l"
+   ]
+  },
+  {
+   "id": "tulip1_leaf1",
+   "shape": "card",
+   "size": [
+    1.6,
+    4.096
+   ],
+   "pivot": [
+    1.5,
+    5.1,
+    -0.4
+   ],
+   "offset": [
+    -0.0,
+    2.048,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    240.0,
+    -14.0
+   ],
+   "style": "tulip1_lf",
+   "paint": {
+    "art_key": {
+     "a": "#72813b",
+     "b": "#859447",
+     "c": "#8e9d4e",
+     "d": "#95a650",
+     "e": "#9dad57",
+     "f": "#a6b45c",
+     "g": "#a1ba52",
+     "h": "#acbb5d",
+     "i": "#b4c364",
+     "j": "#c4d46b",
+     "k": "#d2e46e",
+     "l": "#f1fa82",
+     "m": "#fdfa93",
+     "n": "#fdfa9e"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "..a.........",
+    "..a.........",
+    "..a..d.....g",
+    "..a..b.....e",
+    "..a..g.....e",
+    ".ka...k....c",
+    ".fj...b....b",
+    ".ckk..a....b",
+    ".b.i..a....c",
+    ".c.h..b....h",
+    ".d.d..dl...h",
+    ".i.b..ji...h",
+    "mj.b..md...i",
+    "kl.c...b...j",
+    "in.c...b...m",
+    "hn.c...b...m",
+    "f..d...b...m",
+    "e..h...c...n",
+    "e..i...c...n",
+    "e..i...c...n",
+    "f..i...c....",
+    "f..i...e...."
+   ]
+  },
+  {
+   "id": "tulip2_stem",
+   "shape": "prism",
+   "size": [
+    0.35,
+    0.35,
+    4.4
+   ],
+   "pivot": [
+    0.1,
+    5.1,
+    1.6
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    2.2
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "tulip2_stem",
+   "sides": 4
+  },
+  {
+   "id": "tulip2_head",
+   "shape": "loft",
+   "pivot": [
+    0.1,
+    9.3,
+    1.6
+   ],
+   "style": "tulip2_head",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 0.4
+    },
+    {
+     "at": [
+      0,
+      0.4,
+      0
+     ],
+     "size": 1.3
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 2.0
+    },
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": 1.9
+    },
+    {
+     "at": [
+      0,
+      2.5,
+      0
+     ],
+     "size": 1.2
+    },
+    {
+     "at": [
+      0,
+      2.8,
+      0
+     ],
+     "size": 1.6
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    false
+   ],
+   "double_sided": true,
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "tulip2_leaf0",
+   "shape": "card",
+   "size": [
+    1.6,
+    2.816
+   ],
+   "pivot": [
+    0.1,
+    5.1,
+    1.6
+   ],
+   "offset": [
+    0.0,
+    1.408,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    260.0,
+    16.0
+   ],
+   "style": "tulip2_lf",
+   "paint": {
+    "art_key": {
+     "a": "#72813b",
+     "b": "#7a8f3c",
+     "c": "#839148",
+     "d": "#8a994a",
+     "e": "#91a14f",
+     "f": "#9aa954",
+     "g": "#a5b45c",
+     "h": "#abbc5c",
+     "i": "#abc658",
+     "j": "#b5c363",
+     "k": "#ccdb6f",
+     "l": "#e4f57a",
+     "m": "#fcfa93",
+     "n": "#fdfaba"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    ".........a..",
+    ".........d..",
+    "h.....b..e..",
+    "f.....b..a..",
+    "g.....i..a..",
+    "e....i...a..",
+    "c....d...jg.",
+    "d....a..kkd.",
+    "e....c..j.c.",
+    "h....f..h.c.",
+    "h...mh..f.c.",
+    "h...jl..c.e.",
+    "j...e...d.gm",
+    "k...c...d.kk",
+    "m...c...e.mj",
+    "m...c...e.mh",
+    "m...d...f.ng",
+    "m...d...h.nf",
+    "m...d...j.nf",
+    "m...d...j..g",
+    "....e...j..g",
+    "....f...j..g"
+   ]
+  },
+  {
+   "id": "tulip2_leaf1",
+   "shape": "card",
+   "size": [
+    1.6,
+    2.816
+   ],
+   "pivot": [
+    0.1,
+    5.1,
+    1.6
+   ],
+   "offset": [
+    0.0,
+    1.408,
+    -0.0
+   ],
+   "rotation": [
+    0.0,
+    360.0,
+    -14.0
+   ],
+   "style": "tulip2_lf",
+   "paint": {
+    "art_key": {
+     "a": "#51702d",
+     "b": "#55762f",
+     "c": "#597e31",
+     "d": "#618134",
+     "e": "#648837",
+     "f": "#678d38",
+     "g": "#719a3d",
+     "h": "#7aa543",
+     "i": "#83ae46",
+     "j": "#89bf4a",
+     "k": "#a0cc57",
+     "l": "#a5d459",
+     "m": "#b3e662",
+     "n": "#c5f96c"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "............",
+    "...........h",
+    "....i...j..c",
+    "....f...f..a",
+    "....e...c..b",
+    "....g...h..e",
+    "....j..l..mg",
+    "...j...g..hj",
+    "...g...c..c.",
+    "...d...b..a.",
+    "...b...c..a.",
+    "...b..nf..b.",
+    "...d..jh..b.",
+    "...f..gl..c.",
+    "..ng..en..d.",
+    "..ni..d..nd.",
+    "..li..d..nd.",
+    "..ll..d..ne.",
+    "..im..e..lh.",
+    "..hn..f..ki.",
+    "..h...f..li.",
+    "..h...f..li."
+   ]
+  }
+ ]
+}

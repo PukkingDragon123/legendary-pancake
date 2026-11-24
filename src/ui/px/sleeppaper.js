@@ -21,6 +21,7 @@
 // never touches the DOM.
 // (BME's paper.css is not needed: only the texture and decoration painters are used here)
 import { hasSprite, spriteCanvas } from './sprites.js';
+import { calm } from './calm.js'; // [ui3] every painted colour is graded into the calm palette
 
 export const PX = 3; // CSS px per texel
 
@@ -30,7 +31,7 @@ export const PX = 3; // CSS px per texel
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function hexc(h) {
-  let s = String(h).replace('#', '');
+  let s = calm(String(h)).replace('#', '');
   if (s.length <= 4) s = s.split('').map((c) => c + c).join('');
   const n = parseInt(s.slice(0, 6), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];

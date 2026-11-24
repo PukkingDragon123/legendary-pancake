@@ -1,0 +1,987 @@
+{
+ "name": "moonlamp",
+ "description": "Crescent Moon Lamp",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 8,
+ "grounded": true,
+ "budget": {
+  "tris": 1600,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   16
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "walnut": [
+    "#21130f",
+    "#362119",
+    "#4a3124",
+    "#5d4330",
+    "#6f553d",
+    "#937755",
+    "#ad9979",
+    "#c2b7a0",
+    "#d9d4c7"
+   ],
+   "oat": [
+    "#312110",
+    "#7f5b2b",
+    "#c19753",
+    "#dcc9a1",
+    "#ece4cf",
+    "#f1eddd",
+    "#f6f4ea",
+    "#fcfbf7"
+   ],
+   "rose": [
+    "#2b0e12",
+    "#6f272b",
+    "#b04542",
+    "#cd8a82",
+    "#ddb9b0",
+    "#e5cfc7",
+    "#eee3dd",
+    "#f8f5f2"
+   ],
+   "ochre": [
+    "#211108",
+    "#563318",
+    "#895a29",
+    "#b9863c",
+    "#cbaa68",
+    "#d7c694",
+    "#e5debe",
+    "#f5f3e7"
+   ],
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "glow": [
+    "#241304",
+    "#c27917",
+    "#f1d39a",
+    "#f3dfb1",
+    "#f6eac8",
+    "#faf4df",
+    "#fdfcf5"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "base": {
+   "ramp": "walnut",
+   "tone": 4.4,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "grain0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 2,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grainb0",
+     "op": "stripes",
+     "axis": "y",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 9,
+     "faces": [
+      "front",
+      "back"
+     ]
+    },
+    {
+     "id": "grain1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.7,
+     "width": 0.3,
+     "shift": -0.55,
+     "wobble": 0.8,
+     "seed": 3,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "grainb1",
+     "op": "stripes",
+     "axis": "z",
+     "period": 1.89,
+     "width": 0.22,
+     "shift": -0.5,
+     "wobble": 1.4,
+     "seed": 10,
+     "faces": [
+      "top",
+      "bottom"
+     ]
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.55,
+     "seed": 5
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/oak_veneer_01",
+     "scale": 14,
+     "amount": 0.2,
+     "ramps": [
+      "walnut"
+     ]
+    },
+    {
+     "id": "wear",
+     "op": "wear",
+     "width": 1,
+     "density": 0.4,
+     "shift": 0.9,
+     "scratches": 0.006
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    }
+   ],
+   "brush": {
+    "flow": "x",
+    "length": 4.0,
+    "width": 0.6,
+    "rough": 0.42,
+    "textures": {
+     "walnut": "wood"
+    }
+   }
+  },
+  "br": {
+   "ramp": "brass",
+   "tone": 3.4,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "moon": {
+   "ramp": "glow",
+   "tone": 2.6,
+   "light": 0.25,
+   "rim": {
+    "light": 1,
+    "dark": 0,
+    "light_shift": 0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3
+    },
+    {
+     "id": "craters",
+     "op": "spots",
+     "count": 6,
+     "radius": [
+      0.25,
+      0.45
+     ],
+     "shift": -0.7,
+     "seed": 3,
+     "bevel": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "thread": {
+   "ramp": "oat",
+   "tone": 3,
+   "light": 0,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  },
+  "starst": {
+   "ramp": "glow",
+   "tone": 4.6,
+   "light": 0.25,
+   "rim": {
+    "light": 1,
+    "dark": 0,
+    "light_shift": 0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "base",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "base",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 6.4
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": 6.6
+    },
+    {
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "size": 6.2
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": 4.6
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": 3.6
+    },
+    {
+     "at": [
+      0,
+      2.1,
+      0
+     ],
+     "size": 2.4
+    }
+   ],
+   "profile": {
+    "sides": 12,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "stem",
+   "shape": "prism",
+   "size": [
+    0.7,
+    0.7,
+    5.4
+   ],
+   "pivot": [
+    0.0,
+    2.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    0.0,
+    2.7
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "br",
+   "sides": 6
+  },
+  {
+   "id": "collar",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    7.2,
+    0.0
+   ],
+   "style": "br",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 1.4
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": 1.2
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "crook",
+   "shape": "loft",
+   "pivot": [
+    0.6,
+    12.6,
+    -0.4
+   ],
+   "style": "br",
+   "rings": [
+    {
+     "at": [
+      1.5732926592980756,
+      -4.3225860556151785,
+      0.0
+     ],
+     "size": [
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      0.3208797792229762,
+      -4.588794631195191,
+      0.0
+     ],
+     "size": [
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      -0.9563937777616928,
+      -4.4994789633755055,
+      0.0
+     ],
+     "size": [
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      -2.159569188815097,
+      -4.061558927151064,
+      0.0
+     ],
+     "size": [
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      -3.1954285041113866,
+      -3.308963081557795,
+      0.0
+     ],
+     "size": [
+      0.7,
+      0.7
+     ]
+    },
+    {
+     "at": [
+      -3.983716857408418,
+      -2.299999999999999,
+      0.0
+     ],
+     "size": [
+      0.7,
+      0.7
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "glow_moon",
+   "shape": "loft",
+   "pivot": [
+    0.6,
+    12.6,
+    0.0
+   ],
+   "style": "moon",
+   "paint": {
+    "layers": [
+     {
+      "id": "eye",
+      "op": "spots",
+      "centers": [
+       [
+        -3.9,
+        0.36,
+        1.55,
+        0.2
+       ],
+       [
+        -3.65,
+        0.48,
+        1.55,
+        0.2
+       ],
+       [
+        -3.4,
+        0.6,
+        1.55,
+        0.2
+       ],
+       [
+        -3.15,
+        0.48,
+        1.55,
+        0.2
+       ],
+       [
+        -2.9,
+        0.36,
+        1.55,
+        0.2
+       ]
+      ],
+      "ramp": "ochre",
+      "tone": 1.5
+     },
+     {
+      "id": "cheek",
+      "op": "spots",
+      "centers": [
+       [
+        -3.2,
+        -0.6,
+        1.5,
+        0.45
+       ]
+      ],
+      "ramp": "rose",
+      "tone": 4.6
+     }
+    ]
+   },
+   "rings": [
+    {
+     "at": [
+      2.4090210326743935,
+      3.440438586013766,
+      0.0
+     ],
+     "size": [
+      0.35,
+      0.3
+     ]
+    },
+    {
+     "at": [
+      0.7293223462011075,
+      4.136192562651273,
+      0.0
+     ],
+     "size": [
+      1.112075072452704,
+      1.1815797644809978
+     ]
+    },
+    {
+     "at": [
+      -1.087039989430587,
+      4.056888470414087,
+      0.0
+     ],
+     "size": [
+      1.9835666374967351,
+      2.1075395523402807
+     ]
+    },
+    {
+     "at": [
+      -2.699707960683465,
+      3.2173866610997077,
+      0.0
+     ],
+     "size": [
+      2.64430690124787,
+      2.8095760825758616
+     ]
+    },
+    {
+     "at": [
+      -3.80649270555393,
+      1.7749966993109376,
+      0.0
+     ],
+     "size": [
+      3.058691465571737,
+      3.24985968216997
+     ]
+    },
+    {
+     "at": [
+      -4.2,
+      2.571758278209442e-16,
+      0.0
+     ],
+     "size": [
+      3.2,
+      3.4
+     ]
+    },
+    {
+     "at": [
+      -3.8064927055539304,
+      -1.7749966993109372,
+      0.0
+     ],
+     "size": [
+      3.058691465571737,
+      3.2498596821699706
+     ]
+    },
+    {
+     "at": [
+      -2.6997079606834657,
+      -3.2173866610997073,
+      0.0
+     ],
+     "size": [
+      2.64430690124787,
+      2.8095760825758616
+     ]
+    },
+    {
+     "at": [
+      -1.0870399894305882,
+      -4.056888470414086,
+      0.0
+     ],
+     "size": [
+      1.9835666374967353,
+      2.107539552340281
+     ]
+    },
+    {
+     "at": [
+      0.729322346201108,
+      -4.136192562651273,
+      0.0
+     ],
+     "size": [
+      1.1120750724527042,
+      1.1815797644809982
+     ]
+    },
+    {
+     "at": [
+      2.409021032674394,
+      -3.440438586013766,
+      0.0
+     ],
+     "size": [
+      0.35,
+      0.3
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "subdiv": 1
+  },
+  {
+   "id": "starhang",
+   "shape": "bone",
+   "pivot": [
+    3.4,
+    15.9,
+    0.2
+   ],
+   "paint": {
+    "ramp": "ink"
+   }
+  },
+  {
+   "id": "thread",
+   "shape": "card",
+   "parent": "starhang",
+   "size": [
+    0.14,
+    2.8
+   ],
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "offset": [
+    0.0,
+    -1.4,
+    0.0
+   ],
+   "style": "thread",
+   "paint": {
+    "art_key": {
+     "t": "oat:2"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "t",
+    "t",
+    "t",
+    "t",
+    "t",
+    "t",
+    "t",
+    "t"
+   ]
+  },
+  {
+   "id": "glow_star0",
+   "shape": "card",
+   "parent": "starhang",
+   "size": [
+    1.6,
+    1.6
+   ],
+   "pivot": [
+    0.0,
+    -3.4,
+    0.0
+   ],
+   "style": "starst",
+   "paint": {
+    "art_key": {
+     "c": "glow:6",
+     "y": "glow:5",
+     "o": "glow:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    ".....o.....",
+    ".....o.....",
+    "....oyo....",
+    "....oyo....",
+    "ooyyycyyyoo",
+    "..oycccyo..",
+    "...occco...",
+    "...yyoyy...",
+    "..oyo.oyo..",
+    "..oo...oo..",
+    "..........."
+   ]
+  },
+  {
+   "id": "glow_star1",
+   "shape": "card",
+   "parent": "starhang",
+   "size": [
+    1.6,
+    1.6
+   ],
+   "pivot": [
+    0.0,
+    -3.4,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    90.0,
+    0.0
+   ],
+   "style": "starst",
+   "paint": {
+    "art_key": {
+     "c": "glow:6",
+     "y": "glow:5",
+     "o": "glow:3"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    ".....o.....",
+    ".....o.....",
+    "....oyo....",
+    "....oyo....",
+    "ooyyycyyyoo",
+    "..oycccyo..",
+    "...occco...",
+    "...yyoyy...",
+    "..oyo.oyo..",
+    "..oo...oo..",
+    "..........."
+   ]
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 3.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "starhang",
+     "osc": {
+      "axis": "z",
+      "amp": 9,
+      "cycles": 1
+     }
+    },
+    {
+     "part": "starhang",
+     "osc": {
+      "axis": "x",
+      "amp": 5,
+      "cycles": 1,
+      "phase": 0.25
+     }
+    }
+   ]
+  }
+ }
+}

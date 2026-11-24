@@ -5,7 +5,12 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { sound } from '../audio/sound.ts';
-import { AREA, ITEM_BY_ID, RARITY_COLOR, RARITY_NAME, TRINKET, trinketUrl, type Rarity } from '../game/catalog.ts';
+import { AREA, ITEM_BY_ID, RARITY_COLOR as RARITY_RAW, RARITY_NAME, TRINKET, trinketUrl, type Rarity } from '../game/catalog.ts';
+import { calm } from './px/calm.js';
+import { pxGlowURL, PxBurst } from './pxfx.tsx';
+// [ui3] rarity colours graded into the calm palette, and their stepped pixel glows
+const RARITY_COLOR = Object.fromEntries(Object.entries(RARITY_RAW).map(([k, v]) => [k, calm(v as string)])) as typeof RARITY_RAW;
+const rcStyle = (r: Rarity) => ({ '--rc': RARITY_COLOR[r], '--rc-glow': `url("${pxGlowURL(RARITY_COLOR[r], 48, 0.75)}")` }) as JSX.CSSProperties;
 import { collectAdventure } from '../game/night.ts';
 import { dayKey, edit, save } from '../game/store.ts';
 import { nightKey, stickerFor } from '../game/routine.ts';
@@ -29,7 +34,7 @@ import './morning.css';
 // ------------------------------------------------------------------ the night report
 
 const STAGE_Y: Record<Stage, number> = { awake: 0, rem: 1, light: 2, deep: 3 };
-const STAGE_C: Record<Stage, string> = { awake: '#f2a65a', rem: '#9a7ae0', light: '#7fb0e8', deep: '#3f5aa8' };
+const STAGE_C: Record<Stage, string> = { awake: '#ceb39d', rem: '#938ca4', light: '#9ab0be', deep: '#516271' };
 
 export function Hypnogram(p: { s: SleepSession; h12: boolean; compact?: boolean }) {
   const st = p.s.stages ?? [];
@@ -45,8 +50,8 @@ export function Hypnogram(p: { s: SleepSession; h12: boolean; compact?: boolean 
     <svg viewBox={`0 0 ${W} ${H + 18}`} width="100%" aria-label="Sleep stages through the night">
       {(['awake', 'rem', 'light', 'deep'] as Stage[]).map((k) => <g><rect x="0" y={top + STAGE_Y[k] * rowH - rowH * 0.38} width={W} height={rowH * 0.76} fill={STAGE_C[k]} opacity=".14" />{!p.compact && <text x="3" y={top + STAGE_Y[k] * rowH + 4} font-size="9" font-weight="800" fill={STAGE_C[k]} opacity=".9">{k === 'rem' ? 'REM' : k[0].toUpperCase() + k.slice(1)}</text>}</g>)}
       {st.map((s, i) => (i % 2 === 0 ? <rect x={x(i)} y={top + STAGE_Y[s] * rowH - rowH * 0.25} width={Math.max(0.6, x(i + 2) - x(i))} height={rowH * 0.5} fill={STAGE_C[s]} opacity=".55" /> : null))}
-      <path d={d} fill="none" stroke="#3a2718" stroke-width="2" stroke-linejoin="miter" shape-rendering="crispEdges" />
-      {hours.map((t) => { const xx = ((t - start) / (end - start)) * W; return <g><line x1={xx} y1={top - 4} x2={xx} y2={H - 4} stroke="#3a2718" stroke-opacity=".15" stroke-dasharray="2 3" /><text x={xx} y={H + 14} font-size="10" font-weight="700" text-anchor="middle" fill="#8f7663">{new Date(t).toLocaleTimeString([], { hour: 'numeric', hour12: p.h12 }).replace(':00', '')}</text></g>; })}
+      <path d={d} fill="none" stroke="#382d22" stroke-width="2" stroke-linejoin="miter" shape-rendering="crispEdges" />
+      {hours.map((t) => { const xx = ((t - start) / (end - start)) * W; return <g><line x1={xx} y1={top - 4} x2={xx} y2={H - 4} stroke="#382d22" stroke-opacity=".15" stroke-dasharray="2 3" /><text x={xx} y={H + 14} font-size="10" font-weight="700" text-anchor="middle" fill="#8f7665">{new Date(t).toLocaleTimeString([], { hour: 'numeric', hour12: p.h12 }).replace(':00', '')}</text></g>; })}
     </svg>
   );
 }
@@ -175,10 +180,10 @@ function Confetti(p: { api: { current: Burst | null } }) {
 
 type Step = 'arrive' | 'sack' | 'gift' | 'haul';
 const PAPER_COLORS: Record<string, string[]> = {
-  common: ['#6e9c52', '#9cc070', '#eedcbc', '#4c7a40'], uncommon: ['#3f8f5f', '#6cc08a', '#ffd23f', '#2f6f4a'],
-  rare: ['#3c88d8', '#6cb6ee', '#f2f4f9', '#2c60b2'], legendary: ['#ffcc34', '#ffe478', '#d9453b', '#e0a01e'],
+  common: ['#869271', '#adb794', '#ebdcc6', '#647253'], uncommon: ['#6f8368', '#9cb295', '#e9d5ae', '#53674c'],
+  rare: ['#738996', '#9bb2be', '#f7f1e6', '#526673'], legendary: ['#e6d0aa', '#eae4d7', '#9d756d', '#c1a98b'],
 };
-const CONFETTI = ['#ffd23f', '#f08aa8', '#6cb6ee', '#7cbe46', '#fff6c0', '#a092e0'];
+const CONFETTI = ['#e9d5ae', '#cda1a4', '#9bb2be', '#a2ae8c', '#f6f2e6', '#a09bb4'];
 
 /** Dev/screenshot hook: window.__giftStage = { step, gift, stage, t } jumps straight to a moment. */
 type DevGift = { step?: Step; gift?: number; stage?: number; t?: number };
@@ -300,7 +305,7 @@ export function Morning() {
         </div>
       )}
       {step !== 'arrive' && <div class="mr-sky" />}
-      {step !== 'arrive' && <div class={'mr-rays' + (f && stage >= 3 && step === 'gift' ? ' on r-' + f.rarity : '')} style={{ '--rc': f ? RARITY_COLOR[f.rarity] : '#ffd23f' } as JSX.CSSProperties} />}
+      {step !== 'arrive' && <PxBurst class={'mr-rays' + (f && stage >= 3 && step === 'gift' ? ' on r-' + f.rarity : '')} size={Math.min(1100, Math.max(innerWidth, innerHeight) * 1.2)} scale={4} color={f && stage >= 3 && step === 'gift' ? RARITY_COLOR[f.rarity] : '#f4eedd'} glow="#f1d39a" rays={16} alpha={f && stage >= 3 && step === 'gift' ? 0.45 : 0.22} spin={f && stage >= 3 ? 0.03 : 0.01} />}
 
       {step === 'sack' && (
         <div class="mr-stage">
@@ -316,7 +321,7 @@ export function Morning() {
       {step === 'gift' && f && (
         <div class="mr-stage">
           <p class="mr-count">Gift {gi + 1} of {finds.length}</p>
-          <div class={'mr-box stage' + stage + ' rar-' + f.rarity} ref={boxRef} style={{ '--rc': RARITY_COLOR[f.rarity] } as JSX.CSSProperties}
+          <div class={'mr-box stage' + stage + ' rar-' + f.rarity} ref={boxRef} style={rcStyle(f.rarity)}
             onClick={unwrap} role="button" aria-label="Pull the ribbon to unwrap">
             <span class="glow" />
             {stage < 4 && <ArtCanvas w={44} h={48} k={5} fps={stage === 0 ? 8 : 0} deps={[stage, Math.round(stageT * 20), gi]} label={`A wrapped ${RARITY_NAME[f.rarity].toLowerCase()} present`}
@@ -366,7 +371,7 @@ function Haul(p: { finds: Find[]; night: SleepSession; onReport: () => void; onC
       <div class="haul-board hh-wood-dark">
         <div class="haul-shelf">
           {p.finds.map((f) => (
-            <div class="haul-item" style={{ '--rc': RARITY_COLOR[f.rarity] } as JSX.CSSProperties}>
+            <div class="haul-item" style={rcStyle(f.rarity)}>
               <span class="art"><FindArt f={f} size={52} /></span>
               <b>{findName(f)}</b>
               <small>{f.dupe ? 'Another one' : RARITY_NAME[f.rarity]}</small>

@@ -11,6 +11,22 @@ import { panel, sceneRef, tab } from './state.ts';
 import { ask } from './fx.tsx';
 import { spriteURL } from './px/sprites.js';
 
+/** The full credits list (public/CREDITS.txt, built from docs/credits by scripts/credits.mjs). */
+function Credits() {
+  const [text, setText] = useState<string | null>(null);
+  const open = async () => {
+    tap();
+    if (text !== null) { setText(null); return; }
+    try { const r = await fetch(`${import.meta.env.BASE_URL}CREDITS.txt`); setText(r.ok ? await r.text() : 'Credits could not be loaded.'); } catch { setText('Credits could not be loaded.'); }
+  };
+  return (
+    <div class="col" style="gap:6px">
+      <button class="btn soft sm" onClick={() => void open()}>{text === null ? 'Show credits' : 'Hide credits'}</button>
+      {text !== null && <pre class="credits-text" style="white-space:pre-wrap;max-height:50vh;overflow:auto;font-family:var(--font-small);font-size:13px;line-height:1.35;margin:0;padding:8px;background:rgba(59,36,20,0.06)">{text}</pre>}
+    </div>
+  );
+}
+
 /** Save the journal as JSON: through the host's download sheet when embedded, else a plain link. */
 async function exportJournal() {
   const data = JSON.stringify(save.value, null, 2), filename = 'hoot-hollow-journal.json';
@@ -43,8 +59,8 @@ function Blocker() {
       <Setting title="Strict mode" sub="No pausing during bedtime. Changes wait until morning."><Toggle on={b.strict} onChange={(v) => set((x) => { x.strict = v; })} label="Strict mode" /></Setting>
       <div class="label">Sites</div>
       <div class="tags">
-        {DEFAULT_SITES.map((d) => <button class={'tag' + (b.sites.includes(d) ? ' on' : '')} style="--tag:#4a58a8" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.sites = x.sites.includes(d) ? x.sites.filter((y) => y !== d) : [...x.sites, d]; }); }}>{pretty(d)}</button>)}
-        {b.custom.map((d) => <button class="tag on" style="--tag:#7a5fd0" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.custom = x.custom.filter((y) => y !== d); }); }}>{d}<IcoClose size={20} /></button>)}
+        {DEFAULT_SITES.map((d) => <button class={'tag' + (b.sites.includes(d) ? ' on' : '')} style="--tag:#536273" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.sites = x.sites.includes(d) ? x.sites.filter((y) => y !== d) : [...x.sites, d]; }); }}>{pretty(d)}</button>)}
+        {b.custom.map((d) => <button class="tag on" style="--tag:#77738a" onClick={() => { tap('ui_tab', 0.4); set((x) => { x.custom = x.custom.filter((y) => y !== d); }); }}>{d}<IcoClose size={20} /></button>)}
       </div>
       <form class="row" onSubmit={(e) => { e.preventDefault(); const d = normalizeDomain(custom); if (!d) { toast('That doesn’t look like a website'); return; } set((x) => { if (!x.custom.includes(d)) x.custom.push(d); }); setCustom(''); tap('ui_confirm'); }}>
         <input class="field" placeholder="Add a site, e.g. news.example.com" value={custom} onInput={(e) => setCustom((e.target as HTMLInputElement).value)} />
@@ -97,12 +113,13 @@ export function Settings() {
           <button class="btn soft sm" onClick={() => { tap(); flush(); void exportJournal(); }}>Export journal</button>
           <button class="btn soft sm" onClick={() => { tap(); demoTonight(); panel.value = null; }}>Preview a demo night</button>
           <button class="btn soft sm" onClick={() => { tap(); edit((x) => { x.onboarded = false; x.profile.interviewed = false; }); flush(); location.reload(); }}>Replay the interview</button>
-          <button class="btn soft sm" style="color:#b3304a" onClick={async () => { if (await ask({ title: 'Start over?', body: 'This erases Pip, the journal and every treasure. It cannot be undone.', ok: 'Erase everything', cancel: 'Keep my hollow', tone: 'berry', art: spriteURL('owl', 4) })) { resetSave(); location.reload(); } }}>Start over</button>
+          <button class="btn soft sm" style="color:#845c5b" onClick={async () => { if (await ask({ title: 'Start over?', body: 'This erases Pip, the journal and every treasure. It cannot be undone.', ok: 'Erase everything', cancel: 'Keep my hollow', tone: 'berry', art: spriteURL('owl', 4) })) { resetSave(); location.reload(); } }}>Start over</button>
         </div>
       </div>
       <div class="card col small">
         <div class="label">About</div>
-        <p class="muted">Hoot Hollow. Sound effects and music are CC0 and public-domain recordings from OpenGameArt.org contributors and the U.S. National Park Service; see AUDIO-CREDITS in the docs. Sleep stages are estimated from sound and are not medical advice.</p>
+        <p class="muted">Hoot Hollow. Models, textures, artworks, photos and sounds come from Poly Haven, the Art Institute of Chicago, Wikimedia Commons, OpenGameArt, the U.S. National Park Service and the makers of BUSHED and Gacha Garage, under CC0, public-domain and CC BY licences. Sleep stages are estimated from sound and are not medical advice.</p>
+        <Credits />
       </div>
     </Sheet>
   );

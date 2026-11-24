@@ -22,18 +22,16 @@ const FS = /* glsl */ `
 uniform float uPix;
 varying vec2 vUv; varying float vBlink; varying float vHue;
 void main() {
-  vec2 p = vUv - 0.5;
-  float d = length(p);
-  // pixel core: a hard 2x2-ish square in the middle of the sprite
+  // a crisp pixel spark: a 2x2 core with a one-pixel cross around it, no soft glow
   vec2 q = floor(vUv * uPix) - floor(uPix * 0.5);
   float core = step(abs(q.x + 0.5), 1.0) * step(abs(q.y + 0.5), 1.0);
-  float halo = pow(max(0.0, 1.0 - d * 2.0), 2.6);
-  // quantise the halo into a few rings so it reads as pixel art, not airbrush
-  halo = floor(halo * 5.0) / 5.0;
-  vec3 warm = mix(vec3(1.0, 0.86, 0.35), vec3(0.72, 1.0, 0.55), vHue);
-  vec3 col = warm * (halo * 0.55 + core * 1.4);
-  float a = (halo * 0.7 + core) * vBlink;
-  if (a < 0.01) discard;
+  float crossH = step(abs(q.y + 0.5), 0.5) * step(abs(q.x + 0.5), 2.0);
+  float crossV = step(abs(q.x + 0.5), 0.5) * step(abs(q.y + 0.5), 2.0);
+  float arm = max(crossH, crossV) * (1.0 - core);
+  vec3 warm = mix(vec3(0.95, 0.84, 0.55), vec3(0.78, 0.9, 0.62), vHue);
+  vec3 col = warm * (core * 1.25 + arm * 0.55);
+  float a = (core + arm * 0.6) * vBlink;
+  if (a < 0.05) discard;
   gl_FragColor = vec4(col * a, 1.0);
 }`;
 
@@ -71,7 +69,7 @@ export class Fireflies {
     g.instanceCount = count;
     this.mat = new THREE.ShaderMaterial({
       vertexShader: VS, fragmentShader: FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      uniforms: { uTime: { value: 0 }, uAlpha: { value: 0 }, uPix: { value: 12 } },
+      uniforms: { uTime: { value: 0 }, uAlpha: { value: 0 }, uPix: { value: 8 } },
     });
     this.mesh = new THREE.Mesh(g, this.mat);
     this.mesh.frustumCulled = false;

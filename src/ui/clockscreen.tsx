@@ -118,7 +118,7 @@ function CuckooClock(p: { k: number }) {
     if (full) sound.play('clock_wind', { volume: 0.5, rate: 1.2 });
   };
   return (
-    <ArtCanvas w={CW} h={CH} k={p.k} fps={12} deps={[prefs.finish, prefs.mute, prefs.wound.join()]} class="cuckoo" label="A carved cuckoo clock. Tap the door for the owl, pull a weight's chain to wind it, tap the roof owl to change the wood."
+    <ArtCanvas w={CW} h={CH} k={p.k} fps={12} deps={[prefs.finish, prefs.mute, prefs.wound.join()]} class="cuckoo" label="A carved cuckoo clock. Tap the door for the songbird, pull a weight's chain to wind it, tap the roof moon to change the wood."
       draw={draw} onPointerDown={down} onPointerMove={move} onPointerUp={up} />
   );
 }
@@ -231,7 +231,7 @@ function RoutineBoard() {
           <div class="cb-detail-h"><b>{DAY_NAME[sel]} night</b><span>{fmtDur(plan.min * 60_000)}</span></div>
           <div class="cb-times"><span><Px name="moon" size={30} />Bed <b>{fmtHM(plan.bed, h12)}</b></span><span><Px name="sun" size={30} />Wake <b>{fmtHM(plan.wake, h12)}</b> <small>{DAY_SHORT[(sel + 1) % 7]}</small></span></div>
           <button class="cb-check" onClick={() => { tap('pencil', 0.5); setRoutine(setNight(r, sel, { on: !plan.on })); }}>
-            <span class={'box' + (plan.on ? ' on' : '')}>{plan.on && <svg viewBox="0 0 14 14" width="26" height="26" shape-rendering="crispEdges"><path d="M1 7 L5 11 L13 2" fill="none" stroke="#2c2a5a" stroke-width="2.4" /></svg>}</span>
+            <span class={'box' + (plan.on ? ' on' : '')}>{plan.on && <svg viewBox="0 0 14 14" width="26" height="26" shape-rendering="crispEdges"><path d="M1 7 L5 11 L13 2" fill="none" stroke="#2b3142" stroke-width="2.4" /></svg>}</span>
             <span>Alarm and bedtime reminder{plan.on ? '' : ' (free night: sleep in)'}</span>
           </button>
           <div class="cb-stamps">
@@ -292,7 +292,7 @@ function MonthCalendar(p: { onOpen: (n: SleepSession) => void }) {
               <button class={'tc-d' + (n ? ' has' : '') + (isToday ? ' today' : '') + (i % 7 >= 5 ? ' we' : '')} disabled={!n} onClick={() => { if (!n) return; tap('ui_tap', 0.4); setPeek(peek === k ? null : k); }} aria-label={n ? `${k}: ${fmtDur(n.report!.asleep)}, score ${n.report!.score}` : k}>
                 <span class="num">{d}</span>
                 {n && <img class="stk" src={stickerURL(stickerFor(n.report!.score), 3)} style={{ transform: `rotate(${Math.round((hash(d, ym.m, 1) - 0.5) * 24)}deg)` }} alt="" />}
-                {isToday && <svg class="circle" viewBox="0 0 40 40" preserveAspectRatio="none"><path d="M20 3 C33 2 38 11 37 21 C36 32 28 37 18 37 C8 37 3 30 3 20 C3 11 10 4 22 5" fill="none" stroke="#3a3f6a" stroke-width="2" stroke-linecap="round" /></svg>}
+                {isToday && <i class="circle" aria-hidden="true" />}
               </button>
             );
           })}

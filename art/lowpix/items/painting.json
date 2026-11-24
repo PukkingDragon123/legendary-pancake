@@ -1,0 +1,602 @@
+{
+ "name": "painting",
+ "description": "Moonlit Painting",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 12,
+ "grounded": false,
+ "budget": {
+  "tris": 600,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   24,
+   8
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "night": [
+    "#030407",
+    "#141924",
+    "#27313f",
+    "#45566b",
+    "#647d95",
+    "#91a3b2",
+    "#bdc8cf",
+    "#e8ebed"
+   ],
+   "brass": [
+    "#2f2412",
+    "#4a3819",
+    "#69501f",
+    "#8c6b28",
+    "#b08934",
+    "#cba648",
+    "#e0c26a",
+    "#efdc9b",
+    "#f8f0cf"
+   ],
+   "verd": [
+    "#354d3f",
+    "#60856b",
+    "#96b09c",
+    "#b7c6b9",
+    "#d6ded7"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "gilt": {
+   "ramp": "brass",
+   "tone": 3.8,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 0
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 0
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 0
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 1
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "gilt_d": {
+   "ramp": "brass",
+   "tone": 3.0,
+   "dither": 0.15,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 1.6,
+    "dark_shift": -1.2,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.35,
+     "seed": 3
+    },
+    {
+     "id": "band_hi",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.22,
+     "shift": 1.4,
+     "wobble": 0.2,
+     "seed": 3
+    },
+    {
+     "id": "band_lo",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.3,
+      1
+     ],
+     "period": 2.6,
+     "width": 0.2,
+     "phase": 1.1,
+     "shift": -1.1,
+     "seed": 3
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 0.9,
+     "threshold": 0.74,
+     "ramp": "verd",
+     "tone": 2.4,
+     "faces": [
+      "sides",
+      "bottom"
+     ],
+     "seed": 4
+    },
+    {
+     "id": "spec",
+     "op": "fill",
+     "shift": 1.4,
+     "min_light": 0.5
+    },
+    {
+     "id": "refl",
+     "op": "fill",
+     "shift": -1.0,
+     "max_light": 0.05
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 2.0,
+     "density": 0.7,
+     "post": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "canvas": {
+   "ramp": "night",
+   "tone": 3,
+   "light": 0.35,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "frame0",
+   "shape": "box",
+   "size": [
+    14.0,
+    1.2,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    9.4,
+    0.5
+   ],
+   "style": "gilt",
+   "paint": {
+    "layers": [
+     {
+      "id": "bead",
+      "op": "stripes",
+      "axis": "x",
+      "period": 0.6,
+      "width": 0.4,
+      "shift": 0.8,
+      "faces": [
+       "front"
+      ],
+      "range": [
+       -0.2,
+       0.2
+      ]
+     }
+    ]
+   },
+   "chamfer": 0.3
+  },
+  {
+   "id": "frame1",
+   "shape": "box",
+   "size": [
+    14.0,
+    1.2,
+    1.0
+   ],
+   "pivot": [
+    0.0,
+    0.6,
+    0.5
+   ],
+   "style": "gilt",
+   "paint": {
+    "layers": [
+     {
+      "id": "bead",
+      "op": "stripes",
+      "axis": "x",
+      "period": 0.6,
+      "width": 0.4,
+      "shift": 0.8,
+      "faces": [
+       "front"
+      ],
+      "range": [
+       -0.2,
+       0.2
+      ]
+     }
+    ]
+   },
+   "chamfer": 0.3
+  },
+  {
+   "id": "frame2",
+   "shape": "box",
+   "size": [
+    1.2,
+    7.6,
+    1.0
+   ],
+   "pivot": [
+    -6.4,
+    5.0,
+    0.5
+   ],
+   "style": "gilt",
+   "paint": {
+    "layers": [
+     {
+      "id": "bead",
+      "op": "stripes",
+      "axis": "y",
+      "period": 0.6,
+      "width": 0.4,
+      "shift": 0.8,
+      "faces": [
+       "front"
+      ],
+      "range": [
+       -0.2,
+       0.2
+      ]
+     }
+    ]
+   },
+   "chamfer": 0.3
+  },
+  {
+   "id": "frame3",
+   "shape": "box",
+   "size": [
+    1.2,
+    7.6,
+    1.0
+   ],
+   "pivot": [
+    6.4,
+    5.0,
+    0.5
+   ],
+   "style": "gilt",
+   "paint": {
+    "layers": [
+     {
+      "id": "bead",
+      "op": "stripes",
+      "axis": "y",
+      "period": 0.6,
+      "width": 0.4,
+      "shift": 0.8,
+      "faces": [
+       "front"
+      ],
+      "range": [
+       -0.2,
+       0.2
+      ]
+     }
+    ]
+   },
+   "chamfer": 0.3
+  },
+  {
+   "id": "liner",
+   "shape": "box",
+   "size": [
+    11.8,
+    8.0,
+    0.4
+   ],
+   "pivot": [
+    0.0,
+    5.0,
+    0.35
+   ],
+   "style": "gilt_d"
+  },
+  {
+   "id": "canvas",
+   "shape": "card",
+   "size": [
+    11.0,
+    7.4
+   ],
+   "pivot": [
+    0.0,
+    5.0,
+    0.62
+   ],
+   "style": "canvas",
+   "paint": {
+    "art_key": {
+     "a": "#010102",
+     "b": "#020901",
+     "c": "#051301",
+     "d": "#0c1e00",
+     "e": "#152500",
+     "f": "#192b01",
+     "g": "#213202",
+     "h": "#293803",
+     "i": "#254107",
+     "j": "#333e09",
+     "k": "#35450c",
+     "l": "#394a0a",
+     "m": "#3e4f25",
+     "n": "#415210",
+     "o": "#445b1f",
+     "p": "#4e612d",
+     "q": "#4f6922",
+     "r": "#586b3b",
+     "s": "#547634",
+     "t": "#617545",
+     "u": "#608040",
+     "v": "#6b7f4f",
+     "w": "#73884e",
+     "x": "#7e9157",
+     "y": "#889b64",
+     "z": "#8ba555",
+     "A": "#8fa36d",
+     "B": "#98aa70",
+     "C": "#93ad84",
+     "D": "#97b162",
+     "E": "#a0b381",
+     "F": "#a3bd6b",
+     "G": "#a7bc88",
+     "H": "#adc694",
+     "I": "#b2cc7a",
+     "J": "#b8d3a2",
+     "K": "#c8df98",
+     "L": "#d1ecb2",
+     "M": "#ecf899",
+     "N": "#fafdcb"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "KMMMMMMMMMKKKKKMMMMMMNNNNMNNNNNNNMMMMMNMMMKIIIFDzDDxwwwyyyAxyxxwwwuuwxswuxxxzzxwxzzzzzzzDFDzzDzzzzzzzzDzxxxzxzzDzzzxzDDzzDzzzzDDFzwq",
+    "IMMMNNNNNNMMMMMMMMMMNNNNNNNNNNNNNNNNNNNNNNNNNNLKKKKIIFEEBEBGGBByyyywzBzDyzzzzzDDDDFFFFFFIFDDDDDzzDDFFFFFDDDDDFFIIIFFFIFFFFFFFFFFFIDu",
+    "MNNNNNNNNNMNMMMMNNMMNNNNNNNNNNNNNNNNNNNNNNNNMMLKKKKIIJEEEGEByyxxxyxzyzzyzBzDzzzFDDDFFIKIFFFDDFDDFFIIIIIIFFFFFFIIIIIIIIIFFFFFFFFFFFDx",
+    "IMMNNNNNNNNNNMNNNNNNNNNNNNNNNNNNNNNNNNNNNMNMLKLJJJKIHHGHGGEyyyAAyAAyABBGEEFFFDFFDzzFFFIIFFDDDFFDFFFHHIIIFIIFIIIIFIIFFFFIFFIFFIFFFFDw",
+    "DMNNNNNNNNNNNNNNNNNNNMLNNNNNNNNNNNNNNNNNNNNMJIHHHHGGGGGGGEEByBBBAyAABBBEEGGGEBEEBBDFFFFFDDDEEEEBBBBGGGHGFFFFFFFFFFFDFFFFDFFDFFFFFDzw",
+    "DMMMMMMNMNNNNNNNNNNNNLIHLMMKLLKLLMLMMMKKKKKKIGEEEGGGGGEEEBEEBBBBBEABGGGGGJHGEBBBABDFFFDBBDDGGGGEEEBEGGGGFFFFFFFFFDDFFFFFFFFDFFDDFDzs",
+    "zMMMMKKMKKMMNMMMMMMIIIKHJIKKKKLMMKKLLKKJJIIIIGGEGGHHHGGEBBBEEBABEBBEGGHGEGHHGGGGGGGHGGHHHHHGHHHHGGGHHHJHHHHFIFFFFFFFFFDDDFFDDDDzDDzu",
+    "yIKKMLMLMMNMMMMMMLKKLKKLLLLMMNNNNMMMMLLKKKKKKKJHHJJJJHGEEEEGEECBGEEGHJJHHJHHHHHHGEGHGGHHGGEEGHHHHHGHHHHHJJHFIDFFFFFDDDDzzDDzDFDzzzzs",
+    "uzFIIKMKKMMIIIKMMNNNMMNMMNNNNNNNNNMMMMLLKKKLLLKJJKKLKJHHJHHGGGGEHGGHJJJHGHGGGEGGBEGGECGEECAyBBBEEGEGGGEEGGGEFBFFFDDDzzzzzDDzzDDzwxxs",
+    "uwyBDFKIIKKKKKKMMMMMMMMMMMNNNNNNNNLKKKLLJIKLLLLLKKKMLKJJJHHGHGGEGGGGGGGGGGBEBABBBEEECAAyyyyyAxxyyAABEEBEBBBBBBBBEBBAzzzzzDDzzDDzxxyu",
+    "wzzDIIKLLLLLKKKMMMLMMMMMMMNNNNNNNNNNNNNNNMNNNLLLLLKKKJHHGGGGECCCCyyyAAyxyAyAAyyAAABCyyyxxyxyyyyxyyyBBBBBABABBBABEBBBDDDDDDDzzzzzzzyu",
+    "wyxzFFKLKKLMJKKMMLLMNMMMMNNNNNNNNNNNNNNNNNNNNLNLLLKKKHHHGEEECACCyyxxyyyxxyyyyyyyyyyAyyyxxyxxxyxyyyyyABBABABBBBABEBBBzDDDDDDzzDDDzDzw",
+    "yzzFIKLKJKKKJKKKLLLNNNNMNLNNNNNNNNNNNNNNNNNNLLLJKJIIHHGGCyyAyyAyyAxxxyyxyAyAByyyABBBAAyyyyxyyyyyyyyyyyAABABBAABBBBBBDDFFFFFDzFFDDDzx",
+    "uzzzEFJKHJJJHJJIJKLLLLLLNLLNLLNNLLLNLLLLKKKJJJJHHGHHGGEECCCAACAAyyyyyCCyAAAAyyyyyyBBAAyyyyyxyyyxxxxwxyxyyyyByzzBBBBBDDFDFFFDDFFFDDDx",
+    "qxxxDDFHEGHHGHHHGHJJHHJKKLLLLJLKJKKLKJJJJKKJHHJHHGGEGGGGEECCCCCCCCAACCCyyAAAyyAAABAAAyxxyyyyyyyyyyywxyyABAAzxzzDDDFDzDFDDFFFFFFFFDDz",
+    "xzxyDzEGCGCCCEGFGEHHHHGHHJJJJJJJHHHLJHHJJJJHHHHHHHHHJHHHHECEECCCCCCCEECCCCABEBBBBBBABByyyyAAAyyyAAyxyAABBBBzzzzDzDDDDFFDDFFFIIIIFDDz",
+    "DzDzDBGFCGCCCGGHGEGHEGGHGHJJJHJJHGGKHHHJJKKJJJJJKJJJJHJJHHHHGGECCCCEGEGGEGBEEBEBBEGEBBBBABBBBAAABBAyzzzDFDzzzzzDDDDFFFFFDFIIIIIIFFzD",
+    "FzBCCCFDACCCGGHHGCGHHEHJJJJJJHHHHHKJJJKJKKKKKJJJJJJJJJJJJJHHGEGEGGGGGEGGGGEEEEGEEEGGGECCBAAyyABBABByABBEEEBAyABBBGGGGFFFFFIIKIIIFDDD",
+    "FDFEGCDDEECBFGHHHCEHHGHJJJJJJHHHHHJJKJJKKJJKKKKKKKKJJJJJHJJJHGGEGGEGGGGGGGGGGGHGGGGGCCAAyyyyABEBBBAyABBBAAAxxxyAABBEGFFFFFIIIIIIIDDz",
+    "FDFHHGFDCEFFIJJJHHHJJHJLJJJJJHJKJJLLLLJLLJLLLLLKKJJJJJJJHHHHHHGEGGEGGGGEBGEGGGHHHHGBBCCCBAABBBBBBByxyAyyyyxswxDFDDFFGHIFFFFIIIFFIFDD",
+    "IIIHJHHHEGFFIKKKJJJJHHJLLLLLJJKLLLLLLLKLLJLLLLLKKJJKKJJHGHHHGCCCEEEEEGHGGGGGGHHHHHGECCCECBBAABBEBAyyyxxyBAxswzDFFFFDEDFFDFFIIFFFFFFz",
+    "IKIJJJIJJHFFKKLKJJJHJJLLLLLLLLLLLLLLLLKMKKKKLLLKKKKKKKJJJHHHHCEGGGGGEGHHJHHGHHHJJHHGGEEEEGFEBEEGBywwwxxxxywuuxDFIIFDBDDDDDIIFFIIIFFz",
+    "IIIJJCFJLJIIKLLKJJHHJJJLLJLLLKLLLLLLLLKMMMMMKLLLKLLKKLKJJJHHHHGEEGGGGHHHJJJHHJHHHJIGGHHJHGIGEEBAAAywxBAAxywssxDFIDDDBBDzzDFFFFFFFFFz",
+    "KKJKHyxFJJJJJLJLJHGJJJJLLLLLLLKKKMLLLKMMMMMMMMLLLLLLKKKJKJJHHHEEEGEEGGGGHJHHGGHHHHGGHHHGEDDBBBBBAyutwyxyyyulnuyBEyxByzxxxDFFDFIFFDFz",
+    "KKJLGwwDHJJHHKHJHAyCHJLLLLLLLLLLLLLLLLMKMMMMKKLLKLLKJKKJJHHJHHEEEEBEBEEEGHHGGGGGGGEEECCCAAzyBBBBAypnptuxxyulntyABxwyxwwxwxzFDFIIDzDw",
+    "DFBHCuuzCGGJJJEHHvwGJJLLLLLLLLLLLLLLLKMMMMMMMKLKKLLKKLKKKJJJHGHHHGEEBBGGGGGHGHGHHHEBAACCAAAyBBBAAyvprtuxwwtmotyBAwtwuuuuuxxzDFIIDDFw",
+    "onmmonoorrrrtvrtropvxxAEECCCGHHHJJJLLLMIMMMMKLLKKKKKKJKJJJJHJHHHHEGBBEEEEGBGBEBBBBAwtvvvvwwuwwuvuvtlqrtwtppllovyxrqqpnnoqqsuuxzzwswq",
+    "kihijikknhhhmtmmmmmkmkkmmmmmmmpppptyCyBFMMMMKKLKKKKKJJHGGGGGGEBBEBBxxyyBBAyBByxyyxwpppmmllnoqppprpljnnnpmjhhhlprtonpnkknnnoonqquqosi",
+    "jihggfhijoklkmmkkjmmmmkkkjjjpmjkpnmoppprttwxzzDDBBFFDzyyABBAxwxxxxwqqrtrrpnopmloolhggffeehhggggghecdfghdddccdeeefffgffgghiiikooonkng",
+    "pnqlmjjlouqstvrrrprprrtttttvwtttvtxyxxxxyyAzFIIGGGFFFDDBGGGEBxxxwxxwwwtttrrtrrtpomkgefgeehfddcccbaabcccbbccccddddddddddeghhhhhkkhhhd",
+    "uqzrrrtrrxuwyyxvxtxvwxyyxAxyAwxAEzFIFEBCBCCBFIFEGFFDDDDBEBBByyxyxxxyyyxxyyxyyyyvwwwrpmmjnjghcabaaabbabaaabbcccddeeddcdddffehhhjjhfgb",
+    "qooopqssprprtvtrttvvxxxxwxwyyyxAyyzDzEzBBBEEEGGFDDFDzzDzBzAAyxxxwwwxxwwvwwwwwwwvwrrrrrpmrmmjbaaaaaacbbaaabbbbcbcdcccdddcefeghhhhhfgb",
+    "soqqqqqsppommppooprrrrtvwyxyxyxyyAByyAByBzDCCAABDzzzDDDzzzyyxwxuuuuuurvtttrrtrrrrooqoolkmmmgcaaaaaaaaaaaaaaabbbbbbcceffehhhhhjjkhhgc",
+    "usqoooommmpmmpoompppprtttyxxyyyyzyAwwyAwyAzByABBDzzzzyyyyyxxwuwuusrrrrtrrtrrrppptppqonjmkhhfcaaaaaaaaaabbabaabbccccdehhghhhhhlnlnlkg",
+    "sqqonllmommkmooomommprrtuxwyyyzzzAAwwxwxAAyEBBBBABBywwxxwxtttsusustrtttrprpppoppqqqonlkkjhghfcbbbbbbbbbbbaaaaaabcccdfhjhhjkhhllknnnk",
+    "uuuusqppoomopprrprrrttvwwyxAAyDDzxxwwyuuwxxAyAAyAzzywwxwwwwvtssssuutprqqpoppoppqqqqonlkhjjghgeeeeeefffegeccbccccdddfhjkjklnjknnnppqo",
+    "zuuuuqppprpppprrrtttvvwwxAABAyDDzxwuwusnoxAAxxxyyyyxwwwvvvtrppsqqqqropppponnppqqqoqpnljkjhkjjjggffghjhhhhfeeffeghhhjknlklnnlnpppqqqn",
+    "xuuusqsrotrrprtttttttvxxxxyAABEBzxwwwuqnoxAAyyxxyzzyxwwwwvttrtrtrrqsqqqqqqppppqpqqqoommkkkjjkjhhfeglkjjljhgfggfghhjknnlnnknlnppqssqj",
+    "wsuuqssrrvtrptttttvvvvxxwxxAyyABByxwwuqpuuxxxyxyyyxyyxxwvvvtrtttrrsssqssssrqrqqqqqqrrppmmlkjkmjjhjjtnlnnlkjhhhhhhhhjjjkkkllklnpqqqqn",
+    "xwtwsusrqssqptvwwtvvvvwxxxxyABBABBBxyxtuquwxxxxyyxxxxxvvrttrrrttrrrrpprtttrqrqqqsqqrrprponljjkjjhghknnnnnlljkllklkllklnnnlnnnoppqpqo",
+    "xwtuqsuuuussqwwwwwvwwxyzDyxyyBBAyyxxxvttvwuwsuwxyxxxxwvvrrrrrrrrrppppoprrrtqrpqqssspropoponmkjjgghjqlnnnlkkkllkjkkjklnnnnknopqqqqooj",
+    "ustsqqqqpqsspvvvvwwyxyxyzywxxyEBwwxwyxvvyywyxxwxxxwxxwttrrrpprrppooppprpppqpqpqqsssrtmpoppnjjjhhhhjnnllonkjkkkjklnkllnnonknooqqsspqn",
+    "uqsssusspptuousuuwvxxyyyxxvxwyBAwxxxxxvwywwwwwwxxxwxwwvrrrrrrrtrrrrrpprprprptqrrtuvttprpoonmkjjjhhhjjklnnkkkkkjjkkjkjlnnlknnoqqqqssq",
+    "wsuuuussrrtwqwuwwxwxyyABBAxyxxyAxxxxwxxxBxxwtvwwyyxxxxwtrrrrporpppppppppppppqrtrruvtrorppppmmmmmjjllknnonlkkkkjjkkjkjknnkknnoqqqqqqo",
+    "usuuwwuusssuquuuwxxxyyyBByyyxyBAwwxvtwwwyxxwtxxxyxwxyywtrrrrrrppppoppppppppqqqqqtuttrorprrpmmmkmjjjnnnnnnkjjjhhhjhhjjknnkknnoqqqqqql",
+    "lnqqsssqssqsosssttttxxxxxxxxwxxxwwwtrrxwyyyxvxyxwxyxyxtrrrtpppppppooooppppprqqqruutrrprrrpommmkkjhjjknllljjjjhhhjhhhhlnkhhlnoqqqqqqo",
+    "qqsqqoqqpppqosspoopptvwwwwvvvtrttrppnnwvxxyyvxxwvvwwwwrprrtppppppomnnonpppppoprrtutrrrttrrpppmmmkjkkkmkkkhkjjhhhhhhhjlnkjknnoqqqqqqo",
+    "oqsqsqsqpqsssxwsvttvwxxxxxxxwwtvtpkjlrwtyxxxwwxwwwwwwvrrprrprprrrrrpppqpporpoppqrrrprprrrrrrromommmmmmlkkjkhhhhhhhhhjjljhjnnooqqoqqq",
+    "ooqopopoooqssuvuwwwwwxxxyyyyxpkkmjgmrwywyyxxxxxwwwxxwwtwvttrpoprrrrrrpqopprppqppqrrrtprrrrrrponnmmmppppopnlkkhghhjhjkkjkjhknoqqqqqsq",
+    "ollloonnnnoqqpoprtvtvwwwxxxxwtjhhkotwxywyxxxwxxwvvwwwvrttrtprrpprrpppoppoopppqppqrrrtrtrrrrqpponomoopppnnnjkkhhghkkjjkjkjknooqqqqsqo",
+    "qqqopooonlnoiecemrttvwwxxyxxyvkjkpvvwxxxyyyxxyyxwxwwxwsrtrtrprrrtrrtrpprpppopqrpprrrtrrrrprpmomomkmppppllnkjjhhhjllkkkjlklklnoqqqqqo",
+    "qqpomhgfgeefdcfkprtttttwxxxwvtomottrtvwvxvxwwxwvtvttvvutvrrpmpprrpprrpppppqpqrrpprrrrrrrtrrrppopomprrrqnnnnjjhhjknlllljkjkhkjlpqqqql",
+    "liddcbbcbcehhgmpprrttrrttvwvvtpottttvtvpttvvvvvvttrrrttrrpppoppoppppommmmopnpoppppprrppprrprppmmmmmpppponnnkkkllnonnnnllkkhknnnoooql",
+    "lidbccdfegklljmmoprrrppoopppprtrptvvvvtrttvvtttttttttttprpppopromommkmmmmoonoopnoomppmmmprpppmmmkkmpooonnnllllnnopppoonnlljkknpqqook",
+    "nolfikhghjklmmmmopqpqqqponnnprrrtttrrtttttvvttvvtttttttprrprpppmommmkmjjjllkllmlmmkmmmkhmmmmmkkkjjmmlnnnkllllkknoppppoonllhkjlpsnnql",
+    "lllfgklihkkooommppqqsqponppoortttsusqsusstttrtttrrsssrpopmmmmmmmmommmmmhmlnjnnnmmokmmmmmppmmmkjjjkkkkmnnjnonnjkjnpopponnnnnnnnqqoqol",
+    "iikfkmkiikopqprrrqqpqssssttrpttvvwusussssrrtrttttrssrrtpppppopoommmmmmmjmlnklnponpmppmmppopmmkjjkkjkklnlillklkljlnnoonnnllnnnoqqoool",
+    "lllkkkiiikoprpptooqqsuusqtvvtwxxxwusssusqmmttrrrrrrppprmmmoomommmmjmmnlkklnllnnoopmoomoprpppmkkjkkmmoolhiklkklkjlppoonnnknlnnnpooqol",
+    "onlmkmkiiiloqrproosssuuuutwwvwwvvwxwuussqikrrrrrpppopppmmjmommmmomjnnnllknlnnnnpnpmmoooorrpomjjmjjmmponjlllkknnllponnlnnlnkonnqqoqoi",
+    "plilkhiihhkkoooooopqsuussvsuuwwuwwxywpmmpmptvtttrrrprrrppoomjmkmmmkmkkkhghjjklmlmonkpoppppkmkjjjjmopoolkkllnnnonnoonommnnnnoqoqooqok",
+    "ollokiihhilinooopqpqsuuuuwuuwxwwwwwtpmmmprrttttttttttttrrprpmpmorroppmmmmmmnnnmlmopmnnpppnhhggggjkopppnlnnnooppolnnnpppnnnnnoqqooonl",
+    "nknlkiiigilkoonoooqqqqqssuuuwwtrnjnjhfjptprttttttvutuutsutpppooprppmommmmmmnoonmmoononopmljhhjhhjkmnppnnnoppppppnnpppppnlknpqqqooqqq",
+    "pnokliiihgiilnooooooqqsssssuxxrheeofjkrttrtttttttvttvuustsrpppooponpnmponoopponommmmmmmmjjgefgdhhjjlnkjlklolnponlnonoonllnonqqsooqqq",
+    "lkiiiiigfgikllnoooqqqoqsqssuwxvmhjnrrrvvtrrtrrtrrtrpttrpoorprppoppppnppppppponmnnnmmmmkkjhhhhhehklnknkhhjknlnnlkknnooonlkknnooqnnqqo",
+    "pnkiiiihhhhiilnoooooqqsssqsssuvrmnuwsvvtppprpprrppppopooooprrmmmomoppppprpppommmmmkjmmkkjkkkhhhjhknknkghhhkkkllkknnnoonlkjlnlnqoloon",
+    "oliiiiiiiiihilnoqqoqqqsssqqqsuvwttxusrppoompopppokooopoommoppmmmmmonmnopnnppommmmmkjkmjjjkljhhhjknonolhhhhlkkklllllnnollkhklnqqqnnnk",
+    "okhhihhiiiiiilnnonnnooqqqqpqsuxxyxzxwvtutqpqopqsqmmmmmmkjhkmkkmjhgkhhghjfgkkkkjmmhhffhhjkkjkhhjhjkllnnkjjjlnlnnnlkkknnkkkjlnnooolnqo",
+    "qkghhghiiikkklooonnooooopqqqsuwwxyAxwuuvvuuusssusrrprpoppppppomlkjhjmklkkhjjkmkmmkjeeggjlkhljhhjhhjhlljhjjkkkkkkkkkllllighkknnnonnlk",
+    "kihikihihiiiiinooonnoonlloqqpquwwwywuuuusuussssqqqqppoooomooppppommlnnmmkimmmmmmmmkjjmmknnkkjhjkjkkklnkkkjjkjjjjkklnlkkhghklnonljggg",
+    "kgfgihhhhihgihllnllnlnonnoqqqqqwwwwuuwusqqqqqqqqqqooppmmmkllmnnmlljgjhmkkkmmmmmmommjkmmnnllkjkknlnnnnnnnnllnnnnllkklkhhgggjllnkeccdg",
+    "hefffgghfgghihkknlklnoonnqqqsqpssuuwwuussqsssuusqqppqqpppoonnomkjkjgjjkkkkkkmmmmlmkhkomnnnnlkklljklklkjklklnnllllkjkkiihgfhkllkdecfg",
+    "hefdfeefffghigiilkiilllnnoqoqoqoprrsqrsttqsssqqqssqpopoomkmlklkkhhhghhikkikkkkjkkjjhjjjjlkllkkjnlnllnnkjjjjnnlkkkkkhgggggffhllidgbdc",
+    "iffefedeefefffgghhiinnnnlooooopnnppopoppppqqoooonnpolnmmmmljhhhhgffggghhigghhhhhghjfgghhjhjjhjjjhjjklkhhghjkkkkklklhggfggfgklkgccbda",
+    "kgfffffdffffffghiiiilnlllllnnnollooopprrrqqqoooonnoolkmmmmmkkkjjhgfgggghffiihghhgggfhgffhhjhfhhhghjhhhgfdfhhhhjklhjggfgggfghkkhcbaca",
+    "hgfffffeghgfffghiiiilkklkllnnppnnlmrrppppqqpooonlnnlnlmmmmlkkjjjhhggggfgffggiikjgggfjjjggfghfgggfghghhgedffggghhhfgfeeghgefghhhcbaba",
+    "ffeeefgfghgfeffghhhilkkllllooppppppprrppppqppoooooooonmmmmnmmlmmkkkjhgifgfgiklkjgjjgjhhghhjhghgffgfhhggfdeffffghhefedddfedegggfbbbba",
+    "beccdedddeedddegggghjhjkjlnnnnnnooprrpppppppnppprrrrrrrppqqqppommmmmmlkljjlllnlkhhjkkjhhhhhgfhfgfhgghhfedffddeeedeedfddeddegihdababa",
+    "ccbbcbcddefddddeggghhghhghjkklnnlnnnopnnppqrprrptttvtrrprrqqqpoommnnmlmmkjlnnpnljlnnnkjhjhjkhjhhhhhghhgfefefegggfefffeefeeghihdaaaba",
+    "cbbacbbccdddccdddeeeefghhhjjjjjjhjhlnllklklnlnnmmpprpoooppolikkkihjjjhlhhlllnonljklllkjhjhhhghggfggfffgfefgfghhjjhghgggfefggiheaaaca",
+    "ababbabbbbabbbccdeeeefgghjklknlllkknlnnlnlkljlmkhhhiihikkkljggggffefffggfgjjgkhghhghjhhghghhhhffefeeeeedddddffghjhhjhhhedefeikicbbdb",
+    "bccbbbbcabbcbbccdeddffgggghhhlllnllnoonmnnlnloonlkmmmmkmjkjjhggggfefffgffghgghjhggghhgffefghhgfeededeeddeddeffghjhhjhhhgfeffgkkffded",
+    "ccdbbbbcbccdddddddddffgggillknnnolnooopponnnnooljkkmmmmmmmkkkjlkjhhjjhgffgggghhghhhhjjgfghjjhhffefggffffhhfggghhkkjjkkkhdfhgillggddd",
+    "bbaaabbbcbbbccccccddeegjjlopqqqqqqqsssssqnnnnnmlkkmkkkmopmmmmknnmljjhhgggggghhggjmmmookjjhjhhhhgghhhhhjkkjjkkkkkjlnlklllihlknnlkggfh",
+    "dbbabbcddccbccccdeeeeefgghikopsssuuwwxxxwwwttrrpooommmmmpommmmmmnnnkklljjlkkkmkjjmppppnmjjkkkjhhhhhjkkjjllklllllknnlkkkkighllilliihn",
+    "ddbccbcdbccbcddfeeeeegghhkkmnprrrrtutuxwwtwwutvvrrqpnpmmmmmlnlmjlkjhghkjgifghlkmlmprrpppnnnnlkikkjhhjjjklnlqonnonnonnllkghgikhklifhj",
+    "eddccbccddddededfeefegjklhklmpprpprtttwwussrqqrrppqprrprrpolnonmmkhhjkjjhighgkkklpppponolnpqonlllkjlkkkknnnnnlnooooonlkihihkjjlkgghj",
+    "hdcccccbccdddedcddeedggghhjkknppopprqqprqppppopoopqpppkhkmononnmomnlhhgffgggghhgmollnnnnkonnllijhhhkkkjjlljllklnoonnlkihhghhgjjhgghg",
+    "jfddbabaaabaaaaabbccccdeeedegghhjkjllkjklnkkkjklllmmlkjjkmmnnlkjlkjjfhhggfdedfddghhhghhgfggfeeeddcdefeeefffefghhgihhfeeeffhhghgggeec",
+    "nngdaaaaaaaaaaaaaaabdgffffeegghgghffggheghgdgffgfdcffjkghhgghhgedcbcaacfjeddbcddedddcdeccdccbbbbaaabaabbabcbbabbabcdbabbabccejihllkh"
+   ]
+  },
+  {
+   "id": "plate",
+   "shape": "box",
+   "size": [
+    2.6,
+    0.6,
+    0.2
+   ],
+   "pivot": [
+    0.0,
+    0.6,
+    1.08
+   ],
+   "style": "gilt"
+  }
+ ]
+}

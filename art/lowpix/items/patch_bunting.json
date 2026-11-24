@@ -1,0 +1,1692 @@
+{
+ "name": "patch_bunting",
+ "description": "Nine cloth pennants cut from old pyjamas, each a different print with stitched edges, folded over a sagging twine between two brass pins. They sway a little.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 6.0,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": false,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "berry": [
+    "#37353d",
+    "#483a42",
+    "#5e434a",
+    "#7c4f56",
+    "#9e5f66",
+    "#b67475",
+    "#ca8683",
+    "#dc978d"
+   ],
+   "brass": [
+    "#434035",
+    "#5b4131",
+    "#82673c",
+    "#b08c4b",
+    "#c6a05b",
+    "#d0aa69",
+    "#e1b97c",
+    "#f1d6a2",
+    "#f4eedd"
+   ],
+   "cream": [
+    "#444a4e",
+    "#626562",
+    "#88877e",
+    "#b9b2a1",
+    "#f1e6cc",
+    "#fefbdc",
+    "#fcf7e7",
+    "#fbf2e2"
+   ],
+   "dusk": [
+    "#2d3a43",
+    "#35444d",
+    "#40535d",
+    "#4f6672",
+    "#617f8c",
+    "#79949c",
+    "#8ea6a8",
+    "#a1b5b2"
+   ],
+   "fern": [
+    "#2e3b39",
+    "#36463a",
+    "#42553f",
+    "#536a45",
+    "#66844f",
+    "#7d995e",
+    "#93aa6c",
+    "#a6ba77"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "lake": [
+    "#334149",
+    "#415159",
+    "#536870",
+    "#6a868c",
+    "#86a9b0",
+    "#9ebec0",
+    "#b3cfcb",
+    "#c5ddd4"
+   ],
+   "lilac": [
+    "#3a414d",
+    "#4f5160",
+    "#6a687c",
+    "#8c869f",
+    "#b4a9c9",
+    "#ccbed8",
+    "#e0cfe5",
+    "#f0dde2"
+   ],
+   "linen": [
+    "#414749",
+    "#5b5d59",
+    "#7e7b70",
+    "#a8a18c",
+    "#dccfb0",
+    "#f4e4c0",
+    "#fcf5cb",
+    "#fbf2d4"
+   ],
+   "night": [
+    "#1c232c",
+    "#1b222d",
+    "#232c39",
+    "#364554",
+    "#4f6675",
+    "#678692",
+    "#86a9b0"
+   ],
+   "oat": [
+    "#444a4d",
+    "#606360",
+    "#85847b",
+    "#b3ae9e",
+    "#eae0c8",
+    "#fef5d8",
+    "#fcf7e3",
+    "#fbf2e2"
+   ],
+   "ochre": [
+    "#3d3e3a",
+    "#544d3b",
+    "#72613f",
+    "#987a47",
+    "#c59a52",
+    "#ddaf61",
+    "#f1c06e",
+    "#fbcf7a"
+   ],
+   "rose": [
+    "#414147",
+    "#5b5255",
+    "#7d6a69",
+    "#a78883",
+    "#d9aca4",
+    "#f1c1b3",
+    "#fcd2bf",
+    "#fbe0c8"
+   ],
+   "sage": [
+    "#394343",
+    "#4b564d",
+    "#636f5b",
+    "#82906f",
+    "#a7b788",
+    "#bfcc97",
+    "#d3dea4",
+    "#e4ebad"
+   ],
+   "straw": [
+    "#3e4343",
+    "#55564e",
+    "#756f5d",
+    "#9b9073",
+    "#c9b78d",
+    "#e1cc9d",
+    "#f5dea9",
+    "#fbebb2"
+   ],
+   "terracotta": [
+    "#3d3b3e",
+    "#524743",
+    "#70574c",
+    "#946c59",
+    "#c0866a",
+    "#d89b79",
+    "#ecad86",
+    "#fbbc91"
+   ],
+   "verd": [
+    "#364246",
+    "#4c5b58",
+    "#6c8075",
+    "#96b09c",
+    "#b8ceb2",
+    "#d4e4c1"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "straw",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.3
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "brass",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
+    }
+   ]
+  },
+  "s3": {
+   "ramp": "brass",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.18,
+     "ramps": [
+      "brass"
+     ]
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "rose",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s5": {
+   "ramp": "sage",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s6": {
+   "ramp": "dusk",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s7": {
+   "ramp": "berry",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s8": {
+   "ramp": "night",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s9": {
+   "ramp": "fern",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s10": {
+   "ramp": "lilac",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s11": {
+   "ramp": "terracotta",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s12": {
+   "ramp": "lake",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "twine",
+   "shape": "loft",
+   "pivot": [
+    -24.0,
+    0.0,
+    0.8
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      3.0,
+      -0.6094,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      6.0,
+      -1.1375,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      9.0,
+      -1.5844,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      12.0,
+      -1.95,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      15.0,
+      -2.2344,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      18.0,
+      -2.4375,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      21.0,
+      -2.5594,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      24.0,
+      -2.6,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      27.0,
+      -2.5594,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      30.0,
+      -2.4375,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      33.0,
+      -2.2344,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      36.0,
+      -1.95,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      39.0,
+      -1.5844,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      42.0,
+      -1.1375,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      45.0,
+      -0.6094,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    },
+    {
+     "at": [
+      48.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.36,
+      0.36
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s1"
+  },
+  {
+   "id": "pin0",
+   "shape": "loft",
+   "pivot": [
+    -24.2,
+    -0.6,
+    0.5
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.17573593128807152,
+      0
+     ],
+     "size": [
+      0.8485,
+      0.8485
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0242640687119284,
+      0
+     ],
+     "size": [
+      0.8485,
+      0.8485
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s2",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pin1",
+   "shape": "loft",
+   "pivot": [
+    24.2,
+    -0.6,
+    0.5
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.17573593128807152,
+      0
+     ],
+     "size": [
+      0.8485,
+      0.8485
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0242640687119284,
+      0
+     ],
+     "size": [
+      0.8485,
+      0.8485
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.2,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s3",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "flag0j",
+   "shape": "bone",
+   "pivot": [
+    -21.3333,
+    -0.5457,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    3.803,
+    -3.349
+   ]
+  },
+  {
+   "id": "flag0",
+   "shape": "card",
+   "parent": "flag0j",
+   "pivot": [
+    0.2182,
+    -3.7935,
+    0.0646
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeaaaabbbbbbaaaaaabbbbbbaaaaaaee",
+    "eeaaaabbbbbbaaaaaabbbbbbaaaaaaee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eebbaaaaaabbbbbbaaaaaabbbbee..",
+    "..eebbaaaaaabbbbbbaaaaaabbbbee..",
+    "..eebbaaaaaabbbbbbaaaaaabbbbee..",
+    "..eebbaaaaaabbbbbbaaaaaabbbbee..",
+    "....eeaaaaaabbbbbbaaaaaabbee....",
+    "....eeaaaaaabbbbbbaaaaaabbee....",
+    "....eebbbbbbaaaaaabbbbbbaaee....",
+    "....eebbbbbbaaaaaabbbbbbaaee....",
+    "....eebbbbbbaaaaaabbbbbbaaee....",
+    "....eebbbbbbaaaaaabbbbbbaaee....",
+    "......eebbbbaaaaaabbbbbbee......",
+    "......eebbbbaaaaaabbbbbbee......",
+    "......eeaaaabbbbbbaaaaaaee......",
+    "......eeaaaabbbbbbaaaaaaee......",
+    "......eeaaaabbbbbbaaaaaaee......",
+    "......eeaaaabbbbbbaaaaaaee......",
+    "........eeaabbbbbbaaaaee........",
+    "........eeaabbbbbbaaaaee........",
+    "........eebbaaaaaabbbbee........",
+    "........eebbaaaaaabbbbee........",
+    "........eebbaaaaaabbbbee........",
+    "........eebbaaaaaabbbbee........",
+    "..........eeaaaaaabbee..........",
+    "..........eeaaaaaabbee..........",
+    "..........eebbbbbbaaee..........",
+    "..........eebbbbbbaaee..........",
+    "..........eebbbbbbaaee..........",
+    "..........eebbbbbbaaee..........",
+    "............eebbbbee............",
+    "............eebbbbee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s4",
+   "paint": {
+    "art_key": {
+     "a": "rose:4",
+     "b": "linen:5",
+     "B": "linen:3",
+     "e": "rose:2",
+     "f": "rose:3"
+    }
+   }
+  },
+  {
+   "id": "flag1j",
+   "shape": "bone",
+   "pivot": [
+    -16.0,
+    -1.4444,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    -2.397,
+    2.618
+   ]
+  },
+  {
+   "id": "flag1",
+   "shape": "card",
+   "parent": "flag1j",
+   "pivot": [
+    -0.1713,
+    -3.796,
+    0.0572
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeaabbbbaaaabbbbaaaabbbbaaaabbee",
+    "eeaabbbbaaaabbbbaaaabbbbaaaabbee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eebbbbaaaabbbbaaaabbbbaaaaee..",
+    "..eebbbbaaaabbbbaaaabbbbaaaaee..",
+    "..eebbbbaaaabbbbaaaabbbbaaaaee..",
+    "..eebbbbaaaabbbbaaaabbbbaaaaee..",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s5",
+   "paint": {
+    "art_key": {
+     "a": "sage:4",
+     "b": "oat:5",
+     "B": "oat:3",
+     "e": "sage:2",
+     "f": "sage:3"
+    }
+   }
+  },
+  {
+   "id": "flag2j",
+   "shape": "bone",
+   "pivot": [
+    -10.6667,
+    -2.0864,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    1.563,
+    -1.275
+   ]
+  },
+  {
+   "id": "flag2",
+   "shape": "card",
+   "parent": "flag2j",
+   "pivot": [
+    0.0831,
+    -3.7991,
+    0.0523
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eebbaaaaaabbaaaaaabbaaaaaabbaaee",
+    "eebbaaaaaabbaaaaaabbaaaaaabbaaee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eeaabbaaaaaabbaaaaaabbaaaaee..",
+    "..eeaabbaaaaaabbaaaaaabbaaaaee..",
+    "..eeaaaaaaaaaaaaaaaaaaaaaaaaee..",
+    "..eeaaaaaaaaaaaaaaaaaaaaaaaaee..",
+    "....eeaaaabbaaaaaabbaaaaaaee....",
+    "....eeaaaabbaaaaaabbaaaaaaee....",
+    "....eeaaaaaaaaaaaaaaaaaaaaee....",
+    "....eeaaaaaaaaaaaaaaaaaaaaee....",
+    "....eebbaaaaaabbaaaaaabbaaee....",
+    "....eebbaaaaaabbaaaaaabbaaee....",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaabbaaaaaabbaaaaee......",
+    "......eeaabbaaaaaabbaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "........eeaaaabbaaaaaaee........",
+    "........eeaaaabbaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "........eebbaaaaaabbaaee........",
+    "........eebbaaaaaabbaaee........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s6",
+   "paint": {
+    "art_key": {
+     "a": "dusk:4",
+     "b": "linen:5",
+     "B": "linen:3",
+     "e": "dusk:2",
+     "f": "dusk:3"
+    }
+   }
+  },
+  {
+   "id": "flag3j",
+   "shape": "bone",
+   "pivot": [
+    -5.3333,
+    -2.4716,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    7.434,
+    -0.702
+   ]
+  },
+  {
+   "id": "flag3",
+   "shape": "card",
+   "parent": "flag3j",
+   "pivot": [
+    0.0397,
+    -3.7997,
+    0.0556
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeaaaaaaaaaaaaaaaaaaaaaaaaaaaaee",
+    "eeaaaaaaaaaaaaaaaaaaaaaaaaaaaaee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eeaaaaaaaaaaaaaaaaaaaaaaaaee..",
+    "..eeaaaaaaaaaaaaaaaaaaaaaaaaee..",
+    "..eeaaaaaaaaaaaaaaaabbbbaaaaee..",
+    "..eeaaaaaaaaaaaaaaaabbbbaaaaee..",
+    "....eebbbbaaaaaaaaaabbBBaaee....",
+    "....eebbbbaaaaaaaaaabbBBaaee....",
+    "....eebbBBaaaaaaaaaaaaaaaaee....",
+    "....eebbBBaaaaaaaaaaaaaaaaee....",
+    "....eeaaaaaaaaaaaaaaaaaaaaee....",
+    "....eeaaaaaaaaaaaaaaaaaaaaee....",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaabbbbaaaaaaee......",
+    "......eeaaaaaabbbbaaaaaaee......",
+    "........eeaaaabbBBaaaaee........",
+    "........eeaaaabbBBaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "..........eeaaaaaabbee..........",
+    "..........eeaaaaaabbee..........",
+    "..........eebbaaaabbee..........",
+    "..........eebbaaaabbee..........",
+    "..........eeBBaaaaaaee..........",
+    "..........eeBBaaaaaaee..........",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s7",
+   "paint": {
+    "art_key": {
+     "a": "berry:4",
+     "b": "cream:5",
+     "B": "cream:3",
+     "e": "berry:2",
+     "f": "berry:3"
+    }
+   }
+  },
+  {
+   "id": "flag4j",
+   "shape": "bone",
+   "pivot": [
+    0.0,
+    -2.6,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    5.993,
+    0.652
+   ]
+  },
+  {
+   "id": "flag4",
+   "shape": "card",
+   "parent": "flag4j",
+   "pivot": [
+    -0.0482,
+    -3.7998,
+    0.0452
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeaaaaaaaaaaaaaaaaaaaaaaaaaaaaee",
+    "eeaaaaaaaaaaaaaaaaaaaaaaaaaaaaee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eeaaaaaaaaaaaaaaaaaaaaaaaaee..",
+    "..eeaaaaaaaaaaaaaaaaaaaaaaaaee..",
+    "..eebbbbbbbbaaaaaaaaaaaaaaaaee..",
+    "..eebbbbbbbbaaaaaaaaaaaaaaaaee..",
+    "....eebbbbaaaaaaaaaaaaaaaaee....",
+    "....eebbbbaaaaaaaaaaaaaaaaee....",
+    "....eeaaaaaaaaaaaabbbbbbbbee....",
+    "....eeaaaaaaaaaaaabbbbbbbbee....",
+    "....eeaaaaaaaaaaaaaabbbbaaee....",
+    "....eeaaaaaaaaaaaaaabbbbaaee....",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "........eebbbbbbbbaaaaee........",
+    "........eebbbbbbbbaaaaee........",
+    "........eeaabbbbaaaaaaee........",
+    "........eeaabbbbaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaabbbbbbee..........",
+    "..........eeaabbbbbbee..........",
+    "............eeaabbee............",
+    "............eeaabbee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s8",
+   "paint": {
+    "art_key": {
+     "a": "night:4",
+     "b": "honey:5",
+     "B": "honey:3",
+     "e": "night:2",
+     "f": "night:3"
+    }
+   }
+  },
+  {
+   "id": "flag5j",
+   "shape": "bone",
+   "pivot": [
+    5.3333,
+    -2.4716,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    -2.72,
+    -0.086
+   ]
+  },
+  {
+   "id": "flag5",
+   "shape": "card",
+   "parent": "flag5j",
+   "pivot": [
+    0.0081,
+    -3.8,
+    0.0497
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeaabbaaaaaaaabbaaaaaaaabbaaaaee",
+    "eeaabbaaaaaaaabbaaaaaaaabbaaaaee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eebbaaaaaaaabbaaaaaaaabbaaee..",
+    "..eebbaaaaaaaabbaaaaaaaabbaaee..",
+    "..eebbaaaaaaaabbaaaaaaaabbaaee..",
+    "..eebbaaaaaaaabbaaaaaaaabbaaee..",
+    "....eeaaaaaaaabbaaaaaaaabbee....",
+    "....eeaaaaaaaabbaaaaaaaabbee....",
+    "....eeaaaaaaaabbaaaaaaaabbee....",
+    "....eeaaaaaaaabbaaaaaaaabbee....",
+    "....eebbbbbbbbBBbbbbbbbbBBee....",
+    "....eebbbbbbbbBBbbbbbbbbBBee....",
+    "......eeaaaaaabbaaaaaaaaee......",
+    "......eeaaaaaabbaaaaaaaaee......",
+    "......eeaaaaaabbaaaaaaaaee......",
+    "......eeaaaaaabbaaaaaaaaee......",
+    "......eeaaaaaabbaaaaaaaaee......",
+    "......eeaaaaaabbaaaaaaaaee......",
+    "........eeaaaabbaaaaaaee........",
+    "........eeaaaabbaaaaaaee........",
+    "........eebbbbBBbbbbbbee........",
+    "........eebbbbBBbbbbbbee........",
+    "........eeaaaabbaaaaaaee........",
+    "........eeaaaabbaaaaaaee........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "............eeBBbbee............",
+    "............eeBBbbee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s9",
+   "paint": {
+    "art_key": {
+     "a": "fern:4",
+     "b": "ochre:5",
+     "B": "ochre:3",
+     "e": "fern:2",
+     "f": "fern:3"
+    }
+   }
+  },
+  {
+   "id": "flag6j",
+   "shape": "bone",
+   "pivot": [
+    10.6667,
+    -2.0864,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    5.011,
+    0.721
+   ]
+  },
+  {
+   "id": "flag6",
+   "shape": "card",
+   "parent": "flag6j",
+   "pivot": [
+    -0.052,
+    -3.7997,
+    0.0456
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eebbaaaaaabbaaaaaabbaaaaaabbaaee",
+    "eebbaaaaaabbaaaaaabbaaaaaabbaaee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eeaabbaaaaaabbaaaaaabbaaaaee..",
+    "..eeaabbaaaaaabbaaaaaabbaaaaee..",
+    "..eeaaaaaaaaaaaaaaaaaaaaaaaaee..",
+    "..eeaaaaaaaaaaaaaaaaaaaaaaaaee..",
+    "....eeaaaabbaaaaaabbaaaaaaee....",
+    "....eeaaaabbaaaaaabbaaaaaaee....",
+    "....eeaaaaaaaaaaaaaaaaaaaaee....",
+    "....eeaaaaaaaaaaaaaaaaaaaaee....",
+    "....eebbaaaaaabbaaaaaabbaaee....",
+    "....eebbaaaaaabbaaaaaabbaaee....",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaabbaaaaaabbaaaaee......",
+    "......eeaabbaaaaaabbaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "......eeaaaaaaaaaaaaaaaaee......",
+    "........eeaaaabbaaaaaaee........",
+    "........eeaaaabbaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "........eeaaaaaaaaaaaaee........",
+    "........eebbaaaaaabbaaee........",
+    "........eebbaaaaaabbaaee........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaabbaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "..........eeaaaaaaaaee..........",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s10",
+   "paint": {
+    "art_key": {
+     "a": "lilac:4",
+     "b": "cream:5",
+     "B": "cream:3",
+     "e": "lilac:2",
+     "f": "lilac:3"
+    }
+   }
+  },
+  {
+   "id": "flag7j",
+   "shape": "bone",
+   "pivot": [
+    16.0,
+    -1.4444,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    -6.974,
+    -2.388
+   ]
+  },
+  {
+   "id": "flag7",
+   "shape": "card",
+   "parent": "flag7j",
+   "pivot": [
+    0.1633,
+    -3.7967,
+    0.0304
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeaabbbbaaaabbbbaaaabbbbaaaabbee",
+    "eeaabbbbaaaabbbbaaaabbbbaaaabbee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eebbbbaaaabbbbaaaabbbbaaaaee..",
+    "..eebbbbaaaabbbbaaaabbbbaaaaee..",
+    "..eebbbbaaaabbbbaaaabbbbaaaaee..",
+    "..eebbbbaaaabbbbaaaabbbbaaaaee..",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "....eebbaaaabbbbaaaabbbbaaee....",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "......eeaaaabbbbaaaabbbbee......",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "........eeaabbbbaaaabbee........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "..........eebbbbaaaaee..........",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "............eebbaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s11",
+   "paint": {
+    "art_key": {
+     "a": "terracotta:4",
+     "b": "linen:5",
+     "B": "linen:3",
+     "e": "terracotta:2",
+     "f": "terracotta:3"
+    }
+   }
+  },
+  {
+   "id": "flag8j",
+   "shape": "bone",
+   "pivot": [
+    21.3333,
+    -0.5457,
+    0.8
+   ],
+   "rotation": [
+    0.0,
+    6.39,
+    0.885
+   ]
+  },
+  {
+   "id": "flag8",
+   "shape": "card",
+   "parent": "flag8j",
+   "pivot": [
+    -0.0639,
+    -3.7995,
+    0.0432
+   ],
+   "art": [
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "eeaaaabbbbbbaaaaaabbbbbbaaaaaaee",
+    "eeaaaabbbbbbaaaaaabbbbbbaaaaaaee",
+    "..ffffffffffffffffffffffffffff..",
+    "..ffffffffffffffffffffffffffff..",
+    "..eebbaaaaaabbbbbbaaaaaabbbbee..",
+    "..eebbaaaaaabbbbbbaaaaaabbbbee..",
+    "..eebbaaaaaabbbbbbaaaaaabbbbee..",
+    "..eebbaaaaaabbbbbbaaaaaabbbbee..",
+    "....eeaaaaaabbbbbbaaaaaabbee....",
+    "....eeaaaaaabbbbbbaaaaaabbee....",
+    "....eebbbbbbaaaaaabbbbbbaaee....",
+    "....eebbbbbbaaaaaabbbbbbaaee....",
+    "....eebbbbbbaaaaaabbbbbbaaee....",
+    "....eebbbbbbaaaaaabbbbbbaaee....",
+    "......eebbbbaaaaaabbbbbbee......",
+    "......eebbbbaaaaaabbbbbbee......",
+    "......eeaaaabbbbbbaaaaaaee......",
+    "......eeaaaabbbbbbaaaaaaee......",
+    "......eeaaaabbbbbbaaaaaaee......",
+    "......eeaaaabbbbbbaaaaaaee......",
+    "........eeaabbbbbbaaaaee........",
+    "........eeaabbbbbbaaaaee........",
+    "........eebbaaaaaabbbbee........",
+    "........eebbaaaaaabbbbee........",
+    "........eebbaaaaaabbbbee........",
+    "........eebbaaaaaabbbbee........",
+    "..........eeaaaaaabbee..........",
+    "..........eeaaaaaabbee..........",
+    "..........eebbbbbbaaee..........",
+    "..........eebbbbbbaaee..........",
+    "..........eebbbbbbaaee..........",
+    "..........eebbbbbbaaee..........",
+    "............eebbbbee............",
+    "............eebbbbee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "............eeaaaaee............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "..............eeee..............",
+    "................................",
+    "................................"
+   ],
+   "plane": "xy",
+   "style": "s12",
+   "paint": {
+    "art_key": {
+     "a": "lake:4",
+     "b": "cream:5",
+     "B": "cream:3",
+     "e": "lake:2",
+     "f": "lake:3"
+    }
+   }
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 4.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "flag0j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "flag1j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 0.13
+     }
+    },
+    {
+     "part": "flag2j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 0.26
+     }
+    },
+    {
+     "part": "flag3j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 0.39
+     }
+    },
+    {
+     "part": "flag4j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 0.52
+     }
+    },
+    {
+     "part": "flag5j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 0.65
+     }
+    },
+    {
+     "part": "flag6j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 0.78
+     }
+    },
+    {
+     "part": "flag7j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 0.91
+     }
+    },
+    {
+     "part": "flag8j",
+     "osc": {
+      "axis": "x",
+      "amp": 7,
+      "cycles": 1,
+      "phase": 1.04
+     }
+    }
+   ]
+  }
+ }
+}

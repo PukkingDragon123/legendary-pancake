@@ -1,34 +1,49 @@
-// The interview room: Pip's little office inside the oak, shown as a Stage (see world/scene.ts).
-// A cinematic camera with named shots, slow push-ins, gentle handheld drift and hard cuts on topic
-// changes; Pip in his reading glasses behind the desk with a clipboard; a round window with the real
-// sky; a ticking wall clock; a desk lamp, dust motes in the window light; and a little prop system
-// that pops voxel props in and out with squash and stretch for the answer vignettes.
+// The interview room: Pip's little office inside the oak, shown as a Stage (see world/scene.ts). Every piece of
+// furniture is a hand-made lowpix model (props.ts, art/lowpix/interview/): heartwood walls with a panelled
+// wainscot, a partners' desk with a sliding drawer, a banker's lamp, a bookcase crammed with books, a pendulum
+// clock whose hands really turn, a round window with velvet curtains and the real sky behind it, a cork board
+// of sleep notes, a woven rug, a globe, plants, a lantern. A cinematic camera with named shots, slow push-ins,
+// handheld drift and hard cuts; Pip in reading glasses with a clipboard; and props that pop in with squash and
+// stretch for the answer vignettes.
 import * as THREE from 'three';
-import { PX, type BoxSpec } from '../gfx/box.ts';
+import { PX } from '../gfx/box.ts';
+import { P as PAL } from '../gfx/palette.ts';
 import { sceneSound, sound } from '../audio/sound.ts';
 import { OwlActor, type OwlFx } from '../owl/actor.ts';
 import { featherColour, G, type OwlLook } from '../owl/model.ts';
 import { Fx, SPR } from '../world/fx.ts';
 import type { Stage } from '../world/scene.ts';
-import * as P from './props.ts';
+import { DESK, loadModels, model, onWall, release, ROOM, type ModelId } from './props.ts';
 import { SkyView, type Weather } from './skyview.ts';
+import { HOUSE } from '../world/layout.ts';
+import { modelUrl } from '../gfx/glb.ts';
+
+/** The live world, for the real view through the window (world/scene.ts Scene). */
+export interface WorldView {
+  renderView(camera: THREE.Camera, target: THREE.WebGLRenderTarget): void;
+  viewTarget(w: number, h: number): THREE.WebGLRenderTarget;
+  setHour(h: number | null): void;
+}
 
 export type ShotName = 'establish' | 'pip' | 'pipL' | 'pipR' | 'close' | 'desk' | 'window' | 'clock' | 'clockwin' | 'board' | 'floor' | 'bed' | 'low' | 'wide' | 'tower';
 interface Shot { target: THREE.Vector3; yaw: number; pitch: number; dist: number; fov?: number; /** distance on a portrait screen */ pd?: number }
 
 const U = (px: number) => px * PX;
 const R0 = 80;
-/** where things are, in blocks */
+const WIN_A = -0.72, BOARD_A = 0.72;
+/** where things are */
 export const SPOT = {
-  desk: new THREE.Vector3(0, U(15.4), U(-58)),
+  desk: new THREE.Vector3(0, 0.962, -3.625),
   floor: new THREE.Vector3(U(26), 0, U(10)),
-  bed: new THREE.Vector3(U(24), U(9), U(-3)),
-  window: new THREE.Vector3(Math.sin(-0.72) * U(R0 - 2), U(50), -Math.cos(-0.72) * U(R0 - 2)),
-  board: new THREE.Vector3(Math.sin(0.72) * U(R0 - 2), U(52), -Math.cos(0.72) * U(R0 - 2)),
-  clock: new THREE.Vector3(0, U(64), U(-R0 + 3)),
-  lamp: new THREE.Vector3(U(-24), U(17), U(-44)),
+  bed: new THREE.Vector3(1.35, 0.58, 0.25),
+  window: new THREE.Vector3(Math.sin(WIN_A) * U(R0 - 2), U(50), -Math.cos(WIN_A) * U(R0 - 2)),
+  board: new THREE.Vector3(Math.sin(BOARD_A) * U(R0 - 2), U(52), -Math.cos(BOARD_A) * U(R0 - 2)),
+  clock: new THREE.Vector3(0, 4.0, -4.85),
+  lamp: new THREE.Vector3(-0.6, DESK.h, -2.78),
 };
-const DESK_Z = U(P.DESK.z), DESK_TOP = U(P.DESK.h);
+const DESK_TOP = DESK.h;
+/** the seat of Pip's chair (a stack of books on it brings Pip up to SPOT.desk) */
+const CHAIR_SEAT = 0.52;
 
 const SHOTS: Record<ShotName, () => Shot> = {
   establish: () => ({ target: new THREE.Vector3(0, 2.0, -1.4), yaw: 0, pitch: 0.12, dist: 11.5, pd: 7.4 }),
@@ -77,28 +92,31 @@ export class InterviewRoom implements Stage {
   private cur: Shot = SHOTS.establish();
   private shotAt = 0;
   private baseFov = 32;
-  private cache = new Map<string, THREE.Mesh>();
   private spawned: Spawned[] = [];
   private vig: Vig | null = null;
   vigId: string | null = null;
   private disposers: (() => void)[] = [];
   private lampLight: THREE.PointLight;
+  private hangLight: THREE.PointLight;
+  private candleLight: THREE.PointLight;
   private sun: THREE.DirectionalLight;
   private hemi: THREE.HemisphereLight;
   private beam: THREE.Mesh;
-  private hourHand = new THREE.Group();
-  private minHand = new THREE.Group();
-  private pend = new THREE.Group();
+  private hourHand: THREE.Object3D | null = null;
+  private minHand: THREE.Object3D | null = null;
+  private pend: THREE.Object3D | null = null;
+  private flame: THREE.Object3D | null = null;
   private clockSpin = 0;
   /** previewed clock time in minutes after midnight (null = real time) */
   clockAt: number | null = null;
-  private clockShown = -1;
   ticking = false;
   private tickT = 0;
   private drawerObj = new THREE.Group();
   private drawerS = new Spring(0, 0, 120, 14);
   private plate: { cv: HTMLCanvasElement; tex: THREE.CanvasTexture; name: string };
+  private plateMesh: THREE.Mesh;
   private props = new THREE.Group();
+  private furniture = new THREE.Group();
   private pipAt: keyof typeof SPOT | 'custom' = 'desk';
   private trip: { from: THREE.Vector3; to: THREE.Vector3; t: number; dur: number; done?: () => void } | null = null;
   private moteT = 0;
@@ -106,26 +124,43 @@ export class InterviewRoom implements Stage {
   private quality: 'low' | 'high';
   private glassesOn = true;
   private boardOn = true;
+  private loaded = false;
+  private sway: { o: THREE.Object3D; ph: number }[] = [];
   /** world-space point the camera looks at, for anchoring UI */
   readonly focus = new THREE.Vector3();
 
-  constructor(look: OwlLook, quality: 'low' | 'high' = 'high') {
+  /** the real forest seen through the window */
+  private world: WorldView | null;
+  private winRT: THREE.WebGLRenderTarget | null = null;
+  private winCam = new THREE.PerspectiveCamera(52, 1, 0.3, 400);
+  private winT = 0;
+  private winHour: number | null = null;
+  private rainT = 0;
+
+  constructor(look: OwlLook, quality: 'low' | 'high' = 'high', world: WorldView | null = null) {
+    this.world = world;
     this.quality = quality;
     const s = this.scene;
-    s.background = new THREE.Color(0x1a0f08);
-    s.fog = new THREE.Fog(0x1a0f08, 16, 34);
-    this.fx.setLight(new THREE.Color(1.0, 0.92, 0.82));
-    s.add(this.fx.group, this.props);
+    const bg = new THREE.Color(0x1d1813);
+    s.background = bg;
+    s.fog = new THREE.Fog(bg, 16, 34);
+    this.fx.setLight(new THREE.Color(1.0, 0.94, 0.86));
+    s.add(this.fx.group, this.props, this.furniture);
 
-    // ---- light: warm fill, the desk lamp, daylight (or moonlight) through the window
-    this.hemi = new THREE.HemisphereLight(0xffeedd, 0x4a3424, 0.7);
-    s.add(this.hemi, new THREE.AmbientLight(0x5a4a5a, 0.25));
-    this.lampLight = new THREE.PointLight(0xffc46a, 3.2, 6, 1.6);
-    this.lampLight.position.set(SPOT.lamp.x + U(2), DESK_TOP + U(8), SPOT.lamp.z + U(4));
+    // ---- light: warm fill, the desk lamp, the lantern, a candle, daylight (or moonlight) through the window
+    this.hemi = new THREE.HemisphereLight(0xf4ead8, 0x5b4a3c, 0.95);
+    s.add(this.hemi, new THREE.AmbientLight(0x617f8c, 0.22));
+    this.lampLight = new THREE.PointLight(PAL.lamp, 3.0, 6, 1.6);
+    this.lampLight.position.copy(SPOT.lamp).add(new THREE.Vector3(0.05, 0.55, 0.15));
     s.add(this.lampLight);
-    const front = new THREE.PointLight(0xffe6cc, 1.3, 14, 1.2);
+    const front = new THREE.PointLight(0xf4e6d0, 1.7, 15, 1.1);
     front.position.set(0.5, 3.2, 3.5);
     s.add(front);
+    this.hangLight = new THREE.PointLight(PAL.honey, 1.3, 6, 1.6);
+    this.hangLight.position.set(-1.875, 4.75, -0.3);
+    this.candleLight = new THREE.PointLight(PAL.lamp, 0.5, 2.2, 1.8);
+    this.candleLight.position.set(0.7, DESK_TOP + 0.4, -2.2);
+    s.add(this.hangLight, this.candleLight);
     this.sun = new THREE.DirectionalLight(0xffffff, 1.2);
     const wdir = SPOT.window.clone().setY(0).normalize();
     this.sun.position.copy(SPOT.window).add(wdir.multiplyScalar(4)).add(new THREE.Vector3(0, 2.2, 0));
@@ -137,97 +172,149 @@ export class InterviewRoom implements Stage {
     this.sun.shadow.bias = -0.0015;
     s.add(this.sun, this.sun.target);
 
-    // ---- the room
-    const add = (boxes: BoxSpec[], x = 0, y = 0, z = 0, ry = 0, density = 1) => {
-      const m = P.mesh(boxes, density);
-      m.position.set(x, y, z); m.rotation.y = ry;
-      s.add(m);
-      this.disposers.push(m.userData.dispose);
-      return m;
-    };
-    add(P.shell());
-    add(P.frontArch());
-    add(P.desk(), 0, 0, DESK_Z);
-    add(P.stool(), 0, 0, SPOT.desk.z);
-    add(P.rug(36), U(8), 0.01, U(6));
-    const lamp = P.deskLamp();
-    add(lamp.boxes, SPOT.lamp.x, DESK_TOP, SPOT.lamp.z, 0.45);
-    add(P.inkwell(), U(-13), DESK_TOP, U(-39));
-    add(P.bookStack(1), U(22), DESK_TOP, U(-46));
-    add(P.standingBooks(5, 2), U(14), DESK_TOP, U(-48), -0.1);
-    add(P.paperStack(), U(8), DESK_TOP, U(-35));
-    add(P.candle(), U(27), DESK_TOP, U(-33));
-    add(P.teacup(), U(-27), DESK_TOP, U(-31));
-    add(P.nameplate(), U(-6), DESK_TOP, U(-29.5), 0.12);
-    const ca = 0.72;
-    add(P.windowFrame(15), SPOT.window.x, SPOT.window.y, SPOT.window.z, ca);
-    add(P.corkBoard(), SPOT.board.x, U(40), SPOT.board.z, -ca);
-    add(P.shelf(), Math.sin(1.22) * U(R0 - 7), 0, -Math.cos(1.22) * U(R0 - 7), -1.22);
-    add(P.painting(), Math.sin(-0.33) * U(R0 + 0.6), U(60), -Math.cos(-0.33) * U(R0 + 0.6), 0.33);
-    add(P.wallShelf(), Math.sin(0.34) * U(R0 - 1.5), U(50), -Math.cos(0.34) * U(R0 - 1.5), -0.34);
-    add(P.fernPot(), Math.sin(-1.2) * U(R0 - 10), 0, -Math.cos(-1.2) * U(R0 - 10));
-    add(P.fernPot(), U(-64), 0, U(32));
-    add(P.bookStack(4), U(-46), 0, U(18), 0.4);
-    add(P.hangingIvy(8, 2), U(-70), U(P.ROOM.H - 4), U(40));
-    add(P.hangingIvy(6, 5), U(52), U(P.ROOM.H - 4), U(44));
-    add(P.lanternHanging(), U(-30), U(P.ROOM.H - 6), U(-6));
-    const hang = new THREE.PointLight(0xffc86a, 1.3, 6, 1.6);
-    hang.position.set(U(-30), U(P.ROOM.H - 14), U(-6));
-    s.add(hang);
-
-    // the clock with moving hands and a pendulum
-    const clock = add(P.clockBody(), 0, U(55), U(-R0 + 2.5), 0);
-    void clock;
-    const cz = U(-R0 + 2.5 + 2.3);
-    this.hourHand.position.set(0, U(64), cz + U(0.1));
-    this.minHand.position.set(0, U(64), cz + U(0.25));
-    const hh = P.mesh(P.clockHand(4.4, 1.2), 2, false), mh = P.mesh(P.clockHand(6.4, 0.8), 2, false);
-    this.hourHand.add(hh); this.minHand.add(mh);
-    this.pend.position.set(0, U(53), U(-R0 + 4.6));
-    const pm = P.mesh(P.pendulum(), 2, false);
-    this.pend.add(pm);
-    s.add(this.hourHand, this.minHand, this.pend);
-    this.disposers.push(hh.userData.dispose, mh.userData.dispose, pm.userData.dispose);
-
-    // the window: the painted sky behind the frame, and a soft beam of light into the room
-    const skyMat = new THREE.MeshBasicMaterial({ map: this.sky.tex, toneMapped: false });
-    const skyMesh = new THREE.Mesh(new THREE.CircleGeometry(U(15.2), 24), skyMat);
-    // just behind the frame's mullions, in front of the wall (n = the wall's inward normal)
-    const n = new THREE.Vector3(-Math.sin(-0.72), 0, Math.cos(-0.72));
-    skyMesh.position.copy(SPOT.window).addScaledVector(n, -U(1.4));
-    skyMesh.rotation.y = 0.72;
+    // the window: the painted sky behind the frame (a 16-gon to match the frame), and a beam of light
+    // the window shows the real forest outside the oak (sky, weather, season and time of day), rendered from a camera
+    // at the trunk looking out; without the world (dev pages) it falls back to the little painted view
+    let skyMat: THREE.MeshBasicMaterial;
+    if (world) {
+      this.winRT = world.viewTarget(quality === 'high' ? 176 : 112, quality === 'high' ? 176 : 112);
+      const d = new THREE.Vector3(-0.62, 0, 1).normalize();
+      this.winCam.position.set(HOUSE.x + d.x * (HOUSE.r + 0.6), 5.4, HOUSE.z + d.z * (HOUSE.r + 0.6));
+      this.winCam.lookAt(this.winCam.position.clone().addScaledVector(d, 10).add(new THREE.Vector3(0, -1.6, 0)));
+      this.winCam.updateMatrixWorld();
+      skyMat = new THREE.MeshBasicMaterial({ map: this.winRT.texture });
+      this.disposers.push(() => { this.winRT?.dispose(); this.world?.setHour(null); });
+    } else skyMat = new THREE.MeshBasicMaterial({ map: this.sky.tex, toneMapped: false });
+    const skyMesh = new THREE.Mesh(new THREE.CircleGeometry(0.96, 16), skyMat);
+    const n = new THREE.Vector3(-Math.sin(WIN_A), 0, Math.cos(WIN_A));
+    skyMesh.position.copy(SPOT.window).addScaledVector(n, -0.09);
+    skyMesh.rotation.y = -WIN_A;
     s.add(skyMesh);
     this.disposers.push(() => { skyMesh.geometry.dispose(); skyMat.dispose(); });
     this.beam = this.makeBeam();
     s.add(this.beam);
 
-    // the drawer slides out of the desk front
-    const dm = P.mesh(P.drawer());
-    this.drawerObj.add(dm);
-    this.drawerObj.position.set(U(P.DESK.drawerX), U(P.DESK.h - 9.4), DESK_Z + U(P.DESK.d / 2));
+    // the drawer slides out of the right pedestal
+    this.drawerObj.name = 'ob-drawer';
+    this.drawerObj.position.set(DESK.drawerX, DESK.drawerY, DESK.z + DESK.d / 2);
     s.add(this.drawerObj);
-    this.disposers.push(dm.userData.dispose);
 
-    // the name plate's lettering
-    const cv = document.createElement('canvas'); cv.width = 128; cv.height = 28;
+    // the name on the plate is a canvas texture over the brass
+    const cv = document.createElement('canvas'); cv.width = 160; cv.height = 24;
     const tex = new THREE.CanvasTexture(cv); tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearFilter; tex.colorSpace = THREE.SRGBColorSpace;
-    const pm2 = new THREE.Mesh(new THREE.PlaneGeometry(U(19), U(3)), new THREE.MeshLambertMaterial({ map: tex, emissive: 0x403020, emissiveMap: tex }));
-    pm2.position.set(U(-6) + Math.sin(0.12) * U(1.25), DESK_TOP + U(2.4), U(-29.5) + Math.cos(0.12) * U(1.25));
-    pm2.rotation.set(-20 * (Math.PI / 180), 0.12, 0, 'YXZ');
-    s.add(pm2);
+    this.plateMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.24, 0.186), new THREE.MeshLambertMaterial({ map: tex, transparent: true, alphaTest: 0.5 }));
     this.plate = { cv, tex, name: '' };
-    this.disposers.push(() => { pm2.geometry.dispose(); (pm2.material as THREE.Material).dispose(); tex.dispose(); });
+    this.disposers.push(() => { this.plateMesh.geometry.dispose(); (this.plateMesh.material as THREE.Material).dispose(); tex.dispose(); });
 
     // ---- Pip
     this.actor = this.makeActor(look);
     s.add(this.pip.node);
     this.pip.node.position.copy(SPOT.desk);
-    this.dress();
 
-    s.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && m !== this.beam) { m.receiveShadow = true; } });
     this.setNameplate('Pip');
     this.applyClock(0);
     this.cut('establish');
+    void loadModels().then(() => this.furnish());
+  }
+
+  // ---------------------------------------------------------------- the office
+
+  private put(id: ModelId, x: number, y: number, z: number, ry = 0, scale = 1, parent: THREE.Object3D = this.furniture) {
+    const m = model(id);
+    m.position.set(x, y, z); m.rotation.y = ry; m.scale.setScalar(scale);
+    parent.add(m);
+    return m;
+  }
+  /** on the curved wall: angle a, height y, `inset` from the wall, facing into the room */
+  private onWall(id: ModelId, a: number, y: number, inset = 0) { const p = onWall(a, y, inset); return this.put(id, p.x, p.y, p.z, -a); }
+
+  /** Place every model once they are loaded. */
+  private furnish() {
+    if (this.loaded) return;
+    this.loaded = true;
+    const T = DESK_TOP;
+    this.put('room', 0, 0, 0).traverse((o) => { o.castShadow = false; });
+    this.put('rug', 0.4, 0.005, 0.5);
+    // the desk (an old chest of drawers), Pip's tall chair with a stack of books to stand on
+    this.put('b_desk', 0, 0, DESK.z);
+    this.put('b_chair', 0, 0, SPOT.desk.z - 0.05);
+    this.put('books_stack', 0, CHAIR_SEAT, SPOT.desk.z, 0.3, 1.05);
+    // on the desk: an oil lamp, the inkwell, papers, a candle, tea, a stack of books and the name block
+    this.put('b_oillamp', SPOT.lamp.x, T, SPOT.lamp.z, 0.4);
+    this.put('inkwell', -0.24, T, DESK.z + 0.26, 0.3, 0.85);
+    this.put('papers', 0.22, T, DESK.z + 0.2, -0.2, 0.7);
+    this.put('candle', 0.7, T, DESK.z + 0.28, 0, 0.8);
+    this.put('teacup', -0.66, T, DESK.z + 0.3, 0.4, 0.85);
+    this.put('books_stack', 0.56, T, DESK.z - 0.3, -0.25, 0.62);
+    const np = this.put('nameplate', 0.02, T, DESK.z + 0.42, 0.05, 0.6);
+    this.plateMesh.position.set(0, 0.17, 0.077);
+    this.plateMesh.rotation.x = (-20 * Math.PI) / 180;
+    np.add(this.plateMesh);
+    // the walls: window and curtains over a painted cabinet, cork board, bookcase, clock, painting, the little shelf
+    this.onWall('window', WIN_A, U(50), U(4));
+    this.onWall('curtains', WIN_A, U(50), U(4));
+    const cab = onWall(WIN_A, 0, 0.42);
+    this.put('b_cabinet', cab.x, 0, cab.z, -WIN_A, 1.12);
+    this.put('plant_pothos', cab.x + 0.18, 1.32, cab.z + 0.1, 0.5, 1.0);
+    const cork = this.onWall('corkboard', BOARD_A, 2.35, 0.06);
+    // real art pinned to the board: a print of Whistler's nocturne and Hokusai's cranes (public domain, AIC)
+    this.art(cork, 'nocturne', 0.56, 0.36, 0.06, 1.1, 0.081, 3);
+    this.art(cork, 'cranes', 0.34, 0.33, -0.16 + Math.sin((7 * Math.PI) / 180) * 0.04, 0.5, 0.087, -7);
+    const bc = onWall(1.22, 0, 0.45), bk = 1.35;
+    const shelf = this.put('b_bookcase', bc.x, 0, bc.z, -1.22, bk);
+    // fill the bookcase: rows of books, a stack of old ones, the jug, a bowl, the mantel clock on top
+    const fill: [ModelId, number, number, number, number][] = [
+      ['books_row', -0.48, 0.09, 0.0, 0.5], ['books_row', 0.05, 0.09, 0.02, 0.5], ['g_books', -0.25, 0.47, 0.02, 1.3], ['books_row', 0.12, 0.47, 0.0, 0.5],
+      ['books_row', -0.5, 0.84, 0.0, 0.5], ['b_jug', 0.3, 0.84, 0.03, 1.0], ['books_row', -0.42, 1.21, 0.0, 0.5], ['b_bowl', 0.28, 1.21, 0.02, 0.9],
+      ['b_mantelclock', 0.0, 2.06, 0.02, 1.3],
+    ];
+    for (const [id, x, y, z, k] of fill) this.put(id, x, y, z, 0, k / bk, shelf);
+    const paint = this.onWall('painting', -0.25, 1.95, 0.04);
+    // the painting is a real one: Albert Bierstadt's Mountain Brook (1863, public domain, AIC)
+    this.art(paint, 'mountain_brook', 1.05, 0.78, 0, 0.47, 0.043, 0);
+    this.onWall('wallshelf', 0.3, 3.2, 0.02);
+    const clock = this.onWall('clock', 0, SPOT.clock.y, 0.02);
+    this.hourHand = clock.getObjectByName('hand_h') ?? null;
+    this.minHand = clock.getObjectByName('hand_m') ?? null;
+    this.pend = clock.getObjectByName('pendulum') ?? null;
+    // the floor: a big plant, the globe, a side table with an aloe, a basket of books, a suitcase with books on it
+    this.put('plant_floor', Math.sin(-1.2) * 4.4, 0, -Math.cos(-1.2) * 4.4, 0.4, 1.1);
+    this.put('globe', -3.25, 0, -0.45, 0.6);
+    this.put('b_sidetable', -2.55, 0, 1.0, 0.3, 1.8);
+    this.put('plant_fern', -2.55, 0.42 * 1.8, 1.0, 0.2, 1.1);
+    this.put('b_basket', 1.45, 0, -1.75, 0.5, 1.6);
+    this.put('g_books', 1.45, 0.06, -1.75, 0.9, 1.2);
+    this.put('b_suitcase', 3.3, 0, 0.2, -0.5, 1.45);
+    this.put('books_stack', 3.3, 0.57 * 1.45, 0.2, 0.2, 0.9);
+    this.put('ivy', -4.2, ROOM.H, 2.4, 0.2);
+    this.put('ivy', 3.3, ROOM.H, 2.7, 2.1, 0.9);
+    // the lantern on a chain from the ceiling
+    this.put('b_lantern', -1.875, 4.45, -0.375, 0.3, 2.4);
+    const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, ROOM.H - 4.45 - 0.66, 4), new THREE.MeshStandardMaterial({ color: PAL.iron, roughness: 1 }));
+    chain.position.set(-1.875, (ROOM.H + 4.45 + 0.66) / 2, -0.375);
+    this.furniture.add(chain);
+    this.disposers.push(() => { chain.geometry.dispose(); (chain.material as THREE.Material).dispose(); });
+    this.flame = this.furniture.getObjectByName('flame') ?? null;
+    // the leaves of every plant sway a little, each at its own pace
+    let k = 0;
+    this.furniture.traverse((o) => { if (o.name === 'leaves') this.sway.push({ o, ph: k++ * 1.7 }); });
+    // the drawer that slides out for the phone (hidden in the chest until it opens)
+    const dr = model('desk_drawer');
+    dr.scale.setScalar(0.62);
+    this.drawerObj.add(dr);
+    this.drawerObj.visible = false;
+    this.dress();
+  }
+
+  /** A real artwork (public domain, pixel-graded by art/lowpix/interview/wallart.py) on a plane over a frame or print. */
+  private art(on: THREE.Object3D, id: string, w: number, h: number, x: number, y: number, z: number, rotDeg: number) {
+    const tex = new THREE.TextureLoader().load(modelUrl(`interview/art/${id}.webp`));
+    tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.colorSpace = THREE.SRGBColorSpace;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: tex, roughness: 1, metalness: 0 }));
+    m.position.set(x, y, z); m.rotation.z = (rotDeg * Math.PI) / 180;
+    m.receiveShadow = true;
+    on.add(m);
+    this.disposers.push(() => { m.geometry.dispose(); (m.material as THREE.Material).dispose(); tex.dispose(); });
   }
 
   // ---------------------------------------------------------------- Pip's look
@@ -240,14 +327,17 @@ export class InterviewRoom implements Stage {
     const ey = eyes?.[1] ? eyes[1].position.y / PX : G.eyeY - 13.4;
     const ez = eyes?.[1] ? eyes[1].position.z / PX : G.discFront - 0.4;
     const geo = (this.pip.model as { g?: typeof G }).g ?? G;
-    if (this.glassesOn && B.head) {
-      const g = P.mesh(P.glasses(ex, 3.1), 4, false);
-      g.position.set(0, U(ey - 0.6), U(ez + 0.9));
+    if (this.glassesOn && B.head && this.loaded) {
+      const g = model('glasses', { shadows: false });
+      // the model's lenses sit 0.2 apart from the middle; stretch to this owl's eyes
+      const k = (ex * PX) / 0.2;
+      g.scale.set(k, k * 0.95, k);
+      g.position.set(0, U(ey - 0.3), U(ez + 0.9));
       g.name = 'ob-glasses';
       B.head.add(g);
     }
-    if (this.boardOn && B.body) {
-      const c = P.mesh(P.clipboardSmall(), 3, false);
+    if (this.boardOn && B.body && this.loaded) {
+      const c = model('clipboard_small');
       c.position.set(U(2.2), U(1.5), U(geo.bodyD / 2 + 2.6));
       c.rotation.set(-0.95, -0.15, -0.1);
       c.name = 'ob-board';
@@ -256,8 +346,8 @@ export class InterviewRoom implements Stage {
   }
   private undress() {
     for (const n of ['ob-glasses', 'ob-board']) {
-      const o = this.pip.node.getObjectByName(n) as THREE.Mesh | undefined;
-      if (o) { o.parent?.remove(o); (o.userData.dispose as (() => void) | undefined)?.(); }
+      const o = this.pip.node.getObjectByName(n);
+      if (o) o.parent?.remove(o);
     }
   }
   /** Hold the clipboard (and wear the glasses) or put them down. */
@@ -279,6 +369,7 @@ export class InterviewRoom implements Stage {
     const key = this.lookKey(look), old = this.actor;
     const next = this.actors.get(key) ?? this.makeActor(look);
     if (next !== old) {
+      this.undress();
       next.node.position.copy(old.node.position);
       next.node.rotation.copy(old.node.rotation);
       next.pose = old.pose; next.lookAt = old.lookAt; next.breath = old.breath;
@@ -286,7 +377,7 @@ export class InterviewRoom implements Stage {
       this.scene.remove(old.node);
       this.scene.add(next.node);
       this.actor = next;
-      this.undress(); this.dress();
+      this.dress();
     }
     if (poof) {
       const at = this.pip.node.position.clone().add(new THREE.Vector3(0, 1.0, 0.1));
@@ -294,7 +385,7 @@ export class InterviewRoom implements Stage {
       this.owlFx('feather', at, 9);
       for (let i = 0; i < 8; i++) {
         const a = (i / 8) * Math.PI * 2;
-        this.fx.emit({ x: at.x, y: at.y - 0.3, z: at.z, vx: Math.cos(a) * 1.4, vy: 0.4 + Math.random() * 0.6, vz: Math.sin(a) * 1.4, life: 0.7, frame: SPR.puff1, frames: 3, fps: 6, color: 0xfff4e0, size: 0.55, drag: 3, grow: 0.8 });
+        this.fx.emit({ x: at.x, y: at.y - 0.3, z: at.z, vx: Math.cos(a) * 1.4, vy: 0.4 + Math.random() * 0.6, vz: Math.sin(a) * 1.4, life: 0.7, frame: SPR.puff1, frames: 3, fps: 6, color: 0xf4eedd, size: 0.55, drag: 3, grow: 0.8 });
       }
       this.pip.play('ruffle');
       sound.play('tp_shimmer', { volume: 0.35, gap: 120 });
@@ -305,11 +396,14 @@ export class InterviewRoom implements Stage {
     if (name === this.plate.name) return;
     this.plate.name = name;
     const { cv, tex } = this.plate, g = cv.getContext('2d')!;
-    g.fillStyle = '#4a2c18'; g.fillRect(0, 0, cv.width, cv.height);
-    g.fillStyle = '#c9a14a'; g.fillRect(2, 2, cv.width - 4, 2); g.fillRect(2, cv.height - 4, cv.width - 4, 2); g.fillRect(2, 2, 2, cv.height - 4); g.fillRect(cv.width - 4, 2, 2, cv.height - 4);
+    g.clearRect(0, 0, cv.width, cv.height);
     g.font = '18px "TBME Body", monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = '#1e1008'; g.fillText(name || '...', cv.width / 2 + 1, cv.height / 2 + 2);
-    g.fillStyle = '#ffd86a'; g.fillText(name || '...', cv.width / 2, cv.height / 2 + 1);
+    g.fillStyle = '#5c4219'; g.fillText(name || '...', cv.width / 2 + 1, cv.height / 2 + 2);
+    g.fillStyle = '#2e2b24'; g.fillText(name || '...', cv.width / 2, cv.height / 2 + 1);
+    // no anti-aliased edges on the engraving: snap the alpha
+    const img = g.getImageData(0, 0, cv.width, cv.height), d = img.data;
+    for (let i = 3; i < d.length; i += 4) d[i] = d[i] > 110 ? 255 : 0;
+    g.putImageData(img, 0, 0);
     tex.needsUpdate = true;
   }
 
@@ -329,7 +423,7 @@ export class InterviewRoom implements Stage {
     }
   }
   /** a ring of dust puffs (props landing, Pip landing) */
-  puff(at: THREE.Vector3, n = 6, col = 0xe8d8bc) {
+  puff(at: THREE.Vector3, n = 6, col = 0xeae0c8) {
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2 + Math.random() * 0.4;
       this.fx.emit({ x: at.x + Math.cos(a) * 0.15, y: at.y + 0.05, z: at.z + Math.sin(a) * 0.15, vx: Math.cos(a) * 1.1, vy: 0.25 + Math.random() * 0.3, vz: Math.sin(a) * 1.1, life: 0.45 + Math.random() * 0.2, frame: SPR.puff1, frames: 3, fps: 7, color: col, size: 0.32, drag: 3.2, grow: 0.6 });
@@ -445,40 +539,31 @@ export class InterviewRoom implements Stage {
 
   /** Spin the clock hands round and let them settle (a steady routine!). */
   spinClock(turns = 3) { this.clockSpin += turns * Math.PI * 2; sound.play('clock_wind', { volume: 0.5, gap: 200 }); }
-  drawer(open: boolean) { this.drawerS.target = open ? U(13) : 0; sound.play('drawer', { volume: 0.55, gap: 150 }); }
+  drawer(open: boolean) { this.drawerS.target = open ? 0.82 : 0; sound.play('drawer', { volume: 0.55, gap: 150 }); }
 
   private applyClock(dt: number) {
     const now = new Date();
     const mins = this.clockAt ?? now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
     if (this.clockSpin > 0) this.clockSpin = Math.max(0, this.clockSpin - dt * (1.2 + this.clockSpin * 2.2));
     const m = (mins % 60) / 60, h = ((mins / 60) % 12) / 12;
-    this.minHand.rotation.z = -(m * Math.PI * 2 + this.clockSpin * 12);
-    this.hourHand.rotation.z = -(h * Math.PI * 2 + this.clockSpin);
-    this.pend.rotation.z = Math.sin(this.time * Math.PI) * 0.22;
+    if (this.minHand) this.minHand.rotation.z = -(m * Math.PI * 2 + this.clockSpin * 12);
+    if (this.hourHand) this.hourHand.rotation.z = -(h * Math.PI * 2 + this.clockSpin);
+    if (this.pend) this.pend.rotation.z = Math.sin(this.time * Math.PI) * 0.16;
     if (this.ticking) {
       this.tickT -= dt;
       if (this.tickT <= 0) { this.tickT = 1; sound.play('clock_tick', { volume: 0.25, gap: 400 }); }
     }
-    this.clockShown = mins;
   }
 
   // ---------------------------------------------------------------- props that pop in
 
-  private built(id: string, make: () => BoxSpec[], density = 1): THREE.Mesh {
-    let m = this.cache.get(id);
-    if (!m) { m = P.mesh(make(), density); this.cache.set(id, m); }
-    const c = m.clone();
-    c.castShadow = true; c.receiveShadow = true;
-    return c;
-  }
-
   /**
-   * Pop a prop into the room with squash and stretch and a puff of dust. Returns the object; its
+   * Pop a prop model into the room with squash and stretch and a puff of dust. Returns the object; its
    * `tick` runs every frame while it lives.
    */
-  spawn(id: string, make: () => BoxSpec[], at: THREE.Vector3, o: { ry?: number; scale?: number; delay?: number; density?: number; tick?: Spawned['tick']; quiet?: boolean } = {}): THREE.Object3D {
+  spawn(id: ModelId, at: THREE.Vector3, o: { ry?: number; scale?: number; delay?: number; tint?: number; tick?: Spawned['tick']; quiet?: boolean } = {}): THREE.Object3D {
     const g = new THREE.Group();
-    g.add(this.built(id, make, o.density ?? 1));
+    g.add(model(id, { tint: o.tint }));
     g.position.copy(at);
     g.rotation.y = o.ry ?? 0;
     g.userData.scale = o.scale ?? 1;
@@ -506,6 +591,7 @@ export class InterviewRoom implements Stage {
       s.tick?.(s.obj, this.time, dt);
       if (s.dying && s.s.x < 0.02) {
         s.obj.parent?.remove(s.obj);
+        release(s.obj);
         continue;
       }
       keep.push(s);
@@ -525,8 +611,18 @@ export class InterviewRoom implements Stage {
     if (id && make) this.vig = make(this);
   }
 
-  /** Weather and hour shown through the window. */
-  window(hour: number | null, w: Weather = 'clear') { this.sky.set(hour, w); }
+  /** Hour (and weather) shown through the window: the real world's sky follows the previewed hour. */
+  window(hour: number | null, w: Weather = 'clear') {
+    this.sky.set(hour, w);
+    if (this.world && hour !== this.winHour) { this.winHour = hour; this.world.setHour(hour); this.winT = 0; }
+  }
+  /** Redraw the real view through the window (a few times a second). */
+  private stepWindow(dt: number) {
+    if (!this.world || !this.winRT) return;
+    if ((this.winT -= dt) > 0) return;
+    this.winT = this.quality === 'high' ? 0.2 : 0.5;
+    this.world.renderView(this.winCam, this.winRT);
+  }
 
   // ---------------------------------------------------------------- frame
 
@@ -538,7 +634,7 @@ export class InterviewRoom implements Stage {
       const a = Math.floor(across * along * 5) / 5;
       g.fillStyle = `rgba(255,255,255,${(a * 0.9).toFixed(2)})`; g.fillRect(x, y, 1, 1);
     }
-    const tex = new THREE.CanvasTexture(cv); tex.magFilter = THREE.NearestFilter;
+    const tex = new THREE.CanvasTexture(cv); tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.NearestFilter;
     const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
     const geo = new THREE.PlaneGeometry(1.6, 6.2);
     const m = new THREE.Mesh(geo, mat);
@@ -559,15 +655,30 @@ export class InterviewRoom implements Stage {
     this.sun.intensity = this.sky.lightI * 1.2;
     (this.beam.material as THREE.MeshBasicMaterial).color.copy(this.sky.light);
     (this.beam.material as THREE.MeshBasicMaterial).opacity = 0.05 + this.sky.lightI * 0.07;
-    this.hemi.intensity = 0.55 + this.sky.lightI * 0.18;
-    this.lampLight.intensity = 3.2 + Math.sin(this.time * 9) * 0.08 + Math.sin(this.time * 23) * 0.05;
+    this.hemi.intensity = 0.8 + this.sky.lightI * 0.18;
+    this.lampLight.intensity = 3.0 + Math.sin(this.time * 9) * 0.08 + Math.sin(this.time * 23) * 0.05;
+    this.hangLight.intensity = 1.3 + Math.sin(this.time * 5.3) * 0.1;
+    const fl = Math.sin(this.time * 17) * 0.5 + Math.sin(this.time * 31 + 1) * 0.5;
+    this.candleLight.intensity = 0.5 + fl * 0.08;
+    if (this.flame) { this.flame.scale.set(1 - fl * 0.08, 1 + fl * 0.15, 1); this.flame.rotation.z = fl * 0.06; }
+    for (const { o, ph } of this.sway) { o.rotation.z = Math.sin(this.time * 0.8 + ph) * 0.025; o.rotation.x = Math.sin(this.time * 0.6 + ph * 1.3) * 0.02; }
 
+    this.stepWindow(dt);
+    // rain on the glass when a vignette calls for it
+    if (this.sky.weather === 'rain' && (this.rainT -= dt) <= 0) {
+      this.rainT = 0.05;
+      const n = new THREE.Vector3(-Math.sin(WIN_A), 0, Math.cos(WIN_A)), side = new THREE.Vector3(Math.cos(WIN_A), 0, Math.sin(WIN_A));
+      const p = SPOT.window.clone().addScaledVector(side, (Math.random() - 0.5) * 1.7).addScaledVector(n, -0.05);
+      p.y += 0.85;
+      this.fx.emit({ x: p.x, y: p.y, z: p.z, vx: 0, vy: -1.6 - Math.random(), vz: 0, life: 1.0, frame: SPR.mote, color: 0xd3e0dc, size: 0.06, fadeOut: 0.3 });
+    }
     this.stepTrip(dt);
     if (this.talkT > 0) this.talkT -= dt;
     this.pip.dark = this.sky.night * 0.4;
     this.pip.update(dt);
     this.drawerS.step(dt);
-    this.drawerObj.position.z = DESK_Z + U(P.DESK.d / 2) + this.drawerS.x;
+    this.drawerObj.position.z = DESK.z + DESK.d / 2 + this.drawerS.x * 0.62;
+    this.drawerObj.visible = this.drawerS.x > 0.03;
     this.applyClock(dt);
     this.stepProps(dt);
     this.vig?.update?.(this.time, dt);
@@ -576,7 +687,7 @@ export class InterviewRoom implements Stage {
     if ((this.moteT -= dt) <= 0) {
       this.moteT = this.quality === 'high' ? 0.12 : 0.3;
       const k = Math.random(), p = SPOT.window.clone().lerp(new THREE.Vector3(0.4, 0.2, -1.6), k);
-      this.fx.emit({ x: p.x + (Math.random() - 0.5) * 0.8, y: p.y + (Math.random() - 0.5) * 0.6, z: p.z + (Math.random() - 0.5) * 0.8, vx: (Math.random() - 0.5) * 0.06, vy: (Math.random() - 0.3) * 0.05, vz: (Math.random() - 0.5) * 0.06, life: 4 + Math.random() * 3, frame: SPR.mote, color: 0xfff0c8, size: 0.12 + Math.random() * 0.08, add: true, fadeIn: 1, fadeOut: 1.5, flutter: 0.05 });
+      this.fx.emit({ x: p.x + (Math.random() - 0.5) * 0.8, y: p.y + (Math.random() - 0.5) * 0.6, z: p.z + (Math.random() - 0.5) * 0.8, vx: (Math.random() - 0.5) * 0.06, vy: (Math.random() - 0.3) * 0.05, vz: (Math.random() - 0.5) * 0.06, life: 4 + Math.random() * 3, frame: SPR.mote, color: 0xf6e8c8, size: 0.12 + Math.random() * 0.08, add: true, fadeIn: 1, fadeOut: 1.5, flutter: 0.05 });
     }
     this.fx.update(dt, this.time);
     this.applyCamera(dt);
@@ -585,8 +696,6 @@ export class InterviewRoom implements Stage {
   dispose() {
     this.vig?.exit?.();
     for (const d of this.disposers) d?.();
-    for (const m of this.cache.values()) (m.userData.dispose as (() => void) | undefined)?.();
-    this.cache.clear();
     this.undress();
     for (const a of this.actors.values()) a.dispose();
     this.sky.dispose();

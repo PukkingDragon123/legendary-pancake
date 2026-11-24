@@ -1,0 +1,3374 @@
+{
+ "name": "plant_pothos",
+ "description": "",
+ "license": "CC0-1.0",
+ "density": 110,
+ "budget": {
+  "tris": 6000,
+  "colors": 600
+ },
+ "light": {
+  "dir": [
+   -0.45,
+   1.0,
+   0.6
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 0.6
+ },
+ "brush": {
+  "flow": "long",
+  "length": 0.6,
+  "width": 0.08,
+  "rough": 0.4,
+  "overshoot": 0.25,
+  "textures": {
+   "oak": "wood",
+   "oakpale": "wood",
+   "walnut": "wood",
+   "deep": "wood",
+   "heart": "wood",
+   "wain": "wood",
+   "floor": "wood",
+   "bark": "wood",
+   "cork": "stone",
+   "brass": "metal",
+   "iron": "metal",
+   "steel": "metal",
+   "linen": "cloth",
+   "oat": "cloth",
+   "sage": "cloth",
+   "rose": "cloth",
+   "berry": "cloth",
+   "dusk": "cloth",
+   "plum": "cloth",
+   "lake": "cloth",
+   "blush": "cloth",
+   "moss": "moss",
+   "fern": "organic",
+   "leaf": "organic",
+   "pine": "organic",
+   "terracotta": "stone",
+   "clay": "stone",
+   "snow": "fur",
+   "cream": "organic",
+   "soil": "stone"
+  }
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   -34,
+   20
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "oak": {
+    "base": "#a8845c",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.58
+   },
+   "oakpale": {
+    "base": "#c9ab82",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.5
+   },
+   "walnut": {
+    "base": "#6f553d",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "deep": {
+    "base": "#4a392b",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "heart": {
+    "base": "#b8946a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.55
+   },
+   "wain": {
+    "base": "#7d5f44",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "bark": {
+    "base": "#5b4a3c",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.65
+   },
+   "floor": {
+    "base": "#a07c58",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.58
+   },
+   "brass": {
+    "base": "#c8a764",
+    "steps": 8,
+    "hue_shift": 16,
+    "sat_shift": 0.08,
+    "spread": 0.8
+   },
+   "iron": {
+    "base": "#5c5a56",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.85
+   },
+   "steel": {
+    "base": "#9aa0a4",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.9
+   },
+   "paper": [
+    "#8a7a5e",
+    "#b3a27f",
+    "#d4c6a4",
+    "#e8dfc6",
+    "#f1ead6",
+    "#f8f4e8"
+   ],
+   "oat": [
+    "#7d6a4c",
+    "#a89170",
+    "#cbb893",
+    "#e0d3b4",
+    "#ebe2c9",
+    "#f4efdf"
+   ],
+   "linen": [
+    "#6e5e45",
+    "#988563",
+    "#bba985",
+    "#d4c6a6",
+    "#e2d8bf",
+    "#eee8d8"
+   ],
+   "cork": {
+    "base": "#b08a5a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.7
+   },
+   "ink": {
+    "base": "#2e2b24",
+    "steps": 5,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "graphite": {
+    "base": "#5a5c62",
+    "steps": 5,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "sage": {
+    "base": "#a7b788",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "moss": {
+    "base": "#86a06a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "fern": {
+    "base": "#66844f",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "leaf": {
+    "base": "#557343",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "pine": {
+    "base": "#3f5a3b",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "terracotta": {
+    "base": "#c0866a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "clay": {
+    "base": "#a66c55",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "rose": [
+    "#5a3a3a",
+    "#86595a",
+    "#b38681",
+    "#d9aca4",
+    "#e6c6bf",
+    "#f2e0da"
+   ],
+   "blush": [
+    "#6a4040",
+    "#97615e",
+    "#c48d86",
+    "#e8b4ae",
+    "#f0cbc5",
+    "#f7e2de"
+   ],
+   "berry": {
+    "base": "#9e5f66",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "plum": {
+    "base": "#6e5266",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "dusk": {
+    "base": "#617f8c",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "lake": {
+    "base": "#86a9b0",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "slate": {
+    "base": "#46596a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "night": {
+    "base": "#27313f",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "honey": [
+    "#4a3420",
+    "#7a5833",
+    "#a9804b",
+    "#dcb072",
+    "#e7c994",
+    "#f1e0bd"
+   ],
+   "ochre": {
+    "base": "#c59a52",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "straw": {
+    "base": "#c9b78d",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.65
+   },
+   "lamp": [
+    "#a8743a",
+    "#c99a55",
+    "#e3bd7a",
+    "#f1d39a",
+    "#f6e2b8",
+    "#fbf0d8"
+   ],
+   "glow": [
+    "#d9a25a",
+    "#f0c477",
+    "#f8dc9c",
+    "#fdeec6",
+    "#fff8e6"
+   ],
+   "glass": [
+    "#40606b",
+    "#6a8f99",
+    "#97b9bf",
+    "#bcd6dc",
+    "#d6e7ea",
+    "#eef6f6"
+   ],
+   "cream": [
+    "#8f7650",
+    "#b89d70",
+    "#d9c49b",
+    "#ebdcbb",
+    "#f3ead2",
+    "#faf5e6"
+   ],
+   "snow": [
+    "#5d6b6e",
+    "#8e9c9a",
+    "#bccac3",
+    "#dfe6dc",
+    "#eef2ea",
+    "#f8faf5"
+   ],
+   "soot": {
+    "base": "#3a3029",
+    "steps": 5,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "lilac": {
+    "base": "#b4a9c9",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "mist": [
+    "#4f6663",
+    "#76908b",
+    "#a3b9b3",
+    "#c7d6d1",
+    "#dde7e3",
+    "#eef3f0"
+   ],
+   "soil": {
+    "base": "#4e3b2c",
+    "steps": 5,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "screen": [
+    "#2a3a4a",
+    "#3d5a72",
+    "#6f93ad",
+    "#a9c8d8",
+    "#e6f2f2"
+   ]
+  }
+ },
+ "styles": {
+  "pot": {
+   "ramp": "cream",
+   "tone": 3.4,
+   "brush": {
+    "flow": "vertical",
+    "rough": 0.3
+   },
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.7,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "op": "noise",
+     "id": "glz",
+     "scale": 0.3,
+     "amount": 0.25
+    },
+    {
+     "op": "gloss",
+     "id": "gloss",
+     "dash": true,
+     "length": 2,
+     "density": 0.7,
+     "shift": 1.6,
+     "post": true
+    },
+    {
+     "op": "band",
+     "id": "band",
+     "axis": "z",
+     "from": -0.2,
+     "to": 0.1,
+     "ramp": "lake",
+     "tone": 3.0
+    }
+   ]
+  },
+  "soil": {
+   "ramp": "soil",
+   "tone": 2.2,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.5,
+    "outline": "none"
+   }
+  },
+  "vine": {
+   "ramp": "fern",
+   "tone": 2.8,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.5,
+    "outline": "none"
+   }
+  },
+  "leaf_pothos": {
+   "ramp": "leaf",
+   "brush": {
+    "off": true
+   },
+   "art_key": {
+    "o": "pine:1",
+    "d": "leaf:2",
+    "m": "leaf:3",
+    "l": "fern:4",
+    "h": "sage:4",
+    "v": "sage:3",
+    "c": "cream:3"
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "pot",
+   "shape": "prism",
+   "pivot": [
+    0.0,
+    0.15,
+    0.0
+   ],
+   "size": [
+    0.4,
+    0.4,
+    0.3
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "pot",
+   "sides": 10,
+   "back_scale": [
+    0.85,
+    0.85
+   ]
+  },
+  {
+   "id": "soil",
+   "shape": "prism",
+   "pivot": [
+    0.0,
+    0.31,
+    0.0
+   ],
+   "size": [
+    0.36,
+    0.36,
+    0.02
+   ],
+   "rotation": [
+    -90.0,
+    0.0,
+    0.0
+   ],
+   "style": "soil",
+   "sides": 10
+  },
+  {
+   "id": "leaves",
+   "shape": "bone",
+   "pivot": [
+    0.0,
+    0.3,
+    0.0
+   ],
+   "size": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "id": "leaf",
+   "shape": "card",
+   "pivot": [
+    0.0463,
+    0.0217,
+    0.0041
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -42.9932,
+    84.9773,
+    -3.9364
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........o..........",
+    "........hvo.........",
+    ".......omvlo........",
+    "......ohlvcmo.......",
+    "......ohcvccmo......",
+    ".....olmcvccmo......",
+    "....olllcvmlmmo.....",
+    "....omlllvmmcmmo....",
+    "...ollmllvvmccmo....",
+    "...olllllvvmccmmo...",
+    "...hmllllvvlmmmlo...",
+    "..olllllmvvmmmldo...",
+    "..hllllllccmmldmdo..",
+    "..hmlllllccmmmdmdo..",
+    "..hllllmlccmlmmddo..",
+    "..ollllllvvlmmdddo..",
+    "...olmlllvvmmmldo...",
+    "...ollmllvvmmlddo...",
+    "....ollmmvvmlddo....",
+    "....ollllooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_1",
+   "shape": "card",
+   "pivot": [
+    -0.0779,
+    0.0311,
+    0.1375
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -64.1506,
+    330.4638,
+    -8.9327
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........o........",
+    "..........ovo.......",
+    ".........hvvo.......",
+    "........olvvmo......",
+    ".......ollvvmmo.....",
+    "......olmlvmmmo.....",
+    ".....ohlllvlcmmo....",
+    ".....hmlllvlcmmo....",
+    "....ohllllvmcmmdo...",
+    "....ohlmllvlmmmmo...",
+    "...hmlllmlvmlmmddo..",
+    "...olmllllvlmmmmmo..",
+    "...hllmllccmmmdmdo..",
+    "..hllllllccmmcmmdo..",
+    "..olmlllmccmcccddo..",
+    "...hllllmvvlcccmdo..",
+    "...olllllvvmccldo...",
+    "...ollmllvvmccddo...",
+    "....ollmlvvmcddo....",
+    "....olllloolmmdo....",
+    ".....olmo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_2",
+   "shape": "card",
+   "pivot": [
+    0.0416,
+    0.1298,
+    0.0219
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -77.3014,
+    62.1592,
+    12.2661
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........h...........",
+    ".......hvo..........",
+    "......hmvvo.........",
+    "......olvvco........",
+    ".....ollvvmmo.......",
+    ".....omlcvmlmo......",
+    "....ollccvmmmmo.....",
+    "....ohlccccmmlo.....",
+    "...hlhlccccmmmdo....",
+    "...ollmllvcmlmdo....",
+    "..ohhllmlvmlmmdmo...",
+    "..hlllllmvlmmmldo...",
+    "..ollllllvvmmlmdo...",
+    "..hhllmlmvvmmdmddo..",
+    "..hllllmlvvmccmldo..",
+    "..ollllllvvlccddo...",
+    "...olmllmvvcccddo...",
+    "...ollmlmvvmccddo...",
+    "....ollmmvvmlmdo....",
+    "....olllloolmmdo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_3",
+   "shape": "card",
+   "pivot": [
+    -0.0579,
+    0.0878,
+    0.019
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -72.9353,
+    288.1612,
+    14.1859
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........oh..........",
+    "........hvo.........",
+    ".......olvlo........",
+    "......ollvlmo.......",
+    ".....ohhlvmmo.......",
+    ".....olllvmmmo......",
+    "....hhlllvlmmdo.....",
+    "....hmlllvcmmmo.....",
+    "...hhllllvcmmldo....",
+    "...olhlllvcmlmdo....",
+    "...omllllvmlmmmlo...",
+    "..olhlllmvvmmmldo...",
+    "..hhlllllvcmmlcdo...",
+    "..hlllmlmccmmcccdo..",
+    "..ollllmlccmmcccdo..",
+    "..olllllmvclmmcdo...",
+    "...olmlllvvmccddo...",
+    "...ollmmlvvmccddo...",
+    "....ollmlvvmcddo....",
+    "....ollmmooldddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_4",
+   "shape": "card",
+   "pivot": [
+    -0.03,
+    0.094,
+    0.032
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -62.7679,
+    316.8183,
+    -12.8884
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "..........o.........",
+    ".........hvo........",
+    "........olvco.......",
+    ".......ohlvcmo......",
+    "......olllvcmo......",
+    "......hlllvmlmo.....",
+    ".....ohlmlvmmmmo....",
+    "....ollllmvmmmlo....",
+    "....ohmllvvmmlmmo...",
+    "...ohllmlvvmmmmmo...",
+    "...hmlllmvvmmmdlo...",
+    "...olmlllvvlmmmddo..",
+    "..ohllcllvvmmmmmmo..",
+    "..ollcccmccmmmmmlo..",
+    "..hllccclccmlmmddo..",
+    "..hllccmmvclmmmddo..",
+    "...olccllvvmmmldo...",
+    "...ollmlmvvmmlddo...",
+    "....ollmmvvmlddo....",
+    "....olllloolmmdo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_5",
+   "shape": "card",
+   "pivot": [
+    0.0073,
+    0.1212,
+    -0.0437
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -64.6437,
+    170.4916,
+    -7.9902
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........oo.......",
+    "..........ovco......",
+    ".........omvco......",
+    "........ohlvcmo.....",
+    ".......ohllvcmo.....",
+    ".......hmllvmlmo....",
+    "......hllmvvccmo....",
+    ".....omlllvcccmlo...",
+    "....olhmllvccclmo...",
+    "....ohllllvlccmdo...",
+    "...ohhllmlvmlmmmdo..",
+    "...olmlllmvlmmmldo..",
+    "...hhlmllmvmmmlmdo..",
+    "...olllmllvmmlmddo..",
+    "...omlllmvvmlmmmdo..",
+    "...ollllmcclmmmldo..",
+    "...ollllcccmmmldo...",
+    "...ollmmcccmmlddo...",
+    "....ollmlccmlddo....",
+    "....ollllooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_6",
+   "shape": "card",
+   "pivot": [
+    -0.0659,
+    0.1187,
+    0.1022
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -62.8768,
+    327.1933,
+    -3.4422
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........oo.......",
+    "..........ovo.......",
+    ".........omvlo......",
+    "........hlcvmmo.....",
+    ".......ohccvcmo.....",
+    "......ohmccvccmo....",
+    "......hllccvccmo....",
+    ".....omllcvvmmmlo...",
+    "....olhlllvlmmlmo...",
+    "....hhllllvmccmmo...",
+    "...ollllmlvmccmmdo..",
+    "...olmlllmvlccmmmo..",
+    "...olcclllvmmmlmdo..",
+    "...hcccmlmvmmldddo..",
+    "...occclmvvmlmmmdo..",
+    "...hlcllmvvlmmdldo..",
+    "...olllllvvmmdldo...",
+    "...ollmmlvvmmlddo...",
+    "....ollmmvvmlddo....",
+    "....olllloolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_7",
+   "shape": "card",
+   "pivot": [
+    -0.0576,
+    0.0427,
+    -0.0805
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -76.5667,
+    215.6085,
+    -18.2705
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o...........",
+    ".......ovo..........",
+    "......hmvmo.........",
+    "......olvlmo........",
+    ".....hllvvmmo.......",
+    "....hhmlvvmlmo......",
+    "....ollmvvlmmo......",
+    "...hllllmvmmmlo.....",
+    "...olmlllvlmmmdo....",
+    "...ollmllvlmlmmo....",
+    "..ollccmmvmlmmddo...",
+    "..hllcccmvlmmmldo...",
+    "..ollcccmvmmmlmdo...",
+    "..ollccclvvmlmmdo...",
+    "..olllcmlvvmmmmldo..",
+    "..hlmlllmcclmdddo...",
+    "...olmllmccmmmmdo...",
+    "...ollmllccmmlddo...",
+    "....olllmvvmlmdo....",
+    "....ollmmooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_8",
+   "shape": "card",
+   "pivot": [
+    0.0374,
+    0.0748,
+    0.1247
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -61.2058,
+    16.6759,
+    -6.2863
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........hh..........",
+    ".......hcvo.........",
+    ".......ocvlo........",
+    "......olcvmo........",
+    ".....ohllvmmo.......",
+    ".....hlllvllmo......",
+    "....hhcclvlmmdo.....",
+    "....hlclmvlmmmo.....",
+    "...hhhlllvlmmmdo....",
+    "...ollllccmmlmdo....",
+    "...hhllmccclmmmlo...",
+    "..hlllllccvmmmldo...",
+    "..ollllllvvmmlddo...",
+    "..olllmlmvvmmccddo..",
+    "..ollllmmvvmmccldo..",
+    "..olllllmvvlmmmdo...",
+    "...olmlllvvmmmddo...",
+    "...ollmlmvvmmlddo...",
+    "....ollmlvvmlddo....",
+    "....olllmoolmddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_9",
+   "shape": "card",
+   "pivot": [
+    -0.001,
+    0.0284,
+    0.0613
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -68.4699,
+    359.0204,
+    -8.9478
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........o..........",
+    "........ovo.........",
+    ".......ocvlo........",
+    "......occvmmo.......",
+    "......hclvmmmo......",
+    ".....hcclvmmmo......",
+    ".....hllmvmlmmo.....",
+    "....omcllvvmmmlo....",
+    "...olccllvvmmlmo....",
+    "...hlcclcvvmlmmdo...",
+    "...omlllccvlmmmlo...",
+    "..ohllllcvvmmmlmo...",
+    "..hllllllvvmmlmmdo..",
+    "..hmlllllvvmmmddlo..",
+    "..ollllmmvvmldmmdo..",
+    "..ohllllmvvlmmmddo..",
+    "...olmlllvvmmmldo...",
+    "...ollmlmvvmdlddo...",
+    "....ollmlvvmlmdo....",
+    "....olllmooldddo....",
+    ".....olmo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_10",
+   "shape": "card",
+   "pivot": [
+    0.1177,
+    0.0782,
+    -0.0923
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -80.6942,
+    128.0991,
+    -15.9608
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........ho..........",
+    "........ovo.........",
+    ".......hlvlo........",
+    "......ohlvmmo.......",
+    ".....omllvmmo.......",
+    ".....hhllvmmmo......",
+    "....ohhclvmmmdo.....",
+    "....hmcccclmmmo.....",
+    "...ohlcccclmmlmo....",
+    "...hhlllccmmlmmdo...",
+    "...omllclcmlmmdlo...",
+    "..olllcccvvmmmlmo...",
+    "..olllcccvvmccmmo...",
+    "..olllcccvvcccmddo..",
+    "..ollllccvvcccmldo..",
+    "..olllllmvvcccmdo...",
+    "...olmllmvvmcdmdo...",
+    "...ollmlmvvmmlddo...",
+    "....ollmmvvmlmdo....",
+    "....ollmlooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_11",
+   "shape": "card",
+   "pivot": [
+    0.0251,
+    0.0862,
+    0.0617
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -50.6838,
+    22.1797,
+    -6.7573
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........o........",
+    "..........ovo.......",
+    ".........ovvo.......",
+    "........hlvvmo......",
+    ".......hclvvmmo.....",
+    "......olclvlmmo.....",
+    ".....hhlclvllmmo....",
+    ".....omlllvlmmmo....",
+    "....hlllllccmmmdo...",
+    "....hllmlcccmmmmo...",
+    "...hmlllmccclmmmdo..",
+    "...olmlllcccmmmddo..",
+    "...ollmllvccmmmmdo..",
+    "..olllllmccmmlmmdo..",
+    "..olmlllmccclmdddo..",
+    "...ollllmcccmmmddo..",
+    "...olllllccmmmldo...",
+    "...ollmllvvmmlddo...",
+    "....ollmlvvmlmdo....",
+    "....olllmooldddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_12",
+   "shape": "card",
+   "pivot": [
+    0.0929,
+    0.0976,
+    0.0455
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -80.3168,
+    63.9143,
+    18.1895
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......ho...........",
+    "......ovvo..........",
+    "......olvlo.........",
+    ".....ollvmmo........",
+    ".....hllvmmo........",
+    "....hlmlvlmmo.......",
+    "....ohlmvclmmo......",
+    "...omlllccmmmlo.....",
+    "...hlmllcccmlmo.....",
+    "..ohllmllcccmmmo....",
+    "..hllllmlcccmmddo...",
+    "..hlmlllmvcccmldo...",
+    "..hllmlllvmcccmdo...",
+    "..hlllmllvmcccmdo...",
+    "..hlcclmlvvcccdlo...",
+    "..olccclmvvlmmddo...",
+    "...olcllmvvmmmmdo...",
+    "...ollmllvvmmlddo...",
+    "....ollmmvvmlddo....",
+    "....ollllooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_13",
+   "shape": "card",
+   "pivot": [
+    -0.1828,
+    0.0405,
+    -0.0174
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -83.4703,
+    264.5561,
+    11.0096
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......o............",
+    "......ovoo..........",
+    "......hvvlo.........",
+    ".....ohlvmmo........",
+    ".....hccvmmo........",
+    "....ohclvlmmo.......",
+    "....hllmvllmmo......",
+    "...hmlllvvmmmlo.....",
+    "...ohmllvvmmlmo.....",
+    "..ohllmlvvmmmmmo....",
+    "..hmlllmlvmlmmddo...",
+    "..olmlllmvlmmmddo...",
+    "..ollmlllvccmlmdo...",
+    "..hlllccmvcccmmdo...",
+    "..olllcccccccmmlo...",
+    "..hlmlccccccmmdmo...",
+    "...olmcccccmmmddo...",
+    "...ollmllvvmmlddo...",
+    "....ollmlvvmlddo....",
+    "....olllmoolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_14",
+   "shape": "card",
+   "pivot": [
+    0.0965,
+    0.1145,
+    -0.153
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -53.2035,
+    147.754,
+    -12.3434
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "..........o.........",
+    ".........ovo........",
+    "........hcvlo.......",
+    ".......olcvmmo......",
+    "......ohhcvlmo......",
+    "......ollcvclmo.....",
+    ".....ohlmcccmmmo....",
+    "....ohllccccmmlo....",
+    "....olmlccvmmlmdo...",
+    "...hhllmlvvmmmmdo...",
+    "...omlllmvvmmmmlo...",
+    "...hlmlllvvlmmmmdo..",
+    "..olllmllvvmmmmddo..",
+    "..hllllllvvmmmddlo..",
+    "..hlmllllvvccmmddo..",
+    "..ollllllvvccdmddo..",
+    "...olmlllvcccmldo...",
+    "...ollmllvvcclddo...",
+    "....ollmmvvmlmdo....",
+    "....olllloolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_15",
+   "shape": "card",
+   "pivot": [
+    0.0178,
+    0.1347,
+    -0.0487
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -54.9088,
+    159.8912,
+    -19.6241
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........o..........",
+    "........ovo.........",
+    ".......ocvlo........",
+    "......occvcmo.......",
+    "......oclvcmmo......",
+    ".....olmlvcmmo......",
+    "....hllllvmlmmo.....",
+    "....omlllvlmmmmo....",
+    "...ohhmllvlmmlmo....",
+    "...olllllvvmlmmmo...",
+    "...omllllvvlmmmlo...",
+    "..hlhlllmvvmmmlmo...",
+    "..hhllllmvvmmlmmdo..",
+    "..hmlllllvvmmmmddo..",
+    "..ollllmmvvmmmcldo..",
+    "..hllllllvvlmmcddo..",
+    "...olmllmvvmmdldo...",
+    "...ollmmmvvmmlddo...",
+    "....ollmmvvmlddo....",
+    "....olllloolmddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_16",
+   "shape": "card",
+   "pivot": [
+    0.0159,
+    0.0508,
+    0.0549
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -53.065,
+    16.127,
+    -16.1159
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........o........",
+    "..........ovo.......",
+    ".........ovvlo......",
+    "........hlvvmo......",
+    ".......hllvvmmo.....",
+    "......ohmlvmmlo.....",
+    ".....hlhllvllmmo....",
+    ".....omlllvlmmmo....",
+    "....ohllllvmmmmmo...",
+    "....hllmlccmmlmmo...",
+    "...ollllcccmlmmmmo..",
+    "...ohmllccclmmmddo..",
+    "...ollmlccccmmmddo..",
+    "..hlllllccccmlmmdo..",
+    "..hlmllllvvclmmddo..",
+    "...ollllmvvlmmmmdo..",
+    "...ollllmvvmmdldo...",
+    "...ollmmlvvmmlddo...",
+    "....ollmlvvmlmdo....",
+    "....ollmloolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_17",
+   "shape": "card",
+   "pivot": [
+    -0.0112,
+    0.0083,
+    0.0972
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -42.4872,
+    353.4295,
+    -13.2532
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o...........",
+    ".......ovh..........",
+    "......omvlo.........",
+    "......olvvmo........",
+    ".....ohlvvmmo.......",
+    ".....hmllvmlmo......",
+    "....hhcmlvmmmmo.....",
+    "....olclmvmcmlo.....",
+    "...ohlcllvmccmdo....",
+    "...ollmllvmcccmo....",
+    "..ohlllmlvmcccmdo...",
+    "..olllllmvlccmldo...",
+    "..hllllllvmcccmmo...",
+    "..hlllmllvvcccmddo..",
+    "..ollllmlvvccmdldo..",
+    "..ollllllvvlmmddo...",
+    "...olmlllvvmmdddo...",
+    "...ollmlmvvmmlddo...",
+    "....ollmmvvmlmdo....",
+    "....olllmoolmddo....",
+    ".....olmo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_18",
+   "shape": "card",
+   "pivot": [
+    -0.0483,
+    0.0687,
+    -0.0239
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -51.2076,
+    243.6578,
+    19.9055
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......h............",
+    "......ovoo..........",
+    "......olvlo.........",
+    ".....hhlvmmo........",
+    ".....hllvlmo........",
+    "....ohmlvlmmo.......",
+    "....hllmvvlmmo......",
+    "...omlllvvmmmlo.....",
+    "...hlmllvvmmlmo.....",
+    "..hlllmlccmmmmmo....",
+    "..hllllmccmlmmmmo...",
+    "..hhmlllcclmmmldo...",
+    "..ollmllmvmcmlmdo...",
+    "..hlllmlcccccmdmo...",
+    "..ollllmcccccddlo...",
+    "..hlmllllcccmdddo...",
+    "...olmllmvvmmmmdo...",
+    "...ollmmlvvmmlddo...",
+    "....olllmvvmlmdo....",
+    "....ollllooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_19",
+   "shape": "card",
+   "pivot": [
+    0.0797,
+    0.0573,
+    0.0825
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -84.4446,
+    44.0184,
+    -0.8895
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........o........",
+    "..........ovo.......",
+    ".........ovvlo......",
+    "........olvvmo......",
+    ".......hhlvvmmo.....",
+    "......ohmlvlcmo.....",
+    ".....hhlllvlcmmo....",
+    ".....omllcvlccmo....",
+    "....hlllcccmcmmdo...",
+    "....hllmcccmmmmmo...",
+    "...ohlllcccmlmmmdo..",
+    "...hlmllccclmmdmdo..",
+    "...ollcccvvmmmdmdo..",
+    "..olllccccvmmlmddo..",
+    "..hlmlclcvvmlmmddo..",
+    "...olllllvvlmmmddo..",
+    "...olllllvvmmmldo...",
+    "...ollmlmvvmmlmdo...",
+    "....ollmmvvmlmdo....",
+    "....olllloolmddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_20",
+   "shape": "card",
+   "pivot": [
+    0.0956,
+    0.059,
+    0.0049
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -51.1864,
+    87.0704,
+    15.572
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......o............",
+    "......hvoo..........",
+    "......occco.........",
+    ".....hlcccmo........",
+    ".....hlcvcco........",
+    "....olmcvccmo.......",
+    "....ollmvvlmmo......",
+    "...omlllvvmmmlo.....",
+    "...ohmllvvmmldo.....",
+    "..hlllmlmvmmmmmo....",
+    "..hmlllmlvmlmmddo...",
+    "..ohmlllmvlmmmlmo...",
+    "..ollmlllvmmmlmdo...",
+    "..olllmcccmmlmmdo...",
+    "..hhlllccccmmddlo...",
+    "..olmllcccclmmddo...",
+    "...olmllccvmmmddo...",
+    "...ollmllvvmmlddo...",
+    "....ollmmvvmlddo....",
+    "....ollmloolmddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_21",
+   "shape": "card",
+   "pivot": [
+    -0.0958,
+    0.0356,
+    0.0535
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -50.9075,
+    299.177,
+    -11.6774
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......h............",
+    "......hvoo..........",
+    "......olvlo.........",
+    ".....hllclmo........",
+    ".....ollcmmo........",
+    "....olmlccmmo.......",
+    "....hllmcclmmo......",
+    "...hmlllvvmmmlo.....",
+    "...olmccvvmmlmo.....",
+    "..olhlcclvlmmmmo....",
+    "..hmlccclvmlmmddo...",
+    "..olmlcclvlmmmlmo...",
+    "..hlccllmvmmmlmdo...",
+    "..hlccmlmvcclmmdo...",
+    "..olcclmlvcccmmlo...",
+    "..hlmclllvcccmddo...",
+    "...olmllmvvcmmmdo...",
+    "...ollmllvvmmlddo...",
+    "....ollmlvvmlddo....",
+    "....olllmoolmddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_22",
+   "shape": "card",
+   "pivot": [
+    0.168,
+    0.0072,
+    0.0197
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -81.7615,
+    83.328,
+    2.6138
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........h...........",
+    ".......ovo..........",
+    "......ocvmo.........",
+    "......hcvlmo........",
+    ".....hhlvvmmo.......",
+    "....olmlcvmlmo......",
+    "....ollccvlmmo......",
+    "...ohllccvmmmlo.....",
+    "...ohmlccvmmmmmo....",
+    "...ollmccvmmmmmo....",
+    "..hhlllmlvmlmmmdo...",
+    "..ohllllmvlmmmlmo...",
+    "..ollmlllvmmmcddo...",
+    "..olllmllvvmlccmo...",
+    "..ollllmmvvmmcclo...",
+    "..hlmlllmvvlmmcdo...",
+    "...olmllmvvmmmddo...",
+    "...ollmmmvvmmlddo...",
+    "....ollmlvvmlddo....",
+    "....ollllooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_23",
+   "shape": "card",
+   "pivot": [
+    -0.0056,
+    0.0916,
+    0.0943
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -75.5886,
+    356.6055,
+    9.7891
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........oo.......",
+    "..........ovo.......",
+    ".........omvco......",
+    "........hhlvcco.....",
+    ".......olllvmco.....",
+    ".......omlvvmcmo....",
+    "......ohlmvvlmmo....",
+    ".....omlllvvmmmlo...",
+    "....ohlcclvlmmlmo...",
+    "....ollcclvmmlmdo...",
+    "...olllcclvmlmmddo..",
+    "...olmlccmvlmmmmdo..",
+    "...ollmclmvmmmlddo..",
+    "...olllmllvmmlmmdo..",
+    "...omllllvvmlmdddo..",
+    "...hllllmvccmmmldo..",
+    "...olllmlvccmmldo...",
+    "...ollmmlvccmlddo...",
+    "....ollmmvvmlddo....",
+    "....olllmoolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_24",
+   "shape": "card",
+   "pivot": [
+    0.0016,
+    0.1223,
+    -0.0448
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -80.4893,
+    177.9437,
+    16.9831
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........h...........",
+    ".......ovo..........",
+    "......hmvmo.........",
+    "......ocvvmo........",
+    ".....hhlvvmmo.......",
+    ".....omllvclmo......",
+    "....ohlmlvccmmo.....",
+    "....olllmvccmlo.....",
+    "...hlllllvccmmmo....",
+    "...ohlmllvmmlmmo....",
+    "..ollllmlvmlmmmdo...",
+    "..ollllllvlmmmldo...",
+    "..hhlllllvvmmlmdo...",
+    "..hhllmlmvvmmmmddo..",
+    "..ohlllmlvvmmmdldo..",
+    "..ollllllvvccmddo...",
+    "...olmllmvvccmddo...",
+    "...ollmllvvmmlddo...",
+    "....ollmmvvmlmdo....",
+    "....ollmloolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_25",
+   "shape": "card",
+   "pivot": [
+    0.1156,
+    0.0899,
+    -0.0699
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -76.6672,
+    121.1723,
+    1.121
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........o........",
+    "..........ovo.......",
+    ".........hlvlo......",
+    "........hlvvmo......",
+    ".......hllvvmmo.....",
+    "......olmlvvmlo.....",
+    ".....hhlllvmlmmo....",
+    ".....omlllvmmmmo....",
+    "....olllllvmmmmmo...",
+    "....hllmllvmmlmdo...",
+    "...ohlllmlvmlccmdo..",
+    "...olmlllcclmcccmo..",
+    "...ollmlcccmmcccdo..",
+    "..olllllcccmcccddo..",
+    "..olmllllcvmcccmdo..",
+    "...olllllvvlcccldo..",
+    "...olllmlvvmmccdo...",
+    "...ollmlmvvmmccdo...",
+    "....ollmmvvmlcdo....",
+    "....olllloolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_26",
+   "shape": "card",
+   "pivot": [
+    -0.1155,
+    0.1292,
+    -0.0787
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -83.0326,
+    235.7036,
+    -17.0248
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........oo..........",
+    ".......hvvo.........",
+    ".......ovvlo........",
+    "......hlmvmo........",
+    ".....olclvmmo.......",
+    ".....occlvllmo......",
+    "....hlcclvmmmdo.....",
+    "....hcccmvcmmmo.....",
+    "...ohccllcccmmmo....",
+    "...olccllccclmdo....",
+    "...olllmlcccmmmlo...",
+    "..olllllmvccmmldo...",
+    "..olllllmvvmmldmo...",
+    "..olllmlmvvmmmdddo..",
+    "..ollllmmvvmmddldo..",
+    "..olllllmvvlmmddo...",
+    "...olmlllvvmmmmdo...",
+    "...ollmmmvvmmlddo...",
+    "....ollmlvvmlmdo....",
+    "....olllloolmddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_27",
+   "shape": "card",
+   "pivot": [
+    -0.0332,
+    0.0062,
+    0.1809
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -80.4536,
+    349.5918,
+    -14.8947
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "..........o.........",
+    ".........ovo........",
+    "........omvmo.......",
+    ".......hhlvmmo......",
+    ".......ollvmmo......",
+    "......olllvcmmo.....",
+    ".....ollllvccmmo....",
+    ".....hlllmcccmlo....",
+    "....hhmlllvccmmmo...",
+    "...hlhlmllvccmmmo...",
+    "...omlllccvmmmmlo...",
+    "...olmllccvlmmmddo..",
+    "...hllcccccmmmmddo..",
+    "..ohlcclccvmmccddo..",
+    "..olccccccvmlccmdo..",
+    "...olcccmvvlmccddo..",
+    "...olccllvvmmcldo...",
+    "...ollmlmvvmmlmdo...",
+    "....ollmlvvmlmdo....",
+    "....olllmooldddo....",
+    ".....olmo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_28",
+   "shape": "card",
+   "pivot": [
+    -0.0269,
+    0.0234,
+    0.1341
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -68.5835,
+    348.6726,
+    2.7682
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......hh...........",
+    "......ovvh..........",
+    "......olvlo.........",
+    ".....hllvmmo........",
+    ".....oclvmmmo.......",
+    "....ohclvmmmo.......",
+    "....hllmvvlmmo......",
+    "...omlllvvmmmlo.....",
+    "...hlmllvvmmlmdo....",
+    "..olllmllvmmmmdo....",
+    "..hlllcclvmlmmddo...",
+    "..hhmlccmvlmmmldo...",
+    "..hllmccmvmmmlmdo...",
+    "..ollccllvmmldddo...",
+    "..hllcccmvvmmmdlo...",
+    "..olmcccmvvlmmddo...",
+    "...olcccmvvmmmddo...",
+    "...ollccmvvmmlmdo...",
+    "....olllmvvmlddo....",
+    "....olllmoolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_29",
+   "shape": "card",
+   "pivot": [
+    -0.1784,
+    0.0005,
+    -0.0039
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -81.5063,
+    268.738,
+    -19.4756
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o...........",
+    ".......ovh..........",
+    "......hmvvo.........",
+    "......olvvmo........",
+    ".....ollvvmmo.......",
+    ".....omllvmlmo......",
+    "....ollmlvmmmmo.....",
+    "....hhlccvlmmlo.....",
+    "...ohllccclmmddo....",
+    "...hllmcccmmlmmo....",
+    "..olhlccccmlmcdmo...",
+    "..hlllccmvlmmccmo...",
+    "..hllllllccmmlmdo...",
+    "..olllmllccmmmmddo..",
+    "..ollllmlccmmmmldo..",
+    "..ollllllvvlmmmdo...",
+    "...olmllmvvmmmddo...",
+    "...ollmllvvmmlmdo...",
+    "....ollmlvvmlddo....",
+    "....ollmlooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_30",
+   "shape": "card",
+   "pivot": [
+    -0.034,
+    0.1096,
+    0.0346
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -79.5045,
+    315.5125,
+    2.0243
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........o........",
+    "..........ovo.......",
+    ".........olvlo......",
+    "........olvvmo......",
+    ".......ohlvvmmo.....",
+    "......olmlvvmlo.....",
+    "......hlccvmlmmo....",
+    ".....hmlclvmmmmdo...",
+    "....olllccvmmccdo...",
+    "....hhlmccvccccco...",
+    "...hllllclccccccmo..",
+    "...hlmlllmccccccdo..",
+    "...ollmllmcccmccdo..",
+    "...olllllvvccldddo..",
+    "..olmllllvvmlmdddo..",
+    "...ollllmvvlmmdldo..",
+    "...olllmlvvmmmldo...",
+    "...ollmlmvvmmlddo...",
+    "....ollmmvvmlddo....",
+    "....ollllooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_31",
+   "shape": "card",
+   "pivot": [
+    -0.043,
+    0.0463,
+    0.045
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -80.1288,
+    316.3347,
+    10.943
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "..........oo........",
+    ".........ovo........",
+    "........omvmo.......",
+    ".......ohlvmmo......",
+    ".......ollvlmo......",
+    "......ohllvcmmo.....",
+    ".....ollclvcmmmo....",
+    ".....olccmvcmmlo....",
+    "....ohmlllvmmmmdo...",
+    "...hhhlmllvmmmmdo...",
+    "...omlllmvvmmmdlo...",
+    "...olmlllvvlmmmmdo..",
+    "...ollmllvvmmmdddo..",
+    "..hllllllvvmcldmdo..",
+    "..olmllllvvmcmmmdo..",
+    "...hlllmlvvlmmdddo..",
+    "...ollccmvvmmmldo...",
+    "...ollccmvvmmlmdo...",
+    "....olccmvvmlddo....",
+    "....olllmooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_32",
+   "shape": "card",
+   "pivot": [
+    0.0203,
+    0.0048,
+    -0.1124
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -66.7519,
+    169.7436,
+    -0.4468
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......h............",
+    "......ovoo..........",
+    "......hlclo.........",
+    ".....ollcmmo........",
+    ".....ollclmo........",
+    "....ohmlcmmmo.......",
+    "....ollmvvlmmo......",
+    "...hmlllvvmcclo.....",
+    "...olmllvvmccco.....",
+    "..olllmllvmcccdo....",
+    "..hmlllmlvmlcccmo...",
+    "..hhmllllvlmmclmo...",
+    "..ollmlllvmmmlmdo...",
+    "..ohllmllvmmldmdo...",
+    "..hllllmlccmmddlo...",
+    "..hhmlccccclmmdmo...",
+    "...olmcccccmmmddo...",
+    "...ollmclccmmlmdo...",
+    "....ollmlvvmlddo....",
+    "....ollllooldddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_33",
+   "shape": "card",
+   "pivot": [
+    -0.0956,
+    0.0508,
+    0.084
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -74.5411,
+    311.2991,
+    0.9195
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........h...........",
+    ".......hvo..........",
+    "......hcvmo.........",
+    "......ocvlmo........",
+    ".....olcvvmmo.......",
+    "....olmcvvmlmo......",
+    "....ohlmcclmmo......",
+    "...hhlllcccmmlo.....",
+    "...ohmllccccmmdo....",
+    "...ohlmlccccmmmo....",
+    "..hllllmlcccmmmmo...",
+    "..ohllllmvccmmlmo...",
+    "..ohlmlllvccclmdo...",
+    "..olllmllccccmddo...",
+    "..ollllmmvcccmmlo...",
+    "..hlmllllvvcmdddo...",
+    "...olmllmvvmmmmdo...",
+    "...ollmlmvvmmlddo...",
+    "....ollllvvmlddo....",
+    "....ollmlooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_34",
+   "shape": "card",
+   "pivot": [
+    0.0109,
+    0.0119,
+    0.1637
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -64.452,
+    3.7985,
+    -4.7537
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........o........",
+    "..........ovo.......",
+    ".........olvco......",
+    "........ohcvco......",
+    ".......ohlcvcmo.....",
+    "......ohmlvvmlmo....",
+    "......ohlmvvlmmo....",
+    ".....omlllvcmmmmo...",
+    "....hhhlllccmmldo...",
+    "....hllmllccclmmo...",
+    "...ohhllmmcccmmmmo..",
+    "...hlmlllmccmmmmmo..",
+    "...ohlmlllvmmmldmo..",
+    "...olllllvvmmlmmdo..",
+    "..olmllllvvmlmmddo..",
+    "...olllmmcclmmdldo..",
+    "...ollllmccmmmldo...",
+    "...ollmllvvmmlddo...",
+    "....ollmlvvmlddo....",
+    "....olllloolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_35",
+   "shape": "card",
+   "pivot": [
+    -0.0776,
+    0.0681,
+    0.0186
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -83.4825,
+    283.4595,
+    -16.1952
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o...........",
+    ".......hvo..........",
+    ".......hcvo.........",
+    "......olcvmo........",
+    ".....olccvmmo.......",
+    ".....ohccvmlmo......",
+    "....ohlmlvmmmmo.....",
+    "....olllmvccmlo.....",
+    "...olllllvcccmmo....",
+    "...hlllllvcccmmo....",
+    "..ohlllmlvmccmdlo...",
+    "..olllllmvlmmmlmo...",
+    "..ollllllvvmmlmdo...",
+    "..hlllmlmvvmmddmdo..",
+    "..hllllmmvvmmdmldo..",
+    "..hllllllvvlmdddo...",
+    "...olmlllvvmmmddo...",
+    "...ollmmlvvmdlddo...",
+    "....ollmmvvmlmdo....",
+    "....ollllooldddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_36",
+   "shape": "card",
+   "pivot": [
+    0.0852,
+    0.0717,
+    0.0973
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -59.5279,
+    41.2024,
+    14.3138
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........oo.......",
+    "..........ovo.......",
+    ".........omvco......",
+    "........ollvcmo.....",
+    ".......ohllvcmo.....",
+    "......ohmlcvclmo....",
+    "......ollmcvlmmo....",
+    ".....omlllcvmmmlo...",
+    "....hlhlllvmmmldo...",
+    "....hlllllvmmlmmo...",
+    "...ohlllmlvmlmccdo..",
+    "...olmlllmvlmcccdo..",
+    "...hllmlllvmmcccmo..",
+    "...hlllmlmvmmcccdo..",
+    "...omllllvvmlmccdo..",
+    "...hlllllvvlmddldo..",
+    "...ollllmvvcmmldo...",
+    "...ollmllvccmlddo...",
+    "....ollmlvcclmdo....",
+    "....olllmoolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_37",
+   "shape": "card",
+   "pivot": [
+    -0.0401,
+    0.0274,
+    0.0068
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -53.6037,
+    279.571,
+    13.4577
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "...........oo.......",
+    "..........ovo.......",
+    ".........omvlo......",
+    "........ohlvcmo.....",
+    ".......olllvcmo.....",
+    "......ohclvvccmo....",
+    "......occccvlmmo....",
+    ".....hmccccvmmmlo...",
+    "....ohlclccmmmlmo...",
+    "....ollllcvmmlmmo...",
+    "...ohlllmmvmlmmdmo..",
+    "...ohmllllvlmmmddo..",
+    "...ollmlllvmmmlddo..",
+    "...olllmlmvmmlmddo..",
+    "...omllllvvccmmmdo..",
+    "...ollllmvcccmmldo..",
+    "...ollllmvcccmldo...",
+    "...ollmmlvvcmlddo...",
+    "....ollmmvvmlmdo....",
+    "....olllloolmddo....",
+    ".....ollo.voddo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_38",
+   "shape": "card",
+   "pivot": [
+    0.0738,
+    0.1224,
+    -0.1394
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -47.9358,
+    152.0872,
+    -14.0277
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........h...........",
+    ".......ovo..........",
+    "......hmvmo.........",
+    "......olvmmo........",
+    ".....hllvvmmo.......",
+    "....hhmlvvmlmo......",
+    "....ohlmcclmmo......",
+    "...hhlccccmmmlo.....",
+    "...ohmccccmmmmmo....",
+    "...hllclccmmlmmo....",
+    "..ohlllmlvmlmmmdo...",
+    "..hhllllcvlmmmldo...",
+    "..ollmlccvmmmlddo...",
+    "..olllmcccvmmmmmo...",
+    "..hllllcccvmmdmldo..",
+    "..olmllmcvvccmddo...",
+    "...olmllmvcccmddo...",
+    "...ollmllvvcmlddo...",
+    "....ollmmvvmlddo....",
+    "....olllloolmddo....",
+    ".....ollo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "leaf_39",
+   "shape": "card",
+   "pivot": [
+    0.003,
+    0.1266,
+    -0.0841
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -71.973,
+    177.9319,
+    -19.7775
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "..........o.........",
+    ".........hvo........",
+    "........hlvlo.......",
+    ".......olcvmo.......",
+    "......hhccvmmo......",
+    "......hmccvllmo.....",
+    ".....ollccvlmmo.....",
+    "....omlllvvmmmlo....",
+    "....olmllvvmmlmo....",
+    "...hhllmlvcmlmmmo...",
+    "...omllllcccmmmlo...",
+    "...hlmlllcccmmlmo...",
+    "..olllllccccmmmddo..",
+    "..hmllllcccmmmmmlo..",
+    "..ollllmccvmlmmddo..",
+    "..olllllccvlmmdddo..",
+    "...olmllmvvmmdldo...",
+    "...ollmmlvvmmlddo...",
+    "....ollmmvvmlmdo....",
+    "....olllloolmddo....",
+    ".....olmo.vomdo.....",
+    "......ooo.vooo......"
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.1,
+    0
+   ]
+  },
+  {
+   "id": "vine",
+   "shape": "prism",
+   "pivot": [
+    0.0851,
+    -0.214,
+    0.2013
+   ],
+   "size": [
+    0.016,
+    0.016,
+    0.4317
+   ],
+   "parent": "leaves",
+   "rotation": [
+    82.4133,
+    22.9183,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_40",
+   "shape": "card",
+   "pivot": [
+    0.0762,
+    -0.0428,
+    0.1803
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -10.5397,
+    40.1652,
+    178.74
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o.......",
+    ".......hvo......",
+    "......omvo......",
+    ".....ohlcmo.....",
+    "....hlllccmo....",
+    "....ohllvcmo....",
+    "...ohlllvcmlo...",
+    "...hcclvvmlmo...",
+    "..omccmvvlmmlo..",
+    "..olcclvvmmldo..",
+    "..hlcllvvmmmdo..",
+    "..hlllmccmmddo..",
+    "..olllccclmddo..",
+    "..olmllccmmldo..",
+    "...olmmvvmlmo...",
+    "...ollloodmdo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_41",
+   "shape": "card",
+   "pivot": [
+    0.0806,
+    -0.1284,
+    0.1908
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -20.1824,
+    50.7239,
+    168.5432
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".....ho.........",
+    ".....hvo........",
+    "....olcmo.......",
+    "....hlclmo......",
+    "...hlcvmmmo.....",
+    "...hlcvvmmo.....",
+    "..olcclvmmlo....",
+    "..hhcccvmlmmo...",
+    "..hlcclvmmmmo...",
+    "..hlllmvlmmldo..",
+    "..hlmcmvmmlmmo..",
+    "..ollccvmmmmlo..",
+    "..omlclvmmmddo..",
+    "..olmllvvmmldo..",
+    "..ollmmvvmldo...",
+    "...ollloolddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_42",
+   "shape": "card",
+   "pivot": [
+    0.0851,
+    -0.214,
+    0.2013
+   ],
+   "parent": "leaves",
+   "rotation": [
+    9.4322,
+    33.0544,
+    194.1387
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........o......",
+    "........ovo.....",
+    ".......hvmo.....",
+    "......olvmmo....",
+    ".....ollvclo....",
+    "....hllmvcmmo...",
+    "....hmllccmlo...",
+    "...hhlllccmmmo..",
+    "...hhlmmccmmmo..",
+    "..olmlllvmmmdo..",
+    "..hllmlmvmmmdo..",
+    "..ollllmvmlmmo..",
+    "..hllllvccmmlo..",
+    "..olmlmvcmmldo..",
+    "...olmlvvmlddo..",
+    "...ollloomddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_43",
+   "shape": "card",
+   "pivot": [
+    0.0895,
+    -0.2996,
+    0.2118
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -17.4691,
+    55.9416,
+    177.3623
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o.......",
+    ".......oco......",
+    "......hlcco.....",
+    ".....ohlcco.....",
+    ".....omlvlmo....",
+    "....olclvlmmo...",
+    "...hlcclvmmlo...",
+    "...hhcllvmlmdo..",
+    "..hmllmlvlmmlo..",
+    "..olmllmvmmmmo..",
+    "..ollllvvmmmdo..",
+    "..ollllvvmmdmo..",
+    "..ollllvvlmmmo..",
+    "..olmllvvmmldo..",
+    "...olmlvvmlmo...",
+    "...ollmoommdo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_44",
+   "shape": "card",
+   "pivot": [
+    0.094,
+    -0.3852,
+    0.2223
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -17.774,
+    52.3204,
+    202.948
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........oo.....",
+    "........ovo.....",
+    ".......hcvco....",
+    "......hclvco....",
+    ".....occlvmmo...",
+    ".....ollvvmmo...",
+    "....omllvmmmdo..",
+    "...ollmlvmmmmo..",
+    "...hhlllvmmmmo..",
+    "..hlmllmvmmmmo..",
+    "..hllmccvmmmmo..",
+    "..omllccvmlmdo..",
+    "..hlllccvlmmlo..",
+    "..olmllvvmmldo..",
+    "...olmlvvmlddo..",
+    "...ollloommdo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "vine_1",
+   "shape": "prism",
+   "pivot": [
+    0.2013,
+    -0.2516,
+    -0.0851
+   ],
+   "size": [
+    0.016,
+    0.016,
+    0.5065
+   ],
+   "parent": "leaves",
+   "rotation": [
+    83.538,
+    112.9183,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_45",
+   "shape": "card",
+   "pivot": [
+    0.1803,
+    -0.0503,
+    -0.0762
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -24.3733,
+    134.6017,
+    168.9744
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......h........",
+    "......oco.......",
+    ".....ohclo......",
+    ".....olclmo.....",
+    "....ohlvmmmo....",
+    "....olmvlmmo....",
+    "...omclvlmmdo...",
+    "...occlvmmlmo...",
+    "..hmccmvvlmdlo..",
+    "..olccmvvmmlmo..",
+    "..hccclccmmmdo..",
+    "..olcclccmmddo..",
+    "..hlllmvvlmmdo..",
+    "..olmlmvvmmldo..",
+    "...olmlvvmlmo...",
+    "...ollmoommdo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_46",
+   "shape": "card",
+   "pivot": [
+    0.1908,
+    -0.151,
+    -0.0806
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -24.6698,
+    79.5231,
+    151.5151
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o.......",
+    ".......hvo......",
+    "......ocvmo.....",
+    ".....ohcvmmo....",
+    ".....occvllo....",
+    "....ohcmvlmmo...",
+    "...ohlllvmmlo...",
+    "...olllcvmlmmo..",
+    "...ollcccmmmlo..",
+    "..olmllcvmmmdo..",
+    "..olllllvcmmmo..",
+    "..ollccvccmmdo..",
+    "..ollccvvcmmlo..",
+    "..olmclvvmmldo..",
+    "...olmmvvmldo...",
+    "...ollloomddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_47",
+   "shape": "card",
+   "pivot": [
+    0.2013,
+    -0.2516,
+    -0.0851
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -22.8933,
+    145.0714,
+    169.7591
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........o......",
+    "........ovo.....",
+    ".......omvo.....",
+    "......olvlmo....",
+    ".....hllvmcmo...",
+    "....hhlmvmcco...",
+    "....hmllvmcco...",
+    "...ohlllvcmmdo..",
+    "...ollllvcccco..",
+    "..ohmllmvcccco..",
+    "..hllmlmvmmcco..",
+    "..hllcclvmlmmo..",
+    "..ollccvvlmmlo..",
+    "..olmlcvvmmldo..",
+    "...olmmvvmlddo..",
+    "...ollloomddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_48",
+   "shape": "card",
+   "pivot": [
+    0.2118,
+    -0.3523,
+    -0.0895
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -15.9824,
+    122.5847,
+    147.4774
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o.......",
+    ".......ovo......",
+    "......hmvco.....",
+    ".....ollvco.....",
+    ".....omlvmmo....",
+    "....hhllvlmo....",
+    "...ohllccmmlo...",
+    "...olmlccmlmo...",
+    "..omllmlvlmmlo..",
+    "..hlmllvvmmmdo..",
+    "..hllllvvmmmdo..",
+    "..hllllvvmmmdo..",
+    "..ollllvvlcddo..",
+    "..olmllvcmccdo..",
+    "...olmlvcccmo...",
+    "...ollmoodcdo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_49",
+   "shape": "card",
+   "pivot": [
+    0.2223,
+    -0.4529,
+    -0.094
+   ],
+   "parent": "leaves",
+   "rotation": [
+    7.4475,
+    87.2924,
+    192.3402
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......o........",
+    "......ovo.......",
+    ".....olvmo......",
+    ".....hlvlmo.....",
+    "....ohlvmlo.....",
+    "...hllmvmmmo....",
+    "...omllvmmmdo...",
+    "...olmlvmmlmo...",
+    "..hmllmvmlmmlo..",
+    "..hhlllvvmmlmo..",
+    "..olcclvcmmdmo..",
+    "..olcclvccmddo..",
+    "..olcclvvccddo..",
+    "..olmllvvcccdo..",
+    "...olmmvvccdo...",
+    "...ollmoommdo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "vine_2",
+   "shape": "prism",
+   "pivot": [
+    -0.0851,
+    -0.2158,
+    -0.2013
+   ],
+   "size": [
+    0.016,
+    0.016,
+    0.4354
+   ],
+   "parent": "leaves",
+   "rotation": [
+    82.4778,
+    -157.0817,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_50",
+   "shape": "card",
+   "pivot": [
+    -0.0762,
+    -0.0432,
+    -0.1803
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -29.0731,
+    164.5263,
+    215.9514
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "......oo........",
+    "......ovo.......",
+    ".....omvmo......",
+    "....ohlvmo......",
+    "....hmlvmlo.....",
+    "...ollmccmmo....",
+    "...omccccmmo....",
+    "..hhlccccmmmo...",
+    "..hlcccvmlmmo...",
+    "..ollccvlmmlmo..",
+    "..hllcccmmlddo..",
+    "..ollcccvmmddo..",
+    "..omllcvvccddo..",
+    "..olmllvvccldo..",
+    "...olmmvvmldo...",
+    "...ollloolddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_51",
+   "shape": "card",
+   "pivot": [
+    -0.0806,
+    -0.1295,
+    -0.1908
+   ],
+   "parent": "leaves",
+   "rotation": [
+    2.0442,
+    227.4983,
+    216.2666
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........o......",
+    "........oco.....",
+    ".......hcco.....",
+    "......olccmo....",
+    ".....ollvmmmo...",
+    "....ollmvmmmo...",
+    "....omllvmmmo...",
+    "...ollllvcmmmo..",
+    "...hllllcccmmo..",
+    "..ohmlllcccmmo..",
+    "..hllmlmvccmdo..",
+    "..olllllvmlddo..",
+    "..hlllllccmmlo..",
+    "..olmllvccdldo..",
+    "...olmmvcmlddo..",
+    "...ollloodddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_52",
+   "shape": "card",
+   "pivot": [
+    -0.0851,
+    -0.2158,
+    -0.2013
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -6.6332,
+    202.5376,
+    185.9092
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "......o.........",
+    ".....hvo........",
+    "....hlvco.......",
+    "....olvcmo......",
+    "...ohllvmmo.....",
+    "...olllvlmmo....",
+    "..ohcclvmmlo....",
+    "..hhcclcccmmo...",
+    "..ohlllccccmo...",
+    "..ollllvlcclmo..",
+    "..olllmvmmlmmo..",
+    "..ollmlvmmmmmo..",
+    "..omllmvmmmmdo..",
+    "..olmlmvvmdldo..",
+    "..ollmmvvmldo...",
+    "...ollmoolddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_53",
+   "shape": "card",
+   "pivot": [
+    -0.0895,
+    -0.3022,
+    -0.2118
+   ],
+   "parent": "leaves",
+   "rotation": [
+    0.4101,
+    240.3962,
+    149.3459
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........oo.....",
+    "........ovo.....",
+    ".......olvmo....",
+    "......ohlvmo....",
+    ".....ohmlvmmo...",
+    ".....hllvvmmo...",
+    "....omlccmmmmo..",
+    "...ollmccmmmdo..",
+    "...ollccclmmmo..",
+    "..olllllvlmmmo..",
+    "..hllmllvmmlddo.",
+    "..omllccvmlmdo..",
+    "..hllcccvlmclo..",
+    "..olcccvvmccdo..",
+    "...olclvvmlmdo..",
+    "...ollloomddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_54",
+   "shape": "card",
+   "pivot": [
+    -0.094,
+    -0.3885,
+    -0.2223
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -2.9841,
+    222.5344,
+    189.4294
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "........o.......",
+    ".......oco......",
+    "......olcmo.....",
+    ".....hclcmo.....",
+    ".....hclvmlo....",
+    "....hhllvlmmo...",
+    "...ohlllvlmlo...",
+    "...ollllvmlmdo..",
+    "..omllmlvmmmlo..",
+    "..hhmlllvmmmmo..",
+    "..hlllllvmmmdo..",
+    "..ollllvvmmmmo..",
+    "..ollccvvlmmlo..",
+    "..olcccvvmmldo..",
+    "...olccvvmldo...",
+    "...olccoomddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "vine_3",
+   "shape": "prism",
+   "pivot": [
+    -0.2013,
+    -0.2789,
+    0.0851
+   ],
+   "size": [
+    0.016,
+    0.016,
+    0.5607
+   ],
+   "parent": "leaves",
+   "rotation": [
+    84.1655,
+    -67.0817,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_55",
+   "shape": "card",
+   "pivot": [
+    -0.1803,
+    -0.0558,
+    0.0762
+   ],
+   "parent": "leaves",
+   "rotation": [
+    7.1129,
+    285.4072,
+    187.9227
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    "......oo........",
+    "......ovo.......",
+    ".....omvmo......",
+    "....hllvmo......",
+    "....hmlcclo.....",
+    "...hllmclmmo....",
+    "...omlcccmmo....",
+    "..ollcccmmmmo...",
+    "..ollccvmlmmo...",
+    "..olllcvlmmldo..",
+    "..ollcccmmlddo..",
+    "..hllcccvmmddo..",
+    "..omllccvmmddo..",
+    "..olmllvvmdldo..",
+    "...olmlvvmlmo...",
+    "...ollmoolddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_56",
+   "shape": "card",
+   "pivot": [
+    -0.1908,
+    -0.1673,
+    0.0806
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -1.8564,
+    277.6924,
+    158.4295
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".........o......",
+    "........ovo.....",
+    ".......hlvmo....",
+    "......ollvmo....",
+    ".....hlllvmmo...",
+    ".....hhlvmmmo...",
+    "....hmllvmmmmo..",
+    "...ohlllvmmmmo..",
+    "...hllllvmmmdo..",
+    "..ohmllccccmmo..",
+    "..hllmcccccmmo..",
+    "..omllcccccmdo..",
+    "..ollllcvccmlo..",
+    "..olmllvvcmldo..",
+    "...olmlvvmlmdo..",
+    "...ollloomddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_57",
+   "shape": "card",
+   "pivot": [
+    -0.2013,
+    -0.2789,
+    0.0851
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -4.9281,
+    332.6342,
+    211.9214
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......o........",
+    "......hvo.......",
+    ".....ocvco......",
+    "....ohcvmo......",
+    "....omcvmlo.....",
+    "...ohlmvlmmo....",
+    "...omllvmmmmo...",
+    "..ohlmlcmmmmo...",
+    "..omllccmlmmo...",
+    "..olllcclmmlmo..",
+    "..hlllccmmlmmo..",
+    "..hllllvvmmdmo..",
+    "..omlllvvmmmdo..",
+    "..olmlmvvmdldo..",
+    "...olmlvvmldo...",
+    "...ollmoolddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_58",
+   "shape": "card",
+   "pivot": [
+    -0.2118,
+    -0.3905,
+    0.0895
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -13.9736,
+    318.3176,
+    162.7017
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......o........",
+    "......ovo.......",
+    ".....hlvlo......",
+    ".....olcmmo.....",
+    "....ohccmco.....",
+    "...ohlmvccmo....",
+    "...hmllcccmmo...",
+    "...olmlccclmo...",
+    "..hmllmcccmmlo..",
+    "..hllllccmmlmo..",
+    "..hllllvvmmmdo..",
+    "..olllmvvmmmdo..",
+    "..ollllvvmmddo..",
+    "..olmlmvvmmldo..",
+    "...olmmvvmlmo...",
+    "...ollloomddo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  },
+  {
+   "id": "leaf_59",
+   "shape": "card",
+   "pivot": [
+    -0.2223,
+    -0.502,
+    0.094
+   ],
+   "parent": "leaves",
+   "rotation": [
+    -29.4727,
+    267.6297,
+    183.2158
+   ],
+   "style": "leaf_pothos",
+   "art": [
+    ".......o........",
+    "......ovo.......",
+    ".....hhvco......",
+    ".....hlvcmo.....",
+    "....ohlvclo.....",
+    "...ohlmvlmmo....",
+    "...omlcvmmmmo...",
+    "...olccvmmldo...",
+    "..omlcccmlmmlo..",
+    "..hllccccmmldo..",
+    "..ollllcvmmmdo..",
+    "..ollllvvmmmmo..",
+    "..olllmvvmmddo..",
+    "..olmllvvcdldo..",
+    "...olmmvvcldo...",
+    "...ollmoommdo...",
+    "....olo.vodo....",
+    ".....oo.voo....."
+   ],
+   "plane": "xy",
+   "double_sided": true,
+   "offset": [
+    0,
+    0.08,
+    0
+   ]
+  }
+ ],
+ "material": {
+  "unlit": false,
+  "roughness": 0.92
+ }
+}

@@ -42,9 +42,9 @@ export class BreathOverlay {
     const x = cssX / SCALE, y = cssY / SCALE;
     for (let i = 0; i < 18; i++) {
       const a = (i / 18) * Math.PI * 2 + Math.random() * 0.3, s = 8 + Math.random() * 22;
-      this.motes.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 6, life: 0, max: 0.6 + Math.random() * 0.6, c: Math.random() < 0.5 ? '#fff4c8' : '#ffd36a', size: Math.random() < 0.25 ? 2 : 1, kind: 'spark' });
+      this.motes.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 6, life: 0, max: 0.6 + Math.random() * 0.6, c: Math.random() < 0.5 ? '#f6f1e5' : '#ebd6b3', size: Math.random() < 0.25 ? 2 : 1, kind: 'spark' });
     }
-    this.motes.push({ x, y, vx: 0, vy: -4, life: 0, max: 0.9, c: '#ffffff', size: 3, kind: 'star' });
+    this.motes.push({ x, y, vx: 0, vy: -4, life: 0, max: 0.9, c: '#faf5e9', size: 3, kind: 'star' });
   }
 
   /** cx, cy: the owl's chest on screen (CSS px). lung 0..1. */
@@ -108,10 +108,10 @@ export class BreathOverlay {
       if (phase === 'in') {
         const a = Math.random() * Math.PI * 2, dist = Math.max(W, H) * (0.45 + Math.random() * 0.25);
         const x = ox + Math.cos(a) * dist, y = oy + Math.sin(a) * dist;
-        this.motes.push({ x, y, vx: 0, vy: 0, life: 0, max: 2.6, c: Math.random() < 0.3 ? '#ffffff' : '#ffe08a', size: Math.random() < 0.15 ? 2 : 1, kind: 'in' });
+        this.motes.push({ x, y, vx: 0, vy: 0, life: 0, max: 2.6, c: Math.random() < 0.3 ? '#faf5e9' : '#eae2d1', size: Math.random() < 0.15 ? 2 : 1, kind: 'in' });
       } else if (phase === 'out' && lung > 0.08) {
         const a = -Math.PI / 2 + (Math.random() - 0.5) * 2.6;
-        this.motes.push({ x: ox + (Math.random() - 0.5) * 6, y: oy - 4, vx: Math.cos(a) * (10 + Math.random() * 18), vy: Math.sin(a) * (8 + Math.random() * 14) - 4, life: 0, max: 2 + Math.random(), c: Math.random() < 0.5 ? '#c8d4ff' : '#eef2ff', size: Math.random() < 0.2 ? 2 : 1, kind: 'out' });
+        this.motes.push({ x: ox + (Math.random() - 0.5) * 6, y: oy - 4, vx: Math.cos(a) * (10 + Math.random() * 18), vy: Math.sin(a) * (8 + Math.random() * 14) - 4, life: 0, max: 2 + Math.random(), c: Math.random() < 0.5 ? '#c7d8ea' : '#f0f2f2', size: Math.random() < 0.2 ? 2 : 1, kind: 'out' });
       }
     }
     const keep: Mote[] = [];

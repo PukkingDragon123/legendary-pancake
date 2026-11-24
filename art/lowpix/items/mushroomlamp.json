@@ -1,0 +1,995 @@
+{
+ "name": "mushroomlamp",
+ "description": "Mushroom Lamp",
+ "author": "Hoot Hollow (furnA, lowpix spec)",
+ "license": "CC0-1.0",
+ "density": 7,
+ "grounded": true,
+ "budget": {
+  "tris": 1800,
+  "colors": 200
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.7
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 4.0
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   30,
+   18
+  ],
+  "shadow": 0.45
+ },
+ "palette": {
+  "ramps": {
+   "moss": [
+    "#111a0e",
+    "#2f4425",
+    "#506b3e",
+    "#749059",
+    "#96aa7e",
+    "#b5bfa4",
+    "#d2d6c8",
+    "#eeefea"
+   ],
+   "fern": [
+    "#0c150a",
+    "#22371c",
+    "#3b572f",
+    "#577544",
+    "#7a995e",
+    "#a2b48c",
+    "#c7cfba",
+    "#eaece5"
+   ],
+   "cream": [
+    "#36210c",
+    "#734b1b",
+    "#af782b",
+    "#d3a353",
+    "#e2c690",
+    "#f1e6cc",
+    "#f6f2e2",
+    "#fdfcf8"
+   ],
+   "stone": [
+    "#171412",
+    "#3b352f",
+    "#5e574d",
+    "#81796d",
+    "#9d988f",
+    "#b6b5af",
+    "#d1d1ce",
+    "#ededed"
+   ],
+   "ink": [
+    "#1c1a17",
+    "#2e2b24",
+    "#4b463a",
+    "#6f6856"
+   ],
+   "glowblue": [
+    "#0b1419",
+    "#447384",
+    "#a4c2c8",
+    "#bad0d2",
+    "#d0ddde",
+    "#e4ebeb",
+    "#f7f8f8"
+   ]
+  }
+ },
+ "brush": {
+  "flow": "long",
+  "length": 2.0,
+  "width": 0.5,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {}
+ },
+ "styles": {
+  "rock": {
+   "ramp": "stone",
+   "tone": 4.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.8,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnA/photos/rock_face_03",
+     "scale": 12,
+     "amount": 0.9,
+     "ramps": [
+      "stone"
+     ]
+    },
+    {
+     "id": "clusters",
+     "op": "noise",
+     "scale": 1.5,
+     "amount": 0.7,
+     "seed": 6
+    },
+    {
+     "id": "cracks",
+     "op": "cracks",
+     "scale": 1.0,
+     "width": 0.06,
+     "threshold": 0.82,
+     "shift": -1.2,
+     "bevel": true
+    },
+    {
+     "id": "chips",
+     "op": "wear",
+     "width": 1,
+     "density": 0.3,
+     "shift": 1.0
+    },
+    {
+     "id": "moss",
+     "op": "drip",
+     "ramp": "moss",
+     "tone": 4,
+     "depth": 0.6,
+     "length": 1.4,
+     "width": 0.6,
+     "bevel": {
+      "shadow_ramp": "stone"
+     }
+    }
+   ],
+   "brush": {
+    "flow": "horizontal",
+    "length": 2.0,
+    "width": 0.6,
+    "rough": 0.7,
+    "textures": {
+     "stone": "stone",
+     "moss": "moss"
+    }
+   }
+  },
+  "stem": {
+   "ramp": "cream",
+   "tone": 5.0,
+   "rim": {
+    "light": 1,
+    "dark": 1,
+    "light_shift": 0.8,
+    "dark_shift": -0.6,
+    "threshold": 0.25,
+    "outline": "dark",
+    "outline_width": 1
+   },
+   "layers": [
+    {
+     "id": "warm",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.4
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.4,
+     "seed": 0
+    }
+   ],
+   "brush": {
+    "flow": "vertical",
+    "length": 1.4,
+    "width": 0.4,
+    "rough": 0.3,
+    "textures": {
+     "cream": "organic"
+    }
+   }
+  },
+  "cap": {
+   "ramp": "glowblue",
+   "tone": 3.0,
+   "light": 0.25,
+   "rim": {
+    "light": 1,
+    "dark": 0,
+    "light_shift": 0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.8
+    },
+    {
+     "id": "soft",
+     "op": "noise",
+     "scale": 2.0,
+     "amount": 0.3
+    },
+    {
+     "id": "spots",
+     "op": "spots",
+     "count": 11,
+     "radius": [
+      0.45,
+      0.8
+     ],
+     "ramp": "glowblue",
+     "tone": 6,
+     "seed": 2,
+     "faces": [
+      "up"
+     ],
+     "bevel": true
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "gill": {
+   "ramp": "glowblue",
+   "tone": 4.6,
+   "light": 0.25,
+   "rim": {
+    "light": 1,
+    "dark": 0,
+    "light_shift": 0.6,
+    "outline": "none"
+   },
+   "layers": [
+    {
+     "id": "gills",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.035,
+     "width": 0.35,
+     "shift": -1.2
+    }
+   ],
+   "brush": {
+    "off": true
+   }
+  },
+  "grass": {
+   "ramp": "fern",
+   "tone": 4,
+   "light": 0.8,
+   "rim": {
+    "outline": "none"
+   },
+   "layers": []
+  }
+ },
+ "parts": [
+  {
+   "id": "rock",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "style": "rock",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 7.6
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 8.2
+    },
+    {
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "size": 6.8
+    },
+    {
+     "at": [
+      0,
+      2.2,
+      0
+     ],
+     "size": 3.8
+    }
+   ],
+   "profile": {
+    "sides": 9,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "stem",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    1.8,
+    0.0
+   ],
+   "style": "stem",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 3.0
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": 3.4
+    },
+    {
+     "at": [
+      0,
+      3.0,
+      0
+     ],
+     "size": 2.6
+    },
+    {
+     "at": [
+      0,
+      6.0,
+      0
+     ],
+     "size": 2.2
+    },
+    {
+     "at": [
+      0,
+      7.2,
+      0
+     ],
+     "size": 2.4
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0
+   },
+   "caps": [
+    true,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "ring",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    6.0,
+    0.0
+   ],
+   "style": "stem",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 2.6
+    },
+    {
+     "at": [
+      0,
+      0.7,
+      0
+     ],
+     "size": 3.6
+    },
+    {
+     "at": [
+      0,
+      0.9,
+      0
+     ],
+     "size": 3.4
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "glow_cap",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    8.6,
+    0.0
+   ],
+   "style": "cap",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 12.0
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": 12.2
+    },
+    {
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "size": 11.0
+    },
+    {
+     "at": [
+      0,
+      3.0,
+      0
+     ],
+     "size": 8.0
+    },
+    {
+     "at": [
+      0,
+      4.0,
+      0
+     ],
+     "size": 4.4
+    },
+    {
+     "at": [
+      0,
+      4.3,
+      0
+     ],
+     "size": 0.0
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    false
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "glow_gill",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    8.55,
+    0.0
+   ],
+   "rotation": [
+    180.0,
+    0.0,
+    0.0
+   ],
+   "style": "gill",
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": 12.0
+    },
+    {
+     "at": [
+      0,
+      0.2,
+      0
+     ],
+     "size": 3.0
+    }
+   ],
+   "profile": {
+    "sides": 14,
+    "round": 2.0
+   },
+   "caps": [
+    false,
+    true
+   ],
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "subdiv": 0
+  },
+  {
+   "id": "tuft0_0",
+   "shape": "card",
+   "size": [
+    1.8,
+    1.8
+   ],
+   "pivot": [
+    3.0,
+    1.2,
+    2.6
+   ],
+   "offset": [
+    0.0,
+    0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    10.0,
+    0.0
+   ],
+   "style": "grass",
+   "paint": {
+    "art_key": {
+     "a": "#446227",
+     "b": "#4a682a",
+     "c": "#51702d",
+     "d": "#55772f",
+     "e": "#5b7b31",
+     "f": "#618034",
+     "g": "#578530",
+     "h": "#658636",
+     "i": "#6b933a",
+     "j": "#799f41",
+     "k": "#82b047",
+     "l": "#8fbe4e",
+     "m": "#a9d65c",
+     "n": "#b2ee61",
+     "o": "#c7f66b",
+     "p": "#d4fb74"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "..................",
+    "..................",
+    "..................",
+    "...g..............",
+    "i.........i.......",
+    "a...d.....g.......",
+    "cl...d.....d......",
+    "kb...b.....a......",
+    ".b...kd....ii.....",
+    ".bk...c.....c.....",
+    ".de...eh....c.....",
+    ".id...lc....dj....",
+    ".ke....dn...je....",
+    ".mfm...dl...me....",
+    ".pfl...hh...oe....",
+    "..fk...if....e....",
+    "..hj...jh....ep...",
+    "..hj...mh....fp..."
+   ]
+  },
+  {
+   "id": "tuft0_1",
+   "shape": "card",
+   "size": [
+    1.8,
+    1.8
+   ],
+   "pivot": [
+    3.0,
+    1.2,
+    2.6
+   ],
+   "offset": [
+    0.0,
+    0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    100.0,
+    0.0
+   ],
+   "style": "grass",
+   "paint": {
+    "art_key": {
+     "a": "#446227",
+     "b": "#4a682a",
+     "c": "#51702d",
+     "d": "#55772f",
+     "e": "#5b7b31",
+     "f": "#618034",
+     "g": "#578530",
+     "h": "#658636",
+     "i": "#6b933a",
+     "j": "#799f41",
+     "k": "#82b047",
+     "l": "#8fbe4e",
+     "m": "#a9d65c",
+     "n": "#b2ee61",
+     "o": "#c7f66b",
+     "p": "#d4fb74"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "..................",
+    "..................",
+    "..................",
+    "...g..............",
+    "i.........i.......",
+    "a...d.....g.......",
+    "cl...d.....d......",
+    "kb...b.....a......",
+    ".b...kd....ii.....",
+    ".bk...c.....c.....",
+    ".de...eh....c.....",
+    ".id...lc....dj....",
+    ".ke....dn...je....",
+    ".mfm...dl...me....",
+    ".pfl...hh...oe....",
+    "..fk...if....e....",
+    "..hj...jh....ep...",
+    "..hj...mh....fp..."
+   ]
+  },
+  {
+   "id": "tuft1_0",
+   "shape": "card",
+   "size": [
+    1.8,
+    1.8
+   ],
+   "pivot": [
+    -3.2,
+    1.2,
+    1.8
+   ],
+   "offset": [
+    0.0,
+    0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    60.0,
+    0.0
+   ],
+   "style": "grass",
+   "paint": {
+    "art_key": {
+     "a": "#426326",
+     "b": "#54742e",
+     "c": "#618235",
+     "d": "#668b38",
+     "e": "#6d943c",
+     "f": "#8a964c",
+     "g": "#97a454",
+     "h": "#9fb956",
+     "i": "#b1cc60",
+     "j": "#a9db5b",
+     "k": "#cad96d",
+     "l": "#b9ea64",
+     "m": "#bcfc64",
+     "n": "#d2fb74",
+     "o": "#eef985",
+     "p": "#fdfaa4"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "..................",
+    "..................",
+    "..................",
+    "...........a......",
+    "...........ed.....",
+    "..h........de.....",
+    "...k.......d.a....",
+    "...d.......c.de...",
+    "...f......mb..b...",
+    "...oh.....jb..be..",
+    "o...f.....lb..hb..",
+    "k...f.....lc...bj.",
+    "h...fo....nc...ce.",
+    "f...hi....nc...ec.",
+    "f...kg....nc...hc.",
+    "f...pg....nd...ldn",
+    "g...pg....ne...odi",
+    "g...pg....oe...oej"
+   ]
+  },
+  {
+   "id": "tuft1_1",
+   "shape": "card",
+   "size": [
+    1.8,
+    1.8
+   ],
+   "pivot": [
+    -3.2,
+    1.2,
+    1.8
+   ],
+   "offset": [
+    0.0,
+    0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    150.0,
+    0.0
+   ],
+   "style": "grass",
+   "paint": {
+    "art_key": {
+     "a": "#426326",
+     "b": "#54742e",
+     "c": "#618235",
+     "d": "#668b38",
+     "e": "#6d943c",
+     "f": "#8a964c",
+     "g": "#97a454",
+     "h": "#9fb956",
+     "i": "#b1cc60",
+     "j": "#a9db5b",
+     "k": "#cad96d",
+     "l": "#b9ea64",
+     "m": "#bcfc64",
+     "n": "#d2fb74",
+     "o": "#eef985",
+     "p": "#fdfaa4"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "..................",
+    "..................",
+    "..................",
+    "...........a......",
+    "...........ed.....",
+    "..h........de.....",
+    "...k.......d.a....",
+    "...d.......c.de...",
+    "...f......mb..b...",
+    "...oh.....jb..be..",
+    "o...f.....lb..hb..",
+    "k...f.....lc...bj.",
+    "h...fo....nc...ce.",
+    "f...hi....nc...ec.",
+    "f...kg....nc...hc.",
+    "f...pg....nd...ldn",
+    "g...pg....ne...odi",
+    "g...pg....oe...oej"
+   ]
+  },
+  {
+   "id": "tuft2_0",
+   "shape": "card",
+   "size": [
+    1.8,
+    1.8
+   ],
+   "pivot": [
+    1.0,
+    1.2,
+    -3.2
+   ],
+   "offset": [
+    0.0,
+    0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    120.0,
+    0.0
+   ],
+   "style": "grass",
+   "paint": {
+    "art_key": {
+     "a": "#6f7d3a",
+     "b": "#798741",
+     "c": "#819245",
+     "d": "#829b40",
+     "e": "#8b984c",
+     "f": "#94a251",
+     "g": "#99ab55",
+     "h": "#a4b555",
+     "i": "#beca6b",
+     "j": "#b2d25c",
+     "k": "#cede71",
+     "l": "#e5f381",
+     "m": "#f3fa84",
+     "n": "#fdfa97",
+     "o": "#fdfaad",
+     "p": "#fdfab9"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "..................",
+    "..................",
+    "..................",
+    ".g............j...",
+    ".g........c...c...",
+    ".k.......d....c...",
+    "f........a...ha...",
+    "b.......bk...beg..",
+    "a.......a....bmb..",
+    "a......cf...lb.bn.",
+    "b......am...gg.ef.",
+    "b.....ka....ck.ie.",
+    "e.....fc....cn.me.",
+    "i.....bg....eo.pel",
+    "i.....ck...pe...fk",
+    "k....ocn...pf...fi",
+    "k....oco...pf...gi",
+    "n....oe....pf...gi"
+   ]
+  },
+  {
+   "id": "tuft2_1",
+   "shape": "card",
+   "size": [
+    1.8,
+    1.8
+   ],
+   "pivot": [
+    1.0,
+    1.2,
+    -3.2
+   ],
+   "offset": [
+    0.0,
+    0.9,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    210.0,
+    0.0
+   ],
+   "style": "grass",
+   "paint": {
+    "art_key": {
+     "a": "#6f7d3a",
+     "b": "#798741",
+     "c": "#819245",
+     "d": "#829b40",
+     "e": "#8b984c",
+     "f": "#94a251",
+     "g": "#99ab55",
+     "h": "#a4b555",
+     "i": "#beca6b",
+     "j": "#b2d25c",
+     "k": "#cede71",
+     "l": "#e5f381",
+     "m": "#f3fa84",
+     "n": "#fdfa97",
+     "o": "#fdfaad",
+     "p": "#fdfab9"
+    }
+   },
+   "plane": "xy",
+   "art": [
+    "..................",
+    "..................",
+    "..................",
+    ".g............j...",
+    ".g........c...c...",
+    ".k.......d....c...",
+    "f........a...ha...",
+    "b.......bk...beg..",
+    "a.......a....bmb..",
+    "a......cf...lb.bn.",
+    "b......am...gg.ef.",
+    "b.....ka....ck.ie.",
+    "e.....fc....cn.me.",
+    "i.....bg....eo.pel",
+    "i.....ck...pe...fk",
+    "k....ocn...pf...fi",
+    "k....oco...pf...gi",
+    "n....oe....pf...gi"
+   ]
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 3.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "glow_cap",
+     "channel": "scale",
+     "osc": {
+      "amp": [
+       0.015,
+       0.03,
+       0.015
+      ],
+      "cycles": 1
+     }
+    }
+   ]
+  }
+ }
+}

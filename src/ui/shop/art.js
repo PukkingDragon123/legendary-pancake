@@ -1,8 +1,46 @@
-// The boutique's own pixel art: 9-slice ICE frames (frosted glass panels with silver and pale
-// gold trim and snowflake corner ornaments, icy ribbons, icy and gold buttons, price tags) and a
-// few sprites (snowflakes, icicles, hangers, the gift box, rarity stars). Painted procedurally on
-// first use, like the BME frames in ../px/frames.js, and shown crisp at whole-pixel scales.
-import { Grid, icon, draw, render } from '../px/sprites.js';
+// The boutique's own pixel art, in the calm "Moss & Moonlight" palette: 9-slice frames that feel like
+// the shop's real materials (an oak shop board capped with snow and fixed with brass brackets, linen
+// and kraft price cards with stitched edges, a dusk-velvet card, cloth ribbons, honey / berry / plum /
+// lake / sage / linen buttons with a hard lip, cloth price tags, a paper speech bubble, a dark oak
+// plaque), tiling surface patterns (linen weave, kraft, velvet, planks, a screen-door dim), and the
+// shop's sprites (snowflakes, a wooden hanger, a wrapped gift, rarity stars, an hourglass, holly,
+// a fairy-light bulb, a mystery parcel, shooting stars, pixel sunbursts). Painted procedurally on
+// first use and shown crisp at whole-pixel scales. No smooth circles, no soft glows.
+import { Grid, icon, draw, render, RAMPS, spriteURL } from '../px/sprites.js';
+
+// ------------------------------------------------------------------ palette (src/gfx/palette.ts)
+
+const C = {
+  ink: '#2e2b24', ink2: '#4b463a', ink3: '#6f6856',
+  paper: '#f4eedd', oat: '#eae0c8', linen: '#dccfb0', straw: '#c9b78d',
+  woodPale: '#d8bf98', woodLight: '#bf9d74', wood: '#9c7a56', woodDark: '#6f553d', woodDeep: '#4a392b', bark: '#5b4a3c', barkDark: '#3d3229',
+  sageLight: '#c4cfa3', sage: '#a7b788', moss: '#86a06a', fern: '#66844f', leaf: '#557343', pine: '#3f5a3b', forest: '#2c4030',
+  mist: '#d3e0dc', sky: '#aec8cc', lake: '#86a9b0', dusk: '#617f8c', slate: '#46596a', night: '#27313f', deepNight: '#1b222d',
+  lamp: '#f1d39a', honey: '#dcb072', ochre: '#c59a52', terracotta: '#c0866a', clay: '#a66c55',
+  rose: '#d9aca4', blush: '#e8b4ae', berry: '#9e5f66', plum: '#6e5266',
+  lilac: '#b4a9c9', lavender: '#d3cce0', frost: '#dfe9ea', snow: '#f5f7f2', ice: '#bcd6dc',
+  brass: '#c8a764', brassDark: '#8e7440', brassLight: '#e6d09c', iron: '#5c5a56',
+};
+export const SHOP_COLORS = C;
+
+// ramps for the BME sprite kit (dark -> light, tone 3 = base)
+Object.assign(RAMPS, {
+  nwood: ['#2f2620', '#4a392b', '#6f553d', '#9c7a56', '#bf9d74', '#d8bf98'],
+  nhoney: ['#5a4126', '#8e7440', '#b98c4c', '#dcb072', '#ecca8f', '#f6e6c4'],
+  nbrass: ['#3d3229', '#6b5532', '#8e7440', '#c8a764', '#e0c987', '#f4ead0'],
+  nberry: ['#3a2228', '#5e3a44', '#7d4b54', '#9e5f66', '#c08a88', '#e6c2b8'],
+  nrose: ['#7d4b54', '#a8706e', '#c48e88', '#d9aca4', '#e8c4bc', '#f6e4dc'],
+  nplum: ['#211a24', '#3f3144', '#55405a', '#6e5266', '#93798f', '#c4b2c2'],
+  nlilac: ['#4a4458', '#6a6280', '#8d84a6', '#b4a9c9', '#d3cce0', '#eeeaf4'],
+  nlake: ['#1e2a33', '#3a5160', '#5d7b88', '#86a9b0', '#aec8cc', '#dfe9ea'],
+  nsage: ['#24352a', '#3f5a3b', '#557343', '#86a06a', '#a7b788', '#d4dfb8'],
+  npine: ['#141d18', '#26392c', '#3f5a3b', '#557343', '#7c9a60', '#a7bf82'],
+  nlinen: ['#7b7058', '#a3967a', '#c9b78d', '#dccfb0', '#eae0c8', '#f9f5ea'],
+  nfrost: ['#617f8c', '#86a9b0', '#aec8cc', '#d3e0dc', '#eef3ef', '#ffffff'],
+  nkraft: ['#4a3826', '#7d5f40', '#96744f', '#b99a6e', '#d1b48e', '#e6d3b4'],
+  nink: ['#14120f', '#1f1c18', '#2e2b24', '#4b463a', '#6f6856', '#958d78'],
+  nlamp: ['#8a6532', '#c59a52', '#dcb072', '#f1d39a', '#f9e9c4', '#fffaee'],
+});
 
 // ------------------------------------------------------------------ a tiny RGBA buffer
 
@@ -11,14 +49,15 @@ function rgb(h) {
   const n = parseInt(s.slice(0, 6), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255, s.length >= 8 ? parseInt(s.slice(6, 8), 16) : 255];
 }
-const C = (h) => (h == null ? null : Array.isArray(h) ? h : rgb(h));
+const CC = (h) => (h == null ? null : Array.isArray(h) ? h : rgb(h));
 class Buf {
   constructor(w, h) { this.w = w; this.h = h; this.d = new Uint8ClampedArray(w * h * 4); }
   in(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
   a(x, y) { return this.in(x, y) ? this.d[(y * this.w + x) * 4 + 3] : 0; }
   set(x, y, c) {
+    x = Math.floor(x); y = Math.floor(y);
     if (!this.in(x, y) || c == null) return this;
-    c = C(c);
+    c = CC(c);
     const i = (y * this.w + x) * 4, sa = (c[3] ?? 255) / 255;
     if (sa >= 1) { this.d[i] = c[0]; this.d[i + 1] = c[1]; this.d[i + 2] = c[2]; this.d[i + 3] = 255; return this; }
     const da = this.d[i + 3] / 255, oa = sa + da * (1 - sa);
@@ -27,6 +66,7 @@ class Buf {
     this.d[i + 3] = Math.round(oa * 255);
     return this;
   }
+  rect(x, y, w, h, c) { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) this.set(i, j, c); return this; }
   rows(x, y, rows, map) { rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (r[i] !== '.' && map[r[i]] !== undefined) this.set(x + i, y + j, map[r[i]]); }); return this; }
   corners(rows, map, inset = 0) {
     const w = rows[0].length, h = rows.length, fx = rows.map((r) => r.split('').reverse().join(''));
@@ -35,21 +75,12 @@ class Buf {
     return this;
   }
 }
-function rrMask(x0, y0, w, h, r) {
-  return (x, y) => {
-    if (x < x0 || y < y0 || x >= x0 + w || y >= y0 + h) return false;
-    if (r <= 0) return true;
-    const cx = Math.min(Math.max(x + 0.5, x0 + r), x0 + w - r), cy = Math.min(Math.max(y + 0.5, y0 + r), y0 + h - r);
-    const dx = x + 0.5 - cx, dy = y + 0.5 - cy;
-    return dx * dx + dy * dy <= r * r + 0.15 * r;
-  };
-}
-/** chamfered (cut-corner) rectangle: an ice-cut look */
+/** chamfered (cut-corner) rectangle */
 function chamfer(x0, y0, w, h, c) {
   return (x, y) => x >= x0 && y >= y0 && x < x0 + w && y < y0 + h && x - x0 + (y - y0) >= c && x0 + w - 1 - x + (y - y0) >= c && x - x0 + (y0 + h - 1 - y) >= c && x0 + w - 1 - x + (y0 + h - 1 - y) >= c;
 }
 /** Erosion depth of every pixel of a mask; lit > 0 faces up/left. */
-function bevel(b, mask, pal, max = 14) {
+function bevel(b, mask, pal, max = 16) {
   const W = b.w, H = b.h, N = W * H, depth = new Int16Array(N).fill(-1), lit = new Int8Array(N);
   let cur = new Uint8Array(N);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (mask(x, y)) cur[y * W + x] = 1;
@@ -74,32 +105,7 @@ function bevel(b, mask, pal, max = 14) {
 }
 const hn = (x, y, s = 0) => { let h = (x * 374761393 + y * 668265263 + s * 2246822519) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 
-// ------------------------------------------------------------------ palettes
-
-const ICE = { ol: '#14254c', dk: '#2f5a94', sh: '#5c8fc8', base: '#8fc4ec', lt: '#c6e8fb', hi: '#ffffff', fill: '#eaf6fdee', fill2: '#ddeff9ee' };
-const ICED = { ol: '#0b1430', dk: '#1c2f5e', sh: '#2c4a86', base: '#41679f', lt: '#6f97c9', hi: '#cfe6ff', fill: '#16244ae6', fill2: '#1b2b56e6' };
-const SILVER = { dk: '#6f7c9c', base: '#b9c4dc', hi: '#f4f7ff' };
-const PGOLD = { dk: '#9a7430', base: '#e6c46c', lt: '#f7e3a4', hi: '#fffbe6' };
-const BTN = {
-  ice: { ol: '#14254c', dk: '#2f5a94', sh: '#4f86c4', base: '#7cbcea', lt: '#b8e2fa', hi: '#ffffff' },
-  gold: { ol: '#5e3a0c', dk: '#a8701c', sh: '#dc9e2a', base: '#f6c64a', lt: '#ffe796', hi: '#fffbe0' },
-  berry: { ol: '#4a0f24', dk: '#8e1c3c', sh: '#c22e4e', base: '#e44b62', lt: '#ff9aa2', hi: '#ffe2e2' },
-  violet: { ol: '#221246', dk: '#43307e', sh: '#6650b2', base: '#8c76de', lt: '#c4b6fa', hi: '#f6f0ff' },
-  frost: { ol: '#3a4664', dk: '#7a86a4', sh: '#a2acc4', base: '#c8d0e0', lt: '#e6ecf6', hi: '#ffffff' },
-};
-
-// snowflake ornament for frame corners (top-left orientation)
-const FLAKE = [
-  '...s.....',
-  '..sGs....',
-  '.s.G.s...',
-  'sGGWGGs..',
-  '.s.G.s...',
-  '..sGs.G..',
-  '...s..Gs.',
-  '......sG.',
-  '.......s.',
-];
+// ------------------------------------------------------------------ frames
 
 export const ICE_FRAMES = {};
 const BUILD = {};
@@ -108,137 +114,189 @@ function def(name, spec, build) {
   BUILD[name] = () => build(new Buf(spec.w, spec.h), spec);
 }
 
-// frosted panel: icy rim with crystal facets, a silver inner trim, gold snowflake corners
-function panel(P, o = {}) {
+/** oak grain for a pixel inside a board border: planks run along the border, knots now and then */
+function grain(x, y, along, P) {
+  const u = along ? x : y, v = along ? y : x;
+  const line = (Math.floor(u * 0.35 + Math.sin(v * 1.7 + u * 0.12) * 1.2) + v * 3) % 7 === 0;
+  const knot = hn(Math.floor(u / 6), v, 4) > 0.94;
+  return knot ? P.dk : line ? P.sh : hn(u, v, 9) > 0.86 ? P.lt : P.base;
+}
+const OAK = { ol: C.ink, dk: C.woodDeep, sh: C.woodDark, base: C.wood, lt: C.woodLight, hi: C.woodPale };
+const OAK_DARK = { ol: C.deepNight, dk: '#241d19', sh: C.barkDark, base: C.woodDeep, lt: C.bark, hi: C.woodDark };
+const BRASS = { dk: C.brassDark, base: C.brass, lt: C.brassLight, hi: '#f8f0d8' };
+
+// a brass corner bracket with a rivet (top-left orientation)
+const BRACKET = [
+  'kkkkkkk..',
+  'khhhhhbk.',
+  'khlllbbk.',
+  'khlrlbk..',
+  'khllbk...',
+  'khbbk....',
+  'kbbk.....',
+  'kkk......',
+];
+// a few lumps of snow sitting on the top edge (tiles every 16 px)
+function snowCap(b, y0, x0, x1, seed = 0) {
+  for (let x = x0; x < x1; x++) {
+    const ph = ((x - x0) % 16);
+    const hgt = [3, 4, 4, 5, 5, 5, 4, 3, 3, 2, 3, 4, 4, 3, 2, 2][ph];
+    for (let k = 0; k < hgt; k++) b.set(x, y0 - k, k === hgt - 1 ? C.ink3 : k === hgt - 2 ? C.snow : k === 0 ? C.ice : C.frost);
+    if (ph === 6 || ph === 13) { b.set(x, y0 + 1, C.frost); b.set(x, y0 + 2, C.ice); if (ph === 6) b.set(x, y0 + 3, C.sky); }
+  }
+  void seed;
+}
+
+// the shop board: an oak frame with a groove, brass brackets and snow on its top rail; linen shows inside
+function board(P, o = {}) {
   return (b) => {
-    const W = b.w, H = b.h;
-    bevel(b, chamfer(0, 0, W, H, 3), (d, l, x, y) => {
+    const W = b.w, H = b.h, T = o.top ?? 6;
+    bevel(b, chamfer(0, T - 5, W, H - T + 5, 2), (d, l, x, y) => {
       if (d === 0) return P.ol;
-      if (d === 1) return l > 0 ? P.hi : l < 0 ? P.sh : P.lt;
-      if (d === 2) return l > 0 ? P.lt : l < 0 ? P.dk : P.base;
-      if (d === 3) { const f = (x + y) % 5 === 0 || (x - y + 99) % 7 === 0; return f ? P.lt : l < 0 ? P.sh : P.base; }
-      if (d === 4) return l > 0 ? P.base : P.sh;
-      if (d === 5) return o.gold ? (l > 0 ? PGOLD.hi : PGOLD.dk) : (l > 0 ? SILVER.hi : SILVER.dk);
-      if (d === 6) return o.gold ? PGOLD.base : SILVER.base;
-      if (d === 7) return P.ol;
-      if (d === 8) return l > 0 ? '#ffffff55' : P.fill;
-      return hn(x, y, 3) > 0.93 ? P.fill2 : P.fill;
+      const along = y < 10 || y > H - 10;
+      if (d === 1) return l > 0 ? P.hi : l < 0 ? P.dk : P.lt;
+      if (d <= 5) return grain(x, y, along, P);
+      if (d === 6) return l > 0 ? P.dk : P.sh;
+      if (d === 7) return o.trim ? (l > 0 ? o.trim.hi : o.trim.dk) : P.ol;
+      if (d === 8) return o.trim ? o.trim.base : null;
+      return null;
     });
-    b.corners(FLAKE, { s: o.gold ? PGOLD.dk : P.dk, G: o.gold ? PGOLD.base : PGOLD.lt, W: '#ffffff' }, 0);
+    if (o.snow !== false) snowCap(b, T - 4, 2, W - 2);
+    b.corners(BRACKET, { k: C.ink, h: BRASS.hi, l: BRASS.lt, b: BRASS.base, r: C.ink }, 1);
     return b;
   };
 }
-def('ice_panel', { w: 40, h: 40, slice: [12, 12, 12, 12] }, panel(ICE));
-def('ice_panel_gold', { w: 40, h: 40, slice: [12, 12, 12, 12] }, panel(ICE, { gold: true }));
-def('ice_panel_dark', { w: 40, h: 40, slice: [12, 12, 12, 12] }, panel(ICED));
+def('ice_panel', { w: 48, h: 48, slice: [16, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK));
+def('ice_panel_gold', { w: 48, h: 48, slice: [16, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK, { trim: BRASS }));
+def('ice_panel_dark', { w: 48, h: 48, slice: [16, 12, 12, 12], fill: false, repeat: 'round' }, board(OAK_DARK));
 
-// a smaller card for shop offers
+// paper cards with a stitched border (fill painted flat so it stretches cleanly)
+const inked = (c, x, y) => (hn(x, y, 21) > 0.82 ? mixHex(c, '#8a7f68', 0.45) : c);
+function mixHex(a, b, t) { const A = rgb(a), B = rgb(b); return '#' + [0, 1, 2].map((i) => Math.round(A[i] + (B[i] - A[i]) * t).toString(16).padStart(2, '0')).join(''); }
 function card(P, o = {}) {
   return (b) => {
     const W = b.w, H = b.h;
-    bevel(b, chamfer(0, 0, W, H - 1, 2), (d, l, x, y) => {
-      if (d === 0) return P.ol;
-      if (d === 1) return l > 0 ? P.hi : l < 0 ? P.sh : P.lt;
-      if (d === 2) return o.gold ? (l > 0 ? PGOLD.lt : PGOLD.dk) : l > 0 ? P.lt : P.base;
-      if (d === 3) return o.gold ? PGOLD.base : P.dk;
-      if (d === 4) return l > 0 ? '#ffffffaa' : P.fill;
+    bevel(b, chamfer(0, 0, W, H - 2, 2), (d, l, x, y) => {
+      if (d === 0) return inked(P.ol, x, y);
+      if (d === 1) return l > 0 ? P.hi : l < 0 ? P.sh : P.base;
+      if (d === 3 && (x + y) % 4 < 2) return P.st;
+      if (d >= 4 && hn(x, y, 5) > 0.93) return P.gr ?? P.fill;
+      if (d === 2 && o.corner && ((x < 6 && y < 6) || (x > W - 7 && y < 6) || (x < 6 && y > H - 9) || (x > W - 7 && y > H - 9))) return o.corner;
       return P.fill;
     });
-    for (let x = 2; x < W - 2; x++) b.set(x, H - 1, [10, 20, 50, 80]);
-    b.set(3, 3, '#ffffff').set(4, 3, P.hi).set(3, 4, P.hi);
+    for (let x = 2; x < W - 2; x++) { b.set(x, H - 2, [27, 34, 45, 110]); b.set(x, H - 1, [27, 34, 45, 50]); }
+    if (o.corner) b.corners(['bb', 'b.'], { b: o.corner }, 2);
     return b;
   };
 }
-def('ice_card', { w: 20, h: 20, slice: [6, 6, 7, 6] }, card(ICE));
-def('ice_card_gold', { w: 20, h: 20, slice: [6, 6, 7, 6] }, card(ICE, { gold: true }));
-def('ice_card_dark', { w: 20, h: 20, slice: [6, 6, 7, 6] }, card(ICED));
+const PAPER = { ol: C.ink2, sh: C.straw, base: C.oat, hi: '#fbf8ef', fill: C.paper, st: C.linen, gr: '#ebe3cf' };
+const KRAFT = { ol: C.woodDark, sh: '#bfa67e', base: '#ddcaa6', hi: '#f2e8d2', fill: '#e8dcc0', st: '#b8a27a', gr: '#dccdab' };
+const VELVET = { ol: '#1f2329', sh: '#2a2f36', base: '#4a5157', hi: '#646b70', fill: '#363c42', st: '#8a7652', gr: '#3c4248' };
+def('ice_card', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(PAPER));
+def('ice_card_gold', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(KRAFT, { corner: '#a89068' }));
+def('ice_card_dark', { w: 24, h: 24, slice: [7, 7, 9, 7], repeat: 'round' }, card(VELVET, { corner: '#8a7652' }));
 
-// a recessed frosted slot for item art
+// a recessed slot (art wells, tables)
 def('ice_slot', { w: 18, h: 18, slice: [6, 6, 6, 6] }, (b) => {
-  const W = b.w, H = b.h, P = ICE;
-  bevel(b, chamfer(0, 0, W, H, 3), (d, l, x, y) => {
-    if (d === 0) return P.dk;
-    if (d === 1) return l > 0 ? P.sh : P.hi;
-    if (d === 2) return l > 0 ? P.base : P.lt;
-    return hn(x, y) > 0.9 ? '#d4ecfa' : '#c4e2f6';
+  bevel(b, chamfer(0, 0, b.w, b.h, 2), (d, l, x, y) => {
+    if (d === 0) return C.woodDark;
+    if (d === 1) return l > 0 ? C.straw : C.paper;
+    return hn(x, y) > 0.92 ? C.linen : C.oat;
   });
   return b;
 });
 
-// icy ribbon banner for section titles: silver edges, notched tails, a snowflake knot
-function ribbon(P, o = {}) {
+// cloth ribbons with stitching and notched tails
+function ribbon(P) {
   return (b) => {
-    const W = b.w, H = b.h, TW = 10;
+    const W = b.w, H = b.h, TW = 11;
     for (const side of [0, 1]) {
       const m = (x, y) => { const yy = y - 4, th = H - 6; if (yy < 0 || yy >= th || x < 0 || x >= TW + 2) return false; const mid = (th - 1) / 2, notch = 4 - Math.round(Math.abs(yy - mid) * 1.1); return x >= Math.max(0, notch); };
       const tb = new Buf(W, H);
-      bevel(tb, (x, y) => m(side ? W - 1 - x : x, y), (d, l) => (d === 0 ? P.ol : d === 1 && l > 0 ? P.base : P.dk));
+      bevel(tb, (x, y) => m(side ? W - 1 - x : x, y), (d, l) => (d === 0 ? P.ol : d === 1 && l > 0 ? P.sh : P.dk));
       for (let i = 0; i < tb.d.length; i += 4) if (tb.d[i + 3]) { b.d[i] = tb.d[i]; b.d[i + 1] = tb.d[i + 1]; b.d[i + 2] = tb.d[i + 2]; b.d[i + 3] = 255; }
     }
-    bevel(b, rrMask(6, 0, W - 12, H - 4, 1), (d, l, x, y) => {
-      if (d === 0) return P.ol;
-      if (y === 1) return o.trim ?? SILVER.hi;
-      if (y === 2) return P.lt;
-      if (y === H - 6) return o.trim2 ?? SILVER.base;
-      if (y >= H - 7) return P.sh;
-      return P.base;
+    bevel(b, chamfer(6, 0, W - 12, H - 4, 1), (d, l, x, y) => {
+      if (d === 0) return inked(P.ol, x, y);
+      if (y === 1) return P.hi;
+      if (y === 2 && (x % 4) < 2) return P.lt;
+      if (y === H - 7 && (x % 4) < 2) return P.lt;
+      if (y >= H - 6) return P.sh;
+      return (x + y * 2) % 9 === 0 && y > 3 && y < H - 8 ? P.sh : P.base;
     });
     b.rows(6, H - 5, ['oo', 'do', '.o'], { o: P.ol, d: P.dk });
     b.rows(W - 8, H - 5, ['oo', 'od', 'o.'], { o: P.ol, d: P.dk });
     return b;
   };
 }
-def('ice_ribbon', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(BTN.ice));
-def('ice_ribbon_gold', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(BTN.gold, { trim: '#fffbe6', trim2: '#fff0b0' }));
-def('ice_ribbon_berry', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(BTN.berry, { trim: '#ffe2e2', trim2: '#f7e3a4' }));
-def('ice_ribbon_violet', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(BTN.violet, { trim: '#f6f0ff', trim2: '#f7e3a4' }));
+// quiet, slightly greyed cloth colours: colour is an accent, the UI is mostly paper, wood and ink
+const CLOTH = {
+  sage: { ol: '#2b3329', dk: '#4a5646', sh: '#5f6b58', base: '#7a8670', lt: '#9da690', hi: '#cfd3c0' },
+  honey: { ol: C.woodDeep, dk: '#8a7652', sh: '#ac9468', base: '#c9b183', lt: '#dfcda4', hi: '#f2e8d2' },
+  berry: { ol: '#352628', dk: '#5e4446', sh: '#765a5a', base: '#8f7270', lt: '#b19a94', hi: '#e2d4cc' },
+  plum: { ol: '#25212a', dk: '#433c48', sh: '#57505c', base: '#6d6572', lt: '#918a95', hi: '#d6d0d8' },
+};
+def('ice_ribbon', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.sage));
+def('ice_ribbon_gold', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.honey));
+def('ice_ribbon_berry', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.berry));
+def('ice_ribbon_violet', { w: 44, h: 20, slice: [5, 13, 7, 13] }, ribbon(CLOTH.plum));
 
-// chunky buttons with a 3D lip and a frost sparkle
+// chunky buttons with a hard lip; tones keep their old class names (gold, berry, violet, ice, frost, sage)
+const BTN = {
+  gold: { ol: C.woodDeep, dk: '#9a8662', sh: '#b8a27a', base: '#d4c19a', lt: '#e6d8b8', hi: '#f6efdf' },
+  berry: CLOTH.berry,
+  violet: CLOTH.plum,
+  ice: { ol: '#262e33', dk: '#4b5a60', sh: '#5f7075', base: '#788a8e', lt: '#9fadb0', hi: '#dce3e2' },
+  frost: { ol: C.woodDeep, dk: '#9b8f78', sh: '#bdb299', base: '#dcd3bd', lt: '#ebe5d4', hi: '#faf6ea' },
+  sage: CLOTH.sage,
+};
 function button(P, down = false) {
   return (b) => {
     const W = b.w, H = b.h, top = down ? 2 : 0, lip = down ? 0 : 2, bodyH = H - top - lip;
     if (lip) bevel(b, chamfer(0, top + 2, W, bodyH, 2), (d) => (d === 0 ? P.ol : P.dk));
     bevel(b, chamfer(0, top, W, bodyH, 2), (d, l, x, y) => {
-      if (d === 0) return P.ol;
+      if (d === 0) return inked(P.ol, x, y);
       const yy = y - top;
       if (d === 1 && l < 0 && yy > 2) return P.sh;
-      if (yy <= 2) return P.lt;
+      if (yy <= 2) return yy === 1 && d >= 2 && x % 3 === 0 ? P.hi : P.lt;
       if (yy >= bodyH - 3) return P.sh;
       return P.base;
     });
     if (down) b.set(3, top + 2, P.sh);
-    else b.set(2, 2, P.hi).set(3, 1, P.hi).set(2, 3, P.hi).set(W - 4, 1, P.hi);
+    else b.set(2, 2, P.hi).set(3, 1, P.hi).set(2, 3, P.hi);
     return b;
   };
 }
 const BT = { w: 18, h: 18, slice: [6, 6, 7, 6] };
 for (const k of Object.keys(BTN)) { def(`ice_btn_${k}`, BT, button(BTN[k])); def(`ice_btn_${k}_down`, BT, button(BTN[k], true)); }
 
-// a price / discount tag: a hanging card with a punched hole on the left
+// a cloth price tag with a punched eyelet on the left and stitching
 function tag(P) {
   return (b) => {
     const W = b.w, H = b.h;
     const m = (x, y) => x >= 0 && y >= 0 && x < W && y < H - 1 && x + Math.abs(y - (H - 2) / 2) >= 4;
-    bevel(b, m, (d, l) => (d === 0 ? P.ol : d === 1 ? (l > 0 ? P.lt : P.sh) : P.base));
-    b.set(4, Math.floor((H - 1) / 2), P.ol).set(4, Math.floor((H - 1) / 2) - 1, P.dk);
-    for (let x = 4; x < W - 1; x++) b.set(x, H - 1, [10, 20, 50, 90]);
+    bevel(b, m, (d, l, x) => (d === 0 ? P.ol : d === 1 ? (l > 0 ? P.lt : P.sh) : d === 2 && x > 6 && x % 3 === 0 ? P.lt : P.base));
+    const my = Math.floor((H - 1) / 2);
+    b.set(4, my, P.ol).set(4, my - 1, P.ol).set(5, my, P.dk).set(3, my, C.brass).set(4, my + 1, C.brass);
+    for (let x = 4; x < W - 1; x++) b.set(x, H - 1, [27, 34, 45, 90]);
     return b;
   };
 }
-def('ice_tag_berry', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(BTN.berry));
-def('ice_tag_gold', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(BTN.gold));
+def('ice_tag_berry', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.berry));
+def('ice_tag_gold', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.honey));
 def('ice_tag_ice', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(BTN.ice));
+def('ice_tag_sage', { w: 20, h: 13, slice: [4, 4, 5, 8] }, tag(CLOTH.sage));
 
-// the queen's speech bubble: frosted with a silver rim
+// the queen's speech bubble: paper with an ink outline and cut corners
 def('ice_bubble', { w: 16, h: 16, slice: [5, 5, 5, 5] }, (b) => {
-  bevel(b, rrMask(0, 0, b.w, b.h, 4), (d, l) => (d === 0 ? ICE.ol : d === 1 ? (l > 0 ? '#ffffff' : SILVER.dk) : d === 2 ? (l > 0 ? '#ffffff' : '#e4f1fb') : '#f7fbff'));
+  bevel(b, chamfer(0, 0, b.w, b.h, 3), (d, l) => (d === 0 ? C.ink : d === 1 ? (l > 0 ? '#fffdf6' : C.linen) : C.paper));
   return b;
 });
 
-// a small plaque for counters and chips
+// a small dark oak plaque with a brass rim for counters and chips
 def('ice_chip', { w: 16, h: 14, slice: [5, 6, 6, 6] }, (b) => {
-  bevel(b, chamfer(0, 0, b.w, b.h - 1, 2), (d, l) => (d === 0 ? ICED.ol : d === 1 ? (l > 0 ? ICED.lt : ICED.dk) : d === 2 ? (l > 0 ? SILVER.base : SILVER.dk) : ICED.fill));
-  for (let x = 2; x < b.w - 2; x++) b.set(x, b.h - 1, [0, 0, 0, 90]);
+  bevel(b, chamfer(0, 0, b.w, b.h - 1, 2), (d, l, x, y) => (d === 0 ? C.ink : d === 1 ? (l > 0 ? BRASS.lt : BRASS.dk) : d === 2 ? (l > 0 ? C.bark : '#241d19') : grain(x, y, true, OAK_DARK)));
+  for (let x = 2; x < b.w - 2; x++) b.set(x, b.h - 1, [20, 24, 30, 110]);
   return b;
 });
 
@@ -270,22 +328,148 @@ export function iceURL(name, scale = 2) {
   return urls.get(key);
 }
 const devK = () => { const r = (typeof window !== 'undefined' && window.devicePixelRatio) || 1, k = Math.round(r); return k >= 2 && k <= 4 && Math.abs(r - k) < 0.01 ? k : 1; };
-/** CSS declarations that make an element wear an ice frame (border-image 9-slice). */
+/** CSS declarations that make an element wear a frame (border-image 9-slice). */
 export function iceStyle(name, scale = 2) {
   scale = normScale(scale);
   const f = ICE_FRAMES[name], k = devK(), url = iceURL(name, scale * k);
   const [t, r, b, l] = f.slice.map((v) => v * scale), [st, sr, sb, sl] = f.slice.map((v) => v * scale * k);
   return `border-style:solid;border-width:${t}px ${r}px ${b}px ${l}px;border-image-source:url("${url}");border-image-slice:${st} ${sr} ${sb} ${sl}${f.fill ? ' fill' : ''};border-image-width:${t}px ${r}px ${b}px ${l}px;border-image-repeat:${f.repeat};image-rendering:pixelated`;
 }
+
+// ------------------------------------------------------------------ tiling surface patterns
+
+/** Realistic paper, the way BUSHED paints its notes: a warm base with soft mottling, short fibres and a few
+ * flecks of foxing, lightly quantised. Tileable (the mottling uses whole periods of the tile). */
+function paperTile(N, base, seed, o = {}) {
+  const [br, bg, bb] = rgb(base), px = new Array(N * N);
+  const T = (a, b, ph) => Math.sin(((a * 0) + ph)) * 0, TAU = Math.PI * 2; void T;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const n = Math.sin(TAU * (x * 1 + y * 2) / N + seed) * 2.2 + Math.sin(TAU * (x * 3 - y * 1) / N + seed * 2) * 1.6 + Math.sin(TAU * (x * 5 + y * 4) / N + seed * 3) * 0.9 + (hn(x, y, seed) - 0.5) * (o.grain ?? 6);
+    px[y * N + x] = n;
+  }
+  // fibres: short streaks, mostly along x
+  for (let k = 0; k < N * N * 0.012; k++) {
+    const x0 = Math.floor(hn(k, 1, seed) * N), y0 = Math.floor(hn(k, 2, seed) * N), len = 2 + Math.floor(hn(k, 3, seed) * 5), d = hn(k, 4, seed) > 0.5 ? 5 : -4;
+    for (let i = 0; i < len; i++) px[((y0 + (i > 2 && hn(k, 5, seed) > 0.6 ? 1 : 0)) % N) * N + ((x0 + i) % N)] += d;
+  }
+  // foxing flecks
+  for (let k = 0; k < (o.fox ?? 6); k++) { const x0 = Math.floor(hn(k, 7, seed) * N), y0 = Math.floor(hn(k, 8, seed) * N); px[y0 * N + x0] -= 14; px[y0 * N + ((x0 + 1) % N)] -= 8; }
+  return (x, y) => { const n = px[(y % N) * N + (x % N)]; const q = (v) => Math.max(0, Math.min(255, Math.round((v + n) / 4) * 4)); return '#' + [q(br), q(bg - 0.2 * Math.abs(n)), q(bb - 0.5 * Math.abs(n))].map((v) => v.toString(16).padStart(2, '0')).join(''); };
+}
+const PAPER_TILE = paperTile(64, '#efe6d0', 3);
+const KRAFT_TILE = paperTile(64, '#cdb48c', 9, { grain: 9, fox: 3 });
+const PAT = {
+  /** the board's inside: realistic warm paper */
+  linen: [64, 64, PAPER_TILE],
+  /** kraft paper */
+  kraft: [64, 64, KRAFT_TILE],
+  /** dusk velvet */
+  velvet: [8, 8, (x, y) => ((x + y) % 4 === 0 ? '#2f3b4a' : (x - y + 8) % 4 === 0 ? '#222b37' : C.night)],
+  /** oak planks running sideways */
+  planks: [32, 12, (x, y) => (y % 6 === 0 ? C.woodDeep : y % 6 === 1 ? C.woodLight : grain(x + (y >= 6 ? 13 : 0), y % 6, true, OAK))],
+  /** a screen-door dim for modal backdrops */
+  dim: [2, 2, (x, y) => ((x + y) % 2 ? '#1b222dcc' : '#1b222d99')],
+  /** sage wallpaper stripes for the gacha frame */
+  stripe: [8, 8, (x, y) => (x < 4 ? (hn(x, y, 1) > 0.9 ? '#d6ddb6' : C.sageLight) : x === 6 ? C.sage : (hn(x, y, 7) > 0.92 ? '#e2d6b8' : C.oat))],
+  /** a pine garland with berries and fairy bulbs (two frames: the bulbs take turns) */
+  garland: [32, 8, (x, y) => garlandPx(x, y, 0)],
+  garland2: [32, 8, (x, y) => garlandPx(x, y, 1)],
+};
+function garlandPx(x, y, f) {
+  const bulbs = [[4, C.lamp, '#a37c45'], [12, C.rose, '#86585a'], [20, C.sageLight, '#5f7d4c'], [28, C.ice, '#4d6a78']];
+  for (const [bx, on, off] of bulbs) {
+    const lit = ((bx >> 3) + f) % 2 === 0;
+    if (y === 6 && x === bx) return C.ink2;
+    if (y === 7 && (x === bx || x === bx + 1)) return lit ? on : off;
+    if (y === 6 && x === bx + 1) return lit ? '#fffaee' : off;
+  }
+  const top = 1 + Math.round(hn(x, 0, 3) * 1.2), bot = 5 - Math.round(hn(x, 1, 5) * 1.2);
+  if (y < top || y > bot) return null;
+  if (hn(x, y, 11) > 0.9 && y > top) return C.berry;
+  if (y === top) return (x % 3) ? C.moss : C.sage;
+  return (x + y) % 3 === 0 ? C.forest : (x * 7 + y) % 5 === 0 ? C.leaf : C.pine;
+}
+function patCanvas(name, scale) {
+  const [w, h, fn] = PAT[name];
+  const b = new Buf(w * scale, h * scale);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const c = fn(x, y); if (c) b.rect(x * scale, y * scale, scale, scale, c); }
+  const c = document.createElement('canvas'); c.width = b.w; c.height = b.h;
+  c.getContext('2d').putImageData(new ImageData(b.d, b.w, b.h), 0, 0);
+  return c.toDataURL('image/png');
+}
+export function patternURL(name, scale = 2) { const key = 'pat:' + name + scale; if (!urls.has(key)) urls.set(key, patCanvas(name, scale)); return urls.get(key); }
+
+// ------------------------------------------------------------------ painted canvases (sunbursts, stars, sparkles)
+
+function toURL(b) { const c = document.createElement('canvas'); c.width = b.w; c.height = b.h; c.getContext('2d').putImageData(new ImageData(b.d, b.w, b.h), 0, 0); return c.toDataURL('image/png'); }
+/** A pixel sunburst: hard-edged rays in two alpha steps, dithered out with distance. `off` shifts the rays by half a gap. */
+export function raysURL(off = 0, n = 18, size = 256) {
+  const key = 'rays:' + off + ':' + n + ':' + size;
+  if (urls.has(key)) return urls.get(key);
+  const b = new Buf(size, size), c = size / 2;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const dx = x + 0.5 - c, dy = y + 0.5 - c, r = Math.hypot(dx, dy) / c;
+    if (r > 1 || r < 0.08) continue;
+    const a = ((Math.atan2(dy, dx) / Math.PI / 2 + 1) * n + off * 0.5) % 1;
+    if (a > 0.42) continue;
+    const core = a > 0.08 && a < 0.34;
+    const alpha = (core ? 190 : 110) * (r > 0.8 ? 0.35 : r > 0.6 ? 0.6 : 1);
+    b.set(x, y, [255, 255, 255, Math.round(alpha)]);
+  }
+  urls.set(key, toURL(b));
+  return urls.get(key);
+}
+/** A pixel burst: concentric stepped rings and a 4-point star, white (tint with a filter or mix-blend) */
+export function burstURL(size = 128, col = '#ffffff') {
+  const key = 'burst:' + size + col, k = CC(col), W = (a) => [k[0], k[1], k[2], a];
+  if (urls.has(key)) return urls.get(key);
+  const b = new Buf(size, size), c = size / 2;
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const r = Math.hypot(x + 0.5 - c, y + 0.5 - c) / c;
+    if (r < 0.22) b.set(x, y, [255, 250, 238, 255]);
+    else if (r < 0.34) b.set(x, y, W(255));
+    else if (r < 0.52) b.set(x, y, W(170));
+    else if (r < 0.7 && (x + y) % 2 === 0) b.set(x, y, W(120));
+    else if (r < 0.86 && (x % 2 === 0 && y % 2 === 0)) b.set(x, y, W(90));
+  }
+  for (let q = 0; q < c; q++) { const a = q < c * 0.6 ? 255 : 150; for (const [x, y] of [[c + q, c], [c - q - 1, c], [c, c + q], [c, c - q - 1]]) { b.set(x, y, q < c * 0.3 ? [255, 250, 238, 255] : W(a)); b.set(x + (y === c ? 0 : 1), y + (y === c ? 1 : 0), W(a)); } }
+  urls.set(key, toURL(b));
+  return urls.get(key);
+}
+/** A shooting star: a bright cross head and a stepped tail of pixels in the star's colour. */
+export function shootURL(col, len = 64) {
+  const key = 'shoot:' + col + len;
+  if (urls.has(key)) return urls.get(key);
+  const H = 11, b = new Buf(len + 8, H), cy = 5, k = CC(col);
+  for (let x = 0; x < len; x++) {
+    const t = x / len, th = t > 0.7 ? 2 : t > 0.35 ? 1 : 0;
+    const on = t > 0.45 || (x % Math.max(2, Math.round(6 - t * 8))) === 0;
+    if (!on) continue;
+    for (let j = -th; j <= th; j++) b.set(x, cy + j, [k[0], k[1], k[2], Math.round(70 + t * 185)]);
+    if (t > 0.6) b.set(x, cy, [255, 255, 255, 255]);
+  }
+  const hx = len + 2;
+  for (let j = -4; j <= 4; j++) { b.set(hx, cy + j, Math.abs(j) < 2 ? [255, 255, 255, 255] : [k[0], k[1], k[2], 220]); b.set(hx + j, cy, Math.abs(j) < 2 ? [255, 255, 255, 255] : [k[0], k[1], k[2], 220]); }
+  b.rect(hx - 1, cy - 1, 3, 3, [255, 255, 255, 255]);
+  urls.set(key, toURL(b));
+  return urls.get(key);
+}
+
 let injected = false;
-/** Injects `.if-<name>` (2x) and `.if3-<name>` (3x) classes for every ice frame, once. */
+/** Injects `.if-<name>` (2x) and `.if3-<name>` (3x) classes for every frame, buttons, and pattern variables, once. */
 export function injectIceCSS() {
   if (injected || typeof document === 'undefined') return;
   injected = true;
   let css = '';
-  for (const n of Object.keys(ICE_FRAMES)) css += `.if-${n}{${iceStyle(n, 2)};background:none}\n.if3-${n}{${iceStyle(n, 3)};background:none}\n`;
-  // the boutique's buttons: .nv-btn.<tone> with a pressed state
+  for (const n of Object.keys(ICE_FRAMES)) css += `.if-${n}{${iceStyle(n, 2)};background-color:transparent}\n.if3-${n}{${iceStyle(n, 3)};background-color:transparent}\n`;
   for (const k of Object.keys(BTN)) css += `.nv-btn.${k}{${iceStyle(`ice_btn_${k}`, 2)}}\n.nv-btn.${k}:active:not(.off),.nv-btn.${k}.down{${iceStyle(`ice_btn_${k}_down`, 2)}}\n`;
+  css += ':root{';
+  for (const p of Object.keys(PAT)) css += `--nv-pat-${p}:url("${patternURL(p, 2)}");`;
+  css += `--nv-rays-a:url("${raysURL(0)}");--nv-rays-b:url("${raysURL(1)}");--nv-burst:url("${burstURL()}");--nv-burst-lamp:url("${burstURL(128, C.lamp)}");--nv-burst-lilac:url("${burstURL(128, '#c6bdd6')}");--nv-burst-lake:url("${burstURL(128, C.sky)}");--nv-twinkle:url("${spriteURL('shop_twinkle', 2)}");`;
+  // the shop's own materials (BUSHED pixel textures, restyled): real oak for signs, the boutique's wallpaper
+  const base = (import.meta.env && import.meta.env.BASE_URL) || '/';
+  css += `--nv-wood:url("${base}models/shop/tex/beams.png");--nv-paper:url("${base}models/shop/tex/paper.png");`;
+  css += '}\n';
   const st = document.createElement('style');
   st.id = 'hh-ice-frames';
   st.textContent = css;
@@ -294,7 +478,7 @@ export function injectIceCSS() {
 
 // ------------------------------------------------------------------ sprites
 
-icon('ice_flake', { W: 'ice:5', B: 'ice.r@f', b: 'sky:2', G: 'gold:4' }, [
+icon('ice_flake', { W: 'nfrost:5', B: 'nlake.r@f', b: 'nlake:3', G: 'nbrass:4' }, [
   '.....W.....',
   '...W.B.W...',
   '....BBB....',
@@ -307,17 +491,17 @@ icon('ice_flake', { W: 'ice:5', B: 'ice.r@f', b: 'sky:2', G: 'gold:4' }, [
   '...W.B.W...',
   '.....W.....',
 ]);
-icon('ice_flake_s', { W: 'ice:5!', B: 'ice:4' }, ['..W..', '.WBW.', 'WBBBW', '.WBW.', '..W..']);
+icon('ice_flake_s', { W: 'nfrost:5!', B: 'nfrost:3' }, ['..W..', '.WBW.', 'WBBBW', '.WBW.', '..W..']);
 // icicles that tile along a ledge (16 px period)
 draw('ice_icicles', () => {
   const g = new Grid(16, 10);
   const drips = [[1, 4], [4, 8], [7, 3], [10, 6], [13, 9], [15, 3]];
   g.rect(0, 0, 16, 2, 'I');
   for (const [x, h] of drips) { for (let y = 1; y < h; y++) { const w = y < h * 0.45 ? 2 : 1; g.rect(x - (w > 1 ? 1 : 0), y, w, 1, 'I'); } g.set(x, h - 1, 'w'); }
-  return render(g, { I: 'ice.x@ice', w: 'ice:5' }, { ol: '#1d3a6c' });
+  return render(g, { I: 'nfrost.x@ice', w: 'nfrost:5' }, { ol: C.dusk });
 });
-// a coat hanger with a silver hook
-icon('shop_hanger', { S: 'steel.r@hook', s: 'steel:5', W: 'lwood.y@bar', w: 'lwood:5' }, () => {
+// a wooden coat hanger with a brass hook
+icon('shop_hanger', { S: 'nbrass.r@hook', s: 'nbrass:5', W: 'nwood.y@bar', w: 'nwood:5' }, () => {
   const g = new Grid(22, 14);
   g.set(11, 0, 'S').set(12, 0, 'S').set(13, 1, 'S').set(13, 2, 'S').set(12, 3, 'S').set(11, 4, 'S');
   g.set(11, 5, 'S');
@@ -326,29 +510,28 @@ icon('shop_hanger', { S: 'steel.r@hook', s: 'steel:5', W: 'lwood.y@bar', w: 'lwo
   g.set(12, 0, 's');
   return g.rows();
 });
-// the free daily gift: a frosted box with a red satin bow
-icon('shop_gift', { B: 'ice.r@box', b: 'ice:5', R: 'red.y@rib', r: 'red:5', D: 'red:1', G: 'gold:4' }, () => {
+// the free daily gift: a linen-wrapped box with a berry satin bow and a holly sprig
+icon('shop_gift', { B: 'nlinen.r@box', b: 'nlinen:2', R: 'nberry.y@rib', r: 'nberry:5', D: 'nberry:1', G: 'npine.r@h', g: 'npine:4', y: 'nberry:4' }, () => {
   const g = new Grid(24, 24);
   g.rect(3, 11, 18, 11, 'B');
   g.rect(2, 8, 20, 4, 'B');
+  for (let y = 12; y < 22; y++) for (let x = 3; x < 21; x++) if ((x + y) % 5 === 0 && g.get(x, y) === 'B') g.set(x, y, 'b');
   g.rect(10, 8, 4, 14, 'R'); g.rect(2, 9, 20, 2, 'R');
   g.line(11, 9, 11, 21, 'r');
-  // bow loops
   g.ellipse(7.5, 5.6, 4.2, 3.2, 'R'); g.ellipse(16.5, 5.6, 4.2, 3.2, 'R');
   g.ellipse(7.5, 5.6, 1.8, 1.3, 'D'); g.ellipse(16.5, 5.6, 1.8, 1.3, 'D');
   g.rect(10, 5, 4, 4, 'R'); g.set(11, 5, 'r').set(10, 6, 'r');
   g.line(10, 8, 7, 12, 'R').line(13, 8, 16, 12, 'R');
-  // frost speckles and a sparkle
-  for (const [x, y] of [[5, 14], [17, 17], [6, 19], [16, 13], [4, 9], [19, 9]]) g.set(x, y, 'b');
-  g.set(20, 2, 'G').set(21, 1, '*').set(19, 1, 'G').set(21, 3, 'G');
+  // holly on the lid
+  g.poly([[15, 12], [19, 10], [21, 13], [18, 14]], 'G'); g.set(18, 12, 'g'); g.set(16, 14, 'y').set(17, 15, 'y');
   return g.rows();
 });
-// rarity star (gold, violet, blue)
-for (const [n, m] of [['shop_star5', 'gold'], ['shop_star4', 'lilac'], ['shop_star3', 'sky']]) {
+// rarity stars: honey (5), plum (4), lake (3)
+for (const [n, m] of [['shop_star5', 'nhoney'], ['shop_star4', 'nlilac'], ['shop_star3', 'nlake']]) {
   icon(n, { S: `${m}.R@star`, w: '#ffffff' }, ['....S....', '....S....', '...SSS...', 'SSSSSSSSS', '.SSSwSSS.', '..SSSSS..', '..SS.SS..', '.SS...SS.', '.S.....S.']);
 }
-// a little frosted hourglass for the reset timer
-icon('shop_timer', { F: 'steel.y@frame', f: 'steel:5', G: 'glass.r@g', S: 'ice:5', s: 'ice:3' }, [
+// a little wooden hourglass for the reset timer
+icon('shop_timer', { F: 'nwood.y@frame', f: 'nwood:5', G: 'nfrost.r@g', S: 'nhoney:4', s: 'nhoney:3' }, [
   'FFFFFFFFF',
   '.FfffffF.',
   '.GSSSSSG.',
@@ -361,22 +544,58 @@ icon('shop_timer', { F: 'steel.y@frame', f: 'steel:5', G: 'glass.r@g', S: 'ice:5
   '.FfffffF.',
   'FFFFFFFFF',
 ]);
-// a gem-to-acorn swap arrow
-icon('shop_swap', { A: 'gold.x@arr', a: 'gold:5' }, ['....A....', '....AA...', 'AAAAAAA..', 'AaaaaaAA.', 'AAAAAAA..', '....AA...', '....A....']);
-
-// a mystery present: a frosted box with a violet bow and a big gold question mark
-icon('shop_mystery', { B: 'lilac.r@box', b: 'lilac:5', D: 'lilac:1', R: 'purple.y@rib', r: 'purple:5', Q: 'gold.R@q', q: 'gold:1', w: '#ffffff' }, () => {
+icon('shop_swap', { A: 'nhoney.x@arr', a: 'nhoney:5' }, ['....A....', '....AA...', 'AAAAAAA..', 'AaaaaaAA.', 'AAAAAAA..', '....AA...', '....A....']);
+// a mystery parcel: kraft paper, twine, a wax seal and a tag with a question mark
+icon('shop_mystery', { B: 'nkraft.r@box', b: 'nkraft:2', D: 'nkraft:1', R: 'nlinen.y@rib', r: 'nlinen:5', Q: 'nberry.R@q', T: 'nlinen.f@t', w: '#ffffff', s: 'nberry:3' }, () => {
   const g = new Grid(24, 24);
-  g.rect(3, 12, 18, 10, 'B');
-  g.rect(2, 9, 20, 4, 'B');
-  g.rect(10, 9, 4, 13, 'R'); g.rect(2, 10, 20, 2, 'R');
-  g.ellipse(7.5, 6.4, 4, 3, 'R'); g.ellipse(16.5, 6.4, 4, 3, 'R');
-  g.ellipse(7.5, 6.4, 1.6, 1.2, 'D'); g.ellipse(16.5, 6.4, 1.6, 1.2, 'D');
-  g.rect(10, 6, 4, 4, 'R'); g.set(11, 6, 'r');
-  // the question mark on the front
-  g.stamp(4, 13, ['.QQQ.', 'Q...Q', '...Q.', '..Q..', '.....', '..Q..'], { Q: 'Q' });
-  g.stamp(15, 13, ['.QQQ.', 'Q...Q', '...Q.', '..Q..', '.....', '..Q..'], { Q: 'Q' });
-  for (const [x, y] of [[4, 20], [19, 20], [3, 12], [20, 12]]) g.set(x, y, 'b');
-  g.set(21, 2, '*').set(20, 3, 'w').set(22, 3, 'w').set(21, 4, 'w').set(2, 4, 'w');
+  g.rect(3, 10, 18, 12, 'B');
+  g.rect(2, 7, 20, 4, 'B');
+  for (let y = 8; y < 22; y++) for (let x = 3; x < 21; x++) if ((x * 3 + y) % 7 === 0 && g.get(x, y) === 'B') g.set(x, y, 'b');
+  g.rect(11, 7, 2, 15, 'R'); g.rect(2, 8, 20, 1, 'R'); g.rect(3, 15, 18, 1, 'R');
+  g.ellipse(9, 5, 3, 2, 'R'); g.ellipse(15, 5, 3, 2, 'R'); g.ellipse(9, 5, 1, 0.8, 'D'); g.ellipse(15, 5, 1, 0.8, 'D');
+  g.ellipse(12, 15.5, 2.2, 2.2, 'Q'); g.set(12, 15, 's').set(11, 16, 's');
+  // a hanging tag with a ?
+  g.line(18, 9, 20, 13, 'R'); g.rect(17, 13, 6, 7, 'T');
+  g.stamp(18, 14, ['.QQ.', '...Q', '..Q.', '....', '..Q.'], { Q: 'Q' });
+  g.set(21, 2, '*').set(20, 3, 'w').set(22, 3, 'w').set(21, 4, 'w');
   return g.rows();
 });
+// a holly sprig (two leaves and three berries) for section corners
+icon('shop_holly', { L: 'npine.r@l1', M: 'npine.r@l2', v: 'npine:5', B: 'nberry.R@b', b: 'nberry:5' }, [
+  '.LL.......MM.',
+  'LLLL.....MMMM',
+  '.LLLL...MMMM.',
+  'LLvLLL.MMvMMM',
+  '.LLLvLBMvMMM.',
+  '..LLLBBBMMM..',
+  '....BBbBB....',
+  '.....BBB.....',
+]);
+// a brass shop bell
+icon('shop_bell', { B: 'nbrass.R@bell', b: 'nbrass:5', K: 'nwood.f@base', k: 'nwood:1' }, [
+  '.....b.....',
+  '....BBB....',
+  '...BBBBB...',
+  '..BBBBBBB..',
+  '..BBBBBBB..',
+  '.BBBBBBBBB.',
+  'KKKKKKKKKKK',
+  '.kkkkkkkkk.',
+]);
+// a fairy-light bulb, tinted per colour
+for (const [n, m] of [['shop_bulb_a', 'nlamp'], ['shop_bulb_b', 'nrose'], ['shop_bulb_c', 'nsage'], ['shop_bulb_d', 'nfrost']]) {
+  icon(n, { G: `${m}.R@g`, w: '#ffffff', k: 'nink:3' }, ['..k..', '.kkk.', '.GGG.', 'GGwGG', 'GGGGG', '.GGG.', '..G..']);
+}
+// a twinkle (four-point star) in three sizes for sparkles
+icon('shop_twinkle', { W: 'nfrost:5!', Y: 'nlamp:4!' }, ['...Y...', '...W...', '..YWY..', 'YWWWWWY', '..YWY..', '...W...', '...Y...']);
+icon('shop_twinkle_s', { W: 'nfrost:5!', Y: 'nlamp:4!' }, ['.Y.', 'YWY', '.Y.']);
+// a little price tag with string
+icon('shop_tag', { T: 'nkraft.f@t', t: 'nkraft:2', s: 'nlinen:2', k: 'nink:3' }, [
+  's.........',
+  '.s........',
+  '..TTTTTTT.',
+  '.TTtTTTTTT',
+  'TTTTTkkTTT',
+  '.TTTTTTTTT',
+  '..TTTTTTT.',
+]);

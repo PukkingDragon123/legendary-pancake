@@ -7,15 +7,15 @@ export type Weather = 'clear' | 'rain' | 'sea' | 'wind' | 'stream' | 'snow';
 
 interface Key { h: number; top: string; hor: string; sun: string; light: string; li: number; night: number }
 const KEYS: Key[] = [
-  { h: 0, top: '#070b24', hor: '#1c2c5c', sun: '#f7efd0', light: '#8fb0ff', li: 0.35, night: 1 },
-  { h: 4.8, top: '#0a1030', hor: '#24356a', sun: '#f7efd0', light: '#8fb0ff', li: 0.35, night: 1 },
-  { h: 6.0, top: '#3a3f8c', hor: '#ff9a6a', sun: '#ffd27a', light: '#ffb48a', li: 0.9, night: 0.4 },
-  { h: 7.2, top: '#5a8fd8', hor: '#ffd6a0', sun: '#fff0b0', light: '#ffe0b0', li: 1.5, night: 0 },
-  { h: 12, top: '#4a9fee', hor: '#c6ebff', sun: '#fffbe0', light: '#fff7e6', li: 1.8, night: 0 },
-  { h: 17, top: '#5b8fd8', hor: '#ffdca6', sun: '#fff0b0', light: '#ffd9a0', li: 1.6, night: 0 },
-  { h: 18.9, top: '#3c3f8c', hor: '#f58d6c', sun: '#ff9a5a', light: '#ff9a68', li: 0.9, night: 0.35 },
-  { h: 20.3, top: '#0c1234', hor: '#2a3a74', sun: '#f7efd0', light: '#8fb0ff', li: 0.4, night: 1 },
-  { h: 24, top: '#070b24', hor: '#1c2c5c', sun: '#f7efd0', light: '#8fb0ff', li: 0.35, night: 1 },
+  { h: 0, top: '#151b25', hor: '#2c3a4a', sun: '#f4eedd', light: '#9fb3c4', li: 0.35, night: 1 },
+  { h: 4.8, top: '#1b222d', hor: '#3a4a5c', sun: '#f4eedd', light: '#9fb3c4', li: 0.35, night: 1 },
+  { h: 6.0, top: '#46596a', hor: '#d9aca4', sun: '#f1d39a', light: '#e8c4a8', li: 0.9, night: 0.4 },
+  { h: 7.2, top: '#86a9b0', hor: '#efe0c0', sun: '#f6e8c4', light: '#f1e2c8', li: 1.5, night: 0 },
+  { h: 12, top: '#9dbdc2', hor: '#d3e0dc', sun: '#fbf6e9', light: '#f6f1e4', li: 1.8, night: 0 },
+  { h: 17, top: '#8aaab0', hor: '#ead7b4', sun: '#f6e2b8', light: '#f1d8b0', li: 1.6, night: 0 },
+  { h: 18.9, top: '#46596a', hor: '#c0866a', sun: '#dcb072', light: '#e0a888', li: 0.9, night: 0.35 },
+  { h: 20.3, top: '#1b222d', hor: '#3a4a5c', sun: '#f4eedd', light: '#9fb3c4', li: 0.4, night: 1 },
+  { h: 24, top: '#151b25', hor: '#2c3a4a', sun: '#f4eedd', light: '#9fb3c4', li: 0.35, night: 1 },
 ];
 const c3 = (h: string) => new THREE.Color(h);
 function keyAt(h: number) {
@@ -108,43 +108,43 @@ export class SkyView {
     const cl = this.weather === 'rain' ? 1 : 0.4;
     for (let i = 0; i < 4; i++) {
       const cx = ((hash(i, 11) * N + this.t * (1.5 + i * 0.4)) % (N + 20)) - 10, cy = 6 + i * 6 + Math.floor(hash(i, 12) * 4);
-      g.fillStyle = this.weather === 'rain' ? `rgba(90,100,120,${(0.9 * this.amt).toFixed(2)})` : night > 0.5 ? 'rgba(60,70,120,.55)' : 'rgba(255,255,255,.75)';
+      g.fillStyle = this.weather === 'rain' ? `rgba(97,127,140,${(0.9 * this.amt).toFixed(2)})` : night > 0.5 ? 'rgba(70,89,106,.6)' : 'rgba(244,238,221,.85)';
       if (cl < 1 && i > 1) continue;
       g.fillRect(Math.round(cx), cy, 10, 3); g.fillRect(Math.round(cx) + 2, cy - 2, 6, 2);
     }
-    if (this.weather === 'rain') { g.fillStyle = `rgba(40,50,70,${(0.35 * this.amt).toFixed(2)})`; g.fillRect(0, 0, N, N); }
+    if (this.weather === 'rain') { g.fillStyle = `rgba(39,49,63,${(0.35 * this.amt).toFixed(2)})`; g.fillRect(0, 0, N, N); }
     // the far shore: sea for 'sea', a stream glinting for 'stream'
     const base = night > 0.5 ? 0.35 : 1;
     if (this.weather === 'sea') {
       for (let y = 30; y < N; y++) {
-        g.fillStyle = y === 30 ? '#cfe8ff' : y < 36 ? '#3a8cbc' : '#28699a';
+        g.fillStyle = y === 30 ? '#d3e0dc' : y < 36 ? '#617f8c' : '#46596a';
         g.fillRect(0, y, N, 1);
       }
-      g.fillStyle = '#e8f6ff';
+      g.fillStyle = '#eef3f0';
       for (let i = 0; i < 10; i++) { const x = Math.round((i * 9 + this.t * (6 + (i % 3) * 3)) % (N + 6)) - 3, y = 32 + (i % 5) * 3; g.fillRect(x, y, 3, 1); }
-      g.globalAlpha = night > 0.5 ? 0.55 : 0; g.fillStyle = '#0a1030'; g.fillRect(0, 30, N, 18); g.globalAlpha = 1;
+      g.globalAlpha = night > 0.5 ? 0.55 : 0; g.fillStyle = '#1b222d'; g.fillRect(0, 30, N, 18); g.globalAlpha = 1;
     } else {
       // distant canopy and trunks
       for (let x = 0; x < N; x++) {
         const hh = 12 + Math.round(Math.sin(x * 0.3) * 2 + Math.sin(x * 0.71 + 2) * 2 + hash(x >> 2, 3) * 3);
         for (let y = N - hh; y < N; y++) {
-          const c = y < N - hh + 2 ? [90, 160, 70] : y < N - 6 ? [58, 118, 52] : [40, 88, 44];
+          const c = y < N - hh + 2 ? [134, 160, 106] : y < N - 6 ? [85, 115, 67] : [63, 90, 59];
           g.fillStyle = `rgb(${c.map((v) => Math.round(v * base * (night > 0.5 ? 0.55 : 1))).join(',')})`;
           g.fillRect(x, y, 1, 1);
         }
       }
       if (this.weather === 'stream') {
-        for (let x = 0; x < N; x++) { const y = 42 + Math.round(Math.sin(x * 0.25) * 1.5); g.fillStyle = (x + Math.floor(this.t * 8)) % 6 === 0 ? '#e8f6ff' : '#4aa0d0'; g.fillRect(x, y, 1, 3); }
+        for (let x = 0; x < N; x++) { const y = 42 + Math.round(Math.sin(x * 0.25) * 1.5); g.fillStyle = (x + Math.floor(this.t * 8)) % 6 === 0 ? '#eef3f0' : '#86a9b0'; g.fillRect(x, y, 1, 3); }
       }
     }
     // weather on top
     if (this.weather === 'rain') {
-      g.fillStyle = `rgba(190,220,255,${(0.85 * this.amt).toFixed(2)})`;
+      g.fillStyle = `rgba(211,224,220,${(0.85 * this.amt).toFixed(2)})`;
       for (const d of this.drops) { const y = (d.y + this.t * d.v) % (N + 6) - 3; g.fillRect(Math.round((d.x - y * 0.25 + N) % N), Math.round(y), 1, 3); }
     } else if (this.weather === 'wind' || this.weather === 'snow') {
       for (let i = 0; i < 12; i++) {
         const x = (hash(i, 21) * N + this.t * (14 + i)) % (N + 4) - 2, y = (hash(i, 22) * N + Math.sin(this.t * 2 + i) * 4 + (this.weather === 'snow' ? this.t * 6 : 0)) % N;
-        g.fillStyle = this.weather === 'snow' ? '#ffffff' : ['#6cb845', '#e2b84a', '#c9683f'][i % 3];
+        g.fillStyle = this.weather === 'snow' ? '#f5f7f2' : ['#86a06a', '#dcb072', '#c0866a'][i % 3];
         g.fillRect(Math.round(x), Math.round(y), 2, 1);
       }
     }

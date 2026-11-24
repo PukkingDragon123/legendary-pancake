@@ -1,0 +1,1451 @@
+{
+ "name": "owl_tapestry",
+ "description": "A pine-green woven hanging on a walnut rod with turned finials: a gold-stitched border, Hiroshige's woodblock print Owl on Pine Branch woven in at its heart, and gold tassels on its swallowtail.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 6.0,
+ "budget": {
+  "tris": 2600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": false,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "gold": [
+    "#8a5a3c",
+    "#8d703f",
+    "#b58f4d",
+    "#d2a764",
+    "#d3ac6c",
+    "#d4b473",
+    "#f3d89f",
+    "#fcf4bb"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "paper": [
+    "#756f5d",
+    "#bbab85",
+    "#d6c7a4",
+    "#e3d8bc",
+    "#ede5cf",
+    "#f5f0e0",
+    "#fcf7ed"
+   ],
+   "pine": [
+    "#25332f",
+    "#2b3e30",
+    "#3a5338",
+    "#4c6840",
+    "#5c7a48",
+    "#6f8c57",
+    "#8ba36e",
+    "#a7b788"
+   ],
+   "verd": [
+    "#364246",
+    "#4c5b58",
+    "#6c8075",
+    "#96b09c",
+    "#b8ceb2",
+    "#d4e4c1"
+   ],
+   "walnut": [
+    "#2b2c2d",
+    "#3a312a",
+    "#46372a",
+    "#553e2e",
+    "#654a36",
+    "#7c6044",
+    "#a17f5a",
+    "#bf9d74"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "pine",
+   "tone": 4.0,
+   "light": 0.7,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "paper",
+   "tone": 4,
+   "light": 0.0,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s3": {
+   "ramp": "walnut",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "walnut",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "walnut",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "long"
+   },
+   "layers": [
+    {
+     "id": "grain",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 0.7,
+     "width": 0.32,
+     "shift": -0.75,
+     "wobble": 0.45,
+     "wobble_scale": 2.5
+    },
+    {
+     "id": "grain2",
+     "op": "stripes",
+     "axis": [
+      0,
+      1,
+      0.71
+     ],
+     "period": 1.9,
+     "width": 0.18,
+     "shift": -0.55,
+     "wobble": 0.9,
+     "wobble_scale": 4
+    },
+    {
+     "id": "figure",
+     "op": "noise",
+     "scale": 2.4,
+     "amount": 0.35
+    },
+    {
+     "id": "knots",
+     "op": "spots",
+     "count": 2,
+     "radius": [
+      0.35,
+      0.6
+     ],
+     "stretch": [
+      1,
+      1.6,
+      1
+     ],
+     "shift": -1.6,
+     "bevel": {
+      "shadow": 1,
+      "highlight": 1,
+      "shadow_shift": -0.6,
+      "highlight_shift": 0.8
+     }
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 3,
+     "shift": 1.0,
+     "density": 0.35,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "honey",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.2
+    }
+   ]
+  },
+  "s7": {
+   "ramp": "gold",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
+    }
+   ]
+  },
+  "s8": {
+   "ramp": "honey",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "threads",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.125,
+     "width": 0.4,
+     "shift": -0.9
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "gold",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
+    }
+   ]
+  },
+  "s10": {
+   "ramp": "honey",
+   "tone": 4.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "threads",
+     "op": "stripes",
+     "axis": "around",
+     "period": 0.125,
+     "width": 0.4,
+     "shift": -0.9
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "banner",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    -8.5,
+    0.8
+   ],
+   "art": [
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "ddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbdddddd",
+    "ddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbddddddddbbbbdddddd",
+    "bbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabb",
+    "bbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabb",
+    "bbaaggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGbbbb",
+    "bbaaggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGggggGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGaa",
+    "aaGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGaa",
+    "aaggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggaa",
+    "aaggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "aaggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggaa",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbGGddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddGGbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "bbggddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddggbb",
+    "aaGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGaa",
+    "aaGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGggGGaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbGGaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "aabbGGaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbGGaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "bbaaggbbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaggbbbb",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aaaaGGbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaGGbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaeeeeeeaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaabbbbaaaabbbbaaaaeeeeeeaabbbbaaaabbbbaaaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaeeee......eeeeaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbbbggaabbbbaaaabbbbaaaabbbbaaaabbbbaaeeee......eeeeaaaabbbbaaaabbbbaaaabbbbaaaabbbbggaabb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbeeee..............eeeebbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "bbaaGGbbbbaaaabbbbaaaabbbbaaaabbbbeeee..............eeeebbaaaabbbbaaaabbbbaaaabbbbaaGGbbbb",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbeeee......................eeeebbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aaaaggbbaaaabbbbaaaabbbbaaaabbeeee......................eeeebbbbaaaabbbbaaaabbbbaaaaggbbaa",
+    "aabbggaaaabbbbaaaabbbbaaaaeeee..............................eeeeaabbbbaaaabbbbaaaabbggaaaa",
+    "aabbggaaaabbbbaaaabbbbaaaaeeee..............................eeeeaabbbbaaaabbbbaaaabbggaaaa",
+    "bbbbGGaabbbbaaaabbbbaaeeee......................................eeeeaaaabbbbaaaabbbbGGaabb",
+    "bbbbGGaabbbbaaaabbbbaaeeee......................................eeeeaaaabbbbaaaabbbbGGaabb",
+    "bbaaaabbbbaaaabbbbeeee..............................................eeeebbaaaabbbbaaaabbbb",
+    "bbaaaabbbbaaaabbbbeeee..............................................eeeebbaaaabbbbaaaabbbb",
+    "aaaabbbbaaaabbeeee......................................................eeeebbbbaaaabbbbaa",
+    "aaaabbbbaaaabbeeee......................................................eeeebbbbaaaabbbbaa"
+   ],
+   "plane": "xy",
+   "style": "s1",
+   "paint": {
+    "art_key": {
+     "a": "pine:3",
+     "b": "pine:4",
+     "d": "pine:2",
+     "e": "pine:1",
+     "g": "honey:5",
+     "G": "honey:3"
+    }
+   }
+  },
+  {
+   "id": "print",
+   "shape": "card",
+   "pivot": [
+    0.0,
+    -6.66,
+    0.86
+   ],
+   "art": [
+    "gllgdbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaabbaaaabbbbabbbbbbbb",
+    "HQPPONNNHHHNHHGGGHHHGEEEEvvtqkkkkgggggdbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "HPOOOOOOPPOOOPPPOOOOOOOPOOOOOOPPPOOOPPOOOOONNNNNHHHHHGGEwAppzpgggdggdddddbbgbb",
+    "HPPOOPPOOOOOPOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOPPOPQQRRRRRRRRRRRRRQQQQPLzo",
+    "HOONNOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOQRQQQRRRRRRRRRRRRRRRRRRQQHzB",
+    "GNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNONNOOOOOOOOOOQRRRRRRRRRRRRRRRRRRRQQQRRRBDz",
+    "FHHHHHHHHNNHNNHNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNOMMMMMRQPQQQQQQQRRRQRRRRRRKBJy",
+    "AGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGHHHHNMIMzKLLLLMQLLOOMRRRRRRRRQDJDo",
+    "sFFFEHHGEEEEEEGEEGEEGEEEEEEEEExEExuvxEEEEEGAppAFFMKKCRRMGHLLHLHLLMRRMMQMQMBJzi",
+    "sEAwFLLFwwEEEEEEEEEEEEEEEEExvvxxvvttwuwEEFynheehnCGsJMLFFEGFEHFFKQMRRRQMMDDJpo",
+    "swssHLLFwEEEEExxExxEExxExxxvuttuuttttuvvwoeeeceehzADCFEExEwrwEwsFMMMRMMLMKJBio",
+    "swswEGHGEEEEExxxxxxxEEExvvvutrrrrrrrtttwpceeeccccnynBzsxEwrrqqsAHKLKQMKLMJJBoo",
+    "sEwEEFFGxxExuvvxuuxvxvvutrruEttmrmqrtutAheeececceheeeefoAxtqqqlAKKKKMLMKJJDBoo",
+    "svwwFLLFxxxxxxxxxvxvutvvrturvwtrmmrmrmvpeeeefnhhecceeceejstqqlAKHKKKLKMJDMMyno",
+    "stwEEHLxEvvxvxxxxxuuuvvvvutuwwtrmmmmrmwhecehheeheceeeeeehzwtskALKHKKKMMJJJCiio",
+    "qEEEEHLxExuxxvExxuxxExvtvrtuurrrmmkmrrsecceecccyDeeeceeeeyFtqlsFKKKHMQMJMJznoz",
+    "rEEEGGHExEvxvuxxvvxxvvvuvttttrmqqqlmmrlecchecccDJceeccceecyAqsFFKMMKQRMJJJniiz",
+    "EGEGEFHEuvvvvvxxxuvvvuvuurrutrqmkllkmmsheenehneDnccccceeeenAllHKMMMMKKJJzniiBB",
+    "wxxEvHMwvuvvvvxxxxvvuutttrrturrrqkkkmmvAeeeyhyDhceecccceccepklHMMMMDCMIyyyinDo",
+    "wEEEvFLwtwwvxxxvxxvvuuvumtrrtrmmqmkmmmmvzechDJnccccceeeeeceolmALLMMJIDCyBnioID",
+    "wvxExEFwvvvvvxxxxxxvvruttutrrrrrmmkqmmrrwACCDJhceceecccceehnltsELMJDJJBiiiBDJI",
+    "wEEGGEHwExExxxEExxvuuuuuuumtutrrmmmrmmmqmmrsCnececcccccccceissrwKJBDBoiifzJDID",
+    "EEEGEGGEEwxvExxxxxrrvutruurtrmmmmkmkkkkkklkFzneccccceccecccnsuFKDzDzfiiioJDDDD",
+    "EEEGEGGExxvwvFHEFEEwttrrrmmmmmmmkkkkkkkkkgFRzheceeecccceeheBAlpJJDnfiifiDDyIBD",
+    "EEEEEzIAxvxvEHLFHHHGErrrrqkkmrmkkkkkkkkgkKRMoeececeeecccccnDyyBCoffiiiizyiBDDB",
+    "ExxEzIIBEvEwFLLKHLHHHwmmqqkkkmkkkkkkkkkglRMAoenyhceeecenhyBBDyffffffffiByCDCDo",
+    "ExxEBIIIwuwHHKMLLMMLKHwkqmkkmkkkkkkkkkkgHQAkzeheecccceyIBBoCBddfffffozBCCBDCCn",
+    "xvEEzIIIwxwKMMMMMMMMMKskrrkkskqqsskkkkkFMAgkpyhcchyDyJJzCoioddfdfiooDyoBCMJIBi",
+    "vvEEzBIIDFFKMMMMMMMQMHHvmvwwAFFAHFgsFlMMAglkAByhBBMDMMBpDyddffddyzoCyiDJJMDoif",
+    "vxExBBBIKLHLMMMMRMQMMMLErtwFKLFAHHFHlsMFkllkAyhBzozoICnoyfdfddnBDDJBBDDJMJyiif",
+    "xuEEAIIILKMMMMQQRQRMLLHFEEFHKKKFHFHAAMMgkllkwDJoiJIBiiyifdfdfyDBnyozCBDDDIzoii",
+    "uuxEEKMKMLMMLMQMRQMMMKLLHKMKKKLKKKKFMLlklmqAKJidzDnffffffBDnhizzyynzypBBCynoni",
+    "tvxEHLLMMMMMMQMMRQMMMLMMKHKKHKMMRLKHKHFsrrlMDiipoyffffiifBIDfoIDzJIDJMCDJCoonn",
+    "vvxEHLLMMMMMMLMQRMKMQMMMLKLHFKLRMKFHKFLwmsADznCzBoffdoDzyzifiDDJJMzJJDIJDzoono",
+    "wwxEHMMMMMMMRRMMRRLMQRMMLHHFHKMKMKHKKAFmFCJniDDzfdfddzBynnBCpCDJMDpDJDooiioono",
+    "wEExHLLMMMMQRQLKMMMKMRRLKHAHFMQMDAHKFkmACoffyIzyffdfCzyBCKCsglAMMMJRDBCyononoo",
+    "EEEGLMMMMMMMLLMLMKMMQMLKKKMKLHFAFkAAstApfinnCBifffiCJJHFLHggggzDCMMICICoinoono",
+    "FEGHLLLMMLMMKMMMMMKRMHLLMMMMFklAFklkmFzfiynoCBoffyDIJzsksggADCCCMBzCyCniiooozo",
+    "FEGLLMMMLLLMMQQMMQKMQLLLQLFFFqqsFmrtwAiiiyozDyiifnJDhokkkgAJJDDCMzByiiiiiooDBi",
+    "FHLLMMMMLMRRMQMMKLMMLLLMMwuuutrwwrtwCifinoyyyiifDIfnhzkkkgLMJDCCDBozzoononDIii",
+    "FGHLMMMQMRRMMMRRMLLFtrwLFxEvutwtmtwFiiiooyzyioiyJzchypmlFHMMpoCDyoDIDzninCJCjp",
+    "EGHHHLQRMRRMLRQHwrmtutwwuvuurstvtwKpiniiyoiiiinCAgenyskKKMJzfzDIDDoyoiozBJJBAA",
+    "EGHHLMMQRMMLLLwrtuvrtqtwtrrrttrrmLBinizzyiiioiiDEFonAkAMJiooiBDICyyozBJMDJIpCl",
+    "FGHLLQQMQMLMLFvvtwtvvwwmttswvxuEKBinioyooiiiiiFwrtsAmlKMBiCozJBnfyDDoJMJDKJKsk",
+    "EHHLLLMMMLMHqFwrtwtvuuvqrkrvwxxLJfiiiioBoiioyCFrsmwqFKBozDDBJDionoCMDMKDDKFlkk",
+    "FGHLHHLMLFsFwrrsqrttvvvmqstuwxFCfiiiifoiiiiyDAmmrmmkDzfBCJJJJDConDJMMKMKFlkggg",
+    "FEwFHLLLHEwvEtrtrttmqrtttwtxuFBhiiiiiifiiiizAmmmmkkqDioJMMRCyooiCJMJJHFrmqlkgk",
+    "EEwwFLFHFFwuuwwsswmqqrmruwwvFCiiiiiiiifiiiiArmklkkkFBfCJJMDipDBIMJKKHwrrqllkgg",
+    "wEwEwEEFEEwvvtwqswqrrsqrssuwCoiihiinnfiinnAsmmklkgACyDBJzJJDDBBMMMHuurmkllkkkg",
+    "wEEwwwwwwwwwvwssqqqrtsqsswEFpniiiiiiiiinipAmmmklkACiJJDDDJDofiCDDKEttmklllklll",
+    "AEEEwwssqqssssssqlqqqsqrwtHziiiiiiiiiiiipAmqlkkksDDyBDCyoBCoyBCDDFmrkmmrqqkkls",
+    "AwwwssqqlqsssssllqqqqqtwuFCoonniioiihhipAqmllkkkCzzDDiozCDCoBIJMskmrmrrtwwqqsl",
+    "sllssssslsssssllllllqqqtACooooonoyiiiiAAmmklllgAzByDBBCCCfiioDDKkrrrrruuvwssql",
+    "AsssssssssssssslllllssssAooyooooyonnopsmmkgkkglzoCIJDDBiiiniizKAmltuuvxEwwwsll",
+    "pjjjjjjjjjjjllllllllslpppoooooooyyoozAmmkkkkkgpzyDJDBBzBCzfijAskkkrrrttwswslll",
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbdddddbbbbbbbbgizoBziiznzzddhgkgggkkkkkkkkkgggg"
+   ],
+   "plane": "xy",
+   "style": "s2",
+   "paint": {
+    "art_key": {
+     "a": "#f0e8d3",
+     "b": "#e2ddc7",
+     "c": "#e4cfa5",
+     "d": "#d7cdae",
+     "e": "#dec59b",
+     "f": "#d0c4a5",
+     "g": "#b6c1b0",
+     "h": "#cbbc9b",
+     "i": "#c4bb9e",
+     "j": "#b9baa3",
+     "k": "#a2bcb0",
+     "l": "#a1b8ac",
+     "m": "#9ab9af",
+     "n": "#c0b496",
+     "o": "#bbb296",
+     "p": "#b0b098",
+     "q": "#9bb5ac",
+     "r": "#96b5ae",
+     "s": "#98b1a6",
+     "t": "#93b3ac",
+     "u": "#8fb2ac",
+     "v": "#8eafaa",
+     "w": "#8fada6",
+     "x": "#89ada9",
+     "y": "#b2a88b",
+     "z": "#aba389",
+     "A": "#96a697",
+     "B": "#a49a7f",
+     "C": "#99967e",
+     "D": "#948b72",
+     "E": "#86a9a5",
+     "F": "#859d95",
+     "G": "#779d9c",
+     "H": "#6b8b8b",
+     "I": "#977f69",
+     "J": "#7f7964",
+     "K": "#70776a",
+     "L": "#63746d",
+     "M": "#5f645b",
+     "N": "#3c778a",
+     "O": "#366575",
+     "P": "#365d6c",
+     "Q": "#39535b",
+     "R": "#353e40"
+    }
+   }
+  },
+  {
+   "id": "rod",
+   "shape": "loft",
+   "pivot": [
+    -9.0,
+    3.4,
+    0.9
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      18.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s3"
+  },
+  {
+   "id": "finial0",
+   "shape": "loft",
+   "pivot": [
+    -9.0,
+    3.4,
+    0.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    90.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": [
+      1.8,
+      1.8
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.5,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": [
+      0.4,
+      0.4
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s4",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "finial1",
+   "shape": "loft",
+   "pivot": [
+    9.0,
+    3.4,
+    0.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -90.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": [
+      1.8,
+      1.8
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.5,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8,
+      0
+     ],
+     "size": [
+      0.4,
+      0.4
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s5",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "cord",
+   "shape": "loft",
+   "pivot": [
+    -8.0,
+    3.6,
+    0.9
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.32,
+      0.32
+     ]
+    },
+    {
+     "at": [
+      4.0,
+      1.0,
+      -0.2
+     ],
+     "size": [
+      0.32,
+      0.32
+     ]
+    },
+    {
+     "at": [
+      8.0,
+      1.6,
+      -0.4
+     ],
+     "size": [
+      0.32,
+      0.32
+     ]
+    },
+    {
+     "at": [
+      12.0,
+      1.0,
+      -0.2
+     ],
+     "size": [
+      0.32,
+      0.32
+     ]
+    },
+    {
+     "at": [
+      16.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.32,
+      0.32
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s6"
+  },
+  {
+   "id": "tassel_knot0",
+   "shape": "loft",
+   "pivot": [
+    -7.1,
+    -17.6,
+    0.85
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.14644660940672627,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s7",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "tassel0",
+   "shape": "loft",
+   "pivot": [
+    -7.1,
+    -17.4,
+    0.85
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      -1.6,
+      0
+     ],
+     "size": [
+      1.4,
+      1.4
+     ]
+    },
+    {
+     "at": [
+      0,
+      -2.6,
+      0
+     ],
+     "size": [
+      1.5,
+      1.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s8",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "tassel_knot1",
+   "shape": "loft",
+   "pivot": [
+    7.1,
+    -17.6,
+    0.85
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.14644660940672627,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5,
+      0
+     ],
+     "size": [
+      1.0,
+      1.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.8535533905932737,
+      0
+     ],
+     "size": [
+      0.7071,
+      0.7071
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s9",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "tassel1",
+   "shape": "loft",
+   "pivot": [
+    7.1,
+    -17.4,
+    0.85
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      -1.6,
+      0
+     ],
+     "size": [
+      1.4,
+      1.4
+     ]
+    },
+    {
+     "at": [
+      0,
+      -2.6,
+      0
+     ],
+     "size": [
+      1.5,
+      1.5
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s10",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  }
+ ]
+}

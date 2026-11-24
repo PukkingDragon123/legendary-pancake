@@ -11,8 +11,10 @@ import { sound } from '../audio/sound.ts';
 import { box, buildProp, propMesh, PX, type BoxSpec, type Painter } from '../gfx/box.ts';
 import { ramp, tone } from '../gfx/color.ts';
 import { cloth, lamp, lvl, metal, smooth, solid } from '../gfx/mats.ts';
+import { loadGLB } from '../gfx/glb.ts';
 import { SPR } from './fx.ts';
 import type { CamShot, Scene } from './scene.ts';
+import { HOUSE } from './layout.ts';
 
 export interface CineOpts { onDone?: () => void }
 
@@ -46,21 +48,22 @@ function path(pts: THREE.Vector3[], k: number): THREE.Vector3 {
 const leather = (c: string): Painter => { const r = ramp(c); return (t) => tone(r, lvl(t, { noise: 0.45, scale: 1.6, rim: 0.8 }) + (t.u % 5 === 0 && t.face >= 4 ? -0.5 : 0)); };
 
 function satchel(): BoxSpec[] {
-  const body = leather('#9a5a34'), flap = leather('#7a4228');
-  const stitch: Painter = (t) => (t.u % 2 === 0 && (t.v === 0 || t.v === t.h - 1) ? 0xf0d9a8 : flap(t));
+  // [world3] calm palette: muted saddle leather, oat stitching, brass buckle
+  const body = leather('#8c6448'), flap = leather('#6f553d');
+  const stitch: Painter = (t) => (t.u % 2 === 0 && (t.v === 0 || t.v === t.h - 1) ? 0xeae0c8 : flap(t));
   return [
     box(0, 0, 0, 7, 5, 3, body),
     box(0, 2.6, 0.2, 7.4, 2.8, 3.6, stitch),
-    box(0, 2.4, 1.95, 1.8, 1.8, 0.5, metal('#f0c85a')),
-    box(0, 2.9, 2.2, 0.8, 0.8, 0.3, solid('#5a3a20', { noise: 0 })),
+    box(0, 2.4, 1.95, 1.8, 1.8, 0.5, metal('#c8a764')),
+    box(0, 2.9, 2.2, 0.8, 0.8, 0.3, solid('#4a392b', { noise: 0 })),
     box(-3.6, 0.5, 0, 0.5, 3.6, 2.4, flap), box(3.6, 0.5, 0, 0.5, 3.6, 2.4, flap),
   ];
 }
-function strap(): BoxSpec[] { return [box(0, 0, 0, 1.2, 16, 0.8, leather('#6a3820'))]; }
+function strap(): BoxSpec[] { return [box(0, 0, 0, 1.2, 16, 0.8, leather('#5b4a3c'))]; }
 function goggles(): BoxSpec[] {
-  const brass = metal('#e2b24a');
-  const glass: Painter = (t) => { const r = ramp('#7fd0f0'); return tone(r, (t.u + t.v) % 4 === 0 ? 2 : t.face === 4 ? 0.4 : -0.6); };
-  const band = cloth('#5a3a2a', { stripe: '#7a4a32', stripeEvery: 2 });
+  const brass = metal('#c8a764');
+  const glass: Painter = (t) => { const r = ramp('#86a9b0'); return tone(r, (t.u + t.v) % 4 === 0 ? 2 : t.face === 4 ? 0.4 : -0.6); };
+  const band = cloth('#4a392b', { stripe: '#6f553d', stripeEvery: 2 });
   return [
     box(0, 0.4, -1, 17, 1.6, 1, band),
     box(-2.6, 0, 0, 4.2, 4.2, 1.2, brass), box(2.6, 0, 0, 4.2, 4.2, 1.2, brass),
@@ -70,29 +73,61 @@ function goggles(): BoxSpec[] {
 }
 const ITEMS: (() => BoxSpec[])[] = [
   // a rolled map with a red ribbon
-  () => [box(0, 0, 0, 5, 2, 2, solid('#f1e2bc', { noise: 0.3 })), box(0, -0.1, 0, 1, 2.2, 2.2, solid('#d8463a', { noise: 0 }))],
+  () => [box(0, 0, 0, 5, 2, 2, solid('#eae0c8', { noise: 0.3 })), box(0, -0.1, 0, 1, 2.2, 2.2, solid('#a8505c', { noise: 0 }))],
   // an acorn
-  () => [box(0, 0, 0, 3, 3, 3, smooth('#c8873e')), box(0, 2.4, 0, 3.6, 1.4, 3.6, solid('#7a5230', { noise: 0.8, scale: 0.8 })), box(0, 3.6, 0, 0.8, 1, 0.8, solid('#5a3a20'))],
+  () => [box(0, 0, 0, 3, 3, 3, smooth('#bf9d74')), box(0, 2.4, 0, 3.6, 1.4, 3.6, solid('#6f553d', { noise: 0.8, scale: 0.8 })), box(0, 3.6, 0, 0.8, 1, 0.8, solid('#4a392b'))],
   // a tiny lantern
-  () => [box(0, 0, 0, 2.6, 0.6, 2.6, metal('#3a3a48')), box(0, 0.6, 0, 2, 2.4, 2, lamp('#ffd07a'), { glow: true }), box(0, 3, 0, 2.6, 0.6, 2.6, metal('#3a3a48')), box(0, 3.6, 0, 1, 0.8, 0.4, metal('#3a3a48'))],
+  () => [box(0, 0, 0, 2.6, 0.6, 2.6, metal('#46596a')), box(0, 0.6, 0, 2, 2.4, 2, lamp('#f1d39a'), { glow: true }), box(0, 3, 0, 2.6, 0.6, 2.6, metal('#46596a')), box(0, 3.6, 0, 1, 0.8, 0.4, metal('#46596a'))],
   // a star-shaped cookie
   () => {
-    const r = ramp('#e6a64a');
+    const r = ramp('#dcb072');
     const p: Painter = (t) => { const dx = t.bx - 2, dz = t.bz - 2; const a = Math.atan2(dz, dx), d = Math.hypot(dx, dz); return d > 1.3 + 0.9 * Math.abs(Math.cos(a * 2.5)) ? -1 : tone(r, t.face === 2 ? (d < 0.8 ? 1.4 : 0.6) : -0.6); };
     return [box(0, 0, 0, 4, 1, 4, p, { cut: true })];
   },
 ];
 function bundle(): BoxSpec[] {
-  const c = cloth('#d84a4a', { check: '#f2c35a', seed: 3 });
+  const c = cloth('#c0866a', { check: '#eae0c8', seed: 3 });
   return [
     box(0, 0, 0, 8, 6, 8, c), box(0, 1, 0, 9, 3, 9, c), box(0, 6, 0, 4, 2, 4, c),
     { ...box(-2, 7, 0, 3, 2.4, 1.2, c), rot: [0, 0, 35] }, { ...box(2, 7, 0, 3, 2.4, 1.2, c), rot: [0, 0, -35] },
-    box(3.2, 3, 4.4, 2.4, 2.4, 0.4, metal('#f2c85a')),
+    box(3.2, 3, 4.4, 2.4, 2.4, 0.4, metal('#c8a764')),
   ];
 }
 
+// [world3] The hand-made lowpix props (art/lowpix/world/props.py -> public/models/world/props_*.glb)
+// load in the background; until they are in, the old voxel props stand in.
+const KIT_PROPS = ['satchel', 'strap', 'goggles', 'bundle', 'item0', 'item1', 'item2', 'item3'];
+const kitProps = new Map<string, THREE.Object3D>();
+let kitLoading: Promise<unknown> | null = null;
+/** Load Pip's travel things early (the sleep screen calls this; it is also kicked off on first use). */
+export function preloadCinematics(): Promise<unknown> {
+  kitLoading ??= Promise.allSettled(KIT_PROPS.map((id) => loadGLB(`world/props_${id}.glb`).then((g) => {
+    g.scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      m.castShadow = true;
+      // the lantern glass glows
+      if (/glow/.test(m.name) || /glow/.test(m.parent?.name ?? '')) {
+        const src = m.material as THREE.MeshStandardMaterial;
+        m.material = new THREE.MeshBasicMaterial({ map: src.map, toneMapped: false });
+      }
+    });
+    kitProps.set(id, g.scene);
+  })));
+  return kitLoading;
+}
+
 const propCache = new Map<string, ReturnType<typeof buildProp>>();
-function mesh(key: string, boxes: () => BoxSpec[]): THREE.Mesh {
+function mesh(key: string, boxes: () => BoxSpec[]): THREE.Object3D {
+  void preloadCinematics();
+  const kit = kitProps.get(key);
+  if (kit) {
+    // wrapped, so the cinematic can pop and squash the outer node freely
+    const g = new THREE.Group(), inner = kit.clone(true);
+    inner.scale.setScalar(PX);
+    g.add(inner);
+    return g;
+  }
   let p = propCache.get(key);
   if (!p) { p = buildProp(boxes(), { wind: false }); propCache.set(key, p); }
   const m = propMesh(p);
@@ -135,7 +170,7 @@ function silhouette(scene: Scene, on: boolean) {
       if (!mat.color) continue;
       if (on) {
         if (mat.userData.silC === undefined) { mat.userData.silC = mat.color.getHex(); mat.userData.silE = mat.emissiveIntensity; }
-        mat.color.setRGB(0.06, 0.06, 0.12);
+        mat.color.setRGB(0.07, 0.08, 0.11);
         if (mat.emissiveIntensity !== undefined) mat.emissiveIntensity = 0;
       } else if (mat.userData.silC !== undefined) {
         mat.color.setHex(mat.userData.silC); if (mat.userData.silE !== undefined) mat.emissiveIntensity = mat.userData.silE;
@@ -202,6 +237,16 @@ function relaxSky(scene: Scene) {
 // ---------------------------------------------------------------- goodnight
 
 /** Goodnight: Pip packs the satchel, waves, and flies off across the night sky. */
+
+/** Offsets relative to a spot on the house, turned to face out from the trunk (x right, y up, z outward). */
+function facing(spot: THREE.Vector3) {
+  const out = spot.clone().sub(new THREE.Vector3(HOUSE.x, spot.y, HOUSE.z)).setY(0);
+  if (out.lengthSq() < 1e-6) out.set(0, 0, 1);
+  out.normalize();
+  const right = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), out);
+  return (x: number, y: number, z: number) => right.clone().multiplyScalar(x).add(new THREE.Vector3(0, y, 0)).addScaledVector(out, z);
+}
+
 export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   const owl = scene.owl, fx = scene.fx, sky = scene.sky;
   scene.setView('sleep');
@@ -211,14 +256,17 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   owl.setMood('excited', 2.5);
   const H = scene.spot('porch');
   const spots = scene.house.spots as typeof scene.house.spots & { launch?: THREE.Vector3 };
-  const launch = spots.launch ? spots.launch.clone() : H.clone().add(V(0, 0, 0.65));
+  // take off from the porch step: the launch branch sits up in the canopy, where the camera can't follow
+  void spots;
+  const launch = H.clone().add(facing(H)(0, 0, 0.65));
   const L = launch;
+  const rH = facing(H), rL = facing(L);
   setAspect(scene.camera.aspect);
   scene.applySky();
   // a big moon rising over the trees beside the hollow (away from the house) for the sky shot
   const m = V(0.82, 0.52, -0.25).normalize();
   const side = new THREE.Vector3().crossVectors(m, V(0, 1, 0)).normalize(), upv = new THREE.Vector3().crossVectors(side, m).normalize();
-  const C = L.clone().add(V(-3.0, 2.8, 1.6));
+  const C = L.clone().add(rL(-3.0, 2.8, 1.6));
   sky.moonOverride = { dir: m.clone(), size: 0.05 };
   sky.moonFade = 1;
 
@@ -241,7 +289,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   const pops: { m: THREE.Object3D; t: number; s: number }[] = [];
   const pop = (mm: THREE.Object3D, s = mm.scale.x) => { mm.visible = true; pops.push({ m: mm, t: 0, s }); };
   const items = ITEMS.map((f, i) => { const it = mesh('item' + i, f); it.visible = false; scene.scene.add(it); return it; });
-  const itemFrom = items.map((_, i) => H.clone().add(V((i - 1.5) * 0.42 + (i % 2 ? 0.1 : -0.1), 0.02, 0.55 + (i % 2) * 0.18)));
+  const itemFrom = items.map((_, i) => H.clone().add(rH((i - 1.5) * 0.42 + (i % 2 ? 0.1 : -0.1), 0.02, 0.55 + (i % 2) * 0.18)));
   items.forEach((it, i) => { it.position.copy(itemFrom[i]); it.rotation.y = i * 1.3; });
   const hops: { i: number; t: number }[] = [];
   const bagWorld = () => bag.getWorldPosition(new THREE.Vector3()).add(V(0, 0.1, 0));
@@ -252,9 +300,9 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   // the climb passes right over the low camera, so the shot looks up into open sky
   // a side-on view of the take-off from the left of the launch spot; Pip climbs out over the meadow
   // towards the moon and the camera rises after him, turning to the sky
-  const cam0 = L.clone().add(V(-1.5, 1.5, 3.6));
+  const cam0 = L.clone().add(rL(-1.5, 1.5, 3.6));
   const S0 = C.clone().addScaledVector(m, 9).addScaledVector(side, 4.2).addScaledVector(upv, -1.6);
-  const climbPts = () => [L.clone(), L.clone().add(V(0.9, 1.6, 0.25)), L.clone().add(V(3.0, 4.0, 0.9)), S0.clone()];
+  const climbPts = () => [L.clone(), L.clone().add(rL(0.9, 1.6, 0.25)), L.clone().add(rL(3.0, 4.0, 0.9)), S0.clone()];
   const skyAt = (u: number) => C.clone().addScaledVector(m, 9 + u * 22).addScaledVector(side, (4.2 - u * 9.5) * (1 - u * 0.35)).addScaledVector(upv, -1.6 + u * 2.2 + Math.sin(u * Math.PI) * 0.4);
 
   const evs: Ev[] = [
@@ -265,18 +313,18 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
     [4.5, () => { owl.lookAt = null; pop(gog); const h = headWorld(); fx.burst('magic', h.x, h.y - 0.2, h.z, 12); sound.play('sparkle', { volume: 0.5 }); owl.setMood('proud', 1.6); owl.play('nod'); }],
     [5.3, () => { owl.lookAt = scene.camera.position.clone(); owl.setMood('joy', 2.2); }],
     [5.55, () => { owl.play('wave'); sound.play('owl_hoot', { volume: 0.55 }); const h = headWorld(); fx.burst('hearts', h.x, h.y + 0.1, h.z, 3); }],
-    [6.5, () => { const h = headWorld(); fx.burst('puffs', h.x, h.y + 0.2, h.z, 4, 0xfff6e0); }],
+    [6.5, () => { const h = headWorld(); fx.burst('puffs', h.x, h.y + 0.2, h.z, 4, 0xf4eedd); }],
     [7.0, () => { owl.lookAt = null; owl.play('hop'); }],
     [7.45, () => { owl.play('hop'); }],
     [8.45, () => {
       owl.pose = 'fly'; owl.setMood('excited', 4);
       const p = owl.node.position;
-      fx.burst('feathers', p.x, p.y + 0.5, p.z, 14, 0xe8d2b0); fx.burst('puffs', p.x, p.y + 0.05, p.z, 6, 0xf4ecdc); fx.burst('dust', p.x, p.y, p.z, 8); fx.burst('stars', p.x, p.y + 0.6, p.z, 6);
+      fx.burst('feathers', p.x, p.y + 0.5, p.z, 14, 0xd9bf93); fx.burst('puffs', p.x, p.y + 0.05, p.z, 6, 0xeae0c8); fx.burst('dust', p.x, p.y, p.z, 8); fx.burst('stars', p.x, p.y + 0.6, p.z, 6);
       sound.play('wings_flutter', { volume: 0.8 }); sound.play('pet_jump', { volume: 0.5, rate: 0.8 });
       flyFrom = climbPts();
     }],
     [9.6, () => sound.play('wings_flutter', { volume: 0.5, rate: 0.9 })],
-    [11.2, () => { silhouette(scene, true); scene.weather.hold = { kind: 'clear', intensity: 0.1, source: 'seasonal', temp: 10 }; }],
+    [11.2, () => { silhouette(scene, true); scene.weather.hold = { kind: 'clear', intensity: 0.1, source: 'seasonal', temp: 10 }; scene.weather.snap(); }], // [world3] a clear sky for the moon shot, at once
     [11.9, () => sky.shootingStar(m.clone().addScaledVector(side, -0.42).addScaledVector(upv, 0.3), m.clone().addScaledVector(side, 0.25).addScaledVector(upv, 0.06), 1.1)],
     [12.6, () => sound.play('owl_hoot', { volume: 0.25, rate: 1.1 })],
     [12.8, () => sound.play('sparkle', { volume: 0.2 })],
@@ -298,7 +346,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
         it.position.y += Math.sin(k * Math.PI) * 0.7;
         it.rotation.y += dt * 9; it.rotation.x += dt * 5;
         it.scale.setScalar(1 - Math.max(0, k - 0.7) * 2.6);
-        if (Math.random() < 0.5) fx.emit({ x: it.position.x, y: it.position.y, z: it.position.z, life: 0.4, frame: SPR.spark1, frames: 3, fps: 9, color: 0xfff2b0, size: 0.18, add: true });
+        if (Math.random() < 0.5) fx.emit({ x: it.position.x, y: it.position.y, z: it.position.z, life: 0.4, frame: SPR.spark1, frames: 3, fps: 9, color: 0xf1d39a, size: 0.18, add: true });
       } else if (it.visible) {
         it.visible = false; squash = 1;
         fx.burst('sparkle', to.x, to.y + 0.1, to.z, 6); fx.burst('stars', to.x, to.y, to.z, 3);
@@ -342,7 +390,7 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
     if (t > 8.5 && t < 13.8 && (trailT -= dt) <= 0) {
       trailT = 0.06;
       const p = n.position;
-      fx.emit({ x: p.x + (Math.random() - 0.5) * 0.3, y: p.y + 0.5, z: p.z + (Math.random() - 0.5) * 0.3, vy: -0.2, life: 0.9, frame: Math.random() < 0.6 ? SPR.spark1 : SPR.diamond, frames: 1, color: [0xfff2b0, 0xc9a6ff, 0x9ff0ff][Math.floor(Math.random() * 3)], size: 0.11, add: true, fadeOut: 0.5 });
+      fx.emit({ x: p.x + (Math.random() - 0.5) * 0.3, y: p.y + 0.5, z: p.z + (Math.random() - 0.5) * 0.3, vy: -0.2, life: 0.9, frame: Math.random() < 0.6 ? SPR.spark1 : SPR.diamond, frames: 1, color: [0xf1d39a, 0xb4a9c9, 0xbcd6dc][Math.floor(Math.random() * 3)], size: 0.11, add: true, fadeOut: 0.5 });
     }
     // the sky opens up as the camera climbs
     sky.starBoost = smooth01(span(t, 9.2, 11.4));
@@ -350,9 +398,9 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
   };
 
   const shot = (t: number): CamShot => {
-    const fwd = (x: number, y: number, z: number) => H.clone().add(V(x, y, z));
-    if (t < 5.2) { const k = smooth01(span(t, 0, 5.2)); return look(fwd(-1.6 + k * 2.4, 1.7 - k * 0.2, 5.6 - k * 0.7), H.clone().add(V(0, 0.7, 0)), 30); }
-    if (t < 7.0) { const k = smooth01(span(t, 5.2, 7)); return look(fwd(0.6 - k * 0.3, 1.35, 4.3 - k * 0.4), H.clone().add(V(0, 0.9, 0)), 28); }
+    const fwd = (x: number, y: number, z: number) => H.clone().add(rH(x, y, z));
+    if (t < 5.2) { const k = smooth01(span(t, 0, 5.2)); return look(fwd(-1.6 + k * 2.4, 2.1 - k * 0.2, 5.6 - k * 0.7), H.clone().add(rH(0, 0.7, 0)), 30); }
+    if (t < 7.0) { const k = smooth01(span(t, 5.2, 7)); return look(fwd(0.6 - k * 0.3, 1.8, 4.3 - k * 0.4), H.clone().add(rH(0, 0.9, 0)), 28); }
     if (t < 8.45) { const k = smooth01(span(t, 7, 8.45)); return look(fwd(-0.8, 1.45, 4.8).lerp(cam0, k), launch.clone().add(V(0, 0.7, 0)), 32); }
     if (t < 11.2) {
       // stay low and tilt up as Pip shoots past overhead, then rise with him into the sky
@@ -386,6 +434,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   scene.setView('wake');
   scene.placeOwl('porch');
   const H = scene.spot('porch');
+  const rH = facing(H);
   setAspect(scene.camera.aspect);
   const P = 1;
   owl.node.visible = true;
@@ -402,11 +451,11 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
   attach(scene, M.body, pack, V(0, A.min.y - 0.22, A.max.z * 0.25));
   pack.scale.setScalar(0.9);
   let landed = false, dropped = false, dropT = 0, landT = 0, trailT = 0;
-  const dropTo = H.clone().add(V(0.42, 0.02, 0.5));
+  const dropTo = H.clone().add(rH(0.42, 0.02, 0.5));
   let dropFrom = new THREE.Vector3();
-  const pts = [H.clone().add(V(5, 6.5, 44)), H.clone().add(V(3.0, 4.2, 21)), H.clone().add(V(-1.0, 2.5, 7.4)), H.clone().add(V(0.3, 1.2, 1.7)), H.clone()];
+  const pts = [H.clone().add(rH(5, 6.5, 44)), H.clone().add(rH(3.0, 4.2, 21)), H.clone().add(rH(-1.0, 2.5, 7.4)), H.clone().add(rH(0.3, 1.2, 1.7)), H.clone()];
   // (from the left of the path, so the fallen log stays out of the shot)
-  const camFront = () => H.clone().add(V(-1.7 * P, 1.5, 5.4 * P));
+  const camFront = () => H.clone().add(rH(-1.7 * P, 2.0, 5.4 * P));
 
   const evs: Ev[] = [
     [0.2, () => sound.play('wings_flutter', { volume: 0.25 })],
@@ -415,7 +464,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
     [4.9, () => {
       landed = true; owl.pose = 'stand'; owl.play('hop');
       const p = H;
-      fx.burst('dust', p.x, p.y, p.z, 10); fx.burst('puffs', p.x, p.y + 0.15, p.z, 8, 0xf6e8d2); fx.burst('feathers', p.x, p.y + 0.6, p.z, 5, 0xe8d2b0);
+      fx.burst('dust', p.x, p.y, p.z, 10); fx.burst('puffs', p.x, p.y + 0.15, p.z, 8, 0xeae0c8); fx.burst('feathers', p.x, p.y + 0.6, p.z, 5, 0xd9bf93);
       sound.play('pet_land', { volume: 0.6 });
       owl.lookAt = scene.camera.position.clone();
     }],
@@ -429,7 +478,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
       owl.play('present');
     }],
     [6.25, () => { owl.play('dance'); owl.setMood('joy', 3); sound.play('pet_happy', { volume: 0.55 }); const h = owl.headWorld; fx.burst('hearts', h.x, h.y + 0.2, h.z, 4); }],
-    [7.3, () => { const h = owl.headWorld; fx.burst('puffs', h.x, h.y + 0.3, h.z, 6, 0xfff0f6); fx.burst('notes', h.x, h.y + 0.2, h.z, 3); }],
+    [7.3, () => { const h = owl.headWorld; fx.burst('puffs', h.x, h.y + 0.3, h.z, 6, 0xf4eedd); fx.burst('notes', h.x, h.y + 0.2, h.z, 3); }],
   ];
 
   const frame = (t: number, dt: number) => {
@@ -441,7 +490,7 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
       const v = ahead.sub(p);
       if (v.lengthSq() > 1e-7) n.rotation.y = Math.atan2(v.x, v.z);
       n.rotation.z = Math.sin(t * 1.3) * 0.08;
-      if ((trailT -= dt) <= 0) { trailT = 0.08; fx.emit({ x: p.x, y: p.y + 0.4, z: p.z, vy: -0.15, life: 0.8, frame: SPR.spark1, frames: 3, fps: 7, color: 0xffe6a8, size: 0.2, add: true }); }
+      if ((trailT -= dt) <= 0) { trailT = 0.08; fx.emit({ x: p.x, y: p.y + 0.4, z: p.z, vy: -0.15, life: 0.8, frame: SPR.spark1, frames: 3, fps: 7, color: 0xf1d39a, size: 0.2, add: true }); }
     } else {
       landT += dt;
       n.position.copy(H);
@@ -469,11 +518,11 @@ export function playArrival(scene: Scene, o: CineOpts & { onLanded?: () => void 
     if (t < 3.2) {
       // from beside the porch, looking out over the meadow at the sunrise
       const k = smooth01(span(t, 0, 3.2));
-      return look(H.clone().add(V(-2.2, 1.0 + k * 0.3, 1.4)), H.clone().add(V(1.6 - k * 0.6, 5.2 - k * 1.2, 30)), 44, t < 0.1);
+      return look(H.clone().add(rH(-2.2, 1.0 + k * 0.3, 1.4)), H.clone().add(rH(1.6 - k * 0.6, 5.2 - k * 1.2, 30)), 44, t < 0.1);
     }
     const k = smooth01(span(t, 3.2, 8.6));
-    const from = camFront().lerp(H.clone().add(V(-0.9 * P, 1.25, 4.0 * P)), k);
-    const at = H.clone().add(V(0, 0.85, 0)).lerp(owl.node.position.clone().add(V(0, 0.8, 0)), landed ? 0 : 0.35);
+    const from = camFront().lerp(H.clone().add(rH(-0.9 * P, 1.7, 4.0 * P)), k);
+    const at = H.clone().add(rH(0, 0.85, 0)).lerp(owl.node.position.clone().add(V(0, 0.8, 0)), landed ? 0 : 0.35);
     return look(from, at, 36, t < 3.25);
   };
 

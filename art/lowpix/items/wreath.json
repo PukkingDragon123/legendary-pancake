@@ -1,0 +1,6904 @@
+{
+ "name": "wreath",
+ "description": "A full fir wreath dusted with snow: holly sprigs with glossy berries, pine cones, a velvet berry bow with long tails and two little brass bells that swing.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 5.6,
+ "budget": {
+  "tris": 3000,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": false,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "bark": [
+    "#2b2c2d",
+    "#3a312a",
+    "#514236",
+    "#65503c",
+    "#6d5a47",
+    "#706b62",
+    "#908a7e"
+   ],
+   "gold": [
+    "#8a5a3c",
+    "#8d703f",
+    "#b58f4d",
+    "#d2a764",
+    "#d3ac6c",
+    "#d4b473",
+    "#f3d89f",
+    "#fcf4bb"
+   ],
+   "holly": [
+    "#483a42",
+    "#865661",
+    "#9a5e66",
+    "#a06361",
+    "#a4695a",
+    "#ad735b",
+    "#c68d74",
+    "#e8b4ae"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "leaf": [
+    "#2c4030",
+    "#3c5639",
+    "#4f6c41",
+    "#5f7d4a",
+    "#74905b",
+    "#8fa773",
+    "#abba8c",
+    "#c4cfa3"
+   ],
+   "pine": [
+    "#25332f",
+    "#2b3e30",
+    "#3a5338",
+    "#4c6840",
+    "#5c7a48",
+    "#6f8c57",
+    "#8ba36e",
+    "#a7b788"
+   ],
+   "snow": [
+    "#7a8c9e",
+    "#84a5ad",
+    "#adc9cf",
+    "#c9dcdc",
+    "#d8e4e2",
+    "#e5edec",
+    "#f6f8f3",
+    "#fbfcf8"
+   ],
+   "verd": [
+    "#364246",
+    "#4c5b58",
+    "#6c8075",
+    "#96b09c",
+    "#b8ceb2",
+    "#d4e4c1"
+   ],
+   "walnut": [
+    "#2b2c2d",
+    "#3a312a",
+    "#46372a",
+    "#553e2e",
+    "#654a36",
+    "#7c6044",
+    "#a17f5a",
+    "#bf9d74"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "bark",
+   "tone": 2.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.6
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/bark",
+     "scale": 14.0,
+     "amount": 0.7,
+     "ramps": [
+      "bark"
+     ]
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s3": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s4": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s7": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s8": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s10": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s11": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s12": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s13": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s14": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s15": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s17": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s18": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s19": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s20": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s21": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s22": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s23": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s24": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s25": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s26": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s27": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s28": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s29": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s30": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s31": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s32": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s33": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s34": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s35": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s36": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s37": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s38": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s39": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s40": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s41": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s42": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s43": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s44": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s45": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s46": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s47": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s48": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s49": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s50": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s51": {
+   "ramp": "pine",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.45,
+     "ramps": [
+      "pine"
+     ]
+    }
+   ]
+  },
+  "s52": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s53": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s54": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s55": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s56": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s57": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s58": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s59": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s60": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s61": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s62": {
+   "ramp": "leaf",
+   "tone": 4,
+   "light": 0.8,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   },
+   "layers": [
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/forest_leaves_02",
+     "scale": 8.0,
+     "amount": 0.4,
+     "ramps": [
+      "leaf"
+     ]
+    }
+   ]
+  },
+  "s63": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s64": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s65": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s66": {
+   "ramp": "holly",
+   "tone": 4.4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "gloss",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s67": {
+   "ramp": "walnut",
+   "tone": 4.2,
+   "layers": [
+    {
+     "id": "sc",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.7,
+      0.6
+     ],
+     "gap": 0.7,
+     "highlight": 1.0,
+     "shadow": -1.2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s68": {
+   "ramp": "walnut",
+   "tone": 4.2,
+   "layers": [
+    {
+     "id": "sc",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.7,
+      0.6
+     ],
+     "gap": 0.7,
+     "highlight": 1.0,
+     "shadow": -1.2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s69": {
+   "ramp": "walnut",
+   "tone": 4.2,
+   "layers": [
+    {
+     "id": "sc",
+     "op": "scales",
+     "shape": "round",
+     "along": "x",
+     "size": [
+      0.7,
+      0.6
+     ],
+     "gap": 0.7,
+     "highlight": 1.0,
+     "shadow": -1.2
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "art/lowpix/items/_furnc/photos/wood",
+     "scale": 28.0,
+     "amount": 0.6,
+     "ramps": [
+      "walnut"
+     ]
+    }
+   ]
+  },
+  "s70": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s71": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s72": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s73": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s74": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  },
+  "s75": {
+   "ramp": "honey",
+   "tone": 4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s76": {
+   "ramp": "gold",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
+    }
+   ]
+  },
+  "s77": {
+   "ramp": "honey",
+   "tone": 4,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s78": {
+   "ramp": "gold",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.4,
+    "dark_shift": -1.2
+   },
+   "layers": [
+    {
+     "id": "under",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.2,
+     "amount": 0.5
+    },
+    {
+     "id": "tarnish",
+     "op": "patches",
+     "scale": 1.1,
+     "threshold": 0.78,
+     "ramp": "verd",
+     "tone": 2.2,
+     "faces": [
+      "sides",
+      "bottom",
+      "-up"
+     ]
+    },
+    {
+     "id": "polish",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.5,
+     "density": 0.55,
+     "post": true
+    },
+    {
+     "id": "photo",
+     "op": "photo",
+     "src": "assets/photos/rusty_metal_02",
+     "scale": 10.0,
+     "amount": 0.15,
+     "ramps": [
+      "gold"
+     ]
+    }
+   ]
+  },
+  "s79": {
+   "ramp": "holly",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "nap",
+     "op": "noise",
+     "scale": 0.5,
+     "amount": 0.7
+    },
+    {
+     "id": "sheen",
+     "op": "gloss",
+     "dash": true,
+     "length": 2,
+     "shift": 1.4,
+     "density": 0.6,
+     "post": true
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "ring",
+   "shape": "loft",
+   "pivot": [
+    7.4,
+    10.0,
+    1.2
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -0.5633,
+      2.8319,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -2.1674,
+      5.2326,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -4.5681,
+      6.8367,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -7.4,
+      7.4,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -10.2319,
+      6.8367,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -12.6326,
+      5.2326,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -14.2367,
+      2.8319,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -14.8,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -14.2367,
+      -2.8319,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -12.6326,
+      -5.2326,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -10.2319,
+      -6.8367,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -7.4,
+      -7.4,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -4.5681,
+      -6.8367,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -2.1674,
+      -5.2326,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -0.5633,
+      -2.8319,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      -0.5633,
+      2.8319,
+      0.0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s1"
+  },
+  {
+   "id": "sprig0_0",
+   "shape": "card",
+   "pivot": [
+    5.6,
+    10.0,
+    1.6
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    95.423
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "......Ss....lh.............",
+    "...Sslhvhllnlvh............",
+    "..SsnnlSsllnvvnhSsnnn......",
+    ".llnnnlllnnnllnnlSsnvh.....",
+    "llnnnlmllnlnlnnlnlnnSsnhl..",
+    "vvvvvvvvvvvvvvvvvvnlhnhlhnm",
+    "mmmnmnmmmmnnnnmmmmvvvvvvvvn",
+    ".mmdmmdmmmmdnddmmmmmnhnnhnn",
+    ".mmmdmmdmmmddnndmmmmndhnnh.",
+    "...mmnddmmmmddmmmm.........",
+    ".....dmmmnmmdm.............",
+    ".......mm..................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s2",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_1",
+   "shape": "card",
+   "pivot": [
+    5.0454,
+    12.4297,
+    1.9
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    132.845
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".....llSs..llh.............",
+    "..Ssnlnlnnlllmlh...........",
+    "..lnlSnnSsnllmlnlnnlnn.....",
+    ".lnlllnnlnnSSllnlnllvvn....",
+    "lnlllnnnlnnlllllnllllhhlh..",
+    "vvvvvvvvvvvvvvvvvvllhhlhnSs",
+    "mnmmnmnmmmmnnmmnmnvvvvvvvvh",
+    ".mnmmdmdmmmmddmmdmnmhnhmhhh",
+    ".mdmmmdmdmmmnddmmmnmdhdhmh.",
+    "...nmmm..mmmmmmdvdddm......",
+    "..............mdn..........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s3",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_2",
+   "shape": "card",
+   "pivot": [
+    3.4915,
+    14.3783,
+    1.6
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    138.87
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    ".......lh..................",
+    ".....SslvSs................",
+    "...lnSSsnnvh........hn.....",
+    "..mlllnlnmvlllSsSllnhv.....",
+    ".mllllnnmnnSnnlnlSsnvvn....",
+    "mllllnlnmnnlnllllllnSSshh..",
+    "vvvvvvvvvvvvvvvvvvnnhhhhhlh",
+    "mmmmmnmnmnmnnnmnmmvvvvvvvvn",
+    ".mmmmmnmdmdmnmnmnmmmhhhhnhn",
+    ".mmmmmmdmmnmnnmnmmmmmhhhhn.",
+    "...mmmmmmnm.mmmdmmmmdd.....",
+    ".....mmmmdm......md.nn.....",
+    ".......mm..................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s4",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_3",
+   "shape": "card",
+   "pivot": [
+    1.2461,
+    15.4596,
+    1.9
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    182.196
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".....llhn..................",
+    "...nnllnSsnmhSsnh..........",
+    "..mlllSsSsnllllvvh.........",
+    ".mlllnlllSslnmlSsll........",
+    "mlllnlllllnlnlllllmlSsnmh..",
+    "vvvvvvvvvvvvvvvvvvllhnmhhnh",
+    "mmnnnmmmmnmnmmmnnnvvvvvvvvh",
+    ".mmnmdmmmmdmmmmmddnmhhhhhhh",
+    ".mmddmnmmmnmnmmmmddmmhhhhh.",
+    "...dmdmmnmmmmdmm.nmmm......",
+    ".....nmdnmmmmmm............",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s5",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_4",
+   "shape": "card",
+   "pivot": [
+    -1.2461,
+    15.4596,
+    1.6
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    196.482
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".....lhSSSsn...............",
+    "...mllnlllShnSSs...........",
+    "..nllSsSslllnnlvhh.........",
+    ".nllnllllllllllllnl........",
+    "nllnllllllllllllnllnlmhnh..",
+    "vvvvvvvvvvvvvvvvvvnlmhnhnSl",
+    "mmmmmmmmmnnnmnnmmnvvvvvvvvn",
+    ".mmmmmmmmmdnmmnnmmnmmhmhhhn",
+    ".mmmmmmmmmnndmmnnmdmmmhmhh.",
+    "...mnmmmdmm.mmmm.mmdm......",
+    ".....mmm.m.................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s6",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_5",
+   "shape": "card",
+   "pivot": [
+    -3.4915,
+    14.3783,
+    1.9
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    219.231
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    ".......Sh..h...............",
+    ".....lnnllnh.n.............",
+    "...llllllSslnnSs....n......",
+    "..mSslnlnlnnlnlh.lSsnh.....",
+    ".mnlllnnlllmnllSslllvvh....",
+    "mnlllnlnllnmnlllllnnnhhnh..",
+    "vvvvvvvvvvvvvvvvvvnnhhnhhnn",
+    "mmmnmnmmmnnmnmmmmnvvvvvvvvm",
+    ".mmnmmdmmmdndmmmmmnmhhhnnhm",
+    ".mmmnmmnmmddmnmmmmnmmhhhdd.",
+    ".........mdmm..ddnnmm......",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s7",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_6",
+   "shape": "card",
+   "pivot": [
+    -5.0454,
+    12.4297,
+    1.6
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    246.36
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "........h..................",
+    ".....nnmh..................",
+    "...llnlnmSnhn..Ssnh........",
+    "..llnnnlnlnhvSsnSsnmSs.....",
+    ".llnnlnnlmmnSnSSsnlmvvn....",
+    "llnnlnlnlmnnlnnlnllllnnnn..",
+    "vvvvvvvvvvvvvvvvvvllnnnnhSs",
+    "mmmnnmmmmmmmmmnmmmvvvvvvvvn",
+    ".mmdmdmmmmmmmmmnmmmmnhhhmhn",
+    ".mmmdmdmmmmmmmmmdmmmmdhhhm.",
+    "......mdmdmmmdmmvmmdmv.....",
+    "........mmmmmnmmm...nd.....",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s8",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_7",
+   "shape": "card",
+   "pivot": [
+    -5.6,
+    10.0,
+    1.9
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    267.221
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    ".......Ss..................",
+    ".....SSsh..................",
+    "...SsnlnlhnlSsSs...........",
+    "..lnlSSsnlnnllnnnllSs......",
+    ".lnllllnllSSllnSSsnnvh.....",
+    "lnlllllnlllllnnllnSmnhSsl..",
+    "vvvvvvvvvvvvvvvvvvmnhhhlSmn",
+    "mmmnmmmnnmmmmmmmnmvvvvvvvvh",
+    ".mmdmmmmdnmmmmmmmdmnhhhnhnh",
+    ".mmmnmmmmnmmmmmmmdmnnhhhdh.",
+    "...dmndmmm..ddmmmmmnm......",
+    ".....dnmm........dm........",
+    ".......mm..................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s9",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_8",
+   "shape": "card",
+   "pivot": [
+    -5.0454,
+    7.5703,
+    1.6
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    301.045
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".......SshnhSSshlnn........",
+    "..SslllnlmnlllnllSslln.....",
+    ".nllllllmlllllnnllllvvh....",
+    "nlllllnlmllllnnllllnlhhhn..",
+    "vvvvvvvvvvvvvvvvvvnlhhhnnhn",
+    "mnmmnmmmnnmmmmnnnnvvvvvvvvh",
+    ".mdmmdmmmddmmmmnndnmhhhhhhh",
+    ".mnmmmnmmndmmmmmdddmmhhhhh.",
+    "...mmmmddmmnmdmmmmnmmm.....",
+    ".....mnd....m....m..mm.....",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s10",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_9",
+   "shape": "card",
+   "pivot": [
+    -3.4915,
+    5.6217,
+    1.9
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    332.922
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    ".......mn..................",
+    "....Sslmvn.................",
+    "...mnlnSsnnln..SSsm........",
+    "..nmlSSsnlnlvSsmllnnn......",
+    ".nmllllnllllnnllllnnn......",
+    "nmlllllnllmlnllllnSnnhhSs..",
+    "vvvvvvvvvvvvvvvvvvnnhhhhnSs",
+    "mmmmmnmmmmmmnmmmmnvvvvvvvvh",
+    ".mmmmmnmmmmmdmmmmmnmhnhhnhh",
+    ".mmmmmmnmmmmmdmmmmnmmhdhhd.",
+    "...mmmmnmmmdmndnmmmdm......",
+    "......dd......nnmmm........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s11",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_10",
+   "shape": "card",
+   "pivot": [
+    -1.2461,
+    4.5404,
+    1.6
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    366.827
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    ".......Sn..n...............",
+    "....SnlnSlhn...............",
+    "..SslnnnnlSsn..............",
+    "..SsSsmlSsnnSsh..mlnn......",
+    ".llnlnmllmSlllmnlnnnvh.....",
+    "llnlnmlllmlllmmlnnSSSsSsh..",
+    "vvvvvvvvvvvvvvvvvvlnhhhhmhh",
+    "mmmmmmmmnmnnnmmmnmvvvvvvvvm",
+    ".mmmmmmmmdmndmmmmnmmhnnhnnm",
+    ".mmmmmmmmnmndnmmmdmmmhnnhn.",
+    "...mmmmmdmmmmmdnnnmmmv.....",
+    "......mm......nmmmmmmn.....",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s12",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_11",
+   "shape": "card",
+   "pivot": [
+    1.2461,
+    4.5404,
+    1.9
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    391.281
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".........SsSslmhll.........",
+    "..nSsllllllllSslllh........",
+    ".nnlllllllllSSSsnlmh.......",
+    "nnlllllllllllllnlmmnnSshn..",
+    "vvvvvvvvvvvvvvvvvvnnhhhnmSs",
+    "nmmmmmnmmmmnnnnmmmvvvvvvvvn",
+    ".dmmmmmdmmmmdmndmmmmhhhmhhn",
+    ".nmmmmmmdmmmdnmndmmmmhhhmh.",
+    "...mmmmmmmnmmmmdmmdmn......",
+    "....dmmdv.....mmmm.........",
+    ".......dm..................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s13",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_12",
+   "shape": "card",
+   "pivot": [
+    3.4915,
+    5.6217,
+    1.6
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    420.25
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...lnllSnm...SshnSs........",
+    "..llnSsSslhnlllnnnvm.......",
+    ".llnlnlllSsnllnllnlnm......",
+    "llnlnllllllnlnnlnlnlSnhmn..",
+    "vvvvvvvvvvvvvvvvvvllnhmnnnh",
+    "mmmmmnmnmnmnmnnnmmvvvvvvvvh",
+    ".mmmdmdmdmnmmddddmmnnhhmhnh",
+    ".mmmmdmnmmdmdmdddmmdmdhhmh.",
+    ".........mmmnmmmmmmmm......",
+    "..............mmd..........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s14",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig0_13",
+   "shape": "card",
+   "pivot": [
+    5.0454,
+    7.5703,
+    1.9
+   ],
+   "rotation": [
+    -10.0,
+    0.0,
+    440.466
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "....SSSslnnSsh.............",
+    "..SsnSsSllSslvh..n.........",
+    ".SmnllSsllnmnSslnlllm......",
+    ".mnlllnllSslmSSsSSslm......",
+    "mnlllnllllmlmllllllnnhnnn..",
+    "vvvvvvvvvvvvvvvvvvnnhnnnhmn",
+    "mmmmmmnmmnmmmnnmmmvvvvvvvvh",
+    ".mmmmmmdmmdmmmdnmmmmnhnhhnh",
+    ".mmmmmmmdmdmmmmndmmmnnhdhh.",
+    "...mnmdmnmvddmmmmmmmmm.....",
+    "........nmm..dmdd..........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s15",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_0",
+   "shape": "card",
+   "pivot": [
+    7.3089,
+    11.1576,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    114.944
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    ".......nSs..n..................",
+    "....Snlnnnlln..................",
+    "..SsmnlnlnlllnnhlSSs...........",
+    ".SllSslSlnsllnnllnllnnmmSSs....",
+    ".lllllnllnSsSlSSnlnnnnlmlhvn...",
+    ".llllnllnllllllllnnlSlnlnmmnn..",
+    "llllnllnlllllllnlnlllnlnmmSsnhn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnhnh",
+    "mmmmmmmmmmmmmmmnmmnmmmmhhnhvvvh",
+    ".mmmmmdmmmmmmdmmdmmdmmmmhhdnhhh",
+    "..mmmmmnmmmmmmdmmnmdmmmmmhnhs..",
+    "...mmmmmmmmd...mnmmdmdmnmmd....",
+    "......mm................mmn....",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s16",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_1",
+   "shape": "card",
+   "pivot": [
+    6.4722,
+    13.5876,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    124.506
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    ".......nnh.....................",
+    ".....mnnnvhn...................",
+    "...nlmnlSshnSsn.lnn............",
+    ".SSsmSslSsnlnllllnn....lnl.....",
+    ".llmlllllSsnlmlSSsnlhSslnh.....",
+    ".lmlllllllnllmnnlnllnlmnnhnn...",
+    "llmllllllnllmlnllllnlmnnhnSSshn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvhhnh",
+    "mnmnmmmmmmmmmnmmmmmnmnnhnhhvvvn",
+    ".mnmdmmmmmmmmmnmmmmmmddmhnhhhnn",
+    "..mmdmmmmmmmmmmnmmmmdmndmdhh...",
+    ".......ddmmmmnmmvsmdmdmmnd.....",
+    ".........mmmmnmmm....m.........",
+    "...........mm...m..............",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s17",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_2",
+   "shape": "card",
+   "pivot": [
+    4.8548,
+    15.5849,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    158.818
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "....SslSSSSn...................",
+    "...nnllSnlln...Ssnmhnlhl.......",
+    "..nnllnlnmvvhhlllSSsnlSsSsh....",
+    ".nnllnllnmSsllSSmnSsnlllllh....",
+    ".nllnllnmlllllllnnllllnlnnnn...",
+    "nnllllnmlllllllmnllllnlnnnhnSsn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnhnn",
+    "mmmmmnmmmnmnmnmmmnmnnnmhhhhvvvn",
+    ".mmmmdmmmmnmnmdmmmdmndmmhhhhhnn",
+    "..mmmmnmmmmmnmmdmmdmndnmmhhhd..",
+    "...ddnmdddmmdmnmmdmdnmdmmmm....",
+    ".....nmm.....mnnm.......mmm....",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s18",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_3",
+   "shape": "card",
+   "pivot": [
+    2.6519,
+    16.9085,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    170.813
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "............h..................",
+    "....Ssnh.Sslh..................",
+    "...lllnllllSnSSs...............",
+    "..llSsSslnnllnhvh.nnllnnmh.....",
+    ".llllllllnllnSnnnlnnnlnnmh.....",
+    ".lllllllnllnnlnnlnnnllnmlmnh...",
+    "lllllllnllnnlnnnlnnllnmlmSshnnn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnnnh",
+    "nmmnnmmmmnmnmnmmmmmmmmnhhhhvvvn",
+    ".dmmdmnmmmdmnmnmmmmmmmnmhhhmmhn",
+    "..dmnnmnmmmmdmmdmmmmmmmdmhhh...",
+    "...nmmmmnmmmmmmmmmmmmmmmdm.....",
+    ".....mmmmmmm........mmdm.......",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s19",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_4",
+   "shape": "card",
+   "pivot": [
+    0.1291,
+    17.3989,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    199.354
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    ".........llhl..................",
+    "...lmSSsnlllnlSsllhh...........",
+    "..SslnnSnnnlnlSslllmnnhnSsn....",
+    ".nllnnmlnnSslnlSSSslnnnnnln....",
+    ".nlnnmlnnnllnnllllllllSslmhh...",
+    "nllnmlnnnllnnlllllllllllmhhnSsm",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnhmn",
+    "mmmnnmmnmmmmmmnnmnmmmnmnmnnvvvn",
+    ".mmmdmmmdmmmmmmddmdmmdmmdmdmhnn",
+    "..mmdnmmmnmmmmmmnndmmmdmmmdnd..",
+    "...mmmmmvvsmmddmmmmdddmmmmm....",
+    ".....mmmmm...mdmdmmm.nm.mmm....",
+    "........m......................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s20",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_5",
+   "shape": "card",
+   "pivot": [
+    -2.4092,
+    16.9968,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    198.497
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "........m...h..................",
+    ".....llnmnlnh..................",
+    "...nllllmnlnvvm.....Ssn........",
+    ".SsnnlSSsnlvvhh...nlnlnlnnh....",
+    ".lnnlllllnlllnSlnSSsnlllnnvh...",
+    ".lnlllllnlllnnllnlllSnnlnhhhh..",
+    "lnnllllnlllnnllnnlllnnlnhhnSsnS",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvhnhh",
+    "mmmmmmmmmmmmnnmnmnmmmnnhhnmvvvh",
+    ".mmmmmmmmmmmmmdmnmnmmddmhhdhnnh",
+    "..mmmmmmmmmmmdmnmddmmmndmhdm...",
+    "...........mmmdvvnddmmdmmm.....",
+    ".............mdnm....m.........",
+    "...............mm..............",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s21",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_6",
+   "shape": "card",
+   "pivot": [
+    -4.657,
+    15.7509,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    227.653
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "......Ssnh.lSs.................",
+    ".....lllnnllhh.................",
+    "...lllllnlllvvh.Sshn...........",
+    "..lnnSsmlnvvnhmnllmnSsmllnn....",
+    ".lnnllmllnnSslllSsllmllllnvn...",
+    ".lnllmllnnllnllllllSmSsmlSsnn..",
+    "lnnlmllnnllnlllnlllmllmlhhnSsnn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvhnnn",
+    "mmmmmmmmmmnmmmnmmmmnmmmmhhnvvvh",
+    ".mmmmmmmmmmnmnmdmmmmmmmmmhhhhhh",
+    "..mmmmmmmmmnmmnmnmmmnmmmmhhnm..",
+    "...nmdmm...dmmdmmmddmnnmmmmm...",
+    ".....dmm.............dn.mmm....",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s22",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_7",
+   "shape": "card",
+   "pivot": [
+    -6.343,
+    13.8113,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    249.701
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..........Ssnh.................",
+    "........Ssllnvnh...............",
+    ".......Sslllnnnh....llnh.......",
+    "..SsllSSSsnlnnlSshllllnnl......",
+    ".mlllllllllnmllSSsnnlSsnlh.....",
+    ".mllllllllnmlllllnnnSllnnSs....",
+    "mllllllllnmllllllnnlllnnnhlnmnS",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvmnhh",
+    "mmnnnmmmmnmnmnnmmnmmmmnnhhhvvvh",
+    ".mmddmmmmmdmnmndmmdmmmdmnhhhnhh",
+    "..mdnnmmmmmmdmmdnmnmmmmdmhhh...",
+    "...dmmdmmmmmmmmmmmmmmddmmm.....",
+    ".....mdmm.mdmmmmmmdddnmm.......",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s23",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_8",
+   "shape": "card",
+   "pivot": [
+    -7.264,
+    11.412,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    260.791
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    ".....lSs.......................",
+    "...nllhllnhhnnhh...............",
+    "..nSSsnSllsnlnllnlllSs.ll......",
+    ".nnllnmlllnSslnlnnlnlhnlln.....",
+    ".nllnmlllnllllllnlnlSSSslhmh...",
+    "nnllmlllnllllnlnnnllllllhSshSsn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnhnn",
+    "mmmnmmmmmmnmnmmmnmmmmmmhnnnvvvh",
+    ".mmmnmmmmmmdmmmmmdmmmmmmhddmnmh",
+    "..mmdmmmmmmnmdmmmmmmmmmmmddd...",
+    ".......mdmmmdmmmdmdmmmnddm.....",
+    ".........mmdmmmd.mmmmmd........",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s24",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_9",
+   "shape": "card",
+   "pivot": [
+    -7.3089,
+    8.8424,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    276.382
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    ".......lnl.SSs.................",
+    ".....lllnlnlhlnhm..............",
+    "...nlllSslnlSlnhv....Sh........",
+    "..lnlSsllnslnlSsmnnlllhnnnh....",
+    ".lnllllnlnnlmllSsSSslSsnnnvh...",
+    ".lllllnlnnlmllnnnllSnlSslhhhh..",
+    "lnlllnlnnlmlllnlnllnllllhhSsnnh",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnnhl",
+    "mmmmmmmmnmmmnmmmmnmmmmnnnnnvvvh",
+    ".mmmmmmmmdmmmmmmmmnmmmnmnnnhmhh",
+    "..mmmmmmmmnmmdmmmmdmmmmnmndd...",
+    "...nnmmdnmnmmmdnmnnmmmdmmmm....",
+    ".....mmmmmnmdv.......m..mm.....",
+    ".......mmd.mdd.................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s25",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_10",
+   "shape": "card",
+   "pivot": [
+    -6.4722,
+    6.4124,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    308.283
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..........SSs..................",
+    ".......nlnlhvn..Ssh............",
+    "..llSslmlnmvhhmllllnSsSSs......",
+    ".lllllmllnlllnllnlllnSslln.....",
+    ".llllmllnllllnlllllSSnlllhhm...",
+    "llllmllnllllnllnllllnlllhhhlhSs",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvhhhh",
+    "mmmmnmnmmmmmmnnnnnmmmmmnhmhvvvn",
+    ".mmmmmmdmmmmmmdndnnmmmmnnhmnnhn",
+    "..mmmdmmnmmmmmmnnnnmmmmmdhmhn..",
+    "...mmdmmvddmnmmnnnmmmmndmmdv...",
+    ".....dmmm...............mmdm...",
+    "........m......................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s26",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_11",
+   "shape": "card",
+   "pivot": [
+    -4.8548,
+    4.4151,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    333.698
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............hn...h...........",
+    "...........SslhSsSsh...........",
+    "..lSsnmlSsSsllSslllvmm.ln......",
+    ".lllnmlnnllnllllnSslhhllnh.....",
+    ".llnmlnnllnlnlllmllnSnlSsnh....",
+    "lllnlnnllnlnlllnmlnlnlllnhhSsln",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvhlnm",
+    "mmmnmmnnmmnmmmnmmmmnmmmmmnnvvvn",
+    ".mmmdmmddmmdmnmdmmmmmmmmmmnnmnn",
+    "..mmdmmmddmdmmdmdmmmnmmmmmdd...",
+    "...mmmmmmmmmmnmmmmm...dmmnd....",
+    ".....mmmmmmnmdmnm..............",
+    "............m..................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s27",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_12",
+   "shape": "card",
+   "pivot": [
+    -2.6519,
+    3.0915,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    346.573
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    ".........lSs...................",
+    ".......SSllnSlnn...............",
+    "..lmlnlnllSsllnvh.llllSsn......",
+    ".lmlnlnmlSslnSSSSsllllnlnn.....",
+    ".llnlnmllllnlllllllnlnmlnhl....",
+    "lmlnnmllllnllllnllnlnmlnhlSsSsn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnhnl",
+    "mmmmmmmnnmmmmmnmmmmnnmmhhnhvvvn",
+    ".mmmmmnmdnmmmdmnmmmmdmmmhhdhnnn",
+    "..mmmmmdmnnmmmnmnmmmndmmmhdh...",
+    "...mmmmdmmmdnmm...mmmdmmnmm....",
+    ".........mmd........mnmmnm.....",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s28",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_13",
+   "shape": "card",
+   "pivot": [
+    -0.1291,
+    2.6011,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    366.049
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..........SSsn.................",
+    ".........Sslhn.................",
+    "......Sslmllnhn.Ssh..h.........",
+    ".SsllnllnllllhlnllnlnhhnSs.....",
+    ".lllnlllnlnllllnlnnnnhnnlh.....",
+    ".llnlllnlnllllnnnnnlSslnlhlh...",
+    "lllnllnlnlllllnlnnllllnlhlhhSsn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvhhnh",
+    "mnmmmmmmmnmmmmmmnmmmmmnnhhmvvvm",
+    ".mnmmmmmmmdmmdmmmnmmmmdmdhhmnnm",
+    "..mmmmmmmmmmmmnmmmmmmmmdmhhm...",
+    "...mdnmmmnmmmddnmdm...mdmdm....",
+    ".....nmmmnmdmdnd........md.....",
+    "........m......................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s29",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_14",
+   "shape": "card",
+   "pivot": [
+    2.4092,
+    3.0032,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    375.261
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "......Ss..hh......Ss...........",
+    "...SsnSSsnhhnSSsmnlhh..........",
+    "..lSsnllnlllnllllnlvvh.........",
+    ".lllnllnnSslnSlmSsllhh.........",
+    ".llnllnnlllnnlmmlllnnnlllhh....",
+    "lllnlnnlllnnllmnllnnnlllhhnhnhh",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnhhn",
+    "mmmmmnnmmmmnmnnmmnmmmnmhmnnvvvm",
+    ".mmmmdddmmmmdmddmmdmmdmmhmdhhmm",
+    "..mmmmddnmmmnmmddmnmmmnmmmnd...",
+    "...mdmmmmmmmvmmmmmmmmmmmndd....",
+    "........dmmmm........m..dn.....",
+    "............m..................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s30",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_15",
+   "shape": "card",
+   "pivot": [
+    4.657,
+    4.2491,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    418.348
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    ".......Ssh..Ss.................",
+    ".....nllhnllnnlSs..............",
+    "..SslnlSsnlllnlhvnn............",
+    ".SmnnnlSnllmlnlvhhlllSSSs......",
+    ".mnnnlnlnllllnSSlSSsllnllh.....",
+    ".mnnlnlnllllnnllllllnlllSshh...",
+    "mnnnnlnllllnnllllllnllllhhnmnnh",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnnhh",
+    "mmmmnmnmmnmmmmmmmnnmmmmhnnhvvvm",
+    ".mmmmmmnmmnmmmmmmmddmmmdhddnhhm",
+    "..mmmdmmnmmmmmmmmmdnmmmmdddh...",
+    "...dmmmdddmmmddmnmmmmnmmmmm....",
+    ".....dmm.mmmmdnm.mm.....mm.....",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s31",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_16",
+   "shape": "card",
+   "pivot": [
+    6.343,
+    6.1887,
+    2.4
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    416.526
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "......nh......Ss...n...........",
+    "...Sslnhnnh.nnhSlnln.n.........",
+    "..SslnSsSsllnSsnlnSSsnnllnh....",
+    ".nllnnlnnllllnnlnllnlnnllnh....",
+    ".nlnnlnnlllllnllllnllSslnmhh...",
+    "nllnlnnlllllnnlnlnllmllnmhhhnhn",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvnhnh",
+    "mmmmmmmmmmnnnmmmmmnmmmnhhhhvvvm",
+    ".mmmmmmmmmmddmmmmmmdmmddhhhmnnm",
+    "..mmmmmmmmmnnnmmmmmdmmmdnhhhs..",
+    "...dmmnmmdmdmmnm..mmndmmmdmv...",
+    ".....mdmmnmmm.n......nm.mdmm...",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s32",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig1_17",
+   "shape": "card",
+   "pivot": [
+    7.264,
+    8.588,
+    2.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    463.909
+   ],
+   "art": [
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..........Ss..ln...............",
+    "...nSSslllhhlllnn..............",
+    "..nllnSslllnnllvvnnlnnh........",
+    ".nllnnllllllllllSsnnnnv........",
+    ".nlnnlllllllnllllnnSllSsllm....",
+    "nllnlllllllnlllllnlllllllmhhhhh",
+    "vvvvvvvvvvvvvvvvvvvvvvvvvvvhhhh",
+    "mnmnnmmmmmmmmmmmmnnmnnmnnhhvvvh",
+    ".mnmdmdmmmmmmdmmmmnddnmmddhhnhh",
+    "..mmnnmdmmmmmmnmmmnnmndmmnhh...",
+    "...mmnmmnmnmmmmmmmmmmmmdmm.....",
+    ".....nmm.....mmmm....mm........",
+    "...............mm..............",
+    "...............................",
+    "...............................",
+    "...............................",
+    "..............................."
+   ],
+   "plane": "xy",
+   "style": "s33",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_0",
+   "shape": "card",
+   "pivot": [
+    8.5595,
+    12.7812,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    130.16
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".....nnhnhn.Ss.............",
+    "...llnnSshSlhllSs..........",
+    "..mSsSSslmllnSslnh.........",
+    ".mnllnllmSsSllSsSSs........",
+    "mnllnlllmllllllnllSSnlhhh..",
+    "vvvvvvvvvvvvvvvvvvlnlhhhhSs",
+    "nmnnmnnmmmnnmmmmmnvvvvvvvvh",
+    ".dmnmmddmmmdmdmmmmnmhhhmhhh",
+    ".dmdnmmddmmddmdmmmnmnhhhmh.",
+    "...ddmmnmmmdmmdmdmnmm......",
+    "......nm......nmd..........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s34",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_1",
+   "shape": "card",
+   "pivot": [
+    7.0921,
+    15.541,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    140.93
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "......ln.hhlnh.............",
+    "...llSsnnhSlnll..l.........",
+    "..mlnnnnnnnSslllSslln......",
+    ".mlnnlnnnllllSsnlnllv......",
+    "mlnnlnnnnlllllllnllnlSsnh..",
+    "vvvvvvvvvvvvvvvvvvnlnhnhmhh",
+    "nmmmmmmnnmnmnmnmmmvvvvvvvvh",
+    ".nmmdmmmnnmddmmdmmmmnnhmmhh",
+    ".dmmmnmmmdmdmdmmdmmmmndhmm.",
+    "......mdmmmdmmdnmmddmv.....",
+    "...........nmd......nm.....",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s35",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_2",
+   "shape": "card",
+   "pivot": [
+    4.7693,
+    17.6324,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    153.22
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    ".......Sh..................",
+    "....SSslvh.lnh.............",
+    "...lllnlSSnlnnSs....Ss.....",
+    ".SSslllSsllllnSsnlSshv.....",
+    ".nlllllllmmnlnlllnllvvm....",
+    "nllllllllmnnllllnlllSnhhn..",
+    "vvvvvvvvvvvvvvvvvvllnhhnhhn",
+    "nnmmmmmmmmmmmmnmmmvvvvvvvvh",
+    ".ddmmmmmmmmmmmmnmmmmmhnhhhh",
+    ".dnmmmmmmmmmmmmmdmmmmmhdhh.",
+    "...mmmnmmmmmmmmnnmmnm......",
+    ".....mmdmdmmmmmm...........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s36",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_3",
+   "shape": "card",
+   "pivot": [
+    1.8712,
+    18.8033,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    190.376
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".....lhh...Snn.............",
+    "...nllnlnSsnnlnhlnh.mh.....",
+    "..SslSsllmSsllSsllmlmv.....",
+    ".lllnlllmnnllllnnlnlvvnn...",
+    "lllnllllmnnllllnlnmnlhnnn..",
+    "vvvvvvvvvvvvvvvvvvnlhnnnhnh",
+    "mnnmmmmmmnmmnmmmnmvvvvvvvvn",
+    ".mdmmmmmmmdmdmmmmdmnnhnhhhn",
+    ".mdnmmmmmmdmmnmmmnmdmnhdhh.",
+    "......nmmm..mmmdmdmmmm.....",
+    "..............mmd..........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s37",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_4",
+   "shape": "card",
+   "pivot": [
+    -1.2526,
+    18.9124,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    208.73
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "........h..................",
+    "....Sslnh..................",
+    "...nnlSshnmlhlSsllnSsh.....",
+    "..lllSmSslmnllnllnllhh.....",
+    ".lllnlmlllllnlmlllmlvvh....",
+    "lllnlmmlllnlnmmllmnSlhhnh..",
+    "vvvvvvvvvvvvvvvvvvllhhnhlhh",
+    "nnnmmmmnmmnmmmnmnmvvvvvvvvh",
+    ".dnmmmmmdmmdmmmdmdmnnnhhhhh",
+    ".dddmmmmmmmnmmmmndmndddhhh.",
+    "...mmmdmmmmnmnmmmnm........",
+    ".....mnmmmmmm.mdm..........",
+    "..........mm...............",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s38",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_5",
+   "shape": "card",
+   "pivot": [
+    -4.2252,
+    17.9465,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    213.886
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "......Ssllhn...............",
+    "...SslnllllnhnSSslSs.......",
+    "..SslSlnSslSsnlnSsnSs......",
+    ".lllnllllnSlSSsnlSslv......",
+    "lllnllnllnlllllllllSlhnhn..",
+    "vvvvvvvvvvvvvvvvvvllhnhnnhh",
+    "mmmmnmmnnnmmmmnmnmvvvvvvvvn",
+    ".mmmmnmmnddmmmmdmnmmnhmhhnn",
+    ".mmmmmnmmddmmmmmddmmmnhmhh.",
+    "...mmmmmddmmmmmnmmm........",
+    "........nmn......m.........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s39",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_6",
+   "shape": "card",
+   "pivot": [
+    -6.6883,
+    16.0222,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    251.111
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "......SSs..................",
+    ".....nlhnSsnhl.............",
+    "...nlnlnnllnhv..Shn........",
+    ".SSsSslSsmlnlSmnmllnnn.....",
+    ".llnllllmnnlnlnllnmnvvn....",
+    "llnlllllmnllnnnlnmSlnmSsh..",
+    "vvvvvvvvvvvvvvvvvvlnmhhhhhh",
+    "mmmnmmmmnmmnnnmnmmvvvvvvvvh",
+    ".mmnmmmmmdmmdmnmnmmmhhhnhmh",
+    ".mmmdmmmmnmmndmdmmmmdhhhnh.",
+    "...nmmdddmvvdndmdmmv.......",
+    ".....mnmnmmn..nm.mmd.......",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s40",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_7",
+   "shape": "card",
+   "pivot": [
+    -8.3447,
+    13.3715,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    263.981
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".........hh.mh.............",
+    "......llnnnnmvn..l..l......",
+    "..nmnnnlSsnnvvlnnlnnln.....",
+    ".nmnnlnlllSllllnlnlnvvh....",
+    "nmnnlnllllllllllnllnSSshh..",
+    "vvvvvvvvvvvvvvvvvvnlnhhhhhh",
+    "mmmnmmmmmmmmnnmnmmvvvvvvvvh",
+    ".mmnnmmmmmmmdndmnmmmnhnhhnh",
+    ".mmmnnmmmmmmmdndmmmmmdhdhh.",
+    ".........mmdmmmdmmmddm.....",
+    "...........dmn...md........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s41",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_8",
+   "shape": "card",
+   "pivot": [
+    -8.9945,
+    10.3141,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    291.436
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "......Sshn..Ssnh....m......",
+    "..mllSllnlhnmlnh.lllmn.....",
+    ".mlllllnlllnlSmnmnllvvh....",
+    "mllllllnllnnlmmmnlnllSsSs..",
+    "vvvvvvvvvvvvvvvvvvllnhhhShn",
+    "mmmmmnmnmmmnmmmmmmvvvvvvvvh",
+    ".mmmmmdmdmmmmmmmmmmmhmhnhhh",
+    ".mmmmmmdmmmmnmmmmmmmmhmhnh.",
+    "............mmm..nmmn......",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s42",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_9",
+   "shape": "card",
+   "pivot": [
+    -8.5595,
+    7.2188,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    310.081
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".....nlhh..................",
+    "...nlnSSsnnSsnn....lnh.....",
+    "..nlSslnmnnSsnh..Ssnnh.....",
+    ".nlllllmnllnnlllnnnnvvh....",
+    "nlllllnmnlnnnllnnnlnlnhSs..",
+    "vvvvvvvvvvvvvvvvvvnlnhnhnnh",
+    "mnmnmnmmnnmnmmnmmmvvvvvvvvh",
+    ".mddnmdmmndmmmmdmmmmmhhhhhh",
+    ".mdmndmdmdnmnmmmnmmmdmhhhh.",
+    "...nnmmmnmdmdmmdmmdmm......",
+    "........dmm......mm........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s43",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_10",
+   "shape": "card",
+   "pivot": [
+    -7.0921,
+    4.459,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    309.294
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........nlh.............",
+    "...llSnnSslnSSSs...........",
+    "..nlSsnlnlllnllllh.........",
+    ".nllllnnllSllSsllnlm.......",
+    "nllllnlnllllllllnlnnnnnnn..",
+    "vvvvvvvvvvvvvvvvvvnnnnnnSSs",
+    "mmmmmmmmmnmmnmmmmnvvvvvvvvh",
+    ".mmmmmmmmmdmddmmmmnmhhnhnhh",
+    ".mmmmmmmmmdmmndmmmdmmhhdhd.",
+    "...dmmmmmmmmmmmmmmmmm......",
+    "......mm.......m...........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s44",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_11",
+   "shape": "card",
+   "pivot": [
+    -4.7693,
+    2.3676,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    346.743
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "....SslSs..................",
+    "...SslSsnn..........hh.....",
+    "..lSsmnlll.......llnhv.....",
+    ".lllmnnllnnmnmSslllnvvh....",
+    "lllmnnlllnlmnlllllnlShnnh..",
+    "vvvvvvvvvvvvvvvvvvllhnnhnnh",
+    "nmmmmmnnmnmmmmmmmnvvvvvvvvh",
+    ".nmmmmmddmdmmdmmmmnmhhhhnnh",
+    ".nmmmmmmdmdmmmdmmmdmmhhhhn.",
+    ".........mnmm..mddmmdv.....",
+    ".................md.mm.....",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s45",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_12",
+   "shape": "card",
+   "pivot": [
+    -1.8712,
+    1.1967,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    372.121
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    ".....nhn.mmllh.............",
+    "...lnnSSsmlllvhh...........",
+    "..lSslnlllllvSSslllnhh.....",
+    ".lllllnllnnnnSnlllmnvvh....",
+    "lllllnlllnmnnnnllmnSSSshh..",
+    "vvvvvvvvvvvvvvvvvvllhhhhShh",
+    "nmnmmmnmmnmmmmnmmmvvvvvvvvm",
+    ".nmmdmmnmmdmmmmdmmmnnnhnnhm",
+    ".dmdmdmmdmdmmmmmdmmnmdnhdd.",
+    "......mnmmmmmmm..dmdm......",
+    "........mnd................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s46",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_13",
+   "shape": "card",
+   "pivot": [
+    1.2526,
+    1.0876,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    370.801
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "........lhh................",
+    "...nlnlnlhnnnSshh..........",
+    "..nSslnllnnllnlSslllnh.....",
+    ".nnlllnlnllSlSlllSslvvh....",
+    "nnlllnllnlllllllllllnhnhn..",
+    "vvvvvvvvvvvvvvvvvvlnhnhnhhh",
+    "mnmmmmnmmmnnmmmmmmvvvvvvvvh",
+    ".mdmmmmdmmmdmnmmmmmnhnnhhnh",
+    ".mnmmmmmdmmddmdmmmmdmhddhh.",
+    "...mmnm..mmmnmm..mmmm......",
+    "............dm.............",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s47",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_14",
+   "shape": "card",
+   "pivot": [
+    4.2252,
+    2.0535,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    404.864
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "......lnlllmnll.nnSslh.....",
+    ".SsSslnSsllnllmnSsSslh.....",
+    ".lllllnlllSlllnSslllvvm....",
+    "lllllnlllllllnnlllSnSshSs..",
+    "vvvvvvvvvvvvvvvvvvnlhhnhlSs",
+    "mmnmmmmnnmmnmmnnmmvvvvvvvvh",
+    ".mmmmmmmdnmmmnmnnmmnhhmhhmh",
+    ".mmdmmmmmnmmdmdmnmmnmhhmhh.",
+    "...mmmmdmmmmmvmdmmmmmvm....",
+    ".....mddvn.mdd......mm.....",
+    ".......nm..................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s48",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_15",
+   "shape": "card",
+   "pivot": [
+    6.6883,
+    3.9778,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    403.693
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    ".......Sm..................",
+    "....Ssllvn.................",
+    "...lllnlnhn..Sshn...l......",
+    "..nlnllnnl.lllnSsnlllh.....",
+    ".nlnlllnlllnSSllSsllvvh....",
+    "nlnlllnnlllnllllllSSlhSsn..",
+    "vvvvvvvvvvvvvvvvvvllhmhnhhn",
+    "mmmmnmmmmmnmnmmmnmvvvvvvvvh",
+    ".mmmmdmmmmmdnmmmmnmnhhhhnhh",
+    ".mmmmmnmmmmdmnmmmnmdmhhhhd.",
+    "...mmmmmmmmmmnmmmdnv.......",
+    ".....mmnmmmm...d.ndm.......",
+    ".......dm..................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s49",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_16",
+   "shape": "card",
+   "pivot": [
+    8.3447,
+    6.6285,
+    1.8
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    432.651
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........h...............",
+    "........lnhlhh.............",
+    "...lnSsnlnllSsSs...........",
+    "..lSSsSSslllllnlSnlln......",
+    ".llllnlllnnlnlnnllllvvh....",
+    "llllnllllnllnnnlllnlSnnhn..",
+    "vvvvvvvvvvvvvvvvvvllnnhnSnn",
+    "nmnnmnmmmmnnmmmmmmvvvvvvvvm",
+    ".dmnmmnmmmmnmmmmmmmnhmhhmnm",
+    ".dmndmmdmmmndmmmmmmdmhmhhm.",
+    "...mmdm..mmmmmnm.mmmm......",
+    "..............dm...........",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s50",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "sprig2_17",
+   "shape": "card",
+   "pivot": [
+    8.9945,
+    9.6859,
+    2.1
+   ],
+   "rotation": [
+    10.0,
+    0.0,
+    466.618
+   ],
+   "art": [
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........................",
+    "...........nSs.............",
+    "..........lnllSsnSs........",
+    "..SslSnlllSsnlllnSSsSs.....",
+    ".nllnlnllllnSSlSsnllvvn....",
+    "nllnlnlllllnllllnllSlhnSs..",
+    "vvvvvvvvvvvvvvvvvvllhnhhnhl",
+    "mnmmnmmmmmnmmnmnnmvvvvvvvvn",
+    ".mdmmdmmmmmdmmdmnnmmmnnnnnn",
+    ".mdmmmnmmmmdmmmnmdmmmmdddd.",
+    "...dmmdmdmnnmmmmdnmnn......",
+    "......mm...nmnmmmmmn.......",
+    "...........................",
+    "...........................",
+    "...........................",
+    "..........................."
+   ],
+   "plane": "xy",
+   "style": "s51",
+   "paint": {
+    "art_key": {
+     "d": "pine:1",
+     "n": "pine:2",
+     "m": "pine:4",
+     "l": "pine:5",
+     "h": "pine:6",
+     "v": "bark:3",
+     "s": "snow:6",
+     "S": "snow:5"
+    }
+   }
+  },
+  {
+   "id": "holly0",
+   "shape": "card",
+   "pivot": [
+    7.1417,
+    12.5994,
+    3.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    20.0
+   ],
+   "art": [
+    "...........d................",
+    "...........vd...............",
+    "...........mvnd.............",
+    "..........dmvnd.............",
+    ".......n..dmvnd.............",
+    "........vnn.mvnd............",
+    "........vmmnmvnd............",
+    ".......nlvmdddv.............",
+    ".......nnlvmn.v.............",
+    ".........lvmn...............",
+    ".........llvn...............",
+    "..........nvn...............",
+    "............n...............",
+    "............................",
+    "....................d.......",
+    "............nnvv.vvnnd......",
+    "............nlv.n.dvvddd....",
+    ".........dnnnvm.v.dmmvvn....",
+    "......dddvnhvnnnvmnddmmvd...",
+    "......dmvdnvmn.nlmn..dd.vd..",
+    "......dmvnvnnn..nvn.........",
+    ".....mmvddd....nhvm.........",
+    ".....dvnd.......nvn.........",
+    ".....dvnd........v..........",
+    ".....v......................",
+    "............................",
+    "............................",
+    "............................"
+   ],
+   "plane": "xy",
+   "style": "s52",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "berry0_0",
+   "shape": "loft",
+   "pivot": [
+    6.6417,
+    11.5994,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s53",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry0_1",
+   "shape": "loft",
+   "pivot": [
+    7.6417,
+    11.5994,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s54",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry0_2",
+   "shape": "loft",
+   "pivot": [
+    6.6417,
+    12.4994,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s55",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry0_3",
+   "shape": "loft",
+   "pivot": [
+    7.6417,
+    12.4994,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s56",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "holly1",
+   "shape": "card",
+   "pivot": [
+    -5.8219,
+    14.8852,
+    3.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    140.0
+   ],
+   "art": [
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    ".................v..........",
+    "................dv..........",
+    "...............dmvd.........",
+    "................mnd.........",
+    "...............dvd..........",
+    "...............mvnd.........",
+    "...............dvd..n.nhvv..",
+    "................v...nlvvn...",
+    "....................vvnnn...",
+    "................n....nnd....",
+    "..........v.....nvnvvvvnd...",
+    "..........v.....lvm.dmdvvv..",
+    ".........lvmn...nvn....d....",
+    "........nlvmn....hvn........",
+    ".........nvn....nhv.........",
+    ".........nvmn...dvv.........",
+    "........nlvmm...dvnd........",
+    ".........nvn....dvd.........",
+    "..........nn....mvnd........",
+    "................dvd.........",
+    ".................v..........",
+    "............................"
+   ],
+   "plane": "xy",
+   "style": "s57",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "berry1_0",
+   "shape": "loft",
+   "pivot": [
+    -6.3219,
+    13.8852,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s58",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry1_1",
+   "shape": "loft",
+   "pivot": [
+    -5.3219,
+    13.8852,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s59",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry1_2",
+   "shape": "loft",
+   "pivot": [
+    -6.3219,
+    14.7852,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s60",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry1_3",
+   "shape": "loft",
+   "pivot": [
+    -5.3219,
+    14.7852,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s61",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "holly2",
+   "shape": "card",
+   "pivot": [
+    -2.5994,
+    2.8583,
+    3.9
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    250.0
+   ],
+   "art": [
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    ".............vd.............",
+    "...........ddmnd............",
+    "............dmvd............",
+    "...........dvdv.............",
+    "...........mdmvd............",
+    ".....n.....ddmvd............",
+    "....mm.nn..v..v......lvv....",
+    "..vvvvmmm.....d....nnnmn....",
+    "...nhhvvvvv........vvvmnnm..",
+    "..ddnnnln.........nvnlvvvmn.",
+    "..dvd..n.............lnnhvvv",
+    ".mvnd................n..ln.n",
+    ".vnd....................n...",
+    "vddd........................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................",
+    "............................"
+   ],
+   "plane": "xy",
+   "style": "s62",
+   "paint": {
+    "art_key": {
+     "d": "leaf:1",
+     "n": "leaf:2",
+     "m": "leaf:4",
+     "l": "leaf:5",
+     "h": "leaf:6",
+     "v": "leaf:3",
+     "s": "snow:6",
+     "S": "snow:5",
+     "b": "holly:4"
+    }
+   }
+  },
+  {
+   "id": "berry2_0",
+   "shape": "loft",
+   "pivot": [
+    -3.0994,
+    1.8583,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s63",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry2_1",
+   "shape": "loft",
+   "pivot": [
+    -2.0994,
+    1.8583,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s64",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry2_2",
+   "shape": "loft",
+   "pivot": [
+    -3.0994,
+    2.7583,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s65",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "berry2_3",
+   "shape": "loft",
+   "pivot": [
+    -2.0994,
+    2.7583,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1610912703473989,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.55,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9389087296526012,
+      0
+     ],
+     "size": [
+      0.7778,
+      0.7778
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.1,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s66",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "cone0",
+   "shape": "loft",
+   "pivot": [
+    3.6,
+    16.2354,
+    3.6
+   ],
+   "rotation": [
+    70.0,
+    0.0,
+    60.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "size": [
+      2.2,
+      2.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.6,
+      0
+     ],
+     "size": [
+      0.8,
+      0.8
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s67",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "cone1",
+   "shape": "loft",
+   "pivot": [
+    -6.7658,
+    7.5375,
+    3.6
+   ],
+   "rotation": [
+    70.0,
+    0.0,
+    200.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "size": [
+      2.2,
+      2.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.6,
+      0
+     ],
+     "size": [
+      0.8,
+      0.8
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s68",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "cone2",
+   "shape": "loft",
+   "pivot": [
+    5.5155,
+    5.3719,
+    3.6
+   ],
+   "rotation": [
+    70.0,
+    0.0,
+    320.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6,
+      0
+     ],
+     "size": [
+      2.0,
+      2.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.6,
+      0
+     ],
+     "size": [
+      2.2,
+      2.2
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.6,
+      0
+     ],
+     "size": [
+      0.8,
+      0.8
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    false,
+    true
+   ],
+   "style": "s69",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "bowloop0",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    2.4,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      -2.8,
+      1.8,
+      0.2
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      -4.0,
+      0.2,
+      0.0
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      -2.6,
+      -1.2,
+      0.0
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s70"
+  },
+  {
+   "id": "bowtail0",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    2.4,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.8,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      -1.6,
+      -3.0,
+      0.2
+     ],
+     "size": [
+      1.8,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      -2.6,
+      -6.6,
+      -0.2
+     ],
+     "size": [
+      1.8,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      -2.0,
+      -8.4,
+      -0.4
+     ],
+     "size": [
+      1.8,
+      0.6
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s71",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "bowloop1",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    2.4,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      2.8,
+      1.8,
+      0.2
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      4.0,
+      0.2,
+      0.0
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      2.6,
+      -1.2,
+      0.0
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      2.0,
+      0.8
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 8,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s72"
+  },
+  {
+   "id": "bowtail1",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    2.4,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.8,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      1.6,
+      -3.0,
+      0.2
+     ],
+     "size": [
+      1.8,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      2.6,
+      -6.6,
+      -0.2
+     ],
+     "size": [
+      1.8,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      2.0,
+      -8.4,
+      -0.4
+     ],
+     "size": [
+      1.8,
+      0.6
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s73",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "bowknot",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    1.4,
+    4.7
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.19098300562505255,
+      0
+     ],
+     "size": [
+      1.1756,
+      1.1756
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6909830056250525,
+      0
+     ],
+     "size": [
+      1.9021,
+      1.9021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.3090169943749475,
+      0
+     ],
+     "size": [
+      1.9021,
+      1.9021
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8090169943749475,
+      0
+     ],
+     "size": [
+      1.1756,
+      1.1756
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s74",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "bellj0",
+   "shape": "bone",
+   "pivot": [
+    -0.8,
+    1.6,
+    4.2
+   ]
+  },
+  {
+   "id": "bellcord0",
+   "shape": "box",
+   "parent": "bellj0",
+   "pivot": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "size": [
+    0.15,
+    1.8,
+    0.15
+   ],
+   "style": "s75"
+  },
+  {
+   "id": "bell0",
+   "shape": "loft",
+   "parent": "bellj0",
+   "pivot": [
+    0.0,
+    -1.7,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      -0.4,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      -1.4,
+      0
+     ],
+     "size": [
+      1.4,
+      1.4
+     ]
+    },
+    {
+     "at": [
+      0,
+      -2.0,
+      0
+     ],
+     "size": [
+      2.2,
+      2.2
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s76",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "bellj1",
+   "shape": "bone",
+   "pivot": [
+    0.9,
+    1.6,
+    4.2
+   ]
+  },
+  {
+   "id": "bellcord1",
+   "shape": "box",
+   "parent": "bellj1",
+   "pivot": [
+    0.0,
+    -0.9,
+    0.0
+   ],
+   "size": [
+    0.15,
+    1.8,
+    0.15
+   ],
+   "style": "s77"
+  },
+  {
+   "id": "bell1",
+   "shape": "loft",
+   "parent": "bellj1",
+   "pivot": [
+    0.0,
+    -1.7,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0,
+      0
+     ],
+     "size": [
+      0.6,
+      0.6
+     ]
+    },
+    {
+     "at": [
+      0,
+      -0.4,
+      0
+     ],
+     "size": [
+      1.1,
+      1.1
+     ]
+    },
+    {
+     "at": [
+      0,
+      -1.4,
+      0
+     ],
+     "size": [
+      1.4,
+      1.4
+     ]
+    },
+    {
+     "at": [
+      0,
+      -2.0,
+      0
+     ],
+     "size": [
+      2.2,
+      2.2
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0,
+    "angle": 0.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s78",
+   "up": [
+    0,
+    0,
+    1
+   ],
+   "smooth": true
+  },
+  {
+   "id": "hanger",
+   "shape": "loft",
+   "pivot": [
+    0.0,
+    19.0,
+    1.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      1.2,
+      1.2
+     ]
+    },
+    {
+     "at": [
+      0.0,
+      3.0,
+      -0.6
+     ],
+     "size": [
+      0.4,
+      0.4
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 6,
+    "round": 2.0
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s79"
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 3.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "bellj0",
+     "osc": {
+      "axis": "z",
+      "amp": 9,
+      "cycles": 2,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "bellj1",
+     "osc": {
+      "axis": "z",
+      "amp": 9,
+      "cycles": 2,
+      "phase": 0.35
+     }
+    }
+   ]
+  }
+ }
+}

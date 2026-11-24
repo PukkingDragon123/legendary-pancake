@@ -12,7 +12,7 @@ import { QUEEN_NAME } from '../../owl/queen.ts';
 import { SPECIAL_SKIN } from '../../owl/skins.ts';
 import {
   ACORN_PACKS, activeSeries, buyAcorns, buyDeal, claimGift, dailyDeals, dailyGift, ensureDay, fmtLeft, GEM_PACKS, giftClaimed, grantGems,
-  isSold, KIND_LABEL, msToMidnight, msToWeek, seriesActive, SERIES, type AcornPack, type Deal, type GemPack,
+  isSold, KIND_LABEL, msToMidnight, msToWeek, nameOf, seriesActive, SERIES, type AcornPack, type Deal, type GemPack,
 } from '../../game/shop.ts';
 import type { Series } from '../../game/series.ts';
 import { save } from '../../game/store.ts';
@@ -27,7 +27,7 @@ import { panel, sceneRef } from '../state.ts';
 import { injectIceCSS } from './art.js';
 import { Gacha } from './gacha.tsx';
 import { AnimPx, iceConfirm, rewardMoment, showPrize } from './moment.tsx';
-import { bannerArt, bigOwl, prizeArt, skinLook } from './paint.ts';
+import { bannerArt, bigOwl, prizeArt, seriesColors, skinLook } from './paint.ts';
 import './shop.css';
 
 const fmt = (n: number) => n.toLocaleString('en-US');
@@ -116,7 +116,7 @@ export function Cost(p: { cur: 'coins' | 'gems'; n: number; size?: number }) {
 function Ribbon(p: { children: ComponentChildren; tone?: 'ice' | 'gold' | 'berry' | 'violet'; right?: ComponentChildren; id?: string }) {
   return (
     <div class="nv-sec-head" data-sec={p.id}>
-      <h3 class={'nv-ribbon if-ice_ribbon' + (p.tone && p.tone !== 'ice' ? '_' + p.tone : '')}><Px name="ice_flake_s" size={10} />{p.children}<Px name="ice_flake_s" size={10} /></h3>
+      <h3 class={'nv-ribbon if-ice_ribbon' + (p.tone && p.tone !== 'ice' ? '_' + p.tone : '')}><Px name="shop_holly" size={18} />{p.children}<Px name="ice_flake_s" size={10} /></h3>
       {p.right}
     </div>
   );
@@ -159,6 +159,7 @@ export function Shop() {
     try { b = new Boutique(deals.map((d) => ({ kind: d.kind, id: d.id }))); } catch (e) { console.warn('boutique failed', e); }
     if (b && sc) {
       const st = b;
+      st.attach(sc.renderer, sc);
       void transition('snow', () => { sc.setStage(st); });
       st.greet();
       st.onPick = (i) => { pickDeal(i, true); };
@@ -287,21 +288,23 @@ export function Shop() {
         <header class="nv-head">
           <button class="nv-close nv-btn frost" aria-label="Leave the boutique" onClick={close}><Px name="arrow_left" size={22} /></button>
           <div class="nv-title">
+            <span class="nv-snow" aria-hidden="true" />
             <b class="nv-title-main">Neve's Boutique</b>
-            <span class="nv-title-sub">Fresh treasures every day!</span>
+            <span class="nv-title-sub">Winter wares, fresh every morning</span>
           </div>
           <Timer ms={reset} label="New in " />
         </header>
-        <div class="nv-icicles" aria-hidden="true" />
+        <div class="nv-garland" aria-hidden="true" />
         <div class="nv-scroll" ref={scroller} onScroll={(e) => setRaised((e.currentTarget as HTMLElement).scrollTop > 80)}>
 
-          <Ribbon id="deals" tone="berry" right={<span class="nv-hint">Tap a stand to see it up close</span>}>Daily Deals</Ribbon>
+          <Ribbon id="deals" tone="berry" right={<span class="nv-hint"><Px name="shop_tag" size={14} />Tap a display to see it up close</span>}>Daily Deals</Ribbon>
           <div class="nv-deals">
             <div class="nv-rail" aria-hidden="true" />
             {deals.map((d, i) => {
               const sold = isSold(s, d.key), a = art(d), hang = d.kind !== 'item';
               return (
-                <div class={'nv-deal' + (hang ? ' hang' : ' stand') + (sold ? ' sold' : '') + (focus === i ? ' focus' : '')} data-deal={i} style={{ animationDelay: `${-i * 0.9}s` }}>
+                <div class={'nv-deal' + (hang ? ' hang' : ' stand') + (sold ? ' sold' : '') + (focus === i ? ' focus' : '')} data-deal={i}>
+                  <div class="nv-swing" style={{ animationDelay: `${-i * 0.9}s` }}>
                   {hang && <Px name="shop_hanger" size={44} class="nv-hanger" />}
                   <button class={'nv-deal-card ' + (d.cur === 'gems' ? 'if-ice_card_gold' : 'if-ice_card')} onClick={() => pickDeal(i)}>
                     <span class="nv-off if-ice_tag_berry">-{d.off}%</span>
@@ -310,6 +313,7 @@ export function Shop() {
                     <span class="nv-deal-kind">{d.kind === 'piece' ? `Outfit · ${PIECE[d.id]?.slot ?? ''}` : d.kind === 'species' ? 'Plumage' : 'Furniture'}</span>
                     <s class="nv-was"><Cost cur={d.cur} n={d.base} size={16} /></s>
                   </button>
+                  </div>
                   {sold ? <span class="nv-sold">SOLD</span>
                     : <button class={'nv-btn ' + (d.cur === 'gems' ? 'violet' : 'gold') + ' nv-buy'} onClick={() => void buy(d, i)}><Cost cur={d.cur} n={d.price} /></button>}
                 </div>
@@ -321,7 +325,7 @@ export function Shop() {
           <div class="nv-grid">
             <div class={'nv-offer gift ' + (claimed ? 'sold if-ice_card_dark' : 'if-ice_card_gold')}>
               <span class="nv-tag if-ice_tag_berry">DAILY GIFT</span>
-              <div class="nv-offer-art"><Px name="shop_gift" size={72} class={claimed ? '' : 'nv-wiggle'} /></div>
+              <div class="nv-offer-art"><Px name="shop_gift" size={72} class={claimed ? '' : 'nv-wiggle'} />{!claimed && <span class="nv-sparks" aria-hidden="true"><i style="left:8%;top:10%" /><i style="right:6%;top:30%;animation-delay:-0.6s" /><i style="left:22%;bottom:6%;animation-delay:-1.2s" /></span>}</div>
               <b class="nv-offer-name">{claimed ? 'See you tomorrow' : 'A gift from the Queen'}</b>
               <span class="nv-offer-sub"><Cost cur={g.gems ? 'gems' : 'coins'} n={g.gems ?? g.coins ?? 0} size={18} /></span>
               {claimed ? <span class="nv-sold small">CLAIMED</span> : <button class="nv-btn berry nv-pulse" onClick={gift}>FREE!</button>}
@@ -369,10 +373,10 @@ function SeriesCard(p: { s: Series; onOpen: () => void }) {
   const f5 = s.pool.find((e) => e.stars === 5 && e.featured) ?? s.pool.find((e) => e.stars === 5);
   const f4 = s.pool.filter((e) => e.stars === 4 && e.featured).slice(0, 3);
   const hero = f5 && SPECIAL_SKIN[f5.id] ? bigOwl(skinLook(f5.id), 256) : '';
-  const bg = bannerArt(s, 168, 72);
+  const bg = bannerArt(s, 168, 72), sc = seriesColors(s);
   const look = save.value.look;
   return (
-    <button class={'nv-series ' + s.motif + (on ? ' on' : ' off')} style={{ '--c0': s.colors[0], '--c1': s.colors[1], '--c2': s.colors[2], '--c3': s.colors[3] } as unknown as string} onClick={p.onOpen}>
+    <button class={'nv-series ' + s.motif + (on ? ' on' : ' off')} style={{ '--c0': sc[0], '--c1': sc[1], '--c2': sc[2], '--c3': sc[3] } as unknown as string} onClick={p.onOpen}>
       <img class="nv-series-bg" src={bg} alt="" />
       <span class="nv-series-shine" />
       {hero && <img class="nv-series-hero" src={hero} alt="" />}
@@ -386,6 +390,7 @@ function SeriesCard(p: { s: Series; onOpen: () => void }) {
         </div>
       </div>
       <span class="nv-series-stars">{[0, 1, 2, 3, 4].map(() => <Px name="shop_star5" size={18} />)}</span>
+      <span class="nv-series-plaque">{s.pool.length} treasures · 5-star {nameOf(f5?.kind ?? 'skin', f5?.id ?? '')}</span>
     </button>
   );
 }

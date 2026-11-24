@@ -1,22 +1,37 @@
-// Painted art for the boutique UI: the gacha banner backdrops (Frostlight: a snowy pine forest at
-// night with a cabin's warm windows, garlands and baubles; Starfall: a violet sky of falling stars),
-// big 3D portraits of the featured owls, finish swatches, and prize thumbnails with a fallback.
+// Painted art for the boutique UI, in the calm "Moss & Moonlight" palette: the gacha banner backdrops
+// (Frostlight: an evening of first snow over a pine wood, a gingerbread cottage with lamplit windows,
+// garlands and baubles; Starfall: a dusky plum sky of falling stars over cloud banks and a little
+// observatory), the night sky of the wish cinematic, big 3D portraits of the featured owls, finish
+// swatches, and prize thumbnails with a fallback. Pixel art only: stepped bands, pixel discs and
+// stepped halo rings, never a smooth gradient or a soft glow.
 import * as THREE from 'three';
 import { FINISH } from '../../assets/registry.ts';
 import { rng, strSeed } from '../../gfx/noise.ts';
-import { buildOwl, type OwlLook } from '../../owl/model.ts';
-import { PIECE } from '../../owl/outfits.ts';
+import { buildOwl, owlReady, type OwlLook } from '../../owl/model.ts';
+import { PIECE, piecesReady } from '../../owl/outfits.ts';
 import { SPECIAL_SKIN } from '../../owl/skins.ts';
 import { SPECIES_BY_ID } from '../../owl/species.ts';
 import type { RewardKind, Series } from '../../game/series.ts';
 import { ITEMS } from '../../assets/registry.ts';
-import { itemIcon, owlFull, pieceIcon } from '../portraits.ts';
+import { iconVersion, itemIcon, owlFull, pieceIcon } from '../portraits.ts';
 
 // ------------------------------------------------------------------ a pixel canvas
 
 type RGB = [number, number, number];
 const hx = (s: string): RGB => { const n = parseInt(s.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
+const bay = (x: number, y: number) => BAYER[((y & 3) * 4) + (x & 3)];
+
+// the palette (src/gfx/palette.ts) as CSS hex
+const K = {
+  ink: '#2e2b24', ink2: '#4b463a', paper: '#f4eedd', oat: '#eae0c8', linen: '#dccfb0',
+  woodPale: '#d8bf98', woodLight: '#bf9d74', wood: '#9c7a56', woodDark: '#6f553d', woodDeep: '#4a392b', bark: '#5b4a3c', barkDark: '#3d3229',
+  sageLight: '#c4cfa3', sage: '#a7b788', moss: '#86a06a', fern: '#66844f', leaf: '#557343', pine: '#3f5a3b', forest: '#2c4030',
+  mist: '#d3e0dc', sky: '#aec8cc', lake: '#86a9b0', dusk: '#617f8c', slate: '#46596a', night: '#27313f', deepNight: '#1b222d',
+  lamp: '#f1d39a', honey: '#dcb072', ochre: '#c59a52', terracotta: '#c0866a', clay: '#a66c55',
+  rose: '#d9aca4', blush: '#e8b4ae', berry: '#9e5f66', plum: '#6e5266', plumDeep: '#3f3144', plumNight: '#2a2130',
+  lilac: '#b4a9c9', lavender: '#d3cce0', frost: '#dfe9ea', snow: '#f5f7f2', ice: '#bcd6dc', brass: '#c8a764', brassDark: '#8e7440',
+};
 
 class Pix {
   d: Uint8ClampedArray<ArrayBuffer>;
@@ -29,49 +44,44 @@ class Pix {
     for (let j = 0; j < 3; j++) this.d[i + j] = this.d[i + j] * (1 - a) + k[j] * a;
     this.d[i + 3] = 255;
   }
-  add(x: number, y: number, c: RGB, a: number) {
-    x = Math.round(x); y = Math.round(y);
-    if (x < 0 || y < 0 || x >= this.w || y >= this.h) return;
-    const i = (y * this.w + x) * 4;
-    for (let j = 0; j < 3; j++) this.d[i + j] = Math.min(255, this.d[i + j] + c[j] * a);
-  }
   rect(x: number, y: number, w: number, h: number, c: RGB | string, a = 1) { for (let j = Math.floor(y); j < y + h; j++) for (let i = Math.floor(x); i < x + w; i++) this.set(i, j, c, a); }
-  /** vertical gradient through colour stops with ordered dithering between bands */
+  /** vertical bands between colour stops, ordered-dithered at each step */
   grad(y0: number, y1: number, stops: string[]) {
     const cs = stops.map(hx), n = cs.length - 1;
     for (let y = Math.floor(y0); y < y1; y++) for (let x = 0; x < this.w; x++) {
       const t = Math.max(0, Math.min(0.9999, (y - y0) / (y1 - y0))) * n, i = Math.floor(t), f = t - i;
-      const q = Math.floor(f * 4) / 4, r = f * 4 - Math.floor(f * 4);
-      const pick = r > BAYER[(y % 4) * 4 + (x % 4)] ? q + 0.25 : q;
-      const a = cs[i], b = cs[Math.min(n, i + 1)];
-      this.set(x, y, [a[0] + (b[0] - a[0]) * pick, a[1] + (b[1] - a[1]) * pick, a[2] + (b[2] - a[2]) * pick]);
+      this.set(x, y, f > bay(x, y) ? cs[Math.min(n, i + 1)] : cs[i]);
     }
   }
+  /** a stepped pixel disc */
   circle(cx: number, cy: number, r: number, c: RGB | string, a = 1) { for (let y = Math.floor(cy - r); y <= cy + r; y++) for (let x = Math.floor(cx - r); x <= cx + r; x++) if ((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2 <= r * r) this.set(x, y, c, a); }
-  glow(cx: number, cy: number, r: number, c: string, a = 0.5) {
-    const k = hx(c);
+  /** a pixel halo: two hard rings at fixed alpha and a checkerboard fringe, never a smooth falloff */
+  halo(cx: number, cy: number, r: number, c: string, a = 0.3) {
     for (let y = Math.floor(cy - r); y <= cy + r; y++) for (let x = Math.floor(cx - r); x <= cx + r; x++) {
       const d = Math.hypot(x + 0.5 - cx, y + 0.5 - cy) / r;
-      if (d < 1) { const v = (1 - d) * (1 - d) * a; const q = Math.floor(v * 6) / 6; this.add(x, y, k, q + (v * 6 - Math.floor(v * 6) > BAYER[(y % 4) * 4 + (x % 4)] ? 1 / 6 : 0)); }
+      if (d > 1) continue;
+      if (d < 0.45) this.set(x, y, c, a);
+      else if (d < 0.75) this.set(x, y, c, a * 0.55);
+      else if ((x + y) % 2 === 0) this.set(x, y, c, a * 0.4);
     }
   }
-  /** a pine tree: stacked triangles with snow on each tier; baubles optional */
-  pine(cx: number, base: number, h: number, col: string, snow: string, o: { baubles?: string[]; seed?: number; star?: boolean } = {}) {
+  /** a pine tree: stacked tiers with snow on each ledge; baubles and a star optional */
+  pine(cx: number, base: number, h: number, col: string, dark: string, snow: string, o: { baubles?: string[]; seed?: number; star?: boolean } = {}) {
     const tiers = Math.max(2, Math.round(h / 7)), r = rng(o.seed ?? 1);
-    this.rect(cx - Math.max(1, h / 18), base - h * 0.12, Math.max(2, h / 9), h * 0.12 + 1, '#3a2418');
+    this.rect(cx - Math.max(1, h / 18), base - h * 0.12, Math.max(2, h / 9), h * 0.12 + 1, K.barkDark);
     for (let k = 0; k < tiers; k++) {
       const top = base - h + (k * h * 0.8) / tiers, bot = top + (h * 1.05) / tiers + h * 0.12, half = ((k + 1.4) / (tiers + 0.4)) * h * 0.34;
       for (let y = Math.floor(top); y < bot; y++) {
         const w = ((y - top) / (bot - top)) * half;
         for (let x = Math.floor(cx - w); x <= cx + w; x++) {
           const edge = y >= bot - 1.5 && r() < 0.8;
-          this.set(x, y, edge ? snow : (x + y) % 5 === 0 ? '#0f2436' : col);
+          this.set(x, y, edge ? snow : x < cx - w * 0.15 ? col : (x + y) % 5 === 0 ? col : dark);
         }
         if (y < top + 2) this.set(cx, y, snow);
       }
-      if (o.baubles) for (let i = 0; i < 2 + k; i++) { const bx = cx + (r() - 0.5) * half * 1.6, by = bot - 2 - r() * 3; const c = o.baubles[Math.floor(r() * o.baubles.length)]; this.set(bx, by, c); this.set(bx + 1, by, c); this.set(bx, by + 1, c); this.set(bx + 1, by + 1, '#ffffff', 0.4); }
+      if (o.baubles) for (let i = 0; i < 2 + k; i++) { const bx = cx + (r() - 0.5) * half * 1.6, by = bot - 2 - r() * 3; const c = o.baubles[Math.floor(r() * o.baubles.length)]; this.set(bx, by, c); this.set(bx + 1, by, c); this.set(bx, by + 1, c); this.set(bx + 1, by + 1, c); this.set(bx, by, K.snow, 0.5); }
     }
-    if (o.star) { const y = base - h - 2; this.set(cx, y - 1, '#fff6c0'); this.set(cx - 1, y, '#ffd84a'); this.set(cx, y, '#fffbe0'); this.set(cx + 1, y, '#ffd84a'); this.set(cx, y + 1, '#ffd84a'); this.glow(cx, y, 7, '#ffd84a', 0.35); }
+    if (o.star) { const y = base - h - 2; this.halo(cx, y, 6, K.lamp, 0.35); this.set(cx, y - 1, K.paper); this.set(cx - 1, y, K.honey); this.set(cx, y, '#fffaee'); this.set(cx + 1, y, K.honey); this.set(cx, y + 1, K.honey); }
   }
   url(): string {
     const c = document.createElement('canvas'); c.width = this.w; c.height = this.h;
@@ -82,117 +92,122 @@ class Pix {
 
 // ------------------------------------------------------------------ banner backdrops
 
+/** The calm-palette colours a series is shown in (light, mid, dark, accent). */
+export function seriesColors(s: Series): [string, string, string, string] {
+  if (s.motif === 'stars') return [K.paper, K.lavender, K.plumDeep, K.lamp];
+  return [K.snow, K.sky, '#27404c', K.berry];
+}
+
 function frostlight(w: number, h: number): Pix {
   const p = new Pix(w, h), r = rng(strSeed('frostlight' + w + 'x' + h));
   const hor = h * 0.62;
-  p.grad(0, hor + 4, ['#070d2a', '#0f1d4e', '#1d3a7c', '#3a62a8', '#7aa0d4']);
-  for (let i = 0; i < w * h * 0.012; i++) { const x = r() * w, y = r() * hor * 0.85; p.set(x, y, r() < 0.2 ? '#fff6d8' : '#cfe0ff', 0.5 + r() * 0.5); }
-  for (let i = 0; i < 6; i++) { const x = r() * w, y = r() * hor * 0.5; p.set(x, y, '#ffffff'); p.set(x - 1, y, '#9fc0ff'); p.set(x + 1, y, '#9fc0ff'); p.set(x, y - 1, '#9fc0ff'); p.set(x, y + 1, '#9fc0ff'); }
-  // a big pale moon
+  p.grad(0, hor + 4, [K.deepNight, K.night, K.slate, K.dusk, K.lake, K.sky]);
+  for (let i = 0; i < w * h * 0.012; i++) { const x = r() * w, y = r() * hor * 0.8; p.set(x, y, r() < 0.2 ? K.lamp : K.frost, 0.5 + r() * 0.5); }
+  for (let i = 0; i < 6; i++) { const x = r() * w, y = r() * hor * 0.5; p.set(x, y, K.snow); p.set(x - 1, y, K.ice); p.set(x + 1, y, K.ice); p.set(x, y - 1, K.ice); p.set(x, y + 1, K.ice); }
+  // a big pale moon with stepped halo rings
   const mx = w * 0.82, my = h * 0.16, mr = Math.max(5, h * 0.07);
-  p.glow(mx, my, mr * 3.2, '#9fc0ff', 0.4);
-  p.circle(mx, my, mr, '#f6f4e6'); p.circle(mx + mr * 0.3, my - mr * 0.2, mr * 0.28, '#d8dce6'); p.circle(mx - mr * 0.35, my + mr * 0.35, mr * 0.18, '#dfe2ea');
+  p.circle(mx, my, mr, K.snow); p.circle(mx + mr * 0.3, my - mr * 0.2, mr * 0.28, K.mist); p.circle(mx - mr * 0.35, my + mr * 0.35, mr * 0.18, K.frost);
   // mountains with snowcaps
   for (let x = 0; x < w; x++) {
     const m = hor - h * 0.2 - Math.abs(((x * 0.9) % (w * 0.42)) - w * 0.21) * 0.55 - Math.sin(x * 0.05) * h * 0.03;
-    for (let y = Math.floor(m); y < hor + 2; y++) p.set(x, y, y < m + h * 0.035 ? '#cfe0f6' : (x + y) % 3 ? '#34518c' : '#2c4680');
+    const high = (hor - h * 0.2 - m) / (w * 0.21 * 0.55);
+    for (let y = Math.floor(m); y < hor + 2; y++) p.set(x, y, high > 0.45 && y < m + h * 0.05 * (high - 0.3) + 1 ? (bay(x, y) > 0.3 ? K.frost : K.snow) : (x + y) % 3 ? K.dusk : K.slate);
   }
   // far forest
-  for (let x = -4; x < w + 4; x += 4 + r() * 3) p.pine(x, hor + 3, h * (0.1 + r() * 0.06), '#173356', '#a9c4e6', { seed: x + 1 });
+  for (let x = -4; x < w + 4; x += 4 + r() * 3) p.pine(x, hor + 3, h * (0.1 + r() * 0.06), K.slate, '#3a4a5b', K.sky, { seed: x + 1 });
   // snowy ground with blue shadows
   for (let y = Math.floor(hor); y < h; y++) for (let x = 0; x < w; x++) {
     const hill = hor + Math.sin(x * 0.045) * h * 0.025 + Math.sin(x * 0.13) * h * 0.01;
-    if (y >= hill) p.set(x, y, (x * 3 + y * 7) % 23 === 0 ? '#ffffff' : y - hill < 2 ? '#f4f9ff' : (x + y * 2) % 9 === 0 ? '#c8dcf2' : '#e2eefa');
+    if (y >= hill) p.set(x, y, (x * 3 + y * 7) % 23 === 0 ? K.ice : y - hill < 2 ? K.snow : (x + y * 2) % 9 === 0 ? K.ice : Math.sin(x * 0.045 + 1.3) < -0.3 && bay(x, y) > 0.5 ? K.frost : K.snow);
   }
-  // the cabin, windows aglow
+  // the gingerbread cottage: honey walls with icing trim, berry sweets, lamplit windows
   const cx = w * 0.64, cb = hor + h * 0.05, cw = Math.max(18, w * 0.13), ch = cw * 0.55;
-  p.glow(cx, cb - ch * 0.4, cw * 1.4, '#ffb04a', 0.35);
-  for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) p.set(cx - cw / 2 + x, cb - ch + y, y % 3 === 0 ? '#3e2216' : x % 7 === 0 ? '#4c2c1c' : '#6a3a24');
-  for (let y = 0; y < ch * 0.8; y++) { const half = cw * 0.62 * (y / (ch * 0.8)); for (let x = -half; x <= half; x++) p.set(cx + x, cb - ch - ch * 0.8 + y, y > ch * 0.8 - 3 || r() < 0.08 ? '#ffffff' : y < 2 ? '#f6fbff' : '#e6f0fb'); }
-  p.rect(cx + cw * 0.22, cb - ch - ch * 0.7, cw * 0.1, ch * 0.5, '#5a3a2c'); p.rect(cx + cw * 0.2, cb - ch - ch * 0.75, cw * 0.14, 2, '#ffffff');
-  for (const wx of [-0.3, 0.18]) { const x0 = cx + wx * cw, y0 = cb - ch * 0.75; p.rect(x0, y0, cw * 0.16, ch * 0.38, '#ffcf6a'); p.rect(x0 + cw * 0.075, y0, 1, ch * 0.38, '#8a4a20'); p.rect(x0, y0 + ch * 0.18, cw * 0.16, 1, '#8a4a20'); p.glow(x0 + cw * 0.08, y0 + ch * 0.2, cw * 0.35, '#ffcf6a', 0.4); }
-  p.rect(cx - cw * 0.06, cb - ch * 0.62, cw * 0.12, ch * 0.62, '#3a2014');
+  for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) p.set(cx - cw / 2 + x, cb - ch + y, y % 4 === 0 ? K.clay : x % 5 === 0 ? K.terracotta : K.ochre);
+  for (let x = 0; x < cw; x += 3) p.set(cx - cw / 2 + x, cb - ch + ch * 0.45, K.snow);
+  for (let y = 0; y < ch * 0.8; y++) { const half = cw * 0.62 * (y / (ch * 0.8)); for (let x = -half; x <= half; x++) p.set(cx + x, cb - ch - ch * 0.8 + y, y > ch * 0.8 - 3 || r() < 0.06 ? K.snow : y < 2 ? K.snow : K.frost); }
+  for (let x = -cw * 0.6; x <= cw * 0.6; x += 3) p.set(cx + x, cb - ch + 1 + ((x | 0) % 2 ? 1 : 0), K.snow);
+  p.rect(cx + cw * 0.22, cb - ch - ch * 0.7, cw * 0.1, ch * 0.5, K.clay); p.rect(cx + cw * 0.2, cb - ch - ch * 0.75, cw * 0.14, 2, K.snow);
+  for (const wx of [-0.3, 0.18]) { const x0 = cx + wx * cw, y0 = cb - ch * 0.75; p.rect(x0, y0, cw * 0.16, ch * 0.38, K.lamp); p.rect(x0 + cw * 0.075, y0, 1, ch * 0.38, K.woodDark); p.rect(x0, y0 + ch * 0.18, cw * 0.16, 1, K.woodDark); p.rect(x0 - 1, y0 - 1, cw * 0.16 + 2, 1, K.snow); }
+  p.rect(cx - cw * 0.06, cb - ch * 0.62, cw * 0.12, ch * 0.62, K.woodDeep); p.set(cx + cw * 0.03, cb - ch * 0.3, K.brass);
+  for (const sx of [-0.4, -0.12, 0.36]) { const x = cx + sx * cw, y = cb - ch * 0.2; p.set(x, y, K.berry); p.set(x + 1, y, K.snow); p.set(x, y + 1, K.snow); p.set(x + 1, y + 1, K.berry); }
   // fairy lights along the eaves
-  for (let i = 0; i <= 12; i++) { const t = i / 12, x = cx - cw * 0.62 + t * cw * 1.24, y = cb - ch + 1 + Math.sin(t * Math.PI * 3) * 1.2; const c = ['#ff5a5a', '#ffd84a', '#5ae08a', '#7ac8ff'][i % 4]; p.set(x, y, c); p.glow(x, y, 3, c, 0.25); }
+  for (let i = 0; i <= 12; i++) { const t = i / 12, x = cx - cw * 0.62 + t * cw * 1.24, y = cb - ch + 2 + Math.sin(t * Math.PI * 3) * 1.2; const c = [K.berry, K.lamp, K.sage, K.ice][i % 4]; p.set(x, y, c); p.set(x, y + 1, c); }
   // smoke from the chimney
-  for (let i = 0; i < 6; i++) p.circle(cx + cw * 0.27 + i * 1.6 + Math.sin(i) * 2, cb - ch - ch * 0.8 - i * 3.4, 1.4 + i * 0.4, '#9fb4d4', 0.35);
-  // near christmas trees with baubles and a star on the tallest
-  p.pine(w * 0.08, h + 2, h * 0.55, '#16402e', '#ffffff', { baubles: ['#e8343f', '#ffd84a', '#7ac8ff'], seed: 3, star: true });
-  p.pine(w * 0.2, h + 4, h * 0.38, '#1a4a34', '#ffffff', { baubles: ['#e8343f', '#ffd84a'], seed: 4 });
-  p.pine(w * 0.93, h + 2, h * 0.48, '#16402e', '#ffffff', { baubles: ['#e8343f', '#ffd84a', '#c8a0ff'], seed: 5, star: true });
-  p.pine(w * 0.46, hor + h * 0.07, h * 0.16, '#1d4a36', '#ffffff', { baubles: ['#e8343f'], seed: 6 });
-  // garland across the top with ribbons and baubles
+  for (let i = 0; i < 6; i++) p.circle(cx + cw * 0.27 + i * 1.6 + Math.sin(i) * 2, cb - ch - ch * 0.8 - i * 3.4, 1.4 + i * 0.4, K.mist, 0.4);
+  // near firs with baubles and a star on the tallest
+  p.pine(w * 0.08, h + 2, h * 0.55, K.pine, K.forest, K.snow, { baubles: [K.berry, K.honey, K.ice], seed: 3, star: true });
+  p.pine(w * 0.2, h + 4, h * 0.38, K.leaf, K.pine, K.snow, { baubles: [K.berry, K.honey], seed: 4 });
+  p.pine(w * 0.93, h + 2, h * 0.48, K.pine, K.forest, K.snow, { baubles: [K.berry, K.honey, K.lilac], seed: 5, star: true });
+  p.pine(w * 0.46, hor + h * 0.07, h * 0.16, K.leaf, K.pine, K.snow, { baubles: [K.berry], seed: 6 });
+  // a pine garland swagged across the top with bows and baubles
   for (let x = 0; x < w; x++) {
     const sag = Math.abs(Math.sin((x / w) * Math.PI * 3)) * h * 0.06;
-    for (let k = 0; k < 4; k++) p.set(x, sag + k, (x + k) % 3 === 0 ? '#0f3a26' : k === 0 ? '#3f8f5f' : '#1f5a3c');
-    if (x % 11 === 0) { const c = ['#e8343f', '#ffd84a', '#7ac8ff', '#f2f2f2'][(x / 11) % 4]; p.circle(x, sag + 6, 2.2, c); p.set(x - 1, sag + 5, '#ffffff', 0.7); }
+    for (let k = 0; k < 4; k++) p.set(x, sag + k, (x + k) % 3 === 0 ? K.forest : k === 0 ? K.moss : K.pine);
+    if (x % 11 === 0) { const c = [K.berry, K.honey, K.ice, K.snow][(x / 11) % 4]; p.circle(x, sag + 6, 2.2, c); p.set(x - 1, sag + 5, K.snow, 0.7); }
   }
-  for (const sx of [0, w]) { const dir = sx ? -1 : 1; for (let i = 0; i < Math.min(w, h) * 0.16; i++) { p.set(sx + dir * (i * 0.55), i * 1.1 + 2, '#d9343f'); p.set(sx + dir * (i * 0.55 + 1), i * 1.1 + 2, '#ff6a6a'); p.set(sx + dir * (i * 0.55 + 2), i * 1.1 + 2, '#a8202c'); } }
-  // candy cane in the corner
+  for (const sx of [0, w]) { const dir = sx ? -1 : 1; for (let i = 0; i < Math.min(w, h) * 0.16; i++) { p.set(sx + dir * (i * 0.55), i * 1.1 + 2, K.berry); p.set(sx + dir * (i * 0.55 + 1), i * 1.1 + 2, K.rose); p.set(sx + dir * (i * 0.55 + 2), i * 1.1 + 2, '#6e3e46'); } }
+  // a candy cane in the snow
   const ccx = w * 0.96, ccy = h * 0.9;
-  for (let i = 0; i < h * 0.22; i++) { p.set(ccx, ccy - i, Math.floor(i / 2) % 2 ? '#ffffff' : '#e8343f'); p.set(ccx + 1, ccy - i, Math.floor(i / 2) % 2 ? '#e8e8e8' : '#b82030'); }
+  for (let i = 0; i < h * 0.22; i++) { p.set(ccx, ccy - i, Math.floor(i / 2) % 2 ? K.snow : K.berry); p.set(ccx + 1, ccy - i, Math.floor(i / 2) % 2 ? K.frost : '#6e3e46'); }
+  for (let i = 0; i < 4; i++) { p.set(ccx + 1 + i, ccy - h * 0.22 - Math.sin((i / 3) * Math.PI) * 2, i % 2 ? K.snow : K.berry); }
   // drifting snow baked in
-  for (let i = 0; i < w * h * 0.006; i++) p.set(r() * w, r() * h, '#ffffff', 0.5 + r() * 0.5);
+  for (let i = 0; i < w * h * 0.006; i++) p.set(r() * w, r() * h, K.snow, 0.5 + r() * 0.5);
   return p;
 }
 
 function starfall(w: number, h: number): Pix {
   const p = new Pix(w, h), r = rng(strSeed('starfall' + w + 'x' + h));
-  p.grad(0, h, ['#0b0626', '#1c1150', '#3a2386', '#7446b4', '#c68ad8', '#f3c6e6']);
-  // a soft nebula
-  for (let i = 0; i < 5; i++) p.glow(w * (0.2 + r() * 0.6), h * (0.2 + r() * 0.35), h * (0.18 + r() * 0.12), ['#8a5ae0', '#e070c0', '#5a8ae0'][i % 3], 0.3);
-  for (let i = 0; i < w * h * 0.02; i++) { const x = r() * w, y = r() * h * 0.8; p.set(x, y, r() < 0.3 ? '#ffe9a8' : '#f2eaff', 0.4 + r() * 0.6); }
-  for (let i = 0; i < 10; i++) { const x = r() * w, y = r() * h * 0.6, c = '#fff6c8'; p.set(x, y, '#ffffff'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) p.set(x + dx, y + dy, c, 0.8); p.glow(x, y, 4, '#ffe9a8', 0.25); }
+  p.grad(0, h, [K.deepNight, K.plumNight, K.plumDeep, K.plum, '#93798f', K.lilac, K.lavender]);
+  // stepped haze patches
+  for (let i = 0; i < w * h * 0.02; i++) { const x = r() * w, y = r() * h * 0.8; p.set(x, y, r() < 0.3 ? K.lamp : K.lavender, 0.4 + r() * 0.6); }
+  for (let i = 0; i < 10; i++) { const x = r() * w, y = r() * h * 0.6; p.set(x, y, '#fffaee'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) p.set(x + dx, y + dy, K.lamp, 0.8); }
   // a big crescent moon
   const mx = w * 0.18, my = h * 0.22, mr = Math.max(6, h * 0.1);
-  p.glow(mx, my, mr * 3, '#ffe9a8', 0.4);
   for (let y = Math.floor(my - mr); y <= my + mr; y++) for (let x = Math.floor(mx - mr); x <= mx + mr; x++) {
     const inMoon = (x + 0.5 - mx) ** 2 + (y + 0.5 - my) ** 2 <= mr * mr, inBite = (x + 0.5 - mx - mr * 0.45) ** 2 + (y + 0.5 - my + mr * 0.3) ** 2 <= (mr * 0.88) ** 2;
-    if (inMoon && !inBite) p.set(x, y, (x + y) % 7 === 0 ? '#f2e2a8' : '#fff4c8');
+    if (inMoon && !inBite) p.set(x, y, (x + y) % 7 === 0 ? K.honey : K.lamp);
   }
-  // falling stars
+  // falling stars: stepped tails, a bright cross head
   for (let i = 0; i < 6; i++) {
     const x0 = w * (0.3 + r() * 0.75), y0 = h * (0.02 + r() * 0.4), len = h * (0.12 + r() * 0.15);
-    for (let k = 0; k < len; k++) { const a = 1 - k / len; p.set(x0 + k, y0 - k * 0.55, '#ffe9a8', a * 0.9); if (k < len * 0.4) p.set(x0 + k, y0 - k * 0.55 + 1, '#ffffff', a * 0.5); }
-    p.glow(x0, y0, 5, '#fff6c8', 0.6); p.set(x0, y0, '#ffffff');
+    for (let k = 0; k < len; k++) { const t = 1 - k / len; if (t < 0.4 && k % 2) continue; p.set(x0 + k, y0 - k * 0.55, t > 0.6 ? K.paper : K.lamp, t > 0.3 ? 1 : 0.6); }
+    p.set(x0, y0, '#fffaee'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [2, 0], [-2, 0], [0, 2], [0, -2]]) p.set(x0 + dx, y0 + dy, Math.abs(dx) + Math.abs(dy) > 1 ? K.honey : K.lamp);
   }
-  // cloud banks
+  // cloud banks of stepped pixel discs
   for (let layer = 0; layer < 3; layer++) {
-    const base = h * (0.72 + layer * 0.1), col = ['#9a7ad0', '#c4a2e8', '#efd8fb'][layer], sh = ['#7a5ab4', '#a284d0', '#d4b8ee'][layer];
+    const base = h * (0.72 + layer * 0.1), col = ['#93798f', K.lilac, K.lavender][layer], sh = [K.plum, '#93798f', K.lilac][layer];
     for (let x = -10; x < w + 10; x += 7 + r() * 6) { const rr = h * (0.06 + r() * 0.05) * (1 + layer * 0.3); p.circle(x, base, rr, sh); p.circle(x - 1, base - 1, rr * 0.92, col); }
     p.rect(0, base, w, h - base, col);
   }
   // a little observatory on a cloud
   const ox = w * 0.78, oy = h * 0.74, ow = Math.max(10, w * 0.07);
-  p.rect(ox - ow / 2, oy - ow * 0.9, ow, ow * 0.9, '#3a2a6a'); p.circle(ox, oy - ow * 0.9, ow / 2, '#4a3a8a');
-  p.rect(ox + ow * 0.05, oy - ow * 1.3, ow * 0.5, 2, '#c8b0ff'); p.rect(ox - ow * 0.15, oy - ow * 0.55, ow * 0.3, ow * 0.3, '#ffe08a'); p.glow(ox, oy - ow * 0.4, ow, '#ffe08a', 0.3);
+  p.rect(ox - ow / 2, oy - ow * 0.9, ow, ow * 0.9, K.plumDeep); p.circle(ox, oy - ow * 0.9, ow / 2, K.plum);
+  p.rect(ox + ow * 0.05, oy - ow * 1.3, ow * 0.5, 2, K.lavender); p.rect(ox - ow * 0.15, oy - ow * 0.55, ow * 0.3, ow * 0.3, K.lamp);
   // strings of hanging stars along the top
   for (let i = 0; i < 9; i++) {
     const x = (i + 0.5) * (w / 9) + (r() - 0.5) * 6, len = h * (0.06 + r() * 0.16);
-    for (let y = 0; y < len; y++) p.set(x, y, '#d8c8ff', 0.5);
-    const c = i % 2 ? '#ffd84a' : '#fff1b0', sy = len + 2;
-    p.set(x, sy - 2, c); p.rect(x - 2, sy - 1, 5, 1, c); p.rect(x - 1, sy, 3, 1, c); p.set(x - 1, sy + 1, c); p.set(x + 1, sy + 1, c); p.set(x, sy - 1, '#ffffff');
-    p.glow(x, sy, 5, '#ffe08a', 0.3);
+    for (let y = 0; y < len; y++) p.set(x, y, K.lavender, 0.5);
+    const c = i % 2 ? K.honey : K.lamp, sy = len + 2;
+    p.set(x, sy - 2, c); p.rect(x - 2, sy - 1, 5, 1, c); p.rect(x - 1, sy, 3, 1, c); p.set(x - 1, sy + 1, c); p.set(x + 1, sy + 1, c); p.set(x, sy - 1, '#fffaee');
   }
   return p;
 }
 
-/** The night sky of the wish cinematic: dithered dusk, stars, an aurora or a nebula, snowy hills and pines. */
+/** The night sky of the wish cinematic: dithered dusk, stars, a soft-banded aurora or haze, snowy hills and pines. */
 function nightSky(w: number, h: number, motif: 'snow' | 'stars'): Pix {
   const p = new Pix(w, h), r = rng(strSeed('night' + motif + w + 'x' + h));
-  p.grad(0, h * 0.86, motif === 'stars' ? ['#03020f', '#0d0830', '#221454', '#4a2c86', '#8a5ab4'] : ['#02040f', '#060c2a', '#0e1c50', '#1d3a7c', '#3a62a8']);
+  p.grad(0, h * 0.86, motif === 'stars' ? [K.deepNight, K.plumNight, K.plumDeep, K.plum, '#93798f'] : [K.deepNight, K.night, '#2b3746', K.slate, K.dusk]);
   if (motif === 'snow') for (let x = 0; x < w; x++) for (let k = 0; k < 3; k++) {
     const y0 = h * (0.18 + k * 0.07) + Math.sin(x * 0.05 + k * 2) * h * 0.05 + Math.sin(x * 0.13 + k) * h * 0.015;
-    for (let y = Math.floor(y0); y < y0 + h * 0.12; y++) { const f = 1 - (y - y0) / (h * 0.12); if (r() < f * 0.5) p.add(x, y, k === 1 ? [40, 200, 150] : [90, 60, 200], 0.18 * f); }
+    for (let y = Math.floor(y0); y < y0 + h * 0.12; y++) { const f = 1 - (y - y0) / (h * 0.12); if (bay(x, y) < f * 0.55) p.set(x, y, k === 1 ? K.sage : K.lake, 0.22 * f + 0.06); }
   }
-  else for (let i = 0; i < 4; i++) p.glow(w * (0.2 + r() * 0.6), h * (0.2 + r() * 0.3), h * 0.2, ['#8a5ae0', '#e070c0'][i % 2], 0.25);
-  for (let i = 0; i < w * h * 0.01; i++) p.set(r() * w, r() * h * 0.8, r() < 0.2 ? '#fff6d8' : '#cfe0ff', 0.3 + r() * 0.7);
-  for (let i = 0; i < 14; i++) { const x = r() * w, y = r() * h * 0.6; p.set(x, y, '#ffffff'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) p.set(x + dx, y + dy, '#9fc0ff', 0.7); }
+  for (let i = 0; i < w * h * 0.01; i++) p.set(r() * w, r() * h * 0.8, r() < 0.2 ? K.lamp : K.frost, 0.3 + r() * 0.7);
+  for (let i = 0; i < 14; i++) { const x = r() * w, y = r() * h * 0.6; p.set(x, y, '#fffaee'); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) p.set(x + dx, y + dy, K.ice, 0.7); }
   const hor = h * 0.8;
-  for (let x = -4; x < w + 4; x += 3 + r() * 4) p.pine(x, hor + h * 0.04 + Math.sin(x * 0.07) * h * 0.02, h * (0.08 + r() * 0.09), '#08142a', '#5a78a8', { seed: x + 7 });
+  for (let x = -4; x < w + 4; x += 3 + r() * 4) p.pine(x, hor + h * 0.04 + Math.sin(x * 0.07) * h * 0.02, h * (0.08 + r() * 0.09), K.forest, K.deepNight, K.dusk, { seed: x + 7 });
   for (let y = Math.floor(hor); y < h; y++) for (let x = 0; x < w; x++) {
     const hill = hor + Math.sin(x * 0.04) * h * 0.03 + Math.sin(x * 0.11 + 2) * h * 0.012;
-    if (y >= hill) p.set(x, y, y - hill < 1.5 ? '#c8dcf4' : (x * 5 + y * 3) % 17 === 0 ? '#9ab8e0' : '#7e9ed0');
+    if (y >= hill) p.set(x, y, y - hill < 1.5 ? K.frost : (x * 5 + y * 3) % 17 === 0 ? K.sky : K.lake);
   }
   return p;
 }
@@ -219,9 +234,19 @@ let R: THREE.WebGLRenderer | null = null, scene: THREE.Scene, cam: THREE.Orthogr
 const bigCache = new Map<string, string>();
 /** A large render of an owl look (the featured 5-star), lit like a shop window. */
 export function bigOwl(look: OwlLook, size = 384): string {
+  void iconVersion.value; // re-render the caller when the picture lands
   const key = JSON.stringify(look) + size;
   const hit = bigCache.get(key);
   if (hit !== undefined) return hit;
+  if (!bigPending.has(key)) {
+    bigPending.add(key);
+    // the hand-painted owl and its outfit load as GLBs: shoot only once they are in
+    void Promise.all([owlReady(look), piecesReady(look)]).catch(() => undefined).then(() => shootBig(look, size)).then((url) => { bigCache.set(key, url); bigPending.delete(key); iconVersion.value++; });
+  }
+  return '';
+}
+const bigPending = new Set<string>();
+async function shootBig(look: OwlLook, size: number): Promise<string> {
   let url = '';
   try {
     if (!R) {
@@ -229,16 +254,14 @@ export function bigOwl(look: OwlLook, size = 384): string {
       R = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: true, preserveDrawingBuffer: true });
       R.setClearColor(0, 0); R.outputColorSpace = THREE.SRGBColorSpace;
       scene = new THREE.Scene();
-      scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6a6a9a, 1.5));
-      const k = new THREE.DirectionalLight(0xfff0d8, 2.1); k.position.set(-3, 6, 7); scene.add(k);
-      const rim = new THREE.DirectionalLight(0xbfd8ff, 1.6); rim.position.set(5, 3, -4); scene.add(rim);
+      scene.add(new THREE.HemisphereLight(0xf4ecd8, 0x5b4a3c, 1.5));
+      const k = new THREE.DirectionalLight(0xf6e2b4, 2.0); k.position.set(-3, 6, 7); scene.add(k);
+      const rim = new THREE.DirectionalLight(0xaec8cc, 1.2); rim.position.set(5, 3, -4); scene.add(rim);
       cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
     }
-    R.setSize(size, size, false);
     const o = buildOwl(look);
-    o.eyes.forEach((e) => e.draw({ lid: 0, low: 0.22, tilt: 0, lx: 0.15, ly: 0, pupil: 5.6, mode: 'normal', tear: false }));
-    o.rig.bones.jaw.visible = false;
-    o.rig.bones.head.rotation.set(0, 0.12, 0.06);
+    await o.ready;
+    R.setSize(size, size, false);
     const root = o.rig.root;
     scene.add(root);
     root.updateMatrixWorld(true);
@@ -251,7 +274,6 @@ export function bigOwl(look: OwlLook, size = 384): string {
     url = R.domElement.toDataURL('image/png');
     scene.remove(root); o.dispose();
   } catch (e) { console.warn('big owl render failed', e); }
-  bigCache.set(key, url);
   return url;
 }
 

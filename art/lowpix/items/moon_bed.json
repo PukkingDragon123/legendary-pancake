@@ -1,0 +1,2864 @@
+{
+ "name": "moon_bed",
+ "description": "A cradle carved as a crescent moon, cream-gold and cratered, resting on two cloud puffs: a lavender mattress, a midnight quilt of stars, cloud pillows, a honey throw, and three wishing stars dangling from the high tip.",
+ "author": "Hoot Hollow (furnC lowpix kit)",
+ "license": "CC0-1.0",
+ "density": 4.0,
+ "budget": {
+  "tris": 3600,
+  "colors": 220
+ },
+ "light": {
+  "dir": [
+   -0.5,
+   1.0,
+   0.65
+  ],
+  "strength": 0.6,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 3.0
+ },
+ "brush": {
+  "flow": "long",
+  "length": 1.6,
+  "width": 0.45,
+  "rough": 0.55,
+  "overshoot": 0.3,
+  "textures": {
+   "oak": "wood",
+   "walnut": "wood",
+   "cherry": "wood",
+   "pale": "wood",
+   "bark": "wood",
+   "brass": "metal",
+   "gold": "metal",
+   "iron": "metal",
+   "silver": "metal",
+   "linen": "cloth",
+   "cream": "cloth",
+   "stone": "stone",
+   "pine": "fur",
+   "leaf": "organic",
+   "moss": "moss",
+   "ginger": "organic"
+  }
+ },
+ "material": {
+  "unlit": false,
+  "roughness": 0.9
+ },
+ "grounded": true,
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   34,
+   24
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "blush": [
+    "#434249",
+    "#5f5558",
+    "#846e6e",
+    "#b18e8b",
+    "#e8b4ae",
+    "#fec9bd",
+    "#fcdaca",
+    "#fbe8d2"
+   ],
+   "cream": [
+    "#444a4e",
+    "#626562",
+    "#88877e",
+    "#b9b2a1",
+    "#f1e6cc",
+    "#fefbdc",
+    "#fcf7e7",
+    "#fbf2e2"
+   ],
+   "gold": [
+    "#8a5a3c",
+    "#8d703f",
+    "#b58f4d",
+    "#d2a764",
+    "#d3ac6c",
+    "#d4b473",
+    "#f3d89f",
+    "#fcf4bb"
+   ],
+   "honey": [
+    "#41423f",
+    "#5b5445",
+    "#7e6c50",
+    "#a88a5e",
+    "#dcb072",
+    "#f4c582",
+    "#fcd68e",
+    "#fbe499"
+   ],
+   "lavender": [
+    "#404651",
+    "#585c68",
+    "#797a87",
+    "#a29fb0",
+    "#d3cce0",
+    "#ebe1f0",
+    "#fcf2ec",
+    "#fbf2e2"
+   ],
+   "lilac": [
+    "#3a414d",
+    "#4f5160",
+    "#6a687c",
+    "#8c869f",
+    "#b4a9c9",
+    "#ccbed8",
+    "#e0cfe5",
+    "#f0dde2"
+   ],
+   "linen": [
+    "#414749",
+    "#5b5d59",
+    "#7e7b70",
+    "#a8a18c",
+    "#dccfb0",
+    "#f4e4c0",
+    "#fcf5cb",
+    "#fbf2d4"
+   ],
+   "moonglow": [
+    "#b4a9c9",
+    "#d3cce0",
+    "#dfe9ea",
+    "#f4eedd",
+    "#fffdf6"
+   ],
+   "navy": [
+    "#1b222d",
+    "#2f3140",
+    "#404354",
+    "#4e5869",
+    "#5b7280",
+    "#6d8d98",
+    "#86a9b0"
+   ],
+   "russet": [
+    "#343436",
+    "#413835",
+    "#544134",
+    "#6c4c37",
+    "#8a5a3c",
+    "#a16f4b",
+    "#b78158",
+    "#c89265"
+   ],
+   "snow": [
+    "#7a8c9e",
+    "#84a5ad",
+    "#adc9cf",
+    "#c9dcdc",
+    "#d8e4e2",
+    "#e5edec",
+    "#f6f8f3",
+    "#fbfcf8"
+   ],
+   "star": [
+    "#c59a52",
+    "#dcb072",
+    "#f1d39a",
+    "#f9e9c2",
+    "#fff8e6"
+   ]
+  }
+ },
+ "styles": {
+  "s1": {
+   "ramp": "cream",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "brush": {
+    "flow": "path",
+    "rough": 0.5
+   },
+   "layers": [
+    {
+     "id": "glowedge",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.6
+    },
+    {
+     "id": "craters",
+     "op": "spots",
+     "count": 16,
+     "radius": [
+      0.6,
+      1.4
+     ],
+     "ring": 0.7,
+     "ramp": "linen",
+     "tone": 3.0,
+     "centre_shift": -0.6,
+     "roughness": 0.2
+    },
+    {
+     "id": "dust",
+     "op": "spots",
+     "count": 30,
+     "radius": [
+      0.15,
+      0.3
+     ],
+     "ramp": "honey",
+     "tone": 5
+    },
+    {
+     "id": "gilt",
+     "op": "stripes",
+     "axis": "path",
+     "period": 6.0,
+     "width": 0.05,
+     "ramp": "gold",
+     "tone": 5
+    }
+   ]
+  },
+  "s2": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s3": {
+   "ramp": "cream",
+   "tone": 4.0,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light": 0,
+    "dark": 0
+   }
+  },
+  "s4": {
+   "ramp": "snow",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.2
+    },
+    {
+     "id": "lilac",
+     "op": "band",
+     "axis": "y",
+     "from": -1,
+     "to": -0.4,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s5": {
+   "ramp": "snow",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.2
+    },
+    {
+     "id": "lilac",
+     "op": "band",
+     "axis": "y",
+     "from": -1,
+     "to": -0.4,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s6": {
+   "ramp": "snow",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.2
+    },
+    {
+     "id": "lilac",
+     "op": "band",
+     "axis": "y",
+     "from": -1,
+     "to": -0.4,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s7": {
+   "ramp": "snow",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.2
+    },
+    {
+     "id": "lilac",
+     "op": "band",
+     "axis": "y",
+     "from": -1,
+     "to": -0.4,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s8": {
+   "ramp": "snow",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.2
+    },
+    {
+     "id": "lilac",
+     "op": "band",
+     "axis": "y",
+     "from": -1,
+     "to": -0.4,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s9": {
+   "ramp": "snow",
+   "tone": 5.0,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.2
+    },
+    {
+     "id": "lilac",
+     "op": "band",
+     "axis": "y",
+     "from": -1,
+     "to": -0.4,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s10": {
+   "ramp": "lavender",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "flow": "horizontal",
+    "rough": 0.6
+   },
+   "layers": [
+    {
+     "id": "weave",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.0,
+      1
+     ],
+     "period": 0.5,
+     "width": 0.5,
+     "shift": -0.35
+    },
+    {
+     "id": "weft",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.5,
+     "width": 0.5,
+     "shift": -0.25
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7
+    },
+    {
+     "id": "tufts",
+     "op": "spots",
+     "count": 16,
+     "radius": [
+      0.2,
+      0.3
+     ],
+     "ramp": "lilac",
+     "tone": 3,
+     "faces": [
+      "up"
+     ]
+    }
+   ]
+  },
+  "s11": {
+   "ramp": "navy",
+   "tone": 3.6,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "flow": "horizontal",
+    "rough": 0.6
+   },
+   "layers": [
+    {
+     "id": "weave",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.0,
+      1
+     ],
+     "period": 0.45,
+     "width": 0.5,
+     "shift": -0.35
+    },
+    {
+     "id": "weft",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.45,
+     "width": 0.5,
+     "shift": -0.25
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7
+    },
+    {
+     "id": "stars",
+     "op": "spots",
+     "count": 40,
+     "radius": [
+      0.2,
+      0.35
+     ],
+     "ramp": "star",
+     "tone": 3.6,
+     "roughness": 0.9,
+     "rough_scale": 0.25
+    },
+    {
+     "id": "dust",
+     "op": "spots",
+     "count": 40,
+     "radius": [
+      0.1,
+      0.15
+     ],
+     "ramp": "lavender",
+     "tone": 5
+    },
+    {
+     "id": "quilting",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      1
+     ],
+     "period": 3.0,
+     "width": 0.06,
+     "shift": -1.0
+    },
+    {
+     "id": "quilting2",
+     "op": "stripes",
+     "axis": [
+      1,
+      0,
+      -1
+     ],
+     "period": 3.0,
+     "width": 0.06,
+     "shift": -1.0
+    }
+   ]
+  },
+  "s12": {
+   "ramp": "honey",
+   "tone": 4.6,
+   "rim": {
+    "light_shift": 0.7,
+    "dark_shift": -0.9
+   },
+   "brush": {
+    "flow": "horizontal",
+    "rough": 0.6
+   },
+   "layers": [
+    {
+     "id": "weave",
+     "op": "stripes",
+     "axis": [
+      1,
+      0.0,
+      1
+     ],
+     "period": 0.4,
+     "width": 0.5,
+     "shift": -0.35
+    },
+    {
+     "id": "weft",
+     "op": "stripes",
+     "axis": "y",
+     "period": 0.4,
+     "width": 0.5,
+     "shift": -0.25
+    },
+    {
+     "id": "folds",
+     "op": "noise",
+     "scale": 2.2,
+     "amount": 0.7
+    },
+    {
+     "id": "fringe",
+     "op": "stripes",
+     "axis": "z",
+     "period": 0.8,
+     "width": 0.4,
+     "shift": -0.8,
+     "faces": [
+      "left",
+      "right"
+     ]
+    }
+   ]
+  },
+  "s13": {
+   "ramp": "snow",
+   "tone": 5.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.0
+    },
+    {
+     "id": "lilac",
+     "op": "patches",
+     "scale": 1.0,
+     "threshold": 0.7,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s14": {
+   "ramp": "snow",
+   "tone": 5.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.0
+    },
+    {
+     "id": "lilac",
+     "op": "patches",
+     "scale": 1.0,
+     "threshold": 0.7,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s15": {
+   "ramp": "snow",
+   "tone": 5.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.0
+    },
+    {
+     "id": "lilac",
+     "op": "patches",
+     "scale": 1.0,
+     "threshold": 0.7,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s16": {
+   "ramp": "snow",
+   "tone": 5.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.0
+    },
+    {
+     "id": "lilac",
+     "op": "patches",
+     "scale": 1.0,
+     "threshold": 0.7,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s17": {
+   "ramp": "snow",
+   "tone": 5.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.0
+    },
+    {
+     "id": "lilac",
+     "op": "patches",
+     "scale": 1.0,
+     "threshold": 0.7,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s18": {
+   "ramp": "snow",
+   "tone": 5.2,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": [
+    {
+     "id": "mottle",
+     "op": "noise",
+     "scale": 1.4,
+     "amount": 0.4
+    },
+    {
+     "id": "shade",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 1.0
+    },
+    {
+     "id": "lilac",
+     "op": "patches",
+     "scale": 1.0,
+     "threshold": 0.7,
+     "ramp": "lavender",
+     "tone": 4
+    }
+   ]
+  },
+  "s19": {
+   "ramp": "cream",
+   "tone": 5,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s20": {
+   "ramp": "star",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s21": {
+   "ramp": "cream",
+   "tone": 5,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s22": {
+   "ramp": "star",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  },
+  "s23": {
+   "ramp": "cream",
+   "tone": 5,
+   "rim": {
+    "light_shift": 1.0,
+    "dark_shift": -1.0
+   },
+   "layers": []
+  },
+  "s24": {
+   "ramp": "moonglow",
+   "tone": 4.0,
+   "light": 0.25,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 1.0,
+    "dark": 0,
+    "light": 1
+   },
+   "layers": [
+    {
+     "id": "core",
+     "op": "gradient",
+     "axis": "y",
+     "amount": 0.5
+    }
+   ]
+  }
+ },
+ "parts": [
+  {
+   "id": "moon",
+   "shape": "loft",
+   "pivot": [
+    -22.3801,
+    30.1453,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "size": [
+      0.8,
+      6.24
+     ]
+    },
+    {
+     "at": [
+      0.736,
+      -4.1714,
+      0.0
+     ],
+     "size": [
+      2.6633,
+      12.15
+     ]
+    },
+    {
+     "at": [
+      1.944,
+      -8.0246,
+      0.0
+     ],
+     "size": [
+      3.979,
+      15.0624
+     ]
+    },
+    {
+     "at": [
+      3.6954,
+      -11.5201,
+      0.0
+     ],
+     "size": [
+      5.0487,
+      17.2063
+     ]
+    },
+    {
+     "at": [
+      5.9241,
+      -14.6068,
+      0.0
+     ],
+     "size": [
+      5.8919,
+      18.8011
+     ]
+    },
+    {
+     "at": [
+      8.556,
+      -17.2479,
+      0.0
+     ],
+     "size": [
+      6.5037,
+      19.9169
+     ]
+    },
+    {
+     "at": [
+      11.5219,
+      -19.4176,
+      0.0
+     ],
+     "size": [
+      6.8753,
+      20.5799
+     ]
+    },
+    {
+     "at": [
+      14.7608,
+      -21.0952,
+      0.0
+     ],
+     "size": [
+      7.0,
+      20.8
+     ]
+    },
+    {
+     "at": [
+      18.2175,
+      -22.2596,
+      0.0
+     ],
+     "size": [
+      6.8753,
+      20.5799
+     ]
+    },
+    {
+     "at": [
+      21.8385,
+      -22.886,
+      0.0
+     ],
+     "size": [
+      6.5037,
+      19.9169
+     ]
+    },
+    {
+     "at": [
+      25.5666,
+      -22.9446,
+      0.0
+     ],
+     "size": [
+      5.8919,
+      18.8011
+     ]
+    },
+    {
+     "at": [
+      29.3351,
+      -22.4035,
+      0.0
+     ],
+     "size": [
+      5.0487,
+      17.2063
+     ]
+    },
+    {
+     "at": [
+      33.0663,
+      -21.2353,
+      0.0
+     ],
+     "size": [
+      3.979,
+      15.0624
+     ]
+    },
+    {
+     "at": [
+      36.6771,
+      -19.4275,
+      0.0
+     ],
+     "size": [
+      2.6633,
+      12.15
+     ]
+    },
+    {
+     "at": [
+      40.1891,
+      -17.0593,
+      0.0
+     ],
+     "size": [
+      0.8,
+      6.24
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 10,
+    "round": 2.6
+   },
+   "subdiv": 1,
+   "caps": [
+    true,
+    true
+   ],
+   "style": "s1",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "face0",
+   "shape": "card",
+   "pivot": [
+    -16.0,
+    15.0,
+    9.7
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    -53.0
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "..................ii....",
+    "..................ii....",
+    "..iiii..........iiii....",
+    "..iiii..........iiii....",
+    "....iiiiiiiiiiiiii......",
+    "....iiiiiiiiiiiiii......",
+    "....ii..iiii..ii........",
+    "....ii..iiii..ii........",
+    "....ii..ii....iibbbbbbbb",
+    "....ii..ii....iibbbbbbbb",
+    "..................bbbb..",
+    "..................bbbb..",
+    "........iiiiiiii........",
+    "........iiiiiiii........",
+    "..........iiii..........",
+    "..........iiii.........."
+   ],
+   "plane": "xy",
+   "style": "s2",
+   "paint": {
+    "art_key": {
+     "i": "russet:2",
+     "b": "blush:4"
+    }
+   }
+  },
+  {
+   "id": "face1",
+   "shape": "card",
+   "pivot": [
+    -16.0,
+    15.0,
+    -9.7
+   ],
+   "rotation": [
+    0.0,
+    180.0,
+    -53.0
+   ],
+   "art": [
+    "........................",
+    "........................",
+    "..................ii....",
+    "..................ii....",
+    "..iiii..........iiii....",
+    "..iiii..........iiii....",
+    "....iiiiiiiiiiiiii......",
+    "....iiiiiiiiiiiiii......",
+    "....ii..iiii..ii........",
+    "....ii..iiii..ii........",
+    "....ii..ii....iibbbbbbbb",
+    "....ii..ii....iibbbbbbbb",
+    "..................bbbb..",
+    "..................bbbb..",
+    "........iiiiiiii........",
+    "........iiiiiiii........",
+    "..........iiii..........",
+    "..........iiii.........."
+   ],
+   "plane": "xy",
+   "style": "s3",
+   "paint": {
+    "art_key": {
+     "i": "russet:2",
+     "b": "blush:4"
+    }
+   }
+  },
+  {
+   "id": "cloud00",
+   "shape": "loft",
+   "pivot": [
+    -9.6,
+    0.0,
+    -3.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.17429479249174232,
+      0
+     ],
+     "size": [
+      2.2909,
+      1.9091
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6626579487286292,
+      0
+     ],
+     "size": [
+      4.1281,
+      3.4401
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.368363156236887,
+      0
+     ],
+     "size": [
+      5.1476,
+      4.2897
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.1516368437631135,
+      0
+     ],
+     "size": [
+      5.1476,
+      4.2897
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.857342051271371,
+      0
+     ],
+     "size": [
+      4.1281,
+      3.4401
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.3457052075082583,
+      0
+     ],
+     "size": [
+      2.2909,
+      1.9091
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.5200000000000005,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s4",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "cloud01",
+   "shape": "loft",
+   "pivot": [
+    -6.6,
+    0.0,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.2059847547629682,
+      0
+     ],
+     "size": [
+      2.7074,
+      2.2562
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7831412121338345,
+      0
+     ],
+     "size": [
+      4.8786,
+      4.0655
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.617156457370866,
+      0
+     ],
+     "size": [
+      6.0836,
+      5.0696
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.542843542629134,
+      0
+     ],
+     "size": [
+      6.0836,
+      5.0696
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.3768587878661656,
+      0
+     ],
+     "size": [
+      4.8786,
+      4.0655
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.9540152452370316,
+      0
+     ],
+     "size": [
+      2.7074,
+      2.2562
+     ]
+    },
+    {
+     "at": [
+      0,
+      4.16,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s5",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "cloud02",
+   "shape": "loft",
+   "pivot": [
+    -8.0,
+    0.0,
+    3.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.23767471703419407,
+      0
+     ],
+     "size": [
+      3.124,
+      2.6033
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9036244755390396,
+      0
+     ],
+     "size": [
+      5.6292,
+      4.691
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8659497585048457,
+      0
+     ],
+     "size": [
+      7.0195,
+      5.8496
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.9340502414951546,
+      0
+     ],
+     "size": [
+      7.0195,
+      5.8496
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.8963755244609604,
+      0
+     ],
+     "size": [
+      5.6292,
+      4.691
+     ]
+    },
+    {
+     "at": [
+      0,
+      4.562325282965806,
+      0
+     ],
+     "size": [
+      3.124,
+      2.6033
+     ]
+    },
+    {
+     "at": [
+      0,
+      4.800000000000001,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s6",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "cloud10",
+   "shape": "loft",
+   "pivot": [
+    6.4,
+    0.0,
+    -3.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.17429479249174232,
+      0
+     ],
+     "size": [
+      2.2909,
+      1.9091
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.6626579487286292,
+      0
+     ],
+     "size": [
+      4.1281,
+      3.4401
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.368363156236887,
+      0
+     ],
+     "size": [
+      5.1476,
+      4.2897
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.1516368437631135,
+      0
+     ],
+     "size": [
+      5.1476,
+      4.2897
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.857342051271371,
+      0
+     ],
+     "size": [
+      4.1281,
+      3.4401
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.3457052075082583,
+      0
+     ],
+     "size": [
+      2.2909,
+      1.9091
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.5200000000000005,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s7",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "cloud11",
+   "shape": "loft",
+   "pivot": [
+    9.4,
+    0.0,
+    0.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.2059847547629682,
+      0
+     ],
+     "size": [
+      2.7074,
+      2.2562
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.7831412121338345,
+      0
+     ],
+     "size": [
+      4.8786,
+      4.0655
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.617156457370866,
+      0
+     ],
+     "size": [
+      6.0836,
+      5.0696
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.542843542629134,
+      0
+     ],
+     "size": [
+      6.0836,
+      5.0696
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.3768587878661656,
+      0
+     ],
+     "size": [
+      4.8786,
+      4.0655
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.9540152452370316,
+      0
+     ],
+     "size": [
+      2.7074,
+      2.2562
+     ]
+    },
+    {
+     "at": [
+      0,
+      4.16,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s8",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "cloud12",
+   "shape": "loft",
+   "pivot": [
+    8.0,
+    0.0,
+    3.0
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.23767471703419407,
+      0
+     ],
+     "size": [
+      3.124,
+      2.6033
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9036244755390396,
+      0
+     ],
+     "size": [
+      5.6292,
+      4.691
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.8659497585048457,
+      0
+     ],
+     "size": [
+      7.0195,
+      5.8496
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.9340502414951546,
+      0
+     ],
+     "size": [
+      7.0195,
+      5.8496
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.8963755244609604,
+      0
+     ],
+     "size": [
+      5.6292,
+      4.691
+     ]
+    },
+    {
+     "at": [
+      0,
+      4.562325282965806,
+      0
+     ],
+     "size": [
+      3.124,
+      2.6033
+     ]
+    },
+    {
+     "at": [
+      0,
+      4.800000000000001,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s9",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "mattress",
+   "shape": "box",
+   "pivot": [
+    0.0,
+    9.6,
+    0.0
+   ],
+   "size": [
+    22.0,
+    3.0,
+    18.4
+   ],
+   "style": "s10",
+   "chamfer": 1.0
+  },
+  {
+   "id": "quilt",
+   "shape": "box",
+   "pivot": [
+    3.0,
+    11.6,
+    0.0
+   ],
+   "size": [
+    17.0,
+    1.4,
+    18.8
+   ],
+   "style": "s11",
+   "chamfer": 0.6
+  },
+  {
+   "id": "throw",
+   "shape": "box",
+   "pivot": [
+    9.0,
+    12.6,
+    0.0
+   ],
+   "size": [
+    4.4,
+    1.2,
+    19.0
+   ],
+   "style": "s12",
+   "chamfer": 0.5
+  },
+  {
+   "id": "pillow00",
+   "shape": "loft",
+   "pivot": [
+    -9.0,
+    10.38,
+    -4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.18023666041759717,
+      0
+     ],
+     "size": [
+      2.2562,
+      2.2562
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.685248560617105,
+      0
+     ],
+     "size": [
+      4.0655,
+      4.0655
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4150119001995078,
+      0
+     ],
+     "size": [
+      5.0696,
+      5.0696
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.224988099800492,
+      0
+     ],
+     "size": [
+      5.0696,
+      5.0696
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.954751439382895,
+      0
+     ],
+     "size": [
+      4.0655,
+      4.0655
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.4597633395824023,
+      0
+     ],
+     "size": [
+      2.2562,
+      2.2562
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.6399999999999997,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s13",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pillow01",
+   "shape": "loft",
+   "pivot": [
+    -7.6,
+    10.94,
+    -2.6
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.12477922644295188,
+      0
+     ],
+     "size": [
+      1.562,
+      1.562
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.4744028496579958,
+      0
+     ],
+     "size": [
+      2.8146,
+      2.8146
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9796236232150438,
+      0
+     ],
+     "size": [
+      3.5097,
+      3.5097
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.5403763767849559,
+      0
+     ],
+     "size": [
+      3.5097,
+      3.5097
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.045597150342004,
+      0
+     ],
+     "size": [
+      2.8146,
+      2.8146
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.395220773557048,
+      0
+     ],
+     "size": [
+      1.562,
+      1.562
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.52,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s14",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pillow02",
+   "shape": "loft",
+   "pivot": [
+    -10.2,
+    10.8,
+    -6.2
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1386435849366132,
+      0
+     ],
+     "size": [
+      1.7355,
+      1.7355
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5271142773977731,
+      0
+     ],
+     "size": [
+      3.1273,
+      3.1273
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0884706924611598,
+      0
+     ],
+     "size": [
+      3.8997,
+      3.8997
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.71152930753884,
+      0
+     ],
+     "size": [
+      3.8997,
+      3.8997
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.2728857226022265,
+      0
+     ],
+     "size": [
+      3.1273,
+      3.1273
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.6613564150633864,
+      0
+     ],
+     "size": [
+      1.7355,
+      1.7355
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.8,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s15",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pillow10",
+   "shape": "loft",
+   "pivot": [
+    -9.0,
+    10.38,
+    4.4
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.18023666041759717,
+      0
+     ],
+     "size": [
+      2.2562,
+      2.2562
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.685248560617105,
+      0
+     ],
+     "size": [
+      4.0655,
+      4.0655
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.4150119001995078,
+      0
+     ],
+     "size": [
+      5.0696,
+      5.0696
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.224988099800492,
+      0
+     ],
+     "size": [
+      5.0696,
+      5.0696
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.954751439382895,
+      0
+     ],
+     "size": [
+      4.0655,
+      4.0655
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.4597633395824023,
+      0
+     ],
+     "size": [
+      2.2562,
+      2.2562
+     ]
+    },
+    {
+     "at": [
+      0,
+      3.6399999999999997,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s16",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pillow11",
+   "shape": "loft",
+   "pivot": [
+    -7.6,
+    10.94,
+    6.2
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.12477922644295188,
+      0
+     ],
+     "size": [
+      1.562,
+      1.562
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.4744028496579958,
+      0
+     ],
+     "size": [
+      2.8146,
+      2.8146
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.9796236232150438,
+      0
+     ],
+     "size": [
+      3.5097,
+      3.5097
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.5403763767849559,
+      0
+     ],
+     "size": [
+      3.5097,
+      3.5097
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.045597150342004,
+      0
+     ],
+     "size": [
+      2.8146,
+      2.8146
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.395220773557048,
+      0
+     ],
+     "size": [
+      1.562,
+      1.562
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.52,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s17",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "pillow12",
+   "shape": "loft",
+   "pivot": [
+    -10.2,
+    10.8,
+    2.6
+   ],
+   "rings": [
+    {
+     "at": [
+      0,
+      0.0,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.1386435849366132,
+      0
+     ],
+     "size": [
+      1.7355,
+      1.7355
+     ]
+    },
+    {
+     "at": [
+      0,
+      0.5271142773977731,
+      0
+     ],
+     "size": [
+      3.1273,
+      3.1273
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.0884706924611598,
+      0
+     ],
+     "size": [
+      3.8997,
+      3.8997
+     ]
+    },
+    {
+     "at": [
+      0,
+      1.71152930753884,
+      0
+     ],
+     "size": [
+      3.8997,
+      3.8997
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.2728857226022265,
+      0
+     ],
+     "size": [
+      3.1273,
+      3.1273
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.6613564150633864,
+      0
+     ],
+     "size": [
+      1.7355,
+      1.7355
+     ]
+    },
+    {
+     "at": [
+      0,
+      2.8,
+      0
+     ],
+     "size": [
+      0.0,
+      0.0
+     ]
+    }
+   ],
+   "profile": {
+    "sides": 11,
+    "round": 2.0
+   },
+   "subdiv": 0,
+   "caps": [
+    false,
+    false
+   ],
+   "style": "s18",
+   "up": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "id": "wish0",
+   "shape": "bone",
+   "pivot": [
+    -21.244,
+    25.3739,
+    -0.6
+   ]
+  },
+  {
+   "id": "thread0",
+   "shape": "box",
+   "parent": "wish0",
+   "pivot": [
+    0.0,
+    -3.0,
+    0.0
+   ],
+   "size": [
+    0.12,
+    6.0,
+    0.12
+   ],
+   "style": "s19"
+  },
+  {
+   "id": "glow_wish0",
+   "shape": "card",
+   "parent": "wish0",
+   "pivot": [
+    0.0,
+    -7.4,
+    0.0
+   ],
+   "art": [
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "......bbaaaa......",
+    "......bbaaaa......",
+    "..aaaaaaccbbbbbb..",
+    "..aaaaaaccbbbbbb..",
+    "....bbccccccaa....",
+    "....bbccccccaa....",
+    "....aaaaccbbbb....",
+    "....aaaaccbbbb....",
+    "....aabbbbaabb....",
+    "....aabbbbaabb....",
+    "....bb......aa....",
+    "....bb......aa....",
+    "..................",
+    ".................."
+   ],
+   "plane": "xy",
+   "style": "s20",
+   "paint": {
+    "art_key": {
+     "a": "star:4",
+     "b": "star:2",
+     "c": "star:4"
+    }
+   }
+  },
+  {
+   "id": "wish1",
+   "shape": "bone",
+   "pivot": [
+    -19.444,
+    25.3739,
+    0.0
+   ]
+  },
+  {
+   "id": "thread1",
+   "shape": "box",
+   "parent": "wish1",
+   "pivot": [
+    0.0,
+    -4.5,
+    0.0
+   ],
+   "size": [
+    0.12,
+    9.0,
+    0.12
+   ],
+   "style": "s21"
+  },
+  {
+   "id": "glow_wish1",
+   "shape": "card",
+   "parent": "wish1",
+   "pivot": [
+    0.0,
+    -10.4,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    40.0,
+    0.0
+   ],
+   "art": [
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "......bbaaaa......",
+    "......bbaaaa......",
+    "..aaaaaaccbbbbbb..",
+    "..aaaaaaccbbbbbb..",
+    "....bbccccccaa....",
+    "....bbccccccaa....",
+    "....aaaaccbbbb....",
+    "....aaaaccbbbb....",
+    "....aabbbbaabb....",
+    "....aabbbbaabb....",
+    "....bb......aa....",
+    "....bb......aa....",
+    "..................",
+    ".................."
+   ],
+   "plane": "xy",
+   "style": "s22",
+   "paint": {
+    "art_key": {
+     "a": "star:4",
+     "b": "star:2",
+     "c": "star:4"
+    }
+   }
+  },
+  {
+   "id": "wish2",
+   "shape": "bone",
+   "pivot": [
+    -23.044,
+    25.3739,
+    0.6
+   ]
+  },
+  {
+   "id": "thread2",
+   "shape": "box",
+   "parent": "wish2",
+   "pivot": [
+    0.0,
+    -2.0,
+    0.0
+   ],
+   "size": [
+    0.12,
+    4.0,
+    0.12
+   ],
+   "style": "s23"
+  },
+  {
+   "id": "glow_wish2",
+   "shape": "card",
+   "parent": "wish2",
+   "pivot": [
+    0.0,
+    -5.4,
+    0.0
+   ],
+   "rotation": [
+    0.0,
+    80.0,
+    0.0
+   ],
+   "art": [
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "........aa........",
+    "......bbaaaa......",
+    "......bbaaaa......",
+    "..aaaaaaccbbbbbb..",
+    "..aaaaaaccbbbbbb..",
+    "....bbccccccaa....",
+    "....bbccccccaa....",
+    "....aaaaccbbbb....",
+    "....aaaaccbbbb....",
+    "....aabbbbaabb....",
+    "....aabbbbaabb....",
+    "....bb......aa....",
+    "....bb......aa....",
+    "..................",
+    ".................."
+   ],
+   "plane": "xy",
+   "style": "s24",
+   "paint": {
+    "art_key": {
+     "a": "moonglow:4",
+     "b": "moonglow:2",
+     "c": "moonglow:4"
+    }
+   }
+  }
+ ],
+ "animations": {
+  "idle": {
+   "length": 5.0,
+   "loop": true,
+   "tracks": [
+    {
+     "part": "wish0",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 1,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "wish0",
+     "osc": {
+      "axis": "y",
+      "amp": 25,
+      "cycles": 1,
+      "phase": 0.0
+     }
+    },
+    {
+     "part": "wish1",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 1,
+      "phase": 0.3
+     }
+    },
+    {
+     "part": "wish1",
+     "osc": {
+      "axis": "y",
+      "amp": 25,
+      "cycles": 1,
+      "phase": 0.2
+     }
+    },
+    {
+     "part": "wish2",
+     "osc": {
+      "axis": "z",
+      "amp": 5,
+      "cycles": 1,
+      "phase": 0.6
+     }
+    },
+    {
+     "part": "wish2",
+     "osc": {
+      "axis": "y",
+      "amp": 25,
+      "cycles": 1,
+      "phase": 0.4
+     }
+    }
+   ]
+  }
+ }
+}

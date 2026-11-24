@@ -1,0 +1,2786 @@
+{
+ "name": "ivy",
+ "description": "",
+ "license": "CC0-1.0",
+ "density": 48,
+ "budget": {
+  "tris": 6000,
+  "colors": 600
+ },
+ "light": {
+  "dir": [
+   -0.45,
+   1.0,
+   0.6
+  ],
+  "strength": 0.45,
+  "gradient": 0.3,
+  "ao": 0.55,
+  "ao_height": 0.6
+ },
+ "brush": {
+  "flow": "long",
+  "length": 0.6,
+  "width": 0.08,
+  "rough": 0.4,
+  "overshoot": 0.25,
+  "textures": {
+   "oak": "wood",
+   "oakpale": "wood",
+   "walnut": "wood",
+   "deep": "wood",
+   "heart": "wood",
+   "wain": "wood",
+   "floor": "wood",
+   "bark": "wood",
+   "cork": "stone",
+   "brass": "metal",
+   "iron": "metal",
+   "steel": "metal",
+   "linen": "cloth",
+   "oat": "cloth",
+   "sage": "cloth",
+   "rose": "cloth",
+   "berry": "cloth",
+   "dusk": "cloth",
+   "plum": "cloth",
+   "lake": "cloth",
+   "blush": "cloth",
+   "moss": "moss",
+   "fern": "organic",
+   "leaf": "organic",
+   "pine": "organic",
+   "terracotta": "stone",
+   "clay": "stone",
+   "snow": "fur",
+   "cream": "organic",
+   "soil": "stone"
+  }
+ },
+ "render": {
+  "background": "#27313f",
+  "hero": [
+   -34,
+   20
+  ],
+  "shadow": 0.4
+ },
+ "palette": {
+  "ramps": {
+   "oak": {
+    "base": "#a8845c",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.58
+   },
+   "oakpale": {
+    "base": "#c9ab82",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.5
+   },
+   "walnut": {
+    "base": "#6f553d",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "deep": {
+    "base": "#4a392b",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "heart": {
+    "base": "#b8946a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.55
+   },
+   "wain": {
+    "base": "#7d5f44",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "bark": {
+    "base": "#5b4a3c",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.65
+   },
+   "floor": {
+    "base": "#a07c58",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.58
+   },
+   "brass": {
+    "base": "#c8a764",
+    "steps": 8,
+    "hue_shift": 16,
+    "sat_shift": 0.08,
+    "spread": 0.8
+   },
+   "iron": {
+    "base": "#5c5a56",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.85
+   },
+   "steel": {
+    "base": "#9aa0a4",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.9
+   },
+   "paper": [
+    "#8a7a5e",
+    "#b3a27f",
+    "#d4c6a4",
+    "#e8dfc6",
+    "#f1ead6",
+    "#f8f4e8"
+   ],
+   "oat": [
+    "#7d6a4c",
+    "#a89170",
+    "#cbb893",
+    "#e0d3b4",
+    "#ebe2c9",
+    "#f4efdf"
+   ],
+   "linen": [
+    "#6e5e45",
+    "#988563",
+    "#bba985",
+    "#d4c6a6",
+    "#e2d8bf",
+    "#eee8d8"
+   ],
+   "cork": {
+    "base": "#b08a5a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.7
+   },
+   "ink": {
+    "base": "#2e2b24",
+    "steps": 5,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "graphite": {
+    "base": "#5a5c62",
+    "steps": 5,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "sage": {
+    "base": "#a7b788",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "moss": {
+    "base": "#86a06a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "fern": {
+    "base": "#66844f",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "leaf": {
+    "base": "#557343",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "pine": {
+    "base": "#3f5a3b",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "terracotta": {
+    "base": "#c0866a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "clay": {
+    "base": "#a66c55",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "rose": [
+    "#5a3a3a",
+    "#86595a",
+    "#b38681",
+    "#d9aca4",
+    "#e6c6bf",
+    "#f2e0da"
+   ],
+   "blush": [
+    "#6a4040",
+    "#97615e",
+    "#c48d86",
+    "#e8b4ae",
+    "#f0cbc5",
+    "#f7e2de"
+   ],
+   "berry": {
+    "base": "#9e5f66",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "plum": {
+    "base": "#6e5266",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "dusk": {
+    "base": "#617f8c",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "lake": {
+    "base": "#86a9b0",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "slate": {
+    "base": "#46596a",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "night": {
+    "base": "#27313f",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "honey": [
+    "#4a3420",
+    "#7a5833",
+    "#a9804b",
+    "#dcb072",
+    "#e7c994",
+    "#f1e0bd"
+   ],
+   "ochre": {
+    "base": "#c59a52",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "straw": {
+    "base": "#c9b78d",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.65
+   },
+   "lamp": [
+    "#a8743a",
+    "#c99a55",
+    "#e3bd7a",
+    "#f1d39a",
+    "#f6e2b8",
+    "#fbf0d8"
+   ],
+   "glow": [
+    "#d9a25a",
+    "#f0c477",
+    "#f8dc9c",
+    "#fdeec6",
+    "#fff8e6"
+   ],
+   "glass": [
+    "#40606b",
+    "#6a8f99",
+    "#97b9bf",
+    "#bcd6dc",
+    "#d6e7ea",
+    "#eef6f6"
+   ],
+   "cream": [
+    "#8f7650",
+    "#b89d70",
+    "#d9c49b",
+    "#ebdcbb",
+    "#f3ead2",
+    "#faf5e6"
+   ],
+   "snow": [
+    "#5d6b6e",
+    "#8e9c9a",
+    "#bccac3",
+    "#dfe6dc",
+    "#eef2ea",
+    "#f8faf5"
+   ],
+   "soot": {
+    "base": "#3a3029",
+    "steps": 5,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "lilac": {
+    "base": "#b4a9c9",
+    "steps": 7,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.8
+   },
+   "mist": [
+    "#4f6663",
+    "#76908b",
+    "#a3b9b3",
+    "#c7d6d1",
+    "#dde7e3",
+    "#eef3f0"
+   ],
+   "soil": {
+    "base": "#4e3b2c",
+    "steps": 5,
+    "hue_shift": 12,
+    "sat_shift": 0.05,
+    "spread": 0.6
+   },
+   "screen": [
+    "#2a3a4a",
+    "#3d5a72",
+    "#6f93ad",
+    "#a9c8d8",
+    "#e6f2f2"
+   ]
+  }
+ },
+ "styles": {
+  "leaf": {
+   "ramp": "leaf",
+   "brush": {
+    "off": true
+   },
+   "art_key": {
+    "o": "pine:1",
+    "d": "leaf:2",
+    "m": "leaf:3",
+    "l": "leaf:4",
+    "h": "moss:5",
+    "v": "sage:4",
+    "c": "sage:4"
+   }
+  },
+  "leaf2": {
+   "ramp": "leaf",
+   "brush": {
+    "off": true
+   },
+   "art_key": {
+    "o": "pine:1",
+    "d": "leaf:2",
+    "m": "leaf:3",
+    "l": "fern:4",
+    "h": "sage:4",
+    "v": "sage:3",
+    "c": "cream:3"
+   }
+  },
+  "vine": {
+   "ramp": "pine",
+   "tone": 2.4,
+   "light": 0.6,
+   "brush": {
+    "off": true
+   },
+   "rim": {
+    "light_shift": 0.5,
+    "dark_shift": -0.5,
+    "outline": "none"
+   }
+  }
+ },
+ "parts": [
+  {
+   "id": "vine",
+   "shape": "prism",
+   "pivot": [
+    -0.3935,
+    -0.8374,
+    0.058
+   ],
+   "size": [
+    0.02,
+    0.02,
+    1.677
+   ],
+   "rotation": [
+    86.9754,
+    90.0,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf",
+   "shape": "card",
+   "pivot": [
+    -0.4105,
+    -0.08,
+    0.058
+   ],
+   "rotation": [
+    16.5575,
+    89.659,
+    153.1112
+   ],
+   "style": "leaf",
+   "art": [
+    "....h........",
+    "...olh.......",
+    "...olvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..hmlvmmmo...",
+    ".ohlmvmlmlo..",
+    ".olllmvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmmo..",
+    "..olmlvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_1",
+   "shape": "card",
+   "pivot": [
+    -0.4082,
+    -0.1768,
+    0.058
+   ],
+   "rotation": [
+    -7.1545,
+    36.7108,
+    164.9598
+   ],
+   "style": "leaf2",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_2",
+   "shape": "card",
+   "pivot": [
+    -0.4631,
+    -0.2798,
+    0.058
+   ],
+   "rotation": [
+    22.0475,
+    140.1974,
+    195.7155
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....olvmo....",
+    "...hhlvmmo...",
+    "...ollvlmo...",
+    "..ohllvmmmo..",
+    "..olllvmmmo..",
+    "..omllvmmlo..",
+    ".ollmmvmlddo.",
+    "..hlllvmmdo..",
+    "..olllvmmdo..",
+    "..olmmvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_3",
+   "shape": "card",
+   "pivot": [
+    -0.4676,
+    -0.3781,
+    0.058
+   ],
+   "rotation": [
+    -29.8935,
+    313.7057,
+    162.5674
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_4",
+   "shape": "card",
+   "pivot": [
+    -0.4079,
+    -0.5257,
+    0.058
+   ],
+   "rotation": [
+    -12.6417,
+    346.1321,
+    182.3534
+   ],
+   "style": "leaf2",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_5",
+   "shape": "card",
+   "pivot": [
+    -0.4024,
+    -0.6533,
+    0.058
+   ],
+   "rotation": [
+    11.4385,
+    347.9632,
+    203.6245
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_6",
+   "shape": "card",
+   "pivot": [
+    -0.4644,
+    -0.7446,
+    0.058
+   ],
+   "rotation": [
+    -21.2579,
+    23.4503,
+    168.0815
+   ],
+   "style": "leaf2",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_7",
+   "shape": "card",
+   "pivot": [
+    -0.4724,
+    -0.8697,
+    0.058
+   ],
+   "rotation": [
+    -8.6789,
+    110.1831,
+    191.7852
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_8",
+   "shape": "card",
+   "pivot": [
+    -0.4731,
+    -0.9886,
+    0.058
+   ],
+   "rotation": [
+    28.506,
+    8.2316,
+    194.9877
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_9",
+   "shape": "card",
+   "pivot": [
+    -0.4484,
+    -1.0797,
+    0.058
+   ],
+   "rotation": [
+    4.7111,
+    3.2682,
+    152.8036
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_10",
+   "shape": "card",
+   "pivot": [
+    -0.4682,
+    -1.2071,
+    0.058
+   ],
+   "rotation": [
+    -15.2348,
+    295.0175,
+    177.7323
+   ],
+   "style": "leaf2",
+   "art": [
+    "....o........",
+    "...olo.......",
+    "...hlvo......",
+    "..ollvmo.....",
+    "..hllvlmo....",
+    "..omlvmmmo...",
+    ".ollmvmlmlo..",
+    ".hllllvmmmo..",
+    ".olllmvmmmo..",
+    ".omllmvlmdo..",
+    "..omlmvmddo..",
+    "..olmlvmldo..",
+    "...ollolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_11",
+   "shape": "card",
+   "pivot": [
+    -0.4157,
+    -1.3184,
+    0.058
+   ],
+   "rotation": [
+    -23.5168,
+    269.4233,
+    197.8336
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....olvmo....",
+    "...hhlvmmo...",
+    "...ollvlmo...",
+    "..ohllvmmmo..",
+    "..olllvmmmo..",
+    "..omllvmmlo..",
+    ".ollmmvmlddo.",
+    "..hlllvmmdo..",
+    "..olllvmmdo..",
+    "..olmmvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_12",
+   "shape": "card",
+   "pivot": [
+    -0.461,
+    -1.4106,
+    0.058
+   ],
+   "rotation": [
+    0.7728,
+    130.5452,
+    158.8917
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_13",
+   "shape": "card",
+   "pivot": [
+    -0.4527,
+    -1.5561,
+    0.058
+   ],
+   "rotation": [
+    -10.992,
+    63.892,
+    154.6918
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "vine_1",
+   "shape": "prism",
+   "pivot": [
+    -0.331,
+    -0.7961,
+    -0.0039
+   ],
+   "size": [
+    0.02,
+    0.02,
+    1.5943
+   ],
+   "rotation": [
+    86.9868,
+    -90.0,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_14",
+   "shape": "card",
+   "pivot": [
+    -0.3265,
+    -0.08,
+    -0.0039
+   ],
+   "rotation": [
+    14.4335,
+    123.7798,
+    165.0125
+   ],
+   "style": "leaf2",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_15",
+   "shape": "card",
+   "pivot": [
+    -0.2507,
+    -0.1953,
+    -0.0039
+   ],
+   "rotation": [
+    8.2995,
+    288.5992,
+    170.0511
+   ],
+   "style": "leaf",
+   "art": [
+    "....h........",
+    "...olh.......",
+    "...olvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..hmlvmmmo...",
+    ".ohlmvmlmlo..",
+    ".olllmvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmmo..",
+    "..olmlvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_16",
+   "shape": "card",
+   "pivot": [
+    -0.2786,
+    -0.2931,
+    -0.0039
+   ],
+   "rotation": [
+    17.2806,
+    38.387,
+    176.0733
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_17",
+   "shape": "card",
+   "pivot": [
+    -0.3055,
+    -0.3867,
+    -0.0039
+   ],
+   "rotation": [
+    -2.8107,
+    359.748,
+    201.1352
+   ],
+   "style": "leaf2",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_18",
+   "shape": "card",
+   "pivot": [
+    -0.274,
+    -0.5039,
+    -0.0039
+   ],
+   "rotation": [
+    -10.9379,
+    98.6528,
+    178.2048
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_19",
+   "shape": "card",
+   "pivot": [
+    -0.2789,
+    -0.6006,
+    -0.0039
+   ],
+   "rotation": [
+    -0.0407,
+    121.8524,
+    155.3482
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_20",
+   "shape": "card",
+   "pivot": [
+    -0.324,
+    -0.7215,
+    -0.0039
+   ],
+   "rotation": [
+    17.7091,
+    128.0516,
+    185.2491
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_21",
+   "shape": "card",
+   "pivot": [
+    -0.2843,
+    -0.8571,
+    -0.0039
+   ],
+   "rotation": [
+    10.0985,
+    300.6837,
+    165.8915
+   ],
+   "style": "leaf2",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_22",
+   "shape": "card",
+   "pivot": [
+    -0.2771,
+    -0.9901,
+    -0.0039
+   ],
+   "rotation": [
+    4.8396,
+    4.169,
+    182.8195
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_23",
+   "shape": "card",
+   "pivot": [
+    -0.292,
+    -1.0996,
+    -0.0039
+   ],
+   "rotation": [
+    19.0008,
+    233.0773,
+    197.8576
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....olvmo....",
+    "...hhlvmmo...",
+    "...ollvlmo...",
+    "..ohllvmmmo..",
+    "..olllvmmmo..",
+    "..omllvmmlo..",
+    ".ollmmvmlddo.",
+    "..hlllvmmdo..",
+    "..olllvmmdo..",
+    "..olmmvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_24",
+   "shape": "card",
+   "pivot": [
+    -0.27,
+    -1.2061,
+    -0.0039
+   ],
+   "rotation": [
+    19.6913,
+    126.0163,
+    200.5728
+   ],
+   "style": "leaf2",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_25",
+   "shape": "card",
+   "pivot": [
+    -0.2525,
+    -1.3231,
+    -0.0039
+   ],
+   "rotation": [
+    1.0884,
+    190.5624,
+    159.9704
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_26",
+   "shape": "card",
+   "pivot": [
+    -0.3064,
+    -1.4693,
+    -0.0039
+   ],
+   "rotation": [
+    -25.2698,
+    241.509,
+    174.998
+   ],
+   "style": "leaf2",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "vine_2",
+   "shape": "prism",
+   "pivot": [
+    -0.0695,
+    -0.6314,
+    0.0397
+   ],
+   "size": [
+    0.02,
+    0.02,
+    1.2631
+   ],
+   "rotation": [
+    88.8774,
+    90.0,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_27",
+   "shape": "card",
+   "pivot": [
+    -0.0643,
+    -0.08,
+    0.0397
+   ],
+   "rotation": [
+    -28.3427,
+    57.6083,
+    176.4641
+   ],
+   "style": "leaf2",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....olvmo....",
+    "...hhlvmmo...",
+    "...ollvlmo...",
+    "..ohllvmmmo..",
+    "..olllvmmmo..",
+    "..omllvmmlo..",
+    ".ollmmvmlddo.",
+    "..hlllvmmdo..",
+    "..olllvmmdo..",
+    "..olmmvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_28",
+   "shape": "card",
+   "pivot": [
+    -0.0714,
+    -0.1808,
+    0.0397
+   ],
+   "rotation": [
+    -27.4883,
+    169.7708,
+    163.5746
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_29",
+   "shape": "card",
+   "pivot": [
+    -0.0965,
+    -0.3244,
+    0.0397
+   ],
+   "rotation": [
+    -19.1072,
+    69.6096,
+    152.1395
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_30",
+   "shape": "card",
+   "pivot": [
+    -0.0747,
+    -0.4354,
+    0.0397
+   ],
+   "rotation": [
+    -15.7292,
+    325.1456,
+    150.0396
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_31",
+   "shape": "card",
+   "pivot": [
+    -0.0526,
+    -0.5825,
+    0.0397
+   ],
+   "rotation": [
+    11.3313,
+    197.0075,
+    207.8622
+   ],
+   "style": "leaf2",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_32",
+   "shape": "card",
+   "pivot": [
+    -0.0983,
+    -0.7094,
+    0.0397
+   ],
+   "rotation": [
+    0.7589,
+    342.397,
+    167.5915
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_33",
+   "shape": "card",
+   "pivot": [
+    -0.0892,
+    -0.8485,
+    0.0397
+   ],
+   "rotation": [
+    3.8352,
+    193.8188,
+    178.0483
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_34",
+   "shape": "card",
+   "pivot": [
+    -0.0453,
+    -0.9742,
+    0.0397
+   ],
+   "rotation": [
+    28.0798,
+    219.0996,
+    171.067
+   ],
+   "style": "leaf2",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_35",
+   "shape": "card",
+   "pivot": [
+    -0.0958,
+    -1.0643,
+    0.0397
+   ],
+   "rotation": [
+    24.9886,
+    194.1925,
+    169.5264
+   ],
+   "style": "leaf2",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_36",
+   "shape": "card",
+   "pivot": [
+    -0.0438,
+    -1.1768,
+    0.0397
+   ],
+   "rotation": [
+    -0.3954,
+    172.6469,
+    192.4979
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "vine_3",
+   "shape": "prism",
+   "pivot": [
+    0.1795,
+    -0.5429,
+    0.023
+   ],
+   "size": [
+    0.02,
+    0.02,
+    1.0901
+   ],
+   "rotation": [
+    84.9371,
+    90.0,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_37",
+   "shape": "card",
+   "pivot": [
+    0.1115,
+    -0.08,
+    0.023
+   ],
+   "rotation": [
+    -28.8197,
+    340.2634,
+    168.4493
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_38",
+   "shape": "card",
+   "pivot": [
+    0.1011,
+    -0.1786,
+    0.023
+   ],
+   "rotation": [
+    7.3012,
+    159.6483,
+    167.5862
+   ],
+   "style": "leaf",
+   "art": [
+    "....h........",
+    "...olh.......",
+    "...olvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..hmlvmmmo...",
+    ".ohlmvmlmlo..",
+    ".olllmvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmmo..",
+    "..olmlvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_39",
+   "shape": "card",
+   "pivot": [
+    0.1298,
+    -0.3182,
+    0.023
+   ],
+   "rotation": [
+    3.6189,
+    87.6498,
+    178.4567
+   ],
+   "style": "leaf",
+   "art": [
+    "....h........",
+    "...olh.......",
+    "...olvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..hmlvmmmo...",
+    ".ohlmvmlmlo..",
+    ".olllmvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmmo..",
+    "..olmlvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_40",
+   "shape": "card",
+   "pivot": [
+    0.1589,
+    -0.4229,
+    0.023
+   ],
+   "rotation": [
+    13.2874,
+    102.8623,
+    179.5358
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....olvmo....",
+    "...hhlvmmo...",
+    "...ollvlmo...",
+    "..ohllvmmmo..",
+    "..olllvmmmo..",
+    "..omllvmmlo..",
+    ".ollmmvmlddo.",
+    "..hlllvmmdo..",
+    "..olllvmmdo..",
+    "..olmmvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_41",
+   "shape": "card",
+   "pivot": [
+    0.0927,
+    -0.544,
+    0.023
+   ],
+   "rotation": [
+    -22.4381,
+    101.6451,
+    192.4816
+   ],
+   "style": "leaf2",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_42",
+   "shape": "card",
+   "pivot": [
+    0.1285,
+    -0.6518,
+    0.023
+   ],
+   "rotation": [
+    -8.3376,
+    268.2062,
+    185.4483
+   ],
+   "style": "leaf",
+   "art": [
+    "....h........",
+    "...olh.......",
+    "...olvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..hmlvmmmo...",
+    ".ohlmvmlmlo..",
+    ".olllmvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmmo..",
+    "..olmlvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_43",
+   "shape": "card",
+   "pivot": [
+    0.1462,
+    -0.742,
+    0.023
+   ],
+   "rotation": [
+    -23.544,
+    247.4714,
+    161.4708
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_44",
+   "shape": "card",
+   "pivot": [
+    0.139,
+    -0.8787,
+    0.023
+   ],
+   "rotation": [
+    11.341,
+    343.1764,
+    188.9319
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_45",
+   "shape": "card",
+   "pivot": [
+    0.1633,
+    -0.9973,
+    0.023
+   ],
+   "rotation": [
+    -2.0949,
+    272.9508,
+    168.219
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...olo.......",
+    "...hlvo......",
+    "..ollvmo.....",
+    "..hllvlmo....",
+    "..omlvmmmo...",
+    ".ollmvmlmlo..",
+    ".hllllvmmmo..",
+    ".olllmvmmmo..",
+    ".omllmvlmdo..",
+    "..omlmvmddo..",
+    "..olmlvmldo..",
+    "...ollolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "vine_4",
+   "shape": "prism",
+   "pivot": [
+    0.3043,
+    -0.8294,
+    -0.0513
+   ],
+   "size": [
+    0.02,
+    0.02,
+    1.6608
+   ],
+   "rotation": [
+    87.1653,
+    90.0,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_46",
+   "shape": "card",
+   "pivot": [
+    0.2365,
+    -0.08,
+    -0.0513
+   ],
+   "rotation": [
+    11.714,
+    319.9284,
+    208.3753
+   ],
+   "style": "leaf2",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_47",
+   "shape": "card",
+   "pivot": [
+    0.2288,
+    -0.1792,
+    -0.0513
+   ],
+   "rotation": [
+    -16.1988,
+    295.0537,
+    197.505
+   ],
+   "style": "leaf2",
+   "art": [
+    "....h........",
+    "...olh.......",
+    "...olvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..hmlvmmmo...",
+    ".ohlmvmlmlo..",
+    ".olllmvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmmo..",
+    "..olmlvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_48",
+   "shape": "card",
+   "pivot": [
+    0.2811,
+    -0.3257,
+    -0.0513
+   ],
+   "rotation": [
+    28.7212,
+    359.4004,
+    192.0749
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_49",
+   "shape": "card",
+   "pivot": [
+    0.2408,
+    -0.4231,
+    -0.0513
+   ],
+   "rotation": [
+    8.7442,
+    342.8082,
+    192.7466
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_50",
+   "shape": "card",
+   "pivot": [
+    0.2353,
+    -0.5728,
+    -0.0513
+   ],
+   "rotation": [
+    6.6367,
+    149.017,
+    159.6708
+   ],
+   "style": "leaf2",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_51",
+   "shape": "card",
+   "pivot": [
+    0.2761,
+    -0.6756,
+    -0.0513
+   ],
+   "rotation": [
+    14.7316,
+    100.7534,
+    184.2662
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_52",
+   "shape": "card",
+   "pivot": [
+    0.2241,
+    -0.8101,
+    -0.0513
+   ],
+   "rotation": [
+    -24.5137,
+    246.7715,
+    179.3666
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_53",
+   "shape": "card",
+   "pivot": [
+    0.2965,
+    -0.9564,
+    -0.0513
+   ],
+   "rotation": [
+    -21.7061,
+    106.1007,
+    184.1189
+   ],
+   "style": "leaf2",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_54",
+   "shape": "card",
+   "pivot": [
+    0.2443,
+    -1.0768,
+    -0.0513
+   ],
+   "rotation": [
+    3.1005,
+    91.5085,
+    195.0347
+   ],
+   "style": "leaf2",
+   "art": [
+    "....o........",
+    "...olo.......",
+    "...hlvo......",
+    "..ollvmo.....",
+    "..hllvlmo....",
+    "..omlvmmmo...",
+    ".ollmvmlmlo..",
+    ".hllllvmmmo..",
+    ".olllmvmmmo..",
+    ".omllmvlmdo..",
+    "..omlmvmddo..",
+    "..olmlvmldo..",
+    "...ollolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_55",
+   "shape": "card",
+   "pivot": [
+    0.2924,
+    -1.2253,
+    -0.0513
+   ],
+   "rotation": [
+    -2.7997,
+    140.0053,
+    157.871
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...olo.......",
+    "...hlvo......",
+    "..ollvmo.....",
+    "..hllvlmo....",
+    "..omlvmmmo...",
+    ".ollmvmlmlo..",
+    ".hllllvmmmo..",
+    ".olllmvmmmo..",
+    ".omllmvlmdo..",
+    "..omlmvmddo..",
+    "..olmlvmldo..",
+    "...ollolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_56",
+   "shape": "card",
+   "pivot": [
+    0.2691,
+    -1.3546,
+    -0.0513
+   ],
+   "rotation": [
+    -27.8432,
+    310.8186,
+    180.388
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....hvo.....",
+    "....hlvmo....",
+    "...hhlvmmo...",
+    "...ollvmmo...",
+    "..ohllvlmdo..",
+    "..olllvmmmo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlmdo.",
+    "..hlllvmmmo..",
+    "..olllvmmdo..",
+    "..olmlvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_57",
+   "shape": "card",
+   "pivot": [
+    0.2617,
+    -1.4589,
+    -0.0513
+   ],
+   "rotation": [
+    -10.6028,
+    286.7269,
+    151.7677
+   ],
+   "style": "leaf2",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_58",
+   "shape": "card",
+   "pivot": [
+    0.2989,
+    -1.572,
+    -0.0513
+   ],
+   "rotation": [
+    -4.2399,
+    285.9865,
+    194.9765
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......olo...",
+    "......ovmo...",
+    ".....hlvmmo..",
+    "....hlmvmmo..",
+    "...olllvmlo..",
+    "..omlmmvlmmo.",
+    "..hlllvlmmmo.",
+    "..olllvmmmdo.",
+    "..hllmvmmmlo.",
+    "..olllvmdlo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "vine_5",
+   "shape": "prism",
+   "pivot": [
+    0.479,
+    -0.4769,
+    0.0769
+   ],
+   "size": [
+    0.02,
+    0.02,
+    0.9541
+   ],
+   "rotation": [
+    88.5009,
+    90.0,
+    0.0
+   ],
+   "style": "vine",
+   "sides": 4
+  },
+  {
+   "id": "leaf_59",
+   "shape": "card",
+   "pivot": [
+    0.4934,
+    -0.08,
+    0.0769
+   ],
+   "rotation": [
+    -12.6119,
+    334.9944,
+    192.3195
+   ],
+   "style": "leaf",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_60",
+   "shape": "card",
+   "pivot": [
+    0.4783,
+    -0.1927,
+    0.0769
+   ],
+   "rotation": [
+    18.2702,
+    156.022,
+    201.0946
+   ],
+   "style": "leaf2",
+   "art": [
+    "........o....",
+    ".......omo...",
+    "......hvmo...",
+    ".....olvmmo..",
+    "....olmvmmo..",
+    "...hlllvmlo..",
+    "..omlmmvlmmo.",
+    "..olllvlmmdo.",
+    "..olllvmmdmo.",
+    "..ollmvmmdlo.",
+    "..ollmvmmlo..",
+    "..olmmvmlmo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_61",
+   "shape": "card",
+   "pivot": [
+    0.4857,
+    -0.2849,
+    0.0769
+   ],
+   "rotation": [
+    -6.2694,
+    34.9196,
+    151.9899
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...olo.......",
+    "...hlvo......",
+    "..ollvmo.....",
+    "..hllvlmo....",
+    "..omlvmmmo...",
+    ".ollmvmlmlo..",
+    ".hllllvmmmo..",
+    ".olllmvmmmo..",
+    ".omllmvlmdo..",
+    "..omlmvmddo..",
+    "..olmlvmldo..",
+    "...ollolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_62",
+   "shape": "card",
+   "pivot": [
+    0.4976,
+    -0.3866,
+    0.0769
+   ],
+   "rotation": [
+    -1.1405,
+    273.7251,
+    150.0264
+   ],
+   "style": "leaf",
+   "art": [
+    "......o......",
+    ".....ovo.....",
+    "....olvmo....",
+    "...ohlvmmo...",
+    "...hllvmmo...",
+    "..ohllvmmmo..",
+    "..olllvmmdo..",
+    "..omlmvmmlo..",
+    ".ollmlvmlddo.",
+    "..ollmvmmdo..",
+    "..ollmvmddo..",
+    "..olmmvmldo..",
+    "...olloldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_63",
+   "shape": "card",
+   "pivot": [
+    0.4524,
+    -0.4946,
+    0.0769
+   ],
+   "rotation": [
+    -2.2861,
+    68.9767,
+    189.2017
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_64",
+   "shape": "card",
+   "pivot": [
+    0.496,
+    -0.6071,
+    0.0769
+   ],
+   "rotation": [
+    -1.8204,
+    198.7427,
+    156.6142
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...hlo.......",
+    "...hlvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..omlvlmmo...",
+    ".ohlmvmlmlo..",
+    ".hllllvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmdo..",
+    "..olmlvmldo..",
+    "...olmolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_65",
+   "shape": "card",
+   "pivot": [
+    0.4292,
+    -0.7421,
+    0.0769
+   ],
+   "rotation": [
+    23.7815,
+    123.9474,
+    195.1199
+   ],
+   "style": "leaf",
+   "art": [
+    "....o........",
+    "...olo.......",
+    "...hlvo......",
+    "..ollvmo.....",
+    "..hllvlmo....",
+    "..omlvmmmo...",
+    ".ollmvmlmlo..",
+    ".hllllvmmmo..",
+    ".olllmvmmmo..",
+    ".omllmvlmdo..",
+    "..omlmvmddo..",
+    "..olmlvmldo..",
+    "...ollolmo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  },
+  {
+   "id": "leaf_66",
+   "shape": "card",
+   "pivot": [
+    0.4804,
+    -0.8884,
+    0.0769
+   ],
+   "rotation": [
+    -1.6961,
+    340.3456,
+    157.0748
+   ],
+   "style": "leaf2",
+   "art": [
+    "....h........",
+    "...olh.......",
+    "...olvo......",
+    "..ohlvmo.....",
+    "..ollvlmo....",
+    "..hmlvmmmo...",
+    ".ohlmvmlmlo..",
+    ".olllmvmmmo..",
+    ".ollllvmmdo..",
+    ".omllmvlmmo..",
+    "..omllvmmmo..",
+    "..olmlvmldo..",
+    "...olmoldo...",
+    "....oovoo...."
+   ],
+   "plane": "xy",
+   "double_sided": true
+  }
+ ],
+ "material": {
+  "unlit": false,
+  "roughness": 0.92
+ }
+}

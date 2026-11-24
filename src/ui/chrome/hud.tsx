@@ -14,20 +14,23 @@ import { sound } from '../../audio/sound.ts';
 import { bedtimeOf, phase } from '../../game/night.ts';
 import { claimable, todaysQuests } from '../../game/quests.ts';
 import { dayKey, level, save } from '../../game/store.ts';
-import { portrait } from '../portraits.ts';
+import { iconVersion, portrait } from '../portraits.ts';
+import { pixelate } from '../pxfx.tsx';
 import { haptic } from '../kit.tsx';
 import { breathing, panel, say, sceneRef, type Panel } from '../state.ts';
 import { chainTile, plank, plaque, ropeTile, shelf, tag, type Inner } from './paint.ts';
 import { framesOf, hold, PxAnim, rep, seq, type Timeline } from './pxanim.tsx';
 import { MagicBar } from './magicbar.tsx';
 import { addSwing, kick, makeSwing, removeSwing, type Swing } from './swing.ts';
-import { clearTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts';
-import { lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
+import { clearTransition, installPanelTransitions, panelTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts'; // [motion3] panelTransition, installPanelTransitions
+import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
 import './chrome.css';
 import '../px/currency.js';
 
 installChromeSkin();
+installUiFxAuto(); // [ui3] small pixel bursts on every press, toggle, slider, tab, sheet, dialog and toast
+installPanelTransitions(); // [motion3] every open, close and switch of a place plays a pixel transition
 
 /**
  * Lets another screen keep parts of the HUD up: 'currency' keeps the acorn and gem signs (e.g. a
@@ -44,13 +47,13 @@ export const VIA: Partial<Record<NonNullable<Panel>, TransitionKind>> = {
 /** Open a place with its transition (and the screen point to centre an iris on). */
 export function openPanel(id: Panel, o: TransitionOpts = {}) {
   if ((window as unknown as { __chromeHold?: boolean }).__chromeHold) return; // screenshots: stay on the press
-  const k = id ? VIA[id] : undefined;
-  if (!k) { panel.value = id; return; }
+  const pt = panelTransition(panel.peek(), id); // [motion3] each place has its own transition (VIA is the old table)
+  if (!pt) { panel.value = id; return; }
   if (id === 'wardrobe' && o.x === undefined) {
     const sc = sceneRef.current;
     if (sc) { const p = sc.screenOf(sc.owl.headWorld); o = { ...o, x: p.x, y: p.y }; }
   }
-  void transition(k, () => { panel.value = id; }, { speed: id === 'quests' ? 1.5 : id === 'map' ? 1.2 : 1, ...o });
+  void transition(pt[0], () => { panel.value = id; }, { ...pt[1], ...o }); // [motion3]
 }
 
 /** A pendulum bound to an element: returns [ref callback, swing]. */
@@ -103,7 +106,15 @@ function NameSign() {
   const [ref, sw] = useSwing({ amp: 0.7, rate: 0.8 });
   const [xp, setXp] = useState(false);
   const tm = useRef(0);
-  const pic = useMemo(() => { try { return portrait(s.look); } catch { return ''; } }, [JSON.stringify(s.look)]);
+  // Pip's face is a tiny render of the 3D model, re-sampled to art pixels so it sits in the pixel sign
+  const [pic, setPic] = useState('');
+  const ver = iconVersion.value; // [ui3] re-render when the hand-painted owl model has loaded
+  useEffect(() => {
+    let live = true, url = '';
+    try { url = portrait(s.look); } catch { url = ''; }
+    if (url) void pixelate(url, 25).then((u) => { if (live) setPic(u); });
+    return () => { live = false; };
+  }, [JSON.stringify(s.look), ver]);
   const night = (sceneRef.current?.sky.night ?? 0) > 0.5;
   const tapSign = () => {
     kick(sw, 70);
@@ -117,7 +128,7 @@ function NameSign() {
   return (
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={42} />
-      <button class="hh-board hh-nameboard px" style={{ backgroundImage: bg(plank(96, 36, { seed: 4, nails: [[26, 4], [71, 4]], carve: true })) }} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
+      <button class="hh-board hh-nameboard px" style={{ backgroundImage: bg(plank(96, 36, { seed: 4, nails: [[26, 4], [71, 4]], carve: true, moss: [[34, 52], [80, 90]], ivy: [[92, 3, 9]] })) }} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
         <span class={'hh-portrait' + (night ? ' night' : '')}>
           {pic ? <img class="hh-face" src={pic} alt="" draggable={false} /> : <span class="hh-face" />}
           <PxAnim tl={[['hud_ring', 1e9]]} size={64} class="hh-ring" />
@@ -162,7 +173,7 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
   return (
     <div class={'hh-hang hh-curhang ' + p.kind} ref={ref}>
       <Ropes xs={[22, 102]} top={p.kind === 'coin' ? -28 : -16} len={p.kind === 'coin' ? 36 : 24} chain />
-      <div class="hh-board hh-curboard px" style={{ backgroundImage: bg(plank(62, 20, { seed: p.kind === 'coin' ? 7 : 9, nails: [[11, 3], [51, 3]], tone: p.kind === 'coin' ? 'wood' : 'dwood' })) }} onClick={tapSign} role="group" aria-label={`${label}: ${p.value.toLocaleString()}`}>
+      <div class="hh-board hh-curboard px" style={{ backgroundImage: bg(plank(62, 20, { seed: p.kind === 'coin' ? 7 : 9, nails: [[11, 3], [51, 3]], tone: p.kind === 'coin' ? 'wood' : 'dwood', moss: p.kind === 'coin' ? [[20, 32]] : [[38, 46]] })) }} onClick={tapSign} role="group" aria-label={`${label}: ${p.value.toLocaleString()}`}>
         <span class={'hh-cur-ico ' + p.kind} data-chip={p.kind} ref={ico}>
           <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}
@@ -226,13 +237,15 @@ function claimedCount() { try { return todaysQuests().filter((q) => q.claimed).l
 
 // ------------------------------------------------------------------ side tools
 
-interface ToolDef { id: NonNullable<Panel>; label: string; tl: Timeline; act: Timeline; fx: UiFxKind }
+interface ToolDef { id: NonNullable<Panel>; label: string; tl: Timeline; act: Timeline; fx: UiFxKind; icon?: string }
+/** [ui3] the main icons are detailed pixel art baked from real 3D props (src/dev/iconbake.ts, public/ui/icons) */
+const ICON = (n: string) => `${import.meta.env.BASE_URL}ui/icons/${n}.png`;
 const TOOLS: ToolDef[] = [
-  { id: 'build', label: 'Build', tl: [['tool_build_0', 2600], ['tool_build_1', 90], ['tool_build_2', 120], ['tool_build_3', 90], ['tool_build_4', 120], ['tool_build_5', 260]], act: rep(seq('tool_build', 5, 70, 1), 2), fx: 'puff' },
-  { id: 'shop', label: 'Shop', tl: seq('tool_shop', 6, 260), act: seq('tool_shop', 6, 80), fx: 'snow' },
-  { id: 'wardrobe', label: 'Dress up', tl: [...seq('tool_dress', 8, 150), ['tool_dress_6', 1600]], act: rep(seq('tool_dress', 8, 60), 2), fx: 'hearts' },
-  { id: 'quests', label: 'Quests', tl: [['tool_quest_0', 2400], ['tool_quest_1', 90], ['tool_quest_2', 90], ['tool_quest_3', 380], ['tool_quest_4', 1400]], act: seq('tool_quest', 4, 90), fx: 'stars' },
-  { id: 'map', label: 'Map', tl: [['tool_map_0', 2800], ['tool_map_1', 120], ['tool_map_2', 1400], ['tool_map_3', 300], ['tool_map_2', 600], ['tool_map_1', 120]], act: [['tool_map_1', 90], ['tool_map_2', 200], ['tool_map_3', 260]], fx: 'leaves' },
+  { id: 'build', label: 'Build', tl: [['tool_build_0', 2600], ['tool_build_1', 90], ['tool_build_2', 120], ['tool_build_3', 90], ['tool_build_4', 120], ['tool_build_5', 260]], act: rep(seq('tool_build', 5, 70, 1), 2), fx: 'puff', icon: 'tool_build' },
+  { id: 'shop', label: 'Shop', tl: seq('tool_shop', 6, 260), act: seq('tool_shop', 6, 80), fx: 'snow', icon: 'tool_shop' },
+  { id: 'wardrobe', label: 'Dress up', tl: [...seq('tool_dress', 8, 150), ['tool_dress_6', 1600]], act: rep(seq('tool_dress', 8, 60), 2), fx: 'hearts', icon: 'tool_dress' },
+  { id: 'quests', label: 'Quests', tl: [['tool_quest_0', 2400], ['tool_quest_1', 90], ['tool_quest_2', 90], ['tool_quest_3', 380], ['tool_quest_4', 1400]], act: seq('tool_quest', 4, 90), fx: 'stars', icon: 'tool_quests' },
+  { id: 'map', label: 'Map', tl: [['tool_map_0', 2800], ['tool_map_1', 120], ['tool_map_2', 1400], ['tool_map_3', 300], ['tool_map_2', 600], ['tool_map_1', 120]], act: [['tool_map_1', 90], ['tool_map_2', 200], ['tool_map_3', 260]], fx: 'leaves', icon: 'tool_map' },
   { id: 'settings', label: 'Settings', tl: seq('tool_gear', 4, 220), act: rep(seq('tool_gear', 4, 50), 3), fx: 'sparkle' },
 ];
 
@@ -254,7 +267,7 @@ function ToolTag(p: { t: ToolDef; i: number; badge?: number; isNew?: boolean }) 
     <div class="hh-tool" style={{ '--i': p.i } as Record<string, number>}>
       <div class="hh-toolhang" ref={ref}>
         <button class="hh-tag px" style={{ backgroundImage: bg(tag(26, 26, p.i + 2)) }} onClick={go} aria-label={p.t.label + (p.badge ? ` (${p.badge} ready to claim)` : '')}>
-          <PxAnim tl={p.t.tl} size={44} offset={p.i * 900} act={p.t.act} actKey={act} />
+          {p.t.icon ? <img class={'hh-ticon px' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={ICON(p.t.icon)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} /> : <PxAnim tl={p.t.tl} size={44} offset={p.i * 900} act={p.t.act} actKey={act} />}
           {!!p.badge && <span class="hh-badge"><PxAnim tl={[['hud_seal', 1e9]]} size={28} /><b>{p.badge}</b></span>}
           {p.isNew && <span class="hh-new"><PxAnim tl={[['hud_new', 1e9]]} size={44} /></span>}
         </button>
@@ -279,13 +292,13 @@ export function SideTools() {
 
 // ------------------------------------------------------------------ main buttons
 
-interface MainDef { id: NonNullable<Panel>; label: string; inner: Inner; tl: Timeline; act: Timeline; fx: UiFxKind[] }
+interface MainDef { id: NonNullable<Panel>; label: string; inner: Inner; tl: Timeline; act: Timeline; fx: UiFxKind[]; icon?: string }
 const CUCKOO: Timeline = [['nav_clock_cu_0', 140], ['nav_clock_cu_1', 120], ['nav_clock_cu_2', 220], ['nav_clock_cu_3', 160], ['nav_clock_cu_4', 220], ['nav_clock_cu_5', 160], ['nav_clock_cu_6', 120], ['nav_clock_cu_7', 140]];
 const BOOK_OPEN: Timeline = [['nav_book_u', 200], ['nav_book_o1', 110], ['nav_book_o2', 110], ['nav_book_op', 140], ...rep(seq('nav_book_fl', 3, 90), 2), ...rep(seq('nav_book_gl', 2, 200), 2), ['nav_book_op', 260], ['nav_book_o2', 100], ['nav_book_o1', 100], ['nav_book_u', 160]];
 const MAIN: MainDef[] = [
-  { id: 'sleep', label: 'Sleep', inner: 'night', tl: seq('nav_sleep', 8, 260), act: rep(seq('nav_sleep_tap', 3, 110), 2), fx: ['stars', 'puff'] },
-  { id: 'clock', label: 'Clock', inner: 'paper', tl: [...rep(seq('nav_clock', 8, 120), 7), ...CUCKOO], act: CUCKOO, fx: ['sparkle', 'puff'] },
-  { id: 'book', label: 'Book', inner: 'velvet', tl: [['nav_book_5', 2600], ...seq('nav_book', 5, 70), ['nav_book_5', 1800], ...BOOK_OPEN], act: BOOK_OPEN.slice(0, 7), fx: ['magic', 'puff'] },
+  { id: 'sleep', label: 'Sleep', inner: 'night', tl: seq('nav_sleep', 8, 260), act: rep(seq('nav_sleep_tap', 3, 110), 2), fx: ['stars', 'puff'], icon: 'nav_sleep' },
+  { id: 'clock', label: 'Clock', inner: 'paper', tl: [...rep(seq('nav_clock', 8, 120), 7), ...CUCKOO], act: CUCKOO, fx: ['sparkle', 'puff'], icon: 'nav_clock' },
+  { id: 'book', label: 'Book', inner: 'velvet', tl: [['nav_book_5', 2600], ...seq('nav_book', 5, 70), ['nav_book_5', 1800], ...BOOK_OPEN], act: BOOK_OPEN.slice(0, 7), fx: ['magic', 'puff'], icon: 'nav_book' },
 ];
 
 function Plaque(p: { m: MainDef; i: number; rec: boolean }) {
@@ -307,7 +320,7 @@ function Plaque(p: { m: MainDef; i: number; rec: boolean }) {
   return (
     <button ref={el} class={'hh-plaque px ' + p.m.id + (state ? ' ' + state : '') + (p.rec ? ' rec' : '')} style={{ backgroundImage: bg(plaque(52, 58, p.m.inner, 5 + p.i, 12)), '--i': p.i } as Record<string, string | number>}
       onPointerDown={down} onPointerUp={up} onPointerLeave={() => setState((s) => (s === 'press' ? '' : s))} onClick={go} aria-label={p.m.label}>
-      <span class="hh-pic"><PxAnim tl={p.m.tl} size={64} act={p.m.act} actKey={act} offset={p.i * 700} /></span>
+      <span class="hh-pic">{p.m.icon ? <img class="hh-micon px" src={ICON(p.m.icon)} width={60} height={60} alt="" draggable={false} /> : <PxAnim tl={p.m.tl} size={64} act={p.m.act} actKey={act} offset={p.i * 700} />}{p.m.id === 'sleep' && <PxAnim tl={seq('nav_zz', 8, 220)} size={64} class="hh-zz" offset={p.i * 300} />}</span>
       <span class="hh-plate">{p.m.label}</span>
       {p.rec && <><i class="hh-twinkle a" /><i class="hh-twinkle b" /><i class="hh-twinkle c" /></>}
     </button>

@@ -1,56 +1,60 @@
-// The first-run experience: the sleeping-owl splash hands over to Pip's office, where he wakes up,
-// pops on his reading glasses and interviews you with a clipboard. His lines float in 3D, every
-// answer card makes him act it out with props, answers are pencilled onto the paper, and the plan
-// gets an APPROVED stamp before an iris wipe takes you home to unpack.
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+// The first-run experience: the sleeping-owl splash hands over to Pip's office, where he wakes up, pops on
+// his reading glasses and interviews you with a clipboard. His lines float in crisp extruded pixel letters,
+// every question is its own little toy on the page (a name tag, trading cards of the owls, a sticker sheet,
+// a brass dial, a slider of moons, a sheep-counting game, a phone to put to bed, a sky lever, mugs, cassette
+// tapes, a microphone switch), Pip acts your answers out with props, the pencil writes each answer down, pages
+// flip over the clip, and the plan gets the rubber stamp before a pixel iris takes you home to unpack.
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { syncReminders, requestNotifications } from '../game/night.ts';
 import { edit, save } from '../game/store.ts';
+import { CSS_TOKENS } from '../gfx/palette.ts';
 import type { OwlLook } from '../owl/model.ts';
-import { speciesOf } from '../owl/species.ts';
-import { Px } from '../ui/icons.tsx';
+import { questionTransition, type TransitionKind } from '../ui/chrome/transition.ts';
 import { sceneRef, say } from '../ui/state.ts';
 import { bootReady, releaseBoot, wakeBoot } from './boot.ts';
-import { boardURL, boxURL, clipURL, pixelCorners, sheetURL, speckURL } from './cbart.ts';
-import { Cards, Hand, HoursPick, Row, Stamp, tapSound, WakeDial } from './clipboard.tsx';
+import { boardURL, boxURL, buttonFrame, cardFrame, clipURL, plaqueFrame, sheetURL, slotFrame, speckURL, stampToolURL, tagFrame, vignetteURL } from './cbart.ts';
+import { Hand, Row, StampInk, tapSound } from './clipboard.tsx';
 import { FloatText, type Line } from './floattext.tsx';
-import { iris } from './iris.ts';
+import { cutWipe, iris } from './iris.ts';
+import { frameCSS, pixelCorners } from './pixart.ts';
 import { InterviewRoom } from './room.ts';
-import { ALARM_NAME, answersFrom, applyAnswers, fmt, OUTRO, planOf, RELAX, SOUND_NAME, STEPS, toMin, type Answers, type Beat, type Step } from './script.ts';
+import { ALARM_NAME, answersFrom, applyAnswers, fmt, GOALS, OUTRO, planOf, RELAX, SOUND_NAME, STEPS, toMin, type Answers, type Beat, type Step } from './script.ts';
 import { VIGNETTES } from './vignettes.ts';
-import { frameStyle } from '../ui/px/frames.js';
-import { spriteURL } from '../ui/px/sprites.js';
+import { Ico, MicSwitch, MoonSlider, MugShelf, NameTag, PhoneSort, SheepGame, SkyLever, SpeciesDeck, StampPress, StickerSheet, TapeRack, WakeDial } from './widgets.tsx';
 import './intro.css';
 
 const ARTIFACT = import.meta.env.MODE === 'artifact';
 const DEV = import.meta.env.DEV;
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 type Phase = 'boot' | 'wake' | 'talk' | 'ask' | 'write' | 'stamp' | 'outro' | 'done';
+/** Some pages arrive with a pixel transition over the clipboard that suits them; the rest flip over the clip. */
+const PAGE_FX: Record<string, TransitionKind> = { species: 'feathers', goals: 'mosaic', wake: 'clock', hours: 'stars', latency: 'fireflies', chrono: 'sunrise', relax: 'leaves', plan: 'page' };
 
 let cssDone = false;
 function injectCSS() {
   if (cssDone) return;
   cssDone = true;
-  const k = Math.min(3, Math.max(1, Math.round(devicePixelRatio || 1)));
-  const css = `
-.obc-board{background:url(${boardURL(480, 780)}) 0 0/480px 780px,#7a5232;clip-path:${pixelCorners(5)}}
-.obc-sheet,.obc-page{background:url(${sheetURL(420, 720)}) 0 0/420px 720px,#f6eed8}
-.obc-under.u2{background:url(${sheetURL(420, 720, 9)}) 0 0/420px 720px,#efe4c8}
+  const css = CSS_TOKENS.replace(':root', '.ob,.ob-iris') + `
+.ob .ob-tap{background:url(${vignetteURL()}) 0 0/100% 100% no-repeat;image-rendering:pixelated}
 .obc-clip{background:url(${clipURL()}) 0 0/100% 100% no-repeat}
-.obc-opt{${frameStyle('parchment', 2)}}
-.obc-opt.on{${frameStyle('parchment_dark', 2)}}
-.obc-next{${frameStyle('button_green', 3)}}
-.obc-next:active:not(:disabled){${frameStyle('button_green_down', 3)}}
-.obc-next.gold{${frameStyle('button_gold', 3)}}
-.obc-next.gold:active:not(:disabled){${frameStyle('button_gold_down', 3)}}
-.obc-next:disabled{${frameStyle('button_disabled', 3)}}
-.obc-wbtn{${frameStyle('button_cream', 2)}}
-.obc-wbtn:active{${frameStyle('button_cream_down', 2)}}
-.obc-skip{${frameStyle('sticky_note', 2)}}
-.ft-who b{${frameStyle('plaque', 2)}}
+.ft-who b{${frameCSS(plaqueFrame(), 2)}}
+.obc-next{${frameCSS(buttonFrame('moss'), 2)}}
+.obc-next:active:not(:disabled){${frameCSS(buttonFrame('moss', true), 2)}}
+.obc-next:disabled{${frameCSS(buttonFrame('off'), 2)}}
+.wbtn.moss{${frameCSS(buttonFrame('moss'), 2)}}.wbtn.moss:active{${frameCSS(buttonFrame('moss', true), 2)}}
+.wbtn.honey{${frameCSS(buttonFrame('honey'), 2)}}.wbtn.honey:active{${frameCSS(buttonFrame('honey', true), 2)}}
+.wbtn.linen,.wd-btn{${frameCSS(buttonFrame('linen'), 2)}}.wbtn.linen:active,.wd-btn:active{${frameCSS(buttonFrame('linen', true), 2)}}
+.obc-skip{${frameCSS(tagFrame(), 2)}}
+.ws-card .ws-front,.wsg-tab,.wp-spot,.wk-lab,.wx-c,.wu-tag{${frameCSS(cardFrame(), 1)}}
+.ws-card.on .ws-front,.wsg-tab.on,.wp-spot.on,.wk-lab.on,.wx-c.on,.wu-tag.on{${frameCSS(cardFrame(true), 1)}}
+.ws-slot,.wg-board,.wsg-screen,.wp-home{${frameCSS(slotFrame(), 2)}}
+.wn-tag{${frameCSS(cardFrame(), 1)}}
 .obc-tick{background:url(${boxURL(true)}) 0 0/100% 100% no-repeat}
+.ob{--ob-tick:url(${boxURL(true)})}
 .obc-ink{-webkit-mask:url(${speckURL()}) 0 0/64px 64px;mask:url(${speckURL()}) 0 0/64px 64px}
-.ft-next{background:url(${spriteURL('arrow_down', 2 * k)}) 0 0/100% 100% no-repeat}
+.wst-tool{background:url(${stampToolURL()}) 0 0/100% 100% no-repeat}
+.obc-board{clip-path:${pixelCorners(4)}}
 `;
   const st = document.createElement('style');
   st.id = 'ob-css';
@@ -70,11 +74,26 @@ async function askMic(): Promise<boolean> {
   } catch { return false; }
 }
 
-/** A faint pencil sketch to fill a quiet page. */
-function Doodle(p: { kind: string; species: string }) {
-  const icon = p.kind === 'you' ? 'ob_owl_tawny' : p.kind === 'name' ? 'ob_owl_' + p.species : 'ob_pillows';
-  const note = p.kind === 'you' ? 'hello!' : p.kind === 'name' ? 'me?' : 'zzz';
-  return <><Px name={icon} size={84} class="obc-doodle" /><span class="obc-doodle-note">{note}</span></>;
+/** A faint pencil doodle to fill a quiet corner of a page (never an owl: Pip is always the 3D one). */
+function Doodle(p: { kind: string }) {
+  const icon = p.kind === 'you' ? 'star' : p.kind === 'name' ? 'moon' : 'pillow';
+  const note = p.kind === 'you' ? 'hello!' : p.kind === 'name' ? 'hoo?' : 'zzz';
+  return <span class="obc-doodle"><Ico n={icon} k={2} /><small>{note}</small></span>;
+}
+
+/** The size of an element, kept up to date (the clipboard's painted textures are made to measure). */
+function useBox(ref: { current: HTMLElement | null }, dep: unknown) {
+  const [s, setS] = useState({ w: 0, h: 0 });
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const up = () => setS({ w: Math.round(el.offsetWidth), h: Math.round(el.offsetHeight) });
+    up();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(up) : null;
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, [dep]);
+  return s;
 }
 
 export function Intro() {
@@ -105,6 +124,9 @@ export function Intro() {
   const lid = useRef(0);
   const sel = useRef<string | null>(null);
   const autoT = useRef(0);
+  const wipe = useRef<HTMLCanvasElement>(null);
+  const board = useRef<HTMLDivElement>(null);
+  const paper = useRef<HTMLDivElement>(null);
   const hour12 = save.value.settings.hour12;
 
   // ---------------------------------------------------------------- talking
@@ -116,7 +138,7 @@ export function Intro() {
     setLine({ id: ++lid.current, text: b.text, who: (aRef.current.name || 'Pip').toUpperCase() });
     setLineDone(false);
     if (!r) return;
-    if (b.shot) r.go(b.shot, b.cut);
+    if (b.shot) { if (b.cut && !fast) cutWipe(wipe.current); r.go(b.shot, b.cut); }
     if (b.mood) r.pip.setMood(b.mood);
     if (b.act) r.pip.play(b.act);
     if (!r.vigId) r.pip.lookAt = r.camera.position;
@@ -148,6 +170,7 @@ export function Intro() {
   const enterAsk = (i: number) => {
     const st = STEPS[i], r = room.current;
     setPhase('ask');
+    sound.play('wood_knock', { volume: 0.25, rate: 1.3 });
     if (!r) return;
     r.go(st.shot);
     const x = aRef.current;
@@ -185,7 +208,6 @@ export function Intro() {
     const f = st.field!, r = room.current;
     setPicked((p) => ({ ...p, [st.id]: true }));
     if (st.kind === 'species') {
-      tapSound('ui_check');
       setA((x) => ({ ...x, species: v }));
       r?.setLook(lookFor(v));
       r?.pip.play('hop');
@@ -194,13 +216,11 @@ export function Intro() {
     if (st.kind === 'multi') {
       const cur = aRef.current[f] as string[];
       const on = !cur.includes(v);
-      tapSound(on ? 'ui_check' : 'ui_back', 0.45);
       setA((x) => ({ ...x, [f]: on ? [...cur, v] : cur.filter((q) => q !== v) }));
-      if (on) { sel.current = `${st.id}:${v}`; vig(sel.current); }
+      if (on) { sel.current = `${st.id}:${v}`; vig(sel.current); r?.pip.play('nod'); }
       else if (sel.current === `${st.id}:${v}`) { sel.current = null; vig(null); }
       return;
     }
-    tapSound('ui_check', 0.5);
     setA((x) => ({ ...x, [f]: st.id === 'mic' ? v === 'yes' : v }));
     sel.current = `${st.id}:${v}`;
     vig(sel.current);
@@ -227,15 +247,24 @@ export function Intro() {
     if (phaseRef.current !== 'write' || holdWrite.current) return;
     const i = siRef.current, st = STEPS[i];
     const react = beatOf(st.react?.(aRef.current));
+    const fx = fast ? undefined : PAGE_FX[STEPS[i + 1]?.id ?? ''];
+    const el = board.current;
+    if (fx && el) {
+      // a pixel transition sweeps over the clipboard and the new page is under it
+      void questionTransition(() => { setSi(i + 1); }, { rect: el.getBoundingClientRect(), kind: fx, speed: 1.8 });
+      window.setTimeout(() => { if (phaseRef.current === 'write') startStep(i + 1, react); }, 700);
+      return;
+    }
     sound.play('paper_flip', { volume: 0.55 });
     setFlipFrom(i);
     setSi(i + 1);
-    // let the page flip over the clip before the board goes down and Pip reacts
-    window.setTimeout(() => { setFlipFrom(null); sound.play('wood_knock', { volume: 0.3 }); }, 760);
+    // the page flips over the clip, the clip snaps shut, then the board dips while Pip reacts
+    window.setTimeout(() => { setFlipFrom(null); sound.play('wood_knock', { volume: 0.35, rate: 1.1 }); }, 760);
     window.setTimeout(() => { if (phaseRef.current === 'write') startStep(i + 1, react); }, fast ? 0 : 620);
   };
 
   const approve = () => {
+    if (phaseRef.current !== 'ask') return;
     const r = room.current;
     setPhase('stamp');
     r?.pip.play('peck');
@@ -252,7 +281,7 @@ export function Intro() {
       sound.play('wings_flutter', { volume: 0.45 });
       talk(OUTRO, () => void finishAll());
       setPhase('outro');
-    }, 1300);
+    }, 1400);
   };
 
   const finishAll = async (skipped = false) => {
@@ -288,7 +317,7 @@ export function Intro() {
     injectCSS();
     const sc = sceneRef.current;
     let r: InterviewRoom | null = null;
-    try { if (sc) r = new InterviewRoom(lookFor(aRef.current.species), sc.quality); } catch (e) { console.error('interview room failed', e); }
+    try { if (sc) r = new InterviewRoom(lookFor(aRef.current.species), sc.quality, typeof sc.renderView === 'function' ? sc : null); } catch (e) { console.error('interview room failed', e); }
     if (!sc || !r) { releaseBoot(); return undefined; }
     room.current = r;
     sc.setStage(r);
@@ -298,11 +327,13 @@ export function Intro() {
     for (let i = 0; i < 30; i++) r.update(1 / 30, 0);
     const q = new URLSearchParams(location.search);
     const devStep = DEV ? q.get('ob') : null;
-    (window as unknown as { hhIntro: unknown }).hhIntro = { room: r, a: () => aRef.current, next: () => void next(), flip: () => { holdWrite.current = false; afterWrite(); } };
+    (window as unknown as { hhIntro: unknown }).hhIntro = { room: r, a: () => aRef.current, next: () => void next(), flip: () => { holdWrite.current = false; afterWrite(); }, approve: () => approve() };
     let alive = true;
     (async () => {
       if (devStep) {
         releaseBoot();
+        // dev pages: skip the splash's exit animation
+        { const bt = document.getElementById('boot'); if (bt) bt.style.display = 'none'; }
         const i = Math.max(0, STEPS.findIndex((s) => s.id === devStep));
         r.pip.pose = 'stand';
         setSi(i); siRef.current = i;
@@ -365,8 +396,8 @@ export function Intro() {
     const r = room.current;
     if (!r) return;
     const up = phase === 'ask' || phase === 'write' || phase === 'stamp';
-    const board = up || phase === 'talk';
-    r.frame = wide ? { x: board ? 0.17 : 0, y: 0 } : { x: 0, y: up ? 0.27 : phase === 'talk' ? 0.12 : 0.05 };
+    const brd = up || phase === 'talk';
+    r.frame = wide ? { x: brd ? 0.17 : 0, y: 0 } : { x: 0, y: up ? 0.27 : phase === 'talk' ? 0.12 : 0.05 };
   }, [phase, wide, room.current]);
 
   // live answers into the room
@@ -389,18 +420,22 @@ export function Intro() {
   const st = STEPS[si];
   const plan = useMemo(() => planOf(a), [a]);
   const canNext = !st || st.kind !== 'choice' || !!picked[st.id] || !!written[si];
+  const showBoard = phase !== 'boot' && phase !== 'wake' && phase !== 'done';
+  const bsz = useBox(board, showBoard);
+  const psz = useBox(paper, showBoard);
+
   const pageOf = (i: number, live: boolean) => {
     const s = STEPS[i];
     if (!s) return null;
     return (
-      <div class={'obc-page' + (live ? '' : ' out')} key={'pg' + i}>
+      <div class={'obc-page' + (live ? '' : ' out') + ' pg-' + s.id} key={'pg' + i} style={psz.w ? `background-image:url(${sheetURL(psz.w, psz.h, 3 + i)})` : ''}>
         <div class="obc-head">
           <span class="obc-no">No. {String(i + 1).padStart(2, '0')}<small>/{STEPS.length}</small></span>
           <span class="obc-prog">{STEPS.map((_, k) => <i key={k} class={k < i ? 'done' : k === i ? 'now' : ''} />)}</span>
         </div>
         <h2 class="obc-title">{s.title}</h2>
         <div class="obc-body">{body(s, i, live)}</div>
-        {(s.kind === 'text' || s.kind === 'hours') && <Doodle kind={s.id} species={a.species} />}
+        {s.kind === 'text' && <Doodle kind={s.id} />}
         {s.kind !== 'plan' && (
           <div class="obc-foot">
             <span class={'obc-ans' + ((written[i]?.length ?? 0) > 40 ? ' longer' : (written[i]?.length ?? 0) > 22 ? ' long' : '')}><small>Answer:</small>{written[i] && <Hand key={written[i]} text={written[i]} fast={!live || fast} onDone={live ? afterWrite : undefined} />}</span>
@@ -408,12 +443,12 @@ export function Intro() {
           </div>
         )}
         {s.kind === 'plan' && live && (
-          <div class="obc-foot">
+          <div class="obc-foot plan">
             <label class="obc-check" onClick={() => { setRemind(!remind); tapSound('ui_toggle', 0.4); }}><img src={boxURL(remind)} alt="" />Remind me to wind down</label>
-            <button type="button" class="obc-next gold" disabled={phase !== 'ask'} onClick={() => void next()}>Approve!</button>
+            <StampPress disabled={phase !== 'ask'} onStamp={approve} />
           </div>
         )}
-        {s.kind === 'plan' && (phase === 'stamp' || stamped) && live && <Stamp onHit={onStamp} />}
+        {s.kind === 'plan' && (phase === 'stamp' || stamped) && live && <StampInk onHit={onStamp} />}
       </div>
     );
   };
@@ -421,59 +456,42 @@ export function Intro() {
   const body = (s: Step, i: number, live: boolean) => {
     const set = <K extends keyof Answers>(k: K, v: Answers[K]) => { setA((x) => ({ ...x, [k]: v })); setPicked((p) => ({ ...p, [s.id]: true })); };
     const interactive = live && phase === 'ask';
-    switch (s.kind) {
-      case 'text': {
+    const onPick = (v: string) => interactive && pick(s, v);
+    const onPeek = (v: string | null) => interactive && peek(s, v);
+    const chosen = (f: keyof Answers) => (picked[s.id] || written[i] ? String(a[f]) : null);
+    switch (s.id) {
+      case 'you': case 'name': {
         const k = s.field as 'you' | 'name';
         return (
-          <div class="obc-text">
-            <label class="obc-label">{k === 'you' ? 'Your name' : 'Owl’s name'}</label>
-            <div class="obc-line">
-              <img class="obc-pen" src={spriteURL('ob_pencil', 2)} alt="" />
-              <input class="obc-input" value={a[k]} maxLength={16} placeholder={k === 'you' ? 'write here...' : 'Pip'} disabled={!interactive} spellcheck={false} autocomplete="off"
-                onInput={(e) => { set(k, (e.target as HTMLInputElement).value); sound.play('ui_type', { volume: 0.3, rate: 0.9 + Math.random() * 0.3, gap: 30 }); room.current?.pip.play('peck'); }}
-                onKeyDown={(e) => { if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); void next(); } }} />
-            </div>
-            <div class="obc-chips">
-              {(k === 'name' ? ['Pip', 'Hoot', 'Mochi', 'Biscuit', 'Luna'] : []).map((n) => <button type="button" class="obc-chip" key={n} disabled={!interactive} onClick={() => { set('name', n); tapSound('pencil', 0.4); room.current?.sparkle(room.current.pip.headWorld, 4); }}>{n}</button>)}
-            </div>
-          </div>
+          <NameTag kind={k} value={a[k]} placeholder={k === 'you' ? 'write here...' : 'Pip'} disabled={!interactive} chips={k === 'name' ? ['Pip', 'Hoot', 'Mochi', 'Biscuit', 'Luna', 'Juniper'] : undefined}
+            onInput={(v) => { set(k, v); room.current?.pip.play('peck'); }} onEnter={() => void next()}
+            onChip={(n) => { set('name', n); room.current?.sparkle(room.current.pip.headWorld, 4); }} />
         );
       }
-      case 'species': {
-        const sp = speciesOf(a.species);
-        return (
-          <>
-            <Cards opts={s.opts!} value={[a.species]} cols={wide ? 2 : 3} small={!wide} onPick={(v) => interactive && pick(s, v)} onPeek={(v) => interactive && peek(s, v)} />
-            <p class="obc-blurb"><b>{sp.name}</b> <i>{sp.latin}</i><br />{sp.blurb}</p>
-          </>
-        );
-      }
-      case 'choice': case 'multi': {
-        const f = s.field!;
-        const value = s.id === 'mic' ? (picked.mic ? [a.mic ? 'yes' : 'no'] : []) : s.kind === 'multi' ? (a[f] as string[]) : picked[s.id] ? [String(a[f])] : [];
-        const many = (s.opts?.length ?? 0) > 6;
-        const cols = many ? (wide ? 3 : 4) : 2;
-        return (
-          <>
-            {s.id === 'mic' && <p class="obc-blurb">Pip listens on this device only, for snores, sleep-talk and tossing. {ARTIFACT ? 'This preview can’t use the microphone; the full app can.' : 'You can change it any time in Settings.'}</p>}
-            <Cards opts={s.opts!} value={value} multi={s.kind === 'multi'} cols={cols} small={many} rows={s.opts!.length <= 4} onPick={(v) => interactive && pick(s, v)} onPeek={(v) => interactive && peek(s, v)} />
-            {s.kind === 'multi' && <small class="obc-note">Pick as many as you like.</small>}
-          </>
-        );
-      }
-      case 'dial': return <WakeDial value={a.wake} hour12={hour12} onChange={(v) => interactive && set('wake', v)} />;
-      case 'hours': return <HoursPick value={a.hours} onChange={(v) => interactive && set('hours', v)} />;
+      case 'species': return <SpeciesDeck opts={s.opts!} value={a.species} look={(id) => ({ ...lookFor(id), outfit: {} })} onPick={(v) => { if (interactive) pick(s, v); }} onPeek={(v) => { if (interactive) peek(s, v); }} interactive={interactive} />;
+      case 'goals': return <StickerSheet opts={GOALS} value={a.goals} onToggle={(v) => { if (interactive) pick(s, v); }} onPeek={(v) => { if (interactive) peek(s, v); }} interactive={interactive} />;
+      case 'wake': return <WakeDial value={a.wake} hour12={hour12} interactive={interactive} onChange={(v) => interactive && set('wake', v)} />;
+      case 'hours': return <MoonSlider value={a.hours} interactive={interactive} onChange={(v) => interactive && set('hours', v)} />;
+      case 'latency': return <SheepGame value={chosen('latency')} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive} />;
+      case 'phone': return <PhoneSort value={chosen('phone')} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive} />;
+      case 'chrono': return <SkyLever value={chosen('chrono')} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive} />;
+      case 'caffeine': return <MugShelf value={chosen('caffeine')} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive} />;
+      case 'relax': return <TapeRack opts={RELAX} value={a.relax} onToggle={(v) => { if (interactive) pick(s, v); }} onPeek={(v) => { if (interactive) peek(s, v); }} interactive={interactive} />;
+      case 'mic': return (
+        <MicSwitch value={picked.mic || written[i] ? a.mic : null} onPick={(v) => { onPick(v); }} onPeek={(v) => { onPeek(v); }} interactive={interactive}
+          note={`Pip listens on this device only. ${ARTIFACT ? 'This preview can’t use the microphone; the full app can.' : 'You can change it any time in Settings.'}`} />
+      );
       case 'plan': {
-        const d = (k: number) => (fast ? 0 : 300 + k * 700);
+        const d = (k: number) => (fast ? 0 : 300 + k * 650);
         return (
           <div class="obc-plan">
             <Row icon="moon" label="Bedtime"><Hand text={fmt(plan.bed, hour12)} delay={d(0)} fast={!live || fast} /></Row>
             <Row icon="candle" label="Wind down"><Hand text={`${fmt(plan.windDown, hour12)}`} delay={d(1)} fast={!live || fast} /></Row>
             <Row icon="alarm" label="Wake up"><Hand text={`${fmt(plan.wake, hour12)}`} delay={d(2)} fast={!live || fast} /></Row>
-            <Row icon="music" label="Alarm"><Hand text={ALARM_NAME[plan.alarm] ?? 'Music box'} delay={d(3)} fast={!live || fast} /></Row>
-            <Row icon={RELAX.find((r) => r.sound === plan.soundscape)?.icon ?? 'rain'} label="Sleep sound"><Hand text={SOUND_NAME[plan.soundscape] ?? 'rain'} delay={d(4)} fast={!live || fast} /></Row>
+            <Row icon="note" label="Alarm"><Hand text={ALARM_NAME[plan.alarm] ?? 'Music box'} delay={d(3)} fast={!live || fast} /></Row>
+            <Row icon={RELAX.find((r) => r.sound === plan.soundscape)?.art ?? 'rain'} label="Sleep sound"><Hand text={SOUND_NAME[plan.soundscape] ?? 'rain'} delay={d(4)} fast={!live || fast} /></Row>
             {plan.blocker && <Row icon="shield" label="Bedtime Blocker"><Hand text={a.phone === 'nightly' ? 'On' : 'Ready'} delay={d(5)} fast={!live || fast} /></Row>}
-            {plan.tips.length > 0 && <div class="obc-tips">{plan.tips.map((t, k) => <span key={t} class="obc-tip"><Hand text={'• ' + t} delay={d(6 + k)} fast={!live || fast} /></span>)}</div>}
+            {plan.tips.length > 0 && <div class="obc-tips">{plan.tips.map((t, k) => <span key={t} class="obc-tip"><Hand text={'~ ' + t} delay={d(6 + k)} fast={!live || fast} /></span>)}</div>}
           </div>
         );
       }
@@ -481,19 +499,19 @@ export function Intro() {
     return null;
   };
 
-  const showBoard = phase !== 'boot' && phase !== 'wake' && phase !== 'done';
   return (
-    <div class={'ob' + (wide ? ' wide' : '') + (fast ? ' ob-fast' : '') + ((STEPS[si]?.opts?.length ?? 0) > 4 ? ' tall' : '')} data-phase={phase}>
+    <div class={'ob' + (wide ? ' wide' : '') + (fast ? ' ob-fast' : '') + (st ? ' at-' + st.id : '')} data-phase={phase}>
+      <canvas class="ob-wipe" ref={wipe} />
       <div class="ob-tap" onPointerDown={onTap} />
       <div class="ob-ft">
         <FloatText line={phase === 'boot' || phase === 'wake' ? null : line} onTalk={onTalk} done={onLineDone} finish={finish} fast={fast} low={sceneRef.current?.quality === 'low'} />
       </div>
       {showBoard && (
-        <div class={'obc' + (flipFrom !== null ? ' lift' : '') + (phase === 'outro' ? ' fly' : '')}>
-          <div class="obc-board" />
-          <div class="obc-paper">
-            <div class="obc-under u2" />
-            <div class="obc-under obc-sheet" />
+        <div class={'obc' + (flipFrom !== null ? ' lift' : '') + (phase === 'outro' ? ' fly' : '')} onAnimationEnd={(e) => { if ((e as AnimationEvent).animationName === 'obc-thud') (e.currentTarget as HTMLElement).classList.remove('thud'); }}>
+          <div class="obc-board" ref={board} style={bsz.w ? `background-image:url(${boardURL(bsz.w, bsz.h)})` : ''} />
+          <div class="obc-paper" ref={paper}>
+            <div class="obc-under u2" style={psz.w ? `background-image:url(${sheetURL(psz.w, psz.h, 9)})` : ''} />
+            <div class="obc-under" style={psz.w ? `background-image:url(${sheetURL(psz.w, psz.h, 7)})` : ''} />
             {pageOf(si, true)}
             {flipFrom !== null && pageOf(flipFrom, false)}
           </div>

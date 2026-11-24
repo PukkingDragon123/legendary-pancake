@@ -31,7 +31,7 @@ function blade(base: Vec3, len: number, w: number, pitch: number, yaw: number, c
 // ------------------------------------------------------------------ plants
 
 add({
-  id: 'monstera', name: 'Swiss-Cheese Monstera', cat: 'plants', price: 340, rarity: 'uncommon', size: [2, 2],
+  id: 'monstera', model: 'items/monstera.glb', name: 'Swiss-Cheese Monstera', cat: 'plants', price: 340, rarity: 'uncommon', size: [2, 2],
   blurb: 'Big split leaves that make any corner feel like a jungle nap spot.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -56,7 +56,7 @@ add({
 });
 
 add({
-  id: 'cactus_trio', name: 'Prickly Pals Trio', cat: 'plants', price: 150, rarity: 'common', size: [1, 1], small: true,
+  id: 'cactus_trio', model: 'items/cactus_trio.glb', name: 'Prickly Pals Trio', cat: 'plants', price: 150, rarity: 'common', size: [1, 1], small: true,
   blurb: 'A barrel, a column and a bunny-ear cactus. Low water, high personality.',
   build: () => {
     const out: BoxSpec[] = [box(0, 0, 0, 15, 0.8, 7, wx(WD.light, 0))];
@@ -76,7 +76,7 @@ add({
 });
 
 add({
-  id: 'hanging_ivy', name: 'Trailing Ivy Pot', cat: 'plants', price: 200, rarity: 'uncommon', size: [1, 1], wall: true,
+  id: 'hanging_ivy', model: 'items/hanging_ivy.glb', name: 'Trailing Ivy Pot', cat: 'plants', price: 200, rarity: 'uncommon', size: [1, 1], wall: true,
   blurb: 'A macrame-hung pot with ivy that tumbles halfway down the wall.',
   build: () => {
     const out: BoxSpec[] = [box(0, 20, 0, 1.4, 1.4, 3, metal(MET.iron)), box(0, 19, 2.6, 1, 2, 1, metal(MET.iron)), box(0, 20.6, -0.6, 3, 3, 0.6, metal(MET.iron))];
@@ -101,7 +101,7 @@ add({
 });
 
 add({
-  id: 'maple_bonsai', name: 'Ember Maple Bonsai', cat: 'plants', price: 0, gems: 40, rarity: 'epic', size: [1, 1], small: true,
+  id: 'maple_bonsai', model: 'items/maple_bonsai.glb', name: 'Ember Maple Bonsai', cat: 'plants', price: 0, gems: 40, rarity: 'epic', size: [1, 1], small: true,
   blurb: 'A tiny maple in permanent autumn. Somebody trims it with nail scissors at midnight.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -121,7 +121,7 @@ add({
 });
 
 add({
-  id: 'window_flower_box', name: 'Geranium Window Box', cat: 'plants', price: 170, rarity: 'common', size: [2, 1], small: true,
+  id: 'window_flower_box', model: 'items/window_flower_box.glb', name: 'Geranium Window Box', cat: 'plants', price: 170, rarity: 'common', size: [2, 1], small: true,
   blurb: 'Scarlet geraniums, cheerful daisies and lobelia spilling blue over the edge.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -148,7 +148,7 @@ add({
 });
 
 add({
-  id: 'moss_terrarium', name: 'Moss Terrarium', cat: 'plants', price: 260, rarity: 'rare', size: [1, 1], small: true,
+  id: 'moss_terrarium', model: 'items/moss_terrarium.glb', name: 'Moss Terrarium', cat: 'plants', price: 260, rarity: 'rare', size: [1, 1], small: true,
   blurb: 'A whole forest floor under glass, with two toadstools and a very tiny path.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -167,7 +167,7 @@ add({
 });
 
 add({
-  id: 'fiddle_fig', name: 'Fiddle-Leaf Fig', cat: 'plants', price: 380, rarity: 'uncommon', size: [1, 1],
+  id: 'fiddle_fig', model: 'items/fiddle_fig.glb', name: 'Fiddle-Leaf Fig', cat: 'plants', price: 380, rarity: 'uncommon', size: [1, 1],
   blurb: 'Tall, glossy and a little dramatic. Turns its leaves towards the morning window.',
   build: () => {
     const out: BoxSpec[] = [];
@@ -191,7 +191,7 @@ add({
 // ------------------------------------------------------------------ rugs
 
 add({
-  id: 'braided_rug', name: 'Braided Rag Rug', cat: 'rugs', price: 160, rarity: 'common', size: [2, 2], rug: true, flatItem: true,
+  id: 'braided_rug', model: 'items/braided_rug.glb', name: 'Braided Rag Rug', cat: 'rugs', price: 160, rarity: 'common', size: [2, 2], rug: true, flatItem: true,
   blurb: 'Coiled from old scarves in sunset colours. Warm under cold morning feet.',
   sit: [{ x: 0, y: 1, z: 0 }],
   build: () => {
@@ -207,7 +207,7 @@ add({
 });
 
 add({
-  id: 'kilim_runner', name: 'Kilim Hall Runner', cat: 'rugs', price: 220, rarity: 'uncommon', size: [3, 1], rug: true, flatItem: true,
+  id: 'kilim_runner', model: 'items/kilim_runner.glb', name: 'Kilim Hall Runner', cat: 'rugs', price: 220, rarity: 'uncommon', size: [3, 1], rug: true, flatItem: true,
   blurb: 'Long, flat-woven and full of little diamonds. Points the way to the kitchen.',
   build: () => {
     const red = R('#b8433a'), cream = R('#f2e4c8'), navy = R('#2f3f6a'), gold = R('#e8b04a');
@@ -228,7 +228,7 @@ add({
 });
 
 add({
-  id: 'patch_rug', name: 'Patchwork Quilt Rug', cat: 'rugs', price: 240, rarity: 'uncommon', size: [2, 2], rug: true, flatItem: true,
+  id: 'patch_rug', model: 'items/patch_rug.glb', name: 'Patchwork Quilt Rug', cat: 'rugs', price: 240, rarity: 'uncommon', size: [2, 2], rug: true, flatItem: true,
   blurb: 'Every square is a different pyjama Pip has outgrown. There have been many growth spurts.',
   sit: [{ x: 0, y: 1, z: 0 }], sleep: { x: 0, y: 1, z: 0, rot: 90 },
   build: () => {
@@ -244,7 +244,7 @@ add({
 });
 
 add({
-  id: 'sheepskin_rug', name: 'Cloud Sheepskin', cat: 'rugs', price: 280, rarity: 'rare', size: [2, 2], rug: true, flatItem: true,
+  id: 'sheepskin_rug', model: 'items/sheepskin_rug.glb', name: 'Cloud Sheepskin', cat: 'rugs', price: 280, rarity: 'rare', size: [2, 2], rug: true, flatItem: true,
   blurb: 'Impossibly fluffy. Pip insists it is a cloud that fell down and decided to stay.',
   sit: [{ x: 0, y: 2, z: 0 }], sleep: { x: 0, y: 2, z: 0 },
   build: () => {
@@ -259,7 +259,7 @@ add({
 });
 
 add({
-  id: 'oak_leaf_rug', name: 'Oak Leaf Rug', cat: 'rugs', price: 200, rarity: 'uncommon', size: [2, 2], rug: true, flatItem: true,
+  id: 'oak_leaf_rug', model: 'items/oak_leaf_rug.glb', name: 'Oak Leaf Rug', cat: 'rugs', price: 200, rarity: 'uncommon', size: [2, 2], rug: true, flatItem: true,
   blurb: 'A giant felt oak leaf, veins and all, that fell straight off the hollow’s own tree.',
   build: () => {
     const g = R('#6a9a45'), vein = R('#c9d88a');

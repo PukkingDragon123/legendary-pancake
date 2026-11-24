@@ -3,6 +3,7 @@
 import { computed, signal } from '@preact/signals';
 import type { OwlLook, OutfitSlot } from '../owl/model.ts';
 import { PIECES } from '../owl/outfits.ts';
+import { migrateSpecies } from '../owl/species.ts'; // [owl3]
 import { PALETTE, type Skin } from '../owl/palette.ts';
 import type { SleepSession } from '../sleep/types.ts';
 import { defaultBlockConfig, type BlockConfig } from './blocker.ts';
@@ -141,6 +142,7 @@ function load(): Save {
       if (s.coins === undefined && s.acorns !== undefined) { s.coins = s.acorns; delete s.acorns; }
       if (s.gems === undefined && s.stones !== undefined) { s.gems = s.stones; delete s.stones; }
       s.v = 2;
+      migrateSpecies(s); // [owl3] the owl line is eight species: retired ones move to their nearest relative
       // shallow-merge new fields into older saves
       return { ...f, ...s, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker } };
     }

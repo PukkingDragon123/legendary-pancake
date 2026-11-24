@@ -24,7 +24,9 @@ export const FLOOR_Y: Record<FloorId, number> = { f1: 4, f2: 4 + STORY, f3: 4 + 
 /** underside of the roof over the attic */
 export const ROOF_Y = FLOOR_Y.f3 + ROOM_H;
 /** half-angle of the dollhouse cut in the front of the trunk (radians, 0 = facing the camera) */
-export const OPEN_A = 0.92;
+export const OPEN_A = (7 / 48) * Math.PI * 2;
+/** one of the bark's 48 faces (radians); windows sit on face boundaries so their openings are whole faces */
+export const FACE = (Math.PI * 2) / 48;
 
 export const FLOOR_NAME: Record<FloorId, string> = { f1: 'Living Room', f2: 'Bedroom', f3: 'Attic Observatory' };
 export const FLOOR_SHORT: Record<FloorId, string> = { f1: '1F', f2: '2F', f3: '3F' };
@@ -53,7 +55,7 @@ export interface RoomPlan {
 // Ladders hug the wall near the cut so you can see Pip climb; each floor's hatch sits above the ladder
 // below. The front door opens to the right onto the porch, the bedroom door onto the balcony.
 export const LADDER_A: Record<'f1' | 'f2', number> = { f1: -1.32, f2: 2.05 };
-export const DOOR_A = 1.3;
+export const DOOR_A = 1.16;
 export const PLANS: Record<FloorId, RoomPlan> = {
   f1: {
     id: 'f1', y: FLOOR_Y.f1,
@@ -61,7 +63,7 @@ export const PLANS: Record<FloorId, RoomPlan> = {
       { kind: 'ladder', a: LADDER_A.f1, r: 64, size: 9 },
       { kind: 'door', a: DOOR_A, r: 64, size: 12 },
     ],
-    windows: [{ a: 2.28, v: 34, r: 9 }, { a: -2.36, v: 34, r: 9 }],
+    windows: [{ a: FACE * 19, v: 34, r: 9 }, { a: -FACE * 18, v: 34, r: 9 }],
     gaps: [],
   },
   f2: {
@@ -71,25 +73,30 @@ export const PLANS: Record<FloorId, RoomPlan> = {
       { kind: 'ladder', a: LADDER_A.f2, r: 64, size: 9 },
       { kind: 'door', a: DOOR_A, r: 64, size: 12 },
     ],
-    windows: [{ a: -2.25, v: 34, r: 9 }, { a: 2.95, v: 38, r: 7 }],
+    windows: [{ a: -FACE * 18, v: 34, r: 9 }, { a: FACE * 23, v: 38, r: 7 }],
     gaps: [],
   },
   f3: {
     id: 'f3', y: FLOOR_Y.f3,
-    fixtures: [{ kind: 'hatch', a: LADDER_A.f2, r: 60, size: 13 }],
-    windows: [{ a: Math.PI, v: 32, r: 15 }, { a: -1.75, v: 32, r: 8 }, { a: 1.75, v: 32, r: 8 }],
+    fixtures: [{ kind: 'hatch', a: LADDER_A.f2, r: 60, size: 13 }, { kind: 'ladder', a: Math.atan2(30, -38), r: 54, size: 9 }],
+    windows: [{ a: Math.PI, v: 32, r: 15 }, { a: -FACE * 13, v: 32, r: 8 }, { a: FACE * 13, v: 32, r: 8 }],
     gaps: [],
   },
 };
 // wall gaps: the cut, every window, door and ladder
 for (const p of Object.values(PLANS)) {
-  for (const w of p.windows) p.gaps.push({ a: w.a, half: (w.r + 4) / R_IN, from: w.v - w.r - 4, to: w.v + w.r + 4 });
+  // windows (with the candle sconce beside each, see art/lowpix/house/_src/interior.py)
+  for (const w of p.windows) p.gaps.push({ a: w.a, half: (w.r + 13) / R_IN, from: w.v - w.r - 6, to: w.v + w.r + 4 });
   for (const f of p.fixtures) {
     if (f.kind === 'door') p.gaps.push({ a: f.a, half: 16 / R_IN, from: 0, to: 44 });
     if (f.kind === 'ladder') p.gaps.push({ a: f.a, half: 10 / R_IN, from: 0, to: ROOM_H });
     if (f.kind === 'hatch') p.gaps.push({ a: f.a, half: 9 / R_IN, from: 0, to: 30 });
   }
 }
+// the peg rails by the doors (art/lowpix/house/_src/interior.py)
+PLANS.f1.gaps.push({ a: DOOR_A - 0.42, half: 10 / R_IN, from: 24, to: 44 });
+PLANS.f2.gaps.push({ a: DOOR_A - 0.4, half: 10 / R_IN, from: 22, to: 40 });
+PLANS.f3.gaps.push({ a: -2.4, half: 10 / R_IN, from: 26, to: 42 });
 
 // ------------------------------------------------------------------ floor grid
 
@@ -144,3 +151,52 @@ export function wallSlotFree(fid: FloorId, s: number, v0: number, v1: number): b
 
 /** Is there wall at this angle (not the cut)? */
 export const hasWall = (a: number) => Math.abs(wrapA(a)) >= OPEN_A;
+
+// ------------------------------------------------------------------ the oak's outline and anchors
+// (mirrored in art/lowpix/house/_lib/hx.py and _src/*.py: keep the numbers in step)
+
+/** Outer radius of the bark at height y (px): a flared foot, a swelling at the second floor, a waist under the crown. */
+const TRUNK_R: [number, number][] = [[0, RO + 20], [8, RO + 12], [18, RO + 6.5], [30, RO + 3], [46, RO + 1.2], [66, RO + 0.6], [84, RO + 2.2], [102, RO + 1.5],
+  [120, RO - 0.2], [138, RO - 0.6], [160, RO - 1.5], [180, RO - 0.8], [198, RO + 1.2], [210, RO + 3.0]];
+export function trunkR(y: number): number {
+  for (let i = 0; i < TRUNK_R.length - 1; i++) {
+    const [y0, r0] = TRUNK_R[i], [y1, r1] = TRUNK_R[i + 1];
+    if (y >= y0 && y <= y1) { let t = (y - y0) / (y1 - y0); t = t * t * (3 - 2 * t); return r0 + (r1 - r0) * t; }
+  }
+  return y < 0 ? TRUNK_R[0][1] : TRUNK_R[TRUNK_R.length - 1][1];
+}
+/** A point built facing the front, swung round the trunk axis to angle a (house px). */
+export const swingPt = (x: number, y: number, z: number, a: number): [number, number, number] => [x * Math.cos(a) + z * Math.sin(a), y, -x * Math.sin(a) + z * Math.cos(a)];
+export const LIMB_A = 2.28;
+export const CHIMNEY_A = -2.02;
+/** the platform on the great limb (its deck centre) and the perch Pip launches from */
+export const PLATFORM: [number, number, number] = swingPt(0, FLOOR_Y.f2 + 6, RO + 66, LIMB_A);
+export const LAUNCH: [number, number, number] = swingPt(0, FLOOR_Y.f2 + 6 + 22, RO + 66 + 15, LIMB_A);
+/** where each room's lantern hangs (the glowing body, house px) */
+export const LAMP_AT: Record<FloorId, [number, number, number]> = { f1: [0, FLOOR_Y.f2 - SLAB - 26, -6], f2: [0, FLOOR_Y.f3 - SLAB - 26, -6], f3: [0, ROOF_Y - 26, -6] };
+export const PORCH_AT: [number, number, number] = swingPt(0, FLOOR_Y.f1, RO + 26, DOOR_A);
+export const BALCONY_AT: [number, number, number] = swingPt(0, FLOOR_Y.f2, RO + 15, DOOR_A);
+export const CHIMNEY_TOP: [number, number, number] = swingPt(0, ROOF_Y + 70, RO + 10, CHIMNEY_A);
+/** the bark loft's ring heights in a floor band (art/lowpix/house/_src/trunk.py ring_ys) */
+export function bandRings(fid: FloorId): number[] {
+  const y0 = fid === 'f1' ? 0 : FLOOR_Y[fid] - SLAB, y1 = fid === 'f3' ? ROOF_Y : FLOOR_Y[fid === 'f1' ? 'f2' : 'f3'] - SLAB;
+  const n = Math.max(2, Math.round((y1 - y0) / 12));
+  return Array.from({ length: n + 1 }, (_, i) => y0 + ((y1 - y0) * i) / n);
+}
+/** The real openings cut through the trunk for a floor's windows (whole bark faces): angle, half-angle, y range (px). */
+export function windowHoles(fid: FloorId): { a: number; half: number; y0: number; y1: number }[] {
+  const ys = bandRings(fid);
+  return PLANS[fid].windows.map((w) => {
+    const half = Math.ceil((w.r + 2) / (RO * FACE)) * FACE;
+    const y = FLOOR_Y[fid] + w.v;
+    let y0 = Infinity, y1 = -Infinity;
+    for (let i = 0; i < ys.length - 1; i++) if (ys[i + 1] > y - w.r - 1 + 0.5 && ys[i] < y + w.r + 1 - 0.5) { y0 = Math.min(y0, ys[i]); y1 = Math.max(y1, ys[i + 1]); }
+    return { a: w.a, half, y0, y1 };
+  });
+}
+/** hatch holes in the floors: each floor's hatch sits above the ladder from the floor below: [x, z, half] */
+export const HOLES: Record<FloorId, [number, number, number][]> = {
+  f1: [],
+  f2: [[...polar(LADDER_A.f1, 60), 10] as [number, number, number]],
+  f3: [[...polar(LADDER_A.f2, 60), 10] as [number, number, number]],
+};
