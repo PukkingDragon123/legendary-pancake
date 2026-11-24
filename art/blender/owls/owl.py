@@ -1204,7 +1204,10 @@ def export(O, F):
     }
     json.dump(meta, open(os.path.join(F.out, O.id + '.rig.json'), 'w'), indent=1)
     import pack
-    pack.webp_glb(raw, os.path.join(OUT_GLB, O.id + '.glb'), lossless=True, normals=False)
+    dst = os.path.join(OUT_GLB, O.id + '.glb')
+    pack.webp_glb(raw, dst, lossless=True, normals=False)
+    if os.path.getsize(dst) > 1_000_000:  # (a very busy atlas, the queen's regalia: a careful lossy WebP keeps it under ~850 KB)
+        pack.webp_glb(raw, dst, quality=80, normals=False)
     F.log('exported', os.path.join(OUT_GLB, O.id + '.glb'), meta['tris'], 'tris')
 
 
