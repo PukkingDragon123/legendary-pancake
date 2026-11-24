@@ -110,7 +110,8 @@ async function boot() {
   if (phase.value === 'sleeping') void resumeNight();
   document.addEventListener('visibilitychange', () => { if (!document.hidden && phase.value === 'sleeping') notePeek(); });
   void connectBlocker();
-  if (import.meta.env.MODE !== 'artifact') void registerSW();
+  // no service worker inside the artifact frame or on itch.io (its CDN serves every upload from a new path)
+  if (import.meta.env.MODE !== 'artifact' && import.meta.env.MODE !== 'itch') void registerSW();
   watchLevel();
   // a #breathe link (from the bedtime blocker) opens the breathing exercise
   const route = () => { if (location.hash === '#breathe' && save.value.onboarded && phase.value === 'day') { tab.value = 'breathe'; panel.value = null; } };

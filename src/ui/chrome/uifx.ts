@@ -25,8 +25,9 @@ type Win = Window & { __chromeT?: number };
 
 const R = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-const MAGIC = ['#b4a9c9', '#d3cce0', '#aec8cc', '#f4eedd', '#f1d39a', '#d9aca4'].map((c) => calm(c));
-const CONFETTI = ['#c0866a', '#f1d39a', '#86a06a', '#86a9b0', '#d9aca4', '#b4a9c9', '#f4eedd', '#dcb072'].map((c) => calm(c));
+// [ui4] v4: magic glows violet, sky and gold; confetti is properly festive
+const MAGIC = ['#9c62b0', '#bc8acb', '#5ea8d9', '#b4dcf2', '#fff6d2', '#ecc03c'];
+const CONFETTI = ['#ba4f57', '#ecc03c', '#46a066', '#3f8cc2', '#d06e70', '#804596', '#fff6d2', '#e8a830'];
 const fr = (base: string, n: number) => Array.from({ length: n }, (_, i) => `${base}_${i}`);
 const g8 = (a: string[]) => a.map((c) => calm(c));
 const DUST = g8(['#d8cba9', '#c9b78d', '#e6dcc2', '#b5a27c']);

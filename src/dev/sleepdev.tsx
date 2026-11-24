@@ -9,7 +9,7 @@ import '../ui/style.css';
 import { installPixelSkin } from '../ui/pxskin.ts';
 import { Art } from '../ui/px/sleepart.ts';
 import { candle, GIFT_LOOK, moon, mug, nest, nightWindow, phone, present, sack, songbird, stickerURL } from '../ui/px/sleepprops.ts';
-import { CH, CW, FINISHES, paintCuckoo } from '../ui/px/cuckoo.ts';
+import { CH, CK, CW, FINISHES, paintCuckoo } from '../ui/px/cuckoo.ts';
 import { edit, save } from '../game/store.ts';
 import { demoNight } from '../sleep/index.ts';
 import { demoTonight, phase, setPhoneLock } from '../game/night.ts';
@@ -31,7 +31,7 @@ function Canvas(p: { w: number; h: number; k: number; draw: (a: Art) => void; la
 function ArtGallery() {
   const now = 10 * 60 + 9 + 31 / 60;
   return <div style="overflow:auto;height:100%;padding:8px;box-sizing:border-box">
-    {FINISHES.slice(0, 2).map((f, i) => <Canvas w={CW} h={CH} k={3} label={f.name} draw={(a) => paintCuckoo(a, { now, swing: i ? -0.2 : 0.12, cuckoo: i ? 1 : 0, hoot: !!i, drop: [8, 22], finish: f })} />)}
+    {FINISHES.slice(0, 2).map((f, i) => <Canvas w={CW * CK} h={CH * CK} k={3 / CK} label={f.name} draw={(a) => paintCuckoo(a, { now, swing: i ? -0.2 : 0.12, cuckoo: i ? 1 : 0, hoot: !!i, drop: [8, 22], finish: f })} />)}
     <Canvas w={60} h={40} k={3} label="bird and nest" draw={(a) => { songbird(a, 12, 20, 1, { beak: 'open', wing: 1 }); nest(a, 40, 22, 0.9, 0); }} />
     <Canvas w={70} h={44} k={3} label="props" draw={(a) => { candle(a, 0, 4, 1); mug(a, 20, 18, 2, 'coffee'); mug(a, 44, 18, 2, 'tea'); }} />
     <Canvas w={50} h={36} k={3} label="phone" draw={(a) => { phone(a, 0, 0, false); phone(a, 26, 0, true); }} />

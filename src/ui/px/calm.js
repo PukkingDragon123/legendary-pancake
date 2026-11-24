@@ -30,7 +30,8 @@ function fromLch(L, C, h) {
 }
 
 // hue remap (OKLCH degrees): [from, to] control points, piecewise linear, wraps at 360
-const HUE = [[0, 14], [12, 20], [28, 32], [50, 46], [66, 64], [80, 76], [92, 84], [112, 108], [142, 130], [158, 140], [180, 176], [205, 206], [232, 224], [255, 236], [275, 252], [292, 296], [318, 318], [342, 352], [360, 374]];
+// [ui4] the pull toward the palette's anchors is half as strong as v3 (emerald stays emerald, sapphire stays sapphire)
+const HUE = [[0, 14], [12, 20], [28, 32], [50, 46], [66, 64], [80, 76], [92, 84], [112, 108], [142, 130], [158, 140], [180, 176], [205, 206], [232, 224], [255, 236], [275, 252], [292, 296], [318, 318], [342, 352], [360, 374]].map(([a, b]) => [a, a + (b - a) * 0.4]);
 function remapHue(h) {
   for (let i = 1; i < HUE.length; i++) {
     const [a0, b0] = HUE[i - 1], [a1, b1] = HUE[i];
@@ -45,9 +46,10 @@ function cmax(h) {
   return 0.085;
 }
 
-// The interface is quiet: paper, linen, warm wood and ink, colour only as a small accent. Every
-// hue family's ceiling is scaled by this (1 = the palette's own strength).
-const QUIET = 0.6;
+// [ui4] v4 "Golden Diorama": the interface is rich and warm again (honey and walnut woods, emerald,
+// sapphire, oxblood, brass gold, sky blue), still natural: every hue family's ceiling is scaled by this
+// (1 = the calm palette's own strength; v3 used 0.6).
+const QUIET = 1.55;
 
 const cache = new Map();
 /** Grade one colour into the calm palette. Accepts '#rgb', '#rrggbb', '#rrggbbaa' or [r,g,b(,a)]. Returns the same kind. */
@@ -77,7 +79,7 @@ export function calmRGB(rgb) {
   if (grey) h = 86;
   else h = remapHue(h);
   // lightness: lift blacks to warm ink, settle whites to oat paper
-  let L = Math.max(L0, 0.2 + L0 * 0.36);
+  let L = Math.max(L0, 0.15 + L0 * 0.42);
   L = Math.min(L, 0.955 + (L0 - 0.95) * 0.3);
   // chroma: a soft knee under a per-hue ceiling; very light and very dark colours stay quieter
   let Cm = cmax(h) * QUIET;

@@ -16,7 +16,7 @@ import { FLOOR_IDS, FLOOR_NAME, FLOOR_SHORT, UNLOCK, type FloorId } from '../wor
 import { ask } from './fx.tsx';
 import { Px } from './icons.tsx';
 import { haptic, toast } from './kit.tsx';
-import { itemIcon } from './portraits.ts';
+import { iconVersion, itemIcon } from './portraits.ts';
 import { panel, sceneRef } from './state.ts';
 import './build.css';
 
@@ -68,8 +68,11 @@ function swatch(f: Finish): string {
 
 /** Item render, made lazily so opening a tab never hitches. */
 function Thumb(p: { id: string; i: number }) {
-  const [src, setSrc] = useState('');
-  useEffect(() => { let live = true; const t = setTimeout(() => { if (live) setSrc(itemIcon(p.id)); }, 30 + p.i * 45); return () => { live = false; clearTimeout(t); }; }, [p.id]);
+  const [shot, setShot] = useState({ id: '', src: '' });
+  // [ui4] re-ask when a model's picture lands (iconVersion), so a card never stays a blank sketch
+  const ver = iconVersion.value;
+  const src = shot.id === p.id ? shot.src : '';
+  useEffect(() => { if (src) return; let live = true; const t = setTimeout(() => { if (live) setShot({ id: p.id, src: itemIcon(p.id) }); }, 30 + p.i * 45); return () => { live = false; clearTimeout(t); }; }, [p.id, ver]);
   return src ? <img class="bm-img" src={src} alt="" draggable={false} /> : <span class="bm-sketch" />;
 }
 

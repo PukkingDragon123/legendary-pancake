@@ -21,7 +21,9 @@ const BAKED = {
 export function installBaked() {
   for (const [name, b] of Object.entries(BAKED)) {
     const bin = atob(b.idx), n = b.w * b.h, d = new Uint8ClampedArray(n * 4);
-    const pal = b.pal.map((h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]);
+    // [ui4] v4: the baked props were graded quiet; give them back their colour and a little light
+    const rich = (c) => { const m = (c[0] + c[1] + c[2]) / 3; return c.map((v) => Math.max(0, Math.min(255, Math.round((m + (v - m) * 1.75) * 1.1 + 4)))); };
+    const pal = b.pal.map((h) => rich([parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]));
     for (let i = 0; i < n; i++) { const k = bin.charCodeAt(i); if (!k) continue; const c = pal[k - 1]; d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; }
     hires(name, b.w, b.h, 2, d);
   }

@@ -6,6 +6,7 @@
 // `useOwlIcon`, `usePieceIcon`) wait for the model, render one per frame from a queue and never stall a tap.
 // No 2D drawing of the owl anywhere: every owl picture is a render of its 3D toy.
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { signal } from '@preact/signals';
 import { useEffect, useState } from 'preact/hooks';
 import { buildProp, propMesh } from '../gfx/box.ts';
@@ -27,12 +28,19 @@ function setup() {
   R.setSize(S, S, false);
   R.setClearColor(0x000000, 0);
   R.outputColorSpace = THREE.SRGBColorSpace;
+  // the v4 look: filmic tone mapping, a warm golden key, a sky fill and a soft studio environment for the glossy bits
+  // (bill, talons, the eyes' wet gleam), a cool rim to lift the silhouette off the paper
+  R.toneMapping = THREE.ACESFilmicToneMapping;
+  R.toneMappingExposure = 1.05;
   scene = new THREE.Scene();
-  // the hollow's lamplight: warm key, soft sky fill, a cool moonlit rim
-  scene.add(new THREE.HemisphereLight(0xfff4e0, 0x6a6458, 1.5));
-  const d = new THREE.DirectionalLight(0xfff0d8, 2.0);
+  const pm = new THREE.PMREMGenerator(R);
+  scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.35;
+  pm.dispose();
+  scene.add(new THREE.HemisphereLight(0xd8ecff, 0x7a6a48, 1.25));
+  const d = new THREE.DirectionalLight(0xffe4bc, 2.9);
   d.position.set(-3, 6, 7);
-  const rim = new THREE.DirectionalLight(0xc4d4dc, 0.8);
+  const rim = new THREE.DirectionalLight(0xc8dcff, 1.1);
   rim.position.set(5, 3, -5);
   scene.add(d, rim);
   cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);

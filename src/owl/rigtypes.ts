@@ -14,7 +14,7 @@ export interface OwlRigData {
   max: V3;
   height: number;
   /** a few measurements of the build (Blender frame: z up, the face toward -y; faceY is the face's depth) */
-  dims: { bodyZ0: number; bodyZ1: number; bodyW: number; bodyD: number; headZ: number; headW: number; headH: number; headD: number; faceY: number; eyeX: number; eyeZ: number; tuftTop: number };
+  dims: { bodyZ0: number; bodyZ1: number; bodyW: number; bodyD: number; headZ: number; headW: number; headH: number; headD: number; faceY: number; eyeX: number; eyeZ: number; tuftTop: number; /** (v4) where the face meets the breast */ chin?: number };
   tris?: number;
   /** still portraits shipped beside the GLB (public/models/owls/<id>.<shot>.webp), shown while the model loads */
   shots?: ('face' | 'full')[];

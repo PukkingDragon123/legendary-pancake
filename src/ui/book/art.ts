@@ -85,11 +85,13 @@ export function art(key: string, paint: () => Px): Art {
 
 // ------------------------------------------------------------------ ramps
 
-const LEATHER: RGB[] = [mix(rgb(P.barkDark), rgb(P.deepNight), 0.35), rgb(P.barkDark), rgb(P.woodDeep), mix(rgb(P.woodDeep), rgb(P.woodDark), 0.5), rgb(P.woodDark), mix(rgb(P.woodDark), rgb(P.wood), 0.45), mix(rgb(P.wood), rgb(P.woodLight), 0.3)];
-const BRASS: RGB[] = [mix(rgb(P.brassDark), rgb(P.woodDeep), 0.45), rgb(P.brassDark), mix(rgb(P.brassDark), rgb(P.brass), 0.5), rgb(P.brass), mix(rgb(P.brass), rgb(P.honey), 0.5), rgb(P.lamp), mix(rgb(P.lamp), rgb(P.snow), 0.5)];
-const PAPER: RGB[] = [rgb(P.straw), mix(rgb(P.straw), rgb(P.linen), 0.5), rgb(P.linen), mix(rgb(P.linen), rgb(P.oat), 0.5), rgb(P.oat), mix(rgb(P.oat), rgb(P.paper), 0.5), rgb(P.paper)];
-const GILT: RGB = rgb(P.honey), GILT_HI: RGB = rgb(P.lamp), STITCH: RGB = mix(rgb(P.linen), rgb(P.straw), 0.4);
-
+// [ui4] v4 materials: oxblood morocco leather, real brass, bright gilt, cream paper
+const hx = (h: string): RGB => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const LEATHER: RGB[] = ['#1d0608', '#330b10', '#4b1118', '#661822', '#80222c', '#9a3036', '#b44543'].map(hx);
+const BRASS: RGB[] = ['#3a2408', '#6e4a12', '#94661a', '#b88524', '#d4a432', '#ecc860', '#fff1bd'].map(hx);
+const PAPER: RGB[] = ['#b99868', '#d4b98a', '#e6d2a8', '#f0e2c0', '#f6ecd4', '#faf3e2', '#fdf9ee'].map(hx);
+const GILT: RGB = hx('#e3b640'), GILT_HI: RGB = hx('#fff0a8'), STITCH: RGB = hx('#e8c88a');
+void P;
 /** pebbled leather at a lit value t (0..1) */
 function leather(x: number, y: number, t: number, s = 0) {
   const c = cell(x * 0.42, y * 0.42, s);
@@ -131,6 +133,14 @@ export function boardArt(w: number, h: number, spread: boolean): Art {
       if (e === 0) t = 0.1; else if (e === 1) t = y < h / 2 && x < w / 2 ? 0.78 : 0.62; else if (e === 2) t = 0.62;
       if (spread) { const ds = Math.abs(x + 0.5 - mid); if (ds < 5) t -= (5 - ds) * 0.07; if (ds < 1) t = 0.05; }
       p.set(x, y, leather(x, y, t, 1));
+      // [ui4] the page block's edges peek out beside the pages (B = 6 texels of board): stacked leaves of paper
+      const B = 6, inPages = (xx: number, yy: number) => xx >= B && yy >= B && xx < w - B && yy < h - B;
+      const nearBottom = y >= h - B && y < h - B + 2 && x >= B - 1 && x < w - B + 1;
+      const nearOuter = (x >= w - B && x < w - B + 2 || (spread && x < B && x >= B - 2)) && y >= B && y < h - B + 2;
+      if (!inPages(x, y) && (nearBottom || nearOuter)) {
+        const leafLine = nearBottom ? (y - (h - B)) : spread && x < B ? (B - 1 - x) : (x - (w - B));
+        p.set(x, y, pick(PAPER, leafLine === 0 ? 0.55 : 0.3, x, y, 0));
+      }
     }
     // a stitched line all round, 3 texels in
     for (let x = 4; x < w - 4; x++) if ((x >> 1) % 2 === 0) { p.set(x, 3, STITCH); p.set(x, h - 4, mulc(STITCH, 0.85)); }
@@ -228,8 +238,9 @@ const mutec = (c: number, k = 0.45) => { const a = rgb(c), b = rgb(P.linen); ret
 const inkc = (c: number, k = 0.45) => { const a = rgb(c), b = rgb(P.ink); return ((Math.round(a[0] + (b[0] - a[0]) * k) << 16) | (Math.round(a[1] + (b[1] - a[1]) * k) << 8) | Math.round(a[2] + (b[2] - a[2]) * k)); };
 /** Section accents (dark, mid, light), muted towards linen: colour only as a small accent. */
 export const TAB_COLORS: Record<string, [number, number, number]> = {
-  moss: [inkc(P.pine, 0.2), mutec(P.moss, 0.25), mutec(P.sage, 0.35)], lake: [inkc(P.slate, 0.2), mutec(P.lake, 0.25), mutec(P.sky, 0.35)],
-  berry: [inkc(P.plum, 0.2), mutec(P.berry, 0.25), mutec(P.rose, 0.35)], honey: [inkc(P.brassDark, 0.2), mutec(P.ochre, 0.25), mutec(P.honey, 0.35)],
+  // [ui4] richer section accents: emerald, sky blue, rose, honey
+  moss: [0x123d24, 0x2f8550, 0x6cbc84], lake: [0x1d5580, 0x3f8cc2, 0x86c3e8],
+  berry: [0x5a1820, 0x9c3742, 0xd06e70], honey: [0x86580b, 0xd29e22, 0xfadb6a],
 };
 const CLOTH: RGB[] = [rgb(P.straw), mix(rgb(P.straw), rgb(P.linen), 0.5), rgb(P.linen), mix(rgb(P.linen), rgb(P.oat), 0.5), rgb(P.oat), rgb(P.paper)];
 /** A linen index tab standing up from the page (w x h texels): woven, frayed at the top corners, a coloured running stitch. */

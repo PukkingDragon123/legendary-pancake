@@ -16,6 +16,7 @@ import { AlarmOverlay, NightOverlay } from './sleep.tsx';
 import { breathing, bubble, nightOpen, panel, sceneRef } from './state.ts';
 import { Hud, MainNav, openPanel, SideTools } from './chrome/hud.tsx'; // [chrome] openPanel for the ticket
 import { uiBurst, uiBurstAt } from './chrome/uifx.ts'; // [chrome] bubble puff, ticket stars
+import { clip, DESK_HUD, kFor } from './chrome/objects.ts'; // [ui4] the brass clip on tonight's card
 import { SleepScreen } from './sleepflow.tsx';
 import { ClockScreen } from './clockscreen.tsx';
 import { Book } from './book/book.tsx';
@@ -38,6 +39,7 @@ function Ticket() {
   const soon = !late && diff < 90 * 60_000;
   return (
     <div class={'hh-ticket' + (away ? ' away' : '')}>
+      <img class="hh-tkt-clip" src={clip(kFor(DESK_HUD), 1)} alt="" draggable={false} />
       <div class={'hh-tkt-stub' + (late ? ' late' : '')}><IcoMoon size={40} /><small>{late ? 'LATE' : 'BED'}</small></div>
       <i class="hh-tkt-perf" />
       <div class="hh-tkt-body">
@@ -102,6 +104,8 @@ function Bubble() {
 
 export function App() {
   const s = save.value;
+  // [ui4] the in-app "Calm motion" setting quiets every CSS animation, like the system setting does
+  useEffect(() => { try { document.documentElement.classList.toggle('hh-still', !!s.settings.reduceMotion); } catch { /* no DOM */ } }, [s.settings.reduceMotion]);
   const ph = phase.value;
   const night = nightOpen.value ? s.nights.find((n) => n.id === nightOpen.value) : null;
   return (

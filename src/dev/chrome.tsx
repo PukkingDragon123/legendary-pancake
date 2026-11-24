@@ -71,6 +71,41 @@ if (view === 'parts') {
   );
 }
 
+if (view === 'obj') {
+  // [ui4] the v4 relief objects at both detail levels
+  void import('../ui/chrome/objects.ts').then((O) => {
+    document.body.style.background = q.get('bg') ?? '#5b6b4a';
+    const ks = [1, 2];
+    const cell = (src: string, w: number, h: number, t: string) => `<div style="display:flex;flex-direction:column;gap:2px;align-items:center"><img src="${src}" style="width:${w}px;height:${h}px;image-rendering:pixelated"><span style="${label}">${t}</span></div>`;
+    let html = '<div style="padding:10px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end">';
+    for (const k of ks) {
+      const res = k === 1 ? 2 : 1, s = +(q.get('s') ?? 2);
+      html += cell(O.moonLamp(k, res, 0.6, 1), 52 * s, 54 * s, 'lamp k' + k);
+      html += cell(O.alarmClock(k, res, 0), 52 * s, 54 * s, 'alarm k' + k);
+      html += cell(O.journal(k, res, 0), 52 * s, 54 * s, 'book k' + k);
+      html += cell(O.journal(k, res, 0.35), 52 * s, 54 * s, 'book open .35');
+      html += cell(O.journal(k, res, 0.75), 52 * s, 54 * s, 'book open .75');
+    }
+    const s = +(q.get('s') ?? 2) / 2;
+    html += '</div><div style="padding:10px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end">';
+    html += cell(O.board(96, 36, 2, 1, { seed: 4, hooks: [26, 71], brackets: true, moss: [[34, 50], [78, 90]] }), 192 * s, 72 * s, 'name board');
+    html += cell(O.bezel(32), 64 * s, 64 * s, 'bezel');
+    html += cell(O.medallion(24), 48 * s, 48 * s, 'medal');
+    html += cell(O.board(62, 20, 2, 1, { seed: 7, hooks: [11, 51], screws: [[4, 11], [58, 11]] }), 124 * s, 40 * s, 'coin board');
+    html += cell(O.plusButton(14), 28 * s, 28 * s, 'plus');
+    html += cell(O.plusButton(14, 2, 1, true), 28 * s, 28 * s, 'plus dn');
+    html += cell(O.plate(40, 9), 80 * s, 18 * s, 'plate');
+    for (const [i, hue] of (['sapphire', 'rose', 'plum', 'emerald', 'sky', 'iron'] as const).entries()) html += cell(O.toolTile(26, hue, 2, 1, i + 1), 52 * s, 60 * s, hue);
+    html += cell(O.clip(), 44 * s, 26 * s, 'clip');
+    html += '</div><div style="padding:10px">' + cell(O.shelfBoard(176), 352 * s, 32 * s, 'shelf') + '<canvas id="alarm"></canvas>';
+    root.innerHTML = html + '</div>';
+    const cv = document.getElementById('alarm') as HTMLCanvasElement, im = new Image();
+    im.onload = () => { cv.width = im.width; cv.height = im.height; cv.style.width = `${104 * s * 2}px`; cv.style.imageRendering = 'pixelated'; const g = cv.getContext('2d')!; g.drawImage(im, 0, 0); O.alarmHands(g, 2, 1, new Date(2026, 1, 1, 10, 9, 37), 7 * 60); };
+    im.src = O.alarmClock(2, 1, 0);
+    (window as unknown as { __ready: number }).__ready = 1;
+  });
+}
+
 if (view === 'fx') {
   document.body.style.background = '#3a5a3a';
   const kinds: UiFxKind[] = ['puff', 'sparkle', 'hearts', 'magic', 'coins', 'stars', 'snow', 'leaves', 'confetti'];
