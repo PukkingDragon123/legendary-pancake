@@ -161,7 +161,7 @@ export class Scene {
   readonly autoTier: boolean;
   /** the highest tier auto mode may climb back to (the device's starting tier) */
   private maxTier: Tier = 'high';
-  private perf = { ema: 16.7, slow: 0, fast: 0, warm: 4, lastDown: -1e9, locked: false, frame: 0 };
+  private perf = { ema: 16.7, slow: 0, fast: 0, warm: 4, lastDown: -1e9, lastUp: -1e9, locked: false, frame: 0 };
   private casterT = 0;
   constructor(canvas: HTMLCanvasElement, look: OwlLook, quality: Quality | 'medium' | 'auto') {
     // [look4] 'auto' picks a tier for the device and lets it adapt; the build-time detail follows the starting tier
@@ -569,8 +569,8 @@ export class Scene {
     });
   }
   /**
-   * [look4] Auto tier: if frames stay slower than ~22 ms for 3 s, step down a tier; after 25 s of smooth frames at a
-   * lower tier, try one step back up (once it has to come down again soon after, it stays down).
+   * [look4] Auto tier: if frames stay slower than ~22 ms for 3 s, step down a tier; after 25 s of smooth frames below
+   * the device's starting tier, try one step back up (if it has to come down again within 45 s, it stays down).
    */
   private lastMs = 0;
   private watchFrames(ms: number) {
@@ -582,12 +582,13 @@ export class Scene {
     const now = ms / 1000;
     if (P.ema > 22) { P.slow += raw / 1000; P.fast = 0; } else { P.slow = Math.max(0, P.slow - raw / 2000); P.fast = P.ema < 18.5 ? P.fast + raw / 1000 : 0; }
     if (P.slow > 3 && this.tier !== 'low') {
-      if (now - P.lastDown < 40 && P.lastDown > 0) P.locked = true;
+      // stepping down again soon after a step up: this device can't hold the higher tier, stay down from now on
+      if (now - P.lastUp < 45) P.locked = true;
       this.setTier(this.tier === 'high' ? 'medium' : 'low');
       P.slow = 0; P.fast = 0; P.lastDown = now; P.warm = 2; P.ema = 16.7;
     } else if (!P.locked && P.fast > 25 && RANK[this.tier] < RANK[this.maxTier]) {
       this.setTier(this.tier === 'low' ? 'medium' : 'high');
-      P.fast = 0; P.warm = 2; P.ema = 16.7;
+      P.fast = 0; P.warm = 2; P.ema = 16.7; P.lastUp = now;
     }
   }
 
