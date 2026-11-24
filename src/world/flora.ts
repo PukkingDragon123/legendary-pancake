@@ -408,7 +408,7 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
   function setSeason(info: SeasonInfo) {
     // [look4] autumn turns a share of the broadleaves to amber, copper, crimson and gold (more as it goes on), the
     // rest stay green; winter leaves the broadleaves bare and frosts the conifers; spring is a fresher green
-    const s = info.season, turned = s === 'autumn' ? 0.3 + 0.35 * info.t : 0;
+    const s = info.season, turned = s === 'autumn' ? 0.22 + 0.26 * info.t : 0;
     for (const set of sets) {
       const T = SEASON_TINT[tintKey(set.kind)];
       const deciduous = DECIDUOUS.has(set.kind);
@@ -418,7 +418,8 @@ export function buildFlora(plan: ForestPlan, quality: 'low' | 'high' = 'high'): 
         set.idx[mi].forEach((gi, i) => {
           let tint = 0xffffff, leafState = 0;
           if (s === 'spring') tint = T.spring;
-          else if (s === 'winter') { if (deciduous) leafState = -1; else tint = T.winter ?? 0xffffff; }
+          // winter: oaks and maples hold their dry russet leaves under the snow (marcescence), birches go bare
+          else if (s === 'winter') { if (deciduous) { if (set.kind.startsWith('birch') || set.kind === 'blossom') leafState = -1; else { leafState = 1; tint = 0xb89070; } } else tint = T.winter ?? 0xffffff; }
           else if (s === 'autumn' && deciduous && set.kind !== 'blossom') {
             if (H(gi, set.kind.length + 11) < turned) leafState = 1;
             else tint = 0xf8fae8;

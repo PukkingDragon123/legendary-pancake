@@ -110,7 +110,7 @@ export class Critters {
   constructor(private plan: ForestPlan, private fx: Fx, quality: 'low' | 'high', private sound: (id: string, at?: THREE.Vector3) => void) {
     const parts: Parts = { flyBody: [], flyWing: [], wingCols: [], koiBody: [], koiTail: [], koiCols: [], dfBody: [], dfWing: [] };
     // [world3] calm palette: terracotta, lake, honey, rose, lilac and paper wings
-    const cols = ['#c0866a', '#86a9b0', '#dcb072', '#d9aca4', '#b4a9c9', '#f4eedd'];
+    const cols = ['#f08a2c', '#5aa8e8', '#f2d040', '#f08cb0', '#b08ae8', '#f6f2ea']; // [look4] monarch, blue, brimstone, pink, lilac, white
     const nFly = quality === 'high' ? 7 : 4;
     for (let i = 0; i < nFly; i++) {
       const isBee = false;
@@ -133,9 +133,9 @@ export class Critters {
         this.group.add(sb.rig.root);
       });
     });
-    const koiCols = ['#c0866a', '#dcb072', '#a66c55', '#eae0c8', '#c59a52', '#9e5f66', '#46596a', '#c0866a'];
+    const koiCols = ['#f4efe6', '#f07a2a', '#f4efe6', '#e8562a', '#f2b632', '#f4efe6', '#2e2b30', '#f07a2a']; // [look4] kohaku, ogon, showa...
     for (let i = 0; i < (quality === 'high' ? 8 : 5); i++) {
-      const rig = koiFish(new THREE.Color(koiCols[i]).getHex(), i % 3 ? 0xeae0c8 : 0x2e2b24, parts);
+      const rig = koiFish(new THREE.Color(koiCols[i]).getHex(), [0xe8562a, 0xf4efe6, 0xe0402a, 0xf4efe6, 0xf6e6a0, 0x2e2b30, 0xf07a2a, 0x2e2b30][i], parts);
       this.proxies.add(rig.root);
       this.fish.push({ rig, a: rand(0, 6.28), r: rand(0.25, 0.72), speed: rand(0.22, 0.5) * (i % 2 ? 1 : -1), depth: rand(0.18, 0.42), jump: -1, wait: rand(6, 20) });
     }

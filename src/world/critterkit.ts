@@ -96,7 +96,7 @@ export function koiBody(): THREE.BufferGeometry {
     const n = hashf(Math.floor(t * 7), Math.floor((a + 7) * 1.3)) * 0.6 + hashf(Math.floor(t * 3.5) + 9, 1) * 0.4;
     return top > -0.1 && n > 0.48 && t > 0.15 ? 1 : 0;
   });
-  const fin: [number, number, number] = [1.02, 1.02, 1.02];
+  const fin: [number, number, number] = [1.25, 1.22, 1.18];
   const dorsal = flat(curve([[0, 0], [0.025, 0.02], [0.03, 0.07], [0.012, 0.11], [0, 0.1]]), fin);
   const pect = flat(curve([[0, 0], [0.03, -0.012], [0.042, -0.03], [0.02, -0.034], [0.004, -0.012]]), fin);
   return merge([body, dorsal, pect, pect], [
@@ -108,13 +108,13 @@ export function koiBody(): THREE.BufferGeometry {
 }
 /** The forked tail fin (origin at the tail stem, trailing along -z). */
 export function koiTail(): THREE.BufferGeometry {
-  const t = flat(curve([[0, 0.01], [0.022, -0.02], [0.05, -0.075], [0.028, -0.07], [0, -0.045], [-0.028, -0.07], [-0.05, -0.075], [-0.022, -0.02]]), [1.04, 1.04, 1.04]);
+  const t = flat(curve([[0, 0.01], [0.022, -0.02], [0.05, -0.075], [0.028, -0.07], [0, -0.045], [-0.028, -0.07], [-0.05, -0.075], [-0.022, -0.02]]), [1.25, 1.22, 1.18]);
   return merge([t], [M(v(0, 0, 0), new THREE.Euler(0, 0, Math.PI / 2))]);
 }
 
 /** Koi material: instance colour for the body, a per-instance patch colour (iPatch) where aPatch is set, a soft sheen. */
 export function koiMaterial(): THREE.MeshStandardMaterial {
-  const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.42, metalness: 0, side: THREE.DoubleSide });
+  const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.42, metalness: 0, side: THREE.DoubleSide, emissive: 0x302018 });
   m.onBeforeCompile = (sh) => {
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float aPatch;\nattribute vec3 iPatch;')
@@ -200,7 +200,7 @@ export function butterflyWingMaterial(): THREE.MeshStandardMaterial {
       if (edge) c = (x + y * 3) % 5 === 0 ? [250, 246, 236] : [40, 34, 30];
       else if (fore && Math.abs(u - 0.6) < 0.08 && Math.abs(vv - 0.72) < 0.06) c = [255, 252, 240];
       else if (hind && Math.abs(u - 0.42) < 0.07 && Math.abs(vv - 0.25) < 0.05) c = [60, 50, 60];
-      else { const g = 200 + (u < 0.18 ? -60 : 0) + Math.round((1 - u) * 40); c = [g, g, g]; }
+      else { const g = Math.min(255, 228 + (u < 0.18 ? -70 : 0) + Math.round((1 - u) * 27)); c = [g, g, g]; }
       d.set([...c, 255], k);
     }
     bwTex = new THREE.DataTexture(d, W, H);

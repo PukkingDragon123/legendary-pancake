@@ -137,6 +137,8 @@ export class Scene {
   private trip: Trip | null = null;
   private room: THREE.PointLight;
   private lantern: THREE.PointLight;
+  /** [look4] a warm porch lamp glow at night (the porch is where Pip leaves from and lands) */
+  private porchGlow: THREE.PointLight;
   private gardenFence: THREE.Mesh;
   private weeds: THREE.Group;
   private smokeT = 0;
@@ -209,7 +211,9 @@ export class Scene {
     this.room.position.set(HOUSE.x, 2.6, HOUSE.z + 1.6);
     this.lantern = new THREE.PointLight(0xffc06a, 0, 10, 1.4);
     this.lantern.position.copy(this.house.lampAt);
-    this.scene.add(this.room, this.lantern);
+    this.porchGlow = new THREE.PointLight(0xffb866, 0, 7, 1.6);
+    this.porchGlow.position.copy(this.house.spots.porch).add(new THREE.Vector3(0.6, 1.9, 1.1));
+    this.scene.add(this.room, this.lantern, this.porchGlow);
 
     this.glow = new THREE.PointLight(0xffd59a, 0, 5, 1.4);
     this.scene.add(this.glow);
@@ -492,6 +496,7 @@ export class Scene {
     this.room.intensity = 1.4 + night * 9; // the open rooms glow warm at night
     this.room.distance = 16;
     this.lantern.intensity = night * 8;
+    this.porchGlow.intensity = THREE.MathUtils.smoothstep(night, 0.3, 0.8) * 5;
     this.fireflies.alpha = night > 0.4 && (this.weather?.firefliesOk ?? true) ? 1 : 0; // [world] not in winter or rain
     this.scene.environmentIntensity = L(0.4, 0.3, night);
     // furniture lights follow the sky every frame in rooms.update

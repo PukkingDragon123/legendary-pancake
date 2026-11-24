@@ -13,6 +13,7 @@ import { HALF, SEED } from './layout.ts';
 import { outerY } from './terrain.ts';
 import { tex } from './bushed/textures.ts';
 import type { Sky } from './sky.ts';
+import { WX } from './weather.ts';
 
 /** keep the view from the default cameras down onto the clearing clear of tall trees */
 export const inViewWedge = (x: number, z: number) => z > 7 && Math.abs(x) < (z - 7) * 1.25 + 9;
@@ -210,6 +211,7 @@ export class Vista {
     this.group.add(this.near);
     // impostors: one mesh per belt
     this.impMat = impostorMaterial();
+    this.impMat.uniforms.uSnow = WX.uSnow; // the weather's snow cover
     trees.forEach((list, band) => {
       const g = new THREE.InstancedBufferGeometry();
       g.setAttribute('position', new THREE.Float32BufferAttribute([-0.5, 0, 0, 0.5, 0, 0, 0.5, 1, 0, -0.5, 1, 0], 3));
@@ -342,7 +344,7 @@ export class Vista {
     for (const r of this.ridges) {
       const U = r.mat.uniforms;
       // the ridge's own colour lit by the sky, sunk into the haze by its distance
-      const body = tmp.copy(r.body).multiply(new THREE.Color().copy(sky.hemi.color).lerp(new THREE.Color(1, 1, 1), 0.45)).multiplyScalar(0.75 + 0.35 * (1 - night));
+      const body = tmp.copy(r.body).multiply(new THREE.Color().copy(sky.hemi.color).lerp(new THREE.Color(1, 1, 1), 0.45)).multiplyScalar(0.5 + 0.6 * (1 - night));
       (U.uBody.value as THREE.Color).copy(body).lerp(fog, r.haze);
       (U.uLit.value as THREE.Color).copy(body).lerp(sun, 0.18 * (1 - night)).multiplyScalar(1.12).lerp(fog, r.haze * 0.9);
       (U.uHaze.value as THREE.Color).copy(fog).lerp(hor, 0.5);
@@ -353,20 +355,29 @@ export class Vista {
   /** Dress the far woods for the season (autumn colours on some broadleaves, bare winter broadleaves). */
   setSeason(info: SeasonInfo) {
     this.groundMat.color.setHex({ spring: 0xf6fbf0, summer: 0xffffff, autumn: 0xf6e6cc, winter: 0xe6eae6 }[info.season]); // as the clearing's ground
-    const turned = info.season === 'autumn' ? 0.3 + 0.35 * info.t : 0;
+    const turned = info.season === 'autumn' ? 0.22 + 0.26 * info.t : 0;
     const stateOf = (t: Tree, i: number, band: number) => {
       if (this.kinds[t.kind].conifer) return 0;
-      if (info.season === 'winter') return -1;
+      if (info.season === 'winter') return 1; // dry russet leaves under the snow (darkened below)
       return hash(i, 31, band) < turned ? 1 : 0;
     };
     // the near belt's real trees and every belt's impostors agree tree for tree
     const near = new Map<Tree, number>();
     this.trees[0].forEach((t, i) => near.set(t, stateOf(t, i, 0)));
+    const dry = info.season === 'winter';
+    const col = new THREE.Color();
     for (const nt of this.nearTrees) {
       const a = nt.mesh.geometry.getAttribute('iLeaf') as THREE.InstancedBufferAttribute;
-      nt.list.forEach((t, i) => a.setX(i, near.get(t) ?? 0));
+      nt.list.forEach((t, i) => {
+        a.setX(i, near.get(t) ?? 0);
+        col.setScalar(t.tint);
+        if (dry && !this.kinds[t.kind].conifer) col.multiply(new THREE.Color(0xb89070));
+        nt.mesh.setColorAt(i, col);
+      });
       a.needsUpdate = true;
+      if (nt.mesh.instanceColor) nt.mesh.instanceColor.needsUpdate = true;
     }
+    if (this.impMat) this.impMat.uniforms.uDry.value = dry ? 1 : 0;
     this.impostors.forEach((m, band) => {
       const a = m.geometry.getAttribute('iState') as THREE.InstancedBufferAttribute;
       this.trees[band].forEach((t, i) => a.setX(i, stateOf(t, i, band)));
@@ -429,11 +440,11 @@ function impostorMaterial(): THREE.ShaderMaterial {
     fog: true,
     uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, {
       uAtlas: { value: null }, uSun: { value: new THREE.Color() }, uSunDir: { value: new THREE.Vector3(0, 1, 0) },
-      uSky: { value: new THREE.Color() }, uGround: { value: new THREE.Color() },
+      uSky: { value: new THREE.Color() }, uGround: { value: new THREE.Color() }, uDry: { value: 0 }, uSnow: { value: 0 },
     }]),
     vertexShader: /* glsl */ `
       attribute vec4 iPos; attribute vec3 iCell; attribute float iState;
-      varying vec2 vUv; varying vec3 vN; varying float vTint;
+      varying vec2 vUv; varying vec3 vN; varying float vTint; varying float vAut;
       #include <fog_pars_vertex>
       void main() {
         vec3 toCam = cameraPosition - iPos.xyz; toCam.y = 0.0; toCam = normalize(toCam);
@@ -441,6 +452,7 @@ function impostorMaterial(): THREE.ShaderMaterial {
         float s = iPos.w * ${FRAME.toFixed(2)};
         vec3 wp = iPos.xyz + right * position.x * s + vec3(0.0, position.y * s, 0.0);
         float cell = iState > 0.5 ? iCell.y : iCell.x;
+        vAut = iState > 0.5 && iCell.y != iCell.x ? 1.0 : 0.0;
         vec2 c = vec2(mod(cell, 4.0), 3.0 - floor(cell / 4.0));
         vUv = (c + vec2(position.x + 0.5, position.y)) / 4.0;
         vN = normalize(right * position.x * 1.5 + vec3(0.0, (position.y - 0.5) * 0.9, 0.0) + toCam * 0.8);
@@ -451,8 +463,8 @@ function impostorMaterial(): THREE.ShaderMaterial {
         #include <fog_vertex>
       }`,
     fragmentShader: /* glsl */ `
-      uniform sampler2D uAtlas; uniform vec3 uSun; uniform vec3 uSunDir; uniform vec3 uSky; uniform vec3 uGround;
-      varying vec2 vUv; varying vec3 vN; varying float vTint;
+      uniform sampler2D uAtlas; uniform vec3 uSun; uniform vec3 uSunDir; uniform vec3 uSky; uniform vec3 uGround; uniform float uDry; uniform float uSnow;
+      varying vec2 vUv; varying vec3 vN; varying float vTint; varying float vAut;
       #include <fog_pars_fragment>
       void main() {
         vec4 t = texture2D(uAtlas, vUv);
@@ -460,7 +472,11 @@ function impostorMaterial(): THREE.ShaderMaterial {
         float lod = max(0.0, 0.5 * log2(max(dot(dx, dx), dot(dy, dy))));
         if (t.a * (1.0 + lod * 0.35) < 0.5) discard;
         vec3 alb = t.rgb / max(t.a, 1e-3); alb *= alb;
+        alb *= mix(vec3(1.0), vec3(0.62, 0.42, 0.32), uDry * vAut);
         vec3 n = normalize(vN);
+        // snow settles on the tops of the far crowns
+        float sn = uSnow * smoothstep(0.05, 0.55, n.y + (fract(sin(dot(floor(vUv * 256.0), vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * 0.5);
+        alb = mix(alb, vec3(0.86, 0.9, 0.96), sn * 0.85);
         float nd = max(dot(n, uSunDir), 0.0) * 0.75 + 0.25 * max(dot(n, uSunDir) + 0.5, 0.0);
         vec3 amb = mix(uGround, uSky, n.y * 0.5 + 0.5);
         vec3 col = alb * vTint * (amb + uSun * nd) * 0.42;
