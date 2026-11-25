@@ -15,7 +15,7 @@ void main() {
   blink = smoothstep(0.15, 1.0, blink);
   vBlink = blink * uAlpha;
   vHue = iData.y;
-  mv.xy += position.xy * iData.x * (1.3 + 0.9 * blink);
+  mv.xy += position.xy * iData.x * (0.85 + 0.45 * blink);
   vUv = uv;
   gl_Position = projectionMatrix * mv;
 }`;
@@ -26,9 +26,9 @@ void main() {
   float r2 = dot(q, q);
   if (r2 > 1.0) discard;
   // a hot point, a tight glow round it and a wide soft halo that swells with the light
-  float core = exp(-r2 * 70.0), inner = exp(-r2 * 16.0), halo = exp(-r2 * 4.5) * (1.0 - smoothstep(0.6, 1.0, sqrt(r2)));
-  vec3 warm = mix(vec3(1.0, 0.86, 0.45), vec3(0.78, 0.95, 0.5), vHue);
-  vec3 col = mix(warm, vec3(1.0, 0.98, 0.88), core) * (core * 3.2 + inner * 1.1 + halo * 0.32 * vBlink);
+  float core = exp(-r2 * 140.0), inner = exp(-r2 * 34.0), halo = exp(-r2 * 7.0) * (1.0 - smoothstep(0.6, 1.0, sqrt(r2)));
+  vec3 warm = mix(vec3(1.0, 0.84, 0.42), vec3(0.76, 0.95, 0.46), vHue);
+  vec3 col = mix(warm, vec3(1.0, 0.98, 0.88), core) * (core * 3.0 + inner * 0.7 + halo * 0.2 * vBlink);
   float a = vBlink;
   if (a < 0.01) discard;
   gl_FragColor = vec4(col * a, 1.0);

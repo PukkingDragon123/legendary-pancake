@@ -12,6 +12,7 @@ import { OwlActor, type EmoteKind, type OwlMood } from '../../owl/actor.ts';
 import type { OwlLook } from '../../owl/model.ts';
 import { Beaver, BEAVER_FACES } from '../../world/stages/beaver.ts';
 import { Fx, type BurstKind } from '../../world/fx.ts';
+import { Fireflies } from '../../world/fireflies.ts';
 import { fxMoment, type MomentKind } from './moment.ts';
 import { sheet as pixelSheet } from './pixel.ts';
 import { uiAdvance, uiBurst, type UiFxKind } from '../chrome/uifx.ts';
@@ -123,7 +124,10 @@ function worldSheet(kinds: BurstKind[]) {
     label(k, (p.x * 0.5 + 0.5) * W, (-p.y * 0.5 + 0.5) * H);
   });
   const t = +(q.get('t') ?? 0.8);
-  for (let s = 0; s < Math.round(t * 60); s++) fx.update(1 / 60, s / 60);
+  // ?flies=1: the fireflies round the scene as well
+  const flies = q.get('flies') ? new Fireflies(40, new THREE.Vector3(mid, 0, -1), 3.5, [0.3, 2.4]) : null;
+  if (flies) { flies.alpha = 1; scene.add(flies.mesh); }
+  for (let s = 0; s < Math.round(t * 60); s++) { fx.update(1 / 60, s / 60); flies?.update(1 / 60, s / 60); }
   r.render(scene, cam);
   done();
 }

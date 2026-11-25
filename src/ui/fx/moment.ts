@@ -9,7 +9,7 @@
 // setting or the system's reduced motion) the light only fades in and out in place and fewer particles fly.
 import * as THREE from 'three';
 import { calmMotion, fxNow } from './kit.ts';
-import { shieldRects, uiBurst, type UiFxKind } from '../chrome/uifx.ts';
+import { lastPointer, shieldRects, uiBurst, type UiFxKind } from '../chrome/uifx.ts';
 import { sceneRef } from '../state.ts';
 import { sceneFx } from '../../world/fx.ts';
 
@@ -177,7 +177,9 @@ export function fxMoment(kind: MomentKind, at?: XY | Element | null) {
   if (now - last < 350) return; // never stack two big moments
   last = now;
   const W = innerWidth, H = innerHeight;
-  const p: XY = at instanceof Element ? centreOf(at) ?? { x: W / 2, y: H * 0.42 } : at ?? { x: W / 2, y: H * 0.42 };
+  // a purchase or a stamp happens where the player just pressed, if nothing else is said
+  const lp = lastPointer(), pressed = (kind === 'bigbuy' || kind === 'stamp') && (lp.x || lp.y) ? lp : null;
+  const p: XY = at instanceof Element ? centreOf(at) ?? { x: W / 2, y: H * 0.42 } : at ?? pressed ?? { x: W / 2, y: H * 0.42 };
   const m = Math.min(W, H);
   const burst = (k: UiFxKind, n: number, dx = 0, dy = 0) => uiBurst(k, p.x + dx, p.y + dy, n);
   const o = pip();
