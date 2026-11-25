@@ -173,7 +173,7 @@ export class Scene {
   private zoomAcc = 0;
   private zoomLock = 0;
   /** a warm lamp-and-window light rig for the living room, on while the camera is inside */
-  private insideLights: { key: THREE.PointLight; win: THREE.SpotLight; beam: THREE.Mesh; bounce: THREE.PointLight } | null = null;
+  private insideLights: { win: THREE.SpotLight; beam: THREE.Mesh } | null = null;
   private porchWait = 0;
 
   /** [look4] the running cost tier, and whether it adapts to the frame rate ('auto') */
@@ -745,8 +745,6 @@ export class Scene {
     this.sky.hemi.intensity = this.sky.hemiBase * (1 - k * (0.34 + night * 0.24));
     if (k < 0.005 && !this.insideLights) return;
     if (!this.insideLights) {
-      const key = new THREE.PointLight(0xffc27a, 0, 0, 2);
-      const bounce = new THREE.PointLight(0xffa860, 0, 6, 1.6);
       const win = new THREE.SpotLight(0xffe2b0, 0, 11, 0.5, 0.85, 1.2);
       const beamGeo = new THREE.CylinderGeometry(0.42, 1.05, 1, 16, 1, true);
       beamGeo.translate(0, -0.5, 0);
@@ -768,17 +766,22 @@ export class Scene {
       }));
       beam.renderOrder = 5;
       beam.frustumCulled = false;
-      this.scene.add(key, bounce, win, win.target, beam);
-      this.insideLights = { key, win, beam, bounce };
+      this.scene.add(win, win.target, beam);
+      this.insideLights = { win, beam };
     }
     const L = this.insideLights, fy = FLOOR_Y.f1 * PX, H = new THREE.Vector3(HOUSE.x, 0, HOUSE.z);
     const flick = 0.94 + Math.sin(this.time * 11.3) * 0.03 + Math.sin(this.time * 6.1) * 0.03;
-    // the lantern's warm pool, a low amber bounce off the floorboards near the camera
-    L.key.position.copy(this.house.lampAt).add(new THREE.Vector3(0, -0.35, 0.25));
-    L.key.color.setHex(0xffc27a).lerp(new THREE.Color(0xffe0bc), day * 0.6);
-    L.key.intensity = k * (7 * day + 16 * night) * flick;
-    L.bounce.position.set(H.x + this.pipL.x * 0.8, fy + 1.5, H.z + Math.min(4.2, this.pipL.y + 2.4));
-    L.bounce.intensity = k * (1.1 * day + 3.6 * night);
+    // the hanging lantern makes a warm pool (lit even by day), and the open rooms' warm flood (for the oak seen from
+    // outside) becomes a soft amber fill in front of Pip, as if off the floorboards (no extra lights: the same two lamps)
+    const outLantern = night > 0.4 ? 6 * night * flick : night * 8, M = THREE.MathUtils;
+    this.lantern.intensity = M.lerp(outLantern, (7 * day + 16 * night) * flick, k);
+    this.lantern.decay = M.lerp(1.4, 2, k);
+    this.lantern.distance = M.lerp(10, 14, k);
+    this.lantern.color.setHex(0xffc06a).lerp(new THREE.Color(0xffe0bc), day * 0.6 * k);
+    this.room.position.set(H.x, 2.6, H.z + 1.6).lerp(new THREE.Vector3(H.x + this.pipL.x * 0.8, fy + 1.5, H.z + Math.min(4.2, this.pipL.y + 2.4)), k);
+    this.room.intensity = M.lerp(1.4 + night * 9, 1.1 * day + 3.6 * night, k);
+    this.room.distance = M.lerp(16, 6, k);
+    this.room.decay = M.lerp(1.5, 1.6, k);
     // the beam comes in through the back window on the sun's side, falling across the floor towards the room's middle
     const right = this.sky.sunDir.x >= 0;
     const wa = right ? FACE * 19 : -FACE * 18, wr = R_IN * PX - 0.15;
@@ -822,9 +825,8 @@ export class Scene {
     g.vibrance = b.vibrance + k * 0.1;
     g.saturation = b.saturation + k * 0.04;
     g.warm = b.warm + k * 0.03;
-    // the open rooms' flood of warm light is for the oak seen from outside; inside, the lamps make the pools
-    this.room.intensity = (1.4 + night * 9) * (1 - k * (0.5 + night * 0.35));
-    // fireflies belong to the clearing, not the living room
+    // critters (a dragonfly zipping past the lens) and fireflies belong to the clearing, not the living room
+    this.critters.group.visible = k < 0.4;
     this.fireflies.mesh.visible = k < 0.4;
   }
   /** [look5] Pip strolls in from the porch through the front door (a string of little hops, under the lintel). */
@@ -1070,7 +1072,7 @@ export class Scene {
 
   /**
    * [look5] Zoom by a factor (> 1 out, < 1 in). Inside the living room a zoom out takes the camera out to the whole oak;
-   * outside it zooms the tree view as before, and zooming in past its closest takes the camera back inside.
+   * outside, zooming out widens the view over the valley and zooming in takes the camera back into the living room.
    */
   zoomBy(f: number, src: 'pinch' | 'wheel' | 'ui' = 'ui') {
     if (this.view !== 'home') { this.userZoom = THREE.MathUtils.clamp(this.userZoom * f, 0.32, 1.25); return; }
@@ -1082,8 +1084,9 @@ export class Scene {
       if (this.zoomAcc > th) this.setOutside(true);
       return;
     }
-    if (f < 1 && this.userZoom <= 0.56) { if (this.zoomAcc < -th) this.setOutside(false); return; }
-    this.userZoom = THREE.MathUtils.clamp(this.userZoom * f, 0.55, 1.25);
+    // outside, zooming out widens the view over the valley; zooming back in past the whole tree goes back inside
+    if (f < 1 && this.userZoom <= 1.001) { if (this.zoomAcc < -th) this.setOutside(false); return; }
+    this.userZoom = THREE.MathUtils.clamp(this.userZoom * f, 1, 1.3);
     this.zoomAcc = 0;
   }
 }

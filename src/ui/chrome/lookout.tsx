@@ -65,6 +65,10 @@ const STYLE = `
 @keyframes hhLookSway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
 @keyframes hhLookFlip { 0% { transform: scale(1); } 40% { transform: scale(0.2, 1.1); } 100% { transform: scale(1); } }
 html.hh-still .hh-look .hh-lookhang { animation: none; }
+/* short screens (a phone on its side): just under the name sign, clear of the ticket in the middle */
+@media (max-height: 600px) {
+  .hh-look { bottom: auto; top: calc(var(--safe-t, 0px) + 112px); }
+}
 @media (min-width: 900px) {
   .hh-look { left: 20px; bottom: auto; top: calc(var(--safe-t, 0px) + 318px); }
 }
