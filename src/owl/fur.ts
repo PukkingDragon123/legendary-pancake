@@ -7,6 +7,7 @@
 // disc, none on the bill, the talons, the scaled toes or round the eyes (the ink dots stay clear).
 // One extra draw call per part; shells cast no shadows.
 import * as THREE from 'three';
+import { inkHull, inkMaterial } from '../gfx/ink.ts'; // [outline9]
 
 /** The most shells a part can draw (its instanced mesh is allocated for this many). */
 export const SHELLS = 8;
@@ -107,7 +108,7 @@ export function furShells(mesh: THREE.Mesh, u: FurUniforms): THREE.InstancedMesh
   const src = mesh.material as THREE.MeshStandardMaterial;
   if (!src?.map || !src.roughnessMap || !mesh.geometry.attributes.normal) return null;
   if (!u.uMask.value) u.uMask.value = src.roughnessMap;
-  const im = new THREE.InstancedMesh(mesh.geometry, furMaterial(src, u), SHELLS);
+  const im = new THREE.InstancedMesh(mesh.geometry, inkMaterial(furMaterial(src, u), 'none'), SHELLS); // [outline9] fluff draws no ink
   for (let i = 0; i < SHELLS; i++) im.setMatrixAt(i, new THREE.Matrix4());
   im.instanceMatrix.needsUpdate = true;
   im.name = mesh.name + ':fur';
@@ -117,6 +118,7 @@ export function furShells(mesh: THREE.Mesh, u: FurUniforms): THREE.InstancedMesh
   im.count = shellCount;
   live.add(im);
   im.position.copy(mesh.position); im.quaternion.copy(mesh.quaternion); im.scale.copy(mesh.scale);
+  im.add(inkHull(mesh, u)); // [outline9] the part's outline: an ink hull inside the fluff
   return im;
 }
 

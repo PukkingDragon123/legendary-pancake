@@ -6,8 +6,10 @@
 //   4. a composite: exposure, a filmic shoulder, a warm golden grade that adds saturation, a gentle vignette,
 //      light grain and an 8-bit ordered dither (no posterising),
 //   5. an overlay drawn crisp on top (Pip's words), then shown 1:1 on the canvas.
+// [outline9] plus the game's ink outlines (src/gfx/ink.ts) in the composite; knobs in `outline`.
 // The Stage hands the renderer `present` (a scene with one full-screen triangle) to draw.
 import * as THREE from 'three';
+import { Ink, inkDev, INK_GLSL, defaultInk, inkUniforms, type InkLook } from '../gfx/ink.ts'; // [outline9]
 
 const VERT = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
 const BAYER = /* glsl */ `
@@ -55,9 +57,14 @@ export class Look {
   private mComp: THREE.ShaderMaterial; private mBlit: THREE.ShaderMaterial;
   private frame = 0;
   private bloomOn: boolean;
+  /** [outline9] ink outlines: strength, width, crease, far (metres) */
+  readonly outline: InkLook = { ...defaultInk(), far: 14 };
+  private ink: Ink;
 
   constructor(private gl: THREE.WebGLRenderer, quality: 'low' | 'high') {
     this.bloomOn = quality === 'high';
+    this.ink = new Ink(gl, quality === 'high' ? 'high' : 'medium'); // [outline9]
+    this.present.userData.noInk = true; // [outline9] the world's chain must not ink this finished picture again
     const mk = () => new THREE.WebGLRenderTarget(8, 8, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
     const depth = new THREE.DepthTexture(8, 8); depth.type = THREE.UnsignedIntType;
     // [light7] full resolution, multisampled on the high tier (no pixelated look)
@@ -116,6 +123,7 @@ export class Look {
         uRes: { value: new THREE.Vector2() }, uFrame: { value: 0 }, uTime: { value: 0 },
         uNear: { value: 0.1 }, uFar: { value: 50 }, uFocus: { value: 3 }, uRange: { value: 2 }, uNearBlur: { value: 0 }, uDof: { value: 1 },
         uExposure: { value: 1 }, uWarm: { value: 0.3 }, uSat: { value: 1.1 }, uCon: { value: 1.05 }, uVig: { value: 0.3 }, uGrain: { value: 0.03 }, uBloom: { value: 0.5 }, uFade: { value: 0 },
+        uInkOn: { value: 0 }, ...inkUniforms(), // [outline9]
       },
       fragmentShader: /* glsl */ `
         uniform sampler2D tColor; uniform sampler2D tBg; uniform sampler2D tBloom; uniform sampler2D tBloom2; uniform float uBloomOn;
@@ -124,6 +132,7 @@ export class Look {
         varying vec2 vUv;
         ${DEPTH}
         ${BAYER}
+        uniform float uInkOn; ${INK_GLSL}
         float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + uFrame * 0.618) * 43758.5453); }
         vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
         vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
@@ -131,13 +140,16 @@ export class Look {
           vec2 px = floor(vUv * uRes);
           vec2 uv = (px + 0.5) / uRes;
           vec3 col = texture2D(tColor, uv).rgb;
+          float soft = 0.0;
           if (uDof > 0.0) {
             float c = coc(uv) * uDof;
             vec4 bg = texture2D(tBg, uv);
             vec3 blur = bg.a > 1e-4 ? bg.rgb / bg.a : col;
-            col = mix(col, blur, smoothstep(0.0, 1.0, c) * 0.92 * clamp(bg.a * 4.0, 0.0, 1.0));
+            soft = smoothstep(0.0, 1.0, c) * 0.92 * clamp(bg.a * 4.0, 0.0, 1.0);
+            col = mix(col, blur, soft);
           }
-          if (uBloomOn > 0.5) col += (texture2D(tBloom, uv).rgb * 0.7 + texture2D(tBloom2, uv).rgb * 0.9) * uBloom;
+          vec3 glow = vec3(0.0);
+          if (uBloomOn > 0.5) { glow = (texture2D(tBloom, uv).rgb * 0.7 + texture2D(tBloom2, uv).rgb * 0.9) * uBloom; col += glow; }
           col *= uExposure;
           col = 0.18 * pow(max(col, vec3(1e-5)) / 0.18, vec3(uCon));
           col = aces(col * 0.85);
@@ -151,6 +163,11 @@ export class Look {
           vec2 cc = vUv - 0.5;
           col *= 1.0 - uVig * smoothstep(0.1, 0.75, dot(cc, cc) * 1.5);
           col = toSRGB(clamp(col, 0.0, 1.0));
+          if (uInkOn > 0.5) { // [outline9] ink lines (faded where the background blurs and under bright bloom)
+            float a = inkCover(uv);
+            a *= (1.0 - smoothstep(0.25, 0.85, soft)) * (1.0 - smoothstep(0.35, 1.6, dot(glow, vec3(0.2126, 0.7152, 0.0722)) * uExposure));
+            col = inkOver(col, a);
+          }
           float g = hash(px + floor(uTime * 24.0) * 17.0) - 0.5;
           col += g * uGrain * (1.1 - l);
           col += (bayer4(px) - 0.5) / 255.0; // [light7] an 8-bit ordered dither against banding (no posterising)
@@ -186,6 +203,7 @@ export class Look {
     this.hA.setSize(w >> (1 + k), h >> (1 + k)); this.hB.setSize(w >> (1 + k), h >> (1 + k));
     this.qA.setSize(Math.max(8, w >> (2 + k)), Math.max(8, h >> (2 + k))); this.qB.setSize(Math.max(8, w >> (2 + k)), Math.max(8, h >> (2 + k)));
     this.eA.setSize(Math.max(8, w >> (3 + k)), Math.max(8, h >> (3 + k))); this.eB.setSize(Math.max(8, w >> (3 + k)), Math.max(8, h >> (3 + k)));
+    this.ink.setSize(w, h); // [outline9]
   }
 
   private pass(mat: THREE.ShaderMaterial, target: THREE.WebGLRenderTarget | null) {
@@ -199,9 +217,12 @@ export class Look {
     const gl = this.gl, g = this.grade, prev = gl.getRenderTarget(), auto = gl.autoClear;
     this.frame++;
     gl.autoClear = true;
+    const pr = gl.getPixelRatio();
+    this.ink.frame(this.w, this.h, this.outline, 1, pr, g.exposure); // [outline9]
     gl.setRenderTarget(this.rt);
     gl.clear();
     gl.render(scene, camera);
+    Ink.idle(); // [outline9]
     gl.autoClear = false;
     const depthU = (m: THREE.ShaderMaterial) => {
       m.uniforms.tDepth.value = this.rt.depthTexture; m.uniforms.uNear.value = camera.near; m.uniforms.uFar.value = camera.far;
@@ -229,6 +250,11 @@ export class Look {
       blur(this.mBlur, this.eA, this.eB);
       u.tBloom.value = this.qA.texture; u.tBloom2.value = this.eA.texture; u.uBloomOn.value = 1;
     } else u.uBloomOn.value = 0;
+    // [outline9] the ink mask
+    if (this.outline.strength > 0.001 && inkDev.mode !== 'off') {
+      this.ink.run(this.rt, camera, this.outline, 1, pr);
+      u.tInk.value = this.ink.rt.texture; u.uInkTexel.value.set(1 / this.w, 1 / this.h); u.uInkStr.value = Math.min(1, this.outline.strength); u.uInkOn.value = 1;
+    } else u.uInkOn.value = 0;
     u.tColor.value = this.rt.texture; depthU(this.mComp);
     u.uDof.value = g.dof;
     u.uRes.value.set(this.w, this.h); u.uFrame.value = this.frame % 1000; u.uTime.value = time;
@@ -247,6 +273,7 @@ export class Look {
 
   dispose() {
     for (const t of [this.rt, this.ldr, this.hA, this.hB, this.qA, this.qB, this.eA, this.eB]) t.dispose();
+    this.ink.dispose(); // [outline9]
     for (const m of [this.mBright, this.mBlur, this.mDown, this.mBlurW, this.mComp, this.mBlit, this.showMat]) m.dispose();
   }
 }

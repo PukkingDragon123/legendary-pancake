@@ -973,6 +973,7 @@ export class Scene {
       // focus the depth of field on the subject the camera looks at
       this.post.grade.focus = c.dist;
       this.post.grade.focusRange = Math.max(3, c.dist * 0.3);
+      this.post.grade.outlineFar = c.dist * 2.4 + 24; // [outline9] ink on the subject and round it, thinning out over the far woods
       this.post.grade.blur = this.view === 'home' || this.view === 'sleep' || this.view === 'wake' ? 0.48 : 0.36; // [light7] crisper
       // [look5] inside the living room: Pip and what's round him sharp, the back wall a little soft and the world
       // outside the windows melting into bokeh
