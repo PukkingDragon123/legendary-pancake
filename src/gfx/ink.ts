@@ -178,12 +178,15 @@ void main() {
   float rx2 = lift(z0, -L2.z, -R2.z), ry2 = lift(z0, -D2.z, -U2.z);
   // a hand-drawn line's weight: heavier on the shadow side (the outside towards the lower right, away from the key
   // light), on things near the eye, and with a slow swell and thinning of the pen along the line
-  vec2 outward = vec2(L.z - R.z, D.z - U.z) / z0 + vec2(L2.z - R2.z, D2.z - U2.z) / (2.0 * z0);
-  float side = dot(outward, vec2(0.7071, -0.7071)) / max(length(outward), 1e-5);
-  float press = pen((uCamWorld * vec4(P, 1.0)).xyz * 1.6) - 0.5;
-  float nearK = 1.0 - smoothstep(uFade.y * 0.05, uFade.y * 0.22, z0);
-  float w = clamp(uWide + 0.08 + 0.4 * side + 0.3 * nearK + 0.55 * press, 0.0, 1.0);
-  e = max(e * (0.8 + 0.2 * clamp(side + 0.5, 0.0, 1.0) + 0.15 * press), smoothstep(T * 0.6, T * 1.25, max(rx2, ry2)) * w);
+  float press = 0.0;
+  if (max(r, max(rx2, ry2)) > T * 0.6) {
+    vec2 outward = vec2(L.z - R.z, D.z - U.z) / z0 + vec2(L2.z - R2.z, D2.z - U2.z) / (2.0 * z0);
+    float side = dot(outward, vec2(0.7071, -0.7071)) / max(length(outward), 1e-5);
+    press = pen((uCamWorld * vec4(P, 1.0)).xyz * 1.6) - 0.5;
+    float nearK = 1.0 - smoothstep(uFade.y * 0.05, uFade.y * 0.22, z0);
+    float w = clamp(uWide + 0.06 + 0.36 * side + 0.2 * nearK + 0.55 * press, 0.0, 1.0) * full;
+    e = max(e * (0.8 + 0.2 * clamp(side + 0.5, 0.0, 1.0) + 0.15 * press), smoothstep(T * 0.6, T * 1.25, max(rx2, ry2)) * w);
+  }
   // creases (over a 4 px span, so bevelled and rounded edges count too): only between solid neighbours (never at fluff,
   // glass, glows or grass), never across a depth step; a little thinner than the silhouettes
   if (uCrease > 0.0 && full > 0.0) {
@@ -195,7 +198,8 @@ void main() {
     e = max(e, smoothstep(0.18, 0.42, k) * (0.5 + 0.2 * press) * uCrease * solid);
   }
 #endif
-  gl_FragColor = vec4(e * sil * fade, 0.0, 0.0, 1.0);
+  // leaf cards: a finer line (their ragged edges would read as specks with a heavy one)
+  gl_FragColor = vec4(e * sil * fade * mix(0.72, 1.0, full), 0.0, 0.0, 1.0);
 }`;
 
 /**

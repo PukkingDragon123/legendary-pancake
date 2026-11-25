@@ -40,7 +40,7 @@ export interface CelOpts {
  * The reference look in words and numbers, for painted 2D art (HUD objects, icons, emotes) that has to sit next to the
  * 3D: realistic, high-resolution materials under one warm key light from the upper left, with the light falling off in
  * three softened steps, cool violet-blue shadows that keep the local colour rich, a thin rim of light on silhouettes,
- * small crisp highlights on hard materials and no ink outlines.
+ * small crisp highlights on hard materials, and [outline9] a warm near-black ink line round every form (see `outline`).
  */
 export const CEL_REF = {
   /** key light direction in screen terms: from the upper left, slightly in front of the subject; warm (#ffe2bc) */
@@ -57,7 +57,10 @@ export const CEL_REF = {
   rim: 'thin edge, cool sky colour on the shadow side, warm key colour when back-lit, ~30-50% of the key',
   /** specular: a small, hard-edged glint on brass, glass, ceramics, lacquer and eyes; none on cloth, paper, matte wood */
   glint: 'small and hard-edged, only on smooth materials',
-  outline: 'none',
+  /** [outline9] the 3D's ink (src/gfx/ink.ts): warm near-black #140c10 with a breath of the local colour; ~1.7 px on
+   * 1x screens, 2.3 on 2x round silhouettes and depth steps, thinner on inner creases; heavier on the shadow side
+   * (lower right, away from the key light), finer on the lit side and on leaves; thinning out with distance */
+  outline: 'warm near-black #140c10, ~1.7-2.3 px silhouettes, thinner creases, heavier on the shadow side',
 } as const;
 
 const FNS = /* glsl */ `
