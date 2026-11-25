@@ -27,7 +27,8 @@ import { DRINKS, TAPES } from './props.ts';
 import { answersFrom, applyAnswers, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat } from './script.ts';
 import { Speech } from './speech.ts';
 import { plainOf } from '../ui/talk.ts';
-import { animeMoment } from '../ui/fx/anime.ts'; // [anime6]
+import { fxMoment } from '../ui/fx/moment.ts'; // [fx10] ink and a soft press of light
+import { uiBurst } from '../ui/chrome/uifx.ts';
 
 const ARTIFACT = import.meta.env.MODE === 'artifact';
 const DEV = import.meta.env.DEV;
@@ -235,7 +236,10 @@ export function Intro() {
         office.bump(1);
         const sheet = panelEl.current;
         if (sheet) { sheet.classList.remove('thud'); void sheet.offsetWidth; sheet.classList.add('thud'); window.setTimeout(() => sheet.classList.remove('thud'), 420); }
-        if (text === 'APPROVED') { animeMoment('stamp', { x, y }); office.pip.react('starry', 'sparkle', 2.2); } // [anime6]
+        // [fx10] a few real ink drops flicked off the die (the impression carries its own printed spatter); the
+        // approval gets the full moment: a soft press of light, ink, paper and dust
+        if (text === 'APPROVED') { fxMoment('stamp', { x, y }); office.pip.react('starry', 'sparkle', 2.2); }
+        else uiBurst('ink', x, y, 3);
       };
       play('pickup_item', 0.4, 0.9);
       ov.play(stamp, 1.3, (k, o) => {

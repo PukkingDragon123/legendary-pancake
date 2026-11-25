@@ -251,7 +251,7 @@ export class Office implements Stage {
     s.add(cred);
     s.add(buildCabinets(m));
     await idle();
-    // the wall clock over the credenza (its face is the loading clock's own painting)
+    // the cuckoo clock over the credenza (its face is the loading clock's own painting)
     this.clock = new WallClock(m);
     this.clock.group.position.set(L.clock.x, L.clock.y, L.z0 + 0.004);
     s.add(this.clock.group);
@@ -479,7 +479,7 @@ export class Office implements Stage {
       case 'desk': return { target: V(0.05, DESK_TOP + 0.1, -0.95), yaw: 0.15, pitch: 0.55, fit: P ? [1.2, 1.8] : [2.4, 1.3], anchor: [0, P ? 0.1 : 0] };
       case 'tray': case 'bed': case 'floor': case 'tower': return { target: V(-0.62, DESK_TOP + 0.14, -0.95), yaw: -0.25, pitch: 0.32, fit: P ? [0.75, 1.1] : [1.7, 0.95], anchor: [0, P ? 0.05 : 0] };
       case 'window': return { target: V(L.x0 + 0.4, 1.6, L.window.z), yaw: -0.85, pitch: 0.05, fit: P ? [1.7, 2.6] : [3.4, 2.0] };
-      case 'clock': return { target: V(L.clock.x, L.clock.y + 0.05, L.z0 + 0.1), yaw: 0, pitch: 0.0, fit: P ? [0.8, 1.2] : [1.8, 0.95] };
+      case 'clock': return { target: V(L.clock.x, L.clock.y + 0.18, L.z0 + 0.1), yaw: 0, pitch: 0.0, fit: P ? [0.8, 1.2] : [1.8, 0.95] };
       case 'clockwin': return { target: V(-0.6, 1.6, -1.8), yaw: -0.5, pitch: 0.06, fit: P ? [2.2, 3.0] : [4.2, 2.4] };
       case 'board': return { target: V(L.x1 - 0.2, 1.8, -0.3), yaw: 0.85, pitch: 0.05, fit: P ? [1.6, 2.2] : [3.4, 1.9] };
       case 'ask': {
@@ -515,7 +515,7 @@ export class Office implements Stage {
     return { pos: new THREE.Vector3(s.target.x + Math.sin(s.yaw) * cp * d, s.target.y + Math.sin(s.pitch) * d, s.target.z + Math.cos(s.yaw) * cp * d), look: s.target.clone(), ax: s.anchor?.[0] ?? 0, ay: s.anchor?.[1] ?? 0 };
   }
   /** Where the clock's dial centre is in the room. */
-  get dialWorld() { return this.clock ? this.clock.group.localToWorld(this.clock.dial.clone()) : V(L.clock.x, L.clock.y + 0.32, L.z0 + 0.15); }
+  get dialWorld() { return this.clock ? this.clock.group.localToWorld(this.clock.dial.clone()) : V(L.clock.x, L.clock.y + 0.22, L.z0 + 0.15); }
   /**
    * The opening: start nose to the clock's dial exactly as the loading screen left it (dial centre at screen
    * point (x, y), one art pixel = px CSS px), then pull back and crane down into the room, ending on `to`.
