@@ -343,12 +343,12 @@ export function stampArt(color: string, emblem_: string, done: boolean): Art {
 
 /** Section icons (11 x 11): 'stats' (bars), 'nights' (moon over a list), 'things' (a little chest), 'seals' (a pennant). */
 export function iconArt(name: string, tint: string): Art {
-  return art(`icon7:${name}:${tint}`, 11, 11, (g) => {
+  return art(`icon10:${name}:${tint}`, 11, 11, (g) => {
     const [d, m] = (TAB_COLORS[tint] ?? TAB_COLORS.moss).map(hexOf);
     const ink = hexOf(P.ink2);
     g.shadowColor = 'rgba(40,30,20,.3)'; g.shadowBlur = 0.4 * S(); g.shadowOffsetY = 0.25 * S();
     if (name === 'stats') { g.fillStyle = m; for (const [x, h] of [[1.5, 4], [4.5, 6], [7.5, 8.5]]) { g.beginPath(); g.roundRect(x, 9.5 - h, 2.2, h, 0.6); g.fill(); } g.fillStyle = ink; g.fillRect(0.5, 9.5, 10, 0.6); }
-    else if (name === 'nights') { g.fillStyle = hexOf(P.ochre); g.beginPath(); g.arc(2.6, 3, 2.2, 0, Math.PI * 2); g.arc(3.6, 2.4, 1.8, 0, Math.PI * 2, true); g.fill('evenodd'); g.strokeStyle = ink; g.lineWidth = 0.7; g.lineCap = 'round'; for (const y of [3, 6, 9]) { g.beginPath(); g.moveTo(5.5, y); g.lineTo(10, y); g.stroke(); } }
+    else if (name === 'nights') { g.fillStyle = '#efe2c0'; g.fillRect(1.6, 3.6, 2.2, 5.4); g.fillStyle = '#8e7440'; g.fillRect(0.6, 8.8, 4.2, 0.9); g.fillStyle = hexOf(P.ochre); g.beginPath(); g.ellipse(2.7, 2.1, 0.8, 1.4, 0, 0, Math.PI * 2); g.fill(); /* [ui10] a candle, not a moon */ g.strokeStyle = ink; g.lineWidth = 0.7; g.lineCap = 'round'; for (const y of [3, 6, 9]) { g.beginPath(); g.moveTo(5.5, y); g.lineTo(10, y); g.stroke(); } }
     else if (name === 'things') { g.fillStyle = m; g.beginPath(); g.roundRect(0.8, 2, 9.4, 7.6, 1.2); g.fill(); g.fillStyle = d; g.fillRect(0.8, 4.6, 9.4, 0.8); g.fillStyle = hexOf(P.honey); g.beginPath(); g.roundRect(4.6, 4.2, 1.8, 2.2, 0.4); g.fill(); }
     else { g.strokeStyle = ink; g.lineWidth = 0.7; g.beginPath(); g.moveTo(1.5, 0.5); g.lineTo(1.5, 10.5); g.stroke(); g.fillStyle = m; g.beginPath(); g.moveTo(1.8, 1); g.lineTo(9.5, 3.5); g.lineTo(1.8, 6.5); g.closePath(); g.fill(); }
   });
