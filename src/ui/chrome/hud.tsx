@@ -4,8 +4,8 @@
 //             moon-gem boards on brass chains with enamel "+" buttons (right)
 //   SideTools small walnut tiles with brass corners and coloured felt, hung on a rope down the right
 //             side (Build, Shop, Dress up, Quests, Map, Settings), each with a paper label tag
-//   MainNav   three big objects on a walnut shelf with engraved brass name plates: a moon lamp (Sleep),
-//             a brass twin-bell alarm clock showing the real time (Clock), a leather journal (Book)
+//   MainNav   three big objects on a walnut shelf with engraved brass name plates, live in 3D (shelf3d.tsx): a moon lamp (Sleep),
+//             a carved cuckoo clock showing the real time (Clock), a leather journal (Book)
 // Everything is painted with the relief painter (src/ui/px/relief.ts, src/ui/chrome/objects.ts): real
 // materials lit from the top left. Signs swing when tapped or hit by rewards and sway in the breeze; they
 // are pulled up out of the way when a full-screen place opens and drop back in when it closes. Opening a
@@ -28,6 +28,7 @@ import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt,
 import { installChromeSkin } from './skin.ts';
 import { iconSrc } from './iconset.ts';
 import { installSurfaces } from './surfaces.ts';
+import { shelf3d, useShelf3D, type NavId } from './shelf3d.tsx'; // [icons6] the main buttons as live 3D objects
 import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
@@ -307,7 +308,7 @@ export function SideTools() {
 interface MainDef { id: NonNullable<Panel>; label: string; inner: string; tl: Timeline; act: Timeline; fx: UiFxKind[]; icon?: string }
 const MAIN: MainDef[] = [
   { id: 'sleep', label: 'Sleep', inner: 'night', tl: seq('nav_sleep', 8, 260), act: rep(seq('nav_sleep_tap', 3, 110), 2), fx: ['stars', 'motes'] },
-  { id: 'clock', label: 'Clock', inner: 'paper', tl: seq('nav_clock', 8, 120), act: seq('nav_clock', 8, 60), fx: ['sparkle', 'puff'] },
+  { id: 'clock', label: 'Clock', inner: 'paper', tl: seq('nav_clock', 8, 120), act: seq('nav_clock', 8, 60), fx: ['sparkle', 'motes'] }, // [icons6] no puff over the cuckoo's door
   { id: 'book', label: 'Book', inner: 'velvet', tl: seq('nav_book', 5, 70), act: seq('nav_book', 5, 70), fx: ['paper', 'magic'] },
 ];
 const GLOW = [0.4, 0.55, 0.7, 0.85, 0.7, 0.55];
@@ -394,14 +395,17 @@ function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
   const [state, setState] = useState<'' | 'press' | 'pop'>('');
   const [act, setAct] = useState(0);
   const el = useRef<HTMLButtonElement>(null);
-  const down = () => { setState('press'); sound.play('tick_wood', { volume: 0.4, rate: 0.9, gap: 60 }); haptic(6); };
-  const up = () => setState((s) => (s === 'press' ? 'pop' : s));
+  const nid = p.m.id as NavId;
+  const down = () => { setState('press'); shelf3d.press(nid, true); sound.play('tick_wood', { volume: 0.4, rate: 0.9, gap: 60 }); haptic(6); };
+  const up = () => { shelf3d.press(nid, false); setState((s) => (s === 'press' ? 'pop' : s)); };
   const go = () => {
     setState('pop');
     setAct((n) => n + 1);
+    shelf3d.press(nid, false);
+    shelf3d.act(nid);
     const id = p.m.id;
     if (id === 'sleep') { sound.play('ui_toggle', { volume: 0.7, gap: 60 }); sound.play('chime_sweep', { volume: 0.3, gap: 200 }); }
-    else if (id === 'clock') { sound.play('desk_bell', { volume: 0.35, rate: 1.25, gap: 200 }); sound.play('tick_brass', { volume: 0.5, gap: 60 }); }
+    else if (id === 'clock') { sound.play('drawer', { volume: 0.25, rate: 1.6, gap: 200 }); [110, 380].forEach((ms, i) => setTimeout(() => sound.play('owl_hoot', { volume: 0.4, rate: 1.12 + i * 0.08, gap: 150 }), ms)); } // [icons6] the cuckoo door pops, the owl calls twice
     else { sound.play('book_open', { volume: 0.6, gap: 200 }); }
     const r = el.current!.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height * 0.38;
     uiBurst(p.m.fx[0], x, y, 12);
@@ -411,7 +415,8 @@ function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
   useEffect(() => { if (state !== 'pop') return; const t = setTimeout(() => setState(''), 560); return () => clearTimeout(t); }, [state]);
   return (
     <button ref={el} class={'hh-mobj ' + p.m.id + (state ? ' ' + state : '') + (p.rec ? ' rec' : '')} style={{ '--i': p.i } as Record<string, number>}
-      onPointerDown={down} onPointerUp={up} onPointerLeave={() => setState((s) => (s === 'press' ? '' : s))} onClick={go} aria-label={p.m.label}>
+      onPointerDown={down} onPointerUp={up} onPointerLeave={() => { shelf3d.press(nid, false); shelf3d.hover(nid, false); setState((s) => (s === 'press' ? '' : s)); }}
+      onPointerEnter={(e) => { if ((e as PointerEvent).pointerType === 'mouse') shelf3d.hover(nid, true); }} onPointerCancel={() => shelf3d.press(nid, false)} onClick={go} aria-label={p.m.label}>
       <img class="hh-cshadow" src={contactShadow(p.m.id === 'book' ? 40 : 34, 6, p.k)} alt="" draggable={false} />
       <span class="hh-pic">
         {p.m.id === 'sleep' ? <LampArt k={p.k} act={act} /> : p.m.id === 'clock' ? <AlarmArt k={p.k} act={act} /> : <BookArt k={p.k} act={act} />}
@@ -436,8 +441,10 @@ export function MainNav() {
   let diff = t.getTime() - now.getTime();
   if (diff < -6 * 3600_000) diff += 24 * 3600_000;
   const bedtimeNear = diff < 90 * 60_000;
+  const [host3d, live, still3d, wait3d] = useShelf3D(away, bedtimeNear, DESK_NAV); // [icons6] the live 3D shelf (and last visit's still of it)
   return (
-    <nav class={'hh-nav' + (away ? ' away' : '')} aria-label="Main">
+    <nav class={'hh-nav' + (away ? ' away' : '') + (live || still3d ? ' live' : wait3d ? ' wait' : '')} aria-label="Main">
+      <span class="hh-nav3d" ref={host3d} aria-hidden="true">{still3d && <img src={still3d} alt="" draggable={false} />}</span>
       <div class="hh-plaques">
         {MAIN.map((m, i) => <MainObject key={m.id} m={m} i={i} rec={m.id === 'sleep' && bedtimeNear} k={k} />)}
       </div>

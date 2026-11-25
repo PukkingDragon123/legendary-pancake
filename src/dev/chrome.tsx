@@ -159,6 +159,19 @@ if (view === 'fx') {
   uiAdvance(+(q.get('t') ?? 0.3));
 }
 
+if (view === 'nav') {
+  // [icons6] the live 3D shelf (Sleep, Clock, Book) on its own: &bg= &night=1 (a moonlit backdrop) &art= (art px per CSS px)
+  void import('../ui/chrome/hud.tsx').then(({ MainNav, hudOverride }) => {
+    const night = q.get('night') === '1';
+    document.body.style.background = q.get('bg') ?? (night ? 'linear-gradient(#0e1a44,#2a2a5a 60%,#3a2a3a)' : 'linear-gradient(#8a5a36,#6a3e24)');
+    if (q.get('art')) (window as unknown as { __shelfArt: number }).__shelfArt = +q.get('art')!;
+    (window as unknown as { __shelfNight: number }).__shelfNight = night ? 1 : 0;
+    hudOverride.value = 'all';
+    root.style.cssText = 'position:relative;width:100vw;height:100vh;overflow:hidden';
+    render(<MainNav />, root);
+  });
+}
+
 if (view === 'trans') {
   document.body.style.background = 'linear-gradient(#8fd0f0,#7d9a62)';
   root.innerHTML = '<div style="height:100vh"></div>';
