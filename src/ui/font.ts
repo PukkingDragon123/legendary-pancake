@@ -1,12 +1,11 @@
-// The game's one typeface: Alagard by Hewett Tsoi (Pix3M), a pixel font drawn on a 16 px em
-// (1 font pixel = 1/16 em; caps 11 px, x-height 8 px, descenders 3 px). It is crisp only at whole
-// multiples of 16 px (16, 32, 48) drawn at whole-pixel positions, so every CSS size and every
-// canvas size in the game is one of those.
+// The game's one typeface: Alagard by Hewett Tsoi (Pix3M), drawn on a 16 px em (caps 11/16, x-height 8/16).
+// It is rendered at full device resolution; UI sizes are whole multiples of 16 px (16, 32, 48), where its
+// square strokes land cleanly at any device pixel ratio, and lines start on whole device pixels.
 //
 // Alagard covers printable ASCII plus a few currency signs, nothing else. `alagardSafe` turns
 // typographic punctuation into its ASCII twin and strips accents; every Preact text node goes
 // through it (installed below), and canvas text calls it directly. Anything left over (a name the
-// player typed in another script) falls back to the old pixel face in the CSS stack, never tofu.
+// player typed in another script) falls back to the TBME face in the CSS stack, never tofu.
 import { options, type VNode } from 'preact';
 import alagardUrl from '../assets/fonts/alagard.ttf?url';
 
