@@ -5,14 +5,14 @@
 //   ?sheet=emotes&t=0.45    every emote mark beside Pip, frozen t seconds in
 //   ?fx=levelup&t=0.3&bg=/dist/shot.png   a big moment over a backdrop, frozen t seconds in
 import * as THREE from 'three';
-import { artPx } from '../../gfx/artpx.ts';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { OwlActor, type OwlMood } from '../../owl/actor.ts';
 import type { OwlLook } from '../../owl/model.ts';
 import { SPECIES } from '../../owl/species.ts';
+import { PIECE_MODELS } from '../../owl/outfits.ts';
 import { Beaver, BEAVER_FACES } from '../../world/stages/beaver.ts';
 import { animeMoment, setChibi, sfxArt, type AnimeMoment } from './anime.ts';
-import { EMOTES, popEmote, project, type EmoteKind } from './emotes.ts';
+import { dprNow, EMOTES, popEmote, project, type EmoteKind } from './emotes.ts';
 
 const q = new URLSearchParams(location.search);
 const W = innerWidth, H = innerHeight;
@@ -58,7 +58,8 @@ async function owlGrid(items: { look: OwlLook; mood: OwlMood; label: string; emo
     a.node.updateMatrixWorld(true);
     const f = a.faceCentre(), rad = a.faceRadius();
     const dist = (rad * 6.2) / zoom;
-    cam.position.set(f.x + dist * 0.12, f.y + dist * 0.06, f.z + dist);
+    const elev = +(q.get('elev') ?? 0.06), yaw = +(q.get('yaw') ?? 0.12);
+    cam.position.set(f.x + Math.sin(yaw) * dist, f.y + dist * elev, f.z + Math.cos(yaw) * dist);
     cam.lookAt(f.x, f.y - rad * 0.15, f.z);
     cam.updateMatrixWorld();
     const c = i % cols, row = Math.floor(i / cols), x = c * tw, y = row * th;
@@ -130,9 +131,8 @@ async function fxShot() {
   }
   const look: OwlLook = sp(q.get('sp') ?? 'tawny');
   const { owlIconAsync } = await import('../portraits.ts');
-  const { pixelate } = await import('../pxfx.tsx');
   const url = await owlIconAsync(look, 'face').catch(() => '');
-  if (url) await setChibi(await pixelate(url, 44));
+  if (url) await setChibi(url);
   await document.fonts.ready;
   await new Promise((res) => setTimeout(res, 300));
   const t = +(q.get('t') ?? 0.3);
@@ -154,6 +154,16 @@ if (sheet === 'pip') {
   const moods: OwlMood[] = ['joy', 'starry', 'surprised', 'sleepy', 'shy', 'flustered', 'determined', 'teary', 'grumpy', 'love', 'joy', 'starry'];
   const ids = [...SPECIES.map((s) => s.id), 'gingerbread', 'snowman', 'celestial', 'meowl'];
   void owlGrid(ids.map((id, i) => ({ look: sp(id), mood: moods[i % moods.length], label: `${id}: ${moods[i % moods.length]}` })), +(q.get('cols') ?? 4), +(q.get('zoom') ?? 0.8));
+} else if (sheet === 'hats') {
+  // ?hat=nightcap: every species and skin wearing one head piece (?mood= for the face)
+  const ids = [...SPECIES.map((s) => s.id), 'gingerbread', 'snowman', 'celestial', 'meowl'];
+  const hat = q.get('hat') ?? 'nightcap', mood = (q.get('mood') ?? 'starry') as OwlMood;
+  void owlGrid(ids.map((id) => ({ look: { ...sp(id), outfit: { head: hat } }, mood, label: `${id}: ${hat}` })), +(q.get('cols') ?? 4), +(q.get('zoom') ?? 0.8));
+} else if (sheet === 'hatlist') {
+  // ?sp=horned: one owl in every head piece
+  const id = q.get('sp') ?? 'tawny', mood = (q.get('mood') ?? 'starry') as OwlMood;
+  const hats = Object.entries(PIECE_MODELS).filter(([, m]) => m.anchor === 'anchor_head').map(([h]) => h);
+  void owlGrid(hats.map((h) => ({ look: { ...sp(id), outfit: { head: h } }, mood, label: h })), +(q.get('cols') ?? 6), +(q.get('zoom') ?? 0.8));
 } else if (sheet === 'beaver') void beaverSheet();
 else if (sheet === 'emotes') {
   const mood: Record<EmoteKind, OwlMood> = { bang: 'surprised', ask: 'curious', sweat: 'shy', anger: 'grumpy', notes: 'joy', sparkle: 'starry', hearts: 'love', zzz: 'sleepy', bulb: 'excited', gloom: 'sad', steam: 'grumpy' };
@@ -168,16 +178,17 @@ else if (q.get('words')) void (async () => {
   canvas.style.display = 'none';
   const list = q.get('words')!.split(',');
   const styles = [{ fill: '#ffd84a', deep: '#f08a1c' }, { fill: '#c9a6ff', deep: '#7448d8' }, { fill: '#8ff0b8', deep: '#2ea26a' }, { fill: '#ff6a4a', deep: '#b8202c' }, { fill: '#d8d2ff', deep: '#6a62c8', ink: '#1a1430' }, { fill: '#8fe0ff', deep: '#2f8ad8' }];
-  const B = artPx(), c = document.createElement('canvas');
-  c.width = Math.ceil(W / B); c.height = Math.ceil(H / B);
-  Object.assign(c.style, { position: 'fixed', inset: '0', width: `${c.width * B}px`, height: `${c.height * B}px`, imageRendering: 'pixelated' });
+  const d = dprNow(), c = document.createElement('canvas');
+  c.width = W * d; c.height = H * d;
+  Object.assign(c.style, { position: 'fixed', inset: '0', width: `${W}px`, height: `${H}px` });
   document.body.appendChild(c);
   const g = c.getContext('2d')!;
-  g.imageSmoothingEnabled = false;
+  g.setTransform(d, 0, 0, d, 0, 0);
+  const size = +(q.get('size') ?? 64);
   list.forEach((w, i) => {
-    const art = sfxArt(w, { ...styles[i % styles.length], size: 3 });
-    const cx = c.width / 2, cy = 30 + i * 58;
-    for (const a of art) g.drawImage(a.img, Math.round(cx + a.x - a.img.width / 2), Math.round(cy + a.y - a.img.height / 2));
+    const art = sfxArt(w, { ...styles[i % styles.length], size });
+    const cx = W / 2, cy = size * 0.9 + i * size * 1.35;
+    for (const a of art) { const iw = a.img.width / d, ih = a.img.height / d; g.save(); g.translate(cx + a.x, cy + a.y); g.rotate(a.rot - 0.1); g.drawImage(a.img, -iw / 2, -ih / 2, iw, ih); g.restore(); }
   });
   done();
 })();
