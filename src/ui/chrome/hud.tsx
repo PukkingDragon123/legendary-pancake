@@ -26,11 +26,10 @@ import { addSwing, kick, makeSwing, reducedMotion, removeSwing, type Swing } fro
 import { clearTransition, installPanelTransitions, panelTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts'; // [motion3] panelTransition, installPanelTransitions
 import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
-import { iconCss, iconSrc } from './iconset.ts';
-import { artPxSignal } from '../../gfx/artpx.ts';
+import { iconSrc } from './iconset.ts';
 import { installSurfaces } from './surfaces.ts';
 import { shelf3d, useShelf3D, type NavId } from './shelf3d.tsx'; // [icons6] the main buttons as live 3D objects
-import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, hudZoom, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
+import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
 
@@ -78,8 +77,7 @@ function useK(q: string): number {
     try { mq = matchMedia(q); } catch { return; }
     const on = () => setK(kFor(q));
     mq.addEventListener?.('change', on);
-    const off = artPxSignal.subscribe(on); // [tex7] the art pixel changes with the screen
-    return () => { mq?.removeEventListener?.('change', on); off(); };
+    return () => mq?.removeEventListener?.('change', on);
   }, [q]);
   return k;
 }
@@ -143,7 +141,7 @@ function NameSign() {
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={40} />
       <button class="hh-board hh-nameboard" style={{ backgroundImage: bg(board(96, 36, k, 1, { seed: 4, hooks: [26, 71], brackets: true })) }} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
-        <span class="hh-portrait"><OwlPortrait size={78} frame={s.frame} pokeKey={poke} zoom={hudZoom(DESK_HUD)} /></span>
+        <span class="hh-portrait"><OwlPortrait size={78} frame={s.frame} pokeKey={poke} /></span>
         <span class={'hh-name' + (long ? ' long' : '')}>{s.name}</span>
         {fits && <span class="hh-rank">{rank}</span>}
         <span class="hh-lvl">
@@ -187,7 +185,7 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
       <Ropes xs={[22, 102]} top={p.kind === 'coin' ? -28 : -16} len={p.kind === 'coin' ? 34 : 22} chain />
       <div class="hh-board hh-curboard" style={{ backgroundImage: bg(board(62, 20, k, 1, { seed: p.kind === 'coin' ? 7 : 9, wood: p.kind === 'coin' ? 'oak' : 'walnut', hooks: [11, 51], screws: [[27, 11.5]], bevel: 2 })) }} onClick={tapSign} role="group" aria-label={`${label}: ${p.value.toLocaleString()}`}>
         <span class={'hh-cur-ico ' + p.kind} data-chip={p.kind} ref={ico}>
-          <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} zoom={hudZoom(DESK_HUD)} />
+          <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}
         </span>
         <span class={'hh-num' + (p.value >= 100000 ? ' huge' : p.value >= 10000 ? ' long' : '')}><Odometer value={p.value} /></span>
@@ -282,7 +280,7 @@ function ToolTag(p: { t: ToolDef; i: number; badge?: number; isNew?: boolean }) 
     <div class="hh-tool" style={{ '--i': p.i } as Record<string, number>}>
       <div class="hh-toolhang" ref={ref}>
         <button class="hh-tag" style={{ backgroundImage: bg(toolTile(26, p.t.felt, k, 1, p.i + 1)) }} onClick={go} aria-label={p.t.label + (p.badge ? ` (${p.badge} ready to claim)` : '')}>
-          <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={iconSrc(TOOL_ICON[p.t.id] ?? '', Math.round(44 * dpr()), dpr()) ?? toolIcon(p.t.id as ToolIcon, k, 1)} width={iconCss(TOOL_ICON[p.t.id] ?? '', 44)} height={iconCss(TOOL_ICON[p.t.id] ?? '', 44)} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
+          <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={iconSrc(TOOL_ICON[p.t.id] ?? '', Math.round(44 * dpr()), dpr()) ?? toolIcon(p.t.id as ToolIcon, k, 1)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
           {!!p.badge && <span class="hh-badge"><PxAnim tl={[['hud_seal', 1e9]]} size={28} /><b>{p.badge}</b></span>}
           {p.isNew && <span class="hh-new"><PxAnim tl={[['hud_new', 1e9]]} size={44} /></span>}
         </button>

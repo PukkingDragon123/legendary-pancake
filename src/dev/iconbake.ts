@@ -1,33 +1,30 @@
 // [icons6] The icon bake: every interface icon is a small, properly shaped 3D model (turned brass, carved wood, tooled
-// leather, enamel, glass, cloth; no blocks and balls), lit like the live shelf (src/ui/chrome/shelf3d.tsx) and
-// pixel-finished. The hero objects are the very models on the shelf (src/ui/chrome/props3d.ts: the alarm clock, the
-// journal), furniture comes from the game's own GLBs, the rest are modelled here. Light: a studio panorama for
-// reflections (a bright window up-left, a dark horizon band, a warm floor), a soft warm key from the top left, a sky
-// fill and a cool rim; no cast shadows. Finish: rendered big, re-sampled to a few art pixels by the most common colour
-// (crisp clusters, no blur), shaded in a few steps per colour with lights leaning gold and shadows leaning violet, a
-// light painterly break-up, a little more colour, and a coloured outline that is softer on the lit side. Two sizes per
-// icon (32 and 20 art px; packs bigger), and the currency (the acorn bag, the moon gem) glints in idle frames.
-// [tex7] Every model is textured before it is baked: each material is a detailed hand-painted texture in full colour
-// (src/ui/chrome/paint3d.ts: wood grain and knots, tooled leather, engraved and tarnished brass, crazed enamel, woven and
-// knitted cloth, paper fibres, frosted glass, leaf veins, cut gems, wax, water, bark, stone), laid on at the icons' texel
-// density (`fitUV`) and lit with the shared cel light (2-3 bands, cool shadows, a warm rim) like the shelf and the world.
-// Extra sizes (12, 16, 24, 28 art px, `z`) let every icon be drawn at exactly one art pixel per artPx() CSS px; palettes
-// are capped at 64 colours (median cut).
+// leather, enamel, glass, cloth; no blocks and balls). The hero objects are the very models on the shelf
+// (src/ui/chrome/props3d.ts: the cuckoo clock, the journal), furniture comes from the game's own GLBs, the rest are
+// modelled here.
+// [tex7] High resolution and realistic: every material wears a detailed realistic texture: photo grain (Poly Haven CC0
+// oak, leather, linen, knit and velour, prepared in art/tex7) tinted to its colour, or a texture painted in full colour
+// (src/ui/chrome/paint3d.ts: engraved and tarnished brass, crazed enamel, paper fibres and ink, frosted glass, leaf
+// veins, cut gems, wax, water, bark, stone), laid on at one density (`fitUV`). Lit by a soft studio light (a studio
+// panorama for reflections, a warm key from the top left, a sky fill, a cool rim), rendered at twice the size and
+// scaled down smoothly into a 128 px cell, a little more colour and a soft contact shadow. The cells and the photo
+// swatches make the interface atlas (public/img/ui3d.webp; index in src/ui/px/icons3d.ts); the currency (the acorn
+// bag, the moon gem) glints in idle frames.
 //
 //   /dev-iconbake.html               bake everything and show it on paper (big, then at 1:1)
 //   /dev-iconbake.html?only=regex     just some
-//   window.__module                   the generated src/ui/px/icons3d.ts (a tools script writes it to disk)
+//   window.__module, window.__atlas   the generated src/ui/px/icons3d.ts and public/img/ui3d.webp (a tools script writes them)
 import * as THREE from 'three';
 import { instanceGLB } from '../gfx/glb.ts';
 import { fbm, hash as h2, hex, type RGB } from '../ui/px/relief.ts';
-import { bark, cel, cloth, cloudTex, density, enamel, fitUV, flame, gem, glass, keepUV, leafTex, leather, metal, paper, scales, stone, water, wax, wood, type Painted } from '../ui/chrome/paint3d.ts';
+import { bark, cloth, cloudTex, enamel, fitUV, flame, gem, glass, keepUV, leafTex, leather, metal, paper, scales, setSwatch, stone, swatchAt, SWATCHES, water, wax, wood, type Painted, type Swatch } from '../ui/chrome/paint3d.ts';
 import {
   at, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, MATS, mesh, paintTex, planarUV, rrectPts, setClockHands, shape, smoothProfile, starPts, studioEnv, torus, tube,
   type O,
 } from '../ui/chrome/props3d.ts';
 
 const q = new URLSearchParams(location.search);
-const SS = 8; // supersampling per art pixel
+const SS = 2; // supersampling
 
 // ------------------------------------------------------------------ renderer and light
 const canvas = document.createElement('canvas');
@@ -39,16 +36,18 @@ R.toneMappingExposure = 1.0;
 const scene = new THREE.Scene();
 scene.environment = studioEnv(R);
 scene.environmentIntensity = 0.95;
-scene.add(new THREE.HemisphereLight(0xeef0ff, 0x5a4c8a, 0.72)); // [tex7] the cel light: a cool violet-blue shadow fill
-const key = new THREE.DirectionalLight(0xffe4bc, 3.0); key.position.set(-3.5, 5, 3.5); scene.add(key);
-const fill = new THREE.DirectionalLight(0xd8e4ff, 0.0); fill.position.set(4, 1, 3); scene.add(fill);
-const rim = new THREE.DirectionalLight(0xe4ecff, 0.7); rim.position.set(2.5, 3, -5); scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xfff2e0, 0x6a4a3a, 0.8));
+const key = new THREE.DirectionalLight(0xffe8c8, 3.2); key.position.set(-3.5, 5, 3.5); scene.add(key);
+const fill = new THREE.DirectionalLight(0xd8e4ff, 0.55); fill.position.set(4, 1, 3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xe4ecff, 1.2); rim.position.set(2.5, 3, -5); scene.add(rim);
 const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 500);
 
-// ------------------------------------------------------------------ hand-painted textures for every material
-/** the icons' texture density: a model about two units across fills a 32 art-pixel icon */
-const ICON_DENS = density(15);
+// ------------------------------------------------------------------ realistic textures for every material
+/** the icons' texture density (repeats per model unit): a model is about two units across */
+const ICON_DENS = 0.45;
 type TexKind = 'enamel' | 'grain' | 'weave' | 'burlap' | 'scale' | 'leather' | 'knit' | 'bark' | 'felt' | 'paper' | 'glass' | 'water' | 'wax' | 'stone' | 'cloud' | 'leaf' | 'foliage' | 'gem' | 'metal' | 'plain';
+/** the photo swatch a kind wears (tinted to the material's colour), and its repeats */
+const PHOTO: Partial<Record<TexKind, [Swatch, number]>> = { grain: ['woodg', 1], leather: ['grain', 1.4], weave: ['linen', 1.6], burlap: ['linen', 1], knit: ['knit', 2.2], felt: ['velvet', 1.5] };
 function painted(kind: TexKind, c: string, seed: number): Painted {
   switch (kind) {
     case 'grain': return wood(c, { seed: 3 + seed % 5, knots: 1 });
@@ -67,9 +66,9 @@ function painted(kind: TexKind, c: string, seed: number): Painted {
     case 'cloud': return cloudTex(c);
     case 'leaf': return leafTex(c, { seed: 3, veins: 7 });
     case 'gem': return gem(c);
-    case 'metal': return metal(c, { seed: 2 + seed % 7, patina: 0.2, engrave: 'rings', brush: 'u' });
+    case 'metal': return metal(c, { seed: 2 + seed % 7, patina: 0.15, brush: 'u' });
     case 'plain': return enamel(c, { craze: 0, chips: false });
-    default: return enamel(c, { craze: 0.8 });
+    default: return enamel(c, { craze: 0.6 });
   }
 }
 
@@ -78,8 +77,8 @@ const mats = new Map<string, THREE.Material>();
 /** the bake's own materials (everything else, e.g. a painted face, keeps its own texture coordinates) */
 const ownMats = new Set<THREE.Material>();
 /**
- * A material: a hand-painted texture of `color` (enamel unless told otherwise; metal, glass, gem or a plain glaze when
- * `tex` is null), lit with the cel light.
+ * A material of `color`: photo grain tinted to it (wood, leather, cloth), or a texture painted in it (enamel unless told
+ * otherwise; metal, glass, gem or a plain glaze when `tex` is null).
  */
 function M(color: number, o: MOpt = {}): THREE.MeshStandardMaterial {
   const k = color + JSON.stringify(o);
@@ -89,12 +88,13 @@ function M(color: number, o: MOpt = {}): THREE.MeshStandardMaterial {
   const kind: TexKind = o.tex !== null && o.tex !== undefined ? o.tex : o.tex === null
     ? (o.flat ? 'gem' : (o.metal ?? 0) >= 0.4 ? 'metal' : o.opacity !== undefined || ((o.rough ?? 0.5) <= 0.1 && (o.env ?? 1) >= 1.3) ? 'glass' : 'plain')
     : 'enamel';
-  const p = painted(kind, c, mats.size);
-  m = new THREE.MeshStandardMaterial({ color: 0xffffff, map: p.map, metalness: o.metal ?? 0, roughness: o.rough ?? 0.5, flatShading: !!o.flat, emissive: o.glow ? 0xffffff : 0x000000, emissiveMap: o.glow ? p.map : null, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
-  if (p.bump) { m.bumpMap = p.bump; m.bumpScale = p.bumpScale ?? 1; }
+  const ph = PHOTO[kind], photo = ph ? swatchAt(ph[0], ph[1]) : null;
+  const p = photo ? null : painted(kind, c, mats.size);
+  const map = photo ?? p!.map;
+  m = new THREE.MeshStandardMaterial({ color: photo ? new THREE.Color(color).multiplyScalar(1.45) : 0xffffff, map, metalness: o.metal ?? 0, roughness: o.rough ?? 0.5, flatShading: !!o.flat, emissive: o.glow ? 0xffffff : 0x000000, emissiveMap: o.glow ? map : null, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
+  if (photo) { m.bumpMap = photo; m.bumpScale = 0.7; } else if (p?.bump) { m.bumpMap = p.bump; m.bumpScale = p.bumpScale ?? 1; }
   if (kind === 'leaf') keepUV(m);
   if (o.opacity !== undefined) { m.transparent = true; m.opacity = o.opacity; m.depthWrite = false; }
-  cel(m);
   mats.set(k, m);
   ownMats.add(m);
   return m;
@@ -212,17 +212,14 @@ type Make = () => O | Promise<O>;
 interface Spec { make: Make; yaw?: number; pitch?: number; pad?: number; vivid?: number }
 const glb = (path: string, fix?: (o: O) => void): Make => async () => { const { root } = await instanceGLB(path); fix?.(root); root.userData.glb = true; return root; };
 /**
- * Ready a model for the bake: the cel light on every lit material, and the bake's own painted materials laid on at
- * the icons' texel density (a painted face, a borrowed model's own textures keep their coordinates).
+ * Ready a model for the bake: the bake's own textured materials laid on at the icons' density (a painted face, a
+ * borrowed model's own textures keep their coordinates).
  */
 function prep(obj: O): O {
   obj.traverse((o) => {
     const me = o as THREE.Mesh;
     if (!me.isMesh) return;
-    for (const m of Array.isArray(me.material) ? me.material : [me.material]) {
-      if (!ownMats.has(m) && !(m as THREE.Material).userData.shelfMat) keepUV(m);
-      if ((m as THREE.MeshStandardMaterial).isMeshStandardMaterial) cel(m);
-    }
+    for (const m of Array.isArray(me.material) ? me.material : [me.material]) if (!ownMats.has(m) && !(m as THREE.Material).userData.shelfMat) keepUV(m);
   });
   if (!obj.userData.glb) fitUV(obj, ICON_DENS);
   return obj;
@@ -556,8 +553,9 @@ function ringTex(): THREE.Texture {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; texCache.set('ring', t); return t;
 }
 
-// ------------------------------------------------------------------ render + pixel finish
-function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): ImageData {
+// ------------------------------------------------------------------ render and finish (realistic, smooth)
+/** render the model framed in a square, `n` px, supersampled x2 and scaled down smoothly */
+function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): HTMLCanvasElement {
   const S = n * SS;
   R.setSize(S, S, false);
   scene.add(obj);
@@ -578,243 +576,168 @@ function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): Image
     const step = Math.max(1, Math.floor(p.count / 800));
     for (let i = 0; i < p.count; i += step) { v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld).applyMatrix4(cam.matrixWorldInverse); pb.expandByPoint(v); }
   });
-  // leave one art pixel each side for the outline
-  const half = (Math.max(pb.max.x - pb.min.x, pb.max.y - pb.min.y) / 2) * pad * (n / (n - 2.2)), mx = (pb.max.x + pb.min.x) / 2, my = (pb.max.y + pb.min.y) / 2;
+  // a margin for the soft shadow
+  const half = (Math.max(pb.max.x - pb.min.x, pb.max.y - pb.min.y) / 2) * pad * 1.1, mx = (pb.max.x + pb.min.x) / 2, my = (pb.max.y + pb.min.y) / 2;
   cam.left = mx - half; cam.right = mx + half; cam.top = my + half; cam.bottom = my - half;
   cam.updateProjectionMatrix();
   R.render(scene, cam);
   scene.remove(obj);
   const out = document.createElement('canvas');
-  out.width = out.height = S;
+  out.width = out.height = n;
   const g2 = out.getContext('2d', { willReadFrequently: true })!;
-  g2.drawImage(R.domElement, 0, 0);
-  return g2.getImageData(0, 0, S, S);
-}
-
-const clamp = (v: number, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
-function hsl(r: number, g: number, b: number): [number, number, number] {
-  r /= 255; g /= 255; b /= 255;
-  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
-  if (mx === mn) return [0, 0, l];
-  const d = mx - mn, s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
-  const h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
-  return [h / 6, s, l];
-}
-function rgb(h: number, s: number, l: number): [number, number, number] {
-  const f = (p: number, q: number, t: number) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
-  if (!s) return [l * 255, l * 255, l * 255];
-  const q2 = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q2;
-  return [f(p, q2, h + 1 / 3) * 255, f(p, q2, h) * 255, f(p, q2, h - 1 / 3) * 255];
-}
-const hash = (x: number, y: number, s: number) => { let h = (x * 374761393 + y * 668265263 + s * 982451653) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
-function vnoise(x: number, y: number, s: number) { const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi; const a = hash(xi, yi, s), b = hash(xi + 1, yi, s), c = hash(xi, yi + 1, s), d = hash(xi + 1, yi + 1, s); const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
-
-/** The pixel finish: n x n art pixels from the supersampled render. */
-function pixelFinish(src: ImageData, n: number, seed: number, vivid = 1): ImageData {
-  const S = src.width, sd = src.data, out = new ImageData(n, n), d = out.data;
-  const solid = new Uint8Array(n * n);
-  const k = S / n;
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    const buckets = new Map<number, [number, number, number, number]>();
-    let opaque = 0, tot = 0;
-    for (let j = Math.floor(y * k); j < Math.floor((y + 1) * k); j++) for (let i = Math.floor(x * k); i < Math.floor((x + 1) * k); i++) {
-      const o = (j * S + i) * 4; tot++;
-      if (sd[o + 3] < 128) continue;
-      opaque++;
-      const key2 = ((sd[o] >> 4) << 8) | ((sd[o + 1] >> 4) << 4) | (sd[o + 2] >> 4);
-      const b = buckets.get(key2) ?? [0, 0, 0, 0];
-      b[0] += sd[o]; b[1] += sd[o + 1]; b[2] += sd[o + 2]; b[3]++;
-      buckets.set(key2, b);
-    }
-    if (opaque / tot < 0.42) continue;
-    let best: [number, number, number, number] | null = null;
-    for (const b of buckets.values()) if (!best || b[3] > best[3]) best = b;
-    const [r, g, b] = [best![0] / best![3], best![1] / best![3], best![2] / best![3]];
-    // a pixel artist's ramp: lightness in a few steps (lightly broken up, like a brush), lights lean gold, shadows violet
-    let [h, s, l] = hsl(r, g, b);
-    const brush = (vnoise(x * 0.45, y * 0.45, seed) - 0.5) * 0.025;
-    const steps = 7;
-    let lq = Math.round((l + brush) * steps) / steps;
-    lq = clamp(lq * 0.93 + 0.055, 0.05, 0.97);
-    const warm = lq - 0.5;
-    if (s > 0.08) { const target = warm > 0 ? 0.12 : 0.72; let dh = target - h; if (dh > 0.5) dh -= 1; if (dh < -0.5) dh += 1; h = (h + dh * Math.min(0.08, Math.abs(warm) * 0.18) + 1) % 1; }
-    s = clamp(s * 1.28 * vivid + 0.04 * (s > 0.08 ? 1 : 0), 0, 0.95);
-    const c = rgb(h, s, lq);
-    const o = (y * n + x) * 4;
-    d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
-    solid[y * n + x] = 1;
-  }
-  // [tex7] clean up like a pixel artist: a lone pixel unlike all four of its neighbours (texture speckle) takes the
-  // colour of the neighbour nearest it, so texture reads as clusters and lines, never salt and pepper
-  {
-    const src = new Uint8ClampedArray(d), dist = (a: number, b: number) => Math.abs(src[a] - src[b]) + Math.abs(src[a + 1] - src[b + 1]) + Math.abs(src[a + 2] - src[b + 2]);
-    for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) {
-      if (!solid[y * n + x]) continue;
-      const o = (y * n + x) * 4, nb = [o - 4, o + 4, o - n * 4, o + n * 4].filter((q) => src[q + 3] > 0);
-      if (nb.length < 4 || nb.some((q) => dist(o, q) < 40)) continue;
-      const q = nb.reduce((b, c) => (dist(o, c) < dist(o, b) ? c : b));
-      d[o] = src[q]; d[o + 1] = src[q + 1]; d[o + 2] = src[q + 2];
-    }
-  }
-  // a coloured outline: the darkest neighbour, darker and leaning plum; softer on the lit (top-left) side
-  const add: [number, number[]][] = [];
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    if (solid[y * n + x]) continue;
-    let best: number[] | null = null, lit = false, shade = false;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const X = x + dx, Y = y + dy;
-      if (X < 0 || Y < 0 || X >= n || Y >= n || !solid[Y * n + X]) continue;
-      if (dx > 0 || dy > 0) lit = true; else shade = true;
-      const o = (Y * n + X) * 4, c = [d[o] * 0.34 + 14, d[o + 1] * 0.26 + 7, d[o + 2] * 0.34 + 22];
-      if (!best || c[0] + c[1] + c[2] < best[0] + best[1] + best[2]) best = c;
-    }
-    if (!best) continue;
-    if (lit && !shade) best = [best[0] * 1.25 + 10, best[1] * 1.2 + 6, best[2] * 1.12 + 6];
-    add.push([y * n + x, best]);
-  }
-  for (const [i, c] of add) { d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; }
+  g2.imageSmoothingEnabled = true; g2.imageSmoothingQuality = 'high';
+  g2.drawImage(R.domElement, 0, 0, n, n);
   return out;
 }
 
-/** glint and twinkle overlays for the currency's idle frames */
-function sparkleAt(img: ImageData, x: number, y: number, arm: number, col = [255, 252, 238]) {
-  const n = img.width, d = img.data;
-  const put = (px: number, py: number, a: number) => { if (px < 0 || py < 0 || px >= n || py >= n) return; const o = (py * n + px) * 4; const t = a / 255; d[o] = d[o] * (1 - t) + col[0] * t; d[o + 1] = d[o + 1] * (1 - t) + col[1] * t; d[o + 2] = d[o + 2] * (1 - t) + col[2] * t; d[o + 3] = Math.max(d[o + 3], a); };
-  put(x, y, 255);
-  for (let k = 1; k <= arm; k++) { const a = k === arm ? 150 : 225; put(x - k, y, a); put(x + k, y, a); put(x, y - k, a); put(x, y + k, a); }
-}
-function glint(img: ImageData, f: number) {
-  // a bright diagonal band sweeping across the solid pixels on frames 2..5
-  const n = img.width, d = img.data, pos = [-99, -99, 0.25, 0.42, 0.6, 0.78, -99, -99][f] * n * 2;
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    const o = (y * n + x) * 4;
-    if (d[o + 3] < 255) continue;
-    const t = Math.abs(x + y - pos);
-    if (t < 1.4) { d[o] = d[o] + (255 - d[o]) * 0.55; d[o + 1] = d[o + 1] + (250 - d[o + 1]) * 0.55; d[o + 2] = d[o + 2] + (225 - d[o + 2]) * 0.45; }
+/**
+ * The finish: a little more colour (the studio light is honest; icons want to sing at 20 px), then a soft contact
+ * shadow down and to the right under the object, so it reads on light and dark panels alike.
+ */
+function finish(src: HTMLCanvasElement, vivid = 1): HTMLCanvasElement {
+  const n = src.width, g = src.getContext('2d', { willReadFrequently: true })!;
+  const img = g.getImageData(0, 0, n, n), d = img.data, k = 1.14 * vivid;
+  for (let i = 0; i < d.length; i += 4) {
+    if (!d[i + 3]) continue;
+    const l = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+    for (let c = 0; c < 3; c++) d[i + c] = Math.max(0, Math.min(255, l + (d[i + c] - l) * k));
   }
+  g.putImageData(img, 0, 0);
+  const out = document.createElement('canvas');
+  out.width = out.height = n;
+  const o = out.getContext('2d')!;
+  o.save();
+  o.filter = `blur(${n / 64}px)`;
+  o.globalAlpha = 0.38;
+  o.drawImage(src, n / 64, n / 40);
+  o.globalCompositeOperation = 'source-in';
+  o.fillStyle = '#2a1408';
+  o.fillRect(0, 0, n, n);
+  o.restore();
+  o.drawImage(src, 0, 0);
+  return out;
 }
 
-// ------------------------------------------------------------------ encoding (palette + run-length, base64)
-/** cap an image's colours (median cut): pixel art keeps a small palette, and the file stays small */
-function capPalette(img: ImageData, max = 64) {
-  const d = img.data, px: number[] = [];
-  for (let i = 0; i < d.length; i += 4) if (d[i + 3] >= 128) px.push(i);
-  const boxes: number[][] = [px];
-  while (boxes.length < max) {
-    let bi = -1, bc = 0, br = 0;
-    boxes.forEach((b, i) => { if (b.length < 2) return; for (let c = 0; c < 3; c++) { let lo = 255, hi = 0; for (const o of b) { lo = Math.min(lo, d[o + c]); hi = Math.max(hi, d[o + c]); } if (hi - lo > br) { br = hi - lo; bi = i; bc = c; } } });
-    if (bi < 0 || br < 6) break;
-    const b = boxes[bi].sort((x, y) => d[x + bc] - d[y + bc]), mid = b.length >> 1;
-    boxes.splice(bi, 1, b.slice(0, mid), b.slice(mid));
-  }
-  for (const b of boxes) {
-    if (!b.length) continue;
-    let r = 0, g = 0, bl = 0;
-    for (const o of b) { r += d[o]; g += d[o + 1]; bl += d[o + 2]; }
-    r /= b.length; g /= b.length; bl /= b.length;
-    for (const o of b) { d[o] = r; d[o + 1] = g; d[o + 2] = bl; }
-  }
+/** the currency's idle glints: a soft four-point twinkle, and a band of light sweeping across the object */
+function twinkle(c: HTMLCanvasElement, x: number, y: number, r: number, col = '255,250,232') {
+  const g = c.getContext('2d')!;
+  g.save();
+  g.globalCompositeOperation = 'lighter';
+  const rg = g.createRadialGradient(x, y, 0, x, y, r);
+  rg.addColorStop(0, `rgba(${col},0.95)`); rg.addColorStop(0.25, `rgba(${col},0.35)`); rg.addColorStop(1, `rgba(${col},0)`);
+  g.fillStyle = rg;
+  g.beginPath(); g.ellipse(x, y, r, r * 0.12, 0, 0, Math.PI * 2); g.ellipse(x, y, r * 0.12, r, 0, 0, Math.PI * 2); g.fill();
+  g.beginPath(); g.arc(x, y, r * 0.3, 0, Math.PI * 2); g.fill();
+  g.restore();
 }
-function encode(img: ImageData): { w: number; h: number; p: string; d: string } {
-  capPalette(img);
-  const d = img.data, pal: string[] = [], map = new Map<string, number>(), idx: number[] = [];
-  for (let i = 0; i < img.width * img.height; i++) {
-    if (d[i * 4 + 3] < 128) { idx.push(0); continue; }
-    const h = [d[i * 4], d[i * 4 + 1], d[i * 4 + 2]].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
-    let k = map.get(h);
-    if (k === undefined) { k = Math.min(255, pal.length + 1); if (pal.length < 255) { map.set(h, k); pal.push(h); } }
-    idx.push(k);
-  }
-  const bytes: number[] = [];
-  for (let i = 0; i < idx.length;) { let j = i; while (j < idx.length && idx[j] === idx[i] && j - i < 255) j++; bytes.push(j - i, idx[i]); i = j; }
-  let bin = '';
-  for (const v of bytes) bin += String.fromCharCode(v);
-  return { w: img.width, h: img.height, p: pal.join(''), d: btoa(bin) };
+function glint(c: HTMLCanvasElement, f: number) {
+  const pos = [-9, -9, 0.25, 0.42, 0.6, 0.78, -9, -9][f];
+  if (pos < -1) return;
+  const n = c.width, g = c.getContext('2d')!;
+  const band = document.createElement('canvas');
+  band.width = band.height = n;
+  const b = band.getContext('2d')!;
+  b.drawImage(c, 0, 0);
+  b.globalCompositeOperation = 'source-in';
+  const p = pos * n * 2, lg = b.createLinearGradient(p - n * 0.12, 0, p + n * 0.12, 0);
+  lg.addColorStop(0, 'rgba(255,250,228,0)'); lg.addColorStop(0.5, 'rgba(255,250,228,0.55)'); lg.addColorStop(1, 'rgba(255,250,228,0)');
+  b.setTransform(1, 0, 1, 1, -n, 0); // slanted
+  b.fillStyle = lg;
+  b.fillRect(0, 0, n * 3, n);
+  g.save(); g.globalCompositeOperation = 'lighter'; g.drawImage(band, 0, 0); g.restore();
 }
 
 // ------------------------------------------------------------------ the bake
-const SIZES = { L: 32, S: 20 };
-/** the extra sizes (art px), so an icon can be drawn at exactly one art pixel per artPx() CSS px */
-const ZS = [12, 16, 24, 28];
-/** extra sizes of the currency's idle frames */
-const ANIM_ZS: Record<string, number[]> = { owlcoin: [16, 20, 24], moongem: [16, 20, 24] };
-/** the currency's big and animated versions: [name, model, size, frames] */
-const ANIM: [string, string, number, number][] = [['owlcoin', 'owlcoin', 32, 8], ['acorn_big', 'owlcoin', 48, 8], ['moongem', 'moongem', 32, 8], ['gem_big', 'moongem', 48, 8], ['coin_vault', 'coin_vault', 44, 4]];
+/** the cell size (px) of every icon in the atlas */
+const CELL = 128;
+const COLS = 16;
+/** the currency's idle frames: [name, model, frames]; acorn_big and gem_big are the same frames, drawn bigger */
+const ANIM: [string, string, number][] = [['owlcoin', 'owlcoin', 8], ['moongem', 'moongem', 8], ['coin_vault', 'coin_vault', 4]];
+const ANIM_ALIAS: Record<string, string> = { acorn_big: 'owlcoin', gem_big: 'moongem' };
 /** names that share a model */
 const ALIAS: Record<string, string> = { acorn: 'owlcoin', wd_hanger: 'hanger' };
-/** pack sprites are bigger (their sizes in the store) */
-const BIG: Record<string, number> = { coin_pouch: 40, coin_sack: 40, coin_chest: 44 };
+
+/** the photo swatches (prepared from Poly Haven CC0 textures in art/tex7) */
+async function loadPhotos(): Promise<Record<string, HTMLImageElement>> {
+  const out: Record<string, HTMLImageElement> = {};
+  await Promise.all(SWATCHES.map((n) => new Promise<void>((res) => {
+    const im = new Image();
+    im.onload = () => { out[n] = im; setSwatch(n, im, [0, 0, im.width, im.height]); res(); };
+    im.onerror = () => res();
+    im.src = `/art/tex7/${n}.webp`;
+  })));
+  return out;
+}
 
 async function bake() {
   const only = q.get('only');
   const host = document.getElementById('out')!;
-  const res: Record<string, unknown> = {};
-  const show = (name: string, img: ImageData) => {
-    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; c.getContext('2d')!.putImageData(img, 0, 0);
+  const photos = await loadPhotos();
+  const show = (name: string, c: HTMLCanvasElement) => {
     const fig = document.createElement('figure');
-    fig.innerHTML = `<div class="big"></div><div class="one"></div><figcaption>${name}</figcaption>`;
-    const big = c.cloneNode() as HTMLCanvasElement; big.getContext('2d')!.drawImage(c, 0, 0); big.style.cssText = `width:${img.width * 3}px;image-rendering:pixelated`;
-    fig.querySelector('.big')!.appendChild(big); fig.querySelector('.one')!.appendChild(c);
+    const big = document.createElement('canvas'); big.width = big.height = c.width; big.getContext('2d')!.drawImage(c, 0, 0); big.style.width = '96px';
+    const small = document.createElement('canvas'); small.width = small.height = 32; const sg = small.getContext('2d')!; sg.imageSmoothingQuality = 'high'; sg.drawImage(c, 0, 0, 32, 32);
+    fig.append(big, small, Object.assign(document.createElement('figcaption'), { textContent: name }));
     host.appendChild(fig);
   };
+  const cells: HTMLCanvasElement[] = [];
+  const icons: Record<string, number> = {}, anim: Record<string, number[]> = {};
   const names = Object.keys(ICONS).filter((n) => !only || new RegExp(only).test(n));
-  let seed = 1;
   for (const name of names) {
     const sp = ICONS[name];
     try {
-      const sizes: Record<string, number> = BIG[name] ? { L: BIG[name] } : SIZES;
-      const zs = BIG[name] ? [24, 32] : ZS;
-      const out: Record<string, unknown> = {};
-      const one = async (n: number) => pixelFinish(shoot(prep(await sp.make()), n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad), n, seed, sp.vivid);
-      for (const [tag, n] of Object.entries(sizes)) {
-        const img = await one(n);
-        out[tag] = encode(img);
-        if (tag === 'L') show(name, img);
-      }
-      if (!q.get('fast')) { const z: unknown[] = []; for (const n of zs) z.push(encode(await one(n))); out.z = z; }
-      res[name] = out;
+      const c = finish(shoot(prep(await sp.make()), CELL, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad), sp.vivid);
+      icons[name] = cells.push(c) - 1;
+      show(name, c);
     } catch (e) { console.error('bake failed', name, e); }
-    seed++;
   }
-  for (const [a, b] of Object.entries(ALIAS)) if (res[b] && (!only || new RegExp(only).test(a))) res[a] = res[b];
-  // the idle frames: a bob and squash, a glint across the front, twinkles popping round it
-  const anim: Record<string, unknown[]> = {}, animZ: Record<string, unknown[][]> = {};
-  const frame = async (model: string, n: number, f: number, frames: number) => {
-    const sp = ICONS[model];
-    const ph = (f / frames) * Math.PI * 2;
-    const obj = prep(await sp.make());
-    if (frames === 8) { obj.scale.set(1 + Math.sin(ph) * 0.03, 1 - Math.sin(ph) * 0.03, 1); obj.rotation.z = Math.sin(ph + 1) * 0.04; }
-    const img = pixelFinish(shoot(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, (sp.pad ?? 1.04) * 1.04), n, 77);
-    if (frames === 8) glint(img, f);
-    const tw: [number, number, number][] = [[0.78, 0.16, 2], [0.18, 0.3, 1], [0.82, 0.62, 1], [0.24, 0.12, 2]];
-    const t = tw[f % 4];
-    if (f % 2 === 0 || frames === 4) sparkleAt(img, Math.round(t[0] * n), Math.round(t[1] * n), Math.max(1, Math.round(t[2] * n / 24)), model === 'moongem' ? [240, 236, 255] : [255, 250, 230]);
-    return img;
-  };
-  for (const [name, model, n, frames] of ANIM) {
+  for (const [a, b] of Object.entries(ALIAS)) if (icons[b] !== undefined && (!only || new RegExp(only).test(a))) icons[a] = icons[b];
+  // the idle frames: a bob and squash, a glint across the front, twinkles round it
+  for (const [name, model, frames] of ANIM) {
     if (only && !new RegExp(only).test(name)) continue;
-    const list: unknown[] = [], zl: unknown[][] = [];
+    const sp = ICONS[model], list: number[] = [];
     for (let f = 0; f < frames; f++) {
-      const img = await frame(model, n, f, frames);
-      list.push(encode(img));
-      if (f === 2) show(name + '_f2', img);
-      if (ANIM_ZS[name] && !q.get('fast')) { const z: unknown[] = []; for (const m of ANIM_ZS[name]) z.push(encode(await frame(model, m, f, frames))); zl.push(z); }
+      const ph = (f / frames) * Math.PI * 2;
+      const obj = prep(await sp.make());
+      if (frames === 8) { obj.scale.set(1 + Math.sin(ph) * 0.03, 1 - Math.sin(ph) * 0.03, 1); obj.rotation.z = Math.sin(ph + 1) * 0.04; }
+      const c = finish(shoot(obj, CELL, sp.yaw ?? 0.5, sp.pitch ?? 0.3, (sp.pad ?? 1.04) * 1.04), sp.vivid);
+      if (frames === 8) glint(c, f);
+      const tw: [number, number, number][] = [[0.78, 0.16, 0.16], [0.18, 0.3, 0.1], [0.82, 0.62, 0.1], [0.24, 0.12, 0.15]];
+      const t = tw[f % 4];
+      if (f % 2 === 0 || frames === 4) twinkle(c, t[0] * CELL, t[1] * CELL, t[2] * CELL, model === 'moongem' ? '240,236,255' : '255,250,230');
+      list.push(cells.push(c) - 1);
+      if (f === 2) show(name + '_f2', c);
     }
     anim[name] = list;
-    if (zl.length) animZ[name] = zl;
   }
-  const json = JSON.stringify({ icons: res, anim, animZ });
-  const module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html, then window.__module): every interface icon is a small 3D model,
-// textured, lit and pixel-finished (see that file). { icons: { name: { L, S, z: [extra sizes] } }, anim: { name: [frames] },
-// animZ: { name: [[extra sizes of each frame]] } }; each image is { w, h, p: palette (6 hex digits per colour), d: base64
-// run-length pairs (count, palette index; 0 = clear) }.
-// Models: the game's own GLBs, the shelf's props (src/ui/chrome/props3d.ts) and models made in the bake; credits for
-// borrowed models in docs/credits.
-type Img = { w: number; h: number; p: string; d: string };
-export const ICONS3D: { icons: Record<string, { L: Img; S?: Img; z?: Img[] }>; anim: Record<string, Img[]>; animZ?: Record<string, Img[][]> } = ${json};
+  for (const [a, b] of Object.entries(ANIM_ALIAS)) if (anim[b]) anim[a] = anim[b];
+  // the atlas: the icon cells, then the photo swatches (512 px, four to a row)
+  const rows = Math.ceil(cells.length / COLS), SW = 512, swatches: Record<string, [number, number, number, number]> = {};
+  const atlas = document.createElement('canvas');
+  atlas.width = COLS * CELL;
+  atlas.height = rows * CELL + Math.ceil(SWATCHES.length / 4) * SW;
+  const ag = atlas.getContext('2d')!;
+  cells.forEach((c, i) => ag.drawImage(c, (i % COLS) * CELL, Math.floor(i / COLS) * CELL));
+  SWATCHES.forEach((n, i) => {
+    const im = photos[n];
+    if (!im) return;
+    const r: [number, number, number, number] = [(i % 4) * SW, rows * CELL + Math.floor(i / 4) * SW, SW, SW];
+    ag.drawImage(im, r[0], r[1], SW, SW);
+    swatches[n] = r;
+  });
+  const json = JSON.stringify({ atlas: 'img/ui3d.webp', cell: CELL, cols: COLS, icons, anim, swatches });
+  const module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html; a tools script writes window.__module here and window.__atlas to
+// public/img/ui3d.webp): the interface atlas's index. Every interface icon is a small 3D model with realistic textures,
+// rendered with soft studio light into a ${CELL} px cell; the atlas also carries the photo swatches (Poly Haven, CC0) the
+// live shelf's wood, leather and cloth wear. { atlas, cell, cols, icons: { name: cell }, anim: { name: [cells] },
+// swatches: { name: [x, y, w, h] } }. Models: the game's own GLBs, the shelf's props (src/ui/chrome/props3d.ts) and
+// models made in the bake; credits in docs/credits.
+export const ICONS3D: { atlas: string; cell: number; cols: number; icons: Record<string, number>; anim: Record<string, number[]>; swatches: Record<string, [number, number, number, number]> } = ${json};
 `;
-  (window as unknown as { __module: string }).__module = module;
-  (window as unknown as { __done: boolean }).__done = true;
-  document.title = 'baked ' + Object.keys(res).length;
+  const w = window as unknown as { __module: string; __atlas: string; __done: boolean };
+  w.__module = module;
+  w.__atlas = atlas.toDataURL('image/webp', 0.86);
+  w.__done = true;
+  document.title = 'baked ' + Object.keys(icons).length;
 }
 void bake();

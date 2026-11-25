@@ -8,18 +8,18 @@
 //   journal()    a tooled leather journal: gilt corners, a gold moon on the cover, raised spine bands, page block, a
 //                satin ribbon, a strap with a brass stud; the cover swings open on its hinge
 //   shelf()      a carved walnut shelf: moulded nose, carved scroll ends and acorn rosettes, brass name plates
-// [tex7] Every surface is textured with detailed hand-painted textures (src/ui/chrome/paint3d.ts): walnut and oak with
-// growth rings, knots and figure, carved oak leaves with veins, a shingled roof, engraved and tarnished brass, an
-// enamel dial with painted Roman numerals and crazing, tooled and stitched leather, paper with fibres and ink, a
-// frosted globe catching a window, a feathered owl, scaled pine cones and acorn caps. They are laid on at one texel
-// density (`fitUV`, SHELF_DENSITY here; the icon bake refits them at its own) and lit with the shared cel light.
+// [tex7] Every surface is textured, realistically (src/ui/chrome/paint3d.ts): photo-grained oak and walnut, pebbled
+// leather, linen, under painted detail where a photo can't go: carved veined oak leaves, a shingled roof, engraved and
+// tarnished brass, an enamel dial with Roman numerals and crazing, a tooled and stitched cover, inked paper, a frosted
+// globe catching a window, a feathered owl, scaled pine cones and acorn caps. Painted textures stand in for the photo
+// ones until the interface atlas arrives (`upgradePhotos`). Laid on at one density (`fitUV`; the icon bake refits).
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { clamp, fbm, hash, hex, mix, mul, PAL, rampAt, vnoise, type RGB } from '../px/relief.ts';
-import { Canvas3, cel, cloth, density, enamel, feathers, fitUV, keepUV, leafTex, leatherCanvas, metal, metalCanvas, noise, paperCanvas, ramp, scales, shingles, stitches, wood, type Painted } from './paint3d.ts';
+import { Canvas3, cloth, DENSITY, enamel, feathers, fitUV, keepUV, leafTex, leatherCanvas, metal, metalCanvas, noise, paperCanvas, ramp, scales, shingles, stitches, swatchAt, swatchCanvas, wood, type Painted, type Swatch } from './paint3d.ts';
 
-/** the shelf's texture density: its objects stand about 38 art px to the model unit */
-export const SHELF_DENSITY = density(38);
+/** the shelf's texture density (texture repeats per model unit) */
+export const SHELF_DENSITY = DENSITY;
 
 // ------------------------------------------------------------------ textures
 
@@ -95,21 +95,39 @@ export function studioEnv(R: THREE.WebGLRenderer, night = false): THREE.Texture 
 
 // ------------------------------------------------------------------ materials
 
-type MatOpt = THREE.MeshStandardMaterialParameters & { physical?: THREE.MeshPhysicalMaterialParameters; keep?: boolean };
+/** a photo texture for a material: the swatch, its repeats per texture-coordinate unit, the tint it is multiplied by, its relief */
+interface Photo { name: Swatch; rep?: number; tint?: number; bump?: number }
+type MatOpt = THREE.MeshStandardMaterialParameters & { physical?: THREE.MeshPhysicalMaterialParameters; keep?: boolean; photo?: Photo };
+/** materials that wear a photo texture once it is there (or repaint themselves with it) */
+const upgrades: (() => boolean)[] = [];
+function wearPhoto(m: THREE.MeshStandardMaterial, ph: Photo): boolean {
+  const t = swatchAt(ph.name, ph.rep ?? 1);
+  if (!t) return false;
+  m.map = t; m.bumpMap = t; m.bumpScale = ph.bump ?? 0.6; m.color.setHex(ph.tint ?? 0xffffff);
+  m.needsUpdate = true;
+  return true;
+}
+/** put the photo textures on every material that wants one (when the interface atlas has arrived); true if any changed */
+export function upgradePhotos(): boolean {
+  let any = false;
+  for (let i = upgrades.length - 1; i >= 0; i--) if (upgrades[i]()) { upgrades.splice(i, 1); any = true; }
+  return any;
+}
 const matCache = new Map<string, THREE.Material>();
 function cached<T extends THREE.Material>(key: string, make: () => T): T {
   let m = matCache.get(key) as T | undefined;
   if (!m) { m = make(); matCache.set(key, m); }
   return m;
 }
-/** a lit material (cel light), its painted maps laid on by `fitUV` unless `keep` (its own planar coordinates) */
+/** a lit material, its textures laid on by `fitUV` unless `keep` (its own planar coordinates); `photo` a photo texture */
 function std(key: string, o: MatOpt): THREE.MeshStandardMaterial {
   return cached(key, () => {
-    const { physical, keep, ...rest } = o;
+    const { physical, keep, photo, ...rest } = o;
     const m = physical ? new THREE.MeshPhysicalMaterial({ ...rest, ...physical }) : new THREE.MeshStandardMaterial(rest);
     if (keep) keepUV(m);
     m.userData.shelfMat = true;
-    return cel(m);
+    if (photo && !wearPhoto(m, photo)) upgrades.push(() => wearPhoto(m, photo));
+    return m;
   });
 }
 const painted = new Map<string, Painted>();
@@ -132,9 +150,9 @@ export const MATS = {
   steel: () => std('steel', { ...pm(metal('#4a4652', { seed: 12, patina: 0 })), metalness: 0.6, roughness: 0.35, envMapIntensity: 0.9 }),
   blued: () => std('blued', { ...pm(metal('#2a3874', { seed: 13, patina: 0 })), metalness: 0.7, roughness: 0.28, envMapIntensity: 1.1 }),
   red: () => std('redHand', { ...pm(enamel('#d8282c', { craze: 0.6 })), roughness: 0.35 }),
-  walnut: () => std('walnut', { ...pm(WALNUT()), roughness: 0.72, envMapIntensity: 0.4 }),
-  oak: () => std('oak', { ...pm(OAKW()), roughness: 0.55 }),
-  leather: () => std('leather', { ...pm(leatherPainted('#80222c', 3)), roughness: 0.58, physical: { sheen: 0.4, sheenColor: new THREE.Color(0xd08070), sheenRoughness: 0.5 } }),
+  walnut: () => std('walnut', { ...pm(WALNUT()), roughness: 0.5, envMapIntensity: 0.6, photo: { name: 'woodg', tint: 0x80482a }, physical: { clearcoat: 0.35, clearcoatRoughness: 0.35 } }),
+  oak: () => std('oak', { ...pm(OAKW()), roughness: 0.55, photo: { name: 'wood', tint: 0xffe8cc } }),
+  leather: () => std('leather', { ...pm(leatherPainted('#80222c', 3)), roughness: 0.58, photo: { name: 'grain', rep: 1.6, tint: 0xa8303a, bump: 0.8 }, physical: { sheen: 0.4, sheenColor: new THREE.Color(0xd08070), sheenRoughness: 0.5 } }),
   paper: () => std('paper', { map: paperCanvas('#efe2bf').map(), roughness: 0.92 }),
   ink: () => std('ink', { ...pm(enamel('#2a1c24', { craze: 0, size: 32 })), roughness: 0.5 }),
   /** dielectric gloss added on top of a surface: the reflections and glints of glass, nothing else */
@@ -380,11 +398,11 @@ export function moonLamp(dens = SHELF_DENSITY): LampParts {
   const gloss = at(mesh(new THREE.SphereGeometry(R0 * 1.004, 40, 28), glossM, false), 0, cy, 0);
   gloss.renderOrder = 4;
   // the moon: a plump golden crescent with craters, and three little stars
-  const moonM = keepUV(cel(new THREE.MeshStandardMaterial({ map: moonTex(), color: 0xffffff, emissive: 0xffb848, emissiveMap: moonTex(), emissiveIntensity: 0.4, roughness: 0.5 })));
+  const moonM = keepUV(new THREE.MeshStandardMaterial({ map: moonTex(), color: 0xffffff, emissive: 0xffb848, emissiveMap: moonTex(), emissiveIntensity: 0.4, roughness: 0.5 }));
   const cres = planarUV(new THREE.ExtrudeGeometry(shape(crescentPts(0.42, 0.36, [0.2, 0.13])), { depth: 0.12, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.07, bevelSegments: 4, curveSegments: 32 }));
   cres.translate(0, 0, -0.06);
   cres.computeVertexNormals();
-  const starM = cel(new THREE.MeshStandardMaterial({ ...pm(GOLD()), color: 0xffffff, emissive: 0xffc850, emissiveIntensity: 0.8, roughness: 0.35, metalness: 0.3 }));
+  const starM = new THREE.MeshStandardMaterial({ ...pm(GOLD()), color: 0xffffff, emissive: 0xffc850, emissiveIntensity: 0.8, roughness: 0.35, metalness: 0.3 });
   const star = (s: number) => ext(shape(starPts(s, s * 0.45)), s * 0.25, starM, s * 0.18, 2);
   const moon = grp(at(mesh(cres, moonM, false), -0.06, 0, 0, 0, 0, -0.25), at(star(0.075), 0.36, 0.3, 0.1, 0, 0.3, 0.2), at(star(0.05), 0.42, -0.14, 0.16, 0, -0.2, -0.3), at(star(0.042), -0.38, 0.44, -0.12, 0, 0.2, 0.5));
   moon.position.set(0, cy, 0.04);
@@ -440,7 +458,7 @@ function romanStrokes(g: CanvasRenderingContext2D, t: string, h: number) {
  * centre, a red and gold painted rosette at the arbor and a little red crescent maker's mark.
  */
 function dialTex(): THREE.Texture {
-  const N = 160, c = N / 2, R = ramp('#f0e6cc');
+  const N = 256, c = N / 2, R = ramp('#f0e6cc');
   const cv = new Canvas3(N, N);
   const craze = enamelCrazeAt(N);
   cv.each((x, y) => {
@@ -542,8 +560,8 @@ function pineCone(m: THREE.Material): THREE.Group {
  * scalloped apron, a carved-leaf pendulum and two pine-cone weights on brass chains hanging between turned posts.
  */
 export function cuckooClock(dens = SHELF_DENSITY): ClockParts {
-  const D = std('walnutDark', { ...pm(WALNUT_DK()), roughness: 0.7, envMapIntensity: 0.4 });
-  const W = MATS.walnut(), OAK = std('carveOak', { ...pm(OAKW()), roughness: 0.6, envMapIntensity: 0.5 });
+  const D = std('walnutDark', { ...pm(WALNUT_DK()), roughness: 0.55, envMapIntensity: 0.5, photo: { name: 'woodg', tint: 0x6a3a22 } });
+  const W = MATS.walnut(), OAK = std('carveOak', { ...pm(OAKW()), roughness: 0.6, envMapIntensity: 0.5, photo: { name: 'wood', tint: 0xfff0dc } });
   const ROOF = std('roofShingle', { ...pm(shingles('#6e3a1e', 18)), roughness: 0.75, envMapIntensity: 0.4 });
   const B = MATS.brass(), G = MATS.gold();
   const y0 = 0.62, hw = 0.72, eave = 0.9, peak = 1.45; // the case's floor, half width, eaves and ridge heights
@@ -569,12 +587,12 @@ export function cuckooClock(dens = SHELF_DENSITY): ClockParts {
   // the cuckoo door in the gable: a dark opening, a framed little door on its hinge, the owl behind it
   const doorShape = shape([[-0.15, 0], [0.15, 0], ...Array.from({ length: 13 }, (_, i) => { const a = (i / 12) * Math.PI; return [Math.cos(a) * 0.15, 0.17 + Math.sin(a) * 0.12] as P2; })]);
   const doorY = y0 + eave + 0.04;
-  const hole = at(ext(doorShape, 0.02, std('hole', { ...pm(WALNUT_DK()), color: 0x503028, roughness: 0.9 }), 0.0, 1, 12), 0, doorY, 0.155);
+  const hole = at(ext(doorShape, 0.02, std('hole', { ...pm(WALNUT_DK()), color: 0x503028, roughness: 0.9, photo: { name: 'woodg', tint: 0x2a1610 } }), 0.0, 1, 12), 0, doorY, 0.155);
   const doorM = ext(doorShape, 0.03, OAK, 0.012, 1, 12);
   doorM.position.x = 0.15;
   const door = grp(doorM, at(ball(0.018, G, 6, 4), 0.25, 0.12, 0.028));
   door.position.set(-0.15, doorY, 0.19);
-  const frameM = std('doorFrame', { ...pm(WALNUT_DK()), color: 0xe0c8c0, roughness: 0.6 });
+  const frameM = std('doorFrame', { ...pm(WALNUT_DK()), color: 0xe0c8c0, roughness: 0.6, photo: { name: 'woodg', tint: 0x7a4428 } });
   const doorFrame = grp(at(torus(0.165, 0.026, frameM, Math.PI, 6, 16), 0, doorY + 0.17, 0.18), ...[-1, 1].map((s) => at(cyl(0.026, 0.026, 0.17, frameM, 6), s * 0.165, doorY + 0.085, 0.18)), at(ext(shape(rrectPts(0.42, 0.04, 0.015)), 0.08, frameM, 0.01, 1), 0, doorY - 0.01, 0.17));
   const owl = cuckooOwl();
   owl.scale.setScalar(1.15);
@@ -628,27 +646,28 @@ export interface BookParts { root: THREE.Group; body: THREE.Group; cover: THREE.
  * fleurons and a tooled lattice panel (the gold moon and stars are real raised metal on top).
  */
 function coverTex(): { map: THREE.Texture; bump: THREE.Texture } {
-  const N = 256, cv = new Canvas3(N, N), tile = leatherCanvas('#8a2430', { seed: 13, size: 128 });
+  const N = 512, cv = new Canvas3(N, N);
   const R = ramp('#8a2430'), G = ramp('#e8b848');
   const g = cv.g;
-  g.imageSmoothingEnabled = false;
-  g.drawImage(tile.c, 0, 0, N, N); // at the shelf's texel density (the cover is about 1.6 units across)
+  // the leather: the photo grain dyed oxblood (or the painted grain until it arrives)
+  if (!photoFill(g, 'grain', N, 2, '#b0343e')) g.drawImage(leatherCanvas('#8a2430', { seed: 13, size: 128 }).c, 0, 0, N, N);
   // worn edges: paler, scuffed
   const img = g.getImageData(0, 0, N, N), d = img.data;
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-    const e = Math.min(x, y, N - 1 - x, N - 1 - y), k = clamp(1 - e / 10) * 0.5 + (e < 14 && hash(x >> 1, y >> 1, 3) > 0.8 ? 0.15 : 0);
+    const e = Math.min(x, y, N - 1 - x, N - 1 - y), k = clamp(1 - e / 20) * 0.45 + (e < 28 && hash(x >> 2, y >> 2, 3) > 0.8 ? 0.12 : 0);
     if (k > 0) { const o = (y * N + x) * 4, c = mix([d[o], d[o + 1], d[o + 2]], R[50], k); d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; }
   }
   g.putImageData(img, 0, 0);
+  g.scale(N / 256, N / 256);
   const rgb = (c: RGB, a = 1) => `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${a})`;
-  const rect = (i: number, col: string, w: number) => { g.strokeStyle = col; g.lineWidth = w; g.strokeRect(i, i, N - i * 2, N - i * 2); };
+  const rect = (i: number, col: string, w: number) => { g.strokeStyle = col; g.lineWidth = w; g.strokeRect(i, i, 256 - i * 2, 256 - i * 2); };
   // the stitched edge
-  stitches(g, [[6, 6], [N - 6, 6], [N - 6, N - 6], [6, N - 6], [6, 6]], '#e8cfa0', 6, 4, 2);
+  stitches(g, [[6, 6], [256 - 6, 6], [256 - 6, 256 - 6], [6, 256 - 6], [6, 6]], '#e8cfa0', 6, 4, 2);
   // the tooling: two blind lines and a gilt line between
   rect(16, rgb(R[8], 0.85), 3); rect(28, rgb(R[8], 0.85), 3);
   rect(22, rgb(G[40]), 2.5);
   // corner fleurons: gilt dots and a tooled leaf turned to each corner
-  for (const [cx, cy, a] of [[40, 40, 0], [N - 40, 40, Math.PI / 2], [N - 40, N - 40, Math.PI], [40, N - 40, -Math.PI / 2]] as [number, number, number][]) {
+  for (const [cx, cy, a] of [[40, 40, 0], [256 - 40, 40, Math.PI / 2], [256 - 40, 256 - 40, Math.PI], [40, 256 - 40, -Math.PI / 2]] as [number, number, number][]) {
     g.save(); g.translate(cx, cy); g.rotate(a);
     g.fillStyle = rgb(R[8], 0.85);
     g.beginPath(); g.ellipse(-4, -4, 9, 4, Math.PI / 4, 0, Math.PI * 2); g.fill();
@@ -658,12 +677,21 @@ function coverTex(): { map: THREE.Texture; bump: THREE.Texture } {
   }
   // a blind-tooled lattice panel behind the moon
   g.strokeStyle = rgb(R[10], 0.45); g.lineWidth = 2;
-  g.save(); g.beginPath(); g.rect(50, 46, N - 100, N - 92); g.clip();
-  for (let k = -N; k < N * 2; k += 22) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + N, N); g.moveTo(k + N, 0); g.lineTo(k, N); g.stroke(); }
+  g.save(); g.beginPath(); g.rect(50, 46, 256 - 100, 256 - 92); g.clip();
+  for (let k = -256; k < 512; k += 22) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 256, 256); g.moveTo(k + 256, 0); g.lineTo(k, 256); g.stroke(); }
   g.restore();
-  g.strokeStyle = rgb(R[8], 0.8); g.lineWidth = 2.5; g.strokeRect(50, 46, N - 100, N - 92);
+  g.strokeStyle = rgb(R[8], 0.8); g.lineWidth = 2.5; g.strokeRect(50, 46, 256 - 100, 256 - 92);
   cv.heightFromColour(1.2);
   return { map: canvasTex(cv), bump: canvasTex(cv, true) };
+}
+/** fill a canvas with a photo swatch, `n` x `n` tiles, dyed `tint` (multiplied); false if the swatch isn't there yet */
+function photoFill(g: CanvasRenderingContext2D, name: Swatch, N: number, n: number, tint?: string): boolean {
+  const c = swatchCanvas(name);
+  if (!c) return false;
+  const t = N / n;
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) g.drawImage(c, x * t, y * t, t, t);
+  if (tint) { g.save(); g.globalCompositeOperation = 'multiply'; g.fillStyle = tint; g.fillRect(0, 0, N, N); g.restore(); }
+  return true;
 }
 /** the page block's edges: fine paper leaves (running along v), a little uneven, with a soft gilt wash */
 function pageEdgeTex(): THREE.Texture {
@@ -691,21 +719,23 @@ function endpaperTex(): THREE.Texture {
 }
 /** the strap: cherry leather with a stitched line down each edge (u across, v along) */
 function strapTex(): THREE.Texture {
-  const cv = leatherCanvas('#a8442a', { seed: 9, size: 64 });
-  stitches(cv.g, [[9, -4], [9, 68]], '#f0d8a8', 5, 3, 2);
-  stitches(cv.g, [[55, -2], [55, 70]], '#f0d8a8', 5, 3, 2);
+  const cv = new Canvas3(128, 128);
+  if (!photoFill(cv.g, 'leather', 128, 1, '#e08a60')) cv.g.drawImage(leatherCanvas('#a8442a', { seed: 9, size: 64 }).c, 0, 0, 128, 128);
+  stitches(cv.g, [[18, -8], [18, 136]], '#f0d8a8', 10, 6, 3);
+  stitches(cv.g, [[110, -4], [110, 140]], '#f0d8a8', 10, 6, 3);
   return cv.map();
 }
 export function journal(dens = SHELF_DENSITY): BookParts {
   const w = 1.56, h = 2.04, t = 0.5, ct = 0.075, r = 0.06;
   const { map, bump } = coverTex();
   const leatherM = std('cover', { map, bumpMap: bump, bumpScale: 0.8, roughness: 0.55, keep: true, physical: { sheen: 0.35, sheenColor: new THREE.Color(0xe09080), sheenRoughness: 0.45 } });
+  if (!swatchCanvas('grain')) upgrades.push(() => { if (!swatchCanvas('grain')) return false; const c = coverTex(); leatherM.map = c.map; leatherM.bumpMap = c.bump; leatherM.needsUpdate = true; return true; });
   const plainLeather = MATS.leather();
   const boardGeo = () => { const g = new THREE.ExtrudeGeometry(shape(rrectPts(w, h, r)), { depth: ct - 0.03, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 2, curveSegments: 6 }); g.translate(0, 0, -(ct - 0.03) / 2); planarUV(g); g.computeVertexNormals(); return g; };
   // the back board, the spine (a rounded back with raised bands) and the page block
   const back = at(mesh(boardGeo(), plainLeather), w / 2, h / 2, -t / 2 + ct / 2);
   const spineR = t / 2;
-  const spineM = std('spine', { ...pm(leatherPainted('#7a1e28', 4)), roughness: 0.58, side: THREE.DoubleSide, physical: { sheen: 0.4, sheenColor: new THREE.Color(0xd08070), sheenRoughness: 0.5 } });
+  const spineM = std('spine', { ...pm(leatherPainted('#7a1e28', 4)), photo: { name: 'grain', rep: 1.6, tint: 0xa8303a, bump: 0.8 }, roughness: 0.58, side: THREE.DoubleSide, physical: { sheen: 0.4, sheenColor: new THREE.Color(0xd08070), sheenRoughness: 0.5 } });
   const spine = at(mesh(new THREE.CylinderGeometry(spineR, spineR, h - 0.01, 24, 1, true, Math.PI, Math.PI), spineM), 0.03, h / 2, 0);
   const bands = [0.28, 0.62, 1.42, 1.76].map((y) => at(torus(spineR + 0.008, 0.028, plainLeather, Math.PI, 6, 18), 0.03, y, 0, Math.PI / 2, 0, Math.PI / 2));
   const edge = pageEdgeTex();
@@ -746,7 +776,8 @@ export function journal(dens = SHELF_DENSITY): BookParts {
   // the strap: from the back board round the fore-edge onto the front, its tab held by a brass stud
   const strapT = strapTex();
   const strapM = std('strap', { map: strapT, roughness: 0.55, side: THREE.DoubleSide, keep: true });
-  const tabMat = std('strapTab', { ...pm(leatherPainted('#a8442a', 9)), roughness: 0.55 });
+  if (!swatchCanvas('leather')) upgrades.push(() => { if (!swatchCanvas('leather')) return false; strapM.map = strapTex(); strapM.needsUpdate = true; return true; });
+  const tabMat = std('strapTab', { ...pm(leatherPainted('#a8442a', 9)), roughness: 0.55, photo: { name: 'leather', rep: 2.5, tint: 0xf0a078, bump: 0.6 } });
   const sy = h * 0.36, sw = 0.22;
   const strapBack = ribbon([[w - 0.45, sy, -t / 2 - 0.012], [w - 0.05, sy, -t / 2 - 0.02], [w + 0.05, sy, -t / 2 + 0.04], [w + 0.08, sy, 0], [w + 0.05, sy, t / 2 - 0.02], [w - 0.02, sy, t / 2 + 0.03]], sw, strapM, { across: [0, 1, 0] });
   { const uv = strapBack.geometry.attributes.uv as THREE.BufferAttribute; for (let i = 0; i < uv.count; i++) uv.setY(i, uv.getY(i) * 1.1 / sw); }
@@ -756,7 +787,7 @@ export function journal(dens = SHELF_DENSITY): BookParts {
   const tab = grp(tabM, stud, at(ball(0.012, G, 6, 4), -0.48, -0.06, 0.016), at(ball(0.012, G, 6, 4), -0.48, 0.06, 0.016));
   tab.position.set(w - 0.02, sy, t / 2 + 0.03);
   // the satin ribbon: out of the foot of the pages, across the shelf, its end cut in a swallowtail
-  const ribM = std('ribbon', { ...pm(cloth('#2f8a52', 'twill', 6)), roughness: 0.32, metalness: 0.05, side: THREE.DoubleSide });
+  const ribM = std('ribbon', { ...pm(cloth('#2f8a52', 'twill', 6)), roughness: 0.32, metalness: 0.05, side: THREE.DoubleSide, photo: { name: 'linen', rep: 3, tint: 0x3aa864, bump: 0.3 } });
   const rib = ribbon([[w * 0.62, 0.06, 0.02], [w * 0.63, 0.012, 0.2], [w * 0.68, 0.008, 0.34], [w * 0.76, 0.01, 0.44], [w * 0.82, 0.008, 0.5]], 0.08, ribM, { lift: 0.004 });
   const tail = at(mesh(new THREE.ShapeGeometry(shape([[-0.04, 0], [0.04, 0], [0.04, 0.09], [0, 0.05], [-0.04, 0.09]])), ribM, false), w * 0.82, 0.009, 0.5, -Math.PI / 2, 0, -0.9);
   const ribbonG = grp(rib, tail);
@@ -807,7 +838,7 @@ function plateTex(): THREE.Texture {
  */
 export function shelf(len: number, o: { plates?: { x: number; y: number; w: number; h: number }[]; bosses?: number[]; dens?: number } = {}): ShelfParts {
   const dens = o.dens ?? SHELF_DENSITY;
-  const W = std('shelfWalnut', { ...pm(WALNUT()), roughness: 0.72, envMapIntensity: 0.4, keep: true });
+  const W = std('shelfWalnut', { ...pm(WALNUT()), roughness: 0.5, envMapIntensity: 0.6, keep: true, photo: { name: 'woodg', tint: 0x80482a }, physical: { clearcoat: 0.35, clearcoatRoughness: 0.35 } });
   const front = 0.3, back = -0.62, H = 0.8;
   // the moulded profile (z, y): a flat top, a rounded nose with a fillet, a flat face, a bead and a cove at the foot
   const prof: [number, number][] = [
@@ -858,7 +889,7 @@ export function shelf(len: number, o: { plates?: { x: number; y: number; w: numb
 
 // ------------------------------------------------------------------ small details for the shelf top
 export function acornProp(s = 1, dens = SHELF_DENSITY): THREE.Group {
-  const nut = lathe(smoothProfile([[0, -0.3], [0.08, -0.28], [0.17, -0.18], [0.2, -0.05], [0.19, 0.04], [0.0, 0.06]], 3), std('acornNut', { ...pm(OAKW()), color: 0xffd8a8, roughness: 0.3, physical: { clearcoat: 0.6, clearcoatRoughness: 0.25 } }), 24);
+  const nut = lathe(smoothProfile([[0, -0.3], [0.08, -0.28], [0.17, -0.18], [0.2, -0.05], [0.19, 0.04], [0.0, 0.06]], 3), std('acornNut', { ...pm(OAKW()), color: 0xffd8a8, photo: { name: 'woodg', rep: 2, tint: 0xe0a050 }, roughness: 0.3, physical: { clearcoat: 0.6, clearcoatRoughness: 0.25 } }), 24);
   const capM = std('acornCap', { ...pm(scales('#7a5030', 23)), roughness: 0.85 });
   const cap = lathe(smoothProfile([[0, 0.17], [0.1, 0.16], [0.19, 0.11], [0.235, 0.04], [0.22, 0.0], [0.18, 0.01], [0, 0.03]], 3), capM, 24);
   const stem = at(cyl(0.018, 0.026, 0.1, capM, 8), 0.01, 0.21, 0, 0, 0, -0.3);

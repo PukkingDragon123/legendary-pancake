@@ -1,27 +1,25 @@
-// [tex7] Hand-painted textures for the interface's 3D models (the live shelf, src/ui/chrome/props3d.ts, and the icon
-// bake, src/dev/iconbake.ts), the cel light they are shown under, and the texture coordinates that lay them on.
+// [tex7] Realistic textures for the interface's 3D models (the live shelf, src/ui/chrome/props3d.ts, and the icon bake,
+// src/dev/iconbake.ts), and the texture coordinates that lay them on.
 //
-// Every texture is painted at run time (or bake time) into a small canvas: a procedural base (tileable noise, cells,
-// growth rings) worked over with painted strokes (grain figure, scratches, stitches, veins, engraving), in full colour
-// from a painter's ramp round one base colour (shadows lean violet-blue, lights lean gold), with cavity darkening baked
-// in and no directional light (the light comes from the scene). Every texture is laid on at one shared density, about
-// TEX_ART texels per art pixel on screen (`density`), and its features are painted at least two texels wide, so the
-// detail survives the pixel finish as whole art pixels instead of melting into noise. Most textures tile; `fitUV`
-// gives any model texture coordinates at that density.
+// Photo textures (Poly Haven, CC0: oak veneer (in colour and as grain to tint), two leathers, linen, knitted fleece and
+// velour; prepared in art/tex7, packed into the interface atlas public/img/ui3d.webp) give wood, leather and cloth their grain
+// (`setSwatch` / `swatchAt`). Everything else is painted at run time (or bake time) into a canvas: a procedural base
+// (tileable noise, cells, growth rings) worked over with painted strokes (scratches, engraving, stitches, veins,
+// numerals), in full colour from a ramp round one base colour, with cavity darkening baked in and no directional
+// light (the light comes from the scene). The painted textures also stand in for the photo ones until those load.
+// Most textures tile; `fitUV` gives any model texture coordinates at one density (repeats per model unit).
 //
 //   wood, leather, brass, steel, enamel, cloth (weave, knit, burlap, felt, velvet), paper, glass, leaf, gem, bark,
 //   stone, feather, scales, wax, flame, water, cloud      the painters (each returns { map, bump? } textures)
-//   cel(material)                                       the cel light: 2-3 bands, cool shadows, a gentle warm rim
+//   setSwatch / swatchAt                                the photo textures
 //   fitUV(object, density)                              world-scale texture coordinates for every mesh under object
 import * as THREE from 'three';
 
 export type RGB = [number, number, number];
 type Col = string | number;
 
-/** texels per art pixel on screen: the one texture density shared by the shelf and the icons */
-export const TEX_ART = 2.2;
-/** texture repeats per model unit for a model drawn at `artPerUnit` art pixels per unit (128-texel tiles) */
-export const density = (artPerUnit: number, tile = 128) => (artPerUnit * TEX_ART) / tile;
+/** texture repeats per model unit (a painted 128-texel tile spans about 1.4 units: a hand's breadth of oak) */
+export const DENSITY = 0.7;
 
 // ------------------------------------------------------------------ noise (tileable, fast)
 const clamp = (v: number, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
@@ -119,8 +117,8 @@ export function ramp(base: Col): RGB[] {
   ramps.set(key, r);
   return r;
 }
-/** a shade of a ramp, v -1 .. 1, posterised to a pixel artist's few steps (clean clusters, not noise) */
-const sh = (R: RGB[], v: number): RGB => R[Math.round(clamp((Math.round(v * 5.5) / 5.5 + 1) * 32, 0, 64))];
+/** a shade of a ramp, v -1 .. 1 */
+const sh = (R: RGB[], v: number): RGB => R[Math.round(clamp((v + 1) * 32, 0, 64))];
 const mixc = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
 
 // ------------------------------------------------------------------ the canvas painter
@@ -158,7 +156,7 @@ export class Canvas3 {
     this.hasBump = true;
     return this;
   }
-  /** the colour texture (crisp when magnified, mipmapped when shrunk) */
+  /** the colour texture (smooth, mipmapped) */
   map(repeat = true): THREE.Texture { return toTex(this.c, repeat, false); }
   /** the height field as a bump texture (smooth) */
   bump(repeat = true): THREE.Texture {
@@ -179,7 +177,7 @@ export class Canvas3 {
 function toTex(c: HTMLCanvasElement, repeat: boolean, data: boolean): THREE.Texture {
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = data ? THREE.NoColorSpace : THREE.SRGBColorSpace;
-  t.magFilter = data ? THREE.LinearFilter : THREE.NearestFilter;
+  t.magFilter = THREE.LinearFilter;
   t.minFilter = THREE.LinearMipmapLinearFilter;
   t.anisotropy = 4;
   if (repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
@@ -386,11 +384,11 @@ export function enamelCanvas(base: Col, o: EnamelOpt = {}): Canvas3 {
   const cv = new Canvas3(N, N);
   cv.each((x, y, i) => {
     const brush = (tn(x, y, N, N, 1, 2, s) - 0.5) * 0.9 + (tn(x, y, N, N, 3, 1, s + 2) - 0.5) * 0.4;
-    const [f1, f2] = cells(x, y, N, N, 10, 10, s + 3, 1);
-    const craze = cz > 0 && f2 - f1 < 0.06 ? -0.14 * cz : 0;
+    const [f1, f2] = cells(x, y, N, N, 18, 18, s + 3, 1);
+    const craze = cz > 0 && f2 - f1 < 0.05 ? -0.09 * cz : 0;
     const chip = o.chips !== false && hash(Math.floor(x / 3), Math.floor(y / 3), s + 9) > 0.998 ? 0.6 : 0;
     cv.hgt[i] = craze ? 0.35 : 0.5;
-    return chip ? sh(R, 0.85) : sh(R, brush * 0.5 + craze);
+    return chip ? sh(R, 0.85) : sh(R, brush * 0.3 + craze);
   });
   cv.hasBump = cz > 0;
   return cv;
@@ -740,33 +738,33 @@ function worldUV(g: THREE.BufferGeometry, k: number) {
   uv.needsUpdate = true;
 }
 
-// ------------------------------------------------------------------ the cel light
+// ------------------------------------------------------------------ photo textures
 
-export interface CelOpt { rim?: number; rimColor?: number; bands?: 2 | 3 }
-/**
- * The interface's cel light, matching the 3D world's: direct light falls in two or three soft-edged bands (lit, a
- * half-tone, shadow; the shadow is the cool sky fill), and a gentle warm rim catches the upper silhouette. Patches a
- * MeshStandard/Physical material in place (it keeps its maps, reflections and shadows).
- */
-export function cel<T extends THREE.Material>(m: T, o: CelOpt = {}): T {
-  if (m.userData.cel) return m;
-  m.userData.cel = true;
-  const bands = o.bands ?? 3, rim = o.rim ?? 0.22, rc = new THREE.Color(o.rimColor ?? 0xffd8a8);
-  const prev = m.onBeforeCompile;
-  m.onBeforeCompile = (shd, r) => {
-    prev?.call(m, shd, r);
-    shd.uniforms.celRim = { value: rc.clone().multiplyScalar(rim) };
-    shd.fragmentShader = shd.fragmentShader
-      .replace('void RE_Direct_Physical(', bands === 3
-        ? 'float celBand( float x ) { return 0.45 * smoothstep( 0.03, 0.1, x ) + 0.55 * smoothstep( 0.38, 0.48, x ); }\nvoid RE_Direct_Physical('
-        : 'float celBand( float x ) { return smoothstep( 0.12, 0.22, x ); }\nvoid RE_Direct_Physical(')
-      .replace('vec3 irradiance = dotNL * directLight.color;', 'vec3 irradiance = celBand( dotNL ) * directLight.color;')
-      .replace('#include <opaque_fragment>', `{ float fr = 1.0 - saturate( dot( normal, normalize( vViewPosition ) ) );
-  outgoingLight += celRim * smoothstep( 0.6, 0.7, fr ) * saturate( normal.y * 0.8 + 0.35 ) * ( 0.4 + 0.6 * diffuseColor.rgb ); }
-#include <opaque_fragment>`)
-      .replace('void main() {', 'uniform vec3 celRim;\nvoid main() {');
-  };
-  m.customProgramCacheKey = () => 'cel' + bands + rim;
-  m.needsUpdate = true;
-  return m;
+/** the photo swatches, in the order they sit in the interface atlas */
+export const SWATCHES = ['wood', 'woodg', 'leather', 'grain', 'linen', 'knit', 'velvet'] as const;
+export type Swatch = (typeof SWATCHES)[number];
+const photos = new Map<Swatch, HTMLCanvasElement>();
+const photoTex = new Map<string, THREE.Texture>();
+/** register a photo swatch: the `rect` [x, y, w, h] of `src` (an atlas or a single image) */
+export function setSwatch(name: Swatch, src: CanvasImageSource, rect: [number, number, number, number]) {
+  const c = document.createElement('canvas');
+  c.width = rect[2]; c.height = rect[3];
+  c.getContext('2d')!.drawImage(src, rect[0], rect[1], rect[2], rect[3], 0, 0, rect[2], rect[3]);
+  photos.set(name, c);
+}
+export const hasSwatch = (name: Swatch) => photos.has(name);
+/** a photo swatch's image (null until it is registered) */
+export const swatchCanvas = (name: Swatch): HTMLCanvasElement | null => photos.get(name) ?? null;
+/** a photo swatch as a repeating texture, `rep` times per texture-coordinate unit (null until it is registered) */
+export function swatchAt(name: Swatch, rep = 1): THREE.Texture | null {
+  const c = photos.get(name);
+  if (!c) return null;
+  const key = name + rep;
+  let t = photoTex.get(key);
+  if (!t) {
+    t = toTex(c, true, false);
+    t.repeat.set(rep, rep);
+    photoTex.set(key, t);
+  }
+  return t;
 }

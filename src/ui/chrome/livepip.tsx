@@ -17,13 +17,12 @@ import { portrait } from '../portraits.ts';
 import { sceneRef } from '../state.ts';
 import { FRAME_OPEN, FRAME_D, frameArt, frameSkyOf, portraitSky } from './frameart.ts';
 import { uiBurstAt, type UiFxKind } from './uifx.ts';
-import { artPx } from '../../gfx/artpx.ts';
 
-/** art pixels across the owl's render before a portrait asks for its own size */
-const artPx0 = () => (window as unknown as { __pipArt?: number }).__pipArt || 48;
+/** art pixels across the owl's render (shown at about 1.3 CSS px each in the HUD) */
+const artPx = () => (window as unknown as { __pipArt?: number }).__pipArt || 48;
 const FPS = 24;
 
-interface Host { el: HTMLElement; look: () => OwlLook; visible: boolean; onFx?: (k: OwlFx) => void; art?: number }
+interface Host { el: HTMLElement; look: () => OwlLook; visible: boolean; onFx?: (k: OwlFx) => void }
 
 const lookKey = (l: OwlLook) => JSON.stringify([l.skin ?? 'owl', l.species ?? '', l.palette, l.outfit]);
 
@@ -62,9 +61,8 @@ class OwlCam {
   private tapUntil = 0;
   ready = false;
 
-  private art: number;
   constructor() {
-    const ART = (this.art = artPx0());
+    const ART = artPx();
     const c = (this.canvas = document.createElement('canvas'));
     c.width = c.height = ART;
     c.className = 'lp-canvas';
@@ -122,19 +120,10 @@ class OwlCam {
     if (h !== this.host) {
       this.host?.el.classList.remove('live');
       this.host = h;
-      if (h) { if (h.art) this.setArt(h.art); h.el.appendChild(this.canvas); this.setLook(h.look()); }
+      if (h) { h.el.appendChild(this.canvas); this.setLook(h.look()); }
       else this.canvas.remove();
     }
     this.wake();
-  }
-  /** [tex7] render at `n` art pixels across, so the owl's pixels are the game's art pixels in this portrait */
-  setArt(n: number) {
-    n = Math.max(16, Math.min(160, Math.round((window as unknown as { __pipArt?: number }).__pipArt || n)));
-    if (n === this.art) return;
-    this.art = n;
-    this.R.setSize(n, n, false);
-    this.rt.setSize(n, n);
-    ((this.post.material as THREE.ShaderMaterial).uniforms.px.value as THREE.Vector2).set(1 / n, 1 / n);
   }
   /** keep the actor dressed as the host's owl */
   setLook(l: OwlLook) {
@@ -256,7 +245,7 @@ const FX: Partial<Record<OwlFx, UiFxKind>> = { heart: 'hearts', zzz: 'motes', fe
  * The owl in its frame. `size` CSS px square; `frame` a frame id (src/assets/frames.ts); `look` the owl to show
  * (default: yours). `live` false shows the still. Tapping it (`tappable`) makes the owl react.
  */
-export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; live?: boolean; tappable?: boolean; class?: string; night?: boolean; pokeKey?: number; zoom?: number }) {
+export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; live?: boolean; tappable?: boolean; class?: string; night?: boolean; pokeKey?: number }) {
   installStyles();
   const host = useRef<HTMLSpanElement>(null);
   const slot = useRef<HTMLSpanElement>(null);
@@ -276,7 +265,7 @@ export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; li
     const c = owlCam();
     if (!c || !slot.current) return;
     const h: Host = {
-      el: slot.current, look: () => lookRef.current, visible: false, art: owlArt,
+      el: slot.current, look: () => lookRef.current, visible: false,
       onFx: (k) => { const kind = FX[k]; if (kind && host.current) uiBurstAt(host.current, kind, k === 'zzz' ? 1 : 3); },
     };
     hRef.current = h;
@@ -294,14 +283,13 @@ export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; li
   useEffect(() => { if (p.pokeKey) { cam?.poke(); setTapped((n) => n + 1); } }, [p.pokeKey]);
   const night = p.night ?? frameSkyOf(p.frame) === 'night';
   const S = p.size, open = (FRAME_OPEN / FRAME_D) * S, inset = (S - open * 2) / 2 - 0.5;
-  // [tex7] one art pixel is artPx() screen CSS px (`zoom`: the portrait's box is shown that much bigger on screen), for
-  // the frame, the sky and the live owl alike
-  const ap = artPx() / (p.zoom ?? 1), art = Math.round(S / ap), owlArt = Math.round((S - inset * 2) / ap);
+  // a few art sizes (each frame is painted once per size): about 1.3 to 1.5 CSS px per art pixel
+  const art = S <= 72 ? 48 : S <= 90 ? 60 : S <= 110 ? 76 : 92;
   const tap = p.tappable ? (e: MouseEvent) => { e.stopPropagation(); cam?.poke(); setTapped((n) => n + 1); } : undefined;
   const box = { left: `${inset}px`, top: `${inset}px`, width: `${S - inset * 2}px`, height: `${S - inset * 2}px` };
   return (
     <span ref={host} class={'lp ' + (p.class ?? '') + (tapped % 2 ? ' tapped' : tapped ? ' tapped2' : '')} style={{ width: `${S}px`, height: `${S}px`, '--lp-clip': clipCircle } as Record<string, string>} onClick={tap}>
-      <img class="lp-sky" src={portraitSky(night || (sceneRef.current?.sky.night ?? 0) > 0.5, owlArt)} style={box} alt="" draggable={false} />
+      <img class="lp-sky" src={portraitSky(night || (sceneRef.current?.sky.night ?? 0) > 0.5, Math.round(art * 0.7))} style={box} alt="" draggable={false} />
       <span class="lp-slot" ref={slot} style={box}>{still && <img class="still" src={still} alt="" draggable={false} />}</span>
       <img class="lp-frame" src={frameArt(p.frame, art)} alt="" draggable={false} />
     </span>
