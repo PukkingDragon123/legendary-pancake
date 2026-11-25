@@ -341,7 +341,7 @@
 .lg-framewall { position: absolute; z-index: 5; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px 10px; background: var(--lg-wood) 0 0 / 256px 128px; background-clip: padding-box; filter: drop-shadow(0 8px 0 rgba(20, 12, 6, 0.45)); animation: lgCardInB 0.5s var(--ease) both; }
 .lg-framewall.top { left: 8px; right: 8px; bottom: calc(66px + var(--safe-b)); max-height: 58%; }
 .lg-framewall.side { left: 16px; top: calc(70px + var(--safe-t)); width: min(420px, 40vw); max-height: calc(100% - 160px); animation-name: lgCardInL; }
-.lg-fw-head { display: flex; align-items: baseline; gap: 8px; padding: 0 4px 2px; color: #fbe3a0; text-shadow: 2px 2px 0 #2a1209; }
+.lg-fw-head { display: flex; flex-direction: column; gap: 0; padding: 0 4px 2px; color: #fbe3a0; text-shadow: 2px 2px 0 #2a1209; }
 .lg-fw-head b { font-family: var(--font-display); font-weight: 400; font-size: 21px; line-height: 1; }
 .lg-fw-head span { font-size: 13px; color: #f0cf96; }
 .lg-fw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px 4px; overflow-y: auto; padding: 10px 2px 4px; scrollbar-width: thin; }

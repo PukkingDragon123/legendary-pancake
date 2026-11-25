@@ -178,13 +178,39 @@ export const FRAME_ART_IDS = Object.keys(PAINT);
  * / 1.33 for chunky pixels). The opening is clear.
  */
 export function frameArt(id: string, px = 56): string {
-  const paint = PAINT[id] ?? PAINT.porthole;
-  return cachedRelief(`frame5:${id}:${px}`, () => {
+  return cachedRelief(`frame5:${id}:${px}`, () => frameCanvas(id, px).toDataURL('image/png'));
+}
+const canvases = new Map<string, HTMLCanvasElement>();
+function frameCanvas(id: string, px: number): HTMLCanvasElement {
+  const key = id + ':' + px;
+  let c = canvases.get(key);
+  if (!c) {
     const r = new Relief(FRAME_D, FRAME_D, 1, px / FRAME_D);
     r.wobble = 0.3; r.chip = 0.15;
-    paint(r);
+    (PAINT[id] ?? PAINT.porthole)(r);
     r.cut(disc(C, C, FRAME_OPEN));
-    return r.url({ ambient: 0.56, light: 0.95 });
+    c = r.canvas({ ambient: 0.56, light: 0.95 });
+    canvases.set(key, c);
+  }
+  return c;
+}
+
+/** A frame with its little painted sky inside (no owl): for prize cards and lists. */
+export function frameWithSky(id: string, px = 64): string {
+  return cachedRelief(`framesky5:${id}:${px}`, () => {
+    const c = document.createElement('canvas');
+    c.width = c.height = px;
+    const g = c.getContext('2d')!;
+    const o = Math.round(px * (0.5 - FRAME_OPEN / FRAME_D)) - 1, d = px - o * 2;
+    g.imageSmoothingEnabled = false;
+    g.drawImage(skyCanvas(frameSkyOf(id) === 'night', d), o, o, d, d);
+    // keep only the round opening's part of the sky (stepped edge), then lay the frame over it
+    g.globalCompositeOperation = 'destination-in';
+    g.fillStyle = '#000';
+    for (let y = 0; y < px; y++) for (let x = 0; x < px; x++) if (Math.hypot(x + 0.5 - px / 2, y + 0.5 - px / 2) <= d / 2) g.fillRect(x, y, 1, 1);
+    g.globalCompositeOperation = 'source-over';
+    g.drawImage(frameCanvas(id, px), 0, 0);
+    return c.toDataURL('image/png');
   });
 }
 
@@ -193,7 +219,14 @@ export const frameSkyOf = (id: string): 'auto' | 'night' => (id === 'starry' || 
 
 /** A painted sky for behind the owl, `n` art px square: clear cerulean with a soft cloud, or deep blue night with stars. */
 export function portraitSky(night: boolean, n = 40): string {
-  return cachedRelief(`psky5:${night}:${n}`, () => {
+  return cachedRelief(`psky5:${night}:${n}`, () => skyCanvas(night, n).toDataURL('image/png'));
+}
+const skies = new Map<string, HTMLCanvasElement>();
+function skyCanvas(night: boolean, n: number): HTMLCanvasElement {
+  const key = night + ':' + n;
+  let c0 = skies.get(key);
+  if (c0) return c0;
+  c0 = (() => {
     const c = document.createElement('canvas');
     c.width = c.height = n;
     const g = c.getContext('2d')!, img = g.createImageData(n, n), d = img.data;
@@ -209,6 +242,8 @@ export function portraitSky(night: boolean, n = 40): string {
       d[i] = col[0]; d[i + 1] = col[1]; d[i + 2] = col[2]; d[i + 3] = 255;
     }
     g.putImageData(img, 0, 0);
-    return c.toDataURL('image/png');
-  });
+    return c;
+  })();
+  skies.set(key, c0);
+  return c0;
 }

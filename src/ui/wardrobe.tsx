@@ -395,6 +395,8 @@ export function Wardrobe() {
     if (e?.currentTarget) uiBurstAt(e.currentTarget as Element, tab === 'skins' ? 'magic' : 'sparkle', 7);
   };
   const switchTab = (t: Tab) => { setTab(t); setPick(null); };
+  // [ui5] keep the open tab in view on the rail (Frames sits past the right edge on phones)
+  useEffect(() => { try { document.querySelector('.wd-tag.on')?.scrollIntoView({ inline: 'nearest', block: 'nearest' }); } catch { /* old browsers */ } }, [tab]);
   const pieceLook: OwlLook = { skin: curSkin, species: curSpecies, palette: curSpecies, outfit: {} };
 
   const purse = (

@@ -105,11 +105,19 @@ if (view === 'obj') {
 
 if (view === 'icons') {
   // [ui4] the painted icon family, at 20, 30 and 40 px
-  void import('../ui/chrome/iconset.ts').then(({ installIconSet, ICON_NAMES }) => {
+  // [ui5] the 3D icon family at 20, 30 and 44 CSS px (as the app draws them); ?bag=1: the acorn bag at every size
+  void import('../ui/chrome/iconset.ts').then(({ installIconSet, ICON_NAMES, iconSrc }) => {
     installIconSet();
     document.body.style.background = q.get('bg') ?? '#efe2c0';
-    const sizes = [20, 30, 40];
-    root.innerHTML = '<div style="padding:8px;display:flex;flex-wrap:wrap;gap:10px">' + ICON_NAMES().map((n) => `<div style="display:flex;flex-direction:column;align-items:center;width:96px;font:10px monospace;color:#3a2410"><div style="display:flex;gap:4px;align-items:flex-end">${sizes.map((s) => `<img src="${spriteURL(n, s / 20)}" style="width:${s}px;height:${s}px;image-rendering:pixelated">`).join('')}</div>${n}</div>`).join('') + '</div>';
+    const d = Math.max(1, Math.round(devicePixelRatio || 1));
+    const im = (n: string, s: number) => `<img src="${iconSrc(n, s * d, d) ?? spriteURL(n, 1)}" style="width:${s}px;height:${s}px;image-rendering:pixelated">`;
+    if (q.get('bag')) {
+      const row = (names: string[], sizes: number[]) => `<div style="display:flex;gap:18px;align-items:flex-end;padding:10px 14px">${names.map((n) => sizes.map((s) => `<div style="display:flex;flex-direction:column;align-items:center;font:10px monospace;color:#3a2410">${im(n, s)}${s}</div>`).join('')).join('')}</div>`;
+      root.innerHTML = row(['owlcoin'], [16, 20, 24, 30, 40, 48, 72]) + row(['acorn_big'], [40, 80, 120]) + row(['coin_pouch', 'coin_sack', 'coin_chest', 'coin_vault'], [64]) + row(['moongem', 'gem_big'], [24, 48, 96]);
+    } else {
+      const sizes = [20, 30, 44];
+      root.innerHTML = '<div style="padding:8px;display:flex;flex-wrap:wrap;gap:8px">' + ICON_NAMES().map((n) => `<div style="display:flex;flex-direction:column;align-items:center;width:106px;font:10px monospace;color:#3a2410"><div style="display:flex;gap:4px;align-items:flex-end">${sizes.map((s) => im(n, s)).join('')}</div>${n}</div>`).join('') + '</div>';
+    }
     (window as unknown as { __ready: number }).__ready = 1;
   });
 }

@@ -132,7 +132,7 @@ const heartPath = (): [number, number][] => Array.from({ length: 60 }, (_, i) =>
 /** a glossy acorn: a golden nut, a scaly cap with a rim, a little stem */
 function acorn(s = 1, tilt = 0): THREE.Group {
   const nut = lathe([[0, -0.62], [0.12, -0.6], [0.3, -0.45], [0.4, -0.2], [0.42, 0.02], [0.38, 0.14], [0, 0.16]], M(0xf5a62c, { rough: 0.2, tex: 'grain' }));
-  const cap = lathe([[0, 0.42], [0.2, 0.38], [0.36, 0.28], [0.46, 0.14], [0.47, 0.06], [0.4, 0.04], [0, 0.06]], M(0x5a3418, { rough: 0.8, tex: 'scale', rep: 2 }));
+  const cap = lathe([[0, 0.42], [0.2, 0.38], [0.36, 0.28], [0.46, 0.14], [0.47, 0.06], [0.4, 0.04], [0, 0.06]], M(0x4a2a12, { rough: 0.8, tex: 'scale', rep: 2 }));
   const stem = at(cyl(0.035, 0.05, 0.2, C.dark()), 0.02, 0.5, 0, 0, 0, -0.3);
   return at(grp(nut, cap, stem), 0, 0, 0, 0, 0, tilt, s);
 }
@@ -140,7 +140,7 @@ function acorn(s = 1, tilt = 0): THREE.Group {
  * acorn stitched on the front, glossy acorns spilled at its foot */
 function acornBag(o: { squash?: number; pouch?: 'burlap' | 'leather'; spill?: number; open?: boolean } = {}): THREE.Group {
   const sq = o.squash ?? 0, leather = o.pouch === 'leather';
-  const m = leather ? M(0x9a3f26, { rough: 0.5, tex: 'dab' }) : M(0xa8703c, { rough: 0.9, tex: 'burlap', rep: 2 });
+  const m = leather ? M(0x9a3f26, { rough: 0.5, tex: 'dab' }) : M(0xc99a58, { rough: 0.9, tex: 'burlap', rep: 2 });
   const prof: [number, number][] = [[0, -0.8], [0.5, -0.78], [0.76, -0.6], [0.86, -0.3], [0.82, 0.0], [0.64, 0.24], [0.38, 0.4], [0.24, 0.46], [0.26, 0.54], [0.4, 0.68], [0.52, 0.84], [0.46, 0.9], [0.3, 0.8], [0.12, 0.7], [0, 0.68]];
   const body = lathe(prof, m, 40);
   const pos = body.geometry.attributes.position as THREE.BufferAttribute;

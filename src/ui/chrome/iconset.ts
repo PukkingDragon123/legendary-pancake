@@ -51,7 +51,10 @@ export function installIconSet() {
   const icons = ICONS3D.icons as Record<string, Baked>, anim = ICONS3D.anim as Record<string, Img[]>;
   for (const [name, b] of Object.entries(icons)) define(name, () => sprite(b, LOGICAL[name] ?? 20));
   for (const [a, b] of Object.entries(ALIAS)) if (icons[b]) define(a, () => sprite(icons[b], 20));
-  for (const [name, frames] of Object.entries(anim)) frames.forEach((img, i) => define(`${name}_f${i}`, () => sprite({ L: img }, LOGICAL[name] ?? 20)));
+  for (const [name, frames] of Object.entries(anim)) {
+    frames.forEach((img, i) => define(`${name}_f${i}`, () => sprite({ L: img }, LOGICAL[name] ?? 20)));
+    if (!icons[name]) define(name, () => sprite({ L: frames[0] }, LOGICAL[name] ?? 20)); // acorn_big, gem_big
+  }
 }
 /** the names in the family (for the dev sheet) */
 export const ICON_NAMES = () => Object.keys(ICONS3D.icons);

@@ -253,6 +253,8 @@ export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; li
   const lookRef = useRef(look);
   lookRef.current = look;
   const [tapped, setTapped] = useState(0);
+  const [, tick] = useState(0);
+  useEffect(() => { const id = setInterval(() => tick((n) => n + 1), 60000); return () => clearInterval(id); }, []);
   const hRef = useRef<Host | null>(null);
   const live = p.live !== false;
   // the still (shown until the live owl is in, and as the fallback)
