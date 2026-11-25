@@ -1,9 +1,10 @@
 // [look5] The home view looks into Pip's living room; this little hanging tile takes the camera out through the open
 // front to the whole oak and back in. A walnut tile with brass corners and felt like the side tools, hung by a cord at
-// the left edge. [icons9] On it a door you click: a round hobbit door of green planks in a ring of stones, iron strap
-// hinges and a brass knocker ("Outside"); the same door ajar with warm lamplight inside ("Inside"). Pixel art from the
-// icon bake (src/dev/iconbake.ts, door_out / door_in, 44 art px with a crisp dark outline); the painted window and
-// lantern stay as the fallback while the atlas loads. Pinching and the mouse wheel do the same (src/world/scene.ts zoomBy).
+// the left edge. [icons9] Now just a door you click, hanging from a brass ring (no tile behind it): a round hobbit door
+// of green planks in a ring of stones, iron strap hinges and a brass knocker ("Outside"); the same door ajar with warm
+// lamplight inside ("Inside"). Painted by the icon bake (src/dev/iconbake.ts, door_out / door_in, with a crisp dark
+// outline); the tile with the painted window or lantern stays as the fallback while the icons load. Pinching and the
+// mouse wheel do the same (src/world/scene.ts zoomBy).
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
 import { phase } from '../../game/night.ts';
@@ -12,7 +13,7 @@ import { haptic } from '../kit.tsx';
 import { breathing, panel, sceneRef, tab } from '../state.ts';
 import { GOLD, IRON, Real, bevel, box, cached, circle, clamp, cloth, deviceK, dome, glow, hex, metal, mix, polygon, ring, segment, toURL, tubeY, union, wood, type RGB } from '../real/paint.ts';
 import { DESK_HUD, hempRope, kFor, toolTile } from './objects.ts';
-import { hudOverride } from './hud.tsx';
+import { hookArt, hudOverride } from './hud.tsx';
 import { uiBurstAt } from './uifx.ts';
 import { iconSrc, uiAtlas } from './iconset.ts';
 
@@ -99,7 +100,7 @@ export function LookOut() {
   const k = useMemo(() => kFor(DESK_HUD), []);
   const [, setAtlas] = useState(0);
   useEffect(() => { void uiAtlas().then(() => setAtlas(1)); }, []);
-  // [icons9] the door at whole device pixels: the tile is zoomed 1.5x on desktops (k), so its device size is 44 x dpr x k
+  // [icons9] the door at its device size: the tile is zoomed 1.5x on desktops (k), so that is 44 x dpr x k
   const dpr = Math.min(4, Math.max(1, Math.round((typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1)));
   const door = iconSrc(out ? 'door_in' : 'door_out', Math.round(44 * dpr * k), dpr);
   useEffect(() => {
@@ -129,7 +130,7 @@ export function LookOut() {
     <div class={'hh-look' + (away ? ' away' : '')}>
       <i class="hh-lookcord" style={{ backgroundImage: `url("${hempRope()}")` }} />
       <div class="hh-lookhang">
-        <button class={flip % 2 ? 'flip' : ''} key={flip} style={{ '--art': `url("${toolTile(52, out ? 'rose' : 'sky', k, 1, 7)}")` } as Record<string, string>} onClick={go} aria-label={out ? 'Go back inside the living room' : 'Step outside to see the whole tree'}>
+        <button class={flip % 2 ? 'flip' : ''} key={flip} style={{ '--art': `url("${door ? hookArt() : toolTile(52, out ? 'rose' : 'sky', k, 1, 7)}")` } as Record<string, string>} onClick={go} aria-label={out ? 'Go back inside the living room' : 'Step outside to see the whole tree'}>
           <img src={door ?? (out ? lanternIcon(k) : windowIcon(k))} alt="" draggable={false} />
         </button>
         <span class="hh-looklabel">{label}</span>

@@ -1,25 +1,27 @@
-// [icons8] The icon bake: every interface icon (and the main shelf's sprites, see SHELF below) is a detailed 3D model,
-// rendered with soft, clean studio light and then finished by hand-made rules into pixel art (src/dev/pixelize.ts):
-// a hue-shifted colour ramp per material (warm golden lights, cool violet or teal shadows, calm mid-tones), clean
-// clusters, inner lines where parts overlap, a selective coloured outline (lighter where the light falls), anti-alias
-// pixels in the sprite's own colours and single-pixel glints. Each icon comes at 32 art px and at 20 art px (redrawn
-// from the model, not shrunk) for small sizes; the app shows them crisp at whole-number scales (iconset.ts).
+// [icons8, icons9] The icon bake: every interface icon (and the main shelf's sprites, see SHELF below) is a detailed 3D
+// model with realistic proportions, rendered at 256 px in soft, realistic studio light with its real material textures
+// (photo-grained wood, brushed and tarnished brass, leather, cloth, paper, glass, gems), then finished
+// (src/dev/paintfinish.ts) with smooth, supersampled edges and only a very faint dark edge so it stands off the panels:
+// no cartoon outline, no pixelation, no palette. The app draws it smoothly at the screen's own resolution (iconset.ts).
+// Symbols are real objects too: embossed and engraved metal, lacquered brass coins, forged iron. The shelf's sprites are
+// drawn at 3 px per CSS px.
 // The models: turned brass, carved wood, tooled leather, enamel, glass and cloth with real parts and bevels (no blocks
-// and balls); the shelf's props (src/ui/chrome/props3d.ts: the moon lamp, the cuckoo clock, the journal, the shelf);
+// and balls); the shelf's props (src/ui/chrome/props3d.ts: the oil lamp, the cuckoo clock, the journal, the shelf);
 // furniture from the game's own GLBs. Textures from src/ui/chrome/paint3d.ts.
 //
 //   /dev-iconbake.html               bake everything and show it (big, at 1:1, on parchment and walnut)
 //   /dev-iconbake.html?only=regex     just some (no atlas)
-//   window.__module, window.__atlas   the generated src/ui/px/icons3d.ts and public/img/ui3d.webp (a tools script writes them)
+//   window.__module, window.__atlas, window.__shelfAtlas   the generated src/ui/px/icons3d.ts, public/img/ui3d.webp and
+//                                     public/img/ui3d-shelf.webp (a tools script writes them)
 import * as THREE from 'three';
 import { instanceGLB } from '../gfx/glb.ts';
 import { fbm, hash as h2, hex, type RGB } from '../ui/px/relief.ts';
 import { bark, cloth, cloudTex, enamel, fitUV, flame, gem, glass, keepUV, leafTex, leather, metal, paper, scales, setSwatch, stone, swatchAt, SWATCHES, water, wax, wood, type Painted, type Swatch } from '../ui/chrome/paint3d.ts';
 import {
-  acornProp, at, carvedOak, oakLeafProp, ribbon, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, mesh, moonLamp, paintTex, planarUV, rrectPts, setClockHands, shape, shelf, smoothProfile, starPts, studioEnv, torus, tube,
+  acornProp, at, carvedOak, oakLeafProp, ribbon, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, mesh, oilLamp, paintTex, planarUV, rrectPts, setClockHands, shape, shelf, smoothProfile, starPts, studioEnv, torus, tube,
   type O,
 } from '../ui/chrome/props3d.ts';
-import { pixelize, type Art, type Group, type Passes } from './pixelize.ts';
+import { paintFinish, type Art, type Group, type Passes } from './paintfinish.ts';
 
 const q = new URLSearchParams(location.search);
 
@@ -114,8 +116,24 @@ function placeLights(c: THREE.Vector3, size: number) {
  * Render the three passes of `obj` for a `w` x `h` art sprite at `s` samples per art pixel, through the camera as the
  * caller framed it: the lit picture, a material id per sample and depth.
  */
+/** [icons9] painted, not pixelated: every texture the models wear is sampled smoothly */
+const smoothed = new WeakSet<THREE.Texture>();
+function smoothTextures(obj: O) {
+  obj.traverse((o) => {
+    const me = o as THREE.Mesh;
+    if (!me.isMesh) return;
+    for (const m of Array.isArray(me.material) ? me.material : [me.material]) {
+      for (const t of [(m as THREE.MeshStandardMaterial).map, (m as THREE.MeshStandardMaterial).emissiveMap, (m as THREE.MeshStandardMaterial).bumpMap, (m as THREE.MeshBasicMaterial).alphaMap]) {
+        if (!t || smoothed.has(t)) continue;
+        smoothed.add(t);
+        if (t.magFilter !== THREE.LinearFilter) { t.magFilter = THREE.LinearFilter; t.needsUpdate = true; }
+      }
+    }
+  });
+}
 function passes(obj: O, w: number, h: number, s: number, c: THREE.Vector3, size: number): Passes {
   const W = w * s, H = h * s;
+  smoothTextures(obj);
   R.setSize(W, H, false);
   scene.add(obj);
   obj.updateMatrixWorld(true);
@@ -183,7 +201,7 @@ function painted(kind: TexKind, c: string, seed: number): Painted {
     case 'cloud': return cloudTex(c);
     case 'leaf': return leafTex(c, { seed: 3, veins: 7 });
     case 'gem': return gem(c);
-    case 'metal': return metal(c, { seed: 2 + seed % 7, patina: 0.12, brush: 'u' });
+    case 'metal': return metal(c, { seed: 2 + seed % 7, patina: 0.1, brush: 'u', wear: 0.3 });
     case 'plain': return enamel(c, { craze: 0, chips: false });
     default: return enamel(c, { craze: 0.3, chips: false });
   }
@@ -202,15 +220,20 @@ function M(color: number, o: MOpt = {}): THREE.MeshStandardMaterial {
   let m = mats.get(k) as THREE.MeshStandardMaterial | undefined;
   if (m) return m;
   const c = '#' + color.toString(16).padStart(6, '0');
-  const kind: TexKind = o.tex !== null && o.tex !== undefined ? o.tex : o.tex === null
+  const metallic = (o.metal ?? 0) >= 0.4 && (o.tex === 'plain' || o.tex === undefined);
+  const kind: TexKind = metallic ? 'metal' : o.tex !== null && o.tex !== undefined ? o.tex : o.tex === null
     ? (o.flat ? 'gem' : (o.metal ?? 0) >= 0.4 ? 'metal' : o.opacity !== undefined || ((o.rough ?? 0.5) <= 0.1 && (o.env ?? 1) >= 1.3) ? 'glass' : 'plain')
     : 'enamel';
   const ph = PHOTO[kind], photo = ph ? swatchAt(ph[0], ph[1]) : null;
-  const clean = kind === 'plain' || kind === 'metal' || kind === 'gem' || kind === 'glass';
+  const clean = kind === 'plain' || kind === 'gem' || kind === 'glass';
   const p = photo || clean ? null : painted(kind, c, mats.size);
-  const map = photo ?? p?.map ?? null;
-  m = new THREE.MeshStandardMaterial({ color: photo ? new THREE.Color(color).multiplyScalar(1.45) : clean ? color : 0xffffff, map, metalness: o.metal ?? 0, roughness: o.rough ?? 0.5, flatShading: !!o.flat, emissive: o.glow ? (map ? 0xffffff : color) : 0x000000, emissiveMap: o.glow && map ? map : null, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
-  if (photo) { m.bumpMap = photo; m.bumpScale = 0.5; } else if (p?.bump) { m.bumpMap = p.bump; m.bumpScale = (p.bumpScale ?? 1) * 0.7; }
+  let map = photo ?? p?.map ?? null;
+  // [icons9] real metal: its colour is in its reflections (near-full metalness, no painted colour map), its brushing a
+  // faint relief at a fine scale
+  let brush: THREE.Texture | null = null;
+  if (kind === 'metal' && map) { brush = map.clone(); brush.wrapS = brush.wrapT = THREE.RepeatWrapping; brush.repeat.set(4, 4); brush.needsUpdate = true; map = null; }
+  m = new THREE.MeshStandardMaterial({ color: photo ? new THREE.Color(color).multiplyScalar(1.45) : clean || brush ? color : 0xffffff, map, metalness: (o.metal ?? 0) >= 0.4 ? Math.max(0.88, o.metal ?? 0) : o.metal ?? 0, roughness: o.rough ?? 0.5, flatShading: !!o.flat, emissive: o.glow ? (map ? 0xffffff : color) : 0x000000, emissiveMap: o.glow && map ? map : null, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
+  if (photo) { m.bumpMap = photo; m.bumpScale = 0.5; } else if (brush) { m.bumpMap = brush; m.bumpScale = 0.12; } else if (p?.bump) { m.bumpMap = p.bump; m.bumpScale = (p.bumpScale ?? 1) * 0.7; }
   if (kind === 'leaf') keepUV(m);
   if (o.opacity !== undefined) { m.transparent = true; m.opacity = o.opacity; m.depthWrite = false; }
   if (o.pix) m.userData.pix = o.pix;
@@ -227,8 +250,8 @@ const unlit = (c: number) => { const k = 'unlit' + c; let m = mats.get(k); if (!
 const C = {
   brass: () => M(0xe4ae4a, { metal: 0.5, rough: 0.32, tex: null, env: 1.0 }), gold: () => M(0xf0c04c, { metal: 0.55, rough: 0.27, tex: null, env: 1.15 }), silver: () => M(0xd2d9e2, { metal: 0.75, rough: 0.28, tex: null }),
   iron: () => M(0x88909e, { metal: 0.7, rough: 0.38, tex: null }), wood: () => M(0xb8723c, { tex: 'grain', rough: 0.6 }), dark: () => M(0x6e3c20, { tex: 'grain', rough: 0.65 }), oak: () => M(0xd8a05c, { tex: 'grain', rough: 0.6 }),
-  red: () => M(0xc83c30, { rough: 0.3 }), green: () => M(0x3a9a56, { rough: 0.3 }), blue: () => M(0x3a6cb4, { rough: 0.3 }), sky: () => M(0x56a2d4, { rough: 0.28 }),
-  rose: () => M(0xd8607c, { rough: 0.32 }), plum: () => M(0x8452b8, { rough: 0.34 }), cream: () => M(0xf6e8c8, { rough: 0.45 }), paper: () => M(0xf2e4c4, { rough: 0.85, tex: 'paper' }),
+  red: () => M(0xa83a2e, { rough: 0.42 }), green: () => M(0x3c7a4a, { rough: 0.42 }), blue: () => M(0x345a8e, { rough: 0.42 }), sky: () => M(0x5a8cb4, { rough: 0.4 }),
+  rose: () => M(0xb45a68, { rough: 0.42 }), plum: () => M(0x6a4690, { rough: 0.44 }), cream: () => M(0xeee2c6, { rough: 0.5 }), paper: () => M(0xf2e4c4, { rough: 0.85, tex: 'paper' }),
   leaf: () => M(0x56a43c, { rough: 0.5, tex: 'leaf' }), leather: () => M(0xa8432e, { rough: 0.55, tex: 'leather' }), burlap: () => M(0xc89a5c, { rough: 0.9, tex: 'burlap', rep: 2 }), white: () => M(0xf6f0e4, { rough: 0.4 }),
   ink: () => M(0x2e2436, { rough: 0.45, tex: null }), flame: () => unlit(0xff7a1c), flameIn: () => unlit(0xffd84a), glass: () => M(0xc0e4f4, { rough: 0.06, metal: 0.1, tex: null, env: 1.5 }),
   kraft: () => M(0xd0a066, { rough: 0.85, tex: 'paper' }), snow: () => M(0xeef3fa, { rough: 0.45, tex: 'cloud' }), steel: () => M(0xa8b0bc, { metal: 0.8, rough: 0.3, tex: null }),
@@ -253,8 +276,8 @@ function strokePts(pts: P2[], w: number, caps = 8): P2[] {
   const last = pts.length - 1;
   return [...L, ...arc(pts[last], L[last], -Math.PI), ...Rt.reverse(), ...arc(pts[0], Rt[Rt.length - 1], -Math.PI)];
 }
-/** a pillowy extruded stroke */
-const strokeMesh = (pts: P2[], w: number, m: THREE.Material, depth = 0.22, bev = 0.1) => ext(shape(strokePts(pts, w)), depth, m, bev, 4);
+/** an extruded stroke (a cut, chamfered strip) */
+const strokeMesh = (pts: P2[], w: number, m: THREE.Material, depth = 0.22, bev = 0.1) => ext(shape(strokePts(pts, w)), depth * 0.6, m, Math.min(bev, 0.04), 3);
 /** a round enamel button with a turned brass rim, facing the viewer */
 function button(r: number, m: THREE.Material): O {
   return grp(ext(shape(circlePts(r, 64)), 0.22, m, 0.1, 4, 48), at(torus(r + 0.02, 0.07, C.brass(), Math.PI * 2, 10, 64), 0, 0, 0.0));
@@ -277,17 +300,22 @@ function roundPoly(pts: P2[], r: number, n = 4): P2[] {
   }
   return out;
 }
-/** glossy enamel for the symbols: a smooth glaze in a natural pigment */
-const glaze = (c: number) => M(c, { rough: 0.24, tex: 'plain', env: 1.2 });
+/** [icons9] the symbols' colour: lacquered brass in a muted natural pigment (brushed, a little worn), not a toy glaze */
+function glaze(c: number): THREE.MeshStandardMaterial {
+  const col = new THREE.Color(c), hsl = { h: 0, s: 0, l: 0 };
+  col.getHSL(hsl);
+  col.setHSL(hsl.h, hsl.s * 0.62, hsl.l * 0.86);
+  return M(col.getHex(), { rough: 0.38, metal: 0.3, tex: 'metal', env: 1.0 });
+}
 /**
- * The symbols' jewel style: a domed piece of glossy enamel set in a gilt rim (a bevelled band of gold just round it),
- * like a little brooch.
+ * [icons9] The symbols as real objects: a shape cut from lacquered sheet brass, a fine chamfer on its edges, set on a thin
+ * plate of bare brass a little bigger than it (realistic thicknesses, nothing puffy).
  */
 function jewel(pts: P2[], m: THREE.Material, o: { depth?: number; bevel?: number; rim?: number; rimM?: THREE.Material; z?: number } = {}): THREE.Group {
-  const depth = o.depth ?? 0.16, bev = o.bevel ?? 0.13, rim = o.rim ?? 0.075;
-  const face = ext(shape(pts), depth, m, bev, 6, 48);
+  const depth = Math.min(0.08, (o.depth ?? 0.16) * 0.5), bev = Math.min(0.035, (o.bevel ?? 0.13) * 0.3), rim = Math.min(0.045, (o.rim ?? 0.075) * 0.6);
+  const face = ext(shape(pts), depth, m, bev, 3, 48);
   const g = grp(face);
-  if (rim > 0) g.add(at(ext(shape(offsetPts(pts, bev * 0.85 + rim)), depth * 0.5, o.rimM ?? C.gold(), rim * 0.7, 2, 48), 0, 0, -depth * 0.2));
+  if (rim > 0) g.add(at(ext(shape(offsetPts(pts, bev * 0.85 + rim)), depth * 0.45, o.rimM ?? C.brass(), rim * 0.4, 2, 48), 0, 0, -depth * 0.35));
   g.position.z = o.z ?? 0;
   return g;
 }
@@ -331,10 +359,10 @@ function curvedArrow(m: THREE.Material, cw: boolean): THREE.Group {
   const head = roundPoly([[end[0] + nx * 0.29, end[1] + ny * 0.29], [end[0] + tan[0] * 0.34, end[1] + tan[1] * 0.34], [end[0] - nx * 0.29, end[1] - ny * 0.29]], 0.05);
   return grp(jewelStroke(arc.slice(0, n - 1), 0.21, m), jewel(head, m, { z: 0.03 }));
 }
-/** a round enamel button in a turned brass bezel, a raised cream glyph on it */
+/** [icons9] a struck medallion: a lacquered disc in a turned brass rim, its glyph raised in bare brass (a coin's thickness) */
 function enamelButton(m: THREE.Material, glyph: P2[][]): THREE.Group {
-  const g = grp(ext(shape(circlePts(0.8, 64)), 0.18, m, 0.12, 6, 64), at(torus(0.88, 0.1, M(0xd6a040, { metal: 0.65, rough: 0.3, tex: null }), Math.PI * 2, 12, 72), 0, 0, -0.02));
-  for (const p of glyph) g.add(jewel(p, glaze(0xf4e6c6), { rim: 0, depth: 0.06, bevel: 0.05, z: 0.2 }));
+  const g = grp(ext(shape(circlePts(0.8, 64)), 0.09, m, 0.025, 3, 64), at(torus(0.84, 0.055, C.brass(), Math.PI * 2, 12, 72), 0, 0, 0));
+  for (const p of glyph) g.add(at(ext(shape(p), 0.04, C.brass(), 0.018, 2, 32), 0, 0, 0.075));
   return g;
 }
 const bar = (w: number, h: number, x = 0, y = 0): P2[] => rrectPts(w, h, Math.min(w, h) * 0.3).map(([px, py]) => [px + x, py + y] as P2);
@@ -408,18 +436,18 @@ function oakLeaf(len: number, m: THREE.Material): THREE.Mesh {
  * acorn stitched on the front, glossy acorns spilled at its foot */
 function acornBag(o: { squash?: number; pouch?: 'burlap' | 'leather'; spill?: number } = {}): THREE.Group {
   const sq = o.squash ?? 0, leather = o.pouch === 'leather';
-  const m = leather ? M(0x9a3e2c, { rough: 0.5, tex: 'leather' }) : M(0xd8bc88, { rough: 0.9, tex: 'burlap', rep: 2 });
+  const m = leather ? M(0x7e3426, { rough: 0.55, tex: 'leather' }) : M(0xa8875a, { rough: 0.92, tex: 'burlap', rep: 2 });
   const prof: [number, number][] = [[0, -0.8], [0.5, -0.78], [0.76, -0.6], [0.86, -0.3], [0.82, 0.0], [0.64, 0.24], [0.38, 0.4], [0.24, 0.46], [0.26, 0.54], [0.4, 0.68], [0.52, 0.84], [0.46, 0.9], [0.3, 0.8], [0.12, 0.7], [0, 0.68]];
   const body = lathe(prof, m, 48);
   const pos = body.geometry.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), a = Math.atan2(z, x);
-    const ruffle = y > 0.56 ? 1 + Math.sin(a * 7) * 0.16 : 1;
+    const ruffle = y > 0.56 ? 1 + Math.sin(a * 7) * 0.09 + Math.sin(a * 13 + 1) * 0.03 : 1;
     const k = (1 + Math.sin(a * 3 + y * 2) * 0.05 + Math.sin(a * 5 - 1) * 0.03) * ruffle;
     pos.setXYZ(i, x * k * (1 + sq * 0.5), (y > 0.56 ? y + Math.sin(a * 7) * 0.04 : y) * (1 - sq), z * k * (1 + sq * 0.5));
   }
   body.geometry.computeVertexNormals();
-  const RED = M(0xb8322e, { rough: 0.4, tex: 'weave' });
+  const RED = M(0x8a2e24, { rough: 0.7, tex: 'weave' });
   const cord = at(torus(0.28, 0.08, RED, Math.PI * 2, 10, 32), 0, 0.46 * (1 - sq), 0, Math.PI / 2, 0, 0);
   const bow = grp(at(torus(0.15, 0.06, RED, Math.PI * 2, 8, 24), -0.16, 0, 0, 0, 0.3, 0), at(torus(0.15, 0.06, RED, Math.PI * 2, 8, 24), 0.16, 0, 0, 0, -0.3, 0), at(ball(0.08, RED), 0, 0, 0.02),
     strokeMesh([[-0.02, -0.02], [-0.16, -0.36]], 0.09, RED, 0.03, 0.02), strokeMesh([[0.02, -0.02], [0.18, -0.36]], 0.09, RED, 0.03, 0.02));
@@ -484,17 +512,29 @@ function faceTex(key: string, w: number, h: number, f: (x: number, y: number) =>
 // with a pencil (Build), a top hat with a feather (Dress up), a globe on a brass stand (Map), a round hobbit door
 // (Outside; ajar with warm light for Inside), a checklist scroll (Quests). Painted faces are drawn texel by texel so
 // one texel lands on about one art pixel at 44 px.
-/** a little pixel canvas: set, lines, rectangles; then a nearest-filtered texture of it */
-function pixCanvas(w: number, h: number, bg: RGB) {
-  const d = new Uint8ClampedArray(w * h * 4);
-  const set = (x: number, y: number, c: RGB) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= w || y >= h) return; const i = (y * w + x) * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; };
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) set(x, y, bg);
-  const line = (x0: number, y0: number, x1: number, y1: number, c: RGB) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1); for (let i = 0; i <= n; i++) set(x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n, c); };
-  const rect = (x0: number, y0: number, x1: number, y1: number, c: RGB) => { line(x0, y0, x1, y0, c); line(x1, y0, x1, y1, c); line(x1, y1, x0, y1, c); line(x0, y1, x0, y0, c); };
-  const fill = (x0: number, y0: number, x1: number, y1: number, c: RGB) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) set(x, y, c); };
-  const get = (x: number, y: number): RGB => { const i = (Math.min(h - 1, Math.max(0, y)) * w + Math.min(w - 1, Math.max(0, x))) * 4; return [d[i], d[i + 1], d[i + 2]]; };
-  const tex = (key: string) => paintTex('px9-' + key, w, h, (x, y) => get(x, y));
-  return { set, line, rect, fill, get, tex, w, h };
+/** a texture drawn with canvas strokes at `w` x `h` (smooth, mipmapped), cached by key */
+const drawnTex = new Map<string, THREE.Texture>();
+function drawTex(key: string, w: number, h: number, draw: (g: CanvasRenderingContext2D) => void): THREE.Texture {
+  let t = drawnTex.get(key);
+  if (t) return t;
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const g = c.getContext('2d')!;
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  draw(g);
+  t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  drawnTex.set(key, t);
+  return t;
+}
+/** a little paper grain over a drawn face (fibres and blotches), `a` strong */
+function grain(g: CanvasRenderingContext2D, w: number, h: number, a: number, light = true) {
+  const im = g.getImageData(0, 0, w, h), d = im.data;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const v = (fbm(x * 0.06, y * 0.06, 3) - 0.5) * 2 + (h2(x, y, 7) - 0.5) * 0.6, k = 1 + v * a * (light ? 1 : 0.8), i = (y * w + x) * 4;
+    d[i] *= k; d[i + 1] *= k; d[i + 2] *= k;
+  }
+  g.putImageData(im, 0, 0);
 }
 /** a material for a painted face that keeps its own texture coordinates */
 function faceMat(map: THREE.Texture, o: { rough?: number; side?: THREE.Side; pix?: Group; glow?: number; metal?: number } = {}): THREE.MeshStandardMaterial {
@@ -557,19 +597,30 @@ function shopStall(): O {
 
 // ---- Build: a blueprint, half unrolled, a pencil across it
 function blueprintTex(): THREE.Texture {
-  const BG = hex('#0a4aa6'), GRID = hex('#185ab4'), INK = hex('#f4faff'), SOFT = hex('#7cc0f0');
-  const c = pixCanvas(28, 26, BG);
-  for (let x = 2; x < 28; x += 3) c.line(x, 0, x, 25, GRID);
-  for (let y = 2; y < 26; y += 3) c.line(0, y, 27, y, GRID);
-  c.rect(0, 0, 27, 25, SOFT);
-  // a little house: roof, walls, chimney, door, window; a dimension line under it
-  c.line(4, 11, 13, 3, INK); c.line(13, 3, 22, 11, INK);
-  c.rect(6, 11, 20, 19, INK);
-  c.rect(17, 4, 18, 7, INK);
-  c.rect(11, 14, 14, 19, INK);
-  c.rect(16, 13, 18, 15, INK); c.rect(8, 13, 9, 15, INK);
-  c.line(4, 22, 22, 22, SOFT); c.line(4, 21, 4, 23, SOFT); c.line(22, 21, 22, 23, SOFT);
-  return c.tex('blueprint9');
+  return drawTex('blueprint', 256, 240, (g) => {
+    const W = 256, H = 240;
+    const bg = g.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#1e4a8c'); bg.addColorStop(1, '#173c76');
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    g.strokeStyle = 'rgba(140,190,240,0.28)'; g.lineWidth = 1.5;
+    for (let x = 8; x < W; x += 20) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H); g.stroke(); }
+    for (let y = 8; y < H; y += 20) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+    g.strokeStyle = 'rgba(200,228,255,0.8)'; g.lineWidth = 3; g.strokeRect(6, 6, W - 12, H - 12);
+    // a little house: roof, walls, chimney, door, windows, and its measurements
+    const ink = (wd: number, a = 0.97) => { g.strokeStyle = `rgba(244,250,255,${a})`; g.lineWidth = wd; };
+    ink(6);
+    g.beginPath(); g.moveTo(34, 104); g.lineTo(128, 36); g.lineTo(222, 104); g.stroke();
+    g.strokeRect(54, 104, 148, 86);
+    g.strokeRect(160, 44, 20, 34);
+    ink(5);
+    g.strokeRect(110, 132, 36, 58);
+    g.beginPath(); g.arc(138, 162, 2.5, 0, Math.PI * 2); g.stroke();
+    for (const x of [68, 166]) { g.strokeRect(x, 122, 26, 26); ink(2.5, 0.8); g.beginPath(); g.moveTo(x + 13, 122); g.lineTo(x + 13, 148); g.moveTo(x, 135); g.lineTo(x + 26, 135); g.stroke(); ink(5); }
+    ink(2.5, 0.75);
+    g.beginPath(); g.moveTo(54, 212); g.lineTo(202, 212); g.moveTo(54, 204); g.lineTo(54, 220); g.moveTo(202, 204); g.lineTo(202, 220); g.stroke();
+    g.beginPath(); g.moveTo(224, 104); g.lineTo(224, 190); g.moveTo(216, 104); g.lineTo(232, 104); g.moveTo(216, 190); g.lineTo(232, 190); g.stroke();
+    grain(g, W, H, 0.06);
+  });
 }
 function blueprint(): O {
   const sheetG = new THREE.PlaneGeometry(1.36, 1.3, 14, 14);
@@ -577,13 +628,17 @@ function blueprint(): O {
   // a gentle wave across, the bottom-left corner curling up
   for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i); p.setZ(i, Math.sin(((x + 0.68) / 1.36) * Math.PI * 1.2) * 0.04 + Math.max(0, -0.3 - x - y) ** 2 * 0.5); }
   sheetG.computeVertexNormals();
-  const sheetM = faceMat(blueprintTex(), { rough: 0.85, side: THREE.DoubleSide, pix: { smooth: 0, flat: true, steps: 4 } });
-  sheetM.color.setScalar(0.86);
+  const sheetM = faceMat(blueprintTex(), { rough: 0.85, side: THREE.DoubleSide, pix: { flat: true } });
   const sheet = mesh(sheetG, sheetM);
   // the roll at the right edge: the same blue paper, a white spiral where it is cut
   const blue = M(0x1450a8, { rough: 0.7, tex: 'paper' });
-  const spiral = paintTex('px9-spiral', 16, 16, (x, y) => { const dx = x - 7.5, dy = y - 7.5, r = Math.hypot(dx, dy), a = Math.atan2(dy, dx); return r > 7.4 ? hex('#1450a8') : (r + (a / (Math.PI * 2)) * 2.4) % 2.4 < 0.9 ? hex('#f2f8ff') : hex('#1450a8'); });
-  const endM = faceMat(spiral, { rough: 0.8, pix: { smooth: 0, flat: true } });
+  const spiral = drawTex('spiral', 96, 96, (g) => {
+    g.fillStyle = '#1450a8'; g.fillRect(0, 0, 96, 96);
+    g.strokeStyle = '#eef6ff'; g.lineWidth = 3.2; g.beginPath();
+    for (let i = 0; i <= 200; i++) { const a = (i / 200) * Math.PI * 2 * 4.2, r = 6 + (i / 200) * 40; const x = 48 + Math.cos(a) * r, y = 48 + Math.sin(a) * r; if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+    g.stroke();
+  });
+  const endM = faceMat(spiral, { rough: 0.8, pix: { flat: true } });
   const roll = grp(cyl(0.17, 0.17, 1.42, blue, 28), ...[0.711, -0.711].map((y) => at(mesh(planarUV(new THREE.CircleGeometry(0.168, 28)), endM), 0, y, 0, y > 0 ? -Math.PI / 2 : Math.PI / 2, 0, 0)));
   // the pencil: yellow hexagonal lacquer, a brass ferrule and a pink eraser, a sharpened cedar point
   const lac = M(0xf6b830, { rough: 0.3, tex: 'plain', flat: true });
@@ -596,16 +651,16 @@ function blueprint(): O {
 
 // ---- Dress up: a top hat with a satin band, a gold buckle and a feather
 function topHat(): O {
-  const felt = M(0x4a2c74, { rough: 0.5, tex: 'felt' });
+  const felt = M(0x2a2428, { rough: 0.62, tex: 'felt' });
   const crown = lathe(smoothProfile([[0.47, -0.3], [0.46, 0.0], [0.48, 0.36], [0.52, 0.6], [0.51, 0.64], [0.4, 0.67], [0, 0.68]], 3), felt, 56);
   const brim = lathe(smoothProfile([[0.46, -0.34], [0.7, -0.345], [0.96, -0.33], [1.01, -0.3], [1.0, -0.26], [0.92, -0.28], [0.7, -0.3], [0.46, -0.27]], 3), felt, 64);
   const bp = brim.geometry.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < bp.count; i++) { const x = bp.getX(i), z = bp.getZ(i); bp.setXYZ(i, x, bp.getY(i) + 0.2 * Math.max(0, Math.abs(x) - 0.45) ** 2 / 0.3, z * 0.82); }
   brim.geometry.computeVertexNormals();
-  const band = lathe([[0.478, -0.29], [0.482, -0.06], [0.47, -0.06], [0.466, -0.29]], M(0xc0303c, { rough: 0.28, tex: 'plain' }), 56);
+  const band = lathe([[0.478, -0.29], [0.482, -0.06], [0.47, -0.06], [0.466, -0.29]], M(0x6e1c26, { rough: 0.4, tex: 'weave' }), 56);
   const buckle = shape(rrectPts(0.22, 0.2, 0.03)); buckle.holes.push(new THREE.Path(rrectPts(0.12, 0.1, 0.02).map(([x, y]) => V2c(x, y))));
   const bk = at(ext(buckle, 0.03, C.gold(), 0.015, 2), 0, -0.175, 0.49);
-  const plume = M(0x2fa088, { rough: 0.5, tex: 'leaf' }), tip = M(0xf0c040, { rough: 0.45, tex: 'plain' });
+  const plume = M(0x9a6a3a, { rough: 0.7, tex: 'leaf' }), tip = M(0x3a2a20, { rough: 0.7, tex: 'plain' });
   const feather = at(grp(leafMesh(0.5, 0.13, plume, 0), at(leafMesh(0.12, 0.05, tip, 0), 0, 0.44, 0.02), at(cyl(0.012, 0.016, 1.0, C.cream(), 6), 0, -0.02, 0.03)), 0.38, 0.22, 0.28, -0.25, 0.5, -0.55);
   return at(grp(crown, brim, band, bk, feather), 0, 0, 0, 0, 0, 0.12);
 }
@@ -618,7 +673,7 @@ function earthTex(): Promise<THREE.Texture> {
   earthP ??= new Promise((res) => {
     const im = new Image();
     const make = () => {
-      const W = 192, H = 96, cv = document.createElement('canvas');
+      const W = 512, H = 256, cv = document.createElement('canvas');
       cv.width = W; cv.height = H;
       const g = cv.getContext('2d', { willReadFrequently: true })!;
       g.imageSmoothingQuality = 'high';
@@ -640,14 +695,14 @@ function earthTex(): Promise<THREE.Texture> {
         if (land[i]) c = LAND[kind[i]];
         else {
           let near = false;
-          for (let dy = -2; dy <= 2 && !near; dy++) for (let dx = -2; dx <= 2; dx++) if (land[Math.min(H - 1, Math.max(0, y + dy)) * W + ((x + dx + W) % W)]) { near = true; break; }
+          for (let dy = -4; dy <= 4 && !near; dy += 2) for (let dx = -4; dx <= 4; dx += 2) if (land[Math.min(H - 1, Math.max(0, y + dy)) * W + ((x + dx + W) % W)]) { near = true; break; }
           c = near ? SHALLOW : SEA;
         }
         out.data.set([c[0], c[1], c[2], 255], i * 4);
       }
       g.putImageData(out, 0, 0);
       const t = new THREE.CanvasTexture(cv);
-      t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.anisotropy = 4;
+      t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
       res(t);
     };
     im.onload = make; im.onerror = make;
@@ -656,7 +711,7 @@ function earthTex(): Promise<THREE.Texture> {
   return earthP;
 }
 async function globe(): Promise<O> {
-  const ball = mesh(new THREE.SphereGeometry(0.62, 64, 40), faceMat(await earthTex(), { rough: 0.3, pix: { smooth: 0.1, glossy: true } }));
+  const ball = mesh(new THREE.SphereGeometry(0.62, 64, 40), faceMat(await earthTex(), { rough: 0.32, pix: { glossy: true } }));
   ball.rotation.y = -1.75; // Africa and Europe in front, the Atlantic and a little of the Americas to the left
   const brass = C.brass();
   const ring = torus(0.7, 0.04, brass, Math.PI * 2, 10, 72);
@@ -685,7 +740,7 @@ function roundDoor(open: boolean): O {
   g.add(at(ext(shape(rrectPts(1.56, 0.16, 0.04)), 0.5, stones[1], 0.03, 2), 0, -0.98, 0.08));
   // the doorway behind: dark, or warm lamplight when the door stands open
   const inner = open
-    ? Object.assign(new THREE.MeshBasicMaterial({ map: paintTex('px9-warm', 32, 32, (x, y) => { const r = Math.hypot(x - 15.5, y - 13) / 18; return r < 0.4 ? hex('#ffd65a') : r < 0.72 ? hex('#fb9a2a') : hex('#d2601c'); }), toneMapped: false }), { userData: { pix: { glow: true, steps: 3 } } })
+    ? Object.assign(new THREE.MeshBasicMaterial({ map: drawTex('warm', 128, 128, (g) => { const gr = g.createRadialGradient(64, 54, 4, 64, 60, 76); gr.addColorStop(0, '#fff2b0'); gr.addColorStop(0.35, '#ffcc5a'); gr.addColorStop(0.7, '#f4922c'); gr.addColorStop(1, '#c8561a'); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); }), toneMapped: false }), { userData: { pix: { glow: true } } })
     : M(0x2a1a14, { rough: 0.9, tex: 'plain' });
   g.add(at(mesh(planarUV(new THREE.CircleGeometry(0.82, 48)), inner), 0, 0, -0.06));
   // the door: five planks cut to the circle, two strap hinges, the knocker, a knob
@@ -720,21 +775,23 @@ function roundDoor(open: boolean): O {
 
 // ---- Quests: a checklist scroll with a wax seal and a quill
 function questScroll(): O {
-  const PAPER = hex('#f8ead0'), INK = hex('#5a4652'), RED = hex('#b8402e'), TICK = hex('#2f8a42');
-  const c = pixCanvas(28, 34, PAPER);
-  for (let y = 0; y < 34; y++) for (let x = 0; x < 28; x++) if (h2(x, y, 5) > 0.86) c.set(x, y, hex('#efdcbc'));
-  c.fill(6, 3, 21, 4, RED);
-  for (const [i, done] of [[0, 1], [1, 1], [2, 0]] as [number, number][]) {
-    const y = 9 + i * 7;
-    c.rect(3, y, 7, y + 4, INK);
-    if (done) { c.line(4, y + 2, 5, y + 3, TICK); c.line(5, y + 3, 8, y - 1, TICK); c.set(4, y + 1, TICK); }
-    c.line(10, y + 1, 24 - i * 3, y + 1, INK); c.line(10, y + 3, 19 + i, y + 3, hex('#9a8a90'));
-  }
+  const list = drawTex('quest', 200, 244, (g) => {
+    g.fillStyle = '#f7e8cc'; g.fillRect(0, 0, 200, 244);
+    grain(g, 200, 244, 0.07);
+    g.strokeStyle = '#b8402e'; g.lineWidth = 9; g.beginPath(); g.moveTo(44, 26); g.lineTo(156, 26); g.stroke();
+    for (const [i, done] of [[0, 1], [1, 1], [2, 0]] as [number, number][]) {
+      const y = 70 + i * 52;
+      g.strokeStyle = '#5a4652'; g.lineWidth = 4; g.strokeRect(22, y, 28, 28);
+      if (done) { g.strokeStyle = '#2f8a42'; g.lineWidth = 7; g.beginPath(); g.moveTo(26, y + 14); g.lineTo(35, y + 24); g.lineTo(56, y - 6); g.stroke(); }
+      g.strokeStyle = '#5a4652'; g.lineWidth = 4.5; g.beginPath(); g.moveTo(66, y + 8); g.lineTo(172 - i * 18, y + 8); g.stroke();
+      g.strokeStyle = 'rgba(90,70,82,0.55)'; g.lineWidth = 3.5; g.beginPath(); g.moveTo(66, y + 21); g.lineTo(142 + i * 8, y + 21); g.stroke();
+    }
+  });
   const sheetG = new THREE.PlaneGeometry(1.0, 1.22, 8, 10);
   const p = sheetG.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(((p.getX(i) + 0.5) / 1.0) * Math.PI) * 0.05);
   sheetG.computeVertexNormals();
-  const sheet = mesh(sheetG, faceMat(c.tex('quest9'), { rough: 0.85, side: THREE.DoubleSide, pix: { smooth: 0, flat: true, steps: 5 } }));
+  const sheet = mesh(sheetG, faceMat(list, { rough: 0.85, side: THREE.DoubleSide, pix: { flat: true } }));
   const roll = (y: number) => grp(at(lathe(smoothProfile([[0.12, -0.56], [0.13, 0], [0.12, 0.56]], 2), M(0xf2dcb2, { tex: 'paper', rough: 0.8 }), 20), 0, y, 0.06, 0, 0, Math.PI / 2),
     ...[-1, 1].map((s) => at(lathe(smoothProfile([[0, 0], [0.06, 0.02], [0.08, 0.08], [0.05, 0.13], [0, 0.15]], 2), C.dark(), 12), s * 0.57, y, 0.06, 0, 0, -s * Math.PI / 2)));
   const wax = M(0xc02c34, { rough: 0.3, tex: 'plain' }), rib = M(0x2f5aa0, { rough: 0.4, tex: 'weave' });
@@ -742,7 +799,7 @@ function questScroll(): O {
   const seal = grp(...[-1, 1].map((s) => at(ext(shape([[0, 0], [s * 0.1, -0.34], [s * 0.05, -0.3], [s * 0.02, -0.36], [s * -0.05, -0.02]]), 0.02, rib, 0.01, 1), s * 0.03, -0.02, -0.02)),
     ext(shape(sealPts), 0.06, wax, 0.035, 2), at(goldStar(0.08, 0.035, 5, M(0xe84850, { rough: 0.3, tex: 'plain' })), 0, 0, 0.05));
   const vane: P2[] = []; for (let i = 0; i <= 40; i++) { const t = (i / 40) * Math.PI * 2, y = Math.cos(t); vane.push([Math.sin(t) * 0.14 * (1 + 0.25 * y) * (Math.sin(t * 9) > 0.8 ? 0.85 : 1), y * 0.42 + 0.1]); }
-  const quill = at(grp(ext(shape(vane), 0.03, M(0x4a8ad0, { rough: 0.55, tex: 'plain' }), 0.02, 2), at(cyl(0.014, 0.022, 1.0, M(0xf0e4c4, { tex: null }), 6), 0, -0.1, 0.03), at(lathe([[0.022, 0], [0.008, -0.08], [0, -0.1]], M(0x3a3040, { tex: null }), 8), 0, -0.6, 0.03)), 0.48, 0.12, 0.2, 0, 0, -0.62);
+  const quill = at(grp(ext(shape(vane), 0.03, M(0xeee8dc, { rough: 0.7, tex: 'plain' }), 0.02, 2), at(cyl(0.014, 0.022, 1.0, M(0xf0e4c4, { tex: null }), 6), 0, -0.1, 0.03), at(lathe([[0.022, 0], [0.008, -0.08], [0, -0.1]], M(0x3a3040, { tex: null }), 8), 0, -0.6, 0.03)), 0.48, 0.12, 0.2, 0, 0, -0.62);
   return grp(quill, at(sheet, 0, -0.05, 0), roll(0.62), roll(-0.69), at(seal, 0.3, -0.4, 0.12));
 }
 
@@ -761,15 +818,15 @@ function nutTex(): THREE.Texture {
  * in two browns, set like roof tiles), a rolled rim, a short twig stalk.
  */
 function acorn9(s = 1, tilt = 0, detail = true): THREE.Group {
-  const nutM = new THREE.MeshStandardMaterial({ map: nutTex(), roughness: 0.18, envMapIntensity: 1.3 });
+  const nutM = new THREE.MeshStandardMaterial({ map: nutTex(), roughness: 0.13, envMapIntensity: 1.6 });
   nutM.userData.pix = { glossy: true, smooth: 0.15 };
   const nut = lathe(smoothProfile([[0, -0.86], [0.035, -0.84], [0.06, -0.78], [0.2, -0.68], [0.36, -0.46], [0.44, -0.16], [0.445, 0.06], [0.4, 0.16], [0, 0.18]], 4), nutM, 48);
-  const cupBase = M(0x3c2616, { rough: 0.85, tex: 'plain' });
+  const cupBase = M(0x2a180c, { rough: 0.85, tex: 'plain' });
   const prof = smoothProfile([[0.0, 0.5], [0.16, 0.48], [0.36, 0.39], [0.5, 0.23], [0.54, 0.08], [0.5, 0.02]], 6);
   const cup = lathe([...prof, [0.42, 0.04], [0, 0.08]], cupBase, 48);
   const g = grp(nut, cup);
   if (detail) {
-    const sA = M(0xa07448, { rough: 0.75, tex: 'plain' }), sB = M(0x7c5432, { rough: 0.8, tex: 'plain' }), sC = M(0xc09464, { rough: 0.7, tex: 'plain' });
+    const sA = M(0x8a5e34, { rough: 0.75, tex: 'plain' }), sB = M(0x6a4222, { rough: 0.8, tex: 'plain' }), sC = M(0xa87842, { rough: 0.7, tex: 'plain' });
     const scaleG = new THREE.SphereGeometry(1, 10, 7);
     // along the cup's outline from its crown to its rim
     const L: number[] = [0];
@@ -780,10 +837,10 @@ function acorn9(s = 1, tilt = 0, detail = true): THREE.Group {
       const dr = prof[i][0] - prof[i - 1][0], dy = prof[i][1] - prof[i - 1][1], l = Math.hypot(dr, dy) || 1;
       return [r, y, dr / l, dy / l];
     };
-    const rows = 7, total = L[L.length - 1];
+    const rows = 5, total = L[L.length - 1];
     for (let j = 0; j < rows; j++) {
       const [r, y, dr, dy] = atLen(total * (0.17 + (j / (rows - 1)) * 0.74));
-      const count = Math.max(6, Math.round((Math.PI * 2 * r) / 0.1));
+      const count = Math.max(5, Math.round((Math.PI * 2 * r) / 0.15));
       for (let k = 0; k < count; k++) {
         const a = ((k + (j % 2) * 0.5) / count) * Math.PI * 2, e = new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
         const T = e.clone().multiplyScalar(dr).add(new THREE.Vector3(0, dy, 0)).normalize(); // down the cup, towards the rim
@@ -792,20 +849,20 @@ function acorn9(s = 1, tilt = 0, detail = true): THREE.Group {
         const m = (j + k) % 3 === 0 ? sC : (j + k) % 2 ? sA : sB;
         const sc = mesh(scaleG, m);
         sc.matrixAutoUpdate = false;
-        const basis = new THREE.Matrix4().makeBasis(X.multiplyScalar(0.05), T.multiplyScalar(0.062), Nn.clone().multiplyScalar(0.026));
+        const basis = new THREE.Matrix4().makeBasis(X.multiplyScalar(0.078), T.multiplyScalar(0.088), Nn.clone().multiplyScalar(0.03));
         basis.setPosition(e.clone().multiplyScalar(r).add(new THREE.Vector3(0, y, 0)).addScaledVector(Nn, 0.01));
         sc.matrix.copy(basis);
         g.add(sc);
       }
     }
   }
-  g.add(at(torus(0.505, 0.045, M(0xa8865e, { rough: 0.75, tex: 'plain' }), Math.PI * 2, 8, 48), 0, 0.045, 0, Math.PI / 2));
+  g.add(at(torus(0.505, 0.045, M(0x7a5232, { rough: 0.75, tex: 'plain' }), Math.PI * 2, 8, 48), 0, 0.045, 0, Math.PI / 2));
   g.add(tube([[0, 0.48, 0], [0.03, 0.62, 0], [0.1, 0.72, 0.02]], 0.045, M(0x5a3e28, { rough: 0.8, tex: 'bark' }), 8, 6));
   return grp(at(g, 0, 0, 0, 0, 0, tilt, s));
 }
 /** the currency acorn: the detailed acorn, leaning a little, on an oak leaf */
 function bigAcorn9(): THREE.Group {
-  const leaf = at(oakLeaf(1.0, M(0x5e9e36, { rough: 0.55, tex: 'leaf', pix: { smooth: 0.1 } })), 0.12, 0.2, -0.4, 0, 0.3, -1.05);
+  const leaf = at(oakLeaf(1.0, M(0x5e9e36, { rough: 0.55, tex: 'leaf', pix: {} })), 0.12, 0.2, -0.4, 0, 0.3, -1.05);
   return grp(acorn9(1, -0.12), leaf);
 }
 /**
@@ -1176,9 +1233,7 @@ function ringTex(): THREE.Texture {
 }
 
 
-// ------------------------------------------------------------------ framing and the pixel finish
-/** samples per art pixel */
-const SS = 8;
+// ------------------------------------------------------------------ framing and the painted finish
 /** the projected bounds (camera space) of the model's visible vertices */
 function projBounds(obj: O): THREE.Box3 {
   const pb = new THREE.Box3(), v = new THREE.Vector3();
@@ -1206,79 +1261,95 @@ function aim(obj: O, yaw: number, pitch: number): THREE.Sphere {
   return sph;
 }
 /**
- * Frame the model for an `n` art px icon: fitted to its projected outline, one pixel kept round it for the outline (two
- * at the bottom right, for the shadow); `pad` > 1 draws it smaller.
+ * Frame the model for an `n` px icon: fitted to its projected outline with `margin` px kept round it for the outline;
+ * `pad` > 1 draws it smaller.
  */
-function frameIcon(obj: O, n: number, yaw: number, pitch: number, pad = 1): THREE.Sphere {
+function frameIcon(obj: O, n: number, yaw: number, pitch: number, pad = 1, margin = 3): THREE.Sphere {
   const sph = aim(obj, yaw, pitch);
   const pb = projBounds(obj);
-  const inner = n - 3, upp = (Math.max(pb.max.x - pb.min.x, pb.max.y - pb.min.y) * pad) / inner;
+  const inner = n - margin * 2, upp = (Math.max(pb.max.x - pb.min.x, pb.max.y - pb.min.y) * pad) / inner;
   const mx = (pb.max.x + pb.min.x) / 2, my = (pb.max.y + pb.min.y) / 2;
-  cam.left = mx - (1 + inner / 2) * upp; cam.right = cam.left + n * upp;
-  cam.top = my + (1 + inner / 2) * upp; cam.bottom = cam.top - n * upp;
+  cam.left = mx - (n / 2) * upp; cam.right = cam.left + n * upp;
+  cam.top = my + (n / 2) * upp; cam.bottom = cam.top - n * upp;
   cam.updateProjectionMatrix();
   return sph;
 }
-type Finish = { lineDepth?: number; shadow?: boolean };
-/** [icons9] the drawings every icon comes in: 32 art px ("big"), 20 ("small", redrawn for small sizes) and 44 ("hd", the
- * side tools, the door and the currency at their full 44 CSS px: one art pixel per CSS pixel) */
-const SIZES = [['big', 32], ['small', 20], ['hd', 44]] as const;
+type Finish = { lineDepth?: number };
+/**
+ * [icons9] Every icon is drawn at 256 px and drawn smoothly down to whatever size the screen wants. [name, px, edge px,
+ * ink px, samples per px]
+ */
+const SIZES = [['hd', 256, 1.4, 0, 2]] as const;
 type SizeName = (typeof SIZES)[number][0];
 type Arts = Record<SizeName, Art>;
-/** one icon at every size */
+/** one icon at every size, with its painted highlights */
 async function bakeIcon(sp: Spec, obj?: O): Promise<Arts> {
   obj ??= prep(await sp.make());
   const res = {} as Arts;
-  for (const [name, n] of SIZES) {
-    const sph = frameIcon(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad ?? 1);
-    res[name] = pixelize(passes(obj, n, n, SS, sph.center, sph.radius), { groups: groupOf, tiny: name === 'small', hd: name === 'hd', shadow: sp.fin?.shadow ?? true, lineDepth: sp.fin?.lineDepth });
+  for (const [name, n, outline, ink, ss] of SIZES) {
+    const sph = frameIcon(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad ?? 1, outline + 6);
+    res[name] = paintFinish(passes(obj, n, n, ss, sph.center, sph.radius), { groups: groupOf, outline, outlineAlpha: 0.35, ink, lineDepth: sp.fin?.lineDepth ?? 0.045 });
   }
   return res;
 }
 
-// ------------------------------------------------------------------ pixel touches for the currency's idle frames
+// ------------------------------------------------------------------ painted touches: highlights, the idle frames' glints and twinkles
 const artCanvas = (a: Art): HTMLCanvasElement => { const c = document.createElement('canvas'); c.width = a.w; c.height = a.h; c.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(a.d), a.w, a.h), 0, 0); return c; };
+const toArt = (c: HTMLCanvasElement, g?: Int32Array): Art => ({ w: c.width, h: c.height, d: c.getContext('2d', { willReadFrequently: true })!.getImageData(0, 0, c.width, c.height).data, g });
 const cloneArt = (a: Art): Art => ({ w: a.w, h: a.h, d: new Uint8ClampedArray(a.d), g: a.g });
-/** is this pixel one of a glossy material's (nut, gem, gold)? */
+/** is this pixel one of a glossy material's (nut, gem, gold, glass)? */
 const glossyAt = (a: Art, i: number) => { const g = a.g?.[i] ?? -1; return g >= 0 && !!groupOf(g).glossy; };
-/**
- * [icons9] A band of light sweeping across the glossy parts only (the nut, not its scaly cap or the leaf): pixels in a
- * slanted band step towards a warm white, its core brighter; `pos` 0..1 across the sprite, < 0 none.
- */
-function glintArt(a: Art, pos: number): Art {
-  const o = cloneArt(a);
-  if (pos < 0) return o;
-  const c = (pos * 1.9 - 0.45) * a.w, wid = Math.max(1.2, a.w / 22);
-  for (let y = 0; y < a.h; y++) for (let x = 0; x < a.w; x++) {
-    const i = y * a.w + x, j = i * 4;
-    if (o.d[j + 3] < 250 || !glossyAt(a, i)) continue;
-    const t = x + y * 0.55 - c;
-    if (Math.abs(t) > wid * 1.6) continue;
-    const k = Math.abs(t) < wid * 0.7 ? 0.55 : 0.28;
-    o.d[j] += (255 - o.d[j]) * k; o.d[j + 1] += (250 - o.d[j + 1]) * k; o.d[j + 2] += (226 - o.d[j + 2]) * k;
-  }
-  return o;
+/** a canvas whose alpha is the pixels `pick` keeps */
+function maskOf(a: Art, pick: (i: number) => boolean): HTMLCanvasElement {
+  const c = document.createElement('canvas'); c.width = a.w; c.height = a.h;
+  const g = c.getContext('2d')!, im = g.createImageData(a.w, a.h);
+  for (let i = 0; i < a.w * a.h; i++) if (pick(i)) { im.data[i * 4 + 3] = Math.min(255, a.d[i * 4 + 3] * 1.1); im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = 255; }
+  g.putImageData(im, 0, 0);
+  return c;
 }
-/** a four-point twinkle in pixels at (x, y), arms `r` long, a bright core and fading tips */
-function sparkleArt(a: Art, x: number, y: number, r: number, col: [number, number, number]) {
-  const set = (px: number, py: number, al: number, c: [number, number, number]) => {
-    if (px < 0 || py < 0 || px >= a.w || py >= a.h) return;
-    const i = (py * a.w + px) * 4, a0 = a.d[i + 3] / 255, na = Math.max(a0, al);
-    if (na <= 0) return;
-    // straight alpha: the twinkle over what is there (or over nothing)
-    for (let ch = 0; ch < 3; ch++) a.d[i + ch] = (c[ch] * al + a.d[i + ch] * a0 * (1 - al)) / (al + a0 * (1 - al));
-    a.d[i + 3] = Math.min(255, (al + a0 * (1 - al)) * 255);
-  };
-  set(x, y, 1, [255, 255, 248]);
-  for (let k = 1; k <= r; k++) { const al = k === r ? 0.6 : 0.95; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) set(x + dx * k, y + dy * k, al, k === 1 ? [255, 252, 236] : col); }
-  if (r >= 3) for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) set(x + dx, y + dy, 0.45, col);
+/** lay `paint` (drawn on a scratch canvas) over the art, kept to the mask, with `op` */
+function layOn(c: HTMLCanvasElement, mask: HTMLCanvasElement, op: GlobalCompositeOperation, paint: (g: CanvasRenderingContext2D) => void) {
+  const t = document.createElement('canvas'); t.width = c.width; t.height = c.height;
+  const tg = t.getContext('2d')!;
+  paint(tg);
+  tg.globalCompositeOperation = 'destination-in';
+  tg.drawImage(mask, 0, 0);
+  const g = c.getContext('2d')!;
+  g.save(); g.globalCompositeOperation = op; g.drawImage(t, 0, 0); g.restore();
+}
+/** [icons9] a soft band of light sweeping across the glossy parts only (the nut, not its scaly cup or the leaf); `pos` 0..1 across, < 0 none */
+function glintArt(a: Art, pos: number): Art {
+  if (pos < 0) return cloneArt(a);
+  const c = artCanvas(a), mask = maskOf(a, (i) => glossyAt(a, i));
+  const x = (pos * 1.8 - 0.4) * a.w, w = a.w * 0.09;
+  layOn(c, mask, 'screen', (t) => {
+    t.translate(x, a.h / 2); t.rotate(0.5);
+    const gr = t.createLinearGradient(-w, 0, w, 0);
+    gr.addColorStop(0, 'rgba(255,248,226,0)'); gr.addColorStop(0.5, 'rgba(255,250,236,0.75)'); gr.addColorStop(1, 'rgba(255,248,226,0)');
+    t.fillStyle = gr; t.fillRect(-w, -a.h, w * 2, a.h * 2);
+  });
+  return toArt(c, a.g);
+}
+/** a four-point twinkle at (x, y), arms `r` px long: slim rays with a soft glow and a bright core */
+function sparkleArt(a: Art, x: number, y: number, r: number, col: string): Art {
+  const c = artCanvas(a), g = c.getContext('2d')!;
+  g.save();
+  g.globalCompositeOperation = 'lighter';
+  const glow = g.createRadialGradient(x, y, 0, x, y, r * 0.7);
+  glow.addColorStop(0, `rgba(${col},0.55)`); glow.addColorStop(1, `rgba(${col},0)`);
+  g.fillStyle = glow; g.beginPath(); g.arc(x, y, r * 0.7, 0, Math.PI * 2); g.fill();
+  g.fillStyle = 'rgba(255,255,250,0.95)';
+  const w = Math.max(0.7, r * 0.12);
+  for (const [dx, dy] of [[1, 0], [0, 1]]) { g.beginPath(); g.moveTo(x - dx * r, y - dy * r); g.lineTo(x + dy * w, y + dx * w); g.lineTo(x + dx * r, y + dy * r); g.lineTo(x - dy * w, y - dx * w); g.closePath(); g.fill(); }
+  g.restore();
+  return toArt(c, a.g);
 }
 /** the brightest glossy pixels inside the sprite (where twinkles go), brightest first, spread apart */
 function twinkleSpots(a: Art, n: number): [number, number][] {
   const c: [number, number, number][] = [];
   for (let y = 1; y < a.h - 1; y++) for (let x = 1; x < a.w - 1; x++) {
     const i = y * a.w + x, j = i * 4;
-    if (!glossyAt(a, i)) continue;
+    if (!glossyAt(a, i) || a.d[j + 3] < 250) continue;
     c.push([x, y, a.d[j] * 0.3 + a.d[j + 1] * 0.59 + a.d[j + 2] * 0.11]);
   }
   c.sort((p, q) => q[2] - p[2]);
@@ -1289,19 +1360,19 @@ function twinkleSpots(a: Art, n: number): [number, number][] {
 
 // ------------------------------------------------------------------ the shelf's sprites (the main buttons, in 2D)
 /**
- * The main buttons' shelf, drawn as pixel-art sprites from the 3D props: the carved walnut shelf with its brass name
- * plates, the moon lamp (its glow at four strengths, off, and with the chain pulled), the cuckoo clock (its door shut,
+ * The main buttons' shelf, painted from the 3D props: the carved walnut shelf with its brass name plates, the oil lamp
+ * (its flame at four strengths, out, and flaring as the wick wheel turns), the cuckoo clock (its door shut,
  * ajar, open with the owl out, and the owl calling; the pendulum separately at five swings; the hands are drawn live
- * over the dial) and the journal (shut, peeking, unbuckled, opening, open). One art pixel is one CSS pixel of the
- * shelf's box (352 x 178, the nav's 352 x 132 and 46 above it), all seen through one orthographic camera looking a
- * little down at the shelf so every sprite lines up.
+ * over the dial) and the journal (shut, peeking, unbuckled, opening, open). Positions are in art px, one per CSS px of
+ * the shelf's box (352 x 178, the nav's 352 x 132 and 46 above it), the sprites drawn at SHELF_RES px per art px, all
+ * seen through one orthographic camera looking a little down at the shelf so every sprite lines up.
  */
 const SHELF_BOX = { w: 352, h: 178, top: 46 };
 /** world units per art pixel */
 const SU = 0.0262;
 const SHELF_PITCH = (9 * Math.PI) / 180;
 /** the objects' centres (art px) and how they stand on the shelf */
-const SHELF_OBJ = { sleep: { cx: 60, s: 1.08, ry: 0 }, clock: { cx: 176, s: 1.1, ry: -0.08 }, book: { cx: 292, s: 1.1, ry: 0.42 } };
+const SHELF_OBJ = { sleep: { cx: 60, s: 1.34, ry: 0.35 }, clock: { cx: 176, s: 1.1, ry: -0.08 }, book: { cx: 292, s: 1.1, ry: 0.42 } };
 const SHELF_Z = -0.16;
 let shelfTop = 0;
 /** the shelf camera: pitched down, framing the art rect (x, y, w, h) of the shelf's box */
@@ -1338,11 +1409,13 @@ function shelfRect(objs: O[], margin = 3): [number, number, number, number] {
   return [x, y, Math.ceil(x1) + margin - x, Math.ceil(y1) + margin - y];
 }
 interface ShelfSprite { name: string; art: Art; x: number; y: number }
-function shootShelf(name: string, obj: O, r: [number, number, number, number], fin: { lineDepth?: number; shadow?: boolean } = {}): ShelfSprite {
+/** [icons9] the shelf's sprites are drawn at this many px per art px (one art px is one CSS px of the shelf's box) */
+const SHELF_RES = 3;
+function shootShelf(name: string, obj: O, r: [number, number, number, number], fin: { lineDepth?: number } = {}): ShelfSprite {
   shelfCam(...r);
-  const P = passes(obj, r[2], r[3], SS, new THREE.Vector3(obj.position.x, 1, 0), 2.2);
-  // inner lines where a part stands about 0.09 units in front of another
-  return { name, art: pixelize(P, { groups: groupOf, lineDepth: fin.lineDepth ?? 0.09 / (cam.far - cam.near), shadow: fin.shadow ?? false }), x: r[0], y: r[1] };
+  const P = passes(obj, r[2] * SHELF_RES, r[3] * SHELF_RES, 2, new THREE.Vector3(obj.position.x, 1, 0), 2.2);
+  // a faint dark edge, half a CSS pixel
+  return { name, art: paintFinish(P, { groups: groupOf, outline: SHELF_RES * 0.5, outlineAlpha: 0.3, ink: 0, lineDepth: fin.lineDepth ?? 0.09 / (cam.far - cam.near) }), x: r[0], y: r[1] };
 }
 /** put a prop on the shelf where the live one stood */
 function onShelf(root: O, id: keyof typeof SHELF_OBJ): O {
@@ -1367,31 +1440,24 @@ async function bakeShelf(): Promise<{ sprites: ShelfSprite[]; dial: [number, num
   const plateM = (sh.plates[0].material as THREE.MeshStandardMaterial).clone();
   Object.assign(plateM, { metalness: 0.3, roughness: 0.42, envMapIntensity: 0.6 });
   plateM.color.setScalar(1.12);
-  plateM.userData.pix = { glossy: false, smooth: 0.45 };
+  plateM.userData.pix = { glossy: false };
   for (const p of sh.plates) p.material = plateM;
   void leaf;
   const shelfG = grp(sh.root, a1, a2);
   out.push(shootShelf('shelf', shelfG, [-4, 124, SHELF_BOX.w + 8, SHELF_BOX.h - 124], { lineDepth: 0.05 / 6 }));
-  // the moon lamp: four glows, off, the chain pulled
-  const lamp = moonLamp();
+  // [icons9] the oil lamp: its flame at four strengths, out, and flaring as the wick wheel is turned up
+  const lamp = oilLamp();
   lamp.root.getObjectByName('halo')!.visible = false;
   onShelf(lamp.root, 'sleep');
+  lamp.setGlow(1.6);
   const lr = shelfRect([lamp.root]);
-  lr[3] = Math.max(lr[3], 0);
-  const chainY = lamp.chain.position.y;
-  // a golden moon rather than a white-hot one, the window caught in the glass kept faint, a dark globe when it's off
-  const moonM = (lamp.moon.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial, skyM = lamp.sky.material as THREE.MeshBasicMaterial;
-  moonM.userData.pix = { glow: false, glossy: false }; // shaded like gold, not paled like a flame
-  const starMs = lamp.moon.children.slice(1).map((c) => (c as THREE.Mesh).material as THREE.MeshStandardMaterial);
-  lamp.root.traverse((o) => { const m = (o as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined; if (m?.blending === THREE.AdditiveBlending && m.emissiveMap) m.emissiveIntensity = 0.22; });
-  const lampGlow = (g: number) => { lamp.setGlow(g); moonM.emissiveIntensity = g < 0.1 ? 0 : 0.06 + 0.22 * g; skyM.color.setScalar(g < 0.1 ? 0.42 : 0.5 + 0.4 * g); for (const m of starMs) m.emissiveIntensity = g < 0.1 ? 0 : 0.2 + 0.4 * g; };
-  for (const [n, g, pull] of [['lamp0', 0.55, 0], ['lamp1', 0.8, 0], ['lamp2', 1.05, 0], ['lamp3', 1.3, 0], ['lamp_off', 0.04, 0.05], ['lamp_pull', 1.6, 0.09]] as [string, number, number][]) {
-    lampGlow(g);
-    lamp.chain.position.y = chainY - pull;
-    out.push(shootShelf(n, lamp.root, [lr[0], lr[1], lr[2], lr[3] + 4]));
+  for (const [n, g, turn] of [['lamp0', 0.55, 0], ['lamp1', 0.8, 0], ['lamp2', 1.05, 0], ['lamp3', 1.3, 0], ['lamp_off', 0.04, -0.6], ['lamp_pull', 1.6, 0.9]] as [string, number, number][]) {
+    lamp.setGlow(g);
+    lamp.knob.rotation.x = turn;
+    out.push(shootShelf(n, lamp.root, lr));
   }
-  lamp.chain.position.y = chainY;
-  const lampAt = shelfPx(lamp.root.localToWorld(lamp.moonAt.clone()));
+  lamp.knob.rotation.x = 0;
+  const lampAt = shelfPx(lamp.root.localToWorld(lamp.flameAt.clone()));
   // the cuckoo clock: the body (no pendulum, no hands) with its door and owl, then the pendulum on its own
   const clock = cuckooClock();
   simpleDial(clock.root);
@@ -1462,8 +1528,8 @@ function show(name: string, r: Arts) {
   const fig = document.createElement('figure');
   const row = document.createElement('div');
   row.className = 'row';
-  const add = (a: Art, k: number, cls = '') => { const c = artCanvas(a); c.style.width = `${a.w * k}px`; c.className = cls; row.appendChild(c); };
-  add(r.hd, 4); add(r.big, 4); add(r.small, 4); add(r.hd, 1, 'one'); add(r.big, 1, 'one'); add(r.small, 1, 'one'); add(r.hd, 2, 'dark'); add(r.small, 2, 'dark');
+  const add = (a: Art, w: number, cls = '') => { const c = artCanvas(a); c.style.width = `${w}px`; c.className = cls; row.appendChild(c); };
+  add(r.hd, 128); add(r.hd, 88); add(r.hd, 44, 'one'); add(r.hd, 30, 'one'); add(r.hd, 20, 'one'); add(r.hd, 88, 'dark'); add(r.hd, 30, 'dark');
   fig.append(row, Object.assign(document.createElement('figcaption'), { textContent: name }));
   host.appendChild(fig);
 }
@@ -1487,23 +1553,23 @@ async function bake() {
     } catch (e) { console.error('bake failed', name, e); }
   }
   for (const [a, b] of Object.entries(ALIAS)) if (icons[b] !== undefined && test(a)) icons[a] = icons[b];
-  // [icons9] the currency's idle frames: the acorn's gloss catches a band of light that sweeps across it and twinkles;
-  // the gem's facets flash in turn as the light swings round it (each frame rendered), with twinkles on its brightest
-  // facets; the vault twinkles
+  // [icons9] the currency's idle frames: a soft band of light sweeps across the acorn's gloss and a twinkle comes and
+  // goes; the gem's facets flash in turn as the light swings round it (each frame rendered), with twinkles on its
+  // brightest facets; the vault twinkles
   for (const [name, model, frames] of ANIM) {
     if (!test(name) || icons[model] === undefined) continue;
     const base = cells[icons[model]];
     const list: number[] = [];
     for (let f = 0; f < frames; f++) {
       let src = base;
-      if (model === 'moongem') { lightSwing = Math.sin((f / frames) * Math.PI * 2); src = await bakeIcon(ICONS[model], models.get(model)); lightSwing = 0; }
+      if (model === 'moongem') { lightSwing = Math.sin((f / frames) * Math.PI * 2) * 0.8; src = await bakeIcon(ICONS[model], models.get(model)); lightSwing = 0; }
       const r = {} as Arts;
       for (const [sz] of SIZES) {
-        const a = src[sz], arm = sz === 'hd' ? 3 : sz === 'big' ? 2 : 1;
-        const o = model === 'owlcoin' ? glintArt(a, [-1, -1, 0.05, 0.3, 0.55, 0.8, 1.05, -1][f]) : cloneArt(a);
+        const a = src[sz], arm = a.w * 0.08;
+        let o = model === 'owlcoin' ? glintArt(a, [-1, -1, 0.05, 0.3, 0.55, 0.8, 1.05, -1][f]) : cloneArt(a);
         const spots = twinkleSpots(a, 4);
         const want = model === 'owlcoin' ? (f === 1 || f === 6 ? [spots[0]] : []) : model === 'moongem' ? (f % 2 === 0 ? [spots[(f / 2) % Math.max(1, spots.length)]] : []) : [spots[f % Math.max(1, spots.length)]];
-        for (const p of want) if (p) sparkleArt(o, p[0], p[1], arm, model === 'moongem' ? [236, 222, 255] : [255, 238, 176]);
+        for (const p of want) if (p) o = sparkleArt(o, p[0], p[1], arm * (model === 'moongem' && f % 4 === 2 ? 0.75 : 1), model === 'moongem' ? '226,210,255' : '255,232,170');
         r[sz] = o;
       }
       list.push(push(r));
@@ -1516,44 +1582,47 @@ async function bake() {
   const sh = test('shelf') ? await bakeShelf() : null;
   if (sh) for (const sp of sh.sprites) {
     const fig = document.createElement('figure'), c = artCanvas(sp.art);
-    c.style.width = `${sp.art.w * 3}px`;
+    c.style.width = `${sp.art.w}px`;
     fig.append(c, Object.assign(document.createElement('figcaption'), { textContent: `${sp.name} ${sp.x},${sp.y}` }));
     host.appendChild(fig);
   }
-  const w = window as unknown as { __module: string; __atlas: string; __done: boolean };
+  const w = window as unknown as { __module: string; __atlas: string; __shelfAtlas: string; __done: boolean };
   document.title = 'baked ' + Object.keys(icons).length;
   if (only) { w.__done = true; return; }
-  // the atlas: the 32 px cells, the 20 px cells, the 44 px cells, then the shelf's sprites
-  const AW = 1024, grids = {} as Record<SizeName, [number, number, number]>;
+  // the icons' atlas: the 256 px drawings, 16 to a row
+  const AW = 4096, grids = {} as Record<SizeName, [number, number, number]>;
   let y = 0;
   for (const [sz, n] of SIZES) { const cols = Math.floor(AW / n); grids[sz] = [n, cols, y]; y += Math.ceil(cells.length / cols) * n; }
-  // the shelf's sprites below, packed in rows (tallest first)
-  const shelfY = y + 1, sprites: Record<string, [number, number, number, number, number, number]> = {};
-  let px = 0, py = shelfY, rowH = 0;
-  for (const sp of [...(sh?.sprites ?? [])].sort((a, b) => b.art.h - a.art.h)) {
-    if (px + sp.art.w > AW) { px = 0; py += rowH + 1; rowH = 0; }
-    sprites[sp.name] = [px, py, sp.art.w, sp.art.h, sp.x, sp.y];
-    px += sp.art.w + 1; rowH = Math.max(rowH, sp.art.h);
-  }
   const atlas = document.createElement('canvas');
-  atlas.width = AW;
-  atlas.height = py + rowH;
+  atlas.width = AW; atlas.height = y;
   const ag = atlas.getContext('2d')!;
-  for (const sp of sh?.sprites ?? []) { const r = sprites[sp.name]; ag.putImageData(new ImageData(new Uint8ClampedArray(sp.art.d), sp.art.w, sp.art.h), r[0], r[1]); }
   for (const [sz, n] of SIZES) { const [, cols, y0] = grids[sz]; cells.forEach((c, i) => ag.putImageData(new ImageData(new Uint8ClampedArray(c[sz].d), n, n), (i % cols) * n, y0 + Math.floor(i / cols) * n)); }
-  const shelfIdx = { box: [SHELF_BOX.w, SHELF_BOX.h, SHELF_BOX.top], sprites, dial: sh?.dial.map((v) => +v.toFixed(2)) ?? [0, 0, 0], lamp: sh?.lampAt.map((v) => +v.toFixed(1)) ?? [0, 0], objects: Object.fromEntries(Object.entries(SHELF_OBJ).map(([k, v]) => [k, v.cx])) };
-  const json = JSON.stringify({ atlas: 'img/ui3d.webp', big: grids.big, small: grids.small, hd: grids.hd, icons, anim, shelf: shelfIdx });
-  w.__module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html; a tools script writes window.__module here and window.__atlas to
-// public/img/ui3d.webp, lossless): the interface atlas's index. Every interface icon is a detailed 3D model rendered and
-// finished as pixel art with a crisp near-black outline, drawn at 32 art px ("big"), at 20 art px ("small") and at 44 art
-// px ("hd"). { atlas, big / small / hd: [art px, cells per row, y of the first row], icons: { name: cell }, anim: { name:
-// [cells] }, shelf: the main buttons' sprites { box: [w, h, how far above the nav], sprites: { name: [atlas x, y, w, h, x,
-// y in the box] }, dial: [x, y, radius], lamp: [x, y] of the moon, objects: { id: centre x } } }. Models: the game's own
+  // the shelf's atlas: its sprites packed in rows (tallest first), 2 px apart
+  const SW = 2048, sprites: Record<string, [number, number, number, number, number, number]> = {};
+  let px = 0, py = 0, rowH = 0;
+  for (const sp of [...(sh?.sprites ?? [])].sort((a, b) => b.art.h - a.art.h)) {
+    if (px + sp.art.w > SW) { px = 0; py += rowH + 2; rowH = 0; }
+    sprites[sp.name] = [px, py, sp.art.w, sp.art.h, sp.x, sp.y];
+    px += sp.art.w + 2; rowH = Math.max(rowH, sp.art.h);
+  }
+  const shelfAtlas = document.createElement('canvas');
+  shelfAtlas.width = SW; shelfAtlas.height = Math.max(1, py + rowH);
+  const sg = shelfAtlas.getContext('2d')!;
+  for (const sp of sh?.sprites ?? []) { const r = sprites[sp.name]; sg.putImageData(new ImageData(new Uint8ClampedArray(sp.art.d), sp.art.w, sp.art.h), r[0], r[1]); }
+  const shelfIdx = { atlas: 'img/ui3d-shelf.webp', res: SHELF_RES, box: [SHELF_BOX.w, SHELF_BOX.h, SHELF_BOX.top], sprites, dial: sh?.dial.map((v) => +v.toFixed(2)) ?? [0, 0, 0], lamp: sh?.lampAt.map((v) => +v.toFixed(1)) ?? [0, 0], objects: Object.fromEntries(Object.entries(SHELF_OBJ).map(([k, v]) => [k, v.cx])) };
+  const json = JSON.stringify({ atlas: 'img/ui3d.webp', hd: grids.hd, icons, anim, shelf: shelfIdx });
+  w.__module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html; a tools script writes window.__module here, window.__atlas to
+// public/img/ui3d.webp and window.__shelfAtlas to public/img/ui3d-shelf.webp): the interface atlases' index. Every
+// interface icon is a detailed 3D model rendered realistically with its real textures at 256 px ("hd"). { atlas, hd: [px,
+// cells per row, y of the first row], icons: { name: cell }, anim: { name: [cells] }, shelf: the main buttons' sprites { atlas, res: px per
+// art px, box: [w, h, how far above the nav] in art px, sprites: { name: [atlas x, y, w, h (atlas px), x, y in the box
+// (art px)] }, dial: [x, y, radius], lamp: [x, y] of the flame, objects: { id: centre x } } }. Models: the game's own
 // GLBs, the shelf's props (src/ui/chrome/props3d.ts) and models made in the bake; credits in docs/credits.
-export interface ShelfIndex { box: [number, number, number]; sprites: Record<string, [number, number, number, number, number, number]>; dial: [number, number, number]; lamp: [number, number]; objects: Record<string, number> }
-export const ICONS3D: { atlas: string; big: [number, number, number]; small: [number, number, number]; hd: [number, number, number]; icons: Record<string, number>; anim: Record<string, number[]>; shelf: ShelfIndex } = ${json};
+export interface ShelfIndex { atlas: string; res: number; box: [number, number, number]; sprites: Record<string, [number, number, number, number, number, number]>; dial: [number, number, number]; lamp: [number, number]; objects: Record<string, number> }
+export const ICONS3D: { atlas: string; hd: [number, number, number]; icons: Record<string, number>; anim: Record<string, number[]>; shelf: ShelfIndex } = ${json};
 `;
   w.__atlas = atlas.toDataURL('image/png');
+  w.__shelfAtlas = shelfAtlas.toDataURL('image/png');
   w.__done = true;
 }
 void bake();
