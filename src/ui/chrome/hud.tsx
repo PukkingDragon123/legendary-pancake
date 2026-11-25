@@ -187,7 +187,7 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
           <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}
         </span>
-        <span class="hh-num"><Odometer value={p.value} /></span>
+        <span class={'hh-num' + (p.value >= 100000 ? ' huge' : p.value >= 10000 ? ' long' : '')}><Odometer value={p.value} /></span>
         <button class="hh-plus" style={{ '--plus': bg(plusButton(14, k, 1)), '--plus-dn': bg(plusButton(14, k, 1, true)) } as Record<string, string>} onClick={shop} aria-label={`Get more ${label.toLowerCase()} in the shop`}><span /></button>
       </div>
       {p.children}

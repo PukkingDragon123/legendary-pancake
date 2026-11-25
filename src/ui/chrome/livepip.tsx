@@ -283,7 +283,8 @@ export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; li
   useEffect(() => { if (p.pokeKey) { cam?.poke(); setTapped((n) => n + 1); } }, [p.pokeKey]);
   const night = p.night ?? frameSkyOf(p.frame) === 'night';
   const S = p.size, open = (FRAME_OPEN / FRAME_D) * S, inset = (S - open * 2) / 2 - 0.5;
-  const art = Math.max(24, Math.round(S / 1.33));
+  // a few art sizes (each frame is painted once per size): about 1.3 to 1.5 CSS px per art pixel
+  const art = S <= 72 ? 48 : S <= 90 ? 60 : S <= 110 ? 76 : 92;
   const tap = p.tappable ? (e: MouseEvent) => { e.stopPropagation(); cam?.poke(); setTapped((n) => n + 1); } : undefined;
   const box = { left: `${inset}px`, top: `${inset}px`, width: `${S - inset * 2}px`, height: `${S - inset * 2}px` };
   return (

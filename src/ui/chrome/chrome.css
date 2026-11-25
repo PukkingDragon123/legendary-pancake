@@ -59,6 +59,8 @@
 .hh-cur-ico.gem.bump > img { animation: hhCoinBump 0.32s steps(4); }
 @keyframes hhCoinBump { 0% { transform: scale(1); } 30% { transform: scale(1.35, 0.8) translateY(2px); } 60% { transform: scale(0.88, 1.2) translateY(-3px); } 100% { transform: scale(1); } }
 .hh-num { position: absolute; left: 28px; right: 34px; top: 1px; bottom: 1px; display: flex; align-items: center; justify-content: flex-end; font-family: var(--font-display); font-size: 22px; color: #fff4dc; text-shadow: 2px 2px 0 #2a1209, -1px 0 0 #2a1209, 0 -1px 0 #2a1209, 1px 0 0 #2a1209; }
+.hh-num.long { font-size: 19px; } /* [ui5] five digits stay clear of the acorn bag */
+.hh-num.huge { font-size: 16px; }
 .hh-plus { position: absolute; right: 5px; top: 6px; width: 28px; height: 28px; background: var(--plus) no-repeat center / 28px 28px; image-rendering: pixelated; filter: drop-shadow(1px 2px 0 rgba(26, 14, 8, 0.5)); transition: transform 0.25s var(--pop); }
 .hh-plus:hover { transform: rotate(90deg) scale(1.08); }
 .hh-plus:active { background-image: var(--plus-dn); transform: translateY(1px) scale(0.96); filter: none; }
