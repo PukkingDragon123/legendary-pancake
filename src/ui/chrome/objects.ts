@@ -1,879 +1,488 @@
-// The v4 interface objects, modelled and lit with the relief painter (src/ui/px/relief.ts): the three big
-// main buttons (a moon lamp, a brass twin-bell alarm clock, a leather journal), the walnut shelf they stand
-// on with its brass name plates, the hanging name sign with Pip's brass-bezelled portrait, the currency
-// boards, the side tool tiles, the bedtime card clip, and small brass parts. Everything is painted once per
-// size and cached as a data URL; one design unit = 2 CSS px (k = 1), or twice the detail with k = 2.
-// OWNED BY THE UI BUILDER (ui4).
+// [ui7] The HUD's and screens' physical objects, painted by the realistic material painter (src/ui/real/paint.ts)
+// at device resolution: varnished walnut and oak sign boards with brass brackets, eye-hooks and screws, enamel
+// medallions and push buttons in brass rims, engraved brass name plates, the walnut shelf, the felt-lined side
+// tool tiles, a hemp rope and a brass chain (tiling), soft contact shadows, a bulldog clip and a clipboard clip,
+// a damask wallpaper tile; the nightstand props (a beeswax candle in a brass chamberstick, a stoneware mug with
+// steam, a phone), the burlap gift sack; and the 2D stand-ins of the three main objects (moon lamp, twin-bell
+// alarm clock, leather journal) shown only when the live 3D shelf can't run.
+//
+// Sizes are CSS px; `zoom` is how much larger the HUD is drawn on big screens (1 phones, 1.5 desktops).
 import {
-  all, and, clamp, disc, dome, ell, fbm, flat, hash, hex, leatherGrain, MAT, metal, mix, mul, not, or, PAL, paperGrain, poly, puff, rampAt, rect, Relief,
-  ring, roundRect, rrect, seg, slab, smooth, solid, torus, tubeX, tubeY, vnoise, weave, woodGrain, type AFn, type Mat, type RGB, type Shape, bayer,
-} from '../px/relief.ts';
+  BRASS_OLD, COPPER, GOLD, IRON, Real, SILVER, bevel, box, cached, chamfer, circle, clamp, cloth, deviceK, dome, ellipse, enamel, fbm, glass, glow, hex,
+  inter, leather, matte, metal, mix, paperMat, pillow, polygon, rim, ring, segment, smoothstep, subtract, toURL, tubeX, tubeY, union, vnoise, warp, wood,
+  type Material, type RGB, type SDF, type WoodName,
+} from '../real/paint.ts';
 
-const urls = new Map<string, string>();
-/** paint once per key */
-export function cachedRelief(key: string, make: () => string): string {
-  let u = urls.get(key);
-  if (u === undefined) {
-    try { u = typeof document === 'undefined' ? '' : make(); } catch (e) { console.warn('relief failed', key, e); u = ''; }
-    urls.set(key, u);
-  }
-  return u;
-}
+/** paint once per key (and device scale) */
+export const cachedRelief = (key: string, make: () => string) => cached(key, make);
 
-// ------------------------------------------------------------------ a tiny pixel font for engraved numerals
-const GLYPH: Record<string, string[]> = {
-  '0': ['111', '101', '101', '101', '111'], '1': ['010', '110', '010', '010', '111'], '2': ['111', '001', '111', '100', '111'],
-  '3': ['111', '001', '011', '001', '111'], '4': ['101', '101', '111', '001', '001'], '5': ['111', '100', '111', '001', '111'],
-  '6': ['111', '100', '111', '101', '111'], '7': ['111', '001', '010', '010', '010'], '8': ['111', '101', '111', '101', '111'],
-  '9': ['111', '101', '111', '001', '111'], I: ['1', '1', '1', '1', '1'], V: ['101', '101', '101', '101', '010'], X: ['101', '101', '010', '101', '101'],
+export type PalRamp = 'walnut' | 'oak' | 'cherry' | 'brass' | 'copper' | 'iron' | 'leather' | 'tan' | 'emerald' | 'moss' | 'sapphire' | 'sky' | 'rose' | 'plum' | 'linen' | 'paper' | 'enamel' | 'gold';
+const HUES: Record<PalRamp, string> = {
+  walnut: '#5a3418', oak: '#b07a3c', cherry: '#7a2e18', brass: '#c8962e', copper: '#c06a3a', iron: '#5a5e66', leather: '#7a2a24', tan: '#a8703a',
+  emerald: '#2c6b43', moss: '#4f6e2a', sapphire: '#2b4b86', sky: '#3d8fc4', rose: '#a8404c', plum: '#5e2d6e', linen: '#d8c8a4', paper: '#efe2c4', enamel: '#efe8d8', gold: '#e0b04a',
 };
-/** a text shape: glyphs `g` art-units per glyph pixel, top-left at (x, y) */
-export function textShape(t: string, x: number, y: number, g = 1): Shape {
-  const cells: [number, number][] = [];
-  let cx = x;
-  for (const ch of t) {
-    const gl = GLYPH[ch];
-    if (!gl) { cx += 2 * g; continue; }
-    gl.forEach((row, j) => [...row].forEach((c, i) => { if (c === '1') cells.push([cx + i * g, y + j * g]); }));
-    cx += (gl[0].length + 1) * g;
-  }
-  return (px, py) => cells.some(([a, b]) => px >= a && px < a + g && py >= b && py < b + g);
-}
-export const textWidth = (t: string, g = 1) => [...t].reduce((w, ch) => w + ((GLYPH[ch]?.[0].length ?? 1) + 1) * g, 0) - g;
+export const hueRGB = (h: PalRamp): RGB => hex(HUES[h]);
 
-/** the names of the palette's ramps */
-export type PalRamp = Exclude<keyof typeof PAL, 'ink'>;
-const B = PAL.brass;
-const brass = (o: Parameters<typeof metal>[1] = {}) => metal(B, { base: 0.6, ...o });
-const gold = (base = 0.62) => metal(PAL.gold, { base });
-
-// ------------------------------------------------------------------ the moon lamp (Sleep)
-
-/**
- * A night-light: a glass globe on a brass foot, a glowing crescent moon and stars inside, a brass cap with
- * a ring. `glow` 0..1 breathes the light; `lit` 0 shows it switched off (the press).
- */
-export function moonLamp(k = 1, res = 2, glow = 0.6, lit = 1): string {
-  return cachedRelief(`lamp:${k}:${res}:${glow.toFixed(2)}:${lit}`, () => {
-    const W = 52, H = 54, r = new Relief(W, H, res, k);
-    const cx = 26, gy = 25, GR = 15.5;
-    // ---- foot: a stepped brass plinth, a collar, a ring
-    r.fill(ell(cx, 48.5, 15, 4), dome(cx, 48.5, 15, 4, 2.2), brass({ brush: 'x', base: 0.55, patina: 0.3 }), MAT.brass, { id: 1, seam: true });
-    r.fill(and(ell(cx, 46.5, 11.5, 3), (x, y) => y < 47.5), dome(cx, 46.5, 11.5, 3, 2.4, 2), brass({ brush: 'x', base: 0.62 }), MAT.brass, { id: 2, seam: true });
-    r.fill(rect(cx - 6.5, 38.5, 13, 8), tubeY(cx, 6.5, 3), brass({ brush: 'y', base: 0.6 }), MAT.brass, { id: 3, seam: true });
-    r.carve(or(rect(cx - 6.5, 41, 13, 1), rect(cx - 6.5, 44, 13, 1)), () => -1.6); // turned rings
-    r.fill(ell(cx, 38.6, 8.5, 2.4), dome(cx, 38.6, 8.5, 2.4, 2, 5), brass({ base: 0.66 }), MAT.brass, { id: 4, seam: true });
-    // ---- the globe: night sky glass, a crescent moon, stars
-    const moonC = [cx - 2.5, gy + 1], moonR = 7.4, bite = [cx + 1.8, gy - 1.6], biteR = 6.2;
-    const night: AFn = (x, y, mx, my) => {
-      const dx = x - cx, dy = y - gy, d = Math.hypot(dx, dy) / GR;
-      const inMoon = Math.hypot(mx - moonC[0], my - moonC[1]) < moonR && Math.hypot(mx - bite[0], my - bite[1]) > biteR;
-      const g = glow * lit;
-      if (inMoon) {
-        // a lit crescent: warm cream with a few soft craters, brighter on the outer limb
-        const lim = Math.hypot(mx - moonC[0], my - moonC[1]) / moonR;
-        const crater = vnoise(mx * 0.9, my * 0.9, 41) > 0.7 ? -0.12 : 0;
-        const v = clamp(0.55 + lim * 0.35 + crater + g * 0.12 - (1 - lit) * 0.45);
-        return rampAt([hex('#6a5a3c'), hex('#c9a95e'), hex('#f2d98c'), hex('#fff2c4'), hex('#fffbea')], v);
-      }
-      // stars: a few bright crosses
-      for (const [sx, sy, sz] of [[cx + 7.5, gy - 7, 1], [cx + 9.5, gy + 4, 0], [cx - 9, gy - 6, 0], [cx + 3, gy + 9.5, 0], [cx - 6.5, gy + 8, 0], [cx + 1, gy - 11, 0]] as [number, number, number][]) {
-        const ax = Math.abs(mx - sx), ay = Math.abs(my - sy);
-        if ((ax < 0.5 && ay < 0.5) || (sz && ((ax < 0.5 && ay < 1.5) || (ay < 0.5 && ax < 1.5)))) return lit ? hex('#fff6d2') : hex('#7d86a8');
-      }
-      // the glow around the moon, then the deep night toward the glass edge
-      const md = Math.hypot(mx - moonC[0] - 1, my - moonC[1]) / GR;
-      const halo = Math.max(0, 1 - md * 1.25) * (0.45 + g * 0.55) * lit;
-      const sky = rampAt(PAL.sapphire, clamp(0.62 - d * 0.42 + (dy / GR) * 0.1 + halo * 0.45 + (fbm(mx * 0.12, my * 0.12, 9) - 0.5) * 0.14 - (1 - lit) * 0.25));
-      // [ui4] a night nebula drifts inside the glass: violet and teal veils, hue-shifted, never a flat fill
-      const neb = fbm(mx * 0.16 + 3, my * 0.2, 31, 3), veil = fbm(mx * 0.1, my * 0.14 + 7, 33, 2);
-      let warm = mix(sky, hex('#f6d995'), halo * halo * 0.55);
-      if (neb > 0.56) warm = mix(warm, hex('#7a4aa8'), Math.min(0.45, (neb - 0.56) * 2.2) * lit);
-      if (veil > 0.6) warm = mix(warm, hex('#2a8a9a'), Math.min(0.35, (veil - 0.6) * 2) * lit);
-      // tiny seed bubbles caught in the blown glass
-      if (hash(Math.floor(mx * 2), Math.floor(my * 2), 51) > 0.993) warm = mix(warm, hex('#dff2ff'), 0.6);
-      // the glass edge: a thin darker refracting band, then a pale rim
-      if (d > 0.9) return mix(warm, hex('#120a30'), (d - 0.9) * 5);
-      return warm;
-    };
-    r.fill(disc(cx, gy, GR), (x, y) => 5 + 9 * Math.sqrt(Math.max(0, 1 - ((x - cx) ** 2 + (y - gy) ** 2) / (GR * GR))), night, { spec: 0, shin: 1, emit: 1 }, { id: 5 });
-    // ---- cap: a brass dome, a knob and a ring handle
-    r.fill(and(ell(cx, 10.5, 7.5, 3.6), (_x, y) => y < 11.6), dome(cx, 10.5, 7.5, 3.6, 3, 10), brass({ base: 0.64 }), MAT.brass, { id: 6, seam: true });
-    r.fill(rect(cx - 7.5, 10.4, 15, 1.4), flat(11), brass({ base: 0.5 }), MAT.brass, { id: 6 });
-    r.fill(disc(cx, 6.2, 1.8), dome(cx, 6.2, 1.8, 1.8, 1.6, 12), brass({ base: 0.7 }), MAT.brass, { id: 7, seam: true });
-    r.fill(ring(cx, 2.6, 1.6, 2.7), torus(cx, 2.6, 2.15, 0.6, 1, 11), brass({ base: 0.6 }), MAT.brass, { id: 8 });
-    const c = r.canvas();
-    const g = c.getContext('2d')!;
-    // glass: the window reflection (a curved streak top-left), a small hot glint, a rim light bottom-right
-    const put = (x: number, y: number, col: string, a = 1) => { g.globalAlpha = a; g.fillStyle = col; g.fillRect(Math.floor(x * k) * res, Math.floor(y * k) * res, res, res); };
-    for (let a = 0; a < 1; a += 0.02 / k) {
-      const an = Math.PI * (1.08 + a * 0.38), rr = GR - 2.6;
-      put(cx + Math.cos(an) * rr, gy + Math.sin(an) * rr, '#f4fbff', a < 0.15 || a > 0.85 ? 0.45 : 0.85);
-    }
-    for (let a = 0; a < 1; a += 0.03 / k) { const an = Math.PI * (0.12 + a * 0.3), rr = GR - 1.4; put(cx + Math.cos(an) * rr, gy + Math.sin(an) * rr, '#9fc4ff', 0.5); }
-    put(cx - 8, gy - 9, '#ffffff'); put(cx - 7, gy - 10, '#ffffff', 0.8);
-    g.globalAlpha = 1;
-    return c.toDataURL('image/png');
-  });
-}
-
-/** The halo of moonlight behind the lamp: stepped pixel rings, fading outward (drawn behind it, breathing). */
-export function lampHalo(k = 1, res = 2, strength = 1): string {
-  return cachedRelief(`halo:${k}:${res}:${strength}`, () => {
-    const W = 52 * k * res, H = 54 * k * res, c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    const g = c.getContext('2d')!, img = g.createImageData(W, H), d = img.data;
-    const cx = 26 * k, cy = 25 * k;
-    const RINGS: [number, number, number[]][] = [[17.2, 0.42, [255, 236, 170]], [19.4, 0.26, [250, 220, 150]], [21.8, 0.14, [240, 206, 140]], [24.4, 0.07, [220, 196, 150]]];
-    for (let ay = 0; ay < 54 * k; ay++) for (let ax = 0; ax < 52 * k; ax++) {
-      const dd = Math.hypot(ax + 0.5 - cx, ay + 0.5 - cy) / k;
-      if (dd < 15) continue;
-      const ring = RINGS.find(([r]) => dd < r);
-      if (!ring) continue;
-      const a = Math.round(ring[1] * 255 * strength);
-      for (let ty = 0; ty < res; ty++) for (let tx = 0; tx < res; tx++) {
-        const j = ((ay * res + ty) * W + ax * res + tx) * 4;
-        d[j] = ring[2][0]; d[j + 1] = ring[2][1]; d[j + 2] = ring[2][2]; d[j + 3] = a;
-      }
-    }
-    g.putImageData(img, 0, 0);
-    return c.toDataURL('image/png');
-  });
-}
-
-// ------------------------------------------------------------------ the alarm clock (Clock)
-
-export const ALARM = { W: 52, H: 54, cx: 26, cy: 30, dial: 12.6 };
-/**
- * A brass twin-bell alarm clock with an enamel dial (its hands are drawn live on top, see alarmHands).
- * `ring` 0..2 tips the bells and hammer for the ringing frames.
- */
-export function alarmClock(k = 1, res = 2, ringF = 0): string {
-  return cachedRelief(`alarm:${k}:${res}:${ringF}`, () => {
-    const { W, H, cx, cy, dial } = ALARM, r = new Relief(W, H, res, k);
-    const sh = ringF === 1 ? -1 : ringF === 2 ? 1 : 0;
-    // ---- legs and ball feet
-    for (const sd of [-1, 1]) {
-      r.fill(seg(cx + sd * 9, cy + 12, cx + sd * 13.5, cy + 19.5, 1.5), (x) => 2 + 1.5 * Math.cos(clamp((x - (cx + sd * 11)) / 3) * 1.5), brass({ base: 0.55 }), MAT.brass, { id: 10, seam: true });
-      r.fill(disc(cx + sd * 14, cy + 20.6, 2.4), dome(cx + sd * 14, cy + 20.6, 2.4, 2.4, 2.4), brass({ base: 0.6 }), MAT.brass, { id: 11, seam: true });
-    }
-    // ---- bells: two domes tipped outward, with a rolled lip and a little stud on top
-    for (const sd of [-1, 1]) {
-      const bx = cx + sd * 12.5 + sh * 0.6, by = cy - 17.5, tilt = sd * 0.42 + sh * 0.12;
-      const ca = Math.cos(tilt), sa = Math.sin(tilt);
-      const loc = (x: number, y: number) => [(x - bx) * ca + (y - by) * sa, -(x - bx) * sa + (y - by) * ca];
-      const bell: Shape = (x, y) => { const [u, v] = loc(x, y); return v <= 2.2 && (u / 8) ** 2 + ((v - 2.2) / 8.4) ** 2 <= 1; };
-      r.fill(bell, (x, y) => { const [u, v] = loc(x, y); return 3 + 6 * Math.sqrt(Math.max(0, 1 - (u / 8) ** 2 - ((v - 2.2) / 8.4) ** 2)) + (v > 0.8 ? 0.8 : 0); }, brass({ base: 0.66, brush: 'r', cx: bx, cy: by + 2 }), MAT.brass, { id: 12 + (sd > 0 ? 1 : 0), seam: true });
-      r.carve(bell, (x, y) => (vnoise(x * 1.25 + sd * 7, y * 1.25, 61) - 0.5) * 1.1); // hammered by hand: soft dimples
-      const [sx, sy] = [bx + sa * 7.6, by - ca * 7.6];
-      r.fill(disc(sx, sy, 1.5), dome(sx, sy, 1.5, 1.5, 1.5, 8), brass({ base: 0.7 }), MAT.brass, { id: 14, seam: true });
-    }
-    // ---- the hammer between the bells
-    const hx = cx + sh * 2.2;
-    r.fill(seg(cx, cy - 15, hx, cy - 22.5, 0.9), flat(6), metal(PAL.iron, { base: 0.6 }), MAT.iron, { id: 15, seam: true });
-    r.fill(ell(hx, cy - 23.3, 2.6, 1.7), dome(hx, cy - 23.3, 2.6, 1.7, 2, 6), brass({ base: 0.72 }), MAT.brass, { id: 16, seam: true });
-    // ---- the case: a deep brass drum (its side shows below-right), a rolled bezel, the enamel dial
-    r.fill(disc(cx + 0.9, cy + 1.1, 17), dome(cx + 0.9, cy + 1.1, 17, 17, 3), brass({ base: 0.42, brush: 'x' }), MAT.brass, { id: 20, seam: true });
-    r.fill(disc(cx, cy, 16.6), (x, y) => 4 + 1.5 * Math.sqrt(Math.max(0, 1 - ((x - cx) ** 2 + (y - cy) ** 2) / 280)), brass({ base: 0.6, brush: 'r', cx, cy }), MAT.brass, { id: 21, seam: true });
-    r.fill(ring(cx, cy, dial + 0.2, 16.4), torus(cx, cy, 14.6, 2.1, 2.6, 5), brass({ base: 0.68, brush: 'r', cx, cy }), MAT.brass, { id: 22 });
-    r.fill(disc(cx, cy, dial + 0.3), (x, y) => 5.2 - 0.6 * (((x - cx) ** 2 + (y - cy) ** 2) / (dial * dial)), (x, y, mx, my) => {
-      const d = Math.hypot(mx - cx, my - cy) / dial;
-      let c = rampAt(PAL.enamel, 0.78 - d * 0.18 + (vnoise(mx * 0.7, my * 0.7, 3) - 0.5) * 0.05);
-      c = mix(c, hex('#e8cc8a'), clamp((d - 0.55) * 0.7) * 0.5);
-      if (Math.abs(fbm(mx * 0.5, my * 0.5, 13) - 0.5) < 0.012) c = mul(c, 0.84); // crazing in the old enamel
-      return d > 0.93 ? mul(c, 0.86) : c;
-    }, MAT.enamel, { id: 23, seam: true });
-    // ---- dial printing: a minute track, bold hour bars, numerals at the quarters, a sky-blue moon
-    const ink = hex('#22180f');
-    for (let i = 0; i < 60; i++) {
-      const an = (i / 60) * Math.PI * 2, major = i % 5 === 0;
-      const r0 = dial - (major ? 2.4 : 1.4), r1 = dial - 0.6;
-      if (k < 2 && !major) continue; // [ui5] chunky: hour bars only
-      r.paint(seg(cx + Math.sin(an) * r0, cy - Math.cos(an) * r0, cx + Math.sin(an) * r1, cy - Math.cos(an) * r1, major ? 0.5 : 0.28), solid(ink));
-    }
-    // numerals: the quarters when chunky, all twelve (one art pixel per glyph pixel) when detailed
-    const g = k === 1 ? 1 : 1 / k;
-    const nums: [string, number][] = k < 2 ? [['12', 0], ['3', 3], ['6', 6], ['9', 9]] : Array.from({ length: 12 }, (_, i) => [String(i || 12), i] as [string, number]);
-    for (const [n, hh] of nums) {
-      const a = (hh / 12) * Math.PI * 2, rr = dial - (k === 1 ? 5.4 : k < 2 ? 4.4 : 4.6), tw = textWidth(n, g);
-      r.paint(textShape(n, Math.round((cx + Math.sin(a) * rr - tw / 2) * k) / k, Math.round((cy - Math.cos(a) * rr - 2.5 * g) * k) / k, g), solid(ink));
-    }
-    // a sky-blue enamel crescent and a maker's line under the 12
-    r.paint(and(disc(cx - 0.4, cy - 4.4, 1.9), not(disc(cx + 0.6, cy - 5, 1.6))), solid(hex('#2a70a3')));
-    if (k > 1) r.paint(rect(cx - 2, cy + 3.4, 4, 0.5), solid(hex('#8a7a62')));
-    const c = r.canvas();
-    return c.toDataURL('image/png');
-  });
-}
-
-/** Draw the alarm clock's hands (hour, minute, a red seconds hand) and the glass glint onto a canvas. */
-export function alarmHands(g: CanvasRenderingContext2D, k: number, res: number, d: Date, wake?: number) {
-  const { cx, cy } = ALARM;
-  const px = (x: number, y: number, c: string) => { g.fillStyle = c; g.fillRect(Math.floor(x * k) * res, Math.floor(y * k) * res, res, res); };
-  const line = (a: number, r0: number, r1: number, c: string, wide = 0) => {
-    const n = Math.ceil((r1 - r0) * k * 1.5) + 1;
-    for (let i = 0; i <= n; i++) {
-      const t = r0 + ((r1 - r0) * i) / n, x = cx + Math.sin(a) * t, y = cy - Math.cos(a) * t;
-      px(x, y, c);
-      if (wide && t < r1 - 1) px(x + Math.cos(a) / k, y + Math.sin(a) / k, c);
-    }
-  };
-  const m = d.getMinutes() + d.getSeconds() / 60, h = (d.getHours() % 12) + m / 60;
-  const ha = (h / 12) * Math.PI * 2, ma = (m / 60) * Math.PI * 2, sa = (d.getSeconds() / 60) * Math.PI * 2;
-  // the gold alarm hand points at the wake time, under the others
-  if (wake !== undefined) { const wa = ((wake / 60) % 12) / 12 * Math.PI * 2; line(wa, 0, 8.6, '#d4a432'); px(cx + Math.sin(wa) * 8.9, cy - Math.cos(wa) * 8.9, '#b88524'); }
-  // a soft shadow under the hands, then blued-steel hands
-  line(ha, 0, 7, 'rgba(60,40,20,0.35)'); line(ma, 0, 10.5, 'rgba(60,40,20,0.3)');
-  g.save(); g.translate(-res, -res);
-  line(ha, -1, 7.5, '#1d2738', 1);
-  line(ma, -1.5, 10.8, '#1d2738', k > 1 ? 1 : 0);
-  line(sa, -2.5, 11, '#c0362c');
-  px(cx, cy, '#f6dc7f'); if (k > 1) { px(cx - 0.5, cy, '#b88524'); px(cx, cy - 0.5, '#fff1bd'); }
-  g.restore();
-  // the domed glass: a curved window reflection top-left and a hot glint
-  g.globalAlpha = 0.55;
-  for (let a = 0; a < 1; a += 0.025 / k) { const an = Math.PI * (1.1 + a * 0.32), rr = ALARM.dial - 2.2; px(cx + Math.cos(an) * rr, cy + Math.sin(an) * rr, '#ffffff'); }
-  g.globalAlpha = 1;
-  px(cx - 6.5, cy - 8.2, '#ffffff');
-}
-
-// ------------------------------------------------------------------ the leather journal (Book)
-
-/**
- * An oxblood leather journal with gilt tooling, brass corners, a strap and clasp and a ribbon marker.
- * `open` 0..1 swings the front cover toward you on its spine (0 shut, 1 lying open to the left).
- */
-export function journal(k = 1, res = 2, open = 0): string {
-  return cachedRelief(`journal:${k}:${res}:${open.toFixed(2)}`, () => {
-    const W = 52, H = 54, r = new Relief(W, H, res, k);
-    // the cover faces you; the book's depth runs up and to the right (you look down on it a little), so the
-    // gilt page block shows along the head and the fore-edge, and the back board peeks out behind
-    const x0 = 9, y0 = 14, bw = 31, bh = 38, depth = 5;
-    r.fill(poly([[x0 + 1, y0], [x0 + depth + 1, y0 - depth], [x0 + bw + depth, y0 - depth], [x0 + bw + depth, y0 + bh - depth], [x0 + bw, y0 + bh], [x0 + 1, y0 + bh]]), flat(2), leatherGrain(PAL.leather, { base: 0.3 }), MAT.leather, { id: 1 });
-    const head = poly([[x0 + 1.4, y0], [x0 + depth + 0.8, y0 - depth + 0.8], [x0 + bw + depth - 0.8, y0 - depth + 0.8], [x0 + bw, y0]]);
-    const fore = poly([[x0 + bw, y0], [x0 + bw + depth - 0.8, y0 - depth + 0.8], [x0 + bw + depth - 0.8, y0 + bh - depth - 0.6], [x0 + bw, y0 + bh - 0.6]]);
-    r.fill(or(head, fore), flat(3), (_x, _y, mx, my) => {
-      // gilt-edged pages: fine lines running along the head and down the fore-edge
-      const onFore = mx > x0 + bw;
-      const along = onFore ? mx - (my - y0) * 0 : my;
-      const line = Math.floor((onFore ? along : my) * 2 * k) % 2 === 0;
-      return mix(rampAt(PAL.paper, line ? 0.74 : 0.56), hex('#e0b240'), onFore ? 0.34 : 0.18);
-    }, MAT.paper, { id: 2, seam: true });
-    // the ribbon marker hangs out of the head and down the fore-edge
-    r.fill(poly([[x0 + bw - 4, y0 - 2.4], [x0 + bw - 1.6, y0 - 3], [x0 + bw + 2.2, y0 + 6], [x0 + bw + 2.6, y0 + 15], [x0 + bw + 1.4, y0 + 13.6], [x0 + bw + 0.2, y0 + 15.4], [x0 + bw + 0.4, y0 + 6.5]]), (x, y) => 4.2 + Math.sin(y * 0.7) * 0.3, weave(PAL.emerald, { base: 0.6 }), MAT.velvet, { id: 3, seam: true });
-    // ---- the front cover, swinging open on its spine
-    const ca = Math.cos(open * Math.PI);
-    const span = bw * Math.abs(ca);
-    const coverX0 = ca >= 0 ? x0 : x0 - span, inside = ca < 0;
-    if (open > 0.02) {
-      // the first page shows behind the opening cover
-      r.fill(rect(x0 + 1, y0 + 1, bw - 1, bh - 1), flat(4), (x, y, mx, my) => {
-        const c = rampAt(PAL.paper, 0.78 + (vnoise(mx * 0.5, my * 0.5, 2) - 0.5) * 0.06);
-        if (Math.floor((my - y0 - 6) * k) % (4 * k) === 0 && my > y0 + 6 && my < y0 + bh - 4 && mx > x0 + 5 && mx < x0 + bw - 3) return mix(c, hex('#6a8fb8'), 0.45);
-        if (mx > x0 + 4 && mx < x0 + 4 + 1 / k) return mix(c, hex('#c0503c'), 0.5);
-        return c;
-      }, MAT.paper, { id: 4, seam: true });
-    }
-    if (span > 0.6) {
-      const cover = roundRect(coverX0, y0, span, bh, ca >= 0 ? 1.2 : 0.6);
-      const ccol: AFn = inside
-        ? (x, y, mx, my) => (mx > coverX0 + 2 && mx < coverX0 + span - 2 && my > y0 + 2 && my < y0 + bh - 2
-          ? rampAt([hex('#1c3168'), hex('#33579e'), hex('#c8a24a'), hex('#e9d6a4')], clamp(fbm(mx * 0.3, my * 0.12, 5) * 1.25 - 0.1)) // marbled endpaper
-          : leatherGrain(PAL.leather, { base: 0.45 })(x, y, mx, my))
-        : leatherGrain(PAL.leather, { base: 0.58, seed: 7 });
-      r.fill(cover, (x, y) => {
-        const u = (x - coverX0) / Math.max(1, span);
-        return 6 + (inside ? 0 : 1.6 * Math.sqrt(clamp(Math.min(u * span, (1 - u) * span, y - y0, y0 + bh - y) / 2.2))) + (ca >= 0 ? (1 - ca) * (1 - u) * 6 : 0);
-      }, ccol, MAT.leather, { id: 5, seam: true });
-      if (!inside) {
-        const sx = (v: number) => coverX0 + (v - x0) * (span / bw);
-        // gilt tooling: a double fillet border and a moon-and-stars centrepiece
-        const fil = (o: number) => and(rect(sx(x0 + o), y0 + o, (bw - 2 * o) * span / bw, bh - 2 * o), not(rect(sx(x0 + o + 0.6), y0 + o + 0.6, (bw - 2 * o - 1.2) * span / bw, bh - 2 * o - 1.2)));
-        if (span > 10) {
-          r.paint(or(fil(3.2), fil(4.8)), gold(0.6), MAT.brass);
-          r.carve(or(fil(3.2), fil(4.8)), () => -0.5);
-          const mcx = sx(x0 + bw / 2), mcy = y0 + bh / 2 - 1, sq = span / bw;
-          const moon: Shape = (x, y) => (((x - mcx) / sq) ** 2 + (y - mcy) ** 2 < 36) && (((x - mcx - 2.6 * sq) / sq) ** 2 + (y - mcy + 1.8) ** 2 > 26);
-          r.paint(moon, gold(0.66), MAT.brass); r.carve(moon, () => 0.8);
-          for (const [dx, dy] of [[5, -6], [7, 2], [-1, 8]]) { const s = and(rect(mcx + dx * sq - 0.6, mcy + dy - 0.6, 1.4, 1.4)); r.paint(s, gold(0.75), MAT.brass); r.carve(s, () => 0.6); }
-        }
-        // the spine's raised bands
-        const spine = rect(coverX0, y0, Math.min(span, 4.2), bh);
-        r.carve(and(spine, (_x, y) => [5, 11, 27, 33].some((b) => Math.abs(y - (y0 + b)) < 0.9)), () => 1.4);
-        r.carve(and(spine, (x) => x > coverX0 + 3.4), () => -1.2);
-        // brass corner protectors
-        for (const [ax, ay, dx, dy] of [[coverX0 + span, y0, -1, 1], [coverX0 + span, y0 + bh, -1, -1]] as [number, number, number, number][]) {
-          const tri = poly([[ax, ay], [ax + dx * 6 * span / bw, ay], [ax, ay + dy * 6]]);
-          r.fill(and(tri, cover), (x, y) => 9 + 0.6 * clamp(Math.abs(x - ax) + Math.abs(y - ay)), brass({ base: 0.62, patina: 0.2 }), MAT.brass, { id: 6, seam: true });
-        }
-        // the strap across the fore-edge and its clasp
-        if (open < 0.08) {
-          r.fill(rect(x0 + bw - 7, y0 + bh / 2 - 2.6, 11.4, 5.2), (_x, y) => 9 + 0.8 * Math.sin(clamp((y - y0 - bh / 2 + 2.6) / 5.2) * Math.PI), leatherGrain(PAL.tan, { base: 0.52 }), MAT.leather, { id: 7, seam: true });
-          r.fill(roundRect(x0 + bw - 6.4, y0 + bh / 2 - 3.4, 5.6, 6.8, 1.4), slab(x0 + bw - 6.4, y0 + bh / 2 - 3.4, 5.6, 6.8, 2, 1.4, 10), brass({ base: 0.66 }), MAT.brass, { id: 8, seam: true });
-          r.carve(disc(x0 + bw - 3.6, y0 + bh / 2, 0.9), () => -1.6);
-        }
-      }
-    }
-    return r.url();
-  });
-}
-
-// ------------------------------------------------------------------ boards, brass and the shelf
-
-const WOOD = { walnut: PAL.walnut, oak: PAL.oak, cherry: PAL.cherry } as const;
-type WoodName = keyof typeof WOOD;
+/** device px per CSS px for a HUD part at `zoom` */
+const kz = (zoom = 1) => Math.min(4, deviceK(3) * zoom);
 
 /** brass screw head with a slot */
-function screw(r: Relief, x: number, y: number, rad = 1.3, ang = 0.6) {
-  r.fill(disc(x, y, rad), dome(x, y, rad, rad, 1.2, 0), brass({ base: 0.62 }), MAT.brass, { id: 90, add: true });
-  const c = Math.cos(ang), s = Math.sin(ang);
-  r.carve(seg(x - c * rad * 0.8, y - s * rad * 0.8, x + c * rad * 0.8, y + s * rad * 0.8, 0.28), () => -1);
+function screw(r: Real, x: number, y: number, rad = 1.8, ang = 0.6, z = 0) {
+  r.part(circle(x, y, rad), dome(x, y, rad, rad, 1.3, z + 0.8), metal(BRASS_OLD, { polish: 0.5 }));
+  const c = Math.cos(ang) * rad * 0.72, s = Math.sin(ang) * rad * 0.72;
+  r.carve(segment(x - c, y - s, x + c, y + s, 0.3), 0.9, 0.3);
 }
 
-export interface BoardOpts { wood?: WoodName; seed?: number; bevel?: number; hooks?: number[]; brackets?: boolean; screws?: [number, number][]; inset?: boolean; moss?: [number, number][]; chamfer?: number }
+// ------------------------------------------------------------------ boards, plates, medallions
+
+export type { WoodName };
+export interface BoardOpts { wood?: WoodName; seed?: number; bevel?: number; hooks?: number[]; brackets?: boolean; screws?: [number, number][]; inset?: boolean; moss?: [number, number][]; chamfer?: number; radius?: number; gilt?: boolean }
 /**
- * A varnished hardwood sign board, w x h units: grain along its length, a rounded bevel catching the light,
- * optional brass corner brackets, screws, eye-hooks for its chains, an inset panel and a cushion of moss.
+ * A varnished hardwood sign board, w x h CSS px: grain along its length, a rounded bevel catching the light,
+ * a gilt bead inset from the edge, optional brass corner brackets, screws, brass eye-hooks for its ropes and
+ * an inset panel. Painted with a 5 px shadow margin: show it at (w + 10) x (h + 10) with a -5 px offset, or
+ * use `boardCSS` / `.hh-board` which already allow for it.
  */
-export function board(w: number, h: number, k = 2, res = 1, o: BoardOpts = {}): string {
-  return cachedRelief(`board:${w}x${h}:${k}:${res}:${JSON.stringify(o)}`, () => {
-    const r = new Relief(w, h, res, k), R = WOOD[o.wood ?? 'walnut'], bev = o.bevel ?? 2.4, ch = o.chamfer ?? 2;
-    const knots: [number, number, number][] = [[w * (0.2 + hash(1, 2, o.seed ?? 1) * 0.6), h * 0.55, 1.1]];
-    const body = rrect(0, 1, w, h - 1, ch);
-    r.fill(body, slab(0, 1, w, h - 1, 5, bev), woodGrain(R, { seed: o.seed ?? 1, base: 0.5, knots }), MAT.varnish, { id: 1 });
+export function board(w: number, h: number, zoom = 1, _res = 1, o: BoardOpts = {}): string {
+  return cached(`board:${w}x${h}:${zoom}:${JSON.stringify(o)}`, () => {
+    const m = 5, r = new Real(w, h, kz(zoom), m), bev = o.bevel ?? 5, R = o.radius ?? 8;
+    const body = box(0, 2, w, h - 2, R);
+    r.part(body, bevel(5, bev), wood(o.wood ?? 'walnut', { along: 'x', oy: (o.seed ?? 1) * 53, ox: (o.seed ?? 1) * 131 }));
+    if (o.gilt !== false) {
+      const g = subtract(box(bev - 0.2, bev + 1.8, w - 2 * bev + 0.4, h - 2 * bev - 1.6, Math.max(2, R - bev + 1)), box(bev + 1.2, bev + 3.2, w - 2 * bev - 2.4, h - 2 * bev - 4.4, Math.max(1.5, R - bev)));
+      r.carve(g, 0.8, 0.5);
+      r.paint(g, metal(GOLD, { polish: 0.75 }), 0.85);
+    }
     if (o.inset) {
-      const ins = rrect(bev + 1.2, bev + 2.2, w - 2 * bev - 2.4, h - 2 * bev - 3.4, 1);
-      r.carve(ins, () => -1.6);
-      r.paint(ins, woodGrain(R, { seed: (o.seed ?? 1) + 5, base: 0.38 }));
+      const ins = box(bev + 3, bev + 5, w - 2 * bev - 6, h - 2 * bev - 8, 3);
+      r.carve(ins, 1.8, 1.4);
     }
     if (o.brackets) for (const right of [false, true]) for (const top of [true, false]) {
-      const X = (v: number) => (right ? w - v : v), Y = (v: number) => (top ? 1 + v : h - v);
-      const sh = poly([[X(0), Y(0)], [X(6.5), Y(0)], [X(6.5), Y(1.8)], [X(1.8), Y(1.8)], [X(1.8), Y(6.5)], [X(0), Y(6.5)]]);
-      r.fill(and(sh, body), flat(6.2), brass({ base: 0.62, patina: 0.25 }), MAT.brass, { id: 4, seam: true });
-      screw(r, X(3.6), Y(0.9), 0.7, 0.5);
+      const X = (v: number) => (right ? w - v : v), Y = (v: number) => (top ? 2 + v : h - v);
+      const L = Math.min(18, h * 0.42), B = 6;
+      const sh = union(polygon([[X(-0.5), Y(-0.5)], [X(L), Y(-0.5)], [X(L), Y(B)], [X(B), Y(B)], [X(B), Y(L)], [X(-0.5), Y(L)]]), circle(X(L), Y(B / 2), B / 2), circle(X(B / 2), Y(L), B / 2));
+      r.part(inter(sh, body), bevel(1.6, 1.4, 5.2), metal(BRASS_OLD, { polish: 0.55 }));
+      screw(r, X(L - 1), Y(B / 2), 1.3, 0.5, 6.4);
     }
-    for (const [x0, x1] of o.moss ?? []) {
-      const top = (x: number) => 1.6 - Math.sin(((x - x0) / (x1 - x0)) * Math.PI) * 1.8 + (vnoise(x * 1.7, 9, 5) - 0.5) * 0.8;
-      const bot = (x: number) => 3 + Math.sin(((x - x0) / (x1 - x0)) * Math.PI) * 1.4 + vnoise(x * 1.3, 0, 5) * 1.2;
-      r.fill((x, y) => x >= x0 && x <= x1 && y > top(x) && y < bot(x), (x, y) => 6 + Math.max(0, Math.min(y - top(x), bot(x) - y)) * 0.8,
-        (_x, _y, mx, my) => rampAt(PAL.moss, clamp(0.5 + (hash(Math.floor(mx * 3), Math.floor(my * 3), 3) - 0.5) * 0.55 - my * 0.05)), MAT.moss, { id: 3, seam: true });
-    }
-    for (const [x, y] of o.screws ?? []) screw(r, x, y);
+    for (const [x, y] of o.screws ?? []) screw(r, x, y, 1.8, x * 0.13, 5);
     for (const x of o.hooks ?? []) {
-      r.fill(ring(x, 1.4, 0.7, 1.8), torus(x, 1.4, 1.25, 0.55, 1.2, 6), brass({ base: 0.66 }), MAT.brass, { id: 5 });
-      r.fill(disc(x, 3.4, 1.3), dome(x, 3.4, 1.3, 1.3, 1, 6), brass({ base: 0.6 }), MAT.brass, { id: 5, seam: true });
+      r.part(ring(x, 1.2, 1.4, 3.4), (px, py) => 6.5 + 1.2 * Math.sqrt(Math.max(0, 1 - ((Math.hypot(px - x, py - 1.2) - 2.4) / 1) ** 2)), metal(GOLD, { polish: 0.7 }));
+      r.part(circle(x, 5.4, 2.2), dome(x, 5.4, 2.2, 2.2, 1.4, 5.6), metal(BRASS_OLD, { polish: 0.6 }));
     }
-    return r.url();
+    return r.url({ shadow: { dy: 3, blur: 4, a: 0.45 }, aoR: 3 });
   });
 }
+/** a board of any CSS size (for clipboards and panels) */
+export const boardCSS = (wPx: number, hPx: number, o: BoardOpts = {}): string => board(wPx, hPx, 1, 1, o);
 
-/** A round brass bezel (a portrait or porthole frame), d units across, with four tiny screws. */
-export function bezel(d: number, k = 2, res = 1, inner = 0.76): string {
-  return cachedRelief(`bezel:${d}:${k}:${res}:${inner}`, () => {
-    const r = new Relief(d, d, res, k), c = d / 2, ri = (d / 2) * inner;
-    r.fill(ring(c, c, ri, d / 2 - 0.2), torus(c, c, (ri + d / 2) / 2, (d / 2 - ri) / 2 + 0.2, 3.4, 2), brass({ base: 0.62, brush: 'r', cx: c, cy: c }), MAT.brass, { id: 1 });
-    r.carve(ring(c, c, ri + 0.2, ri + 0.9), () => -0.8);
-    r.carve(ring(c, c, ri + 1, d / 2 - 0.6), (x, y) => { const a = Math.atan2(y - c, x - c), rr = Math.hypot(x - c, y - c); return Math.sin(a * 26 + rr * 1.6) > 0.55 ? -0.7 : 0; }); // rope twist
-    r.carve(ring(c, c, ri, d / 2), (x, y) => (vnoise(x * 0.9, y * 0.9, 63) > 0.74 ? -0.6 : 0)); // knocks and dents
-    for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + (i * Math.PI) / 2, rr = (ri + d / 2) / 2; screw(r, c + Math.cos(a) * rr, c + Math.sin(a) * rr, 0.9, a); }
-    return r.url();
-  });
-}
-
-/** A round enamel medallion with a brass rim (the level badge): `hue` a PAL ramp name. */
-export function medallion(d: number, k = 2, res = 1, hue: PalRamp = 'sapphire'): string {
-  return cachedRelief(`medal:${d}:${k}:${res}:${hue}`, () => {
-    const r = new Relief(d, d, res, k), c = d / 2, R = PAL[hue];
-    r.fill(disc(c, c, d / 2 - 0.1), torus(c, c, d / 2 - 1.6, 1.7, 2.6, 2), brass({ base: 0.64, brush: 'r', cx: c, cy: c }), MAT.brass, { id: 1 });
-    r.fill(disc(c, c, d / 2 - 3), dome(c, c, d / 2 - 3, d / 2 - 3, 2.6, 2.2), (_x, _y, mx, my) => {
-      // guilloché: a wavy sunburst cut into the metal shows through the glassy enamel
-      const a = Math.atan2(my - c, mx - c), rr = Math.hypot(mx - c, my - c);
-      const cut = Math.sin(a * 14 + Math.sin(rr * 1.4) * 1.6) > 0.3 ? 0.07 : -0.03;
-      const v = clamp(0.5 + cut + (fbm(mx * 0.3, my * 0.3, 4) - 0.5) * 0.14 - rr / d * 0.3);
-      return mix(rampAt(R, v), hex('#6a3aa0'), clamp(0.18 - v * 0.2));
-    }, MAT.enamel, { id: 2, seam: true });
-    for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2, rr = d / 2 - 4.4; r.paint(disc(c + Math.cos(a) * rr, c + Math.sin(a) * rr, 0.45), gold(0.7), MAT.brass); }
-    return r.url();
-  });
-}
-
-/** A round enamel push button with a brass rim and a raised plus (the currency "+"). */
-export function plusButton(d: number, k = 2, res = 1, down = false): string {
-  return cachedRelief(`plus:${d}:${k}:${res}:${down}`, () => {
-    const r = new Relief(d, d, res, k), c = d / 2;
-    r.fill(disc(c, c, d / 2 - 0.1), torus(c, c, d / 2 - 1.3, 1.4, 2, 1), brass({ base: 0.62 }), MAT.brass, { id: 1 });
-    r.fill(disc(c, c, d / 2 - 2.4), dome(c, c, d / 2 - 2.4, d / 2 - 2.4, down ? 0.8 : 2.4, down ? 1 : 2), (_x, _y, mx, my) => { const v = clamp((down ? 0.45 : 0.56) + (vnoise(mx * 0.8, my * 0.8, 7) - 0.5) * 0.14); const crack = Math.abs(fbm(mx * 0.6, my * 0.6, 19) - 0.5) < 0.016; return crack ? rampAt(PAL.emerald, 0.24) : mix(rampAt(PAL.emerald, v), hex('#2a8a9a'), 0.12); }, MAT.enamel, { id: 2, seam: true });
-    const pl = or(rect(c - 3, c - 0.9, 6, 1.8), rect(c - 0.9, c - 3, 1.8, 6));
-    r.paint(pl, solid(hex('#fff4d6')), MAT.enamel); r.carve(pl, () => 1);
-    return r.url();
-  });
-}
-
-/** A small engraved brass name plate with two screws, w x h units. */
-export function plate(w: number, h: number, k = 2, res = 1): string {
-  return cachedRelief(`plate:${w}x${h}:${k}:${res}`, () => {
-    const r = new Relief(w, h, res, k);
-    r.fill(rrect(0, 0, w, h, 1.2), slab(0, 0, w, h, 2.4, 1.4), brass({ base: 0.64, brush: 'x', patina: 0.15 }), MAT.brass, { id: 1 });
-    r.carve(and(rrect(1.6, 1.6, w - 3.2, h - 3.2, 0.6), not(rrect(2.2, 2.2, w - 4.4, h - 4.4, 0.6))), () => -0.6);
-    screw(r, 3.2, h / 2, 1, 0.3); screw(r, w - 3.2, h / 2, 1, 1.1);
-    return r.url();
-  });
-}
-
-/** The walnut shelf the three big objects stand on: a thick board with a moulded lip and brass brackets. */
-export function shelfBoard(w: number, k = 2, res = 1): string {
-  return cachedRelief(`shelf:${w}:${k}:${res}`, () => {
-    const h = 16, r = new Relief(w, h, res, k);
-    r.fill(rect(1, 0, w - 2, 4.2), flat(3), woodGrain(PAL.walnut, { seed: 11, base: 0.66 }), MAT.varnish, { id: 1 });
-    r.fill(rrect(0, 4, w, 7, 1), slab(0, 4, w, 7, 4, 1.6, 2), woodGrain(PAL.walnut, { seed: 12, base: 0.5 }), MAT.varnish, { id: 2, seam: true });
-    r.carve(rect(0, 6.6, w, 0.8), () => -1.2);
-    for (const bx of [16, w - 22]) {
-      r.fill(poly([[bx, 11], [bx + 6, 11], [bx + 6, 12], [bx + 2, 15.6], [bx, 15.6]]), flat(3), brass({ base: 0.58, patina: 0.3 }), MAT.brass, { id: 3, seam: true });
-      screw(r, bx + 3, 8.4, 0.9, 0.4);
-    }
-    return r.url();
-  });
-}
-
-/** A small hanging tile for the side tools: a hardwood frame with brass corners round a coloured felt inset, a brass ring on top. */
-export function toolTile(s: number, hue: PalRamp, k = 2, res = 1, seed = 1): string {
-  return cachedRelief(`tool:${s}:${hue}:${k}:${res}:${seed}`, () => {
-    const h = s + 4, r = new Relief(s, h, res, k), R = PAL[hue];
-    r.fill(ring(s / 2, 2, 1, 2.2), torus(s / 2, 2, 1.6, 0.6, 1.2, 4), brass({ base: 0.66 }), MAT.brass, { id: 5 });
-    r.fill(rrect(0, 4, s, s, 2.2), slab(0, 4, s, s, 4.4, 2), woodGrain(PAL.walnut, { seed, base: 0.52, along: seed % 2 ? 'x' : 'y' }), MAT.varnish, { id: 1 });
-    const ins = rrect(3, 7, s - 6, s - 6, 1.2);
-    r.carve(ins, () => -2.2);
-    r.paint(ins, weave(R, { base: 0.52, seed }), MAT.velvet);
-    for (const [x, y] of [[2.4, 6.4], [s - 2.4, 6.4], [2.4, s + 1.6], [s - 2.4, s + 1.6]]) r.fill(disc(x, y, 1.6), dome(x, y, 1.6, 1.6, 1.3, 4.6), brass({ base: 0.64 }), MAT.brass, { id: 6, seam: true });
-    return r.url();
-  });
-}
-
-/** The brass bulldog clip that holds the bedtime card. */
-export function clip(k = 2, res = 1): string {
-  return cachedRelief(`clip:${k}:${res}`, () => {
-    const w = 22, h = 13, r = new Relief(w, h, res, k);
-    r.fill(ring(w / 2, 3.2, 2, 3.3), torus(w / 2, 3.2, 2.6, 0.7, 1.4, 3), metal(PAL.iron, { base: 0.62 }), MAT.iron, { id: 3 });
-    r.fill(rrect(1, 4.6, w - 2, 8, 1.4), (x, y) => 3 + (y - 4.6) * 0.25 + 0.8 * Math.sin(clamp((x - 1) / (w - 2)) * Math.PI), brass({ base: 0.62, brush: 'x', patina: 0.2 }), MAT.brass, { id: 1, seam: true });
-    r.carve(rect(2.4, 9.6, w - 4.8, 0.7), () => -0.8);
-    return r.url();
-  });
-}
-
-/** A big nickel-and-brass clipboard clip: a pressed plate, a rolled lever and two rivets, w units wide. */
-export function clipboardClip(w = 60, k = 2, res = 1): string {
-  return cachedRelief(`cbclip:${w}:${k}:${res}`, () => {
-    const h = 20, r = new Relief(w, h, res, k), cx = w / 2;
-    r.fill(ring(cx, 5, 4.2, 6.4), torus(cx, 5, 5.3, 1.1, 2, 4), metal(PAL.iron, { base: 0.7 }), MAT.iron, { id: 1 });
-    r.cut(rect(cx - 7, 5.4, 14, 3));
-    r.fill(poly([[6, 8], [w - 6, 8], [w - 1, 19], [1, 19]]), (x, y) => 3 + (y - 8) * 0.2 + 1.2 * Math.sin(clamp((x - 1) / (w - 2)) * Math.PI), brass({ base: 0.64, brush: 'x', patina: 0.15 }), MAT.brass, { id: 2, seam: true });
-    r.fill(rect(4, 15, w - 8, 3), tubeX(16.5, 1.5, 6), brass({ base: 0.7 }), MAT.brass, { id: 3, seam: true });
-    for (const x of [10, w - 10]) { r.fill(disc(x, 11.4, 1.6), dome(x, 11.4, 1.6, 1.6, 1.4, 6), metal(PAL.iron, { base: 0.72 }), MAT.iron, { id: 4, seam: true }); }
-    r.carve(rect(cx - 9, 11, 18, 0.7), () => -0.6);
-    return r.url();
-  });
-}
-
-/** A tile of printed damask wallpaper (u x u units): a deep ground, a lighter leafy motif, fine paper grain. */
-export function wallpaperTile(hue: PalRamp = 'emerald', u = 32, k = 2): string {
-  return cachedRelief(`wall:${hue}:${u}:${k}`, () => {
-    const r = new Relief(u, u, 1, k), R = PAL[hue], G = PAL.gold;
-    const motif = (x: number, y: number) => {
-      // a lozenge lattice; in each cell a sprig of three leaves and a dot
-      // a fleur sprig: a tall teardrop bud, two leaves curling up and out, a stem and a gilt berry;
-      // a fine diamond trellis with gilt studs where its lines cross
-      const cx = u / 2, cy = u / 2;
-      const dx = Math.abs(x - cx), dy = y - cy;
-      const bud = (dx / (1.5 - (dy + 6) * 0.12)) ** 2 + ((dy + 5) / 3.6) ** 2 < 1 && dy < -1.4;
-      const lx = dx - 3.4, ly = dy + 1.2 + lx * 0.9;
-      const side = (lx / 3.1) ** 2 + (ly / 1.25) ** 2 < 1 && dx > 0.8;
-      const curl = Math.abs(Math.hypot(dx - 6.2, dy + 3.6) - 1.3) < 0.45 && dy < -2.6;
-      const stem = dx < 0.45 && dy > -2 && dy < 4.6;
-      const berry = Math.hypot(dx, dy - 5.6) < 1.25;
-      const d1 = ((x + y) % u + u) % u, d2 = ((x - y) % u + u) % u;
-      const lat = d1 < 0.45 || d2 < 0.45;
-      const stud = (d1 < 1.1 || d1 > u - 1.1) && (d2 < 1.1 || d2 > u - 1.1);
-      return bud || side || curl || stem ? 2 : berry || stud ? 3 : lat ? 1 : 0;
+/** A round enamel medallion with a polished brass rim (the level badge), d CSS px (+4 px shadow margin). */
+export function medallion(d: number, zoom = 1, _res = 1, hue: PalRamp = 'sapphire'): string {
+  return cached(`medal:${d}:${zoom}:${hue}`, () => {
+    const m = 4, r = new Real(d, d, kz(zoom), m), c = d / 2, col = hueRGB(hue);
+    r.part(circle(c, c, c), rim(3.2, d * 0.15, 1.6), metal(GOLD, { polish: 0.8 }));
+    const ri = c - d * 0.13;
+    const guil = (x: number, y: number): RGB => {
+      const a = Math.atan2(y - c, x - c), rr = Math.hypot(x - c, y - c);
+      const cut = Math.sin(a * 18 + Math.sin(rr * 0.9) * 1.4) * 0.06;
+      return mix(mix(col, [255, 255, 255], clamp(0.18 - rr / d * 0.4 + cut)), [10, 14, 40], clamp(rr / ri - 0.6) * 0.45);
     };
-    r.fill(rect(0, 0, u, u), flat(0), (x, y, mx, my) => {
-      const m = motif(x, y);
-      const grain = (vnoise(mx * 0.7, my * 0.7, 5) - 0.5) * 0.06 + (hash(Math.floor(mx * k), Math.floor(my * k), 2) - 0.5) * 0.04;
-      if (m === 2) return rampAt(R, 0.5 + grain);
-      if (m === 3) return rampAt(G, 0.55 + grain);
-      if (m === 1) return rampAt(R, 0.36 + grain);
-      return rampAt(R, 0.3 + grain);
-    }, { spec: 0, shin: 1, emit: 1 }, { id: 1 });
-    return r.url({ outline: false });
+    r.part(circle(c, c, ri), dome(c, c, ri, ri, 2.4, 2.2), { alb: guil, spec: 0.6, shin: 50, coat: 1 });
+    return r.url({ shadow: { dy: 2, blur: 3, a: 0.45 } });
   });
 }
 
-/** A varnished board of any size in CSS px (1 art px per CSS px): for clipboards and panels. */
-export function boardCSS(wPx: number, hPx: number, o: BoardOpts = {}): string {
-  const W = Math.max(8, Math.round(wPx / 2)), H = Math.max(8, Math.round(hPx / 2));
-  return board(W, H, 2, 1, o);
+/** A round green-enamel push button with a brass rim and a raised cream plus (the currency "+"), d CSS px (+3 margin). */
+export function plusButton(d: number, zoom = 1, _res = 1, down = false): string {
+  return cached(`plus:${d}:${zoom}:${down}`, () => {
+    const m = 3, r = new Real(d, d, kz(zoom), m), c = d / 2;
+    r.part(circle(c, c, c - 0.2), rim(2.4, 3.4, 1), metal(GOLD, { polish: 0.75 }));
+    const ri = c - 3;
+    r.part(circle(c, c + (down ? 0.6 : 0), ri), dome(c, c, ri, ri, down ? 1.2 : 2.8, 1.8), enamel(hex('#2f8a52')));
+    const t = d * 0.09, L = d * 0.27, oy = down ? 0.6 : 0;
+    const pl = union(box(c - L, c - t + oy, 2 * L, 2 * t, t), box(c - t, c - L + oy, 2 * t, 2 * L, t));
+    r.part(pl, (x, y, ins) => (down ? 3.2 : 4.8) + Math.min(0.9, ins * 0.8), enamel(hex('#fff4d6')));
+    return r.url({ shadow: { dy: down ? 0.6 : 1.6, blur: down ? 1 : 2.4, a: 0.45 } });
+  });
 }
 
-/** A twisted hemp rope tile, 6 x 6 px (1 texel per CSS px), tiling vertically: three strands spiralling, lit from the left. */
+/** A small engraved brass name plate with two screws, w x h CSS px (+3 margin). */
+export function plate(w: number, h: number, zoom = 1, _res = 1): string {
+  return cached(`plate:${w}x${h}:${zoom}`, () => {
+    const m = 3, r = new Real(w, h, kz(zoom), m);
+    r.part(box(0, 0, w, h, 3), bevel(2.4, 2), metal(GOLD, { along: 'x', polish: 0.6 }));
+    r.carve(subtract(box(3, 3, w - 6, h - 6, 2), box(3.8, 3.8, w - 7.6, h - 7.6, 1.6)), 0.5, 0.4);
+    screw(r, 5.5, h / 2, 1.6, 0.3, 1.6); screw(r, w - 5.5, h / 2, 1.6, 1.1, 1.6);
+    return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.45 } });
+  });
+}
+
+/** The walnut shelf the three big objects stand on: a thick moulded board with brass brackets, w x 32 CSS px (+4 margin). */
+export function shelfBoard(w: number, zoom = 1, _res = 1): string {
+  return cached(`shelf:${w}:${zoom}`, () => {
+    const m = 4, h = 32, r = new Real(w, h, kz(zoom), m);
+    r.part(box(2, 0, w - 4, 9, 2), chamfer(2, 3, 4), wood('walnut', { along: 'x', oy: 30 }));
+    r.part(box(0, 8, w, 14, 4), bevel(5, 3.5, 2), wood('walnut', { along: 'x', oy: 110 }));
+    r.carve(box(4, 13.2, w - 8, 1.2, 0.6), 1, 0.6);
+    for (const bx of [30, w - 42]) {
+      r.part(polygon([[bx, 21], [bx + 12, 21], [bx + 12, 23], [bx + 4, 31], [bx, 31]]), bevel(1.5, 1.2, 3), metal(BRASS_OLD, { polish: 0.5 }));
+      screw(r, bx + 6, 17, 1.6, 0.4, 5);
+    }
+    return r.url({ shadow: { dy: 4, blur: 6, a: 0.5 } });
+  });
+}
+
+/** A side-tool tile: a hardwood frame with brass corner studs round a coloured felt inset, a brass ring on top; s x (s+8) CSS px (+4 margin). */
+export function toolTile(s: number, hue: PalRamp, zoom = 1, _res = 1, seed = 1): string {
+  return cached(`tool:${s}:${hue}:${zoom}:${seed}`, () => {
+    const m = 4, h = s + 8, r = new Real(s, h, kz(zoom), m);
+    r.part(ring(s / 2, 4, 1.9, 4.4), (x, y) => 4 + 1.6 * Math.sqrt(Math.max(0, 1 - ((Math.hypot(x - s / 2, y - 4) - 3.15) / 1.25) ** 2)), metal(GOLD, { polish: 0.7 }));
+    const fr = box(0, 8, s, s, 6);
+    r.part(fr, bevel(5, 3.4), wood('walnut', { along: seed % 2 ? 'x' : 'y', ox: seed * 77, oy: seed * 41 }));
+    const ins = box(5, 13, s - 10, s - 10, 3.5);
+    r.part(ins, (x, y, i) => 1.4 + Math.min(1.2, i * 0.35), cloth('felt', hueRGB(hue), { scale: 2.6, amt: 0.8 }));
+    for (const [x, y] of [[4.4, 12.4], [s - 4.4, 12.4], [4.4, s + 3.6], [s - 4.4, s + 3.6]]) r.part(circle(x, y, 2.1), dome(x, y, 2.1, 2.1, 1.5, 4.8), metal(GOLD, { polish: 0.7 }));
+    return r.url({ shadow: { dy: 3, blur: 4, a: 0.45 }, aoR: 3 });
+  });
+}
+
+/** The brass bulldog clip that holds the bedtime card, 44 x 26 CSS px (+3 margin). */
+export function clip(zoom = 1, _res = 1): string {
+  return cached(`clip:${zoom}`, () => {
+    const w = 44, h = 26, m = 3, r = new Real(w, h, kz(zoom), m);
+    r.part(ring(w / 2, 6.4, 3.6, 6.4), (x, y) => 3 + 1.4 * Math.sqrt(Math.max(0, 1 - ((Math.hypot(x - w / 2, y - 6.4) - 5) / 1.4) ** 2)), metal(SILVER, { polish: 0.7 }));
+    r.part(box(2, 9, w - 4, 16, 3), (x, y) => 3 + (y - 9) * 0.22 + 1.6 * Math.sin(clamp((x - 2) / (w - 4)) * Math.PI), metal(GOLD, { along: 'x', polish: 0.7 }));
+    r.carve(box(5, 19, w - 10, 1.2, 0.6), 0.8, 0.5);
+    return r.url({ shadow: { dy: 2, blur: 2.5, a: 0.45 } });
+  });
+}
+
+/** A big nickel-and-brass clipboard clip: a pressed plate, a rolled lever and two rivets, w x (w/3) CSS px (+3 margin). */
+export function clipboardClip(w = 120, zoom = 1, _res = 1): string {
+  return cached(`cbclip:${w}:${zoom}`, () => {
+    const h = w / 3, m = 3, r = new Real(w, h, kz(zoom), m), cx = w / 2, u = w / 60;
+    r.part(subtract(ring(cx, 5 * u, 4.2 * u, 6.4 * u), box(cx - 8 * u, 5.4 * u, 16 * u, 4 * u)), (x, y) => 4 + 1.8 * u * Math.sqrt(Math.max(0, 1 - ((Math.hypot(x - cx, y - 5 * u) - 5.3 * u) / (1.1 * u)) ** 2)), metal(SILVER, { polish: 0.8 }));
+    r.part(polygon([[6 * u, 8 * u], [w - 6 * u, 8 * u], [w - 1 * u, h - 1], [1 * u, h - 1]]), (x, y) => 3 + (y - 8 * u) * 0.2 + 2.4 * Math.sin(clamp((x - u) / (w - 2 * u)) * Math.PI), metal(GOLD, { along: 'x', polish: 0.65 }));
+    r.part(box(4 * u, 15 * u, w - 8 * u, 3 * u, 1.5 * u), tubeX(16.5 * u, 1.5 * u, 6), metal(GOLD, { along: 'x', polish: 0.8 }));
+    for (const x of [10 * u, w - 10 * u]) r.part(circle(x, 11.4 * u, 1.6 * u), dome(x, 11.4 * u, 1.6 * u, 1.6 * u, 1.4, 6), metal(SILVER, { polish: 0.7 }));
+    return r.url({ shadow: { dy: 2.5, blur: 3, a: 0.45 } });
+  });
+}
+
+/** A tile of printed damask wallpaper (u CSS px square, tiles): a deep ground, a lighter leafy motif, paper grain. */
+export function wallpaperTile(hue: PalRamp = 'emerald', u = 64, _k = 2): string {
+  return cached(`wall:${hue}:${u}`, () => {
+    const k = deviceK(2), r = new Real(u, u, k, 0), base = hueRGB(hue), lite = mix(base, [240, 220, 170], 0.32), gild = mix(hex('#d9a84a'), base, 0.25);
+    const c = u / 2;
+    r.part(box(-1, -1, u + 2, u + 2), 0, paperMat('paper', { tint: [base[0] * 1.35, base[1] * 1.35, base[2] * 1.35] as RGB, scale: 1.4 }));
+    // a damask medallion in the middle, half medallions on the edges (so it tiles)
+    const motif = (cx: number, cy: number): SDF => {
+      const s = u * 0.22;
+      return union(ellipse(cx, cy, s * 0.55, s), ellipse(cx, cy - s * 0.95, s * 0.28, s * 0.45), ellipse(cx, cy + s * 0.95, s * 0.28, s * 0.45), ellipse(cx - s * 0.75, cy, s * 0.45, s * 0.24), ellipse(cx + s * 0.75, cy, s * 0.45, s * 0.24));
+    };
+    for (const [x, y] of [[c, c], [0, 0], [u, 0], [0, u], [u, u]]) r.part(motif(x, y), 0.6, paperMat('paper', { tint: lite, scale: 1.4 }));
+    for (const [x, y] of [[c, c], [0, 0], [u, 0], [0, u], [u, u]]) r.paint(ring(x, y, u * 0.06, u * 0.085), { ...metal(gild, { polish: 0.5 }) }, 0.8);
+    return r.url({ shadow: false, ambient: 0.55 });
+  });
+}
+
+// ------------------------------------------------------------------ ropes, chains, shadows
+
+/** A twisted hemp rope tile, 6 x 8 CSS px, tiling vertically: three strands spiralling, lit from the left. */
 export function hempRope(): string {
-  return cachedRelief('hemp', () => {
-    const W = 6, H = 6, c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    const g = c.getContext('2d')!, img = g.createImageData(W, H), d = img.data;
-    const R = [hex('#3a2410'), hex('#6a4a24'), hex('#94703c'), hex('#bc9658'), hex('#dcbc80'), hex('#f0d8a4')];
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const strand = ((x + y * 1) % 3 + 3) % 3; // diagonal strands
-      const across = x / (W - 1); // cylinder: lit on the left
-      let v = 4.2 - across * 2.6 - (strand === 0 ? 1.4 : strand === 1 ? 0 : 0.5);
-      if (x === 0) v -= 0.6;
-      if (x === W - 1) v = 0.4;
-      const col = R[Math.max(0, Math.min(5, Math.round(v)))];
-      const j = (y * W + x) * 4;
-      d[j] = col[0]; d[j + 1] = col[1]; d[j + 2] = col[2]; d[j + 3] = 255;
+  return cached('rope2', () => {
+    const W = 6, H = 8, k = deviceK(4), r = new Real(W, H, k, 0);
+    const col: RGB = hex('#c9a46a');
+    r.part(box(0.2, -1, W - 0.4, H + 2, 0), tubeY(W / 2, 2.9, 0), cloth('linen', col, { scale: 3, amt: 0.9 }));
+    // the strands: diagonal grooves, periodic in y
+    for (let i = -1; i < 3; i++) {
+      const y0 = i * (H / 2);
+      r.carve(segment(-0.5, y0 + 4.2, W + 0.5, y0, 0.32), 1.1, 0.6);
     }
-    g.putImageData(img, 0, 0);
-    return c.toDataURL('image/png');
+    return r.url({ shadow: false, ambient: 0.5 });
   });
 }
-/** A brass chain tile, 8 x 12 px: one link face on, one edge on, lit from the top left. */
+
+/** A brass chain tile, 8 x 12 CSS px: one link face on, one edge on, lit from the top left. */
 export function brassChain(): string {
-  return cachedRelief('bchain', () => {
-    const W = 8, H = 12, c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    const g = c.getContext('2d')!, B = PAL.brass;
-    const put = (x: number, y: number, i: number) => { const col = B[i]; g.fillStyle = `rgb(${col[0]},${col[1]},${col[2]})`; g.fillRect(x, y, 1, 1); };
-    const ink = (x: number, y: number) => { g.fillStyle = '#1e1206'; g.fillRect(x, y, 1, 1); };
-    // the face-on link: an open oval 6 wide, 7 tall
-    const ring: [number, number, number][] = [[2, 0, 7], [3, 0, 8], [4, 0, 6], [1, 1, 7], [5, 1, 4], [1, 2, 6], [5, 2, 3], [1, 3, 6], [5, 3, 3], [1, 4, 5], [5, 4, 2], [1, 5, 4], [5, 5, 2], [2, 6, 3], [3, 6, 2], [4, 6, 2]];
-    for (const [x, y, i] of ring) put(x, y, i);
-    for (const [x, y] of [[1, 0], [5, 0], [0, 1], [6, 1], [0, 2], [6, 2], [0, 3], [6, 3], [0, 4], [6, 4], [0, 5], [6, 5], [1, 6], [5, 6], [2, 7], [3, 7], [4, 7]]) ink(x, y);
-    // the edge-on link through it: a bar 2 wide
-    for (let y = 5; y < 12; y++) { put(3, y, y < 8 ? 7 : 5); put(4, y, y < 8 ? 4 : 3); ink(2, y); ink(5, y); }
-    put(3, 11, 6);
-    return c.toDataURL('image/png');
+  return cached('chain2', () => {
+    const W = 8, H = 12, k = deviceK(4), r = new Real(W, H, k, 0);
+    const mat = metal(GOLD, { polish: 0.8 });
+    // a face-on oval link (from y -1 to 7) and an edge-on one (6 .. 13) wrapping round
+    r.part(subtract(ellipse(4, 3, 3.2, 4.4), ellipse(4, 3, 1.5, 2.7)), (x, y) => 1 + 1.2 * Math.sqrt(Math.max(0, 1 - ((Math.hypot((x - 4) / 3.2, (y - 3) / 4.4) - 0.68) / 0.32) ** 2)), mat);
+    r.part(box(2.9, 6, 2.2, 7.5, 1.1), tubeY(4, 1.1, 1.6), mat);
+    r.part(box(2.9, -1.5, 2.2, 1.6, 1.1), tubeY(4, 1.1, 1.6), mat);
+    return r.url({ shadow: false });
   });
 }
 
-/** A dithered contact shadow (an ellipse that darkens toward its middle), w x h units. */
-export function contactShadow(w: number, h: number, k = 2): string {
-  return cachedRelief(`cshadow:${w}x${h}:${k}`, () => {
-    const W = Math.round(w * k), H = Math.round(h * k), c = document.createElement('canvas');
-    c.width = W; c.height = H;
-    const g = c.getContext('2d')!, img = g.createImageData(W, H), d = img.data;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const q = ((x + 0.5 - W / 2) / (W / 2)) ** 2 + ((y + 0.5 - H / 2) / (H / 2)) ** 2;
-      if (q > 1) continue;
-      const v = 1 - q, a = v > 0.55 ? 150 : v > 0.25 ? 105 : bayer(x, y) > 0 ? 70 : 0;
-      if (!a) continue;
-      const j = (y * W + x) * 4;
-      d[j] = 30; d[j + 1] = 16; d[j + 2] = 10; d[j + 3] = a;
-    }
-    g.putImageData(img, 0, 0);
-    return c.toDataURL('image/png');
-  });
-}
-
-// ------------------------------------------------------------------ the side tools' icons (22 x 22 units)
-
-/** Rotated-rectangle shape: centre, half length along angle `a`, half width. */
-const obar = (cx: number, cy: number, a: number, hl: number, hw: number): Shape => {
-  const c = Math.cos(a), s = Math.sin(a);
-  return (x, y) => { const u = (x - cx) * c + (y - cy) * s, v = -(x - cx) * s + (y - cy) * c; return Math.abs(u) <= hl && Math.abs(v) <= hw; };
-};
-export type ToolIcon = 'build' | 'shop' | 'wardrobe' | 'quests' | 'map' | 'settings';
-/** The side tools' icons, modelled and lit like everything else: a claw hammer, a coin purse, a hanger with a scarf, a sealed scroll, a brass compass, a brass cog. */
-export function toolIcon(id: ToolIcon, k = 2, res = 1): string {
-  return cachedRelief(`ticon:${id}:${k}:${res}`, () => {
-    const r = new Relief(22, 22, res, k);
-    if (id === 'build') {
-      const a = -0.86; // handle angle (up-right)
-      r.fill(obar(9.5, 13.5, a, 8.6, 1.4), (x, y) => 2 + 1.2 * Math.cos(clamp(Math.abs(-(x - 9.5) * Math.sin(a) + (y - 13.5) * Math.cos(a)) / 1.4) * 1.4), woodGrain(PAL.oak, { seed: 3, base: 0.6, along: 'y', scale: 0.5 }), MAT.varnish, { id: 1 });
-      r.fill(obar(4.4, 19.6, a, 1.8, 1.7), dome(4.4, 19.6, 2.4, 2.2, 2.4), metal(PAL.iron, { base: 0.4 }), MAT.iron, { id: 2, seam: true });
-      // the head, square to the handle: a striking face one side, a curled claw the other
-      const hx = 15.4, hy = 6.4, ha = a + Math.PI / 2;
-      r.fill(obar(hx, hy, ha, 5.6, 2), (x, y) => 4 + 1.4 * Math.cos(clamp(Math.abs(-(x - hx) * Math.sin(ha) + (y - hy) * Math.cos(ha)) / 2) * 1.3), metal(PAL.iron, { base: 0.62, brush: 'x' }), MAT.iron, { id: 3, seam: true });
-      r.fill(disc(hx + Math.cos(ha) * 5.6, hy + Math.sin(ha) * 5.6, 2.2), dome(hx + Math.cos(ha) * 5.6, hy + Math.sin(ha) * 5.6, 2.2, 2.2, 2, 4), metal(PAL.iron, { base: 0.7 }), MAT.iron, { id: 3 });
-      r.fill(and(ring(hx - Math.cos(ha) * 4.4 + 1.6, hy - Math.sin(ha) * 4.4 + 2.2, 2.2, 3.6), (x, y) => y > hy - Math.sin(ha) * 4.4 - 2), flat(4), metal(PAL.iron, { base: 0.5 }), MAT.iron, { id: 3 });
-      r.fill(and(seg(17.5, 17, 20.5, 20, 0.6)), flat(1.5), brass({ base: 0.6 }), MAT.brass, { id: 4 });
-      r.fill(disc(17.3, 16.8, 1.1), dome(17.3, 16.8, 1.1, 1.1, 1, 1.5), brass({ base: 0.7 }), MAT.brass, { id: 4, seam: true });
-    } else if (id === 'shop') {
-      // a plump leather purse with a brass kiss-lock frame and a coin peeking out
-      r.fill(disc(13.6, 6.2, 3.4), dome(13.6, 6.2, 3.4, 3.4, 2, 2), metal(PAL.gold, { base: 0.66 }), MAT.brass, { id: 5 });
-      r.carve(ring(13.6, 6.2, 2.1, 2.6), () => -0.5);
-      r.fill(and(ell(11, 14.2, 9, 7.4), (_x, y) => y > 7.4), (x, y) => puff(11, 14.6, 9, 7, 6, 2.2)(x, y), leatherGrain(PAL.rose, { base: 0.5 }), MAT.leather, { id: 1 });
-      r.fill(and(ell(11, 9, 8.2, 3.2), (_x, y) => y < 9.6), (x) => 7 + 0.6 * Math.cos((x - 11) * 0.25), brass({ base: 0.62 }), MAT.brass, { id: 2, seam: true });
-      r.fill(rect(2.8, 8.6, 16.4, 1.6), flat(7), brass({ base: 0.5 }), MAT.brass, { id: 2 });
-      for (const bx of [9.6, 12.4]) r.fill(disc(bx, 5.6, 1.4), dome(bx, 5.6, 1.4, 1.4, 1.4, 7.4), brass({ base: 0.72 }), MAT.brass, { id: 3, seam: true });
-      // stitching along the purse's belly
-      for (let i = 0; i < 9; i++) { const an = Math.PI * (0.15 + i * 0.087); r.paint(disc(11 - Math.cos(an) * 7.2, 13.6 + Math.sin(an) * 5.6, 0.35), solid(hex('#f2d9b0'))); }
-    } else if (id === 'wardrobe') {
-      // a wooden coat hanger with a striped knitted scarf draped over it
-      r.fill(ring(11, 3.6, 1.5, 2.6), torus(11, 3.6, 2.05, 0.55, 1, 3), metal(PAL.iron, { base: 0.6 }), MAT.iron, { id: 1 });
-      r.cut(and(rect(11, 3, 3, 4)));
-      r.fill(seg(11, 5.8, 11, 7.4, 0.5), flat(3), metal(PAL.iron, { base: 0.6 }), MAT.iron, { id: 1 });
-      r.fill(or(seg(11, 7.6, 1.6, 12.6, 1.15), seg(11, 7.6, 20.4, 12.6, 1.15)), (x, y) => 3 + 0.8 * Math.cos(0.5), woodGrain(PAL.cherry, { seed: 5, base: 0.6 }), MAT.varnish, { id: 2, seam: true });
-      const scarf: Shape = or(poly([[6, 10.4], [9.6, 8.6], [10.6, 20.6], [6.6, 21.2]]), poly([[9.6, 8.6], [13.4, 9.2], [14.2, 18.4], [10.6, 18.6]]));
-      r.fill(scarf, (x, y) => 5 + Math.sin(x * 1.3) * 0.5 - Math.max(0, y - 18) * 0.3, (_x, _y, mx, my) => {
-        const stripe = Math.floor((my + mx * 0.15) / 2.4) % 2;
-        const knit = ((Math.floor(mx * 2) + Math.floor(my * 2)) & 1) ? 0.05 : -0.05;
-        return rampAt(stripe ? PAL.plum : PAL.linen, clamp((stripe ? 0.55 : 0.6) + knit));
-      }, MAT.cloth, { id: 3, seam: true });
-      // fringe at the ends
-      for (let i = 0; i < 4; i++) r.fill(seg(6.8 + i, 21.2, 6.6 + i * 1.05, 22, 0.35), flat(4.5), solid(rampAt(PAL.plum, 0.5)), MAT.cloth, { id: 4 });
-    } else if (id === 'quests') {
-      // a rolled parchment scroll tied with a ribbon and sealed with red wax
-      r.fill(roundRect(3, 6, 16, 11, 1.4), (x, y) => 2 + 2.8 * Math.sqrt(Math.max(0, 1 - ((y - 11.5) / 5.6) ** 2)), paperGrain(PAL.paper, { base: 0.66 }), MAT.paper, { id: 1 });
-      for (const ex of [3, 19]) r.fill(ell(ex, 11.5, 1.8, 5.6), (x, y) => 3 + 2 * Math.sqrt(Math.max(0, 1 - ((y - 11.5) / 5.6) ** 2)), (_x, _y, mx, my) => rampAt(PAL.paper, clamp(0.5 + Math.sin(Math.hypot(mx - ex, (my - 11.5) * 0.35) * 4) * 0.12)), MAT.paper, { id: 2, seam: true });
-      r.carve(rect(3.5, 13.8, 15, 0.6), () => -0.6);
-      r.fill(rect(10, 5.4, 2.4, 12.4), flat(5.2), weave(PAL.rose, { base: 0.5 }), MAT.cloth, { id: 3, seam: true });
-      r.fill(or(poly([[11, 16], [8.4, 21.2], [10.2, 20.6], [11.2, 17]]), poly([[11.4, 16], [14.2, 21.4], [12.4, 20.8], [11.2, 17]])), flat(4.8), weave(PAL.rose, { base: 0.46 }), MAT.cloth, { id: 3, seam: true });
-      r.fill(disc(11.2, 15.4, 3), (x, y) => 6 + 1.6 * Math.sqrt(Math.max(0, 1 - ((x - 11.2) ** 2 + (y - 15.4) ** 2) / 9)) + (vnoise(x * 2, y * 2, 3) - 0.5) * 0.6, solid(hex('#b8232a'), 0.15), { spec: 0.6, shin: 30, bands: 6 }, { id: 4, seam: true });
-      r.carve(ring(11.2, 15.4, 1.3, 1.8), () => -0.7);
-    } else if (id === 'map') {
-      // a brass pocket compass: a ring on top, a knurled bezel, an enamel card with a red and steel needle
-      r.fill(ring(11, 2.6, 1.3, 2.5), torus(11, 2.6, 1.9, 0.6, 1.2, 3), brass({ base: 0.62 }), MAT.brass, { id: 1 });
-      r.fill(rect(9.8, 3.8, 2.4, 2.4), tubeY(11, 1.2, 3), brass({ base: 0.6 }), MAT.brass, { id: 1, seam: true });
-      r.fill(disc(11, 13, 8.6), torus(11, 13, 7.4, 1.4, 2.6, 2), brass({ base: 0.66, brush: 'r', cx: 11, cy: 13 }), MAT.brass, { id: 2, seam: true });
-      r.fill(disc(11, 13, 6.4), flat(3.4), (_x, _y, mx, my) => rampAt(PAL.enamel, 0.72 - Math.hypot(mx - 11, my - 13) * 0.02), MAT.enamel, { id: 3, seam: true });
-      for (let i = 0; i < 8; i++) { const an = (i / 8) * Math.PI * 2, r0 = i % 2 ? 5 : 4.2; r.paint(seg(11 + Math.sin(an) * r0, 13 - Math.cos(an) * r0, 11 + Math.sin(an) * 5.8, 13 - Math.cos(an) * 5.8, 0.3), solid(hex('#3a2a1c'))); }
-      r.fill(poly([[11, 7.6], [12.2, 13], [9.8, 13]]), flat(4.6), solid(hex('#c4302b')), MAT.enamel, { id: 4 });
-      r.fill(poly([[11, 18.4], [12.2, 13], [9.8, 13]]), flat(4.6), metal(PAL.sapphire, { base: 0.6 }), MAT.iron, { id: 4 });
-      r.fill(disc(11, 13, 0.9), dome(11, 13, 0.9, 0.9, 0.8, 4.8), brass({ base: 0.75 }), MAT.brass, { id: 5 });
-    } else {
-      // a brass cog with a smaller steel one behind it
-      const cog = (cx: number, cy: number, R: number, teeth: number, hole: number, M: RGB[], base: number, ph: number): [Shape, (x: number, y: number) => number] => {
-        const sh: Shape = (x, y) => {
-          const d = Math.hypot(x - cx, y - cy), a = Math.atan2(y - cy, x - cx) + ph;
-          const t = (Math.cos(a * teeth) + 1) / 2;
-          return d <= R - 1.6 + (t > 0.45 ? 1.6 : 0) && d >= hole;
-        };
-        return [sh, (x, y) => { const d = Math.hypot(x - cx, y - cy); return base + 1.4 * smooth(hole, hole + 1.2, d) * (d < R - 2.2 ? 1 : 0.7) + (d > R - 4 && d < R - 3 ? -0.4 : 0); }];
-      };
-      void PAL;
-      const [s2, h2] = cog(16.4, 15.6, 5.6, 7, 1.4, PAL.iron, 1, 0.3);
-      r.fill(s2, h2, metal(PAL.iron, { base: 0.58, brush: 'r', cx: 16.4, cy: 15.6 }), MAT.iron, { id: 1 });
-      const [s1, h1] = cog(9, 9, 8.2, 9, 2.4, PAL.brass, 3, 0);
-      r.fill(s1, h1, brass({ base: 0.64, brush: 'r', cx: 9, cy: 9 }), MAT.brass, { id: 2, seam: true });
-      r.carve(ring(9, 9, 4.2, 4.8), () => -0.7);
-    }
-    return r.url();
-  });
-}
-
-/**
- * An end cap for the glass level tube, 5 x 12 units: a turned brass ferrule with a knurled band, a domed end
- * and a little leaf collar where it grips the glass (drawn for the left end; mirror it for the right).
- */
-export function tubeCap(k = 2): HTMLCanvasElement {
-  const r = new Relief(5, 12, 1, k);
-  r.fill(rect(1.4, 0.4, 3.6, 11.2), tubeX(6, 5.6, 1), brass({ base: 0.62, brush: 'x', patina: 0.3 }), MAT.brass, { id: 1 });
-  r.carve(rect(2.2, 0.4, 1.2, 11.2), (x, y) => (Math.floor(y * 2.2 + x) % 2 ? -0.5 : 0.2)); // knurling
-  r.fill(ell(1.4, 6, 1.4, 5.2), dome(1.4, 6, 1.4, 5.2, 1.4, 4), brass({ base: 0.68 }), MAT.brass, { id: 2, seam: true });
-  for (const [y, s] of [[2.2, -1], [9.8, 1]] as [number, number][]) r.fill(poly([[3.8, y], [5, y + s * 0.4], [5, y + s * 2.2], [4.2, y + s * 1.2]]), flat(5), brass({ base: 0.74 }), MAT.brass, { id: 3, seam: true });
-  r.chip = 0;
-  return r.canvas();
-}
-
-// ------------------------------------------------------------------ the nightstand's props (Sleep screen)
-
-const WAX = [hex('#9a7a4a'), hex('#c8a870'), hex('#e6cc98'), hex('#f4e2b8'), hex('#fcf2d8'), hex('#fffaee')];
-/**
- * A beeswax pillar candle in a brass chamberstick, 18 x 36 units: a melted, uneven crown with a pool and a
- * charred wick, drips run down its sides, the dish has a rolled rim and a finger ring. `f` picks one of four
- * flickering flame frames (-1: snuffed, a curl of smoke instead).
- */
-export function propCandle(f = 0, k = 3): string {
-  return cachedRelief(`pcandle:${f}:${k}`, () => {
-    const r = new Relief(18, 36, 1, k), cx = 9;
-    // the chamberstick: dish, rolled rim, socket, finger ring
-    r.fill(and(ring(15.6, 30.4, 1.4, 2.6), (x) => x > 14.6), torus(15.6, 30.4, 2, 0.6, 1, 2), brass({ base: 0.6, patina: 0.3 }), MAT.brass, { id: 1 });
-    r.fill(ell(cx, 32.6, 8.4, 2.6), (x, y) => 1 + 1.6 * Math.sqrt(Math.max(0, 1 - ((x - cx) / 8.4) ** 2 - ((y - 32.6) / 2.6) ** 2)) + (Math.hypot((x - cx) / 8.4, (y - 32.6) / 2.6) > 0.82 ? 0.9 : 0), brass({ base: 0.62, brush: 'r', cx, cy: 32.6, patina: 0.25 }), MAT.brass, { id: 2, seam: true });
-    r.fill(rect(cx - 3.8, 28.4, 7.6, 3.6), tubeY(cx, 3.8, 2.4), brass({ base: 0.66, brush: 'y' }), MAT.brass, { id: 3, seam: true });
-    r.carve(rect(cx - 3.8, 29.6, 7.6, 0.6), () => -0.8);
-    // the pillar: slightly wider at the foot, a lumpy melted crown
-    const crown = (x: number) => 9.4 + Math.sin((x - cx) * 1.3) * 0.5 + Math.abs(x - cx) * 0.18 + (hash(Math.floor(x * 2), 1, 7) - 0.5) * 0.4;
-    const pillar = Object.assign((x: number, y: number) => y > crown(x) && y < 29 && Math.abs(x - cx) < 3.4 + (y - 10) * 0.012, { bb: [cx - 4, 8, cx + 4, 29] as [number, number, number, number] });
-    r.fill(pillar, (x) => 2.4 + 3.2 * Math.sqrt(Math.max(0, 1 - ((x - cx) / 3.6) ** 2)), (_x, _y, mx, my) => {
-      const glow = Math.max(0, 1 - (my - 9) / 7) * 0.25; // the flame lights the top of the wax from within
-      return rampAt(WAX, clamp(0.62 + glow + (vnoise(mx * 0.6, my * 0.25, 4) - 0.5) * 0.12 - Math.abs(mx - cx) * 0.03));
-    }, { spec: 0.35, shin: 16, bands: 6 }, { id: 4, seam: true });
-    // drips down the sides, each a rounded run with a bead at its foot
-    for (const [x0, len] of [[cx - 3.2, 7.4], [cx + 2.7, 4.6], [cx - 0.6, 3]] as [number, number][]) {
-      const y0 = crown(x0) + 0.2;
-      r.fill(Object.assign((x: number, y: number) => y > y0 && y < y0 + len && Math.abs(x - x0 - Math.sin(y * 0.8) * 0.3) < 0.75, { bb: [x0 - 1.4, y0, x0 + 1.4, y0 + len] as [number, number, number, number] }), flat(6.4), solid(WAX[4]), { spec: 0.6, shin: 30, bands: 6 }, { id: 5, add: false });
-      r.fill(disc(x0 + Math.sin((y0 + len) * 0.8) * 0.3, y0 + len, 1.05), dome(x0, y0 + len, 1.05, 1.05, 1, 6.2), solid(WAX[4]), { spec: 0.6, shin: 30, bands: 6 }, { id: 5 });
-    }
-    // the pool of molten wax and the charred wick
-    r.fill(ell(cx, crown(cx) + 0.8, 2.4, 0.8), flat(5.2), solid(hex('#fff2c8')), { spec: 1, shin: 60, bands: 6 }, { id: 6 });
-    if (f >= 0) r.fill(seg(cx, crown(cx) + 0.4, cx + 0.2, crown(cx) - 1.6, 0.35), flat(6), solid(hex('#2a160c')), MAT.wood, { id: 7 });
-    // the flame: a living teardrop, blue at the root, white-gold core, orange skin
-    if (f >= 0) {
-      const lean = [0, 0.5, -0.4, 0.2][f % 4], tall = [7.2, 6.6, 7.6, 6.9][f % 4];
-      const fy = crown(cx) - 1.4;
-      const flame = Object.assign((x: number, y: number) => { const t = (fy - y) / tall; if (t < 0 || t > 1) return false; const wdt = 2.1 * Math.sin(Math.min(1, t * 1.35) * Math.PI * 0.62) * (1 - t * 0.55); return Math.abs(x - cx - lean * t * t * 2) < Math.max(0.3, wdt); }, { bb: [cx - 3, fy - tall, cx + 3, fy + 0.5] as [number, number, number, number] });
-      r.fill(flame, flat(9), (_x, _y, mx, my) => {
-        const t = (fy - my) / tall, dx = Math.abs(mx - cx - lean * t * t * 2);
-        if (t < 0.14) return hex('#5a8cf0');
-        return rampAt([hex('#e04818'), hex('#f88a20'), hex('#fcc444'), hex('#fff2a8'), hex('#ffffff')], clamp(1 - dx * 0.5 - t * 0.6 + 0.2));
-      }, MAT.glow, { id: 8 });
-    } else {
-      for (let i = 0; i < 5; i++) r.fill(disc(cx + Math.sin(i * 1.3) * 1.2, crown(cx) - 2 - i * 1.6, 0.6 + i * 0.12), flat(8), solid(mix(hex('#b8b0c8'), hex('#e8e4f0'), i / 5)), MAT.glow, { id: 9 });
-    }
-    r.chip = 0.2;
-    return r.url();
-  });
-}
-
-const GLAZE: Record<'tea' | 'coffee', RGB[]> = {
-  tea: [hex('#1d4a40'), hex('#2a6a5a'), hex('#3c8a74'), hex('#5aa88e'), hex('#86c4aa'), hex('#bce0cc')],
-  coffee: [hex('#5a1e18'), hex('#7c2c22'), hex('#a0402e'), hex('#c05a40'), hex('#d8805e'), hex('#ecac8a')],
-};
-/** A hand-thrown stoneware mug, 26 x 26 units: rippled walls, a glaze that pools and runs over bare clay at the foot, speckles, a pulled handle, chamomile or coffee inside. */
-export function propMug(kind: 'tea' | 'coffee', k = 3): string {
-  return cachedRelief(`pmug:${kind}:${k}`, () => {
-    const r = new Relief(26, 26, 1, k), cx = 11, G = GLAZE[kind];
-    const CLAY = [hex('#7a5a3a'), hex('#a07c54'), hex('#c4a076'), hex('#dcc09a')];
-    // the handle, pulled and pressed on
-    r.fill(and(ring(19.2, 15, 2.4, 5), (x) => x > 18), (x, y) => 2 + 2.2 * Math.sqrt(Math.max(0, 1 - ((Math.hypot(x - 19.2, y - 15) - 3.7) / 1.3) ** 2)), solid(G[3]), { spec: 0.8, shin: 30, env: 0.15, bands: 6 }, { id: 1 });
-    // the body: walls ripple where the potter's fingers ran up them; the glaze stops short of the foot
-    const half = (y: number) => 7.6 + (y - 8) * 0.06 + Math.sin(y * 1.1) * 0.25;
-    const body = Object.assign((x: number, y: number) => y > 7 && y < 24 && Math.abs(x - cx) < half(y), { bb: [2, 7, 20, 24] as [number, number, number, number] });
-    r.fill(body, (x, y) => 2 + 6 * Math.sqrt(Math.max(0, 1 - ((x - cx) / half(y)) ** 2)) + Math.sin(y * 2.2) * 0.25, (x, y, mx, my) => {
-      const edge = 20.4 + Math.sin(mx * 1.1) * 0.9 + (hash(Math.floor(mx * 2), 2, 9) > 0.7 ? 0.8 : 0); // the glaze line, with runs
-      if (my > edge) return rampAt(CLAY, clamp(0.55 + (hash(Math.floor(mx * 3), Math.floor(my * 3), 3) - 0.5) * 0.4));
-      const speck = hash(Math.floor(mx * 3), Math.floor(my * 3), 5) > 0.95 ? -0.25 : 0;
-      const pool = my > edge - 2 ? -0.12 : 0; // glaze pools thicker and darker above the line
-      return rampAt(G, clamp(0.56 + speck + pool + (vnoise(mx * 0.4, my * 0.9, 6) - 0.5) * 0.18));
-    }, { spec: 0.8, shin: 34, env: 0.18, bands: 6 }, { id: 2, seam: true });
-    // a brushed leaf on the side, and the rim
-    const leafSh = Object.assign((x: number, y: number) => { const u = x - 8, v = y - 15; return ((u - v * 0.4) / 3.2) ** 2 + (v / 1.4) ** 2 < 1; }, { bb: [4, 13, 12, 17] as [number, number, number, number] });
-    r.paint(leafSh, solid(kind === 'tea' ? hex('#e8d890') : hex('#f4dcb0')));
-    r.fill(ell(cx, 7.6, 7.8, 2.4), (x, y) => 8 + 0.6 * Math.hypot((x - cx) / 7.8, (y - 7.6) / 2.4), solid(G[4]), { spec: 0.9, shin: 40, env: 0.2, bands: 6 }, { id: 3, seam: true });
-    // the drink: chamomile gold or dark coffee with a crema ring
-    r.fill(ell(cx, 7.8, 6.6, 1.7), flat(7.4), (_x, _y, mx, my) => {
-      const d = Math.hypot((mx - cx) / 6.6, (my - 7.8) / 1.7);
-      if (kind === 'tea') return rampAt([hex('#a8701c'), hex('#d4a032'), hex('#ecc860'), hex('#fff0b0')], clamp(0.6 - d * 0.3 + (d < 0.35 && mx < cx ? 0.3 : 0)));
-      return d > 0.78 ? hex('#b88458') : rampAt([hex('#2a1408'), hex('#4a2410'), hex('#6e3a1c')], clamp(0.4 - d * 0.2 + (d < 0.3 && mx < cx ? 0.4 : 0)));
-    }, { spec: 1, shin: 70, env: 0.2, bands: 6 }, { id: 4, seam: true });
-    r.chip = 0.15;
-    return r.url();
-  });
-}
-/** Steam rising from the mug: three soft pixel wisps, frame `f` (0..3), 26 x 14 units, transparent. */
-export function mugSteam(f = 0, k = 3): string {
-  return cachedRelief(`psteam:${f}:${k}`, () => {
-    const W = 26 * k, H = 14 * k, c = document.createElement('canvas'); c.width = W; c.height = H;
+/** A soft contact shadow (an ellipse that darkens toward its middle), w x h CSS px. */
+export function contactShadow(w: number, h: number, _zoom = 1): string {
+  return cached(`cshadow:${w}x${h}`, () => {
+    const k = deviceK(2), c = document.createElement('canvas');
+    c.width = Math.round(w * k); c.height = Math.round(h * k);
     const g = c.getContext('2d')!;
-    for (let s = 0; s < 3; s++) {
-      const x0 = (7 + s * 4) * k;
-      for (let y = H - 1; y > 0; y -= 1) {
-        const t = 1 - y / H, ph = (f / 4 + s * 0.33) * Math.PI * 2;
-        const x = x0 + Math.sin(t * 6 + ph) * (1 + t * 2.4) * k;
-        const a = Math.sin(Math.PI * clamp((t * 1.3 + f * 0.08 + s * 0.1) % 1)) * 0.55;
-        if (a < 0.05 || hash(Math.floor(x), y, s + f) > 0.85) continue;
-        g.fillStyle = `rgba(250, 246, 240, ${a.toFixed(2)})`;
-        g.fillRect(Math.round(x), y, k > 2 ? 2 : 1, 1);
-      }
+    g.scale(k, k); g.translate(w / 2, h / 2); g.scale(1, h / w);
+    const gr = g.createRadialGradient(0, 0, 0, 0, 0, w / 2);
+    gr.addColorStop(0, 'rgba(24,14,8,.6)'); gr.addColorStop(0.55, 'rgba(24,14,8,.32)'); gr.addColorStop(1, 'rgba(24,14,8,0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(0, 0, w / 2, 0, Math.PI * 2); g.fill();
+    return c.toDataURL('image/png');
+  });
+}
+
+export type ToolIcon = 'build' | 'shop' | 'wardrobe' | 'quests' | 'map' | 'settings';
+/** The side tools' icons come from the 3D icon family (iconset.ts); there is no painted fallback any more. */
+export const toolIcon = (_id: ToolIcon, _k = 2, _res = 1): string => '';
+
+// ------------------------------------------------------------------ nightstand props (sleep screen)
+
+/**
+ * A beeswax pillar candle in a brass chamberstick with a finger ring, the flame flickering (frame `f` 0..3);
+ * 54 x 108 CSS px.
+ */
+export function propCandle(f = 0, _k = 3): string {
+  return cached(`candle2:${f}`, () => {
+    const W = 54, H = 108, r = new Real(W, H, deviceK(3), 0), cx = 27;
+    const brass = metal(GOLD, { polish: 0.75 });
+    // the dish and its ring handle
+    r.part(ellipse(cx, 96, 25, 8), (x, y) => 2 + dome(cx, 96, 25, 8, 4)(x, y, 0), brass);
+    r.part(subtract(ellipse(cx + 22, 90, 6, 6), ellipse(cx + 22, 90, 3.4, 3.4)), 4.5, brass);
+    r.part(ellipse(cx, 92, 11, 4), 6.5, brass);
+    // the candle: a creamy beeswax pillar with a melted lip and drips
+    const wax: Material = { alb: (x, y) => mix(hex('#f6e6bc'), hex('#e8c888'), clamp((y - 40) / 60) * 0.5 + (vnoise(x * 0.5, y * 0.2, 5) - 0.5) * 0.08), spec: 0.25, shin: 18, diffuse: 0.85 };
+    const body = union(box(cx - 9, 40, 18, 52, 3), segment(cx - 7, 44, cx - 7, 54, 1.6), segment(cx + 5, 43, cx + 5, 60, 1.4));
+    r.part(body, (x) => tubeY(cx, 9.5, 6)(x, 0, 0), wax);
+    r.part(ellipse(cx, 41, 9, 2.6), (x, y) => 14 - dome(cx, 41, 9, 2.6, 1.4)(x, y, 0), wax);
+    r.part(segment(cx, 33, cx + 0.4, 40, 0.7), 16, matte('#2a1a10'));
+    const c = r.canvas({ shadow: { dy: 2, blur: 3, a: 0.35 } });
+    // the flame (painted smooth, flickering), with a halo
+    const g = c.getContext('2d')!, k = deviceK(3);
+    g.save(); g.scale(k, k);
+    const fl = [0, 0.8, -0.6, 0.3][f % 4], hgt = [15, 16.5, 14, 15.5][f % 4];
+    const halo = g.createRadialGradient(cx, 26, 0, cx, 26, 26);
+    halo.addColorStop(0, 'rgba(255,214,130,.45)'); halo.addColorStop(1, 'rgba(255,190,90,0)');
+    g.globalCompositeOperation = 'destination-over'; g.fillStyle = halo; g.beginPath(); g.arc(cx, 26, 26, 0, Math.PI * 2); g.fill();
+    g.globalCompositeOperation = 'source-over';
+    const fg = g.createLinearGradient(0, 33 - hgt, 0, 34);
+    fg.addColorStop(0, 'rgba(255,246,210,0)'); fg.addColorStop(0.25, '#fff4c4'); fg.addColorStop(0.65, '#ffc24a'); fg.addColorStop(0.92, '#e8762a'); fg.addColorStop(1, 'rgba(70,90,200,.7)');
+    g.fillStyle = fg;
+    g.beginPath(); g.moveTo(cx + fl, 33 - hgt); g.bezierCurveTo(cx + 5 + fl * 0.5, 28 - hgt * 0.4, cx + 4.2, 33, cx, 34); g.bezierCurveTo(cx - 4.2, 33, cx - 5 + fl * 0.5, 28 - hgt * 0.4, cx + fl, 33 - hgt); g.fill();
+    const core = g.createRadialGradient(cx, 30, 0, cx, 30, 3);
+    core.addColorStop(0, 'rgba(255,255,240,.95)'); core.addColorStop(1, 'rgba(255,240,200,0)');
+    g.fillStyle = core; g.beginPath(); g.arc(cx, 30, 3, 0, Math.PI * 2); g.fill();
+    g.restore();
+    return toURL(c);
+  });
+}
+
+/** A hand-thrown stoneware mug (chamomile or coffee inside), 78 x 78 CSS px. */
+export function propMug(kind: 'tea' | 'coffee', _k = 3): string {
+  return cached(`mug2:${kind}`, () => {
+    const W = 78, H = 78, r = new Real(W, H, deviceK(3), 0), cx = 34;
+    const glaze: Material = {
+      alb: (x, y) => {
+        const run = fbm(x * 0.12, y * 0.05, 3, 3);
+        const top = mix(hex('#3f6f8c'), hex('#6f9cb2'), clamp(run * 1.4 - 0.2));
+        const clay = mix(hex('#b9875a'), hex('#d4a476'), vnoise(x * 0.6, y * 0.6, 4));
+        const edge = 58 + Math.sin(x * 0.35) * 3 + run * 4;
+        const c = y > edge ? clay : top;
+        return (vnoise(x * 2.1, y * 2.1, 9) > 0.86 ? mix(c, [30, 26, 22], 0.35) : c) as RGB;
+      },
+      spec: 0.7, shin: 40, coat: 0.7,
+    };
+    // handle
+    r.part(subtract(ellipse(cx + 26, 40, 11, 13), ellipse(cx + 26, 40, 5.5, 7.5)), (x, y) => 6 + 3 * Math.sqrt(Math.max(0, 1 - ((Math.hypot((x - cx - 26) / 11, (y - 40) / 13) - 0.78) / 0.22) ** 2)), glaze);
+    // body (slightly barrel-shaped, rippled)
+    const bodyS = polygon([[cx - 24, 22], [cx + 24, 22], [cx + 25.5, 44], [cx + 23, 68], [cx - 23, 68], [cx - 25.5, 44]]);
+    r.part(bodyS, (x, y) => tubeY(cx, 26, 4)(x, y, 0) + Math.sin(y * 0.55) * 0.35, glaze);
+    // the foot shadow line and the rim with the drink
+    r.part(ellipse(cx, 22, 24, 6), 30, glaze);
+    r.part(ellipse(cx, 22.6, 20.5, 4.6), 29, kind === 'tea' ? { alb: () => hex('#d9a441'), spec: 0.9, shin: 80, coat: 1 } : { alb: () => hex('#4a2a16'), spec: 0.9, shin: 80, coat: 1 });
+    return r.url({ shadow: { dy: 2, blur: 3, a: 0.35 } });
+  });
+}
+
+/** Steam rising from the mug: soft wisps, frame `f` (0..3), 78 x 42 CSS px, transparent. */
+export function mugSteam(f = 0, _k = 3): string {
+  return cached(`steam2:${f}`, () => {
+    const W = 78, H = 42, k = deviceK(2), c = document.createElement('canvas');
+    c.width = W * k; c.height = H * k;
+    const g = c.getContext('2d')!;
+    g.scale(k, k); g.lineCap = 'round';
+    for (let i = 0; i < 3; i++) {
+      const x0 = 24 + i * 10, ph = f * 0.9 + i * 1.7;
+      g.strokeStyle = `rgba(255,252,244,${0.38 - i * 0.06})`; g.lineWidth = 3.2 - i * 0.5;
+      g.filter = 'blur(0.6px)';
+      g.beginPath();
+      for (let y = H; y >= 4; y -= 2) { const x = x0 + Math.sin(y * 0.18 + ph) * (3 + (H - y) * 0.08); if (y === H) g.moveTo(x, y); else g.lineTo(x, y); }
+      g.stroke();
     }
     return c.toDataURL('image/png');
   });
 }
 
 /**
- * The phone, 22 x 34 units: a real handset (rounded aluminium edge, a camera bump, a glass face showing a
- * moonlit lock screen). Put to bed, it lies under a little knitted blanket with a pom-pom.
+ * The phone on the nightstand: lying face up, dark glass with a soft glint, or (`bed`) in its cosy wool sleeve
+ * showing the bedtime lock; 66 x 102 CSS px.
  */
-export function propPhone(bed: boolean, k = 3): string {
-  return cachedRelief(`pphone:${bed}:${k}`, () => {
-    const r = new Relief(22, 34, 1, k), x0 = 3, y0 = 2, w = 16, h = 30;
-    const shell = roundRect(x0, y0, w, h, 3.2);
-    r.fill(shell, slab(x0, y0, w, h, 2.6, 1.6, 1), metal(PAL.iron, { base: 0.46, brush: "y" }), MAT.iron, { id: 1 });
-    const glass = roundRect(x0 + 1.2, y0 + 1.2, w - 2.4, h - 2.4, 2.4);
-    r.fill(glass, flat(3.4), (_x, _y, mx, my) => {
-      const sky = rampAt(PAL.sapphire, clamp(0.3 + (my - y0) * 0.012 + (vnoise(mx * 0.3, my * 0.3, 2) - 0.5) * 0.08));
-      if (Math.hypot(mx - 14, my - 10) < 3 && Math.hypot(mx - 15.2, my - 9.2) > 2.5) return hex('#fbe08a');
-      if (hash(Math.floor(mx * 1.5), Math.floor(my * 1.5), 6) > 0.985) return hex('#e8f0ff');
-      if (my > 16 && my < 18.6 && mx > 6.4 && mx < 15.6) return mix(sky, hex('#ffffff'), 0.55); // the time on the lock screen
-      return sky;
-    }, { spec: 1, shin: 70, env: 0.35, bands: 6 }, { id: 2, seam: true });
-    r.fill(disc(x0 + w / 2, y0 + 2.2, 0.8), flat(4), solid(hex('#0c1020')), MAT.glass ?? MAT.enamel, { id: 3 });
+export function propPhone(bed: boolean, _k = 3): string {
+  return cached(`phone2:${bed}`, () => {
+    const W = 66, H = 102, r = new Real(W, H, deviceK(3), 0);
+    r.part(box(6, 4, 54, 94, 10), bevel(3, 2.5), metal(hex('#3a3c44'), { polish: 0.6 }));
+    const scr = box(9, 7, 48, 88, 8);
+    const sky = (x: number, y: number): RGB => bed ? mix(hex('#1c2a52'), hex('#4a3a6e'), clamp(y / 90)) as RGB : mix(hex('#0e1016'), hex('#1a1d26'), clamp(y / 90)) as RGB;
+    r.part(scr, 3.2, { ...glass(hex('#111')), alb: sky, metal: 0.2 });
     if (bed) {
-      // a knitted blanket: cable stripes, a turned-down cuff, a pom-pom
-      const blanket = Object.assign((x: number, y: number) => y > 14 + Math.sin(x * 0.6) * 0.6 && y < 33.6 && x > 1.2 && x < 20.8, { bb: [1, 13, 21, 34] as [number, number, number, number] });
-      r.fill(blanket, (x, y) => 6 + Math.sin(x * 1.6) * 0.5 + (y < 18 ? 0.8 : 0), (_x, _y, mx, my) => {
-        const stripe = my < 18 ? 3 : Math.floor((mx + 0.5) / 3.4) % 2;
-        const knit = ((Math.floor(mx * 3) + Math.floor(my * 1.5)) % 2) ? 0.06 : -0.06;
-        return rampAt(stripe === 3 ? PAL.linen : stripe ? PAL.rose : PAL.plum, clamp(0.52 + knit));
-      }, MAT.cloth, { id: 4, seam: true });
-      r.fill(disc(18.4, 15.4, 2.2), (x, y) => 9 + 1.6 * Math.sqrt(Math.max(0, 1 - ((x - 18.4) ** 2 + (y - 15.4) ** 2) / 4.84)) + (hash(Math.floor(x * 3), Math.floor(y * 3), 8) - 0.5) * 0.8, solid(rampAt(PAL.linen, 0.8)), MAT.cloth, { id: 5, seam: true });
+      r.paint(circle(33, 30, 7), glow((x, y) => mix(hex('#fff4d0'), hex('#f4d488'), clamp(Math.hypot(x - 33, y - 30) / 7)) as RGB));
+      r.paint(circle(36.5, 27.5, 6.2), { alb: sky, spec: 0.8, shin: 60 });
+      r.paint(box(20, 56, 26, 3, 1.5), glow('#e8dcc0'), 0.85);
+      r.paint(box(24, 63, 18, 2.2, 1.1), glow('#b8b0c8'), 0.7);
     }
-    r.chip = 0.12;
-    return r.url();
+    r.part(box(28, 9, 10, 2.4, 1.2), 3.6, matte('#050608'));
+    const c = r.canvas({ shadow: { dy: 2.5, blur: 4, a: 0.4 } });
+    const g = c.getContext('2d')!, k = deviceK(3);
+    g.save(); g.scale(k, k);
+    const gl = g.createLinearGradient(9, 7, 57, 60);
+    gl.addColorStop(0, 'rgba(255,255,255,.16)'); gl.addColorStop(0.4, 'rgba(255,255,255,.05)'); gl.addColorStop(0.41, 'rgba(255,255,255,0)');
+    g.fillStyle = gl; g.beginPath(); g.roundRect(9, 7, 48, 88, 8); g.fill();
+    g.restore();
+    return toURL(c);
   });
 }
 
-// ------------------------------------------------------------------ the morning's gift sack
+/** The burlap gift sack Pip brings home, tied with a red ribbon; `open` 0..1 loosens the neck. 224 x 232 CSS px. */
+export function giftSack(open = 0, _k = 2): string {
+  return cached(`sack2:${open}`, () => {
+    const W = 224, H = 232, r = new Real(W, H, deviceK(2), 0), cx = 112;
+    const burlap = cloth('linen', hex('#b48a52'), { scale: 1.3, amt: 1.1 });
+    const neckW = 26 + open * 30, top = 30 - open * 6;
+    const bodyS = warp(union(ellipse(cx, 158, 92, 70), polygon([[cx - 60, 110], [cx + 60, 110], [cx + neckW, 70], [cx - neckW, 70]])), 3, 0.05, 4);
+    r.part(bodyS, (x, y, ins) => 8 + Math.min(26, ins * 0.6) + Math.sin(x * 0.12 + y * 0.03) * 1.2, burlap);
+    // the gathered neck and the ruffled top
+    r.part(warp(polygon([[cx - neckW - 18, top + 6], [cx + neckW + 18, top + 4], [cx + neckW + 4, 72], [cx - neckW - 4, 72]]), 3, 0.12, 6), (x, y, ins) => 22 + Math.min(8, ins * 0.4) + Math.sin(x * 0.5) * 1.6, burlap);
+    if (open > 0.3) r.part(ellipse(cx, top + 8, neckW + 10, 8 + open * 4), 30, matte('#2a1a0e'));
+    // the ribbon round the neck with a bow
+    const red: Material = { ...cloth('velvet', hex('#b8343c'), { amt: 0.3 }), spec: 0.45, shin: 28, sheen: 0.45 };
+    r.part(box(cx - neckW - 6, 64, neckW * 2 + 12, 11, 5), (x, y) => 34 + tubeX(69.5, 5.5)(x, y, 0) * 0.6, red);
+    if (open < 0.6) {
+      r.part(ellipse(cx - 16, 66, 15, 9), (x, y) => 38 + dome(cx - 16, 66, 15, 9, 5)(x, y, 0), red);
+      r.part(ellipse(cx + 16, 66, 15, 9), (x, y) => 38 + dome(cx + 16, 66, 15, 9, 5)(x, y, 0), red);
+      r.part(polygon([[cx - 6, 70], [cx - 2, 70], [cx - 14, 100], [cx - 22, 96]]), 36, red);
+      r.part(polygon([[cx + 2, 70], [cx + 6, 70], [cx + 22, 96], [cx + 14, 100]]), 36, red);
+      r.part(circle(cx, 68, 6), dome(cx, 68, 6, 6, 4, 40), red);
+    }
+    void COPPER; void IRON; void leather; void pillow; void glass;
+    return r.url({ shadow: { dy: 6, blur: 10, a: 0.4 }, aoR: 8 });
+  });
+}
 
-const BURLAP = [hex('#4a2e14'), hex('#6c4620'), hex('#8e6230'), hex('#ac7e42'), hex('#c49a58'), hex('#d8b474'), hex('#e8cc94')];
-/**
- * Pip's gift sack, 56 x 58 units: a plump burlap sack stuffed with lumpy presents, its neck gathered and
- * tied with a twisted rope, a sapphire patch with a gilt moon stitched on the front. `open` 0..1 loosens
- * the neck and lets the warm light of the presents spill out.
- */
-export function giftSack(open = 0, k = 2): string {
-  return cachedRelief(`sack:${open.toFixed(2)}:${k}`, () => {
-    const W = 56, H = 58, r = new Relief(W, H, 1, k), cx = 28;
-    const burlap: AFn = (_x, _y, mx, my) => {
-      const X = Math.floor(mx * 1.6), Y = Math.floor(my * 1.6), over = ((X + Y) & 1) ? 0.07 : -0.07;
-      const slub = hash(Y, 1, 5) > 0.82 ? 0.06 : hash(X, 2, 5) > 0.86 ? -0.06 : 0;
-      return rampAt(BURLAP, clamp(0.52 + over + slub + (fbm(mx * 0.08, my * 0.08, 3) - 0.5) * 0.18));
+// ------------------------------------------------------------------ the main objects' 2D stand-ins
+
+/** Moon lamp: a brass stand holding a glowing glass moon. 52 x 54 units (k device px per unit). */
+export function moonLamp(k = 2, _res = 1, glowK = 0.6, lit = 1): string {
+  return cached(`moonlamp2:${k}:${glowK.toFixed(2)}:${lit}`, () => {
+    const r = new Real(52, 54, k * deviceK(3), 0), brass = metal(GOLD, { polish: 0.75 });
+    r.part(ellipse(26, 49, 15, 4), (x, y) => 1 + dome(26, 49, 15, 4, 2.4)(x, y, 0), brass);
+    r.part(box(23.5, 34, 5, 15, 2), tubeY(26, 2.5, 3), brass);
+    const moon = (x: number, y: number): RGB => {
+      const crater = fbm(x * 0.18, y * 0.18, 8, 3);
+      return mix(hex('#c9d4ea'), hex('#fff8dc'), clamp(0.45 + glowK * 0.5 + (crater - 0.5) * 0.4)) as RGB;
     };
-    // ---- the body: bottom-heavy, lumpy with the presents inside
-    const body = (x: number, y: number) => { const u = (x - cx) / (22.5 - Math.max(0, 40 - y) * 0.12), v = (y - 39) / 17.5; return u * u + Math.max(v, -1.2) ** 2 * (v > 0 ? 1.15 : 0.62) <= 1 && y < 56; };
-    r.fill(Object.assign(body, { bb: [2, 18, 54, 57] as [number, number, number, number] }), (x, y) => {
-      const u = (x - cx) / 23, v = (y - 39) / 18, base = Math.max(0, 1 - u * u - v * v);
-      const lumps = (fbm(x * 0.09, y * 0.09, 11) - 0.5) * 6 + Math.sin(x * 0.35 + y * 0.12) * 0.6;
-      return 3 + 11 * Math.sqrt(base) + lumps * Math.sqrt(base);
-    }, burlap, MAT.cloth, { id: 1 });
-    // gathers running up into the neck
-    r.carve(Object.assign((x: number, y: number) => y < 34 && y > 18, { bb: [10, 18, 46, 34] as [number, number, number, number] }), (x, y) => Math.sin((x - cx) * 0.9) * 0.9 * (34 - y) / 16);
-    // ---- the neck and its ruffled mouth
-    const neckW = 7 + open * 6, mouthW = 13 + open * 7;
-    r.fill(Object.assign((x: number, y: number) => y >= 9 && y < 22 && Math.abs(x - cx) < neckW + (22 - y) * (mouthW - neckW) / 13 * (y < 14 ? 1 : 0.4), { bb: [cx - 22, 9, cx + 22, 22] as [number, number, number, number] }), (x) => 9 + Math.sin((x - cx) * 1.1) * 1.1, burlap, MAT.cloth, { id: 2, seam: true });
-    // tied shut, the cloth above the rope bunches up into a ruffle of little peaks
-    if (open < 0.05) {
-      // soft, uneven peaks of bunched cloth, flaring out over the rope
-      const top = (x: number) => { const u = (x - cx + 40) / 3.1, i = Math.floor(u), f = u - i; return 3.4 + hash(i, 7, 3) * 2.6 + (1 - Math.sin(f * Math.PI)) * 2.4 + Math.abs(x - cx) * 0.16; };
-      r.fill(Object.assign((x: number, y: number) => Math.abs(x - cx) < mouthW && y >= top(x) && y < 12, { bb: [cx - mouthW, 3, cx + mouthW, 12] as [number, number, number, number] }),
-        (x, y) => 9.5 + Math.sin((x - cx) * 1.85) * 1.4 - (12 - y) * 0.1, burlap, MAT.cloth, { id: 3, seam: true });
-      r.carve(Object.assign((x: number, y: number) => y < 12, { bb: [cx - mouthW, 3, cx + mouthW, 12] as [number, number, number, number] }), (x) => (((x - cx + 40) % 3.1) < 0.45 ? -1.4 : 0));
-    }
-    // opening: dark inside, the presents' light spilling out
-    const mouth = ell(cx, 10, mouthW * 0.95, 2.2 + open * 3.6);
-    if (open >= 0.05) r.fill(mouth, flat(8), (_x, _y, mx, my) => {
-      const d = Math.hypot((mx - cx) / (mouthW * 0.95), (my - 10) / (2.2 + open * 3.6));
-      if (open < 0.05) return hex('#2a1608');
-      return rampAt([hex('#3a1e08'), hex('#b8701e'), hex('#f2c050'), hex('#fff0b0'), hex('#ffffff')], clamp(open * 1.1 - d * 0.7 + 0.15));
-    }, open > 0.05 ? MAT.glow : MAT.cloth, { id: 3, seam: true });
-    // ---- the rope: twisted, round the neck, with a looped bow and two tails
-    const ropeA: AFn = (_x, _y, mx, my) => rampAt([hex('#5a3818'), hex('#8a6030'), hex('#b88c4c'), hex('#dcb878'), hex('#f0d8a4')], clamp(0.62 + (((Math.floor(mx * 1.4 - my * 1.4) % 3) + 3) % 3 - 1) * 0.16));
-    r.fill(rect(cx - neckW - 2.5, 20.5, (neckW + 2.5) * 2, 3.6), tubeX(22.3, 1.8, 10), ropeA, MAT.cloth, { id: 4, seam: true });
-    r.fill(and(ring(cx + 6, 25, 2.4, 4.2), (_x, y) => y > 21), torus(cx + 6, 25, 3.3, 0.9, 1.6, 11), ropeA, MAT.cloth, { id: 5, seam: true });
-    r.fill(or(seg(cx + 3, 23, cx + 1, 32, 0.9), seg(cx + 5, 23, cx + 8, 33, 0.9)), flat(11), ropeA, MAT.cloth, { id: 5, seam: true });
-    // ---- the patch: sapphire cloth, a running stitch, a gilt crescent and two stars
-    const patch = rrect(cx - 8.5, 33, 17, 15, 1.4);
-    r.fill(patch, (x, y) => 3 + 11 * Math.sqrt(Math.max(0, 1 - ((x - cx) / 23) ** 2 - ((y - 39) / 18) ** 2)) + 0.8, weave(PAL.sapphire, { base: 0.46 }), MAT.cloth, { id: 6, seam: true });
-    r.carve(and(patch, not(rrect(cx - 7.4, 34.1, 14.8, 12.8, 1))), () => -0.3);
-    r.paint(and(patch, not(rrect(cx - 7.6, 33.9, 15.2, 13.2, 1)), (x, y) => (Math.floor(x * 2) + Math.floor(y * 2)) % 3 === 0), solid(hex('#f0dca8')));
-    const moon = and(disc(cx - 0.6, 40.5, 4.6), not(disc(cx + 1.6, 39.2, 3.8)));
-    r.paint(moon, metal(PAL.gold, { base: 0.66 }), MAT.brass); r.carve(moon, () => 0.6);
-    for (const [sx, sy] of [[cx + 4, 37], [cx + 3, 44]]) { const st = or(rect(sx - 0.4, sy - 1.2, 0.8, 2.4), rect(sx - 1.2, sy - 0.4, 2.4, 0.8)); r.paint(st, metal(PAL.gold, { base: 0.78 }), MAT.brass); }
-    r.shadow = null;
-    return r.url();
+    r.part(circle(26, 20, 15), dome(26, 20, 15, 15, 12, 4), lit ? { alb: moon, emit: 0.0, spec: 0.8, shin: 60, coat: 1, diffuse: 0.35 } : { alb: (x, y) => mix(moon(x, y), [70, 80, 110], 0.5) as RGB, spec: 0.8, shin: 60, coat: 1 });
+    return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.35 }, ambient: lit ? 0.75 : 0.4 });
+  });
+}
+/** The halo of moonlight behind the lamp: a soft radial glow (52 x 54 units). */
+export function lampHalo(k = 2, _res = 1, strength = 1): string {
+  return cached(`halo2:${k}:${strength}`, () => {
+    const kk = k * deviceK(2), c = document.createElement('canvas');
+    c.width = Math.round(52 * kk); c.height = Math.round(54 * kk);
+    const g = c.getContext('2d')!;
+    g.scale(kk, kk);
+    const gr = g.createRadialGradient(26, 20, 4, 26, 20, 26);
+    gr.addColorStop(0, `rgba(220,232,255,${0.7 * strength})`); gr.addColorStop(0.45, `rgba(190,210,250,${0.3 * strength})`); gr.addColorStop(1, 'rgba(180,200,250,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 52, 54);
+    return c.toDataURL('image/png');
   });
 }
 
-/** Detail level for a HUD part: 2 art px per unit on phones, 3 where the HUD is shown 1.5x (desktop). */
+/** Geometry of the twin-bell alarm clock, in units. */
+export const ALARM = { W: 52, H: 54, cx: 26, cy: 30, dial: 12.6 };
+/**
+ * A brass twin-bell alarm clock with a cream enamel dial (numerals, minute ticks), units per ALARM; `k` device px
+ * per unit. `ringF` 1/2 tilts the bells (ringing frames).
+ */
+export function alarmClock(k = 2, _res = 1, ringF = 0): string {
+  return cached(`alarm2:${k}:${ringF}`, () => {
+    const { W, H, cx, cy, dial } = ALARM, r = new Real(W, H, k, 0), brass = metal(GOLD, { polish: 0.8 });
+    const tilt = ringF === 1 ? -1.2 : ringF === 2 ? 1.2 : 0;
+    // feet and hammer
+    r.part(segment(cx - 9, cy + 13, cx - 13, cy + 20, 1.6), 3, brass);
+    r.part(segment(cx + 9, cy + 13, cx + 13, cy + 20, 1.6), 3, brass);
+    r.part(segment(cx, cy - 15, cx + tilt * 2, cy - 19.5, 0.9), 6, brass);
+    // bells
+    for (const s of [-1, 1]) {
+      const bx = cx + s * 11 + tilt, by = cy - 14;
+      r.part(ellipse(bx, by, 8.5, 6.4), dome(bx, by + 1, 8.5, 7, 6, 2), brass);
+      r.part(circle(bx, by - 6, 1.4), dome(bx, by - 6, 1.4, 1.4, 1, 7), brass);
+    }
+    // body and bezel
+    r.part(circle(cx, cy, dial + 4), rim(4, 5, 4), brass);
+    r.part(circle(cx, cy, dial + 0.4), (x, y) => 7 - dome(cx, cy, dial, dial, 0.8)(x, y, 0) * 0.2, { alb: (x, y) => mix(hex('#fbf3df'), hex('#ead9b4'), clamp(Math.hypot(x - cx + 3, y - cy + 3) / (dial * 1.6))) as RGB, spec: 0.3, shin: 30 });
+    // minute ticks and hour marks
+    for (let i = 0; i < 60; i++) {
+      const a = (i / 60) * Math.PI * 2, big = i % 5 === 0, r0 = dial - (big ? 2.6 : 1.4), r1 = dial - 0.7;
+      r.paint(segment(cx + Math.sin(a) * r0, cy - Math.cos(a) * r0, cx + Math.sin(a) * r1, cy - Math.cos(a) * r1, big ? 0.42 : 0.16), matte('#2a1e14'));
+    }
+    return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.35 } });
+  });
+}
+/** Draw the alarm clock's hands (blued hour and minute, a red seconds hand, the gold alarm hand) and the glass glint. */
+export function alarmHands(g: CanvasRenderingContext2D, k: number, _res: number, d: Date, wake?: number) {
+  const { cx, cy, dial } = ALARM;
+  g.save();
+  g.scale(k, k);
+  g.lineCap = 'round';
+  const hand = (ang: number, len: number, w: number, col: string, tail = 2) => {
+    g.strokeStyle = col; g.lineWidth = w;
+    g.beginPath(); g.moveTo(cx - Math.sin(ang) * tail, cy + Math.cos(ang) * tail); g.lineTo(cx + Math.sin(ang) * len, cy - Math.cos(ang) * len); g.stroke();
+  };
+  g.shadowColor = 'rgba(20,10,4,.35)'; g.shadowBlur = 0.8 * k; g.shadowOffsetY = 0.5 * k;
+  const h = d.getHours() % 12, m = d.getMinutes(), s = d.getSeconds();
+  if (wake !== undefined) hand(((wake % 720) / 720) * Math.PI * 2, dial - 3.4, 1.0, '#d9a32c', 0);
+  hand(((h * 60 + m) / 720) * Math.PI * 2, dial * 0.52, 1.5, '#1d2a4a');
+  hand(((m * 60 + s) / 3600) * Math.PI * 2, dial * 0.8, 1.1, '#1d2a4a');
+  hand((s / 60) * Math.PI * 2, dial * 0.86, 0.45, '#b8322e', 3);
+  g.shadowColor = 'transparent';
+  g.fillStyle = '#c8962e'; g.beginPath(); g.arc(cx, cy, 1.2, 0, Math.PI * 2); g.fill();
+  const gl = g.createLinearGradient(cx - dial, cy - dial, cx + dial * 0.2, cy + dial * 0.2);
+  gl.addColorStop(0, 'rgba(255,255,255,.35)'); gl.addColorStop(0.5, 'rgba(255,255,255,.06)'); gl.addColorStop(0.51, 'rgba(255,255,255,0)');
+  g.fillStyle = gl; g.beginPath(); g.arc(cx, cy, dial, 0, Math.PI * 2); g.fill();
+  g.restore();
+}
+
+/** The leather journal: oxblood leather over boards, gilt crescent, page block; `open` 0..1 swings the cover. 52 x 54 units. */
+export function journal(k = 2, _res = 1, open = 0): string {
+  return cached(`journal2:${k}:${open}`, () => {
+    const r = new Real(52, 54, k * deviceK(3), 0);
+    const pages: Material = { alb: (_x, y) => mix(hex('#f6ecd2'), hex('#dcc9a0'), (Math.sin(y * 3.1) + 1) * 0.15) as RGB, spec: 0.05 };
+    r.part(box(10, 6, 34, 44, 2), 3, pages);
+    const cw = 34 * (1 - open * 0.85);
+    const cover = box(8, 4, Math.max(6, cw + 2), 46, 3);
+    r.part(cover, bevel(3, 3, 3), leather('#7a1f24', { scale: 3 }));
+    r.part(box(6, 4, 6, 46, 3), (x, y) => 4 + tubeY(9, 3)(x, y, 0) * 0.5, leather('#6a1a1e', { scale: 3 }));
+    if (open < 0.5) {
+      const cxm = 8 + cw / 2 + 1;
+      r.paint(subtract(circle(cxm, 24, 7), circle(cxm + 3.5, 22, 6.4)), metal(GOLD, { polish: 0.8 }));
+      r.carve(subtract(box(11, 7, cw - 4, 40, 2), box(12, 8, cw - 6, 38, 1.6)), 0.4, 0.3);
+    }
+    return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.35 } });
+  });
+}
+
+/** Detail level for a HUD part: the HUD is drawn 1.5x on big screens. */
 export const DESK_HUD = '(min-width: 900px) and (min-height: 640px)';
 export const DESK_NAV = '(min-width: 900px) and (min-height: 760px)';
-/** [ui5] art pixels per design unit (one unit = 2 CSS px): 1.5 makes each art pixel 1.33 CSS px, a little chunkier than 1:1 */
-export const kFor = (q: string) => { try { return matchMedia(q).matches ? 2.25 : 1.5; } catch { return 1.5; } };
+/** [ui7] the HUD zoom for a media query: 1.5 where the HUD is shown 1.5x (desktop), else 1 */
+export const kFor = (q: string) => { try { return matchMedia(q).matches ? 1.5 : 1; } catch { return 1; } };
+
+export { hex, smoothstep };

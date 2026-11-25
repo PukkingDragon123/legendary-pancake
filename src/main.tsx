@@ -16,7 +16,8 @@ import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
 import { alagardReady, installTextSnap } from './ui/font.ts'; // Alagard everywhere: also routes every UI text node through alagardSafe
 import { installText3D } from './ui/text3d.tsx'; // 3D pixel titles, numbers, buttons, toasts
-import { installPixelSkin } from './ui/pxskin.ts';
+import { installRealSkin } from './ui/real/skin.ts'; // [ui7] the realistic material kit (walnut, brass, leather, paper)
+import { loadTextures } from './ui/real/tex.ts';
 import { installIconSet } from './ui/chrome/iconset.ts';
 import { installArtPx } from './gfx/artpx.ts'; // one art pixel for the whole game
 import { Scene } from './world/scene.ts';
@@ -25,7 +26,8 @@ import { bindHome } from './build/home-sync.ts'; // [house]
 
 async function boot() {
   installArtPx();
-  installPixelSkin();
+  await loadTextures(); // [ui7] the UI's material tiles (small WebPs) before anything is painted
+  installRealSkin();
   installIconSet(); // [ui4] the painted icon family replaces the sprite icons everywhere
   await alagardReady();
   installTextSnap();

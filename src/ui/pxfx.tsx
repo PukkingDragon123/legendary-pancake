@@ -1,160 +1,142 @@
-// Pixel-art replacements for every smooth round thing in the interface: stepped, Bayer-dithered
-// glows (instead of radial gradients), pixel sunbursts that turn in whole-pixel steps (instead of
-// conic gradients), dithered vignettes, star tiles, pixel ellipse shadows and stepped circle clips
-// (instead of border-radius: 50%). Everything is painted at art-pixel resolution on a canvas and
-// shown with image-rendering: pixelated, so edges are hard pixel steps, never anti-aliased.
-// OWNED BY THE UI BUILDER (ui3).
+// Soft light and small round things for the interface, painted smooth and anti-aliased at device
+// resolution: radial glows, vignettes, star tiles with soft halos, soft contact shadows, a gradient sky for
+// round portraits, a brass-and-paper knob, a pencil loop, pegboard holes, ticket perforations, a round clip,
+// and a slowly turning sunburst of soft rays. (The file keeps its old name: many screens import from it.)
+// `pixelate()` stays for the anime emotes layer, which still wants a chunky chibi.
 import { useEffect, useRef } from 'preact/hooks';
 import { calm } from './px/calm.js';
 
 type RGB = [number, number, number];
 const rgbOf = (c: string): RGB => { let s = calm(c).replace('#', ''); if (s.length <= 4) s = s.split('').map((k) => k + k).join(''); const n = parseInt(s.slice(0, 6), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
-const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
-const bayer = (x: number, y: number) => BAYER[((y & 3) << 2) | (x & 3)];
+const rgba = (c: string, a: number) => { const [r, g, b] = rgbOf(c); return `rgba(${r},${g},${b},${a})`; };
 const hash = (x: number, y: number, s = 0) => { let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 982451653)) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16; return (h >>> 0) / 4294967296; };
+const DPR = () => Math.min(3, Math.max(1, (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1));
 
 const urls = new Map<string, string>();
-function paint(key: string, w: number, h: number, fn: (d: Uint8ClampedArray, w: number, h: number) => void): string {
+/** paint once: `w` x `h` CSS px drawn at `s` px per CSS px */
+function paint(key: string, w: number, h: number, fn: (g: CanvasRenderingContext2D, w: number, h: number) => void, s = 2): string {
   let u = urls.get(key);
   if (u !== undefined) return u;
   if (typeof document === 'undefined') return '';
   const c = document.createElement('canvas');
-  c.width = w; c.height = h;
-  const g = c.getContext('2d')!, img = g.createImageData(w, h);
-  fn(img.data, w, h);
-  g.putImageData(img, 0, 0);
+  c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+  const g = c.getContext('2d')!;
+  g.scale(s, s);
+  fn(g, w, h);
   u = c.toDataURL('image/png');
   urls.set(key, u);
   return u;
 }
-const put = (d: Uint8ClampedArray, w: number, x: number, y: number, c: RGB, a: number) => { const i = (y * w + x) * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = a; };
 
-/**
- * A stepped glow: `bands` concentric pixel rings fading out in hard steps, the steps broken up by
- * an ordered dither. `n` texels across; `a` the alpha (0..1) of the centre. Returns a data URL.
- */
-export function pxGlowURL(color: string, n = 48, a = 0.6, bands = 5, ry = 1): string {
-  return paint(`glow:${color}:${n}:${a}:${bands}:${ry}`, n, Math.round(n * ry), (d, w, h) => {
-    const c = rgbOf(color), cx = (w - 1) / 2, cy = (h - 1) / 2;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const r = Math.hypot((x - cx) / (w / 2), (y - cy) / (h / 2));
-      if (r >= 1) continue;
-      const k = Math.floor((1 - r) * bands + bayer(x, y) * 0.9);
-      if (k <= 0) continue;
-      put(d, w, x, y, c, Math.round((Math.min(bands, k) / bands) * a * 255));
-    }
-  });
+/** A soft radial glow of `color` (centre alpha `a`), `n` px across. */
+export function pxGlowURL(color: string, n = 48, a = 0.6, _bands = 5, ry = 1): string {
+  return paint(`glow:${color}:${n}:${a}:${ry}`, n, n * ry, (g, w, h) => {
+    g.translate(w / 2, h / 2); g.scale(1, ry);
+    const gr = g.createRadialGradient(0, 0, 0, 0, 0, w / 2);
+    gr.addColorStop(0, rgba(color, a)); gr.addColorStop(0.35, rgba(color, a * 0.55)); gr.addColorStop(0.7, rgba(color, a * 0.16)); gr.addColorStop(1, rgba(color, 0));
+    g.fillStyle = gr; g.beginPath(); g.arc(0, 0, w / 2, 0, Math.PI * 2); g.fill();
+  }, 1);
 }
 
-/** A dithered vignette: clear in the middle, `color` towards the edges, in hard bands. */
-export function pxVignetteURL(color: string, w = 96, h = 160, a = 0.8, cx = 0.5, cy = 0.4, bands = 6): string {
-  return paint(`vig:${color}:${w}x${h}:${a}:${cx}:${cy}:${bands}`, w, h, (d) => {
-    const c = rgbOf(color);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const r = Math.hypot((x / w - cx) / 0.75, (y / h - cy) / 0.9);
-      const k = Math.floor(Math.max(0, r - 0.25) * 1.6 * bands + bayer(x, y) * 0.95);
-      if (k <= 0) continue;
-      put(d, w, x, y, c, Math.round((Math.min(bands, k) / bands) * a * 255));
-    }
-  });
+/** A soft vignette: clear in the middle, `color` towards the edges. */
+export function pxVignetteURL(color: string, w = 96, h = 160, a = 0.8, cx = 0.5, cy = 0.4): string {
+  return paint(`vig:${color}:${w}x${h}:${a}:${cx}:${cy}`, w, h, (g) => {
+    const r = Math.hypot(w, h) * 0.62;
+    const gr = g.createRadialGradient(w * cx, h * cy, r * 0.28, w * cx, h * cy, r);
+    gr.addColorStop(0, rgba(color, 0)); gr.addColorStop(0.55, rgba(color, a * 0.45)); gr.addColorStop(1, rgba(color, a));
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  }, 1);
 }
 
-/** A tile of tiny stars (crosses, dots and dim specks) for night skies. `n` texels square. */
+/** A tile of stars: soft points with halos and a few four-point sparkles. `n` px square. */
 export function pxStarsURL(n = 40, seed = 1, cols: string[] = ['#f4eedd', '#aec8cc', '#f1d39a']): string {
-  return paint(`stars:${n}:${seed}:${cols.join()}`, n, n, (d, w) => {
-    const C = cols.map(rgbOf);
+  return paint(`stars:${n}:${seed}:${cols.join()}`, n, n, (g) => {
     const count = Math.round((n * n) / 90);
     for (let i = 0; i < count; i++) {
-      const x = Math.floor(hash(i, 1, seed) * n), y = Math.floor(hash(i, 2, seed) * n), k = hash(i, 3, seed), c = C[i % C.length];
-      const P = (xx: number, yy: number, al: number) => put(d, w, ((xx % n) + n) % n, ((yy % n) + n) % n, c, al);
-      if (k > 0.9) { P(x, y, 255); P(x - 1, y, 150); P(x + 1, y, 150); P(x, y - 1, 150); P(x, y + 1, 150); }
-      else if (k > 0.55) P(x, y, 230);
-      else P(x, y, 120);
+      const x = hash(i, 1, seed) * n, y = hash(i, 2, seed) * n, k = hash(i, 3, seed), c = cols[i % cols.length];
+      for (const [dx, dy] of [[0, 0], [n, 0], [-n, 0], [0, n], [0, -n]]) {
+        const X = x + dx, Y = y + dy, r = k > 0.9 ? 2.2 : k > 0.55 ? 1.2 : 0.8;
+        if (X < -4 || Y < -4 || X > n + 4 || Y > n + 4) continue;
+        const gr = g.createRadialGradient(X, Y, 0, X, Y, r * 2.2);
+        gr.addColorStop(0, rgba(c, k > 0.55 ? 1 : 0.6)); gr.addColorStop(0.3, rgba(c, 0.5)); gr.addColorStop(1, rgba(c, 0));
+        g.fillStyle = gr; g.beginPath(); g.arc(X, Y, r * 2.2, 0, Math.PI * 2); g.fill();
+        if (k > 0.9) { g.strokeStyle = rgba(c, 0.55); g.lineWidth = 0.5; g.beginPath(); g.moveTo(X - 3.5, Y); g.lineTo(X + 3.5, Y); g.moveTo(X, Y - 3.5); g.lineTo(X, Y + 3.5); g.stroke(); }
+      }
     }
-  });
+  }, 3);
 }
 
-/** A flat pixel ellipse (e.g. a soft shadow under a prop): hard stepped edge, one dither ring. */
+/** A soft elliptical contact shadow. */
 export function pxEllipseURL(color: string, w = 24, h = 6, a = 0.35): string {
-  return paint(`ell:${color}:${w}x${h}:${a}`, w, h, (d) => {
-    const c = rgbOf(color), cx = (w - 1) / 2, cy = (h - 1) / 2;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const r = Math.hypot((x - cx) / (w / 2), (y - cy) / (h / 2));
-      if (r > 1) continue;
-      if (r > 0.78 && bayer(x, y) > 0.5) continue;
-      put(d, w, x, y, c, Math.round(a * 255));
-    }
-  });
+  return paint(`ell:${color}:${w}x${h}:${a}`, w, h, (g) => {
+    g.translate(w / 2, h / 2); g.scale(1, h / w);
+    const gr = g.createRadialGradient(0, 0, 0, 0, 0, w / 2);
+    gr.addColorStop(0, rgba(color, a)); gr.addColorStop(0.6, rgba(color, a * 0.6)); gr.addColorStop(1, rgba(color, 0));
+    g.fillStyle = gr; g.beginPath(); g.arc(0, 0, w / 2, 0, Math.PI * 2); g.fill();
+  }, 3);
 }
 
-/** A little square of sky for a round portrait (clip it with --px-circle): day mist or night with stars. */
+/** A little square of sky for a round portrait: a soft day or night gradient (a few stars at night). */
 export function pxSkyURL(night: boolean, n = 25): string {
-  return paint(`sky:${night}:${n}`, n, n, (d, w) => {
-    const top = rgbOf(night ? '#1b222d' : '#d3e0dc'), mid = rgbOf(night ? '#27313f' : '#aec8cc'), bot = rgbOf(night ? '#46596a' : '#c4cfa3');
-    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-      const k = y / (n - 1) + (bayer(x, y) - 0.5) * 0.22;
-      put(d, w, x, y, k < 0.45 ? top : k < 0.8 ? mid : bot, 255);
-    }
-    if (night) for (const [x, y] of [[4, 4], [18, 3], [12, 7], [21, 9], [6, 11]]) put(d, w, x, y, rgbOf('#f4eedd'), 255);
-    else for (const [x, y, l] of [[3, 6, 5], [15, 4, 6]]) for (let i = 0; i < l; i++) put(d, w, x + i, y, rgbOf('#f4eedd'), 255);
-  });
+  return paint(`sky:${night}:${n}`, n, n, (g) => {
+    const gr = g.createLinearGradient(0, 0, 0, n);
+    if (night) { gr.addColorStop(0, '#141c34'); gr.addColorStop(0.6, '#2a3c66'); gr.addColorStop(1, '#4a5f86'); }
+    else { gr.addColorStop(0, '#6fb0e6'); gr.addColorStop(0.65, '#b6dcf2'); gr.addColorStop(1, '#e8efd2'); }
+    g.fillStyle = gr; g.fillRect(0, 0, n, n);
+    if (night) for (const [x, y] of [[4, 4], [18, 3], [12, 7], [21, 9], [6, 11]]) { g.fillStyle = 'rgba(255,248,226,.9)'; g.beginPath(); g.arc(x, y, 0.5, 0, Math.PI * 2); g.fill(); }
+  }, 4);
 }
 
-/** A round brass-and-paper knob (a pixel disc with a lit rim), `n` texels across. */
+/** A round knob: a brass rim around a paper face, softly lit from the top left. `n` px across. */
 export function pxKnobURL(n = 20, face = '#f4eedd', rim = '#dcb072', edge = '#8e7440'): string {
-  return paint(`knob:${n}:${face}:${rim}:${edge}`, n, n, (d, w) => {
-    const F = rgbOf(face), R = rgbOf(rim), E = rgbOf(edge), H = rgbOf('#f8ecd2'), K = rgbOf('#2e2b24'), c = (n - 1) / 2;
-    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-      const dx = x - c, dy = y - c, r = Math.hypot(dx, dy) / (n / 2);
-      if (r > 1) continue;
-      const lit = (-dx - dy) / (n / 2);
-      put(d, w, x, y, r > 0.9 ? K : r > 0.72 ? (lit > 0.3 ? H : lit < -0.4 ? E : R) : r > 0.6 ? E : F, 255);
-    }
-  });
+  return paint(`knob:${n}:${face}:${rim}:${edge}`, n, n, (g) => {
+    const c = n / 2;
+    let gr = g.createLinearGradient(0, 0, n, n);
+    gr.addColorStop(0, '#fff0c0'); gr.addColorStop(0.35, rim); gr.addColorStop(1, edge);
+    g.fillStyle = gr; g.beginPath(); g.arc(c, c, c - 0.5, 0, Math.PI * 2); g.fill();
+    gr = g.createRadialGradient(c - n * 0.12, c - n * 0.12, 0, c, c, c * 0.72);
+    gr.addColorStop(0, '#fffaf0'); gr.addColorStop(1, face);
+    g.fillStyle = gr; g.beginPath(); g.arc(c, c, c * 0.68, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(60,40,20,.35)'; g.lineWidth = 0.6; g.stroke();
+  }, 3);
 }
 
-/** A hand-drawn pixel loop (a pencil circle round today's date): a wobbly 1-texel ring that overshoots its start. */
+/** A hand-drawn pencil loop round a date: a wobbly stroke that overshoots its start. */
 export function pxRingURL(n = 20, color = '#46596a'): string {
-  return paint(`ring:${n}:${color}`, n, n, (d, w) => {
-    const c = rgbOf(color), m = (n - 1) / 2;
-    for (let i = 0; i < 220; i++) {
-      const a = -1.9 + (i / 220) * Math.PI * 2.25, wob = 1 + Math.sin(a * 3 + 0.6) * 0.04 + (a > 3.6 ? 0.06 : 0);
-      const x = Math.round(m + Math.cos(a) * (m - 0.6) * wob), y = Math.round(m + Math.sin(a) * (m - 1.2) * wob);
-      if (x >= 0 && y >= 0 && x < n && y < n) put(d, w, x, y, c, 255);
+  return paint(`ring:${n}:${color}`, n, n, (g) => {
+    const m = n / 2;
+    g.strokeStyle = rgba(color, 0.85); g.lineWidth = Math.max(1, n / 18); g.lineCap = 'round';
+    g.beginPath();
+    for (let i = 0; i <= 80; i++) {
+      const a = -1.9 + (i / 80) * Math.PI * 2.25, wob = 1 + Math.sin(a * 3 + 0.6) * 0.04 + (a > 3.6 ? 0.06 : 0);
+      const x = m + Math.cos(a) * (m - 1.2) * wob, y = m + Math.sin(a) * (m - 1.8) * wob;
+      if (i) g.lineTo(x, y); else g.moveTo(x, y);
     }
-  });
+    g.stroke();
+  }, 3);
 }
 
-/** A pegboard tile: one little drilled hole per `w` x `h` texels. */
+/** A pegboard tile: one drilled hole per `w` x `h` px. */
 export function pxPegURL(w = 7, h = 9, color = '#3a291d', a = 0.28): string {
-  return paint(`peg:${w}x${h}:${color}:${a}`, w, h, (d) => {
-    const c = rgbOf(color), al = Math.round(a * 255);
-    put(d, w, 2, 3, c, al); put(d, w, 3, 3, c, Math.round(al * 0.6)); put(d, w, 2, 4, c, Math.round(al * 0.6));
-  });
+  return paint(`peg:${w}x${h}:${color}:${a}`, w, h, (g) => {
+    const gr = g.createRadialGradient(2.6, 3.6, 0, 3, 4, 1.4);
+    gr.addColorStop(0, rgba(color, a * 1.6)); gr.addColorStop(0.7, rgba(color, a)); gr.addColorStop(1, rgba(color, 0));
+    g.fillStyle = gr; g.beginPath(); g.arc(3, 4, 1.4, 0, Math.PI * 2); g.fill();
+  }, 4);
 }
 
-/** A column of punched holes (ticket perforation), 4 texels wide, tiling vertically. */
+/** A column of punched round holes (ticket perforation), 4 px wide, tiling vertically. */
 export function pxPerfURL(color = '#2a2a33', a = 0.5): string {
-  return paint(`perf:${color}:${a}`, 4, 5, (d) => {
-    const c = rgbOf(color), al = Math.round(a * 255);
-    for (const [x, y] of [[1, 1], [2, 1], [0, 2], [1, 2], [2, 2], [3, 2], [1, 3], [2, 3]]) put(d, 4, x, y, c, al);
-  });
+  return paint(`perf:${color}:${a}`, 4, 5, (g) => {
+    g.fillStyle = rgba(color, a); g.beginPath(); g.arc(2, 2.5, 1.35, 0, Math.PI * 2); g.fill();
+  }, 4);
 }
 
-/** A stepped pixel circle as a CSS clip-path polygon (n texels across), for round portraits. */
-export function pxCircleClip(n = 25): string {
-  const r = n / 2, pts: string[] = [];
-  const pc = (v: number) => `${((v / n) * 100).toFixed(3)}%`;
-  // per row: the run of pixels whose centres lie inside the circle
-  const run = (y: number) => { const dy = y + 0.5 - r; const half = Math.sqrt(Math.max(0, r * r - dy * dy)); const x0 = Math.round(r - half), x1 = Math.round(r + half); return [x0, x1]; };
-  // right side, top to bottom
-  for (let y = 0; y < n; y++) { const [, x1] = run(y); pts.push(`${pc(x1)} ${pc(y)}`, `${pc(x1)} ${pc(y + 1)}`); }
-  for (let y = n - 1; y >= 0; y--) { const [x0] = run(y); pts.push(`${pc(x0)} ${pc(y + 1)}`, `${pc(x0)} ${pc(y)}`); }
-  return `polygon(${pts.join(',')})`;
-}
+/** A round clip (CSS clip-path) for round portraits. */
+export function pxCircleClip(_n = 25): string { return 'circle(50% at 50% 50%)'; }
 
 const pixCache = new Map<string, Promise<string>>();
-/** Re-sample an image (e.g. a smooth 3D render) down to `n` x `n` art pixels with a hard alpha, so it can be shown pixelated. */
+/** Re-sample an image down to `n` x `n` with a hard alpha (used by the anime emote layer's chibi). */
 export function pixelate(url: string, n = 28, outline = '#2e2b24'): Promise<string> {
   const key = url.length + ':' + url.slice(-64) + ':' + n + outline;
   let p = pixCache.get(key);
@@ -191,34 +173,31 @@ export function pixelate(url: string, n = 28, outline = '#2e2b24'): Promise<stri
 }
 
 let installed = false;
-/** Once: CSS custom properties with the shared pixel textures (used by style.css and screen CSS). */
+/** Once: CSS custom properties with the shared soft textures (used by style.css and screen CSS). */
 export function installPxFx() {
   if (installed || typeof document === 'undefined') return;
   installed = true;
   const u = (s: string) => `url("${s}")`;
-  // vignettes are painted at a quarter of the screen so their steps are ~4 px squares
-  const vw = Math.min(400, Math.max(60, Math.ceil(innerWidth / 4))), vh = Math.min(300, Math.max(80, Math.ceil(innerHeight / 4)));
   const css = `:root{
---px-glow-lamp:${u(pxGlowURL('#f1d39a', 48, 0.55))};
---px-glow-paper:${u(pxGlowURL('#f4eedd', 48, 0.7))};
---px-glow-moon:${u(pxGlowURL('#aec8cc', 48, 0.45))};
---px-glow-ember:${u(pxGlowURL('#e7b98b', 48, 0.5))};
---px-vignette:${u(pxVignetteURL('#1b222d', vw, vh, 0.82))};
---px-vignette-soft:${u(pxVignetteURL('#1b222d', vw, vh, 0.5))};
---px-vignette-warm:${u(pxVignetteURL('#3a2f25', vw, vh, 0.55))};
+--px-glow-lamp:${u(pxGlowURL('#f6d79a', 96, 0.6))};
+--px-glow-paper:${u(pxGlowURL('#fff6e0', 96, 0.75))};
+--px-glow-moon:${u(pxGlowURL('#b8d4f0', 96, 0.5))};
+--px-glow-ember:${u(pxGlowURL('#f2b07a', 96, 0.55))};
+--px-vignette:radial-gradient(ellipse 75% 70% at 50% 42%, rgba(14,18,30,0) 30%, rgba(14,18,30,.5) 70%, rgba(14,18,30,.85) 100%);
+--px-vignette-soft:radial-gradient(ellipse 75% 70% at 50% 42%, rgba(14,18,30,0) 35%, rgba(14,18,30,.3) 75%, rgba(14,18,30,.55) 100%);
+--px-vignette-warm:radial-gradient(ellipse 75% 70% at 50% 42%, rgba(40,26,14,0) 35%, rgba(40,26,14,.3) 75%, rgba(40,26,14,.6) 100%);
 --px-stars:${u(pxStarsURL(40, 3))};
 --px-stars2:${u(pxStarsURL(56, 9, ['#d3e0dc', '#b4a9c9']))};
---px-shadow:${u(pxEllipseURL('#2a2e33', 24, 6, 0.38))};
---px-dot:${u(pxEllipseURL('#78593a', 6, 6, 0.25))};
+--px-shadow:${u(pxEllipseURL('#1e1a16', 24, 6, 0.42))};
+--px-dot:${u(pxEllipseURL('#78593a', 6, 6, 0.3))};
 --px-knob:${u(pxKnobURL())};
 --px-ring:${u(pxRingURL())};
 --px-peg:${u(pxPegURL())};
 --px-perf:${u(pxPerfURL('#2a2e33', 0.55))};
---px-circle:${pxCircleClip(25)};
+--px-circle:circle(50% at 50% 50%);
 --hh-sky-day:${u(pxSkyURL(false))};
 --hh-sky-night:${u(pxSkyURL(true))};
-}
-.px-glow,.px-bg{image-rendering:pixelated;image-rendering:crisp-edges}`;
+}`;
   const st = document.createElement('style');
   st.id = 'hh-pxfx';
   st.textContent = css;
@@ -226,49 +205,32 @@ export function installPxFx() {
 }
 
 /**
- * A turning pixel sunburst with a stepped glow at its heart (level-up, gifts, ceremonies). The
- * rays are re-drawn on the pixel grid every step, so they turn in whole pixels, never smoothly.
+ * A slowly turning sunburst of soft rays with a warm glow at its heart (level-up, gifts, ceremonies).
+ * Painted once, smooth; it turns with a CSS rotation.
  */
 export function PxBurst(p: { size?: number; scale?: number; color?: string; glow?: string; rays?: number; spin?: number; alpha?: number; class?: string; style?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
-  const S = p.scale ?? 3, N = Math.round((p.size ?? 900) / S);
+  const size = p.size ?? 900, k = Math.min(1.5, DPR()), N = Math.round(size * k);
   useEffect(() => {
     const cv = ref.current;
     if (!cv) return;
     cv.width = N; cv.height = N;
-    const g = cv.getContext('2d')!, img = g.createImageData(N, N), d = img.data;
-    const rc = rgbOf(p.color ?? '#f1d39a'), gc = rgbOf(p.glow ?? p.color ?? '#f1d39a');
-    const rays = p.rays ?? 16, A = p.alpha ?? 0.3, c = (N - 1) / 2;
-    let raf = 0, last = -1;
-    const t0 = performance.now();
-    // per texel, once: ray phase, band alpha, glow alpha
-    const M = N * N, F = new Float32Array(M), BA = new Float32Array(M), GA = new Float32Array(M);
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-      const i = y * N + x, dx = x - c, dy = y - c, r = Math.hypot(dx, dy) / (N / 2);
-      if (r >= 1) { BA[i] = -1; continue; }
-      F[i] = ((Math.atan2(dy, dx) / (Math.PI * 2)) * rays % 1 + 1) % 1;
-      BA[i] = (Math.floor((1 - r) * 5 + bayer(x, y) * 0.9) / 5) * A; // hard fade bands, dithered between
-      GA[i] = (Math.floor(Math.max(0, 1 - r * 2.4) * 4 + bayer(x + 1, y) * 0.9) / 4) * Math.min(1, A * 2);
+    const g = cv.getContext('2d')!, c = N / 2, rays = p.rays ?? 16, A = p.alpha ?? 0.3;
+    const col = p.color ?? '#f1d39a', gl = p.glow ?? col;
+    g.clearRect(0, 0, N, N);
+    g.save(); g.translate(c, c);
+    for (let i = 0; i < rays; i++) {
+      const a0 = (i / rays) * Math.PI * 2, w = (Math.PI * 2 / rays) * 0.38;
+      const gr = g.createRadialGradient(0, 0, 0, 0, 0, c);
+      gr.addColorStop(0, rgba(col, A)); gr.addColorStop(0.55, rgba(col, A * 0.5)); gr.addColorStop(1, rgba(col, 0));
+      g.fillStyle = gr;
+      g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, c, a0 - w / 2, a0 + w / 2); g.closePath(); g.fill();
     }
-    const draw = (now: number) => {
-      raf = requestAnimationFrame(draw);
-      const step = Math.floor(((now - t0) / 1000) * 6); // 6 steps a second
-      if (step === last) return;
-      last = step;
-      const sh = ((step * (p.spin ?? 0.012)) / (Math.PI * 2)) * rays;
-      d.fill(0);
-      for (let i = 0; i < M; i++) {
-        if (BA[i] < 0) continue;
-        const f = (F[i] + sh) % 1, ray = f < 0.38 ? BA[i] : 0, gl = GA[i];
-        const a = Math.max(ray, gl);
-        if (a <= 0.01) continue;
-        const col = gl >= ray ? gc : rc, j = i * 4;
-        d[j] = col[0]; d[j + 1] = col[1]; d[j + 2] = col[2]; d[j + 3] = Math.round(a * 255);
-      }
-      g.putImageData(img, 0, 0);
-    };
-    raf = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(raf);
-  }, [N, p.color, p.glow]);
-  return <canvas ref={ref} class={'px-burst' + (p.class ? ' ' + p.class : '')} aria-hidden="true" style={`width:${N * S}px;height:${N * S}px;image-rendering:pixelated;pointer-events:none;${p.style ?? ''}`} />;
+    const gg = g.createRadialGradient(0, 0, 0, 0, 0, c * 0.45);
+    gg.addColorStop(0, rgba(gl, Math.min(1, A * 2.2))); gg.addColorStop(0.5, rgba(gl, A * 0.8)); gg.addColorStop(1, rgba(gl, 0));
+    g.fillStyle = gg; g.beginPath(); g.arc(0, 0, c * 0.45, 0, Math.PI * 2); g.fill();
+    g.restore();
+  }, [N, p.color, p.glow, p.rays, p.alpha]);
+  const secs = Math.max(20, Math.round(40 / Math.max(0.2, (p.spin ?? 0.012) / 0.012)));
+  return <canvas ref={ref} class={'px-burst' + (p.class ? ' ' + p.class : '')} aria-hidden="true" style={`width:${size}px;height:${size}px;pointer-events:none;animation:pxBurstSpin ${secs}s linear infinite;${p.style ?? ''}`} />;
 }

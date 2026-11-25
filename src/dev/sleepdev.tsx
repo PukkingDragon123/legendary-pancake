@@ -6,7 +6,8 @@
 // Add &t=<seconds> to freeze every animation at that moment (for screenshots).
 import { render } from 'preact';
 import '../ui/style.css';
-import { installPixelSkin } from '../ui/pxskin.ts';
+import { installRealSkin } from '../ui/real/skin.ts';
+import { loadTextures } from '../ui/real/tex.ts';
 import { Art } from '../ui/px/sleepart.ts';
 import { candle, GIFT_LOOK, moon, mug, nest, nightWindow, phone, present, sack, songbird, stickerURL } from '../ui/px/sleepprops.ts';
 import { CH, CK, CW, FINISHES, paintCuckoo } from '../ui/px/cuckoo.ts';
@@ -68,7 +69,7 @@ function startFakeNight() {
 }
 
 async function boot() {
-  installPixelSkin();
+  await loadTextures(); installRealSkin();
   try { await document.fonts.load('20px "TBME Body"'); } catch { /* */ }
   const root = document.getElementById('ui')!;
   root.style.pointerEvents = 'auto';

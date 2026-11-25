@@ -7,7 +7,8 @@ import { freshSave, save } from '../game/store.ts';
 import { PIECES } from '../owl/outfits.ts';
 import { demoNight } from '../sleep/simulate.ts';
 import { Book } from '../ui/book/book.tsx';
-import { installPixelSkin } from '../ui/pxskin.ts';
+import { installRealSkin } from '../ui/real/skin.ts';
+import { loadTextures } from '../ui/real/tex.ts';
 import { panel } from '../ui/state.ts';
 import '../ui/style.css';
 
@@ -29,7 +30,7 @@ save.value = {
   home: { ...base.home, seeded: true, boxes: n ? [] : ['b1'] },
   shop: { ...base.shop, pity: n ? { frostlight: { five: 0, four: 0, total: 3 } } : {} },
 };
-installPixelSkin();
+void loadTextures().then(installRealSkin);
 panel.value = 'book';
 
 function Dev() {

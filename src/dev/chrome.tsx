@@ -86,7 +86,6 @@ if (view === 'obj') {
     const s = +(q.get('s') ?? 2) / 2;
     html += '</div><div style="padding:10px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end">';
     html += cell(O.board(96, 36, 2, 1, { seed: 4, hooks: [26, 71], brackets: true, moss: [[34, 50], [78, 90]] }), 192 * s, 72 * s, 'name board');
-    html += cell(O.bezel(32), 64 * s, 64 * s, 'bezel');
     html += cell(O.medallion(24), 48 * s, 48 * s, 'medal');
     html += cell(O.board(62, 20, 2, 1, { seed: 7, hooks: [11, 51], screws: [[4, 11], [58, 11]] }), 124 * s, 40 * s, 'coin board');
     html += cell(O.plusButton(14), 28 * s, 28 * s, 'plus');

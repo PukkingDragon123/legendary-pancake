@@ -18,8 +18,8 @@ import { sceneRef } from '../state.ts';
 import { FRAME_OPEN, FRAME_D, frameArt, frameSkyOf, portraitSky } from './frameart.ts';
 import { uiBurstAt, type UiFxKind } from './uifx.ts';
 
-/** art pixels across the owl's render (shown at about 1.3 CSS px each in the HUD) */
-const artPx = () => (window as unknown as { __pipArt?: number }).__pipArt || 48;
+/** [ui7] device px across the owl's render: sharp, anti-aliased, at the screen's own resolution */
+const artPx = () => (window as unknown as { __pipArt?: number }).__pipArt || Math.round(64 * Math.min(3, Math.max(1, (typeof devicePixelRatio === 'number' && devicePixelRatio) || 1)));
 const FPS = 24;
 
 interface Host { el: HTMLElement; look: () => OwlLook; visible: boolean; onFx?: (k: OwlFx) => void }
@@ -45,10 +45,6 @@ class OwlCam {
   private R: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
   private cam = new THREE.PerspectiveCamera(24, 1, 0.05, 50);
-  private rt: THREE.WebGLRenderTarget;
-  private post: THREE.Mesh;
-  private postScene = new THREE.Scene();
-  private postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   private key: THREE.DirectionalLight;
   private hemi: THREE.HemisphereLight;
   actor: OwlActor | null = null;
@@ -66,12 +62,13 @@ class OwlCam {
     const c = (this.canvas = document.createElement('canvas'));
     c.width = c.height = ART;
     c.className = 'lp-canvas';
-    this.R = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'low-power' });
+    this.R = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: 'low-power' });
     this.R.setPixelRatio(1);
     this.R.setSize(ART, ART, false);
     this.R.setClearColor(0x000000, 0);
     this.R.outputColorSpace = THREE.SRGBColorSpace;
-    this.rt = new THREE.WebGLRenderTarget(ART, ART, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: true });
+    this.R.toneMapping = THREE.ACESFilmicToneMapping;
+    this.R.toneMappingExposure = 1.15;
     // bright, clean studio light: a big soft sky fill, a warm key from the top left, a cool rim; a dim studio
     // environment for the gleam in the eyes and on the bill
     const pm = new THREE.PMREMGenerator(this.R);
@@ -84,29 +81,6 @@ class OwlCam {
     const rim = new THREE.DirectionalLight(0xd4e4ff, 0.9);
     rim.position.set(4, 3, -4);
     this.scene.add(this.hemi, this.key, rim);
-    // the pixel finish: a hard alpha edge, a dark coloured outline round the silhouette, a little more colour
-    this.post = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
-      uniforms: { tex: { value: this.rt.texture }, px: { value: new THREE.Vector2(1 / ART, 1 / ART) }, sat: { value: 1.18 } },
-      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
-      fragmentShader: `
-        uniform sampler2D tex; uniform vec2 px; uniform float sat; varying vec2 vUv;
-        vec3 boost(vec3 c){ float l = dot(c, vec3(0.299, 0.587, 0.114)); return max(vec3(0.0), mix(vec3(l), c, sat)); }
-        void main(){
-          vec4 c = texture2D(tex, vUv);
-          if (c.a > 0.45) { gl_FragColor = vec4(boost(c.rgb / max(c.a, 0.001)), 1.0); }
-          else {
-            vec4 best = vec4(0.0);
-            vec4 n0 = texture2D(tex, vUv + vec2(px.x, 0.0)), n1 = texture2D(tex, vUv - vec2(px.x, 0.0));
-            vec4 n2 = texture2D(tex, vUv + vec2(0.0, px.y)), n3 = texture2D(tex, vUv - vec2(0.0, px.y));
-            if (n0.a > 0.45) best = n0; if (n1.a > 0.45) best = n1; if (n2.a > 0.45) best = n2; if (n3.a > 0.45) best = n3;
-            if (best.a > 0.45) { vec3 o = best.rgb / best.a; gl_FragColor = vec4(o * vec3(0.34, 0.3, 0.38) + vec3(0.02, 0.012, 0.035), 1.0); }
-            else gl_FragColor = vec4(0.0);
-          }
-          #include <colorspace_fragment>
-        }`,
-      depthTest: false, depthWrite: false,
-    }));
-    this.postScene.add(this.post);
     document.addEventListener('visibilitychange', () => this.wake());
     this.ready = true;
   }
@@ -192,12 +166,8 @@ class OwlCam {
     const n = Math.max(1, Math.ceil(dt / (1 / 60)));
     for (let i = 0; i < n; i++) a.update(dt / n);
     const R = this.R;
-    R.setRenderTarget(this.rt);
     R.clear();
     R.render(this.scene, this.cam);
-    R.setRenderTarget(null);
-    R.clear();
-    R.render(this.postScene, this.postCam);
     if (this.host && !this.host.el.classList.contains('live')) this.host.el.classList.add('live');
   }
 }
@@ -217,27 +187,20 @@ function installStyles() {
   const st = document.createElement('style');
   st.id = 'hh-livepip';
   st.textContent = `
-.lp{position:relative;display:block;flex:none;image-rendering:pixelated}
-.lp>.lp-sky,.lp>.lp-slot{position:absolute;clip-path:var(--lp-clip);overflow:hidden}
-.lp>.lp-sky{image-rendering:pixelated}
-.lp-slot>img,.lp-slot>canvas{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated}
+.lp{position:relative;display:block;flex:none}
+.lp>.lp-sky,.lp>.lp-slot{position:absolute;clip-path:circle(50% at 50% 50%);overflow:hidden}
+.lp>.lp-sky::after{content:'';position:absolute;inset:0}
+.lp-slot>img,.lp-slot>canvas{position:absolute;left:0;top:0;width:100%;height:100%}
+.lp-slot::after{content:'';position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 3px 6px rgba(10,8,20,.45),inset 0 -2px 4px rgba(255,255,255,.12);pointer-events:none}
 .lp-slot>img.still{object-fit:cover;transform:translateY(6%) scale(1.08)}
 .lp-slot.live>img.still{visibility:hidden}
-.lp>.lp-frame{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
-.lp.tapped>.lp-frame{animation:lpBump .36s steps(4)}
+.lp>.lp-frame{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.lp.tapped>.lp-frame{animation:lpBump .4s cubic-bezier(.3,1.6,.5,1)}
 @keyframes lpBump{40%{transform:scale(1.06,.95)}70%{transform:scale(.97,1.03)}}
 `;
   document.head.appendChild(st);
 }
-/** a stepped (pixel) circle clip, `n` steps per quarter */
-const clipCircle = (() => {
-  const pts: string[] = [], n = 28;
-  for (let i = 0; i < n * 4; i++) {
-    const a = (i / (n * 4)) * Math.PI * 2, x = 50 + Math.cos(a) * 50, y = 50 + Math.sin(a) * 50;
-    pts.push(`${(Math.round(x * 0.44) / 0.44).toFixed(2)}% ${(Math.round(y * 0.44) / 0.44).toFixed(2)}%`);
-  }
-  return `polygon(${pts.join(',')})`;
-})();
+const clipCircle = 'circle(50% at 50% 50%)';
 
 const FX: Partial<Record<OwlFx, UiFxKind>> = { heart: 'hearts', zzz: 'motes', feather: 'puff', note: 'sparkle', sparkle: 'sparkle' };
 
@@ -283,13 +246,13 @@ export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; li
   useEffect(() => { if (p.pokeKey) { cam?.poke(); setTapped((n) => n + 1); } }, [p.pokeKey]);
   const night = p.night ?? frameSkyOf(p.frame) === 'night';
   const S = p.size, open = (FRAME_OPEN / FRAME_D) * S, inset = (S - open * 2) / 2 - 0.5;
-  // a few art sizes (each frame is painted once per size): about 1.3 to 1.5 CSS px per art pixel
-  const art = S <= 72 ? 48 : S <= 90 ? 60 : S <= 110 ? 76 : 92;
+  // [ui7] each frame is painted once per CSS size, at the screen's resolution
+  const art = Math.round(S);
   const tap = p.tappable ? (e: MouseEvent) => { e.stopPropagation(); cam?.poke(); setTapped((n) => n + 1); } : undefined;
   const box = { left: `${inset}px`, top: `${inset}px`, width: `${S - inset * 2}px`, height: `${S - inset * 2}px` };
   return (
     <span ref={host} class={'lp ' + (p.class ?? '') + (tapped % 2 ? ' tapped' : tapped ? ' tapped2' : '')} style={{ width: `${S}px`, height: `${S}px`, '--lp-clip': clipCircle } as Record<string, string>} onClick={tap}>
-      <img class="lp-sky" src={portraitSky(night || (sceneRef.current?.sky.night ?? 0) > 0.5, Math.round(art * 0.7))} style={box} alt="" draggable={false} />
+      <img class="lp-sky" src={portraitSky(night || (sceneRef.current?.sky.night ?? 0) > 0.5, Math.round(art * 1.4))} style={box} alt="" draggable={false} />
       <span class="lp-slot" ref={slot} style={box}>{still && <img class="still" src={still} alt="" draggable={false} />}</span>
       <img class="lp-frame" src={frameArt(p.frame, art)} alt="" draggable={false} />
     </span>

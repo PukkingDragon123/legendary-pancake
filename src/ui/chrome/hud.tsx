@@ -6,8 +6,8 @@
 //             side (Build, Shop, Dress up, Quests, Map, Settings), each with a paper label tag
 //   MainNav   three big objects on a walnut shelf with engraved brass name plates, live in 3D (shelf3d.tsx): a moon lamp (Sleep),
 //             a carved cuckoo clock showing the real time (Clock), a leather journal (Book)
-// Everything is painted with the relief painter (src/ui/px/relief.ts, src/ui/chrome/objects.ts): real
-// materials lit from the top left. Signs swing when tapped or hit by rewards and sway in the breeze; they
+// [ui7] Everything is painted by the realistic material painter (src/ui/real/, src/ui/chrome/objects.ts) at
+// device resolution: real walnut, oak, brass, enamel and felt lit from the top left, with soft shadows. Signs swing when tapped or hit by rewards and sway in the breeze; they
 // are pulled up out of the way when a full-screen place opens and drop back in when it closes. Opening a
 // place plays a pixel transition (transition.ts) and throws 2D pixel particles (uifx.ts).
 import { signal } from '@preact/signals';
@@ -32,6 +32,7 @@ import { alagardWidth } from '../font.ts';
 import { artPx } from '../../gfx/artpx.ts';
 import { punch } from '../text3d.tsx';
 import { shelf3d, useShelf3D, type NavId } from './shelf3d.tsx'; // [icons6] the main buttons as live 3D objects
+import { deviceK } from '../real/paint.ts';
 import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
@@ -148,7 +149,7 @@ function NameSign() {
   return (
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={40} />
-      <button class="hh-board hh-nameboard" style={{ backgroundImage: bg(board(96, 36, k, 1, { seed: 4, hooks: [26, 71], brackets: true })) }} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
+      <button class="hh-board hh-nameboard" style={{ '--art': bg(board(192, 72, k, 1, { seed: 4, hooks: [52, 142], brackets: true })) } as Record<string, string>} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
         <span class="hh-portrait"><OwlPortrait size={78} frame={s.frame} pokeKey={poke} /></span>
         <span class={'hh-name' + (long ? ' long' : '')}>{s.name}</span>
         {fits && <span class="hh-rank">{rank}</span>}
@@ -157,7 +158,7 @@ function NameSign() {
           <span class={'hh-xp' + (xp ? ' on' : '')}>{lv.into} / {lv.need} XP</span>
         </span>
         <span class="hh-rune" key={lv.level}>
-          <img src={medallion(22, k, 1, 'sapphire')} alt="" draggable={false} />
+          <img src={medallion(44, k, 1, 'sapphire')} alt="" draggable={false} />
           <b>{lv.level}</b>
         </span>
       </button>
@@ -194,13 +195,13 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
   return (
     <div class={'hh-hang hh-curhang ' + p.kind} ref={ref}>
       <Ropes xs={[22, 102]} top={p.kind === 'coin' ? -28 : -16} len={p.kind === 'coin' ? 34 : 22} chain />
-      <div class="hh-board hh-curboard" style={{ backgroundImage: bg(board(62, 20, k, 1, { seed: p.kind === 'coin' ? 7 : 9, wood: p.kind === 'coin' ? 'oak' : 'walnut', hooks: [11, 51], screws: [[27, 11.5]], bevel: 2 })) }} onClick={tapSign} role="group" aria-label={`${label}: ${p.value.toLocaleString()}`}>
+      <div class="hh-board hh-curboard" style={{ '--art': bg(board(124, 40, k, 1, { seed: p.kind === 'coin' ? 7 : 9, wood: p.kind === 'coin' ? 'oak' : 'walnut', hooks: [22, 102], bevel: 4, radius: 7 })) } as Record<string, string>} onClick={tapSign} role="group" aria-label={`${label}: ${p.value.toLocaleString()}`}>
         <span class={'hh-cur-ico ' + p.kind} data-chip={p.kind} ref={ico}>
           <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}
         </span>
         <span class={'hh-num' + (p.value >= 100000 ? ' huge' : p.value >= 10000 ? ' long' : '')} ref={numRef}><Odometer value={p.value} /></span>
-        <button class="hh-plus" style={{ '--plus': bg(plusButton(14, k, 1)), '--plus-dn': bg(plusButton(14, k, 1, true)) } as Record<string, string>} onClick={shop} aria-label={`Get more ${label.toLowerCase()} in the shop`}><span /></button>
+        <button class="hh-plus" style={{ '--plus': bg(plusButton(28, k, 1)), '--plus-dn': bg(plusButton(28, k, 1, true)) } as Record<string, string>} onClick={shop} aria-label={`Get more ${label.toLowerCase()} in the shop`}><span /></button>
       </div>
       {p.children}
     </div>
@@ -290,10 +291,10 @@ function ToolTag(p: { t: ToolDef; i: number; badge?: number; isNew?: boolean }) 
   return (
     <div class="hh-tool" style={{ '--i': p.i } as Record<string, number>}>
       <div class="hh-toolhang" ref={ref}>
-        <button class="hh-tag" style={{ backgroundImage: bg(toolTile(26, p.t.felt, k, 1, p.i + 1)) }} onClick={go} aria-label={p.t.label + (p.badge ? ` (${p.badge} ready to claim)` : '')}>
+        <button class="hh-tag" style={{ '--art': bg(toolTile(52, p.t.felt, k, 1, p.i + 1)) } as Record<string, string>} onClick={go} aria-label={p.t.label + (p.badge ? ` (${p.badge} ready to claim)` : '')}>
           <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={iconSrc(TOOL_ICON[p.t.id] ?? '', Math.round(44 * dpr()), dpr()) ?? toolIcon(p.t.id as ToolIcon, k, 1)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
-          {!!p.badge && <span class="hh-badge"><PxAnim tl={[['hud_seal', 1e9]]} size={28} /><b>{p.badge}</b></span>}
-          {p.isNew && <span class="hh-new"><PxAnim tl={[['hud_new', 1e9]]} size={44} /></span>}
+          {!!p.badge && <span class="hh-badge"><b>{p.badge}</b></span>}
+          {p.isNew && <span class="hh-new">New</span>}
         </button>
         <span class="hh-toollabel">{p.t.label}</span>
       </div>
@@ -337,8 +338,8 @@ function LampArt(p: { k: number; act: number }) {
   const glow = GLOW[g];
   return (
     <>
-      <img class="hh-halo" src={lampHalo(p.k, 1, 1)} style={{ opacity: off ? 0 : 0.35 + glow * 0.6 }} alt="" draggable={false} />
-      <img class="hh-obj" src={moonLamp(p.k, 1, off ? 0.3 : glow, off ? 0 : 1)} alt="" draggable={false} />
+      <img class="hh-halo" src={lampHalo(2 * p.k, 1, 1)} style={{ opacity: off ? 0 : 0.35 + glow * 0.6 }} alt="" draggable={false} />
+      <img class="hh-obj" src={moonLamp(2 * p.k, 1, Math.round((off ? 0.3 : glow) * 4) / 4, off ? 0 : 1)} alt="" draggable={false} />
     </>
   );
 }
@@ -354,7 +355,7 @@ function AlarmArt(p: { k: number; act: number }) {
     const s = st.current;
     const img = (f: number) => {
       let im = s.imgs.get(f);
-      if (!im) { im = new Image(); im.src = alarmClock(p.k, 1, f); s.imgs.set(f, im); im.onload = () => draw(); }
+      if (!im) { im = new Image(); im.src = alarmClock(2 * p.k * deviceK(3), 1, f); s.imgs.set(f, im); im.onload = () => draw(); }
       return im;
     };
     const [wh, wm] = wake.split(':').map(Number);
@@ -364,9 +365,8 @@ function AlarmArt(p: { k: number; act: number }) {
       const im = img(f);
       if (!im.complete || !im.naturalWidth) return;
       c.width = im.naturalWidth; c.height = im.naturalHeight;
-      g.imageSmoothingEnabled = false;
       g.drawImage(im, 0, 0);
-      alarmHands(g, p.k, 1, new Date(), wh * 60 + wm);
+      alarmHands(g, 2 * p.k * deviceK(3), 1, new Date(), wh * 60 + wm);
     };
     img(1); img(2);
     draw();
@@ -398,8 +398,8 @@ function BookArt(p: { k: number; act: number }) {
     return () => ts.forEach(clearTimeout);
   }, [p.act]);
   // paint every frame up front so the swing never stutters
-  useEffect(() => { const id = setTimeout(() => BOOK_FRAMES.forEach((o) => journal(p.k, 1, o)), 400); return () => clearTimeout(id); }, [p.k]);
-  return <img class="hh-obj" src={journal(p.k, 1, BOOK_FRAMES[f])} alt="" draggable={false} />;
+  useEffect(() => { const id = setTimeout(() => BOOK_FRAMES.forEach((o) => journal(2 * p.k, 1, o)), 400); return () => clearTimeout(id); }, [p.k]);
+  return <img class="hh-obj" src={journal(2 * p.k, 1, BOOK_FRAMES[f])} alt="" draggable={false} />;
 }
 
 function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
@@ -428,12 +428,12 @@ function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
     <button ref={el} class={'hh-mobj ' + p.m.id + (state ? ' ' + state : '') + (p.rec ? ' rec' : '')} style={{ '--i': p.i } as Record<string, number>}
       onPointerDown={down} onPointerUp={up} onPointerLeave={() => { shelf3d.press(nid, false); shelf3d.hover(nid, false); setState((s) => (s === 'press' ? '' : s)); }}
       onPointerEnter={(e) => { if ((e as PointerEvent).pointerType === 'mouse') shelf3d.hover(nid, true); }} onPointerCancel={() => shelf3d.press(nid, false)} onClick={go} aria-label={p.m.label}>
-      <img class="hh-cshadow" src={contactShadow(p.m.id === 'book' ? 40 : 34, 6, p.k)} alt="" draggable={false} />
+      <img class="hh-cshadow" src={contactShadow(p.m.id === 'book' ? 80 : 68, 12, p.k)} alt="" draggable={false} />
       <span class="hh-pic">
         {p.m.id === 'sleep' ? <LampArt k={p.k} act={act} /> : p.m.id === 'clock' ? <AlarmArt k={p.k} act={act} /> : <BookArt k={p.k} act={act} />}
         {p.m.id === 'sleep' && <><i class="hh-twinkle moon1" /><i class="hh-twinkle moon2" /></>}
       </span>
-      <span class="hh-plate" style={{ backgroundImage: bg(plate(44, 9, p.k, 1)) }}>{p.m.label}</span>
+      <span class="hh-plate" style={{ '--art': bg(plate(88, 18, p.k, 1)) } as Record<string, string>}>{p.m.label}</span>
       {p.rec && <><i class="hh-twinkle a" /><i class="hh-twinkle b" /><i class="hh-twinkle c" /></>}
       {p.m.id === 'book' && <i class="hh-twinkle gilt" />}
     </button>
@@ -459,7 +459,7 @@ export function MainNav() {
       <div class="hh-plaques">
         {MAIN.map((m, i) => <MainObject key={m.id} m={m} i={i} rec={m.id === 'sleep' && bedtimeNear} k={k} />)}
       </div>
-      <img class="hh-shelf" src={shelfBoard(176, k, 1)} alt="" draggable={false} />
+      <img class="hh-shelf" src={shelfBoard(352, k, 1)} alt="" draggable={false} />
     </nav>
   );
 }
