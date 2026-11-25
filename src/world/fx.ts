@@ -62,21 +62,35 @@ const NAMES = Object.keys(ART);
 export const SPR = Object.fromEntries(NAMES.map((n, i) => [n, i])) as Record<keyof typeof ART, number>;
 const COLS = 8, ROWS = Math.ceil(NAMES.length / COLS);
 
+/** [anime6] texels per art cell of the 8x8 sprites: each sprite is upsampled into a smooth, rounded, anti-aliased shape */
+const UP = 6;
 function atlas(): THREE.DataTexture {
-  const W = COLS * 8, H = ROWS * 8, data = new Uint8Array(W * H * 4);
+  const C = 8 * UP, W = COLS * C, H = ROWS * C, data = new Uint8Array(W * H * 4);
+  const sm = (a: number, b: number, v: number) => { const t = Math.min(1, Math.max(0, (v - a) / (b - a))); return t * t * (3 - 2 * t); };
   NAMES.forEach((n, i) => {
-    const cx = (i % COLS) * 8, cy = Math.floor(i / COLS) * 8;
-    ART[n].forEach((row, ry) => {
-      for (let x = 0; x < 8; x++) {
-        const ch = row[x];
-        if (ch === '.') continue;
-        const v = ch === '#' ? 255 : ch === '+' ? 200 : 140, k = ((cy + 7 - ry) * W + cx + x) * 4;
-        data[k] = data[k + 1] = data[k + 2] = v; data[k + 3] = 255;
+    const cx = (i % COLS) * C, cy = Math.floor(i / COLS) * C, rows = ART[n];
+    const ch = (x: number, y: number) => (x < 0 || y < 0 || x > 7 || y > 7 ? '.' : rows[y][x]);
+    // [anime6] high resolution, smooth: the 8x8 design is sampled bilinearly (its shade and its coverage) at UP texels
+    // per cell and its edge eased over a texel or two, so hearts, notes, puffs and sparks come out as soft, rounded
+    // shapes instead of pixel blocks
+    for (let Y = 0; Y < C; Y++) for (let X = 0; X < C; X++) {
+      const sx = (X + 0.5) / UP - 0.5, sy = (Y + 0.5) / UP - 0.5, x0 = Math.floor(sx), y0 = Math.floor(sy), fx = sx - x0, fy = sy - y0;
+      let cov = 0, val = 0;
+      for (const [dx, dy, w] of [[0, 0, (1 - fx) * (1 - fy)], [1, 0, fx * (1 - fy)], [0, 1, (1 - fx) * fy], [1, 1, fx * fy]]) {
+        const c = ch(x0 + dx, y0 + dy);
+        if (c === '.') continue;
+        cov += w; val += w * (c === '#' ? 255 : c === '+' ? 200 : 140);
       }
-    });
+      const a = sm(0.3, 0.62, cov);
+      if (a <= 0) continue;
+      const k = ((cy + C - 1 - Y) * W + cx + X) * 4, v = val / Math.max(1e-3, cov);
+      data[k] = data[k + 1] = data[k + 2] = v; data[k + 3] = Math.round(a * 255);
+    }
   });
   const t = new THREE.DataTexture(data, W, H, THREE.RGBAFormat);
-  t.magFilter = t.minFilter = THREE.NearestFilter;
+  t.magFilter = THREE.LinearFilter;
+  t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.generateMipmaps = true;
   t.needsUpdate = true;
   return t;
 }
@@ -107,13 +121,11 @@ uniform sampler2D uMap; uniform vec3 uLight; uniform float uAdd;
 varying vec2 vUv; varying vec3 vColor; varying float vAlpha;
 void main() {
   vec4 t = texture2D(uMap, vUv);
-  if (t.a < 0.5) discard;
-  // fade by dissolving on an ordered dither grid instead of blending, so pixels stay crisp
-  vec2 p = floor(gl_FragCoord.xy / 2.0);
-  float th = fract(dot(p, vec2(0.5, 0.25)) + 0.125 * mod(p.x, 2.0));
-  if (vAlpha < 0.98 && vAlpha < th + 0.06) discard;
-  // [world3] lit particles take the scene light; "glowing" ones are unlit pixels in their own colour
-  gl_FragColor = vec4(t.rgb * vColor * (uAdd > 0.5 ? vec3(1.0) : uLight), 1.0);
+  // [anime6] smooth: soft anti-aliased edges and a smooth fade (blended), no pixel dither
+  float a = t.a * vAlpha;
+  if (a < 0.02) discard;
+  // [world3] lit particles take the scene light; "glowing" ones are unlit, in their own colour
+  gl_FragColor = vec4(t.rgb * vColor * (uAdd > 0.5 ? vec3(1.0) : uLight), a);
   #include <colorspace_fragment>
 }`;
 
@@ -160,7 +172,7 @@ class Layer {
       this.geo.setAttribute(n, at);
     }
     this.mat = new THREE.ShaderMaterial({
-      vertexShader: VS, fragmentShader: FS, depthWrite: !add, transparent: false, blending: THREE.NormalBlending,
+      vertexShader: VS, fragmentShader: FS, depthWrite: false, transparent: true, blending: THREE.NormalBlending, // [anime6] blended, smooth edges
       uniforms: { uMap: { value: tex }, uGrid: { value: new THREE.Vector2(COLS, ROWS) }, uLight: { value: new THREE.Color(1, 1, 1) }, uAdd: { value: add ? 1 : 0 } },
     });
     this.mesh = new THREE.Mesh(this.geo, this.mat);

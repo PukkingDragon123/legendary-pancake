@@ -133,6 +133,7 @@ async function fxShot() {
   const { owlIconAsync } = await import('../portraits.ts');
   const url = await owlIconAsync(look, 'face').catch(() => '');
   if (url) await setChibi(url);
+  await (await import('../font.ts')).alagardReady();
   await document.fonts.ready;
   await new Promise((res) => setTimeout(res, 300));
   const t = +(q.get('t') ?? 0.3);
@@ -173,6 +174,7 @@ else if (sheet === 'emotes') {
   });
 } else if (q.get('fx')) void fxShot();
 else if (q.get('words')) void (async () => {
+  await (await import('../font.ts')).alagardReady();
   await document.fonts.ready;
   await new Promise((res) => setTimeout(res, 400));
   canvas.style.display = 'none';

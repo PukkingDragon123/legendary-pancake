@@ -1,7 +1,7 @@
 // Anime screen effects for the big moments: radial speed/focus lines, an impact frame (two frames of high-contrast
 // silhouette), screen shake, sparkle bursts, a sunburst behind a reveal, a chibi Pip popping in from the edge, and
-// manga sound-effect words ("POP!", "DING!", "KA-CHING!"...) in heavy slanted letters with a glossy gradient fill, a
-// thick outline and a 3D extrusion. Everything is smooth, anti-aliased, high-resolution art drawn at the screen's full
+// manga sound-effect words ("POP!", "DING!", "KER-CHING!"...) in the game's font, Alagard, drawn large and smooth with
+// a glossy gradient fill, a thick outline and a 3D extrusion. Everything is smooth, anti-aliased, high-resolution art drawn at the screen's full
 // device-pixel resolution, polished like an anime: soft glows, gradient light, clean shapes.
 // Two transparent canvases: the back one sits between the 3D view and the interface (a sunburst behind a 3D reveal),
 // the front one above everything (lines, sparkles, words, the chibi). Short (each moment is over in about a second)
@@ -10,6 +10,7 @@
 //   animeMoment('levelup' | 'gacha5' | 'gacha4' | 'unlock' | 'morning' | 'bigbuy' | 'stamp' | 'bedtime', at?)
 import { save } from '../../game/store.ts';
 import { owlIconAsync } from '../portraits.ts';
+import { alagardReady } from '../font.ts';
 import { dprNow, markArt, type EmoteKind } from './emotes.ts';
 import { calmMotion, fxNow, rng } from './kit.ts';
 
@@ -225,8 +226,10 @@ const STYLES: Record<string, SfxStyle> = {
   red: { hi: '#fff0e8', fill: '#ff7a52', deep: '#c8202c', ink: '#4a0c14' },
   night: { hi: '#ffffff', fill: '#d8d2ff', deep: '#5a52c0', ink: '#1a1438' },
 };
-/** the lettering: a heavy, rounded display face (never a pixel font) */
-const SFX_FONT = '"Arial Rounded MT Bold", "Arial Black", "Segoe UI Black", "Helvetica Neue", Arial, system-ui, sans-serif';
+/** the lettering: the game's font, Alagard (loaded at boot; the words wait for it), drawn large and smooth */
+const SFX_FONT = '"Alagard"';
+let fontOk = false;
+if (typeof document !== 'undefined') void alagardReady().then(() => { fontOk = document.fonts?.check?.(`32px ${SFX_FONT}`) ?? true; });
 type Letter = { img: HTMLCanvasElement; x: number; y: number; rot: number };
 const sfxCache = new Map<string, Letter[]>();
 
@@ -242,7 +245,7 @@ export function sfxArt(text: string, style: SfxStyle): Letter[] {
   const hit = sfxCache.get(key);
   if (hit) return hit;
   const m = document.createElement('canvas').getContext('2d')!;
-  const font = `900 ${F}px ${SFX_FONT}`;
+  const font = `${F}px ${SFX_FONT}`;
   m.font = font;
   const rr = rng(text.length * 31 + text.charCodeAt(0));
   const metrics = [...text].map((ch) => ({ ch, w: m.measureText(ch).width }));
@@ -291,7 +294,7 @@ export function sfxArt(text: string, style: SfxStyle): Letter[] {
     out.push({ img: c, x: pen + w / 2 - total / 2, y: (rr() - 0.5) * F * 0.12, rot: (rr() - 0.5) * 0.2 });
     pen += w + track;
   }
-  sfxCache.set(key, out);
+  if (fontOk) sfxCache.set(key, out); // (letters made before the font was in are not kept)
   return out;
 }
 
@@ -310,6 +313,8 @@ export function sfx(word: string, x: number, y: number, o: { style?: keyof typeo
   add({
     t0: fxNow() + (o.delay ?? 0), dur,
     draw(c, t) {
+      // the words are lettered in Alagard: wait (silently) until it's in
+      if (!fontOk) { void alagardReady(); return; }
       art ??= sfxArt(word, { ...st, size: o.size ?? st.size ?? wordSize(word) });
       const d = dprNow();
       // keep the whole word on screen (`align` 1: x is its left edge, -1 its right edge)
@@ -448,12 +453,12 @@ export function animeMoment(kind: AnimeMoment, at?: XY) {
     case 'bigbuy':
       shake(4, 0.25);
       sparkleBurst(p.x, p.y, 14, { tint: 'gold' });
-      sfx('KA-CHING!', ...wordAt(0, -Math.min(90, H * 0.11)), { style: 'gold', tilt: -0.1 });
+      sfx('KER-CHING!', ...wordAt(0, -Math.min(90, H * 0.11)), { style: 'gold', tilt: -0.1 });
       break;
     case 'stamp':
       impactFrame(); shake(8, 0.28);
       speedLines({ x: p.x, y: p.y, dur: 0.5, clear: 0.3 });
-      sfx('KA-CHUNK!', ...wordAt(0, -Math.min(100, H * 0.13)), { style: 'red', tilt: -0.08 });
+      sfx('KER-CHUNK!', ...wordAt(0, -Math.min(100, H * 0.13)), { style: 'red', tilt: -0.08 });
       break;
     case 'bedtime':
       sfx('ZZZ...', ...wordAt(Math.min(60, W * 0.15), -Math.min(90, H * 0.11)), { style: 'night', tilt: -0.08, dur: 1.2 });
@@ -475,7 +480,8 @@ if (typeof window !== 'undefined') {
   if (!import.meta.env?.VITEST) setTimeout(() => {
     if (!document.getElementById('world')) return;
     void ensureChibi();
-    const words: [string, string][] = [['DING!', 'gold'], ['KA-CHING!', 'gold'], ['WOW!', 'mint'], ['YAY!', 'rose'], ['SHING!!', 'gold'], ['POP!', 'violet'], ['ZZZ...', 'night'], ['KA-CHUNK!', 'red']];
+    if (!fontOk) return;
+    const words: [string, string][] = [['DING!', 'gold'], ['KER-CHING!', 'gold'], ['WOW!', 'mint'], ['YAY!', 'rose'], ['SHING!!', 'gold'], ['POP!', 'violet'], ['ZZZ...', 'night'], ['KER-CHUNK!', 'red']];
     words.forEach(([w, st], i) => setTimeout(() => { sfxArt(w, { ...STYLES[st], size: wordSize(w) }); }, 400 * (i + 1)));
   }, 9000);
 }
