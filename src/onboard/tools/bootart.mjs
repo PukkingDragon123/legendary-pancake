@@ -729,8 +729,8 @@ function chainTile() {
 /** a dark emerald regency-stripe wall (the office's own wallpaper, in the dark), 64 px tile */
 function wallTile() {
   const N = 64, b = new Buf(N, N);
-  const G = rampOf([0x020605, 0x06120e, 0x0b1e17, 0x112a20], 6);
-  const gold = rampOf([0x1a1306, 0x2e220c], 3);
+  const G = rampOf([0x030a08, 0x071a12, 0x0d281c, 0x143626], 6);
+  const gold = rampOf([0x2a1c08, 0x4a3410], 3);
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     const sx = x % 32;
     const n = (vnoise((x % N) * 0.12, y * 0.12, 5) - 0.5) * 0.2;
@@ -743,9 +743,9 @@ function wallTile() {
 }
 /** A pool of warm lamplight on the wall, in hard stepped bands with ordered dither. */
 function lampPool() {
-  const w = 240, h = 340, b = new Buf(w, h), cx = w / 2, cy = h * 0.42;
+  const w = 260, h = 380, b = new Buf(w, h), cx = w / 2, cy = h * 0.47;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const nx = (x + 0.5 - cx) / (w / 2), ny = (y + 0.5 - cy) / (h / 2), a = Math.atan2(ny, nx);
+    const nx = (x + 0.5 - cx) / (w * 0.4), ny = (y + 0.5 - cy) / (h * 0.38), a = Math.atan2(ny, nx);
     const rag = 1 + (fbm(Math.cos(a) * 1.6 + 3, Math.sin(a) * 1.6 + 3, 8) - 0.5) * 0.34 + (vnoise(x * 0.09, y * 0.09, 9) - 0.5) * 0.1;
     const d = Math.sqrt(nx * nx + ny * ny) / rag;
     if (d >= 1) continue;
@@ -753,7 +753,7 @@ function lampPool() {
     const lv = (1 - d) * 6 * lean, band = Math.floor(lv), frac = lv - band;
     const k = band + (frac > bayer(x, y) ? 1 : 0);
     if (k <= 0) continue;
-    b.set(x, y, [255, 178, 92], Math.min(6, k) * 15);
+    b.set(x, y, [255, 184, 96], Math.min(6, k) * 19);
   }
   return { url: b.url(), w, h };
 }
@@ -875,7 +875,7 @@ background:#020504 url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-
 #boot .bt-stage{position:relative;width:${SW}em;height:${SH}em;flex:none;transform-origin:50% ${((DY / SH) * 100).toFixed(3)}%}
 #boot .bt-clock{left:0;top:0;width:${SW}em;height:${SH}em}
 #boot .bt-case{left:0;top:0;width:${W}em;height:${H}em}
-#boot .bt-pend{left:${PB.x0}em;top:${PB.y0}em;width:${PB.w}em;height:${PB.h}em;background:url(${pend.url()}) 0 0/${PB.w * PEND_N}em ${PB.h}em;animation:bt-pend .6s steps(${PEND_N - 1},jump-none) infinite alternate}
+#boot .bt-pend{left:${PB.x0}em;top:${PB.y0}em;width:${PB.w}em;height:${PB.h}em;background:url(${pend.url()}) 0 0/${PB.w * PEND_N}em ${PB.h}em;animation:bt-pend .6s steps(${PEND_N},jump-none) infinite alternate}
 #boot .bt-wt,#boot .bt-rg{--d:1;animation:bt-wt ${LOAD_S}s steps(1,end) forwards}
 #boot .bt-wt{width:${CONE.w}em;height:${CONE.h}em;background:url(${coneB.url()}) 0 0/100% 100%}
 #boot .bt-rg{--d:-1;width:${RING.w}em;height:${RING.h}em;background:url(${ringB.url()}) 0 0/100% 100%}

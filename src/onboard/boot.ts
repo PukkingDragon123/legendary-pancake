@@ -117,7 +117,7 @@ function strike(): Promise<void> {
       // the minute hand winds once round, landing back on the real time, while the weights settle at the bottom
       const m0 = frameOf(mh, ART.fr, k);
       mh.style.animation = 'none';
-      const dur = 750, t0 = performance.now();
+      const dur = 650, t0 = performance.now();
       play('clock_wind', 0.26, 1.25);
       await new Promise<void>((done) => {
         const step = () => {
