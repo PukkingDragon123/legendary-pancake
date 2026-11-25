@@ -191,7 +191,7 @@ export function wood(kind: WoodName = 'walnut', o: { along?: 'x' | 'y'; scale?: 
   return { alb: texAlb(w.tex, { scale: o.scale ?? 2.2, rot, ox: o.ox, oy: o.oy, tint: w.tint, gain: w.gain }), spec: 0.22 * v, shin: 18, coat: 0.32 * v };
 }
 export function leather(col?: RGB | string, o: TexOpts = {}): Material {
-  const alb = col ? detailAlb('pebble', typeof col === 'string' ? hex(col) : col, { scale: o.scale ?? 2.4, amt: 1.4, ox: o.ox, oy: o.oy }) : texAlb('leather', { scale: o.scale ?? 2.4, ox: o.ox, oy: o.oy });
+  const alb = col ? detailAlb('pebble', typeof col === 'string' ? hex(col) : col, { scale: o.scale ?? 3, amt: 0.75, ox: o.ox, oy: o.oy }) : texAlb('leather', { scale: o.scale ?? 2.4, ox: o.ox, oy: o.oy });
   return { alb, spec: 0.28, shin: 14, coat: 0.08 };
 }
 export const cloth = (n: 'bookcloth' | 'linen' | 'velvet' | 'felt', col: RGB | string, o: TexOpts & { amt?: number } = {}): Material => ({
@@ -221,8 +221,19 @@ export const matte = (col: RGB | string | ((x: number, y: number) => RGB), o: Pa
 const norm3 = (v: number[]) => { const n = Math.hypot(v[0], v[1], v[2]); return [v[0] / n, v[1] / n, v[2] / n]; };
 const L = norm3([-0.48, -0.62, 0.62]);
 const HV = norm3([L[0], L[1], L[2] + 1]);
-const WARM: RGB = [1.06, 1.0, 0.92];
-const COOL: RGB = [0.82, 0.88, 1.05];
+// [ui7] matched to the 3D's reference light (src/gfx/cel.ts CEL_REF): a warm key (#ffe2bc) from the upper left,
+// light falling off in three softened steps (lit, a warm half-tone, shadow), the shadow side pushed towards
+// violet-blue (#5a4fa0) with its local colour kept rich, a thin cool rim on the shadow-side silhouette, and
+// small crisp glints on hard materials only.
+const WARM: RGB = [1.08, 0.99, 0.86];
+const COOL: RGB = [0.78, 0.77, 1.06];
+const HALF: RGB = [1.04, 0.98, 0.93];
+/** three softened light steps (lit 1, half-tone 0.5, shadow 0), a little of the real gradient kept inside each */
+function steps(f: number): number {
+  const sm = (a: number, b: number, v: number) => { const t = clamp((v - a) / (b - a)); return t * t * (3 - 2 * t); };
+  const banded = 0.5 * sm(0.22, 0.32, f) + 0.5 * sm(0.62, 0.74, f) + Math.max(0, f - 1) * 0.35;
+  return banded * 0.65 + f * 0.35;
+}
 /** the soft studio metal and glass mirror: bright overhead window up-left, warm floor, a dark horizon band */
 function envAt(rx: number, ry: number): number {
   const up = -ry;
@@ -374,9 +385,14 @@ export class Real {
         const ao = 1 - clamp((hb[i] - hc) * aoK, 0, 0.6);
         const ndl = nx * L[0] + ny * L[1] + nz * L[2];
         const dif = m.diffuse ?? 1;
-        const lit = Math.max(0, ndl) / L[2];
+        const lit = steps(Math.max(0, ndl) / L[2]);
         const kd = (1 - amb) * kl * (1 + (lit - 1) * dif) * ao, ka = amb * (0.75 + 0.25 * ao) * (0.92 + 0.08 * -ny);
-        let rr = r * (COOL[0] * ka + WARM[0] * kd), gg = g * (COOL[1] * ka + WARM[1] * kd), bb = b * (COOL[2] * ka + WARM[2] * kd);
+        // the half-tone at the turning edge is a touch warmer
+        const ht = lit > 0.3 && lit < 0.8 ? 1 : 0;
+        let rr = r * (COOL[0] * ka + (ht ? HALF[0] : WARM[0]) * kd), gg = g * (COOL[1] * ka + (ht ? HALF[1] : WARM[1]) * kd), bb = b * (COOL[2] * ka + (ht ? HALF[2] : WARM[2]) * kd);
+        // a thin cool rim where the form turns away on the shadow side
+        const rim = Math.pow(1 - nz, 2.2) * clamp(nx * 0.6 + ny * 0.8) * 0.55;
+        if (rim > 0.002) { rr += (r * 0.25 + 46) * rim; gg += (g * 0.25 + 52) * rim; bb += (b * 0.25 + 80) * rim; }
         if (m.metal) {
           const rx = 2 * nz * nx, ry = 2 * nz * ny;
           const e = envAt(rx, ry) * (0.6 + 0.4 * ao);
@@ -389,7 +405,9 @@ export class Real {
         }
         const ndh = Math.max(0, nx * HV[0] + ny * HV[1] + nz * HV[2]);
         if (m.spec) {
-          const s = Math.pow(ndh, m.shin ?? 20) * m.spec * ao;
+          const s0 = Math.pow(ndh, m.shin ?? 20) * m.spec * ao;
+          // hard materials get a small, crisp glint (a bright core with a soft rim); soft ones keep a gentle sheen
+          const s = m.metal || (m.coat ?? 0) > 0.3 ? s0 * 0.45 + clamp((s0 - 0.25) * 3) * 0.55 * m.spec : s0;
           const tint = m.metal ? 0.6 : 0.08;
           rr += (255 * (1 - tint) + r * tint * 1.3) * s; gg += (250 * (1 - tint) + g * tint * 1.3) * s; bb += (236 * (1 - tint) + b * tint * 1.1) * s;
         }
@@ -419,7 +437,7 @@ export class Real {
     for (const s of [sh, ct]) {
       if (!s) continue;
       g.save();
-      g.shadowColor = s.color ?? `rgba(28, 14, 6, ${s.a ?? 0.38})`;
+      g.shadowColor = s.color ?? `rgba(30, 20, 46, ${s.a ?? 0.38})`; // cool violet-brown cast shadows
       g.shadowBlur = (s.blur ?? 4) * k;
       g.shadowOffsetX = (s.dx ?? 0) * k + W * 4; g.shadowOffsetY = (s.dy ?? 2) * k;
       g.drawImage(t, -W * 4, 0); // only the shadow lands on the canvas

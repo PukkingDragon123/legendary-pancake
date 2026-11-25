@@ -29,11 +29,11 @@ export function installRealSkin() {
 --rb-cream:${u(roundButton(48, 'cream'))};--rb-cream-dn:${u(roundButton(48, 'cream', true))};--rb-brass:${u(roundButton(48, 'brass'))};--rb-brass-dn:${u(roundButton(48, 'brass', true))};--rb-walnut:${u(roundButton(48, 'walnut'))};--rb-green:${u(roundButton(48, 'green'))};--rb-red:${u(roundButton(48, 'red'))};--rb-night:${u(roundButton(48, 'night'))};
 --paper-bg:var(--tx-paper) 0 0/320px 320px,#efe2c4;
 --parch-tile:var(--tx-paper);--parch-tile-dark:var(--tx-paper-dark);
---sh-1:0 1px 1.5px rgba(40,22,10,.32),0 2px 5px rgba(40,22,10,.16);
---sh-2:0 2px 3px rgba(40,22,10,.3),0 6px 14px rgba(40,22,10,.2);
---sh-3:0 4px 6px rgba(30,16,8,.32),0 14px 30px rgba(30,16,8,.3);
---drop:drop-shadow(0 2px 3px rgba(40,24,12,.42));
---drop-lg:drop-shadow(0 4px 8px rgba(30,18,8,.45));
+--sh-1:0 1px 1.5px rgba(36,22,40,.34),0 2px 5px rgba(36,24,56,.16);
+--sh-2:0 2px 3px rgba(36,22,40,.32),0 6px 14px rgba(36,24,56,.2);
+--sh-3:0 4px 6px rgba(30,18,40,.34),0 14px 30px rgba(30,20,56,.3);
+--drop:drop-shadow(0 2px 3px rgba(34,22,46,.42));
+--drop-lg:drop-shadow(0 4px 8px rgba(30,20,50,.45));
 --ink-emboss:0 1px 0 rgba(255,250,235,.55);
 --gilt-text:0 1px 0 #2a1408,0 0 1px #2a1408,0 2px 3px rgba(0,0,0,.45);
 }`;
