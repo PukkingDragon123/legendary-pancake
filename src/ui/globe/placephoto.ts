@@ -7,6 +7,7 @@ import { signal } from '@preact/signals';
 import type { Area } from '../../game/catalog.ts';
 import { hash, mix, mul, Pix, type C } from './pix.ts';
 import { sheetUrl, THUMBS } from './photos.ts';
+import { alagardWidth } from '../font.ts';
 
 /** place ids whose photo sheet has loaded */
 export const sheetsReady = signal<Record<string, true>>({});
@@ -67,14 +68,16 @@ export function photoStamp(a: Area, o: { state: 'visited' | 'open' | 'locked'; d
   if (hit) return hit;
   const t = thumb(a.id);
   if (!t) return null;
-  const W = 46, H = 38, p = new Pix(W, H);
+  // [font6] 54 art pixels wide so the place's name fits in Alagard; two lines when it can't
+  const W = 54, H = 38, p = new Pix(W, H);
   const ink = o.state === 'visited' ? mix(parseInt(a.color.slice(1), 16), 0x3d3229, 0.25) : 0x8a8478;
+  const name = a.stamp, lines = alagardWidth(name) / 2 <= W - 8 ? [name] : alagardWidth(name.replace(/ /g, '')) / 2 <= W - 8 ? [name.replace(/ /g, '')] : name.split(' ');
   const paper: C = o.state === 'locked' ? 0xe2dccb : 0xf1e9d6;
   p.rect(0, 0, W, H, paper);
   for (let x = 0; x < W; x += 2) { p.clear(x, 0); p.clear(x, H - 1); }
   for (let y = 0; y < H; y += 2) { p.clear(0, y); p.clear(W - 1, y); }
   // the photo, centre crop, as a two-tone print (ink on cream) with a tiny ordered dither
-  const cw = W - 8, ch = H - 13, Z = Math.min(THUMBS.tw / cw, THUMBS.th / ch) * 0.86;
+  const cw = W - 8, ch = H - 13 - (lines.length - 1) * 7, Z = Math.min(THUMBS.tw / cw, THUMBS.th / ch) * 0.86;
   const sx = t.x + (THUMBS.tw - cw * Z) / 2, sy = t.y + (THUMBS.th - ch * Z) / 2, dw = t.d.width;
   for (let y = 0; y < ch; y++) for (let x = 0; x < cw; x++) {
     const ix = Math.floor(sx + x * Z), iy = Math.floor(sy + y * Z), k = (iy * dw + ix) * 4, d = t.d.data;
@@ -87,9 +90,8 @@ export function photoStamp(a: Area, o: { state: 'visited' | 'open' | 'locked'; d
   }
   p.hline(4, W - 5, 3, mul(ink, 0.9)); p.hline(4, W - 5, 4 + ch, mul(ink, 0.9));
   p.vline(3, 3, 4 + ch, mul(ink, 0.9)); p.vline(W - 4, 3, 4 + ch, mul(ink, 0.9));
-  const txt = a.stamp.length > 10 ? a.stamp.replace(/ /g, '') : a.stamp;
-  const gap = txt.length > 9 ? 0 : 1;
-  p.text(Math.round(W / 2 - Pix.textWidth(txt, gap) / 2), H - 7, txt, o.state === 'locked' ? 0xb9b2a4 : ink, gap);
+  const cap: C = o.state === 'locked' ? 0xb9b2a4 : ink;
+  const labels: { text: string; cx: number; base: number; c: C; maxW: number }[] = lines.map((t, i) => ({ text: t, cx: W / 2, base: H - 2.5 - (lines.length - 1 - i) * 7, c: cap, maxW: W - 6 }));
   if (o.state === 'visited') {
     // the cancellation: a wobbly ring off to one side with the date, a few wavy lines
     const cx = W - 9 - Math.round(hash(o.seed, 1) * 3), cy = 9 + Math.round(hash(o.seed, 2) * 3), mk = 0x4a4458;
@@ -97,10 +99,10 @@ export function photoStamp(a: Area, o: { state: 'visited' | 'open' | 'locked'; d
       const r = Math.sqrt(x * x + y * y) + (hash(x, y, o.seed + 9) - 0.5) * 0.6;
       if ((Math.abs(r - 7.5) < 0.5 || Math.abs(r - 6.2) < 0.4) && hash(x, y, o.seed) > 0.25) p.set(cx + x, cy + y, mk);
     }
-    if (o.date) { const ds = `${new Date(o.date).getDate()}`; p.text(Math.round(cx - Pix.textWidth(ds) / 2), cy - 2, ds, mk); }
+    if (o.date) labels.push({ text: `${new Date(o.date).getDate()}`, cx, base: cy + 3, c: mk, maxW: 12 });
     for (let k = 0; k < 2; k++) for (let x = cx - 22; x < cx - 8; x++) if (hash(x, k, o.seed) > 0.25) p.set(x, Math.round(cy - 4 + k * 4 + Math.sin(x * 0.6) * 1.2), mk);
   }
-  const url = p.url(scale);
+  const url = p.urlText(scale, labels);
   cache.set(key, url);
   return url;
 }

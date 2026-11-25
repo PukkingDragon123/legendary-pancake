@@ -21,15 +21,13 @@
   --font-display: 'Alagard', 'TBME Body', ui-monospace, monospace;
   --font-body: 'Alagard', 'TBME Body', ui-monospace, monospace;
   --font-small: 'Alagard', 'TBME Body', ui-monospace, monospace;
-  /* Text sizes in art pixels (src/gfx/artpx.ts keeps --font-px = 16 art pixels on :root): every Alagard font
-     pixel is exactly one art pixel (t1), two (t2, titles and big numbers), three ... */
-  --font-px: 16px;
-  --t1: var(--font-px);
-  --t2: calc(var(--font-px) * 2);
-  --t3: calc(var(--font-px) * 3);
-  --t4: calc(var(--font-px) * 4);
-  --t6: calc(var(--font-px) * 6);
-  --t8: calc(var(--font-px) * 8);
+  /* Text sizes: Alagard is drawn on a 16 px grid and reads best at whole multiples of it (crisp at any DPR) */
+  --t1: 16px;
+  --t2: 32px;
+  --t3: 48px;
+  --t4: 64px;
+  --t6: 96px;
+  --t8: 128px;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
   --drop: drop-shadow(0 2px 3px rgba(40, 24, 12, 0.42));
@@ -37,9 +35,8 @@
   --pop: cubic-bezier(0.3, 1.6, 0.5, 1);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
-
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--font-body); font-size: var(--t1); line-height: 1.25; letter-spacing: 0; font-synthesis: none; -webkit-font-smoothing: none; font-smooth: never; font-kerning: none; text-rendering: optimizeSpeed; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--font-body); font-size: var(--t1); line-height: 1.25; letter-spacing: 0; font-synthesis: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-kerning: none; text-rendering: geometricPrecision; }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
 input, textarea, select { font: inherit; color: inherit; }
 #world { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; outline: none; }
@@ -173,7 +170,7 @@ input[type='time'].field { font-family: var(--font-small); font-size: var(--t1);
 
 /* ------------------------------------------------------------ toast & bubble */
 .toasts { position: absolute; top: calc(62px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(400px, calc(100% - 24px)); display: flex; flex-direction: column; gap: 6px; z-index: 30; pointer-events: none; }
-.toast { pointer-events: auto; position: relative; display: flex; align-items: center; gap: 8px; padding: 0 2px; font-size: var(--t1); line-height: 1.25; color: var(--ink); filter: var(--drop-lg); animation: toastIn 0.45s var(--pop); }
+.toast { pointer-events: auto; position: relative; display: flex; align-items: center; gap: 8px; padding: 0 2px; font-size: var(--t1); line-height: 1.25; color: var(--ink); filter: var(--drop-lg); animation: toastIn 0.45s var(--pop); transform: rotate(-1deg); }
 .toast .ico { margin: -6px 0; }
 .toast.out { animation: toastOut 0.3s var(--ease) forwards; }
 .bubble { position: absolute; z-index: 4; max-width: 250px; padding: 0 2px; font-size: var(--t1); line-height: 1.25; color: #312821; transform: translate(-50%, -100%); animation: bubbleIn 0.4s var(--pop); pointer-events: none; filter: var(--drop); }
@@ -299,8 +296,8 @@ input[type='time'].field { font-family: var(--font-small); font-size: var(--t1);
 /* ------------------------------------------------------------ animations */
 @keyframes sheetIn { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
 @keyframes sheetOut { to { transform: translate(-50%, 100%); } }
-@keyframes toastIn { 0% { transform: translateY(-40px) rotate(-1deg) scale(0.7); opacity: 0; } 100% { transform: none; opacity: 1; } }
-@keyframes toastOut { to { transform: translateY(-30px); opacity: 0; } }
+@keyframes toastIn { 0% { transform: translateY(-40px) rotate(-1deg) scale(0.7); opacity: 0; } 100% { transform: rotate(-1deg); opacity: 1; } }
+@keyframes toastOut { to { transform: translateY(-30px) rotate(-1deg); opacity: 0; } }
 @keyframes bubbleIn { from { transform: translate(-50%, -80%) scale(0.4); opacity: 0; } to { transform: translate(-50%, -100%) scale(1); opacity: 1; } }
 @keyframes fadeUp { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }

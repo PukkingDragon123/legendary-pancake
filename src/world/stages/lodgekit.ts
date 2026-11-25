@@ -8,7 +8,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { modelUrl } from '../../gfx/glb.ts';
 import { rng } from '../../gfx/noise.ts';
-import { alagard, alagardReady, alagardSafe } from '../../ui/font.ts';
+import { alagard, alagardReady, alagardSafe, alagardText } from '../../ui/font.ts';
 import { drawText3D, fitText3D } from '../../ui/text3d.tsx';
 
 // ------------------------------------------------------------------ textures and materials
@@ -557,31 +557,11 @@ export function lodgeFont(): Promise<void> {
  * letters have hard pixel edges. `y` is the middle of the capitals.
  */
 function pixelText(g: CanvasRenderingContext2D, text: string, x: number, y: number, px: number, col: string, o: { align?: CanvasTextAlign; shadow?: string; outline?: string; maxW?: number } = {}) {
-  const [c2, g2] = canvas(g.canvas.width, g.canvas.height);
   text = alagardSafe(text);
   let n = Math.max(1, Math.round(px / 16));
-  g2.font = alagard(n);
-  if (o.maxW) { while (n > 1 && g2.measureText(text).width > o.maxW) { n -= 1; g2.font = alagard(n); } }
-  const w = Math.round(g2.measureText(text).width), al = o.align ?? 'center';
-  g2.textAlign = 'left';
-  g2.textBaseline = 'alphabetic';
-  g2.fillStyle = '#000';
-  g2.fillText(text, Math.round(al === 'center' ? x - w / 2 : al === 'right' || al === 'end' ? x - w : x), Math.round(y + 5.5 * n));
-  const d = g2.getImageData(0, 0, c2.width, c2.height);
-  const paint = (dx: number, dy: number, hex: string) => {
-    const [r, gg, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-    const out = g.getImageData(0, 0, c2.width, c2.height);
-    for (let yy = 0; yy < c2.height; yy++) for (let xx = 0; xx < c2.width; xx++) {
-      const sx = xx - dx, sy = yy - dy;
-      if (sx < 0 || sy < 0 || sx >= c2.width || sy >= c2.height) continue;
-      if (d.data[(sy * c2.width + sx) * 4 + 3] > 110) { const i = (yy * c2.width + xx) * 4; out.data[i] = r; out.data[i + 1] = gg; out.data[i + 2] = b; out.data[i + 3] = 255; }
-    }
-    g.putImageData(out, 0, 0);
-  };
-  const k = Math.max(1, Math.round(n / 2));
-  if (o.outline) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, 1], [-1, 1], [1, -1]]) paint(dx * k, dy * k, o.outline);
-  if (o.shadow) paint(0, 2 * k, o.shadow);
-  paint(0, 0, col);
+  if (o.maxW) { const m = canvas(4, 4)[1]; m.font = alagard(n); while (n > 1 && m.measureText(text).width > o.maxW) { n -= 1; m.font = alagard(n); } }
+  // [font6] full-resolution chalk lettering, centred on y
+  alagardText(g, text, x, Math.round(y + 5.5 * n), col, { n, align: o.align ?? 'center', shadow: o.shadow, outline: o.outline });
 }
 
 // ------------------------------------------------------------------ dried herbs hung from the beams

@@ -33,7 +33,11 @@ export const isWide = () => innerWidth >= 860 && innerWidth > innerHeight;
 /** the size of one art pixel in CSS px for this screen */
 export function panelScale() {
   if (isWide()) return Math.max(2, Math.min(4, Math.floor(Math.min((innerWidth * 0.5) / 196, (innerHeight - 16) / 252))));
-  return Math.max(2, Math.min(3, Math.floor(Math.min(innerWidth / 196, innerHeight / 420))));
+  const fit = Math.min(innerWidth / 196, innerHeight / 420);
+  if (fit >= 2) return Math.min(3, Math.floor(fit));
+  // [font6] narrow phones (360 px): the largest whole number of device pixels per art pixel that fits the width
+  const dpr = devicePixelRatio || 1;
+  return Math.max(1.5, Math.floor(fit * dpr) / dpr);
 }
 const W = 186;
 

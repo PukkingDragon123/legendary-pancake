@@ -3,6 +3,8 @@
 // polygons, a 3x5 pixel font) and shown scaled up with nearest-neighbour filtering. No smooth shapes.
 // [globe] OWNED BY THE GLOBE BUILDER.
 
+import { alagardSafe, alagardText, alagardWidth } from '../font.ts';
+
 export type C = number; // 0xRRGGBB
 export const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 export const bayer = (x: number, y: number) => BAYER[(y & 3) * 4 + (x & 3)];
@@ -125,6 +127,22 @@ export class Pix {
     return cv;
   }
   url(scale = 1): string { return this.canvas(scale).toDataURL(); }
+  /**
+   * [font6] The picture with Alagard lettering drawn at the output resolution: each label centred on `cx`, its
+   * baseline at `base` (art pixels), at `ratio` font pixels per art pixel where it fits `maxW` (art pixels),
+   * stepping down a whole device pixel at a time; a label that can't fit at one device pixel is left out.
+   */
+  urlText(scale: number, labels: { text: string; cx: number; base: number; c: C; maxW: number; ratio?: number }[]): string {
+    const cv = this.canvas(scale), g = cv.getContext('2d')!;
+    for (const l of labels) {
+      const s = alagardSafe(l.text), w = alagardWidth(s, 1);
+      let n = Math.max(1, Math.round((l.ratio ?? 0.5) * scale));
+      while (n > 1 && w * n > l.maxW * scale) n--;
+      if (w * n > l.maxW * scale) continue;
+      alagardText(g, s, Math.round(l.cx * scale), Math.round(l.base * scale), css(l.c), { n, align: 'center' });
+    }
+    return cv.toDataURL();
+  }
 }
 
 /** Device-crisp scale for a sprite shown at `css` CSS px per art pixel. */

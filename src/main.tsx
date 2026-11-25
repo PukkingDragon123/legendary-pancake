@@ -28,7 +28,7 @@ async function boot() {
   installArtPx();
   await loadTextures(); // [ui7] the UI's material tiles (small WebPs) before anything is painted
   installRealSkin();
-  installIconSet(); // [ui4] the painted icon family replaces the sprite icons everywhere
+  await Promise.race([installIconSet(), new Promise((r) => setTimeout(r, 2500))]); // [ui4] the icon family replaces the sprite icons everywhere; [tex7] its atlas
   await alagardReady();
   installTextSnap();
   installText3D();

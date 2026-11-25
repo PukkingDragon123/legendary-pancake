@@ -42,7 +42,7 @@ export interface EyeState {
 export const defaultEye = (): EyeState => ({ lid: 0, low: 0, tilt: 0, lx: 0, ly: 0, pupil: 5, mode: 'normal', tear: false, nict: 0 });
 
 /** Canvas texels per eye (the decal patch spans the whole canvas). */
-export const EYE_N = 96;
+export const EYE_N = 256; // [anime6] high resolution: smooth, crisp eyes and expressions even in close-ups
 const N = EYE_N;
 const C = (N - 1) / 2;
 /** The dot's radius as a share of the half patch (the GLB's patch is 2.1 toy eye radii across each way); the dots
@@ -95,9 +95,11 @@ export class Eye {
     this.ctx = this.canvas.getContext('2d')!;
     this.img = this.ctx.createImageData(N, N);
     this.tex = new THREE.CanvasTexture(this.canvas);
-    this.tex.magFilter = THREE.NearestFilter;
-    this.tex.minFilter = THREE.LinearFilter;
-    this.tex.generateMipmaps = false;
+    // [anime6] smooth, high-resolution eyes: filtered up close, mipmapped far away (no pixel stair-steps)
+    this.tex.magFilter = THREE.LinearFilter;
+    this.tex.minFilter = THREE.LinearMipmapLinearFilter;
+    this.tex.generateMipmaps = true;
+    this.tex.anisotropy = 4;
     this.tex.flipY = false; // (the decals' UVs come from glTF: v runs down the patch)
     this.tex.colorSpace = THREE.SRGBColorSpace;
     const r = rnd(seed * 31 + (side > 0 ? 17 : 5));
@@ -261,7 +263,7 @@ export class Eye {
       } else {
         // a fat tear welling at the inner corner
         const c = 0x9fdcff, cx = inner * rx * 0.55, cy = -rx * 1.25 - wob;
-        for (let y = -11; y <= 11; y++) for (let x = -8; x <= 8; x++) {
+        for (let y = -Math.ceil(RA * 0.52); y <= Math.ceil(RA * 0.52); y++) for (let x = -Math.ceil(RA * 0.34); x <= Math.ceil(RA * 0.34); x++) {
           const v = y / (RA * 0.42), u = x / (RA * 0.3);
           if (u * u + Math.max(0, v) ** 2 <= 1 && (v <= 0 || Math.abs(u) <= 1 - v * 0.9)) P(cx + x, cy + y, c);
         }
@@ -311,7 +313,7 @@ export class Eye {
     }
     if (s.tear) {
       const c = 0x86a9b0, cx = inner * R0 * 0.5, cy = -R0 * 1.4;
-      for (let y = -6; y <= 6; y++) for (let x = -4; x <= 4; x++) {
+      for (let y = -Math.ceil(R0 * 0.55); y <= Math.ceil(R0 * 0.55); y++) for (let x = -Math.ceil(R0 * 0.35); x <= Math.ceil(R0 * 0.35); x++) {
         const v = y / (R0 * 0.45), u = x / (R0 * 0.3);
         if (u * u + Math.max(0, v) ** 2 <= 1 && (v <= 0 || Math.abs(u) <= 1 - v * 0.9)) P(cx + x, cy + y, c);
       }

@@ -1,57 +1,52 @@
 // Anime screen effects for the big moments: radial speed/focus lines, an impact frame (two frames of high-contrast
 // silhouette), screen shake, sparkle bursts, a sunburst behind a reveal, a chibi Pip popping in from the edge, and
-// manga sound-effect words ("POP!", "DING!", "KA-CHING!"...) lettered in the pixel font with an outline and a 3D
-// extrusion. All pixel art at exactly one art pixel per texel (src/gfx/artpx.ts, the size the HUD and the 3D world
-// use), painted like the interface (src/ui/px/relief.ts: top-left light, cool violet-blue shadows, coloured outlines):
-// hard edges, stepped tones, ordered-dither fades, never a smooth gradient or a stretched sprite.
+// manga sound-effect words ("POP!", "DING!", "KER-CHING!"...) in the game's font, Alagard, drawn large and smooth with
+// a glossy gradient fill, a thick outline and a 3D extrusion. Everything is smooth, anti-aliased, high-resolution art drawn at the screen's full
+// device-pixel resolution, polished like an anime: soft glows, gradient light, clean shapes.
 // Two transparent canvases: the back one sits between the 3D view and the interface (a sunburst behind a 3D reveal),
 // the front one above everything (lines, sparkles, words, the chibi). Short (each moment is over in about a second)
-// and cheap (low-res canvases, only running while something plays). With Calm motion (the setting or the system's
-// reduced motion) there is no flash, no shake and no lines: words and sparkles just appear and fade.
+// and cheap (only running while something plays). With Calm motion (the setting or the system's reduced motion)
+// there is no flash, no shake and no lines: words and sparkles just appear and fade.
 //   animeMoment('levelup' | 'gacha5' | 'gacha4' | 'unlock' | 'morning' | 'bigbuy' | 'stamp' | 'bedtime', at?)
-import { artPx } from '../../gfx/artpx.ts';
 import { save } from '../../game/store.ts';
 import { owlIconAsync } from '../portraits.ts';
-import { pixelate } from '../pxfx.tsx';
-import { flat, hash, hex, mix, Relief, type AFn, type Shape } from '../px/relief.ts';
-import { ENAMEL, markArt, pillow, SHADOW, type EmoteKind } from './emotes.ts';
-import { bayer, blit, calmMotion, col, fxNow, Raster, rng } from './pixart.ts';
+import { alagardReady } from '../font.ts';
+import { dprNow, markArt, type EmoteKind } from './emotes.ts';
+import { calmMotion, fxNow, rng } from './kit.ts';
 
 type XY = { x: number; y: number };
-interface Fx { t0: number; dur: number; back?: boolean; step(r: Raster, t: number, B: number): void; draw?(c: CanvasRenderingContext2D, t: number, B: number): void }
+/** an effect: draws itself (CSS px coordinates) on the front layer, or the back one */
+interface Fx { t0: number; dur: number; back?: boolean; draw(c: CanvasRenderingContext2D, t: number): void }
 
 // ------------------------------------------------------------------ the two layers
 
 class Layer {
   cv: HTMLCanvasElement | null = null;
   ctx: CanvasRenderingContext2D | null = null;
-  ras: Raster | null = null;
+  used = false;
   constructor(private z: string, private cls: string) {}
-  ensure(B: number) {
+  begin() {
     if (!this.cv) {
       const c = document.createElement('canvas');
       c.className = this.cls;
       c.setAttribute('aria-hidden', 'true');
-      Object.assign(c.style, { position: 'fixed', left: '0', top: '0', zIndex: this.z, pointerEvents: 'none', imageRendering: 'pixelated' });
+      Object.assign(c.style, { position: 'fixed', left: '0', top: '0', width: '100vw', height: '100vh', zIndex: this.z, pointerEvents: 'none' });
       document.body.appendChild(c);
       this.cv = c;
       this.ctx = c.getContext('2d');
     }
-    const w = Math.ceil(innerWidth / B), h = Math.ceil(innerHeight / B);
-    if (!this.ras || this.ras.w !== w || this.ras.h !== h) {
-      this.cv.width = w; this.cv.height = h;
-      this.cv.style.width = `${w * B}px`; this.cv.style.height = `${h * B}px`;
-      this.ras = new Raster(w, h);
-    }
-    this.ctx!.imageSmoothingEnabled = false;
+    const d = dprNow(), w = Math.round(innerWidth * d), h = Math.round(innerHeight * d), g = this.ctx!;
+    if (this.cv.width !== w || this.cv.height !== h) { this.cv.width = w; this.cv.height = h; }
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, w, h);
+    g.setTransform(d, 0, 0, d, 0, 0);
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    return g;
   }
-  hide() { if (this.cv && this.ctx) this.ctx.clearRect(0, 0, this.cv.width, this.cv.height); }
 }
 const back = new Layer('1', 'hh-anime-back'), front = new Layer('65', 'hh-anime');
 const fxs: Fx[] = [];
 let raf = 0;
-/** CSS px per texel: the game's one art pixel */
-const texel = () => artPx();
 
 function add(f: Fx) {
   if (typeof document === 'undefined') return;
@@ -60,46 +55,53 @@ function add(f: Fx) {
 }
 function frame() {
   raf = 0;
-  const B = texel(), now = fxNow();
-  back.ensure(B); front.ensure(B);
-  const rb = back.ras!, rf = front.ras!;
-  rb.clear(); rf.clear();
-  let anyBack = false;
+  const now = fxNow();
   for (let i = fxs.length - 1; i >= 0; i--) if (now - fxs[i].t0 > fxs[i].dur) fxs.splice(i, 1);
-  for (const f of fxs) { const t = now - f.t0; if (t < 0) continue; f.step(f.back ? rb : rf, t, B); if (f.back) anyBack = true; }
-  rf.to(front.ctx!);
-  if (anyBack) rb.to(back.ctx!); else back.hide();
-  for (const f of fxs) { const t = now - f.t0; if (t >= 0 && f.draw) f.draw(front.ctx!, t, B); }
+  const gb = back.begin(), gf = front.begin();
+  for (const f of fxs) {
+    const t = now - f.t0;
+    if (t < 0) continue;
+    const g = f.back ? gb : gf;
+    g.save(); f.draw(g, t); g.restore();
+  }
   if (fxs.length) raf = requestAnimationFrame(frame);
-  else { front.hide(); back.hide(); }
 }
 
 // ------------------------------------------------------------------ focus lines
 
+/** a long tapered spike: wide at the screen's edge, a needle point toward the middle */
+function spike(c: CanvasRenderingContext2D, cx: number, cy: number, a: number, r0: number, r1: number, w: number) {
+  const ca = Math.cos(a), sa = Math.sin(a), px = -sa * w / 2, py = ca * w / 2;
+  c.moveTo(cx + ca * r1 + px, cy + sa * r1 + py);
+  c.lineTo(cx + ca * r0, cy + sa * r0);
+  c.lineTo(cx + ca * r1 - px, cy + sa * r1 - py);
+  c.closePath();
+}
 /**
  * Radial speed / focus lines rushing in from the screen edges toward a point, leaving the middle clear. They are
  * redrawn "on twos" (a new set every other frame, as in hand-drawn anime).
  */
 export function speedLines(o: { x?: number; y?: number; dur?: number; color?: string; clear?: number; n?: number; back?: boolean } = {}) {
   if (calmMotion()) return;
-  const dur = o.dur ?? 0.8, c = col(o.color ?? '#3a2448'), n = o.n ?? 70;
+  const dur = o.dur ?? 0.8, n = o.n ?? 90;
   add({
     t0: fxNow(), dur, back: o.back,
-    step(r, t, B) {
-      const cx = (o.x ?? innerWidth / 2) / B, cy = (o.y ?? innerHeight * 0.42) / B;
-      const R = Math.hypot(Math.max(cx, r.w - cx), Math.max(cy, r.h - cy)) + 4;
-      const clear = (o.clear ?? 0.36) * Math.min(r.w, r.h);
+    draw(c, t) {
+      const W = innerWidth, H = innerHeight, cx = o.x ?? W / 2, cy = o.y ?? H * 0.42;
+      const R = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) + 8;
+      const clear = (o.clear ?? 0.36) * Math.min(W, H);
       // rush in, hold, pull back out
       const k = t < 0.1 ? t / 0.1 : t > dur - 0.18 ? Math.max(0, (dur - t) / 0.18) : 1;
       const rr = rng(Math.floor(t * 12) * 7919 + 13);
+      c.fillStyle = o.color ?? '#3a2448';
+      c.globalAlpha = 0.9;
+      c.beginPath();
       for (let i = 0; i < n; i++) {
-        const a = (i / n) * Math.PI * 2 + (rr() - 0.5) * 0.09;
+        const a = (i / n) * Math.PI * 2 + (rr() - 0.5) * 0.07;
         const inner = clear * (0.95 + rr() * 0.75), len = R - inner;
-        const r0 = R - len * k * (0.55 + rr() * 0.45);
-        const w = (1.1 + rr() * 2.6) * Math.max(0.8, R / 260);
-        const ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca;
-        r.poly([[cx + ca * R + px * w, cy + sa * R + py * w], [cx + ca * R - px * w, cy + sa * R - py * w], [cx + ca * r0, cy + sa * r0]], c);
+        spike(c, cx, cy, a, R - len * k * (0.5 + rr() * 0.5), R, (3 + rr() * 9) * Math.max(0.8, R / 520));
       }
+      c.fill();
     },
   });
 }
@@ -114,22 +116,22 @@ export function impactFrame() {
   set('grayscale(1) contrast(9) brightness(1.25)');
   setTimeout(() => set('grayscale(1) contrast(9) invert(1)'), 45);
   setTimeout(() => set(''), 95);
-  // a burst of white impact lines over the silhouette
+  // a burst of impact spikes over the silhouette
   add({
     t0: fxNow(), dur: 0.1,
-    step(r, t) {
-      const cx = r.w / 2, cy = r.h * 0.42, R = Math.hypot(r.w, r.h), c = col(t < 0.045 ? '#14101a' : '#fffaf0'), rr = rng(5);
-      for (let i = 0; i < 40; i++) {
-        const a = rr() * Math.PI * 2, w = 1 + rr() * 3, ca = Math.cos(a), sa = Math.sin(a);
-        r.poly([[cx + ca * R - sa * w, cy + sa * R + ca * w], [cx + ca * R + sa * w, cy + sa * R - ca * w], [cx + ca * R * 0.25, cy + sa * R * 0.25]], c);
-      }
+    draw(c, t) {
+      const W = innerWidth, H = innerHeight, cx = W / 2, cy = H * 0.42, R = Math.hypot(W, H), rr = rng(5);
+      c.fillStyle = t < 0.045 ? '#14101a' : '#fffaf0';
+      c.beginPath();
+      for (let i = 0; i < 46; i++) spike(c, cx, cy, rr() * Math.PI * 2, R * (0.22 + rr() * 0.12), R, 3 + rr() * 9);
+      c.fill();
     },
   });
 }
 
 let shakeUntil = 0, shakeAmp = 0, shakeRaf = 0;
 const saved = new Map<HTMLElement, string>();
-/** Shake the picture and the interface (whole-pixel jolts on twos, decaying). */
+/** Shake the picture and the interface (jolts on twos, decaying). */
 export function shake(amp = 6, dur = 0.35) {
   if (calmMotion() || typeof document === 'undefined') return;
   shakeAmp = Math.max(shakeAmp * (shakeUntil > performance.now() ? 1 : 0), amp);
@@ -141,8 +143,8 @@ export function shake(amp = 6, dur = 0.35) {
     const now = performance.now();
     if (now >= shakeUntil) { for (const [e, tr] of saved) e.style.transform = tr; saved.clear(); shakeRaf = 0; shakeAmp = 0; return; }
     const k = (shakeUntil - now) / d0, f = Math.floor(now / 33), rr = rng(f);
-    const dx = Math.round((rr() * 2 - 1) * shakeAmp * k), dy = Math.round((rr() * 2 - 1) * shakeAmp * k * 0.7);
-    for (const [e] of saved) e.style.transform = e.id === 'world' ? `translate(${dx}px, ${dy}px) scale(1.03)` : `translate(${dx}px, ${dy}px)`;
+    const dx = (rr() * 2 - 1) * shakeAmp * k, dy = (rr() * 2 - 1) * shakeAmp * k * 0.7;
+    for (const [e] of saved) e.style.transform = e.id === 'world' ? `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(1.03)` : `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`;
     shakeRaf = requestAnimationFrame(step);
   };
   if (!shakeRaf) shakeRaf = requestAnimationFrame(step);
@@ -151,25 +153,29 @@ export function shake(amp = 6, dur = 0.35) {
 // ------------------------------------------------------------------ sparkles
 
 const SPARK_TINT: Record<string, number> = { gold: 0, pink: 1, sky: 2, violet: 3 };
-/** Sparkles burst out from a point, spin down and twinkle out. */
+/** Sparkles burst out from a point, spin and twinkle out. */
 export function sparkleBurst(x: number, y: number, n = 14, o: { tint?: string | string[]; spread?: number } = {}) {
   const calm = calmMotion(), rr = rng(Math.floor(Math.random() * 1e6));
   const tints = Array.isArray(o.tint) ? o.tint : [o.tint ?? 'gold'];
+  const scale = Math.min(1.4, Math.max(0.8, Math.min(innerWidth, innerHeight) / 500));
   const ps = Array.from({ length: calm ? Math.ceil(n / 2) : n }, (_, i) => {
-    const a = rr() * Math.PI * 2, v = (calm ? 0 : 120 + rr() * 260) * (o.spread ?? 1);
-    return { a, v, life: 0.55 + rr() * 0.5, arm: 4 + Math.floor(rr() * 8), tint: SPARK_TINT[tints[i % tints.length]] ?? 0, d: rr() * 0.12, dist: calm ? 30 + rr() * 90 : 0 };
+    const a = rr() * Math.PI * 2, v = (calm ? 0 : 120 + rr() * 260) * (o.spread ?? 1) * scale;
+    return { a, v, life: 0.55 + rr() * 0.5, size: (34 + rr() * 60) * scale, tint: SPARK_TINT[tints[i % tints.length]] ?? 0, d: rr() * 0.12, dist: calm ? 30 + rr() * 90 : 0, spin: (rr() - 0.5) * 6 };
   });
   add({
-    t0: fxNow(), dur: 1.15, step() { /* sprites only */ },
-    draw(c, t, B) {
+    t0: fxNow(), dur: 1.15,
+    draw(c, t) {
       for (const p of ps) {
         const tt = t - p.d;
         if (tt < 0 || tt > p.life) continue;
         const k = tt / p.life, travel = p.v * (1 - Math.pow(1 - Math.min(1, tt / 0.6), 3)) * 0.55 + p.dist;
         const px = x + Math.cos(p.a) * travel, py = y + Math.sin(p.a) * travel + (calm ? 0 : tt * tt * 60);
-        // twinkle: a dot, a plus, the full star (flickering to a smaller one), back down
-        const f = k < 0.1 ? 0 : k < 0.22 ? 1 : k > 0.9 ? 0 : k > 0.78 ? 1 : Math.floor(tt * 14) % 3 === 0 ? 3 : 2;
-        blit(c, markArt('sparkle', p.arm / 0.38, p.tint * 4 + f), Math.round(px / B), Math.round(py / B), 1);
+        // twinkle: grow in, flicker, shrink away
+        const s = k < 0.18 ? k / 0.18 : k > 0.72 ? (1 - k) / 0.28 : 1 - (Math.floor(tt * 16) % 3 === 0 ? 0.25 : 0);
+        c.save(); c.translate(px, py); c.rotate(calm ? 0 : tt * p.spin);
+        const img = markArt('sparkle', p.size, p.tint * 4 + 2), d = dprNow(), w = (img.width / d) * s, h = (img.height / d) * s;
+        c.drawImage(img, -w / 2, -h / 2, w, h);
+        c.restore();
       }
     },
   });
@@ -177,147 +183,156 @@ export function sparkleBurst(x: number, y: number, n = 14, o: { tint?: string | 
 
 // ------------------------------------------------------------------ sunburst
 
-/** A slowly turning sunburst behind a reveal: hard-edged rays in two tones, dithered out at both ends. */
+/** A slowly turning sunburst behind a reveal: soft rays in two tones, fading toward the middle and the rim. */
 export function sunburst(x: number, y: number, o: { colors?: [string, string]; dur?: number; r0?: number; r1?: number; rays?: number; alpha?: number } = {}) {
   const calm = calmMotion(), dur = o.dur ?? 1.2, rays = o.rays ?? 16;
   const [ca, cb] = o.colors ?? ['#ffe58a', '#fff6d0'];
-  const A = col(ca, Math.round((o.alpha ?? 0.42) * 255)), Bc = col(cb, Math.round((o.alpha ?? 0.42) * 200));
   const jit = Array.from({ length: rays }, (_, i) => 0.75 + rng(i + 3)() * 0.5);
   add({
     t0: fxNow(), dur, back: true,
-    step(r, t, B) {
-      const cx = x / B, cy = y / B;
-      const r0 = (o.r0 ?? 60) / B, r1 = (o.r1 ?? Math.min(innerWidth, innerHeight) * 0.62) / B;
+    draw(c, t) {
+      const r0 = o.r0 ?? 60, r1 = o.r1 ?? Math.min(innerWidth, innerHeight) * 0.62;
       const env = t < 0.16 ? t / 0.16 : t > dur - 0.3 ? Math.max(0, (dur - t) / 0.3) : 1;
-      const spin = calm ? 0 : Math.floor(t * 12) / 12 * 0.35;
-      // the rays as wedges, then a dithered fade toward the hole and the rim
-      for (let i = 0; i < rays; i++) {
-        const a0 = (i / rays) * Math.PI * 2 + spin, a1 = a0 + (Math.PI / rays) * jit[i];
-        r.poly([[cx + Math.cos(a0) * r0 * 0.6, cy + Math.sin(a0) * r0 * 0.6], [cx + Math.cos(a0) * r1 * 1.1, cy + Math.sin(a0) * r1 * 1.1], [cx + Math.cos(a1) * r1 * 1.1, cy + Math.sin(a1) * r1 * 1.1], [cx + Math.cos(a1) * r0 * 0.6, cy + Math.sin(a1) * r0 * 0.6]], i % 2 ? Bc : A);
+      const spin = calm ? 0 : t * 0.35;
+      c.globalAlpha = env * (o.alpha ?? 0.42) * 1.6;
+      for (const [k, col] of [[0, ca], [1, cb]] as const) {
+        const g = c.createRadialGradient(x, y, r0 * 0.6, x, y, r1);
+        g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.18, col); g.addColorStop(0.6, col); g.addColorStop(1, 'rgba(255,255,255,0)');
+        c.fillStyle = g;
+        c.beginPath();
+        for (let i = k; i < rays; i += 2) {
+          const a0 = (i / rays) * Math.PI * 2 + spin, a1 = a0 + (Math.PI / rays) * jit[i];
+          c.moveTo(x, y); c.arc(x, y, r1, a0, a1); c.closePath();
+        }
+        c.fill();
       }
-      const x0 = Math.max(0, Math.floor(cx - r1 * 1.15)), x1 = Math.min(r.w - 1, Math.ceil(cx + r1 * 1.15));
-      const y0 = Math.max(0, Math.floor(cy - r1 * 1.15)), y1 = Math.min(r.h - 1, Math.ceil(cy + r1 * 1.15));
-      for (let yy = y0; yy <= y1; yy++) for (let xx = x0; xx <= x1; xx++) {
-        const i = yy * r.w + xx;
-        if (!r.buf[i]) continue;
-        const d = Math.hypot(xx - cx, yy - cy);
-        const keep = Math.min((d - r0 * 0.6) / (r0 * 0.6), (r1 - d) / (r1 * 0.45), 1) * env;
-        if (bayer(xx, yy) >= keep) r.buf[i] = 0;
-      }
+      // a soft glow at the heart of it
+      const glow = c.createRadialGradient(x, y, 0, x, y, r0 * 1.6);
+      glow.addColorStop(0, 'rgba(255, 250, 225, 0.55)'); glow.addColorStop(1, 'rgba(255, 250, 225, 0)');
+      c.globalAlpha = env; c.fillStyle = glow; c.fillRect(x - r0 * 1.6, y - r0 * 1.6, r0 * 3.2, r0 * 3.2);
     },
   });
 }
 
 // ------------------------------------------------------------------ manga sound-effect words
 
-export interface SfxStyle { fill: string; deep: string; ink?: string; size?: number }
+export interface SfxStyle { fill: string; deep: string; hi?: string; ink?: string; size?: number }
 const STYLES: Record<string, SfxStyle> = {
-  gold: { fill: '#ffd84a', deep: '#e8821c' },
-  rose: { fill: '#ff9ac0', deep: '#d23c74' },
-  sky: { fill: '#8fe0ff', deep: '#2f7ad0' },
-  mint: { fill: '#9af2c0', deep: '#24966a' },
-  violet: { fill: '#d0b0ff', deep: '#6a44d0' },
-  red: { fill: '#ff7a52', deep: '#b8202c' },
-  night: { fill: '#dcd6ff', deep: '#5a52c0', ink: '#1a1438' },
+  gold: { hi: '#fffbe0', fill: '#ffd84a', deep: '#f07a1c', ink: '#5a2410' },
+  rose: { hi: '#fff0f6', fill: '#ff9ac0', deep: '#d23c74', ink: '#5a1434' },
+  sky: { hi: '#f0fbff', fill: '#8fe0ff', deep: '#2f7ad0', ink: '#14306a' },
+  mint: { hi: '#f2fff8', fill: '#8ff0b8', deep: '#1e9a68', ink: '#0d4030' },
+  violet: { hi: '#f6f0ff', fill: '#c9a6ff', deep: '#6a44d0', ink: '#24135e' },
+  red: { hi: '#fff0e8', fill: '#ff7a52', deep: '#c8202c', ink: '#4a0c14' },
+  night: { hi: '#ffffff', fill: '#d8d2ff', deep: '#5a52c0', ink: '#1a1438' },
 };
-const FONT = '"Alagard", "TBME Body", monospace';
-type Letter = { img: HTMLCanvasElement; ras: Raster; x: number; y: number };
+/** the lettering: the game's font, Alagard (loaded at boot; the words wait for it), drawn large and smooth */
+const SFX_FONT = '"Alagard"';
+let fontOk = false;
+if (typeof document !== 'undefined') void alagardReady().then(() => { fontOk = document.fonts?.check?.(`32px ${SFX_FONT}`) ?? true; });
+type Letter = { img: HTMLCanvasElement; x: number; y: number; rot: number };
 const sfxCache = new Map<string, Letter[]>();
 
 /**
- * The lettering of one sound-effect word, each letter a little painted object at one art pixel per texel: the pixel
- * font at `size` art pixels per font pixel (Alagard is drawn on a 16-row grid), its face a rounded bevel lit from the
- * top left (lighter above, deeper below), a solid 3D extrusion down and to the right, a coloured outline and a cool
- * violet-blue shadow; plus where each letter sits (art px, the word centred on 0,0). The one place the SFX look is
- * decided (a shared lettering helper can replace it).
+ * The lettering of one sound-effect word, each letter its own smooth, high-resolution canvas (device pixels): a heavy
+ * face at `size` CSS px, filled with a glossy gradient (bright top, rich middle, deep bottom) and a white shine, a thick
+ * rounded outline, a solid 3D extrusion down and to the right, and a soft violet drop shadow; plus where each letter
+ * sits (CSS px, the word centred on 0,0) and its tilt. The one place the SFX look is decided (a shared lettering helper
+ * can replace it).
  */
 export function sfxArt(text: string, style: SfxStyle): Letter[] {
-  const n = Math.max(1, Math.round(style.size ?? 2)), key = `${text}|${style.fill}|${style.deep}|${n}`;
+  const F = Math.max(18, Math.round(style.size ?? 56)), d = dprNow(), key = `${text}|${style.fill}|${style.deep}|${F}|${d}`;
   const hit = sfxCache.get(key);
   if (hit) return hit;
-  const px = 16 * n, fill = hex(style.fill), deep = hex(style.deep), lower = mix(fill, deep, 0.38), side = mix(deep, hex(style.ink ?? '#2a1640'), 0.25);
-  const m = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!;
-  const out: Letter[] = [];
+  const m = document.createElement('canvas').getContext('2d')!;
+  const font = `${F}px ${SFX_FONT}`;
+  m.font = font;
   const rr = rng(text.length * 31 + text.charCodeAt(0));
+  const metrics = [...text].map((ch) => ({ ch, w: m.measureText(ch).width }));
+  const track = -F * 0.04, total = metrics.reduce((a, b) => a + b.w, 0) + (metrics.length - 1) * track;
+  const out: Letter[] = [];
+  const ow = F * 0.13, D = Math.max(2, F * 0.09), pad = ow + D + F * 0.2;
   let pen = 0;
-  m.font = `${px}px ${FONT}`;
-  const metrics = [...text].map((ch) => ({ ch, w: Math.ceil(m.measureText(ch).width) }));
-  const total = metrics.reduce((a, b) => a + b.w, 0) + (metrics.length - 1) * Math.max(0, n - 2);
-  const D = n + 1; // extrusion depth
   for (const { ch, w } of metrics) {
-    if (ch === ' ') { pen += w; continue; }
-    const pad = 3 + D, cw = w + pad * 2, chh = Math.ceil(px * 1.15) + pad * 2;
-    m.canvas.width = cw; m.canvas.height = chh;
-    m.clearRect(0, 0, cw, chh);
-    m.font = `${px}px ${FONT}`;
-    m.textBaseline = 'alphabetic';
-    m.fillStyle = '#fff';
-    m.fillText(ch, pad, pad + px * 0.8);
-    const d = m.getImageData(0, 0, cw, chh).data;
-    const mask = new Uint8Array(cw * chh);
-    let top = chh, bot = 0;
-    for (let i = 0; i < cw * chh; i++) if (d[i * 4 + 3] > 110) { mask[i] = 1; top = Math.min(top, (i / cw) | 0); bot = Math.max(bot, (i / cw) | 0); }
-    const at = (x: number, y: number) => { const X = Math.floor(x), Y = Math.floor(y); return X >= 0 && Y >= 0 && X < cw && Y < chh && mask[Y * cw + X] === 1; };
-    const face: Shape = (x, y) => at(x, y);
-    const ext: Shape = (x, y) => { for (let k = 1; k <= D; k++) if (at(x - k, y - k)) return true; return false; };
-    const split = top + (bot - top) * 0.55;
-    const albedo: AFn = (x, y) => (y + (hash(x | 0, y | 0, 5) > 0.7 ? 1 : 0) > split ? lower : fill);
-    const r = new Relief(cw, chh, 1, 1);
-    r.wobble = 0; r.chip = 0;
-    r.fill(ext, flat(1), () => side, { spec: 0.1, shin: 6, bands: 4 }, { id: 1 });
-    r.fill(face, pillow(face, cw, chh, Math.max(1.5, n * 0.9), 3), albedo, ENAMEL, { id: 2, seam: true });
-    const px4 = r.render();
-    const ras = new Raster(cw, chh);
-    ras.buf.set(new Uint32Array(px4.buffer, px4.byteOffset, cw * chh));
-    // a second, darker coloured line outside the painter's own, so the word reads over anything; the cool shadow
-    ras.outline(col(style.ink ?? '#2a1640'));
-    ras.shadow(SHADOW, 1, 1);
-    // a little tilt per letter is in its baseline (never a rotated sprite: the pixels stay square)
-    out.push({ img: ras.canvas(), ras, x: pen + w / 2 - total / 2, y: Math.round((rr() - 0.5) * 2.5 * n) });
-    pen += w + Math.max(0, n - 2);
+    if (ch === ' ') { pen += w + track; continue; }
+    const cw = w + pad * 2, chh = F * 1.25 + pad * 2;
+    const c = document.createElement('canvas');
+    c.width = Math.ceil(cw * d); c.height = Math.ceil(chh * d);
+    const g = c.getContext('2d')!;
+    g.setTransform(d, 0, 0, d, 0, 0);
+    g.font = font; g.textBaseline = 'alphabetic'; g.lineJoin = 'round'; g.lineCap = 'round';
+    const ox = pad, oy = pad + F * 0.95;
+    // the extrusion: the letter stacked down and to the right, outlined, casting a soft violet shadow
+    g.save();
+    g.shadowColor = 'rgba(38, 24, 74, 0.45)'; g.shadowBlur = F * 0.18; g.shadowOffsetX = F * 0.04; g.shadowOffsetY = F * 0.08;
+    g.strokeStyle = style.ink ?? '#2a1640'; g.lineWidth = ow * 2;
+    g.strokeText(ch, ox + D, oy + D);
+    g.restore();
+    for (let k = D; k >= 1; k -= 0.75) { g.fillStyle = k > D * 0.6 ? style.deep : style.deep; g.globalAlpha = 1; g.fillText(ch, ox + k, oy + k); }
+    g.fillStyle = 'rgba(30, 16, 60, 0.28)';
+    g.fillText(ch, ox + D * 0.5, oy + D * 0.5);
+    // the face: outline, glossy gradient fill, a white shine across the top
+    g.strokeStyle = style.ink ?? '#2a1640'; g.lineWidth = ow * 2;
+    g.strokeText(ch, ox, oy);
+    const top = oy - F * 0.78, bot = oy + F * 0.02;
+    const gr = g.createLinearGradient(0, top, 0, bot);
+    gr.addColorStop(0, style.hi ?? '#ffffff'); gr.addColorStop(0.42, style.fill); gr.addColorStop(1, style.deep);
+    g.fillStyle = gr;
+    g.fillText(ch, ox, oy);
+    const face = document.createElement('canvas');
+    face.width = c.width; face.height = c.height;
+    const fg = face.getContext('2d')!;
+    fg.setTransform(d, 0, 0, d, 0, 0);
+    fg.font = font; fg.textBaseline = 'alphabetic';
+    fg.fillStyle = '#000'; fg.fillText(ch, ox, oy);
+    fg.globalCompositeOperation = 'source-in';
+    const sh = fg.createLinearGradient(0, top, 0, top + F * 0.42);
+    sh.addColorStop(0, 'rgba(255,255,255,0.75)'); sh.addColorStop(1, 'rgba(255,255,255,0)');
+    fg.fillStyle = sh; fg.fillRect(0, 0, cw, top + F * 0.42);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.drawImage(face, 0, 0);
+    out.push({ img: c, x: pen + w / 2 - total / 2, y: (rr() - 0.5) * F * 0.12, rot: (rr() - 0.5) * 0.2 });
+    pen += w + track;
   }
-  sfxCache.set(key, out);
+  if (fontOk) sfxCache.set(key, out); // (letters made before the font was in are not kept)
   return out;
 }
 
-/** Three font pixels per art pixel when the word fits across the screen, two when it doesn't. */
+/** The word's letter size: big and bold, as large as fits across the screen. */
 function wordSize(word: string): number {
-  const fit = Math.floor((Math.ceil(innerWidth / artPx()) * 0.86) / Math.max(1, word.length * 10));
-  return Math.max(2, Math.min(3, fit));
+  return Math.round(Math.max(30, Math.min(Math.min(innerWidth, innerHeight) * 0.15, 96, (innerWidth * 0.84) / Math.max(1, word.length * 0.7))));
 }
 
-/** Throw a manga sound-effect word onto the screen: letters slam in one by one, hold, then dissolve upward. */
+/** Throw a manga sound-effect word onto the screen: letters slam in one by one, hold, then float up and fade. */
 export function sfx(word: string, x: number, y: number, o: { style?: keyof typeof STYLES | SfxStyle; size?: number; tilt?: number; dur?: number; delay?: number; align?: -1 | 0 | 1 } = {}) {
   if (typeof document === 'undefined') return;
   const st = typeof o.style === 'object' ? o.style : STYLES[o.style ?? 'gold'];
   const calm = calmMotion(), dur = Math.min(1.2, o.dur ?? 1.05);
-  let art: Letter[] | null = null, big: Letter[] | null = null;
-  // fade levels on the dither grid, made on first draw
-  const levels: HTMLCanvasElement[][] = [];
+  let art: Letter[] | null = null;
   const tilt = o.tilt ?? -0.12;
   add({
-    t0: fxNow() + (o.delay ?? 0), dur, step() { /* sprites only */ },
-    draw(c, t, B) {
-      if (!art) {
-        const n = o.size ?? st.size ?? wordSize(word);
-        art = sfxArt(word, { ...st, size: n });
-        big = calm ? art : sfxArt(word, { ...st, size: n + 1 });
-        for (const a of art) levels.push([0.75, 0.5, 0.25].map((k) => { const r = new Raster(a.ras.w, a.ras.h); r.buf.set(a.ras.buf); r.dissolve(k); return r.canvas(); }));
-      }
-      // keep the whole word on screen
-      const half = art.reduce((m, a) => Math.max(m, Math.abs(a.x) + a.img.width / 2), 0);
-      // `align` 1: x is the word's left edge (-1 its right edge); the whole word always stays on screen
-      const cx = Math.max(half + 4, Math.min(c.canvas.width - half - 4, x / B + (o.align ?? 0) * half)), cy = Math.max(16, Math.min(c.canvas.height - 16, y / B));
-      const fadeT = dur - 0.24, rise = calm ? 0 : t > fadeT ? Math.round((t - fadeT) * 24) : 0;
+    t0: fxNow() + (o.delay ?? 0), dur,
+    draw(c, t) {
+      // the words are lettered in Alagard: wait (silently) until it's in
+      if (!fontOk) { void alagardReady(); return; }
+      art ??= sfxArt(word, { ...st, size: o.size ?? st.size ?? wordSize(word) });
+      const d = dprNow();
+      // keep the whole word on screen (`align` 1: x is its left edge, -1 its right edge)
+      const half = art.reduce((mm, a) => Math.max(mm, Math.abs(a.x) + a.img.width / d / 2), 0);
+      const cx = Math.max(half + 4, Math.min(innerWidth - half - 4, x + (o.align ?? 0) * half)), cy = Math.max(40, Math.min(innerHeight - 40, y));
+      const fadeT = dur - 0.25, k = t > fadeT ? (t - fadeT) / 0.25 : 0;
+      const alpha = calm ? Math.min(1, t / 0.15, 1 - k) : 1 - k, rise = calm ? 0 : k * 18;
+      c.globalAlpha = Math.max(0, alpha);
       art.forEach((a, i) => {
         const tt = calm ? 1 : t - i * 0.045;
         if (tt < 0) return;
-        // letters slam in: a frame a size bigger (re-lettered, not stretched), a drop, then rest on the tilt
-        const lx = cx + a.x * Math.cos(tilt), ly = cy + a.y + a.x * Math.sin(tilt) - rise + (calm ? 0 : tt < 0.11 ? -3 : 0);
-        let img = !calm && tt < 0.07 ? big![i]?.img ?? a.img : a.img;
-        if (t > fadeT) img = levels[i][Math.min(2, Math.floor(((t - fadeT) / 0.24) * 4))] ?? img;
-        if (calm && t < 0.15) img = levels[i][2 - Math.min(2, Math.floor((t / 0.15) * 3))];
-        blit(c, img, Math.round(lx), Math.round(ly), 1);
+        // a slam: big, squashed down, a bounce, then rest on the word's tilt
+        const s = calm ? 1 : tt < 0.05 ? 1.8 - (tt / 0.05) * 0.9 : tt < 0.1 ? 0.9 + ((tt - 0.05) / 0.05) * 0.18 : tt < 0.15 ? 1.08 - ((tt - 0.1) / 0.05) * 0.08 : 1;
+        const lx = cx + a.x * Math.cos(tilt), ly = cy + a.y + a.x * Math.sin(tilt) - rise;
+        const w = (a.img.width / d) * s, h = (a.img.height / d) * s;
+        c.save(); c.translate(lx, ly); c.rotate(tilt + a.rot);
+        c.drawImage(a.img, -w / 2, -h / 2, w, h);
+        c.restore();
       });
     },
   });
@@ -326,7 +341,7 @@ export function sfx(word: string, x: number, y: number, o: { style?: keyof typeo
 // ------------------------------------------------------------------ chibi pop-in
 
 let chibiSrc: HTMLImageElement | null = null, chibiKey = '', chibiWait: Promise<void> | null = null;
-/** Give the chibi pop-in Pip's portrait (any image URL; a small square face shot reads best). */
+/** Give the chibi pop-in Pip's portrait (any image URL; a square face shot reads best). */
 export function setChibi(url: string): Promise<void> {
   if (!url || typeof Image === 'undefined') return Promise.resolve();
   return new Promise((res) => {
@@ -336,14 +351,13 @@ export function setChibi(url: string): Promise<void> {
     im.src = url;
   });
 }
-/** Pip's current portrait, re-sampled to chunky art pixels (rendered once per look). */
+/** Pip's current portrait (rendered once per look). */
 function ensureChibi(): Promise<void> {
   return (chibiWait ??= (async () => {
     const look = save.value.look, key = JSON.stringify(look);
     if (key === chibiKey && chibiSrc) return;
     const url = await owlIconAsync(look, 'face');
-    // about 84 CSS px across, one portrait pixel per art pixel
-    if (url) { await setChibi(await pixelate(url, Math.round(84 / artPx()))); chibiKey = key; }
+    if (url) { await setChibi(url); chibiKey = key; }
   })().catch(() => undefined).finally(() => { chibiWait = null; }));
 }
 /** Pip pops in from the side of the screen like a chibi cut-in: a squashy hop, a mark beside him, then away. */
@@ -357,24 +371,34 @@ export function chibi(o: { side?: 'left' | 'right'; y?: number; mark?: EmoteKind
   }
   void ensureChibi(); // (a new look is shot for next time)
   const calm = calmMotion(), dur = Math.min(1.2, o.dur ?? 1.15), left = (o.side ?? 'left') === 'left';
-  const mk = (u: number) => (o.mark === 'hearts' || o.mark === 'bang' || o.mark === 'notes' ? markArt(o.mark, u, 1) : markArt('sparkle', u, 2));
+  const size = Math.max(84, Math.min(150, Math.min(innerWidth, innerHeight) * 0.24));
+  const mark = o.mark === 'hearts' || o.mark === 'bang' || o.mark === 'notes' ? markArt(o.mark, size * 0.42, 1) : markArt('sparkle', size * 0.42, 2);
   add({
-    t0: fxNow(), dur, step() { /* sprites only */ },
-    draw(c, t, B) {
-      const w = im.width, h = im.height, W = c.canvas.width;
-      const y0 = (o.y ?? innerHeight * 0.4) / B;
-      // slide in with a hop (a jump past the edge and a settle), hold with a bob, drop away
-      let off = 0, lift = 0;
+    t0: fxNow(), dur,
+    draw(c, t) {
+      const W = innerWidth, y0 = o.y ?? innerHeight * 0.4;
+      // slide in with a squashy hop, hold with a bob, drop away
+      let off = 0, sx = 1, sy = 1;
       if (calm) off = 0;
       else if (t < 0.12) off = 1 - t / 0.12;
-      else if (t < 0.18) lift = Math.round(h * 0.12);
-      else if (t < 0.26) lift = -Math.round(h * 0.04);
+      else if (t < 0.2) { const k = (t - 0.12) / 0.08; sx = 1 + 0.16 * Math.sin(k * Math.PI); sy = 1 - 0.14 * Math.sin(k * Math.PI); }
+      else if (t < 0.3) { const k = (t - 0.2) / 0.1; sx = 1 - 0.06 * Math.sin(k * Math.PI); sy = 1 + 0.08 * Math.sin(k * Math.PI); }
       else if (t > dur - 0.18) off = (t - (dur - 0.18)) / 0.18;
-      const bob = calm ? 0 : Math.floor(t * 6) % 2;
-      const x = left ? w * 0.42 - off * w : W - w * 0.42 + off * w;
-      const a = calm ? Math.min(1, t / 0.15, (dur - t) / 0.2) : 1;
-      blit(c, im, Math.round(x), Math.round(y0 - bob - lift), 1, left ? 1 : -1, 1, a);
-      if (t > 0.2 && t < dur - 0.15) blit(c, mk(w * 0.42), Math.round(x + (left ? 1 : -1) * w * 0.55), Math.round(y0 - h * 0.45), 1, 1, 1, a);
+      const bob = calm ? 0 : Math.sin(t * 12) * 2;
+      const x = left ? size * 0.42 - off * size : W - size * 0.42 + off * size;
+      c.globalAlpha = calm ? Math.max(0, Math.min(1, t / 0.15, (dur - t) / 0.2)) : 1;
+      // a soft white halo behind the portrait, like a cut-in panel
+      const halo = c.createRadialGradient(x, y0, size * 0.2, x, y0, size * 0.62);
+      halo.addColorStop(0, 'rgba(255, 252, 240, 0.9)'); halo.addColorStop(1, 'rgba(255, 252, 240, 0)');
+      c.fillStyle = halo; c.fillRect(x - size, y0 - size, size * 2, size * 2);
+      c.save(); c.translate(x, y0 - bob + size * 0.5); c.scale(left ? sx : -sx, sy);
+      c.shadowColor = 'rgba(38, 24, 74, 0.35)'; c.shadowBlur = 10; c.shadowOffsetY = 4;
+      c.drawImage(im, -size / 2, -size, size, size);
+      c.restore();
+      if (t > 0.2 && t < dur - 0.15) {
+        const d = dprNow(), mw = mark.width / d, mh = mark.height / d;
+        c.drawImage(mark, x + (left ? 1 : -1) * size * 0.55 - mw / 2, y0 - size * 0.45 - mh / 2, mw, mh);
+      }
     },
   });
 }
@@ -429,12 +453,12 @@ export function animeMoment(kind: AnimeMoment, at?: XY) {
     case 'bigbuy':
       shake(4, 0.25);
       sparkleBurst(p.x, p.y, 14, { tint: 'gold' });
-      sfx('KA-CHING!', ...wordAt(0, -Math.min(90, H * 0.11)), { style: 'gold', tilt: -0.1 });
+      sfx('KER-CHING!', ...wordAt(0, -Math.min(90, H * 0.11)), { style: 'gold', tilt: -0.1 });
       break;
     case 'stamp':
       impactFrame(); shake(8, 0.28);
       speedLines({ x: p.x, y: p.y, dur: 0.5, clear: 0.3 });
-      sfx('KA-CHUNK!', ...wordAt(0, -Math.min(100, H * 0.13)), { style: 'red', tilt: -0.08 });
+      sfx('KER-CHUNK!', ...wordAt(0, -Math.min(100, H * 0.13)), { style: 'red', tilt: -0.08 });
       break;
     case 'bedtime':
       sfx('ZZZ...', ...wordAt(Math.min(60, W * 0.15), -Math.min(90, H * 0.11)), { style: 'night', tilt: -0.08, dur: 1.2 });
@@ -451,14 +475,13 @@ export function centreOf(el: Element | null | undefined): XY | undefined {
 // dev and screenshot hooks
 if (typeof window !== 'undefined') {
   (window as unknown as { hhAnime: unknown }).hhAnime = { animeMoment, speedLines, impactFrame, shake, sparkleBurst, sunburst, sfx, chibi, setChibi, live: () => fxs.map((f) => [f.t0, f.dur, !!f.back]) };
-  // the lettering font: ask for it early so the first word is already in it
-  try { void document.fonts?.load('32px "Alagard"').catch(() => undefined); } catch { /* no font loading API */ }
   // shoot Pip's chibi portrait once things have settled, so the first cut-in is ready
   // and letter the moments' words a little at a time while nothing is happening, so no moment starts with a hitch
   if (!import.meta.env?.VITEST) setTimeout(() => {
     if (!document.getElementById('world')) return;
     void ensureChibi();
-    const words: [string, string][] = [['DING!', 'gold'], ['KA-CHING!', 'gold'], ['WOW!', 'mint'], ['YAY!', 'rose'], ['SHING!!', 'gold'], ['POP!', 'violet'], ['ZZZ...', 'night'], ['KA-CHUNK!', 'red']];
-    words.forEach(([w, st], i) => setTimeout(() => { const n = wordSize(w); sfxArt(w, { ...STYLES[st], size: n }); sfxArt(w, { ...STYLES[st], size: n + 1 }); }, 400 * (i + 1)));
+    if (!fontOk) return;
+    const words: [string, string][] = [['DING!', 'gold'], ['KER-CHING!', 'gold'], ['WOW!', 'mint'], ['YAY!', 'rose'], ['SHING!!', 'gold'], ['POP!', 'violet'], ['ZZZ...', 'night'], ['KER-CHUNK!', 'red']];
+    words.forEach(([w, st], i) => setTimeout(() => { sfxArt(w, { ...STYLES[st], size: wordSize(w) }); }, 400 * (i + 1)));
   }, 9000);
 }

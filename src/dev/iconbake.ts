@@ -1,26 +1,30 @@
 // [icons6] The icon bake: every interface icon is a small, properly shaped 3D model (turned brass, carved wood, tooled
-// leather, enamel, glass, cloth; no blocks and balls), lit like the live shelf (src/ui/chrome/shelf3d.tsx) and
-// pixel-finished. The hero objects are the very models on the shelf (src/ui/chrome/props3d.ts: the alarm clock, the
-// journal), furniture comes from the game's own GLBs, the rest are modelled here. Light: a studio panorama for
-// reflections (a bright window up-left, a dark horizon band, a warm floor), a soft warm key from the top left, a sky
-// fill and a cool rim; no cast shadows. Finish: rendered big, re-sampled to a few art pixels by the most common colour
-// (crisp clusters, no blur), shaded in a few steps per colour with lights leaning gold and shadows leaning violet, a
-// light painterly break-up, a little more colour, and a coloured outline that is softer on the lit side. Two sizes per
-// icon (32 and 20 art px; packs bigger), and the currency (the acorn bag, the moon gem) glints in idle frames.
+// leather, enamel, glass, cloth; no blocks and balls). The hero objects are the very models on the shelf
+// (src/ui/chrome/props3d.ts: the cuckoo clock, the journal), furniture comes from the game's own GLBs, the rest are
+// modelled here.
+// [tex7] High resolution and realistic: every material wears a detailed realistic texture: photo grain (Poly Haven CC0
+// oak, leather, linen, knit and velour, prepared in art/tex7) tinted to its colour, or a texture painted in full colour
+// (src/ui/chrome/paint3d.ts: engraved and tarnished brass, crazed enamel, paper fibres and ink, frosted glass, leaf
+// veins, cut gems, wax, water, bark, stone), laid on at one density (`fitUV`). Lit by a soft studio light (a studio
+// panorama for reflections, a warm key from the top left, a sky fill, a cool rim), rendered at twice the size and
+// scaled down smoothly into a 128 px cell, a little more colour and a soft contact shadow. The cells and the photo
+// swatches make the interface atlas (public/img/ui3d.webp; index in src/ui/px/icons3d.ts); the currency (the acorn
+// bag, the moon gem) glints in idle frames.
 //
 //   /dev-iconbake.html               bake everything and show it on paper (big, then at 1:1)
 //   /dev-iconbake.html?only=regex     just some
-//   window.__module                   the generated src/ui/px/icons3d.ts (a tools script writes it to disk)
+//   window.__module, window.__atlas   the generated src/ui/px/icons3d.ts and public/img/ui3d.webp (a tools script writes them)
 import * as THREE from 'three';
 import { instanceGLB } from '../gfx/glb.ts';
-import { clamp as cl, fbm, hash as h2, hex, leatherGrain, PAL, vnoise as vn2, weave, woodGrain, type RGB } from '../ui/px/relief.ts';
+import { fbm, hash as h2, hex, type RGB } from '../ui/px/relief.ts';
+import { bark, cloth, cloudTex, enamel, fitUV, flame, gem, glass, keepUV, leafTex, leather, metal, paper, scales, setSwatch, stone, swatchAt, SWATCHES, water, wax, wood, type Painted, type Swatch } from '../ui/chrome/paint3d.ts';
 import {
   at, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, MATS, mesh, paintTex, planarUV, rrectPts, setClockHands, shape, smoothProfile, starPts, studioEnv, torus, tube,
   type O,
 } from '../ui/chrome/props3d.ts';
 
 const q = new URLSearchParams(location.search);
-const SS = 8; // supersampling per art pixel
+const SS = 2; // supersampling
 
 // ------------------------------------------------------------------ renderer and light
 const canvas = document.createElement('canvas');
@@ -32,54 +36,79 @@ R.toneMappingExposure = 1.0;
 const scene = new THREE.Scene();
 scene.environment = studioEnv(R);
 scene.environmentIntensity = 0.95;
-scene.add(new THREE.HemisphereLight(0xfff2e0, 0x6a4a3a, 0.75));
-const key = new THREE.DirectionalLight(0xffe8c8, 3.4); key.position.set(-3.5, 5, 3.5); scene.add(key);
-const fill = new THREE.DirectionalLight(0xd8e4ff, 0.5); fill.position.set(4, 1, 3); scene.add(fill);
-const rim = new THREE.DirectionalLight(0xe4ecff, 1.1); rim.position.set(2.5, 3, -5); scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xfff2e0, 0x6a4a3a, 0.8));
+const key = new THREE.DirectionalLight(0xffe8c8, 3.2); key.position.set(-3.5, 5, 3.5); scene.add(key);
+const fill = new THREE.DirectionalLight(0xd8e4ff, 0.55); fill.position.set(4, 1, 3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xe4ecff, 1.2); rim.position.set(2.5, 3, -5); scene.add(rim);
 const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 500);
 
-// ------------------------------------------------------------------ hand-painted detail maps (grey: the colour comes from the material)
-const GREY: RGB[] = [hex('#8a8a8a'), hex('#a4a4a4'), hex('#bcbcbc'), hex('#d0d0d0'), hex('#e2e2e2'), hex('#f0f0f0'), hex('#fafafa')];
-type TexKind = 'enamel' | 'grain' | 'weave' | 'burlap' | 'scale' | 'leather' | 'knit' | 'bark';
-function detailTex(kind: TexKind): THREE.Texture {
-  const n = 48;
-  const t = paintTex('icon-' + kind, n, n, (x, y): RGB => {
-    if (kind === 'grain') return woodGrain(GREY, { seed: 3, along: 'y', base: 0.6, contrast: 0.8 })(x, y, x * 0.9, y * 0.9);
-    if (kind === 'leather') return leatherGrain(GREY, { seed: 5, base: 0.65 })(x, y, x, y);
-    if (kind === 'weave') return weave(GREY, { seed: 4, base: 0.6, scale: 1.2 })(x, y, x * 0.5, y * 0.5);
-    if (kind === 'burlap') { const X = Math.floor(x / 3), Y = Math.floor(y / 3); const v = ((X + Y) & 1 ? 0.75 : 0.55) + (h2(X, Y, 3) - 0.5) * 0.2; return GREY[Math.round(cl(v) * 6)]; }
-    if (kind === 'knit') { const X = Math.floor(x / 4), yy = y % 6; const v = Math.abs(((x % 4) - 1.5) + (yy - 3) * 0.5) < 1.2 ? 0.85 : 0.5; return GREY[Math.round(cl(v + (X % 2) * 0.05) * 6)]; }
-    if (kind === 'scale') { const row = Math.floor(y / 6), xx = (x + (row % 2) * 3) % 6, yy = y % 6; const d = Math.hypot(xx - 3, yy - 2) / 3.2; return GREY[Math.round(cl(0.95 - d * 0.6) * 6)]; }
-    if (kind === 'bark') { const v = 0.55 + (fbm(x * 0.3, y * 0.06, 9) - 0.5) * 0.9; return GREY[Math.round(cl(v) * 6)]; }
-    return GREY[Math.round(cl(0.9 + (fbm(x * 0.12, y * 0.12, 6) - 0.5) * 0.16) * 6)];
-  }, { repeat: true });
-  return t;
+// ------------------------------------------------------------------ realistic textures for every material
+/** the icons' texture density (repeats per model unit): a model is about two units across */
+const ICON_DENS = 0.45;
+type TexKind = 'enamel' | 'grain' | 'weave' | 'burlap' | 'scale' | 'leather' | 'knit' | 'bark' | 'felt' | 'paper' | 'glass' | 'water' | 'wax' | 'stone' | 'cloud' | 'leaf' | 'foliage' | 'gem' | 'metal' | 'plain';
+/** the photo swatch a kind wears (tinted to the material's colour), and its repeats */
+const PHOTO: Partial<Record<TexKind, [Swatch, number]>> = { grain: ['woodg', 1], leather: ['grain', 1.4], weave: ['linen', 1.6], burlap: ['linen', 1], knit: ['knit', 2.2], felt: ['velvet', 1.5] };
+function painted(kind: TexKind, c: string, seed: number): Painted {
+  switch (kind) {
+    case 'grain': return wood(c, { seed: 3 + seed % 5, knots: 1 });
+    case 'weave': return cloth(c, 'weave', 4);
+    case 'burlap': return cloth(c, 'burlap', 4);
+    case 'knit': return cloth(c, 'knit', 4);
+    case 'felt': return cloth(c, 'felt', 4);
+    case 'scale': case 'foliage': return scales(c, 13);
+    case 'leather': return leather(c, { seed: 5 });
+    case 'bark': return bark(c);
+    case 'paper': return paper(c);
+    case 'glass': return glass(c, { frost: 0.35 });
+    case 'water': return water(c);
+    case 'wax': return wax(c);
+    case 'stone': return stone(c);
+    case 'cloud': return cloudTex(c);
+    case 'leaf': return leafTex(c, { seed: 3, veins: 7 });
+    case 'gem': return gem(c);
+    case 'metal': return metal(c, { seed: 2 + seed % 7, patina: 0.15, brush: 'u' });
+    case 'plain': return enamel(c, { craze: 0, chips: false });
+    default: return enamel(c, { craze: 0.6 });
+  }
 }
 
 interface MOpt { metal?: number; rough?: number; tex?: TexKind | null; glow?: number; flat?: boolean; rep?: number; opacity?: number; side?: THREE.Side; env?: number }
 const mats = new Map<string, THREE.Material>();
-/** a material: colour plus a hand-painted detail map (an enamel mottle unless told otherwise) */
+/** the bake's own materials (everything else, e.g. a painted face, keeps its own texture coordinates) */
+const ownMats = new Set<THREE.Material>();
+/**
+ * A material of `color`: photo grain tinted to it (wood, leather, cloth), or a texture painted in it (enamel unless told
+ * otherwise; metal, glass, gem or a plain glaze when `tex` is null).
+ */
 function M(color: number, o: MOpt = {}): THREE.MeshStandardMaterial {
   const k = color + JSON.stringify(o);
   let m = mats.get(k) as THREE.MeshStandardMaterial | undefined;
   if (m) return m;
-  let map: THREE.Texture | null = o.tex === null ? null : detailTex(o.tex ?? 'enamel');
-  if (map && o.rep) { map = map.clone(); map.repeat.set(o.rep, o.rep); map.needsUpdate = true; }
-  m = new THREE.MeshStandardMaterial({ color, metalness: o.metal ?? 0, roughness: o.rough ?? 0.5, map, flatShading: !!o.flat, emissive: o.glow ? color : 0x000000, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
+  const c = '#' + color.toString(16).padStart(6, '0');
+  const kind: TexKind = o.tex !== null && o.tex !== undefined ? o.tex : o.tex === null
+    ? (o.flat ? 'gem' : (o.metal ?? 0) >= 0.4 ? 'metal' : o.opacity !== undefined || ((o.rough ?? 0.5) <= 0.1 && (o.env ?? 1) >= 1.3) ? 'glass' : 'plain')
+    : 'enamel';
+  const ph = PHOTO[kind], photo = ph ? swatchAt(ph[0], ph[1]) : null;
+  const p = photo ? null : painted(kind, c, mats.size);
+  const map = photo ?? p!.map;
+  m = new THREE.MeshStandardMaterial({ color: photo ? new THREE.Color(color).multiplyScalar(1.45) : 0xffffff, map, metalness: o.metal ?? 0, roughness: o.rough ?? 0.5, flatShading: !!o.flat, emissive: o.glow ? 0xffffff : 0x000000, emissiveMap: o.glow ? map : null, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
+  if (photo) { m.bumpMap = photo; m.bumpScale = 0.7; } else if (p?.bump) { m.bumpMap = p.bump; m.bumpScale = p.bumpScale ?? 1; }
+  if (kind === 'leaf') keepUV(m);
   if (o.opacity !== undefined) { m.transparent = true; m.opacity = o.opacity; m.depthWrite = false; }
   mats.set(k, m);
+  ownMats.add(m);
   return m;
 }
 /** an unlit colour (flames, light) */
-const unlit = (c: number) => { const k = 'unlit' + c; let m = mats.get(k); if (!m) { m = new THREE.MeshBasicMaterial({ color: c }); mats.set(k, m); } return m; };
+const unlit = (c: number) => { const k = 'unlit' + c; let m = mats.get(k); if (!m) { m = new THREE.MeshBasicMaterial({ map: flame('#' + c.toString(16).padStart(6, '0')).map }); mats.set(k, m); ownMats.add(m); } return m; };
 const C = {
   brass: () => M(0xf0b440, { metal: 0.55, rough: 0.3, tex: null, env: 1.2 }), gold: () => M(0xffcc3a, { metal: 0.5, rough: 0.28, tex: null, env: 1.2 }), silver: () => M(0xdfe6ee, { metal: 0.75, rough: 0.28, tex: null }),
   iron: () => M(0x9aa6b8, { metal: 0.7, rough: 0.38, tex: null }), wood: () => M(0xc47e40, { tex: 'grain', rough: 0.6 }), dark: () => M(0x7a4524, { tex: 'grain', rough: 0.65 }), oak: () => M(0xe6a85c, { tex: 'grain', rough: 0.6 }),
   red: () => M(0xe63e38, { rough: 0.28 }), green: () => M(0x38b85a, { rough: 0.28 }), blue: () => M(0x3a7ee6, { rough: 0.28 }), sky: () => M(0x5cc0f4, { rough: 0.26 }),
-  rose: () => M(0xf2668a, { rough: 0.3 }), plum: () => M(0x9a5cd6, { rough: 0.32 }), cream: () => M(0xfff2d2, { rough: 0.45 }), paper: () => M(0xfaecd2, { rough: 0.85, tex: 'weave' }),
-  leaf: () => M(0x58c044, { rough: 0.5 }), leather: () => M(0xc04a30, { rough: 0.55, tex: 'leather' }), burlap: () => M(0xd6a560, { rough: 0.9, tex: 'burlap', rep: 2 }), white: () => M(0xffffff, { rough: 0.4 }),
+  rose: () => M(0xf2668a, { rough: 0.3 }), plum: () => M(0x9a5cd6, { rough: 0.32 }), cream: () => M(0xfff2d2, { rough: 0.45 }), paper: () => M(0xfaecd2, { rough: 0.85, tex: 'paper' }),
+  leaf: () => M(0x58c044, { rough: 0.5, tex: 'leaf' }), leather: () => M(0xc04a30, { rough: 0.55, tex: 'leather' }), burlap: () => M(0xd6a560, { rough: 0.9, tex: 'burlap', rep: 2 }), white: () => M(0xffffff, { rough: 0.4 }),
   ink: () => M(0x30243a, { rough: 0.45, tex: null }), flame: () => unlit(0xff7a1c), flameIn: () => unlit(0xffd84a), glass: () => M(0xc4ecff, { rough: 0.06, metal: 0.1, tex: null, env: 1.6 }),
-  kraft: () => M(0xd9a86a, { rough: 0.85, tex: 'weave' }), snow: () => M(0xf4f9ff, { rough: 0.45 }), steel: () => M(0xb4bcc8, { metal: 0.8, rough: 0.3, tex: null }),
+  kraft: () => M(0xd9a86a, { rough: 0.85, tex: 'paper' }), snow: () => M(0xf4f9ff, { rough: 0.45, tex: 'cloud' }), steel: () => M(0xb4bcc8, { metal: 0.8, rough: 0.3, tex: null }),
 };
 
 // ------------------------------------------------------------------ modelling helpers
@@ -146,7 +175,7 @@ function acornBag(o: { squash?: number; pouch?: 'burlap' | 'leather'; spill?: nu
 }
 /** a brilliant-cut moon gem: a crown and pavilion of flat facets with a golden crescent set in its table */
 function moonGem(): O {
-  const gm = M(0xb08cf4, { rough: 0.08, metal: 0.2, flat: true, tex: null, env: 1.4 });
+  const gm = M(0x9466e6, { rough: 0.08, metal: 0.2, flat: true, tex: null, env: 1.4 });
   const gem = lathe([[0, -0.9], [0.66, -0.06], [0.72, 0.04], [0.56, 0.36], [0.3, 0.46], [0, 0.46]], gm, 10);
   gem.rotation.y = Math.PI / 10;
   const moon = at(ext(shape(crescentPts(0.2, 0.17, [0.08, 0.05], 48)), 0.04, M(0xffd86a, { glow: 0.4, rough: 0.3, tex: null }), 0.02, 2), 0, 0.05, 0.58);
@@ -169,6 +198,7 @@ function leafMesh(len: number, wid: number, m: THREE.Material, serr = 0): THREE.
   const pts: P2[] = [];
   for (let i = 0; i <= 60; i++) { const t = (i / 60) * Math.PI * 2, y = Math.cos(t); const k = 1 + (serr ? Math.sin(t * serr) * 0.08 : 0); pts.push([Math.sin(t) * wid * (1 - 0.35 * Math.max(0, y)) * (1 - 0.2 * Math.max(0, -y)) * k, y * len]); }
   const me = ext(shape(pts), 0.04, m, 0.03, 2, 60);
+  planarUV(me.geometry);
   const p = me.geometry.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) - Math.abs(p.getX(i)) * 0.35 + (p.getY(i) / len) ** 2 * 0.12);
   me.geometry.computeVertexNormals();
@@ -180,7 +210,20 @@ function faceTex(key: string, w: number, h: number, f: (x: number, y: number) =>
 // ------------------------------------------------------------------ the icon models
 type Make = () => O | Promise<O>;
 interface Spec { make: Make; yaw?: number; pitch?: number; pad?: number; vivid?: number }
-const glb = (path: string, fix?: (o: O) => void): Make => async () => { const { root } = await instanceGLB(path); fix?.(root); return root; };
+const glb = (path: string, fix?: (o: O) => void): Make => async () => { const { root } = await instanceGLB(path); fix?.(root); root.userData.glb = true; return root; };
+/**
+ * Ready a model for the bake: the bake's own textured materials laid on at the icons' density (a painted face, a
+ * borrowed model's own textures keep their coordinates).
+ */
+function prep(obj: O): O {
+  obj.traverse((o) => {
+    const me = o as THREE.Mesh;
+    if (!me.isMesh) return;
+    for (const m of Array.isArray(me.material) ? me.material : [me.material]) if (!ownMats.has(m) && !(m as THREE.Material).userData.shelfMat) keepUV(m);
+  });
+  if (!obj.userData.glb) fitUV(obj, ICON_DENS);
+  return obj;
+}
 const T = 0.3; // token depth
 
 const CHECK: P2[] = [[-0.72, 0.02], [-0.24, -0.46], [0.74, 0.6]];
@@ -218,7 +261,7 @@ const ICONS: Record<string, Spec> = {
   zzz: { make: () => { const Z = (s: number) => strokePts([[-0.45 * s, 0.4 * s], [0.42 * s, 0.4 * s], [-0.42 * s, -0.4 * s], [0.45 * s, -0.4 * s]], 0.2 * s, 6); return grp(at(ext(shape(Z(0.95)), 0.2, C.sky(), 0.06, 2), -0.44, -0.38, 0), at(ext(shape(Z(0.68)), 0.18, C.sky(), 0.05, 2), 0.16, 0.2, 0), at(ext(shape(Z(0.46)), 0.16, C.sky(), 0.05, 2), 0.62, 0.66, 0)); }, yaw: 0.28, pitch: 0.2 },
   bolt: { make: () => ext(shape([[0.15, 0.95], [-0.55, -0.1], [-0.05, -0.1], [-0.25, -0.95], [0.55, 0.15], [0.05, 0.15]]), 0.26, M(0xffd23a, { rough: 0.3, glow: 0.15 }), 0.1, 3), yaw: 0.32, pitch: 0.28 },
   ice_flake: {
-    make: () => { const ice = M(0x4ab8f4, { rough: 0.15, metal: 0.15, env: 1.3, tex: null }), g = grp(); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[0, 0], [c * 0.88, s * 0.88]], 0.12, ice, 0.1, 0.04)); for (const f of [0.45, 0.7]) { const px = c * f, py = s * f; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.8) * 0.22, py + Math.sin(a + sg * 0.8) * 0.22]], 0.1, ice, 0.1, 0.04)); } } return g; }, yaw: 0.28, pitch: 0.28,
+    make: () => { const ice = M(0x4ab8f4, { rough: 0.15, metal: 0.15, env: 1.3, tex: 'glass' }), g = grp(); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[0, 0], [c * 0.88, s * 0.88]], 0.12, ice, 0.1, 0.04)); for (const f of [0.45, 0.7]) { const px = c * f, py = s * f; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.8) * 0.22, py + Math.sin(a + sg * 0.8) * 0.22]], 0.1, ice, 0.1, 0.04)); } } return g; }, yaw: 0.28, pitch: 0.28,
   },
   alarm: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 7, 0, 0)); c.door.rotation.y = -2.1; c.owl.position.set(0, c.owl.position.y - 0.05, 0.5); c.owl.rotation.x = 0.2; c.owl.scale.setScalar(2.4); return c.root; }, yaw: 0.26, pitch: 0.12 },
   clock: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 10, 10, 0)); c.pendulum.rotation.z = 0.2; return c.root; }, yaw: 0.22, pitch: 0.1 },
@@ -236,8 +279,8 @@ const ICONS: Record<string, Spec> = {
   },
   candle: {
     make: () => grp(lathe(smoothProfile([[0, -0.78], [0.6, -0.76], [0.66, -0.68], [0.62, -0.62], [0.24, -0.6], [0.22, -0.56], [0, -0.56]], 2), C.brass(), 40),
-      at(lathe(smoothProfile([[0, -0.6], [0.25, -0.6], [0.26, 0.2], [0.24, 0.3], [0.1, 0.32], [0, 0.3]], 2), M(0xfff1d8, { rough: 0.55 }), 28), 0, 0, 0),
-      tube([[0.22, 0.28, 0.12], [0.27, 0.12, 0.12], [0.27, -0.02, 0.1]], 0.04, M(0xfff1d8, { rough: 0.55 }), 8, 6),
+      at(lathe(smoothProfile([[0, -0.6], [0.25, -0.6], [0.26, 0.2], [0.24, 0.3], [0.1, 0.32], [0, 0.3]], 2), M(0xfff1d8, { rough: 0.55, tex: 'wax' }), 28), 0, 0, 0),
+      tube([[0.22, 0.28, 0.12], [0.27, 0.12, 0.12], [0.27, -0.02, 0.1]], 0.04, M(0xfff1d8, { rough: 0.55, tex: 'wax' }), 8, 6),
       at(cyl(0.02, 0.02, 0.12, C.ink(), 6), 0, 0.38, 0),
       at(lathe(smoothProfile([[0, -0.2], [0.13, -0.1], [0.12, 0.05], [0.05, 0.2], [0, 0.3]], 2), C.flame(), 16), 0, 0.6, 0), at(lathe(smoothProfile([[0, -0.12], [0.06, -0.05], [0.04, 0.08], [0, 0.14]], 2), C.flameIn(), 12), 0, 0.56, 0.05),
       at(torus(0.16, 0.05, C.brass(), Math.PI, 8, 16), 0.64, -0.62, 0, 0, 0, -Math.PI / 2)), yaw: 0.4, pitch: 0.24,
@@ -279,14 +322,14 @@ const ICONS: Record<string, Spec> = {
   },
   speaker_on: { make: () => grp(speaker(), at(torus(0.42, 0.07, C.sky(), 1.4, 8, 24), 0.16, 0, 0, 0, 0, -0.7), at(torus(0.7, 0.07, C.sky(), 1.3, 8, 24), 0.16, 0, 0, 0, 0, -0.65)), yaw: 0.25, pitch: 0.15 },
   speaker_off: { make: () => grp(speaker(), strokeMesh([[0.34, -0.3], [0.88, 0.3]], 0.16, C.red(), 0.16, 0.05), strokeMesh([[0.34, 0.3], [0.88, -0.3]], 0.16, C.red(), 0.16, 0.05)), yaw: 0.25, pitch: 0.15 },
-  rain: { make: () => grp(at(cloud(C.snow()), 0, 0.3, 0), ...[[-0.36, -0.5], [0.1, -0.68], [0.52, -0.46]].map(([x, y]) => at(lathe(smoothProfile([[0, -0.16], [0.1, -0.1], [0.09, 0.02], [0.04, 0.12], [0, 0.18]], 3), M(0x4aaef0, { rough: 0.15 }), 16), x, y, 0.1, 0, 0, -0.2))), yaw: 0.28, pitch: 0.2 },
-  drop: { make: () => lathe(smoothProfile([[0, -0.8], [0.34, -0.72], [0.56, -0.45], [0.55, -0.15], [0.36, 0.25], [0.12, 0.65], [0, 0.85]], 3), M(0x4aaef0, { rough: 0.1, metal: 0.1, env: 1.4 }), 40), yaw: 0.3, pitch: 0.2 },
-  waves: { make: () => grp(...[0.55, 0, -0.55].map((y, i) => tube(Array.from({ length: 9 }, (_, k) => [-0.9 + k * 0.225, y + Math.sin(k * 1.4 + i) * 0.13, 0] as [number, number, number]), 0.1, M([0x8ad6ff, 0x5ab4f0, 0x3a8ad8][i], { rough: 0.22 }), 40, 10))), yaw: 0.25, pitch: 0.2 },
+  rain: { make: () => grp(at(cloud(C.snow()), 0, 0.3, 0), ...[[-0.36, -0.5], [0.1, -0.68], [0.52, -0.46]].map(([x, y]) => at(lathe(smoothProfile([[0, -0.16], [0.1, -0.1], [0.09, 0.02], [0.04, 0.12], [0, 0.18]], 3), M(0x4aaef0, { rough: 0.15, tex: 'water' }), 16), x, y, 0.1, 0, 0, -0.2))), yaw: 0.28, pitch: 0.2 },
+  drop: { make: () => lathe(smoothProfile([[0, -0.8], [0.34, -0.72], [0.56, -0.45], [0.55, -0.15], [0.36, 0.25], [0.12, 0.65], [0, 0.85]], 3), M(0x4aaef0, { rough: 0.1, metal: 0.1, env: 1.4, tex: 'water' }), 40), yaw: 0.3, pitch: 0.2 },
+  waves: { make: () => grp(...[0.55, 0, -0.55].map((y, i) => tube(Array.from({ length: 9 }, (_, k) => [-0.9 + k * 0.225, y + Math.sin(k * 1.4 + i) * 0.13, 0] as [number, number, number]), 0.1, M([0x8ad6ff, 0x5ab4f0, 0x3a8ad8][i], { rough: 0.22, tex: 'water' }), 40, 10))), yaw: 0.25, pitch: 0.2 },
   wind: { make: () => grp(...([[0.5, 0.9], [0, 1.1], [-0.5, 0.75]] as P2[]).map(([y, l]) => tube([[-0.9, y, 0], [-0.9 + l * 0.6, y, 0], [-0.9 + l, y + 0.08, 0], [-0.9 + l + 0.1, y + 0.28, 0], [-0.9 + l - 0.12, y + 0.36, 0]], 0.09, M(0xeaf6ff, { rough: 0.4 }), 40, 10))), yaw: 0.25, pitch: 0.2 },
   campfire: {
     make: () => { const bark = M(0x7a4a26, { tex: 'bark', rough: 0.85 }), end = M(0xe8b070, { tex: 'grain', rough: 0.7 });
       const log = (a: number, tilt: number) => { const g = grp(at(cyl(0.13, 0.15, 1.3, bark, 12), 0, 0, 0), at(cyl(0.13, 0.13, 0.01, end, 12), 0, 0.655, 0), at(cyl(0.15, 0.15, 0.01, end, 12), 0, -0.655, 0)); return at(g, 0, -0.58, 0, Math.PI / 2 - tilt, a, 0); };
-      const stone = (a: number) => at(lathe(smoothProfile([[0, 0.12], [0.16, 0.1], [0.2, 0.02], [0.16, -0.06], [0, -0.07]], 2), M(0x9aa0a8, { rough: 0.8 }), 10), Math.cos(a) * 0.74, -0.74, Math.sin(a) * 0.74, 0, a, 0);
+      const stone = (a: number) => at(lathe(smoothProfile([[0, 0.12], [0.16, 0.1], [0.2, 0.02], [0.16, -0.06], [0, -0.07]], 2), M(0x9aa0a8, { rough: 0.8, tex: 'stone' }), 10), Math.cos(a) * 0.74, -0.74, Math.sin(a) * 0.74, 0, a, 0);
       return grp(log(0.5, 0.25), log(-0.6, 0.2), log(1.7, 0.18), ...[0, 1.2, 2.4, 3.6, 4.8].map(stone),
         ...([[0, 0, 1], [-0.2, -0.04, 0.7], [0.22, 0.02, 0.75], [0.06, -0.06, 0.55]] as [number, number, number][]).map(([x, z, k]) => at(lathe(smoothProfile([[0, -0.4], [0.3, -0.25], [0.28, 0], [0.14, 0.35], [0, 0.66]], 3), C.flame(), 16), x, -0.1, z, 0, 0, x * 0.6, [k * 0.8, k, k * 0.8])),
         at(lathe(smoothProfile([[0, -0.3], [0.2, -0.15], [0.15, 0.08], [0, 0.3]], 3), C.flameIn(), 16), 0, -0.2, 0.18), at(lathe(smoothProfile([[0, -0.1], [0.08, -0.04], [0.05, 0.06], [0, 0.12]], 2), unlit(0xfff4c0), 10), 0, -0.24, 0.26)); }, yaw: 0.4, pitch: 0.34,
@@ -322,7 +365,7 @@ const ICONS: Record<string, Spec> = {
   map: { make: () => { const g = grp(); const tx = mapTex(); for (let i = 0; i < 3; i++) { const p = mesh(new THREE.PlaneGeometry(0.62, 1.4), new THREE.MeshStandardMaterial({ map: tx, side: THREE.DoubleSide, roughness: 0.8 })); const uv = p.geometry.attributes.uv as THREE.BufferAttribute; for (let k = 0; k < uv.count; k++) uv.setX(k, (uv.getX(k) + i) / 3); g.add(at(p, -0.6 + i * 0.6, 0, i % 2 ? -0.12 : 0, 0, i % 2 ? 0.35 : -0.35, 0)); } return g; }, yaw: 0.2, pitch: 0.25 },
   gear: { make: () => gear(M(0xeaa634, { metal: 0.55, rough: 0.3, tex: null })), yaw: 0.32, pitch: 0.28 },
   treehouse: {
-    make: () => { const lv = [M(0x4caa3c, { rough: 0.6 }), M(0x62c448, { rough: 0.6 }), M(0x3e9434, { rough: 0.6 })];
+    make: () => { const lv = [M(0x4caa3c, { rough: 0.6, tex: 'foliage' }), M(0x62c448, { rough: 0.6, tex: 'foliage' }), M(0x3e9434, { rough: 0.6, tex: 'foliage' })];
       const clump = (x: number, y: number, r: number, m: THREE.Material) => { const g = new THREE.IcosahedronGeometry(r, 2); const p = g.attributes.position as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) { const v = new THREE.Vector3().fromBufferAttribute(p, i); v.multiplyScalar(1 + (fbm(v.x * 6 + 3, v.y * 6 + v.z * 4, 5) - 0.5) * 0.35); p.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals(); return at(mesh(g, m), x, y, 0); };
       const house = grp(ext(shape([[-0.26, -0.2], [0.26, -0.2], [0.26, 0.14], [0, 0.34], [-0.26, 0.14]]), 0.3, C.oak(), 0.03, 2), at(ext(shape([[-0.34, 0.1], [0, 0.4], [0.34, 0.1], [0.3, 0.06], [0, 0.32], [-0.3, 0.06]]), 0.38, C.red(), 0.03, 2), 0, 0.02, 0), at(ext(shape(rrectPts(0.14, 0.18, 0.05)), 0.02, M(0xffd87a, { glow: 0.7, tex: null }), 0.01, 1), 0, -0.02, 0.17));
       return grp(at(lathe(smoothProfile([[0.34, -1.0], [0.24, -0.8], [0.18, -0.3], [0.16, 0.2]], 2), M(0x8a5a32, { tex: 'bark' }), 16), 0, 0, 0), clump(-0.34, 0.34, 0.46, lv[0]), clump(0.32, 0.4, 0.5, lv[2]), clump(0, 0.7, 0.46, lv[1]), at(house, 0.02, -0.36, 0.22)); }, yaw: 0.3, pitch: 0.18,
@@ -358,7 +401,7 @@ const ICONS: Record<string, Spec> = {
       ext(shape(pts), 0.16, M(0xc8303a, { rough: 0.3 }), 0.1, 3), at(ext(shape(circlePts(0.4, 40)), 0.04, M(0xa8202c, { rough: 0.35 }), 0.04, 2), 0, 0.2, 0.12), at(ext(shape(starPts(0.24, 0.11)), 0.04, M(0xe85058, { rough: 0.3 }), 0.02, 2), 0, 0.2, 0.17)); }, yaw: 0.28, pitch: 0.28 },
   wd_feather: { make: () => { const vane: P2[] = []; for (let i = 0; i <= 50; i++) { const t = (i / 50) * Math.PI * 2, y = Math.cos(t); const notch = Math.sin(t * 13) > 0.85 ? 0.88 : 1; vane.push([Math.sin(t) * 0.3 * (1 + 0.2 * y) * notch, y * 0.86 + 0.12]); }
     return at(grp(ext(shape(vane), 0.04, M(0xd8905a, { tex: 'grain', rough: 0.6 }), 0.03, 2), at(cyl(0.025, 0.035, 1.95, C.cream(), 8), 0, -0.03, 0.04)), 0, 0, 0, 0, 0, -0.6); }, yaw: 0.28, pitch: 0.28 },
-  tophat: { make: () => grp(lathe(smoothProfile([[0, -0.5], [0.95, -0.5], [0.98, -0.44], [0.62, -0.4], [0.56, -0.3], [0.55, 0.5], [0.6, 0.6], [0, 0.62]], 2), M(0x3a2a52, { rough: 0.45, tex: 'weave' }), 48), at(cyl(0.565, 0.57, 0.2, C.red(), 40), 0, -0.26, 0), at(ext(shape(rrectPts(0.2, 0.16, 0.04)), 0.04, C.gold(), 0.02, 1), 0.2, -0.26, 0.55, 0, 0.35, 0)), yaw: 0.4, pitch: 0.32 },
+  tophat: { make: () => grp(lathe(smoothProfile([[0, -0.5], [0.95, -0.5], [0.98, -0.44], [0.62, -0.4], [0.56, -0.3], [0.55, 0.5], [0.6, 0.6], [0, 0.62]], 2), M(0x3a2a52, { rough: 0.45, tex: 'felt' }), 48), at(cyl(0.565, 0.57, 0.2, C.red(), 40), 0, -0.26, 0), at(ext(shape(rrectPts(0.2, 0.16, 0.04)), 0.04, C.gold(), 0.02, 1), 0.2, -0.26, 0.55, 0, 0.35, 0)), yaw: 0.4, pitch: 0.32 },
   wd_glasses: { make: () => grp(...[-0.48, 0.48].map((x) => at(torus(0.36, 0.075, C.gold(), Math.PI * 2, 10, 40), x, 0, 0)), ...[-0.48, 0.48].map((x) => at(cyl(0.33, 0.33, 0.03, M(0x8fd8ff, { rough: 0.06, metal: 0.2, tex: null, env: 2 }), 32), x, 0, -0.01, Math.PI / 2)), at(torus(0.14, 0.055, C.gold(), Math.PI, 8, 16), 0, 0.08, 0), ...[-1, 1].map((sx) => tube([[sx * 0.84, 0.1, -0.02], [sx * 0.92, 0.12, -0.3], [sx * 0.9, 0.0, -0.5]], 0.04, C.gold(), 12, 6))), yaw: 0.3, pitch: 0.2 },
   wd_scarf: { make: () => { const st = new THREE.MeshStandardMaterial({ map: stripeTex(['#e0363c', '#fff0cc'], [3, 1]), roughness: 0.75 }); return grp(tube([[-0.5, 0.55, 0], [0, 0.72, 0.2], [0.5, 0.55, 0], [0.55, 0.3, 0.1], [0.2, 0.15, 0.25], [-0.25, 0.2, 0.2], [-0.4, -0.3, 0.25], [-0.3, -0.85, 0.2]], 0.2, st, 64, 12), at(ext(shape(rrectPts(0.36, 0.5, 0.06)), 0.1, st, 0.04, 2), 0.35, -0.45, 0.25, 0, 0, -0.25)); }, yaw: 0.3, pitch: 0.25 },
   wd_sweater: { make: () => sweater(), yaw: 0.3, pitch: 0.15 },
@@ -510,8 +553,9 @@ function ringTex(): THREE.Texture {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; texCache.set('ring', t); return t;
 }
 
-// ------------------------------------------------------------------ render + pixel finish
-function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): ImageData {
+// ------------------------------------------------------------------ render and finish (realistic, smooth)
+/** render the model framed in a square, `n` px, supersampled x2 and scaled down smoothly */
+function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): HTMLCanvasElement {
   const S = n * SS;
   R.setSize(S, S, false);
   scene.add(obj);
@@ -532,197 +576,168 @@ function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): Image
     const step = Math.max(1, Math.floor(p.count / 800));
     for (let i = 0; i < p.count; i += step) { v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld).applyMatrix4(cam.matrixWorldInverse); pb.expandByPoint(v); }
   });
-  // leave one art pixel each side for the outline
-  const half = (Math.max(pb.max.x - pb.min.x, pb.max.y - pb.min.y) / 2) * pad * (n / (n - 2.2)), mx = (pb.max.x + pb.min.x) / 2, my = (pb.max.y + pb.min.y) / 2;
+  // a margin for the soft shadow
+  const half = (Math.max(pb.max.x - pb.min.x, pb.max.y - pb.min.y) / 2) * pad * 1.1, mx = (pb.max.x + pb.min.x) / 2, my = (pb.max.y + pb.min.y) / 2;
   cam.left = mx - half; cam.right = mx + half; cam.top = my + half; cam.bottom = my - half;
   cam.updateProjectionMatrix();
   R.render(scene, cam);
   scene.remove(obj);
   const out = document.createElement('canvas');
-  out.width = out.height = S;
+  out.width = out.height = n;
   const g2 = out.getContext('2d', { willReadFrequently: true })!;
-  g2.drawImage(R.domElement, 0, 0);
-  return g2.getImageData(0, 0, S, S);
-}
-
-const clamp = (v: number, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
-function hsl(r: number, g: number, b: number): [number, number, number] {
-  r /= 255; g /= 255; b /= 255;
-  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
-  if (mx === mn) return [0, 0, l];
-  const d = mx - mn, s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
-  const h = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
-  return [h / 6, s, l];
-}
-function rgb(h: number, s: number, l: number): [number, number, number] {
-  const f = (p: number, q: number, t: number) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
-  if (!s) return [l * 255, l * 255, l * 255];
-  const q2 = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q2;
-  return [f(p, q2, h + 1 / 3) * 255, f(p, q2, h) * 255, f(p, q2, h - 1 / 3) * 255];
-}
-const hash = (x: number, y: number, s: number) => { let h = (x * 374761393 + y * 668265263 + s * 982451653) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
-function vnoise(x: number, y: number, s: number) { const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi; const a = hash(xi, yi, s), b = hash(xi + 1, yi, s), c = hash(xi, yi + 1, s), d = hash(xi + 1, yi + 1, s); const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
-
-/** The pixel finish: n x n art pixels from the supersampled render. */
-function pixelFinish(src: ImageData, n: number, seed: number, vivid = 1): ImageData {
-  const S = src.width, sd = src.data, out = new ImageData(n, n), d = out.data;
-  const solid = new Uint8Array(n * n);
-  const k = S / n;
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    const buckets = new Map<number, [number, number, number, number]>();
-    let opaque = 0, tot = 0;
-    for (let j = Math.floor(y * k); j < Math.floor((y + 1) * k); j++) for (let i = Math.floor(x * k); i < Math.floor((x + 1) * k); i++) {
-      const o = (j * S + i) * 4; tot++;
-      if (sd[o + 3] < 128) continue;
-      opaque++;
-      const key2 = ((sd[o] >> 4) << 8) | ((sd[o + 1] >> 4) << 4) | (sd[o + 2] >> 4);
-      const b = buckets.get(key2) ?? [0, 0, 0, 0];
-      b[0] += sd[o]; b[1] += sd[o + 1]; b[2] += sd[o + 2]; b[3]++;
-      buckets.set(key2, b);
-    }
-    if (opaque / tot < 0.42) continue;
-    let best: [number, number, number, number] | null = null;
-    for (const b of buckets.values()) if (!best || b[3] > best[3]) best = b;
-    const [r, g, b] = [best![0] / best![3], best![1] / best![3], best![2] / best![3]];
-    // a pixel artist's ramp: lightness in a few steps (lightly broken up, like a brush), lights lean gold, shadows violet
-    let [h, s, l] = hsl(r, g, b);
-    const brush = (vnoise(x * 0.45, y * 0.45, seed) - 0.5) * 0.025;
-    const steps = 7;
-    let lq = Math.round((l + brush) * steps) / steps;
-    lq = clamp(lq * 0.93 + 0.055, 0.05, 0.97);
-    const warm = lq - 0.5;
-    if (s > 0.08) { const target = warm > 0 ? 0.12 : 0.72; let dh = target - h; if (dh > 0.5) dh -= 1; if (dh < -0.5) dh += 1; h = (h + dh * Math.min(0.08, Math.abs(warm) * 0.18) + 1) % 1; }
-    s = clamp(s * 1.16 * vivid + 0.03 * (s > 0.08 ? 1 : 0), 0, 0.95);
-    const c = rgb(h, s, lq);
-    const o = (y * n + x) * 4;
-    d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
-    solid[y * n + x] = 1;
-  }
-  // a coloured outline: the darkest neighbour, darker and leaning plum; softer on the lit (top-left) side
-  const add: [number, number[]][] = [];
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    if (solid[y * n + x]) continue;
-    let best: number[] | null = null, lit = false, shade = false;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const X = x + dx, Y = y + dy;
-      if (X < 0 || Y < 0 || X >= n || Y >= n || !solid[Y * n + X]) continue;
-      if (dx > 0 || dy > 0) lit = true; else shade = true;
-      const o = (Y * n + X) * 4, c = [d[o] * 0.34 + 14, d[o + 1] * 0.26 + 7, d[o + 2] * 0.34 + 22];
-      if (!best || c[0] + c[1] + c[2] < best[0] + best[1] + best[2]) best = c;
-    }
-    if (!best) continue;
-    if (lit && !shade) best = [best[0] * 1.25 + 10, best[1] * 1.2 + 6, best[2] * 1.12 + 6];
-    add.push([y * n + x, best]);
-  }
-  for (const [i, c] of add) { d[i * 4] = c[0]; d[i * 4 + 1] = c[1]; d[i * 4 + 2] = c[2]; d[i * 4 + 3] = 255; }
+  g2.imageSmoothingEnabled = true; g2.imageSmoothingQuality = 'high';
+  g2.drawImage(R.domElement, 0, 0, n, n);
   return out;
 }
 
-/** glint and twinkle overlays for the currency's idle frames */
-function sparkleAt(img: ImageData, x: number, y: number, arm: number, col = [255, 252, 238]) {
-  const n = img.width, d = img.data;
-  const put = (px: number, py: number, a: number) => { if (px < 0 || py < 0 || px >= n || py >= n) return; const o = (py * n + px) * 4; const t = a / 255; d[o] = d[o] * (1 - t) + col[0] * t; d[o + 1] = d[o + 1] * (1 - t) + col[1] * t; d[o + 2] = d[o + 2] * (1 - t) + col[2] * t; d[o + 3] = Math.max(d[o + 3], a); };
-  put(x, y, 255);
-  for (let k = 1; k <= arm; k++) { const a = k === arm ? 150 : 225; put(x - k, y, a); put(x + k, y, a); put(x, y - k, a); put(x, y + k, a); }
-}
-function glint(img: ImageData, f: number) {
-  // a bright diagonal band sweeping across the solid pixels on frames 2..5
-  const n = img.width, d = img.data, pos = [-99, -99, 0.25, 0.42, 0.6, 0.78, -99, -99][f] * n * 2;
-  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-    const o = (y * n + x) * 4;
-    if (d[o + 3] < 255) continue;
-    const t = Math.abs(x + y - pos);
-    if (t < 1.4) { d[o] = d[o] + (255 - d[o]) * 0.55; d[o + 1] = d[o + 1] + (250 - d[o + 1]) * 0.55; d[o + 2] = d[o + 2] + (225 - d[o + 2]) * 0.45; }
+/**
+ * The finish: a little more colour (the studio light is honest; icons want to sing at 20 px), then a soft contact
+ * shadow down and to the right under the object, so it reads on light and dark panels alike.
+ */
+function finish(src: HTMLCanvasElement, vivid = 1): HTMLCanvasElement {
+  const n = src.width, g = src.getContext('2d', { willReadFrequently: true })!;
+  const img = g.getImageData(0, 0, n, n), d = img.data, k = 1.14 * vivid;
+  for (let i = 0; i < d.length; i += 4) {
+    if (!d[i + 3]) continue;
+    const l = d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114;
+    for (let c = 0; c < 3; c++) d[i + c] = Math.max(0, Math.min(255, l + (d[i + c] - l) * k));
   }
+  g.putImageData(img, 0, 0);
+  const out = document.createElement('canvas');
+  out.width = out.height = n;
+  const o = out.getContext('2d')!;
+  o.save();
+  o.filter = `blur(${n / 64}px)`;
+  o.globalAlpha = 0.38;
+  o.drawImage(src, n / 64, n / 40);
+  o.globalCompositeOperation = 'source-in';
+  o.fillStyle = '#2a1408';
+  o.fillRect(0, 0, n, n);
+  o.restore();
+  o.drawImage(src, 0, 0);
+  return out;
 }
 
-// ------------------------------------------------------------------ encoding (palette + run-length, base64)
-function encode(img: ImageData): { w: number; h: number; p: string; d: string } {
-  const d = img.data, pal: string[] = [], map = new Map<string, number>(), idx: number[] = [];
-  for (let i = 0; i < img.width * img.height; i++) {
-    if (d[i * 4 + 3] < 128) { idx.push(0); continue; }
-    const h = [d[i * 4], d[i * 4 + 1], d[i * 4 + 2]].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('');
-    let k = map.get(h);
-    if (k === undefined) { k = Math.min(255, pal.length + 1); if (pal.length < 255) { map.set(h, k); pal.push(h); } }
-    idx.push(k);
-  }
-  const bytes: number[] = [];
-  for (let i = 0; i < idx.length;) { let j = i; while (j < idx.length && idx[j] === idx[i] && j - i < 255) j++; bytes.push(j - i, idx[i]); i = j; }
-  let bin = '';
-  for (const v of bytes) bin += String.fromCharCode(v);
-  return { w: img.width, h: img.height, p: pal.join(''), d: btoa(bin) };
+/** the currency's idle glints: a soft four-point twinkle, and a band of light sweeping across the object */
+function twinkle(c: HTMLCanvasElement, x: number, y: number, r: number, col = '255,250,232') {
+  const g = c.getContext('2d')!;
+  g.save();
+  g.globalCompositeOperation = 'lighter';
+  const rg = g.createRadialGradient(x, y, 0, x, y, r);
+  rg.addColorStop(0, `rgba(${col},0.95)`); rg.addColorStop(0.25, `rgba(${col},0.35)`); rg.addColorStop(1, `rgba(${col},0)`);
+  g.fillStyle = rg;
+  g.beginPath(); g.ellipse(x, y, r, r * 0.12, 0, 0, Math.PI * 2); g.ellipse(x, y, r * 0.12, r, 0, 0, Math.PI * 2); g.fill();
+  g.beginPath(); g.arc(x, y, r * 0.3, 0, Math.PI * 2); g.fill();
+  g.restore();
+}
+function glint(c: HTMLCanvasElement, f: number) {
+  const pos = [-9, -9, 0.25, 0.42, 0.6, 0.78, -9, -9][f];
+  if (pos < -1) return;
+  const n = c.width, g = c.getContext('2d')!;
+  const band = document.createElement('canvas');
+  band.width = band.height = n;
+  const b = band.getContext('2d')!;
+  b.drawImage(c, 0, 0);
+  b.globalCompositeOperation = 'source-in';
+  const p = pos * n * 2, lg = b.createLinearGradient(p - n * 0.12, 0, p + n * 0.12, 0);
+  lg.addColorStop(0, 'rgba(255,250,228,0)'); lg.addColorStop(0.5, 'rgba(255,250,228,0.55)'); lg.addColorStop(1, 'rgba(255,250,228,0)');
+  b.setTransform(1, 0, 1, 1, -n, 0); // slanted
+  b.fillStyle = lg;
+  b.fillRect(0, 0, n * 3, n);
+  g.save(); g.globalCompositeOperation = 'lighter'; g.drawImage(band, 0, 0); g.restore();
 }
 
 // ------------------------------------------------------------------ the bake
-const SIZES = { L: 32, S: 20 };
-/** the currency's big and animated versions: [name, model, size, frames] */
-const ANIM: [string, string, number, number][] = [['owlcoin', 'owlcoin', 32, 8], ['acorn_big', 'owlcoin', 48, 8], ['moongem', 'moongem', 32, 8], ['gem_big', 'moongem', 48, 8], ['coin_vault', 'coin_vault', 44, 4]];
+/** the cell size (px) of every icon in the atlas */
+const CELL = 128;
+const COLS = 16;
+/** the currency's idle frames: [name, model, frames]; acorn_big and gem_big are the same frames, drawn bigger */
+const ANIM: [string, string, number][] = [['owlcoin', 'owlcoin', 8], ['moongem', 'moongem', 8], ['coin_vault', 'coin_vault', 4]];
+const ANIM_ALIAS: Record<string, string> = { acorn_big: 'owlcoin', gem_big: 'moongem' };
 /** names that share a model */
 const ALIAS: Record<string, string> = { acorn: 'owlcoin', wd_hanger: 'hanger' };
-/** pack sprites are bigger (their sizes in the store) */
-const BIG: Record<string, number> = { coin_pouch: 40, coin_sack: 40, coin_chest: 44 };
+
+/** the photo swatches (prepared from Poly Haven CC0 textures in art/tex7) */
+async function loadPhotos(): Promise<Record<string, HTMLImageElement>> {
+  const out: Record<string, HTMLImageElement> = {};
+  await Promise.all(SWATCHES.map((n) => new Promise<void>((res) => {
+    const im = new Image();
+    im.onload = () => { out[n] = im; setSwatch(n, im, [0, 0, im.width, im.height]); res(); };
+    im.onerror = () => res();
+    im.src = `/art/tex7/${n}.webp`;
+  })));
+  return out;
+}
 
 async function bake() {
   const only = q.get('only');
   const host = document.getElementById('out')!;
-  const res: Record<string, unknown> = {};
-  const show = (name: string, img: ImageData) => {
-    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; c.getContext('2d')!.putImageData(img, 0, 0);
+  const photos = await loadPhotos();
+  const show = (name: string, c: HTMLCanvasElement) => {
     const fig = document.createElement('figure');
-    fig.innerHTML = `<div class="big"></div><div class="one"></div><figcaption>${name}</figcaption>`;
-    const big = c.cloneNode() as HTMLCanvasElement; big.getContext('2d')!.drawImage(c, 0, 0); big.style.cssText = `width:${img.width * 3}px;image-rendering:pixelated`;
-    fig.querySelector('.big')!.appendChild(big); fig.querySelector('.one')!.appendChild(c);
+    const big = document.createElement('canvas'); big.width = big.height = c.width; big.getContext('2d')!.drawImage(c, 0, 0); big.style.width = '96px';
+    const small = document.createElement('canvas'); small.width = small.height = 32; const sg = small.getContext('2d')!; sg.imageSmoothingQuality = 'high'; sg.drawImage(c, 0, 0, 32, 32);
+    fig.append(big, small, Object.assign(document.createElement('figcaption'), { textContent: name }));
     host.appendChild(fig);
   };
+  const cells: HTMLCanvasElement[] = [];
+  const icons: Record<string, number> = {}, anim: Record<string, number[]> = {};
   const names = Object.keys(ICONS).filter((n) => !only || new RegExp(only).test(n));
-  let seed = 1;
   for (const name of names) {
     const sp = ICONS[name];
     try {
-      const sizes = BIG[name] ? { L: BIG[name] } : SIZES;
-      const out: Record<string, unknown> = {};
-      for (const [tag, n] of Object.entries(sizes)) {
-        const obj = await sp.make();
-        const img = pixelFinish(shoot(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad), n, seed, sp.vivid);
-        out[tag] = encode(img);
-        if (tag === 'L') show(name, img);
-      }
-      res[name] = out;
+      const c = finish(shoot(prep(await sp.make()), CELL, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad), sp.vivid);
+      icons[name] = cells.push(c) - 1;
+      show(name, c);
     } catch (e) { console.error('bake failed', name, e); }
-    seed++;
   }
-  for (const [a, b] of Object.entries(ALIAS)) if (res[b] && (!only || new RegExp(only).test(a))) res[a] = res[b];
-  // the idle frames: a bob and squash, a glint across the front, twinkles popping round it
-  const anim: Record<string, unknown[]> = {};
-  for (const [name, model, n, frames] of ANIM) {
+  for (const [a, b] of Object.entries(ALIAS)) if (icons[b] !== undefined && (!only || new RegExp(only).test(a))) icons[a] = icons[b];
+  // the idle frames: a bob and squash, a glint across the front, twinkles round it
+  for (const [name, model, frames] of ANIM) {
     if (only && !new RegExp(only).test(name)) continue;
-    const sp = ICONS[model];
-    const list: unknown[] = [];
+    const sp = ICONS[model], list: number[] = [];
     for (let f = 0; f < frames; f++) {
       const ph = (f / frames) * Math.PI * 2;
-      const obj = await sp.make();
+      const obj = prep(await sp.make());
       if (frames === 8) { obj.scale.set(1 + Math.sin(ph) * 0.03, 1 - Math.sin(ph) * 0.03, 1); obj.rotation.z = Math.sin(ph + 1) * 0.04; }
-      const img = pixelFinish(shoot(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, (sp.pad ?? 1.04) * 1.04), n, 77);
-      if (frames === 8) glint(img, f);
-      const tw: [number, number, number][] = [[0.78, 0.16, 2], [0.18, 0.3, 1], [0.82, 0.62, 1], [0.24, 0.12, 2]];
+      const c = finish(shoot(obj, CELL, sp.yaw ?? 0.5, sp.pitch ?? 0.3, (sp.pad ?? 1.04) * 1.04), sp.vivid);
+      if (frames === 8) glint(c, f);
+      const tw: [number, number, number][] = [[0.78, 0.16, 0.16], [0.18, 0.3, 0.1], [0.82, 0.62, 0.1], [0.24, 0.12, 0.15]];
       const t = tw[f % 4];
-      if (f % 2 === 0 || frames === 4) sparkleAt(img, Math.round(t[0] * n), Math.round(t[1] * n), Math.max(1, Math.round(t[2] * n / 24)), model === 'moongem' ? [240, 236, 255] : [255, 250, 230]);
-      list.push(encode(img));
-      if (f === 2) show(name + '_f2', img);
+      if (f % 2 === 0 || frames === 4) twinkle(c, t[0] * CELL, t[1] * CELL, t[2] * CELL, model === 'moongem' ? '240,236,255' : '255,250,230');
+      list.push(cells.push(c) - 1);
+      if (f === 2) show(name + '_f2', c);
     }
     anim[name] = list;
   }
-  const json = JSON.stringify({ icons: res, anim });
-  const module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html, then window.__module): every interface icon is a small 3D model,
-// lit and pixel-finished (see that file). { icons: { name: { L, S } }, anim: { name: [frames] } }; each image is
-// { w, h, p: palette (6 hex digits per colour), d: base64 run-length pairs (count, palette index; 0 = clear) }.
-// Models: the game's own GLBs, the shelf's props (src/ui/chrome/props3d.ts) and models made in the bake; credits for
-// borrowed models in docs/credits.
-type Img = { w: number; h: number; p: string; d: string };
-export const ICONS3D: { icons: Record<string, { L: Img; S?: Img }>; anim: Record<string, Img[]> } = ${json};
+  for (const [a, b] of Object.entries(ANIM_ALIAS)) if (anim[b]) anim[a] = anim[b];
+  // the atlas: the icon cells, then the photo swatches (512 px, four to a row)
+  const rows = Math.ceil(cells.length / COLS), SW = 512, swatches: Record<string, [number, number, number, number]> = {};
+  const atlas = document.createElement('canvas');
+  atlas.width = COLS * CELL;
+  atlas.height = rows * CELL + Math.ceil(SWATCHES.length / 4) * SW;
+  const ag = atlas.getContext('2d')!;
+  cells.forEach((c, i) => ag.drawImage(c, (i % COLS) * CELL, Math.floor(i / COLS) * CELL));
+  SWATCHES.forEach((n, i) => {
+    const im = photos[n];
+    if (!im) return;
+    const r: [number, number, number, number] = [(i % 4) * SW, rows * CELL + Math.floor(i / 4) * SW, SW, SW];
+    ag.drawImage(im, r[0], r[1], SW, SW);
+    swatches[n] = r;
+  });
+  const json = JSON.stringify({ atlas: 'img/ui3d.webp', cell: CELL, cols: COLS, icons, anim, swatches });
+  const module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html; a tools script writes window.__module here and window.__atlas to
+// public/img/ui3d.webp): the interface atlas's index. Every interface icon is a small 3D model with realistic textures,
+// rendered with soft studio light into a ${CELL} px cell; the atlas also carries the photo swatches (Poly Haven, CC0) the
+// live shelf's wood, leather and cloth wear. { atlas, cell, cols, icons: { name: cell }, anim: { name: [cells] },
+// swatches: { name: [x, y, w, h] } }. Models: the game's own GLBs, the shelf's props (src/ui/chrome/props3d.ts) and
+// models made in the bake; credits in docs/credits.
+export const ICONS3D: { atlas: string; cell: number; cols: number; icons: Record<string, number>; anim: Record<string, number[]>; swatches: Record<string, [number, number, number, number]> } = ${json};
 `;
-  (window as unknown as { __module: string }).__module = module;
-  (window as unknown as { __done: boolean }).__done = true;
-  document.title = 'baked ' + Object.keys(res).length;
+  const w = window as unknown as { __module: string; __atlas: string; __done: boolean };
+  w.__module = module;
+  w.__atlas = atlas.toDataURL('image/webp', 0.86);
+  w.__done = true;
+  document.title = 'baked ' + Object.keys(icons).length;
 }
 void bake();

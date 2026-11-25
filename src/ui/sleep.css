@@ -79,7 +79,7 @@
 .calm-opt small { font-size: var(--t1); color: #b9b3cc; }
 .calm-opt.lock { background: linear-gradient(180deg, #594b5d 0 50%, #4a3e50 50%); box-shadow: inset 0 3px 0 #6e5266, inset 0 -4px 0 #33283a, 0 0 0 2px #1c2633, 0 4px 0 2px rgba(24, 22, 16, 0.4); }
 @keyframes glowPulse { 50% { transform: scale(1.08); filter: brightness(1.15); } }
-.calm-tip { padding: 10px 12px 12px; font-size: var(--t1); line-height: 1.25; color: #403426; }
+.calm-tip { padding: 10px 12px 12px; font-size: var(--t1); line-height: 1.25; color: #403426; transform: rotate(-0.8deg); }
 .calm-tip b { display: block; font-weight: 400; color: #6e4d40; }
 .calm-sounds { display: flex; flex-direction: column; gap: 8px; }
 .calm-note { font-size: var(--t1); color: #c6bbd4; text-align: center; }
