@@ -1,6 +1,6 @@
 // [look4] "Golden Diorama": the HD-2D-style picture for every scene the app draws (the forest and every Stage:
 // the shop, the interview office...). The world is drawn into a modest internal-resolution HDR target (crisp
-// pixel texels, never chunky: the short side of the picture is about 560 internal px), then
+// pixel texels, a little chunky: the short side of the picture is about 440-460 internal px), then
 //   1. bloom: a soft-knee bright pass and a five-level down/up mip chain (lamp windows, the sun and its glints,
 //      the moon, fireflies and lanterns glow with a wide, clean halo),
 //   2. tilt-shift depth of field from the depth buffer: a sharp band round the focus distance, the far woods and
@@ -92,10 +92,15 @@ function quad(mat: THREE.Material) {
 const shader = (fragmentShader: string, uniforms: Record<string, THREE.IUniform>) =>
   new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader, uniforms, depthTest: false, depthWrite: false });
 
-/** The internal pixel size (CSS px per internal px): the short side of the picture lands near 560 px. */
-export function pixelFor(w: number, h: number): number {
-  return Math.max(1, Math.min(2.25, Math.min(w, h) / 560));
+/**
+ * The internal pixel size (CSS px per internal px). [look5] A little chunkier than v4: the short side of the picture
+ * lands near `target` internal px (460 on the high tier, 440 on medium; the low tier scales that up again), and even a
+ * narrow phone gets art pixels a touch bigger than its CSS pixels.
+ */
+export function pixelFor(w: number, h: number, target = 440): number {
+  return Math.max(1.12, Math.min(2.6, Math.min(w, h) / target));
 }
+const TARGET = { high: 460, medium: 440, low: 440 } as const;
 
 export class Post {
   /** CSS pixels per internal pixel */
@@ -131,8 +136,8 @@ export class Post {
     this.tier = quality;
     this.levels = quality === 'high' ? 5 : quality === 'medium' ? 3 : 2;
     this.dofShift = quality === 'low' ? 2 : 1;
-    this.pixelScale = quality === 'low' ? 1.25 : 1;
-    this.pixel = pixelFor(innerWidth, innerHeight);
+    this.pixelScale = quality === 'low' ? 1.2 : 1;
+    this.pixel = pixelFor(innerWidth, innerHeight, TARGET[quality]);
     this.mBright = shader(/* glsl */ `
       uniform sampler2D tSrc; uniform float uThresh; uniform vec2 uTexel; varying vec2 vUv;
       vec3 tap(vec2 o) { return min(texture2D(tSrc, vUv + o * uTexel).rgb, vec3(64.0)); }
@@ -299,7 +304,7 @@ export class Post {
     this.tier = t;
     this.levels = t === 'high' ? 5 : t === 'medium' ? 3 : 2;
     this.dofShift = t === 'low' ? 2 : 1;
-    this.pixelScale = t === 'low' ? 1.25 : 1;
+    this.pixelScale = t === 'low' ? 1.2 : 1;
     this.w = -1;
     this.resize(this.cssW, this.cssH);
   }
@@ -314,7 +319,7 @@ export class Post {
   private cssW = 1; private cssH = 1;
   resize(W: number, H: number) {
     this.cssW = W; this.cssH = H;
-    this.pixel = this.fixedPixel ?? pixelFor(W, H) * this.pixelScale;
+    this.pixel = this.fixedPixel ?? pixelFor(W, H, TARGET[this.tier]) * this.pixelScale;
     const w = Math.max(64, Math.round(W / this.pixel)), h = Math.max(64, Math.round(H / this.pixel));
     if (this.rt && w === this.w && h === this.h) return;
     this.w = w; this.h = h;

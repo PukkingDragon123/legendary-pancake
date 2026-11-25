@@ -15,7 +15,7 @@ import { SPR } from './fx.ts';
 import { Ambience } from './ambience.ts';
 import { SURFACE_Y, surfaceY } from './terrain.ts';
 import { GRASS } from './grass.ts';
-import { groundY, HALF, N, POND, pondD, WATER_Y } from './layout.ts';
+import { groundY, HALF, HOUSE, houseD, N, POND, pondD, WATER_Y } from './layout.ts';
 import { place, setPlace, today } from './sky.ts';
 import type { Scene } from './scene.ts';
 
@@ -263,7 +263,7 @@ class SnowMap {
 const PRECIP_VS = /* glsl */ `
 attribute vec4 aSeed;
 uniform float uTime; uniform vec3 uCenter; uniform vec3 uBox; uniform vec2 uDrift; uniform float uFall; uniform float uLen;
-uniform float uSnow; uniform vec2 uRes; uniform float uPx;
+uniform float uSnow; uniform vec2 uRes; uniform float uPx; uniform vec4 uShelter;
 varying float vA;
 void main() {
   float fall = uFall * (0.75 + aSeed.w * 0.5);
@@ -292,6 +292,8 @@ void main() {
   float edge = 1.0 - smoothstep(0.7, 1.0, max(e.x, max(e.y, e.z)));
   float near = smoothstep(0.8, 2.6, a.w);
   vA = edge * near * (0.55 + aSeed.w * 0.45);
+  // [look5] none inside the hollow oak (its rooms are roofed): the living room stays dry while it pours outside
+  if (length(p.xz - uShelter.xy) < uShelter.z && p.y < uShelter.w) vA = 0.0;
 }`;
 const PRECIP_FS = /* glsl */ `
 uniform vec3 uCol; uniform float uAlpha;
@@ -322,6 +324,7 @@ class Precip {
         uTime: { value: 0 }, uCenter: { value: new THREE.Vector3() }, uBox: { value: snow ? new THREE.Vector3(22, 13, 22) : new THREE.Vector3(24, 15, 24) },
         uDrift: { value: new THREE.Vector2() }, uFall: { value: snow ? 1.1 : 13 }, uLen: { value: snow ? 0 : 0.55 }, uSnow: { value: snow ? 1 : 0 },
         uRes: { value: new THREE.Vector2(1, 1) }, uPx: { value: 1 }, uCol: { value: new THREE.Color(snow ? 0xffffff : 0xc6dcff) }, uAlpha: { value: snow ? 1 : 0.55 },
+        uShelter: { value: new THREE.Vector4(HOUSE.x, HOUSE.z, HOUSE.r * 0.9, 14) },
       },
     });
     this.mesh = new THREE.Mesh(g, this.mat);
@@ -548,7 +551,7 @@ export class Weather {
         this.splashT -= 1;
         const x = gx + (Math.random() - 0.5) * 18, z = gz + (Math.random() - 0.5) * 14;
         if (pondD(x, z) < 0.95) { sc.fx.ripple(x, SURFACE_Y, z); continue; }
-        if (Math.abs(x) > HALF - 1 || Math.abs(z) > HALF - 1) continue;
+        if (Math.abs(x) > HALF - 1 || Math.abs(z) > HALF - 1 || houseD(x, z) < 0.2) continue; // [look5] not on the living room floor
         const y = surfaceY(x, z);
         sc.fx.emit({ x, y: y + 0.03, z, life: 0.28, frame: SPR.splat1, frames: 3, fps: 11, color: 0xd8e8ff, size: 0.26 });
         if (Math.random() < 0.18) sc.fx.emit({ x, y: y + 0.02, z, life: 0.8, frame: SPR.ring, color: 0xc9dcf0, size: 0.18, grow: 2.2, fadeOut: 0.5, flat: true });

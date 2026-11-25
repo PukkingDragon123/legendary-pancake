@@ -442,6 +442,60 @@ export function buildOak(): Oak {
       for (const [ox, oz, w, dd] of [[0, -hh, hh * 2 + 2, 2], [0, hh, hh * 2 + 2, 2], [-hh, 0, 2, hh * 2], [hh, 0, 2, hh * 2]] as const) box(fr, [hx + ox, cy - 1.2, hz + oz], [w, 2.4, dd], [0, 0, 0], [0.7, 0.6, 0.5]);
     }
   }
+  // [look5] cosy things hung from each room's ceiling (out of the build grid's way, above the wall pieces): painted
+  // wooden bunting and a string of fairy lights draped across the back of the room, and bundles of drying herbs and
+  // trailing greenery hanging from the beams
+  {
+    const FLAG: V3[] = [[0.78, 0.2, 0.18], [0.92, 0.66, 0.14], [0.36, 0.6, 0.3], [0.2, 0.44, 0.74], [0.56, 0.28, 0.6], [0.94, 0.86, 0.66]];
+    const BULB: V3[] = [[1.2, 1.0, 0.75], [1.25, 0.8, 0.45], [1.1, 0.7, 0.62], [0.95, 1.0, 0.8]];
+    const sagAt = (a: V3, b: V3, t: number, sag: number): V3 => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t - Math.sin(t * Math.PI) * sag, a[2] + (b[2] - a[2]) * t];
+    const garland = (cy: number, a0: number, a1: number, sag: number, seed: number, lights: boolean) => {
+      const A = P(a0, cy - 3.5, R_IN - 1.2), B = P(a1, cy - 3.5, R_IN - 1.2);
+      rope(S.get(null, 'paint'), A, B, sag, lights ? 0.22 : 0.32, lights ? [0.16, 0.2, 0.12] : [0.62, 0.5, 0.36]);
+      const len = Math.hypot(B[0] - A[0], B[2] - A[2]), n = Math.max(4, Math.floor(len / (lights ? 5.5 : 7.5)));
+      const pf = S.get(null, 'painted'), gl = S.get(null, 'glow');
+      for (let i = 1; i < n; i++) {
+        const t = i / n, p = sagAt(A, B, t, sag), q = sagAt(A, B, t + 0.45 / n, sag), q0 = sagAt(A, B, t - 0.45 / n, sag);
+        if (lights) {
+          // a little glass bulb on a short twist of wire
+          const c = BULB[(i + seed) % BULB.length];
+          gl.add(new THREE.SphereGeometry(0.95, 6, 5), mat([p[0], p[1] - 1.5, p[2]], [0, 0, 0], [0.85, 1.2, 0.85]), c);
+          continue;
+        }
+        // a pennant cut from thin painted board: hangs from the cord, tip down, a lighter painted edge at the top
+        const col = FLAG[(i * 5 + seed) % FLAG.length], hang = 5.6 + ((i * 7 + seed) % 3) * 0.5;
+        const tip: V3 = [(q0[0] + q[0]) / 2, (q0[1] + q[1]) / 2 - hang, (q0[2] + q[2]) / 2];
+        const lift = (v: V3, k: number): V3 => [v[0] * k, v[1] * k, v[2] * k];
+        // both faces (own vertices, so each keeps its normal)
+        for (const side of [1, -1]) {
+          const v = [pf.vert(q0, [0, 0], lift(col, 1.12)), pf.vert(q, [0.2, 0], lift(col, 1.12)), pf.vert(tip, [0.1, hang / 40], lift(col, 0.8))];
+          if (side > 0) pf.tri(v[0], v[1], v[2]); else pf.tri(v[0], v[2], v[1]);
+        }
+      }
+    };
+    /** a bundle of drying herbs or a trailing spray of leaves hung on a string from a beam */
+    const bundle = (cy: number, a: number, r: number, drop: number, cell: number, tint: V3, s: number) => {
+      const top = P(a, cy - 2.6, r), y = cy - 2.6 - drop;
+      rope(S.get(null, 'paint'), top, [top[0], y + 0.2, top[2]], 0, 0.22, [0.7, 0.6, 0.45]);
+      for (let k = 0; k < 2; k++) {
+        const yaw = a + k * (Math.PI / 2) + 0.3, T: V3 = [Math.cos(yaw), 0, -Math.sin(yaw)];
+        // upside down: the tied stems at the top, the sprigs spreading below
+        ivy.flat([[top[0] + T[0] * s * 0.6, y - s * 2.2, top[2] + T[2] * s * 0.6], [top[0] - T[0] * s * 0.6, y - s * 2.2, top[2] - T[2] * s * 0.6], [top[0] - T[0] * s * 0.25, y + 0.4, top[2] - T[2] * s * 0.25], [top[0] + T[0] * s * 0.25, y + 0.4, top[2] + T[2] * s * 0.25]],
+          cell, [Math.sin(a), 0.2, Math.cos(a)], tint, 0.25, 0.15, 0, 1);
+      }
+      box(S.get(null, 'paint'), [top[0], y + 0.6, top[2]], [1.4, 1.2, 1.4], [0, a, 0], [0.8, 0.62, 0.4]);
+    };
+    for (const [cy, room] of [[FLOOR_Y.f2 - SLAB, 0], [FLOOR_Y.f3 - SLAB, 1], [ROOF_Y, 2]] as const) {
+      garland(cy, 1.78 + room * 0.1, -1.86 - room * 0.08, 15, room * 2, false);
+      garland(cy, 2.42, -2.5 + room * 0.06, 11, room, true);
+      const herbs: [number, number, number, number, V3, number][] = [
+        [2.35, 52, 15, CELL.hang[room % 4], [0.9, 1.05, 0.8], 5.5], [2.35, 34, 11, CELL.spray[3], [0.95, 0.75, 1.15], 4],
+        [-2.88, 48, 14, CELL.hang[(room + 1) % 4], [0.85, 1.0, 0.78], 5.8], [-2.88, 30, 10, CELL.spray[5], [1.2, 0.95, 0.55], 4],
+        [-1.83, 50, 13, CELL.hang[(room + 2) % 4], [0.88, 1.02, 0.8], 5.2],
+      ];
+      for (const [a, r, drop, cell, tint, s] of herbs) bundle(cy, a, r, drop, cell, tint, s);
+    }
+  }
   // baseboards round each room
   for (const fid of FLOOR_IDS) {
     const g = S.get(fid, 'planks');

@@ -5,6 +5,7 @@
 // pops its furniture out, and the glowing outline build mode uses for the selected item.
 import * as THREE from 'three';
 import { buildProp, propMesh, PX, type Prop } from '../gfx/box.ts';
+import { fbm, hash, vnoise } from '../gfx/noise.ts';
 import { instanceGLB } from '../gfx/glb.ts';
 import { FINISH, ITEMS } from '../assets/registry.ts';
 import { liveClock } from '../assets/clocks.ts';
@@ -62,6 +63,78 @@ function finishTexture(w: number, h: number, at: (i: number, j: number) => numbe
 
 const ARC = Math.PI * 2 - OPEN_A * 2;
 
+// ------------------------------------------------------------------ [look5] hand-painted life on every finish
+
+const RGBc = (c: number): [number, number, number] => [(c >> 16) & 255, (c >> 8) & 255, c & 255];
+const packc = (r: number, g: number, b: number) => (Math.max(0, Math.min(255, Math.round(r))) << 16) | (Math.max(0, Math.min(255, Math.round(g))) << 8) | Math.max(0, Math.min(255, Math.round(b)));
+const BAYER4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+const bayer = (i: number, j: number) => (BAYER4[(j & 3) * 4 + (i & 3)] + 0.5) / 16;
+/** A colour from a painted ramp at t (0..1), stepped to the ramp's swatches with an ordered dither between them (crisp
+ * pixel-art clusters, never a smooth gradient). */
+function rampPick(R: number[], t: number, i: number, j: number): number {
+  const x = Math.max(0, Math.min(R.length - 1.001, t * (R.length - 1)));
+  const k = Math.floor(x);
+  return x - k > bayer(i, j) ? R[k + 1] : R[k];
+}
+/**
+ * Brush work over a flat finish: long soft strokes along the surface (value drifts of a few percent), a slow warm/cool
+ * hue wobble and the odd darker bristle line, so wallpaper and boards read as painted by hand rather than filled.
+ */
+function brush(c: number, u: number, v: number, seed: number, alongV: boolean): number {
+  const s = alongV ? vnoise(u * 0.5, v * 0.07, 0, seed) : vnoise(u * 0.07, v * 0.5, 0, seed);
+  const s2 = vnoise(u * 0.21, v * 0.21, 0, seed + 3);
+  const bristle = (alongV ? hash(Math.floor(u * 3), Math.floor(v / 5), 0, seed + 5) : hash(Math.floor(u / 5), Math.floor(v * 3), 0, seed + 5)) > 0.93 ? -0.05 : 0;
+  const k = 1 + (s - 0.5) * 0.16 + (s2 - 0.5) * 0.08 + bristle;
+  const h = vnoise(u * 0.045, v * 0.045, 0, seed + 9) - 0.5;
+  const [r, g, b] = RGBc(c);
+  return packc(r * k * (1 + h * 0.1), g * k * (1 + h * 0.02), b * k * (1 - h * 0.12));
+}
+
+/** The oak's own heartwood, carved smooth: vertical grain that wanders round knots, warm reds to honey, adze scoops. */
+const HEART = [0x3a2014, 0x523020, 0x6a4128, 0x835331, 0x9b673b, 0xb27d48, 0xc69559, 0xd8ae72];
+function heartwood(u: number, v: number, i: number, j: number): number {
+  const warp = (fbm(u * 0.035, v * 0.018, 0, 11) - 0.5) * 22;
+  let x = u + warp;
+  // knots: a few per wall, the grain bends round them
+  const cu = Math.floor(u / 46), cv = Math.floor(v / 34);
+  let knot = 0;
+  for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) {
+    const ku = cu + a, kv = cv + b;
+    if (hash(ku, kv, 0, 21) > 0.42) continue;
+    const kx = (ku + 0.2 + hash(ku, kv, 1, 21) * 0.6) * 46, ky = (kv + 0.25 + hash(ku, kv, 2, 21) * 0.5) * 34;
+    const dx = (u - kx) / 3.2, dy = (v - ky) / 5.2, d = Math.hypot(dx, dy);
+    if (d < 4.5) { x += (dx / (d + 0.4)) * 2.6 * Math.max(0, 1 - d / 4.5) * 3; if (d < 1) knot = Math.max(knot, 1 - d); else if (d < 1.6) knot = Math.max(knot, 0.35); }
+  }
+  const grain = Math.sin(x * 0.85) * 0.55 + Math.sin(x * 2.1 + v * 0.03) * 0.25 + Math.sin(x * 5.3) * 0.08;
+  const tone = fbm(u * 0.022, v * 0.012, 0, 5);
+  // adze: shallow scoops across the grain catch a little light at their lower lip
+  const sc = ((v + Math.sin(u * 0.13) * 2 + hash(Math.floor(u / 9), 0, 0, 31) * 6) % 7) / 7;
+  const adze = sc > 0.86 ? 0.07 : sc < 0.12 ? -0.05 : 0;
+  let t = 0.18 + tone * 0.62 + grain * 0.1 + adze - knot * 0.55;
+  if (hash(Math.floor(u * 3), Math.floor(v * 0.7), 0, 41) > 0.985) t -= 0.12; // a dark pore streak now and then
+  return rampPick(HEART, t, i, j);
+}
+
+/** Honey floorboards: staggered planks each with their own tone, long grain, darker seams, a lit top edge and pegs. */
+const BOARD = [0x4a2814, 0x66391b, 0x834d24, 0x9e622f, 0xb6783b, 0xca8f4b, 0xdba75f, 0xe9c07c];
+function boards(u: number, v: number, i: number, j: number): number {
+  const W = 7, Lp = 30;
+  const row = Math.floor(v / W), off = (hash(row, 0, 0, 3) * Lp) | 0, plank = Math.floor((u + off) / Lp);
+  const pu = (u + off) - plank * Lp, pv = v - row * W;
+  if (pv < 0.7 || pu < 0.55) return BOARD[0];
+  const base = 0.32 + hash(plank, row, 0, 7) * 0.34;
+  const warp = (vnoise(u * 0.05, v * 0.3, 0, plank * 13 + row) - 0.5) * 5;
+  const grain = Math.sin((pv + warp) * 2.6 + plank) * 0.5 + Math.sin((pv + warp * 1.7) * 6.1) * 0.2;
+  let t = base + grain * 0.09 + (vnoise(u * 0.04, v * 0.2, 0, 77) - 0.5) * 0.16;
+  if (pv < 1.5) t += 0.1; // the lit top edge of each board
+  if (pv > W - 1.3) t -= 0.08;
+  if ((pu < 2.2 || pu > Lp - 1.8) && Math.abs(pv - W / 2) < 0.7 && Math.abs((pu < 2.2 ? pu - 1.4 : pu - (Lp - 1.1))) < 0.6) t = 0.05; // pegs
+  if (hash(Math.floor(u * 2), Math.floor(v * 3), 0, 19) > 0.992) t -= 0.15;
+  return rampPick(BOARD, t, i, j);
+}
+/** Richer, hand-painted versions of the two default finishes (the rest get the brush work on top of their own paint). */
+const PAINTERS: Record<string, (u: number, v: number, i: number, j: number) => number> = { wall_heartwood: heartwood, floor_planks: boards };
+
 /** wallpapers that paint their own dado or are a natural surface (no oak wainscot under them) */
 const NO_WAINSCOT = new Set(['wall_wainscot', 'wall_pine_panelling', 'wall_living_bark', 'wall_moss_stone']);
 /** height of the oak wainscot (px above the floor); the chair rail (oak.ts) caps it */
@@ -91,7 +164,8 @@ function wallMesh(fid: FloorId, wf: Finish): THREE.Mesh {
   const tex = finishTexture(W, H, (i, j) => {
     const a = OPEN_A + ((i + 0.5) / W) * ARC;
     const u = (wrapA(a) + Math.PI) * R, v = (j + 0.5) / TEX;
-    let c = dado && v < DADO ? wainscot(u, v) : wf.paint(u, v);
+    const pa = PAINTERS[wf.id]; // [look5] hand-painted default heartwood; brush work over every other paper
+    let c = dado && v < DADO ? brush(wainscot(u, v), u, v, 2, true) : pa ? pa(u, v, i, j) : brush(wf.paint(u, v), u, v, 1, true);
     // a soft painted shadow where the wall meets the floor and the ceiling, and under the chair rail
     if (v < 3) c = shade(c, 0.74 + v * 0.07);
     else if (v > ROOM_H - 5) c = shade(c, 0.8 + (ROOM_H - v) * 0.04);
@@ -138,7 +212,8 @@ function floorMesh(fid: FloorId, ff: Finish): THREE.Mesh {
       const dx = Math.abs(x - hx), dz = Math.abs(z - hz);
       if (dx < hh && dz < hh) return dx > hh - 1.5 || dz > hh - 1.5 ? 0x4e3a28 : 0x1d1915;
     }
-    let c = ff.paint(x + R_IN, z + R_IN);
+    const pf = PAINTERS[ff.id]; // [look5]
+    let c = pf ? pf(x + R_IN, z + R_IN, i, j) : brush(ff.paint(x + R_IN, z + R_IN), x, z, 4, false);
     // darker towards the walls (ambient occlusion), lighter in the middle of the room
     const d = Math.hypot(x, z), a = Math.abs(wrapA(Math.atan2(x, z)));
     if (a > OPEN_A && d > R_IN - 4) c = shade(c, 0.78 + (R_IN - d) * 0.05);
@@ -208,6 +283,37 @@ function lightUp(root: THREE.Object3D) {
     };
     m.material = Array.isArray(m.material) ? m.material.map(swap) : swap(m.material);
     if (!m.geometry.getAttribute('normal')) m.geometry.computeVertexNormals();
+  });
+}
+
+/**
+ * [look5] A colour lift for the furniture's painted maps: the duller a texel, the more its own hue is lifted (vibrance,
+ * never a flat tint), so faded paint and grey wood read as colourful under the warm room light while the brush work and
+ * every value in the painting stay where they were. Shared per material (patched once).
+ */
+function vivid(root: THREE.Object3D) {
+  root.traverse((n) => {
+    const m = n as THREE.Mesh;
+    if (!m.isMesh) return;
+    for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) {
+      if (!mat || mat.userData.vivid || !mat.map || !(mat as THREE.MeshStandardMaterial).isMeshStandardMaterial) continue;
+      mat.userData.vivid = true;
+      const prev = mat.onBeforeCompile;
+      mat.onBeforeCompile = (sh, r) => {
+        prev?.call(mat, sh, r);
+        sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+{
+  vec3 c = diffuseColor.rgb;
+  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b));
+  float s = (mx - mn) / max(mx, 1e-4);
+  diffuseColor.rgb = max(mix(vec3(l), c, 1.0 + 0.32 * (1.0 - s) * smoothstep(0.004, 0.04, l)), 0.0);
+}`);
+      };
+      const key = mat.customProgramCacheKey?.bind(mat);
+      mat.customProgramCacheKey = () => (key ? key() : '') + '|vivid';
+      mat.needsUpdate = true;
+    }
   });
 }
 
@@ -283,6 +389,7 @@ export class Rooms {
     if (def.model) {
       instanceGLB(def.model).then(({ root, clips }) => {
         lightUp(root);
+        vivid(root); // [look5]
         const bb = new THREE.Box3().setFromObject(root);
         const size = bb.getSize(new THREE.Vector3());
         const s = unitScale(size, id);

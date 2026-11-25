@@ -384,7 +384,8 @@ export function playDeparture(scene: Scene, o: CineOpts = {}): () => void {
 
   const shot = (t: number): CamShot => {
     const fwd = (x: number, y: number, z: number) => H.clone().add(rH(x, y, z));
-    if (t < 5.2) { const k = smooth01(span(t, 0, 5.2)); return look(fwd(-1.6 + k * 2.4, 2.1 - k * 0.2, 5.6 - k * 0.7), H.clone().add(rH(0, 0.7, 0)), 30); }
+    // [look5] a cut straight to the porch (the home view is inside the living room, so no swing through the bark)
+    if (t < 5.2) { const k = smooth01(span(t, 0, 5.2)); return look(fwd(-1.6 + k * 2.4, 2.1 - k * 0.2, 5.6 - k * 0.7), H.clone().add(rH(0, 0.7, 0)), 30, t < 0.1); }
     if (t < 7.0) { const k = smooth01(span(t, 5.2, 7)); return look(fwd(0.6 - k * 0.3, 1.8, 4.3 - k * 0.4), H.clone().add(rH(0, 0.9, 0)), 28); }
     if (t < 8.45) { const k = smooth01(span(t, 7, 8.45)); return look(fwd(-0.8, 1.45, 4.8).lerp(cam0, k), launch.clone().add(V(0, 0.7, 0)), 32); }
     if (t < 11.2) {

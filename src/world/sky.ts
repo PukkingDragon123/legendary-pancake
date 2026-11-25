@@ -279,6 +279,8 @@ const tmpA = new THREE.Color(), tmpB = new THREE.Color();
 export class Sky {
   readonly sun = new THREE.DirectionalLight(0xffffff, 2);
   readonly hemi = new THREE.HemisphereLight(0xffffff, 0x888888, 1);
+  /** [look5] the sky fill's intensity for the hour (the scene may turn the live light down, e.g. inside the oak) */
+  hemiBase = 1;
   readonly fog = new THREE.Fog(0xcfe9f1, 90, 320);
   readonly dome: THREE.Mesh;
   readonly stars: THREE.Points;
@@ -448,7 +450,7 @@ export class Sky {
     this.sun.intensity = num(a.sunI, b.sunI) * (1 - oc * 0.7 - w.fog * 0.25) * (this.night > 0.5 ? 1 : seasonal) + w.flash * 4;
     this.hemi.color.copy(cold(grey(mix(a.sky, b.sky), oc * 0.5)));
     this.hemi.groundColor.copy(cold(grey(mix(a.ground, b.ground), oc * 0.3, 0.9)));
-    this.hemi.intensity = num(a.hemiI, b.hemiI) * (1 + oc * 0.25) + w.flash * 1.5;
+    this.hemi.intensity = this.hemiBase = num(a.hemiI, b.hemiI) * (1 + oc * 0.25) + w.flash * 1.5;
     const top = cold(grey(mix(a.top, b.top), oc * 0.7, 0.85 + day * 0.2));
     const hor = cold(grey(mix(a.hor, b.hor), oc * 0.6, 0.95));
     // the fog is the colour of the horizon the far woods melt into (never a grey veil)
