@@ -16,11 +16,13 @@ import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
 import { installPixelSkin } from './ui/pxskin.ts';
 import { installIconSet } from './ui/chrome/iconset.ts';
+import { installArtPx } from './gfx/artpx.ts'; // one art pixel for the whole game
 import { Scene } from './world/scene.ts';
 import { animeMoment } from './ui/fx/anime.ts'; // [anime6]
 import { bindHome } from './build/home-sync.ts'; // [house]
 
 async function boot() {
+  installArtPx();
   installPixelSkin();
   installIconSet(); // [ui4] the painted icon family replaces the sprite icons everywhere
   try { await document.fonts.load('20px "TBME Body"'); } catch { /* font loads later */ }
