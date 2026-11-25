@@ -17,6 +17,7 @@ import { moon, moonPhase, nest } from './px/sleepprops.ts';
 import { PipPix } from './pippix.tsx';
 import { ArtCanvas, HoldButton, injectSleepFrames, nowT, Paper } from './sleepkit.tsx';
 import { breathing, panel, sceneRef } from './state.ts';
+import { TalkText } from './talkview.tsx'; // [dialog10] the captions type on like a voice
 import { voice, type Tts } from './voice.ts';
 import './sleep.css';
 
@@ -106,11 +107,11 @@ function Departure() {
   const [cap, setCap] = useState(0);
   useEffect(() => { const id = setInterval(() => setCap((c) => Math.min(c + 1, 2)), 2600); return () => clearInterval(id); }, []);
   const name = save.value.name, area = AREA[save.value.area]?.name ?? 'the woods';
-  const lines = [`${name} is packing the satchel…`, `Off to ${area}!`, 'Goodnight. Sleep well.'];
+  const lines = [`${name} is packing the satchel...`, `Off to *${area}!*`, 'Goodnight. _Sleep well._'];
   return (
     <div class="cine" onClick={() => { tap('ui_tap', 0.3); skipDeparture(); }}>
       <div class="bar top" /><div class="bar bot" />
-      <p class="cine-cap" key={cap}>{lines[cap]}</p>
+      <div class="cine-cap hh-cap"><TalkText text={lines[cap]} id={cap} opts={{ size: innerWidth < 600 ? 22 : 26, maxWidth: Math.min(innerWidth - 24, 620), anchor: 'bottom', voice: 'narrator', scrim: 0.3, tag: false }} /></div>
       <span class="cine-skip">Tap to skip</span>
     </div>
   );

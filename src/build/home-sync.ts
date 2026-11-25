@@ -80,7 +80,7 @@ export function bindHome(scene: Scene): () => void {
   scene.tickers.add(tick);
 
   // a nudge towards the boxes for a new player
-  const hint = setTimeout(() => { if (save.value.home.boxes.some((b) => BOX[b]?.floor === 'f1') && save.value.onboarded) say2('Boxes everywhere! Tap one and let’s unpack.', 4200); }, 5200);
+  const hint = setTimeout(() => { if (save.value.home.boxes.some((b) => BOX[b]?.floor === 'f1') && save.value.onboarded) say2('!Boxes everywhere!! Tap one and let’s unpack.', 4200); }, 5200);
   return () => { stop(); stopLv(); off(); scene.tickers.delete(tick); clearTimeout(hint); };
 }
 
@@ -105,7 +105,7 @@ function openBoxFlow(scene: Scene, id: string, screen: { x: number; y: number })
         sound.play('reward_unlock', { volume: 0.7 });
         coin(r.reward, screen);
         scene.owl.play('dance');
-        say2(r.floor === 'f1' ? 'All unpacked! It finally feels like home.' : 'All unpacked up here too. Cozy!', 4200);
+        say2(r.floor === 'f1' ? '*All unpacked!* It finally feels like ~home.~' : 'All unpacked up here too. ~Cozy!~', 4200);
       } else if (first) say2(LINES[first] ?? `Ooh, the ${ITEMS[first]?.name ?? 'thing'}!`, 3200);
     }, 1100);
   });

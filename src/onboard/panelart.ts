@@ -1,7 +1,6 @@
 // [ui7] The interview's form layer as real materials, drawn smooth at device resolution and cached as data URLs:
 // cream laid paper with a deckled edge, a dog-ear and the odd coffee ring; a stitched tan leather folio; a brass
-// bulldog clip; ink ticks and loops that draw themselves; hand-ruled lines; a red rubber-stamp impression set in
-// Alagard; masking tape; a sticky note with a lifting corner; a brass slider rail and knob; little acorns.
+// bulldog clip; ink ticks and loops that draw themselves; hand-ruled lines; masking tape; a sticky note with a lifting corner; a brass slider rail and knob; little acorns.
 // Sizes stay in texels (the form's `--u` unit); each piece is painted at S device px per texel.
 import { BRASS_OLD, GOLD, Real, bevel, box, circle, deviceK, dome, metal, polygon, tubeX, union } from '../ui/real/paint.ts';
 import { texCanvas } from '../ui/real/tex.ts';
@@ -153,25 +152,6 @@ export function ruleURL(w: number, seed = 1) {
   return art(`rule7:${w}:${seed}`, w, 3, (g) => {
     g.strokeStyle = INK2; g.globalAlpha = 0.8; g.lineWidth = 0.6;
     g.beginPath(); for (let x = 0; x <= w; x += 2) { const y = 1.5 + Math.sin(x * 0.07 + seed) * 0.4 + (hash(x, 1, seed) - 0.5) * 0.2; if (x) g.lineTo(x, y); else g.moveTo(x, y); } g.stroke();
-  });
-}
-
-// ------------------------------------------------------------------ the rubber stamp impression
-
-/** RECEIVED / APPROVED in a double-ruled box, red ink that took unevenly, 120 x 44 texels. */
-export function stampURL(word: string, sub: string, color = 0xb3232b, seed = 3) {
-  return art(`stamp7:${word}:${sub}:${color}:${seed}`, 120, 44, (g) => {
-    const c = '#' + color.toString(16).padStart(6, '0');
-    g.strokeStyle = c; g.fillStyle = c; g.globalAlpha = 0.88;
-    g.lineWidth = 1.6; g.beginPath(); g.roundRect(1.5, 1.5, 117, 41, 3); g.stroke();
-    g.lineWidth = 0.7; g.beginPath(); g.roundRect(5, 5, 110, 34, 2); g.stroke();
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = "16px 'Alagard', Georgia, serif"; g.fillText(word, 60, sub ? 18 : 22);
-    if (sub) { g.font = "9px 'Alagard', Georgia, serif"; g.fillText(sub, 60, 32); }
-    // where the rubber missed
-    g.globalCompositeOperation = 'destination-out'; g.globalAlpha = 0.55;
-    for (let i = 0; i < 40; i++) { g.beginPath(); g.arc(hash(i, 1, seed) * 120, hash(i, 2, seed) * 44, 0.4 + hash(i, 3, seed) * 1.6, 0, Math.PI * 2); g.fill(); }
-    g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
   });
 }
 

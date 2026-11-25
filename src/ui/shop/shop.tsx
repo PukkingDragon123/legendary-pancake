@@ -26,6 +26,8 @@ import '../px/anim.ts';
 import { panel, sceneRef } from '../state.ts';
 import { injectLodgeCSS } from './art.js';
 import { Gacha } from './gacha.tsx';
+import { TalkText } from '../talkview.tsx'; // [dialog10]
+import { holdMs, typeTime, VOICES } from '../talk.ts';
 import { AnimPx, rewardMoment, showPrize, Stamp } from './moment.tsx';
 import { bannerArt, prizeArt } from './paint.ts';
 import { fxMoment } from '../fx/moment.ts'; // [fx10]
@@ -40,32 +42,32 @@ type Section = 'home' | 'deals' | 'stash' | 'series' | 'frames';
 
 export const LINES = {
   hello: [
-    'Well hello there, friend! Mind the shavings, I\'ve been whittling.',
-    'Come in, come in! Fresh stock, still smells of pine.',
-    'Barnaby Birchbark, at your service. Have a look around!',
-    'Welcome to the lodge! Everything\'s hand-picked. A few things are hand-gnawed.',
+    'Well hello there, *friend!* Mind the shavings, I\'ve been _whittling._',
+    'Come in, come in! *Fresh stock,* still smells of pine.',
+    '*Barnaby Birchbark,* at your service. Have a look around!',
+    'Welcome to the lodge! Everything\'s hand-picked. _A few things are hand-gnawed._',
   ],
   deal: [
-    (n: string) => `The ${n}? Lovely choice. I sanded that stump myself.`,
+    (n: string) => `The *${n}?* Lovely choice. I sanded that stump myself.`,
     (n: string) => `Ah, the ${n}. Sturdy as a good dam, that one.`,
-    (n: string) => `The ${n}! Between you and me, it's my favourite today.`,
-    (n: string) => `${n}, marked down today. Don't tell my accountant. He's also me.`,
+    (n: string) => `The *${n}!* _Between you and me,_ it's my favourite today.`,
+    (n: string) => `${n}, marked down today. Don't tell my accountant. _He's also me._`,
   ],
-  bought: ['Sold! I\'ll wrap it in birch bark for you.', 'A fine purchase! The whole Hollow will be envious.', 'Timber! That\'s what I shout at a happy sale.', 'Pleasure doing business, friend.'],
-  poor: ['Ah, a few acorns short. Sleep well and come back, it\'ll keep.', 'Not quite enough in the pouch. Pip will find more on an adventure.', 'Hmm, the pouch is light today. Tomorrow, maybe!'],
-  poke: ['Hey now, that tickles!', 'Careful, the pencil\'s sharp. Well, it was, before I chewed it.', 'My teeth never stop growing, you know. Hence all the furniture.', 'Built this whole lodge with my own two teeth.', 'Spectacles? Reading glasses. For the small print on acorns.'],
-  gift: ['Here, a little something from me. No charge, friend.', 'For you! I tied the bow myself. Took eleven tries.'],
+  bought: ['!Sold!! I\'ll wrap it in birch bark for you.', 'A *fine purchase!* The whole Hollow will be envious.', '!TIMBER!! That\'s what I shout at a happy sale.', 'Pleasure doing business, friend.'],
+  poor: ['Ah, a few acorns short. Sleep well and come back, it\'ll keep.', 'Not quite enough in the pouch. Pip will find more on an adventure.', 'Hmm, the pouch is _light_ today. Tomorrow, maybe!'],
+  poke: ['Hey now, that !tickles!!', 'Careful, the pencil\'s sharp. Well, it was, before I chewed it.', 'My teeth never stop growing, you know. Hence all the furniture.', 'Built this whole lodge with my *own two teeth.*', 'Spectacles? Reading glasses. For the small print on acorns.'],
+  gift: ['Here, a little something from me. No charge, friend.', 'For you! I tied the bow myself. _Took eleven tries._'],
   giftLook: ['That parcel has your name on it. Go on, untie it!', 'A gift, every day. That\'s the lodge way.'],
   acorns: ['A fine heap of acorns! Spend them well.', 'Acorns for days! Don\'t eat them all at once.'],
-  gems: ['Moon gems, fresh from the riverbed. Shiny!', 'Mind the glow, those gems are full of moonlight.'],
-  pack: ['Weighed them myself on the brass scales.', 'Every acorn counted twice. Well, once and a half.'],
+  gems: ['Moon gems, fresh from the riverbed. ~Shiny!~', 'Mind the glow, those gems are full of moonlight.'],
+  pack: ['Weighed them myself on the brass scales.', 'Every acorn counted twice. _Well, once and a half._'],
   stash: ['Acorns and moon gems, right this way.', 'The good stuff\'s by the shelf. Help yourself to a look.'],
   frames: ['Portrait frames! I carve the wooden ones myself.', 'A good frame makes a good owl look even better.', 'Try one on, see how your owl likes it.'],
   frame: [(n: string) => `The ${n}? Your owl looks very distinguished in it.`, (n: string) => `Ah, the ${n}. Hangs straight, never squeaks.`],
-  series: ['The weekly series is in! Wishes go in the barrel.', 'The Lucky Barrel! Give it a whirl, see what tumbles out.'],
-  wish: ['Here we go, here we go!', 'Round and round she goes...', 'Every tenth wish brings something special. Beaver\'s promise.'],
+  series: ['The weekly series is in! Wishes go in the *barrel.*', 'The *Lucky Barrel!* Give it a whirl, see what tumbles out.'],
+  wish: ['~Here we go, here we go!~', '~Round and round she goes...~', 'Every tenth wish brings something special. Beaver\'s promise.'],
   sold: ['That one\'s spoken for until tomorrow. New stock at midnight!'],
-  till: ['Ka-ching! Just testing the bell.', 'The till\'s older than me. Still counts better, too.'],
+  till: ['!Ka-ching!! Just testing the bell.', 'The till\'s older than me. Still counts better, too.'],
   scales: ['Honest scales, honest beaver.', 'One acorn against one brass weight. Perfectly fair!'],
   slate: [(t: string) => `New stock in ${t}. I chalk it up every morning.`],
   bye: ['Come back tomorrow, friend! New stock every morning.', 'Mind the step on your way out!'],
@@ -96,6 +98,7 @@ export function Shop() {
   const [section, setSection] = useState<Section>(isSide() ? 'home' : 'home');
   const [card, setCard] = useState<string | null>(null);
   const [line, setLine] = useState<Line | null>(null);
+  const [lineUp, setLineUp] = useState(false); // [dialog10] the words stay up while they drift away
   const [gacha, setGacha] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [stamped, setStamped] = useState<string | null>(null);
@@ -107,8 +110,9 @@ export function Shop() {
 
   const say = (text: string, ms = 4400) => {
     const id = ++lineId;
-    setLine({ text, id });
-    stageRef.current?.talk(Math.min(3.2, text.length * 0.045));
+    setLine({ text, id }); setLineUp(true);
+    stageRef.current?.talk(Math.min(5, typeTime(text, VOICES.barnaby.speed))); // [dialog10] he talks as long as the words type
+    ms = holdMs(text, VOICES.barnaby.speed, ms);
     clearTimeout(lineTimer.current);
     lineTimer.current = window.setTimeout(() => setLine((x) => (x?.id === id ? null : x)), ms);
   };
@@ -133,7 +137,7 @@ export function Shop() {
       stageRef.current = st;
       setTimeout(() => st.act('wave'), 900);
     }
-    const t = setTimeout(() => say(firstVisit() ? 'Welcome, friend! Tap a price tag to look closer, then stamp it to buy. Wishes are by the barrel!' : pick(LINES.hello), 6000), 1100);
+    const t = setTimeout(() => say(firstVisit() ? 'Welcome, *friend!* Tap a price tag to look closer, then *stamp* it to buy. Wishes are by the ~barrel!~' : pick(LINES.hello), 6000), 1100);
     const onResize = () => setLayout(isSide() ? 'side' : 'top');
     addEventListener('resize', onResize);
     if (import.meta.env.DEV) (window as unknown as { hhShop: unknown }).hhShop = { stage: b, open: (id: string) => openSeries(id), say, moment: rewardMoment, card: (c: string) => openCard(c), section: (x: Section) => go(x) };
@@ -415,7 +419,7 @@ export function Shop() {
       {!sel && !gacha && section === 'frames' && <FrameWall offers={wall} layout={layout} onPick={openFrame} />}
 
       {/* Barnaby's speech */}
-      {line && !gacha && <Bubble line={line} />}
+      {(line || lineUp) && !gacha && <Bubble line={line} onNext={() => setLine(null)} onIdle={() => setLineUp(false)} />}
 
       {/* the detail card of whatever's in focus */}
       {sel && !gacha && <DetailCard id={sel} deals={deals} layout={layout} stamped={stamped} onClose={closeCard}
@@ -456,8 +460,8 @@ function placeBubble(el: HTMLElement, st: Lodge) {
   let left: number, top: number, tail: number, below = false;
   if (p.on && p.x > 0 && p.x < innerWidth) {
     left = Math.max(8, Math.min(innerWidth - w - 8, p.x - w * (side ? 0.75 : 0.5)));
-    top = p.y - h - 22;
-    if (top < 64) { top = p.y + 30; below = true; }
+    top = p.y - h + 2; // [dialog10] the floating words carry their own margin below
+    if (top < 64) { top = p.y + 24; below = true; }
     tail = Math.max(14, Math.min(w - 26, p.x - left));
   } else {
     left = side ? innerWidth - w - 16 : 12;
@@ -496,29 +500,13 @@ function firstVisit(): boolean {
   try { if (localStorage.getItem('hoot-hollow:lodge-seen')) return false; localStorage.setItem('hoot-hollow:lodge-seen', '1'); return true; } catch { return false; }
 }
 
-function Bubble(p: { line: Line }) {
-  const [shown, setShown] = useState(0);
-  const l = p.line;
-  useEffect(() => {
-    setShown(0);
-    let i = 0;
-    const t0 = performance.now();
-    const id = setInterval(() => {
-      const n = Math.min(l.text.length, Math.floor((performance.now() - t0) / 26) + 1);
-      if (n === i) return;
-      i = n;
-      setShown(i);
-      const ch = l.text[i - 1] ?? '';
-      // Barnaby's voice: low, warm blips
-      if (i % 2 === 0 && /[a-z]/i.test(ch)) sound.play(ch.charCodeAt(0) % 2 ? 'voice_b' : 'voice_c', { volume: 0.16, rate: 0.78 + ((ch.charCodeAt(0) * 7) % 9) / 60, gap: 40 });
-      if (i >= l.text.length) clearInterval(id);
-    }, 26);
-    return () => clearInterval(id);
-  }, [l.id]);
+/** [dialog10] Barnaby's words float over his head (ui/talk.ts): 3D letters typed in his low, slow voice. */
+function Bubble(p: { line: Line | null; onNext: () => void; onIdle: () => void }) {
+  const phone = innerWidth < 600;
   return (
-    <div class="lg-bubble lf-lg_bubble" key={l.id}>
-      <span class="lg-bubble-who lf-lg_ribbon_gold">{BEAVER_NAME}</span>
-      {l.text.slice(0, shown)}<span style="opacity:0">{l.text.slice(shown)}</span>
+    <div class="lg-bubble hh-float">
+      <TalkText text={p.line?.text ?? null} id={p.line?.id} who={BEAVER_NAME} onNext={p.onNext} onIdle={p.onIdle}
+        opts={{ size: phone ? 20 : 22, maxWidth: Math.min(innerWidth - 20, phone ? 330 : 400), anchor: 'bottom', voice: 'barnaby', scrim: 0.36, tag: true }} />
     </div>
   );
 }

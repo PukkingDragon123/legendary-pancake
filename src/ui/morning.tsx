@@ -24,6 +24,7 @@ import { fmtDur, fmtTime, Sheet, tap, toast } from './kit.tsx';
 import { CountUp, Letters } from './text3d.tsx';
 import { coatIcon, itemIcon, pieceIcon } from './portraits.ts';
 import { lines, panel, say, sceneRef } from './state.ts';
+import { TalkText } from './talkview.tsx'; // [dialog10] the caption types on like a voice
 import { progress } from '../game/quests.ts';
 import { flyReward } from './fx.tsx';
 import { voice, type Tts } from './voice.ts';
@@ -304,7 +305,7 @@ export function Morning() {
       {step === 'arrive' && (
         <div class="cine dawn-cine" onClick={() => { tap('ui_tap', 0.3); skipArrive(); }}>
           <div class="bar top" /><div class="bar bot" />
-          <p class="cine-cap">{save.value.name} is flying home with a bundle…</p>
+          <div class="cine-cap hh-cap"><TalkText text={`${save.value.name} is flying home with a *bundle*...`} opts={{ size: innerWidth < 600 ? 22 : 26, maxWidth: Math.min(innerWidth - 24, 620), anchor: 'bottom', voice: 'narrator', scrim: 0.3, tag: false }} /></div>
           <span class="cine-skip">Tap to skip</span>
         </div>
       )}

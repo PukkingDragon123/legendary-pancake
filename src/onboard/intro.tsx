@@ -20,13 +20,15 @@ import { rubberStamp } from './desk.ts';
 import { dioramas } from './dioramas.ts';
 import { iris } from './iris.ts';
 import { Office, type ShotName, type WorldView } from './office.ts';
-import { Overlay3D } from './overlay3d.ts';
+import { Overlay3D, smoothen } from './overlay3d.ts';
 import { isWide, Panel, panelScale, type PanelActions } from './panel.tsx';
 import { FloatingPen } from './pen.ts';
 import { DRINKS, TAPES } from './props.ts';
 import { answersFrom, applyAnswers, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat } from './script.ts';
 import { Speech } from './speech.ts';
-import { animeMoment } from '../ui/fx/moment.ts'; // [fx10] (the old name: ink and a soft press of light)
+import { plainOf } from '../ui/talk.ts';
+import { light } from '../ui/fx/moment.ts'; // [fx10] a soft press of light
+import { uiBurst } from '../ui/chrome/uifx.ts';
 
 const ARTIFACT = import.meta.env.MODE === 'artifact';
 const DEV = import.meta.env.DEV;
@@ -90,10 +92,8 @@ export function Intro() {
     const postWas = sc.post.enabled;
     sc.post.enabled = false; // the office draws its own HD-2D picture (look.ts)
     sc.setStage(office);
-    const speech = new Speech();
-    speech.px = office.pic.px; // [font6] 1:1 with the picture: Alagard is drawn 2x for the words, 1x for the name tag
-    office.pic.overlay.add(speech.group);
-    office.tickers.add((dt) => { speech.px = office.pic.px; speech.update(dt, office.camera); });
+    const speech = new Speech(); // [dialog10] floating 3D words at device resolution (ui/talk.ts)
+    office.tickers.add((dt) => speech.update(dt, office.camera));
     speech.onTalk = () => office.talk();
     const reactTo = dioramas(office);
     office.pip.pose = 'stand';
@@ -106,7 +106,7 @@ export function Intro() {
     cards.plate = { you: U.a.you, name: U.a.name };
     models.current = cards;
     office.tickers.add((dt) => ov.update(dt));
-    const stamp = rubberStamp(office.mats);
+    const stamp = smoothen(rubberStamp(office.mats)); // [dialog10] its own smooth copies of the office's woods
     const pen = new FloatingPen(ov);
     let penShown = false;
     pen.visible = false;
@@ -153,8 +153,9 @@ export function Intro() {
     const talk = (list: Beat[], then: () => void) => { beats = list; bi = 0; after = then; phase = phase === 'outro' ? 'outro' : 'talk'; show(0); };
     speech.onDone = () => {
       if (phase !== 'talk' && phase !== 'outro') return;
-      const last = bi >= beats.length - 1, txt = beats[bi]?.text ?? '';
-      autoT = window.setTimeout(advance, fast ? 30 : last ? 650 : 1500 + txt.length * 26);
+      // [dialog10] the typing is slower and human now, so the reader is nearly done when it ends: a short hold
+      const last = bi >= beats.length - 1, txt = plainOf(beats[bi]?.text ?? '');
+      autoT = window.setTimeout(advance, fast ? 30 : last ? 650 : 1200 + txt.length * 16);
     };
 
     // ---------------------------------------------------------------- the form
@@ -223,44 +224,41 @@ export function Intro() {
       void pen.letter(Math.min(b.right - 4, b.left + parseFloat(cs.paddingLeft) + w), b.bottom - 3 * U.k, 14 * U.k);
     };
 
-    // ---- the stamp thumping the office box, ink spattering
-    const splat = new THREE.Group();
-    const inkSplat = (x: number, y: number) => {
-      const mat = new THREE.MeshBasicMaterial({ color: 0xa01a1e });
-      const bits: { m: THREE.Mesh; vx: number; vy: number }[] = [];
-      for (let i = 0; i < 14; i++) {
-        const m = new THREE.Mesh(new THREE.PlaneGeometry(U.k * 1.6, U.k * 1.6), mat);
-        const a = Math.random() * Math.PI * 2, v = 60 + Math.random() * 120;
-        bits.push({ m, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.6 - 60 });
-        splat.add(m);
-      }
-      ov.play(splat, 0.45, (k) => {
-        for (const b of bits) { b.m.position.set(x + b.vx * k, -(y + b.vy * k + 260 * k * k), 400); b.m.scale.setScalar(1 - k * 0.6); }
-      }, () => { for (const b of bits) { splat.remove(b.m); b.m.geometry.dispose(); } mat.dispose(); });
-    };
+    // ---- [dialog10] the rubber stamp: it swings in, takes aim, slams down with its weight (the paper dents and
+    // jolts, a slap and a thud), rocks once on the paper the way a hand does, and lifts away from a wet impression
     const stampOn = (text: string) => new Promise<void>((done) => {
       const box = panelEl.current?.querySelector('.qp-box');
       if (!box) { U.stamped = text; bump(); done(); return; }
       let hit = false;
       const onHit = (x: number, y: number) => {
         U.stamped = text; bump();
-        play('stamp', 0.85); haptic(30);
+        play('stamp', 0.9, 0.92); play('place_soft', 0.5, 0.6); haptic(34);
         office.bump(1);
-        inkSplat(x, y);
-        if (text === 'APPROVED') { animeMoment('stamp', { x, y }); office.pip.react('starry', 'sparkle', 2.2); } // [anime6]
+        const sheet = panelEl.current;
+        if (sheet) { sheet.classList.remove('thud'); void sheet.offsetWidth; sheet.classList.add('thud'); window.setTimeout(() => sheet.classList.remove('thud'), 420); }
+        // [fx10] the press puffs a little paper dust from under the die (the ink's spatter is printed in the
+        // impression, in the stamp's own red); the approval adds fx10's soft press of light
+        uiBurst('dust', x, y + 6, text === 'APPROVED' ? 8 : 4);
+        if (text === 'APPROVED') { light.ring({ x, y }, { r0: 18, r1: Math.max(innerWidth, innerHeight) * 0.3, color: '#f4e6c8', alpha: 0.22, dur: 0.6, width: 22 }); light.breath({ x, y }, { r: 120, dur: 0.9 }); uiBurst('paper', x, y, 3); office.pip.react('starry', 'sparkle', 2.2); }
       };
       play('pickup_item', 0.4, 0.9);
-      ov.play(stamp, 1.05, (k, o) => {
-        // swing in from the top right, hover, slam down, lift away (following the box while the form settles)
+      ov.play(stamp, 1.3, (k, o) => {
+        // follows the box while the form settles
         const b = box.getBoundingClientRect(), x = b.left + b.width / 2, y = b.top + b.height / 2, s = b.width * 11;
-        const p1 = Math.min(1, k / 0.38), e1 = 1 - (1 - p1) ** 3;
-        let px = x + (1 - e1) * 220, py = y - 140 - (1 - e1) * 160;
-        if (k > 0.38 && k < 0.52) { const d = (k - 0.38) / 0.14; py = y - 140 + d * d * 136; px = x; }
-        else if (k >= 0.52 && k < 0.66) { py = y - 4; px = x; if (!hit) { hit = true; onHit(x, y); } }
-        else if (k >= 0.66) { const d = (k - 0.66) / 0.34; py = y - 4 - d * 220; px = x + d * 160; }
+        let px = x, py = y - 150, rx = 0.55, rz = 0, sy = 1, sxz = 1;
+        if (k < 0.3) { const e = 1 - (1 - k / 0.3) ** 3; px = x + (1 - e) * 220; py = y - 150 - (1 - e) * 160; }
+        else if (k < 0.42) { const d = (k - 0.3) / 0.12; py = y - 150 - Math.sin(d * Math.PI * 0.5) * 16; rx = 0.55 - d * 0.22; }
+        else if (k < 0.5) { const d = (k - 0.42) / 0.08; py = y - 166 + d * d * d * 162; rx = 0.33; }
+        else if (k < 0.68) {
+          const d = (k - 0.5) / 0.18;
+          if (!hit) { hit = true; onHit(x, y); }
+          py = y - 4; rx = 0.33;
+          sy = 1 - 0.07 * Math.exp(-d * 6) * Math.cos(d * 9); sxz = 1 + 0.035 * Math.exp(-d * 6);
+          rz = Math.sin(d * Math.PI * 2) * 0.045 * (1 - d);
+        } else { const d = (k - 0.68) / 0.32, e = d * d; py = y - 4 - e * 240; px = x + e * 170; rx = 0.33 + d * 0.22; }
         o.position.set(px, -py, 300);
-        o.scale.setScalar(s);
-        o.rotation.set(0.55, -0.3 + k * 0.2, 0);
+        o.scale.set(s * sxz, s * sy, s * sxz);
+        o.rotation.set(rx, -0.3 + k * 0.2, rz);
       }, done);
     });
     /** the stamped form flies into the folder on Pip's desk */
@@ -337,7 +335,7 @@ export function Intro() {
       (document.activeElement as HTMLElement | null)?.blur?.();
       await stampOn('RECEIVED');
       if (!alive) return;
-      await wait(220);
+      await wait(650); // [dialog10] a beat to see the wet ink before the form is filed
       reactTo.show(null);
       office.pip.play('peck');
       pen.visible = false;
@@ -358,7 +356,7 @@ export function Intro() {
       office.sparkle(h, 10);
       office.burst('stars', h, 8);
       play('reward_quest', 0.5);
-      await wait(1100);
+      await wait(1700);
       pen.visible = false;
       await fileAway();
       if (!alive) return;
@@ -385,7 +383,7 @@ export function Intro() {
         releaseBoot();
       });
       sceneRef.current?.owl.play(skipped ? 'wave' : 'present');
-      say(skipped ? `Welcome home! Let's unpack!` : `Let's unpack! Tap the boxes, ${x.you.trim() || 'friend'}!`, 4200);
+      say(skipped ? `Welcome *home!* Let's unpack!` : `Let's *unpack!* Tap the boxes, ${x.you.trim() || 'friend'}!`, 4200);
       window.dispatchEvent(new CustomEvent('hh:intro-done', { detail: { skipped } }));
     };
 
@@ -464,7 +462,7 @@ export function Intro() {
       if (e.key === ' ' || e.key === 'Enter') { if ((e.target as HTMLElement | null)?.closest?.('button')) return; e.preventDefault(); if (phase === 'ask') void file(); else onTap(); }
     };
     addEventListener('keydown', onKey);
-    const onResize = () => { speech.px = office.pic.px; U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); ov.resize(); bump(); window.setTimeout(frameAsk, 50); };
+    const onResize = () => { U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); ov.resize(); bump(); window.setTimeout(frameAsk, 50); };
     addEventListener('resize', onResize);
     (window as unknown as { hhIntro: unknown }).hhIntro = { office, speech, overlay: ov, pen, cards, a: () => U.a, file: () => void file(), act: () => actions.current, phase: () => phase, step: () => U.si, skip: () => void finishAll(true) };
 

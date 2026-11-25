@@ -85,6 +85,18 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   numbers, buttons, toasts and Pip's lines are premium 3D title text (shaded extrusion, crisp outline, metallic fill,
   soft shadow) that pops in, counts up, punches, bursts, shakes and waves (`src/ui/text3d.tsx`), and keeps still
   with Calm motion.
+- **Living dialogue (v10)**: every spoken line (Pip in the interview and at home, Barnaby in his store, the night's
+  captions) floats in 3D with no box: letters ease in from slightly behind, bob, lag a little behind the camera and
+  drift away when the next line comes. They type with a person's rhythm (uneven, quicker through little words, pauses
+  at commas, full stops and ellipses, a beat before an important word) and a soft voice blip per syllable, pitched by
+  the vowel and the sentence. Lines carry markup: `*highlight*` (gold, bigger, glowing), `!scream!` (red-hot, slams in,
+  the line jolts, it trembles), `_whisper_` (small, pale, quiet) and `~sing-song~` (a wave). A tap finishes a line, a
+  second tap moves on (`src/ui/talk.ts`, `src/ui/talkview.tsx`).
+- **Inked interview objects and a real rubber stamp (v10)**: the answer models, pen and stamp are drawn at full device
+  resolution, anti-aliased, with near-black ink outlines like the world's (silhouettes and thinner creases); the alarm
+  clock and pocket watch have real dials. The stamp swings in, slams down with its weight (the paper jolts and dents),
+  rocks once and lifts from a wet, glossy impression that dries matte into the paper: uneven pressure, rubber grain,
+  ink wicking along the fibres, pooled rims, a faint double strike and spatter, different every time (`src/onboard/ink.ts`).
 
 ## Earlier: the hand-made update
 
