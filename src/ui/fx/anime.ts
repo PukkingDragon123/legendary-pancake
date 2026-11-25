@@ -10,6 +10,9 @@
 // reduced motion) there is no flash, no shake and no lines: words and sparkles just appear and fade.
 //   animeMoment('levelup' | 'gacha5' | 'gacha4' | 'unlock' | 'morning' | 'bigbuy' | 'stamp' | 'bedtime', at?)
 import { artPx } from '../../gfx/artpx.ts';
+import { save } from '../../game/store.ts';
+import { owlIconAsync } from '../portraits.ts';
+import { pixelate } from '../pxfx.tsx';
 import { flat, hash, hex, mix, Relief, type AFn, type Shape } from '../px/relief.ts';
 import { ENAMEL, markArt, pillow, SHADOW, type EmoteKind } from './emotes.ts';
 import { bayer, blit, calmMotion, col, fxNow, Raster, rng } from './pixart.ts';
@@ -336,7 +339,6 @@ export function setChibi(url: string): Promise<void> {
 /** Pip's current portrait, re-sampled to chunky art pixels (rendered once per look). */
 function ensureChibi(): Promise<void> {
   return (chibiWait ??= (async () => {
-    const [{ save }, { owlIconAsync }, { pixelate }] = await Promise.all([import('../../game/store.ts'), import('../portraits.ts'), import('../pxfx.tsx')]);
     const look = save.value.look, key = JSON.stringify(look);
     if (key === chibiKey && chibiSrc) return;
     const url = await owlIconAsync(look, 'face');
