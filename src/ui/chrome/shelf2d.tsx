@@ -1,25 +1,28 @@
-// [icons8] The three main buttons in 2D pixel art: a glass moon lamp on a turned brass base (Sleep), a carved Black
-// Forest cuckoo clock (Clock) and a tooled leather journal (Book) on a carved walnut shelf with brass name plates. The
-// sprites are detailed 3D models rendered and finished as pixel art (src/dev/iconbake.ts, packed in the interface
-// atlas with the icons); here one small canvas draws them, one art pixel per CSS pixel of the shelf's box, scaled up by
-// a whole number of device pixels (nearest neighbour), so every pixel is crisp. No WebGL.
-// Everything moves like an object, in whole art pixels: a press sinks it into the shelf and squashes it, a release
+// [icons8, icons9] The three main buttons, painted: a brass oil lamp with a ruby glass font and a warm flame in its
+// glass chimney (Sleep), a carved Black Forest cuckoo clock (Clock) and a tooled leather journal with a gilt acorn
+// (Book) on a carved walnut shelf with brass name plates. The sprites are detailed 3D models rendered with their real
+// textures and finished like hand-painted game art with a crisp dark outline (src/dev/iconbake.ts), drawn at 3 px per
+// CSS px into their own atlas (public/img/ui3d-shelf.webp); here one canvas draws them smoothly at the screen's own
+// resolution. No WebGL.
+// Everything moves like an object: a press sinks it into the shelf and squashes it, a release
 // hops it up to land with a squash, hovering lifts it (the cuckoo's door peeks open, the journal's cover lifts); a tap
-// clicks the lamp off and on as its chain is pulled, opens the cuckoo clock's door for the owl to call twice, and
-// unbuckles the journal and swings its cover open and shut. Idle: the lamp's glow breathes, the pendulum swings, and
-// the clock's hands show the real time, drawn in pixels over the dial. When the shelf comes back the objects drop onto
+// snuffs the lamp's flame and turns it up again bright, opens the cuckoo clock's door for the owl to call twice, and
+// unbuckles the journal and swings its cover open and shut. Idle: the flame breathes, the pendulum swings, and the
+// clock's hands show the real time, drawn over the dial. When the shelf comes back the objects drop onto
 // it one by one. At night the lamp's warm light spills over the shelf. It draws at 12 fps idle and 30 fps while
 // something moves, and stops when the shelf is away or the page is hidden.
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sceneRef } from '../state.ts';
 import { ICONS3D } from '../px/icons3d.ts';
 import { reducedMotion } from './swing.ts';
-import { atlasNow, uiAtlas } from './iconset.ts';
+import { shelfAtlas, shelfAtlasNow } from './iconset.ts';
 
 export type NavId = 'sleep' | 'clock' | 'book';
 const SH = ICONS3D.shelf;
-/** the art canvas: the nav's 352 x 132 CSS px box and 46 px above it (for hops and the lamp's glow), one art px per CSS px */
+/** the art canvas: the nav's 352 x 132 CSS px box and 46 px above it (for hops and the lamp's glow); positions in art px
+ * (one per CSS px), drawn at `SR` canvas px per art px (the sprites' own resolution) */
 const [BW, BH, BTOP] = SH.box;
+const SR = SH.res;
 /** art px per world unit of the baked models (for the physics, kept in model units) */
 const PXU = 38;
 /** where the objects stand: the shelf's top, in art px */
@@ -52,20 +55,20 @@ class ShelfStage {
 
   constructor() {
     this.canvas.className = 'hh-navart-c';
-    this.art.width = this.light.width = BW; this.art.height = this.light.height = BH;
+    this.art.width = this.light.width = BW * SR; this.art.height = this.light.height = BH * SR;
+    this.g.setTransform(SR, 0, 0, SR, 0, 0);
+    this.lg.setTransform(SR, 0, 0, SR, 0, 0);
     document.addEventListener('visibilitychange', () => this.wake());
   }
 
   // ---------------------------------------------------------------- size
   /** `s` device px per CSS px of the nav (the screen's pixel ratio, times 1.5 where the nav is drawn bigger) */
   setScale(s: number) {
-    // a whole number of device px per art px: exact. Otherwise draw at the next whole number and let the screen shrink
-    // it smoothly (crisp pixels with soft edges, never uneven ones)
-    const whole = Math.abs(s - Math.round(s)) < 0.02, p = whole ? Math.max(1, Math.round(s)) : Math.ceil(s);
-    this.canvas.classList.toggle('soft', !whole);
+    // drawn at the screen's own resolution (smoothly resampled from the sprites' 3 px per art px)
+    const p = Math.max(1, Math.round(s * 100) / 100);
     if (p === this.p) return;
     this.p = p;
-    this.canvas.width = BW * p; this.canvas.height = BH * p;
+    this.canvas.width = Math.round(BW * p); this.canvas.height = Math.round(BH * p);
     this.wake();
   }
 
@@ -122,25 +125,26 @@ class ShelfStage {
     return Math.abs(p.vy) + Math.abs(p.vsq) + Math.abs(p.sq - (p.press ? -0.1 : 0)) * 10 + Math.abs(p.y - p.ground) * 10;
   }
 
-  // ---------------------------------------------------------------- drawing (in art pixels)
+  // ---------------------------------------------------------------- drawing (in art pixels, at SR canvas px each)
   /** a sprite where it was baked, lifted `dy` art px and squashed by `sq` about its foot */
   private sprite(name: string, dy = 0, sq = 0) {
-    const s = SH.sprites[name], im = atlasNow();
+    const s = SH.sprites[name], im = shelfAtlasNow();
     if (!s || !im) return;
-    const [ax, ay, w, h, x, y] = s;
-    const w2 = Math.round(w * (1 - sq * 0.5)), h2 = Math.round(h * (1 + sq));
-    this.g.drawImage(im, ax, ay, w, h, x + Math.round((w - w2) / 2), y + h - h2 + dy, w2, h2);
+    const [ax, ay, aw, ah, x, y] = s, w = aw / SR, h = ah / SR;
+    const w2 = w * (1 - sq * 0.5), h2 = h * (1 + sq);
+    this.g.drawImage(im, ax, ay, aw, ah, x + (w - w2) / 2, y + h - h2 + dy, w2, h2);
   }
-  /** a soft pixel shadow on the shelf top under an object (`w` art px wide), fading as it lifts */
+  /** a soft shadow on the shelf top under an object (`w` art px wide), fading and shrinking as it lifts */
   private shadow(cx: number, w: number, lift: number) {
-    const g = this.g, k = Math.max(0.35, 1 - lift * 0.9), hw = Math.round((w / 2) * k), a = 0.3 * Math.max(0.2, 1 - lift * 0.8);
-    g.fillStyle = `rgba(36,16,10,${a.toFixed(3)})`;
-    for (let r = -2; r <= 2; r++) { const ww = Math.round(hw * Math.sqrt(1 - (r / 3) ** 2)); g.fillRect(Math.round(cx) - ww, TOP + r, ww * 2, 1); }
-    g.fillStyle = `rgba(36,16,10,${(a * 0.7).toFixed(3)})`;
-    const inner = Math.round(hw * 0.6);
-    g.fillRect(Math.round(cx) - inner, TOP - 1, inner * 2, 3);
+    const g = this.g, k = Math.max(0.35, 1 - lift * 0.9), hw = (w / 2) * k, a = 0.42 * Math.max(0.2, 1 - lift * 0.8);
+    g.save();
+    g.translate(cx, TOP + 0.5); g.scale(1, 0.16);
+    const gr = g.createRadialGradient(0, 0, 0, 0, 0, hw);
+    gr.addColorStop(0, `rgba(30,14,8,${a.toFixed(3)})`); gr.addColorStop(0.6, `rgba(30,14,8,${(a * 0.6).toFixed(3)})`); gr.addColorStop(1, 'rgba(30,14,8,0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(0, 0, hw, 0, Math.PI * 2); g.fill();
+    g.restore();
   }
-  /** a glow in stepped rings of warm light (`r` art px), added */
+  /** a glow in soft rings of warm light (`r` art px), added */
   private glow(cx: number, cy: number, r: number, a: number, rgb = '255,196,104', steps = 4) {
     if (a <= 0.004) return;
     const g = this.g;
@@ -148,22 +152,20 @@ class ShelfStage {
     g.globalCompositeOperation = 'lighter';
     for (let i = 0; i < steps; i++) {
       // fainter towards the rim, so the glow has no visible edge
-      const rr = Math.round(r * (1 - i / steps));
+      const rr = r * (1 - i / steps);
       g.fillStyle = `rgba(${rgb},${((a * 2 * (i + 1)) / (steps * (steps + 1))).toFixed(3)})`;
-      g.beginPath(); g.arc(Math.round(cx), Math.round(cy), rr, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.arc(cx, cy, rr, 0, Math.PI * 2); g.fill();
     }
     g.restore();
   }
-  /** a clock hand from the dial's centre: a pixel line `len` art px long at angle `a` (0 up, clockwise) */
+  /** a clock hand from the dial's centre: a tapered blued-steel hand `len` art px long at angle `a` (0 up, clockwise) */
   private hand(cx: number, cy: number, a: number, len: number, col: string, thick: boolean) {
-    const g = this.g, x1 = cx + Math.sin(a) * len, y1 = cy - Math.cos(a) * len;
+    const g = this.g, w = thick ? 1.5 : 1;
+    g.save();
+    g.translate(cx, cy); g.rotate(a);
     g.fillStyle = col;
-    const n = Math.ceil(Math.max(Math.abs(x1 - cx), Math.abs(y1 - cy)));
-    for (let i = 0; i <= n; i++) {
-      const x = Math.round(lerp(cx, x1, i / n) - 0.5), y = Math.round(lerp(cy, y1, i / n) - 0.5);
-      g.fillRect(x, y, 1, 1);
-      if (thick && i < n - 1) { if (Math.abs(Math.cos(a)) > 0.7) g.fillRect(x + 1, y, 1, 1); else g.fillRect(x, y + 1, 1, 1); }
-    }
+    g.beginPath(); g.moveTo(-w / 2, len * 0.12); g.lineTo(-w * 0.42, -len * 0.7); g.lineTo(0, -len); g.lineTo(w * 0.42, -len * 0.7); g.lineTo(w / 2, len * 0.12); g.closePath(); g.fill();
+    g.restore();
   }
 
   private frame(dt: number, calm: boolean) {
@@ -175,10 +177,10 @@ class ShelfStage {
       motion += this.stepPhys(p, dt);
       if (p.act >= 0) { p.act += dt; if (p.act > 1.8) p.act = -1; else motion += 1; }
     }
-    const dy = (p: Phys) => -Math.round(Math.max(0, p.y) * PXU) + (p.press ? 1 : 0);
+    const dy = (p: Phys) => -Math.max(0, p.y) * PXU + (p.press ? 1 : 0);
     const night = this.nightness();
     g.clearRect(0, 0, BW, BH);
-    // the lamp: its glow breathes; a tap clicks it off, then bright, as the chain is pulled
+    // the lamp: its flame breathes; a tap snuffs it, then turns it up bright
     const lp = this.objs.sleep, la = lp.act;
     const breath = calm ? 0.6 : 0.5 + 0.5 * Math.sin((t * Math.PI * 2) / 4.2);
     let glow = (0.72 + 0.28 * breath) * (this.rec ? 1.3 : 1) * (lp.hover ? 1.15 : 1);
@@ -193,10 +195,10 @@ class ShelfStage {
     this.shadow(SH.objects.book + 4, 74, this.objs.book.y);
     const lampFrame = la >= 0 && la < 0.13 ? 'lamp_off' : la >= 0.13 && la < 0.35 ? 'lamp_pull' : 'lamp' + Math.min(3, Math.max(0, Math.round((glow - 0.6) * 4)));
     this.sprite(lampFrame, dy(lp), lp.sq);
-    // the moon inside the glass catches the glow
+    // the chimney's glass catches the flame's glow
     if (lampFrame !== 'lamp_off') {
       g.save();
-      g.beginPath(); g.arc(Math.round(lx), Math.round(ly), 28, 0, Math.PI * 2); g.clip();
+      g.beginPath(); g.arc(lx, ly, 13, 0, Math.PI * 2); g.clip();
       g.globalCompositeOperation = 'lighter';
       g.globalAlpha = clamp((glow - 0.7) * 0.14, 0, 0.16);
       this.sprite(lampFrame, dy(lp), lp.sq);
@@ -220,7 +222,7 @@ class ShelfStage {
     this.hand(dcx, dcy, hA, dr * 0.5, '#2b1e2c', true);
     this.hand(dcx, dcy, mA, dr * 0.74, '#3a2a40', false);
     g.fillStyle = '#e8b448';
-    g.fillRect(Math.round(dcx - 1), Math.round(dcy - 1), 2, 2);
+    g.beginPath(); g.arc(dcx, dcy, 1.1, 0, Math.PI * 2); g.fill();
     // the journal: hover lifts the cover; a tap unbuckles it and swings the cover open, then shut
     const bp = this.objs.book, ba = bp.act;
     let bf = bp.hover ? 'book1' : 'book0';
@@ -235,31 +237,32 @@ class ShelfStage {
       L.fillStyle = `rgba(186,194,250,${night.toFixed(3)})`;
       L.fillRect(0, 0, BW, BH);
       L.globalCompositeOperation = 'destination-in';
-      L.drawImage(this.art, 0, 0);
+      L.drawImage(this.art, 0, 0, BW, BH);
       g.save();
       g.globalCompositeOperation = 'multiply';
-      g.drawImage(this.light, 0, 0);
+      g.drawImage(this.light, 0, 0, BW, BH);
       g.restore();
       const r = 170, steps = 7, a = 0.3 * night * Math.min(1.3, glow);
       L.globalCompositeOperation = 'source-over';
       L.clearRect(0, 0, BW, BH);
       for (let i = 0; i < steps; i++) {
         L.fillStyle = `rgba(255,184,100,${(a / steps).toFixed(3)})`;
-        L.beginPath(); L.arc(Math.round(lx + 4), Math.round(ly + 8), Math.round(r * (1 - i / steps)), 0, Math.PI * 2); L.fill();
+        L.beginPath(); L.arc(lx + 4, ly + 8, r * (1 - i / steps), 0, Math.PI * 2); L.fill();
       }
-      // not on the lamp's own glass (it glows by itself)
+      // not on the lamp's own chimney (it glows by itself)
       L.globalCompositeOperation = 'destination-out';
-      L.beginPath(); L.arc(Math.round(lx), Math.round(ly), 31, 0, Math.PI * 2); L.fill();
+      L.beginPath(); L.arc(lx, ly, 16, 0, Math.PI * 2); L.fill();
       L.globalCompositeOperation = 'destination-in';
-      L.drawImage(this.art, 0, 0);
+      L.drawImage(this.art, 0, 0, BW, BH);
       g.save();
       g.globalCompositeOperation = 'lighter';
-      g.drawImage(this.light, 0, 0);
+      g.drawImage(this.light, 0, 0, BW, BH);
       g.restore();
     }
-    // up to the screen, whole device pixels per art pixel
+    // up to the screen, smoothly resampled
     const c = this.ctx;
-    c.imageSmoothingEnabled = false;
+    c.imageSmoothingEnabled = true;
+    c.imageSmoothingQuality = 'high';
     c.clearRect(0, 0, this.canvas.width, this.canvas.height);
     c.drawImage(this.art, 0, 0, this.canvas.width, this.canvas.height);
     if (motion > 0.02) this.moving = 0.4;
@@ -299,8 +302,7 @@ function installStyles() {
   st.id = 'hh-shelf2d';
   st.textContent = `
 .hh-navart{position:absolute;left:0;top:${-BTOP}px;width:${BW}px;height:${BH}px;pointer-events:none;z-index:0}
-.hh-navart>canvas{position:absolute;left:0;top:0;display:block;width:100%;height:100%;image-rendering:pixelated}
-.hh-navart>canvas.soft{image-rendering:auto}
+.hh-navart>canvas{position:absolute;left:0;top:0;display:block;width:100%;height:100%}
 .hh-nav.live .hh-pic,.hh-nav.live .hh-cshadow,.hh-nav.live .hh-shelf,.hh-nav.wait .hh-pic,.hh-nav.wait .hh-cshadow,.hh-nav.wait .hh-shelf{visibility:hidden}
 .hh-nav.live .hh-plate,.hh-nav.wait .hh-plate{background-image:none!important;filter:none}
 .hh-nav.live .hh-mobj,.hh-nav.live .hh-mobj.press,.hh-nav.live .hh-mobj.pop,.hh-nav.live .hh-mobj.rec,.hh-nav.live .hh-mobj.rec.pop{animation:none;scale:none;filter:none}
@@ -314,19 +316,19 @@ function installStyles() {
 const navScale = (big: boolean) => (window as unknown as { __shelfArt?: number }).__shelfArt ?? (big ? 1.5 : 1) * (devicePixelRatio || 1);
 
 /**
- * The pixel-art shelf behind the main buttons. Returns [host ref, live, wait]: put the host span in the nav; `live`
+ * The painted shelf behind the main buttons. Returns [host ref, live, wait]: put the host span in the nav; `live`
  * turns true once the first frame is drawn (then the painted stand-ins hide); `wait` hides them for a moment while the
  * interface atlas is still coming (they show if it can't load).
  */
 export function useShelf2D(away: boolean, rec: boolean, bigQuery: string): [(el: HTMLElement | null) => void, boolean, boolean] {
   installStyles();
   const [live, setLive] = useState(false);
-  const [ready, setReady] = useState(() => !!atlasNow());
-  const [wait, setWait] = useState(() => !atlasNow());
+  const [ready, setReady] = useState(() => !!shelfAtlasNow());
+  const [wait, setWait] = useState(() => !shelfAtlasNow());
   const host = useRef<HTMLElement | null>(null);
   useEffect(() => {
     let gone = false;
-    void uiAtlas().then((im) => { if (gone) return; if (im) setReady(true); else setWait(false); });
+    void shelfAtlas().then((im) => { if (gone) return; if (im) setReady(true); else setWait(false); });
     const t = window.setTimeout(() => setWait(false), 1500);
     return () => { gone = true; clearTimeout(t); };
   }, []);

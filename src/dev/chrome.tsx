@@ -172,6 +172,20 @@ if (view === 'nav') {
   });
 }
 
+if (view === 'hud') {
+  // [icons9] the HUD (name sign, currency), the side tools and the Outside door tile on their own, no 3D: &night=1
+  void Promise.all([import('../ui/chrome/hud.tsx'), import('../ui/chrome/lookout.tsx'), import('../ui/chrome/iconset.ts')]).then(async ([{ Hud, SideTools, hudOverride }, { LookOut }, { installIconSet }]) => {
+    await installIconSet();
+    const night = q.get('night') === '1';
+    document.body.style.background = night ? 'linear-gradient(#0e1a44,#2a2a5a 60%,#3a2a3a)' : 'linear-gradient(#c88a4a,#8a5a30)';
+    hudOverride.value = 'all';
+    root.style.cssText = 'position:relative;width:100vw;height:100vh;overflow:hidden';
+    root.className = 'layer';
+    render(<><Hud /><SideTools /><LookOut /></>, root);
+    (window as unknown as { __ready: number }).__ready = 2;
+  });
+}
+
 if (view === 'trans') {
   document.body.style.background = 'linear-gradient(#8fd0f0,#7d9a62)';
   root.innerHTML = '<div style="height:100vh"></div>';

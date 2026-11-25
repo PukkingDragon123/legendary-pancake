@@ -63,12 +63,13 @@ function untrack(e: Entry) {
 }
 
 const dpr = () => Math.min(4, Math.max(1, Math.round((typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1)));
-/** CSS size and device scale for a sprite shown about `want` px on its long side, kept pixel-crisp. */
-export function crisp(name: string, want: number) {
+/** CSS size and device scale for a sprite shown about `want` px on its long side, kept pixel-crisp; `zoom`: a CSS scale
+ * the sprite is shown through (e.g. the HUD's 1.5 on desktops), so it lands on whole device pixels after it. */
+export function crisp(name: string, want: number, zoom = 1) {
   const sp = (SPRITES as Record<string, { w: number; h: number; i3d?: unknown }>)[name];
   const w0 = sp?.w ?? 20, h0 = sp?.h ?? 20, k = dpr();
   // [icons8] the pixel-art icon family: the nearest crisp size (a whole number of device px per art px)
-  if (sp?.i3d) { const dev = iconDev(Math.max(8, Math.round(want * k))); return { w: dev / k, h: dev / k, scale: 1, dev }; }
+  if (sp?.i3d) { const dev = iconDev(Math.max(8, Math.round(want * k * zoom))); return { w: dev / (k * zoom), h: dev / (k * zoom), scale: 1, dev }; }
   const per = Math.max(1 / k, Math.round((want / Math.max(w0, h0)) * k) / k);
   return { w: Math.round(w0 * per), h: Math.round(h0 * per), scale: Math.max(1, Math.round(per * k)), dev: 0 };
 }
@@ -79,11 +80,11 @@ export interface AnimHandle { play(tl: Timeline): void }
  * A frame animation. `tl` loops; `act` + a changing `actKey` plays `act` once on top. `offset`
  * desynchronises copies; `handle` receives a play() function.
  */
-export function PxAnim(p: { tl: Timeline; size: number; offset?: number; act?: Timeline; actKey?: number; class?: string; style?: string; paused?: boolean; handle?: (h: AnimHandle) => void; alt?: string }) {
+export function PxAnim(p: { tl: Timeline; size: number; zoom?: number; offset?: number; act?: Timeline; actKey?: number; class?: string; style?: string; paused?: boolean; handle?: (h: AnimHandle) => void; alt?: string }) {
   const ref = useRef<HTMLImageElement>(null);
   const ent = useRef<Entry | null>(null);
   const first = p.tl[0][0];
-  const c = crisp(first, p.size);
+  const c = crisp(first, p.size, p.zoom);
   useEffect(() => {
     const img = ref.current!;
     const e: Entry = { img, tl: p.tl, total: Math.max(1, tlTotal(p.tl)), offset: p.offset ?? 0, scale: c.scale, dev: c.dev, cur: '' };
