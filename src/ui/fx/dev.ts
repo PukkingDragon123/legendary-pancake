@@ -104,7 +104,17 @@ async function beaverSheet() {
     r.setViewport(x, H - y - th, tw, th); r.setScissor(x, H - y - th, tw, th);
     r.render(scene, cam);
     label(f, x + tw / 2, y + th - 18);
+    // ?marks=1: the emote mark that goes with each face, pinned to his head through this tile's camera
+    const mark: Partial<Record<string, EmoteKind>> = { happy: 'notes', joy: 'sparkle', sparkly: 'sparkle', shock: 'bang', sleepy: 'zzz', teary: 'gloom', determined: 'anger', shy: 'hearts', flustered: 'sweat', thinking: 'ask', normal: 'bulb' };
+    if (q.get('marks') && mark[f]) {
+      const tile = document.createElement('div');
+      Object.assign(tile.style, { position: 'fixed', left: `${x}px`, top: `${y}px`, width: `${tw}px`, height: `${th}px`, pointerEvents: 'none' });
+      document.body.appendChild(tile);
+      const camI = cam.clone(), fc = c.clone(), rad = +(q.get('rad') ?? 0.075);
+      popEmote(mark[f]!, { screen: () => project(fc, rad, { camera: camI, el: tile }) });
+    }
   });
+  if (q.get('t')) (window as unknown as { __animeT?: number }).__animeT = +q.get('t')!;
   done();
 }
 
@@ -135,7 +145,7 @@ async function fxShot() {
 }
 
 const sheet = q.get('sheet');
-if (q.get('t') && sheet === 'emotes') (window as unknown as { __animeT?: number }).__animeT = 0;
+if (q.get('t') && (sheet === 'emotes' || sheet === 'beaver')) (window as unknown as { __animeT?: number }).__animeT = 0;
 if (sheet === 'pip') {
   const id = q.get('sp') ?? 'tawny';
   const moods: [OwlMood, string][] = [['neutral', 'neutral'], ['joy', 'happy ^ ^'], ['starry', 'sparkly'], ['surprised', 'surprised'], ['sleepy', 'sleepy'], ['shy', 'shy + blush'], ['flustered', 'flustered > <'], ['determined', 'determined'], ['grumpy', 'grumpy'], ['teary', 'teary'], ['love', 'love'], ['sad', 'sad']];

@@ -239,7 +239,7 @@ export class Beaver {
   }
   private faceRadius(): number {
     if (this.eyes.length < 2) return 0.12;
-    return this.eyes[0].bone.getWorldPosition(new THREE.Vector3()).distanceTo(this.eyes[1].bone.getWorldPosition(new THREE.Vector3())) * 0.72;
+    return this.eyes[0].bone.getWorldPosition(new THREE.Vector3()).distanceTo(this.eyes[1].bone.getWorldPosition(new THREE.Vector3())) * 0.55;
   }
 
   /**

@@ -259,11 +259,12 @@ function frame() {
 }
 
 /** Which side of the head a mark goes: the one with room on screen and no interface over it (tested once). */
-function pickSide(s: { x: number; y: number; r: number }): number {
+function pickSide(s: { x: number; y: number; r: number }, ext: number): number {
   const score = (sd: number) => {
     let bad = 0;
-    for (const [dx, dy] of [[1.15, -0.9], [1.15, -0.3], [1.0, -1.5], [1.6, -0.9]] as const) {
-      const x = s.x + sd * s.r * dx, y = s.y + s.r * dy;
+    // sample across where a mark would sit: beside the head, out to its far edge, from cheek to above the head
+    for (const fx of [0.2, 0.6, 1.0]) for (const dy of [-0.3, -0.9, -1.5]) {
+      const x = s.x + sd * (s.r * 0.9 + ext * fx), y = s.y + s.r * dy;
       if (x < 8 || x > innerWidth - 8 || y < 8) { bad += 2; continue; }
       const hit = document.elementFromPoint(x, y);
       if (hit && hit.id !== 'world' && hit.tagName !== 'BODY' && hit.tagName !== 'HTML' && !(hit instanceof HTMLCanvasElement && !hit.closest('#ui'))) bad++;
@@ -296,11 +297,13 @@ function pop(t: number, calm: boolean): number {
 const out = (t: number, dur: number, f = 0.2) => Math.max(0, Math.min(1, (dur - t) / f));
 
 function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y: number; r: number }, avoid: DOMRect[]) {
-  if (!l.side) l.side = pickSide(s);
-  const side = l.side, calm = l.calm;
-  // everything below is in art pixels: the face's centre, its radius, and the marks' unit size
+  const calm = l.calm;
+  // everything below is in art pixels: the face's centre, its radius, and the marks' unit size (bold on a phone,
+  // in proportion with a big face on a big screen)
   const X = s.x / A, Y = s.y / A, r = s.r / A;
-  const u = Math.max(14, Math.min(46, Math.round(r / 2) * 2));
+  const u = Math.max(18, Math.min(44, Math.round(r * 0.7) * 2));
+  if (!l.side) l.side = pickSide(s, u * A * 1.1);
+  const side = l.side;
   const fade = out(t, l.dur, calm ? 0.35 : 0.2);
   const a = fade >= 1 ? 1 : Math.round(fade * 4) / 4;
   // a spot beside the head (art px), nudged off any speech bubble, snapped to the art grid
@@ -313,8 +316,8 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
   const P = (tt: number) => pop(tt, calm);
   switch (l.kind) {
     case 'bang': case 'ask': {
-      const img = markArt(l.kind, u * P(t));
-      const [x, y] = at(side * r * 1.0, -r * 1.05);
+      const img = markArt(l.kind, u * P(t)), rest = markArt(l.kind, u);
+      const [x, y] = at(side * (r * 0.8 + rest.width * 0.5), -r * 0.75 - rest.height * 0.3);
       const hop = calm ? 0 : t < 0.18 ? -Math.round((1 - t / 0.18) * u * 0.18) : 0;
       const wob = l.kind === 'ask' && !calm ? Math.round(Math.sin(t * 7) * 1.2) : 0;
       blit(c, img, x + wob, y + hop + bob, 1, 1, 1, a);
@@ -331,12 +334,12 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
     }
     case 'sweat': {
       const slide = calm ? 0 : Math.round(Math.min(1, t / 1.1) * u * 0.2);
-      const [x, y] = at(side * r * 0.98, -r * 0.55);
+      const [x, y] = at(side * (r * 0.85 + u * 0.3), -r * 0.5);
       blit(c, markArt('sweat', u * P(t)), x, y + slide, 1, side, 1, a);
       break;
     }
     case 'anger': {
-      const [x, y] = at(side * r * 0.86, -r * 0.74);
+      const [x, y] = at(side * (r * 0.7 + u * 0.32), -r * 0.65 - u * 0.2);
       const beat = calm ? 1 : t < 0.18 ? P(t) : Math.floor((t - 0.18) / 0.13) % 2 === 0 ? 1.16 : 1;
       blit(c, markArt('anger', u * beat), x, y, 1, 1, 1, a);
       break;
@@ -347,7 +350,7 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         if (tt < 0) continue;
         const life = l.dur - 0.56, rise = Math.min(1, tt / life);
         const sway = calm ? 0 : Math.round(Math.sin(tt * 6 + i) * u * 0.08);
-        const [x, y] = at(side * (r * 0.95 + i * u * 0.2) + sway, -r * 0.25 - Math.round(rise * u * 0.7) - i * u * 0.08);
+        const [x, y] = at(side * (r * 0.8 + u * 0.35 + i * u * 0.22) + sway, -r * 0.25 - Math.round(rise * u * 0.7) - i * u * 0.08);
         blit(c, markArt('notes', u * P(tt), (i + l.seed) % 4), x, y, 1, 1, 1, Math.min(a, out(tt, life, 0.25)));
       }
       break;
@@ -373,7 +376,7 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         const life = l.dur - 0.4, rise = Math.min(1, tt / life);
         const sway = calm ? 0 : Math.round(Math.sin(tt * 5 + i * 2) * u * 0.07);
         const beat = calm ? 1 : tt < 0.18 ? P(tt) : Math.floor(tt / 0.22) % 2 ? 1.1 : 1;
-        const [x, y] = at(side * (r * (0.6 + i * 0.36)) + sway, -r * (0.95 + i * 0.12) - Math.round(rise * u * 0.55));
+        const [x, y] = at(side * (r * 0.45 + u * (0.3 + i * 0.36)) + sway, -r * 0.9 - u * (0.2 + i * 0.08) - Math.round(rise * u * 0.55));
         blit(c, markArt(i === 1 ? 'heartS' : 'hearts', u * beat), x, y, 1, 1, 1, Math.min(a, out(tt, life, 0.25)));
       }
       break;
@@ -381,7 +384,7 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
     case 'zzz': {
       const breathe = calm ? 1 : t < 0.18 ? P(t) : 1 + (Math.floor(t * 2) % 2) * 0.05;
       const img = markArt('bubble', u * breathe);
-      const [x, y] = at(side * r * 1.3, -r * 1.2);
+      const [x, y] = at(side * (r * 0.8 + img.width * 0.5), -r * 0.8 - img.height * 0.35);
       blit(c, img, x, y, 1, side, 1, a);
       if (t > 0.15 && a > 0) {
         const bx = x - img.width / 2, by = y - img.height / 2, w = img.width;
@@ -396,7 +399,7 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
       break;
     }
     case 'bulb': {
-      const [x, y] = at(side * r * 0.3, -r * 1.6);
+      const [x, y] = at(side * r * 0.3, -r * 1.0 - u * 0.65);
       const on = calm || t > 0.55 || Math.floor(t * 10) % 2 === 0;
       const img = markArt('bulb', u * P(t), on ? 0 : 1);
       blit(c, img, x, y, 1, 1, 1, a);
@@ -413,7 +416,7 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
     case 'gloom': {
       const grow = calm ? 1 : Math.min(1, t / 0.45);
       const img = markArt('cloud', u);
-      const [x, y] = at(0, -r * 1.5);
+      const [x, y] = at(0, -r * 0.95 - u * 0.5);
       const drift = calm ? 0 : Math.round(Math.sin(t * 2.4));
       blit(c, img, x + drift, y, 1, 1, 1, Math.min(a, calm ? 1 : Math.min(1, t / 0.12)));
       // the vertical gloom lines hang down from the cloud over the head

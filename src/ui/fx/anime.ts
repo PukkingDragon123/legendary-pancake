@@ -447,4 +447,6 @@ if (typeof window !== 'undefined') {
   (window as unknown as { hhAnime: unknown }).hhAnime = { animeMoment, speedLines, impactFrame, shake, sparkleBurst, sunburst, sfx, chibi, setChibi, live: () => fxs.map((f) => [f.t0, f.dur, !!f.back]) };
   // the lettering font: ask for it early so the first word is already in it
   try { void document.fonts?.load('32px "Alagard"').catch(() => undefined); } catch { /* no font loading API */ }
+  // shoot Pip's chibi portrait once things have settled, so the first cut-in is ready
+  if (!import.meta.env?.VITEST) setTimeout(() => { if (document.getElementById('world')) void ensureChibi(); }, 9000);
 }
