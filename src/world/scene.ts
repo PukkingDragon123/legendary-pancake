@@ -4,6 +4,7 @@
 // and sounds.
 import * as THREE from 'three';
 import { PX, wind } from '../gfx/box.ts';
+import { vivid } from '../gfx/glb.ts';
 import { ALL_ITEMS, ITEMS } from '../assets/registry.ts';
 import { OwlActor, type OwlFx, type OwlSound } from '../owl/actor.ts';
 import { setFurQuality } from '../owl/fur.ts'; // [owl4]
@@ -575,6 +576,7 @@ export class Scene {
   }
   /** [look4] Shadow casters: everything on high; on medium and low only the big things (and Pip) cast. */
   private cullCasters() {
+    vivid(this.owl.node, 0.24); // [look5] a little more colour in Pip's painted feathers (once per material, as they load)
     const small = this.tier === 'high' ? 0 : this.tier === 'medium' ? 0.55 : 1.1;
     const sp = new THREE.Sphere();
     const owl = this.owl.node;
@@ -697,7 +699,7 @@ export class Scene {
     const tanV = Math.tan((this.insideFov() * Math.PI) / 360), tanH = tanV * a, halfH = Math.atan(tanH), halfV = Math.atan(tanV);
     const d = A.clone().sub(C);
     let yaw = Math.atan2(d.x, -d.z) - Math.atan(M.lerp(0, 0.3, w) * tanH);
-    let pitch = Math.atan2(d.y, Math.hypot(d.x, d.z)) - Math.atan(M.lerp(0.16, 0.1, w) * tanV);
+    let pitch = Math.atan2(d.y, Math.hypot(d.x, d.z)) - Math.atan(M.lerp(0.05, 0.1, w) * tanV);
     // never let the frame reach the cut edges of the trunk (left and right) or the lintel over the opening
     const lip = (s: number) => Math.atan2(s * Math.sin(OPEN_A) * R_IN * PX - camX, camZ - Math.cos(OPEN_A) * R_IN * PX);
     const lo = lip(-1) + halfH + 0.07, hi = lip(1) - halfH - 0.07;
@@ -774,9 +776,9 @@ export class Scene {
     // the lantern's warm pool, a low amber bounce off the floorboards near the camera
     L.key.position.copy(this.house.lampAt).add(new THREE.Vector3(0, -0.35, 0.25));
     L.key.color.setHex(0xffc27a).lerp(new THREE.Color(0xffe0bc), day * 0.6);
-    L.key.intensity = k * (6 * day + 11 * night) * flick;
+    L.key.intensity = k * (7 * day + 16 * night) * flick;
     L.bounce.position.set(H.x + this.pipL.x * 0.8, fy + 1.5, H.z + Math.min(4.2, this.pipL.y + 2.4));
-    L.bounce.intensity = k * (1.1 * day + 3.2 * night);
+    L.bounce.intensity = k * (1.1 * day + 3.6 * night);
     // the beam comes in through the back window on the sun's side, falling across the floor towards the room's middle
     const right = this.sky.sunDir.x >= 0;
     const wa = right ? FACE * 19 : -FACE * 18, wr = R_IN * PX - 0.15;
@@ -813,10 +815,10 @@ export class Scene {
     }
     // the grade: lamplit rooms need no moonlight lift; a touch more vignette and colour for the cosy close view
     const g = this.post.grade, b = this.gradeBase;
-    g.exposure = b.exposure * (1 - k * night * 0.3) * (1 + k * day * 0.05);
+    g.exposure = b.exposure * (1 - k * night * 0.52) * (1 + k * day * 0.1);
     g.bloomThreshold = b.bloomThreshold + k * night * 0.45;
-    g.bloom = b.bloom * (1 - k * night * 0.2);
-    g.vignette = b.vignette + k * 0.06;
+    g.bloom = b.bloom * (1 + k * night * 0.15);
+    g.vignette = b.vignette + k * (0.06 + night * 0.14);
     g.vibrance = b.vibrance + k * 0.1;
     g.saturation = b.saturation + k * 0.04;
     g.warm = b.warm + k * 0.03;
@@ -835,7 +837,9 @@ export class Scene {
   /** [look5] The inside view's field of view: a little wider than the outdoor one, more so on tall screens. */
   private insideFov(): number {
     const a = this.camera.aspect, hf = (34 * Math.PI) / 180;
-    return THREE.MathUtils.clamp((2 * Math.atan(Math.tan(hf / 2) / a) * 180) / Math.PI, 34, 62);
+    // very wide windows: no more than ~52 degrees across, or the frame would reach the cut edges of the trunk
+    const wide = (2 * Math.atan(Math.tan((26 * Math.PI) / 180) / a) * 180) / Math.PI;
+    return THREE.MathUtils.clamp((2 * Math.atan(Math.tan(hf / 2) / a) * 180) / Math.PI, Math.min(34, wide), 62);
   }
 
   /** [house3] Camera distance that fits a w x h (world units) frame at the current aspect and field of view. */

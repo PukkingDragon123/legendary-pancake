@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { buildProp, propMesh, PX, type Prop } from '../gfx/box.ts';
 import { fbm, hash, vnoise } from '../gfx/noise.ts';
-import { instanceGLB } from '../gfx/glb.ts';
+import { instanceGLB, vivid } from '../gfx/glb.ts';
 import { FINISH, ITEMS } from '../assets/registry.ts';
 import { liveClock } from '../assets/clocks.ts';
 import type { Finish } from '../assets/finishes.ts';
@@ -91,7 +91,7 @@ function brush(c: number, u: number, v: number, seed: number, alongV: boolean): 
 }
 
 /** The oak's own heartwood, carved smooth: vertical grain that wanders round knots, warm reds to honey, adze scoops. */
-const HEART = [0x3a2014, 0x523020, 0x6a4128, 0x835331, 0x9b673b, 0xb27d48, 0xc69559, 0xd8ae72];
+const HEART = [0x452817, 0x5e3a22, 0x774d2c, 0x906236, 0xa87842, 0xbd8f51, 0xcfa664, 0xdfbd7d];
 function heartwood(u: number, v: number, i: number, j: number): number {
   const warp = (fbm(u * 0.035, v * 0.018, 0, 11) - 0.5) * 22;
   let x = u + warp;
@@ -283,37 +283,6 @@ function lightUp(root: THREE.Object3D) {
     };
     m.material = Array.isArray(m.material) ? m.material.map(swap) : swap(m.material);
     if (!m.geometry.getAttribute('normal')) m.geometry.computeVertexNormals();
-  });
-}
-
-/**
- * [look5] A colour lift for the furniture's painted maps: the duller a texel, the more its own hue is lifted (vibrance,
- * never a flat tint), so faded paint and grey wood read as colourful under the warm room light while the brush work and
- * every value in the painting stay where they were. Shared per material (patched once).
- */
-function vivid(root: THREE.Object3D) {
-  root.traverse((n) => {
-    const m = n as THREE.Mesh;
-    if (!m.isMesh) return;
-    for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) {
-      if (!mat || mat.userData.vivid || !mat.map || !(mat as THREE.MeshStandardMaterial).isMeshStandardMaterial) continue;
-      mat.userData.vivid = true;
-      const prev = mat.onBeforeCompile;
-      mat.onBeforeCompile = (sh, r) => {
-        prev?.call(mat, sh, r);
-        sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
-{
-  vec3 c = diffuseColor.rgb;
-  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
-  float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b));
-  float s = (mx - mn) / max(mx, 1e-4);
-  diffuseColor.rgb = max(mix(vec3(l), c, 1.0 + 0.32 * (1.0 - s) * smoothstep(0.004, 0.04, l)), 0.0);
-}`);
-      };
-      const key = mat.customProgramCacheKey?.bind(mat);
-      mat.customProgramCacheKey = () => (key ? key() : '') + '|vivid';
-      mat.needsUpdate = true;
-    }
   });
 }
 
