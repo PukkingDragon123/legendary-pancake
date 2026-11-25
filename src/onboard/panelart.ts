@@ -80,21 +80,26 @@ export function sheetURL(w: number, h: number, seed = 1, o: { dog?: boolean; sta
 
 // ------------------------------------------------------------------ the leather folio behind the sheet
 
+/** [ui10] a bevel-cut rectangle path (no rounded corners) */
+function cutPath(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, c: number) {
+  g.beginPath(); g.moveTo(x + c, y); g.lineTo(x + w - c, y); g.lineTo(x + w, y + c); g.lineTo(x + w, y + h - c); g.lineTo(x + w - c, y + h); g.lineTo(x + c, y + h); g.lineTo(x, y + h - c); g.lineTo(x, y + c); g.closePath();
+}
 export function folioURL(w: number, h: number) {
-  return art(`folio7:${w}x${h}`, w + 4, h + 4, (g) => {
+  return art(`folio10:${w}x${h}`, w + 4, h + 4, (g) => {
     g.save();
     g.shadowColor = 'rgba(14,5,4,.5)'; g.shadowBlur = 2 * S(); g.shadowOffsetX = 0.8 * S(); g.shadowOffsetY = 1.6 * S();
-    g.beginPath(); g.roundRect(0, 0, w, h, 6);
+    cutPath(g, 0, 0, w, h, 6);
     g.fillStyle = pat(g, 'pebble', 120, '#8a4a24'); g.fill();
     g.restore();
-    g.save(); g.beginPath(); g.roundRect(0, 0, w, h, 6); g.clip();
+    g.save(); cutPath(g, 0, 0, w, h, 6); g.clip();
     const lg = g.createLinearGradient(0, 0, w, h); lg.addColorStop(0, 'rgba(255,220,180,.16)'); lg.addColorStop(0.5, 'rgba(0,0,0,0)'); lg.addColorStop(1, 'rgba(0,0,0,.3)');
     g.fillStyle = lg; g.fillRect(0, 0, w, h);
-    g.strokeStyle = 'rgba(255,220,180,.25)'; g.lineWidth = 1.2; g.beginPath(); g.roundRect(0.8, 0.8, w - 1.6, h - 1.6, 5.5); g.stroke();
+    g.strokeStyle = 'rgba(255,220,180,.25)'; g.lineWidth = 1.2; cutPath(g, 0.8, 0.8, w - 1.6, h - 1.6, 5.5); g.stroke();
+    g.strokeStyle = "rgba(20,12,16,.9)"; g.lineWidth = 0.8; cutPath(g, 0.2, 0.2, w - 0.4, h - 0.4, 6); g.stroke();
     g.restore();
     g.strokeStyle = 'rgba(240,214,166,.85)'; g.lineWidth = 0.55; g.setLineDash([2, 1.4]);
     g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 0.4 * S(); g.shadowOffsetY = 0.3 * S();
-    g.beginPath(); g.roundRect(4, 4, w - 8, h - 8, 4); g.stroke();
+    cutPath(g, 4, 4, w - 8, h - 8, 4); g.stroke();
   });
 }
 
