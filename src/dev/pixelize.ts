@@ -48,8 +48,6 @@ export interface Opts {
   shadow?: boolean;
   /** how far in front (depth units) a neighbour must be to draw an inner line */
   lineDepth?: number;
-  /** keep these pixels' material even when they're stray (e.g. eyes) */
-  outlineBias?: number;
 }
 export interface Art { w: number; h: number; d: Uint8ClampedArray }
 
@@ -262,7 +260,6 @@ export function pixelize(P: Passes, o: Opts): Art {
     for (const [v, c] of tally) if (c > bc || (c === bc && Math.abs(v - me) < Math.abs(bv - me))) { bc = c; bv = v; }
     idx[i] = bv;
   }
-  // a material of one or two pixels (a screw, an eye) keeps its colour but joins no ramp fights: fine as it is
   const out = new Float32Array(N * 4); // OKLab + alpha
   const put = (i: number, c: Lab, a = 1) => { out[i * 4] = c[0]; out[i * 4 + 1] = c[1]; out[i * 4 + 2] = c[2]; out[i * 4 + 3] = a; };
   for (let i = 0; i < N; i++) if (solid[i]) put(i, ramps.get(px[i].g)![idx[i]]);
