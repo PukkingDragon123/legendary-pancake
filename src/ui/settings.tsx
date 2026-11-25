@@ -22,7 +22,7 @@ function Credits() {
   return (
     <div class="col" style="gap:6px">
       <button class="btn soft sm" onClick={() => void open()}>{text === null ? 'Show credits' : 'Hide credits'}</button>
-      {text !== null && <pre class="credits-text" style="white-space:pre-wrap;max-height:50vh;overflow:auto;font-family:var(--font-small);font-size:16px;line-height:1.25;margin:0;padding:8px;background:rgba(59,36,20,0.06)">{text}</pre>}
+      {text !== null && <pre class="credits-text" style="white-space:pre-wrap;max-height:50vh;overflow:auto;font-family:var(--font-small);font-size:var(--t1);line-height:1.25;margin:0;padding:8px;background:rgba(59,36,20,0.06)">{text}</pre>}
     </div>
   );
 }
@@ -93,7 +93,7 @@ export function Settings() {
       <div class="card col">
         <div class="label">Sound</div>
         {([['sfx', 'Effects', IcoSparkle], ['music', 'Music', IcoNote], ['ambience', 'Sleep sounds', IcoMic]] as const).map(([k, l, I]) => (
-          <div class="row"><I size={40} /><span style="width:96px;font-weight:700">{l}</span><input class="slider grow" type="range" min="0" max="1" step="0.05" value={st[k]} onInput={(e) => vol(k, +(e.target as HTMLInputElement).value)} /></div>
+          <div class="row"><I size={40} /><span style="width:calc(var(--t1) * 6.5);font-weight:700">{l}</span><input class="slider grow" type="range" min="0" max="1" step="0.05" value={st[k]} onInput={(e) => vol(k, +(e.target as HTMLInputElement).value)} /></div>
         ))}
       </div>
       <div class="card col">
@@ -152,9 +152,9 @@ export function Onboarding() {
         {step === 1 && <>
           <h2 class="center">When do you want to wake up?</h2>
           <WoodClock wake={p.wake} bedtime={bedtimeOf(p.wake, p.goalMin)} hour12={s.settings.hour12} size={230} onChange={(v) => edit((x) => { x.sleep.wake = v; })} />
-          <div class="spread card"><div><div class="label">Wake</div><b class="num" style="font-size:16px">{fmtHM(p.wake, s.settings.hour12)}</b></div>
-            <div class="row"><button class="btn soft sm" onClick={() => { tap(); edit((x) => { x.sleep.goalMin = Math.max(360, x.sleep.goalMin - 30); }); }}>-</button><div class="center"><div class="label">Sleep</div><b class="num" style="font-size:16px">{fmtDur(p.goalMin * 60000)}</b></div><button class="btn soft sm" onClick={() => { tap(); edit((x) => { x.sleep.goalMin = Math.min(660, x.sleep.goalMin + 30); }); }}>+</button></div>
-            <div style="text-align:right"><div class="label">Bedtime</div><b class="num" style="font-size:16px">{fmtHM(bedtimeOf(p.wake, p.goalMin), s.settings.hour12)}</b></div></div>
+          <div class="spread card"><div><div class="label">Wake</div><b class="num" style="font-size:var(--t1)">{fmtHM(p.wake, s.settings.hour12)}</b></div>
+            <div class="row"><button class="btn soft sm" onClick={() => { tap(); edit((x) => { x.sleep.goalMin = Math.max(360, x.sleep.goalMin - 30); }); }}>-</button><div class="center"><div class="label">Sleep</div><b class="num" style="font-size:var(--t1)">{fmtDur(p.goalMin * 60000)}</b></div><button class="btn soft sm" onClick={() => { tap(); edit((x) => { x.sleep.goalMin = Math.min(660, x.sleep.goalMin + 30); }); }}>+</button></div>
+            <div style="text-align:right"><div class="label">Bedtime</div><b class="num" style="font-size:var(--t1)">{fmtHM(bedtimeOf(p.wake, p.goalMin), s.settings.hour12)}</b></div></div>
           <button class="btn pillow big block" onClick={next}>That's my rhythm</button>
         </>}
         {step === 2 && <>

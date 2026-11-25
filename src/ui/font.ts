@@ -93,7 +93,7 @@ function snapPass() {
   const done = new Set<Element>();
   const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const range = document.createRange();
-  const vw = innerWidth, vh = innerHeight;
+  const vw = innerWidth, vh = innerHeight, dpr = devicePixelRatio || 1;
   let n: Node | null, budget = 600;
   while ((n = w.nextNode()) && budget-- > 0) {
     const t = n as Text;
@@ -111,9 +111,10 @@ function snapPass() {
     range.selectNodeContents(t);
     const r = range.getClientRects()[0];
     if (!r || r.width === 0 || r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) continue;
-    const fx = r.left - Math.floor(r.left);
+    // whole device pixels (an art pixel is a whole number of them)
+    const X = r.left * dpr, fx = X - Math.floor(X);
     if (fx < 0.03 || fx > 0.97) continue;
-    const want = fx < 0.5 ? -fx : 1 - fx;
+    const want = (fx < 0.5 ? -fx : 1 - fx) / dpr;
     const old = parseFloat(el.getAttribute(SNAP) ?? '0') || 0;
     // try the indent that moves the line by `want` (centred lines move by half the indent)
     for (const k of cs.textAlign === 'center' ? [2, 1] : [1, 2]) {
@@ -122,7 +123,7 @@ function snapPass() {
       el.style.textIndent = `${ind}px`;
       el.setAttribute(SNAP, String(ind));
       const q = range.getClientRects()[0];
-      if (q && Math.abs(q.left - Math.round(q.left)) < 0.03) break;
+      if (q && Math.abs(q.left * dpr - Math.round(q.left * dpr)) < 0.03) break;
       el.style.textIndent = old ? `${old}px` : '';
       el.setAttribute(SNAP, String(old));
     }

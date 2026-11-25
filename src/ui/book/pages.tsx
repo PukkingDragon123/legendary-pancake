@@ -5,6 +5,7 @@
 //   Collection  how much of everything has been found, and the newest finds
 //   Badges      the achievements as postage stamps
 // `buildPages` paginates everything for the current layout.
+import { fontPx } from '../../gfx/artpx.ts';
 import type { JSX } from 'preact';
 import { AREAS } from '../../game/catalog.ts';
 import { level, type Save } from '../../game/store.ts';
@@ -58,7 +59,7 @@ function Head(p: { kicker: string; title: string; right?: JSX.Element }) {
 /** A score as a square ink stamp. */
 export function Badge(p: { score: number; size: number; T: number }) {
   const n = Math.round(p.size / p.T);
-  return <span class="bk-badge" style={{ width: `${n * p.T}px`, height: `${n * p.T}px`, backgroundImage: `url(${badgeArt(p.score, n).url})`, fontSize: `${p.size * 0.44 >= 22 ? 32 : 16}px` }}><b style={{ color: scoreHex(p.score) }}>{p.score}</b></span>;
+  return <span class="bk-badge" style={{ width: `${n * p.T}px`, height: `${n * p.T}px`, backgroundImage: `url(${badgeArt(p.score, n).url})`, fontSize: p.size * 0.44 >= 1.375 * fontPx(1) ? 'var(--t2)' : 'var(--t1)' }}><b style={{ color: scoreHex(p.score) }}>{p.score}</b></span>;
 }
 export function Mood(p: { n?: number; T: number; k?: number }) {
   if (p.n === undefined || p.n === null) return <span class="bk-mood empty" style={{ width: `${12 * p.T * (p.k ?? 1)}px` }} />;

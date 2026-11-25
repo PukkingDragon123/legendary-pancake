@@ -1,5 +1,7 @@
 // Where the diary sits on screen: a two-page spread on wide screens, one page on phones. Sizes are
 // in texels (T CSS px each) so the pixel art lines up; page contents are laid out in CSS px.
+import { fontPx } from '../../gfx/artpx.ts';
+
 export interface BookLayout {
   vw: number; vh: number;
   /** CSS px per texel */
@@ -41,6 +43,6 @@ export function layout(vw: number, vh: number): BookLayout {
   const x = snap((vw - BW) / 2);
   const y = snap(Math.max(tabH + 6, (vh - BH - footer + tabH) / 2));
   const PW = pw * T, PH = ph * T;
-  const fs = 16; // Alagard's pixel grid: page text is always 16 px (titles 32 px)
+  const fs = fontPx(1); // Alagard's grid: page text is 16 art pixels (titles 32), whatever the art pixel
   return { vw, vh, T, single, B, pw, ph, PW, PH, W, H, BW, BH, x, y, fs, tabH };
 }

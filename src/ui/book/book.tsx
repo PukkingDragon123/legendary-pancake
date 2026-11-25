@@ -209,7 +209,7 @@ export function Book() {
         {/* the front cover: it swings open on the way in and shuts on the way out */}
         <div class="bk-cover" style={{ left: `${coverX}px`, width: `${coverW * T}px`, height: `${L.BH}px` }}>
           <div class="bk-face front" style={{ backgroundImage: `url(${coverArt(coverW, L.H).url})` }}>
-            <b class="bk-ct" style={{ top: `${Math.round(L.H * 0.64 + 6.5) * T}px`, fontSize: `${coverW * T * 0.07 >= 22 ? 32 : 16}px` }}>Sleep Diary</b>
+            <b class="bk-ct" style={{ top: `${Math.round(L.H * 0.64 + 6.5) * T}px`, fontSize: coverW * T * 0.07 >= 22 * (L.fs / 16) ? 'var(--t2)' : 'var(--t1)' }}>Sleep Diary</b>
             <b class="bk-cn" style={{ top: `${Math.round(L.H * 0.64 + 18) * T}px` }}>{s.name}</b>
           </div>
           <div class="bk-face back" style={{ backgroundImage: `url(${paperArt(L.single ? L.pw : L.pw, L.ph, 'L', 11).url})` }} />

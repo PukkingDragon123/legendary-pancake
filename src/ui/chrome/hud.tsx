@@ -29,6 +29,7 @@ import { installChromeSkin } from './skin.ts';
 import { iconSrc } from './iconset.ts';
 import { installSurfaces } from './surfaces.ts';
 import { alagardWidth } from '../font.ts';
+import { artPx } from '../../gfx/artpx.ts';
 import { punch } from '../text3d.tsx';
 import { shelf3d, useShelf3D, type NavId } from './shelf3d.tsx'; // [icons6] the main buttons as live 3D objects
 import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
@@ -137,9 +138,12 @@ function NameSign() {
     haptic(6);
     setXp(true); clearTimeout(tm.current); tm.current = window.setTimeout(() => setXp(false), 2600);
   };
-  // [font6] measured in Alagard: name and rank both shown where they fit, the name in 32 px gilt letters if it can
-  const rank = rankOf(lv.level), nw = alagardWidth(s.name), rw = alagardWidth(rank), room = 119;
-  const long = 2 * nw + rw + 8 > room && (nw + rw + 8 <= room || 2 * nw > room);
+  // [font6] measured in Alagard, in art pixels (one font pixel each; the board is drawn 1.5x on big screens): name
+  // and rank both shown where they fit, the name in 2x gilt letters if it can
+  const ap = artPx() / (typeof matchMedia !== 'undefined' && matchMedia('(min-width: 900px) and (min-height: 640px)').matches ? 1.5 : 1);
+  const rank = rankOf(lv.level), nw = alagardWidth(s.name) * ap, rw = alagardWidth(rank) * ap, room = 119;
+  // 2x letters only where their 22 font pixels clear the level bar under them
+  const long = ap > 1.2 || (2 * nw + rw + 8 > room && (nw + rw + 8 <= room || 2 * nw > room));
   const fits = (long ? nw : 2 * nw) + rw + 8 <= room;
   return (
     <div class="hh-hang hh-namehang" ref={ref}>

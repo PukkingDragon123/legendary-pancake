@@ -45,8 +45,9 @@ function Ticket() {
       <i class="hh-tkt-perf" />
       <div class="hh-tkt-body">
         <div class="t">
-          <b class="display">{late ? 'Past bedtime, sleepyhead' : soon ? `Bedtime in ${fmtDur(diff)}` : `Bedtime at ${fmtHM(bed, s.settings.hour12)}`}</b>
-          <div class="small muted">Wake {fmtHM(p.wake, s.settings.hour12)} · tonight: {AREA[s.area]?.name}</div>
+          <b class="display">{late ? 'Past bedtime!' : soon ? `Bedtime in ${fmtDur(diff)}` : `Bedtime ${fmtHM(bed, s.settings.hour12)}`}</b>
+          <div class="small muted">Wake {fmtHM(p.wake, s.settings.hour12)}</div>
+          <div class="small muted hh-tkt-area">{AREA[s.area]?.name}</div>
         </div>
         <button class={'btn pillow sm' + (late || soon ? ' night' : '')} onClick={(e) => { tap('ui_open'); uiBurstAt(e.currentTarget as Element, 'stars', 6); openPanel('sleep'); }}>{late || soon ? 'Get cozy' : 'Plan'}</button>
       </div>

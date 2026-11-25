@@ -66,7 +66,7 @@ body ${T} { color: var(--t-2); text-shadow: ${stack(2)} !important; }
 body ${T}:is(.t3d-deep, h1, .lvup-title, .title-ribbon, .bigclock, .n-time, .lock-time) { text-shadow: ${stack(3)} !important; }
 body ${L} { color: var(--t-1); text-shadow: ${ring('var(--t-ol)')}, ${P(1)} ${P(2)} 0 var(--t-ex), ${P(2)} ${P(2)} 0 var(--t-ex), ${P(2)} ${P(3)} 0 var(--t-ol), ${P(3)} ${P(3)} 0 var(--t-ol), ${P(3)} ${P(4)} 0 var(--t-dr) !important; }
 body :is(.hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .hh-looklabel, .tk-hint, .t3d-ink.t3d-lite) { color: var(--t-2); text-shadow: ${P(1)} ${P(1)} 0 var(--t-ex) !important; }
-.hh-dig { width: 0.625em !important; text-align: right !important; overflow: visible !important; clip-path: inset(0 -6px 0 -2px); } /* the wheels clip only top and bottom: the outline and extrusion show */
+.hh-dig { width: 0.625em !important; text-align: right !important; overflow: visible !important; clip-path: inset(0 -0.4em 0 -0.15em); } /* the wheels clip only top and bottom: the outline and extrusion show */
 .hh-strip i { line-height: 1em !important; }
 :where([data-t]) { position: relative; }
 body :is(${T}[data-t], ${T} [data-t])::after {
