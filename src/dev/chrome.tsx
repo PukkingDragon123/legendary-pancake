@@ -106,8 +106,8 @@ if (view === 'obj') {
 if (view === 'icons') {
   // [ui4] the painted icon family, at 20, 30 and 40 px
   // [ui5] the 3D icon family at 20, 30 and 44 CSS px (as the app draws them); ?bag=1: the acorn bag at every size
-  void import('../ui/chrome/iconset.ts').then(({ installIconSet, ICON_NAMES, iconSrc }) => {
-    installIconSet();
+  void import('../ui/chrome/iconset.ts').then(async ({ installIconSet, ICON_NAMES, iconSrc }) => {
+    await installIconSet(); // [tex7] the atlas
     document.body.style.background = q.get('bg') ?? '#efe2c0';
     const d = Math.max(1, Math.round(devicePixelRatio || 1));
     const im = (n: string, s: number) => `<img src="${iconSrc(n, s * d, d) ?? spriteURL(n, 1)}" style="width:${s}px;height:${s}px;image-rendering:pixelated">`;
