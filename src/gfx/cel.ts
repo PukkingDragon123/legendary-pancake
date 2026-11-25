@@ -37,23 +37,26 @@ export interface CelOpts {
 }
 
 /**
- * The reference look in words and numbers, for 2D art (HUD objects, icons, emotes) that has to match the 3D:
- * one key light from the upper left and a little in front, three bands, cool violet shadows, a warm half-tone, a thin
- * rim, no outlines (edges are read from value and colour steps, not ink lines).
+ * The reference look in words and numbers, for painted 2D art (HUD objects, icons, emotes) that has to sit next to the
+ * 3D: realistic, high-resolution materials under one warm key light from the upper left, with the light falling off in
+ * three softened steps, cool violet-blue shadows that keep the local colour rich, a thin rim of light on silhouettes,
+ * small crisp highlights on hard materials and no ink outlines.
  */
 export const CEL_REF = {
-  /** key light direction in screen terms: from the upper left, slightly in front of the subject */
-  light: 'upper-left, ~45 deg up, ~30 deg towards the viewer',
-  /** light steps on a surface: lit 100%, half-tone ~50% (a touch warmer, more saturated), shadow ~25-35% */
-  bands: [1, 0.5, 0.3],
-  /** the shadow hue (sRGB) the key light's shadows lean to (mixed over the local colour, never grey or black) */
-  shadowHue: '#5a5fa8',
-  /** the half-tone's warm shift (multiply) */
-  halftone: '#ffe8d8',
-  /** rim: a 1-2 art-pixel edge of light on the silhouette away from the key light, ~30-50% of the key's strength */
-  rim: '1-2 px, cool sky colour on the shadow side, warm key colour when back-lit',
-  /** specular: a small hard glint (2-4 art px) on brass, glass, ceramics and eyes, with a 1 px softer edge */
-  glint: 'small, hard, 1 px soft edge; only on smooth materials',
+  /** key light direction in screen terms: from the upper left, slightly in front of the subject; warm (#ffe2bc) */
+  light: 'upper-left, ~45 deg up, ~30 deg towards the viewer; warm white #ffe2bc',
+  /** light steps on a surface (fraction of the key): lit 100%, a half-tone ~50% at the turning edge, shadow 0% + fill */
+  bands: [1, 0.5, 0] as const,
+  /** the transition between steps: soft over ~2-4% of a form's width (crisp but not aliased) */
+  edge: 'soft over a few percent of the form',
+  /** the half-tone's warm shift (multiply the lit colour) */
+  halftone: '#ffeee0',
+  /** the shadow side: the local colour darkened to ~30-40% and pushed towards violet-blue, saturation kept (never grey) */
+  shadowHue: '#5a4fa0',
+  /** rim: a thin edge (~1.5% of the silhouette's size) of cool sky light on the shadow side, warm key light when back-lit */
+  rim: 'thin edge, cool sky colour on the shadow side, warm key colour when back-lit, ~30-50% of the key',
+  /** specular: a small, hard-edged glint on brass, glass, ceramics, lacquer and eyes; none on cloth, paper, matte wood */
+  glint: 'small and hard-edged, only on smooth materials',
   outline: 'none',
 } as const;
 
@@ -93,7 +96,7 @@ vec3 celIrradiance( const in vec3 n, const in IncidentLight l ) {
   vec3 c = l.color * a * mix( vec3( 1.0 ), vec3( 1.07, 0.98, 0.9 ), mid * ( 1.0 - lit ) * k );
   // coloured shadow: where the key light can't reach, a cool violet bounce in proportion to its strength (it joins
   // the ambient light, see lights_fragment_end)
-  float lum = dot( l.color, vec3( 0.2126, 0.7152, 0.0722 ) );
+  float lum = min( dot( l.color, vec3( 0.2126, 0.7152, 0.0722 ) ), 3.5 );
   celFill += hhCelTint.rgb * ( lum * celKey * ( 1.0 - a ) * hhCel.x * HH_CEL_SHADE );
   return c;
 }

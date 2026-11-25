@@ -54,6 +54,21 @@ function canvasRatio(): number {
   return Math.min(typeof devicePixelRatio === 'number' && devicePixelRatio > 0 ? devicePixelRatio : 1, 2);
 }
 
+/** [light7] A soft round contact shadow (cool and dark, never black), laid flat. */
+function contactShadow(): THREE.Mesh {
+  const n = 64, c = document.createElement('canvas');
+  c.width = c.height = n;
+  const g = c.getContext('2d')!, gr = g.createRadialGradient(n / 2, n / 2, 0, n / 2, n / 2, n / 2);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.5, 'rgba(255,255,255,0.8)'); gr.addColorStop(0.78, 'rgba(255,255,255,0.3)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, n, n);
+  const t = new THREE.CanvasTexture(c);
+  const m = new THREE.MeshBasicMaterial({ map: t, color: 0x1c1430, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 1.9).rotateX(-Math.PI / 2), m); // (reaches out from under Pip's round belly)
+  mesh.renderOrder = 1;
+  mesh.name = 'pip-contact-shadow';
+  return mesh;
+}
+
 export type SceneEvent =
   | { type: 'tapOwl' }
   | { type: 'tapSlot'; id: string }
@@ -161,6 +176,8 @@ export class Scene {
   private hourOverride: number | null = null;
   /** breathing: a warm glow at the owl's chest and a gentle camera dolly */
   private glow: THREE.PointLight;
+  /** [light7] a soft contact shadow under Pip on whatever he stands on (lamps cast no shadows) */
+  private contact: THREE.Mesh;
   private breathZoom = 1;
   /** a stage shown instead of the world (see Stage) */
   stage: Stage | null = null;
@@ -259,6 +276,8 @@ export class Scene {
       sound: (id) => this.emit({ type: 'sound', id: 'owl_' + id }),
     });
     this.scene.add(this.owl.node);
+    this.contact = contactShadow();
+    this.scene.add(this.contact);
     this.placeOwl('inside'); // [house] Pip hangs out in the living room by day
 
     this.weather = new Weather(this); // [world] after the owl, house and flora exist
@@ -794,7 +813,7 @@ export class Scene {
     // the hanging lantern makes a warm pool (lit even by day), and the open rooms' warm flood (for the oak seen from
     // outside) becomes a soft amber fill in front of Pip, as if off the floorboards (no extra lights: the same two lamps)
     const outLantern = night > 0.4 ? 6 * night * flick : night * 8, M = THREE.MathUtils;
-    this.lantern.intensity = M.lerp(outLantern, (5.6 * day + 16 * night) * flick, k);
+    this.lantern.intensity = M.lerp(outLantern, (4.6 * day + 16 * night) * flick, k);
     this.lantern.decay = M.lerp(1.4, 2, k);
     this.lantern.distance = M.lerp(10, 14, k);
     this.lantern.color.setHex(0xffc06a).lerp(new THREE.Color(0xffe0bc), day * 0.6 * k);
@@ -842,13 +861,29 @@ export class Scene {
     g.bloomThreshold = b.bloomThreshold + k * night * 0.45;
     g.bloom = b.bloom * (1 + k * night * 0.15);
     g.vignette = b.vignette + k * (0.06 + night * 0.14);
-    g.vibrance = b.vibrance + k * 0.1;
-    g.saturation = b.saturation + k * 0.04;
-    g.warm = b.warm + k * 0.03;
+    g.vibrance = b.vibrance + k * 0.04; // [light7] the lamp and the wood are warm enough on their own
+    g.saturation = b.saturation;
+    g.warm = b.warm;
     // critters (a dragonfly zipping past the lens) and fireflies belong to the clearing, not the living room
     this.critters.group.visible = k < 0.4;
     this.fireflies.mesh.visible = k < 0.4;
   }
+  /** [light7] Keep the contact shadow under Pip: on the floor of the room he is in, or the ground; it fades and widens
+   * as he rises off it (hops, flight) and is gone while he is away. */
+  private stepContact() {
+    const o = this.owl.node.position, c = this.contact;
+    let gy = groundY(o.x, o.z);
+    if (Math.hypot(o.x - HOUSE.x, o.z - HOUSE.z) < R_IN * PX + 0.2) {
+      for (const f of FLOOR_IDS) { const y = FLOOR_Y[f] * PX; if (y <= o.y + 0.05 && y > gy) gy = y; }
+    }
+    const h = Math.max(0, o.y - gy), k = this.owl.node.visible ? THREE.MathUtils.clamp(1 - h / 1.6, 0, 1) : 0;
+    c.visible = k > 0.02;
+    if (!c.visible) return;
+    c.position.set(o.x, gy + 0.012, o.z);
+    c.scale.setScalar(this.owl.node.scale.x * (0.95 + h * 0.35));
+    (c.material as THREE.MeshBasicMaterial).opacity = 0.6 * k * k;
+  }
+
   /** [look5] Pip strolls in from the porch through the front door (a string of little hops, under the lintel). */
   private walkIn() {
     const from = this.owl.node.position.clone(), to = this.spot('inside');
@@ -895,6 +930,7 @@ export class Scene {
     this.owl.dark = this.sky.night;
     this.owl.update(dt);
     const op = this.owl.node.position;
+    this.stepContact();
     GRASS.uPush.value[0].set(op.x, op.z, this.owl.node.visible ? 0.7 : 0, 1);
 
     this.critters.update(dt, t, this.owl.node.visible ? [op] : [], this.sky.night, wind.uWind.value.x, wind.uWind.value.y, gust);

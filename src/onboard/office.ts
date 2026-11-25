@@ -180,8 +180,8 @@ export class Office implements Stage {
     this.fill = new THREE.PointLight(0xffd8a8, 2.2, 9, 1.4);
     this.fill.position.set(0.6, 2.4, 1.6);
     s.add(this.fill);
-    // [light7] the painted cel light (gfx/cel.ts): the sun shaft through the blinds is the key, with cool shadows
-    celKnobs(s).spotKey = 0.8;
+    // [light7] the painted cel light (gfx/cel.ts): a gentle violet fill in the shade of the sun shaft through the blinds
+    celKnobs(s).spotKey = 0.25;
 
     // ---- Pip
     this.actor = this.makeActor(look);
