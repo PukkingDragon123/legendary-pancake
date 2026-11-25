@@ -278,7 +278,7 @@ const TOOL_ICON: Partial<Record<string, string>> = { build: 'tool_build', shop: 
 const hookCache = new Map<number, string>();
 /**
  * [icons9] What a tool hangs from, instead of a rounded tile behind it: a little brass screw-eye ring at the top centre
- * of its 60 x 68 CSS px box (the tag and 4 px round it), painted smoothly with a dark outline like the icons.
+ * of its 60 x 68 CSS px box (the tag and 4 px round it): turned brass with a faint dark edge, like the icons.
  */
 export function hookArt(): string {
   const k = Math.min(4, Math.max(1, (typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1));
@@ -291,7 +291,7 @@ export function hookArt(): string {
   g.scale(k, k);
   const cx = 30, cy = 10, r = 4.4, t = 1.9;
   g.lineCap = 'round';
-  g.strokeStyle = '#120a10'; g.lineWidth = t + 1.8;
+  g.strokeStyle = 'rgba(34,20,10,0.5)'; g.lineWidth = t + 0.9;
   g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
   g.beginPath(); g.moveTo(cx, cy + r); g.lineTo(cx, cy + r + 3.2); g.stroke();
   const gr = g.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
