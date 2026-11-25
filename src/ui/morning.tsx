@@ -31,6 +31,7 @@ import { playArrival } from '../world/cinematics.ts';
 import { GIFT_LOOK, present, sack, stickerURL } from './px/sleepprops.ts';
 import { ArtCanvas, injectSleepFrames, Paper } from './sleepkit.tsx';
 import { uiBurst } from './chrome/uifx.ts';
+import { animeMoment } from './fx/anime.ts'; // [anime6]
 import './morning.css';
 
 // ------------------------------------------------------------------ the night report
@@ -213,10 +214,10 @@ export function Morning() {
     if (step !== 'arrive') return;
     const sc = sceneRef.current;
     let done = false;
-    const fin = () => { if (done) return; done = true; setStep('sack'); sound.play('wings_flutter', { volume: 0.4 }); };
+    const fin = () => { if (done) return; done = true; setStep('sack'); sound.play('wings_flutter', { volume: 0.4 }); if (finds.length) setTimeout(() => animeMoment('morning'), 450); /* [anime6] */ };
     if (!sc) { const id = setTimeout(fin, 1800); return () => clearTimeout(id); }
     try {
-      cancelArrive.current = playArrival(sc, { onLanded: () => { sc.owl.setMood('happy', 3); sound.play('owl_hoot', { volume: 0.5 }); }, onDone: fin });
+      cancelArrive.current = playArrival(sc, { onLanded: () => { sc.owl.setMood('happy', 3); sound.play('owl_hoot', { volume: 0.5 }); sc.owl.react('starry', finds.length ? 'bang' : 'notes', 2.4); /* [anime6] */ }, onDone: fin });
     } catch { fin(); }
     const id = setTimeout(fin, 14000);
     return () => clearTimeout(id);

@@ -1,13 +1,17 @@
 // Pip's body language. Every moving part is a damped spring chasing a target, so motion overshoots
 // and settles like something soft and alive. Layers stack on top of each other: a mood sets the
 // face and posture, an action plays a short clip (hop, dance, yawn...), idle life adds breathing,
-// blinks, glances and head tilts, and the breathing exercise can drive the chest directly.
+// blinks, glances and head tilts, and the breathing exercise can drive the chest directly. Anime expressions (sparkly,
+// shocked, sleepy, teary, shy and flustered faces, blush and bold brows) ride on the eyes, and emote marks (sweat
+// drop, anger vein, "!", "?", notes, sparkles, hearts, "Zzz", light bulb, gloom cloud, steam) pop beside the head.
 import * as THREE from 'three';
 import { PX } from '../gfx/box.ts';
+import { actorAnchor, popEmote, type EmoteAnchor, type EmoteKind } from '../ui/fx/emotes.ts';
 import { defaultEye, type EyeMode, type EyeState } from './eyes.ts';
 import { buildOwl, type OwlLook, type OwlModel } from './model.ts';
 
-export type OwlMood = 'neutral' | 'happy' | 'joy' | 'sleepy' | 'asleep' | 'surprised' | 'love' | 'proud' | 'curious' | 'sad' | 'worried' | 'dizzy' | 'calm' | 'excited';
+export type OwlMood = 'neutral' | 'happy' | 'joy' | 'sleepy' | 'asleep' | 'surprised' | 'love' | 'proud' | 'curious' | 'sad' | 'worried' | 'dizzy' | 'calm' | 'excited'
+  | 'shy' | 'flustered' | 'determined' | 'grumpy' | 'starry' | 'teary';
 export type OwlAction = 'none' | 'hop' | 'dance' | 'ruffle' | 'yawn' | 'spin' | 'wave' | 'nod' | 'peck' | 'present' | 'stretch' | 'flap' | 'shiver';
 export type OwlPose = 'stand' | 'sleep' | 'fly' | 'breathe' | 'sit';
 export type OwlFx = 'feather' | 'zzz' | 'heart' | 'note' | 'sparkle' | 'dust' | 'tear';
@@ -27,27 +31,37 @@ class Spring {
   snap(x: number) { this.x = this.target = x; this.v = 0; }
 }
 
-interface Face { lid: number; low: number; tilt: number; pupil: number; mode: EyeMode; brow: number; browTilt: number; tuft: number; jaw: number; pitch: number; roll: number; tear?: boolean }
+/** eb: the drawn anime brow (+ determined, - worried); blush: embarrassed cheeks */
+interface Face { lid: number; low: number; tilt: number; pupil: number; mode: EyeMode; brow: number; browTilt: number; tuft: number; jaw: number; pitch: number; roll: number; tear?: boolean; eb?: number; blush?: number }
 const FACES: Record<OwlMood, Face> = {
   neutral: { lid: 0, low: 0, tilt: 0, pupil: 5, mode: 'normal', brow: 0, browTilt: 0, tuft: 0, jaw: 0, pitch: 0, roll: 0 },
   happy: { lid: 0.06, low: 0.32, tilt: -0.1, pupil: 5.5, mode: 'normal', brow: 0.4, browTilt: -0.2, tuft: 0.25, jaw: 0, pitch: -0.04, roll: 0.06 },
   joy: { lid: 0, low: 0, tilt: 0, pupil: 5, mode: 'happy', brow: 0.6, browTilt: -0.2, tuft: 0.4, jaw: 0.5, pitch: -0.1, roll: 0 },
-  sleepy: { lid: 0.56, low: 0.08, tilt: -0.15, pupil: 6.5, mode: 'normal', brow: -0.2, browTilt: -0.15, tuft: -0.55, jaw: 0, pitch: 0.12, roll: 0.1 },
+  sleepy: { lid: 0.56, low: 0.08, tilt: -0.15, pupil: 6.5, mode: 'half', brow: -0.2, browTilt: -0.15, tuft: -0.55, jaw: 0, pitch: 0.12, roll: 0.1 },
   asleep: { lid: 1, low: 0, tilt: 0, pupil: 5, mode: 'closed', brow: -0.3, browTilt: 0, tuft: -0.85, jaw: 0, pitch: 0.24, roll: 0.06 },
-  surprised: { lid: 0, low: 0, tilt: 0, pupil: 3, mode: 'wide', brow: 1, browTilt: 0, tuft: 0.7, jaw: 0.7, pitch: -0.08, roll: 0 },
+  surprised: { lid: 0, low: 0, tilt: 0, pupil: 3, mode: 'shock', brow: 1, browTilt: 0, tuft: 0.7, jaw: 0.7, pitch: -0.08, roll: 0 },
   love: { lid: 0.08, low: 0.2, tilt: 0, pupil: 5, mode: 'heart', brow: 0.5, browTilt: -0.3, tuft: 0.3, jaw: 0.15, pitch: -0.05, roll: 0.14 },
   proud: { lid: 0.34, low: 0.3, tilt: 0.05, pupil: 5, mode: 'normal', brow: 0.2, browTilt: 0.2, tuft: 0.45, jaw: 0, pitch: -0.18, roll: 0 },
   curious: { lid: 0.04, low: 0, tilt: 0, pupil: 6.6, mode: 'normal', brow: 0.6, browTilt: 0.5, tuft: 0.35, jaw: 0, pitch: 0, roll: 0.36 },
-  sad: { lid: 0.3, low: 0, tilt: -0.75, pupil: 6.8, mode: 'normal', brow: -0.1, browTilt: -0.8, tuft: -0.9, jaw: 0, pitch: 0.16, roll: 0.05, tear: true },
-  worried: { lid: 0.1, low: 0, tilt: -0.6, pupil: 4, mode: 'normal', brow: 0.4, browTilt: -0.8, tuft: -0.4, jaw: 0, pitch: 0.04, roll: -0.05 },
+  sad: { lid: 0.3, low: 0, tilt: -0.75, pupil: 6.8, mode: 'teary', brow: -0.1, browTilt: -0.8, tuft: -0.9, jaw: 0, pitch: 0.16, roll: 0.05, eb: -0.7 },
+  worried: { lid: 0.1, low: 0, tilt: -0.6, pupil: 4, mode: 'normal', brow: 0.4, browTilt: -0.8, tuft: -0.4, jaw: 0, pitch: 0.04, roll: -0.05, eb: -0.6 },
   dizzy: { lid: 0, low: 0, tilt: 0, pupil: 5, mode: 'spiral', brow: 0.3, browTilt: 0, tuft: -0.2, jaw: 0.4, pitch: 0, roll: 0.25 },
   calm: { lid: 1, low: 0, tilt: 0, pupil: 5, mode: 'closed', brow: 0.05, browTilt: 0, tuft: -0.15, jaw: 0, pitch: -0.02, roll: 0 },
-  excited: { lid: 0, low: 0.15, tilt: 0, pupil: 7, mode: 'sparkle', brow: 0.8, browTilt: -0.1, tuft: 0.7, jaw: 0.4, pitch: -0.08, roll: 0 },
+  excited: { lid: 0, low: 0.15, tilt: 0, pupil: 7, mode: 'sparkly', brow: 0.8, browTilt: -0.1, tuft: 0.7, jaw: 0.4, pitch: -0.08, roll: 0 },
+  // the anime set
+  shy: { lid: 0, low: 0, tilt: 0, pupil: 5, mode: 'happy', brow: 0.2, browTilt: -0.3, tuft: -0.2, jaw: 0, pitch: 0.1, roll: 0.22, blush: 1 },
+  flustered: { lid: 0, low: 0, tilt: 0, pupil: 5, mode: 'squint', brow: 0.5, browTilt: -0.4, tuft: 0.5, jaw: 0.5, pitch: 0.02, roll: -0.12, blush: 1 },
+  determined: { lid: 0.22, low: 0.1, tilt: 0.45, pupil: 5.6, mode: 'normal', brow: -0.2, browTilt: 0.6, tuft: 0.6, jaw: 0, pitch: 0.06, roll: 0, eb: 0.9 },
+  grumpy: { lid: 0.42, low: 0, tilt: 0.85, pupil: 4.6, mode: 'normal', brow: -0.4, browTilt: 0.8, tuft: 0.8, jaw: 0, pitch: 0.1, roll: -0.08, eb: 1 },
+  starry: { lid: 0, low: 0.18, tilt: 0, pupil: 7, mode: 'sparkly', brow: 0.7, browTilt: -0.2, tuft: 0.55, jaw: 0.3, pitch: -0.12, roll: 0.05 },
+  teary: { lid: 0.08, low: 0.12, tilt: -0.5, pupil: 6.5, mode: 'teary', brow: 0.2, browTilt: -0.6, tuft: -0.3, jaw: 0.15, pitch: 0.06, roll: 0.08, eb: -0.55 },
 };
 
 export interface ActorHooks {
   fx?(kind: OwlFx, at: THREE.Vector3, n?: number): void;
   sound?(id: OwlSound): void;
+  /** route emote marks yourself (by default they pop on the shared emote layer, beside the head on screen) */
+  emote?(kind: EmoteKind, actor: OwlActor, delay: number): void;
 }
 
 export class OwlActor {
@@ -80,6 +94,9 @@ export class OwlActor {
   private eye: EyeState = defaultEye();
   private earTwitch = 3;
   private nictT = -1;
+  private pokeN = 0;
+  private pokes: number[] = [];
+  private anchor: EmoteAnchor | null = null;
   // springs
   private s = {
     sy: new Spring(1, 1, 160, 11), sxz: new Spring(1, 1, 160, 11), lean: new Spring(0, 0, 90, 13), hopY: new Spring(0, 0, 0, 0),
@@ -88,6 +105,7 @@ export class OwlActor {
     tuftL: new Spring(0, 0, 180, 9), tuftR: new Spring(0, 0, 180, 9), brow: new Spring(0, 0, 160, 15), browTilt: new Spring(0, 0, 160, 15),
     jaw: new Spring(0, 0, 220, 18), tail: new Spring(0, 0, 120, 8), lid: new Spring(0, 0, 260, 26), low: new Spring(0, 0, 160, 18),
     tilt: new Spring(0, 0, 160, 18), pupil: new Spring(5, 5, 60, 14), lx: new Spring(0, 0, 260, 24), ly: new Spring(0, 0, 260, 24),
+    blush: new Spring(0, 0, 90, 16), eb: new Spring(0, 0, 200, 18),
   };
   private air = 0;
   private airV = 0;
@@ -127,23 +145,59 @@ export class OwlActor {
     const h = this.hooks;
     if (a === 'hop') { this.s.sy.kick(-2.2); h.sound?.('hop'); }
     if (a === 'ruffle') { h.sound?.('rustle'); h.fx?.('feather', this.chest(), 7); }
-    if (a === 'dance') { this.setMood('joy', 2.6); h.sound?.('happy'); }
-    if (a === 'yawn') { this.setMood('sleepy', 2.2); h.sound?.('yawn'); }
-    if (a === 'spin') this.setMood('curious', 1.8);
+    if (a === 'dance') { this.setMood('joy', 2.6); h.sound?.('happy'); this.emote('notes'); }
+    if (a === 'yawn') { this.setMood('sleepy', 2.2); h.sound?.('yawn'); this.emote('zzz', 0.5); }
+    if (a === 'spin') { this.setMood('curious', 1.8); this.emote('ask', 0.5); }
     if (a === 'wave' || a === 'flap') h.sound?.('flap');
-    if (a === 'present') this.setMood('proud', 2.4);
+    if (a === 'present') { this.setMood('proud', 2.4); this.emote('sparkle', 0.3); }
   }
 
-  /** Quick, satisfying reaction to being tapped. */
+  /** Pop an anime emote mark beside Pip's head (see src/ui/fx/emotes.ts). */
+  emote(kind: EmoteKind, delay = 0) {
+    if (this.hooks.emote) { this.hooks.emote(kind, this, delay); return; }
+    this.anchor ??= actorAnchor(() => this.model.eyeMeshes[0], (out) => this.faceCentre(out), () => this.faceRadius());
+    popEmote(kind, this.anchor, { delay });
+  }
+  /** World centre of the face (between the eyes). */
+  faceCentre(out = new THREE.Vector3()): THREE.Vector3 {
+    const [a, b] = this.model.eyeMeshes;
+    if (!a || !b || (a.position.lengthSq() === 0 && b.position.lengthSq() === 0)) return out.copy(this.headWorld).add(new THREE.Vector3(0, -this.model.headUp * PX * 0.5 * this.node.scale.y, 0));
+    const p = a.getWorldPosition(new THREE.Vector3());
+    return b.getWorldPosition(out).add(p).multiplyScalar(0.5);
+  }
+  /** World radius of the head (half its width). */
+  faceRadius(): number {
+    const s = this.model.rig.root.getWorldScale(new THREE.Vector3()).x;
+    return (this.model.g.headW / 2) * PX * s;
+  }
+  /** An anime reaction in one go: a mood held for `hold` seconds and an emote mark. */
+  react(mood: OwlMood, mark?: EmoteKind, hold = 1.8) {
+    this.setMood(mood, hold);
+    if (mark) this.emote(mark);
+  }
+
+  /** Quick, satisfying reaction to being tapped: a cycle of cute anime reactions (and a huff if you keep poking). */
   poke() {
-    const r = Math.random();
-    if (this.pose === 'sleep') { this.setMood('sleepy', 1.4); this.s.sy.kick(-1.5); this.hooks.fx?.('zzz', this.headWorld, 2); return; }
-    if (r < 0.22) { this.play('hop'); this.setMood('happy', 1.6); this.hooks.fx?.('heart', this.headWorld, 2); }
-    else if (r < 0.4) this.play('ruffle');
-    else if (r < 0.55) this.play('spin');
-    else if (r < 0.7) { this.setMood('love', 1.8); this.hooks.fx?.('heart', this.headWorld, 4); this.hooks.sound?.('happy'); this.s.sy.kick(-1.2); }
-    else if (r < 0.85) this.play('dance');
-    else { this.setMood('surprised', 0.9); this.s.sy.kick(2.4); this.s.tuftL.kick(14); this.s.tuftR.kick(14); this.hooks.sound?.('hoot'); }
+    if (this.pose === 'sleep') { this.setMood('sleepy', 1.4); this.s.sy.kick(-1.5); this.hooks.fx?.('zzz', this.headWorld, 2); this.emote('zzz'); return; }
+    this.pokes = this.pokes.filter((t) => this.time - t < 3.6);
+    this.pokes.push(this.time);
+    if (this.pokes.length >= 6) {
+      // poked once too often: a cross little huff, then all forgiven
+      this.pokes = [];
+      this.setMood('grumpy', 1.9); this.s.sy.kick(1.8); this.s.tuftL.kick(16); this.s.tuftR.kick(16); this.hooks.sound?.('hoot');
+      this.emote('anger'); this.emote('steam', 0.12);
+      return;
+    }
+    const h = this.hooks;
+    switch (this.pokeN++ % 7) {
+      case 0: this.play('hop'); this.setMood('joy', 1.6); this.emote('sparkle'); break;
+      case 1: this.setMood('surprised', 1.0); this.s.sy.kick(2.4); this.s.tuftL.kick(14); this.s.tuftR.kick(14); h.sound?.('hoot'); this.emote('bang'); break;
+      case 2: this.setMood('shy', 1.9); this.s.roll.kick(3); this.s.sy.kick(-0.8); this.emote('sweat'); break;
+      case 3: this.play('spin'); break;
+      case 4: this.setMood('love', 1.8); h.fx?.('heart', this.headWorld, 2); h.sound?.('happy'); this.s.sy.kick(-1.2); this.emote('hearts'); break;
+      case 5: this.play('dance'); break;
+      default: this.setMood('flustered', 1.5); this.play('ruffle'); this.emote('sweat', 0.1); break;
+    }
   }
 
   private chest() { const g = this.model.g; return this.node.localToWorld(new THREE.Vector3(0, (g.bodyY + g.bodyH * 0.65) * PX, g.chestZ * PX)); }
@@ -162,6 +216,7 @@ export class OwlActor {
     let wingL = 0, wingR = 0, fold = 0, tuftL = F.tuft, tuftR = F.tuft, jaw = F.jaw, tail = 0;
     let brow = F.brow, browTilt = F.browTilt;
     let lid = F.lid, low = F.low, tilt = F.tilt, pupil = F.pupil + this.dark * 1.6, mode = F.mode;
+    const blush = F.blush ?? 0, eb = F.eb ?? 0;
     let lx = 0, ly = 0;
 
     // idle breathing: slow, visible chest rise
@@ -260,7 +315,7 @@ export class OwlActor {
     if ((this.earTwitch -= dt) <= 0) { this.earTwitch = 2.5 + Math.random() * 6; (Math.random() < 0.5 ? s.tuftL : s.tuftR).kick(-9 - Math.random() * 6); }
 
     // blinks: soft, quick, sometimes doubled
-    if (mode === 'normal' || mode === 'sparkle') {
+    if (mode === 'normal' || mode === 'sparkle' || mode === 'sparkly' || mode === 'teary' || mode === 'half') {
       if ((this.nextBlink -= dt) <= 0) {
         this.nextBlink = 1.8 + Math.random() * 4 + (Math.random() < 0.2 ? -1.5 : 0);
         if (Math.random() < 0.28 && this.model.look.skin !== 'meowl') this.nictT = 0; else this.blinkT = 0;
@@ -285,6 +340,7 @@ export class OwlActor {
     s.wingL.target = wingL; s.wingR.target = wingR; s.wingFold.target = fold; s.tuftL.target = tuftL; s.tuftR.target = tuftR;
     s.brow.target = brow; s.browTilt.target = browTilt; s.jaw.target = jaw; s.tail.target = tail + Math.sin(t * 2.2) * 0.04;
     s.lid.target = lid; s.low.target = low; s.tilt.target = tilt; s.pupil.target = pupil; s.lx.target = lx; s.ly.target = ly;
+    s.blush.target = blush; s.eb.target = eb;
     for (const k of Object.keys(s) as (keyof typeof s)[]) if (k !== 'hopY') s[k].step(dt);
     // blinks should be instant, not springy
     if (this.blinkT >= 0) s.lid.x = lid;
@@ -346,6 +402,9 @@ export class OwlActor {
     this.eye.mode = mode;
     this.eye.tear = !!F.tear;
     this.eye.nict = nict;
+    this.eye.blush = THREE.MathUtils.clamp(s.blush.x, 0, 1);
+    this.eye.brow = Math.abs(s.eb.x) < 0.05 ? 0 : THREE.MathUtils.clamp(s.eb.x, -1, 1);
+    this.eye.t = t;
     this.applyEyes(false);
   }
 

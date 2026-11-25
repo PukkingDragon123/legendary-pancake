@@ -26,6 +26,7 @@ import { FloatingPen } from './pen.ts';
 import { DRINKS, TAPES } from './props.ts';
 import { answersFrom, applyAnswers, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat } from './script.ts';
 import { Speech } from './speech.ts';
+import { animeMoment } from '../ui/fx/anime.ts'; // [anime6]
 
 const ARTIFACT = import.meta.env.MODE === 'artifact';
 const DEV = import.meta.env.DEV;
@@ -246,6 +247,7 @@ export function Intro() {
         play('stamp', 0.85); haptic(30);
         office.bump(1);
         inkSplat(x, y);
+        if (text === 'APPROVED') { animeMoment('stamp', { x, y }); office.pip.react('starry', 'sparkle', 2.2); } // [anime6]
       };
       play('pickup_item', 0.4, 0.9);
       ov.play(stamp, 1.05, (k, o) => {
