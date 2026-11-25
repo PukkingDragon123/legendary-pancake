@@ -481,21 +481,21 @@ export class TalkView {
       if (!still) {
         if (gl.tone === 'yell') {
           // slams in from big, squashes as it lands, settles; then it keeps trembling
-          const k = 1 + (1 - ease) * 1.4, sq = e < 1 ? Math.sin(e * Math.PI) * 0.22 : 0;
+          const k = 1 + (1 - ease) * 1.0, sq = e < 1 ? Math.sin(e * Math.PI) * 0.14 : 0;
           kx = k * (1 + sq); ky = k * (1 - sq);
-          const tr = s * 0.02, f = Math.floor(T * 28);
+          const tr = s * 0.014, f = Math.floor(T * 24);
           dx += (hash(gl.i, f) - 0.5) * tr * 2; dy += (hash(gl.i + 77, f) - 0.5) * tr * 2;
           z = 0;
         } else {
           // from slightly behind: smaller, a little higher and drawn toward the middle of its row, then forward
-          const pop = gl.tone === 'hi' ? Math.sin(Math.min(1, age / 0.46) * Math.PI) * 0.24 : 0;
+          const pop = gl.tone === 'hi' ? Math.sin(Math.min(1, age / 0.5) * Math.PI) * 0.13 : 0;
           kx = ky = 0.55 + 0.45 * ease + pop;
           dy -= (1 - ease) * s * 0.3;
           dx += (l.rows[gl.line].w / 2 - gl.x - gl.sp.adv / 2) * (1 - ease) * 0.07;
         }
         // floating: a slow swell travels along the line; sing-song letters ride a wave; whispers drift
         dy += Math.sin(T * 1.6 - (gl.x / s) * 0.45 + gl.line * 0.9) * s * 0.03;
-        if (gl.tone === 'wave') dy += Math.sin(T * 5 - gl.i * 0.55) * s * 0.09;
+        if (gl.tone === 'wave') dy += Math.sin(T * 4 - gl.i * 0.5) * s * 0.06;
         if (gl.tone === 'hush') dx += Math.sin(T * 0.9 + gl.i * 0.7) * s * 0.016;
       }
       let a = Math.min(1, age / (inDur * 0.55)) * LOOK[gl.tone].alpha;

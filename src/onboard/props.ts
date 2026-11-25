@@ -933,11 +933,13 @@ export function celestial(kind: 'sun' | 'moon' | 'dial'): Prop {
   }
   if (kind !== 'sun') for (let i = 0; i < 18; i++) { const x = (kind === 'dial' ? C0 + 4 : 10) + hash(i, 1, 9) * (kind === 'dial' ? C0 - 12 : T - 20), y = 10 + hash(i, 2, 9) * (T - 20); t.set(x, y, rgb(0xfff0b0)); t.set(x + 1, y, rgb(0xfff0b0)); }
   const twinkle = (cx: number, cy2: number, r: number) => { for (let k = -r; k <= r; k++) { const c = rgb(Math.abs(k) < r * 0.4 ? 0xfff8d8 : 0xf0c860); t.set(cx + k, cy2, c); t.set(cx, cy2 + k, c); } t.set(cx + 1, cy2 + 1, rgb(0xfff0b0)); t.set(cx - 1, cy2 - 1, rgb(0xfff0b0)); };
-  // a sleepy painted face
-  const eye = (cx: number, cy2: number, c: RGB) => { for (let k = -5; k <= 5; k++) t.set(cx + k, cy2 + Math.round(Math.abs(k) * 0.35), c); };
-  if (kind === 'sun') { eye(C0 - 18, C0 - 8, goldD); eye(C0 + 18, C0 - 8, goldD); for (let k = -10; k <= 10; k++) t.set(C0 + k, C0 + 18 - Math.round((1 - (k / 10) ** 2) * -5), goldD); blob(t, C0 - 28, C0 + 8, 6, rgb(0xf08a5a), 0.6); blob(t, C0 + 28, C0 + 8, 6, rgb(0xf08a5a), 0.6); }
-  if (kind === 'moon') { eye(C0 - 18, C0 - 6, rgb(0xf0d8a0)); eye(C0 + 18, C0 - 6, rgb(0xf0d8a0)); blob(t, C0 - 28, C0 + 10, 6, rgb(0xd88aa8), 0.45); blob(t, C0 + 28, C0 + 10, 6, rgb(0xd88aa8), 0.45); twinkle(C0 + 30, C0 - 34, 6); twinkle(C0 - 36, C0 - 30, 4); }
-  if (kind === 'dial') { eye(C0 - 24, C0 - 6, goldD); for (let k = -6; k <= 6; k++) t.set(C0 - 24 + k, C0 + 16 + Math.round((k / 6) ** 2 * -3), goldD); twinkle(C0 + 28, C0 - 4, 8); twinkle(C0 + 18, C0 + 26, 4); }
+  // [dialog10] no cartoon faces: a guilloche sunburst engraved in the gold, stars set in the night enamel
+  if (kind !== 'moon') for (let y = 0; y < T; y++) for (let x = 0; x < (kind === 'dial' ? C0 : T); x++) {
+    const a = Math.atan2(y - C0, x - C0), d = Math.hypot(x - C0, y - C0) / C0;
+    if (d < 0.95) t.shade(x, y, 1 - 0.07 * (0.5 + 0.5 * Math.cos(a * 24)) * (0.4 + d * 0.6));
+  }
+  if (kind === 'moon') { twinkle(C0 + 30, C0 - 34, 6); twinkle(C0 - 36, C0 - 30, 4); twinkle(C0 + 6, C0 + 18, 9); twinkle(C0 - 22, C0 + 36, 3); }
+  if (kind === 'dial') { twinkle(C0 + 28, C0 - 4, 8); twinkle(C0 + 18, C0 + 26, 4); }
   strokes(t, 0, 0, T, T, (x, y) => t.get(x, y), { seed: 12, ang: 0.8, len: 5, val: 0.12, hue: 0.6, n: 3000 });
   const faceM = std({ map: tex(t), metalness: 0.3, roughness: 0.4 });
   const sideM = std({ color: kind === 'moon' ? 0xb8bcc8 : 0xd8a040, metalness: 0.85, roughness: 0.3 });
