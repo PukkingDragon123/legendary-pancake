@@ -3,7 +3,7 @@
 // every art pixel lands on whole screen pixels.
 import type { JSX } from 'preact';
 import { SPRITES, spriteURL } from './px/sprites.js';
-import { iconSrc } from './chrome/iconset.ts';
+import { iconFit } from './chrome/iconset.ts';
 import './px/hollow.js';
 import './px/currency.js';
 
@@ -17,10 +17,11 @@ export function Px(p: { name: string; size?: number; class?: string; style?: str
   const w0 = sp?.w ?? 20, h0 = sp?.h ?? 20;
   const want = p.size ?? 30;
   const k = dpr();
-  // [ui5] the 3D icon family: drawn at exactly the asked size in device pixels, chunky art pixels, never blurred
+  // [icons8] the pixel-art icon family: one of its two drawings at a whole number of device pixels per art pixel,
+  // as near the asked size as that allows (crisp, never blurred)
   if (sp?.i3d) {
-    const dev = Math.max(8, Math.round(want * k)), css = dev / k;
-    return <img class={'px ico ' + (p.class ?? '')} style={p.style} src={iconSrc(p.name, dev, k) ?? ''} width={css} height={Math.round((css * h0) / w0)} alt={p.alt ?? ''} draggable={false} />;
+    const f = iconFit(p.name, want, k), css = f?.css ?? want;
+    return <img class={'px ico ' + (p.class ?? '')} style={p.style} src={f?.src ?? ''} width={css} height={css} alt={p.alt ?? ''} draggable={false} />;
   }
   // css px per art px, a multiple of 1/dpr so it maps to whole device pixels
   const per = Math.max(1 / k, Math.round((want / Math.max(w0, h0)) * k) / k);

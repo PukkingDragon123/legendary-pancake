@@ -387,10 +387,12 @@ export function moonLamp(dens = SHELF_DENSITY): LampParts {
   // the globe: a starry night painted on the inside of the glass (unlit, it glows), the moon's warm light inside it,
   // a faint tint, and the glass's own gloss with a window caught in it and frost round its foot
   const skyM = keepUV(new THREE.MeshBasicMaterial({ map: nightGlassTex(), side: THREE.BackSide }));
+  skyM.userData.pix = { glow: false, smooth: 0.15 }; // notes for the pixel finish (src/dev/pixelize.ts)
   const sky = at(mesh(new THREE.SphereGeometry(R0 * 0.985, 40, 28), skyM, false), 0, cy, 0);
   const haloT = paintTex('lamphalo', 32, 32, (x, y) => { const r = Math.hypot(x - 15.5, y - 15.5) / 15.5; return [255, 255, 255, clamp(1 - r) ** 1.8 * 255]; }, { data: true, smooth: true });
   const haloM = keepUV(new THREE.MeshBasicMaterial({ color: 0xffc870, alphaMap: haloT, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }));
   const halo = at(mesh(new THREE.PlaneGeometry(R0 * 1.5, R0 * 1.5), haloM, false), 0, cy, -0.3);
+  halo.name = 'halo';
   halo.renderOrder = 2;
   const tint = at(mesh(new THREE.SphereGeometry(R0, 40, 28), keepUV(new THREE.MeshStandardMaterial({ color: 0x5a7ad0, transparent: true, opacity: 0.1, roughness: 0.1, depthWrite: false })), false), 0, cy, 0);
   tint.renderOrder = 3;
@@ -399,10 +401,12 @@ export function moonLamp(dens = SHELF_DENSITY): LampParts {
   gloss.renderOrder = 4;
   // the moon: a plump golden crescent with craters, and three little stars
   const moonM = keepUV(new THREE.MeshStandardMaterial({ map: moonTex(), color: 0xffffff, emissive: 0xffb848, emissiveMap: moonTex(), emissiveIntensity: 0.4, roughness: 0.5 }));
+  moonM.userData.pix = { glow: true };
   const cres = planarUV(new THREE.ExtrudeGeometry(shape(crescentPts(0.42, 0.36, [0.2, 0.13])), { depth: 0.12, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.07, bevelSegments: 4, curveSegments: 32 }));
   cres.translate(0, 0, -0.06);
   cres.computeVertexNormals();
   const starM = new THREE.MeshStandardMaterial({ ...pm(GOLD()), color: 0xffffff, emissive: 0xffc850, emissiveIntensity: 0.8, roughness: 0.35, metalness: 0.3 });
+  starM.userData.pix = { glow: true };
   const star = (s: number) => ext(shape(starPts(s, s * 0.45)), s * 0.25, starM, s * 0.18, 2);
   const moon = grp(at(mesh(cres, moonM, false), -0.06, 0, 0, 0, 0, -0.25), at(star(0.075), 0.36, 0.3, 0.1, 0, 0.3, 0.2), at(star(0.05), 0.42, -0.14, 0.16, 0, -0.2, -0.3), at(star(0.042), -0.38, 0.44, -0.12, 0, 0.2, 0.5));
   moon.position.set(0, cy, 0.04);
@@ -600,6 +604,7 @@ export function cuckooClock(dens = SHELF_DENSITY): ClockParts {
   // the dial in a wreath of carved leaves
   const dialY = y0 + 0.45, dr = 0.38;
   const dial = at(mesh(planarUV(new THREE.CircleGeometry(dr, 48)), std('cuckooDial', { map: dialTex(), roughness: 0.3, keep: true, physical: { clearcoat: 0.5, clearcoatRoughness: 0.2 } }), false), 0, dialY, 0.2);
+  dial.name = 'dial';
   const bezel = at(torus(dr + 0.012, 0.026, B, Math.PI * 2, 8, 48), 0, dialY, 0.2);
   const wreath = grp();
   for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2 + 0.3; wreath.add(at(carvedLeaf(0.17, undefined, 0.34), Math.cos(a) * (dr + 0.03), dialY + Math.sin(a) * (dr + 0.03), 0.17, 0, 0, a - Math.PI / 2)); }

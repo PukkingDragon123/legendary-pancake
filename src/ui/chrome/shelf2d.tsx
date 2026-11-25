@@ -1,0 +1,315 @@
+// [icons8] The three main buttons in 2D pixel art: a glass moon lamp on a turned brass base (Sleep), a carved Black
+// Forest cuckoo clock (Clock) and a tooled leather journal (Book) on a carved walnut shelf with brass name plates. The
+// sprites are detailed 3D models rendered and finished as pixel art (src/dev/iconbake.ts, packed in the interface
+// atlas with the icons); here one small canvas draws them, one art pixel per CSS pixel of the shelf's box, scaled up by
+// a whole number of device pixels (nearest neighbour), so every pixel is crisp. No WebGL.
+// Everything moves like an object, in whole art pixels: a press sinks it into the shelf and squashes it, a release
+// hops it up to land with a squash, hovering lifts it (the cuckoo's door peeks open, the journal's cover lifts); a tap
+// clicks the lamp off and on as its chain is pulled, opens the cuckoo clock's door for the owl to call twice, and
+// unbuckles the journal and swings its cover open and shut. Idle: the lamp's glow breathes, the pendulum swings, and
+// the clock's hands show the real time, drawn in pixels over the dial. When the shelf comes back the objects drop onto
+// it one by one. At night the lamp's warm light spills over the shelf. It draws at 12 fps idle and 30 fps while
+// something moves, and stops when the shelf is away or the page is hidden.
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { sceneRef } from '../state.ts';
+import { ICONS3D } from '../px/icons3d.ts';
+import { reducedMotion } from './swing.ts';
+import { atlasNow, uiAtlas } from './iconset.ts';
+
+export type NavId = 'sleep' | 'clock' | 'book';
+const SH = ICONS3D.shelf;
+/** the art canvas: the nav's 352 x 132 CSS px box and 46 px above it (for hops and the lamp's glow), one art px per CSS px */
+const [BW, BH, BTOP] = SH.box;
+/** art px per world unit of the baked models (for the physics, kept in model units) */
+const PXU = 38;
+/** where the objects stand: the shelf's top, in art px */
+const TOP = 147;
+
+interface Phys { y: number; vy: number; ground: number; sq: number; vsq: number; press: boolean; hover: boolean; act: number; drop: number }
+const mkPhys = (): Phys => ({ y: 0, vy: 0, ground: 0, sq: 0, vsq: 0, press: false, hover: false, act: -1, drop: -1 });
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const clamp = (v: number, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
+
+class ShelfStage {
+  readonly canvas = document.createElement('canvas');
+  private ctx = this.canvas.getContext('2d')!;
+  private art = document.createElement('canvas');
+  private g = this.art.getContext('2d')!;
+  private objs: Record<NavId, Phys> = { sleep: mkPhys(), clock: mkPhys(), book: mkPhys() };
+  private p = 0;
+  private raf = 0;
+  private last = 0;
+  private t = 0;
+  private shown = false;
+  private hostEl: HTMLElement | null = null;
+  private rec = false;
+  private moving = 0;
+  onLive: (() => void) | null = null;
+  live = false;
+
+  constructor() {
+    this.canvas.className = 'hh-navart-c';
+    this.art.width = BW; this.art.height = BH;
+    document.addEventListener('visibilitychange', () => this.wake());
+  }
+
+  // ---------------------------------------------------------------- size
+  /** `s` device px per CSS px of the nav (the screen's pixel ratio, times 1.5 where the nav is drawn bigger) */
+  setScale(s: number) {
+    // a whole number of device px per art px: exact. Otherwise draw at the next whole number and let the screen shrink
+    // it smoothly (crisp pixels with soft edges, never uneven ones)
+    const whole = Math.abs(s - Math.round(s)) < 0.02, p = whole ? Math.max(1, Math.round(s)) : Math.ceil(s);
+    this.canvas.classList.toggle('soft', !whole);
+    if (p === this.p) return;
+    this.p = p;
+    this.canvas.width = BW * p; this.canvas.height = BH * p;
+    this.wake();
+  }
+
+  // ---------------------------------------------------------------- input
+  press(id: NavId, on: boolean) {
+    const p = this.objs[id];
+    if (p.press === on) return;
+    p.press = on;
+    if (!on && !reducedMotion()) p.vy = Math.max(p.vy, 2.8);
+    this.kick();
+  }
+  hover(id: NavId, on: boolean) { const p = this.objs[id]; if (p.hover !== on) { p.hover = on; this.kick(); } }
+  act(id: NavId) { this.objs[id].act = 0; this.kick(); }
+  setRec(on: boolean) { if (on !== this.rec) { this.rec = on; this.kick(); } }
+  /** the shelf (re)appears: the objects drop onto it one by one */
+  show(on: boolean) {
+    if (on && !this.shown && !reducedMotion()) (['sleep', 'clock', 'book'] as NavId[]).forEach((id, i) => { const p = this.objs[id]; p.y = 0.32; p.vy = 0; p.drop = i * 0.09; });
+    this.shown = on;
+    this.kick();
+  }
+  attach(el: HTMLElement | null) { this.hostEl = el; if (el && this.canvas.parentElement !== el) el.appendChild(this.canvas); this.wake(); }
+  private kick() { this.moving = Math.max(this.moving, 1.2); this.wake(); }
+
+  // ---------------------------------------------------------------- loop
+  private wake() {
+    if (this.raf || !this.hostEl || !this.shown || document.hidden || !this.p) return;
+    this.raf = requestAnimationFrame(this.loop);
+  }
+  private loop = (now: number) => {
+    this.raf = 0;
+    if (!this.hostEl || !this.shown || document.hidden) return;
+    this.raf = requestAnimationFrame(this.loop);
+    const calm = reducedMotion();
+    const fps = this.moving > 0 ? 30 : calm ? 1 : 12;
+    if (now - this.last < 1000 / fps - 3) return;
+    const dt = Math.min(0.1, this.last ? (now - this.last) / 1000 : 1 / 30);
+    this.last = now;
+    this.frame(dt, calm);
+  };
+
+  /** advance one object's spring-and-gravity body (model units); returns how much it is still moving */
+  private stepPhys(p: Phys, dt: number) {
+    if (p.drop > 0) { p.drop -= dt; return 1; }
+    const n = Math.max(1, Math.ceil(dt / (1 / 120))), h = dt / n;
+    p.ground = p.hover ? 0.07 : 0;
+    for (let i = 0; i < n; i++) {
+      if (p.y > p.ground + 1e-4 || p.vy > 0) {
+        p.vy -= 26 * h; p.y += p.vy * h;
+        if (p.y <= p.ground && p.vy < 0) { p.vsq += p.vy * 0.55; p.y = p.ground; p.vy = 0; }
+      } else p.y += (p.ground - p.y) * Math.min(1, h * 16);
+      const sqT = p.press ? -0.1 : 0;
+      p.vsq += ((sqT - p.sq) * 560 - p.vsq * 19) * h; p.sq += p.vsq * h;
+    }
+    return Math.abs(p.vy) + Math.abs(p.vsq) + Math.abs(p.sq - (p.press ? -0.1 : 0)) * 10 + Math.abs(p.y - p.ground) * 10;
+  }
+
+  // ---------------------------------------------------------------- drawing (in art pixels)
+  /** a sprite where it was baked, lifted `dy` art px and squashed by `sq` about its foot */
+  private sprite(name: string, dy = 0, sq = 0) {
+    const s = SH.sprites[name], im = atlasNow();
+    if (!s || !im) return;
+    const [ax, ay, w, h, x, y] = s;
+    const w2 = Math.round(w * (1 - sq * 0.5)), h2 = Math.round(h * (1 + sq));
+    this.g.drawImage(im, ax, ay, w, h, x + Math.round((w - w2) / 2), y + h - h2 + dy, w2, h2);
+  }
+  /** a soft pixel shadow on the shelf top under an object (`w` art px wide), fading as it lifts */
+  private shadow(cx: number, w: number, lift: number) {
+    const g = this.g, k = Math.max(0.35, 1 - lift * 0.9), hw = Math.round((w / 2) * k), a = 0.3 * Math.max(0.2, 1 - lift * 0.8);
+    g.fillStyle = `rgba(36,16,10,${a.toFixed(3)})`;
+    for (let r = -2; r <= 2; r++) { const ww = Math.round(hw * Math.sqrt(1 - (r / 3) ** 2)); g.fillRect(Math.round(cx) - ww, TOP + r, ww * 2, 1); }
+    g.fillStyle = `rgba(36,16,10,${(a * 0.7).toFixed(3)})`;
+    const inner = Math.round(hw * 0.6);
+    g.fillRect(Math.round(cx) - inner, TOP - 1, inner * 2, 3);
+  }
+  /** a glow in stepped rings of warm light (`r` art px), added */
+  private glow(cx: number, cy: number, r: number, a: number, rgb = '255,196,104', steps = 4) {
+    if (a <= 0.004) return;
+    const g = this.g;
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < steps; i++) {
+      const rr = Math.round(r * (1 - i / steps));
+      g.fillStyle = `rgba(${rgb},${(a / steps).toFixed(3)})`;
+      g.beginPath(); g.arc(Math.round(cx), Math.round(cy), rr, 0, Math.PI * 2); g.fill();
+    }
+    g.restore();
+  }
+  /** a clock hand from the dial's centre: a pixel line `len` art px long at angle `a` (0 up, clockwise) */
+  private hand(cx: number, cy: number, a: number, len: number, col: string, thick: boolean) {
+    const g = this.g, x1 = cx + Math.sin(a) * len, y1 = cy - Math.cos(a) * len;
+    g.fillStyle = col;
+    const n = Math.ceil(Math.max(Math.abs(x1 - cx), Math.abs(y1 - cy)));
+    for (let i = 0; i <= n; i++) {
+      const x = Math.round(lerp(cx, x1, i / n) - 0.5), y = Math.round(lerp(cy, y1, i / n) - 0.5);
+      g.fillRect(x, y, 1, 1);
+      if (thick && i < n - 1) { if (Math.abs(Math.cos(a)) > 0.7) g.fillRect(x + 1, y, 1, 1); else g.fillRect(x, y + 1, 1, 1); }
+    }
+  }
+
+  private frame(dt: number, calm: boolean) {
+    this.t += dt;
+    const t = this.t, g = this.g;
+    let motion = 0;
+    for (const id of ['sleep', 'clock', 'book'] as NavId[]) {
+      const p = this.objs[id];
+      motion += this.stepPhys(p, dt);
+      if (p.act >= 0) { p.act += dt; if (p.act > 1.8) p.act = -1; else motion += 1; }
+    }
+    const dy = (p: Phys) => -Math.round(Math.max(0, p.y) * PXU) + (p.press ? 1 : 0);
+    const night = this.nightness();
+    g.clearRect(0, 0, BW, BH);
+    // the lamp: its glow breathes; a tap clicks it off, then bright, as the chain is pulled
+    const lp = this.objs.sleep, la = lp.act;
+    const breath = calm ? 0.6 : 0.5 + 0.5 * Math.sin((t * Math.PI * 2) / 4.2);
+    let glow = (0.72 + 0.28 * breath) * (this.rec ? 1.3 : 1) * (lp.hover ? 1.15 : 1);
+    if (la >= 0) glow = la < 0.13 ? 0.05 : la < 0.3 ? 1.7 : lerp(1.7, glow, clamp((la - 0.3) / 1.2));
+    glow *= 1 + night * 0.5;
+    const [lx, ly0] = SH.lamp, ly = ly0 + dy(lp);
+    // night: the lamp's warm light pools on the shelf
+    if (night > 0.02) { this.glow(lx + 8, TOP + 4, 120, 0.22 * night * Math.min(1.3, glow), '255,178,92', 5); }
+    this.glow(lx, ly, 52, 0.16 * glow, '255,200,110', 4);
+    this.sprite('shelf');
+    // the objects' shadows on the shelf top
+    this.shadow(SH.objects.sleep, 52, lp.y);
+    this.shadow(SH.objects.clock + 2, 76, this.objs.clock.y);
+    this.shadow(SH.objects.book + 4, 74, this.objs.book.y);
+    const lampFrame = la >= 0 && la < 0.13 ? 'lamp_off' : la >= 0.13 && la < 0.35 ? 'lamp_pull' : 'lamp' + Math.min(3, Math.max(0, Math.round((glow - 0.6) * 4)));
+    this.sprite(lampFrame, dy(lp), lp.sq);
+    // the moon inside the glass catches the glow
+    if (lampFrame !== 'lamp_off') {
+      g.save();
+      g.beginPath(); g.arc(Math.round(lx), Math.round(ly), 28, 0, Math.PI * 2); g.clip();
+      g.globalCompositeOperation = 'lighter';
+      g.globalAlpha = clamp((glow - 0.75) * 0.22, 0, 0.3);
+      this.sprite(lampFrame, dy(lp), lp.sq);
+      g.restore();
+    }
+    // the cuckoo clock: the door and the owl, the pendulum, the real time
+    const cp = this.objs.clock, ca = cp.act;
+    let cf = cp.hover ? 'clock1' : 'clock0';
+    if (ca >= 0) {
+      const bob = [0.32, 0.68].some((c0) => ca > c0 && ca < c0 + 0.24);
+      cf = ca < 0.1 ? 'clock1' : ca < 1.15 ? (bob ? 'clock3' : 'clock2') : ca < 1.32 ? 'clock1' : 'clock0';
+    }
+    const cdy = dy(cp);
+    this.sprite(cf, cdy, cp.sq);
+    const kickP = ca >= 0 ? Math.sin(Math.min(1, ca / 1.2) * Math.PI) * 0.18 : 0;
+    const swing = calm ? 0 : Math.sin((t * Math.PI * 2) / 1.15) * (0.26 + kickP);
+    this.sprite('pend' + Math.max(0, Math.min(4, Math.round(swing / 0.13) + 2)), cdy, cp.sq);
+    const [dx0, dy0, dr] = SH.dial, now = new Date();
+    const dcx = dx0, dcy = dy0 + cdy + (cp.sq ? Math.round(-cp.sq * (TOP - dy0)) : 0);
+    const mA = ((now.getMinutes() + now.getSeconds() / 60) / 60) * Math.PI * 2, hA = (((now.getHours() % 12) + now.getMinutes() / 60) / 12) * Math.PI * 2;
+    this.hand(dcx, dcy, hA, dr * 0.5, '#2b1e2c', true);
+    this.hand(dcx, dcy, mA, dr * 0.74, '#3a2a40', false);
+    g.fillStyle = '#e8b448';
+    g.fillRect(Math.round(dcx - 1), Math.round(dcy - 1), 2, 2);
+    // the journal: hover lifts the cover; a tap unbuckles it and swings the cover open, then shut
+    const bp = this.objs.book, ba = bp.act;
+    let bf = bp.hover ? 'book1' : 'book0';
+    if (ba >= 0) bf = ba < 0.12 ? 'book2' : ba < 0.25 ? 'book3' : ba < 0.4 ? 'book4' : ba < 1.05 ? 'book5' : ba < 1.18 ? 'book4' : ba < 1.3 ? 'book3' : ba < 1.6 ? 'book2' : 'book0';
+    this.sprite(bf, dy(bp), bp.sq);
+    // night: the lamp's light catches the near sides of its neighbours
+    if (night > 0.02) this.glow(lx + 30, ly + 10, 70, 0.1 * night * Math.min(1.3, glow), '255,190,110', 3);
+    // up to the screen, whole device pixels per art pixel
+    const c = this.ctx;
+    c.imageSmoothingEnabled = false;
+    c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    c.drawImage(this.art, 0, 0, this.canvas.width, this.canvas.height);
+    if (motion > 0.02) this.moving = 0.4;
+    else this.moving = Math.max(0, this.moving - dt);
+    if (!this.live) { this.live = true; this.onLive?.(); }
+  }
+  private nightness() {
+    const sc = sceneRef.current as unknown as { sky?: { night?: number } } | null;
+    const n = sc?.sky?.night ?? (window as unknown as { __shelfNight?: number }).__shelfNight;
+    if (typeof n === 'number') return Math.max(0, Math.min(1, (n - 0.15) / 0.6));
+    const h = new Date().getHours();
+    return h >= 20 || h < 6 ? 1 : 0;
+  }
+}
+
+let stage: ShelfStage | undefined;
+const getStage = () => (stage ??= new ShelfStage());
+
+/** the buttons tell the shelf what's happening to their objects */
+export const shelf2d = {
+  press: (id: NavId, on: boolean) => stage?.press(id, on),
+  hover: (id: NavId, on: boolean) => stage?.hover(id, on),
+  act: (id: NavId) => stage?.act(id),
+};
+
+let styled = false;
+function installStyles() {
+  if (styled || typeof document === 'undefined') return;
+  styled = true;
+  const st = document.createElement('style');
+  st.id = 'hh-shelf2d';
+  st.textContent = `
+.hh-navart{position:absolute;left:0;top:${-BTOP}px;width:${BW}px;height:${BH}px;pointer-events:none;z-index:0}
+.hh-navart>canvas{position:absolute;left:0;top:0;display:block;width:100%;height:100%;image-rendering:pixelated}
+.hh-navart>canvas.soft{image-rendering:auto}
+.hh-nav.live .hh-pic,.hh-nav.live .hh-cshadow,.hh-nav.live .hh-shelf,.hh-nav.wait .hh-pic,.hh-nav.wait .hh-cshadow,.hh-nav.wait .hh-shelf{visibility:hidden}
+.hh-nav.live .hh-plate,.hh-nav.wait .hh-plate{background-image:none!important;filter:none}
+.hh-nav.live .hh-mobj,.hh-nav.live .hh-mobj.press,.hh-nav.live .hh-mobj.pop,.hh-nav.live .hh-mobj.rec,.hh-nav.live .hh-mobj.rec.pop{animation:none;scale:none;filter:none}
+.hh-nav.live .hh-mobj.press .hh-plate{translate:0 1px}
+`;
+  document.head.appendChild(st);
+}
+
+/** device px per nav CSS px: the screen's pixel ratio, times 1.5 where the nav is drawn bigger */
+const navScale = (big: boolean) => (window as unknown as { __shelfArt?: number }).__shelfArt ?? (big ? 1.5 : 1) * (devicePixelRatio || 1);
+
+/**
+ * The pixel-art shelf behind the main buttons. Returns [host ref, live, wait]: put the host span in the nav; `live`
+ * turns true once the first frame is drawn (then the painted stand-ins hide); `wait` hides them for a moment while the
+ * interface atlas is still coming (they show if it can't load).
+ */
+export function useShelf2D(away: boolean, rec: boolean, bigQuery: string): [(el: HTMLElement | null) => void, boolean, boolean] {
+  installStyles();
+  const [live, setLive] = useState(false);
+  const [ready, setReady] = useState(() => !!atlasNow());
+  const [wait, setWait] = useState(() => !atlasNow());
+  const host = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    let gone = false;
+    void uiAtlas().then((im) => { if (gone) return; if (im) setReady(true); else setWait(false); });
+    const t = window.setTimeout(() => setWait(false), 1500);
+    return () => { gone = true; clearTimeout(t); };
+  }, []);
+  useEffect(() => {
+    if (!ready) return;
+    const s = getStage();
+    s.onLive = () => { setLive(true); setWait(false); };
+    if (s.live) setLive(true);
+    let mq: MediaQueryList | null = null;
+    const size = () => s.setScale(navScale(!!mq?.matches));
+    try { mq = matchMedia(bigQuery); mq.addEventListener?.('change', size); } catch { mq = null; }
+    size();
+    s.attach(host.current);
+    s.show(!away);
+    addEventListener('resize', size);
+    return () => { mq?.removeEventListener?.('change', size); removeEventListener('resize', size); };
+  }, [ready]);
+  useEffect(() => { if (ready) stage?.show(!away); }, [ready, away]);
+  useEffect(() => { if (ready) stage?.setRec(rec); }, [ready, rec]);
+  return [(el) => { host.current = el; if (ready) stage?.attach(el); }, live, wait && !live];
+}
+
+/** for the dev page and screenshots */
+if (typeof window !== 'undefined') (window as unknown as { __shelf2d: unknown }).__shelf2d = { stage: () => stage, api: shelf2d };

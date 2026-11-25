@@ -4,7 +4,7 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { hasSprite, SPRITES, spriteURL } from '../px/sprites.js';
 import '../px/chromeart.js';
-import { iconSrc } from './iconset.ts';
+import { iconDev, iconSrc } from './iconset.ts';
 
 /** [frame sprite name, milliseconds] steps, looped. */
 export type Timeline = [string, number][];
@@ -67,8 +67,8 @@ const dpr = () => Math.min(4, Math.max(1, Math.round((typeof devicePixelRatio ==
 export function crisp(name: string, want: number) {
   const sp = (SPRITES as Record<string, { w: number; h: number; i3d?: unknown }>)[name];
   const w0 = sp?.w ?? 20, h0 = sp?.h ?? 20, k = dpr();
-  // [ui5] the 3D icon family: exactly the asked size, in device pixels
-  if (sp?.i3d) { const dev = Math.max(8, Math.round(want * k)); return { w: dev / k, h: Math.round(((dev / k) * h0) / w0), scale: 1, dev }; }
+  // [icons8] the pixel-art icon family: the nearest crisp size (a whole number of device px per art px)
+  if (sp?.i3d) { const dev = iconDev(Math.max(8, Math.round(want * k))); return { w: dev / k, h: dev / k, scale: 1, dev }; }
   const per = Math.max(1 / k, Math.round((want / Math.max(w0, h0)) * k) / k);
   return { w: Math.round(w0 * per), h: Math.round(h0 * per), scale: Math.max(1, Math.round(per * k)), dev: 0 };
 }

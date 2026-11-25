@@ -4,8 +4,8 @@
 //             moon-gem boards on brass chains with enamel "+" buttons (right)
 //   SideTools small walnut tiles with brass corners and coloured felt, hung on a rope down the right
 //             side (Build, Shop, Dress up, Quests, Map, Settings), each with a paper label tag
-//   MainNav   three big objects on a walnut shelf with engraved brass name plates, live in 3D (shelf3d.tsx): a moon lamp (Sleep),
-//             a carved cuckoo clock showing the real time (Clock), a leather journal (Book)
+//   MainNav   three big objects on a walnut shelf with engraved brass name plates, in pixel art (shelf2d.tsx): a moon lamp
+//             (Sleep), a carved cuckoo clock showing the real time (Clock), a leather journal (Book)
 // [ui7] Everything is painted by the realistic material painter (src/ui/real/, src/ui/chrome/objects.ts) at
 // device resolution: real walnut, oak, brass, enamel and felt lit from the top left, with soft shadows. Signs swing when tapped or hit by rewards and sway in the breeze; they
 // are pulled up out of the way when a full-screen place opens and drop back in when it closes. Opening a
@@ -31,7 +31,7 @@ import { installSurfaces } from './surfaces.ts';
 import { alagardWidth, uiFontPx } from '../font.ts';
 import { artPx } from '../../gfx/artpx.ts';
 import { punch } from '../text3d.tsx';
-import { shelf3d, useShelf3D, type NavId } from './shelf3d.tsx'; // [icons6] the main buttons as live 3D objects
+import { shelf2d, useShelf2D, type NavId } from './shelf2d.tsx'; // [icons8] the main buttons as pixel-art objects
 import { deviceK } from '../real/paint.ts';
 import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
@@ -408,13 +408,13 @@ function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
   const [act, setAct] = useState(0);
   const el = useRef<HTMLButtonElement>(null);
   const nid = p.m.id as NavId;
-  const down = () => { setState('press'); shelf3d.press(nid, true); sound.play('tick_wood', { volume: 0.4, rate: 0.9, gap: 60 }); haptic(6); };
-  const up = () => { shelf3d.press(nid, false); setState((s) => (s === 'press' ? 'pop' : s)); };
+  const down = () => { setState('press'); shelf2d.press(nid, true); sound.play('tick_wood', { volume: 0.4, rate: 0.9, gap: 60 }); haptic(6); };
+  const up = () => { shelf2d.press(nid, false); setState((s) => (s === 'press' ? 'pop' : s)); };
   const go = () => {
     setState('pop');
     setAct((n) => n + 1);
-    shelf3d.press(nid, false);
-    shelf3d.act(nid);
+    shelf2d.press(nid, false);
+    shelf2d.act(nid);
     const id = p.m.id;
     if (id === 'sleep') { sound.play('ui_toggle', { volume: 0.7, gap: 60 }); sound.play('chime_sweep', { volume: 0.3, gap: 200 }); }
     else if (id === 'clock') { sound.play('drawer', { volume: 0.25, rate: 1.6, gap: 200 }); [110, 380].forEach((ms, i) => setTimeout(() => sound.play('owl_hoot', { volume: 0.4, rate: 1.12 + i * 0.08, gap: 150 }), ms)); } // [icons6] the cuckoo door pops, the owl calls twice
@@ -427,8 +427,8 @@ function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
   useEffect(() => { if (state !== 'pop') return; const t = setTimeout(() => setState(''), 560); return () => clearTimeout(t); }, [state]);
   return (
     <button ref={el} class={'hh-mobj ' + p.m.id + (state ? ' ' + state : '') + (p.rec ? ' rec' : '')} style={{ '--i': p.i } as Record<string, number>}
-      onPointerDown={down} onPointerUp={up} onPointerLeave={() => { shelf3d.press(nid, false); shelf3d.hover(nid, false); setState((s) => (s === 'press' ? '' : s)); }}
-      onPointerEnter={(e) => { if ((e as PointerEvent).pointerType === 'mouse') shelf3d.hover(nid, true); }} onPointerCancel={() => shelf3d.press(nid, false)} onClick={go} aria-label={p.m.label}>
+      onPointerDown={down} onPointerUp={up} onPointerLeave={() => { shelf2d.press(nid, false); shelf2d.hover(nid, false); setState((s) => (s === 'press' ? '' : s)); }}
+      onPointerEnter={(e) => { if ((e as PointerEvent).pointerType === 'mouse') shelf2d.hover(nid, true); }} onPointerCancel={() => shelf2d.press(nid, false)} onClick={go} aria-label={p.m.label}>
       <img class="hh-cshadow" src={contactShadow(p.m.id === 'book' ? 80 : 68, 12, p.k)} alt="" draggable={false} />
       <span class="hh-pic">
         {p.m.id === 'sleep' ? <LampArt k={p.k} act={act} /> : p.m.id === 'clock' ? <AlarmArt k={p.k} act={act} /> : <BookArt k={p.k} act={act} />}
@@ -453,10 +453,10 @@ export function MainNav() {
   let diff = t.getTime() - now.getTime();
   if (diff < -6 * 3600_000) diff += 24 * 3600_000;
   const bedtimeNear = diff < 90 * 60_000;
-  const [host3d, live, still3d, wait3d] = useShelf3D(away, bedtimeNear, DESK_NAV); // [icons6] the live 3D shelf (and last visit's still of it)
+  const [hostArt, live, waitArt] = useShelf2D(away, bedtimeNear, DESK_NAV); // [icons8] the pixel-art shelf
   return (
-    <nav class={'hh-nav' + (away ? ' away' : '') + (live || still3d ? ' live' : wait3d ? ' wait' : '')} aria-label="Main">
-      <span class="hh-nav3d" ref={host3d} aria-hidden="true">{still3d && <img src={still3d} alt="" draggable={false} />}</span>
+    <nav class={'hh-nav' + (away ? ' away' : '') + (live ? ' live' : waitArt ? ' wait' : '')} aria-label="Main">
+      <span class="hh-navart" ref={hostArt} aria-hidden="true" />
       <div class="hh-plaques">
         {MAIN.map((m, i) => <MainObject key={m.id} m={m} i={i} rec={m.id === 'sleep' && bedtimeNear} k={k} />)}
       </div>
