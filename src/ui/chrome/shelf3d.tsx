@@ -15,7 +15,7 @@
 import * as THREE from 'three';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sceneRef } from '../state.ts';
-import { acornProp, cuckooClock, studioEnv, contactBlob, journal, moonLamp, oakLeafProp, setClockHands, shelf, type BookParts, type ClockParts, type LampParts } from './props3d.ts';
+import { acornProp, cuckooClock, mergeStatic, studioEnv, contactBlob, journal, moonLamp, oakLeafProp, setClockHands, shelf, type BookParts, type ClockParts, type LampParts } from './props3d.ts';
 import { reducedMotion } from './swing.ts';
 
 export type NavId = 'sleep' | 'clock' | 'book';
@@ -160,6 +160,12 @@ class ShelfStage {
     this.lamp = moonLamp();
     this.clock = cuckooClock();
     this.book = journal();
+    // one mesh per material for everything that never moves (fewer draw calls)
+    mergeStatic(sh.root);
+    mergeStatic(this.lamp.body, [this.lamp.moon, this.lamp.sky, this.lamp.chain]);
+    mergeStatic(this.clock.body, [this.clock.hour, this.clock.minute, this.clock.pendulum, this.clock.door, this.clock.owl, ...this.clock.weights]);
+    mergeStatic(this.book.body, [this.book.cover, this.book.tab]);
+    for (const g of [this.lamp.chain, this.lamp.moon, this.clock.owl, this.clock.pendulum, this.clock.door, ...this.clock.weights, this.book.cover, this.book.tab]) mergeStatic(g);
     const zObj = -0.16;
     const ko = wAt(zObj);
     const place = (id: NavId, root: THREE.Object3D, body: THREE.Object3D, blobW: number, blobD: number, ry = 0, s = 1) => {

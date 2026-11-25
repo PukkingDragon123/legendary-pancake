@@ -12,6 +12,7 @@
 // Textures are painted per pixel into small canvases (crisp when magnified, mipmapped when shrunk) from the game's
 // interface ramps (src/ui/px/relief.ts), with no light baked in: the light comes from the scene.
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { clamp, fbm, hash, hex, leatherGrain, metal, mix, mul, PAL, paperGrain, rampAt, vnoise, weave, woodGrain, type RGB } from '../px/relief.ts';
 
 // ------------------------------------------------------------------ textures
@@ -240,6 +241,41 @@ export function ribbon(pts: [number, number, number][], w: number, m: THREE.Mate
   g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
   g.setIndex(I);
   return mesh(g, m);
+}
+
+/**
+ * Merge the still parts of a model into one mesh per material (fewer draw calls). `moving` are the parts that animate
+ * (they and everything under them are left alone), as are transparent and ordered meshes.
+ */
+export function mergeStatic(root: THREE.Object3D, moving: THREE.Object3D[] = []): void {
+  root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), mtx = new THREE.Matrix4();
+  const isMoving = (o: THREE.Object3D) => { for (let p: THREE.Object3D | null = o; p && p !== root; p = p.parent) if (moving.includes(p)) return true; return false; };
+  const sets = new Map<string, { mat: THREE.Material; cast: boolean; geos: THREE.BufferGeometry[]; meshes: THREE.Mesh[] }>();
+  root.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh || Array.isArray(m.material) || m.material.transparent || m.renderOrder || !m.visible || isMoving(m)) return;
+    const g0 = m.geometry;
+    if (!g0.attributes.normal || !g0.attributes.uv) return;
+    const g = (g0.index ? g0.toNonIndexed() : g0.clone());
+    for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal' && k !== 'uv') g.deleteAttribute(k);
+    g.clearGroups();
+    g.applyMatrix4(mtx.multiplyMatrices(inv, m.matrixWorld));
+    const key = m.material.uuid + (m.castShadow ? 'c' : '');
+    let s = sets.get(key);
+    if (!s) { s = { mat: m.material, cast: m.castShadow, geos: [], meshes: [] }; sets.set(key, s); }
+    s.geos.push(g); s.meshes.push(m);
+  });
+  for (const s of sets.values()) {
+    if (s.meshes.length < 2) { s.geos.forEach((g) => g.dispose()); continue; }
+    const merged = mergeGeometries(s.geos, false);
+    s.geos.forEach((g) => g.dispose());
+    if (!merged) continue;
+    for (const m of s.meshes) m.removeFromParent();
+    const me = new THREE.Mesh(merged, s.mat);
+    me.castShadow = s.cast; me.receiveShadow = true;
+    root.add(me);
+  }
 }
 
 /** a soft round contact shadow (a dark blob on the surface below) */
