@@ -558,7 +558,7 @@ export function leatherFrame(hue: string = '#2c6b43', t = 14): Nine {
 export function paperCard(o: { gilt?: boolean; tint?: RGB; rule?: boolean } = {}): Nine {
   const m = 6, bw = 10, cs = 16, c = 160, W = 2 * cs + c;
   return nine(`pcard10b:${o.gilt}:${o.tint?.join()}:${o.rule}`, () => {
-    const k = deviceK(3), r = new Real(W, W, k, m);
+    const k = Math.min(2, deviceK(3)), r = new Real(W, W, k, m); // soft paper: 2 device px a unit is plenty (fast first paint)
     const f1 = 20 / c, f2 = 100 / c;
     const base = box(0.6, 0.6, W - 1.2, W - 1.2, 0);
     const deckle: SDF = (x, y) => base(x, y) + (pnoise(x * f1, y * f1, 20, 20, 3) - 0.5) * 1.5 + (pnoise(x * f2, y * f2, 100, 100, 7) - 0.5) * 0.75;
@@ -606,7 +606,7 @@ export function paperCard(o: { gilt?: boolean; tint?: RGB; rule?: boolean } = {}
 export function paperRim(base: string): Nine {
   const m = 3, e = 8, c = 80, W = 2 * e + c;
   return nine(`prim10:${base}`, () => {
-    const k = deviceK(3), r = new Real(W, W, k, m);
+    const k = Math.min(2, deviceK(3)), r = new Real(W, W, k, m);
     const f1 = 10 / c, f2 = 60 / c;
     const box0 = box(-1.2, -1.2, W + 2.4, W + 2.4, 0);
     const deckle: SDF = (x, y) => box0(x, y) + (pnoise(x * f1, y * f1, 10, 10, 5) - 0.5) * 1.8 + (pnoise(x * f2, y * f2, 60, 60, 9) - 0.5) * 0.8;

@@ -34,7 +34,7 @@ export function installChromeSkin() {
 .hh-toast-body{${nineCSS('bubble_bw')}}
 .hh-tkt-body{${nineCSS('paper_card', { bw: [6, 6, 6, 4] })};background:none;border-radius:0;box-shadow:none;filter:drop-shadow(0 2px 3px rgba(34,22,46,.4))}
 .hh-tkt-stub{${nineCSS('paper_card_kraft', { bw: [6, 4, 6, 6] })};background:none;border-radius:0;box-shadow:none;filter:drop-shadow(0 2px 3px rgba(34,22,46,.4))}
-.hh-tkt-seal{position:absolute;right:-10px;bottom:-9px;width:30px;height:30px;background:${'url("' + sealArt(22) + '")'} 0 0/30px 30px no-repeat;z-index:4;pointer-events:none;filter:none}
+.hh-tkt-seal{position:absolute;right:-14px;top:-9px;width:30px;height:30px;background:${'url("' + sealArt(22) + '")'} 0 0/30px 30px no-repeat;z-index:4;pointer-events:none;filter:none}
 .lvup-card{${nineCSS('walnut')};background:var(--paper-bg);background-clip:padding-box}
 .lvup-unlock{${nineCSS('sticky_note')}}
 .hh-bubble{${nineCSS('bubble_bw')}}

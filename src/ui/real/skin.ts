@@ -115,8 +115,8 @@ ${tok}
 .think{${nineCSS('bubble_think')}}
 .tooltip{${nineCSS('tooltip')};color:#f6e9cf}
 /* [ui10] a carved cartouche crest (oak leaves, acorns, the owl in a gilt boss) on every cabinet's top rail */
-.sheet::before{content:'';position:absolute;left:50%;top:-22px;width:104px;height:44px;margin-left:-52px;background:var(--crest) center/104px 44px no-repeat;pointer-events:none;z-index:3}
-.sheet.qb::before,.sheet.wd::before{top:-24px}
+.sheet::before{content:'';position:absolute;left:50%;top:-25px;width:96px;height:41px;margin-left:-48px;background:var(--crest) center/96px 41px no-repeat;pointer-events:none;z-index:3}
+.sheet.qb::before,.sheet.wd::before{top:-26px}
 /* [ui10] toggles are real switches: a walnut plate with a brass escutcheon, a square-cut brass lever */
 .toggle{background:var(--sw-off) center/64px 36px no-repeat}
 .toggle.on{background-image:var(--sw-on)}
@@ -132,6 +132,21 @@ input[type='range'].slider::-moz-range-thumb{width:26px;height:36px;border-radiu
 .seg,.shelf .slot small,.pinpt .flag{${paperRimCSS('#e8d6ae')}}
 .card.sunk{${paperRimCSS('#d9c49a', '10px')}}
 .ticket,.page{${paperRimCSS('#f0e4c8', '8px')}}
+/* [ui10] the morning: the reward on a gilt-edged card, the rarity on a swallowtail pennant, the haul in walnut frames on velvet */
+.mr-card{${paperCardCSS(true)};padding:6px 6px 4px}
+.mr-rarity{clip-path:polygon(0 0,100% 0,calc(100% - 7px) 50%,100% 100%,0 100%,7px 50%);padding:2px 16px 4px}
+.haul-item{${nineCSS('walnut_thin', { bw: [6, 6, 6, 6] })};background:var(--tx-velvet-blue) 0 0/260px,#22345e;background-clip:padding-box;box-shadow:none;padding:2px 2px 4px}
+`;
+  const st = document.createElement('style');
+  st.id = 'hh-real-skin';
+  st.textContent = css;
+  document.head.appendChild(st);
+  // [ui10] the places that open only on a tap (build mode, the globe) are dressed just after the first frame, so
+  // their frames don't hold up the first paint
+  const later = () => {
+    const s2 = document.createElement('style');
+    s2.id = 'hh-real-skin-2';
+    s2.textContent = `
 /* [ui10] build mode: the blueprint pinned in a walnut drafting frame; enamel and brass buttons; paper labels */
 .bm-drawer{${nineCSS('walnut_thin', { bw: [7, 7, 7, 7] })};background-clip:padding-box;padding:4px 4px 6px;box-shadow:6px 9px 17px rgba(12,34,64,.6)}
 .bm-drawer::before,.bm-drawer::after{display:none}
@@ -149,10 +164,6 @@ input[type='range'].slider::-moz-range-thumb{width:26px;height:36px;border-radiu
 .bm-act.no{${nineCSS('button_red', { bw: [4, 4, 7, 4] })};background:none;color:#fbf4e6}
 .bm-act.turn{${nineCSS('button_sky', { bw: [4, 4, 7, 4] })};background:none;color:#fbf4e6}
 .bm-act:active{transform:translateY(2px)}
-/* [ui10] the morning: the reward on a gilt-edged card, the rarity on a swallowtail pennant, the haul in walnut frames on velvet */
-.mr-card{${paperCardCSS(true)};padding:6px 6px 4px}
-.mr-rarity{clip-path:polygon(0 0,100% 0,calc(100% - 7px) 50%,100% 100%,0 100%,7px 50%);padding:2px 16px 4px}
-.haul-item{${nineCSS('walnut_thin', { bw: [6, 6, 6, 6] })};background:var(--tx-velvet-blue) 0 0/260px,#22345e;background-clip:padding-box;box-shadow:none;padding:2px 2px 4px}
 /* [ui10] the globe: place names on card labels, the souvenir tabs as index tabs, brass-and-glass bars, pennants, a brass close plate */
 .gb-lbl{${nineCSS('label', { bw: [1, 3, 1, 3] })};background:none;color:#2a2016;box-shadow:none}
 .gb-lbl.tonight{${nineCSS('label_kraft', { bw: [1, 3, 1, 3] })};background:none;color:#3a2410}
@@ -165,8 +176,8 @@ input[type='range'].slider::-moz-range-thumb{width:26px;height:36px;border-radiu
 .gb-bar i{${nineCSS('bar_fill_green', { bw: [0, 0, 0, 0] })};background:none;box-shadow:none}
 .gb-close{background:${u(roundButton(34, 'cream'))} center/100% 100% no-repeat;box-shadow:none}
 `;
-  const st = document.createElement('style');
-  st.id = 'hh-real-skin';
-  st.textContent = css;
-  document.head.appendChild(st);
+    document.head.appendChild(s2);
+  };
+  const ric = (globalThis as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => void }).requestIdleCallback;
+  if (ric) ric(later, { timeout: 1200 }); else setTimeout(later, 400);
 }
