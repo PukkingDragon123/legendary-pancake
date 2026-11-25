@@ -1,15 +1,13 @@
-// [look4] "Golden Diorama": the HD-2D-style picture for every scene the app draws (the forest and every Stage:
-// the shop, the interview office...). The world is drawn into a modest internal-resolution HDR target (crisp
-// pixel texels, a little chunky: the short side of the picture is about 440-460 internal px), then
-//   1. bloom: a soft-knee bright pass and a five-level down/up mip chain (lamp windows, the sun and its glints,
-//      the moon, fireflies and lanterns glow with a wide, clean halo),
+// [look4] "Golden Diorama", [light7] rendered at full resolution: the picture for every scene the app draws (the forest
+// and every Stage: the shop...). The world is drawn into an HDR target the size of the canvas (multisampled on the
+// high and medium tiers; the low tier draws at about two thirds of the size and scales up smoothly), then
+//   1. bloom: a soft-knee bright pass at half resolution and a down/up mip chain (lamp windows, the sun and its glints,
+//      the moon, fireflies and lanterns glow with a clean halo),
 //   2. tilt-shift depth of field from the depth buffer: a sharp band round the focus distance, the far woods and
 //      the near grass softly out of focus (colour weighted by circle of confusion, so sharp things never smear),
-//   3. a composite at internal resolution: exposure, white balance, ACES filmic tone mapping, a grade that adds
+//   3. a composite straight onto the canvas: exposure, white balance, ACES filmic tone mapping, a grade that adds
 //      warmth, vibrance and saturation, warm-light / cool-shadow split toning, lift/gamma/gain, a gentle vignette,
-//      very light film grain and an 8-bit ordered dither (only against banding, no posterising),
-//   4. a nearest-neighbour upscale to the canvas, so the picture reads as crisp hi-res pixel art and the DOM UI
-//      above it stays sharp.
+//      a whisper of film grain and an 8-bit ordered dither (only against banding).
 // Knobs: `post.grade` (the world's live values, driven by the scene from the sky) and `Stage.look` (see
 // scene.ts): a stage sets any subset of Grade and the rest falls back to STAGE_LOOK.
 import * as THREE from 'three';
@@ -92,25 +90,18 @@ function quad(mat: THREE.Material) {
 const shader = (fragmentShader: string, uniforms: Record<string, THREE.IUniform>) =>
   new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader, uniforms, depthTest: false, depthWrite: false });
 
-/**
- * The internal pixel size (CSS px per internal px). [look5] A little chunkier than v4: the short side of the picture
- * lands near `target` internal px (460 on the high tier, 440 on medium; the low tier scales that up again), and even a
- * narrow phone gets art pixels a touch bigger than its CSS pixels.
- */
-export function pixelFor(w: number, h: number, target = 440): number {
-  return Math.max(1.12, Math.min(2.6, Math.min(w, h) / target));
-}
-const TARGET = { high: 460, medium: 440, low: 440 } as const;
+/** [light7] Per tier: the scene target's size relative to the canvas, and its multisampling. */
+const RES = { high: 1, medium: 1, low: 0.68 } as const;
+const MSAA = { high: 4, medium: 2, low: 0 } as const;
 
 export class Post {
-  /** CSS pixels per internal pixel */
-  pixel: number;
+  /** canvas pixels per scene-target pixel (1 on high and medium) */
+  pixel = 1;
   /** the world's grade (the scene drives it from the sky every frame) */
   grade = defaultGrade();
   private stageGrade = defaultGrade();
   enabled = true;
   private rt!: THREE.WebGLRenderTarget;
-  private ldr!: THREE.WebGLRenderTarget;
   private bloomRT: THREE.WebGLRenderTarget[] = [];
   private dofA!: THREE.WebGLRenderTarget;
   private dofB!: THREE.WebGLRenderTarget;
@@ -122,22 +113,18 @@ export class Post {
   private mCoc: THREE.ShaderMaterial;
   private mDofBlur: THREE.ShaderMaterial;
   private mComp: THREE.ShaderMaterial;
-  private mBlit: THREE.ShaderMaterial;
   private w = 1; private h = 1; private frame = 0;
   private levels: number;
   private fixedPixel: number | null = null;
 
-  /** [look4] cost tier: high (5 bloom levels, half-res depth of field), medium (3 levels, half-res), low (2 levels,
-   * quarter-res, a coarser internal grid) */
+  /** [light7] cost tier: high (full size, 4x MSAA, 6 bloom levels), medium (full size, 2x MSAA, 5 levels), low (about
+   * two thirds of the size scaled up smoothly, no MSAA, 4 levels); depth of field at a quarter of the target on all */
   private tier: 'high' | 'medium' | 'low';
   private dofShift = 1;
-  private pixelScale = 1;
   constructor(private gl: THREE.WebGLRenderer, quality: 'low' | 'high' | 'medium') {
     this.tier = quality;
-    this.levels = quality === 'high' ? 5 : quality === 'medium' ? 3 : 2;
-    this.dofShift = quality === 'low' ? 2 : 1;
-    this.pixelScale = quality === 'low' ? 1.2 : 1;
-    this.pixel = pixelFor(innerWidth, innerHeight, TARGET[quality]);
+    this.levels = quality === 'high' ? 6 : quality === 'medium' ? 5 : 4;
+    this.dofShift = 2;
     this.mBright = shader(/* glsl */ `
       uniform sampler2D tSrc; uniform float uThresh; uniform vec2 uTexel; varying vec2 vUv;
       vec3 tap(vec2 o) { return min(texture2D(tSrc, vUv + o * uTexel).rgb, vec3(64.0)); }
@@ -243,8 +230,8 @@ export class Post {
       vec3 toSRGB(vec3 c) { return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
       float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
       void main() {
-        vec2 px = floor(vUv * uRes);
-        vec2 uv = (px + 0.5) / uRes;
+        vec2 px = gl_FragCoord.xy;
+        vec2 uv = vUv;
         vec3 col = texture2D(tColor, uv).rgb;
         if (uDofOn > 0.5) {
           float k = coc(uv, focusZ()) * uBlur;
@@ -289,27 +276,25 @@ export class Post {
       uVig: { value: 0 }, uGrain: { value: 0 }, uBloom: { value: 0 }, uCold: { value: 0 },
       ...dofU(),
     });
-    this.mBlit = shader('uniform sampler2D tSrc; varying vec2 vUv; void main() { gl_FragColor = texture2D(tSrc, vUv); }', { tSrc: { value: null } });
     this.quadMesh = quad(this.mComp);
     this.scene.add(this.quadMesh);
     this.resize(innerWidth, innerHeight);
   }
 
-  /** Internal resolution (for anything that needs to snap to the pixel grid). */
+  /** The scene target's resolution. */
   get size(): [number, number] { return [this.w, this.h]; }
 
   /** [look4] Change the cost tier at runtime (re-allocates the small targets; cheap). */
   setTier(t: 'high' | 'medium' | 'low') {
     if (t === this.tier) return;
     this.tier = t;
-    this.levels = t === 'high' ? 5 : t === 'medium' ? 3 : 2;
-    this.dofShift = t === 'low' ? 2 : 1;
-    this.pixelScale = t === 'low' ? 1.2 : 1;
+    this.levels = t === 'high' ? 6 : t === 'medium' ? 5 : 4;
+    this.dofShift = 2;
     this.w = -1;
     this.resize(this.cssW, this.cssH);
   }
 
-  /** Force a pixel size (CSS px per internal px); null returns to the automatic size. */
+  /** Force a scale (canvas px per scene-target px); null returns to the tier's. */
   setPixel(p: number | null) {
     if (p === this.fixedPixel) return;
     this.fixedPixel = p;
@@ -317,19 +302,21 @@ export class Post {
   }
 
   private cssW = 1; private cssH = 1;
+  /** [light7] Size the targets for a canvas of W x H CSS px (at the renderer's pixel ratio). */
   resize(W: number, H: number) {
     this.cssW = W; this.cssH = H;
-    this.pixel = this.fixedPixel ?? pixelFor(W, H, TARGET[this.tier]) * this.pixelScale;
-    const w = Math.max(64, Math.round(W / this.pixel)), h = Math.max(64, Math.round(H / this.pixel));
-    if (this.rt && w === this.w && h === this.h) return;
+    const pr = this.gl.getPixelRatio();
+    this.pixel = this.fixedPixel ?? 1 / RES[this.tier];
+    const w = Math.max(64, Math.round((W * pr) / this.pixel)), h = Math.max(64, Math.round((H * pr) / this.pixel));
+    if (this.rt && w === this.w && h === this.h && this.rt.samples === MSAA[this.tier]) return;
     this.w = w; this.h = h;
-    for (const t of [this.rt, this.ldr, this.dofA, this.dofB, ...this.bloomRT]) t?.dispose();
+    for (const t of [this.rt, this.dofA, this.dofB, ...this.bloomRT]) t?.dispose();
     const depth = new THREE.DepthTexture(w, h);
     depth.type = THREE.UnsignedIntType;
     depth.minFilter = depth.magFilter = THREE.NearestFilter;
-    this.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthTexture: depth, samples: 0 });
-    this.ldr = new THREE.WebGLRenderTarget(w, h, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: false });
+    this.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthTexture: depth, samples: MSAA[this.tier] });
     const mk = (a: number, b: number) => new THREE.WebGLRenderTarget(Math.max(4, a), Math.max(4, b), { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
+    // bloom works from half resolution down; the depth of field from a quarter
     this.bloomRT = [];
     for (let i = 1; i <= this.levels; i++) this.bloomRT.push(mk(w >> i, h >> i));
     const dd = this.dofShift;
@@ -393,9 +380,7 @@ export class Post {
     u.uExposure.value = g.exposure; u.uCon.value = g.contrast; u.uSat.value = g.saturation; u.uVib.value = g.vibrance; u.uWarm.value = g.warm; u.uSplit.value = g.split;
     u.uLift.value.copy(g.lift); u.uGamma.value.copy(g.gamma); u.uGain.value.copy(g.gain);
     u.uVig.value = g.vignette; u.uGrain.value = g.grain; u.uBloom.value = g.bloom * 0.12; u.uCold.value = g.cold;
-    this.pass(this.mComp, this.ldr);
-    this.mBlit.uniforms.tSrc.value = this.ldr.texture;
-    this.pass(this.mBlit, null);
+    this.pass(this.mComp, null);
   }
 
   private upAdd: THREE.ShaderMaterial | null = null;
@@ -422,7 +407,7 @@ export class Post {
     this.gl.autoClear = ac;
   }
 
-  dispose() { for (const t of [this.rt, this.ldr, this.dofA, this.dofB, ...this.bloomRT]) t.dispose(); }
+  dispose() { for (const t of [this.rt, this.dofA, this.dofB, ...this.bloomRT]) t.dispose(); }
 }
 
 /** A stage's look over the stage defaults (lift/gamma/gain stay neutral). */

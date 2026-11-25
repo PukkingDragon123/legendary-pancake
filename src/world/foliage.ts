@@ -45,14 +45,14 @@ let texture: THREE.Texture | null = null;
 let readyFn: (() => void) | null = null;
 /** Resolves when the leaf atlas has loaded (or failed). */
 export const leavesReady = new Promise<void>((res) => { readyFn = res; });
-/** The leaf atlas (crisp texels up close, mipmapped far away). */
+/** The leaf atlas (smoothly filtered, mipmapped far away). */
 export function leafTexture(): THREE.Texture {
   if (texture) return texture;
   const t = new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}textures/leaves.webp`, () => readyFn?.(), undefined, () => readyFn?.());
   t.colorSpace = THREE.SRGBColorSpace;
-  t.magFilter = THREE.NearestFilter;
+  t.magFilter = THREE.LinearFilter; // [light7] no pixelated look
   t.minFilter = THREE.LinearMipmapLinearFilter;
-  t.anisotropy = 4;
+  t.anisotropy = 8;
   return (texture = t);
 }
 

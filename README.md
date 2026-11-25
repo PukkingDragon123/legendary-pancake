@@ -29,7 +29,10 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 ## What's new in the golden diorama update (v4)
 
 - **Light and colour**: realistic lighting (filmic tone mapping, sun and sky fill, reflections) with bloom,
-  tilt-shift depth of field and a warm grade; blue days, golden evenings, deep blue nights. Bushy forests of
+  tilt-shift depth of field and a warm grade; blue days, golden evenings, deep blue nights. A painted, gently
+  cel-shaded light: three soft steps of light, cool violet shadows that keep their colour, a rim of light on Pip and
+  his things, crisp glints on brass and glass. The 3D is drawn at full screen resolution, anti-aliased, with smooth,
+  realistic textures (bark, wood grain, plaster, forest floor scans). Bushy forests of
   hand-painted leaves that turn with the real season, a sunny glade, and woods and mountains to the horizon.
   Quality adapts to the device.
 - **The hollow oak**: a gnarled living oak with bark, moss, ivy, carved windows, a porch and balcony; locked

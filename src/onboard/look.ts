@@ -1,11 +1,11 @@
-// The office's own HD-2D picture (the world's post chain steps aside while the interview is up, like the globe):
-//   1. the office is drawn into an HDR target at a modestly reduced internal resolution, with its depth,
+// The office's own picture (the world's post chain steps aside while the interview is up, like the globe):
+//   1. the office is drawn into an HDR target at the canvas's full resolution ([light7]; multisampled on high), with its depth,
 //   2. bloom: a soft-knee bright pass at quarter and eighth resolution (the banker's lamp, the window, brass glints),
 //   3. depth of field: a half-resolution background blur weighted by each texel's circle of confusion, so the
 //      subject stays crisp, the far wall goes soft and nothing in focus bleeds into the blur,
 //   4. a composite: exposure, a filmic shoulder, a warm golden grade that adds saturation, a gentle vignette,
-//      light grain, ordered dither and quantise,
-//   5. an overlay drawn crisp on top (Pip's words), then a nearest upscale to the canvas.
+//      light grain and an 8-bit ordered dither (no posterising),
+//   5. an overlay drawn crisp on top (Pip's words), then shown 1:1 on the canvas.
 // The Stage hands the renderer `present` (a scene with one full-screen triangle) to draw.
 import * as THREE from 'three';
 
@@ -60,8 +60,9 @@ export class Look {
     this.bloomOn = quality === 'high';
     const mk = () => new THREE.WebGLRenderTarget(8, 8, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
     const depth = new THREE.DepthTexture(8, 8); depth.type = THREE.UnsignedIntType;
-    this.rt = new THREE.WebGLRenderTarget(8, 8, { type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthTexture: depth });
-    this.ldr = new THREE.WebGLRenderTarget(8, 8, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: true });
+    // [light7] full resolution, multisampled on the high tier (no pixelated look)
+    this.rt = new THREE.WebGLRenderTarget(8, 8, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthTexture: depth, samples: quality === 'high' ? 4 : 0 });
+    this.ldr = new THREE.WebGLRenderTarget(8, 8, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: true });
     this.hA = mk(); this.hB = mk(); this.qA = mk(); this.qB = mk(); this.eA = mk(); this.eB = mk();
     const base = { vertexShader: VERT, depthTest: false, depthWrite: false };
     this.mBright = new THREE.ShaderMaterial({
@@ -152,7 +153,7 @@ export class Look {
           col = toSRGB(clamp(col, 0.0, 1.0));
           float g = hash(px + floor(uTime * 24.0) * 17.0) - 0.5;
           col += g * uGrain * (1.1 - l);
-          col = floor(col * 64.0 + 0.5 + (bayer4(px) - 0.5) * 0.8) / 64.0;
+          col += (bayer4(px) - 0.5) / 255.0; // [light7] an 8-bit ordered dither against banding (no posterising)
           col = mix(col, vec3(0.0), uFade);
           gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
         }`,
@@ -172,18 +173,19 @@ export class Look {
   fade = 0;
 
   resize(W: number, H: number) {
-    // phones: one texel per CSS px (the paper's print stays readable); big screens a little coarser
-    const portrait = W < H;
-    this.px = Math.min(W, H) < 620 ? 1 : Math.max(1, Math.min(2, Math.floor((portrait ? W : H) / 700))); // [font6] whole texels: crisp pixel type
-    this.w = Math.max(64, Math.round(W / this.px));
-    this.h = Math.max(64, Math.round(H / this.px));
-    const { w, h } = this;
+    // [light7] the full canvas resolution (the renderer's pixel ratio); the blur and bloom levels keep their size on
+    // the screen whatever the ratio
+    const pr = this.gl.getPixelRatio();
+    this.px = 1 / pr;
+    this.w = Math.max(64, Math.round(W * pr));
+    this.h = Math.max(64, Math.round(H * pr));
+    const { w, h } = this, k = pr >= 1.5 ? 1 : 0;
     this.rt.setSize(w, h);
     (this.rt.depthTexture as THREE.DepthTexture).image.width = w; (this.rt.depthTexture as THREE.DepthTexture).image.height = h;
     this.ldr.setSize(w, h);
-    this.hA.setSize(w >> 1, h >> 1); this.hB.setSize(w >> 1, h >> 1);
-    this.qA.setSize(Math.max(8, w >> 2), Math.max(8, h >> 2)); this.qB.setSize(Math.max(8, w >> 2), Math.max(8, h >> 2));
-    this.eA.setSize(Math.max(8, w >> 3), Math.max(8, h >> 3)); this.eB.setSize(Math.max(8, w >> 3), Math.max(8, h >> 3));
+    this.hA.setSize(w >> (1 + k), h >> (1 + k)); this.hB.setSize(w >> (1 + k), h >> (1 + k));
+    this.qA.setSize(Math.max(8, w >> (2 + k)), Math.max(8, h >> (2 + k))); this.qB.setSize(Math.max(8, w >> (2 + k)), Math.max(8, h >> (2 + k)));
+    this.eA.setSize(Math.max(8, w >> (3 + k)), Math.max(8, h >> (3 + k))); this.eB.setSize(Math.max(8, w >> (3 + k)), Math.max(8, h >> (3 + k)));
   }
 
   private pass(mat: THREE.ShaderMaterial, target: THREE.WebGLRenderTarget | null) {

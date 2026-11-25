@@ -5,6 +5,8 @@
 import * as THREE from 'three';
 import { PX, wind } from '../gfx/box.ts';
 import { vivid } from '../gfx/glb.ts';
+import { celKnobs, type CelKnobs } from '../gfx/cel.ts'; // [light7]
+import { setMaxAnisotropy, smoothMaterials } from '../gfx/surface.ts'; // [light7]
 import { ALL_ITEMS, ITEMS } from '../assets/registry.ts';
 import { OwlActor, type OwlFx, type OwlSound } from '../owl/actor.ts';
 import { setFurQuality } from '../owl/fur.ts'; // [owl4]
@@ -42,6 +44,29 @@ export function deviceTier(): Tier {
   const mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || (touch && small);
   if (mobile || (nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4) return 'medium';
   return 'high';
+}
+
+/**
+ * [light7] The canvas's backing-store ratio: the full device resolution (up to 2x). The post chain draws the scene at
+ * this size (smaller on the low tier) and composites straight onto it.
+ */
+function canvasRatio(): number {
+  return Math.min(typeof devicePixelRatio === 'number' && devicePixelRatio > 0 ? devicePixelRatio : 1, 2);
+}
+
+/** [light7] A soft round contact shadow (cool and dark, never black), laid flat. */
+function contactShadow(): THREE.Mesh {
+  const n = 64, c = document.createElement('canvas');
+  c.width = c.height = n;
+  const g = c.getContext('2d')!, gr = g.createRadialGradient(n / 2, n / 2, 0, n / 2, n / 2, n / 2);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.5, 'rgba(255,255,255,0.8)'); gr.addColorStop(0.78, 'rgba(255,255,255,0.3)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, n, n);
+  const t = new THREE.CanvasTexture(c);
+  const m = new THREE.MeshBasicMaterial({ map: t, color: 0x1c1430, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2.3, 1.9).rotateX(-Math.PI / 2), m); // (reaches out from under Pip's round belly)
+  mesh.renderOrder = 1;
+  mesh.name = 'pip-contact-shadow';
+  return mesh;
 }
 
 export type SceneEvent =
@@ -103,12 +128,14 @@ export class Scene {
   /** [world] real-world weather and seasons (see weather.ts) */
   readonly weather: Weather;
   readonly quality: Quality;
-  /** [look4] "Golden Diorama" post chain: modest internal resolution, bloom, tilt-shift depth of field, ACES and a
+  /** [look4] "Golden Diorama" post chain ([light7] at full resolution): bloom, tilt-shift depth of field, ACES and a
    * warm grade (post.enabled = false to bypass; post.grade holds the world's live knobs, Stage.look a stage's) */
   readonly post: Post;
   /** [look4] the world beyond the clearing: forest to the horizon, hills and mountains in the haze */
   readonly vista: Vista;
   private pmrem: THREE.PMREMGenerator;
+  /** [light7] the world's live cel-light knobs (gfx/cel.ts): less sky bounce inside the oak, softer lamp bands */
+  readonly cel: CelKnobs;
   private grass: THREE.Group;
   private envScene = new THREE.Scene();
   private envRT: THREE.WebGLRenderTarget | null = null;
@@ -149,6 +176,8 @@ export class Scene {
   private hourOverride: number | null = null;
   /** breathing: a warm glow at the owl's chest and a gentle camera dolly */
   private glow: THREE.PointLight;
+  /** [light7] a soft contact shadow under Pip on whatever he stands on (lamps cast no shadows) */
+  private contact: THREE.Mesh;
   private breathZoom = 1;
   /** a stage shown instead of the world (see Stage) */
   stage: Stage | null = null;
@@ -190,14 +219,16 @@ export class Scene {
     this.maxTier = this.tier;
     quality = this.tier === 'high' ? 'high' : 'low';
     this.quality = quality;
-    const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', alpha: false }));
-    r.setPixelRatio(Math.min(devicePixelRatio || 1, quality === 'high' ? 2 : 1.25));
+    const r = (this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', alpha: false }) /* [light7] the post chain multisamples its own target; the canvas only gets the composite */);
+    r.setPixelRatio(canvasRatio()); // [light7] see canvasRatio
     r.shadowMap.enabled = true;
     r.shadowMap.type = THREE.PCFSoftShadowMap;
     this.post = new Post(r, this.tier); // [world3]
     r.outputColorSpace = THREE.SRGBColorSpace;
     r.toneMapping = THREE.NoToneMapping; // [look4] the post chain tone-maps (ACES) after bloom and depth of field
     this.pmrem = new THREE.PMREMGenerator(r);
+    this.cel = celKnobs(this.scene);
+    setMaxAnisotropy(r);
 
     this.plan = planForest(this.tier);
     this.sky = new Sky(this.scene, quality === 'high' ? 2048 : 1024, quality); // [world]
@@ -245,6 +276,8 @@ export class Scene {
       sound: (id) => this.emit({ type: 'sound', id: 'owl_' + id }),
     });
     this.scene.add(this.owl.node);
+    this.contact = contactShadow();
+    this.scene.add(this.contact);
     this.placeOwl('inside'); // [house] Pip hangs out in the living room by day
 
     this.weather = new Weather(this); // [world] after the owl, house and flora exist
@@ -500,9 +533,11 @@ export class Scene {
       g.saturation = L(1.1, 0.9, night);
       g.vibrance = L(0.22, 0.1, night);
       g.contrast = L(1.06, 1.1, night);
-      g.split = L(0.5, 0.75, night);
-      g.bloom = L(0.5, 0.95, night) + golden * 0.15;
-      g.bloomThreshold = L(1.05, 0.7, night);
+      // [light7] the cel light carries the colour of the shadows now: lighter split toning, and a tighter bloom on
+      // what is really bright (lamps, the sun's glints, the moon) instead of a haze over everything at night
+      g.split = L(0.3, 0.45, night);
+      g.bloom = L(0.42, 0.62, night) + golden * 0.12;
+      g.bloomThreshold = L(1.2, 0.95, night);
       g.vignette = L(0.2, 0.32, night);
       g.lift.set(0, 0.004, 0.016).multiplyScalar(1 + night);
       g.cold = (this.weather?.vis.cold ?? 0) * 0.6;
@@ -538,6 +573,8 @@ export class Scene {
 
   resize() {
     const w = innerWidth, h = innerHeight;
+    const pr = canvasRatio();
+    if (Math.abs(this.renderer.getPixelRatio() - pr) > 1e-6) this.renderer.setPixelRatio(pr);
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     const hf = (30 * Math.PI) / 180;
@@ -577,6 +614,7 @@ export class Scene {
   /** [look4] Shadow casters: everything on high; on medium and low only the big things (and Pip) cast. */
   private cullCasters() {
     vivid(this.owl.node, 0.24); // [look5] a little more colour in Pip's painted feathers (once per material, as they load)
+    smoothMaterials(this.scene); // [light7] no pixelated textures anywhere (each material once, as things load)
     const small = this.tier === 'high' ? 0 : this.tier === 'medium' ? 0.55 : 1.1;
     const sp = new THREE.Sphere();
     const owl = this.owl.node;
@@ -743,6 +781,7 @@ export class Scene {
     this.inLight += (want - this.inLight) * Math.min(1, dt * 3);
     const k = this.inLight, night = this.sky.night, day = 1 - THREE.MathUtils.smoothstep(night, 0.25, 0.75);
     this.sky.hemi.intensity = this.sky.hemiBase * (1 - k * (0.34 + night * 0.24));
+    this.cel.fill = 1 - k * 0.5; // [light7] less sky bounce gets into the hollow
     if (k < 0.005 && !this.insideLights) return;
     if (!this.insideLights) {
       const win = new THREE.SpotLight(0xffe2b0, 0, 11, 0.5, 0.85, 1.2);
@@ -774,7 +813,7 @@ export class Scene {
     // the hanging lantern makes a warm pool (lit even by day), and the open rooms' warm flood (for the oak seen from
     // outside) becomes a soft amber fill in front of Pip, as if off the floorboards (no extra lights: the same two lamps)
     const outLantern = night > 0.4 ? 6 * night * flick : night * 8, M = THREE.MathUtils;
-    this.lantern.intensity = M.lerp(outLantern, (7 * day + 16 * night) * flick, k);
+    this.lantern.intensity = M.lerp(outLantern, (4.6 * day + 16 * night) * flick, k);
     this.lantern.decay = M.lerp(1.4, 2, k);
     this.lantern.distance = M.lerp(10, 14, k);
     this.lantern.color.setHex(0xffc06a).lerp(new THREE.Color(0xffe0bc), day * 0.6 * k);
@@ -822,13 +861,29 @@ export class Scene {
     g.bloomThreshold = b.bloomThreshold + k * night * 0.45;
     g.bloom = b.bloom * (1 + k * night * 0.15);
     g.vignette = b.vignette + k * (0.06 + night * 0.14);
-    g.vibrance = b.vibrance + k * 0.1;
-    g.saturation = b.saturation + k * 0.04;
-    g.warm = b.warm + k * 0.03;
+    g.vibrance = b.vibrance + k * 0.04; // [light7] the lamp and the wood are warm enough on their own
+    g.saturation = b.saturation;
+    g.warm = b.warm;
     // critters (a dragonfly zipping past the lens) and fireflies belong to the clearing, not the living room
     this.critters.group.visible = k < 0.4;
     this.fireflies.mesh.visible = k < 0.4;
   }
+  /** [light7] Keep the contact shadow under Pip: on the floor of the room he is in, or the ground; it fades and widens
+   * as he rises off it (hops, flight) and is gone while he is away. */
+  private stepContact() {
+    const o = this.owl.node.position, c = this.contact;
+    let gy = groundY(o.x, o.z);
+    if (Math.hypot(o.x - HOUSE.x, o.z - HOUSE.z) < R_IN * PX + 0.2) {
+      for (const f of FLOOR_IDS) { const y = FLOOR_Y[f] * PX; if (y <= o.y + 0.05 && y > gy) gy = y; }
+    }
+    const h = Math.max(0, o.y - gy), k = this.owl.node.visible ? THREE.MathUtils.clamp(1 - h / 1.6, 0, 1) : 0;
+    c.visible = k > 0.02;
+    if (!c.visible) return;
+    c.position.set(o.x, gy + 0.012, o.z);
+    c.scale.setScalar(this.owl.node.scale.x * (0.95 + h * 0.35));
+    (c.material as THREE.MeshBasicMaterial).opacity = 0.6 * k * k;
+  }
+
   /** [look5] Pip strolls in from the porch through the front door (a string of little hops, under the lintel). */
   private walkIn() {
     const from = this.owl.node.position.clone(), to = this.spot('inside');
@@ -855,6 +910,7 @@ export class Scene {
     const t = this.time;
     if (this.stage) {
       this.renderer.shadowMap.autoUpdate = true; // [look4] stages run their own lights
+      if ((this.casterT -= dt) <= 0) { this.casterT = 2; smoothMaterials(this.stage.scene); } // [light7] smooth textures there too
       this.stage.update(dt, t);
       if (draw) this.post.render(this.stage.scene, this.stage.camera, t, this.stage.look ?? {}); // [look4] every stage goes through the chain
       return;
@@ -874,6 +930,7 @@ export class Scene {
     this.owl.dark = this.sky.night;
     this.owl.update(dt);
     const op = this.owl.node.position;
+    this.stepContact();
     GRASS.uPush.value[0].set(op.x, op.z, this.owl.node.visible ? 0.7 : 0, 1);
 
     this.critters.update(dt, t, this.owl.node.visible ? [op] : [], this.sky.night, wind.uWind.value.x, wind.uWind.value.y, gust);
@@ -916,7 +973,7 @@ export class Scene {
       // focus the depth of field on the subject the camera looks at
       this.post.grade.focus = c.dist;
       this.post.grade.focusRange = Math.max(3, c.dist * 0.3);
-      this.post.grade.blur = this.view === 'home' || this.view === 'sleep' || this.view === 'wake' ? 0.6 : 0.45;
+      this.post.grade.blur = this.view === 'home' || this.view === 'sleep' || this.view === 'wake' ? 0.48 : 0.36; // [light7] crisper
       // [look5] inside the living room: Pip and what's round him sharp, the back wall a little soft and the world
       // outside the windows melting into bokeh
       const ink = home && !shot ? 1 - this.outK : 0;
@@ -925,7 +982,7 @@ export class Scene {
         const g = this.post.grade, L = THREE.MathUtils.lerp;
         g.focus = L(g.focus, Math.min(pd, c.dist), ink);
         g.focusRange = L(g.focusRange, 1.5, ink);
-        g.blur = L(g.blur, 0.7, ink);
+        g.blur = L(g.blur, 0.55, ink);
       }
     }
     CUT.uCutCam.value.copy(this.camera.position);
