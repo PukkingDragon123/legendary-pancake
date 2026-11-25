@@ -14,6 +14,7 @@ import { flyReward } from '../ui/fx.tsx';
 import { breathing, panel, say } from '../ui/state.ts';
 import type { Scene } from '../world/scene.ts';
 import { FLOOR_NAME, UNLOCK, type FloorId } from '../world/house/plan.ts';
+import { animeMoment } from '../ui/fx/anime.ts'; // [anime6]
 
 /** A floor build mode should open on (set when a boarded-up floor is tapped). */
 export const buildFocus = signal<FloorId | null>(null);
@@ -39,6 +40,7 @@ export function bindHome(scene: Scene): () => void {
     const grew = unlockedKey !== '' && uk.length > unlockedKey.length;
     key = k; unlockedKey = uk;
     scene.setHome(h, grew);
+    if (grew) { animeMoment('unlock'); scene.owl.react('starry', 'bang', 2.2); } // [anime6] TA-DA, Pip's starry eyes
   });
 
   // a boarded-up floor announces itself when Pip is grown-up enough to repair it

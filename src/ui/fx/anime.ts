@@ -73,11 +73,11 @@ function frame() {
  * Radial speed / focus lines rushing in from the screen edges toward a point, leaving the middle clear. They are
  * redrawn "on twos" (a new set every other frame, as in hand-drawn anime).
  */
-export function speedLines(o: { x?: number; y?: number; dur?: number; color?: string; clear?: number; n?: number } = {}) {
+export function speedLines(o: { x?: number; y?: number; dur?: number; color?: string; clear?: number; n?: number; back?: boolean } = {}) {
   if (calmMotion()) return;
   const dur = o.dur ?? 0.8, c = col(o.color ?? '#1d1420'), n = o.n ?? 70;
   add({
-    t0: fxNow(), dur,
+    t0: fxNow(), dur, back: o.back,
     step(r, t, B) {
       const cx = (o.x ?? innerWidth / 2) / B, cy = (o.y ?? innerHeight * 0.42) / B;
       const R = Math.hypot(Math.max(cx, r.w - cx), Math.max(cy, r.h - cy)) + 4;
@@ -89,7 +89,7 @@ export function speedLines(o: { x?: number; y?: number; dur?: number; color?: st
         const a = (i / n) * Math.PI * 2 + (rr() - 0.5) * 0.09;
         const inner = clear * (0.95 + rr() * 0.75), len = R - inner;
         const r0 = R - len * k * (0.55 + rr() * 0.45);
-        const w = (0.6 + rr() * 2.2) * (R / 260);
+        const w = (1.1 + rr() * 2.6) * Math.max(0.8, R / 260);
         const ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca;
         r.poly([[cx + ca * R + px * w, cy + sa * R + py * w], [cx + ca * R - px * w, cy + sa * R - py * w], [cx + ca * r0, cy + sa * r0]], c);
       }
@@ -171,7 +171,7 @@ export function sparkleBurst(x: number, y: number, n = 14, o: { tint?: string | 
   const tints = Array.isArray(o.tint) ? o.tint : [o.tint ?? 'gold'];
   const ps = Array.from({ length: calm ? Math.ceil(n / 2) : n }, (_, i) => {
     const a = rr() * Math.PI * 2, v = (calm ? 0 : 120 + rr() * 260) * (o.spread ?? 1);
-    return { a, v, life: 0.55 + rr() * 0.5, arm: 2 + Math.floor(rr() * 5), tint: tints[i % tints.length], d: rr() * 0.12, dist: calm ? 30 + rr() * 90 : 0 };
+    return { a, v, life: 0.55 + rr() * 0.5, arm: 3 + Math.floor(rr() * 6), tint: tints[i % tints.length], d: rr() * 0.12, dist: calm ? 30 + rr() * 90 : 0 };
   });
   add({
     t0: fxNow(), dur: 1.15, step() { /* sprites only */ },
@@ -241,12 +241,12 @@ const FONT = '"Alagard", "TBME Body", monospace';
  * with a two-tone fill, a white top glint, a 2-texel ink outline and a 3-texel extrusion down and to the right, plus
  * where it sits in the word (texels, the word centred on 0,0) and its tilt. The one place the SFX look is decided.
  */
-export function sfxArt(text: string, style: SfxStyle): { img: HTMLCanvasElement; x: number; y: number }[] {
+export function sfxArt(text: string, style: SfxStyle): { img: HTMLCanvasElement; ras: Raster; x: number; y: number }[] {
   const size = style.size ?? 2; // font pixels per texel x 16 px: 2 = cap height 22 texels
   const px = 16 * size, ink = col(style.ink ?? '#1d1022'), fill = col(style.fill), deep = col(style.deep), hi = col(style.hi ?? '#fffbe8');
   const ext = col(style.deep, 255), extDark = col(style.ink ?? '#1d1022');
   const m = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!;
-  const out: { img: HTMLCanvasElement; x: number; y: number }[] = [];
+  const out: { img: HTMLCanvasElement; ras: Raster; x: number; y: number }[] = [];
   const rr = rng(text.length * 31 + text.charCodeAt(0));
   let pen = 0;
   const letters = [...text];
@@ -288,7 +288,7 @@ export function sfxArt(text: string, style: SfxStyle): { img: HTMLCanvasElement;
     r.outline(ink, true);
     r.outline(ink);
     const lx = pen + w / 2 - total / 2;
-    out.push({ img: r.canvas(), x: lx, y: (rr() - 0.5) * 3 * size });
+    out.push({ img: r.canvas(), ras: r, x: lx, y: (rr() - 0.5) * 3 * size });
     pen += w - size;
   }
   return out;
@@ -308,7 +308,7 @@ export function sfx(word: string, x: number, y: number, o: { style?: keyof typeo
     draw(c, t, B) {
       if (!art) {
         art = sfxArt(word, { ...st, size: o.size ?? st.size ?? 2 });
-        for (const a of art) levels.push([0.75, 0.5, 0.25].map((k) => { const r = new Raster(a.img.width, a.img.height); const g = a.img.getContext('2d')!.getImageData(0, 0, a.img.width, a.img.height); r.buf.set(new Uint32Array(g.data.buffer)); r.dissolve(k); return r.canvas(); }));
+        for (const a of art) levels.push([0.75, 0.5, 0.25].map((k) => { const r = new Raster(a.ras.w, a.ras.h); r.buf.set(a.ras.buf); r.dissolve(k); return r.canvas(); }));
       }
       // keep the whole word on screen
       const half = art.reduce((m, a) => Math.max(m, Math.abs(a.x) + a.img.width / 2), 0);
@@ -409,7 +409,7 @@ export function animeMoment(kind: AnimeMoment, at?: XY) {
       break;
     case 'gacha5':
       impactFrame(); shake(7, 0.4);
-      speedLines({ x: p.x, y: p.y, dur: 0.95, color: '#2a1a08', clear: 0.34 });
+      speedLines({ x: p.x, y: p.y, dur: 0.95, color: '#2a1a08', clear: 0.34, back: true });
       sunburst(p.x, p.y, { colors: ['#ffd23f', '#fff2b8'], dur: 1.2, r0: 70, alpha: 0.4 });
       sparkleBurst(p.x, p.y, 22, { tint: ['gold', 'gold', 'pink'] });
       sfx('SHING!!', ...wordAt(-Math.min(90, W * 0.22), -Math.min(150, H * 0.2)), { style: 'gold', tilt: 0.14 });
@@ -421,15 +421,15 @@ export function animeMoment(kind: AnimeMoment, at?: XY) {
       break;
     case 'unlock':
       shake(4, 0.25);
-      speedLines({ x: p.x, y: p.y, dur: 0.8, clear: 0.4 });
+      speedLines({ x: p.x, y: p.y, dur: 0.8, clear: 0.4, back: true });
       sunburst(p.x, p.y, { colors: ['#ffe58a', '#fff6d0'], dur: 1.1, r0: 50, alpha: 0.36 });
       sparkleBurst(p.x, p.y, 16, { tint: ['gold', 'sky'] });
-      sfx('TA-DA!', ...wordAt(0, -Math.min(120, H * 0.15)), { style: 'mint', tilt: -0.1 });
+      sfx('WOW!', ...wordAt(0, -Math.min(120, H * 0.15)), { style: 'mint', tilt: -0.1 });
       chibi({ side: 'left', mark: 'bang' });
       break;
     case 'morning':
       sparkleBurst(p.x, p.y, 16, { tint: ['gold', 'pink', 'sky'] });
-      sfx('TA-DA!', ...wordAt(Math.min(70, W * 0.18), -Math.min(110, H * 0.13)), { style: 'gold', tilt: -0.12 });
+      sfx('YAY!', ...wordAt(Math.min(70, W * 0.18), -Math.min(110, H * 0.13)), { style: 'rose', tilt: -0.12 });
       chibi({ side: 'right', mark: 'hearts', y: H * 0.56 });
       break;
     case 'bigbuy':
@@ -456,7 +456,7 @@ export function centreOf(el: Element | null | undefined): XY | undefined {
 
 // dev and screenshot hooks
 if (typeof window !== 'undefined') {
-  (window as unknown as { hhAnime: unknown }).hhAnime = { animeMoment, speedLines, impactFrame, shake, sparkleBurst, sunburst, sfx, chibi, setChibi };
+  (window as unknown as { hhAnime: unknown }).hhAnime = { animeMoment, speedLines, impactFrame, shake, sparkleBurst, sunburst, sfx, chibi, setChibi, live: () => fxs.map((f) => [f.t0, f.dur, !!f.back]) };
   // the lettering font: ask for it early so the first word is already in it
   try { void document.fonts?.load('32px "Alagard"').catch(() => undefined); } catch { /* no font loading API */ }
 }

@@ -17,6 +17,7 @@ import './ui/style.css';
 import { installPixelSkin } from './ui/pxskin.ts';
 import { installIconSet } from './ui/chrome/iconset.ts';
 import { Scene } from './world/scene.ts';
+import { animeMoment } from './ui/fx/anime.ts'; // [anime6]
 import { bindHome } from './build/home-sync.ts'; // [house]
 
 async function boot() {
@@ -108,6 +109,7 @@ async function boot() {
   setupReminders((k) => {
     sound.play('notify_soft', { volume: 0.6 });
     scene.owl.play('yawn');
+    if (k !== 'winddown') animeMoment('bedtime'); // [anime6]
     toast(k === 'winddown' ? 'Time to wind down. Dim the lights?' : 'It’s bedtime. Goodnight soon!', IcoMoon, 5000);
     say(lines.evening());
   });

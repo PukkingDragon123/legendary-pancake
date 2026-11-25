@@ -298,6 +298,24 @@ function frame() {
   if (live.length) raf = requestAnimationFrame(frame);
 }
 
+/** Which side of the head a mark goes: the one with room on screen and no interface over it (tested once). */
+function pickSide(s: { x: number; y: number; r: number }, k: number): number {
+  const score = (sd: number) => {
+    let bad = 0;
+    for (const [dx, dy] of [[1.0, -0.9], [1.0, -0.3], [1.0, -1.5]] as const) {
+      const x = s.x + sd * (s.r * dx + 6 * k), y = s.y + s.r * dy;
+      if (x < 8 || x > innerWidth - 8 || y < 8) { bad += 2; continue; }
+      const hit = document.elementFromPoint(x, y);
+      if (hit && hit.id !== 'world' && hit.tagName !== 'BODY' && hit.tagName !== 'HTML' && !(hit instanceof HTMLCanvasElement && !hit.closest('#ui'))) bad++;
+    }
+    return bad;
+  };
+  try {
+    const a = score(1), b = score(-1);
+    return b < a ? -1 : 1;
+  } catch { return 1; }
+}
+
 /** Speech bubbles the marks step aside from. */
 function bubbleRects(): DOMRect[] {
   const out: DOMRect[] = [];
@@ -320,9 +338,9 @@ const out = (t: number, dur: number, f = 0.2) => Math.max(0, Math.min(1, (dur - 
 function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y: number; r: number }, avoid: DOMRect[]) {
   const A = ART!;
   // whole CSS px per texel: bigger on a bigger face, always bold enough to read on a phone
-  const k = Math.max(2, Math.min(4, Math.round(s.r / 10)));
-  let side = l.side || 1;
-  if (!l.side && s.x + s.r * 2.2 + 24 * k > innerWidth) side = -1;
+  const k = Math.max(2, Math.min(6, Math.round(s.r / 11)));
+  if (!l.side) l.side = pickSide(s, k);
+  const side = l.side;
   const r = s.r, calm = l.calm;
   const fade = out(t, l.dur, calm ? 0.35 : 0.2);
   const a = (fade >= 1 ? 1 : Math.max(0.0, Math.round(fade * 4) / 4)); // stepped fade (four beats)
@@ -379,7 +397,7 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
       const rr = rng(l.seed);
       for (let i = 0; i < 6; i++) {
         // spread over the upper half round the head, alternating sides
-        const ang = -Math.PI * (i % 2 ? 0.08 + rr() * 0.36 : 0.56 + rr() * 0.36), dist = r * (1.1 + rr() * 0.5);
+        const ang = -Math.PI * (i % 2 ? 0.06 + rr() * 0.34 : 0.6 + rr() * 0.34), dist = r * (1.45 + rr() * 0.5);
         const t0 = i * 0.09 + rr() * 0.05, tt = t - t0;
         if (tt < 0) continue;
         const ph = calm ? 2 : [0, 1, 2, 2, 3, 2, 1, 0][Math.min(7, Math.floor(tt / 0.08))] ?? 0;

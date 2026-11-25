@@ -18,6 +18,7 @@ import { MagicBar } from './chrome/magicbar.tsx';
 import { PxAnim, seq } from './chrome/pxanim.tsx';
 import { uiBurst, uiBurstAt } from './chrome/uifx.ts';
 import { pixelate, PxBurst } from './pxfx.tsx';
+import { animeMoment } from './fx/anime.ts'; // [anime6]
 
 // ------------------------------------------------------------------ dialogs
 
@@ -105,6 +106,7 @@ export function Ceremony() {
         sound.play('reward_levelup', { volume: 0.7 });
         const x = innerWidth / 2, y = innerHeight * 0.4;
         uiBurst('magic', x, y, 40); uiBurst('stars', x, y, 16); uiBurst('confetti', x, y - 40, 34); uiBurst('sparkle', x, y, 14);
+        animeMoment('levelup', { x, y }); // [anime6] impact frame, focus lines, DING!
         const sc = sceneRef.current;
         if (sc) { sc.owl.play('dance'); const o = sc.owl.node.position; sc.fx.burst('confetti', o.x, o.y + 1.5, o.z, 40); sc.fx.burst('stars', o.x, o.y + 1.2, o.z, 14); }
       }, 1150),

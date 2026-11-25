@@ -10,7 +10,7 @@ import { OwlActor, type OwlMood } from '../../owl/actor.ts';
 import type { OwlLook } from '../../owl/model.ts';
 import { SPECIES } from '../../owl/species.ts';
 import { Beaver, BEAVER_FACES } from '../../world/stages/beaver.ts';
-import { animeMoment, setChibi, type AnimeMoment } from './anime.ts';
+import { animeMoment, setChibi, sfxArt, type AnimeMoment } from './anime.ts';
 import { EMOTES, popEmote, project, type EmoteKind } from './emotes.ts';
 
 const q = new URLSearchParams(location.search);
@@ -109,7 +109,14 @@ async function beaverSheet() {
 
 async function fxShot() {
   const bg = q.get('bg');
-  if (bg) { document.body.style.background = `#000 url(${bg}) 0 0 / 100% 100% no-repeat`; canvas.style.display = 'none'; }
+  if (bg) {
+    canvas.style.display = 'none';
+    const im = document.createElement('img');
+    im.src = bg;
+    Object.assign(im.style, { position: 'fixed', inset: '0', width: '100vw', height: '100vh', objectFit: 'cover' });
+    document.body.prepend(im);
+    await new Promise((res) => { im.onload = res; im.onerror = res; });
+  }
   const look: OwlLook = sp(q.get('sp') ?? 'tawny');
   const { owlIconAsync } = await import('../portraits.ts');
   const { pixelate } = await import('../pxfx.tsx');
@@ -144,3 +151,22 @@ else if (sheet === 'emotes') {
     if (q.get('t')) w.__animeT = +q.get('t')!;
   });
 } else if (q.get('fx')) void fxShot();
+else if (q.get('words')) void (async () => {
+  await document.fonts.ready;
+  await new Promise((res) => setTimeout(res, 400));
+  canvas.style.display = 'none';
+  const list = q.get('words')!.split(',');
+  const styles = [{ fill: '#ffd84a', deep: '#f08a1c' }, { fill: '#c9a6ff', deep: '#7448d8' }, { fill: '#8ff0b8', deep: '#2ea26a' }, { fill: '#ff6a4a', deep: '#b8202c' }, { fill: '#d8d2ff', deep: '#6a62c8', ink: '#1a1430' }, { fill: '#8fe0ff', deep: '#2f8ad8' }];
+  const B = 2, c = document.createElement('canvas');
+  c.width = Math.ceil(W / B); c.height = Math.ceil(H / B);
+  Object.assign(c.style, { position: 'fixed', inset: '0', width: `${c.width * B}px`, height: `${c.height * B}px`, imageRendering: 'pixelated' });
+  document.body.appendChild(c);
+  const g = c.getContext('2d')!;
+  g.imageSmoothingEnabled = false;
+  list.forEach((w, i) => {
+    const art = sfxArt(w, styles[i % styles.length]);
+    const cx = c.width / 2, cy = 24 + i * 36;
+    for (const a of art) g.drawImage(a.img, Math.round(cx + a.x - a.img.width / 2), Math.round(cy + a.y - a.img.height / 2));
+  });
+  done();
+})();
