@@ -70,7 +70,7 @@ const STYLE = `
 .hh-look button:active { scale: 0.92 1.04; }
 .hh-look button img { position: absolute; left: 4px; top: 13px; width: 44px; height: 44px; }
 .hh-look button.flip img { animation: hhLookFlip 0.45s ease-in-out; }
-.hh-look .hh-looklabel { margin-top: 1px; padding: 2px 5px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; color: #2a1a10; background: var(--tx-paper) 0 0 / 200px, #f6ead0; border-radius: 4px; box-shadow: 0 1px 1px rgba(30, 16, 6, 0.35), 0 3px 6px rgba(30, 16, 6, 0.3), inset 0 1px 0 rgba(255, 252, 240, 0.8), inset 0 -1px 2px rgba(140, 100, 50, 0.25); pointer-events: none; }
+.hh-look .hh-looklabel { margin-top: 1px; padding: 2px 5px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; color: #2a1a10; background: var(--tx-paper) 0 0 / 200px, #f6ead0; border-radius: 4px; box-shadow: 0 1px 1px rgba(30, 16, 6, 0.35), 0 3px 6px rgba(30, 16, 6, 0.3), inset 0 1px 1px rgba(255, 252, 240, 0.8), inset 0 -1px 2px rgba(140, 100, 50, 0.25); pointer-events: none; }
 @keyframes hhLookSway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
 @keyframes hhLookFlip { 0% { transform: scale(1); } 40% { transform: scale(0.2, 1.1); } 100% { transform: scale(1); } }
 html.hh-still .hh-look .hh-lookhang { animation: none; }

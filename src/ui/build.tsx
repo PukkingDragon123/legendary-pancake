@@ -17,10 +17,10 @@ import { ask } from './fx.tsx';
 import { Px } from './icons.tsx';
 import { haptic, toast } from './kit.tsx';
 import { iconVersion, itemIcon } from './portraits.ts';
-import { blueprintTile, tape, thumbtack } from './chrome/surfaces.ts';
+import { blueprintPaper, blueprintTile, tape, thumbtack } from './chrome/surfaces.ts';
 
-// [ui4] the blueprint is real cyanotype paper (its chalk grid printed in), taped down with masking tape and
-// brass drawing pins, all painted with the relief painter
+// [ui7] the blueprint is real cyanotype paper (a photo paper tile dyed prussian blue, its chalk grid printed on),
+// taped down with masking tape and brass drawing pins painted by the material painter
 let bpStyled = false;
 function installBlueprint() {
   if (bpStyled || typeof document === 'undefined') return;
@@ -28,9 +28,9 @@ function installBlueprint() {
   const st = document.createElement('style');
   st.id = 'hh-blueprint';
   st.textContent = `
-.bm-drawer{background-color:#1f4a78;background-image:url("${blueprintTile()}");background-size:64px 64px}
-.bm-floors{background:url("${blueprintTile()}") 0 0/64px 64px}
-.bm-note{background:url("${blueprintTile()}") 0 0/64px 64px}
+.bm-drawer{background:url("${blueprintTile()}") 0 0/128px 128px,url("${blueprintPaper()}") 0 0/320px 320px,#1f4a78}
+.bm-floors{background:url("${blueprintTile()}") 0 0/128px 128px,url("${blueprintPaper()}") 0 0/320px 320px,#1f4a78}
+.bm-note{background:url("${blueprintTile()}") 0 0/128px 128px,url("${blueprintPaper()}") 0 0/320px 320px,#1f4a78}
 .bm-drawer::before,.bm-drawer::after{width:52px;height:14px;top:-9px;background:url("${tape(52)}") 0 0/52px 14px;clip-path:none;box-shadow:none;filter:drop-shadow(2px 2px 5.2px rgba(12,34,64,.4))}
 .bm-pin{width:16px;height:16px;top:-6px;background:url("${thumbtack()}") 0 0/16px 16px}
 .bm-pin > *{display:none}

@@ -67,14 +67,14 @@ function installStyles() {
 .wd-rail::-webkit-scrollbar{display:none}
 .wd-rail::before{content:'';position:absolute;left:0;right:0;top:1px;height:12px;min-width:100%;background:url("${railTile()}") 0 0/16px 12px repeat-x}
 .wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:56px;height:62px;${frameStyle('tab', 2)};color:var(--ink);font-size:var(--t1);line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
-.wd-tag::before{content:'';position:absolute;top:-10px;left:50%;width:2px;height:8px;margin-left:-1px;background:#e8d8b0;box-shadow:1px 0 0 #6e4a12}
+.wd-tag::before{content:'';position:absolute;top:-10px;left:50%;width:2px;height:8px;margin-left:-1px;background:#e8d8b0;box-shadow:1px 0 2px #6e4a12}
 .wd-tag .ico{margin:-4px 0 -2px}
 .wd-tag span{text-shadow:0 1px 1px var(--paper);white-space:nowrap}
 .wd-tag.on{${frameStyle('button_gold', 2)};transform:translateY(3px) rotate(-3deg);color:var(--ink);animation:wdSway 2.4s ease-in-out infinite}
 .wd-tag:active{transform:rotate(6deg)}
-.wd-tag .dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--berry);box-shadow:0 0 0 2px var(--ink)}
+.wd-tag .dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--berry);box-shadow:0 0 0 1px color-mix(in srgb, var(--ink) 50%, transparent)}
 .wd-hint{font-size:var(--t1);color:var(--ink-2);text-align:center;margin:-2px 0 0}
-.wd-room{position:relative;margin:0 -6px;padding:20px 6px 8px;background:url("${velvetTile('plum')}") 0 0/96px 96px repeat;box-shadow:inset 0 6px 0 rgba(20,8,24,.45),inset 0 10px 0 rgba(20,8,24,.2),inset 0 -6px 0 rgba(20,8,24,.35)}
+.wd-room{position:relative;margin:0 -6px;padding:20px 6px 8px;background:url("${velvetTile('plum')}") 0 0/96px 96px repeat;box-shadow:inset 0 6px 6px rgba(20,8,24,.45),inset 0 10px 10px rgba(20,8,24,.2),inset 0 -6px 6px rgba(20,8,24,.35)}
 .wd-room::before{content:'';position:absolute;left:0;right:0;top:4px;height:12px;background:url("${railTile()}") 0 0/16px 12px repeat-x;z-index:1}
 .wd-shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:16px 6px;padding-top:6px}
 .wd-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0;padding:8px 8px 9px;color:#2a1a10;text-align:center;filter:drop-shadow(2px 4px 7.8px rgba(20,8,24,.5));transition:transform .15s var(--pop);animation:wdIn .35s var(--ease) both;transform-origin:50% -10px}
@@ -97,14 +97,14 @@ function installStyles() {
 .wd-card .st.muted{color:#5e4a34;font-size:var(--t1)}
 .wd-card .price{display:flex;align-items:center;gap:2px;font-size:var(--t1);color:#5a3a06}
 .wd-card .price .ico{margin:-6px -2px}
-.wd-card .ribbon{position:absolute;top:-4px;left:-6px;padding:1px 5px;font-size:var(--t1);color:var(--paper);background:var(--dusk);box-shadow:0 0 0 2px var(--slate),0 2px 0 rgba(46,43,36,.4);z-index:2}
-.wd-card .ribbon.gold{background:var(--ochre);box-shadow:0 0 0 2px var(--wood-deep),0 2px 0 rgba(46,43,36,.4)}
-.wd-card .ribbon.red{background:var(--berry);box-shadow:0 0 0 2px var(--plum),0 2px 0 rgba(46,43,36,.4)}
+.wd-card .ribbon{position:absolute;top:-4px;left:-6px;padding:1px 5px;font-size:var(--t1);color:var(--paper);background:var(--dusk);box-shadow:0 0 0 1px color-mix(in srgb, var(--slate) 50%, transparent),0 2px 3.2px rgba(46,43,36,.4);z-index:2}
+.wd-card .ribbon.gold{background:var(--ochre);box-shadow:0 0 0 1px color-mix(in srgb, var(--wood-deep) 50%, transparent),0 2px 3.2px rgba(46,43,36,.4)}
+.wd-card .ribbon.red{background:var(--berry);box-shadow:0 0 0 1px color-mix(in srgb, var(--plum) 50%, transparent),0 2px 3.2px rgba(46,43,36,.4)}
 .wd-card .check{position:absolute;top:2px;right:2px}
 .wd-plaque{position:sticky;top:0;margin:0 -2px;padding:0 2px;${b9(signBoard('walnut'), true)};background:none;display:flex;gap:6px;align-items:center;z-index:3;animation:wdUp .3s var(--ease) both;flex:none}
 .wd-plaque .face{position:relative;flex:none;width:76px;height:76px;display:grid;place-items:center}
 .wd-plaque .face .glass{position:absolute;inset:5px 6px;clip-path:${oval};background:linear-gradient(180deg,var(--mist) 0 48%,var(--sky) 48% 74%,var(--lake) 74%);display:grid;place-items:center;overflow:hidden}
-.wd-plaque .face .glass::after{content:'';position:absolute;left:18%;top:12%;width:4px;height:12px;background:var(--snow);opacity:.7;box-shadow:6px 4px 0 -1px var(--snow)}
+.wd-plaque .face .glass::after{content:'';position:absolute;left:18%;top:12%;width:4px;height:12px;background:var(--snow);opacity:.7;box-shadow:6px 4px 9.4px var(--snow)}
 .wd-plaque .face img{width:100%;height:100%;object-fit:contain;animation:wdBob 3s ease-in-out infinite}
 .wd-plaque .face .rim{position:absolute;inset:0;pointer-events:none}
 .wd-plaque .face.lpface{width:86px;height:86px}

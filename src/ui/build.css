@@ -1,6 +1,6 @@
-/* Build mode: a moonlit blueprint laid over the tree house. Linen chalk linework on slate-blue paper, brass
-   pushpins, masking tape, hand-lettered labels; hard pixel edges and hard offset shadows only (no rounded or
-   blurred shapes), in the calm "Moss & Moonlight" palette (src/gfx/palette.ts). */
+/* Build mode: a moonlit blueprint laid over the tree house. Chalk linework on cyanotype paper, brass
+   pushpins, masking tape, hand-lettered labels; rounded die-cut cards, enamel buttons and soft shadows
+   (the [ui7] block at the end gives the realistic finish). */
 .bm {
   position: absolute; inset: 0; z-index: 12; pointer-events: none !important; font-family: var(--font-body); color: #f4eedd;
   /* [ui4] v4: real cyanotype blue, chalk white, brass and emerald */
@@ -38,15 +38,15 @@
   display: flex; align-items: center; gap: 4px; padding: 6px 12px 8px 8px; cursor: pointer;
   font-family: var(--font-display); font-size: var(--t1); color: var(--paper); text-shadow: 1px 2px 3.6px var(--pine);
   background: var(--moss); border: 0;
-  box-shadow: inset 0 -4px 0 var(--fern), inset 0 3px 0 #c4cfa3, inset 3px 0 0 #a7b788, 0 0 0 3px var(--ink), 0 5px 0 3px var(--ink);
+  box-shadow: inset 0 -4px 4px var(--fern), inset 0 3px 3px #c4cfa3, inset 3px 0 3px #a7b788, 0 0 0 1px color-mix(in srgb, var(--ink) 50%, transparent), 0 5px 8px var(--ink);
   transition: transform 0.08s ease;
 }
-.bm-done:active { transform: translateY(3px); box-shadow: inset 0 -2px 0 var(--fern), inset 0 3px 0 #c4cfa3, 0 0 0 3px var(--ink), 0 2px 0 3px var(--ink); }
+.bm-done:active { transform: translateY(3px); box-shadow: inset 0 -2px 2px var(--fern), inset 0 3px 3px #c4cfa3, 0 0 0 1px color-mix(in srgb, var(--ink) 50%, transparent), 0 2px 3.2px var(--ink); }
 
 .bm-floors {
   flex: 1; display: flex; justify-content: center; gap: 4px; padding: 5px; margin: 0 auto; max-width: 360px;
   background: var(--bp) linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 8px 8px;
-  box-shadow: 0 0 0 2px var(--chalk-d), 0 0 0 4px var(--bp-dd), 4px 6px 0 4px var(--bp-dd);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--chalk-d) 50%, transparent), 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 4px 6px 11.6px var(--bp-dd);
 }
 .bm-floor {
   position: relative; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; padding: 2px 4px 3px; cursor: pointer;
@@ -56,7 +56,7 @@
 .bm-floor b { font-size: var(--t1); font-weight: 400; line-height: 1; text-shadow: 1px 2px 3.6px var(--bp-dd); }
 .bm-floor small { display: flex; align-items: center; gap: 2px; font-size: var(--t1); line-height: 1; opacity: 0.9; white-space: nowrap; }
 .bm-floor:hover { transform: translateY(-2px); }
-.bm-floor.on { background: var(--paper); border: 2px solid var(--paper); color: var(--bp-dd); box-shadow: 0 3px 0 var(--bp-dd), inset 0 -3px 0 var(--oat); transform: translateY(-2px); }
+.bm-floor.on { background: var(--paper); border: 2px solid var(--paper); color: var(--bp-dd); box-shadow: 0 3px 4.8px var(--bp-dd), inset 0 -3px 3px var(--oat); transform: translateY(-2px); }
 .bm-floor.on b { text-shadow: 1px 2px 3.6px var(--oat); }
 .bm-floor.locked { border-color: rgba(201, 195, 174, 0.5); color: #a4acb4; background: repeating-linear-gradient(135deg, rgba(12, 34, 64, 0.45) 0 4px, transparent 4px 8px); }
 .bm-floor.shake, .bm-card.shake { animation: bm-shake 0.35s ease-in-out; }
@@ -65,18 +65,18 @@
 .bm-view { display: flex; flex-direction: column; gap: 4px; }
 .bm-vbtn {
   width: 40px; height: 36px; display: grid; place-items: center; cursor: pointer; padding: 0;
-  background: var(--paper); border: 0; box-shadow: 0 0 0 2px var(--bp-dd), 0 4px 0 2px var(--bp-dd), inset 0 -3px 0 var(--chalk-d), inset 3px 0 0 #fffaf0;
+  background: var(--paper); border: 0; box-shadow: 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 0 4px 6.4px var(--bp-dd), inset 0 -3px 3px var(--chalk-d), inset 3px 0 3px #fffaf0;
   transition: transform 0.08s ease;
 }
 .bm-vbtn:first-child img { transform: scaleX(-1); }
-.bm-vbtn:active { transform: translateY(3px); box-shadow: 0 0 0 2px var(--bp-dd), 0 1px 0 2px var(--bp-dd), inset 0 -2px 0 var(--chalk-d); }
-.bm-vbtn.on { background: var(--lamp); box-shadow: 0 0 0 2px var(--bp-dd), 0 4px 0 2px var(--bp-dd), inset 0 -3px 0 var(--honey); }
+.bm-vbtn:active { transform: translateY(3px); box-shadow: 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 0 1px 2px var(--bp-dd), inset 0 -2px 2px var(--chalk-d); }
+.bm-vbtn.on { background: var(--lamp); box-shadow: 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 0 4px 6.4px var(--bp-dd), inset 0 -3px 3px var(--honey); }
 
 /* chalk notes over the room */
 .bm-note {
   position: absolute; left: 50%; top: calc(74px + var(--safe-t)); transform: translateX(-50%); max-width: calc(100% - 120px);
   padding: 4px 12px 6px; font-size: var(--t1); line-height: 1.25; text-align: center; color: var(--paper); pointer-events: none !important;
-  background: var(--bp-d); box-shadow: 0 0 0 2px var(--chalk-d), 0 0 0 4px var(--bp-dd), 4px 6px 0 4px rgba(12, 34, 64, 0.6);
+  background: var(--bp-d); box-shadow: 0 0 0 1px color-mix(in srgb, var(--chalk-d) 50%, transparent), 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 4px 6px 11.6px rgba(12, 34, 64, 0.6);
   animation: bm-pop 0.3s ease-in-out both;
 }
 @keyframes bm-pop { from { transform: translateX(-50%) scale(0.4); opacity: 0; } }
@@ -84,7 +84,7 @@
 /* ---------------------------------------------------------------- the action bubble (a paper tag with a stepped pixel tail) */
 .bm-bubble {
   position: absolute; left: 50%; top: 40%; transform: translate(-50%, -100%); z-index: 2; min-width: 160px; padding: 5px 7px 7px;
-  background: var(--paper); color: var(--ink); box-shadow: 0 0 0 3px var(--ink), 4px 6px 0 3px var(--ink), inset 0 0 0 2px var(--oat), inset 0 -4px 0 var(--oat);
+  background: var(--paper); color: var(--ink); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 50%, transparent), 4px 6px 11.6px var(--ink), inset 0 0 1px 2px var(--oat), inset 0 -4px 4px var(--oat);
   animation: bm-bub 0.24s ease-in-out both; transition: opacity 0.15s;
   --tail: var(--ink); --tail-in: var(--paper);
 }
@@ -97,7 +97,7 @@
   clip-path: polygon(0 0, 100% 0, 100% 3px, 75% 3px, 75% 6px, 25% 6px, 25% 3px, 0 3px);
 }
 .bm-bubble.bad { background: #f1ddd3; --tail-in: #f1ddd3; }
-.bm-bubble.pending { background: #e4ecea; box-shadow: 0 0 0 3px var(--bp-dd), 4px 6px 0 3px var(--bp-dd), inset 0 0 0 2px #c9d6d3, inset 0 -4px 0 #c9d6d3; --tail: var(--bp-dd); --tail-in: #e4ecea; }
+.bm-bubble.pending { background: #e4ecea; box-shadow: 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 4px 6px 11.6px var(--bp-dd), inset 0 0 1px 2px #c9d6d3, inset 0 -4px 4px #c9d6d3; --tail: var(--bp-dd); --tail-in: #e4ecea; }
 @keyframes bm-bub { from { transform: translate(-50%, -80%) scale(0.5); opacity: 0; } }
 .bm-bname { display: block; text-align: center; font-family: var(--font-display); font-weight: 400; font-size: var(--t1); color: var(--wood-d); white-space: nowrap; margin-bottom: 4px; }
 .bm-bubble.pending .bm-bname { color: var(--bp-d); }
@@ -106,11 +106,11 @@
 .bm-act {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 50px; padding: 4px 4px 3px; cursor: pointer;
   font-family: var(--font-display); font-size: var(--t1); color: var(--ink); background: var(--oat); border: 0;
-  box-shadow: 0 0 0 2px var(--ink), 0 3px 0 2px var(--ink), inset 0 -3px 0 rgba(46, 43, 36, 0.18), inset 2px 2px 0 rgba(255, 250, 240, 0.5); transition: transform 0.08s ease, filter 0.1s;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 50%, transparent), 0 3px 4.8px var(--ink), inset 0 -3px 3px rgba(46, 43, 36, 0.18), inset 2px 2px 4px rgba(255, 250, 240, 0.5); transition: transform 0.08s ease, filter 0.1s;
 }
 .bm-act i { font-style: normal; display: flex; align-items: center; }
 .bm-act:hover { filter: brightness(1.06); transform: translateY(-2px); }
-.bm-act:active { transform: translateY(2px); box-shadow: 0 0 0 2px var(--ink), 0 1px 0 2px var(--ink); }
+.bm-act:active { transform: translateY(2px); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 50%, transparent), 0 1px 2px var(--ink); }
 .bm-act.move { background: #a7b788; } .bm-act.move.on { background: var(--lamp); animation: bm-glow 0.9s ease-in-out infinite; }
 .bm-act.turn { background: #aec8cc; } .bm-act.store { background: #d8bf98; } .bm-act.buy { background: var(--honey); }
 .bm-act.yes { background: var(--moss); min-width: 64px; } .bm-act.no { background: #d9aca4; }
@@ -128,7 +128,7 @@
     linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px),
     linear-gradient(rgba(255, 250, 240, 0.06) 0 12px, transparent 12px);
   background-size: 40px 40px, 40px 40px, 8px 8px, 8px 8px, 100% 100%;
-  box-shadow: 0 0 0 3px var(--chalk-d), 0 0 0 6px var(--bp-dd), 6px 9px 0 6px rgba(12, 34, 64, 0.7), inset 0 0 0 3px var(--bp-l), inset 0 -6px 0 var(--bp-d);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--chalk-d) 50%, transparent), 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 6px 9px 17.4px rgba(12, 34, 64, 0.7), inset 0 0 1px 3px var(--bp-l), inset 0 -6px 6px var(--bp-d);
   animation: bm-up 0.45s var(--pop) both; transition: transform 0.35s var(--ease);
 }
 .bm.out .bm-drawer { animation: bm-down 0.3s ease-in both; }
@@ -137,7 +137,7 @@
 @keyframes bm-up { from { transform: translate(-50%, 115%); } }
 @keyframes bm-down { to { transform: translate(-50%, 130%); } }
 /* masking tape on the corners */
-.bm-drawer::before, .bm-drawer::after { content: ''; position: absolute; top: -11px; width: 52px; height: 16px; background: rgba(234, 224, 200, 0.9); box-shadow: 2px 2px 0 rgba(12, 34, 64, 0.35); left: 44px; background-image: repeating-linear-gradient(90deg, transparent 0 5px, rgba(201, 183, 141, 0.45) 5px 6px); clip-path: polygon(0 2px, 4px 2px, 4px 0, 100% 0, 100% 14px, calc(100% - 4px) 14px, calc(100% - 4px) 16px, 0 16px); }
+.bm-drawer::before, .bm-drawer::after { content: ''; position: absolute; top: -11px; width: 52px; height: 16px; background: rgba(234, 224, 200, 0.9); box-shadow: 2px 2px 4.2px rgba(12, 34, 64, 0.35); left: 44px; background-image: repeating-linear-gradient(90deg, transparent 0 5px, rgba(201, 183, 141, 0.45) 5px 6px); clip-path: polygon(0 2px, 4px 2px, 4px 0, 100% 0, 100% 14px, calc(100% - 4px) 14px, calc(100% - 4px) 16px, 0 16px); }
 .bm-drawer::after { left: auto; right: 44px; }
 .bm-pin { position: absolute; top: -9px; z-index: 2; filter: drop-shadow(2px 2px 5.2px rgba(12, 34, 64, 0.7)); pointer-events: none; }
 .bm-pin.a { left: 6px; } .bm-pin.b { right: 6px; }
@@ -146,7 +146,7 @@
 .bm-head { display: flex; align-items: center; gap: 8px; margin: 0 4px 6px 26px; }
 .bm-label {
   font-family: var(--font-display); font-size: var(--t1); color: var(--ink); padding: 1px 10px 2px; background: var(--paper);
-  box-shadow: 3px 3px 0 rgba(12, 34, 64, 0.6), inset 0 -3px 0 var(--oat); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 58%;
+  box-shadow: 3px 3px 6.3px rgba(12, 34, 64, 0.6), inset 0 -3px 3px var(--oat); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 58%;
 }
 .bm-purse { margin-left: auto; display: flex; align-items: center; gap: 3px; font-family: var(--font-display); font-size: var(--t1); color: var(--lamp); text-shadow: 1px 2px 3.6px var(--bp-dd); white-space: nowrap; }
 .bm-fold { width: 30px; height: 26px; display: grid; place-items: center; padding: 0; cursor: pointer; background: var(--bp-d); border: 2px dashed var(--chalk-d); margin-right: 22px; }
@@ -160,9 +160,9 @@
 .bm-tab span { font-size: var(--t1); line-height: 1; font-family: var(--font-body); white-space: nowrap; } /* [ui4] readable labels */
 .bm-tab img { filter: drop-shadow(2px 2px 5.2px var(--bp-dd)); }
 .bm-tab:hover { transform: translateY(-3px); }
-.bm-tab.on { background: var(--paper); border: 2px solid var(--paper); color: var(--bp-dd); box-shadow: 0 3px 0 var(--bp-dd), inset 0 -3px 0 var(--oat); transform: translateY(-3px); }
+.bm-tab.on { background: var(--paper); border: 2px solid var(--paper); color: var(--bp-dd); box-shadow: 0 3px 4.8px var(--bp-dd), inset 0 -3px 3px var(--oat); transform: translateY(-3px); }
 .bm-tab.on img { filter: none; }
-.bm-count { position: absolute; top: -8px; right: -7px; font-style: normal; font-size: var(--t1); line-height: calc(var(--t1) * 0.875); padding: 1px 4px; background: var(--fern); color: var(--paper); box-shadow: 0 0 0 2px var(--paper), 2px 2px 0 2px var(--bp-dd); }
+.bm-count { position: absolute; top: -8px; right: -7px; font-style: normal; font-size: var(--t1); line-height: calc(var(--t1) * 0.875); padding: 1px 4px; background: var(--fern); color: var(--paper); box-shadow: 0 0 0 1px color-mix(in srgb, var(--paper) 50%, transparent), 2px 2px 4.2px var(--bp-dd); }
 .bm-count.new { background: var(--terra); animation: bm-bob 1s ease-in-out infinite; }
 @keyframes bm-bob { 50% { transform: translateY(-3px); } }
 
@@ -170,12 +170,12 @@
 .bm-card {
   position: relative; flex: 0 0 auto; width: 98px; height: 128px; display: flex; flex-direction: column; align-items: center; padding: 4px 3px 5px; cursor: pointer; scroll-snap-align: start;
   background: rgba(244, 238, 221, 0.08); border: 2px solid var(--chalk-d); color: var(--chalk);
-  box-shadow: 4px 4px 0 rgba(12, 34, 64, 0.5), inset 0 -3px 0 rgba(12, 34, 64, 0.25);
+  box-shadow: 4px 4px 8.4px rgba(12, 34, 64, 0.5), inset 0 -3px 3px rgba(12, 34, 64, 0.25);
   animation: bm-card 0.3s ease-in-out both; transition: transform 0.12s ease, background 0.12s ease;
 }
 .bm-card:hover { transform: translateY(-4px); background: rgba(244, 238, 221, 0.16); }
 .bm-card:active { transform: translateY(1px); }
-.bm-card.on { background: rgba(241, 211, 154, 0.22); border: 3px solid var(--paper); box-shadow: 0 0 0 3px var(--honey), 4px 4px 0 3px rgba(12, 34, 64, 0.5); }
+.bm-card.on { background: rgba(241, 211, 154, 0.22); border: 3px solid var(--paper); box-shadow: 0 0 0 1px color-mix(in srgb, var(--honey) 50%, transparent), 4px 4px 8.4px rgba(12, 34, 64, 0.5); }
 .bm-card.locked { opacity: 0.62; filter: saturate(0.4); }
 @keyframes bm-card { from { transform: translateY(18px); opacity: 0; } }
 /* a chalk frame with crosshair corners behind each render, a pale ground patch under the piece */
@@ -186,20 +186,20 @@
 .bm-art::after { right: 0; bottom: 0; border-left: 0; border-top: 0; }
 .bm-img { max-width: 80px; max-height: 64px; filter: drop-shadow(2px 3px 6.5px rgba(12, 34, 64, 0.6)); }
 .bm-sketch { width: 40px; height: 40px; border: 2px dashed rgba(244, 238, 221, 0.5); animation: bm-bob 0.8s ease-in-out infinite; }
-.bm-swatch { width: 60px; height: 52px; box-shadow: 0 0 0 2px var(--chalk), 4px 4px 0 2px rgba(12, 34, 64, 0.6); }
+.bm-swatch { width: 60px; height: 52px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--chalk) 50%, transparent), 4px 4px 8.4px rgba(12, 34, 64, 0.6); }
 .bm-name { font-size: var(--t1); line-height: 1; text-align: center; height: 30px; display: flex; align-items: center; color: var(--paper); text-shadow: 1px 2px 3.6px var(--bp-dd); overflow: hidden; }
 .bm-tag {
   display: inline-flex; align-items: center; gap: 2px; padding: 1px 6px 2px 4px; margin-top: auto; font-family: var(--font-display); font-size: var(--t1); color: var(--ink);
-  background: var(--lamp); box-shadow: 0 0 0 2px var(--wood-d), 3px 3px 0 2px rgba(12, 34, 64, 0.5), inset 0 -2px 0 var(--honey);
+  background: var(--lamp); box-shadow: 0 0 0 1px color-mix(in srgb, var(--wood-d) 50%, transparent), 3px 3px 6.3px rgba(12, 34, 64, 0.5), inset 0 -2px 2px var(--honey);
 }
-.bm-tag.gem { background: #d3cce0; color: #4a3f5c; box-shadow: 0 0 0 2px #6e5266, 3px 3px 0 2px rgba(12, 34, 64, 0.5), inset 0 -2px 0 var(--lilac); }
-.bm-tag.free { background: #c4cfa3; color: var(--pine); box-shadow: 0 0 0 2px var(--pine), 3px 3px 0 2px rgba(12, 34, 64, 0.5), inset 0 -2px 0 #a7b788; }
-.bm-have { display: inline-flex; align-items: center; gap: 2px; margin-top: auto; font-family: var(--font-display); font-size: var(--t1); padding: 1px 6px; color: var(--paper); background: var(--fern); box-shadow: 0 0 0 2px var(--paper), 3px 3px 0 2px rgba(12, 34, 64, 0.4); }
-.bm-have.on { background: var(--lamp); color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+.bm-tag.gem { background: #d3cce0; color: #4a3f5c; box-shadow: 0 0 0 1px color-mix(in srgb, #6e5266 50%, transparent), 3px 3px 6.3px rgba(12, 34, 64, 0.5), inset 0 -2px 2px var(--lilac); }
+.bm-tag.free { background: #c4cfa3; color: var(--pine); box-shadow: 0 0 0 1px color-mix(in srgb, var(--pine) 50%, transparent), 3px 3px 6.3px rgba(12, 34, 64, 0.5), inset 0 -2px 2px #a7b788; }
+.bm-have { display: inline-flex; align-items: center; gap: 2px; margin-top: auto; font-family: var(--font-display); font-size: var(--t1); padding: 1px 6px; color: var(--paper); background: var(--fern); box-shadow: 0 0 0 1px color-mix(in srgb, var(--paper) 50%, transparent), 3px 3px 6.3px rgba(12, 34, 64, 0.4); }
+.bm-have.on { background: var(--lamp); color: var(--ink); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 50%, transparent); }
 .bm-have.lock { background: var(--bp-dd); color: var(--chalk-d); }
-.bm-lock { position: absolute; top: 34px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; padding: 1px 6px; font-family: var(--font-display); font-size: var(--t1); color: var(--paper); background: #6e5266; box-shadow: 0 0 0 2px var(--paper), 3px 3px 0 2px rgba(12, 34, 64, 0.5); }
-.bm-new { position: absolute; top: -9px; left: -6px; font-style: normal; font-size: var(--t1); padding: 1px 5px; color: var(--paper); background: var(--terra); box-shadow: 0 0 0 2px var(--paper), 2px 2px 0 2px var(--bp-dd); animation: bm-bob 1s ease-in-out infinite; }
-.bm-series { position: absolute; top: -8px; right: -6px; font-style: normal; padding: 1px 2px; background: #6e5266; box-shadow: 0 0 0 2px var(--paper); }
+.bm-lock { position: absolute; top: 34px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; padding: 1px 6px; font-family: var(--font-display); font-size: var(--t1); color: var(--paper); background: #6e5266; box-shadow: 0 0 0 1px color-mix(in srgb, var(--paper) 50%, transparent), 3px 3px 6.3px rgba(12, 34, 64, 0.5); }
+.bm-new { position: absolute; top: -9px; left: -6px; font-style: normal; font-size: var(--t1); padding: 1px 5px; color: var(--paper); background: var(--terra); box-shadow: 0 0 0 1px color-mix(in srgb, var(--paper) 50%, transparent), 2px 2px 4.2px var(--bp-dd); animation: bm-bob 1s ease-in-out infinite; }
+.bm-series { position: absolute; top: -8px; right: -6px; font-style: normal; padding: 1px 2px; background: #6e5266; box-shadow: 0 0 0 1px color-mix(in srgb, var(--paper) 50%, transparent); }
 .bm-owned { position: absolute; top: 4px; right: 4px; font-style: normal; font-size: var(--t1); color: #c4cfa3; font-family: var(--font-small); }
 .bm-empty { display: flex; align-items: center; gap: 12px; padding: 12px; font-size: var(--t1); line-height: 1.25; color: var(--chalk); max-width: 520px; }
 
@@ -215,3 +215,21 @@
   .bm-done { padding: 6px 7px 8px; }
   .bm-floor small { font-size: var(--t1); }
 }
+
+/* [ui7] the realistic finish: cyanotype paper with a printed chalk grid, rounded die-cut cards and enamel buttons,
+   soft shadows (overrides the flat pixel styling above) */
+.bm-wash { background: radial-gradient(ellipse 90% 80% at 50% 45%, rgba(12, 34, 64, 0) 55%, rgba(12, 34, 64, 0.55) 100%), linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 32px 32px, linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 32px 32px; }
+.bm-done, .bm-vbtn, .bm-act, .bm-tag, .bm-have, .bm-lock, .bm-floor, .bm-card, .bm-tab, .bm-fold, .bm-swatch, .bm-sketch { border-radius: 8px; }
+.bm-new, .bm-count, .bm-series { border-radius: 10px; }
+.bm-floors, .bm-drawer, .bm-note, .bm-bubble { border-radius: 12px; }
+.bm-done { background: linear-gradient(180deg, #52b676, #2c7a4a); box-shadow: inset 0 1px 0 rgba(220, 255, 220, 0.6), inset 0 -3px 4px rgba(0, 40, 10, 0.45), 0 3px 6px rgba(6, 18, 34, 0.6); }
+.bm-done:active { box-shadow: inset 0 1px 0 rgba(220, 255, 220, 0.4), inset 0 -1px 2px rgba(0, 40, 10, 0.45), 0 1px 2px rgba(6, 18, 34, 0.6); }
+.bm-vbtn, .bm-act { background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.12)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 3px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(6, 18, 34, 0.55); }
+.bm-vbtn:active, .bm-act:active { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.25), 0 1px 2px rgba(6, 18, 34, 0.55); }
+.bm-floor { border-style: solid; border-color: rgba(196, 212, 224, 0.45); background: rgba(12, 34, 64, 0.25); }
+.bm-floor.on { background: var(--tx-paper) 0 0 / 260px, var(--paper); border-color: transparent; box-shadow: 0 3px 6px rgba(6, 18, 34, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.bm-tab, .bm-fold { border-style: solid; border-color: rgba(196, 212, 224, 0.4); }
+.bm-card { border-style: solid; border-color: rgba(196, 212, 224, 0.35); background-color: rgba(12, 34, 64, 0.3); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 2px 4px rgba(6, 18, 34, 0.35); }
+.bm-card.on { background-color: rgba(246, 220, 138, 0.18); border-color: #f6dc8a; box-shadow: 0 0 0 1px rgba(246, 220, 138, 0.6), 0 0 12px rgba(246, 220, 138, 0.45), 0 3px 6px rgba(6, 18, 34, 0.45); }
+.bm-tag, .bm-have, .bm-new, .bm-count, .bm-series, .bm-lock { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 2px 3px rgba(6, 18, 34, 0.45); }
+.bm-sketch { border-style: dashed; border-width: 1.5px; }
