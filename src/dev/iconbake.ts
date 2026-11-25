@@ -220,7 +220,7 @@ const ICONS: Record<string, Spec> = {
   ice_flake: {
     make: () => { const ice = M(0x4ab8f4, { rough: 0.15, metal: 0.15, env: 1.3, tex: null }), g = grp(); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[0, 0], [c * 0.88, s * 0.88]], 0.12, ice, 0.1, 0.04)); for (const f of [0.45, 0.7]) { const px = c * f, py = s * f; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.8) * 0.22, py + Math.sin(a + sg * 0.8) * 0.22]], 0.1, ice, 0.1, 0.04)); } } return g; }, yaw: 0.28, pitch: 0.28,
   },
-  alarm: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 7, 0, 0)); c.door.rotation.y = -2.1; c.owl.position.set(0, c.owl.position.y - 0.12, 0.32); c.owl.rotation.x = 0.25; c.owl.scale.setScalar(2.3); return c.root; }, yaw: 0.26, pitch: 0.12 },
+  alarm: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 7, 0, 0)); c.door.rotation.y = -2.1; c.owl.position.set(0, c.owl.position.y - 0.05, 0.5); c.owl.rotation.x = 0.2; c.owl.scale.setScalar(2.4); return c.root; }, yaw: 0.26, pitch: 0.12 },
   clock: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 10, 10, 0)); c.pendulum.rotation.z = 0.2; return c.root; }, yaw: 0.22, pitch: 0.1 },
   hourglass: {
     make: () => { const cap = (y: number, flip: number) => at(lathe(smoothProfile([[0, 0], [0.6, 0], [0.64, 0.05], [0.6, 0.1], [0.5, 0.12], [0, 0.12]], 2), C.wood(), 32), 0, y, 0, flip ? Math.PI : 0);

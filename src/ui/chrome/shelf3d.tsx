@@ -412,7 +412,7 @@ function installStyles() {
   st.textContent = `
 .hh-nav3d{position:absolute;left:0;top:${BOX.top}px;width:${BOX.w}px;height:${BOX.h}px;pointer-events:none;z-index:0}
 .hh-nav3d>canvas,.hh-nav3d>img{position:absolute;left:0;top:0;display:block;width:100%;height:100%;image-rendering:pixelated}
-.hh-nav.live .hh-pic,.hh-nav.live .hh-cshadow,.hh-nav.live .hh-shelf{visibility:hidden}
+.hh-nav.live .hh-pic,.hh-nav.live .hh-cshadow,.hh-nav.live .hh-shelf,.hh-nav.wait .hh-pic,.hh-nav.wait .hh-cshadow{visibility:hidden}
 .hh-nav.live .hh-plate{background-image:none!important;filter:none}
 .hh-nav.live .hh-mobj,.hh-nav.live .hh-mobj.press,.hh-nav.live .hh-mobj.pop,.hh-nav.live .hh-mobj.rec,.hh-nav.live .hh-mobj.rec.pop{animation:none;scale:none;filter:none}
 .hh-nav.live .hh-mobj.press .hh-plate{translate:0 1px}
@@ -428,22 +428,26 @@ const artScale = (big: boolean) => (window as unknown as { __shelfArt?: number }
  * turns true once the first 3D frame is drawn (then the painted stand-ins can hide); until then `still` is the last
  * visit's picture of the shelf (when there is one) to show in the host instead of the painted stand-ins.
  */
-export function useShelf3D(away: boolean, rec: boolean, bigQuery: string): [(el: HTMLElement | null) => void, boolean, string] {
+export function useShelf3D(away: boolean, rec: boolean, bigQuery: string): [(el: HTMLElement | null) => void, boolean, string, boolean] {
   installStyles();
   const [live, setLive] = useState(false);
   const [still] = useState(readStill);
+  // with no still yet, the painted objects wait a moment for the 3D ones (so they don't swap in front of you); they
+  // show if WebGL is missing or the 3D is slow
+  const [wait, setWait] = useState(() => !still && typeof WebGL2RenderingContext !== 'undefined');
   const host = useRef<HTMLElement | null>(null);
   const [ready, setReady] = useState(false);
   // build it a moment after first paint
   useEffect(() => {
     const id = window.setTimeout(() => {
       const s = getStage();
-      if (!s) return;
-      s.onLive = () => setLive(true);
+      if (!s) { setWait(false); return; }
+      s.onLive = () => { setLive(true); setWait(false); };
       if (s.live) setLive(true);
       setReady(true);
     }, 120);
-    return () => clearTimeout(id);
+    const t2 = window.setTimeout(() => setWait(false), 2500);
+    return () => { clearTimeout(id); clearTimeout(t2); };
   }, []);
   useEffect(() => {
     const s = ready ? stage : null;
@@ -457,7 +461,7 @@ export function useShelf3D(away: boolean, rec: boolean, bigQuery: string): [(el:
   }, [ready]);
   useEffect(() => { if (ready) stage?.show(!away); }, [ready, away]);
   useEffect(() => { if (ready) stage?.setRec(rec); }, [ready, rec]);
-  return [(el) => { host.current = el; if (ready) stage?.attach(el); }, live, live ? '' : still];
+  return [(el) => { host.current = el; if (ready) stage?.attach(el); }, live, live ? '' : still, wait && !live];
 }
 
 /** for the dev page and screenshots */

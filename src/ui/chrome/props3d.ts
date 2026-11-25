@@ -407,7 +407,7 @@ export function carvedLeaf(len: number, m: THREE.Material, wid = 0.38): THREE.Me
 }
 /** the tiny owl that lives behind the cuckoo door */
 function cuckooOwl(): THREE.Group {
-  const feather = std('owlFeather', { map: clothTex(PAL.tan, 12, 0.7), color: 0xc89870, roughness: 0.75 });
+  const feather = std('owlFeather', { map: clothTex(PAL.tan, 12, 0.7), color: 0xb89a84, roughness: 0.75 });
   const belly = std('owlBelly', { map: clothTex(PAL.linen, 13, 0.6), color: 0xfff0d8, roughness: 0.8 });
   const body = lathe(smoothProfile([[0, 0], [0.07, 0.01], [0.1, 0.06], [0.1, 0.13], [0.085, 0.19], [0.05, 0.22], [0, 0.225]], 3), feather, 20);
   const chest = at(lathe(smoothProfile([[0, 0.01], [0.06, 0.03], [0.07, 0.08], [0.05, 0.13], [0, 0.14]], 2), belly, 14), 0, 0.01, 0.035, 0, 0, 0, [1, 1, 0.7]);

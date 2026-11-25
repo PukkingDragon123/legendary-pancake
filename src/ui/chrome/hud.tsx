@@ -308,7 +308,7 @@ export function SideTools() {
 interface MainDef { id: NonNullable<Panel>; label: string; inner: string; tl: Timeline; act: Timeline; fx: UiFxKind[]; icon?: string }
 const MAIN: MainDef[] = [
   { id: 'sleep', label: 'Sleep', inner: 'night', tl: seq('nav_sleep', 8, 260), act: rep(seq('nav_sleep_tap', 3, 110), 2), fx: ['stars', 'motes'] },
-  { id: 'clock', label: 'Clock', inner: 'paper', tl: seq('nav_clock', 8, 120), act: seq('nav_clock', 8, 60), fx: ['sparkle', 'puff'] },
+  { id: 'clock', label: 'Clock', inner: 'paper', tl: seq('nav_clock', 8, 120), act: seq('nav_clock', 8, 60), fx: ['sparkle', 'motes'] }, // [icons6] no puff over the cuckoo's door
   { id: 'book', label: 'Book', inner: 'velvet', tl: seq('nav_book', 5, 70), act: seq('nav_book', 5, 70), fx: ['paper', 'magic'] },
 ];
 const GLOW = [0.4, 0.55, 0.7, 0.85, 0.7, 0.55];
@@ -441,9 +441,9 @@ export function MainNav() {
   let diff = t.getTime() - now.getTime();
   if (diff < -6 * 3600_000) diff += 24 * 3600_000;
   const bedtimeNear = diff < 90 * 60_000;
-  const [host3d, live, still3d] = useShelf3D(away, bedtimeNear, DESK_NAV); // [icons6] the live 3D shelf (and last visit's still of it)
+  const [host3d, live, still3d, wait3d] = useShelf3D(away, bedtimeNear, DESK_NAV); // [icons6] the live 3D shelf (and last visit's still of it)
   return (
-    <nav class={'hh-nav' + (away ? ' away' : '') + (live || still3d ? ' live' : '')} aria-label="Main">
+    <nav class={'hh-nav' + (away ? ' away' : '') + (live || still3d ? ' live' : wait3d ? ' wait' : '')} aria-label="Main">
       <span class="hh-nav3d" ref={host3d} aria-hidden="true">{still3d && <img src={still3d} alt="" draggable={false} />}</span>
       <div class="hh-plaques">
         {MAIN.map((m, i) => <MainObject key={m.id} m={m} i={i} rec={m.id === 'sleep' && bedtimeNear} k={k} />)}
