@@ -28,11 +28,11 @@ function installBlueprint() {
   const st = document.createElement('style');
   st.id = 'hh-blueprint';
   st.textContent = `
-.bm-drawer{background-color:#1f4a78;background-image:url("${blueprintTile()}");background-size:64px 64px;image-rendering:pixelated}
+.bm-drawer{background-color:#1f4a78;background-image:url("${blueprintTile()}");background-size:64px 64px}
 .bm-floors{background:url("${blueprintTile()}") 0 0/64px 64px}
 .bm-note{background:url("${blueprintTile()}") 0 0/64px 64px}
-.bm-drawer::before,.bm-drawer::after{width:52px;height:14px;top:-9px;background:url("${tape(52)}") 0 0/52px 14px;clip-path:none;box-shadow:none;filter:drop-shadow(2px 2px 0 rgba(12,34,64,.4))}
-.bm-pin{width:16px;height:16px;top:-6px;background:url("${thumbtack()}") 0 0/16px 16px;image-rendering:pixelated}
+.bm-drawer::before,.bm-drawer::after{width:52px;height:14px;top:-9px;background:url("${tape(52)}") 0 0/52px 14px;clip-path:none;box-shadow:none;filter:drop-shadow(2px 2px 5.2px rgba(12,34,64,.4))}
+.bm-pin{width:16px;height:16px;top:-6px;background:url("${thumbtack()}") 0 0/16px 16px}
 .bm-pin > *{display:none}
 `;
   document.head.appendChild(st);

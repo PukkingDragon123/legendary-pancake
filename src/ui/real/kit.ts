@@ -474,7 +474,16 @@ export const NINE: Record<string, () => Nine> = {
 };
 
 /** CSS declarations for a frame. `scale` multiplies the layout borders (old frameStyle scale 2 ~ 1). */
+/** Paper surfaces are plain CSS (a seamless paper tile, rounded corners, soft shadows): they keep their texture at any size. */
+export const SURFACE_CSS: Record<string, string> = {
+  parchment: 'border:10px solid transparent;border-image:none;border-radius:12px;background:var(--tx-paper) 0 0/320px 320px,#f3e7cc;background-clip:border-box;box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(120,84,40,.18),inset 0 -3px 8px rgba(120,80,30,.12)',
+  parchment_dark: 'border:10px solid transparent;border-image:none;border-radius:12px;background:var(--tx-paper-dark) 0 0/320px 320px,#dcc89c;background-clip:border-box;box-shadow:inset 0 2px 5px rgba(60,36,14,.38),inset 0 0 0 1px rgba(90,60,30,.25),0 1px 0 rgba(255,248,230,.6)',
+  paper_ledger: 'border:8px solid transparent;border-image:none;border-radius:6px;background:repeating-linear-gradient(180deg,transparent 0 21px,rgba(70,110,170,.22) 21px 22px) 0 6px,linear-gradient(90deg,transparent 0 22px,rgba(196,72,72,.38) 22px 23.5px,transparent 23.5px),var(--tx-paper) 0 0/320px 320px,#f6ecd4;background-clip:border-box;box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.6)',
+  crt: 'border:8px solid transparent;border-image:none;border-radius:14px;background:radial-gradient(ellipse at 40% 30%,#2a3a4a,#0c1218);box-shadow:0 0 0 3px #3a3c44,0 0 0 5px #1a1b20,var(--sh-2),inset 0 0 18px rgba(120,200,255,.18)',
+};
+
 export function nineCSS(name: string, o: { fill?: boolean; bw?: number[] | false } = {}): string {
+  if (SURFACE_CSS[name]) return SURFACE_CSS[name];
   const make = NINE[name] ?? NINE.walnut;
   const n = make();
   const sl = n.s.map((v) => Math.round(v * n.k)).join(' ');

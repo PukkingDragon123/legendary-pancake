@@ -1,9 +1,9 @@
 /* The breathing picker: lantern cards on a dark wooden board. */
-.bp-back { position: absolute; inset: 0; z-index: 12; display: grid; place-items: center; padding: calc(10px + var(--safe-t)) 10px calc(10px + var(--safe-b)); background: var(--px-vignette) 0 0 / 100% 100% no-repeat, rgba(27, 34, 45, 0.3); image-rendering: pixelated; animation: fade 0.35s ease; }
+.bp-back { position: absolute; inset: 0; z-index: 12; display: grid; place-items: center; padding: calc(10px + var(--safe-t)) 10px calc(10px + var(--safe-b)); background: var(--px-vignette) 0 0 / 100% 100% no-repeat, rgba(27, 34, 45, 0.3); animation: fade 0.35s ease; }
 .bp { width: min(460px, 100%); max-height: 100%; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 8px; padding: 2px 4px 8px; color: #f1eae0; animation: popIn 0.45s var(--pop); filter: drop-shadow(0 5px 0 rgba(24, 22, 16, 0.5)); }
 .bp::-webkit-scrollbar { display: none; }
 .bp-head { display: flex; align-items: center; gap: 6px; }
-.bp-head h2 { font-size: var(--t2); color: #eae2d1; text-shadow: 2px 2px 0 #2b241d; }
+.bp-head h2 { font-size: var(--t2); color: #eae2d1; text-shadow: 1px 2px 3.6px #2b241d; }
 .bp-head p { font-size: var(--t1); color: #dec8a8; }
 .bp-lamp { animation: floaty 3s ease-in-out infinite; }
 .bp-x { width: 40px; height: 40px; display: grid; place-items: center; flex: none; }

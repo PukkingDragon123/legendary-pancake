@@ -354,14 +354,14 @@ function injectCSS() {
   cssDone = true;
   const st = document.createElement('style');
   st.textContent = `
-.hh-phone{position:relative;--u:calc(var(--pk) * 1px);width:calc(80 * var(--u));height:calc(160 * var(--u));image-rendering:pixelated;flex:none;pointer-events:none}
-.hh-phone img,.hh-phone canvas{position:absolute;image-rendering:pixelated;display:block}
+.hh-phone{position:relative;--u:calc(var(--pk) * 1px);width:calc(80 * var(--u));height:calc(160 * var(--u));flex:none;pointer-events:none}
+.hh-phone img,.hh-phone canvas{position:absolute;display:block}
 .hh-phone .body{left:0;top:0;width:100%;height:100%}
 .hh-phone canvas{left:calc(6 * var(--u));top:calc(6 * var(--u));width:calc(${SW} * var(--u));height:calc(${SH} * var(--u))}
-.hh-phone.buzz{animation:hh-phone-buzz .24s steps(6)}
-.hh-lock{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:12px;background:rgba(6,8,26,.84);animation:hh-lock-in .3s steps(4) both}
+.hh-phone.buzz{animation:hh-phone-buzz .24s ease-in-out}
+.hh-lock{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:12px;background:rgba(6,8,26,.84);animation:hh-lock-in .3s ease-in-out both}
 @keyframes hh-lock-in{from{opacity:0}to{opacity:1}}
-.hh-lock .hh-phone{animation:hh-lock-up .5s steps(8) both}
+.hh-lock .hh-phone{animation:hh-lock-up .5s ease-in-out both}
 @keyframes hh-lock-up{from{transform:translateY(60px)}to{transform:none}}
 .hh-lock-cap{max-width:300px;text-align:center;padding:10px 14px;color:#f4e8cc;font:16px var(--font-body, monospace);line-height:1.25}
 .hh-lock-cap b{display:block;font-size:16px;color:#ffe08a;margin-bottom:2px}

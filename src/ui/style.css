@@ -130,8 +130,8 @@ code { font-family: var(--font-small); font-size: var(--t1); background: rgba(56
 .btn.block { width: 100%; }
 .btn.big { font-size: var(--t2); padding: 5px 10px 3px; }
 .btn.big.pillow:active:not(:disabled), .btn.big.soft:active:not(:disabled) { padding-top: 7px; padding-bottom: 1px; }
-.btn.pillow.honey { color: #3a2408; text-shadow: 0 1px 0 rgba(255, 244, 200, 0.7); }
-.btn.soft { color: var(--ink); text-shadow: 0 1px 0 rgba(255, 250, 238, 0.7); font-size: var(--t1); }
+.btn.pillow.honey { color: #3a2408; text-shadow: 0 1px 1px rgba(255, 244, 200, 0.7); }
+.btn.soft { color: var(--ink); text-shadow: 0 1px 1px rgba(255, 250, 238, 0.7); font-size: var(--t1); }
 .btn.oak { color: #f7f1e6; }
 .btn.ghost { color: var(--ink-2); text-shadow: none; filter: none; font-size: var(--t1); padding: 8px 10px; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
 .btn.sm { font-size: var(--t1); }

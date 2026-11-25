@@ -32,9 +32,9 @@
 .hh-nameboard { width: 192px; height: 72px; }
 .hh-portrait { position: absolute; left: -15px; top: -14px; width: 78px; height: 78px; filter: drop-shadow(1px 3px 4px rgba(26, 14, 8, 0.45)); } /* [ui5] the live owl in its frame */
 /* [ui4] gilt lettering on the varnished board */
-.hh-name { position: absolute; left: 63px; right: 10px; top: 11px; font-family: var(--font-display); font-size: var(--t2); line-height: 1; color: #fbe3a0; white-space: nowrap; overflow: hidden; text-overflow: clip; text-shadow: 0 1px 0 #2a1209, 0 0 2px #2a1209, 0 2px 4px rgba(0, 0, 0, 0.55); }
+.hh-name { position: absolute; left: 63px; right: 10px; top: 11px; font-family: var(--font-display); font-size: var(--t2); line-height: 1; color: #fbe3a0; white-space: nowrap; overflow: hidden; text-overflow: clip; text-shadow: 0 1px 1px #2a1209, 0 0 2px #2a1209, 0 2px 4px rgba(0, 0, 0, 0.55); }
 .hh-name.long { font-size: var(--t1); top: 16px; }
-.hh-rank { position: absolute; right: 12px; top: 16px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; color: #f0cf96; text-shadow: 0 1px 0 #2a1209, 0 0 2px #2a1209; }
+.hh-rank { position: absolute; right: 12px; top: 16px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; color: #f0cf96; text-shadow: 0 1px 1px #2a1209, 0 0 2px #2a1209; }
 .hh-lvl { position: absolute; left: 80px; top: 39px; width: 104px; height: 24px; filter: drop-shadow(0 2px 2px rgba(20, 12, 6, 0.5)); }
 .hh-magicbar { display: block; }
 .hh-xp { position: absolute; inset: 0 6px; display: grid; place-items: center; font-family: var(--font-small); font-size: var(--t1); font-weight: 700; color: #faf5e9; text-shadow:  0 1px 1px #282636, 0 0 2px #282636, 0 0 3px #282636; opacity: 0; transform: translateY(4px); transition: opacity 0.2s, transform 0.3s var(--pop); pointer-events: none; }

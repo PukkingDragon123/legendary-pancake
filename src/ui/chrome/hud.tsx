@@ -293,7 +293,7 @@ function ToolTag(p: { t: ToolDef; i: number; badge?: number; isNew?: boolean }) 
     <div class="hh-tool" style={{ '--i': p.i } as Record<string, number>}>
       <div class="hh-toolhang" ref={ref}>
         <button class="hh-tag" style={{ '--art': bg(toolTile(52, p.t.felt, k, 1, p.i + 1)) } as Record<string, string>} onClick={go} aria-label={p.t.label + (p.badge ? ` (${p.badge} ready to claim)` : '')}>
-          <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={iconSrc(TOOL_ICON[p.t.id] ?? '', Math.round(44 * dpr()), dpr()) ?? toolIcon(p.t.id as ToolIcon, k, 1)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
+          <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={iconSrc(TOOL_ICON[p.t.id] ?? '', Math.round(44 * dpr() * k), dpr()) ?? toolIcon(p.t.id as ToolIcon, k, 1)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
           {!!p.badge && <span class="hh-badge"><b>{p.badge}</b></span>}
           {p.isNew && <span class="hh-new">New</span>}
         </button>

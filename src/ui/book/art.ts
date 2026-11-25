@@ -3,7 +3,7 @@
 // wreath of leaves), oat-paper pages with fibres, foxing and a stepped gutter shadow, cloth index
 // tabs, a ribbon bookmark, square score stamps, mood icons and achievement postage stamps.
 // Everything is painted at texel resolution, cached as a data URL and shown with
-// `image-rendering: pixelated` at T CSS px per texel. Importing this module never touches the DOM.
+// `` at T CSS px per texel. Importing this module never touches the DOM.
 import { P } from '../../gfx/palette.ts';
 
 type RGB = [number, number, number];

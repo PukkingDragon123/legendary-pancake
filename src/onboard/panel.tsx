@@ -61,21 +61,21 @@ function css() {
   cssDone = true;
   const st = document.createElement('style');
   st.textContent = `
-.qp{position:fixed;z-index:44;--u:calc(var(--k) * 1px);width:calc(${W + 8} * var(--u));left:50%;bottom:calc(3 * var(--u));transform:translateX(-50%);image-rendering:pixelated;color:#1d2552;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;pointer-events:auto}
+.qp{position:fixed;z-index:44;--u:calc(var(--k) * 1px);width:calc(${W + 8} * var(--u));left:50%;bottom:calc(3 * var(--u));transform:translateX(-50%);color:#1d2552;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;pointer-events:auto}
 .qp.wide{left:auto;right:calc(14 * var(--u));bottom:50%;transform:translateY(50%)}
 .qp *{box-sizing:border-box}
-.qp.in{animation:qp-in .5s steps(10) both}.qp.wide.in{animation:qp-in-w .5s steps(10) both}
+.qp.in{animation:qp-in .5s ease-in-out both}.qp.wide.in{animation:qp-in-w .5s ease-in-out both}
 @keyframes qp-in{0%{transform:translate(-50%,110%)}70%{transform:translate(-50%,-3%)}100%{transform:translate(-50%,0)}}
 @keyframes qp-in-w{0%{transform:translate(130%,50%)}70%{transform:translate(-3%,50%)}100%{transform:translate(0,50%)}}
-.qp-folio{position:absolute;inset:0;background-size:100% 100%;image-rendering:pixelated}
-.qp-sheet{position:relative;margin:calc(5 * var(--u)) calc(4 * var(--u)) calc(5 * var(--u));padding:calc(10 * var(--u)) calc(7 * var(--u)) calc(5 * var(--u));background-size:100% 100%;image-rendering:pixelated}
+.qp-folio{position:absolute;inset:0;background-size:100% 100%}
+.qp-sheet{position:relative;margin:calc(5 * var(--u)) calc(4 * var(--u)) calc(5 * var(--u));padding:calc(10 * var(--u)) calc(7 * var(--u)) calc(5 * var(--u));background-size:100% 100%}
 .qp-clip{position:absolute;left:50%;top:calc(-2 * var(--u));width:calc(46 * var(--u));height:calc(22 * var(--u));transform:translateX(-50%);background-size:100% 100%;z-index:3}
 .qp-head{display:flex;align-items:center;justify-content:space-between;border-bottom:var(--u) solid #2b376a;padding-bottom:calc(2 * var(--u));margin-bottom:calc(3 * var(--u));white-space:nowrap;font:var(--a1) var(--font-body);line-height:var(--a1);color:#5a5f80;letter-spacing:1px}
 .qp-acorns{display:flex;gap:var(--u)}.qp-acorns i{width:calc(6 * var(--u));height:calc(6 * var(--u));background-size:100% 100%}
 .qp-q{font:calc(16 * var(--u)) var(--font-body);line-height:calc(16 * var(--u));color:#17130f;margin:0 0 calc(1 * var(--u));white-space:nowrap;display:flex;align-items:baseline;gap:calc(4 * var(--u))}
 .qp-q small{font:var(--a1) var(--font-body);color:#8a5a14}
 .qp-objs{display:grid;gap:calc(2 * var(--u)) calc(3 * var(--u));margin:calc(2 * var(--u)) 0 calc(3 * var(--u))}
-.qp-obj{position:relative;width:100%;border:0;background:transparent;cursor:pointer;padding:0;text-align:center;color:#1d2552;transition:transform .12s steps(2)}
+.qp-obj{position:relative;width:100%;border:0;background:transparent;cursor:pointer;padding:0;text-align:center;color:#1d2552;transition:transform .12s ease}
 .qp-obj:active{transform:translateY(var(--u))}
 .qp-obj:focus-visible{outline:var(--u) dashed #b33a1a;outline-offset:var(--u)}
 .qp-win{display:block;width:100%;pointer-events:none}
@@ -91,10 +91,10 @@ function css() {
 .qp-box{position:relative;width:calc(78 * var(--u));height:calc(26 * var(--u));border:0;background:transparent;cursor:pointer;padding:0;flex:none;margin-left:auto}
 .qp-box::before{content:'';position:absolute;inset:0;border:var(--u) dashed #6a6f8a}
 .qp-box b{position:relative;display:block;font:calc(16 * var(--u)) var(--font-body);color:#9a9ab0;white-space:nowrap;line-height:calc(26 * var(--u))}
-.qp-box.ready::before{border:calc(2 * var(--u)) solid #b33a1a;animation:qp-pulse 1s steps(2) infinite}
+.qp-box.ready::before{border:calc(2 * var(--u)) solid #b33a1a;animation:qp-pulse 1s ease-in-out infinite}
 .qp-box.ready b{color:#b33a1a}
 @keyframes qp-pulse{50%{border-color:#e07a2a}}
-.qp-impr{position:absolute;left:50%;top:50%;width:calc(80 * var(--u));height:calc(30 * var(--u));transform:translate(-50%,-50%) rotate(-5deg);background-size:100% 100%;animation:qp-impr .12s steps(2) both}
+.qp-impr{position:absolute;left:50%;top:50%;width:calc(80 * var(--u));height:calc(30 * var(--u));transform:translate(-50%,-50%) rotate(-5deg);background-size:100% 100%;animation:qp-impr .12s ease-in-out both}
 @keyframes qp-impr{from{opacity:0}to{opacity:1}}
 .qp-sticky{position:absolute;right:calc(-4 * var(--u));top:calc(-28 * var(--u));width:calc(56 * var(--u));min-height:calc(30 * var(--u));background-size:100% 100%;transform:rotate(5deg);z-index:4;border:0;cursor:pointer;font:var(--a1) var(--font-body);line-height:var(--a1);color:#3a2a0a;padding:calc(4 * var(--u)) calc(3 * var(--u));text-align:center}
 .qp.wide .qp-sticky{right:auto;left:calc(-62 * var(--u));top:calc(18 * var(--u));transform:rotate(-4deg)}
@@ -126,13 +126,13 @@ function css() {
 .qp-sign{display:flex;gap:calc(12 * var(--u));margin-top:calc(2 * var(--u))}
 .qp-sign button{flex:1;border:0;background:transparent;cursor:pointer;text-align:left;padding:0;font:var(--a1) var(--font-body);color:#6a6f8a}
 .qp-sign .s{display:block;height:calc(16 * var(--u));font:calc(16 * var(--u)) var(--font-body);color:#1d2552;overflow:hidden;white-space:nowrap}
-.qp-sign .s.go{animation:qp-write .9s steps(9) both}
+.qp-sign .s.go{animation:qp-write .9s ease-in-out both}
 @keyframes qp-write{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 .qp-sign .hint{color:#b33a1a}
 .qp-remind{display:flex;align-items:center;gap:calc(2 * var(--u));border:0;background:transparent;cursor:pointer;padding:0;font:var(--a1) var(--font-body);color:#17130f}
 .qp-remind .qp-win{width:calc(30 * var(--u))}
 .qp-remind.off{color:#9a9ab0}
-.qp-fly{transition:transform .5s cubic-bezier(.5,0,.8,.4),opacity .5s steps(5)}
+.qp-fly{transition:transform .5s cubic-bezier(.5,0,.8,.4),opacity .5s ease}
 @media (prefers-reduced-motion:reduce){.qp *,.qp{animation-duration:0s!important}}
 `;
   document.head.appendChild(st);

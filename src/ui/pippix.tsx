@@ -18,7 +18,7 @@ export function PipPix(p: { n?: number; size?: number; shot?: OwlShot; class?: s
   return (
     <span class={'pip-pix' + (p.class ? ' ' + p.class : '')} role={p.label ? 'img' : undefined} aria-label={p.label} aria-hidden={p.label ? undefined : 'true'}
       style={`display:inline-block;width:${size}px;height:${size}px;${p.style ?? ''}`}>
-      {url && <img src={url} alt="" draggable={false} style="width:100%;height:100%;image-rendering:pixelated;display:block" />}
+      {url && <img src={url} alt="" draggable={false} style="width:100%;height:100%;display:block" />}
     </span>
   );
 }

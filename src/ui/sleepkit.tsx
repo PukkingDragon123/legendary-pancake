@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { Art } from './px/sleepart.ts';
 import { paperTexture } from './px/sleeppaper.js';
-import { frameStyle } from './px/frames.js';
+import { frameStyle } from './real/kit.ts';
 import { haptic } from './kit.tsx';
 import { uiBurstAt } from './chrome/uifx.ts';
 

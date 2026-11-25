@@ -7,32 +7,32 @@
 .sf-scroll::-webkit-scrollbar { display: none; }
 
 /* the wall with the window */
-.sf-wall { position: relative; display: flex; justify-content: center; padding-top: calc(8px + var(--safe-t)); padding-bottom: 6px; background-size: 48px 48px; image-rendering: pixelated; box-shadow: inset 0 -26px 26px -10px rgba(24, 22, 16, 0.45); }
+.sf-wall { position: relative; display: flex; justify-content: center; padding-top: calc(8px + var(--safe-t)); padding-bottom: 6px; background-size: 48px 48px; box-shadow: inset 0 -26px 26px -10px rgba(24, 22, 16, 0.45); }
 .sf-window { display: block; filter: drop-shadow(0 4px 0 rgba(24, 22, 16, 0.35)); }
 .sf-back { position: absolute; z-index: 5; left: 8px; top: calc(8px + var(--safe-t)); width: 50px; height: 50px; display: grid; place-items: center; background: #ebe2d3; box-shadow: inset 0 -4px 0 #cab294, inset 0 3px 0 #f9f3e8, 0 0 0 3px #382c22, 0 4px 0 3px rgba(24, 22, 16, 0.45); transform: rotate(-4deg); transition: transform 0.15s var(--pop); }
 .sf-back::before { content: ''; position: absolute; top: -7px; left: 50%; width: 10px; height: 10px; margin-left: -5px; background: #9d756d; box-shadow: inset -2px -2px 0 #5f3f3c, inset 2px 2px 0 #bd978a, 0 0 0 2px #312821; }
 .sf-back:active { transform: rotate(-4deg) translateY(2px); }
-.sf-sign { position: absolute; right: 12px; bottom: -14px; z-index: 3; padding: 0 10px 2px; font-size: var(--t1); color: #eee9de; text-shadow: 2px 2px 0 #312821; transform: rotate(3deg); animation: signSwing 6s ease-in-out infinite; transform-origin: 50% -20px; }
+.sf-sign { position: absolute; right: 12px; bottom: -14px; z-index: 3; padding: 0 10px 2px; font-size: var(--t1); color: #eee9de; text-shadow: 1px 2px 3.6px #312821; transform: rotate(3deg); animation: signSwing 6s ease-in-out infinite; transform-origin: 50% -20px; }
 .sf-sign::before, .sf-sign::after { content: ''; position: absolute; top: -18px; width: 2px; height: 20px; background: #c2ac8a; box-shadow: 1px 0 0 #382c22; }
 .sf-sign::before { left: 16px; transform: rotate(14deg); } .sf-sign::after { right: 16px; transform: rotate(-14deg); }
 @keyframes signSwing { 0%, 100% { transform: rotate(3deg); } 50% { transform: rotate(-1.5deg); } }
 
 /* the table */
-.sf-table { position: relative; padding: 0 12px 8px; image-rendering: pixelated; background-repeat: repeat; box-shadow: inset 0 14px 18px -8px rgba(24, 22, 16, 0.55); }
+.sf-table { position: relative; padding: 0 12px 8px; background-repeat: repeat; box-shadow: inset 0 14px 18px -8px rgba(24, 22, 16, 0.55); }
 .sf-edge { height: 12px; margin: 0 -12px; background: linear-gradient(180deg, #917361 0 3px, #6e5040 3px 9px, rgba(24, 22, 16, 0.35) 9px 12px); box-shadow: 0 -3px 0 #32281f; }
 .sf-props { display: flex; align-items: flex-end; justify-content: center; gap: 6px; padding: 6px 0 2px; min-height: 150px; }
 .prop { position: relative; display: block; transition: transform 0.18s var(--pop); filter: drop-shadow(0 4px 0 rgba(40, 34, 27, 0.45)); }
 .prop:active { transform: translateY(3px) scale(0.96); }
-.prop canvas, .prop > img { display: block; image-rendering: pixelated; }
+.prop canvas, .prop > img { display: block; }
 .prop-mug { padding-top: 0; }
 .prop-mug .steam { position: absolute; left: 0; top: -34px; pointer-events: none; }
-.prop::after { content: ''; position: absolute; left: 10%; right: 10%; bottom: -6px; height: 8px; background: var(--px-shadow) center / 100% 100% no-repeat; image-rendering: pixelated; z-index: -1; }
-.prop-candle .halo { position: absolute; left: 50%; top: -6px; width: 150px; height: 150px; margin-left: -75px; background: var(--px-glow-lamp) center / 100% 100% no-repeat; image-rendering: pixelated; pointer-events: none; animation: flick 2.2s steps(5) infinite; mix-blend-mode: screen; }
+.prop::after { content: ''; position: absolute; left: 10%; right: 10%; bottom: -6px; height: 8px; background: var(--px-shadow) center / 100% 100% no-repeat; z-index: -1; }
+.prop-candle .halo { position: absolute; left: 50%; top: -6px; width: 150px; height: 150px; margin-left: -75px; background: var(--px-glow-lamp) center / 100% 100% no-repeat; pointer-events: none; animation: flick 2.2s ease-in-out infinite; mix-blend-mode: screen; }
 @keyframes flick { 0% { opacity: 0.85; transform: scale(1); } 30% { opacity: 1; transform: scale(1.04); } 55% { opacity: 0.8; transform: scale(0.98); } 80% { opacity: 0.95; transform: scale(1.02); } }
 .prop-clock { margin-bottom: -2px; }
 .prop-phone.tucked { animation: tuck 0.6s var(--pop); }
 @keyframes tuck { 30% { transform: translateY(-10px) rotate(-6deg); } }
-.prop-phone .zz { position: absolute; right: -10px; top: -14px; font-size: var(--t1); color: #ebedef; text-shadow: 2px 2px 0 #2b3646; animation: zz 2.4s ease-in-out infinite; }
+.prop-phone .zz { position: absolute; right: -10px; top: -14px; font-size: var(--t1); color: #ebedef; text-shadow: 1px 2px 3.6px #2b3646; animation: zz 2.4s ease-in-out infinite; }
 .prop-phone .zz small { font-size: var(--t1); }
 @keyframes zz { 50% { transform: translate(4px, -6px); opacity: 0.6; } }
 
@@ -83,7 +83,7 @@
 .sf-pencil { position: absolute; right: -8px; bottom: -16px; width: 132px; transform: rotate(-24deg); filter: drop-shadow(0 3px 0 rgba(40, 34, 27, 0.45)); pointer-events: none; }
 
 /* tips */
-.sf-label { margin: 0 0 6px 2px; font-family: var(--font-display); font-weight: 400; font-size: var(--t1); color: #f1eae0; text-shadow: 2px 2px 0 #32281f; }
+.sf-label { margin: 0 0 6px 2px; font-family: var(--font-display); font-weight: 400; font-size: var(--t1); color: #f1eae0; text-shadow: 1px 2px 3.6px #32281f; }
 .sf-tips { cursor: pointer; }
 .tip-stack { position: relative; height: 188px; }
 .tip { position: absolute; inset: 0; padding: 12px 14px 12px 88px; display: flex; flex-direction: column; gap: 4px; color: #382c22; transition: transform 0.45s var(--ease); }
@@ -93,7 +93,7 @@
 .tip.pos1 > *, .tip.pos2 > * { visibility: hidden; }
 .tip b { font-size: var(--t1); font-weight: 400; color: #5c4234; line-height: 1; }
 .tip p { font-size: var(--t1); line-height: 1.25; color: #554231; }
-.tip-ico { position: absolute; left: 12px; top: 18px; width: 64px; height: 64px; display: grid; place-items: center; background: var(--px-glow-paper) center / 100% 100% no-repeat; image-rendering: pixelated; }
+.tip-ico { position: absolute; left: 12px; top: 18px; width: 64px; height: 64px; display: grid; place-items: center; background: var(--px-glow-paper) center / 100% 100% no-repeat; }
 .tip-n { position: absolute; right: 12px; bottom: 8px; font-size: var(--t1); color: #ab9578; }
 
 /* the sound tray */
@@ -111,7 +111,7 @@
 .mic-row small { display: block; font-size: var(--t1); color: #6e5841; line-height: 1.25; }
 .mic-block { display: flex; align-items: center; gap: 4px; font-size: var(--t1); color: #6e5841; margin-top: 4px; }
 .mic-block .ico { margin: -6px 0; }
-.sf-demo { align-self: center; font-size: var(--t1); color: #f1eae0; text-decoration: underline; text-underline-offset: 4px; text-shadow: 2px 2px 0 #32281f; padding: 6px; }
+.sf-demo { align-self: center; font-size: var(--t1); color: #f1eae0; text-decoration: underline; text-underline-offset: 4px; text-shadow: 1px 2px 3.6px #32281f; padding: 6px; }
 .sf-spacer { height: calc(var(--t1) * 10); } /* [font6] room to scroll the last card clear of the footer at any art pixel */
 
 /* the goodnight button */
@@ -119,10 +119,10 @@
 .sf-foot > * { pointer-events: auto; }
 .sf-sleep { width: min(440px, 100%); height: 72px; font-size: var(--t2); color: #f7f1e6; }
 .sf-sleep .ico { margin: -10px 0; }
-.sf-foot p { font-size: var(--t1); color: #c7bfd8; text-shadow: 1px 1px 0 #181610; }
+.sf-foot p { font-size: var(--t1); color: #c7bfd8; text-shadow: 0.5px 1px 1.8px #181610; }
 
 /* lighting */
-.sf-dark { position: absolute; inset: 0; z-index: 6; pointer-events: none; background: var(--px-vignette-soft) 0 0 / 100% 100% no-repeat; image-rendering: pixelated; opacity: 0; transition: opacity 1.2s ease; }
+.sf-dark { position: absolute; inset: 0; z-index: 6; pointer-events: none; background: var(--px-vignette-soft) 0 0 / 100% 100% no-repeat; opacity: 0; transition: opacity 1.2s ease; }
 .sf.dim .sf-dark { opacity: 1; }
 .sf.out .sf-dark { opacity: 1; background: #181e29; transition: opacity 0.9s ease, background 0.9s ease; }
 

@@ -187,7 +187,7 @@ export function BreatheSession() {
   const tapBurst = (e: PointerEvent) => { st.current.overlay?.burst(e.clientX, e.clientY); sound.play('sparkle', { volume: 0.25, gap: 120 }); };
 
   return (
-    <div class="overlay" ref={host} style="background:var(--px-vignette-soft) 0 0/100% 100% no-repeat;image-rendering:pixelated"
+    <div class="overlay" ref={host} style="background:var(--px-vignette-soft) 0 0/100% 100% no-repeat"
       onPointerDown={(e) => { press(true); if (!cfg.follow) tapBurst(e); }} onPointerUp={() => press(false)} onPointerCancel={() => press(false)}>
       {!done && <div class="breath-cue">
         <h1 key={cue.label}>{cue.label}</h1>
