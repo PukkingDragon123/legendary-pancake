@@ -1,9 +1,12 @@
-// Pixel art for the globe screen: waving pin flags (two-frame sprite sheets), the home oak, the selection
-// ring, passport stamps, the postage stamp and postmark on each postcard, deckled paper frames.
+// Art for the globe screen [ui7]: waving cloth pin flags on brass-capped poles (two-frame sheets), the home oak,
+// the selection ring, the passport (pebbled green leather cover with a gilt globe, guilloche pages), a brass
+// padlock and a moon icon, drawn smooth at device resolution; the passport stamps, postage stamps, postmarks
+// and deckled paper frames below.
 // [globe] OWNED BY THE GLOBE BUILDER.
 import type { Area } from '../../game/catalog.ts';
 import { EMBLEM } from './emblems.ts';
 import { bayer, hash, mix, mul, Pix, vnoise, type C } from './pix.ts';
+import { texCanvas } from '../real/tex.ts';
 
 const INK = 0x2e2b24, PAPER = 0xf4eedd, OAT = 0xeae0c8, LINEN = 0xdccfb0, STRAW = 0xc9b78d, LAMP = 0xf1d39a, LAMPHI = 0xfbeac2;
 const WOOD = 0x9c7a56, WOODDK = 0x6f553d, BRASS = 0xc8a764, BRASSDK = 0x8e7440, STONE = 0x908a7e, SLATE = 0x46596a;
@@ -17,72 +20,83 @@ const memo = (key: string, f: () => string) => { let v = cache.get(key); if (!v)
 export const PIN_W = 13, PIN_H = 17;
 export type PinState = 'open' | 'locked' | 'tonight' | 'visited';
 
-/** A flag on a pole, two frames side by side (the flag ripples). Anchor: bottom centre (x = 3). */
+/** draw on a smooth canvas `w` x `h` units at `scale` device px per unit */
+function smooth(w: number, h: number, scale: number, f: (g: CanvasRenderingContext2D) => void): string {
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(w * scale)); c.height = Math.max(1, Math.round(h * scale));
+  const g = c.getContext('2d')!;
+  g.scale(scale, scale); g.lineCap = 'round'; g.lineJoin = 'round';
+  f(g);
+  return c.toDataURL('image/png');
+}
+const hx = (c: number) => '#' + c.toString(16).padStart(6, '0');
+
+/** A cloth flag on a brass-capped pole, two frames side by side (the flag ripples). Anchor: bottom centre (x = 3). */
 export function pinSheet(color: string, state: PinState, scale: number): string {
-  return memo(`pin:${color}:${state}:${scale}`, () => {
-    const p = new Pix(PIN_W * 2, PIN_H);
+  return memo(`pin7:${color}:${state}:${scale}`, () => smooth(PIN_W * 2, PIN_H, scale, (g) => {
     for (let f = 0; f < 2; f++) {
-      const ox = f * PIN_W;
-      const base = state === 'locked' ? 0x9a948a : state === 'tonight' ? 0xe8c070 : hexC(color);
-      const lit = mix(base, 0xfff4dc, 0.35), dk = mul(base, 0.68);
-      // pole with a brass knob and a lit edge
-      p.vline(ox + 3, 2, PIN_H - 3, WOODDK); p.vline(ox + 4, 3, PIN_H - 3, WOOD);
-      p.rect(ox + 3, 0, 2, 2, BRASS); p.set(ox + 3, 0, LAMPHI); p.set(ox + 4, 1, BRASSDK);
-      // the flag: 8 x 6, swallowtail, rippling
-      for (let x = 0; x < 8; x++) {
-        const wob = f === 0 ? (x >= 3 && x <= 5 ? 1 : 0) : (x >= 5 ? 1 : x <= 1 ? 0 : 0);
-        const top = 2 + wob, bot = 7 + wob - (x === 7 ? 1 : 0);
-        for (let y = top; y <= bot; y++) {
-          if (x === 7 && y === Math.round((top + bot) / 2)) continue; // the notch
-          let c = y === top ? lit : y === bot ? dk : base;
-          if (x === 6 && f === 1) c = dk;
-          p.set(ox + 5 + x, y, c);
-        }
-        p.set(ox + 5 + x, top - 1, INK); p.set(ox + 5 + x, bot + 1, INK);
-      }
-      p.vline(ox + 13 - 0, 2, 8, -1 as unknown as C);
-      // emblem on the flag
-      const cx = ox + 8, cy = 4 + (f === 0 ? 1 : 0);
-      if (state === 'locked') { p.rect(cx, cy + 1, 3, 2, 0x4b463a); p.set(cx, cy, 0x4b463a); p.set(cx + 2, cy, 0x4b463a); p.set(cx + 1, cy - 1, 0x4b463a); p.set(cx + 1, cy + 1, 0xc9b78d); }
-      else if (state === 'tonight') { p.set(cx, cy, 0x46596a); p.set(cx + 1, cy - 1, 0x46596a); p.set(cx + 1, cy + 1, 0x46596a); p.set(cx + 2, cy - 1, 0x46596a); p.set(cx + 2, cy + 1, 0x46596a); }
-      else if (state === 'visited') { p.set(cx + 1, cy - 1, PAPER); p.hline(cx, cx + 2, cy, PAPER); p.set(cx + 1, cy + 1, PAPER); }
-      else { p.set(cx + 1, cy, mix(base, PAPER, 0.6)); }
-      // foot: a little stepped mound
-      p.hline(ox + 1, ox + 6, PIN_H - 2, mul(STONE, 0.8)); p.hline(ox + 2, ox + 5, PIN_H - 3, STONE); p.hline(ox + 2, ox + 5, PIN_H - 1, 0x2a3040);
+      g.save(); g.translate(f * PIN_W, 0);
+      const base = state === 'locked' ? '#9a948a' : state === 'tonight' ? '#e8b850' : color;
+      // a soft mound and contact shadow
+      const sh = g.createRadialGradient(3.6, PIN_H - 1.4, 0, 3.6, PIN_H - 1.4, 3.4);
+      sh.addColorStop(0, 'rgba(10,14,24,.55)'); sh.addColorStop(1, 'rgba(10,14,24,0)');
+      g.fillStyle = sh; g.beginPath(); g.ellipse(3.6, PIN_H - 1.4, 3.4, 1.3, 0, 0, Math.PI * 2); g.fill();
+      // the pole: turned walnut
+      const pole = g.createLinearGradient(3, 0, 4.4, 0); pole.addColorStop(0, '#c08a5a'); pole.addColorStop(0.5, '#8a5a32'); pole.addColorStop(1, '#4a2c16');
+      g.fillStyle = pole; g.beginPath(); g.roundRect(3, 1.4, 1.3, PIN_H - 2.6, 0.6); g.fill();
+      // the cloth: a swallowtail that ripples
+      const wob = f === 0 ? 0.7 : -0.5;
+      g.beginPath(); g.moveTo(4.2, 2);
+      g.bezierCurveTo(6.5, 2 + wob, 9.5, 2 - wob, 12.6, 2.4 + wob * 0.6);
+      g.lineTo(11, 5.1); g.lineTo(12.6, 7.8 + wob * 0.6);
+      g.bezierCurveTo(9.5, 7.4 - wob, 6.5, 7.4 + wob, 4.2, 7.4); g.closePath();
+      const cl = g.createLinearGradient(4, 0, 12.6, 0);
+      cl.addColorStop(0, base); cl.addColorStop(0.45, base); cl.addColorStop(0.5, f ? 'rgba(0,0,0,.18)' : 'rgba(255,255,255,.18)'); cl.addColorStop(1, base);
+      g.fillStyle = base; g.fill(); g.fillStyle = cl; g.fill();
+      const lit = g.createLinearGradient(0, 2, 0, 7.8); lit.addColorStop(0, 'rgba(255,250,235,.35)'); lit.addColorStop(0.5, 'rgba(255,250,235,0)'); lit.addColorStop(1, 'rgba(0,0,0,.28)');
+      g.fillStyle = lit; g.fill();
+      g.strokeStyle = 'rgba(20,14,10,.45)'; g.lineWidth = 0.35; g.stroke();
+      // the emblem
+      const cx = 8, cy = 4.9 + (f === 0 ? 0.35 : -0.15);
+      g.fillStyle = '#fffaf0'; g.strokeStyle = '#3a3226'; g.lineWidth = 0.5;
+      if (state === 'locked') { g.fillStyle = '#4b463a'; g.beginPath(); g.roundRect(cx - 1.1, cy - 0.2, 2.2, 1.6, 0.3); g.fill(); g.beginPath(); g.arc(cx, cy - 0.3, 0.8, Math.PI, 0); g.stroke(); }
+      else if (state === 'tonight') { g.fillStyle = '#2a3a66'; g.beginPath(); g.arc(cx, cy, 1.3, 0, Math.PI * 2); g.arc(cx + 0.6, cy - 0.3, 1.1, 0, Math.PI * 2, true); g.fill('evenodd'); }
+      else if (state === 'visited') { g.strokeStyle = '#fffaf0'; g.lineWidth = 0.55; g.beginPath(); g.moveTo(cx - 1, cy); g.lineTo(cx - 0.2, cy + 0.8); g.lineTo(cx + 1.2, cy - 0.9); g.stroke(); }
+      else { g.globalAlpha = 0.7; g.beginPath(); g.arc(cx, cy, 0.7, 0, Math.PI * 2); g.fill(); g.globalAlpha = 1; }
+      // the brass knob
+      const kn = g.createRadialGradient(3.3, 0.8, 0, 3.65, 1.2, 1.1); kn.addColorStop(0, '#fff4c0'); kn.addColorStop(0.5, '#d4a432'); kn.addColorStop(1, '#6e4a12');
+      g.fillStyle = kn; g.beginPath(); g.arc(3.65, 1.2, 1.05, 0, Math.PI * 2); g.fill();
+      g.restore();
     }
-    return p.url(scale);
-  });
+  }));
 }
 
-/** The selection marker under a pin: a stepped ring, two frames (small, big). */
+/** The selection marker under a pin: a glowing ring, two frames (small, big). */
 export function ringSheet(scale: number, color = LAMP): string {
-  return memo(`ring:${scale}:${color}`, () => {
-    const W = 17, H = 7, p = new Pix(W * 2, H);
+  return memo(`ring7:${scale}:${color}`, () => smooth(34, 7, scale, (g) => {
     for (let f = 0; f < 2; f++) {
-      const rx = f ? 8 : 6, ry = f ? 3 : 2;
-      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-        const d = ((x - 8) / rx) ** 2 + ((y - 3) / ry) ** 2;
-        if (d <= 1.15 && d >= 0.45) p.set(f * W + x, y, d > 0.8 ? color : mix(color, 0xffffff, 0.4));
-      }
+      const rx = f ? 7.6 : 5.8, ry = f ? 2.8 : 2.1;
+      g.save(); g.translate(f * 17 + 8.5, 3.5);
+      g.shadowColor = hx(color); g.shadowBlur = 1.4 * scale;
+      g.strokeStyle = hx(color); g.lineWidth = 0.8; g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); g.stroke();
+      g.restore();
     }
-    return p.url(scale);
-  });
+  }));
 }
 
 /** Home: a tiny hollow oak with a lit window. Anchor bottom centre. */
 export function homeSprite(scale: number): string {
-  return memo(`home:${scale}`, () => {
-    const p = new Pix(13, 15);
-    const L = [0x3f5a3b, 0x557343, 0x66844f, 0x86a06a];
-    for (let y = 0; y < 9; y++) for (let x = 0; x < 13; x++) {
-      const d = ((x - 6) / 6.2) ** 2 + ((y - 4.5) / 4.6) ** 2;
-      if (d < 1) p.set(x, y, L[Math.min(3, Math.max(0, Math.round(2.6 - d * 2 - (y - 4) * 0.25 + (bayer(x, y) - 0.5))))]);
+  return memo(`home7:${scale}`, () => smooth(13, 15, scale, (g) => {
+    const tr = g.createLinearGradient(5, 0, 8, 0); tr.addColorStop(0, '#8a6a4a'); tr.addColorStop(1, '#3d2c1c');
+    g.fillStyle = tr; g.beginPath(); g.moveTo(5, 8); g.lineTo(8, 8); g.lineTo(8.6, 13.4); g.lineTo(4.4, 13.4); g.closePath(); g.fill();
+    for (const [x, y, r, c] of [[6.5, 4.6, 5.6, '#3f6a34'], [4.6, 3.6, 3.2, '#557a3c'], [8.4, 3.8, 3.2, '#4a7436'], [6.5, 2.6, 3, '#6a9a48']] as [number, number, number, string][]) {
+      const lg = g.createRadialGradient(x - r * 0.3, y - r * 0.4, 0, x, y, r); lg.addColorStop(0, c); lg.addColorStop(1, '#22401e');
+      g.fillStyle = lg; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
     }
-    p.rect(5, 8, 3, 5, 0x5b4a3c); p.vline(7, 8, 12, 0x3d3229); p.set(6, 10, LAMP); p.set(6, 9, LAMPHI);
-    p.hline(3, 9, 13, 0x3d3229); p.hline(2, 10, 14, 0x2a3040);
-    p.outline(0x1f2733);
-    return p.url(scale);
-  });
+    g.fillStyle = '#ffd884'; g.beginPath(); g.arc(6.5, 10.4, 0.7, 0, Math.PI * 2); g.fill();
+    const sh = g.createRadialGradient(6.5, 14, 0, 6.5, 14, 4); sh.addColorStop(0, 'rgba(10,14,24,.5)'); sh.addColorStop(1, 'rgba(10,14,24,0)');
+    g.fillStyle = sh; g.beginPath(); g.ellipse(6.5, 14, 4, 1, 0, 0, Math.PI * 2); g.fill();
+  }));
 }
 
 // ------------------------------------------------------------------ stamps
@@ -250,54 +264,64 @@ export function paperTile(scale: number, base = PAPER): string {
   });
 }
 
-/** Guilloché security pattern for passport pages. */
+/** Guilloche security pattern for passport pages (smooth, 32 units square). */
 export function passportTile(scale: number): string {
-  return memo(`guil:${scale}`, () => {
-    const N = 32, p = new Pix(N, N), base = 0xe9e3cf;
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-      const a = Math.sin((x / N) * Math.PI * 4 + Math.sin((y / N) * Math.PI * 2) * 2), b = Math.sin((y / N) * Math.PI * 4 + Math.sin((x / N) * Math.PI * 2) * 2);
-      p.set(x, y, Math.abs(a - b) < 0.1 ? 0xdfd8c2 : Math.abs(a + b) < 0.08 ? 0xe3dccb : base);
+  return memo(`guil7:${scale}`, () => smooth(32, 32, scale, (g) => {
+    g.fillStyle = '#ece6d2'; g.fillRect(0, 0, 32, 32);
+    g.strokeStyle = 'rgba(110,140,120,.22)'; g.lineWidth = 0.3;
+    for (let k = 0; k < 6; k++) {
+      g.beginPath();
+      for (let x = 0; x <= 32; x += 0.5) { const y = 16 + Math.sin((x / 32) * Math.PI * 4 + k * 1.05) * (6 + k); if (x === 0) g.moveTo(x, y); else g.lineTo(x, y); }
+      g.stroke();
     }
-    return p.url(scale);
-  });
+  }));
 }
 
-/** The passport's leather cover with a gold globe stamped into it. */
+/** The passport's pebbled green leather cover with a gilt globe stamped into it (60 x 80 units). */
 export function passportCover(scale: number): string {
-  return memo(`cover:${scale}`, () => {
-    const W = 60, H = 80, p = new Pix(W, H), L = 0x34493a, Ld = 0x2a3c30, G = BRASS, Gd = BRASSDK;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) p.set(x, y, hash(x, y, 4) < 0.12 ? Ld : hash(x, y, 5) < 0.05 ? 0x3e5644 : L);
-    p.hline(0, W - 1, 0, Ld); p.hline(0, W - 1, H - 1, 0x1f2c24); p.vline(W - 1, 0, H - 1, 0x1f2c24); p.vline(0, 0, H - 1, 0x40584a);
-    for (let x = 3; x < W - 3; x++) { if (x % 2) { p.set(x, 3, Gd); p.set(x, H - 4, Gd); } }
-    p.ring(30, 36, 13, G); p.ring(30, 36, 12, Gd);
-    for (let k = -1; k <= 1; k++) { p.hline(18, 42, 36 + k * 7, k === 0 ? G : Gd); }
-    for (let y = 24; y <= 48; y++) { const t = (y - 36) / 12, w = Math.round(Math.sqrt(Math.max(0, 1 - t * t)) * 6); p.set(30 - w, y, Gd); p.set(30 + w, y, Gd); p.set(30, y, G); }
-    // [font6] the gilt lettering in Alagard (left off the tiny button-sized cover, where it can't be read)
-    return p.urlText(scale, [{ text: 'PASSPORT', cx: 30, base: 65, c: G, maxW: 52, ratio: 2 / 3 }, { text: 'HOOT HOLLOW', cx: 30, base: 73, c: Gd, maxW: 52, ratio: 1 / 3 }]);
+  return memo(`cover7:${scale}`, () => {
+    const W = 60, H = 80, c = document.createElement('canvas');
+    c.width = Math.round(W * scale); c.height = Math.round(H * scale);
+    const g = c.getContext('2d')!;
+    g.scale(scale, scale);
+    const lt = texCanvas('pebble', '#2c5a3c');
+    if (lt) { const pt = g.createPattern(lt, 'repeat')!; pt.setTransform(new DOMMatrix().scale(70 / lt.width)); g.fillStyle = pt; } else g.fillStyle = '#34493a';
+    g.beginPath(); g.roundRect(0, 0, W, H, [1.5, 4, 4, 1.5]); g.fill();
+    const sh = g.createLinearGradient(0, 0, W, H); sh.addColorStop(0, 'rgba(255,255,230,.12)'); sh.addColorStop(1, 'rgba(0,0,0,.3)');
+    g.fillStyle = sh; g.fill();
+    const gold = g.createLinearGradient(15, 22, 45, 50); gold.addColorStop(0, '#fff0a8'); gold.addColorStop(0.45, '#d8aa40'); gold.addColorStop(1, '#8a5e14');
+    g.strokeStyle = gold; g.lineWidth = 0.6; g.setLineDash([1.4, 0.8]); g.strokeRect(3, 3, W - 6, H - 6); g.setLineDash([]);
+    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 0.6 * scale; g.shadowOffsetY = 0.3 * scale;
+    g.lineWidth = 1.1; g.beginPath(); g.arc(30, 36, 12.5, 0, Math.PI * 2); g.stroke();
+    g.lineWidth = 0.6;
+    for (const k of [-1, 0, 1]) { g.beginPath(); g.moveTo(30 - Math.sqrt(156 - (k * 7) ** 2), 36 + k * 7); g.lineTo(30 + Math.sqrt(156 - (k * 7) ** 2), 36 + k * 7); g.stroke(); }
+    g.beginPath(); g.ellipse(30, 36, 6, 12.5, 0, 0, Math.PI * 2); g.stroke();
+    g.beginPath(); g.moveTo(30, 23.5); g.lineTo(30, 48.5); g.stroke();
+    g.fillStyle = gold; g.font = 'bold 6px Georgia, serif'; g.textAlign = 'center'; g.fillText('PASSPORT', 30, 63);
+    g.font = '3.4px Georgia, serif'; g.fillText('HOOT HOLLOW', 30, 70);
+    return c.toDataURL('image/png');
   });
 }
 
-/** A little padlock (11 x 12) in stone and brass. */
+/** A little brass padlock (11 x 12 units). */
 export function padlock(scale: number): string {
-  return memo(`lock:${scale}`, () => {
-    const p = new Pix(11, 12);
-    p.ring(5, 4, 3, 0x8a8478); p.rect(2, 4, 7, 1, -1 as unknown as C);
-    p.rect(1, 5, 9, 7, BRASS); p.hline(1, 9, 5, 0xe0c88a); p.hline(1, 9, 11, BRASSDK); p.vline(9, 5, 11, BRASSDK);
-    p.rect(5, 7, 1, 3, INK); p.set(5, 7, 0x4b463a);
-    p.outline(0x2a2620);
-    return p.url(scale);
-  });
+  return memo(`lock7:${scale}`, () => smooth(11, 12, scale, (g) => {
+    g.strokeStyle = '#a8a298'; g.lineWidth = 1.3; g.beginPath(); g.arc(5.5, 5, 2.8, Math.PI, 0); g.stroke();
+    const b = g.createLinearGradient(0, 5, 0, 11.5); b.addColorStop(0, '#f6d98a'); b.addColorStop(0.4, '#c8962e'); b.addColorStop(1, '#6e4a12');
+    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 0.8 * scale; g.shadowOffsetY = 0.4 * scale;
+    g.fillStyle = b; g.beginPath(); g.roundRect(1.3, 5, 8.4, 6.6, 1.3); g.fill();
+    g.shadowColor = 'transparent';
+    g.fillStyle = '#2a1c0c'; g.beginPath(); g.arc(5.5, 7.6, 0.9, 0, Math.PI * 2); g.fill(); g.fillRect(5.1, 7.8, 0.8, 2);
+  }));
 }
 
-/** A crescent moon icon (9 x 9) for nights counts. */
+/** A crescent moon icon (9 x 9 units) for nights counts. */
 export function moonIcon(scale: number, on = true): string {
-  return memo(`moon:${scale}:${on}`, () => {
-    const p = new Pix(9, 9);
-    p.disc(4, 4, 3.6, on ? LAMP : 0xb9b2a4); p.disc(6, 3, 3, -1 as unknown as C);
-    if (on) { p.set(2, 3, LAMPHI); p.set(2, 4, LAMPHI); }
-    p.outline(on ? 0x8a6236 : 0x8a8478);
-    return p.url(scale);
-  });
+  return memo(`moon7:${scale}:${on}`, () => smooth(9, 9, scale, (g) => {
+    const m = g.createLinearGradient(1, 1, 8, 8); m.addColorStop(0, on ? '#fff4c8' : '#d8d2c4'); m.addColorStop(1, on ? '#d8a44a' : '#8a8478');
+    g.shadowColor = on ? 'rgba(255,220,140,.6)' : 'rgba(0,0,0,.3)'; g.shadowBlur = 0.8 * scale;
+    g.fillStyle = m; g.beginPath(); g.arc(4.3, 4.5, 3.6, 0, Math.PI * 2); g.arc(6.1, 3.3, 3, 0, Math.PI * 2, true); g.fill('evenodd');
+  }));
 }
 
 export { SLATE as SLATE_C };
