@@ -281,15 +281,15 @@ export class CuckooStage implements Stage {
     const n = this.nightFn ? this.nightFn() : nightNow();
     this.night = n;
     const L = THREE.MathUtils.lerp;
-    this.hemi.intensity = L(0.36, 0.14, n);
+    this.hemi.intensity = L(0.4, 0.09, n);
     this.hemi.color.setHex(n > 0.5 ? 0x7d8cc4 : 0xfff0dc);
     this.hemi.groundColor.setHex(n > 0.5 ? 0x24160e : 0x5a3a24);
-    this.key.intensity = L(1.25, 0.4, n);
+    this.key.intensity = L(1.35, 0.2, n);
     this.key.color.setHex(n > 0.5 ? 0xffc890 : 0xffe6c4);
-    this.sun.intensity = L(12, 0, n);
-    this.moon.intensity = L(0, 0.3, n);
+    this.sun.intensity = L(15, 0, n);
+    this.moon.intensity = L(0, 0.22, n);
     for (const l of this.lamps) l.light.userData.base = L(1.1, 2.6, n);
-    this.look.exposure = L(1.0, 1.08, n);
+    this.look.exposure = L(1.02, 1.04, n);
     this.look.warm = L(0.06, 0.1, n);
   }
 
