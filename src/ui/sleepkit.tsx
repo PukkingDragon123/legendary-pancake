@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { Art } from './px/sleepart.ts';
 import { TEX_URL, tileURL } from './real/tex.ts';
-import { frameStyle } from './real/kit.ts';
+import { frameStyle, paperRimCSS } from './real/kit.ts';
 import { haptic } from './kit.tsx';
 import { uiBurstAt } from './chrome/uifx.ts';
 
@@ -113,6 +113,9 @@ export function usePaper(kind: string, opts: Record<string, unknown> = {}) {
     const c = paperCSS(kind, opts);
     el.style.background = c.bg;
     el.style.setProperty('--paper-edge', c.edge);
+    // [ui10] a deckled, outlined paper edge (border image only: no layout change)
+    const st = STOCK[kind];
+    if (st && kind !== 'cork' && kind !== 'wood' && kind !== 'leather') { try { el.style.cssText += ';' + paperRimCSS(st.base); } catch { /* not painted yet */ } }
   }, [kind, key]);
   return ref as { current: never };
 }

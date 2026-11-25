@@ -66,7 +66,7 @@ function installStyles() {
 .wd-rail{position:relative;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:12px 4px 4px;margin:0 -4px;flex:none}
 .wd-rail::-webkit-scrollbar{display:none}
 .wd-rail::before{content:'';position:absolute;left:0;right:0;top:1px;height:12px;min-width:100%;background:url("${railTile()}") 0 0/64px 12px repeat-x}
-.wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:56px;height:62px;${frameStyle('tab', 2)};color:var(--ink);font-size:var(--t1);line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:56px;height:62px;${frameStyle('label_kraft', 2)};color:var(--ink);font-size:var(--t1);line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
 .wd-tag::before{content:'';position:absolute;top:-10px;left:50%;width:2px;height:8px;margin-left:-1px;border-radius:0;background:linear-gradient(90deg,#8a6a3c,#e8d2a0,#8a6a3c);box-shadow:1px 0 2px #6e4a12}
 .wd-tag .ico{margin:-4px 0 -2px}
 .wd-tag span{text-shadow:0 1px 1px var(--paper);white-space:nowrap}
@@ -97,7 +97,7 @@ function installStyles() {
 .wd-card .st.muted{color:#5e4a34;font-size:var(--t1)}
 .wd-card .price{display:flex;align-items:center;gap:2px;font-size:var(--t1);color:#5a3a06}
 .wd-card .price .ico{margin:-6px -2px}
-.wd-card .ribbon{position:absolute;top:-4px;left:-6px;padding:1px 6px;font-size:var(--t1);color:var(--paper);border-radius:0;background:linear-gradient(180deg,#5a74b0,#2f4680);box-shadow:0 0 0 1px color-mix(in srgb, var(--slate) 50%, transparent),0 2px 3.2px rgba(46,43,36,.4);z-index:2}
+.wd-card .ribbon{position:absolute;top:-4px;left:-6px;padding:1px 10px 1px 6px;clip-path:polygon(0 0,100% 0,calc(100% - 5px) 50%,100% 100%,0 100%);font-size:var(--t1);color:var(--paper);border-radius:0;background:linear-gradient(180deg,#5a74b0,#2f4680);box-shadow:0 0 0 1px color-mix(in srgb, var(--slate) 50%, transparent),0 2px 3.2px rgba(46,43,36,.4);z-index:2}
 .wd-card .ribbon.gold{background:linear-gradient(180deg,#f0c860,#b8862a);box-shadow:0 0 0 1px color-mix(in srgb, var(--wood-deep) 50%, transparent),0 2px 3.2px rgba(46,43,36,.4)}
 .wd-card .ribbon.red{background:linear-gradient(180deg,#d0545a,#8e2a30);box-shadow:0 0 0 1px color-mix(in srgb, var(--plum) 50%, transparent),0 2px 3.2px rgba(46,43,36,.4)}
 .wd-card .check{position:absolute;top:2px;right:2px}

@@ -598,6 +598,46 @@ export function paperCard(o: { gilt?: boolean; tint?: RGB; rule?: boolean } = {}
   });
 }
 
+/**
+ * [ui10] A deckled rim for any CSS paper (any stock, rules and all): shown as a border image that reaches a
+ * little outside the element (`outset`), it covers the straight CSS edge with a torn, slightly aged paper edge
+ * in the stock's colour that fades into the paper inside, inked with the thin dark outline. No layout change.
+ */
+export function paperRim(base: string): Nine {
+  const m = 3, e = 8, c = 80, W = 2 * e + c;
+  return nine(`prim10:${base}`, () => {
+    const k = deviceK(3), r = new Real(W, W, k, m);
+    const f1 = 10 / c, f2 = 60 / c;
+    const box0 = box(-1.2, -1.2, W + 2.4, W + 2.4, 0);
+    const deckle: SDF = (x, y) => box0(x, y) + (pnoise(x * f1, y * f1, 10, 10, 5) - 0.5) * 1.8 + (pnoise(x * f2, y * f2, 60, 60, 9) - 0.5) * 0.8;
+    deckle.bb = [-3, -3, W + 3, W + 3];
+    const col = hex(base);
+    const alb = (x: number, y: number): RGB => {
+      const d = -deckle(x, y), n = (pnoise(x * 1.25, y * 1.25, 100, 100, 2) - 0.5) * 0.08;
+      const a: RGB = [col[0] * (1 + n), col[1] * (1 + n), col[2] * (1 + n)];
+      return mix(a, [a[0] * 0.8, a[1] * 0.68, a[2] * 0.52] as RGB, (1 - clamp(d / 2.6)) * 0.6);
+    };
+    r.part(deckle, 1, { alb, spec: 0, shin: 1 });
+    const cv = r.canvas({ shadow: false, flat: true });
+    // fade the rim into the CSS paper inside it
+    const g = cv.getContext('2d')!, im = g.getImageData(0, 0, cv.width, cv.height), px = im.data, CW = cv.width;
+    for (let py = 0; py < cv.height; py++) for (let qx = 0; qx < CW; qx++) {
+      const x = (qx + 0.5) / k - m, y = (py + 0.5) / k - m, ins = Math.min(x, y, W - x, W - y);
+      if (ins <= 1.4) continue;
+      const i = (py * CW + qx) * 4 + 3;
+      px[i] = px[i] * (1 - smooth01((ins - 1.4) / 2.6));
+    }
+    g.putImageData(im, 0, 0);
+    return { url: toURL(cv, 0.93), s: [m + e, m + e, m + e, m + e], o: m, bw: [0, 0, 0, 0], fill: false, k, rep: 'round' };
+  });
+}
+const smooth01 = (t: number) => { const u = clamp(t); return u * u * (3 - 2 * u); };
+/** [ui10] the CSS for paperRim on an element (border-image only: its own background and layout untouched) */
+export function paperRimCSS(base: string, width = '0'): string {
+  const n = paperRim(base), sl = n.s.map((v) => Math.round(v * n.k)).join(' ');
+  return `border-style:solid;border-width:${width};border-color:transparent;border-image:url("${n.url}") ${sl} / ${n.s.map((v) => v + 'px').join(' ')} / ${n.o}px round`;
+}
+
 /** [ui10] A carved cartouche crest that sits on a cabinet's top rail: C-scrolls, acanthus and a gilt boss (w x h). */
 export function crestArt(w = 96, h = 36, kind: WoodName = 'walnut'): string {
   return cached(`crest10b:${w}x${h}:${kind}`, () => {

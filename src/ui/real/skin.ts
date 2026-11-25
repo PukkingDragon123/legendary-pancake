@@ -8,7 +8,7 @@
 //   --paper-bg     the parchment background shorthand (layers), --sh-1/2/3 soft shadows, --drop/--drop-lg filters
 import { CSS_TOKENS } from '../../gfx/palette.ts';
 import { installPxFx } from '../pxfx.tsx';
-import { bubbleTail, crestArt, medallionArt, nineCSS, paperCardCSS, roundButton, sliderKnob, switchLever, switchPlate } from './kit.ts';
+import { bubbleTail, crestArt, medallionArt, nineCSS, paperCardCSS, paperRimCSS, roundButton, sliderKnob, switchLever, switchPlate } from './kit.ts';
 import { hex } from './paint.ts';
 import { texAbs, tileURL } from './tex.ts';
 
@@ -128,6 +128,27 @@ input[type='range'].slider::-webkit-slider-runnable-track{height:14px;border-rad
 input[type='range'].slider::-moz-range-track{height:14px;border-radius:0;box-shadow:none;background:none;${nineCSS('slider_track')}}
 input[type='range'].slider::-webkit-slider-thumb{width:26px;height:36px;margin-top:-11px;border-radius:0;background:var(--sl-knob) 0 0/26px 36px no-repeat;box-shadow:none}
 input[type='range'].slider::-moz-range-thumb{width:26px;height:36px;border-radius:0;background:var(--sl-knob) 0 0/26px 36px no-repeat;box-shadow:none}
+/* [ui10] CSS paper that isn't a card gets the deckled, outlined rim (no layout change) */
+.seg,.shelf .slot small,.pinpt .flag{${paperRimCSS('#e8d6ae')}}
+.card.sunk{${paperRimCSS('#d9c49a', '10px')}}
+.ticket,.page{${paperRimCSS('#f0e4c8', '8px')}}
+/* [ui10] build mode: the blueprint pinned in a walnut drafting frame; enamel and brass buttons; paper labels */
+.bm-drawer{${nineCSS('walnut_thin', { bw: [7, 7, 7, 7] })};background-clip:padding-box;padding:4px 4px 6px;box-shadow:6px 9px 17px rgba(12,34,64,.6)}
+.bm-drawer::before,.bm-drawer::after{display:none}
+.bm-floors{${nineCSS('walnut_thin', { bw: [5, 5, 5, 5] })};background-clip:padding-box;padding:3px;box-shadow:4px 6px 11px rgba(12,34,64,.5)}
+.bm-floor.on,.bm-tab.on{${nineCSS('label', { bw: [3, 4, 3, 4] })};background:none;box-shadow:none}
+.bm-label{${nineCSS('label', { bw: [2, 6, 2, 6] })};background:none;box-shadow:none;padding:1px 4px 2px}
+.bm-done{${nineCSS('button_green', { bw: [5, 8, 8, 6] })};background:none;box-shadow:none;padding:2px 4px 2px 2px}
+.bm-done:active{${nineCSS('button_green_down', { bw: [5, 8, 8, 6] })};background:none;box-shadow:none}
+.bm-vbtn{${nineCSS('button_cream', { bw: [4, 4, 7, 4] })};background:none;box-shadow:none}
+.bm-vbtn:active{${nineCSS('button_cream_down', { bw: [4, 4, 7, 4] })};background:none;box-shadow:none}
+.bm-vbtn.on{${nineCSS('button_gold', { bw: [4, 4, 7, 4] })};background:none;box-shadow:none}
+.bm-act{${nineCSS('button_cream', { bw: [4, 4, 7, 4] })};background:none;box-shadow:none;padding:2px 2px 1px}
+.bm-act.buy,.bm-act.move.on{${nineCSS('button_gold', { bw: [4, 4, 7, 4] })};background:none}
+.bm-act.yes,.bm-act.move{${nineCSS('button_green', { bw: [4, 4, 7, 4] })};background:none;color:#fbf4e6}
+.bm-act.no{${nineCSS('button_red', { bw: [4, 4, 7, 4] })};background:none;color:#fbf4e6}
+.bm-act.turn{${nineCSS('button_sky', { bw: [4, 4, 7, 4] })};background:none;color:#fbf4e6}
+.bm-act:active{transform:translateY(2px)}
 `;
   const st = document.createElement('style');
   st.id = 'hh-real-skin';
