@@ -57,6 +57,8 @@ save(c, 'chink')
 save(grade(load('places/floor.png'), mul=(1.08, 0.98, 0.86), sat=1.15, gamma=0.92), 'floor')
 save(load('places/floor_n.png'), 'floor_n')
 save(grade(load('places/board_warm.png'), mul=(1.04, 0.98, 0.9), sat=1.1), 'board')
+# fresh-sawn pine: the planks on the workbench and in the timber rack, the bench top, the work in progress [shop11]
+save(grade(load('places/wood_fresh.png'), mul=(1.05, 0.97, 0.86), sat=1.18, gamma=1.04), 'plank')
 
 # burlap for the acorn sacks: an open basket weave of hairy jute threads, painted per pixel
 N = 96
