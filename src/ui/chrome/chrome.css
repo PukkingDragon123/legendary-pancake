@@ -253,3 +253,5 @@
 
 /* [font6] tonight's place on its own line, clipped rather than wrapped */
 .hh-tkt-area { white-space: nowrap; overflow: hidden; }
+/* [font6] on big screens the ticket grows with the art pixel so its lines stay whole */
+@media (min-width: 900px) { .hh-ticket { width: max(380px, calc(var(--t1) * 17)); } }

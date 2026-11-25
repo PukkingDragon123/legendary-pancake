@@ -47,7 +47,7 @@ function Ticket() {
         <div class="t">
           <b class="display">{late ? 'Past bedtime!' : soon ? `Bedtime in ${fmtDur(diff)}` : `Bedtime ${fmtHM(bed, s.settings.hour12)}`}</b>
           <div class="small muted">Wake {fmtHM(p.wake, s.settings.hour12)}</div>
-          <div class="small muted hh-tkt-area">{AREA[s.area]?.name}</div>
+          <div class="small muted hh-tkt-area">{(AREA[s.area]?.name ?? '').replace(/^the /i, '')}</div>
         </div>
         <button class={'btn pillow sm' + (late || soon ? ' night' : '')} onClick={(e) => { tap('ui_open'); uiBurstAt(e.currentTarget as Element, 'stars', 6); openPanel('sleep'); }}>{late || soon ? 'Get cozy' : 'Plan'}</button>
       </div>

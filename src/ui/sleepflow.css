@@ -137,3 +137,10 @@
 .tip.flip > * { visibility: visible; }
 @keyframes tipFlip { 0% { transform: rotate(-1deg); z-index: 20; } 45% { transform: translate(70%, -16px) rotate(14deg); z-index: 20; } 55% { z-index: 0; } 100% { transform: rotate(-3.5deg) translate(-6px, 10px); z-index: 0; } }
 @media (min-width: 900px) { .tip-stack { height: 150px; } }
+
+/* [font6] AM / PM beside the big digits */
+.tk-times b { white-space: nowrap; }
+.tk-times b small.ampm { display: inline; margin-left: 2px; font-size: var(--t1); color: inherit; text-transform: none; }
+/* [font6] sized in art pixels: the big button and the tip cards hold their text at any art pixel */
+.sf-sleep { height: auto; min-height: calc(var(--t1) * 4.5); white-space: nowrap; }
+.tip-stack { height: calc(var(--t1) * 11.75); }

@@ -25,7 +25,7 @@ export type SectionId = 'stats' | 'nights' | 'things' | 'seals';
 export const SECTIONS: { id: SectionId; name: string; tint: string; icon: string }[] = [
   { id: 'stats', name: 'Stats', tint: 'moss', icon: 'stats' },
   { id: 'nights', name: 'Nights', tint: 'lake', icon: 'nights' },
-  { id: 'things', name: 'Collection', tint: 'honey', icon: 'things' },
+  { id: 'things', name: 'Finds', tint: 'honey', icon: 'things' }, // [font6] short enough for four tabs at any art pixel
   { id: 'seals', name: 'Badges', tint: 'berry', icon: 'seals' },
 ];
 

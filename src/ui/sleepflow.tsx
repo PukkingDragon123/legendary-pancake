@@ -30,6 +30,9 @@ type StepId = 'breathe' | 'phone' | 'coffee' | 'lights' | 'jot' | 'read' | 'cool
 interface Step { id: StepId; title: string; sub: string; sprite: string }
 const has = (list: string[], ...words: string[]) => list.some((g) => words.some((w) => g.toLowerCase().includes(w)));
 
+/** [font6] a time in big 3D digits with a small AM/PM, so two fit side by side at any art pixel */
+const hm2 = (t: string) => { const [a, b] = t.split(/\s+/); return <><span>{a}</span>{b ? <small class="ampm">{b}</small> : null}</>; };
+
 export function windDownSteps(p: Profile): Step[] {
   const slow = p.latency === 'slow' || p.latency === 'long';
   const out: Step[] = [
@@ -199,9 +202,9 @@ export function SleepScreen() {
               <Paper kind="postcard" opts={{ edge: 0.3, edgeW: 6 }} class="tk-body">
                 <div class="tk-head"><span class="tk-kicker">Tonight · {DAY_NAME[plan.day]}</span><span class="tk-stamp">{plan.on ? 'PLANNED' : 'FREE NIGHT'}</span></div>
                 <div class="tk-times">
-                  <div><small>Bed</small><b>{fmtHM(plan.bed, h12)}</b></div>
+                  <div><small>Bed</small><b>{hm2(fmtHM(plan.bed, h12))}</b></div>
                   <span class="tk-arrow"><Px name="moon" size={30} /></span>
-                  <div><small>Wake</small><b class="wake">{plan.on ? fmtHM(plan.wake, h12) : 'sleep in'}</b></div>
+                  <div><small>Wake</small><b class="wake">{plan.on ? hm2(fmtHM(plan.wake, h12)) : 'sleep in'}</b></div>
                 </div>
                 <p class="tk-line">{fmtDur(plan.min * 60_000)} of sleep{smart ? <> · smart wake from {smart}</> : null}</p>
                 <p class="tk-line area"><Px name="map" size={30} />Pip explores <b>{area?.name ?? 'the woods'}</b></p>
