@@ -7,7 +7,7 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Sleep tracking with the microphone**: on-device analysis of movement, snoring and sleep talk,
   30-second epochs, estimated stages (awake / light / deep / REM), a 0–100 score and friendly notes.
   Optional snore and sleep-talk clips (Plus). Nothing leaves the device.
-- **Smart alarm**: drag the golden hand on the pixel-art alarm clock; it can ring up to 30 minutes
+- **Smart alarm**: drag the golden hand on the brass alarm clock; it can ring up to 30 minutes
   early when you're sleeping lightly. Four real recorded melodies that swell gently. Snooze or slide to wake.
 - **Bedtime reminders**: a wind-down nudge and a bedtime nudge (in-app plus system notifications).
 - **Social media blocking**: a companion browser extension ([`extension/`](extension)) blocks the
@@ -51,6 +51,12 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **UI as objects**: a walnut, brass and leather HUD; a glass moon lamp, a carved cuckoo clock (real time, an owl that
   calls cuckoo) and a tooled journal as live 3D objects on a carved shelf for the main buttons;
   the big carved cuckoo clock, and about 100 icons baked from detailed 3D models.
+- **A realistic interface (v7)**: every panel, button and badge is a real material at full device resolution: carved
+  walnut and oak frames with brass corner brackets and a gilt bead, parchment and laid paper, enamel buttons in brass rims
+  that press into their bodies, tooled leather tabs, linen-lined brass trays, satin ribbons, glass level tubes, and the
+  owl's eleven portrait frames (porthole, carved walnut, mossy willow, cable knit, silver filigree, toadstools, laurel,
+  frost, orrery, gingerbread, starry night). Lit like the 3D (a warm key from the upper left, soft steps, violet shadows),
+  with smooth particles and transitions; photo materials from Poly Haven (`docs/credits/ui7.md`).
 - **One typeface, in 3D**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms and
   props, the shop's signs) is set in Alagard by Hewett Tsoi, rendered at full device resolution. Titles, names,
   numbers, buttons, toasts and Pip's lines are premium 3D title text (shaded extrusion, crisp outline, metallic fill,
@@ -100,7 +106,7 @@ npm run build
 
 Other scripts: `npm test` (44 sleep-engine tests), `npm run typecheck`. Dev-only pages:
 `/dev-owl.html` (owl coats/outfits/expressions sheet), `/dev-scene.html?hour=22&view=home`
-(scene views and times of day), `/dev-px.html` (every pixel icon and UI frame).
+(scene views and times of day), `/dev-real.html` (every interface frame, button and material).
 
 ### On itch.io
 
@@ -136,7 +142,8 @@ src/sleep/    microphone analyzer, sleep staging and score, smart alarm, reminde
               service worker registration (tests alongside)
 src/breathe/  breathing patterns and session clock, the pixel-art particle overlay
 src/game/     save and economy, catalog, adventures and loot, the night controller, blocker bridge
-src/ui/       screens, the pixel UI kit (frames, sprites, fonts from The Bear Must Eat), pixel alarm clock
+src/ui/       screens; src/ui/real/ the realistic material kit (photo-scanned walnut, oak, leather, linen,
+              velvet and paper tiles, a device-resolution material painter, 9-slice frames, buttons, the skin)
 src/audio/    sound manager: four buses, gapless loops, soundscapes, the swelling alarm
 extension/    MV3 browser extension (declarativeNetRequest blocking, bedtime page, popup)
 ```
