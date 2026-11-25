@@ -206,7 +206,7 @@ function RoutineBoard() {
   return (
     <div class="clipboard">
       <div class="cb-board" ref={board} />
-      <img class="cb-clip" src={clipboardClip(60, 2, 1)} alt="" draggable={false} />
+      <img class="cb-clip" src={clipboardClip(120)} alt="" draggable={false} />
       <Paper kind="graph" opts={{ edge: 0.15 }} class="cb-paper">
         <h3 class="cb-title">My sleep week</h3>
         <div class="cb-chart-wrap" onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
@@ -325,7 +325,7 @@ function MonthCalendar(p: { onOpen: (n: SleepSession) => void }) {
 // ------------------------------------------------------------------ the wall
 
 // [ui4] the wall: printed emerald damask wallpaper (a relief-painted tile, 1 art px per CSS px)
-const wallpaper = () => wallpaperTile('emerald', 32, 2);
+const wallpaper = () => wallpaperTile('emerald', 72);
 
 /** [ui4] paint a varnished board to an element's size (the clipboard's hardboard) */
 function useBoardBg(o: BoardOpts) {
@@ -365,7 +365,7 @@ function ClockWall2D() {
   return (
     <div class={'cs' + (leaving ? ' leaving' : '')} role="dialog" aria-label="Clock">
       <button class="sf-back" aria-label="Back to the hollow" onClick={close}><Px name="arrow_left" size={30} /></button>
-      <div class="cs-scroll" style={{ backgroundImage: `url(${wallpaper()})`, backgroundSize: '64px 64px' }}>
+      <div class="cs-scroll" style={{ backgroundImage: `url(${wallpaper()})`, backgroundSize: '72px 72px' }}>
         <div class="cs-sign hh-wood-sm"><span>Clock</span></div>
         <div class={'cs-layout' + (wide ? ' wide' : '')}>
           <div class="cs-center">
