@@ -68,7 +68,7 @@ export function wear(t: Tex, inBand: (x: number, y: number) => number, o: { seed
 export function letter(t: Tex, text: string, x: number, y: number, font: string, c: RGB, o: { align?: CanvasTextAlign; a?: number; jit?: number; spacing?: number; outline?: RGB } = {}) {
   const cv = document.createElement('canvas');
   cv.width = t.w; cv.height = t.h;
-  const g = cv.getContext('2d')!;
+  const g = cv.getContext('2d', { willReadFrequently: true })!;
   crispText(g, text, x, y, font, '#000000', { align: o.align ?? 'center', spacing: o.spacing });
   const d = g.getImageData(0, 0, t.w, t.h).data;
   const on = (px: number, py: number) => px >= 0 && py >= 0 && px < t.w && py < t.h && d[(py * t.w + px) * 4 + 3] > 128;
@@ -472,13 +472,10 @@ export const TAPES: Tape[] = [
   } },
 ];
 
-/** A compact cassette (100 x 64 x 12 mm), standing on its long edge, facing +z. Its two hubs turn (`spin`). */
-export function cassette(tp: Tape): Prop & { hubs: THREE.Object3D[]; spin: number } {
-  const g = new THREE.Group();
-  const W = 0.1, H = 0.064, D = 0.012, hubX = 0.021, hubY = 0.006, hubR = 0.0046;
-  const sh = rrShape(W, H, 0.004);
-  for (const sx of [-1, 1]) { const p = new THREE.Path(); p.absarc(sx * hubX, hubY, hubR, 0, Math.PI * 2, true); sh.holes.push(p); }
-  const bounds = { x0: -W / 2, y0: -H / 2, w: W, h: H };
+/** a tape's painted face and plastic sides (painted once per tape) */
+const tapeMats = new Map<string, [THREE.MeshStandardMaterial, THREE.MeshStandardMaterial]>();
+function tapeFace(tp: Tape): [THREE.MeshStandardMaterial, THREE.MeshStandardMaterial] {
+  const H = 0.064, hubX = 0.021, hubY = 0.006;
   // the face: 2 texels per mm
   const TW = 200, TH = 128, mm = (x: number) => x * 2;
   const t = new Tex(TW, TH);
@@ -520,6 +517,19 @@ export function cassette(tp: Tape): Prop & { hubs: THREE.Object3D[]; spin: numbe
   const st = new Tex(32, 8, tp.shell);
   wash(st, 0, 0, 32, 8, () => tp.shell, { seed: 2, len: 5 });
   const sideM = std({ map: tex(st, { repeat: true }), roughness: 0.45 });
+  return [faceM, sideM];
+}
+
+/** A compact cassette (100 x 64 x 12 mm), standing on its long edge, facing +z. Its two hubs turn (`spin`). */
+export function cassette(tp: Tape): Prop & { hubs: THREE.Object3D[]; spin: number } {
+  const g = new THREE.Group();
+  const W = 0.1, H = 0.064, D = 0.012, hubX = 0.021, hubY = 0.006, hubR = 0.0046;
+  const sh = rrShape(W, H, 0.004);
+  const mats = tapeMats.get(tp.id) ?? tapeFace(tp);
+  tapeMats.set(tp.id, mats);
+  const [faceM, sideM] = mats;
+  for (const sx of [-1, 1]) { const p = new THREE.Path(); p.absarc(sx * hubX, hubY, hubR, 0, Math.PI * 2, true); sh.holes.push(p); }
+  const bounds = { x0: -W / 2, y0: -H / 2, w: W, h: H };
   const body = mesh(slab(sh, D - 0.0016, 0.0008, bounds, 30, 10), [faceM, sideM]);
   // the raised trapezoid along the bottom (the tape guides), mapped onto the same face painting
   const tz = new THREE.Shape();
@@ -591,10 +601,21 @@ export function deck(): Deck {
   const sideT = new Tex(64, 16);
   wash(sideT, 0, 0, 64, 16, () => teal, { seed: 6, ang: 0, len: 6 });
   const sideM = std({ map: tex(sideT, { repeat: true }), roughness: 0.45 });
+  // the bay is a real recess: a hole through the body with a dark painted back (tape head, spindles, guides)
+  const bcx0 = ((bx0 + bx1) / 2 - TW / 2) / 1000, bcy0 = (TH / 2 - (by0 + by1) / 2) / 1000;
+  sh.holes.push(new THREE.Path(rrShape((bx1 - bx0 - 4) / 1000, (by1 - by0 - 4) / 1000, 0.004, bcx0, bcy0).getPoints(6)));
   const body = mesh(slab(sh, D - 0.006, 0.003, { x0: -W / 2, y0: -H / 2, w: W, h: H }, 8, 10), [faceM, sideM]);
   const g = new THREE.Group();
   g.add(body);
   const front = D / 2;
+  const rt = new Tex(68, 50);
+  wash(rt, 0, 0, 68, 50, (x, y) => tint(rgb(0x1c1a18), -(Math.min(x, y, 67 - x, 49 - y) < 4 ? 0.3 : 0)), { seed: 12, ang: 0, len: 5, val: 0.2 });
+  for (const sx of [24, 44]) { blob(rt, sx, 22, 3, rgb(0xd8d4c8)); rt.set(sx, 22, rgb(0x5a5650)); }
+  for (let x = 30; x < 38; x++) for (let y = 40; y < 46; y++) rt.set(x, y, tint(rgb(0xc8ccd0), (hash(x, y, 2) - 0.5) * 0.3));
+  for (const gx of [14, 54]) for (let y = 40; y < 46; y++) { rt.set(gx, y, rgb(0x9a9a9a)); rt.set(gx + 1, y, rgb(0x7a7a7a)); }
+  const back = mesh(new THREE.PlaneGeometry((bx1 - bx0) / 1000, (by1 - by0) / 1000), std({ map: tex(rt), roughness: 0.8 }), false);
+  back.position.set(bcx0, bcy0, front - 0.03);
+  g.add(back);
   // speaker: a recessed paper cone behind a perforated chrome grille, a chrome ring
   const coneT = new Tex(32, 32);
   wash(coneT, 0, 0, 32, 32, () => rgb(0x2a2420), { seed: 3, ang: Math.PI / 2, len: 5 });
@@ -717,6 +738,7 @@ export const CASES: { base: RGB; alt: RGB; pat: 'stripe' | 'gingham' | 'floral' 
   { base: rgb(0x8ab8b0), alt: rgb(0xf0ece0), pat: 'ticking' },
 ];
 const pillowGeo = new Map<string, THREE.BufferGeometry>();
+const pillowMat = new Map<number, THREE.MeshStandardMaterial>();
 /** A plump pillow (w x d metres, t thick at the middle): puffed top and bottom, bowed edges, sharp piped seam. */
 export function pillow(i = 0, w = 0.6, d = 0.4, th = 0.15): THREE.Mesh {
   const key = `${w}:${d}:${th}`;
@@ -744,7 +766,10 @@ export function pillow(i = 0, w = 0.6, d = 0.4, th = 0.15): THREE.Mesh {
     geo.computeVertexNormals();
     pillowGeo.set(key, geo);
   }
-  const c = CASES[i % CASES.length];
+  const ci = i % CASES.length;
+  let mat = pillowMat.get(ci);
+  if (mat) { const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.receiveShadow = true; return m; }
+  const c = CASES[ci];
   const T = new Tex(128, 128);
   const pat = (x: number, y: number): RGB => {
     const yy = y % 64;
@@ -766,7 +791,9 @@ export function pillow(i = 0, w = 0.6, d = 0.4, th = 0.15): THREE.Mesh {
     const cx = Math.min(x, 127 - x) / 64, cy = Math.min(yy, 63 - yy) / 32;
     if (Math.abs(cx - cy) < 0.04 && cx < 0.4 && hash(x, y, 4) > 0.3) T.shade(x, y, 0.88);
   }
-  const m = new THREE.Mesh(geo, std({ map: tex(T), roughness: 0.95 }));
+  mat = std({ map: tex(T), roughness: 0.95 });
+  pillowMat.set(ci, mat);
+  const m = new THREE.Mesh(geo, mat);
   m.castShadow = true; m.receiveShadow = true;
   return m;
 }

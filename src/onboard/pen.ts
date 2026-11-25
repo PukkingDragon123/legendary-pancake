@@ -203,10 +203,12 @@ export class FloatingPen {
       tx = this.ptr.x; ty = this.ptr.y; tz = 14 + Math.sin(t * 2.3) * 3; k = 22;
     }
     // springs: snappy along the path, floaty when following
-    const p = this.p, ax = (tx - p.x) * k * k - this.v.x * 2 * k, ay = (ty - p.y) * k * k - this.v.y * 2 * k;
-    this.v.x += ax * dt; this.v.y += ay * dt;
-    if (st && st.t < st.dur * 0.15 && Math.hypot(tx - p.x, ty - p.y) > 60) { this.v.x *= 0.9; this.v.y *= 0.9; }
-    p.x += this.v.x * dt; p.y += this.v.y * dt;
+    // a critically damped spring, sub-stepped (semi-implicit) so slow frames can't make it overshoot and fly off
+    const p = this.p, n = Math.max(1, Math.ceil(dt * k * 3)), h = dt / n;
+    for (let i = 0; i < n; i++) {
+      this.v.x += ((tx - p.x) * k * k - this.v.x * 2 * k) * h; this.v.y += ((ty - p.y) * k * k - this.v.y * 2 * k) * h;
+      p.x += this.v.x * h; p.y += this.v.y * h;
+    }
     if (!Number.isFinite(p.x)) { p.x = tx; p.y = ty; this.v.x = this.v.y = 0; }
     p.z += (tz - p.z) * Math.min(1, dt * (st ? 30 : 8));
     const down = p.z < 2;

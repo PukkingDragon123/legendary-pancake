@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { at, Batch, bbox, cyl, lathe, mat } from './kit.ts';
 import type { OfficeMats } from './mats.ts';
-import { C, crispText, hash, hexCSS, lerpRamp, mix3, mul3, paper as paperFill, rgb, Tex, vnoise, type RGB } from './tex.ts';
+import { C, crispText, hash, hexCSS, lerpRamp, measure, mix3, mul3, paper as paperFill, rgb, Tex, vnoise, type RGB } from './tex.ts';
 import { F } from './fonts.ts';
 import { DESK_TOP } from './furnish.ts';
 
@@ -78,9 +78,11 @@ export function nameplate(m: OfficeMats, name: string, title: string): { group: 
     const c = t.canvas(64), cg = c.getContext('2d')!;
     const ink = '#2a1d0c';
     const big = nm.toUpperCase();
-    crispText(cg, big, 129, 27, F.caps(12), '#f7e3a4', { align: 'center', spacing: 2 });
-    crispText(cg, big, 128, 26, F.caps(12), ink, { align: 'center', spacing: 2 });
-    crispText(cg, title, 128, 43, F.small(16), '#4a3414', { align: 'center' });
+    // engraved capitals, as big as fit (a highlight under each stroke), the title beneath
+    const f = measure(big, F.caps(24), 2) < 236 ? F.caps(24) : F.caps(12);
+    crispText(cg, big, 129, 32, f, '#f7e3a4', { align: 'center', spacing: 2 });
+    crispText(cg, big, 128, 31, f, ink, { align: 'center', spacing: 2 });
+    crispText(cg, title, 128, 47, F.small(16), '#4a3414', { align: 'center' });
     // scale the name up 2x for weight
     const g2 = cv.getContext('2d')!;
     g2.imageSmoothingEnabled = false;

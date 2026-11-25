@@ -13,6 +13,7 @@ import type { OfficeMats } from './mats.ts';
 import type { SlotOpts } from './overlay3d.ts';
 import { bookStack, candle, cassette, celestial, deck, DRINKS, microphone, phoneBed, pillow, smartphone, stile, TAPES, type Deck, type Prop } from './props.ts';
 import { WallClock } from './wallclock.ts';
+import { nameplate } from './desk.ts';
 
 /** packed GLB nodes and how to show them */
 const NODES: Record<string, { node: string; o?: SlotOpts }> = {
@@ -56,6 +57,8 @@ export class CardModels {
   private screens: { s: PhoneScreen; tex: THREE.CanvasTexture | null; t: number }[] = [];
   wake = '07:00';
   hour12 = false;
+  /** what the brass nameplates on the name pages say (live as you type) */
+  plate: Record<string, string> = { you: '', name: 'Pip' };
 
   constructor(private mats: OfficeMats, private look: (species: string) => OwlLook) {
     this.ready = loadGLB(PACK).then((g) => {
@@ -140,6 +143,13 @@ export class CardModels {
         g.add(p);
       }
       return { obj: norm(g), opts: { pitch: 0.28, spin: 0.3, yaw: 0.35, sway: 0.2, zoom: 1.04, box: true } };
+    }
+    if (key.startsWith('plate:')) {
+      // a brass-and-walnut desk nameplate: a visitor's plate for you, Pip's own for the owl's name
+      const f = key.slice(6), text = () => (this.plate[f] ?? '').trim() || (f === 'you' ? 'Guest' : 'Pip');
+      let shown = text();
+      const np = nameplate(this.mats, shown, f === 'you' ? 'VISITOR' : 'HEAD OF SLEEP');
+      return { obj: norm(np.group), opts: { pitch: 0.22, yaw: 0, sway: 0.1, spin: 0.7, zoom: 0.92, box: true, tick: () => { const t = text(); if (t !== shown) { shown = t; np.set(t); } } } };
     }
     if (key.startsWith('drink:')) {
       const d = DRINKS.find((x) => x.v === key.slice(6));

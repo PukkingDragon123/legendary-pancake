@@ -248,7 +248,7 @@ export function stamp(t: Tex, x: number, y: number, rows: string[], c: RGB, scal
 /** Draw text with a pixel font and snap its alpha (no anti-aliased fringe). */
 export function crispText(g: CanvasRenderingContext2D, text: string, x: number, y: number, font: string, color: string, o: { align?: CanvasTextAlign; base?: CanvasTextBaseline; spacing?: number; threshold?: number } = {}) {
   const tmp = scratch(Math.max(8, Math.ceil(text.length * 40 + 40)), 96);
-  const t = tmp.getContext('2d')!;
+  const t = tmp.getContext('2d', { willReadFrequently: true })!;
   t.clearRect(0, 0, tmp.width, tmp.height);
   t.font = font;
   t.textBaseline = 'alphabetic';
@@ -277,7 +277,7 @@ export function crispText(g: CanvasRenderingContext2D, text: string, x: number, 
   return w - 4;
 }
 export function measure(text: string, font: string, spacing = 0): number {
-  const t = scratch(8, 8).getContext('2d')!;
+  const t = scratch(8, 8).getContext('2d', { willReadFrequently: true })!;
   t.font = font;
   if ('letterSpacing' in t) (t as unknown as { letterSpacing: string }).letterSpacing = `${spacing}px`;
   return t.measureText(text).width;

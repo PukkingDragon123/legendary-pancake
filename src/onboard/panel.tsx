@@ -226,8 +226,8 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
   const seed = p.index * 7 + 3;
   const ov = p.overlay;
   /** a grid of answer objects */
-  const objs = (list: { v: string; label: string; aria?: string }[], o: { cols: number; h: number; on: (v: string) => boolean; single: boolean; key: (v: string) => string; pick: (v: string) => void; hide?: (v: string) => boolean; extra?: (v: string) => ComponentChildren }) => {
-    const any = list.some((x) => o.on(x.v));
+  const objs = (list: { v: string; label: string; aria?: string }[], o: { cols: number; h: number; on: (v: string) => boolean; single: boolean; key: (v: string) => string; pick: (v: string) => void; hide?: (v: string) => boolean; extra?: (v: string) => ComponentChildren; any?: boolean }) => {
+    const any = o.any ?? list.some((x) => o.on(x.v));
     // a short last row is centred: each object spans two of twice as many columns
     const short = list.length % o.cols, lastRow = list.length - short;
     return (
@@ -247,7 +247,8 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
     case 'text': {
       const f = st.field as 'you' | 'name';
       body = (<>
-        <label class="qp-line">
+        <Win id={'plate-' + f} mkey={'plate:' + f} h={40} overlay={ov} model={p.model} />
+        <label class="qp-line" style="margin-top:0">
           <input value={a[f]} maxLength={16} placeholder={f === 'you' ? 'your name' : 'Pip'} spellcheck={false} autocomplete="off" autocapitalize="words"
             onInput={(e) => act.text((e.target as HTMLInputElement).value)} onKeyDown={(e) => { if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); act.enter(); } }} aria-label={st.title} />
           <i style={`background-image:url(${ruleURL(W - 14, seed)})`} />
@@ -289,8 +290,8 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
         const d = DRINKS.find((x) => x.v === s.drink);
         hint = '';
         body = (<>
-          {objs(DRINKS.slice(0, 4).map((x) => ({ v: x.v, label: x.label })), { cols: 4, h: 40, single: true, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
-          {objs(DRINKS.slice(4).map((x) => ({ v: x.v, label: x.label })), { cols: 3, h: 40, single: true, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
+          {objs(DRINKS.slice(0, 4).map((x) => ({ v: x.v, label: x.label })), { cols: 4, h: 40, single: true, any: !!s.drink, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
+          {objs(DRINKS.slice(4).map((x) => ({ v: x.v, label: x.label })), { cols: 3, h: 40, single: true, any: !!s.drink, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
           {d?.caffeine && (<>
             <div class="qp-q" style="font-size:calc(16 * var(--u));justify-content:center">Your last one?</div>
             {objs([{ v: 'morning', label: 'Mornings' }, { v: 'late', label: 'Afternoon+' }], { cols: 2, h: 28, single: true, on: (v) => !!s.picked.caffeine && a.caffeine === v, key: (v) => 'when:' + v, pick: act.pick })}

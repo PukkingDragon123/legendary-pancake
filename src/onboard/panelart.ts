@@ -130,19 +130,6 @@ export function clipURL() {
 
 // ------------------------------------------------------------------ ink: boxes, ticks, loops, rules
 
-/** A hand-inked tick box (12 x 12), wobbly lines of uneven weight. */
-export function boxURL(seed = 1) {
-  return art('box' + seed, () => {
-    const t = new Tex(13, 13);
-    for (let i = 0; i < t.a.length; i++) t.a[i] = 0;
-    const put = (x: number, y: number, a = 1) => { t.set(x, y, a > 0.8 ? INK : INK2); t.alpha(x, y, a); };
-    for (let i = 0; i < 12; i++) {
-      const j = (k: number) => (hash(i, k, seed) > 0.8 ? 1 : 0);
-      put(i, 0 + j(1), 0.95); put(i, 11 - j(2), 0.9); put(0 + j(3), i, 0.9); put(11 - j(4), i, hash(i, 5, seed) > 0.15 ? 0.95 : 0.6);
-    }
-    return t;
-  });
-}
 /** The frames of an ink tick being drawn (n frames side by side, 16 x 14 each). */
 export function tickStripURL(n = 6, seed = 1) {
   return art(`tick${n}:${seed}`, () => {
@@ -297,34 +284,6 @@ export function acornURL(state: 'done' | 'now' | 'todo') {
       : state === 'now' ? { c: rgb(0x8a6a1a), C: rgb(0xd8a838), n: rgb(0xc08030), N: rgb(0xf0c060) }
         : { c: rgb(0xb8a47a), C: rgb(0xe6d6b4), n: rgb(0xb8a47a), N: rgb(0xe6d6b4) };
     rows.forEach((r, y) => [...r].forEach((ch, x) => { if (col[ch]) { t.set(x, y, col[ch]); t.alpha(x, y, 1); } }));
-    return t;
-  });
-}
-/** a card for an answer: a little paper print with uneven borders and a felt-green backdrop window for the 3D model */
-export function cardURL(w: number, h: number, win: number, seed = 1, on = false) {
-  return art(`card${w}x${h}:${win}:${seed}:${on ? 1 : 0}`, () => {
-    const t = new Tex(w + 2, h + 2);
-    for (let i = 0; i < t.a.length; i++) t.a[i] = 0;
-    for (let y = 0; y < h + 2; y++) for (let x = 0; x < w + 2; x++) if (inset(x - 2, y - 2, w, h, seed, 0.9, 2) >= 0 && ((x + y) & 1 || on)) { t.set(x, y, rgb(on ? 0x4a2a08 : 0x1a0c06)); t.alpha(x, y, on ? 0.4 : 0.25); }
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const d = inset(x, y, w, h, seed, 0.9, 2);
-      if (d < 0) continue;
-      let c: RGB;
-      const inWin = x >= 3 && x < w - 3 && y >= 3 && y < 3 + win;
-      if (inWin) {
-        // a backdrop: a soft lamplit felt, darker at the edges
-        const e = Math.min(x - 3, w - 4 - x, y - 3, 2 + win - y);
-        const k = 0.45 + (vnoise(x * 0.2, y * 0.2, seed) - 0.5) * 0.1 - Math.max(0, 3 - e) * 0.06 + (1 - y / (win + 3)) * 0.12;
-        const F: RGB[] = on ? [rgb(0x3a2a10), rgb(0x5e4416), rgb(0x86642a), rgb(0xb48e44), rgb(0xd8b464)] : [rgb(0x0e2418), rgb(0x173620), rgb(0x214a2c), rgb(0x2e5e38), rgb(0x3e7446)];
-        c = pickR(F, k, x, y);
-      } else {
-        let k = 0.74 + (fbm(x * 0.08, y * 0.08, seed) - 0.5) * 0.12 - (d < 1.5 ? 0.12 : 0);
-        if (on) k += 0.04;
-        c = pickR(PAPER, k, x, y);
-        if (on && d < 2.2) c = pickR(BRASS, 0.7, x, y);
-      }
-      t.set(x, y, c); t.alpha(x, y, 1);
-    }
     return t;
   });
 }

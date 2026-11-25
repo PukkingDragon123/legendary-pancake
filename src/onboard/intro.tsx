@@ -102,6 +102,7 @@ export function Intro() {
     overlay.current = ov;
     const cards = new CardModels(office.mats, lookFor);
     cards.wake = U.a.wake; cards.hour12 = save.value.settings.hour12;
+    cards.plate = { you: U.a.you, name: U.a.name };
     models.current = cards;
     office.tickers.add((dt) => ov.update(dt));
     const stamp = rubberStamp(office.mats);
@@ -390,7 +391,7 @@ export function Intro() {
       pick: (v) => {
         if (phase !== 'ask') return;
         const s = st(), a = U.a;
-        if (s.kind === 'text') { set({ ...a, name: v }); office.setNameplate(v); office.sparkle(office.head, 4); play('pencil', 0.4); inkLoop(v); return; }
+        if (s.kind === 'text') { set({ ...a, name: v }); cards.plate.name = v; office.setNameplate(v); office.sparkle(office.head, 4); play('pencil', 0.4); inkLoop(v); return; }
         if (s.kind === 'species') {
           if (a.species !== v) { set({ ...a, species: v }); office.setLook(lookFor(v)); play('paper_flip', 0.35); }
           U.picked[s.id] = true; bump();
@@ -429,7 +430,7 @@ export function Intro() {
         haptic();
         if (d.caffeine) window.setTimeout(frameAsk, 60);
       },
-      text: (v) => { if (phase !== 'ask') return; const f = st().field as 'you' | 'name'; set({ ...U.a, [f]: v.slice(0, 16) }); if (f === 'name') office.setNameplate(v.trim() || 'Pip'); play('scribble', 0.2, 0.9 + Math.random() * 0.4); window.requestAnimationFrame(inkLetter); },
+      text: (v) => { if (phase !== 'ask') return; const f = st().field as 'you' | 'name'; set({ ...U.a, [f]: v.slice(0, 16) }); cards.plate[f] = v.slice(0, 16); if (f === 'name') office.setNameplate(v.trim() || 'Pip'); play('scribble', 0.2, 0.9 + Math.random() * 0.4); window.requestAnimationFrame(inkLetter); },
       enter: () => void file(),
       nudge: (d) => { const w = hm(toMin(U.a.wake) + d); set({ ...U.a, wake: w }); cards.clockAt = toMin(w); cards.wake = w; office.window(toMin(w) / 60); play('tick_brass', 0.4); },
       ampm: (pm) => { const m = (toMin(U.a.wake) % 720) + (pm ? 720 : 0); set({ ...U.a, wake: hm(m) }); cards.clockAt = m; cards.wake = hm(m); office.window(m / 60); play('pencil', 0.35); inkLoop(pm ? 'pm' : 'am'); },
