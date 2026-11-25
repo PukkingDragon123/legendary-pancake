@@ -147,8 +147,9 @@ class ShelfStage {
     g.save();
     g.globalCompositeOperation = 'lighter';
     for (let i = 0; i < steps; i++) {
+      // fainter towards the rim, so the glow has no visible edge
       const rr = Math.round(r * (1 - i / steps));
-      g.fillStyle = `rgba(${rgb},${(a / steps).toFixed(3)})`;
+      g.fillStyle = `rgba(${rgb},${((a * 2 * (i + 1)) / (steps * (steps + 1))).toFixed(3)})`;
       g.beginPath(); g.arc(Math.round(cx), Math.round(cy), rr, 0, Math.PI * 2); g.fill();
     }
     g.restore();
@@ -184,7 +185,7 @@ class ShelfStage {
     if (la >= 0) glow = la < 0.13 ? 0.05 : la < 0.3 ? 1.7 : lerp(1.7, glow, clamp((la - 0.3) / 1.2));
     glow *= 1 + night * 0.5;
     const [lx, ly0] = SH.lamp, ly = ly0 + dy(lp);
-    this.glow(lx, ly, 50, (0.12 + 0.08 * night) * glow, '255,200,110', 6);
+    this.glow(lx, ly, 50, (0.16 + 0.1 * night) * glow, '255,200,110', 6);
     this.sprite('shelf');
     // the objects' shadows on the shelf top
     this.shadow(SH.objects.sleep, 52, lp.y);
