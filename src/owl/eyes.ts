@@ -6,10 +6,14 @@
 //   closed  a soft downward arc (asleep, calm)       happy   a ^ arc
 //   heart   a little pixel heart                      star / sparkle  a pixel star
 //   spiral  a dizzy spiral                            wide    a bigger, rounder dot
+// and the anime set: sparkly (a big glossy dot with glints and a twinkle), shock (white eyes, tiny pupils), half
+// (sleepy half-lids), teary (wobbly glints over welling water), squint (> <), plus two overlays any eye can wear:
+// embarrassed blush patches (///) under the eye and a bold brow (determined or worried); 'none' draws only those
+// overlays (Barnaby keeps his own glossy 3D eyes under them).
 // plus a tear drop, and lash ticks for Queen Neve. Everything is drawn texel by texel with hard pixel edges.
 import * as THREE from 'three';
 
-export type EyeMode = 'normal' | 'happy' | 'closed' | 'heart' | 'star' | 'spiral' | 'sparkle' | 'wide';
+export type EyeMode = 'normal' | 'happy' | 'closed' | 'heart' | 'star' | 'spiral' | 'sparkle' | 'wide' | 'sparkly' | 'shock' | 'half' | 'teary' | 'squint' | 'none';
 
 export interface EyeState {
   /** 0 = fully open, 1 = closed */
@@ -27,6 +31,12 @@ export interface EyeState {
   tear: boolean;
   /** 0..1 a quick squint (the old nictitating blink) */
   nict?: number;
+  /** 0..1 embarrassed blush patches under the eye */
+  blush?: number;
+  /** -1..1 a bold brow over the eye: + determined (inner end down), - worried (inner end up), 0 none */
+  brow?: number;
+  /** seconds: drives the twinkle of sparkly eyes and the wobble of teary ones */
+  t?: number;
 }
 
 export const defaultEye = (): EyeState => ({ lid: 0, low: 0, tilt: 0, lx: 0, ly: 0, pupil: 5, mode: 'normal', tear: false, nict: 0 });
@@ -75,6 +85,8 @@ export class Eye {
   /** this eye's own wobble: a lumpy outline and a slightly different size from its twin */
   private wob: number[];
   private size: number;
+  /** a host's own scale for the drawn eye (Barnaby's eyes sit far apart on a big head) */
+  scale = 1;
 
   /** side: -1 for the eye at -x, +1 for the eye at +x */
   constructor(private side: number, cols: EyeColours, seed = 7) {
@@ -106,7 +118,8 @@ export class Eye {
   draw(s: EyeState): boolean {
     const q = (v: number, k: number) => Math.round(v * k);
     const nict = s.nict ?? 0;
-    const key = [q(s.lid, 24), q(s.low, 16), q(s.tilt, 8), q(s.lx, 10), q(s.ly, 10), q(s.pupil, 4), s.mode, s.tear ? 1 : 0, q(nict, 8)].join(',');
+    const live = s.mode === 'sparkly' || s.mode === 'teary' ? Math.floor((s.t ?? 0) * 5) % 4 : 0;
+    const key = [q(s.lid, 24), q(s.low, 16), q(s.tilt, 8), q(s.lx, 10), q(s.ly, 10), q(s.pupil, 4), s.mode, s.tear ? 1 : 0, q(nict, 8), q(s.blush ?? 0, 3), q(s.brow ?? 0, 6), live, this.scale].join(',');
     if (key === this.key) return false;
     this.key = key;
     const d = this.img.data;
@@ -118,7 +131,7 @@ export class Eye {
       d[i] = (c >> 16) & 255; d[i + 1] = (c >> 8) & 255; d[i + 2] = c & 255; d[i + 3] = 255;
     };
     const ink = this.ink;
-    const R0 = C * DOT_SHARE * this.size;
+    const R0 = C * DOT_SHARE * this.size * this.scale;
     const inner = -this.side; // +1 when the inner corner is toward +x on this canvas (canvas x runs with the owl's x)
     const [p0, p1, p2, a1, a2, a3] = this.wob;
     const lump = (th: number) => 1 + a1 * Math.sin(2 * th + p0) + a2 * Math.sin(3 * th + p1) + a3 * Math.sin(5 * th + p2);
@@ -146,11 +159,20 @@ export class Eye {
       return pts;
     };
 
+    /** an organic filled oval, lumpy like the dots */
+    const inBlob = (x: number, y: number, rx: number, ry: number) => { const th = Math.atan2(y / ry, x / rx), rr = lump(th); return (x / rx) ** 2 + (y / ry) ** 2 <= rr * rr; };
+    const blob = (cx: number, cy: number, rx: number, ry: number, c: number) => {
+      for (let y = -Math.ceil(ry * 1.2); y <= Math.ceil(ry * 1.2); y++) for (let x = -Math.ceil(rx * 1.2); x <= Math.ceil(rx * 1.2); x++) if (inBlob(x, y, rx, ry)) P(cx + x, cy + y, c);
+    };
+
+    /** the anime eyes are drawn bigger and bolder than the toy's little dots, so they read from across the room */
+    const RA = R0 * 1.38;
+
     let mode = s.mode;
     let lid = Math.max(s.lid, nict * 0.55);
     if (mode === 'wide') lid = Math.min(lid, 0.02);
     // a blink closes even a heart or a star for a moment
-    if (lid > 0.86 && (mode === 'normal' || mode === 'wide' || mode === 'sparkle')) mode = 'closed';
+    if (lid > 0.86 && (mode === 'normal' || mode === 'wide' || mode === 'sparkle' || mode === 'sparkly' || mode === 'teary' || mode === 'shock')) mode = 'closed';
     const W = R0 * 0.62; // stroke weight of the arcs
 
     if (mode === 'normal' || mode === 'wide') {
@@ -186,7 +208,7 @@ export class Eye {
       // a gentle downward arc: asleep, or the bottom of a blink
       stroke(arc(0, R0 * 0.35, R0 * 1.05, R0 * 0.62, Math.PI * 1.08, Math.PI * 1.92), W, ink);
     } else if (mode === 'happy') {
-      stroke(arc(0, -R0 * 0.45, R0 * 1.0, R0 * 0.95, Math.PI * 0.08, Math.PI * 0.92), W, ink);
+      stroke(arc(0, -R0 * 0.55, R0 * 1.25, R0 * 1.15, Math.PI * 0.08, Math.PI * 0.92), W * 1.15, ink);
     } else if (mode === 'heart') {
       const c = hex(this.cols.heart ?? '#a85a62');
       const k = R0 * 1.15;
@@ -219,6 +241,62 @@ export class Eye {
       const pts: [number, number][] = [];
       for (let i = 0; i <= 40; i++) { const t = i / 40, a = t * Math.PI * 4.2 * inner, r = R0 * (0.12 + 1.0 * t); pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
       stroke(pts, W * 0.7, ink);
+    } else if (mode === 'sparkly' || mode === 'teary') {
+      // a big glossy dot full of light: a fat glint up top, a little one below, and (sparkly) a twinkling star
+      const rx = RA * (mode === 'sparkly' ? 1.16 : 1.1), ox = s.lx * RA * 0.2, oy = s.ly * RA * 0.15;
+      const wob = mode === 'teary' && live % 2 ? 1 : 0;
+      blob(ox, oy, rx, rx * 1.05, ink);
+      if (mode === 'teary') {
+        // welling water across the bottom of the eye, a bright rim on it
+        for (let y = -Math.ceil(rx * 1.2); y <= -Math.round(rx * 0.32); y++) for (let x = -Math.ceil(rx * 1.2); x <= Math.ceil(rx * 1.2); x++) {
+          if (inBlob(x - ox, y - oy, rx, rx * 1.05)) P(x, y, y >= -Math.round(rx * 0.32) - 1 ? 0xd8f2ff : 0x6fb8e6);
+        }
+      }
+      blob(ox - rx * 0.36 + wob, oy + rx * 0.36, RA * 0.36, RA * 0.32, 0xffffff);
+      blob(ox + rx * 0.36 - wob, oy - rx * (mode === 'teary' ? 0.05 : 0.38), RA * 0.17, RA * 0.17, 0xffffff);
+      if (mode === 'sparkly') {
+        const arm = [0.2, 0.42, 0.62, 0.42][live] * RA, cx = ox + rx * 0.62, cy = oy + rx * 0.66;
+        stroke([[cx - arm, cy], [cx + arm, cy]], Math.max(1.6, RA * 0.16), 0xffffff);
+        stroke([[cx, cy - arm * 1.25], [cx, cy + arm * 1.25]], Math.max(1.6, RA * 0.16), 0xffffff);
+      } else {
+        // a fat tear welling at the inner corner
+        const c = 0x9fdcff, cx = inner * rx * 0.55, cy = -rx * 1.25 - wob;
+        for (let y = -11; y <= 11; y++) for (let x = -8; x <= 8; x++) {
+          const v = y / (RA * 0.42), u = x / (RA * 0.3);
+          if (u * u + Math.max(0, v) ** 2 <= 1 && (v <= 0 || Math.abs(u) <= 1 - v * 0.9)) P(cx + x, cy + y, c);
+        }
+      }
+    } else if (mode === 'shock') {
+      // anime shock: the eye goes white, an ink ring round it, a tiny pupil in the middle
+      const rx = RA * 1.3, ox = s.lx * RA * 0.12, oy = s.ly * RA * 0.1;
+      blob(0, 0, rx, rx * 1.08, ink);
+      blob(0, 0, rx - Math.max(2, RA * 0.24), rx * 1.08 - Math.max(2, RA * 0.24), 0xfbf8f0);
+      blob(ox, oy, RA * 0.36, RA * 0.4, ink);
+    } else if (mode === 'half') {
+      // sleepy half-lids: the bottom half of the dot under a heavy, drooping lid line
+      const rx = RA * 1.0, cut = RA * 0.12;
+      for (let y = -Math.ceil(rx * 1.2); y <= cut; y++) for (let x = -Math.ceil(rx * 1.2); x <= Math.ceil(rx * 1.2); x++) {
+        if (inBlob(x, y + RA * 0.1, rx, rx)) P(x, y, ink);
+      }
+      stroke([[inner * RA * 1.15, cut + RA * 0.05], [0, cut + RA * 0.08], [-inner * RA * 1.25, cut - RA * 0.32]], W * 0.85, ink);
+    } else if (mode === 'squint') {
+      // > <: squeezed shut, the point toward the beak
+      stroke([[-inner * RA * 0.85, RA * 0.8], [inner * RA * 0.75, 0], [-inner * RA * 0.85, -RA * 0.8]], W, ink);
+    }
+
+    // overlays: a bold brow and embarrassed blush patches (at the eye's own size, whatever the host's scale)
+    const RO = C * DOT_SHARE * this.size, sk = Math.max(1, this.scale);
+    const brow = s.brow ?? 0;
+    if (Math.abs(brow) > 0.08) {
+      const base = RO * 2.05 * Math.min(1.15, sk) + (mode === 'shock' ? RO * 0.35 : 0);
+      const yi = base - RO * 0.6 * brow, yo = base + RO * 0.32 * brow;
+      stroke([[inner * RO * 1.2, yi], [0, (yi + yo) / 2 + RO * 0.14], [-inner * RO * 1.25, yo]], RO * 0.62, ink);
+    }
+    if ((s.blush ?? 0) > 0.3) {
+      const cx = -inner * RO * 0.55, cy = -RO * 2.15, pink = 0xf6a2b0, deep = 0xd84f72;
+      const sz = 0.75 + 0.25 * Math.min(1, s.blush ?? 0);
+      blob(cx, cy, RO * 1.6 * sz, RO * 0.66 * sz, pink);
+      for (const k of [-0.75, 0, 0.75]) stroke([[cx + k * RO - RO * 0.26, cy - RO * 0.42], [cx + k * RO + RO * 0.26, cy + RO * 0.42]], Math.max(2, RO * 0.26), deep);
     }
 
     // Queen Neve: three lash ticks flicking out from the outer top of each eye
