@@ -5,6 +5,7 @@
 // planks, a ruled ledger, a screen-door dim), and the store's sprites (rarity stars, an hourglass, a parcel, a bell,
 // a twinkle, a price tag). Painted procedurally on first use and shown crisp at whole-pixel scales. No smooth circles,
 // no soft glows. OWNED BY THE SHOP BUILDER.
+import { bubbleFrame as rBubble, button as rButton, chip as rChip, panelFrame as rPanel, paperNote as rNote, plaqueFrame as rPlaque, ribbon as rRibbon, tab as rTab, tray as rTray } from '../real/kit.ts';
 import { Grid, icon, draw, render, RAMPS, spriteURL } from '../px/sprites.js';
 
 // ------------------------------------------------------------------ palette (src/gfx/palette.ts)
@@ -625,12 +626,32 @@ export function shootURL(col, len = 64) {
 let injected = false;
 /** Injects `.lf-<name>` (2x) and `.lf3-<name>` (3x) classes for every frame, `.lg-btn.<tone>` buttons, and pattern
  * variables (--lg-pat-*, --lg-wood, --lg-burlap ...), once. */
+// [ui7] the store's frames in the realistic material kit (src/ui/real/kit.ts): every lg_* name maps onto a real
+// object (paper and kraft tags with deckled edges, oak and walnut boards, brass plates, satin cloth, enamel buttons)
+const b9 = (n, fill = n.fill) => `border-style:solid;border-color:transparent;border-width:${n.bw.map((v) => v + 'px').join(' ')};border-image-source:url("${n.url}");border-image-slice:${n.s.map((v) => Math.round(v * n.k)).join(' ')}${fill ? ' fill' : ''};border-image-width:${n.s.map((v) => v + 'px').join(' ')};border-image-outset:${n.o}px;border-image-repeat:stretch`;
+const HEX = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+const REAL = {
+  lg_paper: () => b9(rNote('cream', 3)), lg_kraft: () => b9(rNote('kraft', 5)), lg_velvet: () => b9(rNote('pink', 6)),
+  lg_board: () => b9(rPanel('oak', 12, { brass: true, r: 10, inner: 6, m: 8 })), lg_board_gold: () => b9(rPanel('honey', 12, { brass: true, r: 10, inner: 6, m: 8 })), lg_board_dark: () => b9(rPanel('walnut', 12, { brass: true, r: 10, inner: 6, m: 8 })),
+  lg_plank: () => b9(rButton('oak')), lg_plank_down: () => b9(rButton('oak', true)), lg_stampblock: () => b9(rButton('oak')),
+  lg_brass: () => b9(rPlaque()), lg_chip: () => b9(rChip('walnut')), lg_bubble: () => b9(rBubble(false)),
+  lg_slate: () => b9(rPanel('ebony', 12, { brass: false, r: 10, inner: 6, m: 8 })), lg_slate2: () => b9(rPanel('ebony', 12, { brass: false, r: 10, inner: 6, m: 8 })),
+  lg_slot: () => b9(rTray('off')),
+  lg_cloth_red: () => b9(rRibbon(HEX('#b4383a'))), lg_cloth_violet: () => b9(rRibbon(HEX('#6e4ea0'))), lg_cloth_gold: () => b9(rRibbon(HEX('#d8a444'))),
+  lg_ribbon: () => b9(rRibbon(HEX('#4f7a3a'))), lg_ribbon_gold: () => b9(rRibbon(HEX('#d8a444'))), lg_ribbon_berry: () => b9(rRibbon(HEX('#b0443e'))), lg_ribbon_violet: () => b9(rRibbon(HEX('#6e5498'))),
+  lg_tag_red: () => b9(rTab(false, HEX('#9c3036'))), lg_tag_gold: () => b9(rTab(true)), lg_tag_slate: () => b9(rTab(false, HEX('#3a4650'))), lg_tag_moss: () => b9(rTab(false, HEX('#3f6a34'))),
+  lg_btn_gold: () => b9(rButton('gold')), lg_btn_gold_down: () => b9(rButton('gold', true)), lg_btn_berry: () => b9(rButton('red')), lg_btn_berry_down: () => b9(rButton('red', true)),
+  lg_btn_violet: () => b9(rButton('plum')), lg_btn_violet_down: () => b9(rButton('plum', true)), lg_btn_sage: () => b9(rButton('green')), lg_btn_sage_down: () => b9(rButton('green', true)),
+  lg_btn_linen: () => b9(rButton('cream')), lg_btn_linen_down: () => b9(rButton('cream', true)), lg_btn_slate: () => b9(rButton('night')), lg_btn_slate_down: () => b9(rButton('night', true)),
+};
+const realStyle = (name, scale) => (REAL[name] ? REAL[name]() : lgStyle(name, scale));
+
 export function injectLodgeCSS() {
   if (injected || typeof document === 'undefined') return;
   injected = true;
   let css = '';
-  for (const n of Object.keys(LG_FRAMES)) css += `.lf-${n}{${lgStyle(n, 2)};background-color:transparent}\n.lf3-${n}{${lgStyle(n, 3)};background-color:transparent}\n`;
-  for (const k of Object.keys(BTN)) css += `.lg-btn.${k}{${lgStyle(`lg_btn_${k}`, 2)}}\n.lg-btn.${k}:active:not(.off),.lg-btn.${k}.down{${lgStyle(`lg_btn_${k}_down`, 2)}}\n`;
+  for (const n of Object.keys(LG_FRAMES)) css += `.lf-${n}{${realStyle(n, 2)};background-color:transparent}\n.lf3-${n}{${realStyle(n, 3)};background-color:transparent}\n`;
+  for (const k of Object.keys(BTN)) css += `.lg-btn.${k}{${realStyle(`lg_btn_${k}`, 2)}}\n.lg-btn.${k}:active:not(.off),.lg-btn.${k}.down{${realStyle(`lg_btn_${k}_down`, 2)}}\n`;
   // the store's things wear their materials: paper tags, kraft labels, brass plates, cloth, planks, the oak board
   const WEAR = {
     '.lg-ptag': 'lg_paper', '.lg-ktag': 'lg_kraft', '.lg-ktag.brass': 'lg_brass', '.lg-cloth.on': 'lg_cloth_red', '.lg-cloth.soon': 'lg_cloth_violet', '.lg-stamp-block': 'lg_stampblock',
@@ -639,7 +660,7 @@ export function injectLodgeCSS() {
     '.lg-burlap': 'lg_kraft', '.lg-plate': 'lg_brass', '.lg-page': 'lg_paper', '.lg-prize-page': 'lg_paper', '.lg-timer': 'lg_chip',
     '.lg-framewall': 'lg_board', '.lg-fw-tag': 'lg_paper', // [ui5] the frame wall
   };
-  for (const [sel, fr] of Object.entries(WEAR)) css += Array.isArray(fr) ? `${sel}{${lgStyle(fr[0], fr[1])}}\n` : `${sel}{${lgStyle(fr, 2)}}\n`;
+  for (const [sel, fr] of Object.entries(WEAR)) css += Array.isArray(fr) ? `${sel}{${realStyle(fr[0], fr[1])}}\n` : `${sel}{${realStyle(fr, 2)}}\n`;
   css += ':root{';
   for (const p of Object.keys(PAT)) css += `--lg-pat-${p}:url("${patternURL(p, 2)}");`;
   css += `--lg-rays-a:url("${raysURL(0)}");--lg-rays-b:url("${raysURL(1)}");--lg-burst:url("${burstURL()}");--lg-burst-gold:url("${burstURL(128, '#ffd27a')}");--lg-burst-violet:url("${burstURL(128, '#c79bff')}");--lg-burst-blue:url("${burstURL(128, '#8fd0ff')}");--lg-twinkle:url("${spriteURL('shop_twinkle', 2)}");`;
