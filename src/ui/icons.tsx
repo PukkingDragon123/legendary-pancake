@@ -3,7 +3,7 @@
 // every art pixel lands on whole screen pixels.
 import type { JSX } from 'preact';
 import { SPRITES, spriteURL } from './px/sprites.js';
-import { iconSrc } from './chrome/iconset.ts';
+import { iconFit, iconSrc } from './chrome/iconset.ts';
 import './px/hollow.js';
 import './px/currency.js';
 
@@ -12,15 +12,16 @@ type P = { size?: number; class?: string; style?: string };
 const dpr = () => Math.min(4, Math.max(1, Math.round((typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1)));
 
 /** A pixel sprite at roughly `size` CSS px tall, snapped so art pixels stay square and crisp. */
-export function Px(p: { name: string; size?: number; class?: string; style?: string; alt?: string }) {
+export function Px(p: { name: string; size?: number; class?: string; style?: string; alt?: string; zoom?: number }) {
   const sp = (SPRITES as Record<string, { w: number; h: number; i3d?: unknown }>)[p.name];
   const w0 = sp?.w ?? 20, h0 = sp?.h ?? 20;
   const want = p.size ?? 30;
   const k = dpr();
-  // [ui5] the 3D icon family: drawn at exactly the asked size in device pixels, chunky art pixels, never blurred
+  // [ui5] the 3D icon family, chunky art pixels, never blurred; [tex7] at exactly one art pixel per artPx() CSS px (the
+  // bake nearest the asked size; `zoom` when the icon sits in a box shown bigger on screen)
   if (sp?.i3d) {
-    const dev = Math.max(8, Math.round(want * k)), css = dev / k;
-    return <img class={'px ico ' + (p.class ?? '')} style={p.style} src={iconSrc(p.name, dev, k) ?? ''} width={css} height={Math.round((css * h0) / w0)} alt={p.alt ?? ''} draggable={false} />;
+    const dev = Math.max(8, Math.round(want * k)), css = iconFit(p.name, dev / k, p.zoom)?.css ?? dev / k;
+    return <img class={'px ico ' + (p.class ?? '')} style={p.style} src={iconSrc(p.name, dev, k, p.zoom) ?? ''} width={css} height={(css * h0) / w0} alt={p.alt ?? ''} draggable={false} />;
   }
   // css px per art px, a multiple of 1/dpr so it maps to whole device pixels
   const per = Math.max(1 / k, Math.round((want / Math.max(w0, h0)) * k) / k);

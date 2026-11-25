@@ -12,11 +12,15 @@
 // pendulum swings. It draws at 12 fps idle and 30 fps while something moves, and stops when the shelf is away or the page
 // is hidden. The first paint never waits for it: the painted 2D objects show until the first 3D frame is in, and stay
 // if WebGL is unavailable.
+// [tex7] Every surface wears a detailed hand-painted texture (props3d.ts, paint3d.ts) under the shared cel light
+// (2-3 bands, cool violet-blue shadow fill, a warm key from the top left, a gentle warm rim), and one art pixel of the
+// shelf is exactly one art pixel of the game (`artPx()`, src/gfx/artpx.ts), like the 3D world and the icons.
 import * as THREE from 'three';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sceneRef } from '../state.ts';
 import { acornProp, cuckooClock, mergeStatic, studioEnv, contactBlob, journal, moonLamp, oakLeafProp, setClockHands, shelf, type BookParts, type ClockParts, type LampParts } from './props3d.ts';
 import { reducedMotion } from './swing.ts';
+import { artPx, artPxSignal } from '../../gfx/artpx.ts';
 
 export type NavId = 'sleep' | 'clock' | 'book';
 
@@ -90,7 +94,7 @@ class ShelfStage {
   private postM: THREE.ShaderMaterial;
   private postScene = new THREE.Scene();
   private postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  private hemi = new THREE.HemisphereLight(0xfff1dc, 0x6a3e24, 0.75);
+  private hemi = new THREE.HemisphereLight(0xe8eaff, 0x5a4c8a, 0.8);
   private key = new THREE.DirectionalLight(0xffe2b8, 3.3);
   private fill = new THREE.DirectionalLight(0xbcd2ff, 0.55);
   private rim = new THREE.DirectionalLight(0xdce8ff, 1.3);
@@ -112,8 +116,11 @@ class ShelfStage {
   private snapped = false;
   onLive: (() => void) | null = null;
   live = false;
+  /** how long building the models and painting their textures took (ms) */
+  buildMs = 0;
 
   constructor() {
+    const t0 = performance.now();
     const c = (this.canvas = document.createElement('canvas'));
     c.className = 'hh-nav3d-c';
     this.R = new THREE.WebGLRenderer({ canvas: c, alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'low-power' });
@@ -192,6 +199,7 @@ class ShelfStage {
     const b1 = contactBlob(0.36, 0.22, 0.4); b1.position.set(gx - 0.05, 0.006, 0.07);
     this.scene.add(a1, a2, leaf, b1);
     document.addEventListener('visibilitychange', () => this.wake());
+    this.buildMs = Math.round(performance.now() - t0);
   }
 
   // ---------------------------------------------------------------- framing
@@ -351,8 +359,8 @@ class ShelfStage {
     if (Math.abs(bk._o - open) > 0.002 || Math.abs(bk._t - tab) > 0.002) motion += 1;
     // light: day studio, or a moonlit night lit by the lamp
     const nd = night;
-    this.hemi.intensity = lerp(0.75, 0.62, nd);
-    this.hemi.color.setHex(nd > 0.5 ? 0xc8d0f8 : 0xfff1dc);
+    this.hemi.intensity = lerp(0.8, 0.66, nd);
+    this.hemi.color.setHex(nd > 0.5 ? 0xb8c4f8 : 0xe8eaff);
     this.key.intensity = lerp(3.3, 2.3, nd);
     this.key.color.setHex(nd > 0.5 ? 0xd4dcff : 0xffe2b8);
     this.rim.intensity = lerp(1.3, 1.6, nd);
@@ -392,7 +400,7 @@ class ShelfStage {
   }
 }
 
-const STILL_KEY = 'hh-shelf3d-still:v1';
+const STILL_KEY = 'hh-shelf3d-still:v2';
 const readStill = () => { try { return localStorage.getItem(STILL_KEY) ?? ''; } catch { return ''; } };
 
 let stage: ShelfStage | null | undefined;
@@ -426,8 +434,8 @@ function installStyles() {
   document.head.appendChild(st);
 }
 
-/** art pixels per nav CSS px: about 1.33 CSS px per art pixel on screen (the nav is drawn 1.5x on big screens) */
-const artScale = (big: boolean) => (window as unknown as { __shelfArt?: number }).__shelfArt ?? (big ? 1.0 : 0.66);
+/** art pixels per nav CSS px: one art pixel is artPx() CSS px on screen (the nav is drawn 1.5x on big screens) */
+const artScale = (big: boolean) => (window as unknown as { __shelfArt?: number }).__shelfArt ?? (big ? 1.5 : 1) / artPx();
 
 /**
  * The live 3D shelf behind the main buttons. Returns [host ref, live, still]: put the host span in the nav; `live`
@@ -463,7 +471,8 @@ export function useShelf3D(away: boolean, rec: boolean, bigQuery: string): [(el:
     try { mq = matchMedia(bigQuery); mq.addEventListener?.('change', size); } catch { mq = null; }
     size();
     s.attach(host.current);
-    return () => mq?.removeEventListener?.('change', size);
+    const off = artPxSignal.subscribe(size);
+    return () => { mq?.removeEventListener?.('change', size); off(); };
   }, [ready]);
   useEffect(() => { if (ready) stage?.show(!away); }, [ready, away]);
   useEffect(() => { if (ready) stage?.setRec(rec); }, [ready, rec]);

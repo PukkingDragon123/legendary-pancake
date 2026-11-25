@@ -8,6 +8,7 @@ import {
   all, and, clamp, disc, dome, ell, fbm, flat, hash, hex, leatherGrain, MAT, metal, mix, mul, not, or, PAL, paperGrain, poly, puff, rampAt, rect, Relief,
   ring, roundRect, rrect, seg, slab, smooth, solid, torus, tubeX, tubeY, vnoise, weave, woodGrain, type AFn, type Mat, type RGB, type Shape, bayer,
 } from '../px/relief.ts';
+import { artPx } from '../../gfx/artpx.ts';
 
 const urls = new Map<string, string>();
 /** paint once per key */
@@ -875,5 +876,10 @@ export function giftSack(open = 0, k = 2): string {
 /** Detail level for a HUD part: 2 art px per unit on phones, 3 where the HUD is shown 1.5x (desktop). */
 export const DESK_HUD = '(min-width: 900px) and (min-height: 640px)';
 export const DESK_NAV = '(min-width: 900px) and (min-height: 760px)';
-/** [ui5] art pixels per design unit (one unit = 2 CSS px): 1.5 makes each art pixel 1.33 CSS px, a little chunkier than 1:1 */
-export const kFor = (q: string) => { try { return matchMedia(q).matches ? 2.25 : 1.5; } catch { return 1.5; } };
+/** [tex7] how much bigger a HUD part is shown on screen where the query matches (the big-screen HUD is drawn 1.5x) */
+export const hudZoom = (q: string) => { try { return matchMedia(q).matches ? 1.5 : 1; } catch { return 1; } };
+/**
+ * [ui5] art pixels per design unit (one unit = 2 CSS px); [tex7] so that one art pixel is exactly artPx() screen CSS px,
+ * the one pixel size of the whole game (src/gfx/artpx.ts): 1.5 on a 3x phone (1.33 CSS px per art pixel)
+ */
+export const kFor = (q: string) => (2 * hudZoom(q)) / artPx();

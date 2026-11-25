@@ -7,13 +7,20 @@
 // (crisp clusters, no blur), shaded in a few steps per colour with lights leaning gold and shadows leaning violet, a
 // light painterly break-up, a little more colour, and a coloured outline that is softer on the lit side. Two sizes per
 // icon (32 and 20 art px; packs bigger), and the currency (the acorn bag, the moon gem) glints in idle frames.
+// [tex7] Every model is textured before it is baked: each material is a detailed hand-painted texture in full colour
+// (src/ui/chrome/paint3d.ts: wood grain and knots, tooled leather, engraved and tarnished brass, crazed enamel, woven and
+// knitted cloth, paper fibres, frosted glass, leaf veins, cut gems, wax, water, bark, stone), laid on at the icons' texel
+// density (`fitUV`) and lit with the shared cel light (2-3 bands, cool shadows, a warm rim) like the shelf and the world.
+// Extra sizes (12, 16, 24, 28 art px, `z`) let every icon be drawn at exactly one art pixel per artPx() CSS px; palettes
+// are capped at 64 colours (median cut).
 //
 //   /dev-iconbake.html               bake everything and show it on paper (big, then at 1:1)
 //   /dev-iconbake.html?only=regex     just some
 //   window.__module                   the generated src/ui/px/icons3d.ts (a tools script writes it to disk)
 import * as THREE from 'three';
 import { instanceGLB } from '../gfx/glb.ts';
-import { clamp as cl, fbm, hash as h2, hex, leatherGrain, PAL, vnoise as vn2, weave, woodGrain, type RGB } from '../ui/px/relief.ts';
+import { fbm, hash as h2, hex, type RGB } from '../ui/px/relief.ts';
+import { bark, cel, cloth, cloudTex, density, enamel, fitUV, flame, gem, glass, keepUV, leafTex, leather, metal, paper, scales, stone, water, wax, wood, type Painted } from '../ui/chrome/paint3d.ts';
 import {
   at, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, MATS, mesh, paintTex, planarUV, rrectPts, setClockHands, shape, smoothProfile, starPts, studioEnv, torus, tube,
   type O,
@@ -32,54 +39,76 @@ R.toneMappingExposure = 1.0;
 const scene = new THREE.Scene();
 scene.environment = studioEnv(R);
 scene.environmentIntensity = 0.95;
-scene.add(new THREE.HemisphereLight(0xfff2e0, 0x6a4a3a, 0.75));
-const key = new THREE.DirectionalLight(0xffe8c8, 3.4); key.position.set(-3.5, 5, 3.5); scene.add(key);
-const fill = new THREE.DirectionalLight(0xd8e4ff, 0.5); fill.position.set(4, 1, 3); scene.add(fill);
-const rim = new THREE.DirectionalLight(0xe4ecff, 1.1); rim.position.set(2.5, 3, -5); scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xeef0ff, 0x5a4c8a, 0.72)); // [tex7] the cel light: a cool violet-blue shadow fill
+const key = new THREE.DirectionalLight(0xffe4bc, 3.0); key.position.set(-3.5, 5, 3.5); scene.add(key);
+const fill = new THREE.DirectionalLight(0xd8e4ff, 0.0); fill.position.set(4, 1, 3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xe4ecff, 0.7); rim.position.set(2.5, 3, -5); scene.add(rim);
 const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 500);
 
-// ------------------------------------------------------------------ hand-painted detail maps (grey: the colour comes from the material)
-const GREY: RGB[] = [hex('#8a8a8a'), hex('#a4a4a4'), hex('#bcbcbc'), hex('#d0d0d0'), hex('#e2e2e2'), hex('#f0f0f0'), hex('#fafafa')];
-type TexKind = 'enamel' | 'grain' | 'weave' | 'burlap' | 'scale' | 'leather' | 'knit' | 'bark';
-function detailTex(kind: TexKind): THREE.Texture {
-  const n = 48;
-  const t = paintTex('icon-' + kind, n, n, (x, y): RGB => {
-    if (kind === 'grain') return woodGrain(GREY, { seed: 3, along: 'y', base: 0.6, contrast: 0.8 })(x, y, x * 0.9, y * 0.9);
-    if (kind === 'leather') return leatherGrain(GREY, { seed: 5, base: 0.65 })(x, y, x, y);
-    if (kind === 'weave') return weave(GREY, { seed: 4, base: 0.6, scale: 1.2 })(x, y, x * 0.5, y * 0.5);
-    if (kind === 'burlap') { const X = Math.floor(x / 3), Y = Math.floor(y / 3); const v = ((X + Y) & 1 ? 0.75 : 0.55) + (h2(X, Y, 3) - 0.5) * 0.2; return GREY[Math.round(cl(v) * 6)]; }
-    if (kind === 'knit') { const X = Math.floor(x / 4), yy = y % 6; const v = Math.abs(((x % 4) - 1.5) + (yy - 3) * 0.5) < 1.2 ? 0.85 : 0.5; return GREY[Math.round(cl(v + (X % 2) * 0.05) * 6)]; }
-    if (kind === 'scale') { const row = Math.floor(y / 6), xx = (x + (row % 2) * 3) % 6, yy = y % 6; const d = Math.hypot(xx - 3, yy - 2) / 3.2; return GREY[Math.round(cl(0.95 - d * 0.6) * 6)]; }
-    if (kind === 'bark') { const v = 0.55 + (fbm(x * 0.3, y * 0.06, 9) - 0.5) * 0.9; return GREY[Math.round(cl(v) * 6)]; }
-    return GREY[Math.round(cl(0.9 + (fbm(x * 0.12, y * 0.12, 6) - 0.5) * 0.16) * 6)];
-  }, { repeat: true });
-  return t;
+// ------------------------------------------------------------------ hand-painted textures for every material
+/** the icons' texture density: a model about two units across fills a 32 art-pixel icon */
+const ICON_DENS = density(15);
+type TexKind = 'enamel' | 'grain' | 'weave' | 'burlap' | 'scale' | 'leather' | 'knit' | 'bark' | 'felt' | 'paper' | 'glass' | 'water' | 'wax' | 'stone' | 'cloud' | 'leaf' | 'foliage' | 'gem' | 'metal' | 'plain';
+function painted(kind: TexKind, c: string, seed: number): Painted {
+  switch (kind) {
+    case 'grain': return wood(c, { seed: 3 + seed % 5, knots: 1 });
+    case 'weave': return cloth(c, 'weave', 4);
+    case 'burlap': return cloth(c, 'burlap', 4);
+    case 'knit': return cloth(c, 'knit', 4);
+    case 'felt': return cloth(c, 'felt', 4);
+    case 'scale': case 'foliage': return scales(c, 13);
+    case 'leather': return leather(c, { seed: 5 });
+    case 'bark': return bark(c);
+    case 'paper': return paper(c);
+    case 'glass': return glass(c, { frost: 0.35 });
+    case 'water': return water(c);
+    case 'wax': return wax(c);
+    case 'stone': return stone(c);
+    case 'cloud': return cloudTex(c);
+    case 'leaf': return leafTex(c, { seed: 3, veins: 7 });
+    case 'gem': return gem(c);
+    case 'metal': return metal(c, { seed: 2 + seed % 7, patina: 0.2, engrave: 'rings', brush: 'u' });
+    case 'plain': return enamel(c, { craze: 0, chips: false });
+    default: return enamel(c, { craze: 0.8 });
+  }
 }
 
 interface MOpt { metal?: number; rough?: number; tex?: TexKind | null; glow?: number; flat?: boolean; rep?: number; opacity?: number; side?: THREE.Side; env?: number }
 const mats = new Map<string, THREE.Material>();
-/** a material: colour plus a hand-painted detail map (an enamel mottle unless told otherwise) */
+/** the bake's own materials (everything else, e.g. a painted face, keeps its own texture coordinates) */
+const ownMats = new Set<THREE.Material>();
+/**
+ * A material: a hand-painted texture of `color` (enamel unless told otherwise; metal, glass, gem or a plain glaze when
+ * `tex` is null), lit with the cel light.
+ */
 function M(color: number, o: MOpt = {}): THREE.MeshStandardMaterial {
   const k = color + JSON.stringify(o);
   let m = mats.get(k) as THREE.MeshStandardMaterial | undefined;
   if (m) return m;
-  let map: THREE.Texture | null = o.tex === null ? null : detailTex(o.tex ?? 'enamel');
-  if (map && o.rep) { map = map.clone(); map.repeat.set(o.rep, o.rep); map.needsUpdate = true; }
-  m = new THREE.MeshStandardMaterial({ color, metalness: o.metal ?? 0, roughness: o.rough ?? 0.5, map, flatShading: !!o.flat, emissive: o.glow ? color : 0x000000, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
+  const c = '#' + color.toString(16).padStart(6, '0');
+  const kind: TexKind = o.tex !== null && o.tex !== undefined ? o.tex : o.tex === null
+    ? (o.flat ? 'gem' : (o.metal ?? 0) >= 0.4 ? 'metal' : o.opacity !== undefined || ((o.rough ?? 0.5) <= 0.1 && (o.env ?? 1) >= 1.3) ? 'glass' : 'plain')
+    : 'enamel';
+  const p = painted(kind, c, mats.size);
+  m = new THREE.MeshStandardMaterial({ color: 0xffffff, map: p.map, metalness: o.metal ?? 0, roughness: o.rough ?? 0.5, flatShading: !!o.flat, emissive: o.glow ? 0xffffff : 0x000000, emissiveMap: o.glow ? p.map : null, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
+  if (p.bump) { m.bumpMap = p.bump; m.bumpScale = p.bumpScale ?? 1; }
+  if (kind === 'leaf') keepUV(m);
   if (o.opacity !== undefined) { m.transparent = true; m.opacity = o.opacity; m.depthWrite = false; }
+  cel(m);
   mats.set(k, m);
+  ownMats.add(m);
   return m;
 }
 /** an unlit colour (flames, light) */
-const unlit = (c: number) => { const k = 'unlit' + c; let m = mats.get(k); if (!m) { m = new THREE.MeshBasicMaterial({ color: c }); mats.set(k, m); } return m; };
+const unlit = (c: number) => { const k = 'unlit' + c; let m = mats.get(k); if (!m) { m = new THREE.MeshBasicMaterial({ map: flame('#' + c.toString(16).padStart(6, '0')).map }); mats.set(k, m); ownMats.add(m); } return m; };
 const C = {
   brass: () => M(0xf0b440, { metal: 0.55, rough: 0.3, tex: null, env: 1.2 }), gold: () => M(0xffcc3a, { metal: 0.5, rough: 0.28, tex: null, env: 1.2 }), silver: () => M(0xdfe6ee, { metal: 0.75, rough: 0.28, tex: null }),
   iron: () => M(0x9aa6b8, { metal: 0.7, rough: 0.38, tex: null }), wood: () => M(0xc47e40, { tex: 'grain', rough: 0.6 }), dark: () => M(0x7a4524, { tex: 'grain', rough: 0.65 }), oak: () => M(0xe6a85c, { tex: 'grain', rough: 0.6 }),
   red: () => M(0xe63e38, { rough: 0.28 }), green: () => M(0x38b85a, { rough: 0.28 }), blue: () => M(0x3a7ee6, { rough: 0.28 }), sky: () => M(0x5cc0f4, { rough: 0.26 }),
-  rose: () => M(0xf2668a, { rough: 0.3 }), plum: () => M(0x9a5cd6, { rough: 0.32 }), cream: () => M(0xfff2d2, { rough: 0.45 }), paper: () => M(0xfaecd2, { rough: 0.85, tex: 'weave' }),
-  leaf: () => M(0x58c044, { rough: 0.5 }), leather: () => M(0xc04a30, { rough: 0.55, tex: 'leather' }), burlap: () => M(0xd6a560, { rough: 0.9, tex: 'burlap', rep: 2 }), white: () => M(0xffffff, { rough: 0.4 }),
+  rose: () => M(0xf2668a, { rough: 0.3 }), plum: () => M(0x9a5cd6, { rough: 0.32 }), cream: () => M(0xfff2d2, { rough: 0.45 }), paper: () => M(0xfaecd2, { rough: 0.85, tex: 'paper' }),
+  leaf: () => M(0x58c044, { rough: 0.5, tex: 'leaf' }), leather: () => M(0xc04a30, { rough: 0.55, tex: 'leather' }), burlap: () => M(0xd6a560, { rough: 0.9, tex: 'burlap', rep: 2 }), white: () => M(0xffffff, { rough: 0.4 }),
   ink: () => M(0x30243a, { rough: 0.45, tex: null }), flame: () => unlit(0xff7a1c), flameIn: () => unlit(0xffd84a), glass: () => M(0xc4ecff, { rough: 0.06, metal: 0.1, tex: null, env: 1.6 }),
-  kraft: () => M(0xd9a86a, { rough: 0.85, tex: 'weave' }), snow: () => M(0xf4f9ff, { rough: 0.45 }), steel: () => M(0xb4bcc8, { metal: 0.8, rough: 0.3, tex: null }),
+  kraft: () => M(0xd9a86a, { rough: 0.85, tex: 'paper' }), snow: () => M(0xf4f9ff, { rough: 0.45, tex: 'cloud' }), steel: () => M(0xb4bcc8, { metal: 0.8, rough: 0.3, tex: null }),
 };
 
 // ------------------------------------------------------------------ modelling helpers
@@ -146,7 +175,7 @@ function acornBag(o: { squash?: number; pouch?: 'burlap' | 'leather'; spill?: nu
 }
 /** a brilliant-cut moon gem: a crown and pavilion of flat facets with a golden crescent set in its table */
 function moonGem(): O {
-  const gm = M(0xb08cf4, { rough: 0.08, metal: 0.2, flat: true, tex: null, env: 1.4 });
+  const gm = M(0x9466e6, { rough: 0.08, metal: 0.2, flat: true, tex: null, env: 1.4 });
   const gem = lathe([[0, -0.9], [0.66, -0.06], [0.72, 0.04], [0.56, 0.36], [0.3, 0.46], [0, 0.46]], gm, 10);
   gem.rotation.y = Math.PI / 10;
   const moon = at(ext(shape(crescentPts(0.2, 0.17, [0.08, 0.05], 48)), 0.04, M(0xffd86a, { glow: 0.4, rough: 0.3, tex: null }), 0.02, 2), 0, 0.05, 0.58);
@@ -169,6 +198,7 @@ function leafMesh(len: number, wid: number, m: THREE.Material, serr = 0): THREE.
   const pts: P2[] = [];
   for (let i = 0; i <= 60; i++) { const t = (i / 60) * Math.PI * 2, y = Math.cos(t); const k = 1 + (serr ? Math.sin(t * serr) * 0.08 : 0); pts.push([Math.sin(t) * wid * (1 - 0.35 * Math.max(0, y)) * (1 - 0.2 * Math.max(0, -y)) * k, y * len]); }
   const me = ext(shape(pts), 0.04, m, 0.03, 2, 60);
+  planarUV(me.geometry);
   const p = me.geometry.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) - Math.abs(p.getX(i)) * 0.35 + (p.getY(i) / len) ** 2 * 0.12);
   me.geometry.computeVertexNormals();
@@ -180,7 +210,23 @@ function faceTex(key: string, w: number, h: number, f: (x: number, y: number) =>
 // ------------------------------------------------------------------ the icon models
 type Make = () => O | Promise<O>;
 interface Spec { make: Make; yaw?: number; pitch?: number; pad?: number; vivid?: number }
-const glb = (path: string, fix?: (o: O) => void): Make => async () => { const { root } = await instanceGLB(path); fix?.(root); return root; };
+const glb = (path: string, fix?: (o: O) => void): Make => async () => { const { root } = await instanceGLB(path); fix?.(root); root.userData.glb = true; return root; };
+/**
+ * Ready a model for the bake: the cel light on every lit material, and the bake's own painted materials laid on at
+ * the icons' texel density (a painted face, a borrowed model's own textures keep their coordinates).
+ */
+function prep(obj: O): O {
+  obj.traverse((o) => {
+    const me = o as THREE.Mesh;
+    if (!me.isMesh) return;
+    for (const m of Array.isArray(me.material) ? me.material : [me.material]) {
+      if (!ownMats.has(m) && !(m as THREE.Material).userData.shelfMat) keepUV(m);
+      if ((m as THREE.MeshStandardMaterial).isMeshStandardMaterial) cel(m);
+    }
+  });
+  if (!obj.userData.glb) fitUV(obj, ICON_DENS);
+  return obj;
+}
 const T = 0.3; // token depth
 
 const CHECK: P2[] = [[-0.72, 0.02], [-0.24, -0.46], [0.74, 0.6]];
@@ -218,7 +264,7 @@ const ICONS: Record<string, Spec> = {
   zzz: { make: () => { const Z = (s: number) => strokePts([[-0.45 * s, 0.4 * s], [0.42 * s, 0.4 * s], [-0.42 * s, -0.4 * s], [0.45 * s, -0.4 * s]], 0.2 * s, 6); return grp(at(ext(shape(Z(0.95)), 0.2, C.sky(), 0.06, 2), -0.44, -0.38, 0), at(ext(shape(Z(0.68)), 0.18, C.sky(), 0.05, 2), 0.16, 0.2, 0), at(ext(shape(Z(0.46)), 0.16, C.sky(), 0.05, 2), 0.62, 0.66, 0)); }, yaw: 0.28, pitch: 0.2 },
   bolt: { make: () => ext(shape([[0.15, 0.95], [-0.55, -0.1], [-0.05, -0.1], [-0.25, -0.95], [0.55, 0.15], [0.05, 0.15]]), 0.26, M(0xffd23a, { rough: 0.3, glow: 0.15 }), 0.1, 3), yaw: 0.32, pitch: 0.28 },
   ice_flake: {
-    make: () => { const ice = M(0x4ab8f4, { rough: 0.15, metal: 0.15, env: 1.3, tex: null }), g = grp(); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[0, 0], [c * 0.88, s * 0.88]], 0.12, ice, 0.1, 0.04)); for (const f of [0.45, 0.7]) { const px = c * f, py = s * f; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.8) * 0.22, py + Math.sin(a + sg * 0.8) * 0.22]], 0.1, ice, 0.1, 0.04)); } } return g; }, yaw: 0.28, pitch: 0.28,
+    make: () => { const ice = M(0x4ab8f4, { rough: 0.15, metal: 0.15, env: 1.3, tex: 'glass' }), g = grp(); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[0, 0], [c * 0.88, s * 0.88]], 0.12, ice, 0.1, 0.04)); for (const f of [0.45, 0.7]) { const px = c * f, py = s * f; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.8) * 0.22, py + Math.sin(a + sg * 0.8) * 0.22]], 0.1, ice, 0.1, 0.04)); } } return g; }, yaw: 0.28, pitch: 0.28,
   },
   alarm: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 7, 0, 0)); c.door.rotation.y = -2.1; c.owl.position.set(0, c.owl.position.y - 0.05, 0.5); c.owl.rotation.x = 0.2; c.owl.scale.setScalar(2.4); return c.root; }, yaw: 0.26, pitch: 0.12 },
   clock: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 10, 10, 0)); c.pendulum.rotation.z = 0.2; return c.root; }, yaw: 0.22, pitch: 0.1 },
@@ -236,8 +282,8 @@ const ICONS: Record<string, Spec> = {
   },
   candle: {
     make: () => grp(lathe(smoothProfile([[0, -0.78], [0.6, -0.76], [0.66, -0.68], [0.62, -0.62], [0.24, -0.6], [0.22, -0.56], [0, -0.56]], 2), C.brass(), 40),
-      at(lathe(smoothProfile([[0, -0.6], [0.25, -0.6], [0.26, 0.2], [0.24, 0.3], [0.1, 0.32], [0, 0.3]], 2), M(0xfff1d8, { rough: 0.55 }), 28), 0, 0, 0),
-      tube([[0.22, 0.28, 0.12], [0.27, 0.12, 0.12], [0.27, -0.02, 0.1]], 0.04, M(0xfff1d8, { rough: 0.55 }), 8, 6),
+      at(lathe(smoothProfile([[0, -0.6], [0.25, -0.6], [0.26, 0.2], [0.24, 0.3], [0.1, 0.32], [0, 0.3]], 2), M(0xfff1d8, { rough: 0.55, tex: 'wax' }), 28), 0, 0, 0),
+      tube([[0.22, 0.28, 0.12], [0.27, 0.12, 0.12], [0.27, -0.02, 0.1]], 0.04, M(0xfff1d8, { rough: 0.55, tex: 'wax' }), 8, 6),
       at(cyl(0.02, 0.02, 0.12, C.ink(), 6), 0, 0.38, 0),
       at(lathe(smoothProfile([[0, -0.2], [0.13, -0.1], [0.12, 0.05], [0.05, 0.2], [0, 0.3]], 2), C.flame(), 16), 0, 0.6, 0), at(lathe(smoothProfile([[0, -0.12], [0.06, -0.05], [0.04, 0.08], [0, 0.14]], 2), C.flameIn(), 12), 0, 0.56, 0.05),
       at(torus(0.16, 0.05, C.brass(), Math.PI, 8, 16), 0.64, -0.62, 0, 0, 0, -Math.PI / 2)), yaw: 0.4, pitch: 0.24,
@@ -279,14 +325,14 @@ const ICONS: Record<string, Spec> = {
   },
   speaker_on: { make: () => grp(speaker(), at(torus(0.42, 0.07, C.sky(), 1.4, 8, 24), 0.16, 0, 0, 0, 0, -0.7), at(torus(0.7, 0.07, C.sky(), 1.3, 8, 24), 0.16, 0, 0, 0, 0, -0.65)), yaw: 0.25, pitch: 0.15 },
   speaker_off: { make: () => grp(speaker(), strokeMesh([[0.34, -0.3], [0.88, 0.3]], 0.16, C.red(), 0.16, 0.05), strokeMesh([[0.34, 0.3], [0.88, -0.3]], 0.16, C.red(), 0.16, 0.05)), yaw: 0.25, pitch: 0.15 },
-  rain: { make: () => grp(at(cloud(C.snow()), 0, 0.3, 0), ...[[-0.36, -0.5], [0.1, -0.68], [0.52, -0.46]].map(([x, y]) => at(lathe(smoothProfile([[0, -0.16], [0.1, -0.1], [0.09, 0.02], [0.04, 0.12], [0, 0.18]], 3), M(0x4aaef0, { rough: 0.15 }), 16), x, y, 0.1, 0, 0, -0.2))), yaw: 0.28, pitch: 0.2 },
-  drop: { make: () => lathe(smoothProfile([[0, -0.8], [0.34, -0.72], [0.56, -0.45], [0.55, -0.15], [0.36, 0.25], [0.12, 0.65], [0, 0.85]], 3), M(0x4aaef0, { rough: 0.1, metal: 0.1, env: 1.4 }), 40), yaw: 0.3, pitch: 0.2 },
-  waves: { make: () => grp(...[0.55, 0, -0.55].map((y, i) => tube(Array.from({ length: 9 }, (_, k) => [-0.9 + k * 0.225, y + Math.sin(k * 1.4 + i) * 0.13, 0] as [number, number, number]), 0.1, M([0x8ad6ff, 0x5ab4f0, 0x3a8ad8][i], { rough: 0.22 }), 40, 10))), yaw: 0.25, pitch: 0.2 },
+  rain: { make: () => grp(at(cloud(C.snow()), 0, 0.3, 0), ...[[-0.36, -0.5], [0.1, -0.68], [0.52, -0.46]].map(([x, y]) => at(lathe(smoothProfile([[0, -0.16], [0.1, -0.1], [0.09, 0.02], [0.04, 0.12], [0, 0.18]], 3), M(0x4aaef0, { rough: 0.15, tex: 'water' }), 16), x, y, 0.1, 0, 0, -0.2))), yaw: 0.28, pitch: 0.2 },
+  drop: { make: () => lathe(smoothProfile([[0, -0.8], [0.34, -0.72], [0.56, -0.45], [0.55, -0.15], [0.36, 0.25], [0.12, 0.65], [0, 0.85]], 3), M(0x4aaef0, { rough: 0.1, metal: 0.1, env: 1.4, tex: 'water' }), 40), yaw: 0.3, pitch: 0.2 },
+  waves: { make: () => grp(...[0.55, 0, -0.55].map((y, i) => tube(Array.from({ length: 9 }, (_, k) => [-0.9 + k * 0.225, y + Math.sin(k * 1.4 + i) * 0.13, 0] as [number, number, number]), 0.1, M([0x8ad6ff, 0x5ab4f0, 0x3a8ad8][i], { rough: 0.22, tex: 'water' }), 40, 10))), yaw: 0.25, pitch: 0.2 },
   wind: { make: () => grp(...([[0.5, 0.9], [0, 1.1], [-0.5, 0.75]] as P2[]).map(([y, l]) => tube([[-0.9, y, 0], [-0.9 + l * 0.6, y, 0], [-0.9 + l, y + 0.08, 0], [-0.9 + l + 0.1, y + 0.28, 0], [-0.9 + l - 0.12, y + 0.36, 0]], 0.09, M(0xeaf6ff, { rough: 0.4 }), 40, 10))), yaw: 0.25, pitch: 0.2 },
   campfire: {
     make: () => { const bark = M(0x7a4a26, { tex: 'bark', rough: 0.85 }), end = M(0xe8b070, { tex: 'grain', rough: 0.7 });
       const log = (a: number, tilt: number) => { const g = grp(at(cyl(0.13, 0.15, 1.3, bark, 12), 0, 0, 0), at(cyl(0.13, 0.13, 0.01, end, 12), 0, 0.655, 0), at(cyl(0.15, 0.15, 0.01, end, 12), 0, -0.655, 0)); return at(g, 0, -0.58, 0, Math.PI / 2 - tilt, a, 0); };
-      const stone = (a: number) => at(lathe(smoothProfile([[0, 0.12], [0.16, 0.1], [0.2, 0.02], [0.16, -0.06], [0, -0.07]], 2), M(0x9aa0a8, { rough: 0.8 }), 10), Math.cos(a) * 0.74, -0.74, Math.sin(a) * 0.74, 0, a, 0);
+      const stone = (a: number) => at(lathe(smoothProfile([[0, 0.12], [0.16, 0.1], [0.2, 0.02], [0.16, -0.06], [0, -0.07]], 2), M(0x9aa0a8, { rough: 0.8, tex: 'stone' }), 10), Math.cos(a) * 0.74, -0.74, Math.sin(a) * 0.74, 0, a, 0);
       return grp(log(0.5, 0.25), log(-0.6, 0.2), log(1.7, 0.18), ...[0, 1.2, 2.4, 3.6, 4.8].map(stone),
         ...([[0, 0, 1], [-0.2, -0.04, 0.7], [0.22, 0.02, 0.75], [0.06, -0.06, 0.55]] as [number, number, number][]).map(([x, z, k]) => at(lathe(smoothProfile([[0, -0.4], [0.3, -0.25], [0.28, 0], [0.14, 0.35], [0, 0.66]], 3), C.flame(), 16), x, -0.1, z, 0, 0, x * 0.6, [k * 0.8, k, k * 0.8])),
         at(lathe(smoothProfile([[0, -0.3], [0.2, -0.15], [0.15, 0.08], [0, 0.3]], 3), C.flameIn(), 16), 0, -0.2, 0.18), at(lathe(smoothProfile([[0, -0.1], [0.08, -0.04], [0.05, 0.06], [0, 0.12]], 2), unlit(0xfff4c0), 10), 0, -0.24, 0.26)); }, yaw: 0.4, pitch: 0.34,
@@ -322,7 +368,7 @@ const ICONS: Record<string, Spec> = {
   map: { make: () => { const g = grp(); const tx = mapTex(); for (let i = 0; i < 3; i++) { const p = mesh(new THREE.PlaneGeometry(0.62, 1.4), new THREE.MeshStandardMaterial({ map: tx, side: THREE.DoubleSide, roughness: 0.8 })); const uv = p.geometry.attributes.uv as THREE.BufferAttribute; for (let k = 0; k < uv.count; k++) uv.setX(k, (uv.getX(k) + i) / 3); g.add(at(p, -0.6 + i * 0.6, 0, i % 2 ? -0.12 : 0, 0, i % 2 ? 0.35 : -0.35, 0)); } return g; }, yaw: 0.2, pitch: 0.25 },
   gear: { make: () => gear(M(0xeaa634, { metal: 0.55, rough: 0.3, tex: null })), yaw: 0.32, pitch: 0.28 },
   treehouse: {
-    make: () => { const lv = [M(0x4caa3c, { rough: 0.6 }), M(0x62c448, { rough: 0.6 }), M(0x3e9434, { rough: 0.6 })];
+    make: () => { const lv = [M(0x4caa3c, { rough: 0.6, tex: 'foliage' }), M(0x62c448, { rough: 0.6, tex: 'foliage' }), M(0x3e9434, { rough: 0.6, tex: 'foliage' })];
       const clump = (x: number, y: number, r: number, m: THREE.Material) => { const g = new THREE.IcosahedronGeometry(r, 2); const p = g.attributes.position as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) { const v = new THREE.Vector3().fromBufferAttribute(p, i); v.multiplyScalar(1 + (fbm(v.x * 6 + 3, v.y * 6 + v.z * 4, 5) - 0.5) * 0.35); p.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals(); return at(mesh(g, m), x, y, 0); };
       const house = grp(ext(shape([[-0.26, -0.2], [0.26, -0.2], [0.26, 0.14], [0, 0.34], [-0.26, 0.14]]), 0.3, C.oak(), 0.03, 2), at(ext(shape([[-0.34, 0.1], [0, 0.4], [0.34, 0.1], [0.3, 0.06], [0, 0.32], [-0.3, 0.06]]), 0.38, C.red(), 0.03, 2), 0, 0.02, 0), at(ext(shape(rrectPts(0.14, 0.18, 0.05)), 0.02, M(0xffd87a, { glow: 0.7, tex: null }), 0.01, 1), 0, -0.02, 0.17));
       return grp(at(lathe(smoothProfile([[0.34, -1.0], [0.24, -0.8], [0.18, -0.3], [0.16, 0.2]], 2), M(0x8a5a32, { tex: 'bark' }), 16), 0, 0, 0), clump(-0.34, 0.34, 0.46, lv[0]), clump(0.32, 0.4, 0.5, lv[2]), clump(0, 0.7, 0.46, lv[1]), at(house, 0.02, -0.36, 0.22)); }, yaw: 0.3, pitch: 0.18,
@@ -358,7 +404,7 @@ const ICONS: Record<string, Spec> = {
       ext(shape(pts), 0.16, M(0xc8303a, { rough: 0.3 }), 0.1, 3), at(ext(shape(circlePts(0.4, 40)), 0.04, M(0xa8202c, { rough: 0.35 }), 0.04, 2), 0, 0.2, 0.12), at(ext(shape(starPts(0.24, 0.11)), 0.04, M(0xe85058, { rough: 0.3 }), 0.02, 2), 0, 0.2, 0.17)); }, yaw: 0.28, pitch: 0.28 },
   wd_feather: { make: () => { const vane: P2[] = []; for (let i = 0; i <= 50; i++) { const t = (i / 50) * Math.PI * 2, y = Math.cos(t); const notch = Math.sin(t * 13) > 0.85 ? 0.88 : 1; vane.push([Math.sin(t) * 0.3 * (1 + 0.2 * y) * notch, y * 0.86 + 0.12]); }
     return at(grp(ext(shape(vane), 0.04, M(0xd8905a, { tex: 'grain', rough: 0.6 }), 0.03, 2), at(cyl(0.025, 0.035, 1.95, C.cream(), 8), 0, -0.03, 0.04)), 0, 0, 0, 0, 0, -0.6); }, yaw: 0.28, pitch: 0.28 },
-  tophat: { make: () => grp(lathe(smoothProfile([[0, -0.5], [0.95, -0.5], [0.98, -0.44], [0.62, -0.4], [0.56, -0.3], [0.55, 0.5], [0.6, 0.6], [0, 0.62]], 2), M(0x3a2a52, { rough: 0.45, tex: 'weave' }), 48), at(cyl(0.565, 0.57, 0.2, C.red(), 40), 0, -0.26, 0), at(ext(shape(rrectPts(0.2, 0.16, 0.04)), 0.04, C.gold(), 0.02, 1), 0.2, -0.26, 0.55, 0, 0.35, 0)), yaw: 0.4, pitch: 0.32 },
+  tophat: { make: () => grp(lathe(smoothProfile([[0, -0.5], [0.95, -0.5], [0.98, -0.44], [0.62, -0.4], [0.56, -0.3], [0.55, 0.5], [0.6, 0.6], [0, 0.62]], 2), M(0x3a2a52, { rough: 0.45, tex: 'felt' }), 48), at(cyl(0.565, 0.57, 0.2, C.red(), 40), 0, -0.26, 0), at(ext(shape(rrectPts(0.2, 0.16, 0.04)), 0.04, C.gold(), 0.02, 1), 0.2, -0.26, 0.55, 0, 0.35, 0)), yaw: 0.4, pitch: 0.32 },
   wd_glasses: { make: () => grp(...[-0.48, 0.48].map((x) => at(torus(0.36, 0.075, C.gold(), Math.PI * 2, 10, 40), x, 0, 0)), ...[-0.48, 0.48].map((x) => at(cyl(0.33, 0.33, 0.03, M(0x8fd8ff, { rough: 0.06, metal: 0.2, tex: null, env: 2 }), 32), x, 0, -0.01, Math.PI / 2)), at(torus(0.14, 0.055, C.gold(), Math.PI, 8, 16), 0, 0.08, 0), ...[-1, 1].map((sx) => tube([[sx * 0.84, 0.1, -0.02], [sx * 0.92, 0.12, -0.3], [sx * 0.9, 0.0, -0.5]], 0.04, C.gold(), 12, 6))), yaw: 0.3, pitch: 0.2 },
   wd_scarf: { make: () => { const st = new THREE.MeshStandardMaterial({ map: stripeTex(['#e0363c', '#fff0cc'], [3, 1]), roughness: 0.75 }); return grp(tube([[-0.5, 0.55, 0], [0, 0.72, 0.2], [0.5, 0.55, 0], [0.55, 0.3, 0.1], [0.2, 0.15, 0.25], [-0.25, 0.2, 0.2], [-0.4, -0.3, 0.25], [-0.3, -0.85, 0.2]], 0.2, st, 64, 12), at(ext(shape(rrectPts(0.36, 0.5, 0.06)), 0.1, st, 0.04, 2), 0.35, -0.45, 0.25, 0, 0, -0.25)); }, yaw: 0.3, pitch: 0.25 },
   wd_sweater: { make: () => sweater(), yaw: 0.3, pitch: 0.15 },
@@ -592,11 +638,23 @@ function pixelFinish(src: ImageData, n: number, seed: number, vivid = 1): ImageD
     lq = clamp(lq * 0.93 + 0.055, 0.05, 0.97);
     const warm = lq - 0.5;
     if (s > 0.08) { const target = warm > 0 ? 0.12 : 0.72; let dh = target - h; if (dh > 0.5) dh -= 1; if (dh < -0.5) dh += 1; h = (h + dh * Math.min(0.08, Math.abs(warm) * 0.18) + 1) % 1; }
-    s = clamp(s * 1.16 * vivid + 0.03 * (s > 0.08 ? 1 : 0), 0, 0.95);
+    s = clamp(s * 1.28 * vivid + 0.04 * (s > 0.08 ? 1 : 0), 0, 0.95);
     const c = rgb(h, s, lq);
     const o = (y * n + x) * 4;
     d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
     solid[y * n + x] = 1;
+  }
+  // [tex7] clean up like a pixel artist: a lone pixel unlike all four of its neighbours (texture speckle) takes the
+  // colour of the neighbour nearest it, so texture reads as clusters and lines, never salt and pepper
+  {
+    const src = new Uint8ClampedArray(d), dist = (a: number, b: number) => Math.abs(src[a] - src[b]) + Math.abs(src[a + 1] - src[b + 1]) + Math.abs(src[a + 2] - src[b + 2]);
+    for (let y = 1; y < n - 1; y++) for (let x = 1; x < n - 1; x++) {
+      if (!solid[y * n + x]) continue;
+      const o = (y * n + x) * 4, nb = [o - 4, o + 4, o - n * 4, o + n * 4].filter((q) => src[q + 3] > 0);
+      if (nb.length < 4 || nb.some((q) => dist(o, q) < 40)) continue;
+      const q = nb.reduce((b, c) => (dist(o, c) < dist(o, b) ? c : b));
+      d[o] = src[q]; d[o + 1] = src[q + 1]; d[o + 2] = src[q + 2];
+    }
   }
   // a coloured outline: the darkest neighbour, darker and leaning plum; softer on the lit (top-left) side
   const add: [number, number[]][] = [];
@@ -637,7 +695,28 @@ function glint(img: ImageData, f: number) {
 }
 
 // ------------------------------------------------------------------ encoding (palette + run-length, base64)
+/** cap an image's colours (median cut): pixel art keeps a small palette, and the file stays small */
+function capPalette(img: ImageData, max = 64) {
+  const d = img.data, px: number[] = [];
+  for (let i = 0; i < d.length; i += 4) if (d[i + 3] >= 128) px.push(i);
+  const boxes: number[][] = [px];
+  while (boxes.length < max) {
+    let bi = -1, bc = 0, br = 0;
+    boxes.forEach((b, i) => { if (b.length < 2) return; for (let c = 0; c < 3; c++) { let lo = 255, hi = 0; for (const o of b) { lo = Math.min(lo, d[o + c]); hi = Math.max(hi, d[o + c]); } if (hi - lo > br) { br = hi - lo; bi = i; bc = c; } } });
+    if (bi < 0 || br < 6) break;
+    const b = boxes[bi].sort((x, y) => d[x + bc] - d[y + bc]), mid = b.length >> 1;
+    boxes.splice(bi, 1, b.slice(0, mid), b.slice(mid));
+  }
+  for (const b of boxes) {
+    if (!b.length) continue;
+    let r = 0, g = 0, bl = 0;
+    for (const o of b) { r += d[o]; g += d[o + 1]; bl += d[o + 2]; }
+    r /= b.length; g /= b.length; bl /= b.length;
+    for (const o of b) { d[o] = r; d[o + 1] = g; d[o + 2] = bl; }
+  }
+}
 function encode(img: ImageData): { w: number; h: number; p: string; d: string } {
+  capPalette(img);
   const d = img.data, pal: string[] = [], map = new Map<string, number>(), idx: number[] = [];
   for (let i = 0; i < img.width * img.height; i++) {
     if (d[i * 4 + 3] < 128) { idx.push(0); continue; }
@@ -655,6 +734,10 @@ function encode(img: ImageData): { w: number; h: number; p: string; d: string } 
 
 // ------------------------------------------------------------------ the bake
 const SIZES = { L: 32, S: 20 };
+/** the extra sizes (art px), so an icon can be drawn at exactly one art pixel per artPx() CSS px */
+const ZS = [12, 16, 24, 28];
+/** extra sizes of the currency's idle frames */
+const ANIM_ZS: Record<string, number[]> = { owlcoin: [16, 20, 24], moongem: [16, 20, 24] };
 /** the currency's big and animated versions: [name, model, size, frames] */
 const ANIM: [string, string, number, number][] = [['owlcoin', 'owlcoin', 32, 8], ['acorn_big', 'owlcoin', 48, 8], ['moongem', 'moongem', 32, 8], ['gem_big', 'moongem', 48, 8], ['coin_vault', 'coin_vault', 44, 4]];
 /** names that share a model */
@@ -679,47 +762,56 @@ async function bake() {
   for (const name of names) {
     const sp = ICONS[name];
     try {
-      const sizes = BIG[name] ? { L: BIG[name] } : SIZES;
+      const sizes: Record<string, number> = BIG[name] ? { L: BIG[name] } : SIZES;
+      const zs = BIG[name] ? [24, 32] : ZS;
       const out: Record<string, unknown> = {};
+      const one = async (n: number) => pixelFinish(shoot(prep(await sp.make()), n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad), n, seed, sp.vivid);
       for (const [tag, n] of Object.entries(sizes)) {
-        const obj = await sp.make();
-        const img = pixelFinish(shoot(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad), n, seed, sp.vivid);
+        const img = await one(n);
         out[tag] = encode(img);
         if (tag === 'L') show(name, img);
       }
+      if (!q.get('fast')) { const z: unknown[] = []; for (const n of zs) z.push(encode(await one(n))); out.z = z; }
       res[name] = out;
     } catch (e) { console.error('bake failed', name, e); }
     seed++;
   }
   for (const [a, b] of Object.entries(ALIAS)) if (res[b] && (!only || new RegExp(only).test(a))) res[a] = res[b];
   // the idle frames: a bob and squash, a glint across the front, twinkles popping round it
-  const anim: Record<string, unknown[]> = {};
+  const anim: Record<string, unknown[]> = {}, animZ: Record<string, unknown[][]> = {};
+  const frame = async (model: string, n: number, f: number, frames: number) => {
+    const sp = ICONS[model];
+    const ph = (f / frames) * Math.PI * 2;
+    const obj = prep(await sp.make());
+    if (frames === 8) { obj.scale.set(1 + Math.sin(ph) * 0.03, 1 - Math.sin(ph) * 0.03, 1); obj.rotation.z = Math.sin(ph + 1) * 0.04; }
+    const img = pixelFinish(shoot(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, (sp.pad ?? 1.04) * 1.04), n, 77);
+    if (frames === 8) glint(img, f);
+    const tw: [number, number, number][] = [[0.78, 0.16, 2], [0.18, 0.3, 1], [0.82, 0.62, 1], [0.24, 0.12, 2]];
+    const t = tw[f % 4];
+    if (f % 2 === 0 || frames === 4) sparkleAt(img, Math.round(t[0] * n), Math.round(t[1] * n), Math.max(1, Math.round(t[2] * n / 24)), model === 'moongem' ? [240, 236, 255] : [255, 250, 230]);
+    return img;
+  };
   for (const [name, model, n, frames] of ANIM) {
     if (only && !new RegExp(only).test(name)) continue;
-    const sp = ICONS[model];
-    const list: unknown[] = [];
+    const list: unknown[] = [], zl: unknown[][] = [];
     for (let f = 0; f < frames; f++) {
-      const ph = (f / frames) * Math.PI * 2;
-      const obj = await sp.make();
-      if (frames === 8) { obj.scale.set(1 + Math.sin(ph) * 0.03, 1 - Math.sin(ph) * 0.03, 1); obj.rotation.z = Math.sin(ph + 1) * 0.04; }
-      const img = pixelFinish(shoot(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, (sp.pad ?? 1.04) * 1.04), n, 77);
-      if (frames === 8) glint(img, f);
-      const tw: [number, number, number][] = [[0.78, 0.16, 2], [0.18, 0.3, 1], [0.82, 0.62, 1], [0.24, 0.12, 2]];
-      const t = tw[f % 4];
-      if (f % 2 === 0 || frames === 4) sparkleAt(img, Math.round(t[0] * n), Math.round(t[1] * n), Math.max(1, Math.round(t[2] * n / 24)), model === 'moongem' ? [240, 236, 255] : [255, 250, 230]);
+      const img = await frame(model, n, f, frames);
       list.push(encode(img));
       if (f === 2) show(name + '_f2', img);
+      if (ANIM_ZS[name] && !q.get('fast')) { const z: unknown[] = []; for (const m of ANIM_ZS[name]) z.push(encode(await frame(model, m, f, frames))); zl.push(z); }
     }
     anim[name] = list;
+    if (zl.length) animZ[name] = zl;
   }
-  const json = JSON.stringify({ icons: res, anim });
+  const json = JSON.stringify({ icons: res, anim, animZ });
   const module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html, then window.__module): every interface icon is a small 3D model,
-// lit and pixel-finished (see that file). { icons: { name: { L, S } }, anim: { name: [frames] } }; each image is
-// { w, h, p: palette (6 hex digits per colour), d: base64 run-length pairs (count, palette index; 0 = clear) }.
+// textured, lit and pixel-finished (see that file). { icons: { name: { L, S, z: [extra sizes] } }, anim: { name: [frames] },
+// animZ: { name: [[extra sizes of each frame]] } }; each image is { w, h, p: palette (6 hex digits per colour), d: base64
+// run-length pairs (count, palette index; 0 = clear) }.
 // Models: the game's own GLBs, the shelf's props (src/ui/chrome/props3d.ts) and models made in the bake; credits for
 // borrowed models in docs/credits.
 type Img = { w: number; h: number; p: string; d: string };
-export const ICONS3D: { icons: Record<string, { L: Img; S?: Img }>; anim: Record<string, Img[]> } = ${json};
+export const ICONS3D: { icons: Record<string, { L: Img; S?: Img; z?: Img[] }>; anim: Record<string, Img[]>; animZ?: Record<string, Img[][]> } = ${json};
 `;
   (window as unknown as { __module: string }).__module = module;
   (window as unknown as { __done: boolean }).__done = true;
