@@ -1,68 +1,46 @@
-// The live 3D models in the interview's answer cards: properly modelled props (borrowed CC0 / CC BY models, see
-// docs/credits/intro4.md, packed into public/models/interview/cards_*.glb by tools/packglb.mjs), the game's own
-// owls for the species page and the night-owl card, the office's bracket clock (with real hands) for the wake-up
-// page, and a heap of pillows, one per hour of sleep. Each comes framed for its card and gently alive.
+// The live 3D answer objects of the interview: the drinks, the cassette tapes and their recorder, pillows, a
+// candle, a microphone, the sun and moon ornaments and the phones are modelled and hand-painted in code
+// (props.ts); a day bed, the sheep, an alarm clock, a pocket watch and a nightstand are borrowed
+// CC0 / CC BY models (docs/credits/intro4.md, intro5.md) packed into public/models/interview/cards.glb by
+// tools/packglb.mjs; the owls are the game's own; the wake-up page turns the office's bracket clock. Each comes
+// normalised (its largest side one unit, standing on its base at the origin) and gently alive.
 import * as THREE from 'three';
 import { loadGLB } from '../gfx/glb.ts';
 import { OwlActor } from '../owl/actor.ts';
 import type { OwlLook } from '../owl/model.ts';
+import { PhoneScreen } from '../ui/phone/phone.tsx';
 import type { OfficeMats } from './mats.ts';
 import type { SlotOpts } from './overlay3d.ts';
+import { bookStack, candle, cassette, celestial, deck, DRINKS, microphone, phoneBed, pillow, smartphone, stile, TAPES, type Deck, type Prop } from './props.ts';
 import { WallClock } from './wallclock.ts';
 
-/** answer -> packed model node (and how to show it) */
-const MAP: Record<string, { node: string; o?: SlotOpts; tint?: number; glow?: boolean; paint?: (m: THREE.Mesh) => void }> = {
-  'goals:sleep_better': { node: 'daybed', o: { pitch: 0.4 } },
-  'goals:fall_asleep': { node: 'sheep', o: { pitch: 0.2 } },
-  'goals:wake_refreshed': { node: 'alarm', o: { pitch: 0.2, yaw: 0.3 } },
-  'goals:steady_routine': { node: 'watch', o: { pitch: 0.55 } },
-  'goals:less_phone': { node: 'phone', o: { pitch: 0.7, zoom: 0.95 }, glow: true },
-  'goals:track_sounds': { node: 'headphones', o: { pitch: 0.35 } },
-  'latency:quick': { node: 'pillows', o: { pitch: 0.35 } },
-  'latency:normal': { node: 'candles', o: { pitch: 0.15 } },
-  'latency:slow': { node: 'sheep', o: { pitch: 0.2 } },
-  'latency:long': { node: 'watch', o: { pitch: 0.55 } },
-  'phone:never': { node: 'cabinet', o: { pitch: 0.2 } },
-  'phone:sometimes': { node: 'nightstand', o: { pitch: 0.25 } },
-  'phone:nightly': { node: 'phone', o: { pitch: 0.7, zoom: 0.95 }, glow: true },
-  'chrono:lark': { node: 'alarm', o: { pitch: 0.2, yaw: 0.3 } },
-  'chrono:between': { node: 'mug', o: { pitch: 0.4 }, tint: 0xd9c49a },
-  'caffeine:none': { node: 'milk', o: { pitch: 0.2 } },
-  'caffeine:morning': { node: 'mug', o: { pitch: 0.4 }, tint: 0xf3e2c4 },
-  'caffeine:late': { node: 'teapot', o: { pitch: 0.35 } },
-  'mic:yes': { node: 'headphones', o: { pitch: 0.35 } },
-  'mic:no': { node: 'pillows', o: { pitch: 0.35 } },
-  'relax:rain': { node: 'umbrella', o: { pitch: 0.12, zoom: 0.85 }, paint: umbrella },
-  'relax:waves': { node: 'shell', o: { pitch: 0.5 } },
-  'relax:forest': { node: 'pine', o: { pitch: 0.1 } },
-  'relax:fire': { node: 'firepit', o: { pitch: 0.55 } },
-  'relax:stream': { node: 'rocks', o: { pitch: 0.6 } },
-  'relax:wind': { node: 'paperlantern', o: { pitch: 0.15 } },
-  'relax:brown': { node: 'radio', o: { pitch: 0.2 } },
-  'relax:lullaby': { node: 'gramophone', o: { pitch: 0.2 } },
-  'relax:night': { node: 'lantern', o: { pitch: 0.15 } },
-  'relax:breathing': { node: 'candles', o: { pitch: 0.15 } },
-  'relax:reading': { node: 'books', o: { pitch: 0.3 } },
+/** packed GLB nodes and how to show them */
+const NODES: Record<string, { node: string; o?: SlotOpts }> = {
+  'goals:sleep_better': { node: 'daybed', o: { pitch: 0.42, yaw: 0.5 } },
+  'goals:fall_asleep': { node: 'sheep', o: { pitch: 0.22, yaw: 0.9 } },
+  'goals:wake_refreshed': { node: 'alarm', o: { pitch: 0.2, yaw: 0.25, sway: 0.3 } },
+  'goals:steady_routine': { node: 'watch', o: { pitch: 0.55, yaw: 0.1, sway: 0.3 } },
+  remind: { node: 'alarm', o: { pitch: 0.2, yaw: 0.25, sway: 0.25, shadow: true } },
 };
-const PACKS = ['interview/cards_a.glb', 'interview/cards_b.glb'];
+const PACK = 'interview/cards.glb';
 
-/**
- * The umbrella comes as shape and shading only: colour it per vertex, a red canopy in alternating panels, a
- * turned wooden crook and shaft, a brass ferrule on top.
- */
-function umbrella(me: THREE.Mesh) {
-  const g = me.geometry.clone(), p = g.getAttribute('position'), col = new Float32Array(p.count * 3), c = new THREE.Color();
-  for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), r = Math.hypot(x, z);
-    if (r > 0.9 && y > 6) c.setHex(Math.floor(((Math.atan2(z, x) + Math.PI) / (Math.PI * 2)) * 8) % 2 ? 0xa02a34 : 0x86202c);
-    else if (y > 21) c.setHex(0xd8b04a);
-    else c.setHex(0x74421f);
-    col.set([c.r, c.g, c.b], i * 3);
-  }
-  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  me.geometry = g;
-  (me.material as THREE.MeshStandardMaterial).vertexColors = true;
+/** largest side one unit, standing on its base at the origin, wrapped in a group */
+export function norm(src: THREE.Object3D, k0 = 1): THREE.Group {
+  src.updateMatrixWorld(true);
+  const b = new THREE.Box3().setFromObject(src), ctr = b.getCenter(new THREE.Vector3()), sz = b.getSize(new THREE.Vector3());
+  const k = k0 / Math.max(1e-6, sz.x, sz.y, sz.z);
+  const g = new THREE.Group(), inner = new THREE.Group();
+  inner.add(src);
+  inner.scale.setScalar(k);
+  inner.position.set(-ctr.x * k, -b.min.y * k, -ctr.z * k);
+  g.add(inner);
+  return g;
 }
+const fromProp = (p: Prop, o: SlotOpts = {}, k0 = 1): { obj: THREE.Object3D; opts: SlotOpts } => {
+  const obj = norm(p.obj, k0);
+  const tick = p.tick;
+  return { obj, opts: { ...o, tick: tick ? (_o, t, dt) => tick(t, dt) : o.tick } };
+};
 
 export class CardModels {
   private nodes = new Map<string, THREE.Object3D>();
@@ -72,41 +50,66 @@ export class CardModels {
   clockAt = 7 * 60;
   /** the night owl card shows the player's own owl */
   nightOwl = 'tawny';
+  /** the cassette recorder on the sounds page (one at a time) */
+  deck: Deck | null = null;
+  /** the phone films (shared by the 3D phones' screens) */
+  private screens: { s: PhoneScreen; tex: THREE.CanvasTexture | null; t: number }[] = [];
+  wake = '07:00';
+  hour12 = false;
+
   constructor(private mats: OfficeMats, private look: (species: string) => OwlLook) {
-    this.ready = Promise.all(PACKS.map((p) => loadGLB(p).then((g) => {
+    this.ready = loadGLB(PACK).then((g) => {
       for (const c of g.scene.children) this.nodes.set(c.name, c);
-    }).catch((e) => console.warn('card models failed', p, e)))).then(() => undefined);
+    }).catch((e) => console.warn('card models failed', PACK, e));
   }
 
-  /** A fresh copy of a packed model, centred on its base. */
-  private clone(node: string, tint?: number, paint?: (m: THREE.Mesh) => void): THREE.Object3D | null {
+  /** A fresh copy of a packed model, normalised. */
+  private clone(node: string): THREE.Group | null {
     const src = this.nodes.get(node);
     if (!src) return null;
     const c = src.clone(true);
     c.position.set(0, 0, 0); c.rotation.set(0, 0, 0); c.scale.set(1, 1, 1);
-    c.updateMatrixWorld(true);
-    // every model comes in at the same size (its largest side one unit), standing on its base at the origin
-    const b = new THREE.Box3().setFromObject(c), ctr = b.getCenter(new THREE.Vector3()), sz = b.getSize(new THREE.Vector3());
-    const k = 1 / Math.max(1e-6, sz.x, sz.y, sz.z);
-    const g = new THREE.Group();
-    c.scale.setScalar(k);
-    c.position.set(-ctr.x * k, -b.min.y * k, -ctr.z * k);
-    g.add(c);
     c.traverse((o) => {
       const m = o as THREE.Mesh;
       if (!m.isMesh) return;
       const mat = (m.material as THREE.MeshStandardMaterial).clone();
       if ('roughness' in mat) { mat.roughness = Math.max(0.45, mat.roughness ?? 0.7); mat.metalness = Math.min(0.3, mat.metalness ?? 0); }
-      if (tint !== undefined) mat.color.setHex(tint);
       m.material = mat;
-      paint?.(m);
     });
-    return g;
+    return norm(c);
   }
 
-  /** The model for a card key: '<step>:<value>', 'owl:<species>', 'clock', 'pillows:<n>'. */
+  /** a smartphone whose screen plays the bedtime film from `at` seconds (static when `live` is false) */
+  private phone(at: number | null, live: boolean, glow = 0) {
+    if (at === null) return smartphone(null, 0);
+    const s = new PhoneScreen(this.wake, this.hour12);
+    s.draw(at);
+    const p = smartphone(s.canvas, glow);
+    const entry = { s, tex: null as THREE.CanvasTexture | null, t: at };
+    this.screens.push(entry);
+    const prev = p.tick;
+    let acc = 0;
+    p.tick = (t, dt) => {
+      prev?.(t, dt);
+      if (!live) return;
+      acc += dt;
+      if (acc < 1 / 8) return;
+      entry.t = (entry.t + acc) % 5.6; acc = 0;
+      entry.s.wake = this.wake; entry.s.hour12 = this.hour12;
+      entry.s.draw(0.9 + entry.t);
+      p.obj.traverse((o) => { const m = (o as THREE.Mesh).material as THREE.MeshBasicMaterial; if (m && m.map && (m.map as THREE.CanvasTexture).isCanvasTexture && m.map.image === entry.s.canvas) m.map.needsUpdate = true; });
+    };
+    return p;
+  }
+
+  /** A fresh cassette for a tape id (the flight to the recorder). */
+  tape(id: string) { const tp = TAPES.find((x) => x.id === id); return tp ? cassette(tp) : null; }
+
+  /**
+   * The model for a key: '<step>:<value>', 'drink:<id>', 'tape:<id>', 'deck', 'when:<morning|late>',
+   * 'ampm:<am|pm>', 'owl:<species>', 'clock', 'pillows:<n>', 'remind'.
+   */
   model = (key: string): { obj: THREE.Object3D; opts?: SlotOpts } | null => {
-    if (key === 'chrono:owl') key = 'owl:' + this.nightOwl;
     if (key.startsWith('owl:')) {
       const sp = key.slice(4);
       let a = this.owls.get(sp);
@@ -117,56 +120,114 @@ export class CardModels {
       actor.node.position.set(0, 0, 0);
       actor.node.scale.setScalar(1);
       actor.pose = 'stand';
-      return { obj: g, opts: { pitch: 0.1, zoom: 0.78, lift: -0.05, spin: 0.4, yaw: 0.1, tick: (_o, _t, dt) => actor.update(dt) } };
+      return { obj: g, opts: { pitch: 0.12, zoom: 0.8, lift: -0.04, spin: 0.4, yaw: 0.1, sway: 0.35, tick: (_o, _t, dt) => actor.update(dt) } };
     }
     if (key === 'clock') {
       const c = new WallClock(this.mats);
       const g = new THREE.Group();
       g.add(c.group);
-      // frame the dial only
       const dial = c.dial.clone();
-      const self = this;
-      return { obj: g, opts: { pitch: 0, yaw: 0, spin: 0, zoom: 1, focus: { c: dial, r: 0.13 }, tick: (_o, t, dt) => { c.at = self.clockAt; c.update(dt, t); } } as SlotOpts };
+      return { obj: g, opts: { pitch: 0, yaw: 0, spin: 0, sway: 0, zoom: 1, shadow: false, focus: { c: dial, r: 0.13 }, tick: (_o, t, dt) => { c.at = this.clockAt; c.update(dt, t); } } };
     }
     if (key.startsWith('pillows:')) {
-      const n = Math.max(4, Math.min(12, Number(key.slice(8)) || 8));
+      // one pillow per hour, stacked into a slightly wobbly tower, each in its own pillowcase
+      const n = Math.max(1, Math.min(12, Math.round(Number(key.slice(8)) || 8)));
       const g = new THREE.Group();
-      const one = this.clone('pillows');
-      if (!one) return null;
-      // a heap of pillows, one per hour: rows of up to four, each row a little narrower than the one below
-      const h = new THREE.Box3().setFromObject(one).getSize(new THREE.Vector3()).y;
-      const rows: number[] = [];
-      for (let left = n, cap = 4; left > 0; cap = Math.max(1, cap - 1)) { const r = Math.min(cap, left); rows.push(r); left -= r; }
-      let i = 0;
-      rows.forEach((count, row) => {
-        for (let j = 0; j < count; j++, i++) {
-          const p = i ? this.clone('pillows')! : one;
-          p.position.set((j - (count - 1) / 2) * 0.92 + Math.sin(i * 2.3) * 0.05, row * h * 0.78, Math.sin(i * 1.7) * 0.08);
-          p.rotation.y = Math.sin(i * 1.9) * 0.35;
-          g.add(p);
-        }
-      });
-      return { obj: g, opts: { pitch: 0.3, spin: 0.25, yaw: 0.25, zoom: 1.05, box: true } };
+      for (let i = 0; i < n; i++) {
+        const p = pillow(i);
+        p.position.set(Math.sin(i * 2.3) * 0.025, i * 0.118, Math.sin(i * 1.7) * 0.02);
+        p.rotation.y = Math.sin(i * 1.9) * 0.22;
+        g.add(p);
+      }
+      return { obj: norm(g), opts: { pitch: 0.28, spin: 0.3, yaw: 0.35, sway: 0.2, zoom: 1.04, box: true } };
     }
-    const m = MAP[key];
+    if (key.startsWith('drink:')) {
+      const d = DRINKS.find((x) => x.v === key.slice(6));
+      if (!d) return null;
+      const small = d.v === 'espresso' ? 0.8 : d.v === 'tea' ? 0.9 : 1;
+      return fromProp(d.build(), { pitch: 0.38, yaw: -0.35, sway: 0.18, spin: 0.6, zoom: 1.08 / small });
+    }
+    if (key.startsWith('tape:')) {
+      const c = this.tape(key.slice(5));
+      if (!c) return null;
+      const r = fromProp(c, { pitch: 0.12, yaw: 0, sway: 0.12, spin: 0.8, zoom: 0.84, shadow: true });
+      r.obj.rotation.x = -0.12;
+      return r;
+    }
+    if (key === 'deck') {
+      const d = deck();
+      this.deck = d;
+      return fromProp(d, { pitch: 0.18, yaw: -0.18, sway: 0.08, spin: 0.4, zoom: 0.84 });
+    }
+    if (key === 'when:morning' || key === 'ampm:am' || key === 'chrono:lark') return fromProp(celestial('sun'), { pitch: 0.1, yaw: 0, sway: 0, zoom: key === 'chrono:lark' ? 0.9 : 0.85 });
+    if (key === 'when:late' || key === 'ampm:pm' || key === 'chrono:owl') return fromProp(celestial('moon'), { pitch: 0.1, yaw: 0, sway: 0, zoom: key === 'chrono:owl' ? 0.9 : 0.85 });
+    if (key === 'chrono:between') return fromProp(celestial('dial'), { pitch: 0.1, yaw: 0, sway: 0, zoom: 0.9 });
+    if (key === 'relax:reading') return fromProp(bookStack(), { pitch: 0.45, yaw: 0.4, sway: 0.25, zoom: 0.92 });
+    if (key === 'relax:breathing') return fromProp(candle(), { pitch: 0.25, yaw: 0, sway: 0.1, zoom: 0.92 });
+    if (key === 'goals:track_sounds' || key === 'mic:yes') return fromProp(microphone(false), { pitch: 0.15, yaw: 0.3, sway: 0.3, zoom: 0.9 });
+    if (key === 'mic:no') return fromProp(microphone(true), { pitch: 0.15, yaw: 0.3, sway: 0.3, zoom: 0.9 });
+    if (key === 'goals:less_phone' || key === 'phone:never') {
+      const bed = phoneBed(this.phone(null, false).obj);
+      return { obj: norm(bed), opts: { pitch: 0.62, yaw: 0.35, sway: 0.25, zoom: 0.95 } };
+    }
+    if (key === 'phone:sometimes') {
+      const ns = this.clone('nightstand');
+      if (!ns) return null;
+      const ph = this.phone(2.2, false, 0.15);
+      const top = new THREE.Box3().setFromObject(ns).max.y;
+      const pg = norm(ph.obj, 0.36);
+      pg.children[0].rotation.x = -Math.PI / 2;
+      pg.position.set(0.05, top + 0.006, 0.05);
+      pg.rotation.y = 0.4;
+      const g = new THREE.Group();
+      g.add(ns, pg);
+      return { obj: g, opts: { pitch: 0.4, yaw: 0.35, sway: 0.25, zoom: 0.95, tick: ph.tick ? (_o, t, dt) => ph.tick!(t, dt) : undefined } };
+    }
+    if (key === 'phone:nightly') {
+      // the phone on the pillow, its screen lighting up with notifications
+      const g = new THREE.Group();
+      const pl = pillow(0);
+      g.add(pl);
+      const ph = this.phone(1.0, true, 0.6);
+      const pg = norm(ph.obj, 0.3);
+      pg.children[0].rotation.x = -Math.PI / 2;
+      pg.position.set(0.05, 0.135, 0.02);
+      pg.rotation.y = -0.35;
+      g.add(pg);
+      return { obj: norm(g), opts: { pitch: 0.55, yaw: 0.3, sway: 0.2, zoom: 0.92, tick: ph.tick ? (_o, t, dt) => ph.tick!(t, dt) : undefined } };
+    }
+    if (key.startsWith('latency:')) {
+      // counting sheep over a stile: one, two, four, a whole flock
+      const n = { quick: 1, normal: 2, slow: 4, long: 7 }[key.slice(8)] ?? 1;
+      const g = new THREE.Group();
+      const st = stile();
+      st.scale.setScalar(0.85);
+      g.add(st);
+      const sheep: THREE.Object3D[] = [];
+      for (let i = 0; i < n; i++) { const s = this.clone('sheep'); if (!s) return null; s.scale.setScalar(0.85); s.rotation.y = Math.PI / 2; g.add(s); sheep.push(s); }
+      const place = () => sheep.forEach((s, i) => { if (i === 0) return; const c = Math.floor((i - 1) / 2), r = (i - 1) % 2; s.position.set(-1.05 - c * 0.62, 0, r ? -0.42 : 0.3); });
+      place();
+      // the top of the jump, so the framing leaves room for it (invisible)
+      const apex = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.05), new THREE.MeshBasicMaterial({ visible: false }));
+      apex.position.set(0, 1.3, 0);
+      g.add(apex);
+      const tick = (_o: THREE.Object3D, t: number) => {
+        const k = (t * 0.45) % 1, s = sheep[0];
+        s.position.set(-0.85 + k * 1.7, Math.sin(Math.min(1, Math.max(0, (k - 0.15) / 0.7)) * Math.PI) * 0.62, 0);
+        s.rotation.z = (0.5 - k) * 0.5 * (k > 0.15 && k < 0.85 ? 1 : 0);
+        for (let i = 1; i < sheep.length; i++) sheep[i].position.y = Math.max(0, Math.sin(t * 6 + i * 1.7)) * 0.04;
+      };
+      return { obj: norm(g), opts: { pitch: 0.25, yaw: 0.25, sway: 0.15, spin: 0.4, box: true, zoom: 1.02, tick } };
+    }
+    const m = NODES[key];
     if (!m) return null;
-    const obj = this.clone(m.node, m.tint, m.paint);
+    const obj = this.clone(m.node);
     if (!obj) return null;
-    if (m.node === 'umbrella') obj.children[0].rotation.z = 0.45; // held at a jaunty angle, crook showing
     let tick: SlotOpts['tick'];
-    if (m.glow) {
-      // the phone's screen lights up blue now and then (a notification at night)
-      const screen = new THREE.PointLight(0x7fb8ff, 0, 1, 2);
-      obj.add(screen);
-      const b = new THREE.Box3().setFromObject(obj);
-      screen.position.set(0, b.max.y + (b.max.y - b.min.y) * 0.6, 0);
-      screen.distance = (b.max.y - b.min.y) * 6;
-      tick = (_o, t) => { screen.intensity = (Math.sin(t * 2.2) > 0.4 ? 3 : 0.4) * (b.max.y - b.min.y + 0.1); };
-    }
     if (m.node === 'sheep') tick = (o, t) => { o.position.y += Math.max(0, Math.sin(t * 5)) * 0.06 * o.scale.y; };
-    if (m.node === 'songbird') tick = (o, t) => { const k = (t * 1.4) % 1; o.position.y += (k < 0.2 ? Math.sin((k / 0.2) * Math.PI) : 0) * 0.08 * o.scale.y; };
+    if (m.node === 'alarm') tick = (o, t) => { const ring = (t % 3) < 0.6; o.rotation.z = ring ? Math.sin(t * 60) * 0.04 : 0; };
     return { obj, opts: { ...m.o, tick } };
   };
 
-  dispose() { for (const a of this.owls.values()) a.dispose(); }
+  dispose() { for (const a of this.owls.values()) a.dispose(); this.screens.length = 0; }
 }

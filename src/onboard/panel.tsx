@@ -1,26 +1,55 @@
-// The interview's form: a 2D pixel-art sheet of Hollow & Co. paper on a stitched leather folio, clipped with brass,
-// in front of the 3D office (Pip stays in view above it). Big, readable pixel type; one obvious thing to do on each
-// page (tick, write, turn, slide), then one obvious way on (the stamp box). The answer cards carry live 3D models
-// drawn by overlay3d.ts; the pen and the rubber stamp are 3D moments that play over the paper. All the art is
-// painted by panelart.ts: deckle edges, foxing, wobbly hand-inked boxes and ticks, no clean geometry.
+// The interview's form: a sheet of Hollow & Co. paper on a stitched leather folio, clipped with brass, in front of
+// the 3D office (Pip stays in view beside or above it). Each page is mostly pictures: a one-line question in big
+// type, then the answers as live 3D objects standing on the paper (drawn by overlay3d.ts) with a word or two
+// inked under each. Tap one: it slides forward, the floating fountain pen ticks or rings it, Pip reacts. The
+// drinks, the cassette tapes and their recorder, the pillows, the phones are real little models (cards.ts). One
+// obvious way on: the rubber stamp box. All the paper art is painted by panelart.ts: deckle edges, foxing,
+// wobbly hand-inked ticks and loops, no clean geometry.
 import type { ComponentChildren } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type * as THREE from 'three';
 import { speciesOf } from '../owl/species.ts';
-import { acornURL, boxURL, cardURL, clipURL, folioURL, knobURL, loopStripURL, railURL, ruleURL, sheetURL, stampURL, stickyURL, tapeURL, tickStripURL } from './panelart.ts';
-import { ALARM_NAME, fmt, GOALS, RELAX, SOUND_NAME, toMin, type Answers, type Plan, type Step } from './script.ts';
-import type { Overlay3D, SlotOpts } from './overlay3d.ts';
+import { Px } from '../ui/icons.tsx';
+import { acornURL, clipURL, folioURL, knobURL, loopStripURL, railURL, ruleURL, sheetURL, stampURL, stickyURL, tapeURL, tickStripURL } from './panelart.ts';
+import { DRINKS, TAPES } from './props.ts';
+import { ALARM_NAME, fmt, RELAX, SOUND_NAME, toMin, type Answers, type Plan, type Step } from './script.ts';
+import type { Overlay3D, SlotOpts, SlotState } from './overlay3d.ts';
 
-export interface PanelState { a: Answers; picked: Record<string, boolean>; remind: boolean; signed: boolean; stamped: string | null; ready: boolean; hour12: boolean; artifact: boolean; plan: Plan; skipAsk: boolean }
+export interface PanelState {
+  a: Answers; picked: Record<string, boolean>; remind: boolean; signed: boolean; stamped: string | null; ready: boolean; hour12: boolean; artifact: boolean; plan: Plan; skipAsk: boolean;
+  /** the drink chosen on the caffeine page (a picture only; the answer is when) */
+  drink: string | null;
+  /** the tape in the recorder on the sounds page */
+  deckTape: string | null;
+}
 export interface PanelActions {
   pick(v: string): void; text(v: string): void; enter(): void; nudge(d: number): void; ampm(pm: boolean): void; clock(min12: number): void; hours(v: number): void;
-  sign(): void; remind(): void; stamp(): void; skip(ask: boolean): void; skipYes(): void;
+  sign(): void; remind(): void; stamp(): void; skip(ask: boolean): void; skipYes(): void; drink(v: string): void;
 }
 export type ModelFor = (key: string) => { obj: THREE.Object3D; opts?: SlotOpts } | null;
 
+/** the wide (side by side) layout */
+export const isWide = () => innerWidth >= 860 && innerWidth > innerHeight;
 /** the size of one art pixel in CSS px for this screen */
-export function panelScale() { return Math.max(2, Math.min(3, Math.floor(Math.min(innerWidth / 196, innerHeight / 330)))); }
+export function panelScale() {
+  if (isWide()) return Math.max(2, Math.min(4, Math.floor(Math.min((innerWidth * 0.5) / 196, (innerHeight - 16) / 252))));
+  return Math.max(2, Math.min(3, Math.floor(Math.min(innerWidth / 196, innerHeight / 420))));
+}
 const W = 186;
+
+/** the question, one short line */
+const TITLE: Record<string, string> = {
+  you: 'What’s your name?', species: 'Pick your owl', name: 'Name your owl', goals: 'Your sleep goals', wake: 'Wake-up time', hours: 'Hours of sleep',
+  latency: 'Time to drift off', phone: 'Phone in bed?', chrono: 'Lark or owl?', caffeine: 'Your last drink', relax: 'Sleep sounds', mic: 'Listen for snores?', plan: 'Your sleep plan',
+};
+/** a word or two under each object */
+const SHORT: Record<string, string> = {
+  sleep_better: 'Sleep better', fall_asleep: 'Fall asleep', wake_refreshed: 'Wake fresh', steady_routine: 'Routine', less_phone: 'Less phone', track_sounds: 'Snoring',
+  quick: 'Minutes', normal: '10-20 min', slow: '20-40 min', long: 'Ages',
+  never: 'Never', sometimes: 'Sometimes', nightly: 'Every night',
+  lark: 'Early bird', between: 'In between', owl: 'Night owl',
+  yes: 'Yes, listen', no: 'Not now', breathing: 'Breathing', reading: 'Reading',
+};
 
 let cssDone = false;
 function css() {
@@ -28,87 +57,83 @@ function css() {
   cssDone = true;
   const st = document.createElement('style');
   st.textContent = `
-.qp{position:fixed;z-index:44;--u:calc(var(--k) * 1px);width:calc(${W + 8} * var(--u));left:50%;bottom:calc(4 * var(--u));transform:translateX(-50%);image-rendering:pixelated;color:#1d2552;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;pointer-events:auto}
-.qp.wide{left:auto;right:calc(18 * var(--u));bottom:50%;transform:translateY(50%)}
+.qp{position:fixed;z-index:44;--u:calc(var(--k) * 1px);width:calc(${W + 8} * var(--u));left:50%;bottom:calc(3 * var(--u));transform:translateX(-50%);image-rendering:pixelated;color:#1d2552;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;pointer-events:auto}
+.qp.wide{left:auto;right:calc(14 * var(--u));bottom:50%;transform:translateY(50%)}
 .qp *{box-sizing:border-box}
 .qp.in{animation:qp-in .5s steps(10) both}.qp.wide.in{animation:qp-in-w .5s steps(10) both}
 @keyframes qp-in{0%{transform:translate(-50%,110%)}70%{transform:translate(-50%,-3%)}100%{transform:translate(-50%,0)}}
 @keyframes qp-in-w{0%{transform:translate(130%,50%)}70%{transform:translate(-3%,50%)}100%{transform:translate(0,50%)}}
 .qp-folio{position:absolute;inset:0;background-size:100% 100%;image-rendering:pixelated}
-.qp-sheet{position:relative;margin:calc(5 * var(--u)) calc(4 * var(--u)) calc(6 * var(--u));padding:calc(11 * var(--u)) calc(8 * var(--u)) calc(6 * var(--u));background-size:100% 100%;image-rendering:pixelated}
+.qp-sheet{position:relative;margin:calc(5 * var(--u)) calc(4 * var(--u)) calc(5 * var(--u));padding:calc(10 * var(--u)) calc(7 * var(--u)) calc(5 * var(--u));background-size:100% 100%;image-rendering:pixelated}
 .qp-clip{position:absolute;left:50%;top:calc(-2 * var(--u));width:calc(46 * var(--u));height:calc(22 * var(--u));transform:translateX(-50%);background-size:100% 100%;z-index:3}
-.qp-head{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:var(--u) solid #2b376a;padding-bottom:calc(2 * var(--u));margin-bottom:calc(3 * var(--u));white-space:nowrap}
-.qp-firm{font:bold calc(12 * var(--u)) Galmuri,monospace;color:#22305a;line-height:1}
-.qp-firm small{display:block;font:normal calc(16 * var(--u) / 2) "HH m5x7",monospace;letter-spacing:0;color:#5a5f80;margin-top:var(--u)}
-.qp-no{font:calc(16 * var(--u) / 2) "HH m5x7",monospace;color:#5a5f80;text-align:right}
-.qp-acorns{display:flex;gap:var(--u);margin-top:var(--u)}.qp-acorns i{width:calc(6 * var(--u));height:calc(6 * var(--u));background-size:100% 100%}
-.qp-q{font:calc(18 * var(--u)) "HH m6x11",monospace;line-height:calc(12 * var(--u));color:#17130f;margin:0 0 calc(2 * var(--u))}
-.qp-do{font:calc(16 * var(--u)) "HH m5x7",monospace;line-height:calc(9 * var(--u));color:#8a5a14;margin-bottom:calc(3 * var(--u));display:flex;gap:calc(3 * var(--u));align-items:center}
-.qp-do b{font-weight:normal;color:#b33a1a}
-.qp-grid{display:grid;gap:calc(3 * var(--u));margin-bottom:calc(3 * var(--u))}
-.qp-card{position:relative;background-size:100% 100%;cursor:pointer;padding:calc(3 * var(--u)) calc(3 * var(--u)) calc(4 * var(--u));border:0;background-color:transparent;text-align:center;font:calc(16 * var(--u)) "HH m5x7",monospace;line-height:calc(8 * var(--u));color:#17130f;transition:transform .12s steps(2)}
-.qp-card:active{transform:translateY(var(--u))}
-.qp-card.on{transform:translateY(calc(-1 * var(--u)))}
-.qp-win{display:block;width:100%;margin-bottom:calc(2 * var(--u))}
-.qp-card .qp-tickbox{position:absolute;left:calc(5 * var(--u));top:calc(5 * var(--u));width:calc(13 * var(--u));height:calc(13 * var(--u));background-size:100% 100%;background-color:#f6eedb}
-.qp-card .qp-label{display:flex;align-items:center;justify-content:center;min-height:calc(var(--lines, 2) * 8 * var(--u))}
-.qp-card .qp-tick{left:calc(4 * var(--u));top:calc(4 * var(--u));bottom:auto}
-.qp-tick{position:absolute;left:calc(3 * var(--u));bottom:calc(4 * var(--u));width:calc(16 * var(--u));height:calc(14 * var(--u));background-size:600% 100%;animation:qp-tick .3s steps(5) forwards}
+.qp-head{display:flex;align-items:center;justify-content:space-between;border-bottom:var(--u) solid #2b376a;padding-bottom:calc(2 * var(--u));margin-bottom:calc(3 * var(--u));white-space:nowrap;font:calc(8 * var(--u)) "HH m5x7",monospace;color:#5a5f80;letter-spacing:var(--u)}
+.qp-acorns{display:flex;gap:var(--u)}.qp-acorns i{width:calc(6 * var(--u));height:calc(6 * var(--u));background-size:100% 100%}
+.qp-q{font:calc(18 * var(--u)) "HH m6x11",monospace;line-height:calc(12 * var(--u));color:#17130f;margin:0 0 calc(1 * var(--u));white-space:nowrap;display:flex;align-items:baseline;gap:calc(4 * var(--u))}
+.qp-q small{font:calc(8 * var(--u)) "HH m5x7",monospace;color:#8a5a14}
+.qp-objs{display:grid;gap:calc(2 * var(--u)) calc(3 * var(--u));margin:calc(2 * var(--u)) 0 calc(3 * var(--u))}
+.qp-obj{position:relative;width:100%;border:0;background:transparent;cursor:pointer;padding:0;text-align:center;color:#1d2552;transition:transform .12s steps(2)}
+.qp-obj:active{transform:translateY(var(--u))}
+.qp-obj:focus-visible{outline:var(--u) dashed #b33a1a;outline-offset:var(--u)}
+.qp-win{display:block;width:100%;pointer-events:none}
+.qp-lab{position:relative;display:inline-block;font:calc(8 * var(--u)) "HH m5x7",monospace;line-height:calc(8 * var(--u));padding:0 calc(2 * var(--u));white-space:nowrap}
+.qp-obj.on .qp-lab{color:#a8321a}
+.qp-obj.dim .qp-lab{color:#8a8aa0}
+.qp-tick{position:absolute;left:calc(-13 * var(--u));top:calc(-5 * var(--u));width:calc(16 * var(--u));height:calc(14 * var(--u));background-size:600% 100%;animation:qp-tick .3s steps(5) forwards;pointer-events:none}
 @keyframes qp-tick{from{background-position:0 0}to{background-position:100% 0}}
-.qp-loop{position:absolute;inset:calc(-2 * var(--u));background-size:100% 600%;animation:qp-loop .45s steps(5) forwards;pointer-events:none}
+.qp-loop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background-size:100% 600%;animation:qp-loop .45s steps(5) forwards;pointer-events:none}
 @keyframes qp-loop{from{background-position:0 0}to{background-position:0 100%}}
-.qp-tape{position:absolute;left:50%;top:calc(-4 * var(--u));width:calc(30 * var(--u));height:calc(10 * var(--u));transform:translateX(-50%) rotate(-3deg);background-size:100% 100%;z-index:2}
-.qp-foot{display:flex;align-items:stretch;justify-content:space-between;gap:calc(4 * var(--u));margin-top:calc(2 * var(--u))}
-.qp-fine{font:calc(16 * var(--u) / 2) "HH m5x7",monospace;line-height:calc(5 * var(--u));color:#6a6f8a;align-self:flex-end;max-width:calc(80 * var(--u))}
-.qp-box{position:relative;width:calc(92 * var(--u));height:calc(34 * var(--u));border:0;background:transparent;cursor:pointer;font:calc(16 * var(--u) / 2) "HH m5x7",monospace;color:#5a5f80;padding:0;flex:none}
+.qp-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:calc(4 * var(--u));margin-top:calc(1 * var(--u))}
+.qp-fine{font:calc(8 * var(--u)) "HH m5x7",monospace;line-height:calc(7 * var(--u));color:#6a6f8a;max-width:calc(96 * var(--u))}
+.qp-box{position:relative;width:calc(78 * var(--u));height:calc(26 * var(--u));border:0;background:transparent;cursor:pointer;padding:0;flex:none;margin-left:auto}
 .qp-box::before{content:'';position:absolute;inset:0;border:var(--u) dashed #6a6f8a}
-.qp-box span{position:relative;display:block;margin-top:calc(2 * var(--u))}
-.qp-box b{position:relative;display:block;font:calc(18 * var(--u)) "HH m6x11",monospace;color:#9a9ab0;margin-top:calc(2 * var(--u));white-space:nowrap}
+.qp-box b{position:relative;display:block;font:calc(18 * var(--u)) "HH m6x11",monospace;color:#9a9ab0;white-space:nowrap;line-height:calc(26 * var(--u))}
 .qp-box.ready::before{border:calc(2 * var(--u)) solid #b33a1a;animation:qp-pulse 1s steps(2) infinite}
 .qp-box.ready b{color:#b33a1a}
 @keyframes qp-pulse{50%{border-color:#e07a2a}}
-.qp-impr{position:absolute;left:50%;top:50%;width:calc(86 * var(--u));height:calc(36 * var(--u));transform:translate(-50%,-50%) rotate(-5deg);background-size:100% 100%;animation:qp-impr .12s steps(2) both}
+.qp-impr{position:absolute;left:50%;top:50%;width:calc(80 * var(--u));height:calc(34 * var(--u));transform:translate(-50%,-50%) rotate(-5deg);background-size:100% 100%;animation:qp-impr .12s steps(2) both}
 @keyframes qp-impr{from{opacity:0}to{opacity:1}}
-.qp-sticky{position:absolute;right:calc(-4 * var(--u));top:calc(-30 * var(--u));width:calc(62 * var(--u));min-height:calc(34 * var(--u));background-size:100% 100%;transform:rotate(5deg);z-index:4;border:0;cursor:pointer;font:calc(16 * var(--u)) "HH m5x7",monospace;line-height:calc(7 * var(--u));color:#3a2a0a;padding:calc(4 * var(--u)) calc(3 * var(--u));text-align:center}
-.qp-sticky b{display:block;color:#8a2a1a;margin-top:calc(2 * var(--u))}
-.qp-sticky .qp-yes{display:flex;gap:calc(4 * var(--u));justify-content:center;margin-top:calc(3 * var(--u))}
+.qp-sticky{position:absolute;right:calc(-4 * var(--u));top:calc(-28 * var(--u));width:calc(56 * var(--u));min-height:calc(30 * var(--u));background-size:100% 100%;transform:rotate(5deg);z-index:4;border:0;cursor:pointer;font:calc(8 * var(--u)) "HH m5x7",monospace;line-height:calc(8 * var(--u));color:#3a2a0a;padding:calc(4 * var(--u)) calc(3 * var(--u));text-align:center}
+.qp.wide .qp-sticky{right:auto;left:calc(-62 * var(--u));top:calc(18 * var(--u));transform:rotate(-4deg)}
+.qp-sticky b{display:block;font:calc(16 * var(--u)) "HH m5x7",monospace;line-height:calc(9 * var(--u));color:#8a2a1a;margin-top:calc(1 * var(--u))}
+.qp-sticky .qp-yes{display:flex;gap:calc(5 * var(--u));justify-content:center;margin-top:calc(2 * var(--u));font:calc(16 * var(--u)) "HH m5x7",monospace}
 .qp-sticky .qp-yes span{color:#8a2a1a;text-decoration:underline}
-.qp-line{position:relative;margin:calc(2 * var(--u)) 0 calc(6 * var(--u))}
-.qp-line input{width:100%;border:0;outline:0;background:transparent;font:calc(24 * var(--u)) "TBME Body",monospace;color:#1d2552;caret-color:#1d2552;padding:0 calc(2 * var(--u));height:calc(18 * var(--u));line-height:calc(18 * var(--u))}
-.qp-line input::placeholder{color:#b9ad92}
+.qp-line{position:relative;display:block;margin:calc(6 * var(--u)) 0 calc(4 * var(--u))}
+.qp-line input{width:100%;border:0;outline:0;background:transparent;font:calc(24 * var(--u)) "TBME Body",monospace;color:#1d2552;caret-color:#1d2552;padding:0 calc(2 * var(--u));height:calc(20 * var(--u));line-height:calc(20 * var(--u))}
+.qp-line input::placeholder{color:#c4b898}
 .qp-line i{display:block;height:calc(3 * var(--u));background-size:100% 100%}
-.qp-chips{display:flex;flex-wrap:wrap;gap:calc(3 * var(--u));margin-bottom:calc(5 * var(--u))}
-.qp-chip{position:relative;border:0;cursor:pointer;background-size:100% 100%;font:calc(16 * var(--u)) "HH m5x7",monospace;padding:calc(2 * var(--u)) calc(4 * var(--u)) calc(2 * var(--u)) calc(16 * var(--u));color:#17130f;background-color:transparent}
-.qp-chip .qp-tickbox{position:absolute;left:calc(2 * var(--u));top:calc(1 * var(--u));width:calc(11 * var(--u));height:calc(11 * var(--u));background-size:100% 100%}
-.qp-chip .qp-tick{left:var(--u);bottom:auto;top:calc(-1 * var(--u))}
-.qp-row{display:flex;align-items:center;justify-content:center;gap:calc(4 * var(--u));margin:calc(3 * var(--u)) 0}
-.qp-tag{border:0;cursor:pointer;background-size:100% 100%;font:calc(16 * var(--u)) "HH m5x7",monospace;color:#17130f;padding:calc(3 * var(--u)) calc(6 * var(--u));background-color:transparent;position:relative}
-.qp-big{font:calc(24 * var(--u)) "TBME Body",monospace;color:#1d2552;min-width:calc(60 * var(--u));text-align:center;line-height:1}
-.qp-rail{position:relative;height:calc(28 * var(--u));margin:calc(4 * var(--u)) calc(6 * var(--u)) 0;touch-action:none;cursor:pointer}
+.qp-chips{display:flex;flex-wrap:wrap;gap:calc(3 * var(--u));justify-content:center;margin:calc(2 * var(--u)) 0 calc(5 * var(--u))}
+.qp-chip{position:relative;border:0;cursor:pointer;background-size:100% 100%;font:calc(16 * var(--u)) "HH m5x7",monospace;padding:calc(2 * var(--u)) calc(5 * var(--u));color:#17130f;background-color:transparent}
+.qp-chip.on{color:#a8321a}
+.qp-row{display:flex;align-items:center;justify-content:center;gap:calc(3 * var(--u))}
+.qp-tag{border:0;cursor:pointer;background-size:100% 100%;font:calc(16 * var(--u)) "HH m5x7",monospace;color:#17130f;padding:calc(2 * var(--u)) calc(5 * var(--u));background-color:transparent;position:relative}
+.qp-big{font:calc(24 * var(--u)) "TBME Body",monospace;color:#1d2552;text-align:center;line-height:1;white-space:nowrap}
+.qp-big small{font:calc(16 * var(--u)) "HH m5x7",monospace;color:#5a5f80;margin-left:calc(2 * var(--u))}
+.qp-rail{position:relative;height:calc(26 * var(--u));margin:calc(2 * var(--u)) calc(8 * var(--u)) 0;touch-action:none;cursor:pointer}
 .qp-rail>i{position:absolute;left:0;right:0;top:calc(8 * var(--u));height:calc(9 * var(--u));background-size:100% 100%}
 .qp-rail>b{position:absolute;top:calc(2 * var(--u));width:calc(14 * var(--u));height:calc(18 * var(--u));margin-left:calc(-7 * var(--u));background-size:100% 100%}
-.qp-rail>span{position:absolute;top:calc(20 * var(--u));transform:translateX(-50%);font:calc(16 * var(--u) / 2) "HH m5x7",monospace;color:#5a5f80}
+.qp-rail>span{position:absolute;top:calc(19 * var(--u));transform:translateX(-50%);font:calc(8 * var(--u)) "HH m5x7",monospace;color:#5a5f80}
 .qp-sweet{position:absolute;top:0;height:calc(4 * var(--u));border:var(--u) solid #b07a1a;border-bottom:0}
-.qp-plan{font:calc(16 * var(--u) / 2) "HH m5x7",monospace;line-height:calc(6 * var(--u));color:#17130f;margin-bottom:calc(4 * var(--u))}
-.qp-plan h4{font:bold calc(12 * var(--u)) Galmuri,monospace;margin:calc(3 * var(--u)) 0 calc(1 * var(--u));color:#22305a;font-size:calc(6 * var(--u))}
-.qp-plan .r{display:flex;justify-content:space-between;font:calc(16 * var(--u)) "HH m5x7",monospace;line-height:calc(8 * var(--u))}
-.qp-plan .r em{font-style:normal;color:#1d2552}
-.qp-sign{display:flex;gap:calc(6 * var(--u));margin-top:calc(3 * var(--u))}
-.qp-sign button{flex:1;border:0;background:transparent;cursor:pointer;text-align:left;padding:0;font:calc(16 * var(--u) / 2) "HH m5x7",monospace;color:#6a6f8a}
-.qp-sign .s{display:block;height:calc(16 * var(--u));font:calc(24 * var(--u)) "TBME Body",monospace;color:#1d2552;transform:skewX(-10deg);overflow:hidden;white-space:nowrap}
+.qp-plan{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(3 * var(--u));margin:calc(3 * var(--u)) 0}
+.qp-plan div{text-align:center;font:calc(8 * var(--u)) "HH m5x7",monospace;color:#5a5f80}
+.qp-plan b{display:block;font:calc(18 * var(--u)) "HH m6x11",monospace;color:#1d2552;line-height:calc(12 * var(--u))}
+.qp-plan .px{display:block;margin:0 auto calc(1 * var(--u))}
+.qp-terms{display:flex;flex-wrap:wrap;gap:calc(2 * var(--u)) calc(6 * var(--u));justify-content:center;font:calc(8 * var(--u)) "HH m5x7",monospace;color:#17130f;margin-bottom:calc(3 * var(--u))}
+.qp-terms span{display:flex;align-items:center;gap:calc(1 * var(--u))}
+.qp-sign{display:flex;gap:calc(12 * var(--u));margin-top:calc(2 * var(--u))}
+.qp-sign button{flex:1;border:0;background:transparent;cursor:pointer;text-align:left;padding:0;font:calc(8 * var(--u)) "HH m5x7",monospace;color:#6a6f8a}
+.qp-sign .s{display:block;height:calc(16 * var(--u));font:calc(20 * var(--u)) "TBME Body",monospace;color:#1d2552;transform:skewX(-10deg);overflow:hidden;white-space:nowrap}
 .qp-sign .s.go{animation:qp-write .9s steps(9) both}
 @keyframes qp-write{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 .qp-sign .hint{color:#b33a1a}
-.qp-check{display:flex;align-items:center;gap:calc(4 * var(--u));border:0;background:transparent;cursor:pointer;font:calc(16 * var(--u)) "HH m5x7",monospace;color:#17130f;padding:0;position:relative}
-.qp-check .qp-tickbox{position:relative;width:calc(13 * var(--u));height:calc(13 * var(--u));background-size:100% 100%;display:inline-block}
-.qp-check .qp-tick{left:calc(-1 * var(--u));bottom:auto;top:calc(-1 * var(--u))}
+.qp-remind{display:flex;align-items:center;gap:calc(2 * var(--u));border:0;background:transparent;cursor:pointer;padding:0;font:calc(8 * var(--u)) "HH m5x7",monospace;color:#17130f}
+.qp-remind .qp-win{width:calc(30 * var(--u))}
+.qp-remind.off{color:#9a9ab0}
 .qp-fly{transition:transform .5s cubic-bezier(.5,0,.8,.4),opacity .5s steps(5)}
 @media (prefers-reduced-motion:reduce){.qp *,.qp{animation-duration:0s!important}}
 `;
   document.head.appendChild(st);
 }
 
-/** measure an element (texture sizes follow the layout) */
 /**
  * Register a window's live model with the 3D layer while mounted. The model packs may still be loading on the
  * first render: keep asking until the model is there.
@@ -143,26 +168,28 @@ function useSize(ref: { current: HTMLElement | null }, k: number, dep: unknown) 
   return s;
 }
 
-/** A card whose window carries a live 3D model (registered with the overlay while mounted). */
-function Card(p: { id: string; label: string; on: boolean; seed: number; win: number; lines?: number; overlay: Overlay3D | null; model: ModelFor; mkey: string; k: number; onPick: () => void; multi?: boolean; children?: ComponentChildren }) {
-  const win = useRef<HTMLElement>(null), el = useRef<HTMLButtonElement>(null);
-  const sz = useSize(el, p.k, p.on);
+/**
+ * An answer: a live 3D object standing on the paper with a word or two under it. When chosen it slides forward
+ * (the others step back on single-choice pages) and its word is ticked or ringed in ink.
+ */
+function Obj(p: { id: string; label: string; aria?: string; on: boolean; state: SlotState; h: number; overlay: Overlay3D | null; model: ModelFor; mkey: string; onPick: () => void; mark: 'tick' | 'loop'; seed: number; hide?: boolean; extra?: ComponentChildren }) {
+  const win = useRef<HTMLElement>(null);
   useSlot(p.overlay, p.model, p.id, p.mkey, win);
+  useEffect(() => { p.overlay?.setState(p.id, p.state); }, [p.state, p.overlay, p.mkey]);
+  useEffect(() => { p.overlay?.hide(p.id, !!p.hide); }, [p.hide, p.overlay, p.mkey]);
   useEffect(() => { if (p.on) p.overlay?.pick(p.id); }, [p.on]);
+  const lw = Math.max(22, Math.round(p.label.length * 4.6 + 10));
   return (
-    <button type="button" ref={el} data-v={p.id} class={'qp-card' + (p.on ? ' on' : '')} aria-pressed={p.on} onClick={p.onPick}
-      style={`--lines:${p.lines ?? 2};` + (sz.w ? `background-image:url(${cardURL(sz.w, sz.h, p.win, p.seed, p.on)})` : '')}>
-      <i ref={win} class="qp-win" style={`height:calc(${p.win} * var(--u))`} />
-      <i class="qp-tickbox" style={`background-image:url(${boxURL(p.seed)})`} />
-      {p.on && <i class="qp-tick" style={`background-image:url(${tickStripURL(6, p.seed)})`} />}
-      <span class="qp-label">{p.label}</span>
-      {p.children}
+    <button type="button" data-v={p.id} class={'qp-obj' + (p.on ? ' on' : '') + (p.state === 'back' ? ' dim' : '')} aria-pressed={p.on} aria-label={p.aria ?? p.label} onClick={p.onPick} onPointerEnter={() => p.overlay?.pick(p.id)}>
+      <i ref={win} class="qp-win" style={`height:calc(${p.h} * var(--u))`} />
+      <span class="qp-lab">
+        {p.on && p.mark === 'tick' && <i class="qp-tick" style={`background-image:url(${tickStripURL(6, p.seed)})`} />}
+        {p.label}
+        {p.on && p.mark === 'loop' && <i class="qp-loop" style={`width:calc(${lw} * var(--u));height:calc(14 * var(--u));background-image:url(${loopStripURL(lw, 14, 6, p.seed)})`} />}
+      </span>
+      {p.extra}
     </button>
   );
-}
-
-function Tick(p: { on: boolean; seed: number }) {
-  return (<><i class="qp-tickbox" style={`background-image:url(${boxURL(p.seed)})`} />{p.on && <i class="qp-tick" style={`background-image:url(${tickStripURL(6, p.seed)})`} />}</>);
 }
 
 /** The hand that turns the clock: drag round the window to set the time (12 hours a turn). */
@@ -177,84 +204,121 @@ function ClockWindow(p: { overlay: Overlay3D | null; model: ModelFor; onTurn: (m
     const m = (Math.round(((a / (Math.PI * 2)) * 720) / 15) * 15) % 720;
     if (m !== last.current) { last.current = m; p.onTurn(m); }
   };
-  return <div ref={win} class="qp-win" style={`height:calc(${p.h} * var(--u));touch-action:none;cursor:grab`}
+  return <div ref={win} class="qp-win" aria-label="Turn the clock to your wake-up time" style={`height:calc(${p.h} * var(--u));touch-action:none;cursor:grab`}
     onPointerDown={(e) => { (e.currentTarget as Element).setPointerCapture(e.pointerId); drag.current = true; turn(e); }}
     onPointerMove={(e) => { if (drag.current) turn(e); }} onPointerUp={() => { drag.current = false; }} />;
+}
+
+/** a small live model in a fixed window (no button) */
+function Win(p: { id: string; mkey: string | null; h: number; w?: number; overlay: Overlay3D | null; model: ModelFor; state?: SlotState }) {
+  const el = useRef<HTMLElement>(null);
+  useSlot(p.overlay, p.model, p.id, p.mkey, el);
+  useEffect(() => { p.overlay?.setState(p.id, p.state ?? 'off'); }, [p.state, p.overlay, p.mkey]);
+  return <i ref={el} class="qp-win" style={`height:calc(${p.h} * var(--u));${p.w ? `width:calc(${p.w} * var(--u))` : ''}`} />;
 }
 
 export function Panel(p: { step: Step; index: number; total: number; s: PanelState; act: PanelActions; overlay: Overlay3D | null; model: ModelFor; k: number; wide: boolean; leaving: boolean; sheetRef?: { current: HTMLDivElement | null } }) {
   css();
   const { step: st, s, act, k } = p;
   const root = useRef<HTMLDivElement>(null), sheet = useRef<HTMLDivElement>(null);
-  const rsz = useSize(root, k, st.id), ssz = useSize(sheet, k, st.id + s.skipAsk);
+  const rsz = useSize(root, k, st.id), ssz = useSize(sheet, k, st.id + s.skipAsk + (s.drink ? 1 : 0));
   const a = s.a;
   const seed = p.index * 7 + 3;
-  const winRef = useRef<HTMLElement | null>(null);
-  const card = (id: string, label: string, on: boolean, mkey: string, i: number, win = 40, multi = false, lines = 2) => (
-    <Card key={id} id={id} label={label} on={on} seed={seed + i} win={win} lines={lines} overlay={p.overlay} model={p.model} mkey={mkey} k={k} multi={multi} onPick={() => act.pick(id)} />
-  );
-  const doLine = (t: string) => <div class="qp-do">{t}</div>;
+  const ov = p.overlay;
+  /** a grid of answer objects */
+  const objs = (list: { v: string; label: string; aria?: string }[], o: { cols: number; h: number; on: (v: string) => boolean; single: boolean; key: (v: string) => string; pick: (v: string) => void; hide?: (v: string) => boolean; extra?: (v: string) => ComponentChildren }) => {
+    const any = list.some((x) => o.on(x.v));
+    // a short last row is centred: each object spans two of twice as many columns
+    const short = list.length % o.cols, lastRow = list.length - short;
+    return (
+      <div class="qp-objs" style={`grid-template-columns:repeat(${o.cols * 2},1fr)`}>
+        {list.map((x, i) => {
+          const on = o.on(x.v);
+          const col = short && i === lastRow ? `grid-column:${o.cols - short + 1} / span 2` : 'grid-column:span 2';
+          return <div key={x.v} style={col}><Obj id={x.v} label={x.label} aria={x.aria} on={on} state={on ? 'on' : o.single && any ? 'back' : 'off'} h={o.h} overlay={ov} model={p.model} mkey={o.key(x.v)} mark={o.single ? 'loop' : 'tick'} seed={seed + i} hide={o.hide?.(x.v)} extra={o.extra?.(x.v)} onPick={() => o.pick(x.v)} /></div>;
+        })}
+      </div>
+    );
+  };
+  const chosen = (v: string) => !!s.picked[st.id] && (st.id === 'mic' ? (a.mic ? 'yes' : 'no') === v : String(a[st.field!]) === v);
   let body: ComponentChildren = null;
+  let hint = '';
   switch (st.kind) {
     case 'text': {
       const f = st.field as 'you' | 'name';
       body = (<>
-        {doLine(f === 'you' ? 'Write your name on the line.' : 'Write a name, or tick one below.')}
         <label class="qp-line">
-          <input value={a[f]} maxLength={16} placeholder={f === 'you' ? 'your name...' : 'Pip'} spellcheck={false} autocomplete="off" autocapitalize="words"
+          <input value={a[f]} maxLength={16} placeholder={f === 'you' ? 'your name' : 'Pip'} spellcheck={false} autocomplete="off" autocapitalize="words"
             onInput={(e) => act.text((e.target as HTMLInputElement).value)} onKeyDown={(e) => { if (e.key === 'Enter') { (e.target as HTMLInputElement).blur(); act.enter(); } }} aria-label={st.title} />
-          <i style={`background-image:url(${ruleURL(W - 18, seed)})`} />
+          <i style={`background-image:url(${ruleURL(W - 14, seed)})`} />
         </label>
-        {f === 'name' && (
+        {f === 'name' ? (
           <div class="qp-chips">
             {['Pip', 'Hoot', 'Mochi', 'Biscuit', 'Luna', 'Juniper'].map((n, i) => (
-              <button type="button" key={n} data-v={n} class="qp-chip" style={`background-image:url(${tapeURL(i + 1)})`} onClick={() => act.pick(n)}><Tick on={a.name.trim() === n} seed={i + 1} />{n}</button>
+              <button type="button" key={n} data-v={n} class={'qp-chip' + (a.name.trim() === n ? ' on' : '')} style={`background-image:url(${tapeURL(i + 1)})`} onClick={() => act.pick(n)}>{n}</button>
             ))}
           </div>
-        )}
-        {f === 'you' && <div class="qp-fine" style="margin-bottom:calc(5 * var(--u));max-width:none">Leave it blank to stay a mysterious stranger.</div>}
+        ) : <div class="qp-fine" style="margin:0 auto calc(5 * var(--u));text-align:center;max-width:none">or leave it blank</div>}
       </>);
       break;
     }
     case 'species': {
-      const opts = st.opts ?? [];
-      body = (<>
-        {doLine('Tap the owl you would like Pip to be.')}
-        <div class="qp-grid" style="grid-template-columns:repeat(3,1fr)">
-          {opts.map((o, i) => card(o.v, speciesOf(o.v).name.replace(' Owl', '').replace('Northern ', ''), a.species === o.v, 'owl:' + o.v, i, 46, false, 1))}
-        </div>
-      </>);
+      hint = 'pick one';
+      body = objs((st.opts ?? []).map((o) => ({ v: o.v, label: speciesOf(o.v).name.replace(' Owl', '').replace('Northern ', '') })), { cols: 3, h: 52, single: true, on: (v) => !!s.picked[st.id] && a.species === v, key: (v) => 'owl:' + v, pick: act.pick });
       break;
     }
     case 'multi': case 'choice': {
-      const opts = st.id === 'goals' ? GOALS : st.id === 'relax' ? RELAX : st.opts ?? [];
-      const cur = st.kind === 'multi' ? (a[st.field as 'goals' | 'relax'] as string[]) : [];
-      const val = st.id === 'mic' ? (a.mic ? 'yes' : 'no') : String(a[st.field!]);
-      const n = opts.length, cols = n > 6 ? 3 : n === 4 || n === 2 ? 2 : 3;
-      const winH = n > 6 ? 28 : n === 6 ? 34 : n === 4 ? 30 : 40;
-      const lines = n === 4 || n === 2 ? 1 : 2;
+      const single = st.kind === 'choice';
+      hint = single ? 'pick one' : 'pick any';
+      if (st.id === 'relax') {
+        // the sounds: a cassette recorder, a candle and a book; nine hand-labelled tapes to slide in
+        const cur = a.relax;
+        const tapes = RELAX.filter((r) => r.sound).map((r) => ({ v: r.v, label: TAPES.find((t) => t.id === r.v)?.title.replace('Brown noise', 'Brown') ?? r.label }));
+        body = (<>
+          <div class="qp-row" style="align-items:flex-end;gap:calc(2 * var(--u))">
+            <div style="width:calc(36 * var(--u))">{objs([{ v: 'breathing', label: 'Breathe' }], { cols: 1, h: 38, single: false, on: (v) => cur.includes(v), key: () => 'relax:breathing', pick: act.pick })}</div>
+            <div style="flex:1;position:relative"><Win id="deck" mkey="deck" h={56} overlay={ov} model={p.model} state={s.deckTape ? 'on' : 'off'} /></div>
+            <div style="width:calc(36 * var(--u))">{objs([{ v: 'reading', label: 'Reading' }], { cols: 1, h: 38, single: false, on: (v) => cur.includes(v), key: () => 'relax:reading', pick: act.pick })}</div>
+          </div>
+          {objs(tapes, { cols: 3, h: 26, single: false, on: (v) => cur.includes(v), key: (v) => 'tape:' + v, pick: act.pick, hide: (v) => s.deckTape === v })}
+        </>);
+        break;
+      }
+      if (st.id === 'caffeine') {
+        // the drinks; a caffeinated one asks when it is usually had
+        const d = DRINKS.find((x) => x.v === s.drink);
+        hint = '';
+        body = (<>
+          {objs(DRINKS.slice(0, 4).map((x) => ({ v: x.v, label: x.label })), { cols: 4, h: 40, single: true, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
+          {objs(DRINKS.slice(4).map((x) => ({ v: x.v, label: x.label })), { cols: 3, h: 40, single: true, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
+          {d?.caffeine && (<>
+            <div class="qp-q" style="font-size:calc(16 * var(--u));justify-content:center">Your last one?</div>
+            {objs([{ v: 'morning', label: 'Mornings' }, { v: 'late', label: 'Afternoon+' }], { cols: 2, h: 28, single: true, on: (v) => !!s.picked.caffeine && a.caffeine === v, key: (v) => 'when:' + v, pick: act.pick })}
+          </>)}
+          {!d && <div class="qp-fine" style="margin:0 auto calc(3 * var(--u));text-align:center;max-width:none">tap the one you have most</div>}
+        </>);
+        break;
+      }
+      const opts = st.id === 'goals' ? (st.opts ?? []) : st.opts ?? [];
+      const n = opts.length, cols = n === 4 ? 2 : 3;
+      const h = n === 6 ? 44 : n === 4 ? 44 : n === 2 ? 62 : 58;
+      const list = opts.map((o) => ({ v: o.v, label: SHORT[o.v] ?? o.label, aria: o.label }));
       body = (<>
-        {doLine(st.kind === 'multi' ? 'Tick all that fit you.' : 'Tick the one that fits you.')}
-        <div class="qp-grid" style={`grid-template-columns:repeat(${cols},1fr)`}>
-          {opts.map((o, i) => card(o.v, o.label, st.kind === 'multi' ? cur.includes(o.v) : !!s.picked[st.id] && o.v === val, `${st.id}:${o.v}`, i, winH, st.kind === 'multi', lines))}
-        </div>
-        {st.id === 'mic' && <div class="qp-fine" style="max-width:none;margin-bottom:calc(4 * var(--u))">Pip listens on this device only and keeps nothing else. {s.artifact ? 'This preview cannot use the microphone; the full app can.' : 'You can change it any time in Settings.'}</div>}
+        {objs(list, { cols: n === 2 ? 2 : cols, h, single, on: single ? chosen : (v) => (a[st.field as 'goals'] as string[]).includes(v), key: (v) => `${st.id}:${v}`, pick: act.pick })}
+        {st.id === 'mic' && <div class="qp-fine" style="max-width:none;text-align:center;margin-bottom:calc(3 * var(--u))">It all stays on this device. {s.artifact ? 'The full app can listen; this preview can’t.' : 'Change it any time in Settings.'}</div>}
       </>);
       break;
     }
     case 'dial': {
       const m = toMin(a.wake), pm = m >= 720;
       body = (<>
-        {doLine('Turn the clock, or tap the buttons.')}
-        <ClockWindow overlay={p.overlay} model={p.model} onTurn={act.clock} h={84} />
-        <div class="qp-row">
-          <button type="button" class="qp-tag" style={`background-image:url(${tapeURL(2)})`} onClick={() => act.nudge(-15)}>- 15 min</button>
+        <ClockWindow overlay={ov} model={p.model} onTurn={act.clock} h={84} />
+        <div class="qp-row" style="margin:calc(1 * var(--u)) 0 calc(3 * var(--u))">
+          <div style="width:calc(36 * var(--u))">{objs([{ v: 'am', label: 'AM' }], { cols: 1, h: 26, single: true, on: () => !pm, key: () => 'ampm:am', pick: () => act.ampm(false) })}</div>
+          <button type="button" class="qp-tag" aria-label="15 minutes earlier" style={`background-image:url(${tapeURL(2)})`} onClick={() => act.nudge(-15)}>-15</button>
           <span class="qp-big">{fmt(a.wake, s.hour12).replace(/ [AP]M$/, '')}</span>
-          <button type="button" class="qp-tag" style={`background-image:url(${tapeURL(3)})`} onClick={() => act.nudge(15)}>+ 15 min</button>
-        </div>
-        <div class="qp-row qp-ampm" style="margin-bottom:calc(5 * var(--u))">
-          <button type="button" class="qp-check" onClick={() => act.ampm(false)}><Tick on={!pm} seed={4} />morning (AM)</button>
-          <button type="button" class="qp-check" onClick={() => act.ampm(true)}><Tick on={pm} seed={5} />afternoon (PM)</button>
+          <button type="button" class="qp-tag" aria-label="15 minutes later" style={`background-image:url(${tapeURL(3)})`} onClick={() => act.nudge(15)}>+15</button>
+          <div style="width:calc(36 * var(--u))">{objs([{ v: 'pm', label: 'PM' }], { cols: 1, h: 26, single: true, on: () => pm, key: () => 'ampm:pm', pick: () => act.ampm(true) })}</div>
         </div>
       </>);
       break;
@@ -263,16 +327,16 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
       const lo = 5, hi = 11, pct = (v: number) => ((v - lo) / (hi - lo)) * 100;
       const set = (e: PointerEvent) => { const b = (e.currentTarget as HTMLElement).getBoundingClientRect(); const v = Math.round((lo + Math.max(0, Math.min(1, (e.clientX - b.left) / b.width)) * (hi - lo)) * 2) / 2; act.hours(v); };
       body = (<>
-        {doLine('Slide the brass marker.')}
-        <i class="qp-win" style="height:calc(58 * var(--u))" ref={(el) => { winRef.current = el; }} />
-        <div class="qp-row"><span class="qp-big">{String(a.hours).replace('.5', '½')} hours</span></div>
-        <div class="qp-rail" onPointerDown={(e) => { (e.currentTarget as Element).setPointerCapture(e.pointerId); set(e); }} onPointerMove={(e) => { if (e.buttons) set(e); }}>
+        <div class="qp-row" style="align-items:center;gap:0">
+          <div style="flex:1"><Win id="pillows" mkey={'pillows:' + Math.round(a.hours)} h={100} overlay={ov} model={p.model} /></div>
+          <div class="qp-big" style="width:calc(60 * var(--u));font-size:calc(48 * var(--u))">{String(a.hours).replace('.5', '½')}<small>hours</small></div>
+        </div>
+        <div class="qp-rail" aria-label="Hours of sleep" onPointerDown={(e) => { (e.currentTarget as Element).setPointerCapture(e.pointerId); set(e); }} onPointerMove={(e) => { if (e.buttons) set(e); }}>
           <span class="qp-sweet" style={`left:${pct(7)}%;width:${pct(9) - pct(7)}%`} />
           <i style={`background-image:url(${railURL(160)})`} />
           {[5, 6, 7, 8, 9, 10, 11].map((h) => <span key={h} style={`left:${pct(h)}%`}>{h}</span>)}
           <b style={`left:${pct(a.hours)}%;background-image:url(${knobURL()})`} />
         </div>
-        <div class="qp-fine" style="max-width:none;margin:calc(4 * var(--u)) 0 calc(4 * var(--u))">Most grown-ups need seven to nine hours.</div>
       </>);
       break;
     }
@@ -280,55 +344,60 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
       const pl = s.plan;
       body = (<>
         <div class="qp-plan">
-          <div>between Hollow &amp; Co. and {a.you.trim() || 'our client'}, for the sleep of {a.name.trim() || 'Pip'} and household.</div>
-          <h4>SCHEDULE</h4>
-          {[['Wind down', fmt(pl.windDown, s.hour12)], ['Bedtime', fmt(pl.bed, s.hour12)], ['Wake up', fmt(pl.wake, s.hour12)], ['Alarm', ALARM_NAME[pl.alarm] ?? 'Music box'], ['Sleep sound', SOUND_NAME[pl.soundscape] ?? 'gentle rain'], ...(pl.blocker ? [['Bedtime Blocker', a.phone === 'nightly' ? 'On' : 'Ready']] : [])].map(([l, v]) => <div class="r" key={l}><span>{l}</span><em>{v}</em></div>)}
-          {pl.tips.length > 0 && <><h4>TERMS</h4>{pl.tips.map((t, i) => <div key={t}>{i + 1}. {t}.</div>)}</>}
+          {[['candle', 'wind down', pl.windDown], ['moon', 'bedtime', pl.bed], ['sun', 'wake up', pl.wake]].map(([ic, l, v]) => (
+            <div key={l}><Px name={ic} size={k * 14} class="px" /><b>{fmt(v, s.hour12).replace(/ ([AP]M)$/, '$1')}</b>{l}</div>
+          ))}
         </div>
-        <button type="button" class="qp-check" onClick={act.remind}><Tick on={s.remind} seed={6} />Remind me to wind down</button>
+        <div class="qp-terms">
+          <span><Px name="music" size={k * 9} />{SOUND_NAME[pl.soundscape] ?? 'gentle rain'}</span>
+          <span><Px name="bell" size={k * 9} />{ALARM_NAME[pl.alarm] ?? 'Music box'}</span>
+          {pl.blocker && <span><Px name="shield" size={k * 9} />phone lock</span>}
+          {pl.tips.map((t) => <span key={t}>· {t}</span>)}
+        </div>
+        <button type="button" class={'qp-remind' + (s.remind ? '' : ' off')} onClick={act.remind} aria-pressed={s.remind}>
+          <Win id="remind" mkey="remind" h={30} w={30} overlay={ov} model={p.model} state={s.remind ? 'on' : 'back'} />
+          {s.remind ? 'Remind me at wind-down' : 'No reminders'}
+        </button>
         <div class="qp-sign">
           <button type="button" onClick={act.sign} aria-label="Sign the plan">
             <span class={'s' + (s.signed ? ' go' : '')}>{s.signed ? (a.you.trim() || 'A. Client') : ''}</span>
             <i style={`display:block;height:calc(3 * var(--u));background-image:url(${ruleURL(80, 9)});background-size:100% 100%`} />
-            <span class={s.signed ? '' : 'hint'}>{s.signed ? 'signed, the client' : 'tap here to sign'}</span>
+            <span class={s.signed ? '' : 'hint'}>{s.signed ? 'the client' : 'tap to sign'}</span>
           </button>
           <div style="flex:1">
             <span class="s" style="display:block;height:calc(16 * var(--u));font:calc(24 * var(--u)) 'TBME Body',monospace;color:#1d2552;transform:skewX(-10deg)">{a.name.trim() || 'Pip'}</span>
             <i style={`display:block;height:calc(3 * var(--u));background-image:url(${ruleURL(80, 11)});background-size:100% 100%`} />
-            <span style="font:calc(16 * var(--u) / 2) 'HH m5x7',monospace;color:#6a6f8a">for Hollow &amp; Co.</span>
+            <span style="font:calc(8 * var(--u)) 'HH m5x7',monospace;color:#6a6f8a">Hollow &amp; Co.</span>
           </div>
         </div>
       </>);
       break;
     }
   }
-  // the hours page's pillow tower lives in its own window
-  useSlot(p.overlay, p.model, 'pillows', st.kind === 'hours' ? 'pillows:' + Math.round(a.hours) : null, winRef);
 
   const isPlan = st.kind === 'plan';
-  const label = isPlan ? (s.signed ? 'APPROVE' : 'SIGN FIRST') : s.ready ? 'STAMP IT' : st.kind === 'choice' ? 'TICK ONE' : 'STAMP IT';
-  const acorns = Array.from({ length: p.total }, (_, i) => (i < p.index ? 'done' : i === p.index ? 'now' : 'todo') as 'done' | 'now' | 'todo');
+  const label = isPlan ? (s.signed ? 'APPROVE' : 'SIGN') : 'STAMP';
+  const acorns = Array.from({ length: p.total - 1 }, (_, i) => (i < p.index ? 'done' : i === p.index ? 'now' : 'todo') as 'done' | 'now' | 'todo');
   return (
     <div ref={(el) => { root.current = el; if (p.sheetRef) p.sheetRef.current = el; }} class={'qp' + (p.wide ? ' wide' : '') + (p.leaving ? '' : ' in')} style={`--k:${k}`} data-step={st.id}>
       <i class="qp-folio" style={rsz.w ? `background-image:url(${folioURL(rsz.w, rsz.h)})` : ''} />
       <i class="qp-clip" style={`background-image:url(${clipURL()})`} />
       <div ref={sheet} class="qp-sheet" style={ssz.w ? `background-image:url(${sheetURL(ssz.w, ssz.h, p.index + 1, { dog: !isPlan, stain: p.index % 4 === 2 })})` : ''}>
         <div class="qp-head">
-          <div class="qp-firm">HOLLOW &amp; CO.<small>SLEEP CONSULTANTS</small></div>
-          <div class="qp-no">{isPlan ? 'AGREEMENT' : `QUESTION ${p.index + 1} / ${p.total - 1}`}<div class="qp-acorns">{acorns.slice(0, p.total - 1).map((st2, i) => <i key={i} style={`background-image:url(${acornURL(st2)})`} />)}</div></div>
+          <span>HOLLOW &amp; CO.</span>
+          {isPlan ? <span>AGREEMENT</span> : <span class="qp-acorns">{acorns.map((x, i) => <i key={i} style={`background-image:url(${acornURL(x)})`} />)}</span>}
         </div>
-        <h2 class="qp-q">{isPlan ? 'Your sleep plan' : st.title}</h2>
+        <h2 class="qp-q">{TITLE[st.id] ?? st.title}{hint && <small>{hint}</small>}</h2>
         {body}
         <div class="qp-foot">
-          <div class="qp-fine">{isPlan ? 'Sign, then Pip stamps it.' : 'Hollow & Co. keeps your answers on this device only.'}</div>
-          <button type="button" class={'qp-box' + (s.ready && !s.stamped ? ' ready' : '')} onClick={act.stamp} aria-label={label}>
-            {!s.stamped && <span>FOR OFFICE USE</span>}
+          {isPlan && <div class="qp-fine">Sign, then Pip stamps it.</div>}
+          <button type="button" class={'qp-box' + (s.ready && !s.stamped ? ' ready' : '')} onClick={act.stamp} aria-label={isPlan ? (s.signed ? 'Approve the plan' : 'Sign first') : s.ready ? 'Stamp it' : 'Pick an answer first'}>
             {!s.stamped && <b>{label}</b>}
             {s.stamped && <i class="qp-impr" style={`background-image:url(${stampURL(s.stamped, 'HOLLOW & CO.')})`} />}
           </button>
         </div>
         {!isPlan && (
-          <div class="qp-sticky" role="button" tabIndex={0} style={`background-image:url(${stickyURL(62, s.skipAsk ? 40 : 34)})`} onClick={() => act.skip(!s.skipAsk)}>
+          <div class="qp-sticky" role="button" tabIndex={0} style={`background-image:url(${stickyURL(56, s.skipAsk ? 36 : 30)})`} onClick={() => act.skip(!s.skipAsk)}>
             {!s.skipAsk ? <>Been here before?<b>SKIP &gt;</b></> : <>Skip the forms?<span class="qp-yes"><span onClick={(e) => { e.stopPropagation(); act.skipYes(); }}>YES</span><span>NO</span></span></>}
           </div>
         )}

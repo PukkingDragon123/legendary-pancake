@@ -26,6 +26,13 @@ const S: Record<string, Scene> = {
   'caffeine:none': { mood: 'calm', prop: 'milk' },
   'caffeine:morning': { mood: 'happy', hour: 8, prop: 'mug', mode: 'day' },
   'caffeine:late': { mood: 'dizzy', act: 'shiver', hour: 22.5, prop: 'mug', mode: 'night' },
+  'drink:espresso': { mood: 'dizzy', act: 'shiver', snd: 'glass_clink' },
+  'drink:coffee': { mood: 'happy', act: 'nod', snd: 'place_glass' },
+  'drink:tea': { mood: 'calm', act: 'nod', snd: 'glass_clink' },
+  'drink:soda': { mood: 'excited', act: 'hop', snd: 'sparkle_fizz' },
+  'drink:energy': { mood: 'dizzy', act: 'flap', snd: 'sparkle_fizz' },
+  'drink:cocoa': { mood: 'love', act: 'dance', snd: 'place_glass' },
+  'drink:water': { mood: 'proud', act: 'nod', snd: 'water_plop' },
   'mic:yes': { mood: 'curious', act: 'nod', prop: 'mic' },
   'mic:no': { mood: 'happy', act: 'nod' },
   'hours:tower': { mood: 'happy', prop: 'pillows' },
@@ -48,6 +55,8 @@ export function dioramas(office: Office): Dioramas {
   let cur: string | null = null;
   let stopLoop: (() => void) | null = null;
   const loop = (id: string, level = 0.5) => { void sound.loop(id, true, level, 'amb', 0.6); return () => void sound.loop(id, false, level, 'amb', 0.8); };
+  // a tape in the recorder plays a few seconds of its sound, then fades
+  const preview = (id: string) => { sound.preview(id, 7); return () => void sound.loop(id, false, 1, 'amb', 0.5); };
   return {
     show(id) {
       if (id === cur) return;
@@ -59,7 +68,7 @@ export function dioramas(office: Office): Dioramas {
       if (sc.act) office.pip.play(sc.act);
       office.window(sc.hour ?? null, id.startsWith('relax:rain') ? 'rain' : 'clear');
       if (sc.snd) try { sound.play(sc.snd, { volume: 0.45, gap: 200 }); } catch { /* */ }
-      if (sc.loop) stopLoop = loop(sc.loop, sc.level ?? 0.5);
+      if (sc.loop) stopLoop = id.startsWith('relax:') ? preview(sc.loop) : loop(sc.loop, sc.level ?? 0.5);
       if (sc.spin) office.clock.spin += 3;
     },
   };

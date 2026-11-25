@@ -14,6 +14,7 @@ import { WoodClock } from './clock.tsx';
 import { mugSteam, propCandle, propMug, propPhone } from './chrome/objects.ts';
 import { reducedMotion } from './chrome/swing.ts';
 import { Px } from './icons.tsx';
+import { PhoneLockSheet } from './phone/phone.tsx';
 import { fmtDur, fmtHM, Tags, tap, toast, Toggle } from './kit.tsx';
 import { Art, dtone, hash, tone } from './px/sleepart.ts';
 import { candle, moonPhase, mug, nightWindow, phone } from './px/sleepprops.ts';
@@ -136,6 +137,7 @@ export function SleepScreen() {
   const [tipAt, setTipAt] = useState(0);
   const [flip, setFlip] = useState(-1);
   const [picker, setPicker] = useState(false);
+  const [lock, setLock] = useState(false); // [intro5] the phone-lock step plays the pretend phone
   const [out, setOut] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [vw, setVw] = useState(innerWidth);
@@ -187,7 +189,7 @@ export function SleepScreen() {
             <WoodClock wake={plan.wake} bedtime={plan.bed} hour12={h12} size={128} />
           </button>
           <MugProp tea={s.profile.caffeine !== 'late' || isDone('coffee')} onTap={() => { if (s.profile.caffeine === 'late') toggle('coffee', document.querySelector('.prop-mug')); else { tap('ui_tap', 0.4); sound.play('water_plop', { volume: 0.3 }); } }} />
-          {s.profile.phone !== 'never' && <PhoneProp bed={isDone('phone')} onTap={() => toggle('phone', document.querySelector('.prop-phone'))} />}
+          {s.profile.phone !== 'never' && <PhoneProp bed={isDone('phone')} onTap={() => { if (isDone('phone')) toggle('phone', document.querySelector('.prop-phone')); else { tap('ui_open', 0.5); setLock(true); } }} />}
         </div>
 
         <div class="sf-grid">
@@ -217,7 +219,7 @@ export function SleepScreen() {
                 <ul>
                   {steps.map((st) => (
                     <li class={isDone(st.id) ? 'done' : ''}>
-                      <button class="sf-step" onClick={(e) => { if (st.id === 'breathe' && !isDone('breathe')) { startBreath(); return; } toggle(st.id, (e.currentTarget as Element).querySelector('.box')); }}>
+                      <button class="sf-step" onClick={(e) => { if (st.id === 'breathe' && !isDone('breathe')) { startBreath(); return; } if (st.id === 'phone' && !isDone('phone')) { tap('ui_open', 0.5); setLock(true); return; } toggle(st.id, (e.currentTarget as Element).querySelector('.box')); }}>
                         <span class="box"><PencilTick on={isDone(st.id)} /></span>
                         <span class="txt"><b>{st.title}</b><small>{st.sub}</small></span>
                         <Px name={st.sprite} size={30} />
@@ -281,6 +283,7 @@ export function SleepScreen() {
         <p>Lights out, and Pip flies off to {area?.name ?? 'the woods'}</p>
       </div>
       <div class="sf-dark" />
+      {lock && <PhoneLockSheet wake={plan.wake} hour12={h12} onClose={() => { tap('ui_close', 0.4); setLock(false); }} onDone={() => { setLock(false); if (!isDone('phone')) toggle('phone', document.querySelector('.prop-phone')); }} />}
       {picker && <div class="sf-modal" onClick={(e) => { if (e.target === e.currentTarget) { tap('ui_close', 0.4); setPicker(false); } }}>
         <BreathePicker embedded preset={s.profile.latency === 'slow' || s.profile.latency === 'long' ? 'sleep' : undefined} onClose={() => setPicker(false)} onBegin={() => { const d = done.includes('breathe') ? done : [...done, 'breathe' as StepId]; setDone(d); saveDone(d); }} />
       </div>}
