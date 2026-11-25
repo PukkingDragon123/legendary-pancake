@@ -12,7 +12,7 @@ import {
   inter, leather, matte, metal, mix, paperMat, pillow, polygon, rim, ring, segment, smoothstep, subtract, toURL, tubeX, tubeY, union, vnoise, warp, wood,
   type Material, type RGB, type SDF, type WoodName,
 } from '../real/paint.ts';
-import { filigreeCorner, milgrain, owlCrest, rivet, rosette, stringing } from '../real/orn.ts';
+import { filigreeCorner, milgrain, rivet, rosette, stringing } from '../real/orn.ts';
 
 /** paint once per key (and device scale) */
 export const cachedRelief = (key: string, make: () => string) => cached(key, make);
@@ -477,7 +477,7 @@ export function alarmHands(g: CanvasRenderingContext2D, k: number, _res: number,
   g.restore();
 }
 
-/** The leather journal: oxblood leather over boards, a gilt owl crest, page block; `open` 0..1 swings the cover. 52 x 54 units. */
+/** The leather journal: oxblood leather over boards, a tooled gilt frame, page block; `open` 0..1 swings the cover. 52 x 54 units. */
 export function journal(k = 2, _res = 1, open = 0): string {
   return cached(`journal2:${k}:${open}`, () => {
     const r = new Real(52, 54, k * deviceK(3), 0);
@@ -489,7 +489,7 @@ export function journal(k = 2, _res = 1, open = 0): string {
     r.part(box(6, 4, 6, 46, 3), (x, y) => 4 + tubeY(9, 3)(x, y, 0) * 0.5, leather('#6a1a1e', { scale: 3 }));
     if (open < 0.5) {
       const cxm = 8 + cw / 2 + 1;
-      r.paint(circle(cxm, 24, 6.4), metal(GOLD, { polish: 0.8 })); owlCrest(r, cxm, 24, 4.6, 0.5);
+      void cxm;
       r.carve(subtract(box(11, 7, cw - 4, 40, 2), box(12, 8, cw - 6, 38, 1.6)), 0.4, 0.3);
     }
     return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.35 } });

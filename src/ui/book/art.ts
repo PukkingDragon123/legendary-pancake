@@ -1,11 +1,11 @@
 // [ui7] The diary as real materials, painted smooth at device resolution: an oxblood pebbled-leather board with a
 // stitched edge, brass corner protectors and the page block peeking out, the front cover (blind-tooled and gilt
-// frames, a gilt crescent moon in a vine, a brass title plate, a strap and catch), cream laid paper with a soft
+// frames round a blind-tooled panel, a ribbon, a brass title plate, a strap and catch), cream laid paper with a soft
 // shadow into the gutter, linen index tabs with a coloured running stitch, inked score stamps, mood icons,
 // achievement postage stamps, section icons, satin ribbon bookmarks and brass page-turn buttons.
 // Sizes stay in texels (T CSS px each, see layout.ts); each piece is painted at S device px per texel.
 import { P } from '../../gfx/palette.ts';
-import { BRASS_OLD, GOLD, Real, bevel, box, circle, deviceK, dome, metal, polygon, segment, union } from '../real/paint.ts';
+import { BRASS_OLD, GOLD, Real, bevel, box, circle, cutBox, deviceK, dome, metal, polygon, segment, union } from '../real/paint.ts';
 import { texCanvas, type TexName } from '../real/tex.ts';
 
 type RGB = [number, number, number];
@@ -109,7 +109,7 @@ function stitch(g: CanvasRenderingContext2D, x: number, y: number, w: number, h:
 export function boardArt(w: number, h: number, spread: boolean): Art {
   return art(`board7:${w}x${h}:${spread}`, w, h, (g) => {
     g.fillStyle = pat(g, 'pebble', 90, LEATHER);
-    g.beginPath(); g.roundRect(0, 0, w, h, 3); g.fill();
+    g.beginPath(); g.roundRect(0, 0, w, h, 1); g.fill();
     const vg = g.createLinearGradient(0, 0, 0, h); vg.addColorStop(0, 'rgba(255,210,180,.1)'); vg.addColorStop(1, 'rgba(0,0,0,.2)');
     g.fillStyle = vg; g.fillRect(0, 0, w, h);
     bevelEdge(g, 0, 0, w, h, 2.2, 0.45);
@@ -133,11 +133,11 @@ export function boardArt(w: number, h: number, spread: boolean): Art {
 
 // ------------------------------------------------------------------ the front cover
 
-/** The closed front cover (w x h texels): blind-tooled and gilt frames, a gilt crescent moon in a vine, a title plate. */
+/** The closed front cover (w x h texels): blind-tooled and gilt frames round a tooled panel, a title plate, a ribbon (no emblem). */
 export function coverArt(w: number, h: number): Art {
   return art(`cover7:${w}x${h}`, w, h, (g) => {
     g.fillStyle = pat(g, 'pebble', 90, LEATHER, 17, 5);
-    g.beginPath(); g.roundRect(0, 0, w, h, [1, 3, 3, 1]); g.fill();
+    g.beginPath(); g.roundRect(0, 0, w, h, [0.5, 1, 1, 0.5]); g.fill();
     const lg = g.createRadialGradient(w * 0.35, h * 0.3, 0, w * 0.5, h * 0.5, Math.max(w, h) * 0.75);
     lg.addColorStop(0, 'rgba(255,200,170,.12)'); lg.addColorStop(1, 'rgba(0,0,0,.28)');
     g.fillStyle = lg; g.fillRect(0, 0, w, h);
@@ -153,26 +153,23 @@ export function coverArt(w: number, h: number): Art {
     for (const [cx, cy, sx, sy] of [[14.5, 10.5, 1, 1], [w - 10.5, 10.5, -1, 1], [14.5, h - 10.5, 1, -1], [w - 10.5, h - 10.5, -1, -1]]) {
       g.fillStyle = gilt; g.beginPath(); g.ellipse(cx + sx * 2.4, cy + sy * 2.4, 2.2, 0.9, sx * sy * Math.PI / 4, 0, Math.PI * 2); g.fill();
     }
-    // the emblem: a gilt crescent in a vine, three stars
-    const ex = w / 2 + 2, ey = h * 0.4, R = Math.max(9, Math.min(w, h) * 0.13);
-    g.save();
-    g.shadowColor = 'rgba(20,0,0,.6)'; g.shadowBlur = 0.6 * S(); g.shadowOffsetY = 0.3 * S();
-    const mg = g.createLinearGradient(ex - R, ey - R, ex + R, ey + R); mg.addColorStop(0, '#fff6c0'); mg.addColorStop(0.45, '#e8bc48'); mg.addColorStop(1, '#a06e1a');
-    g.fillStyle = mg;
-    g.beginPath(); g.arc(ex, ey, R * 0.62, 0, Math.PI * 2); g.arc(ex + R * 0.42, ey - R * 0.18, R * 0.52, 0, Math.PI * 2, true); g.fill('evenodd');
-    const vy = ey + R * 0.95;
-    g.strokeStyle = mg; g.lineWidth = 0.7; g.lineCap = 'round';
-    g.beginPath(); for (let x = ex - R; x <= ex + R; x += 0.5) { const y = vy + Math.sin((x - ex) * 0.5) * 1.2; if (x === ex - R) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke();
-    for (let i = 0; i < 6; i++) { const x = ex - R + 2 + i * (2 * R - 4) / 5, y = vy + Math.sin((x - ex) * 0.5) * 1.2, up = i % 2 ? -1 : 1; g.beginPath(); g.ellipse(x + 0.8, y + up * 1.4, 1.4, 0.6, up * 0.6, 0, Math.PI * 2); g.fill(); }
-    for (const [sx, sy, s] of [[-0.55, -0.7, 1.4], [0.75, -0.55, 1.1], [0.6, 0.65, 1]]) {
-      const x = ex + sx * R, y = ey + sy * R;
-      g.beginPath(); for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? s * 0.4 : s * 1.2; g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } g.closePath(); g.fill();
+    // [ui10] no emblem: a blind-tooled centre panel with a gilt fillet, little gilt tool marks round it, and a
+    // satin ribbon bookmark hanging from the foot of the page block
+    {
+      const px = 20.5, py = 17.5, pw2 = w - 37, ph2 = h * 0.5 - 22;
+      g.strokeStyle = 'rgba(20,0,0,.5)'; g.lineWidth = 0.6; g.strokeRect(px, py, pw2, ph2);
+      g.strokeStyle = 'rgba(255,200,170,.16)'; g.lineWidth = 0.35; g.strokeRect(px + 0.5, py + 0.5, pw2, ph2);
+      g.strokeStyle = gilt; g.lineWidth = 0.5; g.strokeRect(px + 2.5, py + 2.5, pw2 - 5, ph2 - 5);
+      g.fillStyle = gilt;
+      for (let x = px + 6; x < px + pw2 - 4; x += 4) { g.beginPath(); g.ellipse(x, py + 1.2, 0.9, 0.4, 0, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(x, py + ph2 - 1.2, 0.9, 0.4, 0, 0, Math.PI * 2); g.fill(); }
+      for (const [cx, cy] of [[px + 2.5, py + 2.5], [px + pw2 - 2.5, py + 2.5], [px + 2.5, py + ph2 - 2.5], [px + pw2 - 2.5, py + ph2 - 2.5]]) { g.beginPath(); g.moveTo(cx, cy - 1.6); g.lineTo(cx + 1.6, cy); g.lineTo(cx, cy + 1.6); g.lineTo(cx - 1.6, cy); g.closePath(); g.fill(); }
+      const rb = g.createLinearGradient(w * 0.3, 0, w * 0.3 + 4, 0); rb.addColorStop(0, '#7a1c24'); rb.addColorStop(0.5, '#c8404a'); rb.addColorStop(1, '#6a1820');
+      g.fillStyle = rb; g.beginPath(); g.moveTo(w * 0.3, h - 2); g.lineTo(w * 0.3 + 4, h - 2); g.lineTo(w * 0.3 + 4, h); g.lineTo(w * 0.3 + 2, h - 1.2); g.lineTo(w * 0.3, h); g.closePath(); g.fill();
     }
-    g.restore();
     // the brass title plate (the title is set in the DOM)
     const pw = Math.round(w * 0.58), ph = 13, px0 = Math.round(w / 2 + 2 - pw / 2), py0 = Math.round(h * 0.64);
     const r = new Real(pw, ph, S(), 1);
-    r.part(box(0, 0, pw, ph, 1.5), bevel(1.6, 1.4), metal(GOLD, { along: 'x', polish: 0.7 }));
+    r.part(cutBox(0, 0, pw, ph, 2), bevel(1.6, 1.4), metal(GOLD, { along: 'x', polish: 0.7 }));
     r.carve(union(box(1.6, 1.6, pw - 3.2, 0.4), box(1.6, ph - 2, pw - 3.2, 0.4)), 0.3, 0.2);
     g.drawImage(r.canvas({ shadow: { dy: 0.6, blur: 1, a: 0.5 } }), px0 - 1, py0 - 1, pw + 2, ph + 2);
     corners(g, w, h, Math.min(12, Math.floor(Math.min(w, h) / 6)), [1, 3]);
@@ -298,7 +295,7 @@ function emblem(g: CanvasRenderingContext2D, name: string, x: number, y: number,
   const star = (cx: number, cy: number, R: number, r: number, n = 5) => { g.beginPath(); for (let k = 0; k < n * 2; k++) { const a = (k / (n * 2)) * Math.PI * 2 - Math.PI / 2, rr = k % 2 ? r : R; g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } g.closePath(); g.fill(); };
   switch (name) {
     case 'heart': g.beginPath(); g.moveTo(4.5, 8); g.bezierCurveTo(-1, 4, 1.5, -0.5, 4.5, 2.6); g.bezierCurveTo(7.5, -0.5, 10, 4, 4.5, 8); g.fill(); break;
-    case 'moon': g.beginPath(); g.arc(4.5, 4.5, 3.8, 0, Math.PI * 2); g.arc(6.2, 3.6, 3.2, 0, Math.PI * 2, true); g.fill('evenodd'); break;
+    case 'moon': case 'candle': g.fillRect(3.1, 4, 2.8, 4.6); g.fillRect(1.6, 8, 5.8, 0.9); g.beginPath(); g.moveTo(4.5, 0.4); g.bezierCurveTo(6.2, 2.2, 5.6, 3.5, 4.5, 3.6); g.bezierCurveTo(3.4, 3.5, 2.8, 2.2, 4.5, 0.4); g.fill(); break;
     case 'seven': text('7'); break;
     case 'three': text('3'); break;
     case 'eight': text('8'); break;

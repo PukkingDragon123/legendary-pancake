@@ -315,12 +315,20 @@ export function padlock(scale: number): string {
   }));
 }
 
-/** A crescent moon icon (9 x 9 units) for nights counts. */
+/** [ui10] A little beeswax candle with its flame (9 x 9 units) for nights counts (no moon emblems). */
 export function moonIcon(scale: number, on = true): string {
-  return memo(`moon7:${scale}:${on}`, () => smooth(9, 9, scale, (g) => {
-    const m = g.createLinearGradient(1, 1, 8, 8); m.addColorStop(0, on ? '#fff4c8' : '#d8d2c4'); m.addColorStop(1, on ? '#d8a44a' : '#8a8478');
-    g.shadowColor = on ? 'rgba(255,220,140,.6)' : 'rgba(0,0,0,.3)'; g.shadowBlur = 0.8 * scale;
-    g.fillStyle = m; g.beginPath(); g.arc(4.3, 4.5, 3.6, 0, Math.PI * 2); g.arc(6.1, 3.3, 3, 0, Math.PI * 2, true); g.fill('evenodd');
+  return memo(`candle10:${scale}:${on}`, () => smooth(9, 9, scale, (g) => {
+    const w = g.createLinearGradient(3, 0, 6.2, 0); w.addColorStop(0, on ? '#fff2cc' : '#d8d2c4'); w.addColorStop(1, on ? '#d8b070' : '#8a8478');
+    g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 0.5 * scale; g.shadowOffsetY = 0.3 * scale;
+    g.fillStyle = on ? '#b8862e' : '#7a746a'; g.fillRect(1.4, 7.6, 6.2, 1.1);
+    g.fillStyle = w; g.fillRect(3, 3.6, 3, 4.2);
+    g.shadowColor = 'transparent';
+    g.strokeStyle = '#2a1a10'; g.lineWidth = 0.35; g.strokeRect(3, 3.6, 3, 4.2);
+    if (on) {
+      const f = g.createRadialGradient(4.5, 2, 0, 4.5, 2, 2.6); f.addColorStop(0, 'rgba(255,240,180,.95)'); f.addColorStop(0.45, 'rgba(255,190,80,.8)'); f.addColorStop(1, 'rgba(255,170,60,0)');
+      g.fillStyle = f; g.beginPath(); g.arc(4.5, 2, 2.6, 0, Math.PI * 2); g.fill();
+      g.fillStyle = '#fff4c8'; g.beginPath(); g.moveTo(4.5, 0.3); g.bezierCurveTo(5.6, 1.6, 5.3, 3, 4.5, 3.1); g.bezierCurveTo(3.7, 3, 3.4, 1.6, 4.5, 0.3); g.fill();
+    }
   }));
 }
 

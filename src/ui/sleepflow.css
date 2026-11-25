@@ -13,7 +13,7 @@
 .sf-back::before { content: none; }
 .sf-back:active { transform: translateY(1px) scale(0.96); background-image: var(--rb-cream-dn); }
 .sf-sign { position: absolute; right: 12px; bottom: -14px; z-index: 3; padding: 0 10px 2px; font-size: var(--t1); color: #eee9de; text-shadow: 1px 2px 3.6px #312821; transform: rotate(3deg); animation: signSwing 6s ease-in-out infinite; transform-origin: 50% -20px; }
-.sf-sign::before, .sf-sign::after { content: ''; position: absolute; top: -18px; width: 2px; height: 20px; border-radius: 1px; background: linear-gradient(90deg, #8a6a3c, #e0c48a, #8a6a3c); box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4); }
+.sf-sign::before, .sf-sign::after { content: ''; position: absolute; top: -18px; width: 2px; height: 20px; border-radius: 0; background: linear-gradient(90deg, #8a6a3c, #e0c48a, #8a6a3c); box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4); }
 .sf-sign::before { left: 16px; transform: rotate(14deg); } .sf-sign::after { right: 16px; transform: rotate(-14deg); }
 @keyframes signSwing { 0%, 100% { transform: rotate(3deg); } 50% { transform: rotate(-1.5deg); } }
 
@@ -45,7 +45,7 @@
 .tk-body { flex: 1; padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 4px; }
 .tk-head { display: flex; justify-content: space-between; align-items: center; }
 .tk-kicker { font-size: var(--t1); text-transform: uppercase; letter-spacing: 0; color: #836d58; }
-.tk-stamp { font-size: var(--t1); color: #4a6a3a; padding: 0 6px; border: 2px solid currentColor; border-radius: 4px; transform: rotate(6deg); opacity: 0.85; mix-blend-mode: multiply; }
+.tk-stamp { font-size: var(--t1); color: #4a6a3a; padding: 0 6px; border: 2px solid currentColor; border-radius: 0; transform: rotate(6deg); opacity: 0.85; mix-blend-mode: multiply; }
 .tk-times { display: flex; align-items: center; gap: 8px; }
 .tk-times div { display: flex; flex-direction: column; }
 .tk-times small { font-size: var(--t1); color: #836d58; text-transform: uppercase; }

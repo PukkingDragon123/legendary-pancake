@@ -389,11 +389,12 @@ function stickerArt(kind: string): Art {
     a.poly(pts, (x, y) => dtone('gold', 3.4 + lit(x - 8, y - 8, 7) * 1.6, x, y));
     a.px(6, 8, INK); a.px(10, 8, INK); a.px(7, 10, INK); a.px(8, 11, INK); a.px(9, 10, INK); a.px(5, 10, '#f08aa8'); a.px(11, 10, '#f08aa8');
   } else if (kind === 'moon') {
-    a.disc(8, 8, 6.6, (x, y) => dtone('lilac', 4 + lit(x - 8, y - 8, 6), x, y));
-    a.disc(11.2, 5.6, 5.4, null);
-    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if (Math.hypot(x + 0.5 - 11.2, y + 0.5 - 5.6) < 5.4) a.d[y * 16 + x] = 0;
-    a.px(4, 9, INK); a.px(5, 10, INK); a.px(6, 9, INK); a.px(4, 11, '#f08aa8');
-    a.px(13, 11, '#fff6b0'); a.px(12, 13, '#fff6b0');
+    // [ui10] a happy acorn (no moon emblems): a honey nut under a scaly cup and a stalk
+    a.disc(8, 9.6, 5.2, (x, y) => dtone('gold', 3.6 + lit(x - 8, y - 9, 6), x, y));
+    a.disc(8, 5.6, 5.6, (x, y) => dtone('wood', 3 + lit(x - 8, y - 5, 6), x, y));
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if (y > 6 && Math.hypot(x + 0.5 - 8, y + 0.5 - 5.6) < 5.6 && Math.hypot(x + 0.5 - 8, y + 0.5 - 9.6) >= 5.2) a.d[y * 16 + x] = 0;
+    a.line(8, 0, 9, 1, INK);
+    a.px(6, 10, INK); a.px(10, 10, INK); a.px(7, 12, INK); a.px(8, 12, INK); a.px(9, 12, INK); a.px(5, 11, '#f08aa8'); a.px(11, 11, '#f08aa8');
   } else if (kind === 'cloud') {
     for (const [cx, cy, r] of [[5, 9.5, 3.6], [9, 7, 4.4], [12, 10, 3.2], [8, 11, 3.6]] as const) a.disc(cx, cy, r, (x, y) => dtone('white', 4.2 + lit(x - 8, y - 8, 7) * 1.2, x, y));
     a.px(7, 9, INK); a.px(10, 9, INK); a.px(8, 10, INK); a.px(9, 10, INK);

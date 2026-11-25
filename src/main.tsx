@@ -10,7 +10,7 @@ import { consumeLaunchAction, onSWMessage, registerSW } from './sleep/index.ts';
 import { App } from './ui/app.tsx';
 import { flyReward, watchLevel } from './ui/fx.tsx';
 import { progress } from './game/quests.ts';
-import { IcoAcorn, IcoMoon, IcoSparkle, IcoStone } from './ui/icons.tsx';
+import { IcoAcorn, IcoCandle, IcoSparkle, IcoStone } from './ui/icons.tsx';
 import { toast } from './ui/kit.tsx';
 import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
@@ -118,7 +118,7 @@ async function boot() {
     sound.play('notify_soft', { volume: 0.6 });
     scene.owl.play('yawn');
     if (k !== 'winddown') animeMoment('bedtime'); // [anime6]
-    toast(k === 'winddown' ? 'Time to wind down. Dim the lights?' : 'It’s bedtime. Goodnight soon!', IcoMoon, 5000);
+    toast(k === 'winddown' ? 'Time to wind down. Dim the lights?' : 'It’s bedtime. Goodnight soon!', IcoCandle, 5000);
     say(lines.evening());
   });
   if (phase.value === 'sleeping') void resumeNight();

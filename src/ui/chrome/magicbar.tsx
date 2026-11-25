@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'preact/hooks';
 import { clockNow } from './pxanim.tsx';
 import { uiBurst } from './uifx.ts';
 import { reducedMotion } from './swing.ts';
-import { GOLD, Real, deviceK, metal, tubeX, box, circle, dome, cached } from '../real/paint.ts';
+import { GOLD, Real, deviceK, metal, tubeX, box, circle, cutBox, dome, cached } from '../real/paint.ts';
 
 interface Bub { x: number; y: number; v: number; r: number }
 
@@ -15,8 +15,9 @@ interface Bub { x: number; y: number; v: number; r: number }
 function capArt(w: number, h: number): HTMLImageElement {
   const url = cached(`tubecap:${w}x${h}`, () => {
     const r = new Real(w, h, deviceK(3) * 2, 0), brass = metal(GOLD, { polish: 0.8, along: 'y' });
-    r.part(box(0, 0, w * 0.72, h, h * 0.3), (x, y) => tubeX(h / 2, h / 2, 0)(x, y, 0) * 0.9 + 0.6, brass);
-    r.part(box(w * 0.58, h * 0.14, w * 0.42, h * 0.72, h * 0.12), (x, y) => tubeX(h / 2, h * 0.36, 0)(x, y, 0) + 0.4, brass);
+    r.part(cutBox(0, 0, w * 0.72, h, h * 0.18), (x, y) => tubeX(h / 2, h / 2, 0)(x, y, 0) * 0.9 + 0.6, brass, { line: true });
+    r.carve(box(w * 0.24, -1, w * 0.06, h + 2, 0), 0.6, 0.3); r.carve(box(w * 0.44, -1, w * 0.06, h + 2, 0), 0.6, 0.3);
+    r.part(box(w * 0.58, h * 0.14, w * 0.42, h * 0.72, 0), (x, y) => tubeX(h / 2, h * 0.36, 0)(x, y, 0) + 0.4, brass, { line: 0.8 });
     r.part(circle(w * 0.3, h / 2, h * 0.14), dome(w * 0.3, h / 2, h * 0.14, h * 0.14, 1.2, h * 0.5), metal(GOLD, { polish: 0.95 }));
     return r.url({ shadow: false });
   });
@@ -50,7 +51,7 @@ export function MagicBar(p: { level: number; into: number; need: number; w?: num
     let raf = 0, lastPaint = 0, lastT = clockNow();
     const still = reducedMotion();
     const x0 = capW * 0.78, x1 = W - capW * 0.78, len = x1 - x0, ty0 = H * 0.16, ty1 = H * 0.84, th = ty1 - ty0, rad = th / 2;
-    const tube = () => { g.beginPath(); g.roundRect(x0 - rad * 0.4, ty0, len + rad * 0.8, th, rad); };
+    const tube = () => { g.beginPath(); g.rect(x0 - rad * 0.4, ty0, len + rad * 0.8, th); }; // [ui10] a square glass bore, no rounded ends
     const frame = (now0: number) => {
       raf = requestAnimationFrame(frame);
       if (now0 - lastPaint < 33) return;

@@ -44,7 +44,7 @@ export function windDownSteps(p: Profile): Step[] {
   out.push({ id: 'lights', title: 'Dim the lights', sub: 'Low, warm light for the last hour', sprite: 'candle' });
   if (has(p.goals, 'stress', 'calm', 'worry', 'mind', 'anx') || has(p.relax, 'journal', 'writ')) out.push({ id: 'jot', title: "Jot down tomorrow's to-do", sub: 'Out of your head, onto paper', sprite: 'pen' });
   if (has(p.relax, 'read', 'book')) out.push({ id: 'read', title: 'Read a few pages', sub: 'Paper, not a screen', sprite: 'book' });
-  if (out.length < 4) out.push({ id: 'cool', title: 'Cool, dark, quiet room', sub: 'About 18°C (65°F) is just right', sprite: 'moon' });
+  if (out.length < 4) out.push({ id: 'cool', title: 'Cool, dark, quiet room', sub: 'About 18°C (65°F) is just right', sprite: 'wind' });
   return out.slice(0, 5);
 }
 
@@ -53,7 +53,7 @@ const TIPS: Record<string, Tip> = {
   wake: { id: 'wake', title: 'Same wake time, every day', body: 'Your body clock sets itself by when you get up. Keep it within an hour, weekends too.', sprite: 'alarm' },
   light: { id: 'light', title: 'Morning light', body: 'Ten minutes of daylight soon after waking makes you sleepy earlier in the evening.', sprite: 'sun' },
   winddown: { id: 'winddown', title: 'A wind-down hour', body: 'Dim lamps, slow tasks, no work. Give your brain a runway to land on.', sprite: 'candle' },
-  cool: { id: 'cool', title: 'Cool, dark and quiet', body: 'A cool room, blackout curtains and soft sounds help you drop off sooner.', sprite: 'moon' },
+  cool: { id: 'cool', title: 'Cool, dark and quiet', body: 'A cool room, blackout curtains and soft sounds help you drop off sooner.', sprite: 'wind' },
   caffeine: { id: 'caffeine', title: 'Caffeine curfew', body: 'Stop coffee, tea and cola about 8 hours before bed. It stays with you longer than you think.', sprite: 'hourglass' },
   screens: { id: 'screens', title: 'Screens out of bed', body: 'Scrolling keeps your mind busy. Charge the phone across the room.', sprite: 'phone_off' },
   shift: { id: 'shift', title: 'Move bedtime in small steps', body: 'Go to bed 15 minutes earlier every few nights instead of all at once.', sprite: 'clock' },
@@ -195,7 +195,7 @@ export function SleepScreen() {
                 <div class="tk-head"><span class="tk-kicker">Tonight · {DAY_NAME[plan.day]}</span><span class="tk-stamp">{plan.on ? 'PLANNED' : 'FREE NIGHT'}</span></div>
                 <div class="tk-times">
                   <div><small>Bed</small><b>{hm2(fmtHM(plan.bed, h12))}</b></div>
-                  <span class="tk-arrow"><Px name="moon" size={30} /></span>
+                  <span class="tk-arrow"><Px name="zzz" size={30} /></span>
                   <div><small>Wake</small><b class="wake">{plan.on ? hm2(fmtHM(plan.wake, h12)) : 'sleep in'}</b></div>
                 </div>
                 <p class="tk-line">{fmtDur(plan.min * 60_000)} of sleep{smart ? <> · smart wake from {smart}</> : null}</p>
@@ -273,7 +273,7 @@ export function SleepScreen() {
 
       <div class="sf-foot">
         <HoldButton ms={1500} label="Hold to go to sleep" class="sf-sleep hh-btn-night" onDone={lightsOut}>
-          <Px name="moon" size={40} /><span>Hold to sleep</span>
+          <Px name="candle" size={40} /><span>Hold to sleep</span>
         </HoldButton>
         <p>Pip flies off to {area?.name ?? 'the woods'}</p>
       </div>

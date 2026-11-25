@@ -19,7 +19,7 @@ import {
   mix, moulding, offset, paperMat, pillow, pnoise, polygon, rim, segment, spiralPts, subtract, texAlb, tileable, toURL, torn, tubeX, union, wood,
   type Material, type RGB, type SDF, type WoodName,
 } from './paint.ts';
-import { acornShapes, alongRect, aroundCircle, beads, carvedCorner, cScroll, filigreeCorner, milgrain, oakLeaf, owlCrest, rivet, rosette, stitches, stringing, THREAD } from './orn.ts';
+import { acornShapes, alongRect, aroundCircle, beads, carvedCorner, cScroll, filigreeCorner, milgrain, oakLeaf, owlCrest, rivet, rosette, stitches, stringing, THREAD, waxSeal } from './orn.ts';
 import { texReady } from './tex.ts';
 
 export interface Nine {
@@ -420,6 +420,31 @@ export function tooltipFrame(): Nine {
   });
 }
 
+/**
+ * [ui10] A small card label (tool names, flags, little tags): stiff paper with bevel-cut corners, a printed rule
+ * and a thin dark outline. `tint` multiplies the paper.
+ */
+export function labelFrame(tint: RGB = [255, 255, 255]): Nine {
+  const m = 3, W = 40, H = 22, b = 5;
+  return nine(`label10:${tint.join()}`, () => {
+    const k = deviceK(3), r = new Real(W, H, k, m);
+    const pap = texAlb('paper', { scale: 1.6, tint });
+    r.part(cutBox(0, 0, W, H, 3.6), (_x, _y, ins) => 1 + Math.min(1, ins * 0.6), { alb: pap, spec: 0.03, shin: 5, diffuse: 0.6 });
+    r.inkFill(subtract(cutBox(1.7, 1.7, W - 3.4, H - 3.4, 2.6), cutBox(2.05, 2.05, W - 4.1, H - 4.1, 2.4)), 0.4);
+    const cv = r.canvas({ shadow: { dy: 1.2, blur: 2, a: 0.38 }, ambient: 0.55 });
+    return { url: toURL(cv, 0.93), s: [b + m, b + m, b + m, b + m], o: m, bw: [2, 4, 2, 4], fill: true, k };
+  });
+}
+
+/** [ui10] a poured wax seal stamped with the owl crest (fixed art, d units + a 4-unit margin) */
+export function sealArt(d = 24, col: RGB = hex('#a8262c'), seed = 3, crest = true): string {
+  return cached(`seal10:${d}:${col.join()}:${seed}:${crest}`, () => {
+    const r = new Real(d, d, deviceK(3), 4);
+    waxSeal(r, d / 2, d / 2, d * 0.4, 0, col, seed, crest);
+    return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.42 } });
+  });
+}
+
 /** A round brass/enamel medallion (fixed size art) for portraits and seals: a ring of gilt pearls. */
 export function medallionArt(d = 60, hue: RGB = hex('#2f4f9a')): string {
   return cached(`medal10:${d}:${hue.join()}`, () => {
@@ -531,21 +556,24 @@ export function leatherFrame(hue: string = '#2c6b43', t = 14): Nine {
  * CSS paper inside without a seam; the edges tile (`round`) with periodic noise.
  */
 export function paperCard(o: { gilt?: boolean; tint?: RGB; rule?: boolean } = {}): Nine {
-  const m = 6, bw = 10, cs = 16, c = 64, W = 2 * cs + c;
-  return nine(`pcard10:${o.gilt}:${o.tint?.join()}:${o.rule}`, () => {
+  const m = 6, bw = 10, cs = 16, c = 160, W = 2 * cs + c;
+  return nine(`pcard10b:${o.gilt}:${o.tint?.join()}:${o.rule}`, () => {
     const k = deviceK(3), r = new Real(W, W, k, m);
-    const f1 = 8 / c, f2 = 40 / c;
+    const f1 = 20 / c, f2 = 100 / c;
     const base = box(0.6, 0.6, W - 1.2, W - 1.2, 0);
-    const deckle: SDF = (x, y) => base(x, y) + (pnoise(x * f1, y * f1, 8, 8, 3) - 0.5) * 1.5 + (pnoise(x * f2, y * f2, 40, 40, 7) - 0.5) * 0.75;
+    const deckle: SDF = (x, y) => base(x, y) + (pnoise(x * f1, y * f1, 20, 20, 3) - 0.5) * 1.5 + (pnoise(x * f2, y * f2, 100, 100, 7) - 0.5) * 0.75;
     deckle.bb = [-1.5, -1.5, W + 1.5, W + 1.5];
     const tint = o.tint ?? [255, 255, 255];
-    const raw = texAlb('paper', { scale: 1.6, tint });
+    // the paper photo at 3.2 texels a unit: its 512-texel tile repeats exactly every 160 units, the tiled middle (seamless)
+    const raw = texAlb('paper', { scale: 3.2, tint });
     // the paper's fibres without its blotches (so the tiled middle never shows a seam): mean + high-pass
     const mean: RGB = [0, 0, 0];
     for (let i = 0; i < 24; i++) for (let j = 0; j < 24; j++) { const a = raw(i * 13.3, j * 13.3); mean[0] += a[0] / 576; mean[1] += a[1] / 576; mean[2] += a[2] / 576; }
     const pap = (x: number, y: number): RGB => {
       const a = raw(x, y), b1 = raw(x - 5, y - 5), b2 = raw(x + 5, y - 5), b3 = raw(x - 5, y + 5), b4 = raw(x + 5, y + 5);
-      return [mean[0] + (a[0] - (b1[0] + b2[0] + b3[0] + b4[0]) / 4) * 0.9, mean[1] + (a[1] - (b1[1] + b2[1] + b3[1] + b4[1]) / 4) * 0.9, mean[2] + (a[2] - (b1[2] + b2[2] + b3[2] + b4[2]) / 4) * 0.9];
+      const out: RGB = [0, 0, 0];
+      for (let q = 0; q < 3; q++) { const bl = (b1[q] + b2[q] + b3[q] + b4[q]) / 4; out[q] = mean[q] + (a[q] - bl) * 0.9 + (bl - mean[q]) * 0.4; }
+      return out;
     };
     const gold: RGB = [214, 164, 70];
     const alb = (x: number, y: number): RGB => {
@@ -554,7 +582,7 @@ export function paperCard(o: { gilt?: boolean; tint?: RGB; rule?: boolean } = {}
       if (o.gilt && d < 1.1) return mix(aged, gold, 0.85 * (1 - clamp((d - 0.6) / 0.5)));
       return aged;
     };
-    r.part(deckle, 1, tileable({ alb, spec: 0, shin: 1 }, cs, c, cs, c));
+    r.part(deckle, 1, { alb, spec: 0, shin: 1 });
     if (o.rule !== false) {
       const rr = (a: number, w: number) => subtract(box(a, a, W - 2 * a, W - 2 * a, 0), box(a + w, a + w, W - 2 * (a + w), W - 2 * (a + w), 0));
       r.inkFill(rr(3.6, 0.32), 0.5);
@@ -668,8 +696,8 @@ export const NINE: Record<string, () => Nine> = {
   walnut_thin: () => panelFrame('walnut', 10, { brass: false, r: 9, inner: 5, m: 7 }),
   ebony: () => panelFrame('ebony', 14, { r: 12, corner: 'gold' }),
   oak_panel: () => panelFrame('oak', 14, { r: 12, corner: 'carved' }),
-  paper_card: () => paperCard(), paper_card_gilt: () => paperCard({ gilt: true }),
-  slider_track: () => sliderTrack(),
+  paper_card: () => paperCard(), paper_card_gilt: () => paperCard({ gilt: true }), paper_card_kraft: () => paperCard({ tint: [238, 214, 170] }),
+  slider_track: () => sliderTrack(), label: () => labelFrame(), label_kraft: () => labelFrame([236, 210, 160]),
   button_green: () => button('green'), button_green_hover: () => button('green'), button_green_down: () => button('green', true),
   button_gold: () => button('gold'), button_gold_down: () => button('gold', true),
   button_red: () => button('red'), button_red_down: () => button('red', true),

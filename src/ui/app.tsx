@@ -7,7 +7,7 @@ import { bedtimeOf, phase } from '../game/night.ts';
 import { save } from '../game/store.ts';
 import { AREA } from '../game/catalog.ts';
 import { BreathePicker, BreatheSession } from './breathe.tsx';
-import { IconDefs, IcoMoon } from './icons.tsx';
+import { IconDefs, IcoCandle } from './icons.tsx';
 import { fmtDur, fmtHM, tap, Toasts, useTick } from './kit.tsx';
 import { Morning, NightReport } from './morning.tsx';
 import { MapPanel, Wardrobe } from './panels.tsx';
@@ -41,7 +41,7 @@ function Ticket() {
   return (
     <div class={'hh-ticket' + (away ? ' away' : '')}>
       <img class="hh-tkt-clip" src={clip(kFor(DESK_HUD), 1)} alt="" draggable={false} />
-      <div class={'hh-tkt-stub' + (late ? ' late' : '')}><IcoMoon size={40} /><small>{late ? 'LATE' : 'BED'}</small></div>
+      <div class={'hh-tkt-stub' + (late ? ' late' : '')}><IcoCandle size={40} /><small>{late ? 'LATE' : 'BED'}</small><i class="hh-tkt-seal" /></div>
       <i class="hh-tkt-perf" />
       <div class="hh-tkt-body">
         <div class="t">

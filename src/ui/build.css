@@ -219,9 +219,9 @@
 /* [ui7] the realistic finish: cyanotype paper with a printed chalk grid, rounded die-cut cards and enamel buttons,
    soft shadows (overrides the flat pixel styling above) */
 .bm-wash { background: radial-gradient(ellipse 90% 80% at 50% 45%, rgba(12, 34, 64, 0) 55%, rgba(12, 34, 64, 0.55) 100%), linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 32px 32px, linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 32px 32px; }
-.bm-done, .bm-vbtn, .bm-act, .bm-tag, .bm-have, .bm-lock, .bm-floor, .bm-card, .bm-tab, .bm-fold, .bm-swatch, .bm-sketch { border-radius: 8px; }
-.bm-new, .bm-count, .bm-series { border-radius: 10px; }
-.bm-floors, .bm-drawer, .bm-note, .bm-bubble { border-radius: 12px; }
+.bm-done, .bm-vbtn, .bm-act, .bm-tag, .bm-have, .bm-lock, .bm-floor, .bm-card, .bm-tab, .bm-fold, .bm-swatch, .bm-sketch { border-radius: 0; }
+.bm-new, .bm-count, .bm-series { border-radius: 0; }
+.bm-floors, .bm-drawer, .bm-note, .bm-bubble { border-radius: 0; }
 .bm-done { background: linear-gradient(180deg, #52b676, #2c7a4a); box-shadow: inset 0 1px 0 rgba(220, 255, 220, 0.6), inset 0 -3px 4px rgba(0, 40, 10, 0.45), 0 3px 6px rgba(6, 18, 34, 0.6); }
 .bm-done:active { box-shadow: inset 0 1px 0 rgba(220, 255, 220, 0.4), inset 0 -1px 2px rgba(0, 40, 10, 0.45), 0 1px 2px rgba(6, 18, 34, 0.6); }
 .bm-vbtn, .bm-act { background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.12)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 3px rgba(0, 0, 0, 0.2), 0 3px 6px rgba(6, 18, 34, 0.55); }

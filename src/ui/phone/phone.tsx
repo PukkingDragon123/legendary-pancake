@@ -306,11 +306,14 @@ export class PhoneScreen {
       this.text(this.time(now), SW / 2, 34, BIG, '#c8c0e8', 'center');
       this.text('Sleeping', SW / 2, 56, MED, '#a8a0d8', 'center');
       this.text(`until ${this.wakeTxt()}`, SW / 2, 66, SMALL, '#8a84c0', 'center');
-      // a crescent moon, glowing softly
-      for (let y = 84; y < 112; y++) for (let x = 18; x < 50; x++) {
-        const d = Math.hypot(x - 33, y - 98), d2 = Math.hypot(x - 38, y - 94);
-        if (d < 9 && d2 > 7.5) { g.fillStyle = d > 8 || d2 < 8.5 ? '#c8b880' : '#f4e6b0'; g.fillRect(x, y, 1, 1); }
-        else if (d < 14 && d2 > 7 && bayer(x, y) < (14 - d) / 12) { g.fillStyle = 'rgba(120,110,190,0.35)'; g.fillRect(x, y, 1, 1); }
+      // [ui10] a candle on a brass dish, its flame glowing softly (no moon emblem)
+      for (let yy = 80; yy < 112; yy++) for (let xx = 18; xx < 50; xx++) {
+        const fd = Math.hypot((xx - 33) * 1.6, yy - 88);
+        if (yy >= 108 && yy < 110 && xx >= 26 && xx < 41) { g.fillStyle = yy === 108 ? '#e0b860' : '#8a6420'; g.fillRect(xx, yy, 1, 1); }
+        else if (yy >= 93 && yy < 108 && xx >= 30 && xx < 37) { g.fillStyle = xx === 30 ? '#c8a878' : xx >= 35 ? '#b89060' : '#f0e0b8'; g.fillRect(xx, yy, 1, 1); }
+        else if (yy >= 91 && yy < 93 && xx === 33) { g.fillStyle = '#2a1a10'; g.fillRect(xx, yy, 1, 1); }
+        else if (fd < 4.2 && yy < 92) { g.fillStyle = fd < 2.2 ? '#fff4c8' : '#f4b04a'; g.fillRect(xx, yy, 1, 1); }
+        else if (fd < 14 && bayer(xx, yy) < (14 - fd) / 16) { g.fillStyle = 'rgba(240,190,110,0.3)'; g.fillRect(xx, yy, 1, 1); }
       }
       const zz = (t * 1.2) % 1;
       this.text('z', 46 + zz * 4, 92 - zz * 8, SMALL, '#c8c0f0');

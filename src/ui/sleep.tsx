@@ -283,7 +283,7 @@ function CantSleep(p: { onClose: () => void }) {
     <div class="calm" onClick={(e) => { e.stopPropagation(); if (e.target === e.currentTarget) p.onClose(); }}>
       <div class="calm-board hh-wood-dark">
         <header class="calm-head">
-          {view !== 'menu' ? <button class="calm-x" aria-label="Back" onClick={() => { tap('ui_back', 0.3); setView('menu'); }}><Px name="arrow_left" size={30} /></button> : <span class="calm-moon"><Px name="moon" size={40} /></span>}
+          {view !== 'menu' ? <button class="calm-x" aria-label="Back" onClick={() => { tap('ui_back', 0.3); setView('menu'); }}><Px name="arrow_left" size={30} /></button> : <span class="calm-moon"><Px name="owl" size={40} /></span>}
           <div class="grow"><h2>{view === 'sounds' ? 'Something to listen to' : view === 'story' ? 'Shh… a story' : "Can't sleep? That's okay."}</h2>{view === 'menu' && <p>Lying awake happens to everyone. Let's make it softer.</p>}</div>
           <button class="calm-x" aria-label="Close" onClick={() => { tap('ui_close', 0.3); p.onClose(); }}><Px name="cross" size={30} /></button>
         </header>

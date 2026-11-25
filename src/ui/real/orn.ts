@@ -262,7 +262,7 @@ export function acornShapes(cx: number, cy: number, s: number): [SDF, SDF] {
 }
 
 /** a poured wax seal (`rad` units) stamped with the owl crest; `col` the wax colour */
-export function waxSeal(r: Real, cx: number, cy: number, rad: number, z = 0, col: RGB = hex('#a8262c'), seed = 3) {
+export function waxSeal(r: Real, cx: number, cy: number, rad: number, z = 0, col: RGB = hex('#a8262c'), seed = 3, crest = true) {
   const wax: Material = { alb: (x, y) => mix(col, [col[0] * 0.62, col[1] * 0.5, col[2] * 0.55] as RGB, clamp(Math.hypot(x - cx, y - cy) / rad - 0.55) * 0.9) as RGB, spec: 0.55, shin: 34, coat: 0.35 };
   const blob = warp(union(circle(cx, cy, rad), ellipse(cx + rad * 0.62, cy + rad * 0.55, rad * 0.32, rad * 0.26), ellipse(cx - rad * 0.7, cy + rad * 0.35, rad * 0.24, rad * 0.2), ellipse(cx - rad * 0.2, cy - rad * 0.86, rad * 0.22, rad * 0.18)), rad * 0.07, 0.9 / rad * 2, seed);
   r.part(blob, (_x, _y, ins) => z + Math.min(rad * 0.28, ins * 0.5) + 0.3, wax, { line: true });
@@ -270,7 +270,7 @@ export function waxSeal(r: Real, cx: number, cy: number, rad: number, z = 0, col
   const ri = rad * 0.66;
   r.carve(circle(cx, cy, ri), rad * 0.12, rad * 0.12);
   r.carve(subtract(circle(cx, cy, ri * 0.92), circle(cx, cy, ri * 0.82)), -rad * 0.05, rad * 0.04);
-  owlCrest(r, cx, cy + ri * 0.04, ri * 0.62, rad * 0.1);
+  if (crest) owlCrest(r, cx, cy + ri * 0.04, ri * 0.62, rad * 0.1);
 }
 
 /**
