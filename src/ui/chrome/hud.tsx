@@ -198,7 +198,8 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
       <Ropes xs={[22, 102]} top={p.kind === 'coin' ? -28 : -16} len={p.kind === 'coin' ? 34 : 22} chain />
       <div class="hh-board hh-curboard" style={{ '--art': bg(board(124, 40, k, 1, { seed: p.kind === 'coin' ? 7 : 9, wood: p.kind === 'coin' ? 'oak' : 'walnut', hooks: [22, 102], bevel: 4, radius: 7 })) } as Record<string, string>} onClick={tapSign} role="group" aria-label={`${label}: ${p.value.toLocaleString()}`}>
         <span class={'hh-cur-ico ' + p.kind} data-chip={p.kind} ref={ico}>
-          <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} />
+          {/* [icons9] the detailed 44 art px acorn and gem, crisp through the sign's desktop zoom */}
+          <PxAnim tl={tl} size={44} zoom={k} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}
         </span>
         <span class={'hh-num' + (p.value >= 100000 ? ' huge' : p.value >= 10000 ? ' long' : '')} ref={numRef}><Odometer value={p.value} /></span>
@@ -270,7 +271,9 @@ const TOOLS: ToolDef[] = [
   { id: 'settings', label: 'Settings', tl: seq('tool_gear', 4, 220), act: rep(seq('tool_gear', 4, 50), 3), fx: 'sparkle', icon: 'tool_settings', felt: 'iron' },
 ];
 
-/** [ui5] the side tools' icons: little 3D models from the icon family (src/ui/chrome/iconset.ts) */
+/** [ui5] the side tools' icons: little 3D models from the icon family (src/ui/chrome/iconset.ts); [icons9] each says what
+ * it does: a market stall (Shop), a blueprint and pencil (Build), a top hat (Dress up), a checklist scroll (Quests), a
+ * globe (Map), gears (Settings) */
 const TOOL_ICON: Partial<Record<string, string>> = { build: 'tool_build', shop: 'tool_shop', wardrobe: 'tool_dress', quests: 'tool_quests', map: 'tool_map', settings: 'tool_settings' };
 const dpr = () => Math.min(4, Math.max(1, Math.round((typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1)));
 
@@ -293,7 +296,8 @@ function ToolTag(p: { t: ToolDef; i: number; badge?: number; isNew?: boolean }) 
     <div class="hh-tool" style={{ '--i': p.i } as Record<string, number>}>
       <div class="hh-toolhang" ref={ref}>
         <button class="hh-tag" style={{ '--art': bg(toolTile(52, p.t.felt, k, 1, p.i + 1)) } as Record<string, string>} onClick={go} aria-label={p.t.label + (p.badge ? ` (${p.badge} ready to claim)` : '')}>
-          <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={iconSrc(TOOL_ICON[p.t.id] ?? '', Math.round(44 * dpr() * k), dpr()) ?? toolIcon(p.t.id as ToolIcon, k, 1)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
+          {/* [icons9] the 44 art px drawing, one art pixel per CSS pixel (the tools are never zoomed, so the device size is just 44 x dpr) */}
+          <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={iconSrc(TOOL_ICON[p.t.id] ?? '', 44 * dpr(), dpr()) ?? toolIcon(p.t.id as ToolIcon, k, 1)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
           {!!p.badge && <span class="hh-badge"><b>{p.badge}</b></span>}
           {p.isNew && <span class="hh-new">New</span>}
         </button>

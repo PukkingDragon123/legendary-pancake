@@ -1,7 +1,9 @@
 // [look5] The home view looks into Pip's living room; this little hanging tile takes the camera out through the open
 // front to the whole oak and back in. A walnut tile with brass corners and felt like the side tools, hung by a cord at
-// the left edge: a tiny arched window onto a leafy tree ("Outside") or a lit lantern ("Inside"). Pinching and the mouse
-// wheel do the same (src/world/scene.ts zoomBy). Kept to one small object, in the same relief-painted style.
+// the left edge. [icons9] On it a door you click: a round hobbit door of green planks in a ring of stones, iron strap
+// hinges and a brass knocker ("Outside"); the same door ajar with warm lamplight inside ("Inside"). Pixel art from the
+// icon bake (src/dev/iconbake.ts, door_out / door_in, 44 art px with a crisp dark outline); the painted window and
+// lantern stay as the fallback while the atlas loads. Pinching and the mouse wheel do the same (src/world/scene.ts zoomBy).
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
 import { phase } from '../../game/night.ts';
@@ -12,6 +14,7 @@ import { GOLD, IRON, Real, bevel, box, cached, circle, clamp, cloth, deviceK, do
 import { DESK_HUD, hempRope, kFor, toolTile } from './objects.ts';
 import { hudOverride } from './hud.tsx';
 import { uiBurstAt } from './uifx.ts';
+import { iconSrc, uiAtlas } from './iconset.ts';
 
 /** An arched window in an oak frame: blue sky, a round leafy tree and a little hill, a brass catch (44 CSS px). */
 function windowIcon(zoom: number): string {
@@ -68,7 +71,7 @@ const STYLE = `
 .hh-look button { position: relative; width: 52px; height: 60px; isolation: isolate; pointer-events: auto; transition: scale 0.15s; }
 .hh-look button::before { content: ''; position: absolute; inset: -4px; z-index: -1; background: var(--art) 0 0 / 100% 100% no-repeat; }
 .hh-look button:active { scale: 0.92 1.04; }
-.hh-look button img { position: absolute; left: 4px; top: 13px; width: 44px; height: 44px; }
+.hh-look button img { position: absolute; left: 4px; top: 13px; width: 44px; height: 44px; filter: drop-shadow(1px 2px 3px rgba(20, 10, 6, 0.5)); }
 .hh-look button.flip img { animation: hhLookFlip 0.45s ease-in-out; }
 .hh-look .hh-looklabel { margin-top: 1px; padding: 2px 5px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; color: #2a1a10; background: var(--tx-paper) 0 0 / 200px, #f6ead0; border-radius: 4px; box-shadow: 0 1px 1px rgba(30, 16, 6, 0.35), 0 3px 6px rgba(30, 16, 6, 0.3), inset 0 1px 1px rgba(255, 252, 240, 0.8), inset 0 -1px 2px rgba(140, 100, 50, 0.25); pointer-events: none; }
 @keyframes hhLookSway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
@@ -94,6 +97,11 @@ export function LookOut() {
   const [out, setOut] = useState(() => !!sceneRef.current?.outside);
   const [flip, setFlip] = useState(0);
   const k = useMemo(() => kFor(DESK_HUD), []);
+  const [, setAtlas] = useState(0);
+  useEffect(() => { void uiAtlas().then(() => setAtlas(1)); }, []);
+  // [icons9] the door at whole device pixels: the tile is zoomed 1.5x on desktops (k), so its device size is 44 x dpr x k
+  const dpr = Math.min(4, Math.max(1, Math.round((typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1)));
+  const door = iconSrc(out ? 'door_in' : 'door_out', Math.round(44 * dpr * k), dpr);
   useEffect(() => {
     let off: (() => void) | null = null, id = 0;
     const hook = () => {
@@ -122,7 +130,7 @@ export function LookOut() {
       <i class="hh-lookcord" style={{ backgroundImage: `url("${hempRope()}")` }} />
       <div class="hh-lookhang">
         <button class={flip % 2 ? 'flip' : ''} key={flip} style={{ '--art': `url("${toolTile(52, out ? 'rose' : 'sky', k, 1, 7)}")` } as Record<string, string>} onClick={go} aria-label={out ? 'Go back inside the living room' : 'Step outside to see the whole tree'}>
-          <img src={out ? lanternIcon(k) : windowIcon(k)} alt="" draggable={false} />
+          <img src={door ?? (out ? lanternIcon(k) : windowIcon(k))} alt="" draggable={false} />
         </button>
         <span class="hh-looklabel">{label}</span>
       </div>

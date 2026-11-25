@@ -6,9 +6,9 @@
 //     (towards gold, or cyan for blues) and pale; neighbouring steps keep a clear contrast
 //   - stray single pixels are folded into their neighbours (clean clusters, no noise)
 //   - inner lines where one part passes in front of another (the part behind gets its darkest shade)
-//   - a selective outline: a darker, cooler version of the local colour round the silhouette, lighter on the side the
-//     light comes from (top left), darkest at the bottom right; edge pixels the true outline only clips are blended a
-//     little towards it (anti-aliasing with the sprite's own colours)
+//   - [icons9] a crisp near-black outline (#120a10) round the silhouette and round holes, to match the outlined 3D
+//     world; edge pixels the true outline only clips lean a little towards it, snapped to the material's own shades
+//     (anti-aliasing with the sprite's own colours)
 //   - single-pixel glints on glossy materials (metal, glass, gems, enamel) at their brightest point
 //   - optionally a hard, faint drop shadow one pixel down and right
 // Used by the icon bake (src/dev/iconbake.ts) for the icons and the shelf's sprites. Dev only.
@@ -44,12 +44,20 @@ export interface Opts {
   groups: (id: number) => Group;
   /** the small size: fewer steps, fewer lines */
   tiny?: boolean;
+  /** [icons9] the large (44 art px) size: a step more per material and less smoothing, so texture detail survives */
+  hd?: boolean;
   /** a faint hard shadow 1 px down and right */
   shadow?: boolean;
   /** how far in front (depth units) a neighbour must be to draw an inner line */
   lineDepth?: number;
 }
-export interface Art { w: number; h: number; d: Uint8ClampedArray }
+export interface Art {
+  w: number; h: number; d: Uint8ClampedArray;
+  /** [icons9] each pixel's material (-1 = outline, shadow or nothing), for touches that keep to one material */
+  g?: Int32Array;
+}
+/** [icons9] the outline: a warm near-black, never a hue-shifted local colour */
+export const OUTLINE_RGB: [number, number, number] = [18, 10, 16];
 
 // ------------------------------------------------------------------ colour (OKLab)
 const clamp = (v: number, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
@@ -120,7 +128,7 @@ interface Px { cov: number; a: number; lab: Lab; g: number; d: number; lum: numb
 
 export function pixelize(P: Passes, o: Opts): Art {
   const { w, h, s } = P, W = w * s, N = w * h;
-  const tiny = !!o.tiny;
+  const tiny = !!o.tiny, hd = !!o.hd && !tiny;
   // ---- downsample: coverage, colour (linear mean, alpha weighted), material (majority), depth (front-most)
   const px: Px[] = new Array(N);
   const counts = new Map<number, number>();
@@ -167,7 +175,7 @@ export function pixelize(P: Passes, o: Opts): Art {
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const i = y * w + x, p = px[i];
     if (!solid[i]) continue;
-    const k = o.groups(p.g).smooth ?? (tiny ? 0.5 : 0.35);
+    const k = o.groups(p.g).smooth ?? (tiny ? 0.5 : hd ? 0.22 : 0.35);
     if (k <= 0) continue;
     let L = 0, A = 0, B = 0, n = 0;
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
@@ -192,7 +200,7 @@ export function pixelize(P: Passes, o: Opts): Art {
     const q = (f: number) => Ls[Math.min(Ls.length - 1, Math.floor(f * Ls.length))];
     const spread = q(0.95) - q(0.05);
     let K = Math.round(1 + Math.log2(list.length) / 1.55);
-    K = Math.min(K, info.steps ?? (tiny ? 4 : 6), list.length);
+    K = Math.min(K, info.steps ?? (tiny ? 4 : hd ? 7 : 6), list.length);
     if (spread < 0.04) K = Math.min(K, 2); else if (spread < 0.09) K = Math.min(K, 3);
     K = Math.max(1, K);
     // k-means, started at the brightness quantiles
@@ -306,37 +314,21 @@ export function pixelize(P: Passes, o: Opts): Art {
     }
     for (const i of picked) { const top = ramp[ramp.length - 1], [, C, hh] = lch(top); put(i, fromLch(Math.min(0.985, top[0] + 0.08), C * 0.45, toward(hh, 90, 30))); glints.push(i); }
   }
-  // ---- the selective outline round the silhouette (and round holes)
+  // ---- the outline round the silhouette (and round holes): crisp near-black
   const outline = new Uint8Array(N);
-  const LX = -0.6, LY = -0.8; // towards the light (up and to the left)
+  const ink = rgbToLab(...OUTLINE_RGB);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
     const i = y * w + x;
     if (solid[i]) continue;
-    const tally = new Map<number, number>();
+    let near = false;
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const xx = x + dx, yy = y + dy, j = yy * w + xx;
-      if (xx < 0 || yy < 0 || xx >= w || yy >= h || !solid[j]) continue;
-      const g = px[j].g;
-      if (o.groups(g).noOutline) continue;
-      tally.set(g, (tally.get(g) ?? 0) + 1);
+      if (xx < 0 || yy < 0 || xx >= w || yy >= h || !solid[j] || o.groups(px[j].g).noOutline) continue;
+      near = true;
+      break;
     }
-    if (!tally.size) continue;
-    // the side this pixel is on: the way out of the shape
-    let nx = 0, ny = 0;
-    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-      const xx = x + dx, yy = y + dy;
-      if ((dx || dy) && xx >= 0 && yy >= 0 && xx < w && yy < h && solid[yy * w + xx]) { nx -= dx; ny -= dy; }
-    }
-    const nl = Math.hypot(nx, ny) || 1, lit = (nx * LX + ny * LY) / nl;
-    // the neighbour material: the most common, the darker on a tie
-    let g = -1, bc = 0;
-    for (const [gg, c] of tally) if (c > bc || (c === bc && g >= 0 && ramps.get(gg)![0][0] < ramps.get(g)![0][0])) { bc = c; g = gg; }
-    const ramp = ramps.get(g)!, info = o.groups(g);
-    let c: Lab;
-    if (info.glow) { const [L, C, hh] = lch(ramp[0]); c = fromLch(L * 0.6, Math.max(C, 0.06), toward(hh, 30, 20)); }
-    else if (lit > 0.45 && ramp.length > 2) { const [L, C, hh] = lch(ramp[Math.min(2, ramp.length - 2)]); c = fromLch(L * 0.74, C * 1.08, toward(hh, 300, 10)); }
-    else { const [L, C, hh] = lch(ramp[0]); const deep = lit < -0.45 ? 0.5 : 0.6; c = fromLch(Math.max(0.1, Math.min(L * deep, 0.34)), Math.max(C * 1.1, 0.035), toward(hh, C < 0.02 ? 300 : inHue(hh, 95, 178) ? 205 : 300, 14)); }
-    put(i, c, 1);
+    if (!near) continue;
+    put(i, ink, 1);
     outline[i] = 1;
   }
   // ---- anti-aliasing with the sprite's own colours: an edge pixel the outline only clips leans towards it
@@ -348,7 +340,7 @@ export function pixelize(P: Passes, o: Opts): Art {
     let oc = -1;
     for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = x + dx, yy = y + dy, j = yy * w + xx; if (xx >= 0 && yy >= 0 && xx < w && yy < h && outline[j]) { oc = j; break; } }
     if (oc < 0) continue;
-    const t = clamp((0.86 - p.cov) * 1.1, 0, 0.55);
+    const t = clamp((0.86 - p.cov) * 0.9, 0, 0.42);
     const ramp = ramps.get(p.g)!;
     // blend, then snap to the nearest of the material's shades and the outline colour
     const mixed: Lab = [out[i * 4] + (out[oc * 4] - out[i * 4]) * t, out[i * 4 + 1] + (out[oc * 4 + 1] - out[i * 4 + 1]) * t, out[i * 4 + 2] + (out[oc * 4 + 2] - out[i * 4 + 2]) * t];
@@ -363,6 +355,8 @@ export function pixelize(P: Passes, o: Opts): Art {
     const [r, g, b] = labToRgb(out[i * 4], out[i * 4 + 1], out[i * 4 + 2]);
     d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b; d[i * 4 + 3] = Math.round(out[i * 4 + 3] * 255);
   }
+  const gid = new Int32Array(N).fill(-1);
+  for (let i = 0; i < N; i++) if (solid[i]) gid[i] = px[i].g;
   if (o.shadow) {
     for (let y = h - 1; y >= 1; y--) for (let x = w - 1; x >= 1; x--) {
       const i = y * w + x, j = (y - 1) * w + x - 1;
@@ -370,5 +364,5 @@ export function pixelize(P: Passes, o: Opts): Art {
       d[i * 4] = 40; d[i * 4 + 1] = 20; d[i * 4 + 2] = 26; d[i * 4 + 3] = 64;
     }
   }
-  return { w, h, d };
+  return { w, h, d, g: gid };
 }

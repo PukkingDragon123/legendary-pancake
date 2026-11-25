@@ -94,13 +94,15 @@ function grab(W: number, H: number): Uint8ClampedArray {
   reader.drawImage(R.domElement, 0, 0);
   return reader.getImageData(0, 0, W, H).data;
 }
+/** [icons9] -1..1: the key light and the lamp swing across the top (the gem's idle frames: its facets flash in turn) */
+let lightSwing = 0;
 /** light from the top left of the picture whatever way the camera looks: placed in the camera's own frame */
 function placeLights(c: THREE.Vector3, size: number) {
   const fwd = new THREE.Vector3(), up = new THREE.Vector3(), right = new THREE.Vector3();
   cam.matrixWorld.extractBasis(right, up, fwd); // fwd points from the subject towards the camera
   const put = (l: THREE.DirectionalLight, x: number, y: number, z: number) => { l.position.copy(c).addScaledVector(right, x * size * 4).addScaledVector(up, y * size * 4).addScaledVector(fwd, z * size * 4); l.target.position.copy(c); l.target.updateMatrixWorld(); };
-  put(key, -0.62, 0.78, 0.72);
-  lamp.position.copy(c).addScaledVector(right, -size * 0.75).addScaledVector(up, size * 0.95).addScaledVector(fwd, size * 1.5);
+  put(key, -0.62 + 0.5 * lightSwing, 0.78 - 0.12 * Math.abs(lightSwing), 0.72);
+  lamp.position.copy(c).addScaledVector(right, -size * (0.75 - 0.9 * lightSwing)).addScaledVector(up, size * 0.95).addScaledVector(fwd, size * 1.5);
   lamp.intensity = 9 * size * size;
   put(fill, 0.85, 0.05, 0.6);
   put(rim, 0.45, 0.55, -0.9);
@@ -385,15 +387,8 @@ function moonJewel(R: number, cut: number, off: [number, number]): THREE.Group {
   planarUV((j.children[0] as THREE.Mesh).geometry);
   return j;
 }
-/** a glossy acorn: a golden nut, a scaly cap with a rim, a little stem */
-function acorn(s = 1, tilt = 0): THREE.Group {
-  const nut = lathe(smoothProfile([[0, -0.62], [0.14, -0.58], [0.32, -0.42], [0.41, -0.18], [0.42, 0.02], [0.38, 0.14], [0, 0.16]], 3), M(0xb36c2c, { rough: 0.24, tex: 'grain' }), 32);
-  const capM = M(0x8a6a4a, { rough: 0.8, tex: 'plain' });
-  const cap = lathe(smoothProfile([[0, 0.44], [0.2, 0.4], [0.37, 0.29], [0.47, 0.14], [0.48, 0.05], [0.4, 0.03], [0, 0.05]], 3), capM, 32);
-  const rows = [0.1, 0.24].map((y, i) => at(torus([0.47, 0.38][i], 0.035, capM, Math.PI * 2, 6, 24), 0, y, 0, Math.PI / 2));
-  const stem = at(cyl(0.035, 0.05, 0.2, C.dark(), 8), 0.02, 0.52, 0, 0, 0, -0.3);
-  return grp(at(grp(nut, cap, ...rows, stem), 0, 0, 0, 0, 0, tilt, s)); // wrapped: a caller's at() sets the outer scale
-}
+/** [icons9] a glossy acorn (the packs, heaps): the currency's acorn, smaller; scales only where they can show */
+function acorn(s = 1, tilt = 0): THREE.Group { return acorn9(s * 0.7, tilt, s >= 0.5); }
 /** a lobed oak leaf blade, base at the origin pointing up, bent a little (veins painted in its texture) */
 function oakLeaf(len: number, m: THREE.Material): THREE.Mesh {
   const pts: P2[] = [];
@@ -408,16 +403,6 @@ function oakLeaf(len: number, m: THREE.Material): THREE.Mesh {
   for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) - Math.abs(p.getX(i)) * 0.4 + Math.sin((p.getY(i) / len) * Math.PI) * len * 0.08);
   me.geometry.computeVertexNormals();
   return me;
-}
-/** the currency: a big glossy acorn (chestnut nut with its little point, a scaly cup, a stalk) on an oak leaf */
-function bigAcorn(): THREE.Group {
-  const nut = lathe(smoothProfile([[0, -0.86], [0.04, -0.84], [0.06, -0.78], [0.2, -0.68], [0.36, -0.46], [0.44, -0.16], [0.44, 0.06], [0.4, 0.16], [0, 0.18]], 4), M(0xb06a2c, { rough: 0.22, tex: 'grain' }), 40);
-  const cupM = M(0x8e6e4c, { rough: 0.8, tex: 'plain' });
-  const cup = grp(lathe(smoothProfile([[0, 0.5], [0.16, 0.47], [0.36, 0.38], [0.5, 0.22], [0.53, 0.08], [0.5, 0.02], [0.42, 0.04], [0, 0.08]], 3), cupM, 40), ...[[0.14, 0.52], [0.28, 0.43]].map(([y, r]) => at(torus(r, 0.04, cupM, Math.PI * 2, 6, 32), 0, y, 0, Math.PI / 2)));
-  const lip = at(torus(0.5, 0.05, M(0xa8865e, { rough: 0.8, tex: 'plain' }), Math.PI * 2, 8, 40), 0, 0.04, 0, Math.PI / 2);
-  const stalk = tube([[0, 0.48, 0], [0.03, 0.62, 0], [0.1, 0.72, 0.02]], 0.045, M(0x5a3e28, { rough: 0.8, tex: 'bark' }), 8, 6);
-  const leaf = at(oakLeaf(1.0, M(0x6e9a3c, { rough: 0.55, tex: 'leaf' })), 0.12, 0.2, -0.4, 0, 0.3, -1.05);
-  return grp(at(grp(nut, cup, lip, stalk), 0, 0, 0, 0, 0, -0.12), leaf);
 }
 /** the acorn bag: a plump burlap sack tied at the neck with a red cord and bow, its ruffled top standing up, a golden
  * acorn stitched on the front, glossy acorns spilled at its foot */
@@ -466,14 +451,8 @@ function openSack(m: THREE.Material, n: number, s: number, cord?: THREE.Material
   if (cord) g.add(at(torus(0.58, 0.045, cord, Math.PI * 2, 8, 48), 0, 0.34, 0, Math.PI / 2));
   return g;
 }
-/** a brilliant-cut moon gem: a crown and pavilion of flat facets with a golden crescent set in its table */
-function moonGem(): O {
-  const gm = M(0x8656c8, { rough: 0.08, metal: 0.2, flat: true, tex: null, env: 1.5 });
-  const gem = lathe([[0, -0.9], [0.5, -0.3], [0.7, -0.06], [0.72, 0.03], [0.62, 0.24], [0.4, 0.42], [0, 0.44]], gm, 8);
-  gem.rotation.y = Math.PI / 10;
-  const moon = at(ext(shape(crescentPts(0.2, 0.17, [0.08, 0.05], 48)), 0.04, M(0xffd86a, { glow: 0.4, rough: 0.3, tex: null }), 0.02, 2), 0, 0.05, 0.58);
-  return grp(gem, moon);
-}
+/** [icons9] the moon gem (in the vault and the things icon): the currency's gem, its moon left out */
+const moonGem = (): O => moonGem9(false);
 /** a puffy cloud: an outline of overlapping bumps, extruded with a deep rounded bevel */
 function cloud(m: THREE.Material): O {
   const bumps: [number, number, number][] = [[-0.5, -0.05, 0.36], [-0.12, 0.2, 0.46], [0.34, 0.12, 0.38], [0.62, -0.08, 0.28], [0.05, -0.18, 0.4]];
@@ -499,6 +478,373 @@ function leafMesh(len: number, wid: number, m: THREE.Material, serr = 0): THREE.
 }
 /** a flat texture painted for a face (planar UV) */
 function faceTex(key: string, w: number, h: number, f: (x: number, y: number) => RGB): THREE.Texture { return paintTex('iconface-' + key, w, h, f); }
+
+// ------------------------------------------------------------------ [icons9] the side tools, the door and the currency, remade
+// Each says what it does at a glance: a market stall with a striped awning and an acorn sign (Shop), a rolled blueprint
+// with a pencil (Build), a top hat with a feather (Dress up), a globe on a brass stand (Map), a round hobbit door
+// (Outside; ajar with warm light for Inside), a checklist scroll (Quests). Painted faces are drawn texel by texel so
+// one texel lands on about one art pixel at 44 px.
+/** a little pixel canvas: set, lines, rectangles; then a nearest-filtered texture of it */
+function pixCanvas(w: number, h: number, bg: RGB) {
+  const d = new Uint8ClampedArray(w * h * 4);
+  const set = (x: number, y: number, c: RGB) => { x = Math.round(x); y = Math.round(y); if (x < 0 || y < 0 || x >= w || y >= h) return; const i = (y * w + x) * 4; d[i] = c[0]; d[i + 1] = c[1]; d[i + 2] = c[2]; d[i + 3] = 255; };
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) set(x, y, bg);
+  const line = (x0: number, y0: number, x1: number, y1: number, c: RGB) => { const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1); for (let i = 0; i <= n; i++) set(x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n, c); };
+  const rect = (x0: number, y0: number, x1: number, y1: number, c: RGB) => { line(x0, y0, x1, y0, c); line(x1, y0, x1, y1, c); line(x1, y1, x0, y1, c); line(x0, y1, x0, y0, c); };
+  const fill = (x0: number, y0: number, x1: number, y1: number, c: RGB) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) set(x, y, c); };
+  const get = (x: number, y: number): RGB => { const i = (Math.min(h - 1, Math.max(0, y)) * w + Math.min(w - 1, Math.max(0, x))) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+  const tex = (key: string) => paintTex('px9-' + key, w, h, (x, y) => get(x, y));
+  return { set, line, rect, fill, get, tex, w, h };
+}
+/** a material for a painted face that keeps its own texture coordinates */
+function faceMat(map: THREE.Texture, o: { rough?: number; side?: THREE.Side; pix?: Group; glow?: number; metal?: number } = {}): THREE.MeshStandardMaterial {
+  const m = new THREE.MeshStandardMaterial({ map, roughness: o.rough ?? 0.8, metalness: o.metal ?? 0, side: o.side ?? THREE.FrontSide, emissive: o.glow ? 0xffffff : 0x000000, emissiveMap: o.glow ? map : null, emissiveIntensity: o.glow ?? 0 });
+  if (o.pix) m.userData.pix = o.pix;
+  return m;
+}
+/** an arc of points (centre, radius, from, to), `n` steps */
+const arcPts = (cx: number, cy: number, r: number, a0: number, a1: number, n = 24): P2[] => Array.from({ length: n + 1 }, (_, i) => { const a = a0 + ((a1 - a0) * i) / n; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r] as P2; });
+
+// ---- Shop: a little market stall
+function shopStall(): O {
+  const honey = M(0xc8843e, { tex: 'grain', rough: 0.55 }), walnut = M(0x7a4426, { tex: 'grain', rough: 0.6 }), dark = M(0x5c3220, { tex: 'grain', rough: 0.6 });
+  const red = M(0xd0382e, { rough: 0.55, tex: 'weave' }), cream = M(0xf8ecd0, { rough: 0.6, tex: 'weave' });
+  const g = grp();
+  // the counter: a walnut box faced with four honey planks, a dark top board
+  g.add(at(ext(shape(rrectPts(1.5, 0.62, 0.02)), 0.56, walnut, 0.01, 1), 0, -0.55, 0));
+  for (let i = 0; i < 4; i++) g.add(at(ext(shape(rrectPts(0.365, 0.6, 0.025)), 0.06, honey, 0.025, 2), -0.565 + i * 0.377, -0.56, 0.3));
+  g.add(at(ext(shape(rrectPts(1.68, 0.09, 0.03)), 0.74, dark, 0.025, 2), 0, -0.2, 0.03));
+  // the back wall: dark planks; a shelf of little jars
+  for (let i = 0; i < 5; i++) g.add(at(ext(shape(rrectPts(0.29, 0.86, 0.02)), 0.05, i % 2 ? walnut : dark, 0.015, 1), -0.6 + i * 0.3, 0.22, -0.3));
+  g.add(at(ext(shape(rrectPts(1.4, 0.05, 0.015)), 0.2, honey, 0.012, 1), 0, 0.2, -0.2));
+  const jar = (x: number, col: number) => grp(at(lathe(smoothProfile([[0, 0], [0.08, 0], [0.09, 0.04], [0.09, 0.14], [0.065, 0.17], [0, 0.17]], 2), M(col, { rough: 0.12, metal: 0.1, tex: null, env: 1.3 }), 20), x, 0.225, -0.18), at(cyl(0.07, 0.07, 0.035, C.brass(), 16), x, 0.41, -0.18));
+  g.add(jar(-0.45, 0x5a9ad8), jar(-0.15, 0x6ab85a), jar(0.15, 0xe0a030), jar(0.45, 0xd8708a));
+  // the posts
+  for (const x of [-0.76, 0.76]) g.add(at(cyl(0.05, 0.055, 0.82, dark, 12), x, 0.2, 0.33), at(cyl(0.05, 0.05, 0.9, dark, 12), x, 0.24, -0.3));
+  // the striped awning, sloping down to the front, a brass rod and a scalloped valance along its edge
+  const N = 7, W = 1.92, sw = W / N;
+  const aw = grp();
+  for (let i = 0; i < N; i++) { const st = ext(shape(rrectPts(sw + 0.004, 0.86, 0.01)), 0.035, i % 2 ? cream : red, 0.012, 1); st.castShadow = false; aw.add(at(st, -W / 2 + sw * (i + 0.5), 0, 0)); }
+  g.add(at(aw, 0, 0.63, 0.06, -1.12, 0, 0));
+  const fy = 0.63 - 0.43 * Math.cos(1.12), fz = 0.06 + 0.43 * Math.sin(1.12);
+  g.add(at(cyl(0.026, 0.026, W + 0.08, C.brass(), 10), 0, fy, fz + 0.01, 0, 0, Math.PI / 2));
+  for (let i = 0; i < N; i++) {
+    const pts: P2[] = [[-sw / 2, 0.06], [sw / 2, 0.06], ...arcPts(0, -0.04, sw / 2, 0, -Math.PI, 10).slice(0, -1), [-sw / 2, -0.04]];
+    const sc = ext(shape(pts), 0.03, i % 2 ? cream : red, 0.012, 1);
+    sc.castShadow = false;
+    g.add(at(sc, -W / 2 + sw * (i + 0.5), fy - 0.07, fz + 0.03));
+  }
+  g.add(at(cyl(0.05, 0.05, W + 0.04, dark, 10), 0, 0.63 + 0.43 * Math.cos(1.12), 0.06 - 0.43 * Math.sin(1.12), 0, 0, Math.PI / 2));
+  // the sign on top: an arched board with a brass rim and a golden acorn
+  const board: P2[] = rrectPts(1.0, 0.44, 0.12);
+  const sign = grp(ext(shape(board), 0.07, M(0xf4e2b8, { tex: 'grain', rough: 0.6 }), 0.03, 2), at(ext(shape(offsetPts(board, 0.055)), 0.04, C.gold(), 0.025, 2), 0, 0, -0.03),
+    ...[-0.34, 0.34].map((x) => at(goldStar(0.07, 0.03, 4), x, 0, 0.06)));
+  // the sign's acorn: a glossy golden nut and a scaly brown cap in relief
+  const nutS = shape(Array.from({ length: 32 }, (_, i) => { const t = (i / 32) * Math.PI * 2, y = Math.cos(t); return [Math.sin(t) * 0.15 * (y < 0 ? 1 - -y * 0.45 : 1), y * 0.17 - 0.08] as P2; }));
+  const capS = shape([...arcPts(0, 0.02, 0.19, 0, Math.PI, 16), [-0.19, -0.01], [0.19, -0.01]]);
+  sign.add(at(grp(at(ext(nutS, 0.05, M(0xc8762a, { rough: 0.2, tex: 'plain', env: 1.2 }), 0.035, 3), 0, -0.03, 0), at(ext(capS, 0.05, M(0x6a4428, { rough: 0.7, tex: 'scale' }), 0.03, 2), 0, 0.03, 0.015), at(cyl(0.02, 0.02, 0.1, C.dark(), 6), 0.02, 0.24, 0.02, 0, 0, -0.35)), 0, -0.04, 0.06, 0, 0, 0, 0.82));
+  g.add(at(sign, 0, 1.03, -0.26));
+  for (const x of [-0.3, 0.3]) g.add(at(cyl(0.02, 0.02, 0.12, C.iron(), 6), x, 0.8, -0.27));
+  // the goods: a honey pot with a cloth cap, red apples, a little sack of acorns
+  const pot = grp(lathe(smoothProfile([[0, 0], [0.1, 0], [0.13, 0.08], [0.12, 0.2], [0.09, 0.24], [0, 0.24]], 2), M(0xe8a032, { rough: 0.14, metal: 0.1, tex: null, env: 1.3, glow: 0.08 }), 24),
+    at(lathe(smoothProfile([[0, 0.06], [0.12, 0.04], [0.15, -0.02], [0.13, -0.05], [0, -0.03]], 2), M(0xd84a3a, { rough: 0.6, tex: 'weave' }), 20), 0, 0.25, 0));
+  g.add(at(pot, -0.52, -0.155, 0.08));
+  const apple = (x: number, y: number, z: number, s: number) => at(grp(lathe(smoothProfile([[0, -0.1], [0.07, -0.095], [0.11, -0.03], [0.105, 0.04], [0.06, 0.085], [0.015, 0.07], [0, 0.06]], 3), M(0xd8322a, { rough: 0.22 }), 20), at(cyl(0.008, 0.01, 0.06, C.dark(), 5), 0.005, 0.09, 0, 0, 0, -0.3)), x, y, z, 0, 0, 0, s);
+  g.add(apple(-0.16, -0.065, 0.1, 1), apple(0.03, -0.065, 0.13, 1.05), apple(-0.06, 0.06, 0.08, 0.95));
+  g.add(at(acornBag({ spill: 0 }), 0.46, -0.03, 0.06, 0, 0.2, 0, 0.18));
+  return g;
+}
+
+// ---- Build: a blueprint, half unrolled, a pencil across it
+function blueprintTex(): THREE.Texture {
+  const BG = hex('#0a4aa6'), GRID = hex('#185ab4'), INK = hex('#f4faff'), SOFT = hex('#7cc0f0');
+  const c = pixCanvas(28, 26, BG);
+  for (let x = 2; x < 28; x += 3) c.line(x, 0, x, 25, GRID);
+  for (let y = 2; y < 26; y += 3) c.line(0, y, 27, y, GRID);
+  c.rect(0, 0, 27, 25, SOFT);
+  // a little house: roof, walls, chimney, door, window; a dimension line under it
+  c.line(4, 11, 13, 3, INK); c.line(13, 3, 22, 11, INK);
+  c.rect(6, 11, 20, 19, INK);
+  c.rect(17, 4, 18, 7, INK);
+  c.rect(11, 14, 14, 19, INK);
+  c.rect(16, 13, 18, 15, INK); c.rect(8, 13, 9, 15, INK);
+  c.line(4, 22, 22, 22, SOFT); c.line(4, 21, 4, 23, SOFT); c.line(22, 21, 22, 23, SOFT);
+  return c.tex('blueprint9');
+}
+function blueprint(): O {
+  const sheetG = new THREE.PlaneGeometry(1.36, 1.3, 14, 14);
+  const p = sheetG.attributes.position as THREE.BufferAttribute;
+  // a gentle wave across, the bottom-left corner curling up
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i); p.setZ(i, Math.sin(((x + 0.68) / 1.36) * Math.PI * 1.2) * 0.04 + Math.max(0, -0.3 - x - y) ** 2 * 0.5); }
+  sheetG.computeVertexNormals();
+  const sheetM = faceMat(blueprintTex(), { rough: 0.85, side: THREE.DoubleSide, pix: { smooth: 0, flat: true, steps: 4 } });
+  sheetM.color.setScalar(0.86);
+  const sheet = mesh(sheetG, sheetM);
+  // the roll at the right edge: the same blue paper, a white spiral where it is cut
+  const blue = M(0x1450a8, { rough: 0.7, tex: 'paper' });
+  const spiral = paintTex('px9-spiral', 16, 16, (x, y) => { const dx = x - 7.5, dy = y - 7.5, r = Math.hypot(dx, dy), a = Math.atan2(dy, dx); return r > 7.4 ? hex('#1450a8') : (r + (a / (Math.PI * 2)) * 2.4) % 2.4 < 0.9 ? hex('#f2f8ff') : hex('#1450a8'); });
+  const endM = faceMat(spiral, { rough: 0.8, pix: { smooth: 0, flat: true } });
+  const roll = grp(cyl(0.17, 0.17, 1.42, blue, 28), ...[0.711, -0.711].map((y) => at(mesh(planarUV(new THREE.CircleGeometry(0.168, 28)), endM), 0, y, 0, y > 0 ? -Math.PI / 2 : Math.PI / 2, 0, 0)));
+  // the pencil: yellow hexagonal lacquer, a brass ferrule and a pink eraser, a sharpened cedar point
+  const lac = M(0xf6b830, { rough: 0.3, tex: 'plain', flat: true });
+  const pencil = grp(mesh(new THREE.CylinderGeometry(0.095, 0.095, 1.2, 6), lac),
+    at(lathe(smoothProfile([[0.095, 0], [0.06, 0.12], [0.025, 0.21]], 2), M(0xecc690, { rough: 0.7, tex: 'grain' }), 12), 0, 0.6, 0), at(lathe([[0.027, 0], [0.01, 0.07], [0, 0.085]], M(0x3a3440, { rough: 0.4, tex: null }), 10), 0, 0.81, 0),
+    at(cyl(0.1, 0.1, 0.13, C.brass(), 14), 0, -0.665, 0), at(torus(0.1, 0.014, C.gold(), Math.PI * 2, 6, 16), 0, -0.63, 0, Math.PI / 2), at(torus(0.1, 0.014, C.gold(), Math.PI * 2, 6, 16), 0, -0.7, 0, Math.PI / 2),
+    at(lathe(smoothProfile([[0.095, 0], [0.096, -0.09], [0.075, -0.15], [0, -0.165]], 2), M(0xec7a8c, { rough: 0.6 }), 14), 0, -0.73, 0));
+  return at(grp(at(sheet, -0.12, 0, 0), at(roll, 0.72, 0, 0.12), at(pencil, -0.02, -0.28, 0.3, 0, 0, -1.05)), 0, 0, 0, 0, 0, 0.1);
+}
+
+// ---- Dress up: a top hat with a satin band, a gold buckle and a feather
+function topHat(): O {
+  const felt = M(0x4a2c74, { rough: 0.5, tex: 'felt' });
+  const crown = lathe(smoothProfile([[0.47, -0.3], [0.46, 0.0], [0.48, 0.36], [0.52, 0.6], [0.51, 0.64], [0.4, 0.67], [0, 0.68]], 3), felt, 56);
+  const brim = lathe(smoothProfile([[0.46, -0.34], [0.7, -0.345], [0.96, -0.33], [1.01, -0.3], [1.0, -0.26], [0.92, -0.28], [0.7, -0.3], [0.46, -0.27]], 3), felt, 64);
+  const bp = brim.geometry.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < bp.count; i++) { const x = bp.getX(i), z = bp.getZ(i); bp.setXYZ(i, x, bp.getY(i) + 0.2 * Math.max(0, Math.abs(x) - 0.45) ** 2 / 0.3, z * 0.82); }
+  brim.geometry.computeVertexNormals();
+  const band = lathe([[0.478, -0.29], [0.482, -0.06], [0.47, -0.06], [0.466, -0.29]], M(0xc0303c, { rough: 0.28, tex: 'plain' }), 56);
+  const buckle = shape(rrectPts(0.22, 0.2, 0.03)); buckle.holes.push(new THREE.Path(rrectPts(0.12, 0.1, 0.02).map(([x, y]) => V2c(x, y))));
+  const bk = at(ext(buckle, 0.03, C.gold(), 0.015, 2), 0, -0.175, 0.49);
+  const plume = M(0x2fa088, { rough: 0.5, tex: 'leaf' }), tip = M(0xf0c040, { rough: 0.45, tex: 'plain' });
+  const feather = at(grp(leafMesh(0.5, 0.13, plume, 0), at(leafMesh(0.12, 0.05, tip, 0), 0, 0.44, 0.02), at(cyl(0.012, 0.016, 1.0, C.cream(), 6), 0, -0.02, 0.03)), 0.38, 0.22, 0.28, -0.25, 0.5, -0.55);
+  return at(grp(crown, brim, band, bk, feather), 0, 0, 0, 0, 0, 0.12);
+}
+
+// ---- Map: a globe on a brass stand
+let earthP: Promise<THREE.Texture> | null = null;
+/** the Earth (from the game's NASA day map) painted as a globe-maker would: blue seas with lighter shallows, green
+ * lowlands, ochre deserts, white ice */
+function earthTex(): Promise<THREE.Texture> {
+  earthP ??= new Promise((res) => {
+    const im = new Image();
+    const make = () => {
+      const W = 192, H = 96, cv = document.createElement('canvas');
+      cv.width = W; cv.height = H;
+      const g = cv.getContext('2d', { willReadFrequently: true })!;
+      g.imageSmoothingQuality = 'high';
+      if (im.width) g.drawImage(im, 0, 0, W, H); else { g.fillStyle = '#103060'; g.fillRect(0, 0, W, H); }
+      const src = g.getImageData(0, 0, W, H).data, land = new Uint8Array(W * H), kind = new Uint8Array(W * H);
+      for (let i = 0; i < W * H; i++) {
+        const r = src[i * 4], gg = src[i * 4 + 1], b = src[i * 4 + 2], lum = (r * 0.3 + gg * 0.59 + b * 0.11) / 255;
+        const y = Math.floor(i / W);
+        if (lum > 0.62 || y < 4 || y > H - 8) { land[i] = 1; kind[i] = 3; continue; } // ice
+        if ((r + gg) / 2 < b * 0.92 && lum < 0.5) continue; // sea
+        land[i] = 1;
+        kind[i] = r > gg * 1.06 && lum > 0.3 ? 2 : lum < 0.2 ? 0 : 1; // desert, forest, grassland
+      }
+      const out = g.createImageData(W, H);
+      const SEA = hex('#2a6cc2'), SHALLOW = hex('#4c98de'), LAND = [hex('#3a8a3c'), hex('#58a844'), hex('#d4ac62'), hex('#f2f6fa')];
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x;
+        let c: RGB;
+        if (land[i]) c = LAND[kind[i]];
+        else {
+          let near = false;
+          for (let dy = -2; dy <= 2 && !near; dy++) for (let dx = -2; dx <= 2; dx++) if (land[Math.min(H - 1, Math.max(0, y + dy)) * W + ((x + dx + W) % W)]) { near = true; break; }
+          c = near ? SHALLOW : SEA;
+        }
+        out.data.set([c[0], c[1], c[2], 255], i * 4);
+      }
+      g.putImageData(out, 0, 0);
+      const t = new THREE.CanvasTexture(cv);
+      t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.anisotropy = 4;
+      res(t);
+    };
+    im.onload = make; im.onerror = make;
+    im.src = '/models/globe/earth_day.webp';
+  });
+  return earthP;
+}
+async function globe(): Promise<O> {
+  const ball = mesh(new THREE.SphereGeometry(0.62, 64, 40), faceMat(await earthTex(), { rough: 0.3, pix: { smooth: 0.1, glossy: true } }));
+  ball.rotation.y = -1.75; // Africa and Europe in front, the Atlantic and a little of the Americas to the left
+  const brass = C.brass();
+  const ring = torus(0.7, 0.04, brass, Math.PI * 2, 10, 72);
+  const pins = [1, -1].map((s) => at(lathe(smoothProfile([[0, 0], [0.05, 0.01], [0.04, 0.06], [0, 0.08]], 2), brass, 12), 0, s * 0.66, 0, s > 0 ? 0 : Math.PI, 0, 0));
+  const tilted = at(grp(ball, ...pins), 0, 0, 0, 0, 0, -0.41);
+  const stem = at(lathe(smoothProfile([[0.035, 0.0], [0.05, -0.06], [0.085, -0.12], [0.05, -0.18], [0.04, -0.24], [0.07, -0.3]], 3), brass, 20), 0, -0.72, 0);
+  const base = at(lathe(smoothProfile([[0, 0.06], [0.2, 0.06], [0.34, 0.03], [0.42, -0.04], [0.43, -0.09], [0, -0.09]], 3), C.dark(), 40), 0, -1.08, 0);
+  const trim = at(torus(0.41, 0.022, C.gold(), Math.PI * 2, 8, 48), 0, -1.12, 0, Math.PI / 2);
+  return grp(tilted, ring, stem, base, trim);
+}
+
+// ---- the door: a round hobbit door of green-painted planks in a ring of stones, iron strap hinges, a brass knocker
+function roundDoor(open: boolean): O {
+  const R = 0.72, g = grp();
+  const stones = [M(0x8e806c, { tex: 'stone', rough: 0.85 }), M(0x72685c, { tex: 'stone', rough: 0.85 }), M(0xa29278, { tex: 'stone', rough: 0.85 })], moss = M(0x4e9234, { tex: 'foliage', rough: 0.8 });
+  const n = 13;
+  const mortar = shape(arcPts(0, 0, 1.03, 0, Math.PI * 2, 48)); mortar.holes.push(new THREE.Path(arcPts(0, 0, 0.79, 0, -Math.PI * 2, 48).map(([x, y]) => V2c(x, y))));
+  g.add(at(ext(mortar, 0.1, M(0x2e2420, { rough: 0.95, tex: 'plain' }), 0.01, 1), 0, 0, -0.08)); // the mortar behind
+  for (let i = 0; i < n; i++) {
+    const a0 = -Math.PI / 2 + ((i + 0.1) / n) * Math.PI * 2, a1 = -Math.PI / 2 + ((i + 0.9) / n) * Math.PI * 2, ro = 1.0 + (h2(i, 3, 7) - 0.5) * 0.08;
+    const pts: P2[] = [...arcPts(0, 0, 0.82, a0, a1, 6), ...arcPts(0, 0, ro, a1, a0, 6)];
+    g.add(at(ext(shape(pts), 0.24, stones[(i * 2 + (i % 3)) % 3], 0.02, 2), 0, 0, -0.02));
+  }
+  // moss on the top stones, a step at the foot
+  g.add(at(ext(shape([...arcPts(0, 0, 1.03, 1.2, 2.3, 10), ...arcPts(0, 0, 0.92, 2.3, 1.2, 10)]), 0.06, moss, 0.03, 2), 0, 0, 0.13));
+  g.add(at(ext(shape(rrectPts(1.56, 0.16, 0.04)), 0.5, stones[1], 0.03, 2), 0, -0.98, 0.08));
+  // the doorway behind: dark, or warm lamplight when the door stands open
+  const inner = open
+    ? Object.assign(new THREE.MeshBasicMaterial({ map: paintTex('px9-warm', 32, 32, (x, y) => { const r = Math.hypot(x - 15.5, y - 13) / 18; return r < 0.4 ? hex('#ffd65a') : r < 0.72 ? hex('#fb9a2a') : hex('#d2601c'); }), toneMapped: false }), { userData: { pix: { glow: true, steps: 3 } } })
+    : M(0x2a1a14, { rough: 0.9, tex: 'plain' });
+  g.add(at(mesh(planarUV(new THREE.CircleGeometry(0.82, 48)), inner), 0, 0, -0.06));
+  // the door: five planks cut to the circle, two strap hinges, the knocker, a knob
+  const door = grp(), pw = (2 * R) / 5;
+  const greens = [M(0x2c7a3e, { tex: 'grain', rough: 0.5 }), M(0x358646, { tex: 'grain', rough: 0.5 })];
+  door.add(at(mesh(planarUV(new THREE.CircleGeometry(R - 0.01, 48)), M(0x1c3a22, { rough: 0.9, tex: 'plain' })), R, 0, -0.035)); // dark between the planks
+  for (let k = 0; k < 5; k++) {
+    const x0 = -R + k * pw + 0.02, x1 = -R + (k + 1) * pw - 0.02, pts: P2[] = [];
+    for (let j = 0; j <= 8; j++) { const x = x0 + ((x1 - x0) * j) / 8; pts.push([x, -Math.sqrt(Math.max(0, R * R - x * x))]); }
+    for (let j = 8; j >= 0; j--) { const x = x0 + ((x1 - x0) * j) / 8; pts.push([x, Math.sqrt(Math.max(0, R * R - x * x))]); }
+    door.add(at(ext(shape(pts), 0.08, greens[k % 2], 0.02, 2), R, 0, 0));
+  }
+  const iron = M(0x34343e, { metal: 0.6, rough: 0.45, tex: null });
+  for (const y of [0.36, -0.36]) {
+    const len = 1.0, strap: P2[] = [[0, -0.05], [len - 0.1, -0.05], [len, 0], [len - 0.1, 0.05], [0, 0.05]];
+    door.add(at(ext(shape(strap), 0.025, iron, 0.012, 1), 0.02, y, 0.06));
+    for (let k = 0; k < 4; k++) door.add(at(ball(0.022, iron, 8, 6), 0.12 + k * 0.24, y, 0.085));
+    door.add(at(cyl(0.045, 0.045, 0.2, iron, 10), 0, y, 0.03));
+  }
+  const brass = M(0xe0a848, { metal: 0.65, rough: 0.28, tex: null, env: 1.15 });
+  door.add(at(lathe(smoothProfile([[0, 0.04], [0.09, 0.03], [0.1, 0], [0, 0]], 2), brass, 24), R, 0.12, 0.05, Math.PI / 2));
+  door.add(at(torus(0.13, 0.026, brass, Math.PI * 2, 8, 32), R, -0.02, 0.1));
+  door.add(at(ball(0.055, brass, 14, 10), R + 0.46, -0.04, 0.08));
+  // hinged at its left edge; ajar, it swings out towards us
+  door.position.set(-R, 0, 0);
+  if (open) door.rotation.y = -0.85;
+  g.add(door);
+  // flowers by the step
+  for (const [x, c] of [[0.62, 0xf0c040], [0.76, 0xe0607a], [-0.7, 0xf4f0e8]] as [number, number][]) g.add(at(grp(at(cyl(0.012, 0.012, 0.16, M(0x4a8a3a, { tex: null }), 5), 0, -0.82, 0.3), at(ball(0.05, M(c, { rough: 0.5, tex: 'plain' }), 8, 6), 0, -0.73, 0.3)), x, 0, 0));
+  return g;
+}
+
+// ---- Quests: a checklist scroll with a wax seal and a quill
+function questScroll(): O {
+  const PAPER = hex('#f8ead0'), INK = hex('#5a4652'), RED = hex('#b8402e'), TICK = hex('#2f8a42');
+  const c = pixCanvas(28, 34, PAPER);
+  for (let y = 0; y < 34; y++) for (let x = 0; x < 28; x++) if (h2(x, y, 5) > 0.86) c.set(x, y, hex('#efdcbc'));
+  c.fill(6, 3, 21, 4, RED);
+  for (const [i, done] of [[0, 1], [1, 1], [2, 0]] as [number, number][]) {
+    const y = 9 + i * 7;
+    c.rect(3, y, 7, y + 4, INK);
+    if (done) { c.line(4, y + 2, 5, y + 3, TICK); c.line(5, y + 3, 8, y - 1, TICK); c.set(4, y + 1, TICK); }
+    c.line(10, y + 1, 24 - i * 3, y + 1, INK); c.line(10, y + 3, 19 + i, y + 3, hex('#9a8a90'));
+  }
+  const sheetG = new THREE.PlaneGeometry(1.0, 1.22, 8, 10);
+  const p = sheetG.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(((p.getX(i) + 0.5) / 1.0) * Math.PI) * 0.05);
+  sheetG.computeVertexNormals();
+  const sheet = mesh(sheetG, faceMat(c.tex('quest9'), { rough: 0.85, side: THREE.DoubleSide, pix: { smooth: 0, flat: true, steps: 5 } }));
+  const roll = (y: number) => grp(at(lathe(smoothProfile([[0.12, -0.56], [0.13, 0], [0.12, 0.56]], 2), M(0xf2dcb2, { tex: 'paper', rough: 0.8 }), 20), 0, y, 0.06, 0, 0, Math.PI / 2),
+    ...[-1, 1].map((s) => at(lathe(smoothProfile([[0, 0], [0.06, 0.02], [0.08, 0.08], [0.05, 0.13], [0, 0.15]], 2), C.dark(), 12), s * 0.57, y, 0.06, 0, 0, -s * Math.PI / 2)));
+  const wax = M(0xc02c34, { rough: 0.3, tex: 'plain' }), rib = M(0x2f5aa0, { rough: 0.4, tex: 'weave' });
+  const sealPts: P2[] = Array.from({ length: 40 }, (_, i) => { const a = (i / 40) * Math.PI * 2, r = 0.17 + Math.sin(a * 7) * 0.012 + (h2(i, 2, 9) - 0.5) * 0.02; return [Math.cos(a) * r, Math.sin(a) * r]; });
+  const seal = grp(...[-1, 1].map((s) => at(ext(shape([[0, 0], [s * 0.1, -0.34], [s * 0.05, -0.3], [s * 0.02, -0.36], [s * -0.05, -0.02]]), 0.02, rib, 0.01, 1), s * 0.03, -0.02, -0.02)),
+    ext(shape(sealPts), 0.06, wax, 0.035, 2), at(goldStar(0.08, 0.035, 5, M(0xe84850, { rough: 0.3, tex: 'plain' })), 0, 0, 0.05));
+  const vane: P2[] = []; for (let i = 0; i <= 40; i++) { const t = (i / 40) * Math.PI * 2, y = Math.cos(t); vane.push([Math.sin(t) * 0.14 * (1 + 0.25 * y) * (Math.sin(t * 9) > 0.8 ? 0.85 : 1), y * 0.42 + 0.1]); }
+  const quill = at(grp(ext(shape(vane), 0.03, M(0x4a8ad0, { rough: 0.55, tex: 'plain' }), 0.02, 2), at(cyl(0.014, 0.022, 1.0, M(0xf0e4c4, { tex: null }), 6), 0, -0.1, 0.03), at(lathe([[0.022, 0], [0.008, -0.08], [0, -0.1]], M(0x3a3040, { tex: null }), 8), 0, -0.6, 0.03)), 0.48, 0.12, 0.2, 0, 0, -0.62);
+  return grp(quill, at(sheet, 0, -0.05, 0), roll(0.62), roll(-0.69), at(seal, 0.3, -0.4, 0.12));
+}
+
+// ---- the currency: a glossy acorn with a cup of real scales, on an oak leaf; a brilliant-cut moon gem
+/** the nut's skin: chestnut with faint stripes along it and a dark point (lathe texture coordinates) */
+function nutTex(): THREE.Texture {
+  return paintTex('px9-nut', 64, 32, (x, y) => {
+    const u = x / 64, v = y / 31, s = Math.sin(u * Math.PI * 2 * 14 + fbm(u * 9, v * 3, 4) * 4) * 0.5 + 0.5;
+    const base: RGB = v < 0.1 ? hex('#5a3016') : v < 0.16 ? hex('#8a4a1e') : hex('#b0621e');
+    const k = 0.9 + s * 0.14 + (fbm(u * 30, v * 6, 2) - 0.5) * 0.1;
+    return [base[0] * k, base[1] * k, base[2] * k];
+  });
+}
+/**
+ * The acorn: a plump glossy nut with its little point, a cup of overlapping scales in rows (each a real little scale,
+ * in two browns, set like roof tiles), a rolled rim, a short twig stalk.
+ */
+function acorn9(s = 1, tilt = 0, detail = true): THREE.Group {
+  const nutM = new THREE.MeshStandardMaterial({ map: nutTex(), roughness: 0.18, envMapIntensity: 1.3 });
+  nutM.userData.pix = { glossy: true, smooth: 0.15 };
+  const nut = lathe(smoothProfile([[0, -0.86], [0.035, -0.84], [0.06, -0.78], [0.2, -0.68], [0.36, -0.46], [0.44, -0.16], [0.445, 0.06], [0.4, 0.16], [0, 0.18]], 4), nutM, 48);
+  const cupBase = M(0x3c2616, { rough: 0.85, tex: 'plain' });
+  const prof = smoothProfile([[0.0, 0.5], [0.16, 0.48], [0.36, 0.39], [0.5, 0.23], [0.54, 0.08], [0.5, 0.02]], 6);
+  const cup = lathe([...prof, [0.42, 0.04], [0, 0.08]], cupBase, 48);
+  const g = grp(nut, cup);
+  if (detail) {
+    const sA = M(0xa07448, { rough: 0.75, tex: 'plain' }), sB = M(0x7c5432, { rough: 0.8, tex: 'plain' }), sC = M(0xc09464, { rough: 0.7, tex: 'plain' });
+    const scaleG = new THREE.SphereGeometry(1, 10, 7);
+    // along the cup's outline from its crown to its rim
+    const L: number[] = [0];
+    for (let i = 1; i < prof.length; i++) L.push(L[i - 1] + Math.hypot(prof[i][0] - prof[i - 1][0], prof[i][1] - prof[i - 1][1]));
+    const atLen = (d: number): [number, number, number, number] => {
+      let i = 1; while (i < prof.length - 1 && L[i] < d) i++;
+      const t = (d - L[i - 1]) / (L[i] - L[i - 1] || 1), r = prof[i - 1][0] + (prof[i][0] - prof[i - 1][0]) * t, y = prof[i - 1][1] + (prof[i][1] - prof[i - 1][1]) * t;
+      const dr = prof[i][0] - prof[i - 1][0], dy = prof[i][1] - prof[i - 1][1], l = Math.hypot(dr, dy) || 1;
+      return [r, y, dr / l, dy / l];
+    };
+    const rows = 7, total = L[L.length - 1];
+    for (let j = 0; j < rows; j++) {
+      const [r, y, dr, dy] = atLen(total * (0.17 + (j / (rows - 1)) * 0.74));
+      const count = Math.max(6, Math.round((Math.PI * 2 * r) / 0.1));
+      for (let k = 0; k < count; k++) {
+        const a = ((k + (j % 2) * 0.5) / count) * Math.PI * 2, e = new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
+        const T = e.clone().multiplyScalar(dr).add(new THREE.Vector3(0, dy, 0)).normalize(); // down the cup, towards the rim
+        const Nn = e.clone().multiplyScalar(-dy).add(new THREE.Vector3(0, dr, 0)).normalize(); // out of the cup
+        const X = new THREE.Vector3().crossVectors(T, Nn).normalize();
+        const m = (j + k) % 3 === 0 ? sC : (j + k) % 2 ? sA : sB;
+        const sc = mesh(scaleG, m);
+        sc.matrixAutoUpdate = false;
+        const basis = new THREE.Matrix4().makeBasis(X.multiplyScalar(0.05), T.multiplyScalar(0.062), Nn.clone().multiplyScalar(0.026));
+        basis.setPosition(e.clone().multiplyScalar(r).add(new THREE.Vector3(0, y, 0)).addScaledVector(Nn, 0.01));
+        sc.matrix.copy(basis);
+        g.add(sc);
+      }
+    }
+  }
+  g.add(at(torus(0.505, 0.045, M(0xa8865e, { rough: 0.75, tex: 'plain' }), Math.PI * 2, 8, 48), 0, 0.045, 0, Math.PI / 2));
+  g.add(tube([[0, 0.48, 0], [0.03, 0.62, 0], [0.1, 0.72, 0.02]], 0.045, M(0x5a3e28, { rough: 0.8, tex: 'bark' }), 8, 6));
+  return grp(at(g, 0, 0, 0, 0, 0, tilt, s));
+}
+/** the currency acorn: the detailed acorn, leaning a little, on an oak leaf */
+function bigAcorn9(): THREE.Group {
+  const leaf = at(oakLeaf(1.0, M(0x5e9e36, { rough: 0.55, tex: 'leaf', pix: { smooth: 0.1 } })), 0.12, 0.2, -0.4, 0, 0.3, -1.05);
+  return grp(acorn9(1, -0.12), leaf);
+}
+/**
+ * The moon gem: a brilliant cut (an octagonal table, star and upper-girdle facets, a girdle, lower-girdle and pavilion
+ * facets down to the culet), every facet flat; the facets are cut from violets, lilac and pink in a pattern like the
+ * light thrown about inside a real stone, the inner facets glowing a little (`withMoon`: a golden crescent on the table).
+ */
+function moonGem9(withMoon = false): O {
+  const pal = [0x2c1264, 0x5a2ab4, 0x8a52e0, 0xb88cf4, 0xe8a8f4, 0xf6ecff];
+  const mats = pal.map((c, i) => { const m = new THREE.MeshStandardMaterial({ color: c, roughness: 0.1, metalness: 0.25, flatShading: true, envMapIntensity: 1.4, emissive: c, emissiveIntensity: [0.1, 0.16, 0.2, 0.24, 0.32, 0.3][i] }); m.userData.pix = { steps: 2, smooth: 0, glossy: i >= 3, flat: true }; return m; });
+  const N = 8, rot = Math.PI / 8, P: number[] = [], groups: [number, number][] = [];
+  const v = (r: number, y: number, a: number) => [Math.cos(a) * r, y, Math.sin(a) * r];
+  const tri = (a: number[], b: number[], c: number[], m: number) => { groups.push([P.length / 3, m]); P.push(...a, ...c, ...b); };
+  const T = (i: number) => v(0.4, 0.42, (i / N) * Math.PI * 2 + rot), G = (j: number) => v(0.76, 0.06, (j / (N * 2)) * Math.PI * 2 + rot), G2 = (j: number) => v(0.76, -0.04, (j / (N * 2)) * Math.PI * 2 + rot);
+  const Pv = (i: number) => v(0.36, -0.46, (i / N) * Math.PI * 2 + rot), Q = (i: number) => v(0.15, -0.76, ((i + 0.5) / N) * Math.PI * 2 + rot), cul = [0, -1.0, 0], top = [0, 0.42, 0];
+  for (let i = 0; i < N; i++) {
+    tri(top, T(i), T(i + 1), 5); // the table
+    tri(T(i), G(2 * i + 1), T(i + 1), i % 2 ? 3 : 2); // star facets
+    tri(T(i), G(2 * i), G(2 * i + 1), i % 2 ? 1 : 3); // upper girdle facets
+    tri(T(i + 1), G(2 * i + 1), G(2 * i + 2), i % 2 ? 4 : 1);
+    for (const j of [2 * i, 2 * i + 1]) { tri(G(j), G2(j), G2(j + 1), 1); tri(G(j), G2(j + 1), G(j + 1), 1); } // the girdle
+    tri(G2(2 * i), Pv(i), G2(2 * i + 1), i % 2 ? 2 : 0); // lower girdle facets
+    tri(G2(2 * i + 1), Pv(i + 1), G2(2 * i + 2), i % 2 ? 0 : 2);
+    tri(G2(2 * i + 1), Pv(i), Pv(i + 1), i % 2 ? 3 : 1);
+    // the pavilion's mains, split: an upper band and a lower star round the culet, lit from within
+    tri(Pv(i), Q(i), Pv(i + 1), [3, 1, 4, 2][i % 4]);
+    tri(Pv(i), Q(i - 1), Q(i), [0, 2, 1, 3][i % 4]);
+    tri(Q(i), cul, Q(i + 1), [4, 5, 2, 4][i % 4]);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  for (const [start, m] of groups) geo.addGroup(start, 3, m);
+  geo.computeVertexNormals();
+  const gem = new THREE.Mesh(geo, mats);
+  gem.castShadow = true; gem.receiveShadow = true;
+  const g = grp(gem);
+  if (withMoon) g.add(at(ext(shape(crescentPts(0.17, 0.15, [0.07, 0.05], 48)), 0.02, M(0xffe08a, { glow: 0.9, rough: 0.3, tex: null, pix: { glow: true } }), 0.01, 1), -0.02, 0.43, 0.02, -Math.PI / 2, 0, 0));
+  return g;
+}
 
 // ------------------------------------------------------------------ the icon models
 type Make = () => O | Promise<O>;
@@ -737,31 +1083,14 @@ const ICONS: Record<string, Spec> = {
       return grp(ext(sh, 0.06, M(0xf0c890, { rough: 0.8, tex: 'weave' }), 0.03, 2), at(stamp, -0.25, 0.02, 0.07), tube([[0.5, 0.1, 0], [0.66, 0.46, 0.06], [0.74, 0.86, 0]], 0.035, C.red(), 12, 5)); }, yaw: 0.22, pitch: 0.22,
   },
   // the side tools
-  tool_build: {
-    make: () => { const head = shape([[-0.62, 0.12], [-0.5, 0.2], [0.1, 0.2], [0.18, 0.26], [0.42, 0.22], [0.66, 0.34], [0.72, 0.28], [0.5, 0.1], [0.4, -0.04], [0.16, -0.06], [0.1, -0.16], [-0.5, -0.16], [-0.62, -0.08]]);
-      return at(grp(at(lathe(smoothProfile([[0, -0.95], [0.1, -0.92], [0.12, -0.6], [0.09, -0.1], [0.1, 0.32]], 3), M(0xd08a48, { tex: 'grain', rough: 0.55 }), 16), 0, -0.1, 0), at(ext(head, 0.24, C.steel(), 0.05, 2), -0.12, 0.38, 0), at(cyl(0.06, 0.06, 0.26, C.dark(), 10), 0, 0.38, 0, Math.PI / 2)), 0, 0, 0, 0, 0, 0.55); }, yaw: 0.38, pitch: 0.28,
-  },
-  tool_shop: {
-    make: () => { const wick = M(0xd8a050, { rough: 0.9, tex: 'weave', rep: 2 });
-      const apple = at(grp(lathe(smoothProfile([[0, -0.26], [0.18, -0.24], [0.28, -0.06], [0.26, 0.12], [0.12, 0.2], [0.02, 0.16]], 3), M(0xe23a32, { rough: 0.25 }), 24), at(cyl(0.015, 0.02, 0.12, C.dark(), 6), 0.02, 0.24, 0, 0, 0, -0.3), at(leafMesh(0.1, 0.06, C.leaf()), 0.1, 0.26, 0, 0, 0, -1.1)), -0.3, 0.32, 0.12);
-      return grp(lathe(smoothProfile([[0, -0.62], [0.62, -0.6], [0.8, -0.2], [0.88, 0.12], [0.86, 0.18], [0.8, 0.16]], 3), wick, 40), at(torus(0.84, 0.05, M(0xb87a3a, { tex: 'grain' }), Math.PI * 2, 8, 40), 0, 0.16, 0, Math.PI / 2), at(torus(0.78, 0.05, M(0xb07a3a, { tex: 'grain' }), Math.PI, 8, 32), 0, 0.15, -0.05),
-        apple, at(acorn(0.62, 0.3), 0.24, 0.4, 0.14), at(lathe(smoothProfile([[0, -0.18], [0.24, -0.14], [0.28, 0], [0.2, 0.12], [0, 0.16]], 3), M(0x7ad04a, { rough: 0.4 }), 20), 0.08, 0.26, -0.32, 0, 0, 0.3)); }, yaw: 0.35, pitch: 0.3,
-  },
-  tool_dress: { make: () => grp(at(hanger(), 0, 0.66, -0.05, 0, 0, 0, 0.62), at(sweater(0xb84a5c), 0, -0.18, 0, 0, 0, 0, 1.0)), yaw: 0.3, pitch: 0.15 },
-  tool_quests: {
-    make: () => { const parch = faceTex('quest', 24, 32, (x, y): RGB => { const base: RGB = [250, 236, 206]; if (y > 6 && y < 24 && y % 4 === 0 && x > 4 && x < 19 - (y % 8 ? 3 : 0)) return hex('#7a6a7a'); return [base[0] - (h2(x, y, 4) > 0.8 ? 8 : 0), base[1] - (h2(x, y, 4) > 0.8 ? 10 : 0), base[2] - 6]; });
-      return grp(at(mesh(planarUV(new THREE.PlaneGeometry(1.0, 1.24, 1, 8)), new THREE.MeshStandardMaterial({ map: parch, roughness: 0.85, side: THREE.DoubleSide })), 0, -0.04, 0), at(lathe(smoothProfile([[0.14, -0.62], [0.16, 0], [0.14, 0.62]], 2), M(0xf2dcb2, { tex: 'weave', rough: 0.8 }), 20), 0, 0.64, 0.06, 0, 0, Math.PI / 2), at(lathe(smoothProfile([[0.14, -0.62], [0.16, 0], [0.14, 0.62]], 2), M(0xf2dcb2, { tex: 'weave', rough: 0.8 }), 20), 0, -0.7, 0.06, 0, 0, Math.PI / 2),
-        ...[-1, 1].map((s) => at(lathe(smoothProfile([[0, 0], [0.06, 0.02], [0.07, 0.1], [0, 0.14]], 2), C.dark(), 10), s * 0.66, 0.64, 0.06, 0, 0, -s * Math.PI / 2)), at(grp(ext(shape(circlePts(0.19, 32).map(([x, y]) => [x + (h2(Math.round(x * 50), 1, 1) - 0.5) * 0.02, y] as P2)), 0.06, M(0xc8303a, { rough: 0.3 }), 0.04, 2), at(ext(shape(starPts(0.1, 0.045)), 0.03, M(0xe85058, { rough: 0.3 }), 0.01, 1), 0, 0, 0.05)), 0.28, -0.38, 0.08)); }, yaw: 0.3, pitch: 0.2,
-  },
-  tool_map: {
-    make: () => { const face = faceTex('compass', 32, 32, (x, y): RGB => { const dx = x - 15.5, dy = y - 15.5, r = Math.hypot(dx, dy); if (r > 14) return hex('#c8a060'); if (Math.abs(r - 12) < 0.7) return hex('#5a4a3a'); const a = (Math.atan2(dx, -dy) / (Math.PI * 2) + 1) % 1; if (r > 9 && r < 12 && Math.abs(a * 8 - Math.round(a * 8)) < 0.12) return hex('#5a4a3a'); return hex('#fbf0d4'); });
-      return grp(at(lathe(smoothProfile([[0, -0.12], [0.8, -0.12], [0.88, -0.06], [0.9, 0.06], [0.84, 0.12], [0.76, 0.12]], 3), C.brass(), 48), 0, 0, 0, Math.PI / 2), at(mesh(planarUV(new THREE.CircleGeometry(0.76, 48)), new THREE.MeshStandardMaterial({ map: face, roughness: 0.5 })), 0, 0, 0.1),
-        at(ext(shape([[0, 0.6], [0.13, 0], [-0.13, 0]]), 0.04, C.red(), 0.02, 1), 0, 0, 0.15, 0, 0, -0.35), at(ext(shape([[0, -0.6], [0.13, 0], [-0.13, 0]]), 0.04, M(0x3a4a62, { tex: null }), 0.02, 1), 0, 0, 0.15, 0, 0, -0.35),
-        at(lathe(smoothProfile([[0, 0.06], [0.07, 0.04], [0.08, 0], [0, 0]], 2), C.brass(), 12), 0, 0, 0.18, Math.PI / 2), at(torus(0.14, 0.045, C.brass(), Math.PI * 2, 8, 24), 0, 0.98, 0), at(cyl(0.08, 0.1, 0.12, C.brass(), 12), 0, 0.88, 0)); }, yaw: 0.28, pitch: 0.2,
-  },
+  tool_build: { make: () => blueprint(), yaw: 0.22, pitch: 0.12 },
+  tool_shop: { make: () => shopStall(), yaw: 0.32, pitch: 0.14 },
+  tool_dress: { make: () => topHat(), yaw: 0.35, pitch: 0.3 },
+  tool_quests: { make: () => questScroll(), yaw: 0.22, pitch: 0.12 },
+  tool_map: { make: () => globe(), yaw: 0.26, pitch: 0.14 },
   tool_settings: { make: () => grp(at(gear(M(0xe6ae50, { metal: 0.55, rough: 0.32, tex: 'plain', env: 1.0 }), 10, M(0xa8722e, { metal: 0.6, rough: 0.36, tex: 'plain' })), -0.12, 0.1, 0, 0, 0, 0, 0.85), at(gear(M(0xb8c0cc, { metal: 0.75, rough: 0.3, tex: 'plain', env: 1.1 }), 8, M(0x7a8290, { metal: 0.7, rough: 0.36, tex: 'plain' })), 0.55, -0.55, 0.05, 0, 0, 0.3, 0.42)), yaw: 0.3, pitch: 0.28 },
   // the currency
-  owlcoin: { make: () => bigAcorn(), yaw: 0.25, pitch: 0.18 },
+  owlcoin: { make: () => bigAcorn9(), yaw: 0.25, pitch: 0.18 },
   coin_pouch: { make: () => grp(acornBag({ pouch: 'leather', spill: 0 }), at(acorn(0.78, 0.5), 0.68, -0.5, 0.55)), yaw: 0.3, pitch: 0.2 },
   coin_sack: { make: () => grp(at(acornBag({ spill: 0 }), 0, 0, 0, 0, 0, 0, [1.1, 1.06, 1.1]), at(acorn(0.72, 0.55), 0.78, -0.56, 0.55), at(acorn(0.66, -0.5), -0.76, -0.62, 0.5)), yaw: 0.3, pitch: 0.2 },
   coin_chest: { make: () => {
@@ -774,7 +1103,10 @@ const ICONS: Record<string, Spec> = {
     return grp(body, lid, ...bands, rimB, lock, at(acorn(0.56, 0.5), 0.6, -0.56, 0.56), at(acorn(0.5, -0.6), -0.54, -0.62, 0.56));
   }, yaw: 0.45, pitch: 0.3 },
   coin_vault: { make: () => { const chest = ICONS.coin_chest.make() as THREE.Group; return grp(at(chest, 0.3, -0.1, 0, 0, 0, 0, 0.92), at(acornBag({ spill: 0 }), -0.78, 0.0, -0.3, 0, 0.3, 0, 0.62), at(moonGem(), 0.95, -0.55, 0.55, 0.2, 0, -0.3, 0.36), at(acorn(0.6, 0.6), -0.55, -0.62, 0.55)); }, yaw: 0.35, pitch: 0.26 },
-  moongem: { make: () => moonGem(), yaw: 0.35, pitch: 0.2 },
+  moongem: { make: () => moonGem9(), yaw: 0.3, pitch: 0.32 },
+  // [icons9] the Outside / Inside tile: a round door, shut; ajar with warm light inside
+  door_out: { make: () => roundDoor(false), yaw: 0.18, pitch: 0.1 },
+  door_in: { make: () => roundDoor(true), yaw: 0.3, pitch: 0.1 },
 };
 function hanger(): O {
   return grp(tube([[-0.9, -0.4, 0], [-0.4, -0.12, 0], [0, 0.12, 0], [0.4, -0.12, 0], [0.9, -0.4, 0], [0.82, -0.5, 0], [-0.82, -0.5, 0], [-0.9, -0.4, 0]], 0.08, C.wood(), 64, 8), at(torus(0.2, 0.045, C.brass(), Math.PI * 1.3, 8, 24), 0.05, 0.42, 0, 0, 0, -0.6), at(cyl(0.045, 0.045, 0.14, C.brass(), 8), 0, 0.2, 0));
@@ -888,49 +1220,71 @@ function frameIcon(obj: O, n: number, yaw: number, pitch: number, pad = 1): THRE
   return sph;
 }
 type Finish = { lineDepth?: number; shadow?: boolean };
-/** one icon at both sizes */
-async function bakeIcon(sp: Spec, obj?: O): Promise<{ big: Art; small: Art }> {
+/** [icons9] the drawings every icon comes in: 32 art px ("big"), 20 ("small", redrawn for small sizes) and 44 ("hd", the
+ * side tools, the door and the currency at their full 44 CSS px: one art pixel per CSS pixel) */
+const SIZES = [['big', 32], ['small', 20], ['hd', 44]] as const;
+type SizeName = (typeof SIZES)[number][0];
+type Arts = Record<SizeName, Art>;
+/** one icon at every size */
+async function bakeIcon(sp: Spec, obj?: O): Promise<Arts> {
   obj ??= prep(await sp.make());
-  const res: Art[] = [];
-  for (const [n, tiny] of [[32, false], [20, true]] as const) {
+  const res = {} as Arts;
+  for (const [name, n] of SIZES) {
     const sph = frameIcon(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad ?? 1);
-    res.push(pixelize(passes(obj, n, n, SS, sph.center, sph.radius), { groups: groupOf, tiny, shadow: sp.fin?.shadow ?? true, lineDepth: sp.fin?.lineDepth }));
+    res[name] = pixelize(passes(obj, n, n, SS, sph.center, sph.radius), { groups: groupOf, tiny: name === 'small', hd: name === 'hd', shadow: sp.fin?.shadow ?? true, lineDepth: sp.fin?.lineDepth });
   }
-  return { big: res[0], small: res[1] };
+  return res;
 }
 
 // ------------------------------------------------------------------ pixel touches for the currency's idle frames
 const artCanvas = (a: Art): HTMLCanvasElement => { const c = document.createElement('canvas'); c.width = a.w; c.height = a.h; c.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(a.d), a.w, a.h), 0, 0); return c; };
-const cloneArt = (a: Art): Art => ({ w: a.w, h: a.h, d: new Uint8ClampedArray(a.d) });
-/** a band of light sweeping across: pixels in a slanted band step towards a warm white */
-function glintArt(a: Art, f: number): Art {
-  const pos = [-9, -9, 0.2, 0.42, 0.64, 0.86, -9, -9][f];
+const cloneArt = (a: Art): Art => ({ w: a.w, h: a.h, d: new Uint8ClampedArray(a.d), g: a.g });
+/** is this pixel one of a glossy material's (nut, gem, gold)? */
+const glossyAt = (a: Art, i: number) => { const g = a.g?.[i] ?? -1; return g >= 0 && !!groupOf(g).glossy; };
+/**
+ * [icons9] A band of light sweeping across the glossy parts only (the nut, not its scaly cap or the leaf): pixels in a
+ * slanted band step towards a warm white, its core brighter; `pos` 0..1 across the sprite, < 0 none.
+ */
+function glintArt(a: Art, pos: number): Art {
   const o = cloneArt(a);
-  if (pos < -1) return o;
-  const c = (pos * 2 - 0.5) * a.w;
+  if (pos < 0) return o;
+  const c = (pos * 1.9 - 0.45) * a.w, wid = Math.max(1.2, a.w / 22);
   for (let y = 0; y < a.h; y++) for (let x = 0; x < a.w; x++) {
-    const i = (y * a.w + x) * 4;
-    if (o.d[i + 3] < 250) continue;
-    const t = x + y * 0.6 - c;
-    if (t < -1.6 || t > 1.6) continue;
-    const lum = o.d[i] * 0.3 + o.d[i + 1] * 0.59 + o.d[i + 2] * 0.11;
-    if (lum < 70) continue; // the outline stays
-    const k = Math.abs(t) < 0.8 ? 0.5 : 0.28;
-    o.d[i] += (255 - o.d[i]) * k; o.d[i + 1] += (248 - o.d[i + 1]) * k; o.d[i + 2] += (220 - o.d[i + 2]) * k;
+    const i = y * a.w + x, j = i * 4;
+    if (o.d[j + 3] < 250 || !glossyAt(a, i)) continue;
+    const t = x + y * 0.55 - c;
+    if (Math.abs(t) > wid * 1.6) continue;
+    const k = Math.abs(t) < wid * 0.7 ? 0.55 : 0.28;
+    o.d[j] += (255 - o.d[j]) * k; o.d[j + 1] += (250 - o.d[j + 1]) * k; o.d[j + 2] += (226 - o.d[j + 2]) * k;
   }
   return o;
 }
-/** a little four-point twinkle in pixels at (x, y), arms `r` long */
+/** a four-point twinkle in pixels at (x, y), arms `r` long, a bright core and fading tips */
 function sparkleArt(a: Art, x: number, y: number, r: number, col: [number, number, number]) {
   const set = (px: number, py: number, al: number, c: [number, number, number]) => {
     if (px < 0 || py < 0 || px >= a.w || py >= a.h) return;
-    const i = (py * a.w + px) * 4, k = al;
-    const a0 = a.d[i + 3] / 255;
-    a.d[i] = c[0] * k + a.d[i] * (1 - k); a.d[i + 1] = c[1] * k + a.d[i + 1] * (1 - k); a.d[i + 2] = c[2] * k + a.d[i + 2] * (1 - k);
-    a.d[i + 3] = Math.max(a0, k) * 255;
+    const i = (py * a.w + px) * 4, a0 = a.d[i + 3] / 255, na = Math.max(a0, al);
+    if (na <= 0) return;
+    // straight alpha: the twinkle over what is there (or over nothing)
+    for (let ch = 0; ch < 3; ch++) a.d[i + ch] = (c[ch] * al + a.d[i + ch] * a0 * (1 - al)) / (al + a0 * (1 - al));
+    a.d[i + 3] = Math.min(255, (al + a0 * (1 - al)) * 255);
   };
-  set(x, y, 1, [255, 255, 246]);
-  for (let k = 1; k <= r; k++) { const al = k === r ? 0.55 : 0.95; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) set(x + dx * k, y + dy * k, al, col); }
+  set(x, y, 1, [255, 255, 248]);
+  for (let k = 1; k <= r; k++) { const al = k === r ? 0.6 : 0.95; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) set(x + dx * k, y + dy * k, al, k === 1 ? [255, 252, 236] : col); }
+  if (r >= 3) for (const [dx, dy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) set(x + dx, y + dy, 0.45, col);
+}
+/** the brightest glossy pixels inside the sprite (where twinkles go), brightest first, spread apart */
+function twinkleSpots(a: Art, n: number): [number, number][] {
+  const c: [number, number, number][] = [];
+  for (let y = 1; y < a.h - 1; y++) for (let x = 1; x < a.w - 1; x++) {
+    const i = y * a.w + x, j = i * 4;
+    if (!glossyAt(a, i)) continue;
+    c.push([x, y, a.d[j] * 0.3 + a.d[j + 1] * 0.59 + a.d[j + 2] * 0.11]);
+  }
+  c.sort((p, q) => q[2] - p[2]);
+  const out: [number, number][] = [], gap = a.w / 5;
+  for (const [x, y] of c) { if (out.length >= n) break; if (out.every(([px, py]) => Math.hypot(px - x, py - y) > gap)) out.push([x, y]); }
+  return out;
 }
 
 // ------------------------------------------------------------------ the shelf's sprites (the main buttons, in 2D)
@@ -1104,12 +1458,12 @@ async function loadPhotos(): Promise<void> {
 }
 
 const host = document.getElementById('out')!;
-function show(name: string, big: Art, small: Art) {
+function show(name: string, r: Arts) {
   const fig = document.createElement('figure');
   const row = document.createElement('div');
   row.className = 'row';
   const add = (a: Art, k: number, cls = '') => { const c = artCanvas(a); c.style.width = `${a.w * k}px`; c.className = cls; row.appendChild(c); };
-  add(big, 4); add(small, 4); add(big, 1, 'one'); add(small, 1, 'one'); add(big, 2, 'dark'); add(small, 2, 'dark');
+  add(r.hd, 4); add(r.big, 4); add(r.small, 4); add(r.hd, 1, 'one'); add(r.big, 1, 'one'); add(r.small, 1, 'one'); add(r.hd, 2, 'dark'); add(r.small, 2, 'dark');
   fig.append(row, Object.assign(document.createElement('figcaption'), { textContent: name }));
   host.appendChild(fig);
 }
@@ -1119,31 +1473,41 @@ async function bake() {
   await loadPhotos();
   carvedOak().color.setRGB(0.8, 0.66, 0.52); // the cuckoo clocks' carved oak leaves: carving, not polka dots
   const test = (n: string) => !only || new RegExp(only).test(n);
-  const bigs: Art[] = [], smalls: Art[] = [];
+  const cells: Arts[] = [];
   const icons: Record<string, number> = {}, anim: Record<string, number[]> = {};
-  const push = (b: Art, s: Art) => { bigs.push(b); smalls.push(s); return bigs.length - 1; };
+  const push = (r: Arts) => { cells.push(r); return cells.length - 1; };
+  const models = new Map<string, O>();
   for (const name of Object.keys(ICONS).filter(test)) {
     try {
-      const r = await bakeIcon(ICONS[name]);
-      icons[name] = push(r.big, r.small);
-      show(name, r.big, r.small);
+      const obj = prep(await ICONS[name].make());
+      models.set(name, obj);
+      const r = await bakeIcon(ICONS[name], obj);
+      icons[name] = push(r);
+      show(name, r);
     } catch (e) { console.error('bake failed', name, e); }
   }
   for (const [a, b] of Object.entries(ALIAS)) if (icons[b] !== undefined && test(a)) icons[a] = icons[b];
-  // the currency's idle frames: a band of light sweeps across, twinkles come and go
+  // [icons9] the currency's idle frames: the acorn's gloss catches a band of light that sweeps across it and twinkles;
+  // the gem's facets flash in turn as the light swings round it (each frame rendered), with twinkles on its brightest
+  // facets; the vault twinkles
   for (const [name, model, frames] of ANIM) {
     if (!test(name) || icons[model] === undefined) continue;
-    const base = { big: bigs[icons[model]], small: smalls[icons[model]] };
+    const base = cells[icons[model]];
     const list: number[] = [];
-    const tw: [number, number][] = [[0.8, 0.16], [0.16, 0.28], [0.84, 0.6], [0.22, 0.12]];
     for (let f = 0; f < frames; f++) {
-      const one = (a: Art, r: number) => {
-        const o = frames === 8 ? glintArt(a, f) : cloneArt(a);
-        if (f % 2 === 0 || frames === 4) { const t = tw[f % 4]; sparkleArt(o, Math.round(t[0] * (a.w - 1)), Math.round(t[1] * (a.h - 1)), r, model === 'moongem' ? [236, 226, 255] : [255, 236, 170]); }
-        return o;
-      };
-      list.push(push(one(base.big, 2), one(base.small, 1)));
-      if (f === 3) show(name + '_f3', bigs[bigs.length - 1], smalls[smalls.length - 1]);
+      let src = base;
+      if (model === 'moongem') { lightSwing = Math.sin((f / frames) * Math.PI * 2); src = await bakeIcon(ICONS[model], models.get(model)); lightSwing = 0; }
+      const r = {} as Arts;
+      for (const [sz] of SIZES) {
+        const a = src[sz], arm = sz === 'hd' ? 3 : sz === 'big' ? 2 : 1;
+        const o = model === 'owlcoin' ? glintArt(a, [-1, -1, 0.05, 0.3, 0.55, 0.8, 1.05, -1][f]) : cloneArt(a);
+        const spots = twinkleSpots(a, 4);
+        const want = model === 'owlcoin' ? (f === 1 || f === 6 ? [spots[0]] : []) : model === 'moongem' ? (f % 2 === 0 ? [spots[(f / 2) % Math.max(1, spots.length)]] : []) : [spots[f % Math.max(1, spots.length)]];
+        for (const p of want) if (p) sparkleArt(o, p[0], p[1], arm, model === 'moongem' ? [236, 222, 255] : [255, 238, 176]);
+        r[sz] = o;
+      }
+      list.push(push(r));
+      if (f === 3 || f === 6) show(`${name}_f${f}`, r);
     }
     anim[name] = list;
   }
@@ -1159,11 +1523,12 @@ async function bake() {
   const w = window as unknown as { __module: string; __atlas: string; __done: boolean };
   document.title = 'baked ' + Object.keys(icons).length;
   if (only) { w.__done = true; return; }
-  // the atlas: the 32 px cells, then the 20 px cells
-  const AW = 1024, B = 32, S = 20, bc = AW / B, sc = Math.floor(AW / S);
-  const bRows = Math.ceil(bigs.length / bc), sY = bRows * B, sRows = Math.ceil(smalls.length / sc);
+  // the atlas: the 32 px cells, the 20 px cells, the 44 px cells, then the shelf's sprites
+  const AW = 1024, grids = {} as Record<SizeName, [number, number, number]>;
+  let y = 0;
+  for (const [sz, n] of SIZES) { const cols = Math.floor(AW / n); grids[sz] = [n, cols, y]; y += Math.ceil(cells.length / cols) * n; }
   // the shelf's sprites below, packed in rows (tallest first)
-  const shelfY = sY + sRows * S + 1, sprites: Record<string, [number, number, number, number, number, number]> = {};
+  const shelfY = y + 1, sprites: Record<string, [number, number, number, number, number, number]> = {};
   let px = 0, py = shelfY, rowH = 0;
   for (const sp of [...(sh?.sprites ?? [])].sort((a, b) => b.art.h - a.art.h)) {
     if (px + sp.art.w > AW) { px = 0; py += rowH + 1; rowH = 0; }
@@ -1175,19 +1540,18 @@ async function bake() {
   atlas.height = py + rowH;
   const ag = atlas.getContext('2d')!;
   for (const sp of sh?.sprites ?? []) { const r = sprites[sp.name]; ag.putImageData(new ImageData(new Uint8ClampedArray(sp.art.d), sp.art.w, sp.art.h), r[0], r[1]); }
-  bigs.forEach((a, i) => ag.putImageData(new ImageData(new Uint8ClampedArray(a.d), B, B), (i % bc) * B, Math.floor(i / bc) * B));
-  smalls.forEach((a, i) => ag.putImageData(new ImageData(new Uint8ClampedArray(a.d), S, S), (i % sc) * S, sY + Math.floor(i / sc) * S));
+  for (const [sz, n] of SIZES) { const [, cols, y0] = grids[sz]; cells.forEach((c, i) => ag.putImageData(new ImageData(new Uint8ClampedArray(c[sz].d), n, n), (i % cols) * n, y0 + Math.floor(i / cols) * n)); }
   const shelfIdx = { box: [SHELF_BOX.w, SHELF_BOX.h, SHELF_BOX.top], sprites, dial: sh?.dial.map((v) => +v.toFixed(2)) ?? [0, 0, 0], lamp: sh?.lampAt.map((v) => +v.toFixed(1)) ?? [0, 0], objects: Object.fromEntries(Object.entries(SHELF_OBJ).map(([k, v]) => [k, v.cx])) };
-  const json = JSON.stringify({ atlas: 'img/ui3d.webp', big: [B, bc, 0], small: [S, sc, sY], icons, anim, shelf: shelfIdx });
+  const json = JSON.stringify({ atlas: 'img/ui3d.webp', big: grids.big, small: grids.small, hd: grids.hd, icons, anim, shelf: shelfIdx });
   w.__module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html; a tools script writes window.__module here and window.__atlas to
 // public/img/ui3d.webp, lossless): the interface atlas's index. Every interface icon is a detailed 3D model rendered and
-// finished as pixel art, drawn at 32 art px ("big") and at 20 art px ("small"). { atlas, big / small: [art px, cells
-// per row, y of the first row], icons: { name: cell }, anim: { name: [cells] }, shelf: the main buttons' sprites
-// { box: [w, h, how far above the nav], sprites: { name: [atlas x, y, w, h, x, y in the box] }, dial: [x, y, radius],
-// lamp: [x, y] of the moon, objects: { id: centre x } } }. Models: the game's own GLBs, the shelf's props
-// (src/ui/chrome/props3d.ts) and models made in the bake; credits in docs/credits.
+// finished as pixel art with a crisp near-black outline, drawn at 32 art px ("big"), at 20 art px ("small") and at 44 art
+// px ("hd"). { atlas, big / small / hd: [art px, cells per row, y of the first row], icons: { name: cell }, anim: { name:
+// [cells] }, shelf: the main buttons' sprites { box: [w, h, how far above the nav], sprites: { name: [atlas x, y, w, h, x,
+// y in the box] }, dial: [x, y, radius], lamp: [x, y] of the moon, objects: { id: centre x } } }. Models: the game's own
+// GLBs, the shelf's props (src/ui/chrome/props3d.ts) and models made in the bake; credits in docs/credits.
 export interface ShelfIndex { box: [number, number, number]; sprites: Record<string, [number, number, number, number, number, number]>; dial: [number, number, number]; lamp: [number, number]; objects: Record<string, number> }
-export const ICONS3D: { atlas: string; big: [number, number, number]; small: [number, number, number]; icons: Record<string, number>; anim: Record<string, number[]>; shelf: ShelfIndex } = ${json};
+export const ICONS3D: { atlas: string; big: [number, number, number]; small: [number, number, number]; hd: [number, number, number]; icons: Record<string, number>; anim: Record<string, number[]>; shelf: ShelfIndex } = ${json};
 `;
   w.__atlas = atlas.toDataURL('image/png');
   w.__done = true;

@@ -3,7 +3,8 @@
 // acorn packs) is a detailed 3D model rendered and finished as hand-made pixel art (src/dev/iconbake.ts,
 // src/dev/pixelize.ts): hue-shifted colour ramps per material, selective coloured outlines, single-pixel glints. Each
 // comes as a 32 art px drawing and a 20 art px one for small sizes (redrawn, not shrunk), packed in the interface atlas
-// (public/img/ui3d.webp, lossless; index in src/ui/px/icons3d.ts).
+// (public/img/ui3d.webp, lossless; index in src/ui/px/icons3d.ts). [icons9] And a 44 art px drawing, the most detailed,
+// for the side tools, the door and the currency at 44 CSS px; every drawing has a crisp near-black outline.
 // Registered under the old sprite names, so every <Px name>, PxAnim and spriteURL in the app picks them up; the
 // currency has glinting idle frames (`owlcoin_f0..7`...). An icon is always drawn crisp: one of the two drawings at a
 // whole number of device pixels per art pixel (nearest neighbour), sized as close as can be to what was asked for. The
@@ -11,11 +12,13 @@
 import { SPRITES } from '../px/sprites.js';
 import { ICONS3D } from '../px/icons3d.ts';
 
-type Size = 'big' | 'small';
+type Size = 'big' | 'small' | 'hd';
 interface Sprite3D { w: number; h: number; rows: string[]; pal: Record<string, string>; hi: { w: number; h: number; rows: string[]; pal: Record<string, string>; px: { d: Uint8ClampedArray } }; res: number; i3d: { i: number } }
 
 /** names drawn at 32 art px when a caller sizes them by their sprite (spriteURL, AnimPx); the rest use the 20 px drawing */
 const BIG = new Set(['acorn_big', 'gem_big', 'coin_pouch', 'coin_sack', 'coin_chest', 'coin_vault']);
+/** [icons9] names drawn at 44 art px when a caller sizes them by their sprite */
+const HD = new Set(['acorn_big', 'gem_big', 'door_out', 'door_in']);
 /** extra names drawn by a baked model */
 const ALIAS: Record<string, string> = { moonstone: 'moongem' };
 
@@ -37,7 +40,7 @@ export function uiAtlas(): Promise<HTMLImageElement | null> {
 /** the atlas, once it is in (for the shelf) */
 export const atlasNow = () => atlas;
 
-const grid = (s: Size) => (s === 'big' ? ICONS3D.big : ICONS3D.small);
+const grid = (s: Size) => (s === 'big' ? ICONS3D.big : s === 'hd' ? ICONS3D.hd : ICONS3D.small);
 /** where a cell's drawing sits in the atlas */
 function cellRect(i: number, s: Size): [number, number, number] {
   const [art, cols, y0] = grid(s);
@@ -63,18 +66,18 @@ function drawn(i: number, s: Size, k: number): HTMLCanvasElement | null {
 
 /**
  * The crisp choice for about `dev` device px: which drawing at which whole scale. `fit` keeps it within `dev` (a fixed
- * box); otherwise the nearest size, leaning towards the more detailed 32 px drawing. Below 20 px the small
- * drawing is shrunk smoothly (nothing smaller is crisp).
+ * box); otherwise the nearest size, leaning towards the more detailed drawings (44, then 32 art px). Below 20 px the
+ * small drawing is shrunk smoothly (nothing smaller is crisp).
  */
 export function pickArt(dev: number, fit = false): { size: Size; k: number; px: number } {
   if (dev < 19) return { size: 'small', k: Math.max(0.4, dev / 20), px: Math.max(8, Math.round(dev)) };
   let best: { size: Size; k: number; px: number } | null = null, bs = 1e9;
-  for (const [size, art] of [['big', 32], ['small', 20]] as [Size, number][]) {
+  for (const [size, art, pen, per] of [['hd', 44, 0, 0.02], ['big', 32, 0.02, 0.02], ['small', 20, 0.08, 0.05]] as [Size, number, number, number][]) {
     for (const k of fit ? [Math.floor(dev / art)] : [Math.floor(dev / art), Math.ceil(dev / art)]) {
       if (k < 1) continue;
-      // the small drawing only where it fits much better (the bigger it is blown up, the less it is wanted); a little
-      // smaller than asked is better than bigger (it never crowds its line)
-      const px = art * k, score = Math.abs(Math.log(px / dev)) * (px > dev ? 1.4 : 1) + (size === 'small' ? 0.05 + 0.06 * (k - 1) : 0);
+      // the less detailed drawings only where they fit much better (the more one is blown up, the less it is wanted);
+      // a little smaller than asked is better than bigger (it never crowds its line)
+      const px = art * k, score = Math.abs(Math.log(px / dev)) * (px > dev ? 1.2 : 1) + pen + per * (k - 1);
       if (score < bs) { bs = score; best = { size, k, px }; }
     }
   }
@@ -102,7 +105,7 @@ export function installIconSet(): Promise<void> {
     get() { let s = cache.get(name); if (!s) { s = make(); if (atlas) cache.set(name, s); } return s; },
   });
   const icons = ICONS3D.icons, anim = ICONS3D.anim;
-  const sz = (name: string): Size => (BIG.has(name) ? 'big' : 'small');
+  const sz = (name: string): Size => (HD.has(name) ? 'hd' : BIG.has(name) ? 'big' : 'small');
   for (const [name, i] of Object.entries(icons)) define(name, () => sprite(i, sz(name)));
   for (const [a, b] of Object.entries(ALIAS)) if (icons[b] !== undefined) define(a, () => sprite(icons[b], 'small'));
   for (const [name, frames] of Object.entries(anim)) {
