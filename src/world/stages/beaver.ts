@@ -14,8 +14,31 @@ import { actorAnchor, popEmote, type EmoteAnchor, type EmoteKind } from '../../u
 
 export const BEAVER_NAME = 'Barnaby';
 export const BEAVER_FULL = 'Barnaby Birchbark';
-export type BeaverClip = 'idle' | 'talk' | 'wave' | 'present' | 'hop' | 'think' | 'gnaw';
-const ONE_SHOT: BeaverClip[] = ['wave', 'present', 'hop', 'think', 'gnaw'];
+/** [shop11] his work at the bench (art/shop/craft.py): marking out with the square and the pencil from behind his ear,
+ * sawing the plank's end off, planing it, chopping a mortise with chisel and mallet, sanding, blowing the dust off,
+ * and holding up the stool he finished to admire it */
+export type WorkClip = 'measure' | 'saw' | 'plane' | 'chisel' | 'sand' | 'blow' | 'proud';
+export type BeaverClip = 'idle' | 'talk' | 'wave' | 'present' | 'hop' | 'think' | 'gnaw' | WorkClip;
+export const WORK: WorkClip[] = ['measure', 'saw', 'plane', 'chisel', 'sand', 'blow', 'proud'];
+const ONE_SHOT: BeaverClip[] = ['wave', 'present', 'hop', 'think', 'gnaw', ...WORK];
+export type CraftTool = 'saw' | 'plane' | 'mallet' | 'chisel' | 'square' | 'block' | 'stool';
+export interface CraftClip { len: number; hold: Partial<Record<CraftTool, [number, number]>>; ev: [number, string, Record<string, number>?][] }
+const f24 = (f: number) => f / 24;
+/** [shop11] the craft clips' moments, in seconds (frames / 24, from the timeline art/shop/craft.py writes): when each
+ * tool is in his paw (its still copy on the bench hides), and the events the bench reacts to */
+export const CRAFT: Record<WorkClip, CraftClip> = {
+  measure: { len: f24(116), hold: { square: [f24(24), f24(102)] }, ev: [[f24(9), 'slide', { t1: f24(16) }], [f24(52), 'line', { t1: f24(70) }]] },
+  saw: {
+    len: f24(168), hold: { saw: [f24(20), f24(150)] },
+    ev: [[f24(34), 'kerf', { t1: f24(142) }], ...Array.from({ length: 9 }, (_, i) => [f24(34 + Math.floor((i + 0.2) * 12)), 'sawdust'] as [number, string]), [f24(142), 'offcut']],
+  },
+  plane: { len: f24(150), hold: { plane: [f24(16), f24(140)] }, ev: Array.from({ length: 5 }, (_, i) => [f24(30 + i * 20), 'stroke', { t1: f24(44 + i * 20), x0: -0.1526, x1: 0.1874 }] as [number, string, Record<string, number>]) },
+  chisel: { len: f24(160), hold: { chisel: [f24(14), f24(144)], mallet: [f24(22), f24(148)] }, ev: Array.from({ length: 7 }, (_, i) => [f24(39 + i * 14), 'chop', { depth: 0.0024 * (i + 1) }] as [number, string, Record<string, number>]) },
+  sand: { len: f24(124), hold: { block: [f24(14), f24(114)] }, ev: Array.from({ length: 8 }, (_, i) => [f24(29 + i * 10), 'dust'] as [number, string]) },
+  blow: { len: f24(64), hold: {}, ev: [[f24(22), 'blow']] },
+  proud: { len: f24(140), hold: { stool: [f24(22), f24(116)] }, ev: [[f24(44), 'admire']] },
+};
+const isWork = (c: string): c is WorkClip => (WORK as string[]).includes(c);
 
 /** [anime6] His anime faces ('normal' = his own glossy eyes). */
 export type BeaverFace = 'normal' | 'happy' | 'joy' | 'sparkly' | 'shock' | 'sleepy' | 'teary' | 'determined' | 'shy' | 'flustered' | 'thinking';
@@ -58,6 +81,18 @@ export class Beaver {
   private body: THREE.Mesh | null = null;
   private anchor: EmoteAnchor | null = null;
   private timers: number[] = [];
+  // [shop11] the work at the bench
+  /** let him work at his bench whenever nobody needs him */
+  working = false;
+  /** a craft event (slide, line, kerf, sawdust, offcut, stroke, chop, dust, blow, admire) at its moment in a clip */
+  onCraft: ((clip: WorkClip, kind: string, data: Record<string, number> | undefined, t0: number) => void) | null = null;
+  private rest = new Map<CraftTool, THREE.Object3D>();
+  private seq = 0;
+  private cycle = 0;
+  private pauseT = 3.5;
+  private pending: BeaverClip | null = null;
+  private wrapping = false;
+  private lastT = 0;
 
   constructor() {
     this.ready = this.load();
@@ -87,6 +122,11 @@ export class Beaver {
       }
     });
     this.node.add(root);
+    // [shop11] the still copies of his tools on the bench (shown while the tool isn't in his paw)
+    for (const t of ['saw', 'plane', 'mallet', 'chisel', 'square', 'block', 'stool'] as CraftTool[]) {
+      const o = root.getObjectByName('rest_' + t);
+      if (o) this.rest.set(t, o);
+    }
     this.mixer = new THREE.AnimationMixer(root);
     for (const c of clips) {
       const a = this.mixer.clipAction(c);
@@ -108,10 +148,15 @@ export class Beaver {
     }
   }
 
-  /** Play a one-shot gesture (then back to idle / talking). */
-  play(clip: BeaverClip, fade = 0.25) {
+  /** Play a one-shot gesture (then back to idle / talking). If he is in the middle of his work, he finishes the
+   * motion quickly and puts his tool down first. */
+  play(clip: BeaverClip, fade = 0.25, force = false) {
     const a = this.acts.get(clip);
     if (!a || !this.mixer) return;
+    if (!isWork(clip) && !force) {
+      this.pauseT = Math.max(this.pauseT, 6);
+      if (this.shot && isWork(this.shot.getClip().name)) { this.wrapUp(clip); return; }
+    }
     this.clipFace(clip); // [anime6]
     if (clip === 'idle' || clip === 'talk') { this.setBase(clip); return; }
     const from = this.shot ?? this.acts.get(this.base);
@@ -120,15 +165,41 @@ export class Beaver {
     a.play();
     if (from && from !== a) a.crossFadeFrom(from, fade, false);
     this.shot = a;
+    a.timeScale = 1;
     this.clipT = 0;
+    this.lastT = 0;
     this.fired.clear();
   }
   get busy() { return !!this.shot; }
+  /** [shop11] the work clip under way and how far into it he is (s), or null */
+  get craft(): { clip: WorkClip; t: number } | null {
+    const n = this.shot?.getClip().name;
+    return n && isWork(n) ? { clip: n, t: this.shot!.time } : null;
+  }
+  /** [shop11] finish the work clip briskly (tools back on the bench, back in his place), then play `next` */
+  private wrapUp(next: BeaverClip | null) {
+    if (next) this.pending = next;
+    if (this.wrapping || !this.shot) return;
+    this.wrapping = true;
+    this.shot.timeScale = 3;
+  }
+  /** [shop11] the next piece of work in his day's round (the stool comes out every other round) */
+  private nextWork() {
+    let c = WORK[this.seq % WORK.length];
+    if (c === 'proud' && this.cycle % 2 === 1) { this.seq++; c = WORK[this.seq % WORK.length]; }
+    this.seq++;
+    if (this.seq % WORK.length === 0) this.cycle++;
+    this.play(c, 0.35);
+  }
   get current(): string { return this.shot?.getClip().name ?? this.base; }
 
   private endShot() {
     const a = this.shot;
     this.shot = null;
+    this.wrapping = false;
+    if (a) a.timeScale = 1;
+    // [shop11] whatever he was asked to do while he finished his work (cross-faded from the work clip's last pose)
+    if (this.pending && a) { const p = this.pending; this.pending = null; this.shot = a; this.play(p, 0.3, true); if (this.shot !== a) return; this.shot = null; }
     const b = this.acts.get(this.base);
     if (!a || !b) return;
     b.reset();
@@ -150,6 +221,8 @@ export class Beaver {
   talk(sec: number) {
     this.talkT = Math.max(this.talkT, sec);
     this.setBase('talk');
+    this.pauseT = Math.max(this.pauseT, sec + 4);
+    if (this.shot && isWork(this.shot.getClip().name)) this.wrapUp(null);
   }
 
   /** World position of his head (for speech bubbles and the camera). */
@@ -162,7 +235,11 @@ export class Beaver {
     if (!this.mixer) return;
     this.time += dt;
     if (this.talkT > 0) { this.talkT -= dt; if (this.talkT <= 0) this.setBase('idle'); }
+    // [shop11] back to work when nobody needs him
+    this.pauseT -= dt;
+    if (this.working && !this.shot && this.pauseT <= 0 && this.talkT <= 0) { this.nextWork(); this.pauseT = 0.6 + Math.random() * 1.4; }
     this.mixer.update(dt);
+    this.craftTick();
     // little moments inside clips: the gnawing, the landing of a hop
     if (this.shot) {
       this.clipT += dt;
@@ -181,6 +258,9 @@ export class Beaver {
         d.applyQuaternion(inv);
         yaw = THREE.MathUtils.clamp(Math.atan2(d.x, d.z), -0.75, 0.75);
         pitch = THREE.MathUtils.clamp(-Math.atan2(d.y, Math.hypot(d.x, d.z)), -0.35, 0.35);
+        // [shop11] at work he only glances up (and not at all while his paw is at his ear for the pencil)
+        const c = this.craft;
+        if (c) { const k = c.clip === 'measure' && ((c.t > 0.9 && c.t < 2.3) || (c.t > 3.0 && c.t < 4.2)) ? 0 : 0.45; yaw *= k; pitch *= k; }
       }
       const k = 1 - Math.exp(-dt * 5);
       this.look.x += (yaw - this.look.x) * k;
@@ -223,8 +303,23 @@ export class Beaver {
     else this.react('happy', undefined, 1.2);
   }
   private later(sec: number, f: () => void) { this.timers.push(window.setTimeout(() => { if (!this.dead) f(); }, sec * 1000)); }
+  /** [shop11] fire the craft events that fall in this frame; show and hide the still copies of his tools */
+  private craftTick() {
+    const c = this.craft;
+    const held = new Set<CraftTool>();
+    if (c) {
+      const C = CRAFT[c.clip];
+      for (const [k, [a, b]] of Object.entries(C.hold) as [CraftTool, [number, number]][]) if (c.t >= a - 0.02 && c.t < b) held.add(k);
+      for (const [t0, kind, data] of C.ev) if (t0 > this.lastT - 1e-4 && t0 <= c.t && !this.fired.has(kind + t0)) { this.fired.add(kind + t0); this.onCraft?.(c.clip, kind, data, t0); }
+      this.lastT = c.t;
+    }
+    for (const [k, o] of this.rest) o.visible = !held.has(k);
+  }
+
   /** Each gesture wears its face. */
   private clipFace(clip: BeaverClip) {
+    if (clip === 'proud') { this.react('joy', 'sparkle', 3.4); this.later(2.4, () => this.emote('notes')); return; }
+    if (clip === 'saw' || clip === 'chisel' || clip === 'plane') { this.setFace('determined', CRAFT[clip].len - 0.5); return; }
     if (clip === 'wave') this.react('happy', 'notes', 1.7);
     else if (clip === 'think') { this.react('thinking', 'ask', 1.6); this.later(1.25, () => this.react('sparkly', 'bulb', 1.1)); }
     else if (clip === 'hop') { this.react('joy', 'sparkle', 2.1); this.emote('notes', 0.45); }

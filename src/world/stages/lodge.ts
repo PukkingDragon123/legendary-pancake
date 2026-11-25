@@ -1,8 +1,13 @@
-// Barnaby's Lodge Store: the beaver's general store inside his lodge, a Stage the app shows instead of the forest.
-// Peeled-log walls chinked with river mud, a ceiling of timber beams under a lattice of sticks, worn floorboards
-// scattered with wood shavings, warm lanterns hung from the beams, a window onto the real forest outside. Everything
-// the shop sells is a real thing in the room:
-//   - today's three deals stand on gnawed tree stumps (paper price tags hang off them in the DOM, shop.tsx);
+// Barnaby's Lodge Store: the beaver's furniture workshop and store inside his lodge, a Stage the app shows instead of
+// the forest. Peeled-log walls chinked with river mud, a ceiling of timber beams under a lattice of sticks, worn
+// floorboards strewn with sawdust and curled shavings, warm lanterns hung from the beams, a window onto the real forest.
+// [shop11] It is a working shop: Barnaby stands at his workbench in front of his tool board and makes furniture while
+// you browse (marking out, sawing, planing, chopping a mortise, sanding, blowing the dust off, admiring the stool he
+// finished: src/world/stages/beaver.ts, workshop.ts); he stops to greet you, talk and show you things, then goes back
+// to work. Timber seasons on the rack, a shaving horse stands by the wall, a chair takes shape in its clamps over the
+// day, a cabinet waits for its doors, glue warms on the finishing table, and finished pieces stand on a dais and hang
+// on the peg rail with their paper price tags. Everything the shop sells is a real thing in the room:
+//   - today's three deals stand on display plinths (paper price tags hang off them in the DOM, shop.tsx);
 //   - the acorn stash (a bowl, a sack, a wicker basket, a mountain of acorns) on the floor by the right wall, the moon
 //     gem chests on the shelf above;
 //   - the free daily gift is a wrapped parcel on the counter, beside the brass scales, the till and a chalk slate;
@@ -24,11 +29,15 @@ import { Fx, SPR } from '../fx.ts';
 import type { Stage } from '../scene.ts';
 import type { Look } from '../post.ts';
 import { HOUSE, groundY } from '../layout.ts';
-import { Beaver, type BeaverClip } from './beaver.ts';
+import { Beaver, CRAFT, type BeaverClip } from './beaver.ts';
 import {
   M, acornHeap, banner, contactShadow, disposeMats, disposeTextures, gem, gemHeap, hangingSign, herbBundle, logGeo, merged, mtx, parcel, sack, scales, taperTube,
   shavings, slate, stump, tex, type Banner, type Sign, type Slate,
 } from './lodgekit.ts';
+import {
+  BOARD, CUT_X, MORTISE, Plank, carcass, chairInProgress, finishingTable, plinth, priceTag, sawdustPatch, shavingHorse, timberRack, toolBoard, workbench,
+} from './workshop.ts';
+import type { WorkClip } from './beaver.ts';
 import { pottedFir, swayPlants, type Plant } from './shopplants.ts';
 import { box, buildProp, propMesh } from '../../gfx/box.ts';
 import { alagardReady, alagardText } from '../../ui/font.ts'; // [font6]
@@ -47,15 +56,18 @@ export type Section = 'home' | 'deals' | 'stash' | 'series';
 
 // ------------------------------------------------------------------ the floor plan (metres; y up, the camera looks toward -z)
 const ROOM = { w: 4.6, back: -3.0, front: 7.5, h: 3.75 };
-const WIN = { x0: 0.35, x1: 2.55, y0: 1.15, y1: 2.6, glass: -3.32 };
+const WIN = { x0: 1.55, x1: 3.35, y0: 1.15, y1: 2.6, glass: -3.32 };
 const COUNTER = { x0: 1.95, x1: 4.05, z: -1.28, d: 0.7, h: 0.92 };
-const BEAVER = { x: 1.32, z: -0.86, yaw: -0.3, scale: 1.24 };
+/** [shop11] Barnaby at his workbench (the bench is built in his own frame, so it stands where he does) */
+const BEAVER = { x: 0.05, z: -1.8, yaw: 0.28, scale: 1.24 };
+/** [shop11] the dais of finished furniture, before the counter */
+const DAIS = { x: 1.78, z: 0.02 };
 const BARREL = { x: -2.72, z: -1.72, h: 1.08, r: 0.44 };
 const SHELF = { x: 4.12, z0: -0.55, z1: 1.75, y: 0.92, d: 0.56 };
-/** the deal stumps: spread across the floor on a wide screen, gathered in front of Barnaby on a tall one */
+/** the deal plinths: spread across the floor on a wide screen, gathered in front of the workbench on a tall one */
 const STUMPS: Record<LodgeLayout, { x: number; z: number; h: number }[]> = {
-  side: [{ x: -2.25, z: 0.2, h: 0.5 }, { x: -1.3, z: 0.5, h: 0.6 }, { x: -0.35, z: 0.2, h: 0.5 }],
-  top: [{ x: 0.68, z: 0.45, h: 0.5 }, { x: 1.36, z: 1.15, h: 0.34 }, { x: 2.04, z: 0.45, h: 0.5 }],
+  side: [{ x: -2.42, z: 0.22, h: 0.42 }, { x: -1.65, z: 0.55, h: 0.5 }, { x: -0.88, z: 0.22, h: 0.42 }],
+  top: [{ x: -0.68, z: 0.5, h: 0.42 }, { x: -0.06, z: 1.12, h: 0.34 }, { x: 0.56, z: 0.5, h: 0.42 }],
 };
 /** acorn packs on the floor before the shelf (ids from ACORN_PACKS), gem packs on the shelf (GEM_PACKS) */
 const ACORN_SPOTS = [{ id: 'handful', z: -0.25 }, { id: 'sack', z: 0.3 }, { id: 'basket', z: 0.88 }, { id: 'mountain', z: 1.5 }];
@@ -163,6 +175,8 @@ export class Lodge implements Stage {
     S.add(b);
     b.add(contactShadow(0.9, 0.8, 0.55));
     this.beaver.onEvent = (e) => this.beaverEvent(e);
+    this.beaver.onCraft = (clip, kind, data) => this.craftEvent(clip, kind, data);
+    this.beaver.working = true;
     this.spot('beaver', b, this.hitBox(0.6, 1.2, 0.5, v3(BEAVER.x, 0.6, BEAVER.z)), v3(BEAVER.x, 1.38, BEAVER.z), (l) => ({ target: v3(BEAVER.x - 0.04, 0.98, BEAVER.z), yaw: -0.22, pitch: 0.05, dist: l === 'side' ? 2.3 : 2.6, fov: 40, cx: l === 'side' ? 0.62 : 0.5, cy: l === 'side' ? 0.5 : 0.42 }));
     this.layout = innerWidth >= innerHeight * 1.05 && innerWidth >= 640 ? 'side' : 'top';
     for (let i = 0; i < 3; i++) this.deals.push(this.makeStump(i));
@@ -336,8 +350,6 @@ export class Lodge implements Stage {
     this.add(roof);
     // wood shavings: by the counter, round the stumps, under the tool wall, by the barrel
     this.add(shavings([{ x: -4.05, z: -0.85, r: 0.42, n: 22 }, { x: -3.7, z: -0.25, r: 0.28, n: 9 }, { x: 0.15, z: -2.25, r: 0.3, n: 8 }]));
-    // a braided rug before the counter
-    this.add(ragRug(2.1, 1.25, v3(1.2, 0.006, 0.0)));
   }
 
   private meshOf(g: THREE.BufferGeometry, m: THREE.Material): THREE.Mesh {
@@ -600,27 +612,181 @@ export class Lodge implements Stage {
   private buildDecor() {
     this.lamp(v3(-1.25, 2.65, 1.45), true);
     this.lamp(v3(2.95, 2.5, -1.25), true);
+    this.lamp(v3(0.3, 2.7, -1.3), true);   // [shop11] over the workbench
     // (two barrels of stock come with hero.glb, in loadProps)
     const lean = sack(0.4, 0.16, 11, 22);
-    lean.position.set(-3.55, 0, 1.55);
+    lean.position.set(-3.55, 0, 1.75);
     lean.rotation.set(0, 0.6, 0.08);
     this.add(lean);
     // bundles of herbs drying under the beams
     const beamY = ROOM.h - 0.18 - 0.14;
-    for (const [k, [x, z, drop]] of ([[-1.12, -2.35, 0.34], [-0.82, -2.35, 0.5], [-0.5, -2.35, 0.3], [-0.2, -2.35, 0.44], [2.95, -0.75, 0.36], [3.3, -0.75, 0.5], [-3.9, -0.75, 0.4], [-3.6, -0.75, 0.3]] as [number, number, number][]).entries()) {
+    for (const [k, [x, z, drop]] of ([[2.95, -0.75, 0.36], [3.3, -0.75, 0.5], [-3.9, -0.75, 0.4], [-3.6, -0.75, 0.3], [-3.25, -0.75, 0.46]] as [number, number, number][]).entries()) {
       const hb = herbBundle(k * 13 + 5, drop);
       hb.position.set(x, beamY - drop, z);
       this.add(hb);
       this.herbs.push(hb);
     }
     const fir = pottedFir(1.5);
-    fir.group.position.set(-0.2, 0, ROOM.back + 0.45);
+    fir.group.position.set(4.12, 0, 1.95);
     this.add(fir.group);
     this.plants.push(fir);
     this.disposables.push(() => fir.dispose());
-    // a deal sign over the stumps (it follows the stumps when the layout changes)
-
+    this.buildWorkshop();
   }
+
+  // ---------------------------------------------------------------- [shop11] the workshop
+
+  private plank: Plank | null = null;
+  private wip: { group: THREE.Group; stage: number } | null = null;
+  private benchNode: THREE.Group | null = null;
+
+  /** The furniture maker's half of the store: his workbench and plank (in his own frame), the tool board and the peg
+   * rail on the wall behind him, the timber rack, the shaving horse, the finishing table, the cabinet waiting for its
+   * doors, the chair taking shape over the day, sawdust and shavings on the floor. */
+  private buildWorkshop() {
+    const b = this.beaver.node;
+    const own = <T extends THREE.Object3D>(o: T): T => { o.traverse((n) => { if ((n as THREE.Mesh).isMesh) n.userData.own = true; }); return o; };
+    const bench = own(workbench());
+    b.add(bench);
+    this.benchNode = bench;
+    this.plank = new Plank(b);
+    this.disposables.push(() => this.plank?.dispose());
+    // the tool board and, above it, the peg rail with finished pieces hung on it
+    const tb = toolBoard(2.7, 1.3, 0.95);
+    tb.group.position.set(0.05, 0, ROOM.back + 0.15);
+    this.add(own(tb.group));
+    this.toolSlots = tb.slots;
+    const rail: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
+    const rg = new RoundedBoxGeometry(3.0, 0.09, 0.03, 2, 0.01);
+    rail.push({ geo: rg, m: mtx(0.05, 2.95, ROOM.back + 0.165) });
+    for (let k = 0; k < 7; k++) {
+      const pg = new THREE.CylinderGeometry(0.012, 0.016, 0.1, 8);
+      pg.rotateX(Math.PI / 2);
+      rail.push({ geo: pg, m: mtx(-1.25 + k * 0.42, 2.95, ROOM.back + 0.23) });
+    }
+    this.add(this.meshOf(merged(rail), M.boardDark()));
+    // the timber rack along the left wall, a chopping block with the hatchet by it
+    const tr = own(timberRack(3.3, 4));
+    tr.position.set(-ROOM.w + 0.16, 0, -1.05);
+    tr.rotation.y = Math.PI / 2;
+    this.add(tr);
+    const block = own(stump(0.42, 0.2, 21));
+    block.position.set(-3.55, 0, -2.45);
+    this.add(block);
+    this.chopBlock = block;
+    // the shaving horse by the wall
+    const sh = own(shavingHorse());
+    sh.position.set(-3.3, 0, -0.42);
+    sh.rotation.y = 0.32;
+    this.add(sh);
+    // the finishing table to his left, the carcass to his right, against the back wall
+    const ft = own(finishingTable());
+    ft.position.set(1.25, 0, ROOM.back + 0.42);
+    ft.rotation.y = -0.08;
+    this.add(ft);
+    const cc = own(carcass());
+    cc.position.set(-1.05, 0, ROOM.back + 0.16);
+    cc.rotation.y = 0.05;
+    this.add(cc);
+    // the chair he's making today, a stage for each part of the day
+    this.setWip();
+    // sawdust and shavings on the floor round the bench, the horse and the rack
+    for (const [x, z, r] of [[-0.75, -1.05, 1.1], [0.6, -1.15, 0.9], [-3.2, -0.35, 0.9], [-3.9, -1.6, 0.8], [-1.5, -1.25, 0.7]] as [number, number, number][]) {
+      const d = sawdustPatch(r, 0.8);
+      d.position.set(x, 0.003, z);
+      d.rotation.z = x * 2.3;
+      this.add(d);
+      this.disposables.push(() => d.geometry.dispose());
+    }
+    this.add(shavings([{ x: -0.9, z: -0.95, r: 0.45, n: 18 }, { x: 0.5, z: -1.0, r: 0.5, n: 14 }, { x: -3.1, z: -0.3, r: 0.4, n: 14 }, { x: -1.5, z: -1.2, r: 0.3, n: 8 }, { x: -2.2, z: -1.2, r: 0.3, n: 6 }], 13));
+    // the dais of finished furniture at the front right (the pieces arrive with the props)
+    const dais = this.meshOf(new RoundedBoxGeometry(1.25, 0.1, 0.8, 2, 0.02), M.board());
+    dais.position.set(DAIS.x, 0.05, DAIS.z);
+    dais.rotation.y = -0.12;
+    this.add(dais);
+    this.add(contactShadow(1.6, 1.15, 0.5)).position.set(DAIS.x, 0.004, DAIS.z);
+  }
+  private toolSlots: Record<string, THREE.Vector3> = {};
+  private chopBlock: THREE.Group | null = null;
+
+  /** The chair in progress follows the time of day: parts laid out in the morning, glued up in clamps by midday, the
+   * seat on, the back going in, finished and oiled by evening. */
+  private setWip() {
+    const h = new Date().getHours();
+    const stage = h < 9 ? 0 : h < 12 ? 1 : h < 15 ? 2 : h < 18 ? 3 : 4;
+    if (this.wip?.stage === stage) return;
+    if (this.wip) { this.wip.group.removeFromParent(); this.wip.group.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) m.geometry.dispose(); }); }
+    const g = chairInProgress(stage);
+    g.traverse((n) => { if ((n as THREE.Mesh).isMesh) n.userData.own = true; });
+    g.position.set(-1.55, 0, -1.35);
+    g.rotation.y = 0.5;
+    this.scene.add(g);
+    this.wip = { group: g, stage };
+  }
+
+  /** a craft event from Barnaby's clip: the plank and the room react */
+  private craftEvent(clip: WorkClip, kind: string, data: Record<string, number> | undefined) {
+    const P = this.plank;
+    if (!P) return;
+    const fx = this.fx, w = (x: number, y: number, z: number) => P.world(x, y, z);
+    const R = (a: number, b: number) => a + Math.random() * (b - a);
+    if (kind === 'sawdust') {
+      P.sawdust();
+      const p = w(CUT_X, BOARD.bottom, (BOARD.near + BOARD.far) / 2);
+      for (let i = 0; i < 9; i++) fx.emit({ x: p.x, y: p.y, z: p.z, vx: R(-0.15, 0.15), vy: R(-0.1, 0.25), vz: R(-0.15, 0.2), life: R(0.6, 1.0), frame: SPR.pixel, color: [0xf0d9a8, 0xe2c08a, 0xd2a86c][i % 3], size: R(0.018, 0.03), gravity: 2.2, drag: 1.2, flutter: 0.2, land: true, delay: i * 0.025 });
+      sound.play('paper_rustle', { volume: 0.1, rate: 0.62 + Math.random() * 0.1, gap: 150 });
+    } else if (kind === 'offcut') {
+      P.offcut();
+      sound.play('wood_knock', { volume: 0.4, rate: 1.1, gap: 200 });
+      setTimeout(() => { if (!this.dead) sound.play('place_wood', { volume: 0.4, rate: 0.95 }); }, 650);
+    } else if (kind === 'chop') {
+      P.chop(data?.depth ?? 0.005);
+      const p = w(MORTISE.x, BOARD.top + 0.01, MORTISE.z);
+      sound.play('wood_knock', { volume: 0.35, rate: 1.4 + Math.random() * 0.2, gap: 80 });
+      for (let i = 0; i < 6; i++) { const a = Math.random() * Math.PI * 2; fx.emit({ x: p.x, y: p.y, z: p.z, vx: Math.cos(a) * R(0.2, 0.6), vy: R(0.5, 1.1), vz: Math.sin(a) * R(0.2, 0.6), life: R(0.6, 0.9), frame: SPR.crumb, color: [0xf0d6a0, 0xd8b078][i % 2], size: R(0.05, 0.08), gravity: 5, drag: 0.6, land: true }); }
+    } else if (kind === 'dust') {
+      const c = this.beaver.craft;
+      const x = 0.1 + (c ? 0.075 * Math.sin(((c.t * 24 - 26) / 10) * Math.PI * 2) : 0);
+      const p = w(x, BOARD.top + 0.01, (BOARD.near + BOARD.far) / 2);
+      for (let i = 0; i < 3; i++) fx.emit({ x: p.x + R(-0.03, 0.03), y: p.y, z: p.z + R(-0.03, 0.03), vx: R(-0.08, 0.08), vy: R(0.06, 0.18), vz: R(0.02, 0.12), life: R(0.9, 1.4), frame: SPR.puff1, frames: 3, fps: 3, color: 0xf3e6c8, size: R(0.06, 0.1), grow: 0.8, drag: 1.5, fadeOut: 0.6, delay: i * 0.05 });
+      sound.play('paper_rustle', { volume: 0.06, rate: 1.35, gap: 200 });
+    } else if (kind === 'blow') {
+      // a cloud of dust blown off the plank toward the front of the bench (it hides a fresh plank going down)
+      const h = this.beaver.headWorld();
+      const p = w(0, BOARD.top + 0.02, (BOARD.near + BOARD.far) / 2);
+      sound.play('wind_gust', { volume: 0.12, rate: 1.4, gap: 300 });
+      for (let i = 0; i < 16; i++) fx.emit({ x: p.x + R(-0.35, 0.35), y: p.y + R(0, 0.06), z: p.z + R(-0.05, 0.05), vx: (p.x - h.x) * 0.4 + R(-0.2, 0.2), vy: R(0.1, 0.35), vz: (p.z - h.z) * 1.2 + R(0.2, 0.5), life: R(1.0, 1.6), frame: i % 3 ? SPR.puff1 : SPR.cloud2, frames: i % 3 ? 3 : 1, fps: 3, color: 0xf0e2c2, size: R(0.08, 0.16), grow: 1.4, drag: 1.6, fadeOut: 0.7, delay: i * 0.02 });
+      setTimeout(() => { if (!this.dead) P.freshIfShort(); }, 250);
+    } else if (kind === 'admire') {
+      const p = this.beaver.headWorld();
+      fx.burst('sparkle', p.x, p.y - 0.2, p.z + 0.25, 6);
+    }
+    void clip;
+  }
+
+  /** the continuous part of the craft: the plank sliding, the pencil line, the kerf, a shaving growing */
+  private craftTick() {
+    const P = this.plank, c = this.beaver.craft;
+    if (!P || !c) { if (this.growing) { P?.releaseShaving(); this.growing = false; } return; }
+    const ev = (kind: string) => CRAFT[c.clip].ev.filter((e) => e[1] === kind);
+    const prog = (t0: number, t1: number) => THREE.MathUtils.clamp((c.t - t0) / Math.max(1e-3, t1 - t0), 0, 1);
+    const sm = (x: number) => x * x * (3 - 2 * x);
+    if (c.clip === 'measure') {
+      for (const [t0, , d] of ev('slide')) if (c.t >= t0) P.slide(sm(prog(t0, d!.t1)));
+      for (const [t0, , d] of ev('line')) if (c.t >= t0) P.drawLine(sm(prog(t0, d!.t1)));
+    } else if (c.clip === 'saw') {
+      for (const [t0, , d] of ev('kerf')) if (c.t >= t0 && c.t < d!.t1) P.kerf(Math.min(1, sm(prog(t0, d!.t1)) * 1.23));
+    } else if (c.clip === 'plane') {
+      let on = false;
+      for (const [t0, , d] of ev('stroke')) {
+        if (c.t >= t0 && c.t < d!.t1) { const k = prog(t0, d!.t1); P.shaving(d!.x0 + (d!.x1 - d!.x0) * sm(k), k); on = true; }
+      }
+      if (!on && this.growing) P.releaseShaving();
+      if (on && !this.growing) sound.play('box_tape', { volume: 0.1, rate: 0.75, gap: 300 });
+      this.growing = on;
+    }
+  }
+  private growing = false;
 
   private lamp(at: THREE.Vector3, hang: boolean) {
     const light = new THREE.PointLight(0xffc684, 3.0, 7, 1.5);
@@ -774,46 +940,26 @@ export class Lodge implements Stage {
     if (till) this.spot('till', till, this.hitBox(0.5, 0.45, 0.45, v3(C.x1 - 0.42, C.h + 0.22, C.z - 0.08)), v3(C.x1 - 0.42, C.h + 0.48, C.z - 0.08));
     put('candle', v3(C.x1 - 0.12, C.h, C.z + 0.2), { h: 0.22 });
     put('books', v3(C.x0 + 1.25, C.h, C.z - 0.2), { h: 0.14, yaw: 0.5 });
-    // behind the counter: the stocked bookshelf with a ladder, a crate of goods
-    const shelf = put('bookshelf', v3(3.45, 0, ROOM.back + 0.36), { h: 2.15, shadow: 0.5 });
+    // behind the counter, right of the window: the stocked bookshelf
+    const shelf = put('bookshelf', v3(3.98, 0, ROOM.back + 0.36), { h: 2.15, shadow: 0.5 });
     if (shelf) void this.stockShelf(shelf, g);
-    put('ladder', v3(2.72, 0, ROOM.back + 0.55), { h: 2.0, pitch: -0.2, yaw: 0.25 });
-    // the hat pegs between the window and the banners
-    // the hat shelf between the window and the banners: planks on log brackets, the hats sat on them
-    for (const y of [1.58, 2.12]) {
-      const sh = new THREE.Mesh(new RoundedBoxGeometry(1.0, 0.04, 0.3, 2, 0.01), M.board());
-      sh.position.set(-0.78, y, ROOM.back + 0.3);
-      sh.castShadow = sh.receiveShadow = true;
-      this.add(sh);
-      for (const x of [-1.15, -0.41]) {
-        const br = new THREE.Mesh(bracketGeo(), M.boardDark());
-        br.position.set(x, y - 0.02, ROOM.back + 0.15);
-        br.castShadow = true;
-        this.add(br);
-      }
-    }
-    put('boater', v3(-1.02, 1.6, ROOM.back + 0.32), { h: 0.11, yaw: 0.3 });
-    put('beanie', v3(-0.55, 1.6, ROOM.back + 0.32), { h: 0.17, yaw: -0.2 });
-    put('fedora', v3(-1.02, 2.14, ROOM.back + 0.32), { h: 0.13, yaw: 0.5 });
-    put('beret', v3(-0.55, 2.14, ROOM.back + 0.32), { h: 0.07, yaw: -0.4 });
-    // the tool wall on the left: a saw, an axe, a hatchet and a plane on pegs, a stool and a bucket of shavings
-    const toolRail = this.meshOf(logGeo(1.7, 0.035, 61, 8), M.boardDark());
-    toolRail.rotation.y = Math.PI / 2;
-    toolRail.position.set(-ROOM.w + 0.17, 1.72, -1.0);
-    this.add(toolRail);
-    put('saw', v3(-ROOM.w + 0.19, 1.08, -1.6), { h: 0.6, pre: [-Math.PI / 2, 0, 0], roll: 0.05 });
-    put('axe', v3(-ROOM.w + 0.2, 1.0, -1.0), { h: 0.72 });
-    put('hatchet', v3(-ROOM.w + 0.2, 1.38, -0.45), { h: 0.36, roll: 0.08 });
-    put('plane', v3(-ROOM.w + 0.42, 0.0, -0.05), { h: 0.12, yaw: 1.2, shadow: 0.4 });
-    put('stool', v3(-3.9, 0, 0.35), { h: 0.48, yaw: 0.3, shadow: 0.5 });
-    put('bucket', v3(-3.75, 0, -0.55), { h: 0.38, yaw: 0.6, shadow: 0.5 });
-    put('jug', v3(-3.9, 0.48, 0.35), { h: 0.2, yaw: -0.4 });
-    // crates stacked by the window and at the front right
-    put('milcrate', v3(-0.05, 0, ROOM.back + 0.55), { h: 0.42, yaw: 0.05, shadow: 0.5 });
-    put('crate2', v3(-0.15, 0.42, ROOM.back + 0.55), { h: 0.32, yaw: -0.25 });
+    // [shop11] the borrowed tools on the tool board: two handsaws hanging, two planes on the shelf, a hatchet; the
+    // chopping block's axe; a bucket of offcuts by the shaving horse; crates by the timber rack
+    const S = this.toolSlots, board = (k: string) => S[k] ? v3(0.05 + S[k].x, S[k].y, ROOM.back + 0.15 + S[k].z) : null;
+    const sv1 = board('saw1'), sv2 = board('saw2'), pl1 = board('plane1'), pl2 = board('plane2'), ht = board('hatchet');
+    if (sv1) put('saw', sv1.clone().add(v3(0, -0.3, 0)), { h: 0.56, pre: [-Math.PI / 2, 0, 0], yaw: Math.PI / 2, roll: 0.04 });
+    if (sv2) put('saw', sv2.clone().add(v3(0, -0.26, 0)), { h: 0.46, pre: [-Math.PI / 2, 0, 0], yaw: Math.PI / 2, roll: -0.06 });
+    if (pl1) put('plane', pl1, { h: 0.13, yaw: 0.15 });
+    if (pl2) put('plane', pl2, { h: 0.105, yaw: -0.2 });
+    if (ht) put('hatchet', ht.clone().add(v3(0, -0.18, 0)), { h: 0.36, yaw: Math.PI / 2, roll: 0.06 });
+    if (this.chopBlock) put('axe', v3(-3.52, 0.42, -2.42), { h: 0.62, roll: -0.35, yaw: 0.6 });
+    put('bucket', v3(-3.2, 0, 1.55), { h: 0.38, yaw: 0.6, shadow: 0.5 });
+    put('milcrate', v3(-4.0, 0, 1.45), { h: 0.42, yaw: 1.62, shadow: 0.5 });
+    put('crate2', v3(-4.0, 0.42, 1.45), { h: 0.32, yaw: 1.3 });
     put('crate1', v3(3.9, 0, 3.1), { h: 0.42, yaw: -0.5, shadow: 0.5 });
     put('cheese', v3(3.9, 0.42, 3.1), { h: 0.1, yaw: 0.3 });
     put('pot', v3(4.05, 0, 2.35), { h: 0.34, shadow: 0.5 });
+    await this.loadWorkshop();
     // the stash's bowl and wicker basket
     const bowl = this.spots.get('acorn:handful');
     if (bowl) put('bowl', v3(0, 0, 0), { w: 0.3, parent: bowl.obj });
@@ -830,6 +976,62 @@ export class Lodge implements Stage {
     }
     put('wlantern', v3(WIN.x0 + 0.25, WIN.y0, ROOM.back + 0.05), { h: 0.3 });
     put('vase', v3(WIN.x1 - 0.25, WIN.y0, ROOM.back + 0.05), { h: 0.24 });
+  }
+
+  /** [shop11] Poly Haven's hand drill and claw hammer on the tool board (shop/workshop.glb); finished furniture from the
+   * catalogue on the dais and hung on the peg rail, each with a paper price tag. */
+  private async loadWorkshop() {
+    try {
+      const w = (await loadGLB('shop/workshop.glb')).scene;
+      if (this.dead) return;
+      const S = this.toolSlots;
+      const hang = (name: string, slot: string, h: number, yaw = 0) => {
+        const src = w.getObjectByName(name), at = S[slot];
+        if (!src || !at) return;
+        const o = new THREE.Group();
+        const c = src.clone(true);
+        c.position.set(0, 0, 0);
+        o.add(c);
+        fit(o, 1, h, 1);
+        const b = new THREE.Box3().setFromObject(o);
+        // hung from its top on the peg
+        o.position.set(0.05 + at.x, at.y + 0.02 - (b.max.y - o.position.y), ROOM.back + 0.15 + at.z + 0.02);
+        o.rotation.y = yaw;
+        o.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+        this.scene.add(o);
+      };
+      hang('drill', 'drill', 0.42, 0.3);
+      hang('hammer', 'hammer', 0.3, 0.0);
+    } catch (e) { console.warn('workshop tools missing', e); }
+    // finished pieces: on the dais at the front right, and hung on the peg rail over the tool board
+    const pieces: { id: string; at: THREE.Vector3; h: number; yaw: number; price: number; hang?: boolean; tag: THREE.Vector3 }[] = [
+      { id: 'rocking_chair', at: v3(DAIS.x - 0.26, 0.1, DAIS.z + 0.02), h: 0.86, yaw: 0.5, price: 480, tag: v3(0.16, 0.7, 0.12) },
+      { id: 'stool', at: v3(DAIS.x + 0.34, 0.1, DAIS.z + 0.1), h: 0.42, yaw: -0.3, price: 90, tag: v3(0.0, 0.38, 0.16) },
+      { id: 'chair', at: v3(-0.83, 2.18, ROOM.back + 0.33), h: 0.84, yaw: 0, price: 180, hang: true, tag: v3(0.12, 0.43, 0.2) },
+      { id: 'chair', at: v3(0.85, 2.18, ROOM.back + 0.33), h: 0.84, yaw: 0, price: 180, hang: true, tag: v3(0.12, 0.43, 0.2) },
+    ];
+    await Promise.all(pieces.map(async (pc, k) => {
+      const def = ITEMS[pc.id];
+      if (!def?.model) return;
+      try {
+        const { root } = await instanceGLB(def.model);
+        if (this.dead) return;
+        const o = new THREE.Group();
+        o.add(root);
+        fit(o, 2, pc.h, 2);
+        const g = new THREE.Group();
+        g.add(o);
+        g.position.copy(pc.at);
+        g.rotation.y = pc.yaw;
+        g.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
+        this.scene.add(g);
+        if (!pc.hang) { const sh = contactShadow(0.7, 0.7, 0.5); sh.position.set(pc.at.x, pc.at.y + 0.003, pc.at.z); this.scene.add(sh); }
+        const tag = priceTag(pc.price, 40 + k);
+        tag.position.copy(pc.tag);
+        g.add(tag);
+        this.disposables.push(() => tag.userData.dispose?.());
+      } catch { /* skip */ }
+    }));
   }
 
   /** Put goods for sale on the bookshelf behind the counter: real furniture models from the catalogue. */
@@ -912,7 +1114,8 @@ export class Lodge implements Stage {
   private makeStump(i: number): Deal {
     const def = STUMPS[this.layout][i];
     const group = new THREE.Group();
-    const st = stump(def.h, 0.21, i + 3);
+    const st = plinth(def.h, 0.46, i + 3);
+    st.traverse((n) => { if ((n as THREE.Mesh).isMesh) n.userData.own = true; });
     group.add(st);
     const holder = new THREE.Group();
     holder.position.y = def.h;
@@ -934,7 +1137,15 @@ export class Lodge implements Stage {
     this.deals.forEach((d, i) => {
       d.def = P[i];
       d.group.position.set(P[i].x, 0, P[i].z);
-      d.stump.scale.y = P[i].h / (d.stump.userData.top as number);
+      if (Math.abs((d.stump.userData.top as number) - P[i].h) > 1e-3) {
+        // a plinth of this layout's height
+        const st = plinth(P[i].h, 0.46, i + 3);
+        st.traverse((n) => { if ((n as THREE.Mesh).isMesh) n.userData.own = true; });
+        d.group.remove(d.stump);
+        d.stump.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh && m.userData.own) m.geometry.dispose(); });
+        d.group.add(st);
+        d.stump = st;
+      }
       d.holder.position.y = P[i].h;
     });
     const sign = this.signs.find((s) => s.group.userData.deals);
@@ -1013,8 +1224,8 @@ export class Lodge implements Stage {
   private shot(name: string): Shot {
     const l = this.layout;
     if (name === 'home') return l === 'side'
-      ? { target: v3(0.1, 1.15, -0.85), yaw: 0.02, pitch: 0.1, dist: 5.5, fov: 46, cx: 0.5, cy: 0.5 }
-      : { target: v3(1.36, 0.78, -0.25), yaw: 0.0, pitch: 0.3, dist: 5.0, fov: 58, cx: 0.5, cy: 0.44 };
+      ? { target: v3(-0.45, 1.05, -1.05), yaw: 0.03, pitch: 0.12, dist: 5.0, fov: 46, cx: 0.5, cy: 0.5 }
+      : { target: v3(-0.05, 0.9, -0.95), yaw: 0.0, pitch: 0.32, dist: 4.8, fov: 58, cx: 0.5, cy: 0.42 };
     if (name === 'deals') { const p = STUMPS[l][1]; return l === 'side' ? { target: v3(p.x, 0.75, p.z - 0.3), yaw: 0.05, pitch: 0.2, dist: 3.9, fov: 44, cx: 0.5, cy: 0.5 } : this.shot('home'); }
     if (name === 'stash') return { target: v3(SHELF.x - 0.45, 0.6, (SHELF.z0 + SHELF.z1) / 2 + 0.05), yaw: -1.12, pitch: l === 'side' ? 0.4 : 0.5, dist: l === 'side' ? 3.5 : 5.4, fov: l === 'side' ? 46 : 52, cx: 0.5, cy: l === 'side' ? 0.48 : 0.42 };
     if (name === 'series') return this.barrelShot(l, false);
@@ -1235,7 +1446,7 @@ export class Lodge implements Stage {
     if (this.lookT > 0) { this.lookT -= dt; if (this.lookT <= 0) this.beaver.lookAt = null; }
     if ((this.idleT -= dt) <= 0) {
       this.idleT = 8 + Math.random() * 9;
-      if (!this.beaver.busy) {
+      if (!this.beaver.busy && !this.beaver.working) {
         const r = Math.random();
         if (r < 0.28) this.beaver.play('gnaw');
         else if (r < 0.48) this.beaver.play('think');
@@ -1244,6 +1455,9 @@ export class Lodge implements Stage {
       }
     }
     this.beaver.update(dt);
+    this.craftTick();
+    this.plank?.update(dt);
+    if (Math.floor(this.time / 30) !== Math.floor((this.time - dt) / 30)) this.setWip();
 
     // deals: a slow turn on the stump, a bounce when picked
     for (const d of this.deals) {
@@ -1313,6 +1527,10 @@ export class Lodge implements Stage {
     this.dead = true;
     for (const d of this.deals) { d.owl?.model.dispose(); for (const c of d.holder.children) c.userData.dispose?.(); }
     this.clearPrize();
+    // [shop11] the workshop's own geometry (built in code; the borrowed models share theirs with the GLB cache)
+    const own = new Set<THREE.BufferGeometry>();
+    for (const o of [this.scene, this.beaver.node]) o.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh && m.userData.own) own.add(m.geometry); });
+    for (const g of own) g.dispose();
     this.beaver.dispose();
     for (const s of this.signs) s.dispose();
     for (const f of this.disposables) f();
@@ -1412,20 +1630,6 @@ export async function displayModel(d: DisplayItem, w: number, h: number): Promis
     const p = parcel(Math.min(w, h) * 0.7);
     return { obj: p, owl: null };
   } catch (e) { console.warn('display failed', d, e); return null; }
-}
-
-/** A shelf bracket: a carved quarter-curve of wood (extruded, bevelled), its back against the wall. */
-let bracket: THREE.BufferGeometry | null = null;
-function bracketGeo(): THREE.BufferGeometry {
-  if (bracket) return bracket;
-  const s = new THREE.Shape();
-  s.moveTo(0, 0); s.lineTo(0.2, 0); s.lineTo(0.2, -0.03);
-  s.bezierCurveTo(0.12, -0.04, 0.05, -0.08, 0.03, -0.16);
-  s.lineTo(0, -0.17); s.closePath();
-  bracket = new THREE.ExtrudeGeometry(s, { depth: 0.04, bevelEnabled: true, bevelSize: 0.005, bevelThickness: 0.005, bevelSegments: 2, curveSegments: 8 });
-  bracket.translate(0, 0, -0.02);
-  bracket.rotateY(-Math.PI / 2);
-  return bracket;
 }
 
 /** A clock face set to the real time: a painted enamel dial with roman numerals, blued-steel spade hands. */
@@ -1543,50 +1747,6 @@ function shaftTexture(vertical = false): THREE.Texture {
   const t = new THREE.CanvasTexture(c);
   if (vertical) { t.flipY = true; shaftV = t; } else shaft = t;
   return t;
-}
-/** A woven rag rug: bands of deep red, moss, mustard and cream with a stepped diamond border and knotted fringes. */
-function ragRug(w: number, d: number, at: THREE.Vector3): THREE.Mesh {
-  const W = 168, H = Math.round((W * d) / w);
-  const c = document.createElement('canvas');
-  c.width = W; c.height = H;
-  const g = c.getContext('2d')!;
-  const img = g.createImageData(W, H);
-  const RED = [150, 52, 44], MOSS = [92, 112, 66], MUST = [196, 150, 62], CREAM = [222, 204, 168], INK = [70, 44, 36], TEAL = [64, 104, 110];
-  const r = mulberry(23);
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const i = (y * W + x) * 4;
-    const fringe = x < 6 || x >= W - 6;
-    if (fringe) {
-      const on = y % 3 !== 2 && ((x < 6 ? 6 - x : x - W + 7) < 4 + (y * 7 % 3));
-      if (!on) { img.data[i + 3] = 0; continue; }
-      img.data[i] = CREAM[0] * 0.9; img.data[i + 1] = CREAM[1] * 0.9; img.data[i + 2] = CREAM[2] * 0.85; img.data[i + 3] = 255;
-      continue;
-    }
-    const u = x - 6, v = y, uw = W - 12;
-    const bx = Math.min(u, uw - 1 - u), by = Math.min(v, H - 1 - v), b = Math.min(bx, by);
-    let col = RED;
-    if (b < 3) col = INK;
-    else if (b < 9) col = (Math.floor((bx < by ? v : u) / 3) + b) % 4 === 0 ? CREAM : MUST;
-    else if (b < 11) col = INK;
-    else {
-      // bands across, a big stepped diamond in the middle
-      const cu = u - uw / 2, cv = v - H / 2;
-      const dia = Math.abs(cu) / (uw * 0.3) + Math.abs(cv) / (H * 0.32);
-      const ring = Math.floor(dia * 4);
-      if (dia < 1) col = [CREAM, TEAL, MUST, RED][ring % 4];
-      else col = Math.floor(u / 10) % 5 === 0 ? MOSS : RED;
-    }
-    const weave = ((x + y) % 2 ? 0.92 : 1) * (0.94 + r() * 0.08);
-    img.data[i] = col[0] * weave; img.data[i + 1] = col[1] * weave; img.data[i + 2] = col[2] * weave; img.data[i + 3] = 255;
-  }
-  g.putImageData(img, 0, 0);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace; t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearMipmapLinearFilter;
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ map: t, roughness: 1, alphaTest: 0.5 }));
-  m.rotation.x = -Math.PI / 2;
-  m.position.copy(at);
-  m.receiveShadow = true;
-  return m;
 }
 void box;
 void tex;
