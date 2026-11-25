@@ -145,12 +145,12 @@ export function panelFrame(kind: WoodName = 'walnut', t = 16, o: { brass?: boole
 
 export type BtnHue = 'green' | 'gold' | 'red' | 'night' | 'cream' | 'oak' | 'grey' | 'plum' | 'sky';
 const HUE: Record<BtnHue, { face: RGB; lip: RGB; rim?: RGB; mat?: 'cloth' | 'wood' | 'metal' }> = {
-  green: { face: hex('#2f8a52'), lip: hex('#174a2b') },
+  green: { face: hex('#3b6f4d'), lip: hex('#1c3a26') }, // [ui10] natural enamels, not candy
   gold: { face: hex('#e2ac4a'), lip: hex('#7a5418'), mat: 'metal' },
-  red: { face: hex('#b8403f'), lip: hex('#5e1a1c') },
-  night: { face: hex('#2f4f9a'), lip: hex('#142553') },
-  plum: { face: hex('#7c3f8e'), lip: hex('#3c1846') },
-  sky: { face: hex('#3d8fc4'), lip: hex('#174566') },
+  red: { face: hex('#94413a'), lip: hex('#4e1c1a') },
+  night: { face: hex('#33497a'), lip: hex('#18233f') },
+  plum: { face: hex('#634068'), lip: hex('#33193a') },
+  sky: { face: hex('#3f6f8c'), lip: hex('#1c3a4c') },
   cream: { face: hex('#efe3c8'), lip: hex('#9c8462'), mat: 'cloth' },
   oak: { face: hex('#b07a3c'), lip: hex('#5a3418'), mat: 'wood' },
   grey: { face: hex('#9b968c'), lip: hex('#5c5850') },
@@ -753,7 +753,7 @@ export const NINE: Record<string, () => Nine> = {
   chip: () => chip('walnut'), chip_oak: () => chip('oak'),
   bar_track: () => barTrack(),
   bar_fill_gold: () => barFill(hex('#f2b63c')), bar_fill_green: () => barFill(hex('#4cbf6c')), bar_fill_red: () => barFill(hex('#e0574f')), bar_fill_blue: () => barFill(hex('#5aa7ff')),
-  ribbon_green: () => ribbon(hex('#2f8a52')), ribbon_red: () => ribbon(hex('#b8343c')), ribbon_blue: () => ribbon(hex('#2f5aa8')), ribbon_gold: () => ribbon(hex('#d9a33c')),
+  ribbon_green: () => ribbon(hex('#35694a')), ribbon_red: () => ribbon(hex('#943438')), ribbon_blue: () => ribbon(hex('#33507e')), ribbon_gold: () => ribbon(hex('#c0913e')),
   bubble_bw: () => bubbleFrame(false), bubble_think: () => bubbleFrame(true),
   sticky_note: () => stickyFrame(), sticky_pink: () => stickyFrame(hex('#f6c2bc')), sticky_blue: () => stickyFrame(hex('#c8dcf0')), sticky_green: () => stickyFrame(hex('#cfe6b8')),
   input: () => fieldFrame(),

@@ -361,7 +361,7 @@ export interface RenderOpts {
 /** [ui10] the outline ink: a warm near-black */
 export const INK: RGB = [20, 12, 16];
 /** [ui10] the default outline width in device px for a painting scale k (1 - 1.5 device px) */
-export const outlinePx = (k: number) => clamp(0.85 + 0.22 * k, 1, 1.5);
+export const outlinePx = (k: number) => clamp(0.55 + 0.17 * k, 0.75, 1.1); // [ui10] thin and subtle: realistic, never a cartoon line
 
 /**
  * A painting surface `w` x `h` units (CSS px) with `pad` units of margin all round for shadows; `k` device px
@@ -425,8 +425,8 @@ export class Real {
    * [ui10] Ink a thin dark line along a shape's edge (centred on it), only over what's painted: inner outlines
    * where parts overlap, engraved rules, printed borders. `w` device px (default a little under the outline).
    */
-  line(s: SDF, w?: number, a = 0.85) {
-    const { k, pad, W } = this, lw = w ?? outlinePx(k) * 0.85, [x0, y0, x1, y1] = this.range(s, 2);
+  line(s: SDF, w?: number, a = 0.5) {
+    const { k, pad, W } = this, lw = w ?? outlinePx(k) * 0.8, [x0, y0, x1, y1] = this.range(s, 2);
     if (!this.ink) this.ink = new Float32Array(this.W * this.H);
     for (let py = y0; py < y1; py++) for (let px = x0; px < x1; px++) {
       const i = py * W + px;
@@ -504,7 +504,7 @@ export class Real {
     // [ui10] the silhouette outline: coverage dilated by `ow` device px (anti-aliased), shown under the object
     const ow = o.outline === false ? 0 : (o.outline ?? outlinePx(k));
     const dil = ow > 0 ? dilate(this.cov, W, H, ow) : null;
-    const ic = o.inkCol ?? INK, ia = o.inkA ?? 0.94, ink = this.ink;
+    const ic = o.inkCol ?? INK, ia = o.inkA ?? 0.62, ink = this.ink;
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x, c = this.cov[i];
       const dv = dil ? dil[i] * ia : 0;

@@ -387,21 +387,20 @@ function stickerArt(kind: string): Art {
     const pts: [number, number][] = [];
     for (let i = 0; i < 10; i++) { const an = -Math.PI / 2 + (i * Math.PI) / 5, r = i % 2 ? 3.4 : 7.6; pts.push([8 + Math.cos(an) * r, 8.4 + Math.sin(an) * r]); }
     a.poly(pts, (x, y) => dtone('gold', 3.4 + lit(x - 8, y - 8, 7) * 1.6, x, y));
-    a.px(6, 8, INK); a.px(10, 8, INK); a.px(7, 10, INK); a.px(8, 11, INK); a.px(9, 10, INK); a.px(5, 10, '#f08aa8'); a.px(11, 10, '#f08aa8');
+    // [ui10] no cartoon faces on the stickers
   } else if (kind === 'moon') {
-    // [ui10] a happy acorn (no moon emblems): a honey nut under a scaly cup and a stalk
+    // [ui10] an acorn (no moon emblems): a honey nut under a scaly cup and a stalk
     a.disc(8, 9.6, 5.2, (x, y) => dtone('gold', 3.6 + lit(x - 8, y - 9, 6), x, y));
     a.disc(8, 5.6, 5.6, (x, y) => dtone('wood', 3 + lit(x - 8, y - 5, 6), x, y));
     for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if (y > 6 && Math.hypot(x + 0.5 - 8, y + 0.5 - 5.6) < 5.6 && Math.hypot(x + 0.5 - 8, y + 0.5 - 9.6) >= 5.2) a.d[y * 16 + x] = 0;
     a.line(8, 0, 9, 1, INK);
-    a.px(6, 10, INK); a.px(10, 10, INK); a.px(7, 12, INK); a.px(8, 12, INK); a.px(9, 12, INK); a.px(5, 11, '#f08aa8'); a.px(11, 11, '#f08aa8');
+    a.px(8, 2, INK);
   } else if (kind === 'cloud') {
     for (const [cx, cy, r] of [[5, 9.5, 3.6], [9, 7, 4.4], [12, 10, 3.2], [8, 11, 3.6]] as const) a.disc(cx, cy, r, (x, y) => dtone('white', 4.2 + lit(x - 8, y - 8, 7) * 1.2, x, y));
-    a.px(7, 9, INK); a.px(10, 9, INK); a.px(8, 10, INK); a.px(9, 10, INK);
   } else {
     for (const [cx, cy, r] of [[5, 7.5, 3.4], [9, 5, 4.2], [12, 8, 3.2], [8, 9, 3.4]] as const) a.disc(cx, cy, r, (x, y) => dtone('steel', 3.2 + lit(x - 8, y - 6, 7), x, y));
     for (const [dx, dy] of [[5, 13], [9, 14], [12, 12]]) { a.px(dx, dy, tone('blue', 4)); a.px(dx, dy + 1, tone('blue', 3)); }
-    a.px(7, 7, INK); a.px(10, 7, INK); a.line(8, 9, 9, 9, INK);
+
   }
   return a.outline(INK);
 }

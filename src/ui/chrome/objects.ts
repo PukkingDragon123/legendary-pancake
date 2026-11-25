@@ -156,7 +156,7 @@ export function toolTile(s: number, hue: PalRamp, zoom = 1, _res = 1, seed = 1):
     const sl = subtract(cutBox(2.4, 10.4, s - 4.8, s - 4.8, 3.6), cutBox(3, 11, s - 6, s - 6, 3.25));
     stringing(r, sl, hex('#ecc98c')); r.line(sl, 0.7, 0.3);
     const ins = cutBox(5.2, 13.2, s - 10.4, s - 10.4, 2.6);
-    r.part(ins, (x, y, i) => 1.4 + Math.min(1.2, i * 0.35) + 0 * x * y, cloth('felt', hueRGB(hue), { scale: 2.6, amt: 0.8 }), { line: 0.9 });
+    r.part(ins, (x, y, i) => 1.4 + Math.min(1.2, i * 0.35) + 0 * x * y, cloth('felt', mix(hueRGB(hue), [96, 84, 70], 0.3), { scale: 2.6, amt: 0.8 }), { line: 0.9 });
     for (const [cx, cy, sx, sy] of [[0, 8, 1, 1], [s, 8, -1, 1], [0, s + 8, 1, -1], [s, s + 8, -1, -1]] as [number, number, number, number][]) filigreeCorner(r, cx + sx * 0.3, cy + sy * 0.3, sx, sy, 14, 5, GOLD, 4.2);
     return r.url({ shadow: { dy: 3, blur: 4, a: 0.45 }, aoR: 3 });
   });
