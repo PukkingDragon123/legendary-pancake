@@ -97,7 +97,7 @@ function Bubble() {
   return (
     <div class="hh-bubble" ref={ref} key={b.id}>
       <span class="who">{save.value.name}</span>
-      <span class="txt">{[...b.text].map((ch, i) => <span class={'ch' + (i < shown ? ' on' : '') + (i === shown - 1 && ch !== ' ' ? ' new' : '')}>{ch}</span>)}</span>
+      <span class={'txt' + (shown >= b.text.length ? (/!/.test(b.text) ? ' t3d-wave t3d-shake' : /hoo|yay|love|lovely/i.test(b.text) ? ' t3d-wave' : '') : '')}>{[...b.text].map((ch, i) => <span class={'ch' + (i < shown ? ' on' : '') + (i === shown - 1 && ch !== ' ' ? ' new' : '')} style={{ '--i': i } as Record<string, number>}>{ch}</span>)}</span>
       {shown >= b.text.length && <i class="bob" />}
     </div>
   );

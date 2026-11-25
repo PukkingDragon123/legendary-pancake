@@ -14,7 +14,8 @@ import { IcoAcorn, IcoMoon, IcoSparkle, IcoStone } from './ui/icons.tsx';
 import { toast } from './ui/kit.tsx';
 import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
-import { alagardReady } from './ui/font.ts'; // Alagard everywhere: also routes every UI text node through alagardSafe
+import { alagardReady, installTextSnap } from './ui/font.ts'; // Alagard everywhere: also routes every UI text node through alagardSafe
+import { installText3D } from './ui/text3d.tsx'; // 3D pixel titles, numbers, buttons, toasts
 import { installPixelSkin } from './ui/pxskin.ts';
 import { installIconSet } from './ui/chrome/iconset.ts';
 import { Scene } from './world/scene.ts';
@@ -24,6 +25,8 @@ async function boot() {
   installPixelSkin();
   installIconSet(); // [ui4] the painted icon family replaces the sprite icons everywhere
   await alagardReady();
+  installTextSnap();
+  installText3D();
   const q = new URLSearchParams(location.search);
   const pref = save.value.settings.quality;
   // [look4] 'auto' starts phones / small machines on the medium tier and adapts to the frame rate (see Scene.setTier)

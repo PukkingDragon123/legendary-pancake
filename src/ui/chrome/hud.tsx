@@ -29,6 +29,7 @@ import { installChromeSkin } from './skin.ts';
 import { iconSrc } from './iconset.ts';
 import { installSurfaces } from './surfaces.ts';
 import { alagardWidth } from '../font.ts';
+import { punch } from '../text3d.tsx';
 import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
@@ -182,6 +183,9 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
     uiBurstAt(ico.current, p.kind === 'coin' ? 'acorns' : 'magic', 4);
   };
   const shop = (e: Event) => { e.stopPropagation(); sound.play('ui_open', { volume: 0.5 }); haptic(); uiBurstAt(e.currentTarget as Element, 'sparkle', 8); openPanel('shop'); };
+  // [font6] the number punches (squash and stretch) when it changes
+  const numRef = useRef<HTMLSpanElement>(null), lastVal = useRef(p.value);
+  useEffect(() => { if (p.value !== lastVal.current) { lastVal.current = p.value; window.setTimeout(() => punch(numRef.current), 650); } }, [p.value]);
   return (
     <div class={'hh-hang hh-curhang ' + p.kind} ref={ref}>
       <Ropes xs={[22, 102]} top={p.kind === 'coin' ? -28 : -16} len={p.kind === 'coin' ? 34 : 22} chain />
@@ -190,7 +194,7 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
           <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}
         </span>
-        <span class={'hh-num' + (p.value >= 100000 ? ' huge' : p.value >= 10000 ? ' long' : '')}><Odometer value={p.value} /></span>
+        <span class={'hh-num' + (p.value >= 100000 ? ' huge' : p.value >= 10000 ? ' long' : '')} ref={numRef}><Odometer value={p.value} /></span>
         <button class="hh-plus" style={{ '--plus': bg(plusButton(14, k, 1)), '--plus-dn': bg(plusButton(14, k, 1, true)) } as Record<string, string>} onClick={shop} aria-label={`Get more ${label.toLowerCase()} in the shop`}><span /></button>
       </div>
       {p.children}

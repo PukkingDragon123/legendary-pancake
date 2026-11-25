@@ -62,7 +62,7 @@
 .haul-rewards small { font-size: 16px; color: #dec8a8; margin-left: 4px; }
 .haul-rewards .ico { margin: -8px 0; }
 .haul-row { display: grid; grid-template-columns: 1fr; gap: 12px; }
-.haul-streak { padding: 10px 12px 12px; transform: rotate(-0.8deg); }
+.haul-streak { padding: 10px 12px 12px; }
 .hs-head { display: flex; justify-content: space-between; align-items: baseline; }
 .hs-head b { font-weight: 400; font-size: 16px; color: #815a55; }
 .hs-head span { font-size: 16px; color: #836d58; }
@@ -72,7 +72,7 @@
 .hs-day img { width: 34px; image-rendering: pixelated; }
 .hs-day i { width: 34px; height: 34px; display: block; background: var(--px-dot) center / 12px 12px no-repeat; image-rendering: pixelated; }
 .hs-day.today { background: rgba(233, 225, 207, 0.35); }
-.haul-tease { display: flex; align-items: center; gap: 10px; padding: 8px 12px 10px; transform: rotate(0.8deg); }
+.haul-tease { display: flex; align-items: center; gap: 10px; padding: 8px 12px 10px; }
 .tease-gift { position: relative; flex: none; filter: drop-shadow(0 3px 0 rgba(49, 38, 30, 0.3)) brightness(0.92); animation: bob 1.8s ease-in-out infinite; }
 .tease-gift b { position: absolute; left: 50%; top: 56%; transform: translate(-50%, -50%); font-size: 32px; color: #faf5e9; text-shadow: 2px 2px 0 #593c35, -2px 0 0 #593c35, 0 -2px 0 #593c35; }
 .tease-txt { font-size: 16px; color: #4f3e2d; line-height: 1.25; }

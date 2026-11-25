@@ -18,6 +18,7 @@ import { Cards, CELL, type Mass } from './crown.ts';
 import { Geo, mat, spline, type V3 } from './geo.ts';
 import { canvasTex, houseMat, patchCut, woodFill, type HouseMat } from './kit.ts';
 import { alagardReady, alagardText } from '../../ui/font.ts';
+import { drawText3D } from '../../ui/text3d.tsx';
 import {
   CHIMNEY_A, CHIMNEY_TOP, DOOR_A, FLOOR_IDS, FLOOR_Y, HOLES, inOpening, LADDER_A, LAMP_AT, LAUNCH, LIMB_A, OPEN_A, openingOutline, openings, PLATFORM,
   R_IN, ROOF_Y, RO, SLAB, trunkR, UNLOCK, wrapA, type FloorId, type Opening,
@@ -230,8 +231,10 @@ function signsMaterial(): THREE.MeshStandardMaterial {
       g.fillStyle = '#5c3a1c'; g.fillRect(1, 13, 94, 1);
       g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(1, 24, 94, 3);
     });
-    ink(SIGNS.sign, 'HOOT HOLLOW', 48, 4, 1, '#f3e6c4', '#3a2410');
-    ink(SIGNS.sign, 'PIP', 48, 15, 1, '#f3e6c4', '#3a2410');
+    // [font6] the hollow's name in cream 3D pixel letters
+    const sign3d = (text: string, capTop: number) => { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); drawText3D(g, text, 2 * (SIGNS.sign[0] + 48) - 2, 2 * (SIGNS.sign[1] + capTop) + 11, { n: 1, palette: 'cream', depth: 1, align: 'center' }); g.restore(); };
+    sign3d('HOOT HOLLOW', 3);
+    sign3d('PIP', 14.5);
     at(SIGNS.mail, () => {
       g.fillStyle = '#9c3a2a'; g.fillRect(0, 0, 32, 16);
       for (let i = 0; i < 32; i++) { g.fillStyle = i % 5 === 0 ? '#8c3224' : '#a6402e'; g.fillRect(i, 0, 1, 16); }

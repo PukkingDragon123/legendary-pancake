@@ -5,6 +5,7 @@ import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { IcoAcorn, IcoBack, IcoClose, IcoStone, Px } from './icons.tsx';
+import { textSpans } from './text3d.tsx';
 
 // ------------------------------------------------------------------ feel
 
@@ -24,7 +25,9 @@ export function toast(text: string, icon?: Toast['icon'], ms = 2800) {
 }
 /** [chrome] Toasts are parchment scrolls that unroll below the hanging signs (styles in ui/chrome/chrome.css). */
 export function Toasts() {
-  return <div class="hh-toasts" role="status">{toasts.value.map((t) => <div key={t.id} class={'hh-toast' + (t.out ? ' out' : '')}><div class="hh-toast-body">{t.icon ? <t.icon size={40} /> : null}<span>{t.text}</span></div></div>)}</div>;
+  // [font6] rewards burst in gold 3D letters with sparkles; exclamations shake
+  const fx = (s: string) => (/^\+\s?\d|quest done|level|found|unlocked|new /i.test(s) ? 'reward t3d-burst' : /!\s*$/.test(s) ? 't3d-shake' : '');
+  return <div class="hh-toasts" role="status">{toasts.value.map((t) => <div key={t.id} class={'hh-toast' + (t.out ? ' out' : '')}><div class="hh-toast-body">{t.icon ? <t.icon size={40} /> : null}<span class={fx(t.text)}>{t.text}</span></div></div>)}</div>;
 }
 
 // ------------------------------------------------------------------ sheet
@@ -38,7 +41,7 @@ export function Sheet(p: { title?: ComponentChildren; sub?: ComponentChildren; o
       {(p.title || p.onClose || p.onBack) && (
         <header class="sheet-head">
           {p.onBack && <button class="icon-btn" aria-label="Back" onClick={() => { tap('ui_back', 0.5); p.onBack!(); }}><IcoBack size={30} /></button>}
-          <div class="grow">{p.title && <h2>{p.title}</h2>}{p.sub && <p class="muted small">{p.sub}</p>}</div>
+          <div class="grow">{p.title && <h2>{textSpans(p.title)}</h2>}{p.sub && <p class="muted small">{p.sub}</p>}</div>
           {p.right}
           {p.onClose && <button class="icon-btn" aria-label="Close" onClick={close}><IcoClose size={30} /></button>}
         </header>

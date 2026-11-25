@@ -74,6 +74,7 @@ html.hh-still .hh-look .hh-lookhang { animation: none; }
 }
 @media (min-width: 900px) and (min-height: 640px) {
   .hh-look { scale: 1.5; transform-origin: 0 0; }
+  .hh-look .hh-looklabel { font-size: calc(32px / 3); } /* [font6] 16 px on screen after the 1.5x scale */
 }
 `;
 let styled = false;

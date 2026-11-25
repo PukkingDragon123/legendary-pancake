@@ -57,13 +57,92 @@ export function installAlagardText() {
     if (v.type == null) {
       if (typeof v.props === 'string') (v as { props: unknown }).props = alagardSafe(v.props as unknown as string);
     } else if (typeof v.type === 'string') {
-      const p = v.props as { placeholder?: unknown };
+      const p = v.props as { placeholder?: unknown; class?: unknown; className?: unknown; children?: unknown; 'data-t'?: string };
       if (typeof p.placeholder === 'string') p.placeholder = alagardSafe(p.placeholder);
+      // 3D text (text3d.tsx): its stepped band fill is drawn from a copy of the text in data-t
+      const cls = typeof p.class === 'string' ? p.class : typeof p.className === 'string' ? p.className : '';
+      if (v.type === 'h1' || v.type === 'h2' || /(^|\s)(t3d|t3d-seg|hh-name|lvup-title|title-ribbon|cb-title)(\s|$)/.test(cls)) {
+        const c = p.children, parts = Array.isArray(c) ? c : [c];
+        if (parts.length && parts.every((x) => typeof x === 'string' || typeof x === 'number')) p['data-t'] = alagardSafe(parts.join(''));
+      }
     }
     prev?.(v);
   };
 }
 installAlagardText();
+
+// ---- whole-pixel text: centring (text-align, flex, grid) can leave a line of text half a pixel off the grid,
+// and a pixel font drawn at x.5 smears. After the UI changes, nudge such lines back onto whole pixels with a
+// sub-pixel text-indent on their block (it moves only the text, never the box or its pixel-art background).
+const SNAP = 'data-hh-snap';
+/** elements whose text wears the full 3D style with a band fill (keep in step with FULL in text3d.tsx) */
+const T3D_HOST = 'h1:not(.qp-q), h2:not(.qp-q), .t3d:not(.t3d-lite), .hh-name, .lvup-title, .title-ribbon, .cb-title, .cs-sign span, .seal b, .tk-times b, .bk-last-t b';
+let snapOn = false, snapQueued = 0, snapLast = 0;
+function snapPass() {
+  snapQueued = 0; snapLast = performance.now();
+  const moving = new Map<Element, boolean>();
+  const isMoving = (el: Element | null): boolean => {
+    if (!el || el === document.body) return false;
+    const c = moving.get(el);
+    if (c !== undefined) return c;
+    const cs = getComputedStyle(el);
+    const m = (cs.transform !== 'none' && !/^matrix\(1, 0, 0, 1, -?\d+, -?\d+\)$/.test(cs.transform)) || cs.rotate !== 'none' || cs.scale !== 'none' || (cs.translate !== 'none' && /\./.test(cs.translate)) || cs.animationName !== 'none' || isMoving(el.parentElement);
+    moving.set(el, m);
+    return m;
+  };
+  const done = new Set<Element>();
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const range = document.createRange();
+  const vw = innerWidth, vh = innerHeight;
+  let n: Node | null, budget = 600;
+  while ((n = w.nextNode()) && budget-- > 0) {
+    const t = n as Text;
+    if (!t.data.trim()) continue;
+    let el = t.parentElement;
+    if (!el || el.closest('script,style,svg,textarea,input,[data-nosnap]')) continue;
+    // 3D titles (text3d.tsx): a text that sits alone in its element inside a title gets its band-fill copy
+    if (el.childNodes.length === 1 && el.closest(T3D_HOST) && el.getAttribute('data-t') !== t.data) el.setAttribute('data-t', t.data);
+    // the block whose first line this text sits on
+    while (el && getComputedStyle(el).display === 'inline') el = el.parentElement;
+    if (!el || done.has(el) || el === document.body) continue;
+    done.add(el);
+    const cs = getComputedStyle(el);
+    if (!/^(block|inline-block|list-item|table-cell|flow-root)$/.test(cs.display) || isMoving(el)) continue;
+    range.selectNodeContents(t);
+    const r = range.getClientRects()[0];
+    if (!r || r.width === 0 || r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) continue;
+    const fx = r.left - Math.floor(r.left);
+    if (fx < 0.03 || fx > 0.97) continue;
+    const want = fx < 0.5 ? -fx : 1 - fx;
+    const old = parseFloat(el.getAttribute(SNAP) ?? '0') || 0;
+    // try the indent that moves the line by `want` (centred lines move by half the indent)
+    for (const k of cs.textAlign === 'center' ? [2, 1] : [1, 2]) {
+      let ind = old + want * k;
+      if (ind > 1.5) ind -= 2; else if (ind < -1.5) ind += 2;
+      el.style.textIndent = `${ind}px`;
+      el.setAttribute(SNAP, String(ind));
+      const q = range.getClientRects()[0];
+      if (q && Math.abs(q.left - Math.round(q.left)) < 0.03) break;
+      el.style.textIndent = old ? `${old}px` : '';
+      el.setAttribute(SNAP, String(old));
+    }
+  }
+}
+function snapSoon() {
+  if (snapQueued) return;
+  const wait = Math.max(0, 200 - (performance.now() - snapLast));
+  snapQueued = window.setTimeout(() => requestAnimationFrame(snapPass), wait);
+}
+/** Keep every line of UI text on whole pixels (call once at boot). */
+export function installTextSnap() {
+  if (snapOn || typeof MutationObserver === 'undefined') return;
+  snapOn = true;
+  new MutationObserver(snapSoon).observe(document.body, { childList: true, subtree: true, characterData: true });
+  addEventListener('resize', snapSoon);
+  document.addEventListener('animationend', snapSoon, true);
+  document.addEventListener('transitionend', snapSoon, true);
+  snapSoon();
+}
 
 let ready: Promise<void> | null = null;
 /** Resolves once Alagard can paint (canvas text waits for it). Adds the face itself on pages without the app CSS. */

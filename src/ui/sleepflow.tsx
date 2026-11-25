@@ -280,7 +280,7 @@ export function SleepScreen() {
         <HoldButton ms={1500} label="Hold to go to sleep" class="sf-sleep hh-btn-night" onDone={lightsOut}>
           <Px name="moon" size={40} /><span>Hold to sleep</span>
         </HoldButton>
-        <p>Lights out, and Pip flies off to {area?.name ?? 'the woods'}</p>
+        <p>Pip flies off to {area?.name ?? 'the woods'}</p>
       </div>
       <div class="sf-dark" />
       {lock && <PhoneLockSheet wake={plan.wake} hour12={h12} onClose={() => { tap('ui_close', 0.4); setLock(false); }} onDone={() => { setLock(false); if (!isDone('phone')) toggle('phone', document.querySelector('.prop-phone')); }} />}

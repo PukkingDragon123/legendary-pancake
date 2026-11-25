@@ -9,6 +9,7 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { modelUrl } from '../../gfx/glb.ts';
 import { rng } from '../../gfx/noise.ts';
 import { alagard, alagardReady, alagardSafe } from '../../ui/font.ts';
+import { drawText3D, fitText3D } from '../../ui/text3d.tsx';
 
 // ------------------------------------------------------------------ textures and materials
 
@@ -679,8 +680,10 @@ export function hangingSign(w: number, h: number, text: string, sub = '', ropeTo
   const t = canvasTex(c);
   const draw = (tx: string, sb: string) => {
     paintPlank(gx, cw, ch, seed);
-    pixelText(gx, tx, cw / 2, sb ? ch * 0.4 : ch / 2, Math.round(ch * (sb ? 0.42 : 0.55)), '#f6dc9a', { shadow: '#3b2a1c', outline: '#4a2f1d', maxW: cw - 16 });
-    if (sb) pixelText(gx, sb, cw / 2, ch * 0.77, Math.round(ch * 0.2), '#f2e7cf', { outline: '#4a2f1d', maxW: cw - 16 });
+    // [font6] the name in gold 3D pixel letters (outline, extrusion, banded fill), the line under it in cream
+    const n1 = fitText3D(tx, Math.round(ch * (sb ? 0.42 : 0.55)), cw - 16);
+    drawText3D(gx, tx, cw / 2 - n1 * 2, Math.round((sb ? ch * 0.4 : ch / 2) + 5.5 * n1), { n: n1, palette: 'gold', depth: 2, align: 'center' });
+    if (sb) { const n2 = fitText3D(sb, Math.round(ch * 0.2), cw - 16); drawText3D(gx, sb, cw / 2 - n2, Math.round(ch * 0.77 + 5.5 * n2), { n: n2, palette: 'cream', depth: 1, align: 'center' }); }
     t.needsUpdate = true;
   };
   draw(text, sub);

@@ -165,7 +165,7 @@ input[type='time'].field { font-family: var(--font-small); font-size: 16px; }
 
 /* ------------------------------------------------------------ toast & bubble */
 .toasts { position: absolute; top: calc(62px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(400px, calc(100% - 24px)); display: flex; flex-direction: column; gap: 6px; z-index: 30; pointer-events: none; }
-.toast { pointer-events: auto; position: relative; display: flex; align-items: center; gap: 8px; padding: 0 2px; font-size: 16px; line-height: 1.25; color: var(--ink); filter: var(--drop-lg); animation: toastIn 0.45s var(--pop); transform: rotate(-1deg); }
+.toast { pointer-events: auto; position: relative; display: flex; align-items: center; gap: 8px; padding: 0 2px; font-size: 16px; line-height: 1.25; color: var(--ink); filter: var(--drop-lg); animation: toastIn 0.45s var(--pop); }
 .toast .ico { margin: -6px 0; }
 .toast.out { animation: toastOut 0.3s var(--ease) forwards; }
 .bubble { position: absolute; z-index: 4; max-width: 250px; padding: 0 2px; font-size: 16px; line-height: 1.25; color: #312821; transform: translate(-50%, -100%); animation: bubbleIn 0.4s var(--pop); pointer-events: none; filter: var(--drop); }
@@ -291,8 +291,8 @@ input[type='time'].field { font-family: var(--font-small); font-size: 16px; }
 /* ------------------------------------------------------------ animations */
 @keyframes sheetIn { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
 @keyframes sheetOut { to { transform: translate(-50%, 100%); } }
-@keyframes toastIn { 0% { transform: translateY(-40px) rotate(-1deg) scale(0.7); opacity: 0; } 100% { transform: rotate(-1deg); opacity: 1; } }
-@keyframes toastOut { to { transform: translateY(-30px) rotate(-1deg); opacity: 0; } }
+@keyframes toastIn { 0% { transform: translateY(-40px) rotate(-1deg) scale(0.7); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes toastOut { to { transform: translateY(-30px); opacity: 0; } }
 @keyframes bubbleIn { from { transform: translate(-50%, -80%) scale(0.4); opacity: 0; } to { transform: translate(-50%, -100%) scale(1); opacity: 1; } }
 @keyframes fadeUp { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }

@@ -6,6 +6,8 @@ import * as THREE from 'three';
 import { sound } from '../audio/sound.ts';
 import { F } from './fonts.ts';
 import { crispText, measure, wrap } from './tex.ts';
+import { drawText3D } from '../ui/text3d.tsx';
+import { reducedMotion } from '../ui/chrome/swing.ts';
 
 const VOICES = ['voice_a', 'voice_b', 'voice_c', 'voice_d', 'voice_e'];
 const pause = (c: string) => (c === '.' || c === '!' || c === '?' ? 0.2 : c === ',' || c === ':' ? 0.1 : 0);
@@ -124,7 +126,7 @@ export class Speech {
   private draw() {
     const font = this.font(), lh = 40, tagH = 18;
     const widths = this.lines.map((l) => measure(l.words.map((w) => w.text).join(' '), font));
-    const W = Math.ceil(Math.max(...widths, 40)) + 12, H = this.lines.length * lh + tagH + 14;
+    const W = Math.ceil(Math.max(...widths, 40)) + 28, H = this.lines.length * lh + tagH + 22;
     if (this.cv.width !== W || this.cv.height !== H) { this.cv.width = W; this.cv.height = H; this.tex.dispose(); this.tex.image = this.cv; }
     const g = this.cv.getContext('2d')!;
     g.clearRect(0, 0, W, H);
@@ -135,16 +137,17 @@ export class Speech {
     let n = 0;
     this.lines.forEach((l, li) => {
       const text = l.words.map((w) => w.text).join(' ');
-      let x = Math.round((W - widths[li]) / 2), y = tagH + 6 + 24 + li * lh;
+      let x = Math.round((W - 16 - widths[li]) / 2), y = tagH + 6 + 24 + li * lh;
       for (const w of l.words) {
         const left = Math.max(0, Math.min(w.text.length, this.shown - n));
         const s = w.text.slice(0, left);
         if (s) {
-          // extrusion (two steps down), outline, face
-          const face = w.em ? '#ffd27a' : '#fff4dc';
-          for (let k = 2; k >= 1; k--) crispText(g, s, x, y + 2 * k, font, k === 2 ? '#1a0d06' : '#5a2e14');
-          for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2]]) crispText(g, s, x + dx, y + dy, font, '#1a0d06');
-          crispText(g, s, x, y, font, face);
+          // [font6] 3D pixel letters (outline, extrusion, banded fill); *emphasis* in gold that flashes rose while it
+          // types; the newest letter pops up a pixel or two as it lands
+          const typing = left < w.text.length || n + left === this.shown;
+          const pal = w.em ? (typing && !this.done && this.shown % 2 && !reducedMotion() ? 'rose' : 'gold') : 'cream';
+          const newest = !this.done && n + left === this.shown && !reducedMotion() ? left - 1 : -1;
+          drawText3D(g, s, x, y, { n: 2, palette: pal, depth: 2, lift: newest >= 0 ? (i) => (i === newest ? 2 : 0) : undefined });
         }
         n += w.text.length + 1;
         x += measure(w.text + ' ', font);

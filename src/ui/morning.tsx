@@ -21,6 +21,7 @@ import { PALETTE } from '../owl/palette.ts';
 import { getClip, listClips, type ClipMeta, type SleepSession, type Stage } from '../sleep/index.ts';
 import { Px } from './icons.tsx';
 import { fmtDur, fmtTime, Sheet, tap, toast } from './kit.tsx';
+import { CountUp } from './text3d.tsx';
 import { coatIcon, itemIcon, pieceIcon } from './portraits.ts';
 import { lines, panel, say, sceneRef } from './state.ts';
 import { progress } from '../game/quests.ts';
@@ -81,7 +82,7 @@ export function NightReport(p: { s: SleepSession; onNext?: () => void; onClose?:
     <Sheet title={qual} sub={new Date(s.start).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' }) + (s.simulated ? ' · demo night' : '')} onClose={p.onClose}>
       <div class="journal-cover"><div class="page col gap-lg">
         <div class="row" style="gap:16px">
-          <div class="seal"><div><b>{r.score}</b><small>SCORE</small></div></div>
+          <div class="seal"><div><b><CountUp value={r.score} from={0} /></b><small>SCORE</small></div></div>
           <div class="col" style="gap:2px">
             <div class="num" style="font-size:32px">{fmtDur(r.asleep)}</div>
             <div class="muted small">asleep · {fmtTime(r.asleepAt, h12)} – {fmtTime(r.wokeAt, h12)}</div>
@@ -408,7 +409,7 @@ function Haul(p: { finds: Find[]; night: SleepSession; onReport: () => void; onC
 
       <button class="haul-report" onClick={() => { tap('paper_flip', 0.5); p.onReport(); }}>
         <Paper kind="notebook" opts={{ rules: 8, ruleTop: 10, margin: 10, seed: 2 }} class="hr-paper">
-          <span class="seal hr-seal"><span><b>{r.score}</b><small>SCORE</small></span></span>
+          <span class="seal hr-seal"><span><b><CountUp value={r.score} from={0} /></b><small>SCORE</small></span></span>
           <span class="hr-txt"><b>{fmtDur(r.asleep)} asleep</b><small>{fmtTime(r.asleepAt, s.settings.hour12)} – {fmtTime(r.wokeAt, s.settings.hour12)}</small><Hypnogram s={p.night} h12={s.settings.hour12} compact /></span>
           <span class="hr-more">Report ›</span>
         </Paper>
