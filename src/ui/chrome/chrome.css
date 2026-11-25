@@ -92,13 +92,13 @@
 @keyframes hhWiggle { 25% { transform: rotate(-8deg); } 50% { transform: rotate(6deg) scale(1.08); } 75% { transform: rotate(-3deg); } }
 /* short screens: the tags hang in two strings */
 @media (max-height: 740px) {
-  .hh-tools { width: 116px; flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
-  .hh-tool { width: 56px; height: 80px; }
-  .hh-toolhang { width: 56px; transform-origin: 28px 4px; }
+  .hh-tools { width: 152px; flex-direction: row; flex-wrap: wrap; align-items: flex-start; } /* [ui7] room for the widest label */
+  .hh-tool { width: 76px; height: 80px; }
+  .hh-toolhang { width: 76px; transform-origin: 38px 4px; }
   .hh-toollabel { font-size: var(--t1); padding: 1px 3px 2px; } /* [ui4] every icon keeps its label */
   /* [ui4] in two columns the shop's NEW flag sits on its own tile, clear of Build */
   .hh-new { left: auto; right: -6px; top: -8px; transform: rotate(10deg); animation: none; }
-  .hh-toolrope { left: 25px; width: 62px; bottom: 50px; background-image: var(--rope), var(--rope) !important; background-size: 6px 8px; background-position: 0 0, 56px 0; background-repeat: repeat-y; filter: none; }
+  .hh-toolrope { left: 35px; width: 82px; bottom: 50px; background-image: var(--rope), var(--rope) !important; background-size: 6px 8px; background-position: 0 0, 76px 0; background-repeat: repeat-y; filter: none; }
 }
 
 /* ------------------------------------------------------------ main objects on the shelf [ui4] */

@@ -247,8 +247,8 @@ function draw(c: CanvasRenderingContext2D, p: P) {
     }
     case 'paper': {
       c.save(); c.translate(x, y); c.rotate(spin * 0.5); c.scale(1, 0.4 + 0.6 * Math.abs(Math.cos(p.age * 4 + p.ph)));
-      c.fillStyle = p.col!; c.fillRect(-4, -3, 8, 6);
-      c.strokeStyle = 'rgba(120,90,50,.35)'; c.lineWidth = 0.5; c.strokeRect(-4, -3, 8, 6);
+      c.shadowColor = 'rgba(30,20,40,.3)'; c.shadowBlur = 2; c.shadowOffsetY = 1;
+      c.fillStyle = p.col!; c.beginPath(); c.moveTo(-3, -2); c.lineTo(2.6, -2.4); c.lineTo(3, 2); c.lineTo(-2.4, 2.4); c.closePath(); c.fill();
       c.restore(); break;
     }
     case 'ink': {
