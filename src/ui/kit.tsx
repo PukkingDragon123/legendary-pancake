@@ -54,7 +54,8 @@ export function Sheet(p: { title?: ComponentChildren; sub?: ComponentChildren; o
 // ------------------------------------------------------------------ controls
 
 export function Toggle(p: { on: boolean; onChange: (v: boolean) => void; label?: string }) {
-  return <button role="switch" aria-checked={p.on} aria-label={p.label} class={'toggle' + (p.on ? ' on' : '')} onClick={() => { tap('ui_toggle', 0.55); p.onChange(!p.on); }}><Px name={p.on ? 'switch_on' : 'switch_off'} size={64} /></button>;
+  // [ui7] a brass knob that slides along a recessed walnut track; the track glows green enamel when on
+  return <button role="switch" aria-checked={p.on} aria-label={p.label} class={'toggle' + (p.on ? ' on' : '')} onClick={() => { tap('ui_toggle', 0.55); p.onChange(!p.on); }}><span class="trk"><i class="knob" /></span></button>;
 }
 
 export function Tags<T extends string | number>(p: { value: T; options: { v: T; label: ComponentChildren; color?: string }[]; onChange: (v: T) => void; round?: boolean }) {

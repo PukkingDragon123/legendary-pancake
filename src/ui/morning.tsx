@@ -29,7 +29,8 @@ import { flyReward } from './fx.tsx';
 import { voice, type Tts } from './voice.ts';
 import { playArrival } from '../world/cinematics.ts';
 import { GIFT_LOOK, present, sack, stickerURL } from './px/sleepprops.ts';
-import { ArtCanvas, injectSleepFrames, Paper } from './sleepkit.tsx';
+import { injectSleepFrames, PaintCanvas, Paper } from './sleepkit.tsx';
+import { paintPresent } from './real/present.ts';
 import { uiBurst } from './chrome/uifx.ts';
 import { animeMoment } from './fx/anime.ts'; // [anime6]
 import './morning.css';
@@ -327,8 +328,8 @@ export function Morning() {
           <div class={'mr-box stage' + stage + ' rar-' + f.rarity} ref={boxRef} style={rcStyle(f.rarity)}
             onClick={unwrap} role="button" aria-label="Pull the ribbon to unwrap">
             <span class="glow" />
-            {stage < 4 && <ArtCanvas w={44} h={48} k={5} fps={stage === 0 ? 8 : 0} deps={[stage, Math.round(stageT * 20), gi]} label={`A wrapped ${RARITY_NAME[f.rarity].toLowerCase()} present`}
-              draw={(a, t, fr) => present(a, 0, 0, look, Math.min(3, stage), stage === 0 ? 0 : stageT, fr)} />}
+            {stage < 4 && <PaintCanvas w={220} h={240} fps={stage === 0 ? 8 : 0} deps={[stage, Math.round(stageT * 20), gi]} label={`A wrapped ${RARITY_NAME[f.rarity].toLowerCase()} present`}
+              draw={(g, t) => { g.scale(5, 5); paintPresent(g, look, Math.min(3, stage), stage === 0 ? 0 : stageT, Math.floor(t * 8)); }} />}
             {stage >= 3 && <div class={'mr-item' + (stage === 3 ? ' rising' : '')}><span class="mr-item-art"><FindArt f={f} size={96} /></span></div>}
           </div>
           {stage === 0 && <p class="mr-hint pull"><Px name="cursor_hand" size={30} />Pull the ribbon</p>}
@@ -343,7 +344,7 @@ export function Morning() {
               </div>
             </div>
           )}
-          <div class="mr-queue">{finds.map((q, i) => (i > gi ? <span class="q" style={{ animationDelay: `${i * 0.2}s` }}><ArtCanvas w={44} h={48} k={2} fps={0} draw={(a) => present(a, 0, 0, GIFT_LOOK[q.rarity], 0, 0, 0)} /></span> : null))}</div>
+          <div class="mr-queue">{finds.map((q, i) => (i > gi ? <span class="q" style={{ animationDelay: `${i * 0.2}s` }}><PaintCanvas w={88} h={96} fps={0} draw={(g) => { g.scale(2, 2); paintPresent(g, GIFT_LOOK[q.rarity], 0, 0, 0); }} /></span> : null))}</div>
         </div>
       )}
 
@@ -403,7 +404,7 @@ function Haul(p: { finds: Find[]; night: SleepSession; onReport: () => void; onC
           </div>
         </Paper>
         <Paper kind="sticky" opts={{ sticky: 1, seed: 5 }} class="haul-tease">
-          <span class="tease-gift"><ArtCanvas w={44} h={48} k={2} fps={6} draw={(a, t, fr) => present(a, 0, 0, GIFT_LOOK.legendary, 0, 0, fr)} /><b>?</b></span>
+          <span class="tease-gift"><PaintCanvas w={88} h={96} fps={6} draw={(g, t) => { g.scale(2, 2); paintPresent(g, GIFT_LOOK.legendary, 0, 0, Math.floor(t * 6)); }} /><b>?</b></span>
           <span class="tease-txt"><b>Tomorrow</b>{long ? 'Sleep 7h+ again and Pip looks somewhere rarer.' : 'A rarer gift if you sleep 7 hours or more.'}</span>
         </Paper>
       </div>

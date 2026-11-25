@@ -1,7 +1,7 @@
 /* The morning gift reveal and today's haul. */
 .mr { position: absolute; inset: 0; z-index: 22; display: flex; flex-direction: column; align-items: center; color: #382c22; overflow: hidden; }
 .mr-confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
-.mr-sky { position: absolute; inset: 0; background: var(--px-vignette-warm) 0 0 / 100% 100% no-repeat, linear-gradient(180deg, rgba(110, 82, 102, 0.55) 0 14%, rgba(158, 95, 102, 0.42) 14% 26%, rgba(192, 134, 106, 0.36) 26% 38%, rgba(232, 180, 174, 0.3) 38% 52%, rgba(241, 211, 154, 0.32) 52% 70%, rgba(234, 224, 200, 0.28) 70%); animation: fade 0.8s ease; pointer-events: none; }
+.mr-sky { position: absolute; inset: 0; background: var(--px-vignette-warm) 0 0 / 100% 100% no-repeat, linear-gradient(180deg, rgba(110, 82, 102, 0.55) 0 14%, rgba(158, 95, 102, 0.42) 20%, rgba(192, 134, 106, 0.36) 32%, rgba(232, 180, 174, 0.3) 45%, rgba(241, 211, 154, 0.32) 61%, rgba(234, 224, 200, 0.28) 70%); animation: fade 0.8s ease; pointer-events: none; }
 .mr-rays { position: absolute; left: 50%; top: 44%; translate: -50% -50%; pointer-events: none; opacity: 0.6; transition: opacity 0.6s; animation: fade 0.8s ease-in-out; }
 .mr-rays.on { opacity: 0.95; }
 .mr-rays.on.r-legendary { opacity: 1; }
