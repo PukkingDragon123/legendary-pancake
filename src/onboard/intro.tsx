@@ -119,7 +119,7 @@ export function Intro() {
       const el = panelEl.current;
       if (!el) return null;
       const u = U.k, w = el.offsetWidth, h = el.offsetHeight;
-      return U.wide ? { x: innerWidth - 14 * u - w + 30 * u, y: (innerHeight - h) / 2 + 34 * u } : { x: (innerWidth - w) / 2 + w * 0.6, y: innerHeight - 3 * u - h + 19 * u };
+      return U.wide ? { x: innerWidth - 14 * u - w - 4 * u, y: (innerHeight - h) / 2 + 60 * u } : { x: (innerWidth - w) / 2 + w * 0.1, y: innerHeight - 3 * u - h + 8 * u };
     };
     const onMove = (e: PointerEvent) => {
       if (phase !== 'ask' && phase !== 'file') return;
