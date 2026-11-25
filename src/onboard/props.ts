@@ -82,7 +82,10 @@ function blob(t: Tex, cx: number, cy: number, r: number, c: RGB | ((x: number, y
     if (d <= 1 - (hash(x, y, 5) - 0.5) * 0.12) t.set(x, y, typeof c === 'function' ? c(x, y) : c, a);
   }
 }
-const tex = (t: Tex, o: { repeat?: boolean } = {}) => t.texture({ repeat: o.repeat ?? false, q: 64 });
+/** [dialog10] the answer objects are drawn at full device resolution now: their painted textures magnify smoothly
+ * (a painted surface, not blocky texels) and stay sharp at grazing angles */
+const smoothTex = <T extends THREE.Texture>(t: T): T => { t.magFilter = THREE.LinearFilter; t.anisotropy = 8; return t; };
+const tex = (t: Tex, o: { repeat?: boolean } = {}) => smoothTex(t.texture({ repeat: o.repeat ?? false, q: 64 }));
 const std = (o: THREE.MeshStandardMaterialParameters) => new THREE.MeshStandardMaterial({ roughness: 0.6, metalness: 0, ...o });
 
 // ------------------------------------------------------------------ geometry helpers
@@ -155,7 +158,7 @@ function steam(top: number, r: number, seed = 1): { group: THREE.Group; tick: (t
     const cx = 8 + Math.sin(y * 0.35) * 3.2, w = 1.6 + Math.sin((y / 32) * Math.PI) * 1.8;
     for (let x = 0; x < 16; x++) { const d = Math.abs(x + 0.5 - cx); if (d < w && hash(x, y, 3) > 0.15) { t.set(x, y, rgb(0xfff6ea)); t.alpha(x, y, (1 - d / w) * Math.sin((y / 32) * Math.PI) * 0.9); } }
   }
-  const map = pixelTex(new THREE.CanvasTexture(t.canvas()), { mips: false });
+  const map = smoothTex(pixelTex(new THREE.CanvasTexture(t.canvas()), { mips: false }));
   const wisps: { m: THREE.Mesh; o: number }[] = [];
   for (let i = 0; i < 3; i++) {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(r * 0.7, r * 1.6), new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, opacity: 0.5 }));
@@ -388,16 +391,17 @@ function waterGlass(): Prop {
   const o = new THREE.Group();
   const H = 0.11;
   const gp: [number, number][] = [[0, 0.006], [0.028, 0.006], [0.03, 0], [0.032, 0.002], [0.037, H - 0.002], [0.0375, H], [0.0355, H], [0.0335, 0.009], [0, 0.009]];
-  const glass = new THREE.MeshPhysicalMaterial({ color: 0xeef6f4, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.28, envMapIntensity: 1.6, depthWrite: false, side: THREE.DoubleSide });
+  // [dialog10] clear glass and clear water (they read as milk before): thin reflections, a cool tint
+  const glass = new THREE.MeshPhysicalMaterial({ color: 0xeaf6f6, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.13, envMapIntensity: 0.9, depthWrite: false, side: THREE.DoubleSide });
   const gm = mesh(turn(gp, 48).g, glass, false);
   gm.renderOrder = 4;
   const wp: [number, number][] = [[0, 0.009], [0.0334, 0.009], [0.0362, H * 0.78], [0, H * 0.78]];
   const wt = new Tex(32, 32);
-  wash(wt, 0, 0, 32, 32, (x, y) => (y < 4 ? rgb(0xd8f2f6) : rgb(0x8fcadb)), { seed: 3, ang: Math.PI / 2, len: 6 });
-  const water = mesh(turn(wp, 40).g, new THREE.MeshStandardMaterial({ map: tex(wt), roughness: 0.05, transparent: true, opacity: 0.5, depthWrite: false }), false);
+  wash(wt, 0, 0, 32, 32, (x, y) => (y < 4 ? rgb(0xc4ecf4) : rgb(0x5fb2d2)), { seed: 3, ang: Math.PI / 2, len: 6 });
+  const water = mesh(turn(wp, 40).g, new THREE.MeshStandardMaterial({ map: tex(wt), roughness: 0.04, transparent: true, opacity: 0.34, depthWrite: false, envMapIntensity: 0.7 }), false);
   water.renderOrder = 3;
   // two ice cubes and a lemon slice on the rim
-  const ice = new THREE.MeshPhysicalMaterial({ color: 0xf4fbff, roughness: 0.15, transparent: true, opacity: 0.55, depthWrite: false });
+  const ice = new THREE.MeshPhysicalMaterial({ color: 0xf4fbff, roughness: 0.15, transparent: true, opacity: 0.42, depthWrite: false });
   for (const [x, y, z, r] of [[0.01, H * 0.74, 0.006, 0.4], [-0.012, H * 0.72, -0.008, 1.1]]) { const c = mesh(new RoundedBoxGeometry(0.018, 0.016, 0.018, 2, 0.004), ice, false); c.position.set(x, y, z); c.rotation.set(0.3, r, 0.2); c.renderOrder = 3; o.add(c); }
   const lt = new Tex(48, 48);
   for (let y = 0; y < 48; y++) for (let x = 0; x < 48; x++) {
@@ -837,7 +841,7 @@ export function candle(): Prop {
   const ft = new Tex(16, 32);
   for (let i = 0; i < ft.a.length; i++) ft.a[i] = 0;
   for (let y = 0; y < 32; y++) { const q = y / 32, hw = Math.sin(Math.pow(1 - q, 0.7) * Math.PI) * 6.5 * (q > 0.8 ? (1 - q) * 5 : 1); for (let x = 0; x < 16; x++) { const d = Math.abs(x + 0.5 - 8) / Math.max(0.5, hw); if (d < 1) { ft.set(x, y, d < 0.35 && q > 0.35 ? rgb(0xfff8e0) : d < 0.7 ? rgb(0xffd070) : rgb(0xf08a30)); ft.alpha(x, y, q > 0.86 ? 0.6 : 1); if (q > 0.86 && d < 0.6) ft.set(x, y, rgb(0x5a8ad8)); } } }
-  const fm = new THREE.MeshBasicMaterial({ map: pixelTex(new THREE.CanvasTexture(ft.canvas()), { mips: false }), transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
+  const fm = new THREE.MeshBasicMaterial({ map: smoothTex(pixelTex(new THREE.CanvasTexture(ft.canvas()), { mips: false })), transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
   const flame = new THREE.Group();
   for (const r of [0, Math.PI / 2]) { const f = new THREE.Mesh(new THREE.PlaneGeometry(0.014, 0.03), fm); f.rotation.y = r; f.position.y = 0.012; flame.add(f); }
   flame.position.y = 0.106;

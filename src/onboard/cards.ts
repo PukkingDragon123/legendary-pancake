@@ -77,6 +77,8 @@ export class CardModels {
       if (!m.isMesh) return;
       const mat = (m.material as THREE.MeshStandardMaterial).clone();
       if ('roughness' in mat) { mat.roughness = Math.max(0.45, mat.roughness ?? 0.7); mat.metalness = Math.min(0.3, mat.metalness ?? 0); }
+      // [dialog10] full device resolution: smooth magnification, sharp at grazing angles
+      for (const t of [mat.map, mat.normalMap, mat.roughnessMap, mat.emissiveMap]) if (t) { t.magFilter = THREE.LinearFilter; t.anisotropy = 8; t.needsUpdate = true; }
       m.material = mat;
     });
     return norm(c);

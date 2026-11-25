@@ -51,6 +51,26 @@ if (q.has('talk')) {
   }
   W.talk = () => v;
   W.__ready = true;
+} else if (q.has('ink')) {
+  // ?ink=RECEIVED,APPROVED&w=160&h=60   rubber-stamp impressions (ink.ts) on the form's paper: wet, half dry, dry
+  const { fontsReady } = await import('./fonts.ts');
+  await fontsReady();
+  const { inkStamp } = await import('./ink.ts');
+  const { sheetURL } = await import('./panelart.ts');
+  cv.style.display = 'none';
+  const w = Number(q.get('w') ?? 160), h = Number(q.get('h') ?? 60);
+  const grid = document.createElement('div');
+  grid.style.cssText = `display:grid;grid-template-columns:repeat(3,${w + 40}px);gap:8px;padding:12px;background:#3a2414 url(${sheetURL(220, 160, 3)}) 0 0/100% 100%;width:max-content`;
+  document.body.appendChild(grid);
+  q.get('ink')!.split(',').forEach((word, wi) => {
+    for (const dry of [1e9, 2200, 1]) {
+      const cell = document.createElement('div');
+      cell.style.cssText = `position:relative;width:${w}px;height:${h}px;margin:20px;transform:rotate(-4deg)`;
+      cell.appendChild(inkStamp(word, 'HOLLOW & CO.', { w, h, seed: wi * 3 + 1 + (dry === 1 ? 1 : 0), dryMs: dry }));
+      grid.appendChild(cell);
+    }
+  });
+  setTimeout(() => { W.__ready = true; }, 1200);
 } else if (q.has('props') || q.has('phone')) {
   // ?props=drink:coffee,tape:rain,deck,...  a sheet of answer objects on paper (&cols=4&pen=1)
   // ?phone=1&t=6.5                            the fake phone at a moment of its film

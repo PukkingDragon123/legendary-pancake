@@ -10,7 +10,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type * as THREE from 'three';
 import { speciesOf } from '../owl/species.ts';
 import { Px } from '../ui/icons.tsx';
-import { acornURL, clipURL, folioURL, knobURL, loopStripURL, railURL, ruleURL, sheetURL, stampURL, stickyURL, tapeURL, tickStripURL } from './panelart.ts';
+import { acornURL, clipURL, folioURL, knobURL, loopStripURL, railURL, ruleURL, sheetURL, stickyURL, tapeURL, tickStripURL } from './panelart.ts';
+import { inkStamp, prepareInk } from './ink.ts';
 import { DRINKS, TAPES } from './props.ts';
 import { ALARM_NAME, fmt, RELAX, SOUND_NAME, toMin, type Answers, type Plan, type Step } from './script.ts';
 import type { Overlay3D, SlotOpts, SlotState } from './overlay3d.ts';
@@ -94,8 +95,10 @@ function css() {
 .qp-box.ready::before{border:calc(2 * var(--u)) solid #b33a1a;animation:qp-pulse 1s ease-in-out infinite}
 .qp-box.ready b{color:#b33a1a}
 @keyframes qp-pulse{50%{border-color:#e07a2a}}
-.qp-impr{position:absolute;left:50%;top:50%;width:calc(80 * var(--u));height:calc(30 * var(--u));transform:translate(-50%,-50%) rotate(-5deg);background-size:100% 100%;animation:qp-impr .12s ease-in-out both}
-@keyframes qp-impr{from{opacity:0}to{opacity:1}}
+.qp-impr{position:absolute;left:50%;top:50%;width:calc(80 * var(--u));height:calc(30 * var(--u));transform:translate(-50%,-50%) rotate(-5deg);isolation:auto}
+.qp-box.inked::before{opacity:.35;transition:opacity .4s}
+.qp.thud .qp-sheet{animation:qp-thud .34s cubic-bezier(.3,1.6,.5,1)}
+@keyframes qp-thud{0%{transform:none}22%{transform:translateY(calc(1.6 * var(--u))) scale(.996,.992)}60%{transform:translateY(calc(-.4 * var(--u)))}100%{transform:none}}
 .qp-sticky{position:absolute;right:calc(-4 * var(--u));top:calc(-28 * var(--u));width:calc(56 * var(--u));min-height:calc(30 * var(--u));background-size:100% 100%;transform:rotate(5deg);z-index:4;border:0;cursor:pointer;font:var(--a1) var(--font-body);line-height:var(--a1);color:#3a2a0a;padding:calc(4 * var(--u)) calc(3 * var(--u));text-align:center}
 .qp.wide .qp-sticky{right:auto;left:calc(-62 * var(--u));top:calc(18 * var(--u));transform:rotate(-4deg)}
 .qp-sticky b{display:block;font:calc(16 * var(--u)) var(--font-body);line-height:calc(16 * var(--u));color:#8a2a1a;margin-top:calc(1 * var(--u))}
@@ -231,6 +234,15 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
   const a = s.a;
   const seed = p.index * 7 + 3;
   const ov = p.overlay;
+  // [dialog10] paint this page's rubber-stamp impression while the page is up (it takes a moment)
+  useEffect(() => {
+    const word = st.kind === 'plan' ? 'APPROVED' : 'RECEIVED';
+    const go = () => prepareInk(word, INK_SUB, { w: Math.round(80 * k), h: Math.round(30 * k), seed: p.index + 1 });
+    const w = window as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (n: number) => void };
+    if (w.requestIdleCallback) { const id = w.requestIdleCallback(go, { timeout: 900 }); return () => w.cancelIdleCallback?.(id); }
+    const t = window.setTimeout(go, 400);
+    return () => clearTimeout(t);
+  }, [st.id, k]);
   /** a grid of answer objects */
   const objs = (list: { v: string; label: string; aria?: string }[], o: { cols: number; h: number; on: (v: string) => boolean; single: boolean; key: (v: string) => string; pick: (v: string) => void; hide?: (v: string) => boolean; extra?: (v: string) => ComponentChildren; any?: boolean }) => {
     const any = o.any ?? list.some((x) => o.on(x.v));
@@ -398,9 +410,9 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
         {body}
         <div class="qp-foot">
           {isPlan && <div class="qp-fine">Sign, then Pip stamps it.</div>}
-          <button type="button" class={'qp-box' + (s.ready && !s.stamped ? ' ready' : '')} onClick={act.stamp} aria-label={isPlan ? (s.signed ? 'Approve the plan' : 'Sign first') : s.ready ? 'Stamp it' : 'Pick an answer first'}>
+          <button type="button" class={'qp-box' + (s.ready && !s.stamped ? ' ready' : '') + (s.stamped ? ' inked' : '')} onClick={act.stamp} aria-label={isPlan ? (s.signed ? 'Approve the plan' : 'Sign first') : s.ready ? 'Stamp it' : 'Pick an answer first'}>
             {!s.stamped && <b>{label}</b>}
-            {s.stamped && <i class="qp-impr" style={`background-image:url(${stampURL(s.stamped, 'HOLLOW & CO.')})`} />}
+            {s.stamped && <Impression word={s.stamped} seed={p.index + 1} />}
           </button>
         </div>
         {!isPlan && (
@@ -413,3 +425,18 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
   );
 }
 export { loopStripURL };
+
+/** what the die says under the word */
+const INK_SUB = 'HOLLOW & CO.';
+/** [dialog10] the rubber stamp's impression: wet, glossy ink that dries into the paper (ink.ts) */
+function Impression(p: { word: string; seed: number }) {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const n = inkStamp(p.word, INK_SUB, { w: el.offsetWidth, h: el.offsetHeight, seed: p.seed });
+    el.appendChild(n);
+    return () => n.remove();
+  }, [p.word]);
+  return <i class="qp-impr" ref={ref} style={`transform:translate(-50%,-50%) rotate(${(-6.5 + ((p.seed * 37) % 50) / 10).toFixed(1)}deg)`} />;
+}
