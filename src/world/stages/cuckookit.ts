@@ -699,9 +699,11 @@ export function owlCrest(s: number, leafCount = 7): Crest {
     carve.push({ geo: g, m: new THREE.Matrix4().makeTranslation(0, s * 0.3, 0).multiply(new THREE.Matrix4().makeRotationZ(a)) });
   }
   // the branch it perches on
-  const br = new THREE.CatmullRomCurve3([new THREE.Vector3(-s * 0.46, s * 0.14, s * 0.06), new THREE.Vector3(-s * 0.16, s * 0.08, s * 0.12), new THREE.Vector3(s * 0.16, s * 0.08, s * 0.12), new THREE.Vector3(s * 0.46, s * 0.14, s * 0.06)]);
-  carve.push({ geo: scaleUV(new THREE.TubeGeometry(br, 18, s * 0.04, 7, false), 3, 0.5) });
-  for (const sd of [-1, 1]) carve.push({ geo: turned([[0.0005, 0], [s * 0.04, s * 0.004], [s * 0.034, s * 0.03], [0.0005, s * 0.05]], 8, 20), m: mtx(sd * s * 0.46, s * 0.14, s * 0.06, 0, 0, -sd * Math.PI / 2) });
+  const br = new THREE.CatmullRomCurve3([new THREE.Vector3(-s * 0.3, s * 0.13, s * 0.07), new THREE.Vector3(-s * 0.12, s * 0.075, s * 0.12), new THREE.Vector3(s * 0.12, s * 0.075, s * 0.12), new THREE.Vector3(s * 0.3, s * 0.13, s * 0.07)]);
+  carve.push({ geo: scaleUV(new THREE.TubeGeometry(br, 18, s * 0.045, 7, false), 3, 0.5) });
+  for (const sd of [-1, 1]) carve.push({ geo: turned([[0.0005, 0], [s * 0.045, s * 0.004], [s * 0.036, s * 0.03], [0.0005, s * 0.05]], 8, 20), m: mtx(sd * s * 0.3, s * 0.13, s * 0.07, 0, 0, -sd * Math.PI / 2) });
+  // a leaf curling off each end of the branch
+  for (const sd of [-1, 1]) carve.push({ geo: leafGeo(s * 0.3, s * 0.16, { seed: 11 + sd, curl: 0.25, fold: 0.12, lobes: 3.2 }), m: mtx(sd * s * 0.28, s * 0.12, s * 0.06, 0, 0, sd > 0 ? -0.5 : Math.PI + 0.5) });
   // wings: feathered trailing edges, raised and spread (the left one is the right one turned round)
   const wing = new THREE.Shape();
   wing.moveTo(0, 0);

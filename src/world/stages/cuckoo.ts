@@ -411,7 +411,7 @@ export class CuckooStage implements Stage {
       const mR = new THREE.Matrix4().makeTranslation(0, RIDGE, ROOF_Z - 0.012).multiply(new THREE.Matrix4().makeRotationZ(-ANG)).multiply(new THREE.Matrix4().makeTranslation(0, -bh, 0));
       carve.push({ geo: bb, m: sx > 0 ? mR : new THREE.Matrix4().makeTranslation(0, 0, 2 * (ROOF_Z - 0.012) + 0.014).multiply(new THREE.Matrix4().makeRotationY(Math.PI)).multiply(mR) });
       // an acorn drop under each eave
-      carve.push({ geo: K.turned(K.finialProfile(0.07, 0.018), 10, 8), m: mtx(sx * (EAVE - 0.012), RIDGE - (EAVE - 0.012) * TANA - 0.055, ROOF_Z - 0.006, Math.PI, 0, 0) });
+      carve.push({ geo: K.turned(K.finialProfile(0.07, 0.018), 10, 8), m: mtx(sx * (EAVE - 0.02), RIDGE - (EAVE - 0.02) * TANA - 0.032, ROOF_Z - 0.006, Math.PI, 0, 0) });
     }
     shingle.g.dispose();
     // the ridge cap: a rounded board along the top
@@ -1030,7 +1030,7 @@ export class CuckooStage implements Stage {
     s.t += real;
     const D = { open: 0.32, out: 0.45, back: 0.4, close: 0.28 };
     switch (s.phase) {
-      case 'open': this.doorK = backOut(Math.min(1, s.t / D.open)); if (s.t >= D.open) { s.phase = 'out'; s.t = 0; this.owl.play('flap'); } break;
+      case 'open': this.doorK = backOut(Math.min(1, s.t / D.open)); if (s.t >= D.open) { s.phase = 'out'; s.t = 0; this.owl.play('nod'); this.owl.setMood('excited', 1.2); } break;
       case 'out': this.outK = backOut(Math.min(1, s.t / D.out)); if (s.t >= D.out) { s.phase = 'show'; s.t = 0; s.hold = 0; if (s.mode === 'hello') { this.owl.play('wave'); this.owl.setMood('happy', 2.4); } if (s.mode === 'present') { this.owl.play('present'); } } break;
       case 'show': {
         const gap = 0.9;
