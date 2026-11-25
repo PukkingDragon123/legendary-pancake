@@ -48,6 +48,10 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **UI as objects**: a walnut, brass and leather HUD; a glass moon lamp, a carved cuckoo clock (real time, an owl that
   calls cuckoo) and a tooled journal as live 3D objects on a carved shelf for the main buttons;
   the big carved cuckoo clock, and about 100 icons baked from detailed 3D models.
+- **One typeface, in 3D**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms and
+  props, the shop's signs) is set in Alagard by Hewett Tsoi, crisp on its 16 px pixel grid. Titles, names, numbers,
+  buttons, toasts and Pip's lines are chunky 3D pixel letters (outline, extrusion, banded fill) that pop in, count
+  up, punch, burst, shake and wave (`src/ui/text3d.tsx`), and keep still with Calm motion.
 
 ## Earlier: the hand-made update
 

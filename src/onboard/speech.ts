@@ -113,7 +113,7 @@ export class Speech {
     const maxCss = Math.min(innerWidth * 0.92, 820);
     const maxTex = Math.floor(maxCss / this.px);
     const font = this.font();
-    const lines = wrap(this.plain, font, maxTex - 12);
+    const lines = wrap(this.plain, font, maxTex - 28);
     // map wrapped lines back onto words (keeping emphasis)
     this.lines = [];
     let wi = 0;

@@ -1,6 +1,7 @@
 // The night: Pip's departure, the very dim night screen (a pixel moon clock, Pip's journey across
 // tonight's area, the microphone), "Can't sleep?" help (a breathing round, sounds, a whispered
 // story, and a phone lock that gently resists), and the ringing alarm at dawn.
+import { Letters } from './text3d.tsx'; // [font6] per-letter 3D text motion
 import { signal } from '@preact/signals';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
@@ -381,7 +382,7 @@ export function AlarmOverlay() {
   return (
     <div class="overlay dawn">
       <div class="dawn-sky" />
-      <div class="dawn-sign hh-wood"><h1>Good morning!</h1></div>
+      <div class="dawn-sign hh-wood"><h1><Letters text="Good morning!" mode="wave" /></h1></div>
       <div class="dawn-scene">
         <WoodClock wake={t.wake} bedtime={t.bed} hour12={s.settings.hour12} ringing size={230} />
         <WakingPip />

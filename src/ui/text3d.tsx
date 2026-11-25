@@ -226,6 +226,7 @@ export function drawText3D(g: CanvasRenderingContext2D, text: string, x: number,
   paint((t) => {
     const band = (c: string, r0: number, r1: number) => { t.fillStyle = c; t.fillRect(0, cap + r0 * n, W, (r1 - r0) * n); };
     t.fillStyle = pal.c3; t.fillRect(0, 0, W, H);
+    t.globalCompositeOperation = 'source-atop'; // the bands paint only over the letters already there
     band(pal.c1, -8, 4); band(pal.hi, -8, 1); band(pal.c2, 4, 8);
   });
   at(0, 0);

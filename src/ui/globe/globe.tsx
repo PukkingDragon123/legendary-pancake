@@ -23,6 +23,7 @@ import { loadSheet, loadThumbs, photoStamp, thumbsReady } from './placephoto.ts'
 import { devScale } from './pix.ts';
 import { PlaceView } from './placeview.tsx';
 import { nightsAt, startTravel, travelOf } from './travel.ts';
+import { alagardSafe } from '../font.ts';
 
 startTravel();
 
@@ -199,7 +200,8 @@ export function GlobePanel() {
         const q = st.project(info.lat, info.lon, 1.01);
         c.style.display = q.facing > 0 ? '' : 'none';
         c.style.opacity = String(Math.min(1, (near - 0.45) * 4));
-        if (c.textContent !== info.name) c.textContent = info.name;
+        const nm = alagardSafe(info.name); // [font6] Alagard draws ASCII only
+        if (c.textContent !== nm) c.textContent = nm;
         // kept inside the clear part of the screen (never under the card or the header)
         const W = innerWidth, H = innerHeight, cw = c.offsetWidth, ch = c.offsetHeight;
         const right = isSide() ? W - Math.min(460, W * 0.4) - 28 : W, bottom = isSide() ? H : H * 0.41;

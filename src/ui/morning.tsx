@@ -21,7 +21,7 @@ import { PALETTE } from '../owl/palette.ts';
 import { getClip, listClips, type ClipMeta, type SleepSession, type Stage } from '../sleep/index.ts';
 import { Px } from './icons.tsx';
 import { fmtDur, fmtTime, Sheet, tap, toast } from './kit.tsx';
-import { CountUp } from './text3d.tsx';
+import { CountUp, Letters } from './text3d.tsx';
 import { coatIcon, itemIcon, pieceIcon } from './portraits.ts';
 import { lines, panel, say, sceneRef } from './state.ts';
 import { progress } from '../game/quests.ts';
@@ -311,7 +311,7 @@ export function Morning() {
 
       {step === 'sack' && (
         <div class="mr-stage">
-          <div class="mr-sign hh-wood"><h2>{finds.length ? `${save.value.name} brought presents!` : `${save.value.name} is home!`}</h2></div>
+          <div class="mr-sign hh-wood"><h2><Letters text={finds.length ? `${save.value.name} brought presents!` : `${save.value.name} is home!`} mode="wave" /></h2></div>
           <p class="mr-sub">{finds.length ? `${finds.length} ${finds.length === 1 ? 'gift' : 'gifts'} from ${area?.name ?? 'the woods'}` : 'A short trip this time. Sleep 5 hours or more and the sack comes home full.'}</p>
           <button class={'mr-sack' + (sackOpen > 0 ? ' opening' : '')} onClick={openSack} aria-label="Open Pip's gift sack">
             <img class="px mr-sackimg" src={giftSack(Math.round(sackOpen * 4) / 4, 4)} width={224} height={232} alt="" draggable={false} />

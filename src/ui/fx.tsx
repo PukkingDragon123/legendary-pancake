@@ -1,5 +1,6 @@
 // Moments: in-app dialogs, rewards that fly into the HUD counters, the level-up ceremony, and the
 // daily quest board. These are what make actions feel like they land.
+import { Letters } from './text3d.tsx'; // [font6] per-letter 3D text motion
 import { signal } from '@preact/signals';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
@@ -121,7 +122,7 @@ export function Ceremony() {
         {step > 0 && <PxBurst class="lvup-rays" size={Math.min(900, Math.max(innerWidth, innerHeight) * 1.1)} scale={3} color="#d3cce0" glow="#f1d39a" rays={14} alpha={0.32} />}
         <RuneCircle n={120} drawMs={1000} />
         <div class="lvup-medal"><PxAnim tl={seq('hud_rune', 8, 120)} size={144} /><b>{c.level}</b></div>
-        <div class="lvup-title">Level {c.level}!</div>
+        <div class="lvup-title"><Letters text={`Level ${c.level}!`} mode="type" /></div>
         {step === 0 && <div class="lvup-bar spill"><MagicBar level={c.level - 1} into={62} need={100} overflow w={56} big /></div>}
         {step > 0 && <CeremonyOwl />}
       </div>

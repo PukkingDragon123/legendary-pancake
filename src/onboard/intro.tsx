@@ -90,9 +90,9 @@ export function Intro() {
     sc.post.enabled = false; // the office draws its own HD-2D picture (look.ts)
     sc.setStage(office);
     const speech = new Speech();
-    speech.px = Math.max(2, office.pic.px);
+    speech.px = office.pic.px; // [font6] 1:1 with the picture: Alagard is drawn 2x for the words, 1x for the name tag
     office.pic.overlay.add(speech.group);
-    office.tickers.add((dt) => { speech.px = Math.max(2, office.pic.px); speech.update(dt, office.camera); });
+    office.tickers.add((dt) => { speech.px = office.pic.px; speech.update(dt, office.camera); });
     speech.onTalk = () => office.talk();
     const reactTo = dioramas(office);
     office.pip.pose = 'stand';
@@ -462,7 +462,7 @@ export function Intro() {
       if (e.key === ' ' || e.key === 'Enter') { if ((e.target as HTMLElement | null)?.closest?.('button')) return; e.preventDefault(); if (phase === 'ask') void file(); else onTap(); }
     };
     addEventListener('keydown', onKey);
-    const onResize = () => { speech.px = Math.max(2, office.pic.px); U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); ov.resize(); bump(); window.setTimeout(frameAsk, 50); };
+    const onResize = () => { speech.px = office.pic.px; U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); ov.resize(); bump(); window.setTimeout(frameAsk, 50); };
     addEventListener('resize', onResize);
     (window as unknown as { hhIntro: unknown }).hhIntro = { office, speech, overlay: ov, pen, cards, a: () => U.a, file: () => void file(), act: () => actions.current, phase: () => phase, step: () => U.si, skip: () => void finishAll(true) };
 
