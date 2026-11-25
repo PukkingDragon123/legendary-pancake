@@ -45,8 +45,9 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   the Lucky Barrel wishes are all physical objects.
 - **The Earth**: NASA imagery with city lights, clouds, relief and a real-time terminator; fly down to 20 real
   places with photos, facts and their souvenirs.
-- **UI as objects**: a walnut, brass and leather HUD, a moon lamp, alarm clock and journal as the main buttons,
-  a carved cuckoo clock, about 80 new organic pixel-art icons.
+- **UI as objects**: a walnut, brass and leather HUD; a glass moon lamp, a carved cuckoo clock (real time, an owl that
+  calls cuckoo) and a tooled journal as live 3D objects on a carved shelf for the main buttons;
+  the big carved cuckoo clock, and about 100 icons baked from detailed 3D models.
 
 ## Earlier: the hand-made update
 
