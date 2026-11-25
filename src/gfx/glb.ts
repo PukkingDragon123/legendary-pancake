@@ -83,6 +83,38 @@ function tune(root: THREE.Object3D, o: { shadows: boolean }) {
   });
 }
 
+/**
+ * [look5] A colour lift for painted maps: the duller a texel, the more its own hue is lifted (vibrance, never a flat
+ * tint), so faded paint, grey wood and dusty feathers read as colourful under warm light while the brush work and every
+ * value in the painting stay where they were. Patched once per material (shared materials are shared); `k` is how much
+ * a grey-ish texel's chroma grows.
+ */
+export function vivid(root: THREE.Object3D, k = 0.32) {
+  root.traverse((n) => {
+    const m = n as THREE.Mesh;
+    if (!m.isMesh) return;
+    for (const mat of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[]) {
+      if (!mat || mat.userData.vivid || !mat.map || !mat.isMeshStandardMaterial) continue;
+      mat.userData.vivid = true;
+      const prev = mat.onBeforeCompile;
+      mat.onBeforeCompile = (sh, r) => {
+        prev?.call(mat, sh, r);
+        sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+{
+  vec3 vc = diffuseColor.rgb;
+  float vl = dot(vc, vec3(0.2126, 0.7152, 0.0722));
+  float vmx = max(vc.r, max(vc.g, vc.b)), vmn = min(vc.r, min(vc.g, vc.b));
+  float vs = (vmx - vmn) / max(vmx, 1e-4);
+  diffuseColor.rgb = max(mix(vec3(vl), vc, 1.0 + ${k.toFixed(3)} * (1.0 - vs) * smoothstep(0.004, 0.04, vl)), 0.0);
+}`);
+      };
+      const key = mat.customProgramCacheKey?.bind(mat);
+      mat.customProgramCacheKey = () => (key ? key() : '') + '|vivid' + k;
+      mat.needsUpdate = true;
+    }
+  });
+}
+
 /** Load (once) and return the parsed glTF. */
 export function loadGLB(path: string): Promise<GLTF> {
   let p = cache.get(path);

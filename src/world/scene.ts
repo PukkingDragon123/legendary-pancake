@@ -4,6 +4,7 @@
 // and sounds.
 import * as THREE from 'three';
 import { PX, wind } from '../gfx/box.ts';
+import { vivid } from '../gfx/glb.ts';
 import { ALL_ITEMS, ITEMS } from '../assets/registry.ts';
 import { OwlActor, type OwlFx, type OwlSound } from '../owl/actor.ts';
 import { setFurQuality } from '../owl/fur.ts'; // [owl4]
@@ -14,8 +15,8 @@ import { buildFlora, planForest, type Flora, type ForestPlan } from './flora.ts'
 import { Fx, SPR } from './fx.ts';
 import { GRASS, makeGrass, FG, type GrassItem } from './grass.ts';
 import { buildGardenFence, buildHouse, type House, type Slot, type Zone } from './house.ts';
-import { CUT } from './house/kit.ts';
-import { FLOOR_IDS, FLOOR_Y, R_IN, type FloorId } from './house/plan.ts';
+import { CUT, HOUSE_LOOK, syncLooks } from './house/kit.ts';
+import { FACE, FLOOR_IDS, FLOOR_Y, OPEN_A, R_IN, RO, SLAB, type FloorId } from './house/plan.ts';
 import { GARDEN, groundY, HOUSE, MEADOW, walkable } from './layout.ts';
 import { Rooms } from './rooms.ts';
 import type { Save } from '../game/store.ts';
@@ -52,7 +53,9 @@ export type SceneEvent =
   | { type: 'tapGround'; x: number; z: number }
   | { type: 'sound'; id: string }
   | { type: 'catch'; x: number; y: number }
-  | { type: 'pet'; x: number; y: number };
+  | { type: 'pet'; x: number; y: number }
+  /** [look5] the home view went outside (the whole oak) or back into the living room */
+  | { type: 'outside'; on: boolean };
 
 export { ALL_ITEMS, ITEMS };
 
@@ -156,6 +159,22 @@ export class Scene {
   /** called every world frame after the built-in updates (weather, house animations...) */
   readonly tickers = new Set<(dt: number, t: number) => void>();
   private baseFov = 32;
+  /**
+   * [look5] The home view normally looks into Pip's living room (a warm, close view through the open front of the
+   * oak); `outside` pulls the camera back out through the opening to the whole tree. Toggle with setOutside() (the
+   * HUD's window button), a pinch or the mouse wheel. `outK` is the eased dolly between the two (0 inside, 1 out).
+   */
+  outside = false;
+  private outT = 0;
+  private outK = 0;
+  /** where the inside camera thinks Pip is (house-local x/z, eased so the view follows him calmly) */
+  private pipL = new THREE.Vector2(0, -0.6);
+  /** wheel / pinch accumulators and a short lock after a switch so one gesture never flips twice */
+  private zoomAcc = 0;
+  private zoomLock = 0;
+  /** a warm lamp-and-window light rig for the living room, on while the camera is inside */
+  private insideLights: { win: THREE.SpotLight; beam: THREE.Mesh } | null = null;
+  private porchWait = 0;
 
   /** [look4] the running cost tier, and whether it adapts to the frame rate ('auto') */
   tier: Tier;
@@ -284,6 +303,8 @@ export class Scene {
 
   /** Hop or fly to another spot. */
   moveOwl(p: Scene['owlPlace'], done?: () => void) {
+    // [look5] while we look into the living room, Pip stays in it (the porch is out of sight round the trunk)
+    if (p === 'porch' && this.view === 'home' && !this.outside && !this.director) p = 'inside';
     if (p === this.owlPlace && p !== 'roam' && !this.trip) { done?.(); return; }
     const from = this.owl.node.position.clone(), to = this.spot(p);
     const d = from.distanceTo(to);
@@ -381,7 +402,7 @@ export class Scene {
     const bed = this.rooms.bedSpot();
     const s = this.house.spots;
     if (bed) s.bed.copy(bed.at); else s.bed.copy(this.rooms.freeSpot('f1', -6, -40));
-    s.inside.copy(this.rooms.freeSpot('f1', -10, 34));
+    s.inside.copy(this.rooms.freeSpot('f1', -4, 2)); // [look5] the middle of the living room, on the rug, where the inside view looks
     s.loft.copy(this.house.isOpen('f2') ? this.rooms.freeSpot('f2', -8, 28) : s.inside);
     if (this.owlPlace === 'bed' && !this.trip) this.owl.node.position.copy(s.bed);
   }
@@ -485,6 +506,7 @@ export class Scene {
       g.vignette = L(0.2, 0.32, night);
       g.lift.set(0, 0.004, 0.016).multiplyScalar(1 + night);
       g.cold = (this.weather?.vis.cold ?? 0) * 0.6;
+      this.gradeBase = { exposure: g.exposure, bloom: g.bloom, bloomThreshold: g.bloomThreshold, vignette: g.vignette, vibrance: g.vibrance, saturation: g.saturation, warm: g.warm }; // [look5]
     }
     GRASS.uKey.value.copy(this.sky.sun.color).multiplyScalar(this.sky.sun.intensity * 0.42);
     GRASS.uSky.value.copy(this.sky.hemi.color).multiplyScalar(this.sky.hemi.intensity * 0.85);
@@ -494,6 +516,7 @@ export class Scene {
     // [look4] lamp-gold windows bloom at night; by day the glass holds a little of the sky
     if (night > 0.4) this.house.panes.color.setRGB(3.4, 2.0, 0.8).multiplyScalar(L(0.6, 1, sm(night, 0.4, 0.9)));
     else this.house.panes.color.copy(this.sky.hemi.color).multiplyScalar(0.42).lerp(new THREE.Color(0x2a3a4a), 0.4);
+    this.paneBase.copy(this.house.panes.color); // [look5]
     this.room.intensity = 1.4 + night * 9; // the open rooms glow warm at night
     this.room.distance = 16;
     this.lantern.intensity = night * 8;
@@ -553,6 +576,7 @@ export class Scene {
   }
   /** [look4] Shadow casters: everything on high; on medium and low only the big things (and Pip) cast. */
   private cullCasters() {
+    vivid(this.owl.node, 0.24); // [look5] a little more colour in Pip's painted feathers (once per material, as they load)
     const small = this.tier === 'high' ? 0 : this.tier === 'medium' ? 0.55 : 1.1;
     const sp = new THREE.Sphere();
     const owl = this.owl.node;
@@ -627,10 +651,197 @@ export class Scene {
         // [house3] the whole oak in frame, crown to roots, porch and limb, with the forest round it; the HUD
         // signs sit over the sky at the top and the big buttons over the meadow at the bottom
         // the open rooms sit about a third of the way up, clear of the big buttons; the crown fills the sky above
-        const d = this.fitDist(portrait ? 23 : 28, portrait ? 42 : 42);
-        return { yaw: 0.1, pitch: portrait ? 0.13 : 0.09, dist: d, target: new THREE.Vector3(0.35, portrait ? 8.4 : 10.8, H.z + 0.6) }; // [look4] wide screens look across the valley: headroom over the crown, the far hills and the clouds
+        const d = this.fitDist(portrait ? 23 : 28, portrait ? 42 : 42) * this.userZoom;
+        const out: Cam = { yaw: 0.1, pitch: portrait ? 0.13 : 0.09, dist: d, target: new THREE.Vector3(0.35, portrait ? 8.4 : 10.8, H.z + 0.6) }; // [look4] wide screens look across the valley: headroom over the crown, the far hills and the clouds
+        // [look5] normally the camera is inside the living room; the dolly runs in a straight line out through the open
+        // front (camera positions blend, not angles, so it never swings through the bark)
+        const e = this.outK;
+        if (e >= 0.999) return out;
+        const ins = this.insideShot();
+        if (e <= 0.001) return ins;
+        const pos = (c: Cam) => new THREE.Vector3(Math.sin(c.yaw) * Math.cos(c.pitch), Math.sin(c.pitch), Math.cos(c.yaw) * Math.cos(c.pitch)).multiplyScalar(c.dist).add(c.target);
+        const p = pos(ins).lerp(pos(out), e), tg = ins.target.clone().lerp(out.target, e), dv = p.clone().sub(tg), dist = dv.length();
+        return { yaw: Math.atan2(dv.x, dv.z), pitch: Math.asin(THREE.MathUtils.clamp(dv.y / dist, -1, 1)), dist, target: tg };
       }
     }
+  }
+
+  /** [look5] Look at the whole oak (true) or into Pip's living room (false, the usual home view). */
+  setOutside(on: boolean) {
+    if (on === this.outside) return;
+    this.outside = on;
+    this.zoomAcc = 0;
+    this.zoomLock = 0.7;
+    if (!on) this.userZoom = 1;
+    this.userYaw = 0;
+    this.emit({ type: 'outside', on });
+  }
+  /** [look5] Is the home camera (mostly) inside the living room right now? */
+  get inside() { return this.view === 'home' && this.outK < 0.5 && !this.director; }
+
+  /**
+   * [look5] The living room, close: the camera stands in the open front of the oak at Pip's eye level and looks across
+   * the room at him, with the back wall, its windows and the furniture round him filling the frame. It follows Pip
+   * calmly as he potters about, never far enough to the side to see the cut edges of the trunk.
+   */
+  private insideShot(): Cam {
+    const M = THREE.MathUtils, a = this.camera.aspect;
+    const w = M.smoothstep(a, 0.6, 1.3); // 0 tall phone .. 1 wide screen
+    const fy = FLOOR_Y.f1 * PX, P = this.pipL;
+    const fx = M.clamp(P.x, -2.6, 2.6), fz = M.clamp(P.y, -3.2, 2.4);
+    // the camera stands in the open front at about Pip's eye level, backing off a little when he comes forward
+    const camZ = M.clamp(fz + M.lerp(6.0, 7.4, w), M.lerp(6.4, 7.2, w), M.lerp(7.6, 8.6, w));
+    const camX = fx * 0.3, camY = fy + M.lerp(2.7, 2.6, w);
+    const C = new THREE.Vector3(HOUSE.x + camX, camY, HOUSE.z + camZ);
+    const A = new THREE.Vector3(HOUSE.x + fx, fy + 1.0, HOUSE.z + fz);
+    // compose: on a phone Pip stands in the middle of the clear band between the signs and the bedtime card; on a
+    // wide screen a little right of centre, clear of the big buttons, with the room opening out to his left
+    const tanV = Math.tan((this.insideFov() * Math.PI) / 360), tanH = tanV * a, halfH = Math.atan(tanH), halfV = Math.atan(tanV);
+    const d = A.clone().sub(C);
+    let yaw = Math.atan2(d.x, -d.z) - Math.atan(M.lerp(0, 0.3, w) * tanH);
+    let pitch = Math.atan2(d.y, Math.hypot(d.x, d.z)) - Math.atan(M.lerp(0.05, 0.1, w) * tanV);
+    // never let the frame reach the cut edges of the trunk (left and right) or the lintel over the opening
+    const lip = (s: number) => Math.atan2(s * Math.sin(OPEN_A) * R_IN * PX - camX, camZ - Math.cos(OPEN_A) * R_IN * PX);
+    const lo = lip(-1) + halfH + 0.07, hi = lip(1) - halfH - 0.07;
+    yaw = lo < hi ? M.clamp(yaw, lo, hi) : (lo + hi) / 2;
+    pitch = Math.min(pitch, Math.atan2((FLOOR_Y.f2 - SLAB) * PX - camY, camZ - RO * PX - 0.1) - halfV - 0.04);
+    const dist = d.length();
+    const T = C.clone().add(new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(dist));
+    const v = C.sub(T);
+    return { yaw: Math.atan2(v.x, v.z), pitch: Math.asin(v.y / dist), dist, target: T };
+  }
+  /** [look5] Per frame: the inside/outside dolly, Pip-following, Pip walking in from the porch, the room's lamp light. */
+  private stepInside(dt: number) {
+    const home = this.view === 'home' && !this.director;
+    // the dolly: ~1.6 s, eased at both ends
+    if (this.view === 'home') this.outT += THREE.MathUtils.clamp((this.outside ? 1 : 0) - this.outT, -dt / 1.6, dt / 1.6);
+    this.outK = THREE.MathUtils.smootherstep(this.outT, 0, 1);
+    this.zoomLock = Math.max(0, this.zoomLock - dt);
+    this.zoomAcc *= Math.exp(-dt * 1.5);
+    // follow Pip round the living room (a calm lag, and only while he's in it)
+    const o = this.owl.node.position, fy = FLOOR_Y.f1 * PX;
+    const lx = o.x - HOUSE.x, lz = o.z - HOUSE.z;
+    if (this.owl.node.visible && Math.hypot(lx, lz) < R_IN * PX + 0.3 && o.y < fy + 2.2) this.pipL.lerp(new THREE.Vector2(lx, lz), 1 - Math.exp(-dt * 1.2));
+    // back from the porch (after the morning landing, or a stroll): Pip hops in through the door when we're inside
+    if (home && !this.outside && this.owlPlace === 'porch' && !this.trip && this.owl.pose === 'stand' && this.owl.node.visible) {
+      if ((this.porchWait += dt) > 1.4) { this.porchWait = 0; this.walkIn(); }
+    } else this.porchWait = 0;
+    this.stepRoomLight(dt);
+  }
+  /**
+   * [look5] Cosy light for the living room while the camera is inside: the hanging lantern lit even by day, the sky's
+   * flat fill turned down so lamp pools and shadows read, and a sunbeam slanting in through the back window on the
+   * sun's side (a pale moonbeam on clear nights) with dust drifting in it.
+   */
+  private inLight = 0;
+  private moteT = 0;
+  /** the sky-driven grade and window glass, before the inside view's adjustments */
+  private gradeBase = { exposure: 1, bloom: 0.5, bloomThreshold: 1, vignette: 0.2, vibrance: 0.2, saturation: 1.1, warm: 0.08 };
+  private paneBase = new THREE.Color();
+  private stepRoomLight(dt: number) {
+    const want = this.view === 'home' && !this.director && !this.stage ? 1 - this.outK : 0;
+    this.inLight += (want - this.inLight) * Math.min(1, dt * 3);
+    const k = this.inLight, night = this.sky.night, day = 1 - THREE.MathUtils.smoothstep(night, 0.25, 0.75);
+    this.sky.hemi.intensity = this.sky.hemiBase * (1 - k * (0.34 + night * 0.24));
+    if (k < 0.005 && !this.insideLights) return;
+    if (!this.insideLights) {
+      const win = new THREE.SpotLight(0xffe2b0, 0, 11, 0.5, 0.85, 1.2);
+      const beamGeo = new THREE.CylinderGeometry(0.42, 1.05, 1, 16, 1, true);
+      beamGeo.translate(0, -0.5, 0);
+      const beam = new THREE.Mesh(beamGeo, new THREE.ShaderMaterial({
+        uniforms: { uCol: { value: new THREE.Color(1, 0.86, 0.6) }, uA: { value: 0 } },
+        vertexShader: /* glsl */ `varying vec3 vN; varying vec3 vV; varying float vT; varying vec3 vP;
+          void main() { vT = -position.y; vP = position; vec4 w = modelMatrix * vec4(position, 1.0); vN = normalize(mat3(modelMatrix) * normal); vV = normalize(cameraPosition - w.xyz); gl_Position = projectionMatrix * viewMatrix * w; }`,
+        fragmentShader: /* glsl */ `uniform vec3 uCol; uniform float uA; varying vec3 vN; varying vec3 vV; varying float vT; varying vec3 vP;
+          float h(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+          void main() {
+            float edge = pow(abs(dot(normalize(vN), vV)), 1.6);
+            float along = smoothstep(0.0, 0.12, vT) * (1.0 - smoothstep(0.55, 1.0, vT));
+            // a few streaks of brighter air, like light through leaves on the other side of the glass
+            float a = atan(vP.x, vP.z);
+            float streak = 0.75 + 0.25 * sin(a * 5.0 + 1.3) * sin(a * 3.0 - 0.4);
+            gl_FragColor = vec4(uCol * uA * edge * along * streak, 1.0);
+          }`,
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, toneMapped: false,
+      }));
+      beam.renderOrder = 5;
+      beam.frustumCulled = false;
+      this.scene.add(win, win.target, beam);
+      this.insideLights = { win, beam };
+    }
+    const L = this.insideLights, fy = FLOOR_Y.f1 * PX, H = new THREE.Vector3(HOUSE.x, 0, HOUSE.z);
+    const flick = 0.94 + Math.sin(this.time * 11.3) * 0.03 + Math.sin(this.time * 6.1) * 0.03;
+    // the hanging lantern makes a warm pool (lit even by day), and the open rooms' warm flood (for the oak seen from
+    // outside) becomes a soft amber fill in front of Pip, as if off the floorboards (no extra lights: the same two lamps)
+    const outLantern = night > 0.4 ? 6 * night * flick : night * 8, M = THREE.MathUtils;
+    this.lantern.intensity = M.lerp(outLantern, (7 * day + 16 * night) * flick, k);
+    this.lantern.decay = M.lerp(1.4, 2, k);
+    this.lantern.distance = M.lerp(10, 14, k);
+    this.lantern.color.setHex(0xffc06a).lerp(new THREE.Color(0xffe0bc), day * 0.6 * k);
+    this.room.position.set(H.x, 2.6, H.z + 1.6).lerp(new THREE.Vector3(H.x + this.pipL.x * 0.8, fy + 1.5, H.z + Math.min(4.2, this.pipL.y + 2.4)), k);
+    this.room.intensity = M.lerp(1.4 + night * 9, 1.1 * day + 3.6 * night, k);
+    this.room.distance = M.lerp(16, 6, k);
+    this.room.decay = M.lerp(1.5, 1.6, k);
+    // the beam comes in through the back window on the sun's side, falling across the floor towards the room's middle
+    const right = this.sky.sunDir.x >= 0;
+    const wa = right ? FACE * 19 : -FACE * 18, wr = R_IN * PX - 0.15;
+    const top = new THREE.Vector3(H.x + Math.sin(wa) * wr, fy + 2.3, H.z + Math.cos(wa) * wr);
+    const foot = new THREE.Vector3(H.x + (right ? 0.7 : -0.7), fy, H.z - 0.6);
+    const overcast = this.weather?.vis.overcast ?? 0;
+    const sunny = day * (1 - overcast * 0.8) * Math.min(1, this.sky.sun.intensity * 0.6);
+    const moon = THREE.MathUtils.smoothstep(night, 0.6, 0.95) * (1 - overcast) * 0.35;
+    L.win.color.setRGB(1, 0.88, 0.66).lerp(new THREE.Color(0.55, 0.68, 1), moon > sunny ? 1 : 0);
+    L.win.position.copy(top);
+    L.win.target.position.copy(foot);
+    L.win.intensity = k * (sunny * 9 + moon * 5);
+    const len = top.distanceTo(foot) * 1.15;
+    L.beam.position.copy(top);
+    L.beam.scale.set(1, len, 1);
+    L.beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), foot.clone().sub(top).normalize());
+    const bu = (L.beam.material as THREE.ShaderMaterial).uniforms;
+    (bu.uCol.value as THREE.Color).copy(L.win.color);
+    bu.uA.value = k * (sunny * 0.16 + moon * 0.1);
+    L.beam.visible = bu.uA.value > 0.003;
+    // dust motes drifting in the light
+    if (L.beam.visible && (this.moteT -= dt) <= 0) {
+      this.moteT = 0.35;
+      const u = Math.random(), p = top.clone().lerp(foot, 0.15 + u * 0.75).add(new THREE.Vector3((Math.random() - 0.5) * 0.7, (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.7));
+      this.fx.emit({ x: p.x, y: p.y, z: p.z, vx: (Math.random() - 0.5) * 0.05, vy: 0.03, vz: (Math.random() - 0.5) * 0.05, life: 3.2, frame: SPR.spark1, frames: 1, color: moon > sunny ? 0xa8b8e0 : 0xe8d8b0, size: 0.04, add: true, fadeOut: 1.2, flutter: 0.2 });
+    }
+    // the lantern glass glows when its light is on; from inside, the window glass shows the sky, not the lamplight
+    // that makes the windows glow gold from outside
+    this.house.panes.color.copy(this.paneBase).lerp(new THREE.Color(this.sky.hemi.color).multiplyScalar(0.3 + day * 0.25), k);
+    if (k > 0.01) {
+      HOUSE_LOOK.glow.multiplyScalar(1 + k * day * 1.1);
+      HOUSE_LOOK.pane.copy(this.house.panes.color);
+      syncLooks();
+    }
+    // the grade: lamplit rooms need no moonlight lift; a touch more vignette and colour for the cosy close view
+    const g = this.post.grade, b = this.gradeBase;
+    g.exposure = b.exposure * (1 - k * night * 0.52) * (1 + k * day * 0.1);
+    g.bloomThreshold = b.bloomThreshold + k * night * 0.45;
+    g.bloom = b.bloom * (1 + k * night * 0.15);
+    g.vignette = b.vignette + k * (0.06 + night * 0.14);
+    g.vibrance = b.vibrance + k * 0.1;
+    g.saturation = b.saturation + k * 0.04;
+    g.warm = b.warm + k * 0.03;
+    // critters (a dragonfly zipping past the lens) and fireflies belong to the clearing, not the living room
+    this.critters.group.visible = k < 0.4;
+    this.fireflies.mesh.visible = k < 0.4;
+  }
+  /** [look5] Pip strolls in from the porch through the front door (a string of little hops, under the lintel). */
+  private walkIn() {
+    const from = this.owl.node.position.clone(), to = this.spot('inside');
+    this.owlPlace = 'inside';
+    this.owl.pose = 'stand';
+    this.trip = { from, to, t: 0, dur: from.distanceTo(to) * 0.5 + 0.3, mode: 'hop', arc: 0 };
+  }
+  /** [look5] The inside view's field of view: a little wider than the outdoor one, more so on tall screens. */
+  private insideFov(): number {
+    const a = this.camera.aspect, hf = (34 * Math.PI) / 180;
+    // very wide windows: no more than ~52 degrees across, or the frame would reach the cut edges of the trunk
+    const wide = (2 * Math.atan(Math.tan((26 * Math.PI) / 180) / a) * 180) / Math.PI;
+    return THREE.MathUtils.clamp((2 * Math.atan(Math.tan(hf / 2) / a) * 180) / Math.PI, Math.min(34, wide), 62);
   }
 
   /** [house3] Camera distance that fits a w x h (world units) frame at the current aspect and field of view. */
@@ -682,16 +893,18 @@ export class Scene {
     for (const f of this.tickers) f(dt, t);
 
     // camera
+    this.stepInside(dt);
     const shot = this.director?.(dt, t) ?? null;
     const g: Cam = shot ?? this.goal();
-    if (!shot) { g.yaw += this.userYaw; g.dist *= this.userZoom * (this.view === 'breathe' ? this.breathZoom : 1); }
-    const wantFov = shot?.fov ?? this.baseFov;
-    if (Math.abs(this.camera.fov - wantFov) > 0.01) { this.camera.fov += (wantFov - this.camera.fov) * Math.min(1, dt * 4); this.camera.updateProjectionMatrix(); }
+    const home = this.view === 'home';
+    if (!shot) { g.yaw += this.userYaw * (home ? THREE.MathUtils.lerp(0.1, 1, this.outK) : 1); g.dist *= (home ? 1 : this.userZoom) * (this.view === 'breathe' ? this.breathZoom : 1); }
+    const wantFov = shot?.fov ?? (home ? THREE.MathUtils.lerp(this.insideFov(), this.baseFov, this.outK) : this.baseFov);
+    if (Math.abs(this.camera.fov - wantFov) > 0.01) { this.camera.fov += (wantFov - this.camera.fov) * (shot?.snap ? 1 : Math.min(1, dt * 4)); this.camera.updateProjectionMatrix(); } // [look5] a cut cuts the lens too
     const k = shot?.snap ? 1 : 1 - Math.exp(-dt * 3.2), c = this.cur;
     c.yaw += (g.yaw - c.yaw) * k; c.pitch += (g.pitch - c.pitch) * k; c.dist += (g.dist - c.dist) * k; c.target.lerp(g.target, k);
     const cp = Math.cos(c.pitch);
     // a slow drift keeps the diorama feeling alive even when nobody touches it
-    const drift = !shot && (this.view === 'home' || this.view === 'sleep') ? Math.sin(t * 0.07) * 0.05 : 0;
+    const drift = !shot && (this.view === 'home' || this.view === 'sleep') ? Math.sin(t * 0.07) * 0.05 * (this.view === 'home' ? 0.3 + this.outK * 0.7 : 1) : 0;
     this.camera.position.set(c.target.x + Math.sin(c.yaw + drift) * cp * c.dist, c.target.y + Math.sin(c.pitch) * c.dist, c.target.z + Math.cos(c.yaw + drift) * cp * c.dist);
     this.camera.lookAt(c.target);
     // [look4] aerial perspective only beyond the subject: the oak and the clearing stay clear, the far forest and the
@@ -704,6 +917,16 @@ export class Scene {
       this.post.grade.focus = c.dist;
       this.post.grade.focusRange = Math.max(3, c.dist * 0.3);
       this.post.grade.blur = this.view === 'home' || this.view === 'sleep' || this.view === 'wake' ? 0.6 : 0.45;
+      // [look5] inside the living room: Pip and what's round him sharp, the back wall a little soft and the world
+      // outside the windows melting into bokeh
+      const ink = home && !shot ? 1 - this.outK : 0;
+      if (ink > 0.001) {
+        const pd = this.owl.node.visible ? this.camera.position.distanceTo(this.owl.node.position.clone().add(new THREE.Vector3(0, 0.9, 0))) : c.dist * 0.8;
+        const g = this.post.grade, L = THREE.MathUtils.lerp;
+        g.focus = L(g.focus, Math.min(pd, c.dist), ink);
+        g.focusRange = L(g.focusRange, 1.5, ink);
+        g.blur = L(g.blur, 0.7, ink);
+      }
     }
     CUT.uCutCam.value.copy(this.camera.position);
     this.shiftCur += (this.shift - this.shiftCur) * k;
@@ -745,7 +968,13 @@ export class Scene {
     return new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, depthBuffer: true });
   }
 
-  snapCamera() { const g = this.goal(); this.cur.yaw = g.yaw; this.cur.pitch = g.pitch; this.cur.dist = g.dist; this.cur.target.copy(g.target); }
+  snapCamera() {
+    // [look5] the home view starts where it rests (inside or out), with its lens
+    const o = this.owl.node.position;
+    if (Math.hypot(o.x - HOUSE.x, o.z - HOUSE.z) < R_IN * PX + 0.3) this.pipL.set(o.x - HOUSE.x, o.z - HOUSE.z);
+    if (this.view === 'home') { this.outT = this.outside ? 1 : 0; this.outK = this.outT; this.camera.fov = this.outside ? this.baseFov : this.insideFov(); this.camera.updateProjectionMatrix(); }
+    const g = this.goal(); this.cur.yaw = g.yaw; this.cur.pitch = g.pitch; this.cur.dist = g.dist; this.cur.target.copy(g.target);
+  }
 
   /** Screen position (CSS px) of a world point, for anchoring speech bubbles. */
   screenOf(v: THREE.Vector3): { x: number; y: number; behind: boolean } {
@@ -788,12 +1017,12 @@ export class Scene {
       moved += Math.abs(dx) + Math.abs(dy);
       if (pts.size === 2) {
         const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinch) this.userZoom = Math.max(0.32, Math.min(1.25, this.userZoom * (pinch / d))); // [house3] pinch right into the rooms
+        if (pinch) this.zoomBy(pinch / d, 'pinch'); // [look5] pinch out of the living room to the whole oak, and back in
         pinch = d;
         return;
       }
       if (onOwl) { rub += Math.abs(dx) + Math.abs(dy); if (rub > 70) { rub = 0; this.emit({ type: 'pet', x: e.clientX, y: e.clientY }); } return; }
-      if (moved > 6 && this.view !== 'breathe' && this.view !== 'sleep') this.userYaw = Math.max(-0.7, Math.min(0.7, this.userYaw - dx * 0.004));
+      if (moved > 6 && this.view !== 'breathe' && this.view !== 'sleep') this.userYaw = Math.max(-0.7, Math.min(0.7, this.userYaw - dx * 0.004)); // [look5] (inside the room the turn is scaled down in step)
     });
     const up = (e: PointerEvent) => {
       if (hook('up', e)) { pts.delete(e.pointerId); return; }
@@ -831,6 +1060,33 @@ export class Scene {
     };
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', (e) => { pts.delete(e.pointerId); });
-    el.addEventListener('wheel', (e) => { if (this.interceptor && !this.stage && this.interceptor('wheel', e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e)) { e.preventDefault(); return; } this.userZoom = Math.max(0.32, Math.min(1.25, this.userZoom * (1 + Math.sign(e.deltaY) * 0.06))); e.preventDefault(); }, { passive: false }); // [house3]
+    el.addEventListener('wheel', (e) => {
+      if (this.interceptor && !this.stage && this.interceptor('wheel', e.clientX, e.clientY, this.rayAt(e.clientX, e.clientY), e)) { e.preventDefault(); return; }
+      e.preventDefault();
+      if (this.stage) return;
+      // [look5] trackpads send many small deltas, mice a few big ones: scale to a gentle step either way
+      const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      this.zoomBy(1 + THREE.MathUtils.clamp(dy, -120, 120) / 1000, 'wheel');
+    }, { passive: false }); // [house3]
+  }
+
+  /**
+   * [look5] Zoom by a factor (> 1 out, < 1 in). Inside the living room a zoom out takes the camera out to the whole oak;
+   * outside, zooming out widens the view over the valley and zooming in takes the camera back into the living room.
+   */
+  zoomBy(f: number, src: 'pinch' | 'wheel' | 'ui' = 'ui') {
+    if (this.view !== 'home') { this.userZoom = THREE.MathUtils.clamp(this.userZoom * f, 0.32, 1.25); return; }
+    if (this.zoomLock > 0 || this.director) return;
+    const lf = Math.log(f), th = src === 'pinch' ? 0.16 : 0.09;
+    // keep going the same way to build up a switch; turning back resets it
+    this.zoomAcc = Math.sign(lf) === Math.sign(this.zoomAcc) ? this.zoomAcc + lf : lf;
+    if (!this.outside) {
+      if (this.zoomAcc > th) this.setOutside(true);
+      return;
+    }
+    // outside, zooming out widens the view over the valley; zooming back in past the whole tree goes back inside
+    if (f < 1 && this.userZoom <= 1.001) { if (this.zoomAcc < -th) this.setOutside(false); return; }
+    this.userZoom = THREE.MathUtils.clamp(this.userZoom * f, 1, 1.3);
+    this.zoomAcc = 0;
   }
 }

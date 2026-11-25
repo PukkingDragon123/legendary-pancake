@@ -3,7 +3,7 @@
 // (so day, night and the lamps shade them) that honour build mode's see-through walls.
 import * as THREE from 'three';
 import { PX } from '../../gfx/box.ts';
-import { instanceGLB } from '../../gfx/glb.ts';
+import { instanceGLB, vivid } from '../../gfx/glb.ts';
 import { patchCut } from './kit.ts';
 
 export interface PartOpts {
@@ -62,6 +62,7 @@ export async function loadPart(id: string, o: PartOpts = {}): Promise<HousePart 
   root.add(inst.root);
   const part: HousePart = { id, root, nodes: {}, meshes: [], dispose: () => {} };
   convert(inst.root, o, part);
+  vivid(inst.root, 0.22); // [look5] mossy rocks and ferns a touch less grey
   inst.root.traverse((n) => { if (n.name && !(n as THREE.Mesh).isMesh && n !== inst.root) part.nodes[n.name] = n; });
   return part;
 }
