@@ -806,7 +806,7 @@ export class Scene {
     if (L.beam.visible && (this.moteT -= dt) <= 0) {
       this.moteT = 0.35;
       const u = Math.random(), p = top.clone().lerp(foot, 0.15 + u * 0.75).add(new THREE.Vector3((Math.random() - 0.5) * 0.7, (Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.7));
-      this.fx.emit({ x: p.x, y: p.y, z: p.z, vx: (Math.random() - 0.5) * 0.05, vy: 0.03, vz: (Math.random() - 0.5) * 0.05, life: 3.2, frame: SPR.spark1, frames: 1, color: moon > sunny ? 0xc8d8ff : 0xfff0c8, size: 0.06, add: true, fadeOut: 1.2, flutter: 0.2 });
+      this.fx.emit({ x: p.x, y: p.y, z: p.z, vx: (Math.random() - 0.5) * 0.05, vy: 0.03, vz: (Math.random() - 0.5) * 0.05, life: 3.2, frame: SPR.spark1, frames: 1, color: moon > sunny ? 0xa8b8e0 : 0xe8d8b0, size: 0.04, add: true, fadeOut: 1.2, flutter: 0.2 });
     }
     // the lantern glass glows when its light is on; from inside, the window glass shows the sky, not the lamplight
     // that makes the windows glow gold from outside
