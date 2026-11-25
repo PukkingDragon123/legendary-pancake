@@ -211,7 +211,8 @@ export class Beaver {
   /** A reaction's subtle touch of light round his head (in the lodge's own particles). */
   emote(kind: EmoteKind, delay = 0) {
     const at = this.faceCentre();
-    if (at) sceneFx.cue(kind, this.node, at, this.faceRadius(), delay);
+    // (a gasp is a bright glint over his head: the owl's loose down feathers are no beaver's)
+    if (at) sceneFx.cue(kind === 'bang' ? 'bulb' : kind, this.node, at, this.faceRadius(), delay);
   }
   /** A face and a mark together. */
   react(f: BeaverFace, mark?: EmoteKind, hold = 1.8) { this.setFace(f, hold); if (mark) this.emote(mark); }

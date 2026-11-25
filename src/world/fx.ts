@@ -12,7 +12,7 @@
 // [fx10] No cartoon shapes any more: the old heart, note, Zzz, "!" and "?" sprites are drawn as warm motes and glints.
 import * as THREE from 'three';
 import { surfaceY } from './terrain.ts';
-import { bayer, coinFrames, flatTone, hash, outline, paintPx, puffFrames, shavingFrames, snowFrames, tidy, type Raster } from '../ui/fx/pixel.ts';
+import { bayer, coinFrames, flatTone, hash, outline, paintPx, shavingFrames, snowFrames, tidy, type Raster } from '../ui/fx/pixel.ts';
 
 // ---------------------------------------------------------------- the sprites
 
@@ -20,7 +20,7 @@ import { bayer, coinFrames, flatTone, hash, outline, paintPx, puffFrames, shavin
 type Mode = 'card' | 'tumble' | 'glow';
 /** glow shapes: a mote, a glint (cross flare), an ember, an orb, a breath of light, a ring of light */
 const G = { mote: 0, glint: 1, ember: 2, orb: 3, breath: 4, ring: 5 } as const;
-interface Look { mode: Mode; cell?: string; frames?: number; start?: number; shape?: number; warm?: number; cool?: number; spin?: [number, number]; metal?: boolean }
+interface Look { mode: Mode; cell?: string; frames?: number; start?: number; shape?: number; warm?: number; cool?: number; spin?: [number, number]; metal?: boolean; scale?: number }
 
 // the names callers use (kept from the old sprite sheet) and what each is now
 const LOOKS = {
@@ -39,7 +39,7 @@ const LOOKS = {
   ring: { mode: 'card', cell: 'ring' },
   coin: { mode: 'tumble', cell: 'coin', spin: [8, 13], metal: true },
   crumb: { mode: 'tumble', cell: 'shaving', spin: [5, 10] },
-  streak: { mode: 'card', cell: 'seed' },
+  streak: { mode: 'card', cell: 'seed', scale: 0.35 }, // (was a wind streak: a dandelion seed riding the gust)
   dots: { mode: 'glow', shape: G.glint },
   flame1: { mode: 'glow', shape: G.ember }, flame2: { mode: 'glow', shape: G.ember },
   feather1: { mode: 'tumble', cell: 'feather', spin: [1.6, 3.4] }, feather2: { mode: 'tumble', cell: 'feather', spin: [1.6, 3.4] }, feather3: { mode: 'tumble', cell: 'feather', spin: [1.6, 3.4] },
@@ -68,7 +68,7 @@ const LOOK: Look[] = NAMES.map((n) => LOOKS[n]);
 const C = 32, COLS = 8;
 type Cell = Raster | ((x: number, y: number) => { v: number; a?: number; o?: boolean } | null);
 function cells(): Record<string, Cell[]> {
-  const pf = puffFrames(), sn = snowFrames(), co = coinFrames();
+  const sn = snowFrames(), co = coinFrames();
   const water = (f: number) => (x: number, y: number) => {
     // a raindrop crown: a low splash, droplets thrown out, then a flattening ring
     const X = x - 7.5, Y = 13.5 - y;
@@ -80,14 +80,22 @@ function cells(): Record<string, Cell[]> {
     leaf: [flatTone('leaf', 32)], leafOak: [flatTone('leafOak', 32)], leafWillow: [flatTone('leafWillow', 32)], petal: [flatTone('petal', 30)],
     feather: [flatTone('feather', 32)], flake: [flatTone('flake', 20)], paper: [flatTone('paper', 24)], shaving: [shavingFrames()[1]],
     coin: [co[0]],
-    puff: [pf[0], pf[2], pf[4]],
+    // a soft puff of dust or breath: round lobes, lit from above, thinning toward the rim as it spreads
+    puff: [0, 1, 2].map((f) => (x: number, y: number) => {
+      const lobes: [number, number, number][] = [[-1.7, 0.3, 3.2], [1.5, 0.8, 3.4], [0.2, -1.2, 3.3], [-0.3, 2.0, 2.6]];
+      const g = 1 + f * 0.16, X = x - 7.5, Y = 7.5 - y;
+      let best = 0, up = 0;
+      for (const [cx, cy, r] of lobes) { const dx = (X - cx * g) / (r * g), dy = (Y - cy * g) / (r * g), d = 1 - (dx * dx + dy * dy); if (d > best) { best = d; up = dy - dx * 0.5; } }
+      if (best <= 0) return null;
+      return { v: 0.66 + 0.26 * up + 0.08 * best, a: Math.min(0.62, best * best * 2.4) * (1 - f * 0.2) };
+    }),
     snow: [sn[0]],
     drop: [outline(paintPx(6, 9, (x, y) => { const t = y + 1.6, rx = t > 0 ? 1.9 * Math.max(0, 1 - t / 4) : Math.sqrt(Math.max(0, 1 - (t / 2.1) ** 2)) * 2.1; return Math.abs(x) > rx ? null : x < -0.3 && x > -1.5 && t < -0.2 && t > -1.4 ? { s: 1, role: 3 } : { s: x < 0 ? 0.75 : 0.5 }; }))],
     splat: [water(0), water(1), water(2)],
     ring: [(x, y) => { const d = Math.hypot((x - 7.5) / 7, (y - 7.5) / 7); return Math.abs(d - 0.86) < 0.08 ? { v: 0.9 } : Math.abs(d - 0.7) < 0.05 ? { v: 0.6, a: 0.6 } : null; }],
     seed: [(x, y) => { const X = x - 7.5, Y = 8.5 - y; if (Math.abs(X) < 0.6 && Y < 0 && Y > -4) return { v: 0.55 }; const r = Math.hypot(X, Y - 1.5); return r < 3.2 && Y > 0.5 && bayer(x, y) < 0.7 ? { v: 0.95, a: r > 2.3 ? 0.55 : 0.9 } : null; }],
-    wisp: [(x, y) => { const X = (x - 7.5) / 7.5, Y = (y - 7.5) / 3; const d = X * X + Y * Y * (1 + X * 0.6); return d < 1 && bayer(x, y) < (1 - d) * 1.2 ? { v: 0.9 - Y * 0.1, a: 0.5 } : null; }],
-    wisp2: [(x, y) => { const X = (x - 7.5) / 7.5, Y = (y - 8.5 - X * 2) / 2.4; const d = X * X + Y * Y; return d < 1 && bayer(x + 1, y) < (1 - d) * 1.1 ? { v: 0.85, a: 0.45 } : null; }],
+    wisp: [(x, y) => { const X = (x - 7.5) / 7.5, Y = (y - 7.5) / 3; const d = X * X + Y * Y * (1 + X * 0.6); return d < 1 ? { v: 0.9 - Y * 0.1, a: 0.5 * (1 - d) } : null; }],
+    wisp2: [(x, y) => { const X = (x - 7.5) / 7.5, Y = (y - 8.5 - X * 2) / 2.4; const d = X * X + Y * Y; return d < 1 ? { v: 0.85, a: 0.45 * (1 - d) } : null; }],
     moth: [0, 1].map((f) => outline(tidy(paintPx(13, 11, (x, y, ix, iy) => {
       const body = Math.abs(x) < 0.8 && y > -3 && y < 2.4;
       if (body) return { s: 0.45 + (y > 0 ? 0.15 : 0) };
@@ -113,7 +121,9 @@ function atlas(): THREE.DataTexture {
       data[o] = Math.round(Math.max(0, Math.min(1, v)) * 255); data[o + 1] = paint ? 255 : 0; data[o + 2] = glint ? 255 : 0; data[o + 3] = Math.round(a * 255);
     };
     if (typeof cell === 'function') {
-      for (let y = 0; y < C; y++) for (let x = 0; x < C; x++) { const q = cell(Math.floor(x / 2), Math.floor(y / 2)); if (q) put(x, y, q.v, q.a ?? 1, !q.o, false); }
+      // soft shapes (mist, ripples) are drawn on the fine grid, the little pixel ones doubled
+      const fine = k === 'wisp' || k === 'wisp2' || k === 'ring' || k === 'puff';
+      for (let y = 0; y < C; y++) for (let x = 0; x < C; x++) { const q = fine ? cell((x + 0.5) / 2 - 0.5, (y + 0.5) / 2 - 0.5) : cell(Math.floor(x / 2), Math.floor(y / 2)); if (q) put(x, y, q.v, q.a ?? 1, !q.o, false); }
     } else {
       // centre the raster in the cell (small ones doubled); tumbling cards keep their albedo, cards facing the camera
       // their painted light
@@ -358,6 +368,8 @@ export type BurstKind = 'hearts' | 'stars' | 'notes' | 'dust' | 'sparkle' | 'coi
 export type Cue = 'sweat' | 'anger' | 'bang' | 'ask' | 'notes' | 'sparkle' | 'hearts' | 'zzz' | 'bulb' | 'gloom' | 'steam';
 
 const all = new Set<Fx>();
+/** forget particle layers whose scene has not been drawn for a while (a closed shop or office) */
+const prune = (now: number) => { for (const f of all) if (now - f.seenAt > 30000) all.delete(f); };
 /** Calm motion (the in-app setting) or the system's reduced motion */
 const calmNow = () => { try { return document.documentElement.classList.contains('hh-still') || matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; } };
 let live: Fx | null = null, liveAt = 0;
@@ -374,6 +386,8 @@ export class Fx {
   private lightsAt = -1e9;
   private lights: THREE.DirectionalLight[] = [];
   private time = 0;
+  /** when its scene was last drawn (ms) */
+  seenAt = performance.now();
   constructor(max = 1600) {
     const tex = atlas(), rows = (tex.userData as { rows: number }).rows;
     const card = new THREE.ShaderMaterial({
@@ -389,7 +403,8 @@ export class Fx {
     this.group.add(this.solid.mesh, this.glow.mesh);
     // learn the scene's light while drawing (and which scene this is, for sceneFx)
     this.solid.mesh.onBeforeRender = (_r, scene) => {
-      live = this; liveAt = performance.now();
+      live = this; liveAt = this.seenAt = performance.now();
+      if (!all.has(this)) all.add(this);
       if (liveAt - this.lightsAt > 1000) {
         this.lightsAt = liveAt;
         this.density = calmNow() ? 0.5 : 1;
@@ -430,6 +445,7 @@ export class Fx {
       floor: e.floor ?? NaN, age: 0, seed, landed: false, r: tmp.r, g: tmp.g, b: tmp.b, look,
       ax: ax / al, ay: ay / al, az: az / al, ang: seed * 6.28, spin: e.spin ?? (s0 + (s1 - s0) * hash(seed * 1e5, 3)) * (seed > 0.5 ? 1 : -1),
     };
+    if (look.scale) p.size *= look.scale;
     if (look.mode !== 'glow') {
       // the old frame groups (puff1..3, splat1..3) start where the caller asked and play to the end
       const base = cellIndex[look.cell!] ?? 0, nf = look.frames ?? 1, off = look.start ?? 0;
@@ -478,7 +494,7 @@ export class Fx {
         case 'crumbs': case 'shavings': this.emit({ x, y, z, vx: Math.cos(a) * R(0.3, 0.8), vy: R(0.6, 1.3), vz: Math.sin(a) * R(0.3, 0.8), life: R(0.9, 1.4), frame: SPR.shaving, color: color ?? pick([0xe2b878, 0xd8a868, 0xeccb94], i), size: kind === 'crumbs' ? 0.12 : 0.16, gravity: 6, drag: 0.6, land: true }); break;
         case 'splash': this.emit({ x, y, z, vx: Math.cos(a) * R(0.4, 1.1), vy: R(1.2, 2.4), vz: Math.sin(a) * R(0.4, 1.1), life: R(0.5, 0.8), frame: SPR.drop, color: color ?? 0xd8e8f2, size: 0.12, gravity: 7 }); break;
         case 'ink': this.emit({ x, y, z, vx: Math.cos(a) * R(0.3, 0.8), vy: R(0.6, 1.4), vz: Math.sin(a) * R(0.3, 0.8), life: R(0.6, 0.9), frame: SPR.ink, color: color ?? 0x2a2c58, size: 0.08, gravity: 6, land: true }); break;
-        case 'zzz': this.emit({ x: x + R(-0.08, 0.08), y: y + i * 0.06, z, vx: R(0.04, 0.1), vy: R(0.12, 0.2), life: 2.6, frame: SPR.zed, color: color ?? pick([0xc8d0ff, 0xe0d8ff], i), size: R(0.07, 0.1), flutter: 0.12, fadeIn: 0.6, fadeOut: 1.2, delay: i * 0.55 }); break;
+        case 'zzz': this.emit({ x: x + R(-0.08, 0.08), y: y + i * 0.06, z, vx: R(0.04, 0.1), vy: R(0.12, 0.2), life: 2.6, frame: SPR.zed, color: color ?? pick([0xb8c4ff, 0xd4c8ff], i), size: R(0.045, 0.065), flutter: 0.12, fadeIn: 0.6, fadeOut: 1.2, delay: i * 0.55 }); break;
         case 'leaves': this.emit({ x: x + R(-0.6, 0.6), y: y + R(-0.3, 0.3), z: z + R(-0.6, 0.6), vx: Math.cos(a) * 0.8, vy: R(0.6, 1.6), vz: Math.sin(a) * 0.8, life: R(1.8, 2.6), frame: pick([SPR.leaf1, SPR.leaf2, SPR.leaf3], i), color: color ?? pick([0x6aa040, 0xd6a032, 0xc4542c], i), size: 0.26, gravity: 2.2, drag: 1.6, wind: 0.6, flutter: 0.5, land: true }); break;
         case 'confetti': case 'flakes':
           // gold leaf flakes (and a few petals) that flash as they turn
@@ -524,7 +540,7 @@ export class Fx {
     const { x, y, z } = at;
     switch (kind) {
       case 'hearts':
-        this.emit({ x, y, z, life: 1.6, frame: SPR.breath, color: 0xffa080, size: r * 6, fadeIn: 0.35, fadeOut: 1, delay });
+        this.emit({ x, y, z, life: 1.6, frame: SPR.breath, color: 0xffb0a0, size: r * 5, fadeIn: 0.35, fadeOut: 1, delay });
         for (let i = 0; i < 4; i++) this.emit({ x: x + R(-1, 1) * r, y: y - r * 0.4, z: z + r * 0.4, vy: r * R(1.6, 2.4), life: R(1.3, 1.8), frame: SPR.mote, color: i % 2 ? 0xffb898 : 0xffd2a0, size: r * R(0.25, 0.4), flutter: r * 0.6, fadeIn: 0.25, fadeOut: 0.7, delay: delay + 0.15 + i * 0.15 });
         break;
       case 'sparkle':
@@ -540,7 +556,7 @@ export class Fx {
         for (let i = 0; i < 3; i++) { const a = R(0, Math.PI * 2); this.emit({ x: x + Math.cos(a) * r * 0.6, y: y + r * 0.9, z: z + Math.sin(a) * r * 0.6, vx: Math.cos(a) * r * 2, vy: r * R(3, 5), vz: Math.sin(a) * r * 2, life: R(1.4, 2), frame: SPR.feather1, color: 0xefe2c8, size: r * R(0.45, 0.6), gravity: r * 6, drag: 2.6, flutter: r * 1.4, fadeOut: 0.6, delay }); }
         break;
       case 'anger': case 'steam':
-        for (const sd of [-1, 1]) this.emit({ x: x + sd * r * 0.5, y: y - r * 0.35, z: z + r * 0.8, vx: sd * r * 2.2, vy: r * 0.6, vz: r * 0.6, life: 0.7, frame: SPR.puff1, frames: 3, fps: 5, color: 0xf2f0ec, size: r * 0.9, grow: 1.2, drag: 3, fadeIn: 0.05, fadeOut: 0.45, delay: delay + 0.08 });
+        for (const sd of [-1, 1]) this.emit({ x: x + sd * r * 0.45, y: y - r * 0.4, z: z + r * 0.8, vx: sd * r * 2.4, vy: r * 0.5, vz: r * 0.6, life: 0.6, frame: SPR.puff1, frames: 3, fps: 5, color: 0xf2f0ec, size: r * 0.55, grow: 1.4, drag: 3, fadeIn: 0.06, fadeOut: 0.45, delay: delay + 0.08 });
         break;
       case 'bulb':
         this.emit({ x, y: y + r * 1.9, z, vy: r * 0.2, life: 0.9, frame: SPR.spark1, color: 0xfff0c0, size: r * 0.9, fadeIn: 0.12, fadeOut: 0.5, delay });
@@ -557,7 +573,7 @@ export class Fx {
 export const sceneFx = {
   get live(): Fx | null { return live && performance.now() - liveAt < 800 ? live : null; },
   of(o: THREE.Object3D | null | undefined): Fx | null {
-    if (o) { const root = rootOf(o); for (const f of all) if (rootOf(f.group) === root) return f; }
+    if (o) { prune(performance.now()); const root = rootOf(o); for (const f of all) if (rootOf(f.group) === root) return f; }
     return this.live;
   },
   burst(kind: BurstKind, at: THREE.Vector3, n = 6, color?: number) { this.live?.burst(kind, at.x, at.y, at.z, n, color); },

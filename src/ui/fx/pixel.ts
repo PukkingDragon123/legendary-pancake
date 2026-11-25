@@ -232,8 +232,8 @@ function flakeSurf(len: number, seed: number): Surf {
   return {
     inside: (u, v) => Math.hypot(u, v) < r(Math.atan2(v, u)),
     at: (u, v) => [u * len, v * len, (u * v * 0.5 + v * v * 0.2) * len],
-    paint: (u, v) => ({ tone: 0.8 + (hash(Math.floor(u * 5), Math.floor(v * 5), seed) - 0.5) * 0.2 }),
-    spec: 0.9,
+    paint: (u, v) => ({ tone: 0.9 + (hash(Math.floor(u * 5), Math.floor(v * 5), seed) - 0.5) * 0.16 }),
+    spec: 1.1,
   };
 }
 function paperSurf(len: number, seed: number): Surf {
@@ -290,7 +290,7 @@ const SPECS: Record<PixKind, Spec> = {
   paper: { make: () => tumble(10, 10, () => paperSurf(4.2, 6), 8, { tilt: 0.45 }).map((r) => outline(tidy(r))), ramps: ['#efe6d2', '#8ca8c8'], outline: '#4a4048', spread: 0.4 },
   ink: { make: inkFrames, ramps: ['#2c2c58'], spread: 0.5 },
   inkSplat: { make: inkSplatFrames, ramps: ['#2c2c58'], spread: 0.5 },
-  flake: { make: () => tumble(7, 7, () => flakeSurf(2.9, 2), 8, { tilt: 0.6 }), ramps: ['#d8a030'], spread: 0.8 },
+  flake: { make: () => tumble(7, 7, () => flakeSurf(2.9, 2), 8, { tilt: 0.6 }), ramps: ['#f4cc5c'], spread: 0.6 },
   snow: { make: snowFrames, ramps: ['#cfe2f6'], glow: true, spread: 0.5 },
   glint: { make: () => glintFrames(), ramps: ['#f2c050'], glow: true },
   glintCool: { make: () => glintFrames(), ramps: ['#a8c8f0'], glow: true },

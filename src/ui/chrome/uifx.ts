@@ -33,7 +33,7 @@ const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
 const CAP = 360;
 
 /** what particles and light keep off: the text the player reads */
-const SHIELD = '.lvup-title, .lvup-medal b, .lvup-card h3, .lvup-unlock span, .hh-toast, .bubble, .hh-bubble, .lg-bubble, .modal h2, .modal .muted, .sheet h2, .sheet h3, .ticket, .hud-top, h1, [data-fx-shield]';
+const SHIELD = '.lvup-title, .lvup-medal b, .lvup-card h3, .lvup-unlock span, .hh-toast, .hh-bubble, .lg-bubble, .bubble, .modal h2, .modal .muted, .sheet h2, .sheet h3, .hh-ticket, .hh-name, .hh-num, .hh-rank, .hh-toollabel, .hh-nav, h1, [data-fx-shield]';
 /** Screen rects of the text that light and particles keep off (also used by the light of src/ui/fx/moment.ts). */
 export function shieldRects(): DOMRect[] {
   const out: DOMRect[] = [];
@@ -89,7 +89,7 @@ function spawn(kind: UiFxKind, x: number, y: number, i: number): P[] {
     case 'leaves': return [{ ...base(pick(['leaf', 'leafGold', 'leafRed', 'leafOak'] as PixKind[]), x, y), vx: R(-90, 90), vy: R(-150, -50), drag: 1.5, g: 110, life: s(1.6, 2.4), fps: s(10, 16), sway: 40 }];
     case 'confetti': case 'flakes': return kind === 'confetti' && i % 4 === 3
       ? [{ ...base('petal', x, y), vx: R(-150, 150), vy: R(-320, -160), drag: 1.8, g: 260, life: s(1.6, 2.2), fps: s(10, 14), sway: 30 }]
-      : [{ ...base('flake', x, y), x: x + R(-30, 30), vx: R(-140, 140), vy: R(-280, -120), drag: 1.9, g: 240, life: s(1.5, 2.2), fps: s(10, 18), sway: 26 }];
+      : [{ ...base('flake', x, y), x: x + R(-90, 90), y: y + R(-40, 30), vx: R(-170, 170), vy: R(-300, -90), drag: 2.1, g: 200, life: s(1.7, 2.5), fps: s(8, 16), sway: 34 }];
     case 'dust': { const v = s(25, 80); return [{ ...base('dust', x, y), vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.5 - 12, drag: 3, g: -6, life: s(0.45, 0.85), fps: 0 }]; }
     case 'chips': case 'shavings': return [{ ...base('shaving', x, y), vx: R(-110, 110), vy: R(-230, -110), drag: 0.8, g: 700, life: s(0.9, 1.3), fps: s(12, 20), floor: y + R(18, 34), onFloor: 'rest' }];
     case 'paper': return [{ ...base('paper', x, y), vx: R(-90, 90), vy: R(-170, -70), drag: 1.8, g: 150, life: s(1.2, 1.9), fps: s(7, 11), sway: 34 }];
@@ -221,6 +221,8 @@ function draw(c: CanvasRenderingContext2D, p: P, S: number, gain = 1) {
   else c.drawImage(img, X, Y, w, h);
   c.globalAlpha = 1;
 }
+
+if (typeof window !== 'undefined') (window as unknown as { hhUiFx: unknown }).hhUiFx = { uiBurst, uiAdvance: (s: number) => uiAdvance(s), shieldRects, count: () => parts.length };
 
 /** Dev/screenshot helper: run the particle simulation forward by `sec` seconds right now. */
 export function uiAdvance(sec: number) {

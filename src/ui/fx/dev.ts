@@ -131,6 +131,7 @@ function worldSheet(kinds: BurstKind[]) {
 async function backdrop() {
   const bg = q.get('bg');
   canvas.style.display = 'none';
+  if (q.get('bgc')) document.body.style.background = '#' + q.get('bgc');
   if (!bg) return;
   const im = document.createElement('img');
   im.src = bg;
