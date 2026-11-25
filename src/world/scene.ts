@@ -128,7 +128,7 @@ export class Scene {
   /** [world] real-world weather and seasons (see weather.ts) */
   readonly weather: Weather;
   readonly quality: Quality;
-  /** [look4] "Golden Diorama" post chain: modest internal resolution, bloom, tilt-shift depth of field, ACES and a
+  /** [look4] "Golden Diorama" post chain ([light7] at full resolution): bloom, tilt-shift depth of field, ACES and a
    * warm grade (post.enabled = false to bypass; post.grade holds the world's live knobs, Stage.look a stage's) */
   readonly post: Post;
   /** [look4] the world beyond the clearing: forest to the horizon, hills and mountains in the haze */
