@@ -66,8 +66,8 @@ const BARREL = { x: -2.72, z: -1.72, h: 1.08, r: 0.44 };
 const SHELF = { x: 4.12, z0: -0.55, z1: 1.75, y: 0.92, d: 0.56 };
 /** the deal plinths: spread across the floor on a wide screen, gathered in front of the workbench on a tall one */
 const STUMPS: Record<LodgeLayout, { x: number; z: number; h: number }[]> = {
-  side: [{ x: -2.3, z: 0.25, h: 0.3 }, { x: -1.58, z: 0.55, h: 0.36 }, { x: -0.86, z: 0.25, h: 0.3 }],
-  top: [{ x: -0.68, z: 0.5, h: 0.42 }, { x: -0.06, z: 1.12, h: 0.34 }, { x: 0.56, z: 0.5, h: 0.42 }],
+  side: [{ x: -2.3, z: 0.06, h: 0.44 }, { x: -1.58, z: 0.3, h: 0.48 }, { x: -0.92, z: 0.16, h: 0.44 }],
+  top: [{ x: -0.68, z: 0.18, h: 0.42 }, { x: -0.06, z: 0.4, h: 0.44 }, { x: 0.56, z: 0.18, h: 0.42 }],
 };
 /** acorn packs on the floor before the shelf (ids from ACORN_PACKS), gem packs on the shelf (GEM_PACKS) */
 const ACORN_SPOTS = [{ id: 'handful', z: -0.25 }, { id: 'sack', z: 0.3 }, { id: 'basket', z: 0.88 }, { id: 'mountain', z: 1.5 }];
