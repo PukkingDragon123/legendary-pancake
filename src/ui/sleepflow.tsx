@@ -11,16 +11,16 @@ import { dayKey, edit, save, type Profile } from '../game/store.ts';
 import { DAY_NAME, setNight, toMin } from '../game/routine.ts';
 import { BreathePicker } from './breathe.tsx';
 import { WoodClock } from './clock.tsx';
-import { mugSteam, propCandle, propMug, propPhone } from './chrome/objects.ts';
+import { mugSteam, propCandle, propMug, propPhone, wallpaperTile } from './chrome/objects.ts';
 import { reducedMotion } from './chrome/swing.ts';
 import { Px } from './icons.tsx';
 import { PhoneLockSheet } from './phone/phone.tsx';
 import { fmtDur, fmtHM, Tags, tap, toast, Toggle } from './kit.tsx';
-import { Art, dtone, hash, tone } from './px/sleepart.ts';
-import { candle, moonPhase, mug, nightWindow, phone } from './px/sleepprops.ts';
-import { paperTile } from './px/sleeppaper.js';
+import { moonPhase } from './px/sleepprops.ts';
+import { paintWindow } from './real/window.ts';
+import { GOLD, Real, box, cached, deviceK, enamel, matte, metal, polygon, tubeX, wood } from './real/paint.ts';
 import { ALARMS, goToSleep, SOUNDSCAPES, SoundTiles } from './sleep.tsx';
-import { ArtCanvas, HoldButton, injectSleepFrames, Paper, PencilTick, sparkleAt } from './sleepkit.tsx';
+import { HoldButton, injectSleepFrames, PaintCanvas, Paper, PencilTick, sparkleAt } from './sleepkit.tsx';
 import { breathing, panel, sceneRef } from './state.ts';
 import { animeMoment } from './fx/anime.ts'; // [anime6]
 import './sleepflow.css';
@@ -76,17 +76,8 @@ const saveDone = (d: StepId[]) => { try { localStorage.setItem(ritualKey(), JSON
 
 // ------------------------------------------------------------------ backgrounds
 
-let wallURL = '';
-/** a deep-blue damask wallpaper tile */
-function wallpaper(): string {
-  if (wallURL) return wallURL;
-  const a = new Art(16, 16);
-  a.rect(0, 0, 16, 16, (x, y) => dtone('navy', 2.2 + (hash(x, y, 4) - 0.5) * 0.4, x, y));
-  for (const [cx, cy] of [[4, 4], [12, 12]]) { a.px(cx, cy - 2, tone('navy', 4)); a.px(cx - 1, cy, tone('navy', 4)); a.px(cx + 1, cy, tone('navy', 4)); a.px(cx, cy + 1, tone('navy', 4)); a.px(cx, cy, tone('plum', 4)); }
-  a.rect(8, 0, 1, 16, tone('navy', 1));
-  wallURL = a.url(3);
-  return wallURL;
-}
+/** [ui7] a deep-blue damask wallpaper tile (realistic, printed paper) */
+const wallpaper = () => wallpaperTile('sapphire', 72);
 
 // ------------------------------------------------------------------ props on the table
 
@@ -106,7 +97,7 @@ function CandleProp(p: { dim: boolean; onTap: () => void }) {
   return (
     <button class={'prop prop-candle' + (p.dim ? ' dim' : '')} aria-label="Candle: dim the lights" onClick={p.onTap}>
       <span class="halo" />
-      <img class="px" src={propCandle(f, 3)} width={54} height={108} alt="" draggable={false} />
+      <img src={propCandle(f, 3)} width={54} height={108} alt="" draggable={false} />
     </button>
   );
 }
@@ -114,15 +105,15 @@ function MugProp(p: { tea: boolean; onTap: () => void }) {
   const f = useFrames(4, 260);
   return (
     <button class="prop prop-mug" aria-label={p.tea ? 'A mug of chamomile tea' : 'Coffee: swap it for tea'} onClick={p.onTap}>
-      <img class="px steam" src={mugSteam(f, 3)} width={78} height={42} alt="" draggable={false} />
-      <img class="px" src={propMug(p.tea ? 'tea' : 'coffee', 3)} width={78} height={78} alt="" draggable={false} />
+      <img class="steam" src={mugSteam(f, 3)} width={78} height={42} alt="" draggable={false} />
+      <img src={propMug(p.tea ? 'tea' : 'coffee', 3)} width={78} height={78} alt="" draggable={false} />
     </button>
   );
 }
 function PhoneProp(p: { bed: boolean; onTap: () => void }) {
   return (
     <button class={'prop prop-phone' + (p.bed ? ' tucked' : '')} aria-label={p.bed ? 'The phone is tucked in for the night' : 'Put the phone to bed'} onClick={p.onTap}>
-      <img class="px" src={propPhone(p.bed, 3)} width={66} height={102} alt="" draggable={false} />
+      <img src={propPhone(p.bed, 3)} width={66} height={102} alt="" draggable={false} />
       {p.bed && <span class="zz">z<small>z</small></span>}
     </button>
   );
@@ -173,16 +164,15 @@ export function SleepScreen() {
   const dim = isDone('lights');
   const winW = Math.max(110, Math.min(230, Math.floor((Math.min(vw, 1100) - 24) / 3)));
   const startBreath = () => { tap('ui_open', 0.5); setPicker(true); };
-  const table = paperTile('wood');
-  const tableBg = { backgroundImage: `url(${table.url})`, backgroundSize: `${table.w * 3}px ${table.h * 3}px` };
+  const tableBg = { background: 'linear-gradient(180deg, rgba(20,10,4,.35), rgba(20,10,4,0) 30%), var(--tx-walnut) 0 0 / 420px 420px, #4a2814' };
   const smart = sp.smartMin && sp.alarmOn && plan.on ? fmtHM(toHHMMm(toMin(plan.wake) - sp.smartMin), h12) : '';
 
   return (
     <div class={'sf' + (dim ? ' dim' : '') + (out ? ' out' : '') + (leaving ? ' leaving' : '')} role="dialog" aria-label="Bedtime">
       <button class="sf-back" aria-label="Back to the hollow" onClick={close}><Px name="arrow_left" size={30} /></button>
       <div class="sf-scroll">
-      <div class="sf-wall" style={{ backgroundImage: `url(${wallpaper()})` }}>
-        <ArtCanvas w={winW} h={56} k={3} fps={4} deps={[winW, dim]} class="sf-window" label="The night outside your window" draw={(a, t, f) => nightWindow(a, winW, 56, f, { phase: moonPhase(), dim: dim ? -0.5 : 0 })} />
+      <div class="sf-wall" style={{ backgroundImage: `url(${wallpaper()})`, backgroundSize: '72px 72px' }}>
+        <PaintCanvas w={winW * 3} h={168} fps={8} deps={[winW, dim]} class="sf-window" label="The night outside your window" draw={(g, t, w, h) => paintWindow(g, w, h, t, { phase: moonPhase(), dim: dim ? -0.5 : 0 })} />
         <div class="sf-sign hh-wood-sm"><span>Bedtime</span></div>
       </div>
 
@@ -297,17 +287,18 @@ export function SleepScreen() {
 }
 const toHHMMm = (m: number) => { m = ((m % 1440) + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
 
-let pencilU = '';
+/** [ui7] a yellow pencil: lacquered hexagonal barrel, brass ferrule, pink eraser, sharpened cedar tip (132 x 24 CSS px) */
 function pencilURL() {
-  if (pencilU) return pencilU;
-  const a = new Art(44, 8);
-  a.rect(6, 1, 30, 5, (x, y) => dtone('yellow', 3.4 + (y < 2 ? 1 : y > 4 ? -1 : 0), x, y));
-  for (let x = 8; x < 36; x += 6) a.rect(x, 1, 1, 5, tone('yellow', 2));
-  a.rect(36, 1, 3, 5, tone('steel', 3)); a.rect(39, 1, 4, 5, tone('rose', 4));
-  a.poly([[6, 1], [6, 6], [0, 3.5]], (x) => (x < 2.5 ? tone('ink', 1) : tone('tan', 4)));
-  a.outline();
-  pencilU = a.url(3);
-  return pencilU;
+  return cached('pencil7', () => {
+    const r = new Real(132, 24, deviceK(3), 0);
+    r.part(box(16, 4, 92, 15, 1), (x, y) => tubeX(11.5, 7.5, 1)(x, y, 0) + (Math.abs(y - 11.5) < 2.6 ? 0.6 : 0), enamel('#f0b828', { gloss: 0.8 }));
+    r.part(box(106, 3.5, 12, 16, 1.5), tubeX(11.5, 8, 1), metal(GOLD, { along: 'y', polish: 0.6 }));
+    for (const x of [108.5, 112, 115.5]) r.carve(box(x, 3.5, 0.8, 16), 0.5, 0.4);
+    r.part(box(117, 4, 13, 15, 5), tubeX(11.5, 7.5, 1), matte('#e88a8a', { spec: 0.12 }));
+    r.part(polygon([[17, 4], [17, 19], [2.5, 11.5]]), (x, y) => tubeX(11.5, 7.5 * (x - 2) / 15, 1)(x, y, 0), wood('honey', { along: 'x', scale: 4 }));
+    r.part(polygon([[7, 9.2], [7, 13.8], [2, 11.5]]), 1.6, matte('#3a3a40', { spec: 0.6, shin: 40 }));
+    return r.url({ shadow: { dy: 2, blur: 3, a: 0.4 } });
+  });
 }
 
 export { breathing };

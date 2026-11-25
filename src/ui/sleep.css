@@ -1,14 +1,14 @@
 /* The night screen, can't-sleep help, the phone lock and the dawn alarm. */
 
 /* ---------- shared bits of my screens */
-.hh-paper { position: relative; background-repeat: no-repeat; filter: drop-shadow(0 3px 0 rgba(40, 34, 27, 0.45)); }
+.hh-paper { position: relative; background-repeat: no-repeat; border-radius: 3px; box-shadow: var(--paper-edge, none), 0 1px 1.5px rgba(40, 22, 10, 0.32), 0 4px 10px rgba(40, 22, 10, 0.22); }
 .hh-tick { display: block; overflow: visible; }
 .hh-tick path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.35s ease; }
 .hh-tick.on path { stroke-dashoffset: 0; }
-.hh-spark { position: fixed; z-index: 60; width: 6px; height: 6px; margin: -3px; pointer-events: none; background: #f6f2e6; box-shadow: 0 0 0 2px #e8d3ac; animation: hhSpark 0.8s ease-in-out forwards; }
-.hh-spark::before, .hh-spark::after { content: ''; position: absolute; background: #f6f2e6; }
-.hh-spark::before { left: 2px; top: -6px; width: 2px; height: 18px; }
-.hh-spark::after { top: 2px; left: -6px; width: 18px; height: 2px; }
+.hh-spark { position: fixed; z-index: 60; width: 8px; height: 8px; margin: -4px; pointer-events: none; border-radius: 50%; background: radial-gradient(circle, #fffbe8 0 30%, rgba(255, 230, 160, 0.6) 55%, rgba(255, 220, 140, 0) 72%); animation: hhSpark 0.8s ease-out forwards; }
+.hh-spark::before, .hh-spark::after { content: ''; position: absolute; border-radius: 2px; background: linear-gradient(90deg, rgba(255, 250, 230, 0), #fffbe8, rgba(255, 250, 230, 0)); }
+.hh-spark::before { left: 3px; top: -6px; width: 2px; height: 20px; background: linear-gradient(180deg, rgba(255, 250, 230, 0), #fffbe8, rgba(255, 250, 230, 0)); }
+.hh-spark::after { top: 3px; left: -6px; width: 20px; height: 2px; }
 @keyframes hhSpark { 0% { transform: translate(0, 0) scale(0.3); opacity: 1; } 60% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(0.6); opacity: 0; } }
 .hh-hold { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
 .hh-hold .fill { position: absolute; left: 6px; top: 6px; bottom: 9px; width: calc((100% - 12px) * var(--k, 0)); background:

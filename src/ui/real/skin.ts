@@ -26,6 +26,7 @@ export function installRealSkin() {
 --tx-felt-green:${u(tileURL('felt', '#2c6b43', 384))};--tx-felt-blue:${u(tileURL('felt', '#2b4b86', 384))};--tx-felt-cream:${u(tileURL('felt', '#e8dcc2', 384))};
 --tx-bookcloth-red:${u(tileURL('bookcloth', '#7a1f24', 384))};--tx-bookcloth-green:${u(tileURL('bookcloth', '#1f5a39', 384))};--tx-bookcloth-blue:${u(tileURL('bookcloth', '#1e3566', 384))};
 --tx-walnut-dark:${u(tileURL('walnut', '#8a7468', 512))};
+--rb-cream:${u(roundButton(48, 'cream'))};--rb-cream-dn:${u(roundButton(48, 'cream', true))};--rb-brass:${u(roundButton(48, 'brass'))};--rb-brass-dn:${u(roundButton(48, 'brass', true))};--rb-walnut:${u(roundButton(48, 'walnut'))};--rb-green:${u(roundButton(48, 'green'))};--rb-red:${u(roundButton(48, 'red'))};--rb-night:${u(roundButton(48, 'night'))};
 --paper-bg:var(--tx-paper) 0 0/320px 320px,#efe2c4;
 --parch-tile:var(--tx-paper);--parch-tile-dark:var(--tx-paper-dark);
 --sh-1:0 1px 1.5px rgba(40,22,10,.32),0 2px 5px rgba(40,22,10,.16);

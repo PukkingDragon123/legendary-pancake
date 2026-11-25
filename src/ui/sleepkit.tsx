@@ -1,10 +1,10 @@
-// Shared pieces for the sleep, clock and morning screens: animated pixel-art canvases, paper that
-// textures itself to its size, a hold-to-confirm button, pencil ticks and tiny pixel sparkles.
+// Shared pieces for the sleep, clock and morning screens: animated canvases, realistic paper stocks, a
+// hold-to-confirm button, pencil ticks and sparkles.
 import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { Art } from './px/sleepart.ts';
-import { paperTexture } from './px/sleeppaper.js';
+import { TEX_URL, tileURL } from './real/tex.ts';
 import { frameStyle } from './real/kit.ts';
 import { haptic } from './kit.tsx';
 import { uiBurstAt } from './chrome/uifx.ts';
@@ -46,25 +46,73 @@ export function ArtCanvas(p: { w: number; h: number; k: number; fps?: number; dr
     onPointerDown={p.onPointerDown} onPointerMove={p.onPointerMove} onPointerUp={p.onPointerUp} onPointerCancel={p.onPointerUp} onClick={p.onClick} />;
 }
 
-/** Give an element a procedural paper texture sized to it (BME paper kinds: notebook, kraft, sticky, cream, board...). */
+/**
+ * [ui7] A smooth canvas at device resolution: `draw(g, t, w, h)` paints in CSS px (the context is pre-scaled).
+ * Animates at `fps` (0 = draw once, or whenever `deps` change).
+ */
+export function PaintCanvas(p: { w: number; h: number; fps?: number; draw: (g: CanvasRenderingContext2D, t: number, w: number, h: number) => void; deps?: unknown[]; class?: string; style?: JSX.CSSProperties | string; label?: string; onClick?: (e: MouseEvent) => void }) {
+  const cv = useRef<HTMLCanvasElement>(null);
+  const drawRef = useRef(p.draw);
+  drawRef.current = p.draw;
+  useEffect(() => {
+    const c = cv.current;
+    if (!c) return;
+    const k = Math.min(3, Math.max(1, devicePixelRatio || 1));
+    c.width = Math.round(p.w * k); c.height = Math.round(p.h * k);
+    const g = c.getContext('2d')!;
+    const paint = () => { g.setTransform(k, 0, 0, k, 0, 0); drawRef.current(g, nowT(), p.w, p.h); };
+    paint();
+    if (!p.fps || frozenT() !== null) return;
+    let raf = 0, last = 0;
+    const loop = (ms: number) => {
+      raf = requestAnimationFrame(loop);
+      if (ms - last < 1000 / p.fps! - 2 || document.hidden) return;
+      last = ms;
+      paint();
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [p.w, p.h, p.fps, ...(p.deps ?? [])]);
+  const st: JSX.CSSProperties = { width: `${p.w}px`, height: `${p.h}px`, ...(typeof p.style === 'object' ? p.style : {}) };
+  return <canvas ref={cv} class={p.class} style={st} role={p.label ? 'img' : undefined} aria-label={p.label} aria-hidden={p.label ? undefined : true} onClick={p.onClick} />;
+}
+
+/** [ui7] the paper stocks: a seamless photo-real paper tile (tinted per stock), CSS rules / grids on top */
+const STOCK: Record<string, { tint?: string; tex?: 'paper' | 'kraft'; base: string; size?: number }> = {
+  cream: { base: '#f4e8cc' }, parchment: { tint: '#ecd3a0', base: '#e9d3a4' }, notebook: { tint: '#fff8ea', base: '#f8f0dc' }, graph: { tint: '#f4f6ec', base: '#f1f2e6' },
+  kraft: { tex: 'kraft', base: '#b08560' }, postcard: { tint: '#fffaf0', base: '#f7f0e0' }, book: { tint: '#f8ecd0', base: '#f3e4c4' }, spread: { tint: '#f8ecd0', base: '#f3e4c4' },
+  sticky: { tint: '#ffe17a', base: '#f8d868' }, receipt: { tint: '#ffffff', base: '#f6f4ee' }, cardboard: { tex: 'kraft', tint: '#c89c6c', base: '#b48a5e' },
+  board: { tex: 'kraft', tint: '#d0b088', base: '#c2a07a' }, cork: { base: '#b08050' }, wood: { base: '#7a4a28' }, leather: { base: '#5a2a1c' },
+};
+/** The CSS background (layers) and inner edge shadow for a paper stock and its options. */
+export function paperCSS(kind: string, opts: Record<string, unknown> = {}): { bg: string; edge: string } {
+  const k = STOCK[kind] ?? STOCK.cream;
+  const tile = kind === 'cork' ? TEX_URL.cork : kind === 'wood' ? TEX_URL.walnut : kind === 'leather' ? TEX_URL.leather : tileURL(k.tex ?? 'paper', k.tint, 512);
+  const size = kind === 'wood' ? 400 : 320, seed = Number(opts.seed ?? 0);
+  const layers: string[] = [];
+  if (kind === 'notebook' || opts.rules) {
+    const sp = Number(opts.rules ?? 8) * 3, top = Number(opts.ruleTop ?? 10) * 3, m = Number(opts.margin ?? 0) * 3;
+    if (m) layers.push(`linear-gradient(90deg, transparent ${m}px, rgba(200,70,70,.42) ${m}px ${m + 1.5}px, transparent ${m + 1.5}px)`);
+    layers.push(`repeating-linear-gradient(180deg, transparent 0 ${sp - 1}px, rgba(70,110,170,.26) ${sp - 1}px ${sp}px) 0 ${top}px / 100% calc(100% - ${top}px) no-repeat`);
+  }
+  if (kind === 'graph') layers.push('linear-gradient(rgba(70,130,150,.16) 1px, transparent 1px) 0 0 / 12px 12px', 'linear-gradient(90deg, rgba(70,130,150,.16) 1px, transparent 1px) 0 0 / 12px 12px');
+  if (kind === 'spread' || opts.spine) layers.push('linear-gradient(90deg, transparent 44%, rgba(90,60,30,.18) 49%, rgba(60,40,20,.3) 50%, rgba(90,60,30,.18) 51%, transparent 56%)');
+  if (kind === 'sticky' || opts.sticky) layers.push('linear-gradient(160deg, rgba(255,255,255,.18), transparent 40%, rgba(150,100,0,.12))');
+  layers.push(`url("${tile}") ${(seed * 37) % size}px ${(seed * 53) % size}px / ${size}px ${size}px`, k.base);
+  const e = Number(opts.edge ?? (kind === 'parchment' ? 0.45 : kind === 'cream' ? 0.2 : 0.15)), ew = Number(opts.edgeW ?? 8);
+  return { bg: layers.join(', '), edge: e > 0 ? `inset 0 0 ${ew * 1.6}px rgba(120,76,30,${Math.min(0.6, e * 0.7)})` : 'none' };
+}
+
+/** Give an element a realistic paper surface (stocks: cream, parchment, notebook, graph, kraft, postcard, book, sticky...). */
 export function usePaper(kind: string, opts: Record<string, unknown> = {}) {
   const ref = useRef<HTMLElement>(null);
   const key = JSON.stringify(opts);
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    let w0 = 0, h0 = 0;
-    const apply = () => {
-      const w = el.offsetWidth, h = el.offsetHeight;
-      if (!w || !h || (Math.abs(w - w0) < 6 && Math.abs(h - h0) < 6)) return;
-      w0 = w; h0 = h;
-      el.style.backgroundImage = `url(${paperTexture(kind, w, h, opts)})`;
-      el.style.backgroundSize = '100% 100%';
-    };
-    apply();
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(apply) : null;
-    ro?.observe(el);
-    return () => ro?.disconnect();
+    const c = paperCSS(kind, opts);
+    el.style.background = c.bg;
+    el.style.setProperty('--paper-edge', c.edge);
   }, [kind, key]);
   return ref as { current: never };
 }
@@ -112,8 +160,8 @@ export function HoldButton(p: { ms?: number; onDone: () => void; class?: string;
 export function PencilTick(p: { on: boolean; size?: number }) {
   const s = p.size ?? 28;
   return (
-    <svg class={'hh-tick' + (p.on ? ' on' : '')} width={s} height={s} viewBox="0 0 14 14" shape-rendering="crispEdges" aria-hidden="true">
-      <path d="M1 7 L5 11 L13 2" fill="none" stroke="#384456" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" pathLength="1" />
+    <svg class={'hh-tick' + (p.on ? ' on' : '')} width={s} height={s} viewBox="0 0 14 14" aria-hidden="true">
+      <path d="M1.5 7.5 C3 9 4 10 5 11.2 C7.5 7.5 10 4.5 13 1.8" fill="none" stroke="#2c3a58" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" pathLength="1" />
     </svg>
   );
 }
