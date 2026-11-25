@@ -67,16 +67,18 @@ function Bubble() {
   useEffect(() => { if (b) setUp(true); }, [b?.id]);
   useEffect(() => {
     if (!up) return undefined;
-    let raf = 0, x = NaN, y = NaN, last = performance.now();
+    let raf = 0, x = NaN, y = NaN, last = performance.now(), frame = 0, right = innerWidth;
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const sc = sceneRef.current, el = ref.current, v = view.current;
       if (!sc || !el) return;
+      // keep clear of the tool buttons down the right-hand side
+      if (frame++ % 30 === 0) { const t = document.querySelector('.tools')?.getBoundingClientRect(); right = t && t.width > 0 ? Math.min(innerWidth, t.left + 6) : innerWidth; }
       const p = sc.screenOf(sc.owl.headWorld);
       const w = v ? v.cssW : 240, h = v ? v.cssH : 90;
-      const tx = Math.max(w / 2 + 2, Math.min(innerWidth - w / 2 - 2, p.x)), ty = Math.max(h + 54, p.y - 4);
+      const tx = Math.max(w / 2 + 2, Math.min(right - w / 2, p.x)), ty = Math.max(h + 54, p.y - 22);
       if (Number.isNaN(x)) { x = tx; y = ty; }
       const k = 1 - Math.exp(-dt * 9), nx = x + (tx - x) * k, ny = y + (ty - y) * k;
       v?.drift(-(nx - x) * 0.2, -(ny - y) * 0.2);
@@ -98,7 +100,7 @@ function Bubble() {
   return (
     <div class="hh-bubble hh-float" ref={ref}>
       <TalkText text={b ? b.text : null} id={b?.id} who={save.value.name} viewRef={view}
-        opts={{ size: phone ? 20 : 22, maxWidth: Math.min(innerWidth - 16, phone ? 330 : 400), anchor: 'bottom', voice: 'pip', scrim: 0.34, tag: true }}
+        opts={{ size: phone ? 18 : 22, maxWidth: Math.min(innerWidth - 100, phone ? 290 : 400), anchor: 'bottom', voice: 'pip', scrim: 0.34, tag: true }}
         onNext={() => { if (bubble.value?.id === b?.id) bubble.value = null; }} onIdle={() => { if (!bubble.value) setUp(false); }} />
     </div>
   );
