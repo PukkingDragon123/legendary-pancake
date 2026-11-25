@@ -75,10 +75,10 @@ function Bubble() {
       const sc = sceneRef.current, el = ref.current, v = view.current;
       if (!sc || !el) return;
       // keep clear of the tool buttons down the right-hand side
-      if (frame++ % 30 === 0) { const t = document.querySelector('.tools')?.getBoundingClientRect(); right = t && t.width > 0 ? Math.min(innerWidth, t.left + 6) : innerWidth; }
+      if (frame++ % 30 === 0) { const t = document.querySelector('.tools')?.getBoundingClientRect(); right = t && t.width > 0 ? Math.min(innerWidth, t.left - 12) : innerWidth; }
       const p = sc.screenOf(sc.owl.headWorld);
       const w = v ? v.cssW : 240, h = v ? v.cssH : 90;
-      const tx = Math.max(w / 2 + 2, Math.min(right - w / 2, p.x)), ty = Math.max(h + 54, p.y - 22);
+      const tx = Math.max(w / 2 + 2, Math.min(right - w / 2, p.x)), ty = Math.max(h + 54, p.y - 44); // above his hat, too
       if (Number.isNaN(x)) { x = tx; y = ty; }
       const k = 1 - Math.exp(-dt * 9), nx = x + (tx - x) * k, ny = y + (ty - y) * k;
       v?.drift(-(nx - x) * 0.2, -(ny - y) * 0.2);
