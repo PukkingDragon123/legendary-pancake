@@ -115,10 +115,10 @@ export function leafCanvas(ramp: RGB[], seed = 5): HTMLCanvasElement {
     let t = 0.58 + grain * 0.18 + (hash(x, y, seed) - 0.5) * 0.06;
     // the midrib: a groove with a lit ridge beside it
     const av = Math.abs(v);
-    if (av < 0.03 && u < 0.92) t -= 0.32; else if (av < 0.06 && u < 0.9) t += 0.12;
-    // side veins: angled grooves from the midrib toward the lobes
-    const ph = (u * 7.5 - av * 6.5) % 1;
-    if (av > 0.07 && av < 0.4 && u > 0.08 && u < 0.88 && ph > 0 && ph < 0.12) t -= 0.22;
+    if (av < 0.035 && u < 0.94) t -= 0.42; else if (av < 0.07 && u < 0.92) t += 0.14;
+    // side veins: angled grooves from the midrib toward the lobes, each with a lit ridge
+    const ph = (((u * 7 - av * 5.5) % 1) + 1) % 1;
+    if (av > 0.06 && av < 0.42 && u > 0.06 && u < 0.9) { if (ph < 0.13) t -= 0.36; else if (ph < 0.22) t += 0.1; }
     // the rim falls away into shadow
     t -= smooth(0.3, 0.5, av) * 0.28;
     return rampAt(ramp, clamp01(t), x, y);
@@ -162,26 +162,26 @@ export function shingleCanvas(seed = 11): HTMLCanvasElement {
 /** Emerald damask wallpaper: a mirrored acanthus-and-lily motif in leaf green and old gold on deep emerald silk. */
 export function wallpaperCanvas(night = false): HTMLCanvasElement {
   const W = 96, H = 128;
-  const base = R('#0b2a1f', '#0f3527', '#143f2e', '#1a4a36', '#20563e', '#286246');
-  const leaf = R('#1d5a3e', '#25694a', '#2f7855', '#3d8962', '#4f9a70');
-  const gold = R('#6e5426', '#8e6e34', '#b08c46', '#cfab5d', '#e6c87e');
+  const base = R('#0c2b20', '#0f3427', '#133d2d', '#174634', '#1c503b', '#225a42');
+  const leaf = R('#174d36', '#1c573d', '#226245', '#2a6d4e', '#337857');
+  const gold = R('#4c4020', '#64522a', '#7c6634', '#94793e', '#ab8c4a');
   void night;
   // the motif in one quarter, mirrored: a value field (0 = ground, 1 = leaf, 2 = gold line)
   const motif = (u: number, v: number): number => {
     // u, v in -1..1 within a cell; mirror on x
     const ax = Math.abs(u);
     // central lily: a teardrop
-    const lily = Math.hypot(ax * 1.6, (v + 0.15) * 1.1) < 0.42 && v < 0.35;
-    const lilyIn = Math.hypot(ax * 1.6, (v + 0.15) * 1.1) < 0.24;
+    const lily = Math.hypot(ax * 1.6, (v + 0.15) * 1.1) < 0.4 && v < 0.35;
+    const lilyIn = Math.hypot(ax * 1.6, (v + 0.15) * 1.1) < 0.13;
     // acanthus curls left and right
     const cr = Math.hypot(ax - 0.55, v - 0.35);
     const curl = cr < 0.3 && cr > 0.17 && !(ax > 0.55 && v < 0.35);
     const stem = Math.abs(ax - 0.1 - (v + 0.9) * 0.25) < 0.05 && v > -0.9 && v < -0.45;
-    const crown = Math.hypot(ax, v - 0.62) < 0.14;
+    const crown = Math.hypot(ax, v - 0.62) < 0.08;
     if (lilyIn || crown) return 2;
     if (lily || curl || stem) return 1;
     // a gold pin dot between motifs
-    if (Math.hypot(Math.abs(u) - 1, Math.abs(v) - 1) < 0.1) return 2;
+    if (Math.hypot(Math.abs(u) - 1, Math.abs(v) - 1) < 0.07) return 2;
     return 0;
   };
   return paint(W, H, (x, y) => {
@@ -204,7 +204,7 @@ export function wallpaperCanvas(night = false): HTMLCanvasElement {
 
 /** Honey-oak wainscot panelling: raised fielded panels between stiles, varnished. */
 export function wainscotCanvas(): HTMLCanvasElement {
-  const ramp = FINISHES[1].ramp;
+  const ramp = R('#2c160c', '#3c2012', '#4e2b18', '#62381f', '#764627', '#8a5530', '#9e653a', '#b27745', '#c48a52');
   const W = 128, H = 128;
   const grainV = woodCanvas(ramp, W, H, 21, 0.02).getContext('2d')!.getImageData(0, 0, W, H).data;
   return paint(W, H, (x, y) => {
@@ -501,7 +501,7 @@ export function turned(profile: [number, number][], segs = 12, k = 4): THREE.Buf
  * the surface it's carved from. Lies in the xy plane pointing +x, rising +z from z = 0. uvs: (u, v) in leafCanvas.
  */
 export function leafGeo(len: number, wid: number, o: { lobes?: number; curl?: number; fold?: number; t?: number; seed?: number; twist?: number } = {}): THREE.BufferGeometry {
-  const NU = 30, NV = 8, lobes = o.lobes ?? 3.5, curl = o.curl ?? 0.25, fold = o.fold ?? 0.12, th = o.t ?? 0.18, seed = o.seed ?? 1, tw = o.twist ?? 0;
+  const NU = 36, NV = 10, lobes = o.lobes ?? 3.5, curl = o.curl ?? 0.25, fold = o.fold ?? 0.12, th = o.t ?? 0.18, seed = o.seed ?? 1, tw = o.twist ?? 0;
   const half = (u: number) => {
     if (u <= 0 || u >= 1) return 0;
     const env = Math.pow(Math.sin(u * Math.PI), 0.75) * (0.85 + 0.25 * u);
@@ -515,7 +515,8 @@ export function leafGeo(len: number, wid: number, o: { lobes?: number; curl?: nu
     const x = u * len, y = s * h * wid;
     const dome = top ? th * wid * (0.35 + 0.65 * Math.sqrt(Math.max(0, 1 - s * s))) * (0.4 + 0.6 * Math.sin(Math.max(0.05, u) * Math.PI)) : 0;
     const rib = top && Math.abs(s) < 0.12 ? -th * wid * 0.25 : 0;
-    const c = -curl * len * (Math.pow(u - 0.45, 2) * 1.6) - fold * wid * Math.abs(s) * 0.5 + tw * s * u * wid;
+    const lobeW = Math.sin(u * Math.PI * lobes * 2 + 0.4 + hash(seed, 1, 2) * 1.2) * Math.abs(s) * th * wid * 0.55;
+    const c = -curl * len * (Math.pow(u - 0.45, 2) * 1.6) - fold * wid * Math.abs(s) * 0.5 + tw * s * u * wid + (top ? lobeW : lobeW * 0.6);
     return [x, y, Math.max(0, dome + rib + c + curl * len * 0.32) ];
   };
   // top and bottom sheets

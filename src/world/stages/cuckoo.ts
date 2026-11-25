@@ -29,13 +29,13 @@ const CW = 0.8, CH = 0.82, CD = 0.26;
 const DIAL = { y: 0.43, r: 0.25 };
 const RIDGE = 1.205, TANA = 0.775, ANG = Math.atan(TANA), EAVE = 0.57, ROOF_Z = 0.45, ROOF_T = 0.016;
 const GABLE_Y = 0.855, GABLE_Z = 0.22;
-const DOOR = { w: 0.118, h: 0.152, y: 0.867, z: 0.24 };
+const DOOR = { w: 0.14, h: 0.18, y: 0.867, z: 0.24 };
 const BAL = { y: 0.855, w: 0.48, z0: 0.24, z1: 0.37 };
-const OWL_H = 0.15, PERCH_IN = 0.115, PERCH_OUT = 0.31;
+const OWL_H = 0.19, PERCH_IN = 0.1, PERCH_OUT = 0.305;
 const PEND = { y: -0.035, z: 0.05, len: 0.5 };
-const CHAIN = { z: 0.13, top: -0.055, wTop: -0.2, wBot: -0.72 };
+const CHAIN = { z: 0.13, top: -0.055, wTop: -0.19, wBot: -0.64 };
 const WEIGHTS = [{ x: -0.155, ring: -0.232 }, { x: 0.155, ring: 0.232 }];
-const TAG = { w: 0.36, h: 0.26, t: 0.014, x: 0.47, hang: 0.05, gap: 0.05 };
+const TAG = { w: 0.36, h: 0.26, t: 0.014, x: 0.5, hang: 0.24 };
 const SHELF = { y: -1.24, w: 1.52, h: 0.07, d: 0.28 };
 const HOUSE = { w: 0.15, d: 0.12, gable: 0.055, z: 0.09, gap: 0.2 };
 const DADO = -1.47;
@@ -61,6 +61,9 @@ const backOut = (t: number) => { const c = 1.6; return 1 + (c + 1) * Math.pow(t 
 const FOV = 28;
 const LOOK: Look = { exposure: 1.04, contrast: 1.07, saturation: 1.12, vibrance: 0.22, warm: 0.07, split: 0.4, vignette: 0.26, grain: 0.012, bloom: 0.55, bloomThreshold: 1.05, focus: 7, focusRange: 2.5, blur: 0.25, cold: 0 };
 const HOUSE_COLS = ['#d79c8e', '#a2c290', '#94b6dc', '#e6c46e', '#bba0d6', '#e8966c', '#86c8b6'];
+
+/** the carvings are a lighter wood than the case (honey oak on walnut, like the Clock button's little clock) */
+const carveOf = (id: string) => (id === 'oak' ? 'linden' : 'oak');
 
 function nightNow(): number {
   const d = new Date(), h = d.getHours() + d.getMinutes() / 60;
@@ -101,7 +104,7 @@ export class CuckooStage implements Stage {
   private boards: { routine: THREE.Group; calendar: THREE.Group } = { routine: new THREE.Group(), calendar: new THREE.Group() };
   private paper: Record<'routine' | 'calendar', { c: HTMLCanvasElement; tex: THREE.CanvasTexture }> = {} as never;
   private lamps: Lamp[] = [];
-  private hemi = new THREE.HemisphereLight(0xfff0dc, 0x5a3a24, 0.5);
+  private hemi = new THREE.HemisphereLight(0xfff0dc, 0x5a3a24, 0.4);
   private key = new THREE.DirectionalLight(0xffe2bc, 1.2);
   private sun = new THREE.SpotLight(0xfff2da, 0, 12, 0.5, 0.9, 1.2);
   private moon = new THREE.DirectionalLight(0x8ea6e8, 0);
@@ -152,7 +155,7 @@ export class CuckooStage implements Stage {
     this.owl.node.position.set(0, 0.009, 0);
     this.perch.add(this.owl.node);
     this.perch.position.set(0, DOOR.y, PERCH_IN);
-    const perchBoard = new THREE.Mesh(this.keepG(K.prep(K.slab(0.1, 0.085, 0.009, 0.002), null).rotateX(-Math.PI / 2).translate(0, 0, 0.0)), this.M.carve);
+    const perchBoard = new THREE.Mesh(this.keepG(K.prep(K.slab(0.12, 0.1, 0.009, 0.002), null).rotateX(-Math.PI / 2).translate(0, 0, 0.0)), this.M.carve);
     perchBoard.castShadow = true;
     this.perch.add(perchBoard);
     this.owl.node.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) m.castShadow = true; });
@@ -164,7 +167,7 @@ export class CuckooStage implements Stage {
     this.from = this.copy(this.cur); this.to = this.copy(this.cur);
     this.setDrops(true);
     this.applyLight();
-    this.ready = Promise.all([this.owl.ready.catch(() => undefined), K.fontReady()]).then(() => undefined);
+    this.ready = K.fontReady();
   }
 
   // ---------------------------------------------------------------- bookkeeping
@@ -203,18 +206,18 @@ export class CuckooStage implements Stage {
     return t;
   }
   private buildMaterials() {
-    const f = K.finishOf(this.prefs.finish);
+    const f = K.finishOf(this.prefs.finish), cf = K.finishOf(carveOf(f.id));
     const std = (o: THREE.MeshStandardMaterialParameters) => new THREE.MeshStandardMaterial(o);
     this.M = {
-      wood: std({ map: this.woodTex(f.id), vertexColors: true, roughness: 0.5, envMapIntensity: 0.55 }),
-      carve: std({ map: this.woodTex(f.id, 0.06), vertexColors: true, roughness: 0.46, envMapIntensity: 0.6 }),
-      leaf: std({ map: this.keep(K.ctex(K.leafCanvas(f.ramp))), vertexColors: true, roughness: 0.48, envMapIntensity: 0.6 }),
-      feather: std({ map: this.keep(K.ctex(K.featherCanvas(f.ramp), true)), vertexColors: true, roughness: 0.5, envMapIntensity: 0.6 }),
+      wood: std({ map: this.woodTex(f.id, -0.1), vertexColors: true, roughness: 0.5, envMapIntensity: 0.55 }),
+      carve: std({ map: this.woodTex(cf.id, -0.08), vertexColors: true, roughness: 0.46, envMapIntensity: 0.6 }),
+      leaf: std({ map: this.keep(K.ctex(K.leafCanvas(cf.ramp))), vertexColors: true, roughness: 0.48, envMapIntensity: 0.6 }),
+      feather: std({ map: this.keep(K.ctex(K.featherCanvas(cf.ramp), true)), vertexColors: true, roughness: 0.5, envMapIntensity: 0.6 }),
       roof: std({ map: this.keep(K.ctex(K.shingleCanvas())), vertexColors: true, roughness: 0.82 }),
       dark: std({ color: 0x1a0e08, roughness: 0.95, side: THREE.BackSide }),
       brass: std({ color: 0xd9ab55, metalness: 0.92, roughness: 0.28, envMapIntensity: 1.25 }),
       brassDark: std({ color: 0xa07a36, metalness: 0.85, roughness: 0.4, envMapIntensity: 1.1 }),
-      steel: std({ color: 0x1c1a22, metalness: 0.75, roughness: 0.3, envMapIntensity: 1.2 }),
+      steel: std({ color: 0x1c2440, metalness: 0.7, roughness: 0.28, envMapIntensity: 1.2 }),
       bronze: std({ color: 0x8a6a46, vertexColors: true, metalness: 0.78, roughness: 0.42, envMapIntensity: 1.1 }),
       enamel: std({ map: this.keep(K.ctex(K.dialCanvas())), roughness: 0.18, envMapIntensity: 0.9 }),
       glass: std({ color: 0xd77a1e, roughness: 0.08, metalness: 0.1, emissive: 0x3a1600, envMapIntensity: 1.5 }),
@@ -235,13 +238,13 @@ export class CuckooStage implements Stage {
 
   /** Change the wood of the case and the carvings. */
   setFinish(id: string) {
-    const f = K.finishOf(id);
+    const f = K.finishOf(id), cf = K.finishOf(carveOf(f.id));
     this.prefs.finish = f.id;
     const swap = (m: THREE.Material, t: THREE.Texture) => { const s = m as THREE.MeshStandardMaterial; s.map?.dispose(); s.map = t; s.needsUpdate = true; };
-    swap(this.M.wood, this.woodTex(f.id));
-    swap(this.M.carve, this.woodTex(f.id, 0.06));
-    swap(this.M.leaf, this.keep(K.ctex(K.leafCanvas(f.ramp))));
-    swap(this.M.feather, this.keep(K.ctex(K.featherCanvas(f.ramp), true)));
+    swap(this.M.wood, this.woodTex(f.id, -0.1));
+    swap(this.M.carve, this.woodTex(cf.id, -0.08));
+    swap(this.M.leaf, this.keep(K.ctex(K.leafCanvas(cf.ramp))));
+    swap(this.M.feather, this.keep(K.ctex(K.featherCanvas(cf.ramp), true)));
   }
 
   // ---------------------------------------------------------------- light
@@ -250,7 +253,7 @@ export class CuckooStage implements Stage {
     const S = this.scene;
     S.add(this.hemi);
     const k = this.key;
-    k.position.set(-2.2, 3.0, 4.4);
+    k.position.set(-2.8, 3.4, 3.0);
     k.target.position.set(0.1, -0.2, 0);
     k.castShadow = true;
     k.shadow.mapSize.set(2048, 2048);
@@ -271,15 +274,15 @@ export class CuckooStage implements Stage {
     const n = this.nightFn ? this.nightFn() : nightNow();
     this.night = n;
     const L = THREE.MathUtils.lerp;
-    this.hemi.intensity = L(0.62, 0.2, n);
+    this.hemi.intensity = L(0.36, 0.14, n);
     this.hemi.color.setHex(n > 0.5 ? 0x7d8cc4 : 0xfff0dc);
     this.hemi.groundColor.setHex(n > 0.5 ? 0x24160e : 0x5a3a24);
-    this.key.intensity = L(1.35, 0.42, n);
+    this.key.intensity = L(1.25, 0.4, n);
     this.key.color.setHex(n > 0.5 ? 0xffc890 : 0xffe6c4);
-    this.sun.intensity = L(22, 0, n);
+    this.sun.intensity = L(12, 0, n);
     this.moon.intensity = L(0, 0.3, n);
     for (const l of this.lamps) l.light.userData.base = L(1.1, 2.6, n);
-    this.look.exposure = L(1.04, 1.1, n);
+    this.look.exposure = L(1.0, 1.08, n);
     this.look.warm = L(0.06, 0.1, n);
   }
 
@@ -358,8 +361,8 @@ export class CuckooStage implements Stage {
     for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2 + Math.PI / 2, r = i % 2 ? 0.006 : 0.015; if (i === 0) star.moveTo(Math.cos(a) * r, Math.sin(a) * r); else star.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
     brass.push({ geo: K.extrude(star, 0.004, 0.001, 1), m: mtx(0.034, DOOR.y + DOOR.h + 0.075, GABLE_Z + 0.021) });
     // the dark little room behind the door
-    const room = this.mesh(new THREE.BoxGeometry(0.15, 0.2, 0.18), this.M.dark, false, false);
-    room.position.set(0, GABLE_Y + 0.1, GABLE_Z - 0.09);
+    const room = this.mesh(new THREE.BoxGeometry(0.19, 0.23, 0.2), this.M.dark, false, false);
+    room.position.set(0, GABLE_Y + 0.115, GABLE_Z - 0.1);
     S.add(room);
     // ---- the roof: boards, shingles, a ridge cap, scalloped bargeboards, acorn drops at the eaves
     const roofParts: Part[] = [];
@@ -429,13 +432,14 @@ export class CuckooStage implements Stage {
       cup.push({ geo: cupG.clone(), m: mtx(x, y, z, 0, 0, rz, s) });
     };
     const leaf = (x: number, y: number, z: number, rz: number, len: number, wid: number, seed: number, curl = 0.25) =>
-      leaves.push({ geo: K.leafGeo(len, wid, { seed, curl, fold: 0.14, lobes: 3.2 + (seed % 3) * 0.3 }), m: mtx(x, y, z, 0, 0, rz) });
+      leaves.push({ geo: K.leafGeo(len, wid, { seed, curl, fold: 0.16, t: 0.3, lobes: 3.2 + (seed % 3) * 0.3 }), m: mtx(x, y, z, 0, 0, rz) });
     const fz = CD + 0.004;
-    for (let i = 0; i < 9; i++) {
-      const a = Math.PI * (0.83 - i * 0.0825), r = DIAL.r + 0.06;
-      const x = Math.cos(a) * r, y = DIAL.y + Math.sin(a) * r;
-      leaf(x, y, fz + 0.004, a + (i % 2 ? -1.75 : -1.3) + (i < 4.5 ? 0 : 0), 0.1, 0.085, i + 1, 0.2);
+    // a wreath of carved oak leaves all round the bezel, an acorn at each quarter
+    for (let i = 0; i < 12; i++) {
+      const a = (i / 12) * Math.PI * 2 + 0.13, r = DIAL.r + 0.055;
+      leaf(Math.cos(a) * r, DIAL.y + Math.sin(a) * r, fz + 0.002, a + Math.PI / 2 + (i % 2 ? 0.3 : -0.15), 0.1, 0.08, i + 1, 0.22);
     }
+    for (let q = 0; q < 4; q++) { const a = (q / 4) * Math.PI * 2 + Math.PI / 4, r = DIAL.r + 0.07; acorn(Math.cos(a) * r, DIAL.y + Math.sin(a) * r, fz + 0.02, a - Math.PI / 2, 1.05); }
     for (const sx of [-1, 1]) {
       // top corners: two leaves and an acorn spray
       const tx = sx * 0.29, ty = 0.74;
@@ -454,7 +458,7 @@ export class CuckooStage implements Stage {
     leaf(0.005, 0.08, fz, Math.PI + 0.25, 0.1, 0.08, 42);
     acorn(0, 0.07, fz + 0.025, 0, 1.15);
     // ---- the crest: a carved owl with spread wings on a fan of oak leaves
-    const crest = K.owlCrest(0.3);
+    const crest = K.owlCrest(0.36);
     const crestAt = mtx(0, RIDGE - 0.004, ROOF_Z - 0.05);
     crest.geo.applyMatrix4(crestAt); crest.feather.applyMatrix4(crestAt); crest.eyes.applyMatrix4(crestAt);
     // ---- the pendulum: a brass rod and a carved leaf bob with a brass boss
@@ -484,7 +488,7 @@ export class CuckooStage implements Stage {
     // ---- merge and add
     const woodG = K.carveShade(K.merge(wood), { lo: 0.5 });
     const carveG = K.carveShade(K.merge([...carve, { geo: crest.geo }]), { lo: 0.36 });
-    const leafG = K.carveShade(K.merge(leaves), { lo: 0.34, z0: CD, z1: CD + 0.03 });
+    const leafG = K.carveShade(K.merge(leaves), { lo: 0.22, z0: CD, z1: CD + 0.035 });
     const featherG = K.carveShade(crest.feather, { lo: 0.45 });
     S.add(this.mesh(woodG, this.M.wood), this.mesh(carveG, this.M.carve), this.mesh(leafG, this.M.leaf), this.mesh(featherG, this.M.feather));
     S.add(this.mesh(crest.eyes, this.M.glass, false, false));
@@ -510,8 +514,8 @@ export class CuckooStage implements Stage {
     S.add(this.doorPivot);
     this.pick(doorM, 'door');
     // pick boxes: the gable and balcony, the crest
-    this.hitBox(0.36, 0.3, 0.2, v3(0, DOOR.y + 0.1, 0.3), 'door');
-    this.hitBox(0.38, 0.3, 0.12, v3(0, RIDGE + 0.12, ROOF_Z - 0.02), 'crest');
+    this.hitBox(0.4, 0.32, 0.2, v3(0, DOOR.y + 0.11, 0.3), 'door');
+    this.hitBox(0.44, 0.34, 0.14, v3(0, RIDGE + 0.15, ROOF_Z - 0.02), 'crest');
     return { hour, minute };
   }
 
@@ -595,7 +599,7 @@ export class CuckooStage implements Stage {
     const both = shape.clone(); both.holes = [K.circlePath(0.011, 0, HOLE_T, 10), K.circlePath(0.011, 0, HOLE_B, 10)];
     const geoTop = this.keepG(K.carveShade(K.prep(K.scaleUV(K.extrude(top, TAG.t, 0.004, 2), 3, 1.5)), { lo: 0.5 }));
     const geoBoth = this.keepG(K.carveShade(K.prep(K.scaleUV(K.extrude(both, TAG.t, 0.004, 2), 3, 1.5)), { lo: 0.5 }));
-    const decalW = w - 0.04, decalH = 0.16;
+    const decalW = w - 0.02, decalH = 0.16;
     const decalG = this.keepG(new THREE.PlaneGeometry(decalW, decalH));
     const twine = (len: number) => { const g = new THREE.CylinderGeometry(0.0026, 0.0026, len, 5); g.translate(0, -len / 2, 0); return this.mesh(g, this.M.twine, true, false); };
     // brass brackets from the case sides: a rod with a ring at the end
@@ -606,7 +610,7 @@ export class CuckooStage implements Stage {
       br.push({ geo: new THREE.TorusGeometry(0.011, 0.0038, 6, 12), m: mtx(sx * TAG.x, HOOK.y - 0.011, HOOK.z, 0, Math.PI / 2, 0) });
     }
     this.scene.add(this.mesh(K.merge(br), this.M.brass));
-    const hangA = TAG.hang, hangB = 0.042;
+    const hangA = TAG.hang, hangB = 0.09;
     const byId: Record<string, Tag> = {};
     for (const [id, side, row] of ids) {
       const [cv] = K.canvas(Math.round(decalW * DECAL_PPU), Math.round(decalH * DECAL_PPU));
@@ -643,7 +647,7 @@ export class CuckooStage implements Stage {
       t.label = s.label; t.value = s.value;
       const c = t.c, g = c.getContext('2d')!;
       g.clearRect(0, 0, c.width, c.height);
-      K.pxText(g, s.label.toUpperCase(), c.width / 2, 9, 16, '#8c2c1e', { maxW: c.width - 2 });
+      K.pxText(g, s.label, c.width / 2, 9, 16, '#8c2c1e', { maxW: c.width - 2 });
       // a burnt rule under the label
       g.fillStyle = '#5a3a22';
       for (let x = 10; x < c.width - 10; x += 2) g.fillRect(x, 19, 1, 1);
@@ -700,7 +704,7 @@ export class CuckooStage implements Stage {
     list.slice(0, 7).forEach((d, i) => {
       const H = this.houses[i];
       H.data = d;
-      const hb = d.hours === null ? 0.075 : THREE.MathUtils.clamp(0.07 + (d.hours / 10) * 0.12, 0.08, 0.19);
+      const hb = d.hours === null ? 0.07 : THREE.MathUtils.clamp(0.075 + (Math.max(0, d.hours - 4) / 6) * 0.13, 0.075, 0.205);
       const changed = Math.abs(H.h - hb) > 0.001;
       H.h = hb;
       if (changed) this.buildHouse(i, hb);
@@ -793,6 +797,7 @@ export class CuckooStage implements Stage {
       const [c] = K.canvas(Math.round(pw * DECAL_PPU * 2), Math.round(ph * DECAL_PPU * 2));
       const tex = this.keep(K.ctex(c));
       this.paper.routine = { c, tex };
+      paperBg(c.getContext('2d')!, c.width, c.height, '#f4ecd8', '#e6d9bc', 7);
       const paper = new THREE.Mesh(this.keepG(new THREE.PlaneGeometry(pw, ph)), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.92 }));
       paper.position.set(0, -0.035, 0.0168);
       paper.receiveShadow = true;
@@ -815,6 +820,7 @@ export class CuckooStage implements Stage {
       const [c] = K.canvas(Math.round(pw * DECAL_PPU * 2), Math.round(ph * DECAL_PPU * 2));
       const tex = this.keep(K.ctex(c));
       this.paper.calendar = { c, tex };
+      paperBg(c.getContext('2d')!, c.width, c.height, '#f6eedb', '#e8dcc0', 11);
       // a few pages under the top one
       for (let k = 2; k >= 0; k--) {
         const pg = new THREE.Mesh(this.keepG(new THREE.PlaneGeometry(pw, ph)), k === 0 ? new THREE.MeshStandardMaterial({ map: tex, roughness: 0.92 }) : this.M.wax);
@@ -962,6 +968,13 @@ export class CuckooStage implements Stage {
   cuckoo(n: number) { this.trip('cuckoo', Math.max(1, Math.min(12, n)), null); }
   /** Pop out, wave hello and look over the numbers. */
   hello() { this.trip('hello', 2, null); }
+  /** Open on the little door: the owl pops out, cuckoos and waves, then the camera pulls back to the whole clock. */
+  intro() {
+    this.focus('door', true);
+    this.introBack = true;
+    setTimeout(() => { if (!this.dead) this.hello(); }, 900);
+  }
+  private introBack = false;
   /** Pop out and show off something (a tag, a house...): look at it, a proud little flourish. */
   present(id: string) {
     const p = this.anchorWorld(id);
@@ -1007,6 +1020,7 @@ export class CuckooStage implements Stage {
         if (s.done < s.calls && s.t >= 0.15 + s.done * gap) { this.call(s.done); s.done++; }
         const end = 0.15 + s.calls * gap + (s.mode === 'hello' ? 2.6 : s.mode === 'present' ? 2.4 : 0.5);
         if (s.mode === 'hello' && s.done === s.calls && s.t > 0.15 + s.calls * gap + 0.4 && !s.look) { s.look = this.tags[0].pivot.getWorldPosition(v3(0, 0, 0)).add(v3(0, -0.2, 0)); }
+        if (this.introBack && s.done === s.calls && s.t > 0.15 + s.calls * gap + 0.1) { this.introBack = false; if (this.shotName === 'door') this.focus('home'); }
         if (s.t >= end) { s.phase = 'back'; s.t = 0; }
         break;
       }

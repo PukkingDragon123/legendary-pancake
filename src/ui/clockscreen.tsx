@@ -1,8 +1,11 @@
-// The Clock button's screen: a wall with a big carved cuckoo clock in the middle (an owl pops out
-// on the hour, or when you tap the little door), paper tags with this week's numbers hanging
-// beside the pendulum, a clipboard with the weekly routine you can drag into shape, and a
-// tear-off month calendar with a sticker for every night Pip went out. No buttons: you poke,
-// drag, stamp and tear things.
+// The Clock button's screen. [clock6] A 3D scene (src/world/stages/cuckoo.ts): a super big carved Black Forest
+// cuckoo clock on a wall in Pip's house, with your owl living behind its door (it pops out on the hour, when you tap
+// the door, to say hello and to present your numbers). The numbers are things in the room: carved tags hanging from
+// the clock (this week, per night, streak, asleep by), a row of little houses on the shelf (one per night, as tall
+// as you slept), the routine on a clipboard and a wall calendar. Tapping a thing flies the camera to it and pins a
+// paper card with its detail; the clipboard and the calendar slide in their 2D editors (below: the routine board
+// you drag into shape and the tear-off month calendar). The DOM adds only a Back control, a one-line title and the
+// cards. Without WebGL the painted wall (ClockWall2D) stands in.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { sound } from '../audio/sound.ts';
@@ -11,13 +14,15 @@ import { copyNight, DAY_NAME, DAY_SHORT, nightDay, nightKey, planFor, setNight, 
 import { dayKey, save } from '../game/store.ts';
 import type { SleepSession } from '../sleep/types.ts';
 import { Px } from './icons.tsx';
-import { fmtDur, fmtHM, tap, toast } from './kit.tsx';
+import { fmtDur, fmtHM, tap, toast, useTick } from './kit.tsx';
+import { CuckooStage, type CuckooPrefs as Prefs3, type RoutineDay, type Sticker } from '../world/stages/cuckoo.ts';
+import { FINISHES as FINISHES3 } from '../world/stages/cuckookit.ts';
 import { NightReport } from './morning.tsx';
 import { Art, dtone, hash, tone } from './px/sleepart.ts';
 import { CH, CK, CW, DOOR, DROP_MAX, FACE, FINISHES, paintCuckoo, PIVOT, WEIGHTS } from './px/cuckoo.ts';
 import { stickerURL } from './px/sleepprops.ts';
 import { ArtCanvas, injectSleepFrames, nowT, Paper, sparkleAt } from './sleepkit.tsx';
-import { panel } from './state.ts';
+import { panel, sceneRef } from './state.ts';
 import { uiBurstAt } from './chrome/uifx.ts';
 import { boardCSS, clipboardClip, wallpaperTile, type BoardOpts } from './chrome/objects.ts';
 import './clockscreen.css';
@@ -343,7 +348,7 @@ function useBoardBg(o: BoardOpts) {
   return ref;
 }
 
-export function ClockScreen() {
+function ClockWall2D() {
   injectSleepFrames();
   const s = save.value, h12 = s.settings.hour12;
   const [report, setReport] = useState<SleepSession | null>(null);
@@ -385,4 +390,218 @@ export function ClockScreen() {
       {report && report.report && <div class="cs-modal"><NightReport s={report} onClose={() => setReport(null)} /></div>}
     </div>
   );
+}
+
+// ================================================================== the 3D clock (the Clock panel)
+
+const PREF3 = 'hoot-hollow:cuckoo3d';
+function loadPrefs3(): Prefs3 {
+  const d: Prefs3 = { finish: 'walnut', mute: false, wound: [Date.now() - 7 * 3600_000, Date.now() - 13 * 3600_000] };
+  try { const p = { ...d, ...JSON.parse(localStorage.getItem(PREF3) ?? '{}') }; return p.wound?.length === 2 ? p : d; } catch { return d; }
+}
+const savePrefs3 = (p: Prefs3) => { try { localStorage.setItem(PREF3, JSON.stringify(p)); } catch { /* storage blocked */ } };
+const MONTHS3 = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const isWide = () => innerWidth >= innerHeight * 1.05 && innerWidth >= 640;
+
+interface Card { id: string; kicker: string; big: string; line: string; night?: SleepSession }
+
+function Clock3D(p: { onFail: () => void }) {
+  const sc = sceneRef.current!;
+  const s = save.value, h12 = s.settings.hour12;
+  const stage = useRef<CuckooStage | null>(null);
+  const [card, setCard] = useState<Card | null>(null);
+  const [sheet, setSheet] = useState<null | 'routine' | 'calendar'>(null);
+  const [report, setReport] = useState<SleepSession | null>(null);
+  const [hint, setHint] = useState(true);
+  const [wide, setWide] = useState(isWide());
+  useTick(30_000);
+
+  // ---- the numbers
+  const goal = useMemo(() => Math.round([0, 1, 2, 3, 4, 5, 6].reduce((a, d) => a + planFor(s.routine, d).min, 0) / 7 / 15) * 15, [s.routine]);
+  const st = useMemo(() => sleepStats(s.nights, goal), [s.nights, goal]);
+  const byDay = useMemo(() => {
+    const m = new Map<string, SleepSession>();
+    for (const n of s.nights) { if (!n.report || n.simulated) continue; const k = nightKey(n), o = m.get(k); if (!o || o.report!.score < n.report.score) m.set(k, n); }
+    return m;
+  }, [s.nights]);
+  const streak = Math.max(s.streak, st.run);
+  const bedTxt = st.avgBed === null ? '–' : fmtHM(toHHMM(st.avgBed), h12);
+  const tags = [
+    { id: 'week', label: 'This week', value: st.weekNights ? fmtDur(st.weekTotal) : '–' },
+    { id: 'avg', label: 'Per night', value: st.avgNight ? fmtDur(st.avgNight) : '–' },
+    { id: 'streak', label: 'Streak', value: `${streak} night${streak === 1 ? '' : 's'}` },
+    { id: 'bed', label: 'Asleep by', value: bedTxt },
+  ];
+  const today = dayKey();
+  const week = useMemo(() => {
+    const out: { key: string; day: string; hours: number | null; text: string; goal: boolean; today: boolean; date: Date; n?: SleepSession }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i);
+      const k = ymd(d), n = byDay.get(k), ms = n?.report?.asleep ?? null;
+      const hrs = ms === null ? null : ms / 3600_000;
+      const mins = hrs === null ? 0 : Math.round(hrs * 60);
+      const text = hrs === null ? '–' : hrs >= 10 ? `${Math.round(hrs)}h` : `${Math.floor(mins / 60)}h${String(mins % 60).padStart(2, '0')}`;
+      out.push({ key: k, day: DAY_SHORT[d.getDay()], hours: hrs, text, goal: ms !== null && ms >= goal * 60_000 * 0.92, today: i === 0, date: d, n });
+    }
+    return out;
+  }, [byDay, goal, today]);
+  const ORDER3 = [1, 2, 3, 4, 5, 6, 0];
+  const tonight = nightDay(Date.now());
+
+  // ---- the stage: built on open, shown at once (the panel's transition covers the cut)
+  useEffect(() => {
+    let st3: CuckooStage | null = null;
+    try {
+      st3 = new CuckooStage(save.value.look, loadPrefs3());
+      st3.attach(sc.renderer, { night: () => sc.sky.night, post: sc.post });
+      sc.setStage(st3);
+    } catch (e) { console.warn('clock stage failed', e); p.onFail(); return; }
+    stage.current = st3;
+    st3.onPick = (id) => onPick(id);
+    st3.intro();
+    const hideHint = setTimeout(() => setHint(false), 7000);
+    const onResize = () => setWide(isWide());
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') backRef.current(); };
+    addEventListener('resize', onResize);
+    addEventListener('keydown', onKey);
+    if (import.meta.env.DEV) (window as unknown as { hhClock: unknown }).hhClock = { stage: st3, pick: (id: string) => onPick(id), back: () => backRef.current() };
+    return () => {
+      clearTimeout(hideHint);
+      removeEventListener('resize', onResize); removeEventListener('keydown', onKey);
+      if (st3) savePrefs3(st3.prefs);
+      if (sc.stage === st3) sc.setStage(null);
+      stage.current = null;
+    };
+  }, []);
+  // ---- keep the things in the scene painted with the numbers
+  const tagKey = tags.map((t) => t.value).join('|');
+  useEffect(() => { void stage.current?.ready.then(() => stage.current?.setStats(tags)); }, [tagKey]);
+  const weekKey = week.map((w) => w.key + w.text).join('|');
+  useEffect(() => { void stage.current?.ready.then(() => stage.current?.setNights(week)); }, [weekKey]);
+  const routineKey = JSON.stringify(s.routine) + h12 + goal + tonight;
+  useEffect(() => {
+    const days: RoutineDay[] = ORDER3.map((d) => { const pl = planFor(s.routine, d); return { day: DAY_SHORT[d], bed: toMin(pl.bed), wake: toMin(pl.wake), on: pl.on, tonight: d === tonight }; });
+    void stage.current?.ready.then(() => stage.current?.setRoutine(days, fmtDur(goal * 60_000), h12));
+  }, [routineKey]);
+  const monthKey = `${new Date().getMonth()}|${byDay.size}`;
+  useEffect(() => {
+    const now = new Date(), y = now.getFullYear(), m = now.getMonth();
+    const marks: Record<number, Sticker> = {};
+    for (const [k, n] of byDay) { const [yy, mm, dd] = k.split('-').map(Number); if (yy === y && mm === m + 1) marks[dd] = stickerFor(n.report!.score); }
+    void stage.current?.ready.then(() => stage.current?.setMonth({ month: MONTHS3[m], year: y, lead: (new Date(y, m, 1).getDay() + 6) % 7, days: new Date(y, m + 1, 0).getDate(), today: now.getDate(), marks }));
+  }, [monthKey]);
+
+  // ---- taps on things in the scene
+  const latest = useRef({ tags, week, st, goal });
+  latest.current = { tags, week, st, goal };
+  function onPick(id: string) {
+    const S = stage.current;
+    if (!S) return;
+    setHint(false);
+    const L = latest.current;
+    if (id.startsWith('tag:')) {
+      const k = id.slice(4), t = L.tags.find((x) => x.id === k)!;
+      const line = k === 'week' ? (L.st.weekNights ? `asleep in the last 7 days, over ${L.st.weekNights} night${L.st.weekNights === 1 ? '' : 's'}.` : 'Sleep with Pip tonight to start the count.')
+        : k === 'avg' ? (L.st.avgNight ? `asleep on an average night. Your goal: ${fmtDur(L.goal * 60_000)}.` : 'Your average shows up after your first night.')
+          : k === 'streak' ? `in a row with Pip. Your best: ${Math.max(save.value.bestStreak, L.st.bestRun)}.`
+            : (L.st.avgBed === null ? 'Your usual time to drift off shows up after a night.' : 'is when you usually drift off.');
+      tap('wood_knock', 0.35);
+      S.focus(id); S.present(id);
+      setSheet(null);
+      setCard({ id, kicker: t.label, big: t.value, line });
+      return;
+    }
+    if (id.startsWith('house:')) {
+      const w = L.week[+id.slice(6)];
+      if (!w) return;
+      tap('place_wood', 0.4);
+      S.focus(id); S.present(id);
+      setSheet(null);
+      const dateTxt = w.date.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
+      setCard(w.n?.report
+        ? { id, kicker: w.today ? `Last night · ${dateTxt}` : dateTxt, big: fmtDur(w.n.report.asleep), line: `asleep · score ${w.n.report.score}${w.goal ? ' · goal met' : ''}`, night: w.n }
+        : { id, kicker: dateTxt, big: 'No night', line: w.today ? 'Tonight, tap Sleep and Pip will keep count.' : 'Pip didn’t track this night.' });
+      return;
+    }
+    if (id === 'routine' || id === 'calendar') {
+      tap('paper_flip', 0.5);
+      setCard(null);
+      S.focus(id);
+      setTimeout(() => setSheet(id), 380);
+      return;
+    }
+    if (id === 'door' || id === 'owl') {
+      if (id === 'owl') S.owl.poke();
+      S.cuckoo(1 + Math.floor(Math.random() * 3));
+      return;
+    }
+    if (id === 'dial') {
+      tap('clock_tick', 0.4);
+      S.focus('dial');
+      setSheet(null);
+      const d = new Date();
+      setCard({ id, kicker: 'The time', big: fmtHM(`${d.getHours()}:${d.getMinutes()}`, save.value.settings.hour12), line: 'Pip pops out to cuckoo every hour. Tap the little door any time.' });
+      return;
+    }
+    if (id === 'crest') {
+      const i = (FINISHES3.findIndex((f) => f.id === S.prefs.finish) + 1) % FINISHES3.length;
+      S.setFinish(FINISHES3[i].id);
+      savePrefs3(S.prefs);
+      sound.play('wood_knock', { volume: 0.5 });
+      toast(FINISHES3[i].name, undefined, 1600);
+      return;
+    }
+    if (id === 'pendulum') {
+      S.prefs.mute = !S.prefs.mute;
+      savePrefs3(S.prefs);
+      sound.play('clock_tick', { volume: 0.4 });
+      toast(S.prefs.mute ? 'Shh: the clock ticks silently now' : 'Tick, tock', undefined, 1600);
+      return;
+    }
+    if (id.startsWith('weight:')) {
+      S.windUp(+id.slice(7));
+      savePrefs3(S.prefs);
+      toast('Wound up for the day', undefined, 1500);
+    }
+  }
+  function back() {
+    const S = stage.current;
+    if (sheet || card || (S && S.current !== 'home')) {
+      tap('ui_back', 0.4);
+      setSheet(null); setCard(null);
+      S?.focus('home');
+      return;
+    }
+    tap('ui_close', 0.5);
+    panel.value = null;
+  }
+  const backRef = useRef(back);
+  backRef.current = back;
+  const zoomed = !!card || !!sheet;
+  return (
+    <div class={'ck' + (wide ? ' wide' : '')} role="dialog" aria-label="Clock">
+      <button class="ck-back hh-wood-sm" aria-label={zoomed ? 'Back to the clock' : 'Back to the hollow'} onClick={back}><Px name="arrow_left" size={30} /><span>Back</span></button>
+      <div class={'ck-title hh-wood-sm' + (zoomed ? ' away' : '')}><span>Your Sleep Clock</span></div>
+      {hint && !zoomed && <div class="ck-hint">Tap a tag, a house or the clipboard</div>}
+      {card && (
+        <Paper kind="cream" class="ck-card" key={card.id} opts={{ seed: card.id.length * 7 }}>
+          <i class="ck-pin" />
+          <small>{card.kicker}</small>
+          <b>{card.big}</b>
+          <span>{card.line}</span>
+          {card.night?.report && <button class="ck-link" onClick={() => { tap('paper_flip', 0.5); setReport(card.night!); }}>Read the night’s report ›</button>}
+        </Paper>
+      )}
+      {sheet === 'routine' && <div class="ck-sheet" key="r"><RoutineBoard /></div>}
+      {sheet === 'calendar' && <div class="ck-sheet cal" key="c"><MonthCalendar onOpen={(n) => setReport(n)} /></div>}
+      {report && report.report && <div class="cs-modal"><NightReport s={report} onClose={() => setReport(null)} /></div>}
+    </div>
+  );
+}
+
+/** The Clock panel: the 3D cuckoo clock stage, or the painted wall if 3D isn't available. */
+export function ClockScreen() {
+  const [flat, setFlat] = useState(() => !sceneRef.current);
+  return flat ? <ClockWall2D /> : <Clock3D onFail={() => setFlat(true)} />;
 }
