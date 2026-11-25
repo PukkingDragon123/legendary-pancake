@@ -31,9 +31,9 @@
 /* ------------------------------------------------------------ name sign */
 .hh-namehang { left: 16px; top: 28px; width: 192px; height: 72px; transform-origin: 96px -26px; }
 .hh-nameboard { width: 192px; height: 72px; }
-.hh-portrait { position: absolute; left: -20px; top: -14px; width: 78px; height: 78px; filter: drop-shadow(2px 3px 0 rgba(26, 14, 8, 0.4)); } /* [ui5] the live owl in its frame */
+.hh-portrait { position: absolute; left: -15px; top: -14px; width: 78px; height: 78px; filter: drop-shadow(2px 3px 0 rgba(26, 14, 8, 0.4)); } /* [ui5] the live owl in its frame */
 /* [ui4] gilt lettering on the varnished board */
-.hh-name { position: absolute; left: 60px; right: 12px; top: 11px; font-family: var(--font-display); font-size: 26px; line-height: 1; color: #fbe3a0; white-space: nowrap; overflow: hidden; text-overflow: clip; text-shadow: 0 -1px 0 #fff6d6, 2px 2px 0 #2a1209, -1px 0 0 #2a1209, 0 1px 0 #2a1209, 1px 0 0 #2a1209, 0 -2px 0 #2a1209; }
+.hh-name { position: absolute; left: 63px; right: 10px; top: 11px; font-family: var(--font-display); font-size: 26px; line-height: 1; color: #fbe3a0; white-space: nowrap; overflow: hidden; text-overflow: clip; text-shadow: 0 -1px 0 #fff6d6, 2px 2px 0 #2a1209, -1px 0 0 #2a1209, 0 1px 0 #2a1209, 1px 0 0 #2a1209, 0 -2px 0 #2a1209; }
 .hh-name.long { font-size: 19px; top: 14px; }
 .hh-rank { position: absolute; right: 12px; top: 16px; font-family: var(--font-display); font-size: 13px; line-height: 1; color: #f0cf96; text-shadow: 1px 1px 0 #2a1209, -1px 0 0 #2a1209, 0 -1px 0 #2a1209; }
 .hh-lvl { position: absolute; left: 80px; top: 39px; width: 104px; height: 24px; filter: drop-shadow(0 2px 0 rgba(34, 38, 40, 0.45)); }
