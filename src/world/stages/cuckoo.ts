@@ -1104,7 +1104,15 @@ export class CuckooStage implements Stage {
     if (name === 'home') return this.homeShot();
     const p = this.anchorWorld(name);
     const card = (w: number, h: number, yaw = 0, pitch = 0.04): Shot => side ? { target: p, yaw, pitch, w: w * 1.6, h, cx: 0.36, cy: 0.5 } : { target: p, yaw, pitch, w, h: h * 1.7, cx: 0.5, cy: 0.3 };
-    if (name.startsWith('tag:')) { const k = TAG_LAY[this.layout].k; return card(0.62 * k, 0.5 * k, 0, 0.02); }
+    if (name.startsWith('tag:')) {
+      const k = TAG_LAY[this.layout].k;
+      if (side) return card(0.62 * k, 0.5 * k, 0, 0.02);
+      // a phone frames the pair hanging together on that side
+      const t = this.tags.find((x) => 'tag:' + x.id === name);
+      const pair = this.tags.filter((x) => t && x.side === t.side).map((x) => x.body.getWorldPosition(v3(0, 0, 0)));
+      const mid = pair.length === 2 ? pair[0].add(pair[1]).multiplyScalar(0.5) : p;
+      return { target: mid, yaw: 0, pitch: 0.02, w: 0.66, h: 1.2, cx: 0.5, cy: 0.34 };
+    }
     if (name.startsWith('house:')) return card(0.58, 0.44, 0, 0.16);
     if (name === 'routine' || name === 'calendar') return side ? { target: p, yaw: 0, pitch: 0.02, w: 1.9, h: 1.05, cx: 0.27, cy: 0.5 } : { target: p.clone().add(v3(0, 0.12, 0)), yaw: 0, pitch: 0.02, w: 0.7, h: 1.7, cx: 0.5, cy: 0.22 };
     if (name === 'dial') return card(0.78, 0.74, 0, 0.03);
