@@ -70,7 +70,7 @@ function installStyles() {
 .wd-tag::before{content:'';position:absolute;top:-10px;left:50%;width:2px;height:8px;margin-left:-1px;background:#e8d8b0;box-shadow:1px 0 0 #6e4a12}
 .wd-tag .ico{margin:-4px 0 -2px}
 .wd-tag span{text-shadow:0 1px 0 var(--paper);white-space:nowrap}
-.wd-tag.on{${frameStyle('button_gold', 2)};transform:translateY(3px) rotate(-3deg);color:var(--ink);animation:wdSway 2.4s steps(8) infinite}
+.wd-tag.on{${frameStyle('button_gold', 2)};transform:translateY(3px);color:var(--ink);animation:wdSway 2.4s steps(1, end) infinite}
 .wd-tag:active{transform:rotate(6deg)}
 .wd-tag .dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--berry);box-shadow:0 0 0 2px var(--ink)}
 .wd-hint{font-size:var(--t1);color:var(--ink-2);text-align:center;margin:-2px 0 0}
@@ -80,7 +80,7 @@ function installStyles() {
 .wd-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;gap:0;padding:8px 8px 9px;color:#2a1a10;text-align:center;filter:drop-shadow(2px 4px 0 rgba(20,8,24,.5));transition:transform .15s var(--pop);animation:wdIn .35s var(--ease) both;transform-origin:50% -10px}
 .wd-card::before{content:'';position:absolute;inset:0;${b9(thinFrame('oak', 7))};background:url("${linenTile()}") 0 0/32px 32px;background-clip:padding-box;z-index:-1;pointer-events:none}
 .wd-card:active{transform:translateY(2px) scale(.97)}
-.wd-card.on{animation:wdIn .35s var(--ease) both,wdSway 2.6s steps(10) .35s infinite}
+.wd-card.on{animation:wdIn .35s var(--ease) both,wdSway 2.6s steps(1, end) .35s infinite}
 .wd-card.on::before{${b9(thinFrame('brass', 7))};background:url("${linenTile()}") 0 0/32px 32px;background-clip:padding-box}
 .wd-card.locked::before{${b9(thinFrame('iron', 7))};background:url("${linenTile()}") 0 0/32px 32px;background-clip:padding-box;filter:brightness(.8)}
 .wd-card .hook{position:absolute;top:-17px;left:50%;margin-left:-17px;pointer-events:none;z-index:2}
@@ -124,7 +124,7 @@ function installStyles() {
 @keyframes wdIn{from{opacity:0;transform:translateY(-10px) rotate(-4deg)}}
 @keyframes wdUp{from{opacity:0;transform:translateY(16px)}}
 @keyframes wdSpin{to{transform:rotate(360deg)}}
-@keyframes wdSway{0%,100%{transform:rotate(0)}25%{transform:rotate(1.6deg)}75%{transform:rotate(-1.6deg)}}
+@keyframes wdSway{0%,100%{transform:none}50%{transform:translateY(var(--art-px, 1px))}}
 @keyframes wdBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 @media (prefers-reduced-motion:reduce){.wd-card,.wd-plaque,.wd-card.on,.wd-tag.on,.wd-plaque .face img{animation:none}}
 `;

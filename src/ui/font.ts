@@ -75,6 +75,8 @@ installAlagardText();
 // and a pixel font drawn at x.5 smears. After the UI changes, nudge such lines back onto whole pixels with a
 // sub-pixel text-indent on their block (it moves only the text, never the box or its pixel-art background).
 const SNAP = 'data-hh-snap';
+/** idle animations that only step whole art pixels up and down: text in them can still be snapped */
+const BOBS = new Set(['tagSway', 'signSwing', 'hhLookSway', 'wdSway', 'lgSwing', 'none']);
 /** elements whose text wears the full 3D style with a band fill (keep in step with FULL in text3d.tsx) */
 const T3D_HOST = 'h1:not(.qp-q), h2:not(.qp-q), .t3d:not(.t3d-lite), .hh-name, .lvup-title, .title-ribbon, .cb-title, .cs-sign span, .seal b, .tk-times b, .bk-last-t b';
 let snapOn = false, snapQueued = 0, snapLast = 0;
@@ -86,7 +88,8 @@ function snapPass() {
     const c = moving.get(el);
     if (c !== undefined) return c;
     const cs = getComputedStyle(el);
-    const m = (cs.transform !== 'none' && !/^matrix\(1, 0, 0, 1, -?\d+, -?\d+\)$/.test(cs.transform)) || cs.rotate !== 'none' || cs.scale !== 'none' || (cs.translate !== 'none' && /\./.test(cs.translate)) || cs.animationName !== 'none' || isMoving(el.parentElement);
+    // turning or scaling (not just sliding) or running an animation other than the whole-art-pixel bobs
+    const m = (cs.transform !== 'none' && !/^matrix\(1, 0, 0, 1, [-\d.e]+, [-\d.e]+\)$/.test(cs.transform)) || cs.rotate !== 'none' || cs.scale !== 'none' || (cs.animationName !== 'none' && !cs.animationName.split(', ').every((a) => BOBS.has(a))) || isMoving(el.parentElement);
     moving.set(el, m);
     return m;
   };
