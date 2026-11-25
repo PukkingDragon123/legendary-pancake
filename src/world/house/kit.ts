@@ -4,6 +4,7 @@
 // top-down build view (walls between the camera and the room dissolve on a pixel dither grid).
 import * as THREE from 'three';
 import { modelUrl } from '../../gfx/glb.ts';
+import { addDetail } from '../../gfx/surface.ts'; // [light7]
 
 /** Shared uniforms: when on, walls between the camera and the room dissolve on a dither grid. */
 export const CUT = {
@@ -63,9 +64,9 @@ export function houseTex(name: string, o: { data?: boolean; smooth?: boolean } =
   t = loader.load(modelUrl(`house/tex/${name}.webp`), () => done(), undefined, () => { console.warn('house texture missing', name); done(); });
   t.colorSpace = o.data ? THREE.NoColorSpace : THREE.SRGBColorSpace;
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.magFilter = o.smooth || o.data ? THREE.LinearFilter : THREE.NearestFilter;
+  t.magFilter = THREE.LinearFilter; // [light7] realistic textures, smoothly filtered
   t.minFilter = THREE.LinearMipmapLinearFilter;
-  t.anisotropy = 4;
+  t.anisotropy = 8;
   texCache.set(key, t);
   return t;
 }
@@ -111,11 +112,11 @@ function patchBark(m: THREE.MeshStandardMaterial) {
 {
   vec3 bk = diffuseColor.rgb;
   float lum = dot(bk, vec3(0.299, 0.587, 0.114));
-  vec2 q = floor(vMapUv * 256.0) / 256.0;
+  vec2 q = vMapUv * 0.25; // [light7] smooth patches (the map repeats 4x now)
   float n0 = hhNoise(q * 7.0) * 0.55 + hhNoise(q * 19.0 + 3.1) * 0.3 + hhNoise(q * 61.0 + 7.7) * 0.15;
-  float m = step(0.5, vColor.g * 1.25 + (n0 - 0.5) * 1.2 + (lum - 0.1) * 2.4 - 0.7);
-  vec3 mossC = texture2D(uMossMap, vMapUv * 2.5).rgb;
-  float l = step(1.12, hhNoise(q * 9.0 + 11.0) * 0.55 + hhNoise(q * 37.0) * 0.45 + vColor.b * 0.3 + (lum - 0.1) * 2.0);
+  float m = smoothstep(0.44, 0.56, vColor.g * 1.25 + (n0 - 0.5) * 1.2 + (lum - 0.1) * 2.4 - 0.7);
+  vec3 mossC = texture2D(uMossMap, vMapUv * 0.62).rgb;
+  float l = smoothstep(1.08, 1.16, hhNoise(q * 9.0 + 11.0) * 0.55 + hhNoise(q * 37.0) * 0.45 + vColor.b * 0.3 + (lum - 0.1) * 2.0);
   vec3 lichen = vec3(0.5, 0.56, 0.42) * (0.7 + lum * 2.5);
   bk = mix(bk, lichen, l * 0.85);
   bk = mix(bk, mossC * (0.62 + lum * 1.2), m);
@@ -160,18 +161,22 @@ export function houseMat(k: HouseMat): THREE.Material {
   const std = (o: THREE.MeshStandardMaterialParameters) => new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.82, metalness: 0, ...o });
   switch (k) {
     case 'bark': {
-      const b = std({ map: houseTex('bark'), normalMap: houseTex('bark_n', { data: true }), normalScale: new THREE.Vector2(1.4, 1.4), roughness: 0.96, color: new THREE.Color(1.3, 1.22, 1.12) });
+      // [light7] a real oak-bark scan (Poly Haven, CC0) about 2 m to a tile, with its relief
+      const bt = houseTex('bark'), bn = houseTex('bark_n', { data: true });
+      bt.repeat.set(4, 4); bn.repeat.set(4, 4);
+      const b = std({ map: bt, normalMap: bn, normalScale: new THREE.Vector2(1.1, 1.1), roughness: 0.92, color: new THREE.Color(1.22, 1.16, 1.08) });
       patchBark(b);
       m = b;
       break;
     }
     case 'lip': { const l = std({ roughness: 0.9 }); patchLip(l); m = l; break; }
-    case 'deck': m = std({ map: houseTex('deck'), roughness: 0.8 }); break;
-    case 'door': m = std({ map: houseTex('door'), roughness: 0.72, side: THREE.DoubleSide }); break;
-    case 'planks': m = std({ map: houseTex('planks'), roughness: 0.78 }); break;
+    // [light7] the boards carry real oak grain and relief (uv: 2.5 m a unit, so ~1.2 m a tile, along the boards)
+    case 'deck': m = addDetail(std({ map: houseTex('deck'), roughness: 0.8 }), 'wood', { repeat: 2, rotation: Math.PI / 2 }); break;
+    case 'door': m = addDetail(std({ map: houseTex('door'), roughness: 0.72, side: THREE.DoubleSide }), 'wood', { repeat: 2, rotation: Math.PI / 2 }); break;
+    case 'planks': m = addDetail(std({ map: houseTex('planks'), roughness: 0.78 }), 'wood', { repeat: 2, rotation: Math.PI / 2 }); break;
     case 'painted': {
       // painted boards: the plank texture's grain under a coat of paint (the vertex colour)
-      const p = std({ map: houseTex('planks'), roughness: 0.6 });
+      const p = addDetail(std({ map: houseTex('planks'), roughness: 0.6 }), 'wood', { repeat: 2, rotation: Math.PI / 2, albedo: 0.4 });
       chain(p, 'painted', (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\ndiffuseColor.rgb = vec3(pow(dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11)), 0.6) * 1.15);'); });
       m = p;
       break;
@@ -243,6 +248,7 @@ export function canvasTex(w: number, h: number, paint: (g: CanvasRenderingContex
   paint(g);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  t.userData.crisp = true; // [light7] lettering stays sharp
   t.magFilter = THREE.NearestFilter;
   t.minFilter = THREE.LinearMipmapLinearFilter;
   t.anisotropy = 4;

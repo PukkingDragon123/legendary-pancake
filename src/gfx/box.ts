@@ -220,6 +220,7 @@ export function assemble(parts: Part[], o: { swayH?: number; sampleEvery?: numbe
   tex.magFilter = THREE.NearestFilter;
   tex.minFilter = THREE.LinearFilter;
   tex.generateMipmaps = false;
+  tex.userData.crisp = true; // [light7] an unpadded atlas: smoothing would bleed between cells
   tex.needsUpdate = true;
 
   const geos = acc.map((a) => {

@@ -36,10 +36,10 @@ export function tex(name: string, o: { repeat?: boolean; srgb?: boolean } = {}):
     t = loader.load(`${import.meta.env.BASE_URL}textures/bushed/${name}.webp`);
     t.colorSpace = o.srgb === false ? THREE.NoColorSpace : THREE.SRGBColorSpace;
     if (o.repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    // BUSHED's convention: crisp pixels up close (nearest magnification), mipmapped minification
-    t.magFilter = THREE.NearestFilter;
+    // [light7] smooth filtering (no pixelated look), trilinear mipmaps and anisotropy
+    t.magFilter = THREE.LinearFilter;
     t.minFilter = THREE.LinearMipmapLinearFilter;
-    t.anisotropy = 4;
+    t.anisotropy = 8;
     cache.set(key, t);
   }
   return t;

@@ -7,6 +7,7 @@ import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { MeshoptDecoder as MeshoptReference } from './meshopt_ref.js';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import { applyCelShading } from './cel.ts'; // [light7] the painted cel light (patches three's light chunks on import)
 
 // The artifact host shows the game in a locked-down frame: it doesn't serve .glb, and it may refuse
 // fetches of data:/blob: URLs and WebAssembly compilation. So the artifact build ships each model as
@@ -55,12 +56,20 @@ async function fetchGLTF(url: string): Promise<GLTF> {
 /** URL of a model under public/models (works with the relative base of the artifact build). */
 export const modelUrl = (path: string) => `${import.meta.env.BASE_URL}models/${path.replace(/^\//, '')}`;
 
+/** [light7] Rim light on the silhouette by model set: characters most, the things they own a little, scenery none. */
+function rimFor(path: string): number {
+  if (/^(owls|outfits)\//.test(path)) return 0.5;
+  if (/^(items|souvenirs)\/|^shop\/(beaver|hero)|^world\/(songbird|critter)/.test(path)) return 0.3;
+  return 0;
+}
+
 /**
- * Crisp pixel-art texels up close, no shimmer far away. [look4] Materials keep their own response to light (polished
+ * [light7] Smoothly filtered textures (linear, trilinear mipmaps, anisotropy). [look4] Materials keep their own response to light (polished
  * wood, brass, glass and ceramics catch the environment's highlights); only the extremes are tamed: no mirror-smooth
- * surfaces flashing white, and painted (non-metal) maps never read as chrome.
+ * surfaces flashing white, and painted (non-metal) maps never read as chrome. [light7] Baked occlusion stays subtle
+ * (creases only), and characters and props get the cel rim (see cel.ts).
  */
-function tune(root: THREE.Object3D, o: { shadows: boolean }) {
+function tune(root: THREE.Object3D, o: { shadows: boolean; rim?: number }) {
   root.traverse((n) => {
     const m = n as THREE.Mesh;
     if (!m.isMesh) return;
@@ -68,17 +77,21 @@ function tune(root: THREE.Object3D, o: { shadows: boolean }) {
     m.receiveShadow = o.shadows;
     const mats = Array.isArray(m.material) ? m.material : [m.material];
     for (const mat of mats as THREE.MeshStandardMaterial[]) {
-      if (mat.map) {
-        mat.map.magFilter = THREE.NearestFilter;
-        mat.map.minFilter = THREE.LinearMipmapLinearFilter;
-        mat.map.generateMipmaps = true;
-        mat.map.anisotropy = 4;
-        mat.map.needsUpdate = true;
+      // [light7] smooth filtering for every map (realistic textures, no pixelated look)
+      for (const t of [mat.map, mat.emissiveMap, mat.normalMap, mat.roughnessMap, mat.metalnessMap, mat.aoMap]) {
+        if (!t || t.userData.smooth) continue;
+        t.userData.smooth = true;
+        t.magFilter = THREE.LinearFilter;
+        t.minFilter = THREE.LinearMipmapLinearFilter;
+        t.generateMipmaps = true;
+        t.anisotropy = 8;
+        t.needsUpdate = true;
       }
-      if (mat.emissiveMap) { mat.emissiveMap.magFilter = THREE.NearestFilter; mat.emissiveMap.needsUpdate = true; }
       const metal = !!mat.metalnessMap || (mat.metalness ?? 0) > 0.5;
       if ('roughness' in mat) mat.roughness = Math.max(mat.roughness ?? 1, metal ? 0.22 : 0.32);
       if ('metalness' in mat && !mat.metalnessMap) mat.metalness = Math.min(mat.metalness ?? 0, 0.85);
+      if (mat.aoMap) mat.aoMapIntensity = Math.min(mat.aoMapIntensity ?? 1, 0.6);
+      if (o.rim !== undefined) applyCelShading(mat, { rim: o.rim });
     }
   });
 }
@@ -119,7 +132,7 @@ export function vivid(root: THREE.Object3D, k = 0.32) {
 export function loadGLB(path: string): Promise<GLTF> {
   let p = cache.get(path);
   if (!p) {
-    p = fetchGLTF(modelUrl(path)).then((g) => { tune(g.scene, { shadows: true }); return g; });
+    p = fetchGLTF(modelUrl(path)).then((g) => { tune(g.scene, { shadows: true, rim: rimFor(path) }); return g; });
     cache.set(path, p);
   }
   return p;
