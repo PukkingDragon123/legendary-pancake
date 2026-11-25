@@ -277,6 +277,12 @@ export function sfxArt(text: string, style: SfxStyle): Letter[] {
   return out;
 }
 
+/** Three font pixels per art pixel when the word fits across the screen, two when it doesn't. */
+function wordSize(word: string): number {
+  const fit = Math.floor((Math.ceil(innerWidth / artPx()) * 0.86) / Math.max(1, word.length * 10));
+  return Math.max(2, Math.min(3, fit));
+}
+
 /** Throw a manga sound-effect word onto the screen: letters slam in one by one, hold, then dissolve upward. */
 export function sfx(word: string, x: number, y: number, o: { style?: keyof typeof STYLES | SfxStyle; size?: number; tilt?: number; dur?: number; delay?: number; align?: -1 | 0 | 1 } = {}) {
   if (typeof document === 'undefined') return;
@@ -290,9 +296,7 @@ export function sfx(word: string, x: number, y: number, o: { style?: keyof typeo
     t0: fxNow() + (o.delay ?? 0), dur, step() { /* sprites only */ },
     draw(c, t, B) {
       if (!art) {
-        // three font pixels per art pixel when the word fits across the screen, two when it doesn't
-        const fit = Math.floor((c.canvas.width * 0.86) / Math.max(1, word.length * 10));
-        const n = o.size ?? st.size ?? Math.max(2, Math.min(3, fit));
+        const n = o.size ?? st.size ?? wordSize(word);
         art = sfxArt(word, { ...st, size: n });
         big = calm ? art : sfxArt(word, { ...st, size: n + 1 });
         for (const a of art) levels.push([0.75, 0.5, 0.25].map((k) => { const r = new Raster(a.ras.w, a.ras.h); r.buf.set(a.ras.buf); r.dissolve(k); return r.canvas(); }));
@@ -448,5 +452,11 @@ if (typeof window !== 'undefined') {
   // the lettering font: ask for it early so the first word is already in it
   try { void document.fonts?.load('32px "Alagard"').catch(() => undefined); } catch { /* no font loading API */ }
   // shoot Pip's chibi portrait once things have settled, so the first cut-in is ready
-  if (!import.meta.env?.VITEST) setTimeout(() => { if (document.getElementById('world')) void ensureChibi(); }, 9000);
+  // and letter the moments' words a little at a time while nothing is happening, so no moment starts with a hitch
+  if (!import.meta.env?.VITEST) setTimeout(() => {
+    if (!document.getElementById('world')) return;
+    void ensureChibi();
+    const words: [string, string][] = [['DING!', 'gold'], ['KA-CHING!', 'gold'], ['WOW!', 'mint'], ['YAY!', 'rose'], ['SHING!!', 'gold'], ['POP!', 'violet'], ['ZZZ...', 'night'], ['KA-CHUNK!', 'red']];
+    words.forEach(([w, st], i) => setTimeout(() => { const n = wordSize(w); sfxArt(w, { ...STYLES[st], size: n }); sfxArt(w, { ...STYLES[st], size: n + 1 }); }, 400 * (i + 1)));
+  }, 9000);
 }
