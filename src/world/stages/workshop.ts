@@ -23,7 +23,7 @@ import { M, contactShadow, logGeo, mat, tex, taperTube } from './lodgekit.ts';
 export const BENCH = { top: 0.5, near: 0.237, far: 0.52, x0: -0.62, x1: 0.62, thick: 0.07 };
 export const BOARD = { near: 0.25, far: 0.34, top: 0.526, bottom: 0.5, right: -0.88, left: 1.0 };
 export const CUT_X = -0.73;
-export const MORTISE = { x: 0.24, z: 0.295 };
+export const MORTISE = { x: 0.32, z: 0.295 };
 export const SLIDE = 0.15;
 export const TOTE = { x0: 0.065, x1: 0.36, z0: 0.344, z1: 0.432, rail: 0.42, floor: 0.008, wall: 0.035 };
 const BZ = (BOARD.near + BOARD.far) / 2;

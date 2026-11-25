@@ -35,7 +35,7 @@ BENCH = {'top': 0.5, 'near': -0.237, 'far': -0.52, 'x0': -0.62, 'x1': 0.62}
 BOARD = {'near': -0.25, 'far': -0.34, 'top': 0.526, 'bottom': 0.5, 'right': -0.88, 'left': 1.0}
 BY = (BOARD['near'] + BOARD['far']) / 2
 CUT_X = -0.73
-MORTISE = (0.24, BY)
+MORTISE = (0.32, BY)
 STOOL = {'x': 0.53, 'y': -0.381, 'h': 0.165, 'r': 0.07}
 # the tool tote on the bench (the game builds it): the chisel and mallet stand in it, either side of its handle board
 TOTE = {'x0': 0.065, 'x1': 0.36, 'y0': -0.344, 'y1': -0.432, 'rail': -0.42, 'floor': 0.008, 'wall': 0.035}
@@ -300,7 +300,7 @@ def paint_strips(img, pk):
 # ------------------------------------------------------------------ the tools (model frames; origin = grip)
 def make_mallet():
     """A joiner's mallet: a beech head with tapered faces, an ash handle wedged through it (head along X at +Y)."""
-    parts = [lathe('m_handle', [(0.0001, 0), (0.0105, 0.004), (0.0118, 0.06), (0.0105, 0.14), (0.0098, 0.2), (0.0001, 0.205)],
+    parts = [lathe('m_handle', [(0.0001, 0), (0.0105, 0.02), (0.0118, 0.3), (0.0105, 0.68), (0.0098, 0.975), (0.0001, 1.0)],
                    (0, -0.06, 0), (0, 0.145, 0), n=10, grain='ash'),
              block('m_head', (-0.05, 0.096, -0.027), (0.05, 0.15, 0.027), grain='beech', bevel=0.004, gaxis=(1, 0, 0))]
     # the faces lean in toward the handle side (a real mallet's tapered faces)
@@ -315,16 +315,16 @@ def make_mallet():
 def make_chisel():
     """A bevel-edged firmer chisel: boxwood handle, brass ferrule, steel blade with its bevel (edge at -Y)."""
     parts = [lathe('c_handle', [(0.0001, 0), (0.0098, 0.01), (0.0112, 0.35), (0.0104, 0.8), (0.0088, 0.97), (0.0001, 1.0)],
-                   (0, -0.026, 0), (0, 0.07, 0), n=10, grain='boxwood'),
-             lathe('c_ferrule', [(0.0082, 0), (0.0086, 0.5), (0.0082, 1.0)], (0, -0.036, 0), (0, -0.024, 0), n=10, grain='brass2'),
-             lathe('c_neck', [(0.0001, 0), (0.0045, 0.05), (0.0035, 1.0)], (0, -0.046, 0), (0, -0.034, 0), n=6, grain='steel')]
-    bl = block('c_blade', (-0.008, -0.13, -0.0022), (0.008, -0.044, 0.0022), grain='steel', bevel=0.0006, gaxis=(0, 1, 0))
+                   (0, -0.024, 0), (0, 0.058, 0), n=10, grain='boxwood'),
+             lathe('c_ferrule', [(0.0082, 0), (0.0086, 0.5), (0.0082, 1.0)], (0, -0.034, 0), (0, -0.022, 0), n=10, grain='brass2'),
+             lathe('c_neck', [(0.0001, 0), (0.0045, 0.05), (0.0035, 1.0)], (0, -0.043, 0), (0, -0.032, 0), n=6, grain='steel')]
+    bl = block('c_blade', (-0.008, -0.105, -0.0022), (0.008, -0.041, 0.0022), grain='steel', bevel=0.0006, gaxis=(0, 1, 0))
     for v in bl.data.vertices:       # the bevel: the back of the blade ground off toward the edge
-        if v.co.y < -0.11 and v.co.z > 0:
-            v.co.z = -0.0022 + 0.0044 * max(0.0, (v.co.y + 0.13) / 0.02)
+        if v.co.y < -0.088 and v.co.z > 0:
+            v.co.z = -0.0022 + 0.0044 * max(0.0, (v.co.y + 0.105) / 0.017)
     parts.append(bl)
     ob = join(parts, 'tool_chisel')
-    return ob, {'grip': V(0, 0, 0), 'A': (V(0, 1, 0), V(0, 0, 1)), 'tip': V(0, -0.13, -0.0015), 'top': V(0, 0.07, 0)}
+    return ob, {'grip': V(0, 0, 0), 'A': (V(0, 1, 0), V(0, 0, 1)), 'tip': V(0, -0.105, -0.0015), 'top': V(0, 0.058, 0)}
 
 
 def make_square():
@@ -849,7 +849,7 @@ def build_clips(A, stance, rig, ns, LM, PENCIL, INFO):
     mx, my = MORTISE
     Bch = basis(V(0.05, 0.12, 1), V(0, -1, 0.1))       # upright, leaning a touch toward him, its flat back away
     Bhit = basis(V(0.92, -0.38, 0.0), V(0.38, 0.92, 0))    # striking: handle level from his right, face down on the chisel
-    Bup = Matrix.Rotation(math.radians(-95), 3, Bhit.col[2]) @ Bhit   # cocked: swung up about the same axis
+    Bup = Matrix.Rotation(math.radians(-58), 3, Bhit.col[2]) @ Bhit   # cocked: swung up about the same axis (beside his face, not into it)
 
     def depth(f):
         n = 0 if f < C0 + HIT else min(NC, (f - C0 - HIT) // CL + 1)
@@ -869,7 +869,7 @@ def build_clips(A, stance, rig, ns, LM, PENCIL, INFO):
         return 1 - sm((u - HIT) / (CL - HIT))
 
     def chisel(f):
-        lean = 24 * seg(f, 4, 14) - 24 * seg(f, 148, 158)
+        lean = 18 * seg(f, 4, 14) - 10 * seg(f, 26, 34) + 10 * seg(f, 136, 144) - 18 * seg(f, 148, 158)
         p = body(f, x=0.2 * seg(f, 0, 12) - 0.2 * seg(f, 148, 160), xmax=0.2, lean=lean, look=(6, 16 * seg(f, 6, 16) - 16 * seg(f, 146, 156)))
         res = 0.0
         Bch_rest, Och_rest = REST['chisel']
@@ -893,7 +893,7 @@ def build_clips(A, stance, rig, ns, LM, PENCIL, INFO):
         # the mallet: its face meets the chisel's top at each strike
         hitO = top - Bhit @ ma['face']
         gh = hitO + Bhit @ ma['grip']
-        gu = gh + V(-0.01, 0.02, 0.06)
+        gu = gh + V(0.01, -0.03, 0.055)
         upO = gu - Bup @ ma['grip']
         if 10 <= f <= 156:
             if f < 22:

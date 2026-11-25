@@ -733,7 +733,7 @@ export class Lodge implements Stage {
     if (kind === 'sawdust') {
       P.sawdust();
       const p = w(CUT_X, BOARD.bottom, (BOARD.near + BOARD.far) / 2);
-      for (let i = 0; i < 9; i++) fx.emit({ x: p.x, y: p.y, z: p.z, vx: R(-0.15, 0.15), vy: R(-0.1, 0.25), vz: R(-0.15, 0.2), life: R(0.6, 1.0), frame: SPR.pixel, color: [0xf0d9a8, 0xe2c08a, 0xd2a86c][i % 3], size: R(0.018, 0.03), gravity: 2.2, drag: 1.2, flutter: 0.2, land: true, delay: i * 0.025 });
+      for (let i = 0; i < 9; i++) fx.emit({ x: p.x, y: p.y, z: p.z, vx: R(-0.15, 0.15), vy: R(-0.1, 0.25), vz: R(-0.15, 0.2), life: R(0.6, 1.0), frame: SPR.crumb, color: [0xf0d9a8, 0xe2c08a, 0xd2a86c][i % 3], size: R(0.035, 0.055), gravity: 2.2, drag: 1.2, flutter: 0.2, land: true, delay: i * 0.025 });
       sound.play('paper_rustle', { volume: 0.1, rate: 0.62 + Math.random() * 0.1, gap: 150 });
     } else if (kind === 'offcut') {
       P.offcut();
