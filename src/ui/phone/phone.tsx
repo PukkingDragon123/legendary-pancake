@@ -1,4 +1,4 @@
-// A pretend smartphone in Hoot Hollow's pixel-art object style (generic: no real brand, made-up apps), used to show
+// A pretend smartphone (a realistic graphite body [ui7]; generic: no real brand, made-up apps), used to show
 // what the bedtime phone lock does. Its screen plays a little film, painted pixel by pixel on a 68 x 146 canvas:
 // the lock screen with the real time over a moonlit wallpaper, notifications buzzing in from made-up apps, the
 // bedtime banner, the home screen where the distracting apps are padlocked one by one, the "Hoot Hollow is keeping
@@ -10,6 +10,7 @@ import { sound } from '../../audio/sound.ts';
 import { crispText } from '../../onboard/tex.ts';
 import { alagard, alagardReady } from '../font.ts';
 import m5 from '../../assets/fonts/m5x7.woff2?url';
+import { Real, bevel, box, deviceK, metal } from '../real/paint.ts';
 
 export const SW = 68, SH = 146;
 /** the film's length (seconds) and its beats */
@@ -327,24 +328,19 @@ export class PhoneScreen {
 
 const bodyCache = new Map<string, string>();
 /** the phone's body (78 x 158): graphite frame with stepped round corners, rim highlights, the side buttons */
+/** [ui7] the phone's body: a satin-graphite aluminium band with polished chamfers, side buttons, a black glass front
+ * (80 x 160 art units, painted by the material painter at device resolution) */
 function bodyURL(): string {
-  let u = bodyCache.get('b');
+  let u = bodyCache.get('b7');
   if (u) return u;
-  const BW = 78, BH = 158, p = new Px(BW + 2, BH + 2);
-  // soft drop shadow
-  p.rr(2, 3, BW, BH, 11, () => [10, 6, 4], 0.35);
-  const frame = hex('#3a3f4c'), rim = hex('#a8b0be'), dark = hex('#15171d');
-  p.rr(1, 0, BW, BH, 11, (x, y, e) => {
-    if (e === 0) return x < BW / 2 && y < BH / 2 ? shade(rim, 1.05) : shade(rim, 0.6);
-    if (e === 1) return shade(frame, 1.1 + (x + y < 60 ? 0.15 : 0));
-    if (e < 4) return shade(dark, 1 + (hash(x, y, 1) - 0.5) * 0.2);
-    return [6, 7, 10];
-  });
-  // side buttons
-  for (const [y0, h] of [[34, 14], [52, 22], [80, 22]] as const) for (let y = y0; y < y0 + h; y++) p.set(0, y, y === y0 ? rim : shade(frame, 0.9));
-  for (let y = 44; y < 64; y++) p.set(BW + 1, y, y === 44 ? rim : shade(frame, 0.9));
-  u = p.done().toDataURL();
-  bodyCache.set('b', u);
+  const BW = 78, BH = 158, r = new Real(BW, BH, deviceK(3) * 3, 1);
+  const band = metal([90, 96, 108], { polish: 0.7 });
+  for (const [y0, h] of [[34, 14], [52, 22], [80, 22]] as const) r.part(box(-0.8, y0, 2, h, 0.8), 1.5, band);
+  r.part(box(BW - 1.2, 44, 2, 20, 0.8), 1.5, band);
+  r.part(box(0, 0, BW, BH, 11), bevel(3, 2.2), band);
+  r.part(box(2.6, 2.6, BW - 5.2, BH - 5.2, 9), 3.4, { alb: () => [8, 9, 12], spec: 1, shin: 90, coat: 1 });
+  u = r.url({ shadow: { dy: 2, blur: 3, a: 0.45 } });
+  bodyCache.set('b7', u);
   return u;
 }
 
