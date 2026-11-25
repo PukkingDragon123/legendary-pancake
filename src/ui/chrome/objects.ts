@@ -45,7 +45,7 @@ export interface BoardOpts { wood?: WoodName; seed?: number; bevel?: number; hoo
  */
 export function board(w: number, h: number, zoom = 1, _res = 1, o: BoardOpts = {}): string {
   return cached(`board:${w}x${h}:${zoom}:${JSON.stringify(o)}`, () => {
-    const m = 5, r = new Real(w, h, kz(zoom), m), bev = o.bevel ?? 5, R = o.radius ?? 8;
+    const m = 5, kk = Math.min(kz(zoom), Math.sqrt(700000 / ((w + 10) * (h + 10)))), r = new Real(w, h, Math.max(1, kk), m), bev = o.bevel ?? 5, R = o.radius ?? 8;
     const body = box(0, 2, w, h - 2, R);
     r.part(body, bevel(5, bev), wood(o.wood ?? 'walnut', { along: 'x', oy: (o.seed ?? 1) * 53, ox: (o.seed ?? 1) * 131 }));
     if (o.gilt !== false) {

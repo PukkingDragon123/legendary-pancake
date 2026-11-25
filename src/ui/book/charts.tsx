@@ -1,32 +1,43 @@
-// Pixel-art charts for the diary: drawn at texel resolution on a canvas (hard edges, no
-// anti-aliasing, no round shapes), shown at T CSS px per texel, with their labels set in the
-// pixel font in the DOM. Stepped bars, stepped lines with square markers, a stepped hypnogram and
-// a segmented stage bar.
+// Charts for the diary [ui7]: laid out on a texel grid (T CSS px each) and drawn smooth at device resolution:
+// rounded bars with a lit edge, lines with round markers, a hypnogram and a segmented stage bar; their labels
+// are set in the DOM.
 import { useEffect, useRef } from 'preact/hooks';
 import { P } from '../../gfx/palette.ts';
 import type { Stage } from '../../sleep/types.ts';
-import { hexOf, Px, SCORE_TINT } from './art.ts';
+import { hexOf, SCORE_TINT } from './art.ts';
 import type { Night } from './stats.ts';
 
 export interface Label { x: number; y: number; text: string; align?: 'l' | 'c' | 'r'; color?: string; small?: boolean; up?: boolean }
 
-/** A texel canvas with a few hard-edged tools. */
-export class Ink extends Px {
-  hline(x0: number, x1: number, y: number, c: number) { for (let x = Math.round(Math.min(x0, x1)); x <= Math.round(Math.max(x0, x1)); x++) this.set(x, Math.round(y), c); }
-  vline(x: number, y0: number, y1: number, c: number) { for (let y = Math.round(Math.min(y0, y1)); y <= Math.round(Math.max(y0, y1)); y++) this.set(Math.round(x), y, c); }
-  dashH(x0: number, x1: number, y: number, c: number, on = 2, off = 2) { for (let x = Math.round(x0); x <= x1; x++) if ((x - Math.round(x0)) % (on + off) < on) this.set(x, Math.round(y), c); }
-  box(x: number, y: number, w: number, h: number, c: number) { this.rect(Math.round(x), Math.round(y), Math.round(w), Math.round(h), c); }
-  /** a filled bar with a lit left edge, a shaded right edge and a 1px ink cap */
-  bar(x: number, y: number, w: number, h: number, fill: number, ink: number) {
-    x = Math.round(x); y = Math.round(y); w = Math.round(w); h = Math.round(h);
-    if (h <= 0) return;
-    const lit = mixHex(fill, P.paper, 0.35), dark = mixHex(fill, ink, 0.4);
-    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
-      let c = fill;
-      if (i === 0) c = lit; else if (i === w - 1) c = dark;
-      if ((i + j) % 4 === 0 && i > 0 && i < w - 1) c = mixHex(fill, dark, 0.5);   // a woven texture
-      if (j === 0) c = ink;
-      this.set(x + i, y + j, c);
+type Op = { k: 'dot' | 'rect' | 'line' | 'bar'; a: number[]; c: number; c2?: number; dash?: number[] };
+/** [ui7] A recorder with the old texel tools; the Chart replays it smooth at device resolution. */
+export class Ink {
+  ops: Op[] = [];
+  constructor(public w: number, public h: number) {}
+  set(x: number, y: number, c: number) { this.ops.push({ k: 'dot', a: [x + 0.5, y + 0.5], c }); return this; }
+  rect(x: number, y: number, w: number, h: number, c: number) { this.ops.push({ k: 'rect', a: [x, y, w, h], c }); return this; }
+  hline(x0: number, x1: number, y: number, c: number) { this.ops.push({ k: 'line', a: [Math.min(x0, x1), y + 0.5, Math.max(x0, x1) + 1, y + 0.5], c }); }
+  vline(x: number, y0: number, y1: number, c: number) { this.ops.push({ k: 'line', a: [x + 0.5, Math.min(y0, y1), x + 0.5, Math.max(y0, y1) + 1], c }); }
+  dashH(x0: number, x1: number, y: number, c: number, on = 2, off = 2) { this.ops.push({ k: 'line', a: [x0, y + 0.5, x1 + 1, y + 0.5], c, dash: [on, off] }); }
+  box(x: number, y: number, w: number, h: number, c: number) { this.rect(x, y, w, h, c); }
+  /** a rounded bar with a lit left edge, a shaded right edge and an ink cap */
+  bar(x: number, y: number, w: number, h: number, fill: number, ink: number) { if (h > 0) this.ops.push({ k: 'bar', a: [x, y, w, h], c: fill, c2: ink }); }
+  /** replay at `s` device px per texel */
+  draw(g: CanvasRenderingContext2D, s: number) {
+    g.setTransform(s, 0, 0, s, 0, 0);
+    g.clearRect(0, 0, this.w, this.h);
+    g.lineCap = 'round';
+    for (const o of this.ops) {
+      const col = hexOf(o.c);
+      if (o.k === 'dot') { g.fillStyle = col; g.beginPath(); g.arc(o.a[0], o.a[1], 0.62, 0, Math.PI * 2); g.fill(); }
+      else if (o.k === 'rect') { g.fillStyle = col; g.beginPath(); g.roundRect(o.a[0], o.a[1], o.a[2], o.a[3], Math.min(0.6, o.a[2] / 3, o.a[3] / 3)); g.fill(); }
+      else if (o.k === 'line') { g.strokeStyle = col; g.lineWidth = 0.8; g.setLineDash(o.dash ?? []); g.beginPath(); g.moveTo(o.a[0], o.a[1]); g.lineTo(o.a[2], o.a[3]); g.stroke(); g.setLineDash([]); }
+      else {
+        const [x, y, w, h] = o.a, gr = g.createLinearGradient(x, 0, x + w, 0);
+        gr.addColorStop(0, hexOf(mixHex(o.c, P.paper, 0.35))); gr.addColorStop(0.45, col); gr.addColorStop(1, hexOf(mixHex(o.c, o.c2!, 0.35)));
+        g.fillStyle = gr; g.beginPath(); g.roundRect(x, y, w, h, [Math.min(1.2, w / 3), Math.min(1.2, w / 3), 0.3, 0.3]); g.fill();
+        g.fillStyle = hexOf(o.c2!); g.beginPath(); g.roundRect(x, y, w, Math.min(1, h), [Math.min(1.2, w / 3), Math.min(1.2, w / 3), 0, 0]); g.fill();
+      }
     }
   }
 }
@@ -45,8 +56,10 @@ export function Chart(p: { w: number; h: number; T: number; draw: (g: Ink) => La
   useEffect(() => {
     const cv = ref.current;
     if (!cv) return;
-    cv.width = tw; cv.height = th;
-    cv.getContext('2d')?.putImageData(new ImageData(g.d, tw, th), 0, 0);
+    const s = p.T * Math.min(3, Math.max(1, devicePixelRatio || 1));
+    cv.width = Math.round(tw * s); cv.height = Math.round(th * s);
+    const ctx = cv.getContext('2d');
+    if (ctx) g.draw(ctx, s);
   }, [p.dep, tw, th]);
   return (
     <div class={'bk-chart ' + (p.class ?? '')} style={{ width: `${tw * p.T}px`, height: `${th * p.T}px` }} role="img" aria-label={p.label}>

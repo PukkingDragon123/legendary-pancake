@@ -338,7 +338,7 @@ function useBoardBg(o: BoardOpts) {
       const w = el.offsetWidth, h = el.offsetHeight;
       if (!w || !h || (Math.abs(w - w0) < 8 && Math.abs(h - h0) < 8)) return;
       w0 = w; h0 = h;
-      el.style.backgroundImage = `url("${boardCSS(w, h, o)}")`;
+      el.style.backgroundImage = `url("${boardCSS(w - 10, h - 10, o)}")`; // [ui7] the art carries a 5 px shadow margin
     };
     apply();
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(apply) : null;

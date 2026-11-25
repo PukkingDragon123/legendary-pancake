@@ -1,44 +1,23 @@
-// The diary in pixel art, in the calm palette: a pebbled brown leather board with stitched,
-// tooled edges and brass corners, the front cover (blind-tooled frame, a gilt crescent moon in a
-// wreath of leaves), oat-paper pages with fibres, foxing and a stepped gutter shadow, cloth index
-// tabs, a ribbon bookmark, square score stamps, mood icons and achievement postage stamps.
-// Everything is painted at texel resolution, cached as a data URL and shown with
-// `` at T CSS px per texel. Importing this module never touches the DOM.
+// [ui7] The diary as real materials, painted smooth at device resolution: an oxblood pebbled-leather board with a
+// stitched edge, brass corner protectors and the page block peeking out, the front cover (blind-tooled and gilt
+// frames, a gilt crescent moon in a vine, a brass title plate, a strap and catch), cream laid paper with a soft
+// shadow into the gutter, linen index tabs with a coloured running stitch, inked score stamps, mood icons,
+// achievement postage stamps, section icons, satin ribbon bookmarks and brass page-turn buttons.
+// Sizes stay in texels (T CSS px each, see layout.ts); each piece is painted at S device px per texel.
 import { P } from '../../gfx/palette.ts';
+import { BRASS_OLD, GOLD, Real, bevel, box, circle, deviceK, dome, metal, polygon, segment, union } from '../real/paint.ts';
+import { texCanvas, type TexName } from '../real/tex.ts';
 
 type RGB = [number, number, number];
 const rgb = (c: number): RGB => [(c >> 16) & 255, (c >> 8) & 255, c & 255];
-const mix = (a: RGB, b: RGB, t: number): RGB => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * t)) as RGB;
-const mulc = (c: RGB, f: number): RGB => c.map((v) => Math.max(0, Math.min(255, Math.round(v * f)))) as RGB;
 export const hexOf = (c: number) => '#' + c.toString(16).padStart(6, '0');
-const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
-
-const BAY = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
-const bay = (x: number, y: number) => BAY[((y & 3) << 2) | (x & 3)];
 export function h2(x: number, y: number, s = 0) {
   let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(s | 0, 982451653)) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16;
   return (h >>> 0) / 4294967296;
 }
-function vn(x: number, y: number, s = 0) {
-  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi, u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
-  const a = h2(xi, yi, s), b = h2(xi + 1, yi, s), c = h2(xi, yi + 1, s), d = h2(xi + 1, yi + 1, s);
-  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
-}
-/** cellular noise: distance to the nearest jittered point (pebbled leather) */
-function cell(x: number, y: number, s = 0) {
-  const xi = Math.floor(x), yi = Math.floor(y);
-  let best = 9;
-  for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) {
-    const px = xi + i + h2(xi + i, yi + j, s), py = yi + j + h2(xi + i, yi + j, s + 1);
-    best = Math.min(best, Math.hypot(x - px, y - py));
-  }
-  return best;
-}
-const pick = (ramp: RGB[], t: number, x: number, y: number, d = 1) => ramp[clamp(Math.floor(t * (ramp.length - 1) + (bay(x, y) - 0.5) * d + 0.5), 0, ramp.length - 1)];
 
-// ------------------------------------------------------------------ texel buffer
-
+/** A texel-sized RGBA buffer (kept for older callers). */
 export class Px {
   d: Uint8ClampedArray<ArrayBuffer>;
   constructor(public w: number, public h: number) { this.d = new Uint8ClampedArray(new ArrayBuffer(w * h * 4)); }
@@ -47,188 +26,181 @@ export class Px {
     x = Math.floor(x); y = Math.floor(y);
     if (!this.in(x, y)) return this;
     const k = typeof c === 'number' ? rgb(c) : c, i = (y * this.w + x) * 4;
-    if (a >= 255 || !this.d[i + 3]) { this.d[i] = k[0]; this.d[i + 1] = k[1]; this.d[i + 2] = k[2]; this.d[i + 3] = a; return this; }
-    const t = a / 255;
-    for (let j = 0; j < 3; j++) this.d[i + j] = Math.round(this.d[i + j] + (k[j] - this.d[i + j]) * t);
-    this.d[i + 3] = Math.max(this.d[i + 3], a);
+    this.d[i] = k[0]; this.d[i + 1] = k[1]; this.d[i + 2] = k[2]; this.d[i + 3] = a;
     return this;
   }
-  get(x: number, y: number): RGB | null { if (!this.in(x, y)) return null; const i = (y * this.w + x) * 4; return this.d[i + 3] ? [this.d[i], this.d[i + 1], this.d[i + 2]] : null; }
-  a(x: number, y: number) { return this.in(x, y) ? this.d[(y * this.w + x) * 4 + 3] : 0; }
-  darken(x: number, y: number, f: number, toward = P.slate) { const c = this.get(x, y); if (c) this.set(x, y, mix(mulc(c, 1 - f), rgb(toward), f * 0.35)); }
   rect(x: number, y: number, w: number, h: number, c: RGB | number) { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) this.set(i, j, c); return this; }
-  outline(c: RGB | number) {
-    const o: number[] = [];
-    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) if (!this.a(x, y) && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => this.a(x + dx, y + dy) > 128)) o.push(x, y);
-    for (let i = 0; i < o.length; i += 2) this.set(o[i], o[i + 1], c);
-    return this;
-  }
-  url() {
-    const cv = document.createElement('canvas');
-    cv.width = this.w; cv.height = this.h;
-    cv.getContext('2d')!.putImageData(new ImageData(this.d, this.w, this.h), 0, 0);
-    return cv.toDataURL();
-  }
 }
+
 export interface Art { url: string; w: number; h: number }
 const CACHE = new Map<string, Art>();
-export function art(key: string, paint: () => Px): Art {
-  let a = CACHE.get(key);
+/** device px per texel for the diary's art */
+const S = () => 2 * deviceK(3);
+/** paint an Art `w` x `h` texels with a 2D context scaled to texels */
+function art(key: string, w: number, h: number, paint: (g: CanvasRenderingContext2D) => void): Art {
+  const kk = key + '@' + S();
+  let a = CACHE.get(kk);
   if (!a) {
-    const p = paint();
-    a = { url: p.url(), w: p.w, h: p.h };
-    CACHE.set(key, a);
+    const s = S(), c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * s)); c.height = Math.max(1, Math.round(h * s));
+    const g = c.getContext('2d')!;
+    g.scale(s, s);
+    paint(g);
+    let url = c.toDataURL('image/webp', 0.9);
+    if (!url.startsWith('data:image/webp')) url = c.toDataURL('image/png');
+    a = { url, w, h };
+    CACHE.set(kk, a);
     if (CACHE.size > 300) CACHE.delete(CACHE.keys().next().value!);
   }
   return a;
 }
-
-// ------------------------------------------------------------------ ramps
-
-// [ui4] v4 materials: oxblood morocco leather, real brass, bright gilt, cream paper
-const hx = (h: string): RGB => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
-const LEATHER: RGB[] = ['#1d0608', '#330b10', '#4b1118', '#661822', '#80222c', '#9a3036', '#b44543'].map(hx);
-const BRASS: RGB[] = ['#3a2408', '#6e4a12', '#94661a', '#b88524', '#d4a432', '#ecc860', '#fff1bd'].map(hx);
-const PAPER: RGB[] = ['#b99868', '#d4b98a', '#e6d2a8', '#f0e2c0', '#f6ecd4', '#faf3e2', '#fdf9ee'].map(hx);
-const GILT: RGB = hx('#e3b640'), GILT_HI: RGB = hx('#fff0a8'), STITCH: RGB = hx('#e8c88a');
-void P;
-/** pebbled leather at a lit value t (0..1) */
-function leather(x: number, y: number, t: number, s = 0) {
-  const c = cell(x * 0.42, y * 0.42, s);
-  const peb = c < 0.32 ? 0.08 : c > 0.62 ? -0.1 : 0;          // pebble tops catch light, the creases between are dark
-  const mott = (vn(x * 0.05, y * 0.05, s + 3) - 0.5) * 0.3;   // broad mottling
-  const scuff = vn(x * 0.3, y * 0.08, s + 5) > 0.83 ? 0.12 : 0; // rubbed streaks
-  return pick(LEATHER, clamp(t + peb + mott + scuff, 0, 1), x, y, 0.9);
+/** a material tile as a pattern, `size` texels per tile */
+function pat(g: CanvasRenderingContext2D, n: TexName, size: number, tint?: string, ox = 0, oy = 0): CanvasPattern | string {
+  const c = texCanvas(n, tint);
+  if (!c) return tint ?? '#7a2a24';
+  const p = g.createPattern(c, 'repeat')!;
+  p.setTransform(new DOMMatrix().translate(ox, oy).scale(size / c.width));
+  return p;
 }
-const brass = (x: number, y: number, t: number) => pick(BRASS, clamp(t + (h2(x, y, 9) - 0.5) * 0.1, 0, 1), x, y, 0.7);
-
-/** a brass corner protector, `q` = which corner (0 tl, 1 tr, 2 bl, 3 br), n texels long */
-function corner(p: Px, x0: number, y0: number, q: number, n: number) {
-  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
-    if (i + j > n - 1) continue;
-    const X = q % 2 ? x0 - i : x0 + i, Y = q > 1 ? y0 - j : y0 + j;
-    const edge = i + j >= n - 2;
-    const lit = (q % 2 ? -1 : 1) * 0.08 + (q > 1 ? -0.12 : 0.08);
-    let t = 0.55 + lit - (i + j) / n * 0.25;
-    if (edge) t = 0.18;
-    if (i === 0 || j === 0) t = q === 0 ? 0.85 : 0.65;
-    p.set(X, Y, brass(X, Y, t));
+const LEATHER = '#7a1f24';
+/** a brass corner protector (n texels), painted once */
+const cornerImgs = new Map<string, HTMLCanvasElement>();
+function brassCorner(n: number): HTMLCanvasElement {
+  const key = n + ':' + S();
+  let c = cornerImgs.get(key);
+  if (!c) {
+    const r = new Real(n, n, S(), 0);
+    r.part(polygon([[0, 0], [n, 0], [0, n]]), bevel(1.4, 1.2), metal(BRASS_OLD, { polish: 0.6 }));
+    for (const [x, y] of [[2, n * 0.42], [n * 0.42, 2]]) r.part(circle(x, y, 0.9), dome(x, y, 0.9, 0.9, 0.8, 1.4), metal(GOLD, { polish: 0.9 }));
+    c = r.canvas({ shadow: false });
+    cornerImgs.set(key, c);
   }
-  // rivets
-  for (const [ri, rj] of [[2, Math.floor(n * 0.45)], [Math.floor(n * 0.45), 2]]) {
-    const X = q % 2 ? x0 - ri : x0 + ri, Y = q > 1 ? y0 - rj : y0 + rj;
-    p.set(X, Y, BRASS[6]); p.set(X + 1, Y + 1, BRASS[1]);
+  return c;
+}
+function corners(g: CanvasRenderingContext2D, w: number, h: number, n: number, which = [0, 1, 2, 3]) {
+  const im = brassCorner(n);
+  for (const q of which) {
+    g.save();
+    g.translate(q % 2 ? w : 0, q > 1 ? h : 0); g.scale(q % 2 ? -1 : 1, q > 1 ? -1 : 1);
+    g.shadowColor = 'rgba(20,6,4,.5)'; g.shadowBlur = 1.2 * S(); g.shadowOffsetY = 0.4 * S();
+    g.drawImage(im, 0, 0, n, n);
+    g.restore();
   }
+}
+/** a bevel of light and shade round a rectangle (inside), `b` texels wide */
+function bevelEdge(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, b: number, a = 0.4) {
+  const side = (x0: number, y0: number, x1: number, y1: number, col: string) => { const gr = g.createLinearGradient(x0, y0, x1, y1); gr.addColorStop(0, col); gr.addColorStop(1, 'rgba(0,0,0,0)'); return gr; };
+  g.fillStyle = side(0, y, 0, y + b, `rgba(255,220,190,${a * 0.8})`); g.fillRect(x, y, w, b);
+  g.fillStyle = side(x, 0, x + b, 0, `rgba(255,220,190,${a * 0.5})`); g.fillRect(x, y, b, h);
+  g.fillStyle = side(0, y + h, 0, y + h - b, `rgba(10,0,0,${a})`); g.fillRect(x, y + h - b, w, b);
+  g.fillStyle = side(x + w, 0, x + w - b, 0, `rgba(10,0,0,${a})`); g.fillRect(x + w - b, y, b, h);
+}
+function stitch(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, col = 'rgba(240,210,150,.85)') {
+  g.save();
+  g.strokeStyle = col; g.lineWidth = 0.55; g.setLineDash([1.6, 1.1]); g.lineCap = 'round';
+  g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 0.5 * S(); g.shadowOffsetY = 0.25 * S();
+  g.strokeRect(x, y, w, h);
+  g.restore();
 }
 
 // ------------------------------------------------------------------ the open book's board
 
 /** The board around the open pages: w x h texels; for a spread, a sunken spine down the middle. */
 export function boardArt(w: number, h: number, spread: boolean): Art {
-  return art(`board:${w}x${h}:${spread}`, () => {
-    const p = new Px(w, h), mid = w / 2;
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const ex = Math.min(x, w - 1 - x), ey = Math.min(y, h - 1 - y), e = Math.min(ex, ey);
-      let t = 0.5 - y / h * 0.12 + (x < w / 2 ? 0.03 : -0.03);
-      if (e === 0) t = 0.1; else if (e === 1) t = y < h / 2 && x < w / 2 ? 0.78 : 0.62; else if (e === 2) t = 0.62;
-      if (spread) { const ds = Math.abs(x + 0.5 - mid); if (ds < 5) t -= (5 - ds) * 0.07; if (ds < 1) t = 0.05; }
-      p.set(x, y, leather(x, y, t, 1));
-      // [ui4] the page block's edges peek out beside the pages (B = 6 texels of board): stacked leaves of paper
-      const B = 6, inPages = (xx: number, yy: number) => xx >= B && yy >= B && xx < w - B && yy < h - B;
-      const nearBottom = y >= h - B && y < h - B + 2 && x >= B - 1 && x < w - B + 1;
-      const nearOuter = (x >= w - B && x < w - B + 2 || (spread && x < B && x >= B - 2)) && y >= B && y < h - B + 2;
-      if (!inPages(x, y) && (nearBottom || nearOuter)) {
-        const leafLine = nearBottom ? (y - (h - B)) : spread && x < B ? (B - 1 - x) : (x - (w - B));
-        p.set(x, y, pick(PAPER, leafLine === 0 ? 0.55 : 0.3, x, y, 0));
-      }
+  return art(`board7:${w}x${h}:${spread}`, w, h, (g) => {
+    g.fillStyle = pat(g, 'pebble', 90, LEATHER);
+    g.beginPath(); g.roundRect(0, 0, w, h, 3); g.fill();
+    const vg = g.createLinearGradient(0, 0, 0, h); vg.addColorStop(0, 'rgba(255,210,180,.1)'); vg.addColorStop(1, 'rgba(0,0,0,.2)');
+    g.fillStyle = vg; g.fillRect(0, 0, w, h);
+    bevelEdge(g, 0, 0, w, h, 2.2, 0.45);
+    if (spread) {
+      const sg = g.createLinearGradient(w / 2 - 6, 0, w / 2 + 6, 0);
+      sg.addColorStop(0, 'rgba(0,0,0,0)'); sg.addColorStop(0.42, 'rgba(10,0,0,.45)'); sg.addColorStop(0.5, 'rgba(10,0,0,.7)'); sg.addColorStop(0.58, 'rgba(10,0,0,.45)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = sg; g.fillRect(w / 2 - 6, 0, 12, h);
     }
-    // a stitched line all round, 3 texels in
-    for (let x = 4; x < w - 4; x++) if ((x >> 1) % 2 === 0) { p.set(x, 3, STITCH); p.set(x, h - 4, mulc(STITCH, 0.85)); }
-    for (let y = 4; y < h - 4; y++) if ((y >> 1) % 2 === 0) { p.set(3, y, STITCH); p.set(w - 4, y, mulc(STITCH, 0.85)); }
-    const n = Math.min(11, Math.floor(Math.min(w, h) / 6));
-    corner(p, 0, 0, 0, n); corner(p, w - 1, 0, 1, n); corner(p, 0, h - 1, 2, n); corner(p, w - 1, h - 1, 3, n);
-    return p;
+    // the page block's edges peek out beside the pages
+    const B = 6;
+    g.fillStyle = '#e8d8b4';
+    g.fillRect(B - 0.5, h - B, w - 2 * B + 1, 1.6);
+    g.fillRect(w - B, B, 1.6, h - 2 * B + 1);
+    if (spread) g.fillRect(B - 1.6, B, 1.6, h - 2 * B + 1);
+    g.strokeStyle = 'rgba(150,120,80,.6)'; g.lineWidth = 0.25;
+    for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(B, h - B + 0.4 + i * 0.4); g.lineTo(w - B, h - B + 0.4 + i * 0.4); g.stroke(); }
+    stitch(g, 3, 3, w - 6, h - 6);
+    corners(g, w, h, Math.min(11, Math.floor(Math.min(w, h) / 6)));
   });
 }
 
 // ------------------------------------------------------------------ the front cover
 
-/** The closed front cover (w x h texels): blind-tooled double frame, gilt crescent moon in a leaf wreath, a title plate. */
+/** The closed front cover (w x h texels): blind-tooled and gilt frames, a gilt crescent moon in a vine, a title plate. */
 export function coverArt(w: number, h: number): Art {
-  return art(`cover:${w}x${h}`, () => {
-    const p = new Px(w, h);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      const e = Math.min(x, y, w - 1 - x, h - 1 - y);
-      let t = 0.55 - y / h * 0.15 + (vn(x * 0.02, y * 0.02, 4) - 0.5) * 0.15;
-      if (e === 0) t = 0.12; else if (e === 1) t = 0.76;
-      p.set(x, y, leather(x, y, t, 2));
+  return art(`cover7:${w}x${h}`, w, h, (g) => {
+    g.fillStyle = pat(g, 'pebble', 90, LEATHER, 17, 5);
+    g.beginPath(); g.roundRect(0, 0, w, h, [1, 3, 3, 1]); g.fill();
+    const lg = g.createRadialGradient(w * 0.35, h * 0.3, 0, w * 0.5, h * 0.5, Math.max(w, h) * 0.75);
+    lg.addColorStop(0, 'rgba(255,200,170,.12)'); lg.addColorStop(1, 'rgba(0,0,0,.28)');
+    g.fillStyle = lg; g.fillRect(0, 0, w, h);
+    bevelEdge(g, 0, 0, w, h, 2.4, 0.5);
+    // the hinge groove
+    const hg = g.createLinearGradient(5, 0, 9, 0); hg.addColorStop(0, 'rgba(0,0,0,0)'); hg.addColorStop(0.5, 'rgba(10,0,0,.55)'); hg.addColorStop(0.7, 'rgba(255,200,170,.25)'); hg.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = hg; g.fillRect(5, 0, 4, h);
+    // a blind-tooled frame and a gilt one inside it
+    g.strokeStyle = 'rgba(20,0,0,.45)'; g.lineWidth = 0.7; g.strokeRect(10.5, 6.5, w - 17, h - 13);
+    g.strokeStyle = 'rgba(255,200,170,.18)'; g.lineWidth = 0.4; g.strokeRect(11, 7, w - 17, h - 13);
+    const gilt = g.createLinearGradient(0, 0, w, h); gilt.addColorStop(0, '#fff0a8'); gilt.addColorStop(0.4, '#e3b640'); gilt.addColorStop(1, '#9a6a1a');
+    g.strokeStyle = gilt; g.lineWidth = 0.8; g.strokeRect(14.5, 10.5, w - 25, h - 21);
+    for (const [cx, cy, sx, sy] of [[14.5, 10.5, 1, 1], [w - 10.5, 10.5, -1, 1], [14.5, h - 10.5, 1, -1], [w - 10.5, h - 10.5, -1, -1]]) {
+      g.fillStyle = gilt; g.beginPath(); g.ellipse(cx + sx * 2.4, cy + sy * 2.4, 2.2, 0.9, sx * sy * Math.PI / 4, 0, Math.PI * 2); g.fill();
     }
-    // spine hinge groove on the left
-    for (let y = 2; y < h - 2; y++) { p.darken(6, y, 0.4); p.darken(7, y, 0.2); p.set(8, y, leather(8, y, 0.72, 2)); }
-    // tooled frames: an outer blind line and an inner gilt line with corner leaves
-    const frame = (m: number, gilt: boolean) => {
-      for (let x = m; x < w - m; x++) for (const y of [m, h - 1 - m]) gilt ? p.set(x, y, (x + y) % 7 === 0 ? GILT_HI : GILT) : p.darken(x, y, 0.35);
-      for (let y = m; y < h - m; y++) for (const x of [m + 4, w - 1 - m]) gilt ? p.set(x, y, (x + y) % 7 === 0 ? GILT_HI : GILT) : p.darken(x, y, 0.35);
-    };
-    frame(6, false); frame(10, true);
-    for (const [cx, cy] of [[15, 11], [w - 11, 11], [15, h - 12], [w - 11, h - 12]]) {
-      for (const [dx, dy] of [[0, 0], [1, 1], [2, 2], [-1, 1], [1, -1], [2, 1], [1, 2]]) p.set(cx + dx * Math.sign(w / 2 - cx), cy + dy * Math.sign(h / 2 - cy), GILT);
+    // the emblem: a gilt crescent in a vine, three stars
+    const ex = w / 2 + 2, ey = h * 0.4, R = Math.max(9, Math.min(w, h) * 0.13);
+    g.save();
+    g.shadowColor = 'rgba(20,0,0,.6)'; g.shadowBlur = 0.6 * S(); g.shadowOffsetY = 0.3 * S();
+    const mg = g.createLinearGradient(ex - R, ey - R, ex + R, ey + R); mg.addColorStop(0, '#fff6c0'); mg.addColorStop(0.45, '#e8bc48'); mg.addColorStop(1, '#a06e1a');
+    g.fillStyle = mg;
+    g.beginPath(); g.arc(ex, ey, R * 0.62, 0, Math.PI * 2); g.arc(ex + R * 0.42, ey - R * 0.18, R * 0.52, 0, Math.PI * 2, true); g.fill('evenodd');
+    const vy = ey + R * 0.95;
+    g.strokeStyle = mg; g.lineWidth = 0.7; g.lineCap = 'round';
+    g.beginPath(); for (let x = ex - R; x <= ex + R; x += 0.5) { const y = vy + Math.sin((x - ex) * 0.5) * 1.2; if (x === ex - R) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke();
+    for (let i = 0; i < 6; i++) { const x = ex - R + 2 + i * (2 * R - 4) / 5, y = vy + Math.sin((x - ex) * 0.5) * 1.2, up = i % 2 ? -1 : 1; g.beginPath(); g.ellipse(x + 0.8, y + up * 1.4, 1.4, 0.6, up * 0.6, 0, Math.PI * 2); g.fill(); }
+    for (const [sx, sy, s] of [[-0.55, -0.7, 1.4], [0.75, -0.55, 1.1], [0.6, 0.65, 1]]) {
+      const x = ex + sx * R, y = ey + sy * R;
+      g.beginPath(); for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2 - Math.PI / 2, r = i % 2 ? s * 0.4 : s * 1.2; g.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); } g.closePath(); g.fill();
     }
-    // the emblem: a gilt crescent moon in a wreath of little leaves (drawn as stepped pixels)
-    const ex = Math.round(w / 2 + 2), ey = Math.round(h * 0.4), R = Math.max(9, Math.round(Math.min(w, h) * 0.13));
-    for (let y = ey - R; y <= ey + R; y++) for (let x = ex - R; x <= ex + R; x++) {
-      const d = Math.hypot(x + 0.5 - ex, y + 0.5 - ey), d2 = Math.hypot(x + 0.5 - ex - R * 0.42, y + 0.5 - ey + R * 0.18);
-      if (d < R * 0.62 && d2 > R * 0.5) p.set(x, y, d < R * 0.4 && x < ex ? GILT_HI : GILT);
-    }
-    // a gilt vine under the moon: a wavy stem with little leaves either side
-    const vy = ey + Math.round(R * 0.95);
-    for (let x = ex - R; x <= ex + R; x++) {
-      const y = vy + Math.round(Math.sin((x - ex) * 0.5) * 1.2);
-      p.set(x, y, GILT);
-      const k = x - ex + R;
-      if (k % 5 === 2 && Math.abs(x - ex) > 1) { const up = k % 10 === 2 ? -1 : 1; p.set(x, y + up, GILT_HI); p.set(x + 1, y + up, GILT); p.set(x + 1, y + up * 2, GILT); }
-    }
-    p.set(ex, vy - 1, GILT_HI); p.set(ex, vy + 1, GILT); p.set(ex - 1, vy, GILT_HI); p.set(ex + 1, vy, GILT_HI);
-    // tiny stars
-    for (const [sx, sy] of [[-0.55, -0.7], [0.75, -0.55], [0.6, 0.65]]) { const x = Math.round(ex + sx * R), y = Math.round(ey + sy * R); p.set(x, y, GILT_HI); p.set(x - 1, y, GILT); p.set(x + 1, y, GILT); p.set(x, y - 1, GILT); p.set(x, y + 1, GILT); }
-    // a brass title plate (the title is set in the DOM) with a bevel
+    g.restore();
+    // the brass title plate (the title is set in the DOM)
     const pw = Math.round(w * 0.58), ph = 13, px0 = Math.round(w / 2 + 2 - pw / 2), py0 = Math.round(h * 0.64);
-    for (let y = py0; y < py0 + ph; y++) for (let x = px0; x < px0 + pw; x++) {
-      const e = Math.min(x - px0, y - py0, px0 + pw - 1 - x, py0 + ph - 1 - y);
-      const t = e === 0 ? (y === py0 || x === px0 ? 0.82 : 0.2) : e === 1 ? 0.42 : 0.6 - (y - py0) / ph * 0.15;
-      p.set(x, y, brass(x, y, t));
-    }
-    p.set(px0 + 2, py0 + 2, BRASS[6]); p.set(px0 + pw - 3, py0 + 2, BRASS[6]); p.set(px0 + 2, py0 + ph - 3, BRASS[1]); p.set(px0 + pw - 3, py0 + ph - 3, BRASS[1]);
-    const n = Math.min(12, Math.floor(Math.min(w, h) / 6));
-    corner(p, w - 1, 0, 1, n); corner(p, w - 1, h - 1, 3, n);
-    // a leather strap and brass catch on the right edge
-    const sy = Math.round(h * 0.5) - 5;
-    for (let y = sy; y < sy + 10; y++) for (let x = w - 14; x < w; x++) p.set(x, y, leather(x, y, y === sy ? 0.8 : y === sy + 9 ? 0.15 : 0.42, 7));
-    for (let y = sy + 2; y < sy + 8; y++) for (let x = w - 10; x < w - 4; x++) p.set(x, y, brass(x, y, 0.75 - (x - w + 10) * 0.06 - (y - sy) * 0.05));
-    return p;
+    const r = new Real(pw, ph, S(), 1);
+    r.part(box(0, 0, pw, ph, 1.5), bevel(1.6, 1.4), metal(GOLD, { along: 'x', polish: 0.7 }));
+    r.carve(union(box(1.6, 1.6, pw - 3.2, 0.4), box(1.6, ph - 2, pw - 3.2, 0.4)), 0.3, 0.2);
+    g.drawImage(r.canvas({ shadow: { dy: 0.6, blur: 1, a: 0.5 } }), px0 - 1, py0 - 1, pw + 2, ph + 2);
+    corners(g, w, h, Math.min(12, Math.floor(Math.min(w, h) / 6)), [1, 3]);
+    // a leather strap and a brass catch on the right edge
+    const sy = h * 0.5 - 5;
+    g.fillStyle = pat(g, 'pebble', 90, '#5a1418');
+    g.beginPath(); g.roundRect(w - 15, sy, 15, 10, [2, 0, 0, 2]); g.fill();
+    bevelEdge(g, w - 15, sy, 15, 10, 1.4, 0.5);
+    const cr = new Real(7, 7, S(), 1);
+    cr.part(box(0, 0, 7, 7, 1.4), bevel(1.4, 1.2), metal(GOLD, { polish: 0.8 }));
+    cr.part(circle(3.5, 3.5, 1), dome(3.5, 3.5, 1, 1, 0.6, 1.6), metal(BRASS_OLD));
+    g.drawImage(cr.canvas({ shadow: { dy: 0.5, blur: 0.8, a: 0.5 } }), w - 11, sy + 1.5 - 1, 9, 9);
   });
 }
 
 // ------------------------------------------------------------------ paper
 
-/** A page of oat paper: fibres, a few foxing spots, deckled edge shading and a stepped shadow into the gutter. */
+/** A page of cream laid paper with foxing, a soft edge and a shadow curving into the gutter. */
 export function paperArt(w: number, h: number, side: 'L' | 'R' | 'S', seed = 1): Art {
-  return art(`paper:${w}x${h}:${side}:${seed}`, () => {
-    const p = new Px(w, h);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      let t = 0.86 + (vn(x * 0.04, y * 0.04, seed) - 0.5) * 0.12;
-      if (h2(x, y, seed + 3) > 0.985) t -= 0.12;                                    // fibres
-      if (vn(x * 0.5, y * 0.05, seed + 6) > 0.86) t -= 0.05;                         // laid lines
-      const fox = vn(x * 0.12, y * 0.12, seed + 9);
-      if (fox > 0.8) t -= (fox - 0.8) * 1.2;                                         // foxing
-      // gutter: the paper curves down into the spine in stepped bands
-      const g = side === 'R' ? x : side === 'L' ? w - 1 - x : x;
-      if (g < 10) t -= ((10 - g) / 10) ** 1.6 * (side === 'S' ? 0.28 : 0.45);
-      // page edges
-      if (y === 0 || y === h - 1 || x === (side === 'L' ? 0 : w - 1)) t -= 0.25;
-      p.set(x, y, pick(PAPER, clamp(t, 0, 1), x, y, 1));
-    }
-    return p;
+  return art(`paper7:${w}x${h}:${side}:${seed}`, w, h, (g) => {
+    g.fillStyle = pat(g, 'paper', 160, '#fbf2dc', seed * 37, seed * 53); g.fillRect(0, 0, w, h);
+    const gl = side === 'L' ? g.createLinearGradient(w, 0, w - 14, 0) : g.createLinearGradient(0, 0, 14, 0);
+    gl.addColorStop(0, `rgba(90,60,30,${side === 'S' ? 0.22 : 0.38})`); gl.addColorStop(1, 'rgba(90,60,30,0)');
+    g.fillStyle = gl; side === 'L' ? g.fillRect(w - 14, 0, 14, h) : g.fillRect(0, 0, 14, h);
+    const eg = g.createLinearGradient(0, 0, 0, 3); eg.addColorStop(0, 'rgba(120,80,40,.25)'); eg.addColorStop(1, 'rgba(120,80,40,0)');
+    g.fillStyle = eg; g.fillRect(0, 0, w, 3);
+    const eb = g.createLinearGradient(0, h, 0, h - 3); eb.addColorStop(0, 'rgba(120,80,40,.25)'); eb.addColorStop(1, 'rgba(120,80,40,0)');
+    g.fillStyle = eb; g.fillRect(0, h - 3, w, 3);
   });
 }
 
@@ -236,183 +208,173 @@ export function paperArt(w: number, h: number, side: 'L' | 'R' | 'S', seed = 1):
 
 const mutec = (c: number, k = 0.45) => { const a = rgb(c), b = rgb(P.linen); return ((Math.round(a[0] + (b[0] - a[0]) * k) << 16) | (Math.round(a[1] + (b[1] - a[1]) * k) << 8) | Math.round(a[2] + (b[2] - a[2]) * k)); };
 const inkc = (c: number, k = 0.45) => { const a = rgb(c), b = rgb(P.ink); return ((Math.round(a[0] + (b[0] - a[0]) * k) << 16) | (Math.round(a[1] + (b[1] - a[1]) * k) << 8) | Math.round(a[2] + (b[2] - a[2]) * k)); };
-/** Section accents (dark, mid, light), muted towards linen: colour only as a small accent. */
+/** Section accents (dark, mid, light). */
 export const TAB_COLORS: Record<string, [number, number, number]> = {
-  // [ui4] richer section accents: emerald, sky blue, rose, honey
   moss: [0x123d24, 0x2f8550, 0x6cbc84], lake: [0x1d5580, 0x3f8cc2, 0x86c3e8],
   berry: [0x5a1820, 0x9c3742, 0xd06e70], honey: [0x86580b, 0xd29e22, 0xfadb6a],
 };
-const CLOTH: RGB[] = [rgb(P.straw), mix(rgb(P.straw), rgb(P.linen), 0.5), rgb(P.linen), mix(rgb(P.linen), rgb(P.oat), 0.5), rgb(P.oat), rgb(P.paper)];
-/** A linen index tab standing up from the page (w x h texels): woven, frayed at the top corners, a coloured running stitch. */
+/** A linen index tab standing up from the page (w x h texels): rounded top, a coloured running stitch. */
 export function tabArt(col: string, w: number, h: number, on: boolean): Art {
-  return art(`tab:${col}:${w}x${h}:${on}`, () => {
-    const p = new Px(w, h), [d, m] = (TAB_COLORS[col] ?? TAB_COLORS.moss).map(rgb);
-    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-      if (y < 2 && (x < 2 - y || x > w - 3 + y)) continue;                         // stepped top corners
-      if (y === 0 && h2(x, 0, 6) > 0.8) continue;                                     // a little fray
-      const weave = (x % 2 === 0) !== (y % 2 === 0) ? -0.08 : 0.02;
-      let t = (on ? 0.8 : 0.55) - y / h * 0.35 + weave + (x === 0 ? 0.12 : x === w - 1 ? -0.3 : 0) + (h2(x >> 1, y, 3) - 0.5) * 0.1;
-      if (y === 0) t = 0.9;
-      p.set(x, y, pick(CLOTH, clamp(t, 0, 1), x, y, 0.6));
-    }
-    // a running stitch in the section's colour, and a darker hem at the bottom where it meets the board
-    for (let x = 2; x < w - 2; x++) if ((x + (on ? 0 : 1)) % 3 !== 0) p.set(x, 3, on ? d : m);
-    for (let x = 0; x < w; x++) p.set(x, h - 1, mix(rgb(P.straw), rgb(P.woodDark), 0.4));
-    return p;
+  return art(`tab7:${col}:${w}x${h}:${on}`, w, h, (g) => {
+    const [d, m, l] = (TAB_COLORS[col] ?? TAB_COLORS.moss).map(hexOf);
+    g.save();
+    g.beginPath(); g.roundRect(0.3, 0.3, w - 0.6, h + 3, [3, 3, 0, 0]); g.clip();
+    g.fillStyle = pat(g, 'linen', 70, on ? '#f6ecd4' : '#e2d4b4'); g.fillRect(0, 0, w, h);
+    const sh = g.createLinearGradient(0, 0, 0, h); sh.addColorStop(0, on ? 'rgba(255,255,255,.25)' : 'rgba(255,255,255,.1)'); sh.addColorStop(1, on ? 'rgba(0,0,0,.05)' : 'rgba(40,20,0,.28)');
+    g.fillStyle = sh; g.fillRect(0, 0, w, h);
+    g.fillStyle = on ? m : d; g.globalAlpha = 0.85; g.fillRect(0, 0, w, 1.4); g.globalAlpha = 1;
+    g.restore();
+    g.strokeStyle = on ? d : m; g.lineWidth = 0.5; g.setLineDash([1.4, 0.9]);
+    g.beginPath(); g.moveTo(2.2, 3.3); g.lineTo(w - 2.2, 3.3); g.stroke(); g.setLineDash([]);
+    void l;
   });
 }
 
 /** [muted field, ink] for a score: colour stays a small accent. */
 export const SCORE_TINT = (s: number): [number, number] => { const c = s >= 85 ? P.fern : s >= 70 ? P.lake : s >= 50 ? P.ochre : P.terracotta; return [mutec(c, 0.62), inkc(c, 0.42)]; };
 export const scoreHex = (s: number) => hexOf(SCORE_TINT(s)[1]);
-/** A square rubber stamp inked on the page for a score (n x n texels): a double border with uneven ink, a faint wash inside. */
+/** A square rubber stamp inked on the page for a score (n x n texels): a double border, uneven ink, a faint wash. */
 export function badgeArt(score: number, n: number): Art {
   const [fill, ink] = SCORE_TINT(score);
-  return art(`badge:${fill}:${n}`, () => {
-    const p = new Px(n, n), f = rgb(fill), k = rgb(ink), paper = rgb(P.paper);
-    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-      const e = Math.min(x, y, n - 1 - x, n - 1 - y);
-      if (e === 0 && (x === 0 || x === n - 1) && (y === 0 || y === n - 1)) continue;   // worn corners
-      const thin = h2(x, y, 11) > 0.86;                                                    // the ink skips here and there
-      let c: RGB | null;
-      if (e === 0) c = thin ? mix(k, paper, 0.55) : k;
-      else if (e === 1) c = mix(f, paper, 0.55);
-      else if (e === 2) c = thin ? mix(k, paper, 0.4) : mix(k, f, 0.25);
-      else c = h2(x, y, 7) > 0.85 ? mix(f, paper, 0.3) : mix(f, paper, 0.12);
-      p.set(x, y, c);
-    }
-    return p;
+  return art(`badge7:${fill}:${n}`, n, n, (g) => {
+    g.globalAlpha = 0.9;
+    g.fillStyle = hexOf(fill); g.globalAlpha = 0.35; g.beginPath(); g.roundRect(1.4, 1.4, n - 2.8, n - 2.8, 1.5); g.fill();
+    g.globalAlpha = 0.88; g.strokeStyle = hexOf(ink); g.lineWidth = 0.9; g.beginPath(); g.roundRect(0.6, 0.6, n - 1.2, n - 1.2, 1.8); g.stroke();
+    g.lineWidth = 0.45; g.beginPath(); g.roundRect(2.2, 2.2, n - 4.4, n - 4.4, 1); g.stroke();
+    // the ink skips here and there
+    g.globalCompositeOperation = 'destination-out'; g.globalAlpha = 0.5;
+    for (let i = 0; i < 10; i++) { g.beginPath(); g.arc(h2(i, 1, n) * n, h2(i, 2, n) * n, 0.5 + h2(i, 3, n), 0, Math.PI * 2); g.fill(); }
+    g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
   });
 }
 
 /** A hand-inked frame for 9-slicing (24 x 24, slice 6): wobbly double lines that overshoot at the corners. */
 export function inkFrameArt(seed = 1): Art {
-  return art(`inkframe:${seed}`, () => {
-    const N = 24, p = new Px(N, N), ink = mix(rgb(P.ink2), rgb(P.linen), 0.25), faint = mix(rgb(P.ink3), rgb(P.linen), 0.55);
-    const wob = (i: number, s: number) => (h2(i >> 2, s, seed) > 0.7 ? 1 : 0);
-    for (let i = 0; i < N; i++) {
-      if (h2(i, 1, seed) > 0.08) { p.set(i, 1 + wob(i, 2), ink); p.set(i, N - 2 - wob(i, 3), ink); p.set(1 + wob(i, 4), i, ink); p.set(N - 2 - wob(i, 5), i, ink); }
-      if (h2(i, 9, seed) > 0.4) { p.set(i, 3, faint); p.set(3, i, faint); }
-    }
-    // corner overshoots, like a quick pen box
-    p.set(0, 1, ink); p.set(N - 1, N - 2, ink); p.set(1, N - 1, ink); p.set(N - 2, 0, ink);
-    return p;
+  return art(`inkframe7:${seed}`, 24, 24, (g) => {
+    const N = 24;
+    g.strokeStyle = 'rgba(70,60,48,.8)'; g.lineWidth = 0.55; g.lineCap = 'round';
+    const wob = (i: number, s: number) => (h2(i, s, seed) - 0.5) * 0.5;
+    const line = (x0: number, y0: number, x1: number, y1: number, s: number) => { g.beginPath(); g.moveTo(x0 + wob(1, s), y0 + wob(2, s)); g.quadraticCurveTo((x0 + x1) / 2 + wob(3, s), (y0 + y1) / 2 + wob(4, s), x1 + wob(5, s), y1 + wob(6, s)); g.stroke(); };
+    line(-0.5, 1.5, N + 0.5, 1.5, 1); line(-0.5, N - 1.5, N + 0.5, N - 1.5, 2); line(1.5, -0.5, 1.5, N + 0.5, 3); line(N - 1.5, -0.5, N - 1.5, N + 0.5, 4);
+    g.strokeStyle = 'rgba(110,100,84,.4)'; g.lineWidth = 0.35;
+    line(0, 3.5, N, 3.5, 5); line(3.5, 0, 3.5, N, 6);
   });
 }
 
-const MOOD_ROWS: string[][] = [
-  // groggy: a rain cloud
-  ['............', '....dddd....', '..ddmmmmdd..', '.dmmllmmmmd.', 'dmmlllmmmmmd', 'dmmmmmmmmmmd', '.dddddddddd.', '..r..r..r...', '.r..r..r....', '............', '..r..r..r...', '............'],
-  // meh: a grey cloud
-  ['............', '............', '.....ddd....', '...ddmmmd...', '..dmlllmmd..', '.dmllmmmmmd.', 'dmmmmmmmmmmd', 'dmmmmmmmmmmd', '.dddddddddd.', '............', '............', '............'],
-  // okay: a leaf
-  ['............', '.......ddd..', '.....ddmmd..', '....dmmlmd..', '...dmmlmmd..', '..dmmlmmd...', '..dmlmmd....', '..dlmdd.....', '..dmd.......', '.s..........', 's...........', '............'],
-  // good: a sprout with two leaves
-  ['............', '..dd....dd..', '.dmmd..dmmd.', '.dmlmddmlmd.', '..dmmmmmmd..', '...ddssdd...', '.....ss.....', '.....ss.....', '....ssss....', '..eeeeeeee..', '.eeeeeeeeee.', '............'],
-  // wonderful: a big star
-  ['.....dd.....', '.....ll.....', '....dlld....', 'dddddllddddd', '.dllllllmmd.', '..dlllmmmd..', '...dlmmmd...', '..dlmddmmd..', '..dlmd.dmd..', '.dmd....dmd.', '.dd......dd.', '............'],
-];
-const MOOD_TINT: [number, number, number][] = [[P.slate, P.dusk, P.mist], [P.stoneDark, P.stone, P.pebble], [P.pine, P.fern, P.sage], [P.leaf, P.moss, P.sageLight], [P.brassDark, P.honey, P.lamp]];
 export const MOOD_NAMES = ['Groggy', 'Meh', 'Okay', 'Good', 'Wonderful'];
+const MOOD_TINT: [number, number, number][] = [[P.slate, P.dusk, P.mist], [P.stoneDark, P.stone, P.pebble], [P.pine, P.fern, P.sage], [P.leaf, P.moss, P.sageLight], [P.brassDark, P.honey, P.lamp]];
+function cloud(g: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
+  g.beginPath(); g.arc(cx - 2.2 * s, cy + 0.6 * s, 2 * s, 0, Math.PI * 2); g.arc(cx, cy - 0.6 * s, 2.8 * s, 0, Math.PI * 2); g.arc(cx + 2.6 * s, cy + 0.6 * s, 2 * s, 0, Math.PI * 2); g.rect(cx - 2.2 * s, cy + 0.6 * s, 4.8 * s, 2 * s); g.fill();
+}
 /** Mood icons (12 x 12): rain cloud, cloud, leaf, sprout, star. */
 export function moodArt(i: number): Art {
-  return art(`mood:${i}`, () => {
-    const p = new Px(12, 12), [d, m, l] = MOOD_TINT[i].map(rgb);
-    MOOD_ROWS[i].forEach((r, y) => [...r].forEach((ch, x) => {
-      const c = ch === 'd' ? d : ch === 'm' ? m : ch === 'l' ? l : ch === 'r' ? rgb(P.lake) : ch === 's' ? rgb(P.fern) : ch === 'e' ? rgb(P.woodDark) : null;
-      if (c) p.set(x, y, c);
-    }));
-    return p;
+  return art(`mood7:${i}`, 12, 12, (g) => {
+    const [d, m, l] = MOOD_TINT[i].map(hexOf);
+    const grad = (y0: number, y1: number) => { const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, l); gr.addColorStop(0.6, m); gr.addColorStop(1, d); return gr; };
+    g.shadowColor = 'rgba(40,30,20,.35)'; g.shadowBlur = 0.5 * S(); g.shadowOffsetY = 0.3 * S();
+    if (i <= 1) {
+      g.fillStyle = grad(2, 8); cloud(g, 6, i ? 5.2 : 4.4, 1);
+      if (i === 0) { g.shadowColor = 'transparent'; g.strokeStyle = hexOf(P.lake); g.lineWidth = 0.6; g.lineCap = 'round'; for (const x of [3, 6, 9]) { g.beginPath(); g.moveTo(x, 8.6); g.lineTo(x - 0.8, 10.8); g.stroke(); } }
+    } else if (i === 2) {
+      g.fillStyle = grad(1, 10); g.beginPath(); g.moveTo(2, 10); g.quadraticCurveTo(1.5, 2, 10, 1.5); g.quadraticCurveTo(10.5, 9.5, 2, 10); g.fill();
+      g.shadowColor = 'transparent'; g.strokeStyle = d; g.lineWidth = 0.4; g.beginPath(); g.moveTo(2, 10); g.lineTo(8.5, 3); g.stroke();
+    } else if (i === 3) {
+      g.fillStyle = hexOf(P.woodDark); g.beginPath(); g.ellipse(6, 10.4, 4.6, 1.2, 0, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = hexOf(P.fern); g.lineWidth = 0.7; g.beginPath(); g.moveTo(6, 10); g.lineTo(6, 5); g.stroke();
+      g.fillStyle = grad(1, 7); g.beginPath(); g.ellipse(3.6, 4, 2.6, 1.4, -0.5, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(8.4, 4, 2.6, 1.4, 0.5, 0, Math.PI * 2); g.fill();
+    } else {
+      g.fillStyle = grad(0.5, 11); g.beginPath();
+      for (let k = 0; k < 10; k++) { const a = (k / 10) * Math.PI * 2 - Math.PI / 2, r = k % 2 ? 2.3 : 5.4; g.lineTo(6 + Math.cos(a) * r, 6.3 + Math.sin(a) * r); }
+      g.closePath(); g.fill();
+    }
   });
 }
 
-// emblems for the achievement stamps (9 x 9)
-const EMB: Record<string, string[]> = {
-  heart: ['.........', '.xx...xx.', 'xxxx.xxxx', 'xxxxxxxxx', 'xxxxxxxxx', '.xxxxxxx.', '..xxxxx..', '...xxx...', '....x....'],
-  moon: ['...xxxx..', '..xxx....', '.xxx.....', '.xxx.....', '.xxx.....', '.xxx.....', '..xxx....', '...xxxx..', '.........'],
-  seven: ['xxxxxxxx.', '......xx.', '.....xx..', '....xx...', '...xx....', '...xx....', '..xx.....', '..xx.....', '.........'],
-  phases: ['.........', 'xx.x.x.xx', 'x..x.xxxx', 'xx.x.x.xx', '.........', 'x.x.xx.xx', 'xxx.xx..x', 'x.x.xx.xx', '.........'],
-  three: ['.xxxxxx..', '......xx.', '......xx.', '..xxxxx..', '......xx.', '......xx.', '.xxxxxx..', '.........', '.........'],
-  flame: ['....x....', '...xx....', '...xxx...', '..xxxx.x.', '.xxxxxxx.', '.xxx.xxx.', '.xx...xx.', '..xx.xx..', '...xxx...'],
-  eight: ['..xxxx...', '.xx..xx..', '.xx..xx..', '..xxxx...', '.xx..xx..', '.xx..xx..', '..xxxx...', '.........', '.........'],
-  star: ['....x....', '....x....', '...xxx...', 'xxxxxxxxx', '.xxxxxxx.', '..xxxxx..', '.xxx.xxx.', '.xx...xx.', '.........'],
-  sun: ['....x....', '.x..x..x.', '..xxxxx..', '..xxxxx..', 'xxxxxxxxx', '..xxxxx..', '..xxxxx..', '.x..x..x.', '....x....'],
-  hush: ['.........', 'xxxx.....', '...x.....', '..x..xxx.', '.x.....x.', 'xxxx..x..', '.....x...', '.....xxx.', '.........'],
-  feather: ['......xx.', '.....xxx.', '....xxx..', '...xxx...', '..xxx....', '..xx.....', '.x.......', 'x........', '.........'],
-  wind: ['.........', 'xxxxxx...', '......x..', '.xxxxx...', '.........', 'xxxxxxxx.', '........x', '..xxxxxx.', '.........'],
-  box: ['.........', 'xxxxxxxxx', 'x...x...x', 'xxxxxxxxx', 'x.......x', 'x...x...x', 'x.......x', 'xxxxxxxxx', '.........'],
-  wish: ['....x....', '...x.x...', '....x....', '.........', '.x.....x.', '.........', '...x.x...', '....x....', '.........'],
-  face: ['.xxxxxxx.', 'x.......x', 'x.x...x.x', 'x.......x', 'x.x...x.x', 'x..xxx..x', 'x.......x', '.xxxxxxx.', '.........'],
-  quill: ['.......xx', '......xxx', '.....xxx.', '....xxx..', '...xxx...', '...xx....', '..x......', '.x.......', 'xxxx.....'],
-  compass: ['....x....', '....x....', '...xxx...', 'xxxx.xxxx', '...xxx...', '....x....', '....x....', '.........', '.........'],
-  chair: ['.xx......', '.xx......', '.xx......', '.xx......', '.xxxxxxx.', '.xxxxxxx.', '.x.....x.', '.x.....x.', '.........'],
-  hat: ['.........', '...xxx...', '..xxxxx..', '..xxxxx..', '..xxxxx..', 'xxxxxxxxx', '.........', '.........', '.........'],
-  crown: ['.........', 'x...x...x', 'xx.xxx.xx', 'xxxxxxxxx', 'xxxxxxxxx', 'xxxxxxxxx', '.........', '.........', '.........'],
-};
 const STAMP_COL: Record<string, [number, number]> = { red: [mutec(P.terracotta), inkc(P.clay)], gold: [mutec(P.honey), inkc(P.brassDark)], green: [mutec(P.moss), inkc(P.pine)], blue: [mutec(P.lake), inkc(P.slate)], purple: [mutec(P.lilac), inkc(P.plum)], pink: [mutec(P.rose), inkc(P.berry)] };
+/** an emblem drawn in a 9 x 9 box at (x, y) */
+function emblem(g: CanvasRenderingContext2D, name: string, x: number, y: number, col: string) {
+  g.save(); g.translate(x, y); g.fillStyle = col; g.strokeStyle = col; g.lineWidth = 0.9; g.lineCap = 'round'; g.lineJoin = 'round';
+  const text = (t: string) => { g.font = `bold 8px Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 4.5, 5); };
+  const star = (cx: number, cy: number, R: number, r: number, n = 5) => { g.beginPath(); for (let k = 0; k < n * 2; k++) { const a = (k / (n * 2)) * Math.PI * 2 - Math.PI / 2, rr = k % 2 ? r : R; g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } g.closePath(); g.fill(); };
+  switch (name) {
+    case 'heart': g.beginPath(); g.moveTo(4.5, 8); g.bezierCurveTo(-1, 4, 1.5, -0.5, 4.5, 2.6); g.bezierCurveTo(7.5, -0.5, 10, 4, 4.5, 8); g.fill(); break;
+    case 'moon': g.beginPath(); g.arc(4.5, 4.5, 3.8, 0, Math.PI * 2); g.arc(6.2, 3.6, 3.2, 0, Math.PI * 2, true); g.fill('evenodd'); break;
+    case 'seven': text('7'); break;
+    case 'three': text('3'); break;
+    case 'eight': text('8'); break;
+    case 'phases': for (let k = 0; k < 3; k++) { g.beginPath(); g.arc(1.5 + k * 3, 4.5, 1.3, 0, Math.PI * 2); k === 1 ? g.fill() : g.stroke(); } break;
+    case 'flame': g.beginPath(); g.moveTo(4.5, 0.5); g.bezierCurveTo(8, 4, 8.5, 8.5, 4.5, 8.5); g.bezierCurveTo(0.5, 8.5, 1, 4.5, 3.5, 3); g.bezierCurveTo(3.5, 4.5, 4.5, 5, 4.5, 0.5); g.fill(); break;
+    case 'star': star(4.5, 4.8, 4.3, 1.8); break;
+    case 'sun': g.beginPath(); g.arc(4.5, 4.5, 2.2, 0, Math.PI * 2); g.fill(); for (let k = 0; k < 8; k++) { const a = (k / 8) * Math.PI * 2; g.beginPath(); g.moveTo(4.5 + Math.cos(a) * 3, 4.5 + Math.sin(a) * 3); g.lineTo(4.5 + Math.cos(a) * 4.3, 4.5 + Math.sin(a) * 4.3); g.stroke(); } break;
+    case 'hush': g.font = 'bold 5px Georgia, serif'; g.fillText('z', 2, 4); g.font = 'bold 7px Georgia, serif'; g.fillText('Z', 5, 8); break;
+    case 'feather': case 'quill': g.beginPath(); g.moveTo(8.5, 0.5); g.quadraticCurveTo(9, 6, 2.5, 7); g.quadraticCurveTo(3, 1.5, 8.5, 0.5); g.fill(); g.beginPath(); g.moveTo(8, 1); g.lineTo(0.5, 8.5); g.stroke(); break;
+    case 'wind': for (const [yy, l] of [[2, 6], [4.5, 8], [7, 5]]) { g.beginPath(); g.moveTo(0.5, yy); g.lineTo(l, yy); g.arc(l, yy - 1, 1, Math.PI / 2, -Math.PI / 2, true); g.stroke(); } break;
+    case 'box': g.strokeRect(1, 2, 7, 6); g.beginPath(); g.moveTo(1, 4); g.lineTo(8, 4); g.moveTo(4.5, 2); g.lineTo(4.5, 4); g.stroke(); break;
+    case 'wish': star(4.5, 4.5, 4.4, 1, 4); break;
+    case 'face': g.beginPath(); g.arc(4.5, 4.5, 3.8, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.arc(3, 3.6, 0.6, 0, Math.PI * 2); g.arc(6, 3.6, 0.6, 0, Math.PI * 2); g.fill(); g.beginPath(); g.arc(4.5, 4.8, 2, 0.3, Math.PI - 0.3); g.stroke(); break;
+    case 'compass': g.beginPath(); g.moveTo(4.5, 0.5); g.lineTo(5.7, 4.5); g.lineTo(4.5, 8.5); g.lineTo(3.3, 4.5); g.closePath(); g.fill(); g.beginPath(); g.moveTo(0.5, 4.5); g.lineTo(8.5, 4.5); g.stroke(); break;
+    case 'chair': g.beginPath(); g.moveTo(2, 0.5); g.lineTo(2, 8.5); g.moveTo(2, 5); g.lineTo(7, 5); g.lineTo(7, 8.5); g.stroke(); break;
+    case 'hat': g.beginPath(); g.roundRect(2.5, 1.5, 4, 5, 0.8); g.fill(); g.beginPath(); g.ellipse(4.5, 6.5, 4.2, 1.2, 0, 0, Math.PI * 2); g.fill(); break;
+    case 'crown': g.beginPath(); g.moveTo(0.5, 7.5); g.lineTo(0.5, 2); g.lineTo(2.7, 4.5); g.lineTo(4.5, 1); g.lineTo(6.3, 4.5); g.lineTo(8.5, 2); g.lineTo(8.5, 7.5); g.closePath(); g.fill(); break;
+    default: star(4.5, 4.8, 4.3, 1.8);
+  }
+  g.restore();
+}
 /** An achievement as a postage stamp (16 x 18): perforated edge, coloured field, emblem. Pencil outline when not earned. */
-export function stampArt(color: string, emblem: string, done: boolean): Art {
-  return art(`stamp:${color}:${emblem}:${done}`, () => {
-    const W = 16, H = 18, p = new Px(W, H), [fc, ic] = (STAMP_COL[color] ?? STAMP_COL.green).map(rgb);
-    const paper = rgb(P.paper), grey = rgb(P.pebble);
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const edge = x === 0 || y === 0 || x === W - 1 || y === H - 1;
-      if (edge && (x + y) % 2 === 1) continue;                                      // perforations
-      const inField = x >= 3 && y >= 3 && x < W - 3 && y < H - 3;
-      if (!done) { if (edge || (inField && (x === 3 || y === 3 || x === W - 4 || y === H - 4))) p.set(x, y, grey); continue; }
-      let c = edge ? mix(paper, rgb(P.linen), 0.5) : paper;
-      if (inField) c = (x + y) % 5 === 0 ? mix(fc, ic, 0.25) : fc;
-      p.set(x, y, c);
+export function stampArt(color: string, emblem_: string, done: boolean): Art {
+  return art(`stamp7:${color}:${emblem_}:${done}`, 16, 18, (g) => {
+    const W = 16, H = 18, [fc, ic] = (STAMP_COL[color] ?? STAMP_COL.green).map(hexOf);
+    if (!done) {
+      g.strokeStyle = 'rgba(110,100,90,.6)'; g.lineWidth = 0.4; g.setLineDash([0.8, 0.6]); g.strokeRect(0.5, 0.5, W - 1, H - 1); g.setLineDash([]);
+      g.strokeRect(3, 3, W - 6, H - 6);
+      emblem(g, emblem_, 3.5, 4.5, 'rgba(110,100,90,.55)');
+      return;
     }
-    const g = EMB[emblem] ?? EMB.star;
-    g.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === 'x') p.set(x + 4 - 1 + 0, y + 5 - 1, done ? (y < 3 ? mix(paper, rgb(P.lamp), 0.4) : paper) : grey); }));
-    if (done) for (let x = 3; x < W - 3; x++) p.set(x, H - 4, ic);
-    return p;
+    g.shadowColor = 'rgba(40,30,20,.35)'; g.shadowBlur = 0.6 * S(); g.shadowOffsetY = 0.3 * S();
+    g.fillStyle = '#f8f0dc'; g.fillRect(0.4, 0.4, W - 0.8, H - 0.8);
+    g.shadowColor = 'transparent';
+    g.globalCompositeOperation = 'destination-out';
+    for (let x = 1; x < W; x += 1.6) for (const y of [0.4, H - 0.4]) { g.beginPath(); g.arc(x, y, 0.55, 0, Math.PI * 2); g.fill(); }
+    for (let y = 1; y < H; y += 1.6) for (const x of [0.4, W - 0.4]) { g.beginPath(); g.arc(x, y, 0.55, 0, Math.PI * 2); g.fill(); }
+    g.globalCompositeOperation = 'source-over';
+    const fg = g.createLinearGradient(0, 3, 0, H - 3); fg.addColorStop(0, fc); fg.addColorStop(1, ic);
+    g.fillStyle = fg; g.globalAlpha = 0.9; g.fillRect(2.6, 2.6, W - 5.2, H - 5.2); g.globalAlpha = 1;
+    emblem(g, emblem_, 3.5, 4.2, '#fff8e8');
+    g.fillStyle = 'rgba(255,255,255,.18)'; g.fillRect(2.6, 2.6, W - 5.2, 3);
   });
 }
 
 /** Section icons (11 x 11): 'stats' (bars), 'nights' (moon over a list), 'things' (a little chest), 'seals' (a pennant). */
-const ICONS: Record<string, string[]> = {
-  stats: ['...........', '........dd.', '........dd.', '....dd..dd.', '....dd..dd.', '.dd.dd..dd.', '.dd.dd..dd.', '.dd.dd..dd.', '.dd.dd..dd.', 'eeeeeeeeeee', '...........'],
-  nights: ['..ll.......', '.ll........', '.ll..eeeee.', '.ll........', '..ll.eeee..', '...........', '.....eeeee.', '.dd........', '.dd..eeee..', '...........', '.....eeeee.'],
-  things: ['...........', '..ddddddd..', '.dmmmmmmmd.', 'dmmmmmmmmmd', 'eeeeelleeee', 'dmmmmllmmmd', 'dmmmmmmmmmd', 'dmmmmmmmmmd', 'ddddddddddd', '...........', '...........'],
-  seals: ['.e.........', '.eddddddd..', '.edmmmmmd..', '.edmmlmmd..', '.edmllldd..', '.edmmlmd...', '.eddddd....', '.e.........', '.e.........', '.e.........', 'eee........'],
-};
 export function iconArt(name: string, tint: string): Art {
-  return art(`icon:${name}:${tint}`, () => {
-    const p = new Px(11, 11), [d, m] = (TAB_COLORS[tint] ?? TAB_COLORS.moss).map(rgb);
-    (ICONS[name] ?? ICONS.stats).forEach((r, y) => [...r].forEach((ch, x) => {
-      const c = ch === 'd' ? rgb(P.ink2) : ch === 'm' ? m : ch === 'l' ? (name === 'nights' ? rgb(P.ochre) : d) : ch === 'e' ? rgb(P.ink3) : null;
-      if (c) p.set(x, y, c);
-    }));
-    return p;
+  return art(`icon7:${name}:${tint}`, 11, 11, (g) => {
+    const [d, m] = (TAB_COLORS[tint] ?? TAB_COLORS.moss).map(hexOf);
+    const ink = hexOf(P.ink2);
+    g.shadowColor = 'rgba(40,30,20,.3)'; g.shadowBlur = 0.4 * S(); g.shadowOffsetY = 0.25 * S();
+    if (name === 'stats') { g.fillStyle = m; for (const [x, h] of [[1.5, 4], [4.5, 6], [7.5, 8.5]]) { g.beginPath(); g.roundRect(x, 9.5 - h, 2.2, h, 0.6); g.fill(); } g.fillStyle = ink; g.fillRect(0.5, 9.5, 10, 0.6); }
+    else if (name === 'nights') { g.fillStyle = hexOf(P.ochre); g.beginPath(); g.arc(2.6, 3, 2.2, 0, Math.PI * 2); g.arc(3.6, 2.4, 1.8, 0, Math.PI * 2, true); g.fill('evenodd'); g.strokeStyle = ink; g.lineWidth = 0.7; g.lineCap = 'round'; for (const y of [3, 6, 9]) { g.beginPath(); g.moveTo(5.5, y); g.lineTo(10, y); g.stroke(); } }
+    else if (name === 'things') { g.fillStyle = m; g.beginPath(); g.roundRect(0.8, 2, 9.4, 7.6, 1.2); g.fill(); g.fillStyle = d; g.fillRect(0.8, 4.6, 9.4, 0.8); g.fillStyle = hexOf(P.honey); g.beginPath(); g.roundRect(4.6, 4.2, 1.8, 2.2, 0.4); g.fill(); }
+    else { g.strokeStyle = ink; g.lineWidth = 0.7; g.beginPath(); g.moveTo(1.5, 0.5); g.lineTo(1.5, 10.5); g.stroke(); g.fillStyle = m; g.beginPath(); g.moveTo(1.8, 1); g.lineTo(9.5, 3.5); g.lineTo(1.8, 6.5); g.closePath(); g.fill(); }
   });
 }
 
-/** A ribbon bookmark hanging below the book (5 x len), with a forked end. */
+/** A satin ribbon bookmark hanging below the book (5 x len), with a forked end. */
 export function ribbonArt(len: number, col: string): Art {
-  return art(`rib:${len}:${col}`, () => {
-    const p = new Px(5, len), [d, m, l] = (TAB_COLORS[col] ?? TAB_COLORS.berry).map(rgb);
-    for (let y = 0; y < len; y++) for (let x = 0; x < 5; x++) {
-      if (y === len - 1 && x >= 1 && x <= 3) continue;   // the forked tail
-      if (y === len - 2 && x === 2) continue;
-      p.set(x, y, x === 0 ? l : x === 4 ? d : (y % 3 === 0 && x === 2 ? l : m));
-    }
-    return p;
+  return art(`rib7:${len}:${col}`, 5, len, (g) => {
+    const [d, m, l] = (TAB_COLORS[col] ?? TAB_COLORS.berry).map(hexOf);
+    const gr = g.createLinearGradient(0, 0, 5, 0); gr.addColorStop(0, l); gr.addColorStop(0.35, m); gr.addColorStop(1, d);
+    g.fillStyle = gr; g.beginPath(); g.moveTo(0.3, 0); g.lineTo(4.7, 0); g.lineTo(4.7, len); g.lineTo(2.5, len - 2.2); g.lineTo(0.3, len); g.closePath(); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(1, 0, 0.6, len - 2);
   });
 }
 
-/** A little brass arrow button face (w x h) pointing left or right. */
+/** A little brass arrow button face (12 x 12) pointing left or right. */
 export function arrowArt(dir: 'l' | 'r'): Art {
-  return art(`arrow:${dir}`, () => {
-    const p = new Px(12, 12);
-    for (let y = 0; y < 12; y++) for (let x = 0; x < 12; x++) {
-      const e = Math.min(x, y, 11 - x, 11 - y);
-      if (e === 0 && (x === 0 || x === 11) && (y === 0 || y === 11)) continue;
-      p.set(x, y, e === 0 ? BRASS[0] : e === 1 ? (y < 6 ? BRASS[5] : BRASS[2]) : brass(x, y, 0.5 - y / 24));
-    }
-    const rows = ['....x', '...xx', '..xxx', '.xxxx', '..xxx', '...xx', '....x'];
-    rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === 'x') { const X = dir === 'l' ? x + 3 : 8 - x; p.set(X, y + 2, rgb(P.woodDeep)); } }));
-    return p;
+  return art(`arrow7:${dir}`, 12, 12, (g) => {
+    const r = new Real(12, 12, S(), 0);
+    r.part(box(0.3, 0.3, 11.4, 11.4, 2.4), bevel(1.6, 1.4), metal(GOLD, { polish: 0.7 }));
+    const pts: [number, number][] = dir === 'l' ? [[3.4, 6], [7.8, 2.8], [7.8, 9.2]] : [[8.6, 6], [4.2, 2.8], [4.2, 9.2]];
+    r.part(polygon(pts), (x, y) => 2.2, { alb: () => [60, 34, 14], spec: 0.2, shin: 10 });
+    g.drawImage(r.canvas({ shadow: false }), 0, 0, 12, 12);
+    void segment;
   });
 }
