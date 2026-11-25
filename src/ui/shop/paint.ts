@@ -14,6 +14,7 @@ import { SPECIES_BY_ID } from '../../owl/species.ts';
 import type { RewardKind, Series } from '../../game/series.ts';
 import { ITEMS } from '../../assets/registry.ts';
 import { iconVersion, itemIcon, owlFull, pieceIcon } from '../portraits.ts';
+import { frameWithSky } from '../chrome/frameart.ts';
 
 // ------------------------------------------------------------------ a pixel canvas
 
@@ -300,6 +301,7 @@ export function prizeArt(kind: RewardKind | 'species', id: string, look: OwlLook
   if (kind === 'skin') return SPECIAL_SKIN[id] ? owlFull({ skin: id as OwlLook['skin'], species: 'snowy', palette: 'snowy', outfit: {} }) : '';
   if (kind === 'species') return SPECIES_BY_ID[id] ? owlFull({ skin: 'owl', species: id, palette: id, outfit: {} }) : '';
   if (kind === 'finish') return finishSwatch(id);
+  if (kind === 'frame') return frameWithSky(id, 72); // [ui5] a portrait frame with its little sky
   return '';
 }
 /** The look used to show a featured 5-star skin big on the banner. */

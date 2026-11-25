@@ -325,7 +325,7 @@ export function trinketUrl(id: string, scale = 4, silhouette = false): string {
 
 // ------------------------------------------------------------------ loot tables
 
-export type LootKind = 'item' | 'piece' | 'palette' | 'trinket' | 'finish' | 'skin' | 'species';
+export type LootKind = 'item' | 'piece' | 'palette' | 'trinket' | 'finish' | 'skin' | 'species' | 'frame'; // [ui5] frame: a portrait frame
 export interface LootEntry { kind: LootKind; id: string; rarity: Rarity; area: string; /** [globe] a souvenir of that place */ souvenir?: boolean }
 
 /** Furniture that turns up on trips, by the old area kin (each place shares its kin's list). */
@@ -384,6 +384,9 @@ export const ZONE_LEVEL = { loft: 3, garden: 5, deck: 8 } as const;
 export const ZONE_NAME = { loft: 'The Loft', garden: 'The Garden', deck: 'Stargazing Deck' } as const;
 
 export const ITEM_BY_ID = Object.fromEntries(ALL_ITEMS.map((i) => [i.id, i]));
+
+// [ui5] portrait frames live in src/assets/frames.ts (no heavy imports: the save reads them while it loads)
+export { DEFAULT_FRAME, FRAME_BY_ID, FRAMES, STARTER_FRAMES, STORE_FRAMES, type FrameDef } from '../assets/frames.ts';
 
 // ------------------------------------------------------------------ store
 

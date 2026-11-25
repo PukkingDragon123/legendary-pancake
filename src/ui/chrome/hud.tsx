@@ -17,8 +17,7 @@ import { sound } from '../../audio/sound.ts';
 import { bedtimeOf, phase } from '../../game/night.ts';
 import { claimable, todaysQuests } from '../../game/quests.ts';
 import { dayKey, level, save } from '../../game/store.ts';
-import { iconVersion, portrait } from '../portraits.ts';
-import { pixelate } from '../pxfx.tsx';
+import { OwlPortrait } from './livepip.tsx'; // [ui5] the live 3D owl in its frame
 import { haptic } from '../kit.tsx';
 import { breathing, panel, say, sceneRef, type Panel } from '../state.ts';
 import { framesOf, hold, PxAnim, rep, seq, type Timeline } from './pxanim.tsx';
@@ -27,8 +26,9 @@ import { addSwing, kick, makeSwing, reducedMotion, removeSwing, type Swing } fro
 import { clearTransition, installPanelTransitions, panelTransition, previewTransition, transition, type TransitionKind, type TransitionOpts } from './transition.ts'; // [motion3] panelTransition, installPanelTransitions
 import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt, type UiFxKind } from './uifx.ts';
 import { installChromeSkin } from './skin.ts';
+import { iconSrc } from './iconset.ts';
 import { installSurfaces } from './surfaces.ts';
-import { alarmClock, alarmHands, board, bezel, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
+import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
 
@@ -124,18 +124,10 @@ function NameSign() {
   const k = useK(DESK_HUD);
   const [ref, sw] = useSwing({ amp: 0.7, rate: 0.8 });
   const [xp, setXp] = useState(false);
+  const [poke, setPoke] = useState(0);
   const tm = useRef(0);
-  // Pip's face is a tiny render of the 3D model, re-sampled to art pixels so it sits in the porthole
-  const [pic, setPic] = useState('');
-  const ver = iconVersion.value; // [ui3] re-render when the hand-painted owl model has loaded
-  useEffect(() => {
-    let live = true, url = '';
-    try { url = portrait(s.look); } catch { url = ''; }
-    if (url) void pixelate(url, 25).then((u) => { if (live) setPic(u); });
-    return () => { live = false; };
-  }, [JSON.stringify(s.look), ver]);
-  const night = (sceneRef.current?.sky.night ?? 0) > 0.5;
   const tapSign = () => {
+    setPoke((n) => n + 1); // [ui5] the owl in the portrait reacts
     kick(sw, 70);
     sound.play('door_creak', { volume: 0.12, rate: 1.15 + Math.random() * 0.3, gap: 300 });
     sound.play('wood_knock', { volume: 0.35, gap: 80 });
@@ -143,23 +135,20 @@ function NameSign() {
     setXp(true); clearTimeout(tm.current); tm.current = window.setTimeout(() => setXp(false), 2600);
   };
   const long = s.name.length > 8;
-  const rank = rankOf(lv.level), fits = s.name.length * (long ? 11 : 14) + rank.length * 7 + 8 < 120;
+  const rank = rankOf(lv.level), fits = s.name.length * (long ? 11 : 14) + rank.length * 7 + 8 < 114;
   return (
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={40} />
       <button class="hh-board hh-nameboard" style={{ backgroundImage: bg(board(96, 36, k, 1, { seed: 4, hooks: [26, 71], brackets: true })) }} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
-        <span class={'hh-portrait' + (night ? ' night' : '')}>
-          {pic ? <img class="hh-face" src={pic} alt="" draggable={false} /> : <span class="hh-face" />}
-          <img class="hh-ring" src={bezel(32, k, 1)} alt="" draggable={false} />
-        </span>
+        <span class="hh-portrait"><OwlPortrait size={78} frame={s.frame} pokeKey={poke} /></span>
         <span class={'hh-name' + (long ? ' long' : '')}>{s.name}</span>
         {fits && <span class="hh-rank">{rank}</span>}
         <span class="hh-lvl">
-          <MagicBar level={lv.level} into={lv.into} need={lv.need} w={56} />
+          <MagicBar level={lv.level} into={lv.into} need={lv.need} w={52} />
           <span class={'hh-xp' + (xp ? ' on' : '')}>{lv.into} / {lv.need} XP</span>
         </span>
         <span class="hh-rune" key={lv.level}>
-          <img src={medallion(24, k, 1, 'sapphire')} alt="" draggable={false} />
+          <img src={medallion(22, k, 1, 'sapphire')} alt="" draggable={false} />
           <b>{lv.level}</b>
         </span>
       </button>
@@ -198,7 +187,7 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
           <PxAnim tl={tl} size={40} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}
         </span>
-        <span class="hh-num"><Odometer value={p.value} /></span>
+        <span class={'hh-num' + (p.value >= 100000 ? ' huge' : p.value >= 10000 ? ' long' : '')}><Odometer value={p.value} /></span>
         <button class="hh-plus" style={{ '--plus': bg(plusButton(14, k, 1)), '--plus-dn': bg(plusButton(14, k, 1, true)) } as Record<string, string>} onClick={shop} aria-label={`Get more ${label.toLowerCase()} in the shop`}><span /></button>
       </div>
       {p.children}
@@ -267,6 +256,10 @@ const TOOLS: ToolDef[] = [
   { id: 'settings', label: 'Settings', tl: seq('tool_gear', 4, 220), act: rep(seq('tool_gear', 4, 50), 3), fx: 'sparkle', icon: 'tool_settings', felt: 'iron' },
 ];
 
+/** [ui5] the side tools' icons: little 3D models from the icon family (src/ui/chrome/iconset.ts) */
+const TOOL_ICON: Partial<Record<string, string>> = { build: 'tool_build', shop: 'tool_shop', wardrobe: 'tool_dress', quests: 'tool_quests', map: 'tool_map', settings: 'tool_settings' };
+const dpr = () => Math.min(4, Math.max(1, Math.round((typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1)));
+
 function ToolTag(p: { t: ToolDef; i: number; badge?: number; isNew?: boolean }) {
   const [ref, sw] = useSwing({ amp: 1.1, rate: 1.1 + p.i * 0.07, k: 34 });
   const k = useK(DESK_HUD);
@@ -286,7 +279,7 @@ function ToolTag(p: { t: ToolDef; i: number; badge?: number; isNew?: boolean }) 
     <div class="hh-tool" style={{ '--i': p.i } as Record<string, number>}>
       <div class="hh-toolhang" ref={ref}>
         <button class="hh-tag" style={{ backgroundImage: bg(toolTile(26, p.t.felt, k, 1, p.i + 1)) }} onClick={go} aria-label={p.t.label + (p.badge ? ` (${p.badge} ready to claim)` : '')}>
-          <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={toolIcon(p.t.id as ToolIcon, k, 1)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
+          <img class={'hh-ticon' + (act % 2 ? ' tap' : act ? ' tap2' : '')} src={iconSrc(TOOL_ICON[p.t.id] ?? '', Math.round(44 * dpr()), dpr()) ?? toolIcon(p.t.id as ToolIcon, k, 1)} width={44} height={44} alt="" draggable={false} style={{ '--i': p.i } as Record<string, number>} />
           {!!p.badge && <span class="hh-badge"><PxAnim tl={[['hud_seal', 1e9]]} size={28} /><b>{p.badge}</b></span>}
           {p.isNew && <span class="hh-new"><PxAnim tl={[['hud_new', 1e9]]} size={44} /></span>}
         </button>

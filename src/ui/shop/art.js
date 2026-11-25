@@ -637,6 +637,7 @@ export function injectLodgeCSS() {
     '.lg-g-tab': 'lg_kraft', '.lg-g-tab.on': 'lg_paper', '.lg-new': 'lg_cloth_red', '.lg-up': ['lg_cloth_red', 1], '.lg-bonus': 'lg_cloth_gold', '.lg-bonus.gem': 'lg_cloth_violet', '.lg-bubble-who': 'lg_cloth_gold', '.lg-hint': 'lg_paper', '.lg-poster': 'lg_paper', '.lg-poster-title': 'lg_chip', '.lg-sum-card': 'lg_paper', '.lg-sum-card.r5': 'lg_kraft', '.lg-gnote': ['lg_kraft', 1],
     '.lg-navsign': 'lg_plank', '.lg-navsign:active,.lg-navsign.on': 'lg_plank_down', '.lg-card': 'lg_board', '.lg-ledger': 'lg_paper', '.lg-gtag': 'lg_kraft',
     '.lg-burlap': 'lg_kraft', '.lg-plate': 'lg_brass', '.lg-page': 'lg_paper', '.lg-prize-page': 'lg_paper', '.lg-timer': 'lg_chip',
+    '.lg-framewall': 'lg_board', '.lg-fw-tag': 'lg_paper', // [ui5] the frame wall
   };
   for (const [sel, fr] of Object.entries(WEAR)) css += Array.isArray(fr) ? `${sel}{${lgStyle(fr[0], fr[1])}}\n` : `${sel}{${lgStyle(fr, 2)}}\n`;
   css += ':root{';

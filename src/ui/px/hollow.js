@@ -2,7 +2,6 @@
 // drawings keyed to hue-shifted material ramps, shaded from the top-left with an automatic dark
 // outline, and graded into the calm "Moss & Moonlight" palette when built. No 2D owls.
 import { Grid, icon } from './sprites.js';
-import { installBaked } from './baked.js';
 
 icon('acorn', { C: 'wood.R@cap', c: 'wood:1', N: 'lwood.R@nut', n: 'lwood:5', S: 'dwood.x@stem' }, () => {
   const g = new Grid(20, 20);
@@ -297,6 +296,4 @@ for (const on of [false, true]) {
 
 export const HOLLOW_ICONS = ['acorn', 'moonstone', 'candle', 'jar', 'treehouse', 'mic', 'rain', 'waves', 'wind', 'leaf', 'hanger', 'brush', 'satchel', 'nest', 'phone_off', 'owl', 'mood0', 'mood1', 'mood2', 'mood3', 'mood4', 'switch_on', 'switch_off'];
 
-// [ui3] detailed icons baked from real 3D props replace the drawn ones of the same name (bell, lantern, alarm,
-// clock, book, nest, jar, camera, bench, shop, clipboard); see src/dev/iconbake.ts
-installBaked();
+// [ui5] the interface icons are now the 3D family (src/ui/chrome/iconset.ts), registered over these names at boot

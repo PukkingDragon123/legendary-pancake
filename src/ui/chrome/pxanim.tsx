@@ -4,6 +4,7 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { hasSprite, SPRITES, spriteURL } from '../px/sprites.js';
 import '../px/chromeart.js';
+import { iconSrc } from './iconset.ts';
 
 /** [frame sprite name, milliseconds] steps, looped. */
 export type Timeline = [string, number][];
@@ -29,7 +30,7 @@ type W = Window & { __chromeT?: number };
 /** Time for every chrome animation; `window.__chromeT` freezes it (screenshots). */
 export const clockNow = () => (window as W).__chromeT ?? performance.now();
 
-interface Entry { img: HTMLImageElement; tl: Timeline; total: number; offset: number; scale: number; cur: string; act?: { tl: Timeline; total: number; t0: number }; paused?: boolean }
+interface Entry { img: HTMLImageElement; tl: Timeline; total: number; offset: number; scale: number; dev?: number; cur: string; act?: { tl: Timeline; total: number; t0: number }; paused?: boolean }
 const live = new Set<Entry>();
 let timer = 0;
 function frameAt(tl: Timeline, t: number): string {
@@ -45,7 +46,7 @@ function update(e: Entry, now: number) {
     else if (t >= e.act.total) e.act = undefined;
   }
   if (!name) name = frameAt(e.tl, (((now + e.offset) % e.total) + e.total) % e.total);
-  if (name !== e.cur) { e.cur = name; e.img.src = spriteURL(name, e.scale); }
+  if (name !== e.cur) { e.cur = name; e.img.src = (e.dev && iconSrc(name, e.dev, dpr())) || spriteURL(name, e.scale); }
 }
 function tick() {
   if (typeof document !== 'undefined' && document.hidden) return;
@@ -64,10 +65,12 @@ function untrack(e: Entry) {
 const dpr = () => Math.min(4, Math.max(1, Math.round((typeof devicePixelRatio === 'number' ? devicePixelRatio : 1) || 1)));
 /** CSS size and device scale for a sprite shown about `want` px on its long side, kept pixel-crisp. */
 export function crisp(name: string, want: number) {
-  const sp = (SPRITES as Record<string, { w: number; h: number }>)[name];
+  const sp = (SPRITES as Record<string, { w: number; h: number; i3d?: unknown }>)[name];
   const w0 = sp?.w ?? 20, h0 = sp?.h ?? 20, k = dpr();
+  // [ui5] the 3D icon family: exactly the asked size, in device pixels
+  if (sp?.i3d) { const dev = Math.max(8, Math.round(want * k)); return { w: dev / k, h: Math.round(((dev / k) * h0) / w0), scale: 1, dev }; }
   const per = Math.max(1 / k, Math.round((want / Math.max(w0, h0)) * k) / k);
-  return { w: Math.round(w0 * per), h: Math.round(h0 * per), scale: Math.max(1, Math.round(per * k)) };
+  return { w: Math.round(w0 * per), h: Math.round(h0 * per), scale: Math.max(1, Math.round(per * k)), dev: 0 };
 }
 
 export interface AnimHandle { play(tl: Timeline): void }
@@ -83,13 +86,13 @@ export function PxAnim(p: { tl: Timeline; size: number; offset?: number; act?: T
   const c = crisp(first, p.size);
   useEffect(() => {
     const img = ref.current!;
-    const e: Entry = { img, tl: p.tl, total: Math.max(1, tlTotal(p.tl)), offset: p.offset ?? 0, scale: c.scale, cur: '' };
+    const e: Entry = { img, tl: p.tl, total: Math.max(1, tlTotal(p.tl)), offset: p.offset ?? 0, scale: c.scale, dev: c.dev, cur: '' };
     ent.current = e;
     update(e, clockNow());
     track(e);
     p.handle?.({ play: (tl) => { e.act = { tl, total: tlTotal(tl), t0: clockNow() }; update(e, clockNow()); } });
     return () => untrack(e);
-  }, [p.tl, c.scale]);
+  }, [p.tl, c.scale, c.dev]);
   useEffect(() => { if (ent.current) ent.current.paused = !!p.paused; }, [p.paused]);
   useEffect(() => {
     const e = ent.current;
@@ -97,5 +100,5 @@ export function PxAnim(p: { tl: Timeline; size: number; offset?: number; act?: T
     e.act = { tl: p.act, total: tlTotal(p.act), t0: clockNow() };
     update(e, clockNow());
   }, [p.actKey]);
-  return <img ref={ref} class={'px ico ' + (p.class ?? '')} style={p.style} src={spriteURL(first, c.scale)} width={c.w} height={c.h} alt={p.alt ?? ''} draggable={false} />;
+  return <img ref={ref} class={'px ico ' + (p.class ?? '')} style={p.style} src={(c.dev && iconSrc(first, c.dev, dpr())) || spriteURL(first, c.scale)} width={c.w} height={c.h} alt={p.alt ?? ''} draggable={false} />;
 }

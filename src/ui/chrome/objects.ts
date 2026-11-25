@@ -188,14 +188,14 @@ export function alarmClock(k = 1, res = 2, ringF = 0): string {
     for (let i = 0; i < 60; i++) {
       const an = (i / 60) * Math.PI * 2, major = i % 5 === 0;
       const r0 = dial - (major ? 2.4 : 1.4), r1 = dial - 0.6;
-      if (k === 1 && !major) continue;
+      if (k < 2 && !major) continue; // [ui5] chunky: hour bars only
       r.paint(seg(cx + Math.sin(an) * r0, cy - Math.cos(an) * r0, cx + Math.sin(an) * r1, cy - Math.cos(an) * r1, major ? 0.5 : 0.28), solid(ink));
     }
     // numerals: the quarters when chunky, all twelve (one art pixel per glyph pixel) when detailed
     const g = k === 1 ? 1 : 1 / k;
-    const nums: [string, number][] = k === 1 ? [['12', 0], ['3', 3], ['6', 6], ['9', 9]] : Array.from({ length: 12 }, (_, i) => [String(i || 12), i] as [string, number]);
+    const nums: [string, number][] = k < 2 ? [['12', 0], ['3', 3], ['6', 6], ['9', 9]] : Array.from({ length: 12 }, (_, i) => [String(i || 12), i] as [string, number]);
     for (const [n, hh] of nums) {
-      const a = (hh / 12) * Math.PI * 2, rr = dial - (k === 1 ? 5.4 : 4.6), tw = textWidth(n, g);
+      const a = (hh / 12) * Math.PI * 2, rr = dial - (k === 1 ? 5.4 : k < 2 ? 4.4 : 4.6), tw = textWidth(n, g);
       r.paint(textShape(n, Math.round((cx + Math.sin(a) * rr - tw / 2) * k) / k, Math.round((cy - Math.cos(a) * rr - 2.5 * g) * k) / k, g), solid(ink));
     }
     // a sky-blue enamel crescent and a maker's line under the 12
@@ -875,4 +875,5 @@ export function giftSack(open = 0, k = 2): string {
 /** Detail level for a HUD part: 2 art px per unit on phones, 3 where the HUD is shown 1.5x (desktop). */
 export const DESK_HUD = '(min-width: 900px) and (min-height: 640px)';
 export const DESK_NAV = '(min-width: 900px) and (min-height: 760px)';
-export const kFor = (q: string) => { try { return matchMedia(q).matches ? 3 : 2; } catch { return 2; } };
+/** [ui5] art pixels per design unit (one unit = 2 CSS px): 1.5 makes each art pixel 1.33 CSS px, a little chunkier than 1:1 */
+export const kFor = (q: string) => { try { return matchMedia(q).matches ? 2.25 : 1.5; } catch { return 1.5; } };
