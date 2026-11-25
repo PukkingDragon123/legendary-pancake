@@ -16,7 +16,7 @@ import { haptic, Rolling, toast, useTick } from '../kit.tsx';
 import { panel } from '../state.ts';
 import { AnimPx, rewardMoment, Stamp } from './moment.tsx';
 import { bannerArt, prizeArt } from './paint.ts';
-import { animeMoment } from '../fx/anime.ts'; // [anime6]
+import { fxMoment } from '../fx/moment.ts'; // [fx10]
 
 const fmt = (n: number) => n.toLocaleString('en-US');
 const isSide = () => innerWidth >= innerHeight * 1.05 && innerWidth >= 640;
@@ -205,7 +205,7 @@ export function Reveal(p: { prizes: Prize[]; stage: Lodge | null; say: (t: strin
     void p.stage?.showPrize(pr.entry.kind === 'frame' ? { kind: 'item', id: 'frame:' + pr.entry.id } : { kind: pr.entry.kind, id: pr.entry.id }, pr.stars);
     sound.play(pr.stars === 5 ? 'reward_levelup' : pr.stars === 4 ? 'reward_unlock' : 'ui_page', { volume: pr.stars === 3 ? 0.5 : 0.6 });
     haptic(pr.stars === 5 ? 30 : 10);
-    if (pr.stars >= 4) { animeMoment(pr.stars === 5 ? 'gacha5' : 'gacha4'); p.stage?.beaver.wow(pr.stars); } // [anime6]
+    if (pr.stars >= 4) { fxMoment(pr.stars === 5 ? 'gacha5' : 'gacha4'); p.stage?.beaver.wow(pr.stars); } // [fx10]
     if (pr.stars === 5) p.say(pick(['TIMBER! Would you look at that!', 'Gnaw me a log, a five-star!', 'Oh my whiskers, the big one!']), 2600);
     else if (pr.stars === 4 && i === order.length - 1) p.say(pick(['Ooh, a four-star! Lovely.', 'That\'s a good one, friend!']), 2200);
   }, [phase, i]);

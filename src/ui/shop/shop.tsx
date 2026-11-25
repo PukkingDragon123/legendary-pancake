@@ -28,7 +28,7 @@ import { injectLodgeCSS } from './art.js';
 import { Gacha } from './gacha.tsx';
 import { AnimPx, rewardMoment, showPrize, Stamp } from './moment.tsx';
 import { bannerArt, prizeArt } from './paint.ts';
-import { animeMoment } from '../fx/anime.ts'; // [anime6]
+import { fxMoment } from '../fx/moment.ts'; // [fx10]
 import './shop.css';
 
 const fmt = (n: number) => n.toLocaleString('en-US');
@@ -269,7 +269,7 @@ export function Shop() {
     setTimeout(() => { sound.play('ui_buy', { volume: 0.55 }); sound.play('reward_unlock', { volume: 0.4 }); }, 260);
     haptic(20);
     stageRef.current?.celebrate('deal:' + i);
-    animeMoment('bigbuy'); // [anime6] KA-CHING!
+    fxMoment('bigbuy'); // [fx10] glints, acorns and shavings
     say(pick(LINES.bought));
     const a = art(d);
     setTimeout(() => showPrize({
@@ -338,7 +338,7 @@ export function Shop() {
     setTimeout(() => { sound.play('ui_buy', { volume: 0.55 }); sound.play('reward_unlock', { volume: 0.4 }); }, 260);
     haptic(20);
     stageRef.current?.act('hop');
-    animeMoment('bigbuy'); // [anime6]
+    fxMoment('bigbuy'); // [fx10]
     say(pick(LINES.bought));
   };
   const openFrame = (id: string) => { openCard('frame:' + id); const f = wall.find((o) => o.frame.id === id); if (f) say(pick(LINES.frame)(f.frame.name)); };

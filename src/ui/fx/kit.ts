@@ -1,5 +1,4 @@
-// Small shared helpers for the anime layer (emote marks and screen effects): a seeded random, the shared clock, and
-// the Calm motion test.
+// Small shared helpers for the effects layer (src/ui/fx): a seeded random, the shared clock, and the Calm motion test.
 
 /** A small seeded random (shapes and sparkles land the same way every run). */
 export function rng(seed: number) {
@@ -7,9 +6,9 @@ export function rng(seed: number) {
   return () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return (s % 100000) / 100000; };
 }
 
-/** The shared clock (seconds) for the anime layer; `window.__animeT` freezes it (screenshots, tests). */
+/** The shared clock (seconds) for the effects layer; `window.__fxT` freezes it (screenshots, tests). */
 export function fxNow(): number {
-  const f = (globalThis as { __animeT?: number }).__animeT;
+  const g = globalThis as { __fxT?: number; __animeT?: number }, f = g.__fxT ?? g.__animeT;
   return f !== undefined ? f : performance.now() / 1000;
 }
 

@@ -17,9 +17,9 @@ import { RuneCircle } from './chrome/lvup.tsx';
 import { openPanel } from './chrome/hud.tsx';
 import { MagicBar } from './chrome/magicbar.tsx';
 import { PxAnim, seq } from './chrome/pxanim.tsx';
-import { uiBurst, uiBurstAt } from './chrome/uifx.ts';
+import { uiBurstAt } from './chrome/uifx.ts';
 import { pixelate, PxBurst } from './pxfx.tsx';
-import { animeMoment } from './fx/anime.ts'; // [anime6]
+import { fxMoment } from './fx/moment.ts'; // [fx10]
 
 // ------------------------------------------------------------------ dialogs
 
@@ -92,8 +92,8 @@ export function Flyers() {
 // ------------------------------------------------------------------ level-up ceremony
 
 export const ceremony = signal<{ level: number } | null>(null);
-// [chrome] the ceremony: a rune circle draws itself in while the magic bar overflows, then a
-// burst of magic, the glowing rune medallion with the new level, Pip, and what just opened up.
+// [chrome] the ceremony: a rune circle draws itself in while the magic bar overflows, then a breath of
+// golden light and a ring of light round the rune medallion with the new level, Pip, and what just opened up.
 export function Ceremony() {
   const c = ceremony.value;
   const [step, setStep] = useState(0);
@@ -106,10 +106,9 @@ export function Ceremony() {
         setStep(1);
         sound.play('reward_levelup', { volume: 0.7 });
         const x = innerWidth / 2, y = innerHeight * 0.4;
-        uiBurst('magic', x, y, 40); uiBurst('stars', x, y, 16); uiBurst('confetti', x, y - 40, 34); uiBurst('sparkle', x, y, 14);
-        animeMoment('levelup', { x, y }); // [anime6] impact frame, focus lines, DING!
-        const sc = sceneRef.current;
-        if (sc) { sc.owl.play('dance'); const o = sc.owl.node.position; sc.fx.burst('confetti', o.x, o.y + 1.5, o.z, 40); sc.fx.burst('stars', o.x, o.y + 1.2, o.z, 14); }
+        // [fx10] light, golden motes and gold-leaf flakes round the medal (once it is in place), golden motes round Pip
+        requestAnimationFrame(() => fxMoment('levelup', document.querySelector('.lvup-medal') ?? { x, y }));
+        sceneRef.current?.owl.play('dance');
       }, 1150),
       setTimeout(() => setStep(2), 2000),
     ];
