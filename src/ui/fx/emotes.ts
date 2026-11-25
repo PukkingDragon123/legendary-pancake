@@ -1,17 +1,15 @@
-// Anime emote marks: bold, hand-painted pixel-art marks that pop beside a character's head and follow it in 3D (the
+// Anime emote marks: bold, polished anime-style marks that pop beside a character's head and follow it in 3D (the
 // head is projected through the camera that draws it every frame): a sweat drop, an anger vein, "!" and "?" with
 // motion lines, music notes, sparkles, hearts, a "Zzz" bubble, a light bulb, a gloom cloud with vertical lines and
-// steam puffs. Each mark is a little object modelled and lit by the interface's own painter (src/ui/px/relief.ts:
-// light from the top left, cool violet-blue shadows, a coloured outline) at exactly one art pixel per texel
-// (src/gfx/artpx.ts), re-rasterised at every size it pops through (never scaled), on the game's art-pixel grid. They
-// live on one transparent canvas between the 3D view and the interface, so the HUD and panels always sit on top of
-// them, and they step aside from the interface and speech bubbles. With Calm motion they simply appear and fade.
+// steam puffs. Each is drawn as smooth, anti-aliased vector art at the screen's full resolution (device pixels): a
+// glossy fill shaded from a warm light at the top left into a cool violet shadow, a coloured outline, a white gloss
+// highlight and a soft drop shadow, like the marks in an anime. They live on one transparent canvas between the 3D view
+// and the interface, so the HUD and panels always sit on top of them, and they step aside from the interface and
+// speech bubbles. Snappy pops and bounces; with Calm motion they simply appear and fade.
 //   popEmote('bang', anchor)          anchor: anything with screen() -> { x, y, r } (CSS px) or null when hidden
 //   actorAnchor(obj, faceCentre, r)   an anchor for an object in a 3D scene (finds the camera that draws it)
 import * as THREE from 'three';
-import { artPx } from '../../gfx/artpx.ts';
-import { clamp, disc, ell, hex, or, poly, Relief, seg, solid, type HFn, type Mat, type Shape } from '../px/relief.ts';
-import { blit, calmMotion, col, fxNow, Raster, rng, texLine } from './pixart.ts';
+import { calmMotion, fxNow, rng } from './kit.ts';
 
 export type EmoteKind = 'sweat' | 'anger' | 'bang' | 'ask' | 'notes' | 'sparkle' | 'hearts' | 'zzz' | 'bulb' | 'gloom' | 'steam';
 export const EMOTES: EmoteKind[] = ['bang', 'ask', 'sweat', 'anger', 'notes', 'sparkle', 'hearts', 'zzz', 'bulb', 'gloom', 'steam'];
@@ -22,183 +20,284 @@ export interface EmoteAnchor {
 }
 
 const DUR: Record<EmoteKind, number> = { bang: 1.05, ask: 1.4, sweat: 1.5, anger: 1.25, notes: 1.7, sparkle: 1.25, hearts: 1.6, zzz: 2.4, bulb: 1.4, gloom: 1.9, steam: 1.0 };
-/** the cast shadow under every mark: cool violet-blue, like the interface's */
-export const SHADOW = col('#221a4a', 92);
+/** the soft cast shadow under every mark: cool violet */
+export const SHADOW_RGBA = 'rgba(38, 24, 74, 0.32)';
 /** motion lines and gloom lines: a deep violet-brown, never black */
 const LINE = '#3a2448';
 
-// ------------------------------------------------------------------ the art: little painted objects
+// ------------------------------------------------------------------ smooth anime painting kit
 
-/** glossy enamel, like the HUD's badges */
-export const ENAMEL: Mat = { spec: 0.8, shin: 34, env: 0.12, bands: 5 };
-/** soft and matte: clouds, steam, the thought bubble */
-export const SOFT: Mat = { spec: 0.12, shin: 8, sheen: 0.12, bands: 5 };
-/** water and glass */
-const WET: Mat = { spec: 1.0, shin: 60, env: 0.35, bands: 6 };
-/** a lit bulb: bright, a hard glint */
-const LIT: Mat = { spec: 1.0, shin: 50, env: 0.2, bands: 4 };
-const METAL: Mat = { spec: 0.8, shin: 26, env: 0.7, bands: 5 };
+/** The device-pixel ratio the marks are drawn at (capped: a 4x screen gains nothing visible). */
+export const dprNow = () => Math.min(3, Math.max(1, window.devicePixelRatio || 1));
+
+export interface Look {
+  /** light, base and shadow tones of the fill (top left to bottom right) */
+  hi: string; base: string; low: string;
+  /** the coloured outline */
+  line: string;
+  /** gloss highlight strength (0 = matte) */
+  gloss?: number;
+  /** an outer glow colour (sparkles, a lit bulb) */
+  glow?: string;
+}
+export const LOOKS = {
+  sun: { hi: '#fff6b8', base: '#ffcf33', low: '#f08a1c', line: '#7a3a1c', gloss: 0.9 },
+  sky: { hi: '#e6f8ff', base: '#78ccff', low: '#3b7ee0', line: '#1f3f86', gloss: 0.9 },
+  water: { hi: '#f2fbff', base: '#92dcff', low: '#4a96e8', line: '#2a5aa8', gloss: 1 },
+  red: { hi: '#ffb4a2', base: '#ff4b3e', low: '#c4204a', line: '#6a1430', gloss: 0.8 },
+  pink: { hi: '#ffd6e4', base: '#ff5b8f', low: '#d22e74', line: '#7a1442', gloss: 1 },
+  teal: { hi: '#c8fff2', base: '#38c9b2', low: '#1a8a90', line: '#0f4a58', gloss: 0.8 },
+  gold: { hi: '#fff0c0', base: '#ffb43a', low: '#e0702a', line: '#6e3214', gloss: 0.8 },
+  rose: { hi: '#ffe0ec', base: '#ff7aa8', low: '#c8467e', line: '#6e1a44', gloss: 0.8 },
+  violet: { hi: '#efe8ff', base: '#a08cff', low: '#6248d8', line: '#2e1a78', gloss: 0.8 },
+  cloud: { hi: '#ffffff', base: '#f6f3ff', low: '#cfc8f0', line: '#7d76b0', gloss: 0 },
+  storm: { hi: '#9ea3c4', base: '#6c7196', low: '#41456a', line: '#211d36', gloss: 0 },
+  steam: { hi: '#ffffff', base: '#f4f6fb', low: '#cdd3e6', line: '#8890aa', gloss: 0 },
+  zee: { hi: '#a89cff', base: '#5b4fc8', low: '#3a2c98', line: '#f6f3ff', gloss: 0.4 },
+  bulb: { hi: '#fffbe0', base: '#ffe35a', low: '#f2a531', line: '#8a5214', gloss: 1, glow: 'rgba(255, 220, 90, 0.85)' },
+  bulbOff: { hi: '#ffffff', base: '#f3eedc', low: '#cbbf9a', line: '#7a6a4a', gloss: 0.8 },
+  metal: { hi: '#ffffff', base: '#c8ccda', low: '#7d8298', line: '#3a3c52', gloss: 0.6 },
+} satisfies Record<string, Look>;
 
 /**
- * A rounded, pillowy height for any shape: the distance from each art pixel to the shape's edge, through a circular
- * profile `R` px deep (the shape is sampled once on the art grid, unwarped).
+ * Paint a filled shape: a soft violet drop shadow, a coloured outline (`lw` wide outside the shape), a fill shaded from
+ * the light at the top left to a cool shadow at the bottom right, and a gloss highlight up top. `box` is the shape's
+ * bounds [x0, y0, x1, y1] (for the shading).
  */
-export function pillow(sh: Shape, w: number, h: number, R: number, base = 0): HFn {
-  const W = Math.ceil(w) + 2, H = Math.ceil(h) + 2, d = new Float32Array(W * H);
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) d[y * W + x] = sh(x + 0.5, y + 0.5) ? 1e4 : 0;
-  // two-pass chamfer distance (1, 1.41)
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const i = y * W + x;
-    if (!d[i]) continue;
-    let v = d[i];
-    if (x > 0) v = Math.min(v, d[i - 1] + 1); else v = Math.min(v, 1);
-    if (y > 0) v = Math.min(v, d[i - W] + 1); else v = Math.min(v, 1);
-    if (x > 0 && y > 0) v = Math.min(v, d[i - W - 1] + 1.41);
-    if (x < W - 1 && y > 0) v = Math.min(v, d[i - W + 1] + 1.41);
-    d[i] = v;
+export function paintShape(g: CanvasRenderingContext2D, path: Path2D, box: [number, number, number, number], L: Look, lw: number, rim = true) {
+  const [x0, y0, x1, y1] = box, w = x1 - x0, h = y1 - y0;
+  g.save();
+  g.lineJoin = 'round'; g.lineCap = 'round';
+  // drop shadow and outline in one: the outline colour, stroked wide and filled, casting the shadow
+  g.shadowColor = SHADOW_RGBA; g.shadowBlur = lw * 2.2; g.shadowOffsetX = lw * 0.5; g.shadowOffsetY = lw * 0.9;
+  if (L.glow) { g.shadowColor = L.glow; g.shadowBlur = lw * 5; g.shadowOffsetX = 0; g.shadowOffsetY = 0; }
+  g.fillStyle = L.line; g.strokeStyle = L.line; g.lineWidth = lw * 2;
+  g.fill(path); g.stroke(path);
+  g.restore();
+  g.save();
+  g.clip(path);
+  // the fill: light at the top left falling to the base, then a cool shadow pooling at the bottom right
+  const lin = g.createLinearGradient(x0 + w * 0.2, y0, x0 + w * 0.8, y1);
+  lin.addColorStop(0, L.hi); lin.addColorStop(0.45, L.base); lin.addColorStop(1, L.low);
+  g.fillStyle = lin; g.fillRect(x0 - lw, y0 - lw, w + lw * 2, h + lw * 2);
+  const cool = g.createRadialGradient(x1, y1, 0, x1, y1, Math.max(w, h) * 0.9);
+  cool.addColorStop(0, 'rgba(70, 50, 150, 0.32)'); cool.addColorStop(1, 'rgba(70, 50, 150, 0)');
+  g.fillStyle = cool; g.fillRect(x0 - lw, y0 - lw, w + lw * 2, h + lw * 2);
+  // a thin bright rim along the lit edge (not on unions of shapes, where it would trace the seams)
+  if (rim) {
+    g.globalAlpha = 0.55; g.strokeStyle = L.hi; g.lineWidth = lw * 1.2;
+    g.translate(lw * 0.5, lw * 0.6); g.stroke(path); g.translate(-lw * 0.5, -lw * 0.6);
+    g.globalAlpha = 1;
   }
-  for (let y = H - 1; y >= 0; y--) for (let x = W - 1; x >= 0; x--) {
-    const i = y * W + x;
-    if (!d[i]) continue;
-    let v = d[i];
-    if (x < W - 1) v = Math.min(v, d[i + 1] + 1); else v = Math.min(v, 1);
-    if (y < H - 1) v = Math.min(v, d[i + W] + 1); else v = Math.min(v, 1);
-    if (x < W - 1 && y < H - 1) v = Math.min(v, d[i + W + 1] + 1.41);
-    if (x > 0 && y < H - 1) v = Math.min(v, d[i + W - 1] + 1.41);
-    d[i] = v;
+  if (L.gloss) {
+    // the gloss: a soft white oval up at the top left
+    const gx = x0 + w * 0.32, gy = y0 + h * 0.24, gr = Math.max(w, h) * 0.32;
+    const gl = g.createRadialGradient(gx, gy, 0, gx, gy, gr);
+    gl.addColorStop(0, `rgba(255,255,255,${0.85 * L.gloss})`); gl.addColorStop(0.45, `rgba(255,255,255,${0.35 * L.gloss})`); gl.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gl; g.fillRect(x0, y0, w, h);
   }
-  return (x, y) => {
-    const i = clamp(Math.floor(y), 0, H - 1) * W + clamp(Math.floor(x), 0, W - 1);
-    const t = Math.min(1, Math.max(0.35, d[i]) / R);
-    return base + R * Math.sqrt(t * (2 - t));
-  };
+  g.restore();
 }
-/** a thick brush stroke along a polyline */
-const stroke = (pts: [number, number][], r: number): Shape => or(...pts.slice(1).map((p, i) => seg(pts[i][0], pts[i][1], p[0], p[1], r)));
-const arcPts = (cx: number, cy: number, rx: number, ry: number, a0: number, a1: number, n = 10): [number, number][] =>
-  Array.from({ length: n + 1 }, (_, i) => { const a = a0 + ((a1 - a0) * i) / n; return [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry] as [number, number]; });
+/** Paint a thick brush stroke (a hook, a vein, a flag, a Z) the same way: outline, shaded body, a bright streak. */
+export function paintStroke(g: CanvasRenderingContext2D, path: Path2D, width: number, box: [number, number, number, number], L: Look, lw: number) {
+  const [x0, y0, x1, y1] = box;
+  g.save();
+  g.lineJoin = 'round'; g.lineCap = 'round';
+  g.shadowColor = SHADOW_RGBA; g.shadowBlur = lw * 2.2; g.shadowOffsetX = lw * 0.5; g.shadowOffsetY = lw * 0.9;
+  g.strokeStyle = L.line; g.lineWidth = width + lw * 2; g.stroke(path);
+  g.restore();
+  g.save();
+  g.lineJoin = 'round'; g.lineCap = 'round';
+  const lin = g.createLinearGradient(x0, y0, x1, y1);
+  lin.addColorStop(0, L.hi); lin.addColorStop(0.45, L.base); lin.addColorStop(1, L.low);
+  g.strokeStyle = lin; g.lineWidth = width; g.stroke(path);
+  if (L.gloss) { g.globalAlpha = 0.7 * L.gloss; g.strokeStyle = '#ffffff'; g.lineWidth = width * 0.24; g.translate(-width * 0.16, -width * 0.18); g.stroke(path); }
+  g.restore();
+}
 
-interface Part { shape: Shape; color: string; mat?: Mat; depth?: number; base?: number; seam?: boolean }
-/** Model and light a mark from parts (w x h art px), then give it its cool cast shadow. */
-function paint(w: number, h: number, parts: Part[], o: { wobble?: number } = {}): HTMLCanvasElement {
-  const M = 3, W = Math.ceil(w) + M * 2, H = Math.ceil(h) + M * 2;
-  const r = new Relief(W, H, 1, 1);
-  r.wobble = o.wobble ?? 0.3;
-  r.chip = 0;
-  parts.forEach((p, i) => {
-    const sh = p.shape;
-    const moved: Shape = Object.assign((x: number, y: number) => sh(x - M, y - M), sh.bb ? { bb: [sh.bb[0] + M, sh.bb[1] + M, sh.bb[2] + M, sh.bb[3] + M] as [number, number, number, number] } : {});
-    const ph = pillow(moved, W, H, p.depth ?? Math.max(2, Math.min(w, h) * 0.22), p.base ?? 0);
-    r.fill(moved, ph, solid(hex(p.color)), p.mat ?? ENAMEL, { id: i + 1, seam: p.seam });
-  });
-  const px = r.render();
-  const ras = new Raster(W, H);
-  ras.buf.set(new Uint32Array(px.buffer, px.byteOffset, W * H));
-  ras.shadow(SHADOW, 1, 1);
-  return ras.canvas();
+/** A sprite canvas at device resolution: `w` x `h` CSS px of art plus a margin for the outline, shadow and glow. */
+function sprite(w: number, h: number, draw: (g: CanvasRenderingContext2D) => void, pad = 0.22): HTMLCanvasElement {
+  const d = dprNow(), m = Math.ceil(Math.max(w, h) * pad + 4);
+  const c = document.createElement('canvas');
+  c.width = Math.ceil((w + m * 2) * d); c.height = Math.ceil((h + m * 2) * d);
+  const g = c.getContext('2d')!;
+  g.setTransform(d, 0, 0, d, m * d, m * d);
+  draw(g);
+  return c;
+}
+const ell = (p: Path2D, cx: number, cy: number, rx: number, ry: number, rot = 0) => { p.moveTo(cx + Math.cos(rot) * rx, cy + Math.sin(rot) * rx); p.ellipse(cx, cy, rx, ry, rot, 0, Math.PI * 2); return p; };
+const circ = (p: Path2D, cx: number, cy: number, r: number) => ell(p, cx, cy, r, r);
+/** a cloud: the union of circles, outlined and shaded as one */
+function cloud(g: CanvasRenderingContext2D, blobs: [number, number, number][], L: Look, lw: number) {
+  const p = new Path2D();
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y, r] of blobs) { circ(p, x, y, r); x0 = Math.min(x0, x - r); y0 = Math.min(y0, y - r); x1 = Math.max(x1, x + r); y1 = Math.max(y1, y + r); }
+  paintShape(g, p, [x0, y0, x1, y1], L, lw, false);
 }
 
 const cache = new Map<string, HTMLCanvasElement>();
-const memo = (key: string, f: () => HTMLCanvasElement) => { let c = cache.get(key); if (!c) { c = f(); cache.set(key, c); if (cache.size > 400) cache.delete(cache.keys().next().value!); } return c; };
+const memo = (key: string, f: () => HTMLCanvasElement) => { let c = cache.get(key); if (!c) { c = f(); cache.set(key, c); if (cache.size > 300) cache.delete(cache.keys().next().value!); } return c; };
 
-const NOTE_COLS = ['#3cc8b4', '#ffb43a', '#ff7aa8', '#9f8cff'];
-const SPARK_COLS = ['#fff1a8', '#ffd2ec', '#cdeeff', '#e6d8ff'];
+const NOTE_LOOKS: Look[] = [LOOKS.teal, LOOKS.gold, LOOKS.rose, LOOKS.violet];
+const SPARK_TINTS = ['#ffd24a', '#ff7ac0', '#5ec8ff', '#a98cff'];
 
 /**
- * One mark, `u` art px for the head's radius (the marks scale with the face: re-painted at each size, never
- * stretched). `v` picks a variant (note colour and shape, sparkle tint and twinkle frame, steam frame, bulb on/off).
+ * One mark at unit size `u` CSS px (about the head's radius), drawn at device resolution and cached per size step (a
+ * pop scales the cached mark smoothly). `v` picks a variant (note colour and shape, sparkle tint, steam frame, bulb
+ * on/off). Marks are centred on their canvas.
  */
 export function markArt(kind: EmoteKind | 'heartS' | 'z' | 'zs' | 'cloud' | 'bubble', u: number, v = 0): HTMLCanvasElement {
-  u = Math.max(6, Math.round(u));
-  return memo(`${kind}:${u}:${v}`, () => {
+  u = Math.max(8, Math.round(u / 4) * 4);
+  return memo(`${kind}:${u}:${v}:${dprNow()}`, () => {
+    const lw = Math.max(1.4, u * 0.055);
     switch (kind) {
       case 'bang': {
-        const h = u * 1.3, w = u * 0.52, cx = w / 2, sk = (y: number) => (y - h * 0.4) * -0.12;
-        const bar = poly([[cx - w * 0.47 + sk(0), h * 0.05], [cx + w * 0.47 + sk(0), h * 0.05], [cx + w * 0.17 + sk(h * 0.68), h * 0.68], [cx - w * 0.17 + sk(h * 0.68), h * 0.68]]);
-        const cap = ell(cx + sk(h * 0.1), h * 0.11, w * 0.47, h * 0.1);
-        return paint(w, h, [{ shape: or(bar, cap), color: '#ffcf3a' }, { shape: disc(cx + sk(h * 0.88), h * 0.88, Math.max(1.5, w * 0.22)), color: '#ffcf3a' }]);
+        const h = u * 1.3, w = u * 0.56, cx = w / 2;
+        return sprite(w, h, (g) => {
+          g.transform(1, 0, -0.12, 1, h * 0.05, 0); // a lean, like a shout
+          const bar = new Path2D();
+          bar.moveTo(cx - w * 0.44, h * 0.12);
+          bar.quadraticCurveTo(cx - w * 0.44, 0, cx, 0);
+          bar.quadraticCurveTo(cx + w * 0.44, 0, cx + w * 0.44, h * 0.12);
+          bar.lineTo(cx + w * 0.13, h * 0.64);
+          bar.quadraticCurveTo(cx, h * 0.7, cx - w * 0.13, h * 0.64);
+          bar.closePath();
+          paintShape(g, bar, [cx - w * 0.44, 0, cx + w * 0.44, h * 0.7], LOOKS.sun, lw);
+          paintShape(g, circ(new Path2D(), cx, h * 0.87, w * 0.2), [cx - w * 0.2, h * 0.87 - w * 0.2, cx + w * 0.2, h * 0.87 + w * 0.2], LOOKS.sun, lw);
+        });
       }
       case 'ask': {
-        const h = u * 1.3, w = u * 0.8, cx = w / 2, rr = Math.max(1.5, u * 0.09);
-        const hook = [...arcPts(cx, h * 0.3, w * 0.33, h * 0.21, Math.PI * 1.08, Math.PI * 2.18, 12), [cx + w * 0.04, h * 0.52] as [number, number], [cx, h * 0.64] as [number, number]];
-        return paint(w, h, [{ shape: stroke(hook, rr), color: '#6fc6ff' }, { shape: disc(cx, h * 0.87, Math.max(1.5, rr * 1.25)), color: '#6fc6ff' }]);
+        const h = u * 1.3, w = u * 0.78, cx = w / 2, sw = u * 0.17;
+        return sprite(w, h, (g) => {
+          const p = new Path2D();
+          p.moveTo(cx - w * 0.3, h * 0.26);
+          p.bezierCurveTo(cx - w * 0.3, h * 0.04, cx + w * 0.34, h * 0.0, cx + w * 0.32, h * 0.27);
+          p.bezierCurveTo(cx + w * 0.3, h * 0.42, cx + w * 0.02, h * 0.44, cx, h * 0.6);
+          paintStroke(g, p, sw, [0, 0, w, h * 0.62], LOOKS.sky, lw);
+          paintShape(g, circ(new Path2D(), cx, h * 0.86, sw * 0.62), [cx - sw, h * 0.8, cx + sw, h * 0.92], LOOKS.sky, lw);
+        });
       }
       case 'sweat': {
-        const h = u * 0.85, w = u * 0.6, cx = w / 2;
-        const drop = or(ell(cx, h * 0.66, w * 0.46, h * 0.33), poly([[cx + w * 0.08, 0], [cx - w * 0.44, h * 0.6], [cx + w * 0.45, h * 0.6]]));
-        return paint(w, h, [{ shape: drop, color: '#8ed6ff', mat: WET, depth: w * 0.35 }]);
+        const h = u * 0.86, w = u * 0.6, cx = w / 2;
+        return sprite(w, h, (g) => {
+          const p = new Path2D();
+          p.moveTo(cx + w * 0.06, 0);
+          p.bezierCurveTo(cx + w * 0.22, h * 0.28, cx + w * 0.5, h * 0.48, cx + w * 0.5, h * 0.68);
+          p.bezierCurveTo(cx + w * 0.5, h * 0.9, cx + w * 0.26, h, cx, h);
+          p.bezierCurveTo(cx - w * 0.26, h, cx - w * 0.5, h * 0.9, cx - w * 0.5, h * 0.68);
+          p.bezierCurveTo(cx - w * 0.5, h * 0.48, cx - w * 0.1, h * 0.28, cx + w * 0.06, 0);
+          paintShape(g, p, [0, 0, w, h], LOOKS.water, lw);
+          // the classic curved glint down the left of a sweat drop
+          g.save(); g.clip(p);
+          g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineCap = 'round'; g.lineWidth = w * 0.1;
+          g.beginPath(); g.arc(cx + w * 0.06, h * 0.66, w * 0.3, Math.PI * 0.85, Math.PI * 1.3); g.stroke();
+          g.restore();
+        });
       }
       case 'anger': {
-        const s = u * 0.85, c = s / 2, rr = Math.max(1.4, s * 0.1);
-        const pieces = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => {
-          const a0 = Math.atan2(-sy, -sx);
-          return stroke(arcPts(c + sx * s * 0.47, c + sy * s * 0.47, s * 0.36, s * 0.36, a0 - 0.52, a0 + 0.52, 8), rr);
+        const s = u * 0.9, c = s / 2, sw = s * 0.15;
+        return sprite(s, s, (g) => {
+          for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+            const p = new Path2D(), a0 = Math.atan2(-sy, -sx), ax = c + sx * s * 0.46, ay = c + sy * s * 0.46, rr = s * 0.34;
+            p.arc(ax, ay, rr, a0 - 0.55, a0 + 0.55);
+            paintStroke(g, p, sw, [0, 0, s, s], LOOKS.red, lw);
+          }
         });
-        return paint(s, s, [{ shape: or(...pieces), color: '#ff4b3e', depth: rr * 1.4 }]);
       }
       case 'hearts': case 'heartS': {
         const s = u * (kind === 'heartS' ? 0.5 : 0.72), c = s / 2;
-        const heart: Shape = Object.assign((x: number, y: number) => {
-          const a = (x - c) / (s * 0.5), b = -(y - c) / (s * 0.5) + 0.12;
-          return (a * a + b * b - 1) ** 3 - a * a * b * b * b <= 0;
-        }, { bb: [0, 0, s, s] as [number, number, number, number] });
-        return paint(s, s, [{ shape: heart, color: kind === 'heartS' ? '#ff86ac' : '#ff5b8a', depth: s * 0.3 }]);
+        return sprite(s, s * 0.92, (g) => {
+          const p = new Path2D();
+          p.moveTo(c, s * 0.28);
+          p.bezierCurveTo(c, s * 0.08, c - s * 0.5, s * 0.02, c - s * 0.5, s * 0.32);
+          p.bezierCurveTo(c - s * 0.5, s * 0.56, c - s * 0.18, s * 0.72, c, s * 0.9);
+          p.bezierCurveTo(c + s * 0.18, s * 0.72, c + s * 0.5, s * 0.56, c + s * 0.5, s * 0.32);
+          p.bezierCurveTo(c + s * 0.5, s * 0.02, c, s * 0.08, c, s * 0.28);
+          paintShape(g, p, [0, 0, s, s * 0.9], kind === 'heartS' ? LOOKS.rose : LOOKS.pink, lw);
+        });
       }
       case 'notes': {
-        const h = u * 0.8, rr = Math.max(1.1, u * 0.045), color = NOTE_COLS[v % 4];
+        const h = u * 0.82, L = NOTE_LOOKS[v % 4], sw = u * 0.075;
         if (v % 2 === 0) {
           const w = h * 0.62, hx = w * 0.32, hy = h * 0.8, sx = hx + h * 0.15;
-          const head = ell(hx, hy, h * 0.19, h * 0.13);
-          const stem = seg(sx, hy - h * 0.02, sx, h * 0.07, rr);
-          const flag = stroke([[sx, h * 0.07], [sx + w * 0.3, h * 0.22], [sx + w * 0.36, h * 0.4], [sx + w * 0.22, h * 0.52]], rr);
-          return paint(w, h, [{ shape: or(head, stem, flag), color, depth: h * 0.12 }]);
+          return sprite(w, h, (g) => {
+            const st = new Path2D(); st.moveTo(sx, hy - h * 0.02); st.lineTo(sx, h * 0.07);
+            st.bezierCurveTo(sx + w * 0.1, h * 0.2, sx + w * 0.42, h * 0.24, sx + w * 0.26, h * 0.52);
+            paintStroke(g, st, sw, [0, 0, w, h], L, lw);
+            paintShape(g, ell(new Path2D(), hx, hy, h * 0.19, h * 0.13, -0.4), [hx - h * 0.19, hy - h * 0.13, hx + h * 0.19, hy + h * 0.13], L, lw);
+          });
         }
-        const w = h * 0.95, x1 = w * 0.3, x2 = w * 0.84;
-        const heads = or(ell(x1 - h * 0.14, h * 0.82, h * 0.17, h * 0.12), ell(x2 - h * 0.14, h * 0.74, h * 0.17, h * 0.12));
-        const stems = or(seg(x1, h * 0.8, x1, h * 0.1, rr), seg(x2, h * 0.72, x2, h * 0.02, rr));
-        const beam = poly([[x1 - rr, h * 0.06], [x2 + rr, -h * 0.02], [x2 + rr, h * 0.12], [x1 - rr, h * 0.2]]);
-        return paint(w, h, [{ shape: or(heads, stems, beam), color, depth: h * 0.12 }]);
+        const w = h * 0.95, x1 = w * 0.3, x2 = w * 0.86;
+        return sprite(w, h, (g) => {
+          const st = new Path2D(); st.moveTo(x1, h * 0.8); st.lineTo(x1, h * 0.12); st.lineTo(x2, h * 0.02); st.lineTo(x2, h * 0.72);
+          paintStroke(g, st, sw, [0, 0, w, h], L, lw);
+          const beam = new Path2D(); beam.moveTo(x1, h * 0.12); beam.lineTo(x2, h * 0.02);
+          paintStroke(g, beam, sw * 2.2, [0, 0, w, h], L, lw);
+          for (const [hx, hy] of [[x1 - h * 0.14, h * 0.82], [x2 - h * 0.14, h * 0.74]]) paintShape(g, ell(new Path2D(), hx, hy, h * 0.17, h * 0.12, -0.4), [hx - h * 0.17, hy - h * 0.12, hx + h * 0.17, hy + h * 0.12], L, lw);
+        });
       }
       case 'sparkle': {
-        // a four-point twinkle: the arm length picks the frame (v = tint * 4 + frame)
-        const a = Math.max(1.5, u * [0.12, 0.24, 0.38, 0.3][v % 4]), s = a * 2 + 1, c = s / 2, q = Math.max(0.7, a * 0.22);
-        const star = poly([[c, c - a], [c + q, c - q], [c + a, c], [c + q, c + q], [c, c + a], [c - q, c + q], [c - a, c], [c - q, c - q]]);
-        return paint(s, s, [{ shape: star, color: SPARK_COLS[Math.floor(v / 4) % 4], mat: LIT, depth: Math.max(1, a * 0.35) }], { wobble: 0 });
+        // a four-point twinkle with concave sides and a glow; the arm length picks the frame (v = tint * 4 + frame)
+        const a = Math.max(3, u * [0.12, 0.24, 0.38, 0.3][v % 4]), s = a * 2, c = a, tint = SPARK_TINTS[Math.floor(v / 4) % 4];
+        return sprite(s, s, (g) => {
+          const p = new Path2D(), k = a * 0.16;
+          p.moveTo(c, c - a);
+          p.quadraticCurveTo(c + k, c - k, c + a, c); p.quadraticCurveTo(c + k, c + k, c, c + a);
+          p.quadraticCurveTo(c - k, c + k, c - a, c); p.quadraticCurveTo(c - k, c - k, c, c - a);
+          g.save();
+          g.shadowColor = tint; g.shadowBlur = a * 0.9;
+          const rg = g.createRadialGradient(c, c, 0, c, c, a);
+          rg.addColorStop(0, '#ffffff'); rg.addColorStop(0.35, '#ffffff'); rg.addColorStop(1, tint);
+          g.fillStyle = rg; g.fill(p);
+          g.restore();
+          g.fillStyle = '#ffffff'; g.beginPath(); g.arc(c, c, a * 0.14, 0, Math.PI * 2); g.fill();
+        }, 0.45);
       }
       case 'bubble': case 'zzz': {
         const w = u * 1.75, h = u * 1.3;
-        const cloud = or(ell(w * 0.52, h * 0.4, w * 0.4, h * 0.27), ell(w * 0.3, h * 0.4, w * 0.24, h * 0.22), ell(w * 0.74, h * 0.37, w * 0.22, h * 0.22), ell(w * 0.5, h * 0.22, w * 0.25, h * 0.18));
-        const tail = or(disc(w * 0.17, h * 0.78, Math.max(1.5, h * 0.09)), disc(w * 0.06, h * 0.93, Math.max(1, h * 0.05)));
-        return paint(w, h, [{ shape: cloud, color: '#fbf8ff', mat: SOFT, depth: h * 0.2 }, { shape: tail, color: '#fbf8ff', mat: SOFT, depth: h * 0.06 }]);
+        return sprite(w, h, (g) => {
+          cloud(g, [[w * 0.52, h * 0.42, h * 0.27], [w * 0.3, h * 0.42, h * 0.22], [w * 0.74, h * 0.39, h * 0.22], [w * 0.47, h * 0.24, h * 0.2], [w * 0.63, h * 0.25, h * 0.17]], LOOKS.cloud, lw);
+          cloud(g, [[w * 0.18, h * 0.79, h * 0.085]], LOOKS.cloud, lw * 0.8);
+          cloud(g, [[w * 0.07, h * 0.94, h * 0.05]], LOOKS.cloud, lw * 0.7);
+        });
       }
       case 'z': case 'zs': {
-        const s = u * (kind === 'z' ? 0.34 : 0.22), rr = Math.max(0.9, s * 0.12);
-        const z = stroke([[s * 0.1, s * 0.12], [s * 0.9, s * 0.12], [s * 0.12, s * 0.88], [s * 0.92, s * 0.88]], rr);
-        return paint(s, s, [{ shape: z, color: '#5b4fc8', depth: rr }], { wobble: 0.15 });
+        const s = u * (kind === 'z' ? 0.34 : 0.22), sw = Math.max(2, s * 0.2);
+        return sprite(s, s, (g) => {
+          const p = new Path2D(); p.moveTo(s * 0.1, s * 0.12); p.lineTo(s * 0.9, s * 0.12); p.lineTo(s * 0.12, s * 0.88); p.lineTo(s * 0.92, s * 0.88);
+          paintStroke(g, p, sw, [0, 0, s, s], LOOKS.zee, Math.max(1, lw * 0.5));
+        });
       }
       case 'bulb': {
-        const h = u * 1.25, w = u * 0.8, cx = w / 2;
-        const glass = or(ell(cx, h * 0.36, w * 0.47, h * 0.34), poly([[cx - w * 0.33, h * 0.52], [cx + w * 0.33, h * 0.52], [cx + w * 0.21, h * 0.73], [cx - w * 0.21, h * 0.73]]));
-        const base = or(...[0, 1, 2].map((i) => ell(cx, h * (0.77 + i * 0.065), w * 0.24, h * 0.035)));
-        const tip = ell(cx, h * 0.95, w * 0.12, h * 0.04);
-        return paint(w, h, [
-          { shape: glass, color: v ? '#f3ecd2' : '#ffe35a', mat: v ? SOFT : LIT, depth: w * 0.3 },
-          { shape: base, color: '#c8ccda', mat: METAL, depth: h * 0.035, base: 1, seam: true },
-          { shape: tip, color: '#5d6074', mat: METAL, depth: 1, base: 1, seam: true },
-        ]);
+        const h = u * 1.25, w = u * 0.8, cx = w / 2, L = v ? LOOKS.bulbOff : LOOKS.bulb;
+        return sprite(w, h, (g) => {
+          for (let i = 2; i >= 0; i--) {
+            const y = h * (0.76 + i * 0.065), p = new Path2D();
+            p.roundRect(cx - w * 0.24, y, w * 0.48, h * 0.07, h * 0.035);
+            paintShape(g, p, [cx - w * 0.24, y, cx + w * 0.24, y + h * 0.07], LOOKS.metal, lw * 0.7);
+          }
+          const glass = new Path2D();
+          glass.moveTo(cx - w * 0.2, h * 0.76);
+          glass.bezierCurveTo(cx - w * 0.2, h * 0.6, cx - w * 0.48, h * 0.56, cx - w * 0.48, h * 0.36);
+          glass.bezierCurveTo(cx - w * 0.48, h * 0.1, cx - w * 0.24, 0, cx, 0);
+          glass.bezierCurveTo(cx + w * 0.24, 0, cx + w * 0.48, h * 0.1, cx + w * 0.48, h * 0.36);
+          glass.bezierCurveTo(cx + w * 0.48, h * 0.56, cx + w * 0.2, h * 0.6, cx + w * 0.2, h * 0.76);
+          glass.closePath();
+          paintShape(g, glass, [0, 0, w, h * 0.76], L, lw);
+          if (!v) { g.strokeStyle = 'rgba(255, 150, 40, 0.9)'; g.lineWidth = lw * 1.1; g.lineCap = 'round'; g.beginPath(); g.moveTo(cx - w * 0.12, h * 0.62); g.lineTo(cx - w * 0.06, h * 0.44); g.lineTo(cx, h * 0.56); g.lineTo(cx + w * 0.06, h * 0.44); g.lineTo(cx + w * 0.12, h * 0.62); g.stroke(); }
+        });
       }
       case 'cloud': case 'gloom': {
         const w = u * 2.3, h = u * 0.95;
-        const cloud = or(ell(w * 0.5, h * 0.6, w * 0.42, h * 0.3), ell(w * 0.3, h * 0.45, w * 0.2, h * 0.3), ell(w * 0.58, h * 0.36, w * 0.22, h * 0.32), ell(w * 0.8, h * 0.55, w * 0.15, h * 0.26));
-        return paint(w, h, [{ shape: cloud, color: '#6e7398', mat: SOFT, depth: h * 0.3 }]);
+        return sprite(w, h, (g) => cloud(g, [[w * 0.5, h * 0.6, h * 0.32], [w * 0.28, h * 0.52, h * 0.3], [w * 0.58, h * 0.36, h * 0.32], [w * 0.8, h * 0.56, h * 0.26], [w * 0.4, h * 0.34, h * 0.24]], LOOKS.storm, lw));
       }
       case 'steam': {
         // swelling in three frames, breaking into wisps in the fourth
         const d = u * [0.32, 0.44, 0.56, 0.56][v % 4], s = d * 1.3, c = s / 2;
-        const sh = v % 4 < 3
-          ? or(ell(c + d * 0.08, c, d * 0.42, d * 0.35), ell(c - d * 0.24, c + d * 0.1, d * 0.27, d * 0.22), ...(v % 4 ? [ell(c + d * 0.2, c - d * 0.16, d * 0.24, d * 0.2)] : []))
-          : or(ell(c - d * 0.3, c + d * 0.1, d * 0.16, d * 0.13), ell(c + d * 0.22, c - d * 0.18, d * 0.2, d * 0.15), ell(c + d * 0.06, c + d * 0.3, d * 0.11, d * 0.1));
-        return paint(s, s, [{ shape: sh, color: '#ffffff', mat: SOFT, depth: d * 0.2 }]);
+        const blobs: [number, number, number][] = v % 4 < 3
+          ? [[c + d * 0.08, c, d * 0.36], [c - d * 0.24, c + d * 0.1, d * 0.24], ...(v % 4 ? [[c + d * 0.24, c - d * 0.16, d * 0.22] as [number, number, number]] : [])]
+          : [[c - d * 0.3, c + d * 0.1, d * 0.15], [c + d * 0.22, c - d * 0.18, d * 0.18], [c + d * 0.06, c + d * 0.3, d * 0.1]];
+        return sprite(s, s, (g) => cloud(g, blobs, LOOKS.steam, Math.max(1, lw * 0.7)));
       }
     }
   });
@@ -208,7 +307,7 @@ export function markArt(kind: EmoteKind | 'heartS' | 'z' | 'zs' | 'cloud' | 'bub
 
 interface Live { kind: EmoteKind; anchor: EmoteAnchor; t0: number; dur: number; side: number; seed: number; calm: boolean }
 const live: Live[] = [];
-let cv: HTMLCanvasElement | null = null, ctx: CanvasRenderingContext2D | null = null, raf = 0, A = 1;
+let cv: HTMLCanvasElement | null = null, ctx: CanvasRenderingContext2D | null = null, raf = 0;
 
 function ensure() {
   if (cv || typeof document === 'undefined') return;
@@ -216,7 +315,7 @@ function ensure() {
   cv.className = 'hh-emotes';
   cv.setAttribute('aria-hidden', 'true');
   // between the 3D view (#world) and the interface (#ui, z-index 2): the HUD and panels always cover a mark
-  Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', zIndex: '1', pointerEvents: 'none', imageRendering: 'pixelated' });
+  Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', width: '100vw', height: '100vh', zIndex: '1', pointerEvents: 'none' });
   document.body.appendChild(cv);
   ctx = cv.getContext('2d');
 }
@@ -239,12 +338,13 @@ export function clearEmotes() { live.length = 0; ctx?.clearRect(0, 0, cv!.width,
 function frame() {
   raf = 0;
   if (!cv || !ctx) return;
-  // one canvas pixel = one art pixel (a whole number of device pixels, so the browser's upscale stays crisp)
-  A = artPx();
-  const W = Math.ceil(innerWidth / A), H = Math.ceil(innerHeight / A);
-  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; cv.style.width = `${W * A}px`; cv.style.height = `${H * A}px`; }
+  // full device resolution: smooth, crisp vector art on any screen
+  const d = dprNow(), W = Math.round(innerWidth * d), H = Math.round(innerHeight * d);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, W, H);
-  ctx.imageSmoothingEnabled = false;
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+  ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   const now = fxNow();
   const avoid = bubbleRects();
   for (let i = live.length - 1; i >= 0; i--) {
@@ -284,64 +384,80 @@ function bubbleRects(): DOMRect[] {
   return out;
 }
 
-/** A pop: a quick overshoot in four stepped beats (anime pops on twos), then rest; the mark is re-painted at each size. */
+/** A pop: a quick squash-and-stretch overshoot, then rest. */
 function pop(t: number, calm: boolean): number {
   if (calm) return 1;
-  if (t < 0.04) return 0.55;
-  if (t < 0.08) return 1.3;
-  if (t < 0.13) return 0.9;
-  if (t < 0.18) return 1.06;
+  if (t < 0.05) return 0.4 + (t / 0.05) * 0.9;
+  if (t < 0.1) return 1.3 - ((t - 0.05) / 0.05) * 0.4;
+  if (t < 0.16) return 0.9 + ((t - 0.1) / 0.06) * 0.16;
+  if (t < 0.22) return 1.06 - ((t - 0.16) / 0.06) * 0.06;
   return 1;
 }
-/** fade out over the last `f` seconds, in four steps */
+/** fade out over the last `f` seconds */
 const out = (t: number, dur: number, f = 0.2) => Math.max(0, Math.min(1, (dur - t) / f));
+/** Draw a mark canvas centred at (x, y) CSS px, scaled (sx may flip it), faded. */
+function put(c: CanvasRenderingContext2D, img: HTMLCanvasElement, x: number, y: number, sx = 1, sy = 1, alpha = 1) {
+  if (alpha <= 0.01) return;
+  const d = dprNow(), w = (img.width / d) * Math.abs(sx), h = (img.height / d) * sy;
+  c.save();
+  c.globalAlpha = alpha;
+  c.translate(x, y);
+  if (sx < 0) c.scale(-1, 1);
+  c.drawImage(img, -w / 2, -h / 2, w, h);
+  c.restore();
+}
+/** a tapered stroke (motion lines, rays): thick at `a`, a point at `b` */
+function taper(c: CanvasRenderingContext2D, ax: number, ay: number, bx: number, by: number, w: number) {
+  const dx = bx - ax, dy = by - ay, l = Math.hypot(dx, dy) || 1, nx = -dy / l * w / 2, ny = dx / l * w / 2;
+  c.beginPath(); c.moveTo(ax + nx, ay + ny); c.lineTo(bx, by); c.lineTo(ax - nx, ay - ny); c.arc(ax, ay, w / 2, Math.atan2(-ny, -nx), Math.atan2(ny, nx), true); c.fill();
+}
 
 function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y: number; r: number }, avoid: DOMRect[]) {
   const calm = l.calm;
-  // everything below is in art pixels: the face's centre, its radius, and the marks' unit size (bold on a phone,
-  // in proportion with a big face on a big screen)
-  const X = s.x / A, Y = s.y / A, r = s.r / A;
-  const u = Math.max(18, Math.min(44, Math.round(r * 0.7) * 2));
-  if (!l.side) l.side = pickSide(s, u * A * 1.1);
+  // everything below is in CSS px: the face's centre, its radius, and the marks' unit size (bold on a phone, in
+  // proportion with a big face on a big screen)
+  const X = s.x, Y = s.y, r = s.r;
+  const u = Math.max(26, Math.min(84, r * 1.4));
+  if (!l.side) l.side = pickSide(s, u * 1.1);
   const side = l.side;
-  const fade = out(t, l.dur, calm ? 0.35 : 0.2);
-  const a = fade >= 1 ? 1 : Math.round(fade * 4) / 4;
-  // a spot beside the head (art px), nudged off any speech bubble, snapped to the art grid
+  const fade = out(t, l.dur, calm ? 0.35 : 0.22);
+  const a = fade;
+  // a spot beside the head, nudged off any speech bubble
   const at = (dx: number, dy: number): [number, number] => {
     let x = X + dx, y = Y + dy;
-    for (const b of avoid) if (x * A > b.left - u * A * 0.5 && x * A < b.right + u * A * 0.5 && y * A > b.top - u * A * 0.4 && y * A < b.bottom + u * A * 0.3) y = b.bottom / A + u * 0.45;
-    return [Math.round(x), Math.round(y)];
+    for (const b of avoid) if (x > b.left - u * 0.5 && x < b.right + u * 0.5 && y > b.top - u * 0.4 && y < b.bottom + u * 0.3) y = b.bottom + u * 0.45;
+    return [x, y];
   };
-  const bob = calm ? 0 : Math.round(Math.sin(t * 9) * 0.6);
+  const bob = calm ? 0 : Math.sin(t * 9) * u * 0.02;
   const P = (tt: number) => pop(tt, calm);
   switch (l.kind) {
     case 'bang': case 'ask': {
-      const img = markArt(l.kind, u * P(t)), rest = markArt(l.kind, u);
-      const [x, y] = at(side * (r * 0.8 + rest.width * 0.5), -r * 0.75 - rest.height * 0.3);
-      const hop = calm ? 0 : t < 0.18 ? -Math.round((1 - t / 0.18) * u * 0.18) : 0;
-      const wob = l.kind === 'ask' && !calm ? Math.round(Math.sin(t * 7) * 1.2) : 0;
-      blit(c, img, x + wob, y + hop + bob, 1, 1, 1, a);
+      const img = markArt(l.kind, u), h = img.height / dprNow(), w = img.width / dprNow();
+      const [x, y] = at(side * (r * 0.8 + w * 0.36), -r * 0.75 - h * 0.22);
+      const hop = calm ? 0 : t < 0.2 ? -(1 - t / 0.2) * u * 0.18 : 0;
+      const wob = l.kind === 'ask' && !calm ? Math.sin(t * 7) * u * 0.03 : 0;
+      put(c, img, x + wob, y + hop + bob, P(t), P(t), a);
       // motion lines flicking on twos round the top
       if (!calm && t > 0.04 && t < 0.62 && Math.floor(t * 12) % 2 === 0) {
         c.fillStyle = LINE;
-        const hh = img.height / 2, n = Math.max(2, Math.round(u * 0.14)), th = u >= 30 ? 2 : 1;
+        const hh = h * 0.36, n = u * 0.2, th = Math.max(2, u * 0.06);
         for (const ang of [-2.5, -1.57, -0.64]) {
           const ca = Math.cos(ang), sa = Math.sin(ang);
-          texLine(c, ca * (hh + 2), sa * (hh + 2), ca * (hh + 2 + n), sa * (hh + 2 + n), 1, x + wob, y + hop, th);
+          taper(c, x + wob + ca * (hh + 4), y + hop + sa * (hh + 4), x + wob + ca * (hh + 4 + n), y + hop + sa * (hh + 4 + n), th);
         }
       }
       break;
     }
     case 'sweat': {
-      const slide = calm ? 0 : Math.round(Math.min(1, t / 1.1) * u * 0.2);
+      const slide = calm ? 0 : Math.min(1, t / 1.1) * u * 0.2;
       const [x, y] = at(side * (r * 0.85 + u * 0.3), -r * 0.5);
-      blit(c, markArt('sweat', u * P(t)), x, y + slide, 1, side, 1, a);
+      put(c, markArt('sweat', u), x, y + slide, side * P(t), P(t), a);
       break;
     }
     case 'anger': {
       const [x, y] = at(side * (r * 0.7 + u * 0.32), -r * 0.65 - u * 0.2);
-      const beat = calm ? 1 : t < 0.18 ? P(t) : Math.floor((t - 0.18) / 0.13) % 2 === 0 ? 1.16 : 1;
-      blit(c, markArt('anger', u * beat), x, y, 1, 1, 1, a);
+      const beat = calm ? 1 : t < 0.22 ? P(t) : 1 + 0.08 * (1 + Math.sin((t - 0.22) * 22)) ;
+      put(c, markArt('anger', u), x, y, beat, beat, a);
       break;
     }
     case 'notes': {
@@ -349,9 +465,12 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         const tt = t - i * 0.28;
         if (tt < 0) continue;
         const life = l.dur - 0.56, rise = Math.min(1, tt / life);
-        const sway = calm ? 0 : Math.round(Math.sin(tt * 6 + i) * u * 0.08);
-        const [x, y] = at(side * (r * 0.8 + u * 0.35 + i * u * 0.22) + sway, -r * 0.25 - Math.round(rise * u * 0.7) - i * u * 0.08);
-        blit(c, markArt('notes', u * P(tt), (i + l.seed) % 4), x, y, 1, 1, 1, Math.min(a, out(tt, life, 0.25)));
+        const sway = calm ? 0 : Math.sin(tt * 6 + i) * u * 0.08;
+        const tilt = calm ? 0 : Math.sin(tt * 5 + i) * 0.12;
+        const [x, y] = at(side * (r * 0.8 + u * 0.35 + i * u * 0.22) + sway, -r * 0.25 - rise * u * 0.7 - i * u * 0.08);
+        c.save(); c.translate(x, y); c.rotate(tilt);
+        put(c, markArt('notes', u, (i + l.seed) % 4), 0, 0, P(tt), P(tt), Math.min(a, out(tt, life, 0.25)));
+        c.restore();
       }
       break;
     }
@@ -362,10 +481,13 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         const ang = -Math.PI * (i % 2 ? 0.06 + rr() * 0.34 : 0.6 + rr() * 0.34), dist = r * (1.45 + rr() * 0.5);
         const t0 = i * 0.09 + rr() * 0.05, tt = t - t0;
         if (tt < 0) continue;
-        if (tt > 0.64 && !calm) continue;
-        const ph = calm ? 2 : [0, 1, 2, 2, 3, 2, 1, 0][Math.min(7, Math.floor(tt / 0.08))] ?? 0;
+        if (tt > 0.7 && !calm) continue;
+        // a twinkle: grows in, flickers, shrinks away (and turns a little)
+        const k = calm ? 1 : tt < 0.15 ? tt / 0.15 : tt > 0.5 ? Math.max(0, (0.7 - tt) / 0.2) : 1 - (Math.floor(tt * 16) % 3 === 0 ? 0.25 : 0);
         const [x, y] = at(Math.cos(ang) * dist, Math.sin(ang) * dist * 0.85);
-        blit(c, markArt('sparkle', u, ((i + l.seed) % 3) * 4 + ph), x, y, 1, 1, 1, calm ? a : 1);
+        c.save(); c.translate(x, y); c.rotate(calm ? 0 : tt * 1.6);
+        put(c, markArt('sparkle', u, ((i + l.seed) % 4) * 4 + 2), 0, 0, k, k, calm ? a : 1);
+        c.restore();
       }
       break;
     }
@@ -374,26 +496,26 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         const tt = t - i * 0.2;
         if (tt < 0) continue;
         const life = l.dur - 0.4, rise = Math.min(1, tt / life);
-        const sway = calm ? 0 : Math.round(Math.sin(tt * 5 + i * 2) * u * 0.07);
-        const beat = calm ? 1 : tt < 0.18 ? P(tt) : Math.floor(tt / 0.22) % 2 ? 1.1 : 1;
-        const [x, y] = at(side * (r * 0.45 + u * (0.3 + i * 0.36)) + sway, -r * 0.9 - u * (0.2 + i * 0.08) - Math.round(rise * u * 0.55));
-        blit(c, markArt(i === 1 ? 'heartS' : 'hearts', u * beat), x, y, 1, 1, 1, Math.min(a, out(tt, life, 0.25)));
+        const sway = calm ? 0 : Math.sin(tt * 5 + i * 2) * u * 0.07;
+        const beat = calm ? 1 : tt < 0.22 ? P(tt) : 1 + 0.06 * Math.max(0, Math.sin(tt * 18));
+        const [x, y] = at(side * (r * 0.45 + u * (0.3 + i * 0.36)) + sway, -r * 0.9 - u * (0.2 + i * 0.08) - rise * u * 0.55);
+        put(c, markArt(i === 1 ? 'heartS' : 'hearts', u), x, y, beat, beat, Math.min(a, out(tt, life, 0.25)));
       }
       break;
     }
     case 'zzz': {
-      const breathe = calm ? 1 : t < 0.18 ? P(t) : 1 + (Math.floor(t * 2) % 2) * 0.05;
-      const img = markArt('bubble', u * breathe);
-      const [x, y] = at(side * (r * 0.8 + img.width * 0.5), -r * 0.8 - img.height * 0.35);
-      blit(c, img, x, y, 1, side, 1, a);
-      if (t > 0.15 && a > 0) {
-        const bx = x - img.width / 2, by = y - img.height / 2, w = img.width;
-        const zs: ['z' | 'zs', number, number, number][] = [['z', 0.46, 0.4, 0.25], ['zs', 0.66, 0.3, 0.55], ['zs', 0.8, 0.2, 0.85]];
+      const breathe = calm ? 1 : t < 0.22 ? P(t) : 1 + Math.sin(t * 3) * 0.03;
+      const img = markArt('bubble', u), w = img.width / dprNow(), h = img.height / dprNow();
+      const [x, y] = at(side * (r * 0.8 + w * 0.4), -r * 0.8 - h * 0.3);
+      put(c, img, x, y, side * breathe, breathe, a);
+      if (t > 0.15) {
+        const bx = x - w / 2, by = y - h / 2;
+        const zs: ['z' | 'zs', number, number, number][] = [['z', 0.44, 0.42, 0.25], ['zs', 0.63, 0.33, 0.55], ['zs', 0.77, 0.24, 0.85]];
         for (const [kind, zx, zy, tz] of zs) {
           if (t < tz) continue;
-          const b = calm ? 0 : Math.round(Math.sin((t - tz) * 6) * 0.8);
+          const b = calm ? 0 : Math.sin((t - tz) * 6) * u * 0.03;
           const xx = side > 0 ? bx + zx * w : bx + (1 - zx) * w;
-          blit(c, markArt(kind, u), Math.round(xx), Math.round(by + zy * img.height + b), 1, 1, 1, a);
+          put(c, markArt(kind, u), xx, by + zy * h + b, P(t - tz), P(t - tz), a);
         }
       }
       break;
@@ -401,33 +523,32 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
     case 'bulb': {
       const [x, y] = at(side * r * 0.3, -r * 1.0 - u * 0.65);
       const on = calm || t > 0.55 || Math.floor(t * 10) % 2 === 0;
-      const img = markArt('bulb', u * P(t), on ? 0 : 1);
-      blit(c, img, x, y, 1, 1, 1, a);
-      if (on && t > 0.1 && a > 0.5) {
-        c.fillStyle = '#ffcf3a';
-        const hh = img.height / 2, n = Math.max(2, Math.round(u * 0.12)), th = u >= 30 ? 2 : 1;
+      const img = markArt('bulb', u, on ? 0 : 1), h = img.height / dprNow();
+      put(c, img, x, y, P(t), P(t), a);
+      if (on && t > 0.1 && a > 0.3) {
+        c.save(); c.globalAlpha = a; c.fillStyle = '#ffc93a';
+        const r0 = h * 0.34 + (calm ? 0 : (Math.floor(t * 8) % 2) * u * 0.03), n = u * 0.18, th = Math.max(2, u * 0.07);
         for (const ang of [-2.6, -2.05, -1.57, -1.09, -0.54]) {
-          const ca = Math.cos(ang), sa = Math.sin(ang), r0 = hh * 0.85 + 2 + (calm ? 0 : Math.floor(t * 8) % 2);
-          texLine(c, ca * r0, sa * r0 - hh * 0.25, ca * (r0 + n), sa * (r0 + n) - hh * 0.25, 1, x, y, th);
+          const ca = Math.cos(ang), sa = Math.sin(ang), cy = y - h * 0.12;
+          taper(c, x + ca * (r0 + n), cy + sa * (r0 + n), x + ca * r0, cy + sa * r0, th);
         }
+        c.restore();
       }
       break;
     }
     case 'gloom': {
       const grow = calm ? 1 : Math.min(1, t / 0.45);
-      const img = markArt('cloud', u);
+      const img = markArt('cloud', u), w = img.width / dprNow(), h = img.height / dprNow();
       const [x, y] = at(0, -r * 0.95 - u * 0.5);
-      const drift = calm ? 0 : Math.round(Math.sin(t * 2.4));
-      blit(c, img, x + drift, y, 1, 1, 1, Math.min(a, calm ? 1 : Math.min(1, t / 0.12)));
-      // the vertical gloom lines hang down from the cloud over the head
-      if (a > 0.25) {
-        c.fillStyle = '#4d4a7e';
-        const top = img.height / 2 - 3, rr = rng(l.seed), n = Math.max(4, Math.round(u / 4)), span = img.width * 0.62;
-        for (let i = 0; i < n; i++) {
-          const lx = Math.round(-span / 2 + (i / (n - 1)) * span + rr() * 2), len = Math.round((u * 0.25 + rr() * u * 0.3) * grow);
-          const flick = calm ? 0 : (Math.floor(t * 8) + i) % 3 === 0 ? 1 : 0;
-          texLine(c, lx, top + 2 + flick, lx, top + 2 + flick + len, 1, x + drift, y, u >= 30 ? 2 : 1);
-        }
+      const drift = calm ? 0 : Math.sin(t * 2.4) * u * 0.03;
+      put(c, img, x + drift, y, 1, 1, Math.min(a, calm ? 1 : Math.min(1, t / 0.12)));
+      // the vertical gloom lines hang down from the cloud over the head, fading as they fall
+      const rr = rng(l.seed), n = 7, span = w * 0.5, top = y + h * 0.22;
+      for (let i = 0; i < n; i++) {
+        const lx = x + drift - span / 2 + (i / (n - 1)) * span + (rr() - 0.5) * u * 0.05, len = (u * 0.3 + rr() * u * 0.35) * grow;
+        const gr = c.createLinearGradient(lx, top, lx, top + len);
+        gr.addColorStop(0, `rgba(77, 74, 126, ${0.95 * a})`); gr.addColorStop(1, 'rgba(77, 74, 126, 0)');
+        c.fillStyle = gr; c.fillRect(lx - Math.max(1, u * 0.025), top, Math.max(2, u * 0.05), len);
       }
       break;
     }
@@ -435,10 +556,10 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
       for (let wave = 0; wave < 2; wave++) {
         const tt = t - wave * 0.32;
         if (tt < 0 || tt > 0.62) continue;
-        const f = Math.min(3, Math.floor(tt / 0.16));
+        const f = Math.min(3, Math.floor(tt / 0.16)), k = tt / 0.62;
         for (const sd of [-1, 1]) {
-          const [x, y] = at(sd * (r * 1.05 + Math.round((tt / 0.62) * u * 0.4)), -r * 0.35 - Math.round((tt / 0.62) * u * 0.25));
-          blit(c, markArt('steam', u, f), x, y, 1, sd, 1, calm ? a : 1);
+          const [x, y] = at(sd * (r * 1.05 + k * u * 0.4), -r * 0.35 - k * u * 0.25);
+          put(c, markArt('steam', u, f), x, y, sd * (0.85 + k * 0.3), 0.85 + k * 0.3, calm ? a : Math.min(1, (1 - k) * 2.5));
         }
       }
       break;

@@ -5,7 +5,6 @@
 //   ?sheet=emotes&t=0.45    every emote mark beside Pip, frozen t seconds in
 //   ?fx=levelup&t=0.3&bg=/dist/shot.png   a big moment over a backdrop, frozen t seconds in
 import * as THREE from 'three';
-import { artPx } from '../../gfx/artpx.ts';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { OwlActor, type OwlMood } from '../../owl/actor.ts';
 import type { OwlLook } from '../../owl/model.ts';
@@ -13,7 +12,7 @@ import { SPECIES } from '../../owl/species.ts';
 import { PIECE_MODELS } from '../../owl/outfits.ts';
 import { Beaver, BEAVER_FACES } from '../../world/stages/beaver.ts';
 import { animeMoment, setChibi, sfxArt, type AnimeMoment } from './anime.ts';
-import { EMOTES, popEmote, project, type EmoteKind } from './emotes.ts';
+import { dprNow, EMOTES, popEmote, project, type EmoteKind } from './emotes.ts';
 
 const q = new URLSearchParams(location.search);
 const W = innerWidth, H = innerHeight;
@@ -132,9 +131,8 @@ async function fxShot() {
   }
   const look: OwlLook = sp(q.get('sp') ?? 'tawny');
   const { owlIconAsync } = await import('../portraits.ts');
-  const { pixelate } = await import('../pxfx.tsx');
   const url = await owlIconAsync(look, 'face').catch(() => '');
-  if (url) await setChibi(await pixelate(url, 44));
+  if (url) await setChibi(url);
   await document.fonts.ready;
   await new Promise((res) => setTimeout(res, 300));
   const t = +(q.get('t') ?? 0.3);
@@ -180,16 +178,17 @@ else if (q.get('words')) void (async () => {
   canvas.style.display = 'none';
   const list = q.get('words')!.split(',');
   const styles = [{ fill: '#ffd84a', deep: '#f08a1c' }, { fill: '#c9a6ff', deep: '#7448d8' }, { fill: '#8ff0b8', deep: '#2ea26a' }, { fill: '#ff6a4a', deep: '#b8202c' }, { fill: '#d8d2ff', deep: '#6a62c8', ink: '#1a1430' }, { fill: '#8fe0ff', deep: '#2f8ad8' }];
-  const B = artPx(), c = document.createElement('canvas');
-  c.width = Math.ceil(W / B); c.height = Math.ceil(H / B);
-  Object.assign(c.style, { position: 'fixed', inset: '0', width: `${c.width * B}px`, height: `${c.height * B}px`, imageRendering: 'pixelated' });
+  const d = dprNow(), c = document.createElement('canvas');
+  c.width = W * d; c.height = H * d;
+  Object.assign(c.style, { position: 'fixed', inset: '0', width: `${W}px`, height: `${H}px` });
   document.body.appendChild(c);
   const g = c.getContext('2d')!;
-  g.imageSmoothingEnabled = false;
+  g.setTransform(d, 0, 0, d, 0, 0);
+  const size = +(q.get('size') ?? 64);
   list.forEach((w, i) => {
-    const art = sfxArt(w, { ...styles[i % styles.length], size: 3 });
-    const cx = c.width / 2, cy = 30 + i * 58;
-    for (const a of art) g.drawImage(a.img, Math.round(cx + a.x - a.img.width / 2), Math.round(cy + a.y - a.img.height / 2));
+    const art = sfxArt(w, { ...styles[i % styles.length], size });
+    const cx = W / 2, cy = size * 0.9 + i * size * 1.35;
+    for (const a of art) { const iw = a.img.width / d, ih = a.img.height / d; g.save(); g.translate(cx + a.x, cy + a.y); g.rotate(a.rot - 0.1); g.drawImage(a.img, -iw / 2, -ih / 2, iw, ih); g.restore(); }
   });
   done();
 })();
