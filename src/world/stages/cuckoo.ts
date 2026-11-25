@@ -1233,6 +1233,7 @@ export class CuckooStage implements Stage {
 
   dispose() {
     this.dead = true;
+    this.perch.remove(this.owl.node);
     this.owl.model.dispose();
     for (const g of this.geos) g.dispose();
     this.scene.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh && m.geometry && !this.geos.includes(m.geometry)) m.geometry.dispose(); });

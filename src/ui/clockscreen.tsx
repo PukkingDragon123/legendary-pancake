@@ -529,11 +529,12 @@ function Clock3D(p: { onFail: () => void }) {
       return;
     }
     if (id === 'routine' || id === 'calendar') {
-      // the board comes off the wall: on a phone the camera follows it down first, on a wide screen it comes
-      // forward where it hangs
+      // the board comes off the wall and forward: on a phone it slides up from where it peeks in at the bottom,
+      // on a wide screen it comes forward where it hangs
       tap('paper_flip', 0.5);
       setCard(null);
-      if (isWide()) { S.focus('home'); setSheet(id); } else { S.focus(id); setTimeout(() => setSheet(id), 380); }
+      S.focus('home');
+      setSheet(id);
       return;
     }
     if (id === 'door' || id === 'owl') {
@@ -587,7 +588,7 @@ function Clock3D(p: { onFail: () => void }) {
   return (
     <div class={'ck' + (wide ? ' wide' : '')} role="dialog" aria-label="Clock">
       <button class="ck-back hh-wood-sm" aria-label={zoomed ? 'Back to the clock' : 'Back to the hollow'} onClick={back}><Px name="arrow_left" size={30} /><span>Back</span></button>
-      <div class={'ck-title hh-wood-sm' + (zoomed ? ' away' : '')}><span>Your Sleep Clock</span></div>
+      <div class={'ck-title hh-wood-sm' + (zoomed ? ' away' : '')}><span>Sleep Clock</span></div>
       {hint && !zoomed && <div class="ck-hint">Tap anything to look closer</div>}
       {card && (
         <Paper kind="cream" class="ck-card" key={card.id} opts={{ seed: card.id.length * 7 }}>
@@ -599,7 +600,7 @@ function Clock3D(p: { onFail: () => void }) {
         </Paper>
       )}
       {sheet === 'routine' && <div class="ck-sheet left" key="r"><RoutineBoard /></div>}
-      {sheet === 'calendar' && <div class="ck-sheet cal right" key="c"><MonthCalendar onOpen={(n) => setReport(n)} /></div>}
+      {sheet === 'calendar' && <div class="ck-sheet ck-cal right" key="c"><MonthCalendar onOpen={(n) => setReport(n)} /></div>}
       {report && report.report && <div class="cs-modal"><NightReport s={report} onClose={() => setReport(null)} /></div>}
     </div>
   );

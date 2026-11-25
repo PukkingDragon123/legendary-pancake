@@ -144,12 +144,12 @@
 .ck-card span { font-size: 17px; line-height: 1.2; color: #4a3a2a; }
 .ck-link { margin-top: 6px; font-size: 17px; color: #6e3d2a; text-decoration: underline; text-underline-offset: 3px; padding: 6px 4px; }
 /* the editors slide up (phone) or in from the side (wide) over the zoomed scene */
-.ck-sheet { position: absolute; left: 50%; bottom: 0; width: min(440px, 100%); margin-left: min(-220px, -50%); max-height: calc(100% - 68px - var(--safe-t)); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; padding: 26px 8px calc(16px + var(--safe-b)); animation: ckSheet 0.5s var(--ease) both; }
+.ck-sheet { position: absolute; left: 0; right: 0; bottom: 0; width: min(440px, 100%); margin: 0 auto; max-height: calc(100% - 68px - var(--safe-t)); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; padding: 26px 8px calc(16px + var(--safe-b)); animation: ckSheet 0.5s var(--ease) both; }
 .ck-sheet::-webkit-scrollbar { display: none; }
-.ck.wide .ck-sheet { bottom: auto; top: 50%; transform: translateY(-50%); margin: 0; width: 420px; max-height: calc(100% - 90px - var(--safe-t)); animation-name: ckSheetSide; }
+.ck.wide .ck-sheet { right: auto; bottom: auto; top: 50%; transform: translateY(-50%); margin: 0; width: 420px; max-height: calc(100% - 90px - var(--safe-t)); animation-name: ckSheetSide; }
 .ck.wide .ck-sheet.left { left: max(16px, 3vw); }
 .ck.wide .ck-sheet.right { left: auto; right: max(16px, 3vw); }
 @keyframes ckSheet { from { transform: translateY(70%); opacity: 0; } }
 @keyframes ckSheetSide { from { transform: translateY(-50%) scale(0.55) rotate(-3deg); opacity: 0; } }
 .ck-sheet .clipboard { margin: 0 auto; }
-.ck-sheet.cal { padding-top: 10px; }
+.ck-sheet.ck-cal { padding-top: 10px; }
