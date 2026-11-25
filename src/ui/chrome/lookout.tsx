@@ -56,13 +56,13 @@ const STYLE = `
 .hh-look { position: absolute; left: 8px; bottom: calc(274px + var(--safe-b, 0px)); z-index: 4; width: 60px; transition: transform 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) 0.1s; image-rendering: pixelated; pointer-events: none; }
 .hh-look.away { transform: translateX(-110px); transition: transform 0.4s cubic-bezier(0.55, -0.3, 0.75, 0.4); }
 .hh-look .hh-lookcord { position: absolute; left: 27px; top: -26px; width: 6px; height: 30px; background-repeat: repeat-y; background-size: 6px 6px; box-shadow: 2px 0 0 rgba(40, 34, 27, 0.25); }
-.hh-look .hh-lookhang { position: relative; display: flex; flex-direction: column; align-items: center; transform-origin: 30px 0; animation: hhLookSway 5.5s steps(1, end) infinite; }
+.hh-look .hh-lookhang { position: relative; display: flex; flex-direction: column; align-items: center; transform-origin: 30px 0; animation: hhLookSway 5.5s ease-in-out infinite; }
 .hh-look button { position: relative; width: 52px; height: 60px; background-size: 100% 100%; background-repeat: no-repeat; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 rgba(26, 14, 8, 0.45)); pointer-events: auto; transition: scale 0.15s; }
 .hh-look button:active { scale: 0.92 1.04; }
 .hh-look button img { position: absolute; left: 4px; top: 13px; width: 44px; height: 44px; image-rendering: pixelated; filter: drop-shadow(1px 2px 0 rgba(20, 10, 6, 0.55)); }
 .hh-look button.flip img { animation: hhLookFlip 0.45s steps(5); }
 .hh-look .hh-looklabel { margin-top: 1px; padding: 2px 5px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; color: #2a1a10; background: #f6ead0; box-shadow: inset 0 2px 0 #fffaf0, inset 0 -2px 0 #dcc497, 0 0 0 2px #3a2414, 2px 4px 0 2px rgba(26, 14, 8, 0.35); pointer-events: none; }
-@keyframes hhLookSway { 0%, 100% { transform: none; } 50% { transform: translateY(var(--art-px, 1px)); } } /* [font6] a one-art-pixel bob: crisp label */
+@keyframes hhLookSway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
 @keyframes hhLookFlip { 0% { transform: scale(1); } 40% { transform: scale(0.2, 1.1); } 100% { transform: scale(1); } }
 html.hh-still .hh-look .hh-lookhang { animation: none; }
 /* short screens (a phone on its side): just under the name sign, clear of the ticket in the middle */

@@ -30,19 +30,16 @@ function loop(now: number) {
   if (document.hidden) return;
   const t = now / 1000, still = reducedMotion();
   for (const s of swings) {
-    // [font6] no idle breeze: the signs carry pixel text, which is crisp only when they hang straight. They still
-    // swing when tapped or hit by a reward, and come to rest exactly level.
-    const wind = 0; void t; void still;
+    const wind = still ? 0 : s.amp * (Math.sin(t * s.rate + s.ph) + 0.45 * Math.sin(t * s.rate * 2.3 + s.ph * 1.7));
     // integrate in small steps so a hard kick stays stable
     for (let i = 0; i < 2; i++) {
       const h = dt / 2, acc = -s.k * (s.a - wind) - s.c * s.v;
       s.v += acc * h; s.a += s.v * h;
     }
-    if (Math.abs(s.a) < 0.04 && Math.abs(s.v) < 0.4) { s.a = 0; s.v = 0; }
     apply(s);
   }
 }
-function apply(s: Swing) { if (s.el) s.el.style.transform = s.a === 0 ? (s.post ?? '') : `rotate(${s.a.toFixed(2)}deg)${s.post ?? ''}`; }
+function apply(s: Swing) { if (s.el) s.el.style.transform = `rotate(${s.a.toFixed(2)}deg)${s.post ?? ''}`; }
 
 export function makeSwing(o: Partial<Swing> = {}): Swing {
   return { el: null, a: 0, v: 0, k: 26, c: 2.4, amp: 0.8, rate: 0.9, ph: Math.random() * 6.28, ...o };

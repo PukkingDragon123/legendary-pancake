@@ -12,10 +12,10 @@
 .sf-back { position: absolute; z-index: 5; left: 8px; top: calc(8px + var(--safe-t)); width: 50px; height: 50px; display: grid; place-items: center; background: #ebe2d3; box-shadow: inset 0 -4px 0 #cab294, inset 0 3px 0 #f9f3e8, 0 0 0 3px #382c22, 0 4px 0 3px rgba(24, 22, 16, 0.45); transform: rotate(-4deg); transition: transform 0.15s var(--pop); }
 .sf-back::before { content: ''; position: absolute; top: -7px; left: 50%; width: 10px; height: 10px; margin-left: -5px; background: #9d756d; box-shadow: inset -2px -2px 0 #5f3f3c, inset 2px 2px 0 #bd978a, 0 0 0 2px #312821; }
 .sf-back:active { transform: rotate(-4deg) translateY(2px); }
-.sf-sign { position: absolute; right: 12px; bottom: -14px; z-index: 3; padding: 0 10px 2px; font-size: var(--t1); color: #eee9de; text-shadow: 2px 2px 0 #312821; animation: signSwing 6s steps(1, end) infinite; transform-origin: 50% -20px; }
+.sf-sign { position: absolute; right: 12px; bottom: -14px; z-index: 3; padding: 0 10px 2px; font-size: var(--t1); color: #eee9de; text-shadow: 2px 2px 0 #312821; transform: rotate(3deg); animation: signSwing 6s ease-in-out infinite; transform-origin: 50% -20px; }
 .sf-sign::before, .sf-sign::after { content: ''; position: absolute; top: -18px; width: 2px; height: 20px; background: #c2ac8a; box-shadow: 1px 0 0 #382c22; }
 .sf-sign::before { left: 16px; transform: rotate(14deg); } .sf-sign::after { right: 16px; transform: rotate(-14deg); }
-@keyframes signSwing { 0%, 100% { transform: none; } 50% { transform: translateY(var(--art-px, 1px)); } } /* [font6] a one-art-pixel bob, no tilt: crisp text */
+@keyframes signSwing { 0%, 100% { transform: rotate(3deg); } 50% { transform: rotate(-1.5deg); } }
 
 /* the table */
 .sf-table { position: relative; padding: 0 12px 8px; image-rendering: pixelated; background-repeat: repeat; box-shadow: inset 0 14px 18px -8px rgba(24, 22, 16, 0.55); }
@@ -40,8 +40,8 @@
 .sf-col { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 
 /* tonight's ticket */
-.sf-ticket { position: relative; display: flex; align-items: stretch; text-align: left; transition: transform 0.2s var(--pop); }
-.sf-ticket:active { transform: translateY(3px); }
+.sf-ticket { position: relative; display: flex; align-items: stretch; text-align: left; transform: rotate(-1.2deg); transition: transform 0.2s var(--pop); }
+.sf-ticket:active { transform: rotate(-1.2deg) translateY(3px); }
 .tk-body { flex: 1; padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 4px; }
 .tk-head { display: flex; justify-content: space-between; align-items: center; }
 .tk-kicker { font-size: var(--t1); text-transform: uppercase; letter-spacing: 0; color: #836d58; }
@@ -66,7 +66,7 @@
 .sf-under { position: absolute; inset: 0; background: #f4eee3; box-shadow: 0 0 0 2px rgba(113, 92, 68, 0.4), 0 3px 0 rgba(40, 34, 27, 0.4); }
 .sf-under.u1 { transform: rotate(2.5deg) translate(6px, 6px); background: #eaeeee; }
 .sf-under.u2 { transform: rotate(-2deg) translate(-5px, 9px); background: #efe4e0; }
-.sf-index { padding: 14px 14px 10px 46px; }
+.sf-index { padding: 14px 14px 10px 46px; transform: rotate(-0.6deg); }
 .sf-index h3 { font-size: var(--t2); color: #815a55; height: 36px; line-height: calc(var(--t1) * 1.875); }
 .sf-index ul { list-style: none; margin: 0; padding: 0; }
 .sf-index li { min-height: 48px; }
@@ -87,7 +87,7 @@
 .sf-tips { cursor: pointer; }
 .tip-stack { position: relative; height: 188px; }
 .tip { position: absolute; inset: 0; padding: 12px 14px 12px 88px; display: flex; flex-direction: column; gap: 4px; color: #382c22; transition: transform 0.45s var(--ease); }
-.tip.pos0 { transform: none; }
+.tip.pos0 { transform: rotate(-1deg); }
 .tip.pos1 { transform: rotate(2.5deg) translate(8px, 6px); }
 .tip.pos2 { transform: rotate(-3.5deg) translate(-6px, 10px); }
 .tip.pos1 > *, .tip.pos2 > * { visibility: hidden; }
@@ -105,7 +105,7 @@
 .tray-row .tag { font-size: var(--t1); }
 
 /* the mic note */
-.sf-mic { padding: 10px 10px 12px; }
+.sf-mic { padding: 10px 10px 12px; transform: rotate(0.8deg); }
 .mic-row { display: flex; align-items: center; gap: 8px; }
 .mic-row b { display: block; font-weight: 400; font-size: var(--t1); color: #403426; }
 .mic-row small { display: block; font-size: var(--t1); color: #6e5841; line-height: 1.25; }

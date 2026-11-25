@@ -9,21 +9,14 @@
 // player typed in another script) falls back to the old pixel face in the CSS stack, never tofu.
 import { options, type VNode } from 'preact';
 import alagardUrl from '../assets/fonts/alagard.ttf?url';
-import { artPx } from '../gfx/artpx.ts';
 
 export const FAMILY = 'Alagard';
 /** the full stack: Alagard, then a pixel face that has the glyphs Alagard lacks */
 export const STACK = '"Alagard", "TBME Body", ui-monospace, monospace';
 /** the font pixel: one sixteenth of an em */
 export const EM = 16;
-/**
- * CSS px per font pixel of UI text (the --t1 token in style.css): one art pixel on phones, half an art pixel on
- * big screens (a documented exception until the panels are drawn at the art pixel there).
- */
-export const uiFontPx = (): number => {
-  const wide = typeof window !== 'undefined' && Math.min(innerWidth, innerHeight) >= 600 && innerWidth >= 600;
-  return artPx() * (wide ? 0.5 : 1);
-};
+/** CSS px per font pixel of UI text (the --t1 token in style.css is 16 px: one CSS px per font pixel). */
+export const uiFontPx = (): number => 1;
 /** a canvas/CSS font string at `n` font pixels per screen/texture pixel (16 px, 32 px, 48 px ...) */
 export const alagard = (n = 1) => `${EM * Math.max(1, Math.round(n))}px ${STACK}`;
 
@@ -174,45 +167,23 @@ export function alagardReady(): Promise<void> {
 }
 
 /**
- * Draw Alagard text on a canvas at `n` font pixels per canvas pixel, snapped to whole pixels and
- * alpha-thresholded so every font pixel is either fully painted or empty (no smoothing halos).
- * `y` is the baseline. Returns the drawn width in canvas pixels.
+ * Draw Alagard text on a canvas at full resolution (16 x `n` px, or `size` px), starting on a whole pixel, with an
+ * optional rounded outline and a soft offset shadow. `y` is the baseline. Returns the width in canvas pixels.
  */
-export function alagardText(g: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, o: { n?: number; align?: CanvasTextAlign; shadow?: string; outline?: string } = {}): number {
-  const s = alagardSafe(text), n = Math.max(1, Math.round(o.n ?? 1));
+export function alagardText(g: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, o: { n?: number; size?: number; align?: CanvasTextAlign; shadow?: string; outline?: string } = {}): number {
+  const s = alagardSafe(text), size = o.size ?? EM * Math.max(1, Math.round(o.n ?? 1));
   g.save();
-  g.font = alagard(n);
+  g.font = `${size}px ${STACK}`;
   g.textBaseline = 'alphabetic';
   g.textAlign = 'left';
-  const w = Math.round(g.measureText(s).width);
+  const w = g.measureText(s).width;
   const x0 = Math.round(o.align === 'center' ? x - w / 2 : o.align === 'right' || o.align === 'end' ? x - w : x), y0 = Math.round(y);
-  const pad = 2 * n + 2, top = y0 - 13 * n - pad, h = 17 * n + pad * 2, left = x0 - pad, ww = w + pad * 2;
-  const c = document.createElement('canvas');
-  c.width = Math.max(1, ww); c.height = Math.max(1, h);
-  const t = c.getContext('2d', { willReadFrequently: true })!;
-  t.font = alagard(n); t.textBaseline = 'alphabetic'; t.fillStyle = '#000';
-  t.fillText(s, x0 - left, y0 - top);
-  const img = t.getImageData(0, 0, c.width, c.height), d = img.data;
-  for (let i = 3; i < d.length; i += 4) d[i] = d[i] >= 110 ? 255 : 0;
-  t.putImageData(img, 0, 0);
-  t.globalCompositeOperation = 'source-in';
-  const ink = document.createElement('canvas');
-  ink.width = c.width; ink.height = c.height;
-  const k = ink.getContext('2d')!;
-  const stamp = (col: string, dx: number, dy: number) => {
-    k.clearRect(0, 0, ink.width, ink.height);
-    k.globalCompositeOperation = 'source-over';
-    k.drawImage(c, 0, 0);
-    k.globalCompositeOperation = 'source-in';
-    k.fillStyle = col; k.fillRect(0, 0, ink.width, ink.height);
-    g.drawImage(ink, left + dx, top + dy);
-  };
-  g.imageSmoothingEnabled = false;
-  if (o.outline) for (const [dx, dy] of [[-n, 0], [n, 0], [0, -n], [0, n]]) stamp(o.outline, dx, dy);
-  if (o.shadow) stamp(o.shadow, 0, n);
-  stamp(color, 0, 0);
+  if (o.outline) { g.lineJoin = 'round'; g.lineWidth = Math.max(2, size / 8); g.strokeStyle = o.outline; g.strokeText(s, x0, y0); }
+  if (o.shadow) { g.fillStyle = o.shadow; g.fillText(s, x0 + size / 20, y0 + size / 14); }
+  g.fillStyle = color;
+  g.fillText(s, x0, y0);
   g.restore();
-  return w;
+  return Math.round(w);
 }
 
 /** width of `text` in Alagard at `n` font pixels per pixel (needs a context only for measuring) */

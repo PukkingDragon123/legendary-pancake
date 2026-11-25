@@ -1,26 +1,27 @@
-// Impressive 3D pixel text in Alagard, the game's font: a chunky extrusion (stacked one-font-pixel layers in a
-// darker shade toward the bottom right), a crisp coloured outline, a stepped 3-band fill with a bright top row,
-// and a soft pixel drop shadow. Plus anime-style motion: titles pop in with squash and stretch, numbers count up
-// and punch, rewards burst with sparkles, exclamations shake, happy lines wave letter by letter, dialogue types
-// on letter by letter, emphasis flashes. Everything respects reduced motion and the in-app Calm motion setting
+// Premium 3D title text in Alagard, the game's font, rendered at full device resolution: a smooth extrusion with
+// depth shading (layers that darken as they go back), a crisp outline, a realistic metallic or painted fill (a
+// soft highlight across the top, a darker horizon line through the middle, a warm reflection near the bottom)
+// and a soft drop shadow. Plus game-style motion: titles pop in with squash and stretch, numbers count up and
+// punch, rewards burst with sparkles, exclamations shake, happy lines wave letter by letter, dialogue types on
+// letter by letter, emphasis flashes. Everything respects reduced motion and the in-app Calm motion setting
 // (the global rules in style.css stop CSS animation; the JS bits below check reducedMotion()).
 //
 // CSS (installed by installText3D(), called at boot):
-//   .t3d                 3D text: outline + 2-pixel extrusion + drop shadow (h1 and h2 get it automatically)
-//   .t3d-deep            3-pixel extrusion (big titles)          .t3d-lite  small text: a 1-pixel drop only
-//   .t3d-gold | -cream | -sky | -rose | -leaf | -moon | -ink     palettes (gold is the default; ink is for paper)
+//   .t3d                 3D text: outline + shaded extrusion + metallic fill + soft shadow (h1 and h2 get it too)
+//   .t3d-deep            a deeper extrusion (big titles)        .t3d-lite  small text: outline and a soft shadow
+//   .t3d-gold | -cream | -sky | -rose | -leaf | -moon | -ink     materials (gold is the default; ink is for paper)
 //   .t3d-pop             entrance: squash-and-stretch pop       .t3d-punch  a punch (re-add to replay)
 //   .t3d-shake           an exclamation shake                    .t3d-flash  an emphasis colour flash
-//   .t3d-burst           a reward burst with pixel sparkles      .t3d-wave / .t3d-type  per-letter (see <Letters>)
-// The stepped band fill needs the text in a data-t attribute: the app's vnode hook (font.ts) adds it to every
-// h1, h2 and .t3d element whose children are plain text, and the fill is drawn by its ::after.
+//   .t3d-burst           a reward burst with sparkles            .t3d-wave / .t3d-type  per-letter (see <Letters>)
+// The metallic fill needs the text in a data-t attribute: the app's vnode hook (font.ts) adds it to every h1, h2
+// and .t3d element whose children are plain text, and the fill is drawn by its ::after.
 //
 // Preact:   <Letters text="Good morning!" mode="wave" />   <CountUp value={n} />   punch(el)
-// Canvas:   drawText3D(ctx, text, x, baselineY, { n, palette, depth, align, outline, drop, lift }) -> width
-//           fitText3D(text, wishPx, maxW) -> n (font pixels per canvas pixel that fit)
+// Canvas:   drawText3D(ctx, text, x, baselineY, { size | n, palette, depth, align, outline, drop, lift }) -> width
+//           fitText3D(text, wishPx, maxW) -> n (16 px steps that fit)
 import { cloneElement, isValidElement, toChildArray, type ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { alagard, alagardSafe } from './font.ts';
+import { alagard, alagardSafe, STACK } from './font.ts';
 import { reducedMotion } from './chrome/swing.ts';
 
 /** a palette: top highlight row, three fill bands (light to dark), outline, extrusion */
@@ -39,14 +40,17 @@ export type PaletteName = keyof typeof PALETTES;
 // ------------------------------------------------------------------ CSS
 
 const vars = (p: Palette) => `--t-hi:${p.hi};--t-1:${p.c1};--t-2:${p.c2};--t-3:${p.c3};--t-ol:${p.ol};--t-ex:${p.ex};--t-dr:${p.drop ?? 'rgba(18,10,4,.42)'}`;
-const P = (k: number) => `calc(var(--tp) * ${k})`;
-const ring = (c: string) => [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]].map(([x, y]) => `${P(x)} ${P(y)} 0 ${c}`).join(',');
-/** outline, then `d` extrusion layers toward the bottom right with their own outline, then a drop */
-const stack = (d: number) => [
+/** a length in ems (scales with the text) */
+const E = (k: number) => `${k}em`;
+const ring = (c: string, w = 'var(--ow)') => [[-1, 0], [1, 0], [0, -1], [0, 1], [-0.7, -0.7], [0.7, -0.7], [-0.7, 0.7], [0.7, 0.7]].map(([x, y]) => `calc(${w} * ${x}) calc(${w} * ${y}) 0 ${c}`).join(',');
+/** crisp outline, then `n` extrusion layers back toward the bottom right that darken with depth, an outline round
+ * the back face, then a soft contact shadow and a soft drop */
+const stack = (n: number) => [
   ring('var(--t-ol)'),
-  ...Array.from({ length: d }, (_, k) => `${P(k + 1)} ${P(k + 2)} 0 var(--t-ex),${P(k + 2)} ${P(k + 1)} 0 var(--t-ex),${P(k + 2)} ${P(k + 2)} 0 var(--t-ex)`),
-  `${P(d + 2)} ${P(d + 2)} 0 var(--t-ol),${P(d + 1)} ${P(d + 3)} 0 var(--t-ol),${P(d + 3)} ${P(d + 1)} 0 var(--t-ol),${P(d + 2)} ${P(d + 3)} 0 var(--t-ol),${P(d + 3)} ${P(d + 2)} 0 var(--t-ol)`,
-  `${P(d + 4)} ${P(d + 4)} 0 var(--t-dr)`,
+  ...Array.from({ length: n }, (_, k) => `${E(0.022 * (k + 1))} ${E(0.04 * (k + 1))} 0 color-mix(in srgb, var(--t-ex), #000 ${Math.round((k / Math.max(1, n - 1)) * 45)}%)`),
+  `${E(0.022 * n + 0.03)} ${E(0.04 * n + 0.03)} 0 var(--t-ol)`,
+  `${E(0.022 * n)} ${E(0.04 * n + 0.06)} ${E(0.06)} rgba(10,6,2,.55)`,
+  `0 ${E(0.04 * n + 0.18)} ${E(0.3)} var(--t-dr)`,
 ].join(',');
 /** Where the game wears it without a class in its markup: titles, sign names, big numbers (full 3D) ... */
 const FULL = ['.hh-name', '.lvup-title', '.lvup-medal b', '.title-ribbon', '.cs-sign span', '.sf-sign', '.sf-sleep', '.seal b', '.tk-times b', '.bk-last-t b', '.n-time', '.lock-time', '.bigclock', '.cb-title'];
@@ -55,18 +59,18 @@ const LITE = ['.hh-num', '.hh-rune b', '.btn.pillow', '.btn.oak', '.lg-btn', '.h
 const T = `:is(.t3d:not(.t3d-lite), h1:not(.qp-q), h2:not(.qp-q), ${FULL.join(', ')})`;
 const L = `:is(.t3d.t3d-lite, ${LITE.join(', ')})`;
 const CSS = `
-:where(.t3d, h1, h2, ${FULL.join(', ')}, ${LITE.join(', ')}) { ${vars(PALETTES.gold)}; --tp: calc(1em / 16); }
+:where(.t3d, h1, h2, ${FULL.join(', ')}, ${LITE.join(', ')}) { ${vars(PALETTES.gold)}; --tp: calc(1em / 16); --ow: max(1px, 0.055em); }
 /* the palette each place wears: gold for titles on wood, cream on dark and coloured surfaces, ink on paper */
 :where(.hh-num, .hh-rune b, .cs-sign span, .sf-sign, .sf-sleep, .lvup-medal b, .n-time, .lock-time, .bigclock, .btn.pillow, .btn.oak, .lg-btn, .hh-btn-green, .hh-btn-night) { ${vars(PALETTES.cream)} }
 :where(.bk-title, .tk-times b, .seal b, .bk-last-t b, .stat b, .bk-tile b, .cb-title, .hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .hh-looklabel, .tk-hint, .hh-btn-cream, .qp-sheet h2, .sheet-head h2) { ${vars(PALETTES.ink)} }
 :where(.lock-time, .n-time) { ${vars(PALETTES.moon)} }
 .t3d-gold { ${vars(PALETTES.gold)} } .t3d-cream { ${vars(PALETTES.cream)} } .t3d-sky { ${vars(PALETTES.sky)} }
 .t3d-rose { ${vars(PALETTES.rose)} } .t3d-leaf { ${vars(PALETTES.leaf)} } .t3d-moon { ${vars(PALETTES.moon)} } .t3d-ink { ${vars(PALETTES.ink)} }
-body ${T} { color: var(--t-2); text-shadow: ${stack(2)} !important; }
-body ${T}:is(.t3d-deep, h1, .lvup-title, .title-ribbon, .bigclock, .n-time, .lock-time) { text-shadow: ${stack(3)} !important; }
-body ${L} { color: var(--t-1); text-shadow: ${ring('var(--t-ol)')}, ${P(1)} ${P(2)} 0 var(--t-ex), ${P(2)} ${P(2)} 0 var(--t-ex), ${P(2)} ${P(3)} 0 var(--t-ol), ${P(3)} ${P(3)} 0 var(--t-ol), ${P(3)} ${P(4)} 0 var(--t-dr) !important; }
-body :is(.hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .hh-looklabel, .tk-hint, .t3d-ink.t3d-lite) { color: var(--t-2); text-shadow: ${P(1)} ${P(1)} 0 var(--t-ex) !important; }
-.hh-dig { width: 0.625em !important; text-align: right !important; overflow: visible !important; clip-path: inset(0 -0.4em 0 -0.15em); } /* the wheels clip only top and bottom: the outline and extrusion show */
+body ${T} { color: var(--t-2); text-shadow: ${stack(5)} !important; }
+body ${T}:is(.t3d-deep, h1, .lvup-title, .title-ribbon, .bigclock, .n-time, .lock-time) { text-shadow: ${stack(8)} !important; }
+body ${L} { color: var(--t-1); text-shadow: ${ring('var(--t-ol)', 'max(1px, 0.06em)')}, 0.03em 0.06em 0 var(--t-ex), 0.05em 0.1em 0 color-mix(in srgb, var(--t-ex), #000 35%), 0 0.16em 0.22em var(--t-dr) !important; }
+body :is(.hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .hh-looklabel, .tk-hint, .t3d-ink.t3d-lite) { color: var(--t-2); text-shadow: 0 1px 0 color-mix(in srgb, var(--t-ex), transparent 40%) !important; }
+.hh-dig { width: 0.625em !important; text-align: right !important; overflow: visible !important; clip-path: inset(-0.1em -0.5em 0 -0.2em); } /* the wheels clip only top and bottom: the outline and extrusion show */
 .hh-strip i { line-height: 1em !important; }
 :where([data-t]) { position: relative; }
 body :is(${T}[data-t], ${T} [data-t])::after {
@@ -74,34 +78,34 @@ body :is(${T}[data-t], ${T} [data-t])::after {
   display: inherit; flex-direction: inherit; flex-wrap: inherit; align-items: inherit; justify-content: inherit; gap: inherit;
   font: inherit; line-height: inherit; letter-spacing: inherit; text-align: inherit; text-indent: inherit; text-transform: inherit; white-space: inherit; overflow-wrap: inherit;
   color: transparent; text-shadow: none; pointer-events: none; overflow: hidden; transform: none; animation: none;
-  --c0: calc((1lh - 1em) / 2 + var(--tp));
-  background: linear-gradient(180deg, transparent 0 var(--c0), var(--t-hi) var(--c0) calc(var(--c0) + var(--tp)), var(--t-1) calc(var(--c0) + var(--tp)) calc(var(--c0) + var(--tp) * 4), var(--t-2) calc(var(--c0) + var(--tp) * 4) calc(var(--c0) + var(--tp) * 8), var(--t-3) calc(var(--c0) + var(--tp) * 8)) 0 0 / 100% 1lh repeat-y content-box;
+  --c0: calc((1lh - 1em) / 2 + 0.06em);
+  background: linear-gradient(180deg, var(--t-hi) 0, var(--t-hi) var(--c0), var(--t-1) calc(var(--c0) + 0.16em), var(--t-2) calc(var(--c0) + 0.36em), var(--t-3) calc(var(--c0) + 0.4em), var(--t-2) calc(var(--c0) + 0.56em), var(--t-1) calc(var(--c0) + 0.72em), var(--t-3) calc(var(--c0) + 0.9em), var(--t-3) 1lh) 0 0 / 100% 1lh repeat-y content-box;
   -webkit-background-clip: text; background-clip: text;
 }
-/* anime motion (steps, so it stays pixel art); the global reduced-motion rules freeze all of it */
-.t3d-pop { animation: t3dPop .62s steps(12) both; transform-origin: 50% 85%; }
+/* game-style motion; the global reduced-motion rules freeze all of it */
+.t3d-pop { animation: t3dPop .62s cubic-bezier(.3, 1.3, .5, 1) both; transform-origin: 50% 85%; }
 @keyframes t3dPop { 0% { transform: translateY(-30%) scale(.3, 1.7); opacity: 0; } 35% { transform: scale(1.38, .68); opacity: 1; } 55% { transform: scale(.86, 1.18); } 75% { transform: scale(1.07, .95); } 100% { transform: none; opacity: 1; } }
-.t3d-punch { animation: t3dPunch .42s steps(7); }
+.t3d-punch { animation: t3dPunch .42s cubic-bezier(.3, 1.4, .5, 1); }
 @keyframes t3dPunch { 0% { transform: none; } 30% { transform: scale(1.45, .78); } 55% { transform: scale(.88, 1.2); } 80% { transform: scale(1.06, .96); } 100% { transform: none; } }
-.t3d-shake { animation: t3dShake .36s steps(6) 2; }
+.t3d-shake { animation: t3dShake .36s linear 2; }
 @keyframes t3dShake { 0%, 100% { transform: none; } 20% { transform: translate(-2px, 1px) rotate(-3deg); } 40% { transform: translate(2px, -1px) rotate(2.5deg); } 60% { transform: translate(-2px, 0) rotate(-1.5deg); } 80% { transform: translate(1px, 1px); } }
-.t3d-flash { animation: t3dFlash .3s steps(1) 4; }
+.t3d-flash { animation: t3dFlash .3s ease-in-out 4; }
 @keyframes t3dFlash { 0% { filter: brightness(1.7) saturate(1.3); } 50% { filter: hue-rotate(150deg) saturate(1.6); } 100% { filter: none; } }
-.t3d-burst { position: relative; animation: t3dPunch .5s steps(8); }
-.t3d-burst::before { content: ''; position: absolute; left: 50%; top: 45%; width: 4px; height: 4px; margin: -2px; pointer-events: none; animation: t3dSpark .7s steps(7) forwards;
-  box-shadow: 0 -22px #fff8d6, 18px -14px #ffe68f, 26px 2px #ffffff, 16px 16px #ffe68f, -2px 22px #fff8d6, -18px 14px #ffffff, -26px -2px #ffe68f, -16px -16px #ffffff; }
+.t3d-burst { position: relative; animation: t3dPunch .5s cubic-bezier(.3, 1.4, .5, 1); }
+.t3d-burst::before { content: ''; position: absolute; left: 50%; top: 45%; width: 4px; height: 4px; margin: -2px; pointer-events: none; animation: t3dSpark .7s ease-out forwards; border-radius: 50%;
+  box-shadow: 0 -22px 2px #fff8d6, 18px -14px 2px #ffe68f, 26px 2px 2px #ffffff, 16px 16px 2px #ffe68f, -2px 22px 2px #fff8d6, -18px 14px 2px #ffffff, -26px -2px 2px #ffe68f, -16px -16px 2px #ffffff, 0 0 10px 4px rgba(255,230,140,.6); }
 @keyframes t3dSpark { 0% { transform: scale(.2); opacity: 1; } 60% { opacity: 1; } 100% { transform: scale(1.7); opacity: 0; } }
 .t3d-ch { display: inline-block; white-space: pre; }
 .t3d-seg { display: inline-block; }
-.t3d-wave > .t3d-ch { animation: t3dWave 1.5s steps(6) infinite; animation-delay: calc(var(--i) * 80ms); }
-@keyframes t3dWave { 0%, 55%, 100% { transform: none; } 18% { transform: translateY(calc(var(--tp) * -3)); } 36% { transform: translateY(var(--tp)); } }
-.t3d-type > .t3d-ch { animation: t3dType .26s steps(4) both; animation-delay: calc(var(--i) * 30ms); }
-@keyframes t3dType { 0% { transform: translateY(calc(var(--tp) * -5)) scale(1.5); opacity: 0; } 50% { transform: translateY(var(--tp)) scale(.9, 1.12); opacity: 1; } 100% { transform: none; opacity: 1; } }
+.t3d-wave > .t3d-ch { animation: t3dWave 1.5s ease-in-out infinite; animation-delay: calc(var(--i) * 80ms); }
+@keyframes t3dWave { 0%, 55%, 100% { transform: none; } 18% { transform: translateY(-0.18em); } 36% { transform: translateY(0.05em); } }
+.t3d-type > .t3d-ch { animation: t3dType .26s cubic-bezier(.3, 1.5, .5, 1) both; animation-delay: calc(var(--i) * 30ms); }
+@keyframes t3dType { 0% { transform: translateY(-0.3em) scale(1.5); opacity: 0; } 50% { transform: translateY(0.06em) scale(.9, 1.12); opacity: 1; } 100% { transform: none; opacity: 1; } }
 /* where the game uses the motion: titles pop in, Pip's happy lines wave, rewards burst in gold */
-:is(.sheet-head h2, .mr-sign h2, .dawn-sign h1, .bk-title, .cb-title, .title-ribbon, .gb-title b) { animation: t3dPop .62s steps(12) both; transform-origin: 50% 85%; }
+:is(.sheet-head h2, .mr-sign h2, .dawn-sign h1, .bk-title, .cb-title, .title-ribbon, .gb-title b) { animation: t3dPop .62s cubic-bezier(.3, 1.3, .5, 1) both; transform-origin: 50% 85%; }
 .hh-bubble .txt.t3d-shake { display: inline-block; }
-.hh-bubble .txt.t3d-wave .ch { display: inline-block; white-space: pre; animation: t3dWave 1.5s steps(6) infinite; animation-delay: calc(var(--i) * 60ms); }
-body .hh-toast-body > span.reward { ${vars(PALETTES.gold)}; color: var(--t-2); text-shadow: ${stack(1)} !important; }
+.hh-bubble .txt.t3d-wave .ch { display: inline-block; white-space: pre; animation: t3dWave 1.5s ease-in-out infinite; animation-delay: calc(var(--i) * 60ms); }
+body .hh-toast-body > span.reward { ${vars(PALETTES.gold)}; color: var(--t-2); text-shadow: ${stack(3)} !important; }
 `;
 let cssDone = false;
 /** Install the text styles (once; safe to call from any component). */
@@ -168,68 +172,66 @@ export function CountUp(p: { value: number; from?: number; ms?: number; format?:
 
 // ------------------------------------------------------------------ canvas
 
-const mask = (() => {
-  let c: HTMLCanvasElement | null = null;
-  return (w: number, h: number) => { if (!c) c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
-})();
+let mctx: CanvasRenderingContext2D | null = null;
+const measureCtx = () => (mctx ??= document.createElement('canvas').getContext('2d')!);
 
-/** The biggest whole multiple of Alagard's 16 px (at most the wished size) whose width fits `maxW`. */
+/** The biggest whole multiple of 16 px (at most the wished size) whose 3D text fits `maxW`. */
 export function fitText3D(text: string, wishPx: number, maxW: number): number {
-  const g = mask(4, 4).getContext('2d')!;
+  const g = measureCtx(), s = alagardSafe(text);
   let n = Math.max(1, Math.round(wishPx / 16));
-  const s = alagardSafe(text);
-  for (; n > 1; n--) { g.font = alagard(n); if (g.measureText(s).width + (2 + 4) * n <= maxW) break; }
+  for (; n > 1; n--) { g.font = alagard(n); if (g.measureText(s).width + 0.35 * 16 * n <= maxW) break; }
   return n;
 }
 
+const shade = (hex: string, k: number) => {
+  const v = parseInt(hex.slice(1, 7), 16), f = (c: number) => Math.round(Math.max(0, Math.min(255, c * k)));
+  return `rgb(${f((v >> 16) & 255)},${f((v >> 8) & 255)},${f(v & 255)})`;
+};
+
 /**
- * Draw 3D pixel text on a canvas: crisp Alagard at `n` canvas pixels per font pixel, outlined, extruded `depth`
- * font pixels toward the bottom right, a stepped band fill with a bright top row, a soft drop. `y` is the
- * baseline. `lift(i)` raises letter i by that many font pixels (per-letter pops and waves). Returns the width of
- * the letters (the outline and extrusion add `(depth + 4) * n` to the right and below).
+ * Draw premium 3D title text on a canvas at full resolution: a soft drop shadow, a smooth extrusion toward the
+ * bottom right that darkens with depth, a crisp rounded outline, and a metallic fill (bright top, a darker horizon
+ * line, a warm reflection low down). `size` in canvas px (or `n` x 16). `y` is the baseline. `lift(i)` raises
+ * letter i by that many sixteenths of the size (per-letter pops and waves). Returns the width of the letters
+ * (outline and extrusion add about a third of the size to the right and below).
  */
-export function drawText3D(g: CanvasRenderingContext2D, text: string, x: number, y: number, o: { n?: number; palette?: PaletteName | Palette; depth?: number; align?: CanvasTextAlign; outline?: boolean; drop?: boolean; lift?: (i: number) => number } = {}): number {
-  const s = alagardSafe(text), n = Math.max(1, Math.round(o.n ?? 1)), d = o.depth ?? 2;
+export function drawText3D(g: CanvasRenderingContext2D, text: string, x: number, y: number, o: { n?: number; size?: number; palette?: PaletteName | Palette; depth?: number; align?: CanvasTextAlign; outline?: boolean; drop?: boolean; lift?: (i: number) => number } = {}): number {
+  const s = alagardSafe(text), size = o.size ?? 16 * Math.max(1, o.n ?? 1), d = o.depth ?? 2;
   const pal: Palette = typeof o.palette === 'object' ? o.palette : PALETTES[o.palette ?? 'gold'];
-  const font = alagard(n);
-  const m0 = mask(4, 4).getContext('2d')!;
-  m0.font = font;
-  const w = Math.round(m0.measureText(s).width);
-  const x0 = Math.round(o.align === 'center' ? x - w / 2 : o.align === 'right' || o.align === 'end' ? x - w : x), y0 = Math.round(y);
-  const pad = (d + 6) * n + 2, top = y0 - 15 * n - pad, H = 19 * n + pad * 2, left = x0 - pad, W = w + pad * 2;
-  // the glyph mask, alpha snapped
-  const mc = document.createElement('canvas'); mc.width = Math.max(1, W); mc.height = Math.max(1, H);
-  const mg = mc.getContext('2d', { willReadFrequently: true })!;
-  mg.font = font; mg.textBaseline = 'alphabetic'; mg.fillStyle = '#000';
-  if (o.lift) {
-    let cx = x0 - left;
-    [...s].forEach((ch, i) => { mg.fillText(ch, cx, y0 - top - Math.round((o.lift!(i) || 0) * n)); cx += Math.round(mg.measureText(ch).width); });
-  } else mg.fillText(s, x0 - left, y0 - top);
-  const img = mg.getImageData(0, 0, W, H), dd = img.data;
-  for (let i = 3; i < dd.length; i += 4) dd[i] = dd[i] >= 110 ? 255 : 0;
-  mg.putImageData(img, 0, 0);
-  // a coloured copy of the mask
-  const tint = document.createElement('canvas'); tint.width = W; tint.height = H;
-  const tg = tint.getContext('2d')!;
-  const paint = (fill: (c: CanvasRenderingContext2D) => void) => { tg.globalCompositeOperation = 'source-over'; tg.clearRect(0, 0, W, H); tg.drawImage(mc, 0, 0); tg.globalCompositeOperation = 'source-in'; fill(tg); tg.globalCompositeOperation = 'source-over'; return tint; };
-  const solid = (c: string) => paint((t) => { t.fillStyle = c; t.fillRect(0, 0, W, H); });
   g.save();
-  g.imageSmoothingEnabled = false;
-  const at = (dx: number, dy: number) => g.drawImage(tint, left + dx * n, top + dy * n);
-  if (o.drop !== false) { solid(pal.drop ?? 'rgba(18,10,4,.42)'); at(d + 4, d + 4); }
-  if (o.outline !== false) { solid(pal.ol); for (const [ox, oy] of [[d + 2, d + 2], [d + 1, d + 3], [d + 3, d + 1], [d + 2, d + 3], [d + 3, d + 2]]) at(ox, oy); }
-  solid(pal.ex);
-  for (let k = d; k >= 1; k--) { at(k, k + 1); at(k + 1, k); at(k + 1, k + 1); }
-  if (o.outline !== false) { solid(pal.ol); for (const [ox, oy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, -1], [-1, 1], [1, 1]]) at(ox, oy); }
-  // the face: a bright top row, then three bands, by font-pixel row from the capitals' top
-  const cap = y0 - top - 11 * n;
-  paint((t) => {
-    const band = (c: string, r0: number, r1: number) => { t.fillStyle = c; t.fillRect(0, cap + r0 * n, W, (r1 - r0) * n); };
-    t.fillStyle = pal.c3; t.fillRect(0, 0, W, H);
-    t.globalCompositeOperation = 'source-atop'; // the bands paint only over the letters already there
-    band(pal.c1, -8, 4); band(pal.hi, -8, 1); band(pal.c2, 4, 8);
-  });
-  at(0, 0);
+  g.font = `${size}px ${STACK}`; g.textBaseline = 'alphabetic'; g.textAlign = 'left'; g.lineJoin = 'round'; g.miterLimit = 2;
+  const w = g.measureText(s).width;
+  const x0 = Math.round(o.align === 'center' ? x - w / 2 : o.align === 'right' || o.align === 'end' ? x - w : x), y0 = Math.round(y);
+  const chars = [...s];
+  const xs: number[] = []; { let cx = x0; for (const ch of chars) { xs.push(cx); cx += g.measureText(ch).width; } }
+  const each = (dx: number, dy: number, f: (ch: string, px: number, py: number) => void) => {
+    if (!o.lift) { f(s, x0 + dx, y0 + dy); return; }
+    chars.forEach((ch, i) => f(ch, xs[i] + dx, y0 + dy - ((o.lift!(i) || 0) * size) / 16));
+  };
+  const step = size * 0.022 * (d >= 3 ? 1.2 : 1), layers = Math.max(2, Math.round(d * 2.5)), ow = Math.max(1.5, size * 0.09);
+  // soft drop shadow
+  if (o.drop !== false) {
+    g.save(); g.shadowColor = pal.drop ?? 'rgba(14,8,2,.55)'; g.shadowBlur = size * 0.28; g.shadowOffsetX = size * 0.06; g.shadowOffsetY = size * 0.16;
+    g.fillStyle = pal.ol; each(step * layers, step * layers * 1.8, (t, px, py) => g.fillText(t, px, py)); g.restore();
+  }
+  // the back outline and the shaded extrusion
+  if (o.outline !== false) { g.strokeStyle = pal.ol; g.lineWidth = ow; each(step * layers, step * layers * 1.8, (t, px, py) => g.strokeText(t, px, py)); }
+  for (let k = layers; k >= 1; k--) {
+    g.fillStyle = shade(pal.ex, 1 - (k / layers) * 0.45);
+    each(step * k, step * k * 1.8, (t, px, py) => g.fillText(t, px, py));
+  }
+  // the crisp outline round the face
+  if (o.outline !== false) { g.strokeStyle = pal.ol; g.lineWidth = ow; each(0, 0, (t, px, py) => g.strokeText(t, px, py)); }
+  // the face: metallic, lit from the top
+  const top = y0 - size * 0.69, base = y0;
+  const gr = g.createLinearGradient(0, top, 0, base + size * 0.19);
+  gr.addColorStop(0, pal.hi); gr.addColorStop(0.18, pal.c1); gr.addColorStop(0.45, pal.c2); gr.addColorStop(0.5, pal.c3);
+  gr.addColorStop(0.66, pal.c2); gr.addColorStop(0.84, pal.c1); gr.addColorStop(1, pal.c3);
+  g.fillStyle = gr;
+  each(0, 0, (t, px, py) => g.fillText(t, px, py));
+  // a soft specular glint along the top edge
+  g.save(); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.35; g.fillStyle = '#ffffff';
+  each(0, -Math.max(1, size * 0.04), (t, px, py) => g.fillText(t, px, py)); g.restore();
   g.restore();
-  return w;
+  return Math.round(w);
 }
