@@ -19,6 +19,7 @@ Built headless in Blender (bpy 5.x), in metres, standing on z = 0 and facing -Y 
 
 Writes public/models/shop/beaver.glb (meshopt + WebP packing happens in art/shop/pack.mjs).
 """
+import json
 import math
 import os
 import sys
@@ -33,6 +34,7 @@ from mathutils.bvhtree import BVHTree
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import paintkit as pk  # noqa: E402
+import craft  # noqa: E402
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
 BUILD = os.environ.get('SHOP_BUILD') or os.path.join(ROOT, 'art', 'shop', '_build')
 os.makedirs(BUILD, exist_ok=True)
@@ -907,6 +909,7 @@ def paint_kit():
                 img[cy0 + y, cx0 + x] = R[int(np.clip(round(t), 0, 6))]
         SW[nm] = ((cx0 + cs / 2) / n, (cy0 + cs / 2) / n, cs / n)
     path = os.path.join(BUILD, 'beaver_kit.png')
+    craft.paint_strips(img, pk)  # wood grain, steel, glasspaper, cork and brass for the tools
     pk.save(img, np.ones((n, n), bool), path, px=0)
     return path
 
@@ -1002,6 +1005,7 @@ def build_rig():
     B('pencil_ear', pe[0], pe[0] + pe[1] * 0.1, 'head')
     ph = PENCIL['hand']
     B('pencil_hand', ph[0], ph[0] + ph[1] * 0.1, 'hand_r')
+    craft.add_bones(B)
     bpy.ops.object.mode_set(mode='OBJECT')
     for pb in ob.pose.bones:
         pb.rotation_mode = 'QUATERNION'
@@ -1228,20 +1232,29 @@ def arm_ik(k, target, pole=(0, -1, -0.4), parent_q=Quaternion()):
 
 def animate(rig):
     A = Anim(rig)
-    # the relaxed stance: arms down by the sides, a little forward, hands resting on the apron
-    relax_up = {'l': [('Y', 35), ('X', -16)], 'r': [('Y', -35), ('X', -16)]}
-    relax_fore = {'l': [('X', -46), ('Y', 20)], 'r': [('X', -46), ('Y', -20)]}
+    # the stance: he stands at his workbench, both paws resting on the plank in front of him (palm down, fingers
+    # forward), solved once by IK [shop11]
+    rest = {}
+    for sx, k in ((1, 'l'), (-1, 'r')):
+        wr = Vector(BONES['hand_' + k][0])
+        d_rest = (Vector(BONES['hand_' + k][1]) - wr).normalized()
+        Rh = d_rest.rotation_difference(Vector((sx * 0.15, -1, 0)).normalized())
+        at = Vector((sx * craft.REST_X, craft.BOARD['near'] - craft.REST_IN, craft.BOARD['top']))
+        W = at + Vector((0, 0, 0.046)) - Rh @ (Vector(LM['palm_' + k]) - wr)
+        q_up, q_fore = arm_ik(k, tuple(W), pole=(sx * 1.0, 0.5, 0.0))
+        rest[k] = (q_up, q_fore, (q_up @ q_fore).inverted() @ Rh)
 
     def stance(extra=None, breath=0.0, sway=0.0, tail=0.0, head=None):
         p = {
             'spine': {'rot': ('X', -1.0 * breath)}, 'chest': {'rot': ('X', -1.6 * breath), 'move': (0, 0, 0.003 * breath)},
             'neck': {'rot': ('X', 1.0 * breath)},
-            'upper_arm_l': {'rot': relax_up['l'] + [('Y', -2 * breath)]}, 'upper_arm_r': {'rot': relax_up['r'] + [('Y', 2 * breath)]},
-            'forearm_l': {'rot': relax_fore['l']}, 'forearm_r': {'rot': relax_fore['r']},
-            'hand_l': {'rot': ('X', -10)}, 'hand_r': {'rot': ('X', -10)},
+            'upper_arm_l': {'quat': rest['l'][0]}, 'upper_arm_r': {'quat': rest['r'][0]},
+            'forearm_l': {'quat': rest['l'][1]}, 'forearm_r': {'quat': rest['r'][1]},
+            'hand_l': {'quat': rest['l'][2]}, 'hand_r': {'quat': rest['r'][2]},
             'tail1': {'rot': [('Z', 5 * tail), ('X', 2 * sway)]}, 'tail2': {'rot': ('Z', 7 * tail)}, 'tail3': {'rot': ('Z', 8 * tail)}, 'tail4': {'rot': ('Z', 9 * tail)},
             'hips': {'rot': ('Y', 1.6 * sway)}, 'root': {'move': (0.006 * sway, 0, 0)},
             'pencil_hand': {'scale': 0.001},
+            **{'tool_' + t: {'scale': 0.001} for t in craft.TOOLS},
         }
         if head:
             p['head'] = head
@@ -1260,7 +1273,7 @@ def animate(rig):
     # talk: the jaw chatters, the head bobs, the right paw gestures
     A.begin('talk', 48)
     for f, jw, hd, g in ((0, 0, 0, 0), (6, 13, 3, 1), (11, 3, 0, 1), (17, 10, -2, 0.5), (23, 1, 1, 0), (29, 14, 4, 1), (35, 4, -1, 1), (41, 9, 1, 0.4)):
-        q_up, q_f = arm_ik('r', (-0.25 - 0.03 * g, -0.22 - 0.06 * g, 0.53 + 0.07 * g), pole=(-0.6, 0.4, -0.6))
+        q_up, q_f = arm_ik('r', (-0.25 - 0.03 * g, -0.2 - 0.06 * g, 0.6 + 0.06 * g), pole=(-0.6, 0.4, -0.6))  # [shop11] up over the workbench
         A.pose(f, **stance(breath=0.5, tail=0.3 * math.sin(f), extra={
             'jaw': {'rot': ('X', jw)}, 'head': {'rot': [('X', hd), ('Z', -3 + g * 2)]},
             'upper_arm_r': {'quat': q_up}, 'forearm_r': {'quat': q_f}, 'hand_r': {'rot': [('X', -40 * g), ('Y', -20 * g)]}}))
@@ -1281,12 +1294,16 @@ def animate(rig):
     # present: a sweep of the right paw out to the display, palm up, a little bow and a nod toward it
     A.begin('present', 48)
     A.pose(0, **stance())
-    q_up, q_f = arm_ik('r', (-0.4, -0.25, 0.6), pole=(-0.3, 0.6, -0.8))
+    # [shop11] the paw rises close to the body first, then sweeps out over the workbench (never through it)
+    q_up0, q_f0 = arm_ik('r', (-0.3, -0.16, 0.62), pole=(-0.6, 0.5, -0.6))
+    A.pose(6, **stance(breath=0.3, extra={'upper_arm_r': {'quat': q_up0}, 'forearm_r': {'quat': q_f0}, 'hand_r': {'rot': [('Y', -40), ('X', -10)]}}))
+    A.pose(42, **stance(breath=0.3, extra={'upper_arm_r': {'quat': q_up0}, 'forearm_r': {'quat': q_f0}, 'hand_r': {'rot': [('Y', -40), ('X', -10)]}}))
+    q_up, q_f = arm_ik('r', (-0.42, -0.27, 0.68), pole=(-0.3, 0.6, -0.8))
     for f in (14, 34):
         A.pose(f, **stance(breath=0.6, extra={
             'upper_arm_r': {'quat': q_up}, 'forearm_r': {'quat': q_f}, 'hand_r': {'rot': [('Y', -70), ('X', -20)]},
             'spine': {'rot': [('Z', -8), ('X', -4)]}, 'chest': {'rot': [('Z', -6), ('Y', 4)]}, 'head': {'rot': [('Z', -18), ('X', 8), ('Y', 6)]},
-            'upper_arm_l': {'rot': [('Y', 18), ('X', -20)]}, 'forearm_l': {'rot': ('X', -50)}, 'jaw': {'rot': ('X', 8 if f == 14 else 2)}}))
+            'jaw': {'rot': ('X', 8 if f == 14 else 2)}}))
     A.pose(48, **stance())
     A.end(loop=False)
 
@@ -1317,7 +1334,7 @@ def animate(rig):
         A.pose(f, **stance(breath=0.4, extra={
             'upper_arm_r': {'quat': q_up}, 'forearm_r': {'quat': q_f}, 'hand_r': {'rot': [('X', -60 + 14 * sc), ('Y', 30)]},
             'head': {'rot': [('Y', 10), ('Z', 6), ('X', -4)]}, 'neck': {'rot': ('Y', 4)}, 'jaw': {'rot': ('X', 3)},
-            'ear_r': {'rot': ('Y', 12 * sc)}, 'upper_arm_l': {'rot': [('Y', 22), ('X', -14)]}, 'forearm_l': {'rot': ('X', -40)}}))
+            'ear_r': {'rot': ('Y', 12 * sc)}}))
     A.pose(72, **stance())
     A.end(loop=False)
 
@@ -1338,6 +1355,8 @@ def animate(rig):
     A.pose(71, **stance(extra={**hold, 'head': {'rot': ('Y', 8)}}))
     A.pose(84, **stance())
     A.end(loop=False)
+    # the craft at the workbench: measure, saw, plane, chisel, sand, blow, proud (art/shop/craft.py)
+    CRAFT['worst'] = craft.build_clips(A, stance, rig, globals(), LM, PENCIL, CRAFT['info'])
     return A
 
 
@@ -1370,7 +1389,8 @@ def main():
     tail = build_tail()
     set_attr(body, 'reg', 0.0)
     set_attr(tail, 'reg', 1.0)
-    PENCIL['ear'] = (np.array((-0.113, 0.07, 0.984)), np.array(Vector((-0.16, -1.0, -0.22)).normalized()))
+    # behind his right ear, eraser forward (he takes it by that end), the sharpened end tucked back over the ear
+    PENCIL['ear'] = (np.array((-0.13, -0.035, 0.961)), np.array(Vector((0.16, 1.0, 0.22)).normalized()))
     PENCIL['hand'] = (np.array((-0.3, -0.165, 0.425)), np.array(Vector((0.25, -1.0, 0.3)).normalized()))
     P_ = props()
     ap, straps, pocket, stuff = build_apron(body, tail)
@@ -1400,6 +1420,12 @@ def main():
         for p in P_[nm].data.polygons:
             p.use_smooth = True
     P_['glass'].data.materials.append(m_glass)
+    # the craft: his tools, each built in its own frame, then set in his paw (rest pose), and a still copy on the bench
+    INFO = build_tools(m_kit)
+    CRAFT['info'] = INFO
+    proc = [INFO[t]['ob'] for t in ('mallet', 'chisel', 'square', 'block', 'stool')]
+    ph = [INFO[t]['ob'] for t in ('saw', 'plane')]
+    stills = craft.still_copies(INFO)
     # the rig and the weights
     rig = build_rig()
     names = [b.name for b in rig.data.bones]
@@ -1420,10 +1446,12 @@ def main():
     write_weights(P_['pencil_hand'], names, rigid(P_['pencil_hand'], names, 'pencil_hand'))
     for nm in ('eye_l', 'eye_r'):
         write_weights(P_[nm], names, rigid(P_[nm], names, nm))
-    kit = join(kit_objs, 'kit')
+    for t in craft.TOOLS:
+        ob = INFO[t]['ob']
+        write_weights(ob, names, rigid(ob, names, 'tool_' + t))
     eyes = join([P_['eye_l'], P_['eye_r']], 'eyes')
     glass = P_['glass']
-    for o in (fur, kit, eyes, glass):
+    for o in [fur, eyes, glass] + kit_objs + proc + ph:
         if o.parent != rig:
             o.parent = rig
         if not any(md.type == 'ARMATURE' for md in o.modifiers):
@@ -1432,11 +1460,113 @@ def main():
     log('rigged')
     A = animate(rig)
     log('clips', A.actions)
+    work = ['measure', 'saw', 'plane', 'chisel', 'sand', 'blow', 'proud', 'idle', 'talk', 'wave', 'present', 'hop', 'think', 'gnaw']
+    if '--no-check' not in FLAGS:
+        bad = craft.check(rig, [fur, ap, pocket] + proc + ph, {o.name: t for t in craft.TOOLS for o in [INFO[t]['ob']]}, work, step=3)
+        for b in bad:
+            log('CLIP', *b)
+        log('clipping check:', len(bad), 'contacts', 'worst', max((b[4] for b in bad), default=0), 'mm')
+    tl = craft.timeline()
+    with open(os.path.join(BUILD, 'craft_timeline.json'), 'w') as fh:
+        json.dump({'events': tl, 'bench': craft.BENCH, 'board': craft.BOARD, 'cut': craft.CUT_X, 'mortise': craft.MORTISE,
+                   'stool': craft.STOOL, 'slide': craft.SLIDE, 'worst_ik_mm': {k: round(v[0] * 1000, 1) for k, v in CRAFT['worst'].items()}}, fh, indent=1)
+    log('timeline', os.path.join(BUILD, 'craft_timeline.json'))
     if '--preview' in FLAGS:
         preview_poses(rig, A.actions)
+    if '--craft-preview' in FLAGS:
+        preview_craft(rig, stills)
+    kit = join(kit_objs + proc, 'kit')
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(BUILD, 'beaver.blend'))
     if '--no-export' not in FLAGS:
-        export([fur, kit, eyes, glass], rig, os.path.join(BUILD, 'beaver_raw.glb'))
+        export([fur, kit, eyes, glass] + ph + stills, rig, os.path.join(BUILD, 'beaver_raw.glb'))
+
+
+CRAFT = {}
+
+
+def build_tools(m_kit):
+    """Every tool in its model frame, set into his paw (rest pose); their places on the bench."""
+    craft.INFO_GRIP.update({k: tuple(craft.grip_point(k, LM)) for k in ('l', 'r')})
+    INFO = {}
+    for t, mk in (('mallet', craft.make_mallet), ('chisel', craft.make_chisel), ('square', craft.make_square),
+                  ('block', craft.make_block), ('stool', craft.make_stool)):
+        ob, info = mk()
+        ob.data.materials.clear()
+        ob.data.materials.append(m_kit)
+        for p in ob.data.polygons:
+            p.use_smooth = t != 'block'
+        info['ob'] = ob
+        INFO[t] = info
+    for t, mk in (('saw', craft.make_saw), ('plane', craft.make_plane)):
+        ob, info = mk(BUILD)
+        ob.name = 'tool_' + t
+        info['ob'] = ob
+        INFO[t] = info
+    for t in craft.TOOLS:
+        craft.place_in_hand(INFO[t]['ob'], INFO[t], craft.HAND[t], LM)
+    # the pencil (already built and placed in his paw by props()): its frames, in the hand and behind the ear
+    def frame(base, d):
+        d = Vector(d).normalized()
+        u = d.cross(Vector((0, 0, 1)))
+        if u.length < 0.1:
+            u = d.cross(Vector((1, 0, 0)))
+        u.normalize()
+        w = d.cross(u).normalized()
+        return Matrix((u, d, w)).transposed(), Vector(base)
+    Fh, bh = frame(*PENCIL['hand'])
+    Fe, be = frame(*PENCIL['ear'])
+    INFO['pencil'] = {'F': Fh, 'M_rest': Matrix.Translation(bh) @ Fh.to_4x4(), 'F_ear': Fe, 'grip': Vector((0, 0.05, 0))}
+    craft.place_rests(INFO, LM)
+    return INFO
+
+
+def preview_craft(rig, stills):
+    """Contact sheets of the work clips on a stand-in bench, close on his paws (a 3/4 view like the game's); the still
+    copy of each tool hides while he holds it, as in the game. CRAFT_SHOTS=clip:frame,... picks other frames."""
+    sc = bpy.context.scene
+    bench = craft.preview_bench()
+    cam = [float(x) for x in os.environ.get('CRAFT_CAM', '0.55,-1.55,1.05,-0.05,-0.3,0.6,38').split(',')]
+    res = [int(x) for x in os.environ.get('CRAFT_RES', '400,340').split(',')]
+    setup_preview_scene(res=tuple(res), cam=(tuple(cam[:3]), tuple(cam[3:6])), lens=cam[6])
+    rig.animation_data_create()
+    shots = {'measure': (30, 60), 'saw': (70, 100), 'plane': (44, 76), 'chisel': (70, 76), 'sand': (40,), 'blow': (30,), 'proud': (24, 70)}
+    if os.environ.get('CRAFT_SHOTS'):
+        shots = {}
+        for it in os.environ['CRAFT_SHOTS'].split(','):
+            nm, f = it.split(':')
+            shots.setdefault(nm, []).append(int(f))
+    held = {}
+    for nm, evs in craft.EV.items():
+        for f, k, d in evs:
+            if k in ('take', 'put'):
+                held.setdefault((nm, d['tool']), [None, None])[0 if k == 'take' else 1] = f
+    outs = []
+    for nm, frames in shots.items():
+        rig.animation_data.action = bpy.data.actions[nm]
+        for f in frames:
+            for st in stills:
+                t = st.name[5:]
+                w = held.get((nm, t))
+                st.hide_render = bool(w and w[0] <= f < w[1])
+            sc.frame_set(f)
+            sc.render.filepath = os.path.join(BUILD, f'craft_{nm}_{f}.png')
+            bpy.ops.render.render(write_still=True)
+            outs.append(sc.render.filepath)
+    for st in stills:
+        st.hide_render = False
+    rig.animation_data.action = None
+    sc.frame_set(0)
+    from PIL import Image
+    ims = [Image.open(p) for p in outs]
+    cols = 4
+    W, H = ims[0].size
+    out = Image.new('RGB', (W * cols, H * ((len(ims) + cols - 1) // cols)))
+    for i, im in enumerate(ims):
+        out.paste(im, ((i % cols) * W, (i // cols) * H))
+    out.save(os.path.join(BUILD, 'craft.png'))
+    for o in bench:
+        bpy.data.objects.remove(o)
+    log('craft sheet', os.path.join(BUILD, 'craft.png'))
 
 
 def preview_poses(rig, actions):
