@@ -22,7 +22,7 @@ import { bindHome } from './build/home-sync.ts'; // [house]
 
 async function boot() {
   installArtPx();
-installPixelSkin();
+  installPixelSkin();
   installIconSet(); // [ui4] the painted icon family replaces the sprite icons everywhere
   try { await document.fonts.load('20px "TBME Body"'); } catch { /* font loads later */ }
   const q = new URLSearchParams(location.search);
