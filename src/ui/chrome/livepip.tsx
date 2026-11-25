@@ -148,12 +148,11 @@ class OwlCam {
     a.node.rotation.y = 0.32;
     a.node.updateMatrixWorld(true);
     const g = a.model.g, px = 1 / 16;
-    const all = new THREE.Box3().setFromObject(a.model.rig.root);
-    const headTop = (Math.max(g.headTop, g.tuftTop) + 0.6) * px;
-    const top = Math.min(all.max.y, Math.max(headTop, all.max.y - 0.02)) + 0.03, bottom = (g.headY - g.headH * 0.42) * px;
+    // the face fills the opening (a tall hat or crown may be cropped by the frame, as in any portrait)
+    const top = (g.headTop + g.headH * 0.32) * px, bottom = (g.headY - g.headH * 0.36) * px;
     const cy = (top + bottom) / 2, span = Math.max(0.2, top - bottom);
     const dist = (span / 2) / Math.tan((this.cam.fov * Math.PI) / 360) * 1.12;
-    this.cam.position.set(dist * 0.06, cy - span * 0.14, dist);
+    this.cam.position.set(dist * 0.06, cy - span * 0.1, dist);
     this.cam.lookAt(0, cy, 0);
     this.framed = true;
   }
@@ -189,7 +188,9 @@ class OwlCam {
     this.hemi.color.setHex(night ? 0xdfe6ff : 0xfff4e4);
     this.key.color.setHex(night ? 0xe4e8ff : 0xffecd0);
     a.node.rotation.y = 0.32;
-    a.update(dt);
+    // the actor's springs want small steps (the portrait draws at ~24 fps)
+    const n = Math.max(1, Math.ceil(dt / (1 / 60)));
+    for (let i = 0; i < n; i++) a.update(dt / n);
     const R = this.R;
     R.setRenderTarget(this.rt);
     R.clear();
