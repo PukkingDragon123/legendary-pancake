@@ -536,6 +536,26 @@ Linssen and Galmuri11 (Lee Minseo, SIL Open Font License), credited there too.
 
 ---
 
+# light7 credits (realistic textures for the oak, the rooms and the ground)
+
+Poly Haven texture scans (1k), resized, re-encoded as WebP and, where they replace an older texture, colour-matched to
+its average colour so the world's palette stays as tuned. The detail packs hold the scan's normal map (red, green) and
+its brightness variation (blue), see `src/gfx/surface.ts`.
+
+| File | Texture | Source | Author | Licence |
+|---|---|---|---|---|
+| `public/models/house/tex/bark.webp`, `bark_n.webp` (the hollow oak's bark and its relief) | Bark Brown 02 | https://polyhaven.com/a/bark_brown_02 | Rob Tuytel | CC0 |
+| `public/models/house/tex/moss.webp` (moss on the oak) | Moss Wood | https://polyhaven.com/a/moss_wood | Rob Tuytel | CC0 |
+| `public/textures/bushed/forest_floor.webp` (the forest floor) | Forest Ground 04 | https://polyhaven.com/a/forest_ground_04 | Rob Tuytel, Rico Cilliers | CC0 |
+| `public/textures/bushed/earth.webp` (bare earth and paths) | Dirt Floor | https://polyhaven.com/a/dirt_floor | eye-candy.xyz | CC0 |
+| `public/textures/bushed/moss.webp` (the lawn and moss) | Leafy Grass | https://polyhaven.com/a/leafy_grass | Charlotte Baglioni | CC0 |
+| `public/textures/bushed/mossy_rock.webp` (mossy rock) | Mossy Rock | https://polyhaven.com/a/mossy_rock | Rob Tuytel | CC0 |
+| `public/textures/detail/wood_d.webp` (oak grain on the floors, boards, deck and doors) | Oak Veneer 01 | https://polyhaven.com/a/oak_veneer_01 | Jenelle van Heerden | CC0 |
+| `public/textures/detail/plaster_d.webp` (fibre and relief on the room walls) | White Plaster Rough 01 | https://polyhaven.com/a/white_plaster_rough_01 | Rob Tuytel | CC0 |
+
+
+---
+
 # look4 credits (the "Golden Diorama" look: post, sky, forest, vista)
 
 | Asset | Source | Author | Licence |
@@ -807,6 +827,27 @@ Poly Haven scans by BUSHED's `tools/make_textures.py`), recoloured by `art/shop/
 
 ---
 
+# tex7 credits
+
+Photo textures for the interface's 3D models: the live shelf's wood, leather and cloth (`src/ui/chrome/props3d.ts`)
+and the baked icons (`src/dev/iconbake.ts`). Downloaded from Poly Haven (1k diffuse), scaled to 512 px, kept in colour
+or reduced to tintable grain (`art/tex7/*.webp`), and packed into the interface atlas `public/img/ui3d.webp`.
+
+| Swatch | Source | Author(s) | Licence |
+|---|---|---|---|
+| `wood`, `woodg` (oak, walnut when tinted) | [Oak Veneer 01](https://polyhaven.com/a/oak_veneer_01) | Jenelle van Heerden | CC0 1.0 |
+| `leather` (straps, tan leather) | [Brown Leather](https://polyhaven.com/a/brown_leather) | Rob Tuytel | CC0 1.0 |
+| `grain` (the journal's leather, tinted) | [Leather Red 02](https://polyhaven.com/a/leather_red_02) | Rob Tuytel | CC0 1.0 |
+| `linen` (cloth, burlap, ribbon) | [Rough Linen](https://polyhaven.com/a/rough_linen) | colormass, Rico Cilliers | CC0 1.0 |
+| `knit` (knitwear) | [Knitted Fleece](https://polyhaven.com/a/knitted_fleece) | colormass, Rico Cilliers | CC0 1.0 |
+| `velvet` (felt, velvet) | [Velour Velvet](https://polyhaven.com/a/velour_velvet) | colormass, Rico Cilliers | CC0 1.0 |
+
+Everything else (brass, enamel, paper, glass, carving, the dial, the tooled cover) is painted procedurally in
+`src/ui/chrome/paint3d.ts` and `props3d.ts`.
+
+
+---
+
 # Credits: interface (builder ui3)
 
 Everything below was borrowed from the owner's own games and restyled for Hoot Hollow (graded into the calm,
@@ -855,6 +896,28 @@ To re-bake: copy the models above into `public/models/uibake/` (they are not com
 
 The 9-slice frames, sprites and fonts come from the owner's game The Bear Must Eat (as before); this round
 repainted them in Hoot Hollow's palette with BUSHED-style materials.
+
+
+---
+
+# ui7 credits (the realistic interface materials)
+
+The interface's material tiles live in `src/ui/real/tex/` (512 px, seamless, WebP). The photo ones are Poly Haven texture
+scans (1k): each albedo is lit by its own normal map from the interface's light (top left), shrunk seamlessly to 512 px
+and graded; the "detail" tiles keep only the brightness variation (grey, tinted to any colour at run time). Rebuilt by
+`art/ui/textures.py`. Everything else in the interface (frames, buttons, brass, enamel, glass, the props, portrait frames,
+the book, the presents, the window, the transitions and particles) is painted procedurally by our own code
+(`src/ui/real/paint.ts`, `kit.ts`), and `paper`, `kraft`, `cork` and `brushed` are procedural tiles from the same script.
+
+| File | Texture | Source | Author | Licence |
+|---|---|---|---|---|
+| `src/ui/real/tex/walnut.webp` (walnut frames, boards, the nightstand, the shelf) | Dark Wood | https://polyhaven.com/a/dark_wood | Dario Barresi, Dimitrios Savva, Rico Cilliers | CC0 |
+| `src/ui/real/tex/oak.webp` (oak frames, signs, blinds, window casements) | Oak Veneer 01 | https://polyhaven.com/a/oak_veneer_01 | Jenelle van Heerden | CC0 |
+| `src/ui/real/tex/leather.webp`, `pebble.webp` (leather: the diary, the passport, tabs, the interview folio) | Leather Red 02 | https://polyhaven.com/a/leather_red_02 | Rob Tuytel | CC0 |
+| `src/ui/real/tex/bookcloth.webp` (book cloth) | Book Pattern | https://polyhaven.com/a/book_pattern | Rob Tuytel | CC0 |
+| `src/ui/real/tex/linen.webp` (linen: tray linings, index tabs, rope, burlap) | Rough Linen | https://polyhaven.com/a/rough_linen | colormass, Rico Cilliers | CC0 |
+| `src/ui/real/tex/velvet.webp` (velvet: curtains, ribbons, the dressing room) | Velour Velvet | https://polyhaven.com/a/velour_velvet | colormass, Rico Cilliers | CC0 |
+| `src/ui/real/tex/felt.webp` (felt and wool: tool tiles, the knitted frame, moss) | Knitted Fleece | https://polyhaven.com/a/knitted_fleece | colormass, Rico Cilliers | CC0 |
 
 
 ---
