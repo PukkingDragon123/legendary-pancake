@@ -1,8 +1,8 @@
 // Soft light and small round things for the interface, painted smooth and anti-aliased at device
 // resolution: radial glows, vignettes, star tiles with soft halos, soft contact shadows, a gradient sky for
 // round portraits, a brass-and-paper knob, a pencil loop, pegboard holes, ticket perforations, a round clip,
-// and a slowly turning sunburst of soft rays. (The file keeps its old name: many screens import from it.)
-// `pixelate()` stays for the anime emotes layer, which still wants a chunky chibi.
+// and slowly turning soft shafts of light. (The file keeps its old name: many screens import from it.)
+// `pixelate()` re-samples a render to art pixels (Pip at the level-up ceremony).
 import { useEffect, useRef } from 'preact/hooks';
 import { calm } from './px/calm.js';
 
@@ -136,7 +136,7 @@ export function pxPerfURL(color = '#2a2a33', a = 0.5): string {
 export function pxCircleClip(_n = 25): string { return 'circle(50% at 50% 50%)'; }
 
 const pixCache = new Map<string, Promise<string>>();
-/** Re-sample an image down to `n` x `n` with a hard alpha (used by the anime emote layer's chibi). */
+/** Re-sample an image down to `n` x `n` with a hard alpha and an outline (Pip at the level-up ceremony). */
 export function pixelate(url: string, n = 28, outline = '#2e2b24'): Promise<string> {
   const key = url.length + ':' + url.slice(-64) + ':' + n + outline;
   let p = pixCache.get(key);
@@ -205,8 +205,9 @@ export function installPxFx() {
 }
 
 /**
- * A slowly turning sunburst of soft rays with a warm glow at its heart (level-up, gifts, ceremonies).
- * Painted once, smooth; it turns with a CSS rotation.
+ * Soft shafts of light round a glowing heart (level-up, gifts, ceremonies): rays of uneven width and length with
+ * feathered sides (three nested wedges of falling strength each), the light thinning out along them, turning very
+ * slowly. Painted once, smooth; it turns with a CSS rotation. [fx10] (was a cartoon sunburst)
  */
 export function PxBurst(p: { size?: number; scale?: number; color?: string; glow?: string; rays?: number; spin?: number; alpha?: number; class?: string; style?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -215,22 +216,25 @@ export function PxBurst(p: { size?: number; scale?: number; color?: string; glow
     const cv = ref.current;
     if (!cv) return;
     cv.width = N; cv.height = N;
-    const g = cv.getContext('2d')!, c = N / 2, rays = p.rays ?? 16, A = p.alpha ?? 0.3;
+    const g = cv.getContext('2d')!, c = N / 2, rays = Math.max(5, Math.round((p.rays ?? 16) * 0.7)), A = (p.alpha ?? 0.3) * 0.8;
     const col = p.color ?? '#f1d39a', gl = p.glow ?? col;
     g.clearRect(0, 0, N, N);
     g.save(); g.translate(c, c);
+    g.globalCompositeOperation = 'lighter';
     for (let i = 0; i < rays; i++) {
-      const a0 = (i / rays) * Math.PI * 2, w = (Math.PI * 2 / rays) * 0.38;
-      const gr = g.createRadialGradient(0, 0, 0, 0, 0, c);
-      gr.addColorStop(0, rgba(col, A)); gr.addColorStop(0.55, rgba(col, A * 0.5)); gr.addColorStop(1, rgba(col, 0));
-      g.fillStyle = gr;
-      g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, c, a0 - w / 2, a0 + w / 2); g.closePath(); g.fill();
+      const j = hash(i, 7, rays), a0 = ((i + j * 0.6) / rays) * Math.PI * 2, w = (Math.PI * 2 / rays) * (0.08 + hash(i, 3, rays) * 0.16), len = c * (0.55 + hash(i, 5, rays) * 0.45);
+      for (const [kw, ka] of [[1, 0.28], [0.62, 0.36], [0.3, 0.5]] as const) {
+        const gr = g.createRadialGradient(0, 0, 0, 0, 0, len);
+        gr.addColorStop(0, rgba(col, A * ka)); gr.addColorStop(0.3, rgba(col, A * ka * 0.55)); gr.addColorStop(0.7, rgba(col, A * ka * 0.14)); gr.addColorStop(1, rgba(col, 0));
+        g.fillStyle = gr;
+        g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, len, a0 - w * kw, a0 + w * kw); g.closePath(); g.fill();
+      }
     }
-    const gg = g.createRadialGradient(0, 0, 0, 0, 0, c * 0.45);
-    gg.addColorStop(0, rgba(gl, Math.min(1, A * 2.2))); gg.addColorStop(0.5, rgba(gl, A * 0.8)); gg.addColorStop(1, rgba(gl, 0));
-    g.fillStyle = gg; g.beginPath(); g.arc(0, 0, c * 0.45, 0, Math.PI * 2); g.fill();
+    const gg = g.createRadialGradient(0, 0, 0, 0, 0, c * 0.5);
+    gg.addColorStop(0, rgba(gl, Math.min(0.9, A * 2))); gg.addColorStop(0.25, rgba(gl, A * 0.9)); gg.addColorStop(0.6, rgba(gl, A * 0.25)); gg.addColorStop(1, rgba(gl, 0));
+    g.fillStyle = gg; g.beginPath(); g.arc(0, 0, c * 0.5, 0, Math.PI * 2); g.fill();
     g.restore();
   }, [N, p.color, p.glow, p.rays, p.alpha]);
-  const secs = Math.max(20, Math.round(40 / Math.max(0.2, (p.spin ?? 0.012) / 0.012)));
+  const secs = Math.max(60, Math.round(90 / Math.max(0.2, (p.spin ?? 0.012) / 0.012)));
   return <canvas ref={ref} class={'px-burst' + (p.class ? ' ' + p.class : '')} aria-hidden="true" style={`width:${size}px;height:${size}px;pointer-events:none;animation:pxBurstSpin ${secs}s linear infinite;${p.style ?? ''}`} />;
 }
