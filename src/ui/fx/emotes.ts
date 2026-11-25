@@ -1,13 +1,17 @@
-// Anime emote marks: bold, hand-drawn pixel-art marks that pop beside a character's head and follow it in 3D (the head
-// is projected through the camera that draws it every frame): a sweat drop, an anger vein, "!" and "?" with motion
-// lines, music notes, sparkles, hearts, a "Zzz" bubble, a light bulb, a gloom cloud with vertical lines and steam
-// puffs. They live on one transparent canvas between the 3D view and the interface, so the HUD and panels always sit
-// on top of them, and they step aside from a speech bubble. Snappy pops and bounces; with Calm motion they simply
-// appear and fade.
+// Anime emote marks: bold, hand-painted pixel-art marks that pop beside a character's head and follow it in 3D (the
+// head is projected through the camera that draws it every frame): a sweat drop, an anger vein, "!" and "?" with
+// motion lines, music notes, sparkles, hearts, a "Zzz" bubble, a light bulb, a gloom cloud with vertical lines and
+// steam puffs. Each mark is a little object modelled and lit by the interface's own painter (src/ui/px/relief.ts:
+// light from the top left, cool violet-blue shadows, a coloured outline) at exactly one art pixel per texel
+// (src/gfx/artpx.ts), re-rasterised at every size it pops through (never scaled), on the game's art-pixel grid. They
+// live on one transparent canvas between the 3D view and the interface, so the HUD and panels always sit on top of
+// them, and they step aside from the interface and speech bubbles. With Calm motion they simply appear and fade.
 //   popEmote('bang', anchor)          anchor: anything with screen() -> { x, y, r } (CSS px) or null when hidden
 //   actorAnchor(obj, faceCentre, r)   an anchor for an object in a 3D scene (finds the camera that draws it)
 import * as THREE from 'three';
-import { blit, calmMotion, col, fxNow, Raster, rng, sprite, texLine } from './pixart.ts';
+import { artPx } from '../../gfx/artpx.ts';
+import { clamp, disc, ell, hex, or, poly, Relief, seg, solid, type HFn, type Mat, type Shape } from '../px/relief.ts';
+import { blit, calmMotion, col, fxNow, Raster, rng, texLine } from './pixart.ts';
 
 export type EmoteKind = 'sweat' | 'anger' | 'bang' | 'ask' | 'notes' | 'sparkle' | 'hearts' | 'zzz' | 'bulb' | 'gloom' | 'steam';
 export const EMOTES: EmoteKind[] = ['bang', 'ask', 'sweat', 'anger', 'notes', 'sparkle', 'hearts', 'zzz', 'bulb', 'gloom', 'steam'];
@@ -17,239 +21,194 @@ export interface EmoteAnchor {
   screen(): { x: number; y: number; r: number } | null;
 }
 
-const INK = '#2a1820';
-const SHADOW = '#1a0a1260';
 const DUR: Record<EmoteKind, number> = { bang: 1.05, ask: 1.4, sweat: 1.5, anger: 1.25, notes: 1.7, sparkle: 1.25, hearts: 1.6, zzz: 2.4, bulb: 1.4, gloom: 1.9, steam: 1.0 };
+/** the cast shadow under every mark: cool violet-blue, like the interface's */
+export const SHADOW = col('#221a4a', 92);
+/** motion lines and gloom lines: a deep violet-brown, never black */
+const LINE = '#3a2448';
 
-// ------------------------------------------------------------------ the art (built once, on first use)
+// ------------------------------------------------------------------ the art: little painted objects
 
-interface Art {
-  bang: HTMLCanvasElement; ask: HTMLCanvasElement; sweat: HTMLCanvasElement; heart: HTMLCanvasElement; heartS: HTMLCanvasElement;
-  notes: HTMLCanvasElement[]; anger: HTMLCanvasElement; bulb: HTMLCanvasElement; bulbOff: HTMLCanvasElement;
-  bubble: HTMLCanvasElement; zBig: HTMLCanvasElement; zSmall: HTMLCanvasElement; cloud: HTMLCanvasElement;
-  puff: HTMLCanvasElement[]; spark: HTMLCanvasElement[][];
+/** glossy enamel, like the HUD's badges */
+export const ENAMEL: Mat = { spec: 0.8, shin: 34, env: 0.12, bands: 5 };
+/** soft and matte: clouds, steam, the thought bubble */
+export const SOFT: Mat = { spec: 0.12, shin: 8, sheen: 0.12, bands: 5 };
+/** water and glass */
+const WET: Mat = { spec: 1.0, shin: 60, env: 0.35, bands: 6 };
+/** a lit bulb: bright, a hard glint */
+const LIT: Mat = { spec: 1.0, shin: 50, env: 0.2, bands: 4 };
+const METAL: Mat = { spec: 0.8, shin: 26, env: 0.7, bands: 5 };
+
+/**
+ * A rounded, pillowy height for any shape: the distance from each art pixel to the shape's edge, through a circular
+ * profile `R` px deep (the shape is sampled once on the art grid, unwarped).
+ */
+export function pillow(sh: Shape, w: number, h: number, R: number, base = 0): HFn {
+  const W = Math.ceil(w) + 2, H = Math.ceil(h) + 2, d = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) d[y * W + x] = sh(x + 0.5, y + 0.5) ? 1e4 : 0;
+  // two-pass chamfer distance (1, 1.41)
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x;
+    if (!d[i]) continue;
+    let v = d[i];
+    if (x > 0) v = Math.min(v, d[i - 1] + 1); else v = Math.min(v, 1);
+    if (y > 0) v = Math.min(v, d[i - W] + 1); else v = Math.min(v, 1);
+    if (x > 0 && y > 0) v = Math.min(v, d[i - W - 1] + 1.41);
+    if (x < W - 1 && y > 0) v = Math.min(v, d[i - W + 1] + 1.41);
+    d[i] = v;
+  }
+  for (let y = H - 1; y >= 0; y--) for (let x = W - 1; x >= 0; x--) {
+    const i = y * W + x;
+    if (!d[i]) continue;
+    let v = d[i];
+    if (x < W - 1) v = Math.min(v, d[i + 1] + 1); else v = Math.min(v, 1);
+    if (y < H - 1) v = Math.min(v, d[i + W] + 1); else v = Math.min(v, 1);
+    if (x < W - 1 && y < H - 1) v = Math.min(v, d[i + W + 1] + 1.41);
+    if (x > 0 && y < H - 1) v = Math.min(v, d[i + W - 1] + 1.41);
+    d[i] = v;
+  }
+  return (x, y) => {
+    const i = clamp(Math.floor(y), 0, H - 1) * W + clamp(Math.floor(x), 0, W - 1);
+    const t = Math.min(1, Math.max(0.35, d[i]) / R);
+    return base + R * Math.sqrt(t * (2 - t));
+  };
 }
-let ART: Art | null = null;
+/** a thick brush stroke along a polyline */
+const stroke = (pts: [number, number][], r: number): Shape => or(...pts.slice(1).map((p, i) => seg(pts[i][0], pts[i][1], p[0], p[1], r)));
+const arcPts = (cx: number, cy: number, rx: number, ry: number, a0: number, a1: number, n = 10): [number, number][] =>
+  Array.from({ length: n + 1 }, (_, i) => { const a = a0 + ((a1 - a0) * i) / n; return [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry] as [number, number]; });
 
-function makeArt(): Art {
-  const o = { ink: INK, shadow: SHADOW };
-  const bang = sprite([
-    '..YYYY..',
-    '.WWYYYYo',
-    '.WYYYYYo',
-    '.WYYYYYo',
-    '.WYYYYo.',
-    '..WYYYo.',
-    '..WYYYo.',
-    '..YYYo..',
-    '..YYYo..',
-    '...YYo..',
-    '...Yo...',
-    '........',
-    '...WY...',
-    '..WYYo..',
-    '..YYoo..',
-    '...oo...',
-  ], { Y: '#ffd23f', W: '#fff7c8', o: '#ef8a1a' }, o);
-  const ask = sprite([
-    '...WBBBB...',
-    '..WBBBBBBo.',
-    '.WBBBooBBBo',
-    '.WBBo..oBBo',
-    '..oo...WBBo',
-    '......WBBo.',
-    '.....WBBo..',
-    '....WBBo...',
-    '....BBo....',
-    '....BBo....',
-    '.....o.....',
-    '...........',
-    '....WB.....',
-    '...WBBo....',
-    '...BBoo....',
-    '....oo.....',
-  ], { B: '#7fd4ff', W: '#e9f9ff', o: '#3a8cd6' }, o);
-  const sweat = sprite([
-    '....L....',
-    '....LM...',
-    '...LLM...',
-    '...LLMM..',
-    '..LLLMM..',
-    '..LWLLMM.',
-    '.LWWLLLM.',
-    '.LWLLLLMD',
-    '.LWLLLLMD',
-    '.LLLLLMMD',
-    '..LLLMMD.',
-    '...MMDD..',
-  ], { L: '#c4ecff', M: '#73c2f3', D: '#3a84cc', W: '#ffffff' }, o);
-  const heartRows = [
-    '.PPR...RRR.',
-    'PWPRR.RRRRR',
-    'PPRRRRRRRSR',
-    'RRRRRRRRRSR',
-    'RRRRRRRRSSR',
-    '.RRRRRRSSR.',
-    '..RRRRSSR..',
-    '...RRSSR...',
-    '....RSR....',
-    '.....R.....',
-  ];
-  const heart = sprite(heartRows, { R: '#ff5b8a', S: '#c42a5e', P: '#ffb3ca', W: '#ffffff' }, o);
-  const heartS = sprite([
-    '.PR.RR.',
-    'PWRRRSR',
-    'RRRRRSR',
-    '.RRRSR.',
-    '..RSR..',
-    '...R...',
-  ], { R: '#ff7aa0', S: '#c43c6c', P: '#ffc4d6', W: '#ffffff' }, o);
-  const noteRows = [
-    '....CC....',
-    '....CCC...',
-    '....CSCC..',
-    '....CS.CC.',
-    '....CS..C.',
-    '....CS.C..',
-    '....CS....',
-    '....CS....',
-    '.HCCCS....',
-    'HHCCCS....',
-    'CCCCSS....',
-    '.CSSS.....',
-  ];
-  const beamRows = [
-    '...CCCCCCC',
-    '...CCCCCCS',
-    '...CS...CS',
-    '...CS...CS',
-    '...CS...CS',
-    '...CS...CS',
-    '.HCCS.HCCS',
-    'HHCCSHHCCS',
-    'CCCSSCCCSS',
-    '.CSS..CSS.',
-  ];
-  const notes = [
-    sprite(noteRows, { C: '#3cc8b4', S: '#1f8a86', H: '#c6fff2' }, o),
-    sprite(beamRows, { C: '#ffb43a', S: '#d0702a', H: '#fff0bf' }, o),
-    sprite(noteRows, { C: '#ff7aa8', S: '#c0467a', H: '#ffe0ec' }, o),
-    sprite(beamRows, { C: '#9f8cff', S: '#6450c8', H: '#ece6ff' }, o),
-  ];
-  // the anger vein: four fat curved pieces bowed in toward a cross-shaped gap, the classic popping mark
-  const anger = (() => {
-    const N = 15, r = new Raster(N + 4, N + 4), c = 2 + N / 2;
-    const R = col('#ff4a3d'), D = col('#b8202c'), H = col('#ffc6bc');
-    for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-      // each piece bows in toward the middle and stops short of its neighbours, its tips flicking outward
-      const ccx = c + sx * 7.4, ccy = c + sy * 7.4, a0 = Math.atan2(-sy, -sx);
-      const arc = Raster.arc(ccx, ccy, 5.6, 5.6, a0 - 0.5, a0 + 0.5, 10);
-      r.stroke(arc, 3.2, R, 0.3);
-    }
-    // a darker underside and a pale highlight on each piece (light from the top left)
-    const src = r.buf.slice();
-    for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) {
-      if (!src[y * r.w + x]) continue;
-      const below = y + 1 < r.h && !src[(y + 1) * r.w + x], right = x + 1 < r.w && !src[y * r.w + x + 1];
-      const above = y > 0 && !src[(y - 1) * r.w + x], left = x > 0 && !src[y * r.w + x - 1];
-      if (below || right) r.set(x, y, D);
-      else if (above && left) r.set(x, y, H);
-    }
-    r.outline(col(INK));
-    r.shadow(col(SHADOW), 1, 1);
-    return r.canvas();
-  })();
-  const bulbRows = [
-    '...WWYYY...',
-    '..WYYYYYYO.',
-    '.WWYYYYYYOO',
-    '.WYYYYYYYOO',
-    '.WYYYYYYYOO',
-    '.YYYYYYYYOO',
-    '..YYYYYYOO.',
-    '..YYYYYYOO.',
-    '...YYYYOO..',
-    '...GGGGgg..',
-    '...ggggdd..',
-    '...GGGGgg..',
-    '....dddd...',
-  ];
-  const bulb = sprite(bulbRows, { Y: '#ffe75a', W: '#fffbe2', O: '#f2a531', G: '#dfe1ea', g: '#9296aa', d: '#5d6074' }, o);
-  const bulbOff = sprite(bulbRows, { Y: '#f1e7b0', W: '#fffdf0', O: '#d8c27a', G: '#dfe1ea', g: '#9296aa', d: '#5d6074' }, o);
-  // the thought bubble: a lumpy cloud and two little puffs trailing back to the head
-  const bubble = (() => {
-    const r = new Raster(30, 24);
-    const W = col('#fdfaff'), L = col('#d9d3f4');
-    r.blob(15, 10, 11, 7.4, W, 0.12, 4);
-    r.blob(8.5, 9, 6, 5.2, W, 0.08, 9);
-    r.blob(21.5, 8.5, 6.2, 5.4, W, 0.08, 12);
-    r.blob(14.5, 5.5, 6.5, 4.2, W, 0.08, 15);
-    // a lilac shade along the bottom of the cloud
-    const src = r.buf.slice();
-    for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) if (src[y * r.w + x] && !src[Math.min(r.h - 1, y + 2) * r.w + x]) r.set(x, y, L);
-    r.blob(5, 19, 2.6, 2.2, W, 0.05, 3);
-    r.blob(2.2, 22, 1.5, 1.3, W, 0, 5);
-    r.outline(col(INK));
-    r.shadow(col(SHADOW), 1, 1);
-    return r.canvas();
-  })();
-  const zBig = sprite(['ZZZZZZ', '....ZZ', '...ZZ.', '..ZZ..', '.ZZ...', 'ZZZZZZ'], { Z: '#4b47a8' });
-  const zSmall = sprite(['zzzz', '..z.', '.z..', 'zzzz'], { z: '#6a64c4' });
-  const cloud = (() => {
-    const r = new Raster(32, 16);
-    const B = col('#696e8f'), T = col('#9095b6'), S = col('#474b68');
-    r.blob(16, 9, 12, 4.6, B, 0.1, 21);
-    r.blob(10, 6.5, 6, 4.6, B, 0.1, 22);
-    r.blob(19, 5.2, 7, 4.6, B, 0.1, 23);
-    r.blob(25, 8, 4.6, 3.8, B, 0.08, 24);
-    const src = r.buf.slice();
-    for (let y = 0; y < r.h; y++) for (let x = 0; x < r.w; x++) {
-      if (!src[y * r.w + x]) continue;
-      if (!src[(y - 1) * r.w + x] || !src[(y - 2) * r.w + x]) { if (!src[(y - 1) * r.w + x - 1] || (x + y) % 3 === 0) r.set(x, y, T); }
-      else if (y + 2 >= r.h || !src[(y + 2) * r.w + x]) r.set(x, y, S);
-    }
-    r.outline(col('#24202f'));
-    r.shadow(col(SHADOW), 1, 1);
-    return r.canvas();
-  })();
-  // steam: a puff that swells (three frames), then breaks into wisps (the fourth)
-  const puff = [2.4, 3.4, 4.4, 4.4].map((rad, i) => {
-    const n = Math.ceil(rad * 2 + 8), r = new Raster(n, n), c = n / 2, Wt = col('#ffffff');
-    if (i < 3) {
-      r.blob(c + 0.5, c, rad, rad * 0.82, Wt, 0.14, 30 + i);
-      r.blob(c - rad * 0.5, c + rad * 0.25, rad * 0.62, rad * 0.52, Wt, 0.1, 40 + i);
-      if (i > 0) r.blob(c + rad * 0.45, c - rad * 0.35, rad * 0.55, rad * 0.45, Wt, 0.1, 50 + i);
-    } else {
-      r.blob(c - 2.6, c + 1, 1.8, 1.5, Wt, 0.1, 61);
-      r.blob(c + 2.2, c - 1.8, 2.2, 1.7, Wt, 0.1, 62);
-      r.blob(c + 0.5, c + 2.6, 1.2, 1.1, Wt, 0.1, 63);
-    }
-    const src = r.buf.slice();
-    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (src[y * n + x] && (y + 1 >= n || !src[(y + 1) * n + x] || (x + 1 < n && !src[y * n + x + 1]))) r.set(x, y, col('#d5d9e8'));
-    r.outline(col('#6c7088'));
-    return r.canvas();
+interface Part { shape: Shape; color: string; mat?: Mat; depth?: number; base?: number; seam?: boolean }
+/** Model and light a mark from parts (w x h art px), then give it its cool cast shadow. */
+function paint(w: number, h: number, parts: Part[], o: { wobble?: number } = {}): HTMLCanvasElement {
+  const M = 3, W = Math.ceil(w) + M * 2, H = Math.ceil(h) + M * 2;
+  const r = new Relief(W, H, 1, 1);
+  r.wobble = o.wobble ?? 0.3;
+  r.chip = 0;
+  parts.forEach((p, i) => {
+    const sh = p.shape;
+    const moved: Shape = Object.assign((x: number, y: number) => sh(x - M, y - M), sh.bb ? { bb: [sh.bb[0] + M, sh.bb[1] + M, sh.bb[2] + M, sh.bb[3] + M] as [number, number, number, number] } : {});
+    const ph = pillow(moved, W, H, p.depth ?? Math.max(2, Math.min(w, h) * 0.22), p.base ?? 0);
+    r.fill(moved, ph, solid(hex(p.color)), p.mat ?? ENAMEL, { id: i + 1, seam: p.seam });
   });
-  // sparkles: a twinkle in four frames (a dot, a plus, a long four-point star, a smaller star) in three tints
-  const spark = ['#ffc94a', '#ff8fc8', '#7fd8ff'].map((edge) => [1, 2, 4, 3].map((arm) => {
-    const n = arm * 2 + 5, r = new Raster(n, n), c = (n - 1) / 2;
-    const W = col('#ffffff'), Y = col(edge === '#ffc94a' ? '#fff3b0' : edge === '#ff8fc8' ? '#ffe0f0' : '#e0f6ff');
-    for (let i = -arm; i <= arm; i++) { r.set(c + i, c, Math.abs(i) <= arm / 2 ? W : Y); r.set(c, c + i, Math.abs(i) <= arm / 2 ? W : Y); }
-    if (arm >= 3) { r.set(c - 1, c - 1, Y); r.set(c + 1, c - 1, Y); r.set(c - 1, c + 1, Y); r.set(c + 1, c + 1, Y); r.set(c, c, W); }
-    if (arm >= 4) { r.set(c - 1, c, W); r.set(c + 1, c, W); r.set(c, c - 1, W); r.set(c, c + 1, W); }
-    r.outline(col(edge));
-    return r.canvas();
-  }));
-  return { bang, ask, sweat, heart, heartS, notes, anger, bulb, bulbOff, bubble, zBig, zSmall, cloud, puff, spark };
+  const px = r.render();
+  const ras = new Raster(W, H);
+  ras.buf.set(new Uint32Array(px.buffer, px.byteOffset, W * H));
+  ras.shadow(SHADOW, 1, 1);
+  return ras.canvas();
 }
 
-/** The emote art (for dev sheets). */
-export function emoteArt(): Art { return (ART ??= makeArt()); }
+const cache = new Map<string, HTMLCanvasElement>();
+const memo = (key: string, f: () => HTMLCanvasElement) => { let c = cache.get(key); if (!c) { c = f(); cache.set(key, c); if (cache.size > 400) cache.delete(cache.keys().next().value!); } return c; };
+
+const NOTE_COLS = ['#3cc8b4', '#ffb43a', '#ff7aa8', '#9f8cff'];
+const SPARK_COLS = ['#fff1a8', '#ffd2ec', '#cdeeff', '#e6d8ff'];
+
+/**
+ * One mark, `u` art px for the head's radius (the marks scale with the face: re-painted at each size, never
+ * stretched). `v` picks a variant (note colour and shape, sparkle tint and twinkle frame, steam frame, bulb on/off).
+ */
+export function markArt(kind: EmoteKind | 'heartS' | 'z' | 'zs' | 'cloud' | 'bubble', u: number, v = 0): HTMLCanvasElement {
+  u = Math.max(6, Math.round(u));
+  return memo(`${kind}:${u}:${v}`, () => {
+    switch (kind) {
+      case 'bang': {
+        const h = u * 1.3, w = u * 0.52, cx = w / 2, sk = (y: number) => (y - h * 0.4) * -0.12;
+        const bar = poly([[cx - w * 0.47 + sk(0), h * 0.05], [cx + w * 0.47 + sk(0), h * 0.05], [cx + w * 0.17 + sk(h * 0.68), h * 0.68], [cx - w * 0.17 + sk(h * 0.68), h * 0.68]]);
+        const cap = ell(cx + sk(h * 0.1), h * 0.11, w * 0.47, h * 0.1);
+        return paint(w, h, [{ shape: or(bar, cap), color: '#ffcf3a' }, { shape: disc(cx + sk(h * 0.88), h * 0.88, Math.max(1.5, w * 0.22)), color: '#ffcf3a' }]);
+      }
+      case 'ask': {
+        const h = u * 1.3, w = u * 0.8, cx = w / 2, rr = Math.max(1.5, u * 0.09);
+        const hook = [...arcPts(cx, h * 0.3, w * 0.33, h * 0.21, Math.PI * 1.08, Math.PI * 2.18, 12), [cx + w * 0.04, h * 0.52] as [number, number], [cx, h * 0.64] as [number, number]];
+        return paint(w, h, [{ shape: stroke(hook, rr), color: '#6fc6ff' }, { shape: disc(cx, h * 0.87, Math.max(1.5, rr * 1.25)), color: '#6fc6ff' }]);
+      }
+      case 'sweat': {
+        const h = u * 0.85, w = u * 0.6, cx = w / 2;
+        const drop = or(ell(cx, h * 0.66, w * 0.46, h * 0.33), poly([[cx + w * 0.08, 0], [cx - w * 0.44, h * 0.6], [cx + w * 0.45, h * 0.6]]));
+        return paint(w, h, [{ shape: drop, color: '#8ed6ff', mat: WET, depth: w * 0.35 }]);
+      }
+      case 'anger': {
+        const s = u * 0.85, c = s / 2, rr = Math.max(1.4, s * 0.1);
+        const pieces = [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => {
+          const a0 = Math.atan2(-sy, -sx);
+          return stroke(arcPts(c + sx * s * 0.47, c + sy * s * 0.47, s * 0.36, s * 0.36, a0 - 0.52, a0 + 0.52, 8), rr);
+        });
+        return paint(s, s, [{ shape: or(...pieces), color: '#ff4b3e', depth: rr * 1.4 }]);
+      }
+      case 'hearts': case 'heartS': {
+        const s = u * (kind === 'heartS' ? 0.5 : 0.72), c = s / 2;
+        const heart: Shape = Object.assign((x: number, y: number) => {
+          const a = (x - c) / (s * 0.5), b = -(y - c) / (s * 0.5) + 0.12;
+          return (a * a + b * b - 1) ** 3 - a * a * b * b * b <= 0;
+        }, { bb: [0, 0, s, s] as [number, number, number, number] });
+        return paint(s, s, [{ shape: heart, color: kind === 'heartS' ? '#ff86ac' : '#ff5b8a', depth: s * 0.3 }]);
+      }
+      case 'notes': {
+        const h = u * 0.8, rr = Math.max(1.1, u * 0.045), color = NOTE_COLS[v % 4];
+        if (v % 2 === 0) {
+          const w = h * 0.62, hx = w * 0.32, hy = h * 0.8, sx = hx + h * 0.15;
+          const head = ell(hx, hy, h * 0.19, h * 0.13);
+          const stem = seg(sx, hy - h * 0.02, sx, h * 0.07, rr);
+          const flag = stroke([[sx, h * 0.07], [sx + w * 0.3, h * 0.22], [sx + w * 0.36, h * 0.4], [sx + w * 0.22, h * 0.52]], rr);
+          return paint(w, h, [{ shape: or(head, stem, flag), color, depth: h * 0.12 }]);
+        }
+        const w = h * 0.95, x1 = w * 0.3, x2 = w * 0.84;
+        const heads = or(ell(x1 - h * 0.14, h * 0.82, h * 0.17, h * 0.12), ell(x2 - h * 0.14, h * 0.74, h * 0.17, h * 0.12));
+        const stems = or(seg(x1, h * 0.8, x1, h * 0.1, rr), seg(x2, h * 0.72, x2, h * 0.02, rr));
+        const beam = poly([[x1 - rr, h * 0.06], [x2 + rr, -h * 0.02], [x2 + rr, h * 0.12], [x1 - rr, h * 0.2]]);
+        return paint(w, h, [{ shape: or(heads, stems, beam), color, depth: h * 0.12 }]);
+      }
+      case 'sparkle': {
+        // a four-point twinkle: the arm length picks the frame (v = tint * 4 + frame)
+        const a = Math.max(1.5, u * [0.12, 0.24, 0.38, 0.3][v % 4]), s = a * 2 + 1, c = s / 2, q = Math.max(0.7, a * 0.22);
+        const star = poly([[c, c - a], [c + q, c - q], [c + a, c], [c + q, c + q], [c, c + a], [c - q, c + q], [c - a, c], [c - q, c - q]]);
+        return paint(s, s, [{ shape: star, color: SPARK_COLS[Math.floor(v / 4) % 4], mat: LIT, depth: Math.max(1, a * 0.35) }], { wobble: 0 });
+      }
+      case 'bubble': case 'zzz': {
+        const w = u * 1.75, h = u * 1.3;
+        const cloud = or(ell(w * 0.52, h * 0.4, w * 0.4, h * 0.27), ell(w * 0.3, h * 0.4, w * 0.24, h * 0.22), ell(w * 0.74, h * 0.37, w * 0.22, h * 0.22), ell(w * 0.5, h * 0.22, w * 0.25, h * 0.18));
+        const tail = or(disc(w * 0.17, h * 0.78, Math.max(1.5, h * 0.09)), disc(w * 0.06, h * 0.93, Math.max(1, h * 0.05)));
+        return paint(w, h, [{ shape: cloud, color: '#fbf8ff', mat: SOFT, depth: h * 0.2 }, { shape: tail, color: '#fbf8ff', mat: SOFT, depth: h * 0.06 }]);
+      }
+      case 'z': case 'zs': {
+        const s = u * (kind === 'z' ? 0.34 : 0.22), rr = Math.max(0.9, s * 0.12);
+        const z = stroke([[s * 0.1, s * 0.12], [s * 0.9, s * 0.12], [s * 0.12, s * 0.88], [s * 0.92, s * 0.88]], rr);
+        return paint(s, s, [{ shape: z, color: '#5b4fc8', depth: rr }], { wobble: 0.15 });
+      }
+      case 'bulb': {
+        const h = u * 1.25, w = u * 0.8, cx = w / 2;
+        const glass = or(ell(cx, h * 0.36, w * 0.47, h * 0.34), poly([[cx - w * 0.33, h * 0.52], [cx + w * 0.33, h * 0.52], [cx + w * 0.21, h * 0.73], [cx - w * 0.21, h * 0.73]]));
+        const base = or(...[0, 1, 2].map((i) => ell(cx, h * (0.77 + i * 0.065), w * 0.24, h * 0.035)));
+        const tip = ell(cx, h * 0.95, w * 0.12, h * 0.04);
+        return paint(w, h, [
+          { shape: glass, color: v ? '#f3ecd2' : '#ffe35a', mat: v ? SOFT : LIT, depth: w * 0.3 },
+          { shape: base, color: '#c8ccda', mat: METAL, depth: h * 0.035, base: 1, seam: true },
+          { shape: tip, color: '#5d6074', mat: METAL, depth: 1, base: 1, seam: true },
+        ]);
+      }
+      case 'cloud': case 'gloom': {
+        const w = u * 2.3, h = u * 0.95;
+        const cloud = or(ell(w * 0.5, h * 0.6, w * 0.42, h * 0.3), ell(w * 0.3, h * 0.45, w * 0.2, h * 0.3), ell(w * 0.58, h * 0.36, w * 0.22, h * 0.32), ell(w * 0.8, h * 0.55, w * 0.15, h * 0.26));
+        return paint(w, h, [{ shape: cloud, color: '#6e7398', mat: SOFT, depth: h * 0.3 }]);
+      }
+      case 'steam': {
+        // swelling in three frames, breaking into wisps in the fourth
+        const d = u * [0.32, 0.44, 0.56, 0.56][v % 4], s = d * 1.3, c = s / 2;
+        const sh = v % 4 < 3
+          ? or(ell(c + d * 0.08, c, d * 0.42, d * 0.35), ell(c - d * 0.24, c + d * 0.1, d * 0.27, d * 0.22), ...(v % 4 ? [ell(c + d * 0.2, c - d * 0.16, d * 0.24, d * 0.2)] : []))
+          : or(ell(c - d * 0.3, c + d * 0.1, d * 0.16, d * 0.13), ell(c + d * 0.22, c - d * 0.18, d * 0.2, d * 0.15), ell(c + d * 0.06, c + d * 0.3, d * 0.11, d * 0.1));
+        return paint(s, s, [{ shape: sh, color: '#ffffff', mat: SOFT, depth: d * 0.2 }]);
+      }
+    }
+  });
+}
 
 // ------------------------------------------------------------------ the layer
 
 interface Live { kind: EmoteKind; anchor: EmoteAnchor; t0: number; dur: number; side: number; seed: number; calm: boolean }
 const live: Live[] = [];
-let cv: HTMLCanvasElement | null = null, ctx: CanvasRenderingContext2D | null = null, raf = 0;
+let cv: HTMLCanvasElement | null = null, ctx: CanvasRenderingContext2D | null = null, raf = 0, A = 1;
 
 function ensure() {
   if (cv || typeof document === 'undefined') return;
@@ -257,16 +216,15 @@ function ensure() {
   cv.className = 'hh-emotes';
   cv.setAttribute('aria-hidden', 'true');
   // between the 3D view (#world) and the interface (#ui, z-index 2): the HUD and panels always cover a mark
-  Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', width: '100vw', height: '100vh', zIndex: '1', pointerEvents: 'none', imageRendering: 'pixelated' });
+  Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', zIndex: '1', pointerEvents: 'none', imageRendering: 'pixelated' });
   document.body.appendChild(cv);
   ctx = cv.getContext('2d');
 }
 
-/** Pop an emote mark beside an anchor's head. A new mark on the same anchor replaces one of the same kind. */
+/** Pop an emote mark beside an anchor's head. A new mark in the same spot replaces the old one. */
 export function popEmote(kind: EmoteKind, anchor: EmoteAnchor, o: { side?: number; delay?: number } = {}) {
   if (typeof document === 'undefined') return;
   ensure();
-  ART ??= makeArt();
   for (const l of live) if (l.anchor === anchor && (l.kind === kind || overlaps(l.kind, kind))) l.dur = Math.min(l.dur, fxNow() - l.t0 + 0.12);
   live.push({ kind, anchor, t0: fxNow() + (o.delay ?? 0), dur: DUR[kind] * (calmMotion() ? 1.2 : 1), side: o.side ?? 0, seed: Math.floor(Math.random() * 1e6), calm: calmMotion() });
   if (!raf) raf = requestAnimationFrame(frame);
@@ -281,8 +239,10 @@ export function clearEmotes() { live.length = 0; ctx?.clearRect(0, 0, cv!.width,
 function frame() {
   raf = 0;
   if (!cv || !ctx) return;
-  const W = innerWidth, H = innerHeight;
-  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  // one canvas pixel = one art pixel (a whole number of device pixels, so the browser's upscale stays crisp)
+  A = artPx();
+  const W = Math.ceil(innerWidth / A), H = Math.ceil(innerHeight / A);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; cv.style.width = `${W * A}px`; cv.style.height = `${H * A}px`; }
   ctx.clearRect(0, 0, W, H);
   ctx.imageSmoothingEnabled = false;
   const now = fxNow();
@@ -299,11 +259,11 @@ function frame() {
 }
 
 /** Which side of the head a mark goes: the one with room on screen and no interface over it (tested once). */
-function pickSide(s: { x: number; y: number; r: number }, k: number): number {
+function pickSide(s: { x: number; y: number; r: number }): number {
   const score = (sd: number) => {
     let bad = 0;
-    for (const [dx, dy] of [[1.0, -0.9], [1.0, -0.3], [1.0, -1.5]] as const) {
-      const x = s.x + sd * (s.r * dx + 6 * k), y = s.y + s.r * dy;
+    for (const [dx, dy] of [[1.15, -0.9], [1.15, -0.3], [1.0, -1.5], [1.6, -0.9]] as const) {
+      const x = s.x + sd * s.r * dx, y = s.y + s.r * dy;
       if (x < 8 || x > innerWidth - 8 || y < 8) { bad += 2; continue; }
       const hit = document.elementFromPoint(x, y);
       if (hit && hit.id !== 'world' && hit.tagName !== 'BODY' && hit.tagName !== 'HTML' && !(hit instanceof HTMLCanvasElement && !hit.closest('#ui'))) bad++;
@@ -323,62 +283,62 @@ function bubbleRects(): DOMRect[] {
   return out;
 }
 
-/** A pop: a quick overshoot in four stepped beats (anime pops on twos), then rest at 1. */
+/** A pop: a quick overshoot in four stepped beats (anime pops on twos), then rest; the mark is re-painted at each size. */
 function pop(t: number, calm: boolean): number {
   if (calm) return 1;
   if (t < 0.04) return 0.55;
-  if (t < 0.08) return 1.35;
-  if (t < 0.13) return 0.88;
-  if (t < 0.18) return 1.08;
+  if (t < 0.08) return 1.3;
+  if (t < 0.13) return 0.9;
+  if (t < 0.18) return 1.06;
   return 1;
 }
-/** fade out over the last `f` seconds on the dither grid (returned as 0..1 for globalAlpha-free stepping) */
+/** fade out over the last `f` seconds, in four steps */
 const out = (t: number, dur: number, f = 0.2) => Math.max(0, Math.min(1, (dur - t) / f));
 
 function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y: number; r: number }, avoid: DOMRect[]) {
-  const A = ART!;
-  // whole CSS px per texel: bigger on a bigger face, always bold enough to read on a phone
-  const k = Math.max(2, Math.min(6, Math.round(s.r / 11)));
-  if (!l.side) l.side = pickSide(s, k);
-  const side = l.side;
-  const r = s.r, calm = l.calm;
+  if (!l.side) l.side = pickSide(s);
+  const side = l.side, calm = l.calm;
+  // everything below is in art pixels: the face's centre, its radius, and the marks' unit size
+  const X = s.x / A, Y = s.y / A, r = s.r / A;
+  const u = Math.max(14, Math.min(46, Math.round(r / 2) * 2));
   const fade = out(t, l.dur, calm ? 0.35 : 0.2);
-  const a = (fade >= 1 ? 1 : Math.max(0.0, Math.round(fade * 4) / 4)); // stepped fade (four beats)
-  // a spot beside the head, nudged off any speech bubble
-  const at = (dx: number, dy: number) => {
-    let x = s.x + dx, y = s.y + dy;
-    for (const b of avoid) if (x > b.left - 14 * k && x < b.right + 14 * k && y > b.top - 10 * k && y < b.bottom + 8 * k) y = b.bottom + 9 * k;
-    return [Math.round(x), Math.round(y)] as [number, number];
+  const a = fade >= 1 ? 1 : Math.round(fade * 4) / 4;
+  // a spot beside the head (art px), nudged off any speech bubble, snapped to the art grid
+  const at = (dx: number, dy: number): [number, number] => {
+    let x = X + dx, y = Y + dy;
+    for (const b of avoid) if (x * A > b.left - u * A * 0.5 && x * A < b.right + u * A * 0.5 && y * A > b.top - u * A * 0.4 && y * A < b.bottom + u * A * 0.3) y = b.bottom / A + u * 0.45;
+    return [Math.round(x), Math.round(y)];
   };
-  const bob = calm ? 0 : Math.round(Math.sin(t * 9) * 0.6) * k;
+  const bob = calm ? 0 : Math.round(Math.sin(t * 9) * 0.6);
+  const P = (tt: number) => pop(tt, calm);
   switch (l.kind) {
     case 'bang': case 'ask': {
-      const img = l.kind === 'bang' ? A.bang : A.ask;
-      const [x, y] = at(side * r * 0.95, -r * 1.05);
-      const hop = calm ? 0 : t < 0.18 ? -Math.round((1 - t / 0.18) * 4) * k : 0;
-      const wob = l.kind === 'ask' && !calm ? Math.round(Math.sin(t * 7) * 1.2) * k : 0;
-      blit(c, img, x + wob, y + hop + bob, k, pop(t, calm), pop(t, calm), a);
-      // motion lines flicking on twos around the top
+      const img = markArt(l.kind, u * P(t));
+      const [x, y] = at(side * r * 1.0, -r * 1.05);
+      const hop = calm ? 0 : t < 0.18 ? -Math.round((1 - t / 0.18) * u * 0.18) : 0;
+      const wob = l.kind === 'ask' && !calm ? Math.round(Math.sin(t * 7) * 1.2) : 0;
+      blit(c, img, x + wob, y + hop + bob, 1, 1, 1, a);
+      // motion lines flicking on twos round the top
       if (!calm && t > 0.04 && t < 0.62 && Math.floor(t * 12) % 2 === 0) {
-        c.fillStyle = INK;
-        const hh = img.height / 2, ox = x + wob, oy = y + hop;
-        for (const ang of [-2.45, -1.57, -0.7]) {
+        c.fillStyle = LINE;
+        const hh = img.height / 2, n = Math.max(2, Math.round(u * 0.14)), th = u >= 30 ? 2 : 1;
+        for (const ang of [-2.5, -1.57, -0.64]) {
           const ca = Math.cos(ang), sa = Math.sin(ang);
-          texLine(c, ca * (hh + 2), sa * (hh + 2), ca * (hh + 5), sa * (hh + 5), k, ox, oy);
+          texLine(c, ca * (hh + 2), sa * (hh + 2), ca * (hh + 2 + n), sa * (hh + 2 + n), 1, x + wob, y + hop, th);
         }
       }
       break;
     }
     case 'sweat': {
-      const slide = calm ? 0 : Math.round(Math.min(1, t / 1.1) * 5) * k;
-      const [x, y] = at(side * r * 0.92, -r * 0.55);
-      blit(c, A.sweat, x, y + slide, k, side * pop(t, calm), pop(t, calm), a);
+      const slide = calm ? 0 : Math.round(Math.min(1, t / 1.1) * u * 0.2);
+      const [x, y] = at(side * r * 0.98, -r * 0.55);
+      blit(c, markArt('sweat', u * P(t)), x, y + slide, 1, side, 1, a);
       break;
     }
     case 'anger': {
-      const [x, y] = at(side * r * 0.82, -r * 0.72);
-      const beat = calm ? 1 : t < 0.18 ? pop(t, false) : Math.floor((t - 0.18) / 0.13) % 2 === 0 ? 1.18 : 1;
-      blit(c, A.anger, x, y, k, beat, beat, a);
+      const [x, y] = at(side * r * 0.86, -r * 0.74);
+      const beat = calm ? 1 : t < 0.18 ? P(t) : Math.floor((t - 0.18) / 0.13) % 2 === 0 ? 1.16 : 1;
+      blit(c, markArt('anger', u * beat), x, y, 1, 1, 1, a);
       break;
     }
     case 'notes': {
@@ -386,10 +346,9 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         const tt = t - i * 0.28;
         if (tt < 0) continue;
         const life = l.dur - 0.56, rise = Math.min(1, tt / life);
-        const img = A.notes[(i + (l.seed % 4)) % 4];
-        const sway = calm ? 0 : Math.round(Math.sin(tt * 6 + i) * 2.2) * k;
-        const [x, y] = at(side * (r * 0.85 + i * 5 * k) + sway, -r * 0.25 - Math.round(rise * 18) * k - i * 2 * k);
-        blit(c, img, x, y, k, pop(tt, calm), pop(tt, calm), Math.min(a, out(tt, life, 0.25)));
+        const sway = calm ? 0 : Math.round(Math.sin(tt * 6 + i) * u * 0.08);
+        const [x, y] = at(side * (r * 0.95 + i * u * 0.2) + sway, -r * 0.25 - Math.round(rise * u * 0.7) - i * u * 0.08);
+        blit(c, markArt('notes', u * P(tt), (i + l.seed) % 4), x, y, 1, 1, 1, Math.min(a, out(tt, life, 0.25)));
       }
       break;
     }
@@ -400,11 +359,10 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         const ang = -Math.PI * (i % 2 ? 0.06 + rr() * 0.34 : 0.6 + rr() * 0.34), dist = r * (1.45 + rr() * 0.5);
         const t0 = i * 0.09 + rr() * 0.05, tt = t - t0;
         if (tt < 0) continue;
-        const ph = calm ? 2 : [0, 1, 2, 2, 3, 2, 1, 0][Math.min(7, Math.floor(tt / 0.08))] ?? 0;
         if (tt > 0.64 && !calm) continue;
-        const tint = A.spark[(i + l.seed) % 3];
+        const ph = calm ? 2 : [0, 1, 2, 2, 3, 2, 1, 0][Math.min(7, Math.floor(tt / 0.08))] ?? 0;
         const [x, y] = at(Math.cos(ang) * dist, Math.sin(ang) * dist * 0.85);
-        blit(c, tint[ph], x, y, k, 1, 1, calm ? a : 1);
+        blit(c, markArt('sparkle', u, ((i + l.seed) % 3) * 4 + ph), x, y, 1, 1, 1, calm ? a : 1);
       }
       break;
     }
@@ -413,56 +371,59 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         const tt = t - i * 0.2;
         if (tt < 0) continue;
         const life = l.dur - 0.4, rise = Math.min(1, tt / life);
-        const sway = calm ? 0 : Math.round(Math.sin(tt * 5 + i * 2) * 2) * k;
-        const beat = calm ? 1 : tt < 0.18 ? pop(tt, false) : Math.floor(tt / 0.22) % 2 ? 1.1 : 1;
-        const [x, y] = at(side * (r * (0.55 + i * 0.32)) + sway, -r * (0.9 + i * 0.12) - Math.round(rise * 14) * k);
-        blit(c, i === 1 ? A.heartS : A.heart, x, y, k, beat, beat, Math.min(a, out(tt, life, 0.25)));
+        const sway = calm ? 0 : Math.round(Math.sin(tt * 5 + i * 2) * u * 0.07);
+        const beat = calm ? 1 : tt < 0.18 ? P(tt) : Math.floor(tt / 0.22) % 2 ? 1.1 : 1;
+        const [x, y] = at(side * (r * (0.6 + i * 0.36)) + sway, -r * (0.95 + i * 0.12) - Math.round(rise * u * 0.55));
+        blit(c, markArt(i === 1 ? 'heartS' : 'hearts', u * beat), x, y, 1, 1, 1, Math.min(a, out(tt, life, 0.25)));
       }
       break;
     }
     case 'zzz': {
-      const [x, y] = at(side * r * 1.25, -r * 1.15);
-      const breathe = calm ? 1 : t < 0.18 ? pop(t, false) : 1 + (Math.floor(t * 2) % 2) * 0.06;
-      blit(c, A.bubble, x, y, k, side * breathe, breathe, a);
+      const breathe = calm ? 1 : t < 0.18 ? P(t) : 1 + (Math.floor(t * 2) % 2) * 0.05;
+      const img = markArt('bubble', u * breathe);
+      const [x, y] = at(side * r * 1.3, -r * 1.2);
+      blit(c, img, x, y, 1, side, 1, a);
       if (t > 0.15 && a > 0) {
-        const bx = x - (A.bubble.width / 2) * k + side * 0, by = y - (A.bubble.height / 2) * k;
-        const zs: [HTMLCanvasElement, number, number, number][] = [[A.zBig, 13, 9, 0.25], [A.zSmall, 20, 6, 0.55], [A.zSmall, 24, 3, 0.85]];
-        for (const [img, zx, zy, tz] of zs) {
+        const bx = x - img.width / 2, by = y - img.height / 2, w = img.width;
+        const zs: ['z' | 'zs', number, number, number][] = [['z', 0.46, 0.4, 0.25], ['zs', 0.66, 0.3, 0.55], ['zs', 0.8, 0.2, 0.85]];
+        for (const [kind, zx, zy, tz] of zs) {
           if (t < tz) continue;
-          const b = calm ? 0 : Math.round(Math.sin((t - tz) * 6) * 0.8) * k;
-          const xx = side > 0 ? bx + zx * k : bx + (A.bubble.width - zx) * k;
-          blit(c, img, xx, by + zy * k + b, k, 1, 1, a);
+          const b = calm ? 0 : Math.round(Math.sin((t - tz) * 6) * 0.8);
+          const xx = side > 0 ? bx + zx * w : bx + (1 - zx) * w;
+          blit(c, markArt(kind, u), Math.round(xx), Math.round(by + zy * img.height + b), 1, 1, 1, a);
         }
       }
       break;
     }
     case 'bulb': {
-      const [x, y] = at(side * r * 0.25, -r * 1.55);
+      const [x, y] = at(side * r * 0.3, -r * 1.6);
       const on = calm || t > 0.55 || Math.floor(t * 10) % 2 === 0;
-      blit(c, on ? A.bulb : A.bulbOff, x, y, k, pop(t, calm), pop(t, calm), a);
+      const img = markArt('bulb', u * P(t), on ? 0 : 1);
+      blit(c, img, x, y, 1, 1, 1, a);
       if (on && t > 0.1 && a > 0.5) {
-        c.fillStyle = '#ffd23f';
-        const hh = A.bulb.height / 2;
+        c.fillStyle = '#ffcf3a';
+        const hh = img.height / 2, n = Math.max(2, Math.round(u * 0.12)), th = u >= 30 ? 2 : 1;
         for (const ang of [-2.6, -2.05, -1.57, -1.09, -0.54]) {
-          const ca = Math.cos(ang), sa = Math.sin(ang), r0 = hh + 1 + (calm ? 0 : Math.floor(t * 8) % 2);
-          texLine(c, ca * r0, sa * r0 - 2, ca * (r0 + 3), sa * (r0 + 3) - 2, k, x, y);
+          const ca = Math.cos(ang), sa = Math.sin(ang), r0 = hh * 0.85 + 2 + (calm ? 0 : Math.floor(t * 8) % 2);
+          texLine(c, ca * r0, sa * r0 - hh * 0.25, ca * (r0 + n), sa * (r0 + n) - hh * 0.25, 1, x, y, th);
         }
       }
       break;
     }
     case 'gloom': {
       const grow = calm ? 1 : Math.min(1, t / 0.45);
-      const [x, y] = at(0, -r * 1.45);
-      const drift = calm ? 0 : Math.round(Math.sin(t * 2.4) * 1) * k;
-      blit(c, A.cloud, x + drift, y, k, 1, 1, Math.min(a, calm ? 1 : Math.min(1, t / 0.12)));
+      const img = markArt('cloud', u);
+      const [x, y] = at(0, -r * 1.5);
+      const drift = calm ? 0 : Math.round(Math.sin(t * 2.4));
+      blit(c, img, x + drift, y, 1, 1, 1, Math.min(a, calm ? 1 : Math.min(1, t / 0.12)));
       // the vertical gloom lines hang down from the cloud over the head
       if (a > 0.25) {
         c.fillStyle = '#4d4a7e';
-        const top = (A.cloud.height / 2) - 2, rr = rng(l.seed);
-        for (let i = 0; i < 6; i++) {
-          const lx = -10 + i * 4 + Math.floor(rr() * 2), len = (5 + Math.floor(rr() * 6)) * grow;
+        const top = img.height / 2 - 3, rr = rng(l.seed), n = Math.max(4, Math.round(u / 4)), span = img.width * 0.62;
+        for (let i = 0; i < n; i++) {
+          const lx = Math.round(-span / 2 + (i / (n - 1)) * span + rr() * 2), len = Math.round((u * 0.25 + rr() * u * 0.3) * grow);
           const flick = calm ? 0 : (Math.floor(t * 8) + i) % 3 === 0 ? 1 : 0;
-          texLine(c, lx, top + 2 + flick, lx, top + 2 + flick + len, k, x + drift, y);
+          texLine(c, lx, top + 2 + flick, lx, top + 2 + flick + len, 1, x + drift, y, u >= 30 ? 2 : 1);
         }
       }
       break;
@@ -473,9 +434,8 @@ function draw(c: CanvasRenderingContext2D, l: Live, t: number, s: { x: number; y
         if (tt < 0 || tt > 0.62) continue;
         const f = Math.min(3, Math.floor(tt / 0.16));
         for (const sd of [-1, 1]) {
-          const dx = sd * (r * 1.0 + Math.round((tt / 0.62) * 10) * k), dy = -r * 0.35 - Math.round((tt / 0.62) * 6) * k;
-          const [x, y] = at(dx, dy);
-          blit(c, A.puff[f], x, y, k, sd, 1, calm ? a : 1);
+          const [x, y] = at(sd * (r * 1.05 + Math.round((tt / 0.62) * u * 0.4)), -r * 0.35 - Math.round((tt / 0.62) * u * 0.25));
+          blit(c, markArt('steam', u, f), x, y, 1, sd, 1, calm ? a : 1);
         }
       }
       break;

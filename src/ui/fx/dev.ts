@@ -5,6 +5,7 @@
 //   ?sheet=emotes&t=0.45    every emote mark beside Pip, frozen t seconds in
 //   ?fx=levelup&t=0.3&bg=/dist/shot.png   a big moment over a backdrop, frozen t seconds in
 import * as THREE from 'three';
+import { artPx } from '../../gfx/artpx.ts';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { OwlActor, type OwlMood } from '../../owl/actor.ts';
 import type { OwlLook } from '../../owl/model.ts';
@@ -157,15 +158,15 @@ else if (q.get('words')) void (async () => {
   canvas.style.display = 'none';
   const list = q.get('words')!.split(',');
   const styles = [{ fill: '#ffd84a', deep: '#f08a1c' }, { fill: '#c9a6ff', deep: '#7448d8' }, { fill: '#8ff0b8', deep: '#2ea26a' }, { fill: '#ff6a4a', deep: '#b8202c' }, { fill: '#d8d2ff', deep: '#6a62c8', ink: '#1a1430' }, { fill: '#8fe0ff', deep: '#2f8ad8' }];
-  const B = 2, c = document.createElement('canvas');
+  const B = artPx(), c = document.createElement('canvas');
   c.width = Math.ceil(W / B); c.height = Math.ceil(H / B);
   Object.assign(c.style, { position: 'fixed', inset: '0', width: `${c.width * B}px`, height: `${c.height * B}px`, imageRendering: 'pixelated' });
   document.body.appendChild(c);
   const g = c.getContext('2d')!;
   g.imageSmoothingEnabled = false;
   list.forEach((w, i) => {
-    const art = sfxArt(w, styles[i % styles.length]);
-    const cx = c.width / 2, cy = 24 + i * 36;
+    const art = sfxArt(w, { ...styles[i % styles.length], size: 3 });
+    const cx = c.width / 2, cy = 30 + i * 58;
     for (const a of art) g.drawImage(a.img, Math.round(cx + a.x - a.img.width / 2), Math.round(cy + a.y - a.img.height / 2));
   });
   done();

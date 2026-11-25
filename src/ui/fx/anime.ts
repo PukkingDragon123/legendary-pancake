@@ -1,13 +1,17 @@
 // Anime screen effects for the big moments: radial speed/focus lines, an impact frame (two frames of high-contrast
 // silhouette), screen shake, sparkle bursts, a sunburst behind a reveal, a chibi Pip popping in from the edge, and
 // manga sound-effect words ("POP!", "DING!", "KA-CHING!"...) lettered in the pixel font with an outline and a 3D
-// extrusion. All pixel art: whole texels, hard edges, flat colours, ordered-dither fades (no smooth gradients).
+// extrusion. All pixel art at exactly one art pixel per texel (src/gfx/artpx.ts, the size the HUD and the 3D world
+// use), painted like the interface (src/ui/px/relief.ts: top-left light, cool violet-blue shadows, coloured outlines):
+// hard edges, stepped tones, ordered-dither fades, never a smooth gradient or a stretched sprite.
 // Two transparent canvases: the back one sits between the 3D view and the interface (a sunburst behind a 3D reveal),
 // the front one above everything (lines, sparkles, words, the chibi). Short (each moment is over in about a second)
 // and cheap (low-res canvases, only running while something plays). With Calm motion (the setting or the system's
 // reduced motion) there is no flash, no shake and no lines: words and sparkles just appear and fade.
 //   animeMoment('levelup' | 'gacha5' | 'gacha4' | 'unlock' | 'morning' | 'bigbuy' | 'stamp' | 'bedtime', at?)
-import { emoteArt, type EmoteKind } from './emotes.ts';
+import { artPx } from '../../gfx/artpx.ts';
+import { flat, hash, hex, mix, Relief, type AFn, type Shape } from '../px/relief.ts';
+import { ENAMEL, markArt, pillow, SHADOW, type EmoteKind } from './emotes.ts';
 import { bayer, blit, calmMotion, col, fxNow, Raster, rng } from './pixart.ts';
 
 type XY = { x: number; y: number };
@@ -43,8 +47,8 @@ class Layer {
 const back = new Layer('1', 'hh-anime-back'), front = new Layer('65', 'hh-anime');
 const fxs: Fx[] = [];
 let raf = 0;
-/** CSS px per texel: chunky enough to read as pixel art, finer on a phone */
-const texel = () => (Math.min(innerWidth, innerHeight) >= 600 ? 3 : 2);
+/** CSS px per texel: the game's one art pixel */
+const texel = () => artPx();
 
 function add(f: Fx) {
   if (typeof document === 'undefined') return;
@@ -75,7 +79,7 @@ function frame() {
  */
 export function speedLines(o: { x?: number; y?: number; dur?: number; color?: string; clear?: number; n?: number; back?: boolean } = {}) {
   if (calmMotion()) return;
-  const dur = o.dur ?? 0.8, c = col(o.color ?? '#1d1420'), n = o.n ?? 70;
+  const dur = o.dur ?? 0.8, c = col(o.color ?? '#3a2448'), n = o.n ?? 70;
   add({
     t0: fxNow(), dur, back: o.back,
     step(r, t, B) {
@@ -143,35 +147,14 @@ export function shake(amp = 6, dur = 0.35) {
 
 // ------------------------------------------------------------------ sparkles
 
-const SPARK_TINTS: Record<string, [string, string]> = { gold: ['#fff3b0', '#f0a828'], pink: ['#ffe0f0', '#ff6fb4'], sky: ['#e2f7ff', '#4cb8f0'], violet: ['#f0e4ff', '#9a64f0'] };
-const sparkCache = new Map<string, HTMLCanvasElement>();
-/** A four-point anime sparkle: long thin arms, a white heart, a coloured rim (arm 1..8 texels). */
-function sparkArt(arm: number, tint: string): HTMLCanvasElement {
-  const key = arm + tint;
-  let c = sparkCache.get(key);
-  if (c) return c;
-  const [lt, rim] = SPARK_TINTS[tint] ?? SPARK_TINTS.gold;
-  const n = arm * 2 + 5, r = new Raster(n, n), m = (n - 1) / 2, W = col('#ffffff'), L = col(lt);
-  for (let i = -arm; i <= arm; i++) {
-    const inner = Math.abs(i) <= Math.max(1, arm * 0.35);
-    r.set(m + i, m, inner ? W : L); r.set(m, m + i, inner ? W : L);
-    // fat in the middle: the arms taper to a point
-    if (Math.abs(i) < arm * 0.45 && arm >= 3) { r.set(m + i, m - 1, L); r.set(m + i, m + 1, L); r.set(m - 1, m + i, L); r.set(m + 1, m + i, L); }
-  }
-  if (arm >= 3) { r.set(m, m, W); r.set(m - 1, m, W); r.set(m + 1, m, W); r.set(m, m - 1, W); r.set(m, m + 1, W); }
-  r.outline(col(rim));
-  c = r.canvas();
-  sparkCache.set(key, c);
-  return c;
-}
-
+const SPARK_TINT: Record<string, number> = { gold: 0, pink: 1, sky: 2, violet: 3 };
 /** Sparkles burst out from a point, spin down and twinkle out. */
 export function sparkleBurst(x: number, y: number, n = 14, o: { tint?: string | string[]; spread?: number } = {}) {
   const calm = calmMotion(), rr = rng(Math.floor(Math.random() * 1e6));
   const tints = Array.isArray(o.tint) ? o.tint : [o.tint ?? 'gold'];
   const ps = Array.from({ length: calm ? Math.ceil(n / 2) : n }, (_, i) => {
     const a = rr() * Math.PI * 2, v = (calm ? 0 : 120 + rr() * 260) * (o.spread ?? 1);
-    return { a, v, life: 0.55 + rr() * 0.5, arm: 3 + Math.floor(rr() * 6), tint: tints[i % tints.length], d: rr() * 0.12, dist: calm ? 30 + rr() * 90 : 0 };
+    return { a, v, life: 0.55 + rr() * 0.5, arm: 4 + Math.floor(rr() * 8), tint: SPARK_TINT[tints[i % tints.length]] ?? 0, d: rr() * 0.12, dist: calm ? 30 + rr() * 90 : 0 };
   });
   add({
     t0: fxNow(), dur: 1.15, step() { /* sprites only */ },
@@ -181,9 +164,9 @@ export function sparkleBurst(x: number, y: number, n = 14, o: { tint?: string | 
         if (tt < 0 || tt > p.life) continue;
         const k = tt / p.life, travel = p.v * (1 - Math.pow(1 - Math.min(1, tt / 0.6), 3)) * 0.55 + p.dist;
         const px = x + Math.cos(p.a) * travel, py = y + Math.sin(p.a) * travel + (calm ? 0 : tt * tt * 60);
-        // twinkle: grow, flicker, shrink
-        const arm = Math.max(1, Math.round(p.arm * (k < 0.2 ? k / 0.2 : k > 0.7 ? (1 - k) / 0.3 : 1 - (Math.floor(tt * 14) % 3 === 0 ? 0.35 : 0))));
-        blit(c, sparkArt(arm, p.tint), Math.round(px / B), Math.round(py / B), 1);
+        // twinkle: a dot, a plus, the full star (flickering to a smaller one), back down
+        const f = k < 0.1 ? 0 : k < 0.22 ? 1 : k > 0.9 ? 0 : k > 0.78 ? 1 : Math.floor(tt * 14) % 3 === 0 ? 3 : 2;
+        blit(c, markArt('sparkle', p.arm / 0.38, p.tint * 4 + f), Math.round(px / B), Math.round(py / B), 1);
       }
     },
   });
@@ -224,82 +207,82 @@ export function sunburst(x: number, y: number, o: { colors?: [string, string]; d
 
 // ------------------------------------------------------------------ manga sound-effect words
 
-export interface SfxStyle { fill: string; deep: string; ink?: string; hi?: string; size?: number }
+export interface SfxStyle { fill: string; deep: string; ink?: string; size?: number }
 const STYLES: Record<string, SfxStyle> = {
-  gold: { fill: '#ffd84a', deep: '#f08a1c' },
-  rose: { fill: '#ff8fb4', deep: '#d23c74' },
-  sky: { fill: '#8fe0ff', deep: '#2f8ad8' },
-  mint: { fill: '#8ff0b8', deep: '#2ea26a' },
-  violet: { fill: '#c9a6ff', deep: '#7448d8' },
-  red: { fill: '#ff6a4a', deep: '#b8202c' },
-  night: { fill: '#d8d2ff', deep: '#6a62c8', ink: '#1a1430' },
+  gold: { fill: '#ffd84a', deep: '#e8821c' },
+  rose: { fill: '#ff9ac0', deep: '#d23c74' },
+  sky: { fill: '#8fe0ff', deep: '#2f7ad0' },
+  mint: { fill: '#9af2c0', deep: '#24966a' },
+  violet: { fill: '#d0b0ff', deep: '#6a44d0' },
+  red: { fill: '#ff7a52', deep: '#b8202c' },
+  night: { fill: '#dcd6ff', deep: '#5a52c0', ink: '#1a1438' },
 };
 const FONT = '"Alagard", "TBME Body", monospace';
+type Letter = { img: HTMLCanvasElement; ras: Raster; x: number; y: number };
+const sfxCache = new Map<string, Letter[]>();
 
 /**
- * The lettering of one sound-effect word: each letter a small canvas (1 texel = 1 canvas px) drawn in the pixel font
- * with a two-tone fill, a white top glint, a 2-texel ink outline and a 3-texel extrusion down and to the right, plus
- * where it sits in the word (texels, the word centred on 0,0) and its tilt. The one place the SFX look is decided.
+ * The lettering of one sound-effect word, each letter a little painted object at one art pixel per texel: the pixel
+ * font at `size` art pixels per font pixel (Alagard is drawn on a 16-row grid), its face a rounded bevel lit from the
+ * top left (lighter above, deeper below), a solid 3D extrusion down and to the right, a coloured outline and a cool
+ * violet-blue shadow; plus where each letter sits (art px, the word centred on 0,0). The one place the SFX look is
+ * decided (a shared lettering helper can replace it).
  */
-export function sfxArt(text: string, style: SfxStyle): { img: HTMLCanvasElement; ras: Raster; x: number; y: number }[] {
-  const size = style.size ?? 2; // font pixels per texel x 16 px: 2 = cap height 22 texels
-  const px = 16 * size, ink = col(style.ink ?? '#1d1022'), fill = col(style.fill), deep = col(style.deep), hi = col(style.hi ?? '#fffbe8');
-  const ext = col(style.deep, 255), extDark = col(style.ink ?? '#1d1022');
+export function sfxArt(text: string, style: SfxStyle): Letter[] {
+  const n = Math.max(1, Math.round(style.size ?? 2)), key = `${text}|${style.fill}|${style.deep}|${n}`;
+  const hit = sfxCache.get(key);
+  if (hit) return hit;
+  const px = 16 * n, fill = hex(style.fill), deep = hex(style.deep), lower = mix(fill, deep, 0.38), side = mix(deep, hex(style.ink ?? '#2a1640'), 0.25);
   const m = document.createElement('canvas').getContext('2d', { willReadFrequently: true })!;
-  const out: { img: HTMLCanvasElement; ras: Raster; x: number; y: number }[] = [];
+  const out: Letter[] = [];
   const rr = rng(text.length * 31 + text.charCodeAt(0));
   let pen = 0;
-  const letters = [...text];
-  const metrics: { ch: string; w: number }[] = letters.map((ch) => { m.font = `${px}px ${FONT}`; return { ch, w: Math.ceil(m.measureText(ch).width) }; });
-  const total = metrics.reduce((a, b) => a + b.w, 0) - (letters.length - 1) * size;
+  m.font = `${px}px ${FONT}`;
+  const metrics = [...text].map((ch) => ({ ch, w: Math.ceil(m.measureText(ch).width) }));
+  const total = metrics.reduce((a, b) => a + b.w, 0) + (metrics.length - 1) * Math.max(0, n - 2);
+  const D = n + 1; // extrusion depth
   for (const { ch, w } of metrics) {
     if (ch === ' ') { pen += w; continue; }
-    const pad = 9, cw = w + pad * 2 + 6, chh = px + pad * 2 + 6;
+    const pad = 3 + D, cw = w + pad * 2, chh = Math.ceil(px * 1.15) + pad * 2;
     m.canvas.width = cw; m.canvas.height = chh;
     m.clearRect(0, 0, cw, chh);
     m.font = `${px}px ${FONT}`;
     m.textBaseline = 'alphabetic';
-    const tilt = (rr() - 0.5) * 0.24;
-    m.save();
-    m.translate(cw / 2, chh / 2);
-    m.rotate(tilt);
     m.fillStyle = '#fff';
-    m.fillText(ch, -w / 2, px * 0.34);
-    m.restore();
+    m.fillText(ch, pad, pad + px * 0.8);
     const d = m.getImageData(0, 0, cw, chh).data;
-    const r = new Raster(cw, chh);
-    // the letter: a hard threshold of the glyph (no soft edges), lighter on top, deeper below a ragged line
+    const mask = new Uint8Array(cw * chh);
     let top = chh, bot = 0;
-    for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) if (d[(y * cw + x) * 4 + 3] > 110) { top = Math.min(top, y); bot = Math.max(bot, y); }
-    const split = top + (bot - top) * 0.56;
-    for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) {
-      if (d[(y * cw + x) * 4 + 3] <= 110) continue;
-      r.set(x, y, y + ((x * 7) % 3 === 0 ? 1 : 0) > split ? deep : fill);
-    }
-    // a white glint along every top edge
-    const src = r.buf.slice();
-    for (let y = 1; y < chh; y++) for (let x = 0; x < cw; x++) if (src[y * cw + x] && !src[(y - 1) * cw + x] && y < split) r.set(x, y, hi);
-    // 3D: an extrusion down-right in the deep tone, then the ink outline round letter and extrusion together
-    const body = r.buf.slice();
-    for (let s = 3; s >= 1; s--) for (let y = 0; y < chh; y++) for (let x = 0; x < cw; x++) {
-      const sx = x - s, sy = y - s;
-      if (sx >= 0 && sy >= 0 && body[sy * cw + sx] && !r.buf[y * cw + x]) r.set(x, y, s === 3 ? extDark : ext);
-    }
-    r.outline(ink, true);
-    r.outline(ink);
-    const lx = pen + w / 2 - total / 2;
-    out.push({ img: r.canvas(), ras: r, x: lx, y: (rr() - 0.5) * 3 * size });
-    pen += w - size;
+    for (let i = 0; i < cw * chh; i++) if (d[i * 4 + 3] > 110) { mask[i] = 1; top = Math.min(top, (i / cw) | 0); bot = Math.max(bot, (i / cw) | 0); }
+    const at = (x: number, y: number) => { const X = Math.floor(x), Y = Math.floor(y); return X >= 0 && Y >= 0 && X < cw && Y < chh && mask[Y * cw + X] === 1; };
+    const face: Shape = (x, y) => at(x, y);
+    const ext: Shape = (x, y) => { for (let k = 1; k <= D; k++) if (at(x - k, y - k)) return true; return false; };
+    const split = top + (bot - top) * 0.55;
+    const albedo: AFn = (x, y) => (y + (hash(x | 0, y | 0, 5) > 0.7 ? 1 : 0) > split ? lower : fill);
+    const r = new Relief(cw, chh, 1, 1);
+    r.wobble = 0; r.chip = 0;
+    r.fill(ext, flat(1), () => side, { spec: 0.1, shin: 6, bands: 4 }, { id: 1 });
+    r.fill(face, pillow(face, cw, chh, Math.max(1.5, n * 0.9), 3), albedo, ENAMEL, { id: 2, seam: true });
+    const px4 = r.render();
+    const ras = new Raster(cw, chh);
+    ras.buf.set(new Uint32Array(px4.buffer, px4.byteOffset, cw * chh));
+    // a second, darker coloured line outside the painter's own, so the word reads over anything; the cool shadow
+    ras.outline(col(style.ink ?? '#2a1640'));
+    ras.shadow(SHADOW, 1, 1);
+    // a little tilt per letter is in its baseline (never a rotated sprite: the pixels stay square)
+    out.push({ img: ras.canvas(), ras, x: pen + w / 2 - total / 2, y: Math.round((rr() - 0.5) * 2.5 * n) });
+    pen += w + Math.max(0, n - 2);
   }
+  sfxCache.set(key, out);
   return out;
 }
 
 /** Throw a manga sound-effect word onto the screen: letters slam in one by one, hold, then dissolve upward. */
-export function sfx(word: string, x: number, y: number, o: { style?: keyof typeof STYLES | SfxStyle; size?: number; tilt?: number; dur?: number; delay?: number } = {}) {
+export function sfx(word: string, x: number, y: number, o: { style?: keyof typeof STYLES | SfxStyle; size?: number; tilt?: number; dur?: number; delay?: number; align?: -1 | 0 | 1 } = {}) {
   if (typeof document === 'undefined') return;
   const st = typeof o.style === 'object' ? o.style : STYLES[o.style ?? 'gold'];
   const calm = calmMotion(), dur = Math.min(1.2, o.dur ?? 1.05);
-  let art: ReturnType<typeof sfxArt> | null = null;
+  let art: Letter[] | null = null, big: Letter[] | null = null;
   // fade levels on the dither grid, made on first draw
   const levels: HTMLCanvasElement[][] = [];
   const tilt = o.tilt ?? -0.12;
@@ -307,23 +290,27 @@ export function sfx(word: string, x: number, y: number, o: { style?: keyof typeo
     t0: fxNow() + (o.delay ?? 0), dur, step() { /* sprites only */ },
     draw(c, t, B) {
       if (!art) {
-        art = sfxArt(word, { ...st, size: o.size ?? st.size ?? 2 });
+        // three font pixels per art pixel when the word fits across the screen, two when it doesn't
+        const fit = Math.floor((c.canvas.width * 0.86) / Math.max(1, word.length * 10));
+        const n = o.size ?? st.size ?? Math.max(2, Math.min(3, fit));
+        art = sfxArt(word, { ...st, size: n });
+        big = calm ? art : sfxArt(word, { ...st, size: n + 1 });
         for (const a of art) levels.push([0.75, 0.5, 0.25].map((k) => { const r = new Raster(a.ras.w, a.ras.h); r.buf.set(a.ras.buf); r.dissolve(k); return r.canvas(); }));
       }
       // keep the whole word on screen
       const half = art.reduce((m, a) => Math.max(m, Math.abs(a.x) + a.img.width / 2), 0);
-      const cx = Math.max(half + 4, Math.min(c.canvas.width - half - 4, x / B)), cy = Math.max(16, Math.min(c.canvas.height - 16, y / B));
+      // `align` 1: x is the word's left edge (-1 its right edge); the whole word always stays on screen
+      const cx = Math.max(half + 4, Math.min(c.canvas.width - half - 4, x / B + (o.align ?? 0) * half)), cy = Math.max(16, Math.min(c.canvas.height - 16, y / B));
       const fadeT = dur - 0.24, rise = calm ? 0 : t > fadeT ? Math.round((t - fadeT) * 24) : 0;
       art.forEach((a, i) => {
         const tt = calm ? 1 : t - i * 0.045;
         if (tt < 0) return;
-        const s = calm ? 1 : tt < 0.035 ? 1.7 : tt < 0.07 ? 1.25 : tt < 0.11 ? 0.9 : 1;
-        // letters ride a slight tilt along the word
-        const lx = cx + a.x * Math.cos(tilt), ly = cy + a.y + a.x * Math.sin(tilt) - rise + (calm ? 0 : tt < 0.11 ? -2 : 0);
-        let img = a.img;
+        // letters slam in: a frame a size bigger (re-lettered, not stretched), a drop, then rest on the tilt
+        const lx = cx + a.x * Math.cos(tilt), ly = cy + a.y + a.x * Math.sin(tilt) - rise + (calm ? 0 : tt < 0.11 ? -3 : 0);
+        let img = !calm && tt < 0.07 ? big![i]?.img ?? a.img : a.img;
         if (t > fadeT) img = levels[i][Math.min(2, Math.floor(((t - fadeT) / 0.24) * 4))] ?? img;
         if (calm && t < 0.15) img = levels[i][2 - Math.min(2, Math.floor((t / 0.15) * 3))];
-        blit(c, img, Math.round(lx), Math.round(ly), 1, s, s);
+        blit(c, img, Math.round(lx), Math.round(ly), 1);
       });
     },
   });
@@ -349,7 +336,8 @@ function ensureChibi(): Promise<void> {
     const look = save.value.look, key = JSON.stringify(look);
     if (key === chibiKey && chibiSrc) return;
     const url = await owlIconAsync(look, 'face');
-    if (url) { await setChibi(await pixelate(url, 44)); chibiKey = key; }
+    // about 84 CSS px across, one portrait pixel per art pixel
+    if (url) { await setChibi(await pixelate(url, Math.round(84 / artPx()))); chibiKey = key; }
   })().catch(() => undefined).finally(() => { chibiWait = null; }));
 }
 /** Pip pops in from the side of the screen like a chibi cut-in: a squashy hop, a mark beside him, then away. */
@@ -363,26 +351,24 @@ export function chibi(o: { side?: 'left' | 'right'; y?: number; mark?: EmoteKind
   }
   void ensureChibi(); // (a new look is shot for next time)
   const calm = calmMotion(), dur = Math.min(1.2, o.dur ?? 1.15), left = (o.side ?? 'left') === 'left';
-  const art = emoteArt();
-  const mark = o.mark === 'hearts' ? art.heart : o.mark === 'bang' ? art.bang : o.mark === 'notes' ? art.notes[1] : art.spark[0][2];
+  const mk = (u: number) => (o.mark === 'hearts' || o.mark === 'bang' || o.mark === 'notes' ? markArt(o.mark, u, 1) : markArt('sparkle', u, 2));
   add({
     t0: fxNow(), dur, step() { /* sprites only */ },
     draw(c, t, B) {
-      const k = Math.max(1, Math.round(110 / B / im.width)); // about 110 CSS px across
-      const w = im.width * k, h = im.height * k, W = c.canvas.width;
+      const w = im.width, h = im.height, W = c.canvas.width;
       const y0 = (o.y ?? innerHeight * 0.4) / B;
-      // slide in with a hop and a squash, hold with a bob, drop away
-      let off = 0, sx = 1, sy = 1;
+      // slide in with a hop (a jump past the edge and a settle), hold with a bob, drop away
+      let off = 0, lift = 0;
       if (calm) off = 0;
       else if (t < 0.12) off = 1 - t / 0.12;
-      else if (t < 0.18) { sx = 1.18; sy = 0.84; }
-      else if (t < 0.26) { sx = 0.9; sy = 1.12; }
+      else if (t < 0.18) lift = Math.round(h * 0.12);
+      else if (t < 0.26) lift = -Math.round(h * 0.04);
       else if (t > dur - 0.18) off = (t - (dur - 0.18)) / 0.18;
       const bob = calm ? 0 : Math.floor(t * 6) % 2;
       const x = left ? w * 0.42 - off * w : W - w * 0.42 + off * w;
       const a = calm ? Math.min(1, t / 0.15, (dur - t) / 0.2) : 1;
-      blit(c, im, Math.round(x), Math.round(y0 - bob), k, (left ? 1 : -1) * sx, sy, a);
-      if (t > 0.2 && t < dur - 0.15) blit(c, mark, Math.round(x + (left ? 1 : -1) * w * 0.5), Math.round(y0 - h * 0.45), Math.max(1, Math.round(k / 2)), 1, 1, a);
+      blit(c, im, Math.round(x), Math.round(y0 - bob - lift), 1, left ? 1 : -1, 1, a);
+      if (t > 0.2 && t < dur - 0.15) blit(c, mk(w * 0.42), Math.round(x + (left ? 1 : -1) * w * 0.55), Math.round(y0 - h * 0.45), 1, 1, 1, a);
     },
   });
 }
@@ -405,12 +391,14 @@ export function animeMoment(kind: AnimeMoment, at?: XY) {
       impactFrame(); shake(5, 0.3);
       speedLines({ x: p.x, y: p.y, dur: 0.85, color: '#fff6d8', clear: 0.38 });
       sparkleBurst(p.x, p.y, 18, { tint: ['gold', 'violet', 'sky'] });
-      sfx('DING!', ...wordAt(Math.min(110, W * 0.26), -Math.min(130, H * 0.16)), { style: 'gold', tilt: -0.16 });
+      // beside the medal on a wide screen, above it on a phone
+      if (W >= 700) sfx('DING!', p.x + 84, p.y - 120, { style: 'gold', tilt: -0.16, align: 1 });
+      else sfx('DING!', p.x, p.y - 150, { style: 'gold', tilt: -0.12 });
       break;
     case 'gacha5':
       impactFrame(); shake(7, 0.4);
-      speedLines({ x: p.x, y: p.y, dur: 0.95, color: '#2a1a08', clear: 0.34, back: true });
       sunburst(p.x, p.y, { colors: ['#ffd23f', '#fff2b8'], dur: 1.2, r0: 70, alpha: 0.4 });
+      speedLines({ x: p.x, y: p.y, dur: 0.95, color: '#3a2448', clear: 0.34, back: true });
       sparkleBurst(p.x, p.y, 22, { tint: ['gold', 'gold', 'pink'] });
       sfx('SHING!!', ...wordAt(-Math.min(90, W * 0.22), -Math.min(150, H * 0.2)), { style: 'gold', tilt: 0.14 });
       break;
@@ -421,8 +409,8 @@ export function animeMoment(kind: AnimeMoment, at?: XY) {
       break;
     case 'unlock':
       shake(4, 0.25);
-      speedLines({ x: p.x, y: p.y, dur: 0.8, clear: 0.4, back: true });
       sunburst(p.x, p.y, { colors: ['#ffe58a', '#fff6d0'], dur: 1.1, r0: 50, alpha: 0.36 });
+      speedLines({ x: p.x, y: p.y, dur: 0.8, clear: 0.4, back: true, color: '#3a2448' });
       sparkleBurst(p.x, p.y, 16, { tint: ['gold', 'sky'] });
       sfx('WOW!', ...wordAt(0, -Math.min(120, H * 0.15)), { style: 'mint', tilt: -0.1 });
       chibi({ side: 'left', mark: 'bang' });
