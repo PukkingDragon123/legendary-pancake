@@ -118,7 +118,7 @@ export function furShells(mesh: THREE.Mesh, u: FurUniforms): THREE.InstancedMesh
   im.count = shellCount;
   live.add(im);
   im.position.copy(mesh.position); im.quaternion.copy(mesh.quaternion); im.scale.copy(mesh.scale);
-  im.add(inkHull(mesh, u)); // [outline9] the part's outline: an ink hull inside the fluff
+  im.add(inkHull(mesh, u)); // [outline9] the part's outline: an ink hull at the fluff's edge
   return im;
 }
 
