@@ -3,8 +3,9 @@
 // by the live shelf at the bottom of the home screen (shelf3d.tsx) and the icon bake (src/dev/iconbake.ts).
 //   moonLamp()   a glass moon lamp on a turned brass base: a crescent moon glowing in a starry glass globe, a bead
 //                pull chain
-//   alarmClock() a twin-bell brass alarm clock: enamel dial with real hands (hour, minute, ticking second, gold alarm
-//                hand), domed glass, bells, hammer, carry handle, splayed feet
+//   cuckooClock() a carved Black Forest cuckoo clock on a little stand: a leafy roof and crest, an enamel dial with the
+//                real time in a wreath of carved leaves, a cuckoo door with an owl behind it, a leaf pendulum, pine-cone
+//                weights on chains
 //   journal()    a tooled leather journal: gilt corners, a gold moon on the cover, raised spine bands, page block, a
 //                satin ribbon, a strap with a brass stud; the cover swings open on its hinge
 //   shelf()      a carved walnut shelf: moulded nose, carved scroll ends and acorn rosettes, brass name plates
@@ -142,6 +143,8 @@ export const MATS = {
 };
 
 // ------------------------------------------------------------------ modelling helpers
+
+type P2 = [number, number];
 
 export type O = THREE.Object3D;
 export const V2 = (x: number, y: number) => new THREE.Vector2(x, y);
@@ -353,9 +356,9 @@ export function moonLamp(): LampParts {
   return { root, body, moon, sky, chain, setGlow, moonAt: new THREE.Vector3(0, cy, 0.04), height: cy + R0 + 0.3 };
 }
 
-// ------------------------------------------------------------------ the twin-bell alarm clock
+// ------------------------------------------------------------------ the cuckoo clock
 
-export interface ClockParts { root: THREE.Group; body: THREE.Group; hour: O; minute: O; second: O; alarm: O; hammer: O; bells: O[]; height: number; faceY: number }
+export interface ClockParts { root: THREE.Group; body: THREE.Group; hour: O; minute: O; pendulum: O; door: O; owl: THREE.Group; weights: O[]; height: number }
 
 function dialTex(): THREE.Texture {
   const E = PAL.enamel, N = 128, c = 63.5;
@@ -389,59 +392,120 @@ function handShape(kind: 'hour' | 'minute' | 'second' | 'alarm'): THREE.Shape {
   if (kind === 'alarm') return shape([[-0.018, -0.04], [0.018, -0.04], [0.014, 0.3], [0.05, 0.3], [0.0, 0.4], [-0.05, 0.3], [-0.014, 0.3]]);
   return shape([[-0.04, -0.17], [0.04, -0.17], [0.012, -0.1], [0.008, 0.56], [0.0, 0.6], [-0.008, 0.56], [-0.012, -0.1]]);
 }
-export function alarmClock(o: { caseColor?: number } = {}): ClockParts {
-  const B = MATS.brass(), G = MATS.gold();
-  const caseM = o.caseColor !== undefined ? std('case' + o.caseColor, { map: enamelTex('#' + o.caseColor.toString(16).padStart(6, '0'), 3), metalness: 0.15, roughness: 0.22, physical: { clearcoat: 0.8, clearcoatRoughness: 0.15 } }) : B;
-  const faceY = 1.1, R = 0.74;
-  // the drum case (turned about its axis, facing you), the front bezel, the dial, the domed glass
-  const drum = lathe(smoothProfile([[0, -0.3], [0.42, -0.3], [0.62, -0.27], [0.74, -0.2], [0.8, -0.08], [0.81, 0.06], [0.79, 0.13], [0.74, 0.16], [0.7, 0.16]], 3), caseM, 56);
-  drum.rotation.x = Math.PI / 2;
-  const bezel = at(torus(0.695, 0.04, B, Math.PI * 2, 12, 64), 0, 0, 0.17);
-  const bezel2 = at(torus(0.655, 0.016, G, Math.PI * 2, 8, 64), 0, 0, 0.2);
-  const dial = at(mesh(planarUV(new THREE.CircleGeometry(0.665, 64)), std('dial', { map: dialTex(), roughness: 0.25, physical: { clearcoat: 0.6, clearcoatRoughness: 0.2 } }), false), 0, 0, 0.17);
-  const glass = at(mesh(new THREE.SphereGeometry(1.6, 48, 12, 0, Math.PI * 2, 0, 0.42), MATS.glassSpec(), false), 0, 0, 0.28 - 1.6, Math.PI / 2);
-  glass.renderOrder = 4;
-  // the hands on their arbor, stacked front to back: second, minute, hour, alarm
-  const handMesh = (k: 'hour' | 'minute' | 'second' | 'alarm', m: THREE.Material, z: number) => { const h = ext(handShape(k), 0.012, m, 0.006, 1, 8); h.castShadow = false; const p = grp(h); p.position.z = z; return p; };
-  const alarm = handMesh('alarm', G, 0.185);
-  const hour = handMesh('hour', MATS.blued(), 0.2);
-  const minute = handMesh('minute', MATS.blued(), 0.215);
-  const second = handMesh('second', MATS.red(), 0.23);
-  const arbor = at(lathe([[0, 0.03], [0.035, 0.02], [0.04, 0], [0, 0]], G, 16), 0, 0, 0.235, Math.PI / 2);
-  const face = grp(drum, bezel, bezel2, dial, glass, alarm, hour, minute, second, arbor);
-  face.position.y = faceY;
-  // the bells: domes on posts leaning out, each with a finial nut
-  const bellProf = smoothProfile([[0.0, 0.3], [0.08, 0.29], [0.2, 0.24], [0.28, 0.15], [0.32, 0.05], [0.335, 0.0], [0.33, -0.02], [0.3, -0.005], [0.27, 0.06]], 3);
-  const bells: O[] = [];
-  for (const s of [-1, 1]) {
-    const bell = grp(lathe(bellProf, B, 40), at(lathe(smoothProfile([[0, 0.4], [0.035, 0.39], [0.045, 0.35], [0.03, 0.31], [0, 0.3]], 2), G, 16), 0, 0, 0));
-    const ang = s * 0.5;
-    bell.position.set(s * 0.5, faceY + 0.86, -0.06);
-    bell.rotation.z = -ang;
-    bells.push(bell);
+/** a carved oak leaf, base at the origin pointing up +y: lobed edges, extruded with a rounded bevel */
+export function carvedLeaf(len: number, m: THREE.Material, wid = 0.38): THREE.Mesh {
+  const L: P2[] = [], Rr: P2[] = [];
+  for (let i = 0; i <= 24; i++) {
+    const t = i / 24, w = Math.max(0.002, Math.sin(Math.PI * Math.pow(t, 0.8)) * len * wid * (1 + 0.3 * Math.abs(Math.sin(t * Math.PI * 4.5))));
+    L.push([-w, t * len]); Rr.push([w, t * len]);
   }
-  const posts = [-1, 1].map((s) => tube([[s * 0.22, faceY + 0.66, -0.06], [s * 0.36, faceY + 0.78, -0.06], [s * 0.44, faceY + 0.88, -0.06]], 0.022, B, 8, 6));
-  // the hammer between the bells, on its spring arm
-  const hammer = grp(tube([[0, 0, 0], [0, 0.16, 0.01], [0, 0.32, 0.0]], 0.016, B, 8, 6), at(ball(0.055, B, 12, 10), 0, 0.34, 0));
-  hammer.position.set(0, faceY + 0.7, -0.02);
-  // the carry handle behind the bells
-  const handle = tube([[-0.3, faceY + 0.7, -0.2], [-0.24, faceY + 1.06, -0.22], [0, faceY + 1.16, -0.22], [0.24, faceY + 1.06, -0.22], [0.3, faceY + 0.7, -0.2]], 0.032, B, 24, 8);
-  const handleCaps = [-1, 1].map((s) => at(ball(0.05, G, 10, 8), s * 0.3, faceY + 0.7, -0.2));
-  // splayed feet with turned toes
-  const legs = [-1, 1].map((s) => grp(
-    tube([[s * 0.34, faceY - 0.56, -0.02], [s * 0.44, faceY - 0.78, 0.0], [s * 0.52, faceY - 1.02, 0.02]], 0.04, B, 10, 8),
-    at(lathe(smoothProfile([[0, 0.1], [0.05, 0.09], [0.075, 0.05], [0.07, 0.015], [0.04, 0], [0, 0]], 2), G, 16), s * 0.53, 0, 0.02)));
-  const body = grp(face, ...bells, ...posts, hammer, handle, ...handleCaps, ...legs);
-  const root = grp(body);
-  return { root, body, hour, minute, second, alarm, hammer, bells, height: faceY + 1.25, faceY };
+  const me = ext(shape([...Rr, ...L.reverse()]), len * 0.06, m, len * 0.05, 2, 8);
+  const p = me.geometry.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) - Math.abs(p.getX(i)) * 0.4 + Math.sin((p.getY(i) / len) * Math.PI) * len * 0.08);
+  me.geometry.computeVertexNormals();
+  return me;
 }
-/** set the hands: `d` the time (seconds may be fractional), `wakeMin` minutes past midnight of the alarm */
-export function setClockHands(c: ClockParts, d: Date, wakeMin: number, secAngle?: number) {
+/** the tiny owl that lives behind the cuckoo door */
+function cuckooOwl(): THREE.Group {
+  const feather = std('owlFeather', { map: clothTex(PAL.tan, 12, 0.7), color: 0xc89870, roughness: 0.75 });
+  const belly = std('owlBelly', { map: clothTex(PAL.linen, 13, 0.6), color: 0xfff0d8, roughness: 0.8 });
+  const body = lathe(smoothProfile([[0, 0], [0.07, 0.01], [0.1, 0.06], [0.1, 0.13], [0.085, 0.19], [0.05, 0.22], [0, 0.225]], 3), feather, 20);
+  const chest = at(lathe(smoothProfile([[0, 0.01], [0.06, 0.03], [0.07, 0.08], [0.05, 0.13], [0, 0.14]], 2), belly, 14), 0, 0.01, 0.035, 0, 0, 0, [1, 1, 0.7]);
+  const eyeW = std('owlEyeW', { color: 0xfff6dc, roughness: 0.3 }), eyeI = std('owlEyeI', { color: 0xf0a020, roughness: 0.25, emissive: 0x6a3a00, emissiveIntensity: 0.4 }), pupil = MATS.ink();
+  const glint = std('glint', { color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.6 });
+  const eye = (s: number): THREE.Group => {
+    const e = grp(at(cyl(0.04, 0.04, 0.02, eyeW, 14), 0, 0, 0, Math.PI / 2), at(cyl(0.026, 0.026, 0.022, eyeI, 12), 0, 0, 0.004, Math.PI / 2), at(cyl(0.014, 0.014, 0.024, pupil, 10), 0, 0, 0.008, Math.PI / 2), at(ball(0.006, glint, 6, 4), -0.008, 0.01, 0.022));
+    e.position.x = s * 0.042;
+    return e;
+  };
+  const beak = at(cyl(0.0, 0.018, 0.05, std('beak', { color: 0xf0b030, roughness: 0.4 }), 8), 0, 0.125, 0.09, Math.PI / 2 + 0.4);
+  const tufts = [-1, 1].map((s) => at(cyl(0.0, 0.025, 0.07, feather, 6), s * 0.06, 0.23, 0.0, 0, 0, -s * 0.5));
+  const face = grp(eye(-1), eye(1));
+  face.position.set(0, 0.155, 0.08);
+  return grp(body, chest, face, beak, ...tufts);
+}
+/** a cast pine-cone weight */
+function pineCone(m: THREE.Material): THREE.Group {
+  const cone = lathe(smoothProfile([[0, -0.2], [0.04, -0.18], [0.075, -0.1], [0.085, 0.0], [0.08, 0.08], [0.05, 0.13], [0, 0.14]], 3), m, 16);
+  const ridge = grp();
+  for (let r = 0; r < 5; r++) { const y = -0.15 + r * 0.06, rad = [0.05, 0.075, 0.087, 0.083, 0.06][r]; ridge.add(at(torus(rad, 0.013, m, Math.PI * 2, 5, 14), 0, y, 0, Math.PI / 2)); }
+  return grp(cone, ridge, at(torus(0.025, 0.008, MATS.brass(), Math.PI * 2, 5, 10), 0, 0.16, 0));
+}
+/**
+ * A Black Forest cuckoo clock on a little carved stand: a steep roof with carved oak-leaf bargeboards and a crest, a
+ * cuckoo door (an owl lives behind it), an enamel dial in a wreath of carved leaves with the real time, a scalloped
+ * apron, a carved-leaf pendulum and two pine-cone weights on brass chains hanging between turned posts.
+ */
+export function cuckooClock(): ClockParts {
+  const D = std('walnutDark', { map: woodTex('walnut', 7), color: 0xb08070, roughness: 0.7, envMapIntensity: 0.4 });
+  const W = MATS.walnut(), OAK = std('carveOak', { map: woodTex('oak', 9), roughness: 0.6, envMapIntensity: 0.5 });
+  const B = MATS.brass(), G = MATS.gold();
+  const y0 = 0.62, hw = 0.72, eave = 0.9, peak = 1.45; // the case's floor, half width, eaves and ridge heights
+  // the stand: a plinth and two turned posts
+  const plinth = at(ext(shape(rrectPts(1.5, 0.12, 0.04)), 0.62, D, 0.025, 2), 0, 0.075, -0.06);
+  const postProf = smoothProfile([[0.075, 0], [0.1, 0.03], [0.065, 0.07], [0.055, 0.16], [0.09, 0.24], [0.055, 0.32], [0.052, 0.4], [0.085, 0.44], [0.09, 0.47], [0.075, 0.49]], 3);
+  const posts = [-1, 1].map((s) => at(lathe(postProf, D, 14), s * 0.6, 0.135, -0.2));
+  // the case: a gabled house
+  const caseM = ext(shape([[-hw, 0], [hw, 0], [hw, eave], [0, peak], [-hw, eave]]), 0.46, W, 0.03, 2);
+  caseM.position.set(0, y0, -0.08);
+  // the roof boards sit on the gables, overhanging the eaves; carved oak leaves hang from the outer eaves; a crest of
+  // leaves on the ridge
+  const ex = hw, ey = peak - eave, len = Math.hypot(ex, ey), ang = Math.atan2(ey, ex), nx = -ey / len, ny = ex / len;
+  const roof = [-1, 1].map((s) => at(ext(shape(rrectPts(len + 0.24, 0.08, 0.03)), 0.66, D, 0.02, 2), s * (ex / 2 + 0.06 * Math.cos(ang) - nx * 0.05), y0 + eave + ey / 2 - 0.06 * Math.sin(ang) + ny * 0.05, -0.06, 0, 0, -s * ang));
+  const barge = grp();
+  for (const s of [-1, 1]) for (let i = 0; i < 4; i++) {
+    const t = 0.38 + i * 0.2, x = s * t * (ex + 0.12), y = y0 + peak - t * (ey + 0.09) - 0.02;
+    barge.add(at(carvedLeaf(0.19, OAK), x, y, 0.29, 0, 0, Math.PI + s * (0.4 + i * 0.06)));
+  }
+  const crest = grp(at(carvedLeaf(0.22, OAK), -0.07, y0 + peak + 0.02, 0.22, 0, 0, 0.6), at(carvedLeaf(0.22, OAK), 0.07, y0 + peak + 0.02, 0.22, 0, 0, -0.6), at(carvedLeaf(0.26, OAK), 0, y0 + peak + 0.04, 0.2, 0, 0, 0));
+  // the cuckoo door in the gable: a dark opening, a framed little door on its hinge, the owl behind it
+  const doorShape = shape([[-0.15, 0], [0.15, 0], ...Array.from({ length: 13 }, (_, i) => { const a = (i / 12) * Math.PI; return [Math.cos(a) * 0.15, 0.17 + Math.sin(a) * 0.12] as P2; })]);
+  const doorY = y0 + eave + 0.04;
+  const hole = at(ext(doorShape, 0.02, std('hole', { color: 0x1a0d0a, roughness: 0.9 }), 0.0, 1, 12), 0, doorY, 0.155);
+  const doorM = ext(doorShape, 0.03, OAK, 0.012, 1, 12);
+  doorM.position.x = 0.15;
+  const door = grp(doorM, at(ball(0.018, G, 6, 4), 0.25, 0.12, 0.028));
+  door.position.set(-0.15, doorY, 0.19);
+  const frameM = std('doorFrame', { color: 0x5a2e1a, map: woodTex('walnut', 3), roughness: 0.6 });
+  const doorFrame = grp(at(torus(0.165, 0.026, frameM, Math.PI, 6, 16), 0, doorY + 0.17, 0.18), ...[-1, 1].map((s) => at(cyl(0.026, 0.026, 0.17, frameM, 6), s * 0.165, doorY + 0.085, 0.18)), at(ext(shape(rrectPts(0.42, 0.04, 0.015)), 0.08, frameM, 0.01, 1), 0, doorY - 0.01, 0.17));
+  const owl = cuckooOwl();
+  owl.scale.setScalar(1.15);
+  owl.position.set(0, doorY + 0.01, 0.0);
+  // the dial in a wreath of carved leaves
+  const dialY = y0 + 0.45, dr = 0.38;
+  const dial = at(mesh(planarUV(new THREE.CircleGeometry(dr, 48)), std('cuckooDial', { map: dialTex(), roughness: 0.3, physical: { clearcoat: 0.5, clearcoatRoughness: 0.2 } }), false), 0, dialY, 0.2);
+  const bezel = at(torus(dr + 0.012, 0.026, B, Math.PI * 2, 8, 48), 0, dialY, 0.2);
+  const wreath = grp();
+  for (let i = 0; i < 11; i++) { const a = (i / 11) * Math.PI * 2 + 0.3; wreath.add(at(carvedLeaf(0.17, OAK, 0.34), Math.cos(a) * (dr + 0.03), dialY + Math.sin(a) * (dr + 0.03), 0.17, 0, 0, a - Math.PI / 2)); }
+  const handMesh = (k: 'hour' | 'minute', z: number, sc: number) => { const h = ext(handShape(k), 0.01, MATS.blued(), 0.005, 1, 8); h.castShadow = false; h.scale.setScalar(sc); const p = grp(h); p.position.set(0, dialY, z); return p; };
+  const hour = handMesh('hour', 0.225, 0.78), minute = handMesh('minute', 0.235, 0.7);
+  const arbor = at(lathe([[0, 0.025], [0.03, 0.015], [0.035, 0], [0, 0]], G, 12), 0, dialY, 0.245, Math.PI / 2);
+  // the scalloped apron under the case
+  const apronPts: P2[] = [[-hw - 0.02, 0.08]];
+  for (let i = 0; i <= 40; i++) { const x = -hw - 0.02 + (i / 40) * (hw + 0.02) * 2; apronPts.push([x, -0.02 - Math.abs(Math.sin((x / (hw + 0.02)) * Math.PI * 2.5)) * 0.07]); }
+  apronPts.push([hw + 0.02, 0.08]);
+  const apron = at(ext(shape(apronPts), 0.04, OAK, 0.012, 1), 0, y0 - 0.02, 0.17);
+  // the pendulum (a carved leaf on a rod) and the two pine-cone weights on chains
+  const pendulum = grp(at(cyl(0.011, 0.011, 0.26, B, 6), 0, -0.13, 0), at(carvedLeaf(0.17, OAK, 0.42), 0, -0.25, 0.01, 0, 0, Math.PI));
+  pendulum.position.set(0, y0 - 0.06, 0.1);
+  const iron = std('coneIron', { map: brassTex(14, 0.36, 0.4), color: 0xc8a080, metalness: 0.6, roughness: 0.45, envMapIntensity: 0.8 });
+  const chainBead = new THREE.SphereGeometry(0.013, 6, 4);
+  const weights = [-1, 1].map((s, i) => {
+    const len2 = i ? 0.08 : 0.16, g = grp();
+    for (let k = 0; k < len2 / 0.04; k++) { const b = mesh(chainBead, B, false); b.position.set(0, -k * 0.04, 0); g.add(b); }
+    g.add(at(pineCone(iron), 0, -len2 - 0.13, 0, 0, 0, 0, 0.85));
+    g.position.set(s * 0.3, y0 - 0.06, -0.02);
+    return g;
+  });
+  const body = grp(plinth, ...posts, caseM, ...roof, barge, crest, hole, door, doorFrame, owl, dial, bezel, wreath, hour, minute, arbor, apron, pendulum, ...weights);
+  const root = grp(body);
+  return { root, body, hour, minute, pendulum, door, owl, weights, height: y0 + peak + 0.3 };
+}
+/** set the hands to the time `d` */
+export function setClockHands(c: ClockParts, d: Date) {
   const h = d.getHours() % 12, m = d.getMinutes(), s = d.getSeconds();
   c.hour.rotation.z = -((h + m / 60) / 12) * Math.PI * 2;
   c.minute.rotation.z = -((m + s / 60) / 60) * Math.PI * 2;
-  c.second.rotation.z = secAngle ?? -(s / 60) * Math.PI * 2;
-  c.alarm.rotation.z = -(((wakeMin / 60) % 12) / 12) * Math.PI * 2;
 }
 
 // ------------------------------------------------------------------ the leather journal

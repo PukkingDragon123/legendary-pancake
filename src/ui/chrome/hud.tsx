@@ -4,8 +4,8 @@
 //             moon-gem boards on brass chains with enamel "+" buttons (right)
 //   SideTools small walnut tiles with brass corners and coloured felt, hung on a rope down the right
 //             side (Build, Shop, Dress up, Quests, Map, Settings), each with a paper label tag
-//   MainNav   three big objects on a walnut shelf with engraved brass name plates: a moon lamp (Sleep),
-//             a brass twin-bell alarm clock showing the real time (Clock), a leather journal (Book)
+//   MainNav   three big objects on a walnut shelf with engraved brass name plates, live in 3D (shelf3d.tsx): a moon lamp (Sleep),
+//             a carved cuckoo clock showing the real time (Clock), a leather journal (Book)
 // Everything is painted with the relief painter (src/ui/px/relief.ts, src/ui/chrome/objects.ts): real
 // materials lit from the top left. Signs swing when tapped or hit by rewards and sway in the breeze; they
 // are pulled up out of the way when a full-screen place opens and drop back in when it closes. Opening a
@@ -405,7 +405,7 @@ function MainObject(p: { m: MainDef; i: number; rec: boolean; k: number }) {
     shelf3d.act(nid);
     const id = p.m.id;
     if (id === 'sleep') { sound.play('ui_toggle', { volume: 0.7, gap: 60 }); sound.play('chime_sweep', { volume: 0.3, gap: 200 }); }
-    else if (id === 'clock') { sound.play('desk_bell', { volume: 0.35, rate: 1.25, gap: 200 }); sound.play('tick_brass', { volume: 0.5, gap: 60 }); }
+    else if (id === 'clock') { sound.play('drawer', { volume: 0.25, rate: 1.6, gap: 200 }); [110, 380].forEach((ms, i) => setTimeout(() => sound.play('owl_hoot', { volume: 0.4, rate: 1.12 + i * 0.08, gap: 150 }), ms)); } // [icons6] the cuckoo door pops, the owl calls twice
     else { sound.play('book_open', { volume: 0.6, gap: 200 }); }
     const r = el.current!.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height * 0.38;
     uiBurst(p.m.fx[0], x, y, 12);
@@ -441,10 +441,10 @@ export function MainNav() {
   let diff = t.getTime() - now.getTime();
   if (diff < -6 * 3600_000) diff += 24 * 3600_000;
   const bedtimeNear = diff < 90 * 60_000;
-  const [host3d, live] = useShelf3D(away, bedtimeNear, DESK_NAV); // [icons6]
+  const [host3d, live, still3d] = useShelf3D(away, bedtimeNear, DESK_NAV); // [icons6] the live 3D shelf (and last visit's still of it)
   return (
-    <nav class={'hh-nav' + (away ? ' away' : '') + (live ? ' live' : '')} aria-label="Main">
-      <span class="hh-nav3d" ref={host3d} aria-hidden="true" />
+    <nav class={'hh-nav' + (away ? ' away' : '') + (live || still3d ? ' live' : '')} aria-label="Main">
+      <span class="hh-nav3d" ref={host3d} aria-hidden="true">{still3d && <img src={still3d} alt="" draggable={false} />}</span>
       <div class="hh-plaques">
         {MAIN.map((m, i) => <MainObject key={m.id} m={m} i={i} rec={m.id === 'sleep' && bedtimeNear} k={k} />)}
       </div>

@@ -1,22 +1,21 @@
-// [icons6] The three main buttons, live in 3D: a glass moon lamp on a turned brass base (Sleep), a twin-bell brass
-// alarm clock showing the real time (Clock) and a tooled leather journal (Book), standing on a carved walnut shelf
+// [icons6] The three main buttons, live in 3D: a glass moon lamp on a turned brass base (Sleep), a carved Black Forest
+// cuckoo clock showing the real time (Clock) and a tooled leather journal (Book), standing on a carved walnut shelf
 // with brass name plates (models: props3d.ts). One small WebGL canvas behind the buttons draws the lot under warm
 // studio light (a soft key from the top left with gentle shadows on the shelf, sky fill, a cool rim, studio
 // reflections in the brass and glass; at night the moon lamp lights its neighbours), then pixel-finishes it to match
 // the game: rendered at twice the art resolution, each art pixel takes the most representative of its samples (crisp
 // colour clusters, no blur), a coloured outline, a little more colour, and the lamp's glow as a stepped pixel halo.
 // Everything moves like an object: a press squashes it into the shelf, a release hops it up to land with a squash;
-// hovering lifts it (and the journal's cover peeks open); the lamp clicks off and on as its chain is pulled, the clock
-// rings with its hammer flying between the bells, the journal unbuckles its strap and swings its cover open; when the
-// shelf comes back the objects drop onto it one by one. Idle: the moon breathes and bobs, the stars drift, the second
-// hand ticks. It draws at 12 fps idle and 30 fps while something moves, and stops when the shelf is away or the page
+// hovering lifts it (and the journal's cover peeks open); the lamp clicks off and on as its chain is pulled, the cuckoo
+// clock's door pops open and a little owl calls cuckoo, the journal unbuckles its strap and swings its cover open; when the
+// shelf comes back the objects drop onto it one by one. Idle: the moon breathes and bobs, the stars drift, the
+// pendulum swings. It draws at 12 fps idle and 30 fps while something moves, and stops when the shelf is away or the page
 // is hidden. The first paint never waits for it: the painted 2D objects show until the first 3D frame is in, and stay
 // if WebGL is unavailable.
 import * as THREE from 'three';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { save } from '../../game/store.ts';
 import { sceneRef } from '../state.ts';
-import { acornProp, alarmClock, studioEnv, contactBlob, journal, moonLamp, oakLeafProp, setClockHands, shelf, type BookParts, type ClockParts, type LampParts } from './props3d.ts';
+import { acornProp, cuckooClock, studioEnv, contactBlob, journal, moonLamp, oakLeafProp, setClockHands, shelf, type BookParts, type ClockParts, type LampParts } from './props3d.ts';
 import { reducedMotion } from './swing.ts';
 
 export type NavId = 'sleep' | 'clock' | 'book';
@@ -109,8 +108,8 @@ class ShelfStage {
   private shown = false;
   private hostEl: HTMLElement | null = null;
   private rec = false;
-  private wake0 = 420;
   private moving = 0;
+  private snapped = false;
   onLive: (() => void) | null = null;
   live = false;
 
@@ -159,7 +158,7 @@ class ShelfStage {
     const sh = shelf((BOX.w - 6) * k, { plates, bosses });
     this.scene.add(sh.root);
     this.lamp = moonLamp();
-    this.clock = alarmClock({ caseColor: 0x2f9a6a });
+    this.clock = cuckooClock();
     this.book = journal();
     const zObj = -0.16;
     const ko = wAt(zObj);
@@ -175,7 +174,7 @@ class ShelfStage {
     };
     this.objs = {
       sleep: place('sleep', this.lamp.root, this.lamp.body, 1.5, 0.9, 0, 1.1),
-      clock: place('clock', this.clock.root, this.clock.body, 1.7, 0.8, -0.12, 1.1),
+      clock: place('clock', this.clock.root, this.clock.body, 1.8, 0.85, -0.08, 1.12),
       book: place('book', this.book.root, this.book.body, 2.1, 0.95, 0.42, 1.12),
     };
     // a few things left on the shelf: acorns and a fallen oak leaf by the lamp
@@ -243,7 +242,6 @@ class ShelfStage {
   }
   act(id: NavId) { this.objs[id].p.act = 0; this.kick(); }
   setRec(on: boolean) { if (on !== this.rec) { this.rec = on; this.kick(); } }
-  setWake(min: number) { this.wake0 = min; }
   /** the shelf (re)appears: the objects drop onto it one by one */
   show(on: boolean) {
     if (on && !this.shown && !reducedMotion()) (['sleep', 'clock', 'book'] as NavId[]).forEach((id, i) => { const p = this.objs[id].p; p.y = 0.32; p.vy = 0; p.drop = i * 0.09; });
@@ -312,20 +310,26 @@ class ShelfStage {
     if (!calm) { L.moon.position.y = L.moonAt.y + Math.sin(t * 1.3) * 0.028; L.moon.rotation.z = Math.sin(t * 0.7) * 0.07; L.sky.rotation.y = t * 0.06; }
     L.moon.rotation.y = la >= 0 ? Math.PI * 2 * ease(la / 1.0) : (calm ? 0 : Math.sin(t * 0.5) * 0.25);
     L.chain.position.y = 0.72 - (la >= 0 ? 0.09 * Math.max(0, Math.sin(Math.min(1, la / 0.35) * Math.PI)) : 0) - (lp.press ? 0.05 : 0);
-    // the clock: real time, the second hand ticks with a little overshoot; a press rings it
+    // the cuckoo clock: real time, the pendulum swings; a press pops the door open and the owl calls cuckoo twice
     const C = this.clock, cp = this.objs.clock.p, ca = cp.act;
-    const now = new Date(), ms = now.getMilliseconds() / 1000;
-    const over = calm ? 0 : ms < 0.25 ? -Math.sin((ms / 0.25) * Math.PI) * 0.045 : 0;
-    setClockHands(C, now, this.wake0, -(now.getSeconds() / 60) * Math.PI * 2 + over);
-    const ringing = ca >= 0 && ca < 0.95;
-    C.hammer.rotation.z = ringing ? Math.sin(ca * Math.PI * 2 * 21) * 0.5 : 0;
-    C.bells.forEach((b, i) => { b.position.x = (i ? 0.5 : -0.5) + (ringing ? Math.sin(ca * 140 + i) * 0.012 : 0); });
-    if (ringing) {
-      const env = 1 - ca / 0.95;
-      C.body.rotation.z += Math.sin(ca * Math.PI * 2 * 17) * 0.07 * env;
-      C.body.position.x = Math.sin(ca * Math.PI * 2 * 23) * 0.035 * env;
-      C.body.position.y += Math.abs(Math.sin(ca * Math.PI * 2 * 8)) * 0.05 * env;
-    } else C.body.position.x = 0;
+    setClockHands(C, new Date());
+    const kickP = ca >= 0 ? Math.sin(Math.min(1, ca / 1.2) * Math.PI) * 0.18 : 0;
+    C.pendulum.rotation.z = calm ? 0 : Math.sin((t * Math.PI * 2) / 1.15) * (0.26 + kickP);
+    C.weights.forEach((w, i) => { w.rotation.z = calm ? 0 : Math.sin((t * Math.PI * 2) / 1.15 + 1.2 + i) * 0.03; });
+    let door = cp.hover ? 0.5 : 0, out = cp.hover ? 0.25 : 0, bob = 0;
+    if (ca >= 0) {
+      door = ca < 0.14 ? back(ca / 0.14) * 2.1 : ca < 1.3 ? 2.1 : ca < 1.5 ? lerp(2.1, 0, ease((ca - 1.3) / 0.2)) : 0;
+      out = ca < 0.08 ? 0 : ca < 0.24 ? back((ca - 0.08) / 0.16) : ca < 1.15 ? 1 : ca < 1.32 ? lerp(1, 0, ease((ca - 1.15) / 0.17)) : 0;
+      for (const c0 of [0.32, 0.68]) { const u = (ca - c0) / 0.24; if (u > 0 && u < 1) bob = Math.sin(u * Math.PI); }
+    }
+    const ck = C as ClockParts & { _d?: number; _o?: number };
+    ck._d = lerp(ck._d ?? 0, door, ca >= 0 ? 1 : Math.min(1, dt * 10));
+    ck._o = lerp(ck._o ?? 0, out, ca >= 0 ? 1 : Math.min(1, dt * 10));
+    C.door.rotation.y = -ck._d;
+    C.owl.position.z = ck._o * 0.25;
+    C.owl.rotation.x = bob * 0.45;
+    C.owl.scale.setScalar(1.15 + ck._o * 0.55 + bob * 0.12);
+    if (Math.abs(ck._d - door) > 0.002 || Math.abs(ck._o - out) > 0.002) motion += 1;
     // the journal: hover peeks the cover open; a press unbuckles the strap and swings the cover open, then shut
     const B = this.book, bp = this.objs.book.p, ba = bp.act;
     let open = bp.hover ? 0.2 : 0, tab = bp.hover ? 0.25 : 0;
@@ -367,6 +371,11 @@ class ShelfStage {
     R.clear();
     R.render(this.postScene, this.postCam);
     if (!this.live) { this.live = true; this.onLive?.(); }
+    // once settled, keep a still of the shelf for the next visit's first paint
+    if (!this.snapped && this.t > 2.5 && this.moving === 0) {
+      this.snapped = true;
+      try { localStorage.setItem(STILL_KEY, this.canvas.toDataURL('image/png')); } catch { /* storage full or blocked */ }
+    }
   }
   private nightness() {
     const sc = sceneRef.current as unknown as { sky?: { night?: number } } | null;
@@ -376,6 +385,9 @@ class ShelfStage {
     return h >= 20 || h < 6 ? 1 : 0;
   }
 }
+
+const STILL_KEY = 'hh-shelf3d-still:v1';
+const readStill = () => { try { return localStorage.getItem(STILL_KEY) ?? ''; } catch { return ''; } };
 
 let stage: ShelfStage | null | undefined;
 /** the one live shelf (null when WebGL isn't available) */
@@ -399,7 +411,7 @@ function installStyles() {
   st.id = 'hh-shelf3d';
   st.textContent = `
 .hh-nav3d{position:absolute;left:0;top:${BOX.top}px;width:${BOX.w}px;height:${BOX.h}px;pointer-events:none;z-index:0}
-.hh-nav3d>canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.hh-nav3d>canvas,.hh-nav3d>img{position:absolute;left:0;top:0;display:block;width:100%;height:100%;image-rendering:pixelated}
 .hh-nav.live .hh-pic,.hh-nav.live .hh-cshadow,.hh-nav.live .hh-shelf{visibility:hidden}
 .hh-nav.live .hh-plate{background-image:none!important;filter:none}
 .hh-nav.live .hh-mobj,.hh-nav.live .hh-mobj.press,.hh-nav.live .hh-mobj.pop,.hh-nav.live .hh-mobj.rec,.hh-nav.live .hh-mobj.rec.pop{animation:none;scale:none;filter:none}
@@ -412,12 +424,14 @@ function installStyles() {
 const artScale = (big: boolean) => (window as unknown as { __shelfArt?: number }).__shelfArt ?? (big ? 1.0 : 0.66);
 
 /**
- * The live 3D shelf behind the main buttons. Returns [host ref, live]: put the host span in the nav; `live` turns
- * true once the first 3D frame is drawn (then the painted stand-ins can hide).
+ * The live 3D shelf behind the main buttons. Returns [host ref, live, still]: put the host span in the nav; `live`
+ * turns true once the first 3D frame is drawn (then the painted stand-ins can hide); until then `still` is the last
+ * visit's picture of the shelf (when there is one) to show in the host instead of the painted stand-ins.
  */
-export function useShelf3D(away: boolean, rec: boolean, bigQuery: string): [(el: HTMLElement | null) => void, boolean] {
+export function useShelf3D(away: boolean, rec: boolean, bigQuery: string): [(el: HTMLElement | null) => void, boolean, string] {
   installStyles();
   const [live, setLive] = useState(false);
+  const [still] = useState(readStill);
   const host = useRef<HTMLElement | null>(null);
   const [ready, setReady] = useState(false);
   // build it a moment after first paint
@@ -443,9 +457,7 @@ export function useShelf3D(away: boolean, rec: boolean, bigQuery: string): [(el:
   }, [ready]);
   useEffect(() => { if (ready) stage?.show(!away); }, [ready, away]);
   useEffect(() => { if (ready) stage?.setRec(rec); }, [ready, rec]);
-  const wake = save.value.sleep.wake;
-  useEffect(() => { const [h, m] = wake.split(':').map(Number); stage?.setWake(h * 60 + m); }, [ready, wake]);
-  return [(el) => { host.current = el; if (ready) stage?.attach(el); }, live];
+  return [(el) => { host.current = el; if (ready) stage?.attach(el); }, live, live ? '' : still];
 }
 
 /** for the dev page and screenshots */

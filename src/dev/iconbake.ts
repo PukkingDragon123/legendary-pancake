@@ -1,19 +1,23 @@
-// [ui5] The icon bake: every interface icon is a little 3D model, lit, then pixel-finished. Models are the game's own
-// GLBs where one exists (furniture, outfits, the firefly jar...) or small purpose-made models built here (enamel
-// tokens, a brass padlock, an alarm clock, a burlap bag of glossy acorns...). Each is rendered big with a bright, soft
-// studio light (a strong sky fill, a warm key from the top left, no cast shadows), then finished as pixel art: re-sampled
-// to a few art pixels by the most common colour (crisp clusters, no blur), shaded in a few steps per colour with
-// shadows leaning violet and lights leaning gold, brushed with a painterly break-up so every material keeps a
-// hand-painted texture, a little more colour, and a coloured outline. Two sizes per icon (24 and 16 art px) so small
-// icons stay clear; the currency (the acorn bag and the moon gem) also gets glinting idle frames.
+// [icons6] The icon bake: every interface icon is a small, properly shaped 3D model (turned brass, carved wood, tooled
+// leather, enamel, glass, cloth; no blocks and balls), lit like the live shelf (src/ui/chrome/shelf3d.tsx) and
+// pixel-finished. The hero objects are the very models on the shelf (src/ui/chrome/props3d.ts: the alarm clock, the
+// journal), furniture comes from the game's own GLBs, the rest are modelled here. Light: a studio panorama for
+// reflections (a bright window up-left, a dark horizon band, a warm floor), a soft warm key from the top left, a sky
+// fill and a cool rim; no cast shadows. Finish: rendered big, re-sampled to a few art pixels by the most common colour
+// (crisp clusters, no blur), shaded in a few steps per colour with lights leaning gold and shadows leaning violet, a
+// light painterly break-up, a little more colour, and a coloured outline that is softer on the lit side. Two sizes per
+// icon (32 and 20 art px; packs bigger), and the currency (the acorn bag, the moon gem) glints in idle frames.
 //
 //   /dev-iconbake.html               bake everything and show it on paper (big, then at 1:1)
 //   /dev-iconbake.html?only=regex     just some
 //   window.__module                   the generated src/ui/px/icons3d.ts (a tools script writes it to disk)
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { instanceGLB } from '../gfx/glb.ts';
+import { clamp as cl, fbm, hash as h2, hex, leatherGrain, PAL, vnoise as vn2, weave, woodGrain, type RGB } from '../ui/px/relief.ts';
+import {
+  at, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, MATS, mesh, paintTex, planarUV, rrectPts, setClockHands, shape, smoothProfile, starPts, studioEnv, torus, tube,
+  type O,
+} from '../ui/chrome/props3d.ts';
 
 const q = new URLSearchParams(location.search);
 const SS = 8; // supersampling per art pixel
@@ -23,126 +27,100 @@ const canvas = document.createElement('canvas');
 const R = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
 R.setClearColor(0x000000, 0);
 R.outputColorSpace = THREE.SRGBColorSpace;
-R.toneMapping = THREE.NoToneMapping;
+R.toneMapping = THREE.ACESFilmicToneMapping;
+R.toneMappingExposure = 1.0;
 const scene = new THREE.Scene();
-{
-  const pm = new THREE.PMREMGenerator(R);
-  scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.55;
-  pm.dispose();
-}
-scene.add(new THREE.HemisphereLight(0xfffaf0, 0xd9c7a6, 1.55));
-const key = new THREE.DirectionalLight(0xfff0d8, 2.1); key.position.set(-3, 5, 4.5); scene.add(key);
-const fill = new THREE.DirectionalLight(0xdfe8ff, 0.45); fill.position.set(4, 1, 3); scene.add(fill);
+scene.environment = studioEnv(R);
+scene.environmentIntensity = 0.95;
+scene.add(new THREE.HemisphereLight(0xfff2e0, 0x6a4a3a, 0.75));
+const key = new THREE.DirectionalLight(0xffe8c8, 3.4); key.position.set(-3.5, 5, 3.5); scene.add(key);
+const fill = new THREE.DirectionalLight(0xd8e4ff, 0.5); fill.position.set(4, 1, 3); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xe4ecff, 1.1); rim.position.set(2.5, 3, -5); scene.add(rim);
 const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 500);
 
-// ------------------------------------------------------------------ hand-painted material maps
-function paintTex(kind: 'dab' | 'grain' | 'weave' | 'burlap' | 'scale', seed = 1): THREE.Texture {
-  const n = 64, c = document.createElement('canvas');
-  c.width = c.height = n;
-  const g = c.getContext('2d')!;
-  let s = seed * 9301 + 49297;
-  const rnd = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
-  g.fillStyle = '#e8e8e8'; g.fillRect(0, 0, n, n);
-  const dab = (x: number, y: number, w: number, h: number, v: number) => { g.fillStyle = `rgb(${v},${v},${v})`; g.beginPath(); g.ellipse(x, y, w, h, rnd() * 3, 0, Math.PI * 2); g.fill(); };
-  if (kind === 'dab') for (let i = 0; i < 70; i++) dab(rnd() * n, rnd() * n, 3 + rnd() * 6, 2 + rnd() * 4, 205 + rnd() * 50);
-  if (kind === 'grain') for (let y = 0; y < n; y += 2) { const v = 200 + rnd() * 55; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(0, y + Math.sin(y) * 0.5, n, 1 + rnd() * 2); if (rnd() > 0.85) dab(rnd() * n, y, 3, 1.5, 180); }
-  if (kind === 'weave' || kind === 'burlap') { const st = kind === 'burlap' ? 4 : 3; for (let y = 0; y < n; y += st) for (let x = 0; x < n; x += st) { const v = ((x + y) / st) % 2 ? 236 : 200 + rnd() * 20; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(x, y, st, st); } for (let i = 0; i < 20; i++) dab(rnd() * n, rnd() * n, 4 + rnd() * 6, 3, 210 + rnd() * 40); }
-  if (kind === 'scale') for (let y = 0; y < n; y += 5) for (let x = (y / 5) % 2 ? 2 : 0; x < n; x += 5) { dab(x + 2, y + 2, 2.4, 2, 180); dab(x + 1.5, y + 1.5, 1.5, 1.1, 245); }
-  const t = new THREE.CanvasTexture(c);
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.colorSpace = THREE.SRGBColorSpace;
+// ------------------------------------------------------------------ hand-painted detail maps (grey: the colour comes from the material)
+const GREY: RGB[] = [hex('#8a8a8a'), hex('#a4a4a4'), hex('#bcbcbc'), hex('#d0d0d0'), hex('#e2e2e2'), hex('#f0f0f0'), hex('#fafafa')];
+type TexKind = 'enamel' | 'grain' | 'weave' | 'burlap' | 'scale' | 'leather' | 'knit' | 'bark';
+function detailTex(kind: TexKind): THREE.Texture {
+  const n = 48;
+  const t = paintTex('icon-' + kind, n, n, (x, y): RGB => {
+    if (kind === 'grain') return woodGrain(GREY, { seed: 3, along: 'y', base: 0.6, contrast: 0.8 })(x, y, x * 0.9, y * 0.9);
+    if (kind === 'leather') return leatherGrain(GREY, { seed: 5, base: 0.65 })(x, y, x, y);
+    if (kind === 'weave') return weave(GREY, { seed: 4, base: 0.6, scale: 1.2 })(x, y, x * 0.5, y * 0.5);
+    if (kind === 'burlap') { const X = Math.floor(x / 3), Y = Math.floor(y / 3); const v = ((X + Y) & 1 ? 0.75 : 0.55) + (h2(X, Y, 3) - 0.5) * 0.2; return GREY[Math.round(cl(v) * 6)]; }
+    if (kind === 'knit') { const X = Math.floor(x / 4), yy = y % 6; const v = Math.abs(((x % 4) - 1.5) + (yy - 3) * 0.5) < 1.2 ? 0.85 : 0.5; return GREY[Math.round(cl(v + (X % 2) * 0.05) * 6)]; }
+    if (kind === 'scale') { const row = Math.floor(y / 6), xx = (x + (row % 2) * 3) % 6, yy = y % 6; const d = Math.hypot(xx - 3, yy - 2) / 3.2; return GREY[Math.round(cl(0.95 - d * 0.6) * 6)]; }
+    if (kind === 'bark') { const v = 0.55 + (fbm(x * 0.3, y * 0.06, 9) - 0.5) * 0.9; return GREY[Math.round(cl(v) * 6)]; }
+    return GREY[Math.round(cl(0.9 + (fbm(x * 0.12, y * 0.12, 6) - 0.5) * 0.16) * 6)];
+  }, { repeat: true });
   return t;
 }
-const TEX: Record<string, THREE.Texture> = {};
-const tex = (k: Parameters<typeof paintTex>[0], seed = 1) => (TEX[k + seed] ??= paintTex(k, seed));
 
-interface MOpt { metal?: number; rough?: number; tex?: Parameters<typeof paintTex>[0] | null; glow?: number; flat?: boolean; rep?: number; opacity?: number }
+interface MOpt { metal?: number; rough?: number; tex?: TexKind | null; glow?: number; flat?: boolean; rep?: number; opacity?: number; side?: THREE.Side; env?: number }
 const mats = new Map<string, THREE.Material>();
-/** a material: colour plus a hand-painted map (dabs unless told otherwise) */
+/** a material: colour plus a hand-painted detail map (an enamel mottle unless told otherwise) */
 function M(color: number, o: MOpt = {}): THREE.MeshStandardMaterial {
   const k = color + JSON.stringify(o);
   let m = mats.get(k) as THREE.MeshStandardMaterial | undefined;
   if (m) return m;
-  const map = o.tex === null ? null : tex(o.tex ?? 'dab', color % 7);
-  if (map && o.rep) { map.repeat.set(o.rep, o.rep); }
-  m = new THREE.MeshStandardMaterial({ color, metalness: o.metal ?? 0, roughness: o.rough ?? 0.62, map, flatShading: !!o.flat, emissive: o.glow ? color : 0x000000, emissiveIntensity: o.glow ?? 0 });
-  if (o.opacity !== undefined) { m.transparent = true; m.opacity = o.opacity; }
+  let map: THREE.Texture | null = o.tex === null ? null : detailTex(o.tex ?? 'enamel');
+  if (map && o.rep) { map = map.clone(); map.repeat.set(o.rep, o.rep); map.needsUpdate = true; }
+  m = new THREE.MeshStandardMaterial({ color, metalness: o.metal ?? 0, roughness: o.rough ?? 0.5, map, flatShading: !!o.flat, emissive: o.glow ? color : 0x000000, emissiveIntensity: o.glow ?? 0, side: o.side ?? THREE.FrontSide, envMapIntensity: o.env ?? 1 });
+  if (o.opacity !== undefined) { m.transparent = true; m.opacity = o.opacity; m.depthWrite = false; }
   mats.set(k, m);
   return m;
 }
+/** an unlit colour (flames, light) */
+const unlit = (c: number) => { const k = 'unlit' + c; let m = mats.get(k); if (!m) { m = new THREE.MeshBasicMaterial({ color: c }); mats.set(k, m); } return m; };
 const C = {
-  brass: () => M(0xf4c24c, { metal: 0.38, rough: 0.34 }), gold: () => M(0xffd44a, { metal: 0.4, rough: 0.3 }), silver: () => M(0xe2e9f2, { metal: 0.35, rough: 0.32 }),
-  iron: () => M(0x8d9aac, { metal: 0.3, rough: 0.42 }), wood: () => M(0xc07a3c, { tex: 'grain' }), dark: () => M(0x7a4524, { tex: 'grain' }), oak: () => M(0xe0a35a, { tex: 'grain' }),
-  red: () => M(0xe8463c, { rough: 0.3 }), green: () => M(0x3fb85c, { rough: 0.3 }), blue: () => M(0x3d7fe0, { rough: 0.3 }), sky: () => M(0x62c0f2, { rough: 0.28 }),
-  rose: () => M(0xf06a86, { rough: 0.3 }), plum: () => M(0x9a5cd0, { rough: 0.35 }), cream: () => M(0xfff0cc, { rough: 0.5 }), paper: () => M(0xf8ead0, { rough: 0.8, tex: 'grain' }),
-  leaf: () => M(0x5cc04a, { rough: 0.55 }), leather: () => M(0xb84a30, { rough: 0.55, tex: 'dab' }), burlap: () => M(0xd6a560, { rough: 0.85, tex: 'burlap', rep: 2 }), white: () => M(0xffffff, { rough: 0.4 }),
-  ink: () => M(0x33263a, { rough: 0.5, tex: null }), flame: () => M(0xffa030, { glow: 1.1, tex: null }), flameIn: () => M(0xfff07a, { glow: 1.2, tex: null }), glass: () => M(0xc4ecff, { rough: 0.08, metal: 0.1, tex: null }),
-  kraft: () => M(0xd9a86a, { rough: 0.8, tex: 'weave' }), snow: () => M(0xf2f8ff, { rough: 0.5 }),
+  brass: () => M(0xf0b440, { metal: 0.55, rough: 0.3, tex: null, env: 1.2 }), gold: () => M(0xffcc3a, { metal: 0.5, rough: 0.28, tex: null, env: 1.2 }), silver: () => M(0xdfe6ee, { metal: 0.75, rough: 0.28, tex: null }),
+  iron: () => M(0x9aa6b8, { metal: 0.7, rough: 0.38, tex: null }), wood: () => M(0xc47e40, { tex: 'grain', rough: 0.6 }), dark: () => M(0x7a4524, { tex: 'grain', rough: 0.65 }), oak: () => M(0xe6a85c, { tex: 'grain', rough: 0.6 }),
+  red: () => M(0xe63e38, { rough: 0.28 }), green: () => M(0x38b85a, { rough: 0.28 }), blue: () => M(0x3a7ee6, { rough: 0.28 }), sky: () => M(0x5cc0f4, { rough: 0.26 }),
+  rose: () => M(0xf2668a, { rough: 0.3 }), plum: () => M(0x9a5cd6, { rough: 0.32 }), cream: () => M(0xfff2d2, { rough: 0.45 }), paper: () => M(0xfaecd2, { rough: 0.85, tex: 'weave' }),
+  leaf: () => M(0x58c044, { rough: 0.5 }), leather: () => M(0xc04a30, { rough: 0.55, tex: 'leather' }), burlap: () => M(0xd6a560, { rough: 0.9, tex: 'burlap', rep: 2 }), white: () => M(0xffffff, { rough: 0.4 }),
+  ink: () => M(0x30243a, { rough: 0.45, tex: null }), flame: () => unlit(0xff7a1c), flameIn: () => unlit(0xffd84a), glass: () => M(0xc4ecff, { rough: 0.06, metal: 0.1, tex: null, env: 1.6 }),
+  kraft: () => M(0xd9a86a, { rough: 0.85, tex: 'weave' }), snow: () => M(0xf4f9ff, { rough: 0.45 }), steel: () => M(0xb4bcc8, { metal: 0.8, rough: 0.3, tex: null }),
 };
 
 // ------------------------------------------------------------------ modelling helpers
-type O = THREE.Object3D;
-const V2 = (x: number, y: number) => new THREE.Vector2(x, y);
-function mesh(geo: THREE.BufferGeometry, m: THREE.Material): THREE.Mesh { return new THREE.Mesh(geo, m); }
-function grp(...ch: O[]): THREE.Group { const g = new THREE.Group(); for (const c of ch) g.add(c); return g; }
-function at<T extends O>(o: T, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, s: number | [number, number, number] = 1): T {
-  o.position.set(x, y, z); o.rotation.set(rx, ry, rz);
-  if (Array.isArray(s)) o.scale.set(s[0], s[1], s[2]); else o.scale.setScalar(s);
-  return o;
+type P2 = [number, number];
+const sub = (a: P2, b: P2): P2 => [a[0] - b[0], a[1] - b[1]];
+const nrm = (a: P2): P2 => { const l = Math.hypot(a[0], a[1]) || 1; return [a[0] / l, a[1] / l]; };
+/** a thick stroke along a polyline as a closed outline (mitred joints, round caps): a pen stroke to extrude */
+function strokePts(pts: P2[], w: number, caps = 8): P2[] {
+  const hw = w / 2, L: P2[] = [], Rt: P2[] = [];
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i];
+    const d0 = i > 0 ? nrm(sub(p, pts[i - 1])) : nrm(sub(pts[1], p));
+    const d1 = i < pts.length - 1 ? nrm(sub(pts[i + 1], p)) : d0;
+    const n0: P2 = [-d0[1], d0[0]], n1: P2 = [-d1[1], d1[0]];
+    const m = nrm([n0[0] + n1[0], n0[1] + n1[1]]), k = hw / Math.max(0.35, m[0] * n1[0] + m[1] * n1[1]);
+    L.push([p[0] + m[0] * k, p[1] + m[1] * k]); Rt.push([p[0] - m[0] * k, p[1] - m[1] * k]);
+  }
+  const arc = (c: P2, from: P2, sweep: number): P2[] => { const a0 = Math.atan2(from[1] - c[1], from[0] - c[0]); return Array.from({ length: caps - 1 }, (_, i) => { const a = a0 + (sweep * (i + 1)) / caps; return [c[0] + Math.cos(a) * hw, c[1] + Math.sin(a) * hw] as P2; }); };
+  const last = pts.length - 1;
+  return [...L, ...arc(pts[last], L[last], -Math.PI), ...Rt.reverse(), ...arc(pts[0], Rt[Rt.length - 1], -Math.PI)];
 }
-const shape = (pts: [number, number][]) => new THREE.Shape(pts.map(([x, y]) => V2(x, y)));
-function circlePath(r: number, n = 40, cx = 0, cy = 0): [number, number][] { return Array.from({ length: n }, (_, i) => [cx + Math.cos((i / n) * Math.PI * 2) * r, cy + Math.sin((i / n) * Math.PI * 2) * r]); }
-function starPath(R: number, r: number, n = 5, rot = Math.PI / 2): [number, number][] { return Array.from({ length: n * 2 }, (_, i) => { const a = rot + (i / (n * 2)) * Math.PI * 2, rr = i % 2 ? r : R; return [Math.cos(a) * rr, Math.sin(a) * rr]; }); }
-/** an extruded 2D shape with a rounded bevel, centred on z */
-function ext(sh: THREE.Shape | THREE.Shape[], depth: number, m: THREE.Material, bevel = 0.1, segs = 3): THREE.Mesh {
-  const g = new THREE.ExtrudeGeometry(sh, { depth, bevelEnabled: bevel > 0, bevelThickness: bevel, bevelSize: bevel * 0.9, bevelSegments: segs, curveSegments: 24 });
-  g.translate(0, 0, -depth / 2);
-  g.computeVertexNormals();
-  return mesh(g, m);
+/** a pillowy extruded stroke */
+const strokeMesh = (pts: P2[], w: number, m: THREE.Material, depth = 0.22, bev = 0.1) => ext(shape(strokePts(pts, w)), depth, m, bev, 4);
+/** a round enamel button with a turned brass rim, facing the viewer */
+function button(r: number, m: THREE.Material): O {
+  return grp(ext(shape(circlePts(r, 64)), 0.22, m, 0.1, 4, 48), at(torus(r + 0.02, 0.07, C.brass(), Math.PI * 2, 10, 64), 0, 0, 0.0));
 }
-function lathe(pts: [number, number][], m: THREE.Material, seg = 32): THREE.Mesh { return mesh(new THREE.LatheGeometry(pts.map(([r, y]) => V2(Math.max(0.0001, r), y)), seg), m); }
-function cyl(rt: number, rb: number, h: number, m: THREE.Material, seg = 28): THREE.Mesh { return mesh(new THREE.CylinderGeometry(rt, rb, h, seg), m); }
-function ball(r: number, m: THREE.Material, w = 24, h = 16): THREE.Mesh { return mesh(new THREE.SphereGeometry(r, w, h), m); }
-function tor(R0: number, r: number, m: THREE.Material, arc = Math.PI * 2): THREE.Mesh { return mesh(new THREE.TorusGeometry(R0, r, 12, 40, arc), m); }
-function tube(pts: [number, number, number][], r: number, m: THREE.Material, closed = false): THREE.Mesh {
-  const c = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(...p)), closed);
-  return mesh(new THREE.TubeGeometry(c, 48, r, 10, closed), m);
-}
-function rbox(w: number, h: number, d: number, m: THREE.Material, r = 0.08): THREE.Mesh { return mesh(new RoundedBoxGeometry(w, h, d, 3, Math.min(r, w / 2.1, h / 2.1, d / 2.1)), m); }
-/** a rounded bar from (x0, y0) to (x1, y1), thickness t, depth d */
-function bar(x0: number, y0: number, x1: number, y1: number, t: number, d: number, m: THREE.Material): THREE.Mesh {
-  const len = Math.hypot(x1 - x0, y1 - y0);
-  return at(rbox(len + t, t, d, m, t * 0.48), (x0 + x1) / 2, (y0 + y1) / 2, 0, 0, 0, Math.atan2(y1 - y0, x1 - x0));
-}
-/** a round enamel button (a coin standing up, facing the viewer) */
-function button(r: number, m: THREE.Material, d = 0.34): THREE.Mesh { return ext(shape(circlePath(r, 48)), d, m, 0.12, 4); }
-function crescentShape(R0: number, cut: number, off: [number, number]): THREE.Shape {
-  const s = new THREE.Shape(); s.absarc(0, 0, R0, 0, Math.PI * 2, false);
-  const h = new THREE.Path(); h.absarc(off[0], off[1], cut, 0, Math.PI * 2, true);
-  // a crescent: the outer disc minus an offset disc (via points sampled outside the cut)
-  const pts: [number, number][] = [];
-  for (let i = 0; i <= 64; i++) { const a = (i / 64) * Math.PI * 2, x = Math.cos(a) * R0, y = Math.sin(a) * R0; if (Math.hypot(x - off[0], y - off[1]) > cut) pts.push([x, y]); }
-  const inner: [number, number][] = [];
-  for (let i = 64; i >= 0; i--) { const a = (i / 64) * Math.PI * 2, x = off[0] + Math.cos(a) * cut, y = off[1] + Math.sin(a) * cut; if (Math.hypot(x, y) < R0) inner.push([x, y]); }
-  void s; void h;
-  return shape([...pts, ...inner]);
-}
-const heartPath = (): [number, number][] => Array.from({ length: 60 }, (_, i) => { const t = (i / 60) * Math.PI * 2; return [16 * Math.sin(t) ** 3 / 16, (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 16]; });
 /** a glossy acorn: a golden nut, a scaly cap with a rim, a little stem */
 function acorn(s = 1, tilt = 0): THREE.Group {
-  const nut = lathe([[0, -0.62], [0.12, -0.6], [0.3, -0.45], [0.4, -0.2], [0.42, 0.02], [0.38, 0.14], [0, 0.16]], M(0xf5a62c, { rough: 0.2, tex: 'grain' }));
-  const cap = lathe([[0, 0.42], [0.2, 0.38], [0.36, 0.28], [0.46, 0.14], [0.47, 0.06], [0.4, 0.04], [0, 0.06]], M(0x4a2a12, { rough: 0.8, tex: 'scale', rep: 2 }));
-  const stem = at(cyl(0.035, 0.05, 0.2, C.dark()), 0.02, 0.5, 0, 0, 0, -0.3);
+  const nut = lathe(smoothProfile([[0, -0.62], [0.14, -0.58], [0.32, -0.42], [0.41, -0.18], [0.42, 0.02], [0.38, 0.14], [0, 0.16]], 3), M(0xf2a02a, { rough: 0.22, tex: 'grain' }), 32);
+  const cap = lathe(smoothProfile([[0, 0.44], [0.2, 0.4], [0.37, 0.29], [0.47, 0.14], [0.48, 0.05], [0.4, 0.03], [0, 0.05]], 3), M(0x6a3c1a, { rough: 0.85, tex: 'scale', rep: 2 }), 32);
+  const stem = at(cyl(0.035, 0.05, 0.2, C.dark(), 8), 0.02, 0.52, 0, 0, 0, -0.3);
   return at(grp(nut, cap, stem), 0, 0, 0, 0, 0, tilt, s);
 }
 /** the acorn bag: a plump burlap sack tied at the neck with a red cord and bow, its ruffled top standing up, a golden
  * acorn stitched on the front, glossy acorns spilled at its foot */
-function acornBag(o: { squash?: number; pouch?: 'burlap' | 'leather'; spill?: number; open?: boolean } = {}): THREE.Group {
+function acornBag(o: { squash?: number; pouch?: 'burlap' | 'leather'; spill?: number } = {}): THREE.Group {
   const sq = o.squash ?? 0, leather = o.pouch === 'leather';
-  const m = leather ? M(0x9a3f26, { rough: 0.5, tex: 'dab' }) : M(0xc99a58, { rough: 0.9, tex: 'burlap', rep: 2 });
+  const m = leather ? M(0xa8462a, { rough: 0.5, tex: 'leather' }) : M(0xd2a060, { rough: 0.9, tex: 'burlap', rep: 2 });
   const prof: [number, number][] = [[0, -0.8], [0.5, -0.78], [0.76, -0.6], [0.86, -0.3], [0.82, 0.0], [0.64, 0.24], [0.38, 0.4], [0.24, 0.46], [0.26, 0.54], [0.4, 0.68], [0.52, 0.84], [0.46, 0.9], [0.3, 0.8], [0.12, 0.7], [0, 0.68]];
-  const body = lathe(prof, m, 40);
+  const body = lathe(prof, m, 48);
   const pos = body.geometry.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i), a = Math.atan2(z, x);
@@ -152,157 +130,348 @@ function acornBag(o: { squash?: number; pouch?: 'burlap' | 'leather'; spill?: nu
   }
   body.geometry.computeVertexNormals();
   const RED = M(0xe8363c, { rough: 0.4, tex: 'weave' });
-  const cord = at(tor(0.28, 0.08, RED), 0, 0.46 * (1 - sq), 0, Math.PI / 2, 0, 0);
-  const bow = grp(at(tor(0.15, 0.06, RED), -0.16, 0, 0, 0, 0.3, 0), at(tor(0.15, 0.06, RED), 0.16, 0, 0, 0, -0.3, 0), at(ball(0.08, RED), 0, 0, 0.02),
-    bar(-0.02, -0.02, -0.16, -0.36, 0.08, 0.05, RED), bar(0.02, -0.02, 0.18, -0.36, 0.08, 0.05, RED));
+  const cord = at(torus(0.28, 0.08, RED, Math.PI * 2, 10, 32), 0, 0.46 * (1 - sq), 0, Math.PI / 2, 0, 0);
+  const bow = grp(at(torus(0.15, 0.06, RED, Math.PI * 2, 8, 24), -0.16, 0, 0, 0, 0.3, 0), at(torus(0.15, 0.06, RED, Math.PI * 2, 8, 24), 0.16, 0, 0, 0, -0.3, 0), at(ball(0.08, RED), 0, 0, 0.02),
+    strokeMesh([[-0.02, -0.02], [-0.16, -0.36]], 0.09, RED, 0.03, 0.02), strokeMesh([[0.02, -0.02], [0.18, -0.36]], 0.09, RED, 0.03, 0.02));
   at(bow, 0.04, 0.44 * (1 - sq), 0.3);
   const g = grp(body, cord, bow);
-  // a golden acorn stitched on the front
-  const GOLD = M(0xffc83a, { rough: 0.5, tex: null }), CAPC = M(0x6a3a1a, { rough: 0.8, tex: null });
-  const nutS = shape(Array.from({ length: 28 }, (_, i) => { const t = (i / 28) * Math.PI * 2, y = Math.cos(t); return [Math.sin(t) * 0.2 * (y < 0 ? 1 - (-y) * 0.35 : 1), y * 0.24 - 0.04] as [number, number]; }));
-  const capS = shape(Array.from({ length: 18 }, (_, i) => { const t = (i / 17) * Math.PI; return [Math.cos(t) * 0.24, Math.sin(t) * 0.13] as [number, number]; }));
-  g.add(at(grp(at(ext(nutS, 0.02, GOLD, 0.01), 0, -0.08, 0), at(ext(capS, 0.02, CAPC, 0.01), 0, 0.1, 0.01), at(rbox(0.04, 0.12, 0.03, CAPC, 0.01), 0.02, 0.27, 0.01)), 0.03, -0.22 * (1 - sq), 0.84, -0.12, 0.08, 0));
+  const GOLD = M(0xffc83a, { rough: 0.45, tex: null }), CAPC = M(0x6a3a1a, { rough: 0.8, tex: null });
+  const nutS = shape(Array.from({ length: 28 }, (_, i) => { const t = (i / 28) * Math.PI * 2, y = Math.cos(t); return [Math.sin(t) * 0.2 * (y < 0 ? 1 - (-y) * 0.35 : 1), y * 0.24 - 0.04] as P2; }));
+  const capS = shape(Array.from({ length: 18 }, (_, i) => { const t = (i / 17) * Math.PI; return [Math.cos(t) * 0.24, Math.sin(t) * 0.13] as P2; }));
+  g.add(at(grp(at(ext(nutS, 0.02, GOLD, 0.012), 0, -0.08, 0), at(ext(capS, 0.02, CAPC, 0.012), 0, 0.1, 0.01)), 0.03, -0.22 * (1 - sq), 0.84, -0.12, 0.08, 0));
   const spill = o.spill ?? 2;
   if (spill > 0) g.add(at(acorn(0.6, 0.6), 0.7, -0.56, 0.52));
   if (spill > 1) g.add(at(acorn(0.5, -0.55), -0.64, -0.64, 0.5));
   return g;
 }
+/** a brilliant-cut moon gem: a crown and pavilion of flat facets with a golden crescent set in its table */
+function moonGem(): O {
+  const gm = M(0xb08cf4, { rough: 0.08, metal: 0.2, flat: true, tex: null, env: 1.4 });
+  const gem = lathe([[0, -0.9], [0.66, -0.06], [0.72, 0.04], [0.56, 0.36], [0.3, 0.46], [0, 0.46]], gm, 10);
+  gem.rotation.y = Math.PI / 10;
+  const moon = at(ext(shape(crescentPts(0.2, 0.17, [0.08, 0.05], 48)), 0.04, M(0xffd86a, { glow: 0.4, rough: 0.3, tex: null }), 0.02, 2), 0, 0.05, 0.58);
+  return grp(gem, moon);
+}
+/** a puffy cloud: an outline of overlapping bumps, extruded with a deep rounded bevel */
+function cloud(m: THREE.Material): O {
+  const bumps: [number, number, number][] = [[-0.5, -0.05, 0.36], [-0.12, 0.2, 0.46], [0.34, 0.12, 0.38], [0.62, -0.08, 0.28], [0.05, -0.18, 0.4]];
+  const pts: P2[] = [];
+  for (let i = 0; i < 120; i++) {
+    const a = (i / 120) * Math.PI * 2, dir: P2 = [Math.cos(a), Math.sin(a)];
+    let best = 0;
+    for (const [bx, by, br] of bumps) { const t = bx * dir[0] + by * dir[1], d2 = br * br - (bx * bx + by * by - t * t); if (d2 > 0) best = Math.max(best, t + Math.sqrt(d2)); }
+    pts.push([dir[0] * best, Math.max(-0.3, dir[1] * best)]);
+  }
+  return ext(shape(pts), 0.3, m, 0.18, 5, 64);
+}
+/** a leaf blade with a midrib, bent a little */
+function leafMesh(len: number, wid: number, m: THREE.Material, serr = 0): THREE.Mesh {
+  const pts: P2[] = [];
+  for (let i = 0; i <= 60; i++) { const t = (i / 60) * Math.PI * 2, y = Math.cos(t); const k = 1 + (serr ? Math.sin(t * serr) * 0.08 : 0); pts.push([Math.sin(t) * wid * (1 - 0.35 * Math.max(0, y)) * (1 - 0.2 * Math.max(0, -y)) * k, y * len]); }
+  const me = ext(shape(pts), 0.04, m, 0.03, 2, 60);
+  const p = me.geometry.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) - Math.abs(p.getX(i)) * 0.35 + (p.getY(i) / len) ** 2 * 0.12);
+  me.geometry.computeVertexNormals();
+  return me;
+}
+/** a flat texture painted for a face (planar UV) */
+function faceTex(key: string, w: number, h: number, f: (x: number, y: number) => RGB): THREE.Texture { return paintTex('iconface-' + key, w, h, f); }
 
 // ------------------------------------------------------------------ the icon models
 type Make = () => O | Promise<O>;
 interface Spec { make: Make; yaw?: number; pitch?: number; pad?: number; vivid?: number }
 const glb = (path: string, fix?: (o: O) => void): Make => async () => { const { root } = await instanceGLB(path); fix?.(root); return root; };
-const flatOn = (o: O) => o; // tokens face the viewer
-const T = 0.34; // token depth
+const T = 0.3; // token depth
 
+const CHECK: P2[] = [[-0.72, 0.02], [-0.24, -0.46], [0.74, 0.6]];
 const ICONS: Record<string, Spec> = {
-  check: { make: () => grp(bar(-0.75, 0.05, -0.25, -0.5, 0.34, T, C.green()), bar(-0.25, -0.5, 0.8, 0.65, 0.34, T, C.green())), yaw: 0.35, pitch: 0.3 },
-  cross: { make: () => grp(bar(-0.65, -0.65, 0.65, 0.65, 0.34, T, C.red()), bar(-0.65, 0.65, 0.65, -0.65, 0.34, T, C.red())), yaw: 0.35, pitch: 0.3 },
-  plus: { make: () => grp(button(0.9, C.green()), at(grp(bar(-0.5, 0, 0.5, 0, 0.24, 0.16, C.cream()), bar(0, -0.5, 0, 0.5, 0.24, 0.16, C.cream())), 0, 0, 0.24)), yaw: 0.3, pitch: 0.25 },
-  minus: { make: () => grp(button(0.9, C.rose()), at(bar(-0.5, 0, 0.5, 0, 0.24, 0.16, C.cream()), 0, 0, 0.24)), yaw: 0.3, pitch: 0.25 },
-  info: { make: () => grp(button(0.9, C.blue()), at(grp(at(ball(0.13, C.cream()), 0, 0.42, 0), bar(0, -0.5, 0, 0.12, 0.22, 0.16, C.cream())), 0, 0, 0.24)), yaw: 0.3, pitch: 0.25 },
-  arrow_right: { make: () => ext(shape([[-0.8, -0.22], [0.1, -0.22], [0.1, -0.6], [0.85, 0], [0.1, 0.6], [0.1, 0.22], [-0.8, 0.22]]), T, C.green(), 0.1), yaw: 0.35, pitch: 0.3 },
-  arrow_left: { make: () => ext(shape([[0.8, -0.22], [-0.1, -0.22], [-0.1, -0.6], [-0.85, 0], [-0.1, 0.6], [-0.1, 0.22], [0.8, 0.22]]), T, C.green(), 0.1), yaw: 0.35, pitch: 0.3 },
-  arrow_up: { make: () => ext(shape([[-0.22, -0.8], [0.22, -0.8], [0.22, 0.1], [0.6, 0.1], [0, 0.85], [-0.6, 0.1], [-0.22, 0.1]]), T, C.green(), 0.1), yaw: 0.35, pitch: 0.3 },
-  arrow_down: { make: () => ext(shape([[-0.22, 0.8], [0.22, 0.8], [0.22, -0.1], [0.6, -0.1], [0, -0.85], [-0.6, -0.1], [-0.22, -0.1]]), T, C.rose(), 0.1), yaw: 0.35, pitch: 0.3 },
-  rotate_right: { make: () => grp(at(tor(0.55, 0.15, C.sky(), Math.PI * 1.5), 0, 0, 0, 0, 0, Math.PI * 0.5), at(ext(shape([[-0.32, 0], [0.32, 0], [0, 0.36]]), 0.22, C.sky(), 0.06), 0.55, -0.02, 0, 0, 0, Math.PI)), yaw: 0.3, pitch: 0.3 },
-  rotate_left: { make: () => grp(at(tor(0.55, 0.15, C.sky(), Math.PI * 1.5), 0, 0, 0, 0, Math.PI, Math.PI * 0.5), at(ext(shape([[-0.32, 0], [0.32, 0], [0, 0.36]]), 0.22, C.sky(), 0.06), -0.55, -0.02, 0, 0, 0, Math.PI)), yaw: 0.3, pitch: 0.3 },
-  play: { make: () => ext(shape([[-0.5, -0.7], [0.75, 0], [-0.5, 0.7]]), T, C.green(), 0.14), yaw: 0.35, pitch: 0.25 },
-  pause: { make: () => grp(at(rbox(0.36, 1.3, T + 0.1, C.blue(), 0.1), -0.3, 0, 0), at(rbox(0.36, 1.3, T + 0.1, C.blue(), 0.1), 0.3, 0, 0)), yaw: 0.35, pitch: 0.25 },
-  lock: { make: () => grp(at(rbox(1.1, 0.85, 0.42, C.brass(), 0.12), 0, -0.28, 0), at(tor(0.32, 0.09, C.silver(), Math.PI), 0, 0.14, 0), at(cyl(0.09, 0.09, 0.5, C.silver()), -0.32, 0.02, 0), at(cyl(0.09, 0.09, 0.5, C.silver()), 0.32, 0.02, 0),
-    at(grp(at(cyl(0.09, 0.09, 0.08, C.ink()), 0, 0, 0, Math.PI / 2), at(rbox(0.08, 0.2, 0.08, C.ink(), 0.02), 0, -0.12, 0)), 0, -0.26, 0.21)), yaw: 0.45, pitch: 0.3 },
-  star: { make: () => ext(shape(starPath(0.95, 0.42)), 0.3, C.gold(), 0.16, 4), yaw: 0.35, pitch: 0.3 },
-  heart: { make: () => ext(shape(heartPath().map(([x, y]) => [x * 0.95, y * 0.95 + 0.1])), 0.36, C.rose(), 0.18, 4), yaw: 0.35, pitch: 0.3 },
-  sparkle: { make: () => grp(ext(shape(starPath(0.95, 0.22, 4)), 0.22, C.gold(), 0.1), at(ext(shape(starPath(0.35, 0.1, 4)), 0.14, C.cream(), 0.06), 0.62, 0.6, 0.1)), yaw: 0.3, pitch: 0.3 },
-  moon: { make: () => ext(crescentShape(0.85, 0.72, [0.38, 0.22]), 0.3, M(0xffd86a, { rough: 0.4 }), 0.14), yaw: 0.35, pitch: 0.3 },
-  sun: { make: () => { const g = grp(at(button(0.5, C.gold(), 0.3), 0, 0, 0.06)); for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2; g.add(at(ext(shape([[-0.15, 0], [0.15, 0], [0, 0.32]]), 0.16, M(0xffa83a, { rough: 0.35 }), 0.05), Math.cos(a) * 0.68, Math.sin(a) * 0.68, 0, 0, 0, a - Math.PI / 2)); } return g; }, yaw: 0.3, pitch: 0.3 },
-  shield: { make: () => grp(ext(shape([[-0.75, 0.8], [0.75, 0.8], [0.75, 0.05], [0, -0.9], [-0.75, 0.05]]), 0.3, C.blue(), 0.14), at(ext(shape(starPath(0.38, 0.17)), 0.12, C.gold(), 0.06), 0, 0.05, 0.24)), yaw: 0.35, pitch: 0.3 },
-  zzz: { make: () => { const Z = (s: number) => shape([[-0.5, 0.5], [0.5, 0.5], [0.5, 0.32], [-0.14, -0.32], [0.5, -0.32], [0.5, -0.5], [-0.5, -0.5], [-0.5, -0.32], [0.14, 0.32], [-0.5, 0.32]].map(([x, y]) => [x * s, y * s] as [number, number])); return grp(at(ext(Z(0.75), 0.22, C.sky(), 0.06), -0.45, -0.4, 0), at(ext(Z(0.55), 0.2, C.sky(), 0.05), 0.15, 0.2, 0), at(ext(Z(0.38), 0.18, C.sky(), 0.05), 0.62, 0.68, 0)); }, yaw: 0.3, pitch: 0.2 },
-  bolt: { make: () => ext(shape([[0.15, 0.95], [-0.55, -0.1], [-0.05, -0.1], [-0.25, -0.95], [0.55, 0.15], [0.05, 0.15]]), 0.3, C.gold(), 0.1), yaw: 0.35, pitch: 0.3 },
-  ice_flake: { make: () => { const g = grp(); for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI; g.add(bar(-Math.cos(a) * 0.85, -Math.sin(a) * 0.85, Math.cos(a) * 0.85, Math.sin(a) * 0.85, 0.16, 0.16, C.sky())); for (const s of [-1, 1]) { const cx = Math.cos(a) * 0.55 * s, cy = Math.sin(a) * 0.55 * s; g.add(bar(cx, cy, cx + Math.cos(a + 0.8) * 0.22 * s, cy + Math.sin(a + 0.8) * 0.22 * s, 0.1, 0.12, C.snow()), bar(cx, cy, cx + Math.cos(a - 0.8) * 0.22 * s, cy + Math.sin(a - 0.8) * 0.22 * s, 0.1, 0.12, C.snow())); } } return g; }, yaw: 0.3, pitch: 0.3 },
-  alarm: { make: () => { const face = grp(at(cyl(0.62, 0.62, 0.38, C.red()), 0, 0, 0, Math.PI / 2), at(cyl(0.52, 0.52, 0.06, C.cream()), 0, 0, 0.2, Math.PI / 2), at(bar(0, 0, 0, 0.36, 0.07, 0.04, C.ink()), 0, 0, 0.25), at(bar(0, 0, 0.26, -0.1, 0.07, 0.04, C.ink()), 0, 0, 0.25), at(ball(0.06, C.gold()), 0, 0, 0.27));
-    const bells = [-1, 1].map((s) => at(lathe([[0, 0.24], [0.2, 0.2], [0.27, 0.06], [0.28, 0], [0, 0]], C.brass()), s * 0.42, 0.56, 0, 0, 0, -s * 0.5));
-    const legs = [-1, 1].map((s) => at(bar(0, 0, s * 0.14, -0.26, 0.1, 0.1, C.brass()), s * 0.36, -0.58, 0));
-    return grp(face, ...bells, ...legs, at(tor(0.18, 0.05, C.brass(), Math.PI), 0, 0.64, 0)); }, yaw: 0.35, pitch: 0.2 },
-  clock: { make: () => grp(at(cyl(0.9, 0.9, 0.26, C.wood()), 0, 0, 0, Math.PI / 2), at(cyl(0.76, 0.76, 0.06, C.cream()), 0, 0, 0.13, Math.PI / 2), ...Array.from({ length: 12 }, (_, i) => at(rbox(0.06, i % 3 ? 0.08 : 0.16, 0.03, C.ink(), 0.01), Math.sin((i / 12) * Math.PI * 2) * 0.62, Math.cos((i / 12) * Math.PI * 2) * 0.62, 0.17, 0, 0, -(i / 12) * Math.PI * 2)),
-    at(bar(0, 0, 0, 0.5, 0.07, 0.04, C.ink()), 0, 0, 0.19), at(bar(0, 0, 0.36, -0.12, 0.08, 0.04, C.ink()), 0, 0, 0.19), at(ball(0.07, C.brass()), 0, 0, 0.2)), yaw: 0.3, pitch: 0.15 },
-  hourglass: { make: () => grp(at(cyl(0.6, 0.6, 0.14, C.wood()), 0, 0.82, 0), at(cyl(0.6, 0.6, 0.14, C.wood()), 0, -0.82, 0), ...[-1, 1].map((s) => at(cyl(0.06, 0.06, 1.5, C.dark()), s * 0.5, 0, 0)),
-    lathe([[0.42, -0.75], [0.44, -0.5], [0.3, -0.2], [0.08, 0], [0.3, 0.2], [0.44, 0.5], [0.42, 0.75]], M(0xbfe8ff, { rough: 0.05, metal: 0.1, opacity: 0.55, tex: null })), lathe([[0, -0.74], [0.4, -0.74], [0.3, -0.45], [0, -0.3]], M(0xf2c25a, { rough: 0.7 })), lathe([[0, 0.05], [0.18, 0.2], [0.28, 0.32], [0, 0.32]], M(0xf2c25a, { rough: 0.7 }))), yaw: 0.4, pitch: 0.2 },
-  calendar: { make: () => grp(at(rbox(1.4, 1.3, 0.14, C.paper(), 0.06), 0, -0.1, 0), at(rbox(1.4, 0.36, 0.2, C.red(), 0.06), 0, 0.5, 0.02), ...[-0.4, 0.4].map((x) => at(tor(0.12, 0.04, C.brass()), x, 0.7, 0.02, 0, Math.PI / 2, 0)),
-    ...Array.from({ length: 12 }, (_, i) => at(rbox(0.2, 0.16, 0.04, i === 6 ? C.red() : M(0xc9b08a, { tex: null }), 0.02), -0.45 + (i % 4) * 0.3, 0.12 - Math.floor(i / 4) * 0.27, 0.08))), yaw: 0.35, pitch: 0.25 },
-  candle: { make: () => grp(lathe([[0, -0.75], [0.62, -0.72], [0.66, -0.62], [0.5, -0.6], [0, -0.6]], C.brass()), at(cyl(0.26, 0.28, 0.9, M(0xfff3d6, { rough: 0.6 })), 0, -0.15, 0), at(cyl(0.02, 0.02, 0.12, C.ink()), 0, 0.36, 0),
-    at(lathe([[0, -0.2], [0.13, -0.1], [0.12, 0.05], [0.05, 0.2], [0, 0.28]], C.flame()), 0, 0.6, 0), at(lathe([[0, -0.12], [0.06, -0.05], [0.04, 0.08], [0, 0.14]], C.flameIn()), 0, 0.56, 0.05), at(tor(0.16, 0.05, C.brass(), Math.PI), 0.62, -0.62, 0, 0, 0, -Math.PI / 2)), yaw: 0.4, pitch: 0.25 },
-  lantern: { make: () => grp(at(cyl(0.5, 0.56, 0.12, C.brass()), 0, -0.72, 0), at(cyl(0.36, 0.36, 1.0, M(0xffd77a, { glow: 0.75, tex: null })), 0, -0.14, 0), ...[0, 1, 2, 3].map((i) => at(cyl(0.05, 0.05, 1.04, C.brass()), Math.cos(i * Math.PI / 2 + 0.6) * 0.42, -0.14, Math.sin(i * Math.PI / 2 + 0.6) * 0.42)), at(lathe([[0.5, 0], [0.42, 0.14], [0.2, 0.3], [0, 0.34]], C.brass()), 0, 0.38, 0), at(tor(0.18, 0.05, C.brass()), 0, 0.82, 0), at(ball(0.1, M(0xfff6c8, { glow: 1, tex: null })), 0, -0.16, 0.3)), yaw: 0.4, pitch: 0.2 },
-  nest: { make: () => grp(at(tor(0.62, 0.26, M(0xa8743c, { rough: 0.9, tex: 'grain', rep: 3 })), 0, -0.1, 0, Math.PI / 2, 0, 0, [1, 1, 0.75]), at(cyl(0.5, 0.4, 0.2, M(0x8a5a2c, { tex: 'grain' })), 0, -0.22, 0), ...[[-0.2, 0.05, 0.05], [0.18, 0.05, -0.05], [0, 0.04, 0.24]].map(([x, y, z]) => at(ball(0.26, M(0x8fd2f0, { rough: 0.3 })), x * 1.2, y + 0.12, z, 0.3, 0, 0, [0.85, 1.1, 0.85]))), yaw: 0.4, pitch: 0.5 },
-  bell: { make: () => grp(at(cyl(0.72, 0.78, 0.14, C.wood()), 0, -0.62, 0), lathe([[0, 0.38], [0.18, 0.36], [0.4, 0.2], [0.56, -0.12], [0.66, -0.48], [0.68, -0.54], [0, -0.54]], C.brass()), at(cyl(0.06, 0.06, 0.16, C.brass()), 0, 0.46, 0), at(ball(0.11, C.brass()), 0, 0.56, 0)), yaw: 0.4, pitch: 0.35 },
-  phone_off: { make: () => grp(at(rbox(0.85, 1.5, 0.16, M(0x3a3048, { rough: 0.4 }), 0.14), 0, 0, 0), at(rbox(0.7, 1.22, 0.04, M(0x5fa0e8, { rough: 0.2, glow: 0.25 }), 0.06), 0, 0.02, 0.08), at(bar(-0.7, -0.75, 0.7, 0.75, 0.2, 0.26, C.red()), 0, 0, 0.18)), yaw: 0.35, pitch: 0.2 },
-  music: { make: () => grp(at(ball(0.24, C.blue()), -0.42, -0.58, 0, 0, 0, 0, [1.25, 0.95, 0.6]), at(ball(0.24, C.blue()), 0.46, -0.42, 0, 0, 0, 0, [1.25, 0.95, 0.6]), at(rbox(0.1, 1.2, 0.12, C.blue(), 0.04), -0.18, 0.0, 0), at(rbox(0.1, 1.2, 0.12, C.blue(), 0.04), 0.7, 0.16, 0), bar(-0.18, 0.56, 0.7, 0.74, 0.22, 0.14, C.blue())), yaw: 0.3, pitch: 0.2 },
-  note: { make: () => grp(at(ball(0.3, C.blue()), -0.2, -0.55, 0, 0, 0, 0, [1.25, 0.95, 0.6]), at(rbox(0.12, 1.3, 0.12, C.blue(), 0.04), 0.13, 0.08, 0), at(ext(shape([[0, 0], [0.42, -0.3], [0.38, -0.5], [0, -0.26]]), 0.12, C.blue(), 0.04), 0.14, 0.74, 0)), yaw: 0.3, pitch: 0.2 },
-  mic: { make: () => grp(at(cyl(0.3, 0.3, 0.5, M(0x8d97a6, { metal: 0.6, rough: 0.35, tex: 'weave', rep: 3 })), 0, 0.3, 0), at(ball(0.3, M(0x8d97a6, { metal: 0.6, rough: 0.35, tex: 'weave', rep: 3 })), 0, 0.55, 0), at(cyl(0.32, 0.32, 0.08, C.brass()), 0, 0.06, 0),
-    at(tor(0.42, 0.05, C.brass(), Math.PI), 0, 0.18, 0, 0, 0, Math.PI), at(cyl(0.05, 0.05, 0.5, C.brass()), 0, -0.46, 0), at(cyl(0.38, 0.42, 0.1, C.dark()), 0, -0.72, 0)), yaw: 0.4, pitch: 0.25 },
-  speaker_on: { make: () => grp(speaker(), at(tor(0.42, 0.08, C.sky(), 1.4), 0.12, 0, 0, 0, 0, -0.7), at(tor(0.72, 0.08, C.sky(), 1.3), 0.12, 0, 0, 0, 0, -0.65)), yaw: 0.25, pitch: 0.15 },
-  speaker_off: { make: () => grp(speaker(), bar(0.32, -0.32, 0.88, 0.32, 0.18, 0.2, C.red()), bar(0.32, 0.32, 0.88, -0.32, 0.18, 0.2, C.red())), yaw: 0.25, pitch: 0.15 },
-  rain: { make: () => grp(at(ball(0.42, C.snow()), -0.3, 0.3, 0), at(ball(0.5, C.snow()), 0.15, 0.42, -0.05), at(ball(0.36, C.snow()), 0.55, 0.26, 0), at(rbox(1.4, 0.36, 0.6, C.snow(), 0.18), 0.1, 0.12, 0),
-    ...[[-0.3, -0.4], [0.2, -0.6], [0.6, -0.35]].map(([x, y]) => at(lathe([[0, -0.14], [0.1, -0.08], [0.09, 0.02], [0, 0.16]], C.sky()), x, y, 0.1, 0, 0, -0.2))), yaw: 0.3, pitch: 0.2 },
-  drop: { make: () => lathe([[0, -0.8], [0.34, -0.72], [0.56, -0.45], [0.55, -0.15], [0.36, 0.25], [0.12, 0.65], [0, 0.85]], M(0x4fb2f0, { rough: 0.12, metal: 0.1 })), yaw: 0.3, pitch: 0.2 },
-  waves: { make: () => grp(...[0.55, 0, -0.55].map((y, i) => tube(Array.from({ length: 9 }, (_, k) => [-0.9 + k * 0.225, y + Math.sin(k * 1.4 + i) * 0.13, 0] as [number, number, number]), 0.1, M([0x8ad6ff, 0x5fb8f0, 0x3d8fd8][i], { rough: 0.25 })))), yaw: 0.25, pitch: 0.2 },
-  wind: { make: () => grp(...([[0.5, 0.9], [0, 1.1], [-0.5, 0.75]] as [number, number][]).map(([y, l]) => tube([[-0.9, y, 0], [-0.9 + l * 0.6, y, 0], [-0.9 + l, y + 0.08, 0], [-0.9 + l + 0.1, y + 0.28, 0], [-0.9 + l - 0.12, y + 0.36, 0]], 0.09, C.cream()))), yaw: 0.25, pitch: 0.2 },
-  campfire: { make: () => grp(...[0.5, -0.5, 1.6].map((a) => at(cyl(0.13, 0.13, 1.3, C.dark()), 0, -0.6, 0, Math.PI / 2, a, 0)), ...[0, 2.1, 4.2].map((a) => at(rbox(0.26, 0.2, 0.22, M(0x9aa0a8, { rough: 0.8 }), 0.08), Math.cos(a) * 0.72, -0.76, Math.sin(a) * 0.72)),
-    at(lathe([[0, -0.4], [0.36, -0.25], [0.36, 0], [0.2, 0.35], [0, 0.6]], C.flame()), 0, -0.1, 0), at(lathe([[0, -0.3], [0.2, -0.15], [0.16, 0.08], [0, 0.28]], C.flameIn()), 0, -0.18, 0.12)), yaw: 0.4, pitch: 0.35 },
-  leaf: { make: () => grp(ext(shape(Array.from({ length: 40 }, (_, i) => { const t = (i / 40) * Math.PI * 2; return [Math.sin(t) * 0.5 * (1 - 0.3 * Math.cos(t)), Math.cos(t) * 0.92] as [number, number]; })), 0.12, C.leaf(), 0.06), at(rbox(0.06, 1.6, 0.06, M(0x3e8a32, { tex: null }), 0.02), 0, -0.15, 0.08)), yaw: 0.3, pitch: 0.3 },
-  book: { make: () => grp(at(rbox(1.2, 1.5, 0.36, M(0xc0392b, { rough: 0.5, tex: 'dab' }), 0.08), 0, 0, 0), at(rbox(1.08, 1.4, 0.3, C.paper(), 0.04), 0.07, 0, 0), at(ext(crescentShape(0.3, 0.26, [0.13, 0.08]), 0.06, C.gold(), 0.02), 0, 0.05, 0.19)), yaw: 0.5, pitch: 0.25 },
-  pen: { make: () => at(grp(at(cyl(0.14, 0.14, 1.2, M(0x2d4fa8, { rough: 0.25 })), 0, 0.15, 0), at(cyl(0.15, 0.15, 0.1, C.gold()), 0, -0.45, 0), at(lathe([[0.13, 0], [0.1, -0.2], [0, -0.42]], C.gold()), 0, -0.5, 0), at(rbox(0.06, 0.6, 0.06, C.gold(), 0.02), 0.15, 0.4, 0), at(ball(0.14, M(0x2d4fa8, { rough: 0.25 })), 0, 0.75, 0)), 0, 0, 0, 0, 0, -0.75), yaw: 0.3, pitch: 0.3 },
-  jar: { make: () => grp(lathe([[0, -0.8], [0.52, -0.78], [0.58, -0.6], [0.58, 0.4], [0.44, 0.56], [0.36, 0.62], [0, 0.62]], M(0xbfe9f4, { rough: 0.08, metal: 0.15, tex: null })), at(cyl(0.4, 0.4, 0.18, C.brass()), 0, 0.7, 0), ...[[-0.2, -0.2], [0.18, 0.1], [0.05, -0.5], [-0.12, 0.28]].map(([x, y]) => at(ball(0.1, M(0xfff27a, { glow: 1.1, tex: null })), x, y, 0.52))), yaw: 0.4, pitch: 0.2 },
-  hanger: { make: () => grp(tube([[-0.9, -0.4, 0], [0, 0.15, 0], [0.9, -0.4, 0], [0.8, -0.5, 0], [-0.8, -0.5, 0], [-0.9, -0.4, 0]], 0.08, C.wood()), at(tor(0.2, 0.05, C.brass(), Math.PI * 1.3), 0.05, 0.42, 0, 0, 0, -0.6), at(cyl(0.05, 0.05, 0.14, C.brass()), 0, 0.2, 0)), yaw: 0.3, pitch: 0.25 },
-  brush: { make: () => at(grp(at(cyl(0.08, 0.11, 1.1, C.wood()), 0, -0.25, 0), at(cyl(0.14, 0.12, 0.3, C.silver()), 0, 0.42, 0), at(lathe([[0.14, 0], [0.16, 0.18], [0.1, 0.36], [0, 0.46]], M(0xf2d9a0, { tex: 'grain' })), 0, 0.56, 0), at(lathe([[0.1, 0], [0.06, 0.1], [0, 0.16]], M(0x3d7fe0, { rough: 0.2 })), 0, 0.88, 0)), 0, 0, 0, 0, 0, -0.75), yaw: 0.3, pitch: 0.3 },
-  pushpin: { make: () => grp(at(cyl(0.02, 0.02, 0.6, C.silver()), 0.2, -0.45, 0, 0, 0, 0.5), at(cyl(0.44, 0.44, 0.14, C.red()), 0, 0, 0, 0, 0, 0.5), at(cyl(0.22, 0.3, 0.42, C.red()), -0.14, 0.22, 0, 0, 0, 0.5), at(cyl(0.36, 0.36, 0.14, C.red()), -0.26, 0.44, 0, 0, 0, 0.5)), yaw: 0.4, pitch: 0.3 },
-  magnifier: { make: () => grp(at(tor(0.5, 0.1, C.brass()), -0.2, 0.25, 0), at(cyl(0.48, 0.48, 0.05, M(0xd2f0ff, { rough: 0.05, metal: 0.2, tex: null })), -0.2, 0.25, 0, Math.PI / 2), bar(0.18, -0.12, 0.75, -0.7, 0.18, 0.18, C.wood())), yaw: 0.3, pitch: 0.25 },
-  clipboard: { make: () => grp(at(rbox(1.2, 1.55, 0.08, C.wood(), 0.06), 0, 0, 0), at(rbox(1.0, 1.25, 0.04, C.paper(), 0.02), 0, -0.07, 0.05), ...[0.25, 0.05, -0.15, -0.35].map((y) => at(rbox(0.7, 0.05, 0.02, M(0x8a7a8a, { tex: null }), 0.01), 0, y, 0.08)), at(rbox(0.5, 0.22, 0.14, C.silver(), 0.05), 0, 0.68, 0.06)), yaw: 0.3, pitch: 0.2 },
-  satchel: { make: () => grp(at(rbox(1.3, 0.95, 0.42, C.leather(), 0.14), 0, -0.25, 0), at(rbox(1.32, 0.5, 0.12, M(0x8f3a24, { rough: 0.5, tex: 'dab' }), 0.08), 0, 0.02, 0.2), at(rbox(0.22, 0.2, 0.06, C.brass(), 0.03), 0, -0.2, 0.28), tube([[-0.6, 0.15, 0], [-0.5, 0.75, 0], [0, 0.95, 0], [0.5, 0.75, 0], [0.6, 0.15, 0]], 0.07, M(0x8f3a24, { rough: 0.5 }))), yaw: 0.35, pitch: 0.25 },
+  check: { make: () => strokeMesh(CHECK, 0.36, C.green(), T, 0.12), yaw: 0.3, pitch: 0.28 },
+  cross: { make: () => grp(strokeMesh([[-0.6, -0.6], [0.6, 0.6]], 0.34, C.red(), T, 0.12), at(strokeMesh([[-0.6, 0.6], [0.6, -0.6]], 0.34, C.red(), T, 0.12), 0, 0, 0.01)), yaw: 0.3, pitch: 0.28 },
+  plus: { make: () => grp(button(0.88, C.green()), at(grp(strokeMesh([[-0.44, 0], [0.44, 0]], 0.24, C.cream(), 0.1, 0.05), strokeMesh([[0, -0.44], [0, 0.44]], 0.24, C.cream(), 0.1, 0.05)), 0, 0, 0.22)), yaw: 0.28, pitch: 0.24 },
+  minus: { make: () => grp(button(0.88, C.rose()), at(strokeMesh([[-0.44, 0], [0.44, 0]], 0.24, C.cream(), 0.1, 0.05), 0, 0, 0.22)), yaw: 0.28, pitch: 0.24 },
+  info: { make: () => grp(button(0.88, C.blue()), at(grp(at(ext(shape(circlePts(0.12, 24)), 0.08, C.cream(), 0.05, 2), 0, 0.42, 0), strokeMesh([[-0.1, 0.12], [0.02, 0.12], [0.02, -0.46]], 0.2, C.cream(), 0.08, 0.05)), 0, 0, 0.22)), yaw: 0.28, pitch: 0.24 },
+  arrow_right: { make: () => ext(shape([[-0.8, -0.22], [0.1, -0.22], [0.1, -0.6], [0.85, 0], [0.1, 0.6], [0.1, 0.22], [-0.8, 0.22]]), T, C.green(), 0.1, 3), yaw: 0.3, pitch: 0.28 },
+  arrow_left: { make: () => ext(shape([[0.8, -0.22], [-0.1, -0.22], [-0.1, -0.6], [-0.85, 0], [-0.1, 0.6], [-0.1, 0.22], [0.8, 0.22]]), T, C.green(), 0.1, 3), yaw: 0.3, pitch: 0.28 },
+  arrow_up: { make: () => ext(shape([[-0.22, -0.8], [0.22, -0.8], [0.22, 0.1], [0.6, 0.1], [0, 0.85], [-0.6, 0.1], [-0.22, 0.1]]), T, C.green(), 0.1, 3), yaw: 0.3, pitch: 0.28 },
+  arrow_down: { make: () => ext(shape([[-0.22, 0.8], [0.22, 0.8], [0.22, -0.1], [0.6, -0.1], [0, -0.85], [-0.6, -0.1], [-0.22, -0.1]]), T, C.rose(), 0.1, 3), yaw: 0.3, pitch: 0.28 },
+  rotate_right: { make: () => grp(at(torus(0.56, 0.15, C.sky(), Math.PI * 1.45, 12, 48), 0, 0, 0, 0, 0, Math.PI * 0.55), at(ext(shape([[-0.34, 0], [0.34, 0], [0, 0.4]]), 0.2, C.sky(), 0.07, 3), 0.56, -0.04, 0, 0, 0, Math.PI)), yaw: 0.28, pitch: 0.28 },
+  rotate_left: { make: () => grp(at(torus(0.56, 0.15, C.sky(), Math.PI * 1.45, 12, 48), 0, 0, 0, 0, Math.PI, Math.PI * 0.55), at(ext(shape([[-0.34, 0], [0.34, 0], [0, 0.4]]), 0.2, C.sky(), 0.07, 3), -0.56, -0.04, 0, 0, 0, Math.PI)), yaw: 0.28, pitch: 0.28 },
+  play: { make: () => ext(shape([[-0.42, -0.62], [0.68, 0], [-0.42, 0.62]]), T, C.green(), 0.16, 4), yaw: 0.32, pitch: 0.24 },
+  pause: { make: () => grp(at(strokeMesh([[0, -0.52], [0, 0.52]], 0.34, C.blue(), T, 0.12), -0.3, 0, 0), at(strokeMesh([[0, -0.52], [0, 0.52]], 0.34, C.blue(), T, 0.12), 0.3, 0, 0)), yaw: 0.32, pitch: 0.24 },
+  lock: {
+    make: () => {
+      const keyhole = shape([...Array.from({ length: 24 }, (_, i) => { const a = -Math.PI / 3 + (i / 23) * ((Math.PI * 5) / 3); return [Math.cos(a) * 0.1, 0.06 + Math.sin(a) * 0.1] as P2; }), [-0.06, -0.22], [0.06, -0.22]]);
+      return grp(at(ext(shape(rrectPts(1.1, 0.86, 0.16)), 0.36, C.brass(), 0.08, 3), 0, -0.3, 0),
+        at(torus(0.31, 0.085, C.steel(), Math.PI, 12, 32), 0, 0.2, 0), at(cyl(0.085, 0.085, 0.3, C.steel(), 12), -0.31, 0.06, 0), at(cyl(0.085, 0.085, 0.3, C.steel(), 12), 0.31, 0.06, 0),
+        at(ext(keyhole, 0.03, C.ink(), 0.01, 1), 0, -0.32, 0.27));
+    }, yaw: 0.42, pitch: 0.28,
+  },
+  star: { make: () => ext(shape(starPts(0.95, 0.44)), 0.26, C.gold(), 0.16, 4), yaw: 0.32, pitch: 0.28 },
+  heart: { make: () => ext(shape(Array.from({ length: 72 }, (_, i) => { const t = (i / 72) * Math.PI * 2; return [(16 * Math.sin(t) ** 3) / 16 * 0.95, ((13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 16) * 0.95 + 0.1] as P2; })), 0.32, C.rose(), 0.18, 5), yaw: 0.32, pitch: 0.28 },
+  sparkle: { make: () => grp(ext(shape(starPts(0.95, 0.22, 4)), 0.2, C.gold(), 0.1, 3), at(ext(shape(starPts(0.36, 0.1, 4)), 0.12, M(0xfff4c0, { glow: 0.3, rough: 0.3 }), 0.06, 2), 0.62, 0.6, 0.1)), yaw: 0.28, pitch: 0.28 },
+  moon: { make: () => ext(shape(crescentPts(0.85, 0.72, [0.38, 0.22])), 0.28, M(0xffd462, { rough: 0.35, glow: 0.12 }), 0.14, 4), yaw: 0.32, pitch: 0.28 },
+  sun: { make: () => { const g = grp(at(ext(shape(circlePts(0.5, 48)), 0.26, C.gold(), 0.12, 4), 0, 0, 0.06)); for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; g.add(at(ext(shape([[-0.13, 0], [0.13, 0], [0, 0.3]]), 0.12, M(0xffa83a, { rough: 0.3 }), 0.05, 2), Math.cos(a) * 0.66, Math.sin(a) * 0.66, 0, 0, 0, a - Math.PI / 2)); } return g; }, yaw: 0.28, pitch: 0.28 },
+  shield: {
+    make: () => { const pts: P2[] = [[-0.72, 0.78], [0.72, 0.78], [0.72, 0.08], [0.5, -0.42], [0, -0.88], [-0.5, -0.42], [-0.72, 0.08]];
+      return grp(ext(shape(pts), 0.22, C.blue(), 0.12, 3), at(ext(shape(pts.map(([x, y]) => [x * 1.06, y * 1.05 + 0.01] as P2)), 0.12, C.brass(), 0.06, 2), 0, 0, -0.08), at(ext(shape(starPts(0.36, 0.16)), 0.1, C.gold(), 0.06, 2), 0, 0.06, 0.2)); }, yaw: 0.32, pitch: 0.28,
+  },
+  zzz: { make: () => { const Z = (s: number) => strokePts([[-0.45 * s, 0.4 * s], [0.42 * s, 0.4 * s], [-0.42 * s, -0.4 * s], [0.45 * s, -0.4 * s]], 0.2 * s, 6); return grp(at(ext(shape(Z(0.95)), 0.2, C.sky(), 0.06, 2), -0.44, -0.38, 0), at(ext(shape(Z(0.68)), 0.18, C.sky(), 0.05, 2), 0.16, 0.2, 0), at(ext(shape(Z(0.46)), 0.16, C.sky(), 0.05, 2), 0.62, 0.66, 0)); }, yaw: 0.28, pitch: 0.2 },
+  bolt: { make: () => ext(shape([[0.15, 0.95], [-0.55, -0.1], [-0.05, -0.1], [-0.25, -0.95], [0.55, 0.15], [0.05, 0.15]]), 0.26, M(0xffd23a, { rough: 0.3, glow: 0.15 }), 0.1, 3), yaw: 0.32, pitch: 0.28 },
+  ice_flake: {
+    make: () => { const ice = M(0x4ab8f4, { rough: 0.15, metal: 0.15, env: 1.3, tex: null }), g = grp(); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[0, 0], [c * 0.88, s * 0.88]], 0.12, ice, 0.1, 0.04)); for (const f of [0.45, 0.7]) { const px = c * f, py = s * f; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.8) * 0.22, py + Math.sin(a + sg * 0.8) * 0.22]], 0.1, ice, 0.1, 0.04)); } } return g; }, yaw: 0.28, pitch: 0.28,
+  },
+  alarm: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 7, 0, 0)); c.door.rotation.y = -2.1; c.owl.position.set(0, c.owl.position.y - 0.12, 0.32); c.owl.rotation.x = 0.25; c.owl.scale.setScalar(2.3); return c.root; }, yaw: 0.26, pitch: 0.12 },
+  clock: { make: () => { const c = cuckooClock(); setClockHands(c, new Date(2024, 0, 1, 10, 10, 0)); c.pendulum.rotation.z = 0.2; return c.root; }, yaw: 0.22, pitch: 0.1 },
+  hourglass: {
+    make: () => { const cap = (y: number, flip: number) => at(lathe(smoothProfile([[0, 0], [0.6, 0], [0.64, 0.05], [0.6, 0.1], [0.5, 0.12], [0, 0.12]], 2), C.wood(), 32), 0, y, 0, flip ? Math.PI : 0);
+      return grp(cap(-0.9, 0), cap(0.9, 1), ...[0, 1, 2].map((i) => { const a = (i / 3) * Math.PI * 2 + 0.5; return at(lathe(smoothProfile([[0.05, -0.8], [0.065, -0.4], [0.045, 0], [0.065, 0.4], [0.05, 0.8]], 2), C.dark(), 8), Math.cos(a) * 0.5, 0, Math.sin(a) * 0.5); }),
+        lathe(smoothProfile([[0.4, -0.78], [0.44, -0.5], [0.3, -0.2], [0.07, 0], [0.3, 0.2], [0.44, 0.5], [0.4, 0.78]], 3), M(0xbfe8ff, { rough: 0.05, metal: 0.1, opacity: 0.45, tex: null, env: 1.6 }), 32),
+        lathe(smoothProfile([[0, -0.77], [0.39, -0.76], [0.3, -0.5], [0.12, -0.34], [0, -0.3]], 2), M(0xf4c058, { rough: 0.8 }), 24), lathe([[0, 0.05], [0.16, 0.18], [0.28, 0.32], [0, 0.32]], M(0xf4c058, { rough: 0.8 }), 24), at(cyl(0.015, 0.015, 0.36, M(0xf4c058, { rough: 0.8 }), 6), 0, -0.14, 0)); }, yaw: 0.4, pitch: 0.2,
+  },
+  calendar: {
+    make: () => { const red = hex('#d23a34'), ink = hex('#4a3a4a'), paper = hex('#fbf0d8');
+      const tex = faceTex('cal', 32, 32, (x, y): RGB => { if (y > 24) return x > 3 && x < 28 && (y === 27 || y === 28) ? hex('#ffe9c0') : red; const col = Math.floor((x - 3) / 4), row = Math.floor((y - 3) / 5); if (x > 2 && x < 30 && y > 2 && y < 23 && (x - 3) % 4 < 3 && (y - 3) % 5 < 3) return col === 4 && row === 2 ? red : ink; return paper; });
+      const pad = at(mesh(planarUV(new THREE.ExtrudeGeometry(shape(rrectPts(1.4, 1.4, 0.1)), { depth: 0.16, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2 })), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 })), 0, -0.05, -0.08);
+      return grp(pad, ...[-0.4, 0.4].map((x) => at(torus(0.12, 0.035, C.brass(), Math.PI * 2, 8, 20), x, 0.66, 0.06, 0, Math.PI / 2, 0))); }, yaw: 0.32, pitch: 0.24,
+  },
+  candle: {
+    make: () => grp(lathe(smoothProfile([[0, -0.78], [0.6, -0.76], [0.66, -0.68], [0.62, -0.62], [0.24, -0.6], [0.22, -0.56], [0, -0.56]], 2), C.brass(), 40),
+      at(lathe(smoothProfile([[0, -0.6], [0.25, -0.6], [0.26, 0.2], [0.24, 0.3], [0.1, 0.32], [0, 0.3]], 2), M(0xfff1d8, { rough: 0.55 }), 28), 0, 0, 0),
+      tube([[0.22, 0.28, 0.12], [0.27, 0.12, 0.12], [0.27, -0.02, 0.1]], 0.04, M(0xfff1d8, { rough: 0.55 }), 8, 6),
+      at(cyl(0.02, 0.02, 0.12, C.ink(), 6), 0, 0.38, 0),
+      at(lathe(smoothProfile([[0, -0.2], [0.13, -0.1], [0.12, 0.05], [0.05, 0.2], [0, 0.3]], 2), C.flame(), 16), 0, 0.6, 0), at(lathe(smoothProfile([[0, -0.12], [0.06, -0.05], [0.04, 0.08], [0, 0.14]], 2), C.flameIn(), 12), 0, 0.56, 0.05),
+      at(torus(0.16, 0.05, C.brass(), Math.PI, 8, 16), 0.64, -0.62, 0, 0, 0, -Math.PI / 2)), yaw: 0.4, pitch: 0.24,
+  },
+  lantern: {
+    make: () => grp(at(lathe(smoothProfile([[0, 0], [0.52, 0], [0.56, 0.05], [0.5, 0.12], [0.4, 0.14], [0, 0.14]], 2), C.brass(), 32), 0, -0.8, 0),
+      at(cyl(0.36, 0.36, 0.95, M(0xffd77a, { glow: 0.8, tex: null }), 24), 0, -0.18, 0),
+      ...[0, 1, 2, 3].map((i) => at(cyl(0.045, 0.045, 1.0, C.brass(), 8), Math.cos(i * Math.PI / 2 + 0.6) * 0.4, -0.18, Math.sin(i * Math.PI / 2 + 0.6) * 0.4)),
+      at(lathe(smoothProfile([[0.5, 0], [0.46, 0.08], [0.32, 0.2], [0.14, 0.3], [0.1, 0.36], [0, 0.38]], 2), C.brass(), 32), 0, 0.32, 0), at(torus(0.17, 0.045, C.brass(), Math.PI * 2, 8, 24), 0, 0.84, 0),
+      at(lathe(smoothProfile([[0, -0.14], [0.08, -0.06], [0.07, 0.06], [0.03, 0.16], [0, 0.2]], 2), M(0xfff6c8, { glow: 1.2, tex: null }), 12), 0, -0.22, 0)), yaw: 0.4, pitch: 0.2,
+  },
+  nest: {
+    make: () => { const twig = M(0xa8743c, { rough: 0.9, tex: 'bark', rep: 2 }); const g = grp(at(torus(0.6, 0.24, twig, Math.PI * 2, 12, 40), 0, -0.1, 0, Math.PI / 2, 0, 0, [1, 1, 0.75]), at(cyl(0.48, 0.38, 0.2, M(0x8a5a2c, { tex: 'bark' }), 24), 0, -0.22, 0));
+      for (let i = 0; i < 9; i++) { const a = (i / 9) * Math.PI * 2; g.add(tube([[Math.cos(a) * 0.5, 0.0, Math.sin(a) * 0.5], [Math.cos(a + 0.5) * 0.85, 0.06, Math.sin(a + 0.5) * 0.85], [Math.cos(a + 0.8) * 0.95, -0.02, Math.sin(a + 0.8) * 0.95]], 0.025, twig, 8, 5)); }
+      const egg = (x: number, z: number, r: number) => at(lathe(smoothProfile([[0, -0.3], [0.2, -0.24], [0.26, -0.05], [0.2, 0.18], [0, 0.32]], 3), M(0x8fd6f4, { rough: 0.3 }), 24), x, 0.08, z, 0.25, 0, r);
+      g.add(egg(-0.22, 0.02, 0.3), egg(0.2, -0.04, -0.25), egg(0, 0.22, 0.05)); return g; }, yaw: 0.4, pitch: 0.48,
+  },
+  bell: {
+    make: () => grp(at(lathe(smoothProfile([[0, 0], [0.76, 0], [0.8, 0.05], [0.74, 0.12], [0, 0.12]], 2), C.wood(), 40), 0, -0.7, 0),
+      lathe(smoothProfile([[0, 0.38], [0.18, 0.36], [0.4, 0.2], [0.56, -0.12], [0.66, -0.48], [0.7, -0.56], [0, -0.56]], 3), C.brass(), 48),
+      at(cyl(0.06, 0.06, 0.16, C.brass(), 10), 0, 0.46, 0), at(lathe(smoothProfile([[0, 0.14], [0.11, 0.1], [0.12, 0.02], [0, 0]], 2), C.brass(), 16), 0, 0.54, 0)), yaw: 0.4, pitch: 0.32,
+  },
+  phone_off: {
+    make: () => grp(ext(shape(rrectPts(0.86, 1.52, 0.16)), 0.12, M(0x3a3048, { rough: 0.35 }), 0.05, 3), at(mesh(new THREE.PlaneGeometry(0.7, 1.2), M(0x5fa0e8, { rough: 0.15, glow: 0.3, tex: null })), 0, 0.03, 0.12),
+      at(strokeMesh([[-0.66, -0.7], [0.66, 0.7]], 0.2, C.red(), 0.16, 0.06), 0, 0, 0.2)), yaw: 0.32, pitch: 0.2,
+  },
+  music: {
+    make: () => { const b = C.blue(); const head = (x: number, y: number) => at(ext(shape(circlePts(0.24, 32).map(([px, py]) => [px * 1.25, py * 0.9] as P2)), 0.12, b, 0.07, 3), x, y, 0, 0, 0, 0.35);
+      return grp(head(-0.44, -0.56), head(0.44, -0.4), strokeMesh([[-0.18, -0.5], [-0.18, 0.56]], 0.1, b, 0.1, 0.03), strokeMesh([[0.7, -0.34], [0.7, 0.74]], 0.1, b, 0.1, 0.03), strokeMesh([[-0.18, 0.5], [0.7, 0.68]], 0.24, b, 0.12, 0.04)); }, yaw: 0.28, pitch: 0.2,
+  },
+  note: {
+    make: () => { const b = C.blue(); return grp(at(ext(shape(circlePts(0.3, 32).map(([px, py]) => [px * 1.25, py * 0.9] as P2)), 0.14, b, 0.08, 3), -0.18, -0.55, 0, 0, 0, 0.35), strokeMesh([[0.14, -0.5], [0.14, 0.8]], 0.12, b, 0.12, 0.03),
+      ext(shape([[0.1, 0.8], [0.22, 0.8], [0.5, 0.52], [0.56, 0.26], [0.48, 0.06], [0.5, 0.3], [0.38, 0.46], [0.18, 0.56]]), 0.1, b, 0.04, 2)); }, yaw: 0.28, pitch: 0.2,
+  },
+  mic: {
+    make: () => { const grille = M(0x9aa4b4, { metal: 0.6, rough: 0.35, tex: 'weave', rep: 3 });
+      return grp(at(lathe(smoothProfile([[0, 0.62], [0.2, 0.58], [0.3, 0.46], [0.32, 0.25], [0.31, 0.05], [0, 0.04]], 3), grille, 32), 0, 0.02, 0), at(torus(0.315, 0.035, C.brass(), Math.PI * 2, 8, 32), 0, 0.3, 0, Math.PI / 2), at(lathe(smoothProfile([[0, 0.08], [0.32, 0.06], [0.33, 0], [0.2, -0.1], [0, -0.12]], 2), C.brass(), 24), 0, 0.04, 0),
+        at(torus(0.44, 0.045, C.brass(), Math.PI, 8, 24), 0, 0.22, 0, 0, 0, Math.PI), at(cyl(0.045, 0.045, 0.5, C.brass(), 8), 0, -0.46, 0), at(lathe(smoothProfile([[0, 0.1], [0.3, 0.08], [0.42, 0.02], [0.4, -0.04], [0, -0.04]], 2), C.dark(), 32), 0, -0.76, 0)); }, yaw: 0.4, pitch: 0.24,
+  },
+  speaker_on: { make: () => grp(speaker(), at(torus(0.42, 0.07, C.sky(), 1.4, 8, 24), 0.16, 0, 0, 0, 0, -0.7), at(torus(0.7, 0.07, C.sky(), 1.3, 8, 24), 0.16, 0, 0, 0, 0, -0.65)), yaw: 0.25, pitch: 0.15 },
+  speaker_off: { make: () => grp(speaker(), strokeMesh([[0.34, -0.3], [0.88, 0.3]], 0.16, C.red(), 0.16, 0.05), strokeMesh([[0.34, 0.3], [0.88, -0.3]], 0.16, C.red(), 0.16, 0.05)), yaw: 0.25, pitch: 0.15 },
+  rain: { make: () => grp(at(cloud(C.snow()), 0, 0.3, 0), ...[[-0.36, -0.5], [0.1, -0.68], [0.52, -0.46]].map(([x, y]) => at(lathe(smoothProfile([[0, -0.16], [0.1, -0.1], [0.09, 0.02], [0.04, 0.12], [0, 0.18]], 3), M(0x4aaef0, { rough: 0.15 }), 16), x, y, 0.1, 0, 0, -0.2))), yaw: 0.28, pitch: 0.2 },
+  drop: { make: () => lathe(smoothProfile([[0, -0.8], [0.34, -0.72], [0.56, -0.45], [0.55, -0.15], [0.36, 0.25], [0.12, 0.65], [0, 0.85]], 3), M(0x4aaef0, { rough: 0.1, metal: 0.1, env: 1.4 }), 40), yaw: 0.3, pitch: 0.2 },
+  waves: { make: () => grp(...[0.55, 0, -0.55].map((y, i) => tube(Array.from({ length: 9 }, (_, k) => [-0.9 + k * 0.225, y + Math.sin(k * 1.4 + i) * 0.13, 0] as [number, number, number]), 0.1, M([0x8ad6ff, 0x5ab4f0, 0x3a8ad8][i], { rough: 0.22 }), 40, 10))), yaw: 0.25, pitch: 0.2 },
+  wind: { make: () => grp(...([[0.5, 0.9], [0, 1.1], [-0.5, 0.75]] as P2[]).map(([y, l]) => tube([[-0.9, y, 0], [-0.9 + l * 0.6, y, 0], [-0.9 + l, y + 0.08, 0], [-0.9 + l + 0.1, y + 0.28, 0], [-0.9 + l - 0.12, y + 0.36, 0]], 0.09, M(0xeaf6ff, { rough: 0.4 }), 40, 10))), yaw: 0.25, pitch: 0.2 },
+  campfire: {
+    make: () => { const bark = M(0x7a4a26, { tex: 'bark', rough: 0.85 }), end = M(0xe8b070, { tex: 'grain', rough: 0.7 });
+      const log = (a: number, tilt: number) => { const g = grp(at(cyl(0.13, 0.15, 1.3, bark, 12), 0, 0, 0), at(cyl(0.13, 0.13, 0.01, end, 12), 0, 0.655, 0), at(cyl(0.15, 0.15, 0.01, end, 12), 0, -0.655, 0)); return at(g, 0, -0.58, 0, Math.PI / 2 - tilt, a, 0); };
+      const stone = (a: number) => at(lathe(smoothProfile([[0, 0.12], [0.16, 0.1], [0.2, 0.02], [0.16, -0.06], [0, -0.07]], 2), M(0x9aa0a8, { rough: 0.8 }), 10), Math.cos(a) * 0.74, -0.74, Math.sin(a) * 0.74, 0, a, 0);
+      return grp(log(0.5, 0.25), log(-0.6, 0.2), log(1.7, 0.18), ...[0, 1.2, 2.4, 3.6, 4.8].map(stone),
+        ...([[0, 0, 1], [-0.2, -0.04, 0.7], [0.22, 0.02, 0.75], [0.06, -0.06, 0.55]] as [number, number, number][]).map(([x, z, k]) => at(lathe(smoothProfile([[0, -0.4], [0.3, -0.25], [0.28, 0], [0.14, 0.35], [0, 0.66]], 3), C.flame(), 16), x, -0.1, z, 0, 0, x * 0.6, [k * 0.8, k, k * 0.8])),
+        at(lathe(smoothProfile([[0, -0.3], [0.2, -0.15], [0.15, 0.08], [0, 0.3]], 3), C.flameIn(), 16), 0, -0.2, 0.18), at(lathe(smoothProfile([[0, -0.1], [0.08, -0.04], [0.05, 0.06], [0, 0.12]], 2), unlit(0xfff4c0), 10), 0, -0.24, 0.26)); }, yaw: 0.4, pitch: 0.34,
+  },
+  leaf: { make: () => grp(leafMesh(0.92, 0.5, C.leaf(), 9), at(cyl(0.025, 0.035, 1.5, M(0x3e8a32, { tex: null }), 6), 0, -0.2, 0.05)), yaw: 0.3, pitch: 0.32 },
+  book: { make: () => { const b = journal(); b.ribbon.visible = false; return b.root; }, yaw: 0.5, pitch: 0.2 },
+  pen: {
+    make: () => { const lac = M(0x2c58c0, { rough: 0.2 }); return at(grp(lathe(smoothProfile([[0, -0.36], [0.1, -0.34], [0.14, -0.2], [0.15, 0.5], [0.12, 0.66], [0, 0.7]], 3), lac, 24), at(torus(0.15, 0.025, C.gold(), Math.PI * 2, 6, 24), 0, 0.12, 0, Math.PI / 2), at(torus(0.145, 0.02, C.gold(), Math.PI * 2, 6, 24), 0, 0.5, 0, Math.PI / 2),
+      at(lathe(smoothProfile([[0, -0.42], [0.05, -0.36], [0.1, -0.2], [0.12, 0], [0, 0]], 2), C.gold(), 16), 0, -0.36, 0), strokeMesh([[0.18, 0.62], [0.18, 0.2]], 0.06, C.gold(), 0.04, 0.015)), 0, 0, 0, 0, 0, -0.75); }, yaw: 0.3, pitch: 0.3,
+  },
+  jar: {
+    make: () => grp(lathe(smoothProfile([[0, -0.8], [0.5, -0.78], [0.58, -0.6], [0.58, 0.38], [0.46, 0.54], [0.38, 0.6], [0, 0.6]], 3), M(0x9ad8f0, { rough: 0.06, metal: 0.15, tex: null, env: 1.6, opacity: 0.5 }), 40), at(lathe(smoothProfile([[0, 0.12], [0.4, 0.12], [0.43, 0.06], [0.42, 0], [0, 0]], 2), C.brass(), 32), 0, 0.62, 0),
+      ...[[-0.2, -0.2], [0.18, 0.1], [0.05, -0.5], [-0.12, 0.28]].map(([x, y]) => at(ball(0.1, M(0xfff27a, { glow: 1.2, tex: null }), 10, 8), x, y, 0.4))), yaw: 0.4, pitch: 0.2,
+  },
+  hanger: { make: () => hanger(), yaw: 0.3, pitch: 0.24 },
+  brush: {
+    make: () => at(grp(lathe(smoothProfile([[0, -0.8], [0.08, -0.78], [0.1, -0.3], [0.08, 0.2], [0.1, 0.3]], 2), C.wood(), 16), at(lathe(smoothProfile([[0.1, 0], [0.13, 0.1], [0.13, 0.25], [0.11, 0.32]], 2), C.silver(), 16), 0, 0.28, 0),
+      at(lathe(smoothProfile([[0.11, 0], [0.14, 0.12], [0.11, 0.3], [0, 0.42]], 3), M(0xf2d9a0, { tex: 'grain' }), 16), 0, 0.6, 0), at(lathe(smoothProfile([[0.09, 0], [0.06, 0.1], [0, 0.16]], 2), C.blue(), 12), 0, 0.92, 0)), 0, 0, 0, 0, 0, -0.75), yaw: 0.3, pitch: 0.3,
+  },
+  pushpin: { make: () => at(grp(lathe(smoothProfile([[0, 0.7], [0.36, 0.66], [0.38, 0.56], [0.2, 0.5], [0.18, 0.2], [0.42, 0.1], [0.44, 0.02], [0, 0]], 3), C.red(), 32), at(cyl(0.025, 0.012, 0.6, C.silver(), 8), 0, -0.3, 0)), 0, 0, 0, 0, 0, 0.55), yaw: 0.4, pitch: 0.3 },
+  magnifier: { make: () => grp(at(torus(0.5, 0.09, C.brass(), Math.PI * 2, 10, 40), -0.2, 0.25, 0), at(cyl(0.48, 0.48, 0.04, M(0xd2f0ff, { rough: 0.04, metal: 0.2, tex: null, env: 2 }), 32), -0.2, 0.25, 0, Math.PI / 2), at(lathe(smoothProfile([[0, -0.5], [0.09, -0.46], [0.1, 0], [0.07, 0.3], [0.08, 0.34]], 2), C.wood(), 16), 0.42, -0.38, 0, 0, 0, Math.PI * 0.75)), yaw: 0.28, pitch: 0.24 },
+  clipboard: {
+    make: () => { const ruled = faceTex('ruled', 24, 32, (x, y): RGB => (y > 6 && y % 5 === 0 && x > 3 && x < 21 ? hex('#8a90b8') : y > 4 && y < 9 && x > 3 && x < 14 ? hex('#5a4a6a') : hex('#fbf2dc')));
+      return grp(ext(shape(rrectPts(1.2, 1.56, 0.1)), 0.06, C.wood(), 0.03, 2), at(mesh(planarUV(new THREE.PlaneGeometry(1.0, 1.24)), new THREE.MeshStandardMaterial({ map: ruled, roughness: 0.85 })), 0, -0.08, 0.06),
+        at(ext(shape([[-0.3, -0.1], [0.3, -0.1], [0.26, 0.12], [0.12, 0.16], [0.08, 0.26], [-0.08, 0.26], [-0.12, 0.16], [-0.26, 0.12]]), 0.08, C.silver(), 0.03, 2), 0, 0.66, 0.08)); }, yaw: 0.3, pitch: 0.2,
+  },
+  satchel: {
+    make: () => { const lea = C.leather(), dk = M(0x8a3420, { rough: 0.55, tex: 'leather' });
+      return grp(at(ext(shape(rrectPts(1.36, 1.0, 0.22)), 0.36, lea, 0.12, 3), 0, -0.24, 0), at(ext(shape([[-0.7, 0.26], [0.7, 0.26], [0.7, -0.14], [0.5, -0.32], [-0.5, -0.32], [-0.7, -0.14]]), 0.06, dk, 0.04, 2), 0, 0.02, 0.24),
+        ...[-0.32, 0.32].map((x) => grp(at(ext(shape(rrectPts(0.12, 0.5, 0.04)), 0.02, dk, 0.01, 1), x, -0.2, 0.3), at(ext(shape(rrectPts(0.18, 0.14, 0.03)), 0.03, C.brass(), 0.015, 1), x, -0.32, 0.32))),
+        tube([[-0.6, 0.2, 0], [-0.52, 0.72, 0], [0, 0.94, 0], [0.52, 0.72, 0], [0.6, 0.2, 0]], 0.06, dk, 24, 8)); }, yaw: 0.34, pitch: 0.22,
+  },
   map: { make: () => { const g = grp(); const tx = mapTex(); for (let i = 0; i < 3; i++) { const p = mesh(new THREE.PlaneGeometry(0.62, 1.4), new THREE.MeshStandardMaterial({ map: tx, side: THREE.DoubleSide, roughness: 0.8 })); const uv = p.geometry.attributes.uv as THREE.BufferAttribute; for (let k = 0; k < uv.count; k++) uv.setX(k, (uv.getX(k) + i) / 3); g.add(at(p, -0.6 + i * 0.6, 0, i % 2 ? -0.12 : 0, 0, i % 2 ? 0.35 : -0.35, 0)); } return g; }, yaw: 0.2, pitch: 0.25 },
-  gear: { make: () => { const pts: [number, number][] = []; for (let i = 0; i < 64; i++) { const a = (i / 64) * Math.PI * 2, tooth = Math.floor((i / 64) * 8 * 4) % 4 < 2; pts.push([Math.cos(a) * (tooth ? 0.92 : 0.7), Math.sin(a) * (tooth ? 0.92 : 0.7)]); } const s = shape(pts); const h = new THREE.Path(); h.absarc(0, 0, 0.26, 0, Math.PI * 2, true); s.holes.push(h); return grp(ext(s, 0.3, M(0xe9a634, { metal: 0.42, rough: 0.32, tex: 'dab' }), 0.06), at(tor(0.4, 0.07, M(0xb87a1e, { metal: 0.4, rough: 0.35, tex: null })), 0, 0, 0.2)); }, yaw: 0.35, pitch: 0.3 },
-  treehouse: { make: () => grp(at(cyl(0.22, 0.34, 1.0, M(0x8a5a32, { tex: 'grain' })), 0, -0.45, 0), at(ball(0.55, C.leaf()), -0.3, 0.35, 0), at(ball(0.6, M(0x4aa83e)), 0.3, 0.45, -0.1), at(ball(0.5, M(0x6cc850)), 0, 0.72, 0.1), at(rbox(0.2, 0.28, 0.06, C.red(), 0.04), 0, -0.55, 0.31), at(ball(0.08, M(0xffe28a, { glow: 0.6, tex: null })), 0.2, 0.3, 0.55)), yaw: 0.3, pitch: 0.2 },
-  birdhouse: { make: () => grp(at(rbox(0.9, 0.9, 0.8, C.oak(), 0.05), 0, -0.25, 0), at(rbox(0.66, 0.08, 1.0, C.red(), 0.03), -0.3, 0.38, 0, 0, 0, 0.72), at(rbox(0.66, 0.08, 1.0, C.red(), 0.03), 0.3, 0.38, 0, 0, 0, -0.72), at(cyl(0.16, 0.16, 0.06, C.ink()), 0, -0.15, 0.4, Math.PI / 2), at(cyl(0.035, 0.035, 0.3, C.dark()), 0, -0.45, 0.5, Math.PI / 2), at(cyl(0.06, 0.06, 0.5, C.dark()), 0, -0.9, 0)), yaw: 0.45, pitch: 0.2 },
-  cursor_hand: { make: () => grp(at(rbox(0.8, 0.75, 0.36, M(0xffe0b8, { rough: 0.6 }), 0.18), 0, -0.35, 0), at(rbox(0.26, 0.8, 0.3, M(0xffe0b8, { rough: 0.6 }), 0.12), -0.18, 0.32, 0), ...[0, 0.22].map((x) => at(rbox(0.24, 0.4, 0.3, M(0xffe0b8, { rough: 0.6 }), 0.11), 0.08 + x, -0.02, 0.02)), at(rbox(0.26, 0.4, 0.3, M(0xffe0b8, { rough: 0.6 }), 0.11), -0.45, -0.38, 0.02, 0, 0, 0.6), at(rbox(0.86, 0.18, 0.4, C.sky(), 0.06), 0, -0.8, 0)), yaw: 0.3, pitch: 0.2 },
-  stats: { make: () => grp(at(rbox(1.6, 0.14, 0.5, C.wood(), 0.04), 0, -0.82, 0), at(rbox(0.36, 0.7, 0.36, C.green(), 0.06), -0.5, -0.4, 0), at(rbox(0.36, 1.1, 0.36, C.gold(), 0.06), 0, -0.2, 0), at(rbox(0.36, 1.5, 0.36, C.blue(), 0.06), 0.5, 0, 0)), yaw: 0.45, pitch: 0.3 },
-  nights: { make: () => grp(at(ext(crescentShape(0.65, 0.55, [0.3, 0.18]), 0.24, M(0xffd86a, { rough: 0.4 }), 0.1), -0.2, 0, 0), at(ext(shape(starPath(0.28, 0.12)), 0.14, C.gold(), 0.05), 0.62, 0.55, 0), at(ext(shape(starPath(0.2, 0.09)), 0.12, C.gold(), 0.05), 0.72, -0.35, 0)), yaw: 0.3, pitch: 0.3 },
-  things: { make: glb('items/chest.glb'), yaw: 0.6, pitch: 0.35, vivid: 1.35 },
-  seals: { make: () => { const pts: [number, number][] = []; for (let i = 0; i < 48; i++) { const a = (i / 48) * Math.PI * 2, r = 0.62 + Math.sin(a * 9) * 0.06; pts.push([Math.cos(a) * r, Math.sin(a) * r + 0.2]); } return grp(at(ext(shape([[-0.15, -0.2], [0.05, -0.2], [-0.25, -1], [-0.45, -0.85]]), 0.05, C.red(), 0.02), 0, 0, -0.1), at(ext(shape([[0.15, -0.2], [-0.05, -0.2], [0.25, -1], [0.45, -0.85]]), 0.05, C.red(), 0.02), 0, 0, -0.1), ext(shape(pts), 0.2, M(0xc8343c, { rough: 0.35 }), 0.1), at(ext(shape(starPath(0.26, 0.12)), 0.06, M(0xa8262e, { rough: 0.4 }), 0.03), 0, 0.2, 0.14)); }, yaw: 0.3, pitch: 0.3 },
-  wd_feather: { make: () => at(grp(ext(shape(Array.from({ length: 40 }, (_, i) => { const t = (i / 40) * Math.PI * 2; return [Math.sin(t) * 0.32 * (1 + 0.2 * Math.cos(t)), Math.cos(t) * 0.9 + 0.1] as [number, number]; })), 0.06, M(0xc9905a, { tex: 'grain' }), 0.03), at(cyl(0.03, 0.03, 2.0, C.cream()), 0, -0.05, 0.05)), 0, 0, 0, 0, 0, -0.6), yaw: 0.3, pitch: 0.3 },
-  tophat: { make: () => grp(lathe([[0, -0.5], [0.95, -0.5], [0.98, -0.44], [0.6, -0.4], [0.55, 0.55], [0.6, 0.62], [0, 0.62]], M(0x3a2a52, { rough: 0.45, tex: 'weave' })), at(cyl(0.565, 0.57, 0.2, C.red()), 0, -0.26, 0)), yaw: 0.4, pitch: 0.35 },
-  wd_glasses: { make: () => grp(...[-0.48, 0.48].map((x) => at(tor(0.36, 0.08, C.gold()), x, 0, 0)), ...[-0.48, 0.48].map((x) => at(cyl(0.33, 0.33, 0.04, M(0x8fd8ff, { rough: 0.1, metal: 0.2, tex: null })), x, 0, -0.01, Math.PI / 2)), at(tor(0.14, 0.06, C.gold(), Math.PI), 0, 0.08, 0), ...[-1, 1].map((sx) => at(bar(0, 0, sx * 0.3, -0.05, 0.07, 0.07, C.gold()), sx * 0.84, 0.1, -0.1, 0, sx * 0.9, 0))), yaw: 0.3, pitch: 0.2 },
-  wd_scarf: { make: () => { const st = new THREE.MeshStandardMaterial({ map: stripeTex(['#e0363c', '#fff0cc'], [3, 1]), roughness: 0.7 }); return grp(tube([[-0.5, 0.55, 0], [0, 0.72, 0.2], [0.5, 0.55, 0], [0.55, 0.3, 0.1], [0.2, 0.15, 0.25], [-0.25, 0.2, 0.2], [-0.4, -0.3, 0.25], [-0.3, -0.85, 0.2]], 0.2, st), at(rbox(0.36, 0.5, 0.12, st, 0.05), 0.35, -0.45, 0.25, 0, 0, -0.25)); }, yaw: 0.3, pitch: 0.25 },
+  gear: { make: () => gear(M(0xeaa634, { metal: 0.55, rough: 0.3, tex: null })), yaw: 0.32, pitch: 0.28 },
+  treehouse: {
+    make: () => { const lv = [M(0x4caa3c, { rough: 0.6 }), M(0x62c448, { rough: 0.6 }), M(0x3e9434, { rough: 0.6 })];
+      const clump = (x: number, y: number, r: number, m: THREE.Material) => { const g = new THREE.IcosahedronGeometry(r, 2); const p = g.attributes.position as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) { const v = new THREE.Vector3().fromBufferAttribute(p, i); v.multiplyScalar(1 + (fbm(v.x * 6 + 3, v.y * 6 + v.z * 4, 5) - 0.5) * 0.35); p.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals(); return at(mesh(g, m), x, y, 0); };
+      const house = grp(ext(shape([[-0.26, -0.2], [0.26, -0.2], [0.26, 0.14], [0, 0.34], [-0.26, 0.14]]), 0.3, C.oak(), 0.03, 2), at(ext(shape([[-0.34, 0.1], [0, 0.4], [0.34, 0.1], [0.3, 0.06], [0, 0.32], [-0.3, 0.06]]), 0.38, C.red(), 0.03, 2), 0, 0.02, 0), at(ext(shape(rrectPts(0.14, 0.18, 0.05)), 0.02, M(0xffd87a, { glow: 0.7, tex: null }), 0.01, 1), 0, -0.02, 0.17));
+      return grp(at(lathe(smoothProfile([[0.34, -1.0], [0.24, -0.8], [0.18, -0.3], [0.16, 0.2]], 2), M(0x8a5a32, { tex: 'bark' }), 16), 0, 0, 0), clump(-0.34, 0.34, 0.46, lv[0]), clump(0.32, 0.4, 0.5, lv[2]), clump(0, 0.7, 0.46, lv[1]), at(house, 0.02, -0.36, 0.22)); }, yaw: 0.3, pitch: 0.18,
+  },
+  birdhouse: {
+    make: () => grp(at(ext(shape([[-0.45, -0.7], [0.45, -0.7], [0.45, 0.1], [0, 0.5], [-0.45, 0.1]]), 0.8, C.oak(), 0.04, 2), 0, 0, 0),
+      at(ext(shape(rrectPts(0.78, 0.07, 0.03)), 1.0, C.red(), 0.02, 1), -0.25, 0.36, 0, 0, 0, 0.72), at(ext(shape(rrectPts(0.78, 0.07, 0.03)), 1.0, C.red(), 0.02, 1), 0.25, 0.36, 0, 0, 0, -0.72),
+      at(cyl(0.15, 0.15, 0.06, C.ink(), 20), 0, -0.12, 0.4, Math.PI / 2), at(cyl(0.03, 0.03, 0.26, C.dark(), 8), 0, -0.4, 0.48, Math.PI / 2), at(cyl(0.06, 0.07, 0.5, C.dark(), 8), 0, -0.95, 0)), yaw: 0.45, pitch: 0.2,
+  },
+  cursor_hand: {
+    make: () => { const skin = M(0xffe2bc, { rough: 0.55 });
+      const pts: P2[] = [[-0.42, 0.78], [-0.38, 0.88], [-0.3, 0.92], [-0.22, 0.88], [-0.18, 0.78], [-0.18, 0.26], [-0.14, 0.32], [-0.04, 0.34], [0.04, 0.3], [0.07, 0.2], [0.11, 0.25], [0.2, 0.27], [0.27, 0.22], [0.29, 0.12], [0.33, 0.16], [0.42, 0.16], [0.49, 0.1], [0.51, 0.0],
+        [0.55, -0.2], [0.52, -0.46], [0.42, -0.66], [0.28, -0.78], [-0.26, -0.78], [-0.42, -0.62], [-0.5, -0.36], [-0.56, -0.2], [-0.7, -0.06], [-0.76, 0.04], [-0.72, 0.12], [-0.6, 0.1], [-0.46, 0.0], [-0.42, 0.18]];
+      return grp(ext(shape(pts), 0.28, skin, 0.12, 4), at(ext(shape(rrectPts(0.92, 0.2, 0.06)), 0.4, C.sky(), 0.05, 2), 0.16, -0.86, 0)); }, yaw: 0.28, pitch: 0.2,
+  },
+  stats: {
+    make: () => grp(at(ext(shape(rrectPts(1.7, 0.16, 0.06)), 0.5, C.wood(), 0.03, 2), 0, -0.82, 0),
+      ...([[-0.52, 0.66, C.green()], [0, 1.06, C.gold()], [0.52, 1.46, C.blue()]] as [number, number, THREE.Material][]).map(([x, h, m]) => at(ext(shape(rrectPts(0.34, h, 0.1)), 0.32, m, 0.04, 2), x, -0.74 + h / 2, 0)),
+      at(ext(shape(strokePts([[-0.7, -0.1], [-0.2, 0.3], [0.15, 0.1], [0.66, 0.66]], 0.1)), 0.06, C.red(), 0.03, 2), 0, 0.1, 0.3), at(ext(shape([[0.5, 0.74], [0.82, 0.84], [0.74, 0.52]]), 0.06, C.red(), 0.03, 2), 0, 0.06, 0.3)), yaw: 0.42, pitch: 0.24,
+  },
+  nights: { make: () => grp(at(ext(shape(crescentPts(0.65, 0.55, [0.3, 0.18])), 0.22, M(0xffd462, { rough: 0.35 }), 0.1, 3), -0.2, 0, 0), at(ext(shape(starPts(0.28, 0.12)), 0.12, C.gold(), 0.05, 2), 0.62, 0.55, 0), at(ext(shape(starPts(0.2, 0.09)), 0.1, C.gold(), 0.05, 2), 0.72, -0.35, 0)), yaw: 0.28, pitch: 0.28 },
+  things: {
+    make: () => { const wood = M(0xc8783a, { tex: 'grain', rough: 0.55 }), band = M(0x6a5a5a, { metal: 0.6, rough: 0.4, tex: null });
+      const lidG = new THREE.CylinderGeometry(0.42, 0.42, 1.3, 24, 1, false, 0, Math.PI); lidG.rotateZ(Math.PI / 2);
+      return grp(at(ext(shape(rrectPts(1.3, 0.62, 0.05)), 0.84, wood, 0.03, 2), 0, -0.3, 0), at(mesh(lidG, wood), 0, 0.02, 0, 0, 0, 0, [1, 0.8, 1]),
+        ...[-0.42, 0.42].map((x) => grp(at(ext(shape(rrectPts(0.1, 0.62, 0.02)), 0.88, band, 0.015, 1), x, -0.3, 0), at(torus(0.425, 0.05, band, Math.PI, 6, 20), x, 0.02, 0, 0, Math.PI / 2, 0, [1, 0.8, 1]))),
+        at(ext(shape(rrectPts(0.22, 0.28, 0.05)), 0.04, C.gold(), 0.02, 2), 0, -0.04, 0.45), at(ext(shape(circlePts(0.04, 12)), 0.02, C.ink(), 0.01, 1), 0, -0.06, 0.49),
+        at(moonGem(), 0.32, 0.4, 0.06, 0.3, 0.4, -0.3, 0.3), at(acorn(0.3, 0.6), -0.3, 0.42, 0.1)); }, yaw: 0.55, pitch: 0.32,
+  },
+  seals: { make: () => { const pts: P2[] = []; for (let i = 0; i < 64; i++) { const a = (i / 64) * Math.PI * 2, r = 0.62 + Math.sin(a * 9) * 0.05 + (h2(i, 1, 2) - 0.5) * 0.03; pts.push([Math.cos(a) * r, Math.sin(a) * r + 0.2]); }
+    const rib = M(0xd8343c, { rough: 0.35, tex: 'weave' });
+    return grp(at(ext(shape([[-0.15, -0.2], [0.05, -0.2], [-0.25, -1], [-0.36, -0.84], [-0.46, -0.98]]), 0.04, rib, 0.02, 1), 0, 0, -0.1), at(ext(shape([[0.15, -0.2], [-0.05, -0.2], [0.25, -1], [0.36, -0.84], [0.46, -0.98]]), 0.04, rib, 0.02, 1), 0, 0, -0.1),
+      ext(shape(pts), 0.16, M(0xc8303a, { rough: 0.3 }), 0.1, 3), at(ext(shape(circlePts(0.4, 40)), 0.04, M(0xa8202c, { rough: 0.35 }), 0.04, 2), 0, 0.2, 0.12), at(ext(shape(starPts(0.24, 0.11)), 0.04, M(0xe85058, { rough: 0.3 }), 0.02, 2), 0, 0.2, 0.17)); }, yaw: 0.28, pitch: 0.28 },
+  wd_feather: { make: () => { const vane: P2[] = []; for (let i = 0; i <= 50; i++) { const t = (i / 50) * Math.PI * 2, y = Math.cos(t); const notch = Math.sin(t * 13) > 0.85 ? 0.88 : 1; vane.push([Math.sin(t) * 0.3 * (1 + 0.2 * y) * notch, y * 0.86 + 0.12]); }
+    return at(grp(ext(shape(vane), 0.04, M(0xd8905a, { tex: 'grain', rough: 0.6 }), 0.03, 2), at(cyl(0.025, 0.035, 1.95, C.cream(), 8), 0, -0.03, 0.04)), 0, 0, 0, 0, 0, -0.6); }, yaw: 0.28, pitch: 0.28 },
+  tophat: { make: () => grp(lathe(smoothProfile([[0, -0.5], [0.95, -0.5], [0.98, -0.44], [0.62, -0.4], [0.56, -0.3], [0.55, 0.5], [0.6, 0.6], [0, 0.62]], 2), M(0x3a2a52, { rough: 0.45, tex: 'weave' }), 48), at(cyl(0.565, 0.57, 0.2, C.red(), 40), 0, -0.26, 0), at(ext(shape(rrectPts(0.2, 0.16, 0.04)), 0.04, C.gold(), 0.02, 1), 0.2, -0.26, 0.55, 0, 0.35, 0)), yaw: 0.4, pitch: 0.32 },
+  wd_glasses: { make: () => grp(...[-0.48, 0.48].map((x) => at(torus(0.36, 0.075, C.gold(), Math.PI * 2, 10, 40), x, 0, 0)), ...[-0.48, 0.48].map((x) => at(cyl(0.33, 0.33, 0.03, M(0x8fd8ff, { rough: 0.06, metal: 0.2, tex: null, env: 2 }), 32), x, 0, -0.01, Math.PI / 2)), at(torus(0.14, 0.055, C.gold(), Math.PI, 8, 16), 0, 0.08, 0), ...[-1, 1].map((sx) => tube([[sx * 0.84, 0.1, -0.02], [sx * 0.92, 0.12, -0.3], [sx * 0.9, 0.0, -0.5]], 0.04, C.gold(), 12, 6))), yaw: 0.3, pitch: 0.2 },
+  wd_scarf: { make: () => { const st = new THREE.MeshStandardMaterial({ map: stripeTex(['#e0363c', '#fff0cc'], [3, 1]), roughness: 0.75 }); return grp(tube([[-0.5, 0.55, 0], [0, 0.72, 0.2], [0.5, 0.55, 0], [0.55, 0.3, 0.1], [0.2, 0.15, 0.25], [-0.25, 0.2, 0.2], [-0.4, -0.3, 0.25], [-0.3, -0.85, 0.2]], 0.2, st, 64, 12), at(ext(shape(rrectPts(0.36, 0.5, 0.06)), 0.1, st, 0.04, 2), 0.35, -0.45, 0.25, 0, 0, -0.25)); }, yaw: 0.3, pitch: 0.25 },
   wd_sweater: { make: () => sweater(), yaw: 0.3, pitch: 0.15 },
-  wd_cape: { make: () => grp(ext(shape([[-0.32, 0.7], [0.32, 0.7], [0.82, -0.72], [0.5, -0.86], [0, -0.78], [-0.5, -0.86], [-0.82, -0.72]]), 0.16, M(0x7a4ad0, { rough: 0.5, tex: 'weave' }), 0.08), at(tor(0.32, 0.1, M(0xb07ae8, { rough: 0.5 })), 0, 0.68, 0.02, Math.PI / 2 - 0.3, 0, 0, [1, 1, 0.6]), at(ext(crescentShape(0.16, 0.14, [0.07, 0.04]), 0.06, C.gold(), 0.02), 0, 0.58, 0.18), ...[[-0.3, -0.2], [0.35, -0.45], [0.1, 0.1]].map(([x, y]) => at(ext(shape(starPath(0.08, 0.035)), 0.02, C.gold(), 0.01), x, y, 0.13))), yaw: 0.3, pitch: 0.2 },
-  wd_mirror: { make: () => grp(at(tor(0.48, 0.1, C.brass()), 0, 0.3, 0, 0, 0, 0, [1, 1.2, 1]), at(cyl(0.47, 0.47, 0.06, M(0xcfeeff, { rough: 0.05, metal: 0.4, tex: null })), 0, 0.3, 0, Math.PI / 2, 0, 0, [1, 1, 1.2]), at(cyl(0.09, 0.11, 0.7, C.brass()), 0, -0.6, 0), at(ball(0.13, C.brass()), 0, -0.98, 0)), yaw: 0.3, pitch: 0.2 },
-  wd_frame: { make: () => grp(at(tor(0.66, 0.2, C.brass()), 0, 0, 0), at(cyl(0.56, 0.56, 0.08, M(0x6ec2f0, { rough: 0.5 })), 0, 0, -0.05, Math.PI / 2), ...[0, 1, 2, 3].map((i) => at(ball(0.1, C.gold()), Math.cos(i * Math.PI / 2 + Math.PI / 4) * 0.66, Math.sin(i * Math.PI / 2 + Math.PI / 4) * 0.66, 0.16))), yaw: 0.3, pitch: 0.2 },
-  bp_box: { make: () => grp(rbox(1.3, 1.0, 1.0, C.kraft(), 0.05), at(rbox(1.32, 0.04, 0.3, M(0xe9d8a6, { tex: null }), 0.01), 0, 0.5, 0), at(rbox(0.3, 1.02, 0.04, M(0xe9d8a6, { tex: null }), 0.01), 0, 0, 0.5)), yaw: 0.6, pitch: 0.35 },
-  bp_bed: { make: () => grp(at(rbox(1.0, 0.3, 1.6, C.wood(), 0.05), 0, -0.3, 0), at(rbox(0.94, 0.16, 1.5, C.white(), 0.06), 0, -0.08, 0), at(rbox(1.0, 0.14, 1.0, M(0x3d7fe0, { rough: 0.7, tex: 'weave' }), 0.06), 0, 0, 0.28), at(rbox(0.6, 0.18, 0.34, M(0xfff8ee, { rough: 0.7 }), 0.09), 0, 0.04, -0.5), at(rbox(1.04, 0.8, 0.14, C.wood(), 0.06), 0, 0.12, -0.8), ...[-1, 1].map((x) => at(cyl(0.06, 0.06, 0.5, C.dark()), x * 0.44, -0.55, 0.72))), yaw: 0.65, pitch: 0.42 },
-  bp_chair: { make: glb('items/armchair.glb'), yaw: 0.6, pitch: 0.3, vivid: 1.35 },
-  bp_table: { make: glb('items/round_table.glb'), yaw: 0.6, pitch: 0.35, vivid: 1.3 },
-  bp_shelf: { make: () => { const g = grp(at(rbox(1.2, 1.7, 0.5, C.wood(), 0.05), 0, 0, -0.06), at(rbox(1.04, 1.54, 0.4, M(0x5a3018, { tex: 'grain' }), 0.02), 0, 0, 0.04), ...[-0.25, 0.3].map((y) => at(rbox(1.08, 0.08, 0.44, C.oak(), 0.02), 0, y, 0.06))); const cols = [0xe0453c, 0x3d7fe0, 0x3fb85c, 0xf4c24c, 0x9a5cd0, 0xf06a86]; for (const [row, y0] of [[0, -0.21], [1, 0.34]] as [number, number][]) for (let i = 0; i < 5; i++) { const h = 0.36 + ((i * 7 + row * 3) % 4) * 0.04; g.add(at(rbox(0.16, h, 0.32, M(cols[(i + row * 2) % 6], { rough: 0.6 }), 0.02), -0.38 + i * 0.19, y0 + h / 2, 0.1, 0, 0, i === 3 ? 0.18 : 0)); } return g; }, yaw: 0.35, pitch: 0.15 },
-  bp_lamp: { make: () => grp(at(lathe([[0.34, 0], [0.62, -0.5], [0.66, -0.56], [0.6, -0.56], [0.3, -0.04]], M(0xffc46a, { rough: 0.8, glow: 0.35, tex: 'weave' })), 0, 0.72, 0), at(cyl(0.05, 0.05, 1.0, C.brass()), 0, -0.2, 0), at(lathe([[0, -0.86], [0.5, -0.84], [0.52, -0.76], [0.22, -0.66], [0.06, -0.6], [0, -0.6]], C.brass()), 0, 0, 0), at(ball(0.12, M(0xfff4c0, { glow: 1, tex: null })), 0, 0.3, 0)), yaw: 0.4, pitch: 0.25 },
-  bp_plant: { make: glb('items/fernpot.glb'), yaw: 0.5, pitch: 0.3, vivid: 1.3 },
-  bp_rug: { make: () => at(mesh(new THREE.CylinderGeometry(1, 1, 0.08, 48), new THREE.MeshStandardMaterial({ map: ringTex(), roughness: 0.9 })), 0, 0, 0, 0, 0, 0, [1, 1, 0.75]), yaw: 0.2, pitch: 0.95 },
-  bp_wall: { make: glb('items/painting.glb'), yaw: 0.25, pitch: 0.1, vivid: 1.3 },
-  bp_decor: { make: () => grp(lathe([[0, -0.85], [0.36, -0.84], [0.48, -0.5], [0.44, -0.2], [0.2, 0.05], [0.24, 0.16], [0, 0.16]], M(0x3d8fd8, { rough: 0.3 })), ...[[-0.3, 0.75, 0xf06a86], [0.1, 0.9, 0xffd44a], [0.38, 0.62, 0xf5f0ff]].map(([x, y, c]) => grp(tube([[0, 0.1, 0], [x * 0.5, y * 0.6, 0], [x, y, 0]], 0.04, M(0x3e9a3a, { tex: null })), at(ball(0.2, M(c, { rough: 0.6 })), x, y, 0.04, 0, 0, 0, [1, 0.8, 1]), at(ball(0.07, M(0xffe070, { tex: null })), x, y, 0.2)))), yaw: 0.35, pitch: 0.2 },
-  bp_fun: { make: () => at(mesh(new THREE.SphereGeometry(0.85, 32, 20), new THREE.MeshStandardMaterial({ map: stripeTex(['#e0363c', '#ffd44a', '#3d7fe0', '#fff6e8'], [1, 1, 1, 1], true), roughness: 0.3 })), 0, 0, 0, 0.5, 0.3, 0.4), yaw: 0.3, pitch: 0.3 },
-  bp_wallpaper: { make: () => { const t = stripeTex(); const roll = mesh(new THREE.CylinderGeometry(0.34, 0.34, 1.5, 28), new THREE.MeshStandardMaterial({ map: t, roughness: 0.7 })); const sheet = mesh(new THREE.PlaneGeometry(0.9, 1.5), new THREE.MeshStandardMaterial({ map: t, roughness: 0.7, side: THREE.DoubleSide })); return grp(at(roll, -0.35, 0, 0), at(sheet, 0.4, -0.1, 0.25, -0.2, -0.3, 0)); }, yaw: 0.4, pitch: 0.25 },
-  bp_floor: { make: () => grp(...[-0.5, 0, 0.5].map((x, i) => at(rbox(0.46, 0.12, 1.5, [C.wood(), C.oak(), C.dark()][i], 0.03), x, 0, i === 1 ? 0.15 : 0))), yaw: 0.5, pitch: 0.6 },
-  bp_season: { make: () => grp(rbox(1.1, 0.9, 1.1, M(0xe0363c, { rough: 0.5 }), 0.06), at(rbox(1.16, 0.2, 1.16, M(0xe0363c, { rough: 0.5 }), 0.05), 0, 0.5, 0), at(rbox(0.2, 0.96, 1.14, C.gold(), 0.03), 0, 0.02, 0), at(rbox(1.14, 0.96, 0.2, C.gold(), 0.03), 0, 0.02, 0), at(tor(0.2, 0.07, C.gold()), -0.18, 0.72, 0, 0, 0.4, 0.4), at(tor(0.2, 0.07, C.gold()), 0.18, 0.72, 0, 0, -0.4, -0.4)), yaw: 0.6, pitch: 0.35 },
-  bp_move: { make: () => { const s = shape([[-0.12, 0.12], [-0.12, 0.5], [-0.32, 0.5], [0, 0.9], [0.32, 0.5], [0.12, 0.5], [0.12, 0.12], [0.5, 0.12], [0.5, 0.32], [0.9, 0], [0.5, -0.32], [0.5, -0.12], [0.12, -0.12], [0.12, -0.5], [0.32, -0.5], [0, -0.9], [-0.32, -0.5], [-0.12, -0.5], [-0.12, -0.12], [-0.5, -0.12], [-0.5, -0.32], [-0.9, 0], [-0.5, 0.32], [-0.5, 0.12]]); return ext(s, 0.26, C.sky(), 0.08); }, yaw: 0.35, pitch: 0.3 },
-  bp_buy: { make: () => { const s = shape([[-0.8, -0.45], [0.35, -0.45], [0.85, 0], [0.35, 0.45], [-0.8, 0.45]]); const h = new THREE.Path(); h.absarc(0.45, 0, 0.1, 0, Math.PI * 2, true); s.holes.push(h); return grp(at(ext(s, 0.1, C.kraft(), 0.04), 0, 0, 0, 0, 0, 0.4), at(acorn(0.5, 0.3), -0.25, -0.1, 0.25, 0, 0, 0.4)); }, yaw: 0.3, pitch: 0.3 },
+  wd_cape: { make: () => grp(ext(shape([[-0.32, 0.7], [0.32, 0.7], [0.82, -0.72], [0.5, -0.86], [0, -0.78], [-0.5, -0.86], [-0.82, -0.72]]), 0.14, M(0x7a4ad6, { rough: 0.5, tex: 'weave' }), 0.08, 3), at(torus(0.32, 0.1, M(0xb07ae8, { rough: 0.5, tex: 'weave' }), Math.PI * 2, 10, 32), 0, 0.68, 0.02, Math.PI / 2 - 0.3, 0, 0, [1, 1, 0.6]), at(ext(shape(crescentPts(0.16, 0.14, [0.07, 0.04], 48)), 0.05, C.gold(), 0.02, 2), 0, 0.58, 0.16), ...[[-0.3, -0.2], [0.35, -0.45], [0.1, 0.1]].map(([x, y]) => at(ext(shape(starPts(0.08, 0.035)), 0.02, C.gold(), 0.01, 1), x, y, 0.12))), yaw: 0.3, pitch: 0.2 },
+  wd_mirror: { make: () => grp(at(torus(0.48, 0.09, C.brass(), Math.PI * 2, 10, 40), 0, 0.3, 0, 0, 0, 0, [1, 1.2, 1]), at(cyl(0.47, 0.47, 0.05, M(0xcfeeff, { rough: 0.04, metal: 0.5, tex: null, env: 2 }), 32), 0, 0.3, 0, Math.PI / 2, 0, 0, [1, 1, 1.2]), at(lathe(smoothProfile([[0.06, -0.5], [0.1, -0.44], [0.07, -0.1], [0.09, 0.0], [0.12, 0.08]], 2), C.brass(), 16), 0, -0.4, 0), at(lathe(smoothProfile([[0, 0], [0.1, 0.02], [0.13, 0.08], [0.06, 0.14]], 2), C.brass(), 16), 0, -1.02, 0)), yaw: 0.3, pitch: 0.2 },
+  wd_frame: { make: () => grp(at(torus(0.66, 0.18, C.brass(), Math.PI * 2, 14, 48), 0, 0, 0), at(cyl(0.56, 0.56, 0.06, M(0x6ec2f0, { rough: 0.5 }), 40), 0, 0, -0.05, Math.PI / 2), ...[0, 1, 2, 3].map((i) => at(ext(shape(starPts(0.12, 0.05, 4)), 0.06, C.gold(), 0.03, 2), Math.cos(i * Math.PI / 2 + Math.PI / 4) * 0.66, Math.sin(i * Math.PI / 2 + Math.PI / 4) * 0.66, 0.16))), yaw: 0.3, pitch: 0.2 },
+  bp_box: {
+    make: () => { const k = C.kraft(), tape = M(0xeedcae, { rough: 0.6, tex: null });
+      const box = ext(shape(rrectPts(1.3, 0.9, 0.03)), 1.0, k, 0.02, 1);
+      const flap = (px: number, pz: number, ry: number, w: number, tilt: number) => { const g = grp(at(ext(shape(rrectPts(w, 0.46, 0.02)), 0.025, k, 0.01, 1), 0, 0.23, 0)); g.position.set(px, 0.45, pz); g.rotation.order = 'YXZ'; g.rotation.set(tilt, ry, 0); return g; };
+      return grp(box, flap(0, 0.5, 0, 1.28, 0.55), flap(0, -0.5, Math.PI, 1.28, 0.4), flap(0.65, 0, Math.PI / 2, 0.98, 0.7), flap(-0.65, 0, -Math.PI / 2, 0.98, 0.6), at(ext(shape(rrectPts(0.3, 0.92, 0.01)), 0.03, tape, 0.01, 1), 0, 0, 0.52)); }, yaw: 0.6, pitch: 0.34,
+  },
+  bp_bed: {
+    make: () => { const wood = M(0xc8803e, { tex: 'grain', rough: 0.55 });
+      const quiltT = faceTex('quilt', 16, 16, (x, y): RGB => { const c = [hex('#e05a5a'), hex('#f4d070'), hex('#5aa0e0'), hex('#6ac080')][(Math.floor(x / 4) + Math.floor(y / 4) * 3) % 4]; return x % 4 === 0 || y % 4 === 0 ? hex('#fff2dc') : c; });
+      const quilt = new THREE.MeshStandardMaterial({ map: quiltT, roughness: 0.8 });
+      const head = ext(shape([[-0.55, -0.1], [0.55, -0.1], [0.55, 0.5], ...Array.from({ length: 13 }, (_, i) => { const a = (i / 12) * Math.PI; return [Math.cos(a) * 0.55, 0.5 + Math.sin(a) * 0.22] as P2; })]), 0.1, wood, 0.03, 2);
+      const foot = ext(shape(rrectPts(1.1, 0.4, 0.08)), 0.1, wood, 0.03, 2);
+      const qg = new THREE.BoxGeometry(1.04, 0.1, 1.1); const uv = qg.attributes.uv as THREE.BufferAttribute; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i), uv.getY(i));
+      return grp(at(head, 0, 0, -0.8), at(foot, 0, -0.18, 0.8), at(ext(shape(rrectPts(1.04, 0.22, 0.06)), 1.56, M(0xfff6ea, { rough: 0.8, tex: 'weave' }), 0.03, 2), 0, 0.02, 0), at(mesh(qg, quilt), 0, 0.16, 0.22),
+        at(ext(shape(rrectPts(0.6, 0.18, 0.09)), 0.34, M(0xffffff, { rough: 0.8, tex: 'weave' }), 0.06, 3), 0, 0.22, -0.52, -0.2), at(ext(shape(rrectPts(1.16, 0.12, 0.04)), 1.7, wood, 0.02, 1), 0, -0.14, 0), ...[-1, 1].flatMap((sx) => [-1, 1].map((sz) => at(cyl(0.05, 0.05, 0.3, C.dark(), 8), sx * 0.52, -0.3, sz * 0.78)))); }, yaw: 0.65, pitch: 0.42,
+  },
+  bp_chair: { make: glb('items/armchair.glb'), yaw: 0.6, pitch: 0.28, vivid: 1.25 },
+  bp_table: { make: glb('items/round_table.glb'), yaw: 0.6, pitch: 0.34, vivid: 1.2 },
+  bp_shelf: { make: glb('items/bookshelf.glb'), yaw: 0.45, pitch: 0.2, vivid: 1.25 },
+  bp_lamp: {
+    make: () => grp(at(lathe(smoothProfile([[0.3, 0], [0.5, -0.32], [0.64, -0.56], [0.6, -0.58], [0.28, -0.04]], 3), M(0xffc46a, { rough: 0.8, glow: 0.35, tex: 'weave', side: THREE.DoubleSide }), 40), 0, 0.74, 0),
+      at(lathe(smoothProfile([[0.04, -0.6], [0.05, 0], [0.04, 0.5]], 2), C.brass(), 10), 0, -0.1, 0), at(lathe(smoothProfile([[0, -0.86], [0.5, -0.84], [0.53, -0.78], [0.3, -0.72], [0.14, -0.6], [0.06, -0.58], [0, -0.58]], 3), C.brass(), 40), 0, 0, 0),
+      at(lathe(smoothProfile([[0, -0.1], [0.1, -0.04], [0.1, 0.06], [0, 0.14]], 2), M(0xfff4c0, { glow: 1.2, tex: null }), 12), 0, 0.3, 0)), yaw: 0.4, pitch: 0.24,
+  },
+  bp_plant: { make: glb('items/fernpot.glb'), yaw: 0.5, pitch: 0.3, vivid: 1.25 },
+  bp_rug: { make: () => at(mesh(new THREE.CylinderGeometry(1, 1, 0.08, 64), new THREE.MeshStandardMaterial({ map: ringTex(), roughness: 0.9 })), 0, 0, 0, 0, 0, 0, [1, 1, 0.75]), yaw: 0.2, pitch: 0.95 },
+  bp_wall: { make: glb('items/painting.glb'), yaw: 0.25, pitch: 0.1, vivid: 1.25 },
+  bp_decor: {
+    make: () => { const flower = (x: number, y: number, c: number) => { const pet: P2[] = Array.from({ length: 60 }, (_, i) => { const a = (i / 60) * Math.PI * 2, r = 0.2 * (0.6 + 0.4 * Math.abs(Math.cos(a * 2.5))); return [Math.cos(a) * r, Math.sin(a) * r]; });
+      return grp(tube([[0, 0.1, 0], [x * 0.5, y * 0.6, 0], [x, y, 0]], 0.035, M(0x3e9a3a, { tex: null }), 12, 5), at(ext(shape(pet), 0.05, M(c, { rough: 0.5 }), 0.03, 2), x, y, 0.04), at(ext(shape(circlePts(0.06, 16)), 0.04, M(0xffd040, { tex: null }), 0.02, 1), x, y, 0.1)); };
+      return grp(lathe(smoothProfile([[0, -0.85], [0.36, -0.84], [0.48, -0.5], [0.44, -0.2], [0.2, 0.05], [0.24, 0.16], [0, 0.16]], 3), M(0x3d8fd8, { rough: 0.25 }), 40), flower(-0.3, 0.75, 0xf06a86), flower(0.1, 0.92, 0xffd44a), flower(0.38, 0.64, 0xf5f0ff)); }, yaw: 0.35, pitch: 0.2,
+  },
+  bp_fun: { make: glb('items/rocking_horse.glb'), yaw: 0.7, pitch: 0.24, vivid: 1.25 },
+  bp_wallpaper: { make: () => { const t = stripeTex(); const roll = mesh(new THREE.CylinderGeometry(0.34, 0.34, 1.5, 32), new THREE.MeshStandardMaterial({ map: t, roughness: 0.7 })); const sheet = mesh(new THREE.PlaneGeometry(0.9, 1.5), new THREE.MeshStandardMaterial({ map: t, roughness: 0.7, side: THREE.DoubleSide })); return grp(at(roll, -0.35, 0, 0), at(sheet, 0.4, -0.1, 0.25, -0.2, -0.3, 0), at(cyl(0.1, 0.1, 1.52, C.kraft(), 16), -0.35, 0, 0)); }, yaw: 0.4, pitch: 0.25 },
+  bp_floor: { make: () => grp(...[-0.5, 0, 0.5].map((x, i) => at(ext(shape(rrectPts(0.46, 1.5, 0.04)), 0.12, [C.wood(), C.oak(), C.dark()][i], 0.02, 1), x, 0, i === 1 ? 0.06 : 0, -Math.PI / 2))), yaw: 0.5, pitch: 0.6 },
+  bp_season: {
+    make: () => { const pap = M(0xe0363c, { rough: 0.45 }); return grp(ext(shape(rrectPts(1.1, 0.9, 0.04)), 1.1, pap, 0.03, 2), at(ext(shape(rrectPts(1.18, 0.22, 0.04)), 1.18, pap, 0.03, 2), 0, 0.5, 0), at(ext(shape(rrectPts(0.2, 0.96, 0.02)), 1.14, C.gold(), 0.02, 1), 0, 0.02, 0), at(ext(shape(rrectPts(1.14, 0.96, 0.02)), 0.2, C.gold(), 0.02, 1), 0, 0.02, 0),
+      at(torus(0.2, 0.065, C.gold(), Math.PI * 2, 8, 24), -0.18, 0.72, 0, 0, 0.4, 0.4), at(torus(0.2, 0.065, C.gold(), Math.PI * 2, 8, 24), 0.18, 0.72, 0, 0, -0.4, -0.4)); }, yaw: 0.6, pitch: 0.34,
+  },
+  bp_move: { make: () => ext(shape([[-0.12, 0.12], [-0.12, 0.5], [-0.32, 0.5], [0, 0.9], [0.32, 0.5], [0.12, 0.5], [0.12, 0.12], [0.5, 0.12], [0.5, 0.32], [0.9, 0], [0.5, -0.32], [0.5, -0.12], [0.12, -0.12], [0.12, -0.5], [0.32, -0.5], [0, -0.9], [-0.32, -0.5], [-0.12, -0.5], [-0.12, -0.12], [-0.5, -0.12], [-0.5, -0.32], [-0.9, 0], [-0.5, 0.32], [-0.5, 0.12]]), 0.24, C.sky(), 0.08, 3), yaw: 0.32, pitch: 0.28 },
+  bp_buy: {
+    make: () => { const sh = shape([[-0.8, -0.5], [0.3, -0.5], [0.85, 0], [0.3, 0.5], [-0.8, 0.5]]); const hl = new THREE.Path(); hl.absarc(0.5, 0, 0.1, 0, Math.PI * 2, true); sh.holes.push(hl);
+      const nutS = shape(Array.from({ length: 28 }, (_, i) => { const t = (i / 28) * Math.PI * 2, y = Math.cos(t); return [Math.sin(t) * 0.2 * (y < 0 ? 1 - (-y) * 0.35 : 1), y * 0.24 - 0.04] as P2; }));
+      const capS = shape(Array.from({ length: 18 }, (_, i) => { const t = (i / 17) * Math.PI; return [Math.cos(t) * 0.25, Math.sin(t) * 0.14] as P2; }));
+      const stamp = grp(at(ext(nutS, 0.04, C.gold(), 0.02, 2), 0, -0.1, 0), at(ext(capS, 0.04, M(0x8a5020, { rough: 0.6, tex: null }), 0.02, 2), 0, 0.08, 0.01));
+      return grp(ext(sh, 0.06, M(0xf0c890, { rough: 0.8, tex: 'weave' }), 0.03, 2), at(stamp, -0.25, 0.02, 0.07), tube([[0.5, 0.1, 0], [0.66, 0.46, 0.06], [0.74, 0.86, 0]], 0.035, C.red(), 12, 5)); }, yaw: 0.22, pitch: 0.22,
+  },
   // the side tools
-  tool_build: { make: () => at(grp(at(cyl(0.1, 0.12, 1.5, C.wood()), 0, -0.25, 0), at(rbox(0.9, 0.34, 0.34, C.iron(), 0.06), 0, 0.55, 0), at(rbox(0.3, 0.3, 0.3, C.iron(), 0.04), -0.5, 0.55, 0), at(ext(shape([[0.45, 0.4], [0.8, 0.62], [0.82, 0.48], [0.45, 0.7]]), 0.3, C.iron(), 0.04), 0, 0, 0)), 0, 0, 0, 0, 0, 0.6), yaw: 0.4, pitch: 0.3 },
-  tool_shop: { make: () => grp(lathe([[0, -0.6], [0.7, -0.58], [0.86, 0.1], [0.84, 0.16], [0, 0.16]], M(0xd9a050, { rough: 0.9, tex: 'weave', rep: 2 })), at(tor(0.78, 0.06, M(0xb07a3a, { tex: 'grain' }), Math.PI), 0, 0.15, 0), at(ball(0.3, M(0xe0363c, { rough: 0.3 })), -0.3, 0.3, 0.1), at(acorn(0.62, 0.3), 0.22, 0.38, 0.12), at(ball(0.22, M(0x7ad04a, { rough: 0.4 })), 0.05, 0.25, -0.32), at(rbox(0.9, 0.05, 0.6, M(0xf4e4c4, { tex: 'weave' }), 0.02), 0, 0.17, 0.1, 0.1)), yaw: 0.35, pitch: 0.3 },
-  tool_dress: { make: () => grp(at(ICONS.hanger.make() as O, 0, 0.62, -0.05, 0, 0, 0, 0.75), at(sweater(0xe0457a), 0, -0.25, 0, 0, 0, 0, 0.82)), yaw: 0.3, pitch: 0.15 },
-  tool_quests: { make: () => grp(at(rbox(1.0, 1.2, 0.04, C.paper(), 0.02), 0, -0.05, 0, 0, 0, 0.05), at(cyl(0.16, 0.16, 1.2, C.paper()), 0, 0.62, 0, 0, 0, Math.PI / 2), at(cyl(0.16, 0.16, 1.2, C.paper()), 0, -0.68, 0, 0, 0, Math.PI / 2), ...[0.25, 0.02, -0.21].map((y) => at(rbox(0.6, 0.05, 0.02, M(0x8a6a5a, { tex: null }), 0.01), -0.05, y, 0.04)), at(ext(shape(circlePath(0.2, 20)), 0.08, M(0xc8343c, { rough: 0.35 }), 0.04), 0.3, -0.4, 0.06)), yaw: 0.3, pitch: 0.2 },
-  tool_map: { make: () => grp(at(cyl(0.85, 0.85, 0.22, C.brass()), 0, 0, 0, Math.PI / 2), at(cyl(0.72, 0.72, 0.06, C.cream()), 0, 0, 0.1, Math.PI / 2), at(ext(shape([[0, 0.62], [0.12, 0], [-0.12, 0]]), 0.05, C.red(), 0.02), 0, 0, 0.15), at(ext(shape([[0, -0.62], [0.12, 0], [-0.12, 0]]), 0.05, M(0x3a4a62, { tex: null }), 0.02), 0, 0, 0.15), at(ball(0.07, C.brass()), 0, 0, 0.18), at(tor(0.14, 0.05, C.brass()), 0, 0.95, 0)), yaw: 0.3, pitch: 0.2 },
-  tool_settings: { make: () => grp(at(ICONS.gear.make() as O, -0.12, 0.1, 0, 0, 0, 0, 0.85), at(ICONS.gear.make() as O, 0.55, -0.55, 0.05, 0, 0, 0.3, 0.42)), yaw: 0.35, pitch: 0.3 },
+  tool_build: {
+    make: () => { const head = shape([[-0.62, 0.12], [-0.5, 0.2], [0.1, 0.2], [0.18, 0.26], [0.42, 0.22], [0.66, 0.34], [0.72, 0.28], [0.5, 0.1], [0.4, -0.04], [0.16, -0.06], [0.1, -0.16], [-0.5, -0.16], [-0.62, -0.08]]);
+      return at(grp(at(lathe(smoothProfile([[0, -0.95], [0.1, -0.92], [0.12, -0.6], [0.09, -0.1], [0.1, 0.32]], 3), M(0xd08a48, { tex: 'grain', rough: 0.55 }), 16), 0, -0.1, 0), at(ext(head, 0.24, C.steel(), 0.05, 2), -0.12, 0.38, 0), at(cyl(0.06, 0.06, 0.26, C.dark(), 10), 0, 0.38, 0, Math.PI / 2)), 0, 0, 0, 0, 0, 0.55); }, yaw: 0.38, pitch: 0.28,
+  },
+  tool_shop: {
+    make: () => { const wick = M(0xd8a050, { rough: 0.9, tex: 'weave', rep: 2 });
+      const apple = at(grp(lathe(smoothProfile([[0, -0.26], [0.18, -0.24], [0.28, -0.06], [0.26, 0.12], [0.12, 0.2], [0.02, 0.16]], 3), M(0xe23a32, { rough: 0.25 }), 24), at(cyl(0.015, 0.02, 0.12, C.dark(), 6), 0.02, 0.24, 0, 0, 0, -0.3), at(leafMesh(0.1, 0.06, C.leaf()), 0.1, 0.26, 0, 0, 0, -1.1)), -0.3, 0.32, 0.12);
+      return grp(lathe(smoothProfile([[0, -0.62], [0.62, -0.6], [0.8, -0.2], [0.88, 0.12], [0.86, 0.18], [0.8, 0.16]], 3), wick, 40), at(torus(0.84, 0.05, M(0xb87a3a, { tex: 'grain' }), Math.PI * 2, 8, 40), 0, 0.16, 0, Math.PI / 2), at(torus(0.78, 0.05, M(0xb07a3a, { tex: 'grain' }), Math.PI, 8, 32), 0, 0.15, -0.05),
+        apple, at(acorn(0.62, 0.3), 0.24, 0.4, 0.14), at(lathe(smoothProfile([[0, -0.18], [0.24, -0.14], [0.28, 0], [0.2, 0.12], [0, 0.16]], 3), M(0x7ad04a, { rough: 0.4 }), 20), 0.08, 0.26, -0.32, 0, 0, 0.3)); }, yaw: 0.35, pitch: 0.3,
+  },
+  tool_dress: { make: () => grp(at(hanger(), 0, 0.62, -0.05, 0, 0, 0, 0.75), at(sweater(0xe0457a), 0, -0.25, 0, 0, 0, 0, 0.82)), yaw: 0.3, pitch: 0.15 },
+  tool_quests: {
+    make: () => { const parch = faceTex('quest', 24, 32, (x, y): RGB => { const base: RGB = [250, 236, 206]; if (y > 6 && y < 24 && y % 4 === 0 && x > 4 && x < 19 - (y % 8 ? 3 : 0)) return hex('#7a6a7a'); return [base[0] - (h2(x, y, 4) > 0.8 ? 8 : 0), base[1] - (h2(x, y, 4) > 0.8 ? 10 : 0), base[2] - 6]; });
+      return grp(at(mesh(planarUV(new THREE.PlaneGeometry(1.0, 1.24, 1, 8)), new THREE.MeshStandardMaterial({ map: parch, roughness: 0.85, side: THREE.DoubleSide })), 0, -0.04, 0), at(lathe(smoothProfile([[0.14, -0.62], [0.16, 0], [0.14, 0.62]], 2), M(0xf2dcb2, { tex: 'weave', rough: 0.8 }), 20), 0, 0.64, 0.06, 0, 0, Math.PI / 2), at(lathe(smoothProfile([[0.14, -0.62], [0.16, 0], [0.14, 0.62]], 2), M(0xf2dcb2, { tex: 'weave', rough: 0.8 }), 20), 0, -0.7, 0.06, 0, 0, Math.PI / 2),
+        ...[-1, 1].map((s) => at(lathe(smoothProfile([[0, 0], [0.06, 0.02], [0.07, 0.1], [0, 0.14]], 2), C.dark(), 10), s * 0.66, 0.64, 0.06, 0, 0, -s * Math.PI / 2)), at(grp(ext(shape(circlePts(0.19, 32).map(([x, y]) => [x + (h2(Math.round(x * 50), 1, 1) - 0.5) * 0.02, y] as P2)), 0.06, M(0xc8303a, { rough: 0.3 }), 0.04, 2), at(ext(shape(starPts(0.1, 0.045)), 0.03, M(0xe85058, { rough: 0.3 }), 0.01, 1), 0, 0, 0.05)), 0.28, -0.38, 0.08)); }, yaw: 0.3, pitch: 0.2,
+  },
+  tool_map: {
+    make: () => { const face = faceTex('compass', 32, 32, (x, y): RGB => { const dx = x - 15.5, dy = y - 15.5, r = Math.hypot(dx, dy); if (r > 14) return hex('#c8a060'); if (Math.abs(r - 12) < 0.7) return hex('#5a4a3a'); const a = (Math.atan2(dx, -dy) / (Math.PI * 2) + 1) % 1; if (r > 9 && r < 12 && Math.abs(a * 8 - Math.round(a * 8)) < 0.12) return hex('#5a4a3a'); return hex('#fbf0d4'); });
+      return grp(at(lathe(smoothProfile([[0, -0.12], [0.8, -0.12], [0.88, -0.06], [0.9, 0.06], [0.84, 0.12], [0.76, 0.12]], 3), C.brass(), 48), 0, 0, 0, Math.PI / 2), at(mesh(planarUV(new THREE.CircleGeometry(0.76, 48)), new THREE.MeshStandardMaterial({ map: face, roughness: 0.5 })), 0, 0, 0.1),
+        at(ext(shape([[0, 0.6], [0.13, 0], [-0.13, 0]]), 0.04, C.red(), 0.02, 1), 0, 0, 0.15, 0, 0, -0.35), at(ext(shape([[0, -0.6], [0.13, 0], [-0.13, 0]]), 0.04, M(0x3a4a62, { tex: null }), 0.02, 1), 0, 0, 0.15, 0, 0, -0.35),
+        at(lathe(smoothProfile([[0, 0.06], [0.07, 0.04], [0.08, 0], [0, 0]], 2), C.brass(), 12), 0, 0, 0.18, Math.PI / 2), at(torus(0.14, 0.045, C.brass(), Math.PI * 2, 8, 24), 0, 0.98, 0), at(cyl(0.08, 0.1, 0.12, C.brass(), 12), 0, 0.88, 0)); }, yaw: 0.28, pitch: 0.2,
+  },
+  tool_settings: { make: () => grp(at(gear(M(0xeaa634, { metal: 0.55, rough: 0.3, tex: null })), -0.12, 0.1, 0, 0, 0, 0, 0.85), at(gear(M(0xc8d0dc, { metal: 0.6, rough: 0.3, tex: null })), 0.55, -0.55, 0.05, 0, 0, 0.3, 0.42)), yaw: 0.32, pitch: 0.28 },
   // the currency
   owlcoin: { make: () => acornBag(), yaw: 0.3, pitch: 0.2 },
   coin_pouch: { make: () => acornBag({ pouch: 'leather', spill: 1 }), yaw: 0.35, pitch: 0.18 },
   coin_sack: { make: () => grp(at(acornBag({ spill: 0 }), 0, 0, 0, 0, 0, 0, [1.15, 1.1, 1.15]), at(acorn(0.42, 1.2), 0.7, -0.66, 0.4), at(acorn(0.38, -0.8), -0.72, -0.7, 0.3), at(acorn(0.36, 0.2), 0.1, -0.78, 0.7)), yaw: 0.35, pitch: 0.2 },
-  coin_chest: { make: () => grp(lathe([[0, -0.6], [0.7, -0.6], [0.82, 0.3], [0.78, 0.34], [0, 0.34]], C.oak()), at(tor(0.76, 0.04, C.iron()), 0, -0.2, 0, Math.PI / 2), at(tor(0.8, 0.04, C.iron()), 0, 0.22, 0, Math.PI / 2), ...[[-0.3, 0.5, 0.2], [0.25, 0.52, 0.1], [0, 0.68, -0.1], [-0.05, 0.5, 0.45], [0.42, 0.42, -0.3], [-0.45, 0.42, -0.25], [0.1, 0.84, 0.15]].map(([x, y, z], i) => at(acorn(0.4, i - 3), x, y, z)), at(tor(0.6, 0.04, C.iron(), Math.PI), 0, 0.34, 0, 0, 0, 0)), yaw: 0.35, pitch: 0.3 },
-  coin_vault: { make: () => grp(at(acornBag({ spill: 0 }), -0.4, 0.05, -0.3, 0, 0.3, 0, 0.8), at(acornBag({ spill: 0, pouch: 'leather' }), 0.5, -0.05, -0.2, 0, -0.4, 0, 0.7), ...Array.from({ length: 9 }, (_, i) => at(acorn(0.36, i * 0.7), -0.8 + (i % 5) * 0.4, -0.75 + Math.floor(i / 5) * 0.2, 0.4 + (i % 2) * 0.15)), at(lathe([[0, -0.3], [0.2, -0.05], [0.22, 0], [0.12, 0.15], [0, 0.18]], M(0xb7a0f0, { rough: 0.15, flat: true, tex: null }), 6), 0.1, -0.55, 0.65, 0.2, 0, 0.3)), yaw: 0.3, pitch: 0.25 },
+  coin_chest: {
+    make: () => { const wood = M(0xc8783a, { tex: 'grain', rough: 0.55 }), band = M(0x6a5a5a, { metal: 0.6, rough: 0.4, tex: null });
+      const lidG = new THREE.CylinderGeometry(0.42, 0.42, 1.3, 24, 1, false, 0, Math.PI); lidG.rotateZ(Math.PI / 2);
+      const lid = grp(at(mesh(lidG, wood), 0, 0, 0.42, 0, 0, 0, [1, 0.8, 1]), ...[-0.42, 0.42].map((x) => at(torus(0.425, 0.05, band, Math.PI, 6, 20), x, 0, 0.42, 0, Math.PI / 2, 0, [1, 0.8, 1])));
+      lid.position.set(0, 0.02, -0.42); lid.rotation.x = -1.2;
+      const heap = grp(...[[-0.35, 0.12, 0.15], [0.0, 0.18, 0.05], [0.32, 0.12, 0.18], [-0.18, 0.26, -0.12], [0.2, 0.28, -0.1], [0.02, 0.36, 0.12], [-0.42, 0.1, -0.2], [0.42, 0.08, -0.22]].map(([x, y, z], i) => at(acorn(0.36, i * 0.9 - 2), x, y, z)));
+      return grp(at(ext(shape(rrectPts(1.3, 0.62, 0.05)), 0.84, wood, 0.03, 2), 0, -0.3, 0), lid, heap,
+        ...[-0.42, 0.42].map((x) => at(ext(shape(rrectPts(0.1, 0.62, 0.02)), 0.88, band, 0.015, 1), x, -0.3, 0)),
+        at(ext(shape(rrectPts(0.22, 0.26, 0.05)), 0.04, C.gold(), 0.02, 2), 0, -0.1, 0.45)); }, yaw: 0.5, pitch: 0.36,
+  },
+  coin_vault: { make: () => grp(at(acornBag({ spill: 0 }), -0.4, 0.05, -0.3, 0, 0.3, 0, 0.8), at(acornBag({ spill: 0, pouch: 'leather' }), 0.5, -0.05, -0.2, 0, -0.4, 0, 0.7), ...Array.from({ length: 9 }, (_, i) => at(acorn(0.36, i * 0.7), -0.8 + (i % 5) * 0.4, -0.75 + Math.floor(i / 5) * 0.2, 0.4 + (i % 2) * 0.15)), at(moonGem(), 0.1, -0.55, 0.65, 0.2, 0, 0.3, 0.32)), yaw: 0.3, pitch: 0.25 },
   moongem: { make: () => moonGem(), yaw: 0.35, pitch: 0.2 },
 };
+function hanger(): O {
+  return grp(tube([[-0.9, -0.4, 0], [-0.4, -0.12, 0], [0, 0.12, 0], [0.4, -0.12, 0], [0.9, -0.4, 0], [0.82, -0.5, 0], [-0.82, -0.5, 0], [-0.9, -0.4, 0]], 0.08, C.wood(), 64, 8), at(torus(0.2, 0.045, C.brass(), Math.PI * 1.3, 8, 24), 0.05, 0.42, 0, 0, 0, -0.6), at(cyl(0.045, 0.045, 0.14, C.brass(), 8), 0, 0.2, 0));
+}
+function gear(m: THREE.Material): O {
+  const pts: P2[] = [];
+  for (let i = 0; i < 96; i++) { const a = (i / 96) * Math.PI * 2, ph = ((a / (Math.PI * 2)) * 8) % 1, tooth = ph < 0.42 ? 1 : ph < 0.5 ? 1 - (ph - 0.42) / 0.08 : ph > 0.92 ? (ph - 0.92) / 0.08 : 0; const r = 0.7 + 0.22 * tooth; pts.push([Math.cos(a) * r, Math.sin(a) * r]); }
+  const s = shape(pts); const hl = new THREE.Path(); hl.absarc(0, 0, 0.24, 0, Math.PI * 2, true); s.holes.push(hl);
+  return grp(ext(s, 0.26, m, 0.06, 2, 96), at(torus(0.42, 0.06, m, Math.PI * 2, 8, 40), 0, 0, 0.16));
+}
 function sweater(col = 0x3fae5a): O {
-  const knit = M(col, { rough: 0.85, tex: 'weave', rep: 2 });
-  const body = ext(shape([[-0.5, 0.62], [-0.18, 0.7], [0.18, 0.7], [0.5, 0.62], [0.95, 0.15], [0.78, -0.05], [0.5, 0.2], [0.48, -0.75], [-0.48, -0.75], [-0.5, 0.2], [-0.78, -0.05], [-0.95, 0.15]]), 0.3, knit, 0.12);
-  const collar = at(tor(0.2, 0.07, M(0xfff0cc, { rough: 0.8, tex: 'weave' }), Math.PI), 0, 0.68, 0.06, 0, 0, Math.PI);
-  const hem = at(rbox(0.98, 0.14, 0.44, M(0xfff0cc, { rough: 0.8, tex: 'weave' }), 0.05), 0, -0.72, 0);
-  const heart = at(ext(shape(heartPath().map(([x, y]) => [x * 0.2, y * 0.2])), 0.04, M(0xfff0cc, { rough: 0.7, tex: null }), 0.02), 0, 0.02, 0.24);
+  const knit = M(col, { rough: 0.85, tex: 'knit', rep: 2 });
+  const body = ext(shape([[-0.5, 0.62], [-0.18, 0.7], [0.18, 0.7], [0.5, 0.62], [0.95, 0.15], [0.78, -0.05], [0.5, 0.2], [0.48, -0.75], [-0.48, -0.75], [-0.5, 0.2], [-0.78, -0.05], [-0.95, 0.15]]), 0.28, knit, 0.12, 3);
+  const collar = at(torus(0.2, 0.07, M(0xfff0cc, { rough: 0.8, tex: 'knit' }), Math.PI, 8, 20), 0, 0.68, 0.06, 0, 0, Math.PI);
+  const hem = at(ext(shape(rrectPts(0.98, 0.14, 0.05)), 0.36, M(0xfff0cc, { rough: 0.8, tex: 'knit' }), 0.04, 2), 0, -0.72, 0);
+  const heart = at(ext(shape(Array.from({ length: 40 }, (_, i) => { const t = (i / 40) * Math.PI * 2; return [(16 * Math.sin(t) ** 3) / 16 * 0.2, ((13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 16) * 0.2] as P2; })), 0.04, M(0xfff0cc, { rough: 0.7, tex: null }), 0.02, 1), 0, 0.02, 0.22);
   return grp(body, collar, hem, heart);
 }
 function speaker(): O {
-  return grp(at(rbox(0.36, 0.6, 0.5, C.brass(), 0.08), -0.55, 0, 0), at(lathe([[0.16, 0], [0.24, 0.2], [0.5, 0.5], [0.56, 0.52], [0.5, 0.54], [0.2, 0.25], [0.12, 0.02]], C.brass()), -0.42, 0, 0, 0, 0, -Math.PI / 2), at(cyl(0.48, 0.48, 0.04, M(0x5a3a28, { tex: 'weave' })), 0.08, 0, 0, 0, 0, Math.PI / 2));
-}
-function moonGem(): O {
-  const gem = lathe([[0, -0.9], [0.62, -0.05], [0.7, 0.12], [0.5, 0.42], [0, 0.48]], M(0xb59cf2, { rough: 0.12, metal: 0.15, flat: true, tex: null }), 8);
-  gem.rotation.y = Math.PI / 8;
-  const moon = at(ext(crescentShape(0.22, 0.19, [0.09, 0.05]), 0.06, M(0xffd86a, { glow: 0.35, rough: 0.3, tex: null }), 0.02), 0, 0.05, 0.6);
-  return grp(gem, moon);
+  return grp(at(ext(shape(rrectPts(0.36, 0.62, 0.08)), 0.46, C.brass(), 0.05, 2), -0.55, 0, 0), at(lathe(smoothProfile([[0.16, 0], [0.24, 0.2], [0.5, 0.48], [0.56, 0.52], [0.5, 0.54], [0.2, 0.25], [0.12, 0.02]], 2), C.brass(), 32), -0.42, 0, 0, 0, 0, -Math.PI / 2), at(cyl(0.48, 0.48, 0.04, M(0x5a3a28, { tex: 'weave' }), 32), 0.08, 0, 0, 0, 0, Math.PI / 2));
 }
 const texCache = new Map<string, THREE.Texture>();
 function mapTex(): THREE.Texture {
@@ -322,8 +491,8 @@ function stripeTex(cols?: string[], widths?: number[], vertical = false): THREE.
   const c = document.createElement('canvas'); c.width = c.height = 32;
   const g = c.getContext('2d')!;
   if (!cols) {
-    g.fillStyle = '#f7d9e0'; g.fillRect(0, 0, 32, 32);
-    g.fillStyle = '#e8708a'; for (let x = 0; x < 32; x += 8) g.fillRect(x, 0, 3, 32);
+    g.fillStyle = '#f2b4c4'; g.fillRect(0, 0, 32, 32);
+    g.fillStyle = '#d24a6a'; for (let x = 0; x < 32; x += 8) g.fillRect(x, 0, 3, 32);
     g.fillStyle = '#fff6da'; for (let y = 4; y < 32; y += 10) for (let x = 5; x < 32; x += 8) g.fillRect(x, y, 2, 2);
   } else {
     const tot = (widths ?? cols.map(() => 1)).reduce((a, b) => a + b, 0);
@@ -340,7 +509,6 @@ function ringTex(): THREE.Texture {
   for (let i = 0; i < cols.length; i++) { g.fillStyle = cols[i]; g.beginPath(); g.arc(32, 32, 32 - i * 4.4, 0, 7); g.fill(); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; texCache.set('ring', t); return t;
 }
-void flatOn;
 
 // ------------------------------------------------------------------ render + pixel finish
 function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): ImageData {
@@ -357,9 +525,11 @@ function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): Image
   // fit the projected bounds of the actual vertices (tighter than the box corners)
   obj.traverse((m) => {
     const g = (m as THREE.Mesh).geometry as THREE.BufferGeometry | undefined;
-    if (!g?.attributes?.position) return;
+    if (!g?.attributes?.position || !m.visible) return;
+    let vis = true; m.traverseAncestors((a) => { if (!a.visible) vis = false; });
+    if (!vis) return;
     const p = g.attributes.position as THREE.BufferAttribute, v = new THREE.Vector3();
-    const step = Math.max(1, Math.floor(p.count / 600));
+    const step = Math.max(1, Math.floor(p.count / 800));
     for (let i = 0; i < p.count; i += step) { v.fromBufferAttribute(p, i).applyMatrix4(m.matrixWorld).applyMatrix4(cam.matrixWorldInverse); pb.expandByPoint(v); }
   });
   // leave one art pixel each side for the outline
@@ -368,7 +538,6 @@ function shoot(obj: O, n: number, yaw: number, pitch: number, pad = 1.04): Image
   cam.updateProjectionMatrix();
   R.render(scene, cam);
   scene.remove(obj);
-  obj.traverse((m) => { const g = (m as THREE.Mesh).geometry as THREE.BufferGeometry | undefined; g?.dispose?.(); });
   const out = document.createElement('canvas');
   out.width = out.height = S;
   const g2 = out.getContext('2d', { willReadFrequently: true })!;
@@ -388,8 +557,8 @@ function hsl(r: number, g: number, b: number): [number, number, number] {
 function rgb(h: number, s: number, l: number): [number, number, number] {
   const f = (p: number, q: number, t: number) => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < 0.5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
   if (!s) return [l * 255, l * 255, l * 255];
-  const q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
-  return [f(p, q, h + 1 / 3) * 255, f(p, q, h) * 255, f(p, q, h - 1 / 3) * 255];
+  const q2 = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q2;
+  return [f(p, q2, h + 1 / 3) * 255, f(p, q2, h) * 255, f(p, q2, h - 1 / 3) * 255];
 }
 const hash = (x: number, y: number, s: number) => { let h = (x * 374761393 + y * 668265263 + s * 982451653) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
 function vnoise(x: number, y: number, s: number) { const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi; const a = hash(xi, yi, s), b = hash(xi + 1, yi, s), c = hash(xi, yi + 1, s), d = hash(xi + 1, yi + 1, s); const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy); return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v; }
@@ -406,25 +575,24 @@ function pixelFinish(src: ImageData, n: number, seed: number, vivid = 1): ImageD
       const o = (j * S + i) * 4; tot++;
       if (sd[o + 3] < 128) continue;
       opaque++;
-      const key = ((sd[o] >> 4) << 8) | ((sd[o + 1] >> 4) << 4) | (sd[o + 2] >> 4);
-      const b = buckets.get(key) ?? [0, 0, 0, 0];
+      const key2 = ((sd[o] >> 4) << 8) | ((sd[o + 1] >> 4) << 4) | (sd[o + 2] >> 4);
+      const b = buckets.get(key2) ?? [0, 0, 0, 0];
       b[0] += sd[o]; b[1] += sd[o + 1]; b[2] += sd[o + 2]; b[3]++;
-      buckets.set(key, b);
+      buckets.set(key2, b);
     }
     if (opaque / tot < 0.42) continue;
     let best: [number, number, number, number] | null = null;
     for (const b of buckets.values()) if (!best || b[3] > best[3]) best = b;
     const [r, g, b] = [best![0] / best![3], best![1] / best![3], best![2] / best![3]];
-    // a pixel artist's ramp: lightness in a few steps (broken up by a painterly noise), shadows lean violet, lights gold
+    // a pixel artist's ramp: lightness in a few steps (lightly broken up, like a brush), lights lean gold, shadows violet
     let [h, s, l] = hsl(r, g, b);
-    const brush = (vnoise(x * 0.55, y * 0.55, seed) - 0.5) * 0.09 + (hash(x, y, seed + 7) - 0.5) * 0.035;
-    const steps = 6;
+    const brush = (vnoise(x * 0.45, y * 0.45, seed) - 0.5) * 0.025;
+    const steps = 7;
     let lq = Math.round((l + brush) * steps) / steps;
-    lq = clamp(lq * 0.92 + 0.07, 0.06, 0.97);
+    lq = clamp(lq * 0.93 + 0.055, 0.05, 0.97);
     const warm = lq - 0.5;
-    // hue drift towards gold in light, towards violet-blue in shadow (only for coloured pixels)
-    if (s > 0.08) { const target = warm > 0 ? 0.12 : 0.72; let dh = target - h; if (dh > 0.5) dh -= 1; if (dh < -0.5) dh += 1; h = (h + dh * Math.min(0.1, Math.abs(warm) * 0.22) + 1) % 1; }
-    s = clamp(s * 1.22 * vivid + 0.03 * (s > 0.08 ? 1 : 0), 0, 0.95);
+    if (s > 0.08) { const target = warm > 0 ? 0.12 : 0.72; let dh = target - h; if (dh > 0.5) dh -= 1; if (dh < -0.5) dh += 1; h = (h + dh * Math.min(0.08, Math.abs(warm) * 0.18) + 1) % 1; }
+    s = clamp(s * 1.16 * vivid + 0.03 * (s > 0.08 ? 1 : 0), 0, 0.95);
     const c = rgb(h, s, lq);
     const o = (y * n + x) * 4;
     d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
@@ -439,7 +607,7 @@ function pixelFinish(src: ImageData, n: number, seed: number, vivid = 1): ImageD
       const X = x + dx, Y = y + dy;
       if (X < 0 || Y < 0 || X >= n || Y >= n || !solid[Y * n + X]) continue;
       if (dx > 0 || dy > 0) lit = true; else shade = true;
-      const o = (Y * n + X) * 4, c = [d[o] * 0.36 + 16, d[o + 1] * 0.28 + 8, d[o + 2] * 0.36 + 22];
+      const o = (Y * n + X) * 4, c = [d[o] * 0.34 + 14, d[o + 1] * 0.26 + 7, d[o + 2] * 0.34 + 22];
       if (!best || c[0] + c[1] + c[2] < best[0] + best[1] + best[2]) best = c;
     }
     if (!best) continue;
@@ -464,7 +632,7 @@ function glint(img: ImageData, f: number) {
     const o = (y * n + x) * 4;
     if (d[o + 3] < 255) continue;
     const t = Math.abs(x + y - pos);
-    if (t < 1.2) { d[o] = d[o] + (255 - d[o]) * 0.55; d[o + 1] = d[o + 1] + (250 - d[o + 1]) * 0.55; d[o + 2] = d[o + 2] + (225 - d[o + 2]) * 0.45; }
+    if (t < 1.4) { d[o] = d[o] + (255 - d[o]) * 0.55; d[o + 1] = d[o + 1] + (250 - d[o + 1]) * 0.55; d[o + 2] = d[o + 2] + (225 - d[o + 2]) * 0.45; }
   }
 }
 
@@ -486,13 +654,13 @@ function encode(img: ImageData): { w: number; h: number; p: string; d: string } 
 }
 
 // ------------------------------------------------------------------ the bake
-const SIZES = { L: 24, S: 16 };
-/** the currency's big and animated versions: [name, size, frames] */
-const ANIM: [string, string, number, number][] = [['owlcoin', 'owlcoin', 24, 8], ['acorn_big', 'owlcoin', 40, 8], ['moongem', 'moongem', 24, 8], ['gem_big', 'moongem', 40, 8], ['coin_vault', 'coin_vault', 36, 4]];
+const SIZES = { L: 32, S: 20 };
+/** the currency's big and animated versions: [name, model, size, frames] */
+const ANIM: [string, string, number, number][] = [['owlcoin', 'owlcoin', 32, 8], ['acorn_big', 'owlcoin', 48, 8], ['moongem', 'moongem', 32, 8], ['gem_big', 'moongem', 48, 8], ['coin_vault', 'coin_vault', 44, 4]];
 /** names that share a model */
 const ALIAS: Record<string, string> = { acorn: 'owlcoin', wd_hanger: 'hanger' };
 /** pack sprites are bigger (their sizes in the store) */
-const BIG: Record<string, number> = { coin_pouch: 32, coin_sack: 32, coin_chest: 36 };
+const BIG: Record<string, number> = { coin_pouch: 40, coin_sack: 40, coin_chest: 44 };
 
 async function bake() {
   const only = q.get('only');
@@ -545,10 +713,11 @@ async function bake() {
     anim[name] = list;
   }
   const json = JSON.stringify({ icons: res, anim });
-  const module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html, then window.__module): every interface icon is a little 3D model,
+  const module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html, then window.__module): every interface icon is a small 3D model,
 // lit and pixel-finished (see that file). { icons: { name: { L, S } }, anim: { name: [frames] } }; each image is
 // { w, h, p: palette (6 hex digits per colour), d: base64 run-length pairs (count, palette index; 0 = clear) }.
-// Models: the game's own GLBs and small purpose-made ones; credits for borrowed models in docs/credits.
+// Models: the game's own GLBs, the shelf's props (src/ui/chrome/props3d.ts) and models made in the bake; credits for
+// borrowed models in docs/credits.
 type Img = { w: number; h: number; p: string; d: string };
 export const ICONS3D: { icons: Record<string, { L: Img; S?: Img }>; anim: Record<string, Img[]> } = ${json};
 `;
