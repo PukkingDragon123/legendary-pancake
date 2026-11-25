@@ -242,7 +242,7 @@ function sprite(c: string, size: number, pal: Palette, depth: number, kind: 'fac
 
 /** dev builds: a global time scale for the words (screenshots in slow headless browsers): window.hhTalk.k */
 const dev = { k: 1 };
-try { if (import.meta.env?.DEV && typeof window !== 'undefined') (window as unknown as { hhTalk: unknown }).hhTalk = dev; } catch { /* */ }
+try { if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { hhTalk: unknown }).hhTalk = dev; } catch { /* */ }
 
 export interface TalkOpts {
   /** CSS px the body text aims for (snapped to whole font pixels on this device) */
