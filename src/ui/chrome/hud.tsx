@@ -28,7 +28,7 @@ import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt,
 import { installChromeSkin } from './skin.ts';
 import { iconSrc } from './iconset.ts';
 import { installSurfaces } from './surfaces.ts';
-import { alagardWidth } from '../font.ts';
+import { alagardWidth, uiFontPx } from '../font.ts';
 import { artPx } from '../../gfx/artpx.ts';
 import { punch } from '../text3d.tsx';
 import { shelf3d, useShelf3D, type NavId } from './shelf3d.tsx'; // [icons6] the main buttons as live 3D objects
@@ -140,7 +140,8 @@ function NameSign() {
   };
   // [font6] measured in Alagard, in art pixels (one font pixel each; the board is drawn 1.5x on big screens): name
   // and rank both shown where they fit, the name in 2x gilt letters if it can
-  const ap = artPx() / (typeof matchMedia !== 'undefined' && matchMedia('(min-width: 900px) and (min-height: 640px)').matches ? 1.5 : 1);
+  void artPx(); // re-measure when the art pixel changes
+  const ap = uiFontPx() / (typeof matchMedia !== 'undefined' && matchMedia('(min-width: 900px) and (min-height: 640px)').matches ? 1.5 : 1);
   const rank = rankOf(lv.level), nw = alagardWidth(s.name) * ap, rw = alagardWidth(rank) * ap, room = 119;
   // 2x letters only where their 22 font pixels clear the level bar under them
   const long = ap > 1.2 || (2 * nw + rw + 8 > room && (nw + rw + 8 <= room || 2 * nw > room));

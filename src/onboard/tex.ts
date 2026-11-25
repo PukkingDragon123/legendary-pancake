@@ -246,7 +246,7 @@ export function stamp(t: Tex, x: number, y: number, rows: string[], c: RGB, scal
 
 // ------------------------------------------------------------------ text on canvases
 
-/** Draw text with a pixel font and snap its alpha (no anti-aliased fringe). */
+/** Draw text in the game's font at full resolution (anti-aliased; `threshold` snaps its alpha to 1-bit). */
 export function crispText(g: CanvasRenderingContext2D, text: string, x: number, y: number, font: string, color: string, o: { align?: CanvasTextAlign; base?: CanvasTextBaseline; spacing?: number; threshold?: number } = {}) {
   text = alagardSafe(text); // [font6] Alagard draws ASCII only
   const px = parseFloat(/(\d+(?:\.\d+)?)px/.exec(font)?.[1] ?? '16'), mid = Math.ceil(px * 1.5);
@@ -263,9 +263,10 @@ export function crispText(g: CanvasRenderingContext2D, text: string, x: number, 
   const asc = Math.ceil(m.actualBoundingBoxAscent || 12), desc = Math.ceil(m.actualBoundingBoxDescent || 4);
   t.fillText(text, 2, mid);
   const img = t.getImageData(0, mid - asc - 1, w, asc + desc + 2), d = img.data;
-  const thr = (o.threshold ?? 0.45) * 255;
+  // [font6] full-resolution, anti-aliased lettering; a threshold (0..1) gives hard 1-bit edges where asked
+  const thr = o.threshold === undefined ? -1 : o.threshold * 255;
   const [cr, cg, cb] = cssRGB(color);
-  for (let i = 0; i < d.length; i += 4) { const on = d[i + 3] > thr; d[i] = cr; d[i + 1] = cg; d[i + 2] = cb; d[i + 3] = on ? 255 : 0; }
+  for (let i = 0; i < d.length; i += 4) { d[i] = cr; d[i + 1] = cg; d[i + 2] = cb; if (thr >= 0) d[i + 3] = d[i + 3] > thr ? 255 : 0; }
   const out = scratch2(w, asc + desc + 2);
   out.getContext('2d')!.putImageData(img, 0, 0);
   const align = o.align ?? 'left', base = o.base ?? 'alphabetic';

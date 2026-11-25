@@ -28,7 +28,7 @@
 .ctag-paper em { font-style: normal; font-size: var(--t1); color: #644d3a; }
 
 /* the routine clipboard */
-.clipboard { position: relative; padding: 30px 12px 14px; }
+.clipboard { position: relative; padding: 30px 12px 14px; transform: rotate(-0.8deg); }
 .cb-board { position: absolute; inset: 0; background: #8a5226 0 0 / 100% 100% no-repeat; image-rendering: pixelated; filter: drop-shadow(3px 6px 0 rgba(20, 12, 6, 0.45)); }
 .cb-clip { position: absolute; top: -14px; left: 50%; width: 120px; height: 40px; margin-left: -60px; z-index: 3; image-rendering: pixelated; filter: drop-shadow(2px 3px 0 rgba(20, 12, 6, 0.45)); pointer-events: none; }
 .cb-paper { position: relative; padding: 18px 10px 12px; display: flex; flex-direction: column; gap: 8px; }
@@ -115,7 +115,7 @@
 .tc-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; justify-content: center; font-size: var(--t1); color: #644d3a; }
 .tc-legend span { display: flex; align-items: center; gap: 2px; }
 .tc-legend img { width: 22px; image-rendering: pixelated; }
-.tc-peek { position: absolute; left: 50%; top: 45%; width: 220px; margin-left: -110px; padding: 10px 12px 10px; display: flex; flex-direction: column; gap: 2px; color: #403426; animation: popIn 0.35s var(--pop); z-index: 4; }
+.tc-peek { position: absolute; left: 50%; top: 45%; width: 220px; margin-left: -110px; padding: 10px 12px 10px; display: flex; flex-direction: column; gap: 2px; color: #403426; transform: rotate(-2deg); animation: popIn 0.35s var(--pop); z-index: 4; }
 .tc-peek b { font-weight: 400; font-size: var(--t1); }
 .tc-peek span { font-size: var(--t1); }
 .tc-peek button { align-self: flex-start; font-size: var(--t1); color: #6e4d40; text-decoration: underline; text-underline-offset: 3px; padding: 4px 0 0; }
