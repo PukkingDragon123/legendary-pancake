@@ -1,17 +1,24 @@
 // Generates the loading screen (the `#boot` block in index.html) and the office clock's painting
-// (public/models/interview/clock.png + src/onboard/clockart.gen.ts): one Regency bracket clock in polished
-// flame mahogany on a carved wall bracket, alone on a dark emerald wall in a pool of lamplight. No text.
+// (public/models/interview/clock.png + src/onboard/clockart.gen.ts): the game's carved Black Forest cuckoo clock
+// hanging alone on a dark emerald wall in a pool of lamplight. No text.
 //
-// The clock is painted as a 2.5D relief: every texel gets a material, a height and an albedo offset; a key
-// light from the top left, a soft fill, cavity occlusion, polished highlights and (for brass and steel) a
-// reflected environment shade it; the shade is then mapped onto hand-picked, hue-shifted ramps with ordered
-// dither, so the result is crisp pixel art that reads as real walnut, cast brass, enamel and blued steel.
-// Images are written as indexed PNGs (small enough to inline before any script loads).
+// The clock (the same design as the HUD shelf's and the big Clock screen's): a shingled chalet roof with scalloped
+// bargeboards, a carved owl crest on a fan of oak leaves, a little arched double door over a balcony of turned
+// balusters (Pip lives behind it), a walnut case with a wreath of carved oak leaves and acorns round an enamel dial
+// (Roman numerals, a painted rosette, pierced Gothic hands), a pierced fretwork apron, a carved-leaf pendulum and two
+// cast pine-cone weights on brass chains.
 //
-// Moving parts are pre-drawn frames played with CSS steps(): 120 minute and hour hand angles, 60 for the
-// seconds, a cosine-spaced pendulum swing and a moon disc that rises in the arch as the app loads.
-// src/onboard/boot.ts takes over once the app is ready (the hands swing round to the real time, the clock
-// chimes; a tap dives into the dial, where the 3D office's own clock takes over and the camera pulls back).
+// It is painted as a 2.5D relief: every texel gets a material, a height and an albedo offset; a warm key light from
+// the top left, a soft fill, cavity occlusion and polished highlights shade it; the shade is mapped onto hand-picked,
+// hue-shifted ramps (violet shadows, golden lights) with a light ordered dither, then every part gets a dark inner
+// line where it overlaps the part behind and the whole sprite a near-black outer outline. Images are written as
+// indexed PNGs (small enough to inline before any script loads).
+//
+// Moving parts are pre-drawn frames played with CSS steps(): 120 minute and 120 hour hand angles (started at the
+// real time by a tiny inline script), a cosine-spaced pendulum swing, the door and the owl (closed, ajar, open,
+// out, calling, bowing) and the weights, which sink on their chains with the (estimated) loading progress while
+// the other ends of the chains rise. src/onboard/boot.ts takes over once the app is ready (the clock is wound,
+// the doors open and the owl calls; a dive into the dial, where the 3D office's own clock takes over).
 //
 //   node src/onboard/tools/bootart.mjs [--preview out.png]
 import { deflateSync } from 'node:zlib';
@@ -22,26 +29,31 @@ import { fileURLToPath } from 'node:url';
 
 const hex = (h) => [(h >> 16) & 255, (h >> 8) & 255, h & 255];
 const mix = (a, b, t) => [0, 1, 2].map((i) => Math.round(a[i] + (b[i] - a[i]) * t));
-const css = (c) => '#' + c.map((v) => v.toString(16).padStart(2, '0')).join('');
 const clamp = (v, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
 /** a ramp through key colours, n steps */
 function rampOf(keys, n) { const out = []; for (let i = 0; i < n; i++) { const f = (i / (n - 1)) * (keys.length - 1), k = Math.min(keys.length - 2, Math.floor(f)); out.push(mix(hex(keys[k]), hex(keys[k + 1]), f - k)); } return out; }
 
-// hue-shifted ramps: shadows lean cool/purple, lights lean warm/gold
+// hue-shifted ramps: shadows lean cool/violet, lights lean warm/gold
 const R = {
-  wood: rampOf([0x0e0408, 0x22090a, 0x3c120e, 0x561c12, 0x702816, 0x8c381c, 0xa84c26, 0xc66a36, 0xe8985a, 0xffd2a0], 14),
-  woodDark: rampOf([0x0c0508, 0x1e0a0a, 0x34120e, 0x4c1c12, 0x642616, 0x80361e], 8),
-  brass: rampOf([0x1a0e06, 0x3a2210, 0x6a4414, 0x9a6c1c, 0xc4942a, 0xe2b840, 0xf6d666, 0xfff0aa, 0xffffff], 14),
-  enamel: rampOf([0x6e6252, 0x9a8a70, 0xc4b494, 0xdfd2b4, 0xefe6d0, 0xfaf5e8, 0xffffff], 10),
-  steel: rampOf([0x06081a, 0x0e1634, 0x18265a, 0x263e84, 0x3a5cae, 0x6a8ed6, 0xb0ccf4, 0xf0f8ff], 10),
-  ink: rampOf([0x0e0a08, 0x241c16, 0x4a3e32], 3),
-  sky: rampOf([0x050a1e, 0x0c1638, 0x142456, 0x1e3676, 0x2c4c94, 0x4468b0], 8),
-  moon: rampOf([0x6a5a38, 0xa8946a, 0xd8c896, 0xf4e8c0, 0xfffaf0], 7),
-  moss: rampOf([0x0e2010, 0x1a3a1a, 0x28562a, 0x3c7438, 0x5a9446, 0x86b45a, 0xb8d47a], 9),
-  dark: rampOf([0x050305, 0x0e0808, 0x1a100c, 0x2a1a12], 5),
-  red: rampOf([0x3a0808, 0x6a1010, 0x9a1c18, 0xc83828, 0xf06a48], 6),
+  walnut: rampOf([0x0c050a, 0x1c0a10, 0x2e1212, 0x441c14, 0x5a2818, 0x72361e, 0x8c4826, 0xa85e30, 0xc47a40, 0xe09e5a, 0xf6c886], 14),
+  carve: rampOf([0x1e0a10, 0x3c1814, 0x602c16, 0x86461c, 0xa86424, 0xc6822e, 0xdea03c, 0xf0bc58, 0xfcd684, 0xfff0c0], 14),
+  shingle: rampOf([0x0c0612, 0x1c0a16, 0x2e1218, 0x461c1a, 0x60281c, 0x7c3822, 0x9a4c2a, 0xb66434, 0xd2844a], 12),
+  brass: rampOf([0x1a0e0a, 0x3a2210, 0x6a4414, 0x9a6c1c, 0xc4942a, 0xe2b840, 0xf6d666, 0xfff0aa, 0xffffff], 14),
+  enamel: rampOf([0x7a6656, 0xa68e72, 0xcab696, 0xe2d2b2, 0xf2e6cc, 0xfcf4e2, 0xfffcf4], 10),
+  steel: rampOf([0x05040c, 0x0a0c1c, 0x121a34, 0x1c2a54, 0x2e447c, 0x5070aa, 0x90b0e0, 0xe0ecff], 10),
+  ink: rampOf([0x180c12, 0x2c1a1c, 0x4a3430], 3),
+  dark: rampOf([0x060308, 0x10080c, 0x1c0e0e, 0x2c1812, 0x402418], 6),
+  red: rampOf([0x3c0814, 0x6a101a, 0x9a1c22, 0xc8342c, 0xf0644a, 0xffa27a], 8),
+  green: rampOf([0x0c2418, 0x1a4024, 0x2c6030, 0x48843a, 0x72aa48, 0xa8cc6a], 8),
+  bronze: rampOf([0x0a0610, 0x1e1012, 0x341c14, 0x4e2c18, 0x6a4020, 0x8a582c, 0xaa743c, 0xc89656, 0xe6bc7c, 0xfadca8], 12),
+  feather: rampOf([0x1e0a14, 0x3a1410, 0x62240e, 0x8c3812, 0xb4521a, 0xd27026, 0xe8923a, 0xf6b45a, 0xffd48a], 12),
+  chest: rampOf([0x52282a, 0x8a5038, 0xb87c4c, 0xdca86a, 0xf2cc92, 0xfce6bc, 0xfff6e2], 10),
+  eye: rampOf([0x5a2004, 0x9a4808, 0xd07a10, 0xf0a820, 0xffd050, 0xfff0a0], 8),
+  beak: rampOf([0x4a2410, 0x8a5420, 0xc88a36, 0xecbc5e, 0xfce49a], 7),
   patina: rampOf([0x0c140c, 0x1c2a16, 0x34401e, 0x4e5a2a, 0x6a7436, 0x8a8a44], 8),
 };
+/** the outer outline: near-black, a touch of violet */
+const OUTLINE = [16, 8, 16];
 
 // ------------------------------------------------------------------ noise
 
@@ -54,7 +66,7 @@ function vnoise(x, y, s = 0) {
 const fbm = (x, y, s = 0) => vnoise(x, y, s) * 0.55 + vnoise(x * 2.1, y * 2.1, s + 7) * 0.3 + vnoise(x * 4.3, y * 4.3, s + 13) * 0.15;
 const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
 const bayer = (x, y) => BAYER[((y & 3) << 2) | (x & 3)];
-const pick = (ramp, t, x, y, d = 0.85) => ramp[clamp(Math.floor(t * (ramp.length - 1) + (bayer(x, y) - 0.5) * d + 0.5), 0, ramp.length - 1)];
+const pick = (ramp, t, x, y, d = 0.55) => ramp[clamp(Math.floor(t * (ramp.length - 1) + (bayer(x, y) - 0.5) * d + 0.5), 0, ramp.length - 1)];
 const dist = (x, y, cx, cy) => Math.hypot(x + 0.5 - cx, y + 0.5 - cy);
 
 // ------------------------------------------------------------------ RGBA buffer + (indexed) PNG
@@ -70,8 +82,8 @@ class Buf {
   }
   get(x, y) { if (!this.in(x, y)) return null; const i = (y * this.w + x) * 4; return this.d[i + 3] ? [this.d[i], this.d[i + 1], this.d[i + 2], this.d[i + 3]] : null; }
   a(x, y) { return this.in(x, y) ? this.d[(y * this.w + x) * 4 + 3] : 0; }
-  clear(x, y) { if (this.in(x, y)) this.d.fill(0, (y * this.w + x) * 4, (y * this.w + x) * 4 + 4); }
   blit(src, ox, oy) { for (let y = 0; y < src.h; y++) for (let x = 0; x < src.w; x++) { const c = src.get(x, y); if (c) this.set(ox + x, oy + y, c, c[3]); } }
+  crop(x0, y0, w, h) { const b = new Buf(w, h); for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const c = this.get(x0 + x, y0 + y); if (c) b.set(x, y, c, c[3]); } return b; }
   png() {
     const chunk = (type, data) => { const len = Buffer.alloc(4); len.writeUInt32BE(data.length); const td = Buffer.concat([Buffer.from(type), data]); const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(td) >>> 0); return Buffer.concat([len, td, crc]); };
     // indexed when the picture has 256 colours or fewer
@@ -106,179 +118,206 @@ function crc32(b) { let c = -1; for (const x of b) c = CRC[(c ^ x) & 255] ^ (c >
 
 // ------------------------------------------------------------------ the relief painter
 
-const M = { none: 0, wood: 1, woodDark: 2, brass: 3, enamel: 4, steel: 5, ink: 6, sky: 7, moon: 8, moss: 9, dark: 10, red: 11, patina: 12 };
+const M = { none: 0, walnut: 1, carve: 2, shingle: 3, brass: 4, enamel: 5, steel: 6, ink: 7, dark: 8, red: 9, green: 10, bronze: 11, feather: 12, chest: 13, eye: 14, beak: 15, patina: 16 };
+const RAMP = [null, R.walnut, R.carve, R.shingle, R.brass, R.enamel, R.steel, R.ink, R.dark, R.red, R.green, R.bronze, R.feather, R.chest, R.eye, R.beak, R.patina];
+const isWood = (m) => m === M.walnut || m === M.carve || m === M.shingle;
+const norm = (v) => { const l = Math.hypot(...v) || 1; return v.map((c) => c / l); };
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
 class Relief {
-  constructor(w, h) { this.w = w; this.h = h; this.m = new Uint8Array(w * h); this.hgt = new Float32Array(w * h); this.alb = new Float32Array(w * h); this.flat = new Uint8Array(w * h); this.gloss = new Float32Array(w * h).fill(1); }
+  constructor(w, h) {
+    this.w = w; this.h = h;
+    this.m = new Uint8Array(w * h); this.hgt = new Float32Array(w * h); this.alb = new Float32Array(w * h);
+    this.flat = new Uint8Array(w * h); this.gloss = new Float32Array(w * h).fill(1); this.pt = new Uint16Array(w * h);
+    this.cur = 1;
+  }
   in(x, y) { return x >= 0 && y >= 0 && x < this.w && y < this.h; }
+  /** start a new part (parts get a dark inner line where they overlap a lower part) */
+  np() { this.cur++; return this; }
   put(x, y, mat, h, alb = 0, o = {}) {
     x = Math.floor(x); y = Math.floor(y);
     if (!this.in(x, y)) return;
     const i = y * this.w + x;
-    this.m[i] = mat; this.hgt[i] = h; this.alb[i] = alb; this.flat[i] = o.flat ? 1 : 0; this.gloss[i] = o.gloss ?? 1;
+    this.m[i] = mat; this.hgt[i] = h; this.alb[i] = alb; this.flat[i] = o.flat ? 1 : 0; this.gloss[i] = o.gloss ?? 1; this.pt[i] = mat ? this.cur : 0;
   }
   /** fill where mask(x, y) is true; h(x, y) and alb(x, y) give height and albedo offset */
   fill(x0, y0, x1, y1, mask, mat, h, alb = () => 0, o = {}) {
     for (let y = Math.max(0, Math.floor(y0)); y < Math.min(this.h, Math.ceil(y1)); y++) for (let x = Math.max(0, Math.floor(x0)); x < Math.min(this.w, Math.ceil(x1)); x++) {
       if (!mask(x, y)) continue;
-      this.put(x, y, typeof mat === 'function' ? mat(x, y) : mat, h(x, y), alb(x, y), o);
+      this.put(x, y, typeof mat === 'function' ? mat(x, y) : mat, typeof h === 'function' ? h(x, y) : h, alb(x, y), o);
     }
+    return this;
   }
   mat(x, y) { return this.in(x, y) ? this.m[y * this.w + x] : 0; }
-  /**
-   * Age the piece: wood arrises rubbed pale where hands touch them, little nicks out of the edges, fine scratches
-   * and dents in the veneer; verdigris settling in the brass's hollows and its high points rubbed bright.
-   * `keep(x, y)` protects regions that must stay exact (windows other sprites are fitted into).
-   */
+  /** Age the wood: arrises rubbed pale in places, a few nicks and fine scratches; brass dulled in its hollows. */
   wear(seed, keep = () => false) {
-    const { w, h } = this, isWood = (m) => m === M.wood || m === M.woodDark;
+    const { w, h } = this;
     const hg = Float32Array.from(this.hgt), mt = Uint8Array.from(this.m);
     const at = (x, y) => (x < 0 || y < 0 || x >= w || y >= h ? -9 : mt[y * w + x] ? hg[y * w + x] : -9);
     for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
       const i = y * w + x, m = mt[i];
       if (!m || keep(x, y)) continue;
-      const here = hg[i];
-      let drop = 0, avg = 0;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) drop = Math.max(drop, here - at(x + dx, y + dy));
-      for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2], [-2, -2], [2, 2], [2, -2], [-2, 2]]) avg += Math.max(-2, at(x + dx, y + dy));
-      avg /= 8;
+      let drop = 0;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) drop = Math.max(drop, hg[i] - at(x + dx, y + dy));
       const n = vnoise(x * 0.1, y * 0.1, seed), n2 = vnoise(x * 0.5, y * 0.5, seed + 3);
       if (isWood(m)) {
-        // the edge of a step: rubbed pale in long patches, nicked here and there
-        if (drop > 1.2 && n > 0.56) this.alb[i] += 0.05 + (n - 0.56) * 0.35;
-        if (drop > 1.2 && hash(x, y, seed + 5) > 0.97 && n2 > 0.5) { this.hgt[i] -= 1.6; this.alb[i] -= 0.1; }
-        if (hash(x, y, seed + 9) > 0.996) { this.hgt[i] -= 0.9; for (const [dx, dy] of [[1, 0], [0, 1]]) { const j = (y + dy) * w + x + dx; if (x + dx < w && y + dy < h && isWood(this.m[j])) this.hgt[j] -= 0.5; } }
+        if (drop > 1.2 && drop < 6 && n > 0.6) this.alb[i] += 0.04 + (n - 0.6) * 0.3;
+        if (drop > 1.2 && drop < 6 && hash(x, y, seed + 5) > 0.985 && n2 > 0.55) { this.hgt[i] -= 1.4; this.alb[i] -= 0.08; }
       } else if (m === M.brass) {
-        if (here < avg - 0.7 && n > 0.42 && hash(x, y, seed + 11) > 0.25) this.m[i] = M.patina;
-        else if (here > avg + 0.5 && n2 > 0.5) this.alb[i] += 0.08;
-        else this.alb[i] += (n - 0.5) * 0.12;
+        if (n > 0.66 && hash(x, y, seed + 11) > 0.6) this.alb[i] -= 0.08;
       }
     }
-    // fine scratches across the veneer, light where they catch the lamp
-    for (let k = 0; k < Math.round((w * h) / 900); k++) {
-      const x0 = hash(k, 1, seed + 21) * w, y0 = hash(k, 2, seed + 21) * h, a = hash(k, 3, seed + 21) * Math.PI, len = 3 + hash(k, 4, seed + 21) * 7;
+    for (let k = 0; k < Math.round((w * h) / 1400); k++) {
+      const x0 = hash(k, 1, seed + 21) * w, y0 = hash(k, 2, seed + 21) * h, a = hash(k, 3, seed + 21) * Math.PI, len = 3 + hash(k, 4, seed + 21) * 5;
       for (let t = 0; t < len; t++) {
         const x = Math.floor(x0 + Math.cos(a) * t), y = Math.floor(y0 + Math.sin(a) * t * 0.6);
-        if (!this.in(x, y) || keep(x, y) || !isWood(this.m[y * w + x])) continue;
-        this.alb[y * w + x] += t === 0 || t > len - 2 ? 0.05 : 0.1;
+        if (!this.in(x, y) || keep(x, y) || this.m[y * w + x] !== M.walnut) continue;
+        this.alb[y * w + x] += 0.07;
       }
     }
     return this;
   }
   H(x, y) { x = clamp(x, 0, this.w - 1); y = clamp(y, 0, this.h - 1); const i = y * this.w + x; return this.m[i] ? this.hgt[i] : this.hgt[i] - 4; }
-  /** shade into a Buf */
+  /** shade into a Buf: inner lines between parts; `outline` adds the near-black outer outline */
   render(o = {}) {
-    const out = new Buf(this.w, this.h);
+    const out = new Buf(this.w, this.h), { w } = this;
     const L = norm([-0.55, -0.72, 0.72]), Fl = norm([0.6, 0.2, 0.75]);
     const Hh = norm([L[0], L[1], L[2] + 1]);
-    for (let y = 0; y < this.h; y++) for (let x = 0; x < this.w; x++) {
-      const i = y * this.w + x, mat = this.m[i];
+    for (let y = 0; y < this.h; y++) for (let x = 0; x < w; x++) {
+      const i = y * w + x, mat = this.m[i];
       if (!mat) continue;
       const alb = this.alb[i];
-      if (this.flat[i]) { out.set(x, y, pick(rampFor(mat), clamp(0.5 + alb), x, y)); continue; }
-      // the normal from the height field (clamped so steps read as bevels, not black)
+      if (this.flat[i]) { out.set(x, y, pick(RAMP[mat], clamp(0.5 + alb), x, y)); continue; }
       const gx = clamp((this.H(x + 1, y) - this.H(x - 1, y)) * 0.5, -3, 3), gy = clamp((this.H(x, y + 1) - this.H(x, y - 1)) * 0.5, -3, 3);
       const N = norm([-gx * 0.55, -gy * 0.55, 1]);
       const dif = Math.max(0, dot(N, L)), fil = Math.max(0, dot(N, Fl)) * 0.25;
-      // cavity: lower than the neighbourhood -> darker
       let avg = 0;
       for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2], [0, 2], [-2, -2], [2, 2], [2, -2], [-2, 2]]) avg += this.H(x + dx, y + dy);
-      const occ = clamp((avg / 8 - this.hgt[i]) * 0.09, 0, 0.35);
+      const occ = clamp((avg / 8 - this.hgt[i]) * 0.08, 0, 0.32);
       const spec = Math.pow(Math.max(0, dot(N, Hh)), 26) * this.gloss[i];
-      // reflection of a simple room: a bright window up-left, warm ceiling, dark floor
       const Rf = [2 * N[2] * N[0], 2 * N[2] * N[1], 2 * N[2] * N[2] - 1];
       const env = clamp(0.45 - Rf[1] * 0.55 + (Rf[0] < -0.15 && Rf[1] < -0.1 ? 0.35 : 0) - (Rf[1] > 0.35 ? 0.25 : 0), 0, 1);
       let t;
       switch (mat) {
-        case M.wood: case M.woodDark: t = 0.04 + dif * 0.48 + fil * 0.8 + alb - occ + spec * 0.7 + env * 0.05; break;
         case M.brass: t = env * 0.5 + dif * 0.46 + spec * 0.75 + alb - occ * 1.2; break;
+        case M.bronze: t = env * 0.26 + dif * 0.5 + spec * 0.7 + alb - occ; break;
         case M.patina: t = 0.2 + dif * 0.4 + alb - occ; break;
         case M.enamel: t = 0.42 + dif * 0.45 + alb - occ * 0.8 + spec * 0.2; break;
-        case M.steel: t = env * 0.45 + spec * 0.9 + dif * 0.15 + alb - occ; break;
-        case M.dark: t = 0.15 + dif * 0.25 + alb - occ; break;
-        default: t = 0.3 + dif * 0.5 + alb - occ; break;
+        case M.steel: t = env * 0.4 + spec * 0.9 + dif * 0.12 + alb - occ; break;
+        case M.eye: t = 0.42 + dif * 0.3 + alb + spec * 0.8; break;
+        case M.dark: t = 0.12 + dif * 0.25 + alb - occ + spec * 0.6; break;
+        case M.red: case M.green: t = 0.36 + dif * 0.38 + alb - occ; break;
+        default: t = 0.05 + dif * 0.5 + fil * 0.8 + alb - occ + spec * 0.45; break;
       }
-      out.set(x, y, pick(rampFor(mat), clamp(t), x, y));
+      // the inner line: this part dips under a neighbouring, higher part (darker on the shadow side)
+      let line = 0;
+      for (const [dx, dy, s] of [[-1, 0, 2], [0, -1, 2], [1, 0, 1], [0, 1, 1]]) {
+        const X = x + dx, Y = y + dy;
+        if (X < 0 || Y < 0 || X >= w || Y >= this.h) continue;
+        const j = Y * w + X;
+        if (this.m[j] && this.pt[j] !== this.pt[i] && this.hgt[j] > this.hgt[i] + 1.2) line = Math.max(line, s);
+      }
+      if (line === 2) t = t * 0.28 - 0.04;
+      else if (line === 1) t = t * 0.62 - 0.04;
+      out.set(x, y, pick(RAMP[mat], clamp(t), x, y));
     }
-    if (o.outline) organicEdge(out, o.seed ?? 1, o.keep ?? (() => false));
+    if (o.outline) outline(out);
     return out;
   }
 }
-/**
- * Hand-drawn edges for a painted sprite: the silhouette wobbles in and out by a pixel along its length (never a
- * ruler-straight line or a compass-perfect curve), then gets a selective outline: on the shadow side (below,
- * right) a dark, cool, purple-leaning version of the colour it borders; on the lit side (above, left) a warmer,
- * softer one, broken where the light catches the edge. Regions `keep` marks stay exactly as painted.
- */
-function organicEdge(out, seed, keep) {
-  const { w, h } = out;
-  const src = new Buf(w, h); src.d.set(out.d);
-  const solid = (x, y) => src.a(x, y) > 200;
-  const col = (x, y) => { const i = (y * w + x) * 4; return [src.d[i], src.d[i + 1], src.d[i + 2]]; };
-  const N4 = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-  // 1. the silhouette breathes: low-frequency noise nibbles or grows the edge by one pixel
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    if (keep(x, y)) continue;
-    // long, slow undulations (a hand's wobble), never single-pixel noise
-    const n = vnoise(x * 0.07, y * 0.07, seed) * 0.85 + vnoise(x * 0.2, y * 0.2, seed + 1) * 0.15;
-    if (solid(x, y)) {
-      const open = N4.filter(([dx, dy]) => !solid(x + dx, y + dy)).length;
-      if (open === 1 && n > 0.7) out.set(x, y, [0, 0, 0], 0);
-    } else {
-      const nb = N4.find(([dx, dy]) => solid(x + dx, y + dy));
-      if (nb && n < 0.27) { const c = col(x + nb[0], y + nb[1]); out.set(x, y, c.map((v) => Math.round(v * 0.82))); }
-    }
+/** the near-black outer outline round every opaque region (holes included) */
+function outline(out) {
+  const s = new Buf(out.w, out.h); s.d.set(out.d);
+  for (let y = 0; y < out.h; y++) for (let x = 0; x < out.w; x++) {
+    if (s.a(x, y) > 200) continue;
+    if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => s.a(x + dx, y + dy) > 200)) out.set(x, y, OUTLINE);
   }
-  // 2. selective outline round the new silhouette
-  const s2 = new Buf(w, h); s2.d.set(out.d);
-  const solid2 = (x, y) => s2.a(x, y) > 200;
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    if (solid2(x, y)) continue;
-    const nb = N4.find(([dx, dy]) => solid2(x + dx, y + dy));
-    if (!nb) continue;
-    const i = ((y + nb[1]) * w + x + nb[0]) * 4, c = [s2.d[i], s2.d[i + 1], s2.d[i + 2]];
-    const lit = nb[0] > 0 || nb[1] > 0; // the outline sits on the object's upper or left side
-    if (lit && vnoise(x * 0.3, y * 0.3, seed + 7) > 0.62) continue; // lost in the light
-    const o = lit
-      ? [c[0] * 0.55 + 10, c[1] * 0.42 + 4, c[2] * 0.4 + 4]
-      : [c[0] * 0.26 + 8, c[1] * 0.16 + 3, c[2] * 0.26 + 12];
-    out.set(x, y, o.map((v) => Math.round(Math.min(255, v))));
-  }
+  return out;
 }
-const norm = (v) => { const l = Math.hypot(...v) || 1; return v.map((c) => c / l); };
-const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-function rampFor(m) { return m === M.patina ? R.patina : m === M.wood ? R.wood : m === M.woodDark ? R.woodDark : m === M.brass ? R.brass : m === M.enamel ? R.enamel : m === M.steel ? R.steel : m === M.ink ? R.ink : m === M.sky ? R.sky : m === M.moon ? R.moon : m === M.moss ? R.moss : m === M.red ? R.red : R.dark; }
+/** a soft wall shadow: the sprite's silhouette offset down and right, two translucent steps */
+function wallShadow(src, dx, dy, a1 = 105, a2 = 50) {
+  const out = new Buf(src.w, src.h);
+  for (let y = 0; y < src.h; y++) for (let x = 0; x < src.w; x++) {
+    if (src.a(x, y)) continue;
+    if (src.a(x - dx, y - dy) > 200) out.set(x, y, [10, 4, 12], a1);
+    else if (src.a(x - dx - 1, y - dy - 2) > 200 || src.a(x - dx + 1, y - dy - 1) > 200) out.set(x, y, [10, 4, 12], a2);
+  }
+  out.blit(src, 0, 0);
+  return out;
+}
 
-/** flame-mahogany veneer figure as an albedo offset (dir: 'v' vertical boards, 'h' rails, 'f' flame from a centre) */
-function veneer(x, y, dir = 'v', seed = 0, cx = 0) {
-  let u, v;
-  if (dir === 'h') { u = y; v = x; } else if (dir === 'f') { u = Math.abs(x - cx); v = y; } else { u = x; v = y; }
-  const warp = (vnoise(v * 0.04, u * 0.15, seed) - 0.5) * 6 + (dir === 'f' ? -Math.pow(u * 0.35, 1.3) : 0);
-  const g = (dir === 'f' ? v + warp * 1.5 + u * 0.6 : u + warp);
-  const band = (((g / 3.2) % 1) + 1) % 1;
-  const fig = (fbm(u * 0.06, v * 0.03, seed + 4) - 0.5) * 0.22;
-  const flame = dir === 'f' ? Math.sin(g * 0.9 + vnoise(u * 0.2, v * 0.05, seed) * 3) * 0.06 : 0;
-  return fig + flame + (band < 0.2 ? -0.07 : band > 0.55 && band < 0.65 ? 0.03 : 0);
+/** wood grain as an albedo offset (dir 'v' vertical boards, 'h' rails) */
+function grain(x, y, dir = 'v', seed = 0) {
+  const u = dir === 'h' ? y : x, v = dir === 'h' ? x : y;
+  const warp = (vnoise(v * 0.05, u * 0.2, seed) - 0.5) * 5;
+  const band = ((((u + warp) / 2.6) % 1) + 1) % 1;
+  return (fbm(u * 0.08, v * 0.025, seed + 4) - 0.5) * 0.2 + (band < 0.22 ? -0.06 : band > 0.6 && band < 0.7 ? 0.03 : 0);
+}
+
+// ------------------------------------------------------------------ carved bits
+
+/** An oak leaf from its stalk at (ax, ay) pointing along angle a: lobed edge, a domed blade, a carved midrib and veins. */
+function oakLeaf(r, ax, ay, a, len, wid, o = {}) {
+  const ca = Math.cos(a), sa = Math.sin(a), ext = len + wid + 2;
+  const base = o.h ?? 8, alb0 = (o.alb ?? 0) + (hash(Math.round(ax * 3), Math.round(ay * 3), Math.round(a * 10)) - 0.5) * 0.1, lobes = o.lobes ?? Math.max(2, Math.round(len / 4.5)), mat = o.mat ?? M.carve;
+  const geo = (x, y) => {
+    const px = x + 0.5 - ax, py = y + 0.5 - ay, u = px * ca + py * sa, v = -px * sa + py * ca;
+    return { u, v, t: u / len };
+  };
+  const half = (t) => {
+    if (t < 0.1) return 0.75;
+    const env = Math.sin(Math.PI * Math.pow((t - 0.1) / 0.9, 0.72));
+    return Math.max(0.6, wid * env * (0.56 + 0.44 * Math.abs(Math.sin(((t - 0.1) / 0.9) * Math.PI * lobes))));
+  };
+  r.np();
+  r.fill(ax - ext, ay - ext, ax + ext, ay + ext, (x, y) => { const { u, v, t } = geo(x, y); return u >= -0.4 && t <= 1 && Math.abs(v) <= half(t); }, mat, (x, y) => {
+    const { u, v, t } = geo(x, y), hw = half(t), q = Math.abs(v) / Math.max(0.6, hw);
+    let h = base + (1 - q * q) * 1.6 + (o.curl ?? 0) * Math.sin(t * Math.PI);
+    if (Math.abs(v) < 0.6 && t > 0.12 && t < 0.9) h -= 0.9; // the midrib
+    const s = u - Math.abs(v) * 0.9, P = len / lobes;
+    if (Math.abs(v) > 0.9 && q < 0.8 && Math.abs((((s / P) % 1) + 1) % 1 - 0.5) * P < 0.5) h -= 0.6; // veins
+    return h;
+  }, () => alb0);
+}
+/** an acorn hanging from (x, y): a stalk, a cross-hatched cup, a glossy nut */
+function acorn(r, x, y, s = 1, o = {}) {
+  const base = o.h ?? 8.5;
+  r.np();
+  r.put(x, y, M.carve, base + 0.5, -0.1);
+  const cy = y + 1 + 2.2 * s, ny = cy + 2.6 * s;
+  r.fill(x - 4 * s, ny - 4 * s, x + 4 * s + 1, ny + 4 * s, (X, Y) => ((X + 0.5 - x - 0.5) / (2.1 * s)) ** 2 + ((Y + 0.5 - ny) / (2.9 * s)) ** 2 < 1, M.carve, (X, Y) => base + 2.2 * Math.sqrt(Math.max(0, 1 - ((X + 0.5 - x - 0.5) / (2.1 * s)) ** 2 - ((Y + 0.5 - ny) / (2.9 * s)) ** 2)), () => 0.1, { gloss: 1.6 });
+  r.np();
+  r.fill(x - 4 * s, cy - 3 * s, x + 4 * s + 1, cy + 2 * s, (X, Y) => { const dx = (X + 0.5 - x - 0.5) / (2.7 * s), dy = (Y + 0.5 - cy) / (2.2 * s); return dx * dx + dy * dy < 1 && Y + 0.5 < cy + 1.4 * s; }, M.carve, (X, Y) => base + 2.6 + ((X + Y) & 1 ? -0.35 : 0.2), (X, Y) => -0.2 + ((X + Y) & 1 ? -0.06 : 0.04), { gloss: 0.3 });
 }
 
 // ------------------------------------------------------------------ the clock: geometry (art px, y down)
 
-const W = 160, H = 258, CX = 80;
-const DY = 150, RD = 34;              // dial centre (a pixel corner) and enamel radius
-const AY = 114, AR = 42;              // the break arch of the door opening: centre height and radius
-const OPEN = { x0: CX - AR, x1: CX + AR, y1: 188 };
-const MOON = { cx: CX, cy: AY, r: 24, dcy: AY + 6, dr: 30 };
-const AP = { cx: CX, cy: 212, r: 13, y1: 231 }; // the pendulum aperture
-const PIVOT = { x: CX, y: 203 }, PEND_LEN = 18, PEND_R = 6;
-const bellY0 = 20, bellY1 = 58;
-const bellHW = (y) => { const t = clamp((y - bellY0) / (bellY1 - bellY0)); return 28 + 32 * (t < 0.3 ? 0.18 * Math.sin((t / 0.3) * Math.PI / 2) : 0.18 + 0.82 * Math.pow((t - 0.3) / 0.7, 1.7)); };
+const W = 176, CX = 88;
+const RIDGE = 31, SL = 0.62, ROOF_T = 12.6, BARGE = 7, EAVE = 86;   // the roof: outer top at the ridge, pitch, bands, half span
+const rt = (x) => RIDGE + Math.abs(x + 0.5 - CX) * SL;           // the roof's outer top over column x
+const CASE = { hw: 62, y0: 103, y1: 206 };
+const CORN = { hw: 66, y0: 97, y1: 103 };
+const BOT = { hw: 66, y0: 206, y1: 211 };
+const APR = { hw: 54, y0: 211, y1: 227 };
+const DY = 155, RD = 33;                                          // the dial: centre (a pixel corner), enamel radius
+const DOOR = { r: 11, ay: 69, y1: 89 };                           // the arched door: arch centre height, sill
+const BAL = { y: 89, hw: 25 };                                    // the balcony deck
+const H = 228;                                                    // the case painting: crest to apron
+const GHW = 64;                                                   // the gable's half width
 /** signed distance (px) to the door opening: < 0 inside */
-const sdOpen = (x, y) => (y + 0.5 < AY ? dist(x, y, CX, AY) - AR : Math.max(Math.abs(x + 0.5 - CX) - AR, y + 0.5 - OPEN.y1));
-const inMoonWin = (x, y) => y + 0.5 < AY && dist(x, y, CX, AY) < MOON.r && dist(x, y, CX - 12, AY) >= 12 && dist(x, y, CX + 12, AY) >= 12;
-const sdAp = (x, y) => (y + 0.5 < AP.cy ? dist(x, y, AP.cx, AP.cy) - AP.r : Math.max(Math.abs(x + 0.5 - AP.cx) - AP.r, y + 0.5 - AP.y1));
+const sdDoor = (x, y) => (y + 0.5 < DOOR.ay ? dist(x, y, CX, DOOR.ay) - DOOR.r : Math.max(Math.abs(x + 0.5 - CX) - DOOR.r, y + 0.5 - DOOR.y1));
+const gableTop = (x) => rt(x) + ROOF_T + BARGE - 1;
+// the pendulum and the weights
+const PIVOT = { x: CX, y: 196 }, LEAF = { len: 26, wid: 8.6, at: 54 }; // the leaf's stalk sits `at` px below the pivot
+const PEND_N = 11, PEND_A = 0.15;
+const WT_TRAVEL = 58;                                             // how far the weights sink while loading (art px)
+const CONE = { w: 17, h: 34 };                                    // the cone sprite (shadow included)
+const RING = { w: 9, h: 10 };
+const WEIGHTS = [{ x: CX - 31, y: 229 }, { x: CX + 31, y: 236 }]; // chain centre x, cone sprite top at the start
+const RINGS = [{ x: CX - 45, y: 296 }, { x: CX + 45, y: 288 }];   // ring sprite top at the start (they rise)
+const SH = Math.max(...WEIGHTS.map((w) => w.y + WT_TRAVEL + CONE.h)) + 2; // the stage: clock, pendulum, weights
 
-/** tiny 3x5 capitals for the dial signature */
-const TINY = { H: ['#.#', '#.#', '###', '#.#', '#.#'], O: ['###', '#.#', '#.#', '#.#', '###'], L: ['#..', '#..', '#..', '#..', '###'], W: ['#.#', '#.#', '#.#', '###', '#.#'], C: ['###', '#..', '#..', '#..', '###'], '&': ['.#.', '#.#', '.#.', '#.#', '.##'], '.': ['.', '.', '.', '.', '#'], ' ': ['.', '.', '.', '.', '.'] };
-/** roman numeral glyphs, 7 px tall, with serifs */
+/** tiny Roman numerals, 7 px tall, with joined serifs */
 const ROM = {
   I: ['###', '.#.', '.#.', '.#.', '.#.', '.#.', '###'],
   V: ['##.##', '.#.#.', '.#.#.', '.#.#.', '.#.#.', '..#..', '..#..'],
@@ -286,191 +325,301 @@ const ROM = {
 };
 const NUMS = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
 
-function leafMask(ax, ay, a, len, wid) {
-  return (x, y) => {
-    const px = x + 0.5 - ax, py = y + 0.5 - ay, u = px * Math.cos(a) + py * Math.sin(a), v = -px * Math.sin(a) + py * Math.cos(a);
-    return u >= 0 && u <= len && Math.abs(v) <= Math.sin((u / len) * Math.PI) * wid;
-  };
+/** Pip, the owl behind the door: tawny barred feathers, pale facial discs, amber eyes. `pose`: peek|out|call|bow */
+function paintOwl(r, cx, foot, pose) {
+  const dim = pose === 'peek' ? -0.3 : 0, s = pose === 'peek' ? 0.86 : 1;
+  const clip = pose === 'peek' ? (x, y) => sdDoor(x, y) < -0.5 : () => true;
+  const headUp = pose === 'call' ? 2 : pose === 'bow' ? -3 : 0;
+  const by = foot - 10.5 * s, bry = 10.5 * s, brx = 9.6 * s;
+  const hx = cx, hy = foot - 20.5 * s - headUp, hr = 8.2 * s;
+  // the wings flare on the call
+  if (pose === 'call') for (const sx of [-1, 1]) {
+    r.np();
+    r.fill(cx - 14, by - 6, cx + 15, by + 6, (x, y) => { const u = (x + 0.5 - cx) * sx, v = y + 0.5 - (by - 2); return u > 6 && u < 12.6 && v > -4 + (u - 6) * 0.35 && v < 5 - (u - 6) * 0.5; }, M.feather, 9, (x, y) => dim - 0.05 + ((y + (x >> 1)) % 3 === 0 ? -0.14 : 0));
+  }
+  // the body: a soft egg, barred wings on the sides, a pale streaked chest
+  r.np();
+  r.fill(cx - brx - 1, by - bry - 1, cx + brx + 1, by + bry + 1, (x, y) => clip(x, y) && ((x + 0.5 - cx) / brx) ** 2 + ((y + 0.5 - by) / bry) ** 2 < 1, (x, y) => (Math.abs(x + 0.5 - cx) < brx * 0.45 && y + 0.5 > by - bry * 0.4 ? M.chest : M.feather), (x, y) => {
+    const q = ((x + 0.5 - cx) / brx) ** 2 + ((y + 0.5 - by) / bry) ** 2;
+    return 8 + Math.sqrt(Math.max(0, 1 - q)) * 3.4 + (Math.abs(x + 0.5 - cx) > brx * 0.6 ? 0.9 : 0);
+  }, (x, y) => {
+    const ax = Math.abs(x + 0.5 - cx);
+    if (ax < brx * 0.45 && y + 0.5 > by - bry * 0.4) return dim - 0.06 + ((x * 5 + Math.floor((y + 1) / 3) * 3) % 4 === 0 && (y % 3) === 1 ? -0.22 : 0);
+    return dim + ((y + (x >> 1)) % 3 === 0 ? -0.14 : 0) + (vnoise(x * 0.5, y * 0.5, 71) - 0.5) * 0.1;
+  });
+  // feet
+  if (pose !== 'peek') for (const sx of [-1, 1]) { r.np(); for (let k = -1; k <= 1; k++) r.put(cx + sx * 3 + k, foot - 1, M.beak, 10.5, 0); }
+  // the head: ear tufts, round head, two pale facial discs, amber eyes, a hooked beak
+  r.np();
+  for (const sx of [-1, 1]) r.fill(hx - 10, hy - 12, hx + 11, hy - 3, (x, y) => { const u = (x + 0.5 - hx) * sx, v = y + 0.5 - (hy - hr + 1); return clip(x, y) && u > 2.5 * s && u < 7.5 * s && v < 2 && v > -3.4 * s + (7.5 * s - u) * 0.15 - (u - 2.5 * s) * 0.55; }, M.feather, 9.5, () => dim - 0.12);
+  r.np();
+  r.fill(hx - hr - 1, hy - hr - 1, hx + hr + 1, hy + hr + 1, (x, y) => clip(x, y) && dist(x, y, hx, hy) < hr, M.feather, (x, y) => 9.5 + Math.sqrt(Math.max(0, 1 - (dist(x, y, hx, hy) / hr) ** 2)) * 3, (x, y) => dim + ((x + 2 * y) % 5 === 0 ? -0.1 : 0) + (y + 0.5 < hy - hr * 0.5 ? 0.04 : 0));
+  for (const sx of [-1, 1]) {
+    const ex = hx + sx * 3.5 * s, ey = hy + 0.6 * s, dr = 3.9 * s;
+    r.np();
+    r.fill(ex - 5, ey - 5, ex + 5, ey + 5, (x, y) => clip(x, y) && dist(x, y, ex, ey) < dr, (x, y) => (dist(x, y, ex, ey) > dr - 0.9 ? M.feather : M.chest), (x, y) => 11.6 - dist(x, y, ex, ey) * 0.15, (x, y) => dim + (dist(x, y, ex, ey) > dr - 0.9 ? -0.24 : -0.12));
+    if (pose === 'bow') {
+      // closed, happy eyes: a dark little arch
+      for (let k = -1; k <= 1; k++) r.put(ex + k - 0.5, ey - (k === 0 ? 1 : 0), M.dark, 12, 0.1);
+    } else {
+      const er = (pose === 'call' ? 2.5 : 2.2) * s;
+      r.np();
+      r.fill(ex - 3, ey - 3, ex + 3, ey + 3, (x, y) => clip(x, y) && dist(x, y, ex, ey) < er, M.eye, 12.2, (x, y) => dim + (y + 0.5 < ey ? 0.15 : -0.05));
+      r.fill(ex - 2, ey - 2, ex + 2, ey + 2, (x, y) => clip(x, y) && dist(x, y, ex, ey) < er * 0.55, M.dark, 12.3, () => -0.1);
+      r.put(ex - 1, ey - 2, M.enamel, 12.5, 0.6, { flat: true });
+    }
+  }
+  // Pip's blue bow tie, as he wears it in the office
+  if (pose !== 'peek') {
+    const ty = foot - 13 + (pose === 'bow' ? 2 : 0);
+    r.np();
+    r.fill(cx - 5, ty - 2, cx + 5, ty + 3, (x, y) => { const u = Math.abs(x + 0.5 - cx), v = Math.abs(y + 0.5 - ty - 0.5); return u < 1 ? v < 1.2 : u < 4.2 && v < 0.6 + u * 0.42; }, M.steel, (x) => 12.4 - Math.abs(x + 0.5 - cx) * 0.1 + (Math.abs(x + 0.5 - cx) < 1 ? 0.6 : 0), (x, y) => 0.35 + (y + 0.5 < ty + 0.5 ? 0.12 : -0.06));
+  }
+  // the brow between the eyes, the beak (open on the call)
+  r.np();
+  r.put(hx - 1, hy - 2 * s, M.feather, 12, dim - 0.2); r.put(hx, hy - 2 * s, M.feather, 12, dim - 0.2);
+  const bk = hy + 2 * s;
+  if (pose === 'call') {
+    r.np();
+    r.fill(hx - 2, bk - 1, hx + 2, bk + 1, (x, y) => Math.abs(x + 0.5 - hx) < (y === Math.floor(bk - 1) ? 1.6 : 1.1), M.beak, 12.6, () => 0.05);
+    r.fill(hx - 2, bk + 1, hx + 2, bk + 3, (x) => Math.abs(x + 0.5 - hx) < 1.6, M.red, 12.1, () => -0.25);
+    r.fill(hx - 2, bk + 3, hx + 2, bk + 4, (x) => Math.abs(x + 0.5 - hx) < 1.1, M.beak, 12.4, () => -0.1);
+  } else {
+    r.np();
+    r.fill(hx - 2, bk, hx + 2, bk + 3, (x, y) => clip(x, y) && Math.abs(x + 0.5 - hx) < (y - Math.floor(bk) === 0 ? 1.6 : y - Math.floor(bk) === 1 ? 1.1 : 0.6), M.beak, 12.6, () => dim);
+  }
 }
 
-function paintClock() {
+/**
+ * The whole case as one relief. `v` is the door's state: { door: 0 closed | 1 ajar | 2 open, owl: null|peek|out|call|bow }.
+ */
+function paintCase(v = { door: 0, owl: null }) {
   const r = new Relief(W, H);
   const ink = (x, y) => r.put(x, y, M.ink, 8.5, 0, { flat: true });
 
-  // ---- the bun feet (brass) and the base moulding
-  for (const fx of [32, 128]) r.fill(fx - 11, 246, fx + 11, 258, (x, y) => { const nx = (x + 0.5 - fx) / 10.5, ny = (y + 0.5 - 251) / 7; return nx * nx + ny * ny < 1; }, M.brass, (x, y) => 6 + 5 * Math.sqrt(Math.max(0, 1 - ((x + 0.5 - fx) / 10.5) ** 2 - ((y + 0.5 - 251) / 7) ** 2)));
-  const baseProf = [11, 13, 14, 13, 11, 9, 10, 12, 13, 13, 12, 10];
-  r.fill(0, 236, W, 248, (x, y) => Math.abs(x + 0.5 - CX) < 60 + Math.min(6, (y - 236) * 0.7), M.wood, (x, y) => baseProf[y - 236] + (Math.abs(x + 0.5 - CX) > 60 + (y - 236) * 0.7 - 1.5 ? -2 : 0), (x, y) => veneer(x, y, 'h', 3));
-  r.fill(0, 236, W, 238, (x, y) => Math.abs(x + 0.5 - CX) < 61, M.brass, (x, y) => 14 - (y - 236) * 1.5);
-
-  // ---- the case body (lower part and door section), pilasters
-  const bodyW = 60;
-  r.fill(CX - bodyW, 194, CX + bodyW, 236, () => true, M.wood, (x, y) => {
-    const fx = Math.abs(x + 0.5 - CX), inField = fx < bodyW - 16 && y >= 203 && y < 232;
-    if (!inField) return 11;
-    const e = Math.min(bodyW - 16 - fx, y - 203, 232 - y);
-    return 9 + Math.min(1.5, e * 0.5);
-  }, (x, y) => {
-    const fx = Math.abs(x + 0.5 - CX);
-    const string = (Math.abs(fx - (bodyW - 19)) < 0.6 && y > 205 && y < 230) || ((Math.abs(y - 205.5) < 0.6 || Math.abs(y - 229.5) < 0.6) && fx < bodyW - 19);
-    return string ? 0.3 : veneer(x, y, 'f', 11, CX) * 1.4;
-  });
-  const midProf = [12, 13.5, 13, 11, 12];
-  r.fill(CX - bodyW - 1, 194, CX + bodyW + 1, 199, () => true, M.wood, (x, y) => midProf[y - 194], (x, y) => veneer(x, y, 'h', 5));
-  r.fill(CX - bodyW, 68, CX + bodyW, 194, () => true, M.wood, (x, y) => {
-    const fx = x + 0.5 - CX, ax = Math.abs(fx);
-    if (ax > bodyW - 12) {
-      const c = (bodyW - 6) * Math.sign(fx), u = (fx - c) / 6;
-      let h = 11 + 2.6 * Math.sqrt(Math.max(0, 1 - u * u));
-      if ([-3, 0, 3].some((k) => Math.abs(fx - c - k) < 0.7) && y > 78 && y < 184) h -= 1.4;
-      return h;
-    }
-    const d = sdOpen(x, y);
-    return 11 + Math.min(1.2, Math.max(0, d - 4) * 0.4);
-  }, (x, y) => (Math.abs(x + 0.5 - CX) > bodyW - 12 ? veneer(x, y, 'v', 7) : y < 76 || y > 188 ? veneer(x, y, 'h', 9) : veneer(x, y, 'v', 13)));
+  // ---- the gable: vertical walnut boards under the roof
+  r.np();
+  r.fill(CX - GHW, 40, CX + GHW, CORN.y0, (x, y) => y >= gableTop(x), M.walnut, (x) => (((x - CX + 64) % 8) === 0 ? 3.4 : 4), (x, y) => grain(x, y, 'v', 3) + (((x - CX + 64) % 8) === 0 ? -0.16 : 0));
+  // little carved sprigs either side of the door: two leaves and an acorn
   for (const sx of [-1, 1]) {
-    const c = CX + sx * (bodyW - 6);
-    const capProf = [13, 14.5, 13.5, 12.5, 13.5, 14.5, 13.5];
-    r.fill(c - 7, 68, c + 7, 75, () => true, M.brass, (x, y) => capProf[y - 68] + 1.5 * Math.sqrt(Math.max(0, 1 - ((x + 0.5 - c) / 7) ** 2)));
-    r.fill(c - 7, 186, c + 7, 194, () => true, M.brass, (x, y) => [12.5, 13.5, 14.5, 13.5, 12.5, 13.5, 14.5, 13][y - 186] + 1.5 * Math.sqrt(Math.max(0, 1 - ((x + 0.5 - c) / 7) ** 2)));
+    oakLeaf(r, CX + sx * 24, 86, -Math.PI / 2 - sx * 0.35, 13, 4.2, { h: 6.5 });
+    oakLeaf(r, CX + sx * 24, 86, -Math.PI / 2 + sx * 0.75, 10, 3.6, { h: 6 });
+    acorn(r, CX + sx * 30 - 0.5, 77, 0.8, { h: 6.5 });
   }
 
-  // ---- the opening: dial plate, moon arch, spandrels, the enamel dial
-  r.fill(OPEN.x0 - 4, AY - AR - 4, OPEN.x1 + 4, OPEN.y1 + 4, (x, y) => sdOpen(x, y) < 0, M.brass, () => 6, (x, y) => (hash(x, y, 31) - 0.5) * 0.12 + (vnoise(x * 0.3, y * 0.3, 2) - 0.5) * 0.08, { gloss: 0.3 });
-  r.fill(CX - AR, AY - AR, CX + AR, AY, (x, y) => sdOpen(x, y) < -2 && dist(x, y, CX, AY) > MOON.r + 2.5 && y + 0.5 < AY, M.brass, () => 6, (x, y) => {
-    const a = Math.atan2(y + 0.5 - AY, x + 0.5 - CX), d = dist(x, y, CX, AY);
-    const rr = 33 + Math.sin(a * 7) * 3.2;
-    const line = Math.abs(d - rr) < 0.6 || (Math.sin(a * 7) > 0.6 && Math.abs(d - rr - 3) < 0.5) || (Math.sin(a * 7) < -0.6 && Math.abs(d - rr + 3) < 0.5);
-    return line ? -0.32 : (hash(x, y, 33) - 0.5) * 0.12;
-  }, { gloss: 0.3 });
-  for (const [sx, sy] of [[CX - 32, AY - 8], [CX + 31, AY - 8], [CX - 20, AY - 30], [CX + 19, AY - 30], [CX, AY - 37]]) for (let k = -1; k <= 1; k++) { r.put(sx + k, sy, M.brass, 8); r.put(sx, sy + k, M.brass, 8); }
-  r.fill(CX - MOON.r - 3, AY - MOON.r - 3, CX + MOON.r + 3, AY, (x, y) => { const d = dist(x, y, CX, AY); return d >= MOON.r && d < MOON.r + 2 && y + 0.5 < AY; }, M.brass, (x, y) => 7 + (1 - Math.abs(dist(x, y, CX, AY) - MOON.r - 1)) * 1.6);
-  for (const hx of [CX - 12, CX + 12]) {
-    r.fill(hx - 12, AY - 12, hx + 12, AY, (x, y) => dist(x, y, hx, AY) < 12 && dist(x, y, CX, AY) < MOON.r && y + 0.5 < AY, M.moss, (x, y) => 7 + Math.sqrt(Math.max(0, 144 - (x + 0.5 - hx) ** 2 - (y + 0.5 - AY) ** 2)) * 0.35, (x, y) => (hash(x, y, 41) - 0.5) * 0.25 + (vnoise(x * 0.4, y * 0.4, 4) - 0.5) * 0.2);
+  // ---- the door: its carved arch frame, the doors (closed, ajar or open) and the dark inside
+  r.np();
+  r.fill(CX - 16, 50, CX + 16, DOOR.y1 + 1, (x, y) => { const d = sdDoor(x, y); return d >= 0 && d < 3 && y < DOOR.y1; }, M.carve, (x, y) => [7.6, 8.6, 7.8][Math.min(2, Math.floor(sdDoor(x, y)))], () => 0);
+  r.np();
+  if (v.door === 0) {
+    for (const sx of [-1, 1]) r.fill(CX - 12, 55, CX + 12, DOOR.y1, (x, y) => sdDoor(x, y) < 0 && (x + 0.5 - CX) * sx > 0, M.walnut, (x, y) => {
+      const e = -sdDoor(x, y), mid = Math.abs(x + 0.5 - CX);
+      return 5 + Math.min(1, e * 0.5) + (mid < 1 ? -0.6 : 0) + (Math.abs(Math.abs(x + 0.5 - CX - sx * 5.5) + Math.abs(y + 0.5 - 76) * 0.6 - 2.6) < 0.6 ? 0.7 : 0);
+    }, (x, y) => 0.1 + grain(x, y, 'v', 5) * 0.8);
+    r.np(); r.put(CX - 2, 79, M.brass, 7.5); r.put(CX + 1, 79, M.brass, 7.5);
+  } else {
+    // the dark inside: a back wall, a perch
+    r.fill(CX - 12, 55, CX + 12, DOOR.y1, (x, y) => sdDoor(x, y) < 0, M.dark, (x, y) => 1 + (y + 0.5 - DOOR.ay) * 0.03, (x, y) => (y > DOOR.y1 - 4 ? 0.12 : 0) + (dist(x, y, CX, DOOR.ay) < 7 ? -0.08 : 0));
+    // the doors: ajar (turned out to the viewer, narrowed) or open (standing out either side of the arch)
+    const open = v.door === 2, wd = open ? 6.3 : 5.5;
+    for (const sx of [-1, 1]) {
+      r.np();
+      const x0 = open ? CX + sx * DOOR.r : CX + sx * DOOR.r, x1 = x0 + (open ? sx * wd : -sx * wd);
+      const lo = Math.min(x0, x1), hi = Math.max(x0, x1);
+      // inner face when open (left leaf in shade, right leaf lit), outer face when ajar
+      const lit = open ? sx > 0 : sx < 0;
+      r.fill(lo - 1, 54, hi + 1, DOOR.y1 + 1, (x, y) => {
+        const X = x + 0.5;
+        if (X < lo || X > hi) return false;
+        // the arch top foreshortened with the leaf
+        const f = Math.abs(X - x0) / wd, topY = DOOR.ay - Math.sqrt(Math.max(0, 1 - (1 - f) ** 2)) * DOOR.r * 0.98;
+        return y + 0.5 > (open ? DOOR.ay - DOOR.r * 0.9 + f * 2 : topY) && y < DOOR.y1 + (open ? 1 : 0);
+      }, M.walnut, () => (open ? 10.5 : 7), (x, y) => (lit ? 0.16 : -0.12) + grain(x, y, 'v', 9) * 0.6 + (Math.abs(x + 0.5 - x1) < 1 ? 0.08 : 0));
+    }
   }
-  for (const [tx, ty, hh] of [[CX - 17, AY - 9, 5], [CX - 12, AY - 12, 6], [CX - 7, AY - 9, 4], [CX + 8, AY - 10, 5], [CX + 13, AY - 12, 6], [CX + 18, AY - 8, 4]]) {
-    for (let k = 0; k < hh; k++) for (let j = -Math.floor(k / 2); j <= Math.floor(k / 2); j++) r.put(tx + j, ty + k, M.moss, 9 + (hh - k) * 0.3, j < 0 ? 0.1 : -0.25);
-    r.put(tx, ty + hh, M.woodDark, 8.5, 0);
+  if (v.owl) paintOwl(r, CX, v.owl === 'peek' ? DOOR.y1 + 3 : BAL.y, v.owl);
+
+  // ---- the roof: a band of fish-scale shingles, a ridge cap, a scalloped carved bargeboard
+  const shingle = (x, y) => {
+    const v0 = y + 0.5 - rt(x);
+    // fish scales laid in screen space (the roof face, as a painter would show it), mirrored about the ridge
+    const X = Math.abs(x + 0.5 - CX), row = Math.floor((y + 0.5) / 4.4), fy = (y + 0.5) / 4.4 - row, col = (X + (row & 1) * 3.5) / 7, fx = col - Math.floor(col);
+    const e = fy < 0.42 ? 0 : (2 * fx - 1) ** 2 + ((fy - 0.42) / 0.58) ** 2, inTab = e < 1;
+    return { v0, row, fy, fx, inTab, edge: inTab && (e > 0.6 || fx < 0.08 || fx > 0.92), id: Math.floor(col) * 7 + row * 131 + (x < CX ? 977 : 0) };
+  };
+  r.np();
+  r.fill(CX - EAVE, RIDGE - 1, CX + EAVE, RIDGE + EAVE * SL + ROOF_T + 1, (x, y) => { const v0 = y + 0.5 - rt(x); return Math.abs(x + 0.5 - CX) <= EAVE && v0 >= 0 && v0 < ROOF_T; }, M.shingle, (x, y) => {
+    const s = shingle(x, y);
+    if (s.v0 < 1.6) return 11.4; // the ridge cap
+    let h = s.inTab ? 8.6 + s.fy * 1.6 - (s.edge ? 0.5 : 0) : 6.4;
+    if (Math.abs(x + 0.5 - CX) > EAVE - 1.5) h -= 1.2;
+    return h;
+  }, (x, y) => {
+    const s = shingle(x, y);
+    if (s.v0 < 1.6) return 0.06 + grain(x, y, 'h', 15) * 0.5;
+    if (!s.inTab) return -0.2;
+    return (hash(s.id, 3, 17) - 0.5) * 0.2 + (s.edge ? -0.14 : s.fx < 0.45 && s.fy < 0.6 ? 0.07 : 0) + (vnoise(x * 0.3, y * 0.3, 18) - 0.5) * 0.06;
+  });
+  const barge = (x, y) => { const u = Math.abs(x + 0.5 - CX), v2 = y + 0.5 - rt(x) - ROOF_T, ph = ((((u * 1.18) - 2) / 7.4) % 1 + 1) % 1; return { u, v2, ph }; };
+  r.np();
+  r.fill(CX - EAVE, RIDGE + ROOF_T - 1, CX + EAVE, RIDGE + EAVE * SL + ROOF_T + BARGE + 1, (x, y) => {
+    const { u, v2, ph } = barge(x, y);
+    if (u > EAVE - 1 || v2 < 0) return false;
+    return v2 < 3.6 || v2 < 3.6 + 3.6 * Math.sqrt(Math.max(0, 1 - ((ph - 0.5) / 0.5) ** 2));
+  }, M.carve, (x, y) => {
+    const { v2, ph } = barge(x, y);
+    if (v2 < 1.3) return 9.8;
+    if (v2 > 4.2 && v2 < 6.2 && Math.abs(ph - 0.5) < 0.14) return 4.6; // a drilled hole in each scallop
+    if (v2 < 3.6 && v2 > 1.3 && (ph < 0.07 || ph > 0.93)) return 7.4; // a notch over each join
+    return 8.6;
+  }, () => 0);
+  // the drop finial under the apex
+  r.np();
+  r.fill(CX - 3, RIDGE + ROOF_T + BARGE - 3, CX + 3, RIDGE + ROOF_T + BARGE + 7, (x, y) => { const t = y + 0.5 - (RIDGE + ROOF_T + BARGE - 2.5); return Math.abs(x + 0.5 - CX) < [1.2, 2.2, 2.4, 1.3, 2.1, 1.4, 0.7, 0, 0][Math.max(0, Math.min(8, Math.floor(t)))]; }, M.carve, (x) => 9.6 - Math.abs(x + 0.5 - CX) * 0.5);
+  // carved oak leaves and an acorn hang from both eaves
+  for (const sx of [-1, 1]) {
+    const ex = CX + sx * (EAVE - 4), ey = Math.round(rt(ex) + ROOF_T + BARGE - 1);
+    oakLeaf(r, ex, ey - 1, Math.PI / 2 + sx * 0.12, 15, 4.6, { h: 9 });
+    acorn(r, ex - sx * 6, ey - 1, 0.85, { h: 9.5 });
   }
-  // an engraved ring round the dial, and in each corner a cast rosette with four leaves and a scroll
-  r.fill(OPEN.x0, AY, OPEN.x1, OPEN.y1, (x, y) => Math.abs(dist(x, y, CX, DY) - (RD + 2.6)) < 0.55 && sdOpen(x, y) < -1, M.brass, () => 5.4, () => -0.3);
-  for (const [qx, qy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const rx = CX + qx * (AR - 9), ry = (qy < 0 ? AY + 8 : OPEN.y1 - 8);
-    r.fill(rx - 9, ry - 9, rx + 9, ry + 9, (x, y) => sdOpen(x, y) < -1 && dist(x, y, CX, DY) > RD + 3.5, M.brass, (x, y) => {
-      const d = dist(x, y, rx, ry), a = Math.atan2(y + 0.5 - ry, x + 0.5 - rx);
-      const petal = d < 3.6 + Math.cos(a * 6) * 0.9;
-      const leaf = d < 8 && Math.abs(Math.sin(a * 2 + Math.PI / 4)) < 0.28 * (1 - d / 9) + 0.06 && d > 3;
-      return petal ? 7.6 + (3.6 - d) * 0.5 : leaf ? 7 - d * 0.08 : 6;
-    }, (x, y) => (dist(x, y, rx, ry) < 1.2 ? 0.15 : 0));
+
+  // ---- the crest: a carved owl on the ridge, on a fan of oak leaves with two acorns
+  const OC = { x: CX, y: 21 }, ORX = 9.6, ORY = 11.6;
+  for (const [a, len, wd] of [[-Math.PI + 0.1, 24, 7], [-0.1, 24, 7], [-Math.PI / 2 - 0.95, 26, 7.8], [-Math.PI / 2 + 0.95, 26, 7.8]]) oakLeaf(r, OC.x, 31, a, len, wd, { h: 8.2, curl: 0.5 });
+  for (const sx of [-1, 1]) acorn(r, CX + sx * 15 - 0.5, 26, 1.05, { h: 10 });
+  // the ridge block the owl grips
+  r.np();
+  r.fill(CX - 8, 29, CX + 8, 37, (x, y) => Math.abs(x + 0.5 - CX) < 7.5 - (y - 29) * 0.45, M.carve, (x, y) => 10.4 - (y - 29) * 0.2, (x, y) => grain(x, y, 'h', 21) * 0.6 - 0.05);
+  // the carved owl: a domed body with a scalloped chest, carved wings, ear tufts, ringed facial discs with glass
+  // eyes, a hooked beak, toes over the ridge block
+  const owlH = (x, y) => 11 + Math.sqrt(Math.max(0, 1 - ((x + 0.5 - OC.x) / ORX) ** 2 - ((y + 0.5 - OC.y) / ORY) ** 2)) * 3.6;
+  r.np();
+  r.fill(OC.x - 11, 8, OC.x + 11, 34, (x, y) => ((x + 0.5 - OC.x) / ORX) ** 2 + ((y + 0.5 - OC.y) / ORY) ** 2 < 1, M.carve, (x, y) => owlH(x, y) - (Math.abs(x + 0.5 - OC.x) < 4.6 && y > 22 && (y % 3) === 0 && ((x + (y / 3 | 0)) % 2 === 0) ? 0.7 : 0), () => 0.06);
+  for (const sx of [-1, 1]) {
+    // the wing: a raised blade down the side with three feather grooves
+    r.np();
+    r.fill(OC.x - 11, 17, OC.x + 11, 34, (x, y) => { const u = (x + 0.5 - OC.x) * sx, v = y + 0.5 - OC.y; return ((x + 0.5 - OC.x) / ORX) ** 2 + ((y + 0.5 - OC.y) / ORY) ** 2 < 1.02 && u > 4.4 + Math.max(0, 6 - v) * 0.25 && v > -1.5; }, M.carve, (x, y) => owlH(x, y) + 1.2 - ((y + 0.5 - OC.y + (x + 0.5 - OC.x) * sx * 0.5) % 3.2 < 0.9 ? 0.8 : 0), () => -0.04);
+    r.np();
+    r.fill(OC.x + sx * 7 - 4, 4, OC.x + sx * 7 + 4, 13, (x, y) => { const u = (x + 0.5 - OC.x) * sx, v = y + 0.5 - 12; return u > 3 && u < 8.6 && v < 0.5 && v > -1 - (u - 3) * 0.95; }, M.carve, 14.2, () => -0.04);
+    const ex = OC.x + sx * 4, ey = 16;
+    r.np();
+    r.fill(ex - 5, ey - 5, ex + 5, ey + 5, (x, y) => dist(x, y, ex, ey) < 4.4 && dist(x, y, ex, ey) >= 3.3, M.carve, (x, y) => owlH(x, y) + 0.7, () => 0.1);
+    r.np();
+    r.fill(ex - 4, ey - 4, ex + 4, ey + 4, (x, y) => dist(x, y, ex, ey) < 3.3, M.carve, (x, y) => owlH(x, y) - 0.5, () => -0.02);
+    r.np();
+    r.fill(ex - 2, ey - 2, ex + 2, ey + 2, (x, y) => dist(x, y, ex, ey) < 2.1, M.dark, (x, y) => owlH(x, y) + 0.2, () => 0, { gloss: 2 });
+    r.put(ex - 1, ey - 1, M.enamel, 16, 0.35, { flat: true });
+    r.np(); for (let k = -1; k <= 1; k++) r.put(OC.x + sx * 3 + k, 32, M.carve, 12.6, 0.06);
   }
-  r.fill(CX - RD, DY - RD, CX + RD, DY + RD, (x, y) => dist(x, y, CX, DY) < RD, M.enamel, (x, y) => { const d = dist(x, y, CX, DY) / RD; return 7.5 + 1.8 * (1 - d * d); }, (x, y) => {
+  r.np();
+  r.fill(OC.x - 2, 18, OC.x + 2, 23, (x, y) => Math.abs(x + 0.5 - OC.x) < (y === 18 ? 1.6 : y === 19 ? 1.3 : y === 20 ? 0.9 : 0.5), M.carve, 17, () => 0.02);
+
+  // ---- the case: walnut boards in a carved bead frame; the cornice with dentils; the base moulding
+  r.np();
+  r.fill(CX - CASE.hw, CASE.y0, CX + CASE.hw, CASE.y1, () => true, M.walnut, 5, (x, y) => grain(x, y, 'v', 7) - 0.04);
+  r.np();
+  r.fill(CX - CASE.hw, CASE.y0, CX + CASE.hw, CASE.y1, (x, y) => { const e = Math.min(x + 0.5 - (CX - CASE.hw), CX + CASE.hw - x - 0.5, y + 0.5 - CASE.y0, CASE.y1 - y - 0.5); return e > 1.4 && e < 3.6; }, M.carve, (x, y) => { const e = Math.min(x + 0.5 - (CX - CASE.hw), CX + CASE.hw - x - 0.5, y + 0.5 - CASE.y0, CASE.y1 - y - 0.5); return 6.4 + (1 - Math.abs(e - 2.5)) * 0.9 - (((x + y) % 4) === 0 ? 0.5 : 0); }, () => 0);
+  const cornProf = [8.6, 10, 10.6, 9.4, 9.8, 8.4];
+  r.np();
+  r.fill(CX - CORN.hw, CORN.y0, CX + CORN.hw, CORN.y1, (x, y) => Math.abs(x + 0.5 - CX) < CORN.hw - (y === CORN.y0 ? 1 : 0), M.walnut, (x, y) => cornProf[y - CORN.y0] - (Math.abs(x + 0.5 - CX) > CORN.hw - 1.5 ? 1 : 0), (x, y) => grain(x, y, 'h', 11) - 0.08);
+  r.np();
+  r.fill(CX - CORN.hw + 2, CORN.y0 + 3, CX + CORN.hw - 2, CORN.y0 + 5, (x) => ((x - CX + 66) % 4) < 2, M.carve, 10.8, () => 0);
+  const botProf = [8.4, 9.8, 10.4, 9.6, 8.2];
+  r.np();
+  r.fill(CX - BOT.hw, BOT.y0, CX + BOT.hw, BOT.y1, (x, y) => Math.abs(x + 0.5 - CX) < BOT.hw - (y === BOT.y1 - 1 ? 1 : 0), M.walnut, (x, y) => botProf[y - BOT.y0], (x, y) => grain(x, y, 'h', 13) - 0.06);
+  r.np();
+  r.fill(CX - BOT.hw + 1, BOT.y0 + 2, CX + BOT.hw - 1, BOT.y0 + 3, () => true, M.carve, 10.9, (x) => ((x & 3) === 0 ? -0.15 : 0.02));
+
+  // ---- the balcony: a deck on two little corbels, turned balusters, end posts with knobs, a rail
+  r.np();
+  for (const sx of [-1, 1]) r.fill(CX + sx * 19 - 3, BAL.y + 2, CX + sx * 19 + 3, CORN.y0 + 2, (x, y) => { const t = y + 0.5 - (BAL.y + 2); return Math.abs(x + 0.5 - CX - sx * 19) < 2.4 - t * 0.28; }, M.carve, 10.6, () => -0.04);
+  r.np();
+  r.fill(CX - BAL.hw, BAL.y, CX + BAL.hw, BAL.y + 3, () => true, M.carve, (x, y) => [12.4, 12, 11.2][y - BAL.y], (x, y) => grain(x, y, 'h', 23) * 0.5);
+  const balProf = [0.7, 1.45, 1.5, 0.7, 1.15, 1.5, 0.9];
+  for (const bx of [-17, -11, -5, 5, 11, 17]) {
+    r.np();
+    r.fill(CX + bx - 2, 82, CX + bx + 2, BAL.y, (x, y) => Math.abs(x + 0.5 - CX - bx) < balProf[y - 82], M.carve, (x) => 11.6 + (1.5 - Math.abs(x + 0.5 - CX - bx)) * 0.7);
+  }
+  for (const sx of [-1, 1]) {
+    r.np();
+    r.fill(CX + sx * 23 - 2, 78, CX + sx * 23 + 2, BAL.y, (x) => Math.abs(x + 0.5 - CX - sx * 23) < 1.6, M.carve, (x) => 12.6 + (1.6 - Math.abs(x + 0.5 - CX - sx * 23)) * 0.6);
+    r.np();
+    r.fill(CX + sx * 23 - 3, 74, CX + sx * 23 + 3, 79, (x, y) => dist(x, y, CX + sx * 23, 76.5) < 2.2, M.carve, (x, y) => 13 + (2.2 - dist(x, y, CX + sx * 23, 76.5)));
+  }
+  r.np();
+  r.fill(CX - 22, 79, CX + 22, 82, (x, y) => y < 81 || Math.abs(x + 0.5 - CX) < 21, M.carve, (x, y) => [13, 12.4, 11.6][y - 79], () => 0.02);
+
+  // ---- the dial: a beaded brass bezel, cream enamel, a painted minute track, numerals, a rosette and a crescent
+  r.np();
+  r.fill(CX - RD - 4, DY - RD - 4, CX + RD + 4, DY + RD + 4, (x, y) => { const d = dist(x, y, CX, DY); return d >= RD && d < RD + 3.6; }, M.brass, (x, y) => { const d = dist(x, y, CX, DY) - RD; return 8 + Math.sin(d / 3.6 * Math.PI) * 1.7 + (Math.abs(d - 1.8) < 0.7 && (Math.floor(Math.atan2(y + 0.5 - DY, x + 0.5 - CX) * 18) & 1) ? 0.6 : 0); });
+  r.np();
+  r.fill(CX - RD, DY - RD, CX + RD, DY + RD, (x, y) => dist(x, y, CX, DY) < RD, M.enamel, (x, y) => { const d = dist(x, y, CX, DY) / RD; return 7.2 + 1.6 * (1 - d * d); }, (x, y) => {
     const d = dist(x, y, CX, DY);
     let a = (vnoise(x * 0.15, y * 0.15, 61) - 0.5) * 0.06;
-    if (Math.abs(vnoise(x * 0.3, y * 0.3, 62) - 0.5) < 0.014 && hash(x, y, 63) > 0.4) a -= 0.16;
-    if (d < 20.5) a += (Math.sin(d * 2.6) > 0.3 ? 0.025 : -0.025);
-    if (d > RD - 1.2) a -= 0.15;
-    a -= Math.pow(d / RD, 5) * 0.08; // yellowed toward the rim
-    return a;
+    if (Math.abs(vnoise(x * 0.3, y * 0.3, 62) - 0.5) < 0.012 && hash(x, y, 63) > 0.45) a -= 0.13;
+    if (d > RD - 1.2) a -= 0.14;
+    return a - Math.pow(d / RD, 5) * 0.07;
   });
-  // an old chip out of the enamel by the IIII, the dark ground showing through
-  for (let y = DY + 10; y < DY + 22; y++) for (let x = CX + 22; x < CX + 34; x++) {
-    const d = dist(x, y, CX + 27.5, DY + 15.5) + (vnoise(x * 0.7, y * 0.7, 66) - 0.5) * 2.2;
-    if (d < 2.1 && dist(x, y, CX, DY) < RD - 0.5) r.put(x, y, M.dark, 6.6, 0.1);
-    else if (d < 3 && dist(x, y, CX, DY) < RD) r.alb[y * W + x] -= 0.12;
-  }
   for (let y = DY - RD; y < DY + RD; y++) for (let x = CX - RD; x < CX + RD; x++) {
     const d = dist(x, y, CX, DY);
-    if (Math.abs(d - 32.6) < 0.5 || Math.abs(d - 29.4) < 0.5) ink(x, y);
+    if (Math.abs(d - 31.4) < 0.5 || Math.abs(d - 28.4) < 0.5) ink(x, y);
   }
   for (let m = 0; m < 60; m++) {
-    // a dot for every minute on the track, a bold bar across it every five
     const a = (m / 60) * Math.PI * 2 - Math.PI / 2;
-    if (m % 5 === 0) for (let rr = 29.6; rr < 32.6; rr += 0.25) ink(Math.floor(CX + Math.cos(a) * rr), Math.floor(DY + Math.sin(a) * rr));
-    else ink(Math.floor(CX + Math.cos(a) * 31), Math.floor(DY + Math.sin(a) * 31));
+    if (m % 5 === 0) for (let rr = 28.6; rr < 31.4; rr += 0.25) ink(Math.floor(CX + Math.cos(a) * rr), Math.floor(DY + Math.sin(a) * rr));
+    else ink(Math.floor(CX + Math.cos(a) * 29.9), Math.floor(DY + Math.sin(a) * 29.9));
   }
   NUMS.forEach((s, h) => {
     const a = (h / 12) * Math.PI * 2 - Math.PI / 2;
     const glyphs = [...s].map((c) => ROM[c]);
     const w = glyphs.reduce((acc, g) => acc + g[0].length, 0);
-    const rr = 24.4 + Math.abs(Math.cos(a)) * (w > 9 ? 1.4 : 0.5);
-    const x0 = Math.round(CX + Math.cos(a) * rr - w / 2), y0 = Math.round(DY + Math.sin(a) * rr - 3.5);
-    let xx = x0;
+    // as far out as the numeral's box fits inside the track
+    let rr = 26;
+    for (; rr > 14; rr -= 0.25) {
+      const x0 = CX + Math.cos(a) * rr - w / 2, y0 = DY + Math.sin(a) * rr - 3.5;
+      if ([[x0, y0], [x0 + w, y0], [x0, y0 + 7], [x0 + w, y0 + 7]].every(([px, py]) => Math.hypot(px - CX, py - DY) < 27.6)) break;
+    }
+    let xx = Math.round(CX + Math.cos(a) * rr - w / 2);
+    const y0 = Math.round(DY + Math.sin(a) * rr - 3.5);
     for (const g of glyphs) { g.forEach((row, yy) => [...row].forEach((ch, k) => { if (ch === '#') ink(xx + k, y0 + yy); })); xx += g[0].length; }
   });
-  const tiny = (str, cx, y) => { let w = -1; for (const c of str) w += (TINY[c]?.[0].length ?? 3) + 1; let x = Math.round(cx - w / 2); for (const c of str) { const g = TINY[c] ?? TINY[' ']; g.forEach((row, yy) => [...row].forEach((ch, k) => { if (ch === '#') ink(x + k, y + yy); })); x += g[0].length + 1; } };
-  tiny('HOLLOW', CX, DY - 14);
-  tiny('& CO.', CX, DY + 9);
-  for (const sx of [-1, 1]) {
-    const hx = CX + sx * 12, hy = DY + 5;
-    r.fill(hx - 3, hy - 3, hx + 3, hy + 3, (x, y) => dist(x, y, hx, hy) < 2.6, M.brass, (x, y) => 8.6 - dist(x, y, hx, hy) * 0.3);
-    r.fill(hx - 2, hy - 2, hx + 2, hy + 2, (x, y) => dist(x, y, hx, hy) < 1.4, M.dark, () => 6);
+  // a red-and-gold rosette at the arbor, the maker's little red heart
+  r.np();
+  r.fill(CX - 6, DY - 6, CX + 6, DY + 6, (x, y) => { const d = dist(x, y, CX, DY), a = Math.atan2(y + 0.5 - DY, x + 0.5 - CX); return d < 3.2 + Math.cos(a * 6) * 1.4 + 0.6; }, (x, y) => (dist(x, y, CX, DY) < 2 ? M.brass : M.red), 9, (x, y) => (dist(x, y, CX, DY) < 2 ? 0.1 : 0.05));
+  ['.#.#.', '#####', '#####', '.###.', '..#..'].forEach((row, y) => [...row].forEach((ch, x) => { if (ch === '#') r.put(CX - 2 + x, DY + 10 + y, M.red, 9, x === 1 && y === 1 ? 0.3 : 0.08, { flat: true }); }));
+
+  // ---- the wreath: carved oak leaves and acorns round the dial, filling the corners
+  // a garland of leaves all round the bezel, clusters with acorns in the corners, acorn pairs at the sides
+  for (let k = 0; k < 18; k++) {
+    const a = (k / 18) * Math.PI * 2 + 0.12, sx = CX + Math.cos(a) * 39.5, sy = DY + Math.sin(a) * 39.5;
+    oakLeaf(r, sx, sy, a + Math.PI / 2 - 0.32, 14, 4.8, { h: 9 + (k % 2) * 0.7 });
   }
-  for (let y = AY - MOON.r; y < AY; y++) for (let x = CX - MOON.r; x < CX + MOON.r; x++) if (inMoonWin(x, y)) r.put(x, y, M.none, 0);
-
-  // ---- the brass bezel round the opening (a bead between two fillets)
-  r.fill(OPEN.x0 - 5, AY - AR - 5, OPEN.x1 + 5, OPEN.y1 + 5, (x, y) => { const d = sdOpen(x, y); return d >= 0 && d < 4; }, M.brass, (x, y) => [12.6, 14.2, 15, 14.2, 12.8][Math.min(4, Math.floor(sdOpen(x, y) * 1.25))]);
-
-  // ---- the pendulum aperture: brass bezel, dark interior with the back board, the beat plate
-  r.fill(AP.cx - AP.r - 4, AP.cy - AP.r - 4, AP.cx + AP.r + 4, AP.y1 + 4, (x, y) => sdAp(x, y) < 3 && sdAp(x, y) >= 0, M.brass, (x, y) => [12.5, 14, 14.6, 13][Math.min(3, Math.floor(sdAp(x, y) * 1.4))]);
-  r.fill(AP.cx - AP.r, AP.cy - AP.r, AP.cx + AP.r, AP.y1, (x, y) => sdAp(x, y) < 0, M.woodDark, (x, y) => 2 + (y - AP.cy + AP.r) * 0.04, (x, y) => veneer(x, y, 'v', 17) * 0.6 - 0.2);
-  r.fill(CX - 4, PIVOT.y - 1, CX + 4, PIVOT.y + 2, (x, y) => sdAp(x, y) < 0, M.brass, () => 4);
-
-  // ---- cornice, bell top, fret, finials, handle
-  const corProf = [11, 13, 14.5, 15, 14.5, 13, 11, 10, 11, 12];
-  const corHW = [60, 62, 64, 65, 65, 64, 63, 62, 61, 61];
-  r.fill(0, 58, W, 68, (x, y) => Math.abs(x + 0.5 - CX) < corHW[y - 58], M.wood, (x, y) => corProf[y - 58] - (Math.abs(x + 0.5 - CX) > corHW[y - 58] - 1.5 ? 1.5 : 0), (x, y) => veneer(x, y, 'h', 21));
-  r.fill(0, 64, W, 65, (x, y) => Math.abs(x + 0.5 - CX) < 63, M.brass, () => 12.5);
-  r.fill(0, bellY0, W, bellY1, (x, y) => Math.abs(x + 0.5 - CX) < bellHW(y), M.wood, (x, y) => {
-    const hw = bellHW(y), bc = (hw - 28) / 32, dx = (x + 0.5 - CX) / hw;
-    return 3 + bc * 9 + 4 * Math.sqrt(Math.max(0, 1 - dx * dx));
-  }, (x, y) => veneer(x, y, 'f', 23, CX) * 1.3);
-  const fcx = CX, fcy = 41;
-  const inF = (x, y) => ((x + 0.5 - fcx) / 18) ** 2 + ((y + 0.5 - fcy) / 8) ** 2 < 1;
-  const fretMat = (x, y) => {
-    const e = 1 - ((x + 0.5 - fcx) / 18) ** 2 - ((y + 0.5 - fcy) / 8) ** 2;
-    if (e < 0.14) return M.brass;
-    const gx = (((x + 0.5 - fcx) % 6) + 6) % 6 - 3, gy = (((y + 0.5 - fcy + 3) % 6) + 6) % 6 - 3, d = Math.hypot(gx, gy);
-    return Math.abs(d - 2.4) < 0.75 ? M.brass : M.dark;
-  };
-  r.fill(fcx - 19, fcy - 9, fcx + 19, fcy + 9, inF, fretMat, (x, y) => (fretMat(x, y) === M.dark ? 2 : 11.5));
-  r.fill(0, 15, W, 21, (x, y) => Math.abs(x + 0.5 - CX) < [20, 22, 23, 23, 22, 21][y - 15], M.wood, (x, y) => [10, 12, 13, 12.5, 11.5, 10][y - 15], (x, y) => veneer(x, y, 'h', 25));
-  for (const sx of [-1, 1]) r.fill(CX + sx * 22 - 4, 14, CX + sx * 22 + 4, 22, (x, y) => dist(x, y, CX + sx * 22, 18) < 3.4, M.brass, (x, y) => 13 + Math.sqrt(Math.max(0, 11.6 - dist(x, y, CX + sx * 22, 18) ** 2)));
-  const pts = [];
-  for (let i = 0; i <= 200; i++) { const th = -Math.PI / 2 + (i / 200) * Math.PI; pts.push([CX + 22 * Math.sin(th), 17 - 13.5 * Math.cos(th)]); }
-  const near = (x, y) => { let best = 9; for (const [px, py] of pts) best = Math.min(best, Math.hypot(x + 0.5 - px, y + 0.5 - py)); return best; };
-  r.fill(CX - 26, 1, CX + 26, 18, (x, y) => near(x, y) < (y < 6 ? 2.1 : 1.6) && y < 16, M.brass, (x, y) => 14 + Math.sqrt(Math.max(0, 4 - near(x, y) ** 2)) * 1.5);
-  for (const sx of [-1, 1]) {
-    const fx = CX + sx * 56;
-    r.fill(fx - 6, 52, fx + 6, 58, (x, y) => Math.abs(x + 0.5 - fx) < [4, 5, 5, 6, 6, 6][y - 52], M.wood, (x, y) => [11, 12, 12.5, 12, 11.5, 11][y - 52], (x, y) => veneer(x, y, 'h', 27));
-    r.fill(fx - 6, 40, fx + 6, 53, (x, y) => dist(x, y, fx, 47) < 5.4, M.brass, (x, y) => 12 + Math.sqrt(Math.max(0, 29 - dist(x, y, fx, 47) ** 2)) * 1.1);
-    r.fill(fx - 2, 37, fx + 2, 42, (x, y) => Math.abs(x + 0.5 - fx) < (y < 39 ? 0.8 : 1.6), M.brass, () => 15);
+  for (const [qx, qy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    const ox = CX + qx * 41, oy = DY + qy * 33, a = Math.atan2(qy * 0.9, qx);
+    oakLeaf(r, ox, oy, a - 0.95, 14, 5, { h: 10.4 });
+    oakLeaf(r, ox, oy, a + 0.95, 14, 5, { h: 10.4 });
+    oakLeaf(r, ox, oy, a, 19, 6, { h: 11.2, curl: 0.6 });
+    acorn(r, ox - qx * 5 + (qx > 0 ? -1 : 0), oy + (qy < 0 ? 4 : -9), 0.95, { h: 12.4 });
+    acorn(r, ox + qx * 1 + (qx > 0 ? -1 : 0), oy + (qy < 0 ? 6 : -7), 0.85, { h: 12.8 });
   }
+  for (const sx of [-1, 1]) { acorn(r, CX + sx * 52 - 0.5, 143, 1, { h: 10 }); acorn(r, CX + sx * 52 - 0.5, 156, 1, { h: 10 }); }
+
+  // ---- the apron: pierced fretwork with a big scallop under the middle
+  r.np();
+  r.fill(CX - APR.hw, APR.y0, CX + APR.hw, APR.y1, (x, y) => {
+    const u = Math.abs(x + 0.5 - CX), v0 = y + 0.5 - APR.y0;
+    if (u > APR.hw - v0 * 0.6) return false;
+    const bottom = u < 18 ? 16 - (u / 18) ** 2 * 7 : 9 - Math.abs(Math.sin(((u - 18) / 36) * Math.PI * 2.5)) * 4;
+    if (v0 > bottom) return false;
+    // the piercings: a row of round holes and teardrops
+    if (dist(x, y, CX, APR.y0 + 7.5) < 2.2) return false;
+    for (const hx of [11, 22, 33, 44]) if (u > hx - 2.5 && u < hx + 2.5 && dist(Math.abs(x + 0.5 - CX) - 0.5 + CX, y, CX + hx, APR.y0 + 4.5) < 1.6) return false;
+    return true;
+  }, M.carve, (x, y) => 7 + (y + 0.5 - APR.y0 < 1.5 ? 1 : 0), (x, y) => grain(x, y, 'h', 31) * 0.5);
   return r;
 }
 
-/** the glass over the dial and the aperture: reflections only (alpha) */
-function paintGlass() {
-  const b = new Buf(W, H);
-  const white = [255, 252, 240], warm = [255, 236, 200];
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const dOpen = sdOpen(x, y), dAp = sdAp(x, y);
-    if (dOpen < 0) {
-      // the convex glass: a crescent of window light along the upper-left of the arch, a soft broad sheen, a glint
-      const d = dist(x, y, CX + 6, AY + 8), ang = Math.atan2(y + 0.5 - (AY + 8), x + 0.5 - (CX + 6));
-      const upLeft = ang < -1.6 && ang > -2.9;
-      if (upLeft && d > AR - 5.5 && d < AR - 3.6) b.set(x, y, white, 70);
-      else if (upLeft && d > AR - 9 && d < AR - 5.5 && bayer(x, y) < 0.25) b.set(x, y, white, 40);
-      if ((x === CX - 19 && y >= DY - 25 && y <= DY - 23) || (y === DY - 24 && x >= CX - 20 && x <= CX - 18)) b.set(x, y, white, 200);
-      const lowR = dist(x, y, CX - 10, DY - 14);
-      if (lowR > RD + 4 && lowR < RD + 6.5 && x > CX + 8 && y > DY + 8 && bayer(x, y) < 0.45) b.set(x, y, warm, 50);
-    } else if (dAp < 0) {
-      const u = (x - (AP.cx - AP.r)) + (y - (AP.cy - AP.r));
-      if (u > 5 && u < 8) b.set(x, y, white, 80);
-      if (u > 11 && u < 12) b.set(x, y, white, 55);
-    }
-  }
-  return b;
-}
+const keepDial = (x, y) => dist(x, y, CX, DY) < RD + 4;
 
 // ------------------------------------------------------------------ moving parts
 
@@ -482,179 +631,121 @@ function inPoly(x, y, pts) {
   }
   return inside;
 }
-// hands in hand space (+y from the centre towards the tip), blued steel spade hands and a gilt seconds hand
-const HOUR = [
-  { poly: [[-1.2, -5], [1.2, -5], [1.0, 11], [-1.0, 11]] },
-  { poly: [[0, 9], [3.6, 11.5], [3.8, 14.5], [1.2, 16.5], [1.1, 18.5], [0, 21.5], [-1.1, 18.5], [-1.2, 16.5], [-3.8, 14.5], [-3.6, 11.5]] },
-  { c: [0, -6.4], r: 2.4 },
-];
-const MINUTE = [
-  { poly: [[-1.0, -7], [1.0, -7], [0.7, 23], [-0.7, 23]] },
-  { poly: [[0, 19.5], [2.3, 23.5], [0, 31.5], [-2.3, 23.5]] },
-  { c: [0, -8.2], r: 2.2 },
-];
-const SECOND = [{ poly: [[-0.55, -11], [0.55, -11], [0.45, 32.5], [-0.45, 32.5]] }, { c: [0, -10], r: 2.4 }];
-const HUB = [{ c: [0, 0], r: 2.6 }];
-const FR = 70;
-/** rasterise a hand at an angle: lit edge facing the lamp, a dark outline; `gilt` for the seconds */
-function handFrame(shape, ang, gilt = false) {
+// pierced Gothic hands in blued steel (hand space: +y from the centre towards the tip); `holes` are pierced through
+const MINUTE = {
+  parts: [{ poly: [[-0.9, -6], [0.9, -6], [0.6, 20], [-0.6, 20]] }, { poly: [[0, 18], [2.8, 22.4], [0, 29.4], [-2.8, 22.4]] }, { c: [0, -6.6], r: 2.1 }],
+  holes: [{ poly: [[0, 20.4], [1.1, 22.4], [0, 25], [-1.1, 22.4]] }, { c: [0, -6.6], r: 0.9 }],
+};
+const HOUR = {
+  parts: [{ poly: [[-1.2, -5], [1.2, -5], [0.9, 9], [-0.9, 9]] }, { poly: [[0, 7.5], [3.9, 10.5], [3.6, 14], [1.2, 15.6], [0, 20.4], [-1.2, 15.6], [-3.6, 14], [-3.9, 10.5]] }, { c: [0, -5.6], r: 2.4 }],
+  holes: [{ poly: [[0, 10], [1.6, 11.6], [0, 14], [-1.6, 11.6]] }, { c: [0, -5.6], r: 1 }],
+};
+const FR = 62;
+const inShape = (s, hx, hy) => s.some((p) => (p.poly ? inPoly(hx, hy, p.poly) : Math.hypot(hx - p.c[0], hy - p.c[1]) < p.r));
+/** rasterise a hand at an angle: bevelled (the edge toward the lamp bright), a glint along the top */
+function handFrame(hand, ang) {
   const b = new Buf(FR, FR), c = FR / 2, ca = Math.cos(ang), sa = Math.sin(ang);
-  const ramp = gilt ? R.brass : R.steel;
-  const inside = (px, py) => {
-    const hx = px * ca + py * sa, hy = -(-px * sa + py * ca);
-    return shape.some((p) => (p.poly ? inPoly(hx, hy, p.poly) : Math.hypot(hx - p.c[0], hy - p.c[1]) < p.r));
-  };
+  const inside = (px, py) => { const hx = px * ca + py * sa, hy = -(-px * sa + py * ca); return inShape(hand.parts, hx, hy) && !inShape(hand.holes, hx, hy); };
   for (let y = 0; y < FR; y++) for (let x = 0; x < FR; x++) {
     const px = x + 0.5 - c, py = y + 0.5 - c;
     if (!inside(px, py)) continue;
-    // a bevelled hand: the face toward the top-left light is bright, the other side darker, a glint on top
     const tl = !inside(px - 1, py) || !inside(px, py - 1), br = !inside(px + 1, py) || !inside(px, py + 1);
-    let t = 0.42 + (tl && !br ? 0.38 : br && !tl ? -0.2 : 0);
-    if (!tl && !br) t += 0.08;
-    b.set(x, y, pick(ramp, clamp(t), x, y, 0.5));
+    let t = 0.2 + (tl && !br ? 0.36 : br && !tl ? -0.14 : 0);
+    if (!tl && !br) t += 0.05;
+    b.set(x, y, pick(R.steel, clamp(t), x, y, 0.4));
   }
-  // outline
-  const o = new Buf(FR, FR); o.d.set(b.d);
-  for (let y = 0; y < FR; y++) for (let x = 0; x < FR; x++) {
-    if (b.a(x, y)) continue;
-    if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => b.a(x + dx, y + dy) > 200)) o.set(x, y, gilt ? [42, 22, 8] : [4, 4, 12]);
-  }
-  return o;
+  return b;
 }
-function handStrip(shape, n, gilt = false) {
+function handStrip(hand, n) {
   const strip = new Buf(FR * n, FR);
-  for (let i = 0; i < n; i++) strip.blit(handFrame(shape, (i / n) * Math.PI * 2, gilt), i * FR, 0);
+  for (let i = 0; i < n; i++) strip.blit(handFrame(hand, (i / n) * Math.PI * 2), i * FR, 0);
   return strip;
 }
-/** the brass centre boss over the hands */
+/** the brass arbor nut over the hands */
 function boss() {
-  const b = new Buf(8, 8);
-  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
-    const d = dist(x, y, 4, 4);
-    if (d > 3.3) continue;
-    b.set(x, y, d > 2.6 ? [36, 22, 8] : pick(R.brass, clamp(0.75 - (x - 3.5) * 0.14 - (y - 3.5) * 0.14 - (d < 1 ? 0.3 : 0)), x, y));
+  const b = new Buf(6, 6);
+  for (let y = 0; y < 6; y++) for (let x = 0; x < 6; x++) {
+    const d = dist(x, y, 3, 3);
+    if (d > 2.7) continue;
+    b.set(x, y, d > 2 ? [40, 20, 10] : pick(R.brass, clamp(0.78 - (x - 2.5) * 0.18 - (y - 2.5) * 0.18), x, y));
   }
   return b;
 }
 
-// the pendulum: a brass rod with a lenticular bob, clipped to the aperture; cosine-spaced swing frames
-const PEND_N = 11, PEND_A = 0.2;
-const APB = { x0: AP.cx - AP.r, y0: AP.cy - AP.r, w: AP.r * 2, h: AP.y1 - (AP.cy - AP.r) };
-function pendulumFrame(a, clip = true) {
-  const f = new Buf(APB.w, APB.h);
-  const bx = PIVOT.x + Math.sin(a) * PEND_LEN, by = PIVOT.y + Math.cos(a) * PEND_LEN;
-  for (let y = 0; y < APB.h; y++) for (let x = 0; x < APB.w; x++) {
-    const X = x + APB.x0, Y = y + APB.y0;
-    if (clip && sdAp(X, Y) >= 0) continue;
-    const t = clamp(((X + 0.5 - PIVOT.x) * (bx - PIVOT.x) + (Y + 0.5 - PIVOT.y) * (by - PIVOT.y)) / (PEND_LEN * PEND_LEN));
-    const qx = PIVOT.x + (bx - PIVOT.x) * t, qy = PIVOT.y + (by - PIVOT.y) * t;
-    const dr = Math.hypot(X + 0.5 - qx, Y + 0.5 - qy), db = dist(X, Y, bx, by);
-    if (db < PEND_R) {
-      const nx = (X + 0.5 - bx) / PEND_R, ny = (Y + 0.5 - by) / PEND_R;
-      let tt = 0.5 - nx * 0.28 - ny * 0.3;
-      if (db > PEND_R - 1) tt -= 0.25;
-      if (Math.abs(db - 3.4) < 0.5) tt -= 0.15;
-      if (Math.hypot(nx + 0.35, ny + 0.35) < 0.28) tt += 0.4;
-      f.set(x, y, pick(R.brass, clamp(tt), X, Y));
-    } else if (dr < 0.8 && t < 0.99) f.set(x, y, pick(R.brass, (X + Y) % 3 ? 0.5 : 0.7, X, Y));
-  }
-  return f;
+// the pendulum: a brass rod with a carved oak-leaf bob and an acorn, swinging from the pivot behind the case
+const PB = { x0: CX - 23, y0: BOT.y0, w: 48, h: PIVOT.y + LEAF.at + LEAF.len + 4 - BOT.y0 };
+function pendulumFrame(a, shadow = true) {
+  const r = new Relief(PB.w, PB.h), px = PIVOT.x - PB.x0, py = PIVOT.y - PB.y0;
+  const dx = Math.sin(a), dy = Math.cos(a);
+  r.np();
+  for (let t = 0; t <= LEAF.at + 1; t += 0.25) r.put(px + dx * t - 0.5, py + dy * t, M.brass, 6 + (t > LEAF.at - 2 ? 1 : 0), 0.05);
+  const sx = px + dx * LEAF.at, sy = py + dy * LEAF.at;
+  oakLeaf(r, sx, sy, Math.PI / 2 - a, LEAF.len, LEAF.wid, { h: 8, curl: 0.6 });
+  acorn(r, Math.round(sx + dx * 2 - 4), Math.round(sy + dy * 2 - 2), 0.8, { h: 9.4 });
+  const out = r.render({ outline: true });
+  return shadow ? wallShadow(out, 2, 3, 80, 36) : out;
 }
 function pendulumStrip() {
-  const strip = new Buf(APB.w * PEND_N, APB.h);
-  for (let j = 0; j < PEND_N; j++) strip.blit(pendulumFrame(PEND_A * Math.cos((Math.PI * j) / (PEND_N - 1))), j * APB.w, 0);
+  const strip = new Buf(PB.w * PEND_N, PB.h);
+  for (let j = 0; j < PEND_N; j++) strip.blit(pendulumFrame(PEND_A * Math.cos((Math.PI * j) / (PEND_N - 1))), j * PB.w, 0);
   return strip;
 }
 
-// the moon disc behind the arch: deep blue with stars and two painted moons, turning on (CX, dcy)
-const MDS = MOON.dr * 2 + 2;
-function moonDisc(rot) {
-  const b = new Buf(MDS, MDS), c = MDS / 2;
-  for (let y = 0; y < MDS; y++) for (let x = 0; x < MDS; x++) {
-    const px = x + 0.5 - c, py = y + 0.5 - c, d = Math.hypot(px, py);
-    if (d > MOON.dr) continue;
-    // disc space (unrotated)
-    const ca = Math.cos(-rot), sa = Math.sin(-rot), ux = px * ca - py * sa, uy = px * sa + py * ca;
-    let col = pick(R.sky, clamp(0.35 + (1 - d / MOON.dr) * 0.45 + (vnoise(ux * 0.2, uy * 0.2, 81) - 0.5) * 0.25), x, y, 0.9);
-    const sx = Math.floor(ux + 100), sy = Math.floor(uy + 100);
-    if (hash(sx, sy, 82) > 0.955) col = hash(sx, sy, 83) > 0.5 ? [255, 236, 170] : [210, 228, 255];
-    for (const sgn of [-1, 1]) {
-      const mx = 0, my = sgn * -19, md = Math.hypot(ux - mx, uy - my);
-      if (md < 6.2) {
-        const nx = (ux - mx) / 6.2, ny = (uy - my) / 6.2;
-        let t = 0.68 - (nx * Math.cos(rot) - ny * Math.sin(rot)) * 0.3 - (nx * Math.sin(rot) + ny * Math.cos(rot)) * 0.25;
-        if (Math.hypot(nx - 0.3, ny + 0.2) < 0.25 || Math.hypot(nx + 0.25, ny - 0.35) < 0.2 || Math.hypot(nx + 0.1, ny + 0.45) < 0.12) t -= 0.18;
-        col = pick(R.moon, clamp(t), x, y, 0.7);
-      } else if (md < 7.6 && bayer(x, y) < 0.4) col = mix(col, [255, 226, 150], 0.35);
-    }
-    b.set(x, y, col);
-  }
+/** a cast pine-cone weight on its hook: overlapping scales in dark bronze */
+function cone(shadow = true) {
+  const r = new Relief(CONE.w, CONE.h), cx = 7, top = 4, len = 27;
+  r.np();
+  for (const [x, y] of [[6, 0], [7, 0], [5, 1], [8, 1], [5, 2], [8, 2], [6, 3], [7, 3]]) r.put(x, y, M.brass, 10, 0.05);
+  const half = (t) => 6.4 * Math.pow(Math.sin(Math.PI * Math.pow(clamp(t), 0.62)), 0.75);
+  r.np();
+  r.fill(0, top, CONE.w, top + len, (x, y) => { const t = (y + 0.5 - top) / len; return Math.abs(x + 0.5 - cx - 0.5) < half(t) + (t < 0.05 ? 1 : 0); }, M.bronze, (x, y) => {
+    const t = (y + 0.5 - top) / len, hw = Math.max(0.8, half(t)), q = clamp(Math.abs(x + 0.5 - cx - 0.5) / hw);
+    const phi = Math.asin(clamp((x + 0.5 - cx - 0.5) / hw, -1, 1)), row = Math.floor((y - top) / 2.6), fy = (y - top) / 2.6 - row;
+    const col = phi / 0.75 + (row & 1) * 0.5, fx = col - Math.floor(col);
+    const scale = (1 - Math.abs(fx - 0.5) * 2) * 0.7 + fy * 0.9;
+    return 6 + Math.sqrt(1 - q * q) * 4 + scale * 1.1 - (fy > 0.82 ? 0.9 : 0);
+  }, (x, y) => { const row = Math.floor((y - top) / 2.6), fy = (y - top) / 2.6 - row; return fy > 0.55 && fy < 0.82 ? 0.08 : 0; }, { gloss: 1.2 });
+  const out = r.render({ outline: true });
+  return shadow ? wallShadow(out, 2, 3, 80, 36) : out;
+}
+/** the brass pull ring on the other end of each chain */
+function ring() {
+  const r = new Relief(RING.w, RING.h);
+  r.np();
+  r.fill(0, 0, RING.w, RING.h, (x, y) => { const d = dist(x, y, 4.5, 5); return d > 1.6 && d < 3.8; }, M.brass, (x, y) => 8 + (1.1 - Math.abs(dist(x, y, 4.5, 5) - 2.7)) * 2);
+  r.put(4, 0, M.brass, 9); r.put(4, 1, M.brass, 9);
+  return r.render({ outline: true });
+}
+/** a 3 x 8 tile of brass chain: an oval link face on, then one edge on */
+function chainTile() {
+  const b = new Buf(3, 8), Lt = R.brass[10], Md = R.brass[6], Dk = R.brass[3], O = OUTLINE;
+  const rows = ['.L.', 'LoD', 'LoD', '.D.', '.M.', '.M.', '.L.', '.M.'];
+  rows.forEach((row, y) => [...row].forEach((ch, x) => { const c = ch === 'L' ? Lt : ch === 'M' ? Md : ch === 'D' ? Dk : ch === 'o' ? O : null; if (c) b.set(x, y, c); }));
   return b;
 }
-/** the moon seen through the window at N disc angles (rising from behind the left hill to the top) */
-const MOON_N = 40;
-const MW = { x0: CX - MOON.r, y0: AY - MOON.r, w: MOON.r * 2, h: MOON.r };
-function moonStrip() {
-  const strip = new Buf(MW.w * MOON_N, MW.h);
-  for (let j = 0; j < MOON_N; j++) {
-    const rot = -Math.PI * 0.62 + (j / (MOON_N - 1)) * Math.PI * 0.62; // the upper moon from low left to the top
-    const disc = moonDisc(rot), dx = CX - MDS / 2, dy = MOON.dcy - MDS / 2;
-    for (let y = 0; y < MW.h; y++) for (let x = 0; x < MW.w; x++) {
-      const X = x + MW.x0, Y = y + MW.y0;
-      if (!inMoonWin(X, Y)) continue;
-      const c = disc.get(X - dx, Y - dy);
-      if (c) strip.set(j * MW.w + x, y, c);
-    }
-  }
-  return strip;
-}
 
-// ------------------------------------------------------------------ the boot scene: wall, bracket, light
+// ------------------------------------------------------------------ the boot scene: wall, light
 
 /** a dark emerald regency-stripe wall (the office's own wallpaper, in the dark), 64 px tile */
 function wallTile() {
   const N = 64, b = new Buf(N, N);
-  const G = rampOf([0x020605, 0x06120e, 0x0b1e17, 0x112a20], 6);
-  const gold = rampOf([0x1a1306, 0x2e220c], 3);
+  const G = rampOf([0x030a08, 0x071a12, 0x0d281c, 0x143626], 6);
+  const gold = rampOf([0x2a1c08, 0x4a3410], 3);
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
     const sx = x % 32;
     const n = (vnoise((x % N) * 0.12, y * 0.12, 5) - 0.5) * 0.2;
-    if (sx === 20 || sx === 31) { b.set(x, y, pick(gold, 0.5 + n, x, y)); continue; }
+    if (sx === 20 || sx === 31) { b.set(x, y, pick(gold, 0.5 + n, x, y, 0.85)); continue; }
     const satin = sx < 20;
     const dia = satin && Math.abs(Math.abs((sx % 20) - 10) + Math.abs((y % 16) - 8) - 7) < 0.8;
     b.set(x, y, pick(G, clamp((satin ? 0.62 : 0.32) + n + (dia ? 0.12 : 0) + ((x + y) & 1 ? 0.02 : -0.02)), x, y, 1));
   }
   return { url: b.url(), N };
 }
-/** the carved mahogany wall bracket the clock stands on, with the clock's soft shadow */
-const BR = { w: 172, h: 40 };
-function bracket() {
-  const r = new Relief(BR.w, BR.h), cx = BR.w / 2;
-  // two carved scroll corbels: an S-curve with a volute at the top and a smaller one at the foot
-  for (const sx of [-1, 1]) {
-    const bx = cx + sx * 52;
-    r.fill(bx - 14, 8, bx + 14, BR.h, (x, y) => {
-      const t = (y - 8) / (BR.h - 8), w = 7 - t * 3, off = Math.sin(t * Math.PI) * 4 * -sx;
-      return Math.abs(x + 0.5 - bx - off) < w || dist(x, y, bx - sx * 2, 13) < 6 || dist(x, y, bx + sx * 1, BR.h - 4) < 3.6;
-    }, M.wood, (x, y) => {
-      const t = (y - 8) / (BR.h - 8), off = Math.sin(t * Math.PI) * 4 * -sx, u = (x + 0.5 - bx - off) / (7 - t * 3);
-      const vol = dist(x, y, bx - sx * 2, 13);
-      if (vol < 6) return 8 + (Math.sin(vol * 1.4 + Math.atan2(y - 13, x - bx) * sx) > 0 ? 2 : 0.5);
-      return 6 + 3 * Math.sqrt(Math.max(0, 1 - u * u));
-    }, (x, y) => veneer(x, y, 'v', 91));
-  }
-  // the shelf: a moulded top board with a brass-edged lip
-  const prof = [9, 11, 12, 12, 11, 9, 8, 9, 10, 9];
-  r.fill(0, 0, BR.w, 10, (x, y) => Math.abs(x + 0.5 - cx) < 84 - (y > 6 ? (y - 6) * 2 : 0), M.wood, (x, y) => prof[y], (x, y) => veneer(x, y, 'h', 93));
-  r.fill(0, 3, BR.w, 4, (x, y) => Math.abs(x + 0.5 - cx) < 83, M.brass, () => 12.5);
-  return r.wear(19).render({ outline: true, seed: 5 });
-}
 /** A pool of warm lamplight on the wall, in hard stepped bands with ordered dither. */
 function lampPool() {
-  const w = 220, h = 280, b = new Buf(w, h), cx = w / 2, cy = h * 0.45;
+  const w = 260, h = 380, b = new Buf(w, h), cx = w / 2, cy = h * 0.47;
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const nx = (x + 0.5 - cx) / (w / 2), ny = (y + 0.5 - cy) / (h / 2), a = Math.atan2(ny, nx);
-    // the rim wanders (a shade's uneven edge, the wall's texture), the light leans up and left
+    const nx = (x + 0.5 - cx) / (w * 0.4), ny = (y + 0.5 - cy) / (h * 0.38), a = Math.atan2(ny, nx);
     const rag = 1 + (fbm(Math.cos(a) * 1.6 + 3, Math.sin(a) * 1.6 + 3, 8) - 0.5) * 0.34 + (vnoise(x * 0.09, y * 0.09, 9) - 0.5) * 0.1;
     const d = Math.sqrt(nx * nx + ny * ny) / rag;
     if (d >= 1) continue;
@@ -662,7 +753,7 @@ function lampPool() {
     const lv = (1 - d) * 6 * lean, band = Math.floor(lv), frac = lv - band;
     const k = band + (frac > bayer(x, y) ? 1 : 0);
     if (k <= 0) continue;
-    b.set(x, y, [255, 178, 92], Math.min(6, k) * 11);
+    b.set(x, y, [255, 184, 96], Math.min(6, k) * 19);
   }
   return { url: b.url(), w, h };
 }
@@ -688,143 +779,156 @@ function pointer() {
   }
   return { url: b.url(), fw, fh };
 }
-function sparkle() {
-  const b = new Buf(7, 7);
-  for (let k = -3; k <= 3; k++) { b.set(3 + k, 3, Math.abs(k) < 2 ? [255, 252, 240] : [255, 210, 120]); b.set(3, 3 + k, Math.abs(k) < 2 ? [255, 252, 240] : [255, 210, 120]); }
-  return b.url();
+/** a little gold music note (for the owl's call) */
+function note() {
+  const rows = ['..##', '..#.#', '..#..', '..#..', '###..', '###..'];
+  const b = new Buf(7, 8);
+  rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch === '#') b.set(x + 1, y + 1, x < 2 && y > 3 ? [255, 214, 120] : [255, 240, 200]); }));
+  return outline(b).url();
 }
 
 // ------------------------------------------------------------------ assemble
 
-const relief = paintClock();
-const keepClock = (x, y) => dist(x, y, CX, DY) < RD + 1 || (y < AY + 1 && dist(x, y, CX, AY) < MOON.r + 2) || sdAp(x, y) < 2;
-relief.wear(7, keepClock);
-const caseB = relief.render({ outline: true, seed: 3, keep: keepClock });
-const glass = paintGlass();
-const HN = 120, MN = 120, SN = 60;
-const hourS = handStrip(HOUR, HN), minS = handStrip(MINUTE, MN), secS = handStrip(SECOND, SN, true);
-const pend = pendulumStrip(), moon = moonStrip(), ptr = pointer(), wall = wallTile(), pool = lampPool(), brk = bracket(), bossB = boss();
+/** paint, age and shade one state of the case (the same noise every time, so states differ only round the door) */
+function caseState(v) { return paintCase(v).wear(7, keepDial).render({ outline: true }); }
+const caseB = caseState({ door: 0, owl: null });
+const STATES = [{ door: 1, owl: null }, { door: 2, owl: 'peek' }, { door: 2, owl: 'out' }, { door: 2, owl: 'call' }, { door: 2, owl: 'bow' }];
+const stateBufs = STATES.map(caseState);
+// the door box: everything any state changes
+let bx0 = W, by0 = H, bx1 = 0, by1 = 0;
+for (const s of stateBufs) for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+  const i = (y * W + x) * 4;
+  if (s.d[i] !== caseB.d[i] || s.d[i + 1] !== caseB.d[i + 1] || s.d[i + 2] !== caseB.d[i + 2] || s.d[i + 3] !== caseB.d[i + 3]) { bx0 = Math.min(bx0, x); by0 = Math.min(by0, y); bx1 = Math.max(bx1, x + 1); by1 = Math.max(by1, y + 1); }
+}
+const DB = { x: bx0, y: by0, w: bx1 - bx0, h: by1 - by0, n: STATES.length + 1 };
+const doorStrip = new Buf(DB.w * DB.n, DB.h);
+[caseB, ...stateBufs].forEach((s, i) => doorStrip.blit(s.crop(DB.x, DB.y, DB.w, DB.h), i * DB.w, 0));
+const caseShadow = wallShadow(caseB, 5, 7);
+const HN = 120, MN = 120;
+const hourS = handStrip(HOUR, HN), minS = handStrip(MINUTE, MN);
+const pend = pendulumStrip(), coneB = cone(), ringB = ring(), chain = chainTile();
+const ptr = pointer(), wall = wallTile(), pool = lampPool(), bossB = boss();
 const EDGE = 44, edgeH = edgeShade(EDGE, false), edgeV = edgeShade(EDGE, true);
 const HO = { x: CX - FR / 2, y: DY - FR / 2 };
 
 // ---- the 3D office's copy of the clock: one atlas + its layout
 {
-  const AW = W * 2 + FR * 3 + 4, AH = H;
+  const CH = 100; // a strip of chain long enough for the lowest weight
+  const AW = W + FR * 2 + 2 + PB.w + 2 + CONE.w + 2 + 3 + 2, AH = H;
   const atlas = new Buf(AW, AH);
   atlas.blit(caseB, 0, 0);
-  atlas.blit(glass, W, 0);
-  const hx = W * 2;
+  const hx = W;
   atlas.blit(handFrame(HOUR, 0), hx, 0);
   atlas.blit(handFrame(MINUTE, 0), hx + FR, 0);
-  atlas.blit(handFrame(SECOND, 0, true), hx + FR * 2, 0);
-  atlas.blit(moonDisc(0), hx, FR);
-  const pf = pendulumFrame(0, false);
-  atlas.blit(pf, hx + MDS + 2, FR);
-  atlas.blit(bossB, hx + MDS + 2 + APB.w + 2, FR);
+  atlas.blit(bossB, hx, FR);
+  const px = hx + FR * 2 + 2;
+  atlas.blit(pendulumFrame(0, false), px, 0);
+  const cx = px + PB.w + 2;
+  atlas.blit(cone(false), cx, 0);
+  atlas.blit(ringB, cx, CONE.h + 2);
+  const chx = cx + CONE.w + 2;
+  for (let y = 0; y < CH; y += 8) atlas.blit(chain, chx, y);
   writeFileSync(fileURLToPath(new URL('../../../public/models/interview/clock.png', import.meta.url)), atlas.png());
-  // the case outline per row (for the 3D case walls): [y, x0, x1]
-  const rows = [];
-  for (let y = 14; y < H; y += 2) {
-    let x0 = -1, x1 = -1;
-    for (let x = 0; x < W; x++) if (caseB.a(x, y)) { if (x0 < 0) x0 = x; x1 = x + 1; }
-    if (x0 >= 0) rows.push([y, x0, x1]);
-  }
-  const gen = `// Generated by src/onboard/tools/bootart.mjs: the layout of public/models/interview/clock.png (art px).
+  const gen = `// Generated by src/onboard/tools/bootart.mjs: the layout of public/models/interview/clock.png and the cuckoo clock's
+// geometry (art px, x right, y down; the case painting is W x H, the weights hang below it).
 export const CLOCK_ART = ${JSON.stringify({
-    W, H, CX, DY, RD, atlas: [AW, AH], case: [0, 0, W, H], glass: [W, 0, W, H], hour: [hx, 0, FR, FR], minute: [hx + FR, 0, FR, FR], second: [hx + FR * 2, 0, FR, FR],
-    moon: [hx, FR, MDS, MDS], moonAt: [CX, MOON.dcy], pend: [hx + MDS + 2, FR, APB.w, APB.h], pendBox: [APB.x0, APB.y0], pivot: [PIVOT.x, PIVOT.y], boss: [hx + MDS + 2 + APB.w + 2, FR, 8, 8],
-    rows,
+    W, H, CX, DY, RD, atlas: [AW, AH], case: [0, 0, W, H],
+    hour: [hx, 0, FR, FR], minute: [hx + FR, 0, FR, FR], boss: [hx, FR, 6, 6],
+    pend: [px, 0, PB.w, PB.h], pendBox: [PB.x0, PB.y0], pivot: [PIVOT.x, PIVOT.y],
+    cone: [cx, 0, CONE.w, CONE.h], ring: [cx, CONE.h + 2, RING.w, RING.h], chain: [chx, 0, 3, CH],
+    // where the weights and rings hang once the clock is wound (the loading screen's last frame): sprite top-left
+    cones: WEIGHTS.map((w) => [w.x - 7, w.y + WT_TRAVEL]), rings: RINGS.map((g) => [g.x - 4, g.y - WT_TRAVEL]), chainX: [...WEIGHTS.map((w) => w.x - 1), ...RINGS.map((g) => g.x - 1)],
+    roof: { ridge: RIDGE, slope: SL, t: ROOF_T + BARGE, eave: EAVE }, gable: GHW, corn: [CORN.hw, CORN.y0, CORN.y1], bot: [BOT.hw, BOT.y0, BOT.y1], caseBox: [CASE.hw, CASE.y0, CASE.y1],
   })} as const;
 `;
   writeFileSync(fileURLToPath(new URL('../clockart.gen.ts', import.meta.url)), gen);
 }
 
-// ---- progress timing: the moon rises in the arch with the (estimated) loading progress, fast at first, then a crawl
+// ---- progress timing: the weights sink with the (estimated) loading progress, fast at first, then a crawl
 const LOAD_S = 26;
 const prog = (t) => { const a = Math.min(1, t / 7); return 0.9 * (1 - (1 - a) ** 2.4) + 0.07 * Math.max(0, (t - 7) / (LOAD_S - 7)); };
 const invProg = (p) => { let lo = 0, hi = LOAD_S; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (prog(m) < p) lo = m; else hi = m; } return hi; };
-function progFrames(name, frames, fw) {
-  const out = [], n = frames.length;
-  for (let i = 0; i < n; i++) {
-    const p = (i / (n - 1)) * prog(LOAD_S);
-    const pct = i === 0 ? 0 : (invProg(p) / LOAD_S) * 100;
-    out.push(`${pct.toFixed(2)}%{background-position:-${frames[i] * fw}em 0}`);
+/** one keyframe per art pixel of travel (steps, so the weights stay on the pixel grid); stops short of the end */
+function sinkFrames() {
+  const out = [], n = Math.round(WT_TRAVEL * prog(LOAD_S)) - 2;
+  for (let i = 0; i <= n; i++) {
+    const pct = i === 0 ? 0 : (invProg(i / WT_TRAVEL) / LOAD_S) * 100;
+    out.push(`${pct.toFixed(2)}%{transform:translateY(calc(var(--d)*${i}em))}`);
   }
-  return `@keyframes ${name}{${out.join('')}}`;
+  return `@keyframes bt-wt{${out.join('')}}`;
 }
-const moonFrames = Array.from({ length: MOON_N - 4 }, (_, i) => i);
-const SH = H + BR.h - 2; // the clock and its bracket
+const SW = W; // the stage's width
+const dw = DB.w, dh = DB.h;
 
 const CSSTXT = `
-#boot{--k:min(calc(86vw / ${BR.w}),calc(72vh / ${SH}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
+#boot{--k:min(calc(86vw / ${SW}),calc(72vh / ${SH}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
 background:#020504 url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s steps(6)}
-@supports (width:round(nearest,1px,1px)){#boot{--k:max(1px,min(round(nearest,min(calc(86vw / ${BR.w}),calc(72vh / ${SH})),1px),round(down,min(calc(98vw / ${BR.w}),calc(92vh / ${SH})),1px)))}}
+@supports (width:round(nearest,1px,1px)){#boot{--k:max(1px,min(round(nearest,min(calc(86vw / ${SW}),calc(72vh / ${SH})),1px),round(down,min(calc(98vw / ${SW}),calc(92vh / ${SH})),1px)))}}
 #boot.gone:not(.hold):not(.js){opacity:0;pointer-events:none}
 #boot *{position:absolute;display:block;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;pointer-events:none}
 #boot .bt-edge{left:0;top:0;width:${EDGE}em;height:100%;background:url(${edgeH}) 0 0/${EDGE}em 4em repeat-y}
 #boot .bt-edge.r{left:auto;right:0;transform:scaleX(-1)}
 #boot .bt-edge.t{width:100%;height:${EDGE}em;background:url(${edgeV}) 0 0/4em ${EDGE}em repeat-x}
 #boot .bt-edge.b{top:auto;bottom:0;width:100%;height:${EDGE}em;background:url(${edgeV}) 0 0/4em ${EDGE}em repeat-x;transform:scaleY(-1)}
-#boot .bt-pool{width:${pool.w}em;height:${pool.h}em;left:50%;top:50%;margin:-${(pool.h * 0.47).toFixed(1)}em 0 0 -${pool.w / 2}em;background:url(${pool.url}) 0 0/100% 100%;animation:bt-flick 3.2s steps(1) infinite}
+#boot .bt-pool{width:${pool.w}em;height:${pool.h}em;left:50%;top:50%;margin:-${(pool.h * 0.5).toFixed(1)}em 0 0 -${pool.w / 2}em;background:url(${pool.url}) 0 0/100% 100%;animation:bt-flick 3.2s steps(1) infinite}
 #boot .bt-mote{width:1em;height:1em;background:#ffd890;opacity:0;animation:bt-mote 9s steps(36) infinite}
-#boot .bt-stage{position:relative;width:${BR.w}em;height:${SH}em;flex:none;transform-origin:50% ${((DY / SH) * 100).toFixed(3)}%}
-#boot .bt-clock{left:${(BR.w - W) / 2}em;top:0;width:${W}em;height:${H}em;transform-origin:50% 96%}
-#boot .bt-brk{left:0;top:${H - 2}em;width:${BR.w}em;height:${BR.h}em}
-#boot .bt-shadow{left:${(BR.w - W) / 2 + 14}em;top:${H - 6}em;width:${W - 22}em;height:6em;background:repeating-linear-gradient(90deg,rgba(0,0,0,.55) 0 1em,rgba(0,0,0,.25) 1em 2em)}
-#boot .bt-moon{left:${MW.x0}em;top:${MW.y0}em;width:${MW.w}em;height:${MW.h}em;background:url(${moon.url()}) 0 0/${MW.w * MOON_N}em ${MW.h}em;animation:bt-moon ${LOAD_S}s steps(1,end) forwards}
+#boot .bt-stage{position:relative;width:${SW}em;height:${SH}em;flex:none;transform-origin:50% ${((DY / SH) * 100).toFixed(3)}%}
+#boot .bt-clock{left:0;top:0;width:${SW}em;height:${SH}em}
 #boot .bt-case{left:0;top:0;width:${W}em;height:${H}em}
-#boot .bt-glass{left:0;top:0;width:${W}em;height:${H}em}
-#boot .bt-pend{left:${APB.x0}em;top:${APB.y0}em;width:${APB.w}em;height:${APB.h}em;background:url(${pend.url()}) 0 0/${APB.w * PEND_N}em ${APB.h}em;animation:bt-pend .55s steps(${PEND_N - 1},jump-none) infinite alternate}
+#boot .bt-pend{left:${PB.x0}em;top:${PB.y0}em;width:${PB.w}em;height:${PB.h}em;background:url(${pend.url()}) 0 0/${PB.w * PEND_N}em ${PB.h}em;animation:bt-pend .6s steps(${PEND_N},jump-none) infinite alternate}
+#boot .bt-wt,#boot .bt-rg{--d:1;animation:bt-wt ${LOAD_S}s steps(1,end) forwards}
+#boot .bt-wt{width:${CONE.w}em;height:${CONE.h}em;background:url(${coneB.url()}) 0 0/100% 100%}
+#boot .bt-rg{--d:-1;width:${RING.w}em;height:${RING.h}em;background:url(${ringB.url()}) 0 0/100% 100%}
+#boot .bt-wt::before,#boot .bt-rg::before{content:'';position:absolute;left:6em;bottom:${CONE.h - 1}em;width:3em;height:120em;background:url(${chain.url()}) 0 100%/3em 8em repeat-y;image-rendering:pixelated}
+#boot .bt-rg::before{left:3em;bottom:${RING.h - 1}em}
+${WEIGHTS.map((w, i) => `#boot .bt-wt.w${i}{left:${w.x - 7}em;top:${w.y}em}`).join('\n')}
+${RINGS.map((g, i) => `#boot .bt-rg.w${i}{left:${g.x - 4}em;top:${g.y}em}`).join('\n')}
+#boot .bt-door{left:${DB.x}em;top:${DB.y}em;width:${dw}em;height:${dh}em;background:url(${doorStrip.url()}) 0 0/${dw * DB.n}em ${dh}em}
 #boot .bt-h{left:${HO.x}em;top:${HO.y}em;width:${FR}em;height:${FR}em}
 #boot .bt-hh{background:url(${hourS.url()}) 0 0/${FR * HN}em ${FR}em;animation:bt-hh 43200s steps(${HN}) calc(var(--th, 0) * -1s) infinite}
 #boot .bt-mh{background:url(${minS.url()}) 0 0/${FR * MN}em ${FR}em;animation:bt-mh 3600s steps(${MN}) calc(var(--tm, 0) * -1s) infinite}
-#boot .bt-sh{background:url(${secS.url()}) 0 0/${FR * SN}em ${FR}em;animation:bt-sh 60s steps(${SN}) calc(var(--ts, 0) * -1s) infinite}
-#boot .bt-boss{left:${CX - 4}em;top:${DY - 4}em;width:8em;height:8em}
-#boot .bt-tap{left:${CX + 26}em;top:${DY + 24}em;width:${ptr.fw}em;height:${ptr.fh}em;background:url(${ptr.url}) 0 0/${ptr.fw * 2}em ${ptr.fh}em;opacity:0}
-#boot .bt-spark{width:7em;height:7em;opacity:0}
+#boot .bt-boss{left:${CX - 3}em;top:${DY - 3}em;width:6em;height:6em}
+#boot .bt-tap{left:${CX + 20}em;top:${DY + 18}em;width:${ptr.fw}em;height:${ptr.fh}em;background:url(${ptr.url}) 0 0/${ptr.fw * 2}em ${ptr.fh}em;opacity:0}
+#boot .bt-note{width:7em;height:8em;opacity:0}
 #boot.ready{cursor:pointer}
 #boot.ready *{pointer-events:none}
 #boot.ready .bt-tap{opacity:1;animation:bt-tap 1s steps(1) infinite}
-#boot.ready .bt-clock{animation:bt-invite 2.6s steps(1) infinite}
-#boot.done .bt-clock{animation:bt-chime .9s steps(1)}
-#boot.done.ready .bt-clock{animation:bt-chime .9s steps(1),bt-invite 2.6s steps(1) .9s infinite}
-#boot.done .bt-spark{animation:bt-spark .8s steps(4) forwards}
+#boot.ready.out .bt-door{animation:bt-nod 2.6s steps(1) infinite}
+#boot.call .bt-note{animation:bt-note .9s steps(6) forwards}
 #boot.zoom .bt-tap{opacity:0;animation:none}
 @keyframes bt-flick{0%,100%{opacity:1}31%{opacity:.9}36%{opacity:1}70%{opacity:.94}}
 @keyframes bt-mote{0%{opacity:0;transform:translate(0,0)}15%{opacity:.7}50%{transform:translate(6em,-14em)}85%{opacity:.5}100%{opacity:0;transform:translate(2em,-28em)}}
-@keyframes bt-sh{to{background-position:-${SN * FR}em 0}}
-@keyframes bt-pend{to{background-position:-${(PEND_N - 1) * APB.w}em 0}}
+@keyframes bt-pend{to{background-position:-${(PEND_N - 1) * PB.w}em 0}}
 @keyframes bt-mh{to{background-position:-${MN * FR}em 0}}
 @keyframes bt-hh{to{background-position:-${HN * FR}em 0}}
-${progFrames('bt-moon', moonFrames, MW.w)}
+${sinkFrames()}
 @keyframes bt-tap{0%{background-position:0 0}50%{background-position:-${ptr.fw}em 0}}
-@keyframes bt-invite{0%,100%{transform:none}84%{transform:translateY(-1em)}88%{transform:translateY(0)}92%{transform:translateY(-.5em)}96%{transform:none}}
-@keyframes bt-chime{0%{transform:rotate(0)}10%{transform:rotate(-1deg)}22%{transform:rotate(.9deg)}34%{transform:rotate(-.6deg)}46%{transform:rotate(.4deg)}58%{transform:rotate(-.2deg)}70%,100%{transform:none}}
-@keyframes bt-spark{0%{opacity:1;transform:translate(0,0) scale(.4)}60%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1)}}
+@keyframes bt-nod{0%,100%{background-position:-${dw * 3}em 0}84%{background-position:-${dw * 5}em 0}92%{background-position:-${dw * 3}em 0}}
+@keyframes bt-note{0%{opacity:1;transform:translate(0,0)}70%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
 @media (prefers-reduced-motion:reduce){#boot *:not(.bt-h){animation-duration:0s!important;animation-iteration-count:1!important}}
 `.trim().replace(/\n+/g, '\n');
 
 const motes = [[-48, 30, 0], [44, 10, -2.1], [-22, -40, -4.4], [56, -56, -6.2], [-62, -8, -1.3], [14, 62, -3.6], [32, -70, -7.7], [-36, 70, -5.1]];
-const sparks = [[CX - 22, 20, -10, -12], [CX + 16, 16, 12, -14], [CX - 3, 4, -2, -16], [CX + 34, 40, 16, -6], [CX - 40, 40, -16, -6]];
+const notes = [[CX - 20, 58, -9, -14], [CX + 14, 54, 10, -16], [CX - 4, 46, -2, -18]];
+const noteUrl = note();
 const html = `<!-- boot:begin (generated by src/onboard/tools/bootart.mjs; edit the generator, not this block) -->
     <style>${CSSTXT}</style>
-    <div id="boot" role="progressbar" aria-label="Loading" data-art='${JSON.stringify({ fr: FR, mn: MN, hn: HN, sn: SN, mw: MW.w, mf: MOON_N, cx: CX, dy: DY, rd: RD, w: W, sh: SH, bw: BR.w })}'>
+    <div id="boot" role="progressbar" aria-label="Loading" data-art='${JSON.stringify({ fr: FR, mn: MN, hn: HN, cx: CX, dy: DY, rd: RD, w: W, sh: SH, bw: SW, dw, wt: WT_TRAVEL })}'>
       <i class="bt-edge"></i><i class="bt-edge r"></i><i class="bt-edge t"></i><i class="bt-edge b"></i><i class="bt-pool"></i>${motes.map(([x, y, d]) => `<i class="bt-mote" style="left:calc(50% + ${x}em);top:calc(50% + ${y}em);animation-delay:${d}s"></i>`).join('')}
       <div class="bt-stage">
-        <img class="bt-brk" src="${brk.url()}" alt="" /><i class="bt-shadow"></i>
         <div class="bt-clock">
-          <i class="bt-moon"></i>
-          <img class="bt-case" src="${caseB.url()}" alt="" />
           <i class="bt-pend"></i>
-          <i class="bt-h bt-hh"></i><i class="bt-h bt-mh"></i><i class="bt-h bt-sh"></i>
+          <i class="bt-wt w0"></i><i class="bt-wt w1"></i><i class="bt-rg w0"></i><i class="bt-rg w1"></i>
+          <img class="bt-case" src="${caseShadow.url()}" alt="" />
+          <i class="bt-door"></i>
+          <i class="bt-h bt-hh"></i><i class="bt-h bt-mh"></i>
           <img class="bt-boss" src="${bossB.url()}" alt="" />
-          <img class="bt-glass" src="${glass.url()}" alt="" />
           <i class="bt-tap"></i>
-          ${sparks.map(([x, y, dx, dy]) => `<img class="bt-spark" style="left:${x}em;top:${y}em;--dx:${dx}em;--dy:${dy}em" src="${sparkle()}" alt="" />`).join('')}
+          ${notes.map(([x, y, dx, dy]) => `<img class="bt-note" style="left:${x}em;top:${y}em;--dx:${dx}em;--dy:${dy}em" src="${noteUrl}" alt="" />`).join('')}
         </div>
       </div>
     </div>
-    <script>(function(){try{var d=new Date(),s=d.getSeconds()+d.getMilliseconds()/1e3,m=d.getMinutes()*60+s,b=document.getElementById('boot').style;b.setProperty('--ts',s.toFixed(2));b.setProperty('--tm',m.toFixed(1));b.setProperty('--th',((d.getHours()%12)*3600+m).toFixed(1))}catch(e){}})()</script>
+    <script>(function(){try{var d=new Date(),m=d.getMinutes()*60+d.getSeconds()+d.getMilliseconds()/1e3,b=document.getElementById('boot').style;b.setProperty('--tm',m.toFixed(1));b.setProperty('--th',((d.getHours()%12)*3600+m).toFixed(1))}catch(e){}})()</script>
     <!-- boot:end -->`;
 
 const file = fileURLToPath(new URL('../../../index.html', import.meta.url));
@@ -833,19 +937,24 @@ const a = src.indexOf('<!-- boot:begin'), z = src.indexOf('<!-- boot:end -->');
 if (a < 0 || z < 0) throw new Error('boot markers missing in index.html');
 writeFileSync(file, src.slice(0, a) + html + src.slice(z + '<!-- boot:end -->'.length));
 if (process.argv.includes('--preview')) {
+  // the clock at 10:10 (closed, weights up), the owl out calling (weights down), and the door states
   const out = process.argv[process.argv.indexOf('--preview') + 1];
-  const P = new Buf(W * 2 + 8 + BR.w, SH);
-  P.blit(caseB, 0, 0);
-  P.blit(handFrame(HOUR, (10 / 12) * Math.PI * 2 + 0.2), HO.x, HO.y);
-  P.blit(handFrame(MINUTE, (10 / 60) * Math.PI * 2), HO.x, HO.y);
-  P.blit(bossB, CX - 4, DY - 4);
-  P.blit(glass, 0, 0);
-  P.blit(brk, (W - BR.w) / 2, H - 2);
-  const md = moonDisc(-0.2);
-  for (let y = 0; y < MW.h; y++) for (let x = 0; x < MW.w; x++) { const X = x + MW.x0, Y = y + MW.y0; if (inMoonWin(X, Y)) { const c = md.get(X - (CX - MDS / 2), Y - (MOON.dcy - MDS / 2)); if (c) P.set(X, Y, c); } }
-  P.blit(pendulumFrame(0.12), APB.x0, APB.y0);
-  P.blit(caseB, W + 8, 0);
+  const P = new Buf(W * 2 + 8 + DB.w + 4, SH);
+  const shot = (ox, st, sink) => {
+    const pf = pendulumFrame(0.1);
+    P.blit(pf, ox + PB.x0, PB.y0);
+    for (const w of WEIGHTS) { P.blit(coneB, ox + w.x - 7, w.y + sink); for (let y = BOT.y0; y < w.y + sink + 1; y += 8) P.blit(chain, ox + w.x - 1, y); }
+    for (const g of RINGS) { P.blit(ringB, ox + g.x - 4, g.y - sink); for (let y = BOT.y0; y < g.y - sink + 1; y += 8) P.blit(chain, ox + g.x - 1, y); }
+    P.blit(caseShadow, ox, 0);
+    P.blit(st, ox, 0);
+    P.blit(handFrame(HOUR, (10 / 12) * Math.PI * 2 + 0.17), ox + HO.x, HO.y);
+    P.blit(handFrame(MINUTE, (10 / 60) * Math.PI * 2), ox + HO.x, HO.y);
+    P.blit(bossB, ox + CX - 3, DY - 3);
+  };
+  shot(0, caseB, 0);
+  const callFull = new Buf(W, H); callFull.blit(caseB, 0, 0); callFull.blit(doorStrip.crop(DB.w * 4, 0, DB.w, DB.h), DB.x, DB.y);
+  shot(W + 8, callFull, WT_TRAVEL);
+  for (let i = 0; i < DB.n; i++) P.blit(doorStrip.crop(DB.w * i, 0, DB.w, DB.h), W * 2 + 12, i * (DB.h + 2));
   writeFileSync(out, P.png());
 }
-console.log('boot block written:', (html.length / 1024).toFixed(1), 'KB');
-
+console.log('boot block written:', (html.length / 1024).toFixed(1), 'KB; door box', JSON.stringify(DB), 'stage', SW, 'x', SH);

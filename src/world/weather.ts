@@ -264,8 +264,9 @@ const PRECIP_VS = /* glsl */ `
 attribute vec4 aSeed;
 uniform float uTime; uniform vec3 uCenter; uniform vec3 uBox; uniform vec2 uDrift; uniform float uFall; uniform float uLen;
 uniform float uSnow; uniform vec2 uRes; uniform float uPx; uniform vec4 uShelter;
-varying float vA;
+varying float vA; varying vec2 vQ;
 void main() {
+  vQ = vec2(position.x, position.y * 2.0 - 1.0);
   float fall = uFall * (0.75 + aSeed.w * 0.5);
   vec3 sp = aSeed.xyz * uBox + vec3(uDrift.x * uTime, -fall * uTime, uDrift.y * uTime);
   if (uSnow > 0.5) sp.xz += vec2(sin(uTime * 0.9 + aSeed.w * 31.0), cos(uTime * 0.7 + aSeed.w * 17.0)) * 0.35;
@@ -275,8 +276,9 @@ void main() {
   vec4 b = projectionMatrix * viewMatrix * vec4(p - dir * uLen, 1.0);
   vec2 px = uRes * 0.5;
   if (uSnow > 0.5) {
-    float s = (aSeed.w > 0.8 ? 3.0 : aSeed.w > 0.35 ? 2.0 : 1.0) * uPx;
-    vec2 ctr = (floor(a.xy / a.w * px) + 0.5) / px;
+    // [fx10] soft round flakes of a few sizes, nearer ones bigger
+    float s = (aSeed.w > 0.8 ? 5.0 : aSeed.w > 0.35 ? 3.6 : 2.6) * uPx * clamp(9.0 / a.w, 0.7, 1.6);
+    vec2 ctr = a.xy / a.w;
     vec2 off = vec2(position.x, position.y * 2.0 - 1.0) * s * 0.5 / px;
     gl_Position = vec4((ctr + off) * a.w, a.zw);
   } else {
@@ -284,7 +286,7 @@ void main() {
     vec2 sa = a.xy / a.w * px, sb = b.xy / b.w * px;
     vec2 d = sb - sa;
     vec2 perp = length(d) > 0.001 ? normalize(vec2(-d.y, d.x)) : vec2(1.0, 0.0);
-    c.xy += perp * position.x * uPx * 0.5 / px * c.w;
+    c.xy += perp * position.x * uPx * 1.0 / px * c.w;
     gl_Position = c;
   }
   // fade towards the edges of the box and right at the camera
@@ -296,10 +298,12 @@ void main() {
   if (length(p.xz - uShelter.xy) < uShelter.z && p.y < uShelter.w) vA = 0.0;
 }`;
 const PRECIP_FS = /* glsl */ `
-uniform vec3 uCol; uniform float uAlpha;
-varying float vA;
+uniform vec3 uCol; uniform float uAlpha; uniform float uSnow;
+varying float vA; varying vec2 vQ;
 void main() {
-  float a = vA * uAlpha;
+  // [fx10] snow: a soft round flake; rain: a streak brightest at its head, thinning toward the tail and its sides
+  float shape = uSnow > 0.5 ? smoothstep(1.0, 0.25, length(vQ)) : (1.0 - smoothstep(0.35, 1.0, abs(vQ.x))) * (0.35 + 0.65 * (1.0 - (vQ.y * 0.5 + 0.5)));
+  float a = vA * uAlpha * shape;
   if (a < 0.02) discard;
   gl_FragColor = vec4(uCol, a);
 }`;

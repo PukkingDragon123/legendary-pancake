@@ -39,7 +39,9 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   floors are shuttered with brass plaques; warm rooms with real lamp light. Every clock shows the real time.
 - **Fluffy owls**: eight realistic, hand-painted species and four skins with soft downy plumage; 39 remodelled
   cosmetics.
-- **Intro and interview**: a hand-painted loading clock showing the real time, then the Hollow & Co. office,
+- **Intro and interview**: a carved pixel-art cuckoo clock as the loading screen (the real time from the first frame,
+  pine-cone weights that sink as the game loads, Pip popping out of the little doors to call cuckoo), then the
+  Hollow & Co. office (the very same clock hangs on its wall),
   where Pip interviews you with a 2D paper form, live 3D answer cards, a fountain pen and a rubber stamp.
 - **A visual interview**: one-line questions answered by tapping hand-painted 3D objects (drinks, cassette tapes that
   slide into a recorder and play, a pillow tower, sheep over a stile), a floating fountain pen that writes, ticks and
@@ -65,6 +67,19 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   number of device pixels per art pixel. The shelf (a moon lamp whose glow breathes, a cuckoo clock with real-time
   hands whose owl pops out to call, a journal that unbuckles and opens) is one light 2D canvas, no WebGL. The bake:
   `/dev-iconbake.html` (`src/dev/iconbake.ts`, `src/dev/pixelize.ts`), into the lossless atlas `public/img/ui3d.webp`.
+- **Realistic icons (v9)**: every icon and the main buttons' shelf is a detailed 3D model rendered realistically at
+  256 px (3 px per CSS px for the shelf) with its real materials (photo-grained wood, brushed brass that takes its colour
+  from its reflections, leather, cloth, paper, glass, gems) in soft studio light, with smooth supersampled edges and only
+  a faint dark edge (`src/dev/paintfinish.ts`); the app draws them smoothly at the screen's own resolution. The side
+  tools say what they do and hang from little brass rings, with no tiles behind them: a market stall with a striped
+  awning and an acorn sign (Shop), a blueprint unrolling from its roll with a pencil (Build), a black felt top hat with a
+  burgundy band and a pheasant feather (Dress up), a checklist scroll with a wax seal and a goose quill (Quests), a globe
+  of the real Earth on a brass stand (Map), brass and steel gears (Settings); the Outside tile is a round hobbit door of
+  green planks in a ring of stones with iron strap hinges and a brass knocker, ajar with warm lamplight for Inside.
+  Symbols are struck brass medallions and cut, lacquered metal. The acorn has a glossy chestnut nut and a cup of real
+  overlapping scales; the moon gem is a brilliant cut whose facets flash in turn as the light swings round it. On the
+  shelf, Sleep is a brass oil lamp with a ruby glass font and a flame in its glass chimney, and the journal is plain
+  tooled leather with gilt corners (no logos).
 - **One typeface, in 3D**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms and
   props, the shop's signs) is set in Alagard by Hewett Tsoi, rendered at full device resolution. Titles, names,
   numbers, buttons, toasts and Pip's lines are premium 3D title text (shaded extrusion, crisp outline, metallic fill,

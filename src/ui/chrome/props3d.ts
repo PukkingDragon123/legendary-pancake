@@ -1,18 +1,17 @@
-// [icons6] Real 3D interface props: properly shaped, detailed models, the source of the main buttons' pixel-art
-// sprites and of several icons ([icons8] the icon bake, src/dev/iconbake.ts, renders them and finishes them as pixel
-// art; the shelf on screen, shelf2d.tsx, is 2D). Dev only: nothing here ships in the app.
-//   moonLamp()   a glass moon lamp on a turned brass base: a crescent moon glowing in a starry glass globe, a bead
-//                pull chain
+// [icons6] Real 3D interface props: properly shaped, detailed models, the source of the main buttons' painted
+// sprites and of several icons ([icons8, icons9] the icon bake, src/dev/iconbake.ts, renders them and finishes them as
+// hand-painted art; the shelf on screen, shelf2d.tsx, is 2D). Dev only: nothing here ships in the app.
+//   oilLamp()    [icons9] a bedside oil lamp: an engraved brass foot with a finger loop, a ruby glass font, a brass
+//                burner with a wick wheel, a glass chimney round a warm flame
 //   cuckooClock() a carved Black Forest cuckoo clock on a little stand: a leafy roof and crest, an enamel dial with the
 //                real time in a wreath of carved leaves, a cuckoo door with an owl behind it, a leaf pendulum, pine-cone
 //                weights on chains
-//   journal()    a tooled leather journal: gilt corners, a gold moon on the cover, raised spine bands, page block, a
+//   journal()    a tooled leather journal: gilt corners, a tooled cover (no emblem), raised spine bands, page block, a
 //                satin ribbon, a strap with a brass stud; the cover swings open on its hinge
 //   shelf()      a carved walnut shelf: moulded nose, carved scroll ends and acorn rosettes, brass name plates
 // [tex7] Every surface is textured, realistically (src/ui/chrome/paint3d.ts): photo-grained oak and walnut, pebbled
 // leather, linen, under painted detail where a photo can't go: carved veined oak leaves, a shingled roof, engraved and
-// tarnished brass, an enamel dial with Roman numerals and crazing, a tooled and stitched cover, inked paper, a frosted
-// globe catching a window, a feathered owl, scaled pine cones and acorn caps. Painted textures stand in for the photo
+// tarnished brass, an enamel dial with Roman numerals and crazing, a tooled and stitched cover, inked paper, a feathered owl, scaled pine cones and acorn caps. Painted textures stand in for the photo
 // ones until those are registered (`upgradePhotos`). Laid on at one density (`fitUV`; the icon bake refits).
 import * as THREE from 'three';
 import { clamp, fbm, hash, hex, mix, mul, PAL, rampAt, vnoise, type RGB } from '../px/relief.ts';
@@ -275,116 +274,53 @@ function digitsAt(t: string, cx: number, cy: number, g: number): (x: number, y: 
   };
 }
 
-// ------------------------------------------------------------------ the moon lamp
+// ------------------------------------------------------------------ [icons9] the oil lamp (the Sleep button)
 
-export interface LampParts { root: THREE.Group; body: THREE.Group; moon: THREE.Group; sky: THREE.Mesh; chain: THREE.Group; setGlow: (g: number) => void; moonAt: THREE.Vector3; height: number }
-
-function nightGlassTex(): THREE.Texture {
-  const S = PAL.sapphire;
-  return paintTex('nightglass', 256, 128, (x, y) => {
-    const v = y / 127; // 0 top .. 1 bottom
-    const neb = noise(x, y * 2, 11);
-    let c = rampAt(S, clamp(0.5 - v * 0.34 + (neb - 0.5) * 0.45));
-    if (neb > 0.62) c = mix(c, hex('#6a5ab8'), (neb - 0.62) * 1.6);
-    const h = hash(x, y, 3);
-    if (h > 0.985) c = mix(c, [255, 246, 214], 0.9);
-    else if (h > 0.972) c = mix(c, [190, 210, 255], 0.55);
-    // a few bigger twinkles (little crosses)
-    for (const [sx, sy] of [[30, 30], [96, 52], [170, 24], [212, 74], [60, 86], [140, 96], [236, 40]]) {
-      const dx = Math.abs(x - sx), dy = Math.abs(y - sy);
-      if ((dx === 0 && dy <= 2) || (dy === 0 && dx <= 2)) c = mix(c, [255, 248, 220], dx + dy === 0 ? 1 : 0.7);
-    }
-    return c;
-  });
-}
-function moonTex(): THREE.Texture {
-  const R = [hex('#9a5e1c'), hex('#c88a30'), hex('#e8b448'), hex('#f8d470'), hex('#fff0b0')];
-  const craters: [number, number, number][] = [[20, 22, 5], [38, 40, 6], [16, 44, 3.5], [44, 18, 3], [30, 54, 4], [50, 34, 2.5]];
-  return paintTex('moon', 64, 64, (x, y) => {
-    let v = 0.62 + (noise(x * 4, y * 4, 21) - 0.5) * 0.7;
-    for (const [cx, cy, r] of craters) { const d = Math.hypot(x - cx, y - cy) / r; if (d < 1) v -= 0.26 * (1 - d * 0.5); else if (d < 1.35) v += 0.12; }
-    return rampAt(R, clamp(v));
-  });
-}
-/** the globe's own gloss: painted window reflections up on the left, and frosted glass round its foot (added light) */
-function globeGlossTex(): THREE.Texture {
-  const W = 256, H = 128, cv = new Canvas3(W, H);
-  cv.each((x, y) => {
-    // sphere coordinates: u round (0.25 faces the viewer, smaller is to the left), v from the top
-    let a = 0;
-    const fx = x / W, fy = y / H;
-    // a four-pane window: two bright slanted bars and a cross bar
-    const wx = (fx - 0.17) * 9 + (fy - 0.3) * 2.2, wy = (fy - 0.3) * 9;
-    if (Math.abs(wx) < 1.05 && Math.abs(wy) < 1.25 && Math.abs(wx) > 0.16 && Math.abs(wy) > 0.14) a = 0.9 - Math.abs(wy) * 0.25;
-    // a soft second reflection on the right
-    if (Math.abs(fx - 0.36) < 0.012 && fy > 0.28 && fy < 0.5) a = Math.max(a, 0.45);
-    // frost round the foot: sparkling, densest at the bottom
-    if (fy > 0.74) { const k = (fy - 0.74) / 0.26; a = Math.max(a, k * (0.22 + vnoise(x * 0.5, y * 0.5, 7) * 0.3) + (hash(x, y, 4) > 0.93 ? k * 0.4 : 0)); }
-    const v = clamp(a) * 255;
-    return [v, v * 0.98, v * 0.92];
-  });
-  return cv.map(false);
-}
-export function moonLamp(dens = SHELF_DENSITY): LampParts {
-  const B = MATS.brass(), BE = MATS.brassEngr();
-  const foot = lathe(smoothProfile([[0, 0], [0.5, 0], [0.56, 0.015], [0.58, 0.05], [0.55, 0.085], [0.47, 0.1], [0.45, 0.13], [0.38, 0.16], [0.29, 0.22], [0.22, 0.3], [0.19, 0.37], [0.2, 0.41]], 3), BE, 48);
-  const knurl = at(torus(0.215, 0.035, B, Math.PI * 2, 8, 32), 0, 0.43, 0, Math.PI / 2);
-  const neck = lathe(smoothProfile([[0.2, 0.45], [0.16, 0.5], [0.15, 0.56], [0.19, 0.6], [0.27, 0.63], [0.36, 0.66], [0.42, 0.7], [0.45, 0.74], [0.43, 0.76], [0.38, 0.75]], 3), BE, 48);
-  // a ring of little beads round the cup's rim
+export interface OilLampParts { root: THREE.Group; body: THREE.Group; flame: THREE.Group; knob: O; setGlow: (g: number) => void; flameAt: THREE.Vector3; height: number }
+/**
+ * A bedside oil lamp: an engraved brass foot with a finger loop, a ruby glass font holding the oil, a brass burner with
+ * its gallery of prongs and a knurled wick wheel, a clear glass chimney bulging round a warm teardrop flame.
+ */
+export function oilLamp(dens = SHELF_DENSITY): OilLampParts {
+  const B = MATS.brass(), BE = MATS.brassEngr(), G = MATS.gold();
+  const foot = lathe(smoothProfile([[0, 0], [0.46, 0], [0.5, 0.015], [0.52, 0.05], [0.49, 0.085], [0.41, 0.1], [0.38, 0.13], [0.28, 0.17], [0.19, 0.23], [0.15, 0.29], [0.15, 0.33]], 3), BE, 48);
+  const loop = at(torus(0.11, 0.026, B, Math.PI * 1.45, 8, 24), 0.5, 0.17, 0, 0, 0, -Math.PI * 0.72);
+  const rubyM = std('lampFont', { color: 0x8c1628, roughness: 0.12, metalness: 0.1, envMapIntensity: 1.5, emissive: 0x3a0610, emissiveIntensity: 0.5, keep: true });
+  const font = lathe(smoothProfile([[0.15, 0.32], [0.3, 0.36], [0.43, 0.45], [0.48, 0.55], [0.46, 0.64], [0.36, 0.73], [0.22, 0.78], [0.17, 0.8]], 4), rubyM, 48);
   const beads = grp();
-  const beadGeo = new THREE.SphereGeometry(0.03, 8, 6);
-  for (let i = 0; i < 22; i++) { const a = (i / 22) * Math.PI * 2; const b = mesh(beadGeo, MATS.gold()); b.position.set(Math.cos(a) * 0.44, 0.765, Math.sin(a) * 0.44); beads.add(b); }
-  // the turned base, a little squat so the whole lamp fits its shelf space
-  const base = grp(foot, knurl, neck, beads);
-  base.scale.y = 0.86;
-  const R0 = 0.74, cy = 0.74 * 0.86 + R0 * 0.9;
-  // the globe: a starry night painted on the inside of the glass (unlit, it glows), the moon's warm light inside it,
-  // a faint tint, and the glass's own gloss with a window caught in it and frost round its foot
-  const skyM = keepUV(new THREE.MeshBasicMaterial({ map: nightGlassTex(), side: THREE.BackSide }));
-  skyM.userData.pix = { glow: false, smooth: 0.15 }; // notes for the pixel finish (src/dev/pixelize.ts)
-  const sky = at(mesh(new THREE.SphereGeometry(R0 * 0.985, 40, 28), skyM, false), 0, cy, 0);
+  const beadGeo = new THREE.SphereGeometry(0.022, 8, 6);
+  for (let i = 0; i < 26; i++) { const a = (i / 26) * Math.PI * 2; const b = mesh(beadGeo, G); b.position.set(Math.cos(a) * 0.49, 0.55, Math.sin(a) * 0.49); beads.add(b); }
+  const collar = lathe(smoothProfile([[0.17, 0.79], [0.21, 0.81], [0.22, 0.86], [0.2, 0.9], [0.25, 0.93], [0.25, 0.96], [0.2, 0.96]], 3), BE, 40);
+  const prongs = grp();
+  for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; prongs.add(at(cyl(0.012, 0.016, 0.09, B, 6), Math.cos(a) * 0.235, 0.99, Math.sin(a) * 0.235, Math.sin(a) * 0.12, 0, -Math.cos(a) * 0.12)); }
+  const knob = grp(at(cyl(0.018, 0.018, 0.2, B, 8), 0.3, 0.86, 0.1, 0, 0, Math.PI / 2), at(cyl(0.075, 0.075, 0.03, G, 18), 0.41, 0.86, 0.1, 0, 0, Math.PI / 2), at(cyl(0.04, 0.04, 0.045, B, 12), 0.41, 0.86, 0.1, 0, 0, Math.PI / 2));
+  // the chimney: clear glass, a bulb round the flame and a tall neck with a crimped lip
+  const glassM = std('lampGlass', { color: 0xfff6e4, roughness: 0.03, metalness: 0, envMapIntensity: 1.2, transparent: true, opacity: 0.1, depthWrite: false, side: THREE.DoubleSide, keep: true });
+  const chimney = lathe(smoothProfile([[0.2, 0.95], [0.23, 1.0], [0.31, 1.12], [0.34, 1.23], [0.31, 1.35], [0.21, 1.47], [0.165, 1.57], [0.165, 1.72], [0.19, 1.76], [0.2, 1.78]], 3), glassM, 40);
+  chimney.renderOrder = 3;
+  // the flame: the wick, a teardrop of warm light with a bright heart (unlit: it glows)
+  const outerM = new THREE.MeshBasicMaterial({ color: 0xffa83a, toneMapped: false }), innerM = new THREE.MeshBasicMaterial({ color: 0xfff8d8, toneMapped: false });
+  outerM.userData.pix = { glow: true }; innerM.userData.pix = { glow: true };
+  const tear = (k: number, m: THREE.Material) => lathe(smoothProfile([[0, 0], [0.06 * k, 0.03 * k], [0.075 * k, 0.1 * k], [0.055 * k, 0.2 * k], [0.022 * k, 0.29 * k], [0, 0.34 * k]], 3), m, 20);
+  const flame = grp(tear(1.35, outerM), at(tear(0.75, innerM), 0, 0.015, 0.03));
+  flame.position.set(0, 1.0, 0);
+  const wick = at(cyl(0.028, 0.03, 0.05, std('wick', { color: 0x2a2018, roughness: 0.9 }), 8), 0, 0.98, 0);
   const haloT = paintTex('lamphalo', 32, 32, (x, y) => { const r = Math.hypot(x - 15.5, y - 15.5) / 15.5; return [255, 255, 255, clamp(1 - r) ** 1.8 * 255]; }, { data: true, smooth: true });
   const haloM = keepUV(new THREE.MeshBasicMaterial({ color: 0xffc870, alphaMap: haloT, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }));
-  const halo = at(mesh(new THREE.PlaneGeometry(R0 * 1.5, R0 * 1.5), haloM, false), 0, cy, -0.3);
+  const halo = at(mesh(new THREE.PlaneGeometry(1.1, 1.1), haloM, false), 0, 1.15, -0.3);
   halo.name = 'halo';
   halo.renderOrder = 2;
-  const tint = at(mesh(new THREE.SphereGeometry(R0, 40, 28), keepUV(new THREE.MeshStandardMaterial({ color: 0x5a7ad0, transparent: true, opacity: 0.1, roughness: 0.1, depthWrite: false })), false), 0, cy, 0);
-  tint.renderOrder = 3;
-  const glossM = keepUV(new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 0.05, metalness: 0, envMapIntensity: 4, emissive: 0xfff4e0, emissiveMap: globeGlossTex(), emissiveIntensity: 0.55, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
-  const gloss = at(mesh(new THREE.SphereGeometry(R0 * 1.004, 40, 28), glossM, false), 0, cy, 0);
-  gloss.renderOrder = 4;
-  // the moon: a plump golden crescent with craters, and three little stars
-  const moonM = keepUV(new THREE.MeshStandardMaterial({ map: moonTex(), color: 0xffffff, emissive: 0xffb848, emissiveMap: moonTex(), emissiveIntensity: 0.4, roughness: 0.5 }));
-  moonM.userData.pix = { glow: true };
-  const cres = planarUV(new THREE.ExtrudeGeometry(shape(crescentPts(0.42, 0.36, [0.2, 0.13])), { depth: 0.12, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.07, bevelSegments: 4, curveSegments: 32 }));
-  cres.translate(0, 0, -0.06);
-  cres.computeVertexNormals();
-  const starM = new THREE.MeshStandardMaterial({ ...pm(GOLD()), color: 0xffffff, emissive: 0xffc850, emissiveIntensity: 0.8, roughness: 0.35, metalness: 0.3 });
-  starM.userData.pix = { glow: true };
-  const star = (s: number) => ext(shape(starPts(s, s * 0.45)), s * 0.25, starM, s * 0.18, 2);
-  const moon = grp(at(mesh(cres, moonM, false), -0.06, 0, 0, 0, 0, -0.25), at(star(0.075), 0.36, 0.3, 0.1, 0, 0.3, 0.2), at(star(0.05), 0.42, -0.14, 0.16, 0, -0.2, -0.3), at(star(0.042), -0.38, 0.44, -0.12, 0, 0.2, 0.5));
-  moon.position.set(0, cy, 0.04);
-  // the cap and finial
-  const cap = lathe(smoothProfile([[0.0, cy + R0 + 0.1], [0.12, cy + R0 + 0.085], [0.2, cy + R0 + 0.03], [0.24, cy + R0 - 0.04], [0.2, cy + R0 - 0.05], [0.0, cy + R0 - 0.05]], 3), BE, 40);
-  const fin = lathe(smoothProfile([[0.0, cy + R0 + 0.22], [0.035, cy + R0 + 0.2], [0.05, cy + R0 + 0.16], [0.03, cy + R0 + 0.13], [0.06, cy + R0 + 0.11], [0.0, cy + R0 + 0.09]], 3), MATS.gold(), 24);
-  const finRing = at(torus(0.05, 0.016, MATS.gold(), Math.PI * 2, 6, 20), 0, cy + R0 + 0.27, 0);
-  // the pull chain: brass beads hanging from the cup, a teardrop pull
-  const chain = grp();
-  const chainBead = new THREE.SphereGeometry(0.022, 8, 6);
-  for (let i = 0; i < 9; i++) { const b = mesh(chainBead, B); b.position.set(0, -i * 0.05, 0); chain.add(b); }
-  chain.add(at(lathe(smoothProfile([[0, 0.02], [0.03, 0], [0.045, -0.05], [0.04, -0.09], [0.02, -0.12], [0, -0.125]], 3), MATS.gold(), 16), 0, -0.47, 0));
-  chain.position.set(0.39, 0.62, 0.18);
-  const body = grp(base, sky, halo, tint, gloss, moon, cap, fin, finRing, chain);
+  const body = grp(foot, loop, font, beads, collar, prongs, knob, wick, flame, chimney, halo);
   const root = grp(body);
   fitUV(root, dens);
   const setGlow = (g: number) => {
-    skyM.color.setScalar(0.62 + 0.38 * g);
+    flame.visible = g > 0.1;
+    flame.scale.set(0.85 + 0.15 * Math.min(1.4, g), 0.7 + 0.35 * Math.min(1.6, g), 0.85 + 0.15 * Math.min(1.4, g));
     haloM.opacity = 0.06 + 0.14 * g;
-    moonM.emissiveIntensity = 0.2 + 0.45 * g;
-    starM.emissiveIntensity = 0.4 + 0.7 * g;
+    rubyM.emissiveIntensity = 0.3 + 0.4 * Math.min(1.5, g);
   };
   setGlow(0.8);
-  return { root, body, moon, sky, chain, setGlow, moonAt: new THREE.Vector3(0, cy, 0.04), height: cy + R0 + 0.3 };
+  return { root, body, flame, knob, setGlow, flameAt: new THREE.Vector3(0, 1.14, 0), height: 1.8 };
 }
 
 // ------------------------------------------------------------------ the cuckoo clock
@@ -602,7 +538,7 @@ export interface BookParts { root: THREE.Group; body: THREE.Group; cover: THREE.
 /**
  * The front cover, laid flat over the board: oxblood leather with its pebbled grain and creases, worn paler at the
  * edges and corners, a running stitch round the edge, a blind-tooled double fillet with a gilt line between, corner
- * fleurons and a tooled lattice panel (the gold moon and stars are real raised metal on top).
+ * fleurons and a tooled lattice panel.
  */
 function coverTex(): { map: THREE.Texture; bump: THREE.Texture } {
   const N = 512, cv = new Canvas3(N, N);
@@ -634,7 +570,7 @@ function coverTex(): { map: THREE.Texture; bump: THREE.Texture } {
     for (const [dx, dy] of [[6, -6], [-6, 6], [4, 4]]) { g.beginPath(); g.arc(dx, dy, 2.4, 0, Math.PI * 2); g.fill(); }
     g.restore();
   }
-  // a blind-tooled lattice panel behind the moon
+  // a blind-tooled lattice panel in the middle
   g.strokeStyle = rgb(R[10], 0.45); g.lineWidth = 2;
   g.save(); g.beginPath(); g.rect(50, 46, 256 - 100, 256 - 92); g.clip();
   for (let k = -256; k < 512; k += 22) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 256, 256); g.moveTo(k + 256, 0); g.lineTo(k, 256); g.stroke(); }
@@ -660,12 +596,13 @@ function pageEdgeTex(): THREE.Texture {
     return leaf === 0 ? mul(base, 0.8) : leaf === 1 ? mix(base, [244, 214, 140], 0.25) : base;
   }, { repeat: true });
 }
-/** the first page: ruled paper with fibres, a few lines in ink and a little moon doodle */
+/** the first page: ruled paper with fibres, a few lines in ink and a little leaf doodle */
 function pageFaceTex(): THREE.Texture {
   const cv = paperCanvas('#f4e8cc', { seed: 21, size: 128, ruled: '#9ab4d8', ink: '#3a3060', lines: 10 });
   const g = cv.g;
-  g.fillStyle = 'rgb(212,160,32)';
-  g.beginPath(); g.arc(100, 20, 10, 0, Math.PI * 2); g.arc(104, 18, 8.5, 0, Math.PI * 2, true); g.fill('evenodd');
+  g.fillStyle = 'rgb(96,140,60)'; // [icons9] a little leaf doodle in the corner
+  g.beginPath(); g.ellipse(100, 20, 9, 4.5, -0.6, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = 'rgb(60,90,40)'; g.lineWidth = 1; g.beginPath(); g.moveTo(93, 26); g.lineTo(107, 14); g.stroke();
   return canvasTex(cv);
 }
 function endpaperTex(): THREE.Texture {
@@ -711,8 +648,7 @@ export function journal(dens = SHELF_DENSITY): BookParts {
       if (Math.abs(n.getX(i)) > 0.5) uv.setXY(i, u * 1.3, v * h * dens); else uv.setXY(i, v * 1.3, u * w * dens);
     }
   }
-  // the front board on its hinge at the spine: tooled leather outside, a marbled endpaper inside, gilt corners,
-  // a gold moon and stars
+  // the front board on its hinge at the spine: tooled leather outside, a marbled endpaper inside, gilt corners
   const front = at(mesh(boardGeo(), leatherM), w / 2, h / 2, 0);
   const endp = at(mesh(new THREE.PlaneGeometry(w - 0.08, h - 0.08), std('endpaper', { map: endpaperTex(), roughness: 0.8 }), false), w / 2, h / 2, -ct / 2 - 0.004, 0, Math.PI, 0);
   const G = MATS.gold();
@@ -723,12 +659,8 @@ export function journal(dens = SHELF_DENSITY): BookParts {
     g.rotation.z = sx > 0 ? (sy > 0 ? Math.PI : Math.PI / 2) : sy > 0 ? -Math.PI / 2 : 0;
     return g;
   };
-  const emblem = grp(
-    at(ext(shape(crescentPts(0.3, 0.25, [0.13, 0.08])), 0.025, G, 0.012, 2), 0, 0, 0, 0, 0, -0.3),
-    ...([[0.26, 0.28, 0.07], [0.34, -0.06, 0.05], [-0.28, 0.32, 0.045]] as [number, number, number][]).map(([x, y, s]) => at(ext(shape(starPts(s, s * 0.42)), 0.02, G, 0.008, 1), x, y, 0)));
-  emblem.position.set(w / 2 + 0.06, h * 0.65, ct / 2 + 0.008);
-  emblem.scale.setScalar(0.92);
-  const coverIn = grp(front, endp, corner(1, 1), corner(1, -1), emblem);
+  // [icons9] no emblem: the tooled leather, the gilt corners, the strap and the ribbon carry it
+  const coverIn = grp(front, endp, corner(1, 1), corner(1, -1));
   coverIn.position.set(0, 0, 0);
   const cover = grp(coverIn);
   cover.position.set(0, 0, t / 2 - ct / 2);

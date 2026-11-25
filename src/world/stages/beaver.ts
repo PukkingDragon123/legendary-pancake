@@ -3,14 +3,14 @@
 // his ear. His clips: idle (breathing, the tail swaying), talk, wave, present, hop, think (a scratch of the head) and
 // gnaw (he nibbles the pencil). On top of the clips he blinks, turns his head toward whatever he is looking at, and
 // talks while his lines type out. OWNED BY THE SHOP BUILDER.
-// [anime6] Anime faces: ink decals painted onto his own head round each eye (cut from the body mesh at load, carried by
-// the head bone) draw happy ^ ^ arcs, sparkly, shocked, sleepy and teary eyes, > < squints, bold brows and blush; his
-// glossy 3D eyes hide while one is on. Emote marks (src/ui/fx/emotes.ts) pop beside his head: a greeting, a think
-// (? then a light bulb), a celebration for every purchase, a gasp at a five-star wish.
+// Faces: ink decals painted onto his own head round each eye (cut from the body mesh at load, carried by the head bone)
+// draw a happy squint and sleepy lids; his glossy 3D eyes hide while one is on. [fx10] Only natural faces now (the old
+// sparkly, shocked, teary, > < and blush faces fall back to these), and his reactions are body language plus a subtle
+// touch of light in the lodge (src/world/fx.ts, Fx.cue): a greeting, a think, a celebration, a gasp at a five-star wish.
 import * as THREE from 'three';
 import { instanceGLB } from '../../gfx/glb.ts';
 import { Eye, defaultEye, type EyeMode } from '../../owl/eyes.ts';
-import { actorAnchor, popEmote, type EmoteAnchor, type EmoteKind } from '../../ui/fx/emotes.ts';
+import { sceneFx, type Cue as EmoteKind } from '../fx.ts';
 
 export const BEAVER_NAME = 'Barnaby';
 export const BEAVER_FULL = 'Barnaby Birchbark';
@@ -21,9 +21,9 @@ const ONE_SHOT: BeaverClip[] = ['wave', 'present', 'hop', 'think', 'gnaw'];
 export type BeaverFace = 'normal' | 'happy' | 'joy' | 'sparkly' | 'shock' | 'sleepy' | 'teary' | 'determined' | 'shy' | 'flustered' | 'thinking';
 export const BEAVER_FACES: BeaverFace[] = ['normal', 'happy', 'joy', 'sparkly', 'shock', 'sleepy', 'teary', 'determined', 'shy', 'flustered', 'thinking'];
 const FACE: Record<BeaverFace, { mode: EyeMode | null; brow?: number; blush?: number; k?: number }> = {
-  normal: { mode: null }, happy: { mode: 'happy', k: 1.4 }, joy: { mode: 'happy', blush: 0.8, k: 1.4 }, sparkly: { mode: 'sparkly', brow: -0.25 },
-  shock: { mode: 'shock', k: 0.92 }, sleepy: { mode: 'half', k: 1.15 }, teary: { mode: 'teary', brow: -0.75 }, determined: { mode: 'none', brow: 0.95 },
-  shy: { mode: 'happy', blush: 1, k: 1.4 }, flustered: { mode: 'squint', blush: 1, k: 1.25 }, thinking: { mode: 'none', brow: -0.45 },
+  normal: { mode: null }, happy: { mode: 'happy', k: 1.4 }, joy: { mode: 'happy', k: 1.4 }, sparkly: { mode: null },
+  shock: { mode: null }, sleepy: { mode: 'half', k: 1.15 }, teary: { mode: null }, determined: { mode: null },
+  shy: { mode: 'happy', k: 1.4 }, flustered: { mode: 'happy', k: 1.4 }, thinking: { mode: null },
 };
 /** the drawn eye's half size, in eye-sphere radii (the dot comes out a touch bigger than his real eye) */
 const DECAL_K = 1.2;
@@ -56,7 +56,6 @@ export class Beaver {
   private faceT = 0;
   private time = 0;
   private body: THREE.Mesh | null = null;
-  private anchor: EmoteAnchor | null = null;
   private timers: number[] = [];
 
   constructor() {
@@ -209,10 +208,11 @@ export class Beaver {
 
   /** Show an anime face (for `hold` seconds, then back to his own eyes; 0 = until changed). */
   setFace(f: BeaverFace, hold = 0) { this.face = f; this.faceT = hold > 0 ? this.time + hold : Infinity; }
-  /** Pop an emote mark beside his head. */
+  /** A reaction's subtle touch of light round his head (in the lodge's own particles). */
   emote(kind: EmoteKind, delay = 0) {
-    this.anchor ??= actorAnchor(() => this.body, (out) => this.faceCentre(out), () => this.faceRadius());
-    popEmote(kind, this.anchor, { delay });
+    const at = this.faceCentre();
+    // (a gasp is a bright glint over his head: the owl's loose down feathers are no beaver's)
+    if (at) sceneFx.cue(kind === 'bang' ? 'bulb' : kind, this.node, at, this.faceRadius(), delay);
   }
   /** A face and a mark together. */
   react(f: BeaverFace, mark?: EmoteKind, hold = 1.8) { this.setFace(f, hold); if (mark) this.emote(mark); }

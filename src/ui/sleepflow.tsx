@@ -22,7 +22,7 @@ import { GOLD, Real, box, cached, deviceK, enamel, matte, metal, polygon, tubeX,
 import { ALARMS, goToSleep, SOUNDSCAPES, SoundTiles } from './sleep.tsx';
 import { HoldButton, injectSleepFrames, PaintCanvas, Paper, PencilTick, sparkleAt } from './sleepkit.tsx';
 import { breathing, panel, sceneRef } from './state.ts';
-import { animeMoment } from './fx/anime.ts'; // [anime6]
+import { fxMoment } from './fx/moment.ts'; // [fx10]
 import './sleepflow.css';
 
 // ------------------------------------------------------------------ the wind-down, personalised
@@ -158,7 +158,7 @@ export function SleepScreen() {
     setOut(true);
     sound.play('bowl', { volume: 0.45 });
     setTimeout(() => sound.play('owl_hoot', { volume: 0.35, rate: 0.9 }), 500);
-    sceneRef.current?.owl.play('yawn'); animeMoment('bedtime'); // [anime6] sleepy half-lids, a Zzz bubble, ZZZ...
+    sceneRef.current?.owl.play('yawn'); fxMoment('bedtime'); // [fx10] sleepy lids, a dusk veil, dream motes
     setTimeout(() => { void goToSleep(); }, 1100);
   };
   const dim = isDone('lights');

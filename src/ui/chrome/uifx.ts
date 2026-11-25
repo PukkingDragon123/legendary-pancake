@@ -1,46 +1,56 @@
-// Particles for the interface (puffs, sparkles, hearts, swirling magic motes, spinning acorns, stars, snow,
-// leaves, confetti, dust, wood chips, paper scraps, ink, embers, feathers, light motes, fireflies), drawn smooth
-// and anti-aliased at device resolution on one overlay canvas above the UI, lit from the top left. [ui7]
-// Anyone may call uiBurst(kind, x, y, n) with screen coordinates in CSS px.
-// OWNED BY THE UI-CHROME BUILDER.
+// Particles for the interface: detailed pixel-art sprites (src/ui/fx/pixel.ts) on one overlay canvas above the UI,
+// at the game's art-pixel size (src/gfx/artpx.ts) and snapped to its grid, so they read like the icons: leaves and
+// petals that tumble through a dozen frames, acorns that spin and bounce, curled wood shavings, torn paper, ink drops
+// that splat, downy feathers, gold-leaf flakes that flash as they turn, snow crystals; and lights (glints, golden
+// motes, embers, fireflies) added on top unoutlined. Nothing is drawn over the text the player reads (headings,
+// titles, toasts, speech bubbles, dialogs): those are cut out of the layer every frame. [fx10]
+//   uiBurst(kind, x, y, n)  /  uiBurstAt(el, kind, n)  /  uiFx.burst(kind, el | {x, y}, n)
+// OWNED BY THE FX BUILDER.
 import { reducedMotion } from './swing.ts';
-import { calm } from '../px/calm.js';
+import { artPx } from '../../gfx/artpx.ts';
+import { frameCount, sprite, type PixKind } from '../fx/pixel.ts';
 
 export type UiFxKind = 'puff' | 'sparkle' | 'hearts' | 'magic' | 'coins' | 'stars' | 'snow' | 'leaves' | 'confetti'
-  | 'dust' | 'chips' | 'paper' | 'ink' | 'embers' | 'feathers' | 'acorns' | 'motes';
+  | 'dust' | 'chips' | 'paper' | 'ink' | 'embers' | 'feathers' | 'acorns' | 'motes'
+  | 'glints' | 'glintsCool' | 'flakes' | 'petals' | 'motesCool' | 'shavings';
 
-let B = 1; // device px per CSS px (set in fit)
 interface P {
-  kind: UiFxKind | 'firefly'; x: number; y: number; vx: number; vy: number; g: number; drag: number;
-  life: number; age: number; frames?: string[]; fps: number; f0: number;
-  col?: string; ph: number; ox: number; oy: number; r: number; w: number; trail?: [number, number][];
+  spr: PixKind; glow: boolean; x: number; y: number; vx: number; vy: number; g: number; drag: number;
+  life: number; age: number; fps: number; f0: number; ph: number; sway: number;
+  /** a floor (CSS px) to bounce or land on, and what happens there */
+  floor?: number; onFloor?: 'bounce' | 'splat' | 'rest';
+  trail?: [number, number][]; swirl?: { ox: number; oy: number; r: number; w: number; vy: number };
+  fire?: boolean; fadeIn: number;
 }
 const parts: P[] = [];
 let cv: HTMLCanvasElement | null = null, ctx: CanvasRenderingContext2D | null = null;
-let raf = 0, last = 0, W = 0, H = 0;
+let raf = 0, last = 0, W = 0, H = 0, B = 1;
 let ambientOn = false, ambientBox = { x: 0, y: 0, w: 0, h: 0 };
 type Win = Window & { __chromeT?: number };
 
 const R = (a: number, b: number) => a + Math.random() * (b - a);
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-// [ui4] v4: magic glows violet, sky and gold; confetti is properly festive
-const MAGIC = ['#9c62b0', '#bc8acb', '#5ea8d9', '#b4dcf2', '#fff6d2', '#ecc03c'];
-const CONFETTI = ['#ba4f57', '#ecc03c', '#46a066', '#3f8cc2', '#d06e70', '#804596', '#fff6d2', '#e8a830'];
-const fr = (base: string, n: number) => Array.from({ length: n }, (_, i) => `${base}_${i}`);
-const g8 = (a: string[]) => a.map((c) => calm(c));
-const DUST = g8(['#d8cba9', '#c9b78d', '#e6dcc2', '#b5a27c']);
-const CHIPS = g8(['#9c7a56', '#bf9d74', '#6f553d', '#d8bf98']);
-const PAPERS = g8(['#f4eedd', '#eae0c8', '#dccfb0', '#e9e2d0']);
-const INKS = g8(['#2e2b24', '#3b3a40', '#46596a']);
-const EMBERS = g8(['#f1d39a', '#e7b98b', '#dcb072', '#fff2c9']);
-const FEATHERS = g8(['#a87652', '#d9bf93', '#8a5a3c', '#f1e6cc']);
-const MOTES = g8(['#f4eedd', '#f1d39a', '#d3e0dc']);
+const CAP = 360;
+
+/** what particles and light keep off: the text the player reads */
+const SHIELD = '.lvup-title, .lvup-medal b, .lvup-card h3, .lvup-unlock span, .hh-toast, .hh-bubble, .lg-bubble, .bubble, .modal h2, .modal .muted, .sheet h2, .sheet h3, .hh-ticket, .hh-name, .hh-num, .hh-rank, .hh-toollabel, .hh-nav, h1, [data-fx-shield]';
+/** Screen rects of the text that light and particles keep off (also used by the light of src/ui/fx/moment.ts). */
+export function shieldRects(): DOMRect[] {
+  const out: DOMRect[] = [];
+  if (typeof document === 'undefined') return out;
+  document.querySelectorAll(SHIELD).forEach((e) => {
+    const r = e.getBoundingClientRect();
+    if (r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight && r.width * r.height < innerWidth * innerHeight * 0.5) out.push(r);
+  });
+  return out;
+}
 
 function ensure() {
   if (cv || typeof document === 'undefined') return;
   cv = document.createElement('canvas');
   cv.className = 'hh-uifx';
-  Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', zIndex: '70', pointerEvents: 'none' });
+  cv.setAttribute('aria-hidden', 'true');
+  Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', zIndex: '70', pointerEvents: 'none', imageRendering: 'pixelated' });
   document.body.appendChild(cv);
   ctx = cv.getContext('2d');
   fit();
@@ -48,7 +58,7 @@ function ensure() {
 }
 function fit() {
   if (!cv) return;
-  B = Math.min(2, Math.max(1, devicePixelRatio || 1));
+  B = Math.min(3, Math.max(1, devicePixelRatio || 1));
   W = Math.ceil(innerWidth); H = Math.ceil(innerHeight);
   cv.width = Math.round(W * B); cv.height = Math.round(H * B);
   cv.style.width = `${W}px`; cv.style.height = `${H}px`;
@@ -58,28 +68,35 @@ function start() {
   if (!raf) { last = 0; raf = requestAnimationFrame(step); }
 }
 
-function spawn(kind: UiFxKind, x: number, y: number): P {
-  const base: P = { kind, x, y, vx: 0, vy: 0, g: 0, drag: 0, life: 1, age: 0, fps: 10, f0: Math.floor(Math.random() * 4), ph: Math.random() * 6.28, ox: x, oy: y, r: 0, w: 0 };
-  const a = Math.random() * Math.PI * 2;
+function base(spr: PixKind, x: number, y: number, glow = false): P {
+  return { spr, glow, x, y, vx: 0, vy: 0, g: 0, drag: 0, life: 1, age: 0, fps: 10, f0: Math.floor(Math.random() * 12), ph: Math.random() * 6.28, sway: 0, fadeIn: 0.06 };
+}
+function spawn(kind: UiFxKind, x: number, y: number, i: number): P[] {
+  const a = Math.random() * Math.PI * 2, s = (lo: number, hi: number) => R(lo, hi);
   switch (kind) {
-    case 'puff': { const s = R(70, 150); return { ...base, vx: Math.cos(a) * s, vy: Math.sin(a) * s * 0.6 - 25, drag: 3.6, g: -14, life: R(0.55, 0.8), frames: fr('fx_puff', 6), fps: 0, f0: 0 }; }
-    case 'sparkle': { const s = R(70, 190); return { ...base, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 40, drag: 3.5, g: 40, life: R(0.55, 0.95), frames: fr('fx_spark', 4), fps: 12 }; }
-    case 'hearts': return { ...base, vx: R(-70, 70), vy: R(-130, -60), drag: 1.2, g: -20, life: R(1, 1.5), frames: fr('fx_heart', 2), fps: 4 };
-    case 'magic': return { ...base, vx: 0, vy: R(-60, -20), drag: 0, g: -15, life: R(0.9, 1.5), r: R(6, 18), w: R(5, 9) * (Math.random() < 0.5 ? -1 : 1), col: pick(MAGIC), trail: [] };
-    case 'coins': return { ...base, vx: R(-120, 120), vy: R(-300, -160), drag: 0.6, g: 620, life: R(0.9, 1.3), frames: fr('fx_acorn', 4), fps: R(10, 16) };
-    case 'stars': { const s = R(90, 220); return { ...base, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 60, drag: 2.2, g: 90, life: R(0.8, 1.2), frames: fr('fx_star', 3), fps: 10 }; }
-    case 'snow': return { ...base, x: x + R(-60, 60), vx: R(-20, 20), vy: R(15, 50), drag: 0.3, g: 6, life: R(1.6, 2.6), frames: fr('fx_snow', 2), fps: 3 };
-    case 'leaves': return { ...base, vx: R(-90, 90), vy: R(-140, -40), drag: 1.4, g: 120, life: R(1.4, 2.2), frames: fr(pick(['fx_leaf', 'fx_leafo', 'fx_leafr']), 4), fps: R(6, 10) };
-    case 'confetti': return { ...base, vx: R(-160, 160), vy: R(-360, -180), drag: 1.6, g: 520, life: R(1.2, 1.9), col: pick(CONFETTI), fps: R(8, 16) };
-    // [ui3] hand-made bits: dust, wood chips, paper scraps, ink, embers, feathers, bouncing acorns, light motes
-    case 'dust': { const s = R(30, 90); return { ...base, vx: Math.cos(a) * s, vy: Math.sin(a) * s * 0.5 - 10, drag: 3, g: -8, life: R(0.45, 0.9), col: pick(DUST), w: Math.random() < 0.3 ? 2 : 1 }; }
-    case 'chips': return { ...base, vx: R(-110, 110), vy: R(-230, -110), drag: 0.8, g: 700, life: R(0.7, 1.1), col: pick(CHIPS), fps: R(10, 18), oy: y + R(18, 34) };
-    case 'paper': return { ...base, vx: R(-90, 90), vy: R(-170, -70), drag: 1.8, g: 160, life: R(1.1, 1.8), col: pick(PAPERS), fps: R(5, 9) };
-    case 'ink': return { ...base, vx: R(-140, 140), vy: R(-180, -40), drag: 2.4, g: 420, life: R(0.6, 1), col: pick(INKS), oy: y + R(6, 22), w: 0 };
-    case 'embers': return { ...base, x: x + R(-14, 14), vx: R(-20, 20), vy: R(-90, -40), drag: 0.6, g: -30, life: R(0.8, 1.5), col: pick(EMBERS) };
-    case 'feathers': return { ...base, vx: R(-60, 60), vy: R(-110, -40), drag: 2.2, g: 60, life: R(1.6, 2.4), col: pick(FEATHERS), fps: 3 };
-    case 'acorns': return { ...base, vx: R(-120, 120), vy: R(-300, -170), drag: 0.4, g: 900, life: R(1.1, 1.5), frames: fr('fx_acorn', 4), fps: R(10, 16), oy: y + R(24, 44) };
-    case 'motes': return { ...base, x: x + R(-60, 60), y: y + R(-40, 40), vx: R(-6, 6), vy: R(-14, -4), drag: 0, g: 0, life: R(1.4, 2.4), col: pick(MOTES) };
+    case 'puff': { const p = base('puff', x, y); const v = s(40, 90); return [{ ...p, vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.5 - 18, drag: 3.2, g: -10, life: s(0.6, 0.85), fps: 0, f0: 0 }]; }
+    case 'sparkle': case 'glints': case 'glintsCool': case 'stars': {
+      const p = base(kind === 'glintsCool' ? 'glintCool' : 'glint', x, y, true), v = kind === 'stars' ? s(90, 200) : s(40, 140);
+      return [{ ...p, x: x + R(-8, 8), y: y + R(-8, 8), vx: Math.cos(a) * v, vy: Math.sin(a) * v - 30, drag: 3, g: 30, life: s(0.55, 0.9), fps: s(8, 11), f0: 0 }];
+    }
+    case 'hearts': return i % 3 === 2
+      ? [{ ...base('moteRose', x, y, true), x: x + R(-20, 20), vx: R(-12, 12), vy: R(-60, -30), drag: 0.6, g: -6, life: s(1.2, 1.7), fps: 5, sway: 10 }]
+      : [{ ...base(i % 2 ? 'petal' : 'petalWhite', x, y), vx: R(-80, 80), vy: R(-150, -70), drag: 1.6, g: 120, life: s(1.4, 2), fps: s(9, 14), sway: 36 }];
+    case 'petals': return [{ ...base(Math.random() < 0.65 ? 'petal' : 'petalWhite', x, y), x: x + R(-40, 40), vx: R(-40, 40), vy: R(-90, -20), drag: 1.8, g: 70, life: s(1.8, 2.6), fps: s(8, 13), sway: 40 }];
+    case 'magic': return [{ ...base(pick(['moteViolet', 'moteCool', 'mote'] as PixKind[]), x, y, true), life: s(0.9, 1.5), fps: 6, trail: [], swirl: { ox: x, oy: y, r: s(6, 16), w: s(4, 8) * (Math.random() < 0.5 ? -1 : 1), vy: s(-60, -25) } }];
+    case 'coins': case 'acorns': return [{ ...base('acorn', x, y), vx: R(-120, 120), vy: R(-300, -170), drag: 0.4, g: 900, life: s(1.2, 1.6), fps: s(12, 18), floor: y + R(24, 44), onFloor: 'bounce' }];
+    case 'snow': return [{ ...base('snow', x, y, true), x: x + R(-60, 60), vx: R(-16, 16), vy: R(12, 40), drag: 0.3, g: 5, life: s(1.8, 2.8), fps: s(3, 6), sway: 18 }];
+    case 'leaves': return [{ ...base(pick(['leaf', 'leafGold', 'leafRed', 'leafOak'] as PixKind[]), x, y), vx: R(-90, 90), vy: R(-150, -50), drag: 1.5, g: 110, life: s(1.6, 2.4), fps: s(10, 16), sway: 40 }];
+    case 'confetti': case 'flakes': return kind === 'confetti' && i % 4 === 3
+      ? [{ ...base('petal', x, y), vx: R(-150, 150), vy: R(-320, -160), drag: 1.8, g: 260, life: s(1.6, 2.2), fps: s(10, 14), sway: 30 }]
+      : [{ ...base('flake', x, y), x: x + R(-90, 90), y: y + R(-40, 30), vx: R(-170, 170), vy: R(-300, -90), drag: 2.1, g: 200, life: s(1.7, 2.5), fps: s(8, 16), sway: 34 }];
+    case 'dust': { const v = s(25, 80); return [{ ...base('dust', x, y), vx: Math.cos(a) * v, vy: Math.sin(a) * v * 0.5 - 12, drag: 3, g: -6, life: s(0.45, 0.85), fps: 0 }]; }
+    case 'chips': case 'shavings': return [{ ...base('shaving', x, y), vx: R(-110, 110), vy: R(-230, -110), drag: 0.8, g: 700, life: s(0.9, 1.3), fps: s(12, 20), floor: y + R(18, 34), onFloor: 'rest' }];
+    case 'paper': return [{ ...base('paper', x, y), vx: R(-90, 90), vy: R(-170, -70), drag: 1.8, g: 150, life: s(1.2, 1.9), fps: s(7, 11), sway: 34 }];
+    case 'ink': return [{ ...base('ink', x, y), vx: R(-130, 130), vy: R(-190, -60), drag: 2, g: 520, life: s(0.9, 1.3), fps: 0, f0: 0, floor: y + R(8, 26), onFloor: 'splat' }];
+    case 'embers': return [{ ...base('ember', x, y, true), x: x + R(-14, 14), vx: R(-20, 20), vy: R(-90, -40), drag: 0.6, g: -30, life: s(0.8, 1.5), fps: s(10, 14), sway: 14, fire: true }];
+    case 'feathers': return [{ ...base('feather', x, y), vx: R(-60, 60), vy: R(-110, -40), drag: 2.2, g: 60, life: s(1.8, 2.6), fps: s(5, 8), sway: 60 }];
+    case 'motes': case 'motesCool': return [{ ...base(kind === 'motesCool' ? 'moteCool' : 'mote', x, y, true), x: x + R(-60, 60), y: y + R(-40, 40), vx: R(-8, 8), vy: R(-26, -6), life: s(1.4, 2.4), fps: s(3, 5), sway: 8, fadeIn: 0.35 }];
   }
 }
 
@@ -87,12 +104,17 @@ function spawn(kind: UiFxKind, x: number, y: number): P {
 export function uiBurst(kind: UiFxKind, x: number, y: number, n = 10): void {
   if (typeof document === 'undefined') return;
   if (reducedMotion()) n = Math.ceil(n / 3);
-  if (parts.length > 420) parts.splice(0, parts.length - 420);
-  for (let i = 0; i < n; i++) parts.push(spawn(kind, x, y));
+  if (parts.length + n > CAP) parts.splice(0, Math.min(parts.length, parts.length + n - CAP));
+  for (let i = 0; i < n; i++) for (const p of spawn(kind, x, y, i)) parts.push(p);
   start();
 }
 /** Burst from the centre of an element. */
 export function uiBurstAt(el: Element | null, kind: UiFxKind, n = 10) { if (!el) return; const r = el.getBoundingClientRect(); uiBurst(kind, r.left + r.width / 2, r.top + r.height / 2, n); }
+/** The same, as one object: `uiFx.burst('leaves', el)` or `uiFx.burst('glints', { x, y }, 8)`. */
+export const uiFx = {
+  burst(kind: UiFxKind, at: Element | { x: number; y: number } | null, n = 10) { if (!at) return; if ('getBoundingClientRect' in at) uiBurstAt(at, kind, n); else uiBurst(kind, at.x, at.y, n); },
+  ambient: (box: { x: number; y: number; w: number; h: number } | null) => uiAmbient(box),
+};
 
 /** Fireflies drifting over a screen box (e.g. the HUD at night); `null` stops them. */
 export function uiAmbient(box: { x: number; y: number; w: number; h: number } | null) {
@@ -112,171 +134,95 @@ function step(now: number) {
   const dt = frozen !== undefined ? 0 : Math.min(0.05, Math.max(0, (now - (last || now)) / 1000));
   last = now;
   if (!ctx || !cv) return;
-  if (innerWidth > W + 1 || innerHeight > H + 1) fit();
+  if (innerWidth > W + 1 || innerHeight > H + 1 || Math.min(3, Math.max(1, devicePixelRatio || 1)) !== B) fit();
   // ambient fireflies
-  const flies = parts.reduce((n, p) => n + (p.kind === 'firefly' ? 1 : 0), 0);
+  let flies = 0;
+  for (const p of parts) if (p.spr === 'firefly') flies++;
   if (ambientOn && flies < 7 && Math.random() < dt * 2) {
     const b = ambientBox;
-    parts.push({ kind: 'firefly', x: R(b.x, b.x + b.w), y: R(b.y, b.y + b.h), vx: R(-8, 8), vy: R(-6, 6), g: 0, drag: 0, life: R(5, 9), age: 0, fps: 0, f0: 0, ph: Math.random() * 6.28, ox: 0, oy: 0, r: 0, w: R(1.5, 3) });
+    parts.push({ ...base('firefly', R(b.x, b.x + b.w), R(b.y, b.y + b.h), true), vx: R(-8, 8), vy: R(-6, 6), life: R(5, 9), fps: R(2, 4), sway: 0, fadeIn: 0.8 });
   }
-  ctx.setTransform(B, 0, 0, B, 0, 0);
-  ctx.clearRect(0, 0, W, H);
+  const c = ctx;
+  c.setTransform(1, 0, 0, 1, 0, 0);
+  c.clearRect(0, 0, cv.width, cv.height);
+  c.imageSmoothingEnabled = false;
+  const S = Math.max(1, Math.round(artPx() * B)); // device px per art pixel
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i];
     p.age += dt;
-    if (p.kind === 'firefly' && !ambientOn && p.life - p.age > 0.6) p.age = p.life - 0.6;
+    if (p.spr === 'firefly' && !ambientOn && p.life - p.age > 0.8) p.age = p.life - 0.8;
     if (p.age >= p.life) { parts.splice(i, 1); continue; }
     move(p, dt);
-    draw(ctx, p);
+  }
+  // objects, then lights: painted solid (so they read on a bright scene too), then added once more for their glow
+  for (const p of parts) if (!p.glow) draw(c, p, S);
+  for (const p of parts) if (p.glow) draw(c, p, S);
+  c.globalCompositeOperation = 'lighter';
+  for (const p of parts) if (p.glow) draw(c, p, S, 0.45);
+  c.globalCompositeOperation = 'source-over';
+  if (parts.length) {
+    c.globalCompositeOperation = 'destination-out';
+    c.globalAlpha = 1; c.fillStyle = '#000';
+    for (const r of shieldRects()) c.fillRect(Math.floor((r.left - 2) * B), Math.floor((r.top - 2) * B), Math.ceil((r.width + 4) * B), Math.ceil((r.height + 4) * B));
+    c.globalCompositeOperation = 'source-over';
   }
   if (parts.length || ambientOn) raf = requestAnimationFrame(step);
-  else ctx.clearRect(0, 0, W, H);
 }
 
 function move(p: P, dt: number) {
-  if (p.kind === 'magic') {
-    // swirl around a rising centre, the orbit widening
-    p.oy += p.vy * dt; p.vy += p.g * dt;
-    p.ph += p.w * dt; p.r += dt * 26;
-    p.trail!.unshift([p.x, p.y]); if (p.trail!.length > 4) p.trail!.pop();
-    p.x = p.ox + Math.cos(p.ph) * p.r; p.y = p.oy + Math.sin(p.ph) * p.r * 0.55;
+  if (p.swirl) {
+    // swirl around a rising centre, the orbit widening, a short trail behind
+    const w = p.swirl;
+    w.oy += w.vy * dt; w.vy -= 12 * dt; p.ph += w.w * dt; w.r += dt * 24;
+    p.trail!.unshift([p.x, p.y]); if (p.trail!.length > 5) p.trail!.pop();
+    p.x = w.ox + Math.cos(p.ph) * w.r; p.y = w.oy + Math.sin(p.ph) * w.r * 0.55;
     return;
   }
-  if (p.kind === 'firefly') {
+  if (p.spr === 'firefly') {
     p.ph += dt;
-    p.vx += Math.sin(p.ph * 0.9 + p.w) * 6 * dt; p.vy += Math.cos(p.ph * 1.3) * 5 * dt;
+    p.vx += Math.sin(p.ph * 0.9 + p.f0) * 6 * dt; p.vy += Math.cos(p.ph * 1.3) * 5 * dt;
     p.vx *= 1 - dt * 0.3; p.vy *= 1 - dt * 0.3;
     p.x += p.vx * dt; p.y += p.vy * dt;
     return;
   }
   const k = Math.max(0, 1 - p.drag * dt);
   p.vx *= k; p.vy = p.vy * k + p.g * dt;
-  if (p.kind === 'snow' || p.kind === 'leaves' || p.kind === 'paper' || p.kind === 'feathers') p.vx += Math.sin(p.age * (p.kind === 'feathers' ? 2 : 3) + p.ph) * (p.kind === 'feathers' ? 70 : 40) * dt;
-  if (p.kind === 'motes') { p.vx += Math.sin(p.age * 1.3 + p.ph) * 6 * dt; }
-  // chips, ink and acorns land on an invisible floor below where they started and bounce (ink just splats)
-  if ((p.kind === 'chips' || p.kind === 'acorns' || p.kind === 'ink') && p.y + p.vy * dt > p.oy && p.vy > 0) {
-    if (p.kind === 'ink') { p.vx = 0; p.vy = 0; p.g = 0; p.w = 1; p.y = p.oy; return; }
-    p.vy *= -0.38; p.vx *= 0.6; if (Math.abs(p.vy) < 40) { p.vy = 0; p.g = 0; p.vx *= 0.5; }
+  if (p.sway) p.vx += Math.sin(p.age * 2.6 + p.ph) * p.sway * 2 * dt;
+  if (p.floor !== undefined && p.vy > 0 && p.y + p.vy * dt > p.floor) {
+    if (p.onFloor === 'splat') { p.spr = 'inkSplat'; p.vx = 0; p.vy = 0; p.g = 0; p.y = p.floor; p.fps = 14; p.f0 = 0; p.floor = undefined; p.life = Math.min(p.life, p.age + 0.9); p.sway = 0; return; }
+    if (p.onFloor === 'rest') { p.vy = 0; p.g = 0; p.vx = 0; p.fps = 0; p.y = p.floor; p.floor = undefined; return; }
+    p.vy *= -0.38; p.vx *= 0.6;
+    if (Math.abs(p.vy) < 50) { p.vy = 0; p.g = 0; p.vx *= 0.5; p.fps = 0; p.floor = undefined; }
   }
-  if (p.kind === 'hearts') p.x += Math.sin(p.age * 5 + p.ph) * 18 * dt;
   p.x += p.vx * dt; p.y += p.vy * dt;
 }
 
-const TAU = Math.PI * 2;
-/** a soft round glow */
-function glowDot(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
-  const g = c.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, col); g.addColorStop(1, 'rgba(255,255,255,0)');
-  c.globalAlpha *= a; c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
-}
-/** a four-point glint */
-function glint(c: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, col: string) {
-  c.save(); c.translate(x, y); c.rotate(rot);
-  glowDot(c, 0, 0, r * 0.8, 'rgba(255,236,170,.7)');
-  c.globalAlpha = Math.min(1, c.globalAlpha * 1.6);
-  c.fillStyle = col;
-  for (const a of [0, Math.PI / 2]) { c.rotate(a); c.beginPath(); c.moveTo(-r, 0); c.quadraticCurveTo(0, -r * 0.14, r, 0); c.quadraticCurveTo(0, r * 0.14, -r, 0); c.fill(); }
-  c.restore();
-}
-function heart(c: CanvasRenderingContext2D, x: number, y: number, s: number) {
-  c.save(); c.translate(x, y); c.scale(s, s);
-  const g = c.createLinearGradient(-6, -6, 6, 6); g.addColorStop(0, '#ff8a96'); g.addColorStop(0.5, '#e0405a'); g.addColorStop(1, '#a01c34');
-  c.fillStyle = g;
-  c.beginPath(); c.moveTo(0, 5); c.bezierCurveTo(-8, -1, -5, -8, 0, -3.5); c.bezierCurveTo(5, -8, 8, -1, 0, 5); c.fill();
-  c.fillStyle = 'rgba(255,255,255,.6)'; c.beginPath(); c.ellipse(-2.6, -2.6, 1.3, 0.8, -0.6, 0, TAU); c.fill();
-  c.restore();
-}
-function acorn(c: CanvasRenderingContext2D, x: number, y: number, rot: number, s = 1) {
-  c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s);
-  let g = c.createLinearGradient(-4, -2, 4, 6); g.addColorStop(0, '#e0a050'); g.addColorStop(1, '#8a4a1c');
-  c.fillStyle = g; c.beginPath(); c.ellipse(0, 1.6, 3.6, 4.6, 0, 0, TAU); c.fill();
-  g = c.createLinearGradient(0, -5, 0, 0); g.addColorStop(0, '#9a7448'); g.addColorStop(1, '#5a3a1c');
-  c.fillStyle = g; c.beginPath(); c.ellipse(0, -1.4, 4.4, 2.6, 0, Math.PI, TAU); c.lineTo(4.4, -0.6); c.lineTo(-4.4, -0.6); c.fill();
-  c.strokeStyle = '#4a2e14'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, -3.6); c.lineTo(0.6, -5.4); c.stroke();
-  c.fillStyle = 'rgba(255,240,210,.55)'; c.beginPath(); c.ellipse(-1.4, 1, 0.9, 1.6, 0.3, 0, TAU); c.fill();
-  c.restore();
-}
-function leafShape(c: CanvasRenderingContext2D, x: number, y: number, rot: number, col: string, s = 1) {
-  c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s);
-  c.fillStyle = col; c.beginPath(); c.moveTo(-6, 0); c.quadraticCurveTo(0, -4.2, 6, 0); c.quadraticCurveTo(0, 4.2, -6, 0); c.fill();
-  c.strokeStyle = 'rgba(40,30,10,.35)'; c.lineWidth = 0.6; c.beginPath(); c.moveTo(-6, 0); c.lineTo(5, 0); c.stroke();
-  c.restore();
-}
-const LEAF = ['#6aa63a', '#c98a2a', '#b8452c', '#8ab848'];
-
-function draw(c: CanvasRenderingContext2D, p: P) {
+function draw(c: CanvasRenderingContext2D, p: P, S: number, gain = 1) {
   const k = p.age / p.life;
-  const fade = k > 0.65 ? 1 - (k - 0.65) / 0.35 : 1;
-  c.globalAlpha = fade;
-  const x = p.x, y = p.y, spin = p.ph + p.age * (p.fps || 6);
-  switch (p.kind) {
-    case 'puff': {
-      const r = 6 + k * 14;
-      c.globalAlpha = fade * 0.7;
-      for (let i = 0; i < 3; i++) glowDot(c, x + Math.cos(p.ph + i * 2.1) * r * 0.4, y + Math.sin(p.ph + i * 2.1) * r * 0.3, r, 'rgba(255,250,240,.9)');
-      break;
-    }
-    case 'sparkle': glint(c, x, y, 5 + 3 * Math.sin(p.age * 14 + p.ph), spin * 0.3, '#fffbe8'); break;
-    case 'stars': glint(c, x, y, 7, spin * 0.2, '#fff0b8'); break;
-    case 'hearts': heart(c, x, y, 1.3); break;
-    case 'magic': {
-      p.trail!.forEach(([tx, ty], i) => { c.globalAlpha = fade * (0.5 - i * 0.1); glowDot(c, tx, ty, 3, p.col!); });
-      c.globalAlpha = fade;
-      glowDot(c, x, y, 6, p.col!);
-      c.globalAlpha = fade; c.fillStyle = '#fffaf0'; c.beginPath(); c.arc(x, y, 1.2, 0, TAU); c.fill();
-      break;
-    }
-    case 'coins': case 'acorns': acorn(c, x, y, spin * 0.6, 1.3); break;
-    case 'snow': glowDot(c, x, y, 3.2, 'rgba(255,255,255,.95)'); break;
-    case 'leaves': leafShape(c, x, y, spin * 0.5, LEAF[Math.floor(p.ph * 10) % LEAF.length], 1.1); break;
-    case 'confetti': {
-      c.save(); c.translate(x, y); c.rotate(p.ph + p.age * 3); c.scale(1, Math.cos(p.age * p.fps + p.ph));
-      c.fillStyle = p.col!; c.fillRect(-3.5, -2, 7, 4);
-      c.restore(); break;
-    }
-    case 'dust': case 'motes': {
-      const tw = p.kind === 'motes' ? 0.6 + 0.4 * Math.sin(p.age * 6 + p.ph) : 0.8;
-      glowDot(c, x, y, p.kind === 'motes' ? 4 : 2.2 + (p.w || 1), p.col!, tw);
-      break;
-    }
-    case 'chips': {
-      c.save(); c.translate(x, y); c.rotate(spin);
-      const g = c.createLinearGradient(-3, -1, 3, 1); g.addColorStop(0, '#d8b07c'); g.addColorStop(1, p.col!);
-      c.fillStyle = g; c.beginPath(); c.moveTo(-3.5, -1); c.lineTo(3, -1.6); c.lineTo(3.5, 0.8); c.lineTo(-3, 1.2); c.fill();
-      c.restore(); break;
-    }
-    case 'paper': {
-      c.save(); c.translate(x, y); c.rotate(spin * 0.5); c.scale(1, 0.4 + 0.6 * Math.abs(Math.cos(p.age * 4 + p.ph)));
-      c.shadowColor = 'rgba(30,20,40,.3)'; c.shadowBlur = 2; c.shadowOffsetY = 1;
-      c.fillStyle = p.col!; c.beginPath(); c.moveTo(-3, -2); c.lineTo(2.6, -2.4); c.lineTo(3, 2); c.lineTo(-2.4, 2.4); c.closePath(); c.fill();
-      c.restore(); break;
-    }
-    case 'ink': {
-      c.fillStyle = p.col!;
-      if (p.w) { c.beginPath(); c.ellipse(x, y, 3.2, 1.3, 0, 0, TAU); c.fill(); }
-      else { c.beginPath(); c.ellipse(x, y, 1.4, 2.2, 0, 0, TAU); c.fill(); }
-      break;
-    }
-    case 'embers': glowDot(c, x, y, 4, Math.floor(p.age * 14 + p.ph) % 2 ? p.col! : EMBERS[3]); break;
-    case 'feathers': {
-      c.save(); c.translate(x, y); c.rotate(Math.sin(p.age * 2 + p.ph) * 0.8);
-      const g = c.createLinearGradient(0, -7, 0, 7); g.addColorStop(0, p.col!); g.addColorStop(1, FEATHERS[2]);
-      c.fillStyle = g; c.beginPath(); c.ellipse(0, 0, 2.6, 7, 0, 0, TAU); c.fill();
-      c.strokeStyle = 'rgba(60,40,20,.5)'; c.lineWidth = 0.6; c.beginPath(); c.moveTo(0, -7); c.lineTo(0, 8); c.stroke();
-      c.restore(); break;
-    }
-    case 'firefly': {
-      const pulse = 0.5 + 0.5 * Math.sin(p.age * p.w * 2 + p.ph);
-      const f2 = Math.min(1, p.age / 0.6, (p.life - p.age) / 0.6);
-      c.globalAlpha = f2 * (0.3 + pulse * 0.5);
-      glowDot(c, x, y, 7, 'rgba(240,230,140,.8)');
-      c.globalAlpha = f2 * (0.7 + pulse * 0.3);
-      c.fillStyle = '#fffbe0'; c.beginPath(); c.arc(x, y, 1.3, 0, TAU); c.fill();
-      break;
-    }
-  }
+  let a = gain * Math.min(1, p.age / Math.max(0.01, p.fadeIn)) * (k > 0.62 ? 1 - (k - 0.62) / 0.38 : 1);
+  const n = frameCount(p.spr);
+  // splats play once and hold; everything else cycles
+  let f = p.spr === 'inkSplat' ? Math.min(n - 1, Math.floor(p.age * p.fps * 0.3)) : Math.floor(p.f0 + p.age * p.fps) % n;
+  if (p.spr === 'glint' || p.spr === 'glintCool' || p.spr === 'glintRose') f = Math.min(n - 1, Math.floor(k * n)); // one twinkle over its life
+  if (p.spr === 'firefly') a *= 0.55 + 0.45 * Math.sin(p.age * 2.4 + p.f0);
+  if (p.fire) a *= 0.8 + 0.2 * Math.sin(p.age * 30 + p.ph);
+  if (a <= 0.02) return;
+  const img = sprite(p.spr, f), w = img.width * S, h = img.height * S;
+  // snap to the art-pixel grid
+  const X = Math.round((p.x * B - w / 2) / S) * S, Y = Math.round((p.y * B - h / 2) / S) * S;
+  c.globalAlpha = a;
+  if (p.trail) p.trail.forEach(([tx, ty], i) => {
+    c.globalAlpha = a * (0.45 - i * 0.08);
+    c.fillStyle = '#ffe8b0';
+    c.fillRect(Math.round(tx * B / S) * S, Math.round(ty * B / S) * S, S, S);
+  });
+  c.globalAlpha = a;
+  if (p.spr === 'ink' && p.vy < 0) { c.save(); c.translate(X, Y + h); c.scale(1, -1); c.drawImage(img, 0, 0, w, h); c.restore(); }
+  else c.drawImage(img, X, Y, w, h);
   c.globalAlpha = 1;
 }
+
+if (typeof window !== 'undefined') (window as unknown as { hhUiFx: unknown }).hhUiFx = { uiBurst, uiAdvance: (s: number) => uiAdvance(s), shieldRects, count: () => parts.length };
 
 /** Dev/screenshot helper: run the particle simulation forward by `sec` seconds right now. */
 export function uiAdvance(sec: number) {
@@ -284,11 +230,12 @@ export function uiAdvance(sec: number) {
   start();
 }
 
-// ------------------------------------------------------------------ [ui3] particles on every interaction
+// ------------------------------------------------------------------ small bursts on every interaction
 let auto = false;
 /**
- * Once: small 2D pixel bursts on every press, toggle, slider drag, tab change, sheet, dialog and toast across
- * the whole interface (delegated listeners; screens can still throw their own bigger bursts).
+ * Once: small pixel bursts on every press, toggle, slider drag, tab change, sheet, dialog and toast across the whole
+ * interface (delegated listeners; screens can still throw their own bigger bursts): wood dust, a curl of shaving, a
+ * scrap of paper, a glint on the gold buttons.
  */
 export function installUiFxAuto() {
   if (auto || typeof document === 'undefined') return;
@@ -300,11 +247,11 @@ export function installUiFxAuto() {
     if (!el) return;
     const x = e.clientX, y = e.clientY;
     if (el.matches('input[type="range"]')) { uiBurst('dust', x, y, 3); return; }
-    if (el.matches('[role="switch"], .toggle')) { uiBurst('chips', x, y, 5); uiBurst('dust', x, y, 3); return; }
-    if (el.matches('.tag, .seg button, .tab, [role="tab"]')) { uiBurst('paper', x, y, 3); uiBurst('dust', x, y, 2); return; }
+    if (el.matches('[role="switch"], .toggle')) { uiBurst('chips', x, y, 2); uiBurst('dust', x, y, 3); return; }
+    if (el.matches('.tag, .seg button, .tab, [role="tab"]')) { uiBurst('paper', x, y, 2); uiBurst('dust', x, y, 2); return; }
     if (el.matches('.icon-btn')) { uiBurst('dust', x, y, 5); return; }
-    if (el.matches('.btn.pillow.honey, .hh-btn-gold')) { uiBurst('dust', x, y, 4); uiBurst('motes', x, y - 10, 3); return; }
-    if (el.matches('.btn.pillow, .btn.soft, .btn')) { uiBurst('dust', x, y, 5); uiBurst('chips', x, y, 2); return; }
+    if (el.matches('.btn.pillow.honey, .hh-btn-gold')) { uiBurst('dust', x, y, 4); uiBurst('glints', x, y - 8, 2); return; }
+    if (el.matches('.btn.pillow, .btn.soft, .btn')) { uiBurst('dust', x, y, 5); uiBurst('chips', x, y, 1); return; }
     uiBurst('dust', x, y, 3);
   }, { capture: true, passive: true });
   document.addEventListener('input', (e) => {
@@ -326,9 +273,7 @@ export function installUiFxAuto() {
         const box = (hit.matches('.modal-back') ? hit.querySelector('.modal') : hit) as HTMLElement | null;
         if (!box) return;
         const r = box.getBoundingClientRect();
-        if (hit.matches('.hh-toast')) { uiBurst('paper', r.left + 10, r.top + r.height / 2, 4); return; }
-        if (hit.matches('.lvup')) return;
-        uiBurst('paper', r.left + r.width / 2, r.top + 8, 5);
+        if (hit.matches('.hh-toast') || hit.matches('.lvup')) return;
         uiBurst('dust', r.left + 12, r.top + 12, 4); uiBurst('dust', r.right - 12, r.top + 12, 4);
       });
     }

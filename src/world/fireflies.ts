@@ -1,12 +1,13 @@
-// Fireflies: each one is a crisp 2x2 pixel core inside a soft glow halo, blinking on its own slow
-// rhythm and drifting on a lazy wander. They can be gathered towards a point (the breathing
-// exercise pulls them in on the inhale and releases them on the exhale).
+// Fireflies: each one a hot yellow-green point of light in a soft halo that blooms as it glows (high dynamic range,
+// so the post chain's bloom carries it), blinking on its own slow rhythm and drifting on a lazy wander, its glow
+// fading in and out rather than switching. They can be gathered towards a point (the breathing exercise pulls them
+// in on the inhale and releases them on the exhale). [fx10]
 import * as THREE from 'three';
 
 const VS = /* glsl */ `
 attribute vec4 iPos;   // xyz, phase
 attribute vec2 iData;  // size, hue
-uniform float uTime; uniform float uAlpha; uniform float uPix;
+uniform float uTime; uniform float uAlpha;
 varying vec2 vUv; varying float vBlink; varying float vHue;
 void main() {
   vec4 mv = viewMatrix * vec4(iPos.xyz, 1.0);
@@ -14,24 +15,22 @@ void main() {
   blink = smoothstep(0.15, 1.0, blink);
   vBlink = blink * uAlpha;
   vHue = iData.y;
-  mv.xy += position.xy * iData.x * (0.75 + 0.5 * blink);
+  mv.xy += position.xy * iData.x * (0.85 + 0.45 * blink);
   vUv = uv;
   gl_Position = projectionMatrix * mv;
 }`;
 const FS = /* glsl */ `
-uniform float uPix;
 varying vec2 vUv; varying float vBlink; varying float vHue;
 void main() {
-  // a crisp pixel spark: a 2x2 core with a one-pixel cross around it, no soft glow
-  vec2 q = floor(vUv * uPix) - floor(uPix * 0.5);
-  float core = step(abs(q.x + 0.5), 1.0) * step(abs(q.y + 0.5), 1.0);
-  float crossH = step(abs(q.y + 0.5), 0.5) * step(abs(q.x + 0.5), 2.0);
-  float crossV = step(abs(q.x + 0.5), 0.5) * step(abs(q.y + 0.5), 2.0);
-  float arm = max(crossH, crossV) * (1.0 - core);
-  vec3 warm = mix(vec3(0.95, 0.84, 0.55), vec3(0.78, 0.9, 0.62), vHue);
-  vec3 col = warm * (core * 4.0 + arm * 1.4); // [look4] HDR: the post chain's bloom gives them a soft glow
-  float a = (core + arm * 0.6) * vBlink;
-  if (a < 0.05) discard;
+  vec2 q = (vUv - 0.5) * 2.0;
+  float r2 = dot(q, q);
+  if (r2 > 1.0) discard;
+  // a hot point, a tight glow round it and a wide soft halo that swells with the light
+  float core = exp(-r2 * 140.0), inner = exp(-r2 * 34.0), halo = exp(-r2 * 7.0) * (1.0 - smoothstep(0.6, 1.0, sqrt(r2)));
+  vec3 warm = mix(vec3(1.0, 0.84, 0.42), vec3(0.76, 0.95, 0.46), vHue);
+  vec3 col = mix(warm, vec3(1.0, 0.98, 0.88), core) * (core * 3.0 + inner * 0.7 + halo * 0.2 * vBlink);
+  float a = vBlink;
+  if (a < 0.01) discard;
   gl_FragColor = vec4(col * a, 1.0);
 }`;
 
@@ -69,7 +68,7 @@ export class Fireflies {
     g.instanceCount = count;
     this.mat = new THREE.ShaderMaterial({
       vertexShader: VS, fragmentShader: FS, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      uniforms: { uTime: { value: 0 }, uAlpha: { value: 0 }, uPix: { value: 8 } },
+      uniforms: { uTime: { value: 0 }, uAlpha: { value: 0 } },
     });
     this.mesh = new THREE.Mesh(g, this.mat);
     this.mesh.frustumCulled = false;

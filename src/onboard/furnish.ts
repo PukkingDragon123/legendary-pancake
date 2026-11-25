@@ -17,7 +17,7 @@ export const L = {
   chair: { x: 0, z: -1.98 },
   seat: 0.5,
   window: { z: -0.95, w: 1.5, y0: 0.92, y1: 2.62, depth: 0.38 },
-  clock: { x: 0, y: 2.05, z: -3.2 },
+  clock: { x: 0, y: 2.0, z: -3.2 },
   cred: { x: 0, z: -2.94, w: 1.9, d: 0.5, h: 0.8 },
   shelves: [{ x0: -3.32, x1: -1.18 }, { x0: 1.18, x1: 3.32 }],
   shelfD: 0.4, shelfH: 2.78,

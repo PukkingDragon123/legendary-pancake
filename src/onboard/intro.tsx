@@ -26,7 +26,7 @@ import { FloatingPen } from './pen.ts';
 import { DRINKS, TAPES } from './props.ts';
 import { answersFrom, applyAnswers, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat } from './script.ts';
 import { Speech } from './speech.ts';
-import { animeMoment } from '../ui/fx/anime.ts'; // [anime6]
+import { animeMoment } from '../ui/fx/moment.ts'; // [fx10] (the old name: ink and a soft press of light)
 
 const ARTIFACT = import.meta.env.MODE === 'artifact';
 const DEV = import.meta.env.DEV;
