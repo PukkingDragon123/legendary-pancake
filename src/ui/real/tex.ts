@@ -80,6 +80,31 @@ export function sampleTex(n: TexName, u: number, v: number, out: number[]): numb
   return out;
 }
 
+const CANVASES = new Map<string, HTMLCanvasElement | null>();
+/** A tile as a canvas (for canvas patterns), optionally tinted like tileURL. null if the tile isn't loaded. */
+export function texCanvas(n: TexName, tint?: string): HTMLCanvasElement | null {
+  const key = n + ':' + (tint ?? '');
+  if (CANVASES.has(key)) return CANVASES.get(key)!;
+  const t = DATA[n];
+  if (typeof document === 'undefined' || !t) return null;
+  const src = document.createElement('canvas');
+  src.width = t.w; src.height = t.h;
+  const sg = src.getContext('2d')!, img = sg.createImageData(t.w, t.h);
+  for (let i = 0, j = 0; j < t.d.length; i += 4, j += 3) { img.data[i] = t.d[j]; img.data[i + 1] = t.d[j + 1]; img.data[i + 2] = t.d[j + 2]; img.data[i + 3] = 255; }
+  sg.putImageData(img, 0, 0);
+  let out = src;
+  if (tint) {
+    out = document.createElement('canvas');
+    out.width = t.w; out.height = t.h;
+    const g = out.getContext('2d')!;
+    g.fillStyle = tint; g.fillRect(0, 0, t.w, t.h);
+    g.globalCompositeOperation = DETAIL[n] ? 'overlay' : 'multiply';
+    g.drawImage(src, 0, 0);
+  }
+  CANVASES.set(key, out);
+  return out;
+}
+
 const TILES = new Map<string, string>();
 /**
  * A tile as a CSS-ready URL: colour tiles as they are (or multiplied by `tint`); grey detail tiles tinted to

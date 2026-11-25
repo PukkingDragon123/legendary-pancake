@@ -1,17 +1,15 @@
-// 2D pixel-art particles for the interface, in the calm palette (puffs, sparkles, hearts, swirling magic motes,
-// spinning acorns, stars, snow, leaves, confetti), drawn on one overlay canvas above the UI.
-// One canvas texel is 2 CSS px, so particles share the chunky pixel grid of the sprites.
+// Particles for the interface (puffs, sparkles, hearts, swirling magic motes, spinning acorns, stars, snow,
+// leaves, confetti, dust, wood chips, paper scraps, ink, embers, feathers, light motes, fireflies), drawn smooth
+// and anti-aliased at device resolution on one overlay canvas above the UI, lit from the top left. [ui7]
 // Anyone may call uiBurst(kind, x, y, n) with screen coordinates in CSS px.
 // OWNED BY THE UI-CHROME BUILDER.
-import { spriteCanvas } from '../px/sprites.js';
-import '../px/chromeart.js';
 import { reducedMotion } from './swing.ts';
 import { calm } from '../px/calm.js';
 
 export type UiFxKind = 'puff' | 'sparkle' | 'hearts' | 'magic' | 'coins' | 'stars' | 'snow' | 'leaves' | 'confetti'
   | 'dust' | 'chips' | 'paper' | 'ink' | 'embers' | 'feathers' | 'acorns' | 'motes';
 
-const B = 2; // CSS px per texel
+let B = 1; // device px per CSS px (set in fit)
 interface P {
   kind: UiFxKind | 'firefly'; x: number; y: number; vx: number; vy: number; g: number; drag: number;
   life: number; age: number; frames?: string[]; fps: number; f0: number;
@@ -42,7 +40,7 @@ function ensure() {
   if (cv || typeof document === 'undefined') return;
   cv = document.createElement('canvas');
   cv.className = 'hh-uifx';
-  Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', zIndex: '70', pointerEvents: 'none', imageRendering: 'pixelated' });
+  Object.assign(cv.style, { position: 'fixed', left: '0', top: '0', zIndex: '70', pointerEvents: 'none' });
   document.body.appendChild(cv);
   ctx = cv.getContext('2d');
   fit();
@@ -50,10 +48,10 @@ function ensure() {
 }
 function fit() {
   if (!cv) return;
-  W = Math.ceil(innerWidth / B); H = Math.ceil(innerHeight / B);
-  cv.width = W; cv.height = H;
-  cv.style.width = `${W * B}px`; cv.style.height = `${H * B}px`;
-  if (ctx) ctx.imageSmoothingEnabled = false;
+  B = Math.min(2, Math.max(1, devicePixelRatio || 1));
+  W = Math.ceil(innerWidth); H = Math.ceil(innerHeight);
+  cv.width = Math.round(W * B); cv.height = Math.round(H * B);
+  cv.style.width = `${W}px`; cv.style.height = `${H}px`;
 }
 function start() {
   ensure();
@@ -114,13 +112,14 @@ function step(now: number) {
   const dt = frozen !== undefined ? 0 : Math.min(0.05, Math.max(0, (now - (last || now)) / 1000));
   last = now;
   if (!ctx || !cv) return;
-  if (innerWidth / B > W + 1 || innerHeight / B > H + 1) fit();
+  if (innerWidth > W + 1 || innerHeight > H + 1) fit();
   // ambient fireflies
   const flies = parts.reduce((n, p) => n + (p.kind === 'firefly' ? 1 : 0), 0);
   if (ambientOn && flies < 7 && Math.random() < dt * 2) {
     const b = ambientBox;
     parts.push({ kind: 'firefly', x: R(b.x, b.x + b.w), y: R(b.y, b.y + b.h), vx: R(-8, 8), vy: R(-6, 6), g: 0, drag: 0, life: R(5, 9), age: 0, fps: 0, f0: 0, ph: Math.random() * 6.28, ox: 0, oy: 0, r: 0, w: R(1.5, 3) });
   }
+  ctx.setTransform(B, 0, 0, B, 0, 0);
   ctx.clearRect(0, 0, W, H);
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i];
@@ -163,68 +162,118 @@ function move(p: P, dt: number) {
   p.x += p.vx * dt; p.y += p.vy * dt;
 }
 
+const TAU = Math.PI * 2;
+/** a soft round glow */
+function glowDot(c: CanvasRenderingContext2D, x: number, y: number, r: number, col: string, a = 1) {
+  const g = c.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, col); g.addColorStop(1, 'rgba(255,255,255,0)');
+  c.globalAlpha *= a; c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, TAU); c.fill();
+}
+/** a four-point glint */
+function glint(c: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number, col: string) {
+  c.save(); c.translate(x, y); c.rotate(rot);
+  glowDot(c, 0, 0, r * 0.8, 'rgba(255,236,170,.7)');
+  c.globalAlpha = Math.min(1, c.globalAlpha * 1.6);
+  c.fillStyle = col;
+  for (const a of [0, Math.PI / 2]) { c.rotate(a); c.beginPath(); c.moveTo(-r, 0); c.quadraticCurveTo(0, -r * 0.14, r, 0); c.quadraticCurveTo(0, r * 0.14, -r, 0); c.fill(); }
+  c.restore();
+}
+function heart(c: CanvasRenderingContext2D, x: number, y: number, s: number) {
+  c.save(); c.translate(x, y); c.scale(s, s);
+  const g = c.createLinearGradient(-6, -6, 6, 6); g.addColorStop(0, '#ff8a96'); g.addColorStop(0.5, '#e0405a'); g.addColorStop(1, '#a01c34');
+  c.fillStyle = g;
+  c.beginPath(); c.moveTo(0, 5); c.bezierCurveTo(-8, -1, -5, -8, 0, -3.5); c.bezierCurveTo(5, -8, 8, -1, 0, 5); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.6)'; c.beginPath(); c.ellipse(-2.6, -2.6, 1.3, 0.8, -0.6, 0, TAU); c.fill();
+  c.restore();
+}
+function acorn(c: CanvasRenderingContext2D, x: number, y: number, rot: number, s = 1) {
+  c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s);
+  let g = c.createLinearGradient(-4, -2, 4, 6); g.addColorStop(0, '#e0a050'); g.addColorStop(1, '#8a4a1c');
+  c.fillStyle = g; c.beginPath(); c.ellipse(0, 1.6, 3.6, 4.6, 0, 0, TAU); c.fill();
+  g = c.createLinearGradient(0, -5, 0, 0); g.addColorStop(0, '#9a7448'); g.addColorStop(1, '#5a3a1c');
+  c.fillStyle = g; c.beginPath(); c.ellipse(0, -1.4, 4.4, 2.6, 0, Math.PI, TAU); c.lineTo(4.4, -0.6); c.lineTo(-4.4, -0.6); c.fill();
+  c.strokeStyle = '#4a2e14'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, -3.6); c.lineTo(0.6, -5.4); c.stroke();
+  c.fillStyle = 'rgba(255,240,210,.55)'; c.beginPath(); c.ellipse(-1.4, 1, 0.9, 1.6, 0.3, 0, TAU); c.fill();
+  c.restore();
+}
+function leafShape(c: CanvasRenderingContext2D, x: number, y: number, rot: number, col: string, s = 1) {
+  c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s);
+  c.fillStyle = col; c.beginPath(); c.moveTo(-6, 0); c.quadraticCurveTo(0, -4.2, 6, 0); c.quadraticCurveTo(0, 4.2, -6, 0); c.fill();
+  c.strokeStyle = 'rgba(40,30,10,.35)'; c.lineWidth = 0.6; c.beginPath(); c.moveTo(-6, 0); c.lineTo(5, 0); c.stroke();
+  c.restore();
+}
+const LEAF = ['#6aa63a', '#c98a2a', '#b8452c', '#8ab848'];
+
 function draw(c: CanvasRenderingContext2D, p: P) {
   const k = p.age / p.life;
-  // fade in pixel steps, never smoothly
-  c.globalAlpha = k > 0.85 ? 0.35 : k > 0.7 ? 0.7 : 1;
-  const tx = Math.round(p.x / B), ty = Math.round(p.y / B);
-  if (p.frames) {
-    const n = p.frames.length;
-    const f = p.fps ? (p.f0 + Math.floor(p.age * p.fps)) % n : Math.min(n - 1, Math.floor(k * n));
-    const img = spriteCanvas(p.frames[f], 1);
-    c.drawImage(img, tx - (img.width >> 1), ty - (img.height >> 1));
-  } else if (p.kind === 'magic') {
-    p.trail!.forEach(([x, y], i) => { c.globalAlpha = 0.75 - i * 0.16; c.fillStyle = i < 2 ? p.col! : '#617f8c'; c.fillRect(Math.round(x / B), Math.round(y / B), 1, 1); });
-    c.globalAlpha = (k > 0.8 ? 0.5 : 1) * 0.6;
-    c.fillStyle = p.col!;
-    c.fillRect(tx - 1, ty, 3, 1); c.fillRect(tx, ty - 1, 1, 3);
-    c.globalAlpha = k > 0.8 ? 0.5 : 1;
-    c.fillStyle = Math.floor(p.age * 12 + p.w) % 3 === 0 ? '#f4eedd' : p.col!;
-    c.fillRect(tx, ty, 1, 1);
-  } else if (p.kind === 'confetti') {
-    const flip = Math.floor(p.age * p.fps + p.ph) % 4;
-    c.fillStyle = p.col!;
-    if (flip === 0) c.fillRect(tx - 1, ty, 3, 2);
-    else if (flip === 1) c.fillRect(tx, ty - 1, 2, 3);
-    else if (flip === 2) { c.fillRect(tx - 1, ty, 3, 1); c.globalAlpha *= 0.5; c.fillStyle = '#2e2b24'; c.fillRect(tx - 1, ty + 1, 3, 1); }
-    else c.fillRect(tx, ty - 1, 1, 3);
-  } else if (p.kind === 'dust' || p.kind === 'motes') {
-    c.fillStyle = p.col!;
-    c.globalAlpha *= p.kind === 'motes' ? (Math.floor(p.age * 6 + p.ph) % 3 === 0 ? 0.45 : 0.85) : 0.8;
-    c.fillRect(tx, ty, p.w || 1, p.w || 1);
-  } else if (p.kind === 'chips') {
-    const f = Math.floor(p.age * p.fps + p.ph) % 3;
-    c.fillStyle = p.col!;
-    if (f === 0) c.fillRect(tx - 1, ty, 3, 1); else if (f === 1) c.fillRect(tx, ty - 1, 1, 2); else c.fillRect(tx, ty, 2, 1);
-    c.fillStyle = '#3a2f25'; c.globalAlpha *= 0.5; c.fillRect(tx + 1, ty + (f === 1 ? 1 : 1), 1, 1);
-  } else if (p.kind === 'paper') {
-    const f = Math.floor(p.age * p.fps + p.ph) % 4;
-    c.fillStyle = p.col!;
-    if (f === 0) c.fillRect(tx - 1, ty, 3, 2); else if (f === 1) c.fillRect(tx - 1, ty, 2, 2); else if (f === 2) c.fillRect(tx, ty, 1, 2); else c.fillRect(tx - 1, ty, 2, 1);
-    c.fillStyle = '#b5a27c'; c.fillRect(tx - 1 + (f === 0 ? 2 : 0), ty + 1, 1, 1);
-  } else if (p.kind === 'ink') {
-    c.fillStyle = p.col!;
-    if (p.w) { c.fillRect(tx - 1, ty, 3, 1); c.fillRect(tx, ty - 1, 1, 1); if (p.ph > 3) c.fillRect(tx + 2, ty - 1, 1, 1); }
-    else c.fillRect(tx, ty, 1, 2);
-  } else if (p.kind === 'embers') {
-    c.fillStyle = Math.floor(p.age * 14 + p.ph) % 2 ? p.col! : EMBERS[3];
-    c.fillRect(tx, ty, 1, 1);
-    if (p.age < 0.3) { c.globalAlpha *= 0.4; c.fillRect(tx, ty + 1, 1, 1); }
-  } else if (p.kind === 'feathers') {
-    const f = Math.floor(p.age * p.fps + p.ph) % 2;
-    c.fillStyle = p.col!;
-    // a little barred feather: quill and vane, tilting as it drifts
-    if (f === 0) { c.fillRect(tx - 2, ty, 4, 1); c.fillRect(tx - 1, ty - 1, 3, 1); c.fillStyle = FEATHERS[2]; c.fillRect(tx, ty, 1, 1); c.fillRect(tx + 2, ty + 1, 1, 1); }
-    else { c.fillRect(tx - 1, ty - 1, 1, 3); c.fillRect(tx, ty - 2, 1, 3); c.fillStyle = FEATHERS[2]; c.fillRect(tx, ty - 1, 1, 1); c.fillRect(tx - 1, ty + 2, 1, 1); }
-  } else if (p.kind === 'firefly') {
-    const pulse = 0.5 + 0.5 * Math.sin(p.age * p.w * 2 + p.ph);
-    const fade = Math.min(1, p.age / 0.6, (p.life - p.age) / 0.6);
-    c.globalAlpha = fade * (0.15 + pulse * 0.3);
-    c.fillStyle = '#c8a764';
-    c.fillRect(tx - 1, ty, 3, 1); c.fillRect(tx, ty - 1, 1, 3);
-    c.globalAlpha = fade * (0.6 + pulse * 0.4);
-    c.fillStyle = pulse > 0.6 ? '#f4eedd' : '#f1d39a';
-    c.fillRect(tx, ty, 1, 1);
+  const fade = k > 0.65 ? 1 - (k - 0.65) / 0.35 : 1;
+  c.globalAlpha = fade;
+  const x = p.x, y = p.y, spin = p.ph + p.age * (p.fps || 6);
+  switch (p.kind) {
+    case 'puff': {
+      const r = 6 + k * 14;
+      c.globalAlpha = fade * 0.7;
+      for (let i = 0; i < 3; i++) glowDot(c, x + Math.cos(p.ph + i * 2.1) * r * 0.4, y + Math.sin(p.ph + i * 2.1) * r * 0.3, r, 'rgba(255,250,240,.9)');
+      break;
+    }
+    case 'sparkle': glint(c, x, y, 5 + 3 * Math.sin(p.age * 14 + p.ph), spin * 0.3, '#fffbe8'); break;
+    case 'stars': glint(c, x, y, 7, spin * 0.2, '#fff0b8'); break;
+    case 'hearts': heart(c, x, y, 1.3); break;
+    case 'magic': {
+      p.trail!.forEach(([tx, ty], i) => { c.globalAlpha = fade * (0.5 - i * 0.1); glowDot(c, tx, ty, 3, p.col!); });
+      c.globalAlpha = fade;
+      glowDot(c, x, y, 6, p.col!);
+      c.globalAlpha = fade; c.fillStyle = '#fffaf0'; c.beginPath(); c.arc(x, y, 1.2, 0, TAU); c.fill();
+      break;
+    }
+    case 'coins': case 'acorns': acorn(c, x, y, spin * 0.6, 1.3); break;
+    case 'snow': glowDot(c, x, y, 3.2, 'rgba(255,255,255,.95)'); break;
+    case 'leaves': leafShape(c, x, y, spin * 0.5, LEAF[Math.floor(p.ph * 10) % LEAF.length], 1.1); break;
+    case 'confetti': {
+      c.save(); c.translate(x, y); c.rotate(p.ph + p.age * 3); c.scale(1, Math.cos(p.age * p.fps + p.ph));
+      c.fillStyle = p.col!; c.fillRect(-3.5, -2, 7, 4);
+      c.restore(); break;
+    }
+    case 'dust': case 'motes': {
+      const tw = p.kind === 'motes' ? 0.6 + 0.4 * Math.sin(p.age * 6 + p.ph) : 0.8;
+      glowDot(c, x, y, p.kind === 'motes' ? 4 : 2.2 + (p.w || 1), p.col!, tw);
+      break;
+    }
+    case 'chips': {
+      c.save(); c.translate(x, y); c.rotate(spin);
+      const g = c.createLinearGradient(-3, -1, 3, 1); g.addColorStop(0, '#d8b07c'); g.addColorStop(1, p.col!);
+      c.fillStyle = g; c.beginPath(); c.moveTo(-3.5, -1); c.lineTo(3, -1.6); c.lineTo(3.5, 0.8); c.lineTo(-3, 1.2); c.fill();
+      c.restore(); break;
+    }
+    case 'paper': {
+      c.save(); c.translate(x, y); c.rotate(spin * 0.5); c.scale(1, 0.4 + 0.6 * Math.abs(Math.cos(p.age * 4 + p.ph)));
+      c.fillStyle = p.col!; c.fillRect(-4, -3, 8, 6);
+      c.strokeStyle = 'rgba(120,90,50,.35)'; c.lineWidth = 0.5; c.strokeRect(-4, -3, 8, 6);
+      c.restore(); break;
+    }
+    case 'ink': {
+      c.fillStyle = p.col!;
+      if (p.w) { c.beginPath(); c.ellipse(x, y, 3.2, 1.3, 0, 0, TAU); c.fill(); }
+      else { c.beginPath(); c.ellipse(x, y, 1.4, 2.2, 0, 0, TAU); c.fill(); }
+      break;
+    }
+    case 'embers': glowDot(c, x, y, 4, Math.floor(p.age * 14 + p.ph) % 2 ? p.col! : EMBERS[3]); break;
+    case 'feathers': {
+      c.save(); c.translate(x, y); c.rotate(Math.sin(p.age * 2 + p.ph) * 0.8);
+      const g = c.createLinearGradient(0, -7, 0, 7); g.addColorStop(0, p.col!); g.addColorStop(1, FEATHERS[2]);
+      c.fillStyle = g; c.beginPath(); c.ellipse(0, 0, 2.6, 7, 0, 0, TAU); c.fill();
+      c.strokeStyle = 'rgba(60,40,20,.5)'; c.lineWidth = 0.6; c.beginPath(); c.moveTo(0, -7); c.lineTo(0, 8); c.stroke();
+      c.restore(); break;
+    }
+    case 'firefly': {
+      const pulse = 0.5 + 0.5 * Math.sin(p.age * p.w * 2 + p.ph);
+      const f2 = Math.min(1, p.age / 0.6, (p.life - p.age) / 0.6);
+      c.globalAlpha = f2 * (0.3 + pulse * 0.5);
+      glowDot(c, x, y, 7, 'rgba(240,230,140,.8)');
+      c.globalAlpha = f2 * (0.7 + pulse * 0.3);
+      c.fillStyle = '#fffbe0'; c.beginPath(); c.arc(x, y, 1.3, 0, TAU); c.fill();
+      break;
+    }
   }
   c.globalAlpha = 1;
 }
