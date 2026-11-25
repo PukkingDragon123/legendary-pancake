@@ -223,7 +223,7 @@ const unlit = (c: number) => { const k = 'unlit' + c; let m = mats.get(k); if (!
  * old rose, amethyst; honey oak, walnut and cherry; warm brass and gold; cream paper and linen.
  */
 const C = {
-  brass: () => M(0xd8a344, { metal: 0.62, rough: 0.3, tex: null, env: 1.1 }), gold: () => M(0xf0c04c, { metal: 0.55, rough: 0.27, tex: null, env: 1.15 }), silver: () => M(0xd2d9e2, { metal: 0.75, rough: 0.28, tex: null }),
+  brass: () => M(0xe4ae4a, { metal: 0.5, rough: 0.32, tex: null, env: 1.0 }), gold: () => M(0xf0c04c, { metal: 0.55, rough: 0.27, tex: null, env: 1.15 }), silver: () => M(0xd2d9e2, { metal: 0.75, rough: 0.28, tex: null }),
   iron: () => M(0x88909e, { metal: 0.7, rough: 0.38, tex: null }), wood: () => M(0xb8723c, { tex: 'grain', rough: 0.6 }), dark: () => M(0x6e3c20, { tex: 'grain', rough: 0.65 }), oak: () => M(0xd8a05c, { tex: 'grain', rough: 0.6 }),
   red: () => M(0xc83c30, { rough: 0.3 }), green: () => M(0x3a9a56, { rough: 0.3 }), blue: () => M(0x3a6cb4, { rough: 0.3 }), sky: () => M(0x56a2d4, { rough: 0.28 }),
   rose: () => M(0xd8607c, { rough: 0.32 }), plum: () => M(0x8452b8, { rough: 0.34 }), cream: () => M(0xf6e8c8, { rough: 0.45 }), paper: () => M(0xf2e4c4, { rough: 0.85, tex: 'paper' }),
@@ -531,7 +531,7 @@ const ICONS: Record<string, Spec> = {
   arrow_up: { make: () => jewel(rot(ARROW, Math.PI / 2), glaze(0x2f9457)), yaw: 0.28, pitch: 0.26 },
   arrow_down: { make: () => jewel(rot(ARROW, -Math.PI / 2), glaze(0xc8506e)), yaw: 0.28, pitch: 0.26 },
   rotate_right: { make: () => curvedArrow(glaze(0x4a8ac4), true), yaw: 0.26, pitch: 0.26 },
-  rotate_left: { make: () => curvedArrow(glaze(0x4a8ac4), false), yaw: 0.26, pitch: 0.26 },
+  rotate_left: { make: () => at(curvedArrow(glaze(0x4a8ac4), true), 0, 0, 0, 0, 0, 0, [-1, 1, 1]), yaw: -0.26, pitch: 0.26 }, // the mirror of rotate_right
   play: { make: () => jewel(roundPoly([[-0.44, -0.66], [0.72, 0], [-0.44, 0.66]], 0.16), glaze(0x2f9457)), yaw: 0.28, pitch: 0.24 },
   pause: { make: () => grp(jewel(bar(0.32, 1.12, -0.3), glaze(0x3462a8)), jewel(bar(0.32, 1.12, 0.3), glaze(0x3462a8))), yaw: 0.28, pitch: 0.24 },
   lock: {
@@ -647,7 +647,7 @@ const ICONS: Record<string, Spec> = {
         tube([[-0.6, 0.2, 0], [-0.52, 0.72, 0], [0, 0.94, 0], [0.52, 0.72, 0], [0.6, 0.2, 0]], 0.06, dk, 24, 8)); }, yaw: 0.34, pitch: 0.22,
   },
   map: { make: () => { const g = grp(); const tx = mapTex(); for (let i = 0; i < 3; i++) { const p = mesh(new THREE.PlaneGeometry(0.62, 1.4), new THREE.MeshStandardMaterial({ map: tx, side: THREE.DoubleSide, roughness: 0.8 })); const uv = p.geometry.attributes.uv as THREE.BufferAttribute; for (let k = 0; k < uv.count; k++) uv.setX(k, (uv.getX(k) + i) / 3); g.add(at(p, -0.6 + i * 0.6, 0, i % 2 ? -0.12 : 0, 0, i % 2 ? 0.35 : -0.35, 0)); } return g; }, yaw: 0.2, pitch: 0.25 },
-  gear: { make: () => gear(M(0xdca24a, { metal: 0.75, rough: 0.3, tex: 'plain', env: 1.1 }), 10, M(0xa8722e, { metal: 0.7, rough: 0.36, tex: 'plain' })), yaw: 0.3, pitch: 0.3 },
+  gear: { make: () => gear(M(0xe6ae50, { metal: 0.55, rough: 0.32, tex: 'plain', env: 1.0 }), 10, M(0xa8722e, { metal: 0.6, rough: 0.36, tex: 'plain' })), yaw: 0.3, pitch: 0.3 },
   treehouse: {
     make: () => { const lv = [M(0x4caa3c, { rough: 0.6, tex: 'foliage' }), M(0x62c448, { rough: 0.6, tex: 'foliage' }), M(0x3e9434, { rough: 0.6, tex: 'foliage' })];
       const clump = (x: number, y: number, r: number, m: THREE.Material) => { const g = new THREE.IcosahedronGeometry(r, 2); const p = g.attributes.position as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) { const v = new THREE.Vector3().fromBufferAttribute(p, i); v.multiplyScalar(1 + (fbm(v.x * 6 + 3, v.y * 6 + v.z * 4, 5) - 0.5) * 0.35); p.setXYZ(i, v.x, v.y, v.z); } g.computeVertexNormals(); return at(mesh(g, m), x, y, 0); };
@@ -759,7 +759,7 @@ const ICONS: Record<string, Spec> = {
         at(ext(shape([[0, 0.6], [0.13, 0], [-0.13, 0]]), 0.04, C.red(), 0.02, 1), 0, 0, 0.15, 0, 0, -0.35), at(ext(shape([[0, -0.6], [0.13, 0], [-0.13, 0]]), 0.04, M(0x3a4a62, { tex: null }), 0.02, 1), 0, 0, 0.15, 0, 0, -0.35),
         at(lathe(smoothProfile([[0, 0.06], [0.07, 0.04], [0.08, 0], [0, 0]], 2), C.brass(), 12), 0, 0, 0.18, Math.PI / 2), at(torus(0.14, 0.045, C.brass(), Math.PI * 2, 8, 24), 0, 0.98, 0), at(cyl(0.08, 0.1, 0.12, C.brass(), 12), 0, 0.88, 0)); }, yaw: 0.28, pitch: 0.2,
   },
-  tool_settings: { make: () => grp(at(gear(M(0xdca24a, { metal: 0.75, rough: 0.3, tex: 'plain', env: 1.1 }), 10, M(0xa8722e, { metal: 0.7, rough: 0.36, tex: 'plain' })), -0.12, 0.1, 0, 0, 0, 0, 0.85), at(gear(M(0xb8c0cc, { metal: 0.75, rough: 0.3, tex: 'plain', env: 1.1 }), 8, M(0x7a8290, { metal: 0.7, rough: 0.36, tex: 'plain' })), 0.55, -0.55, 0.05, 0, 0, 0.3, 0.42)), yaw: 0.3, pitch: 0.28 },
+  tool_settings: { make: () => grp(at(gear(M(0xe6ae50, { metal: 0.55, rough: 0.32, tex: 'plain', env: 1.0 }), 10, M(0xa8722e, { metal: 0.6, rough: 0.36, tex: 'plain' })), -0.12, 0.1, 0, 0, 0, 0, 0.85), at(gear(M(0xb8c0cc, { metal: 0.75, rough: 0.3, tex: 'plain', env: 1.1 }), 8, M(0x7a8290, { metal: 0.7, rough: 0.36, tex: 'plain' })), 0.55, -0.55, 0.05, 0, 0, 0.3, 0.42)), yaw: 0.3, pitch: 0.28 },
   // the currency
   owlcoin: { make: () => bigAcorn(), yaw: 0.25, pitch: 0.18 },
   coin_pouch: { make: () => grp(acornBag({ pouch: 'leather', spill: 0 }), at(acorn(0.78, 0.5), 0.68, -0.5, 0.55)), yaw: 0.3, pitch: 0.2 },
@@ -1004,7 +1004,7 @@ async function bakeShelf(): Promise<{ sprites: ShelfSprite[]; dial: [number, num
   shelfCam();
   const plateY = -(163 - 146) * SU / Math.cos(SHELF_PITCH);
   const plates = (['sleep', 'clock', 'book'] as const).map((id) => ({ x: (SHELF_OBJ[id].cx - SHELF_BOX.w / 2) * SU, y: plateY, w: 88 * SU, h: 18 * SU }));
-  const sh = shelf(354 * SU, { plates, bosses: [118, 234].map((x) => (x - SHELF_BOX.w / 2) * SU) });
+  const sh = shelf(344 * SU, { plates, bosses: [118, 234].map((x) => (x - SHELF_BOX.w / 2) * SU) });
   const a1 = acornProp(0.62), a2 = acornProp(0.55), leaf = oakLeafProp(0.9), gx = (SHELF_OBJ.sleep.cx + 56 - SHELF_BOX.w / 2) * SU;
   a1.position.set(gx - 0.08, 0.13, 0.08); a1.rotation.set(0.2, 0.6, Math.PI / 2 - 0.15);
   a2.position.set(gx + 0.26, 0.17, -0.2); a2.rotation.set(0, -0.4, 0.1);

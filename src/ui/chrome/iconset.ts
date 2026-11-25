@@ -72,8 +72,9 @@ export function pickArt(dev: number, fit = false): { size: Size; k: number; px: 
   for (const [size, art] of [['big', 32], ['small', 20]] as [Size, number][]) {
     for (const k of fit ? [Math.floor(dev / art)] : [Math.floor(dev / art), Math.ceil(dev / art)]) {
       if (k < 1) continue;
-      // the small drawing only where it fits much better: the bigger it is blown up, the less it is wanted
-      const px = art * k, score = Math.abs(Math.log(px / dev)) + (size === 'small' ? 0.05 + 0.05 * (k - 1) : 0);
+      // the small drawing only where it fits much better (the bigger it is blown up, the less it is wanted); a little
+      // smaller than asked is better than bigger (it never crowds its line)
+      const px = art * k, score = Math.abs(Math.log(px / dev)) * (px > dev ? 1.4 : 1) + (size === 'small' ? 0.05 + 0.06 * (k - 1) : 0);
       if (score < bs) { bs = score; best = { size, k, px }; }
     }
   }

@@ -227,12 +227,19 @@ class ShelfStage {
     this.sprite(bf, dy(bp), bp.sq);
     // night: moonlight cools everything on the shelf, and the lamp's warm light falls across it in soft bands
     if (night > 0.02) {
+      const L = this.lg;
+      // moonlight: a cool shade multiplied over what is drawn (never lifting the darks)
+      L.globalCompositeOperation = 'source-over';
+      L.clearRect(0, 0, BW, BH);
+      L.fillStyle = `rgba(186,194,250,${night.toFixed(3)})`;
+      L.fillRect(0, 0, BW, BH);
+      L.globalCompositeOperation = 'destination-in';
+      L.drawImage(this.art, 0, 0);
       g.save();
-      g.globalCompositeOperation = 'source-atop';
-      g.fillStyle = `rgba(34,42,104,${(0.24 * night).toFixed(3)})`;
-      g.fillRect(0, 0, BW, BH);
+      g.globalCompositeOperation = 'multiply';
+      g.drawImage(this.light, 0, 0);
       g.restore();
-      const L = this.lg, r = 170, steps = 7, a = 0.4 * night * Math.min(1.3, glow);
+      const r = 170, steps = 7, a = 0.3 * night * Math.min(1.3, glow);
       L.globalCompositeOperation = 'source-over';
       L.clearRect(0, 0, BW, BH);
       for (let i = 0; i < steps; i++) {

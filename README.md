@@ -49,14 +49,22 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **The Earth**: NASA imagery with city lights, clouds, relief and a real-time terminator; fly down to 20 real
   places with photos, facts and their souvenirs.
 - **UI as objects**: a walnut, brass and leather HUD; a glass moon lamp, a carved cuckoo clock (real time, an owl that
-  calls cuckoo) and a tooled journal as live 3D objects on a carved shelf for the main buttons;
-  the big carved cuckoo clock, and about 100 icons baked from detailed 3D models.
+  calls cuckoo) and a tooled journal as pixel-art objects on a carved shelf for the main buttons;
+  the big carved cuckoo clock, and about 100 pixel-art icons baked from detailed 3D models.
 - **A realistic interface (v7)**: every panel, button and badge is a real material at full device resolution: carved
   walnut and oak frames with brass corner brackets and a gilt bead, parchment and laid paper, enamel buttons in brass rims
   that press into their bodies, tooled leather tabs, linen-lined brass trays, satin ribbons, glass level tubes, and the
   owl's eleven portrait frames (porthole, carved walnut, mossy willow, cable knit, silver filigree, toadstools, laurel,
   frost, orrery, gingerbread, starry night). Lit like the 3D (a warm key from the upper left, soft steps, violet shadows),
   with smooth particles and transitions; photo materials from Poly Haven (`docs/credits/ui7.md`).
+- **Pixel-art icons and shelf (v8)**: every icon (the acorn and the moon gem too) and the main buttons' shelf is a
+  detailed 3D model, rendered and then finished as hand-made pixel art by the rules a pixel artist works by: a
+  hue-shifted colour ramp per material (golden lights, violet or teal shadows, calm mid-tones), clean clusters, inner
+  lines where parts overlap, a selective coloured outline that is lighter on the lit side, anti-alias pixels in the
+  sprite's own colours and single-pixel glints. Icons come drawn at 32 and at 20 art px and always show at a whole
+  number of device pixels per art pixel. The shelf (a moon lamp whose glow breathes, a cuckoo clock with real-time
+  hands whose owl pops out to call, a journal that unbuckles and opens) is one light 2D canvas, no WebGL. The bake:
+  `/dev-iconbake.html` (`src/dev/iconbake.ts`, `src/dev/pixelize.ts`), into the lossless atlas `public/img/ui3d.webp`.
 - **One typeface, in 3D**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms and
   props, the shop's signs) is set in Alagard by Hewett Tsoi, rendered at full device resolution. Titles, names,
   numbers, buttons, toasts and Pip's lines are premium 3D title text (shaded extrusion, crisp outline, metallic fill,
@@ -106,7 +114,8 @@ npm run build
 
 Other scripts: `npm test` (44 sleep-engine tests), `npm run typecheck`. Dev-only pages:
 `/dev-owl.html` (owl coats/outfits/expressions sheet), `/dev-scene.html?hour=22&view=home`
-(scene views and times of day), `/dev-real.html` (every interface frame, button and material).
+(scene views and times of day), `/dev-real.html` (every interface frame, button and material),
+`/dev-iconbake.html` (bakes the pixel-art icons and the shelf's sprites), `/dev-chrome.html?view=icons` and `?view=nav`.
 
 ### On itch.io
 
