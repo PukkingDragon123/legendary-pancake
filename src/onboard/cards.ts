@@ -10,7 +10,7 @@ import { OwlActor } from '../owl/actor.ts';
 import type { OwlLook } from '../owl/model.ts';
 import { PhoneScreen } from '../ui/phone/phone.tsx';
 import type { OfficeMats } from './mats.ts';
-import type { SlotOpts } from './overlay3d.ts';
+import { boxOf, type SlotOpts } from './overlay3d.ts';
 import { bookStack, candle, cassette, celestial, deck, DRINKS, microphone, phoneBed, pillow, smartphone, stile, TAPES, type Deck, type Prop } from './props.ts';
 import { WallClock } from './wallclock.ts';
 import { nameplate } from './desk.ts';
@@ -28,7 +28,7 @@ const PACK = 'interview/cards.glb';
 /** largest side one unit, standing on its base at the origin, wrapped in a group */
 export function norm(src: THREE.Object3D, k0 = 1): THREE.Group {
   src.updateMatrixWorld(true);
-  const b = new THREE.Box3().setFromObject(src), ctr = b.getCenter(new THREE.Vector3()), sz = b.getSize(new THREE.Vector3());
+  const b = boxOf(src), ctr = b.getCenter(new THREE.Vector3()), sz = b.getSize(new THREE.Vector3());
   const k = k0 / Math.max(1e-6, sz.x, sz.y, sz.z);
   const g = new THREE.Group(), inner = new THREE.Group();
   inner.add(src);
@@ -40,7 +40,7 @@ export function norm(src: THREE.Object3D, k0 = 1): THREE.Group {
 const fromProp = (p: Prop, o: SlotOpts = {}, k0 = 1): { obj: THREE.Object3D; opts: SlotOpts } => {
   const obj = norm(p.obj, k0);
   const tick = p.tick;
-  return { obj, opts: { ...o, tick: tick ? (_o, t, dt) => tick(t, dt) : o.tick } };
+  return { obj, opts: { fit: 'h', ...o, tick: tick ? (_o, t, dt) => tick(t, dt) : o.tick } };
 };
 
 export class CardModels {
@@ -123,7 +123,7 @@ export class CardModels {
       actor.node.position.set(0, 0, 0);
       actor.node.scale.setScalar(1);
       actor.pose = 'stand';
-      return { obj: g, opts: { pitch: 0.12, zoom: 0.8, lift: -0.04, spin: 0.4, yaw: 0.1, sway: 0.35, tick: (_o, _t, dt) => actor.update(dt) } };
+      return { obj: g, opts: { pitch: 0.12, fit: 'h', spin: 0.4, yaw: 0.1, sway: 0.35, tick: (_o, _t, dt) => actor.update(dt) } };
     }
     if (key === 'clock') {
       const c = new WallClock(this.mats);
@@ -154,31 +154,30 @@ export class CardModels {
     if (key.startsWith('drink:')) {
       const d = DRINKS.find((x) => x.v === key.slice(6));
       if (!d) return null;
-      const small = d.v === 'espresso' ? 0.8 : d.v === 'tea' ? 0.9 : 1;
-      return fromProp(d.build(), { pitch: 0.38, yaw: -0.35, sway: 0.18, spin: 0.6, zoom: 1.08 / small });
+      return fromProp(d.build(), { pitch: 0.32, yaw: -0.35, sway: 0.18, spin: 0.6 });
     }
     if (key.startsWith('tape:')) {
       const c = this.tape(key.slice(5));
       if (!c) return null;
-      const r = fromProp(c, { pitch: 0.12, yaw: 0, sway: 0.12, spin: 0.8, zoom: 0.84, shadow: true });
+      const r = fromProp(c, { pitch: 0.12, yaw: 0, sway: 0.12, spin: 0.8, shadow: true });
       r.obj.rotation.x = -0.12;
       return r;
     }
     if (key === 'deck') {
       const d = deck();
       this.deck = d;
-      return fromProp(d, { pitch: 0.18, yaw: -0.18, sway: 0.08, spin: 0.4, zoom: 0.84 });
+      return fromProp(d, { pitch: 0.18, yaw: -0.18, sway: 0.08, spin: 0.4 });
     }
-    if (key === 'when:morning' || key === 'ampm:am' || key === 'chrono:lark') return fromProp(celestial('sun'), { pitch: 0.1, yaw: 0, sway: 0, zoom: key === 'chrono:lark' ? 0.9 : 0.85 });
-    if (key === 'when:late' || key === 'ampm:pm' || key === 'chrono:owl') return fromProp(celestial('moon'), { pitch: 0.1, yaw: 0, sway: 0, zoom: key === 'chrono:owl' ? 0.9 : 0.85 });
-    if (key === 'chrono:between') return fromProp(celestial('dial'), { pitch: 0.1, yaw: 0, sway: 0, zoom: 0.9 });
-    if (key === 'relax:reading') return fromProp(bookStack(), { pitch: 0.45, yaw: 0.4, sway: 0.25, zoom: 0.92 });
-    if (key === 'relax:breathing') return fromProp(candle(), { pitch: 0.25, yaw: 0, sway: 0.1, zoom: 0.92 });
-    if (key === 'goals:track_sounds' || key === 'mic:yes') return fromProp(microphone(false), { pitch: 0.15, yaw: 0.3, sway: 0.3, zoom: 0.9 });
-    if (key === 'mic:no') return fromProp(microphone(true), { pitch: 0.15, yaw: 0.3, sway: 0.3, zoom: 0.9 });
+    if (key === 'when:morning' || key === 'ampm:am' || key === 'chrono:lark') return fromProp(celestial('sun'), { pitch: 0.1, yaw: 0, sway: 0});
+    if (key === 'when:late' || key === 'ampm:pm' || key === 'chrono:owl') return fromProp(celestial('moon'), { pitch: 0.1, yaw: 0, sway: 0});
+    if (key === 'chrono:between') return fromProp(celestial('dial'), { pitch: 0.1, yaw: 0, sway: 0 });
+    if (key === 'relax:reading') return fromProp(bookStack(), { pitch: 0.45, yaw: 0.4, sway: 0.25 });
+    if (key === 'relax:breathing') return fromProp(candle(), { pitch: 0.25, yaw: 0, sway: 0.1 });
+    if (key === 'goals:track_sounds' || key === 'mic:yes') return fromProp(microphone(false), { pitch: 0.15, yaw: 0.3, sway: 0.3 });
+    if (key === 'mic:no') return fromProp(microphone(true), { pitch: 0.15, yaw: 0.3, sway: 0.3 });
     if (key === 'goals:less_phone' || key === 'phone:never') {
       const bed = phoneBed(this.phone(null, false).obj);
-      return { obj: norm(bed), opts: { pitch: 0.62, yaw: 0.35, sway: 0.25, zoom: 0.95 } };
+      return { obj: norm(bed), opts: { fit: 'h', pitch: 0.62, yaw: 0.35, sway: 0.25 } };
     }
     if (key === 'phone:sometimes') {
       const ns = this.clone('nightstand');
@@ -191,7 +190,7 @@ export class CardModels {
       pg.rotation.y = 0.4;
       const g = new THREE.Group();
       g.add(ns, pg);
-      return { obj: g, opts: { pitch: 0.4, yaw: 0.35, sway: 0.25, zoom: 0.95, tick: ph.tick ? (_o, t, dt) => ph.tick!(t, dt) : undefined } };
+      return { obj: g, opts: { fit: 'h', pitch: 0.4, yaw: 0.35, sway: 0.25, tick: ph.tick ? (_o, t, dt) => ph.tick!(t, dt) : undefined } };
     }
     if (key === 'phone:nightly') {
       // the phone on the pillow, its screen lighting up with notifications
@@ -204,7 +203,7 @@ export class CardModels {
       pg.position.set(0.05, 0.135, 0.02);
       pg.rotation.y = -0.35;
       g.add(pg);
-      return { obj: norm(g), opts: { pitch: 0.55, yaw: 0.3, sway: 0.2, zoom: 0.92, tick: ph.tick ? (_o, t, dt) => ph.tick!(t, dt) : undefined } };
+      return { obj: norm(g), opts: { fit: 'h', pitch: 0.55, yaw: 0.3, sway: 0.2, tick: ph.tick ? (_o, t, dt) => ph.tick!(t, dt) : undefined } };
     }
     if (key.startsWith('latency:')) {
       // counting sheep over a stile: one, two, four, a whole flock
@@ -236,7 +235,7 @@ export class CardModels {
     let tick: SlotOpts['tick'];
     if (m.node === 'sheep') tick = (o, t) => { o.position.y += Math.max(0, Math.sin(t * 5)) * 0.06 * o.scale.y; };
     if (m.node === 'alarm') tick = (o, t) => { const ring = (t % 3) < 0.6; o.rotation.z = ring ? Math.sin(t * 60) * 0.04 : 0; };
-    return { obj, opts: { ...m.o, tick } };
+    return { obj, opts: { fit: 'h', ...m.o, tick } };
   };
 
   dispose() { for (const a of this.owls.values()) a.dispose(); this.screens.length = 0; }

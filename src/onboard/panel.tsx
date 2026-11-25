@@ -75,10 +75,10 @@ function css() {
 .qp-obj:active{transform:translateY(var(--u))}
 .qp-obj:focus-visible{outline:var(--u) dashed #b33a1a;outline-offset:var(--u)}
 .qp-win{display:block;width:100%;pointer-events:none}
-.qp-lab{position:relative;display:inline-block;font:calc(8 * var(--u)) "HH m5x7",monospace;line-height:calc(8 * var(--u));padding:0 calc(2 * var(--u));white-space:nowrap}
+.qp-lab{position:relative;display:inline-block;max-width:100%;font:calc(9 * var(--u)) "TBME Body",monospace;line-height:calc(9 * var(--u));padding:0 calc(1 * var(--u));color:#17204a;white-space:normal;text-align:center}
 .qp-obj.on .qp-lab{color:#a8321a}
-.qp-obj.dim .qp-lab{color:#8a8aa0}
-.qp-tick{position:absolute;left:calc(-13 * var(--u));top:calc(-5 * var(--u));width:calc(16 * var(--u));height:calc(14 * var(--u));background-size:600% 100%;animation:qp-tick .3s steps(5) forwards;pointer-events:none}
+.qp-obj.dim .qp-lab{color:#4c4a66}
+.qp-tick{position:absolute;left:calc(-14 * var(--u));top:calc(-4 * var(--u));width:calc(16 * var(--u));height:calc(14 * var(--u));background-size:600% 100%;animation:qp-tick .3s steps(5) forwards;pointer-events:none}
 @keyframes qp-tick{from{background-position:0 0}to{background-position:100% 0}}
 .qp-loop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background-size:100% 600%;animation:qp-loop .45s steps(5) forwards;pointer-events:none}
 @keyframes qp-loop{from{background-position:0 0}to{background-position:0 100%}}
@@ -173,19 +173,21 @@ function useSize(ref: { current: HTMLElement | null }, k: number, dep: unknown) 
  * (the others step back on single-choice pages) and its word is ticked or ringed in ink.
  */
 function Obj(p: { id: string; label: string; aria?: string; on: boolean; state: SlotState; h: number; overlay: Overlay3D | null; model: ModelFor; mkey: string; onPick: () => void; mark: 'tick' | 'loop'; seed: number; hide?: boolean; extra?: ComponentChildren }) {
-  const win = useRef<HTMLElement>(null);
+  const win = useRef<HTMLElement>(null), lab = useRef<HTMLSpanElement>(null);
+  const [lsz, setLsz] = useState({ w: 0, h: 0 });
+  useLayoutEffect(() => { const el = lab.current; if (!el) return; const u = parseFloat(getComputedStyle(el).fontSize) / 9 || 2; setLsz({ w: Math.round(el.offsetWidth / u), h: Math.round(el.offsetHeight / u) }); }, [p.label]);
   useSlot(p.overlay, p.model, p.id, p.mkey, win);
   useEffect(() => { p.overlay?.setState(p.id, p.state); }, [p.state, p.overlay, p.mkey]);
   useEffect(() => { p.overlay?.hide(p.id, !!p.hide); }, [p.hide, p.overlay, p.mkey]);
   useEffect(() => { if (p.on) p.overlay?.pick(p.id); }, [p.on]);
-  const lw = Math.max(22, Math.round(p.label.length * 4.6 + 10));
+  const lw = Math.max(22, (lsz.w || p.label.length * 5) + 10), lh = Math.max(14, (lsz.h || 9) + 6);
   return (
     <button type="button" data-v={p.id} class={'qp-obj' + (p.on ? ' on' : '') + (p.state === 'back' ? ' dim' : '')} aria-pressed={p.on} aria-label={p.aria ?? p.label} onClick={p.onPick} onPointerEnter={() => p.overlay?.pick(p.id)}>
       <i ref={win} class="qp-win" style={`height:calc(${p.h} * var(--u))`} />
-      <span class="qp-lab">
+      <span ref={lab} class="qp-lab">
         {p.on && p.mark === 'tick' && <i class="qp-tick" style={`background-image:url(${tickStripURL(6, p.seed)})`} />}
         {p.label}
-        {p.on && p.mark === 'loop' && <i class="qp-loop" style={`width:calc(${lw} * var(--u));height:calc(14 * var(--u));background-image:url(${loopStripURL(lw, 14, 6, p.seed)})`} />}
+        {p.on && p.mark === 'loop' && <i class="qp-loop" style={`width:calc(${lw} * var(--u));height:calc(${lh} * var(--u));background-image:url(${loopStripURL(lw, lh, 6, p.seed)})`} />}
       </span>
       {p.extra}
     </button>
@@ -277,9 +279,9 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
         const tapes = RELAX.filter((r) => r.sound).map((r) => ({ v: r.v, label: TAPES.find((t) => t.id === r.v)?.title.replace('Brown noise', 'Brown') ?? r.label }));
         body = (<>
           <div class="qp-row" style="align-items:flex-end;gap:calc(2 * var(--u))">
-            <div style="width:calc(36 * var(--u))">{objs([{ v: 'breathing', label: 'Breathe' }], { cols: 1, h: 38, single: false, on: (v) => cur.includes(v), key: () => 'relax:breathing', pick: act.pick })}</div>
+            <div style="width:calc(42 * var(--u))">{objs([{ v: 'breathing', label: 'Breathe' }], { cols: 1, h: 38, single: false, on: (v) => cur.includes(v), key: () => 'relax:breathing', pick: act.pick })}</div>
             <div style="flex:1;position:relative"><Win id="deck" mkey="deck" h={56} overlay={ov} model={p.model} state={s.deckTape ? 'on' : 'off'} /></div>
-            <div style="width:calc(36 * var(--u))">{objs([{ v: 'reading', label: 'Reading' }], { cols: 1, h: 38, single: false, on: (v) => cur.includes(v), key: () => 'relax:reading', pick: act.pick })}</div>
+            <div style="width:calc(42 * var(--u))">{objs([{ v: 'reading', label: 'Reading' }], { cols: 1, h: 38, single: false, on: (v) => cur.includes(v), key: () => 'relax:reading', pick: act.pick })}</div>
           </div>
           {objs(tapes, { cols: 3, h: 26, single: false, on: (v) => cur.includes(v), key: (v) => 'tape:' + v, pick: act.pick, hide: (v) => s.deckTape === v })}
         </>);
@@ -294,7 +296,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
           {objs(DRINKS.slice(4).map((x) => ({ v: x.v, label: x.label })), { cols: 3, h: 40, single: true, any: !!s.drink, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
           {d?.caffeine && (<>
             <div class="qp-q" style="font-size:calc(16 * var(--u));justify-content:center">Your last one?</div>
-            {objs([{ v: 'morning', label: 'Mornings' }, { v: 'late', label: 'Afternoon+' }], { cols: 2, h: 28, single: true, on: (v) => !!s.picked.caffeine && a.caffeine === v, key: (v) => 'when:' + v, pick: act.pick })}
+            {objs([{ v: 'morning', label: 'Mornings' }, { v: 'late', label: 'Afternoon+' }], { cols: 2, h: 34, single: true, on: (v) => !!s.picked.caffeine && a.caffeine === v, key: (v) => 'when:' + v, pick: act.pick })}
           </>)}
           {!d && <div class="qp-fine" style="margin:0 auto calc(3 * var(--u));text-align:center;max-width:none">tap the one you have most</div>}
         </>);

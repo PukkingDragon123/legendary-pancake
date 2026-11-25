@@ -38,6 +38,9 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   cosmetics.
 - **Intro and interview**: a hand-painted loading clock showing the real time, then the Hollow & Co. office,
   where Pip interviews you with a 2D paper form, live 3D answer cards, a fountain pen and a rubber stamp.
+- **A visual interview**: one-line questions answered by tapping hand-painted 3D objects (drinks, cassette tapes that
+  slide into a recorder and play, a pillow tower, sheep over a stile), a floating fountain pen that writes, ticks and
+  signs, and a pretend phone that shows the bedtime phone lock (also in the Sleep panel).
 - **Barnaby's Lodge Store**: a beaver shopkeeper in a log-cabin general store; price tags, packs, banners and
   the Lucky Barrel wishes are all physical objects.
 - **The Earth**: NASA imagery with city lights, clouds, relief and a real-time terminator; fly down to 20 real

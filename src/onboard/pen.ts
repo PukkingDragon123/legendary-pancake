@@ -127,6 +127,9 @@ export class FloatingPen {
   rest = { x: innerWidth * 0.8, y: innerHeight * 0.55 };
   /** where to rest, asked every frame (follows the form as it slides in); null: use `rest` */
   restAt: (() => { x: number; y: number } | null) | null = null;
+  /** the angle it leans at while resting (radians from +x, screen up; 0.72 points up and right), or null */
+  restLean: number | null = null;
+  private lean = 0.72;
   /** pen length on screen, CSS px */
   len = 150;
   private queue: Stroke[] = [];
@@ -180,7 +183,7 @@ export class FloatingPen {
   }
   get busy() { return this.queue.length > 0; }
   /** jump straight to the resting place (the first time it shows) */
-  snap() { const r = this.restAt?.() ?? this.rest; this.p.x = r.x; this.p.y = r.y; this.p.z = this.hover; this.v.x = this.v.y = 0; }
+  snap() { const r = this.restAt?.() ?? this.rest; this.p.x = r.x; this.p.y = r.y; this.p.z = this.hover; this.v.x = this.v.y = 0; this.lean = this.restLean ?? 0.72; }
 
   private update(dt: number, t: number) {
     this.time = t;
@@ -216,7 +219,9 @@ export class FloatingPen {
     this.wasDown = down;
     // a pen held in a right hand: pointing up and to the right, leaning toward you; it leans into its motion
     const vx = Math.max(-1, Math.min(1, this.v.x / 900)), vy = Math.max(-1, Math.min(1, this.v.y / 900));
-    const alpha = 0.72 - vx * 0.25 + vy * 0.12 + Math.sin(t * 0.9) * 0.03, beta = 0.82 - Math.abs(vx) * 0.12 + (st ? -0.06 : 0);
+    const resting = !st && !(this.ptr && t - this.ptr.t < 3.5);
+    this.lean += ((resting && this.restLean !== null ? this.restLean : 0.72) - this.lean) * Math.min(1, dt * 5);
+    const alpha = this.lean - vx * 0.25 + vy * 0.12 + Math.sin(t * 0.9) * 0.03, beta = 0.82 - Math.abs(vx) * 0.12 + (st ? -0.06 : 0);
     const d = V(Math.cos(beta) * Math.cos(alpha), Math.cos(beta) * Math.sin(alpha), Math.sin(beta)).normalize();
     const up = V(0, 0, 1).sub(d.clone().multiplyScalar(d.z)).normalize();
     const side = new THREE.Vector3().crossVectors(d, up);

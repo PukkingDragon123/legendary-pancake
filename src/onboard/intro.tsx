@@ -57,7 +57,7 @@ function phoneSpot(panel: DOMRect | null, wide: boolean): { k: number; x: number
     return { k, x: Math.round(free * 0.06), y: Math.round((innerHeight - PH * k) / 2) };
   }
   const top = panel ? panel.top : innerHeight * 0.45;
-  const k = top - 16 >= PH * 2 ? 2 : 1.5;
+  const k = top - 16 >= PH * 2 ? 2 : 1; // whole pixels only
   return { k, x: Math.round(innerWidth - PW * k - 8), y: Math.max(6, Math.round((top - PH * k) / 2) - 6) };
 }
 
@@ -119,7 +119,8 @@ export function Intro() {
       const el = panelEl.current;
       if (!el) return null;
       const u = U.k, w = el.offsetWidth, h = el.offsetHeight;
-      return U.wide ? { x: innerWidth - 14 * u - w - 4 * u, y: (innerHeight - h) / 2 + 60 * u } : { x: (innerWidth - w) / 2 + w * 0.1, y: innerHeight - 3 * u - h + 8 * u };
+      pen.restLean = U.wide ? Math.PI - 0.72 : null; // beside the form on wide screens, leaning away from it
+      return U.wide ? { x: innerWidth - 14 * u - w - 10 * u, y: (innerHeight - h) / 2 + 110 * u } : { x: (innerWidth - w) / 2 + w * 0.1, y: innerHeight - 3 * u - h + 8 * u };
     };
     const onMove = (e: PointerEvent) => {
       if (phase !== 'ask' && phase !== 'file') return;

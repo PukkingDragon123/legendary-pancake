@@ -425,7 +425,7 @@ export function FakePhone(p: { k?: number; wake: string; hour12: boolean; loop?:
 export function PhoneLockSheet(p: { wake: string; hour12: boolean; onDone: () => void; onClose: () => void }) {
   injectCSS();
   const [end, setEnd] = useState(false);
-  const k = innerHeight >= 700 && innerWidth >= 300 ? 3 : 2;
+  const k = innerHeight >= 700 && innerWidth >= 300 ? 3 : innerHeight >= 480 ? 2 : 1; // whole pixels only
   const [h, m] = p.wake.split(':').map(Number);
   const wake = p.hour12 ? ((h + 11) % 12) + 1 + ':' + String(m).padStart(2, '0') + (h < 12 ? ' am' : ' pm') : p.wake;
   return (

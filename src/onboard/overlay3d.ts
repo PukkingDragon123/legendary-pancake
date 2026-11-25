@@ -10,6 +10,11 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 export interface SlotOpts {
   /** sway speed (0: still) */
   spin?: number; pitch?: number; zoom?: number; yaw?: number; lift?: number; box?: boolean;
+  /**
+   * 'h' (the default for answer objects): the model's projected height fills a common share of its window, so a
+   * little espresso cup reads as large as a tall can; a wide model is limited by the window's width instead
+   */
+  fit?: 'h';
   /** sway amplitude in radians (0.5) */
   sway?: number;
   /** a soft contact shadow under the model (true) */
@@ -42,6 +47,19 @@ function shadowMap() {
   shadowTex = new THREE.CanvasTexture(c);
   shadowTex.magFilter = THREE.NearestFilter; shadowTex.minFilter = THREE.LinearFilter; shadowTex.generateMipmaps = false;
   return shadowTex;
+}
+/** A model's bounding box, leaving out decorative effects (steam, glows) marked userData.noFit. */
+export function boxOf(o: THREE.Object3D): THREE.Box3 {
+  const b = new THREE.Box3(), tmp = new THREE.Box3();
+  o.updateWorldMatrix(true, true);
+  const walk = (n: THREE.Object3D) => {
+    if (n.userData.noFit) return;
+    const m = n as THREE.Mesh;
+    if (m.isMesh && m.geometry) { if (!m.geometry.boundingBox) m.geometry.computeBoundingBox(); tmp.copy(m.geometry.boundingBox!).applyMatrix4(m.matrixWorld); b.union(tmp); }
+    for (const c of n.children) walk(c);
+  };
+  walk(o);
+  return b;
 }
 export function softShadow(opacity = 0.5): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowMap(), transparent: true, depthWrite: false, opacity, toneMapped: false }));
@@ -124,7 +142,7 @@ export class Overlay3D {
     const rot = s.obj.rotation.y, sc = s.obj.scale.x, py = s.obj.position.y, pz = s.obj.position.z;
     s.obj.rotation.y = 0; s.obj.scale.setScalar(1); s.obj.position.y = s.home.y; s.obj.position.z = s.home.z;
     s.obj.updateMatrixWorld(true);
-    const box = new THREE.Box3().setFromObject(s.obj);
+    const box = boxOf(s.obj);
     s.obj.rotation.y = rot; s.obj.scale.setScalar(sc); s.obj.position.y = py; s.obj.position.z = pz;
     if (box.isEmpty()) return;
     const sph = box.getBoundingSphere(new THREE.Sphere()), sz = box.getSize(V(0, 0, 0));
@@ -202,8 +220,13 @@ export class Overlay3D {
       const fit = Math.max(1, 1 / Math.min(1, cam.aspect));
       const tv = Math.tan((cam.fov * Math.PI) / 360);
       // a sphere fit for compact things; wide heaps fit their box to the window
-      const dist = s.o.box ? (s.o.zoom ?? 1) * Math.max(s.bh / 2 / tv, s.bw / 2 / (tv * cam.aspect)) + s.bw / 2 : (s.r * (s.o.zoom ?? 1.0) * fit) / tv;
       const pitch = s.o.pitch ?? 0.32;
+      let dist: number;
+      if (s.o.fit === 'h') {
+        // what the camera sees of the box at this pitch: its height foreshortened plus the top of its depth
+        const depth = Math.max(s.bd, s.bw * 0.7), ph = s.bh * Math.cos(pitch) + depth * Math.sin(pitch);
+        dist = (s.o.zoom ?? 1) * Math.max(ph / 2 / (tv * 0.9), s.bw / 2 / (tv * cam.aspect * 0.92)) + depth * 0.3;
+      } else dist = s.o.box ? (s.o.zoom ?? 1) * Math.max(s.bh / 2 / tv, s.bw / 2 / (tv * cam.aspect)) + s.bw / 2 : (s.r * (s.o.zoom ?? 1.0) * fit) / tv;
       const c = s.c.clone().add(V(0, s.r * (s.o.lift ?? 0), 0));
       cam.position.set(c.x, c.y + Math.sin(pitch) * dist, c.z + Math.cos(pitch) * dist);
       cam.near = Math.max(1e-3, dist - s.r * 3); cam.far = dist + s.r * 3;
@@ -212,6 +235,7 @@ export class Overlay3D {
       if (s.hidden) continue;
       R.setViewport(x, y, w, h);
       R.setScissor(x, y, w, h);
+      R.clearDepth();
       // only this slot's object is near its camera; hide the rest for the pass
       hideAll();
       s.obj.visible = true;

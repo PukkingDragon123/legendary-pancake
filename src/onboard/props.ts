@@ -148,6 +148,7 @@ export interface Prop { obj: THREE.Group; tick?: (t: number, dt: number) => void
 /** a few wisps of steam: pixel-painted cards that rise, sway and fade */
 function steam(top: number, r: number, seed = 1): { group: THREE.Group; tick: (t: number) => void } {
   const g = new THREE.Group();
+  g.userData.noFit = true; // framing ignores the steam
   const t = new Tex(16, 32);
   for (let i = 0; i < t.a.length; i++) t.a[i] = 0;
   for (let y = 0; y < 32; y++) {
@@ -207,14 +208,14 @@ function espresso(): Prop {
   strokes(t, 0, 0, 128, 64, (x, y) => t.get(x, y), { seed: 3, ang: 0, angJ: 0.25, len: 6, val: 0.08, hue: 0.6, wrap: true });
   const cup = mesh(g, std({ map: tex(t), roughness: 0.18 }));
   const hm = mesh(handle(0.027, 0.046, 0.024, 0.018, 0.0038), std({ color: 0xf2ebde, roughness: 0.2 }));
-  const sauc = saucer(0.062, (x, y, rim) => (rim && vnoise(x * 0.4, y, 2) > 0.2 ? rgb(0x2a4a8a) : PORCELAIN), 5);
+  const sauc = saucer(0.05, (x, y, rim) => (rim && vnoise(x * 0.4, y, 2) > 0.2 ? rgb(0x2a4a8a) : PORCELAIN), 5);
   // a little spoon resting on the saucer
   const spoon = new THREE.Group();
   const bowl = mesh(turn([[0, 0], [0.006, 0.0008], [0.0085, 0.003], [0.0088, 0.0034]], 16).g, std({ color: 0xd8d2c4, metalness: 0.9, roughness: 0.25 }));
   bowl.scale.set(1, 1, 1.45);
   const stem = mesh(tube([V(0, 0.003, 0.012), V(0.002, 0.006, 0.035), V(0.003, 0.007, 0.058)], 0.0016, 0.45, 12, 6), std({ color: 0xd8d2c4, metalness: 0.9, roughness: 0.25 }));
   spoon.add(bowl, stem);
-  spoon.position.set(-0.045, 0.011, 0.012); spoon.rotation.y = -1.2;
+  spoon.position.set(-0.034, 0.011, 0.014); spoon.rotation.y = -1.3; spoon.scale.setScalar(0.8);
   const st = steam(H + 0.01, 0.024, 2);
   o.add(sauc, cup, hm, spoon, st.group);
   return { obj: o, tick: st.tick };
@@ -271,7 +272,7 @@ function teaCup(): Prop {
   strokes(t, 0, 0, 192, 96, (x, y) => t.get(x, y), { seed: 12, ang: 0, angJ: 0.4, len: 4, val: 0.07, hue: 0.5, wrap: true, n: 2600 });
   const cup = mesh(g, std({ map: tex(t), roughness: 0.18 }));
   const hm = mesh(handle(0.042, 0.055, 0.03, 0.018, 0.0035), std({ color: 0xf3ecdf, roughness: 0.2 }));
-  const sauc = saucer(0.075, (x, y, rim) => (rim ? (y % 8 < 2 ? gold : PORCELAIN) : PORCELAIN), 6);
+  const sauc = saucer(0.064, (x, y, rim) => (rim ? (y % 8 < 2 ? gold : PORCELAIN) : PORCELAIN), 6);
   // the tea bag's string over the rim and its paper tag
   const str = mesh(tube([V(0.01, 0.05, 0.0), V(0.03, 0.062, 0.02), V(0.044, 0.066, 0.03), V(0.05, 0.05, 0.035), V(0.051, 0.03, 0.036)], 0.0006, 1, 20, 4), std({ color: 0xe8dcc0, roughness: 1 }));
   const tt = new Tex(16, 20);
