@@ -54,7 +54,7 @@ export function TalkText(p: TalkTextProps) {
     box.current?.appendChild(v.canvas);
     v.onDone = () => cb.current.onDone?.();
     v.onBlip = () => cb.current.onBlip?.();
-    let raf = 0, last = performance.now(), wasIdle = true;
+    let raf = 0, last = performance.now(), wasIdle = false; // mounted with nothing to say: idle at once
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
       const dt = Math.min(0.1, (now - last) / 1000);

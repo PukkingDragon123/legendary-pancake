@@ -158,10 +158,11 @@ export function pace(chs: Ch[], speed = 1): { beats: Beat[]; end: number } {
 
 /** How long a line takes to type, in seconds (for timers that hide it again). */
 export const typeTime = (text: string, speed = 1) => pace(parse(text), speed).end;
-/** How long to leave a finished line up so it can be read (ms): typing, then about a word every 0.28 s. */
+/** How long to leave a line up so it can be read (ms): it types, then stays a beat plus a little per word (most of
+ * the reading happens while it types). */
 export function holdMs(text: string, speed = 1, min = 0): number {
   const p = plainOf(text), w = p.split(/\s+/).filter(Boolean).length;
-  return Math.max(min, Math.round((typeTime(text, speed) + 1.4 + w * 0.28) * 1000));
+  return Math.max(min, Math.round((typeTime(text, speed) + 1.3 + w * 0.15) * 1000));
 }
 
 // ------------------------------------------------------------------ voices
@@ -414,8 +415,13 @@ export class TalkView {
     const still = reducedMotion(), L = this.lag;
     if (still) L.x = L.y = L.vx = L.vy = 0;
     else {
-      L.vx += (-L.x * 55 - L.vx * 10) * dt; L.vy += (-L.y * 55 - L.vy * 10) * dt;
-      L.x += L.vx * dt; L.y += L.vy * dt;
+      // the spring in small steps (stable whatever the frame time)
+      for (let left = dt; left > 1e-6; left -= 1 / 120) {
+        const h = Math.min(1 / 120, left);
+        L.vx += (-L.x * 55 - L.vx * 10) * h; L.vy += (-L.y * 55 - L.vy * 10) * h;
+        L.x += L.vx * h; L.y += L.vy * h;
+      }
+      if (!Number.isFinite(L.x + L.y + L.vx + L.vy)) L.x = L.y = L.vx = L.vy = 0;
     }
     const l = this.cur;
     if (l && !l.done) {
@@ -556,7 +562,8 @@ export class TalkView {
       if (fontOK) this.tags.set(l.who, t);
     }
     const k = still ? 1 : Math.max(0, Math.min(1, (this.clock - l.tagBorn) / 0.4)), e = 1 - (1 - k) ** 3;
-    const x = this.o.align === 'center' ? Math.round((this.canvas.width - t.w) / 2) : x0;
+    // over the start of the first row, a speaker's label (a centred one would float off while a long row types)
+    const x = x0 - Math.round(this.s * 0.06);
     g.globalAlpha = e * fade;
     g.drawImage(t.cv, Math.round(x - (1 - e) * s * 0.35), Math.round(top - t.h - s * 0.02));
     g.globalAlpha = 1;

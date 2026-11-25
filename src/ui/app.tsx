@@ -93,7 +93,7 @@ function Bubble() {
     const puff = setTimeout(() => { const el = ref.current; if (!el) return; const r = el.getBoundingClientRect(); uiBurst('puff', r.left + r.width / 2, r.bottom + 4, 3); }, 60); // [chrome]
     return () => clearTimeout(puff);
   }, [b?.id]);
-  if (!up || phase.value !== 'day' || breathing.value) return null;
+  if (!up || phase.value !== 'day' || breathing.value || panel.value) return null; // his words stay at home
   const phone = innerWidth < 600;
   return (
     <div class="hh-bubble hh-float" ref={ref}>
