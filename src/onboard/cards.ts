@@ -2,7 +2,7 @@
 // candle, a microphone, the sun and moon ornaments and the phones are modelled and hand-painted in code
 // (props.ts); a day bed, the sheep, an alarm clock, a pocket watch and a nightstand are borrowed
 // CC0 / CC BY models (docs/credits/intro4.md, intro5.md) packed into public/models/interview/cards.glb by
-// tools/packglb.mjs; the owls are the game's own; the wake-up page turns the office's bracket clock. Each comes
+// tools/packglb.mjs; the owls are the game's own; the wake-up page turns the office's cuckoo clock. Each comes
 // normalised (its largest side one unit, standing on its base at the origin) and gently alive.
 import * as THREE from 'three';
 import { loadGLB } from '../gfx/glb.ts';
