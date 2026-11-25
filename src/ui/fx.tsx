@@ -173,7 +173,7 @@ export function QuestBoard() {
               <div class="row" style="gap:8px">
                 <span class="quest-icon"><Px name={d.sprite} size={40} /></span>
                 <div class="grow col" style="gap:4px">
-                  <b class="display" style="font-size:20px;font-weight:400">{d.title}</b>
+                  <b class="display" style="font-size:16px;font-weight:400">{d.title}</b>
                   <div class="qbar"><i style={{ width: `${(q.prog / d.goal) * 100}%` }} /><span>{q.prog}/{d.goal}</span></div>
                 </div>
                 {q.claimed ? <span class="stamp">Done!</span> : (

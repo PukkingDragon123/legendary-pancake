@@ -106,7 +106,7 @@ export class Speech {
   finish() { if (!this.done) { this.shown = this.plain.length; this.draw(); this.done = true; this.onDone?.(); } }
   get typing() { return !this.done; }
 
-  private font() { return F.hand(24); }
+  private font() { return F.hand(32); } // [font6] Alagard at 2 texels per font pixel
   private layout() {
     const maxCss = Math.min(innerWidth * 0.92, 820);
     const maxTex = Math.floor(maxCss / this.px);
@@ -122,28 +122,28 @@ export class Speech {
     }
   }
   private draw() {
-    const font = this.font(), lh = 28, tagH = 16;
+    const font = this.font(), lh = 40, tagH = 18;
     const widths = this.lines.map((l) => measure(l.words.map((w) => w.text).join(' '), font));
-    const W = Math.ceil(Math.max(...widths, 40)) + 12, H = this.lines.length * lh + tagH + 10;
+    const W = Math.ceil(Math.max(...widths, 40)) + 12, H = this.lines.length * lh + tagH + 14;
     if (this.cv.width !== W || this.cv.height !== H) { this.cv.width = W; this.cv.height = H; this.tex.dispose(); this.tex.image = this.cv; }
     const g = this.cv.getContext('2d')!;
     g.clearRect(0, 0, W, H);
     // the speaker's name tag: small gold caps
     const tag = this.who;
-    crispText(g, tag, W / 2 + 1, 11, F.small(16), '#2a1608', { align: 'center' });
-    crispText(g, tag, W / 2, 10, F.small(16), '#f2c766', { align: 'center' });
+    crispText(g, tag, W / 2 + 1, 14, F.small(16), '#2a1608', { align: 'center' });
+    crispText(g, tag, W / 2, 13, F.small(16), '#f2c766', { align: 'center' });
     let n = 0;
     this.lines.forEach((l, li) => {
       const text = l.words.map((w) => w.text).join(' ');
-      let x = Math.round((W - widths[li]) / 2), y = tagH + 4 + li * lh + 20;
+      let x = Math.round((W - widths[li]) / 2), y = tagH + 6 + 24 + li * lh;
       for (const w of l.words) {
         const left = Math.max(0, Math.min(w.text.length, this.shown - n));
         const s = w.text.slice(0, left);
         if (s) {
           // extrusion (two steps down), outline, face
           const face = w.em ? '#ffd27a' : '#fff4dc';
-          for (let k = 2; k >= 1; k--) crispText(g, s, x, y + k, font, k === 2 ? '#1a0d06' : '#5a2e14');
-          for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1]]) crispText(g, s, x + dx, y + dy, font, '#1a0d06');
+          for (let k = 2; k >= 1; k--) crispText(g, s, x, y + 2 * k, font, k === 2 ? '#1a0d06' : '#5a2e14');
+          for (const [dx, dy] of [[-2, 0], [2, 0], [0, -2]]) crispText(g, s, x + dx, y + dy, font, '#1a0d06');
           crispText(g, s, x, y, font, face);
         }
         n += w.text.length + 1;

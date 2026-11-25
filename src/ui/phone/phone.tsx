@@ -7,8 +7,9 @@
 //   new PhoneScreen(wake, hour12)                             just the screen (a canvas), e.g. as a 3D texture
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
-import { fontsReady } from '../../onboard/fonts.ts';
 import { crispText } from '../../onboard/tex.ts';
+import { alagard, alagardReady } from '../font.ts';
+import m5 from '../../assets/fonts/m5x7.woff2?url';
 
 export const SW = 68, SH = 146;
 /** the film's length (seconds) and its beats */
@@ -164,7 +165,13 @@ function wallpaper() {
 
 /** the screen is drawn at twice the art resolution (a phone's screen is finer than the world): native-size fonts */
 const S2 = 2;
-const SMALL = '16px "HH m5x7", monospace', BIG = 'bold 36px Galmuri, monospace', MED = 'bold 24px Galmuri, monospace';
+// [font6] the game's Alagard for the big clock, "Sleeping" and Hoot Hollow's own message; the phone's tiny
+// system font (m5x7 at its native size) only where Alagard can't fit: app labels, notifications, banners
+const SMALL = '16px "HH m5x7", monospace', BIG = alagard(2), MED = alagard(2), APP = alagard(1);
+const phoneFonts: Promise<void> = typeof document === 'undefined' ? Promise.resolve() : (async () => {
+  try { if (![...document.fonts].some((f) => f.family.replace(/["']/g, '') === 'HH m5x7')) document.fonts.add(await new FontFace('HH m5x7', `url(${m5})`).load()); } catch { /* falls back */ }
+  await alagardReady();
+})();
 const step = (t: number, a: number, d: number) => Math.max(0, Math.min(1, Math.floor(((t - a) / d) * 5) / 5));
 const ease = (k: number) => 1 - (1 - k) ** 3;
 
@@ -283,9 +290,9 @@ export class PhoneScreen {
         const sx = SW / 2 - 7, sy = y + 5;
         for (let j = 0; j < 16; j++) { const hw = j < 9 ? 7 : Math.max(0, 7 - (j - 8) * 1); for (let i = -hw; i < hw; i++) { g.fillStyle = Math.abs(i + 0.5) > hw - 1.5 || j === 0 ? '#c89a3a' : j < 8 ? '#3a5ab8' : '#2a4aa0'; g.fillRect(sx + 7 + i, sy + j, 1, 1); } }
         g.drawImage(padlock(), sx + 4, sy + 4, 7, 9);
-        this.text('Hoot Hollow', SW / 2, y + 30, SMALL, '#ffe8a0', 'center');
-        this.text('is keeping', SW / 2, y + 38, SMALL, '#f0f0ff', 'center');
-        this.text('you asleep', SW / 2, y + 46, SMALL, '#f0f0ff', 'center');
+        this.text('Hoot Hollow', SW / 2, y + 30, APP, '#ffe8a0', 'center');
+        this.text('is keeping', SW / 2, y + 38, APP, '#f0f0ff', 'center');
+        this.text('you asleep', SW / 2, y + 46, APP, '#f0f0ff', 'center');
         this.text(`until ${this.wakeTxt()}`, SW / 2, y + 57, SMALL, '#a8b4f0', 'center');
         g.globalAlpha = 1;
       }
@@ -357,8 +364,8 @@ function injectCSS() {
 .hh-lock .hh-phone{animation:hh-lock-up .5s steps(8) both}
 @keyframes hh-lock-up{from{transform:translateY(60px)}to{transform:none}}
 .hh-lock-cap{max-width:300px;text-align:center;padding:10px 14px;color:#f4e8cc;font:16px var(--font-body, monospace);line-height:1.25}
-.hh-lock-cap b{display:block;font-size:20px;color:#ffe08a;margin-bottom:2px}
-.hh-lock button{min-width:200px;padding:10px 18px;font:18px var(--font-body, monospace);cursor:pointer}
+.hh-lock-cap b{display:block;font-size:16px;color:#ffe08a;margin-bottom:2px}
+.hh-lock button{min-width:200px;padding:10px 18px;font:16px var(--font-body, monospace);cursor:pointer}
 @keyframes hh-phone-buzz{0%,100%{transform:none}20%{transform:translateX(calc(-1 * var(--u))) rotate(-1deg)}40%{transform:translateX(var(--u)) rotate(1deg)}60%{transform:translateX(calc(-1 * var(--u)))}80%{transform:translateX(var(--u))}}
 @media (prefers-reduced-motion:reduce){.hh-phone.buzz{animation:none}}
 `;
@@ -384,7 +391,7 @@ export function FakePhone(p: { k?: number; wake: string; hour12: boolean; loop?:
     const cues = [...T.notif.map((x) => ({ t: x, id: 'notify_soft', v: 0.25, buzz: true })), { t: T.banner, id: 'notify_reminder', v: 0.3, buzz: true },
       ...APPS.filter((a) => a.lock).map((_, i) => ({ t: T.lock0 + i * T.lockStep, id: 'place_metal', v: 0.18, buzz: false })), { t: T.shield, id: 'sparkle', v: 0.3, buzz: false }, { t: T.calm, id: 'breath_out', v: 0.2, buzz: false }];
     let ready = false;
-    void fontsReady().then(() => { ready = true; });
+    void phoneFonts.then(() => { ready = true; });
     const frame = (now: number) => {
       if (!alive) return;
       raf = requestAnimationFrame(frame);

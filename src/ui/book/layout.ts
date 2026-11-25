@@ -41,6 +41,6 @@ export function layout(vw: number, vh: number): BookLayout {
   const x = snap((vw - BW) / 2);
   const y = snap(Math.max(tabH + 6, (vh - BH - footer + tabH) / 2));
   const PW = pw * T, PH = ph * T;
-  const fs = Math.round(Math.max(16, Math.min(20, PW / 21)));
+  const fs = 16; // Alagard's pixel grid: page text is always 16 px (titles 32 px)
   return { vw, vh, T, single, B, pw, ph, PW, PH, W, H, BW, BH, x, y, fs, tabH };
 }

@@ -61,7 +61,7 @@ const STYLE = `
 .hh-look button:active { scale: 0.92 1.04; }
 .hh-look button img { position: absolute; left: 4px; top: 13px; width: 44px; height: 44px; image-rendering: pixelated; filter: drop-shadow(1px 2px 0 rgba(20, 10, 6, 0.55)); }
 .hh-look button.flip img { animation: hhLookFlip 0.45s steps(5); }
-.hh-look .hh-looklabel { margin-top: 1px; padding: 2px 5px; font-family: var(--font-display); font-size: 13px; line-height: 1; white-space: nowrap; color: #2a1a10; background: #f6ead0; box-shadow: inset 0 2px 0 #fffaf0, inset 0 -2px 0 #dcc497, 0 0 0 2px #3a2414, 2px 4px 0 2px rgba(26, 14, 8, 0.35); pointer-events: none; }
+.hh-look .hh-looklabel { margin-top: 1px; padding: 2px 5px; font-family: var(--font-display); font-size: 16px; line-height: 1; white-space: nowrap; color: #2a1a10; background: #f6ead0; box-shadow: inset 0 2px 0 #fffaf0, inset 0 -2px 0 #dcc497, 0 0 0 2px #3a2414, 2px 4px 0 2px rgba(26, 14, 8, 0.35); pointer-events: none; }
 @keyframes hhLookSway { 0%, 100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
 @keyframes hhLookFlip { 0% { transform: scale(1); } 40% { transform: scale(0.2, 1.1); } 100% { transform: scale(1); } }
 html.hh-still .hh-look .hh-lookhang { animation: none; }

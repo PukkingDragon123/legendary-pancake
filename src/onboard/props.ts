@@ -275,10 +275,10 @@ function teaCup(): Prop {
   const sauc = saucer(0.064, (x, y, rim) => (rim ? (y % 8 < 2 ? gold : PORCELAIN) : PORCELAIN), 6);
   // the tea bag's string over the rim and its paper tag
   const str = mesh(tube([V(0.01, 0.05, 0.0), V(0.03, 0.062, 0.02), V(0.044, 0.066, 0.03), V(0.05, 0.05, 0.035), V(0.051, 0.03, 0.036)], 0.0006, 1, 20, 4), std({ color: 0xe8dcc0, roughness: 1 }));
-  const tt = new Tex(16, 20);
-  wash(tt, 0, 0, 16, 20, () => rgb(0xf0e2c2), { seed: 2, len: 2 });
-  for (let y = 0; y < 20; y++) for (let x = 0; x < 16; x++) if (x === 0 || y === 0 || x === 15 || y === 19) tt.shade(x, y, 0.85);
-  letter(tt, 'tea', 8, 13, F.small(16), rgb(0x3a6a2a));
+  const tt = new Tex(32, 40); // [font6] 2 texels per mm so 'tea' fits in Alagard
+  wash(tt, 0, 0, 32, 40, () => rgb(0xf0e2c2), { seed: 2, len: 2 });
+  for (let y = 0; y < 40; y++) for (let x = 0; x < 32; x++) if (x < 2 || y < 2 || x > 29 || y > 37) tt.shade(x, y, 0.85);
+  letter(tt, 'tea', 16, 25, F.small(16), rgb(0x3a6a2a));
   const tag = mesh(new THREE.PlaneGeometry(0.016, 0.02), std({ map: tex(tt), side: THREE.DoubleSide, roughness: 0.9 }), false);
   tag.position.set(0.0515, 0.022, 0.037); tag.rotation.y = 0.5;
   const st = steam(0.066, 0.034, 3);
@@ -489,9 +489,9 @@ function tapeFace(tp: Tape): [THREE.MeshStandardMaterial, THREE.MeshStandardMate
   for (let y = L.y0 + mm(35); y < L.y1; y++) for (let x = L.x0; x < L.x1; x++) t.set(x, y, tint(tp.stripe[(y - (L.y0 + mm(35))) < 5 ? 0 : 1], (hash(x, y, 4) - 0.5) * 0.12));
   // ruled lines and the hand-written title on the top strip
   for (let x = L.x0 + 4; x < L.x1 - 4; x++) if (hash(x, 9, 2) > 0.2) t.set(x, L.y0 + mm(11.5), tint(tp.stripe[0], 0.2), 0.7);
-  letter(t, tp.title, (L.x0 + L.x1) / 2 + 6, L.y0 + mm(10), F.hand(tp.title.length > 8 ? 16 : 24), rgb(0x1d2552), { jit: 0.3 });
-  letter(t, 'A', L.x0 + mm(4), L.y0 + mm(8), F.caps(12), tp.stripe[0]);
-  letter(t, 'C60', L.x1 - mm(6), L.y0 + mm(30), F.small(16), rgb(0x5a5f80));
+  letter(t, tp.title, (L.x0 + L.x1) / 2 + 6, L.y0 + mm(10), F.hand(16), rgb(0x1d2552), { jit: 0.3 });
+  letter(t, 'A', L.x0 + mm(4), L.y0 + mm(8), F.caps(16), tp.stripe[0]);
+  letter(t, 'C60', L.x1 - mm(8), L.y0 + mm(30), F.small(16), rgb(0x5a5f80));
   // the little cover picture, framed, left of the window
   const P = { x: L.x0 + mm(4), y: Wn.y0 - 2, w: mm(21), h: Wn.y1 - Wn.y0 + 4 };
   tp.pic(t, P.x, P.y, P.w, P.h);
@@ -577,12 +577,12 @@ export function deck(): Deck {
   wash(t, 0, 0, TW, TH, (x, y) => (y < 44 ? cream : teal), { seed: 41, ang: 0, angJ: 0.3, len: 7, val: 0.1, hue: 0.6, n: 9000 });
   for (let x = 0; x < TW; x++) { t.set(x, 44, tint(chrome, -0.1)); t.set(x, 45, chrome); t.set(x, 46, tint(chrome, -0.3)); }
   // the tuning scale window: numbers, a red needle
-  const sx0 = 22, sx1 = 192, sy0 = 10, sy1 = 34;
+  const sx0 = 22, sx1 = 192, sy0 = 8, sy1 = 29;
   for (let y = sy0; y < sy1; y++) for (let x = sx0; x < sx1; x++) t.set(x, y, tint(rgb(0x1a1c1a), (hash(x, y, 2) - 0.5) * 0.1));
   for (let x = sx0 + 6; x < sx1 - 6; x += 4) for (let y = sy1 - 8; y < sy1 - (x % 20 === 2 ? 2 : 5); y++) t.set(x, y, rgb(0xe8d8a0));
-  letter(t, 'FM 88  92  96  100  104  108', (sx0 + sx1) / 2, sy0 + 10, F.small(16), rgb(0xe8d8a0), { spacing: 0 });
+  letter(t, 'FM 88 96 104', (sx0 + sx1) / 2, sy0 + 12, F.small(16), rgb(0xe8d8a0), { spacing: 0 });
   for (let y = sy0 + 2; y < sy1 - 2; y++) t.set(118, y, rgb(0xe83a2a));
-  letter(t, 'HOLLOW TONE', (sx0 + sx1) / 2, 41, F.small(16), rgb(0x6a4a2a), { spacing: 1 });
+  letter(t, 'HOLLOW TONE', (sx0 + sx1) / 2, 42, F.small(16), rgb(0x6a4a2a), { spacing: 1 });
   // the VU meter (a real needle swings over it)
   for (let y = 12; y < 36; y++) for (let x = 206; x < 244; x++) t.set(x, y, mix3(rgb(0xf4e8b0), rgb(0xe8c870), (y - 12) / 24));
   for (let a = -0.9; a <= 0.9; a += 0.15) { const cx = 225, cy = 38; for (let r = 16; r < 19; r++) t.set(cx + Math.sin(a) * r, cy - Math.cos(a) * r, a > 0.45 ? rgb(0xc8281e) : rgb(0x2a2420)); }
@@ -594,7 +594,16 @@ export function deck(): Deck {
   const scx = 76, scy = 104, sr = 54;
   for (let y = scy - sr - 3; y < scy + sr + 3; y++) for (let x = scx - sr - 3; x < scx + sr + 3; x++) { const d = Math.hypot(x - scx, y - scy); if (d < sr + 3 && d > sr - 1) t.set(x, y, tint(tealD, -0.2)); }
   // labels under the keys, a little sticker
-  for (const [i, s] of ['REC', 'REW', 'PLAY', 'FF', 'STOP', 'EJECT'].entries()) letter(t, s, bx0 + 11 + i * 22.6, by0 - 3, F.small(16), rgb(0xf0e6cc));
+  // [font6] the keys' symbols (record, rewind, play, fast-forward, stop, eject), 7 texels tall, above each key
+  const KEY_SYM = [
+    ['..###..', '.#####.', '#######', '#######', '#######', '.#####.', '..###..'],
+    ['...#..#', '..##.##', '.######', '#######', '.######', '..##.##', '...#..#'],
+    ['.#.....', '.###...', '.#####.', '.######', '.#####.', '.###...', '.#.....'],
+    ['#..#...', '##.##..', '######.', '#######', '######.', '##.##..', '#..#...'],
+    ['.......', '######.', '######.', '######.', '######.', '######.', '.......'],
+    ['...#...', '..###..', '.#####.', '#######', '.......', '#######', '#######'],
+  ];
+  KEY_SYM.forEach((rows, i) => rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch === '#') t.set(Math.round(bx0 + 11 + i * 22.6) - 3 + x, by0 - 10 + y, i === 0 ? rgb(0xe83a2a) : rgb(0xf0e6cc)); })));
   // worn paint along every edge (the cream and teal rubbed through to grey primer)
   wear(t, (x, y) => Math.max(0, 1 - Math.min(x, y, TW - 1 - x, TH - 1 - y) / 6), { seed: 3, chip: rgb(0x9a9890), k: 0.3 });
   strokes(t, 0, 0, TW, TH, (x, y) => t.get(x, y), { seed: 77, ang: 0, len: 3, val: 0.06, hue: 0.4, n: 3000 });
@@ -1055,7 +1064,13 @@ function book(w: number, d: number, th: number, cloth: RGB, seed: number, title:
   const S = new Tex(32, 128);
   wash(S, 0, 0, 32, 128, () => cloth, { seed: seed + 1, ang: Math.PI / 2, len: 5 });
   for (const yy of [10, 14, 112, 116]) for (let x = 0; x < 32; x++) S.set(x, yy, rgb(0xe0b24a));
-  letter(S, title, 16, 60, F.small(16), rgb(0xf0cc6a));
+  { // [font6] the title runs along the spine, as on a real book (Alagard is too wide to fit across it)
+    const lc = document.createElement('canvas'); lc.width = 128; lc.height = 32;
+    const lg = lc.getContext('2d', { willReadFrequently: true })!;
+    crispText(lg, title, 64, 21, F.small(16), '#000000', { align: 'center' });
+    const ld = lg.getImageData(0, 0, 128, 32).data;
+    for (let y = 0; y < 32; y++) for (let x = 0; x < 128; x++) if (ld[(y * 128 + x) * 4 + 3] > 128) S.set(31 - y, x, rgb(0xf0cc6a));
+  }
   const sp = new THREE.CylinderGeometry(th / 2, th / 2, d + ov, 16, 1, true, Math.PI, Math.PI);
   sp.rotateX(Math.PI / 2);
   const spine = mesh(sp, std({ map: tex(S), roughness: 0.7, side: THREE.DoubleSide }));

@@ -187,7 +187,7 @@ export function ruleURL(w: number, seed = 1) {
 /** RECEIVED / APPROVED in a double-ruled box, red ink that took unevenly, w x h. */
 export function stampURL(word: string, sub: string, color = 0xb3232b, seed = 3) {
   return art(`stamp:${word}:${sub}:${color}:${seed}`, () => {
-    const w = 96, h = 40, t = new Tex(w, h);
+    const w = 120, h = 44, t = new Tex(w, h); // [font6] room for Alagard
     for (let i = 0; i < t.a.length; i++) t.a[i] = 0;
     const c = rgb(color), dk = mul3(c, 0.75);
     const ink = (x: number, y: number, miss = 0.74) => {
@@ -206,8 +206,8 @@ export function stampURL(word: string, sub: string, color = 0xb3232b, seed = 3) 
       const d = g.getImageData(0, 0, w, h).data;
       for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) if (d[(j * w + i) * 4 + 3] > 128) { ink(i, j, 0.86); if (bold) ink(i, j + 1, 0.86); }
     };
-    print(word, sub ? 22 : 25, F.body(18), true);
-    if (sub) print(sub, 32, F.small(16), false);
+    print(word, sub ? 21 : 27, F.body(16), true);
+    if (sub) print(sub, 35, F.small(16), false);
     return t;
   });
 }

@@ -185,7 +185,7 @@ export function folder(): { group: THREE.Group; cover: THREE.Object3D; stack: TH
     crispText(g2, text, 48, 14, F.small(16), '#24304e', { align: 'center' });
     lt.needsUpdate = true;
   };
-  label('CLIENT FILE');
+  label('YOUR FILE'); // [font6] fits the tab in Alagard
   // the stack of filed pages (grows as pages go in)
   const stack = new THREE.Mesh(new THREE.BoxGeometry(W - 0.02, 1, D - 0.02), mat({ color: 0xf3ead6, roughness: 0.9 }));
   stack.position.set(0.004, 0.0015, 0.004); stack.scale.y = 0.0001; stack.visible = false;

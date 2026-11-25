@@ -1,0 +1,135 @@
+// The game's one typeface: Alagard by Hewett Tsoi (Pix3M), a pixel font drawn on a 16 px em
+// (1 font pixel = 1/16 em; caps 11 px, x-height 8 px, descenders 3 px). It is crisp only at whole
+// multiples of 16 px (16, 32, 48) drawn at whole-pixel positions, so every CSS size and every
+// canvas size in the game is one of those.
+//
+// Alagard covers printable ASCII plus a few currency signs, nothing else. `alagardSafe` turns
+// typographic punctuation into its ASCII twin and strips accents; every Preact text node goes
+// through it (installed below), and canvas text calls it directly. Anything left over (a name the
+// player typed in another script) falls back to the old pixel face in the CSS stack, never tofu.
+import { options, type VNode } from 'preact';
+import alagardUrl from '../assets/fonts/alagard.ttf?url';
+
+export const FAMILY = 'Alagard';
+/** the full stack: Alagard, then a pixel face that has the glyphs Alagard lacks */
+export const STACK = '"Alagard", "TBME Body", ui-monospace, monospace';
+/** the font pixel: one sixteenth of an em */
+export const EM = 16;
+/** a canvas/CSS font string at `n` font pixels per screen/texture pixel (16 px, 32 px, 48 px ...) */
+export const alagard = (n = 1) => `${EM * Math.max(1, Math.round(n))}px ${STACK}`;
+
+const MAP: Record<string, string> = {
+  '\u2018': "'", '\u2019': "'", '\u201a': "'", '\u201b': "'", '\u02bc': "'", '\u2032': "'", '\u00b4': "'",
+  '\u201c': '"', '\u201d': '"', '\u201e': '"', '\u2033': '"', '\u00ab': '"', '\u00bb': '"',
+  '\u2010': '-', '\u2011': '-', '\u2012': '-', '\u2013': '-', '\u2014': '-', '\u2015': '-', '\u2212': '-',
+  '\u00b7': '-', '\u2022': '-', '\u2219': '-', '\u22c5': '-', '\u2027': '-',
+  '\u2026': '...', '\u00d7': 'x', '\u00f7': '/', '\u2605': '*', '\u2606': '*', '\u2736': '*', '\u2726': '*',
+  '\u203a': '>', '\u2039': '<', '\u25b8': '>', '\u25b6': '>', '\u25ba': '>', '\u25c2': '<', '\u25c0': '<', '\u25c4': '<',
+  '\u2192': '->', '\u2190': '<-', '\u2191': '^', '\u2193': 'v', '\u2713': 'v', '\u2714': 'v', '\u2715': 'x', '\u2716': 'x',
+  '\u00a0': ' ', '\u202f': ' ', '\u2009': ' ', '\u200a': ' ', '\u2007': ' ', '\u2002': ' ', '\u2003': ' ', '\u2008': ' ',
+  '\u200b': '', '\u200c': '', '\u200d': '', '\u2060': '', '\ufe0f': '', '\u00ad': '',
+  '\u00bd': ' 1/2', '\u00bc': ' 1/4', '\u00be': ' 3/4', '\u00b0': '', '\u2116': 'No.', '\u00a9': '(c)', '\u00ae': '(R)', '\u2122': 'TM',
+  '\u00df': 'ss', '\u00e6': 'ae', '\u00c6': 'AE', '\u0153': 'oe', '\u0152': 'OE', '\u00f8': 'o', '\u00d8': 'O', '\u0142': 'l',
+  '\u0141': 'L', '\u0111': 'd', '\u0110': 'D', '\u00f0': 'd', '\u00fe': 'th', '\u0131': 'i', '\u00a1': '!', '\u00bf': '?',
+};
+// eslint-disable-next-line no-control-regex
+const ODD = /[^\x09\x0a\x0d\x20-\x7e\u00a2\u00a3\u00a5\u20ac]/;
+const ODD_G = /[^\x09\x0a\x0d\x20-\x7e\u00a2\u00a3\u00a5\u20ac]/g;
+
+/** Text Alagard can draw: typographic punctuation to ASCII, accents stripped (an e with an acute becomes e), the rest kept for the fallback face. */
+export function alagardSafe(text: string): string {
+  if (!ODD.test(text)) return text;
+  return text.replace(ODD_G, (ch) => {
+    const m = MAP[ch];
+    if (m !== undefined) return m;
+    const base = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return base && !ODD.test(base) ? base : ch;
+  });
+}
+
+// ---- every Preact text node (and input placeholder) goes through alagardSafe
+let installed = false;
+export function installAlagardText() {
+  if (installed) return;
+  installed = true;
+  const prev = options.vnode;
+  options.vnode = (v: VNode) => {
+    if (v.type == null) {
+      if (typeof v.props === 'string') (v as { props: unknown }).props = alagardSafe(v.props as unknown as string);
+    } else if (typeof v.type === 'string') {
+      const p = v.props as { placeholder?: unknown };
+      if (typeof p.placeholder === 'string') p.placeholder = alagardSafe(p.placeholder);
+    }
+    prev?.(v);
+  };
+}
+installAlagardText();
+
+let ready: Promise<void> | null = null;
+/** Resolves once Alagard can paint (canvas text waits for it). Adds the face itself on pages without the app CSS. */
+export function alagardReady(): Promise<void> {
+  if (ready) return ready;
+  ready = (async () => {
+    try {
+      if (![...document.fonts].some((f) => f.family.replace(/["']/g, '') === FAMILY)) {
+        const face = new FontFace(FAMILY, `url(${alagardUrl})`, { ascentOverride: '75%', descentOverride: '25%', lineGapOverride: '0%' } as FontFaceDescriptors);
+        document.fonts.add(await face.load());
+      }
+      await document.fonts.load(`16px "${FAMILY}"`, 'Aa1');
+    } catch { /* no FontFace API: canvas text falls back */ }
+  })();
+  return ready;
+}
+
+/**
+ * Draw Alagard text on a canvas at `n` font pixels per canvas pixel, snapped to whole pixels and
+ * alpha-thresholded so every font pixel is either fully painted or empty (no smoothing halos).
+ * `y` is the baseline. Returns the drawn width in canvas pixels.
+ */
+export function alagardText(g: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, o: { n?: number; align?: CanvasTextAlign; shadow?: string; outline?: string } = {}): number {
+  const s = alagardSafe(text), n = Math.max(1, Math.round(o.n ?? 1));
+  g.save();
+  g.font = alagard(n);
+  g.textBaseline = 'alphabetic';
+  g.textAlign = 'left';
+  const w = Math.round(g.measureText(s).width);
+  const x0 = Math.round(o.align === 'center' ? x - w / 2 : o.align === 'right' || o.align === 'end' ? x - w : x), y0 = Math.round(y);
+  const pad = 2 * n + 2, top = y0 - 13 * n - pad, h = 17 * n + pad * 2, left = x0 - pad, ww = w + pad * 2;
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, ww); c.height = Math.max(1, h);
+  const t = c.getContext('2d', { willReadFrequently: true })!;
+  t.font = alagard(n); t.textBaseline = 'alphabetic'; t.fillStyle = '#000';
+  t.fillText(s, x0 - left, y0 - top);
+  const img = t.getImageData(0, 0, c.width, c.height), d = img.data;
+  for (let i = 3; i < d.length; i += 4) d[i] = d[i] >= 110 ? 255 : 0;
+  t.putImageData(img, 0, 0);
+  t.globalCompositeOperation = 'source-in';
+  const ink = document.createElement('canvas');
+  ink.width = c.width; ink.height = c.height;
+  const k = ink.getContext('2d')!;
+  const stamp = (col: string, dx: number, dy: number) => {
+    k.clearRect(0, 0, ink.width, ink.height);
+    k.globalCompositeOperation = 'source-over';
+    k.drawImage(c, 0, 0);
+    k.globalCompositeOperation = 'source-in';
+    k.fillStyle = col; k.fillRect(0, 0, ink.width, ink.height);
+    g.drawImage(ink, left + dx, top + dy);
+  };
+  g.imageSmoothingEnabled = false;
+  if (o.outline) for (const [dx, dy] of [[-n, 0], [n, 0], [0, -n], [0, n]]) stamp(o.outline, dx, dy);
+  if (o.shadow) stamp(o.shadow, 0, n);
+  stamp(color, 0, 0);
+  g.restore();
+  return w;
+}
+
+/** width of `text` in Alagard at `n` font pixels per pixel (needs a context only for measuring) */
+let mctx: CanvasRenderingContext2D | null = null;
+export function alagardWidth(text: string, n = 1): number {
+  if (!mctx) mctx = document.createElement('canvas').getContext('2d');
+  if (!mctx) return text.length * 9 * n;
+  mctx.font = alagard(n);
+  return Math.round(mctx.measureText(alagardSafe(text)).width);
+}
+
+export { alagardUrl };

@@ -31,6 +31,7 @@ import {
 } from './lodgekit.ts';
 import { pottedFir, swayPlants, type Plant } from './shopplants.ts';
 import { box, buildProp, propMesh } from '../../gfx/box.ts';
+import { alagardReady, alagardText } from '../../ui/font.ts'; // [font6]
 
 /** The real world the window looks out on (the app's Scene). */
 export interface WorldView {
@@ -1430,24 +1431,31 @@ function bracketGeo(): THREE.BufferGeometry {
 /** A clock face set to the real time: a painted enamel dial with roman numerals, blued-steel spade hands. */
 function clockFace(r: number): { group: THREE.Group; set(d: Date): void; dispose(): void } {
   const g = new THREE.Group();
-  const N = 96;
+  // [font6] 192 texels across so the roman numerals fit in Alagard, the game's font, at its 16 px grid
+  const N = 192;
   const c = document.createElement('canvas');
   c.width = c.height = N;
   const x = c.getContext('2d')!;
-  x.fillStyle = '#efe4c8'; x.fillRect(0, 0, N, N);
-  const rr = mulberry(9);
-  for (let i = 0; i < 400; i++) { x.fillStyle = rr() < 0.5 ? 'rgba(180,150,100,0.12)' : 'rgba(255,250,235,0.25)'; x.fillRect(Math.floor(rr() * N), Math.floor(rr() * N), 1, 1); }
-  x.strokeStyle = '#4a3a2a'; x.lineWidth = 2;
-  x.beginPath(); x.arc(N / 2, N / 2, N / 2 - 3, 0, Math.PI * 2); x.stroke();
-  x.fillStyle = '#2e2416'; x.font = 'bold 11px serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
-  const R = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
-  for (let h = 0; h < 12; h++) {
-    const a = (h / 12) * Math.PI * 2;
-    x.fillText(R[h], N / 2 + Math.sin(a) * N * 0.36, N / 2 - Math.cos(a) * N * 0.36);
-    for (let m = 0; m < 5; m++) { const b = a + (m / 5) * (Math.PI / 6); x.fillRect(Math.round(N / 2 + Math.sin(b) * N * 0.45), Math.round(N / 2 - Math.cos(b) * N * 0.45), 1, 1); }
-  }
+  const paint = () => {
+    x.fillStyle = '#efe4c8'; x.fillRect(0, 0, N, N);
+    const rr = mulberry(9);
+    for (let i = 0; i < 1600; i++) { x.fillStyle = rr() < 0.5 ? 'rgba(180,150,100,0.12)' : 'rgba(255,250,235,0.25)'; x.fillRect(Math.floor(rr() * N), Math.floor(rr() * N), 1, 1); }
+    x.strokeStyle = '#4a3a2a'; x.lineWidth = 4;
+    x.beginPath(); x.arc(N / 2, N / 2, N / 2 - 6, 0, Math.PI * 2); x.stroke();
+    x.fillStyle = '#2e2416';
+    const R = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+    for (let h = 0; h < 12; h++) {
+      const a = (h / 12) * Math.PI * 2;
+      alagardText(x, R[h], N / 2 + Math.sin(a) * N * 0.34, Math.round(N / 2 - Math.cos(a) * N * 0.34 + 5.5), '#2e2416', { align: 'center' });
+      x.fillStyle = '#2e2416';
+      for (let m = 0; m < 5; m++) { const b = a + (m / 5) * (Math.PI / 6); x.fillRect(Math.round(N / 2 + Math.sin(b) * N * 0.45) - 1, Math.round(N / 2 - Math.cos(b) * N * 0.45) - 1, 2, 2); }
+    }
+  };
+  paint();
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
+  t.magFilter = THREE.NearestFilter;
+  void alagardReady().then(() => { paint(); t.needsUpdate = true; });
   const dialM = new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 });
   const dial = new THREE.Mesh(new THREE.CircleGeometry(r, 32), dialM);
   g.add(dial);

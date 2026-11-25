@@ -1,7 +1,7 @@
 Bundled pixel fonts
 ===================
 
-TBMEGoofy-Regular.woff2   (THE game font: every CSS family 'TBME Title', 'TBME Body',
+TBMEGoofy-Regular.woff2   (the game font until round 6, now the fallback; every CSS family 'TBME Title', 'TBME Body',
                            'TBME Logo'; src/ui/fonts.css)
 src/ui/goofyFont.js       (the same glyphs as bitmap tables for canvas pixel text:
                            chalkboard, comic words, classroom signs)
@@ -24,15 +24,14 @@ src/ui/goofyFont.js       (the same glyphs as bitmap tables for canvas pixel tex
 
   Credit (title screen): "Font: TBME Goofy, made from Chewy by Font Diner / Sideshow (Apache 2.0)"
 
-Legacy files (no longer referenced by any CSS or JS; kept for old branches):
+alagard.ttf  (THE game font since round 6: every CSS family and canvas text; src/ui/font.ts)
+  "Alagard" by Hewett Tsoi (Pix3M), https://www.dafont.com/alagard.font
+  Licence: "Give credit if used." Shipped unmodified. Credited in docs/credits/font6.md.
 
-Galmuri11.subset.woff2 / Galmuri11-Bold.subset.woff2 (v17 font)
-  Galmuri by Lee Minseo (quiple), https://github.com/quiple/galmuri, npm galmuri@2.40.3.
-  SIL Open Font License 1.1, full text in Galmuri-OFL.txt. Modified (subset, redrawn
-  male/female signs); build-galmuri-subset.py rebuilds them.
+TBMEGoofy-Regular.woff2 is now only the fallback for glyphs Alagard lacks.
 
-m6x11plus.woff2 / m5x7.woff2 by Daniel Linssen (managore)
-  https://managore.itch.io/m6x11   https://managore.itch.io/m5x7
-  m6x11 / m6x11plus: "free to use with attribution"
-  m5x7:              "free to use but attribution appreciated"
-  If they are used again, credit: "m6x11plus and m5x7 fonts by Daniel Linssen (managore.itch.io)"
+m5x7.woff2 by Daniel Linssen (managore), https://managore.itch.io/m5x7
+  "free to use but attribution appreciated". Used only for the pretend phone's tiny system text
+  (src/ui/phone/phone.tsx). Credit: "m5x7 font by Daniel Linssen (managore.itch.io)"
+
+(m6x11plus and Galmuri11 were removed in round 6.)

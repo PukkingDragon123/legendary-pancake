@@ -16,7 +16,8 @@ import { fbm, rng } from '../../gfx/noise.ts';
 import { canopy, leafMaterial, withLeafState, type Puff } from '../foliage.ts';
 import { Cards, CELL, type Mass } from './crown.ts';
 import { Geo, mat, spline, type V3 } from './geo.ts';
-import { canvasTex, houseMat, patchCut, pixelText, textWidth, woodFill, type HouseMat } from './kit.ts';
+import { canvasTex, houseMat, patchCut, woodFill, type HouseMat } from './kit.ts';
+import { alagardReady, alagardText } from '../../ui/font.ts';
 import {
   CHIMNEY_A, CHIMNEY_TOP, DOOR_A, FLOOR_IDS, FLOOR_Y, HOLES, inOpening, LADDER_A, LAMP_AT, LAUNCH, LIMB_A, OPEN_A, openingOutline, openings, PLATFORM,
   R_IN, ROOF_Y, RO, SLAB, trunkR, UNLOCK, wrapA, type FloorId, type Opening,
@@ -212,21 +213,30 @@ function signUV(r: readonly number[], u: number, v: number): [number, number] {
 let signsMat: THREE.MeshStandardMaterial | null = null;
 function signsMaterial(): THREE.MeshStandardMaterial {
   if (signsMat) return signsMat;
-  const t = canvasTex(SIGNS.W, SIGNS.H, (g) => {
+  // [font6] the atlas is painted at 2 texels per art pixel so the lettering can be Alagard (the game's font) at its
+  // 16 px grid; the art itself is drawn scaled 2x, so it looks exactly as before
+  const paint = (g: CanvasRenderingContext2D) => {
+    g.setTransform(2, 0, 0, 2, 0, 0);
     const at = (r: readonly number[], f: () => void) => { g.save(); g.translate(r[0], r[1]); f(); g.restore(); };
+    /** Alagard, `n` texels per font pixel, centred on `cx`, capitals from `capTop` (art pixels within region r) */
+    const ink = (r: readonly number[], text: string, cx: number, capTop: number, n: number, color: string, shadow?: string) => {
+      g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+      alagardText(g, text, 2 * (r[0] + cx), 2 * (r[1] + capTop) + 11 * n, color, { n, align: 'center', shadow });
+      g.restore();
+    };
     at(SIGNS.sign, () => {
       g.fillStyle = '#3c2614'; g.fillRect(0, 0, 96, 28);
       woodFill(g, 1, 1, 94, 26, [176, 122, 70], 3);
       g.fillStyle = '#5c3a1c'; g.fillRect(1, 13, 94, 1);
       g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(1, 24, 94, 3);
-      pixelText(g, 'HOOT HOLLOW', Math.round(48 - textWidth('HOOT HOLLOW', 1) / 2), 4, 1, '#f3e6c4', '#3a2410');
-      pixelText(g, 'PIP', Math.round(48 - textWidth('PIP', 1) / 2), 15, 1, '#f3e6c4', '#3a2410');
     });
+    ink(SIGNS.sign, 'HOOT HOLLOW', 48, 4, 1, '#f3e6c4', '#3a2410');
+    ink(SIGNS.sign, 'PIP', 48, 15, 1, '#f3e6c4', '#3a2410');
     at(SIGNS.mail, () => {
       g.fillStyle = '#9c3a2a'; g.fillRect(0, 0, 32, 16);
       for (let i = 0; i < 32; i++) { g.fillStyle = i % 5 === 0 ? '#8c3224' : '#a6402e'; g.fillRect(i, 0, 1, 16); }
-      pixelText(g, 'PIP', 8, 5, 1, '#f4e8cc', '#5a1e14');
     });
+    ink(SIGNS.mail, 'PIP', 16, 5, 1, '#f4e8cc', '#5a1e14');
     at(SIGNS.mat, () => {
       for (let j = 0; j < 16; j++) for (let i = 0; i < 32; i++) {
         const weave = ((i >> 1) + (j >> 1)) % 2;
@@ -234,9 +244,9 @@ function signsMaterial(): THREE.MeshStandardMaterial {
         if (i < 2 || j < 2 || i > 29 || j > 13) g.fillStyle = weave ? '#6e4a2a' : '#5e3e22';
         g.fillRect(i, j, 1, 1);
       }
-      pixelText(g, 'HOOT', 5, 5, 1, '#5a3a1a');
     });
-    [UNLOCK.f2.level, UNLOCK.f3.level].forEach((level, k) => at(SIGNS.lv[k], () => {
+    ink(SIGNS.mat, 'HOOT', 16, 5, 1, '#5a3a1a');
+    [0, 1].forEach((k) => at(SIGNS.lv[k], () => {
       // brass plate with a bevelled rim, rivets and the level engraved
       g.fillStyle = '#5a3c16'; g.fillRect(0, 0, 48, 32);
       g.fillStyle = '#b98a3c'; g.fillRect(1, 1, 46, 30);
@@ -245,11 +255,12 @@ function signsMaterial(): THREE.MeshStandardMaterial {
       g.fillStyle = '#d7a957'; g.fillRect(4, 4, 40, 24);
       for (let i = 0; i < 40; i += 3) { g.fillStyle = i % 2 ? '#ddb262' : '#cfa04e'; g.fillRect(4 + i, 4, 1, 24); }
       g.fillStyle = '#8a5f22'; for (const [x, y] of [[3, 3], [43, 3], [3, 27], [43, 27]]) g.fillRect(x, y, 2, 2);
-      const t2 = 'LV ' + level, w = textWidth(t2, 1) * 2;
-      pixelText(g, t2, Math.round(24 - w / 2), 9, 2, '#4a2e0e', '#f6dc98');
     }));
+    [UNLOCK.f2.level, UNLOCK.f3.level].forEach((level, k) => ink(SIGNS.lv[k], 'LV ' + level, 24, 10, 2, '#4a2e0e', '#f6dc98'));
     at(SIGNS.brass, () => { g.fillStyle = '#c99a4c'; g.fillRect(0, 0, 8, 8); });
-  });
+  };
+  const t = canvasTex(SIGNS.W * 2, SIGNS.H * 2, paint);
+  void alagardReady().then(() => { const g = (t.image as HTMLCanvasElement).getContext('2d'); if (g) { paint(g); t.needsUpdate = true; } });
   signsMat = new THREE.MeshStandardMaterial({ map: t, roughness: 0.6, metalness: 0.15 });
   signsMat.name = 'house:signs';
   return signsMat;

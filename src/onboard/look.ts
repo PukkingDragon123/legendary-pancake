@@ -174,7 +174,7 @@ export class Look {
   resize(W: number, H: number) {
     // phones: one texel per CSS px (the paper's print stays readable); big screens a little coarser
     const portrait = W < H;
-    this.px = Math.min(W, H) < 620 ? 1 : Math.max(1, Math.min(2, (portrait ? W : H) / 700));
+    this.px = Math.min(W, H) < 620 ? 1 : Math.max(1, Math.min(2, Math.floor((portrait ? W : H) / 700))); // [font6] whole texels: crisp pixel type
     this.w = Math.max(64, Math.round(W / this.px));
     this.h = Math.max(64, Math.round(H / this.px));
     const { w, h } = this;

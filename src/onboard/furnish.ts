@@ -478,10 +478,10 @@ export function certificate(title: string, lines: string[], seal: RGB = rgb(0xa8
     else if (y > 6 && Math.abs(x + (y - 6) * 0.4) < 2.5 && y < 22) t.set(sx + x, sy + y, mul3(seal, 0.7));
   }
   const c = t.canvas(64), g = c.getContext('2d')!;
-  crispText(g, title, W / 2, 34, F.caps(12), hexCSS(ink), { align: 'center' });
-  lines.forEach((l, i) => crispText(g, l, W / 2, 56 + i * 13, i === 1 ? F.hand(16) : F.small(16), hexCSS(i === 1 ? rgb(0x1a1a3a) : ink), { align: 'center' }));
+  crispText(g, title, W / 2, 36, F.caps(16), hexCSS(ink), { align: 'center' });
+  lines.forEach((l, i) => crispText(g, l, W / 2, 56 + i * 18, i === 1 ? F.hand(16) : F.small(16), hexCSS(i === 1 ? rgb(0x1a1a3a) : ink), { align: 'center' }));
   // signatures
-  crispText(g, 'H. Oakley', 40, H - 22, F.hand(12), '#1c2340', { align: 'center' });
+  crispText(g, 'Oakley', 41, H - 22, F.hand(16), '#1c2340', { align: 'center' });
   for (let x = 20; x < 62; x++) g.fillRect(x, H - 19, 1, 1);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace; tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.anisotropy = 4;

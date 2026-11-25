@@ -8,6 +8,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { modelUrl } from '../../gfx/glb.ts';
 import { rng } from '../../gfx/noise.ts';
+import { alagard, alagardReady, alagardSafe } from '../../ui/font.ts';
 
 // ------------------------------------------------------------------ textures and materials
 
@@ -544,35 +545,27 @@ export function parcel(s = 0.26): THREE.Group {
 
 // ------------------------------------------------------------------ text on wood and slate (canvas)
 
-let fontReady: Promise<void> | null = null;
-/** The game's pixel font, loaded for canvas painting (already present in the app; the dev page loads it). */
+/** The game's pixel font (Alagard), loaded for canvas painting (already present in the app; the dev page loads it). */
 export function lodgeFont(): Promise<void> {
-  if (!fontReady) {
-    fontReady = (async () => {
-      try {
-        if (!document.fonts.check('24px "TBME Body"')) {
-          const url = new URL('../../assets/fonts/TBMEGoofy-Regular.woff2', import.meta.url).href;
-          const f = new FontFace('TBME Body', `url(${url})`);
-          document.fonts.add(await f.load());
-        }
-        await document.fonts.load('24px "TBME Body"');
-      } catch { /* the fallback font will do */ }
-    })();
-  }
-  return fontReady;
+  return alagardReady();
 }
-const FONT = '"TBME Body", ui-monospace, monospace';
 
-/** Draw text crisply (no smoothing): render large, then threshold the alpha so letters have hard pixel edges. */
+/**
+ * Draw text crisply in Alagard: `px` is the wished size, snapped to whole multiples of the font's 16 px grid (and
+ * stepped down a whole multiple at a time until it fits `maxW`), drawn on whole pixels, the alpha thresholded so
+ * letters have hard pixel edges. `y` is the middle of the capitals.
+ */
 function pixelText(g: CanvasRenderingContext2D, text: string, x: number, y: number, px: number, col: string, o: { align?: CanvasTextAlign; shadow?: string; outline?: string; maxW?: number } = {}) {
   const [c2, g2] = canvas(g.canvas.width, g.canvas.height);
-  g2.font = `${px}px ${FONT}`;
-  g2.textAlign = o.align ?? 'center';
-  g2.textBaseline = 'middle';
-  let size = px;
-  if (o.maxW) { while (size > 8 && g2.measureText(text).width > o.maxW) { size -= 1; g2.font = `${size}px ${FONT}`; } }
+  text = alagardSafe(text);
+  let n = Math.max(1, Math.round(px / 16));
+  g2.font = alagard(n);
+  if (o.maxW) { while (n > 1 && g2.measureText(text).width > o.maxW) { n -= 1; g2.font = alagard(n); } }
+  const w = Math.round(g2.measureText(text).width), al = o.align ?? 'center';
+  g2.textAlign = 'left';
+  g2.textBaseline = 'alphabetic';
   g2.fillStyle = '#000';
-  g2.fillText(text, x, y);
+  g2.fillText(text, Math.round(al === 'center' ? x - w / 2 : al === 'right' || al === 'end' ? x - w : x), Math.round(y + 5.5 * n));
   const d = g2.getImageData(0, 0, c2.width, c2.height);
   const paint = (dx: number, dy: number, hex: string) => {
     const [r, gg, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -584,8 +577,9 @@ function pixelText(g: CanvasRenderingContext2D, text: string, x: number, y: numb
     }
     g.putImageData(out, 0, 0);
   };
-  if (o.outline) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, 1], [-1, 1], [1, -1]]) paint(dx, dy, o.outline);
-  if (o.shadow) paint(0, 2, o.shadow);
+  const k = Math.max(1, Math.round(n / 2));
+  if (o.outline) for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [1, 1], [-1, 1], [1, -1]]) paint(dx * k, dy * k, o.outline);
+  if (o.shadow) paint(0, 2 * k, o.shadow);
   paint(0, 0, col);
 }
 
@@ -679,14 +673,14 @@ export interface Sign { group: THREE.Group; redraw(text: string, sub?: string): 
 /** A carved wooden sign hung on two ropes (from `ropeTo` metres above its top edge), letters painted in honey. */
 export function hangingSign(w: number, h: number, text: string, sub = '', ropeTo = 0.4, seed = 2): Sign {
   const g = new THREE.Group();
-  const PX = 160; // texels per metre
+  const PX = 256; // texels per metre (the props' texel density; Alagard's 16 px letters fit)
   const cw = Math.round(w * PX), ch = Math.round(h * PX);
   const [c, gx] = canvas(cw, ch);
   const t = canvasTex(c);
   const draw = (tx: string, sb: string) => {
     paintPlank(gx, cw, ch, seed);
-    pixelText(gx, tx, cw / 2, sb ? ch * 0.4 : ch / 2, Math.round(ch * (sb ? 0.42 : 0.55)), '#f6dc9a', { shadow: '#3b2a1c', outline: '#4a2f1d', maxW: cw - 24 });
-    if (sb) pixelText(gx, sb, cw / 2, ch * 0.77, Math.round(ch * 0.2), '#f2e7cf', { outline: '#4a2f1d', maxW: cw - 24 });
+    pixelText(gx, tx, cw / 2, sb ? ch * 0.4 : ch / 2, Math.round(ch * (sb ? 0.42 : 0.55)), '#f6dc9a', { shadow: '#3b2a1c', outline: '#4a2f1d', maxW: cw - 16 });
+    if (sb) pixelText(gx, sb, cw / 2, ch * 0.77, Math.round(ch * 0.2), '#f2e7cf', { outline: '#4a2f1d', maxW: cw - 16 });
     t.needsUpdate = true;
   };
   draw(text, sub);
@@ -743,7 +737,7 @@ export function slate(w: number, h: number): Slate {
     let y = ch * 0.1;
     const total = lines.reduce((a, l) => a + l.size * 1.25, 0);
     y = (ch - total) / 2;
-    for (const l of lines) { pixelText(gx, l.text, cw / 2, y + l.size * 0.62, l.size, l.col ?? '#ece9dc', { maxW: cw - 20 }); y += l.size * 1.25; }
+    for (const l of lines) { pixelText(gx, l.text, cw / 2, y + l.size * 0.62, l.size, l.col ?? '#ece9dc', { maxW: cw - 16 }); y += l.size * 1.25; }
     // chalk dust along the bottom
     for (let k = 0; k < 140; k++) { gx.fillStyle = 'rgba(236,233,220,0.25)'; gx.fillRect(Math.floor(r() * cw), Math.floor(ch - 2 - r() * 10), 1, 1); }
     t.needsUpdate = true;

@@ -280,9 +280,9 @@ export class Office implements Stage {
     const chailly = frame(m, 0.9, 0.726, artMat(0, 256 / 512, 310 / 512, 506 / 512), { mould: 0.07 });
     chailly.position.set(L.x0 + 0.03, 1.78, 1.35); chailly.rotation.y = Math.PI / 2;
     s.add(chailly);
-    const certA = frame(m, 0.36, 0.27, new THREE.MeshStandardMaterial({ map: certificate('CERTIFICATE', ['of Excellence in Sleep', 'Pip', 'Head of Sleep, Hollow & Co.']), roughness: 0.7 }), { mould: 0.03, mat: m.blackLacquer });
+    const certA = frame(m, 0.36, 0.27, new THREE.MeshStandardMaterial({ map: certificate('CERTIFICATE', ['for Sleeping Well', 'Pip', 'Head of Sleep']), roughness: 0.7 }), { mould: 0.03, mat: m.blackLacquer });
     certA.position.set(L.x1 - 0.03, 1.72, 0.42 + 0.75); certA.rotation.y = -Math.PI / 2;
-    const certB = frame(m, 0.36, 0.27, new THREE.MeshStandardMaterial({ map: certificate('DIPLOMA', ['Hoot Hollow School of Dreams', 'Master of Naps', 'awarded with distinction']), roughness: 0.7 }), { mould: 0.03, mat: m.blackLacquer });
+    const certB = frame(m, 0.36, 0.27, new THREE.MeshStandardMaterial({ map: certificate('DIPLOMA', ['School of Dreams', 'Master of Naps', 'with distinction']), roughness: 0.7 }), { mould: 0.03, mat: m.blackLacquer });
     certB.position.set(L.x1 - 0.03, 2.12, 0.42 + 0.75); certB.rotation.y = -Math.PI / 2;
     s.add(certA, certB);
     await idle();

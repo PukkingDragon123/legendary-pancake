@@ -83,7 +83,7 @@ export function NightReport(p: { s: SleepSession; onNext?: () => void; onClose?:
         <div class="row" style="gap:16px">
           <div class="seal"><div><b>{r.score}</b><small>SCORE</small></div></div>
           <div class="col" style="gap:2px">
-            <div class="num" style="font-size:30px">{fmtDur(r.asleep)}</div>
+            <div class="num" style="font-size:32px">{fmtDur(r.asleep)}</div>
             <div class="muted small">asleep · {fmtTime(r.asleepAt, h12)} – {fmtTime(r.wokeAt, h12)}</div>
             <div class="muted small">in bed {fmtDur(r.inBed)}{s.micUsed ? '' : ' · estimated'}</div>
           </div>

@@ -28,6 +28,7 @@ import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt,
 import { installChromeSkin } from './skin.ts';
 import { iconSrc } from './iconset.ts';
 import { installSurfaces } from './surfaces.ts';
+import { alagardWidth } from '../font.ts';
 import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
 import '../px/currency.js';
@@ -134,8 +135,10 @@ function NameSign() {
     haptic(6);
     setXp(true); clearTimeout(tm.current); tm.current = window.setTimeout(() => setXp(false), 2600);
   };
-  const long = s.name.length > 8;
-  const rank = rankOf(lv.level), fits = s.name.length * (long ? 11 : 14) + rank.length * 7 + 8 < 114;
+  // [font6] measured in Alagard: name and rank both shown where they fit, the name in 32 px gilt letters if it can
+  const rank = rankOf(lv.level), nw = alagardWidth(s.name), rw = alagardWidth(rank), room = 119;
+  const long = 2 * nw + rw + 8 > room && (nw + rw + 8 <= room || 2 * nw > room);
+  const fits = (long ? nw : 2 * nw) + rw + 8 <= room;
   return (
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={40} />

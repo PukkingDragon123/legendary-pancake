@@ -7,16 +7,17 @@ import * as THREE from 'three';
 import { PX } from '../../gfx/box.ts';
 import { hash } from '../../gfx/noise.ts';
 import { BOX } from '../../game/home.ts';
-import { canvasTex, patchCut, pixelText, textWidth } from './kit.ts';
+import { canvasTex, patchCut } from './kit.ts';
+import { alagardReady, alagardText, alagardWidth } from '../../ui/font.ts';
 
 /** box size in px (the model's body) */
 export const BOX_W = 18, BOX_H = 14, BOX_D = 16;
 
-/** split a label into at most two short lines (the box art does the same) */
+/** split a label into at most two short lines (the box art does the same); one word stays whole */
 export function labelLines(s: string): string[] {
   if (s.length <= 7) return [s];
   const sp = s.indexOf(' ');
-  return sp > 0 ? [s.slice(0, sp), s.slice(sp + 1)] : [s.slice(0, 7), s.slice(7)];
+  return sp > 0 ? [s.slice(0, sp), s.slice(sp + 1)] : [s];
 }
 
 export interface BoxModel {
@@ -63,18 +64,24 @@ function tape(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: n
 
 function frontTex(id: string, label: string): THREE.CanvasTexture {
   const seed = id.length * 7 + label.length;
-  return canvasTex(BOX_W * TPX, BOX_H * TPX, (g) => {
+  // [font6] painted at 2 texels per art texel so the marker lettering can be Alagard (the game's font) at its 16 px
+  // grid; the cardboard, tape and marks are drawn scaled 2x and look exactly as before
+  const paint = (g: CanvasRenderingContext2D) => {
+    g.setTransform(2, 0, 0, 2, 0, 0);
     card(g, BOX_W, BOX_H, seed);
     tape(g, (BOX_W * TPX) / 2 - 6, 0, 12, 22);
     // the paper label, lettered in marker
     const lines = labelLines(label);
     const fragile = label === 'FRAGILE';
-    const tw = Math.max(...lines.map((l) => textWidth(l, 1))) + 8, th = lines.length * 9 + 5;
-    const lx = Math.round((BOX_W * TPX - tw) / 2), ly = 26 + (lines.length === 1 ? 4 : 0);
-    g.fillStyle = 'rgba(60,40,20,0.3)'; g.fillRect(lx + 1, ly + 1, tw, th);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    const W2 = BOX_W * TPX * 2;
+    const tw = Math.max(...lines.map((l) => alagardWidth(l))) + 12, th = lines.length * 15 + 7;
+    const lx = Math.round((W2 - tw) / 2), ly = 52 + (lines.length === 1 ? 8 : 0);
+    g.fillStyle = 'rgba(60,40,20,0.3)'; g.fillRect(lx + 2, ly + 2, tw, th);
     g.fillStyle = '#efe6d2'; g.fillRect(lx, ly, tw, th);
-    g.fillStyle = '#e2d6bc'; g.fillRect(lx, ly + th - 2, tw, 2);
-    lines.forEach((l, i) => pixelText(g, l, Math.round((BOX_W * TPX - textWidth(l, 1)) / 2), ly + 3 + i * 9, 1, fragile ? '#b0301e' : '#2c2a36'));
+    g.fillStyle = '#e2d6bc'; g.fillRect(lx, ly + th - 4, tw, 4);
+    lines.forEach((l, i) => alagardText(g, l, W2 / 2, ly + 15 + i * 15, fragile ? '#b0301e' : '#2c2a36', { align: 'center' }));
+    g.setTransform(2, 0, 0, 2, 0, 0);
     if (fragile) {
       // red "this way up" arrows either side
       for (const x of [6, BOX_W * TPX - 12]) {
@@ -88,7 +95,10 @@ function frontTex(id: string, label: string): THREE.CanvasTexture {
       const cx = BOX_W * TPX - 9, cy = 8;
       for (const [dx, dy] of [[0, -3], [-1, -2], [0, -2], [1, -2], [-3, -1], [-2, -1], [-1, -1], [0, -1], [1, -1], [2, -1], [3, -1], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [-2, 1], [-1, 1], [1, 1], [2, 1], [-3, 2], [3, 2]]) g.fillRect(cx + dx, cy + dy, 1, 1);
     }
-  });
+  };
+  const t = canvasTex(BOX_W * TPX * 2, BOX_H * TPX * 2, paint);
+  void alagardReady().then(() => { const g = (t.image as HTMLCanvasElement).getContext('2d'); if (g) { paint(g); t.needsUpdate = true; } });
+  return t;
 }
 
 let sideT: THREE.CanvasTexture | null = null, flapT: THREE.CanvasTexture | null = null;

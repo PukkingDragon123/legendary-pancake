@@ -4,6 +4,7 @@
 // diorama" look); light is never baked in, only cavity/AO and wear. Every texture is crisp pixel art up close
 // (nearest magnification) and calm far away (mipmapped minification).
 import * as THREE from 'three';
+import { alagardSafe } from '../ui/font.ts';
 
 export type RGB = [number, number, number];
 export const rgb = (h: number): RGB => [((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255];
@@ -247,7 +248,9 @@ export function stamp(t: Tex, x: number, y: number, rows: string[], c: RGB, scal
 
 /** Draw text with a pixel font and snap its alpha (no anti-aliased fringe). */
 export function crispText(g: CanvasRenderingContext2D, text: string, x: number, y: number, font: string, color: string, o: { align?: CanvasTextAlign; base?: CanvasTextBaseline; spacing?: number; threshold?: number } = {}) {
-  const tmp = scratch(Math.max(8, Math.ceil(text.length * 40 + 40)), 96);
+  text = alagardSafe(text); // [font6] Alagard draws ASCII only
+  const px = parseFloat(/(\d+(?:\.\d+)?)px/.exec(font)?.[1] ?? '16'), mid = Math.ceil(px * 1.5);
+  const tmp = scratch(Math.max(8, Math.ceil(text.length * px * 1.5 + 40)), mid * 2);
   const t = tmp.getContext('2d', { willReadFrequently: true })!;
   t.clearRect(0, 0, tmp.width, tmp.height);
   t.font = font;
@@ -258,8 +261,8 @@ export function crispText(g: CanvasRenderingContext2D, text: string, x: number, 
   const m = t.measureText(text);
   const w = Math.ceil(m.width) + 4;
   const asc = Math.ceil(m.actualBoundingBoxAscent || 12), desc = Math.ceil(m.actualBoundingBoxDescent || 4);
-  t.fillText(text, 2, 48);
-  const img = t.getImageData(0, 48 - asc - 1, w, asc + desc + 2), d = img.data;
+  t.fillText(text, 2, mid);
+  const img = t.getImageData(0, mid - asc - 1, w, asc + desc + 2), d = img.data;
   const thr = (o.threshold ?? 0.45) * 255;
   const [cr, cg, cb] = cssRGB(color);
   for (let i = 0; i < d.length; i += 4) { const on = d[i + 3] > thr; d[i] = cr; d[i + 1] = cg; d[i + 2] = cb; d[i + 3] = on ? 255 : 0; }
@@ -280,7 +283,7 @@ export function measure(text: string, font: string, spacing = 0): number {
   const t = scratch(8, 8).getContext('2d', { willReadFrequently: true })!;
   t.font = font;
   if ('letterSpacing' in t) (t as unknown as { letterSpacing: string }).letterSpacing = `${spacing}px`;
-  return t.measureText(text).width;
+  return t.measureText(alagardSafe(text)).width;
 }
 let sc1: HTMLCanvasElement | null = null, sc2: HTMLCanvasElement | null = null;
 function scratch(w: number, h: number) { if (!sc1) sc1 = document.createElement('canvas'); if (sc1.width < w) sc1.width = w; if (sc1.height < h) sc1.height = h; return sc1; }
