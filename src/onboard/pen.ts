@@ -33,7 +33,8 @@ function marble(w: number, h: number, seed: number, base: RGB, vein: RGB, gold: 
   strokes(t, 0, 0, w, h, (x, y) => t.get(x, y), { seed, ang: Math.PI / 2, angJ: 0.6, len: 5, val: 0.12, hue: 0.6, wrap: true, n: Math.round(w * h / 3) });
   return t;
 }
-const tx = (t: Tex) => t.texture({ q: 64 });
+// [dialog10] drawn at full device resolution: the painted textures magnify smoothly
+const tx = (t: Tex) => { const x = t.texture({ q: 64 }); x.magFilter = THREE.LinearFilter; x.anisotropy = 8; return x; };
 
 /** The pen as a model: lying along +x, the nib's tip at the origin, the nib's top facing +y. */
 export function detailedPen(): THREE.Group {

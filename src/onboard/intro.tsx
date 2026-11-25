@@ -20,7 +20,7 @@ import { rubberStamp } from './desk.ts';
 import { dioramas } from './dioramas.ts';
 import { iris } from './iris.ts';
 import { Office, type ShotName, type WorldView } from './office.ts';
-import { Overlay3D } from './overlay3d.ts';
+import { Overlay3D, smoothen } from './overlay3d.ts';
 import { isWide, Panel, panelScale, type PanelActions } from './panel.tsx';
 import { FloatingPen } from './pen.ts';
 import { DRINKS, TAPES } from './props.ts';
@@ -105,7 +105,7 @@ export function Intro() {
     cards.plate = { you: U.a.you, name: U.a.name };
     models.current = cards;
     office.tickers.add((dt) => ov.update(dt));
-    const stamp = rubberStamp(office.mats);
+    const stamp = smoothen(rubberStamp(office.mats)); // [dialog10] its own smooth copies of the office's woods
     const pen = new FloatingPen(ov);
     let penShown = false;
     pen.visible = false;

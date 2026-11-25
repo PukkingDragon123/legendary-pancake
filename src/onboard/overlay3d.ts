@@ -68,6 +68,25 @@ export function boxOf(o: THREE.Object3D): THREE.Box3 {
   walk(o);
   return b;
 }
+/** Give an object its own copies of its materials with smoothly magnified textures (for models shared with a
+ * pixel-textured scene, drawn here at full device resolution). */
+export function smoothen(o: THREE.Object3D): THREE.Object3D {
+  const done = new Map<THREE.Material, THREE.Material>();
+  const fix = (m: THREE.Material) => {
+    let c = done.get(m);
+    if (c) return c;
+    c = m.clone();
+    const r = c as unknown as Record<string, THREE.Texture | null>;
+    for (const k of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'emissiveMap', 'bumpMap']) {
+      const t = r[k];
+      if (t && t.isTexture) { const n = t.clone(); n.magFilter = THREE.LinearFilter; n.anisotropy = 8; n.needsUpdate = true; r[k] = n; }
+    }
+    done.set(m, c);
+    return c;
+  };
+  o.traverse((x) => { const m = x as THREE.Mesh; if (m.isMesh) m.material = Array.isArray(m.material) ? m.material.map(fix) : fix(m.material); });
+  return o;
+}
 export function softShadow(opacity = 0.5): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: shadowMap(), transparent: true, depthWrite: false, opacity, toneMapped: false }));
   m.renderOrder = -1;

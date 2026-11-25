@@ -239,6 +239,10 @@ function sprite(c: string, size: number, pal: Palette, depth: number, kind: 'fac
 
 // ------------------------------------------------------------------ the view
 
+/** dev builds: a global time scale for the words (screenshots in slow headless browsers): window.hhTalk.k */
+const dev = { k: 1 };
+try { if (import.meta.env?.DEV && typeof window !== 'undefined') (window as unknown as { hhTalk: unknown }).hhTalk = dev; } catch { /* */ }
+
 export interface TalkOpts {
   /** CSS px the body text aims for (snapped to whole font pixels on this device) */
   size: number;
@@ -405,7 +409,7 @@ export class TalkView {
 
   /** Advance time (seconds), speak the letters that are due, and draw. */
   step(dt: number) {
-    dt = Math.min(0.1, Math.max(0, dt)) * this.pace;
+    dt = Math.min(0.1, Math.max(0, dt)) * this.pace * dev.k;
     this.clock += dt;
     const still = reducedMotion(), L = this.lag;
     if (still) L.x = L.y = L.vx = L.vy = 0;
