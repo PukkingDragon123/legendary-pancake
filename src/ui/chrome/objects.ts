@@ -3,7 +3,7 @@
 // medallions and push buttons in brass rims, engraved brass name plates, the walnut shelf, the felt-lined side
 // tool tiles, a hemp rope and a brass chain (tiling), soft contact shadows, a bulldog clip and a clipboard clip,
 // a damask wallpaper tile; the nightstand props (a beeswax candle in a brass chamberstick, a stoneware mug with
-// steam, a phone), the burlap gift sack; and the 2D stand-ins of the three main objects (moon lamp, twin-bell
+// steam, a phone), the burlap gift sack; and the 2D stand-ins of the three main objects (oil lamp, twin-bell
 // alarm clock, leather journal) shown only when the live 3D shelf can't run.
 //
 // Sizes are CSS px; `zoom` is how much larger the HUD is drawn on big screens (1 phones, 1.5 desktops).
@@ -394,29 +394,50 @@ export function giftSack(open = 0, _k = 2): string {
 
 // ------------------------------------------------------------------ the main objects' 2D stand-ins
 
-/** Moon lamp: a brass stand holding a glowing glass moon. 52 x 54 units (k device px per unit). */
+/**
+ * [ui10] The bedside oil lamp (the Sleep object's painted stand-in): a turned brass foot and oil font, a burner
+ * collar with its wick knob, and a tall glass chimney glowing with the flame (`glowK` how bright, `lit` 0 = out).
+ * 52 x 54 units (k device px per unit). No moon.
+ */
 export function moonLamp(k = 2, _res = 1, glowK = 0.6, lit = 1): string {
-  return cached(`moonlamp2:${k}:${glowK.toFixed(2)}:${lit}`, () => {
-    const r = new Real(52, 54, k * deviceK(3), 0), brass = metal(GOLD, { polish: 0.75 });
-    r.part(ellipse(26, 49, 15, 4), (x, y) => 1 + dome(26, 49, 15, 4, 2.4)(x, y, 0), brass);
-    r.part(box(23.5, 34, 5, 15, 2), tubeY(26, 2.5, 3), brass);
-    const moon = (x: number, y: number): RGB => {
-      const crater = fbm(x * 0.18, y * 0.18, 8, 3);
-      return mix(hex('#c9d4ea'), hex('#fff8dc'), clamp(0.45 + glowK * 0.5 + (crater - 0.5) * 0.4)) as RGB;
+  return cached(`oillamp10:${k}:${glowK.toFixed(2)}:${lit}`, () => {
+    const r = new Real(52, 54, k * deviceK(3), 0), brass = metal(GOLD, { polish: 0.75 }), old = metal(BRASS_OLD, { polish: 0.55 });
+    // the foot, the stem and the oil font
+    r.part(ellipse(26, 49.5, 14, 3.6), (x, y) => 1 + dome(26, 49.5, 14, 3.6, 2.2)(x, y, 0), brass, { line: true });
+    r.part(cutBox(23.4, 41, 5.2, 8, 1), tubeY(26, 2.6, 2), old, { line: 0.8 });
+    r.part(ellipse(26, 38.5, 11, 5.2), (x, y) => 2 + dome(26, 38.5, 11, 5.2, 4)(x, y, 0), brass, { line: true });
+    r.carve(ellipse(26, 38.5, 9.6, 0.5), 0.5, 0.4);
+    // the side ring handle
+    r.part(ring(38.5, 41, 2.2, 3.4), 4.5, old, { line: 0.8 });
+    // the burner collar and the wick knob
+    r.part(cutBox(20.5, 31, 11, 4.4, 1.2), tubeY(26, 5.5, 4), old, { line: 0.8 });
+    for (let x = 21.6; x < 31; x += 1.4) r.carve(box(x, 31.4, 0.5, 3.6, 0), 0.4, 0.25);
+    r.part(circle(33.4, 33.2, 1.6), dome(33.4, 33.2, 1.6, 1.6, 1.2, 5), brass, { line: 0.8 });
+    // the glass chimney: a bulb narrowing to a tall neck, glowing warm from inside
+    const g = Math.max(0, Math.min(1, glowK)) * (lit ? 1 : 0);
+    const glassAlb = (x: number, y: number): RGB => {
+      const d = Math.hypot((x - 26) / 8, (y - 25) / 7);
+      const hot = Math.max(0, 1 - d) * g;
+      return mix(lit ? hex('#c9a46a') : hex('#8a8478'), hex('#fff1c4'), Math.min(1, hot * 1.4 + g * 0.25)) as RGB;
     };
-    r.part(circle(26, 20, 15), dome(26, 20, 15, 15, 12, 4), lit ? { alb: moon, emit: 0.0, spec: 0.8, shin: 60, coat: 1, diffuse: 0.35 } : { alb: (x, y) => mix(moon(x, y), [70, 80, 110], 0.5) as RGB, spec: 0.8, shin: 60, coat: 1 });
-    return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.35 }, ambient: lit ? 0.75 : 0.4 });
+    const chim = union(ellipse(26, 24, 8.6, 8.2), cutBox(22.6, 5, 6.8, 16, 1));
+    r.part(chim, (x, y, ins) => 6 + Math.min(2.6, ins * 0.9) + 0 * x * y, { alb: glassAlb, spec: 0.9, shin: 80, coat: 1, emit: lit ? 1 : 0 }, { line: 0.9 });
+    // the flame inside it
+    if (lit) r.part(ellipse(26, 26.5, 1.6 + g * 0.6, 3.2 + g), 9, glow((x, y) => mix(hex('#fff8dc'), hex('#f0a040'), Math.min(1, Math.hypot((x - 26) / 2, (y - 27) / 4))) as RGB));
+    // a cool highlight down the glass
+    r.paint(cutBox(21.2, 18, 1.2, 9, 0.4), glow([255, 250, 240]), 0.35);
+    return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.35 }, ambient: lit ? 0.6 : 0.4 });
   });
 }
-/** The halo of moonlight behind the lamp: a soft radial glow (52 x 54 units). */
+/** The lamp's warm halo: a soft radial glow round the chimney (52 x 54 units). */
 export function lampHalo(k = 2, _res = 1, strength = 1): string {
-  return cached(`halo2:${k}:${strength}`, () => {
+  return cached(`halo10:${k}:${strength}`, () => {
     const kk = k * deviceK(2), c = document.createElement('canvas');
     c.width = Math.round(52 * kk); c.height = Math.round(54 * kk);
     const g = c.getContext('2d')!;
     g.scale(kk, kk);
-    const gr = g.createRadialGradient(26, 20, 4, 26, 20, 26);
-    gr.addColorStop(0, `rgba(220,232,255,${0.7 * strength})`); gr.addColorStop(0.45, `rgba(190,210,250,${0.3 * strength})`); gr.addColorStop(1, 'rgba(180,200,250,0)');
+    const gr = g.createRadialGradient(26, 24, 3, 26, 24, 26);
+    gr.addColorStop(0, `rgba(255,226,160,${0.7 * strength})`); gr.addColorStop(0.45, `rgba(255,196,110,${0.28 * strength})`); gr.addColorStop(1, 'rgba(255,180,90,0)');
     g.fillStyle = gr; g.fillRect(0, 0, 52, 54);
     return c.toDataURL('image/png');
   });

@@ -87,7 +87,7 @@
 .hh-badge > img { position: absolute; left: 0; top: 0; }
 .hh-badge b { position: relative; font-family: var(--font-display); font-weight: 400; font-size: var(--t1); color: #f8f1e6; text-shadow: 0 1px 1px rgba(40, 0, 0, 0.7); }
 @keyframes hhBadge { 50% { transform: scale(1.18) rotate(-6deg); } }
-.hh-new { position: absolute; left: -16px; top: 6px; padding: 2px 6px 1px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; color: #fff6e6; border-radius: 0; background: linear-gradient(#d8443e, #9a2226); box-shadow: 0 2px 3px rgba(30, 8, 4, 0.5), inset 0 1px 1px rgba(255, 200, 190, 0.6); text-shadow: 0 1px 1px rgba(40, 0, 0, 0.6); transform: rotate(-14deg); pointer-events: none; animation: hhNew 1.6s ease-in-out infinite; }
+.hh-new { position: absolute; left: -22px; top: 40px; z-index: 2; padding: 2px 6px 1px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; color: #fff6e6; border-radius: 0; background: linear-gradient(#d8443e, #9a2226); box-shadow: 0 2px 3px rgba(30, 8, 4, 0.5), inset 0 1px 1px rgba(255, 200, 190, 0.6); text-shadow: 0 1px 1px rgba(40, 0, 0, 0.6); transform: rotate(-14deg); pointer-events: none; animation: hhNew 1.6s ease-in-out infinite; }
 @keyframes hhNew { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(-8deg) scale(1.08); } }
 @keyframes hhWiggle { 25% { transform: rotate(-8deg); } 50% { transform: rotate(6deg) scale(1.08); } 75% { transform: rotate(-3deg); } }
 /* short screens: the tags hang in two strings */
@@ -97,7 +97,7 @@
   .hh-toolhang { width: 76px; transform-origin: 38px 4px; }
   .hh-toollabel { font-size: var(--t1); padding: 1px 3px 2px; } /* [ui4] every icon keeps its label */
   /* [ui4] in two columns the shop's NEW flag sits on its own tile, clear of Build */
-  .hh-new { left: auto; right: -6px; top: -8px; transform: rotate(10deg); animation: none; }
+  .hh-new { left: -20px; right: auto; top: 40px; transform: rotate(-8deg); animation: none; } /* [ui10] low on the left: clear of the icon's sign */
   .hh-toolrope { left: 35px; width: 82px; bottom: 50px; background-image: var(--rope), var(--rope) !important; background-size: 6px 8px; background-position: 0 0, 76px 0; background-repeat: repeat-y; filter: none; }
 }
 

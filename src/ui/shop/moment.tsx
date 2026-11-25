@@ -10,6 +10,7 @@ import { flyReward } from '../fx.tsx';
 import { haptic } from '../kit.tsx';
 import { SPRITES, spriteURL } from '../px/sprites.js';
 import { frameAt } from '../px/anim.ts';
+import { iconSrc } from '../chrome/iconset.ts';
 import { injectLodgeCSS } from './art.js';
 import './shop.css';
 
@@ -34,9 +35,12 @@ export function AnimPx(p: { name: string; size: number; fps?: number; class?: st
   useEffect(() => { const id = setInterval(() => setT(performance.now()), 1000 / (p.fps ?? 8)); return () => clearInterval(id); }, [p.fps]);
   const n = frameAt(p.name, t || performance.now(), p.fps ?? 8);
   const art = (SPRITES as Record<string, { w: number; h: number }>)[n] ?? { w: 24, h: 24 };
+  // [ui10] the painted icon family (detailed 128 px drawings) is shown smoothly at its device size, never blown up in hard pixels
+  const k = dpr(), smooth = iconSrc(n, Math.round(p.size * k), k) ?? iconSrc(p.name, Math.round(p.size * k), k);
+  if (smooth) return <img class={p.class ?? ""} style={"image-rendering:auto;" + (p.style ?? "")} src={smooth} width={p.size} height={p.size} alt="" draggable={false} />;
   // whole art pixels: snap the shown size to a multiple of the sprite's own size
   const per = Math.max(1, Math.round(p.size / Math.max(art.w, art.h)));
-  return <img class={'px ' + (p.class ?? '')} style={p.style} src={spriteURL(n, per * dpr())} width={art.w * per} height={art.h * per} alt="" draggable={false} />;
+  return <img class={"px " + (p.class ?? "")} style={p.style} src={spriteURL(n, per * dpr())} width={art.w * per} height={art.h * per} alt="" draggable={false} />;
 }
 
 /** The purchase as a rubber stamp: a turned wooden handle on a red rubber block; it thumps down when pressed. */
