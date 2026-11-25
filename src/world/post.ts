@@ -5,12 +5,17 @@
 //      the moon, fireflies and lanterns glow with a clean halo),
 //   2. tilt-shift depth of field from the depth buffer: a sharp band round the focus distance, the far woods and
 //      the near grass softly out of focus (colour weighted by circle of confusion, so sharp things never smear),
-//   3. a composite straight onto the canvas: exposure, white balance, ACES filmic tone mapping, a grade that adds
+//   3. [outline9] ink: crisp warm near-black outlines from the depth and each material's ink class (src/gfx/ink.ts):
+//      silhouettes, depth steps and creases on solid things, only the outer edge of leaf cards, none on the sky, glows,
+//      glass, grass or particles; thinning out with distance; the owls' fluff outlined by their ink hulls,
+//   4. a composite straight onto the canvas: exposure, white balance, ACES filmic tone mapping, a grade that adds
 //      warmth, vibrance and saturation, warm-light / cool-shadow split toning, lift/gamma/gain, a gentle vignette,
-//      a whisper of film grain and an 8-bit ordered dither (only against banding).
+//      the ink lines (faded where the depth of field blurs and under bright bloom), a whisper of film grain and an
+//      8-bit ordered dither (only against banding).
 // Knobs: `post.grade` (the world's live values, driven by the scene from the sky) and `Stage.look` (see
 // scene.ts): a stage sets any subset of Grade and the rest falls back to STAGE_LOOK.
 import * as THREE from 'three';
+import { Ink, inkDev, INK_GLSL, inkUniforms, type InkLook } from '../gfx/ink.ts';
 
 export interface Grade {
   /** linear exposure before tone mapping */
@@ -44,6 +49,14 @@ export interface Grade {
   cold: number;
   /** @deprecated kept for older callers; the picture is no longer posterised */
   quant: number;
+  /** [outline9] ink outlines: opacity 0..1 (0 = off) */
+  outline: number;
+  /** [outline9] ink line weight multiplier (1 = about 1.7 device px on a 1x screen, 2.3 on a 2x one) */
+  outlineWidth: number;
+  /** [outline9] 0..1 strength of the inner lines (creases); silhouettes and depth steps are always drawn */
+  outlineCrease: number;
+  /** [outline9] view distance (world units) where the lines have faded out (they start thinning at 40% of it) */
+  outlineFar: number;
 }
 
 export function defaultGrade(): Grade {
@@ -52,6 +65,7 @@ export function defaultGrade(): Grade {
     lift: new THREE.Vector3(0, 0, 0), gamma: new THREE.Vector3(1, 1, 1), gain: new THREE.Vector3(1, 1, 1),
     split: 0.5, vignette: 0.22, grain: 0.018, bloom: 0.55, bloomThreshold: 1.0,
     focus: 0, focusRange: 6, blur: 0.6, focusAt: new THREE.Vector2(0.5, 0.5), cold: 0, quant: 255,
+    outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 80,
   };
 }
 
@@ -59,6 +73,7 @@ export function defaultGrade(): Grade {
 export const STAGE_LOOK: Partial<Grade> = {
   exposure: 1.0, contrast: 1.05, saturation: 1.1, vibrance: 0.2, warm: 0.1, split: 0.4, vignette: 0.24, grain: 0.016,
   bloom: 0.5, bloomThreshold: 1.2, focus: 0, focusRange: 1.5, blur: 0.3, cold: 0,
+  outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 40,
 };
 
 /** Knobs a Stage may set (any subset of Grade). */
@@ -116,6 +131,9 @@ export class Post {
   private w = 1; private h = 1; private frame = 0;
   private levels: number;
   private fixedPixel: number | null = null;
+  /** [outline9] the edge pass */
+  private ink: Ink;
+  private inkLook: InkLook = { strength: 1, width: 1, crease: 1, far: 80 };
 
   /** [light7] cost tier: high (full size, 4x MSAA, 6 bloom levels), medium (full size, 2x MSAA, 5 levels), low (about
    * two thirds of the size scaled up smoothly, no MSAA, 4 levels); depth of field at a quarter of the target on all */
@@ -125,6 +143,7 @@ export class Post {
     this.tier = quality;
     this.levels = quality === 'high' ? 6 : quality === 'medium' ? 5 : 4;
     this.dofShift = 2;
+    this.ink = new Ink(gl, quality);
     this.mBright = shader(/* glsl */ `
       uniform sampler2D tSrc; uniform float uThresh; uniform vec2 uTexel; varying vec2 vUv;
       vec3 tap(vec2 o) { return min(texture2D(tSrc, vUv + o * uTexel).rgb, vec3(64.0)); }
@@ -214,9 +233,11 @@ export class Post {
       uniform float uExposure; uniform float uCon; uniform float uSat; uniform float uVib; uniform float uWarm; uniform float uSplit;
       uniform vec3 uLift; uniform vec3 uGamma; uniform vec3 uGain;
       uniform float uVig; uniform float uGrain; uniform float uBloom; uniform float uCold;
+      uniform float uInkOn;
       varying vec2 vUv;
       ${COC}
       ${BAYER}
+      ${INK_GLSL}
       float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233)) + uFrame * 0.618) * 43758.5453); }
       // ACES filmic (Hill's RRT + ODT fit), as three.js does it
       vec3 rrt(vec3 v) { vec3 a = v * (v + 0.0245786) - 0.000090537; vec3 b = v * (0.983729 * v + 0.4329510) + 0.238081; return a / b; }
@@ -233,13 +254,16 @@ export class Post {
         vec2 px = gl_FragCoord.xy;
         vec2 uv = vUv;
         vec3 col = texture2D(tColor, uv).rgb;
+        float soft = 0.0;
         if (uDofOn > 0.5) {
           float k = coc(uv, focusZ()) * uBlur;
           vec4 d = texture2D(tDof, uv);
-          vec3 soft = d.rgb / max(d.a, 1e-4);
-          col = mix(col, soft, smoothstep(0.0, 0.55, k) * step(1e-3, d.a));
+          vec3 sc = d.rgb / max(d.a, 1e-4);
+          soft = smoothstep(0.0, 0.55, k) * step(1e-3, d.a);
+          col = mix(col, sc, soft);
         }
-        if (uBloomOn > 0.5) col += texture2D(tBloom, uv).rgb * uBloom;
+        vec3 glow = vec3(0.0);
+        if (uBloomOn > 0.5) { glow = texture2D(tBloom, uv).rgb * uBloom; col += glow; }
         col *= uExposure;
         // white balance: warm days and lamplight, cool when negative
         col *= vec3(1.0 + uWarm * 0.16, 1.0 + uWarm * 0.03, 1.0 - uWarm * 0.16);
@@ -263,6 +287,13 @@ export class Post {
         col = mix(col, mix(vec3(l), col, 0.75) * vec3(0.94, 0.98, 1.05), uCold * 0.6);
         col *= 1.0 - uVig * smoothstep(0.1, 0.62, r2);
         col = toSRGB(clamp(col, 0.0, 1.0));
+        // [outline9] the ink lines: out-of-focus things lose them with their sharpness, lamps glow over them
+        if (uInkOn > 0.5) {
+          float a = inkCover(uv);
+          a *= (1.0 - smoothstep(0.25, 0.85, soft)) * (1.0 - smoothstep(0.35, 1.6, luma(glow) * uExposure));
+          col = inkOver(col, a);
+          if (uInkOn > 1.5) col = mix(col, vec3(1.0 - texture2D(tInk, uv).r), 0.85); // dev: ?ink=mask
+        }
         float g = hash(px + floor(uTime * 24.0) * 17.0) - 0.5;
         col += g * uGrain * (1.1 - l);
         // 8-bit ordered dither: smooth skies without banding
@@ -274,6 +305,7 @@ export class Post {
       uExposure: { value: 1 }, uCon: { value: 1 }, uSat: { value: 1 }, uVib: { value: 0 }, uWarm: { value: 0 }, uSplit: { value: 0 },
       uLift: { value: new THREE.Vector3() }, uGamma: { value: new THREE.Vector3(1, 1, 1) }, uGain: { value: new THREE.Vector3(1, 1, 1) },
       uVig: { value: 0 }, uGrain: { value: 0 }, uBloom: { value: 0 }, uCold: { value: 0 },
+      uInkOn: { value: 0 }, ...inkUniforms(),
       ...dofU(),
     });
     this.quadMesh = quad(this.mComp);
@@ -290,6 +322,7 @@ export class Post {
     this.tier = t;
     this.levels = t === 'high' ? 6 : t === 'medium' ? 5 : 4;
     this.dofShift = 2;
+    this.ink.setTier(t);
     this.w = -1;
     this.resize(this.cssW, this.cssH);
   }
@@ -321,6 +354,7 @@ export class Post {
     for (let i = 1; i <= this.levels; i++) this.bloomRT.push(mk(w >> i, h >> i));
     const dd = this.dofShift;
     this.dofA = mk(w >> dd, h >> dd); this.dofB = mk(w >> dd, h >> dd);
+    this.ink.setSize(w, h);
   }
 
   private pass(mat: THREE.ShaderMaterial, target: THREE.WebGLRenderTarget | null) {
@@ -335,10 +369,19 @@ export class Post {
     if (!this.enabled) { gl.setRenderTarget(null); gl.render(scene, camera); return; }
     this.frame++;
     const g = look ? resolveLook(look, this.stageGrade) : this.grade;
+    // [outline9] ink for this picture (a stage's own finished picture, e.g. the office's, opts out with userData.noInk)
+    const L = this.inkLook, pr = gl.getPixelRatio();
+    L.strength = scene.userData.noInk || inkDev.mode === 'off' ? 0 : g.outline; L.width = g.outlineWidth; L.crease = g.outlineCrease; L.far = g.outlineFar;
+    this.ink.frame(this.w, this.h, L, this.pixel, pr, g.exposure);
     gl.setRenderTarget(this.rt);
     gl.clear();
     gl.render(scene, camera);
+    Ink.idle();
     const u = this.mComp.uniforms;
+    if (L.strength > 0.001) {
+      this.ink.run(this.rt, camera, L, this.pixel, pr);
+      u.tInk.value = this.ink.rt.texture; u.uInkTexel.value.set(1 / this.w, 1 / this.h); u.uInkStr.value = Math.min(1, L.strength); u.uInkOn.value = inkDev.mode === 'mask' ? 2 : 1;
+    } else u.uInkOn.value = 0;
     // ---- bloom
     if (g.bloom > 0.001) {
       const B = this.bloomRT;
@@ -407,7 +450,7 @@ export class Post {
     this.gl.autoClear = ac;
   }
 
-  dispose() { for (const t of [this.rt, this.dofA, this.dofB, ...this.bloomRT]) t.dispose(); }
+  dispose() { for (const t of [this.rt, this.dofA, this.dofB, ...this.bloomRT]) t.dispose(); this.ink.dispose(); }
 }
 
 /** A stage's look over the stage defaults (lift/gamma/gain stay neutral). */
