@@ -73,7 +73,7 @@
 .hh-sep { display: inline-block; width: 0.3em; text-align: center; }
 
 /* ------------------------------------------------------------ side tools */
-.hh-tools { position: absolute; right: calc(6px + (var(--font-px) - 16px) * 1.5); top: calc(var(--safe-t) + 132px); width: 60px; display: flex; flex-direction: column; align-items: center; gap: 0; z-index: 4; transition: transform 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) 0.05s; }
+.hh-tools { position: absolute; right: calc(6px + (var(--t1) - 16px) * 1.5); top: calc(var(--safe-t) + 132px); width: 60px; display: flex; flex-direction: column; align-items: center; gap: 0; z-index: 4; transition: transform 0.6s cubic-bezier(0.3, 1.4, 0.5, 1) 0.05s; }
 .hh-tools.away { transform: translateX(100px); transition: transform 0.4s cubic-bezier(0.55, -0.3, 0.75, 0.4); }
 .hh-toolrope { position: absolute; left: 27px; top: -150px; bottom: 40px; width: 6px; background-image: var(--rope); background-repeat: repeat-y; background-size: 6px 6px; z-index: -1; box-shadow: 2px 0 0 rgba(40, 34, 27, 0.25); }
 .hh-tool { position: relative; width: 60px; height: 78px; }
@@ -224,7 +224,7 @@
   .hh-left .hh-lift, .hh-branch.left { scale: 1.5; transform-origin: 0 0; }
   .hh-right .hh-lift, .hh-branch.right { scale: 1.5; transform-origin: 100% 0; }
   .hh-branch.left { width: 248px; }
-  .hh-tools { top: calc(var(--safe-t) + 190px); right: calc(10px + (var(--font-px) - 16px) * 1.5); } /* [font6] labels wider than the tiles stay on screen */
+  .hh-tools { top: calc(var(--safe-t) + 190px); right: calc(10px + (var(--t1) - 16px) * 1.5); } /* [font6] labels wider than the tiles stay on screen */
   .hh-toolrope { top: -210px; }
 }
 @media (min-width: 900px) and (min-height: 760px) {

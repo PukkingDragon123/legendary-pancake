@@ -37,6 +37,13 @@
   --pop: cubic-bezier(0.3, 1.6, 0.5, 1);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
+/* [font6] Documented exception: on big screens the art pixel is about 2 CSS px, but the panels, tags and cards
+   are still laid out for phone-sized type, so UI text there uses half-art-pixel font pixels (16 CSS px at 1x),
+   still whole device pixels and crisp. Flip these back to the :root values once the panels are drawn at the art
+   pixel on big screens. Matches the "wide" test in src/gfx/artpx.ts (short side >= 600 px). */
+@media (min-width: 600px) and (min-height: 600px) {
+  :root { --t1: calc(var(--font-px) / 2); --t2: var(--font-px); --t3: calc(var(--font-px) * 1.5); --t4: calc(var(--font-px) * 2); --t6: calc(var(--font-px) * 3); --t8: calc(var(--font-px) * 4); }
+}
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--font-body); font-size: var(--t1); line-height: 1.25; letter-spacing: 0; font-synthesis: none; -webkit-font-smoothing: none; font-smooth: never; font-kerning: none; text-rendering: optimizeSpeed; }

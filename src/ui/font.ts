@@ -9,12 +9,21 @@
 // player typed in another script) falls back to the old pixel face in the CSS stack, never tofu.
 import { options, type VNode } from 'preact';
 import alagardUrl from '../assets/fonts/alagard.ttf?url';
+import { artPx } from '../gfx/artpx.ts';
 
 export const FAMILY = 'Alagard';
 /** the full stack: Alagard, then a pixel face that has the glyphs Alagard lacks */
 export const STACK = '"Alagard", "TBME Body", ui-monospace, monospace';
 /** the font pixel: one sixteenth of an em */
 export const EM = 16;
+/**
+ * CSS px per font pixel of UI text (the --t1 token in style.css): one art pixel on phones, half an art pixel on
+ * big screens (a documented exception until the panels are drawn at the art pixel there).
+ */
+export const uiFontPx = (): number => {
+  const wide = typeof window !== 'undefined' && Math.min(innerWidth, innerHeight) >= 600 && innerWidth >= 600;
+  return artPx() * (wide ? 0.5 : 1);
+};
 /** a canvas/CSS font string at `n` font pixels per screen/texture pixel (16 px, 32 px, 48 px ...) */
 export const alagard = (n = 1) => `${EM * Math.max(1, Math.round(n))}px ${STACK}`;
 
