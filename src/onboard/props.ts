@@ -467,7 +467,8 @@ export const TAPES: Tape[] = [
   } },
   { id: 'lullaby', title: 'Lullaby', shell: rgb(0xe0a8b4), label: rgb(0xfaeef0), stripe: [rgb(0xd87890), rgb(0xf0b8c4)], pic: (t, x, y, w, h) => {
     sky(t, x, y, w, h, rgb(0x2a2a6a), rgb(0x4a3a8a));
-    blob(t, x + w * 0.35, y + h * 0.45, h * 0.28, rgb(0xfff0b0)); blob(t, x + w * 0.42, y + h * 0.4, h * 0.25, rgb(0x2e2e70));
+    // [dialog10] a music box's star mobile, not a crescent
+    for (const [sx, sy, r] of [[0.28, 0.42, 3], [0.45, 0.62, 2.2], [0.18, 0.7, 1.6]] as const) { const cx = x + w * sx, cy = y + h * sy; for (let k = -r; k <= r; k++) { t.set(cx + k, cy, rgb(0xfff0b0)); t.set(cx, cy + k, rgb(0xfff0b0)); } t.set(cx, cy, rgb(0xffffff)); for (let j = 1; j < (cy - y); j += 2) t.set(cx, cy - r - j, rgb(0x8a86c0)); }
     for (const [nx, ny] of [[0.68, 0.35], [0.82, 0.55]]) { blob(t, x + w * nx, y + h * ny, 1.6, rgb(0xf0c0d0)); for (let j = 1; j < 6; j++) t.set(x + w * nx + 1.4, y + h * ny - j, rgb(0xf0c0d0)); }
   } },
   { id: 'night', title: 'Crickets', shell: rgb(0x26285a), label: rgb(0xe4e6f2), stripe: [rgb(0x4a4a9a), rgb(0x9a9ad8)], pic: (t, x, y, w, h) => {

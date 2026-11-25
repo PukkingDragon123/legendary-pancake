@@ -357,6 +357,7 @@ export class Overlay3D {
       if ((o as THREE.Light).isLight) { o.layers.enableAll(); return; }
       const m = o as THREE.Mesh;
       if (m.isMesh) m.layers.set(kindOf(m));
+      else if ((o as THREE.Line).isLine || (o as THREE.Points).isPoints || (o as THREE.Sprite).isSprite) o.layers.set(L_OVER);
       else o.layers.enableAll();
     });
   }

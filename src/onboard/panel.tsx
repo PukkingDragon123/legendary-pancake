@@ -363,7 +363,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
       const pl = s.plan;
       body = (<>
         <div class="qp-plan">
-          {[['candle', 'wind down', pl.windDown], ['moon', 'bedtime', pl.bed], ['sun', 'wake up', pl.wake]].map(([ic, l, v]) => (
+          {[['candle', 'wind down', pl.windDown], ['zzz', 'bedtime', pl.bed], ['sun', 'wake up', pl.wake]].map(([ic, l, v]) => (
             <div key={l}><Px name={ic} size={k * 14} class="px" /><b>{fmt(v, s.hour12).replace(/ ([AP]M)$/, '$1')}</b>{l}</div>
           ))}
         </div>
