@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { F } from './fonts.ts';
+import { alagardSafe, STACK } from '../ui/font.ts';
 import { crispText, fbm, hash, mix3, mul3, pixelTex, rgb, Tex, vnoise, type RGB } from './tex.ts';
 
 const cl = (v: number, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
@@ -392,13 +393,13 @@ function waterGlass(): Prop {
   const H = 0.11;
   const gp: [number, number][] = [[0, 0.006], [0.028, 0.006], [0.03, 0], [0.032, 0.002], [0.037, H - 0.002], [0.0375, H], [0.0355, H], [0.0335, 0.009], [0, 0.009]];
   // [dialog10] clear glass and clear water (they read as milk before): thin reflections, a cool tint
-  const glass = new THREE.MeshPhysicalMaterial({ color: 0xeaf6f6, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.13, envMapIntensity: 0.9, depthWrite: false, side: THREE.DoubleSide });
+  const glass = new THREE.MeshPhysicalMaterial({ color: 0xeaf6f6, roughness: 0.04, metalness: 0, transparent: true, opacity: 0.14, envMapIntensity: 0.8, depthWrite: false });
   const gm = mesh(turn(gp, 48).g, glass, false);
   gm.renderOrder = 4;
   const wp: [number, number][] = [[0, 0.009], [0.0334, 0.009], [0.0362, H * 0.78], [0, H * 0.78]];
   const wt = new Tex(32, 32);
-  wash(wt, 0, 0, 32, 32, (x, y) => (y < 4 ? rgb(0xc4ecf4) : rgb(0x5fb2d2)), { seed: 3, ang: Math.PI / 2, len: 6 });
-  const water = mesh(turn(wp, 40).g, new THREE.MeshStandardMaterial({ map: tex(wt), roughness: 0.04, transparent: true, opacity: 0.34, depthWrite: false, envMapIntensity: 0.7 }), false);
+  wash(wt, 0, 0, 32, 32, (x, y) => (y < 4 ? rgb(0xb8e6f2) : rgb(0x3a98c4)), { seed: 3, ang: Math.PI / 2, len: 6 });
+  const water = mesh(turn(wp, 40).g, new THREE.MeshStandardMaterial({ map: tex(wt), roughness: 0.04, transparent: true, opacity: 0.42, depthWrite: false, envMapIntensity: 0.5 }), false);
   water.renderOrder = 3;
   // two ice cubes and a lemon slice on the rim
   const ice = new THREE.MeshPhysicalMaterial({ color: 0xf4fbff, roughness: 0.15, transparent: true, opacity: 0.42, depthWrite: false });
@@ -924,28 +925,23 @@ export function celestial(kind: 'sun' | 'moon' | 'dial'): Prop {
   const facePaint = (x: number, y: number, sun: boolean): RGB => {
     const d = Math.hypot(x - C0, y - C0) / (T / 2);
     if (sun) return mix3(rgb(0xffe08a), gold, d) as RGB;
-    return mix3(rgb(0xf4f2ea), silver, d * 0.8) as RGB;
+    return mix3(rgb(0x3a58a8), rgb(0x16224e), d) as RGB; // [dialog10] a starry night, not a crescent
   };
   for (let y = 0; y < T; y++) for (let x = 0; x < T; x++) {
     const sunSide = kind === 'sun' || (kind === 'dial' && x < C0);
     t.set(x, y, kind === 'dial' && !sunSide ? tint(blue, (hash(x, y, 3) - 0.5) * 0.2) : facePaint(x, y, sunSide)); t.alpha(x, y, 1);
   }
-  if (kind !== 'sun') for (let i = 0; i < 14; i++) { const x = (kind === 'dial' ? C0 + 4 : 10) + hash(i, 1, 9) * (kind === 'dial' ? C0 - 12 : T - 20), y = 10 + hash(i, 2, 9) * (T - 20); if (kind === 'dial') { t.set(x, y, rgb(0xfff0b0)); t.set(x + 1, y, rgb(0xfff0b0)); } }
+  if (kind !== 'sun') for (let i = 0; i < 18; i++) { const x = (kind === 'dial' ? C0 + 4 : 10) + hash(i, 1, 9) * (kind === 'dial' ? C0 - 12 : T - 20), y = 10 + hash(i, 2, 9) * (T - 20); t.set(x, y, rgb(0xfff0b0)); t.set(x + 1, y, rgb(0xfff0b0)); }
+  const twinkle = (cx: number, cy2: number, r: number) => { for (let k = -r; k <= r; k++) { const c = rgb(Math.abs(k) < r * 0.4 ? 0xfff8d8 : 0xf0c860); t.set(cx + k, cy2, c); t.set(cx, cy2 + k, c); } t.set(cx + 1, cy2 + 1, rgb(0xfff0b0)); t.set(cx - 1, cy2 - 1, rgb(0xfff0b0)); };
   // a sleepy painted face
   const eye = (cx: number, cy2: number, c: RGB) => { for (let k = -5; k <= 5; k++) t.set(cx + k, cy2 + Math.round(Math.abs(k) * 0.35), c); };
   if (kind === 'sun') { eye(C0 - 18, C0 - 8, goldD); eye(C0 + 18, C0 - 8, goldD); for (let k = -10; k <= 10; k++) t.set(C0 + k, C0 + 18 - Math.round((1 - (k / 10) ** 2) * -5), goldD); blob(t, C0 - 28, C0 + 8, 6, rgb(0xf08a5a), 0.6); blob(t, C0 + 28, C0 + 8, 6, rgb(0xf08a5a), 0.6); }
-  if (kind === 'moon') { eye(C0 - 34, C0 - 6, rgb(0x6a6e88)); blob(t, C0 - 38, C0 + 14, 5, rgb(0xe8a0a8), 0.5); }
-  if (kind === 'dial') { eye(C0 - 24, C0 - 6, goldD); for (let k = -6; k <= 6; k++) t.set(C0 - 24 + k, C0 + 16 + Math.round((k / 6) ** 2 * -3), goldD); blob(t, C0 + 28, C0, 14, silver); blob(t, C0 + 34, C0 - 4, 12, blue); }
+  if (kind === 'moon') { eye(C0 - 18, C0 - 6, rgb(0xf0d8a0)); eye(C0 + 18, C0 - 6, rgb(0xf0d8a0)); blob(t, C0 - 28, C0 + 10, 6, rgb(0xd88aa8), 0.45); blob(t, C0 + 28, C0 + 10, 6, rgb(0xd88aa8), 0.45); twinkle(C0 + 30, C0 - 34, 6); twinkle(C0 - 36, C0 - 30, 4); }
+  if (kind === 'dial') { eye(C0 - 24, C0 - 6, goldD); for (let k = -6; k <= 6; k++) t.set(C0 - 24 + k, C0 + 16 + Math.round((k / 6) ** 2 * -3), goldD); twinkle(C0 + 28, C0 - 4, 8); twinkle(C0 + 18, C0 + 26, 4); }
   strokes(t, 0, 0, T, T, (x, y) => t.get(x, y), { seed: 12, ang: 0.8, len: 5, val: 0.12, hue: 0.6, n: 3000 });
   const faceM = std({ map: tex(t), metalness: 0.3, roughness: 0.4 });
   const sideM = std({ color: kind === 'moon' ? 0xb8bcc8 : 0xd8a040, metalness: 0.85, roughness: 0.3 });
-  let shape: THREE.Shape;
-  if (kind === 'moon') {
-    shape = new THREE.Shape(); shape.absarc(0, 0, R, 0.888, Math.PI * 2 - 0.888, false);
-    shape.absarc(R * 0.55, 0, R * 0.78, Math.PI * 2 - 1.4666, 1.4666, true);
-  } else {
-    shape = new THREE.Shape(); shape.absarc(0, 0, R * 0.72, 0, Math.PI * 2, false);
-  }
+  const shape = new THREE.Shape(); shape.absarc(0, 0, R * 0.72, 0, Math.PI * 2, false);
   const disc = mesh(slab(shape, 0.008, 0.002, { x0: -R, y0: -R, w: R * 2, h: R * 2 }, 30, 32), [faceM, sideM]);
   face.add(disc);
   // rays (the sun's half of the dial, all round for the sun)
@@ -966,9 +962,187 @@ export function celestial(kind: 'sun' | 'moon' | 'dial'): Prop {
   if (kind === 'moon') {
     const star = new THREE.Shape();
     for (let i = 0; i <= 10; i++) { const a = (i / 10) * Math.PI * 2 + Math.PI / 2, r = i % 2 ? 0.006 : 0.014; const x = Math.cos(a) * r, y = Math.sin(a) * r; if (i === 0) star.moveTo(x, y); else star.lineTo(x, y); }
-    for (const [x, y, s] of [[0.04, 0.035, 1], [0.052, -0.012, 0.7]]) { const m = mesh(slab(star, 0.004, 0.001, { x0: -0.014, y0: -0.014, w: 0.028, h: 0.028 }, 30, 2), [std({ color: 0xffe08a, metalness: 0.7, roughness: 0.3, emissive: 0x3a2a08 }), sideM]); m.position.set(x, y, 0); m.scale.setScalar(s); face.add(m); }
+    for (const [x, y, s] of [[0.036, 0.034, 1], [0.046, -0.014, 0.7], [-0.04, 0.026, 0.55]]) { const m = mesh(slab(star, 0.004, 0.001, { x0: -0.014, y0: -0.014, w: 0.028, h: 0.028 }, 30, 2), [std({ color: 0xffe08a, metalness: 0.7, roughness: 0.3, emissive: 0x3a2a08 }), sideM]); m.position.set(x, y, 0); m.scale.setScalar(s); face.add(m); }
   }
   return { obj: o, tick: (tt) => { face.rotation.y = Math.sin(tt * 0.8) * 0.12; } };
+}
+
+// ------------------------------------------------------------------ [dialog10] clocks: a twin-bell alarm clock and a pocket watch
+
+/** a clock dial painted smooth at high resolution: enamel, minute track, numerals in Alagard, a maker's name */
+function dialTex(o: { face: string; ink: string; accent: string; numerals: 'arabic' | 'roman'; maker: string; sub?: boolean }): THREE.CanvasTexture {
+  const N = 512, c = document.createElement('canvas');
+  c.width = c.height = N;
+  const g = c.getContext('2d')!, C = N / 2;
+  // enamel: a soft vignette and a faint warm sheen, as old enamel has
+  const gr = g.createRadialGradient(C * 0.8, C * 0.7, N * 0.05, C, C, C);
+  gr.addColorStop(0, o.face); gr.addColorStop(0.85, o.face); gr.addColorStop(1, 'rgba(120,96,60,1)');
+  g.fillStyle = gr; g.fillRect(0, 0, N, N);
+  for (let i = 0; i < 900; i++) { g.fillStyle = `rgba(${hash(i, 1) > 0.5 ? '255,255,255' : '120,90,50'},${0.02 + hash(i, 2) * 0.03})`; g.fillRect(hash(i, 3) * N, hash(i, 4) * N, 2 + hash(i, 5) * 3, 1 + hash(i, 6) * 2); }
+  g.translate(C, C);
+  g.strokeStyle = g.fillStyle = o.ink; g.lineCap = 'round';
+  // the minute track: a fine double ring and sixty ticks, heavier at the hours
+  g.lineWidth = 2.2; g.beginPath(); g.arc(0, 0, C * 0.9, 0, Math.PI * 2); g.stroke();
+  g.lineWidth = 1.4; g.beginPath(); g.arc(0, 0, C * 0.8, 0, Math.PI * 2); g.stroke();
+  for (let i = 0; i < 60; i++) {
+    const a = (i / 60) * Math.PI * 2, hr = i % 5 === 0, r0 = hr ? C * 0.78 : C * 0.82;
+    g.lineWidth = hr ? 7 : 2.4;
+    g.beginPath(); g.moveTo(Math.sin(a) * r0, -Math.cos(a) * r0); g.lineTo(Math.sin(a) * C * 0.89, -Math.cos(a) * C * 0.89); g.stroke();
+  }
+  const ROMAN = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  for (let h = 0; h < 12; h++) {
+    const a = (h / 12) * Math.PI * 2, r = C * (o.numerals === 'roman' ? 0.62 : 0.64), t = o.numerals === 'roman' ? ROMAN[h] : String(h || 12);
+    g.save(); g.translate(Math.sin(a) * r, -Math.cos(a) * r);
+    if (o.numerals === 'roman') g.rotate(a);
+    g.font = `${o.numerals === 'roman' ? 48 : 64}px ${STACK}`;
+    g.fillStyle = o.ink; g.fillText(alagardSafe(t), 0, 2);
+    g.restore();
+  }
+  g.font = `32px ${STACK}`; g.fillStyle = o.accent;
+  g.fillText(alagardSafe(o.maker), 0, -C * 0.3);
+  if (o.sub) {
+    // the small seconds
+    g.lineWidth = 1.6; g.strokeStyle = o.ink; g.beginPath(); g.arc(0, C * 0.36, C * 0.17, 0, Math.PI * 2); g.stroke();
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; g.lineWidth = 2; g.beginPath(); g.moveTo(Math.sin(a) * C * 0.13, C * 0.36 - Math.cos(a) * C * 0.13); g.lineTo(Math.sin(a) * C * 0.165, C * 0.36 - Math.cos(a) * C * 0.165); g.stroke(); }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return t;
+}
+/** a clock hand (spade tip, a round boss and a short tail), pointing up +y from its pivot, flat in z */
+function hand(len: number, w: number, m: THREE.Material, tail = 0.22): THREE.Mesh {
+  const s = new THREE.Shape();
+  s.moveTo(-w * 0.5, -len * tail);
+  s.lineTo(w * 0.5, -len * tail);
+  s.lineTo(w * 0.4, len * 0.7);
+  s.quadraticCurveTo(w * 1.4, len * 0.78, 0, len);
+  s.quadraticCurveTo(-w * 1.4, len * 0.78, -w * 0.4, len * 0.7);
+  s.closePath();
+  const boss = new THREE.Shape(); boss.absarc(0, 0, w * 1.3, 0, Math.PI * 2, false);
+  return new THREE.Mesh(new THREE.ExtrudeGeometry([s, boss], { depth: w * 0.25, bevelEnabled: false, curveSegments: 8 }), m);
+}
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes() + d.getSeconds() / 60; };
+
+/** A twin-bell alarm clock in mint enamel and brass, its hands at `at()` (minutes), ringing now and then. */
+export function alarmClock(at: () => number = nowMin): Prop {
+  const o = new THREE.Group(), body = new THREE.Group();
+  o.add(body);
+  const R = 0.05, D = 0.034, cy = R + 0.012;
+  const enamel = std({ color: 0x8fd0b6, roughness: 0.32, metalness: 0.05 });
+  const brass = std({ color: 0xd9a64a, metalness: 0.9, roughness: 0.28 });
+  const steel = std({ color: 0x2a2422, metalness: 0.6, roughness: 0.35 });
+  const bellM = std({ color: 0xe2b458, metalness: 0.95, roughness: 0.2, side: THREE.DoubleSide });
+  // the drum, its axis toward the viewer
+  const drum = mesh(turn([[0, -D / 2], [R - 0.003, -D / 2], [R, -D / 2 + 0.003], [R + 0.0015, 0], [R, D / 2 - 0.003], [R - 0.003, D / 2], [0, D / 2]], 48).g, enamel);
+  drum.rotation.x = Math.PI / 2;
+  // the bezel and the dial under a domed glass
+  const bezel = mesh(new THREE.TorusGeometry(R - 0.002, 0.0042, 12, 64), brass);
+  bezel.position.z = D / 2;
+  const face = mesh(new THREE.CircleGeometry(R - 0.004, 64), std({ map: dialTex({ face: '#fbf4e2', ink: '#241a16', accent: '#b0302c', numerals: 'arabic', maker: 'HOLLOW & CO.' }), roughness: 0.5 }));
+  face.position.z = D / 2 + 0.0006;
+  const glass = mesh(new THREE.SphereGeometry(R * 1.6, 48, 12, 0, Math.PI * 2, 0, 0.6), new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.03, transparent: true, opacity: 0.12, depthWrite: false, envMapIntensity: 1.2 }), false);
+  glass.rotation.x = Math.PI / 2; glass.position.z = D / 2 - R * 1.6 * Math.cos(0.6) + 0.004;
+  const hands = new THREE.Group();
+  hands.position.z = D / 2 + 0.0008;
+  const hr = hand(R * 0.5, 0.0042, steel), mn = hand(R * 0.74, 0.0034, steel), al = hand(R * 0.32, 0.0026, brass, 0.1);
+  hr.position.z = 0.0006; mn.position.z = 0.0018; al.position.z = 0.0001;
+  const cap = mesh(new THREE.CylinderGeometry(0.0026, 0.0026, 0.004, 16), brass); cap.rotation.x = Math.PI / 2; cap.position.z = 0.003;
+  hands.add(al, hr, mn, cap);
+  body.add(drum, bezel, face, hands, glass);
+  body.position.y = cy;
+  // bells on curved posts, the hammer between them, the carrying handle, two ball feet, the winding key behind
+  const bells: THREE.Object3D[] = [];
+  for (const s of [-1, 1]) {
+    const arm = new THREE.Group();
+    arm.position.set(0, cy, -0.004); arm.rotation.z = -s * 0.68;
+    const post = mesh(new THREE.CylinderGeometry(0.0022, 0.0022, R + 0.012, 8), brass); post.position.y = (R + 0.012) / 2;
+    const bell = mesh(new THREE.SphereGeometry(0.024, 32, 12, 0, Math.PI * 2, 0, Math.PI / 2), bellM);
+    bell.position.y = R + 0.012;
+    const knob = mesh(new THREE.SphereGeometry(0.004, 12, 8), brass); knob.position.y = R + 0.012 + 0.024;
+    arm.add(post, bell, knob);
+    o.add(arm); bells.push(bell);
+    const foot = mesh(new THREE.SphereGeometry(0.007, 16, 12), brass);
+    foot.position.set(s * Math.sin(0.62) * (R + 0.002), cy - Math.cos(0.62) * (R + 0.002), 0);
+    o.add(foot);
+    const leg = mesh(new THREE.CylinderGeometry(0.0028, 0.0028, 0.012, 8), brass);
+    leg.position.set(s * Math.sin(0.62) * (R - 0.004), cy - Math.cos(0.62) * (R - 0.004), 0); leg.rotation.z = s * 0.62;
+    o.add(leg);
+  }
+  const hammer = new THREE.Group();
+  hammer.position.set(0, cy + R, -0.006);
+  const rod = mesh(new THREE.CylinderGeometry(0.0015, 0.0015, 0.022, 8), steel); rod.position.y = 0.011;
+  const ball = mesh(new THREE.SphereGeometry(0.0045, 12, 8), brass); ball.position.y = 0.022;
+  hammer.add(rod, ball);
+  const handleArc = mesh(new THREE.TorusGeometry(0.03, 0.0026, 10, 32, Math.PI), brass);
+  handleArc.position.set(0, cy + R - 0.004, -0.014); handleArc.rotation.y = Math.PI / 2;
+  const key = mesh(new RoundedBoxGeometry(0.022, 0.014, 0.003, 2, 0.002), brass); key.position.set(0, cy, -D / 2 - 0.008);
+  o.add(hammer, handleArc, key);
+  const place = () => {
+    const m = ((at() % 720) + 720) % 720;
+    hr.rotation.z = -(m / 720) * Math.PI * 2; mn.rotation.z = -((m % 60) / 60) * Math.PI * 2;
+    al.rotation.z = -(((at() - 2) % 720) / 720) * Math.PI * 2;
+  };
+  place();
+  return {
+    obj: o,
+    tick: (t) => {
+      place();
+      // it rings for a moment every few seconds: the hammer drums, the bells shiver, the clock hops on its feet
+      const ring = t % 3.4 < 0.7;
+      hammer.rotation.z = ring ? Math.sin(t * 70) * 0.55 : 0;
+      body.position.x = ring ? Math.sin(t * 61) * 0.0012 : 0;
+      o.rotation.z = ring ? Math.sin(t * 47) * 0.02 : 0;
+      for (const b of bells) b.rotation.y = ring ? Math.sin(t * 90) * 0.1 : 0;
+    },
+  };
+}
+
+/** A gold pocket watch lying face up on its chain, keeping the real time. */
+export function pocketWatch(): Prop {
+  const o = new THREE.Group();
+  const R = 0.045, T = 0.014;
+  const gold = std({ color: 0xe3b25a, metalness: 0.95, roughness: 0.22 });
+  const goldD = std({ color: 0xb8862e, metalness: 0.95, roughness: 0.3 });
+  const blued = std({ color: 0x1c2a6a, metalness: 0.7, roughness: 0.25 });
+  // the case (a rounded drum lying flat), its bezel and the dial
+  const cas = mesh(turn([[0, 0], [R - 0.006, 0], [R - 0.001, 0.002], [R + 0.001, T * 0.45], [R - 0.001, T - 0.002], [R - 0.004, T], [0, T]], 64).g, gold);
+  const bez = mesh(new THREE.TorusGeometry(R - 0.004, 0.0024, 12, 64), goldD); bez.rotation.x = -Math.PI / 2; bez.position.y = T;
+  const dial = mesh(new THREE.CircleGeometry(R - 0.006, 64), std({ map: dialTex({ face: '#fbf6ea', ink: '#1b1712', accent: '#7a5a2a', numerals: 'roman', maker: 'HOLLOW', sub: true }), roughness: 0.4 }));
+  dial.rotation.x = -Math.PI / 2; dial.position.y = T + 0.0004;
+  const hands = new THREE.Group();
+  hands.rotation.x = -Math.PI / 2; hands.position.y = T + 0.0008;
+  const hr = hand(R * 0.42, 0.0034, blued), mn = hand(R * 0.66, 0.0026, blued);
+  const sec = new THREE.Group(); sec.position.set(0, -(R - 0.006) * 0.36, 0);
+  const sh = hand(R * 0.11, 0.0012, blued, 0.15); sec.add(sh);
+  hr.position.z = 0.0004; mn.position.z = 0.0012; sh.position.z = 0.0004;
+  hands.add(hr, mn, sec);
+  // the crown and its bow, then the chain curling away across the paper
+  const crown = mesh(new THREE.CylinderGeometry(0.0055, 0.0055, 0.006, 16), goldD); crown.rotation.x = Math.PI / 2; crown.position.set(0, T / 2, -R - 0.004);
+  const stem = mesh(new THREE.CylinderGeometry(0.0028, 0.0028, 0.006, 10), gold); stem.rotation.x = Math.PI / 2; stem.position.set(0, T / 2, -R);
+  const bow = mesh(new THREE.TorusGeometry(0.009, 0.0018, 10, 28), gold); bow.rotation.x = -Math.PI / 2; bow.position.set(0, T / 2, -R - 0.015);
+  o.add(cas, bez, dial, hands, crown, stem, bow);
+  const curve = new THREE.CatmullRomCurve3([V(0, T / 2, -R - 0.022), V(0.02, 0.003, -R - 0.04), V(0.05, 0.003, -R - 0.03), V(0.066, 0.003, -0.01), V(0.058, 0.003, 0.03)]);
+  // oval links, each turned a quarter to the last (one lies flat, the next stands), along the chain
+  const n = 26, linkG = new THREE.TorusGeometry(0.0032, 0.00085, 8, 18);
+  for (let i = 0; i < n; i++) {
+    const u = i / (n - 1), p = curve.getPointAt(u), tg = curve.getTangentAt(u);
+    const holder = new THREE.Group();
+    holder.position.copy(p);
+    holder.rotation.y = Math.atan2(-tg.z, tg.x);
+    const link = mesh(linkG, gold, false);
+    link.scale.set(1.45, 1, 1);
+    if (i % 2 === 0) link.rotation.x = Math.PI / 2;
+    link.position.y = i % 2 === 0 ? 0 : 0.0012;
+    holder.add(link);
+    o.add(holder);
+  }
+  const place = () => {
+    const d = new Date(), s = d.getSeconds() + d.getMilliseconds() / 1000, m = d.getMinutes() + s / 60, h = (d.getHours() % 12) + m / 60;
+    hr.rotation.z = -(h / 12) * Math.PI * 2; mn.rotation.z = -(m / 60) * Math.PI * 2; sh.rotation.z = -(Math.floor(s * 5) / 5 / 60) * Math.PI * 2;
+  };
+  place();
+  return { obj: o, tick: () => place() };
 }
 
 // ------------------------------------------------------------------ the phone

@@ -35,6 +35,7 @@ interface Actor { obj: THREE.Object3D; f: (dt: number, t: number) => void }
 interface Box { x: number; y: number; w: number; h: number }
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
+const sm01 = (x: number) => { const t = Math.max(0, Math.min(1, x)); return t * t * (3 - 2 * t); };
 /** the ink of every outline (near-black, a touch warm, as in the world) */
 const INK = { r: 0x14 / 255, g: 0x0c / 255, b: 0x10 / 255 };
 /** render layers: what goes in the inked pass, soft shadows under it, glows and steam over it */
@@ -48,7 +49,7 @@ function shadowMap() {
   c.width = c.height = n;
   const g = c.getContext('2d')!;
   const gr = g.createRadialGradient(n / 2, n / 2, 0, n / 2, n / 2, n / 2);
-  for (let i = 0; i <= 10; i++) { const d = i / 10, a = Math.max(0, 1 - d) ** 1.6 * (1 - 0.15 * d); gr.addColorStop(d, `rgba(28,14,6,${a.toFixed(3)})`); }
+  for (let i = 0; i <= 12; i++) { const d = i / 12, a = sm01(1 - d / 0.94) ** 1.5; gr.addColorStop(d, `rgba(28,14,6,${a.toFixed(3)})`); }
   g.fillStyle = gr; g.fillRect(0, 0, n, n);
   shadowTex = new THREE.CanvasTexture(c);
   shadowTex.colorSpace = THREE.SRGBColorSpace;
@@ -366,8 +367,10 @@ export class Overlay3D {
     const C = this.rtC!, N = this.rtN!;
     // the solid parts: their colour, then their normals and depth
     cam.layers.set(L_SOLID);
-    for (const t of [C, N]) { t.viewport.set(0, 0, b.w, b.h); t.scissor.set(0, 0, b.w, b.h); t.scissorTest = true; }
-    R.setRenderTarget(C); R.clear(true, true, false); R.render(this.scene, cam);
+    // clear a margin round the box too: the ink kernel reads a few texels past its edge
+    const cw = Math.min(this.rtW, b.w + 4), chh = Math.min(this.rtH, b.h + 4);
+    for (const t of [C, N]) { t.viewport.set(0, 0, b.w, b.h); t.scissor.set(0, 0, cw, chh); t.scissorTest = true; R.setRenderTarget(t); R.clear(true, true, false); t.scissor.set(0, 0, b.w, b.h); }
+    R.setRenderTarget(C); R.render(this.scene, cam);
     zRange.value.set(zr[0], zr[1]);
     this.swap.length = 0;
     this.scene.traverseVisible((o) => {
@@ -376,7 +379,7 @@ export class Overlay3D {
       this.swap.push({ m, mat: m.material });
       m.material = Array.isArray(m.material) ? m.material.map(ndOf) : ndOf(m.material);
     });
-    R.setRenderTarget(N); R.clear(true, true, false); R.render(this.scene, cam);
+    R.setRenderTarget(N); R.render(this.scene, cam);
     for (const s of this.swap) s.m.material = s.mat;
     this.swap.length = 0;
     // ink it onto the canvas
@@ -470,7 +473,7 @@ export class Overlay3D {
         s.shadow.visible = true;
         const lift = Math.max(0, s.sel) * 0.25;
         s.shadow.position.set(s.obj.position.x, s.home.y + 0.002 * s.r, s.obj.position.z);
-        s.shadow.scale.set(s.bw * 1.25 * pop * (1 - lift * 0.5), (s.bd + s.bw) * 0.62 * pop * (1 - lift * 0.5), 1);
+        s.shadow.scale.set(s.bw * 1.2 * pop * (1 - lift * 0.5), (s.bd + s.bw) * 0.5 * pop * (1 - lift * 0.5), 1);
         (s.shadow.material as THREE.MeshBasicMaterial).opacity = 0.5 * (1 - lift);
       }
       this.sortLayers(s.shadow ? [s.obj, s.shadow] : [s.obj]);

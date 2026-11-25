@@ -11,7 +11,7 @@ import type { OwlLook } from '../owl/model.ts';
 import { PhoneScreen } from '../ui/phone/phone.tsx';
 import type { OfficeMats } from './mats.ts';
 import { boxOf, type SlotOpts } from './overlay3d.ts';
-import { bookStack, candle, cassette, celestial, deck, DRINKS, microphone, phoneBed, pillow, smartphone, stile, TAPES, type Deck, type Prop } from './props.ts';
+import { alarmClock, bookStack, candle, pocketWatch, cassette, celestial, deck, DRINKS, microphone, phoneBed, pillow, smartphone, stile, TAPES, type Deck, type Prop } from './props.ts';
 import { WallClock } from './wallclock.ts';
 import { nameplate } from './desk.ts';
 
@@ -19,11 +19,9 @@ import { nameplate } from './desk.ts';
 const NODES: Record<string, { node: string; o?: SlotOpts }> = {
   'goals:sleep_better': { node: 'daybed', o: { pitch: 0.42, yaw: 0.5 } },
   'goals:fall_asleep': { node: 'sheep', o: { pitch: 0.22, yaw: 0.9 } },
-  'goals:wake_refreshed': { node: 'alarm', o: { pitch: 0.2, yaw: 0.25, sway: 0.3 } },
-  'goals:steady_routine': { node: 'watch', o: { pitch: 0.55, yaw: 0.1, sway: 0.3 } },
-  remind: { node: 'alarm', o: { pitch: 0.2, yaw: 0.25, sway: 0.25, shadow: true } },
 };
 const PACK = 'interview/cards.glb';
+const toMinutes = (hhmm: string) => { const [h, m] = hhmm.split(':').map(Number); return (h || 0) * 60 + (m || 0); };
 
 /** largest side one unit, standing on its base at the origin, wrapped in a group */
 export function norm(src: THREE.Object3D, k0 = 1): THREE.Group {
@@ -173,6 +171,9 @@ export class CardModels {
     if (key === 'when:morning' || key === 'ampm:am' || key === 'chrono:lark') return fromProp(celestial('sun'), { pitch: 0.1, yaw: 0, sway: 0});
     if (key === 'when:late' || key === 'ampm:pm' || key === 'chrono:owl') return fromProp(celestial('moon'), { pitch: 0.1, yaw: 0, sway: 0});
     if (key === 'chrono:between') return fromProp(celestial('dial'), { pitch: 0.1, yaw: 0, sway: 0 });
+    // [dialog10] modelled clocks with painted dials (the borrowed ones had blank faces): the alarm shows the wake time
+    if (key === 'goals:wake_refreshed' || key === 'remind') return fromProp(alarmClock(() => toMinutes(this.wake)), { pitch: 0.16, yaw: 0.3, sway: 0.28, ...(key === 'remind' ? { shadow: true } : {}) });
+    if (key === 'goals:steady_routine') return fromProp(pocketWatch(), { pitch: 0.78, yaw: 0.2, sway: 0.25 });
     if (key === 'relax:reading') return fromProp(bookStack(), { pitch: 0.45, yaw: 0.4, sway: 0.25 });
     if (key === 'relax:breathing') return fromProp(candle(), { pitch: 0.25, yaw: 0, sway: 0.1 });
     if (key === 'goals:track_sounds' || key === 'mic:yes') return fromProp(microphone(false), { pitch: 0.15, yaw: 0.3, sway: 0.3 });
