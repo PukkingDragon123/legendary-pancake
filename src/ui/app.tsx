@@ -25,6 +25,7 @@ import { Shop } from './shop/shop.tsx';
 import { Intro } from './intro.tsx';
 import { TalkText } from './talkview.tsx'; // [dialog10]
 import type { TalkView } from './talk.ts';
+import { Box3, Vector3 } from 'three';
 
 // [chrome] Tonight's ticket: a punched paper ticket with a stub, stamped with the place Pip explores.
 function Ticket() {
@@ -64,21 +65,31 @@ function Bubble() {
   const view = useRef<TalkView | null>(null);
   const b = bubble.value;
   const [up, setUp] = useState(false);
+  /** the free width left of the tool buttons (CSS px) */
+  const [room, setRoom] = useState(innerWidth);
   useEffect(() => { if (b) setUp(true); }, [b?.id]);
   useEffect(() => {
     if (!up) return undefined;
-    let raf = 0, x = NaN, y = NaN, last = performance.now(), frame = 0, right = innerWidth;
+    let raf = 0, x = NaN, y = NaN, last = performance.now(), frame = 0, right = innerWidth, lift = 44;
+    const box = new Box3(), top = new Vector3();
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const sc = sceneRef.current, el = ref.current, v = view.current;
       if (!sc || !el) return;
-      // keep clear of the tool buttons down the right-hand side
-      if (frame++ % 30 === 0) { const t = document.querySelector('.tools')?.getBoundingClientRect(); right = t && t.width > 0 ? Math.min(innerWidth, t.left - 12) : innerWidth; }
       const p = sc.screenOf(sc.owl.headWorld);
+      if (frame++ % 20 === 0) {
+        // keep clear of the tool buttons down the right-hand side (a column on phones, a block on narrow ones)
+        const t = document.querySelector('.hh-tools:not(.away)')?.getBoundingClientRect();
+        right = t && t.width > 0 && t.left > innerWidth * 0.4 ? Math.min(innerWidth, t.left - 10) : innerWidth;
+        setRoom((r) => (Math.abs(r - right) > 4 ? right : r));
+        // and above the top of Pip, hat and all
+        box.setFromObject(sc.owl.node);
+        if (!box.isEmpty()) { top.set((box.min.x + box.max.x) / 2, box.max.y, (box.min.z + box.max.z) / 2); lift = Math.max(24, Math.min(160, p.y - sc.screenOf(top).y + 4)); }
+      }
       const w = v ? v.cssW : 240, h = v ? v.cssH : 90;
-      const tx = Math.max(w / 2 + 2, Math.min(right - w / 2, p.x)), ty = Math.max(h + 54, p.y - 44); // above his hat, too
+      const tx = Math.max(w / 2 + 2, Math.min(right - w / 2, p.x)), ty = Math.max(h + 54, p.y - lift);
       if (Number.isNaN(x)) { x = tx; y = ty; }
       const k = 1 - Math.exp(-dt * 9), nx = x + (tx - x) * k, ny = y + (ty - y) * k;
       v?.drift(-(nx - x) * 0.2, -(ny - y) * 0.2);
@@ -100,7 +111,7 @@ function Bubble() {
   return (
     <div class="hh-bubble hh-float" ref={ref}>
       <TalkText text={b ? b.text : null} id={b?.id} who={save.value.name} viewRef={view}
-        opts={{ size: phone ? 18 : 22, maxWidth: Math.min(innerWidth - 100, phone ? 290 : 400), anchor: 'bottom', voice: 'pip', scrim: 0.34, tag: true }}
+        opts={{ size: phone ? 18 : 22, maxWidth: Math.round(Math.max(170, Math.min(room - 6, phone ? 290 : 400))), anchor: 'bottom', voice: 'pip', scrim: 0.34, tag: true }}
         onNext={() => { if (bubble.value?.id === b?.id) bubble.value = null; }} onIdle={() => { if (!bubble.value) setUp(false); }} />
     </div>
   );
