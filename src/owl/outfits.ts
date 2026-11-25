@@ -608,8 +608,9 @@ export function dressModel(model: OwlModel, look: OwlLook): Dressing {
       if (dead || !g) return;
       const root = cloneSkinned(g.scene);
       root.name = 'piece:' + id;
-      fluffPiece(root);
       anchor.add(root);
+      if (pm.anchor === 'anchor_head') clearEyes(model, anchor, root, id); // [anime6] a hat never hides the eyes
+      fluffPiece(root);
       added.push(root);
     };
     const have = loadedPieces.get(id);
@@ -621,6 +622,73 @@ export function dressModel(model: OwlModel, look: OwlLook): Dressing {
     ready: Promise.all(jobs).then(() => undefined),
     dispose() { dead = true; for (const o of added) { dropFur(o); o.removeFromParent(); } },
   };
+}
+
+// [anime6] Hats sit clear of the eyes. A head piece is modelled round the tawny's head anchor; on some heads (and with
+// the bigger anime eyes, brows and blush) its brim came down over the eyes. Before a piece is fluffed, the front of it
+// is measured against the eyes in the anchor's frame (y up, +z forward) and the hat is tipped back about the back of its
+// band (and lifted if that isn't enough), so the brim and its fluff clear the eyes and brows, with room for the camera
+// looking down a little at Pip. Per owl and piece, cached.
+const fits = new Map<string, { tilt: number; lift: number; pivot: [number, number] }>();
+function clearEyes(model: OwlModel, anchor: THREE.Object3D, root: THREE.Object3D, id: string) {
+  const key = model.id + ':' + id;
+  let fit = fits.get(key);
+  if (!fit) {
+    fit = { tilt: 0, lift: 0, pivot: [0, 0] };
+    fits.set(key, fit);
+    const [el, er] = model.eyeMeshes;
+    if (!el?.geometry.getAttribute('position') || !er) return;
+    anchor.updateWorldMatrix(true, false);
+    root.updateWorldMatrix(false, true);
+    el.updateWorldMatrix(true, false); er.updateWorldMatrix(true, false);
+    const inv = anchor.matrixWorld.clone().invert();
+    const L = el.getWorldPosition(new THREE.Vector3()).applyMatrix4(inv), Rr = er.getWorldPosition(new THREE.Vector3()).applyMatrix4(inv);
+    // the eye's radius: its decal patch is 2.1 eye radii each way
+    el.geometry.computeBoundingBox();
+    const bb = el.geometry.boundingBox!, up = new THREE.Vector3(0, (bb.max.y - bb.min.y) / 2, 0).applyMatrix4(el.matrixWorld).applyMatrix4(inv);
+    const ctr = new THREE.Vector3(0, 0, 0).applyMatrix4(el.matrixWorld).applyMatrix4(inv);
+    const re = Math.max(0.1, up.distanceTo(ctr) / 2.1);
+    const eyeY = Math.max(L.y, Rr.y), eyeZ = Math.min(L.z, Rr.z);
+    const x0 = Math.min(L.x, Rr.x) - re * 1.5, x1 = Math.max(L.x, Rr.x) + re * 1.5;
+    // clear of the brows (1.6 eye radii up), plus the fluff on a brim, plus what a camera a little above sees
+    const top = eyeY + re * 1.6 + re * 0.35, slope = Math.tan(0.28);
+    const pts: THREE.Vector3[] = [];
+    let zBack = Infinity, yBack = Infinity;
+    root.traverse((o) => {
+      const m = o as THREE.Mesh;
+      const pos = m.isMesh ? m.geometry.getAttribute('position') : null;
+      if (!pos) return;
+      const M = inv.clone().multiply(m.matrixWorld), v = new THREE.Vector3();
+      const step = Math.max(1, Math.floor(pos.count / 4000));
+      for (let i = 0; i < pos.count; i += step) {
+        v.fromBufferAttribute(pos, i).applyMatrix4(M);
+        if (v.z < zBack) { zBack = v.z; yBack = v.y; }
+        if (v.x > x0 && v.x < x1 && v.z > eyeZ - re * 2.5) pts.push(v.clone());
+      }
+    });
+    if (!pts.length || !Number.isFinite(zBack)) return;
+    const need = (tilt: number, lift: number) => {
+      let worst = 0;
+      const c = Math.cos(tilt), sn = Math.sin(tilt);
+      for (const p of pts) {
+        const dy = p.y - yBack, dz = p.z - zBack;
+        const y = yBack + dy * c + dz * sn + lift, z = zBack - dy * sn + dz * c;
+        worst = Math.max(worst, top + Math.max(0, z - eyeZ) * slope - y);
+      }
+      return worst;
+    };
+    if (need(0, 0) <= 0) return;
+    // tip it back first (up to about 16 degrees), then lift whatever is still in the way
+    let tilt = 0;
+    for (let a = 0.02; a <= 0.28 && need(tilt, 0) > 0; a += 0.02) tilt = a;
+    fit.tilt = tilt; fit.pivot = [yBack, zBack]; fit.lift = Math.max(0, need(tilt, 0));
+  }
+  if (!fit.tilt && !fit.lift) return;
+  // rotate about the back of the band (a pivot in the anchor's frame), then lift
+  const [py, pz] = fit.pivot, c = Math.cos(fit.tilt), sn = Math.sin(fit.tilt);
+  root.rotation.x -= fit.tilt;
+  root.position.y += py - (py * c + pz * sn) + fit.lift;
+  root.position.z += pz - (-py * sn + pz * c);
 }
 
 /** A piece on its own (shop stands, icons): the GLB at the tawny's size, in toy millimetres; null when not remade yet. */
