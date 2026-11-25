@@ -35,7 +35,15 @@ const OWL_H = 0.19, PERCH_IN = 0.1, PERCH_OUT = 0.305;
 const PEND = { y: -0.035, z: 0.05, len: 0.5 };
 const CHAIN = { z: 0.13, top: -0.055, wTop: -0.19, wBot: -0.64 };
 const WEIGHTS = [{ x: -0.155, ring: -0.232 }, { x: 0.155, ring: 0.232 }];
-const TAG = { w: 0.36, h: 0.26, t: 0.014, x: 0.5, hang: 0.24 };
+const TAG = { w: 0.4, h: 0.29, t: 0.014 };
+const TAG_HOLE_T = TAG.h / 2 - 0.028, TAG_HOLE_B = -TAG.h / 2 + 0.026, TAG_Z = CD * 0.55;
+/** the text on a tag: two lines of Alagard, two texels to a font pixel */
+const TAG_DECAL = { w: 0.38, h: 0.2, px: [164, 86] as [number, number] };
+/** where the tags hang: a phone stacks them in pairs under the case, a wide screen hangs them two by two beside it */
+const TAG_LAY = {
+  top: { k: 1, x: 0.53, hooks: [0.06], hang: 0.24, hang2: 0.09 },
+  side: { k: 1.55, x: 0.86, hooks: [0.7, 0.14], hang: 0.06, hang2: 0.06 },
+};
 const SHELF = { y: -1.24, w: 1.52, h: 0.07, d: 0.28 };
 const HOUSE = { w: 0.15, d: 0.12, gable: 0.055, z: 0.09, gap: 0.2 };
 const DADO = -1.47;
@@ -52,7 +60,7 @@ export interface CuckooPrefs { finish: string; mute: boolean; wound: [number, nu
 
 interface Shot { target: THREE.Vector3; yaw: number; pitch: number; w: number; h: number; cx: number; cy: number }
 interface Lamp { light: THREE.PointLight; flame: THREE.Mesh; halo: THREE.Sprite; phase: number }
-interface Tag { id: string; pivot: THREE.Group; body: THREE.Mesh; decal: THREE.Mesh; c: HTMLCanvasElement; tex: THREE.CanvasTexture; phase: number; label: string; value: string }
+interface Tag { id: string; pivot: THREE.Group; body: THREE.Mesh; decal: THREE.Mesh; twine: THREE.Mesh; c: HTMLCanvasElement; tex: THREE.CanvasTexture; phase: number; label: string; value: string; side: number; row: number }
 interface House { group: THREE.Group; data: NightHouse | null; h: number; bounce: number }
 
 const v3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
@@ -98,6 +106,7 @@ export class CuckooStage implements Stage {
   private drop: [number, number] = [0, 0];
   private wind: [number, number] = [0, 0];
   private tags: Tag[] = [];
+  private brackets: { top: THREE.Mesh; side: THREE.Mesh } = {} as never;
   private houses: House[] = [];
   private houseAtlas: { c: HTMLCanvasElement; glow: HTMLCanvasElement; tex: THREE.CanvasTexture; glowTex: THREE.CanvasTexture } | null = null;
   private shelfLabels: { c: HTMLCanvasElement; tex: THREE.CanvasTexture } | null = null;
@@ -110,7 +119,6 @@ export class CuckooStage implements Stage {
   private moon = new THREE.DirectionalLight(0x8ea6e8, 0);
   private pmrem: THREE.PMREMGenerator | null = null;
   private env: THREE.Texture | null = null;
-  private post: { setPixel(p: number | null): void } | null = null;
   private night = 0;
   private nightFn: (() => number) | null = null;
   private time = 0;
@@ -162,7 +170,7 @@ export class CuckooStage implements Stage {
     S.add(this.perch);
     this.perch.visible = false;
     this.layout = innerWidth >= innerHeight * 1.05 && innerWidth >= 640 ? 'side' : 'top';
-    this.placeBoards();
+    this.placeBoards(); this.placeLamps(); this.placeTags();
     this.cur = this.shot('home');
     this.from = this.copy(this.cur); this.to = this.copy(this.cur);
     this.setDrops(true);
@@ -184,7 +192,7 @@ export class CuckooStage implements Stage {
   private copy(s: Shot): Shot { return { ...s, target: s.target.clone() }; }
 
   /** Draw through the app's renderer (an environment map for brass and enamel), and follow the world's day and night. */
-  attach(renderer: THREE.WebGLRenderer, o: { night?: () => number; post?: { setPixel(p: number | null): void } } = {}) {
+  attach(renderer: THREE.WebGLRenderer, o: { night?: () => number } = {}) {
     if (!this.pmrem) {
       this.pmrem = new THREE.PMREMGenerator(renderer);
       const env = new RoomEnvironment();
@@ -194,7 +202,6 @@ export class CuckooStage implements Stage {
       env.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) { m.geometry.dispose(); (m.material as THREE.Material).dispose(); } });
     }
     this.nightFn = o.night ?? null;
-    this.post = o.post ?? null;
     this.applyLight();
     this.resize(innerWidth, innerHeight);
   }
@@ -291,7 +298,7 @@ export class CuckooStage implements Stage {
   private buildWall() {
     const S = this.scene;
     const paper = new THREE.PlaneGeometry(9, 5.2);
-    K.scaleUV(paper, 9 / 0.24, 5.2 / 0.32);
+    K.scaleUV(paper, 9 / 0.2, 5.2 / 0.2);
     const wp = this.mesh(paper, this.M.wallpaper, false, true);
     wp.position.set(0, DADO + 2.6, 0);
     S.add(wp);
@@ -592,54 +599,56 @@ export class CuckooStage implements Stage {
 
   private buildTags() {
     const ids: [string, number, number][] = [['week', -1, 0], ['avg', -1, 1], ['streak', 1, 0], ['bed', 1, 1]];
-    const shape = new THREE.Shape(), w = TAG.w, h = TAG.h, c = 0.055;
+    const shape = new THREE.Shape(), w = TAG.w, h = TAG.h, c = 0.06;
     shape.moveTo(-w / 2, -h / 2); shape.lineTo(w / 2, -h / 2); shape.lineTo(w / 2, h / 2 - c); shape.lineTo(w / 2 - c, h / 2); shape.lineTo(-w / 2 + c, h / 2); shape.lineTo(-w / 2, h / 2 - c); shape.closePath();
-    const HOLE_T = h / 2 - 0.028, HOLE_B = -h / 2 + 0.026;
-    const top = shape.clone(); top.holes = [K.circlePath(0.011, 0, HOLE_T, 10)];
-    const both = shape.clone(); both.holes = [K.circlePath(0.011, 0, HOLE_T, 10), K.circlePath(0.011, 0, HOLE_B, 10)];
+    const top = shape.clone(); top.holes = [K.circlePath(0.011, 0, TAG_HOLE_T, 10)];
+    const both = shape.clone(); both.holes = [K.circlePath(0.011, 0, TAG_HOLE_T, 10), K.circlePath(0.011, 0, TAG_HOLE_B, 10)];
     const geoTop = this.keepG(K.carveShade(K.prep(K.scaleUV(K.extrude(top, TAG.t, 0.004, 2), 3, 1.5)), { lo: 0.5 }));
     const geoBoth = this.keepG(K.carveShade(K.prep(K.scaleUV(K.extrude(both, TAG.t, 0.004, 2), 3, 1.5)), { lo: 0.5 }));
-    const decalW = w - 0.02, decalH = 0.16;
-    const decalG = this.keepG(new THREE.PlaneGeometry(decalW, decalH));
-    const twine = (len: number) => { const g = new THREE.CylinderGeometry(0.0026, 0.0026, len, 5); g.translate(0, -len / 2, 0); return this.mesh(g, this.M.twine, true, false); };
-    // brass brackets from the case sides: a rod with a ring at the end
-    const HOOK = { y: 0.06, z: CD * 0.55 };
-    const br: Part[] = [];
-    for (const sx of [-1, 1]) {
-      br.push({ geo: K.turned([[0.0005, 0], [0.016, 0], [0.016, 0.004], [0.006, 0.008], [0.0045, TAG.x - CW / 2 + 0.002], [0.0005, TAG.x - CW / 2 + 0.004]], 8, 10), m: mtx(sx * CW / 2, HOOK.y, HOOK.z, 0, 0, -sx * Math.PI / 2) });
-      br.push({ geo: new THREE.TorusGeometry(0.011, 0.0038, 6, 12), m: mtx(sx * TAG.x, HOOK.y - 0.011, HOOK.z, 0, Math.PI / 2, 0) });
-    }
-    this.scene.add(this.mesh(K.merge(br), this.M.brass));
-    const hangA = TAG.hang, hangB = 0.09;
-    const byId: Record<string, Tag> = {};
+    const decalG = this.keepG(new THREE.PlaneGeometry(TAG_DECAL.w, TAG_DECAL.h));
+    const twineG = this.keepG(new THREE.CylinderGeometry(0.0026, 0.0026, 1, 5).translate(0, -0.5, 0));
+    // brass brackets from the case sides: a rod with a ring at the end. Two under-the-case arms on a phone, four
+    // long arms beside the case on a wide screen.
+    const bracket = (y: number, reach: number): Part[] => [-1, 1].flatMap((sx) => [
+      { geo: K.turned([[0.0005, 0], [0.016, 0], [0.016, 0.004], [0.006, 0.008], [0.0045, reach - CW / 2 + 0.002], [0.0005, reach - CW / 2 + 0.004]], 8, 10), m: mtx(sx * CW / 2, y, TAG_Z, 0, 0, -sx * Math.PI / 2) },
+      { geo: new THREE.TorusGeometry(0.011, 0.0038, 6, 12), m: mtx(sx * reach, y - 0.011, TAG_Z, 0, Math.PI / 2, 0) },
+    ]);
+    this.brackets.top = this.mesh(K.merge(bracket(TAG_LAY.top.hooks[0], TAG_LAY.top.x)), this.M.brass);
+    this.brackets.side = this.mesh(K.merge([...bracket(TAG_LAY.side.hooks[0], TAG_LAY.side.x), ...bracket(TAG_LAY.side.hooks[1], TAG_LAY.side.x)]), this.M.brass);
+    this.scene.add(this.brackets.top, this.brackets.side);
     for (const [id, side, row] of ids) {
-      const [cv] = K.canvas(Math.round(decalW * DECAL_PPU), Math.round(decalH * DECAL_PPU));
+      const [cv] = K.canvas(TAG_DECAL.px[0], TAG_DECAL.px[1]);
       const tex = this.keep(K.ctex(cv));
       const mat = new THREE.MeshStandardMaterial({ map: tex, alphaTest: 0.5, roughness: 0.7, polygonOffset: true, polygonOffsetFactor: -2 });
       this.M['tag_' + id] = mat;
-      const hang = row === 0 ? hangA : hangB;
       const body = this.mesh(row === 0 ? geoBoth : geoTop, this.M.linden);
-      body.position.set(0, -hang - HOLE_T, -TAG.t / 2);
       const decal = new THREE.Mesh(decalG, mat);
-      decal.position.set(0, body.position.y - 0.01, TAG.t / 2 + 0.0008);
       decal.receiveShadow = true;
+      const twine = this.mesh(twineG, this.M.twine, true, false);
       const pivot = new THREE.Group();
-      pivot.add(body, decal, twine(hang + 0.006));
+      pivot.add(body, decal, twine);
+      this.scene.add(pivot);
       this.pick(body, 'tag:' + id); this.pick(decal, 'tag:' + id);
-      const t: Tag = { id, pivot, body, decal, c: cv, tex, phase: side * 1.7 + row * 2.3, label: '', value: '' };
-      this.tags.push(t);
-      byId[id] = t;
-      if (row === 0) { pivot.position.set(side * TAG.x, HOOK.y - 0.022, HOOK.z); this.scene.add(pivot); }
-    }
-    // the second tag on each side hangs from the first one's bottom hole
-    for (const [a, b] of [['week', 'avg'], ['streak', 'bed']]) {
-      const A = byId[a], B = byId[b];
-      B.pivot.position.set(0, A.body.position.y + HOLE_B, 0);
-      A.pivot.add(B.pivot);
+      this.tags.push({ id, pivot, body, decal, twine, c: cv, tex, phase: side * 1.7 + row * 2.3, label: '', value: '', side, row });
     }
   }
 
-  /** Paint the four number tags (label above, the number big below). */
+  /** Hang the tags for the layout: stacked in pairs under the case (phone), or two by two beside it (wide). */
+  private placeTags() {
+    const L = TAG_LAY[this.layout];
+    this.brackets.top.visible = this.layout === 'top';
+    this.brackets.side.visible = this.layout === 'side';
+    for (const t of this.tags) {
+      const k = L.k, hang = (t.row === 0 || this.layout === 'side' ? L.hang : L.hang2) / k;
+      t.pivot.scale.setScalar(k);
+      t.twine.scale.set(1, hang + 0.006, 1);
+      t.body.position.set(0, -hang - TAG_HOLE_T, -TAG.t / 2);
+      t.decal.position.set(0, t.body.position.y - 0.004, TAG.t / 2 + 0.0008);
+      t.pivot.position.set(t.side * L.x, (this.layout === 'side' ? L.hooks[t.row] : L.hooks[0]) - 0.022, TAG_Z);
+    }
+  }
+
+  /** Paint the four number tags (label above, the number below), two texels to a font pixel. */
   setStats(list: StatTag[]) {
     for (const s of list) {
       const t = this.tags.find((x) => x.id === s.id);
@@ -647,11 +656,11 @@ export class CuckooStage implements Stage {
       t.label = s.label; t.value = s.value;
       const c = t.c, g = c.getContext('2d')!;
       g.clearRect(0, 0, c.width, c.height);
-      K.pxText(g, s.label, c.width / 2, 9, 16, '#8c2c1e', { maxW: c.width - 2 });
+      K.pxText(g, s.label, c.width / 2, 18, 32, '#8c2c1e', { maxW: c.width - 4 });
       // a burnt rule under the label
       g.fillStyle = '#5a3a22';
-      for (let x = 10; x < c.width - 10; x += 2) g.fillRect(x, 19, 1, 1);
-      K.pxText(g, s.value, c.width / 2, 29, 16, '#26140b', { maxW: c.width - 2 });
+      for (let x = 16; x < c.width - 16; x += 4) g.fillRect(x, 38, 2, 2);
+      K.pxText(g, s.value, c.width / 2, 60, 32, '#26140b', { maxW: c.width - 4 });
       t.tex.needsUpdate = true;
     }
   }
@@ -842,6 +851,7 @@ export class CuckooStage implements Stage {
   private hangOn(G: THREE.Group, bw: number, bh: number) {
     const nail = this.mesh(K.prep(K.turned([[0.0005, 0], [0.004, 0], [0.004, 0.03], [0.009, 0.032], [0.009, 0.036], [0.0005, 0.037]], 8, 20)).rotateX(Math.PI / 2), this.M.iron);
     nail.position.set(0, bh / 2 + 0.11, -0.006);
+    nail.userData.stays = true;
     G.add(nail);
     for (const sx of [-1, 1]) {
       const a = v3(sx * (bw / 2 - 0.03), bh / 2 - 0.01, 0.008), b = v3(0, bh / 2 + 0.115, 0.024);
@@ -857,11 +867,18 @@ export class CuckooStage implements Stage {
     G.add(sh);
   }
 
+  /** Take the clipboard or the calendar off its nail while its editor is open (null puts it back). */
+  lift(id: 'routine' | 'calendar' | null) {
+    for (const k of ['routine', 'calendar'] as const) for (const c of this.boards[k].children) if (!c.userData.stays) c.visible = k !== id;
+  }
+  private placeLamps() {
+    for (const l of this.lamps) { const g = l.light.parent!; g.position.x = Math.sign(g.position.x) * (this.layout === 'side' ? 1.4 : 0.98); }
+  }
   private placeBoards() {
     const side = this.layout === 'side';
     // on a wide screen they hang either side of the clock; on a phone, below the shelf (their tops peek in)
-    this.boards.routine.position.set(side ? -1.42 : -0.34, side ? 0.12 : -1.95, 0.012);
-    this.boards.calendar.position.set(side ? 1.42 : 0.34, side ? 0.12 : -1.95, 0.012);
+    this.boards.routine.position.set(side ? -1.98 : -0.34, side ? 0.12 : -1.95, 0.012);
+    this.boards.calendar.position.set(side ? 1.98 : 0.34, side ? 0.12 : -1.95, 0.012);
     this.boards.routine.rotation.z = side ? 0.015 : 0.02;
     this.boards.calendar.rotation.z = side ? -0.02 : -0.015;
   }
@@ -970,7 +987,7 @@ export class CuckooStage implements Stage {
   hello() { this.trip('hello', 2, null); }
   /** Open on the little door: the owl pops out, cuckoos and waves, then the camera pulls back to the whole clock. */
   intro() {
-    this.focus('door', true);
+    this.focus('intro', true);
     this.introBack = true;
     setTimeout(() => { if (!this.dead) this.hello(); }, 900);
   }
@@ -1008,9 +1025,9 @@ export class CuckooStage implements Stage {
     this.fx.emit({ x: p.x + (i % 2 ? 0.05 : -0.05), y: p.y + 0.02, z: p.z + 0.06, vx: (i % 2 ? 0.06 : -0.06), vy: 0.18, life: 1.1, frame: SPR.note, color: 0xf1d39a, size: 0.05, flutter: 0.1, fadeIn: 0.05, fadeOut: 0.4, add: true });
   }
 
-  private stepOwl(dt: number) {
+  private stepOwl(dt: number, real: number) {
     const s = this.seq;
-    s.t += dt;
+    s.t += real;
     const D = { open: 0.32, out: 0.45, back: 0.4, close: 0.28 };
     switch (s.phase) {
       case 'open': this.doorK = backOut(Math.min(1, s.t / D.open)); if (s.t >= D.open) { s.phase = 'out'; s.t = 0; this.owl.play('flap'); } break;
@@ -1020,7 +1037,7 @@ export class CuckooStage implements Stage {
         if (s.done < s.calls && s.t >= 0.15 + s.done * gap) { this.call(s.done); s.done++; }
         const end = 0.15 + s.calls * gap + (s.mode === 'hello' ? 2.6 : s.mode === 'present' ? 2.4 : 0.5);
         if (s.mode === 'hello' && s.done === s.calls && s.t > 0.15 + s.calls * gap + 0.4 && !s.look) { s.look = this.tags[0].pivot.getWorldPosition(v3(0, 0, 0)).add(v3(0, -0.2, 0)); }
-        if (this.introBack && s.done === s.calls && s.t > 0.15 + s.calls * gap + 0.1) { this.introBack = false; if (this.shotName === 'door') this.focus('home'); }
+        if (this.introBack && s.done === s.calls && s.t > 0.15 + s.calls * gap + 0.1) { this.introBack = false; if (this.shotName === 'intro') this.focus('home'); }
         if (s.t >= end) { s.phase = 'back'; s.t = 0; }
         break;
       }
@@ -1030,7 +1047,7 @@ export class CuckooStage implements Stage {
     this.doorPivot.rotation.y = -this.doorK * 1.9;
     this.perch.position.z = THREE.MathUtils.lerp(PERCH_IN, PERCH_OUT, this.outK);
     this.perch.visible = this.doorK > 0.05;
-    this.bow = Math.max(0, this.bow - dt * 3.2);
+    this.bow = Math.max(0, this.bow - real * 3.2);
     this.perch.rotation.x = Math.sin((1 - this.bow) * Math.PI) * this.bow * 0.4;
     this.owl.lookAt = s.phase === 'show' && s.look ? s.look : this.camera.position;
     if (this.perch.visible) this.owl.update(dt);
@@ -1079,7 +1096,7 @@ export class CuckooStage implements Stage {
 
   private homeShot(): Shot {
     return this.layout === 'side'
-      ? { target: v3(0, 0.0, 0.2), yaw: 0.0, pitch: 0.04, w: 4.3, h: 3.12, cx: 0.5, cy: 0.5 }
+      ? { target: v3(0, 0.07, 0.2), yaw: 0.0, pitch: 0.04, w: 4.7, h: 2.98, cx: 0.5, cy: 0.5 }
       : { target: v3(0, -0.08, 0.2), yaw: 0.0, pitch: 0.04, w: 1.52, h: 3.36, cx: 0.5, cy: 0.5 };
   }
   private shot(name: string): Shot {
@@ -1087,11 +1104,12 @@ export class CuckooStage implements Stage {
     if (name === 'home') return this.homeShot();
     const p = this.anchorWorld(name);
     const card = (w: number, h: number, yaw = 0, pitch = 0.04): Shot => side ? { target: p, yaw, pitch, w: w * 1.6, h, cx: 0.36, cy: 0.5 } : { target: p, yaw, pitch, w, h: h * 1.7, cx: 0.5, cy: 0.3 };
-    if (name.startsWith('tag:')) return card(0.62, 0.5, 0, 0.02);
+    if (name.startsWith('tag:')) { const k = TAG_LAY[this.layout].k; return card(0.62 * k, 0.5 * k, 0, 0.02); }
     if (name.startsWith('house:')) return card(0.58, 0.44, 0, 0.16);
     if (name === 'routine' || name === 'calendar') return side ? { target: p, yaw: 0, pitch: 0.02, w: 1.9, h: 1.05, cx: 0.27, cy: 0.5 } : { target: p.clone().add(v3(0, 0.12, 0)), yaw: 0, pitch: 0.02, w: 0.7, h: 1.7, cx: 0.5, cy: 0.22 };
     if (name === 'dial') return card(0.78, 0.74, 0, 0.03);
     if (name === 'door' || name === 'owl' || name === 'crest') return card(0.62, 0.52, 0.12, 0.08);
+    if (name === 'intro') return side ? { target: v3(0, 0.72, 0.28), yaw: 0.1, pitch: 0.06, w: 2.4, h: 1.45, cx: 0.5, cy: 0.5 } : { target: v3(0, 0.74, 0.28), yaw: 0.1, pitch: 0.06, w: 1.05, h: 1.5, cx: 0.5, cy: 0.42 };
     if (name.startsWith('weight:') || name === 'pendulum') return card(0.78, 0.9, 0, 0.04);
     return this.homeShot();
   }
@@ -1132,15 +1150,11 @@ export class CuckooStage implements Stage {
     const side = w >= h * 1.05 && w >= 640;
     const was = this.layout;
     this.layout = side ? 'side' : 'top';
-    if (was !== this.layout) this.placeBoards();
+    if (was !== this.layout) { this.placeBoards(); this.placeLamps(); }
+    this.placeTags();
     const to = this.shot(this.shotName);
     this.cur = this.copy(to); this.to = to; this.camT = 1;
     this.applyCamera(this.cur);
-    // text on the tags is painted near one texel per internal pixel: keep the internal resolution near that
-    const home = this.homeShot(), d = this.fitDist(home);
-    const unitsTall = 2 * d * Math.tan((FOV * Math.PI) / 360);
-    const want = h / unitsTall / 228;
-    this.post?.setPixel(THREE.MathUtils.clamp(want, 1, 2.2));
   }
 
   // ---------------------------------------------------------------- per frame
@@ -1148,6 +1162,7 @@ export class CuckooStage implements Stage {
   update(dt: number, t: number) {
     if (this.dead) return;
     this.time += dt;
+    const rawDt = dt;
     dt = Math.min(dt, 0.05);
     this.enterT = Math.min(1, this.enterT + dt * 0.6);
     if (Math.floor(this.time / 2) !== Math.floor((this.time - dt) / 2)) this.applyLight();
@@ -1186,6 +1201,12 @@ export class CuckooStage implements Stage {
     this.lastSign = sign;
     // tags sway on their twine
     for (const tg of this.tags) tg.pivot.rotation.z = Math.sin(t * 0.8 + tg.phase) * 0.028 + Math.sin(t * 1.9 + tg.phase * 2) * 0.008;
+    if (this.layout === 'top') for (const tg of this.tags) {
+      if (tg.row !== 1) continue;
+      const a = this.tags.find((x) => x.side === tg.side && x.row === 0)!;
+      a.pivot.updateMatrixWorld();
+      tg.pivot.position.copy(a.pivot.localToWorld(v3(0, a.body.position.y + TAG_HOLE_B, 0)));
+    }
     // houses settle with a bounce when they change or are picked
     for (const H of this.houses) {
       if (H.bounce <= 0) continue;
@@ -1201,7 +1222,7 @@ export class CuckooStage implements Stage {
       (l.halo.material as THREE.SpriteMaterial).opacity = (0.28 + this.night * 0.3) * f;
     }
     (this.M.houseFront as THREE.MeshStandardMaterial).emissiveIntensity = 0.5 + this.night * 1.6;
-    this.stepOwl(dt);
+    this.stepOwl(dt, Math.min(1, rawDt));
     // warm motes drifting in the candle light
     if ((this.moteT -= dt) <= 0) {
       this.moteT = 0.35;
@@ -1212,7 +1233,6 @@ export class CuckooStage implements Stage {
 
   dispose() {
     this.dead = true;
-    this.post?.setPixel(null);
     this.owl.model.dispose();
     for (const g of this.geos) g.dispose();
     this.scene.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh && m.geometry && !this.geos.includes(m.geometry)) m.geometry.dispose(); });

@@ -159,46 +159,36 @@ export function shingleCanvas(seed = 11): HTMLCanvasElement {
 
 // ------------------------------------------------------------------ the wall
 
-/** Emerald damask wallpaper: a mirrored acanthus-and-lily motif in leaf green and old gold on deep emerald silk. */
-export function wallpaperCanvas(night = false): HTMLCanvasElement {
-  const W = 96, H = 128;
-  const base = R('#0c2b20', '#0f3427', '#133d2d', '#174634', '#1c503b', '#225a42');
-  const leaf = R('#174d36', '#1c573d', '#226245', '#2a6d4e', '#337857');
-  const gold = R('#4c4020', '#64522a', '#7c6634', '#94793e', '#ab8c4a');
-  void night;
-  // the motif in one quarter, mirrored: a value field (0 = ground, 1 = leaf, 2 = gold line)
-  const motif = (u: number, v: number): number => {
-    // u, v in -1..1 within a cell; mirror on x
-    const ax = Math.abs(u);
-    // central lily: a teardrop
-    const lily = Math.hypot(ax * 1.6, (v + 0.15) * 1.1) < 0.4 && v < 0.35;
-    const lilyIn = Math.hypot(ax * 1.6, (v + 0.15) * 1.1) < 0.13;
-    // acanthus curls left and right
-    const cr = Math.hypot(ax - 0.55, v - 0.35);
-    const curl = cr < 0.3 && cr > 0.17 && !(ax > 0.55 && v < 0.35);
-    const stem = Math.abs(ax - 0.1 - (v + 0.9) * 0.25) < 0.05 && v > -0.9 && v < -0.45;
-    const crown = Math.hypot(ax, v - 0.62) < 0.08;
-    if (lilyIn || crown) return 2;
-    if (lily || curl || stem) return 1;
-    // a gold pin dot between motifs
-    if (Math.hypot(Math.abs(u) - 1, Math.abs(v) - 1) < 0.07) return 2;
-    return 0;
-  };
+/** Emerald regency-stripe wallpaper: a deep silk stripe sprigged with little gilt oak sprigs, a paler woven stripe,
+ * fine gold pinstripes between them (lit from the top left: a bright edge and a dark one on each pinstripe). */
+export function wallpaperCanvas(): HTMLCanvasElement {
+  const W = 64, H = 64;
+  const deep = R('#0b2c20', '#0e3426', '#113b2b', '#144231', '#184a37');
+  const pale = R('#174a36', '#1b533c', '#1f5b42', '#246448', '#2a6d4f');
+  const gold = R('#4e3f1c', '#6a5526', '#866c32', '#a2843f', '#bc9c52');
+  // a gilt sprig: a stem, two oak leaves and an acorn (12 x 16), "#" gold, "+" light gold, "-" shade
+  const SPRIG = [
+    '.....++.....', '....+##-....', '....-##-....', '.....--.....', '.....#......', '.++..#..++..', '+##+.#.+##+.', '-###+#+###-.',
+    '.-###+###-..', '..-##+##-...', '....-#-.....', '.....#......', '....+#......', '.....#......', '......-.....', '............',
+  ];
   return paint(W, H, (x, y) => {
-    const u = ((x + 0.5) / W) * 2 - 1, v = ((y + 0.5) / H) * 2 - 1;
-    const m = motif(u, v);
-    const silk = (x * 3 + y) % 6 < 3 ? 0.04 : -0.02;
-    const n = (hash(x, y, 31) - 0.5) * 0.08 + silk;
-    if (m === 2) {
-      const e = motif(u - 2 / W, v - 2 / H) === 2 ? 0.15 : -0.2; // lit from the top left
-      return rampAt(gold, clamp01(0.55 + e + n), x, y);
+    const silk = ((x + y * 2) % 5 < 2 ? 0.05 : -0.02) + (hash(x, y, 31) - 0.5) * 0.06;
+    if (x === 38 || x === 63) return rampAt(gold, clamp01(0.7 + silk), x, y);
+    if (x === 39 || x === 0) return rampAt(gold, clamp01(0.25 + silk), x, y);
+    if (x > 39 && x < 63) {
+      const weave = (y % 3 === 0 ? -0.08 : 0.04) + (x % 4 === 0 ? -0.05 : 0);
+      return rampAt(pale, clamp01(0.55 + weave + silk), x, y);
     }
-    if (m === 1) {
-      const e = motif(u - 2 / W, v - 2 / H) >= 1 ? 0.1 : -0.25;
-      return rampAt(leaf, clamp01(0.5 + e + n), x, y);
+    // the deep stripe with sprigs (one in the middle of each tile, half-dropped every other stripe is not needed)
+    const sx = x - 13, sy = y - 24;
+    if (sx >= 0 && sx < 12 && sy >= 0 && sy < 16) {
+      const ch = SPRIG[sy][sx];
+      if (ch === '#') return rampAt(gold, clamp01(0.55 + silk), x, y);
+      if (ch === '+') return rampAt(gold, clamp01(0.85 + silk), x, y);
+      if (ch === '-') return rampAt(deep, clamp01(0.1), x, y);
     }
-    const sh = motif(u - 2 / W, v - 2 / H) > 0 ? -0.25 : 0;
-    return rampAt(base, clamp01(0.62 + n + sh), x, y);
+    const edge = x === 1 ? -0.2 : x === 37 ? -0.12 : 0;
+    return rampAt(deep, clamp01(0.55 + silk + edge), x, y);
   });
 }
 

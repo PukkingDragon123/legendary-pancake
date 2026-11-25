@@ -22,7 +22,7 @@ import { Art, dtone, hash, tone } from './px/sleepart.ts';
 import { CH, CK, CW, DOOR, DROP_MAX, FACE, FINISHES, paintCuckoo, PIVOT, WEIGHTS } from './px/cuckoo.ts';
 import { stickerURL } from './px/sleepprops.ts';
 import { ArtCanvas, injectSleepFrames, nowT, Paper, sparkleAt } from './sleepkit.tsx';
-import { panel, sceneRef } from './state.ts';
+import { bubble, panel, sceneRef } from './state.ts';
 import { uiBurstAt } from './chrome/uifx.ts';
 import { boardCSS, clipboardClip, wallpaperTile, type BoardOpts } from './chrome/objects.ts';
 import './clockscreen.css';
@@ -449,12 +449,14 @@ function Clock3D(p: { onFail: () => void }) {
   const ORDER3 = [1, 2, 3, 4, 5, 6, 0];
   const tonight = nightDay(Date.now());
 
+  // Pip's speech bubbles belong to the world view: none over the clock
+  useEffect(() => { bubble.value = null; return bubble.subscribe((b) => { if (b) bubble.value = null; }); }, []);
   // ---- the stage: built on open, shown at once (the panel's transition covers the cut)
   useEffect(() => {
     let st3: CuckooStage | null = null;
     try {
       st3 = new CuckooStage(save.value.look, loadPrefs3());
-      st3.attach(sc.renderer, { night: () => sc.sky.night, post: sc.post });
+      st3.attach(sc.renderer, { night: () => sc.sky.night });
       sc.setStage(st3);
     } catch (e) { console.warn('clock stage failed', e); p.onFail(); return; }
     stage.current = st3;
@@ -492,6 +494,8 @@ function Clock3D(p: { onFail: () => void }) {
     void stage.current?.ready.then(() => stage.current?.setMonth({ month: MONTHS3[m], year: y, lead: (new Date(y, m, 1).getDay() + 6) % 7, days: new Date(y, m + 1, 0).getDate(), today: now.getDate(), marks }));
   }, [monthKey]);
 
+  // the clipboard (or the calendar) comes off the wall while its editor is open
+  useEffect(() => { stage.current?.lift(sheet); }, [sheet]);
   // ---- taps on things in the scene
   const latest = useRef({ tags, week, st, goal });
   latest.current = { tags, week, st, goal };
@@ -525,10 +529,11 @@ function Clock3D(p: { onFail: () => void }) {
       return;
     }
     if (id === 'routine' || id === 'calendar') {
+      // the board comes off the wall: on a phone the camera follows it down first, on a wide screen it comes
+      // forward where it hangs
       tap('paper_flip', 0.5);
       setCard(null);
-      S.focus(id);
-      setTimeout(() => setSheet(id), 380);
+      if (isWide()) { S.focus('home'); setSheet(id); } else { S.focus(id); setTimeout(() => setSheet(id), 380); }
       return;
     }
     if (id === 'door' || id === 'owl') {
@@ -583,7 +588,7 @@ function Clock3D(p: { onFail: () => void }) {
     <div class={'ck' + (wide ? ' wide' : '')} role="dialog" aria-label="Clock">
       <button class="ck-back hh-wood-sm" aria-label={zoomed ? 'Back to the clock' : 'Back to the hollow'} onClick={back}><Px name="arrow_left" size={30} /><span>Back</span></button>
       <div class={'ck-title hh-wood-sm' + (zoomed ? ' away' : '')}><span>Your Sleep Clock</span></div>
-      {hint && !zoomed && <div class="ck-hint">Tap a tag, a house or the clipboard</div>}
+      {hint && !zoomed && <div class="ck-hint">Tap anything to look closer</div>}
       {card && (
         <Paper kind="cream" class="ck-card" key={card.id} opts={{ seed: card.id.length * 7 }}>
           <i class="ck-pin" />
@@ -593,8 +598,8 @@ function Clock3D(p: { onFail: () => void }) {
           {card.night?.report && <button class="ck-link" onClick={() => { tap('paper_flip', 0.5); setReport(card.night!); }}>Read the night’s report ›</button>}
         </Paper>
       )}
-      {sheet === 'routine' && <div class="ck-sheet" key="r"><RoutineBoard /></div>}
-      {sheet === 'calendar' && <div class="ck-sheet cal" key="c"><MonthCalendar onOpen={(n) => setReport(n)} /></div>}
+      {sheet === 'routine' && <div class="ck-sheet left" key="r"><RoutineBoard /></div>}
+      {sheet === 'calendar' && <div class="ck-sheet cal right" key="c"><MonthCalendar onOpen={(n) => setReport(n)} /></div>}
       {report && report.report && <div class="cs-modal"><NightReport s={report} onClose={() => setReport(null)} /></div>}
     </div>
   );
