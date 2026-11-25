@@ -105,11 +105,12 @@ if (view === 'obj') {
 if (view === 'icons') {
   // [ui4] the painted icon family, at 20, 30 and 40 px
   // [ui5] the 3D icon family at 20, 30 and 44 CSS px (as the app draws them); ?bag=1: the acorn bag at every size
-  void import('../ui/chrome/iconset.ts').then(async ({ installIconSet, ICON_NAMES, iconSrc }) => {
+  void import('../ui/chrome/iconset.ts').then(async ({ installIconSet, ICON_NAMES, iconFit }) => {
     await installIconSet(); // [tex7] the atlas
     document.body.style.background = q.get('bg') ?? '#efe2c0';
-    const d = Math.max(1, Math.round(devicePixelRatio || 1));
-    const im = (n: string, s: number) => `<img src="${iconSrc(n, s * d, d) ?? spriteURL(n, 1)}" style="width:${s}px;height:${s}px;image-rendering:pixelated">`;
+    const d = devicePixelRatio || 1;
+    // [icons8] as <Px> draws them: the crisp size nearest the ask
+    const im = (n: string, s: number) => { const f = iconFit(n, s, d); return `<img src="${f?.src ?? spriteURL(n, 1)}" style="width:${f?.css ?? s}px;height:${f?.css ?? s}px;image-rendering:pixelated">`; };
     if (q.get('bag')) {
       const row = (names: string[], sizes: number[]) => `<div style="display:flex;gap:18px;align-items:flex-end;padding:10px 14px">${names.map((n) => sizes.map((s) => `<div style="display:flex;flex-direction:column;align-items:center;font:10px monospace;color:#3a2410">${im(n, s)}${s}</div>`).join('')).join('')}</div>`;
       root.innerHTML = row(['owlcoin'], [16, 20, 24, 30, 40, 48, 72]) + row(['acorn_big'], [40, 80, 120]) + row(['coin_pouch', 'coin_sack', 'coin_chest', 'coin_vault'], [64]) + row(['moongem', 'gem_big'], [24, 48, 96]);
@@ -159,7 +160,7 @@ if (view === 'fx') {
 }
 
 if (view === 'nav') {
-  // [icons6] the live 3D shelf (Sleep, Clock, Book) on its own: &bg= &night=1 (a moonlit backdrop) &art= (art px per CSS px)
+  // [icons8] the pixel-art shelf (Sleep, Clock, Book) on its own: &bg= &night=1 (a moonlit backdrop) &art= (device px per CSS px)
   void import('../ui/chrome/hud.tsx').then(({ MainNav, hudOverride }) => {
     const night = q.get('night') === '1';
     document.body.style.background = q.get('bg') ?? (night ? 'linear-gradient(#0e1a44,#2a2a5a 60%,#3a2a3a)' : 'linear-gradient(#8a5a36,#6a3e24)');

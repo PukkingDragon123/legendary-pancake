@@ -35,6 +35,9 @@ class ShelfStage {
   private ctx = this.canvas.getContext('2d')!;
   private art = document.createElement('canvas');
   private g = this.art.getContext('2d')!;
+  /** the lamp's light at night, laid only on what is drawn */
+  private light = document.createElement('canvas');
+  private lg = this.light.getContext('2d')!;
   private objs: Record<NavId, Phys> = { sleep: mkPhys(), clock: mkPhys(), book: mkPhys() };
   private p = 0;
   private raf = 0;
@@ -49,7 +52,7 @@ class ShelfStage {
 
   constructor() {
     this.canvas.className = 'hh-navart-c';
-    this.art.width = BW; this.art.height = BH;
+    this.art.width = this.light.width = BW; this.art.height = this.light.height = BH;
     document.addEventListener('visibilitychange', () => this.wake());
   }
 
@@ -181,9 +184,7 @@ class ShelfStage {
     if (la >= 0) glow = la < 0.13 ? 0.05 : la < 0.3 ? 1.7 : lerp(1.7, glow, clamp((la - 0.3) / 1.2));
     glow *= 1 + night * 0.5;
     const [lx, ly0] = SH.lamp, ly = ly0 + dy(lp);
-    // night: the lamp's warm light pools on the shelf
-    if (night > 0.02) { this.glow(lx + 8, TOP + 4, 120, 0.22 * night * Math.min(1.3, glow), '255,178,92', 5); }
-    this.glow(lx, ly, 52, 0.16 * glow, '255,200,110', 4);
+    this.glow(lx, ly, 50, (0.12 + 0.08 * night) * glow, '255,200,110', 6);
     this.sprite('shelf');
     // the objects' shadows on the shelf top
     this.shadow(SH.objects.sleep, 52, lp.y);
@@ -196,7 +197,7 @@ class ShelfStage {
       g.save();
       g.beginPath(); g.arc(Math.round(lx), Math.round(ly), 28, 0, Math.PI * 2); g.clip();
       g.globalCompositeOperation = 'lighter';
-      g.globalAlpha = clamp((glow - 0.75) * 0.22, 0, 0.3);
+      g.globalAlpha = clamp((glow - 0.7) * 0.14, 0, 0.16);
       this.sprite(lampFrame, dy(lp), lp.sq);
       g.restore();
     }
@@ -224,8 +225,30 @@ class ShelfStage {
     let bf = bp.hover ? 'book1' : 'book0';
     if (ba >= 0) bf = ba < 0.12 ? 'book2' : ba < 0.25 ? 'book3' : ba < 0.4 ? 'book4' : ba < 1.05 ? 'book5' : ba < 1.18 ? 'book4' : ba < 1.3 ? 'book3' : ba < 1.6 ? 'book2' : 'book0';
     this.sprite(bf, dy(bp), bp.sq);
-    // night: the lamp's light catches the near sides of its neighbours
-    if (night > 0.02) this.glow(lx + 30, ly + 10, 70, 0.1 * night * Math.min(1.3, glow), '255,190,110', 3);
+    // night: moonlight cools everything on the shelf, and the lamp's warm light falls across it in soft bands
+    if (night > 0.02) {
+      g.save();
+      g.globalCompositeOperation = 'source-atop';
+      g.fillStyle = `rgba(34,42,104,${(0.24 * night).toFixed(3)})`;
+      g.fillRect(0, 0, BW, BH);
+      g.restore();
+      const L = this.lg, r = 170, steps = 7, a = 0.4 * night * Math.min(1.3, glow);
+      L.globalCompositeOperation = 'source-over';
+      L.clearRect(0, 0, BW, BH);
+      for (let i = 0; i < steps; i++) {
+        L.fillStyle = `rgba(255,184,100,${(a / steps).toFixed(3)})`;
+        L.beginPath(); L.arc(Math.round(lx + 4), Math.round(ly + 8), Math.round(r * (1 - i / steps)), 0, Math.PI * 2); L.fill();
+      }
+      // not on the lamp's own glass (it glows by itself)
+      L.globalCompositeOperation = 'destination-out';
+      L.beginPath(); L.arc(Math.round(lx), Math.round(ly), 31, 0, Math.PI * 2); L.fill();
+      L.globalCompositeOperation = 'destination-in';
+      L.drawImage(this.art, 0, 0);
+      g.save();
+      g.globalCompositeOperation = 'lighter';
+      g.drawImage(this.light, 0, 0);
+      g.restore();
+    }
     // up to the screen, whole device pixels per art pixel
     const c = this.ctx;
     c.imageSmoothingEnabled = false;
@@ -245,7 +268,13 @@ class ShelfStage {
 }
 
 let stage: ShelfStage | undefined;
-const getStage = () => (stage ??= new ShelfStage());
+function getStage(): ShelfStage {
+  if (!stage) {
+    stage = new ShelfStage();
+    try { localStorage.removeItem('hh-shelf3d-still:v3'); } catch { /* the old 3D shelf's picture: no longer needed */ }
+  }
+  return stage;
+}
 
 /** the buttons tell the shelf what's happening to their objects */
 export const shelf2d = {
@@ -268,6 +297,7 @@ function installStyles() {
 .hh-nav.live .hh-plate,.hh-nav.wait .hh-plate{background-image:none!important;filter:none}
 .hh-nav.live .hh-mobj,.hh-nav.live .hh-mobj.press,.hh-nav.live .hh-mobj.pop,.hh-nav.live .hh-mobj.rec,.hh-nav.live .hh-mobj.rec.pop{animation:none;scale:none;filter:none}
 .hh-nav.live .hh-mobj.press .hh-plate{translate:0 1px}
+@media (min-width: 900px) and (min-height: 760px){.hh-nav.live .hh-plate{line-height:18px}}
 `;
   document.head.appendChild(st);
 }

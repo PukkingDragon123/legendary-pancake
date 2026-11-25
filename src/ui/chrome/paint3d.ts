@@ -1,8 +1,9 @@
-// [tex7] Realistic textures for the interface's 3D models (the live shelf, src/ui/chrome/props3d.ts, and the icon bake,
-// src/dev/iconbake.ts), and the texture coordinates that lay them on.
+// [tex7] Realistic textures for the interface's 3D models (the props in src/ui/chrome/props3d.ts and the icon bake,
+// src/dev/iconbake.ts, which renders them into the pixel-art icons and shelf sprites), and the texture coordinates that
+// lay them on. Dev only: nothing here ships in the app.
 //
 // Photo textures (Poly Haven, CC0: oak veneer (in colour and as grain to tint), two leathers, linen, knitted fleece and
-// velour; prepared in art/tex7, packed into the interface atlas public/img/ui3d.webp) give wood, leather and cloth their grain
+// velour; prepared in art/tex7 and loaded by the bake from there) give wood, leather and cloth their grain
 // (`setSwatch` / `swatchAt`). Everything else is painted at run time (or bake time) into a canvas: a procedural base
 // (tileable noise, cells, growth rings) worked over with painted strokes (scratches, engraving, stitches, veins,
 // numerals), in full colour from a ramp round one base colour, with cavity darkening baked in and no directional

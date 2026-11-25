@@ -1,5 +1,6 @@
-// [icons6] Real 3D interface props: properly shaped, detailed models, shared by the live shelf at the bottom of the
-// home screen (shelf3d.tsx) and the icon bake (src/dev/iconbake.ts).
+// [icons6] Real 3D interface props: properly shaped, detailed models, the source of the main buttons' pixel-art
+// sprites and of several icons ([icons8] the icon bake, src/dev/iconbake.ts, renders them and finishes them as pixel
+// art; the shelf on screen, shelf2d.tsx, is 2D). Dev only: nothing here ships in the app.
 //   moonLamp()   a glass moon lamp on a turned brass base: a crescent moon glowing in a starry glass globe, a bead
 //                pull chain
 //   cuckooClock() a carved Black Forest cuckoo clock on a little stand: a leafy roof and crest, an enamel dial with the
@@ -12,9 +13,8 @@
 // leather, linen, under painted detail where a photo can't go: carved veined oak leaves, a shingled roof, engraved and
 // tarnished brass, an enamel dial with Roman numerals and crazing, a tooled and stitched cover, inked paper, a frosted
 // globe catching a window, a feathered owl, scaled pine cones and acorn caps. Painted textures stand in for the photo
-// ones until the interface atlas arrives (`upgradePhotos`). Laid on at one density (`fitUV`; the icon bake refits).
+// ones until those are registered (`upgradePhotos`). Laid on at one density (`fitUV`; the icon bake refits).
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { clamp, fbm, hash, hex, mix, mul, PAL, rampAt, vnoise, type RGB } from '../px/relief.ts';
 import { Canvas3, cloth, DENSITY, enamel, feathers, fitUV, keepUV, leafTex, leatherCanvas, metal, metalCanvas, noise, paperCanvas, ramp, scales, shingles, stitches, swatchAt, swatchCanvas, wood, type Painted, type Swatch } from './paint3d.ts';
 
@@ -259,52 +259,6 @@ export function ribbon(pts: [number, number, number][], w: number, m: THREE.Mate
   return mesh(g, m);
 }
 
-/**
- * Merge the still parts of a model into one mesh per material (fewer draw calls). `moving` are the parts that animate
- * (they and everything under them are left alone), as are transparent and ordered meshes.
- */
-export function mergeStatic(root: THREE.Object3D, moving: THREE.Object3D[] = []): void {
-  root.updateMatrixWorld(true);
-  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), mtx = new THREE.Matrix4();
-  const isMoving = (o: THREE.Object3D) => { for (let p: THREE.Object3D | null = o; p && p !== root; p = p.parent) if (moving.includes(p)) return true; return false; };
-  const sets = new Map<string, { mat: THREE.Material; cast: boolean; geos: THREE.BufferGeometry[]; meshes: THREE.Mesh[] }>();
-  root.traverse((o) => {
-    const m = o as THREE.Mesh;
-    if (!m.isMesh || Array.isArray(m.material) || m.material.transparent || m.renderOrder || !m.visible || isMoving(m)) return;
-    const g0 = m.geometry;
-    if (!g0.attributes.normal || !g0.attributes.uv) return;
-    const g = (g0.index ? g0.toNonIndexed() : g0.clone());
-    for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal' && k !== 'uv') g.deleteAttribute(k);
-    g.clearGroups();
-    g.applyMatrix4(mtx.multiplyMatrices(inv, m.matrixWorld));
-    const key = m.material.uuid + (m.castShadow ? 'c' : '');
-    let s = sets.get(key);
-    if (!s) { s = { mat: m.material, cast: m.castShadow, geos: [], meshes: [] }; sets.set(key, s); }
-    s.geos.push(g); s.meshes.push(m);
-  });
-  for (const s of sets.values()) {
-    if (s.meshes.length < 2) { s.geos.forEach((g) => g.dispose()); continue; }
-    const merged = mergeGeometries(s.geos, false);
-    s.geos.forEach((g) => g.dispose());
-    if (!merged) continue;
-    for (const m of s.meshes) m.removeFromParent();
-    const me = new THREE.Mesh(merged, s.mat);
-    me.castShadow = s.cast; me.receiveShadow = true;
-    root.add(me);
-  }
-}
-
-/** a soft round contact shadow (a dark blob on the surface below) */
-let blobTex: THREE.Texture | null = null;
-export function contactBlob(w: number, d: number, opacity = 0.55): THREE.Mesh {
-  blobTex ??= paintTex('blob', 32, 32, (x, y) => { const r = Math.hypot((x - 15.5) / 15.5, (y - 15.5) / 15.5); const a = clamp(1 - r) ** 1.6; return [255, 255, 255, a * 255]; }, { data: true, smooth: true });
-  const m = new THREE.MeshBasicMaterial({ color: 0x1a0c08, alphaMap: blobTex, transparent: true, opacity, depthWrite: false });
-  const me = new THREE.Mesh(new THREE.PlaneGeometry(w, d), m);
-  me.rotation.x = -Math.PI / 2;
-  me.renderOrder = 1;
-  return me;
-}
-
 // ------------------------------------------------------------------ a tiny pixel numeral font for dials
 const DIGIT: Record<string, string[]> = {
   '0': ['111', '101', '101', '101', '111'], '1': ['010', '110', '010', '010', '111'], '2': ['111', '001', '111', '100', '111'],
@@ -517,7 +471,7 @@ function handShape(kind: 'hour' | 'minute' | 'second' | 'alarm'): THREE.Shape {
   return shape([[-0.04, -0.17], [0.04, -0.17], [0.012, -0.1], [0.008, 0.56], [0.0, 0.6], [-0.008, 0.56], [-0.012, -0.1]]);
 }
 /** the carved oak leaves: oak with a carved midrib and veins (laid flat on each leaf) */
-const carvedOak = () => std('carvedLeaf', { ...pm(leafTex('#c08a48', { carved: true, seed: 9 })), roughness: 0.6, envMapIntensity: 0.5, keep: true });
+export const carvedOak = () => std('carvedLeaf', { ...pm(leafTex('#c08a48', { carved: true, seed: 9 })), roughness: 0.6, envMapIntensity: 0.5, keep: true });
 /** a carved oak leaf, base at the origin pointing up +y: lobed edges, extruded with a rounded bevel */
 export function carvedLeaf(len: number, m: THREE.Material = carvedOak(), wid = 0.38): THREE.Mesh {
   const L: P2[] = [], Rr: P2[] = [];

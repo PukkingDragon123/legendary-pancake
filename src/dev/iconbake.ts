@@ -16,7 +16,7 @@ import { instanceGLB } from '../gfx/glb.ts';
 import { fbm, hash as h2, hex, type RGB } from '../ui/px/relief.ts';
 import { bark, cloth, cloudTex, enamel, fitUV, flame, gem, glass, keepUV, leafTex, leather, metal, paper, scales, setSwatch, stone, swatchAt, SWATCHES, water, wax, wood, type Painted, type Swatch } from '../ui/chrome/paint3d.ts';
 import {
-  acornProp, at, oakLeafProp, ribbon, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, mesh, moonLamp, paintTex, planarUV, rrectPts, setClockHands, shape, shelf, smoothProfile, starPts, studioEnv, torus, tube,
+  acornProp, at, carvedOak, oakLeafProp, ribbon, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, mesh, moonLamp, paintTex, planarUV, rrectPts, setClockHands, shape, shelf, smoothProfile, starPts, studioEnv, torus, tube,
   type O,
 } from '../ui/chrome/props3d.ts';
 import { pixelize, type Art, type Group, type Passes } from './pixelize.ts';
@@ -336,6 +336,20 @@ function enamelButton(m: THREE.Material, glyph: P2[][]): THREE.Group {
   return g;
 }
 const bar = (w: number, h: number, x = 0, y = 0): P2[] => rrectPts(w, h, Math.min(w, h) * 0.3).map(([px, py]) => [px + x, py + y] as P2);
+/** a little sunny landscape for the wall-art icon */
+function landscape(): THREE.Texture {
+  return paintTex('landscape', 48, 36, (x, y) => {
+    const sky = [hex('#6aa8d8'), hex('#8cc0e4'), hex('#b8d8ec')][Math.min(2, Math.floor(y / 6))];
+    const h1 = 20 + Math.sin(x * 0.12) * 3, h2 = 25 + Math.sin(x * 0.2 + 2) * 2;
+    if (Math.hypot(x - 36, y - 8) < 4) return hex('#ffe08a');
+    const tx = x - 14, ty = y - 15;
+    if (Math.hypot(tx, ty) < 6 && ty < 3) return ty < -2 ? hex('#5a9a40') : hex('#3e7a34');
+    if (Math.abs(tx) < 1.2 && ty >= 3 && y < h1 + 2) return hex('#6a4426');
+    if (y > h2) return y > 31 ? hex('#4a8434') : hex('#64a044');
+    if (y > h1) return hex('#7ab452');
+    return sky;
+  });
+}
 /** a simple dial for the small clocks: cream enamel, a brass ring, twelve hour ticks (the hands are on top) */
 function pixelDial(): THREE.Texture {
   return paintTex('pixdial', 64, 64, (x, y) => {
@@ -538,9 +552,7 @@ const ICONS: Record<string, Spec> = {
   shield: { make: () => { const pts = roundPoly([[-0.7, 0.78], [0.7, 0.78], [0.7, 0.06], [0.48, -0.44], [0, -0.88], [-0.48, -0.44], [-0.7, 0.06]], 0.1); return grp(jewel(pts, glaze(0x3462a8), { rimM: M(0xd6a040, { metal: 0.65, rough: 0.3, tex: null }), rim: 0.1 }), at(goldStar(0.4, 0.18), 0, 0.06, 0.2)); }, yaw: 0.26, pitch: 0.24 },
   zzz: { make: () => { const Z = (s: number) => strokePts([[-0.45 * s, 0.4 * s], [0.42 * s, 0.4 * s], [-0.42 * s, -0.4 * s], [0.45 * s, -0.4 * s]], 0.17 * s, 6); const m = glaze(0x4a8ac4), r = C.silver(); return grp(at(jewel(Z(0.92), m, { rimM: r, rim: 0.05 }), -0.52, -0.48, 0), at(jewel(Z(0.64), m, { rimM: r, rim: 0.04 }), 0.2, 0.18, 0), at(jewel(Z(0.44), m, { rimM: r, rim: 0.035 }), 0.74, 0.72, 0)); }, yaw: 0.26, pitch: 0.2 },
   bolt: { make: () => jewel(roundPoly([[0.15, 0.95], [-0.55, -0.1], [-0.05, -0.1], [-0.25, -0.95], [0.55, 0.15], [0.05, 0.15]], 0.04), M(0xf0b632, { rough: 0.26, tex: 'plain', glow: 0.1 }), { rimM: M(0xb87a26, { metal: 0.6, rough: 0.35, tex: null }) }), yaw: 0.28, pitch: 0.26 },
-  ice_flake: {
-    make: () => { const ice = M(0x4ab8f4, { rough: 0.15, metal: 0.15, env: 1.3, tex: 'glass' }), g = grp(); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[0, 0], [c * 0.88, s * 0.88]], 0.12, ice, 0.1, 0.04)); for (const f of [0.45, 0.7]) { const px = c * f, py = s * f; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.8) * 0.22, py + Math.sin(a + sg * 0.8) * 0.22]], 0.1, ice, 0.1, 0.04)); } } return g; }, yaw: 0.28, pitch: 0.28,
-  },
+  ice_flake: { make: () => { const ice = M(0x9ad2ee, { rough: 0.18, metal: 0.1, env: 1.2, tex: 'glass' }), g = grp(jewel(circlePts(0.16, 6), ice, { rim: 0, depth: 0.08, bevel: 0.05 })); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + Math.PI / 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[c * 0.1, s * 0.1], [c * 0.92, s * 0.92]], 0.1, ice, 0.08, 0.035)); for (const fr of [0.48, 0.72]) { const px = c * fr, py = s * fr, l = fr < 0.6 ? 0.24 : 0.17; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.75) * l, py + Math.sin(a + sg * 0.75) * l]], 0.08, ice, 0.07, 0.03)); } } return g; }, yaw: 0.24, pitch: 0.24 },
   alarm: { make: () => { const c = cuckooClock(); simpleDial(c.root); boldHands(c); setClockHands(c, new Date(2024, 0, 1, 7, 0, 0)); c.door.rotation.y = -2.1; c.owl.position.set(0, c.owl.position.y - 0.05, 0.5); c.owl.rotation.x = 0.2; c.owl.scale.setScalar(2.4); return c.root; }, yaw: 0.26, pitch: 0.12 },
   clock: { make: () => { const c = cuckooClock(); simpleDial(c.root); boldHands(c); setClockHands(c, new Date(2024, 0, 1, 10, 10, 0)); c.pendulum.rotation.z = 0.2; return c.root; }, yaw: 0.22, pitch: 0.1 },
   hourglass: {
@@ -585,7 +597,7 @@ const ICONS: Record<string, Spec> = {
     make: () => grp(ext(shape(rrectPts(0.86, 1.52, 0.16)), 0.12, M(0x3a3048, { rough: 0.35 }), 0.05, 3), at(mesh(new THREE.PlaneGeometry(0.7, 1.2), M(0x5fa0e8, { rough: 0.15, glow: 0.3, tex: null })), 0, 0.03, 0.12),
       at(strokeMesh([[-0.66, -0.7], [0.66, 0.7]], 0.2, C.red(), 0.16, 0.06), 0, 0, 0.2)), yaw: 0.32, pitch: 0.2,
   },
-  music: { make: () => { const b = glaze(0x34509a); const head = (x: number, y: number) => jewel(circlePts(0.24, 32).map(([px, py]) => [px * 1.25, py * 0.9] as P2).map(([px, py]) => [px * Math.cos(0.35) - py * Math.sin(0.35) + x, px * Math.sin(0.35) + py * Math.cos(0.35) + y] as P2), b, { rim: 0 }); return grp(head(-0.44, -0.56), head(0.44, -0.4), jewelStroke([[-0.2, -0.5], [-0.2, 0.56]], 0.11, b, { rim: 0, bevel: 0.04, depth: 0.08 }), jewelStroke([[0.68, -0.34], [0.68, 0.74]], 0.11, b, { rim: 0, bevel: 0.04, depth: 0.08 }), jewelStroke([[-0.2, 0.5], [0.68, 0.68]], 0.24, b, { rim: 0, z: 0.02 })); }, yaw: 0.26, pitch: 0.2 },
+  music: { make: () => { const b = glaze(0x34509a); const head = (x: number, y: number) => jewel(circlePts(0.2, 32).map(([px, py]) => [px * 1.3, py * 0.9] as P2).map(([px, py]) => [px * Math.cos(0.4) - py * Math.sin(0.4) + x, px * Math.sin(0.4) + py * Math.cos(0.4) + y] as P2), b, { rim: 0, depth: 0.1, bevel: 0.08 }); return grp(head(-0.48, -0.58), head(0.42, -0.44), jewelStroke([[-0.26, -0.52], [-0.26, 0.56]], 0.09, b, { rim: 0, bevel: 0.03, depth: 0.06 }), jewelStroke([[0.64, -0.38], [0.64, 0.74]], 0.09, b, { rim: 0, bevel: 0.03, depth: 0.06 }), jewel(roundPoly([[-0.31, 0.62], [0.69, 0.82], [0.69, 0.6], [-0.31, 0.4]], 0.03), b, { rim: 0, depth: 0.08, bevel: 0.05, z: 0.02 })); }, yaw: 0.24, pitch: 0.2 },
   note: { make: () => { const b = glaze(0x34509a); return grp(jewel(circlePts(0.3, 32).map(([px, py]) => [px * 1.25, py * 0.9] as P2).map(([px, py]) => [px * Math.cos(0.35) - py * Math.sin(0.35) - 0.18, px * Math.sin(0.35) + py * Math.cos(0.35) - 0.55] as P2), b, { rim: 0 }), jewelStroke([[0.14, -0.5], [0.14, 0.8]], 0.13, b, { rim: 0, bevel: 0.04, depth: 0.08 }), jewel(roundPoly([[0.08, 0.86], [0.24, 0.86], [0.52, 0.56], [0.58, 0.28], [0.48, 0.06], [0.5, 0.3], [0.38, 0.46], [0.16, 0.54]], 0.03), b, { rim: 0, bevel: 0.04, depth: 0.08 })); }, yaw: 0.26, pitch: 0.2 },
   mic: {
     make: () => { const grille = M(0x9aa4b4, { metal: 0.6, rough: 0.35, tex: 'weave', rep: 3 });
@@ -703,7 +715,7 @@ const ICONS: Record<string, Spec> = {
   },
   bp_plant: { make: glb('items/fernpot.glb'), yaw: 0.5, pitch: 0.3 },
   bp_rug: { make: () => at(mesh(new THREE.CylinderGeometry(1, 1, 0.08, 64), new THREE.MeshStandardMaterial({ map: ringTex(), roughness: 0.9 })), 0, 0, 0, 0, 0, 0, [1, 1, 0.75]), yaw: 0.2, pitch: 0.95 },
-  bp_wall: { make: glb('items/painting.glb'), yaw: 0.25, pitch: 0.1 },
+  bp_wall: { make: () => { const gold = M(0xd8a040, { metal: 0.6, rough: 0.32, tex: 'plain' }); const outer = shape(rrectPts(1.7, 1.32, 0.06)), hole = new THREE.Path(); rrectPts(1.36, 0.98, 0.02).forEach(([x, y], i) => (i ? hole.lineTo(x, y) : hole.moveTo(x, y))); outer.holes.push(hole); const pic = mesh(planarUV(new THREE.PlaneGeometry(1.4, 1.02)), new THREE.MeshStandardMaterial({ map: landscape(), roughness: 0.8 })); return grp(ext(outer, 0.12, gold, 0.06, 3), at(pic, 0, 0, -0.02), at(ext(shape(rrectPts(1.44, 1.06, 0.02)), 0.04, M(0x8a5a26, { metal: 0.5, rough: 0.4, tex: 'plain' }), 0.015, 1), 0, 0, -0.06)); }, yaw: 0.22, pitch: 0.12 },
   bp_decor: {
     make: () => { const flower = (x: number, y: number, c: number) => { const pet: P2[] = Array.from({ length: 60 }, (_, i) => { const a = (i / 60) * Math.PI * 2, r = 0.2 * (0.6 + 0.4 * Math.abs(Math.cos(a * 2.5))); return [Math.cos(a) * r, Math.sin(a) * r]; });
       return grp(tube([[0, 0.1, 0], [x * 0.5, y * 0.6, 0], [x, y, 0]], 0.035, M(0x3e9a3a, { tex: null }), 12, 5), at(ext(shape(pet), 0.05, M(c, { rough: 0.5 }), 0.03, 2), x, y, 0.04), at(ext(shape(circlePts(0.06, 16)), 0.04, M(0xffd040, { tex: null }), 0.02, 1), x, y, 0.1)); };
@@ -1003,7 +1015,8 @@ async function bakeShelf(): Promise<{ sprites: ShelfSprite[]; dial: [number, num
   plateM.color.setScalar(1.12);
   plateM.userData.pix = { glossy: false, smooth: 0.45 };
   for (const p of sh.plates) p.material = plateM;
-  const shelfG = grp(sh.root, a1, a2, leaf);
+  void leaf;
+  const shelfG = grp(sh.root, a1, a2);
   out.push(shootShelf('shelf', shelfG, [-4, 124, SHELF_BOX.w + 8, SHELF_BOX.h - 124], { lineDepth: 0.05 / 6 }));
   // the moon lamp: four glows, off, the chain pulled
   const lamp = moonLamp();
@@ -1012,8 +1025,14 @@ async function bakeShelf(): Promise<{ sprites: ShelfSprite[]; dial: [number, num
   const lr = shelfRect([lamp.root]);
   lr[3] = Math.max(lr[3], 0);
   const chainY = lamp.chain.position.y;
+  // a golden moon rather than a white-hot one, the window caught in the glass kept faint, a dark globe when it's off
+  const moonM = (lamp.moon.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial, skyM = lamp.sky.material as THREE.MeshBasicMaterial;
+  moonM.userData.pix = { glow: false, glossy: false }; // shaded like gold, not paled like a flame
+  const starMs = lamp.moon.children.slice(1).map((c) => (c as THREE.Mesh).material as THREE.MeshStandardMaterial);
+  lamp.root.traverse((o) => { const m = (o as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined; if (m?.blending === THREE.AdditiveBlending && m.emissiveMap) m.emissiveIntensity = 0.22; });
+  const lampGlow = (g: number) => { lamp.setGlow(g); moonM.emissiveIntensity = g < 0.1 ? 0 : 0.06 + 0.22 * g; skyM.color.setScalar(g < 0.1 ? 0.42 : 0.5 + 0.4 * g); for (const m of starMs) m.emissiveIntensity = g < 0.1 ? 0 : 0.2 + 0.4 * g; };
   for (const [n, g, pull] of [['lamp0', 0.55, 0], ['lamp1', 0.8, 0], ['lamp2', 1.05, 0], ['lamp3', 1.3, 0], ['lamp_off', 0.04, 0.05], ['lamp_pull', 1.6, 0.09]] as [string, number, number][]) {
-    lamp.setGlow(g);
+    lampGlow(g);
     lamp.chain.position.y = chainY - pull;
     out.push(shootShelf(n, lamp.root, [lr[0], lr[1], lr[2], lr[3] + 4]));
   }
@@ -1098,6 +1117,7 @@ function show(name: string, big: Art, small: Art) {
 async function bake() {
   const only = q.get('only');
   await loadPhotos();
+  carvedOak().color.setRGB(0.8, 0.66, 0.52); // the cuckoo clocks' carved oak leaves: carving, not polka dots
   const test = (n: string) => !only || new RegExp(only).test(n);
   const bigs: Art[] = [], smalls: Art[] = [];
   const icons: Record<string, number> = {}, anim: Record<string, number[]> = {};
