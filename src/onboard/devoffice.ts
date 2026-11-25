@@ -18,7 +18,40 @@ R.shadowMap.enabled = true;
 R.shadowMap.type = THREE.PCFSoftShadowMap;
 const W = window as unknown as Record<string, unknown>;
 
-if (q.has('props') || q.has('phone')) {
+if (q.has('talk')) {
+  // ?talk=<line>|<line>&size=26&w=560&voice=pip|barnaby&scrim=0.2   the dialogue engine (ui/talk.ts) on its own;
+  // window.talkAt(t, i) shows line i as it is t seconds after it started (deterministic frames for screenshots)
+  const { TalkView } = await import('../ui/talk.ts');
+  const { fontsReady } = await import('./fonts.ts');
+  await fontsReady();
+  cv.style.display = 'none';
+  document.body.style.background = q.get('bg') ?? 'repeating-linear-gradient(90deg,#0d4a34 0 22px,#0a3a29 22px 26px,#c9a040 26px 27px,#0d4a34 27px 44px)';
+  const lines = q.get('talk')!.split('|');
+  const mk = () => {
+    const v = new TalkView({ size: Number(q.get('size') ?? 26), maxWidth: Number(q.get('w') ?? Math.min(innerWidth - 12, 560)), anchor: 'top', voice: (q.get('voice') as 'pip') ?? 'pip', scrim: Number(q.get('scrim') ?? 0.2), tag: true });
+    Object.assign(v.canvas.style, { position: 'fixed', left: '0', top: '40px' });
+    document.body.appendChild(v.canvas);
+    return v;
+  };
+  let v = mk();
+  const place = () => { v.canvas.style.left = Math.round((innerWidth - v.cssW) / 2) + 'px'; };
+  W.talkAt = (t: number, i = 0, prev = -1) => {
+    v.dispose(); v = mk();
+    if (prev >= 0) { v.say(lines[prev], { who: 'PIP · HEAD OF SLEEP', instant: true }); for (let k = 0; k < 60; k++) v.step(1 / 60); }
+    v.say(lines[i], { who: 'PIP · HEAD OF SLEEP' });
+    for (let k = 0; k < Math.round(t * 60); k++) v.step(1 / 60);
+    place();
+    return v.text;
+  };
+  if (!q.has('still')) {
+    v.say(lines[0], { who: 'PIP · HEAD OF SLEEP' });
+    let last = performance.now(), i = 0;
+    const loop = (now: number) => { const dt = (now - last) / 1000; last = now; if (!W.frozen) { v.step(dt); place(); if (!v.typing && v.text && (W.auto ?? true)) { W.autoT = (W.autoT as number ?? 0) + dt; if ((W.autoT as number) > 2) { W.autoT = 0; i = (i + 1) % lines.length; v.say(lines[i], { who: 'PIP · HEAD OF SLEEP' }); } } } requestAnimationFrame(loop); };
+    requestAnimationFrame(loop);
+  }
+  W.talk = () => v;
+  W.__ready = true;
+} else if (q.has('props') || q.has('phone')) {
   // ?props=drink:coffee,tape:rain,deck,...  a sheet of answer objects on paper (&cols=4&pen=1)
   // ?phone=1&t=6.5                            the fake phone at a moment of its film
   const { fontsReady } = await import('./fonts.ts');

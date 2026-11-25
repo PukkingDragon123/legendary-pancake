@@ -1,6 +1,7 @@
 // UI navigation state and Pip's voice.
 import { signal } from '@preact/signals';
 import type { Scene } from '../world/scene.ts';
+import { holdMs } from './talk.ts';
 
 export type Tab = 'home' | 'sleep' | 'breathe' | 'journal' | 'market';
 /**
@@ -25,7 +26,10 @@ export interface Bubble { text: string; id: number }
 export const bubble = signal<Bubble | null>(null);
 let bid = 0;
 let btimer = 0;
+/** Pip says a line over his head (ui/talk.ts markup: *highlight*, !scream!, _whisper_, ~sing-song~). It stays up at
+ * least `ms`, and always long enough to type out and read. */
 export function say(text: string, ms = 3600) {
+  ms = holdMs(text, 1, ms); // [dialog10]
   const id = ++bid;
   bubble.value = { text, id };
   clearTimeout(btimer);
@@ -34,9 +38,9 @@ export function say(text: string, ms = 3600) {
 
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
 export const lines = {
-  poke: () => pick(['Hoo! That tickles.', 'Hello, hello!', 'Did you know owls can’t move their eyes? I just wiggle my whole head.', 'I found a very round pebble today.', 'Hoo-hoo! Hi!', 'Ruffle ruffle.', 'Shall we tidy the nest later?', 'My feathers are extra fluffy today.']),
-  morning: (name: string) => pick([`Good morning! ${name} is back with treasures.`, 'Morning! Did you dream of anything nice?', 'I flew SO far last night. Let me tell you everything!']),
-  evening: () => pick(['It’s getting late. Want to wind down with me?', 'I’m packing my satchel for tonight’s adventure.', 'Dim the lights, and let’s breathe together?', 'Hoo... yawn. Is it bedtime yet?']),
-  day: () => pick(['What a lovely day in the Hollow.', 'Tonight I’m exploring somewhere new!', 'Sleep well tonight and I’ll find something shiny.', 'Have you had water today? Owls approve of water.']),
-  breathe: () => pick(['That was lovely. I feel all floaty.', 'Mmm. My feathers are so calm now.', 'Let’s do that again tomorrow.']),
+  poke: () => pick(['!Hoo!! That _tickles._', '~Hello, hello!~', 'Did you know owls can’t move their eyes? I just wiggle my *whole head.*', 'I found a *very round* pebble today.', '~Hoo-hoo!~ Hi!', '~Ruffle ruffle.~', 'Shall we tidy the nest later?', 'My feathers are extra *fluffy* today.']),
+  morning: (name: string) => pick([`*Good morning!* ${name} is back with *treasures.*`, 'Morning! Did you dream of anything _nice?_', 'I flew !SO! far last night. Let me tell you *everything!*']),
+  evening: () => pick(['It’s getting _late._ Want to wind down with me?', 'I’m packing my satchel for tonight’s *adventure.*', '_Dim the lights,_ and let’s breathe together?', 'Hoo... _yawn._ Is it bedtime yet?']),
+  day: () => pick(['What a ~lovely day~ in the Hollow.', 'Tonight I’m exploring somewhere *new!*', 'Sleep well tonight and I’ll find something *shiny.*', 'Have you had water today? _Owls approve of water._']),
+  breathe: () => pick(['That was lovely. I feel all ~floaty.~', '_Mmm._ My feathers are so calm now.', 'Let’s do that again tomorrow.']),
 };

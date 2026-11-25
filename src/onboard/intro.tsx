@@ -26,6 +26,7 @@ import { FloatingPen } from './pen.ts';
 import { DRINKS, TAPES } from './props.ts';
 import { answersFrom, applyAnswers, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat } from './script.ts';
 import { Speech } from './speech.ts';
+import { plainOf } from '../ui/talk.ts';
 import { animeMoment } from '../ui/fx/anime.ts'; // [anime6]
 
 const ARTIFACT = import.meta.env.MODE === 'artifact';
@@ -90,10 +91,8 @@ export function Intro() {
     const postWas = sc.post.enabled;
     sc.post.enabled = false; // the office draws its own HD-2D picture (look.ts)
     sc.setStage(office);
-    const speech = new Speech();
-    speech.px = office.pic.px; // [font6] 1:1 with the picture: Alagard is drawn 2x for the words, 1x for the name tag
-    office.pic.overlay.add(speech.group);
-    office.tickers.add((dt) => { speech.px = office.pic.px; speech.update(dt, office.camera); });
+    const speech = new Speech(); // [dialog10] floating 3D words at device resolution (ui/talk.ts)
+    office.tickers.add((dt) => speech.update(dt, office.camera));
     speech.onTalk = () => office.talk();
     const reactTo = dioramas(office);
     office.pip.pose = 'stand';
@@ -153,8 +152,9 @@ export function Intro() {
     const talk = (list: Beat[], then: () => void) => { beats = list; bi = 0; after = then; phase = phase === 'outro' ? 'outro' : 'talk'; show(0); };
     speech.onDone = () => {
       if (phase !== 'talk' && phase !== 'outro') return;
-      const last = bi >= beats.length - 1, txt = beats[bi]?.text ?? '';
-      autoT = window.setTimeout(advance, fast ? 30 : last ? 650 : 1500 + txt.length * 26);
+      // [dialog10] the typing is slower and human now, so the reader is nearly done when it ends: a short hold
+      const last = bi >= beats.length - 1, txt = plainOf(beats[bi]?.text ?? '');
+      autoT = window.setTimeout(advance, fast ? 30 : last ? 650 : 1200 + txt.length * 16);
     };
 
     // ---------------------------------------------------------------- the form
@@ -385,7 +385,7 @@ export function Intro() {
         releaseBoot();
       });
       sceneRef.current?.owl.play(skipped ? 'wave' : 'present');
-      say(skipped ? `Welcome home! Let's unpack!` : `Let's unpack! Tap the boxes, ${x.you.trim() || 'friend'}!`, 4200);
+      say(skipped ? `Welcome *home!* Let's unpack!` : `Let's *unpack!* Tap the boxes, ${x.you.trim() || 'friend'}!`, 4200);
       window.dispatchEvent(new CustomEvent('hh:intro-done', { detail: { skipped } }));
     };
 
@@ -464,7 +464,7 @@ export function Intro() {
       if (e.key === ' ' || e.key === 'Enter') { if ((e.target as HTMLElement | null)?.closest?.('button')) return; e.preventDefault(); if (phase === 'ask') void file(); else onTap(); }
     };
     addEventListener('keydown', onKey);
-    const onResize = () => { speech.px = office.pic.px; U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); ov.resize(); bump(); window.setTimeout(frameAsk, 50); };
+    const onResize = () => { U.k = panelScale(); U.wide = isWide(); ov.setScale(U.k); ov.resize(); bump(); window.setTimeout(frameAsk, 50); };
     addEventListener('resize', onResize);
     (window as unknown as { hhIntro: unknown }).hhIntro = { office, speech, overlay: ov, pen, cards, a: () => U.a, file: () => void file(), act: () => actions.current, phase: () => phase, step: () => U.si, skip: () => void finishAll(true) };
 

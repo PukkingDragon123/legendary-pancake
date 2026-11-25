@@ -1,7 +1,6 @@
 // The app shell: HUD, dock, tonight's ticket, Pip's speech bubble, and whichever sheet, panel or
 // overlay is open. The 3D scene lives underneath on its own canvas.
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { sound } from '../audio/sound.ts';
 import { Ceremony, Dialogs, Flyers, QuestBoard } from './fx.tsx';
 import { bedtimeOf, phase } from '../game/night.ts';
 import { save } from '../game/store.ts';
@@ -24,6 +23,8 @@ import { Book } from './book/book.tsx';
 import { BuildMode } from './build.tsx';
 import { Shop } from './shop/shop.tsx';
 import { Intro } from './intro.tsx';
+import { TalkText } from './talkview.tsx'; // [dialog10]
+import type { TalkView } from './talk.ts';
 
 // [chrome] Tonight's ticket: a punched paper ticket with a stub, stamped with the place Pip explores.
 function Ticket() {
@@ -55,51 +56,50 @@ function Ticket() {
   );
 }
 
-// [chrome] Pip's speech bubble: pops in from Pip's beak with a little puff, letters hop in as Pip
-// "says" them, and a sleepy dot-dot-dot bobs once Pip has finished.
+// [dialog10] Pip's words float over his head (ui/talk.ts): 3D letters typed with his voice and a person's rhythm,
+// *highlights* in gold, !screams! red-hot. They follow his head with a little lag and drift away when he is done;
+// a tap finishes a line that is still typing, a second tap sends it away.
 function Bubble() {
   const ref = useRef<HTMLDivElement>(null);
+  const view = useRef<TalkView | null>(null);
   const b = bubble.value;
+  const [up, setUp] = useState(false);
+  useEffect(() => { if (b) setUp(true); }, [b?.id]);
   useEffect(() => {
-    let raf = 0;
-    const loop = () => {
+    if (!up) return undefined;
+    let raf = 0, x = NaN, y = NaN, last = performance.now();
+    const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
-      const sc = sceneRef.current, el = ref.current;
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      const sc = sceneRef.current, el = ref.current, v = view.current;
       if (!sc || !el) return;
       const p = sc.screenOf(sc.owl.headWorld);
-      el.style.left = `${Math.max(130, Math.min(innerWidth - 140, p.x))}px`;
-      el.style.top = `${Math.max(176, p.y - 12)}px`;
+      const w = v ? v.cssW : 240, h = v ? v.cssH : 90;
+      const tx = Math.max(w / 2 + 2, Math.min(innerWidth - w / 2 - 2, p.x)), ty = Math.max(h + 54, p.y - 4);
+      if (Number.isNaN(x)) { x = tx; y = ty; }
+      const k = 1 - Math.exp(-dt * 9), nx = x + (tx - x) * k, ny = y + (ty - y) * k;
+      v?.drift(-(nx - x) * 0.2, -(ny - y) * 0.2);
+      x = nx; y = ny;
+      const d = devicePixelRatio || 1;
+      el.style.left = `${Math.round(x * d) / d}px`;
+      el.style.top = `${Math.round(y * d) / d}px`;
     };
     raf = requestAnimationFrame(loop);
-    const puff = setTimeout(() => { const el = ref.current; if (!el) return; const r = el.getBoundingClientRect(); uiBurst('puff', r.left + r.width / 2, r.bottom + 10, 4); }, 60);
-    return () => { cancelAnimationFrame(raf); clearTimeout(puff); };
-  }, [b?.id]);
-  const [shown, setShown] = useState(0);
+    return () => cancelAnimationFrame(raf);
+  }, [up]);
   useEffect(() => {
-    if (!b) return;
-    setShown(0);
-    let i = 0;
-    const t0 = performance.now();
-    const voices = ['voice_a', 'voice_b', 'voice_c', 'voice_e'];
-    const id = setInterval(() => {
-      // letters follow the clock, so a slow device catches up instead of crawling
-      const n = Math.min(b.text.length, Math.floor((performance.now() - t0) / 28) + 1);
-      if (n === i) return;
-      i = n;
-      setShown(i);
-      const ch = b.text[i - 1] ?? '';
-      // Pip's little voice: a soft blip every other letter, pitched by the letter
-      if (i % 2 === 0 && /[a-z]/i.test(ch)) sound.play(voices[ch.charCodeAt(0) % voices.length], { volume: 0.18, rate: 1.5 + ((ch.charCodeAt(0) * 7) % 11) / 40, gap: 40 });
-      if (i >= b.text.length) clearInterval(id);
-    }, 28);
-    return () => clearInterval(id);
+    if (!b) return undefined;
+    const puff = setTimeout(() => { const el = ref.current; if (!el) return; const r = el.getBoundingClientRect(); uiBurst('puff', r.left + r.width / 2, r.bottom + 4, 3); }, 60); // [chrome]
+    return () => clearTimeout(puff);
   }, [b?.id]);
-  if (!b || phase.value !== 'day' || breathing.value) return null;
+  if (!up || phase.value !== 'day' || breathing.value) return null;
+  const phone = innerWidth < 600;
   return (
-    <div class="hh-bubble" ref={ref} key={b.id}>
-      <span class="who">{save.value.name}</span>
-      <span class={'txt' + (shown >= b.text.length ? (/!/.test(b.text) ? ' t3d-wave t3d-shake' : /hoo|yay|love|lovely/i.test(b.text) ? ' t3d-wave' : '') : '')}>{[...b.text].map((ch, i) => <span class={'ch' + (i < shown ? ' on' : '') + (i === shown - 1 && ch !== ' ' ? ' new' : '')} style={{ '--i': i } as Record<string, number>}>{ch}</span>)}</span>
-      {shown >= b.text.length && <i class="bob" />}
+    <div class="hh-bubble hh-float" ref={ref}>
+      <TalkText text={b ? b.text : null} id={b?.id} who={save.value.name} viewRef={view}
+        opts={{ size: phone ? 20 : 22, maxWidth: Math.min(innerWidth - 16, phone ? 330 : 400), anchor: 'bottom', voice: 'pip', scrim: 0.34, tag: true }}
+        onNext={() => { if (bubble.value?.id === b?.id) bubble.value = null; }} onIdle={() => { if (!bubble.value) setUp(false); }} />
     </div>
   );
 }
