@@ -78,6 +78,7 @@ function strands(): THREE.DataTexture {
 export function furMaterial(src: THREE.MeshStandardMaterial, u: FurUniforms): THREE.MeshStandardMaterial {
   const m = new THREE.MeshStandardMaterial({ map: src.map, roughness: 0.95, metalness: 0, side: THREE.FrontSide, emissive: 0xffffff, emissiveMap: src.map, emissiveIntensity: 0.07 });
   m.name = 'fur';
+  m.defines = { ...src.defines }; // [light7] the coat's cel knobs (rim) carry over to its fluff
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u, { uShells: shellUniform });
     sh.vertexShader = sh.vertexShader

@@ -15,6 +15,8 @@ import type { Stage } from '../world/scene.ts';
 import { HOUSE } from '../world/layout.ts';
 import { modelUrl } from '../gfx/glb.ts';
 import { Look } from './look.ts';
+import { celKnobs } from '../gfx/cel.ts';
+import { smoothMaterials } from '../gfx/surface.ts';
 import { officeMats, type OfficeMats } from './mats.ts';
 import { buildCabinets, buildCredenza, buildDesk, buildRoom, buildShelves, buildWindow, certificate, DESK_TOP, frame, L, spineAtlas, type WindowParts } from './furnish.ts';
 import { bankersLamp, carafeSet, DESK, fountainPen, folder, inkPad, nameplate, paperwork, pottedFig, rubberStamp, sconce, type Lamp } from './desk.ts';
@@ -178,6 +180,8 @@ export class Office implements Stage {
     this.fill = new THREE.PointLight(0xffd8a8, 2.2, 9, 1.4);
     this.fill.position.set(0.6, 2.4, 1.6);
     s.add(this.fill);
+    // [light7] the painted cel light (gfx/cel.ts): a gentle violet fill in the shade of the sun shaft through the blinds
+    celKnobs(s).spotKey = 0.25;
 
     // ---- Pip
     this.actor = this.makeActor(look);
@@ -691,8 +695,10 @@ export class Office implements Stage {
 
   update(dt: number, t: number) {
     this.step(dt, t);
+    if ((this.smoothT -= dt) <= 0) { this.smoothT = 2; smoothMaterials(this.room); } // [light7] no pixelated textures
     this.pic.render(this.room, this.camera, this.time);
   }
+  private smoothT = 0;
   /** advance everything one tick without drawing (dev pages fast-forward with it) */
   step(dt: number, t: number) {
     void t;

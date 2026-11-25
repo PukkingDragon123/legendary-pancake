@@ -500,8 +500,9 @@ export class Sky {
     this.sunDir.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el) * 0.8 + 0.3).normalize();
     if (!isDay) this.sunDir.set(-0.32, 0.78, 0.54).normalize();
     this.sun.position.copy(this.sunDir).multiplyScalar(60);
-    // [look4] long low-sun shadows stay soft and luminous (the glade never goes murky at golden hour)
-    this.sun.shadow.intensity = isDay ? THREE.MathUtils.lerp(0.62, 0.85, THREE.MathUtils.smoothstep(this.sunDir.y, 0.35, 0.75)) : 0.7;
+    // [light7] cast shadows are whole: the cel ramp (gfx/cel.ts) lights them with the cool sky bounce, so they carry
+    // colour and the same crisp edge as the form shadows instead of being dimmed (muddy) sunlight
+    this.sun.shadow.intensity = 1;
     this.sun.target.position.set(0, 0, 0);
     this.ambient.copy(this.hemi.color).multiplyScalar(0.45 * this.hemi.intensity).add(this.sun.color.clone().multiplyScalar(0.22 * this.sun.intensity));
     U.uSunDisc.value.copy(this.sunDisc ? this.sunDisc.dir : this.sunDir).normalize();

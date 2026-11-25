@@ -16,6 +16,7 @@ import type { Fx } from './fx.ts';
 import type { House } from './house.ts';
 import { buildMovingBox, stepBoxIdle, stepBoxOpen, type BoxAnim, type BoxModel } from './house/boxes.ts';
 import { patchCut } from './house/kit.ts';
+import { addDetail } from '../gfx/surface.ts'; // [light7]
 import { barkR } from './house/oak.ts';
 import { CELL, FLOOR_IDS, FLOOR_Y, HOLES, inOpening, OPEN_A, openings, R_IN, ROOM_H, wallCenterA, wrapA, type FloorId } from './house/plan.ts';
 
@@ -53,10 +54,10 @@ function finishTexture(w: number, h: number, at: (i: number, j: number) => numbe
   }
   const tex = new THREE.DataTexture(data, w, h, THREE.RGBAFormat);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.magFilter = THREE.NearestFilter;
+  tex.magFilter = THREE.LinearFilter; // [light7] smooth, with photo detail on top (addDetail)
   tex.minFilter = THREE.LinearMipmapLinearFilter;
   tex.generateMipmaps = true;
-  tex.anisotropy = 4;
+  tex.anisotropy = 8;
   tex.needsUpdate = true;
   return tex;
 }
@@ -193,6 +194,7 @@ function wallMesh(fid: FloorId, wf: Finish): THREE.Mesh {
   g.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
   g.setIndex(idx);
   const m = new THREE.MeshStandardMaterial({ map: tex, side: THREE.DoubleSide, roughness: 0.86, metalness: 0 });
+  addDetail(m, 'plaster', { repeat: [(R * ARC * PX) / 0.9, (ROOM_H * PX) / 0.9], albedo: 0.7 }); // [light7] real fibre and relief
   patchCut(m);
   const mesh = new THREE.Mesh(g, m);
   mesh.receiveShadow = true;
@@ -246,6 +248,7 @@ function floorMesh(fid: FloorId, ff: Finish): THREE.Mesh {
   }
   g.computeVertexNormals();
   const m = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.74, metalness: 0 });
+  addDetail(m, 'wood', { repeat: (2 * Rs * PX) / 1.2, rotation: Math.PI / 2 }); // [light7] real oak grain and relief
   patchCut(m);
   const mesh = new THREE.Mesh(g, m);
   mesh.receiveShadow = true;

@@ -235,7 +235,7 @@ export function buildTerrain(shade: Collider[]): Terrain {
   geo.setIndex(idx);
   geo.computeVertexNormals();
   const { splat, tint } = paintMaps(shade);
-  const detail = (name: string) => { const t = tex(name, { repeat: true }); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearMipmapLinearFilter; return t; };
+  const detail = (name: string) => { const t = tex(name, { repeat: true }); t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.anisotropy = 8; return t; }; // [light7] realistic scans, smooth
   const topMat = new THREE.MeshLambertMaterial({ map: tint });
   const gu = { uSplat: { value: splat }, uFloor: { value: detail('forest_floor') }, uEarth: { value: detail('earth') }, uMoss: { value: detail('moss') }, uRock: { value: detail('mossy_rock') } };
   topMat.onBeforeCompile = (sh) => {
