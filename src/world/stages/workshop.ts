@@ -55,6 +55,8 @@ export const W = {
 // ------------------------------------------------------------------ geometry helpers
 
 type Part = { geo: THREE.BufferGeometry; m: THREE.Matrix4 };
+/** add `o` to `g` at (x, y, z) */
+const placed = (g: THREE.Object3D, o: THREE.Object3D, x: number, y: number, z: number) => { o.position.set(x, y, z); g.add(o); return o; };
 const mx = (x: number, y: number, z: number, rx = 0, ry = 0, rz = 0) =>
   new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(1, 1, 1));
 
@@ -177,7 +179,7 @@ export function workbench(seed = 7): THREE.Group {
   const can = varnishTin(0x2f5d4a, 'BEESWAX', 0.055, 0.05, seed);
   can.position.set(-0.05, 0.143, 0.45);
   g.add(can);
-  g.add(contactShadow(len + 0.3, depth + 0.25, 0.55)).position.set(cx, 0.004, (T.near + T.far) / 2);
+  placed(g, contactShadow(len + 0.3, depth + 0.25, 0.55), cx, 0.004, (T.near + T.far) / 2);
   return g;
 }
 
@@ -638,7 +640,7 @@ export function shavingHorse(): THREE.Group {
   B.build(g);
   g.add(contactShadow(1.4, 0.5, 0.5));
   // shavings under the ramp
-  g.add(sawdustPatch(0.7, 0.85)).position.set(0.15, 0.003, 0.05);
+  placed(g, sawdustPatch(0.7, 0.85), 0.15, 0.003, 0.05);
   return g;
 }
 
@@ -798,7 +800,7 @@ export function carcass(): THREE.Group {
   B.add(W.steel(), box(0.14, 0.02, 0.08, 'x', 0.003), mx(0.1, 0.48 + t / 2 + 0.01, d / 2 + 0.03));
   for (let k = 0; k < 4; k++) B.add(M.brass(), new THREE.BoxGeometry(0.03, 0.004, 0.05), mx(0.06 + k * 0.025, 0.48 + t / 2 + 0.022, d / 2 + 0.03, 0, k * 0.2));
   B.build(g);
-  g.add(contactShadow(w + 0.4, d + 0.4, 0.5)).position.set(0.1, 0.004, d / 2);
+  placed(g, contactShadow(w + 0.4, d + 0.4, 0.5), 0.1, 0.004, d / 2);
   return g;
 }
 

@@ -181,7 +181,7 @@ export class Beaver {
     if (next) this.pending = next;
     if (this.wrapping || !this.shot) return;
     this.wrapping = true;
-    this.shot.timeScale = 3;
+    this.shot.timeScale = 3.5;
   }
   /** [shop11] the next piece of work in his day's round (the stool comes out every other round) */
   private nextWork() {

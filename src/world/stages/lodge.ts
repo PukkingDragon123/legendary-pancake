@@ -66,7 +66,7 @@ const BARREL = { x: -2.72, z: -1.72, h: 1.08, r: 0.44 };
 const SHELF = { x: 4.12, z0: -0.55, z1: 1.75, y: 0.92, d: 0.56 };
 /** the deal plinths: spread across the floor on a wide screen, gathered in front of the workbench on a tall one */
 const STUMPS: Record<LodgeLayout, { x: number; z: number; h: number }[]> = {
-  side: [{ x: -2.42, z: 0.22, h: 0.42 }, { x: -1.65, z: 0.55, h: 0.5 }, { x: -0.88, z: 0.22, h: 0.42 }],
+  side: [{ x: -2.3, z: 0.25, h: 0.3 }, { x: -1.58, z: 0.55, h: 0.36 }, { x: -0.86, z: 0.25, h: 0.3 }],
   top: [{ x: -0.68, z: 0.5, h: 0.42 }, { x: -0.06, z: 1.12, h: 0.34 }, { x: 0.56, z: 0.5, h: 0.42 }],
 };
 /** acorn packs on the floor before the shelf (ids from ACORN_PACKS), gem packs on the shelf (GEM_PACKS) */
@@ -1224,7 +1224,7 @@ export class Lodge implements Stage {
   private shot(name: string): Shot {
     const l = this.layout;
     if (name === 'home') return l === 'side'
-      ? { target: v3(-0.45, 1.05, -1.05), yaw: 0.03, pitch: 0.12, dist: 5.0, fov: 46, cx: 0.5, cy: 0.5 }
+      ? { target: v3(-0.38, 1.0, -1.15), yaw: 0.03, pitch: 0.12, dist: 4.6, fov: 46, cx: 0.5, cy: 0.5 }
       : { target: v3(-0.05, 0.9, -0.95), yaw: 0.0, pitch: 0.32, dist: 4.8, fov: 58, cx: 0.5, cy: 0.42 };
     if (name === 'deals') { const p = STUMPS[l][1]; return l === 'side' ? { target: v3(p.x, 0.75, p.z - 0.3), yaw: 0.05, pitch: 0.2, dist: 3.9, fov: 44, cx: 0.5, cy: 0.5 } : this.shot('home'); }
     if (name === 'stash') return { target: v3(SHELF.x - 0.45, 0.6, (SHELF.z0 + SHELF.z1) / 2 + 0.05), yaw: -1.12, pitch: l === 'side' ? 0.4 : 0.5, dist: l === 'side' ? 3.5 : 5.4, fov: l === 'side' ? 46 : 52, cx: 0.5, cy: l === 'side' ? 0.48 : 0.42 };
