@@ -8,7 +8,7 @@
 //   --paper-bg     the parchment background shorthand (layers), --sh-1/2/3 soft shadows, --drop/--drop-lg filters
 import { CSS_TOKENS } from '../../gfx/palette.ts';
 import { installPxFx } from '../pxfx.tsx';
-import { bubbleTail, medallionArt, nineCSS, roundButton } from './kit.ts';
+import { bubbleTail, crestArt, medallionArt, nineCSS, paperCardCSS, roundButton, sliderKnob, switchLever, switchPlate } from './kit.ts';
 import { hex } from './paint.ts';
 import { texAbs, tileURL } from './tex.ts';
 
@@ -26,6 +26,7 @@ export function installRealSkin() {
 --tx-felt-green:${u(tileURL('felt', '#2c6b43', 384))};--tx-felt-blue:${u(tileURL('felt', '#2b4b86', 384))};--tx-felt-cream:${u(tileURL('felt', '#e8dcc2', 384))};
 --tx-bookcloth-red:${u(tileURL('bookcloth', '#7a1f24', 384))};--tx-bookcloth-green:${u(tileURL('bookcloth', '#1f5a39', 384))};--tx-bookcloth-blue:${u(tileURL('bookcloth', '#1e3566', 384))};
 --tx-walnut-dark:${u(tileURL('walnut', '#8a7468', 512))};
+--sl-knob:${u(sliderKnob())};--sw-off:${u(switchPlate(false))};--sw-on:${u(switchPlate(true))};--sw-lever:${u(switchLever())};--crest:${u(crestArt())};
 --rb-cream:${u(roundButton(48, 'cream'))};--rb-cream-dn:${u(roundButton(48, 'cream', true))};--rb-brass:${u(roundButton(48, 'brass'))};--rb-brass-dn:${u(roundButton(48, 'brass', true))};--rb-walnut:${u(roundButton(48, 'walnut'))};--rb-green:${u(roundButton(48, 'green'))};--rb-red:${u(roundButton(48, 'red'))};--rb-night:${u(roundButton(48, 'night'))};
 --paper-bg:var(--tx-paper) 0 0/320px 320px,#efe2c4;
 --parch-tile:var(--tx-paper);--parch-tile-dark:var(--tx-paper-dark);
@@ -37,15 +38,17 @@ export function installRealSkin() {
 --ink-emboss:0 1px 0 rgba(255,250,235,.55);
 --gilt-text:0 1px 0 #2a1408,0 0 1px #2a1408,0 2px 3px rgba(0,0,0,.45);
 }`;
-  const card = `background:var(--tx-paper) 0 0/320px 320px,#f3e7cc;background-clip:border-box;border:10px solid transparent;border-radius:12px;box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(120,84,40,.18),inset 0 -3px 8px rgba(120,80,30,.12)`;
-  const sunk = `background:var(--tx-paper-dark) 0 0/320px 320px,#dcc89c;background-clip:border-box;border:10px solid transparent;border-radius:12px;box-shadow:inset 0 2px 5px rgba(60,36,14,.38),inset 0 0 0 1px rgba(90,60,30,.25),0 1px 0 rgba(255,248,230,.6)`;
-  const ledger = `background:repeating-linear-gradient(180deg,transparent 0 21px,rgba(70,110,170,.22) 21px 22px) 0 6px,linear-gradient(90deg,transparent 0 22px,rgba(196,72,72,.38) 22px 23.5px,transparent 23.5px),var(--tx-paper) 0 0/320px 320px,#f6ecd4;border:8px solid transparent;border-radius:6px;background-clip:border-box;box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.6)`;
+  // [ui10] paper cards have deckled, printed edges (kit paperCard); nothing in the interface is rounded
+  const card = paperCardCSS();
+  const sunk = `border-image:none;background:var(--tx-paper-dark) 0 0/320px 320px,#dcc89c;background-clip:border-box;border:10px solid transparent;border-radius:0;box-shadow:inset 0 2px 5px rgba(60,36,14,.38),inset 0 0 0 1px rgba(90,60,30,.25),0 1px 0 rgba(255,248,230,.6)`;
+  const ledger = `background:repeating-linear-gradient(180deg,transparent 0 21px,rgba(70,110,170,.22) 21px 22px) 0 6px,linear-gradient(90deg,transparent 0 22px,rgba(196,72,72,.38) 22px 23.5px,transparent 23.5px),var(--tx-paper) 0 0/320px 320px,#f6ecd4;border:8px solid transparent;border-radius:0;background-clip:border-box;box-shadow:var(--sh-1),inset 0 1px 0 rgba(255,255,255,.6)`;
   const css = `${CSS_TOKENS}
 ${tok}
 .sheet{${nineCSS('walnut')};background:var(--paper-bg);background-clip:padding-box}
 .modal{${nineCSS('walnut')};background:var(--paper-bg);background-clip:padding-box}
 .card{${card}}
 .card.sunk{${sunk}}
+.modal.card{${nineCSS('walnut')};background:var(--paper-bg);background-clip:padding-box;border-radius:0;box-shadow:none}
 .card.night{${nineCSS('walnut_thin')};background:var(--tx-velvet-blue) 0 0/260px,#22345e;background-clip:padding-box;border-radius:0;box-shadow:none}
 .btn.pillow{${nineCSS('button_green')}}
 .btn.pillow:active{${nineCSS('button_green_down')}}
@@ -62,7 +65,7 @@ ${tok}
 .btn.pillow:disabled,.btn.soft:disabled{${nineCSS('button_disabled')}}
 .tag{${nineCSS('tab')}}
 .tag.on{${nineCSS('tab_active')}}
-.seg{background:var(--tx-paper-dark) 0 0/320px,#d8c398;border-radius:12px;padding:4px;box-shadow:inset 0 2px 5px rgba(60,36,14,.4),inset 0 0 0 1px rgba(90,60,30,.25),0 1px 0 rgba(255,248,230,.6)}
+.seg{background:var(--tx-paper-dark) 0 0/320px,#d8c398;border-radius:0;padding:4px;box-shadow:inset 0 2px 5px rgba(60,36,14,.4),inset 0 0 0 1px rgba(90,60,30,.25),0 1px 0 rgba(255,248,230,.6)}
 .seg button{${nineCSS('tab')}}
 .seg button.on{${nineCSS('tab_active')}}
 .tile{${nineCSS('slot_brass')}}
@@ -82,7 +85,7 @@ ${tok}
 .lvbar>i{${nineCSS('bar_fill_gold')}}
 .journal-cover{${nineCSS('ebony')};background:var(--tx-bookcloth-red) 0 0/260px,#6e1c22;background-clip:padding-box}
 .page{${ledger}}
-.polaroid{${card};background-color:#fbf6ea}
+.polaroid{${card}}
 .plus-card{${nineCSS('ebony')};background:var(--tx-velvet-blue) 0 0/260px,#22345e;background-clip:padding-box}
 .shelf{${nineCSS('wood')};background:var(--tx-oak) 0 0/300px;background-clip:padding-box}
 .map{${card}}
@@ -111,6 +114,20 @@ ${tok}
 .pick.sound-tile.on{${nineCSS('slot_gold_active')}}
 .think{${nineCSS('bubble_think')}}
 .tooltip{${nineCSS('tooltip')};color:#f6e9cf}
+/* [ui10] a carved cartouche crest (oak leaves, acorns, the owl in a gilt boss) on every cabinet's top rail */
+.sheet::before{content:'';position:absolute;left:50%;top:-22px;width:104px;height:44px;margin-left:-52px;background:var(--crest) center/104px 44px no-repeat;pointer-events:none;z-index:3}
+.sheet.qb::before,.sheet.wd::before{top:-24px}
+/* [ui10] toggles are real switches: a walnut plate with a brass escutcheon, a square-cut brass lever */
+.toggle{background:var(--sw-off) center/64px 36px no-repeat}
+.toggle.on{background-image:var(--sw-on)}
+.toggle .trk,.toggle.on .trk{background:none;box-shadow:none;border-radius:0}
+.toggle .knob{left:-1px;top:-1px;width:32px;height:32px;border-radius:0;background:var(--sw-lever) 0 0/32px 32px no-repeat;box-shadow:none}
+/* [ui10] sliders are brass levers in carved walnut tracks */
+input[type='range'].slider{height:40px}
+input[type='range'].slider::-webkit-slider-runnable-track{height:14px;border-radius:0;box-shadow:none;background:none;${nineCSS('slider_track')}}
+input[type='range'].slider::-moz-range-track{height:14px;border-radius:0;box-shadow:none;background:none;${nineCSS('slider_track')}}
+input[type='range'].slider::-webkit-slider-thumb{width:26px;height:36px;margin-top:-11px;border-radius:0;background:var(--sl-knob) 0 0/26px 36px no-repeat;box-shadow:none}
+input[type='range'].slider::-moz-range-thumb{width:26px;height:36px;border-radius:0;background:var(--sl-knob) 0 0/26px 36px no-repeat;box-shadow:none}
 `;
   const st = document.createElement('style');
   st.id = 'hh-real-skin';

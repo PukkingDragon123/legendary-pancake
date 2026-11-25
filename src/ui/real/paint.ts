@@ -40,6 +40,16 @@ export function fbm(x: number, y: number, s = 0, oct = 3): number {
   return sum / n;
 }
 
+/** [ui10] value noise that repeats every `px` x `py` lattice cells (seamless along tiled 9-slice edges) */
+export function pnoise(x: number, y: number, px: number, py: number, s = 0): number {
+  const xi = Math.floor(x), yi = Math.floor(y), fx = x - xi, fy = y - yi;
+  const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+  const w = (a: number, n: number) => (n > 0 ? ((a % n) + n) % n : a);
+  const x0 = w(xi, px), x1 = w(xi + 1, px), y0 = w(yi, py), y1 = w(yi + 1, py);
+  const a = hash(x0, y0, s), b = hash(x1, y0, s), c = hash(x0, y1, s), d = hash(x1, y1, s);
+  return a + (b - a) * u + (c - a) * v + (a - b - c + d) * u * v;
+}
+
 // ------------------------------------------------------------------ shapes (signed distance, units)
 const withBB = (f: (x: number, y: number) => number, bb?: BB): SDF => { const g = f as SDF; if (bb) g.bb = bb; return g; };
 /** a rounded rectangle, top-left (x, y), size w x h, corner radius r */
@@ -48,6 +58,19 @@ export const box = (x: number, y: number, w: number, h: number, r = 0): SDF => {
   return withBB((px, py) => {
     const qx = Math.abs(px - cx) - hw + rr, qy = Math.abs(py - cy) - hh + rr;
     return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - rr;
+  }, [x, y, x + w, y + h]);
+};
+/**
+ * [ui10] A rectangle with its corners cut off at 45 degrees (`c` units along each side): the angular,
+ * bevel-cut plate the interface is built from (no rounded rectangles).
+ */
+export const cutBox = (x: number, y: number, w: number, h: number, c = 0): SDF => {
+  const cx = x + w / 2, cy = y + h / 2, hw = w / 2, hh = h / 2, cc = Math.min(c, hw, hh);
+  return withBB((px, py) => {
+    const ax = Math.abs(px - cx), ay = Math.abs(py - cy);
+    const qx = ax - hw, qy = ay - hh;
+    const b = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0);
+    return cc > 0 ? Math.max(b, (ax + ay - (hw + hh - cc)) * Math.SQRT1_2) : b;
   }, [x, y, x + w, y + h]);
 };
 export const circle = (cx: number, cy: number, r: number): SDF => withBB((x, y) => Math.hypot(x - cx, y - cy) - r, [cx - r, cy - r, cx + r, cy + r]);
@@ -64,6 +87,47 @@ export const segment = (x0: number, y0: number, x1: number, y1: number, r: numbe
   const dx = x1 - x0, dy = y1 - y0, t = clamp(((x - x0) * dx + (y - y0) * dy) / (dx * dx + dy * dy || 1));
   return Math.hypot(x - x0 - dx * t, y - y0 - dy * t) - r;
 }, [Math.min(x0, x1) - r, Math.min(y0, y1) - r, Math.max(x0, x1) + r, Math.max(y0, y1) + r]);
+/**
+ * [ui10] A tapered stroke along a polyline of [x, y, radius] points (scrolls, tendrils, filigree wire, vines):
+ * the distance to the nearest segment minus the radius interpolated along it.
+ */
+export function curve(pts: [number, number, number][]): SDF {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [x, y, r] of pts) { x0 = Math.min(x0, x - r); y0 = Math.min(y0, y - r); x1 = Math.max(x1, x + r); y1 = Math.max(y1, y + r); }
+  const n = pts.length;
+  return withBB((px, py) => {
+    let d = Infinity;
+    for (let i = 0; i < n - 1; i++) {
+      const a = pts[i], b = pts[i + 1], ex = b[0] - a[0], ey = b[1] - a[1];
+      const t = clamp(((px - a[0]) * ex + (py - a[1]) * ey) / (ex * ex + ey * ey || 1));
+      const dd = Math.hypot(px - a[0] - ex * t, py - a[1] - ey * t) - (a[2] + (b[2] - a[2]) * t);
+      if (dd < d) d = dd;
+    }
+    return d;
+  }, [x0, y0, x1, y1]);
+}
+/**
+ * [ui10] Points along a curling scroll (a volute): starts at angle `a0` at radius `r0` round (cx, cy) and winds
+ * `turns` times (negative = anticlockwise) inwards to radius `r1`, the stroke tapering from `w0` to `w1`.
+ */
+export function spiralPts(cx: number, cy: number, r0: number, r1: number, a0: number, turns: number, w0: number, w1: number, n = 28): [number, number, number][] {
+  const out: [number, number, number][] = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, a = a0 + turns * Math.PI * 2 * t, rr = r0 * Math.pow(r1 / r0, t);
+    out.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, w0 + (w1 - w0) * t]);
+  }
+  return out;
+}
+/** [ui10] points along a cubic Bezier, the radius tapering from w0 to w1 */
+export function bezierPts(p0: [number, number], p1: [number, number], p2: [number, number], p3: [number, number], w0: number, w1: number, n = 16): [number, number, number][] {
+  const out: [number, number, number][] = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, u = 1 - t;
+    out.push([u * u * u * p0[0] + 3 * u * u * t * p1[0] + 3 * u * t * t * p2[0] + t * t * t * p3[0], u * u * u * p0[1] + 3 * u * u * t * p1[1] + 3 * u * t * t * p2[1] + t * t * t * p3[1], w0 + (w1 - w0) * t]);
+  }
+  return out;
+}
+
 /** a polygon (exact distance) */
 export function polygon(pts: [number, number][]): SDF {
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -217,6 +281,26 @@ export const glass = (col: RGB | string, o: { metal?: number } = {}): Material =
 export const glow = (col: RGB | string | ((x: number, y: number) => RGB)): Material => ({ alb: typeof col === 'function' ? col : solidAlb(col), emit: 1 });
 export const matte = (col: RGB | string | ((x: number, y: number) => RGB), o: Partial<Material> = {}): Material => ({ alb: typeof col === 'function' ? col : solidAlb(col), spec: 0.08, shin: 8, ...o });
 
+/**
+ * [ui10] Make a material seamless for a 9-slice frame shown with `border-image-repeat: round`: across the
+ * repeating middle [x0, x0 + px] (and [y0, y0 + py]) the albedo cross-fades into itself shifted one period, and
+ * the far corner continues from the near one, so tile joins never show.
+ */
+export function tileable(m: Material, x0: number, px: number, y0 = 0, py = 0): Material {
+  const a = m.alb;
+  const ax = (x: number, y: number): RGB => {
+    if (!px || x <= x0) return a(x, y);
+    if (x >= x0 + px) return a(x - px, y);
+    return mix(a(x, y), a(x - px, y), (x - x0) / px);
+  };
+  const alb = !py ? ax : (x: number, y: number): RGB => {
+    if (y <= y0) return ax(x, y);
+    if (y >= y0 + py) return ax(x, y - py);
+    return mix(ax(x, y), ax(x, y - py), (y - y0) / py);
+  };
+  return { ...m, alb };
+}
+
 // ------------------------------------------------------------------ lighting
 const norm3 = (v: number[]) => { const n = Math.hypot(v[0], v[1], v[2]); return [v[0] / n, v[1] / n, v[2] / n]; };
 const L = norm3([-0.48, -0.62, 0.62]);
@@ -251,6 +335,8 @@ export interface PartOpts {
   add?: boolean;
   /** only where something is already painted */
   onTop?: boolean;
+  /** [ui10] ink the part's edge with a thin dark line (true = the default width; a number = device px) */
+  line?: boolean | number;
 }
 export interface Shadow { dx?: number; dy?: number; blur?: number; a?: number; color?: string }
 export interface RenderOpts {
@@ -264,7 +350,18 @@ export interface RenderOpts {
   aoR?: number; ao?: number;
   /** light strength */
   light?: number;
+  /** [ui10] the thin warm-black silhouette outline (matches the outlined 3D world): device px, false = none */
+  outline?: number | false;
+  /** [ui10] no lighting at all: the albedo as it is (paper rings that meet a CSS paper tile seamlessly) */
+  flat?: boolean;
+  /** outline colour (rgb) and opacity */
+  inkCol?: RGB; inkA?: number;
 }
+
+/** [ui10] the outline ink: a warm near-black */
+export const INK: RGB = [20, 12, 16];
+/** [ui10] the default outline width in device px for a painting scale k (1 - 1.5 device px) */
+export const outlinePx = (k: number) => clamp(0.85 + 0.22 * k, 1, 1.5);
 
 /**
  * A painting surface `w` x `h` units (CSS px) with `pad` units of margin all round for shadows; `k` device px
@@ -275,6 +372,8 @@ export class Real {
   readonly W: number; readonly H: number;
   readonly hgt: Float32Array; readonly alb: Float32Array; readonly cov: Float32Array; readonly mi: Uint8Array;
   readonly mats: Material[] = [];
+  /** [ui10] ink lines laid over the lit result (0..1) */
+  ink: Float32Array | null = null;
   constructor(readonly w: number, readonly h: number, k = deviceK(), pad = 0) {
     this.k = k; this.pad = pad;
     this.W = Math.ceil((w + pad * 2) * k); this.H = Math.ceil((h + pad * 2) * k);
@@ -317,6 +416,37 @@ export class Real {
         if (c >= 0.5) this.mi[i] = mi;
       }
       this.cov[i] = old + c * (1 - old);
+      if (this.ink) this.ink[i] *= 1 - c;
+    }
+    if (o.line) this.line(s, typeof o.line === 'number' ? o.line : undefined);
+    return this;
+  }
+  /**
+   * [ui10] Ink a thin dark line along a shape's edge (centred on it), only over what's painted: inner outlines
+   * where parts overlap, engraved rules, printed borders. `w` device px (default a little under the outline).
+   */
+  line(s: SDF, w?: number, a = 0.85) {
+    const { k, pad, W } = this, lw = w ?? outlinePx(k) * 0.85, [x0, y0, x1, y1] = this.range(s, 2);
+    if (!this.ink) this.ink = new Float32Array(this.W * this.H);
+    for (let py = y0; py < y1; py++) for (let px = x0; px < x1; px++) {
+      const i = py * W + px;
+      if (this.cov[i] <= 0) continue;
+      const x = (px + 0.5) / k - pad, y = (py + 0.5) / k - pad;
+      const v = clamp(lw / 2 + 0.5 - Math.abs(s(x, y) * k)) * a;
+      if (v > this.ink[i]) this.ink[i] = v;
+    }
+    return this;
+  }
+  /** [ui10] Ink inside a shape (printed or painted dark marks over the lit surface: rules, stamps, lettering). */
+  inkFill(s: SDF, a = 0.85) {
+    const { k, pad, W } = this, [x0, y0, x1, y1] = this.range(s);
+    if (!this.ink) this.ink = new Float32Array(this.W * this.H);
+    for (let py = y0; py < y1; py++) for (let px = x0; px < x1; px++) {
+      const i = py * W + px;
+      if (this.cov[i] <= 0) continue;
+      const x = (px + 0.5) / k - pad, y = (py + 0.5) / k - pad;
+      const v = clamp(0.5 - s(x, y) * k) * a;
+      if (v > this.ink[i]) this.ink[i] = v;
     }
     return this;
   }
@@ -345,6 +475,7 @@ export class Real {
       const a = m.alb(x, y), j = i * 3;
       this.alb[j] += (a[0] - this.alb[j]) * c; this.alb[j + 1] += (a[1] - this.alb[j + 1]) * c; this.alb[j + 2] += (a[2] - this.alb[j + 2]) * c;
       if (c >= 0.5) this.mi[i] = mi;
+      if (this.ink) this.ink[i] *= 1 - c;
     }
     return this;
   }
@@ -370,13 +501,21 @@ export class Real {
     const aoR = Math.max(1, Math.round((o.aoR ?? 5) * k)), aoK = (o.ao ?? 1) * 0.16;
     const hb = boxBlur(boxBlur(this.hgt, W, H, aoR), W, H, aoR);
     const sk = k / 2; // central differences span 2 px = 2/k units
+    // [ui10] the silhouette outline: coverage dilated by `ow` device px (anti-aliased), shown under the object
+    const ow = o.outline === false ? 0 : (o.outline ?? outlinePx(k));
+    const dil = ow > 0 ? dilate(this.cov, W, H, ow) : null;
+    const ic = o.inkCol ?? INK, ia = o.inkA ?? 0.94, ink = this.ink;
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x, c = this.cov[i];
-      if (c <= 0.002) continue;
+      const dv = dil ? dil[i] * ia : 0;
+      if (c <= 0.002) {
+        if (dv > 0.002) { const q = i * 4; out[q] = ic[0]; out[q + 1] = ic[1]; out[q + 2] = ic[2]; out[q + 3] = dv * 255; }
+        continue;
+      }
       const m = this.mats[this.mi[i]] ?? this.mats[0];
       const j = i * 3, o4 = i * 4;
       let r = this.alb[j], g = this.alb[j + 1], b = this.alb[j + 2];
-      if (!m.emit) {
+      if (!m.emit && !o.flat) {
         const hc = this.hgt[i];
         const hl = x > 0 && this.cov[i - 1] > 0 ? this.hgt[i - 1] : hc, hr = x < W - 1 && this.cov[i + 1] > 0 ? this.hgt[i + 1] : hc;
         const hu = y > 0 && this.cov[i - W] > 0 ? this.hgt[i - W] : hc, hd = y < H - 1 && this.cov[i + W] > 0 ? this.hgt[i + W] : hc;
@@ -417,6 +556,13 @@ export class Real {
         }
         r = rr; g = gg; b = bb;
       }
+      if (ink && ink[i] > 0) { const t = ink[i]; r += (ic[0] - r) * t; g += (ic[1] - g) * t; b += (ic[2] - b) * t; }
+      if (dv > 0.002 && c < 0.998) {
+        // the object over its outline
+        const ob = dv * (1 - c), A = c + ob;
+        out[o4] = (r * c + ic[0] * ob) / A; out[o4 + 1] = (g * c + ic[1] * ob) / A; out[o4 + 2] = (b * c + ic[2] * ob) / A; out[o4 + 3] = A * 255;
+        continue;
+      }
       out[o4] = r; out[o4 + 1] = g; out[o4 + 2] = b; out[o4 + 3] = c * 255;
     }
     return out;
@@ -447,6 +593,26 @@ export class Real {
     return c;
   }
   url(o: RenderOpts = {}) { return toURL(this.canvas(o)); }
+}
+
+/** [ui10] grow a coverage field by `r` device px (an anti-aliased disc), for outlines */
+export function dilate(cov: Float32Array, W: number, H: number, r: number): Float32Array {
+  const out = new Float32Array(cov.length), R = Math.ceil(r + 0.5);
+  const off: number[] = [];
+  for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) { const w = clamp(r + 0.5 - Math.hypot(dx, dy)); if (w > 0) off.push(dx, dy, w); }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x;
+    if (cov[i] >= 0.998) { out[i] = 1; continue; }
+    let m = cov[i];
+    for (let q = 0; q < off.length; q += 3) {
+      const xx = x + off[q], yy = y + off[q + 1];
+      if (xx < 0 || yy < 0 || xx >= W || yy >= H) continue;
+      const v = cov[yy * W + xx] * off[q + 2];
+      if (v > m) { m = v; if (m >= 0.998) break; }
+    }
+    out[i] = m;
+  }
+  return out;
 }
 
 /** separable box blur of a W x H float field (radius r px) */

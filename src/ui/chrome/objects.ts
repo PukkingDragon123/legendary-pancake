@@ -8,10 +8,11 @@
 //
 // Sizes are CSS px; `zoom` is how much larger the HUD is drawn on big screens (1 phones, 1.5 desktops).
 import {
-  BRASS_OLD, COPPER, GOLD, IRON, Real, SILVER, bevel, box, cached, chamfer, circle, clamp, cloth, deviceK, dome, ellipse, enamel, fbm, glass, glow, hex,
+  BRASS_OLD, COPPER, GOLD, IRON, Real, SILVER, bevel, box, cached, chamfer, circle, clamp, cloth, cutBox, deviceK, dome, ellipse, enamel, fbm, glass, glow, hex,
   inter, leather, matte, metal, mix, paperMat, pillow, polygon, rim, ring, segment, smoothstep, subtract, toURL, tubeX, tubeY, union, vnoise, warp, wood,
   type Material, type RGB, type SDF, type WoodName,
 } from '../real/paint.ts';
+import { filigreeCorner, milgrain, owlCrest, rivet, rosette, stringing } from '../real/orn.ts';
 
 /** paint once per key (and device scale) */
 export const cachedRelief = (key: string, make: () => string) => cached(key, make);
@@ -28,7 +29,7 @@ const kz = (zoom = 1) => Math.min(4, deviceK(3) * zoom);
 
 /** brass screw head with a slot */
 function screw(r: Real, x: number, y: number, rad = 1.8, ang = 0.6, z = 0) {
-  r.part(circle(x, y, rad), dome(x, y, rad, rad, 1.3, z + 0.8), metal(BRASS_OLD, { polish: 0.5 }));
+  r.part(circle(x, y, rad), dome(x, y, rad, rad, 1.3, z + 0.8), metal(BRASS_OLD, { polish: 0.5 }), { line: 0.8 });
   const c = Math.cos(ang) * rad * 0.72, s = Math.sin(ang) * rad * 0.72;
   r.carve(segment(x - c, y - s, x + c, y + s, 0.3), 0.9, 0.3);
 }
@@ -44,30 +45,38 @@ export interface BoardOpts { wood?: WoodName; seed?: number; bevel?: number; hoo
  * use `boardCSS` / `.hh-board` which already allow for it.
  */
 export function board(w: number, h: number, zoom = 1, _res = 1, o: BoardOpts = {}): string {
-  return cached(`board:${w}x${h}:${zoom}:${JSON.stringify(o)}`, () => {
-    const m = 5, kk = Math.min(kz(zoom), Math.sqrt(700000 / ((w + 10) * (h + 10)))), r = new Real(w, h, Math.max(1, kk), m), bev = o.bevel ?? 5, R = o.radius ?? 8;
-    const body = box(0, 2, w, h - 2, R);
+  return cached(`board10:${w}x${h}:${zoom}:${JSON.stringify(o)}`, () => {
+    // [ui10] a bevel-cut hardwood sign: an inlaid boxwood line, a gilt bead, pierced brass filigree corners
+    // (or carved rosettes), brass eye-hooks; no rounded corners anywhere
+    const m = 5, kk = Math.min(kz(zoom), Math.sqrt(700000 / ((w + 10) * (h + 10)))), r = new Real(w, h, Math.max(1, kk), m), bev = o.bevel ?? 5;
+    const C = Math.min(9, h * 0.2), ci = (d: number) => Math.max(0.6, C - d * 0.586);
+    const body = cutBox(0, 2, w, h - 2, C);
     r.part(body, bevel(5, bev), wood(o.wood ?? 'walnut', { along: 'x', oy: (o.seed ?? 1) * 53, ox: (o.seed ?? 1) * 131 }));
+    // a carved groove and an inlaid boxwood line just inside the bevel
+    const a0 = bev * 0.55, sl = subtract(cutBox(a0, 2 + a0, w - 2 * a0, h - 2 - 2 * a0, ci(a0)), cutBox(a0 + 0.6, 2 + a0 + 0.6, w - 2 * a0 - 1.2, h - 2 - 2 * a0 - 1.2, ci(a0 + 0.6)));
+    stringing(r, sl, (o.wood ?? 'walnut') === 'oak' ? hex('#4a2c18') : hex('#ecc98c'));
+    r.line(sl, 0.7, 0.3);
     if (o.gilt !== false) {
-      const g = subtract(box(bev - 0.2, bev + 1.8, w - 2 * bev + 0.4, h - 2 * bev - 1.6, Math.max(2, R - bev + 1)), box(bev + 1.2, bev + 3.2, w - 2 * bev - 2.4, h - 2 * bev - 4.4, Math.max(1.5, R - bev)));
+      const g = subtract(cutBox(bev - 0.2, bev + 1.8, w - 2 * bev + 0.4, h - 2 * bev - 1.6, ci(bev)), cutBox(bev + 1.2, bev + 3.2, w - 2 * bev - 2.4, h - 2 * bev - 4.4, ci(bev + 1.4)));
       r.carve(g, 0.8, 0.5);
       r.paint(g, metal(GOLD, { polish: 0.75 }), 0.85);
+      r.line(g, 0.7, 0.35);
     }
     if (o.inset) {
-      const ins = box(bev + 3, bev + 5, w - 2 * bev - 6, h - 2 * bev - 8, 3);
+      const ins = cutBox(bev + 3, bev + 5, w - 2 * bev - 6, h - 2 * bev - 8, ci(bev + 3));
       r.carve(ins, 1.8, 1.4);
     }
-    if (o.brackets) for (const right of [false, true]) for (const top of [true, false]) {
-      const X = (v: number) => (right ? w - v : v), Y = (v: number) => (top ? 2 + v : h - v);
-      const L = Math.min(18, h * 0.42), B = 6;
-      const sh = union(polygon([[X(-0.5), Y(-0.5)], [X(L), Y(-0.5)], [X(L), Y(B)], [X(B), Y(B)], [X(B), Y(L)], [X(-0.5), Y(L)]]), circle(X(L), Y(B / 2), B / 2), circle(X(B / 2), Y(L), B / 2));
-      r.part(inter(sh, body), bevel(1.6, 1.4, 5.2), metal(BRASS_OLD, { polish: 0.55 }));
-      screw(r, X(L - 1), Y(B / 2), 1.3, 0.5, 6.4);
+    if (o.brackets) {
+      const L = Math.min(22, h * 0.46);
+      for (const [cx, cy, sx, sy] of [[0, 2, 1, 1], [w, 2, -1, 1], [0, h, 1, -1], [w, h, -1, -1]] as [number, number, number, number][]) filigreeCorner(r, cx + sx * 0.3, cy + sy * 0.3, sx, sy, L, 6, BRASS_OLD, L * 0.3);
+    } else if (h >= 30) {
+      for (const [x, y] of [[C * 0.62 + 2.4, 2 + C * 0.62 + 2.4], [w - C * 0.62 - 2.4, 2 + C * 0.62 + 2.4], [C * 0.62 + 2.4, h - C * 0.62 - 2.4], [w - C * 0.62 - 2.4, h - C * 0.62 - 2.4]]) rosette(r, x, y, 2.6, 5, wood(o.wood ?? 'walnut', { along: 'y', ox: x * 3 }), 6, metal(GOLD, { polish: 0.85 }));
     }
     for (const [x, y] of o.screws ?? []) screw(r, x, y, 1.8, x * 0.13, 5);
     for (const x of o.hooks ?? []) {
-      r.part(ring(x, 1.2, 1.4, 3.4), (px, py) => 6.5 + 1.2 * Math.sqrt(Math.max(0, 1 - ((Math.hypot(px - x, py - 1.2) - 2.4) / 1) ** 2)), metal(GOLD, { polish: 0.7 }));
-      r.part(circle(x, 5.4, 2.2), dome(x, 5.4, 2.2, 2.2, 1.4, 5.6), metal(BRASS_OLD, { polish: 0.6 }));
+      r.part(ring(x, 1.2, 1.4, 3.4), (px, py) => 6.5 + 1.2 * Math.sqrt(Math.max(0, 1 - ((Math.hypot(px - x, py - 1.2) - 2.4) / 1) ** 2)), metal(GOLD, { polish: 0.7 }), { line: 0.8 });
+      r.part(cutBox(x - 2.6, 3.2, 5.2, 4.6, 1.4), (_x, _y, ins) => 5.6 + Math.min(1.2, ins), metal(BRASS_OLD, { polish: 0.6 }), { line: 0.8 });
+      r.carve(segment(x - 1.2, 5.5, x + 1.2, 5.5, 0.25), 0.6, 0.25);
     }
     return r.url({ shadow: { dy: 3, blur: 4, a: 0.45 }, aoR: 3 });
   });
@@ -75,42 +84,47 @@ export function board(w: number, h: number, zoom = 1, _res = 1, o: BoardOpts = {
 /** a board of any CSS size (for clipboards and panels) */
 export const boardCSS = (wPx: number, hPx: number, o: BoardOpts = {}): string => board(wPx, hPx, 1, 1, o);
 
-/** A round enamel medallion with a polished brass rim (the level badge), d CSS px (+4 px shadow margin). */
+/** A round enamel medallion (a struck coin: the level badge) in a polished brass rim with a ring of pearls, d CSS px (+4 px shadow margin). */
 export function medallion(d: number, zoom = 1, _res = 1, hue: PalRamp = 'sapphire'): string {
-  return cached(`medal:${d}:${zoom}:${hue}`, () => {
+  return cached(`medal10:${d}:${zoom}:${hue}`, () => {
     const m = 4, r = new Real(d, d, kz(zoom), m), c = d / 2, col = hueRGB(hue);
     r.part(circle(c, c, c), rim(3.2, d * 0.15, 1.6), metal(GOLD, { polish: 0.8 }));
-    const ri = c - d * 0.13;
+    const n = Math.round(d * 0.75);
+    for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2, x = c + Math.cos(a) * (c - d * 0.075), y = c + Math.sin(a) * (c - d * 0.075); r.part(circle(x, y, d * 0.026), dome(x, y, d * 0.026, d * 0.026, d * 0.02, 3.4), metal(GOLD, { polish: 0.9 })); }
+    const ri = c - d * 0.15;
     const guil = (x: number, y: number): RGB => {
       const a = Math.atan2(y - c, x - c), rr = Math.hypot(x - c, y - c);
       const cut = Math.sin(a * 18 + Math.sin(rr * 0.9) * 1.4) * 0.06;
       return mix(mix(col, [255, 255, 255], clamp(0.18 - rr / d * 0.4 + cut)), [10, 14, 40], clamp(rr / ri - 0.6) * 0.45);
     };
-    r.part(circle(c, c, ri), dome(c, c, ri, ri, 2.4, 2.2), { alb: guil, spec: 0.6, shin: 50, coat: 1 });
+    r.part(circle(c, c, ri), dome(c, c, ri, ri, 2.4, 2.2), { alb: guil, spec: 0.6, shin: 50, coat: 1 }, { line: true });
     return r.url({ shadow: { dy: 2, blur: 3, a: 0.45 } });
   });
 }
 
-/** A round green-enamel push button with a brass rim and a raised cream plus (the currency "+"), d CSS px (+3 margin). */
+/** An octagonal green-enamel push button in a beaded brass bezel with a raised cream plus (the currency "+"), d CSS px (+3 margin). */
 export function plusButton(d: number, zoom = 1, _res = 1, down = false): string {
-  return cached(`plus:${d}:${zoom}:${down}`, () => {
-    const m = 3, r = new Real(d, d, kz(zoom), m), c = d / 2;
-    r.part(circle(c, c, c - 0.2), rim(2.4, 3.4, 1), metal(GOLD, { polish: 0.75 }));
-    const ri = c - 3;
-    r.part(circle(c, c + (down ? 0.6 : 0), ri), dome(c, c, ri, ri, down ? 1.2 : 2.8, 1.8), enamel(hex('#2f8a52')));
-    const t = d * 0.09, L = d * 0.27, oy = down ? 0.6 : 0;
-    const pl = union(box(c - L, c - t + oy, 2 * L, 2 * t, t), box(c - t, c - L + oy, 2 * t, 2 * L, t));
-    r.part(pl, (x, y, ins) => (down ? 3.2 : 4.8) + Math.min(0.9, ins * 0.8), enamel(hex('#fff4d6')));
+  return cached(`plus10:${d}:${zoom}:${down}`, () => {
+    const m = 3, r = new Real(d, d, kz(zoom), m), c = d / 2, oc = (s: number) => s * 0.293;
+    r.part(cutBox(0.2, 0.2, d - 0.4, d - 0.4, oc(d - 0.4)), (_x, _y, ins) => 1 + Math.min(2.4, ins * 1.2), metal(GOLD, { polish: 0.75 }));
+    milgrain(r, 1.5, 1.5, d - 3, d - 3, oc(d - 3), d / 12, 0, 0, 0.42);
+    const ri = d - 6, oy = down ? 0.6 : 0;
+    r.part(cutBox(3, 3 + oy, ri, ri, oc(ri)), (_x, _y, ins) => 1.8 + Math.min(down ? 1.2 : 2.6, ins * 0.8), enamel(hex('#2f8a52')), { line: true });
+    const t = d * 0.09, L = d * 0.27;
+    const pl = union(box(c - L, c - t + oy, 2 * L, 2 * t, 0), box(c - t, c - L + oy, 2 * t, 2 * L, 0));
+    r.part(pl, (x, y, ins) => (down ? 3.2 : 4.8) + Math.min(0.9, ins * 0.8) + 0 * x * y, enamel(hex('#fff4d6')), { line: 0.8 });
     return r.url({ shadow: { dy: down ? 0.6 : 1.6, blur: down ? 1 : 2.4, a: 0.45 } });
   });
 }
 
-/** A small engraved brass name plate with two screws, w x h CSS px (+3 margin). */
+/** A small engraved brass name plate: notched corners, an engraved border with curls, two screws, w x h CSS px (+3 margin). */
 export function plate(w: number, h: number, zoom = 1, _res = 1): string {
-  return cached(`plate:${w}x${h}:${zoom}`, () => {
-    const m = 3, r = new Real(w, h, kz(zoom), m);
-    r.part(box(0, 0, w, h, 3), bevel(2.4, 2), metal(GOLD, { along: 'x', polish: 0.6 }));
-    r.carve(subtract(box(3, 3, w - 6, h - 6, 2), box(3.8, 3.8, w - 7.6, h - 7.6, 1.6)), 0.5, 0.4);
+  return cached(`plate10:${w}x${h}:${zoom}`, () => {
+    const m = 3, r = new Real(w, h, kz(zoom), m), n = Math.min(3, h * 0.2);
+    const notch = (x: number, y: number, ww: number, hh: number, nn: number) => subtract(box(x, y, ww, hh, 0), union(circle(x, y, nn), circle(x + ww, y, nn), circle(x, y + hh, nn), circle(x + ww, y + hh, nn)));
+    r.part(notch(0, 0, w, h, n), bevel(2.4, 2), metal(GOLD, { along: 'x', polish: 0.6 }));
+    const eng = subtract(notch(2.8, 2.8, w - 5.6, h - 5.6, n * 0.8), notch(3.5, 3.5, w - 7, h - 7, n * 0.7));
+    r.carve(eng, 0.5, 0.4); r.line(eng, 0.6, 0.22);
     screw(r, 5.5, h / 2, 1.6, 0.3, 1.6); screw(r, w - 5.5, h / 2, 1.6, 1.1, 1.6);
     return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.45 } });
   });
@@ -136,11 +150,14 @@ export function toolTile(s: number, hue: PalRamp, zoom = 1, _res = 1, seed = 1):
   return cached(`tool:${s}:${hue}:${zoom}:${seed}`, () => {
     const m = 4, h = s + 8, r = new Real(s, h, kz(zoom), m);
     r.part(ring(s / 2, 4, 1.9, 4.4), (x, y) => 4 + 1.6 * Math.sqrt(Math.max(0, 1 - ((Math.hypot(x - s / 2, y - 4) - 3.15) / 1.25) ** 2)), metal(GOLD, { polish: 0.7 }));
-    const fr = box(0, 8, s, s, 6);
+    // [ui10] a bevel-cut walnut frame with an inlaid line, a felt inset with a stitched edge, brass filigree corners
+    const fr = cutBox(0, 8, s, s, 5);
     r.part(fr, bevel(5, 3.4), wood('walnut', { along: seed % 2 ? 'x' : 'y', ox: seed * 77, oy: seed * 41 }));
-    const ins = box(5, 13, s - 10, s - 10, 3.5);
-    r.part(ins, (x, y, i) => 1.4 + Math.min(1.2, i * 0.35), cloth('felt', hueRGB(hue), { scale: 2.6, amt: 0.8 }));
-    for (const [x, y] of [[4.4, 12.4], [s - 4.4, 12.4], [4.4, s + 3.6], [s - 4.4, s + 3.6]]) r.part(circle(x, y, 2.1), dome(x, y, 2.1, 2.1, 1.5, 4.8), metal(GOLD, { polish: 0.7 }));
+    const sl = subtract(cutBox(2.4, 10.4, s - 4.8, s - 4.8, 3.6), cutBox(3, 11, s - 6, s - 6, 3.25));
+    stringing(r, sl, hex('#ecc98c')); r.line(sl, 0.7, 0.3);
+    const ins = cutBox(5.2, 13.2, s - 10.4, s - 10.4, 2.6);
+    r.part(ins, (x, y, i) => 1.4 + Math.min(1.2, i * 0.35) + 0 * x * y, cloth('felt', hueRGB(hue), { scale: 2.6, amt: 0.8 }), { line: 0.9 });
+    for (const [cx, cy, sx, sy] of [[0, 8, 1, 1], [s, 8, -1, 1], [0, s + 8, 1, -1], [s, s + 8, -1, -1]] as [number, number, number, number][]) filigreeCorner(r, cx + sx * 0.3, cy + sy * 0.3, sx, sy, 14, 5, GOLD, 4.2);
     return r.url({ shadow: { dy: 3, blur: 4, a: 0.45 }, aoR: 3 });
   });
 }
@@ -460,7 +477,7 @@ export function alarmHands(g: CanvasRenderingContext2D, k: number, _res: number,
   g.restore();
 }
 
-/** The leather journal: oxblood leather over boards, gilt crescent, page block; `open` 0..1 swings the cover. 52 x 54 units. */
+/** The leather journal: oxblood leather over boards, a gilt owl crest, page block; `open` 0..1 swings the cover. 52 x 54 units. */
 export function journal(k = 2, _res = 1, open = 0): string {
   return cached(`journal2:${k}:${open}`, () => {
     const r = new Real(52, 54, k * deviceK(3), 0);
@@ -472,7 +489,7 @@ export function journal(k = 2, _res = 1, open = 0): string {
     r.part(box(6, 4, 6, 46, 3), (x, y) => 4 + tubeY(9, 3)(x, y, 0) * 0.5, leather('#6a1a1e', { scale: 3 }));
     if (open < 0.5) {
       const cxm = 8 + cw / 2 + 1;
-      r.paint(subtract(circle(cxm, 24, 7), circle(cxm + 3.5, 22, 6.4)), metal(GOLD, { polish: 0.8 }));
+      r.paint(circle(cxm, 24, 6.4), metal(GOLD, { polish: 0.8 })); owlCrest(r, cxm, 24, 4.6, 0.5);
       r.carve(subtract(box(11, 7, cw - 4, 40, 2), box(12, 8, cw - 6, 38, 1.6)), 0.4, 0.3);
     }
     return r.url({ shadow: { dy: 1.5, blur: 2, a: 0.35 } });
