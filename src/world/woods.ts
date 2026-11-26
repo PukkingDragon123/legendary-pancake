@@ -55,16 +55,21 @@ export function shrubProto(kind: ShrubKind, seed = 1): THREE.BufferGeometry {
   let g = shrubCache.get(key);
   if (g) return g;
   const rnd = (k: number) => { const x = Math.sin(seed * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+  // [look12] an irregular shrub, not a ball: an off-centre main clump, side clumps of very different sizes and
+  // heights (one leaning out low, one standing tall), so every shrub has its own lopsided silhouette
   const mound = (n: number, r: number, h: number): Puff[] => {
-    const out: Puff[] = [{ x: 0, y: h * 0.55, z: 0, r, sy: h / r * 0.62 }];
+    const lean = rnd(40) * Math.PI * 2;
+    const out: Puff[] = [{ x: Math.cos(lean) * r * 0.12, y: h * 0.55, z: Math.sin(lean) * r * 0.12, r: r * 0.9, sy: h / r * 0.62 }];
+    n += Math.floor(rnd(41) * 2);
     for (let i = 0; i < n; i++) {
-      const a = (i / n) * Math.PI * 2 + rnd(i) * 1.2, d = r * (0.45 + rnd(i + 9) * 0.3);
-      out.push({ x: Math.cos(a) * d, y: h * (0.4 + rnd(i + 3) * 0.25), z: Math.sin(a) * d, r: r * (0.55 + rnd(i + 5) * 0.25), sy: 0.8 });
+      const a = (i / n) * Math.PI * 2 + rnd(i) * 1.4, d = r * (0.4 + rnd(i + 9) * 0.5);
+      const tall = i === 0 ? 1.35 : i === 1 ? 0.6 : 1;
+      out.push({ x: Math.cos(a) * d, y: h * (0.3 + rnd(i + 3) * 0.4) * tall, z: Math.sin(a) * d, r: r * (0.38 + rnd(i + 5) * 0.4), sy: 0.65 + rnd(i + 7) * 0.4 });
     }
     return out;
   };
   switch (kind) {
-    case 'round': g = canopy(mound(3, 0.62, 0.95), { cells: ['hedge', 'hedge', 'oakFresh'], seed, size: 0.5, cover: 2.6, floor: 0.02, sway: 0.05 }); break;
+    case 'round': g = canopy(mound(3, 0.62, 0.95), { cells: ['hedge', 'oakFresh', 'birch'], seed, size: 0.5, cover: 2.6, floor: 0.02, sway: 0.05 }); break; // [look12] mixed leaves, not a boxwood ball
     case 'hedge': g = canopy(mound(4, 0.7, 0.9), { cells: ['hedge'], seed, size: 0.48, cover: 2.8, floor: 0.02, sway: 0.04 }); break;
     case 'holly': g = canopy(mound(3, 0.6, 1.1), { cells: ['holly', 'holly', 'hedge'], seed, size: 0.55, cover: 2.6, floor: 0.02, sway: 0.04 }); break;
     case 'elder': g = canopy(mound(3, 0.7, 1.2), { cells: ['elder', 'elder', 'oakFresh'], seed, size: 0.6, cover: 2.4, floor: 0.02, sway: 0.06 }); break;

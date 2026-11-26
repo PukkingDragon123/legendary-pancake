@@ -15,6 +15,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { inkMaterial } from '../../gfx/ink.ts'; // [look12]
 import { rng } from '../../gfx/noise.ts';
 import { fontReady, canvasText } from '../../ui/font.ts';
 import { M, contactShadow, logGeo, mat, tex, taperTube } from './lodgekit.ts';
@@ -204,7 +205,7 @@ function curlGeo(): THREE.BufferGeometry {
   geo.computeVertexNormals();
   return geo;
 }
-const shavingMat = () => mat('w_shaving', () => new THREE.MeshStandardMaterial({ map: tex('plank'), color: 0xfff0d8, roughness: 0.8, side: THREE.DoubleSide }));
+const shavingMat = () => mat('w_shaving', () => inkMaterial(new THREE.MeshStandardMaterial({ map: tex('plank'), color: 0xfff0d8, roughness: 0.8, side: THREE.DoubleSide }), 'sil')); // [look12] curls: no speckle of ink
 
 interface Fall { obj: THREE.Object3D; v: THREE.Vector3; w: THREE.Vector3; t: number; floor: number; done: boolean }
 

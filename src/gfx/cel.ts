@@ -81,6 +81,19 @@ const FNS = /* glsl */ `
 uniform vec4 hhCel;
 // rgb: the hue of the key light's shadow fill; w: how much shadow-casting spot lights count as a key (a sun shaft)
 uniform vec4 hhCelTint;
+// [look12] the painted colour itself (see celKnobs): x vibrance (the duller a colour, the more its own hue grows),
+// y saturation, z the saturation of orange-browns instead (wood, floorboards, leather, clay: 1 = as painted, a little
+// less keeps warm wood from reading orange under warm light), w unused
+uniform vec4 hhAlbedo;
+vec3 celAlbedo( vec3 c ) {
+  float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
+  float mx = max( c.r, max( c.g, c.b ) ), mn = min( c.r, min( c.g, c.b ) );
+  float s = ( mx - mn ) / max( mx, 1e-4 );
+  // orange-brown: red highest, then green, blue lowest, green about half way (wood, floorboards, leather, clay)
+  float hueO = step( c.g, c.r ) * step( c.b, c.g ) * ( 1.0 - abs( ( c.g - c.b ) / max( c.r - c.b, 1e-4 ) - 0.42 ) * 2.4 );
+  float k = mix( hhAlbedo.y * ( 1.0 + hhAlbedo.x * ( 1.0 - s ) * smoothstep( 0.002, 0.03, l ) ), hhAlbedo.z, saturate( hueO ) ) - 1.0;
+  return max( mix( vec3( l ), c, 1.0 + k ), 0.0 );
+}
 // the key light's cast shadow (sun / moon), kept apart from its colour; 1 while point and spot lights are added
 float celShadow = 1.0;
 // 1 while the directional (key) lights are added, 0 for lamps
@@ -142,14 +155,22 @@ export interface CelKnobs {
   tint: THREE.Color;
   /** 0..1 how much a shadow-casting spot light counts as a key light (a sun or moon shaft through a window) */
   spotKey: number;
+  /** [look12] painted colour: vibrance (0 = off; the duller a colour, the more its own hue grows) */
+  vibrance: number;
+  /** [look12] painted colour: saturation (1 = as painted) */
+  saturation: number;
+  /** [look12] the saturation of orange-browns instead (1 = as painted; a little less keeps wood from reading orange) */
+  orange: number;
 }
-const defaults = (): CelKnobs => ({ fill: 1, rim: 1, lampBands: 0.6, keyBands: 1, tint: new THREE.Color(0.3, 0.2, 0.48), spotKey: 0 });
+const defaults = (): CelKnobs => ({ fill: 1, rim: 1, lampBands: 0.6, keyBands: 1, tint: new THREE.Color(0.32, 0.25, 0.44), spotKey: 0, vibrance: 0.3, saturation: 1.08, orange: 0.96 }); // [look12] a gentler cool fill in the shadows
 const DEFAULT = defaults();
 const LIVE = { x: 1, y: 1, z: 0.6, w: 1 };
-const TINT = { x: 0.3, y: 0.2, z: 0.48, w: 0 };
+const TINT = { x: 0.32, y: 0.25, z: 0.44, w: 0 };
+const ALBEDO = { x: 0.3, y: 1.08, z: 0.96, w: 0 }; // [look12]
 function push(k: CelKnobs) {
   LIVE.x = k.fill * 0.4; LIVE.y = k.rim; LIVE.z = k.lampBands; LIVE.w = k.keyBands;
   TINT.x = k.tint.r; TINT.y = k.tint.g; TINT.z = k.tint.b; TINT.w = k.spotKey;
+  ALBEDO.x = k.vibrance; ALBEDO.y = k.saturation; ALBEDO.z = k.orange;
 }
 push(DEFAULT);
 const sceneKnobs = new WeakMap<THREE.Scene, CelKnobs>();
@@ -168,7 +189,7 @@ export function celKnobs(scene: THREE.Scene): CelKnobs {
   return k;
 }
 
-const CHUNKS = ['lights_physical_pars_fragment', 'lights_lambert_pars_fragment', 'lights_fragment_begin', 'lights_fragment_end'] as const;
+const CHUNKS = ['lights_physical_pars_fragment', 'lights_lambert_pars_fragment', 'lights_fragment_begin', 'lights_fragment_end', 'color_fragment'] as const;
 let installed = false;
 /** Patch three's light chunks (idempotent; runs on import). */
 export function installCel(): void {
@@ -178,11 +199,12 @@ export function installCel(): void {
   // always patch three's own chunks (kept aside on first install), so a second copy of this module (hot reload) can't
   // stack a second patch on the first
   const SC = THREE.ShaderChunk as unknown as Record<string, string> & { __hhCelOrig?: Record<string, string> };
-  const O = (SC.__hhCelOrig ??= Object.fromEntries(CHUNKS.map((k) => [k, SC[k]])));
+  const O = (SC.__hhCelOrig ??= {});
+  for (const k of CHUNKS) O[k] ??= SC[k]; // [look12] (a chunk added later is kept aside too)
   const C: Record<string, string> = { ...O };
   // the live knobs reach every lit material: plain objects in the shader library's uniforms are shared by reference
   // when three clones them per material (Vector/Color values would be copied)
-  for (const id of ['standard', 'physical', 'lambert']) Object.assign(THREE.ShaderLib[id].uniforms, { hhCel: { value: LIVE }, hhCelTint: { value: TINT } });
+  for (const id of ['standard', 'physical', 'lambert']) Object.assign(THREE.ShaderLib[id].uniforms, { hhCel: { value: LIVE }, hhCelTint: { value: TINT }, hhAlbedo: { value: ALBEDO } });
   // the bands, the glints and the rim in the physically based direct light
   C.lights_physical_pars_fragment = FNS + P(
     /float dotNL = saturate\( dot\( geometryNormal, directLight\.direction \) \);\s*vec3 irradiance = dotNL \* directLight\.color;/,
@@ -230,6 +252,12 @@ export function installCel(): void {
   C.lights_fragment_begin = b;
   // the shadow fill joins the ambient light; the rim's sky half wraps the ambient round the silhouette; and the light
   // in shadow keeps the colour of what it lights (a cool fill over warm paint must not cancel out to grey)
+  // [look12] fuller painted colour on every lit material (after the map and the vertex / instance colours)
+  C.color_fragment += `
+#ifdef HH_CEL
+	diffuseColor.rgb = celAlbedo( diffuseColor.rgb );
+#endif
+`;
   C.lights_fragment_end = `
 #if defined( HH_CEL ) && defined( RE_IndirectDiffuse )
 	irradiance += celFill;

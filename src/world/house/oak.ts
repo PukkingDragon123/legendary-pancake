@@ -820,7 +820,7 @@ export function buildOak(): Oak {
   const crownMeshes: THREE.InstancedMesh[] = [];
   const leafCrown = (ms: Mass[], centre: V3, seed: number, name: string) => {
     const puffs: Puff[] = ms.map((l) => { const r = Math.max(l.r[0], l.r[2]); return { x: l.c[0] * PX, y: l.c[1] * PX, z: l.c[2] * PX, r: r * PX, sy: l.r[1] / r }; });
-    const geo = canopy(puffs, { cells: ['oak', 'oak', 'oakFresh'], seed, size: 1.75, cover: 2.1, centre: new THREE.Vector3(centre[0] * PX, centre[1] * PX, centre[2] * PX), height: 27, sway: 0.008, depthDark: 0.36 });
+    const geo = canopy(puffs, { cells: ['oak', 'oak', 'oakFresh'], seed, size: 1.75, cover: 2.7, centre: new THREE.Vector3(centre[0] * PX, centre[1] * PX, centre[2] * PX), height: 27, sway: 0.008, depthDark: 0.36 }); // [look12] fuller over the twig sprays (no boards showing through)
     geo.computeBoundingSphere();
     const leaf = leafMaterial();
     const m = new THREE.InstancedMesh(withLeafState(geo, 1), leaf.mat, 1);

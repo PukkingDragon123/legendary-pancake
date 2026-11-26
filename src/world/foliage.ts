@@ -244,26 +244,51 @@ export function canopyBuilder(puffs: Puff[], o: CanopyOpts): MeshBuilder {
     return (dark + (1 - dark) * Math.pow(out, 1.6)) * (0.72 + 0.28 * under);
   };
   const inside = (q: V3, self: Puff) => puffs.some((p) => p !== self && Math.hypot(q.x - p.x, (q.y - p.y) / (p.sy ?? 1), q.z - p.z) < p.r * 0.72);
-  const cover = o.cover ?? 2.4;
+  // [look12] the twig sprays leave more air between their leaves than the old round clusters: a few more cards
+  const cover = (o.cover ?? 2.4) * 1.3;
+  const unit = () => { const z = rng.range(-1, 1), a = rng.range(0, Math.PI * 2), rr = Math.sqrt(1 - z * z); return v3(rr * Math.cos(a), z, rr * Math.sin(a)); };
   for (const pf of puffs) {
     const ys = pf.sy ?? 1;
     const area = 4 * Math.PI * pf.r * pf.r * (0.6 + 0.4 * ys);
     const n = Math.max(6, Math.round((area / (o.size * o.size)) * cover));
     const cell = () => o.cells[Math.floor(rng.next() * o.cells.length)];
+    // [look12] no round puffs: every clump gets its own lobes (bulges reaching out, mostly sideways and up) and gaps
+    // (dents where the cards thin out), so the outline is ragged and asymmetric
+    const lobes = Array.from({ length: 3 + Math.floor(rng.next() * 3) }, () => { const d = unit(); d.y = d.y * 0.6 + 0.25; return { d: d.normalize(), a: rng.range(0.14, 0.42) }; });
+    const gaps = Array.from({ length: rng.chance(0.6) ? 2 : 1 }, () => unit());
+    const reach = (d: V3) => 0.82 + lobes.reduce((acc, l) => acc + l.a * Math.max(0, d.dot(l.d)) ** 3, 0);
     for (let i = 0; i < n; i++) {
       // a point on the puff's skin (a few tucked in deeper), fewer underneath
       const z = rng.range(-1, 1), a = rng.range(0, Math.PI * 2), rr = Math.sqrt(1 - z * z);
       const d = v3(rr * Math.cos(a), z, rr * Math.sin(a));
       if (d.y < -0.4 && rng.chance(0.55)) continue;
-      const depth = rng.chance(0.18) ? rng.range(0.45, 0.75) : rng.range(0.78, 1.02);
+      let depth = rng.chance(0.18) ? rng.range(0.45, 0.75) : rng.range(0.78, 1.02);
+      if (depth > 0.78 && gaps.some((g) => d.dot(g) > 0.86) && rng.chance(0.6)) continue;
+      depth *= reach(d);
       const p = v3(pf.x + d.x * pf.r * depth, pf.y + d.y * pf.r * depth * ys, pf.z + d.z * pf.r * depth);
       if (o.floor !== undefined && p.y < o.floor + o.size * 0.3) p.y = o.floor + o.size * 0.3 + rng.range(0, 0.1);
       if (inside(p, pf)) continue;
       // cards mostly face out of the crown, tipped at random so the edges stay leafy
       const nrm = d.clone().add(v3(rng.range(-0.75, 0.75), rng.range(-0.5, 0.75), rng.range(-0.75, 0.75))).normalize();
-      const sz = o.size * rng.range(0.8, 1.2);
-      const b = rng.range(0.9, 1.08), h = rng.range(-0.04, 0.04);
-      leafCard(mb, p, nrm, rng.range(0, Math.PI * 2), sz, sz, leafRect(cell()), c, rad, sy, shade, [b * (1 + h), b, b * (1 - h)], wind, rng.chance(0.5));
+      const sz = o.size * rng.range(0.7, 1.3), asp = rng.range(0.85, 1.18);
+      const b = rng.range(0.88, 1.1), h = rng.range(-0.05, 0.05);
+      leafCard(mb, p, nrm, rng.range(0, Math.PI * 2), sz * asp, sz / asp, leafRect(cell()), c, rad, sy, shade, [b * (1 + h), b, b * (1 - h)], wind, rng.chance(0.5));
+    }
+    // [look12] sprigs poking out past the clump along its biggest lobes: short chains of smaller cards
+    for (const l of lobes) {
+      if (l.a < 0.24) continue;
+      const k = 2 + Math.floor(rng.next() * 2);
+      const dir = l.d.clone().add(v3(rng.range(-0.25, 0.25), rng.range(-0.1, 0.25), rng.range(-0.25, 0.25))).normalize();
+      for (let j = 0; j < k; j++) {
+        const t = reach(l.d) * (0.95 + (j / k) * 0.4);
+        const p = v3(pf.x + dir.x * pf.r * t, pf.y + dir.y * pf.r * t * ys, pf.z + dir.z * pf.r * t);
+        if (o.floor !== undefined && p.y < o.floor + o.size * 0.4) break;
+        if (inside(p, pf)) continue;
+        const nrm = dir.clone().add(v3(rng.range(-0.8, 0.8), rng.range(-0.3, 0.8), rng.range(-0.8, 0.8))).normalize();
+        const sz = o.size * rng.range(0.55, 0.8) * (1 - j * 0.12);
+        const b = rng.range(0.95, 1.12);
+        leafCard(mb, p, nrm, rng.range(0, Math.PI * 2), sz, sz * rng.range(0.9, 1.15), leafRect(cell()), c, rad, sy, shade, [b, b, b], wind, rng.chance(0.5));
+      }
     }
     if (o.core !== false) hull(mb, pf, leafRect(o.cells[0]), c, sy, dark * 0.75, [1, 1, 1], wind);
   }

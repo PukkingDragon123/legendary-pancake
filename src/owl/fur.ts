@@ -103,11 +103,27 @@ export function furMaterial(src: THREE.MeshStandardMaterial, u: FurUniforms): TH
   return m;
 }
 
+/** [look12] The coat's material for its furry parts only (the wings, bill and feet share the original and keep their
+ * screen-space ink): the same material that draws no ink (one twin per coat, shared by every owl wearing it). */
+const twins = new WeakMap<THREE.Material, THREE.MeshStandardMaterial>();
+function inklessTwin(src: THREE.MeshStandardMaterial): THREE.MeshStandardMaterial {
+  let m = twins.get(src);
+  if (!m) {
+    m = src.clone();
+    m.defines = { ...src.defines };
+    m.onBeforeCompile = src.onBeforeCompile;
+    m.customProgramCacheKey = src.customProgramCacheKey;
+    twins.set(src, inkMaterial(m, 'none'));
+  }
+  return m;
+}
+
 /** Shells for one painted mesh (null when the part has no fur mask to read). */
 export function furShells(mesh: THREE.Mesh, u: FurUniforms): THREE.InstancedMesh | null {
   const src = mesh.material as THREE.MeshStandardMaterial;
   if (!src?.map || !src.roughnessMap || !mesh.geometry.attributes.normal) return null;
   if (!u.uMask.value) u.uMask.value = src.roughnessMap;
+  mesh.material = inklessTwin(src); // [look12] the hull alone outlines a furry part: no second contour along its bare edge inside the fluff
   const im = new THREE.InstancedMesh(mesh.geometry, inkMaterial(furMaterial(src, u), 'none'), SHELLS); // [outline9] fluff draws no ink
   for (let i = 0; i < SHELLS; i++) im.setMatrixAt(i, new THREE.Matrix4());
   im.instanceMatrix.needsUpdate = true;

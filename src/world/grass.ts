@@ -1,10 +1,9 @@
-// Moleforge's forest grass field, ported: an instanced field of crossed quads (one atlas of
-// 32x32 cells) that bends in the wind, takes dappled sun and sky light, glows when backlit by a low
+// Moleforge's forest grass field, ported: an instanced field of crossed pixel-art quads (one atlas of
+// 32x32 cells, [look12] Moleforge's own hand-set pixel blades and flowers again, crisp: nearest-filtered) that bends in the wind, takes dappled sun and sky light, glows when backlit by a low
 // sun, gets pushed aside by the owl's feet, and fades into the scene fog. Lighting uniforms are fed
 // from this app's Sky every frame instead of Moleforge's forest atmosphere module.
 import * as THREE from 'three';
-import { FG, NCELL } from './grassAtlas.js';
-import { vegRect, type VegCell } from './bushed/atlas.ts';
+import { FG, NCELL, paintGrassAtlas } from './grassAtlas.js';
 
 export { FG };
 export interface GrassItem { x: number; y: number; z: number; rot: number; size: number; cell: number; tint: number }
@@ -127,7 +126,7 @@ float bayer4(vec2 a) { return bayer2(0.5 * a) * 0.25 + bayer2(a); }
 void main() {
   vec4 t = texture2D(uMap, vUv);
   if (t.a < 0.5) discard;
-  // dappled sun through the canopy: two drifting octaves of leafy noise, softly stepped like brushwork
+  // dappled sun through the canopy: two drifting octaves of leafy noise, quantised like pixel art
   vec2 sway = uWind * (sin(uTime * 0.9 + vW.x * 0.3) * 0.05 + sin(uTime * 1.7 + vW.z * 0.4) * 0.025);
   float n = texture2D(uCloud, vW.xz * 0.11 + sway).r * 0.65 + texture2D(uCloud, vW.xz * 0.31 - sway * 2.0 + 0.4).r * 0.35;
   float s = smoothstep(0.36, 0.46, n);
@@ -136,7 +135,9 @@ void main() {
   vec3 amb = mix(uGround, uSky, 0.3 + vH * 0.6) * 0.72;
   vec3 lit = amb + uKey * (0.62 * sun + 0.06);
   float pt = texture2D(uCloud, vW.xz * 0.05).r - 0.5;
-  vec3 col = t.rgb * uTint * vTint * lit * uBright * (1.0 + vec3(0.1, 0.04, -0.08) * pt * 2.0);
+  // [look12] sit into the ground: a little deeper overall, and white petals and seed heads soft cream rather than glaring
+  vec3 tc = t.rgb * mix(1.0, 0.8, smoothstep(0.55, 0.85, dot(t.rgb, vec3(0.2126, 0.7152, 0.0722))));
+  vec3 col = tc * uTint * vTint * lit * uBright * 0.86 * (1.0 + vec3(0.1, 0.04, -0.08) * pt * 2.0);
   col *= 1.0 - uWet * 0.18;
   // frost and snow clinging to the lower blades
   float frost = uSnow * step(vH, uSnow * 0.55 + fract(sin(dot(floor(vW.xz * 16.0), vec2(12.9898, 78.233))) * 43758.5453) * 0.35);
@@ -149,40 +150,8 @@ void main() {
   #include <fog_fragment>
 }`;
 
-/**
- * [world3] The field now wears BUSHED's hand-painted ground-cover atlas (Poly Haven scans re-made by hand, in
- * the calm palette): each of Moleforge's cell slots is filled with the matching grass, flower, fern or reed,
- * copied into one strip of 128 x 256 cells (bottom-aligned, keeping each painting's proportions).
- */
-const CELL_SRC: VegCell[] = [
-  'grass_short', 'grass_green', 'grass_lush', 'daisy', 'hawkweed', 'aster_purple', 'everlasting', 'fireweed', 'vetch',
-  'bunch_berry', 'goldenrod', 'bunch_flower', 'moss_tuft', 'grass_dry', 'fern_b', 'bracken', 'reed', 'cattail_leaf', 'seed_timothy', 'seed_hair',
-  'yarrow', 'aster', 'sarsaparilla', 'grass_sedge', 'litter_mixed', 'seed_bluejoint',
-];
-const CW = 128, CH = 256;
-let readyResolve: (() => void) | null = null;
-/** Resolves when the field's painted atlas has loaded. */
-export const grassReady = new Promise<void>((res) => { readyResolve = res; });
-function vegStrip(): THREE.CanvasTexture {
-  const cv = document.createElement('canvas');
-  cv.width = CW * NCELL; cv.height = CH;
-  const t = new THREE.CanvasTexture(cv);
-  const img = new Image();
-  img.onload = () => {
-    const ctx = cv.getContext('2d')!;
-    CELL_SRC.forEach((k, i) => {
-      const [u0, v0, u1, v1] = vegRect(k);
-      const sx = u0 * img.width, sw = (u1 - u0) * img.width, sy = (1 - v1) * img.height, sh = (v1 - v0) * img.height;
-      const k2 = Math.min(CW / sw, CH / sh), dw = sw * k2, dh = sh * k2;
-      ctx.drawImage(img, sx, sy, sw, sh, i * CW + (CW - dw) / 2, CH - dh, dw, dh);
-    });
-    t.needsUpdate = true;
-    readyResolve?.();
-  };
-  img.onerror = () => readyResolve?.();
-  img.src = `${import.meta.env.BASE_URL}textures/bushed/veg_atlas.webp`;
-  return t;
-}
+/** Resolves when the field's atlas is ready ([look12] painted in code, so at once). */
+export const grassReady = Promise.resolve();
 
 let tex: THREE.Texture | null = null;
 
@@ -190,8 +159,10 @@ let tex: THREE.Texture | null = null;
 export function makeGrass(items: GrassItem[], cell = 10): THREE.Group {
   const grp = new THREE.Group();
   if (!tex) {
-    const t = vegStrip();
-    t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; // [light7] smooth
+    // [look12] Moleforge's pixel-art atlas, crisp (the user asked for the old pixel grass back)
+    const t = new THREE.CanvasTexture(paintGrassAtlas());
+    t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter; t.generateMipmaps = false; t.colorSpace = THREE.SRGBColorSpace;
+    t.userData.crisp = true;
     tex = t;
   }
   if (!GRASS.uCloud.value) GRASS.uCloud.value = noiseTexture();
@@ -204,8 +175,8 @@ export function makeGrass(items: GrassItem[], cell = 10): THREE.Group {
 
   const P: number[] = [], U: number[] = [], I: number[] = [];
   for (let q = 0; q < 2; q++) {
-    // [world3] half as wide as tall, like the painted cells
-    const a = q * Math.PI / 2 + 0.3, cx = Math.cos(a) * 0.25, cz = Math.sin(a) * 0.25, o = P.length / 3;
+    // [look12] square, like Moleforge's 32 x 32 cells
+    const a = q * Math.PI / 2 + 0.3, cx = Math.cos(a) * 0.5, cz = Math.sin(a) * 0.5, o = P.length / 3;
     P.push(-cx, 0, -cz, cx, 0, cz, cx, 1, cz, -cx, 1, -cz);
     U.push(0, 0, 1, 0, 1, 1, 0, 1);
     I.push(o, o + 1, o + 2, o, o + 2, o + 3);

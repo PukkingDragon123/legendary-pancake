@@ -28,6 +28,8 @@ function put(x: number, y: number, c: RGB, a = 255) {
   const k = (y * W + x) * 4;
   img[k] = c[0]; img[k + 1] = c[1]; img[k + 2] = c[2]; img[k + 3] = a;
 }
+/** [look12] is there a leaf painted at (x, y)? (flowers and berries only grow where the spray is) */
+const solid = (x: number, y: number) => img[(Math.floor(y) * W + Math.floor(x)) * 4 + 3] > 0;
 function line(x0: number, y0: number, x1: number, y1: number, c: RGB, w = 1) {
   const n = Math.ceil(Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0))) + 1;
   for (let i = 0; i <= n; i++) {
@@ -130,19 +132,56 @@ function cellBox(i: number): Box & { cx: number; cy: number } {
   return { x0: c * CELL + 2, y0: r * CELL + 2, x1: (c + 1) * CELL - 2, y1: (r + 1) * CELL - 2, cx: c * CELL + CELL / 2, cy: r * CELL + CELL / 2 };
 }
 interface Spot { x: number; y: number; ang: number; z: number }
-/** Spots for leaves on a rounded, dense cluster: a few twigs from the middle (mostly hidden), leaves spread over the
- * whole disc pointing outwards, sorted back to front (z also sets the tone: inner and back leaves deeper). */
+/**
+ * [look12] Spots for leaves on a natural spray (no round puff): a stem enters the cell off-centre and forks into
+ * uneven twigs of different lengths (a few long ones poking out, short ones tucked in), each with side shoots; the
+ * leaves grow along them, alternating sides and pointing out along the twig, biggest mid-twig, a tuft at every tip.
+ * The silhouette is ragged and lobed with gaps between the twigs; the twigs show between the leaves. Sorted back to
+ * front (z also sets the tone: inner and back leaves deeper).
+ */
 function clusterSpots(cx: number, cy: number, rad: number, n: number, twigs: number, twigCol: RGB): Spot[] {
   const out: Spot[] = [];
-  for (let i = 0; i < twigs; i++) {
-    const a = (i / twigs) * Math.PI * 2 + range(-0.4, 0.4), l = rad * range(0.5, 0.8);
-    line(cx, cy, cx + Math.cos(a) * l, cy + Math.sin(a) * l, twigCol, 2);
+  const base = { x: cx + range(-0.15, 0.15) * rad, y: cy + range(0.3, 0.42) * rad };
+  const a0 = -Math.PI / 2 + range(-0.3, 0.3);
+  interface Tw { x0: number; y0: number; x1: number; y1: number; w: number; len: number; tip: boolean }
+  const tws: Tw[] = [];
+  const nt = twigs + 2;
+  for (let i = 0; i < nt; i++) {
+    // a fan of twigs, uneven: angles jittered, lengths from short to long (long ones break the outline)
+    const f = nt === 1 ? 0 : i / (nt - 1) - 0.5;
+    const a = a0 + f * range(3.1, 3.6) + range(-0.22, 0.22);
+    const L = rad * (rnd() < 0.35 ? range(0.92, 1.04) : range(0.5, 0.84));
+    // the twig starts a little up the stem
+    const sx = base.x + Math.cos(a0) * rad * range(0, 0.25), sy = base.y + Math.sin(a0) * rad * range(0, 0.25);
+    // a slight bend half way
+    const bend = range(-0.35, 0.35);
+    const mx = sx + Math.cos(a) * L * 0.5, my = sy + Math.sin(a) * L * 0.5;
+    const ex = mx + Math.cos(a + bend) * L * 0.5, ey = my + Math.sin(a + bend) * L * 0.5;
+    tws.push({ x0: sx, y0: sy, x1: mx, y1: my, w: 3, len: L * 0.5, tip: false }, { x0: mx, y0: my, x1: ex, y1: ey, w: 2, len: L * 0.5, tip: true });
+    // one or two side shoots
+    for (let k = 0, m = rnd() < 0.6 ? 2 : 1; k < m; k++) {
+      const t = range(0.35, 0.75), bx = sx + (ex - sx) * t, by = sy + (ey - sy) * t;
+      const sa = a + (rnd() < 0.5 ? -1 : 1) * range(0.5, 0.95), sl = L * range(0.25, 0.45);
+      tws.push({ x0: bx, y0: by, x1: bx + Math.cos(sa) * sl, y1: by + Math.sin(sa) * sl, w: 1, len: sl, tip: true });
+    }
   }
-  for (let i = 0; i < n; i++) {
-    const a = rnd() * Math.PI * 2, s = Math.pow(rnd(), 0.6);
-    const x = cx + Math.cos(a) * rad * s, y = cy + Math.sin(a) * rad * s;
-    const ang = a + range(-0.8, 0.8);
-    out.push({ x, y, ang, z: rnd() * 0.55 + s * 0.45 });
+  // the stem and twigs (drawn first: leaves cover most of them, they show in the gaps)
+  line(base.x, base.y, base.x + Math.cos(a0) * rad * 0.25, base.y + Math.sin(a0) * rad * 0.25, twigCol, 3);
+  for (const t of tws) line(t.x0, t.y0, t.x1, t.y1, twigCol, t.w);
+  const total = tws.reduce((s0, t) => s0 + t.len, 0);
+  for (const t of tws) {
+    const m = Math.max(1, Math.round((n * t.len) / total));
+    const ta = Math.atan2(t.y1 - t.y0, t.x1 - t.x0);
+    for (let k = 0; k < m; k++) {
+      const f = (k + range(0.2, 0.8)) / m;
+      const side = k % 2 ? 1 : -1;
+      const x = t.x0 + (t.x1 - t.x0) * f, y = t.y0 + (t.y1 - t.y0) * f;
+      // out along the twig, splayed to its side; tip leaves point straight on
+      const ang = ta + side * range(0.35, 0.95) * (t.tip && f > 0.85 ? 0.3 : 1);
+      const dOut = Math.hypot(x - base.x, y - base.y) / rad;
+      out.push({ x, y, ang, z: rnd() * 0.5 + Math.min(1, dOut) * 0.5 });
+    }
+    if (t.tip) out.push({ x: t.x1, y: t.y1, ang: ta + range(-0.2, 0.2), z: 0.6 + rnd() * 0.4 });
   }
   return out.sort((p, q) => p.z - q.z);
 }
@@ -155,7 +194,7 @@ function broadleaf(i: number, rp: Ramp, o: { rad?: number; n: number; len: [numb
   const spots = clusterSpots(b.cx, b.cy, o.rad ?? 84, o.n, o.twigs ?? 5, twig);
   for (const s of spots) {
     const len = range(o.len[0], o.len[1]);
-    leaf({ x: s.x - Math.cos(s.ang) * len * 0.35, y: s.y - Math.sin(s.ang) * len * 0.35, ang: s.ang, len, wid: len * o.wid * range(0.85, 1.1), shape: o.shape(), ramp: rp, tone: 0.16 + s.z * 0.66, veins: o.veins, gloss: o.gloss });
+    leaf({ x: s.x - Math.cos(s.ang) * len * 0.1, y: s.y - Math.sin(s.ang) * len * 0.1, ang: s.ang, len, wid: len * o.wid * range(0.85, 1.1), shape: o.shape(), ramp: rp, tone: 0.16 + s.z * 0.66, veins: o.veins, gloss: o.gloss });
   }
   o.extra?.(b);
   clip = { x0: 0, y0: 0, x1: W, y1: H };
@@ -239,6 +278,17 @@ function fern(i: number, rp: Ramp) {
 function tiny(i: number, rp: Ramp, o: { n: number; len: [number, number]; full?: boolean; tone?: [number, number] }) {
   const b = cellBox(i);
   clip = b;
+  if (!o.full) {
+    // [look12] boxwood as a ragged spray of little leaves on many twigs (no round ball)
+    const spots = clusterSpots(b.cx, b.cy, 96, o.n, 9, hex('#3e2c1e'));
+    const [t0, t1] = o.tone ?? [0.25, 0.95];
+    for (const s of spots) {
+      const len = range(o.len[0], o.len[1]);
+      leaf({ x: s.x, y: s.y, ang: s.ang, len, wid: len * 0.6, shape: elliptic, ramp: rp, tone: t0 + (t1 - t0) * s.z, vein: len > 9 });
+    }
+    clip = { x0: 0, y0: 0, x1: W, y1: H };
+    return;
+  }
   if (o.full) for (let y = b.y0; y < b.y1; y++) for (let x = b.x0; x < b.x1; x++) put(x, y, pick(rp, 0.1));
   for (let k = 0; k < o.n; k++) {
     const a = rnd() * Math.PI * 2, r = o.full ? 0 : Math.sqrt(rnd()) * 100;
@@ -293,7 +343,7 @@ seed = 404;
 broadleaf(7, R.gold, { n: 210, len: [22, 32], wid: 0.68, shape: () => serrate(ovate, 9, 0.12), twigs: 7 });
 seed = 707;
 broadleaf(8, R.bronze, { n: 70, len: [26, 36], wid: 0.55, shape: () => serrate(ovate, 8, 0.1), twigs: 6, extra: (b) => {
-  for (let k = 0; k < 120; k++) { const a = rnd() * Math.PI * 2, r = Math.pow(rnd(), 0.6) * 92; blossom(b.cx + Math.cos(a) * r, b.cy + Math.sin(a) * r, range(7, 10), R.petal, hex('#d4486e')); }
+  for (let k = 0; k < 120; k++) { const a = rnd() * Math.PI * 2, r = Math.pow(rnd(), 0.6) * 92; if (!solid(b.cx + Math.cos(a) * r, b.cy + Math.sin(a) * r)) continue; blossom(b.cx + Math.cos(a) * r, b.cy + Math.sin(a) * r, range(7, 10), R.petal, hex('#d4486e')); }
 } });
 seed = 808;
 needles(9, R.fir, false);
@@ -306,15 +356,17 @@ broadleaf(12, R.elder, { n: 110, len: [34, 48], wid: 0.42, shape: () => serrate(
   // flat umbels of tiny cream flowers
   for (let k = 0; k < 14; k++) {
     const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 74, ux = b.cx + Math.cos(a) * r, uy = b.cy + Math.sin(a) * r;
+    if (!solid(ux, uy)) continue;
     for (let q = 0; q < 34; q++) { const aa = rnd() * Math.PI * 2, rr = Math.sqrt(rnd()) * 20; disc(ux + Math.cos(aa) * rr, uy + Math.sin(aa) * rr * 0.8, range(1.6, 2.6), pick(R.cream, 0.3 + rnd() * 0.7)); }
   }
 } });
 seed = 1212;
-tiny(13, R.hedge, { n: 1500, len: [11, 16] });
+tiny(13, R.hedge, { n: 620, len: [12, 18] });
 seed = 1414;
 broadleaf(14, R.holly, { n: 110, len: [32, 44], wid: 0.55, shape: () => hollyShape, twigs: 5, gloss: true, extra: (b) => {
   for (let k = 0; k < 22; k++) {
     const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 74, bx = b.cx + Math.cos(a) * r, by = b.cy + Math.sin(a) * r;
+    if (!solid(bx, by)) continue;
     for (let q = 0; q < 3; q++) { const x = bx + range(-6, 6), y = by + range(-6, 6); disc(x, y, 4.2, pick(R.berry, 0.1)); disc(x, y, 3.2, pick(R.berry, 0.55)); put(Math.floor(x - 1), Math.floor(y - 1), pick(R.berry, 1)); }
   }
 } });
@@ -323,6 +375,7 @@ broadleaf(15, R.elder, { n: 90, len: [32, 44], wid: 0.55, shape: () => ovate, tw
   // lilac panicles: cones of little four-petal florets
   for (let k = 0; k < 11; k++) {
     const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 66, px = b.cx + Math.cos(a) * r, py = b.cy + Math.sin(a) * r;
+    if (!solid(px, py)) continue;
     const ang = -Math.PI / 2 + range(-0.6, 0.6), L = range(44, 62);
     for (let q = 0; q < 130; q++) {
       const f = rnd(), w = (1 - f) * 18 + 4;

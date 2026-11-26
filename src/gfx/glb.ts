@@ -103,6 +103,7 @@ function tune(root: THREE.Object3D, o: { shadows: boolean; rim?: number }) {
  * a grey-ish texel's chroma grows.
  */
 export function vivid(root: THREE.Object3D, k = 0.32) {
+  // [look12] every lit material now gets fuller painted colour (cel.ts, celAlbedo): this is a smaller lift on top of it
   root.traverse((n) => {
     const m = n as THREE.Mesh;
     if (!m.isMesh) return;
@@ -118,7 +119,7 @@ export function vivid(root: THREE.Object3D, k = 0.32) {
   float vl = dot(vc, vec3(0.2126, 0.7152, 0.0722));
   float vmx = max(vc.r, max(vc.g, vc.b)), vmn = min(vc.r, min(vc.g, vc.b));
   float vs = (vmx - vmn) / max(vmx, 1e-4);
-  diffuseColor.rgb = max(mix(vec3(vl), vc, 1.0 + ${k.toFixed(3)} * (1.0 - vs) * smoothstep(0.004, 0.04, vl)), 0.0);
+  diffuseColor.rgb = max(mix(vec3(vl), vc, 1.0 + ${(k * 0.6).toFixed(3)} * (1.0 - vs) * smoothstep(0.004, 0.04, vl)), 0.0);
 }`);
       };
       const key = mat.customProgramCacheKey?.bind(mat);
