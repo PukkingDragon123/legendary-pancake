@@ -31,9 +31,9 @@
 //      the graded picture in the ink colour, faded where the depth of field blurs and under bright bloom (lamps glow
 //      over their lines).
 // The owls' fluff would give a noisy, crawling contour, so a furry part draws no screen-space ink at all (fur.ts) and
-// gets an inverted hull instead (inkHull): its back faces pushed out to the fluff's outer edge and then a constant
-// number of pixels on screen, drawing only that last band (one clean silhouette line that the longest strands cross
-// over, [look12] and no second contour along the bare part's edge inside the fluff).
+// gets an inverted hull instead (inkHull, [look12] a plain one): its back faces pushed a little way into the fluff, then
+// a constant number of pixels on screen and a touch further from the eye: one solid silhouette line at the body's edge
+// that the longer strands cross over, hidden behind a wing lying over the body (no second contour beside the wing's).
 // Cost tiers: high (8 depth taps, creases, object edges), medium (4, creases, object edges), low (4 taps, outlines only).
 import * as THREE from 'three';
 
@@ -386,10 +386,14 @@ export class Ink {
 
 // ------------------------------------------------------------------ owl hulls
 
+// [look12] A plain inverted hull, which holds up where the band trick broke into dots: the part's back faces pushed
+// out a little into the fluff and then a constant number of pixels on screen, a touch further from the eye. Inside the
+// silhouette the part and its fluff hide it; outside, it shows as a solid line at the bare body's edge, which the
+// longer strands cross over (and a wing lying over the body hides the body's line, so no second contour beside it).
 const HULL_VS = /* glsl */ `
 uniform float uLen; uniform vec3 uComb; uniform vec3 uWind; uniform sampler2D uMask; uniform float uHasMask;
 uniform vec3 uInkPx; uniform vec2 uInkFade;
-varying vec3 vN; varying vec3 vV; varying float vW;
+varying float vW;
 void main() {
   // the line's width in px, thinning out with the part's distance (one value for the whole part); none at all outside
   // an inked pass (portraits, icon bakes, the world seen through a stage's window)
@@ -397,12 +401,15 @@ void main() {
   vW = w;
   if (w < 0.05) { gl_Position = vec4(0.0, 0.0, 2.0, 1.0); return; }
   vec3 n = normalize(normal);
-  // out to where the fluff thins (the mask is the fluff's length: none round the eyes and the bill), combed and swayed
+  // a little way into the fluff (the mask is the fluff's length: none round the eyes and the bill), combed and swayed
   // as the shells are
   float len = uLen * (uHasMask > 0.5 ? texture2D(uMask, uv).r : 1.0);
   vec3 comb = uComb - n * dot(uComb, n);
-  vec3 p = position + n * (len * 0.85) + comb * (len * 0.72) + uWind * 0.72;
+  vec3 p = position + n * (len * 0.3) + comb * (len * 0.2) + uWind * 0.2;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
+  // a little further from the eye, so whatever lies on the part (a wing, the fluff) stays in front of its line
+  float lenV = length((modelViewMatrix * vec4(n * uLen, 0.0)).xyz);
+  mv.xyz += normalize(mv.xyz) * lenV * 0.35;
   vec4 c = projectionMatrix * mv;
   // then a constant number of pixels outwards on screen
   vec3 vn = normalize(normalMatrix * n);
@@ -410,28 +417,15 @@ void main() {
   float l = length(dn);
   // heavier on the shadow side, like the screen-space lines
   if (l > 1e-6) { w *= 0.9 + 0.28 * dot(dn / l, vec2(0.7071, -0.7071)); c.xy += (dn / l) * uInkPx.xy * w * c.w; }
-  // [look12] at the depth of the bare part's rim brought most of the fluff's length towards the eye, not of the fluff's
-  // outer edge: in front of most strands, but a wing lying in the fluff hides the line behind it (it was drawn over the
-  // wing, a second contour beside the wing's own)
-  vec4 mv0 = modelViewMatrix * vec4(position, 1.0);
-  float lenV = length((modelViewMatrix * vec4(n * len, 0.0)).xyz);
-  vec4 rim = projectionMatrix * vec4(mv0.xyz + normalize(-mv0.xyz) * lenV * 0.8, 1.0);
-  c.z = (rim.z / rim.w) * c.w;
-  vN = vn; vV = -mv.xyz; vW = w;
+  vW = w;
   gl_Position = c;
 }`;
-// only the outer band of the hull's back faces is drawn: near its contour n.v ~ -sqrt(2d/R), so the distance to the
-// contour in px is about |n.v| / (2 |grad n.v|) (exact on round forms); the band's inner edge is anti-aliased
 const HULL_FS = /* glsl */ `
 uniform vec3 uInkLin;
-varying vec3 vN; varying vec3 vV; varying float vW;
+varying float vW;
 void main() {
-  float ndv = dot(normalize(vN), normalize(vV));
-  float g = length(vec2(dFdx(ndv), dFdy(ndv)));
-  float d = abs(ndv) / max(2.0 * g, 1e-5);
-  float a = 1.0 - smoothstep(vW - 0.5, vW + 1.5, d); // [look12] a fuller band (it broke into dots on the head)
-  if (a <= 0.003) discard;
-  gl_FragColor = vec4(uInkLin, a);
+  if (vW < 0.05) discard;
+  gl_FragColor = vec4(uInkLin, 1.0);
 }`;
 
 export interface FurLike { uLen: { value: number }; uComb: { value: THREE.Vector3 }; uWind: { value: THREE.Vector3 }; uMask: { value: THREE.Texture | null } }
