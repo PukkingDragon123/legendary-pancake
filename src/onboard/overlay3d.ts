@@ -243,6 +243,17 @@ export class Overlay3D {
     this.R.toneMappingExposure = this.exposure;
     this.R.setClearColor(0x000000, 0);
     this.R.autoClear = false;
+    // [text15] The game's ink (gfx/ink.ts) patches three's opaque_fragment chunk so every opaque material writes an
+    // ink class (.25-.37) into alpha instead of 1. Here alpha is the coverage laid over the paper, so with the patch
+    // every solid object came out a third opaque: milky, washed-out, the paper showing through. This renderer
+    // compiles its own programs, so it compiles them from three's unpatched chunk (opaque parts: alpha 1).
+    const SC = THREE.ShaderChunk as unknown as Record<string, string> & { __hhInkOrig?: string };
+    const render = this.R.render.bind(this.R);
+    this.R.render = (sc, cam) => {
+      const cur = SC.opaque_fragment;
+      if (SC.__hhInkOrig) SC.opaque_fragment = SC.__hhInkOrig;
+      try { render(sc, cam); } finally { SC.opaque_fragment = cur; }
+    };
     const ex = this.R.extensions;
     this.ink = this.R.capabilities.isWebGL2 && (ex.has('EXT_color_buffer_float') || ex.has('EXT_color_buffer_half_float'));
     // light: a warm key from the upper left (as on the paper), a cool rim, sky and floor fill, and a room's reflections
