@@ -480,7 +480,7 @@ const STAMP_COL: Record<string, [number, number]> = { red: [mutec(P.terracotta),
 /** an emblem drawn in a 9 x 9 box at (x, y) */
 function emblem(g: CanvasRenderingContext2D, name: string, x: number, y: number, col: string) {
   g.save(); g.translate(x, y); g.fillStyle = col; g.strokeStyle = col; g.lineWidth = 0.9; g.lineCap = 'round'; g.lineJoin = 'round';
-  const text = (t: string) => { fillTextMid(g, t, 4.5, 4.6, 6); }; // [font14] the pixel face, crisp at device pixels
+  const text = (t: string) => { fillTextMid(g, t, 4.5, 4.6, 6); }; // the game's face, set at device pixels
   const star = (cx: number, cy: number, R: number, r: number, n = 5) => { g.beginPath(); for (let k = 0; k < n * 2; k++) { const a = (k / (n * 2)) * Math.PI * 2 - Math.PI / 2, rr = k % 2 ? r : R; g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } g.closePath(); g.fill(); };
   switch (name) {
     case 'heart': g.beginPath(); g.moveTo(4.5, 8); g.bezierCurveTo(-1, 4, 1.5, -0.5, 4.5, 2.6); g.bezierCurveTo(7.5, -0.5, 10, 4, 4.5, 8); g.fill(); break;

@@ -219,7 +219,7 @@ export function Intro() {
       const cs = getComputedStyle(inp);
       measureC ??= document.createElement('canvas').getContext('2d');
       if (!measureC) return;
-      measureC.font = `${cs.fontSize} ${cs.fontFamily}`;
+      measureC.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
       const b = inp.getBoundingClientRect(), w = measureC.measureText(inp.value).width;
       void pen.letter(Math.min(b.right - 4, b.left + parseFloat(cs.paddingLeft) + w), b.bottom - 3 * U.k, 14 * U.k);
     };

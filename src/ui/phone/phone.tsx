@@ -165,9 +165,9 @@ function wallpaper() {
 
 /** the screen is drawn at twice the art resolution (a phone's screen is finer than the world): native-size fonts */
 const S2 = 2;
-// [font14] the game's pixel faces at whole grid sizes (on the screen's 2x canvas, a font pixel is half an art pixel or
-// a whole one): the clock and "Sleeping" in the display face, app labels and notifications in the body face
-const SMALL = fontAt(15), BIG = fontAt(45, { caps: true }), MED = fontAt(30, { caps: true }), APP = fontAt(15);
+// [text15] the game's face at a phone's sizes (on the screen's 2x canvas): the clock and "Sleeping" extra-bold, app
+// labels and notifications in the body weight
+const SMALL = fontAt(10), BIG = fontAt(32, { caps: true }), MED = fontAt(20, { caps: true }), APP = fontAt(11.5, { weight: 700 });
 const phoneFonts: Promise<void> = typeof document === 'undefined' ? Promise.resolve() : fontReady();
 const step = (t: number, a: number, d: number) => Math.max(0, Math.min(1, Math.floor(((t - a) / d) * 5) / 5));
 const ease = (k: number) => 1 - (1 - k) ** 3;
@@ -268,7 +268,7 @@ export class PhoneScreen {
         const pop = step(t, T.home, 0.3);
         g.globalAlpha = pop;
         g.drawImage(icon(a, locked), cx + 1, cy, 15, 15);
-        this.text(a.name.split(' ')[a.id === 'hollow' ? 1 : 0], cx + 8.5, cy + 20, SMALL, locked ? '#8a8aa0' : '#f0f0ff', 'center');
+        this.text(a.name.split(' ')[a.id === 'hollow' ? 1 : 0], cx + 8.5, cy + 20, fontAt(9), locked ? '#8a8aa0' : '#f0f0ff', 'center');
         if (locked) {
           const k = step(t, lt, 0.18), drop = (1 - k) * -8 + (k >= 1 ? 0 : Math.sin(k * 3) * 1);
           g.globalAlpha = Math.min(1, k * 2);
@@ -358,7 +358,7 @@ function injectCSS() {
 @keyframes hh-lock-in{from{opacity:0}to{opacity:1}}
 .hh-lock .hh-phone{animation:hh-lock-up .5s ease-in-out both}
 @keyframes hh-lock-up{from{transform:translateY(60px)}to{transform:none}}
-.hh-lock-cap{max-width:300px;text-align:center;padding:10px 14px;color:#f4e8cc;font:600 17px var(--font-body, serif);line-height: 1.0667}
+.hh-lock-cap{max-width:300px;text-align:center;padding:10px 14px;color:#f4e8cc;font:600 17px var(--font-body, serif);line-height: 1.25}
 .hh-lock-cap b{display:block;font-size:var(--t1);color:#ffe08a;margin-bottom:2px}
 .hh-lock button{min-width:200px;padding:10px 18px;font:600 17px var(--font-body, serif);cursor:pointer}
 @keyframes hh-phone-buzz{0%,100%{transform:none}20%{transform:translateX(calc(-1 * var(--u))) rotate(-1deg)}40%{transform:translateX(var(--u)) rotate(1deg)}60%{transform:translateX(calc(-1 * var(--u)))}80%{transform:translateX(var(--u))}}

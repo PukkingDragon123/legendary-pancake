@@ -79,13 +79,12 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   overlapping scales; the moon gem is a brilliant cut whose facets flash in turn as the light swings round it. On the
   shelf, Sleep is a brass oil lamp with a ruby glass font and a flame in its glass chimney, and the journal is plain
   tooled leather with gilt corners (no logos).
-- **Pixel type (v14)**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms
-  and props, the shop's signs, the pretend phone, Pip's and Barnaby's lines) is set in two pixel fonts by SpicyGame
-  Studios (CC0, supplied by the project owner; bundled, no web fonts): Quest Square for copy and dialogue, Retro Sans
-  for titles, signs and names. Both sit on one 15 px grid and are always drawn at whole device pixels per font pixel,
-  so they stay crisp on every screen. Titles are chunky pixel stickers (a hard ink outline, an ink extrusion, a face
-  shaded in pixel bands, a hard drop shadow) whose letters sit a pixel up or down like hand-stamped type and hop in a
-  little wave now and then; dialogue letters pop in, wave, shake and glow, all in whole pixels.
+- **Clean type (v15)**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms
+  and props, the shop's signs, the pretend phone, Pip's and Barnaby's lines) is set in one warm, rounded, very
+  readable face, Nunito (SIL OFL 1.1; bundled as WOFF2, no web fonts), in a regular-bold body and an extra-bold for
+  titles and signs. Text is plain and calm: dark ink on paper, warm cream on dark wood, with one soft shadow only
+  where the background needs it; emphasis is bold, italic or a single accent colour. Dialogue types on at a
+  readable pace.
 - **Inked, full-colour interface (v12)**: every panel, button, tab, card, ribbon and frame has a bold near-black ink
   outline (like the outlined 3D world and the icons) and richer, saturated enamel, wood and brass. Pip's portrait sits
   in a carved walnut frame of honey-oak leaves and acorns by default. Zoom in and out of the oak with a pinch or the
@@ -195,7 +194,7 @@ extension/    MV3 browser extension (declarativeNetRequest blocking, bedtime pag
   garden furniture, and the original CC0/public-domain sound library.
 - **Moleforge (Burrowsmith)**: the forest grass field (`src/world/grassAtlas.js`, `grass.ts`).
 - **The Bear Must Eat**: the pixel sprite kit and ~170 icons (`src/ui/px/sprites.js`), the 9-slice UI
-  frames (`src/ui/px/frames.js`) and (formerly) the TBME Goofy pixel font, now used only on a few dev pages. Hoot Hollow's own icons are
+  frames (`src/ui/px/frames.js`). Hoot Hollow's own icons are
   drawn with the same kit (`src/ui/px/hollow.js`).
 
 ### Sounds and art credits

@@ -10,7 +10,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type * as THREE from 'three';
 import { speciesOf } from '../owl/species.ts';
 import { Px } from '../ui/icons.tsx';
-import { crispCss, VIS } from '../ui/font.ts'; // [font14] pixel-face sizes at whole device pixels per font pixel
+import { crispCss, VIS } from '../ui/font.ts'; // [text15] form text sizes
 import { acornURL, clipURL, folioURL, knobURL, loopStripURL, railURL, ruleURL, sheetURL, stickyURL, tapeURL, tickStripURL } from './panelart.ts';
 import { inkStamp, prepareInk } from './ink.ts';
 import { DRINKS, TAPES } from './props.ts';
@@ -399,7 +399,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
   const label = isPlan ? (s.signed ? 'APPROVE' : 'SIGN') : 'STAMP';
   const acorns = Array.from({ length: p.total - 1 }, (_, i) => (i < p.index ? 'done' : i === p.index ? 'now' : 'todo') as 'done' | 'now' | 'todo');
   return (
-    <div ref={(el) => { root.current = el; if (p.sheetRef) p.sheetRef.current = el; }} class={'qp' + (p.wide ? ' wide' : '') + (p.leaving ? '' : ' in')} style={`--k:${k};--a1:${crispCss(17 * VIS * Math.max(1, Math.floor(k / 2)))}px;--a2:${crispCss(16 * VIS * k)}px;--a3:${crispCss(17 * VIS * Math.floor(1.5 * k))}px;--a4:${crispCss(40 * VIS * k)}px`} data-step={st.id}>
+    <div ref={(el) => { root.current = el; if (p.sheetRef) p.sheetRef.current = el; }} class={'qp' + (p.wide ? ' wide' : '') + (p.leaving ? '' : ' in')} style={`--k:${k};--a1:${crispCss(15 * VIS * Math.max(1, Math.floor(k / 2)))}px;--a2:${crispCss(16 * VIS * k)}px;--a3:${crispCss(17 * VIS * Math.floor(1.5 * k))}px;--a4:${crispCss(40 * VIS * k)}px`} data-step={st.id}>
       <i class="qp-folio" style={rsz.w ? `background-image:url(${folioURL(rsz.w, rsz.h)})` : ''} />
       <i class="qp-clip" style={`background-image:url(${clipURL()})`} />
       <div ref={sheet} class="qp-sheet" style={ssz.w ? `background-image:url(${sheetURL(ssz.w, ssz.h, p.index + 1, { dog: !isPlan, stain: p.index % 4 === 2 })})` : ''}>

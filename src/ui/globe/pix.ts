@@ -3,7 +3,7 @@
 // polygons, a 3x5 pixel font) and shown scaled up with nearest-neighbour filtering. No smooth shapes.
 // [globe] OWNED BY THE GLOBE BUILDER.
 
-import { textSafe, canvasText, textWidthPx, GRID, METRICS } from '../font.ts';
+import { textSafe, canvasText, textWidthPx, CAP } from '../font.ts';
 
 export type C = number; // 0xRRGGBB
 export const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16);
@@ -128,19 +128,18 @@ export class Pix {
   }
   url(scale = 1): string { return this.canvas(scale).toDataURL(); }
   /**
-   * [font6] The picture with pixel-face lettering drawn at the output resolution: each label centred on `cx`, its
-   * baseline at `base` (art pixels), at `ratio` font pixels per art pixel where it fits `maxW` (art pixels),
-   * stepping down a whole device pixel at a time; a label that can't fit at one device pixel is left out.
+   * The picture with lettering drawn at the output resolution: each label centred on `cx`, its baseline at `base`
+   * (art pixels), its capitals `ratio` * 11 art pixels tall where it fits `maxW` (art pixels), smaller where not; a
+   * label that can't fit legibly is left out.
    */
   urlText(scale: number, labels: { text: string; cx: number; base: number; c: C; maxW: number; ratio?: number }[]): string {
     const cv = this.canvas(scale), g = cv.getContext('2d')!;
     for (const l of labels) {
-      // [font14] n device px per font pixel; `ratio` was set for capitals 11 font pixels tall, these are 7
-      const s = textSafe(l.text), w = textWidthPx(s, GRID);
-      let n = Math.max(1, Math.round(((l.ratio ?? 0.5) * 11 / METRICS.cap) * scale));
-      while (n > 1 && w * n > l.maxW * scale) n--;
-      if (w * n > l.maxW * scale) continue;
-      canvasText(g, s, Math.round(l.cx * scale), Math.round(l.base * scale), css(l.c), { size: GRID * n, align: 'center' });
+      // [text15] capitals `ratio` * 11 art pixels tall, smaller where the label must fit `maxW`
+      const s = textSafe(l.text), w1 = textWidthPx(s, 100) / 100;
+      const size = Math.floor(Math.min(((l.ratio ?? 0.5) * 11 * scale) / CAP, (l.maxW * scale) / Math.max(1e-3, w1)));
+      if (size < 7) continue;
+      canvasText(g, s, l.cx * scale, l.base * scale, css(l.c), { size, align: 'center' });
     }
     return cv.toDataURL();
   }

@@ -64,8 +64,8 @@ function tape(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: n
 
 function frontTex(id: string, label: string): THREE.CanvasTexture {
   const seed = id.length * 7 + label.length;
-  // [font6] painted at 2 texels per art texel so the marker lettering can be the game's pixel face at its 18 px
-  // grid; the cardboard, tape and marks are drawn scaled 2x and look exactly as before
+  // [font6] painted at 2 texels per art texel so the marker lettering is crisp in the game's face
+  // (the cardboard, tape and marks are drawn scaled 2x and look exactly as before)
   const paint = (g: CanvasRenderingContext2D) => {
     g.setTransform(2, 0, 0, 2, 0, 0);
     card(g, BOX_W, BOX_H, seed);

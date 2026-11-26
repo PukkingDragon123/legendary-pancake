@@ -141,7 +141,7 @@
 .ck-pin { position: absolute; left: 50%; top: -7px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff9a8a, #c8382c 50%, #7a1a14); box-shadow: 0 3px 4px rgba(20, 8, 4, 0.5), inset 0 -2px 3px rgba(60, 0, 0, 0.4); }
 .ck-card small { font-family: var(--font-display); font-size: var(--t1); color: #8c2c1e; letter-spacing: 0; }
 .ck-card b { font-family: var(--font-display); font-weight: 700; font-size: var(--t3); line-height: 1.05; color: #26140b; white-space: nowrap; }
-.ck-card span { font-size: var(--t1); line-height: 1.0667; color: #4a3a2a; }
+.ck-card span { font-size: var(--t1); line-height: 1.25; color: #4a3a2a; }
 .ck-link { margin-top: 6px; font-size: var(--t1); color: #6e3d2a; text-decoration: underline; text-underline-offset: 3px; padding: 6px 4px; }
 /* the editors slide up (phone) or in from the side (wide) over the zoomed scene */
 .ck-sheet { position: absolute; left: 0; right: 0; bottom: 0; width: min(440px, 100%); margin: 0 auto; max-height: calc(100% - 68px - var(--safe-t)); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; padding: 26px 8px calc(16px + var(--safe-b)); animation: ckSheet 0.5s var(--ease) both; }

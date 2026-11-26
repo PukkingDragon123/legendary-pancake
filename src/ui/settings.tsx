@@ -22,7 +22,7 @@ function Credits() {
   return (
     <div class="col" style="gap:6px">
       <button class="btn soft sm" onClick={() => void open()}>{text === null ? 'Show credits' : 'Hide credits'}</button>
-      {text !== null && <pre class="credits-text" style="white-space:pre-wrap;max-height:50vh;overflow:auto;font-family:var(--font-small);font-size:var(--t1);line-height: 1.0667;margin:0;padding:8px;background:rgba(59,36,20,0.06)">{text}</pre>}
+      {text !== null && <pre class="credits-text" style="white-space:pre-wrap;max-height:50vh;overflow:auto;font-family:var(--font-small);font-size:var(--t1);line-height: 1.25;margin:0;padding:8px;background:rgba(59,36,20,0.06)">{text}</pre>}
     </div>
   );
 }

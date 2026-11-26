@@ -298,15 +298,15 @@ export function passportCover(scale: number): string {
     for (const k of [-1, 0, 1]) { g.beginPath(); g.moveTo(30 - Math.sqrt(156 - (k * 7) ** 2), 36 + k * 7); g.lineTo(30 + Math.sqrt(156 - (k * 7) ** 2), 36 + k * 7); g.stroke(); }
     g.beginPath(); g.ellipse(30, 36, 6, 12.5, 0, 0, Math.PI * 2); g.stroke();
     g.beginPath(); g.moveTo(30, 23.5); g.lineTo(30, 48.5); g.stroke();
-    // [font14] the gilt lettering in the pixel face, set in device pixels (whole pixels per font pixel, crisp)
+    // [text15] the gilt lettering in the game's face, set in device pixels, one flat gold
     g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
-    const gl = g.createLinearGradient(0, 55 * scale, 0, 71 * scale); gl.addColorStop(0, '#fff0a8'); gl.addColorStop(0.45, '#d8aa40'); gl.addColorStop(1, '#8a5e14');
-    g.fillStyle = gl; g.textAlign = 'left';
+    g.fillStyle = '#e2bc5c'; g.textAlign = 'left';
     const gilt = (t: string, want: number, base: number) => {
-      const sz = snapFont(want * scale);
+      let sz = snapFont(want * 0.9 * scale);
       g.font = fontAt(sz, { caps: true });
+      while (sz > 7 && g.measureText(t).width > 50 * scale) { sz = snapFont(sz * 0.93); g.font = fontAt(sz, { caps: true }); }
       const w = g.measureText(t).width;
-      if (w <= 54 * scale) g.fillText(t, Math.round(30 * scale - w / 2), Math.round(base * scale));
+      if (w <= 54 * scale) g.fillText(t, 30 * scale - w / 2, base * scale);
     };
     gilt('PASSPORT', 8.5, 63); gilt('HOOT HOLLOW', 6, 70.5);
     g.restore();

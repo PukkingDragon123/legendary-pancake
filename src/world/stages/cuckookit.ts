@@ -8,11 +8,11 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { fbm, hash, rng, vnoise } from '../../gfx/noise.ts';
-import { fontAt, fontReady as uiFontReady, GRID, snapFont, visPx } from '../../ui/font.ts';
+import { CAP, capMid, FAMILY, fontAt, fontReady as uiFontReady, GRID, METRICS, snapFont, visPx } from '../../ui/font.ts';
 
 // ------------------------------------------------------------------ the game's typeface (canvas text, src/ui/font.ts)
 
-export const FONT = 'Hoot Pixel';
+export const FONT = FAMILY;
 /** Load the game's faces for canvas painting (resolves even if they fail: canvas text then falls back). */
 export function fontReady(): Promise<void> {
   return uiFontReady();
@@ -416,25 +416,24 @@ export function wainscotCanvas(): HTMLCanvasElement {
 
 // ------------------------------------------------------------------ the dial
 
-/** [font14] Draw text in the game's pixel faces, crisp: `size` on the old 16 px grid (32 and up is a title, set in
- * the display face), snapped to whole pixels per font pixel and stepped down a grid step at a time to fit `maxW`;
- * centred on `x` by default, `y` its middle (or its top with base 'top'), an optional one-font-pixel shadow. */
+/** [text15] Draw text in the game's face: `size` on the old 16 px scale (32 and up is a title, set extra-bold),
+ * shrunk a little at a time to fit `maxW`; centred on `x` by default, `y` its middle (or its top with base 'top'),
+ * an optional soft shadow. */
 export function pxText(g: CanvasRenderingContext2D, text: string, x: number, y: number, size: number, col: string, o: { align?: CanvasTextAlign; shadow?: string; maxW?: number; base?: CanvasTextBaseline; spacing?: number } = {}) {
   const big = size >= 32;
-  let s = visPx(size * (big ? 1 : 1.12));
+  let s = visPx(size * (big ? 0.95 : 1.0));
   const font = () => fontAt(s, { caps: big });
   g.save();
   g.font = font();
-  if (o.maxW) while (s > GRID && g.measureText(text).width > o.maxW) { s = snapFont(s - GRID); g.font = font(); }
+  if (o.maxW) while (s > 8 && g.measureText(text).width > o.maxW) { s = snapFont(s * 0.94); g.font = font(); }
   g.textBaseline = 'alphabetic';
   g.textAlign = 'left';
   const tw = Math.ceil(g.measureText(text).width);
   const al = o.align ?? 'center';
-  const fp = s / GRID;
-  const dx = Math.round(al === 'center' ? x - tw / 2 : al === 'right' ? x - tw : x);
+  const dx = al === 'center' ? x - tw / 2 : al === 'right' ? x - tw : x;
   // the middle of the lowercase (or, on big words, between it and the capitals) sits on `y`
-  const by = Math.round(o.base === 'top' ? y + 7 * fp : y + (big ? 3.5 : 3) * fp);
-  if (o.shadow) { g.fillStyle = o.shadow; g.fillText(text, dx + Math.max(1, Math.round(fp)), by + Math.max(1, Math.round(fp))); }
+  const by = o.base === 'top' ? y + s * CAP : y + (big ? capMid(s) : (s * METRICS.x) / GRID / 2);
+  if (o.shadow) { g.shadowColor = o.shadow; g.shadowOffsetY = Math.max(1, s / 16); g.shadowBlur = Math.max(1, s / 10); }
   g.fillStyle = col;
   g.fillText(text, dx, by);
   g.restore();

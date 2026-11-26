@@ -65,7 +65,7 @@ export function wear(t: Tex, inBand: (x: number, y: number) => number, o: { seed
     else if (n * b > 0.35) t.shade(x, y, 1 + (o.k ?? 0.18) * b);
   }
 }
-/** Hand-lettered text into a Tex (a pixel font, alpha snapped, with a little ink variation). */
+/** Hand-lettered text into a Tex (the game's face, anti-aliased, with a little ink variation). */
 export function letter(t: Tex, text: string, x: number, y: number, font: string, c: RGB, o: { align?: CanvasTextAlign; a?: number; jit?: number; spacing?: number; outline?: RGB } = {}) {
   const cv = document.createElement('canvas');
   cv.width = t.w; cv.height = t.h;
@@ -74,7 +74,8 @@ export function letter(t: Tex, text: string, x: number, y: number, font: string,
   const d = g.getImageData(0, 0, t.w, t.h).data;
   const on = (px: number, py: number) => px >= 0 && py >= 0 && px < t.w && py < t.h && d[(py * t.w + px) * 4 + 3] > 128;
   if (o.outline) for (let py = 0; py < t.h; py++) for (let px = 0; px < t.w; px++) if (!on(px, py) && (on(px - 1, py) || on(px + 1, py) || on(px, py - 1) || on(px, py + 1) || on(px + 1, py + 1))) t.set(px, py, o.outline);
-  for (let py = 0; py < t.h; py++) for (let px = 0; px < t.w; px++) if (on(px, py)) t.set(px, py, tint(c, (hash(px, py, 77) - 0.5) * (o.jit ?? 0.2)), o.a ?? 1);
+  // [text15] anti-aliased letters: each texel takes the ink by its coverage
+  for (let py = 0; py < t.h; py++) for (let px = 0; px < t.w; px++) { const a = d[(py * t.w + px) * 4 + 3]; if (a > 8) t.set(px, py, tint(c, (hash(px, py, 77) - 0.5) * (o.jit ?? 0.2)), (o.a ?? 1) * Math.min(1, a / 230)); }
 }
 /** a soft-edged painted disc (cx, cy, r in texels) */
 function blob(t: Tex, cx: number, cy: number, r: number, c: RGB | ((x: number, y: number) => RGB), a = 1, ry = r) {

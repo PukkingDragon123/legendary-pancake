@@ -50,14 +50,14 @@ function die(word: string, sub: string, W: number, H: number, k: number, dx = 0,
   rr(1.9 * k, 2.3 * k, 3.4 * k);
   rr(4.9 * k, 0.9 * k, 1.8 * k);
   g.textAlign = 'center'; g.textBaseline = 'alphabetic';
-  // [font14] the word in the pixel face, a whole grid size that fits, one font pixel of letter spacing (cut rubber)
+  // [text15] the word in the game's face, extra-bold, the biggest size that fits, a little letter spacing (cut rubber)
   const s = textSafe(word);
   const maxW = W - 15 * k;
   const chars = [...s];
-  let size = snapFont(H * 0.62), sp = size / GRID, tot = 0;
-  const fit = () => { g.font = fontAt(size, { caps: true }); sp = size / GRID; tot = chars.reduce((a, ch) => a + g.measureText(ch).width, 0) + sp * (chars.length - 1); };
+  let size = snapFont(H * 0.56), sp = size / GRID, tot = 0;
+  const fit = () => { g.font = fontAt(size, { weight: 900 }); sp = size / GRID; tot = chars.reduce((a, ch) => a + g.measureText(ch).width, 0) + sp * (chars.length - 1); };
   fit();
-  while (size > GRID && tot > maxW) { size = snapFont(size - GRID); fit(); }
+  while (size > 8 && tot > maxW) { size = snapFont(size * 0.93); fit(); }
   let x = Math.round(W / 2 - tot / 2);
   const base = Math.round(sub ? H * 0.6 : H * 0.66);
   g.textAlign = 'left';
@@ -65,7 +65,7 @@ function die(word: string, sub: string, W: number, H: number, k: number, dx = 0,
   if (sub) {
     let ss = snapFont(Math.max(10 * k, H * 0.22));
     g.font = fontAt(ss);
-    while (ss > GRID && g.measureText(textSafe(sub)).width > maxW * 0.8) { ss = snapFont(ss - GRID); g.font = fontAt(ss); }
+    while (ss > 7 && g.measureText(textSafe(sub)).width > maxW * 0.8) { ss = snapFont(ss * 0.93); g.font = fontAt(ss); }
     g.textAlign = 'left';
     const subW = g.measureText(textSafe(sub)).width;
     g.fillText(textSafe(sub), Math.round(W / 2 - subW / 2), Math.round(H * 0.85));

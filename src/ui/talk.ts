@@ -1,16 +1,14 @@
 // Living dialogue for every spoken line in the game (Pip in the interview and at home, Barnaby in his store).
-// The words float: chunky pixel letters (text3d.tsx: a hard ink outline, an ink extrusion, a face shaded in pixel
-// bands) drawn at whole device pixels per font pixel, each with its own soft shadow on an imagined plane behind it. Letters ease in from slightly
-// behind (small and pale, their shadow tight under them) and come forward into place; they bob gently, lag a little
-// when the camera or the speaker moves (the shadows lag more: depth), and the old line drifts back and away when the
-// next one arrives. The pacing is a person's: an uneven typing rhythm, short filler words quicker, pauses at
+// [text15] The words are plain, warm cream letters in the game's face (font.ts) with one soft shadow under them for
+// contrast over the scene. Letters fade in from slightly behind and settle into place; the line lags a little when
+// the camera or the speaker moves, and the old line drifts back and away when the next one arrives. The pacing is a person's: an uneven typing rhythm, short filler words quicker, pauses at
 // commas, full stops and ellipses, a beat before an important word. A soft voice blip per syllable, pitched by the
 // vowel and the sentence's intonation.
 //
-// Markup in a line:   *word*  highlight: warm gold, a little bigger, glows, lands with a punch (a beat before it)
-//                     !word!  scream: big and red-hot, slams in, the line jolts, it keeps trembling (a longer beat)
-//                     _word_  whisper: smaller, pale lavender, slower and quieter
-//                     ~word~  sing-song: the letters ride a wave
+// Markup in a line:   *word*  highlight: bold, in the one warm accent colour (a beat before it)
+//                     !word!  scream: extra-bold and bigger, slams in, the line jolts (a longer beat)
+//                     _word_  whisper: italic, a little smaller and paler, slower and quieter
+//                     ~word~  sing-song: typed a little slower (plain letters)
 // A span may hold several words ("*Hoot Hollow!*"); punctuation right after a span takes its style. A mark that
 // is not an opener or has no closer is printed as it is (so "Hoo! Oh!" is just exclamations).
 import { sound } from '../audio/sound.ts';
@@ -188,52 +186,50 @@ function blipOf(v: Voice, b: Beat, i: number) {
 
 // ------------------------------------------------------------------ letters
 
-/** the look of each tone (3D palettes from text3d.tsx, plus a red-hot one for screams) */
-const YELL: Palette = { hi: '#fff3e6', c1: '#ffc19e', c2: '#ff6d46', c3: '#d42c22', ol: '#2a0705', ex: '#7c1510' };
-const HUSH: Palette = { ...PALETTES.moon, c1: '#f1efff', c2: '#d6d2f6', c3: '#a8a2dc' };
-const LOOK: Record<Tone, { pal: Palette; scale: number; depth: number; alpha: number }> = {
-  say: { pal: PALETTES.cream, scale: 1, depth: 2, alpha: 1 },
-  hi: { pal: PALETTES.gold, scale: 1.18, depth: 2.6, alpha: 1 },
-  yell: { pal: YELL, scale: 1.5, depth: 3, alpha: 1 },
-  hush: { pal: HUSH, scale: 0.85, depth: 1.4, alpha: 0.9 },
-  wave: { pal: PALETTES.cream, scale: 1, depth: 2, alpha: 1 },
+/** the look of each tone: one cream, one warm accent for emphasis, weight and slant for the rest */
+const ACCENT: Palette = { ...PALETTES.cream, c: '#ffd27a' };
+const HUSH: Palette = { ...PALETTES.cream, c: '#efe6d6' };
+const LOOK: Record<Tone, { pal: Palette; scale: number; weight: number; italic: boolean; alpha: number }> = {
+  say: { pal: PALETTES.cream, scale: 1, weight: 700, italic: false, alpha: 1 },
+  hi: { pal: ACCENT, scale: 1, weight: 800, italic: false, alpha: 1 },
+  yell: { pal: PALETTES.cream, scale: 1.2, weight: 900, italic: false, alpha: 1 },
+  hush: { pal: HUSH, scale: 0.92, weight: 600, italic: true, alpha: 0.92 },
+  wave: { pal: PALETTES.cream, scale: 1, weight: 700, italic: false, alpha: 1 },
 };
-/** [font14] a size on the pixel face's grid (whole device px per font pixel; never under one step) */
+/** a size in whole device px (never under one step) */
 const grid = (px: number) => Math.max(GRID, snapFont(px));
-/** the letters' face (the pixel face has one weight and no italic: whispers are told by colour, size and drift) */
-const face = (size: number, _it = false) => fontAt(size);
+/** the letters' face for a tone */
+const face = (size: number, t: Tone = 'say') => fontAt(size, { weight: LOOK[t].weight, italic: LOOK[t].italic });
 
 interface Sprite { cv: HTMLCanvasElement; ox: number; oy: number; adv: number }
 let fontOK = false;
 void fontReady().then(() => { fontOK = true; sprites.clear(); });
 const sprites = new Map<string, Sprite>();
 let mctx: CanvasRenderingContext2D | null = null;
-function advance(c: string, size: number, it = false) {
+function advance(c: string, size: number, t: Tone = 'say') {
   mctx ??= document.createElement('canvas').getContext('2d');
   if (!mctx) return size * 0.55;
-  mctx.font = face(size, it);
+  mctx.font = face(size, t);
   return mctx.measureText(c).width;
 }
-/** one letter in 3D (or its soft shadow, or its glow), cached */
-function sprite(c: string, size: number, pal: Palette, depth: number, kind: 'face' | 'shadow' | 'glow', glow = '255,196,90'): Sprite {
-  const key = `${kind}|${c}|${size}|${pal.c2}|${depth}|${fontOK ? 1 : 0}`;
+/** one letter (or its soft shadow), cached */
+function sprite(c: string, size: number, t: Tone, kind: 'face' | 'shadow'): Sprite {
+  const lk = LOOK[t], key = `${kind}|${c}|${size}|${t}|${fontOK ? 1 : 0}`;
   let s = sprites.get(key);
   if (s) return s;
-  // [font14] room for the pixel outline (one font pixel) and the extrusion (up to three more) round the letter
-  const it = pal === HUSH, adv = advance(c, size, it), fp = size / GRID, ow = fp * 1.5, ext = fp * (Math.min(3, Math.round(depth)) + 2);
-  const blur = kind === 'shadow' ? size * 0.16 : kind === 'glow' ? size * 0.32 : 0;
-  const padL = Math.ceil(ow + 2 + blur * 1.6), padT = Math.ceil(size * 0.82 + ow + blur * 1.6);
-  const W = Math.ceil(padL + adv + ext + ow + 3 + blur * 1.6), H = Math.ceil(padT + size * 0.28 + ext * 1.8 + ow + 3 + blur * 1.6);
+  const adv = advance(c, size, t);
+  const blur = kind === 'shadow' ? size * 0.12 : 0;
+  const padL = Math.ceil(size * 0.25 + blur * 1.6), padT = Math.ceil(size * 1.05 + blur * 1.6);
+  const W = Math.ceil(padL * 2 + adv), H = Math.ceil(padT + size * 0.4 + blur * 1.6);
   const cv = document.createElement('canvas');
   cv.width = Math.max(1, W); cv.height = Math.max(1, H);
   const g = cv.getContext('2d')!;
-  if (kind === 'face') drawText3D(g, c, padL, padT, { size, palette: pal, depth: Math.round(depth), drop: false });
+  g.font = face(size, t); g.textBaseline = 'alphabetic';
+  if (kind === 'face') { g.fillStyle = lk.pal.c; g.fillText(textSafe(c), padL, padT); }
   else {
     // the shape blurred, drawn off-canvas and brought in by its shadow (works where canvas filters don't)
-    g.font = face(size, it); g.textBaseline = 'alphabetic';
-    g.shadowColor = kind === 'shadow' ? 'rgba(10,5,2,1)' : `rgba(${glow},1)`; g.shadowBlur = blur; g.shadowOffsetX = W * 2;
-    g.lineJoin = 'miter'; g.lineWidth = ow * 2; g.strokeStyle = '#000'; g.fillStyle = '#000';
-    g.strokeText(textSafe(c), padL - W * 2, padT); g.fillText(textSafe(c), padL - W * 2, padT);
+    g.shadowColor = 'rgba(14,7,2,1)'; g.shadowBlur = blur; g.shadowOffsetX = W * 2; g.fillStyle = '#000';
+    g.fillText(textSafe(c), padL - W * 2, padT);
   }
   s = { cv, ox: padL, oy: padT, adv };
   if (sprites.size > 900) sprites.clear();
@@ -262,7 +258,7 @@ export interface TalkOpts {
   /** a name tag over the first line */
   tag?: boolean;
 }
-interface Placed extends Beat { x: number; base: number; size: number; sp: Sprite; sh: Sprite; gl: Sprite | null; line: number; i: number }
+interface Placed extends Beat { x: number; base: number; size: number; sp: Sprite; sh: Sprite; line: number; i: number }
 interface Row { w: number; base: number; top: number; bot: number; g0: number }
 interface Line { glyphs: Placed[]; start: number; end: number; leave: number; w: number; h: number; rows: Row[]; who: string; tagBorn: number; plain: string; heard: number; done: boolean; jolt: number }
 
@@ -360,7 +356,7 @@ export class TalkView {
     // words, with their letters' advances
     const items: { beats: Beat[]; w: number; space: number }[] = [];
     let word: Beat[] = [];
-    const flush = () => { if (word.length) items.push({ beats: word, w: word.reduce((a, b) => a + advance(b.c, size(b.tone), b.tone === 'hush'), 0), space: 0 }); word = []; };
+    const flush = () => { if (word.length) items.push({ beats: word, w: word.reduce((a, b) => a + advance(b.c, size(b.tone), b.tone), 0), space: 0 }); word = []; };
     for (const b of beats) { if (b.c === ' ') { flush(); if (items.length) items[items.length - 1].space += advance(' ', s); } else word.push(b); }
     flush();
     // wrap into rows
@@ -380,21 +376,20 @@ export class TalkView {
       let rx = 0;
       for (const it of row) {
         for (const b of it.beats) {
-          const sz = size(b.tone), lk = LOOK[b.tone];
-          const sp = sprite(b.c, sz, lk.pal, lk.depth, 'face'), sh = sprite(b.c, sz, lk.pal, lk.depth, 'shadow');
-          const gl = b.tone === 'hi' || b.tone === 'yell' ? sprite(b.c, sz, lk.pal, lk.depth, 'glow', b.tone === 'yell' ? '255,90,40' : '255,190,80') : null;
-          glyphs.push({ c: b.c, tone: b.tone, at: b.at, blip: b.blip, pitch: b.pitch, word: b.word, lead: b.lead, x: rx, base, size: sz, sp, sh, gl, line: ri, i: gi++ });
+          const sz = size(b.tone);
+          const sp = sprite(b.c, sz, b.tone, 'face'), sh = sprite(b.c, sz, b.tone, 'shadow');
+          glyphs.push({ c: b.c, tone: b.tone, at: b.at, blip: b.blip, pitch: b.pitch, word: b.word, lead: b.lead, x: rx, base, size: sz, sp, sh, line: ri, i: gi++ });
           rx += sp.adv;
         }
         rx += it.space;
       }
-      const bot = base + big * 0.3;
+      const bot = base + big * 0.32;
       l.rows.push({ w: rx - (row.length ? row[row.length - 1].space : 0), base, top, bot, g0: glyphs.findIndex((x) => x.line === ri) });
-      y = bot + s * 0.16;
+      y = bot + s * 0.12;
     });
     l.glyphs = glyphs;
     l.w = Math.max(s, ...l.rows.map((r) => r.w));
-    l.h = y - s * 0.16;
+    l.h = y - s * 0.12;
   }
   private padX() { return Math.ceil(this.s * 0.75); }
   private padTop() { return Math.ceil(this.s * (this.o.tag ? 1.2 : 0.7)); }
@@ -484,23 +479,14 @@ export class TalkView {
       let kx = 1, ky = 1, dy = 0, dx = 0, z = still ? 0 : 1 - ease;
       if (!still) {
         if (gl.tone === 'yell') {
-          // slams in from big, squashes as it lands, settles; then it keeps trembling
-          const k = 1 + (1 - ease) * 1.0, sq = e < 1 ? Math.sin(e * Math.PI) * 0.14 : 0;
-          kx = k * (1 + sq); ky = k * (1 - sq);
-          const tr = s * 0.014, f = Math.floor(T * 24);
-          dx += (hash(gl.i, f) - 0.5) * tr * 2; dy += (hash(gl.i + 77, f) - 0.5) * tr * 2;
+          // slams in from a little bigger and settles
+          kx = ky = 1 + (1 - ease) * 0.45;
           z = 0;
         } else {
-          // from slightly behind: smaller, a little higher and drawn toward the middle of its row, then forward
-          const pop = gl.tone === 'hi' ? Math.sin(Math.min(1, age / 0.5) * Math.PI) * 0.13 : 0;
-          kx = ky = 0.55 + 0.45 * ease + pop;
-          dy -= (1 - ease) * s * 0.3;
-          dx += (l.rows[gl.line].w / 2 - gl.x - gl.sp.adv / 2) * (1 - ease) * 0.07;
+          // from slightly behind: a touch smaller and higher, then into place
+          kx = ky = 0.86 + 0.14 * ease;
+          dy -= (1 - ease) * s * 0.16;
         }
-        // floating: a slow swell travels along the line; sing-song letters ride a wave; whispers drift
-        dy += Math.sin(T * 1.6 - (gl.x / s) * 0.45 + gl.line * 0.9) * s * 0.03;
-        if (gl.tone === 'wave') dy += Math.sin(T * 4 - gl.i * 0.5) * s * 0.06;
-        if (gl.tone === 'hush') dx += Math.sin(T * 0.9 + gl.i * 0.7) * s * 0.016;
       }
       let a = Math.min(1, age / (inDur * 0.55)) * LOOK[gl.tone].alpha;
       if (tl >= 0) {
@@ -518,40 +504,16 @@ export class TalkView {
       g.drawImage(sp.cv, x + cx - (sp.ox + cx) * kx, y + cy - (sp.oy + cy) * ky, sp.cv.width * kx, sp.cv.height * ky);
     };
     g.imageSmoothingEnabled = true; // the soft shadows and glows stay soft when scaled
-    // 1. soft shadows on a plane behind (they lag more than the letters, and part from them as they come forward)
-    const shx = s * 0.12, shy = s * 0.38;
+    // 1. one soft shadow under the letters (contrast over the scene)
+    const shx = s * 0.03, shy = s * 0.07;
     for (const p of ps) {
-      const f = 1 - p.z * 0.8;
-      g.globalAlpha = p.a * 0.5 * (0.45 + 0.55 * f);
-      put(p.gl.sh, p.gl, p.x + shx * f + this.lag.x * this.dpr * 0.6, p.y + shy * f + this.lag.y * this.dpr * 0.6, p.kx * (1 + p.z * 0.12), p.ky * (1 + p.z * 0.12));
+      g.globalAlpha = p.a * 0.55 * (1 - p.z);
+      put(p.gl.sh, p.gl, p.x + shx, p.y + shy, p.kx, p.ky);
     }
-    // 2. glows behind highlighted and screamed words
-    g.globalCompositeOperation = 'lighter';
-    for (const p of ps) {
-      if (!p.gl.gl) continue;
-      const yell = p.gl.tone === 'yell';
-      const pulse = still ? 0.7 : yell ? 0.78 + 0.22 * Math.sin(T * 9 + p.gl.i) : 0.62 + 0.22 * Math.sin(T * 2.4 - (p.gl.x / s) * 0.5);
-      g.globalAlpha = p.a * pulse * (yell ? 0.62 : 0.5);
-      put(p.gl.gl, p.gl, p.x, p.y, p.kx * 1.04, p.ky * 1.04);
-    }
-    g.globalCompositeOperation = 'source-over';
-    // 3. the letters, left to right (each face covers its left neighbour's extrusion)
-    g.imageSmoothingEnabled = false; // [font14] pixel letters stay blocky while they scale in
+    // 2. the letters
     for (const p of ps) {
       g.globalAlpha = p.a * (1 - p.z * 0.35);
       put(p.gl.sp, p.gl, p.x, p.y, p.kx, p.ky);
-    }
-    // 4. a glint sweeps along a highlighted word now and then
-    if (!still) {
-      g.globalCompositeOperation = 'lighter';
-      for (const p of ps) {
-        if (p.gl.tone !== 'hi' || p.z > 0.02) continue;
-        const ph = ((T - l.start) * 0.5 - (p.gl.x / s) * 0.05) % 2.6 - 0.6;
-        if (ph < 0 || ph > 0.3) continue;
-        g.globalAlpha = p.a * Math.sin((ph / 0.3) * Math.PI) * 0.42;
-        put(p.gl.sp, p.gl, p.x, p.y, p.kx, p.ky);
-      }
-      g.globalCompositeOperation = 'source-over';
     }
     g.globalAlpha = 1;
   }
@@ -560,10 +522,10 @@ export class TalkView {
     const s = this.s, ts = grid(s * 0.67);
     let t = this.tags.get(l.who);
     if (!t) {
-      const w = Math.ceil(advanceText(l.who, ts) + ts * 0.7), h = Math.ceil(ts * 1.45);
+      const w = Math.ceil(advanceText(l.who, ts) + ts * 0.7), h = Math.ceil(ts * 1.5);
       const cv = document.createElement('canvas');
       cv.width = w; cv.height = h;
-      drawText3D(cv.getContext('2d')!, l.who, Math.round(ts * 0.14), Math.round(ts * 0.9), { size: ts, palette: 'gold', depth: 1, caps: true });
+      drawText3D(cv.getContext('2d')!, l.who, Math.round(ts * 0.14), Math.round(ts * 1.0), { size: ts, palette: ACCENT, caps: true });
       t = { cv, w, h };
       if (fontOK) this.tags.set(l.who, t);
     }
