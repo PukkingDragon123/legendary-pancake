@@ -474,8 +474,8 @@ scroll) is made in code in `src/dev/iconbake.ts` and `src/ui/chrome/props3d.ts`.
 
 # Credits: the loading clock and Hollow & Co.'s office (builder intro4)
 
-The loading clock (`index.html` boot block, `public/models/interview/clock.png`) is painted in code by
-`src/onboard/tools/bootart.mjs`. The interview's form layer (paper, leather folio, brass clip, ink boxes and ticks,
+The loading clock (`index.html` boot block, laid out by `src/onboard/tools/bootart.mjs`) and the office, shelf and Clock-screen clocks are painted in code by
+`src/onboard/clockpaint.ts`. The interview's form layer (paper, leather folio, brass clip, ink boxes and ticks,
 rubber-stamp impressions, sticky note, acorns) is painted in code by `src/onboard/panelart.ts`. The office (walls,
 parquet, rug, coffered ceiling, desk, bookcases and books, credenza, filing cabinets, banker's lamp, nameplate,
 carafe, fountain pen, rubber stamp and ink pad, client folder, sconces, fig trees, the bracket clock) is modelled
