@@ -519,11 +519,12 @@ export class CuckooStage implements Stage {
     brass.push({ geo: K.turned([[0.0005, 0], [0.013, 0], [0.012, 0.004], [0.007, 0.008], [0.004, 0.012], [0.0005, 0.013]], 14, 20), m: mtx(0, DIAL.y, CD + 0.025, Math.PI / 2, 0, 0) });
     // ---- merge and add
     const woodG = K.carveShade(K.merge(wood), { lo: 0.5 });
-    const carveG = K.carveShade(K.merge([...carve, { geo: crest.geo }]), { lo: 0.36 });
-    const featherG = K.carveShade(crest.feather, { lo: 0.45 });
-    S.add(this.mesh(woodG, this.M.wood), this.mesh(carveG, this.M.carve), this.mesh(featherG, this.M.feather));
+    // the plain clock (loading screen, office) has no carved owl crest on the roof
+    const carveG = K.carveShade(K.merge(this.plain ? carve : [...carve, { geo: crest.geo }]), { lo: 0.36 });
+    S.add(this.mesh(woodG, this.M.wood), this.mesh(carveG, this.M.carve));
+    if (!this.plain) S.add(this.mesh(K.carveShade(crest.feather, { lo: 0.45 }), this.M.feather));
     if (leaves.length) S.add(this.mesh(K.carveShade(K.merge(leaves), { lo: 0.22, z0: CD, z1: CD + 0.035 }), this.M.leaf));
-    S.add(this.mesh(crest.eyes, this.M.glass, false, false));
+    if (!this.plain) S.add(this.mesh(crest.eyes, this.M.glass, false, false));
     S.add(this.mesh(K.merge(brass), this.M.brass));
     if (nut.length) S.add(this.mesh(K.carveShade(K.merge(nut), { lo: 0.5 }), this.M.carve), this.mesh(K.carveShade(K.merge(cup), { lo: 0.3, hi: 0.75 }), this.M.wood));
     nutG.dispose(); cupG.dispose();
@@ -545,7 +546,7 @@ export class CuckooStage implements Stage {
     this.pick(doorM, 'door');
     // pick boxes: the gable and balcony, the crest
     this.hitBox(0.4, 0.32, 0.2, v3(0, DOOR.y + 0.11, 0.3), 'door');
-    this.hitBox(0.44, 0.34, 0.14, v3(0, RIDGE + 0.15, ROOF_Z - 0.02), 'crest');
+    if (!this.plain) this.hitBox(0.44, 0.34, 0.14, v3(0, RIDGE + 0.15, ROOF_Z - 0.02), 'crest');
     return { hour, minute };
   }
 
