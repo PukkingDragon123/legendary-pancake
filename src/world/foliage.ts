@@ -244,7 +244,8 @@ export function canopyBuilder(puffs: Puff[], o: CanopyOpts): MeshBuilder {
     return (dark + (1 - dark) * Math.pow(out, 1.6)) * (0.72 + 0.28 * under);
   };
   const inside = (q: V3, self: Puff) => puffs.some((p) => p !== self && Math.hypot(q.x - p.x, (q.y - p.y) / (p.sy ?? 1), q.z - p.z) < p.r * 0.72);
-  const cover = o.cover ?? 2.4;
+  // [look12] the twig sprays leave more air between their leaves than the old round clusters: a few more cards
+  const cover = (o.cover ?? 2.4) * 1.3;
   const unit = () => { const z = rng.range(-1, 1), a = rng.range(0, Math.PI * 2), rr = Math.sqrt(1 - z * z); return v3(rr * Math.cos(a), z, rr * Math.sin(a)); };
   for (const pf of puffs) {
     const ys = pf.sy ?? 1;
@@ -262,7 +263,7 @@ export function canopyBuilder(puffs: Puff[], o: CanopyOpts): MeshBuilder {
       const d = v3(rr * Math.cos(a), z, rr * Math.sin(a));
       if (d.y < -0.4 && rng.chance(0.55)) continue;
       let depth = rng.chance(0.18) ? rng.range(0.45, 0.75) : rng.range(0.78, 1.02);
-      if (depth > 0.78 && gaps.some((g) => d.dot(g) > 0.8) && rng.chance(0.8)) continue;
+      if (depth > 0.78 && gaps.some((g) => d.dot(g) > 0.86) && rng.chance(0.6)) continue;
       depth *= reach(d);
       const p = v3(pf.x + d.x * pf.r * depth, pf.y + d.y * pf.r * depth * ys, pf.z + d.z * pf.r * depth);
       if (o.floor !== undefined && p.y < o.floor + o.size * 0.3) p.y = o.floor + o.size * 0.3 + rng.range(0, 0.1);

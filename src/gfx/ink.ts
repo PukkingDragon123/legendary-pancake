@@ -31,9 +31,9 @@
 //      the graded picture in the ink colour, faded where the depth of field blurs and under bright bloom (lamps glow
 //      over their lines).
 // The owls' fluff would give a noisy, crawling contour, so a furry part draws no screen-space ink at all (fur.ts) and
-// gets an inverted hull instead (inkHull, [look12] a plain one): its back faces pushed a little way into the fluff, then
-// a constant number of pixels on screen and a touch further from the eye: one solid silhouette line at the body's edge
-// that the longer strands cross over, hidden behind a wing lying over the body (no second contour beside the wing's).
+// gets an inverted hull instead (inkHull, [look12] a plain one): its back faces pushed out to the fluff's edge, then
+// a constant number of pixels on screen: one solid silhouette line round the fluff
+// that the longest strands cross over, hidden behind a wing lying over the body (no second contour beside the wing's).
 // Cost tiers: high (8 depth taps, creases, object edges), medium (4, creases, object edges), low (4 taps, outlines only).
 import * as THREE from 'three';
 
@@ -253,7 +253,7 @@ void main() {
       float b0 = bend(D, P, U);
       if (b0 > bend(D2, D, P) && b0 >= bend(P, U, U2)) k = max(k, b0);
     }
-    cr = smoothstep(0.1, 0.26, k) * uCrease * solid * (1.0 - smoothstep(uFade.x * 0.5, uFade.x * 1.3, z0));
+    cr = smoothstep(0.1, 0.26, k) * 0.82 * uCrease * solid * (1.0 - smoothstep(uFade.x * 0.3, uFade.x * 0.85, z0));
   }
 #endif
   e *= 1.0 - thin * smoothstep(uFade.x * 0.25, uFade.x * 0.8, z0);
@@ -387,8 +387,8 @@ export class Ink {
 // ------------------------------------------------------------------ owl hulls
 
 // [look12] A plain inverted hull, which holds up where the band trick broke into dots: the part's back faces pushed
-// out a little into the fluff and then a constant number of pixels on screen, a touch further from the eye. Inside the
-// silhouette the part and its fluff hide it; outside, it shows as a solid line at the bare body's edge, which the
+// out to the fluff's edge and then a constant number of pixels on screen. Inside the
+// silhouette the part and its fluff hide it; outside, it shows as a solid line round the fluff, which the
 // longer strands cross over (and a wing lying over the body hides the body's line, so no second contour beside it).
 const HULL_VS = /* glsl */ `
 uniform float uLen; uniform vec3 uComb; uniform vec3 uWind; uniform sampler2D uMask; uniform float uHasMask;
@@ -401,15 +401,15 @@ void main() {
   vW = w;
   if (w < 0.05) { gl_Position = vec4(0.0, 0.0, 2.0, 1.0); return; }
   vec3 n = normalize(normal);
-  // a little way into the fluff (the mask is the fluff's length: none round the eyes and the bill), combed and swayed
+  // out to the fluff's edge (the mask is the fluff's length: none round the eyes and the bill), combed and swayed
   // as the shells are
   float len = uLen * (uHasMask > 0.5 ? texture2D(uMask, uv).r : 1.0);
   vec3 comb = uComb - n * dot(uComb, n);
-  vec3 p = position + n * (len * 0.3) + comb * (len * 0.2) + uWind * 0.2;
+  vec3 p = position + n * (len * 0.9) + comb * (len * 0.72) + uWind * 0.72;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  // a little further from the eye, so whatever lies on the part (a wing, the fluff) stays in front of its line
+  // a hair further from the eye, so whatever lies on the part (a wing) stays in front of its line
   float lenV = length((modelViewMatrix * vec4(n * uLen, 0.0)).xyz);
-  mv.xyz += normalize(mv.xyz) * lenV * 0.35;
+  mv.xyz += normalize(mv.xyz) * lenV * 0.05;
   vec4 c = projectionMatrix * mv;
   // then a constant number of pixels outwards on screen
   vec3 vn = normalize(normalMatrix * n);
