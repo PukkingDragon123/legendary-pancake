@@ -8,7 +8,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { modelUrl } from '../../gfx/glb.ts';
 import { rng } from '../../gfx/noise.ts';
-import { uiFont, fontReady, textSafe, canvasText } from '../../ui/font.ts';
+import { fontPx, fontReady, textSafe, canvasText } from '../../ui/font.ts';
 import { drawText3D, fitText3D } from '../../ui/text3d.tsx';
 
 // ------------------------------------------------------------------ textures and materials
@@ -552,16 +552,14 @@ export function lodgeFont(): Promise<void> {
 }
 
 /**
- * Draw text crisply in Alegreya: `px` is the wished size, snapped to whole multiples of the font's 16 px grid (and
- * stepped down a whole multiple at a time until it fits `maxW`), drawn on whole pixels, the alpha thresholded so
- * letters have hard pixel edges. `y` is the middle of the capitals.
+ * Draw text in Alegreya, smooth and anti-aliased: `px` is the wished size (shrunk until it fits `maxW`), `y` the middle
+ * of the capitals.
  */
 function pixelText(g: CanvasRenderingContext2D, text: string, x: number, y: number, px: number, col: string, o: { align?: CanvasTextAlign; shadow?: string; outline?: string; maxW?: number } = {}) {
   text = textSafe(text);
-  let n = Math.max(1, Math.round(px / 16));
-  if (o.maxW) { const m = canvas(4, 4)[1]; m.font = uiFont(n); while (n > 1 && m.measureText(text).width > o.maxW) { n -= 1; m.font = uiFont(n); } }
-  // [font6] full-resolution chalk lettering, centred on y
-  canvasText(g, text, x, Math.round(y + 5.5 * n), col, { n, align: o.align ?? 'center', shadow: o.shadow, outline: o.outline });
+  let size = Math.max(10, px * 1.08);
+  if (o.maxW) { const m = canvas(4, 4)[1]; m.font = fontPx(size, { weight: 700 }); while (size > 10 && m.measureText(text).width > o.maxW) { size *= 0.93; m.font = fontPx(size, { weight: 700 }); } }
+  canvasText(g, text, x, Math.round(y + 0.32 * size), col, { size, align: o.align ?? 'center', shadow: o.shadow, outline: o.outline });
 }
 
 // ------------------------------------------------------------------ dried herbs hung from the beams

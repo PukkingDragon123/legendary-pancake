@@ -41,6 +41,7 @@
 .bk-tab { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 1px; padding-top: calc(var(--T) * 3) !important; background-size: 100% 100%; color: var(--ink-2) !important; transition: transform .12s ease; }
 .bk-tab span { font-family: var(--font-small); font-size: var(--t1); font-weight: 700; line-height: 1; white-space: nowrap; letter-spacing: 0px; }
 .bk-tab .bk-px { filter: none; }
+.bk-tab:not(.on) { padding-top: calc(var(--T) * 1) !important; } /* [ui12] the lower tabs keep their names clear of the book's edge */
 .bk-tab:active { transform: translateY(2px); }
 .bk-tab.on span { color: var(--ink); }
 .spread .bk-tab span { font-size: var(--t1); }

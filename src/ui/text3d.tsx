@@ -24,7 +24,7 @@ import { fontPx, stepPx, textSafe, uiFont } from './font.ts';
 import { reducedMotion } from './chrome/swing.ts';
 
 /** a palette: top highlight row, three fill bands (light to dark), outline, extrusion */
-export interface Palette { hi: string; c1: string; c2: string; c3: string; ol: string; ex: string; drop?: string }
+export interface Palette { hi: string; c1: string; c2: string; c3: string; ol: string; ex: string; drop?: string; /** CSS outline width ('0px' = printed ink, no outline) */ ow?: string }
 /** the UI's ink: every outline in the game (2D and 3D) is this near-black */
 export const INK = '#120a0e';
 export const PALETTES = {
@@ -34,13 +34,13 @@ export const PALETTES = {
   rose: { hi: '#fff0ec', c1: '#ffc4b4', c2: '#f27a62', c3: '#cc3e34', ol: INK, ex: '#5e1414' },
   leaf: { hi: '#f4ffe2', c1: '#d2f29a', c2: '#8fcf4e', c3: '#4e9a2a', ol: INK, ex: '#1c4012' },
   moon: { hi: '#ffffff', c1: '#f0f1ff', c2: '#cfd3ff', c3: '#9ea6f0', ol: INK, ex: '#262c78' },
-  ink: { hi: '#4a5fae', c1: '#2e3f86', c2: '#22306c', c3: '#18224e', ol: '#fbf3df', ex: '#c2a777', drop: 'rgba(0,0,0,0)' },
+  ink: { hi: '#4a5fae', c1: '#2e3f86', c2: '#22306c', c3: '#18224e', ol: 'rgba(255,250,236,.7)', ex: '#c2a777', drop: 'rgba(0,0,0,0)', ow: '0px' },
 } satisfies Record<string, Palette>;
 export type PaletteName = keyof typeof PALETTES;
 
 // ------------------------------------------------------------------ CSS
 
-const vars = (p: Palette) => `--t-hi:${p.hi};--t-1:${p.c1};--t-2:${p.c2};--t-3:${p.c3};--t-ol:${p.ol};--t-ex:${p.ex};--t-dr:${p.drop ?? 'rgba(18,10,4,.42)'}`;
+const vars = (p: Palette) => `--t-ow:${p.ow ?? 'max(1px, 0.05em)'};--t-hi:${p.hi};--t-1:${p.c1};--t-2:${p.c2};--t-3:${p.c3};--t-ol:${p.ol};--t-ex:${p.ex};--t-dr:${p.drop ?? 'rgba(18,10,4,.42)'}`;
 /** a length in ems (scales with the text) */
 const E = (k: number) => `${k}em`;
 /** an outline from text shadows: twelve directions, so curves stay round */
@@ -51,7 +51,7 @@ const ring = (c: string, w = 'var(--ow)') => DIRS.map(([x, y]) => `calc(${w} * $
  * 2-3 on big titles), a shallow bevel of the same ink below it (the letters stand a little proud), a tight contact
  * shadow and a soft cast shadow. `n` deepens the bevel a little on the biggest titles.
  */
-const OW = 'max(1px, 0.05em)';
+const OW = 'var(--t-ow, max(1px, 0.05em))';
 const stack = (n: number) => [
   ring('var(--t-ol)', OW),
   `0 calc(${OW} + ${E(0.025 + n * 0.003)}) 0 var(--t-ol)`,
