@@ -401,6 +401,7 @@ export function buildLibrary(runs: ShelfRun[], m: OfficeMats): THREE.Group {
   const pageMat = new THREE.MeshStandardMaterial({ map: tx(pageEdges(), true, true), roughness: 0.85, vertexColors: true, name: 'bookPages' });
   m.all.push(spineMat, coverMat, pageMat);
   const A = { spine: new Acc(), cover: new Acc(), page: new Acc() };
+  thingTurn.n = 0; thingTurn.start = 1;
   const placed: Placed[] = [];
   const list = art.list;
   const singles = list.filter((d) => !(d.cell < 15));
@@ -489,7 +490,7 @@ function flatStack(out: Placed[], x: number, run: ShelfRun, pool: Design[], r: (
   }
   // a small thing on top of the pile
   if (r() < 0.6 && y < run.y + run.maxH - 0.12) {
-    const o = smallThing(m, r);
+    const o = smallThing(m, r, run.y + run.maxH - y);
     o.position.set(x + 0.01 + wMax * (0.45 + r() * 0.1), y, run.z - 0.09);
     o.rotation.y = r() * Math.PI * 2;
     props.add(o);
@@ -525,18 +526,22 @@ function ornament(props: THREE.Group, m: OfficeMats, x: number, run: ShelfRun, r
 }
 
 const extra = new WeakMap<OfficeMats, { sand: THREE.Material; tape: THREE.Material }>();
+const thingTurn = { n: 0, start: 0 };
 function smallThing(m: OfficeMats, r: () => number, maxH = 0.4): THREE.Group {
-  const g = new THREE.Group(), k = Math.floor(r() * 4);
+  // the objects take turns (never three hourglasses in a row), starting from a random one
+  const g = new THREE.Group();
+  let k = (thingTurn.n++ + thingTurn.start) % 4;
+  if (maxH < 0.18) k = 2; else if ((k === 0 && maxH <= 0.2) || (k === 1 && maxH <= 0.22)) k = 2 + (r() < 0.5 ? 1 : 0);
   let X = extra.get(m);
   if (!X) { X = { sand: new THREE.MeshStandardMaterial({ color: 0xd8b878, roughness: 0.95 }), tape: new THREE.MeshStandardMaterial({ color: 0x8a1c16, roughness: 0.7 }) }; extra.set(m, X); m.all.push(X.sand, X.tape); }
   const add = (geo: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) => { const me = new THREE.Mesh(at(geo, x, y, z, rx, ry, rz), mat); me.castShadow = true; me.receiveShadow = true; g.add(me); };
-  if (k === 0 && maxH > 0.2) {
+  if (k === 0) {
     // an hourglass: turned walnut ends, three spindles, the glass and its sand
     for (const y of [0, 0.142]) add(cyl(0.036, 0.012, 20), m.walnut, 0, y, 0);
     for (let i = 0; i < 3; i++) { const a = (i / 3) * Math.PI * 2; add(lathe([[0.004, 0], [0.005, 0.03], [0.003, 0.065], [0.005, 0.1], [0.004, 0.13]], 8), m.walnut, Math.cos(a) * 0.028, 0.012, Math.sin(a) * 0.028); }
     add(lathe([[0.002, 0], [0.022, 0.012], [0.024, 0.04], [0.006, 0.062], [0.003, 0.065], [0.006, 0.068], [0.024, 0.09], [0.022, 0.118], [0.002, 0.13]], 24), m.glass, 0, 0.012, 0);
     add(lathe([[0, 0], [0.019, 0.004], [0.012, 0.026], [0, 0.034]], 16), X.sand, 0, 0.014, 0);
-  } else if (k === 1 && maxH > 0.22) {
+  } else if (k === 1) {
     // a small brass armillary sphere on a turned stand
     add(lathe([[0, 0], [0.035, 0], [0.034, 0.008], [0.012, 0.016], [0.008, 0.06], [0.014, 0.07], [0, 0.072]], 20), m.brass, 0, 0, 0);
     for (let i = 0; i < 3; i++) add(new THREE.TorusGeometry(0.055, 0.0025, 6, 40), m.brass, 0, 0.128, 0, i === 0 ? Math.PI / 2 : 0, i * 1.0, i === 2 ? 0.41 : 0);
