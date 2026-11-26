@@ -58,7 +58,7 @@ export class Look {
   private frame = 0;
   private bloomOn: boolean;
   /** [outline9] ink outlines: strength, width, crease, far (metres) */
-  readonly outline: InkLook = { ...defaultInk(), far: 14 };
+  readonly outline: InkLook = { ...defaultInk(), far: 20 }; // [look12] (was 14: the bookcases at the back kept their lines)
   private ink: Ink;
 
   constructor(private gl: THREE.WebGLRenderer, quality: 'low' | 'high') {

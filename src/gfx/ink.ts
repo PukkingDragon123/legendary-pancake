@@ -253,7 +253,7 @@ void main() {
       float b0 = bend(D, P, U);
       if (b0 > bend(D2, D, P) && b0 >= bend(P, U, U2)) k = max(k, b0);
     }
-    cr = smoothstep(0.1, 0.26, k) * 0.82 * uCrease * solid * (1.0 - smoothstep(uFade.x * 0.3, uFade.x * 0.85, z0));
+    cr = smoothstep(0.1, 0.26, k) * 0.82 * uCrease * solid * (1.0 - smoothstep(uFade.x * 0.45, uFade.x * 1.2, z0));
   }
 #endif
   e *= 1.0 - thin * smoothstep(uFade.x * 0.25, uFade.x * 0.8, z0);
@@ -264,7 +264,7 @@ void main() {
     float side = dot(outward, vec2(0.7071, -0.7071)) / max(length(outward), 1e-5);
     float press = pen((uCamWorld * vec4(P, 1.0)).xyz * 1.6) - 0.5;
     float nearK = 1.0 - smoothstep(uFade.y * 0.05, uFade.y * 0.22, z0);
-    float farK = smoothstep(uFade.x * 0.5, uFade.y, z0);
+    float farK = smoothstep(uFade.x * 0.75, uFade.y, z0);
     b = clamp(0.62 + 0.16 * side * step(0.01, e) + 0.12 * nearK + 0.3 * press - 0.45 * farK - 0.22 * (1.0 - full), 0.0, 1.0);
   }
   // leaf cards: a lighter line (their ragged edges would read as scribble under a heavy one)
