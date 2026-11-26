@@ -529,15 +529,15 @@ export class Scene {
       const g = this.post.grade, hr = this.sky.hour;
       const golden = Math.max(sm(hr, 16.6, 18.2) * (1 - sm(hr, 19.0, 19.8)), sm(hr, 5.6, 6.4) * (1 - sm(hr, 7.4, 8.6)));
       g.exposure = (L(1.0, 1.45, night) + golden * 0.18) * (1 + (this.weather?.vis.overcast ?? 0) * 0.25);
-      // [look12] full, saturated colour by day and night (deep sapphire, never grey), punchier contrast, and only a
-      // touch of warmth by day (the sun is gold enough: no orange cast)
-      g.warm = L(0.03, -0.08, night) + golden * 0.1;
+      // [look12] full, saturated colour by day and night (deep sapphire, never grey), and a cosy warmth: golden light,
+      // soft contrast, gentle cool shadows (no cold or grey cast, no orange one either)
+      g.warm = L(0.07, -0.03, night) + golden * 0.1;
       g.saturation = L(1.2, 1.1, night);
       g.vibrance = L(0.34, 0.24, night);
-      g.contrast = L(1.1, 1.12, night);
+      g.contrast = L(1.06, 1.08, night);
       // [light7] the cel light carries the colour of the shadows now: lighter split toning, and a tighter bloom on
       // what is really bright (lamps, the sun's glints, the moon) instead of a haze over everything at night
-      g.split = L(0.22, 0.4, night); // [look12] less honey wash over the lights
+      g.split = L(0.28, 0.4, night); // [look12] warm lights, gently cool shadows
       g.bloom = L(0.42, 0.62, night) + golden * 0.12;
       g.bloomThreshold = L(1.2, 0.95, night);
       g.vignette = L(0.2, 0.32, night);
@@ -784,7 +784,7 @@ export class Scene {
     const k = this.inLight, night = this.sky.night, day = 1 - THREE.MathUtils.smoothstep(night, 0.25, 0.75);
     this.sky.hemi.intensity = this.sky.hemiBase * (1 - k * (0.34 + night * 0.24));
     this.cel.fill = 1 - k * 0.5; // [light7] less sky bounce gets into the hollow
-    this.cel.orange = 0.96 - k * 0.14; // [look12] honey floorboards, not orange ones, under the lamp
+    this.cel.orange = 0.96 - k * 0.08; // [look12] honey floorboards, not orange ones, under the lamp
     if (k < 0.005 && !this.insideLights) return;
     if (!this.insideLights) {
       const win = new THREE.SpotLight(0xffe2b0, 0, 11, 0.5, 0.85, 1.2);
@@ -819,7 +819,7 @@ export class Scene {
     this.lantern.intensity = M.lerp(outLantern, (4.6 * day + 16 * night) * flick, k);
     this.lantern.decay = M.lerp(1.4, 2, k);
     this.lantern.distance = M.lerp(10, 14, k);
-    this.lantern.color.setHex(0xffcc88).lerp(new THREE.Color(0xfff0dc), day * 0.6 * k); // [look12] a cleaner, less orange lamplight
+    this.lantern.color.setHex(0xffc680).lerp(new THREE.Color(0xffe8cc), day * 0.6 * k); // [look12] a warm lamp pool, golden rather than orange
     this.room.position.set(H.x, 2.6, H.z + 1.6).lerp(new THREE.Vector3(H.x + this.pipL.x * 0.8, fy + 1.5, H.z + Math.min(4.2, this.pipL.y + 2.4)), k);
     this.room.intensity = M.lerp(1.4 + night * 9, 1.1 * day + 3.6 * night, k);
     this.room.distance = M.lerp(16, 6, k);
@@ -866,8 +866,8 @@ export class Scene {
     g.vignette = b.vignette + k * (0.06 + night * 0.14);
     g.vibrance = b.vibrance + k * 0.04; // [light7] the lamp and the wood are warm enough on their own
     g.saturation = b.saturation;
-    g.warm = b.warm - k * 0.07; // [look12] the hollow's wood and lamplight are warm already: balance them (no orange floor)
-    g.orange = 1.04 - k * 0.14; // [look12]
+    g.warm = THREE.MathUtils.lerp(b.warm, 0.04, k); // [look12] cosy inside, but the wood and lamplight are warm already (no orange floor) and no cold cast either
+    g.orange = 1.04 - k * 0.06; // [look12]
     // critters (a dragonfly zipping past the lens) and fireflies belong to the clearing, not the living room
     this.critters.group.visible = k < 0.4;
     this.fireflies.mesh.visible = k < 0.4;

@@ -87,7 +87,7 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 
 /** The store's own grade over the app's post chain: warm, rich, a little bloom on the lanterns. */
 /** The store's look on the app's post chain (src/world/post.ts): warm and rich, bloom on the lanterns, a tilt-shift
  * depth of field focused on whatever the camera is looking at (set every frame in update). */
-const LOOK: Look = { exposure: 1.02, contrast: 1.1, saturation: 1.18, vibrance: 0.32, warm: -0.03, orange: 0.9, split: 0.3, vignette: 0.28, grain: 0.016, bloom: 0.55, bloomThreshold: 1.1, focus: 6, focusRange: 2.2, blur: 0.4, cold: 0 }; // [look12] fuller colour; cooler balance (the logs and lamps are orange enough)
+const LOOK: Look = { exposure: 1.02, contrast: 1.06, saturation: 1.18, vibrance: 0.32, warm: 0.0, orange: 0.9, split: 0.3, vignette: 0.28, grain: 0.016, bloom: 0.55, bloomThreshold: 1.1, focus: 6, focusRange: 2.2, blur: 0.4, cold: 0 }; // [look12] fuller colour; a neutral balance (the logs and lamps are warm enough on their own)
 
 export class Lodge implements Stage {
   readonly scene = new THREE.Scene();
@@ -260,7 +260,7 @@ export class Lodge implements Stage {
     this.hemi.color.setHex(n > 0.5 ? 0x8a9ac8 : 0xdde6f2);
     this.hemi.groundColor.setHex(n > 0.5 ? 0x2a1e1a : 0x4a3a2e); // [look12] a less orange bounce off the floor
     this.key.intensity = L(0.62, 0.3, n);
-    this.key.color.setHex(n > 0.5 ? 0xffd09c : 0xfff0d8); // [look12] cleaner light, so the wood keeps its own colour
+    this.key.color.setHex(n > 0.5 ? 0xffd09c : 0xffeacc); // [look12] golden but clean light, so the wood keeps its own colour
     this.sun.intensity = L(34, 14, n);
     this.sun.color.setHex(n > 0.5 ? 0x8fa8e8 : 0xeef4ff);
     for (const s of this.shafts) (s.material as THREE.MeshBasicMaterial).color.setHex(n > 0.5 ? 0x1c3058 : 0x6c6450);

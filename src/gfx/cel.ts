@@ -162,10 +162,10 @@ export interface CelKnobs {
   /** [look12] the saturation of orange-browns instead (1 = as painted; a little less keeps wood from reading orange) */
   orange: number;
 }
-const defaults = (): CelKnobs => ({ fill: 1, rim: 1, lampBands: 0.6, keyBands: 1, tint: new THREE.Color(0.3, 0.2, 0.48), spotKey: 0, vibrance: 0.3, saturation: 1.08, orange: 0.96 });
+const defaults = (): CelKnobs => ({ fill: 1, rim: 1, lampBands: 0.6, keyBands: 1, tint: new THREE.Color(0.32, 0.25, 0.44), spotKey: 0, vibrance: 0.3, saturation: 1.08, orange: 0.96 }); // [look12] a gentler cool fill in the shadows
 const DEFAULT = defaults();
 const LIVE = { x: 1, y: 1, z: 0.6, w: 1 };
-const TINT = { x: 0.3, y: 0.2, z: 0.48, w: 0 };
+const TINT = { x: 0.32, y: 0.25, z: 0.44, w: 0 };
 const ALBEDO = { x: 0.3, y: 1.08, z: 0.96, w: 0 }; // [look12]
 function push(k: CelKnobs) {
   LIVE.x = k.fill * 0.4; LIVE.y = k.rim; LIVE.z = k.lampBands; LIVE.w = k.keyBands;

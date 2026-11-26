@@ -233,8 +233,13 @@ void main() {
   // two or three pixels wide counts as thin too
   thin = max(thin, max(step(T, 1.0 - z0 / -L2.z) * step(T, 1.0 - z0 / -R2.z), step(T, 1.0 - z0 / -D2.z) * step(T, 1.0 - z0 / -U2.z)) * 0.7);
   float aL = cls(uL), aR = cls(uR), aD = cls(uD), aU = cls(uU);
-  // where one object meets another just behind it (only solid things, both sides)
-  if (full > 0.5) e = max(e, max(objStep(rx, c0, aL, aR), objStep(ry, c0, aD, aU)) * full);
+  // where one object lies flat on another just behind it (only solid things, both sides; only on surfaces facing up,
+  // so the seam between two parts of a wall or a trunk never draws)
+  if (full > 0.5) {
+    vec3 nW = mat3(uCamWorld) * normalize(cross(R - L, U - D));
+    float up = smoothstep(0.6, 0.85, abs(nW.y));
+    if (up > 0.0) e = max(e, max(objStep(rx, c0, aL, aR), objStep(ry, c0, aD, aU)) * full * up);
+  }
   // creases (only between solid neighbours, never at fluff, glass, glows or grass, never across a depth step), one
   // pixel wide: kept only where the bend peaks along the axis
   if (uCrease > 0.0 && full > 0.0) {
@@ -405,9 +410,12 @@ void main() {
   float l = length(dn);
   // heavier on the shadow side, like the screen-space lines
   if (l > 1e-6) { w *= 0.9 + 0.28 * dot(dn / l, vec2(0.7071, -0.7071)); c.xy += (dn / l) * uInkPx.xy * w * c.w; }
-  // [look12] at the depth of the bare part's own rim, not of the fluff's edge: a wing lying in the fluff hides the line
-  // behind it (it was drawn over the wing, a second contour beside the wing's own)
-  vec4 rim = projectionMatrix * (modelViewMatrix * vec4(position, 1.0));
+  // [look12] at the depth of the bare part's rim brought half the fluff's length towards the eye, not of the fluff's
+  // outer edge: in front of most strands, but a wing lying in the fluff hides the line behind it (it was drawn over the
+  // wing, a second contour beside the wing's own)
+  vec4 mv0 = modelViewMatrix * vec4(position, 1.0);
+  float lenV = length((modelViewMatrix * vec4(n * len, 0.0)).xyz);
+  vec4 rim = projectionMatrix * vec4(mv0.xyz + normalize(-mv0.xyz) * lenV * 0.5, 1.0);
   c.z = (rim.z / rim.w) * c.w;
   vN = vn; vV = -mv.xyz; vW = w;
   gl_Position = c;
