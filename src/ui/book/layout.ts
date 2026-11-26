@@ -24,7 +24,7 @@ export interface BookLayout {
 export function layout(vw: number, vh: number): BookLayout {
   const single = vw < 760 || vh < 560;
   const T = vw >= 1700 && vh >= 1100 ? 3 : 2;
-  const B = 6, gut = single ? 10 : 24;
+  const B = single ? 9 : 12, gut = single ? 10 : 24;
   const tabH = 25 * T;
   const footer = single ? 64 : 70;       // the arrows and the close button under the book
   let pw: number, ph: number;
@@ -43,6 +43,6 @@ export function layout(vw: number, vh: number): BookLayout {
   const x = snap((vw - BW) / 2);
   const y = snap(Math.max(tabH + 6, (vh - BH - footer + tabH) / 2));
   const PW = pw * T, PH = ph * T;
-  const fs = 16 * uiFontPx(); // Alagard's grid: page text is the UI text size (--t1), titles twice that
+  const fs = 17 * uiFontPx(); // page text is the UI text size (--t1), titles about 1.6x that
   return { vw, vh, T, single, B, pw, ph, PW, PH, W, H, BW, BH, x, y, fs, tabH };
 }

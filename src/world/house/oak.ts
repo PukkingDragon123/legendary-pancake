@@ -17,7 +17,7 @@ import { canopy, leafMaterial, withLeafState, type Puff } from '../foliage.ts';
 import { Cards, CELL, type Mass } from './crown.ts';
 import { Geo, mat, spline, type V3 } from './geo.ts';
 import { canvasTex, houseMat, patchCut, woodFill, type HouseMat } from './kit.ts';
-import { alagardReady, alagardText } from '../../ui/font.ts';
+import { fontReady, canvasText } from '../../ui/font.ts';
 import { drawText3D } from '../../ui/text3d.tsx';
 import {
   CHIMNEY_A, CHIMNEY_TOP, DOOR_A, FLOOR_IDS, FLOOR_Y, HOLES, inOpening, LADDER_A, LAMP_AT, LAUNCH, LIMB_A, OPEN_A, openingOutline, openings, PLATFORM,
@@ -214,15 +214,15 @@ function signUV(r: readonly number[], u: number, v: number): [number, number] {
 let signsMat: THREE.MeshStandardMaterial | null = null;
 function signsMaterial(): THREE.MeshStandardMaterial {
   if (signsMat) return signsMat;
-  // [font6] the atlas is painted at 2 texels per art pixel so the lettering can be Alagard (the game's font) at its
+  // [font6] the atlas is painted at 2 texels per art pixel so the lettering can be Alegreya (the game's font) at its
   // 16 px grid; the art itself is drawn scaled 2x, so it looks exactly as before
   const paint = (g: CanvasRenderingContext2D) => {
     g.setTransform(2, 0, 0, 2, 0, 0);
     const at = (r: readonly number[], f: () => void) => { g.save(); g.translate(r[0], r[1]); f(); g.restore(); };
-    /** Alagard, `n` texels per font pixel, centred on `cx`, capitals from `capTop` (art pixels within region r) */
+    /** Alegreya, `n` texels per font pixel, centred on `cx`, capitals from `capTop` (art pixels within region r) */
     const ink = (r: readonly number[], text: string, cx: number, capTop: number, n: number, color: string, shadow?: string) => {
       g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
-      alagardText(g, text, 2 * (r[0] + cx), 2 * (r[1] + capTop) + 11 * n, color, { n, align: 'center', shadow });
+      canvasText(g, text, 2 * (r[0] + cx), 2 * (r[1] + capTop) + 11 * n, color, { n, align: 'center', shadow });
       g.restore();
     };
     at(SIGNS.sign, () => {
@@ -231,8 +231,8 @@ function signsMaterial(): THREE.MeshStandardMaterial {
       g.fillStyle = '#5c3a1c'; g.fillRect(1, 13, 94, 1);
       g.fillStyle = 'rgba(0,0,0,0.18)'; g.fillRect(1, 24, 94, 3);
     });
-    // [font6] the hollow's name in cream 3D pixel letters
-    const sign3d = (text: string, capTop: number) => { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); drawText3D(g, text, 2 * (SIGNS.sign[0] + 48) - 2, 2 * (SIGNS.sign[1] + capTop) + 11, { n: 1, palette: 'cream', depth: 1, align: 'center' }); g.restore(); };
+    // the hollow's name in cream 3D small capitals
+    const sign3d = (text: string, capTop: number) => { g.save(); g.setTransform(1, 0, 0, 1, 0, 0); drawText3D(g, text, 2 * (SIGNS.sign[0] + 48) - 2, 2 * (SIGNS.sign[1] + capTop) + 11, { n: 1, palette: 'cream', depth: 1, align: 'center', caps: true }); g.restore(); };
     sign3d('HOOT HOLLOW', 3);
     sign3d('PIP', 14.5);
     at(SIGNS.mail, () => {
@@ -263,7 +263,7 @@ function signsMaterial(): THREE.MeshStandardMaterial {
     at(SIGNS.brass, () => { g.fillStyle = '#c99a4c'; g.fillRect(0, 0, 8, 8); });
   };
   const t = canvasTex(SIGNS.W * 2, SIGNS.H * 2, paint);
-  void alagardReady().then(() => { const g = (t.image as HTMLCanvasElement).getContext('2d'); if (g) { paint(g); t.needsUpdate = true; } });
+  void fontReady().then(() => { const g = (t.image as HTMLCanvasElement).getContext('2d'); if (g) { paint(g); t.needsUpdate = true; } });
   signsMat = new THREE.MeshStandardMaterial({ map: t, roughness: 0.6, metalness: 0.15 });
   signsMat.name = 'house:signs';
   return signsMat;

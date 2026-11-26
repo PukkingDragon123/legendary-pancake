@@ -14,8 +14,8 @@ import { IcoAcorn, IcoCandle, IcoSparkle, IcoStone } from './ui/icons.tsx';
 import { toast } from './ui/kit.tsx';
 import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
-import { alagardReady, installTextSnap } from './ui/font.ts'; // Alagard everywhere: also routes every UI text node through alagardSafe
-import { installText3D } from './ui/text3d.tsx'; // 3D pixel titles, numbers, buttons, toasts
+import { fontReady, installTextSnap } from './ui/font.ts'; // the game's faces; also routes every UI text node through textSafe
+import { installText3D } from './ui/text3d.tsx'; // lettered titles, numbers, buttons, toasts
 import { installRealSkin } from './ui/real/skin.ts'; // [ui7] the realistic material kit (walnut, brass, leather, paper)
 import { loadTextures } from './ui/real/tex.ts';
 import { installIconSet } from './ui/chrome/iconset.ts';
@@ -29,7 +29,7 @@ async function boot() {
   await loadTextures(); // [ui7] the UI's material tiles (small WebPs) before anything is painted
   installRealSkin();
   await Promise.race([installIconSet(), new Promise((r) => setTimeout(r, 2500))]); // [ui4] the icon family replaces the sprite icons everywhere; [tex7] its atlas
-  await alagardReady();
+  await fontReady();
   installTextSnap();
   installText3D();
   const q = new URLSearchParams(location.search);
@@ -40,7 +40,7 @@ async function boot() {
   const canvas = document.getElementById('world') as HTMLCanvasElement;
   const scene = new Scene(canvas, save.value.look, quality);
   sceneRef.current = scene;
-  (window as unknown as { hh: unknown }).hh = { scene, save, phase, tab, panel };
+  (window as unknown as { hh: unknown }).hh = { scene, save, phase, tab, panel, say };
   bindHome(scene); // [house] rooms, moving boxes and boarded-up floors follow save.home
   if (import.meta.env.DEV && q.get('hour')) scene.setHour(+q.get('hour')!); // [ui4] dev only: ?hour=22 to check the HUD at night
   scene.setZones(zones.value);

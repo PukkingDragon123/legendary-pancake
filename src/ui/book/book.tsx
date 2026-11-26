@@ -14,6 +14,7 @@ import { uiBurst } from '../chrome/uifx.ts';
 import { fmtDur, fmtTime } from '../kit.tsx';
 import { panel, sceneRef } from '../state.ts';
 import { CSS_TOKENS } from '../../gfx/palette.ts';
+import { texReady } from '../real/tex.ts';
 import { arrowArt, boardArt, coverArt, hexOf, iconArt, inkFrameArt, moodArt, MOOD_NAMES, paperArt, ribbonArt, scoreHex, tabArt } from './art.ts';
 import { Chart, hypnoSteps, STAGE_INK, STAGE_NAME, stageBar } from './charts.tsx';
 import { layout, type BookLayout } from './layout.ts';
@@ -45,6 +46,7 @@ const freezeAt = (ms: number) => requestAnimationFrame(() => requestAnimationFra
 export function Book() {
   const [L, setL] = useState<BookLayout>(() => layout(innerWidth, innerHeight));
   const s = save.value;
+  void texReady.value; // [ui12] repaint the leather and paper once the photo tiles are in
   const pages = useMemo(() => buildPages(s, L), [s, L]);
   const per = L.single ? 1 : 2, spreads = Math.ceil(pages.length / per);
   const [at, setAt] = useState(() => { const m = /^page:(\d+)/.exec(DEV); return m ? Math.min(spreads - 1, Math.floor(+m[1] / per)) : 0; });
@@ -139,7 +141,7 @@ export function Book() {
   // ---------------------------------------------------------------- render
   const T = L.T, pad = Math.round(L.fs * 0.9);
   const ctx: PageCtx = { L, cw: L.PW - 2 * pad, openNight: (id) => { sfx('paper_flip', 0.4, 1.2); setNight(id); } };
-  const board = boardArt(L.W, L.H, !L.single);
+  const board = boardArt(L.W, L.H, !L.single, L.B);
   const PageView = (idx: number, side: 'L' | 'R' | 'S', cls = '') => {
     const def: PageDef | undefined = pages[idx];
     return (

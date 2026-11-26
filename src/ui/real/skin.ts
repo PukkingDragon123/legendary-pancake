@@ -136,6 +136,8 @@ input[type='range'].slider::-moz-range-thumb{width:26px;height:36px;border-radiu
 .mr-card{${paperCardCSS(true)};padding:6px 6px 4px}
 .mr-rarity{clip-path:polygon(0 0,100% 0,calc(100% - 7px) 50%,100% 100%,0 100%,7px 50%);padding:2px 16px 4px}
 .haul-item{${nineCSS('walnut_thin', { bw: [6, 6, 6, 6] })};background:var(--tx-velvet-blue) 0 0/260px,#22345e;background-clip:padding-box;box-shadow:none;padding:2px 2px 4px}
+/* [ui12] the few objects drawn in CSS wear the same bold ink outline as the painted ones */
+.hh-new,.tile .badge,.badge-dot,.hh-bubble .who,.steps i,.pips i,.week .bar i,.pinpt .stem{outline:1.5px solid #120a0e;outline-offset:0}
 `;
   const st = document.createElement('style');
   st.id = 'hh-real-skin';

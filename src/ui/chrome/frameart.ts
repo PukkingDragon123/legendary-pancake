@@ -1,6 +1,6 @@
 // [ui5, ui7] The portrait frames (a cosmetic, see src/assets/frames.ts): eleven round frames for the live owl
 // portrait, each a real object modelled with the material painter (src/ui/real/paint.ts) at device resolution:
-// a polished brass porthole, carved walnut, a mossy willow ring with mushrooms, cranberry cable knit, silver
+// carved walnut (the default), a polished brass porthole, a mossy willow ring with mushrooms, cranberry cable knit, silver
 // filigree with pearls, a toadstool fairy ring, a golden laurel wreath, frost crystals, a celestial orrery, iced
 // gingerbread and a ring of night sky studded with gold stars. Lit from the top left with soft shadows; the
 // opening is cut clear and the owl (src/ui/chrome/livepip.tsx) shows through it over a little painted sky.
@@ -8,6 +8,7 @@ import {
   BRASS_OLD, GOLD, Real, SILVER, bevel, box, cached, circle, clamp, cloth, deviceK, dome, ellipse, enamel, fbm, glass, hex, metal, mix, paperMat, pillow,
   polygon, rim, ring, rotate, segment, subtract, toURL, union, vnoise, warp, wood, type Material, type RGB, type SDF,
 } from '../real/paint.ts';
+import { texReady } from '../real/tex.ts';
 
 /** design units across a frame */
 export const FRAME_D = 38;
@@ -38,12 +39,57 @@ const PAINT: Record<string, Paint> = {
     r.part(ring(C, C, FRAME_OPEN - 0.4, FRAME_OPEN + 1.5), torusH(1.6, FRAME_OPEN + 0.55, 0.95, 3.2), metal(BRASS_OLD, { polish: 0.7 }));
     for (let i = 0; i < 8; i++) { const [x, y] = at(-Math.PI / 8 + (i * Math.PI) / 4, mid + 0.5); r.part(circle(x, y, 1.15), dome(x, y, 1.15, 1.15, 1.2, 4.2), gold(0.9)); }
   },
-  // carved walnut: oiled grain, a beaded outer edge, a cove on the inside, four carved leaves
+  // [ui12] the default frame, carved from walnut like a cuckoo clock: a rounded field of oiled walnut, a wreath of
+  // raised oak leaves (veined, lobed) and acorns (honey nuts in cross-hatched cups) carved round it, a beaded outer
+  // edge and a honey-oak lip round the opening, every part inked like the rest of the interface
   walnut: (r) => {
-    r.part(band(), torusH(3.6), wood('walnut', { along: 'x', scale: 5 }));
-    for (let i = 0; i < 28; i++) { const [x, y] = at((i / 28) * Math.PI * 2, R1 - 0.75); r.carve(circle(x, y, 0.42), 0.7, 0.35); }
-    r.carve(ring(C, C, FRAME_OPEN + 1.4, FRAME_OPEN + 2.1), 0.8, 0.35);
-    for (let i = 0; i < 4; i++) { const a = -Math.PI / 2 + (i * Math.PI) / 2, [x, y] = at(a, mid + 0.4); r.part(leaf(x, y, 4.4, 1.9, a + Math.PI / 2), (px, py) => torusH(3.6)(px, py) + 0.8, wood('walnut', { along: 'y', scale: 5, ox: 40 })); r.carve(segment(...at(a, mid + 0.4 - 0.01), ...at(a, mid + 0.4 + 0.01), 0.15), 0.4, 0.2); }
+    const r0 = FRAME_OPEN + 0.8, fm = (r0 + R1 - 0.4) / 2, fh = (R1 - 0.4 - r0) / 2;
+    const field = (x: number, y: number) => torusH(2.6, fm, fh, 0.6)(x, y);
+    r.part(band(r0, R1 - 0.4), field, wood('walnut', { along: 'x', scale: 5 }));
+    // the beaded outer edge
+    r.part(ring(C, C, R1 - 1.3, R1), torusH(1.1, R1 - 0.65, 0.65, 0.4), wood('walnut', { along: 'x', scale: 5, ox: 20 }));
+    for (let i = 0; i < 36; i++) { const [x, y] = at((i / 36) * Math.PI * 2, R1 - 0.65); r.part(circle(x, y, 0.56), dome(x, y, 0.56, 0.56, 0.6, 1.2), wood('cherry', { scale: 6, ox: i * 3 }), { line: 0.8 }); }
+    // the honey-oak lip round the opening
+    r.part(ring(C, C, FRAME_OPEN - 0.4, FRAME_OPEN + 1.4), torusH(1.5, FRAME_OPEN + 0.5, 0.9, 1.4), wood('honey', { along: 'y', scale: 6 }), { line: true });
+    // oak leaves laid round the ring, each pointing on round it, and a pair of acorns between them
+    const oakLeaf = (cx: number, cy: number, len: number, wid: number, ang: number): SDF => {
+      const ca = Math.cos(ang), sa = Math.sin(ang), h = len / 2;
+      const f = ((x: number, y: number) => {
+        const u = (x - cx) * ca + (y - cy) * sa, v = -(x - cx) * sa + (y - cy) * ca, t = u / h;
+        if (t <= -1 || t >= 1) return Math.hypot(Math.max(0, Math.abs(u) - h), v);
+        const lobes = 0.78 + 0.22 * Math.abs(Math.cos(t * Math.PI * 2.5));
+        const w = (wid / 2) * Math.pow(Math.cos(t * Math.PI / 2), 0.75) * lobes;
+        return (Math.abs(v) - w) * 0.8;
+      }) as SDF;
+      f.bb = [cx - h - 1, cy - h - 1, cx + h + 1, cy + h + 1];
+      return f;
+    };
+    const N = 6;
+    for (let i = 0; i < N; i++) {
+      const a = -Math.PI / 2 + (i / N) * Math.PI * 2 + 0.12, [x, y] = at(a, fm + 0.1), tang = a + Math.PI / 2;
+      const lf = oakLeaf(x, y, 7, 3.3, tang);
+      r.part(lf, (px, py, ins) => field(px, py) + 0.55 + Math.min(0.9, ins * 1.1), { ...wood('honey', { along: 'x', scale: 6, ox: i * 17 }), coat: 0.5 }, { line: true });
+      // the midrib and a few veins, carved
+      const [ux, uy] = [Math.cos(tang), Math.sin(tang)];
+      r.carve(segment(x - ux * 2.8, y - uy * 2.8, x + ux * 2.6, y + uy * 2.6, 0.13), 0.4, 0.16);
+      for (const t of [-1.4, 0, 1.4]) for (const sd of [-1, 1]) {
+        const bx = x + ux * t, by = y + uy * t, ex = bx + ux * 0.55 - uy * sd * 0.8, ey = by + uy * 0.55 + ux * sd * 0.8;
+        r.carve(segment(bx, by, ex, ey, 0.08), 0.22, 0.1);
+      }
+      // two acorns where this leaf's stem meets the next leaf's tip
+      const b0 = a + (Math.PI * 2) / N / 2 + 0.05;
+      for (const [da, dr] of [[-0.07, -0.95], [0.08, 0.95]] as [number, number][]) {
+        const [nx, ny] = at(b0 + da, fm + dr), rad = Math.atan2(ny - C, nx - C);
+        const ox = Math.cos(rad), oy = Math.sin(rad), tilt = dr > 0 ? 0.5 : -0.5;
+        const dx = Math.cos(rad + tilt), dy = Math.sin(rad + tilt);
+        const nut = rotate(ellipse(nx + dx * 0.4, ny + dy * 0.4, 1.1, 0.85), rad + tilt, nx + dx * 0.4, ny + dy * 0.4);
+        r.part(nut, (px, py) => field(px, py) + 0.3 + dome(nx + dx * 0.4, ny + dy * 0.4, 1.1, 1.1, 0.8)(px, py, 0), { ...wood('honey', { scale: 8, ox: i * 9 }), coat: 0.6, spec: 0.5, shin: 40 }, { line: true });
+        const cup = rotate(ellipse(nx - dx * 0.42, ny - dy * 0.42, 0.68, 0.98), rad + tilt, nx - dx * 0.42, ny - dy * 0.42);
+        r.part(cup, (px, py) => field(px, py) + 0.5 + dome(nx - dx * 0.42, ny - dy * 0.42, 0.98, 0.98, 0.6)(px, py, 0), wood('walnut', { scale: 7, ox: i * 5 }), { line: true });
+        for (let q = 0; q < 4; q++) { const qx = nx - dx * (0.15 + 0.16 * q) + (q % 2 ? -oy : oy) * 0.18 * (q - 1.5), qy = ny - dy * (0.15 + 0.16 * q) + (q % 2 ? ox : -ox) * 0.18 * (q - 1.5); r.carve(circle(qx, qy, 0.13), 0.18, 0.1); }
+        void ox;
+      }
+    }
   },
   // a willow twig bent into a ring: bark, clumps of moss, two red mushrooms and a fresh leaf
   moss: (r) => {
@@ -168,10 +214,10 @@ function frameCanvas(id: string, px: number): HTMLCanvasElement {
   if (!c) {
     const k = (px / FRAME_D) * deviceK(3);
     const r = new Real(FRAME_D, FRAME_D, k, 0);
-    (PAINT[id] ?? PAINT.porthole)(r);
+    (PAINT[id] ?? PAINT.walnut)(r);
     r.cut(circle(C, C, FRAME_OPEN));
     c = r.canvas({ shadow: { dy: 0.8, blur: 1.2, a: 0.4 }, ambient: 0.5, aoR: 1.2 });
-    canvases.set(key, c);
+    if (texReady.peek()) canvases.set(key, c); // [ui12] wood grain needs the photo tiles: repaint until they are in
   }
   return c;
 }

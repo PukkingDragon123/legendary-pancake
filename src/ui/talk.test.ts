@@ -22,8 +22,9 @@ describe('dialogue markup', () => {
     expect(tones('*Hoot Hollow*! ok')).toBe('HHHHHHHHHHHH...');
     expect(tones('_(No *really*.)_')).toBe('wwwwHHHHHHww');
   });
-  it('turns typographic punctuation into what the font has', () => {
-    expect(plainOf('I’m here…')).toBe("I'm here...");
+  it('keeps typographic punctuation (the font has it) and swaps the few glyphs it lacks', () => {
+    expect(plainOf('I’m here…')).toBe('I’m here…');
+    expect(plainOf('No\u2011one\u2027ever')).toBe('No-one\u00b7ever');
   });
 });
 

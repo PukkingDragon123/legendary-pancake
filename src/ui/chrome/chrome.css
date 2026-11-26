@@ -41,7 +41,7 @@
 .hh-xp.on { opacity: 1; transform: none; }
 .hh-rune { position: absolute; left: 42px; top: 34px; width: 44px; height: 44px; display: grid; place-items: center; animation: hhRuneIn 0.7s cubic-bezier(0.3, 1.6, 0.5, 1) both; filter: drop-shadow(2px 3px 6.5px rgba(26, 14, 8, 0.5)); }
 .hh-rune > img { position: absolute; left: -4px; top: -4px; width: 52px; height: 52px; }
-.hh-rune b { position: relative; font-family: var(--font-display); font-weight: 400; font-size: var(--t1); line-height: 1; color: #fff3c8; margin-top: -1px; text-shadow:  0 1px 1px #0b1434, 0 0 2px #0b1434, 0 0 3px #0b1434; animation: hhRuneGlow 2.4s ease-in-out infinite; }
+.hh-rune b { position: relative; font-family: var(--font-display); font-weight: 700; font-size: var(--t1); line-height: 1; color: #fff3c8; margin-top: -1px; text-shadow:  0 1px 1px #0b1434, 0 0 2px #0b1434, 0 0 3px #0b1434; animation: hhRuneGlow 2.4s ease-in-out infinite; }
 @keyframes hhRuneIn { 0% { transform: scale(0.3) rotate(-90deg); } 60% { transform: scale(1.25) rotate(8deg); } 100% { transform: none; } }
 @keyframes hhRuneGlow { 50% { color: #ffd97a; } }
 
@@ -82,10 +82,10 @@
 .hh-tag > .hh-ticon { position: absolute; left: 4px; top: 13px; }
 .hh-tag:hover > img { animation: hhWiggle 0.45s ease-in-out; }
 .hh-tag:active { scale: 0.92 1.04; }
-.hh-toollabel { margin-top: 1px; padding: 2px 5px 2px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; color: #2a1a10; background: var(--tx-paper) 0 0 / 200px, #f6ead0; border-radius: 0; box-shadow: 0 1px 1px rgba(30, 16, 6, 0.35), 0 3px 6px rgba(30, 16, 6, 0.3), inset 0 1px 1px rgba(255, 252, 240, 0.8), inset 0 -1px 2px rgba(140, 100, 50, 0.25); pointer-events: none; }
-.hh-badge { position: absolute; right: -8px; top: 6px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #ff8a7a, #c8302c 50%, #7a1418); box-shadow: 0 2px 3px rgba(30, 8, 4, 0.5), inset 0 -2px 3px rgba(60, 0, 0, 0.35), inset 0 1px 1px rgba(255, 210, 200, 0.6); animation: hhBadge 1.4s ease-in-out infinite; pointer-events: none; }
+.hh-toollabel { margin-top: 1px; padding: 2px 5px 2px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; color: #2a1a10; background: var(--tx-paper) 0 0 / 200px, #f6ead0; border-radius: 0; box-shadow: 0 0 0 1.5px #120a0e, 0 2px 0 1.5px #120a0e, 0 3px 6px rgba(30, 16, 6, 0.4), inset 0 1px 1px rgba(255, 252, 240, 0.8), inset 0 -1px 2px rgba(140, 100, 50, 0.25); pointer-events: none; }
+.hh-badge { position: absolute; right: -8px; top: 6px; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 36% 30%, #ff8a7a, #c8302c 50%, #7a1418); box-shadow: 0 0 0 1.5px #120a0e, 0 2px 3px rgba(30, 8, 4, 0.5), inset 0 -2px 3px rgba(60, 0, 0, 0.35), inset 0 1px 1px rgba(255, 210, 200, 0.6); animation: hhBadge 1.4s ease-in-out infinite; pointer-events: none; }
 .hh-badge > img { position: absolute; left: 0; top: 0; }
-.hh-badge b { position: relative; font-family: var(--font-display); font-weight: 400; font-size: var(--t1); color: #f8f1e6; text-shadow: 0 1px 1px rgba(40, 0, 0, 0.7); }
+.hh-badge b { position: relative; font-family: var(--font-display); font-weight: 700; font-size: var(--t1); color: #f8f1e6; text-shadow: 0 1px 1px rgba(40, 0, 0, 0.7); }
 @keyframes hhBadge { 50% { transform: scale(1.18) rotate(-6deg); } }
 .hh-new { position: absolute; left: -22px; top: 40px; z-index: 2; padding: 2px 6px 1px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; color: #fff6e6; border-radius: 0; background: linear-gradient(#d8443e, #9a2226); box-shadow: 0 2px 3px rgba(30, 8, 4, 0.5), inset 0 1px 1px rgba(255, 200, 190, 0.6); text-shadow: 0 1px 1px rgba(40, 0, 0, 0.6); transform: rotate(-14deg); pointer-events: none; animation: hhNew 1.6s ease-in-out infinite; }
 @keyframes hhNew { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(-8deg) scale(1.08); } }
@@ -171,13 +171,13 @@
 .hh-tkt-clip { position: absolute; left: 19px; top: -17px; width: 50px; height: 32px; z-index: 3; pointer-events: none; }
 .hh-tkt-stub { position: relative; width: 74px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0; text-align: center; }
 .hh-tkt-stub small { font-size: var(--t1); color: var(--ink-3); line-height: 1; }
-.hh-tkt-stub b { font-family: var(--font-display); font-weight: 400; font-size: var(--t1); line-height: 1; color: var(--ink); }
+.hh-tkt-stub b { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); line-height: 1; color: var(--ink); }
 .hh-tkt-stub .ico { margin: -4px 0 -2px; }
 .hh-tkt-stub.late .ico { animation: hhBadge 1s ease-in-out infinite; }
 .hh-tkt-perf { width: 8px; flex: none; margin: 4px -4px; z-index: 1; background: radial-gradient(circle at 4px 5px, rgba(40, 30, 20, 0.5) 0 2px, rgba(40, 30, 20, 0) 2.6px) 0 0 / 8px 10px repeat-y; }
 .hh-tkt-body { position: relative; flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; padding: 0 0 0 6px; }
 .hh-tkt-body .t { flex: 1; min-width: 0; }
-.hh-tkt-body b.display { display: block; font-size: var(--t1); font-weight: 400; line-height: 1; }
+.hh-tkt-body b.display { display: block; font-size: var(--t1); font-weight: 700; line-height: 1; }
 .hh-tkt-stamp { position: absolute; right: 86px; top: -12px; padding: 1px 5px; font-size: var(--t1); color: #2f4c78; border: 2px solid #2f4c78; border-radius: 0; transform: rotate(9deg); opacity: 0.75; mix-blend-mode: multiply; pointer-events: none; }
 /* [ui4] narrow phones: keep the bedtime line on one line */
 @media (max-width: 389px) {
@@ -198,7 +198,7 @@
 .lvup-stack > .lvup-medal, .lvup-stack > .lvup-title, .lvup-stack > .lvup-bar, .lvup-stack > .lvup-owl { z-index: 1; }
 .lvup-medal { position: relative; width: 144px; height: 144px; display: grid; place-items: center; animation: hhMedalIn 0.8s cubic-bezier(0.3, 1.6, 0.5, 1) both; filter: drop-shadow(0 6px 7.8px rgba(27, 34, 45, 0.5)); }
 .lvup-medal > img { position: absolute; left: 0; top: 0; }
-.lvup-medal b { position: relative; font-family: var(--font-display); font-weight: 400; font-size: var(--t4); line-height: 1; color: #f1f5f2; text-shadow:  0 1px 1px #27313f, 0 0 2px #27313f, 0 0 3px #27313f; }
+.lvup-medal b { position: relative; font-family: var(--font-display); font-weight: 700; font-size: var(--t4); line-height: 1; color: #f1f5f2; text-shadow:  0 1px 1px #27313f, 0 0 2px #27313f, 0 0 3px #27313f; }
 .lvup.pre .lvup-medal { opacity: 0; animation: none; }
 @keyframes hhMedalIn { 0% { transform: scale(0.2) rotate(-180deg); opacity: 0; } 55% { transform: scale(1.25) rotate(10deg); opacity: 1; } 100% { transform: none; } }
 .lvup-title { font-family: var(--font-display); font-size: var(--t3); line-height: 1; color: #ebe5da; text-shadow:  0 1px 1px #312821, 0 0 2px #312821, 0 0 3px #312821; animation: hhTitleIn 0.6s cubic-bezier(0.3, 1.7, 0.5, 1) 0.2s both; white-space: nowrap; }

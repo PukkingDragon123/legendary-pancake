@@ -14,7 +14,6 @@ import { Settings } from './settings.tsx';
 import { AlarmOverlay, NightOverlay } from './sleep.tsx';
 import { breathing, bubble, nightOpen, panel, sceneRef } from './state.ts';
 import { Hud, MainNav, openPanel, SideTools } from './chrome/hud.tsx'; // [chrome] openPanel for the ticket
-import { LookOut } from './chrome/lookout.tsx'; // [look5] step outside to see the whole oak, and back in
 import { uiBurst, uiBurstAt } from './chrome/uifx.ts'; // [chrome] bubble puff, ticket stars
 import { clip, DESK_HUD, kFor } from './chrome/objects.ts'; // [ui4] the brass clip on tonight's card
 import { SleepScreen } from './sleepflow.tsx';
@@ -129,7 +128,6 @@ export function App() {
       <Hud />
       <SideTools />
       <Ticket />
-      <LookOut />
       <Bubble />
       {ph === 'day' && !breathing.value && (
         panel.value === 'sleep' ? <SleepScreen />

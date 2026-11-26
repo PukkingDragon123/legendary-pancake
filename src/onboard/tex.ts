@@ -4,7 +4,7 @@
 // diorama" look); light is never baked in, only cavity/AO and wear. Every texture is crisp pixel art up close
 // (nearest magnification) and calm far away (mipmapped minification).
 import * as THREE from 'three';
-import { alagardSafe } from '../ui/font.ts';
+import { textSafe } from '../ui/font.ts';
 
 export type RGB = [number, number, number];
 export const rgb = (h: number): RGB => [((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255];
@@ -248,7 +248,7 @@ export function stamp(t: Tex, x: number, y: number, rows: string[], c: RGB, scal
 
 /** Draw text in the game's font at full resolution (anti-aliased; `threshold` snaps its alpha to 1-bit). */
 export function crispText(g: CanvasRenderingContext2D, text: string, x: number, y: number, font: string, color: string, o: { align?: CanvasTextAlign; base?: CanvasTextBaseline; spacing?: number; threshold?: number } = {}) {
-  text = alagardSafe(text); // [font6] Alagard draws ASCII only
+  text = textSafe(text);
   const px = parseFloat(/(\d+(?:\.\d+)?)px/.exec(font)?.[1] ?? '16'), mid = Math.ceil(px * 1.5);
   const tmp = scratch(Math.max(8, Math.ceil(text.length * px * 1.5 + 40)), mid * 2);
   const t = tmp.getContext('2d', { willReadFrequently: true })!;
@@ -284,7 +284,7 @@ export function measure(text: string, font: string, spacing = 0): number {
   const t = scratch(8, 8).getContext('2d', { willReadFrequently: true })!;
   t.font = font;
   if ('letterSpacing' in t) (t as unknown as { letterSpacing: string }).letterSpacing = `${spacing}px`;
-  return t.measureText(alagardSafe(text)).width;
+  return t.measureText(textSafe(text)).width;
 }
 let sc1: HTMLCanvasElement | null = null, sc2: HTMLCanvasElement | null = null;
 function scratch(w: number, h: number) { if (!sc1) sc1 = document.createElement('canvas'); if (sc1.width < w) sc1.width = w; if (sc1.height < h) sc1.height = h; return sc1; }

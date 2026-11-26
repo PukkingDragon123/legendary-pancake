@@ -1,4 +1,4 @@
-// Pip's words, floating in the office (the shared dialogue engine, ui/talk.ts): 3D Alagard letters in warm cream
+// Pip's words, floating in the office (the shared dialogue engine, ui/talk.ts): 3D Alegreya letters in warm cream
 // with a gold name tag, hanging near the top of the picture with no box behind them, at full device resolution.
 // They type with a person's rhythm and a soft voice, *highlights* glow gold, !screams! slam in red-hot and
 // tremble, _whispers_ come small and pale. The words lag a little behind the camera's moves (they hang in the

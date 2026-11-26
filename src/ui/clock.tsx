@@ -46,7 +46,7 @@ function paint(g: CanvasRenderingContext2D, k: number, o: { now: Date; wake: num
   const wx = CX - 3.4, wy = CY + 4.4, ww = 6.8, wh = 3.6;
   g.fillStyle = '#7a5418'; g.beginPath(); g.roundRect(wx - 0.4, wy - 0.4, ww + 0.8, wh + 0.8, 0.9); g.fill();
   g.fillStyle = '#1d1208'; g.beginPath(); g.roundRect(wx, wy, ww, wh, 0.6); g.fill();
-  g.fillStyle = '#f6dc7f'; g.font = `600 ${2.7}px Georgia, 'Times New Roman', serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = '#f6dc7f'; g.font = `600 ${2.7}px Alegreya, Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillText(o.wake >= 720 ? 'PM' : 'AM', CX, wy + wh / 2 + 0.15);
   g.restore();
   // the hands (hour, minute, seconds and the gold alarm hand), then a knurled knob on the alarm hand

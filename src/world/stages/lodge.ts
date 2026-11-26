@@ -40,7 +40,7 @@ import {
 import type { WorkClip } from './beaver.ts';
 import { pottedFir, swayPlants, type Plant } from './shopplants.ts';
 import { box, buildProp, propMesh } from '../../gfx/box.ts';
-import { alagardReady, alagardText } from '../../ui/font.ts'; // [font6]
+import { fontReady, canvasText } from '../../ui/font.ts'; // [font6]
 
 /** The real world the window looks out on (the app's Scene). */
 export interface WorldView {
@@ -1635,7 +1635,7 @@ export async function displayModel(d: DisplayItem, w: number, h: number): Promis
 /** A clock face set to the real time: a painted enamel dial with roman numerals, blued-steel spade hands. */
 function clockFace(r: number): { group: THREE.Group; set(d: Date): void; dispose(): void } {
   const g = new THREE.Group();
-  // [font6] 192 texels across so the roman numerals fit in Alagard, the game's font, at its 16 px grid
+  // [font6] 192 texels across so the roman numerals fit in Alegreya, the game's font, at its 16 px grid
   const N = 192;
   const c = document.createElement('canvas');
   c.width = c.height = N;
@@ -1650,7 +1650,7 @@ function clockFace(r: number): { group: THREE.Group; set(d: Date): void; dispose
     const R = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
     for (let h = 0; h < 12; h++) {
       const a = (h / 12) * Math.PI * 2;
-      alagardText(x, R[h], N / 2 + Math.sin(a) * N * 0.34, Math.round(N / 2 - Math.cos(a) * N * 0.34 + 5.5), '#2e2416', { align: 'center' });
+      canvasText(x, R[h], N / 2 + Math.sin(a) * N * 0.34, Math.round(N / 2 - Math.cos(a) * N * 0.34 + 5.5), '#2e2416', { align: 'center' });
       x.fillStyle = '#2e2416';
       for (let m = 0; m < 5; m++) { const b = a + (m / 5) * (Math.PI / 6); x.fillRect(Math.round(N / 2 + Math.sin(b) * N * 0.45) - 1, Math.round(N / 2 - Math.cos(b) * N * 0.45) - 1, 2, 2); }
     }
@@ -1659,7 +1659,7 @@ function clockFace(r: number): { group: THREE.Group; set(d: Date): void; dispose
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.magFilter = THREE.NearestFilter;
-  void alagardReady().then(() => { paint(); t.needsUpdate = true; });
+  void fontReady().then(() => { paint(); t.needsUpdate = true; });
   const dialM = new THREE.MeshStandardMaterial({ map: t, roughness: 0.5 });
   const dial = new THREE.Mesh(new THREE.CircleGeometry(r, 32), dialM);
   g.add(dial);

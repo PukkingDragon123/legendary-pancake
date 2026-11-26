@@ -60,6 +60,20 @@ describe('frames in the save', () => {
     for (const id of STARTER_FRAMES) expect(m.owned.frames).toContain(id);
   });
 
+  it('starts on the carved wooden frame, and moves an old save from the brass porthole to it once', () => {
+    expect(DEFAULT_FRAME).toBe('walnut');
+    expect(FRAME_BY_ID[DEFAULT_FRAME].starter).toBe(true);
+    const old = freshSave();
+    old.frame = 'porthole';
+    delete old.frameV;
+    const m = migrateFrames(old);
+    expect(m.frame).toBe('walnut');
+    expect(m.owned.frames).toContain('porthole');
+    // a porthole chosen after the move stays on
+    m.frame = 'porthole';
+    expect(migrateFrames(m).frame).toBe('porthole');
+  });
+
   it('grants a frame once', () => {
     const s = freshSave();
     grant(s, { kind: 'frame', id: 'knit' });
@@ -73,8 +87,8 @@ describe('frames in the save', () => {
     save.value = freshSave();
     expect(setFrame('celestial')).toBe(false);
     expect(save.value.frame).toBe(DEFAULT_FRAME);
-    expect(setFrame('walnut')).toBe(true);
-    expect(save.value.frame).toBe('walnut');
+    expect(setFrame('porthole')).toBe(true);
+    expect(save.value.frame).toBe('porthole');
   });
 });
 

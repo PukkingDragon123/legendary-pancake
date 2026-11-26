@@ -124,7 +124,7 @@ if (view === 'icons') {
 
 if (view === 'frames') {
   // [ui5] the portrait frames, over the day and night sky, at 48 / 64 / 96 CSS px
-  void import('../ui/chrome/frameart.ts').then(({ FRAME_ART_IDS, frameArt, portraitSky, frameSkyOf }) => {
+  void Promise.all([import('../ui/chrome/frameart.ts'), import('../ui/real/tex.ts').then((t) => t.loadTextures())]).then(([{ FRAME_ART_IDS, frameArt, portraitSky, frameSkyOf }]) => {
     document.body.style.background = q.get('bg') ?? '#efe2c0';
     const cell = (id: string, css: number, night: boolean) => {
       const sky = portraitSky(night || frameSkyOf(id) === 'night', 40);
@@ -173,15 +173,15 @@ if (view === 'nav') {
 }
 
 if (view === 'hud') {
-  // [icons9] the HUD (name sign, currency), the side tools and the Outside door tile on their own, no 3D: &night=1
-  void Promise.all([import('../ui/chrome/hud.tsx'), import('../ui/chrome/lookout.tsx'), import('../ui/chrome/iconset.ts')]).then(async ([{ Hud, SideTools, hudOverride }, { LookOut }, { installIconSet }]) => {
+  // [icons9] the HUD (name sign, currency) and the side tools on their own, no 3D: &night=1
+  void Promise.all([import('../ui/chrome/hud.tsx'), import('../ui/chrome/iconset.ts')]).then(async ([{ Hud, SideTools, hudOverride }, { installIconSet }]) => {
     await installIconSet();
     const night = q.get('night') === '1';
     document.body.style.background = night ? 'linear-gradient(#0e1a44,#2a2a5a 60%,#3a2a3a)' : 'linear-gradient(#c88a4a,#8a5a30)';
     hudOverride.value = 'all';
     root.style.cssText = 'position:relative;width:100vw;height:100vh;overflow:hidden';
     root.className = 'layer';
-    render(<><Hud /><SideTools /><LookOut /></>, root);
+    render(<><Hud /><SideTools /></>, root);
     (window as unknown as { __ready: number }).__ready = 2;
   });
 }

@@ -24,8 +24,8 @@ export interface FrameDef {
   level?: number;
 }
 export const FRAMES: FrameDef[] = [
+  { id: 'walnut', name: 'Carved Walnut', blurb: 'Hand-carved from a fallen walnut branch: oak leaves and acorns round the rim, oiled until it glows like honey.', price: 0, cur: 'coins', rarity: 'common', starter: true },
   { id: 'porthole', name: 'Brass Porthole', blurb: 'A ship’s porthole, polished every morning. Four brass rivets hold the sky in.', price: 0, cur: 'coins', rarity: 'common', starter: true },
-  { id: 'walnut', name: 'Carved Walnut', blurb: 'Hand-carved from a fallen walnut branch, oiled until it glows like honey.', price: 0, cur: 'coins', rarity: 'common', starter: true },
   { id: 'moss', name: 'Mossy Branch Ring', blurb: 'A willow twig bent into a ring, moss and two tiny mushrooms moved in.', price: 450, cur: 'coins', rarity: 'uncommon' },
   { id: 'knit', name: 'Cozy Knit', blurb: 'A knitted ring in cranberry wool with a cable stitch. Warm to the touch.', price: 600, cur: 'coins', rarity: 'uncommon' },
   { id: 'filigree', name: 'Silver Filigree', blurb: 'Curls of fine silver wire around a pearl at each quarter. Very proper.', price: 900, cur: 'coins', rarity: 'rare', level: 2 },
@@ -37,8 +37,10 @@ export const FRAMES: FrameDef[] = [
   { id: 'starry', name: 'Star-Studded Night', blurb: 'A ring of deep night sky where little gold stars have come to rest.', price: 0, cur: 'gems', rarity: 'rare', series: 'starfall' },
 ];
 export const FRAME_BY_ID: Record<string, FrameDef> = Object.fromEntries(FRAMES.map((f) => [f.id, f]));
-/** The frame on every new and old save until the player picks another. */
-export const DEFAULT_FRAME = 'porthole';
+/** The frame on every new save until the player picks another: the carved wooden frame. */
+export const DEFAULT_FRAME = 'walnut';
+/** [ui12] bumped when the default changed from the brass porthole to the carved walnut (src/game/store.ts migrates) */
+export const FRAME_V = 2;
 export const STARTER_FRAMES = FRAMES.filter((f) => f.starter).map((f) => f.id);
 /** Frames Barnaby keeps in stock (not starters, not series-only). */
 export const STORE_FRAMES = FRAMES.filter((f) => !f.starter && !f.series);

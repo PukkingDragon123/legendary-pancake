@@ -265,8 +265,8 @@ export const cloth = (n: 'bookcloth' | 'linen' | 'velvet' | 'felt', col: RGB | s
 export const paperMat = (kind: 'paper' | 'kraft' = 'paper', o: TexOpts & { tint?: RGB } = {}): Material => ({ alb: texAlb(kind, { scale: o.scale ?? 1.6, ox: o.ox, oy: o.oy, tint: o.tint }), spec: 0.03, shin: 5, diffuse: 0.75 });
 export const corkMat = (o: TexOpts = {}): Material => ({ alb: texAlb('cork', { scale: o.scale ?? 1.6, ox: o.ox, oy: o.oy }), spec: 0.04, shin: 4 });
 
-export const GOLD: RGB = [226, 172, 74];
-export const BRASS_OLD: RGB = [196, 150, 72];
+export const GOLD: RGB = [240, 182, 60];
+export const BRASS_OLD: RGB = [222, 166, 62];
 export const SILVER: RGB = [200, 204, 210];
 export const COPPER: RGB = [214, 128, 84];
 export const IRON: RGB = [92, 96, 104];
@@ -358,10 +358,15 @@ export interface RenderOpts {
   inkCol?: RGB; inkA?: number;
 }
 
-/** [ui10] the outline ink: a warm near-black */
-export const INK: RGB = [20, 12, 16];
-/** [ui10] the default outline width in device px for a painting scale k (1 - 1.5 device px) */
-export const outlinePx = (k: number) => clamp(0.55 + 0.17 * k, 0.75, 1.1); // [ui10] thin and subtle: realistic, never a cartoon line
+/** the outline ink: the near-black of the outlined 3D world and the icons (#120a0e) */
+export const INK: RGB = [18, 10, 14];
+/**
+ * [ui12] The silhouette outline in device px for a painting scale k: a clear, bold ink line round every object
+ * (2 device px on a 1x screen, up to 3 on a 3x one), like the inked 3D world. Inner lines (`line`) run about half.
+ */
+export const outlinePx = (k: number) => clamp(1.3 + 0.5 * k, 2, 3);
+/** [ui12] colour richness: the lit result is pushed this much further from grey (full, saturated enamel and wood) */
+export const SAT = 1.24;
 
 /**
  * A painting surface `w` x `h` units (CSS px) with `pad` units of margin all round for shadows; `k` device px
@@ -426,7 +431,9 @@ export class Real {
    * where parts overlap, engraved rules, printed borders. `w` device px (default a little under the outline).
    */
   line(s: SDF, w?: number, a = 0.5) {
-    const { k, pad, W } = this, lw = w ?? outlinePx(k) * 0.8, [x0, y0, x1, y1] = this.range(s, 2);
+    // [ui12] inner ink lines read clearly: at least one device px, and darker (a faint rule stays faint)
+    const { k, pad, W } = this, lw = Math.max(1, (w ?? outlinePx(k) * 0.5) * 1.3), [x0, y0, x1, y1] = this.range(s, 2);
+    a = Math.min(0.92, a * 1.6);
     if (!this.ink) this.ink = new Float32Array(this.W * this.H);
     for (let py = y0; py < y1; py++) for (let px = x0; px < x1; px++) {
       const i = py * W + px;
@@ -504,7 +511,7 @@ export class Real {
     // [ui10] the silhouette outline: coverage dilated by `ow` device px (anti-aliased), shown under the object
     const ow = o.outline === false ? 0 : (o.outline ?? outlinePx(k));
     const dil = ow > 0 ? dilate(this.cov, W, H, ow) : null;
-    const ic = o.inkCol ?? INK, ia = o.inkA ?? 0.62, ink = this.ink;
+    const ic = o.inkCol ?? INK, ia = o.inkA ?? 1, ink = this.ink, sat = o.flat ? 1 : SAT;
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = y * W + x, c = this.cov[i];
       const dv = dil ? dil[i] * ia : 0;
@@ -555,6 +562,9 @@ export class Real {
           rr += 255 * s; gg += 250 * s; bb += 240 * s;
         }
         r = rr; g = gg; b = bb;
+        // [ui12] richer colour: push away from grey (luma kept), a touch more in the mid-tones than the highlights
+        const lu = r * 0.299 + g * 0.587 + b * 0.114, sv = 1 + (sat - 1) * (1 - clamp((lu - 170) / 120) * 0.5);
+        r = lu + (r - lu) * sv; g = lu + (g - lu) * sv; b = lu + (b - lu) * sv;
       }
       if (ink && ink[i] > 0) { const t = ink[i]; r += (ic[0] - r) * t; g += (ic[1] - g) * t; b += (ic[2] - b) * t; }
       if (dv > 0.002 && c < 0.998) {

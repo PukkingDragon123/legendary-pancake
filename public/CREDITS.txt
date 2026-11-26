@@ -5,19 +5,16 @@ Models, textures, artworks, photos and sounds by their authors, used under their
 
 ---
 
-# Credits: the game's typeface (builder font6)
+# Credits: the game's typefaces (builder ui12)
 
-- **Alagard** - Hewett Tsoi (Pix3M), https://www.dafont.com/alagard.font, "Give credit if used."
-  A 16 px pixel font, supplied by the project owner. It is now the game's one typeface: every screen, button,
-  sign, tag, toast, the book, the globe, the shop's signs and slate, the interview's forms, speech, name plate,
-  certificates and props, the house signs and moving-box labels. Shipped unmodified as
-  `src/assets/fonts/alagard.ttf`.
-
-Glyphs Alagard does not have (typographic quotes and dashes, the middle dot, the ellipsis, accents) are turned into
-their plain ASCII twins before they are drawn (`src/ui/font.ts`). Anything else falls back to the TBME Goofy pixel
-face (made from Chewy by Font Diner, Apache 2.0, see `src/assets/fonts/FONTS_LICENSE.txt`). The pretend phone's
-tiny system text (app labels, notifications) keeps m5x7 by Daniel Linssen (managore.itch.io), credited in
-`intro4.md`. The m6x11plus and Galmuri11 faces are no longer used and were removed.
+- **Alegreya** (upright and italic, variable weights 400-900) and **Alegreya SC** (ExtraBold) - Juan Pablo del Peral,
+  Huerta Tipografica, Copyright 2011 The Alegreya Project Authors, https://github.com/huertatipografica/Alegreya,
+  SIL Open Font License 1.1 (full text in `src/assets/fonts/Alegreya-OFL.txt`). Latin subsets taken from the
+  Fontsource packages (`@fontsource-variable/alegreya` 5.3.0, `@fontsource/alegreya-sc` 5.3.0), shipped as
+  `src/assets/fonts/alegreya.woff2`, `alegreya-italic.woff2` and `alegreya-sc.woff2`. Modified only so that the plain
+  digits map to the fonts' own lining figures (the `lnum` glyphs), so numbers stand level on canvas too.
+  Alegreya is the game's book face (every screen, button, sign, tag, toast, the book, the globe, the interview's
+  forms, speech and props, the pretend phone); Alegreya SC sets titles, signs, names and the rubber stamp.
 
 
 ---
@@ -523,8 +520,8 @@ domain), downsampled to a pixel grid and packed into `public/models/interview/ar
 
 ## Fonts
 
-The forms are printed in m6x11plus and m5x7 by Daniel Linssen ([managore.itch.io](https://managore.itch.io/)),
-free to use (credit appreciated), with Galmuri11 (Lee Minseo, SIL Open Font License) and the game's own TBME face.
+The forms are printed in the game's own typefaces, Alegreya and Alegreya SC (SIL Open Font License, credited in
+`font12.md`).
 
 
 ---
@@ -548,8 +545,8 @@ Everything this round added is made in code for Hoot Hollow; nothing new was bor
   the shield, painted pixel by pixel in code. No real brand, logo or app is shown.
 
 The sheep, day bed, alarm clock, pocket watch and nightstand in the answers are the borrowed models already
-credited in `intro4.md` (repacked into `public/models/interview/cards.glb`). The phone's text uses m5x7 by Daniel
-Linssen and Galmuri11 (Lee Minseo, SIL Open Font License), credited there too.
+credited in `intro4.md` (repacked into `public/models/interview/cards.glb`). The phone's text is set in the game's
+Alegreya (`font12.md`).
 
 
 ---

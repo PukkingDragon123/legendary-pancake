@@ -8,26 +8,14 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { fbm, hash, rng, vnoise } from '../../gfx/noise.ts';
-import alagardUrl from '../../assets/fonts/alagard.ttf?url';
+import { fontPx, fontReady as uiFontReady } from '../../ui/font.ts';
 
-// ------------------------------------------------------------------ the Alagard pixel font (canvas text)
+// ------------------------------------------------------------------ the game's typeface (canvas text, src/ui/font.ts)
 
-export const FONT = 'Alagard';
-let fontP: Promise<void> | null = null;
-/** Load Alagard for canvas painting (resolves even if it fails: canvas text then falls back). */
+export const FONT = 'Alegreya';
+/** Load the game's faces for canvas painting (resolves even if they fail: canvas text then falls back). */
 export function fontReady(): Promise<void> {
-  if (!fontP) {
-    fontP = (async () => {
-      try {
-        if (!document.fonts.check(`16px "${FONT}"`)) {
-          const f = new FontFace(FONT, `url(${alagardUrl})`);
-          document.fonts.add(await f.load());
-        }
-        await document.fonts.load(`16px "${FONT}"`, '0123456789hm');
-      } catch { /* fallback font */ }
-    })();
-  }
-  return fontP;
+  return uiFontReady();
 }
 
 // ------------------------------------------------------------------ canvases and colour ramps
@@ -217,34 +205,27 @@ export function wainscotCanvas(): HTMLCanvasElement {
 
 // ------------------------------------------------------------------ the dial
 
-/** Draw crisp pixel text: render with the pixel font, threshold the alpha, draw in `col` (with an optional shadow). */
+/** Draw text in the game's face, smooth and anti-aliased: `size` on the old 16 px grid (32 and up is set in small
+ * capitals), centred on `x` by default, `y` its middle (or its top with base 'top'), an optional 1 px shadow. */
 export function pxText(g: CanvasRenderingContext2D, text: string, x: number, y: number, size: number, col: string, o: { align?: CanvasTextAlign; shadow?: string; maxW?: number; base?: CanvasTextBaseline; spacing?: number } = {}) {
-  const W = Math.ceil(size * (text.length + 2) * 0.9) + 8, H = Math.ceil(size * 1.6) + 4;
-  const [c2, g2] = canvas(W, H);
-  let s = size;
-  g2.font = `${s}px "${FONT}", serif`;
-  if (o.maxW) while (s > 8 && g2.measureText(text).width > o.maxW) { s -= 1; g2.font = `${s}px "${FONT}", serif`; }
-  g2.textBaseline = 'middle';
-  g2.textAlign = 'left';
-  const tw = Math.ceil(g2.measureText(text).width);
-  g2.fillStyle = '#000';
-  g2.fillText(text, 4, Math.round(H / 2));
-  const d = g2.getImageData(0, 0, W, H);
-  const [cr, cg, cb] = hex(col);
-  for (let i = 0; i < d.data.length; i += 4) { const on = d.data[i + 3] > 110; d.data[i] = cr; d.data[i + 1] = cg; d.data[i + 2] = cb; d.data[i + 3] = on ? 255 : 0; }
-  g2.putImageData(d, 0, 0);
+  const caps = size >= 32;
+  let s = size * (caps ? 1 : 1.12);
+  const font = () => fontPx(s, { caps, weight: 700 });
+  g.save();
+  g.font = font();
+  if (o.maxW) while (s > 8 && g.measureText(text).width > o.maxW) { s -= 1; g.font = font(); }
+  g.textBaseline = 'alphabetic';
+  g.textAlign = 'left';
+  const tw = Math.ceil(g.measureText(text).width);
   const al = o.align ?? 'center';
-  const dx = Math.round(al === 'center' ? x - tw / 2 - 4 : al === 'right' ? x - tw - 4 : x - 4);
-  const dy = Math.round((o.base === 'top' ? y + H / 2 - s * 0.35 : y) - H / 2);
-  if (o.shadow) {
-    const [c3, g3] = canvas(W, H);
-    g3.drawImage(c2, 0, 0);
-    g3.globalCompositeOperation = 'source-in';
-    g3.fillStyle = o.shadow;
-    g3.fillRect(0, 0, W, H);
-    g.drawImage(c3, dx + 1, dy + 1);
-  }
-  g.drawImage(c2, dx, dy);
+  const dx = al === 'center' ? x - tw / 2 : al === 'right' ? x - tw : x;
+  // the middle of the lowercase (or the small capitals) sits on `y`
+  const mid = (caps ? 0.33 : 0.24) * s;
+  const by = o.base === 'top' ? y + (caps ? 0.66 : 0.64) * s : y + mid;
+  if (o.shadow) { g.fillStyle = o.shadow; g.fillText(text, dx + Math.max(1, s / 20), by + Math.max(1, s / 16)); }
+  g.fillStyle = col;
+  g.fillText(text, dx, by);
+  g.restore();
   return tw;
 }
 

@@ -104,7 +104,7 @@ export function homeSprite(scale: number): string {
 /** A passport stamp: ink in the place colour, one of four border shapes, the emblem and the stamp text. */
 export function stampArt(a: Area, opts: { date?: number; state: 'visited' | 'open' | 'locked'; seed: number }, scale: number): string {
   return memo(`stamp:${a.id}:${opts.state}:${opts.date ?? 0}:${scale}`, () => {
-    const W = 54, H = 38, p = new Pix(W, H); // [font6] wide enough for the name in Alagard
+    const W = 54, H = 38, p = new Pix(W, H); // [font6] wide enough for the name in Alegreya
     const ink = opts.state === 'visited' ? mix(hexC(a.color), 0x4b463a, 0.32) : opts.state === 'open' ? 0xb2aa98 : 0xc8c0ae;
     const faint = opts.state !== 'visited';
     const dot = (x: number, y: number) => { if (!faint || (x + y) % 2 === 0) { if (!faint && hash(x, y, opts.seed) < 0.07) return; p.set(x, y, ink); } };
@@ -297,8 +297,8 @@ export function passportCover(scale: number): string {
     for (const k of [-1, 0, 1]) { g.beginPath(); g.moveTo(30 - Math.sqrt(156 - (k * 7) ** 2), 36 + k * 7); g.lineTo(30 + Math.sqrt(156 - (k * 7) ** 2), 36 + k * 7); g.stroke(); }
     g.beginPath(); g.ellipse(30, 36, 6, 12.5, 0, 0, Math.PI * 2); g.stroke();
     g.beginPath(); g.moveTo(30, 23.5); g.lineTo(30, 48.5); g.stroke();
-    g.fillStyle = gold; g.font = 'bold 6px Georgia, serif'; g.textAlign = 'center'; g.fillText('PASSPORT', 30, 63);
-    g.font = '3.4px Georgia, serif'; g.fillText('HOOT HOLLOW', 30, 70);
+    g.fillStyle = gold; g.font = 'bold 6px Alegreya, Georgia, serif'; g.textAlign = 'center'; g.fillText('PASSPORT', 30, 63);
+    g.font = '3.4px Alegreya, Georgia, serif'; g.fillText('HOOT HOLLOW', 30, 70);
     return c.toDataURL('image/png');
   });
 }
