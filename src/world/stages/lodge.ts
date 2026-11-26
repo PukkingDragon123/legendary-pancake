@@ -86,7 +86,7 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 
 /** The store's own grade over the app's post chain: warm, rich, a little bloom on the lanterns. */
 /** The store's look on the app's post chain (src/world/post.ts): warm and rich, bloom on the lanterns, a tilt-shift
  * depth of field focused on whatever the camera is looking at (set every frame in update). */
-const LOOK: Look = { exposure: 1.02, contrast: 1.08, saturation: 1.06, vibrance: 0.2, warm: 0.06, split: 0.45, vignette: 0.3, grain: 0.016, bloom: 0.55, bloomThreshold: 1.1, focus: 6, focusRange: 2.2, blur: 0.4, cold: 0 };
+const LOOK: Look = { exposure: 1.02, contrast: 1.1, saturation: 1.18, vibrance: 0.32, warm: -0.03, split: 0.3, vignette: 0.28, grain: 0.016, bloom: 0.55, bloomThreshold: 1.1, focus: 6, focusRange: 2.2, blur: 0.4, cold: 0 }; // [look12] fuller colour; cooler balance (the logs and lamps are orange enough)
 
 export class Lodge implements Stage {
   readonly scene = new THREE.Scene();

@@ -7,13 +7,24 @@ describe('ink outlines', () => {
     installInk();
     installInk();
     const chunk = THREE.ShaderChunk.opaque_fragment;
-    expect(chunk.match(/gl_FragColor\.a = HH_INK;/g)?.length).toBe(1);
+    expect(chunk.match(/gl_FragColor\.a = hhInk;/g)?.length).toBe(1);
     // the plain class is "full"; alpha-cut double-sided cards are "silhouette only"; unlit is "none"
     expect(chunk).toContain('#define HH_INK 0.25');
     expect(chunk).toContain('#define HH_INK 0.5');
     expect(THREE.ShaderLib.basic.fragmentShader.startsWith('#define HH_UNLIT\n')).toBe(true);
     expect(THREE.ShaderLib.basic.fragmentShader.indexOf('#define HH_UNLIT')).toBe(THREE.ShaderLib.basic.fragmentShader.lastIndexOf('#define HH_UNLIT'));
     expect(THREE.ShaderLib.standard.fragmentShader).not.toContain('HH_UNLIT');
+  });
+
+  it('gives lit materials a per-object id, once', () => {
+    installInk();
+    expect(THREE.ShaderChunk.project_vertex.match(/vHhInkId =/g)?.length).toBe(1);
+    for (const id of ['standard', 'physical', 'lambert']) {
+      const lib = THREE.ShaderLib[id];
+      expect(lib.vertexShader.startsWith('#define HH_INKID\nvarying float vHhInkId;')).toBe(true);
+      expect(lib.fragmentShader.lastIndexOf('#define HH_INKID')).toBe(0);
+    }
+    expect(THREE.ShaderLib.basic.vertexShader).not.toContain('HH_INKID');
   });
 
   it('sets a material class as a define and recompiles only on change', () => {
@@ -29,13 +40,16 @@ describe('ink outlines', () => {
     expect((m.defines as Record<string, string>).HH_INK).toBe('0.5');
   });
 
-  it('draws lines about 1.7 device px on 1x screens and 2.3 on 2x ones, in target px', () => {
+  it('draws outlines about 2 device px on 1x screens and 2.4 on 2x ones, creases 1.15 / 1.45, in target px', () => {
     const k = defaultInk();
-    expect(Ink.widthPx(k, 1, 1)).toBeCloseTo(1.7);
-    expect(Ink.widthPx(k, 1, 2)).toBeCloseTo(2.3);
+    expect(Ink.widthPx(k, 1, 1)).toBeCloseTo(2);
+    expect(Ink.widthPx(k, 1, 2)).toBeCloseTo(2.4);
+    expect(Ink.widthPx(k, 1, 3)).toBeCloseTo(2.4);
+    expect(Ink.creasePx(k, 1, 1)).toBeCloseTo(1.15);
+    expect(Ink.creasePx(k, 1, 2)).toBeCloseTo(1.45);
     // the low tier's smaller target: fewer target px for the same line on screen
-    expect(Ink.widthPx(k, 1 / 0.68, 2)).toBeCloseTo(2.3 * 0.68);
-    expect(Ink.widthPx({ ...k, width: 2 }, 1, 1)).toBeCloseTo(3.4);
+    expect(Ink.widthPx(k, 1 / 0.68, 2)).toBeCloseTo(2.4 * 0.68);
+    expect(Ink.widthPx({ ...k, width: 2 }, 1, 1)).toBeCloseTo(4);
   });
 
   it('bakes the ink colour into the composite snippet', () => {

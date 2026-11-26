@@ -529,13 +529,15 @@ export class Scene {
       const g = this.post.grade, hr = this.sky.hour;
       const golden = Math.max(sm(hr, 16.6, 18.2) * (1 - sm(hr, 19.0, 19.8)), sm(hr, 5.6, 6.4) * (1 - sm(hr, 7.4, 8.6)));
       g.exposure = (L(1.0, 1.45, night) + golden * 0.18) * (1 + (this.weather?.vis.overcast ?? 0) * 0.25);
-      g.warm = L(0.08, -0.06, night) + golden * 0.08;
-      g.saturation = L(1.1, 0.9, night);
-      g.vibrance = L(0.22, 0.1, night);
-      g.contrast = L(1.06, 1.1, night);
+      // [look12] full, saturated colour by day and night (deep sapphire, never grey), punchier contrast, and only a
+      // touch of warmth by day (the sun is gold enough: no orange cast)
+      g.warm = L(0.03, -0.08, night) + golden * 0.1;
+      g.saturation = L(1.2, 1.1, night);
+      g.vibrance = L(0.34, 0.24, night);
+      g.contrast = L(1.1, 1.12, night);
       // [light7] the cel light carries the colour of the shadows now: lighter split toning, and a tighter bloom on
       // what is really bright (lamps, the sun's glints, the moon) instead of a haze over everything at night
-      g.split = L(0.3, 0.45, night);
+      g.split = L(0.22, 0.4, night); // [look12] less honey wash over the lights
       g.bloom = L(0.42, 0.62, night) + golden * 0.12;
       g.bloomThreshold = L(1.2, 0.95, night);
       g.vignette = L(0.2, 0.32, night);
@@ -816,7 +818,7 @@ export class Scene {
     this.lantern.intensity = M.lerp(outLantern, (4.6 * day + 16 * night) * flick, k);
     this.lantern.decay = M.lerp(1.4, 2, k);
     this.lantern.distance = M.lerp(10, 14, k);
-    this.lantern.color.setHex(0xffc06a).lerp(new THREE.Color(0xffe0bc), day * 0.6 * k);
+    this.lantern.color.setHex(0xffcc88).lerp(new THREE.Color(0xfff0dc), day * 0.6 * k); // [look12] a cleaner, less orange lamplight
     this.room.position.set(H.x, 2.6, H.z + 1.6).lerp(new THREE.Vector3(H.x + this.pipL.x * 0.8, fy + 1.5, H.z + Math.min(4.2, this.pipL.y + 2.4)), k);
     this.room.intensity = M.lerp(1.4 + night * 9, 1.1 * day + 3.6 * night, k);
     this.room.distance = M.lerp(16, 6, k);
@@ -863,7 +865,7 @@ export class Scene {
     g.vignette = b.vignette + k * (0.06 + night * 0.14);
     g.vibrance = b.vibrance + k * 0.04; // [light7] the lamp and the wood are warm enough on their own
     g.saturation = b.saturation;
-    g.warm = b.warm;
+    g.warm = b.warm - k * 0.07; // [look12] the hollow's wood and lamplight are warm already: balance them (no orange floor)
     // critters (a dragonfly zipping past the lens) and fireflies belong to the clearing, not the living room
     this.critters.group.visible = k < 0.4;
     this.fireflies.mesh.visible = k < 0.4;

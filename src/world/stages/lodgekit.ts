@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { modelUrl } from '../../gfx/glb.ts';
+import { inkMaterial } from '../../gfx/ink.ts'; // [look12]
 import { rng } from '../../gfx/noise.ts';
 import { alagard, alagardReady, alagardSafe, alagardText } from '../../ui/font.ts';
 import { drawText3D, fitText3D } from '../../ui/text3d.tsx';
@@ -57,7 +58,7 @@ export const M = {
   rope: () => mat('rope', () => new THREE.MeshStandardMaterial({ color: 0xb99a68, roughness: 1 })),
   acorn: () => mat('acorn', () => new THREE.MeshStandardMaterial({ color: 0xb8772f, roughness: 0.42, envMapIntensity: 0.8 })),
   acornCap: () => mat('acornCap', () => new THREE.MeshStandardMaterial({ map: acornCapTexture(), roughness: 0.95 })),
-  shaving: () => mat('shaving', () => new THREE.MeshStandardMaterial({ color: 0xe8c690, roughness: 0.85, side: THREE.DoubleSide })),
+  shaving: () => mat('shaving', () => inkMaterial(new THREE.MeshStandardMaterial({ color: 0xe8c690, roughness: 0.85, side: THREE.DoubleSide }), 'sil')), // [look12] curls: no speckle of ink
 };
 const shadowMat = (o: number) => mat('shadow' + o.toFixed(2), () => new THREE.MeshBasicMaterial({ map: blobTexture(), transparent: true, depthWrite: false, opacity: o, color: 0x1a0f08 }));
 

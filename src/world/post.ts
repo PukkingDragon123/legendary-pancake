@@ -61,9 +61,9 @@ export interface Grade {
 
 export function defaultGrade(): Grade {
   return {
-    exposure: 1, contrast: 1.06, saturation: 1.12, vibrance: 0.25, warm: 0.12,
+    exposure: 1, contrast: 1.1, saturation: 1.2, vibrance: 0.34, warm: 0.04, // [look12] fuller colour, less orange
     lift: new THREE.Vector3(0, 0, 0), gamma: new THREE.Vector3(1, 1, 1), gain: new THREE.Vector3(1, 1, 1),
-    split: 0.5, vignette: 0.22, grain: 0.018, bloom: 0.55, bloomThreshold: 1.0,
+    split: 0.3, vignette: 0.22, grain: 0.018, bloom: 0.55, bloomThreshold: 1.0,
     focus: 0, focusRange: 6, blur: 0.6, focusAt: new THREE.Vector2(0.5, 0.5), cold: 0, quant: 255,
     outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 80,
   };
@@ -71,7 +71,7 @@ export function defaultGrade(): Grade {
 
 /** What a Stage gets unless it sets its own `look` (warm, softly bloomed, auto-focused at the centre). */
 export const STAGE_LOOK: Partial<Grade> = {
-  exposure: 1.0, contrast: 1.05, saturation: 1.1, vibrance: 0.2, warm: 0.1, split: 0.4, vignette: 0.24, grain: 0.016,
+  exposure: 1.0, contrast: 1.08, saturation: 1.18, vibrance: 0.32, warm: 0.02, split: 0.3, vignette: 0.24, grain: 0.016, // [look12]
   bloom: 0.5, bloomThreshold: 1.2, focus: 0, focusRange: 1.5, blur: 0.3, cold: 0,
   outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 40,
 };
@@ -292,7 +292,7 @@ export class Post {
           float a = inkCover(uv);
           a *= (1.0 - smoothstep(0.25, 0.85, soft)) * (1.0 - smoothstep(0.35, 1.6, luma(glow) * uExposure));
           col = inkOver(col, a);
-          if (uInkOn > 1.5) col = mix(col, vec3(1.0 - texture2D(tInk, uv).r), 0.85); // dev: ?ink=mask
+          if (uInkOn > 1.5) col = mix(col, vec3(1.0 - inkCover(uv)), 0.85); // dev: ?ink=mask
         }
         float g = hash(px + floor(uTime * 24.0) * 17.0) - 0.5;
         col += g * uGrain * (1.1 - l);
