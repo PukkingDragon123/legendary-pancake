@@ -82,8 +82,8 @@ uniform vec4 hhCel;
 // rgb: the hue of the key light's shadow fill; w: how much shadow-casting spot lights count as a key (a sun shaft)
 uniform vec4 hhCelTint;
 // [look12] the painted colour itself (see celKnobs): x vibrance (the duller a colour, the more its own hue grows),
-// y saturation, z how much of the extra goes to warm orange-browns (1 = as much as any hue, less keeps wood from
-// turning orange), w unused
+// y saturation, z the saturation of orange-browns instead (wood, floorboards, leather, clay: 1 = as painted, a little
+// less keeps warm wood from reading orange under warm light), w unused
 uniform vec4 hhAlbedo;
 vec3 celAlbedo( vec3 c ) {
   float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
@@ -91,7 +91,7 @@ vec3 celAlbedo( vec3 c ) {
   float s = ( mx - mn ) / max( mx, 1e-4 );
   // orange-brown: red highest, then green, blue lowest, green about half way (wood, floorboards, leather, clay)
   float hueO = step( c.g, c.r ) * step( c.b, c.g ) * ( 1.0 - abs( ( c.g - c.b ) / max( c.r - c.b, 1e-4 ) - 0.42 ) * 2.4 );
-  float k = ( hhAlbedo.y * ( 1.0 + hhAlbedo.x * ( 1.0 - s ) * smoothstep( 0.002, 0.03, l ) ) - 1.0 ) * mix( 1.0, hhAlbedo.z, saturate( hueO ) );
+  float k = mix( hhAlbedo.y * ( 1.0 + hhAlbedo.x * ( 1.0 - s ) * smoothstep( 0.002, 0.03, l ) ), hhAlbedo.z, saturate( hueO ) ) - 1.0;
   return max( mix( vec3( l ), c, 1.0 + k ), 0.0 );
 }
 // the key light's cast shadow (sun / moon), kept apart from its colour; 1 while point and spot lights are added
@@ -159,14 +159,14 @@ export interface CelKnobs {
   vibrance: number;
   /** [look12] painted colour: saturation (1 = as painted) */
   saturation: number;
-  /** [look12] 0..1 how much of that extra colour orange-browns get (wood and floorboards stay wood, not orange) */
+  /** [look12] the saturation of orange-browns instead (1 = as painted; a little less keeps wood from reading orange) */
   orange: number;
 }
-const defaults = (): CelKnobs => ({ fill: 1, rim: 1, lampBands: 0.6, keyBands: 1, tint: new THREE.Color(0.3, 0.2, 0.48), spotKey: 0, vibrance: 0.3, saturation: 1.08, orange: 0.35 });
+const defaults = (): CelKnobs => ({ fill: 1, rim: 1, lampBands: 0.6, keyBands: 1, tint: new THREE.Color(0.3, 0.2, 0.48), spotKey: 0, vibrance: 0.3, saturation: 1.08, orange: 0.96 });
 const DEFAULT = defaults();
 const LIVE = { x: 1, y: 1, z: 0.6, w: 1 };
 const TINT = { x: 0.3, y: 0.2, z: 0.48, w: 0 };
-const ALBEDO = { x: 0.3, y: 1.08, z: 0.35, w: 0 }; // [look12]
+const ALBEDO = { x: 0.3, y: 1.08, z: 0.96, w: 0 }; // [look12]
 function push(k: CelKnobs) {
   LIVE.x = k.fill * 0.4; LIVE.y = k.rim; LIVE.z = k.lampBands; LIVE.w = k.keyBands;
   TINT.x = k.tint.r; TINT.y = k.tint.g; TINT.z = k.tint.b; TINT.w = k.spotKey;

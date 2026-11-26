@@ -24,6 +24,9 @@ export interface Grade {
   contrast: number;
   /** global saturation (1 = neutral) */
   saturation: number;
+  /** [look12] the saturation of orange-brown hues instead (warm wood, floorboards, leather): a little less than
+   * `saturation` keeps honey wood from reading orange under warm light (1 = neutral) */
+  orange: number;
   /** extra saturation for the less saturated colours (0 = off) */
   vibrance: number;
   /** white balance: + warm (amber), - cool (blue) */
@@ -64,7 +67,7 @@ export function defaultGrade(): Grade {
     exposure: 1, contrast: 1.1, saturation: 1.2, vibrance: 0.34, warm: 0.04, // [look12] fuller colour, less orange
     lift: new THREE.Vector3(0, 0, 0), gamma: new THREE.Vector3(1, 1, 1), gain: new THREE.Vector3(1, 1, 1),
     split: 0.3, vignette: 0.22, grain: 0.018, bloom: 0.55, bloomThreshold: 1.0,
-    focus: 0, focusRange: 6, blur: 0.6, focusAt: new THREE.Vector2(0.5, 0.5), cold: 0, quant: 255,
+    focus: 0, focusRange: 6, blur: 0.6, focusAt: new THREE.Vector2(0.5, 0.5), cold: 0, quant: 255, orange: 1.04,
     outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 80,
   };
 }
@@ -72,7 +75,7 @@ export function defaultGrade(): Grade {
 /** What a Stage gets unless it sets its own `look` (warm, softly bloomed, auto-focused at the centre). */
 export const STAGE_LOOK: Partial<Grade> = {
   exposure: 1.0, contrast: 1.08, saturation: 1.18, vibrance: 0.32, warm: 0.02, split: 0.3, vignette: 0.24, grain: 0.016, // [look12]
-  bloom: 0.5, bloomThreshold: 1.2, focus: 0, focusRange: 1.5, blur: 0.3, cold: 0,
+  bloom: 0.5, bloomThreshold: 1.2, focus: 0, focusRange: 1.5, blur: 0.3, cold: 0, orange: 1.0,
   outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 40,
 };
 
@@ -230,7 +233,7 @@ export class Post {
       uniform sampler2D tColor; uniform sampler2D tBloom; uniform sampler2D tDof;
       uniform float uBloomOn; uniform float uDofOn; uniform float uBlur;
       uniform vec2 uRes; uniform float uFrame; uniform float uTime;
-      uniform float uExposure; uniform float uCon; uniform float uSat; uniform float uVib; uniform float uWarm; uniform float uSplit;
+      uniform float uExposure; uniform float uCon; uniform float uSat; uniform float uOrange; uniform float uVib; uniform float uWarm; uniform float uSplit;
       uniform vec3 uLift; uniform vec3 uGamma; uniform vec3 uGain;
       uniform float uVig; uniform float uGrain; uniform float uBloom; uniform float uCold;
       uniform float uInkOn;
@@ -280,8 +283,10 @@ export class Post {
         // vibrance then saturation
         l = luma(col);
         float sat = max(col.r, max(col.g, col.b)) - min(col.r, min(col.g, col.b));
-        col = mix(vec3(l), col, 1.0 + uVib * (1.0 - sat) * (1.0 - smoothstep(0.85, 1.0, l)));
-        col = mix(vec3(l), col, uSat);
+        // [look12] orange-browns (red over green over blue, green about half way) get their own saturation
+        float hO = step(col.b, col.g) * step(col.g, col.r) * clamp(1.0 - abs((col.g - col.b) / max(col.r - col.b, 1e-4) - 0.45) * 2.6, 0.0, 1.0) * smoothstep(0.04, 0.16, sat);
+        col = mix(vec3(l), col, 1.0 + uVib * (1.0 - sat) * (1.0 - smoothstep(0.85, 1.0, l)) * (1.0 - 0.7 * hO));
+        col = mix(vec3(l), col, mix(uSat, uOrange, hO));
         vec2 cc = vUv - 0.5;
         float r2 = dot(cc * vec2(uRes.x / uRes.y, 1.0), cc * vec2(uRes.x / uRes.y, 1.0)) / max(1.0, uRes.x / uRes.y);
         col = mix(col, mix(vec3(l), col, 0.75) * vec3(0.94, 0.98, 1.05), uCold * 0.6);
@@ -302,7 +307,7 @@ export class Post {
       }`, {
       tColor: { value: null }, tBloom: { value: null }, tDof: { value: null }, uBloomOn: { value: 0 }, uDofOn: { value: 0 }, uBlur: { value: 0 },
       uRes: { value: new THREE.Vector2() }, uFrame: { value: 0 }, uTime: { value: 0 },
-      uExposure: { value: 1 }, uCon: { value: 1 }, uSat: { value: 1 }, uVib: { value: 0 }, uWarm: { value: 0 }, uSplit: { value: 0 },
+      uExposure: { value: 1 }, uCon: { value: 1 }, uSat: { value: 1 }, uOrange: { value: 1 }, uVib: { value: 0 }, uWarm: { value: 0 }, uSplit: { value: 0 },
       uLift: { value: new THREE.Vector3() }, uGamma: { value: new THREE.Vector3(1, 1, 1) }, uGain: { value: new THREE.Vector3(1, 1, 1) },
       uVig: { value: 0 }, uGrain: { value: 0 }, uBloom: { value: 0 }, uCold: { value: 0 },
       uInkOn: { value: 0 }, ...inkUniforms(),
@@ -420,7 +425,7 @@ export class Post {
     // ---- composite
     u.tColor.value = this.rt.texture;
     u.uRes.value.set(this.w, this.h); u.uFrame.value = this.frame % 1000; u.uTime.value = time;
-    u.uExposure.value = g.exposure; u.uCon.value = g.contrast; u.uSat.value = g.saturation; u.uVib.value = g.vibrance; u.uWarm.value = g.warm; u.uSplit.value = g.split;
+    u.uExposure.value = g.exposure; u.uCon.value = g.contrast; u.uSat.value = g.saturation; u.uOrange.value = g.orange; u.uVib.value = g.vibrance; u.uWarm.value = g.warm; u.uSplit.value = g.split;
     u.uLift.value.copy(g.lift); u.uGamma.value.copy(g.gamma); u.uGain.value.copy(g.gain);
     u.uVig.value = g.vignette; u.uGrain.value = g.grain; u.uBloom.value = g.bloom * 0.12; u.uCold.value = g.cold;
     this.pass(this.mComp, null);

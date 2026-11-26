@@ -262,7 +262,8 @@ void main() {
     float farK = smoothstep(uFade.x * 0.5, uFade.y, z0);
     b = clamp(0.62 + 0.16 * side * step(0.01, e) + 0.12 * nearK + 0.3 * press - 0.45 * farK - 0.22 * (1.0 - full), 0.0, 1.0);
   }
-  gl_FragColor = vec4(e * sil * fade * mix(0.8, 1.0, full), cr * fade, b, 1.0);
+  // leaf cards: a lighter line (their ragged edges would read as scribble under a heavy one)
+  gl_FragColor = vec4(e * sil * fade * mix(0.66, 1.0, full), cr * fade, b, 1.0);
 }`;
 
 /**
@@ -404,6 +405,10 @@ void main() {
   float l = length(dn);
   // heavier on the shadow side, like the screen-space lines
   if (l > 1e-6) { w *= 0.9 + 0.28 * dot(dn / l, vec2(0.7071, -0.7071)); c.xy += (dn / l) * uInkPx.xy * w * c.w; }
+  // [look12] at the depth of the bare part's own rim, not of the fluff's edge: a wing lying in the fluff hides the line
+  // behind it (it was drawn over the wing, a second contour beside the wing's own)
+  vec4 rim = projectionMatrix * (modelViewMatrix * vec4(position, 1.0));
+  c.z = (rim.z / rim.w) * c.w;
   vN = vn; vV = -mv.xyz; vW = w;
   gl_Position = c;
 }`;

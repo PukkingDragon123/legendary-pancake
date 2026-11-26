@@ -20,6 +20,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { instanceGLB, loadGLB } from '../../gfx/glb.ts';
+import { celKnobs } from '../../gfx/cel.ts'; // [look12]
 import { ITEMS, FINISH } from '../../assets/registry.ts';
 import { OwlActor } from '../../owl/actor.ts';
 import type { OwlLook } from '../../owl/model.ts';
@@ -86,7 +87,7 @@ const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 
 /** The store's own grade over the app's post chain: warm, rich, a little bloom on the lanterns. */
 /** The store's look on the app's post chain (src/world/post.ts): warm and rich, bloom on the lanterns, a tilt-shift
  * depth of field focused on whatever the camera is looking at (set every frame in update). */
-const LOOK: Look = { exposure: 1.02, contrast: 1.1, saturation: 1.18, vibrance: 0.32, warm: -0.03, split: 0.3, vignette: 0.28, grain: 0.016, bloom: 0.55, bloomThreshold: 1.1, focus: 6, focusRange: 2.2, blur: 0.4, cold: 0 }; // [look12] fuller colour; cooler balance (the logs and lamps are orange enough)
+const LOOK: Look = { exposure: 1.02, contrast: 1.1, saturation: 1.18, vibrance: 0.32, warm: -0.03, orange: 0.9, split: 0.3, vignette: 0.28, grain: 0.016, bloom: 0.55, bloomThreshold: 1.1, focus: 6, focusRange: 2.2, blur: 0.4, cold: 0 }; // [look12] fuller colour; cooler balance (the logs and lamps are orange enough)
 
 export class Lodge implements Stage {
   readonly scene = new THREE.Scene();
@@ -167,6 +168,7 @@ export class Lodge implements Stage {
     this.buildDecor();
     S.add(this.fx.group);
     this.fx.setLight(new THREE.Color(0xffe8c8));
+    celKnobs(S).orange = 0.84; // [look12] honey logs and floorboards, not orange ones
     // Barnaby at the end of his counter, turned a little toward the deals
     const b = this.beaver.node;
     b.position.set(BEAVER.x, 0, BEAVER.z);
@@ -256,9 +258,9 @@ export class Lodge implements Stage {
     const L = THREE.MathUtils.lerp;
     this.hemi.intensity = L(0.4, 0.16, n);
     this.hemi.color.setHex(n > 0.5 ? 0x8a9ac8 : 0xdde6f2);
-    this.hemi.groundColor.setHex(n > 0.5 ? 0x2a1a12 : 0x4a2e1c);
+    this.hemi.groundColor.setHex(n > 0.5 ? 0x2a1e1a : 0x4a3a2e); // [look12] a less orange bounce off the floor
     this.key.intensity = L(0.62, 0.3, n);
-    this.key.color.setHex(n > 0.5 ? 0xffc48a : 0xffe4bc);
+    this.key.color.setHex(n > 0.5 ? 0xffd09c : 0xfff0d8); // [look12] cleaner light, so the wood keeps its own colour
     this.sun.intensity = L(34, 14, n);
     this.sun.color.setHex(n > 0.5 ? 0x8fa8e8 : 0xeef4ff);
     for (const s of this.shafts) (s.material as THREE.MeshBasicMaterial).color.setHex(n > 0.5 ? 0x1c3058 : 0x6c6450);
@@ -789,7 +791,7 @@ export class Lodge implements Stage {
   private growing = false;
 
   private lamp(at: THREE.Vector3, hang: boolean) {
-    const light = new THREE.PointLight(0xffc684, 3.0, 7, 1.5);
+    const light = new THREE.PointLight(0xffd29e, 3.0, 7, 1.5); // [look12] lamplight a touch less orange
     light.position.copy(at).add(v3(0, -0.12, 0));
     this.add(light);
     const flame = new THREE.Sprite(new THREE.SpriteMaterial({ color: 0xfff0c0, map: haloTexture(), blending: THREE.AdditiveBlending, depthWrite: false, fog: false }));

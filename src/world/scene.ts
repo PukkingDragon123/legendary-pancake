@@ -784,6 +784,7 @@ export class Scene {
     const k = this.inLight, night = this.sky.night, day = 1 - THREE.MathUtils.smoothstep(night, 0.25, 0.75);
     this.sky.hemi.intensity = this.sky.hemiBase * (1 - k * (0.34 + night * 0.24));
     this.cel.fill = 1 - k * 0.5; // [light7] less sky bounce gets into the hollow
+    this.cel.orange = 0.96 - k * 0.14; // [look12] honey floorboards, not orange ones, under the lamp
     if (k < 0.005 && !this.insideLights) return;
     if (!this.insideLights) {
       const win = new THREE.SpotLight(0xffe2b0, 0, 11, 0.5, 0.85, 1.2);
@@ -866,6 +867,7 @@ export class Scene {
     g.vibrance = b.vibrance + k * 0.04; // [light7] the lamp and the wood are warm enough on their own
     g.saturation = b.saturation;
     g.warm = b.warm - k * 0.07; // [look12] the hollow's wood and lamplight are warm already: balance them (no orange floor)
+    g.orange = 1.04 - k * 0.14; // [look12]
     // critters (a dragonfly zipping past the lens) and fireflies belong to the clearing, not the living room
     this.critters.group.visible = k < 0.4;
     this.fireflies.mesh.visible = k < 0.4;

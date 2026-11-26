@@ -67,7 +67,7 @@ const v3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const backOut = (t: number) => { const c = 1.6; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
 const FOV = 28;
-const LOOK: Look = { exposure: 1.04, contrast: 1.1, saturation: 1.18, vibrance: 0.3, warm: 0.02, split: 0.3, // [look12]
+const LOOK: Look = { exposure: 1.04, contrast: 1.1, saturation: 1.18, vibrance: 0.3, warm: 0.02, orange: 0.96, split: 0.3, // [look12]
   vignette: 0.26, grain: 0.012, bloom: 0.55, bloomThreshold: 1.05, focus: 7, focusRange: 2.5, blur: 0.25, cold: 0 };
 const HOUSE_COLS = ['#d79c8e', '#a2c290', '#94b6dc', '#e6c46e', '#bba0d6', '#e8966c', '#86c8b6'];
 
