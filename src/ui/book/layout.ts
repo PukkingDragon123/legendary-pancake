@@ -1,6 +1,6 @@
 // Where the diary sits on screen: a two-page spread on wide screens, one page on phones. Sizes are
 // in texels (T CSS px each) so the pixel art lines up; page contents are laid out in CSS px.
-import { uiFontPx } from '../font.ts';
+import { tokenSizes } from '../font.ts';
 
 export interface BookLayout {
   vw: number; vh: number;
@@ -43,6 +43,6 @@ export function layout(vw: number, vh: number): BookLayout {
   const x = snap((vw - BW) / 2);
   const y = snap(Math.max(tabH + 6, (vh - BH - footer + tabH) / 2));
   const PW = pw * T, PH = ph * T;
-  const fs = 17 * uiFontPx(); // page text is the UI text size (--t1), titles about 1.6x that
+  const fs = tokenSizes().t1; // page text is the UI text size (--t1, crisp on this screen), titles --t2
   return { vw, vh, T, single, B, pw, ph, PW, PH, W, H, BW, BH, x, y, fs, tabH };
 }

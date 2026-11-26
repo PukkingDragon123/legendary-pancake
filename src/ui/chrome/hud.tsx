@@ -28,7 +28,7 @@ import { installUiFxAuto, lastPointer, uiAdvance, uiAmbient, uiBurst, uiBurstAt,
 import { installChromeSkin } from './skin.ts';
 import { iconSrc } from './iconset.ts';
 import { installSurfaces } from './surfaces.ts';
-import { textWidth, uiFontPx } from '../font.ts';
+import { textWidthPx, tokenSizes, uiFontPx } from '../font.ts';
 import { artPx } from '../../gfx/artpx.ts';
 import { punch } from '../text3d.tsx';
 import { shelf2d, useShelf2D, type NavId } from './shelf2d.tsx'; // [icons8] the main buttons as pixel-art objects
@@ -143,10 +143,10 @@ function NameSign() {
   // and rank both shown where they fit, the name in 2x gilt letters if it can
   void artPx(); // re-measure when the art pixel changes
   const ap = uiFontPx() / (typeof matchMedia !== 'undefined' && matchMedia('(min-width: 900px) and (min-height: 640px)').matches ? 1.5 : 1);
-  const rank = rankOf(lv.level), nw = textWidth(s.name, 1, { caps: true }) * ap, rw = textWidth(rank) * ap, room = 119;
-  // 2x letters only where their 22 font pixels clear the level bar under them
-  const long = ap > 1.2 || (2 * nw + rw + 8 > room && (nw + rw + 8 <= room || 2 * nw > room));
-  const fits = (long ? nw : 2 * nw) + rw + 8 <= room;
+  // [font14] measured at the CSS token sizes the board sets them in (the name in the display face at --t2, or --t1 when long)
+  const ts = tokenSizes(), rank = rankOf(lv.level), nw = textWidthPx(s.name, ts.t1, { caps: true }) * ap, nw2 = textWidthPx(s.name, ts.t2, { caps: true }) * ap, rw = textWidthPx(rank, ts.t1) * ap, room = 119;
+  const long = ap > 1.2 || (nw2 + rw + 8 > room && (nw + rw + 8 <= room || nw2 > room));
+  const fits = (long ? nw : nw2) + rw + 8 <= room;
   return (
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={40} />

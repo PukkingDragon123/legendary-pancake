@@ -7,7 +7,7 @@ import { signal } from '@preact/signals';
 import type { Area } from '../../game/catalog.ts';
 import { hash, mix, mul, Pix, type C } from './pix.ts';
 import { sheetUrl, THUMBS } from './photos.ts';
-import { textWidth } from '../font.ts';
+import { GRID, textWidthPx } from '../font.ts';
 
 /** place ids whose photo sheet has loaded */
 export const sheetsReady = signal<Record<string, true>>({});
@@ -68,10 +68,10 @@ export function photoStamp(a: Area, o: { state: 'visited' | 'open' | 'locked'; d
   if (hit) return hit;
   const t = thumb(a.id);
   if (!t) return null;
-  // [font6] 54 art pixels wide so the place's name fits in Alegreya; two lines when it can't
+  // [font6] 54 art pixels wide so the place's name fits in the game's face; two lines when it can't
   const W = 54, H = 38, p = new Pix(W, H);
   const ink = o.state === 'visited' ? mix(parseInt(a.color.slice(1), 16), 0x3d3229, 0.25) : 0x8a8478;
-  const name = a.stamp, lines = textWidth(name) / 2 <= W - 8 ? [name] : textWidth(name.replace(/ /g, '')) / 2 <= W - 8 ? [name.replace(/ /g, '')] : name.split(' ');
+  const name = a.stamp, lines = textWidthPx(name, GRID) * 0.8 <= W - 8 ? [name] : textWidthPx(name.replace(/ /g, ''), GRID) * 0.8 <= W - 8 ? [name.replace(/ /g, '')] : name.split(' ');
   const paper: C = o.state === 'locked' ? 0xe2dccb : 0xf1e9d6;
   p.rect(0, 0, W, H, paper);
   for (let x = 0; x < W; x += 2) { p.clear(x, 0); p.clear(x, H - 1); }

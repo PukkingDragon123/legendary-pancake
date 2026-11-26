@@ -661,7 +661,7 @@ function labelTex(text: string, col: number, seed: number): THREE.Texture {
     // the paper label
     g.fillStyle = '#efe2c2'; g.fillRect(14, 10, 68, 28);
     g.fillStyle = '#8a3a26'; g.fillRect(14, 10, 68, 3); g.fillRect(14, 35, 68, 3);
-    canvasText(g, text, 48, 30, '#2e2416', { align: 'center' });
+    canvasText(g, text, 48, 28, '#2e2416', { align: 'center', size: 15 }); // [font14] one font pixel per texel: VARNISH fits the label
     // drips down from the rim
     g.fillStyle = 'rgba(120,70,20,0.6)';
     for (let i = 0; i < 4; i++) { const x = 4 + Math.floor(r() * 88); g.fillRect(x, 0, 2, 3 + Math.floor(r() * 7)); }

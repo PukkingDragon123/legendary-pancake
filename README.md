@@ -79,12 +79,13 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   overlapping scales; the moon gem is a brilliant cut whose facets flash in turn as the light swings round it. On the
   shelf, Sleep is a brass oil lamp with a ruby glass font and a flame in its glass chimney, and the journal is plain
   tooled leather with gilt corners (no logos).
-- **Storybook type (v12)**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms
-  and props, the shop's signs, the pretend phone) is set in Alegreya, a warm calligraphic book face, with titles, signs
-  and names in its true small capitals, Alegreya SC (Huerta Tipografica, SIL Open Font License; bundled, no web fonts).
-  Titles, names, numbers, buttons, toasts and Pip's lines are lettered like a painted sign (a clean ink outline, a
-  shallow bevel, a face lit from the top, a soft shadow) that pops in, counts up, punches, bursts, shakes and waves
-  (`src/ui/text3d.tsx`), and keeps still with Calm motion.
+- **Pixel type (v14)**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms
+  and props, the shop's signs, the pretend phone, Pip's and Barnaby's lines) is set in two pixel fonts by SpicyGame
+  Studios (CC0, supplied by the project owner; bundled, no web fonts): Quest Square for copy and dialogue, Retro Sans
+  for titles, signs and names. Both sit on one 15 px grid and are always drawn at whole device pixels per font pixel,
+  so they stay crisp on every screen. Titles are chunky pixel stickers (a hard ink outline, an ink extrusion, a face
+  shaded in pixel bands, a hard drop shadow) whose letters sit a pixel up or down like hand-stamped type and hop in a
+  little wave now and then; dialogue letters pop in, wave, shake and glow, all in whole pixels.
 - **Inked, full-colour interface (v12)**: every panel, button, tab, card, ribbon and frame has a bold near-black ink
   outline (like the outlined 3D world and the icons) and richer, saturated enamel, wood and brass. Pip's portrait sits
   in a carved walnut frame of honey-oak leaves and acorns by default. Zoom in and out of the oak with a pinch or the

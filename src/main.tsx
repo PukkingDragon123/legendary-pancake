@@ -14,7 +14,7 @@ import { IcoAcorn, IcoCandle, IcoSparkle, IcoStone } from './ui/icons.tsx';
 import { toast } from './ui/kit.tsx';
 import { breathing, lines, panel, say, sceneRef, tab } from './ui/state.ts';
 import './ui/style.css';
-import { fontReady, installTextSnap } from './ui/font.ts'; // the game's faces; also routes every UI text node through textSafe
+import { fontReady, installFontScale, installTextSnap } from './ui/font.ts'; // the game's pixel face; also routes every UI text node through textSafe
 import { installText3D } from './ui/text3d.tsx'; // lettered titles, numbers, buttons, toasts
 import { installRealSkin } from './ui/real/skin.ts'; // [ui7] the realistic material kit (walnut, brass, leather, paper)
 import { loadTextures } from './ui/real/tex.ts';
@@ -29,6 +29,7 @@ async function boot() {
   await loadTextures(); // [ui7] the UI's material tiles (small WebPs) before anything is painted
   installRealSkin();
   await Promise.race([installIconSet(), new Promise((r) => setTimeout(r, 2500))]); // [ui4] the icon family replaces the sprite icons everywhere; [tex7] its atlas
+  installFontScale(); // [font14] text sizes snapped to whole device pixels per font pixel
   await fontReady();
   installTextSnap();
   installText3D();

@@ -9,7 +9,7 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { modelUrl } from '../../gfx/glb.ts';
 import { inkMaterial } from '../../gfx/ink.ts'; // [look12]
 import { rng } from '../../gfx/noise.ts';
-import { fontPx, fontReady, textSafe, canvasText } from '../../ui/font.ts';
+import { fontAt, fontReady, textSafe, canvasText, GRID, snapFont, visPx } from '../../ui/font.ts';
 import { drawText3D, fitText3D } from '../../ui/text3d.tsx';
 
 // ------------------------------------------------------------------ textures and materials
@@ -547,20 +547,20 @@ export function parcel(s = 0.26): THREE.Group {
 
 // ------------------------------------------------------------------ text on wood and slate (canvas)
 
-/** The game's font (Alegreya), loaded for canvas painting (already present in the app; the dev page loads it). */
+/** The game's pixel face, loaded for canvas painting (already present in the app; the dev page loads it). */
 export function lodgeFont(): Promise<void> {
   return fontReady();
 }
 
 /**
- * Draw text in Alegreya, smooth and anti-aliased: `px` is the wished size (shrunk until it fits `maxW`), `y` the middle
- * of the capitals.
+ * [font14] Draw text in the game's pixel face, crisp: `px` is the wished size (on the old 16 px grid), snapped to the
+ * face's 15 px grid and stepped down a grid step at a time until it fits `maxW`; `y` the middle of the capitals.
  */
 function pixelText(g: CanvasRenderingContext2D, text: string, x: number, y: number, px: number, col: string, o: { align?: CanvasTextAlign; shadow?: string; outline?: string; maxW?: number } = {}) {
   text = textSafe(text);
-  let size = Math.max(10, px * 1.08);
-  if (o.maxW) { const m = canvas(4, 4)[1]; m.font = fontPx(size, { weight: 700 }); while (size > 10 && m.measureText(text).width > o.maxW) { size *= 0.93; m.font = fontPx(size, { weight: 700 }); } }
-  canvasText(g, text, x, Math.round(y + 0.32 * size), col, { size, align: o.align ?? 'center', shadow: o.shadow, outline: o.outline });
+  let size = visPx(px * 1.08);
+  if (o.maxW) { const m = canvas(4, 4)[1]; m.font = fontAt(size); while (size > GRID && m.measureText(text).width > o.maxW) { size = snapFont(size - GRID); m.font = fontAt(size); } }
+  canvasText(g, text, x, Math.round(y + (3.5 * size) / GRID), col, { size, align: o.align ?? 'center', shadow: o.shadow, outline: o.outline });
 }
 
 // ------------------------------------------------------------------ dried herbs hung from the beams
@@ -653,7 +653,7 @@ export interface Sign { group: THREE.Group; redraw(text: string, sub?: string): 
 /** A carved wooden sign hung on two ropes (from `ropeTo` metres above its top edge), letters painted in honey. */
 export function hangingSign(w: number, h: number, text: string, sub = '', ropeTo = 0.4, seed = 2): Sign {
   const g = new THREE.Group();
-  const PX = 256; // texels per metre (the props' texel density; Alegreya's 16 px letters fit)
+  const PX = 256; // texels per metre (the props' texel density; the pixel face's letters fit)
   const cw = Math.round(w * PX), ch = Math.round(h * PX);
   const [c, gx] = canvas(cw, ch);
   const t = canvasTex(c);

@@ -2,14 +2,15 @@
    brass, tooled leather, linen, velvet, parchment and kraft paper) lit from the top left, with soft shadows,
    smooth anti-aliased edges and physical motion (buttons press into their bodies, papers slide, signs swing).
    Frames and buttons are painted at device resolution and mapped onto the app's classes by real/skin.ts;
-   soft glows, vignettes and rays come from pxfx.tsx. Type: Alegreya and Alegreya SC (src/ui/font.ts). */
+   soft glows, vignettes and rays come from pxfx.tsx. Type: the Hoot Pixel face (src/ui/font.ts). */
 
-/* Alegreya (Juan Pablo del Peral, Huerta Tipografica; SIL OFL) is the game's book face: warm, calligraphic and very
-   readable, a variable font (weights 400-900) with its italic; Alegreya SC, its true small capitals, sets titles,
-   signs and names. Bundled locally (Latin subset, lining figures); src/ui/font.ts has the canvas helpers. */
-@font-face { font-family: 'Alegreya'; src: url('../assets/fonts/alegreya.woff2') format('woff2'); font-weight: 400 900; font-style: normal; font-display: block; }
-@font-face { font-family: 'Alegreya'; src: url('../assets/fonts/alegreya-italic.woff2') format('woff2'); font-weight: 400 900; font-style: italic; font-display: block; }
-@font-face { font-family: 'Alegreya SC'; src: url('../assets/fonts/alegreya-sc.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: block; }
+/* The game's two pixel faces by SpicyGame Studios (CC0; supplied by the project owner), bundled: Quest Square for
+   every word of copy (square, compact, readable) and Retro Sans for titles, signs and names (chunky and friendly).
+   Retro Sans is drawn on a 17 px em, Quest Square on 15: size-adjust puts both on one 15 px grid, capitals 7 font
+   pixels tall in each. One weight each: no faux bold or italic. Sizes come from the --t tokens, which font.ts snaps so
+   each font pixel covers whole device pixels. */
+@font-face { font-family: 'Hoot Pixel'; src: url('../assets/fonts/quest-square.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: block; }
+@font-face { font-family: 'Hoot Title'; src: url('../assets/fonts/retro-sans.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: block; size-adjust: 113.3333%; }
 
 :root {
   --ink: #2e2b24;
@@ -18,17 +19,18 @@
   --paper: #f4eedd;
   --line: rgba(74, 57, 43, 0.3);
   --night: #1b222d;
-  --font-title: 'Alegreya SC', 'Alegreya', 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif;
-  --font-display: 'Alegreya', 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif;
-  --font-body: 'Alegreya', 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif;
-  --font-small: 'Alegreya', 'Iowan Old Style', Palatino, 'Palatino Linotype', Georgia, serif;
-  /* Text sizes: body, title and display steps (Alegreya's small x-height reads best a touch larger than a grotesque) */
-  --t1: 17px;
-  --t2: 27px;
-  --t3: 40px;
-  --t4: 52px;
-  --t6: 76px;
-  --t8: 100px;
+  --font-title: 'Hoot Title', 'Hoot Pixel', ui-monospace, monospace;
+  --font-display: 'Hoot Pixel', ui-monospace, monospace;
+  --font-body: 'Hoot Pixel', ui-monospace, monospace;
+  --font-small: 'Hoot Pixel', ui-monospace, monospace;
+  /* Text sizes on the 15 px pixel grid, whole device pixels per font pixel (font.ts installFontScale() sets them for
+     the screen's pixel ratio; these are the 2x values: body 22.5 px, titles 37.5 px) */
+  --t1: 22.5px;
+  --t2: 37.5px;
+  --t3: 45px;
+  --t4: 67.5px;
+  --t6: 97.5px;
+  --t8: 127.5px;
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-t: env(safe-area-inset-top, 0px);
   --drop: drop-shadow(0 2px 3px rgba(34, 22, 46, 0.42));
@@ -37,7 +39,9 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--font-body); font-size: var(--t1); font-weight: 600; line-height: 1.25; letter-spacing: 0; font-synthesis: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-kerning: normal; font-variant-ligatures: common-ligatures; text-rendering: optimizeLegibility; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--night); color: var(--ink); font-family: var(--font-body); font-size: var(--t1); font-weight: 400; line-height: 1.0667; letter-spacing: 0; font-synthesis: none; font-style: normal; -webkit-font-smoothing: none; -moz-osx-font-smoothing: unset; font-smooth: never; font-kerning: none; font-variant-ligatures: none; text-rendering: optimizeSpeed; }
+/* one face, one weight, no slant: pixel letters never get a fake bold or italic */
+:where(em, i, cite, var, dfn, address) { font-style: normal; }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
 input, textarea, select { font: inherit; color: inherit; }
 #world { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; outline: none; }
@@ -47,15 +51,15 @@ input, textarea, select { font: inherit; color: inherit; }
 .layer > * { pointer-events: auto; }
 
 h1, h2, h3, .display { font-family: var(--font-display); font-weight: 700; margin: 0; line-height: 1; }
-/* titles, sign names and the owl's name in true small capitals (Alegreya SC); everything else in the book face */
-body :is(h1, h2, .hh-name, .title-ribbon, .lvup-title, .cb-title, .bk-title, .lg-page-title, .lg-plaque-name, .lg-prize-title, .sf-sign, .cs-sign span, .ck-title, .gb-title b) { font-family: var(--font-title); font-weight: 800; letter-spacing: 0.01em; }
+/* titles, sign names and the owl's name: the same pixel face, chunkier (text3d.tsx gives them the pixel outline) */
+body :is(h1, h2, .hh-name, .title-ribbon, .lvup-title, .cb-title, .bk-title, .lg-page-title, .lg-plaque-name, .lg-prize-title, .sf-sign, .cs-sign span, .ck-title, .gb-title b) { font-family: var(--font-title); letter-spacing: 0; }
 h1 { font-size: var(--t2); }
 h2 { font-size: var(--t2); }
 h3 { font-size: var(--t1); }
 p { margin: 0; }
 .label { font-size: var(--t1); letter-spacing: 0; text-transform: uppercase; color: var(--ink-3); }
 .muted { color: var(--ink-2); }
-.small { font-size: var(--t1); line-height: 1.25; }
+.small { font-size: var(--t1); line-height: 1.0667; }
 .num { white-space: nowrap; font-family: var(--font-display); font-variant-numeric: tabular-nums; }
 .row { display: flex; align-items: center; gap: 10px; }
 .col { display: flex; flex-direction: column; gap: 10px; }
@@ -169,14 +173,14 @@ input[type='time'].field { font-family: var(--font-small); font-size: var(--t1);
 .setting + .setting { border-top: 1px solid rgba(110, 76, 36, 0.28); box-shadow: inset 0 1px 1px rgba(255, 250, 238, 0.55); padding-top: 6px; }
 .setting .t { flex: 1; min-width: 0; }
 .setting .t b { display: block; font-weight: 700; font-size: var(--t1); }
-.setting .t small { display: block; color: var(--ink-2); font-size: var(--t1); line-height: 1.25; }
+.setting .t small { display: block; color: var(--ink-2); font-size: var(--t1); line-height: 1.0667; }
 
 /* ------------------------------------------------------------ toast & bubble */
 .toasts { position: absolute; top: calc(62px + var(--safe-t)); left: 50%; transform: translateX(-50%); width: min(400px, calc(100% - 24px)); display: flex; flex-direction: column; gap: 6px; z-index: 30; pointer-events: none; }
-.toast { pointer-events: auto; position: relative; display: flex; align-items: center; gap: 8px; padding: 0 2px; font-size: var(--t1); line-height: 1.25; color: var(--ink); filter: var(--drop-lg); animation: toastIn 0.45s var(--pop); transform: rotate(-1deg); }
+.toast { pointer-events: auto; position: relative; display: flex; align-items: center; gap: 8px; padding: 0 2px; font-size: var(--t1); line-height: 1.0667; color: var(--ink); filter: var(--drop-lg); animation: toastIn 0.45s var(--pop); transform: rotate(-1deg); }
 .toast .ico { margin: -6px 0; }
 .toast.out { animation: toastOut 0.3s var(--ease) forwards; }
-.bubble { position: absolute; z-index: 4; max-width: 250px; padding: 0 2px; font-size: var(--t1); line-height: 1.25; color: #312821; transform: translate(-50%, -100%); animation: bubbleIn 0.4s var(--pop); pointer-events: none; filter: var(--drop); }
+.bubble { position: absolute; z-index: 4; max-width: 250px; padding: 0 2px; font-size: var(--t1); line-height: 1.0667; color: #312821; transform: translate(-50%, -100%); animation: bubbleIn 0.4s var(--pop); pointer-events: none; filter: var(--drop); }
 .bubble::after { content: ''; position: absolute; left: 50%; bottom: -26px; width: 24px; height: 18px; margin-left: -12px; }
 .bubble .who { display: block; font-size: var(--t1); color: var(--ink-3); }
 
@@ -211,7 +215,7 @@ input[type='time'].field { font-family: var(--font-small); font-size: var(--t1);
 .stat { padding: 0 2px; }
 .stat b { display: block; font-size: var(--t2); line-height: 1; font-weight: 700; }
 .stat small { font-size: var(--t1); color: var(--ink-2); line-height: 1; display: block; }
-.note { font-size: var(--t1); color: var(--ink-2); line-height: 1.25; }
+.note { font-size: var(--t1); color: var(--ink-2); line-height: 1.0667; }
 .moods { display: flex; justify-content: space-between; gap: 2px; }
 .mood { flex: 1; display: grid; place-items: center; transition: transform 0.2s var(--pop); padding: 0; }
 .mood.on { transform: translateY(-3px); }
@@ -396,7 +400,7 @@ input[type='time'].field { font-family: var(--font-small); font-size: var(--t1);
 .sound-tile .star { position: absolute; width: 2px; height: 2px; background: #f7f2e6; opacity: 0.7; animation: twinkle 2.4s ease-in-out infinite; }
 .sound-tile .s1 { left: 14%; top: 18%; } .sound-tile .s2 { left: 78%; top: 12%; animation-delay: 0.8s; } .sound-tile .s3 { left: 64%; top: 30%; animation-delay: 1.5s; }
 @keyframes twinkle { 50% { opacity: 0.1; } }
-.sound-tile .name { display: block; width: 100%; padding: 3px 0 1px; font-size: var(--t1); line-height: 1; text-align: center; white-space: normal; overflow: visible; line-height: 1.25; color: #f7f1e6; text-shadow: 0.5px 1px 1.8px #312821; }
+.sound-tile .name { display: block; width: 100%; padding: 3px 0 1px; font-size: var(--t1); line-height: 1; text-align: center; white-space: normal; overflow: visible; line-height: 1.0667; color: #f7f1e6; text-shadow: 0.5px 1px 1.8px #312821; }
 .sound-tile.on .name { color: #f6f2e6; }
 .sound-tile .eq { position: absolute; right: 4px; bottom: 4px; display: flex; align-items: flex-end; gap: 2px; height: 14px; }
 .sound-tile .eq i { width: 3px; background: #f6f1e5; box-shadow: 0 1px 2px rgba(24, 22, 16, 0.4); animation: eq 0.5s ease-in-out infinite alternate; }
