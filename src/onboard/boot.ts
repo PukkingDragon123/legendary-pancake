@@ -4,9 +4,9 @@
 // with the (estimated) loading progress while the rings on the other ends rise, and the leaf pendulum swings.
 // Once main.tsx marks the splash `gone`, this module takes over:
 //   1. strike  the weights settle at the bottom while the minute hand winds once round (landing back on the real
-//              time), then the little doors open and the cuckoo pops out onto the balcony rail and calls "cu-ckoo"
+//              time), then the little doors open and Pip pops out onto the balcony and calls "cu-ckoo"
 //   2. dive    a returning player: the clock zooms into its dial while a stepped pixel iris opens through it onto
-//              the world; a new player (`hold`): the cuckoo waits on the rail, bobbing, for one tap on the clock (which
+//              the world; a new player (`hold`): Pip waits on the balcony, nodding, for one tap on the clock (which
 //              also unlocks audio), calls twice, goes back in and shuts the doors; then the clock zooms nose to the
 //              dial, where the 3D office's own clock (the same painting) takes over and the camera pulls back into
 //              Pip's office (see Office.pullBack).
@@ -39,7 +39,7 @@ function syncTime(b: HTMLElement) {
 }
 const fontPx = (b: HTMLElement) => parseFloat(getComputedStyle(b).fontSize) || 2;
 
-// ------------------------------------------------------------------ the door and the cuckoo
+// ------------------------------------------------------------------ the door and the owl
 
 /** the door strip's frames (bootart.mjs STATES, after the closed door) */
 const F = { closed: 0, ajar: 1, peek: 2, out: 3, call: 4, bow: 5 } as const;
@@ -47,7 +47,7 @@ function door(f: number) {
   const d = el()?.querySelector<HTMLElement>('.bt-door');
   if (d) d.style.backgroundPosition = `-${f * ART.dw}em 0`;
 }
-/** the doors swing open and the cuckoo hops out onto the balcony rail */
+/** the doors swing open and Pip hops out onto the balcony */
 async function popOut() {
   const b = el();
   if (!b) return;
@@ -262,7 +262,7 @@ function check() {
 export function holdBoot() { el()?.classList.add('hold'); }
 export const bootShowing = () => { const b = el(); return !!b && b.style.display !== 'none' && (!b.classList.contains('gone') || b.classList.contains('hold')) && !b.classList.contains('zoom'); };
 
-/** The clock strikes (the cuckoo pops out), then waits for one tap on it (the tap unlocks audio). Resolves at once without a splash. */
+/** The clock strikes (Pip pops out), then waits for one tap on it (the tap unlocks audio). Resolves at once without a splash. */
 export function bootReady(): Promise<void> {
   const b = el();
   if (!b || !bootShowing()) return Promise.resolve();
@@ -283,7 +283,7 @@ export function bootReady(): Promise<void> {
 }
 
 /**
- * A new player's dive: the cuckoo calls twice (now with sound), goes back in and the doors shut; then the clock zooms nose
+ * A new player's dive: Pip calls twice (now with sound), goes back in and the doors shut; then the clock zooms nose
  * to its dial (the office's own clock is waiting underneath at the same framing, see bootDial) and the painting
  * dissolves into the 3D room. Resolves when the splash is gone.
  */

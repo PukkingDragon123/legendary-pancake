@@ -40,7 +40,7 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Fluffy owls**: eight realistic, hand-painted species and four skins with soft downy plumage; 39 remodelled
   cosmetics.
 - **Intro and interview**: a pixel-art Black Forest cuckoo clock on a plain lamplit wall as the loading screen (the real time from the first frame,
-  pine-cone weights that sink as the game loads, a little cuckoo popping out of the doors to call cuckoo), then the
+  pine-cone weights that sink as the game loads, Pip popping out of the little doors to call cuckoo), then the
   Hollow & Co. office (the very same clock hangs on its wall),
   where Pip interviews you with a 2D paper form, live 3D answer cards, a fountain pen and a rubber stamp.
 - **A visual interview**: one-line questions answered by tapping hand-painted 3D objects (drinks, cassette tapes that
