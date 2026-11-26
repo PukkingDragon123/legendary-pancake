@@ -22,6 +22,8 @@ import {
   type O,
 } from '../ui/chrome/props3d.ts';
 import { paintFinish, type Art, type Group, type Passes } from './paintfinish.ts';
+import * as CP from '../onboard/clockpaint.ts';
+import { ICONS3D } from '../ui/px/icons3d.ts';
 
 const q = new URLSearchParams(location.search);
 
@@ -1458,39 +1460,11 @@ async function bakeShelf(): Promise<{ sprites: ShelfSprite[]; dial: [number, num
   }
   lamp.knob.rotation.x = 0;
   const lampAt = shelfPx(lamp.root.localToWorld(lamp.flameAt.clone()));
-  // the cuckoo clock: the body (no pendulum, no hands) with its door and owl, then the pendulum on its own
-  const clock = cuckooClock();
-  simpleDial(clock.root);
-  onShelf(clock.root, 'clock');
-  clock.hour.visible = clock.minute.visible = false;
-  const owl0 = { y: clock.owl.position.y, s: clock.owl.scale.x };
-  clock.door.rotation.y = -2.1; clock.owl.position.z = 0.25; clock.owl.scale.setScalar(owl0.s + 0.55 + 0.12);
-  const cr = shelfRect([clock.root]);
-  for (const [n, door, outK, bob] of [['clock0', 0, 0, 0], ['clock1', 0.9, 0.3, 0], ['clock2', 2.1, 1, 0], ['clock3', 2.1, 1, 1]] as [string, number, number, number][]) {
-    clock.door.rotation.y = -door;
-    clock.owl.position.z = outK * 0.25;
-    clock.owl.rotation.x = bob * 0.45;
-    clock.owl.scale.setScalar(owl0.s + outK * 0.55 + bob * 0.12);
-    clock.pendulum.visible = false;
-    out.push(shootShelf(n, clock.root, cr));
-  }
-  clock.door.rotation.y = 0; clock.owl.position.z = 0; clock.owl.rotation.x = 0; clock.owl.scale.setScalar(owl0.s);
-  // the pendulum alone: hide everything else
-  const shown = new Map<O, boolean>();
-  clock.body.children.forEach((c) => { shown.set(c, c.visible); c.visible = c === clock.pendulum; });
-  clock.pendulum.rotation.z = 0.3;
-  const prA = shelfRect([clock.pendulum]);
-  clock.pendulum.rotation.z = -0.3;
-  const prB = shelfRect([clock.pendulum]);
-  const pr: [number, number, number, number] = [Math.min(prA[0], prB[0]), Math.min(prA[1], prB[1]), 0, 0];
-  pr[2] = Math.max(prA[0] + prA[2], prB[0] + prB[2]) - pr[0]; pr[3] = Math.max(prA[1] + prA[3], prB[1] + prB[3]) - pr[1];
-  [-0.26, -0.13, 0, 0.13, 0.26].forEach((a, i) => { clock.pendulum.rotation.z = a; out.push(shootShelf('pend' + i, clock.root, pr)); });
-  clock.body.children.forEach((c) => { c.visible = shown.get(c) ?? true; });
-  // the dial: its centre and radius in art px (the hands are drawn there live)
-  const dialM = clock.root.getObjectByName('dial')!;
-  dialM.updateMatrixWorld(true);
-  const c0 = shelfPx(dialM.localToWorld(new THREE.Vector3(0, 0, 0))), c1 = shelfPx(dialM.localToWorld(new THREE.Vector3(0.38, 0, 0)));
-  const dial: [number, number, number] = [c0[0], c0[1], Math.hypot(c1[0] - c0[0], c1[1] - c0[1])];
+  // [clock12] the cuckoo clock: the loading screen's own painting (onboard/clockpaint.ts) standing on a little walnut
+  // plinth with turned posts, its weights hanging short between them; the body (no pendulum, no hands) with its door
+  // and owl, then the pendulum on its own (cut wherever the body is in front of it)
+  const { sprites: clockSprites, dial } = bakeShelfClock();
+  out.push(...clockSprites);
   // the journal: shut, peeking, unbuckled, opening, open
   const book = journal();
   onShelf(book.root, 'book');
@@ -1505,6 +1479,48 @@ async function bakeShelf(): Promise<{ sprites: ShelfSprite[]; dial: [number, num
     out.push(shootShelf(n, book.root, br));
   }
   return { sprites: out, dial, lampAt };
+}
+/** [clock12] the shelf's clock: art px per art unit of the painting, and where its plinth sits */
+const CLOCK_K = 0.4, CLOCK_PLINTH = 286, CLOCK_FOOT = 146;
+function bakeShelfClock(): { sprites: ShelfSprite[]; dial: [number, number, number] } {
+  const cx = SHELF_OBJ.clock.cx, R = SHELF_RES * CLOCK_K;
+  // the painting's box (art units) -> the shelf's box (art px), on whole art px
+  const u0 = CP.CASE_BOX.x, u1 = CP.CASE_BOX.x + CP.CASE_BOX.w, v0 = 8, v1 = CLOCK_PLINTH + 9;
+  const bx = Math.floor(cx + (u0 - CP.CX) * CLOCK_K), by = Math.floor(CLOCK_FOOT - (v1 - v0) * CLOCK_K);
+  const bw = Math.ceil((u1 - u0) * CLOCK_K) + 1, bh = CLOCK_FOOT - by;
+  const ux = CP.CX + (bx - cx) / CLOCK_K, uy = v1 - (CLOCK_FOOT - by) / CLOCK_K, uw = bw / CLOCK_K, uh = bh / CLOCK_K;
+  const loop = 238, ringY = 248;
+  const body = (door: CP.DoorState, owl: CP.OwlPose | null) => {
+    const [c, g] = CP.layer(ux, uy, uw, uh, R);
+    CP.paintStand(g, CLOCK_PLINTH);
+    for (const sd of [-1, 1]) {
+      CP.paintChain(g, CP.CX + sd * CP.G.rx, CP.G.chainTop, ringY - 2.6); CP.paintRing(g, CP.CX + sd * CP.G.rx, ringY);
+      CP.paintChain(g, CP.CX + sd * CP.G.wx, CP.G.chainTop, loop + 0.5); CP.paintCone(g, CP.CX + sd * CP.G.wx, loop);
+    }
+    CP.paintCase(g, { door, owl });
+    return CP.finish(c, R, 1.15);
+  };
+  const out: ShelfSprite[] = [];
+  let closed: HTMLCanvasElement | null = null;
+  for (const [n, door, owl] of [['clock0', 'closed', null], ['clock1', 'ajar', 'peek'], ['clock2', 'open', 'out'], ['clock3', 'open', 'bow']] as [string, CP.DoorState, CP.OwlPose | null][]) {
+    const c = body(door, owl);
+    if (!closed) closed = c;
+    out.push({ name: n, art: toArt(c), x: bx, y: by });
+  }
+  // the pendulum at five angles, behind the body
+  const len = 34;
+  for (const [i, a] of [-0.26, -0.13, 0, 0.13, 0.26].entries()) {
+    const [c, g] = CP.layer(ux, uy, uw, uh, R);
+    g.translate(CP.CX, CP.G.pivot.y); g.rotate(a); g.translate(-CP.CX, -CP.G.pivot.y);
+    CP.paintPendulum(g, len);
+    const f = CP.finish(c, R, 1);
+    const fg = f.getContext('2d')!;
+    fg.globalCompositeOperation = 'destination-out';
+    fg.drawImage(closed!, 0, 0);
+    out.push({ name: 'pend' + i, art: toArt(f), x: bx, y: by });
+  }
+  const dial: [number, number, number] = [cx, by + (CP.G.dial.y - uy) * CLOCK_K, CP.G.dial.r * CLOCK_K];
+  return { sprites: out, dial };
 }
 // ------------------------------------------------------------------ the bake
 /** the currency's idle frames: [name, model, frames]; acorn_big and gem_big are the same frames, drawn bigger */
@@ -1588,6 +1604,30 @@ async function bake() {
   }
   const w = window as unknown as { __module: string; __atlas: string; __shelfAtlas: string; __done: boolean };
   document.title = 'baked ' + Object.keys(icons).length;
+  // the shelf's atlas: its sprites packed in rows (tallest first), 2 px apart
+  const packShelf = () => {
+    const SW = 2048, sprites: Record<string, [number, number, number, number, number, number]> = {};
+    let px = 0, py = 0, rowH = 0;
+    for (const sp of [...(sh?.sprites ?? [])].sort((a, b) => b.art.h - a.art.h)) {
+      if (px + sp.art.w > SW) { px = 0; py += rowH + 2; rowH = 0; }
+      sprites[sp.name] = [px, py, sp.art.w, sp.art.h, sp.x, sp.y];
+      px += sp.art.w + 2; rowH = Math.max(rowH, sp.art.h);
+    }
+    const shelfAtlas = document.createElement('canvas');
+    shelfAtlas.width = SW; shelfAtlas.height = Math.max(1, py + rowH);
+    const sg = shelfAtlas.getContext('2d')!;
+    for (const sp of sh?.sprites ?? []) { const r = sprites[sp.name]; sg.putImageData(new ImageData(new Uint8ClampedArray(sp.art.d), sp.art.w, sp.art.h), r[0], r[1]); }
+    const shelfIdx = { atlas: 'img/ui3d-shelf.webp', res: SHELF_RES, box: [SHELF_BOX.w, SHELF_BOX.h, SHELF_BOX.top], sprites, dial: sh?.dial.map((v) => +v.toFixed(2)) ?? [0, 0, 0], lamp: sh?.lampAt.map((v) => +v.toFixed(1)) ?? [0, 0], objects: Object.fromEntries(Object.entries(SHELF_OBJ).map(([k, v]) => [k, v.cx])) };
+    return { shelfAtlas, shelfIdx };
+  };
+  // [clock12] ?only=shelf&shelfonly=1: re-bake the shelf's atlas alone, keeping the icons' atlas and index as they are
+  if (only && q.get('shelfonly') && sh) {
+    const { shelfAtlas, shelfIdx } = packShelf();
+    w.__module = moduleText(JSON.stringify({ atlas: ICONS3D.atlas, hd: ICONS3D.hd, icons: ICONS3D.icons, anim: ICONS3D.anim, shelf: shelfIdx }));
+    w.__shelfAtlas = shelfAtlas.toDataURL('image/png');
+    w.__done = true;
+    return;
+  }
   if (only) { w.__done = true; return; }
   // the icons' atlas: the 256 px drawings, 16 to a row
   const AW = 4096, grids = {} as Record<SizeName, [number, number, number]>;
@@ -1597,21 +1637,15 @@ async function bake() {
   atlas.width = AW; atlas.height = y;
   const ag = atlas.getContext('2d')!;
   for (const [sz, n] of SIZES) { const [, cols, y0] = grids[sz]; cells.forEach((c, i) => ag.putImageData(new ImageData(new Uint8ClampedArray(c[sz].d), n, n), (i % cols) * n, y0 + Math.floor(i / cols) * n)); }
-  // the shelf's atlas: its sprites packed in rows (tallest first), 2 px apart
-  const SW = 2048, sprites: Record<string, [number, number, number, number, number, number]> = {};
-  let px = 0, py = 0, rowH = 0;
-  for (const sp of [...(sh?.sprites ?? [])].sort((a, b) => b.art.h - a.art.h)) {
-    if (px + sp.art.w > SW) { px = 0; py += rowH + 2; rowH = 0; }
-    sprites[sp.name] = [px, py, sp.art.w, sp.art.h, sp.x, sp.y];
-    px += sp.art.w + 2; rowH = Math.max(rowH, sp.art.h);
-  }
-  const shelfAtlas = document.createElement('canvas');
-  shelfAtlas.width = SW; shelfAtlas.height = Math.max(1, py + rowH);
-  const sg = shelfAtlas.getContext('2d')!;
-  for (const sp of sh?.sprites ?? []) { const r = sprites[sp.name]; sg.putImageData(new ImageData(new Uint8ClampedArray(sp.art.d), sp.art.w, sp.art.h), r[0], r[1]); }
-  const shelfIdx = { atlas: 'img/ui3d-shelf.webp', res: SHELF_RES, box: [SHELF_BOX.w, SHELF_BOX.h, SHELF_BOX.top], sprites, dial: sh?.dial.map((v) => +v.toFixed(2)) ?? [0, 0, 0], lamp: sh?.lampAt.map((v) => +v.toFixed(1)) ?? [0, 0], objects: Object.fromEntries(Object.entries(SHELF_OBJ).map(([k, v]) => [k, v.cx])) };
+  const { shelfAtlas, shelfIdx } = packShelf();
   const json = JSON.stringify({ atlas: 'img/ui3d.webp', hd: grids.hd, icons, anim, shelf: shelfIdx });
-  w.__module = `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html; a tools script writes window.__module here, window.__atlas to
+  w.__module = moduleText(json);
+  w.__atlas = atlas.toDataURL('image/png');
+  w.__shelfAtlas = shelfAtlas.toDataURL('image/png');
+  w.__done = true;
+}
+function moduleText(json: string): string {
+  return `// GENERATED by src/dev/iconbake.ts (/dev-iconbake.html; a tools script writes window.__module here, window.__atlas to
 // public/img/ui3d.webp and window.__shelfAtlas to public/img/ui3d-shelf.webp): the interface atlases' index. Every
 // interface icon is a detailed 3D model rendered realistically with its real textures at 256 px ("hd"). { atlas, hd: [px,
 // cells per row, y of the first row], icons: { name: cell }, anim: { name: [cells] }, shelf: the main buttons' sprites { atlas, res: px per
@@ -1621,8 +1655,5 @@ async function bake() {
 export interface ShelfIndex { atlas: string; res: number; box: [number, number, number]; sprites: Record<string, [number, number, number, number, number, number]>; dial: [number, number, number]; lamp: [number, number]; objects: Record<string, number> }
 export const ICONS3D: { atlas: string; hd: [number, number, number]; icons: Record<string, number>; anim: Record<string, number[]>; shelf: ShelfIndex } = ${json};
 `;
-  w.__atlas = atlas.toDataURL('image/png');
-  w.__shelfAtlas = shelfAtlas.toDataURL('image/png');
-  w.__done = true;
 }
 void bake();

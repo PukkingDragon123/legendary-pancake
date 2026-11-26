@@ -219,8 +219,8 @@ class ShelfStage {
     const [dx0, dy0, dr] = SH.dial, now = new Date();
     const dcx = dx0, dcy = dy0 + cdy + (cp.sq ? Math.round(-cp.sq * (TOP - dy0)) : 0);
     const mA = ((now.getMinutes() + now.getSeconds() / 60) / 60) * Math.PI * 2, hA = (((now.getHours() % 12) + now.getMinutes() / 60) / 12) * Math.PI * 2;
-    this.hand(dcx, dcy, hA, dr * 0.5, '#2b1e2c', true);
-    this.hand(dcx, dcy, mA, dr * 0.74, '#3a2a40', false);
+    this.hand(dcx, dcy, hA, dr * 0.6, '#141a30', true); // [clock12] the painted clock's blued hands
+    this.hand(dcx, dcy, mA, dr * 0.86, '#141a30', false);
     g.fillStyle = '#e8b448';
     g.beginPath(); g.arc(dcx, dcy, 1.1, 0, Math.PI * 2); g.fill();
     // the journal: hover lifts the cover; a tap unbuckles it and swings the cover open, then shut

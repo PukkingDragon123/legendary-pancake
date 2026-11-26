@@ -248,133 +248,6 @@ export function pxText(g: CanvasRenderingContext2D, text: string, x: number, y: 
   return tw;
 }
 
-/** A Roman numeral in pixel serif capitals: thick and thin strokes, bracketed serifs (glyphs 28 px tall). */
-function romanCanvas(txt: string, col: string): HTMLCanvasElement {
-  const GH = 28, GAP = 3;
-  const W = (ch: string) => (ch === 'I' ? 10 : 22);
-  const seg = (px: number, py: number, x0: number, y0: number, x1: number, y1: number) => {
-    const dx = x1 - x0, dy = y1 - y0, t = Math.max(0, Math.min(1, ((px - x0) * dx + (py - y0) * dy) / (dx * dx + dy * dy)));
-    return Math.hypot(px - (x0 + dx * t), py - (y0 + dy * t));
-  };
-  const inside = (ch: string, u: number, v: number): boolean => {
-    const serif = (v < 0.08 || v > 0.92);
-    if (ch === 'I') return (u > 0.28 && u < 0.72) || (serif && u > 0.04 && u < 0.96);
-    if (ch === 'V') {
-      if (v < 0.08 && ((u > 0.02 && u < 0.4) || (u > 0.66 && u < 0.98))) return true;
-      return (seg(u, v * 1.3, 0.21, 0.02, 0.5, 1.28) < 0.12) || (seg(u, v * 1.3, 0.82, 0.02, 0.53, 1.28) < 0.055);
-    }
-    if (serif && ((u > 0.0 && u < 0.38) || (u > 0.62 && u < 1.0))) return true;
-    return (seg(u, v * 1.3, 0.2, 0.04, 0.8, 1.26) < 0.115) || (seg(u, v * 1.3, 0.8, 0.04, 0.2, 1.26) < 0.05);
-  };
-  const tw = [...txt].reduce((a, ch) => a + W(ch), 0) + GAP * (txt.length - 1);
-  const [c, g] = canvas(tw + 2, GH + 2);
-  const [r, gg, b] = hex(col);
-  const im = g.createImageData(tw + 2, GH + 2);
-  let x0 = 1;
-  for (const ch of txt) {
-    const w = W(ch);
-    for (let y = 0; y < GH; y++) for (let x = 0; x < w; x++) {
-      if (!inside(ch, (x + 0.5) / w, (y + 0.5) / GH)) continue;
-      const i = ((y + 1) * (tw + 2) + x0 + x) * 4;
-      im.data[i] = r; im.data[i + 1] = gg; im.data[i + 2] = b; im.data[i + 3] = 255;
-    }
-    x0 += w + GAP;
-  }
-  g.putImageData(im, 0, 0);
-  return c;
-}
-const ROMAN = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
-/** The enamel dial: warm white enamel with fine crazing, a double chapter ring with minute track, Roman numerals
- * set radially in Alagard, a painted laurel of oak leaves and acorns, and a little owl maker's mark. */
-export function dialCanvas(): HTMLCanvasElement {
-  const S = 512, C = S / 2;
-  const enamel = R('#b9a586', '#cdbb9a', '#ddcdaf', '#e8dbc0', '#f1e7d0', '#f8f1e0');
-  const c = paint(S, S, (x, y) => {
-    const dx = x - C + 0.5, dy = y - C + 0.5, r = Math.hypot(dx, dy) / C;
-    if (r > 1) return [0, 0, 0, 0];
-    let t = 0.78 + (fbm(x * 0.02, y * 0.02, 1, 3) - 0.5) * 0.12 + (hash(x, y, 5) - 0.5) * 0.04;
-    // crazing: fine dark cracks in the glaze
-    const cr = Math.abs(vnoise(x * 0.045, y * 0.045, 2, 9) - 0.5);
-    if (cr < 0.012) t -= 0.12;
-    t -= smooth(0.86, 1, r) * 0.25; // shadowed by the bezel
-    return rampAt(enamel, clamp01(t), x, y, 0.5);
-  });
-  const g = c.getContext('2d')!;
-  const ink = '#2a1c16', red = '#8a2a22', gold = '#a8822e', leafG = '#4f6b2e', leafD = '#33481f';
-  const ringPx = (r0: number, r1: number, col: string) => {
-    const im = g.getImageData(0, 0, S, S);
-    const [cr, cg, cb] = hex(col);
-    for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
-      const r = Math.hypot(x - C + 0.5, y - C + 0.5);
-      if (r >= r0 && r < r1) { const i = (y * S + x) * 4; im.data[i] = cr; im.data[i + 1] = cg; im.data[i + 2] = cb; }
-    }
-    g.putImageData(im, 0, 0);
-  };
-  // the chapter ring: two lines with the minute track between
-  ringPx(C * 0.935, C * 0.95, ink);
-  ringPx(C * 0.835, C * 0.845, ink);
-  ringPx(C * 0.5, C * 0.508, ink);
-  g.fillStyle = ink;
-  for (let m = 0; m < 60; m++) {
-    const a = (m / 60) * Math.PI * 2;
-    const five = m % 5 === 0;
-    const r0 = C * (five ? 0.85 : 0.89), r1 = C * 0.93;
-    for (let rr = r0; rr <= r1; rr += 1) {
-      const x = C + Math.sin(a) * rr, y = C - Math.cos(a) * rr;
-      g.fillRect(Math.floor(x) - (five ? 1 : 0), Math.floor(y) - (five ? 1 : 0), five ? 3 : 2, five ? 3 : 2);
-    }
-  }
-  // numerals: hand-cut pixel serif glyphs (thick and thin strokes), each drawn upright, then turned onto the dial
-  for (let h = 0; h < 12; h++) {
-    const nc = romanCanvas(ROMAN[h], ink);
-    const a = (h / 12) * Math.PI * 2;
-    g.save();
-    g.translate(Math.round(C + Math.sin(a) * C * 0.665), Math.round(C - Math.cos(a) * C * 0.665));
-    g.rotate(a);
-    g.imageSmoothingEnabled = false;
-    g.drawImage(nc, -Math.round(nc.width / 2), -Math.round(nc.height / 2));
-    g.restore();
-  }
-  // a painted laurel of oak leaves round the centre, an acorn at each quarter
-  for (let i = 0; i < 24; i++) {
-    const a = (i / 24) * Math.PI * 2 + 0.13, rr = C * 0.42;
-    const x = C + Math.sin(a) * rr, y = C - Math.cos(a) * rr;
-    g.save(); g.translate(x, y); g.rotate(a + Math.PI / 2 + (i % 2 ? 0.5 : -0.5));
-    for (let k = -9; k <= 9; k++) {
-      const w = Math.round(Math.sin(((k + 9) / 18) * Math.PI) * 5 * (0.8 + 0.2 * Math.abs(Math.sin(k * 1.3))));
-      g.fillStyle = k < 0 ? leafD : leafG;
-      g.fillRect(k, -w, 1, w * 2);
-    }
-    g.fillStyle = '#26351a'; g.fillRect(-9, 0, 18, 1);
-    g.restore();
-  }
-  for (let q = 0; q < 4; q++) {
-    const a = (q / 4) * Math.PI * 2 + Math.PI / 4, rr = C * 0.42;
-    const x = Math.round(C + Math.sin(a) * rr), y = Math.round(C - Math.cos(a) * rr);
-    g.fillStyle = '#6b3d1c'; g.fillRect(x - 5, y - 2, 10, 10);
-    g.fillStyle = '#a0622c'; g.fillRect(x - 4, y - 1, 6, 7);
-    g.fillStyle = '#d29a52'; g.fillRect(x - 3, y, 2, 3);
-    g.fillStyle = '#4a3420'; g.fillRect(x - 6, y - 5, 12, 4);
-    g.fillStyle = '#6e5232'; g.fillRect(x - 5, y - 5, 4, 2);
-  }
-  // the centre: a red-and-gold painted rosette under the hands
-  for (let rr = 0; rr < 34; rr++) for (let k = 0; k < 360; k += 2) {
-    const a = (k / 180) * Math.PI, petal = Math.abs(Math.sin(a * 4)) * 12 + 16;
-    if (rr > petal) continue;
-    g.fillStyle = rr < 9 ? gold : rr > petal - 3 ? red : rr > petal - 7 ? '#b8473a' : '#d6c296';
-    g.fillRect(Math.floor(C + Math.cos(a) * rr), Math.floor(C + Math.sin(a) * rr), 2, 2);
-  }
-  // a tiny owl maker's mark above VI
-  const ox = C, oy = Math.round(C + C * 0.3);
-  const owl = ['..#....#..', '..##..##..', '.########.', '##oo##oo##', '#o.o##o.o#', '##oo##oo##', '.###vv###.', '.########.', '..######..', '...#..#...'];
-  owl.forEach((row, j) => [...row].forEach((ch, i) => {
-    if (ch === '.') return;
-    g.fillStyle = ch === 'o' ? '#e8d9b4' : ch === 'v' ? gold : '#6b4a2c';
-    g.fillRect(ox - 10 + i * 2, oy - 10 + j * 2, 2, 2);
-  }));
-  return c;
-}
-
 // ------------------------------------------------------------------ geometry helpers
 
 export type Part = { geo: THREE.BufferGeometry; m?: THREE.Matrix4 };
@@ -495,7 +368,7 @@ export function leafGeo(len: number, wid: number, o: { lobes?: number; curl?: nu
   const half = (u: number) => {
     if (u <= 0 || u >= 1) return 0;
     const env = Math.pow(Math.sin(u * Math.PI), 0.75) * (0.85 + 0.25 * u);
-    const lobe = 0.62 + 0.38 * Math.abs(Math.sin(u * Math.PI * lobes + 0.4 + hash(seed, 1, 2) * 0.6));
+    const lobe = 0.5 + 0.5 * Math.pow(Math.abs(Math.sin(u * Math.PI * lobes + 0.4 + hash(seed, 1, 2) * 0.6)), 0.55);
     return env * lobe * 0.5;
   };
   const pos: number[] = [], uv: number[] = [], idx: number[] = [];
@@ -608,39 +481,29 @@ export function linkGeo(): THREE.BufferGeometry {
 // ------------------------------------------------------------------ clock hands
 
 /**
- * A pierced Gothic hand pointing +y from the arbor (length L): a fine tapering shaft, an open lozenge-and-lyre
- * cartouche, a spear tip, and a ringed counterweight tail. One outline with holes (no overlaps, no z-fighting).
+ * [clock12] A blued spade hand pointing +y from the arbor (length L), as painted by onboard/clockpaint.ts: a tapered
+ * shaft, a spade (the hour hand's bigger, pierced with an oval), a round counterweight tail.
  */
 export function handGeo(L: number, kind: 'hour' | 'minute', t = 0.0035): THREE.BufferGeometry {
-  const W = kind === 'hour' ? 0.022 : 0.015;
-  const tail = kind === 'hour' ? 0.05 : 0.065;
-  const c0 = kind === 'hour' ? 0.5 : 0.6, c1 = kind === 'hour' ? 0.82 : 0.84;
-  const right: [number, number][] = [];
-  // tail ring
-  for (let i = 0; i <= 8; i++) { const a = -Math.PI / 2 + (i / 8) * Math.PI; right.push([Math.cos(a) * W * 0.55, -tail + Math.sin(a) * W * 0.55]); }
-  right.push([W * 0.16, -tail + W * 0.7], [W * 0.13, -0.01], [W * 0.42, -0.004], [W * 0.42, 0.006], [W * 0.13, 0.012]);
-  right.push([W * 0.12, L * (c0 - 0.06)]);
-  // the cartouche bulge
-  for (let i = 0; i <= 10; i++) { const u = i / 10, y = L * (c0 + (c1 - c0) * u); right.push([W * (0.12 + 0.88 * Math.pow(Math.sin(u * Math.PI), 0.8) * (u < 0.5 ? 1 : 0.85)), y]); }
-  right.push([W * 0.1, L * (c1 + 0.02)], [W * 0.32, L * 0.9], [W * 0.05, L * 0.985], [0, L]);
+  const H = kind === 'hour', u = L / (H ? 21 : 30);
+  const w = (H ? 1.5 : 1.0) * u, sp = (H ? 4.4 : 2.7) * u, sy = H ? L * 0.68 : L * 0.84, tail = (H ? 5 : 7) * u;
   const s = new THREE.Shape();
-  s.moveTo(0, -tail - W * 0.55);
-  for (const [x, y] of right) s.lineTo(x, y);
-  for (const [x, y] of [...right].reverse()) s.lineTo(-x, y);
-  // piercings: the tail ring's eye, a lozenge in the cartouche, a small drop below it
-  s.holes.push(circlePath(W * 0.28, 0, -tail, 10));
-  const lz = new THREE.Path(), ly = L * (c0 + (c1 - c0) * 0.5), lh = L * (c1 - c0) * 0.36, lw = W * 0.5;
-  lz.moveTo(0, ly - lh); lz.lineTo(-lw, ly); lz.lineTo(0, ly + lh); lz.lineTo(lw, ly); lz.lineTo(0, ly - lh);
-  s.holes.push(lz);
-  const dy = L * (c0 + 0.03);
-  s.holes.push(circlePath(W * 0.12, 0, dy, 8));
-  return extrude(s, t, t * 0.25, 1, 4);
+  s.moveTo(-w * 0.7, -tail * 0.55);
+  s.lineTo(-w * 0.5, sy - sp * 0.2);
+  s.bezierCurveTo(-sp * 1.1, sy - sp * 0.5, -sp * 1.1, sy + sp * 0.9, -w * 0.3, sy + sp * 0.95);
+  s.lineTo(0, L);
+  s.lineTo(w * 0.3, sy + sp * 0.95);
+  s.bezierCurveTo(sp * 1.1, sy + sp * 0.9, sp * 1.1, sy - sp * 0.5, w * 0.5, sy - sp * 0.2);
+  s.lineTo(w * 0.7, -tail * 0.55);
+  s.absarc(0, -tail, w * 1.25, Math.PI / 2 - 0.6, -Math.PI * 1.5 + 0.6, true);
+  if (H) { const o = new THREE.Path(); o.absellipse(0, sy + sp * 0.2, sp * 0.3, sp * 0.42, 0, Math.PI * 2, true, 0); s.holes.push(o); }
+  return extrude(s, t, t * 0.25, 1, 6);
 }
 
 // ------------------------------------------------------------------ fretwork
 
 /** A scalloped bargeboard along +x (length L, height H): a run of half-round scallops with a pierced eye above each. */
-export function bargeboard(L: number, H: number, n: number): THREE.Shape {
+export function bargeboard(L: number, H: number, n: number, holes = true): THREE.Shape {
   const s = new THREE.Shape(), r = L / n / 2;
   s.moveTo(0, H);
   s.lineTo(L, H);
@@ -650,35 +513,22 @@ export function bargeboard(L: number, H: number, n: number): THREE.Shape {
     s.absarc(cx, H - r * 0.4 - r * 0.15, r, 0, -Math.PI, true);
   }
   s.lineTo(0, H);
-  for (let i = 0; i < n; i++) s.holes.push(circlePath(r * 0.32, (i + 0.5) * (L / n), H - r * 0.62, 8));
+  if (holes) for (let i = 0; i < n; i++) s.holes.push(circlePath(r * 0.32, (i + 0.5) * (L / n), H - r * 0.62, 8));
   return s;
 }
 
-/** The apron under the case: a carved valance with scallops, a centre pendant leaf and pierced trefoils. */
+/** The apron under the case: a plain carved board with two scallops each side and a pointed drop in the middle (as
+ * painted by onboard/clockpaint.ts). Top edge at y = 0, hanging down to -H. */
 export function apronShape(W: number, H: number): THREE.Shape {
-  const s = new THREE.Shape();
-  s.moveTo(-W / 2, 0);
-  s.lineTo(-W / 2, -H * 0.35);
-  // scallops from the sides toward the centre, a pendant in the middle
-  const n = 4, seg = (W / 2 - W * 0.12) / n;
-  for (let i = 0; i < n; i++) {
-    const x0 = -W / 2 + i * seg, x1 = x0 + seg;
-    s.quadraticCurveTo((x0 + x1) / 2, -H * (0.85 - i * 0.04), x1, -H * 0.35);
-  }
-  s.quadraticCurveTo(-W * 0.06, -H * 0.7, 0, -H);
-  s.quadraticCurveTo(W * 0.06, -H * 0.7, W * 0.12, -H * 0.35);
-  for (let i = n - 1; i >= 0; i--) {
-    const x1 = W / 2 - i * seg, x0 = x1 - seg;
-    s.quadraticCurveTo((x0 + x1) / 2, -H * (0.85 - i * 0.04), x1, -H * 0.35);
-  }
-  s.lineTo(W / 2, 0);
-  s.lineTo(-W / 2, 0);
-  for (let i = 0; i < n; i++) for (const sd of [-1, 1]) {
-    const cx = sd * (W / 2 - (i + 0.5) * seg);
-    // a trefoil: three small round piercings
-    s.holes.push(circlePath(H * 0.07, cx, -H * 0.3, 7));
-  }
-  s.holes.push(circlePath(H * 0.1, 0, -H * 0.42, 9));
+  const s = new THREE.Shape(), w = W / 2, k = H / 18, X = (u: number) => (u / 57) * w;
+  s.moveTo(-w, 0); s.lineTo(w, 0); s.lineTo(w, -5 * k);
+  s.quadraticCurveTo(X(49), -12 * k, X(39), -7 * k);
+  s.quadraticCurveTo(X(26), -14 * k, X(13), -9 * k);
+  s.quadraticCurveTo(X(5), -15 * k, 0, -H);
+  s.quadraticCurveTo(-X(5), -15 * k, -X(13), -9 * k);
+  s.quadraticCurveTo(-X(26), -14 * k, -X(39), -7 * k);
+  s.quadraticCurveTo(-X(49), -12 * k, -w, -5 * k);
+  s.lineTo(-w, 0);
   return s;
 }
 
@@ -690,7 +540,7 @@ export interface Crest { geo: THREE.BufferGeometry; feather: THREE.BufferGeometr
  * 0.9 s tall, 1.2 s wide). Three geometries: the leaf fan, branch, discs, beak and talons (carving material), the
  * body, head and wings (feather material, planar uvs), and two amber glass eyes. Origin at the bottom centre.
  */
-export function owlCrest(s: number, leafCount = 7): Crest {
+export function owlCrest(s: number, leafCount = 7, side = 0.3): Crest {
   const carve: Part[] = [], feather: Part[] = [];
   // the fan of leaves behind the bird
   for (let i = 0; i < leafCount; i++) {
@@ -703,7 +553,8 @@ export function owlCrest(s: number, leafCount = 7): Crest {
   carve.push({ geo: scaleUV(new THREE.TubeGeometry(br, 18, s * 0.045, 7, false), 3, 0.5) });
   for (const sd of [-1, 1]) carve.push({ geo: turned([[0.0005, 0], [s * 0.045, s * 0.004], [s * 0.036, s * 0.03], [0.0005, s * 0.05]], 8, 20), m: mtx(sd * s * 0.3, s * 0.13, s * 0.07, 0, 0, -sd * Math.PI / 2) });
   // a leaf curling off each end of the branch
-  for (const sd of [-1, 1]) carve.push({ geo: leafGeo(s * 0.3, s * 0.16, { seed: 11 + sd, curl: 0.25, fold: 0.12, lobes: 3.2 }), m: mtx(sd * s * 0.28, s * 0.12, s * 0.06, 0, 0, sd > 0 ? -0.5 : Math.PI + 0.5) });
+  const lie = side > 0.3 ? 0.42 : -0.5;
+  for (const sd of [-1, 1]) carve.push({ geo: leafGeo(s * side, s * side * 0.6, { seed: 11 + sd, curl: 0.2, fold: 0.12, lobes: 3.5 }), m: mtx(sd * s * 0.2, s * 0.1, s * 0.03, 0, 0, sd > 0 ? -lie : Math.PI + lie) });
   // wings: feathered trailing edges, raised and spread (the left one is the right one turned round)
   const wing = new THREE.Shape();
   wing.moveTo(0, 0);

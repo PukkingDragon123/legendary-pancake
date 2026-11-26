@@ -19,6 +19,7 @@ import { Fx, SPR } from '../fx.ts';
 import type { Look } from '../post.ts';
 import type { Stage } from '../scene.ts';
 import * as K from './cuckookit.ts';
+import { CX as PCX, G as PG, layer as pLayer, paintDial } from '../../onboard/clockpaint.ts';
 
 const { mtx } = K;
 type Part = K.Part;
@@ -72,6 +73,15 @@ const HOUSE_COLS = ['#d79c8e', '#a2c290', '#94b6dc', '#e6c46e', '#bba0d6', '#e89
 
 /** the carvings are a lighter wood than the case (honey oak on walnut, like the Clock button's little clock) */
 const carveOf = (id: string) => (id === 'oak' ? 'linden' : 'oak');
+
+/** [clock12] the enamel: the loading clock's own dial painting (clockpaint.ts), fine enough for the closest shot */
+function dialTex(): THREE.CanvasTexture {
+  const r = PG.dial.r, [c, g] = pLayer(PCX - r, PG.dial.y - r, r * 2, r * 2, 2048 / (r * 2));
+  paintDial(g, false);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return t;
+}
 
 function nightNow(): number {
   const d = new Date(), h = d.getHours() + d.getMinutes() / 60;
@@ -226,7 +236,7 @@ export class CuckooStage implements Stage {
       brassDark: std({ color: 0xa07a36, metalness: 0.85, roughness: 0.4, envMapIntensity: 1.1 }),
       steel: std({ color: 0x1c2440, metalness: 0.7, roughness: 0.28, envMapIntensity: 1.2 }),
       bronze: std({ color: 0x8a6a46, vertexColors: true, metalness: 0.78, roughness: 0.42, envMapIntensity: 1.1 }),
-      enamel: std({ map: this.keep(K.ctex(K.dialCanvas())), roughness: 0.18, envMapIntensity: 0.9 }),
+      enamel: std({ map: this.keep(dialTex()), roughness: 0.18, envMapIntensity: 0.9 }),
       glass: std({ color: 0xd77a1e, roughness: 0.08, metalness: 0.1, emissive: 0x3a1600, envMapIntensity: 1.5 }),
       linden: std({ map: this.keep(K.ctex(K.woodCanvas(K.FINISHES[3].ramp, 128, 256, 17, 0.04), true)), vertexColors: true, roughness: 0.6, envMapIntensity: 0.4 }),
       oak: std({ map: this.keep(K.ctex(K.woodCanvas(K.FINISHES[1].ramp, 128, 256, 29), true)), vertexColors: true, roughness: 0.55, envMapIntensity: 0.45 }),
@@ -338,7 +348,6 @@ export class CuckooStage implements Stage {
     const inner = K.rect(CW - 0.1, CH - 0.1, 0, CH / 2);
     inner.holes.push(K.rectPath(CW - 0.13, CH - 0.13, 0, CH / 2));
     carve.push({ geo: K.scaleUV(K.extrude(inner, 0.008, 0.003, 1), 4, 2), m: mtx(0, 0, CD) });
-    for (const sx of [-1, 1]) carve.push({ geo: K.turned(K.columnProfile(CH, 0.021), 12, 6), m: mtx(sx * (CW / 2 - 0.004), 0, CD + 0.004) });
     // side panels: a raised frame on each side
     for (const sx of [-1, 1]) {
       const sf = K.rect(CD - 0.02, CH, 0, CH / 2);
@@ -350,7 +359,7 @@ export class CuckooStage implements Stage {
     wood.push({ geo: K.slab(CW + 0.08, 0.035, CD + 0.05, 0.008), m: mtx(0, CH + 0.0175, 0) });
     wood.push({ geo: K.slab(CW + 0.035, 0.016, CD + 0.025, 0.004), m: mtx(0, CH - 0.004, 0) });
     // ---- the apron: carved fretwork under the plinth
-    carve.push({ geo: K.scaleUV(K.extrude(K.apronShape(CW + 0.02, 0.12), 0.014, 0.004, 1, 10), 4, 2), m: mtx(0, -0.055, CD + 0.01) });
+    carve.push({ geo: K.scaleUV(K.extrude(K.apronShape(CW + 0.02, 0.128), 0.014, 0.004, 1, 10), 4, 2), m: mtx(0, -0.055, CD + 0.01) });
     // ---- the gable: a wall with the arched door opening, a carved arch round the door and a crescent moon
     const gb = (RIDGE - GABLE_Y - 0.018) / TANA;
     const gable = new THREE.Shape();
@@ -360,13 +369,6 @@ export class CuckooStage implements Stage {
     const archS = K.arch(DOOR.w + 0.036, DOOR.h + 0.02, 0, -0.002);
     archS.holes.push(K.archPath(DOOR.w, DOOR.h, 0, 0));
     carve.push({ geo: K.scaleUV(K.extrude(archS, 0.012, 0.004, 2), 4, 2), m: mtx(0, DOOR.y, GABLE_Z + 0.02) });
-    const moon = new THREE.Shape();
-    moon.absarc(0, 0, 0.032, Math.PI * 0.35, Math.PI * 1.65, false);
-    moon.absarc(0.016, 0, 0.026, Math.PI * 1.55, Math.PI * 0.45, true);
-    carve.push({ geo: K.pillow(moon, 0.014, 0.006, 2, 12), m: mtx(-0.006, DOOR.y + DOOR.h + 0.055, GABLE_Z + 0.02, 0, 0, -0.3) });
-    const star = new THREE.Shape();
-    for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2 + Math.PI / 2, r = i % 2 ? 0.006 : 0.015; if (i === 0) star.moveTo(Math.cos(a) * r, Math.sin(a) * r); else star.lineTo(Math.cos(a) * r, Math.sin(a) * r); }
-    brass.push({ geo: K.extrude(star, 0.004, 0.001, 1), m: mtx(0.034, DOOR.y + DOOR.h + 0.075, GABLE_Z + 0.021) });
     // the dark little room behind the door
     const room = this.mesh(new THREE.BoxGeometry(0.19, 0.23, 0.2), this.M.dark, false, false);
     room.position.set(0, GABLE_Y + 0.115, GABLE_Z - 0.1);
@@ -407,7 +409,7 @@ export class CuckooStage implements Stage {
       }
       // the bargeboard under the front edge (the left one is the right one turned round)
       const bh = 0.062, bl = L * 1.0;
-      const bb = K.scaleUV(K.extrude(K.bargeboard(bl, bh, 13), 0.014, 0.0035, 1, 6), 4, 2);
+      const bb = K.scaleUV(K.extrude(K.bargeboard(bl, bh, 7, false), 0.014, 0.0035, 1, 6), 4, 2);
       const mR = new THREE.Matrix4().makeTranslation(0, RIDGE, ROOF_Z - 0.012).multiply(new THREE.Matrix4().makeRotationZ(-ANG)).multiply(new THREE.Matrix4().makeTranslation(0, -bh, 0));
       carve.push({ geo: bb, m: sx > 0 ? mR : new THREE.Matrix4().makeTranslation(0, 0, 2 * (ROOF_Z - 0.012) + 0.014).multiply(new THREE.Matrix4().makeRotationY(Math.PI)).multiply(mR) });
       // an acorn drop under each eave
@@ -423,7 +425,7 @@ export class CuckooStage implements Stage {
     carve.push({ geo: balF, m: mtx(0, BAL.y, (BAL.z0 + BAL.z1) / 2, -Math.PI / 2, 0, 0) });
     const bH = 0.046, bY = BAL.y + 0.012;
     const bal = K.balusterProfile(bH, 0.008);
-    for (let i = 0; i < 11; i++) carve.push({ geo: K.turned(bal, 8, 8), m: mtx(-BAL.w / 2 + 0.03 + i * ((BAL.w - 0.06) / 10), bY, BAL.z1 - 0.012) });
+    for (let i = 0; i < 7; i++) carve.push({ geo: K.turned(bal, 8, 8), m: mtx(-BAL.w / 2 + 0.043 + i * ((BAL.w - 0.086) / 6), bY, BAL.z1 - 0.012) });
     for (const sx of [-1, 1]) for (const z of [0.285, 0.322]) carve.push({ geo: K.turned(bal, 8, 8), m: mtx(sx * (BAL.w / 2 - 0.012), bY, z) });
     carve.push({ geo: K.slab(BAL.w, 0.022, 0.011, 0.003), m: mtx(0, bY + bH, BAL.z1 - 0.012, -Math.PI / 2, 0, 0) });
     for (const sx of [-1, 1]) {
@@ -441,31 +443,17 @@ export class CuckooStage implements Stage {
     const leaf = (x: number, y: number, z: number, rz: number, len: number, wid: number, seed: number, curl = 0.25) =>
       leaves.push({ geo: K.leafGeo(len, wid, { seed, curl, fold: 0.16, t: 0.3, lobes: 3.2 + (seed % 3) * 0.3 }), m: mtx(x, y, z, 0, 0, rz) });
     const fz = CD + 0.004;
-    // a wreath of carved oak leaves all round the bezel, an acorn at each quarter
-    for (let i = 0; i < 12; i++) {
-      const a = (i / 12) * Math.PI * 2 + 0.13, r = DIAL.r + 0.055;
-      leaf(Math.cos(a) * r, DIAL.y + Math.sin(a) * r, fz + 0.002, a + Math.PI / 2 + (i % 2 ? 0.3 : -0.15), 0.1, 0.08, i + 1, 0.22);
+    // [clock12] four big carved oak leaves in the corners round the dial, two acorns under each lower one (as painted)
+    for (const [sx, sy, seed] of [[-1, 1, 3], [1, 1, 5], [-1, -1, 7], [1, -1, 9]] as [number, number, number][]) {
+      const a = Math.atan2(sy, sx) - sx * sy * 0.05, r0 = 0.275;
+      leaf(Math.cos(a) * r0, DIAL.y + Math.sin(a) * r0, fz, a, 0.24, 0.15, seed, 0.16);
     }
-    for (let q = 0; q < 4; q++) { const a = (q / 4) * Math.PI * 2 + Math.PI / 4, r = DIAL.r + 0.07; acorn(Math.cos(a) * r, DIAL.y + Math.sin(a) * r, fz + 0.02, a - Math.PI / 2, 1.05); }
     for (const sx of [-1, 1]) {
-      // top corners: two leaves and an acorn spray
-      const tx = sx * 0.29, ty = 0.74;
-      leaf(tx, ty, fz, sx > 0 ? Math.PI - 0.3 : 0.3, 0.12, 0.09, 20 + sx);
-      leaf(tx, ty, fz, sx > 0 ? -2.1 : -1.05, 0.11, 0.085, 23 + sx);
-      acorn(tx + sx * 0.02, ty - 0.045, fz + 0.02, sx * 0.5);
-      acorn(tx - sx * 0.025, ty - 0.03, fz + 0.016, -sx * 0.3);
-      // bottom corners: a fan of three leaves, two acorns
-      const bx = sx * 0.27, by = 0.11;
-      for (let k = 0; k < 3; k++) leaf(bx, by, fz, (sx > 0 ? Math.PI : 0) + sx * (-0.2 + k * 0.62) * (sx > 0 ? -1 : 1) + (sx > 0 ? 0 : 0), 0.13 - k * 0.012, 0.095, 30 + k + sx * 5);
-      acorn(bx + sx * 0.03, by + 0.01, fz + 0.022, sx * 0.8, 1.1);
-      acorn(bx + sx * 0.0, by - 0.035, fz + 0.02, sx * 0.2, 1.1);
+      acorn(sx * 0.236, DIAL.y - 0.243, fz + 0.02, -sx * 0.35, 1.25);
+      acorn(sx * 0.279, DIAL.y - 0.214, fz + 0.016, sx * 0.25, 1.15);
     }
-    // a spray under the dial
-    leaf(-0.005, 0.08, fz, -0.25, 0.1, 0.08, 41);
-    leaf(0.005, 0.08, fz, Math.PI + 0.25, 0.1, 0.08, 42);
-    acorn(0, 0.07, fz + 0.025, 0, 1.15);
     // ---- the crest: a carved owl with spread wings on a fan of oak leaves
-    const crest = K.owlCrest(0.36);
+    const crest = K.owlCrest(0.36, 0, 0.62);
     const crestAt = mtx(0, RIDGE - 0.004, ROOF_Z - 0.05);
     crest.geo.applyMatrix4(crestAt); crest.feather.applyMatrix4(crestAt); crest.eyes.applyMatrix4(crestAt);
     // ---- the pendulum: a brass rod and a carved leaf bob with a brass boss

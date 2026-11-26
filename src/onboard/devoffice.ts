@@ -165,6 +165,8 @@ if (q.has('talk')) {
     const box = document.createElement('div');
     box.innerHTML = html.slice(a, z);
     document.body.append(...Array.from(box.childNodes));
+    // [clock12] scripts set by innerHTML don't run: run the block's painter
+    { const sc = document.querySelector('#boot + script'); if (sc) { const n = document.createElement('script'); n.textContent = sc.textContent; sc.replaceWith(n); } }
     const b = document.getElementById('boot')!;
     b.classList.add('hold');
     await import('./boot.ts');
