@@ -1,7 +1,6 @@
-// Premium 3D title text in Alagard, the game's font, rendered at full device resolution: a smooth extrusion with
-// depth shading (layers that darken as they go back), a crisp outline, a realistic metallic or painted fill (a
-// soft highlight across the top, a darker horizon line through the middle, a warm reflection near the bottom)
-// and a soft drop shadow. Plus game-style motion: titles pop in with squash and stretch, numbers count up and
+// Premium title text in the game's Alegreya (titles in Alegreya SC), rendered at full device resolution like lettering
+// cut and painted on a sign: a clean near-black ink outline (the same ink as the UI's and the world's outlines), a
+// shallow bevel below the face, a face lit softly from the top (no chrome bands) and a soft cast shadow. Plus game-style motion: titles pop in with squash and stretch, numbers count up and
 // punch, rewards burst with sparkles, exclamations shake, happy lines wave letter by letter, dialogue types on
 // letter by letter, emphasis flashes. Everything respects reduced motion and the in-app Calm motion setting
 // (the global rules in style.css stop CSS animation; the JS bits below check reducedMotion()).
@@ -21,19 +20,21 @@
 //           fitText3D(text, wishPx, maxW) -> n (16 px steps that fit)
 import { cloneElement, isValidElement, toChildArray, type ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { alagard, alagardSafe, STACK } from './font.ts';
+import { fontPx, stepPx, textSafe, uiFont } from './font.ts';
 import { reducedMotion } from './chrome/swing.ts';
 
 /** a palette: top highlight row, three fill bands (light to dark), outline, extrusion */
 export interface Palette { hi: string; c1: string; c2: string; c3: string; ol: string; ex: string; drop?: string }
+/** the UI's ink: every outline in the game (2D and 3D) is this near-black */
+export const INK = '#120a0e';
 export const PALETTES = {
-  gold: { hi: '#fff4d2', c1: '#f4dc98', c2: '#ddb158', c3: '#b07c2e', ol: '#2b1405', ex: '#6a3e14' },
-  cream: { hi: '#ffffff', c1: '#fff7e4', c2: '#f4e3be', c3: '#dcc08a', ol: '#2a1608', ex: '#5e361a' },
-  sky: { hi: '#eef5f8', c1: '#cddfe6', c2: '#9dbccb', c3: '#6a8ea2', ol: '#0e1c2a', ex: '#24384a' },
-  rose: { hi: '#f8ebe6', c1: '#e6bdb2', c2: '#c98a7c', c3: '#9c5a4a', ol: '#2e0c0c', ex: '#5e2620' },
-  leaf: { hi: '#eff3e4', c1: '#cbd8ae', c2: '#98b074', c3: '#647f46', ol: '#0f2410', ex: '#2c4528' },
-  moon: { hi: '#ffffff', c1: '#eef0ff', c2: '#c9cdf2', c3: '#9ba2da', ol: '#14183a', ex: '#2d3372' },
-  ink: { hi: '#7d8cc0', c1: '#46578c', c2: '#2d3964', c3: '#1e274a', ol: '#fbf3df', ex: '#c2a777', drop: 'rgba(0,0,0,0)' },
+  gold: { hi: '#fff8d8', c1: '#ffe07a', c2: '#f4b43a', c3: '#c97a16', ol: INK, ex: '#5c2e08' },
+  cream: { hi: '#ffffff', c1: '#fffaf0', c2: '#f7e8c6', c3: '#e2c48c', ol: INK, ex: '#4a2810' },
+  sky: { hi: '#f2fbff', c1: '#c8ecff', c2: '#7cc6f2', c3: '#3a8fd0', ol: INK, ex: '#123a66' },
+  rose: { hi: '#fff0ec', c1: '#ffc4b4', c2: '#f27a62', c3: '#cc3e34', ol: INK, ex: '#5e1414' },
+  leaf: { hi: '#f4ffe2', c1: '#d2f29a', c2: '#8fcf4e', c3: '#4e9a2a', ol: INK, ex: '#1c4012' },
+  moon: { hi: '#ffffff', c1: '#f0f1ff', c2: '#cfd3ff', c3: '#9ea6f0', ol: INK, ex: '#262c78' },
+  ink: { hi: '#4a5fae', c1: '#2e3f86', c2: '#22306c', c3: '#18224e', ol: '#fbf3df', ex: '#c2a777', drop: 'rgba(0,0,0,0)' },
 } satisfies Record<string, Palette>;
 export type PaletteName = keyof typeof PALETTES;
 
@@ -42,36 +43,39 @@ export type PaletteName = keyof typeof PALETTES;
 const vars = (p: Palette) => `--t-hi:${p.hi};--t-1:${p.c1};--t-2:${p.c2};--t-3:${p.c3};--t-ol:${p.ol};--t-ex:${p.ex};--t-dr:${p.drop ?? 'rgba(18,10,4,.42)'}`;
 /** a length in ems (scales with the text) */
 const E = (k: number) => `${k}em`;
-const ring = (c: string, w = 'var(--ow)') => [[-1, 0], [1, 0], [0, -1], [0, 1], [-0.7, -0.7], [0.7, -0.7], [-0.7, 0.7], [0.7, 0.7]].map(([x, y]) => `calc(${w} * ${x}) calc(${w} * ${y}) 0 ${c}`).join(',');
+/** an outline from text shadows: twelve directions, so curves stay round */
+const DIRS = Array.from({ length: 12 }, (_, i) => [Math.cos((i / 12) * Math.PI * 2), Math.sin((i / 12) * Math.PI * 2)].map((v) => Math.round(v * 1000) / 1000));
+const ring = (c: string, w = 'var(--ow)') => DIRS.map(([x, y]) => `calc(${w} * ${x}) calc(${w} * ${y}) 0 ${c}`).join(',');
 /**
- * [ui10] Realistic lettering, not cartoon type: a hairline edge (half-strength), a thin cut bevel below the face
- * (gilt or painted letters standing a hair proud of the board), a tight contact shadow and a soft cast shadow.
- * `n` only deepens the bevel a little on the biggest titles.
+ * [ui12] Lettering cut and painted on a sign: a clean ink outline all round (about 1.5 device px on body sizes,
+ * 2-3 on big titles), a shallow bevel of the same ink below it (the letters stand a little proud), a tight contact
+ * shadow and a soft cast shadow. `n` deepens the bevel a little on the biggest titles.
  */
+const OW = 'max(1px, 0.05em)';
 const stack = (n: number) => [
-  ring('color-mix(in srgb, var(--t-ol) 45%, transparent)', 'max(0.5px, 0.028em)'),
-  `0 ${E(0.03 + n * 0.003)} 0 color-mix(in srgb, var(--t-ex), #000 25%)`,
-  `0 ${E(0.05 + n * 0.004)} ${E(0.05)} rgba(10,6,2,.42)`,
-  `0 ${E(0.1 + n * 0.008)} ${E(0.22)} var(--t-dr)`,
+  ring('var(--t-ol)', OW),
+  `0 calc(${OW} + ${E(0.025 + n * 0.003)}) 0 var(--t-ol)`,
+  `0 calc(${OW} + ${E(0.05 + n * 0.004)}) ${E(0.04)} rgba(10,6,2,.5)`,
+  `0 ${E(0.12 + n * 0.008)} ${E(0.22)} var(--t-dr)`,
 ].join(',');
 /** Where the game wears it without a class in its markup: titles, sign names, big numbers (full 3D) ... */
 const FULL = ['.hh-name', '.lvup-title', '.lvup-medal b', '.title-ribbon', '.cs-sign span', '.sf-sign', '.sf-sleep', '.seal b', '.tk-times b', '.bk-last-t b', '.n-time', '.lock-time', '.bigclock', '.cb-title'];
 /** ... and buttons, counters, labels, toasts and dialogue (light 3D: outline and a one-pixel extrusion) */
-const LITE = ['.hh-num', '.hh-rune b', '.btn.pillow', '.btn.oak', '.lg-btn', '.hh-btn-gold', '.hh-btn-green', '.hh-btn-night', '.hh-btn-cream', '.hh-toast-body > span', '.hh-bubble .txt', '.stat b', '.bk-tile b', '.hh-toollabel', '.hh-looklabel', '.tk-hint'];
+const LITE = ['.hh-num', '.hh-rune b', '.btn.pillow', '.btn.oak', '.lg-btn', '.hh-btn-gold', '.hh-btn-green', '.hh-btn-night', '.hh-btn-cream', '.hh-toast-body > span', '.hh-bubble .txt', '.stat b', '.bk-tile b', '.hh-toollabel', '.tk-hint'];
 const T = `:is(.t3d:not(.t3d-lite), h1:not(.qp-q), h2:not(.qp-q), ${FULL.join(', ')})`;
 const L = `:is(.t3d.t3d-lite, ${LITE.join(', ')})`;
 const CSS = `
 :where(.t3d, h1, h2, ${FULL.join(', ')}, ${LITE.join(', ')}) { ${vars(PALETTES.gold)}; --tp: calc(1em / 16); --ow: max(1px, 0.055em); }
 /* the palette each place wears: gold for titles on wood, cream on dark and coloured surfaces, ink on paper */
 :where(.hh-num, .hh-rune b, .cs-sign span, .sf-sign, .sf-sleep, .lvup-medal b, .n-time, .lock-time, .bigclock, .btn.pillow, .btn.oak, .lg-btn, .hh-btn-green, .hh-btn-night) { ${vars(PALETTES.cream)} }
-:where(.bk-title, .tk-times b, .seal b, .bk-last-t b, .stat b, .bk-tile b, .cb-title, .hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .hh-looklabel, .tk-hint, .hh-btn-cream, .qp-sheet h2, .sheet-head h2) { ${vars(PALETTES.ink)} }
+:where(.bk-title, .tk-times b, .seal b, .bk-last-t b, .stat b, .bk-tile b, .cb-title, .hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .tk-hint, .hh-btn-cream, .qp-sheet h2, .sheet-head h2) { ${vars(PALETTES.ink)} }
 :where(.lock-time, .n-time) { ${vars(PALETTES.moon)} }
 .t3d-gold { ${vars(PALETTES.gold)} } .t3d-cream { ${vars(PALETTES.cream)} } .t3d-sky { ${vars(PALETTES.sky)} }
 .t3d-rose { ${vars(PALETTES.rose)} } .t3d-leaf { ${vars(PALETTES.leaf)} } .t3d-moon { ${vars(PALETTES.moon)} } .t3d-ink { ${vars(PALETTES.ink)} }
 body ${T} { color: var(--t-2); text-shadow: ${stack(5)} !important; }
 body ${T}:is(.t3d-deep, h1, .lvup-title, .title-ribbon, .bigclock, .n-time, .lock-time) { text-shadow: ${stack(8)} !important; }
-body ${L} { color: var(--t-1); text-shadow: ${ring('color-mix(in srgb, var(--t-ol) 40%, transparent)', 'max(0.5px, 0.03em)')}, 0 0.04em 0 color-mix(in srgb, var(--t-ex), #000 30%), 0 0.1em 0.16em var(--t-dr) !important; }
-body :is(.hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .hh-looklabel, .tk-hint, .t3d-ink.t3d-lite) { color: var(--t-2); text-shadow: 0 1px 0 color-mix(in srgb, var(--t-ex), transparent 40%) !important; }
+body ${L} { color: var(--t-1); text-shadow: ${ring('var(--t-ol)', 'max(1px, 0.055em)')}, 0 calc(max(1px, 0.055em) + 0.03em) 0 var(--t-ol), 0 0.1em 0.16em var(--t-dr) !important; }
+body :is(.hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .tk-hint, .t3d-ink.t3d-lite) { color: var(--t-2); text-shadow: 0 1px 0 color-mix(in srgb, var(--t-ex), transparent 40%) !important; }
 .hh-dig { width: 0.625em !important; text-align: right !important; overflow: visible !important; clip-path: inset(-0.1em -0.5em 0 -0.2em); } /* the wheels clip only top and bottom: the outline and extrusion show */
 .hh-strip i { line-height: 1em !important; }
 :where([data-t]) { position: relative; }
@@ -80,8 +84,9 @@ body :is(${T}[data-t], ${T} [data-t])::after {
   display: inherit; flex-direction: inherit; flex-wrap: inherit; align-items: inherit; justify-content: inherit; gap: inherit;
   font: inherit; line-height: inherit; letter-spacing: inherit; text-align: inherit; text-indent: inherit; text-transform: inherit; white-space: inherit; overflow-wrap: inherit;
   color: transparent; text-shadow: none; pointer-events: none; overflow: hidden; transform: none; animation: none;
-  --c0: calc((1lh - 1em) / 2 + 0.06em);
-  background: linear-gradient(180deg, var(--t-hi) 0, var(--t-hi) var(--c0), var(--t-1) calc(var(--c0) + 0.16em), var(--t-2) calc(var(--c0) + 0.36em), var(--t-3) calc(var(--c0) + 0.4em), var(--t-2) calc(var(--c0) + 0.56em), var(--t-1) calc(var(--c0) + 0.72em), var(--t-3) calc(var(--c0) + 0.9em), var(--t-3) 1lh) 0 0 / 100% 1lh repeat-y content-box;
+  /* the top of Alegreya's content box in each line; its capitals run from 0.38em to the baseline at 1.02em */
+  --c0: calc((1lh - 1.361em) / 2);
+  background: linear-gradient(180deg, var(--t-hi) 0, var(--t-hi) calc(var(--c0) + 0.42em), var(--t-1) calc(var(--c0) + 0.6em), var(--t-2) calc(var(--c0) + 0.86em), var(--t-3) calc(var(--c0) + 1.04em), var(--t-3) 1lh) 0 0 / 100% 1lh repeat-y content-box;
   -webkit-background-clip: text; background-clip: text;
 }
 /* game-style motion; the global reduced-motion rules freeze all of it */
@@ -125,7 +130,7 @@ export function installText3D() {
 /** Text split into letters for per-letter motion: mode 'wave' (happy lines), 'type' (types on with a pop), 'pop'. */
 export function Letters(p: { text: string; mode?: 'wave' | 'type'; class?: string; palette?: PaletteName }) {
   installText3D();
-  const s = alagardSafe(p.text);
+  const s = textSafe(p.text);
   const cls = `t3d ${p.palette ? 't3d-' + p.palette : ''} t3d-${p.mode ?? 'wave'} ${p.class ?? ''}`;
   return <span class={cls} aria-label={s}>{[...s].map((ch, i) => <span aria-hidden="true" class={'t3d-ch' + (ch === ' ' ? '' : ' t3d')} style={{ '--i': i } as Record<string, number>}>{ch}</span>)}</span>;
 }
@@ -177,11 +182,11 @@ export function CountUp(p: { value: number; from?: number; ms?: number; format?:
 let mctx: CanvasRenderingContext2D | null = null;
 const measureCtx = () => (mctx ??= document.createElement('canvas').getContext('2d')!);
 
-/** The biggest whole multiple of 16 px (at most the wished size) whose 3D text fits `maxW`. */
+/** The biggest whole size step (at most the wished size, in old 16 px steps) whose 3D text fits `maxW`. */
 export function fitText3D(text: string, wishPx: number, maxW: number): number {
-  const g = measureCtx(), s = alagardSafe(text);
+  const g = measureCtx(), s = textSafe(text);
   let n = Math.max(1, Math.round(wishPx / 16));
-  for (; n > 1; n--) { g.font = alagard(n); if (g.measureText(s).width + 0.35 * 16 * n <= maxW) break; }
+  for (; n > 1; n--) { g.font = uiFont(n, { caps: true }); if (g.measureText(s).width + 0.3 * stepPx(n) <= maxW) break; }
   return n;
 }
 
@@ -191,50 +196,46 @@ const shade = (hex: string, k: number) => {
 };
 
 /**
- * Draw premium 3D title text on a canvas at full resolution: a soft drop shadow, a smooth extrusion toward the
- * bottom right that darkens with depth, a crisp rounded outline, and a metallic fill (bright top, a darker horizon
- * line, a warm reflection low down). `size` in canvas px (or `n` x 16). `y` is the baseline. `lift(i)` raises
- * letter i by that many sixteenths of the size (per-letter pops and waves). Returns the width of the letters
- * (outline and extrusion add about a third of the size to the right and below).
+ * Draw title text on a canvas at full resolution, lettered like a painted sign: a soft cast shadow, a clean ink
+ * outline, a shallow bevel of ink below it, and a face lit softly from the top. `size` in canvas px (or `n` size
+ * steps). Titles (caps: true) are set in Alegreya SC, the rest in bold Alegreya (italic: true for whispers). `y` is
+ * the baseline. `lift(i)` raises letter i by that many sixteenths of the size (per-letter pops and waves). Returns
+ * the width of the letters (the outline and bevel add about a fifth of the size to the right and below).
  */
-export function drawText3D(g: CanvasRenderingContext2D, text: string, x: number, y: number, o: { n?: number; size?: number; palette?: PaletteName | Palette; depth?: number; align?: CanvasTextAlign; outline?: boolean; drop?: boolean; lift?: (i: number) => number } = {}): number {
-  const s = alagardSafe(text), size = o.size ?? 16 * Math.max(1, o.n ?? 1), d = o.depth ?? 2;
+export function drawText3D(g: CanvasRenderingContext2D, text: string, x: number, y: number, o: { n?: number; size?: number; palette?: PaletteName | Palette; depth?: number; align?: CanvasTextAlign; outline?: boolean; drop?: boolean; lift?: (i: number) => number; caps?: boolean; italic?: boolean } = {}): number {
+  const s = textSafe(text), size = o.size ?? stepPx(o.n ?? 1), d = o.depth ?? 2;
   const pal: Palette = typeof o.palette === 'object' ? o.palette : PALETTES[o.palette ?? 'gold'];
   g.save();
-  g.font = `${size}px ${STACK}`; g.textBaseline = 'alphabetic'; g.textAlign = 'left'; g.lineJoin = 'round'; g.miterLimit = 2;
+  g.font = fontPx(size, { caps: o.caps, italic: o.italic, weight: 700 }); g.textBaseline = 'alphabetic'; g.textAlign = 'left'; g.lineJoin = 'round'; g.miterLimit = 2;
   const w = g.measureText(s).width;
-  const x0 = Math.round(o.align === 'center' ? x - w / 2 : o.align === 'right' || o.align === 'end' ? x - w : x), y0 = Math.round(y);
+  const x0 = o.align === 'center' ? x - w / 2 : o.align === 'right' || o.align === 'end' ? x - w : x, y0 = y;
   const chars = [...s];
   const xs: number[] = []; { let cx = x0; for (const ch of chars) { xs.push(cx); cx += g.measureText(ch).width; } }
   const each = (dx: number, dy: number, f: (ch: string, px: number, py: number) => void) => {
     if (!o.lift) { f(s, x0 + dx, y0 + dy); return; }
     chars.forEach((ch, i) => f(ch, xs[i] + dx, y0 + dy - ((o.lift!(i) || 0) * size) / 16));
   };
-  // [ui10] realistic lettering: a hairline half-strength edge, a thin bevel, a soft shadow (no cartoon outline)
-  const step = size * 0.014 * (d >= 3 ? 1.2 : 1), layers = Math.min(2, Math.max(1, Math.round(d))), ow = Math.max(0.8, size * 0.035);
-  // soft drop shadow
+  // the ink line: about 1.5 px at 20 px, 3 px on a 64 px title (half of the stroke is under the face)
+  const ow = o.outline === false ? 0 : Math.max(2.2, size * 0.1);
+  const bevel = Math.max(1, size * 0.03 * Math.min(1.6, Math.max(0.6, d / 2)));
   if (o.drop !== false) {
-    g.save(); g.shadowColor = pal.drop ?? 'rgba(14,8,2,.55)'; g.shadowBlur = size * 0.28; g.shadowOffsetX = size * 0.06; g.shadowOffsetY = size * 0.16;
-    g.fillStyle = pal.ol; each(step * layers, step * layers * 1.8, (t, px, py) => g.fillText(t, px, py)); g.restore();
+    g.save(); g.shadowColor = pal.drop ?? 'rgba(14,8,2,.5)'; g.shadowBlur = size * 0.22; g.shadowOffsetX = size * 0.03; g.shadowOffsetY = size * 0.12;
+    g.fillStyle = pal.ol; g.strokeStyle = pal.ol; g.lineWidth = ow; each(0, bevel, (t, px, py) => { g.fillText(t, px, py); if (ow) g.strokeText(t, px, py); }); g.restore();
   }
-  // the back outline and the shaded extrusion
-  if (o.outline !== false) { g.save(); g.globalAlpha = 0.45; g.strokeStyle = pal.ol; g.lineWidth = ow; each(step * layers, step * layers * 1.8, (t, px, py) => g.strokeText(t, px, py)); g.restore(); }
-  for (let k = layers; k >= 1; k--) {
-    g.fillStyle = shade(pal.ex, 1 - (k / layers) * 0.45);
-    each(step * k, step * k * 1.8, (t, px, py) => g.fillText(t, px, py));
+  // the bevel (the letters' cut edge, in shade) and the outline round it all
+  if (ow) {
+    g.strokeStyle = pal.ol; g.fillStyle = pal.ol; g.lineWidth = ow;
+    each(0, bevel, (t, px, py) => { g.strokeText(t, px, py); g.fillText(t, px, py); });
+    each(0, 0, (t, px, py) => g.strokeText(t, px, py));
   }
-  // the crisp outline round the face
-  if (o.outline !== false) { g.save(); g.globalAlpha = 0.5; g.strokeStyle = pal.ol; g.lineWidth = ow; each(0, 0, (t, px, py) => g.strokeText(t, px, py)); g.restore(); }
-  // the face: metallic, lit from the top
-  const top = y0 - size * 0.69, base = y0;
-  const gr = g.createLinearGradient(0, top, 0, base + size * 0.19);
-  gr.addColorStop(0, pal.hi); gr.addColorStop(0.18, pal.c1); gr.addColorStop(0.45, pal.c2); gr.addColorStop(0.5, pal.c3);
-  gr.addColorStop(0.66, pal.c2); gr.addColorStop(0.84, pal.c1); gr.addColorStop(1, pal.c3);
+  g.fillStyle = shade(pal.ex, 1.1);
+  each(0, bevel * 0.6, (t, px, py) => g.fillText(t, px, py));
+  // the face: lit from the top (a bright top, the colour, a deeper foot)
+  const top = y0 - size * 0.66, base = y0;
+  const gr = g.createLinearGradient(0, top, 0, base);
+  gr.addColorStop(0, pal.hi); gr.addColorStop(0.3, pal.c1); gr.addColorStop(0.72, pal.c2); gr.addColorStop(1, pal.c3);
   g.fillStyle = gr;
   each(0, 0, (t, px, py) => g.fillText(t, px, py));
-  // a soft specular glint along the top edge
-  g.save(); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.35; g.fillStyle = '#ffffff';
-  each(0, -Math.max(1, size * 0.04), (t, px, py) => g.fillText(t, px, py)); g.restore();
   g.restore();
   return Math.round(w);
 }

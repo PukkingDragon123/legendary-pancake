@@ -8,7 +8,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { modelUrl } from '../../gfx/glb.ts';
 import { rng } from '../../gfx/noise.ts';
-import { alagard, alagardReady, alagardSafe, alagardText } from '../../ui/font.ts';
+import { uiFont, fontReady, textSafe, canvasText } from '../../ui/font.ts';
 import { drawText3D, fitText3D } from '../../ui/text3d.tsx';
 
 // ------------------------------------------------------------------ textures and materials
@@ -546,22 +546,22 @@ export function parcel(s = 0.26): THREE.Group {
 
 // ------------------------------------------------------------------ text on wood and slate (canvas)
 
-/** The game's pixel font (Alagard), loaded for canvas painting (already present in the app; the dev page loads it). */
+/** The game's font (Alegreya), loaded for canvas painting (already present in the app; the dev page loads it). */
 export function lodgeFont(): Promise<void> {
-  return alagardReady();
+  return fontReady();
 }
 
 /**
- * Draw text crisply in Alagard: `px` is the wished size, snapped to whole multiples of the font's 16 px grid (and
+ * Draw text crisply in Alegreya: `px` is the wished size, snapped to whole multiples of the font's 16 px grid (and
  * stepped down a whole multiple at a time until it fits `maxW`), drawn on whole pixels, the alpha thresholded so
  * letters have hard pixel edges. `y` is the middle of the capitals.
  */
 function pixelText(g: CanvasRenderingContext2D, text: string, x: number, y: number, px: number, col: string, o: { align?: CanvasTextAlign; shadow?: string; outline?: string; maxW?: number } = {}) {
-  text = alagardSafe(text);
+  text = textSafe(text);
   let n = Math.max(1, Math.round(px / 16));
-  if (o.maxW) { const m = canvas(4, 4)[1]; m.font = alagard(n); while (n > 1 && m.measureText(text).width > o.maxW) { n -= 1; m.font = alagard(n); } }
+  if (o.maxW) { const m = canvas(4, 4)[1]; m.font = uiFont(n); while (n > 1 && m.measureText(text).width > o.maxW) { n -= 1; m.font = uiFont(n); } }
   // [font6] full-resolution chalk lettering, centred on y
-  alagardText(g, text, x, Math.round(y + 5.5 * n), col, { n, align: o.align ?? 'center', shadow: o.shadow, outline: o.outline });
+  canvasText(g, text, x, Math.round(y + 5.5 * n), col, { n, align: o.align ?? 'center', shadow: o.shadow, outline: o.outline });
 }
 
 // ------------------------------------------------------------------ dried herbs hung from the beams
@@ -654,7 +654,7 @@ export interface Sign { group: THREE.Group; redraw(text: string, sub?: string): 
 /** A carved wooden sign hung on two ropes (from `ropeTo` metres above its top edge), letters painted in honey. */
 export function hangingSign(w: number, h: number, text: string, sub = '', ropeTo = 0.4, seed = 2): Sign {
   const g = new THREE.Group();
-  const PX = 256; // texels per metre (the props' texel density; Alagard's 16 px letters fit)
+  const PX = 256; // texels per metre (the props' texel density; Alegreya's 16 px letters fit)
   const cw = Math.round(w * PX), ch = Math.round(h * PX);
   const [c, gx] = canvas(cw, ch);
   const t = canvasTex(c);
@@ -662,7 +662,7 @@ export function hangingSign(w: number, h: number, text: string, sub = '', ropeTo
     paintPlank(gx, cw, ch, seed);
     // [font6] the name in gold 3D pixel letters (outline, extrusion, banded fill), the line under it in cream
     const n1 = fitText3D(tx, Math.round(ch * (sb ? 0.42 : 0.55)), cw - 16);
-    drawText3D(gx, tx, cw / 2 - n1 * 2, Math.round((sb ? ch * 0.4 : ch / 2) + 5.5 * n1), { n: n1, palette: 'gold', depth: 2, align: 'center' });
+    drawText3D(gx, tx, cw / 2 - n1 * 2, Math.round((sb ? ch * 0.4 : ch / 2) + 5.5 * n1), { n: n1, palette: 'gold', depth: 2, align: 'center', caps: true });
     if (sb) { const n2 = fitText3D(sb, Math.round(ch * 0.2), cw - 16); drawText3D(gx, sb, cw / 2 - n2, Math.round(ch * 0.77 + 5.5 * n2), { n: n2, palette: 'cream', depth: 1, align: 'center' }); }
     t.needsUpdate = true;
   };

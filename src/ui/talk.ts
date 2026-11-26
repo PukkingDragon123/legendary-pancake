@@ -1,5 +1,5 @@
 // Living dialogue for every spoken line in the game (Pip in the interview and at home, Barnaby in his store).
-// The words float: 3D Alagard letters (text3d.tsx: shaded extrusion, crisp outline, metallic face) drawn at full
+// The words float: 3D Alegreya letters (text3d.tsx: a clean ink outline, a shallow bevel, a lit face) drawn at full
 // device resolution, each with its own soft shadow on an imagined plane behind it. Letters ease in from slightly
 // behind (small and pale, their shadow tight under them) and come forward into place; they bob gently, lag a little
 // when the camera or the speaker moves (the shadows lag more: depth), and the old line drifts back and away when the
@@ -14,7 +14,7 @@
 // A span may hold several words ("*Hoot Hollow!*"); punctuation right after a span takes its style. A mark that
 // is not an opener or has no closer is printed as it is (so "Hoo! Oh!" is just exclamations).
 import { sound } from '../audio/sound.ts';
-import { alagardReady, alagardSafe, STACK } from './font.ts';
+import { fontPx, fontReady, SCALE, textSafe } from './font.ts';
 import { drawText3D, PALETTES, type Palette } from './text3d.tsx';
 import { reducedMotion } from './chrome/swing.ts';
 
@@ -32,7 +32,7 @@ const PUNCT = /[.,!?;:…]/;
 
 /** Split a line into characters with their tone (the marks themselves are dropped). */
 export function parse(text: string): Ch[] {
-  const s = alagardSafe(text);
+  const s = textSafe(text);
   const closesAt = (j: number, m: string) => s[j] === m && j > 0 && !/\s/.test(s[j - 1]) && (j + 1 >= s.length || CLOSE_AFTER.test(s[j + 1]) || isMark(s[j + 1]));
   const opens = (i: number) => {
     const m = s[i], n = s[i + 1];
@@ -197,18 +197,20 @@ const LOOK: Record<Tone, { pal: Palette; scale: number; depth: number; alpha: nu
   hush: { pal: HUSH, scale: 0.8, depth: 1.4, alpha: 0.86 },
   wave: { pal: PALETTES.cream, scale: 1, depth: 2, alpha: 1 },
 };
-/** a size in device px on Alagard's grid (whole font pixels) */
-const grid = (px: number) => Math.max(16, Math.round(px / 16) * 16);
+/** a size in whole device px */
+const grid = (px: number) => Math.max(12, Math.round(px));
+/** the letters' face: bold book face, whispers in italic */
+const face = (size: number, it = false) => fontPx(size, { weight: 700, italic: it });
 
 interface Sprite { cv: HTMLCanvasElement; ox: number; oy: number; adv: number }
 let fontOK = false;
-void alagardReady().then(() => { fontOK = true; sprites.clear(); });
+void fontReady().then(() => { fontOK = true; sprites.clear(); });
 const sprites = new Map<string, Sprite>();
 let mctx: CanvasRenderingContext2D | null = null;
-function advance(c: string, size: number) {
+function advance(c: string, size: number, it = false) {
   mctx ??= document.createElement('canvas').getContext('2d');
   if (!mctx) return size * 0.55;
-  mctx.font = `${size}px ${STACK}`;
+  mctx.font = face(size, it);
   return mctx.measureText(c).width;
 }
 /** one letter in 3D (or its soft shadow, or its glow), cached */
@@ -216,20 +218,20 @@ function sprite(c: string, size: number, pal: Palette, depth: number, kind: 'fac
   const key = `${kind}|${c}|${size}|${pal.c2}|${depth}|${fontOK ? 1 : 0}`;
   let s = sprites.get(key);
   if (s) return s;
-  const adv = advance(c, size), ow = Math.max(1.5, size * 0.09), ext = size * 0.022 * (depth >= 3 ? 1.2 : 1) * Math.max(2, Math.round(depth * 2.5));
+  const it = pal === HUSH, adv = advance(c, size, it), ow = Math.max(1.5, size * 0.09), ext = size * 0.022 * (depth >= 3 ? 1.2 : 1) * Math.max(2, Math.round(depth * 2.5));
   const blur = kind === 'shadow' ? size * 0.16 : kind === 'glow' ? size * 0.32 : 0;
   const padL = Math.ceil(ow + 2 + blur * 1.6), padT = Math.ceil(size * 0.82 + ow + blur * 1.6);
   const W = Math.ceil(padL + adv + ext + ow + 3 + blur * 1.6), H = Math.ceil(padT + size * 0.28 + ext * 1.8 + ow + 3 + blur * 1.6);
   const cv = document.createElement('canvas');
   cv.width = Math.max(1, W); cv.height = Math.max(1, H);
   const g = cv.getContext('2d')!;
-  if (kind === 'face') drawText3D(g, c, padL, padT, { size, palette: pal, depth, drop: false });
+  if (kind === 'face') drawText3D(g, c, padL, padT, { size, palette: pal, depth, drop: false, italic: it });
   else {
     // the shape blurred, drawn off-canvas and brought in by its shadow (works where canvas filters don't)
-    g.font = `${size}px ${STACK}`; g.textBaseline = 'alphabetic';
+    g.font = face(size, it); g.textBaseline = 'alphabetic';
     g.shadowColor = kind === 'shadow' ? 'rgba(10,5,2,1)' : `rgba(${glow},1)`; g.shadowBlur = blur; g.shadowOffsetX = W * 2;
     g.lineJoin = 'round'; g.lineWidth = ow * 2; g.strokeStyle = '#000'; g.fillStyle = '#000';
-    g.strokeText(alagardSafe(c), padL - W * 2, padT); g.fillText(alagardSafe(c), padL - W * 2, padT);
+    g.strokeText(textSafe(c), padL - W * 2, padT); g.fillText(textSafe(c), padL - W * 2, padT);
   }
   s = { cv, ox: padL, oy: padT, adv };
   if (sprites.size > 900) sprites.clear();
@@ -303,7 +305,7 @@ export class TalkView {
     this.measure();
     if (`${this.o.size}|${this.o.maxWidth}|${this.dpr}` !== before) { this.tags.clear(); for (const l of [this.cur, this.old]) if (l) this.layout(l, l.glyphs); this.sizeCanvas(); }
   }
-  private measure() { this.dpr = Math.min(3, Math.max(1, devicePixelRatio || 1)); this.s = grid(this.o.size * this.dpr); }
+  private measure() { this.dpr = Math.min(3, Math.max(1, devicePixelRatio || 1)); this.s = grid(this.o.size * SCALE * this.dpr); }
 
   /** the line on screen (marks removed) */
   get text() { return this.cur?.plain ?? ''; }
@@ -356,7 +358,7 @@ export class TalkView {
     // words, with their letters' advances
     const items: { beats: Beat[]; w: number; space: number }[] = [];
     let word: Beat[] = [];
-    const flush = () => { if (word.length) items.push({ beats: word, w: word.reduce((a, b) => a + advance(b.c, size(b.tone)), 0), space: 0 }); word = []; };
+    const flush = () => { if (word.length) items.push({ beats: word, w: word.reduce((a, b) => a + advance(b.c, size(b.tone), b.tone === 'hush'), 0), space: 0 }); word = []; };
     for (const b of beats) { if (b.c === ' ') { flush(); if (items.length) items[items.length - 1].space += advance(' ', s); } else word.push(b); }
     flush();
     // wrap into rows
@@ -557,7 +559,7 @@ export class TalkView {
       const w = Math.ceil(advanceText(l.who, ts) + ts * 0.7), h = Math.ceil(ts * 1.45);
       const cv = document.createElement('canvas');
       cv.width = w; cv.height = h;
-      drawText3D(cv.getContext('2d')!, l.who, Math.round(ts * 0.12), Math.round(ts * 0.92), { size: ts, palette: 'gold', depth: 1 });
+      drawText3D(cv.getContext('2d')!, l.who, Math.round(ts * 0.14), Math.round(ts * 0.92), { size: ts, palette: 'gold', depth: 1, caps: true });
       t = { cv, w, h };
       if (fontOK) this.tags.set(l.who, t);
     }
@@ -571,4 +573,10 @@ export class TalkView {
 
   dispose() { this.live?.remove(); this.canvas.remove(); }
 }
-function advanceText(t: string, size: number) { return [...alagardSafe(t)].reduce((a, c) => a + advance(c, size), 0); }
+/** a name in small capitals, as the tag sets it */
+function advanceText(t: string, size: number) {
+  mctx ??= document.createElement('canvas').getContext('2d');
+  if (!mctx) return t.length * size * 0.6;
+  mctx.font = fontPx(size, { caps: true });
+  return mctx.measureText(textSafe(t)).width;
+}

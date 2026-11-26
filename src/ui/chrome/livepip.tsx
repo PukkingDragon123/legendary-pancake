@@ -16,6 +16,7 @@ import type { OwlLook } from '../../owl/model.ts';
 import { portrait } from '../portraits.ts';
 import { sceneRef } from '../state.ts';
 import { FRAME_OPEN, FRAME_D, frameArt, frameSkyOf, portraitSky } from './frameart.ts';
+import { texReady } from '../real/tex.ts';
 import { uiBurstAt, type UiFxKind } from './uifx.ts';
 
 /** [ui7] device px across the owl's render: sharp, anti-aliased, at the screen's own resolution */
@@ -248,6 +249,7 @@ export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; li
   const S = p.size, open = (FRAME_OPEN / FRAME_D) * S, inset = (S - open * 2) / 2 - 0.5;
   // [ui7] each frame is painted once per CSS size, at the screen's resolution
   const art = Math.round(S);
+  void texReady.value; // [ui12] repaint the frame once the wood and metal photo tiles are in
   const tap = p.tappable ? (e: MouseEvent) => { e.stopPropagation(); cam?.poke(); setTapped((n) => n + 1); } : undefined;
   const box = { left: `${inset}px`, top: `${inset}px`, width: `${S - inset * 2}px`, height: `${S - inset * 2}px` };
   return (

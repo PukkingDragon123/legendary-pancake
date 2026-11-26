@@ -291,7 +291,7 @@ const STAMP_COL: Record<string, [number, number]> = { red: [mutec(P.terracotta),
 /** an emblem drawn in a 9 x 9 box at (x, y) */
 function emblem(g: CanvasRenderingContext2D, name: string, x: number, y: number, col: string) {
   g.save(); g.translate(x, y); g.fillStyle = col; g.strokeStyle = col; g.lineWidth = 0.9; g.lineCap = 'round'; g.lineJoin = 'round';
-  const text = (t: string) => { g.font = `bold 8px Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 4.5, 5); };
+  const text = (t: string) => { g.font = `bold 8px Alegreya, Georgia, serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 4.5, 5); };
   const star = (cx: number, cy: number, R: number, r: number, n = 5) => { g.beginPath(); for (let k = 0; k < n * 2; k++) { const a = (k / (n * 2)) * Math.PI * 2 - Math.PI / 2, rr = k % 2 ? r : R; g.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } g.closePath(); g.fill(); };
   switch (name) {
     case 'heart': g.beginPath(); g.moveTo(4.5, 8); g.bezierCurveTo(-1, 4, 1.5, -0.5, 4.5, 2.6); g.bezierCurveTo(7.5, -0.5, 10, 4, 4.5, 8); g.fill(); break;
@@ -303,7 +303,7 @@ function emblem(g: CanvasRenderingContext2D, name: string, x: number, y: number,
     case 'flame': g.beginPath(); g.moveTo(4.5, 0.5); g.bezierCurveTo(8, 4, 8.5, 8.5, 4.5, 8.5); g.bezierCurveTo(0.5, 8.5, 1, 4.5, 3.5, 3); g.bezierCurveTo(3.5, 4.5, 4.5, 5, 4.5, 0.5); g.fill(); break;
     case 'star': star(4.5, 4.8, 4.3, 1.8); break;
     case 'sun': g.beginPath(); g.arc(4.5, 4.5, 2.2, 0, Math.PI * 2); g.fill(); for (let k = 0; k < 8; k++) { const a = (k / 8) * Math.PI * 2; g.beginPath(); g.moveTo(4.5 + Math.cos(a) * 3, 4.5 + Math.sin(a) * 3); g.lineTo(4.5 + Math.cos(a) * 4.3, 4.5 + Math.sin(a) * 4.3); g.stroke(); } break;
-    case 'hush': g.font = 'bold 5px Georgia, serif'; g.fillText('z', 2, 4); g.font = 'bold 7px Georgia, serif'; g.fillText('Z', 5, 8); break;
+    case 'hush': g.font = 'bold 5px Alegreya, Georgia, serif'; g.fillText('z', 2, 4); g.font = 'bold 7px Alegreya, Georgia, serif'; g.fillText('Z', 5, 8); break;
     case 'feather': case 'quill': g.beginPath(); g.moveTo(8.5, 0.5); g.quadraticCurveTo(9, 6, 2.5, 7); g.quadraticCurveTo(3, 1.5, 8.5, 0.5); g.fill(); g.beginPath(); g.moveTo(8, 1); g.lineTo(0.5, 8.5); g.stroke(); break;
     case 'wind': for (const [yy, l] of [[2, 6], [4.5, 8], [7, 5]]) { g.beginPath(); g.moveTo(0.5, yy); g.lineTo(l, yy); g.arc(l, yy - 1, 1, Math.PI / 2, -Math.PI / 2, true); g.stroke(); } break;
     case 'box': g.strokeRect(1, 2, 7, 6); g.beginPath(); g.moveTo(1, 4); g.lineTo(8, 4); g.moveTo(4.5, 2); g.lineTo(4.5, 4); g.stroke(); break;

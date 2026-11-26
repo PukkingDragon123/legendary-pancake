@@ -1,5 +1,5 @@
 // A real rubber-stamp impression, inked at full device resolution and different every time: the die (a double-ruled
-// border, the word in Alagard, the firm's name) pressed into the paper by a hand that rocks it a little, so the ink
+// border, the word in small capitals, the firm's name) pressed into the paper by a hand that rocks it a little, so the ink
 // takes unevenly: solid where the pressure was heavy, speckled with tiny voids where the rubber's grain and the paper's
 // tooth kept it off, missing in patches where it barely touched. The ink wicks a hair's breadth out along the paper's
 // fibres, pools darker at the edges of every stroke, leaves a faint ghost where the die bounced (a double strike)
@@ -9,7 +9,7 @@
 //   inkStamp(word, sub, { w, h, seed }) -> an element w x h CSS px (absolutely placed by the caller)
 //   prepareInk(...) paints it ahead of time (the painting is a few tens of ms; do it before the stamp falls)
 import { fbm, hash, vnoise } from './tex.ts';
-import { alagardSafe, STACK } from '../ui/font.ts';
+import { fontPx, textSafe } from '../ui/font.ts';
 import { reducedMotion } from '../ui/chrome/swing.ts';
 
 export interface InkOpts { w: number; h: number; seed?: number; rgb?: [number, number, number]; dryMs?: number }
@@ -50,12 +50,12 @@ function die(word: string, sub: string, W: number, H: number, k: number, dx = 0,
   rr(1.9 * k, 2.3 * k, 3.4 * k);
   rr(4.9 * k, 0.9 * k, 1.8 * k);
   g.textAlign = 'center'; g.textBaseline = 'alphabetic';
-  const s = alagardSafe(word);
+  const s = textSafe(word);
   let size = Math.floor(H * 0.5);
-  g.font = `${size}px ${STACK}`;
+  g.font = fontPx(size, { caps: true });
   const maxW = W - 15 * k;
   const ww = g.measureText(s).width;
-  if (ww > maxW) { size = Math.floor((size * maxW) / ww); g.font = `${size}px ${STACK}`; }
+  if (ww > maxW) { size = Math.floor((size * maxW) / ww); g.font = fontPx(size, { caps: true }); }
   // a little letter spacing, as cut rubber has
   const chars = [...s], sp = size * 0.06, tot = chars.reduce((a, ch) => a + g.measureText(ch).width, 0) + sp * (chars.length - 1);
   let x = W / 2 - tot / 2;
@@ -64,10 +64,10 @@ function die(word: string, sub: string, W: number, H: number, k: number, dx = 0,
   for (const ch of chars) { g.fillText(ch, x, base); g.lineWidth = size * 0.035; g.strokeText(ch, x, base); x += g.measureText(ch).width + sp; }
   if (sub) {
     const ss = Math.max(8 * k, Math.floor(H * 0.17));
-    g.font = `${ss}px ${STACK}`; g.textAlign = 'center';
-    g.fillText(alagardSafe(sub), W / 2, H * 0.83);
+    g.font = fontPx(ss, { caps: true }); g.textAlign = 'center';
+    g.fillText(textSafe(sub), W / 2, H * 0.83);
     // two little stars either side of the firm's name
-    const sw = g.measureText(alagardSafe(sub)).width / 2 + ss * 0.9;
+    const sw = g.measureText(textSafe(sub)).width / 2 + ss * 0.9;
     for (const sx of [-1, 1]) { g.beginPath(); for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2 - Math.PI / 2, r = (i % 2 ? 0.42 : 1) * ss * 0.36; g.lineTo(W / 2 + sx * sw + Math.cos(a) * r, H * 0.83 - ss * 0.33 + Math.sin(a) * r); } g.fill(); }
   }
   const d = g.getImageData(0, 0, W, H).data, out = new Float32Array(W * H);

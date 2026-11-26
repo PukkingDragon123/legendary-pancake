@@ -17,5 +17,5 @@ Everything this round added is made in code for Hoot Hollow; nothing new was bor
   the shield, painted pixel by pixel in code. No real brand, logo or app is shown.
 
 The sheep, day bed, alarm clock, pocket watch and nightstand in the answers are the borrowed models already
-credited in `intro4.md` (repacked into `public/models/interview/cards.glb`). The phone's text uses m5x7 by Daniel
-Linssen and Galmuri11 (Lee Minseo, SIL Open Font License), credited there too.
+credited in `intro4.md` (repacked into `public/models/interview/cards.glb`). The phone's text is set in the game's
+Alegreya (`font12.md`).

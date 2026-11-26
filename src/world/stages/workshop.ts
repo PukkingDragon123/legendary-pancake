@@ -16,7 +16,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { rng } from '../../gfx/noise.ts';
-import { alagardReady, alagardText } from '../../ui/font.ts';
+import { fontReady, canvasText } from '../../ui/font.ts';
 import { M, contactShadow, logGeo, mat, tex, taperTube } from './lodgekit.ts';
 
 // ------------------------------------------------------------------ the work, in Barnaby's frame (three.js: x, z = -y_blender)
@@ -660,14 +660,14 @@ function labelTex(text: string, col: number, seed: number): THREE.Texture {
     // the paper label
     g.fillStyle = '#efe2c2'; g.fillRect(14, 10, 68, 28);
     g.fillStyle = '#8a3a26'; g.fillRect(14, 10, 68, 3); g.fillRect(14, 35, 68, 3);
-    alagardText(g, text, 48, 30, '#2e2416', { align: 'center' });
+    canvasText(g, text, 48, 30, '#2e2416', { align: 'center' });
     // drips down from the rim
     g.fillStyle = 'rgba(120,70,20,0.6)';
     for (let i = 0; i < 4; i++) { const x = 4 + Math.floor(r() * 88); g.fillRect(x, 0, 2, 3 + Math.floor(r() * 7)); }
   };
   paint();
   t = canvasTex(c);
-  void alagardReady().then(() => { paint(); t!.needsUpdate = true; });
+  void fontReady().then(() => { paint(); t!.needsUpdate = true; });
   labelCache.set(key, t);
   return t;
 }
@@ -835,11 +835,11 @@ export function priceTag(price: number, seed = 1): THREE.Group {
     gx.fillStyle = '#3a2a18'; gx.fillRect(6, 18, 4, 4);
     // a little acorn and the price in ink
     gx.fillStyle = '#6a4220'; gx.fillRect(19, 15, 7, 3); gx.fillStyle = '#b8772f'; gx.fillRect(20, 18, 5, 6); gx.fillRect(21, 24, 3, 1);
-    alagardText(gx, String(price), 44, 27, '#2a1e12', { align: 'center' });
+    canvasText(gx, String(price), 44, 27, '#2a1e12', { align: 'center' });
   };
   paint();
   const t = canvasTex(c);
-  void alagardReady().then(() => { paint(); t.needsUpdate = true; });
+  void fontReady().then(() => { paint(); t.needsUpdate = true; });
   const m = new THREE.MeshStandardMaterial({ map: t, roughness: 0.95, side: THREE.DoubleSide });
   const tag = new THREE.Mesh(new THREE.PlaneGeometry(0.09, 0.056), m);
   tag.position.set(0.03, -0.075, 0);

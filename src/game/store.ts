@@ -7,7 +7,7 @@ import { migrateSpecies } from '../owl/species.ts'; // [owl3]
 import { PALETTE, type Skin } from '../owl/palette.ts';
 import type { SleepSession } from '../sleep/types.ts';
 import { defaultBlockConfig, type BlockConfig } from './blocker.ts';
-import { DEFAULT_FRAME, FRAME_BY_ID, STARTER_FRAMES } from '../assets/frames.ts';
+import { DEFAULT_FRAME, FRAME_BY_ID, FRAME_V, STARTER_FRAMES } from '../assets/frames.ts';
 import { AREAS, ITEM_BY_ID, levelOf, TRINKET, ZONE_LEVEL, type LootEntry } from './catalog.ts';
 import type { AdventureResult } from './adventure.ts';
 
@@ -89,6 +89,8 @@ export interface Save {
   owned: { items: string[]; pieces: string[]; palettes: string[]; skins: string[]; species: string[]; finishes: string[]; /** [ui5] portrait frames */ frames: string[] };
   /** [ui5] the frame round the live owl portrait on the name sign (catalog FRAMES) */
   frame: string;
+  /** [ui12] frame defaults version: 2 = the carved wooden frame is the default (older saves on the porthole move to it) */
+  frameV?: number;
   /** extra copies of furniture the player owns beyond those placed (inventory counts) */
   furniture: Record<string, string>;
   collection: Record<string, number>;
@@ -122,6 +124,7 @@ export function freshSave(): Save {
     coins: 250, gems: 20, xp: 0, streak: 0, bestStreak: 0,
     owned: { items: ['nestbed', 'moonlamp', 'roundrug', 'fernpot', 'candles', 'stool'], pieces: ['nightcap', 'sprout', 'satchel'], palettes: ['tawny'], skins: ['owl'], species: ['tawny'], finishes: ['wall_heartwood', 'floor_planks'], frames: [...STARTER_FRAMES] },
     frame: DEFAULT_FRAME,
+    frameV: FRAME_V,
     furniture: { g_back: 'nestbed', g_left: 'moonlamp', g_mid: 'roundrug', g_frontL: 'fernpot' },
     collection: {}, area: 'woods',
     sleep: { goalMin: 480, wake: '07:00', days: [1, 2, 3, 4, 5], smartMin: 20, alarmSound: 'alarm_musicbox', alarmOn: true, reminders: true, windDownMin: 30, mic: true, clips: false, sensitivity: 0.5, soundscape: 'amb_rain', soundscapeMin: 30, soundscapeVol: 0.6 },
@@ -148,7 +151,7 @@ function load(): Save {
       s.v = 2;
       migrateSpecies(s); // [owl3] the owl line is eight species: retired ones move to their nearest relative
       // shallow-merge new fields into older saves
-      return migrateFrames({ ...f, ...s, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker } });
+      return migrateFrames({ ...f, ...s, frameV: s.frameV, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker } });
     }
   } catch { /* ignore */ }
   return freshSave();
@@ -156,6 +159,8 @@ function load(): Save {
 
 /** [ui5] Saves from before portrait frames: the starter frames are always owned, and the chosen frame must exist and be owned. */
 export function migrateFrames(s: Save): Save {
+  // [ui12] the old default brass porthole gives way to the carved wooden frame (once; the porthole stays owned)
+  if ((s.frameV ?? 0) < FRAME_V) { if (s.frame === 'porthole') s.frame = DEFAULT_FRAME; s.frameV = FRAME_V; }
   const have = Array.isArray(s.owned.frames) ? s.owned.frames.filter((id) => FRAME_BY_ID[id]) : [];
   for (const id of STARTER_FRAMES) if (!have.includes(id)) have.push(id);
   s.owned = { ...s.owned, frames: have };

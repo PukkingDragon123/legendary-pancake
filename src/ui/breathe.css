@@ -11,7 +11,7 @@
 .bp-list { display: flex; flex-direction: column; gap: 6px; }
 .bp-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px 9px 6px; text-align: left; color: #e4dce8; background: linear-gradient(180deg, #2f3d4f 0 50%, #2a3646 50%); box-shadow: inset 0 2px 2px #46596a, inset 0 -3px 3px #1b222d, 0 0 0 1px color-mix(in srgb, #1b222d 50%, transparent); transition: transform 0.15s var(--pop); }
 .bp-card:active { transform: translateY(2px); }
-.bp-card b { font-size: var(--t1); font-weight: 400; color: #f7f1e6; }
+.bp-card b { font-size: var(--t1); font-weight: 700; color: #f7f1e6; }
 .bp-card small { font-size: var(--t1); color: #b9b2cb; line-height: 1.25; }
 .bp-card .bp-best { font-size: var(--t1); color: #2c2820; background: var(--pc); padding: 1px 6px; box-shadow: 0 0 0 1px color-mix(in srgb, #202332 50%, transparent); }
 .bp-card.on { background: linear-gradient(180deg, #46596a 0 50%, #3d4f60 50%); box-shadow: inset 0 2px 2px #617f8c, inset 0 -3px 3px #27313f, 0 0 0 1px color-mix(in srgb, #e9d5ae 50%, transparent), 0 0 0 1px color-mix(in srgb, #69523e 50%, transparent); }
@@ -24,6 +24,6 @@
 .bp-len { flex-wrap: nowrap; }
 .bp-len .hh-tab { font-size: var(--t1); color: #382c22; padding: 0 1px; white-space: nowrap; }
 .bp-toggle { display: flex; align-items: center; gap: 8px; }
-.bp-toggle b { display: block; font-size: var(--t1); font-weight: 400; }
+.bp-toggle b { display: block; font-size: var(--t1); font-weight: 700; }
 .bp-toggle small { display: block; font-size: var(--t1); color: #c6b096; }
 .bp-go { height: 62px; font-size: var(--t2); }

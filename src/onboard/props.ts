@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { F } from './fonts.ts';
-import { alagardSafe, STACK } from '../ui/font.ts';
+import { fontPx, textSafe } from '../ui/font.ts';
 import { crispText, fbm, hash, mix3, mul3, pixelTex, rgb, Tex, vnoise, type RGB } from './tex.ts';
 
 const cl = (v: number, a = 0, b = 1) => (v < a ? a : v > b ? b : v);
@@ -279,7 +279,7 @@ function teaCup(): Prop {
   const sauc = saucer(0.064, (x, y, rim) => (rim ? (y % 8 < 2 ? gold : PORCELAIN) : PORCELAIN), 6);
   // the tea bag's string over the rim and its paper tag
   const str = mesh(tube([V(0.01, 0.05, 0.0), V(0.03, 0.062, 0.02), V(0.044, 0.066, 0.03), V(0.05, 0.05, 0.035), V(0.051, 0.03, 0.036)], 0.0006, 1, 20, 4), std({ color: 0xe8dcc0, roughness: 1 }));
-  const tt = new Tex(32, 40); // [font6] 2 texels per mm so 'tea' fits in Alagard
+  const tt = new Tex(32, 40); // 2 texels per mm so 'tea' fits
   wash(tt, 0, 0, 32, 40, () => rgb(0xf0e2c2), { seed: 2, len: 2 });
   for (let y = 0; y < 40; y++) for (let x = 0; x < 32; x++) if (x < 2 || y < 2 || x > 29 || y > 37) tt.shade(x, y, 0.85);
   letter(tt, 'tea', 16, 25, F.small(16), rgb(0x3a6a2a));
@@ -972,7 +972,7 @@ export function celestial(kind: 'sun' | 'moon' | 'dial'): Prop {
 
 // ------------------------------------------------------------------ [dialog10] clocks: a twin-bell alarm clock and a pocket watch
 
-/** a clock dial painted smooth at high resolution: enamel, minute track, numerals in Alagard, a maker's name */
+/** a clock dial painted smooth at high resolution: enamel, minute track, numerals in the game's face, a maker's name */
 function dialTex(o: { face: string; ink: string; accent: string; numerals: 'arabic' | 'roman'; maker: string; sub?: boolean }): THREE.CanvasTexture {
   const N = 512, c = document.createElement('canvas');
   c.width = c.height = N;
@@ -998,12 +998,12 @@ function dialTex(o: { face: string; ink: string; accent: string; numerals: 'arab
     const a = (h / 12) * Math.PI * 2, r = C * (o.numerals === 'roman' ? 0.62 : 0.64), t = o.numerals === 'roman' ? ROMAN[h] : String(h || 12);
     g.save(); g.translate(Math.sin(a) * r, -Math.cos(a) * r);
     if (o.numerals === 'roman') g.rotate(a);
-    g.font = `${o.numerals === 'roman' ? 48 : 64}px ${STACK}`;
-    g.fillStyle = o.ink; g.fillText(alagardSafe(t), 0, 2);
+    g.font = o.numerals === 'roman' ? fontPx(54, { caps: true }) : fontPx(70, { weight: 700 });
+    g.fillStyle = o.ink; g.fillText(textSafe(t), 0, 2);
     g.restore();
   }
-  g.font = `32px ${STACK}`; g.fillStyle = o.accent;
-  g.fillText(alagardSafe(o.maker), 0, -C * 0.3);
+  g.font = fontPx(34, { caps: true }); g.fillStyle = o.accent;
+  g.fillText(textSafe(o.maker), 0, -C * 0.3);
   if (o.sub) {
     // the small seconds
     g.lineWidth = 1.6; g.strokeStyle = o.ink; g.beginPath(); g.arc(0, C * 0.36, C * 0.17, 0, Math.PI * 2); g.stroke();
@@ -1245,7 +1245,7 @@ function book(w: number, d: number, th: number, cloth: RGB, seed: number, title:
   const S = new Tex(32, 128);
   wash(S, 0, 0, 32, 128, () => cloth, { seed: seed + 1, ang: Math.PI / 2, len: 5 });
   for (const yy of [10, 14, 112, 116]) for (let x = 0; x < 32; x++) S.set(x, yy, rgb(0xe0b24a));
-  { // [font6] the title runs along the spine, as on a real book (Alagard is too wide to fit across it)
+  { // [font6] the title runs along the spine, as on a real book (too wide to fit across it)
     const lc = document.createElement('canvas'); lc.width = 128; lc.height = 32;
     const lg = lc.getContext('2d', { willReadFrequently: true })!;
     crispText(lg, title, 64, 21, F.small(16), '#000000', { align: 'center' });

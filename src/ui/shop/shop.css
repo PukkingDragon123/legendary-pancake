@@ -48,7 +48,7 @@
 .lg-hole { position: absolute; top: -2px; left: 50%; width: 16px; height: 16px; margin-left: -8px; background: var(--lg-eyelet) 0 0 / 16px 16px no-repeat; z-index: 2; }
 .lg-ptag-name { padding: 0 6px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; text-align: center; color: #3d2a1c; min-height: 2.04em; display: flex; align-items: center; }
 .lg-ptag-price { display: flex; align-items: baseline; gap: 5px; font-size: var(--t1); }
-.lg-ptag-price b { font-weight: 400; font-family: var(--font-display); color: #2e2416; }
+.lg-ptag-price b { font-weight: 700; font-family: var(--font-display); color: #2e2416; }
 /* the old price, struck through in red pencil (a hand-drawn wobbly line) */
 .lg-was { position: relative; text-decoration: none; color: #7b6a54; font-size: var(--t1); }
 .lg-was::after { content: ''; position: absolute; left: -4px; right: -4px; top: 50%; height: 10px; margin-top: -5px; background: var(--lg-strike) center / 100% 100% no-repeat; }
@@ -68,12 +68,12 @@
 /* kraft tags (the gift), burlap and brass labels (the packs) */
 .lg-gifttag .lg-ktag, .lg-packtag .lg-ktag { position: absolute; left: 0; top: 8px; translate: -50% 0; transform-origin: 50% 0; display: flex; flex-direction: column; align-items: center; padding: 7px 3px 3px; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; font-size: var(--t1); line-height: 1; white-space: nowrap; animation: lgSwing 4.2s ease-in-out infinite; filter: drop-shadow(0 3px 0 rgba(30, 18, 8, 0.4)); }
 .lg-gifttag .lg-ktag { top: 10px; scale: 0.86; }
-.lg-gifttag .lg-ktag b { font-family: var(--font-display); font-weight: 400; font-size: var(--t1); color: #b0342c; }
+.lg-gifttag .lg-ktag b { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); color: #b0342c; }
 .lg-gifttag .lg-ktag.done { opacity: 0.75; }
 .lg-packtag .lg-ktag { top: 4px; transform-origin: 50% 0; animation: lgSwing 4.4s ease-in-out infinite; }
 .lg-packtag.gem .lg-ktag { top: 6px; transform-origin: 50% 0; animation: lgSwing 4s ease-in-out infinite; }
 .lg-packtag.gem .lg-string { height: 8px; }
-.lg-packtag .lg-ktag b, .lg-packtag .lg-ktag span { display: inline-flex; align-items: center; gap: 2px; font-weight: 400; }
+.lg-packtag .lg-ktag b, .lg-packtag .lg-ktag span { display: inline-flex; align-items: center; gap: 2px; font-weight: 700; }
 .lg-packtag .lg-ktag b { font-family: var(--font-display); font-size: var(--t1); }
 .lg-ktag.burlap { background: var(--lg-burlap) 0 0 / 64px 64px; background-clip: padding-box; color: #2e2416; }
 .lg-ktag.burlap b { text-shadow: 0 1px 1px rgba(255, 240, 210, 0.6); }
@@ -112,7 +112,7 @@
 .lg-shop.top .lg-nav { width: calc(100% - 20px); max-width: 420px; }
 /* the pinned note: what this part of the store is, and what to do */
 .lg-hint { position: absolute; z-index: 4; left: 12px; top: calc(62px + var(--safe-t)); display: flex; flex-direction: column; gap: 1px; max-width: 220px; padding: 2px 4px 0; background: var(--lg-pat-linen) 0 0 / 64px 64px; background-clip: padding-box; color: #3d2416; rotate: -1.5deg; animation: lgHintIn 0.5s var(--pop) both 0.3s; pointer-events: none; filter: drop-shadow(0 3px 0 rgba(20, 10, 6, 0.35)); }
-.lg-hint b { font-family: var(--font-display); font-weight: 400; font-size: var(--t1); line-height: 1; color: #8e241e; }
+.lg-hint b { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); line-height: 1; color: #8e241e; }
 .lg-hint > span { font-size: var(--t1); line-height: 1.25; }
 .lg-hint-time { display: inline-flex; align-items: center; gap: 3px; font-size: var(--t1) !important; color: #6b5844; }
 .lg-hint .lg-pin { top: -10px; }
@@ -124,7 +124,7 @@
 .lg-bubble.notail::after, .lg-bubble.notail::before { display: none; }
 .lg-gnote { margin: 0 8px; padding: 0 4px; font-size: var(--t1); line-height: 1.25; text-align: center; color: #3d2416; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
 .lg-timer { display: inline-flex; align-items: center; gap: 3px; padding: 0 3px; font-size: var(--t1); color: #f1d39a; white-space: nowrap; }
-.lg-timer b { color: #fff4dc; font-weight: 400; font-variant-numeric: tabular-nums; }
+.lg-timer b { color: #fff4dc; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* ---------------------------------------------------------------- detail cards: a ledger page pinned to an oak board, a gift tag, a burlap label, a brass plate */
 .lg-card { position: absolute; z-index: 6; display: flex; flex-direction: column; background: var(--lg-wood) 0 0 / 256px 128px; background-clip: padding-box; filter: drop-shadow(0 8px 0 rgba(20, 12, 6, 0.45)); pointer-events: auto; }
@@ -135,7 +135,7 @@
 .lg-card-close { position: absolute; z-index: 3; right: -6px; top: -12px; min-height: 38px; width: 42px; }
 .lg-card > div { position: relative; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 .lg-kind { font-size: var(--t1); color: #7b6550; text-transform: uppercase; letter-spacing: 1px; }
-.lg-card h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: var(--t2); line-height: 1; color: #2e2416; }
+.lg-card h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: var(--t2); line-height: 1; color: #2e2416; }
 .lg-blurb { margin: 4px 0; font-size: var(--t1); line-height: 1.25; color: #4b3a2a; }
 .lg-note { margin: 6px 0 0; font-size: var(--t1); color: #6b5844; text-align: center; }
 .lg-fine { margin: 4px 0; font-size: var(--t1); line-height: 1.25; color: #5a4320; }
@@ -148,22 +148,22 @@
 .lg-ledger-art img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 0 rgba(30, 18, 8, 0.3)); }
 .lg-ledger-text { grid-area: text; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .lg-prices { display: flex; align-items: baseline; gap: 10px; margin-top: 2px; }
-.lg-now { font-family: var(--font-display); font-weight: 400; font-size: var(--t2); color: #2e2416; }
+.lg-now { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #2e2416; }
 .lg-ledger .lg-stampbtn, .lg-ledger .lg-note { grid-area: stamp; justify-self: center; }
 /* the gift tag */
 .lg-gtag { margin: 6px; padding: 18px 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; text-align: center; }
 .lg-hole.big { top: 6px; width: 10px; height: 10px; margin-left: -5px; }
 .lg-hand { margin: 2px 0; font-size: var(--t1); line-height: 1.25; color: #3d2416; }
-.lg-hand b { font-weight: 400; font-family: var(--font-display); color: #8e241e; }
+.lg-hand b { font-weight: 700; font-family: var(--font-display); color: #8e241e; }
 .lg-gtag-what { display: flex; align-items: center; gap: 6px; font-size: var(--t1); }
-.lg-gtag-what b { font-family: var(--font-display); font-weight: 400; font-size: var(--t2); }
+.lg-gtag-what b { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); }
 .lg-ribbonpull { min-width: 200px; margin-top: 4px; }
 /* burlap label sewn on kraft */
 .lg-burlap { margin: 6px; padding: 10px 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; background: var(--lg-burlap) 0 0 / 64px 64px; background-clip: padding-box; }
 .lg-burlap h3, .lg-plate h3 { text-shadow: 0 2px 1.8px rgba(255, 236, 200, 0.6); }
 .lg-burlap .lg-blurb { background: rgba(250, 240, 215, 0.85); padding: 2px 6px; box-shadow: 0 0 0 1px color-mix(in srgb, rgba(120, 90, 50, 0.4) 50%, transparent); }
 .lg-big-amount { display: flex; align-items: center; gap: 6px; }
-.lg-big-amount b { font-family: var(--font-display); font-weight: 400; font-size: var(--t2); color: #2e2416; text-shadow: 0 2px 1.8px rgba(255, 236, 200, 0.6); }
+.lg-big-amount b { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #2e2416; text-shadow: 0 2px 1.8px rgba(255, 236, 200, 0.6); }
 .lg-bonus { font-size: var(--t1); color: #3d2416; padding: 0 4px; }
 .lg-bonus.gem { color: #fff4dc; }
 /* the brass plate */
@@ -205,14 +205,14 @@
 .lg-poster-art { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; box-shadow: 0 0 0 1px color-mix(in srgb, #3d2416 50%, transparent); }
 .lg-poster-title { position: absolute; left: 12px; right: 12px; bottom: 10px; padding: 0 4px; background: #4a3020; background-clip: padding-box; color: #fff4dc; }
 .lg-poster-kick { font-size: var(--t1); color: #ffe39a; text-transform: uppercase; letter-spacing: 1px; }
-.lg-poster-title h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: var(--t2); line-height: 1; }
+.lg-poster-title h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: var(--t2); line-height: 1; }
 .lg-poster-title p { margin: 2px 0 0; font-size: var(--t1); line-height: 1.25; opacity: 0.9; }
 .lg-feat { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr; gap: 6px; padding: 0 4px; align-items: end; }
 .lg-fcard { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; padding: 2px 0 2px; background: #f4e6c8; background-clip: padding-box; text-align: center; }
 .lg-fcard.five { background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
 .lg-fart { display: grid; place-items: center; width: 100%; aspect-ratio: 1; }
 .lg-fart img { width: 100%; height: 100%; object-fit: contain; }
-.lg-fcard b { font-family: var(--font-display); font-weight: 400; font-size: var(--t1); line-height: 1; }
+.lg-fcard b { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); line-height: 1; }
 .lg-fcard small { font-size: var(--t1); line-height: 1; color: #4b3a2a; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .lg-up { position: absolute; top: -9px; right: -7px; padding: 0 2px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; color: #fff4dc; rotate: 9deg; z-index: 1; }
 .lg-stars { display: inline-flex; gap: 1px; }
@@ -221,7 +221,7 @@
 .lg-g-slate { margin: 0 6px; padding: 2px 6px; color: #ece9dc; background: #323c41; background-clip: padding-box; font-size: var(--t1); text-shadow: 0 0 1px rgba(236, 233, 220, 0.5); }
 .lg-chalk-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; line-height: 1.25; }
 .lg-chalk-row > span { display: inline-flex; align-items: center; gap: 1px; white-space: nowrap; }
-.lg-chalk-row b { font-family: var(--font-display); font-weight: 400; font-size: var(--t2); color: #ffe39a; }
+.lg-chalk-row b { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #ffe39a; }
 .lg-chalk-row.small { font-size: var(--t1); }
 .lg-chalk-row.gold { color: #ffe39a; }
 .lg-tally { display: inline-flex; gap: 6px; align-items: center; }
@@ -250,7 +250,7 @@
 @keyframes lgFade { from { opacity: 0; } }
 .lg-page { position: relative; display: flex; flex-direction: column; gap: 8px; width: min(440px, 100%); max-height: min(620px, calc(100% - 20px)); padding: 6px 8px 8px 22px; background: var(--lg-pat-ledger) 0 0 / 64px 64px; background-clip: padding-box; filter: drop-shadow(0 8px 0 rgba(20, 12, 6, 0.5)); animation: lgPageIn 0.45s var(--pop) both; }
 @keyframes lgPageIn { from { translate: 0 40px; rotate: 3deg; opacity: 0; } }
-.lg-page-title { margin: 0; text-align: center; font-family: var(--font-display); font-weight: 400; font-size: var(--t2); color: #8e241e; }
+.lg-page-title { margin: 0; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #8e241e; }
 .lg-page-scroll { overflow-y: auto; min-height: 0; flex: 1; font-size: var(--t1); line-height: 1.25; }
 .lg-page-scroll p { margin: 6px 0; }
 .lg-rates { width: 100%; border-collapse: collapse; font-size: var(--t1); }
@@ -286,7 +286,7 @@
 .lg-plaque { position: absolute; left: 50%; bottom: calc(40px + var(--safe-b)); translate: -50% 0; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: min(340px, calc(100vw - 32px)); max-width: calc(100vw - 24px); padding: 2px 10px 0; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; text-align: center; animation: lgPlaqueIn 0.5s var(--pop) both 0.35s; filter: drop-shadow(0 6px 0 rgba(20, 12, 6, 0.5)); }
 .lg-gacha.side .lg-plaque, .lg-reveal .lg-plaque { pointer-events: none; }
 @keyframes lgPlaqueIn { from { translate: -50% 80px; opacity: 0; } }
-.lg-plaque-name { font-family: var(--font-display); font-weight: 400; font-size: var(--t2); line-height: 1; color: #2e2416; }
+.lg-plaque-name { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); line-height: 1; color: #2e2416; }
 .lg-plaque-kind { font-size: var(--t1); color: #6b5844; }
 .lg-plaque-wrap.r5 .lg-plaque-name { color: #9a5a0c; }
 .lg-plaque-wrap.r4 .lg-plaque-name { color: #55407a; }
@@ -322,15 +322,15 @@
 @keyframes lgShower { 0% { opacity: 1; translate: 0 0; } 100% { opacity: 0; translate: var(--dx) var(--dy); } }
 .lg-moment-label { position: absolute; left: 50%; top: calc(45% + 120px); translate: -50% 0; display: flex; flex-direction: column; align-items: center; animation: lgPlaqueIn2 0.5s var(--pop) both 0.3s; }
 @keyframes lgPlaqueIn2 { from { opacity: 0; translate: -50% 30px; } }
-.lg-moment-label b { font-family: var(--font-display); font-weight: 400; font-size: var(--t3); }
+.lg-moment-label b { font-family: var(--font-display); font-weight: 700; font-size: var(--t3); }
 .lg-moment-label span { font-size: var(--t1); color: #fff4dc; text-shadow: 0 2px 1.8px rgba(20, 10, 6, 0.7); }
 .lg-prize { position: relative; display: flex; flex-direction: column; gap: 10px; width: min(380px, calc(100vw - 28px)); padding: 0; background: var(--lg-wood) 0 0 / 256px 128px; background-clip: padding-box; filter: drop-shadow(0 8px 0 rgba(20, 12, 6, 0.5)); animation: lgPageIn 0.5s var(--pop) both; }
 .lg-prize .lg-mrays { top: 40%; z-index: -1; }
 .lg-prize-page { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 8px 6px; background: var(--lg-pat-linen) 0 0 / 64px 64px; background-clip: padding-box; text-align: center; rotate: -1deg; }
-.lg-prize-title { font-family: var(--font-display); font-weight: 400; font-size: var(--t2); color: #8e241e; }
+.lg-prize-title { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #8e241e; }
 .lg-prize-art { width: 160px; height: 160px; display: grid; place-items: center; animation: lgMomPop 0.6s var(--pop) both 0.15s; }
 .lg-prize-img { width: 100%; height: 100%; object-fit: contain; }
-.lg-prize-name { font-family: var(--font-display); font-weight: 400; font-size: var(--t1); }
+.lg-prize-name { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); }
 .lg-prize-sub { font-size: var(--t1); color: #6b5844; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -342,7 +342,7 @@
 .lg-framewall.top { left: 8px; right: 8px; bottom: calc(66px + var(--safe-b)); max-height: 58%; }
 .lg-framewall.side { left: 16px; top: calc(70px + var(--safe-t)); width: min(420px, 40vw); max-height: calc(100% - 160px); animation-name: lgCardInL; }
 .lg-fw-head { display: flex; flex-direction: column; gap: 0; padding: 0 4px 2px; color: #fbe3a0; text-shadow: 1px 2px 3.6px #2a1209; }
-.lg-fw-head b { font-family: var(--font-display); font-weight: 400; font-size: var(--t1); line-height: 1; }
+.lg-fw-head b { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); line-height: 1; }
 .lg-fw-head span { font-size: var(--t1); color: #f0cf96; }
 .lg-fw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px 4px; overflow-y: auto; padding: 10px 2px 4px; scrollbar-width: thin; }
 .lg-fw-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 0; padding-top: 4px; transform-origin: 50% 0; animation: lgTagIn 0.5s var(--pop) both, lgSwing 4.2s ease-in-out infinite; }

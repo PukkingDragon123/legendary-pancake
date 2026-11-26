@@ -53,7 +53,7 @@
   background: transparent; border: 2px dashed var(--chalk-d); color: var(--chalk); font-family: var(--font-display);
   transition: transform 0.12s ease, background 0.12s ease;
 }
-.bm-floor b { font-size: var(--t1); font-weight: 400; line-height: 1; text-shadow: 1px 2px 3.6px var(--bp-dd); }
+.bm-floor b { font-size: var(--t1); font-weight: 700; line-height: 1; text-shadow: 1px 2px 3.6px var(--bp-dd); }
 .bm-floor small { display: flex; align-items: center; gap: 2px; font-size: var(--t1); line-height: 1; opacity: 0.9; white-space: nowrap; }
 .bm-floor:hover { transform: translateY(-2px); }
 .bm-floor.on { background: var(--paper); border: 2px solid var(--paper); color: var(--bp-dd); box-shadow: 0 3px 4.8px var(--bp-dd), inset 0 -3px 3px var(--oat); transform: translateY(-2px); }
@@ -99,7 +99,7 @@
 .bm-bubble.bad { background: #f1ddd3; --tail-in: #f1ddd3; }
 .bm-bubble.pending { background: #e4ecea; box-shadow: 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 4px 6px 11.6px var(--bp-dd), inset 0 0 1px 2px #c9d6d3, inset 0 -4px 4px #c9d6d3; --tail: var(--bp-dd); --tail-in: #e4ecea; }
 @keyframes bm-bub { from { transform: translate(-50%, -80%) scale(0.5); opacity: 0; } }
-.bm-bname { display: block; text-align: center; font-family: var(--font-display); font-weight: 400; font-size: var(--t1); color: var(--wood-d); white-space: nowrap; margin-bottom: 4px; }
+.bm-bname { display: block; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: var(--t1); color: var(--wood-d); white-space: nowrap; margin-bottom: 4px; }
 .bm-bubble.pending .bm-bname { color: var(--bp-d); }
 .bm-why { display: block; text-align: center; font-size: var(--t1); color: var(--berry); margin: -2px 0 4px; }
 .bm-acts { display: flex; gap: 6px; justify-content: center; }

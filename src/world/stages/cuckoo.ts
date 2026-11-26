@@ -37,7 +37,7 @@ const CHAIN = { z: 0.13, top: -0.055, wTop: -0.19, wBot: -0.64 };
 const WEIGHTS = [{ x: -0.155, ring: -0.232 }, { x: 0.155, ring: 0.232 }];
 const TAG = { w: 0.4, h: 0.29, t: 0.014 };
 const TAG_HOLE_T = TAG.h / 2 - 0.028, TAG_HOLE_B = -TAG.h / 2 + 0.026, TAG_Z = CD * 0.55;
-/** the text on a tag: two lines of Alagard, two texels to a font pixel */
+/** the text on a tag: two lines in the game's face */
 const TAG_DECAL = { w: 0.38, h: 0.2, px: [164, 86] as [number, number] };
 /** where the tags hang: a phone stacks them in pairs under the case, a wide screen hangs them two by two beside it */
 const TAG_LAY = {

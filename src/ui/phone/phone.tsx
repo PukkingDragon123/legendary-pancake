@@ -8,8 +8,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
 import { crispText } from '../../onboard/tex.ts';
-import { alagard, alagardReady } from '../font.ts';
-import m5 from '../../assets/fonts/m5x7.woff2?url';
+import { fontPx, fontReady } from '../font.ts';
 import { Real, bevel, box, deviceK, metal } from '../real/paint.ts';
 
 export const SW = 68, SH = 146;
@@ -166,13 +165,10 @@ function wallpaper() {
 
 /** the screen is drawn at twice the art resolution (a phone's screen is finer than the world): native-size fonts */
 const S2 = 2;
-// [font6] the game's Alagard for the big clock, "Sleeping" and Hoot Hollow's own message; the phone's tiny
-// system font (m5x7 at its native size) only where Alagard can't fit: app labels, notifications, banners
-const SMALL = '16px "HH m5x7", monospace', BIG = alagard(2), MED = alagard(2), APP = alagard(1);
-const phoneFonts: Promise<void> = typeof document === 'undefined' ? Promise.resolve() : (async () => {
-  try { if (![...document.fonts].some((f) => f.family.replace(/["']/g, '') === 'HH m5x7')) document.fonts.add(await new FontFace('HH m5x7', `url(${m5})`).load()); } catch { /* falls back */ }
-  await alagardReady();
-})();
+// the game's Alegreya throughout: a bold clock, small capitals for "Sleeping", the book face for app labels and
+// notifications (sized for the phone's fine screen)
+const SMALL = fontPx(15, { weight: 600 }), BIG = fontPx(40, { weight: 700 }), MED = fontPx(30, { caps: true }), APP = fontPx(18, { weight: 700 });
+const phoneFonts: Promise<void> = typeof document === 'undefined' ? Promise.resolve() : fontReady();
 const step = (t: number, a: number, d: number) => Math.max(0, Math.min(1, Math.floor(((t - a) / d) * 5) / 5));
 const ease = (k: number) => 1 - (1 - k) ** 3;
 

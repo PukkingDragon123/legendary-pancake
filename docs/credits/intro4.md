@@ -46,5 +46,5 @@ domain), downsampled to a pixel grid and packed into `public/models/interview/ar
 
 ## Fonts
 
-The forms are printed in m6x11plus and m5x7 by Daniel Linssen ([managore.itch.io](https://managore.itch.io/)),
-free to use (credit appreciated), with Galmuri11 (Lee Minseo, SIL Open Font License) and the game's own TBME face.
+The forms are printed in the game's own typefaces, Alegreya and Alegreya SC (SIL Open Font License, credited in
+`font12.md`).
