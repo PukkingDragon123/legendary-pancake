@@ -195,7 +195,7 @@ const LOOK: Record<Tone, { pal: Palette; scale: number; depth: number; alpha: nu
   say: { pal: PALETTES.cream, scale: 1, depth: 2, alpha: 1 },
   hi: { pal: PALETTES.gold, scale: 1.18, depth: 2.6, alpha: 1 },
   yell: { pal: YELL, scale: 1.5, depth: 3, alpha: 1 },
-  hush: { pal: HUSH, scale: 0.8, depth: 1.4, alpha: 0.86 },
+  hush: { pal: HUSH, scale: 0.85, depth: 1.4, alpha: 0.9 },
   wave: { pal: PALETTES.cream, scale: 1, depth: 2, alpha: 1 },
 };
 /** [font14] a size on the pixel face's grid (whole device px per font pixel; never under one step) */
