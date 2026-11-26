@@ -410,12 +410,12 @@ void main() {
   float l = length(dn);
   // heavier on the shadow side, like the screen-space lines
   if (l > 1e-6) { w *= 0.9 + 0.28 * dot(dn / l, vec2(0.7071, -0.7071)); c.xy += (dn / l) * uInkPx.xy * w * c.w; }
-  // [look12] at the depth of the bare part's rim brought half the fluff's length towards the eye, not of the fluff's
+  // [look12] at the depth of the bare part's rim brought most of the fluff's length towards the eye, not of the fluff's
   // outer edge: in front of most strands, but a wing lying in the fluff hides the line behind it (it was drawn over the
   // wing, a second contour beside the wing's own)
   vec4 mv0 = modelViewMatrix * vec4(position, 1.0);
   float lenV = length((modelViewMatrix * vec4(n * len, 0.0)).xyz);
-  vec4 rim = projectionMatrix * vec4(mv0.xyz + normalize(-mv0.xyz) * lenV * 0.5, 1.0);
+  vec4 rim = projectionMatrix * vec4(mv0.xyz + normalize(-mv0.xyz) * lenV * 0.8, 1.0);
   c.z = (rim.z / rim.w) * c.w;
   vN = vn; vV = -mv.xyz; vW = w;
   gl_Position = c;
@@ -429,7 +429,7 @@ void main() {
   float ndv = dot(normalize(vN), normalize(vV));
   float g = length(vec2(dFdx(ndv), dFdy(ndv)));
   float d = abs(ndv) / max(2.0 * g, 1e-5);
-  float a = 1.0 - smoothstep(vW - 0.5, vW + 0.5, d);
+  float a = 1.0 - smoothstep(vW - 0.5, vW + 1.5, d); // [look12] a fuller band (it broke into dots on the head)
   if (a <= 0.003) discard;
   gl_FragColor = vec4(uInkLin, a);
 }`;

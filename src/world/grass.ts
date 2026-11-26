@@ -135,7 +135,9 @@ void main() {
   vec3 amb = mix(uGround, uSky, 0.3 + vH * 0.6) * 0.72;
   vec3 lit = amb + uKey * (0.62 * sun + 0.06);
   float pt = texture2D(uCloud, vW.xz * 0.05).r - 0.5;
-  vec3 col = t.rgb * uTint * vTint * lit * uBright * (1.0 + vec3(0.1, 0.04, -0.08) * pt * 2.0);
+  // [look12] sit into the ground: a little deeper overall, and white petals and seed heads soft cream rather than glaring
+  vec3 tc = t.rgb * mix(1.0, 0.8, smoothstep(0.55, 0.85, dot(t.rgb, vec3(0.2126, 0.7152, 0.0722))));
+  vec3 col = tc * uTint * vTint * lit * uBright * 0.86 * (1.0 + vec3(0.1, 0.04, -0.08) * pt * 2.0);
   col *= 1.0 - uWet * 0.18;
   // frost and snow clinging to the lower blades
   float frost = uSnow * step(vH, uSnow * 0.55 + fract(sin(dot(floor(vW.xz * 16.0), vec2(12.9898, 78.233))) * 43758.5453) * 0.35);
