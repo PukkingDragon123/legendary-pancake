@@ -44,7 +44,7 @@ const TAG_HOLE_T = TAG.h / 2 - 0.028, TAG_HOLE_B = -TAG.h / 2 + 0.026, TAG_Z = C
 const TAG_DECAL = { w: 0.38, h: 0.2, px: [164, 86] as [number, number] };
 /** where the tags hang: a phone stacks them in pairs under the case, a wide screen hangs them two by two beside it */
 const TAG_LAY = {
-  top: { k: 1, x: 0.5, hooks: [0.06], hang: 0.24, hang2: 0.09 },
+  top: { k: 1, x: 0.47, hooks: [0.06], hang: 0.24, hang2: 0.09 },
   side: { k: 1.55, x: 0.86, hooks: [0.7, 0.14], hang: 0.06, hang2: 0.06 },
 };
 const SHELF = { y: -1.24, w: 1.52, h: 0.07, d: 0.28 };
@@ -1176,7 +1176,7 @@ export class CuckooStage implements Stage {
   private homeShot(): Shot {
     return this.layout === 'side'
       ? { target: v3(0, 0.07, 0.2), yaw: 0.0, pitch: 0.04, w: 4.7, h: 2.98, cx: 0.5, cy: 0.5 }
-      : { target: v3(0, -0.08, 0.2), yaw: 0.0, pitch: 0.04, w: 1.86, h: 3.36, cx: 0.5, cy: 0.5 }; // phone: wide enough that the hanging tags stay on screen
+      : { target: v3(0, -0.08, 0.2), yaw: 0.0, pitch: 0.04, w: 2.02, h: 3.36, cx: 0.5, cy: 0.5 }; // phone: wide enough that the hanging tags stay on screen
   }
   private shot(name: string): Shot {
     const side = this.layout === 'side';
