@@ -32,7 +32,7 @@
 .hh-nameboard { width: 192px; height: 72px; }
 .hh-portrait { position: absolute; left: -15px; top: -14px; width: 78px; height: 78px; filter: drop-shadow(1px 3px 4px rgba(26, 14, 8, 0.45)); } /* [ui5] the live owl in its frame */
 /* [ui4] gilt lettering on the varnished board */
-.hh-name { position: absolute; left: 63px; right: 10px; top: 11px; font-family: var(--font-display); font-size: var(--t2); line-height: 1; color: #fbe3a0; white-space: nowrap; overflow: hidden; text-overflow: clip; text-shadow: 0 1px 1px #2a1209, 0 0 2px #2a1209, 0 2px 4px rgba(0, 0, 0, 0.55); }
+.hh-name { position: absolute; left: 63px; right: 10px; top: 6px; font-family: var(--font-title); font-size: var(--t2); line-height: 1; color: #fbe3a0; white-space: nowrap; overflow: hidden; text-overflow: clip; text-shadow: 0 1px 1px #2a1209, 0 0 2px #2a1209, 0 2px 4px rgba(0, 0, 0, 0.55); }
 .hh-name.long { font-size: var(--t1); top: 16px; }
 .hh-rank { position: absolute; right: 12px; top: 16px; font-family: var(--font-display); font-size: var(--t1); line-height: 1; color: #f0cf96; text-shadow: 0 1px 1px #2a1209, 0 0 2px #2a1209; }
 .hh-lvl { position: absolute; left: 80px; top: 39px; width: 104px; height: 24px; filter: drop-shadow(0 2px 2px rgba(20, 12, 6, 0.5)); }
@@ -125,7 +125,7 @@
 .hh-mobj.sleep .hh-pic { animation: hhBreathe 4.2s ease-in-out infinite; }
 .hh-mobj.sleep.pop .hh-pic { animation: hhHop 0.56s cubic-bezier(0.3, 1.6, 0.5, 1); }
 @keyframes hhBreathe { 0%, 100% { transform: none; } 50% { transform: translateY(-2px); } }
-.hh-plate { position: absolute; left: 8px; top: 108px; width: 88px; height: 18px; isolation: isolate; font-family: var(--font-display); font-size: var(--t1); line-height: calc(var(--t1) * 1.125); text-align: center; color: #3a1f06; text-shadow: 0 1px 1px rgba(255, 241, 189, 0.75), 0 -1px 1px rgba(58, 31, 6, 0.35); pointer-events: none; filter: drop-shadow(1px 2px 3.9px rgba(26, 14, 8, 0.45)); }
+.hh-plate { position: absolute; left: 8px; top: 108px; width: 88px; height: 18px; isolation: isolate; font-family: var(--font-display); font-size: var(--t1); line-height: calc(18px - var(--t1) / 15); text-align: center; color: #3a1f06; text-shadow: 0 1px 1px rgba(255, 241, 189, 0.75), 0 -1px 1px rgba(58, 31, 6, 0.35); pointer-events: none; filter: drop-shadow(1px 2px 3.9px rgba(26, 14, 8, 0.45)); }
 .hh-mobj.rec { animation: hhRise 0.7s cubic-bezier(0.3, 1.5, 0.5, 1) both, hhRec 1.6s ease-in-out infinite; }
 .hh-mobj.rec.pop { animation: hhPop 0.56s cubic-bezier(0.3, 1.8, 0.5, 1); }
 @keyframes hhRec { 0%, 100% { filter: none; } 50% { filter: drop-shadow(0 -3px 3.9px rgba(255, 220, 140, 0.85)); } }
@@ -243,7 +243,7 @@
   .hh-left .hh-rank { top: 20px; }
 }
 @media (min-width: 900px) and (min-height: 760px) {
-  .hh-nav .hh-plate { font-size: calc(var(--t1) / 1.5); line-height: calc(var(--t1) * 0.75); }
+  .hh-nav .hh-plate { font-size: calc(var(--t1) / 1.5); line-height: calc(18px - var(--t1) / 22.5); }
 }
 
 /* [font6] tonight's place on its own line, clipped rather than wrapped */

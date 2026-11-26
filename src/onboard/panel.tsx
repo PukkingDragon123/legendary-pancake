@@ -119,7 +119,7 @@ function css() {
 .qp-rail{position:relative;height:calc(26 * var(--u));margin:calc(2 * var(--u)) calc(8 * var(--u)) 0;touch-action:none;cursor:pointer}
 .qp-rail>i{position:absolute;left:0;right:0;top:calc(8 * var(--u));height:calc(9 * var(--u));background-size:100% 100%}
 .qp-rail>b{position:absolute;top:calc(2 * var(--u));width:calc(14 * var(--u));height:calc(18 * var(--u));margin-left:calc(-7 * var(--u));background-size:100% 100%}
-.qp-rail>span{position:absolute;top:calc(19 * var(--u));transform:translateX(-50%);font:600 var(--a1) var(--font-body);color:#5a5f80}
+.qp-rail>span{position:absolute;top:calc(14 * var(--u));transform:translateX(-50%);font:600 var(--a1)/1 var(--font-body);color:#5a5f80}
 .qp-sweet{position:absolute;top:0;height:calc(4 * var(--u));border:var(--u) solid #b07a1a;border-bottom:0}
 .qp-plan{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(3 * var(--u));margin:calc(3 * var(--u)) 0}
 .qp-plan div{text-align:center;font:600 var(--a1) var(--font-body);color:#5a5f80}

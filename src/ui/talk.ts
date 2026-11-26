@@ -512,12 +512,12 @@ export class TalkView {
       ps.push({ gl, x: rowX(gl.line) + gl.x + dx + lx, y: top + gl.base + dy + ly, kx, ky, a, z });
     }
     // a sprite scaled about the middle of its letter
-    g.imageSmoothingEnabled = false; // [font14] pixel letters stay blocky while they scale in
     const put = (sp: Sprite, gl: Placed, x: number, y: number, kx: number, ky: number) => {
       if (Math.abs(kx - 1) < 0.003 && Math.abs(ky - 1) < 0.003) { g.drawImage(sp.cv, Math.round(x - sp.ox), Math.round(y - sp.oy)); return; }
       const cx = gl.sp.adv / 2, cy = -gl.size * 0.35;
       g.drawImage(sp.cv, x + cx - (sp.ox + cx) * kx, y + cy - (sp.oy + cy) * ky, sp.cv.width * kx, sp.cv.height * ky);
     };
+    g.imageSmoothingEnabled = true; // the soft shadows and glows stay soft when scaled
     // 1. soft shadows on a plane behind (they lag more than the letters, and part from them as they come forward)
     const shx = s * 0.12, shy = s * 0.38;
     for (const p of ps) {
@@ -536,6 +536,7 @@ export class TalkView {
     }
     g.globalCompositeOperation = 'source-over';
     // 3. the letters, left to right (each face covers its left neighbour's extrusion)
+    g.imageSmoothingEnabled = false; // [font14] pixel letters stay blocky while they scale in
     for (const p of ps) {
       g.globalAlpha = p.a * (1 - p.z * 0.35);
       put(p.gl.sp, p.gl, p.x, p.y, p.kx, p.ky);

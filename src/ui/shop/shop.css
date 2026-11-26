@@ -84,8 +84,8 @@
 
 /* cloth ribbons under the banners */
 .lg-bannertag .lg-cloth { position: absolute; left: 0; top: 4px; translate: -50% 0; display: flex; flex-direction: column; align-items: center; min-width: 118px; padding: 2px 6px 4px; color: #fff4dc; text-shadow: 0 2px 1.8px rgba(40, 10, 10, 0.5); animation: lgSwing 5s ease-in-out infinite; transform-origin: 50% 0; filter: drop-shadow(0 3px 0 rgba(30, 18, 8, 0.45)); }
-.lg-cloth span { font-family: var(--font-display); font-size: var(--t1); line-height: 1; }
-.lg-cloth small { font-size: var(--t1); opacity: 0.9; }
+.lg-cloth span { font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; }
+.lg-cloth small { font-size: var(--t1); line-height: 1.0667; opacity: 0.9; white-space: nowrap; }
 
 /* ---------------------------------------------------------------- Barnaby's speech */
 .lg-bubble { position: absolute; z-index: 7; max-width: min(280px, calc(100vw - 24px)); padding: 12px 6px 4px; font-size: var(--t1); line-height: 1.0667; color: #2e2416; background: #fbf4e2; background-clip: padding-box; pointer-events: none; animation: lgBubbleIn 0.35s var(--pop); filter: drop-shadow(0 4px 0 rgba(30, 18, 8, 0.4)); }

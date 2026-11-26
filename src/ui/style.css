@@ -374,7 +374,7 @@ input[type='time'].field { font-family: var(--font-small); font-size: var(--t1);
 .quest.ready .quest-icon { animation: bob 1.2s var(--ease) infinite; }
 .qbar { position: relative; height: 22px; }
 .qbar > i { position: absolute; left: 0; top: 0; bottom: 0; min-width: 12px; transition: width 0.6s var(--ease); }
-.qbar > span { position: absolute; inset: 0; display: grid; place-items: center; font-size: var(--t1); color: #f8f2e7; text-shadow:  0 1px 1px #312821, 0 0 2px #312821, 0 0 3px #312821; }
+.qbar > span { position: absolute; inset: 0; display: grid; place-items: center; padding-bottom: 5px; font-size: var(--t1); color: #f8f2e7; text-shadow:  0 1px 1px #312821, 0 0 2px #312821, 0 0 3px #312821; }
 .stamp { font-size: var(--t1); color: #a8343a; padding: 2px 8px; border: 3px solid #a8343a; border-radius: 0; transform: rotate(-12deg); animation: stamp 0.35s var(--pop); opacity: 0.88; mix-blend-mode: multiply; }
 @keyframes stamp { from { transform: rotate(-12deg) scale(2.2); opacity: 0; } }
 @keyframes wiggle { 0%, 86%, 100% { transform: none; } 90% { transform: rotate(-1.2deg); } 94% { transform: rotate(1.2deg); } }
