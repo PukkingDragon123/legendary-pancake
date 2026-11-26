@@ -45,8 +45,8 @@ const sinkFrames = () => {
 const SW = G.W, SH = G.SH, R = G.dial.bez + 1, HL = HANDS.minute + 2;
 const box = (x, y, w, h) => `left:${+x.toFixed(2)}em;top:${+y.toFixed(2)}em;width:${+w.toFixed(2)}em;height:${+h.toFixed(2)}em`;
 const CSSTXT = `
-#boot{--k:min(calc(86vw / ${SW}),calc(74vh / ${SH}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
-background:radial-gradient(ellipse 58% 40% at 50% 38%,rgba(255,190,100,.34),rgba(255,170,80,.1) 55%,rgba(255,170,80,0) 78%),radial-gradient(ellipse 120% 95% at 50% 40%,rgba(0,0,0,0) 40%,rgba(1,6,3,.86) 100%),repeating-linear-gradient(90deg,#0f4a2f 0 6.2em,#a08a3a 6.2em 6.6em,#0b3b25 6.6em 12.8em,#a08a3a 12.8em 13.2em),#0b3b25;
+#boot{--k:min(calc(86vw / ${SW}),calc(80vh / ${SH}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
+background:radial-gradient(ellipse 58% 40% at 50% 38%,rgba(255,190,100,.34),rgba(255,170,80,.1) 55%,rgba(255,170,80,0) 78%),radial-gradient(ellipse 120% 95% at 50% 40%,rgba(0,0,0,0) 40%,rgba(1,6,3,.86) 100%),repeating-linear-gradient(90deg,#0f4a2f 0 9em,#8c7a34 9em 9.8em,#0b3b25 9.8em 18.8em,#8c7a34 18.8em 19.6em),#0b3b25;
 user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s}
 #boot.gone:not(.hold):not(.js){opacity:0;pointer-events:none}
 #boot *{position:absolute;display:block;-webkit-user-drag:none;pointer-events:none}

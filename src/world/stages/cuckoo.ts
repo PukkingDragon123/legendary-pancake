@@ -226,7 +226,7 @@ export class CuckooStage implements Stage {
     const f = K.finishOf(this.prefs.finish), cf = K.finishOf(carveOf(f.id));
     const std = (o: THREE.MeshStandardMaterialParameters) => new THREE.MeshStandardMaterial(o);
     this.M = {
-      wood: std({ map: this.woodTex(f.id, -0.1), vertexColors: true, roughness: 0.5, envMapIntensity: 0.55 }),
+      wood: std({ map: this.woodTex(f.id, -0.1), color: 0x957a6c, vertexColors: true, roughness: 0.5, envMapIntensity: 0.55 }),
       carve: std({ map: this.woodTex(cf.id, -0.08), vertexColors: true, roughness: 0.46, envMapIntensity: 0.6 }),
       leaf: std({ map: this.keep(K.ctex(K.leafCanvas(cf.ramp))), vertexColors: true, roughness: 0.48, envMapIntensity: 0.6 }),
       feather: std({ map: this.keep(K.ctex(K.featherCanvas(cf.ramp), true)), vertexColors: true, roughness: 0.5, envMapIntensity: 0.6 }),
@@ -449,8 +449,8 @@ export class CuckooStage implements Stage {
       leaf(Math.cos(a) * r0, DIAL.y + Math.sin(a) * r0, fz, a, 0.24, 0.15, seed, 0.16);
     }
     for (const sx of [-1, 1]) {
-      acorn(sx * 0.236, DIAL.y - 0.243, fz + 0.02, -sx * 0.35, 1.25);
-      acorn(sx * 0.279, DIAL.y - 0.214, fz + 0.016, sx * 0.25, 1.15);
+      acorn(sx * 0.236, DIAL.y - 0.243, fz + 0.045, -sx * 0.35, 1.25);
+      acorn(sx * 0.279, DIAL.y - 0.214, fz + 0.04, sx * 0.25, 1.15);
     }
     // ---- the crest: a carved owl with spread wings on a fan of oak leaves
     const crest = K.owlCrest(0.36, 0, 0.62);

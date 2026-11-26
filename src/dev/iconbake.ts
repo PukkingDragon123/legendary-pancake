@@ -1481,7 +1481,7 @@ async function bakeShelf(): Promise<{ sprites: ShelfSprite[]; dial: [number, num
   return { sprites: out, dial, lampAt };
 }
 /** [clock12] the shelf's clock: art px per art unit of the painting, and where its plinth sits */
-const CLOCK_K = 0.4, CLOCK_PLINTH = 286, CLOCK_FOOT = 146;
+const CLOCK_K = 0.37, CLOCK_PLINTH = 286, CLOCK_FOOT = 146;
 function bakeShelfClock(): { sprites: ShelfSprite[]; dial: [number, number, number] } {
   const cx = SHELF_OBJ.clock.cx, R = SHELF_RES * CLOCK_K;
   // the painting's box (art units) -> the shelf's box (art px), on whole art px
