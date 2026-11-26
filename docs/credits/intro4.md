@@ -47,5 +47,4 @@ domain), downsampled to a pixel grid and packed into `public/models/interview/ar
 
 ## Fonts
 
-The forms are printed in the game's own typefaces, Alegreya and Alegreya SC (SIL Open Font License, credited in
-`font12.md`).
+The forms are printed in the game's own pixel typefaces, Quest Square and Retro Sans (CC0, credited in `font14.md`).

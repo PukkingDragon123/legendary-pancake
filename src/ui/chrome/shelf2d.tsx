@@ -307,7 +307,7 @@ function installStyles() {
 .hh-nav.live .hh-plate,.hh-nav.wait .hh-plate{background-image:none!important;filter:none}
 .hh-nav.live .hh-mobj,.hh-nav.live .hh-mobj.press,.hh-nav.live .hh-mobj.pop,.hh-nav.live .hh-mobj.rec,.hh-nav.live .hh-mobj.rec.pop{animation:none;scale:none;filter:none}
 .hh-nav.live .hh-mobj.press .hh-plate{translate:0 1px}
-@media (min-width: 900px) and (min-height: 760px){.hh-nav.live .hh-plate{line-height:18px}}
+@media (min-width: 900px) and (min-height: 760px){.hh-nav.live .hh-plate{line-height:calc(18px - var(--t1) / 22.5)}}
 `;
   document.head.appendChild(st);
 }

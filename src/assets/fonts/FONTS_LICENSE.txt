@@ -24,14 +24,10 @@ src/ui/goofyFont.js       (the same glyphs as bitmap tables for canvas pixel tex
 
   Credit (title screen): "Font: TBME Goofy, made from Chewy by Font Diner / Sideshow (Apache 2.0)"
 
-alagard.ttf  (THE game font since round 6: every CSS family and canvas text; src/ui/font.ts)
-  "Alagard" by Hewett Tsoi (Pix3M), https://www.dafont.com/alagard.font
-  Licence: "Give credit if used." Shipped unmodified. Credited in docs/credits/font6.md.
+quest-square.woff2, retro-sans.woff2  (THE game fonts since round 14; src/ui/font.ts, src/ui/style.css)
+  "Quest Square" and "Retro Sans" by SpicyGame Studios (https://spicygame.itch.io/fonts), supplied by the
+  project owner. Licence: Creative Commons Zero v1.0 Universal (from the fonts' name tables).
+  Rescaled to 128 units per font pixel and snapped to the pixel grid (art/fonts/snapgrid.py); glyphs unchanged.
+  Credited in docs/credits/font14.md.
 
-TBMEGoofy-Regular.woff2 is now only the fallback for glyphs Alagard lacks.
-
-m5x7.woff2 by Daniel Linssen (managore), https://managore.itch.io/m5x7
-  "free to use but attribution appreciated". Used only for the pretend phone's tiny system text
-  (src/ui/phone/phone.tsx). Credit: "m5x7 font by Daniel Linssen (managore.itch.io)"
-
-(m6x11plus and Galmuri11 were removed in round 6.)
+TBMEGoofy-Regular.woff2 is used only on a few dev pages.

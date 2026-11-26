@@ -5,16 +5,23 @@ Models, textures, artworks, photos and sounds by their authors, used under their
 
 ---
 
-# Credits: the game's typefaces (builder ui12)
+# Credits: the game's typefaces (builder font14)
 
-- **Alegreya** (upright and italic, variable weights 400-900) and **Alegreya SC** (ExtraBold) - Juan Pablo del Peral,
-  Huerta Tipografica, Copyright 2011 The Alegreya Project Authors, https://github.com/huertatipografica/Alegreya,
-  SIL Open Font License 1.1 (full text in `src/assets/fonts/Alegreya-OFL.txt`). Latin subsets taken from the
-  Fontsource packages (`@fontsource-variable/alegreya` 5.3.0, `@fontsource/alegreya-sc` 5.3.0), shipped as
-  `src/assets/fonts/alegreya.woff2`, `alegreya-italic.woff2` and `alegreya-sc.woff2`. Modified only so that the plain
-  digits map to the fonts' own lining figures (the `lnum` glyphs), so numbers stand level on canvas too.
-  Alegreya is the game's book face (every screen, button, sign, tag, toast, the book, the globe, the interview's
-  forms, speech and props, the pretend phone); Alegreya SC sets titles, signs, names and the rubber stamp.
+Both faces were supplied by the project owner (pixel fonts by SpicyGame Studios; from their font name tables:
+"Copyright SpicyGame Studios 2020", https://spicygame.itch.io/fonts, https://pixel-forge.com, licence Creative
+Commons Zero v1.0 Universal, https://creativecommons.org/public-domain/cc0/).
+
+- **Quest Square** (SpicyGame Studios, CC0): the body face, every word of copy, buttons, counters, Pip's and
+  Barnaby's dialogue, the book, the globe, the interview's forms and props, the pretend phone. Shipped as
+  `src/assets/fonts/quest-square.woff2`.
+- **Retro Sans** (SpicyGame Studios, CC0): the display face, titles, signs, names, the big clock numbers, the rubber
+  stamp. Shipped as `src/assets/fonts/retro-sans.woff2`, loaded with size-adjust 17/15 so both faces share one
+  15 px pixel grid.
+
+Modified only to sit exactly on their pixel grids: rescaled to 128 font units per font pixel with every point,
+advance and vertical metric snapped to whole font pixels (`art/fonts/snapgrid.py`), so letters never drift between
+device pixels along a line. The glyph designs are unchanged. The handful of characters neither face draws (stars,
+the numero sign, fractions) are mapped to near twins by `textSafe` in `src/ui/font.ts`.
 
 
 ---
@@ -521,8 +528,7 @@ domain), downsampled to a pixel grid and packed into `public/models/interview/ar
 
 ## Fonts
 
-The forms are printed in the game's own typefaces, Alegreya and Alegreya SC (SIL Open Font License, credited in
-`font12.md`).
+The forms are printed in the game's own pixel typefaces, Quest Square and Retro Sans (CC0, credited in `font14.md`).
 
 
 ---
@@ -547,7 +553,7 @@ Everything this round added is made in code for Hoot Hollow; nothing new was bor
 
 The sheep, day bed, alarm clock, pocket watch and nightstand in the answers are the borrowed models already
 credited in `intro4.md` (repacked into `public/models/interview/cards.glb`). The phone's text is set in the game's
-Alegreya (`font12.md`).
+pixel faces (`font14.md`).
 
 
 ---

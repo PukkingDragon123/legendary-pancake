@@ -75,7 +75,7 @@
 /* chalk notes over the room */
 .bm-note {
   position: absolute; left: 50%; top: calc(74px + var(--safe-t)); transform: translateX(-50%); max-width: calc(100% - 120px);
-  padding: 4px 12px 6px; font-size: var(--t1); line-height: 1.25; text-align: center; color: var(--paper); pointer-events: none !important;
+  padding: 4px 12px 6px; font-size: var(--t1); line-height: 1.0667; text-align: center; color: var(--paper); pointer-events: none !important;
   background: var(--bp-d); box-shadow: 0 0 0 1px color-mix(in srgb, var(--chalk-d) 50%, transparent), 0 0 0 1px color-mix(in srgb, var(--bp-dd) 50%, transparent), 4px 6px 11.6px rgba(12, 34, 64, 0.6);
   animation: bm-pop 0.3s ease-in-out both;
 }
@@ -201,7 +201,7 @@
 .bm-new { position: absolute; top: -9px; left: -6px; font-style: normal; font-size: var(--t1); padding: 1px 5px; color: var(--paper); background: var(--terra); box-shadow: 0 0 0 1px color-mix(in srgb, var(--paper) 50%, transparent), 2px 2px 4.2px var(--bp-dd); animation: bm-bob 1s ease-in-out infinite; }
 .bm-series { position: absolute; top: -8px; right: -6px; font-style: normal; padding: 1px 2px; background: #6e5266; box-shadow: 0 0 0 1px color-mix(in srgb, var(--paper) 50%, transparent); }
 .bm-owned { position: absolute; top: 4px; right: 4px; font-style: normal; font-size: var(--t1); color: #c4cfa3; font-family: var(--font-small); }
-.bm-empty { display: flex; align-items: center; gap: 12px; padding: 12px; font-size: var(--t1); line-height: 1.25; color: var(--chalk); max-width: 520px; }
+.bm-empty { display: flex; align-items: center; gap: 12px; padding: 12px; font-size: var(--t1); line-height: 1.0667; color: var(--chalk); max-width: 520px; }
 
 @media (min-width: 900px) {
   .bm-card { width: 112px; height: 138px; }

@@ -18,4 +18,4 @@ Everything this round added is made in code for Hoot Hollow; nothing new was bor
 
 The sheep, day bed, alarm clock, pocket watch and nightstand in the answers are the borrowed models already
 credited in `intro4.md` (repacked into `public/models/interview/cards.glb`). The phone's text is set in the game's
-Alegreya (`font12.md`).
+pixel faces (`font14.md`).

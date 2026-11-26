@@ -203,7 +203,7 @@ export function syncLooks() {
   if (p) { p.color.copy(HOUSE_LOOK.pane); p.opacity = HOUSE_LOOK.paneOpacity; }
 }
 
-// ------------------------------------------------------------------ painted signs (runtime canvas; lettered in Alegreya, src/ui/font.ts)
+// ------------------------------------------------------------------ painted signs (runtime canvas; lettered in the game's pixel face, src/ui/font.ts)
 
 /** A crisp canvas texture (nearest filtered) painted by `paint`. */
 export function canvasTex(w: number, h: number, paint: (g: CanvasRenderingContext2D) => void): THREE.CanvasTexture {

@@ -8,7 +8,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
 import { crispText } from '../../onboard/tex.ts';
-import { fontPx, fontReady } from '../font.ts';
+import { fontAt, fontReady } from '../font.ts';
 import { Real, bevel, box, deviceK, metal } from '../real/paint.ts';
 
 export const SW = 68, SH = 146;
@@ -165,9 +165,9 @@ function wallpaper() {
 
 /** the screen is drawn at twice the art resolution (a phone's screen is finer than the world): native-size fonts */
 const S2 = 2;
-// the game's Alegreya throughout: a bold clock, small capitals for "Sleeping", the book face for app labels and
-// notifications (sized for the phone's fine screen)
-const SMALL = fontPx(15, { weight: 600 }), BIG = fontPx(40, { weight: 700 }), MED = fontPx(30, { caps: true }), APP = fontPx(18, { weight: 700 });
+// [font14] the game's pixel faces at whole grid sizes (on the screen's 2x canvas, a font pixel is half an art pixel or
+// a whole one): the clock and "Sleeping" in the display face, app labels and notifications in the body face
+const SMALL = fontAt(15), BIG = fontAt(45, { caps: true }), MED = fontAt(30, { caps: true }), APP = fontAt(15);
 const phoneFonts: Promise<void> = typeof document === 'undefined' ? Promise.resolve() : fontReady();
 const step = (t: number, a: number, d: number) => Math.max(0, Math.min(1, Math.floor(((t - a) / d) * 5) / 5));
 const ease = (k: number) => 1 - (1 - k) ** 3;
@@ -358,8 +358,8 @@ function injectCSS() {
 @keyframes hh-lock-in{from{opacity:0}to{opacity:1}}
 .hh-lock .hh-phone{animation:hh-lock-up .5s ease-in-out both}
 @keyframes hh-lock-up{from{transform:translateY(60px)}to{transform:none}}
-.hh-lock-cap{max-width:300px;text-align:center;padding:10px 14px;color:#f4e8cc;font:600 17px var(--font-body, serif);line-height:1.25}
-.hh-lock-cap b{display:block;font-size:16px;color:#ffe08a;margin-bottom:2px}
+.hh-lock-cap{max-width:300px;text-align:center;padding:10px 14px;color:#f4e8cc;font:600 17px var(--font-body, serif);line-height: 1.0667}
+.hh-lock-cap b{display:block;font-size:var(--t1);color:#ffe08a;margin-bottom:2px}
 .hh-lock button{min-width:200px;padding:10px 18px;font:600 17px var(--font-body, serif);cursor:pointer}
 @keyframes hh-phone-buzz{0%,100%{transform:none}20%{transform:translateX(calc(-1 * var(--u))) rotate(-1deg)}40%{transform:translateX(var(--u)) rotate(1deg)}60%{transform:translateX(calc(-1 * var(--u)))}80%{transform:translateX(var(--u))}}
 @media (prefers-reduced-motion:reduce){.hh-phone.buzz{animation:none}}

@@ -1637,7 +1637,7 @@ export async function displayModel(d: DisplayItem, w: number, h: number): Promis
 /** A clock face set to the real time: a painted enamel dial with roman numerals, blued-steel spade hands. */
 function clockFace(r: number): { group: THREE.Group; set(d: Date): void; dispose(): void } {
   const g = new THREE.Group();
-  // [font6] 192 texels across so the roman numerals fit in Alegreya, the game's font, at its 16 px grid
+  // [font6] 192 texels across so the roman numerals fit in the game's pixel face at its 18 px grid
   const N = 192;
   const c = document.createElement('canvas');
   c.width = c.height = N;
@@ -1652,7 +1652,7 @@ function clockFace(r: number): { group: THREE.Group; set(d: Date): void; dispose
     const R = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
     for (let h = 0; h < 12; h++) {
       const a = (h / 12) * Math.PI * 2;
-      canvasText(x, R[h], N / 2 + Math.sin(a) * N * 0.34, Math.round(N / 2 - Math.cos(a) * N * 0.34 + 5.5), '#2e2416', { align: 'center' });
+      canvasText(x, R[h], N / 2 + Math.sin(a) * N * 0.34, Math.round(N / 2 - Math.cos(a) * N * 0.34 + 4), '#2e2416', { align: 'center', size: 15 });
       x.fillStyle = '#2e2416';
       for (let m = 0; m < 5; m++) { const b = a + (m / 5) * (Math.PI / 6); x.fillRect(Math.round(N / 2 + Math.sin(b) * N * 0.45) - 1, Math.round(N / 2 - Math.cos(b) * N * 0.45) - 1, 2, 2); }
     }

@@ -10,6 +10,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import type * as THREE from 'three';
 import { speciesOf } from '../owl/species.ts';
 import { Px } from '../ui/icons.tsx';
+import { crispCss, VIS } from '../ui/font.ts'; // [font14] pixel-face sizes at whole device pixels per font pixel
 import { acornURL, clipURL, folioURL, knobURL, loopStripURL, railURL, ruleURL, sheetURL, stickyURL, tapeURL, tickStripURL } from './panelart.ts';
 import { inkStamp, prepareInk } from './ink.ts';
 import { DRINKS, TAPES } from './props.ts';
@@ -71,9 +72,9 @@ function css() {
 .qp-folio{position:absolute;inset:0;background-size:100% 100%}
 .qp-sheet{position:relative;margin:calc(5 * var(--u)) calc(4 * var(--u)) calc(5 * var(--u));padding:calc(10 * var(--u)) calc(7 * var(--u)) calc(5 * var(--u));background-size:100% 100%}
 .qp-clip{position:absolute;left:50%;top:calc(-2 * var(--u));width:calc(46 * var(--u));height:calc(22 * var(--u));transform:translateX(-50%);background-size:100% 100%;z-index:3}
-.qp-head{display:flex;align-items:center;justify-content:space-between;border-bottom:var(--u) solid #2b376a;padding-bottom:calc(2 * var(--u));margin-bottom:calc(3 * var(--u));white-space:nowrap;font:600 var(--a1) var(--font-body);line-height:var(--a1);color:#5a5f80;letter-spacing:1px}
+.qp-head{display:flex;align-items:center;justify-content:space-between;border-bottom:var(--u) solid #2b376a;padding-bottom:calc(2 * var(--u));margin-bottom:calc(3 * var(--u));white-space:nowrap;font:600 var(--a1) var(--font-body);line-height:var(--a1);color:#5a5f80;letter-spacing:0}
 .qp-acorns{display:flex;gap:var(--u)}.qp-acorns i{width:calc(6 * var(--u));height:calc(6 * var(--u));background-size:100% 100%}
-.qp-q{font:600 calc(16 * var(--u)) var(--font-body);line-height:calc(16 * var(--u));color:#17130f;margin:0 0 calc(1 * var(--u));white-space:nowrap;display:flex;align-items:baseline;gap:calc(4 * var(--u))}
+.qp-q{font:600 var(--a2) var(--font-body);line-height:calc(16 * var(--u));color:#17130f;margin:0 0 calc(1 * var(--u));white-space:nowrap;display:flex;align-items:baseline;gap:calc(4 * var(--u))}
 .qp-q small{font:600 var(--a1) var(--font-body);color:#8a5a14}
 .qp-objs{display:grid;gap:calc(2 * var(--u)) calc(3 * var(--u));margin:calc(2 * var(--u)) 0 calc(3 * var(--u))}
 .qp-obj{position:relative;width:100%;border:0;background:transparent;cursor:pointer;padding:0;text-align:center;color:#1d2552;transition:transform .12s ease}
@@ -91,7 +92,7 @@ function css() {
 .qp-fine{font:600 var(--a1) var(--font-body);line-height:var(--a1);color:#6a6f8a;max-width:calc(96 * var(--u))}
 .qp-box{position:relative;width:calc(78 * var(--u));height:calc(26 * var(--u));border:0;background:transparent;cursor:pointer;padding:0;flex:none;margin-left:auto}
 .qp-box::before{content:'';position:absolute;inset:0;border:var(--u) dashed #6a6f8a}
-.qp-box b{position:relative;display:block;font:600 calc(16 * var(--u)) var(--font-body);color:#9a9ab0;white-space:nowrap;line-height:calc(26 * var(--u))}
+.qp-box b{position:relative;display:block;font:600 var(--a2) var(--font-body);color:#9a9ab0;white-space:nowrap;line-height:calc(26 * var(--u))}
 .qp-box.ready::before{border:calc(2 * var(--u)) solid #b33a1a;animation:qp-pulse 1s ease-in-out infinite}
 .qp-box.ready b{color:#b33a1a}
 @keyframes qp-pulse{50%{border-color:#e07a2a}}
@@ -101,11 +102,11 @@ function css() {
 @keyframes qp-thud{0%{transform:none}22%{transform:translateY(calc(1.6 * var(--u))) scale(.996,.992)}60%{transform:translateY(calc(-.4 * var(--u)))}100%{transform:none}}
 .qp-sticky{position:absolute;right:calc(-4 * var(--u));top:calc(-28 * var(--u));width:calc(56 * var(--u));min-height:calc(30 * var(--u));background-size:100% 100%;transform:rotate(5deg);z-index:4;border:0;cursor:pointer;font:600 var(--a1) var(--font-body);line-height:var(--a1);color:#3a2a0a;padding:calc(4 * var(--u)) calc(3 * var(--u));text-align:center}
 .qp.wide .qp-sticky{right:auto;left:calc(-62 * var(--u));top:calc(18 * var(--u));transform:rotate(-4deg)}
-.qp-sticky b{display:block;font:600 calc(16 * var(--u)) var(--font-body);line-height:calc(16 * var(--u));color:#8a2a1a;margin-top:calc(1 * var(--u))}
+.qp-sticky b{display:block;font:600 var(--a2) var(--font-body);line-height:calc(16 * var(--u));color:#8a2a1a;margin-top:calc(1 * var(--u))}
 .qp-sticky .qp-yes{display:flex;gap:calc(5 * var(--u));justify-content:center;margin-top:calc(2 * var(--u));font:600 var(--a1) var(--font-body)}
 .qp-sticky .qp-yes span{color:#8a2a1a;text-decoration:underline}
 .qp-line{position:relative;display:block;margin:calc(6 * var(--u)) 0 calc(4 * var(--u))}
-.qp-line input{width:100%;border:0;outline:0;background:transparent;font:600 calc(16 * var(--u)) var(--font-body);color:#1d2552;caret-color:#1d2552;padding:0 calc(2 * var(--u));height:calc(20 * var(--u));line-height:calc(20 * var(--u))}
+.qp-line input{width:100%;border:0;outline:0;background:transparent;font:600 var(--a2) var(--font-body);color:#1d2552;caret-color:#1d2552;padding:0 calc(2 * var(--u));height:calc(20 * var(--u));line-height:calc(20 * var(--u))}
 .qp-line input::placeholder{color:#c4b898}
 .qp-line i{display:block;height:calc(3 * var(--u));background-size:100% 100%}
 .qp-chips{display:flex;flex-wrap:wrap;gap:calc(3 * var(--u));justify-content:center;margin:calc(2 * var(--u)) 0 calc(5 * var(--u))}
@@ -118,17 +119,17 @@ function css() {
 .qp-rail{position:relative;height:calc(26 * var(--u));margin:calc(2 * var(--u)) calc(8 * var(--u)) 0;touch-action:none;cursor:pointer}
 .qp-rail>i{position:absolute;left:0;right:0;top:calc(8 * var(--u));height:calc(9 * var(--u));background-size:100% 100%}
 .qp-rail>b{position:absolute;top:calc(2 * var(--u));width:calc(14 * var(--u));height:calc(18 * var(--u));margin-left:calc(-7 * var(--u));background-size:100% 100%}
-.qp-rail>span{position:absolute;top:calc(19 * var(--u));transform:translateX(-50%);font:600 var(--a1) var(--font-body);color:#5a5f80}
+.qp-rail>span{position:absolute;top:calc(14 * var(--u));transform:translateX(-50%);font:600 var(--a1)/1 var(--font-body);color:#5a5f80}
 .qp-sweet{position:absolute;top:0;height:calc(4 * var(--u));border:var(--u) solid #b07a1a;border-bottom:0}
 .qp-plan{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(3 * var(--u));margin:calc(3 * var(--u)) 0}
 .qp-plan div{text-align:center;font:600 var(--a1) var(--font-body);color:#5a5f80}
-.qp-plan b{display:block;font:600 calc(16 * var(--u)) var(--font-body);color:#1d2552;line-height:calc(16 * var(--u))}
+.qp-plan b{display:block;font:600 var(--a2) var(--font-body);color:#1d2552;line-height:calc(16 * var(--u))}
 .qp-plan .px{display:block;margin:0 auto calc(1 * var(--u))}
 .qp-terms{display:flex;flex-wrap:wrap;gap:calc(2 * var(--u)) calc(6 * var(--u));justify-content:center;font:600 var(--a1) var(--font-body);color:#17130f;margin-bottom:calc(3 * var(--u))}
 .qp-terms span{display:flex;align-items:center;gap:calc(1 * var(--u))}
 .qp-sign{display:flex;gap:calc(12 * var(--u));margin-top:calc(2 * var(--u))}
 .qp-sign button{flex:1;border:0;background:transparent;cursor:pointer;text-align:left;padding:0;font:600 var(--a1) var(--font-body);color:#6a6f8a}
-.qp-sign .s{display:block;height:calc(20 * var(--u));font:600 calc(16 * var(--u)) var(--font-body);color:#1d2552;overflow:hidden;white-space:nowrap}
+.qp-sign .s{display:block;height:calc(20 * var(--u));font:600 var(--a2) var(--font-body);color:#1d2552;overflow:hidden;white-space:nowrap}
 .qp-sign .s.go{animation:qp-write .9s ease-in-out both}
 @keyframes qp-write{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 .qp-sign .hint{color:#b33a1a}
@@ -311,7 +312,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
           {objs(DRINKS.slice(0, 4).map((x) => ({ v: x.v, label: x.label })), { cols: 4, h: 40, single: true, any: !!s.drink, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
           {objs(DRINKS.slice(4).map((x) => ({ v: x.v, label: x.label })), { cols: 3, h: 40, single: true, any: !!s.drink, on: (v) => s.drink === v, key: (v) => 'drink:' + v, pick: act.drink })}
           {d?.caffeine && (<>
-            <div class="qp-q" style="font-size:calc(16 * var(--u));justify-content:center">Your last one?</div>
+            <div class="qp-q" style="font-size:var(--a2);justify-content:center">Your last one?</div>
             {objs([{ v: 'morning', label: 'Mornings' }, { v: 'late', label: 'Afternoon+' }], { cols: 2, h: 34, single: true, on: (v) => !!s.picked.caffeine && a.caffeine === v, key: (v) => 'when:' + v, pick: act.pick })}
           </>)}
           {!d && <div class="qp-fine" style="margin:0 auto calc(3 * var(--u));text-align:center;max-width:none">tap the one you have most</div>}
@@ -348,7 +349,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
       body = (<>
         <div class="qp-row" style="align-items:center;gap:0">
           <div style="flex:1"><Win id="pillows" mkey={'pillows:' + Math.round(a.hours)} h={100} overlay={ov} model={p.model} /></div>
-          <div class="qp-big" style="width:calc(60 * var(--u));font-size:calc(48 * var(--u))">{String(a.hours).replace('.5', '½')}<small>hours</small></div>
+          <div class="qp-big" style="width:calc(60 * var(--u));font-size:var(--a4)">{String(a.hours).replace('.5', '½')}<small>hours</small></div>
         </div>
         <div class="qp-rail" aria-label="Hours of sleep" onPointerDown={(e) => { (e.currentTarget as Element).setPointerCapture(e.pointerId); set(e); }} onPointerMove={(e) => { if (e.buttons) set(e); }}>
           <span class="qp-sweet" style={`left:${pct(7)}%;width:${pct(9) - pct(7)}%`} />
@@ -384,7 +385,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
             <span class={s.signed ? '' : 'hint'}>{s.signed ? 'the client' : 'tap to sign'}</span>
           </button>
           <div style="flex:1">
-            <span class="s" style="display:block;height:calc(20 * var(--u));font:600 calc(16 * var(--u)) var(--font-body);color:#1d2552">{a.name.trim() || 'Pip'}</span>
+            <span class="s" style="display:block;height:calc(20 * var(--u));font:600 var(--a2) var(--font-body);color:#1d2552">{a.name.trim() || 'Pip'}</span>
             <i style={`display:block;height:calc(3 * var(--u));background-image:url(${ruleURL(80, 11)});background-size:100% 100%`} />
             <span style="font:600 var(--a1) var(--font-body);color:#6a6f8a">Hollow &amp; Co.</span>
           </div>
@@ -398,7 +399,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
   const label = isPlan ? (s.signed ? 'APPROVE' : 'SIGN') : 'STAMP';
   const acorns = Array.from({ length: p.total - 1 }, (_, i) => (i < p.index ? 'done' : i === p.index ? 'now' : 'todo') as 'done' | 'now' | 'todo');
   return (
-    <div ref={(el) => { root.current = el; if (p.sheetRef) p.sheetRef.current = el; }} class={'qp' + (p.wide ? ' wide' : '') + (p.leaving ? '' : ' in')} style={`--k:${k};--a1:${17 * Math.max(1, Math.floor(k / 2))}px;--a3:${17 * Math.floor(1.5 * k)}px`} data-step={st.id}>
+    <div ref={(el) => { root.current = el; if (p.sheetRef) p.sheetRef.current = el; }} class={'qp' + (p.wide ? ' wide' : '') + (p.leaving ? '' : ' in')} style={`--k:${k};--a1:${crispCss(17 * VIS * Math.max(1, Math.floor(k / 2)))}px;--a2:${crispCss(16 * VIS * k)}px;--a3:${crispCss(17 * VIS * Math.floor(1.5 * k))}px;--a4:${crispCss(40 * VIS * k)}px`} data-step={st.id}>
       <i class="qp-folio" style={rsz.w ? `background-image:url(${folioURL(rsz.w, rsz.h)})` : ''} />
       <i class="qp-clip" style={`background-image:url(${clipURL()})`} />
       <div ref={sheet} class="qp-sheet" style={ssz.w ? `background-image:url(${sheetURL(ssz.w, ssz.h, p.index + 1, { dog: !isPlan, stain: p.index % 4 === 2 })})` : ''}>

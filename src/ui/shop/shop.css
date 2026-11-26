@@ -84,11 +84,11 @@
 
 /* cloth ribbons under the banners */
 .lg-bannertag .lg-cloth { position: absolute; left: 0; top: 4px; translate: -50% 0; display: flex; flex-direction: column; align-items: center; min-width: 118px; padding: 2px 6px 4px; color: #fff4dc; text-shadow: 0 2px 1.8px rgba(40, 10, 10, 0.5); animation: lgSwing 5s ease-in-out infinite; transform-origin: 50% 0; filter: drop-shadow(0 3px 0 rgba(30, 18, 8, 0.45)); }
-.lg-cloth span { font-family: var(--font-display); font-size: var(--t1); line-height: 1; }
-.lg-cloth small { font-size: var(--t1); opacity: 0.9; }
+.lg-cloth span { font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; }
+.lg-cloth small { font-size: var(--t1); line-height: 1.0667; opacity: 0.9; white-space: nowrap; }
 
 /* ---------------------------------------------------------------- Barnaby's speech */
-.lg-bubble { position: absolute; z-index: 7; max-width: min(280px, calc(100vw - 24px)); padding: 12px 6px 4px; font-size: var(--t1); line-height: 1.25; color: #2e2416; background: #fbf4e2; background-clip: padding-box; pointer-events: none; animation: lgBubbleIn 0.35s var(--pop); filter: drop-shadow(0 4px 0 rgba(30, 18, 8, 0.4)); }
+.lg-bubble { position: absolute; z-index: 7; max-width: min(280px, calc(100vw - 24px)); padding: 12px 6px 4px; font-size: var(--t1); line-height: 1.0667; color: #2e2416; background: #fbf4e2; background-clip: padding-box; pointer-events: none; animation: lgBubbleIn 0.35s var(--pop); filter: drop-shadow(0 4px 0 rgba(30, 18, 8, 0.4)); }
 .lg-bubble::after { content: ''; position: absolute; left: var(--tail, 40px); bottom: -14px; width: 14px; height: 10px; background: #2e2416; clip-path: polygon(0 0, 100% 0, 30% 100%); }
 .lg-bubble::before { content: ''; position: absolute; left: calc(var(--tail, 40px) + 3px); bottom: -8px; width: 8px; height: 6px; background: #fbf4e2; clip-path: polygon(0 0, 100% 0, 30% 100%); z-index: 1; }
 .lg-bubble.below::after { bottom: auto; top: -14px; clip-path: polygon(30% 0, 0 100%, 100% 100%); }
@@ -113,7 +113,7 @@
 /* the pinned note: what this part of the store is, and what to do */
 .lg-hint { position: absolute; z-index: 4; left: 12px; top: calc(62px + var(--safe-t)); display: flex; flex-direction: column; gap: 1px; max-width: 220px; padding: 2px 4px 0; background: var(--lg-pat-linen) 0 0 / 64px 64px; background-clip: padding-box; color: #3d2416; rotate: -1.5deg; animation: lgHintIn 0.5s var(--pop) both 0.3s; pointer-events: none; filter: drop-shadow(0 3px 0 rgba(20, 10, 6, 0.35)); }
 .lg-hint b { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); line-height: 1; color: #8e241e; }
-.lg-hint > span { font-size: var(--t1); line-height: 1.25; }
+.lg-hint > span { font-size: var(--t1); line-height: 1.0667; }
 .lg-hint-time { display: inline-flex; align-items: center; gap: 3px; font-size: var(--t1) !important; color: #6b5844; }
 .lg-hint .lg-pin { top: -10px; }
 @keyframes lgHintIn { from { opacity: 0; scale: 0.6; rotate: -8deg; } }
@@ -122,7 +122,7 @@
 .lg-shop.side .lg-hint { top: auto; left: auto; right: 18px; bottom: calc(18px + var(--safe-b)); max-width: 260px; }
 .lg-cloth-prize { display: inline-flex; align-items: center; gap: 2px; color: #ffe39a; }
 .lg-bubble.notail::after, .lg-bubble.notail::before { display: none; }
-.lg-gnote { margin: 0 8px; padding: 0 4px; font-size: var(--t1); line-height: 1.25; text-align: center; color: #3d2416; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
+.lg-gnote { margin: 0 8px; padding: 0 4px; font-size: var(--t1); line-height: 1.0667; text-align: center; color: #3d2416; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
 .lg-timer { display: inline-flex; align-items: center; gap: 3px; padding: 0 3px; font-size: var(--t1); color: #f1d39a; white-space: nowrap; }
 .lg-timer b { color: #fff4dc; font-weight: 700; font-variant-numeric: tabular-nums; }
 
@@ -136,9 +136,9 @@
 .lg-card > div { position: relative; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
 .lg-kind { font-size: var(--t1); color: #7b6550; text-transform: uppercase; letter-spacing: 1px; }
 .lg-card h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: var(--t2); line-height: 1; color: #2e2416; }
-.lg-blurb { margin: 4px 0; font-size: var(--t1); line-height: 1.25; color: #4b3a2a; }
+.lg-blurb { margin: 4px 0; font-size: var(--t1); line-height: 1.0667; color: #4b3a2a; }
 .lg-note { margin: 6px 0 0; font-size: var(--t1); color: #6b5844; text-align: center; }
-.lg-fine { margin: 4px 0; font-size: var(--t1); line-height: 1.25; color: #5a4320; }
+.lg-fine { margin: 4px 0; font-size: var(--t1); line-height: 1.0667; color: #5a4320; }
 .lg-pin { position: absolute; z-index: 2; left: 50%; top: -8px; width: 14px; height: 20px; margin-left: -7px; background: var(--lg-pin) 0 0 / 14px 20px no-repeat; }
 .lg-pin.r { left: auto; right: 14px; }
 /* the ledger page */
@@ -153,7 +153,7 @@
 /* the gift tag */
 .lg-gtag { margin: 6px; padding: 18px 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; text-align: center; }
 .lg-hole.big { top: 6px; width: 10px; height: 10px; margin-left: -5px; }
-.lg-hand { margin: 2px 0; font-size: var(--t1); line-height: 1.25; color: #3d2416; }
+.lg-hand { margin: 2px 0; font-size: var(--t1); line-height: 1.0667; color: #3d2416; }
 .lg-hand b { font-weight: 700; font-family: var(--font-display); color: #8e241e; }
 .lg-gtag-what { display: flex; align-items: center; gap: 6px; font-size: var(--t1); }
 .lg-gtag-what b { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); }
@@ -206,7 +206,7 @@
 .lg-poster-title { position: absolute; left: 12px; right: 12px; bottom: 10px; padding: 0 4px; background: #4a3020; background-clip: padding-box; color: #fff4dc; }
 .lg-poster-kick { font-size: var(--t1); color: #ffe39a; text-transform: uppercase; letter-spacing: 1px; }
 .lg-poster-title h2 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: var(--t2); line-height: 1; }
-.lg-poster-title p { margin: 2px 0 0; font-size: var(--t1); line-height: 1.25; opacity: 0.9; }
+.lg-poster-title p { margin: 2px 0 0; font-size: var(--t1); line-height: 1.0667; opacity: 0.9; }
 .lg-feat { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr; gap: 6px; padding: 0 4px; align-items: end; }
 .lg-fcard { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 0; padding: 2px 0 2px; background: #f4e6c8; background-clip: padding-box; text-align: center; }
 .lg-fcard.five { background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
@@ -219,7 +219,7 @@
 .lg-stars.pop > span { animation: lgStarPop 0.45s var(--pop) both; display: inline-block; }
 @keyframes lgStarPop { from { scale: 0; rotate: -90deg; } }
 .lg-g-slate { margin: 0 6px; padding: 2px 6px; color: #ece9dc; background: #323c41; background-clip: padding-box; font-size: var(--t1); text-shadow: 0 0 1px rgba(236, 233, 220, 0.5); }
-.lg-chalk-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; line-height: 1.25; }
+.lg-chalk-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; line-height: 1.0667; }
 .lg-chalk-row > span { display: inline-flex; align-items: center; gap: 1px; white-space: nowrap; }
 .lg-chalk-row b { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #ffe39a; }
 .lg-chalk-row.small { font-size: var(--t1); }
@@ -251,7 +251,7 @@
 .lg-page { position: relative; display: flex; flex-direction: column; gap: 8px; width: min(440px, 100%); max-height: min(620px, calc(100% - 20px)); padding: 6px 8px 8px 22px; background: var(--lg-pat-ledger) 0 0 / 64px 64px; background-clip: padding-box; filter: drop-shadow(0 8px 0 rgba(20, 12, 6, 0.5)); animation: lgPageIn 0.45s var(--pop) both; }
 @keyframes lgPageIn { from { translate: 0 40px; rotate: 3deg; opacity: 0; } }
 .lg-page-title { margin: 0; text-align: center; font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #8e241e; }
-.lg-page-scroll { overflow-y: auto; min-height: 0; flex: 1; font-size: var(--t1); line-height: 1.25; }
+.lg-page-scroll { overflow-y: auto; min-height: 0; flex: 1; font-size: var(--t1); line-height: 1.0667; }
 .lg-page-scroll p { margin: 6px 0; }
 .lg-rates { width: 100%; border-collapse: collapse; font-size: var(--t1); }
 .lg-rates td { padding: 3px 2px; border-bottom: 2px solid rgba(140, 160, 175, 0.5); }

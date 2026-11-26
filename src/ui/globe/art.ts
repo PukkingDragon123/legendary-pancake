@@ -7,6 +7,7 @@ import type { Area } from '../../game/catalog.ts';
 import { EMBLEM } from './emblems.ts';
 import { bayer, hash, mix, mul, Pix, vnoise, type C } from './pix.ts';
 import { texCanvas } from '../real/tex.ts';
+import { fontAt, snapFont } from '../font.ts';
 
 const INK = 0x2e2b24, PAPER = 0xf4eedd, OAT = 0xeae0c8, LINEN = 0xdccfb0, STRAW = 0xc9b78d, LAMP = 0xf1d39a, LAMPHI = 0xfbeac2;
 const WOOD = 0x9c7a56, WOODDK = 0x6f553d, BRASS = 0xc8a764, BRASSDK = 0x8e7440, STONE = 0x908a7e, SLATE = 0x46596a;
@@ -104,7 +105,7 @@ export function homeSprite(scale: number): string {
 /** A passport stamp: ink in the place colour, one of four border shapes, the emblem and the stamp text. */
 export function stampArt(a: Area, opts: { date?: number; state: 'visited' | 'open' | 'locked'; seed: number }, scale: number): string {
   return memo(`stamp:${a.id}:${opts.state}:${opts.date ?? 0}:${scale}`, () => {
-    const W = 54, H = 38, p = new Pix(W, H); // [font6] wide enough for the name in Alegreya
+    const W = 54, H = 38, p = new Pix(W, H); // [font6] wide enough for the name in the game's face
     const ink = opts.state === 'visited' ? mix(hexC(a.color), 0x4b463a, 0.32) : opts.state === 'open' ? 0xb2aa98 : 0xc8c0ae;
     const faint = opts.state !== 'visited';
     const dot = (x: number, y: number) => { if (!faint || (x + y) % 2 === 0) { if (!faint && hash(x, y, opts.seed) < 0.07) return; p.set(x, y, ink); } };
@@ -297,8 +298,18 @@ export function passportCover(scale: number): string {
     for (const k of [-1, 0, 1]) { g.beginPath(); g.moveTo(30 - Math.sqrt(156 - (k * 7) ** 2), 36 + k * 7); g.lineTo(30 + Math.sqrt(156 - (k * 7) ** 2), 36 + k * 7); g.stroke(); }
     g.beginPath(); g.ellipse(30, 36, 6, 12.5, 0, 0, Math.PI * 2); g.stroke();
     g.beginPath(); g.moveTo(30, 23.5); g.lineTo(30, 48.5); g.stroke();
-    g.fillStyle = gold; g.font = 'bold 6px Alegreya, Georgia, serif'; g.textAlign = 'center'; g.fillText('PASSPORT', 30, 63);
-    g.font = '3.4px Alegreya, Georgia, serif'; g.fillText('HOOT HOLLOW', 30, 70);
+    // [font14] the gilt lettering in the pixel face, set in device pixels (whole pixels per font pixel, crisp)
+    g.save(); g.setTransform(1, 0, 0, 1, 0, 0);
+    const gl = g.createLinearGradient(0, 55 * scale, 0, 71 * scale); gl.addColorStop(0, '#fff0a8'); gl.addColorStop(0.45, '#d8aa40'); gl.addColorStop(1, '#8a5e14');
+    g.fillStyle = gl; g.textAlign = 'left';
+    const gilt = (t: string, want: number, base: number) => {
+      const sz = snapFont(want * scale);
+      g.font = fontAt(sz, { caps: true });
+      const w = g.measureText(t).width;
+      if (w <= 54 * scale) g.fillText(t, Math.round(30 * scale - w / 2), Math.round(base * scale));
+    };
+    gilt('PASSPORT', 8.5, 63); gilt('HOOT HOLLOW', 6, 70.5);
+    g.restore();
     return c.toDataURL('image/png');
   });
 }

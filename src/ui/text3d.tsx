@@ -1,6 +1,6 @@
-// Premium title text in the game's Alegreya (titles in Alegreya SC), rendered at full device resolution like lettering
-// cut and painted on a sign: a clean near-black ink outline (the same ink as the UI's and the world's outlines), a
-// shallow bevel below the face, a face lit softly from the top (no chrome bands) and a soft cast shadow. Plus game-style motion: titles pop in with squash and stretch, numbers count up and
+// [font14] Chunky pixel lettering in the game's pixel faces (font.ts; titles in the display face): a hard one-font-pixel ink outline (the same ink
+// as the UI's and the world's outlines), an ink extrusion below it so the letters stand proud like a sticker, a face
+// shaded in hard bands a font pixel row each (bright top, colour, deeper foot) and a hard translucent drop shadow. Plus game-style motion: titles pop in with squash and stretch, numbers count up and
 // punch, rewards burst with sparkles, exclamations shake, happy lines wave letter by letter, dialogue types on
 // letter by letter, emphasis flashes. Everything respects reduced motion and the in-app Calm motion setting
 // (the global rules in style.css stop CSS animation; the JS bits below check reducedMotion()).
@@ -20,7 +20,7 @@
 //           fitText3D(text, wishPx, maxW) -> n (16 px steps that fit)
 import { cloneElement, isValidElement, toChildArray, type ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { fontPx, stepPx, textSafe, uiFont } from './font.ts';
+import { fontAt, GRID, snapFont, stepPx, textSafe, uiFont } from './font.ts';
 import { reducedMotion } from './chrome/swing.ts';
 
 /** a palette: top highlight row, three fill bands (light to dark), outline, extrusion */
@@ -40,24 +40,24 @@ export type PaletteName = keyof typeof PALETTES;
 
 // ------------------------------------------------------------------ CSS
 
-const vars = (p: Palette) => `--t-ow:${p.ow ?? 'max(1px, 0.05em)'};--t-hi:${p.hi};--t-1:${p.c1};--t-2:${p.c2};--t-3:${p.c3};--t-ol:${p.ol};--t-ex:${p.ex};--t-dr:${p.drop ?? 'rgba(18,10,4,.42)'}`;
-/** a length in ems (scales with the text) */
-const E = (k: number) => `${k}em`;
-/** an outline from text shadows: twelve directions, so curves stay round */
-const DIRS = Array.from({ length: 12 }, (_, i) => [Math.cos((i / 12) * Math.PI * 2), Math.sin((i / 12) * Math.PI * 2)].map((v) => Math.round(v * 1000) / 1000));
-const ring = (c: string, w = 'var(--ow)') => DIRS.map(([x, y]) => `calc(${w} * ${x}) calc(${w} * ${y}) 0 ${c}`).join(',');
+const vars = (p: Palette) => `--t-ow:${p.ow ?? 'var(--fp)'};--t-hi:${p.hi};--t-1:${p.c1};--t-2:${p.c2};--t-3:${p.c3};--t-ol:${p.ol};--t-ex:${p.ex};--t-dr:${p.drop ?? 'rgba(18,10,4,.38)'}`;
+/** [font14] one font pixel of the pixel face (its em is 18 font pixels): every outline and extrusion is whole font pixels */
+const FP = 'var(--fp)';
+const at = (x: number, y: number, c: string, w = FP) => `calc(${w} * ${x}) calc(${w} * ${y}) 0 ${c}`;
+/** a hard pixel outline: the eight neighbours one font pixel away (square, like a sprite's outline) */
+const ring = (c: string, w = FP) => [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]].map(([x, y]) => at(x, y, c, w)).join(',');
 /**
- * [ui12] Lettering cut and painted on a sign: a clean ink outline all round (about 1.5 device px on body sizes,
- * 2-3 on big titles), a shallow bevel of the same ink below it (the letters stand a little proud), a tight contact
- * shadow and a soft cast shadow. `n` deepens the bevel a little on the biggest titles.
+ * [font14] Chunky pixel lettering: a one-font-pixel ink outline all round, `n` font pixels of ink extrusion below it
+ * (the letters stand proud like a sticker or a carved sign), then a hard translucent drop shadow one more font pixel
+ * down and to the right. No blur anywhere: every edge lands on the pixel grid.
  */
-const OW = 'var(--t-ow, max(1px, 0.05em))';
-const stack = (n: number) => [
-  ring('var(--t-ol)', OW),
-  `0 calc(${OW} + ${E(0.025 + n * 0.003)}) 0 var(--t-ol)`,
-  `0 calc(${OW} + ${E(0.05 + n * 0.004)}) ${E(0.04)} rgba(10,6,2,.5)`,
-  `0 ${E(0.12 + n * 0.008)} ${E(0.22)} var(--t-dr)`,
-].join(',');
+const OW = 'var(--t-ow, var(--fp))';
+const stack = (n: number) => {
+  const out = [ring('var(--t-ol)', OW)];
+  for (let k = 2; k <= n + 1; k++) out.push(at(-1, k, 'var(--t-ol)'), at(0, k, 'var(--t-ol)'), at(1, k, 'var(--t-ol)'));
+  out.push(at(0, n + 2, 'var(--t-dr)'), at(1, n + 2, 'var(--t-dr)'), at(2, n + 2, 'var(--t-dr)'), at(2, n + 1, 'var(--t-dr)'));
+  return out.join(',');
+};
 /** Where the game wears it without a class in its markup: titles, sign names, big numbers (full 3D) ... */
 const FULL = ['.hh-name', '.lvup-title', '.lvup-medal b', '.title-ribbon', '.cs-sign span', '.sf-sign', '.sf-sleep', '.seal b', '.tk-times b', '.bk-last-t b', '.n-time', '.lock-time', '.bigclock', '.cb-title'];
 /** ... and buttons, counters, labels, toasts and dialogue (light 3D: outline and a one-pixel extrusion) */
@@ -65,18 +65,18 @@ const LITE = ['.hh-num', '.hh-rune b', '.btn.pillow', '.btn.oak', '.lg-btn', '.h
 const T = `:is(.t3d:not(.t3d-lite), h1:not(.qp-q), h2:not(.qp-q), ${FULL.join(', ')})`;
 const L = `:is(.t3d.t3d-lite, ${LITE.join(', ')})`;
 const CSS = `
-:where(.t3d, h1, h2, ${FULL.join(', ')}, ${LITE.join(', ')}) { ${vars(PALETTES.gold)}; --tp: calc(1em / 16); --ow: max(1px, 0.055em); }
+:where(.t3d, h1, h2, ${FULL.join(', ')}, ${LITE.join(', ')}) { ${vars(PALETTES.gold)}; --fp: calc(1em / 15); --tp: var(--fp); --ow: var(--fp); }
 /* the palette each place wears: gold for titles on wood, cream on dark and coloured surfaces, ink on paper */
 :where(.hh-num, .hh-rune b, .cs-sign span, .sf-sign, .sf-sleep, .lvup-medal b, .n-time, .lock-time, .bigclock, .btn.pillow, .btn.oak, .lg-btn, .hh-btn-green, .hh-btn-night) { ${vars(PALETTES.cream)} }
 :where(.bk-title, .tk-times b, .seal b, .bk-last-t b, .stat b, .bk-tile b, .cb-title, .hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .tk-hint, .hh-btn-cream, .qp-sheet h2, .sheet-head h2) { ${vars(PALETTES.ink)} }
 :where(.lock-time, .n-time) { ${vars(PALETTES.moon)} }
 .t3d-gold { ${vars(PALETTES.gold)} } .t3d-cream { ${vars(PALETTES.cream)} } .t3d-sky { ${vars(PALETTES.sky)} }
 .t3d-rose { ${vars(PALETTES.rose)} } .t3d-leaf { ${vars(PALETTES.leaf)} } .t3d-moon { ${vars(PALETTES.moon)} } .t3d-ink { ${vars(PALETTES.ink)} }
-body ${T} { color: var(--t-2); text-shadow: ${stack(5)} !important; }
-body ${T}:is(.t3d-deep, h1, .lvup-title, .title-ribbon, .bigclock, .n-time, .lock-time) { text-shadow: ${stack(8)} !important; }
-body ${L} { color: var(--t-1); text-shadow: ${ring('var(--t-ol)', 'max(1px, 0.055em)')}, 0 calc(max(1px, 0.055em) + 0.03em) 0 var(--t-ol), 0 0.1em 0.16em var(--t-dr) !important; }
-body :is(.hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .tk-hint, .t3d-ink.t3d-lite) { color: var(--t-2); text-shadow: 0 1px 0 color-mix(in srgb, var(--t-ex), transparent 40%) !important; }
-.hh-dig { width: 0.625em !important; text-align: right !important; overflow: visible !important; clip-path: inset(-0.1em -0.5em 0 -0.2em); } /* the wheels clip only top and bottom: the outline and extrusion show */
+body ${T} { font-family: var(--font-title); color: var(--t-2); text-shadow: ${stack(1)} !important; }
+body ${T}:is(.t3d-deep, h1, .lvup-title, .title-ribbon, .bigclock, .n-time, .lock-time) { text-shadow: ${stack(2)} !important; }
+body ${L} { color: var(--t-1); text-shadow: ${ring('var(--t-ol)', OW)}, ${at(-1, 2, 'var(--t-ol)')}, ${at(0, 2, 'var(--t-ol)')}, ${at(1, 2, 'var(--t-ol)')}, ${at(1, 3, 'var(--t-dr)')} !important; }
+body :is(.hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .tk-hint, .t3d-ink.t3d-lite) { color: var(--t-2); text-shadow: ${at(0, 1, 'color-mix(in srgb, var(--t-ex), transparent 40%)')} !important; }
+.hh-dig { width: calc(6em / 15) !important; text-align: right !important; overflow: visible !important; clip-path: inset(-0.1em -0.5em 0 -0.2em); } /* the wheels clip only top and bottom: the outline and extrusion show */
 .hh-strip i { line-height: 1em !important; }
 :where([data-t]) { position: relative; }
 body :is(${T}[data-t], ${T} [data-t])::after {
@@ -84,14 +84,16 @@ body :is(${T}[data-t], ${T} [data-t])::after {
   display: inherit; flex-direction: inherit; flex-wrap: inherit; align-items: inherit; justify-content: inherit; gap: inherit;
   font: inherit; line-height: inherit; letter-spacing: inherit; text-align: inherit; text-indent: inherit; text-transform: inherit; white-space: inherit; overflow-wrap: inherit;
   color: transparent; text-shadow: none; pointer-events: none; overflow: hidden; transform: none; animation: none;
-  /* the top of Alegreya's content box in each line; its capitals run from 0.38em to the baseline at 1.02em */
-  --c0: calc((1lh - 1.361em) / 2);
-  background: linear-gradient(180deg, var(--t-hi) 0, var(--t-hi) calc(var(--c0) + 0.42em), var(--t-1) calc(var(--c0) + 0.6em), var(--t-2) calc(var(--c0) + 0.86em), var(--t-3) calc(var(--c0) + 1.04em), var(--t-3) 1lh) 0 0 / 100% 1lh repeat-y content-box;
+  /* [font14] the top of the display face's content box in each line (16 font pixels: 12 up, 4 down); capitals stand
+     from font pixel 5 to the baseline at 12, lowercase from 7. Hard bands, whole font pixel rows: a bright top, the
+     colour, a deeper foot, like a sprite lit from above */
+  --c0: calc((1lh - var(--fp) * 16) / 2);
+  background: linear-gradient(180deg, var(--t-hi) 0, var(--t-hi) calc(var(--c0) + var(--fp) * 6), var(--t-1) calc(var(--c0) + var(--fp) * 6), var(--t-1) calc(var(--c0) + var(--fp) * 8), var(--t-2) calc(var(--c0) + var(--fp) * 8), var(--t-2) calc(var(--c0) + var(--fp) * 10), var(--t-3) calc(var(--c0) + var(--fp) * 10), var(--t-3) 1lh) 0 0 / 100% 1lh repeat-y content-box;
   -webkit-background-clip: text; background-clip: text;
 }
 /* game-style motion; the global reduced-motion rules freeze all of it */
-.t3d-pop { animation: t3dPop .45s cubic-bezier(.2, .7, .3, 1) both; transform-origin: 50% 85%; }
-@keyframes t3dPop { 0% { transform: translateY(0.22em); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.t3d-pop { animation: t3dPop .45s steps(6, end) both; transform-origin: 50% 85%; }
+@keyframes t3dPop { 0% { transform: translateY(calc(1em / 15 * 4)); opacity: 0; } 40% { transform: translateY(calc(1em / -15 * 2)); opacity: 1; } 70% { transform: translateY(calc(1em / 15)); } 100% { transform: none; opacity: 1; } }
 .t3d-punch { animation: t3dPunch .42s cubic-bezier(.3, 1.4, .5, 1); }
 @keyframes t3dPunch { 0% { transform: none; } 35% { transform: scale(1.08); } 100% { transform: none; } }
 .t3d-shake { animation: t3dShake .36s linear 2; }
@@ -103,15 +105,29 @@ body :is(${T}[data-t], ${T} [data-t])::after {
   box-shadow: 0 -22px 2px #fff8d6, 18px -14px 2px #ffe68f, 26px 2px 2px #ffffff, 16px 16px 2px #ffe68f, -2px 22px 2px #fff8d6, -18px 14px 2px #ffffff, -26px -2px 2px #ffe68f, -16px -16px 2px #ffffff, 0 0 10px 4px rgba(255,230,140,.6); }
 @keyframes t3dSpark { 0% { transform: scale(.2); opacity: 1; } 60% { opacity: 1; } 100% { transform: scale(1.7); opacity: 0; } }
 .t3d-ch { display: inline-block; white-space: pre; }
+/* [font14] hand-lettered titles (font.ts splits h1, h2 and sheet-title text into letters): each letter rests a font
+   pixel up or down in a fixed pattern and now and then a little hop runs along the word, in whole font pixels */
+.hh-sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.hop-w { display: inline-block; white-space: nowrap; }
+.hop-s { display: inline-block; white-space: pre; }
+.hop { display: inline-block; white-space: pre; --fp: calc(1em / 15); transform: translateY(calc(var(--fp) * var(--y, 0))); animation: hhHop 6s steps(1, end) infinite; animation-delay: calc(1.4s + var(--i, 0) * 70ms); }
+@keyframes hhHop {
+  0%, 100% { transform: translateY(calc(var(--fp) * var(--y, 0))); }
+  2% { transform: translateY(calc(var(--fp) * (var(--y, 0) - 2))); }
+  4% { transform: translateY(calc(var(--fp) * (var(--y, 0) - 3))); }
+  6% { transform: translateY(calc(var(--fp) * (var(--y, 0) - 1))); }
+  8% { transform: translateY(calc(var(--fp) * (var(--y, 0) + 1))); }
+  10% { transform: translateY(calc(var(--fp) * var(--y, 0))); }
+}
 .t3d-seg { display: inline-block; }
-.t3d-wave > .t3d-ch { animation: t3dWave 1.5s ease-in-out infinite; animation-delay: calc(var(--i) * 80ms); }
-@keyframes t3dWave { 0%, 55%, 100% { transform: none; } 22% { transform: translateY(-0.06em); } }
-.t3d-type > .t3d-ch { animation: t3dType .26s cubic-bezier(.3, 1.5, .5, 1) both; animation-delay: calc(var(--i) * 30ms); }
-@keyframes t3dType { 0% { transform: translateY(0.12em); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.t3d-wave > .t3d-ch { animation: t3dWave 1.5s steps(1, end) infinite; animation-delay: calc(var(--i) * 80ms); }
+@keyframes t3dWave { 0%, 40%, 100% { transform: none; } 12%, 28% { transform: translateY(calc(1em / -15)); } 20% { transform: translateY(calc(2em / -15)); } }
+.t3d-type > .t3d-ch { animation: t3dType .24s steps(3, end) both; animation-delay: calc(var(--i) * 30ms); }
+@keyframes t3dType { 0% { transform: translateY(calc(2em / 15)); opacity: 0; } 50% { transform: translateY(calc(1em / -15)); opacity: 1; } 100% { transform: none; opacity: 1; } }
 /* where the game uses the motion: titles pop in, Pip's happy lines wave, rewards burst in gold */
-:is(.sheet-head h2, .mr-sign h2, .dawn-sign h1, .bk-title, .cb-title, .title-ribbon, .gb-title b) { animation: t3dPop .45s cubic-bezier(.2, .7, .3, 1) both; transform-origin: 50% 85%; }
+:is(.sheet-head h2, .mr-sign h2, .dawn-sign h1, .bk-title, .cb-title, .title-ribbon, .gb-title b) { animation: t3dPop .45s steps(6, end) both; transform-origin: 50% 85%; }
 .hh-bubble .txt.t3d-shake { display: inline-block; }
-.hh-bubble .txt.t3d-wave .ch { display: inline-block; white-space: pre; animation: t3dWave 1.5s ease-in-out infinite; animation-delay: calc(var(--i) * 60ms); }
+.hh-bubble .txt.t3d-wave .ch { display: inline-block; white-space: pre; animation: t3dWave 1.5s steps(1, end) infinite; animation-delay: calc(var(--i) * 60ms); }
 body .hh-toast-body > span.reward { ${vars(PALETTES.gold)}; color: var(--t-2); text-shadow: ${stack(3)} !important; }
 `;
 let cssDone = false;
@@ -196,46 +212,44 @@ const shade = (hex: string, k: number) => {
 };
 
 /**
- * Draw title text on a canvas at full resolution, lettered like a painted sign: a soft cast shadow, a clean ink
- * outline, a shallow bevel of ink below it, and a face lit softly from the top. `size` in canvas px (or `n` size
- * steps). Titles (caps: true) are set in Alegreya SC, the rest in bold Alegreya (italic: true for whispers). `y` is
- * the baseline. `lift(i)` raises letter i by that many sixteenths of the size (per-letter pops and waves). Returns
- * the width of the letters (the outline and bevel add about a fifth of the size to the right and below).
+ * [font14] Draw pixel lettering on a canvas: a hard translucent drop shadow, a one-font-pixel ink outline all round,
+ * an ink extrusion below it (`depth` 1-3 font pixels), a darker lip, and a face shaded in hard bands a font pixel row
+ * each (bright top, colour, deeper foot). `size` in canvas px (or `n` steps) is snapped to the 18 px grid and the text
+ * to whole pixels, so every edge is crisp. `y` is the baseline. `lift(i)` raises letter i by that many sixteenths of
+ * the size (rounded to whole font pixels; per-letter pops and waves). Returns the width of the letters (the outline
+ * and extrusion add about a quarter of the size to the right and below).
  */
 export function drawText3D(g: CanvasRenderingContext2D, text: string, x: number, y: number, o: { n?: number; size?: number; palette?: PaletteName | Palette; depth?: number; align?: CanvasTextAlign; outline?: boolean; drop?: boolean; lift?: (i: number) => number; caps?: boolean; italic?: boolean } = {}): number {
-  const s = textSafe(text), size = o.size ?? stepPx(o.n ?? 1), d = o.depth ?? 2;
+  const s = textSafe(text), size = snapFont(o.size ?? stepPx(o.n ?? 1)), p = Math.max(1, Math.round(size / GRID));
+  const d = Math.max(1, Math.min(3, Math.round(o.depth ?? 2)));
   const pal: Palette = typeof o.palette === 'object' ? o.palette : PALETTES[o.palette ?? 'gold'];
   g.save();
-  g.font = fontPx(size, { caps: o.caps, italic: o.italic, weight: 700 }); g.textBaseline = 'alphabetic'; g.textAlign = 'left'; g.lineJoin = 'round'; g.miterLimit = 2;
+  g.font = fontAt(size, { caps: o.caps }); g.textBaseline = 'alphabetic'; g.textAlign = 'left';
   const w = g.measureText(s).width;
-  const x0 = o.align === 'center' ? x - w / 2 : o.align === 'right' || o.align === 'end' ? x - w : x, y0 = y;
+  const x0 = Math.round(o.align === 'center' ? x - w / 2 : o.align === 'right' || o.align === 'end' ? x - w : x), y0 = Math.round(y);
   const chars = [...s];
   const xs: number[] = []; { let cx = x0; for (const ch of chars) { xs.push(cx); cx += g.measureText(ch).width; } }
   const each = (dx: number, dy: number, f: (ch: string, px: number, py: number) => void) => {
     if (!o.lift) { f(s, x0 + dx, y0 + dy); return; }
-    chars.forEach((ch, i) => f(ch, xs[i] + dx, y0 + dy - ((o.lift!(i) || 0) * size) / 16));
+    chars.forEach((ch, i) => f(ch, xs[i] + dx, y0 + dy - Math.round(((o.lift!(i) || 0) * size) / 16 / p) * p));
   };
-  // the ink line: about 1.5 px at 20 px, 3 px on a 64 px title (half of the stroke is under the face)
-  const ow = o.outline === false ? 0 : Math.max(2.2, size * 0.1);
-  const bevel = Math.max(1, size * 0.03 * Math.min(1.6, Math.max(0.6, d / 2)));
-  if (o.drop !== false) {
-    g.save(); g.shadowColor = pal.drop ?? 'rgba(14,8,2,.5)'; g.shadowBlur = size * 0.22; g.shadowOffsetX = size * 0.03; g.shadowOffsetY = size * 0.12;
-    g.fillStyle = pal.ol; g.strokeStyle = pal.ol; g.lineWidth = ow; each(0, bevel, (t, px, py) => { g.fillText(t, px, py); if (ow) g.strokeText(t, px, py); }); g.restore();
+  const fill = (dx: number, dy: number) => each(dx * p, dy * p, (t, px, py) => g.fillText(t, px, py));
+  const ink = o.outline !== false;
+  // the hard drop shadow, one font pixel below and right of the extrusion
+  if (o.drop !== false) { g.fillStyle = pal.drop ?? 'rgba(14,8,2,.42)'; for (const dx of [0, 1, 2]) fill(dx, d + 2); fill(2, d + 1); }
+  if (ink) {
+    g.fillStyle = pal.ol;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (dx || dy) fill(dx, dy);
+    for (let k = 2; k <= d + 1; k++) for (const dx of [-1, 0, 1]) fill(dx, k);
   }
-  // the bevel (the letters' cut edge, in shade) and the outline round it all
-  if (ow) {
-    g.strokeStyle = pal.ol; g.fillStyle = pal.ol; g.lineWidth = ow;
-    each(0, bevel, (t, px, py) => { g.strokeText(t, px, py); g.fillText(t, px, py); });
-    each(0, 0, (t, px, py) => g.strokeText(t, px, py));
-  }
-  g.fillStyle = shade(pal.ex, 1.1);
-  each(0, bevel * 0.6, (t, px, py) => g.fillText(t, px, py));
-  // the face: lit from the top (a bright top, the colour, a deeper foot)
-  const top = y0 - size * 0.66, base = y0;
-  const gr = g.createLinearGradient(0, top, 0, base);
-  gr.addColorStop(0, pal.hi); gr.addColorStop(0.3, pal.c1); gr.addColorStop(0.72, pal.c2); gr.addColorStop(1, pal.c3);
+  // the lip (the letters' cut edge, in shade)
+  g.fillStyle = shade(pal.ex, 1.15);
+  for (let k = 1; k <= d; k++) fill(0, k);
+  // the face: hard bands a font pixel row each (capitals stand 7 font pixels above the baseline)
+  const gr = g.createLinearGradient(0, y0 - 7 * p, 0, y0 + 4 * p), st = (a: number, b: number, c: string) => { gr.addColorStop(a / 11, c); gr.addColorStop(b / 11, c); };
+  st(0, 1, pal.hi); st(1, 3, pal.c1); st(3, 5, pal.c2); st(5, 11, pal.c3);
   g.fillStyle = gr;
-  each(0, 0, (t, px, py) => g.fillText(t, px, py));
+  fill(0, 0);
   g.restore();
   return Math.round(w);
 }

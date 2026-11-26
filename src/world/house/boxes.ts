@@ -64,7 +64,7 @@ function tape(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: n
 
 function frontTex(id: string, label: string): THREE.CanvasTexture {
   const seed = id.length * 7 + label.length;
-  // [font6] painted at 2 texels per art texel so the marker lettering can be Alegreya (the game's font) at its 16 px
+  // [font6] painted at 2 texels per art texel so the marker lettering can be the game's pixel face at its 18 px
   // grid; the cardboard, tape and marks are drawn scaled 2x and look exactly as before
   const paint = (g: CanvasRenderingContext2D) => {
     g.setTransform(2, 0, 0, 2, 0, 0);
@@ -75,12 +75,12 @@ function frontTex(id: string, label: string): THREE.CanvasTexture {
     const fragile = label === 'FRAGILE';
     g.setTransform(1, 0, 0, 1, 0, 0);
     const W2 = BOX_W * TPX * 2;
-    const tw = Math.max(...lines.map((l) => textWidth(l))) + 12, th = lines.length * 15 + 7;
+    const tw = Math.max(...lines.map((l) => textWidth(l))) + 12, th = lines.length * 18 + 8; // [font14] 14-texel capitals
     const lx = Math.round((W2 - tw) / 2), ly = 52 + (lines.length === 1 ? 8 : 0);
     g.fillStyle = 'rgba(60,40,20,0.3)'; g.fillRect(lx + 2, ly + 2, tw, th);
     g.fillStyle = '#efe6d2'; g.fillRect(lx, ly, tw, th);
     g.fillStyle = '#e2d6bc'; g.fillRect(lx, ly + th - 4, tw, 4);
-    lines.forEach((l, i) => canvasText(g, l, W2 / 2, ly + 15 + i * 15, fragile ? '#b0301e' : '#2c2a36', { align: 'center' }));
+    lines.forEach((l, i) => canvasText(g, l, W2 / 2, ly + 18 + i * 18, fragile ? '#b0301e' : '#2c2a36', { align: 'center' }));
     g.setTransform(2, 0, 0, 2, 0, 0);
     if (fragile) {
       // red "this way up" arrows either side
