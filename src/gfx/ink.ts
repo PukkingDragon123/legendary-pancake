@@ -245,13 +245,16 @@ void main() {
   if (uCrease > 0.0 && full > 0.0) {
     float solid = full * (1.0 - smoothstep(0.4, 0.46, max(max(aL, aR), max(aD, aU))));
     float k = 0.0;
+    // a ridge one pixel thin standing out in front of both neighbours (a wire, a twig, a string of lights) is drawn by
+    // the crease too (the surface behind runs straight on under it): it goes sooner with distance, before it shimmers
+    float wireFade = smoothstep(uFade.x * 0.12, uFade.x * 0.45, z0);
     if (abs(rx) < T && abs(lift(z0, -L2.z, -R2.z)) < T * 2.0) {
       float b0 = bend(L, P, R);
-      if (b0 > bend(L2, L, P) && b0 >= bend(P, R, R2)) k = max(k, b0);
+      if (b0 > bend(L2, L, P) && b0 >= bend(P, R, R2)) k = max(k, b0 * (1.0 - step(0.0005, rx) * (1.0 - smoothstep(0.02, 0.06, bend(L2, L, R))) * wireFade));
     }
     if (abs(ry) < T && abs(lift(z0, -D2.z, -U2.z)) < T * 2.0) {
       float b0 = bend(D, P, U);
-      if (b0 > bend(D2, D, P) && b0 >= bend(P, U, U2)) k = max(k, b0);
+      if (b0 > bend(D2, D, P) && b0 >= bend(P, U, U2)) k = max(k, b0 * (1.0 - step(0.0005, ry) * (1.0 - smoothstep(0.02, 0.06, bend(D2, D, U))) * wireFade));
     }
     cr = smoothstep(0.1, 0.26, k) * 0.82 * uCrease * solid * (1.0 - smoothstep(uFade.x * 0.45, uFade.x * 1.2, z0));
   }
