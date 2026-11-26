@@ -1,23 +1,24 @@
-// The loading cuckoo clock (#boot in index.html, painted by src/onboard/tools/bootart.mjs) and its handoff.
-// Before any module runs the clock already keeps the real time: the hands are CSS animations at clock speed,
-// started at the current time by a tiny inline script (negative delays), the pine-cone weights sink on their chains
-// with the (estimated) loading progress while the rings on the other ends rise, and the leaf pendulum swings.
+// The loading cuckoo clock (#boot in index.html: renders of the real 3D owl cuckoo clock baked by
+// src/onboard/clockbake.ts) and its handoff.
+// Before any module runs the clock already keeps the real time: the hands are turned by CSS animations at clock
+// speed, started at the current time (negative delays), the pine-cone weights sink on their chains with the
+// (estimated) loading progress while the rings on the other ends rise, and the brass pendulum swings.
 // Once main.tsx marks the splash `gone`, this module takes over:
 //   1. strike  the weights settle at the bottom while the minute hand winds once round (landing back on the real
-//              time), then the little doors open and Pip pops out onto the balcony and calls "cu-ckoo"
-//   2. dive    a returning player: the clock zooms into its dial while a stepped pixel iris opens through it onto
-//              the world; a new player (`hold`): Pip waits on the balcony, nodding, for one tap on the clock (which
-//              also unlocks audio), calls twice, goes back in and shuts the doors; then the clock zooms nose to the
-//              dial, where the 3D office's own clock (the same painting) takes over and the camera pulls back into
-//              Pip's office (see Office.pullBack).
+//              time), then the door opens and Pip steps out onto the balcony and calls "cu-ckoo"
+//   2. dive    a returning player: the clock zooms into its dial while a round iris opens through it onto the world;
+//              a new player (`hold`): Pip waits on the balcony, nodding, for one tap on the clock (which also unlocks
+//              audio), calls twice, goes back in and shuts the door; then the clock zooms nose to the dial, where the
+//              3D office's own clock (the same painting) takes over and the camera pulls back into Pip's office (see
+//              Office.pullBack).
 //
 // Public (for intro.tsx and src/ui/intro.tsx): holdBoot, bootShowing, bootReady, bootDial, wakeBoot,
 // releaseBoot. The `gone` class contract with main.tsx is unchanged.
 import { sound } from '../audio/sound.ts';
 
 const el = () => document.getElementById('boot');
-type Art = { fr: number; mn: number; hn: number; cx: number; dy: number; rd: number; w: number; sh: number; bw: number; dw: number; wt: number };
-const ART: Art = (() => { try { return JSON.parse(el()?.dataset.art ?? ''); } catch { return { fr: 62, mn: 120, hn: 120, cx: 88, dy: 155, rd: 33, w: 176, sh: 330, bw: 176, dw: 38, wt: 58 }; } })();
+type Art = { cx: number; dy: number; rd: number; w: number; sh: number; dw: number; wt: number };
+const ART: Art = (() => { try { return JSON.parse(el()?.dataset.art ?? ''); } catch { return { cx: 100, dy: 135, rd: 37.5, w: 200, sh: 400, dw: 60, wt: 55 }; } })();
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const play = (id: string, volume: number, rate = 1) => { try { sound.play(id, { volume, rate, gap: 60 }); } catch { /* audio not ready */ } };
 const reduced = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; } };
@@ -41,20 +42,20 @@ const fontPx = (b: HTMLElement) => parseFloat(getComputedStyle(b).fontSize) || 2
 
 // ------------------------------------------------------------------ the door and the owl
 
-/** the door strip's frames (bootart.mjs STATES, after the closed door) */
+/** the door strip's frames (clockbake.ts): shut, ajar, the owl peeking, out, calling, bowing */
 const F = { closed: 0, ajar: 1, peek: 2, out: 3, call: 4, bow: 5 } as const;
-function door(f: number) {
+function door(f: keyof typeof F) {
   const d = el()?.querySelector<HTMLElement>('.bt-door');
-  if (d) d.style.backgroundPosition = `-${f * ART.dw}em 0`;
+  if (d) d.style.backgroundPosition = `-${F[f] * ART.dw}em 0`;
 }
-/** the doors swing open and Pip hops out onto the balcony */
+/** the door swings open and Pip steps out onto the balcony */
 async function popOut() {
   const b = el();
   if (!b) return;
   play('door_open', 0.22, 1.7);
-  door(F.ajar); await wait(70);
-  door(F.peek); await wait(130);
-  door(F.out);
+  door('ajar'); await wait(80);
+  door('peek'); await wait(140);
+  door('out');
   b.classList.add('out');
   await wait(140);
 }
@@ -64,41 +65,49 @@ async function call(n: number) {
   if (!b) return;
   for (let i = 0; i < n; i++) {
     b.classList.remove('call'); void b.offsetWidth; b.classList.add('call');
-    door(F.call); play('owl_hoot', 0.42, 1.34 + (i % 2) * 0.02);
+    door('call'); play('owl_hoot', 0.42, 1.34 + (i % 2) * 0.02);
     await wait(300);
-    door(F.bow); play('owl_hoot', 0.38, 1.08);
+    door('bow'); play('owl_hoot', 0.38, 1.08);
     await wait(340);
-    door(F.out);
+    door('out');
     await wait(i < n - 1 ? 200 : 110);
   }
 }
-/** back inside, the doors clack shut */
+/** back inside, the door clacks shut */
 async function popIn() {
   const b = el();
   if (!b) return;
   b.classList.remove('out');
-  door(F.peek); await wait(90);
-  door(F.ajar); await wait(70);
-  door(F.closed);
+  door('peek'); await wait(90);
+  door('ajar'); await wait(70);
+  door('closed');
   play('wood_knock', 0.18, 1.6);
   await wait(120);
+}
+/** while it waits for the tap, Pip nods now and then */
+let nodTimer = 0;
+function nodding(on: boolean) {
+  clearInterval(nodTimer);
+  if (!on || reduced()) return;
+  nodTimer = window.setInterval(() => {
+    const b = el();
+    if (!b?.classList.contains('ready') || !b.classList.contains('out')) return;
+    door('bow');
+    setTimeout(() => { if (b.classList.contains('ready')) door('out'); }, 220);
+  }, 2600);
 }
 
 // ------------------------------------------------------------------ 1. strike the real time
 
-/** Current frame of a stepped sprite strip (from its computed background position). */
-function frameOf(node: HTMLElement, fw: number, k: number): number {
-  const px = parseFloat(getComputedStyle(node).backgroundPositionX) || 0;
-  return Math.round(-px / (fw * k));
-}
-const setFrame = (n: HTMLElement, f: number, fw: number) => { n.style.backgroundPosition = `-${f * fw}em 0`; };
-/** how far (art px) the weights have sunk so far (from the running CSS animation) */
-function sinkOf(w: HTMLElement, k: number): number {
-  const m = /matrix\(([^)]+)\)/.exec(getComputedStyle(w).transform);
-  return m ? Math.abs(parseFloat(m[1].split(',')[5]) || 0) / k : 0;
+/** a CSS-transformed element's current rotation (radians) and vertical offset (px) */
+function matOf(node: HTMLElement): { a: number; y: number } {
+  const m = /matrix\(([^)]+)\)/.exec(getComputedStyle(node).transform);
+  if (!m) return { a: 0, y: 0 };
+  const v = m[1].split(',').map(parseFloat);
+  return { a: Math.atan2(v[1], v[0]), y: v[5] || 0 };
 }
 function setSink(ws: HTMLElement[], s: number) {
-  for (const w of ws) w.style.transform = `translateY(${w.classList.contains('bt-rg') ? -s : s}em)`;
+  for (const w of ws) w.style.transform = `translateY(${(w.classList.contains('bt-rg') ? -s : s).toFixed(2)}em)`;
 }
 function strike(): Promise<void> {
   if (struck) return struck;
@@ -110,20 +119,20 @@ function strike(): Promise<void> {
     const mh = b.querySelector<HTMLElement>('.bt-mh');
     const ws = Array.from(b.querySelectorAll<HTMLElement>('.bt-wt, .bt-rg'));
     syncTime(b);
-    const s0 = ws.length ? sinkOf(ws[0], k) : ART.wt;
+    const s0 = ws.length ? Math.min(ART.wt, Math.abs(matOf(ws[0]).y) / k) : ART.wt;
     for (const w of ws) w.style.animation = 'none';
-    setSink(ws, Math.round(s0));
+    setSink(ws, s0);
     if (!reduced() && mh) {
       // the minute hand winds once round, landing back on the real time, while the weights settle at the bottom
-      const m0 = frameOf(mh, ART.fr, k);
+      const a0 = matOf(mh).a;
       mh.style.animation = 'none';
       const dur = 650, t0 = performance.now();
       play('clock_wind', 0.26, 1.25);
       await new Promise<void>((done) => {
         const step = () => {
           const t = Math.min(1, (performance.now() - t0) / dur), e = 1 - (1 - t) ** 3;
-          setFrame(mh, (m0 + Math.round(ART.mn * e)) % ART.mn, ART.fr);
-          setSink(ws, Math.round(s0 + (ART.wt - s0) * e));
+          mh.style.transform = `rotate(${(a0 + e * Math.PI * 2).toFixed(4)}rad)`;
+          setSink(ws, s0 + (ART.wt - s0) * e);
           if (t >= 1) { done(); return; }
           requestAnimationFrame(step);
         };
@@ -131,12 +140,13 @@ function strike(): Promise<void> {
         setTimeout(done, dur + 400);
       });
       // back to keeping time
-      mh.style.animation = ''; mh.style.backgroundPosition = '';
       syncTime(b);
+      mh.style.animation = ''; mh.style.transform = '';
     }
     setSink(ws, ART.wt);
     b.classList.add('done');
     if (!reduced()) { await popOut(); await call(1); }
+    else door('out');
     state = 'struck';
   })();
   return struck;
@@ -144,27 +154,20 @@ function strike(): Promise<void> {
 
 // ------------------------------------------------------------------ 2. the dive
 
-/** A stepped pixel circle as a polygon contour (clockwise), cell size s, around (cx, cy). */
-function pixelCircle(cx: number, cy: number, r: number, s: number): string[] {
-  const right: string[] = [], left: string[] = [];
-  const n = Math.max(1, Math.ceil(r / s));
-  for (let i = -n; i < n; i++) {
-    const y0 = cy + i * s, y1 = y0 + s, ym = Math.min(Math.abs(i), Math.abs(i + 1)) * s;
-    const hw = Math.floor(Math.sqrt(Math.max(0, r * r - ym * ym)) / s) * s;
-    if (hw <= 0) continue;
-    right.push(`${(cx + hw).toFixed(1)}px ${y0.toFixed(1)}px`, `${(cx + hw).toFixed(1)}px ${y1.toFixed(1)}px`);
-    left.unshift(`${(cx - hw).toFixed(1)}px ${y1.toFixed(1)}px`, `${(cx - hw).toFixed(1)}px ${y0.toFixed(1)}px`);
-  }
-  return [...right, ...left];
+/** a circle as a polygon contour (clockwise) */
+function circlePts(cx: number, cy: number, r: number): string[] {
+  const n = 72, out: string[] = [];
+  for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; out.push(`${(cx + Math.cos(a) * r).toFixed(1)}px ${(cy + Math.sin(a) * r).toFixed(1)}px`); }
+  return out;
 }
-function irisClip(cx: number, cy: number, r: number, s: number): string {
+function irisClip(cx: number, cy: number, r: number): string {
   const W = innerWidth, H = innerHeight;
-  const hole = r > 0.5 ? pixelCircle(cx, cy, r, s) : [];
-  if (!hole.length) return 'none';
+  if (r <= 0.5) return 'none';
+  const hole = circlePts(cx, cy, r);
   return `polygon(evenodd, 0px 0px, ${W}px 0px, ${W}px ${H}px, 0px ${H}px, 0px 0px, ${hole.join(', ')}, ${hole[0]}, 0px 0px)`;
 }
 
-/** Where the dial centre is on screen and how big one art pixel is (CSS px), at a given zoom of the dive. */
+/** Where the dial centre is on screen and how big one art unit is (CSS px), at a given zoom of the dive. */
 export function bootDial(zoom = DIVE_ZOOM): { x: number; y: number; px: number } {
   const b = el(), stage = b?.querySelector<HTMLElement>('.bt-stage');
   if (!b || !stage) return { x: innerWidth / 2, y: innerHeight / 2, px: 2 * zoom };
@@ -199,7 +202,7 @@ function zoomIn(dur: number, to: number, onFrame?: (t: number, z: number) => voi
   });
 }
 
-/** a returning player: dive through the dial into the world (a pixel iris opens inside the zooming dial) */
+/** a returning player: dive through the dial into the world (an iris opens inside the zooming dial) */
 function leave(): Promise<void> {
   if (leaving) return leaving;
   leaving = (async () => {
@@ -216,7 +219,7 @@ function leave(): Promise<void> {
     await zoomIn(1000, 13, (t, z) => {
       const g = Math.max(0, (t - 0.12) / 0.88);
       const r = Math.min(ART.rd * k * z * 0.96, ART.rd * k * z * (0.15 + g * 1.1) * Math.min(1, g * 3)) + (t > 0.85 ? (t - 0.85) * reach * 6 : 0);
-      b.style.clipPath = irisClip(cx, cy, r, Math.max(3, k * z * (z > 6 ? 1 : 2)));
+      b.style.clipPath = irisClip(cx, cy, r);
     });
     hide();
   })();
@@ -224,7 +227,7 @@ function leave(): Promise<void> {
 }
 
 async function fadeOut(b: HTMLElement, ms = 320) {
-  b.style.transition = `opacity ${ms}ms steps(6)`;
+  b.style.transition = `opacity ${ms}ms ease`;
   b.style.opacity = '0';
   await wait(ms + 40);
 }
@@ -232,6 +235,7 @@ async function fadeOut(b: HTMLElement, ms = 320) {
 function hide() {
   const b = el();
   state = 'gone';
+  nodding(false);
   if (!b) return;
   b.classList.add('gone');
   b.classList.remove('hold');
@@ -262,11 +266,11 @@ function check() {
 export function holdBoot() { el()?.classList.add('hold'); }
 export const bootShowing = () => { const b = el(); return !!b && b.style.display !== 'none' && (!b.classList.contains('gone') || b.classList.contains('hold')) && !b.classList.contains('zoom'); };
 
-/** The clock strikes (Pip pops out), then waits for one tap on it (the tap unlocks audio). Resolves at once without a splash. */
+/** The clock strikes (Pip steps out), then waits for one tap on it (the tap unlocks audio). Resolves at once without a splash. */
 export function bootReady(): Promise<void> {
   const b = el();
   if (!b || !bootShowing()) return Promise.resolve();
-  void strike().then(() => { if (state !== 'leaving' && state !== 'gone') b.classList.add('ready'); });
+  void strike().then(() => { if (state !== 'leaving' && state !== 'gone') { b.classList.add('ready'); nodding(true); } });
   return new Promise((res) => {
     const go = (e: Event) => {
       if (e instanceof KeyboardEvent && e.key !== ' ' && e.key !== 'Enter') return;
@@ -275,6 +279,7 @@ export function bootReady(): Promise<void> {
       removeEventListener('keydown', go);
       sound.unlock();
       b.classList.remove('ready');
+      nodding(false);
       res();
     };
     b.addEventListener('pointerdown', go);
@@ -283,7 +288,7 @@ export function bootReady(): Promise<void> {
 }
 
 /**
- * A new player's dive: Pip calls twice (now with sound), goes back in and the doors shut; then the clock zooms nose
+ * A new player's dive: Pip calls twice (now with sound), goes back in and the door shuts; then the clock zooms nose
  * to its dial (the office's own clock is waiting underneath at the same framing, see bootDial) and the painting
  * dissolves into the 3D room. Resolves when the splash is gone.
  */
@@ -291,12 +296,13 @@ export function wakeBoot(): Promise<void> {
   const b = el();
   if (!b || state === 'gone') return Promise.resolve();
   b.classList.remove('ready');
+  nodding(false);
   if (leaving) return leaving;
   leaving = (async () => {
     await strike();
     state = 'leaving';
-    if (!reduced() && !FREEZE) { await call(2); await popIn(); }
-    else door(F.closed);
+    if (!reduced() && !FREEZE) { door('out'); await call(2); await popIn(); }
+    else door('closed');
     b.classList.add('zoom');
     if (reduced()) { await fadeOut(b, 400); hide(); return; }
     play('whoosh_soft', 0.32, 0.9);

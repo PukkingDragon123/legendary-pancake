@@ -535,7 +535,7 @@ export function owlCrest(s: number, leafCount = 7, side = 0.3): Crest {
   for (const sd of [-1, 1]) carve.push({ geo: turned([[0.0005, 0], [s * 0.045, s * 0.004], [s * 0.036, s * 0.03], [0.0005, s * 0.05]], 8, 20), m: mtx(sd * s * 0.3, s * 0.13, s * 0.07, 0, 0, -sd * Math.PI / 2) });
   // a leaf curling off each end of the branch
   const lie = side > 0.3 ? 0.42 : -0.5;
-  for (const sd of [-1, 1]) carve.push({ geo: leafGeo(s * side, s * side * 0.6, { seed: 11 + sd, curl: 0.2, fold: 0.12, lobes: 3.5 }), m: mtx(sd * s * 0.2, s * 0.1, s * 0.03, 0, 0, sd > 0 ? -lie : Math.PI + lie) });
+  if (side > 0) for (const sd of [-1, 1]) carve.push({ geo: leafGeo(s * side, s * side * 0.6, { seed: 11 + sd, curl: 0.2, fold: 0.12, lobes: 3.5 }), m: mtx(sd * s * 0.2, s * 0.1, s * 0.03, 0, 0, sd > 0 ? -lie : Math.PI + lie) });
   // wings: feathered trailing edges, raised and spread (the left one is the right one turned round)
   const wing = new THREE.Shape();
   wing.moveTo(0, 0);

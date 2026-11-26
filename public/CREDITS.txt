@@ -474,9 +474,9 @@ scroll) is made in code in `src/dev/iconbake.ts` and `src/ui/chrome/props3d.ts`.
 
 # Credits: the loading clock and Hollow & Co.'s office (builder intro4)
 
-The loading clock (`index.html` boot block) and the office's wall clock (`public/models/interview/clock.png`) are
-pixel art painted in code by `src/onboard/tools/bootart.mjs`; the shelf and Clock-screen clocks are painted in code by
-`src/onboard/clockpaint.ts`. The interview's form layer (paper, leather folio, brass clip, ink boxes and ticks,
+The loading clock (`index.html` boot block, `public/img/boot/*.webp`) is rendered from the game's own 3D owl cuckoo
+clock (`src/world/stages/cuckoo.ts`) by `src/onboard/clockbake.ts`; the office hangs the same model. The shelf's clock
+is painted in code by `src/onboard/clockpaint.ts`. The interview's form layer (paper, leather folio, brass clip, ink boxes and ticks,
 rubber-stamp impressions, sticky note, acorns) is painted in code by `src/onboard/panelart.ts`. The office (walls,
 parquet, rug, coffered ceiling, desk, bookcases and books, credenza, filing cabinets, banker's lamp, nameplate,
 carafe, fountain pen, rubber stamp and ink pad, client folder, sconces, fig trees, the bracket clock) is modelled

@@ -251,7 +251,7 @@ export class Office implements Stage {
     s.add(cred);
     s.add(buildCabinets(m));
     await idle();
-    // the cuckoo clock over the credenza (its face is the loading clock's own painting)
+    // the cuckoo clock over the credenza (the loading clock's own 3D model)
     this.clock = new WallClock(m);
     this.clock.group.position.set(L.clock.x, L.clock.y, L.z0 + 0.004);
     s.add(this.clock.group);

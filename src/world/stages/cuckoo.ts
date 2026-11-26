@@ -36,6 +36,8 @@ const OWL_H = 0.19, PERCH_IN = 0.1, PERCH_OUT = 0.305;
 const PEND = { y: -0.035, z: 0.05, len: 0.5 };
 const CHAIN = { z: 0.13, top: -0.055, wTop: -0.19, wBot: -0.64 };
 const WEIGHTS = [{ x: -0.155, ring: -0.232 }, { x: 0.155, ring: 0.232 }];
+/** the clock's plan, for the hosts of a bare clock (the loading clock's bake, the office) */
+export const CLOCK_PLAN = { CW, CH, CD, DIAL, RIDGE, EAVE, ROOF_Z, DOOR, BAL, PEND, CHAIN, WEIGHTS };
 const TAG = { w: 0.4, h: 0.29, t: 0.014 };
 const TAG_HOLE_T = TAG.h / 2 - 0.028, TAG_HOLE_B = -TAG.h / 2 + 0.026, TAG_Z = CD * 0.55;
 /** the text on a tag: two lines in the game's face */
@@ -110,7 +112,7 @@ export class CuckooStage implements Stage {
   private pend = new THREE.Group();
   private doorPivot = new THREE.Group();
   private perch = new THREE.Group();
-  readonly owl: OwlActor;
+  readonly owl!: OwlActor;
   private cones: THREE.Mesh[] = [];
   private rings: THREE.Mesh[] = [];
   private links: THREE.InstancedMesh;
@@ -151,25 +153,48 @@ export class CuckooStage implements Stage {
   private bow = 0;
   private shadowBlob: THREE.Texture;
 
-  constructor(look: OwlLook, prefs: CuckooPrefs) {
+  /** `bare`: only the clock itself (no wall, lights, tags, shelf, boards or lamps; the owl only with a look), for the
+   * loading clock's bake and the office's wall clock, which light it themselves. `plain`: no carved leaves or acorns
+   * round the dial and a brass disc pendulum bob. */
+  readonly bare: boolean;
+  private plain: boolean;
+  constructor(look: OwlLook | null, prefs: CuckooPrefs, o: { bare?: boolean; plain?: boolean } = {}) {
     this.prefs = prefs;
+    this.bare = !!o.bare; this.plain = !!o.plain;
     const S = this.scene;
-    S.background = new THREE.Color(0x140d09);
+    S.background = this.bare ? null : new THREE.Color(0x140d09);
     this.shadowBlob = this.keep(K.ctex(K.blobCanvas()));
     this.buildMaterials();
-    this.buildLights();
-    this.buildWall();
+    if (!this.bare) { this.buildLights(); this.buildWall(); }
     const hands = this.buildClock();
     this.hour = hands.hour; this.minute = hands.minute;
     this.links = this.buildWeights();
+    if (this.bare) {
+      if (look) this.addOwl(look);
+      this.setDrops(true);
+      this.ready = look ? this.owl.ready : Promise.resolve();
+      return;
+    }
     this.buildTags();
     this.buildShelf();
     this.buildBoards();
     this.buildLamps();
     S.add(this.fx.group);
     this.fx.setLight(new THREE.Color(0xffe8c8));
-    // the owl, at home behind the door
-    this.owl = new OwlActor(look, { sound: (id) => { if (id === 'flap') sound.play('owl_wing', { volume: 0.25, rate: 1.3, gap: 300 }); } });
+    this.addOwl(look ?? { skin: 'owl', species: 'tawny', palette: 'tawny', outfit: {} });
+    this.layout = innerWidth >= innerHeight * 1.05 && innerWidth >= 640 ? 'side' : 'top';
+    this.placeBoards(); this.placeLamps(); this.placeTags();
+    this.cur = this.shot('home');
+    this.from = this.copy(this.cur); this.to = this.copy(this.cur);
+    this.setDrops(true);
+    this.applyLight();
+    this.ready = K.fontReady();
+  }
+
+  /** The owl, at home behind the door. */
+  private addOwl(look: OwlLook) {
+    const S = this.scene;
+    (this as { owl: OwlActor }).owl = new OwlActor(look, { sound: (id) => { if (id === 'flap') sound.play('owl_wing', { volume: 0.25, rate: 1.3, gap: 300 }); } });
     this.owl.node.scale.setScalar(OWL_H / Math.max(0.1, this.owl.height));
     this.owl.node.position.set(0, 0.009, 0);
     this.perch.add(this.owl.node);
@@ -180,14 +205,19 @@ export class CuckooStage implements Stage {
     this.owl.node.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh) m.castShadow = true; });
     S.add(this.perch);
     this.perch.visible = false;
-    this.layout = innerWidth >= innerHeight * 1.05 && innerWidth >= 640 ? 'side' : 'top';
-    this.placeBoards(); this.placeLamps(); this.placeTags();
-    this.cur = this.shot('home');
-    this.from = this.copy(this.cur); this.to = this.copy(this.cur);
-    this.setDrops(true);
-    this.applyLight();
-    this.ready = K.fontReady();
   }
+
+  /** The moving parts, for a host that drives them itself (the office, the loading clock's bake). */
+  get parts() { return { hour: this.hour, minute: this.minute, pend: this.pend, door: this.doorPivot, perch: this.perch, cones: this.cones, rings: this.rings, links: this.links }; }
+  /** Pose the door (0 shut .. 1 open), the owl's trip out (0 in .. 1 on the balcony) and its bow (radians). */
+  poseDoor(door: number, out: number, bow = 0) {
+    this.doorPivot.rotation.y = -door * 1.9;
+    this.perch.position.z = THREE.MathUtils.lerp(PERCH_IN, PERCH_OUT, out);
+    this.perch.visible = !!this.owl && door > 0.05;
+    this.perch.rotation.x = bow;
+  }
+  /** Hang both weights at `f` of their drop (0 just wound .. 1 run down). */
+  setDrop(f: number) { this.drop = [f, f]; this.placeChains(); }
 
   // ---------------------------------------------------------------- bookkeeping
 
@@ -445,28 +475,34 @@ export class CuckooStage implements Stage {
       leaves.push({ geo: K.leafGeo(len, wid, { seed, curl, fold: 0.16, t: 0.3, lobes: 3.2 + (seed % 3) * 0.3 }), m: mtx(x, y, z, 0, 0, rz) });
     const fz = CD + 0.004;
     // [clock12] four big carved oak leaves in the corners round the dial, two acorns under each lower one (as painted)
-    for (const [sx, sy, seed] of [[-1, 1, 3], [1, 1, 5], [-1, -1, 7], [1, -1, 9]] as [number, number, number][]) {
+    if (!this.plain) for (const [sx, sy, seed] of [[-1, 1, 3], [1, 1, 5], [-1, -1, 7], [1, -1, 9]] as [number, number, number][]) {
       const a = Math.atan2(sy, sx) - sx * sy * 0.05, r0 = 0.275;
       leaf(Math.cos(a) * r0, DIAL.y + Math.sin(a) * r0, fz, a, 0.24, 0.15, seed, 0.16);
     }
-    for (const sx of [-1, 1]) {
+    if (!this.plain) for (const sx of [-1, 1]) {
       acorn(sx * 0.236, DIAL.y - 0.243, fz + 0.045, -sx * 0.35, 1.25);
       acorn(sx * 0.279, DIAL.y - 0.214, fz + 0.04, sx * 0.25, 1.15);
     }
     // ---- the crest: a carved owl with spread wings on a fan of oak leaves
-    const crest = K.owlCrest(0.36, 0, 0.62);
+    const crest = K.owlCrest(0.36, 0, this.plain ? 0 : 0.62);
     const crestAt = mtx(0, RIDGE - 0.004, ROOF_Z - 0.05);
     crest.geo.applyMatrix4(crestAt); crest.feather.applyMatrix4(crestAt); crest.eyes.applyMatrix4(crestAt);
     // ---- the pendulum: a brass rod and a carved leaf bob with a brass boss
     this.pend.position.set(0, PEND.y, PEND.z);
     const rod = this.mesh(K.prep(K.slab(0.007, PEND.len, 0.003, 0.001)).translate(0, -PEND.len / 2, 0), this.M.brass);
     this.pend.add(rod);
-    const bob = K.leafGeo(0.2, 0.15, { seed: 77, curl: 0.12, fold: 0.1, lobes: 3.6 });
-    bob.applyMatrix4(mtx(0, -PEND.len + 0.03, 0.002, 0, 0, -Math.PI / 2));
-    const bobM = this.mesh(K.carveShade(K.prep(bob), { lo: 0.5 }), this.M.leaf);
+    let bobM: THREE.Mesh;
+    if (this.plain) {
+      // a domed brass disc with a turned rim
+      bobM = this.mesh(K.prep(K.turned([[0.0005, 0], [0.068, 0], [0.074, 0.005], [0.07, 0.011], [0.058, 0.016], [0.03, 0.02], [0.0005, 0.021]], 40, 20)).rotateX(Math.PI / 2).translate(0, -PEND.len - 0.04, 0.004), this.M.brass);
+    } else {
+      const bob = K.leafGeo(0.2, 0.15, { seed: 77, curl: 0.12, fold: 0.1, lobes: 3.6 });
+      bob.applyMatrix4(mtx(0, -PEND.len + 0.03, 0.002, 0, 0, -Math.PI / 2));
+      bobM = this.mesh(K.carveShade(K.prep(bob), { lo: 0.5 }), this.M.leaf);
+    }
     this.pend.add(bobM);
     const boss = this.mesh(K.prep(K.turned([[0.0005, 0], [0.024, 0.002], [0.026, 0.008], [0.016, 0.014], [0.0005, 0.016]], 14, 20)).rotateX(Math.PI / 2).translate(0, -PEND.len - 0.04, 0.028), this.M.brass);
-    this.pend.add(boss);
+    if (!this.plain) this.pend.add(boss);
     this.pick(bobM, 'pendulum');
     S.add(this.pend);
     // ---- the dial: a turned wooden dial board, the enamel, a brass bezel, the hands
@@ -484,14 +520,12 @@ export class CuckooStage implements Stage {
     // ---- merge and add
     const woodG = K.carveShade(K.merge(wood), { lo: 0.5 });
     const carveG = K.carveShade(K.merge([...carve, { geo: crest.geo }]), { lo: 0.36 });
-    const leafG = K.carveShade(K.merge(leaves), { lo: 0.22, z0: CD, z1: CD + 0.035 });
     const featherG = K.carveShade(crest.feather, { lo: 0.45 });
-    S.add(this.mesh(woodG, this.M.wood), this.mesh(carveG, this.M.carve), this.mesh(leafG, this.M.leaf), this.mesh(featherG, this.M.feather));
+    S.add(this.mesh(woodG, this.M.wood), this.mesh(carveG, this.M.carve), this.mesh(featherG, this.M.feather));
+    if (leaves.length) S.add(this.mesh(K.carveShade(K.merge(leaves), { lo: 0.22, z0: CD, z1: CD + 0.035 }), this.M.leaf));
     S.add(this.mesh(crest.eyes, this.M.glass, false, false));
     S.add(this.mesh(K.merge(brass), this.M.brass));
-    const nutM = this.mesh(K.carveShade(K.merge(nut), { lo: 0.5 }), this.M.carve);
-    const cupM = this.mesh(K.carveShade(K.merge(cup), { lo: 0.3, hi: 0.75 }), this.M.wood);
-    S.add(nutM, cupM);
+    if (nut.length) S.add(this.mesh(K.carveShade(K.merge(nut), { lo: 0.5 }), this.M.carve), this.mesh(K.carveShade(K.merge(cup), { lo: 0.3, hi: 0.75 }), this.M.wood));
     nutG.dispose(); cupG.dispose();
     // the door: planked, with iron strap hinges and a brass knob, hinged on its left
     const door = K.scaleUV(K.extrude(K.arch(DOOR.w - 0.004, DOOR.h - 0.003, 0, 0), 0.01, 0.0025, 1, 10), 4, 2);
@@ -1230,8 +1264,7 @@ export class CuckooStage implements Stage {
 
   dispose() {
     this.dead = true;
-    this.perch.remove(this.owl.node);
-    this.owl.model.dispose();
+    if (this.owl) { this.perch.remove(this.owl.node); this.owl.model.dispose(); }
     for (const g of this.geos) g.dispose();
     this.scene.traverse((n) => { const m = n as THREE.Mesh; if (m.isMesh && m.geometry && !this.geos.includes(m.geometry)) m.geometry.dispose(); });
     for (const t of this.tex) t.dispose();
