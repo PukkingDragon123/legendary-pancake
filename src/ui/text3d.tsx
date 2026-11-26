@@ -50,7 +50,7 @@ const CSS = `
 :where(.t3d, h1, h2, ${FULL.join(', ')}, ${LITE.join(', ')}) { ${vars(PALETTES.gold)} }
 /* the colour each place wears: warm cream on wood and dark or coloured surfaces, dark ink on paper */
 :where(.hh-num, .hh-rune b, .cs-sign span, .sf-sign, .sf-sleep, .lvup-medal b, .n-time, .lock-time, .bigclock, .btn.pillow, .btn.oak, .lg-btn, .hh-btn-green, .hh-btn-night) { ${vars(PALETTES.cream)} }
-:where(.bk-title, .tk-times b, .seal b, .bk-last-t b, .stat b, .bk-tile b, .cb-title, .hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .tk-hint, .hh-btn-cream, .qp-sheet h2, .sheet-head h2) { ${vars(PALETTES.ink)} }
+:where(.lg-btn.gold, .lg-btn.linen, .btn.pillow.honey, .bk-title, .tk-times b, .seal b, .bk-last-t b, .stat b, .bk-tile b, .cb-title, .hh-toast-body > span, .hh-bubble .txt, .hh-toollabel, .tk-hint, .hh-btn-cream, .qp-sheet h2, .sheet-head h2) { ${vars(PALETTES.ink)} }
 :where(.lock-time, .n-time) { ${vars(PALETTES.moon)} }
 .t3d-gold { ${vars(PALETTES.gold)} } .t3d-cream { ${vars(PALETTES.cream)} } .t3d-sky { ${vars(PALETTES.sky)} }
 .t3d-rose { ${vars(PALETTES.rose)} } .t3d-leaf { ${vars(PALETTES.leaf)} } .t3d-moon { ${vars(PALETTES.moon)} } .t3d-ink { ${vars(PALETTES.ink)} }

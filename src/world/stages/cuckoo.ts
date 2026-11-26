@@ -735,7 +735,7 @@ export class CuckooStage implements Stage {
       t.label = s.label; t.value = s.value;
       const c = t.c, g = c.getContext('2d')!;
       g.clearRect(0, 0, c.width, c.height);
-      K.pxText(g, s.label, c.width / 2, 18, 32, '#8c2c1e', { maxW: c.width - 4 });
+      K.pxText(g, s.label, c.width / 2, 18, 30, '#3a2214', { maxW: c.width - 12 });
       // a burnt rule under the label
       g.fillStyle = '#5a3a22';
       for (let x = 16; x < c.width - 16; x += 4) g.fillRect(x, 38, 2, 2);
@@ -972,7 +972,7 @@ export class CuckooStage implements Stage {
     g.fillStyle = '#b8c8d8';
     for (let y = 70; y < H - 10; y += 16) g.fillRect(8, y, W - 16, 1);
     g.fillStyle = '#d89a8a'; g.fillRect(30, 0, 1, H);
-    K.pxText(g, 'Routine', W / 2, 34, 32, '#8c2c1e');
+    K.pxText(g, 'Routine', W / 2, 34, 32, '#4a2c18');
     // the chart: 7 columns, 8 PM at the top to noon at the bottom
     const top = 74, bot = H - 52, x0 = 46, cw = (W - x0 - 12) / 7;
     const pos = (m: number) => top + ((((m - 20 * 60) % 1440) + 1440) % 1440) / (16 * 60) * (bot - top);

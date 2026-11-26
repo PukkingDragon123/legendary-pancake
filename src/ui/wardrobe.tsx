@@ -69,7 +69,7 @@ function installStyles() {
 .wd-tag{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;width:56px;height:62px;${frameStyle('label_kraft', 2)};color:var(--ink);font-size:var(--t1);line-height:1;transform-origin:50% -8px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
 .wd-tag::before{content:'';position:absolute;top:-10px;left:50%;width:2px;height:8px;margin-left:-1px;border-radius:0;background:linear-gradient(90deg,#8a6a3c,#e8d2a0,#8a6a3c);box-shadow:1px 0 2px #6e4a12}
 .wd-tag .ico{margin:-4px 0 -2px}
-.wd-tag span{text-shadow:0 1px 1px var(--paper);white-space:nowrap}
+.wd-tag span{text-shadow:0 1px 1px var(--paper);white-space:nowrap;font-size:14px;letter-spacing:-0.01em}
 .wd-tag.on{${frameStyle('button_gold', 2)};transform:translateY(3px) rotate(-3deg);color:var(--ink);animation:wdSway 2.4s ease-in-out infinite}
 .wd-tag:active{transform:rotate(6deg)}
 .wd-tag .dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--berry);box-shadow:0 0 0 1px color-mix(in srgb, var(--ink) 50%, transparent)}
