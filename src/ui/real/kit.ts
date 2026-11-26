@@ -145,12 +145,12 @@ export function panelFrame(kind: WoodName = 'walnut', t = 16, o: { brass?: boole
 
 export type BtnHue = 'green' | 'gold' | 'red' | 'night' | 'cream' | 'oak' | 'grey' | 'plum' | 'sky';
 const HUE: Record<BtnHue, { face: RGB; lip: RGB; rim?: RGB; mat?: 'cloth' | 'wood' | 'metal' }> = {
-  green: { face: hex('#3b6f4d'), lip: hex('#1c3a26') }, // [ui10] natural enamels, not candy
-  gold: { face: hex('#e2ac4a'), lip: hex('#7a5418'), mat: 'metal' },
-  red: { face: hex('#94413a'), lip: hex('#4e1c1a') },
-  night: { face: hex('#33497a'), lip: hex('#18233f') },
-  plum: { face: hex('#634068'), lip: hex('#33193a') },
-  sky: { face: hex('#3f6f8c'), lip: hex('#1c3a4c') },
+  green: { face: hex('#2e8049'), lip: hex('#123a20') }, // [ui12] full, rich enamels (deep emerald, ruby, sapphire)
+  gold: { face: hex('#f4bf48'), lip: hex('#7a4c10'), mat: 'metal' },
+  red: { face: hex('#b8392e'), lip: hex('#561410') },
+  night: { face: hex('#2b4c9c'), lip: hex('#111f48') },
+  plum: { face: hex('#7a3c86'), lip: hex('#3a1440') },
+  sky: { face: hex('#2e82b4'), lip: hex('#0f3a56') },
   cream: { face: hex('#efe3c8'), lip: hex('#9c8462'), mat: 'cloth' },
   oak: { face: hex('#b07a3c'), lip: hex('#5a3418'), mat: 'wood' },
   grey: { face: hex('#9b968c'), lip: hex('#5c5850') },
@@ -176,7 +176,7 @@ export function button(hue: BtnHue, down = false, o: { r?: number; rim?: boolean
     const face = cutBox(1.2, press, W - 2.4, fh, C);
     // body / side wall
     r.part(body, bevel(4, 2), enamel(h.lip, { gloss: 0.4 }));
-    const faceMat: Material = til(h.mat === 'metal' ? metal(h.face, { polish: 0.75 }) : h.mat === 'wood' ? wood('oak', { along: 'x', ox: 30 }) : h.mat === 'cloth' ? cloth('linen', h.face, { scale: 2.4, amt: 0.6 }) : enamel(h.face));
+    const faceMat: Material = til(h.mat === 'metal' ? { ...metal(h.face, { polish: 0.55 }), metal: 0.5 } : h.mat === 'wood' ? wood('oak', { along: 'x', ox: 30 }) : h.mat === 'cloth' ? cloth('linen', h.face, { scale: 2.4, amt: 0.6 }) : enamel(h.face));
     const rimOn = o.rim !== false && hue !== 'gold';
     // a brass frame with a beaded (milgrain) edge, then the face
     if (rimOn) {
