@@ -1085,7 +1085,7 @@ export class CuckooStage implements Stage {
   private homeShot(): Shot {
     return this.layout === 'side'
       ? { target: v3(0, 0.07, 0.2), yaw: 0.0, pitch: 0.04, w: 4.7, h: 2.98, cx: 0.5, cy: 0.5 }
-      : { target: v3(0, -0.08, 0.2), yaw: 0.0, pitch: 0.04, w: 1.7, h: 3.36, cx: 0.5, cy: 0.5 }; // phone: wide enough that the hanging tags stay on screen
+      : { target: v3(0, -0.08, 0.2), yaw: 0.0, pitch: 0.04, w: 1.86, h: 3.36, cx: 0.5, cy: 0.5 }; // phone: wide enough that the hanging tags stay on screen
   }
   private shot(name: string): Shot {
     const side = this.layout === 'side';
