@@ -1,12 +1,12 @@
 // Generates the loading screen (the `#boot` block in index.html) and the office clock's painting
-// (public/models/interview/clock.png + src/onboard/clockart.gen.ts): the game's carved Black Forest cuckoo clock
-// hanging alone on a dark emerald wall in a pool of lamplight. No text.
+// (public/models/interview/clock.png + src/onboard/clockart.gen.ts): a classic carved Black Forest cuckoo clock
+// hanging alone on a plain, softly lamplit wall. No text.
 //
-// The clock (the same design as the HUD shelf's and the big Clock screen's): a shingled chalet roof with scalloped
-// bargeboards, a carved owl crest on a fan of oak leaves, a little arched double door over a balcony of turned
-// balusters (Pip lives behind it), a walnut case with a wreath of carved oak leaves and acorns round an enamel dial
-// (Roman numerals, a painted rosette, pierced Gothic hands), a pierced fretwork apron, a carved-leaf pendulum and two
-// cast pine-cone weights on brass chains.
+// The clock: a shingled chalet roof with scalloped bargeboards, a carved bird crest on a fan of oak leaves, a little
+// arched double door over a balcony of turned balusters (the cuckoo lives behind it), a walnut case with carved oak
+// leaves and acorns in its corners round an enamel dial (Roman numerals, pierced Gothic hands), a scalloped apron, a
+// carved-leaf pendulum and two cast pine-cone weights on brass chains. Calm on purpose: no wallpaper pattern, no
+// fretwork, no fish scales; the detail is in the carving and the light.
 //
 // It is painted as a 2.5D relief: every texel gets a material, a height and an albedo offset; a warm key light from
 // the top left, a soft fill, cavity occlusion and polished highlights shade it; the shade is mapped onto hand-picked,
@@ -15,10 +15,10 @@
 // indexed PNGs (small enough to inline before any script loads).
 //
 // Moving parts are pre-drawn frames played with CSS steps(): 120 minute and 120 hour hand angles (started at the
-// real time by a tiny inline script), a cosine-spaced pendulum swing, the door and the owl (closed, ajar, open,
+// real time by a tiny inline script), a cosine-spaced pendulum swing, the door and the cuckoo (closed, ajar, open,
 // out, calling, bowing) and the weights, which sink on their chains with the (estimated) loading progress while
 // the other ends of the chains rise. src/onboard/boot.ts takes over once the app is ready (the clock is wound,
-// the doors open and the owl calls; a dive into the dial, where the 3D office's own clock takes over).
+// the doors open and the cuckoo calls; a dive into the dial, where the 3D office's own clock takes over).
 //
 //   node src/onboard/tools/bootart.mjs [--preview out.png]
 import { deflateSync } from 'node:zlib';
@@ -46,7 +46,8 @@ const R = {
   red: rampOf([0x3c0814, 0x6a101a, 0x9a1c22, 0xc8342c, 0xf0644a, 0xffa27a], 8),
   green: rampOf([0x0c2418, 0x1a4024, 0x2c6030, 0x48843a, 0x72aa48, 0xa8cc6a], 8),
   bronze: rampOf([0x0a0610, 0x1e1012, 0x341c14, 0x4e2c18, 0x6a4020, 0x8a582c, 0xaa743c, 0xc89656, 0xe6bc7c, 0xfadca8], 12),
-  feather: rampOf([0x1e0a14, 0x3a1410, 0x62240e, 0x8c3812, 0xb4521a, 0xd27026, 0xe8923a, 0xf6b45a, 0xffd48a], 12),
+  // the cuckoo's slate-blue plumage: violet in the shadows, a warm grey in the light
+  feather: rampOf([0x120c1c, 0x1e1a30, 0x2c2c46, 0x3e425e, 0x545c78, 0x6c7690, 0x8a92a6, 0xaeb2b8, 0xd6d4cc], 12),
   chest: rampOf([0x52282a, 0x8a5038, 0xb87c4c, 0xdca86a, 0xf2cc92, 0xfce6bc, 0xfff6e2], 10),
   eye: rampOf([0x5a2004, 0x9a4808, 0xd07a10, 0xf0a820, 0xffd050, 0xfff0a0], 8),
   beak: rampOf([0x4a2410, 0x8a5420, 0xc88a36, 0xecbc5e, 0xfce49a], 7),
@@ -325,73 +326,53 @@ const ROM = {
 };
 const NUMS = ['XII', 'I', 'II', 'III', 'IIII', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
 
-/** Pip, the owl behind the door: tawny barred feathers, pale facial discs, amber eyes. `pose`: peek|out|call|bow */
-function paintOwl(r, cx, foot, pose) {
-  const dim = pose === 'peek' ? -0.3 : 0, s = pose === 'peek' ? 0.86 : 1;
-  const clip = pose === 'peek' ? (x, y) => sdDoor(x, y) < -0.5 : () => true;
-  const headUp = pose === 'call' ? 2 : pose === 'bow' ? -3 : 0;
-  const by = foot - 10.5 * s, bry = 10.5 * s, brx = 9.6 * s;
-  const hx = cx, hy = foot - 20.5 * s - headUp, hr = 8.2 * s;
-  // the wings flare on the call
-  if (pose === 'call') for (const sx of [-1, 1]) {
-    r.np();
-    r.fill(cx - 14, by - 6, cx + 15, by + 6, (x, y) => { const u = (x + 0.5 - cx) * sx, v = y + 0.5 - (by - 2); return u > 6 && u < 12.6 && v > -4 + (u - 6) * 0.35 && v < 5 - (u - 6) * 0.5; }, M.feather, 9, (x, y) => dim - 0.05 + ((y + (x >> 1)) % 3 === 0 ? -0.14 : 0));
-  }
-  // the body: a soft egg, barred wings on the sides, a pale streaked chest
-  r.np();
-  r.fill(cx - brx - 1, by - bry - 1, cx + brx + 1, by + bry + 1, (x, y) => clip(x, y) && ((x + 0.5 - cx) / brx) ** 2 + ((y + 0.5 - by) / bry) ** 2 < 1, (x, y) => (Math.abs(x + 0.5 - cx) < brx * 0.45 && y + 0.5 > by - bry * 0.4 ? M.chest : M.feather), (x, y) => {
-    const q = ((x + 0.5 - cx) / brx) ** 2 + ((y + 0.5 - by) / bry) ** 2;
-    return 8 + Math.sqrt(Math.max(0, 1 - q)) * 3.4 + (Math.abs(x + 0.5 - cx) > brx * 0.6 ? 0.9 : 0);
-  }, (x, y) => {
-    const ax = Math.abs(x + 0.5 - cx);
-    if (ax < brx * 0.45 && y + 0.5 > by - bry * 0.4) return dim - 0.06 + ((x * 5 + Math.floor((y + 1) / 3) * 3) % 4 === 0 && (y % 3) === 1 ? -0.22 : 0);
-    return dim + ((y + (x >> 1)) % 3 === 0 ? -0.14 : 0) + (vnoise(x * 0.5, y * 0.5, 71) - 0.5) * 0.1;
-  });
-  // feet
-  if (pose !== 'peek') for (const sx of [-1, 1]) { r.np(); for (let k = -1; k <= 1; k++) r.put(cx + sx * 3 + k, foot - 1, M.beak, 10.5, 0); }
-  // the head: ear tufts, round head, two pale facial discs, amber eyes, a hooked beak
-  r.np();
-  for (const sx of [-1, 1]) r.fill(hx - 10, hy - 12, hx + 11, hy - 3, (x, y) => { const u = (x + 0.5 - hx) * sx, v = y + 0.5 - (hy - hr + 1); return clip(x, y) && u > 2.5 * s && u < 7.5 * s && v < 2 && v > -3.4 * s + (7.5 * s - u) * 0.15 - (u - 2.5 * s) * 0.55; }, M.feather, 9.5, () => dim - 0.12);
-  r.np();
-  r.fill(hx - hr - 1, hy - hr - 1, hx + hr + 1, hy + hr + 1, (x, y) => clip(x, y) && dist(x, y, hx, hy) < hr, M.feather, (x, y) => 9.5 + Math.sqrt(Math.max(0, 1 - (dist(x, y, hx, hy) / hr) ** 2)) * 3, (x, y) => dim + ((x + 2 * y) % 5 === 0 ? -0.1 : 0) + (y + 0.5 < hy - hr * 0.5 ? 0.04 : 0));
-  for (const sx of [-1, 1]) {
-    const ex = hx + sx * 3.5 * s, ey = hy + 0.6 * s, dr = 3.9 * s;
-    r.np();
-    r.fill(ex - 5, ey - 5, ex + 5, ey + 5, (x, y) => clip(x, y) && dist(x, y, ex, ey) < dr, (x, y) => (dist(x, y, ex, ey) > dr - 0.9 ? M.feather : M.chest), (x, y) => 11.6 - dist(x, y, ex, ey) * 0.15, (x, y) => dim + (dist(x, y, ex, ey) > dr - 0.9 ? -0.24 : -0.12));
-    if (pose === 'bow') {
-      // closed, happy eyes: a dark little arch
-      for (let k = -1; k <= 1; k++) r.put(ex + k - 0.5, ey - (k === 0 ? 1 : 0), M.dark, 12, 0.1);
-    } else {
-      const er = (pose === 'call' ? 2.5 : 2.2) * s;
-      r.np();
-      r.fill(ex - 3, ey - 3, ex + 3, ey + 3, (x, y) => clip(x, y) && dist(x, y, ex, ey) < er, M.eye, 12.2, (x, y) => dim + (y + 0.5 < ey ? 0.15 : -0.05));
-      r.fill(ex - 2, ey - 2, ex + 2, ey + 2, (x, y) => clip(x, y) && dist(x, y, ex, ey) < er * 0.55, M.dark, 12.3, () => -0.1);
-      r.put(ex - 1, ey - 2, M.enamel, 12.5, 0.6, { flat: true });
-    }
-  }
-  // Pip's blue bow tie, as he wears it in the office
-  if (pose !== 'peek') {
-    const ty = foot - 13 + (pose === 'bow' ? 2 : 0);
-    r.np();
-    r.fill(cx - 5, ty - 2, cx + 5, ty + 3, (x, y) => { const u = Math.abs(x + 0.5 - cx), v = Math.abs(y + 0.5 - ty - 0.5); return u < 1 ? v < 1.2 : u < 4.2 && v < 0.6 + u * 0.42; }, M.steel, (x) => 12.4 - Math.abs(x + 0.5 - cx) * 0.1 + (Math.abs(x + 0.5 - cx) < 1 ? 0.6 : 0), (x, y) => 0.35 + (y + 0.5 < ty + 0.5 ? 0.12 : -0.06));
-  }
-  // the brow between the eyes, the beak (open on the call)
-  r.np();
-  r.put(hx - 1, hy - 2 * s, M.feather, 12, dim - 0.2); r.put(hx, hy - 2 * s, M.feather, 12, dim - 0.2);
-  const bk = hy + 2 * s;
-  if (pose === 'call') {
-    r.np();
-    r.fill(hx - 2, bk - 1, hx + 2, bk + 1, (x, y) => Math.abs(x + 0.5 - hx) < (y === Math.floor(bk - 1) ? 1.6 : 1.1), M.beak, 12.6, () => 0.05);
-    r.fill(hx - 2, bk + 1, hx + 2, bk + 3, (x) => Math.abs(x + 0.5 - hx) < 1.6, M.red, 12.1, () => -0.25);
-    r.fill(hx - 2, bk + 3, hx + 2, bk + 4, (x) => Math.abs(x + 0.5 - hx) < 1.1, M.beak, 12.4, () => -0.1);
-  } else {
-    r.np();
-    r.fill(hx - 2, bk, hx + 2, bk + 3, (x, y) => clip(x, y) && Math.abs(x + 0.5 - hx) < (y - Math.floor(bk) === 0 ? 1.6 : y - Math.floor(bk) === 1 ? 1.1 : 0.6), M.beak, 12.6, () => dim);
+/**
+ * A cuckoo in profile, facing left: a slate-blue bird with a barred cream breast, a long tail, a folded wing (lifted
+ * on the call), a yellow-ringed eye and a yellow bill. Painted (the bird behind the door) or carved in the clock's
+ * wood (`carved`: the crest). `pose`: peek | out | call | bow (the bob: head down, tail up). `s` scales it about the
+ * middle of its body, which sits `5 * s` px over `foot`; `clip` masks it (the doorway while it peeks).
+ */
+function paintBird(r, cx, foot, pose, o = {}) {
+  const s = o.s ?? 1, carved = !!o.carved, h0 = o.h ?? 9, clip = o.clip ?? (() => true);
+  const dim = pose === 'peek' ? -0.26 : 0;
+  const th = pose === 'bow' ? -0.36 : pose === 'call' ? 0.1 : 0, ct = Math.cos(th), st = Math.sin(th);
+  const py = foot - 5 * s;
+  /** screen pixel -> the bird's own frame (u along the body, bill at -u; v down) */
+  const L = (x, y) => { const dx = (x + 0.5 - cx) / s, dy = (y + 0.5 - py) / s; return [dx * ct + dy * st, -dx * st + dy * ct]; };
+  const box = [cx - 18 * s, py - 14 * s, cx + 18 * s, py + 9 * s];
+  const part = (inside, mat, h, alb) => { r.np(); r.fill(box[0], box[1], box[2], box[3], (x, y) => clip(x, y) && inside(...L(x, y)), carved ? M.carve : mat, (x, y) => h(...L(x, y)), (x, y) => (carved ? 0.04 : dim) + alb(...L(x, y), x, y)); };
+  const ell = (u, v, cu, cv, ru, rv) => ((u - cu) / ru) ** 2 + ((v - cv) / rv) ** 2;
+  const dome = (q) => Math.sqrt(Math.max(0, 1 - q));
+  const call = pose === 'call' || pose === 'bow';
+  // the tail: a long wedge, behind the body, a pale tip
+  part((u, v) => inPoly(u, v, [[3.5, -1.6], [15, -6.4], [16.2, -4.2], [5.2, 2]]), M.feather, (u) => h0 - 0.4 + (u < 8 ? 0.6 : 0), (u, v) => -0.08 + (u > 14.6 ? 0.22 : 0) + (Math.abs(v + u * 0.38 - 0.2) < 0.45 ? -0.08 : 0));
+  // feet on the perch
+  if (pose !== 'peek' && !carved) { r.np(); for (const k of [-1, 1]) { r.put(cx + k, foot - 1, M.beak, h0 + 0.5, -0.05); r.put(cx + k - (k < 0 ? 1 : 0), foot - 1, M.beak, h0 + 0.5, -0.1); } }
+  // the body: slate back, a cream breast with fine dark bars
+  part((u, v) => ell(u, v, 0, 0, 7, 4.8) < 1, M.feather, (u, v) => h0 + dome(ell(u, v, 0, 0, 7, 4.8)) * 3, () => 0);
+  if (!carved) part((u, v) => ell(u, v, 0, 0, 7, 4.8) < 1 && v > -1.4 + u * 0.3 && u < 3.4, M.chest, (u, v) => h0 + 0.15 + dome(ell(u, v, 0, 0, 7, 4.8)) * 3, (u, v) => -0.04 + ((((v + 9) / 2.1) % 1) < 0.34 && v > -0.4 ? -0.22 : 0));
+  else part((u, v) => ell(u, v, 0, 0, 7, 4.8) < 1 && v > -1.4 + u * 0.3 && u < 3.4 && ((((v + 9) / 2.1) % 1) < 0.34 && v > -0.4), M.carve, (u, v) => h0 - 0.5 + dome(ell(u, v, 0, 0, 7, 4.8)) * 3, () => -0.06);
+  // the wing: folded along the back, or lifted on the call
+  if (pose === 'call') part((u, v) => inPoly(u, v, [[-1.5, -2.6], [3, -10.6], [8.2, -10], [6.8, -6.4], [5, -0.6]]), M.feather, (u, v) => h0 + 3.4 - Math.max(0, -v - 3) * 0.12, (u, v) => -0.06 + (Math.abs(u - 3.6 - (v + 2) * -0.35) < 0.45 && v < -3 ? -0.12 : 0) + (v < -9 ? -0.1 : 0));
+  else part((u, v) => ell(u, v, 2.4, -0.8, 5.8, 3) < 1 || inPoly(u, v, [[4, -2.8], [10.8, -2.6], [6.4, 1.4]]), M.feather, (u, v) => h0 + 3.2 + dome(Math.min(1, ell(u, v, 2.4, -0.8, 5.8, 3))) * 0.8, (u, v) => -0.1 + (Math.abs(v - 0.3 - (u - 2) * 0.12) < 0.4 && u > 1 ? -0.12 : 0) + (v < -2.4 && u < 4 ? 0.08 : 0));
+  // the head, a touch paler on the crown
+  part((u, v) => Math.hypot(u + 6, v + 5) < 4.1, M.feather, (u, v) => h0 + 1.2 + dome((Math.hypot(u + 6, v + 5) / 4.1) ** 2) * 2.6, (u, v) => (v < -7.4 ? 0.06 : 0) + (v > -3.4 && u > -8 ? 0.05 : 0));
+  // the bill: shut, or open on the call with a red gape
+  if (call) {
+    part((u, v) => inPoly(u, v, [[-9.2, -5.6], [-13.4, -6], [-13, -2.4], [-9.2, -3.6]]), carved ? M.carve : M.red, () => h0 + 2.6, () => -0.2);
+    part((u, v) => inPoly(u, v, [[-9.4, -6.6], [-14, -6.1], [-9.6, -4.9]]), M.beak, () => h0 + 3.4, () => 0.08);
+    part((u, v) => inPoly(u, v, [[-9.6, -4.3], [-13.2, -2.2], [-9.4, -3.2]]), M.beak, () => h0 + 3.3, () => -0.06);
+  } else part((u, v) => inPoly(u, v, [[-9.4, -6.4], [-14, -4.9], [-9.4, -3.8]]), M.beak, (u) => h0 + 3.4 + (u + 9.4) * 0.1, (u, v) => (v < -5.1 ? 0.1 : -0.06));
+  // the eye: a yellow ring, a glossy black pupil, a glint (a drilled dot on the carving)
+  if (carved) part((u, v) => Math.hypot(u + 7, v + 5.6) < 1.1, M.dark, () => h0 + 3, () => 0);
+  else {
+    part((u, v) => Math.hypot(u + 7, v + 5.6) < 1.5, M.eye, () => h0 + 4, () => 0.12);
+    part((u, v) => Math.hypot(u + 7.1, v + 5.6) < 0.8, M.dark, () => h0 + 4.2, () => -0.1);
   }
 }
 
 /**
- * The whole case as one relief. `v` is the door's state: { door: 0 closed | 1 ajar | 2 open, owl: null|peek|out|call|bow }.
+ * The whole case as one relief. `v` is the door's state: { door: 0 closed | 1 ajar | 2 open, owl: null|peek|out|call|bow } (`owl`: the cuckoo's pose).
  */
 function paintCase(v = { door: 0, owl: null }) {
   const r = new Relief(W, H);
@@ -404,7 +385,6 @@ function paintCase(v = { door: 0, owl: null }) {
   for (const sx of [-1, 1]) {
     oakLeaf(r, CX + sx * 24, 86, -Math.PI / 2 - sx * 0.35, 13, 4.2, { h: 6.5 });
     oakLeaf(r, CX + sx * 24, 86, -Math.PI / 2 + sx * 0.75, 10, 3.6, { h: 6 });
-    acorn(r, CX + sx * 30 - 0.5, 77, 0.8, { h: 6.5 });
   }
 
   // ---- the door: its carved arch frame, the doors (closed, ajar or open) and the dark inside
@@ -437,28 +417,28 @@ function paintCase(v = { door: 0, owl: null }) {
       }, M.walnut, () => (open ? 10.5 : 7), (x, y) => (lit ? 0.16 : -0.12) + grain(x, y, 'v', 9) * 0.6 + (Math.abs(x + 0.5 - x1) < 1 ? 0.08 : 0));
     }
   }
-  if (v.owl) paintOwl(r, CX, v.owl === 'peek' ? DOOR.y1 + 3 : BAL.y, v.owl);
+  if (v.owl === 'peek') paintBird(r, CX + 3, 81, 'peek', { s: 0.95, clip: (x, y) => sdDoor(x, y) < -0.5 });
+  else if (v.owl) paintBird(r, CX + 1, 79, v.owl, { h: 12, s: 1.15 }); // perched on the balcony rail
 
   // ---- the roof: a band of fish-scale shingles, a ridge cap, a scalloped carved bargeboard
+  // three courses of plain split shingles along each slope, the joints staggered course to course
   const shingle = (x, y) => {
-    const v0 = y + 0.5 - rt(x);
-    // fish scales laid in screen space (the roof face, as a painter would show it), mirrored about the ridge
-    const X = Math.abs(x + 0.5 - CX), row = Math.floor((y + 0.5) / 4.4), fy = (y + 0.5) / 4.4 - row, col = (X + (row & 1) * 3.5) / 7, fx = col - Math.floor(col);
-    const e = fy < 0.42 ? 0 : (2 * fx - 1) ** 2 + ((fy - 0.42) / 0.58) ** 2, inTab = e < 1;
-    return { v0, row, fy, fx, inTab, edge: inTab && (e > 0.6 || fx < 0.08 || fx > 0.92), id: Math.floor(col) * 7 + row * 131 + (x < CX ? 977 : 0) };
+    const v0 = y + 0.5 - rt(x), X = Math.abs(x + 0.5 - CX);
+    const row = Math.floor((v0 - 1.6) / 3.7), fy = (v0 - 1.6) / 3.7 - row;
+    const col = (X + v0 * SL + (row & 1) * 4.5) / 9, fx = col - Math.floor(col);
+    return { v0, row, fy, fx, joint: fx < 0.09, id: Math.floor(col) * 7 + row * 131 + (x < CX ? 977 : 0) };
   };
   r.np();
   r.fill(CX - EAVE, RIDGE - 1, CX + EAVE, RIDGE + EAVE * SL + ROOF_T + 1, (x, y) => { const v0 = y + 0.5 - rt(x); return Math.abs(x + 0.5 - CX) <= EAVE && v0 >= 0 && v0 < ROOF_T; }, M.shingle, (x, y) => {
     const s = shingle(x, y);
     if (s.v0 < 1.6) return 11.4; // the ridge cap
-    let h = s.inTab ? 8.6 + s.fy * 1.6 - (s.edge ? 0.5 : 0) : 6.4;
+    let h = 8.4 + s.fy * 1.5 - (s.joint ? 0.7 : 0);
     if (Math.abs(x + 0.5 - CX) > EAVE - 1.5) h -= 1.2;
     return h;
   }, (x, y) => {
     const s = shingle(x, y);
     if (s.v0 < 1.6) return 0.06 + grain(x, y, 'h', 15) * 0.5;
-    if (!s.inTab) return -0.2;
-    return (hash(s.id, 3, 17) - 0.5) * 0.2 + (s.edge ? -0.14 : s.fx < 0.45 && s.fy < 0.6 ? 0.07 : 0) + (vnoise(x * 0.3, y * 0.3, 18) - 0.5) * 0.06;
+    return (hash(s.id, 3, 17) - 0.5) * 0.14 + (s.joint ? -0.1 : 0) + grain(x, y, 'h', 19) * 0.35;
   });
   const barge = (x, y) => { const u = Math.abs(x + 0.5 - CX), v2 = y + 0.5 - rt(x) - ROOF_T, ph = ((((u * 1.18) - 2) / 7.4) % 1 + 1) % 1; return { u, v2, ph }; };
   r.np();
@@ -469,9 +449,7 @@ function paintCase(v = { door: 0, owl: null }) {
   }, M.carve, (x, y) => {
     const { v2, ph } = barge(x, y);
     if (v2 < 1.3) return 9.8;
-    if (v2 > 4.2 && v2 < 6.2 && Math.abs(ph - 0.5) < 0.14) return 4.6; // a drilled hole in each scallop
-    if (v2 < 3.6 && v2 > 1.3 && (ph < 0.07 || ph > 0.93)) return 7.4; // a notch over each join
-    return 8.6;
+    return 8.6 + Math.sin(Math.PI * clamp(ph)) * 0.4;
   }, () => 0);
   // the drop finial under the apex
   r.np();
@@ -480,55 +458,27 @@ function paintCase(v = { door: 0, owl: null }) {
   for (const sx of [-1, 1]) {
     const ex = CX + sx * (EAVE - 4), ey = Math.round(rt(ex) + ROOF_T + BARGE - 1);
     oakLeaf(r, ex, ey - 1, Math.PI / 2 + sx * 0.12, 15, 4.6, { h: 9 });
-    acorn(r, ex - sx * 6, ey - 1, 0.85, { h: 9.5 });
   }
 
-  // ---- the crest: a carved owl on the ridge, on a fan of oak leaves with two acorns
-  const OC = { x: CX, y: 21 }, ORX = 9.6, ORY = 11.6;
-  for (const [a, len, wd] of [[-Math.PI + 0.1, 24, 7], [-0.1, 24, 7], [-Math.PI / 2 - 0.95, 26, 7.8], [-Math.PI / 2 + 0.95, 26, 7.8]]) oakLeaf(r, OC.x, 31, a, len, wd, { h: 8.2, curl: 0.5 });
-  for (const sx of [-1, 1]) acorn(r, CX + sx * 15 - 0.5, 26, 1.05, { h: 10 });
-  // the ridge block the owl grips
+  // ---- the crest: a carved cuckoo on the ridge block, on a fan of oak leaves
+  for (const [a, len, wd] of [[-Math.PI + 0.1, 24, 7], [-0.1, 24, 7], [-Math.PI / 2 - 0.95, 26, 7.8], [-Math.PI / 2 + 0.95, 26, 7.8]]) oakLeaf(r, CX, 31, a, len, wd, { h: 8.2, curl: 0.5, mat: M.walnut, alb: 0.12 });
   r.np();
   r.fill(CX - 8, 29, CX + 8, 37, (x, y) => Math.abs(x + 0.5 - CX) < 7.5 - (y - 29) * 0.45, M.carve, (x, y) => 10.4 - (y - 29) * 0.2, (x, y) => grain(x, y, 'h', 21) * 0.6 - 0.05);
-  // the carved owl: a domed body with a scalloped chest, carved wings, ear tufts, ringed facial discs with glass
-  // eyes, a hooked beak, toes over the ridge block
-  const owlH = (x, y) => 11 + Math.sqrt(Math.max(0, 1 - ((x + 0.5 - OC.x) / ORX) ** 2 - ((y + 0.5 - OC.y) / ORY) ** 2)) * 3.6;
-  r.np();
-  r.fill(OC.x - 11, 8, OC.x + 11, 34, (x, y) => ((x + 0.5 - OC.x) / ORX) ** 2 + ((y + 0.5 - OC.y) / ORY) ** 2 < 1, M.carve, (x, y) => owlH(x, y) - (Math.abs(x + 0.5 - OC.x) < 4.6 && y > 22 && (y % 3) === 0 && ((x + (y / 3 | 0)) % 2 === 0) ? 0.7 : 0), () => 0.06);
-  for (const sx of [-1, 1]) {
-    // the wing: a raised blade down the side with three feather grooves
-    r.np();
-    r.fill(OC.x - 11, 17, OC.x + 11, 34, (x, y) => { const u = (x + 0.5 - OC.x) * sx, v = y + 0.5 - OC.y; return ((x + 0.5 - OC.x) / ORX) ** 2 + ((y + 0.5 - OC.y) / ORY) ** 2 < 1.02 && u > 4.4 + Math.max(0, 6 - v) * 0.25 && v > -1.5; }, M.carve, (x, y) => owlH(x, y) + 1.2 - ((y + 0.5 - OC.y + (x + 0.5 - OC.x) * sx * 0.5) % 3.2 < 0.9 ? 0.8 : 0), () => -0.04);
-    r.np();
-    r.fill(OC.x + sx * 7 - 4, 4, OC.x + sx * 7 + 4, 13, (x, y) => { const u = (x + 0.5 - OC.x) * sx, v = y + 0.5 - 12; return u > 3 && u < 8.6 && v < 0.5 && v > -1 - (u - 3) * 0.95; }, M.carve, 14.2, () => -0.04);
-    const ex = OC.x + sx * 4, ey = 16;
-    r.np();
-    r.fill(ex - 5, ey - 5, ex + 5, ey + 5, (x, y) => dist(x, y, ex, ey) < 4.4 && dist(x, y, ex, ey) >= 3.3, M.carve, (x, y) => owlH(x, y) + 0.7, () => 0.1);
-    r.np();
-    r.fill(ex - 4, ey - 4, ex + 4, ey + 4, (x, y) => dist(x, y, ex, ey) < 3.3, M.carve, (x, y) => owlH(x, y) - 0.5, () => -0.02);
-    r.np();
-    r.fill(ex - 2, ey - 2, ex + 2, ey + 2, (x, y) => dist(x, y, ex, ey) < 2.1, M.dark, (x, y) => owlH(x, y) + 0.2, () => 0, { gloss: 2 });
-    r.put(ex - 1, ey - 1, M.enamel, 16, 0.35, { flat: true });
-    r.np(); for (let k = -1; k <= 1; k++) r.put(OC.x + sx * 3 + k, 32, M.carve, 12.6, 0.06);
-  }
-  r.np();
-  r.fill(OC.x - 2, 18, OC.x + 2, 23, (x, y) => Math.abs(x + 0.5 - OC.x) < (y === 18 ? 1.6 : y === 19 ? 1.3 : y === 20 ? 0.9 : 0.5), M.carve, 17, () => 0.02);
+  paintBird(r, CX - 1, 30, 'out', { s: 1.45, carved: true, h: 12 });
 
   // ---- the case: walnut boards in a carved bead frame; the cornice with dentils; the base moulding
   r.np();
   r.fill(CX - CASE.hw, CASE.y0, CX + CASE.hw, CASE.y1, () => true, M.walnut, 5, (x, y) => grain(x, y, 'v', 7) - 0.04);
   r.np();
-  r.fill(CX - CASE.hw, CASE.y0, CX + CASE.hw, CASE.y1, (x, y) => { const e = Math.min(x + 0.5 - (CX - CASE.hw), CX + CASE.hw - x - 0.5, y + 0.5 - CASE.y0, CASE.y1 - y - 0.5); return e > 1.4 && e < 3.6; }, M.carve, (x, y) => { const e = Math.min(x + 0.5 - (CX - CASE.hw), CX + CASE.hw - x - 0.5, y + 0.5 - CASE.y0, CASE.y1 - y - 0.5); return 6.4 + (1 - Math.abs(e - 2.5)) * 0.9 - (((x + y) % 4) === 0 ? 0.5 : 0); }, () => 0);
+  r.fill(CX - CASE.hw, CASE.y0, CX + CASE.hw, CASE.y1, (x, y) => { const e = Math.min(x + 0.5 - (CX - CASE.hw), CX + CASE.hw - x - 0.5, y + 0.5 - CASE.y0, CASE.y1 - y - 0.5); return e > 1.4 && e < 3.6; }, M.carve, (x, y) => { const e = Math.min(x + 0.5 - (CX - CASE.hw), CX + CASE.hw - x - 0.5, y + 0.5 - CASE.y0, CASE.y1 - y - 0.5); return 6.4 + (1 - Math.abs(e - 2.5)) * 0.9; }, () => 0);
   const cornProf = [8.6, 10, 10.6, 9.4, 9.8, 8.4];
   r.np();
   r.fill(CX - CORN.hw, CORN.y0, CX + CORN.hw, CORN.y1, (x, y) => Math.abs(x + 0.5 - CX) < CORN.hw - (y === CORN.y0 ? 1 : 0), M.walnut, (x, y) => cornProf[y - CORN.y0] - (Math.abs(x + 0.5 - CX) > CORN.hw - 1.5 ? 1 : 0), (x, y) => grain(x, y, 'h', 11) - 0.08);
-  r.np();
-  r.fill(CX - CORN.hw + 2, CORN.y0 + 3, CX + CORN.hw - 2, CORN.y0 + 5, (x) => ((x - CX + 66) % 4) < 2, M.carve, 10.8, () => 0);
   const botProf = [8.4, 9.8, 10.4, 9.6, 8.2];
   r.np();
   r.fill(CX - BOT.hw, BOT.y0, CX + BOT.hw, BOT.y1, (x, y) => Math.abs(x + 0.5 - CX) < BOT.hw - (y === BOT.y1 - 1 ? 1 : 0), M.walnut, (x, y) => botProf[y - BOT.y0], (x, y) => grain(x, y, 'h', 13) - 0.06);
   r.np();
-  r.fill(CX - BOT.hw + 1, BOT.y0 + 2, CX + BOT.hw - 1, BOT.y0 + 3, () => true, M.carve, 10.9, (x) => ((x & 3) === 0 ? -0.15 : 0.02));
+  r.fill(CX - BOT.hw + 1, BOT.y0 + 2, CX + BOT.hw - 1, BOT.y0 + 3, () => true, M.carve, 10.9, (x, y) => grain(x, y, 'h', 14) * 0.4);
 
   // ---- the balcony: a deck on two little corbels, turned balusters, end posts with knobs, a rail
   r.np();
@@ -549,9 +499,9 @@ function paintCase(v = { door: 0, owl: null }) {
   r.np();
   r.fill(CX - 22, 79, CX + 22, 82, (x, y) => y < 81 || Math.abs(x + 0.5 - CX) < 21, M.carve, (x, y) => [13, 12.4, 11.6][y - 79], () => 0.02);
 
-  // ---- the dial: a beaded brass bezel, cream enamel, a painted minute track, numerals, a rosette and a crescent
+  // ---- the dial: a brass bezel, cream enamel, a painted minute track and numerals
   r.np();
-  r.fill(CX - RD - 4, DY - RD - 4, CX + RD + 4, DY + RD + 4, (x, y) => { const d = dist(x, y, CX, DY); return d >= RD && d < RD + 3.6; }, M.brass, (x, y) => { const d = dist(x, y, CX, DY) - RD; return 8 + Math.sin(d / 3.6 * Math.PI) * 1.7 + (Math.abs(d - 1.8) < 0.7 && (Math.floor(Math.atan2(y + 0.5 - DY, x + 0.5 - CX) * 18) & 1) ? 0.6 : 0); });
+  r.fill(CX - RD - 4, DY - RD - 4, CX + RD + 4, DY + RD + 4, (x, y) => { const d = dist(x, y, CX, DY); return d >= RD && d < RD + 3.6; }, M.brass, (x, y) => { const d = dist(x, y, CX, DY) - RD; return 8 + Math.sin(d / 3.6 * Math.PI) * 1.7; });
   r.np();
   r.fill(CX - RD, DY - RD, CX + RD, DY + RD, (x, y) => dist(x, y, CX, DY) < RD, M.enamel, (x, y) => { const d = dist(x, y, CX, DY) / RD; return 7.2 + 1.6 * (1 - d * d); }, (x, y) => {
     const d = dist(x, y, CX, DY);
@@ -583,37 +533,23 @@ function paintCase(v = { door: 0, owl: null }) {
     const y0 = Math.round(DY + Math.sin(a) * rr - 3.5);
     for (const g of glyphs) { g.forEach((row, yy) => [...row].forEach((ch, k) => { if (ch === '#') ink(xx + k, y0 + yy); })); xx += g[0].length; }
   });
-  // a red-and-gold rosette at the arbor, the maker's little red heart
-  r.np();
-  r.fill(CX - 6, DY - 6, CX + 6, DY + 6, (x, y) => { const d = dist(x, y, CX, DY), a = Math.atan2(y + 0.5 - DY, x + 0.5 - CX); return d < 3.2 + Math.cos(a * 6) * 1.4 + 0.6; }, (x, y) => (dist(x, y, CX, DY) < 2 ? M.brass : M.red), 9, (x, y) => (dist(x, y, CX, DY) < 2 ? 0.1 : 0.05));
-  ['.#.#.', '#####', '#####', '.###.', '..#..'].forEach((row, y) => [...row].forEach((ch, x) => { if (ch === '#') r.put(CX - 2 + x, DY + 10 + y, M.red, 9, x === 1 && y === 1 ? 0.3 : 0.08, { flat: true }); }));
 
-  // ---- the wreath: carved oak leaves and acorns round the dial, filling the corners
-  // a garland of leaves all round the bezel, clusters with acorns in the corners, acorn pairs at the sides
-  for (let k = 0; k < 18; k++) {
-    const a = (k / 18) * Math.PI * 2 + 0.12, sx = CX + Math.cos(a) * 39.5, sy = DY + Math.sin(a) * 39.5;
-    oakLeaf(r, sx, sy, a + Math.PI / 2 - 0.32, 14, 4.8, { h: 9 + (k % 2) * 0.7 });
-  }
+  // ---- the carving: a spray of three oak leaves and an acorn growing out from the dial into each corner of the case
   for (const [qx, qy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const ox = CX + qx * 41, oy = DY + qy * 33, a = Math.atan2(qy * 0.9, qx);
-    oakLeaf(r, ox, oy, a - 0.95, 14, 5, { h: 10.4 });
-    oakLeaf(r, ox, oy, a + 0.95, 14, 5, { h: 10.4 });
-    oakLeaf(r, ox, oy, a, 19, 6, { h: 11.2, curl: 0.6 });
-    acorn(r, ox - qx * 5 + (qx > 0 ? -1 : 0), oy + (qy < 0 ? 4 : -9), 0.95, { h: 12.4 });
-    acorn(r, ox + qx * 1 + (qx > 0 ? -1 : 0), oy + (qy < 0 ? 6 : -7), 0.85, { h: 12.8 });
+    const ox = CX + qx * 34, oy = DY + qy * 28, a = Math.atan2(qy * 0.8, qx);
+    oakLeaf(r, ox, oy, a - 0.95, 15, 4, { h: 9.4 });
+    oakLeaf(r, ox, oy, a + 0.95, 15, 4, { h: 9.4 });
+    oakLeaf(r, ox, oy, a, 20, 5, { h: 10.6, curl: 0.6 });
+    acorn(r, ox + qx * 2 - 0.5 + (qx > 0 ? 0 : 0), oy + (qy < 0 ? 2 : -9), 1.05, { h: 12.4 });
   }
-  for (const sx of [-1, 1]) { acorn(r, CX + sx * 52 - 0.5, 143, 1, { h: 10 }); acorn(r, CX + sx * 52 - 0.5, 156, 1, { h: 10 }); }
 
-  // ---- the apron: pierced fretwork with a big scallop under the middle
+  // ---- the apron: a plain carved scallop under the middle
   r.np();
   r.fill(CX - APR.hw, APR.y0, CX + APR.hw, APR.y1, (x, y) => {
     const u = Math.abs(x + 0.5 - CX), v0 = y + 0.5 - APR.y0;
     if (u > APR.hw - v0 * 0.6) return false;
     const bottom = u < 18 ? 16 - (u / 18) ** 2 * 7 : 9 - Math.abs(Math.sin(((u - 18) / 36) * Math.PI * 2.5)) * 4;
     if (v0 > bottom) return false;
-    // the piercings: a row of round holes and teardrops
-    if (dist(x, y, CX, APR.y0 + 7.5) < 2.2) return false;
-    for (const hx of [11, 22, 33, 44]) if (u > hx - 2.5 && u < hx + 2.5 && dist(Math.abs(x + 0.5 - CX) - 0.5 + CX, y, CX + hx, APR.y0 + 4.5) < 1.6) return false;
     return true;
   }, M.carve, (x, y) => 7 + (y + 0.5 - APR.y0 < 1.5 ? 1 : 0), (x, y) => grain(x, y, 'h', 31) * 0.5);
   return r;
@@ -726,45 +662,10 @@ function chainTile() {
 
 // ------------------------------------------------------------------ the boot scene: wall, light
 
-/** a dark emerald regency-stripe wall (the office's own wallpaper, in the dark), 64 px tile */
-function wallTile() {
-  const N = 64, b = new Buf(N, N);
-  const G = rampOf([0x030a08, 0x071a12, 0x0d281c, 0x143626], 6);
-  const gold = rampOf([0x2a1c08, 0x4a3410], 3);
-  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-    const sx = x % 32;
-    const n = (vnoise((x % N) * 0.12, y * 0.12, 5) - 0.5) * 0.2;
-    if (sx === 20 || sx === 31) { b.set(x, y, pick(gold, 0.5 + n, x, y, 0.85)); continue; }
-    const satin = sx < 20;
-    const dia = satin && Math.abs(Math.abs((sx % 20) - 10) + Math.abs((y % 16) - 8) - 7) < 0.8;
-    b.set(x, y, pick(G, clamp((satin ? 0.62 : 0.32) + n + (dia ? 0.12 : 0) + ((x + y) & 1 ? 0.02 : -0.02)), x, y, 1));
-  }
-  return { url: b.url(), N };
-}
-/** A pool of warm lamplight on the wall, in hard stepped bands with ordered dither. */
-function lampPool() {
-  const w = 260, h = 380, b = new Buf(w, h), cx = w / 2, cy = h * 0.47;
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const nx = (x + 0.5 - cx) / (w * 0.4), ny = (y + 0.5 - cy) / (h * 0.38), a = Math.atan2(ny, nx);
-    const rag = 1 + (fbm(Math.cos(a) * 1.6 + 3, Math.sin(a) * 1.6 + 3, 8) - 0.5) * 0.34 + (vnoise(x * 0.09, y * 0.09, 9) - 0.5) * 0.1;
-    const d = Math.sqrt(nx * nx + ny * ny) / rag;
-    if (d >= 1) continue;
-    const lean = clamp(1 - (nx * 0.25 + ny * 0.3) * 0.4, 0.7, 1.15);
-    const lv = (1 - d) * 6 * lean, band = Math.floor(lv), frac = lv - band;
-    const k = band + (frac > bayer(x, y) ? 1 : 0);
-    if (k <= 0) continue;
-    b.set(x, y, [255, 184, 96], Math.min(6, k) * 19);
-  }
-  return { url: b.url(), w, h };
-}
-function edgeShade(n, vertical) {
-  const b = vertical ? new Buf(4, n) : new Buf(n, 4);
-  for (let k = 0; k < n; k++) for (let j = 0; j < 4; j++) {
-    const x = vertical ? j : k, y = vertical ? k : j, f = 1 - k / n;
-    if (bayer(x, y) < f * f * 0.9) b.set(x, y, [2, 4, 4], 170);
-  }
-  return b.url();
-}
+// The wall is plain, calm plaster in a deep green, lit by a warm lamp: smooth CSS gradients (no tile, no stripes, no
+// dither), so nothing behind the clock competes with it.
+const WALL = '#143a2a', POOL = { w: 300, h: 400 };
+
 /** a tiny pixel hand pointer (2 frames: up, pressed) for "tap the clock" */
 function pointer() {
   const rows = ['..##........', '.#oo#.......', '.#oo#.......', '.#oo###.....', '.#oo#oo##...', '.#oo#oo#o#..', '##oooooooo#.', '#o#ooooooo#.', '#ooooooooo#.', '.#oooooooo#.', '..#ooooooo#.', '...#ssssss#.', '...########.'];
@@ -807,8 +708,7 @@ const caseShadow = wallShadow(caseB, 5, 7);
 const HN = 120, MN = 120;
 const hourS = handStrip(HOUR, HN), minS = handStrip(MINUTE, MN);
 const pend = pendulumStrip(), coneB = cone(), ringB = ring(), chain = chainTile();
-const ptr = pointer(), wall = wallTile(), pool = lampPool(), bossB = boss();
-const EDGE = 44, edgeH = edgeShade(EDGE, false), edgeV = edgeShade(EDGE, true);
+const ptr = pointer(), bossB = boss();
 const HO = { x: CX - FR / 2, y: DY - FR / 2 };
 
 // ---- the 3D office's copy of the clock: one atlas + its layout
@@ -862,15 +762,11 @@ const dw = DB.w, dh = DB.h;
 
 const CSSTXT = `
 #boot{--k:min(calc(86vw / ${SW}),calc(72vh / ${SH}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
-background:#020504 url(${wall.url}) 50% 50%/${wall.N}em ${wall.N}em repeat;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s steps(6)}
+background:radial-gradient(ellipse 120% 100% at 50% 46%,rgba(2,8,5,0) 38%,rgba(2,8,5,.42) 72%,rgba(2,8,5,.86) 100%),${WALL};user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s steps(6)}
 @supports (width:round(nearest,1px,1px)){#boot{--k:max(1px,min(round(nearest,min(calc(86vw / ${SW}),calc(72vh / ${SH})),1px),round(down,min(calc(98vw / ${SW}),calc(92vh / ${SH})),1px)))}}
 #boot.gone:not(.hold):not(.js){opacity:0;pointer-events:none}
 #boot *{position:absolute;display:block;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;pointer-events:none}
-#boot .bt-edge{left:0;top:0;width:${EDGE}em;height:100%;background:url(${edgeH}) 0 0/${EDGE}em 4em repeat-y}
-#boot .bt-edge.r{left:auto;right:0;transform:scaleX(-1)}
-#boot .bt-edge.t{width:100%;height:${EDGE}em;background:url(${edgeV}) 0 0/4em ${EDGE}em repeat-x}
-#boot .bt-edge.b{top:auto;bottom:0;width:100%;height:${EDGE}em;background:url(${edgeV}) 0 0/4em ${EDGE}em repeat-x;transform:scaleY(-1)}
-#boot .bt-pool{width:${pool.w}em;height:${pool.h}em;left:50%;top:50%;margin:-${(pool.h * 0.5).toFixed(1)}em 0 0 -${pool.w / 2}em;background:url(${pool.url}) 0 0/100% 100%;animation:bt-flick 3.2s steps(1) infinite}
+#boot .bt-pool{width:${POOL.w}em;height:${POOL.h}em;left:50%;top:50%;margin:-${POOL.h * 0.5}em 0 0 -${POOL.w / 2}em;background:radial-gradient(closest-side,rgba(255,190,110,.34),rgba(255,180,96,.2) 40%,rgba(255,170,90,.07) 72%,rgba(255,170,90,0));animation:bt-flick 4s ease-in-out infinite}
 #boot .bt-mote{width:1em;height:1em;background:#ffd890;opacity:0;animation:bt-mote 9s steps(36) infinite}
 #boot .bt-stage{position:relative;width:${SW}em;height:${SH}em;flex:none;transform-origin:50% ${((DY / SH) * 100).toFixed(3)}%}
 #boot .bt-clock{left:0;top:0;width:${SW}em;height:${SH}em}
@@ -896,7 +792,7 @@ ${RINGS.map((g, i) => `#boot .bt-rg.w${i}{left:${g.x - 4}em;top:${g.y}em}`).join
 #boot.ready.out .bt-door{animation:bt-nod 2.6s steps(1) infinite}
 #boot.call .bt-note{animation:bt-note .9s steps(6) forwards}
 #boot.zoom .bt-tap{opacity:0;animation:none}
-@keyframes bt-flick{0%,100%{opacity:1}31%{opacity:.9}36%{opacity:1}70%{opacity:.94}}
+@keyframes bt-flick{0%,100%{opacity:1}35%{opacity:.93}70%{opacity:.97}}
 @keyframes bt-mote{0%{opacity:0;transform:translate(0,0)}15%{opacity:.7}50%{transform:translate(6em,-14em)}85%{opacity:.5}100%{opacity:0;transform:translate(2em,-28em)}}
 @keyframes bt-pend{to{background-position:-${(PEND_N - 1) * PB.w}em 0}}
 @keyframes bt-mh{to{background-position:-${MN * FR}em 0}}
@@ -914,7 +810,7 @@ const noteUrl = note();
 const html = `<!-- boot:begin (generated by src/onboard/tools/bootart.mjs; edit the generator, not this block) -->
     <style>${CSSTXT}</style>
     <div id="boot" role="progressbar" aria-label="Loading" data-art='${JSON.stringify({ fr: FR, mn: MN, hn: HN, cx: CX, dy: DY, rd: RD, w: W, sh: SH, bw: SW, dw, wt: WT_TRAVEL })}'>
-      <i class="bt-edge"></i><i class="bt-edge r"></i><i class="bt-edge t"></i><i class="bt-edge b"></i><i class="bt-pool"></i>${motes.map(([x, y, d]) => `<i class="bt-mote" style="left:calc(50% + ${x}em);top:calc(50% + ${y}em);animation-delay:${d}s"></i>`).join('')}
+      <i class="bt-pool"></i>${motes.map(([x, y, d]) => `<i class="bt-mote" style="left:calc(50% + ${x}em);top:calc(50% + ${y}em);animation-delay:${d}s"></i>`).join('')}
       <div class="bt-stage">
         <div class="bt-clock">
           <i class="bt-pend"></i>
