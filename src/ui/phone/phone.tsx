@@ -358,9 +358,9 @@ function injectCSS() {
 @keyframes hh-lock-in{from{opacity:0}to{opacity:1}}
 .hh-lock .hh-phone{animation:hh-lock-up .5s ease-in-out both}
 @keyframes hh-lock-up{from{transform:translateY(60px)}to{transform:none}}
-.hh-lock-cap{max-width:300px;text-align:center;padding:10px 14px;color:#f4e8cc;font:16px var(--font-body, monospace);line-height:1.25}
+.hh-lock-cap{max-width:300px;text-align:center;padding:10px 14px;color:#f4e8cc;font:600 17px var(--font-body, serif);line-height:1.25}
 .hh-lock-cap b{display:block;font-size:16px;color:#ffe08a;margin-bottom:2px}
-.hh-lock button{min-width:200px;padding:10px 18px;font:16px var(--font-body, monospace);cursor:pointer}
+.hh-lock button{min-width:200px;padding:10px 18px;font:600 17px var(--font-body, serif);cursor:pointer}
 @keyframes hh-phone-buzz{0%,100%{transform:none}20%{transform:translateX(calc(-1 * var(--u))) rotate(-1deg)}40%{transform:translateX(var(--u)) rotate(1deg)}60%{transform:translateX(calc(-1 * var(--u)))}80%{transform:translateX(var(--u))}}
 @media (prefers-reduced-motion:reduce){.hh-phone.buzz{animation:none}}
 `;

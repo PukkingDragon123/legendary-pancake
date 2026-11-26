@@ -133,14 +133,15 @@ export function pace(chs: Ch[], speed = 1): { beats: Beat[]; end: number } {
     let d: number;
     if (/\s/.test(c)) d = 0.028 + hash(i, 7) * 0.03;
     else {
-      const lw = w ? w.text.replace(/[^a-z']/gi, '').toLowerCase() : '';
+      const lw = w ? w.text.replace(/’/g, "'").replace(/[^a-z']/gi, '').toLowerCase() : '';
       const wk = FILLER.has(lw) ? 0.74 : lw.length >= 9 ? 0.92 : 1;
       const caps = w && w.text.length > 1 && w.text === w.text.toUpperCase() && /[A-Z]/.test(w.text) ? 1.25 : 1;
       d = 0.046 * TONE_K[tone] * wk * caps * jit;
     }
     // pauses after punctuation (only where a phrase really breaks: before a space or the end)
-    const nx = chs[i + 1]?.c ?? '', brk = nx === '' || /[\s"')\]]/.test(nx);
-    if (c === '.' && nx === '.') d += 0.17;
+    const nx = chs[i + 1]?.c ?? '', brk = nx === '' || /[\s"')\]’”]/.test(nx);
+    if (c === '…') d += brk ? 0.67 : 0.37;
+    else if (c === '.' && nx === '.') d += 0.17;
     else if (c === '.' && i > 0 && chs[i - 1].c === '.') d += brk ? 0.5 : 0.2;
     else if (brk) {
       if (c === ',') d += 0.22;

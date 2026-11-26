@@ -110,7 +110,7 @@
 .bk-head { display: flex; flex-direction: column; gap: 2px; }
 .bk-kicker { font-family: var(--font-small); font-size: var(--t1); color: var(--ink-3); letter-spacing: 0px; }
 .bk-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.bk-title { font-family: var(--font-display); font-weight: 700; font-size: calc(var(--fs) * 2); line-height: 1; color: var(--ink); margin: 0; }
+.bk-title { font-family: var(--font-display); font-weight: 700; font-size: calc(var(--fs) * 1.6); line-height: 1; color: var(--ink); margin: 0; }
 .bk-rule { display: block; height: 2px; margin-top: 4px; background: repeating-linear-gradient(90deg, var(--ink-3) 0 6px, transparent 6px 8px); opacity: .55; }
 .bk-h3 { font-family: var(--font-display); font-weight: 700; font-size: var(--fs); color: var(--wood-dark); margin: 2px 0 -2px; }
 .bk-count { font-family: var(--font-display); font-size: var(--fs); color: var(--ink-2); }
@@ -130,7 +130,7 @@
 .bk-last:active { transform: translateY(1px); }
 .bk-last-t { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
 .bk-last-t small { font-family: var(--font-small); font-size: var(--t1); color: var(--ink-3); }
-.bk-last-t b { font-family: var(--font-display); font-weight: 700; font-size: calc(var(--fs) * 2); line-height: 1; color: var(--ink); }
+.bk-last-t b { font-family: var(--font-display); font-weight: 700; font-size: calc(var(--fs) * 1.6); line-height: 1; color: var(--ink); }
 .bk-last-t span { font-size: var(--fs); color: var(--ink-2); white-space: nowrap; }
 
 /* stat tiles */

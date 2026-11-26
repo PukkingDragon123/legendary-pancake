@@ -56,7 +56,7 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **A realistic interface (v7)**: every panel, button and badge is a real material at full device resolution: carved
   walnut and oak frames with brass corner brackets and a gilt bead, parchment and laid paper, enamel buttons in brass rims
   that press into their bodies, tooled leather tabs, linen-lined brass trays, satin ribbons, glass level tubes, and the
-  owl's eleven portrait frames (porthole, carved walnut, mossy willow, cable knit, silver filigree, toadstools, laurel,
+  owl's eleven portrait frames (carved walnut, porthole, mossy willow, cable knit, silver filigree, toadstools, laurel,
   frost, orrery, gingerbread, starry night). Lit like the 3D (a warm key from the upper left, soft steps, violet shadows),
   with smooth particles and transitions; photo materials from Poly Haven (`docs/credits/ui7.md`).
 - **Pixel-art icons and shelf (v8)**: every icon (the acorn and the moon gem too) and the main buttons' shelf is a
@@ -74,17 +74,21 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   tools say what they do and hang from little brass rings, with no tiles behind them: a market stall with a striped
   awning and an acorn sign (Shop), a blueprint unrolling from its roll with a pencil (Build), a black felt top hat with a
   burgundy band and a pheasant feather (Dress up), a checklist scroll with a wax seal and a goose quill (Quests), a globe
-  of the real Earth on a brass stand (Map), brass and steel gears (Settings); the Outside tile is a round hobbit door of
-  green planks in a ring of stones with iron strap hinges and a brass knocker, ajar with warm lamplight for Inside.
+  of the real Earth on a brass stand (Map), brass and steel gears (Settings).
   Symbols are struck brass medallions and cut, lacquered metal. The acorn has a glossy chestnut nut and a cup of real
   overlapping scales; the moon gem is a brilliant cut whose facets flash in turn as the light swings round it. On the
   shelf, Sleep is a brass oil lamp with a ruby glass font and a flame in its glass chimney, and the journal is plain
   tooled leather with gilt corners (no logos).
-- **One typeface, in 3D**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms and
-  props, the shop's signs) is set in Alagard by Hewett Tsoi, rendered at full device resolution. Titles, names,
-  numbers, buttons, toasts and Pip's lines are premium 3D title text (shaded extrusion, crisp outline, metallic fill,
-  soft shadow) that pops in, counts up, punches, bursts, shakes and waves (`src/ui/text3d.tsx`), and keeps still
-  with Calm motion.
+- **Storybook type (v12)**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms
+  and props, the shop's signs, the pretend phone) is set in Alegreya, a warm calligraphic book face, with titles, signs
+  and names in its true small capitals, Alegreya SC (Huerta Tipografica, SIL Open Font License; bundled, no web fonts).
+  Titles, names, numbers, buttons, toasts and Pip's lines are lettered like a painted sign (a clean ink outline, a
+  shallow bevel, a face lit from the top, a soft shadow) that pops in, counts up, punches, bursts, shakes and waves
+  (`src/ui/text3d.tsx`), and keeps still with Calm motion.
+- **Inked, full-colour interface (v12)**: every panel, button, tab, card, ribbon and frame has a bold near-black ink
+  outline (like the outlined 3D world and the icons) and richer, saturated enamel, wood and brass. Pip's portrait sits
+  in a carved walnut frame of honey-oak leaves and acorns by default. Zoom in and out of the oak with a pinch or the
+  mouse wheel.
 - **Living dialogue (v10)**: every spoken line (Pip in the interview and at home, Barnaby in his store, the night's
   captions) floats in 3D with no box: letters ease in from slightly behind, bob, lag a little behind the camera and
   drift away when the next line comes. They type with a person's rhythm (uneven, quicker through little words, pauses
@@ -142,7 +146,7 @@ npm run build
 Other scripts: `npm test` (44 sleep-engine tests), `npm run typecheck`. Dev-only pages:
 `/dev-owl.html` (owl coats/outfits/expressions sheet), `/dev-scene.html?hour=22&view=home`
 (scene views and times of day), `/dev-real.html` (every interface frame, button and material),
-`/dev-iconbake.html` (bakes the pixel-art icons and the shelf's sprites), `/dev-chrome.html?view=icons` and `?view=nav`.
+`/dev-iconbake.html` (bakes the pixel-art icons and the shelf's sprites), `/dev-chrome.html?view=icons`, `?view=nav` and `?view=frames`.
 
 ### On itch.io
 
@@ -190,7 +194,7 @@ extension/    MV3 browser extension (declarativeNetRequest blocking, bedtime pag
   garden furniture, and the original CC0/public-domain sound library.
 - **Moleforge (Burrowsmith)**: the forest grass field (`src/world/grassAtlas.js`, `grass.ts`).
 - **The Bear Must Eat**: the pixel sprite kit and ~170 icons (`src/ui/px/sprites.js`), the 9-slice UI
-  frames (`src/ui/px/frames.js`) and the TBME Goofy / Galmuri pixel fonts. Hoot Hollow's own icons are
+  frames (`src/ui/px/frames.js`) and (formerly) the TBME Goofy pixel font, now used only on a few dev pages. Hoot Hollow's own icons are
   drawn with the same kit (`src/ui/px/hollow.js`).
 
 ### Sounds and art credits
