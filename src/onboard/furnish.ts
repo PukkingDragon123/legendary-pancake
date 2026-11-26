@@ -4,10 +4,11 @@
 // a credenza, filing cabinets, framed paintings and certificates, a tall window with venetian blinds and the real
 // forest outside. Every piece is real geometry with hand-painted pixel textures (tex.ts / mats.ts).
 import * as THREE from 'three';
-import { at, Batch, bbox, cardBox, cyl, lathe, mat } from './kit.ts';
+import { at, Batch, bbox, cyl, lathe } from './kit.ts';
 import type { OfficeMats } from './mats.ts';
-import { C, cloth, crispText, hash, hexCSS, lerpRamp, mix3, mul3, paper as paperFill, rgb, Tex, type RGB } from './tex.ts';
+import { C, crispText, hexCSS, mix3, mul3, paper as paperFill, rgb, Tex, type RGB } from './tex.ts';
 import { F } from './fonts.ts';
+import { buildLibrary, type ShelfRun } from './books.ts';
 
 /** Where everything is (metres; +z towards the visitor, y up). */
 export const L = {
@@ -193,78 +194,13 @@ export function buildWindow(m: OfficeMats, viewMat: THREE.Material): WindowParts
   return { group: g, view, slats, glassAt: V(fx, (y0 + y1) / 2, w.z), normal: V(1, 0, 0), tilt, opening: { y0, y1, z0, z1, x: fx } };
 }
 
-// ------------------------------------------------------------------ book spines (atlas) and shelves
+// ------------------------------------------------------------------ the bookcases (their books: books.ts)
 
-/** An atlas of 32 spines (16 x 128 px each): binders with label windows, ledgers, cloth books with gilt bands. */
-export function spineAtlas(): THREE.CanvasTexture {
-  const W = 512, H = 128, t = new Tex(W, H);
-  const cols: RGB[] = [rgb(0x1d2c52), rgb(0x5e1216), rgb(0x173621), rgb(0x2a2420), rgb(0x6b4a2a), rgb(0x24324a), rgb(0x7a2a1c), rgb(0x3a4a2a), rgb(0x1a1a1e), rgb(0x8a6a3a), rgb(0x2e5560), rgb(0x4a1e3a)];
-  for (let i = 0; i < 32; i++) {
-    const x0 = i * 16, c = cols[Math.floor(hash(i, 1, 3) * cols.length)], kind = i % 4;
-    cloth(t, x0, 0, 16, H, c, { seed: i });
-    if (kind === 0) {
-      // a lever-arch binder: a white label window and a finger hole
-      t.rect(x0 + 3, 20, 10, 38, (x, y) => lerpRamp(C.paper, 0.8 + (hash(x, y, i) - 0.5) * 0.1));
-      for (let y = 26; y < 52; y += 4) t.rect(x0 + 5, y, 4 + Math.floor(hash(i, y, 2) * 3), 1, rgb(0x2a2a3a));
-      t.rect(x0 + 3, 20, 10, 1, mul3(c, 0.6)); t.rect(x0 + 3, 57, 10, 1, mul3(c, 1.3));
-      for (let y = 92; y < 102; y++) for (let x = x0 + 5; x < x0 + 11; x++) if (Math.hypot(x - x0 - 8, (y - 97) * 0.7) < 3.5) t.set(x, y, mul3(c, 0.35));
-    } else if (kind === 1) {
-      // a ledger: leather with raised bands and a red title label
-      for (const y of [14, 30, 96, 112]) { t.rect(x0, y, 16, 3, mul3(c, 1.35)); t.rect(x0, y + 3, 16, 1, mul3(c, 0.6)); }
-      t.rect(x0 + 2, 40, 12, 18, rgb(0x7a1b17));
-      t.rect(x0 + 3, 41, 10, 1, lerpRamp(C.gilt, 0.8)); t.rect(x0 + 3, 56, 10, 1, lerpRamp(C.gilt, 0.8));
-      for (let y = 45; y < 54; y += 3) t.rect(x0 + 4, y, 8, 1, lerpRamp(C.gilt, 0.6));
-    } else {
-      // cloth book: gilt bands and a title
-      for (const y of [8, 11, 116, 119]) t.rect(x0 + 1, y, 14, 1, lerpRamp(C.gilt, 0.7));
-      const ty = 24 + Math.floor(hash(i, 2, 5) * 30);
-      for (let k = 0; k < 6; k++) t.rect(x0 + 5 + (k % 2), ty + k * 6, 5, 2, lerpRamp(C.gilt, 0.5 + hash(i, k, 6) * 0.3));
-    }
-    // worn edges
-    for (let y = 0; y < H; y++) { t.shade(x0, y, 0.7); t.shade(x0 + 15, y, 0.75); t.shade(x0 + 1, y, 1.1); }
-    for (let x = x0; x < x0 + 16; x++) { t.shade(x, 0, 0.7); t.shade(x, H - 1, 0.7); }
-  }
-  return t.texture({ repeat: false, q: 56 });
-}
-
-/** A row of books standing on a shelf from x0 to x1 (local), spines facing +z. */
-function bookRow(spines: THREE.Material, pages: THREE.Material, cover: THREE.Material, x0: number, x1: number, y: number, z: number, depth: number, maxH: number, seed: number) {
-  const out: { spine: THREE.BufferGeometry[]; page: THREE.BufferGeometry[]; cover: THREE.BufferGeometry[] } = { spine: [], page: [], cover: [] };
-  let x = x0, i = 0;
-  while (x < x1 - 0.03) {
-    const r = hash(seed, i, 7);
-    if (r > 0.93 && x < x1 - 0.25) { x += 0.06 + r * 0.05; i++; continue; } // a gap
-    const kind = Math.floor(hash(seed, i, 3) * 32);
-    const isBinder = kind % 4 === 0, isLedger = kind % 4 === 1;
-    const w = isBinder ? 0.07 : isLedger ? 0.055 : 0.03 + hash(seed, i, 9) * 0.03;
-    const h = Math.min(maxH, isBinder ? 0.32 : isLedger ? 0.36 : 0.22 + hash(seed, i, 11) * 0.1);
-    if (x + w > x1) break;
-    const d = Math.min(depth, isBinder ? 0.28 : 0.2 + hash(seed, i, 13) * 0.06);
-    const lean = i > 0 && hash(seed, i, 17) > 0.94 ? 0.08 : 0;
-    // spine face: a plane with UVs into its atlas tile
-    const sp = new THREE.PlaneGeometry(w, h);
-    const uv = sp.attributes.uv as THREE.BufferAttribute;
-    const u0 = kind / 32, u1 = (kind + 1) / 32, vs = Math.min(1, h / 0.36);
-    for (let k = 0; k < uv.count; k++) uv.setXY(k, uv.getX(k) ? u1 : u0, uv.getY(k) ? (1 + vs) / 2 : (1 - vs) / 2);
-    sp.translate(0, h / 2, 0);
-    out.spine.push(at(sp, x + w / 2, y, z + 0.0005, 0, 0, lean));
-    // the block: cover on the sides, pages on top
-    const blk = bbox(w, h, d, { r: 0.002, along: 'y' });
-    out.cover.push(at(blk, x + w / 2, y, z - d / 2, 0, 0, lean));
-    out.page.push(at(bbox(w * 0.8, 0.004, d * 0.95, { r: 0 }), x + w / 2, y + h - 0.002, z - d / 2 - 0.004, 0, 0, lean));
-    x += w + 0.002 + (lean ? 0.02 : 0);
-    i++;
-  }
-  return out;
-}
-
-export function buildShelves(m: OfficeMats, spineTex: THREE.Texture): THREE.Group {
+export function buildShelves(m: OfficeMats): THREE.Group {
   const g = new THREE.Group();
   g.name = 'shelves';
   const b = new Batch();
-  const spines = mat({ map: spineTex, roughness: 0.75, name: 'spines' });
-  const coverMat = mat({ color: 0x3a2418, roughness: 0.8 });
-  const books: THREE.BufferGeometry[] = [], pages: THREE.BufferGeometry[] = [], covers: THREE.BufferGeometry[] = [];
+  const runs: ShelfRun[] = [];
   const D = L.shelfD, Hh = L.shelfH, z = L.z0;
   L.shelves.forEach((s, si) => {
     const w = s.x1 - s.x0, cx = (s.x0 + s.x1) / 2;
@@ -294,15 +230,12 @@ export function buildShelves(m: OfficeMats, spineTex: THREE.Texture): THREE.Grou
       b.add(m.mahogany, at(bbox(w - 0.06, 0.03, D - 0.03, { r: 0.004 }), cx, y - 0.03, z + D / 2));
       for (const [a, c] of [[s.x0 + 0.05, mid - 0.025], [mid + 0.025, s.x1 - 0.05]] as [number, number][]) {
         const seed = si * 31 + k * 7 + (a < mid ? 0 : 3);
-        // some runs hold an ornament instead of books on one end
-        const r = bookRow(spines, m.paperStack, coverMat, a, c - (hash(seed, 4, 4) > 0.5 ? 0.22 : 0.02), y, z + D - 0.02, D - 0.06, (ys[k + 1] ?? Hh - 0.04) - y - 0.04, seed);
-        books.push(...r.spine); pages.push(...r.page); covers.push(...r.cover);
+        // [clock14] real books (books.ts): sets, leaners, flat stacks, bookends and small objects
+        runs.push({ x0: a, x1: c, y, z: z + D - 0.02, depth: D - 0.06, maxH: (ys[k + 1] ?? Hh - 0.04) - y - 0.03, seed });
       }
     });
   });
-  const bb = new Batch();
-  bb.add(spines, ...books); bb.add(m.paperStack, ...pages); bb.add(coverMat, ...covers);
-  g.add(b.build('carcass'), bb.build('books'));
+  g.add(b.build('carcass'), buildLibrary(runs, m));
   return g;
 }
 

@@ -94,6 +94,217 @@ export function woodCanvas(ramp: RGB[], W = 128, H = 256, seed = 3, bright = 0, 
   });
 }
 
+// ------------------------------------------------------------------ [clock14] real wood: scanned figure, our finishes
+
+/**
+ * Real wood figure from three Poly Haven scans (CC0; public/img/clock/wood.webp, src/onboard/tools/clockwood.py):
+ * levelled luminance tiles, grain down v. 0 walnut (cathedral figure and pores), 1 oak (straight grain, ray fleck),
+ * 2 weathered (split, checked: the shingles). Coloured through a finish's ramp at runtime: one file, every finish.
+ */
+export interface RealWood { n: number; tiles: Uint8Array[] }
+let woodP: Promise<RealWood | null> | null = null;
+export function realWood(): Promise<RealWood | null> {
+  return (woodP ??= new Promise<RealWood | null>((res) => {
+    if (typeof Image === 'undefined' || typeof document === 'undefined') { res(null); return; }
+    const im = new Image();
+    im.decoding = 'async';
+    im.onload = () => {
+      try {
+        const N = im.height, [, g] = canvas(im.width, N);
+        g.drawImage(im, 0, 0);
+        const d = g.getImageData(0, 0, im.width, N).data;
+        const tiles = [0, 1, 2].map((k) => {
+          const a = new Uint8Array(N * N);
+          for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) a[y * N + x] = d[(y * im.width + k * N + x) * 4 + 1];
+          return a;
+        });
+        res({ n: N, tiles });
+      } catch (e) { console.warn('clock wood failed', e); res(null); }
+    };
+    im.onerror = () => { console.warn('clock wood missing'); res(null); };
+    im.src = `${import.meta.env.BASE_URL}img/clock/wood.webp`;
+  }));
+}
+
+/** Real finishes: smooth ramps (dark latewood and pores .. warm figure highlights), the scan tile, its contrast. */
+export const REAL: Record<string, { ramp: RGB[]; tile: number; contrast: number }> = {
+  walnut: { ramp: R('#160c07', '#24150c', '#352013', '#472b19', '#5a3821', '#6e452a', '#845535', '#9c6741'), tile: 0, contrast: 0.66 },
+  oak: { ramp: R('#36210f', '#523316', '#70481f', '#8d5e2a', '#a87437', '#bd8a48', '#cf9f5c', '#ddb473'), tile: 1, contrast: 0.62 },
+  cherry: { ramp: R('#260a04', '#3e1208', '#5a1d0d', '#782b14', '#923b1c', '#a94d25', '#be6432', '#cf7c44'), tile: 0, contrast: 0.6 },
+  linden: { ramp: R('#5e4026', '#7c5a38', '#9a774c', '#b49163', '#c8a777', '#d6ba8c', '#e2cba2'), tile: 1, contrast: 0.55 },
+};
+
+function lut(ramp: RGB[]): Uint8ClampedArray {
+  const out = new Uint8ClampedArray(256 * 3);
+  for (let i = 0; i < 256; i++) {
+    const f = (i / 255) * (ramp.length - 1), a = Math.min(ramp.length - 2, Math.floor(f)), t = f - a;
+    for (let k = 0; k < 3; k++) out[i * 3 + k] = ramp[a][k] + (ramp[a + 1][k] - ramp[a][k]) * t;
+  }
+  return out;
+}
+
+/** A finish's colour map (tileable, n x n) from the scan: figure through the ramp, a slow tonal drift (heart and
+ * sap), shifted by `bright`. */
+export function realWoodCanvas(src: RealWood, id: string, bright = 0, size = 1024): HTMLCanvasElement {
+  const key = `${id}|${bright}|${size}`, hit = woodCache.get(key);
+  if (hit) return hit;
+  const f = REAL[id] ?? REAL.walnut, L = lut(f.ramp), T = src.tiles[f.tile], N = src.n, k = N / size;
+  // the slow drift on a coarse tileable grid (bilinear), not per pixel: this runs on phones while a room builds
+  const G = 32, drift = new Float32Array(G * G);
+  for (let j = 0; j < G; j++) for (let i = 0; i < G; i++) drift[j * G + i] = (tnoise(i, j, G, G, 2.2 / G, 0.6 / G, f.tile * 7 + 3) - 0.5) * 0.16;
+  const [c, g] = canvas(size, size);
+  const im = g.createImageData(size, size);
+  for (let y = 0; y < size; y++) {
+    const gy = (y / size) * G, j0 = Math.floor(gy), fy = gy - j0, j1 = (j0 + 1) % G;
+    for (let x = 0; x < size; x++) {
+      let l = 0;
+      if (k === 1) l = T[y * N + x];
+      else { for (let j = 0; j < k; j++) for (let i = 0; i < k; i++) l += T[(y * k + j) * N + x * k + i]; l /= k * k; }
+      const gx = (x / size) * G, i0 = Math.floor(gx), fx = gx - i0, i1 = (i0 + 1) % G;
+      const d = (drift[j0 * G + i0] * (1 - fx) + drift[j0 * G + i1] * fx) * (1 - fy) + (drift[j1 * G + i0] * (1 - fx) + drift[j1 * G + i1] * fx) * fy;
+      const t = clamp01(0.5 + (l / 255 - 0.5) * f.contrast + d + bright);
+      const o = (y * size + x) * 4, q = Math.round(t * 255) * 3;
+      im.data[o] = L[q]; im.data[o + 1] = L[q + 1]; im.data[o + 2] = L[q + 2]; im.data[o + 3] = 255;
+    }
+  }
+  g.putImageData(im, 0, 0);
+  woodCache.set(key, c);
+  return c;
+}
+/** coloured finishes, shared by every clock (the office's, the Clock screen's, the bake) */
+const woodCache = new Map<string, HTMLCanvasElement>();
+
+/** The scan as a bump map (pores and latewood sit low). */
+export function realBumpCanvas(src: RealWood, tile: number, size = 512): HTMLCanvasElement {
+  const T = src.tiles[tile], N = src.n, k = N / size;
+  return paint(size, size, (x, y) => { const v = T[(y * k) * N + x * k]; return [v, v, v]; });
+}
+
+/** Smooth, mipmapped, anisotropic: real material, not pixel art. */
+export function rtex(c: HTMLCanvasElement, srgb = true, repeat = true): THREE.CanvasTexture {
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+  t.magFilter = THREE.LinearFilter;
+  t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.anisotropy = 8;
+  if (repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
+/**
+ * Aged wooden shingles from the weathered scan: four variants side by side (256 x 384 each), each cut from its own
+ * strip of the board: silvered brown grain, splits and checks, a dark wet overlap at the top where the row above
+ * covers it, a sun-worn lighter tail, a few lichen spots, dark gaps at the sides.
+ */
+export function realShingleCanvas(src: RealWood): HTMLCanvasElement {
+  const T = src.tiles[2], N = src.n, W = 256, H = 384;
+  const L = lut(R('#140c08', '#22160f', '#332318', '#463222', '#58412d', '#6b513a', '#7f6249', '#94775c', '#a88c70'));
+  const [c, g] = canvas(W * 4, H);
+  const im = g.createImageData(W * 4, H);
+  for (let v = 0; v < 4; v++) {
+    const ox = [40, 300, 560, 760][v], oy = [0, 300, 620, 140][v], tone = [0.02, -0.05, 0.05, -0.02][v];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const l = T[((oy + y * 2) % N) * N + ((ox + x) % N)] / 255;
+      let t = 0.5 + (l - 0.5) * 0.95 + tone;
+      t -= smooth(H * 0.55, 0, y) * 0.34; // the overlap (y = 0 is the hidden top)
+      t += smooth(H - 40, H, y) * 0.08; // the worn tail
+      t -= smooth(10, 0, x) * 0.3 + smooth(W - 10, W, x) * 0.3;
+      t -= smooth(H - 4, H, y) * 0.25; // the tail's own edge in shadow
+      const lichen = vnoise(x * 0.09 + v * 31, y * 0.09, 3, 77);
+      const o = (y * W * 4 + v * W + x) * 4, q = Math.round(clamp01(t) * 255) * 3;
+      let r = L[q], gg = L[q + 1], b = L[q + 2];
+      if (lichen > 0.8 && y > H * 0.45) { const a = smooth(0.8, 0.88, lichen) * 0.55; r += (118 - r) * a; gg += (124 - gg) * a; b += (86 - b) * a; }
+      im.data[o] = r; im.data[o + 1] = gg; im.data[o + 2] = b; im.data[o + 3] = 255;
+    }
+  }
+  g.putImageData(im, 0, 0);
+  return c;
+}
+
+/** Brass with a patina: warm polished metal, a brown tarnish that gathers in blotches, fine turning lines. Returns
+ * a colour map and a roughness map (tarnish is duller). Tileable. */
+export function brassCanvases(seed = 21): { map: HTMLCanvasElement; rough: HTMLCanvasElement } {
+  const S = 256;
+  const tarn = (x: number, y: number) => tnoise(x, y, S, S, 0.035, 0.035, seed);
+  const map = paint(S, S, (x, y) => {
+    const n = tarn(x, y), lines = (hash(0, y, seed, 5) - 0.5) * 0.08 + (hash(x >> 3, y, seed, 6) - 0.5) * 0.03;
+    const a = smooth(0.48, 0.75, n) * 0.75, b = 1 + lines;
+    return [Math.round((232 - 120 * a) * b), Math.round((186 - 104 * a) * b), Math.round((104 - 62 * a) * b)];
+  });
+  const rough = paint(S, S, (x, y) => { const v = Math.round(255 * (0.25 + smooth(0.45, 0.78, tarn(x, y)) * 0.45 + hash(x, y, seed) * 0.04)); return [v, v, v]; });
+  return { map, rough };
+}
+
+/** A carved oak leaf in real wood (leafCanvas's carving at 4x, the scan's grain running along the leaf). */
+export function realLeafCanvas(src: RealWood, id: string): HTMLCanvasElement {
+  const f = REAL[id] ?? REAL.oak, L = lut(f.ramp), T = src.tiles[f.tile], N = src.n, W = 512, H = 256;
+  return paint(W, H, (x, y) => {
+    const u = x / W, v = (y + 0.5) / H - 0.5, av = Math.abs(v);
+    const grain = T[((x * 2) % N) * N + ((y * 3 + 200) % N)] / 255 - 0.5;
+    let t = 0.52 + grain * f.contrast * 0.6;
+    // the midrib: a cut groove with a lit ridge beside it, soft edged
+    if (u < 0.94) t -= smooth(0.04, 0.022, av) * 0.42 - smooth(0.035, 0.05, av) * smooth(0.085, 0.06, av) * 0.14;
+    // side veins: angled grooves from the midrib toward the lobes, each with a lit ridge
+    const ph = (((u * 7 - av * 5.5) % 1) + 1) % 1;
+    if (av > 0.06 && av < 0.42 && u > 0.06 && u < 0.9) t += -smooth(0.1, 0.02, Math.abs(ph - 0.06)) * 0.34 + smooth(0.06, 0.0, Math.abs(ph - 0.17)) * 0.1;
+    // the rim falls away into shadow
+    t -= smooth(0.3, 0.5, av) * 0.3;
+    const q = Math.round(clamp01(t) * 255) * 3;
+    return [L[q], L[q + 1], L[q + 2]];
+  });
+}
+
+/** Carved plumage in real wood: scalloped feather rows with cut grooves (featherCanvas at 4x, scan grain). */
+export function realFeatherCanvas(src: RealWood, id: string): HTMLCanvasElement {
+  const f = REAL[id] ?? REAL.oak, L = lut(f.ramp), T = src.tiles[f.tile], N = src.n, S = 512;
+  return paint(S, S, (x, y) => {
+    const X = x / 4, Y = y / 4, row = Math.floor(Y / 9), off = (row % 2) * 6;
+    const cx = ((X + off) % 12) - 6, cy = Y % 9, d = Math.hypot(cx, cy * 1.25);
+    const grain = T[(y % N) * N + ((x + 333) % N)] / 255 - 0.5;
+    let t = 0.55 - (cy / 9) * 0.28 + grain * f.contrast * 0.55;
+    if (cy > 2) t -= smooth(0.9, 0, Math.abs(d - 6.1)) * 0.4;
+    if (cy > 2) t -= smooth(0.7, 0, Math.abs(cx)) * 0.12;
+    const q = Math.round(clamp01(t) * 255) * 3;
+    return [L[q], L[q + 1], L[q + 2]];
+  });
+}
+
+/**
+ * Box-map a placed part's uvs in metres (1 / tile per metre) with the grain along its longest side, from a random
+ * spot on the board: so every piece of a cabinet shows real grain running the right way, never stretched. A `frame`
+ * (a moulding round an opening) is mitred like a real one: each rail's grain runs along that rail.
+ */
+export function woodUV(g: THREE.BufferGeometry, tile: number, seed: number, frame = false): THREE.BufferGeometry {
+  g.computeBoundingBox();
+  const bb = g.boundingBox!, s = bb.getSize(new THREE.Vector3()), mid = bb.getCenter(new THREE.Vector3());
+  const sz = [s.x, s.y, s.z], md = [mid.x, mid.y, mid.z];
+  const long = s.z > s.x * 1.4 && s.z > s.y * 1.4 ? 2 : s.x > s.y * 1.15 ? 0 : 1;
+  // the frame's plane: its two largest sides
+  const [A, B] = [0, 1, 2].sort((i, j) => sz[j] - sz[i]);
+  const p = g.attributes.position as THREE.BufferAttribute, n = g.attributes.normal as THREE.BufferAttribute, uv = g.attributes.uv as THREE.BufferAttribute;
+  for (let t = 0; t < p.count; t += 3) {
+    let grain = long, rail = 0;
+    if (frame) {
+      const cA = (p.getComponent(t, A) + p.getComponent(t + 1, A) + p.getComponent(t + 2, A)) / 3 - md[A];
+      const cB = (p.getComponent(t, B) + p.getComponent(t + 1, B) + p.getComponent(t + 2, B)) / 3 - md[B];
+      const onA = Math.abs(cA) / (sz[A] / 2) > Math.abs(cB) / (sz[B] / 2);
+      grain = onA ? B : A;
+      rail = onA ? (cA > 0 ? 1 : 2) : (cB > 0 ? 3 : 4);
+    }
+    const ou = hash(seed, rail + 1, 91), ov = hash(seed, rail + 2, 92);
+    for (let i = t; i < t + 3 && i < p.count; i++) {
+      const c = [p.getX(i), p.getY(i), p.getZ(i)], a = [Math.abs(n.getX(i)), Math.abs(n.getY(i)), Math.abs(n.getZ(i))];
+      const d = a[0] > a[1] && a[0] > a[2] ? 0 : a[1] > a[2] ? 1 : 2;
+      const plane = [0, 1, 2].filter((k) => k !== d);
+      let u: number, v: number;
+      if (plane.includes(grain)) { v = c[grain]; u = c[plane.find((k) => k !== grain)!]; } else { u = c[plane[0]]; v = c[plane[1]] * 0.35; }
+      uv.setXY(i, u / tile + ou, v / tile + ov);
+    }
+  }
+  uv.needsUpdate = true;
+  return g;
+}
+
 /** A carved oak leaf, painted in its own (u, v) space: grain, a grooved midrib, side veins, a darker rim. */
 export function leafCanvas(ramp: RGB[], seed = 5): HTMLCanvasElement {
   const W = 128, H = 64;
@@ -231,7 +442,7 @@ export function pxText(g: CanvasRenderingContext2D, text: string, x: number, y: 
 
 // ------------------------------------------------------------------ geometry helpers
 
-export type Part = { geo: THREE.BufferGeometry; m?: THREE.Matrix4 };
+export type Part = { geo: THREE.BufferGeometry; m?: THREE.Matrix4; frame?: boolean };
 export const mtx = (x: number, y: number, z: number, rx = 0, ry = 0, rz = 0, sx = 1, sy = sx, sz = sx) =>
   new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
 
@@ -252,8 +463,8 @@ export function prep(g: THREE.BufferGeometry, col: RGB | null = null): THREE.Buf
   return o;
 }
 /** Merge parts (each transformed by its matrix) into one geometry. */
-export function merge(parts: Part[]): THREE.BufferGeometry {
-  const gs = parts.map((p) => { const g = prep(p.geo); if (p.m) g.applyMatrix4(p.m); return g; });
+export function merge(parts: Part[], woodTile = 0): THREE.BufferGeometry {
+  const gs = parts.map((p, i) => { const g = prep(p.geo); if (p.m) g.applyMatrix4(p.m); if (woodTile) woodUV(g, woodTile, i + 1, p.frame); return g; });
   const out = mergeGeometries(gs, false)!;
   for (const g of gs) g.dispose();
   return out;

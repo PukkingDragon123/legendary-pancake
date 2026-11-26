@@ -10,6 +10,7 @@
 // The Stage hands the renderer `present` (a scene with one full-screen triangle) to draw.
 import * as THREE from 'three';
 import { Ink, inkDev, INK_GLSL, defaultInk, inkUniforms, type InkLook } from '../gfx/ink.ts'; // [outline9]
+import { REALISM } from '../world/post.ts';
 
 const VERT = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
 const BAYER = /* glsl */ `
@@ -40,6 +41,8 @@ export interface LookGrade { exposure: number; warm: number; sat: number; contra
 
 export class Look {
   grade: LookGrade = { exposure: 1.0, warm: 0.35, sat: 1.12, contrast: 1.06, vignette: 0.32, grain: 0.03, bloom: 0.38, dof: 1, focus: 3, range: 2, nearBlur: 0 };
+  /** [clock14] natural colour (post.ts REALISM): the grade's intent at a realistic strength, thin dark ink */
+  private R = REALISM.on ? REALISM : null;
   /** CSS px per internal texel */
   px = 1;
   w = 2; h = 2;
@@ -63,6 +66,8 @@ export class Look {
 
   constructor(private gl: THREE.WebGLRenderer, quality: 'low' | 'high') {
     this.bloomOn = quality === 'high';
+    // [clock14] thin dark edges, not cartoon lines (REALISM)
+    if (this.R) { this.outline.strength *= this.R.ink; this.outline.width *= this.R.inkWidth; this.outline.crease *= this.R.crease; }
     this.ink = new Ink(gl, quality === 'high' ? 'high' : 'medium'); // [outline9]
     this.present.userData.noInk = true; // [outline9] the world's chain must not ink this finished picture again
     const mk = () => new THREE.WebGLRenderTarget(8, 8, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
@@ -258,7 +263,8 @@ export class Look {
     u.tColor.value = this.rt.texture; depthU(this.mComp);
     u.uDof.value = g.dof;
     u.uRes.value.set(this.w, this.h); u.uFrame.value = this.frame % 1000; u.uTime.value = time;
-    u.uExposure.value = g.exposure; u.uWarm.value = g.warm; u.uSat.value = g.sat; u.uCon.value = g.contrast; u.uVig.value = g.vignette; u.uGrain.value = g.grain; u.uBloom.value = g.bloom; u.uFade.value = this.fade;
+    const R = this.R;
+    u.uExposure.value = g.exposure; u.uWarm.value = g.warm * (R ? R.warm : 1); u.uSat.value = R ? 1 + (g.sat - 1) * R.sat : g.sat; u.uCon.value = g.contrast + (R ? R.contrast : 0); u.uVig.value = g.vignette; u.uGrain.value = g.grain * (R ? R.grain : 1); u.uBloom.value = g.bloom * (R ? R.bloom : 1); u.uFade.value = this.fade;
     this.pass(this.mComp, this.ldr);
     // the overlay (Pip's words) goes on crisp, after the grade
     if (this.overlay.children.length) {

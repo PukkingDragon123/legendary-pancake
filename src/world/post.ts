@@ -79,6 +79,24 @@ export const STAGE_LOOK: Partial<Grade> = {
   outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 40,
 };
 
+/**
+ * [clock14] Natural colour. Every scene's grade (the sky-driven world grade and each stage's look) was tuned for a
+ * stylised, saturated picture: on real materials that read as a white-washed, oversaturated haze (lifted blacks, a
+ * wide bloom veil, split toning tinting everything, saturation and vibrance stacked on ACES). The composite keeps each
+ * look's intent (warmer at golden hour, cooler at night, a stage's own warmth) but at a natural strength: colour near
+ * neutral, real contrast and deep shadows, bloom only on what is really bright, black stays black, thin dark ink.
+ * Dev: `?real=0` in the URL shows the old look (A/B).
+ */
+export const REALISM = {
+  on: !(typeof location !== 'undefined' && /[?&]real=0\b/.test(location.search)),
+  /** fraction of each look's saturation / vibrance / split toning / white balance / lift that is kept */
+  sat: 0.22, vib: 0.15, split: 0.3, warm: 0.6, lift: 0.2,
+  /** added contrast round mid grey, bloom kept, bloom threshold multiplier */
+  contrast: 0.07, bloom: 0.6, thresh: 1.3,
+  /** ink: opacity, line width and crease strength multipliers (thin dark edges, not cartoon lines) */
+  ink: 0.7, inkWidth: 0.6, crease: 0.35, grain: 0.6,
+};
+
 /** Knobs a Stage may set (any subset of Grade). */
 export type Look = Partial<Omit<Grade, 'lift' | 'gamma' | 'gain' | 'focusAt'>> & { focusAt?: [number, number] };
 
@@ -377,7 +395,8 @@ export class Post {
     const g = look ? resolveLook(look, this.stageGrade) : this.grade;
     // [outline9] ink for this picture (a stage's own finished picture, e.g. the office's, opts out with userData.noInk)
     const L = this.inkLook, pr = gl.getPixelRatio();
-    L.strength = scene.userData.noInk || inkDev.mode === 'off' ? 0 : g.outline; L.width = g.outlineWidth; L.crease = g.outlineCrease; L.far = g.outlineFar;
+    const R = REALISM.on ? REALISM : null;
+    L.strength = scene.userData.noInk || inkDev.mode === 'off' ? 0 : g.outline * (R ? R.ink : 1); L.width = g.outlineWidth * (R ? R.inkWidth : 1); L.crease = g.outlineCrease * (R ? R.crease : 1); L.far = g.outlineFar;
     this.ink.frame(this.w, this.h, L, this.pixel, pr, g.exposure);
     gl.setRenderTarget(this.rt);
     gl.clear();
@@ -393,7 +412,7 @@ export class Post {
       const B = this.bloomRT;
       this.mBright.uniforms.tSrc.value = this.rt.texture;
       this.mBright.uniforms.uTexel.value.set(1 / this.w, 1 / this.h);
-      this.mBright.uniforms.uThresh.value = g.bloomThreshold;
+      this.mBright.uniforms.uThresh.value = g.bloomThreshold * (R ? R.thresh : 1);
       this.pass(this.mBright, B[0]);
       for (let i = 1; i < B.length; i++) {
         this.mDown.uniforms.tSrc.value = B[i - 1].texture;
@@ -426,9 +445,11 @@ export class Post {
     // ---- composite
     u.tColor.value = this.rt.texture;
     u.uRes.value.set(this.w, this.h); u.uFrame.value = this.frame % 1000; u.uTime.value = time;
-    u.uExposure.value = g.exposure; u.uCon.value = g.contrast; u.uSat.value = g.saturation; u.uOrange.value = g.orange; u.uVib.value = g.vibrance; u.uWarm.value = g.warm; u.uSplit.value = g.split;
-    u.uLift.value.copy(g.lift); u.uGamma.value.copy(g.gamma); u.uGain.value.copy(g.gain);
-    u.uVig.value = g.vignette; u.uGrain.value = g.grain; u.uBloom.value = g.bloom * 0.12; u.uCold.value = g.cold;
+    const nat = (v: number, k: number) => (R ? 1 + (v - 1) * k : v);
+    u.uExposure.value = g.exposure; u.uCon.value = g.contrast + (R ? R.contrast : 0); u.uSat.value = nat(g.saturation, R?.sat ?? 1); u.uOrange.value = nat(g.orange, R?.sat ?? 1);
+    u.uVib.value = g.vibrance * (R ? R.vib : 1); u.uWarm.value = g.warm * (R ? R.warm : 1); u.uSplit.value = g.split * (R ? R.split : 1);
+    u.uLift.value.copy(g.lift).multiplyScalar(R ? R.lift : 1); u.uGamma.value.copy(g.gamma); u.uGain.value.copy(g.gain);
+    u.uVig.value = g.vignette; u.uGrain.value = g.grain * (R ? R.grain : 1); u.uBloom.value = g.bloom * 0.12 * (R ? R.bloom : 1); u.uCold.value = g.cold;
     this.pass(this.mComp, null);
   }
 

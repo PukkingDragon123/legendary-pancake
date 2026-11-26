@@ -31,33 +31,35 @@ export async function bake(): Promise<{ html: string; files: Record<string, stri
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(1);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.08;
+  renderer.toneMappingExposure = 1.0;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.type = THREE.VSMShadowMap; // [clock14] soft lamp shadows (a penumbra, not a cut-out)
 
   const st = new CuckooStage({ skin: 'owl', species: 'tawny', palette: 'tawny', outfit: {} }, { finish: K.FINISHES[0].id, mute: true, wound: [Date.now(), Date.now()] }, { bare: true, plain: true });
   await st.ready;
   const S = st.scene, parts = st.parts;
 
-  // ---- light: a warm lamp up and to the left, a soft fill, a studio environment for the brass and the enamel
+  // ---- light: [clock14] a warm lamp up and to the left, raking across the case so every moulding, column and
+  // carving throws a shadow (it was nearly frontal and far too bright: the wood washed out to a milky orange in
+  // ACES's shoulder), a dim warm fill, a faint studio environment for the brass and the enamel
   const pm = new THREE.PMREMGenerator(renderer);
   const room = new RoomEnvironment();
   S.environment = pm.fromScene(room, 0.04).texture;
-  (S as unknown as { environmentIntensity: number }).environmentIntensity = 0.4;
-  const hemi = new THREE.HemisphereLight(0xfff0dc, 0x4a3022, 0.55);
-  const key = new THREE.DirectionalLight(0xffe0b8, 2.3);
-  key.position.set(-1.0, 1.6, 5.2);
-  key.target.position.set(0, 0.25, 0);
+  (S as unknown as { environmentIntensity: number }).environmentIntensity = 0.3;
+  const hemi = new THREE.HemisphereLight(0xffe6c8, 0x2a1810, 0.32);
+  const key = new THREE.DirectionalLight(0xffdcb0, 2.0);
+  key.position.set(-1.7, 2.3, 5.0);
+  key.target.position.set(0, 0.3, 0);
   key.castShadow = true;
-  key.shadow.mapSize.set(4096, 4096);
+  key.shadow.mapSize.set(2048, 2048);
   const sc = key.shadow.camera;
-  sc.left = -1.3; sc.right = 1.3; sc.top = 1.8; sc.bottom = -1.4; sc.near = 1; sc.far = 12;
-  key.shadow.bias = -0.0002; key.shadow.normalBias = 0.01; key.shadow.radius = 6;
-  const fill = new THREE.PointLight(0xffc890, 0.9, 6, 1.6);
-  fill.position.set(0.9, 0.3, 1.6);
+  sc.left = -1.4; sc.right = 1.4; sc.top = 1.8; sc.bottom = -1.6; sc.near = 1; sc.far = 12;
+  key.shadow.bias = -0.0004; key.shadow.normalBias = 0.004; key.shadow.radius = 14; key.shadow.blurSamples = 20;
+  const fill = new THREE.PointLight(0xffb878, 0.35, 6, 1.6);
+  fill.position.set(1.2, 0.2, 1.8);
   // the wall only catches shadows: the boot block paints the plain lamplit wall itself
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.36, color: 0x0a0604 }));
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(8, 8), new THREE.ShadowMaterial({ opacity: 0.55, color: 0x0a0604 }));
   wall.position.z = 0.0008;
   wall.receiveShadow = true;
   S.add(hemi, key, key.target, fill, wall);
@@ -76,9 +78,11 @@ export async function bake(): Promise<{ html: string; files: Record<string, stri
   const caseB = new THREE.Box3();
   S.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && o !== wall && (m.material as THREE.Material).visible !== false && !moving.some((p) => p === o || isIn(o, p))) caseB.expandByObject(o); });
   const loB = new THREE.Box3().setFromObject(parts.cones[0]);
-  const half = Math.max(-caseB.min.x, caseB.max.x) + 0.1;
+  const half = Math.max(-caseB.min.x, caseB.max.x) + 0.2;
   const X0 = -half, YT = caseB.max.y + 0.03, YB = Math.min(loB.min.y, P.PEND.y - P.PEND.len - 0.16) - 0.1;
   const SW = +((2 * half) * EM).toFixed(2), SH = +((YT - YB) * EM).toFixed(2);
+  /** the width the screen fits (the case and a little air; the stage's extra margin only holds the lamp's shadow) */
+  const FW = +((2 * (half - 0.1)) * EM).toFixed(2);
   const em = (m: number) => +(m * EM).toFixed(3);
   const ex = (x: number) => em(x - X0), ey = (y: number) => em(YT - y);
 
@@ -128,7 +132,7 @@ export async function bake(): Promise<{ html: string; files: Record<string, stri
   const webp = (c: HTMLCanvasElement) => c.toDataURL('image/webp', QUALITY);
 
   // ---- the case (door shut) and the door strip
-  const CB = pxBox(X0, YT, -X0, Math.max(YB, -0.42), PPM);
+  const CB = pxBox(X0, YT, -X0, Math.max(YB, -0.5), PPM);
   const pose = (door: number, out: number, bow: number, mood: 'calm' | 'happy' | 'joy') => {
     show(null);
     st.poseDoor(door, out, bow);
@@ -226,7 +230,7 @@ export async function bake(): Promise<{ html: string; files: Record<string, stri
   const dA = `url(img/boot/dial.webp) 0 0/${r2(DLE.w * 3)}em ${r2(DLE.h)}em no-repeat`;
   const bossR = em(0.016);
   const CSS = `
-#boot{--k:min(calc(88vw / ${SW}),calc(84vh / ${SH}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
+#boot{--k:min(calc(88vw / ${FW}),calc(84vh / ${SH}));font-size:var(--k);position:fixed;inset:0;z-index:99;overflow:hidden;display:flex;align-items:center;justify-content:center;
 background:radial-gradient(ellipse 120% 100% at 50% 46%,rgba(2,8,5,0) 38%,rgba(2,8,5,.42) 72%,rgba(2,8,5,.86) 100%),#143a2a;
 user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .7s}
 #boot.gone:not(.hold):not(.js){opacity:0;pointer-events:none}

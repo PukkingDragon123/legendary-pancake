@@ -52,6 +52,8 @@ const HOUSE = { w: 0.15, d: 0.12, gable: 0.055, z: 0.09, gap: 0.2 };
 const DADO = -1.47;
 /** text decals are painted near one texel per internal pixel on a phone (crisp at a glance) */
 const DECAL_PPU = 233;
+/** [clock14] metres of board per tile of the real wood scans (the grain's scale) */
+const WOOD_TILE = 0.55;
 
 export type ClockLayout = 'side' | 'top';
 export interface StatTag { id: string; label: string; value: string }
@@ -172,7 +174,8 @@ export class CuckooStage implements Stage {
     if (this.bare) {
       if (look) this.addOwl(look);
       this.setDrops(true);
-      this.ready = look ? this.owl.ready : Promise.resolve();
+      const wood = this.useRealWood();
+      this.ready = look ? Promise.all([this.owl.ready, wood]).then(() => undefined) : wood;
       return;
     }
     this.buildTags();
@@ -188,7 +191,7 @@ export class CuckooStage implements Stage {
     this.from = this.copy(this.cur); this.to = this.copy(this.cur);
     this.setDrops(true);
     this.applyLight();
-    this.ready = K.fontReady();
+    this.ready = Promise.all([K.fontReady(), this.useRealWood()]).then(() => undefined);
   }
 
   /** The owl, at home behind the door. */
@@ -256,18 +259,22 @@ export class CuckooStage implements Stage {
   private buildMaterials() {
     const f = K.finishOf(this.prefs.finish), cf = K.finishOf(carveOf(f.id));
     const std = (o: THREE.MeshStandardMaterialParameters) => new THREE.MeshStandardMaterial(o);
+    const brass = K.brassCanvases();
+    const bmap = this.keep(K.rtex(brass.map)), brough = this.keep(K.rtex(brass.rough, false));
     this.M = {
+      // [clock14] the woods start as the painted stand-ins and take the real scans (useRealWood) once loaded
       wood: std({ map: this.woodTex(f.id, -0.1), color: 0x957a6c, vertexColors: true, roughness: 0.5, envMapIntensity: 0.55 }),
       carve: std({ map: this.woodTex(cf.id, -0.08), vertexColors: true, roughness: 0.46, envMapIntensity: 0.6 }),
       leaf: std({ map: this.keep(K.ctex(K.leafCanvas(cf.ramp))), vertexColors: true, roughness: 0.48, envMapIntensity: 0.6 }),
       feather: std({ map: this.keep(K.ctex(K.featherCanvas(cf.ramp), true)), vertexColors: true, roughness: 0.5, envMapIntensity: 0.6 }),
       roof: std({ map: this.keep(K.ctex(K.shingleCanvas())), vertexColors: true, roughness: 0.82 }),
       dark: std({ color: 0x1a0e08, roughness: 0.95, side: THREE.BackSide }),
-      brass: std({ color: 0xd9ab55, metalness: 0.92, roughness: 0.28, envMapIntensity: 1.25 }),
-      brassDark: std({ color: 0xa07a36, metalness: 0.85, roughness: 0.4, envMapIntensity: 1.1 }),
-      steel: std({ color: 0x1c2440, metalness: 0.7, roughness: 0.28, envMapIntensity: 1.2 }),
+      // [clock14] brass with a patina: polished where hands touch it, a brown tarnish in blotches, duller there
+      brass: std({ map: bmap, roughnessMap: brough, color: 0xffffff, metalness: 0.95, roughness: 1, envMapIntensity: 1.2 }),
+      brassDark: std({ map: bmap, roughnessMap: brough, color: 0xb08a58, metalness: 0.9, roughness: 1, envMapIntensity: 1.05 }),
+      steel: std({ color: 0x141a30, metalness: 0.75, roughness: 0.3, envMapIntensity: 1.1 }),
       bronze: std({ color: 0x8a6a46, vertexColors: true, metalness: 0.78, roughness: 0.42, envMapIntensity: 1.1 }),
-      enamel: std({ map: this.keep(dialTex()), roughness: 0.18, envMapIntensity: 0.9 }),
+      enamel: std({ map: this.keep(dialTex()), roughness: 0.16, envMapIntensity: 0.7 }),
       glass: std({ color: 0xd77a1e, roughness: 0.08, metalness: 0.1, emissive: 0x3a1600, envMapIntensity: 1.5 }),
       linden: std({ map: this.keep(K.ctex(K.woodCanvas(K.FINISHES[3].ramp, 128, 256, 17, 0.04), true)), vertexColors: true, roughness: 0.6, envMapIntensity: 0.4 }),
       oak: std({ map: this.keep(K.ctex(K.woodCanvas(K.FINISHES[1].ramp, 128, 256, 29), true)), vertexColors: true, roughness: 0.55, envMapIntensity: 0.45 }),
@@ -284,10 +291,58 @@ export class CuckooStage implements Stage {
     this.M.roof.userData.k = 1;
   }
 
+  /** [clock14] The real wood (scans through our finishes), the aged shingles; resolves when they're on. */
+  private real: K.RealWood | null = null;
+  private bumps: THREE.Texture[] = [];
+  private useRealWood(): Promise<void> {
+    return K.realWood().then((src) => {
+      if (!src || this.dead) return;
+      this.real = src;
+      const bump = (tile: number) => (this.bumps[tile] ??= this.keep(K.rtex(K.realBumpCanvas(src, tile), false)));
+      const set = (m: THREE.Material, map: THREE.Texture, tile: number, o: { rough?: number; env?: number; bump?: number } = {}) => {
+        const s = m as THREE.MeshStandardMaterial;
+        s.map = map; s.color.setHex(0xffffff);
+        s.bumpMap = bump(tile); s.bumpScale = o.bump ?? 1.2;
+        s.roughness = o.rough ?? 0.52; s.envMapIntensity = o.env ?? 0.32;
+        s.needsUpdate = true;
+      };
+      this.realFinish(this.prefs.finish);
+      // the tags, the shelf, the boards and the dado rail (only on the Clock screen's wall)
+      if (!this.bare) {
+        set(this.M.linden, this.keep(K.rtex(K.realWoodCanvas(src, 'linden', -0.03, 512))), 1, { rough: 0.62 });
+        set(this.M.oak, this.keep(K.rtex(K.realWoodCanvas(src, 'oak', 0, 512))), 1, { rough: 0.55 });
+      }
+      set(this.M.roof, this.keep(K.rtex(K.realShingleCanvas(src))), 2, { rough: 0.86, env: 0.15, bump: 2.2 });
+    });
+  }
+  /** The case and the carvings in a finish, from the scans. */
+  private realFinish(id: string) {
+    const src = this.real;
+    if (!src) return;
+    const cid = carveOf(id);
+    const bump = (tile: number) => this.bumps[tile] ?? (this.bumps[tile] = this.keep(K.rtex(K.realBumpCanvas(src, tile), false)));
+    const put = (m: THREE.Material, c: HTMLCanvasElement, tile: number, rough: number, env: number) => {
+      const s = m as THREE.MeshStandardMaterial;
+      if (s.map && !this.bumps.includes(s.map)) { this.tex = this.tex.filter((t) => t !== s.map); s.map.dispose(); }
+      s.map = this.keep(K.rtex(c)); s.color.setHex(0xffffff);
+      s.bumpMap = bump(tile); s.bumpScale = 1.2; s.roughness = rough; s.envMapIntensity = env;
+      s.needsUpdate = true;
+    };
+    put(this.M.wood, K.realWoodCanvas(src, id, -0.02), K.REAL[id]?.tile ?? 0, 0.5, 0.3);
+    put(this.M.carve, K.realWoodCanvas(src, cid, -0.07), K.REAL[cid]?.tile ?? 1, 0.48, 0.32);
+    // the carved leaves and the crest's plumage (not on the plain clock)
+    if (!this.plain) {
+      put(this.M.leaf, K.realLeafCanvas(src, cid), 1, 0.5, 0.3);
+      put(this.M.feather, K.realFeatherCanvas(src, cid), 1, 0.52, 0.3);
+    }
+  }
+
   /** Change the wood of the case and the carvings. */
   setFinish(id: string) {
-    const f = K.finishOf(id), cf = K.finishOf(carveOf(f.id));
+    const f = K.finishOf(id);
     this.prefs.finish = f.id;
+    if (this.real) { this.realFinish(f.id); return; }
+    const cf = K.finishOf(carveOf(f.id));
     const swap = (m: THREE.Material, t: THREE.Texture) => { const s = m as THREE.MeshStandardMaterial; s.map?.dispose(); s.map = t; s.needsUpdate = true; };
     swap(this.M.wood, this.woodTex(f.id, -0.1));
     swap(this.M.carve, this.woodTex(cf.id, -0.08));
@@ -353,7 +408,7 @@ export class CuckooStage implements Stage {
       { geo: K.slab(9, 0.05, 0.03, 0.006), m: mtx(0, DADO + 0.005, 0) },
       { geo: K.slab(9, 0.018, 0.04, 0.006), m: mtx(0, DADO + 0.03, 0) },
       { geo: K.slab(9, 0.014, 0.034, 0.004), m: mtx(0, DADO - 0.022, 0) },
-    ]);
+    ], WOOD_TILE);
     K.carveShade(rail, { lo: 0.55 });
     S.add(this.mesh(rail, this.M.oak, true, true));
     // soft contact darkening behind the clock (it hangs close to the wall)
@@ -375,15 +430,15 @@ export class CuckooStage implements Stage {
     wood.push({ geo: K.slab(CW, CH, 0.02), m: mtx(0, CH / 2, CD - 0.02) });
     const frame = K.rect(CW, CH, 0, CH / 2);
     frame.holes.push(K.rectPath(CW - 0.07, CH - 0.07, 0, CH / 2));
-    carve.push({ geo: K.scaleUV(K.extrude(frame, 0.016, 0.006, 2), 4, 2), m: mtx(0, 0, CD) });
+    carve.push({ geo: K.scaleUV(K.extrude(frame, 0.016, 0.006, 2), 4, 2), m: mtx(0, 0, CD), frame: true });
     const inner = K.rect(CW - 0.1, CH - 0.1, 0, CH / 2);
     inner.holes.push(K.rectPath(CW - 0.13, CH - 0.13, 0, CH / 2));
-    carve.push({ geo: K.scaleUV(K.extrude(inner, 0.008, 0.003, 1), 4, 2), m: mtx(0, 0, CD) });
+    carve.push({ geo: K.scaleUV(K.extrude(inner, 0.008, 0.003, 1), 4, 2), m: mtx(0, 0, CD), frame: true });
     // side panels: a raised frame on each side
     for (const sx of [-1, 1]) {
       const sf = K.rect(CD - 0.02, CH, 0, CH / 2);
       sf.holes.push(K.rectPath(CD - 0.08, CH - 0.08, 0, CH / 2));
-      carve.push({ geo: K.scaleUV(K.extrude(sf, 0.01, 0.003), 4, 2), m: mtx(sx * CW / 2, 0, CD / 2 - 0.0, 0, sx * Math.PI / 2, 0) });
+      carve.push({ geo: K.scaleUV(K.extrude(sf, 0.01, 0.003), 4, 2), m: mtx(sx * CW / 2, 0, CD / 2 - 0.0, 0, sx * Math.PI / 2, 0), frame: true });
     }
     wood.push({ geo: K.slab(CW + 0.07, 0.055, CD + 0.04, 0.008), m: mtx(0, -0.0275, 0) });
     wood.push({ geo: K.slab(CW + 0.03, 0.02, CD + 0.02, 0.005), m: mtx(0, 0.008, 0) });
@@ -434,7 +489,7 @@ export class CuckooStage implements Stage {
           const col = new Float32Array(p.count * 3).fill(tone);
           g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
           // the rounded end toward the eave, tilted so each row laps over the one below
-          const m = at(Math.min(L, lx), Math.max(-D / 2 + 0.03, Math.min(D / 2 - 0.03, ly)) , ROOF_T + 0.0005).multiply(new THREE.Matrix4().makeRotationZ(Math.PI / 2)).multiply(new THREE.Matrix4().makeRotationX(-0.075)).multiply(new THREE.Matrix4().makeTranslation(0, 0, shingle.sl * 0.075));
+          const m = at(Math.max(shingle.sl + 0.004, Math.min(L, lx)), Math.max(-D / 2 + 0.03, Math.min(D / 2 - 0.03, ly)) , ROOF_T + 0.0005).multiply(new THREE.Matrix4().makeRotationZ(Math.PI / 2)).multiply(new THREE.Matrix4().makeRotationX(-0.075)).multiply(new THREE.Matrix4().makeTranslation(0, 0, shingle.sl * 0.075));
           roofParts.push({ geo: g, m });
         }
       }
@@ -518,9 +573,9 @@ export class CuckooStage implements Stage {
     const minute = handG(K.handGeo(0.215, 'minute'), CD + 0.0215);
     brass.push({ geo: K.turned([[0.0005, 0], [0.013, 0], [0.012, 0.004], [0.007, 0.008], [0.004, 0.012], [0.0005, 0.013]], 14, 20), m: mtx(0, DIAL.y, CD + 0.025, Math.PI / 2, 0, 0) });
     // ---- merge and add
-    const woodG = K.carveShade(K.merge(wood), { lo: 0.5 });
+    const woodG = K.carveShade(K.merge(wood, WOOD_TILE), { lo: 0.5 });
     // the plain clock (loading screen, office) has no carved owl crest on the roof
-    const carveG = K.carveShade(K.merge(this.plain ? carve : [...carve, { geo: crest.geo }]), { lo: 0.36 });
+    const carveG = K.carveShade(K.merge(this.plain ? carve : [...carve, { geo: crest.geo }], WOOD_TILE), { lo: 0.36 });
     S.add(this.mesh(woodG, this.M.wood), this.mesh(carveG, this.M.carve));
     if (!this.plain) S.add(this.mesh(K.carveShade(crest.feather, { lo: 0.45 }), this.M.feather));
     if (leaves.length) S.add(this.mesh(K.carveShade(K.merge(leaves), { lo: 0.22, z0: CD, z1: CD + 0.035 }), this.M.leaf));
@@ -530,7 +585,7 @@ export class CuckooStage implements Stage {
     nutG.dispose(); cupG.dispose();
     // the door: planked, with iron strap hinges and a brass knob, hinged on its left
     const door = K.scaleUV(K.extrude(K.arch(DOOR.w - 0.004, DOOR.h - 0.003, 0, 0), 0.01, 0.0025, 1, 10), 4, 2);
-    const doorM = this.mesh(K.carveShade(K.prep(door), { lo: 0.55 }), this.M.wood);
+    const doorM = this.mesh(K.carveShade(K.woodUV(K.prep(door), WOOD_TILE, 77), { lo: 0.55 }), this.M.wood);
     doorM.position.set(DOOR.w / 2, 0, 0);
     this.doorPivot.add(doorM);
     for (const y of [0.03, DOOR.h - 0.06]) {
@@ -701,7 +756,7 @@ export class CuckooStage implements Stage {
     br.quadraticCurveTo(0.05, -0.15, 0.06, -0.19); br.quadraticCurveTo(0.03, -0.2, 0, -0.17); br.closePath();
     br.holes.push(K.circlePath(0.02, 0.13, -0.035, 10));
     for (const x of [-0.5, 0.5]) parts.push({ geo: K.scaleUV(K.extrude(br, 0.03, 0.006, 2), 4, 2), m: mtx(x + 0.015, SHELF.y - SHELF.h, 0, 0, -Math.PI / 2, 0) });
-    this.scene.add(this.mesh(K.carveShade(K.merge(parts), { lo: 0.5 }), this.M.oak));
+    this.scene.add(this.mesh(K.carveShade(K.merge(parts, WOOD_TILE), { lo: 0.5 }), this.M.oak));
     // painted day labels on the shelf's front edge
     const [lc] = K.canvas(Math.round(SHELF.w * DECAL_PPU), 16);
     const ltex = this.keep(K.ctex(lc));

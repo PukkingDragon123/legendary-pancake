@@ -7,7 +7,7 @@ import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { MeshoptDecoder as MeshoptReference } from './meshopt_ref.js';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
-import { applyCelShading } from './cel.ts'; // [light7] the painted cel light (patches three's light chunks on import)
+import { applyCelShading, CEL_REAL } from './cel.ts'; // [light7] the painted cel light (patches three's light chunks on import)
 
 // The artifact host shows the game in a locked-down frame: it doesn't serve .glb, and it may refuse
 // fetches of data:/blob: URLs and WebAssembly compilation. So the artifact build ships each model as
@@ -90,7 +90,7 @@ function tune(root: THREE.Object3D, o: { shadows: boolean; rim?: number }) {
       const metal = !!mat.metalnessMap || (mat.metalness ?? 0) > 0.5;
       if ('roughness' in mat) mat.roughness = Math.max(mat.roughness ?? 1, metal ? 0.22 : 0.32);
       if ('metalness' in mat && !mat.metalnessMap) mat.metalness = Math.min(mat.metalness ?? 0, 0.85);
-      if (mat.aoMap) mat.aoMapIntensity = Math.min(mat.aoMapIntensity ?? 1, 0.6);
+      if (mat.aoMap) mat.aoMapIntensity = Math.min(mat.aoMapIntensity ?? 1, CEL_REAL.on ? 1 : 0.6); // [clock14] real contact darkness
       if (o.rim !== undefined) applyCelShading(mat, { rim: o.rim });
     }
   });
@@ -119,7 +119,7 @@ export function vivid(root: THREE.Object3D, k = 0.32) {
   float vl = dot(vc, vec3(0.2126, 0.7152, 0.0722));
   float vmx = max(vc.r, max(vc.g, vc.b)), vmn = min(vc.r, min(vc.g, vc.b));
   float vs = (vmx - vmn) / max(vmx, 1e-4);
-  diffuseColor.rgb = max(mix(vec3(vl), vc, 1.0 + ${(k * 0.6).toFixed(3)} * (1.0 - vs) * smoothstep(0.004, 0.04, vl)), 0.0);
+  diffuseColor.rgb = max(mix(vec3(vl), vc, 1.0 + ${(k * (CEL_REAL.on ? 0.1 : 0.6)).toFixed(3)} * (1.0 - vs) * smoothstep(0.004, 0.04, vl)), 0.0);
 }`);
       };
       const key = mat.customProgramCacheKey?.bind(mat);

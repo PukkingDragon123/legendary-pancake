@@ -18,7 +18,7 @@ import { Look } from './look.ts';
 import { celKnobs } from '../gfx/cel.ts';
 import { smoothMaterials } from '../gfx/surface.ts';
 import { officeMats, type OfficeMats } from './mats.ts';
-import { buildCabinets, buildCredenza, buildDesk, buildRoom, buildShelves, buildWindow, certificate, DESK_TOP, frame, L, spineAtlas, type WindowParts } from './furnish.ts';
+import { buildCabinets, buildCredenza, buildDesk, buildRoom, buildShelves, buildWindow, certificate, DESK_TOP, frame, L, type WindowParts } from './furnish.ts';
 import { bankersLamp, carafeSet, DESK, fountainPen, folder, inkPad, nameplate, paperwork, pottedFig, rubberStamp, sconce, type Lamp } from './desk.ts';
 import { loadGLB } from '../gfx/glb.ts';
 import { WallClock } from './wallclock.ts';
@@ -216,7 +216,7 @@ export class Office implements Stage {
     s.add(this.win.group);
     this.addShafts();
     await idle();
-    s.add(buildShelves(m, spineAtlas()));
+    s.add(buildShelves(m));
     await idle();
     const desk = buildDesk(m);
     desk.position.set(L.desk.x, 0, L.desk.z);

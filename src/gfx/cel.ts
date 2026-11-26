@@ -64,6 +64,8 @@ export const CEL_REF = {
 } as const;
 
 const FNS = /* glsl */ `
+#define HH_GLINT_K ${(typeof location !== 'undefined' && /[?&]real=0\b/.test(location.search)) ? '1.0' : '0.3'}
+#define HH_SHADE_SAT ${(typeof location !== 'undefined' && /[?&]real=0\b/.test(location.search)) ? '0.3' : '0.05'}
 #ifndef HH_NOCEL
 #define HH_CEL
 #endif
@@ -121,7 +123,7 @@ vec3 celGlint( const in vec3 spec, const in vec3 n, const in vec3 v, const in ve
   float a2 = pow2( pow2( rough ) );
   float nh = saturate( dot( n, normalize( l + v ) ) );
   float dn = pow2( a2 / ( nh * nh * ( a2 - 1.0 ) + 1.0 ) );
-  float k = ( 1.0 - smoothstep( 0.42, 0.72, rough ) ) * HH_CEL_GLINT * step( 0.001, hhCel.w );
+  float k = ( 1.0 - smoothstep( 0.42, 0.72, rough ) ) * HH_CEL_GLINT * step( 0.001, hhCel.w ) * HH_GLINT_K;
   return mix( spec, spec * smoothstep( 0.26, 0.4, dn ) * 1.4, k );
 }
 #ifdef HH_CEL_RIM
@@ -163,14 +165,28 @@ export interface CelKnobs {
   orange: number;
 }
 const defaults = (): CelKnobs => ({ fill: 1, rim: 1, lampBands: 0.6, keyBands: 1, tint: new THREE.Color(0.32, 0.25, 0.44), spotKey: 0, vibrance: 0.3, saturation: 1.08, orange: 0.96 }); // [look12] a gentler cool fill in the shadows
+/**
+ * [clock14] Realistic light. The scenes keep their knobs (a stage may still ask for more or less), but the light is
+ * pushed most of the way back to physically based shading: the bands are a gentle hint of a painter's turning edge
+ * instead of cel steps, the coloured shadow fill is a faint cool bounce (no violet cast), the painted colour is kept as
+ * painted (no saturation or vibrance on the albedo), glints are a real GGX sheen and rims a whisper. `?real=0`: the old
+ * look (A/B), as post.ts's REALISM.
+ */
+export const CEL_REAL = {
+  on: !(typeof location !== 'undefined' && /[?&]real=0\b/.test(location.search)),
+  bands: 0.22, fill: 0.35, rim: 0.4, albedo: 0.15, glint: 0.3,
+};
 const DEFAULT = defaults();
 const LIVE = { x: 1, y: 1, z: 0.6, w: 1 };
 const TINT = { x: 0.32, y: 0.25, z: 0.44, w: 0 };
 const ALBEDO = { x: 0.3, y: 1.08, z: 0.96, w: 0 }; // [look12]
 function push(k: CelKnobs) {
-  LIVE.x = k.fill * 0.4; LIVE.y = k.rim; LIVE.z = k.lampBands; LIVE.w = k.keyBands;
-  TINT.x = k.tint.r; TINT.y = k.tint.g; TINT.z = k.tint.b; TINT.w = k.spotKey;
-  ALBEDO.x = k.vibrance; ALBEDO.y = k.saturation; ALBEDO.z = k.orange;
+  const R = CEL_REAL.on ? CEL_REAL : null, nat = (v: number) => (R ? 1 + (v - 1) * R.albedo : v);
+  LIVE.x = k.fill * 0.4 * (R ? R.fill : 1); LIVE.y = k.rim * (R ? R.rim : 1); LIVE.z = k.lampBands * (R ? R.bands : 1); LIVE.w = Math.max(k.keyBands * (R ? R.bands : 1), k.keyBands > 0 ? 0.002 : 0);
+  // the shadow fill's hue: towards a neutral cool grey-blue (no violet)
+  const t = R ? 0.6 : 0, g = (k.tint.r + k.tint.g + k.tint.b) / 3;
+  TINT.x = k.tint.r + (g * 0.92 - k.tint.r) * t; TINT.y = k.tint.g + (g * 0.98 - k.tint.g) * t; TINT.z = k.tint.b + (g * 1.12 - k.tint.b) * t; TINT.w = k.spotKey;
+  ALBEDO.x = k.vibrance * (R ? R.albedo : 1); ALBEDO.y = nat(k.saturation); ALBEDO.z = nat(k.orange);
 }
 push(DEFAULT);
 const sceneKnobs = new WeakMap<THREE.Scene, CelKnobs>();
@@ -276,7 +292,7 @@ export function installCel(): void {
 	{
 		vec3 celD = reflectedLight.indirectDiffuse;
 		float celL = dot( celD, vec3( 0.2126, 0.7152, 0.0722 ) );
-		reflectedLight.indirectDiffuse = max( mix( vec3( celL ), celD, 1.0 + 0.3 * HH_CEL_SHADE * step( 0.001, hhCel.w ) ), 0.0 );
+		reflectedLight.indirectDiffuse = max( mix( vec3( celL ), celD, 1.0 + HH_SHADE_SAT * HH_CEL_SHADE * step( 0.001, hhCel.w ) ), 0.0 );
 	}
 #endif
 `;
