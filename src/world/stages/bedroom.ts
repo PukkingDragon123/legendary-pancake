@@ -16,8 +16,9 @@ import { sceneSound, sound } from '../../audio/sound.ts';
 import { OwlActor, type OwlFx } from '../../owl/actor.ts';
 import { featherColour, type OwlLook } from '../../owl/model.ts';
 import { at, Batch, bbox, cyl, lathe } from '../../onboard/kit.ts';
-import { officeMats, type OfficeMats } from '../../onboard/mats.ts';
-import { C, ramp, rgb, Tex, vnoise, fbm, hash, wood } from '../../onboard/tex.ts';
+import type { OfficeMats } from '../../onboard/mats.ts';
+import { ramp, rgb, Tex, vnoise, fbm, hash } from '../../onboard/tex.ts';
+import { texCanvas, type TexName } from '../../ui/real/tex.ts';
 import { Fx, SPR } from '../fx.ts';
 import type { Look } from '../post.ts';
 import type { Stage } from '../scene.ts';
@@ -71,20 +72,33 @@ function canvasTex(w: number, h: number, paint: (g: CanvasRenderingContext2D) =>
   return t;
 }
 
-/** wide oak floorboards: 512 px = 2 m, six boards across, staggered butt joints */
+/** a photo material tile (src/ui/real/tex: scanned walnut, oak, linen, velvet...) as a repeating texture */
+function photo(n: TexName, tint?: string, rep = 2): THREE.Texture | null {
+  const c = texCanvas(n, tint);
+  if (!c) return null;
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.repeat.set(rep, rep);
+  return t;
+}
+/** wide oak floorboards from the scanned oak: 1024 px = 2 m, six boards across, staggered butt joints, nails */
 function boardsTex(): THREE.Texture {
-  const N = 512, t = new Tex(N, N), bw = N / 6;
-  for (let i = 0; i < 6; i++) {
-    const x0 = Math.round(i * bw), w = Math.round((i + 1) * bw) - x0;
-    wood(t, x0, 0, w, N, { ramp: C.oak, seed: 30 + i, dir: 'v', base: 0.42 + hash(i, 1, 5) * 0.2, contrast: 0.85, scale: 1.4, knots: true });
-    const joint = Math.floor(hash(i, 2, 7) * N);
-    for (let x = x0; x < x0 + w; x++) { t.shade(x, joint, 0.45); t.shade(x, (joint + 1) % N, 0.8); }
-    for (let y = 0; y < N; y++) { t.shade(x0, y, 0.42); t.shade(x0 + 1, y, 0.75); t.shade(x0 + w - 1, y, 1.08); }
-    // two nails at each joint
-    for (const nx of [x0 + 7, x0 + w - 8]) { t.set(nx, (joint + 6) % N, rgb(0x2a2018)); t.set(nx, (joint - 6 + N) % N, rgb(0x2a2018)); }
-  }
-  const x = t.texture({ repeat: true, q: 64 });
-  return x;
+  return canvasTex(1024, 1024, (g) => {
+    const oak = texCanvas('oak');
+    const bw = 1024 / 6;
+    for (let i = 0; i < 6; i++) {
+      const x0 = Math.round(i * bw), w = Math.round((i + 1) * bw) - x0, joint = Math.floor(hash(i, 2, 7) * 1024);
+      for (const [y0, h] of [[joint - 1024, 1024], [joint, 1024]] as [number, number][]) {
+        g.save(); g.beginPath(); g.rect(x0, y0, w, h); g.clip();
+        if (oak) { g.translate(x0 + w / 2, y0 + h / 2); g.rotate(Math.PI / 2); g.drawImage(oak, -h / 2 - hash(i, y0, 3) * 200, -w / 2 - hash(i, 4, y0) * 300, 1024, 512); }
+        else { g.fillStyle = '#a8763e'; g.fillRect(x0, y0, w, h); }
+        g.restore();
+        g.fillStyle = `rgba(${hash(i, y0, 9) > 0.5 ? '255,230,190' : '40,20,6'},${0.04 + hash(i, y0, 8) * 0.08})`; g.fillRect(x0, y0, w, h);
+      }
+      g.fillStyle = 'rgba(20,10,4,.75)'; g.fillRect(x0, 0, 2, 1024); g.fillStyle = 'rgba(255,235,200,.12)'; g.fillRect(x0 + 2, 0, 1, 1024);
+      g.fillStyle = 'rgba(20,10,4,.7)'; g.fillRect(x0, joint, w, 2);
+      g.fillStyle = '#2a2018'; for (const nx of [x0 + 14, x0 + w - 16]) { g.beginPath(); g.arc(nx, (joint + 12) % 1024, 2.2, 0, 7); g.arc(nx, (joint - 12 + 1024) % 1024, 2.2, 0, 7); g.fill(); }
+    }
+  }, true);
 }
 
 /** warm limewash plaster with soft trowel marks */
@@ -101,9 +115,9 @@ function plasterTex(): THREE.Texture {
 
 /** a hand-stitched patchwork quilt: squares of faded indigo, cream, rust and sage with tiny stars, quilting lines */
 function quiltTex(): THREE.Texture {
-  return canvasTex(1024, 1024, (g) => {
+  return canvasTex(512, 512, (g) => {
     const cols = ['#2f4a78', '#e9dcc0', '#a8553a', '#6f8a6a', '#3d5f8f', '#d9b98a', '#8a3f36', '#c8cfb6'];
-    const n = 8, s = 1024 / n;
+    const n = 8, s = 512 / n;
     for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
       const c = cols[(x * 3 + y * 5 + ((x * y) % 3)) % cols.length];
       g.fillStyle = c; g.fillRect(x * s, y * s, s, s);
@@ -111,20 +125,19 @@ function quiltTex(): THREE.Texture {
       g.save(); g.beginPath(); g.rect(x * s, y * s, s, s); g.clip();
       const kind = (x + y * 2) % 4;
       g.fillStyle = (x + y) % 2 ? 'rgba(255,248,230,.22)' : 'rgba(20,16,30,.16)';
-      if (kind === 0) for (let i = 0; i < 16; i++) { g.beginPath(); g.arc(x * s + ((i % 4) + 0.5) * s / 4, y * s + (Math.floor(i / 4) + 0.5) * s / 4, 4, 0, 7); g.fill(); }
-      if (kind === 1) for (let i = 0; i < 5; i++) star(g, x * s + 20 + ((i * 47) % (s - 40)), y * s + 22 + ((i * 71) % (s - 44)), 9);
+      if (kind === 0) for (let i = 0; i < 16; i++) { g.beginPath(); g.arc(x * s + ((i % 4) + 0.5) * s / 4, y * s + (Math.floor(i / 4) + 0.5) * s / 4, 2, 0, 7); g.fill(); }
+      if (kind === 1) for (let i = 0; i < 5; i++) star(g, x * s + 10 + ((i * 23) % (s - 20)), y * s + 11 + ((i * 35) % (s - 22)), 5);
       if (kind === 2) for (let i = 0; i < 8; i++) g.fillRect(x * s + i * s / 8, y * s, s / 16, s);
-      if (kind === 3) { g.beginPath(); g.arc(x * s + s / 2, y * s + s / 2, s * 0.28, 0, 7); g.lineWidth = 6; g.strokeStyle = g.fillStyle as string; g.stroke(); }
+      if (kind === 3) { g.beginPath(); g.arc(x * s + s / 2, y * s + s / 2, s * 0.28, 0, 7); g.lineWidth = 3; g.strokeStyle = g.fillStyle as string; g.stroke(); }
       g.restore();
       // seams: a dark crease and a running stitch
       g.fillStyle = 'rgba(30,20,20,.35)'; g.fillRect(x * s, y * s, s, 2); g.fillRect(x * s, y * s, 2, s);
-      g.setLineDash([7, 6]); g.strokeStyle = 'rgba(250,240,215,.55)'; g.lineWidth = 1.6;
-      g.strokeRect(x * s + 9, y * s + 9, s - 18, s - 18); g.setLineDash([]);
+      g.setLineDash([4, 3]); g.strokeStyle = 'rgba(250,240,215,.55)'; g.lineWidth = 1;
+      g.strokeRect(x * s + 5, y * s + 5, s - 10, s - 10); g.setLineDash([]);
     }
-    // fabric weave noise
-    const img = g.getImageData(0, 0, 1024, 1024), d = img.data;
-    for (let i = 0; i < d.length; i += 4) { const k = 1 + (Math.random() - 0.5) * 0.08 + (((i >> 2) & 1) ? 0.02 : -0.02); d[i] *= k; d[i + 1] *= k; d[i + 2] *= k; }
-    g.putImageData(img, 0, 0);
+    // the cotton's weave over it all
+    const lin = texCanvas('linen', '#808080');
+    if (lin) { g.globalCompositeOperation = 'overlay'; g.globalAlpha = 0.5; g.drawImage(lin, 0, 0, 512, 512); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
   });
 }
 function star(g: CanvasRenderingContext2D, x: number, y: number, r: number) {
@@ -134,14 +147,12 @@ function star(g: CanvasRenderingContext2D, x: number, y: number, r: number) {
 }
 /** soft linen with a fine weave */
 function linenTex(base: string): THREE.Texture {
-  return canvasTex(256, 256, (g) => {
-    g.fillStyle = base; g.fillRect(0, 0, 256, 256);
-    for (let y = 0; y < 256; y += 2) { g.fillStyle = `rgba(255,255,255,${0.03 + Math.random() * 0.04})`; g.fillRect(0, y, 256, 1); }
-    for (let x = 0; x < 256; x += 2) { g.fillStyle = `rgba(0,0,0,${0.02 + Math.random() * 0.03})`; g.fillRect(x, 0, 1, 256); }
-  }, true);
+  return photo('linen', base, 3) ?? canvasTex(64, 64, (g) => { g.fillStyle = base; g.fillRect(0, 0, 64, 64); }, true);
 }
 /** deep velvet: vertical pile with a sheen */
 function velvetTex(): THREE.Texture {
+  const v = photo('velvet', '#28306a', 2);
+  if (v) return v;
   return canvasTex(256, 256, (g) => {
     const gr = g.createLinearGradient(0, 0, 256, 0);
     gr.addColorStop(0, '#1d2350'); gr.addColorStop(0.5, '#2b3470'); gr.addColorStop(1, '#1d2350');
@@ -190,7 +201,54 @@ function labelTex(): THREE.Texture {
 }
 
 // painted once per session and kept: reopening the bedroom is instant
-let MATS: OfficeMats | null = null;
+type BedMats = Pick<OfficeMats, 'walnut' | 'oak' | 'brass' | 'chrome' | 'blackLacquer' | 'mahoganyDark' | 'felt' | 'chairPlain' | 'soil' | 'rug' | 'glass' | 'gilt' | 'deskLeather' | 'ceramic'>;
+let MATS: BedMats | null = null;
+/** an oriental rug: a madder field, an indigo medallion, a rosette border, drawn in a few dozen strokes */
+function rugTex(): THREE.Texture {
+  return canvasTex(768, 512, (g) => {
+    const W = 768, H = 512;
+    g.fillStyle = '#6e1c18'; g.fillRect(0, 0, W, H);
+    const band = (i: number, c: string) => { g.fillStyle = c; g.fillRect(i, i, W - 2 * i, H - 2 * i); };
+    band(0, '#c8b894'); band(6, '#2a120c'); band(10, '#842a22'); band(20, '#c8b894'); band(24, '#1d2350'); band(70, '#2a120c'); band(74, '#a47e3a'); band(80, '#6e1c18');
+    // rosettes round the border
+    for (let x = 48; x < W - 30; x += 46) for (const y of [47, H - 47]) { g.fillStyle = '#c8b894'; g.beginPath(); g.arc(x, y, 12, 0, 7); g.fill(); g.fillStyle = '#842a22'; g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); }
+    for (let y = 94; y < H - 60; y += 46) for (const x of [47, W - 47]) { g.fillStyle = '#c8b894'; g.beginPath(); g.arc(x, y, 12, 0, 7); g.fill(); g.fillStyle = '#842a22'; g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); }
+    // a lattice of small flowers over the field
+    g.fillStyle = 'rgba(200,184,148,.55)';
+    for (let y = 100; y < H - 90; y += 28) for (let x = 100 + ((y / 28) % 2) * 14; x < W - 90; x += 28) { g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill(); }
+    // the medallion
+    g.save(); g.translate(W / 2, H / 2);
+    for (const [r, c] of [[150, '#2a120c'], [144, '#1d2350'], [110, '#a47e3a'], [104, '#6e1c18'], [60, '#c8b894'], [52, '#1d2350'], [18, '#a47e3a']] as [number, string][]) {
+      g.fillStyle = c; g.beginPath(); g.moveTo(-r * 1.4, 0); g.lineTo(0, -r * 0.8); g.lineTo(r * 1.4, 0); g.lineTo(0, r * 0.8); g.closePath(); g.fill();
+    }
+    g.restore();
+    // the weave: wool knots and a soft wear in the middle
+    const lin = texCanvas('felt', '#808080');
+    if (lin) { g.globalCompositeOperation = 'overlay'; g.globalAlpha = 0.6; for (let x = 0; x < W; x += 256) for (let y = 0; y < H; y += 256) g.drawImage(lin, x, y, 256, 256); g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'; }
+    const wear = g.createRadialGradient(W / 2, H / 2, 20, W / 2, H / 2, W * 0.5); wear.addColorStop(0, 'rgba(255,240,220,.1)'); wear.addColorStop(1, 'rgba(0,0,0,.12)');
+    g.fillStyle = wear; g.fillRect(0, 0, W, H);
+  });
+}
+function bedMats(): BedMats {
+  const std = (o: THREE.MeshStandardMaterialParameters) => new THREE.MeshStandardMaterial({ roughness: 0.7, metalness: 0, ...o });
+  const wood = (n: TexName, tint: string | undefined, rough: number, fallback: number) => { const t = photo(n, tint, 2); return std({ map: t ?? undefined, color: t ? 0xffffff : fallback, roughness: rough }); };
+  return {
+    walnut: wood('walnut', undefined, 0.48, 0x5a3a22),
+    oak: wood('oak', undefined, 0.55, 0xa8763e),
+    mahoganyDark: wood('walnut', '#7a3a2a', 0.5, 0x4a1e14),
+    felt: std({ map: photo('felt', '#2c5a40', 2) ?? undefined, roughness: 1 }),
+    chairPlain: std({ map: photo('leather', '#8a2e22', 2) ?? undefined, roughness: 0.5 }),
+    deskLeather: std({ map: photo('leather', '#2e5a3a', 2) ?? undefined, roughness: 0.5 }),
+    brass: std({ color: 0xd9ae58, metalness: 0.9, roughness: 0.3, map: photo('brushed', '#d9b060', 2) ?? undefined }),
+    gilt: std({ color: 0xd9ab4a, metalness: 0.9, roughness: 0.35 }),
+    chrome: std({ color: 0xd8dde2, metalness: 1, roughness: 0.2 }),
+    blackLacquer: std({ color: 0x14110f, roughness: 0.18, metalness: 0.1 }),
+    ceramic: std({ color: 0x3e6e8a, roughness: 0.25 }),
+    soil: std({ color: 0x2e1f12, roughness: 1 }),
+    rug: std({ map: rugTex(), roughness: 1 }),
+    glass: new THREE.MeshPhysicalMaterial({ color: 0xe8f2ee, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.16, specularIntensity: 1, envMapIntensity: 1.4, depthWrite: false }),
+  } as unknown as BedMats;
+}
 const TEX: Record<string, THREE.Texture> = {};
 const once = (k: string, f: () => THREE.Texture) => (TEX[k] ??= f());
 
@@ -209,7 +267,7 @@ export class BedroomStage implements Stage {
   /** the pointer is over a hotspot (or not) */
   onHover: (id: Hot | null) => void = () => {};
 
-  private m: OfficeMats;
+  private m: BedMats;
   private fx = new Fx(900);
   private pmrem: THREE.PMREMGenerator | null = null;
   private disposers: (() => void)[] = [];
@@ -276,7 +334,7 @@ export class BedroomStage implements Stage {
     this.quality = quality;
     const s = this.scene;
     s.background = new THREE.Color(0x0d0a12);
-    this.m = MATS ??= officeMats();
+    this.m = MATS ??= bedMats();
     try {
       this.pmrem = new THREE.PMREMGenerator(renderer);
       const env = this.pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -330,9 +388,10 @@ export class BedroomStage implements Stage {
     // each piece on its own: one that fails never keeps the rest of the room (or its controls) away
     const steps: [string, () => void][] = [['shell', () => this.buildShell()], ['window', () => this.buildWindow()], ['bed', () => this.buildBed()], ['nightstand', () => this.buildNightstand()],
       ['cabinet', () => this.buildCabinet()], ['globe', () => this.buildGlobe()], ['decor', () => this.buildDecor()], ['phone', () => this.buildPhoneBed()], ['hotspots', () => this.hotspots()]];
+    // one yield so the veil is up, then the whole room in one go (the painting is light now: photo tiles)
+    await idle();
     for (const [name, f] of steps) {
       try { f(); } catch (e) { console.error('bedroom: ' + name + ' failed', e); }
-      await idle();
     }
     // the room's own studio light for metal and glass, refreshed for the shadows
     this.scene.traverse((o) => { const me = o as THREE.Mesh; if (me.isMesh && me.userData.noShadow !== true) { me.castShadow = me.castShadow ?? true; me.receiveShadow = true; } });

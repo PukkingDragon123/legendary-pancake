@@ -345,6 +345,7 @@ export class FlightStage implements Stage {
   // Pip
   private pip: OwlActor;
   private lantern: THREE.PointLight;
+  private camFill: THREE.DirectionalLight;
   private lanternGlow: THREE.Mesh;
   private pos = V(0, 24, 0);
   private speed = 13;
@@ -405,8 +406,12 @@ export class FlightStage implements Stage {
     key.position.copy(this.moonDir).multiplyScalar(10);
     key.target = this.pip.node;
     s.add(key);
-    const fill = new THREE.HemisphereLight(0x4a5a90, 0x0c140f, 0.9);
+    const fill = new THREE.HemisphereLight(0x5a6aa8, 0x0c140f, 1.1);
     s.add(fill);
+    // a soft cool light from our side, so his back, wings and pack read against the dark woods
+    this.camFill = new THREE.DirectionalLight(0x9aa8e8, 1.5);
+    this.camFill.target = this.pip.node;
+    s.add(this.camFill);
     this.lantern = new THREE.PointLight(0xffb060, 0.5, 1.6, 2);
     s.add(this.lantern);
     this.lanternGlow = new THREE.Mesh(new THREE.SphereGeometry(0.022, 12, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 3.4, 1.2) }));
@@ -629,6 +634,7 @@ export class FlightStage implements Stage {
     cam.lookAt(look);
     cam.rotation.z += this.bank * 0.25;
     cam.updateMatrixWorld();
+    this.camFill.position.copy(cam.position).add(V(0, 2.5, 0));
     this.u.uCam.value.copy(cam.position);
     // the sky and its things follow the camera
     this.sky.position.copy(cam.position);

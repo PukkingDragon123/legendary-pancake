@@ -250,3 +250,6 @@
 .hh-tkt-area { white-space: nowrap; overflow: hidden; }
 /* [font6] on big screens the ticket grows with the art pixel so its lines stay whole */
 @media (min-width: 900px) { .hh-ticket { width: max(380px, calc(var(--t1) * 17)); } }
+
+/* the tools slide away under full-screen places: their "New" ribbon and badges go with them instead of peeking in at the edge */
+.hh-tools.away .hh-new, .hh-tools.away .hh-badge { opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s; }

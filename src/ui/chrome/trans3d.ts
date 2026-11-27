@@ -409,3 +409,4 @@ export function hold3D(kind: Kind3D) { const tr = get(); if (tr) { tr.show(true)
 export function hide3D() { runner?.show(false); }
 /** dev: one still frame */
 export function preview3D(kind: Kind3D, T: number) { const tr = get(); if (tr) { tr.show(true); tr.draw(kind, T, performance.now() / 1000, 0.02); } }
+if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { hhTrans: unknown }).hhTrans = { preview: preview3D, hide: hide3D };
