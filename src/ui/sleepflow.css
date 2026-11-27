@@ -124,7 +124,8 @@
 
 /* ---- the globe: pins on the planet, the place cards */
 .bd-pins { position: absolute; inset: 0; pointer-events: none; }
-.bd-pin { position: absolute; left: 0; top: 0; pointer-events: auto; display: none; }
+.bd-pin { position: absolute; left: 0; top: 0; pointer-events: auto; opacity: 0; width: 1px; height: 1px; }
+.bd-pin::before { content: ''; position: absolute; left: -16px; top: -16px; width: 32px; height: 32px; } /* a comfortable tap target */
 .bd-pin i { position: absolute; left: -6px; top: -6px; width: 12px; height: 12px; border-radius: 50%; background: var(--c, #e3bd72); border: 2px solid #fff6dd; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.25), 0 0 12px var(--c, #e3bd72); transition: transform 0.2s var(--pop); }
 .bd-pin span { position: absolute; left: 10px; top: -10px; white-space: nowrap; font-size: 12px; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: rgba(10, 12, 26, 0.72); color: #f4e9d2; opacity: 0; transition: opacity 0.2s; }
 .bd-pin:hover span, .bd-pin.sel span { opacity: 1; }

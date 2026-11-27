@@ -13,7 +13,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { BreathSession, PATTERN, type Phase } from '../breathe/session.ts';
 import { AREA, AREAS, type Area } from '../game/catalog.ts';
-import { blockStatus, demoTonight, setRoutine, startNight, syncReminders, tonight } from '../game/night.ts';
+import { blockStatus, demoTonight, setPhoneLock, setRoutine, startNight, syncReminders, tonight } from '../game/night.ts';
 import { DAY_NAME, setNight, toMin } from '../game/routine.ts';
 import { areaOpen, dayKey, edit, save } from '../game/store.ts';
 import { homeGuess } from '../world/globe/earth.ts';
@@ -177,6 +177,7 @@ export function SleepScreen() {
     await wait(80);
     caption('Pip tucks your phone into bed…', 'No more scrolling tonight.');
     await st.playLock();
+    lockedRef.current = true;
     const wakeTxt = plan.on ? fmtHM(plan.wake, h12) : 'morning';
     caption(`Locked until ${wakeTxt}.`, blockStatus.value ? 'The bedtime blocker is on guard too.' : 'Pip keeps the key.');
     await wait(1500);
@@ -188,11 +189,18 @@ export function SleepScreen() {
     await transition('clouds', () => { setStep('globe'); setCap(null); });
   }
 
+  const started = useRef(false);
+  /** the phone was put to bed and padlocked on the way */
+  const lockedRef = useRef(false);
   async function startTheNight() {
+    if (started.current) return;
+    started.current = true;
     setStep('arrive');
     const sc2 = sceneRef.current;
     try { sc2?.placeOwl('away'); } catch { /* */ }
     await startNight({ alarm: true });
+    // the padlock was real: the night screen stays locked (and the blocker blocks) until the alarm
+    if (lockedRef.current) setPhoneLock(true);
     panel.value = null;
   }
 
@@ -463,6 +471,8 @@ function Flight(p: { onArrive: () => void; arriving: boolean }) {
     return () => { cancelAnimationFrame(raf); clearInterval(qt); sound.music(null); if (sc && st && sc.stage === st) sc.setStage(null); };
   }, []);
 
+  // if you have dozed off by the time he lands, the night starts by itself
+  useEffect(() => { if (!done) return undefined; const id = setTimeout(() => p.onArrive(), 9000); return () => clearTimeout(id); }, [done]);
   const r = REFLECT[q % REFLECT.length];
   const mm = Math.floor(left / 60), ss = String(left % 60).padStart(2, '0');
   return (
@@ -489,7 +499,7 @@ function Flight(p: { onArrive: () => void; arriving: boolean }) {
       {done && <div class="bd-arrive">
         <span class="bd-kicker">You’ve arrived</span>
         <h1>{a?.title ?? 'The woods'}</h1>
-        <p>Pip will explore while you sleep, and be home with treasures by morning.</p>
+        <p>Pip will explore while you sleep, and be home with treasures by morning. The night starts in a moment.</p>
         <button class="bd-go" onClick={() => { tap('ui_confirm', 0.5); p.onArrive(); }} disabled={p.arriving}>
           <span class="bd-go-moon" aria-hidden="true" />
           <span class="bd-go-txt"><b>Goodnight</b><small>Start the night</small></span>

@@ -151,8 +151,8 @@ void main(){
   vec3 r = reflect(v, n);
   float fres = 0.04 + 0.96 * pow(1.0 - max(dot(-v, n), 0.0), 5.0);
   vec3 sky = mix(uFog * 0.8, uFogMoon, pow(max(dot(r, uMoonDir), 0.0), 4.0));
-  float spec = pow(max(dot(r, uMoonDir), 0.0), 220.0) * 7.0 + pow(max(dot(r, uMoonDir), 0.0), 30.0) * 0.5;
-  vec3 c = vec3(0.01, 0.02, 0.04) + sky * (0.35 + fres * 0.65) + uMoonCol * spec;
+  float spec = pow(max(dot(r, uMoonDir), 0.0), 400.0) * 4.0 + pow(max(dot(r, uMoonDir), 0.0), 40.0) * 0.18;
+  vec3 c = vec3(0.006, 0.012, 0.03) + sky * (0.15 + fres * 0.45) + uMoonCol * spec;
   gl_FragColor = vec4(fogged(c, vW), 1.0);
 }`;
 
@@ -207,32 +207,44 @@ function firGeo(): THREE.BufferGeometry {
     const p = g.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < p.count; i++) { const yy = p.getY(i); if (yy < -h / 2 + 0.01) { p.setY(i, yy - 0.04); } p.setX(i, p.getX(i) * (1 + (h2(i, y) - 0.5) * 0.25)); p.setZ(i, p.getZ(i) * (1 + (h2(y, i) - 0.5) * 0.25)); }
     g.translate(0, y + h / 2, 0);
+    g.computeVertexNormals();
+    // soften: lean every normal up a little so the tiers read as soft boughs, not paper cones
+    const nn = g.attributes.normal as THREE.BufferAttribute;
+    for (let i = 0; i < nn.count; i++) { const v = V(nn.getX(i), nn.getY(i) + 0.35, nn.getZ(i)).normalize(); nn.setXYZ(i, v.x, v.y, v.z); }
     parts.push(g);
   }
   const trunk = new THREE.CylinderGeometry(0.03, 0.045, 0.2, 5); trunk.translate(0, 0.08, 0);
   parts.push(trunk);
-  const geo = mergeAll(parts);
-  geo.computeVertexNormals();
-  return geo;
+  return mergeAll(parts);
 }
 /** a round broadleaf crown: a lumpy ball on a trunk (unit height) */
 function crownGeo(): THREE.BufferGeometry {
-  const g = new THREE.IcosahedronGeometry(0.36, 1);
+  const g = new THREE.IcosahedronGeometry(0.36, 2);
   const p = g.attributes.position as THREE.BufferAttribute;
-  for (let i = 0; i < p.count; i++) { const v = V(p.getX(i), p.getY(i), p.getZ(i)); const k = 1 + (vn(v.x * 6 + 3, v.y * 6 + v.z * 4) - 0.5) * 0.35; v.multiplyScalar(k); v.y *= 0.85; p.setXYZ(i, v.x, v.y + 0.6, v.z); }
+  const nrm = new Float32Array(p.count * 3);
+  for (let i = 0; i < p.count; i++) {
+    const v = V(p.getX(i), p.getY(i), p.getZ(i));
+    // smooth, rounded shading (the radial direction), with a lumpy silhouette
+    const d = v.clone().normalize();
+    nrm.set([d.x, d.y, d.z], i * 3);
+    const k = 1 + (vn(v.x * 6 + 3, v.y * 6 + v.z * 4) - 0.5) * 0.3; v.multiplyScalar(k); v.y *= 0.85; p.setXYZ(i, v.x, v.y + 0.6, v.z);
+  }
+  g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
   const trunk = new THREE.CylinderGeometry(0.035, 0.05, 0.36, 5); trunk.translate(0, 0.18, 0);
-  const geo = mergeAll([g.toNonIndexed(), trunk.toNonIndexed()]);
-  geo.computeVertexNormals();
-  return geo;
+  return mergeAll([g, trunk]);
 }
 function mergeAll(gs: THREE.BufferGeometry[]): THREE.BufferGeometry {
-  const ng = gs.map((g) => (g.index ? g.toNonIndexed() : g));
+  const ng = gs.map((g) => { if (!g.attributes.normal) g.computeVertexNormals(); return g.index ? g.toNonIndexed() : g; });
   let n = 0; for (const g of ng) n += (g.attributes.position as THREE.BufferAttribute).count;
-  const pos = new Float32Array(n * 3);
+  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3);
   let o = 0;
-  for (const g of ng) { const a = (g.attributes.position as THREE.BufferAttribute).array as Float32Array; pos.set(a, o); o += a.length; }
+  for (const g of ng) {
+    const a = (g.attributes.position as THREE.BufferAttribute).array as Float32Array, b = (g.attributes.normal as THREE.BufferAttribute).array as Float32Array;
+    pos.set(a, o); nor.set(b, o); o += a.length;
+  }
   const out = new THREE.BufferGeometry();
   out.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  out.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
   return out;
 }
 
@@ -302,7 +314,7 @@ interface Chunk { z0: number; land: THREE.Mesh; water: THREE.Mesh; firs: THREE.I
 export class FlightStage implements Stage {
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(46, 1, 0.3, 1400);
-  look: Look = { exposure: 1.12, contrast: 1.05, saturation: 1.1, vibrance: 0.2, warm: -0.05, split: 0.2, vignette: 0.42, grain: 0.02, bloom: 1.0, bloomThreshold: 0.75, focus: 0, focusRange: 6, blur: 0.18, outline: 0.0 };
+  look: Look = { exposure: 0.92, contrast: 1.14, saturation: 1.15, vibrance: 0.25, warm: -0.06, split: 0.25, vignette: 0.5, grain: 0.02, bloom: 0.9, bloomThreshold: 0.85, focus: 0, focusRange: 6, blur: 0.2, outline: 0.0, motionBlur: 0.45 };
   /** 0..1 how far along tonight's flight */
   progress = 0;
 
@@ -342,7 +354,7 @@ export class FlightStage implements Stage {
   private alt = 24;
   // camera
   private camOrbit = 0;
-  private camK = { x: 2.6, y: 0.9, z: 4.6 };
+  private camK = { x: 3.4, y: 0.7, z: 3.3 };
   private seed = 1;
 
   constructor(renderer: THREE.WebGLRenderer, look: OwlLook, quality: 'low' | 'high' = 'high', seed = 1) {
@@ -375,8 +387,8 @@ export class FlightStage implements Stage {
     const n = this.quality === 'high' ? 9 : 8;
     for (let i = 0; i < n; i++) this.chunks.push(this.makeChunk(-i * CD + CD));
     // valley mist in two layers, and clouds
-    for (const [y, amt, sc] of [[WATER + 3.5, 0.5, 0.004], [WATER + 9, 0.28, 0.0026]] as [number, number, number][]) {
-      const mm = new THREE.ShaderMaterial({ vertexShader: MIST_VS, fragmentShader: MIST_FS, transparent: true, depthWrite: false, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor, uniforms: { uNoise: { value: this.noise }, uTime: this.u.uTime, uAmt: { value: amt }, uCol: { value: new THREE.Color(0.34, 0.4, 0.58) }, uCam: this.u.uCam, uScale: { value: sc } } });
+    for (const [y, amt, sc] of [[WATER + 3.2, 0.26, 0.004], [WATER + 8, 0.12, 0.0026]] as [number, number, number][]) {
+      const mm = new THREE.ShaderMaterial({ vertexShader: MIST_VS, fragmentShader: MIST_FS, transparent: true, depthWrite: false, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor, uniforms: { uNoise: { value: this.noise }, uTime: this.u.uTime, uAmt: { value: amt }, uCol: { value: new THREE.Color(0.24, 0.29, 0.45) }, uCam: this.u.uCam, uScale: { value: sc } } });
       const me = new THREE.Mesh(new THREE.PlaneGeometry(900, 900).rotateX(-Math.PI / 2), mm);
       me.position.y = y; me.renderOrder = 2; me.frustumCulled = false;
       this.mist.push(me); s.add(me);
@@ -395,9 +407,9 @@ export class FlightStage implements Stage {
     s.add(key);
     const fill = new THREE.HemisphereLight(0x4a5a90, 0x0c140f, 0.9);
     s.add(fill);
-    this.lantern = new THREE.PointLight(0xffb060, 1.6, 2.4, 1.6);
+    this.lantern = new THREE.PointLight(0xffb060, 0.5, 1.6, 2);
     s.add(this.lantern);
-    this.lanternGlow = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color(5, 3.0, 1.2) }));
+    this.lanternGlow = new THREE.Mesh(new THREE.SphereGeometry(0.022, 12, 10), new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 3.4, 1.2) }));
     s.add(this.lanternGlow);
     s.add(this.fx.group);
     this.fx.setLight(new THREE.Color(0.7, 0.78, 1));
@@ -523,12 +535,12 @@ export class FlightStage implements Stage {
       const t = h2(i, 14);
       if (broad) {
         if (nc >= c.crowns.count) continue;
-        cl.setRGB(0.1 + t * 0.06, 0.16 + t * 0.05, 0.13 + t * 0.03);
+        cl.setRGB(0.08 + t * 0.05, 0.19 + t * 0.06, 0.12 + t * 0.03);
         if (t > 0.9) cl.setRGB(0.22, 0.2, 0.12); // an early autumn crown
         c.crowns.setMatrixAt(nc, dm.matrix); c.crowns.setColorAt(nc, cl); nc++;
       } else {
         if (nf >= c.firs.count) continue;
-        cl.setRGB(0.05 + t * 0.04, 0.12 + t * 0.06, 0.12 + t * 0.05);
+        cl.setRGB(0.04 + t * 0.03, 0.15 + t * 0.06, 0.12 + t * 0.04);
         c.firs.setMatrixAt(nf, dm.matrix); c.firs.setColorAt(nf, cl); nf++;
       }
     }
@@ -602,10 +614,10 @@ export class FlightStage implements Stage {
     o.rotation.set(-0.08 + (0.5 - this.breathV) * 0.06, Math.PI + dx * 0.05, this.bank, 'YXZ');
     this.pip.update(dt);
     // his lantern swings under the pack
-    const back = V(0, 0.3, -0.26).applyEuler(o.rotation).add(this.pos);
+    const back = V(0.12, 0.08, -0.22).applyEuler(o.rotation).add(this.pos);
     this.lanternGlow.position.copy(back).add(V(Math.sin(this.time * 3) * 0.02, -0.02, 0));
     this.lantern.position.copy(back);
-    this.lantern.intensity = 1.5 + Math.sin(this.time * 11) * 0.06;
+    this.lantern.intensity = 0.5 + Math.sin(this.time * 11) * 0.03;
     // the camera: three-quarters behind him, slowly drifting round
     this.camOrbit = Math.sin(this.time * 0.035) * 0.35;
     const k = this.camK, a = this.camOrbit;
@@ -613,7 +625,7 @@ export class FlightStage implements Stage {
     const cam = this.camera;
     const want = this.pos.clone().add(off);
     if (cam.position.lengthSq() < 1e-6) cam.position.copy(want); else cam.position.lerp(want, 1 - Math.exp(-dt * 3));
-    const look = this.pos.clone().add(V(-0.9, 0.0, -6));
+    const look = this.pos.clone().add(V(-1.6, -0.5, -6));
     cam.lookAt(look);
     cam.rotation.z += this.bank * 0.25;
     cam.updateMatrixWorld();
@@ -660,7 +672,7 @@ export class FlightStage implements Stage {
     this.camera.aspect = w / Math.max(1, h);
     // on tall screens step back a little so the moon and the horizon stay in
     this.camera.fov = this.camera.aspect < 0.8 ? 60 : 46;
-    this.camK = this.camera.aspect < 0.8 ? { x: 1.6, y: 1.3, z: 5.4 } : { x: 2.6, y: 0.9, z: 4.6 };
+    this.camK = this.camera.aspect < 0.8 ? { x: 2.2, y: 1.0, z: 4.4 } : { x: 3.4, y: 0.7, z: 3.3 };
     this.camera.updateProjectionMatrix();
   }
 
