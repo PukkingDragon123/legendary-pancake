@@ -172,3 +172,4 @@
 
 /* the game's global title lettering is for wood and dark backgrounds: on parchment, plain dark ink */
 .bd .bd-sec h2, .bd .bd-sec h2 * { color: #3a2414 !important; text-shadow: none !important; -webkit-text-stroke: 0 !important; background: none !important; -webkit-background-clip: border-box !important; filter: none !important; }
+.bd-tag-in img, .bd-tag-in .px { width: 24px !important; height: 24px !important; margin: -3px 0; filter: drop-shadow(0 1px 0 #2a1209); }

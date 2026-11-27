@@ -249,7 +249,7 @@ export function SleepScreen() {
       <div class="bd-tags" aria-hidden={!inRoom}>
         {inRoom && tags.map((t) => (
           <button key={t.id} ref={(el) => { if (el) chips.current.set(t.id, el); else chips.current.delete(t.id); }} class={'bd-tag' + (t.on ? ' on' : '') + (hover === t.id ? ' hover' : '') + ((t.id === 'alarm' && pane === 'alarm') || pane === t.id ? ' sel' : '')} onClick={() => pickHot(t.id)} aria-label={`${t.label}: ${t.value}`}>
-            <span class="bd-tag-in"><i class="led" /><b>{t.label}</b><span>{t.value}</span></span>
+            <span class="bd-tag-in"><Px name={t.icon} size={30} /><b>{t.label}</b><span>{t.value}</span><i class="led" /></span>
             <span class="bd-tag-stem" />
           </button>
         ))}
