@@ -1,13 +1,13 @@
-// [text15] The office's typefaces: the game's face (src/ui/font.ts, Nunito), loaded once before any paper is
-// printed. The four roles keep their names so callers read the same: Pip's hand and signatures in bold italic, the
-// letterhead and big titles extra-bold, the forms' print and fine print in the body weight.
+// [type16] The office's typefaces: the game's two faces (src/ui/font.ts), loaded once before any paper is printed. The
+// four roles keep their names so callers read the same: Pip's hand and signatures in the display face's italic, the
+// letterhead and big titles in the display face, the forms' print and fine print in the body face.
 import { fontPx, fontReady } from '../ui/font.ts';
 
 /** the callers' sizes were set for the old faces; the same lettering reads at about this much more */
 const k = (px: number) => px * 1.2;
 export const F = {
   /** Pip's handwriting, signatures, big titles */
-  hand: (px = 16) => fontPx(k(px), { weight: 700, italic: true }),
+  hand: (px = 16) => fontPx(k(px), { display: true, weight: 600, italic: true }),
   /** the forms' printed text */
   body: (px = 16) => fontPx(k(px)),
   /** fine print */

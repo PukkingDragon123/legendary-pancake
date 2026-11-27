@@ -82,12 +82,11 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   overlapping scales; the moon gem is a brilliant cut whose facets flash in turn as the light swings round it. On the
   shelf, Sleep is a brass oil lamp with a ruby glass font and a flame in its glass chimney, and the journal is plain
   tooled leather with gilt corners (no logos).
-- **Clean type (v15)**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms
-  and props, the shop's signs, the pretend phone, Pip's and Barnaby's lines) is set in one warm, rounded, very
-  readable face, Nunito (SIL OFL 1.1; bundled as WOFF2, no web fonts), in a regular-bold body and an extra-bold for
-  titles and signs. Text is plain and calm: dark ink on paper, warm cream on dark wood, with one soft shadow only
-  where the background needs it; emphasis is bold, italic or a single accent colour. Dialogue types on at a
-  readable pace.
+- **Storybook type (v16)**: two faces, both SIL OFL 1.1 and bundled as WOFF2 (no web fonts), defined once in
+  `src/ui/font.ts`: **Fraunces** with its soft terminals for titles, signs, buttons, names and big numbers (and its
+  italic for Pip's handwriting), and **Figtree**, a clear, friendly sans, for copy, dialogue and small text. Text is
+  plain and calm: dark ink on paper, warm cream on dark wood, with one soft shadow only where the background needs
+  it; emphasis is bold, italic or a single accent colour. Dialogue types on at a readable pace.
 - **Inked, full-colour interface (v12)**: every panel, button, tab, card, ribbon and frame has a bold near-black ink
   outline (like the outlined 3D world and the icons) and richer, saturated enamel, wood and brass. Pip's portrait sits
   in a carved walnut frame of honey-oak leaves and acorns by default. Zoom in and out of the oak with a pinch or the

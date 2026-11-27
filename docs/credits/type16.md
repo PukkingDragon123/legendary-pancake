@@ -1,0 +1,4 @@
+# Credits: the game's typefaces (builder type16)
+
+- **Fraunces** by The Fraunces Project Authors (Phaedra Charles and Flavia Zimbardi, Undercase Type), https://github.com/undercasetype/Fraunces, SIL Open Font License 1.1. The display face (titles, signs, buttons, names and big numbers). From npm @fontsource-variable/fraunces@5.3.0 (latin, all axes, normal and italic), instanced with fontTools at SOFT 100 and WONK 1 (weight and optical size stay variable): `src/assets/fonts/fraunces-soft.woff2`, `fraunces-soft-italic.woff2`; licence `src/assets/fonts/Fraunces-OFL.txt`.
+- **Figtree** by The Figtree Project Authors (Erik Kennedy), https://github.com/erikdkennedy/figtree, SIL Open Font License 1.1. The body face (copy, dialogue and small interface text). From npm @fontsource-variable/figtree@5.3.0 (latin, variable weight, normal and italic), unmodified: `src/assets/fonts/figtree.woff2`, `figtree-italic.woff2`; licence `src/assets/fonts/Figtree-OFL.txt`.

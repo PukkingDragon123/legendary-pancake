@@ -1,11 +1,23 @@
 Bundled fonts
 =============
 
-nunito.woff2, nunito-italic.woff2   (THE game font since round 15; src/ui/font.ts, src/ui/style.css)
-  "Nunito" by Vernon Adams, Jacques Le Bailly, Manvel Shmavonyan and Alexei Vanyashin
-  (The Nunito Project Authors, https://github.com/googlefonts/nunito).
-  Licensed under the SIL Open Font License, Version 1.1 - full text in Nunito-OFL.txt next to this file
-  (https://openfontlicense.org).
-  Taken unmodified from the npm package @fontsource-variable/nunito@5.3.0 (latin subset, variable weight axis
-  200-1000): files/nunito-latin-wght-normal.woff2 and files/nunito-latin-wght-italic.woff2.
-  Credited in docs/credits/text15.md.
+The game's two faces since round 16 (src/ui/font.ts, src/ui/style.css). Both are licensed under the SIL Open Font
+License, Version 1.1 (https://openfontlicense.org); neither declares a Reserved Font Name.
+
+fraunces-soft.woff2, fraunces-soft-italic.woff2   (the display face: titles, signs, buttons, names, big numbers)
+  "Fraunces" by The Fraunces Project Authors (Phaedra Charles and Flavia Zimbardi for Undercase Type,
+  https://github.com/undercasetype/Fraunces). Full text of the licence in Fraunces-OFL.txt next to this file.
+  From the npm package @fontsource-variable/fraunces@5.3.0, latin subset, all axes:
+  files/fraunces-latin-full-normal.woff2 and files/fraunces-latin-full-italic.woff2.
+  Modified (as the OFL allows) with fontTools' instancer: the SOFT axis is pinned at 100 and WONK at its default (1);
+  the weight (100-900) and optical size (9-144) axes stay variable. Pinning SOFT lets canvas text, which cannot set
+  font-variation-settings, draw the same soft letters as CSS. Nothing else is changed; the modified fonts stay under
+  the OFL.
+
+figtree.woff2, figtree-italic.woff2   (the body face: copy, dialogue, small UI text)
+  "Figtree" by The Figtree Project Authors (Erik Kennedy, https://github.com/erikdkennedy/figtree).
+  Full text of the licence in Figtree-OFL.txt next to this file.
+  Taken unmodified from the npm package @fontsource-variable/figtree@5.3.0 (latin subset, variable weight axis
+  300-900): files/figtree-latin-wght-normal.woff2 and files/figtree-latin-wght-italic.woff2.
+
+Credited in docs/credits/type16.md (and so in Settings > Credits).

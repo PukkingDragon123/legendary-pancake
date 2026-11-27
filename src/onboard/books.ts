@@ -10,6 +10,7 @@
 import * as THREE from 'three';
 import type { OfficeMats } from './mats.ts';
 import { at, cyl, lathe } from './kit.ts';
+import { TITLE_STACK } from '../ui/font.ts';
 import { hash, vnoise } from './tex.ts';
 
 type C3 = [number, number, number];
@@ -139,7 +140,7 @@ export function paintSpines(): { map: HTMLCanvasElement; mr: HTMLCanvasElement; 
     });
     const text = (str: string, y: number, size: number, col: string | null, o: { vertical?: boolean; maxW?: number; italic?: boolean } = {}) => both((c, m) => {
       c.save();
-      c.font = `${o.italic ? 'italic ' : ''}bold ${size.toFixed(1)}px Georgia, 'Times New Roman', serif`;
+      c.font = `${o.italic ? 'italic ' : ''}700 ${size.toFixed(1)}px ${TITLE_STACK}`; // [type16] the display face, gilt
       c.textAlign = 'center'; c.textBaseline = 'middle';
       c.fillStyle = m ? (col ? 'rgb(0,200,0)' : 'rgb(0,90,255)') : (col ?? gold(c, m));
       if (o.vertical) { c.translate(cx, oy + y); c.rotate(Math.PI / 2); c.fillText(str, 0, 0, o.maxW); }
