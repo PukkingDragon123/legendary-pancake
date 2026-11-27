@@ -1,0 +1,35 @@
+/* [tutor] The guided tour: a lamplit spotlight over a night dim, a pointing glove, Pip's floating words and a small
+   row of controls (Skip tour, the step plate, Next). Sizes follow the art pixel (--art-px) where they are pixel art. */
+.layer > .tt { pointer-events: none; }
+.tt { position: absolute; inset: 0; z-index: 90; pointer-events: none; }
+.tt-dim { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity 0.45s ease; }
+.tt-dim.on { opacity: 1; }
+.tt-block { position: absolute; pointer-events: auto; background: transparent; touch-action: none; }
+
+.tt-hand { position: absolute; width: 0; height: 0; pointer-events: none; animation: ttBob 0.9s cubic-bezier(0.45, 0, 0.55, 1) infinite; transition: left 0.35s var(--ease, ease), top 0.35s var(--ease, ease); filter: drop-shadow(2px 4px 0 rgba(18, 8, 20, 0.35)); }
+.tt-hand img { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; }
+.tt-hand.in { animation: ttHandIn 0.35s steps(5) both, ttBob 0.9s cubic-bezier(0.45, 0, 0.55, 1) 0.35s infinite; }
+@keyframes ttBob { 0%, 100% { translate: 0 0; } 50% { translate: calc(var(--dx) * -9px) calc(var(--dy) * -9px); } }
+@keyframes ttHandIn { from { opacity: 0; translate: calc(var(--dx) * -30px) calc(var(--dy) * -30px); } to { opacity: 1; translate: 0 0; } }
+
+.tt-say { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; transition: left 0.3s ease, top 0.3s ease, bottom 0.3s ease; }
+.tt-say .hh-talk { pointer-events: auto; }
+.tt-ctl { display: flex; align-items: center; justify-content: center; gap: 10px; pointer-events: auto; animation: ttCtlIn 0.4s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+@keyframes ttCtlIn { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
+.tt-ctl .btn { min-width: 0; white-space: nowrap; }
+.tt-ctl .btn.pillow { font-family: var(--font-display); padding-left: 18px; padding-right: 18px; }
+.tt-ctl .tt-skip { font-family: var(--font-body); }
+/* the step count, engraved in a little brass plate */
+.tt-plate { position: relative; display: flex; align-items: center; gap: 3px; height: 30px; min-width: 66px; justify-content: center; padding: 0 16px 1px; font: 700 calc(var(--t1) * 1.2)/1 var(--font-display); color: #2e1a04; letter-spacing: 0.04em; text-shadow: 0 1px 0 rgba(255, 236, 170, 0.75), 0 -1px 0 rgba(70, 40, 6, 0.35); white-space: nowrap; }
+.tt-plate small { font: 600 var(--t1)/1 var(--font-body); color: #6a4a18; opacity: 0.8; }
+.tt-plate::before { content: ''; position: absolute; inset: -1px -2px; z-index: -1; background: var(--plate) 0 0 / 100% 100% no-repeat; }
+/* while a place is open: a slim walnut rail with Skip only, out of the way at the top */
+.tt-waiting { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: auto; }
+
+@media (max-width: 599px) {
+  .tt-ctl { gap: 6px; }
+  .tt-ctl .btn.pillow { padding-left: 12px; padding-right: 12px; }
+  .tt-plate { padding: 0 12px 1px; height: 26px; min-width: 56px; }
+}
+@media (prefers-reduced-motion: reduce) { .tt-hand, .tt-hand.in { animation: none; } }
+.hh-still .tt-hand, .hh-still .tt-hand.in { animation: none; }
