@@ -81,6 +81,11 @@ export class OwlActor {
   dark = 0;
   /** hold still: no idle glances or fidgets (used in menus and screenshots) */
   still = false;
+  /** in the fly pose: 1 = full wingbeats, 0 = gliding on spread wings (the breathing flight eases between them) */
+  wingbeat = 1;
+  /** in the fly pose: wingbeat speed multiplier */
+  flapRate = 1;
+  private flapPh = 0;
   hooks: ActorHooks = {};
 
   private moodUntil = 0;
@@ -233,8 +238,9 @@ export class OwlActor {
     }
     if (this.pose === 'fly') {
       // a real wingbeat: open wings sweeping from well above the back to below the body, the downstroke quicker
-      const ph = t * 9.5, f = Math.sin(ph + 0.35 * Math.sin(ph));
-      wingL = wingR = 1.5 + f * 0.72; lean = 0.62; pitch -= 0.38; tuftL -= 0.5; tuftR -= 0.5; tail = 0.35;
+      this.flapPh += dt * 9.5 * this.flapRate * (0.35 + 0.65 * this.wingbeat);
+      const ph = this.flapPh, f = Math.sin(ph + 0.35 * Math.sin(ph)) * this.wingbeat;
+      wingL = wingR = 1.5 + f * 0.72 + (1 - this.wingbeat) * 0.12; lean = 0.62; pitch -= 0.38; tuftL -= 0.5; tuftR -= 0.5; tail = 0.35;
       if (f > 0.97 && Math.random() < 0.5) this.hooks.sound?.('flap');
     }
 

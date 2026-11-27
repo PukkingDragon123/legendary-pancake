@@ -33,9 +33,10 @@ import { texCanvas, type TexName } from '../real/tex.ts';
 const smooth = (t: number) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 import { reducedMotion } from './swing.ts';
+import { animate3D, hold3D, hide3D, is3D, preview3D, type Kind3D } from './trans3d.ts'; // realistic 3D kinds with motion blur
 
-export type TransitionKind = 'iris' | 'dither' | 'fade' | 'leaves' | 'feathers' | 'snow' | 'fireflies' | 'page' | 'blinds' | 'mosaic' | 'branch' | 'clock' | 'curtain' | 'blueprint' | 'stars' | 'sunrise';
-export const TRANSITION_KINDS: TransitionKind[] = ['iris', 'dither', 'leaves', 'feathers', 'snow', 'fireflies', 'page', 'blinds', 'mosaic', 'branch', 'clock', 'curtain', 'blueprint', 'stars', 'sunrise'];
+export type TransitionKind = 'iris' | 'dither' | 'fade' | 'leaves' | 'feathers' | 'snow' | 'fireflies' | 'page' | 'blinds' | 'mosaic' | 'branch' | 'clock' | 'curtain' | 'blueprint' | 'stars' | 'sunrise' | Kind3D;
+export const TRANSITION_KINDS: TransitionKind[] = ['iris', 'dither', 'leaves', 'feathers', 'snow', 'fireflies', 'page', 'blinds', 'mosaic', 'branch', 'clock', 'curtain', 'blueprint', 'stars', 'sunrise', 'acorns', 'plumes', 'clouds', 'dream'];
 export interface TransitionOpts {
   /** centre of the iris / clock / fireflies (CSS px); defaults to the middle of the screen */
   x?: number; y?: number;
@@ -354,10 +355,12 @@ const SOUND: Partial<Record<TransitionKind, [string, number, number?]>> = {
   iris: ['whoosh_soft', 0.4], dither: ['whoosh_soft', 0.25, 0.9], fade: ['whoosh_soft', 0.2, 0.85], leaves: ['leaf_rustle', 0.5], feathers: ['feather_ruffle', 0.4, 0.85], snow: ['star_shimmer', 0.3, 0.9],
   fireflies: ['sparkle_fizz', 0.3], page: ['page_turn', 0.55], blinds: ['whoosh_cloth', 0.35, 1.2], mosaic: ['tick_paper', 0.45], branch: ['leaf_rustle', 0.5, 0.85], clock: ['clock_wind', 0.35, 1.2],
   curtain: ['whoosh_cloth', 0.5], blueprint: ['paper_rustle', 0.45], stars: ['chime_sweep', 0.25, 0.9], sunrise: ['bird_song', 0.3],
+  acorns: ['place_wood', 0.45, 1.25], plumes: ['feather_ruffle', 0.5], clouds: ['wind_gust', 0.28, 1.15], dream: ['chime_sweep', 0.35, 0.8],
 };
 const DUR: Record<TransitionKind, [number, number]> = {
   iris: [0.5, 0.55], dither: [0.4, 0.45], fade: [0.35, 0.4], leaves: [0.6, 0.7], feathers: [0.6, 0.7], snow: [0.6, 0.65], fireflies: [0.6, 0.7], page: [0.55, 0.55],
   blinds: [0.5, 0.5], mosaic: [0.5, 0.55], branch: [0.55, 0.6], clock: [0.55, 0.55], curtain: [0.5, 0.55], blueprint: [0.65, 0.6], stars: [0.6, 0.8], sunrise: [0.5, 1.2],
+  acorns: [0.75, 0.85], plumes: [0.85, 0.95], clouds: [0.8, 0.9], dream: [0.9, 1.05],
 };
 
 function animate(r: Run, phase: 'in' | 'out', dur: number): Promise<void> {
@@ -383,6 +386,20 @@ export async function transition(kind: TransitionKind, mid?: () => void | Promis
   busy = true;
   try {
     if (reducedMotion()) kind = 'dither';
+    if (is3D(kind)) {
+      const s = SOUND[kind];
+      if (s) try { sound.play(s[0], { volume: s[1], rate: s[2] ?? 1, gap: 80 }); } catch { /* not ready */ }
+      const [din, dout] = DUR[kind].map((d) => (d * 1000) / (o.speed ?? 1));
+      if (await animate3D(kind, 'in', din)) {
+        try { await mid?.(); } catch (e) { console.warn('transition mid failed', e); }
+        hold3D(kind);
+        await new Promise((res) => setTimeout(res, 140));
+        await animate3D(kind, 'out', dout);
+        return;
+      }
+      hide3D();
+      kind = 'dither'; // no WebGL for the overlay: the plain dusk instead
+    }
     const r = setup(kind, o);
     r.t0 = performance.now();
     cv!.style.pointerEvents = 'auto'; // no double taps while covered
@@ -410,6 +427,13 @@ export async function reveal(kind: TransitionKind, o: TransitionOpts = {}): Prom
   busy = true;
   try {
     if (reducedMotion()) kind = 'dither';
+    if (is3D(kind)) {
+      hold3D(kind);
+      await new Promise((res) => setTimeout(res, 160));
+      if (await animate3D(kind, 'out', (DUR[kind][1] * 1000) / (o.speed ?? 1))) return;
+      hide3D();
+      kind = 'dither';
+    }
     const r = setup(kind, o);
     r.t0 = performance.now();
     paint(r, 'in', 1, 0);
@@ -428,6 +452,7 @@ export const transitioning = () => busy;
 
 /** Dev/screenshot helper: draw one still frame of a transition and leave it on screen. */
 export function previewTransition(kind: TransitionKind, phase: 'in' | 'out', p: number, t = 0.6, o: TransitionOpts = {}) {
+  if (is3D(kind)) { preview3D(kind, (phase === 'in' ? 0 : 1) + p); return; }
   const r = setup(kind, o);
   r.t0 = 0;
   paint(r, phase, p, t);
@@ -437,12 +462,12 @@ export function clearTransition() { if (cv) { ctx?.setTransform(1, 0, 0, 1, 0, 0
 // ------------------------------------------------------------------ which transition for which change of place
 
 const OPEN: Partial<Record<NonNullable<Panel>, [TransitionKind, TransitionOpts?]>> = {
-  sleep: ['stars'], clock: ['clock'], book: ['page'], build: ['blueprint'], decorate: ['blueprint'], shop: ['leaves'], wardrobe: ['curtain'],
-  map: ['branch', { speed: 1.15 }], quests: ['mosaic', { speed: 1.3 }], settings: ['blinds', { speed: 1.2 }], breathe: ['fireflies'], night: ['stars'],
+  sleep: ['dream'], clock: ['clock'], book: ['page'], build: ['blueprint'], decorate: ['blueprint'], shop: ['acorns'], wardrobe: ['curtain'],
+  map: ['clouds', { speed: 1.1 }], quests: ['mosaic', { speed: 1.3 }], settings: ['blinds', { speed: 1.2 }], breathe: ['plumes'], night: ['stars'],
 };
 const CLOSE: Partial<Record<NonNullable<Panel>, [TransitionKind, TransitionOpts?]>> = {
-  sleep: ['stars', { speed: 1.25 }], clock: ['clock', { reverse: true, speed: 1.35 }], book: ['page', { reverse: true, speed: 1.25 }], build: ['blueprint', { speed: 1.3 }], decorate: ['blueprint', { speed: 1.3 }],
-  shop: ['leaves', { speed: 1.2 }], wardrobe: ['curtain', { speed: 1.3 }], map: ['leaves', { speed: 1.35 }], quests: ['dither', { speed: 1.4 }], settings: ['blinds', { reverse: true, speed: 1.4 }],
+  sleep: ['dream', { speed: 1.25 }], clock: ['clock', { reverse: true, speed: 1.35 }], book: ['page', { reverse: true, speed: 1.25 }], build: ['blueprint', { speed: 1.3 }], decorate: ['blueprint', { speed: 1.3 }],
+  shop: ['acorns', { speed: 1.2 }], wardrobe: ['plumes', { speed: 1.3 }], map: ['clouds', { speed: 1.25 }], quests: ['dither', { speed: 1.4 }], settings: ['blinds', { reverse: true, speed: 1.4 }],
   breathe: ['feathers', { speed: 1.2 }], night: ['sunrise'],
 };
 /** The transition (and options) for a change of place, or null for none. */

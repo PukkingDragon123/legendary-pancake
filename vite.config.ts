@@ -7,7 +7,9 @@ export default defineConfig(({ mode }) => ({
   base: mode === 'artifact' || mode === 'itch' ? './' : '/',
   plugins: [preact()],
   esbuild: { charset: 'ascii' },
-  server: { host: true, port: 5173 },
+  // agent worktrees live under .claude/: never scan, watch or serve them as part of this app
+  server: { host: true, port: 5173, watch: { ignored: ['**/.claude/**', '**/dist*/**'] } },
+  optimizeDeps: { entries: ['index.html', 'dev-*.html'] },
   build: { target: 'es2022', outDir: mode === 'artifact' ? 'dist-artifact' : mode === 'itch' ? 'dist-itch' : 'dist', chunkSizeWarningLimit: 4000 },
   test: { environment: 'node', include: ['src/**/*.test.ts'] },
 }));

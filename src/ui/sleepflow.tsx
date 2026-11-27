@@ -1,304 +1,502 @@
-// The Sleep button's screen: a bedtime ritual laid out on the nightstand at night. A flickering
-// candle, the alarm clock, a mug and the phone stand on the table; tonight's plan is a ticket, the
-// wind-down steps are pencilled on an index card (personalised from the interview), three cards
-// say how to fall asleep earlier, and a little tray holds the sounds and the alarm. Hold the
-// quilted button to say goodnight: the lights go out and Pip flies off on tonight's adventure.
-import { useEffect, useMemo, useState } from 'preact/hooks';
+// The Sleep button's screen: bedtime as one journey in 3D.
+//   1. Pip's bedroom (world/stages/bedroom.ts): a cosy lamplit room with the real forest in its window. The things in
+//      the room are the controls: a microphone on the sill (sleep tracking), a record player (falling-asleep sounds),
+//      the alarm clock on the nightstand, a moon lamp (dim the lights). Little brass tags float over them; tapping one
+//      (or its row in the side panel, a bottom sheet on phones) opens its 2D controls.
+//   2. "I'm going to bed": Pip puts the phone to bed in its little box and padlocks it, turning the key with his beak.
+//   3. He packs: a spin, a puff, and his trail backpack is on.
+//   4. He spins the floor globe and the room gives way to the real Earth: choose tonight's place.
+//   5. The flight (world/stages/flight.ts): Pip flies over the moonlit forest towards it while you breathe for five
+//      minutes. He rises on each in-breath and glides on each out-breath; a quiet question to think about drifts in now
+//      and then; the time to arrival counts down. When he lands, the night begins (microphone, alarm, sounds).
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
-import { AREA } from '../game/catalog.ts';
-import { blockStatus, demoTonight, setRoutine, syncReminders, tonight } from '../game/night.ts';
-import { dayKey, edit, save, type Profile } from '../game/store.ts';
+import { BreathSession, PATTERN, type Phase } from '../breathe/session.ts';
+import { AREA, AREAS, type Area } from '../game/catalog.ts';
+import { blockStatus, demoTonight, setRoutine, startNight, syncReminders, tonight } from '../game/night.ts';
 import { DAY_NAME, setNight, toMin } from '../game/routine.ts';
-import { BreathePicker } from './breathe.tsx';
-import { WoodClock } from './clock.tsx';
-import { mugSteam, propCandle, propMug, propPhone, wallpaperTile } from './chrome/objects.ts';
-import { reducedMotion } from './chrome/swing.ts';
+import { areaOpen, dayKey, edit, save } from '../game/store.ts';
+import { homeGuess } from '../world/globe/earth.ts';
+import { GlobeStage, type GlobePlace, type PinView } from '../world/globe/stage.ts';
+import { BedroomStage, type Hot } from '../world/stages/bedroom.ts';
+import { FlightStage } from '../world/stages/flight.ts';
+import type { OwlLook } from '../owl/model.ts';
+import { transition } from './chrome/transition.ts';
+import { PLACE_SAT, SHEET, sheetUrl } from './globe/photos.ts';
+import { loadThumbs, thumbStyle, thumbsReady } from './globe/placephoto.ts';
+import { PLACE_INFO } from '../game/places.ts';
 import { Px } from './icons.tsx';
-import { PhoneLockSheet } from './phone/phone.tsx';
-import { fmtDur, fmtHM, Tags, tap, toast, Toggle } from './kit.tsx';
-import { moonPhase } from './px/sleepprops.ts';
-import { paintWindow } from './real/window.ts';
-import { GOLD, Real, box, cached, deviceK, enamel, matte, metal, polygon, tubeX, wood } from './real/paint.ts';
-import { ALARMS, goToSleep, SOUNDSCAPES, SoundTiles } from './sleep.tsx';
-import { HoldButton, injectSleepFrames, PaintCanvas, Paper, PencilTick, sparkleAt } from './sleepkit.tsx';
-import { breathing, panel, sceneRef } from './state.ts';
-import { fxMoment } from './fx/moment.ts'; // [fx10]
+import { fmtDur, fmtHM, haptic, tap, toast, Toggle } from './kit.tsx';
+import { ALARMS, SOUNDSCAPES, SoundTiles } from './sleep.tsx';
+import { bubble, panel, sceneRef } from './state.ts';
+import { fxMoment } from './fx/moment.ts';
 import './sleepflow.css';
 
-// ------------------------------------------------------------------ the wind-down, personalised
+type Step = 'room' | 'lock' | 'pack' | 'globe' | 'flight' | 'arrive';
+type Pane = 'tonight' | 'mic' | 'sound' | 'alarm';
 
-type StepId = 'breathe' | 'phone' | 'coffee' | 'lights' | 'jot' | 'read' | 'cool';
-interface Step { id: StepId; title: string; sub: string; sprite: string }
-const has = (list: string[], ...words: string[]) => list.some((g) => words.some((w) => g.toLowerCase().includes(w)));
+const FLIGHT_MIN = 5;
+const home = homeGuess();
+const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+const toHHMM = (m: number) => { m = ((m % 1440) + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
+const isWide = () => innerWidth >= 900 && innerWidth / innerHeight > 1.1;
+const tripLook = (l: OwlLook): OwlLook => ({ ...l, outfit: { ...(l.outfit ?? {}), back: 'backpack' } });
 
-/** [font6] a time in big 3D digits with a small AM/PM, so two fit side by side at any art pixel */
-const hm2 = (t: string) => { const [a, b] = t.split(/\s+/); return <><span>{a}</span>{b ? <small class="ampm">{b}</small> : null}</>; };
+/** quiet questions for the flight: one at a time, to think about, not to answer */
+const REFLECT: { q: string; sub: string }[] = [
+  { q: 'What went well today?', sub: 'Even a small thing counts. Let it come to you.' },
+  { q: 'Who made you smile today?', sub: 'Picture their face for a moment.' },
+  { q: 'What are you grateful for tonight?', sub: 'A warm drink, a kind word, a quiet minute.' },
+  { q: 'Is anything still on your mind?', sub: 'Put it in Pip’s backpack. He’ll carry it until morning.' },
+  { q: 'What did you do today that took courage?', sub: 'Give yourself a little credit for it.' },
+  { q: 'What would make tomorrow gentle?', sub: 'One small, kind thing is enough.' },
+  { q: 'Notice your shoulders, your jaw, your hands.', sub: 'Let each one soften as you breathe out.' },
+  { q: 'What did you learn today?', sub: 'About the world, or about yourself.' },
+];
 
-export function windDownSteps(p: Profile): Step[] {
-  const slow = p.latency === 'slow' || p.latency === 'long';
-  const out: Step[] = [
-    { id: 'breathe', title: slow ? 'Breathe with Pip (4-7-8)' : 'A few slow breaths with Pip', sub: slow ? 'Long, slow exhales tell your body it is safe to rest' : 'Three minutes, in the moonlit clearing', sprite: 'lantern' },
-  ];
-  if (p.phone !== 'never') out.push({ id: 'phone', title: 'Put the phone to bed', sub: p.phone === 'nightly' ? 'Face-down, out of reach. Pip keeps watch.' : 'Face-down on the nightstand', sprite: 'phone_off' });
-  if (p.caffeine === 'late') out.push({ id: 'coffee', title: 'No more coffee today', sub: 'Caffeine lingers for hours. Chamomile instead?', sprite: 'hourglass' });
-  out.push({ id: 'lights', title: 'Dim the lights', sub: 'Low, warm light for the last hour', sprite: 'candle' });
-  if (has(p.goals, 'stress', 'calm', 'worry', 'mind', 'anx') || has(p.relax, 'journal', 'writ')) out.push({ id: 'jot', title: "Jot down tomorrow's to-do", sub: 'Out of your head, onto paper', sprite: 'pen' });
-  if (has(p.relax, 'read', 'book')) out.push({ id: 'read', title: 'Read a few pages', sub: 'Paper, not a screen', sprite: 'book' });
-  if (out.length < 4) out.push({ id: 'cool', title: 'Cool, dark, quiet room', sub: 'About 18°C (65°F) is just right', sprite: 'wind' });
-  return out.slice(0, 5);
-}
-
-interface Tip { id: string; title: string; body: string; sprite: string }
-const TIPS: Record<string, Tip> = {
-  wake: { id: 'wake', title: 'Same wake time, every day', body: 'Your body clock sets itself by when you get up. Keep it within an hour, weekends too.', sprite: 'alarm' },
-  light: { id: 'light', title: 'Morning light', body: 'Ten minutes of daylight soon after waking makes you sleepy earlier in the evening.', sprite: 'sun' },
-  winddown: { id: 'winddown', title: 'A wind-down hour', body: 'Dim lamps, slow tasks, no work. Give your brain a runway to land on.', sprite: 'candle' },
-  cool: { id: 'cool', title: 'Cool, dark and quiet', body: 'A cool room, blackout curtains and soft sounds help you drop off sooner.', sprite: 'wind' },
-  caffeine: { id: 'caffeine', title: 'Caffeine curfew', body: 'Stop coffee, tea and cola about 8 hours before bed. It stays with you longer than you think.', sprite: 'hourglass' },
-  screens: { id: 'screens', title: 'Screens out of bed', body: 'Scrolling keeps your mind busy. Charge the phone across the room.', sprite: 'phone_off' },
-  shift: { id: 'shift', title: 'Move bedtime in small steps', body: 'Go to bed 15 minutes earlier every few nights instead of all at once.', sprite: 'clock' },
-  getup: { id: 'getup', title: "Can't drop off? Get up", body: 'After about 20 minutes awake, do something calm in dim light, then try again.', sprite: 'lantern' },
-  move: { id: 'move', title: 'Move in the daytime', body: 'Exercise deepens sleep. Finish hard workouts a few hours before bed.', sprite: 'bolt' },
-};
-export function tipsFor(p: Profile): Tip[] {
-  const order: string[] = [];
-  if (p.chronotype === 'owl') order.push('light', 'shift');
-  if (p.caffeine === 'late') order.push('caffeine');
-  if (p.phone === 'nightly') order.push('screens');
-  if (p.latency === 'long' || p.latency === 'slow') order.push('getup');
-  order.push('wake', 'light', 'winddown', 'cool', 'move');
-  return [...new Set(order)].slice(0, 3).map((k) => TIPS[k]);
-}
-
-const ritualKey = () => 'hoot-hollow:ritual:' + dayKey(Date.now() - 5 * 3600_000);
-const loadDone = (): StepId[] => { try { return JSON.parse(localStorage.getItem(ritualKey()) ?? '[]'); } catch { return []; } };
-const saveDone = (d: StepId[]) => { try { localStorage.setItem(ritualKey(), JSON.stringify(d)); } catch { /* storage blocked */ } };
-
-// ------------------------------------------------------------------ backgrounds
-
-/** [ui7] a deep-blue damask wallpaper tile (realistic, printed paper) */
-const wallpaper = () => wallpaperTile('sapphire', 72);
-
-// ------------------------------------------------------------------ props on the table
-
-/** [ui4] a frame counter for a little looping animation (stays on frame 0 with calm motion) */
-function useFrames(n: number, ms: number) {
-  const [f, setF] = useState(0);
-  useEffect(() => {
-    if (reducedMotion()) return;
-    const id = setInterval(() => { if (!document.hidden) setF((v) => (v + 1) % n); }, ms);
-    return () => clearInterval(id);
-  }, [n, ms]);
-  return f;
-}
-// [ui4] the props are detailed relief-painted objects (src/ui/chrome/objects.ts), one art px per CSS px
-function CandleProp(p: { dim: boolean; onTap: () => void }) {
-  const f = useFrames(4, 130);
-  return (
-    <button class={'prop prop-candle' + (p.dim ? ' dim' : '')} aria-label="Candle: dim the lights" onClick={p.onTap}>
-      <span class="halo" />
-      <img src={propCandle(f, 3)} width={54} height={108} alt="" draggable={false} />
-    </button>
-  );
-}
-function MugProp(p: { tea: boolean; onTap: () => void }) {
-  const f = useFrames(4, 260);
-  return (
-    <button class="prop prop-mug" aria-label={p.tea ? 'A mug of chamomile tea' : 'Coffee: swap it for tea'} onClick={p.onTap}>
-      <img class="steam" src={mugSteam(f, 3)} width={78} height={42} alt="" draggable={false} />
-      <img src={propMug(p.tea ? 'tea' : 'coffee', 3)} width={78} height={78} alt="" draggable={false} />
-    </button>
-  );
-}
-function PhoneProp(p: { bed: boolean; onTap: () => void }) {
-  return (
-    <button class={'prop prop-phone' + (p.bed ? ' tucked' : '')} aria-label={p.bed ? 'The phone is tucked in for the night' : 'Put the phone to bed'} onClick={p.onTap}>
-      <img src={propPhone(p.bed, 3)} width={66} height={102} alt="" draggable={false} />
-      {p.bed && <span class="zz">z<small>z</small></span>}
-    </button>
-  );
+function placeOf(a: Area): GlobePlace {
+  return { id: a.id, lat: a.lat, lon: a.lon, color: a.color, open: areaOpen(a.id), span: PLACE_INFO[a.id]?.span, sheet: PLACE_SAT[a.id] ? sheetUrl(a.id) : undefined, sat: PLACE_SAT[a.id], satRect: [SHEET.cw, SHEET.ch, SHEET.cw, SHEET.ch] };
 }
 
 // ------------------------------------------------------------------ the screen
 
 export function SleepScreen() {
-  injectSleepFrames();
+  const sc = sceneRef.current;
   const s = save.value, sp = s.sleep, h12 = s.settings.hour12;
   const plan = tonight();
   const area = AREA[s.area];
-  const steps = useMemo(() => windDownSteps(s.profile), [s.profile]);
-  const tips = useMemo(() => tipsFor(s.profile), [s.profile]);
-  const [done, setDone] = useState<StepId[]>(loadDone);
-  const [tipAt, setTipAt] = useState(0);
-  const [flip, setFlip] = useState(-1);
-  const [picker, setPicker] = useState(false);
-  const [lock, setLock] = useState(false); // [intro5] the phone-lock step plays the pretend phone
-  const [out, setOut] = useState(false);
-  const [leaving, setLeaving] = useState(false);
-  const [vw, setVw] = useState(innerWidth);
-  useEffect(() => { const f = () => setVw(innerWidth); addEventListener('resize', f); return () => removeEventListener('resize', f); }, []);
-  // a breathing session finished today ticks the breathing step
-  useEffect(() => { if (s.breath.lastDay === dayKey() && !done.includes('breathe') && steps.some((x) => x.id === 'breathe')) { const d = [...done, 'breathe' as StepId]; setDone(d); saveDone(d); } }, []);
-  const isDone = (id: StepId) => done.includes(id);
-  const toggle = (id: StepId, el?: Element | null) => {
-    const on = !isDone(id);
-    const d = on ? [...done, id] : done.filter((x) => x !== id);
-    setDone(d); saveDone(d);
-    if (on) {
-      sound.play('pencil', { volume: 0.55 });
-      setTimeout(() => sound.play('sparkle', { volume: 0.3 }), 220);
-      sparkleAt(el ?? null, 7);
-      if (d.length === steps.length) setTimeout(() => { sound.play('reward_quest', { volume: 0.4 }); toast('Wind-down complete. Pip is proud of you!', undefined, 2600); }, 500);
-    } else sound.play('paper_flip', { volume: 0.3 });
-  };
-  const close = () => { tap('ui_close', 0.5); setLeaving(true); setTimeout(() => { if (panel.value === 'sleep') panel.value = null; }, 260); };
-  const openClock = () => { tap('ui_open', 0.5); panel.value = 'clock'; };
+  const [step, setStep] = useState<Step>('room');
+  const [pane, setPane] = useState<Pane>('tonight');
+  const [hover, setHover] = useState<Hot | null>(null);
+  const [cap, setCap] = useState<{ text: string; sub?: string; id: number } | null>(null);
+  const [wide, setWide] = useState(isWide());
+  const [ready, setReady] = useState(false);
+  const [busy, setBusy] = useState(false);
+  /** the bedroom is rebuilt when we come back to it (a stage is disposed when another one takes the screen) */
+  const [roomKey, setRoomKey] = useState(0);
+  const room = useRef<BedroomStage | null>(null);
+  const chips = useRef(new Map<Hot, HTMLElement>());
+  const stepRef = useRef<Step>('room');
+  stepRef.current = step;
+
   const set = (f: (x: typeof sp) => void) => { edit((x) => f(x.sleep)); syncReminders(); };
-  const lightsOut = async () => {
-    setOut(true);
-    sound.play('bowl', { volume: 0.45 });
-    setTimeout(() => sound.play('owl_hoot', { volume: 0.35, rate: 0.9 }), 500);
-    sceneRef.current?.owl.play('yawn'); fxMoment('bedtime'); // [fx10] sleepy lids, a dusk veil, dream motes
-    setTimeout(() => { void goToSleep(); }, 1100);
-  };
-  const dim = isDone('lights');
-  const winW = Math.max(110, Math.min(230, Math.floor((Math.min(vw, 1100) - 24) / 3)));
-  const startBreath = () => { tap('ui_open', 0.5); setPicker(true); };
-  const tableBg = { background: 'linear-gradient(180deg, rgba(20,10,4,.35), rgba(20,10,4,0) 30%), var(--tx-walnut) 0 0 / 420px 420px, #4a2814' };
-  const smart = sp.smartMin && sp.alarmOn && plan.on ? fmtHM(toHHMMm(toMin(plan.wake) - sp.smartMin), h12) : '';
+  const caption = (text: string, sub?: string) => setCap({ text, sub, id: Date.now() });
+
+  // Pip's speech bubbles belong to the world: none over the bedroom
+  useEffect(() => { bubble.value = null; return bubble.subscribe((b) => { if (b) bubble.value = null; }); }, []);
+  useEffect(() => { const f = () => setWide(isWide()); addEventListener('resize', f); return () => removeEventListener('resize', f); }, []);
+
+  // ---- the bedroom stage
+  useEffect(() => {
+    if (!sc) return undefined;
+    let st: BedroomStage | null = null;
+    try { st = new BedroomStage(sc.renderer, save.value.look, sc, sc.quality); } catch (e) { console.warn('bedroom failed', e); return undefined; }
+    room.current = st;
+    st.resize(innerWidth, innerHeight);
+    st.setMic(save.value.sleep.mic);
+    st.setSound(save.value.sleep.soundscape !== 'none');
+    st.prepareTrip(save.value.look);
+    st.onPick = (id) => pickHot(id);
+    st.onHover = (id) => setHover(id);
+    sc.setStage(st);
+    void st.ready.then(() => setReady(true));
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && stepRef.current === 'room') close(); };
+    addEventListener('keydown', onKey);
+    if (import.meta.env.DEV) (window as unknown as { hhBed: unknown }).hhBed = { stage: st, bed: () => goToBed(), step: (x: Step) => setStep(x) };
+    return () => {
+      removeEventListener('keydown', onKey);
+      if (st && sc.stage === st) sc.setStage(null);
+      room.current = null;
+    };
+  }, [roomKey]);
+
+  // ---- keep the room in step with the controls
+  useEffect(() => { room.current?.setMic(sp.mic); }, [sp.mic]);
+  useEffect(() => { room.current?.setSound(sp.soundscape !== 'none'); }, [sp.soundscape]);
+
+  // ---- frame the room in the part of the screen the controls leave free
+  useEffect(() => {
+    const st = room.current;
+    if (!st) return;
+    if (step !== 'room') st.free = { x0: 0, x1: 1, y0: 0.04, y1: wide ? 0.84 : 0.78 };
+    else if (wide) st.free = { x0: 0, x1: 1 - Math.min(420, innerWidth * 0.34) / innerWidth, y0: 0.08, y1: 0.86 };
+    else st.free = { x0: 0, x1: 1, y0: 0.06, y1: 0.5 };
+    st.refit();
+  }, [wide, step, ready]);
+
+  // ---- the floating tags follow their things
+  useEffect(() => {
+    if (step !== 'room') return undefined;
+    let raf = 0;
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      const st = room.current;
+      if (!st) return;
+      const a = st.anchors();
+      for (const [id, el] of chips.current) {
+        const p = a[id];
+        if (!p) continue;
+        el.style.opacity = p.on ? '' : '0';
+        el.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`;
+      }
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [step]);
+
+  function pickHot(id: Hot) {
+    if (stepRef.current !== 'room') return;
+    const st = room.current;
+    tap('ui_tap', 0.45);
+    if (id === 'mic') { setPane('mic'); st?.go('mic'); }
+    else if (id === 'sound') { setPane('sound'); st?.go('sound'); }
+    else if (id === 'alarm' || id === 'phone') { setPane('alarm'); st?.go('alarm'); }
+    else if (id === 'lamp') { const d = !lampDim.current; lampDim.current = d; st?.setDim(d ? 0.55 : 0); sound.play('ui_toggle', { volume: 0.4 }); }
+    else if (id === 'window' || id === 'globe' || id === 'bed') { setPane('tonight'); st?.go('room'); if (id === 'bed') st?.owl.play('yawn'); else st?.owl.play('nod'); }
+  }
+  const lampDim = useRef(false);
+
+  function close() {
+    if (busy) return;
+    tap('ui_close', 0.5);
+    panel.value = null;
+  }
+
+  // ---- 2..4: lock, pack, globe
+  async function goToBed() {
+    const st = room.current;
+    if (busy) return;
+    setBusy(true);
+    sound.unlock();
+    haptic(14);
+    sound.play('bowl', { volume: 0.4 });
+    if (!sc || !st) { await startTheNight(); return; }
+    fxMoment('bedtime');
+    st.setDim(0.4);
+    setStep('lock');
+    await wait(80);
+    caption('Pip tucks your phone into bed…', 'No more scrolling tonight.');
+    await st.playLock();
+    const wakeTxt = plan.on ? fmtHM(plan.wake, h12) : 'morning';
+    caption(`Locked until ${wakeTxt}.`, blockStatus.value ? 'The bedtime blocker is on guard too.' : 'Pip keeps the key.');
+    await wait(1500);
+    setStep('pack');
+    caption('Packing for the trip…', 'Snacks, a map, and one emergency acorn.');
+    await st.playPack(save.value.look);
+    caption('Where shall we fly tonight?');
+    await st.playGlobe();
+    await transition('clouds', () => { setStep('globe'); setCap(null); });
+  }
+
+  async function startTheNight() {
+    setStep('arrive');
+    const sc2 = sceneRef.current;
+    try { sc2?.placeOwl('away'); } catch { /* */ }
+    await startNight({ alarm: true });
+    panel.value = null;
+  }
+
+  const onIntoFlight = () => { void transition('dream', () => { setStep('flight'); }); };
+
+  // ---------------------------------------------------------------- render
+
+  if (step === 'globe') return <GlobePick onBack={() => { void transition('clouds', () => { setReady(false); setStep('room'); setBusy(false); setCap(null); setRoomKey((k) => k + 1); }); }} onGo={onIntoFlight} />;
+  if (step === 'flight' || step === 'arrive') return <Flight onArrive={() => { void startTheNight(); }} arriving={step === 'arrive'} />;
+
+  const wakeHM = plan.on ? fmtHM(plan.wake, h12) : 'Sleep in';
+  const smart = sp.smartMin && sp.alarmOn && plan.on ? fmtHM(toHHMM(toMin(plan.wake) - sp.smartMin), h12) : '';
+  const soundName = SOUNDSCAPES.find((o) => o.v === sp.soundscape)?.label ?? 'Silence';
+  const panes: { id: Pane; icon: string; title: string; value: string }[] = [
+    { id: 'tonight', icon: 'moon', title: 'Tonight', value: `${fmtHM(plan.bed, h12)} – ${wakeHM}` },
+    { id: 'mic', icon: 'mic', title: 'Sleep tracking', value: sp.mic ? 'Listening' : 'Off' },
+    { id: 'sound', icon: 'music', title: 'Sounds', value: soundName },
+    { id: 'alarm', icon: 'bell', title: 'Alarm', value: sp.alarmOn && plan.on ? wakeHM : 'Off' },
+  ];
+  const tags: { id: Hot; icon: string; label: string; value: string; on: boolean }[] = [
+    { id: 'mic', icon: 'mic', label: 'Mic', value: sp.mic ? 'On' : 'Off', on: sp.mic },
+    { id: 'sound', icon: 'music', label: 'Sound', value: soundName, on: sp.soundscape !== 'none' },
+    { id: 'alarm', icon: 'bell', label: 'Alarm', value: sp.alarmOn && plan.on ? wakeHM : 'Off', on: sp.alarmOn && plan.on },
+    { id: 'lamp', icon: 'candle', label: 'Lamp', value: lampDim.current ? 'Dim' : 'On', on: !lampDim.current },
+  ];
+  const inRoom = step === 'room';
 
   return (
-    <div class={'sf' + (dim ? ' dim' : '') + (out ? ' out' : '') + (leaving ? ' leaving' : '')} role="dialog" aria-label="Bedtime">
-      <button class="sf-back" aria-label="Back to the hollow" onClick={close}><Px name="arrow_left" size={30} /></button>
-      <div class="sf-scroll">
-      <div class="sf-wall" style={{ backgroundImage: `url(${wallpaper()})`, backgroundSize: '72px 72px' }}>
-        <PaintCanvas w={winW * 3} h={168} fps={8} deps={[winW, dim]} class="sf-window" label="The night outside your window" draw={(g, t, w, h) => paintWindow(g, w, h, t, { phase: moonPhase(), dim: dim ? -0.5 : 0 })} />
-        <div class="sf-sign hh-wood-sm"><span>Bedtime</span></div>
-      </div>
-
-      <div class="sf-table" style={tableBg}>
-        <div class="sf-edge" />
-        <div class="sf-props">
-          <CandleProp dim={dim} onTap={() => { tap('ui_toggle', 0.4); if (steps.some((x) => x.id === 'lights')) toggle('lights', document.querySelector('.prop-candle')); }} />
-          <button class="prop prop-clock" aria-label="Alarm clock: adjust tonight on the Clock" onClick={openClock}>
-            <WoodClock wake={plan.wake} bedtime={plan.bed} hour12={h12} size={128} />
+    <div class={'bd' + (inRoom ? '' : ' cine') + (ready ? ' ready' : '')} role="dialog" aria-label="Bedtime">
+      {/* the brass tags over the things in the room */}
+      <div class="bd-tags" aria-hidden={!inRoom}>
+        {inRoom && tags.map((t) => (
+          <button key={t.id} ref={(el) => { if (el) chips.current.set(t.id, el); else chips.current.delete(t.id); }} class={'bd-tag' + (t.on ? ' on' : '') + (hover === t.id ? ' hover' : '') + ((t.id === 'alarm' && pane === 'alarm') || pane === t.id ? ' sel' : '')} onClick={() => pickHot(t.id)} aria-label={`${t.label}: ${t.value}`}>
+            <span class="bd-tag-in"><i class="led" /><b>{t.label}</b><span>{t.value}</span></span>
+            <span class="bd-tag-stem" />
           </button>
-          <MugProp tea={s.profile.caffeine !== 'late' || isDone('coffee')} onTap={() => { if (s.profile.caffeine === 'late') toggle('coffee', document.querySelector('.prop-mug')); else { tap('ui_tap', 0.4); sound.play('water_plop', { volume: 0.3 }); } }} />
-          {s.profile.phone !== 'never' && <PhoneProp bed={isDone('phone')} onTap={() => { if (isDone('phone')) toggle('phone', document.querySelector('.prop-phone')); else { tap('ui_open', 0.5); setLock(true); } }} />}
-        </div>
+        ))}
+      </div>
 
-        <div class="sf-grid">
-          <div class="sf-col">
-            {/* tonight's plan, a ticket */}
-            <button class="sf-ticket" onClick={openClock} aria-label="Tonight's plan: tap to adjust on the Clock">
-              <Paper kind="postcard" opts={{ edge: 0.3, edgeW: 6 }} class="tk-body">
-                <div class="tk-head"><span class="tk-kicker">Tonight · {DAY_NAME[plan.day]}</span><span class="tk-stamp">{plan.on ? 'PLANNED' : 'FREE NIGHT'}</span></div>
-                <div class="tk-times">
-                  <div><small>Bed</small><b>{hm2(fmtHM(plan.bed, h12))}</b></div>
-                  <span class="tk-arrow"><Px name="zzz" size={30} /></span>
-                  <div><small>Wake</small><b class="wake">{plan.on ? hm2(fmtHM(plan.wake, h12)) : 'sleep in'}</b></div>
-                </div>
-                <p class="tk-line">{fmtDur(plan.min * 60_000)} of sleep{smart ? <> · smart wake from {smart}</> : null}</p>
-                <p class="tk-line area"><Px name="map" size={30} />Pip explores <b>{area?.name ?? 'the woods'}</b></p>
-                <span class="tk-hint">Tap to adjust</span>
-              </Paper>
-              <span class="tk-stub"><Px name="owl" size={30} /></span>
-            </button>
-            {!plan.on && <button class="sf-plan-it hh-btn-cream" onClick={() => { tap('stamp', 0.5); setRoutine(setNight(s.routine, plan.day, { on: true })); }}>Set an alarm for tonight</button>}
-
-            {/* the wind-down card */}
-            <div class="sf-cards">
-              <span class="sf-under u1" /><span class="sf-under u2" />
-              <Paper kind="notebook" opts={{ rules: 8, ruleTop: 18, margin: 14, edge: 0.15 }} class="sf-index">
-                <h3>Wind-down</h3>
-                <ul>
-                  {steps.map((st) => (
-                    <li class={isDone(st.id) ? 'done' : ''}>
-                      <button class="sf-step" onClick={(e) => { if (st.id === 'breathe' && !isDone('breathe')) { startBreath(); return; } if (st.id === 'phone' && !isDone('phone')) { tap('ui_open', 0.5); setLock(true); return; } toggle(st.id, (e.currentTarget as Element).querySelector('.box')); }}>
-                        <span class="box"><PencilTick on={isDone(st.id)} /></span>
-                        <span class="txt"><b>{st.title}</b><small>{st.sub}</small></span>
-                        <Px name={st.sprite} size={30} />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                <p class="sf-count">{done.filter((d) => steps.some((x) => x.id === d)).length} of {steps.length} done</p>
-              </Paper>
-              <img class="sf-pencil" src={pencilURL()} alt="" />
-            </div>
+      {inRoom && <>
+        <header class="bd-top">
+          <button class="bd-back" aria-label="Back to the hollow" onClick={close}><Px name="arrow_left" size={30} /></button>
+          <div class="bd-title">
+            <span class="bd-kicker">{DAY_NAME[plan.day]} night</span>
+            <h1>Bedtime</h1>
           </div>
+        </header>
 
-          <div class="sf-col">
-            {/* three cards: how to fall asleep earlier */}
-            <div class="sf-tips" onClick={() => { tap('paper_flip', 0.45); setFlip(tipAt); setTimeout(() => setFlip(-1), 520); setTipAt((i) => (i + 1) % tips.length); }} role="button" aria-label="How to fall asleep earlier: tap for the next tip">
-              <h4 class="sf-label">How to fall asleep earlier</h4>
-              <div class="tip-stack">
-                {tips.map((t, i) => {
-                  const pos = (i - tipAt + tips.length) % tips.length;
-                  return (
-                    <Paper kind="cream" opts={{ edge: 0.25, edgeW: 6, seed: 40 + i }} class={'tip pos' + pos + (flip === i ? ' flip' : '')} style={{ zIndex: 10 - pos }}>
-                      <span class="tip-n">{i + 1}/{tips.length}</span>
-                      <span class="tip-ico"><Px name={t.sprite} size={52} /></span>
-                      <b>{t.title}</b>
-                      <p>{t.body}</p>
-                    </Paper>
-                  );
-                })}
+        <aside class={'bd-panel' + (wide ? ' side' : ' sheet')}>
+          {!wide && <nav class="bd-tabs" role="tablist">
+            {panes.map((p) => <button role="tab" aria-selected={pane === p.id} class={'bd-tabbtn' + (pane === p.id ? ' sel' : '')} onClick={() => { tap('ui_tab', 0.4); setPane(p.id); room.current?.go(p.id === 'tonight' ? 'room' : p.id); }}><Px name={p.icon} size={30} /><span>{p.title}</span></button>)}
+          </nav>}
+          <div class="bd-body">
+            {(wide || pane === 'tonight') && <section class={'bd-sec' + (pane === 'tonight' ? ' sel' : '')} onClick={() => wide && setPane('tonight')}>
+              {wide && <h2><Px name="moon" size={30} />Tonight</h2>}
+              <button class="bd-times" onClick={() => { tap('ui_open', 0.5); panel.value = 'clock'; }} aria-label="Tonight's times: tap to adjust on the Clock">
+                <div><small>Bed</small><b class="num">{fmtHM(plan.bed, h12)}</b></div>
+                <span class="bd-arc"><i /><em>{fmtDur(plan.min * 60_000)}</em></span>
+                <div><small>Wake</small><b class="num">{wakeHM}</b></div>
+              </button>
+              <p class="bd-line"><Px name="map" size={30} /><span>Pip flies to <b>{area?.name ?? 'the woods'}</b>{smart ? <><br />Smart wake from {smart}</> : null}</span></p>
+              {!plan.on && <button class="bd-link" onClick={() => { tap('stamp', 0.5); setRoutine(setNight(s.routine, plan.day, { on: true })); }}>Set an alarm for tonight</button>}
+            </section>}
+
+            {(wide || pane === 'mic') && <section class={'bd-sec' + (pane === 'mic' ? ' sel' : '')} onClick={() => wide && pane !== 'mic' && (setPane('mic'), room.current?.go('mic'))}>
+              <div class="bd-row">
+                {wide && <h2 class="grow"><Px name="mic" size={30} />Sleep tracking</h2>}
+                {!wide && <b class="grow">Pip listens while you sleep</b>}
+                <Toggle on={sp.mic} onChange={(v) => { set((x) => { x.mic = v; }); sound.play(v ? 'ui_toggle' : 'ui_back', { volume: 0.4 }); }} label="Sleep tracking" />
               </div>
-            </div>
+              <p class="bd-note">{import.meta.env.MODE === 'artifact' ? 'Here the night is tracked by time; the microphone works in the full app.' : sp.mic ? 'Snores, sleep talk and tossing, analysed on this device. Nothing is uploaded.' : 'Off: the night is tracked by time only.'}</p>
+            </section>}
 
-            {/* the sound tray */}
-            <div class="sf-tray hh-wood-dark">
-              <div class="tray-head"><Px name="music" size={30} /><b>Falling-asleep sounds</b></div>
-              <SoundTiles value={sp.soundscape} options={SOUNDSCAPES} onPick={(v) => set((x) => { x.soundscape = v; })} preview={(v) => { if (v === 'none') return 0; sound.preview(v, 5); return 5000; }} />
-              {sp.soundscape !== 'none' && <div class="tray-row"><span>Fade after</span><Tags value={sp.soundscapeMin} onChange={(v) => set((x) => { x.soundscapeMin = v; })} options={[{ v: 15, label: '15m' }, { v: 30, label: '30m' }, { v: 60, label: '1h' }, { v: 0, label: 'All night' }]} /></div>}
-              <div class="tray-head"><Px name="bell" size={30} /><b class="grow">Alarm</b><Toggle on={sp.alarmOn} onChange={(v) => set((x) => { x.alarmOn = v; })} label="Alarm" /></div>
+            {(wide || pane === 'sound') && <section class={'bd-sec' + (pane === 'sound' ? ' sel' : '')} onClick={() => wide && pane !== 'sound' && (setPane('sound'), room.current?.go('sound'))}>
+              {wide && <h2><Px name="music" size={30} />Falling-asleep sounds</h2>}
+              <SoundTiles cols={4} value={sp.soundscape} options={SOUNDSCAPES} onPick={(v) => set((x) => { x.soundscape = v; })} preview={(v) => { if (v === 'none') return 0; sound.preview(v, 5); return 5000; }} />
+              {sp.soundscape !== 'none' && <div class="bd-row bd-seg"><span class="grow">Fade out</span>
+                {[[15, '15m'], [30, '30m'], [60, '1h'], [0, 'All night']].map(([v, l]) => <button class={'seg' + (sp.soundscapeMin === v ? ' sel' : '')} onClick={(e) => { e.stopPropagation(); tap('ui_tab', 0.35); set((x) => { x.soundscapeMin = v as number; }); }}>{l}</button>)}
+              </div>}
+            </section>}
+
+            {(wide || pane === 'alarm') && <section class={'bd-sec' + (pane === 'alarm' ? ' sel' : '')} onClick={() => wide && pane !== 'alarm' && (setPane('alarm'), room.current?.go('alarm'))}>
+              <div class="bd-row">
+                {wide ? <h2 class="grow"><Px name="bell" size={30} />Alarm</h2> : <b class="grow">Wake me at {wakeHM}</b>}
+                <Toggle on={sp.alarmOn} onChange={(v) => set((x) => { x.alarmOn = v; })} label="Alarm" />
+              </div>
               {sp.alarmOn && <>
-                <SoundTiles value={sp.alarmSound} options={ALARMS} onPick={(v) => set((x) => { x.alarmSound = v; })} preview={(v) => { sound.preview(v, 4, 'alarm'); return 4000; }} />
-                <div class="tray-row"><span>Smart wake</span><Tags value={sp.smartMin} onChange={(v) => set((x) => { x.smartMin = v; })} options={[{ v: 0, label: 'Exact' }, { v: 10, label: '10m' }, { v: 20, label: '20m' }, { v: 30, label: '30m' }]} /></div>
+                <SoundTiles cols={4} value={sp.alarmSound} options={ALARMS} onPick={(v) => set((x) => { x.alarmSound = v; })} preview={(v) => { sound.preview(v, 4, 'alarm'); return 4000; }} />
+                <div class="bd-row bd-seg"><span class="grow">Smart wake</span>
+                  {[[0, 'Exact'], [10, '10m'], [20, '20m'], [30, '30m']].map(([v, l]) => <button class={'seg' + (sp.smartMin === v ? ' sel' : '')} onClick={(e) => { e.stopPropagation(); tap('ui_tab', 0.35); set((x) => { x.smartMin = v as number; }); }}>{l}</button>)}
+                </div>
               </>}
-            </div>
-
-            {/* the microphone note */}
-            <Paper kind="sticky" opts={{ sticky: 1, seed: 3 }} class="sf-mic">
-              <div class="mic-row"><Px name="mic" size={40} /><span class="grow"><b>Pip listens while you sleep</b><small>{import.meta.env.MODE === 'artifact' ? 'Here the night is tracked by time; the mic works in the full app.' : 'Snores, sleep talk and tossing. It all stays on this phone.'}</small></span><Toggle on={sp.mic} onChange={(v) => set((x) => { x.mic = v; })} label="Sleep tracking" /></div>
-              {blockStatus.value && <p class="mic-block"><Px name="shield" size={30} />{blockStatus.value.blocking ? 'The bedtime blocker is on' : 'The bedtime blocker will switch on'}</p>}
-            </Paper>
-            {s.nights.length < 2 && <button class="sf-demo" onClick={() => { tap(); demoTonight(); panel.value = null; toast('A pretend night, so you can see the morning.'); }}>Try a pretend night first</button>}
+            </section>}
           </div>
-        </div>
-        <div class="sf-spacer" />
-      </div>
-      </div>
+          {s.nights.length < 2 && <button class="bd-demo" onClick={() => { tap(); demoTonight(); panel.value = null; toast('A pretend night, so you can see the morning.'); }}>Try a pretend night first</button>}
+        </aside>
 
-      <div class="sf-foot">
-        <HoldButton ms={1500} label="Hold to go to sleep" class="sf-sleep hh-btn-night" onDone={lightsOut}>
-          <Px name="candle" size={40} /><span>Hold to sleep</span>
-        </HoldButton>
-        <p>Pip flies off to {area?.name ?? 'the woods'}</p>
-      </div>
-      <div class="sf-dark" />
-      {lock && <PhoneLockSheet wake={plan.wake} hour12={h12} onClose={() => { tap('ui_close', 0.4); setLock(false); }} onDone={() => { setLock(false); if (!isDone('phone')) toggle('phone', document.querySelector('.prop-phone')); }} />}
-      {picker && <div class="sf-modal" onClick={(e) => { if (e.target === e.currentTarget) { tap('ui_close', 0.4); setPicker(false); } }}>
-        <BreathePicker embedded preset={s.profile.latency === 'slow' || s.profile.latency === 'long' ? 'sleep' : undefined} onClose={() => setPicker(false)} onBegin={() => { const d = done.includes('breathe') ? done : [...done, 'breathe' as StepId]; setDone(d); saveDone(d); }} />
-      </div>}
+        <footer class="bd-foot">
+          <button class="bd-go" onClick={() => void goToBed()} disabled={busy}>
+            <span class="bd-go-moon" aria-hidden="true" />
+            <span class="bd-go-txt"><b>I’m going to bed</b><small>Lock the phone · pack · fly to {area?.title ?? 'the woods'}</small></span>
+          </button>
+        </footer>
+      </>}
+
+      {cap && !inRoom && <div class="bd-cap" key={cap.id}><b>{cap.text}</b>{cap.sub && <small>{cap.sub}</small>}</div>}
+      {!inRoom && <><i class="bd-bar t" /><i class="bd-bar b" /></>}
     </div>
   );
 }
-const toHHMMm = (m: number) => { m = ((m % 1440) + 1440) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
 
-/** [ui7] a yellow pencil: lacquered hexagonal barrel, brass ferrule, pink eraser, sharpened cedar tip (132 x 24 CSS px) */
-function pencilURL() {
-  return cached('pencil7', () => {
-    const r = new Real(132, 24, deviceK(3), 0);
-    r.part(box(16, 4, 92, 15, 1), (x, y) => tubeX(11.5, 7.5, 1)(x, y, 0) + (Math.abs(y - 11.5) < 2.6 ? 0.6 : 0), enamel('#f0b828', { gloss: 0.8 }));
-    r.part(box(106, 3.5, 12, 16, 1.5), tubeX(11.5, 8, 1), metal(GOLD, { along: 'y', polish: 0.6 }));
-    for (const x of [108.5, 112, 115.5]) r.carve(box(x, 3.5, 0.8, 16), 0.5, 0.4);
-    r.part(box(117, 4, 13, 15, 5), tubeX(11.5, 7.5, 1), matte('#e88a8a', { spec: 0.12 }));
-    r.part(polygon([[17, 4], [17, 19], [2.5, 11.5]]), (x, y) => tubeX(11.5, 7.5 * (x - 2) / 15, 1)(x, y, 0), wood('honey', { along: 'x', scale: 4 }));
-    r.part(polygon([[7, 9.2], [7, 13.8], [2, 11.5]]), 1.6, matte('#3a3a40', { spec: 0.6, shin: 40 }));
-    return r.url({ shadow: { dy: 2, blur: 3, a: 0.4 } });
-  });
+// ------------------------------------------------------------------ choosing tonight's place on the real Earth
+
+function GlobePick(p: { onBack: () => void; onGo: () => void }) {
+  const sc = sceneRef.current;
+  const s = save.value;
+  const [sel, setSel] = useState<string>(s.area);
+  const [ready, setReady] = useState(false);
+  const stageRef = useRef<GlobeStage | null>(null);
+  const pinEls = useRef(new Map<string, HTMLElement>());
+  const rail = useRef<HTMLDivElement>(null);
+  const places = useMemo(() => [...AREAS].sort((a, b) => Number(areaOpen(b.id)) - Number(areaOpen(a.id)) || a.level - b.level), []);
+  thumbsReady.value;
+
+  useEffect(() => {
+    if (!sc) return undefined;
+    let st: GlobeStage | null = null;
+    try { st = new GlobeStage(sc.renderer, sc.quality); } catch (e) { console.warn('globe failed', e); return undefined; }
+    stageRef.current = st;
+    st.setPlaces(AREAS.map(placeOf));
+    st.setOwl(tripLook(save.value.look));
+    const t = AREA[save.value.area];
+    st.lookAt(t ? t.lat * 0.7 + 8 : home.lat * 0.6, t ? t.lon : home.lon);
+    if (t) st.setRoute(home, t);
+    loadThumbs();
+    const postWas = sc.post.enabled;
+    sc.post.enabled = false;
+    sc.setStage(st);
+    st.resize(innerWidth, innerHeight);
+    const layout = () => { const w = innerWidth, h = innerHeight, bottom = h - Math.min(250, h * 0.36); st!.setView(w / 2, (78 + bottom) / 2, Math.min(w * 0.42, (bottom - 78) * 0.44)); };
+    layout();
+    addEventListener('resize', layout);
+    st.onFrame = (pins) => placePins(pins);
+    st.onReady = () => setReady(true);
+    st.onSpin = (v) => { if (v > 25) sound.play('globe_spin', { volume: 0.15, gap: 600 }); };
+    sound.play('tp_shimmer', { volume: 0.25 });
+    return () => { removeEventListener('resize', layout); if (sc.stage === st) sc.setStage(null); sc.post.enabled = postWas; };
+  }, []);
+
+  function placePins(pins: PinView[]) {
+    for (const pv of pins) {
+      const el = pinEls.current.get(pv.id);
+      if (!el) continue;
+      if (pv.facing < 0.05) { el.style.display = 'none'; continue; }
+      el.style.display = '';
+      el.style.opacity = String(Math.min(1, (pv.facing - 0.05) * 6));
+      el.style.transform = `translate(${Math.round(pv.x)}px, ${Math.round(pv.y)}px)`;
+      el.style.zIndex = String(Math.round((1 - pv.depth) * 500));
+    }
+  }
+
+  function choose(id: string, from: 'pin' | 'card') {
+    const a = AREA[id];
+    if (!a) return;
+    if (!areaOpen(id)) { tap('ui_error', 0.4); toast(`${a.title} opens at level ${a.level}${a.streak ? ` and a ${a.streak}-night streak` : ''}.`); return; }
+    tap('pin_tap', 0.5);
+    setSel(id);
+    const st = stageRef.current;
+    if (st) { st.setRoute(home, a); st.lookAt(a.lat * 0.7 + 6, a.lon); }
+    if (from === 'pin') rail.current?.querySelector(`[data-id="${id}"]`)?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
+  function go() {
+    tap('ui_confirm', 0.6);
+    sound.play('owl_wing', { volume: 0.5 });
+    edit((x) => { x.area = sel; });
+    p.onGo();
+  }
+  const a = AREA[sel];
+  return (
+    <div class={'bd bd-globe' + (ready ? ' ready' : '')} role="dialog" aria-label="Choose tonight's place">
+      <header class="bd-top">
+        <button class="bd-back" aria-label="Back to the bedroom" onClick={() => { tap('ui_back', 0.5); p.onBack(); }}><Px name="arrow_left" size={30} /></button>
+        <div class="bd-title"><span class="bd-kicker">Tonight’s flight</span><h1>Where to?</h1></div>
+      </header>
+      <div class="bd-pins">
+        {AREAS.map((x) => {
+          const open = areaOpen(x.id);
+          return <button key={x.id} ref={(el) => { if (el) pinEls.current.set(x.id, el); }} class={'bd-pin' + (open ? '' : ' locked') + (sel === x.id ? ' sel' : '')} style={{ '--c': x.color } as Record<string, string>} onClick={() => choose(x.id, 'pin')} aria-label={x.title}>
+            <i /><span>{x.title.replace(/^The /, '')}</span>
+          </button>;
+        })}
+      </div>
+      <div class="bd-rail" ref={rail}>
+        {places.map((x) => {
+          const open = areaOpen(x.id);
+          return (
+            <button key={x.id} data-id={x.id} class={'bd-place' + (open ? '' : ' locked') + (sel === x.id ? ' sel' : '')} onClick={() => choose(x.id, 'card')}>
+              <span class="ph" style={thumbStyle(x.id, 148)} />
+              <span class="tx"><b>{x.title}</b><small>{open ? x.country : `Level ${x.level}${x.streak ? ` · ${x.streak}-night streak` : ''}`}</small></span>
+              {!open && <span class="lk"><Px name="lock" size={30} /></span>}
+            </button>
+          );
+        })}
+      </div>
+      <footer class="bd-foot">
+        <button class="bd-go" onClick={go} disabled={!a || !areaOpen(sel)}>
+          <span class="bd-go-moon" aria-hidden="true" />
+          <span class="bd-go-txt"><b>Fly to {a?.title ?? '…'}</b><small>{a ? `${a.country} · a five-minute breathing flight` : ''}</small></span>
+        </button>
+      </footer>
+    </div>
+  );
 }
 
-export { breathing };
+// ------------------------------------------------------------------ the breathing flight
+
+function Flight(p: { onArrive: () => void; arriving: boolean }) {
+  const sc = sceneRef.current;
+  const s = save.value;
+  const a = AREA[s.area];
+  const slow = s.profile.latency === 'slow' || s.profile.latency === 'long';
+  const pattern = PATTERN[slow ? 'sleep' : 'settle'] ?? PATTERN.settle;
+  const [phase, setPhase] = useState<Phase>(pattern.phases[0]);
+  const [count, setCount] = useState(0);
+  const [left, setLeft] = useState(FLIGHT_MIN * 60);
+  const [q, setQ] = useState(0);
+  const [done, setDone] = useState(false);
+  const ring = useRef<HTMLDivElement>(null);
+  const bar = useRef<HTMLElement>(null);
+  const stage = useRef<FlightStage | null>(null);
+  const session = useMemo(() => new BreathSession(pattern, FLIGHT_MIN), []);
+
+  useEffect(() => {
+    let st: FlightStage | null = null;
+    if (sc) {
+      try { st = new FlightStage(sc.renderer, tripLook(save.value.look), sc.quality, Math.floor(Math.random() * 1000)); } catch (e) { console.warn('flight failed', e); }
+      if (st) { stage.current = st; st.resize(innerWidth, innerHeight); sc.setStage(st); }
+    }
+    sound.music('music_breath');
+    sound.preload(['breath_in', 'breath_out', 'breath_hold']);
+    session.onPhase = (ph) => {
+      setPhase(ph);
+      sound.play(ph.kind === 'in' ? 'breath_in' : ph.kind === 'out' ? 'breath_out' : 'breath_hold', { volume: 0.32 });
+      if (ph.kind === 'in') haptic(6);
+    };
+    let raf = 0, last = performance.now(), lastLeft = -1, lastCount = -1, finished = false, hx = innerWidth / 2, hy = innerHeight / 2;
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      const b = session.step(dt);
+      stage.current?.setBreath(b.lung);
+      if (ring.current) {
+        ring.current.style.setProperty('--lung', b.lung.toFixed(3));
+        // the halo breathes round Pip, following him gently
+        const o = stage.current?.pipScreen();
+        if (o && Number.isFinite(o.x)) { hx += (o.x - hx) * Math.min(1, dt * 3); hy += (o.y + 30 - hy) * Math.min(1, dt * 3); ring.current.style.left = `${Math.round(hx)}px`; ring.current.style.top = `${Math.round(hy)}px`; }
+      }
+      const rem = Math.max(0, Math.ceil(b.total - b.elapsed));
+      if (rem !== lastLeft) { lastLeft = rem; setLeft(rem); }
+      if (bar.current) bar.current.style.setProperty('--p', String(Math.min(1, b.elapsed / b.total)));
+      if (b.left !== lastCount) { lastCount = b.left; setCount(b.left); }
+      if (b.done && !finished) { finished = true; setDone(true); sound.play('chime_sweep', { volume: 0.5 }); edit((x) => { x.breath.sessions += 1; x.breath.minutes += FLIGHT_MIN; x.breath.lastDay = dayKey(); }); }
+    };
+    raf = requestAnimationFrame(loop);
+    const qt = setInterval(() => setQ((n) => n + 1), 36000);
+    return () => { cancelAnimationFrame(raf); clearInterval(qt); sound.music(null); if (sc && st && sc.stage === st) sc.setStage(null); };
+  }, []);
+
+  const r = REFLECT[q % REFLECT.length];
+  const mm = Math.floor(left / 60), ss = String(left % 60).padStart(2, '0');
+  return (
+    <div class={'bd bd-fly' + (done ? ' done' : '')} role="dialog" aria-label="The flight">
+      <header class="bd-route">
+        <div class="bd-route-in">
+          <span class="from"><Px name="treehouse" size={30} />Home</span>
+          <span class="track" ref={bar}><i class="fill" /><i class="owl" /></span>
+          <span class="to"><Px name="map" size={30} />{a?.title ?? 'The woods'}</span>
+        </div>
+        <span class="eta">{done ? 'Arriving' : <><b class="num">{mm}:{ss}</b> to {a?.name ?? 'the woods'}</>}</span>
+      </header>
+
+      {!done && <div class="bd-breath" ref={ring} aria-live="polite">
+        <span class="ring" /><span class="ring r2" />
+        <span class="cue"><b>{phase.label}</b><span class="num">{count}</span></span>
+      </div>}
+
+      {!done && <div class="bd-think" key={q}>
+        <b>{r.q}</b>
+        <small>{r.sub}</small>
+      </div>}
+
+      {done && <div class="bd-arrive">
+        <span class="bd-kicker">You’ve arrived</span>
+        <h1>{a?.title ?? 'The woods'}</h1>
+        <p>Pip will explore while you sleep, and be home with treasures by morning.</p>
+        <button class="bd-go" onClick={() => { tap('ui_confirm', 0.5); p.onArrive(); }} disabled={p.arriving}>
+          <span class="bd-go-moon" aria-hidden="true" />
+          <span class="bd-go-txt"><b>Goodnight</b><small>Start the night</small></span>
+        </button>
+      </div>}
+
+      {!done && <button class="bd-skip" onClick={() => { tap('ui_tap', 0.4); p.onArrive(); }}>Skip to sleep</button>}
+      <i class="bd-bar t" /><i class="bd-bar b" />
+    </div>
+  );
+}
