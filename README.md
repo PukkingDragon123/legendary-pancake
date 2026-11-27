@@ -26,6 +26,26 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Optional premium**: moonstones and a Hoot Hollow Plus subscription. The bundled store is a
   clearly labelled demo (`src/ui/market.tsx`, `PurchaseProvider`): nothing is charged.
 
+## Profile, photo studio and friends
+
+- **Tap Pip's portrait** on the name sign to open the profile: a walnut cabinet over a little 3D photo studio, with
+  Studio, Frames, Friends and Ranks tabs (`src/ui/profile/`).
+- **Photo studio** (`src/world/stages/studio.ts`): a chroma-green muslin on backdrop stands, softboxes, a fresnel on
+  the screen and a walnut bellows camera on a wooden tripod whose ground glass shows the shot live. Pick a pose (wave,
+  proud, wing up, thinking, dancing, flying, hug, ta-da, sleepy, stretch), an expression, a framing and a backdrop.
+  It is a real key: the studio is rendered from the lens, the green is keyed out in a shader (matte, choke, despill,
+  light wrap) and Pip is laid over a painted plate (`backdrops.ts`: moonlit wood, full moon, Milky Way, meadow, the old
+  oak, golden hour, six paper rolls). The shutter fires the strobes and saves a 256 px WebP into the save; the frame
+  on the name sign then shows the photo (or the live owl again, at a tap).
+- **Fourteen portrait frames**, each a modelled object with its own silhouette (carved walnut, a cast brass porthole
+  with glass, twisted willow and moss, knitted wool, silver filigree, a fairy ring, gilt laurel, frost, an orrery,
+  gingerbread, a starry night, and new: honeycomb, driftwood and hemp, a rose window).
+- **Friends and ranks, honestly local**: there is no server, so your friend code (`hoot1.…`, versioned and checksummed,
+  or a `#friend=` link) is a snapshot of your name, owl, level, streaks and sleep averages. Paste a friend's code to add
+  them, a newer one to refresh them. The board ranks you, your friends and the Hollow's neighbours (Barnaby, Hazel,
+  Fennimore, Mabel, Juniper: characters, shown as cut-paper silhouettes) by streak, sleep or level; ties share a place.
+  Dev page: `/dev-profile.html` (`?tab=ranks&friends=1`, `?frames=1`).
+
 ## What's new in the golden diorama update (v4)
 
 - **Light and colour**: realistic lighting (filmic tone mapping, sun and sky fill, reflections) with bloom,

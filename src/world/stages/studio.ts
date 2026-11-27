@@ -674,7 +674,7 @@ export class Studio implements Stage {
     // one, closer in on Pip, the box and the screen behind him
     const wide = vw >= 600 && vh >= 420;
     const target = wide ? v3(-0.22, 1.0, -0.05) : v3(0.0, 0.85, 0.1);
-    const tw = wide ? 3.1 : 2.5, th = wide ? 2.15 : 1.75;
+    const tw = wide ? 2.85 : 2.5, th = wide ? 2.0 : 1.75;
     const hv = t * (vh / h), hh = t * (w / h) * (vw / w);
     const d = Math.max(tw / 2 / hh, th / 2 / hv) * 1.02;
     const yaw = (wide ? 0.06 : 0.1) + this.yaw, pitch = wide ? 0.1 : 0.14;
