@@ -189,6 +189,11 @@ function labelTex(): THREE.Texture {
   });
 }
 
+// painted once per session and kept: reopening the bedroom is instant
+let MATS: OfficeMats | null = null;
+const TEX: Record<string, THREE.Texture> = {};
+const once = (k: string, f: () => THREE.Texture) => (TEX[k] ??= f());
+
 // ------------------------------------------------------------------ the stage
 
 interface Hop { from: THREE.Vector3; to: THREE.Vector3; t: number; dur: number; face: number; done: () => void; hops: number }
@@ -271,8 +276,7 @@ export class BedroomStage implements Stage {
     this.quality = quality;
     const s = this.scene;
     s.background = new THREE.Color(0x0d0a12);
-    this.m = officeMats();
-    this.disposers.push(() => { for (const t of this.m.textures) t.dispose(); for (const x of this.m.all) x.dispose(); });
+    this.m = MATS ??= officeMats();
     try {
       this.pmrem = new THREE.PMREMGenerator(renderer);
       const env = this.pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
@@ -338,9 +342,9 @@ export class BedroomStage implements Stage {
 
   private buildShell() {
     const m = this.m, b = new Batch();
-    const floorMat = new THREE.MeshStandardMaterial({ map: boardsTex(), roughness: 0.62 });
-    const plaster = new THREE.MeshStandardMaterial({ map: plasterTex(), roughness: 0.95 });
-    this.disposers.push(() => { floorMat.map?.dispose(); floorMat.dispose(); plaster.map?.dispose(); plaster.dispose(); });
+    const floorMat = new THREE.MeshStandardMaterial({ map: once('boards', boardsTex), roughness: 0.62 });
+    const plaster = new THREE.MeshStandardMaterial({ map: once('plaster', plasterTex), roughness: 0.95 });
+    this.disposers.push(() => { floorMat.dispose(); plaster.dispose(); });
     // floor (world-scaled UVs: 2 m a tile)
     const fl = new THREE.PlaneGeometry(X1 - X0, 5.6).rotateX(-Math.PI / 2);
     fl.translate((X0 + X1) / 2, 0, Z0 + 2.8);
@@ -528,9 +532,9 @@ export class BedroomStage implements Stage {
     b.add(m.walnut, at(hg, x, 0.52, z0 + 0.02));
     this.add(b.build('bed'));
     // mattress, quilt and pillows
-    const quilt = new THREE.MeshStandardMaterial({ map: quiltTex(), roughness: 0.92 });
-    const sheet = new THREE.MeshStandardMaterial({ map: linenTex('#efe6d2'), roughness: 0.95 });
-    this.disposers.push(() => { quilt.map?.dispose(); quilt.dispose(); sheet.map?.dispose(); sheet.dispose(); });
+    const quilt = new THREE.MeshStandardMaterial({ map: once('quilt', quiltTex), roughness: 0.92 });
+    const sheet = new THREE.MeshStandardMaterial({ map: once('sheet', () => linenTex('#efe6d2')), roughness: 0.95 });
+    this.disposers.push(() => { quilt.dispose(); sheet.dispose(); });
     const mat = new THREE.Mesh(bbox(W - 0.04, 0.2, L - 0.06, { r: 0.06 }), sheet); mat.position.set(x, 0.3, zc + 0.01); this.add(mat);
     // the quilt: a soft slab that drapes over the sides, with a rumple
     const qg = new THREE.BoxGeometry(W + 0.12, 0.06, L * 0.72, 30, 2, 30);

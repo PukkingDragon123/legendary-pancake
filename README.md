@@ -26,6 +26,25 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Optional premium**: moonstones and a Hoot Hollow Plus subscription. The bundled store is a
   clearly labelled demo (`src/ui/market.tsx`, `PurchaseProvider`): nothing is charged.
 
+## What's new in the bedtime journey update (v16)
+
+- **Bedtime is a journey in 3D** (`src/ui/sleepflow.tsx`): Pip's lamplit bedroom high in the oak
+  (`src/world/stages/bedroom.ts`) with the real forest in its arched window and moonlight falling through the glazing
+  bars. The things in the room are the controls: a microphone on the sill (sleep tracking), a record player that spins
+  while a sleep sound is on, the brass alarm clock, the moon lamp. Brass tags float over them and a smoked-glass panel
+  (a sheet on phones) holds the settings.
+- **"I'm going to bed"**: Pip tucks the phone into its little wooden bed, padlocks it and turns the key with his beak;
+  then he packs (his trail backpack goes on), spins the floor globe, and the real Earth comes up to choose tonight's place.
+- **The breathing flight** (`src/world/stages/flight.ts`): five minutes over an endless moonlit forest (firs and round
+  crowns, a river with a glittering moon path, valley mist, clouds, a Milky Way, far ridges in the haze). Pip rises with
+  full wingbeats on each in-breath and glides on each out-breath; a halo breathes round him, quiet questions to think
+  about drift in, and the time to arrival counts down. When he lands, the night begins.
+- **Realistic 3D transitions with motion blur** (`src/ui/chrome/trans3d.ts`): acorns, feathers, clouds and a dream
+  haze, rendered in 3D on their own overlay with sub-frame motion blur; the main picture gets camera motion blur too
+  (`src/world/post.ts`).
+- **The Clock** is now set in Barnaby's workshop: drag the moon and sun hands on the cuckoo clock's dial to set bedtime
+  and wake time; settings live in a walnut panel beside it (`src/world/stages/clockshop.ts`).
+
 ## What's new in the golden diorama update (v4)
 
 - **Light and colour**: realistic lighting (filmic tone mapping, sun and sky fill, reflections) with bloom,

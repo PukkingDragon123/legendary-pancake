@@ -60,6 +60,8 @@ export interface Grade {
   outlineCrease: number;
   /** [outline9] view distance (world units) where the lines have faded out (they start thinning at 40% of it) */
   outlineFar: number;
+  /** camera motion blur: the shutter as a fraction of a frame (0 = off, 0.5 = a film camera's 180 degree shutter) */
+  motionBlur: number;
 }
 
 export function defaultGrade(): Grade {
@@ -68,7 +70,7 @@ export function defaultGrade(): Grade {
     lift: new THREE.Vector3(0, 0, 0), gamma: new THREE.Vector3(1, 1, 1), gain: new THREE.Vector3(1, 1, 1),
     split: 0.3, vignette: 0.22, grain: 0.018, bloom: 0.55, bloomThreshold: 1.0,
     focus: 0, focusRange: 6, blur: 0.6, focusAt: new THREE.Vector2(0.5, 0.5), cold: 0, quant: 255, orange: 1.04,
-    outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 80,
+    outline: 1, outlineWidth: 1, outlineCrease: 1, outlineFar: 80, motionBlur: 0.5,
   };
 }
 
@@ -138,6 +140,14 @@ export class Post {
   private stageGrade = defaultGrade();
   enabled = true;
   private rt!: THREE.WebGLRenderTarget;
+  /** the scene after camera motion blur (when the camera moves) */
+  private mbRT!: THREE.WebGLRenderTarget;
+  private mMotion: THREE.ShaderMaterial;
+  private prevVP = new THREE.Matrix4();
+  private curVP = new THREE.Matrix4();
+  private invVP = new THREE.Matrix4();
+  private prevCam: THREE.Camera | null = null;
+  private lastT = 0;
   private bloomRT: THREE.WebGLRenderTarget[] = [];
   private dofA!: THREE.WebGLRenderTarget;
   private dofB!: THREE.WebGLRenderTarget;
@@ -165,6 +175,27 @@ export class Post {
     this.levels = quality === 'high' ? 6 : quality === 'medium' ? 5 : 4;
     this.dofShift = 2;
     this.ink = new Ink(gl, quality);
+    // camera motion blur: each pixel's world point from the depth, where it was on screen last frame, and samples along
+    // the path between (the sky and far hills streak when the camera turns, the near things when it travels)
+    this.mMotion = shader(/* glsl */ `
+      uniform sampler2D tSrc; uniform sampler2D tDepth; uniform mat4 uInvVP; uniform mat4 uPrevVP; uniform float uAmt; uniform vec2 uTexel;
+      varying vec2 vUv;
+      void main() {
+        float d = texture2D(tDepth, vUv).x;
+        vec4 w = uInvVP * vec4(vUv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0); w /= w.w;
+        vec4 pc = uPrevVP * w;
+        vec2 v = (vUv - (pc.xy / pc.w * 0.5 + 0.5)) * uAmt;
+        float L = length(v), maxL = 0.04;
+        if (pc.w <= 0.0) v = vec2(0.0); else if (L > maxL) v *= maxL / L;
+        vec3 c0 = texture2D(tSrc, vUv).rgb;
+        if (length(v / uTexel) < 0.75) { gl_FragColor = vec4(c0, 1.0); return; }
+        vec3 acc = vec3(0.0); float ws = 0.0;
+        for (int i = 0; i < 12; i++) {
+          float t = float(i) / 11.0 - 0.5, wt = 1.0 - abs(t);
+          acc += min(texture2D(tSrc, vUv + v * t).rgb, vec3(24.0)) * wt; ws += wt;
+        }
+        gl_FragColor = vec4(acc / ws, 1.0);
+      }`, { tSrc: { value: null }, tDepth: { value: null }, uInvVP: { value: new THREE.Matrix4() }, uPrevVP: { value: new THREE.Matrix4() }, uAmt: { value: 0.5 }, uTexel: { value: new THREE.Vector2() } });
     this.mBright = shader(/* glsl */ `
       uniform sampler2D tSrc; uniform float uThresh; uniform vec2 uTexel; varying vec2 vUv;
       vec3 tap(vec2 o) { return min(texture2D(tSrc, vUv + o * uTexel).rgb, vec3(64.0)); }
@@ -367,12 +398,13 @@ export class Post {
     const w = Math.max(64, Math.round((W * pr) / this.pixel)), h = Math.max(64, Math.round((H * pr) / this.pixel));
     if (this.rt && w === this.w && h === this.h && this.rt.samples === MSAA[this.tier]) return;
     this.w = w; this.h = h;
-    for (const t of [this.rt, this.dofA, this.dofB, ...this.bloomRT]) t?.dispose();
+    for (const t of [this.rt, this.mbRT, this.dofA, this.dofB, ...this.bloomRT]) t?.dispose();
     const depth = new THREE.DepthTexture(w, h);
     depth.type = THREE.UnsignedIntType;
     depth.minFilter = depth.magFilter = THREE.NearestFilter;
     this.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthTexture: depth, samples: MSAA[this.tier] });
     const mk = (a: number, b: number) => new THREE.WebGLRenderTarget(Math.max(4, a), Math.max(4, b), { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false });
+    this.mbRT = mk(w, h);
     // bloom works from half resolution down; the depth of field from a quarter
     this.bloomRT = [];
     for (let i = 1; i <= this.levels; i++) this.bloomRT.push(mk(w >> i, h >> i));
@@ -402,6 +434,22 @@ export class Post {
     gl.clear();
     gl.render(scene, camera);
     Ink.idle();
+    // ---- camera motion blur (only while the camera really moves; a cut or a new camera starts clean)
+    let src = this.rt;
+    camera.updateMatrixWorld();
+    this.curVP.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    const now = performance.now(), gap = now - this.lastT;
+    this.lastT = now;
+    if (g.motionBlur > 0.01 && this.prevCam === camera && gap < 250 && !matNear(this.curVP, this.prevVP)) {
+      const mu = this.mMotion.uniforms;
+      mu.tSrc.value = this.rt.texture; mu.tDepth.value = this.rt.depthTexture;
+      mu.uInvVP.value.copy(this.invVP.copy(this.curVP).invert()); mu.uPrevVP.value.copy(this.prevVP);
+      mu.uAmt.value = g.motionBlur; mu.uTexel.value.set(1 / this.w, 1 / this.h);
+      this.pass(this.mMotion, this.mbRT);
+      src = this.mbRT;
+    }
+    this.prevVP.copy(this.curVP);
+    this.prevCam = camera;
     const u = this.mComp.uniforms;
     if (L.strength > 0.001) {
       this.ink.run(this.rt, camera, L, this.pixel, pr);
@@ -410,7 +458,7 @@ export class Post {
     // ---- bloom
     if (g.bloom > 0.001) {
       const B = this.bloomRT;
-      this.mBright.uniforms.tSrc.value = this.rt.texture;
+      this.mBright.uniforms.tSrc.value = src.texture;
       this.mBright.uniforms.uTexel.value.set(1 / this.w, 1 / this.h);
       this.mBright.uniforms.uThresh.value = g.bloomThreshold * (R ? R.thresh : 1);
       this.pass(this.mBright, B[0]);
@@ -433,7 +481,7 @@ export class Post {
       cu.uFocus.value = g.focus; cu.uRange.value = g.focusRange; cu.uFocusAt.value.copy(g.focusAt);
     }
     if (dofOn) {
-      this.mCoc.uniforms.tSrc.value = this.rt.texture;
+      this.mCoc.uniforms.tSrc.value = src.texture;
       this.mCoc.uniforms.uTexel.value.set(1 / this.w, 1 / this.h);
       this.pass(this.mCoc, this.dofA);
       const step = 0.6 + g.blur * 1.1;
@@ -443,7 +491,7 @@ export class Post {
     }
     u.uDofOn.value = dofOn ? 1 : 0; u.uBlur.value = Math.min(1, g.blur) * 1.4;
     // ---- composite
-    u.tColor.value = this.rt.texture;
+    u.tColor.value = src.texture;
     u.uRes.value.set(this.w, this.h); u.uFrame.value = this.frame % 1000; u.uTime.value = time;
     const nat = (v: number, k: number) => (R ? 1 + (v - 1) * k : v);
     u.uExposure.value = g.exposure; u.uCon.value = g.contrast + (R ? R.contrast : 0); u.uSat.value = nat(g.saturation, R?.sat ?? 1); u.uOrange.value = nat(g.orange, R?.sat ?? 1);
@@ -477,7 +525,14 @@ export class Post {
     this.gl.autoClear = ac;
   }
 
-  dispose() { for (const t of [this.rt, this.dofA, this.dofB, ...this.bloomRT]) t.dispose(); this.ink.dispose(); }
+  dispose() { for (const t of [this.rt, this.mbRT, this.dofA, this.dofB, ...this.bloomRT]) t.dispose(); this.ink.dispose(); }
+}
+
+/** two view-projections close enough that nothing on screen moved by more than a fraction of a pixel */
+function matNear(a: THREE.Matrix4, b: THREE.Matrix4) {
+  const x = a.elements, y = b.elements;
+  for (let i = 0; i < 16; i++) if (Math.abs(x[i] - y[i]) > 1e-5 * (1 + Math.abs(x[i]))) return false;
+  return true;
 }
 
 /** A stage's look over the stage defaults (lift/gamma/gain stay neutral). */

@@ -88,9 +88,9 @@ export function SleepScreen() {
 
   // ---- the bedroom stage
   useEffect(() => {
-    if (!sc) return undefined;
+    if (!sc) { setReady(true); return undefined; }
     let st: BedroomStage | null = null;
-    try { st = new BedroomStage(sc.renderer, save.value.look, sc, sc.quality); } catch (e) { console.warn('bedroom failed', e); return undefined; }
+    try { st = new BedroomStage(sc.renderer, save.value.look, sc, sc.quality); } catch (e) { console.warn('bedroom failed', e); setReady(true); return undefined; }
     room.current = st;
     st.resize(innerWidth, innerHeight);
     st.setMic(save.value.sleep.mic);
@@ -222,6 +222,7 @@ export function SleepScreen() {
 
   return (
     <div class={'bd' + (inRoom ? '' : ' cine') + (ready ? ' ready' : '')} role="dialog" aria-label="Bedtime">
+      {inRoom && <div class="bd-veil" aria-hidden="true"><i /></div>}
       {/* the brass tags over the things in the room */}
       <div class="bd-tags" aria-hidden={!inRoom}>
         {inRoom && tags.map((t) => (
