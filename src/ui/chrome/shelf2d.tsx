@@ -127,12 +127,20 @@ class ShelfStage {
 
   // ---------------------------------------------------------------- drawing (in art pixels, at SR canvas px each)
   /** a sprite where it was baked, lifted `dy` art px and squashed by `sq` about its foot */
-  private sprite(name: string, dy = 0, sq = 0) {
+  private sprite(name: string, dy = 0, sq = 0, ink = false) {
     const s = SH.sprites[name], im = shelfAtlasNow();
     if (!s || !im) return;
     const [ax, ay, aw, ah, x, y] = s, w = aw / SR, h = ah / SR;
     const w2 = w * (1 - sq * 0.5), h2 = h * (1 + sq);
-    this.g.drawImage(im, ax, ay, aw, ah, x + (w - w2) / 2, y + h - h2 + dy, w2, h2);
+    const X = x + (w - w2) / 2, Y = y + h - h2 + dy;
+    // a crisp near-black outline, like the cuckoo clock's: the silhouette stamped round the sprite first
+    if (ink && 'filter' in this.g) {
+      const g = this.g, o = 1.1;
+      g.save(); g.filter = 'brightness(0) opacity(0.9)';
+      for (const [ox, oy] of [[-o, 0], [o, 0], [0, -o], [0, o], [-o * 0.7, -o * 0.7], [o * 0.7, -o * 0.7], [-o * 0.7, o * 0.7], [o * 0.7, o * 0.7]]) g.drawImage(im, ax, ay, aw, ah, X + ox, Y + oy, w2, h2);
+      g.restore();
+    }
+    this.g.drawImage(im, ax, ay, aw, ah, X, Y, w2, h2);
   }
   /** a soft shadow on the shelf top under an object (`w` art px wide), fading and shrinking as it lifts */
   private shadow(cx: number, w: number, lift: number) {
@@ -194,14 +202,14 @@ class ShelfStage {
     this.shadow(SH.objects.clock + 2, 76, this.objs.clock.y);
     this.shadow(SH.objects.book + 4, 74, this.objs.book.y);
     const lampFrame = la >= 0 && la < 0.13 ? 'lamp_off' : la >= 0.13 && la < 0.35 ? 'lamp_pull' : 'lamp' + Math.min(3, Math.max(0, Math.round((glow - 0.6) * 4)));
-    this.sprite(lampFrame, dy(lp), lp.sq);
+    this.sprite(lampFrame, dy(lp), lp.sq, true);
     // the chimney's glass catches the flame's glow
     if (lampFrame !== 'lamp_off') {
       g.save();
       g.beginPath(); g.arc(lx, ly, 13, 0, Math.PI * 2); g.clip();
       g.globalCompositeOperation = 'lighter';
       g.globalAlpha = clamp((glow - 0.7) * 0.14, 0, 0.16);
-      this.sprite(lampFrame, dy(lp), lp.sq);
+      this.sprite(lampFrame, dy(lp), lp.sq, true);
       g.restore();
     }
     // the cuckoo clock: the door and the owl, the pendulum, the real time
@@ -227,7 +235,7 @@ class ShelfStage {
     const bp = this.objs.book, ba = bp.act;
     let bf = bp.hover ? 'book1' : 'book0';
     if (ba >= 0) bf = ba < 0.12 ? 'book2' : ba < 0.25 ? 'book3' : ba < 0.4 ? 'book4' : ba < 1.05 ? 'book5' : ba < 1.18 ? 'book4' : ba < 1.3 ? 'book3' : ba < 1.6 ? 'book2' : 'book0';
-    this.sprite(bf, dy(bp), bp.sq);
+    this.sprite(bf, dy(bp), bp.sq, true);
     // night: moonlight cools everything on the shelf, and the lamp's warm light falls across it in soft bands
     if (night > 0.02) {
       const L = this.lg;
