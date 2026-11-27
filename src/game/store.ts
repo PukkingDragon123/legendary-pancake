@@ -130,7 +130,11 @@ export interface Save {
   seen: { zones: string[]; areas: string[] };
   /** the Book's diary: a free note per calendar day (dayKey), written in the briefing room */
   diary?: Record<string, DiaryEntry>;
+  /** [tutor] the guided tour of the hollow after the interview: finished, or the step to resume at (missing: not taken yet) */
+  tutorial?: Tutorial;
 }
+/** [tutor] the tour's progress; `gift` says its acorns were already given (a replay does not pay twice) */
+export interface Tutorial { done: boolean; step: number; gift?: boolean }
 
 const KEY = 'hoot-hollow:save:v1';
 
@@ -174,10 +178,18 @@ function load(): Save {
       s.v = 2;
       migrateSpecies(s); // [owl3] the owl line is eight species: retired ones move to their nearest relative
       // shallow-merge new fields into older saves
-      return migrateProfile(migrateFrames({ ...f, ...s, frameV: s.frameV, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker }, diary: cleanDiary(s.diary) }));
+      return migrateProfile(migrateFrames({ ...f, ...s, frameV: s.frameV, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker }, diary: cleanDiary(s.diary), tutorial: cleanTutorial(s.tutorial) }));
     }
   } catch { /* ignore */ }
   return freshSave();
+}
+
+/** [tutor] The tour's progress from a stored save: anything malformed reads as "not taken yet". */
+export function cleanTutorial(t: unknown): Tutorial | undefined {
+  if (!t || typeof t !== 'object') return undefined;
+  const o = t as Partial<Tutorial>;
+  const step = typeof o.step === 'number' && Number.isFinite(o.step) ? Math.max(0, Math.min(99, Math.floor(o.step))) : 0;
+  return { done: o.done === true, step, ...(o.gift === true ? { gift: true } : {}) };
 }
 
 /** The diary from a stored save: only well-formed day pages survive (a bad entry never breaks loading). */

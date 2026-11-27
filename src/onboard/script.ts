@@ -18,6 +18,8 @@ export interface Answers {
   caffeine: Profile['caffeine'];
   relax: string[];
   mic: boolean;
+  /** what gets in the way of sleep (the combined page): fills latency, phone, caffeine and goals */
+  blocks: string[];
 }
 
 export type PageKind = 'text' | 'species' | 'choice' | 'multi' | 'dial' | 'hours' | 'plan';
@@ -52,6 +54,29 @@ export const GOALS: Sticker[] = [
   { v: 'less_phone', label: 'Less phone at night', sub: 'tuck it away', icon: 'phonedrawer', art: 'phonedrawer', col: 'oat' },
   { v: 'track_sounds', label: 'Track snoring', sub: 'and sleep-talking', icon: 'mic', art: 'mic', col: 'linen' },
 ];
+/** [tutor] the one page that replaced the latency, phone, caffeine and goals questions */
+export const BLOCKS: Sticker[] = [
+  { v: 'phone', label: 'My phone', sub: 'just one more scroll', icon: 'phonedrawer', art: 'phonedrawer', col: 'oat' },
+  { v: 'caffeine', label: 'Caffeine', sub: 'a late coffee or tea', icon: 'mugmoon', art: 'mugmoon', col: 'linen' },
+  { v: 'mind', label: 'A busy mind', sub: 'thoughts that won’t stop', icon: 'clock', art: 'clock', col: 'paper' },
+  { v: 'slow', label: 'Slow to drift off', sub: 'a lot of sheep', icon: 'sheep', art: 'sheep', col: 'oat' },
+];
+/** The profile fields the obstacles page stands for (removed questions keep sensible defaults). */
+export function fromBlocks(a: Answers, blocks: string[]): Answers {
+  const has = (v: string) => blocks.includes(v);
+  const latency: Answers['latency'] = has('slow') && has('mind') ? 'long' : has('slow') || has('mind') ? 'slow' : 'normal';
+  const goals = ['sleep_better', ...(has('phone') ? ['less_phone'] : []), ...(has('slow') || has('mind') ? ['fall_asleep'] : [])];
+  return { ...a, blocks: [...blocks], latency, phone: has('phone') ? 'nightly' : 'sometimes', caffeine: has('caffeine') ? 'late' : a.caffeine === 'none' ? 'none' : 'morning', goals };
+}
+/** what the save's profile says about the obstacles (a returning player sees their answer again) */
+export function blocksOf(p: Pick<Profile, 'latency' | 'phone' | 'caffeine'>): string[] {
+  const b: string[] = [];
+  if (p.phone === 'nightly') b.push('phone');
+  if (p.caffeine === 'late') b.push('caffeine');
+  if (p.latency === 'long') b.push('mind');
+  if (p.latency === 'slow' || p.latency === 'long') b.push('slow');
+  return b;
+}
 export const RELAX: (Sticker & { sound?: string })[] = [
   { v: 'rain', label: 'Rain', icon: 'rain', art: 'rain', col: 'mist', sound: 'amb_rain' },
   { v: 'waves', label: 'Waves', icon: 'waves', art: 'waves', col: 'mist', sound: 'amb_waves' },
@@ -88,6 +113,7 @@ export function answersFrom(s: Save): Answers {
   return {
     you: p.you, species: s.look.species ?? 'tawny', name: s.name || 'Pip', goals: [...p.goals], wake: s.sleep.wake, hours: p.sleepHours || s.sleep.goalMin / 60,
     latency: p.latency, phone: p.phone, chrono: p.chronotype, caffeine: p.caffeine, relax: [...p.relax], mic: s.sleep.mic,
+    blocks: blocksOf(p),
   };
 }
 
@@ -106,6 +132,7 @@ export function planOf(a: Answers): Plan {
   if (a.caffeine === 'late') tips.push('Last coffee by 2 pm');
   if (a.phone !== 'never') tips.push('Phone sleeps in the drawer');
   if (a.latency === 'slow' || a.latency === 'long') tips.push('Breathe with Pip in bed');
+  if (a.blocks?.includes('mind')) tips.push('Jot your thoughts in the Book');
   if (a.goals.includes('steady_routine')) tips.push('Same wake time, weekends too');
   if (a.goals.includes('wake_refreshed')) tips.push('Open the curtains first thing');
   return { wake: a.wake, bed, windDown: hm(toMin(bed) - windDownMin), windDownMin, goalMin, soundscape: sound, alarm, blocker: a.phone !== 'never', tips: tips.slice(0, 3) };
@@ -144,10 +171,8 @@ export const STEPS: Step[] = [
   {
     id: 'you', title: 'What should Pip call you?', kind: 'text', field: 'you', shot: 'pip',
     say: () => [
-      { text: '!Hoo!! Oh! A *visitor!*', mood: 'surprised', shot: 'close', cut: true },
-      { text: 'Sorry, I was _resting my eyes._ Very *important* owl business.', mood: 'sleepy', act: 'yawn', shot: 'pip' },
-      { text: 'Welcome to *Hoot Hollow!* I’m ~head of sleep~ here at Hollow & Co.', mood: 'happy', act: 'wave', shot: 'establish' },
-      { text: 'Before we move in, a few quick forms. Answer, then *stamp* each one.', mood: 'proud', act: 'nod', shot: 'pipL' },
+      { text: '!Hoo!! Oh! A *visitor!* Sorry, I was _resting my eyes._', mood: 'surprised', shot: 'close', cut: true },
+      { text: 'Welcome to *Hoot Hollow!* I’m ~head of sleep~ here. Just *five* quick forms, then we go home.', mood: 'happy', act: 'wave', shot: 'establish' },
       { text: 'First things first. Write your *name* on the line!', mood: 'curious', shot: 'pip' },
     ],
     react: (a) => (a.you.trim() ? { text: `*${a.you.trim()}!* Lovely. I’ll write it in my ~best handwriting.~`, mood: 'joy', act: 'nod' } : { text: 'A _mysterious_ stranger! Very owl of you.', mood: 'curious' }),
@@ -156,43 +181,16 @@ export const STEPS: Step[] = [
   {
     id: 'species', title: 'Choose your owl', kind: 'species', field: 'species', shot: 'pipR',
     say: () => [
-      { text: 'Now, _a secret:_ I can be *any* owl I like.', mood: 'excited', act: 'ruffle', shot: 'pipR', cut: true },
-      { text: 'Which owl should I be? Tap one and I’ll *try it on!*', mood: 'happy', shot: 'close' },
+      { text: 'Now, _a secret:_ I can be *any* owl I like. Tap one and I’ll *try it on!*', mood: 'excited', act: 'ruffle', shot: 'pipR', cut: true },
     ],
     opts: SPECIES_OPTS,
     react: (a) => ({ text: `A *${speciesOf(a.species).name}!* I feel extra ~${ADJ[a.species] ?? 'fluffy'}~ already.`, mood: 'proud', act: 'present' }),
     written: (a) => speciesOf(a.species).name,
   },
   {
-    id: 'name', title: 'Name your owl', kind: 'text', field: 'name', shot: 'desk',
-    say: () => [{ text: 'Every owl needs a name. Mine’s *Pip*... but you can write a new one!', mood: 'curious', shot: 'desk', cut: true }],
-    react: (a) => (a.name.trim() === '' || a.name.trim() === 'Pip' ? { text: '*Pip* it is! Classic. Timeless. ~Fluffy.~', mood: 'joy', act: 'hop' } : { text: `*${a.name.trim()}!* It fits like a nightcap.`, mood: 'love', act: 'dance' }),
-    written: (a) => a.name.trim() || 'Pip',
-  },
-  {
-    id: 'goals', title: 'Your sleep goals', kind: 'multi', field: 'goals', shot: 'wide', vignettes: true,
-    say: () => [
-      { text: 'Okay. The !BIG! question!', mood: 'excited', shot: 'low', cut: true },
-      { text: 'What would you like *help* with? Tick as many as you like.', mood: 'curious', shot: 'wide' },
-    ],
-    opts: GOALS,
-    react: (a) => {
-      if (!a.goals.length) return { text: 'Just here for the ~cosy vibes?~ I respect that.', mood: 'happy' };
-      if (a.goals.length > 3) return { text: '!Ambitious!! We’ll tackle them _one feather at a time._', mood: 'proud', act: 'nod' };
-      const g = a.goals[0];
-      const t: Record<string, string> = {
-        sleep_better: 'Better sleep, coming *right up.* I’ll fluff the pillows.', fall_asleep: 'Faster sleep! I’ll _retire_ the sheep.', wake_refreshed: '*Bright mornings!* I’ll have the sun on standby.',
-        steady_routine: 'A steady routine! My clock is *thrilled.*', less_phone: 'Less phone. The drawer and I have _an understanding._', track_sounds: 'I’ll listen for snores. *Professionally.*',
-      };
-      return { text: t[g] ?? 'Noted!', mood: 'happy', act: 'nod' };
-    },
-    written: (a) => a.goals.map((g) => GOALS.find((x) => x.v === g)?.label).filter(Boolean).join(', ') || 'Just the cosy vibes',
-  },
-  {
     id: 'wake', title: 'Usual wake-up time', kind: 'dial', field: 'wake', shot: 'clockwin',
     say: () => [
-      { text: 'When do you usually *wake up?*', mood: 'curious', shot: 'clockwin', cut: true },
-      { text: 'Turn the hands on my clock. I’ll move the *sky* to match. _I’m very powerful._', mood: 'proud' },
+      { text: 'When do you usually *wake up?* Turn the hands on my clock. I’ll move the *sky* to match.', mood: 'curious', shot: 'clockwin', cut: true },
     ],
     react: (a) => {
       const m = toMin(a.wake);
@@ -207,80 +205,25 @@ export const STEPS: Step[] = [
     react: (a) => (a.hours < 7 ? { text: 'Hmm, a little short. Most people need *seven to nine* hours. We can nudge it later.', mood: 'worried' } : a.hours >= 9 ? { text: 'A !champion! sleeper! Respect.', mood: 'love' } : { text: 'Perfect. Right in the *sweet spot.*', mood: 'joy', act: 'nod' }),
   },
   {
-    id: 'latency', title: 'Falling asleep takes...', kind: 'choice', field: 'latency', shot: 'bed', vignettes: true,
-    say: () => [
-      { text: 'When the lights go out, how long until you’re asleep?', mood: 'sleepy', shot: 'wide', cut: true },
-      { text: 'Tick the one that sounds most like you.', mood: 'excited', shot: 'pip' },
-    ],
-    opts: [
-      { v: 'quick', label: 'Minutes', sub: 'out like a candle', icon: 'pillow' },
-      { v: 'normal', label: '10 to 20 min', sub: 'a little drift', icon: 'moon' },
-      { v: 'slow', label: '20 to 40 min', sub: 'some sheep involved', icon: 'sheep' },
-      { v: 'long', label: 'Ages', sub: 'staring at the ceiling', icon: 'clock' },
-    ],
-    react: (a) => (a.latency === 'quick' ? { text: '*Lucky!* I’m _a little jealous._', mood: 'happy' } : a.latency === 'long' ? { text: 'That’s tough. We’ll wind down *together*, I promise.', mood: 'love' } : { text: 'Got it. A longer wind-down will help.', mood: 'happy', act: 'nod' }),
-  },
-  {
-    id: 'phone', title: 'Phone in bed?', kind: 'choice', field: 'phone', shot: 'desk', vignettes: true,
+    id: 'blocks', title: 'What gets in the way of sleep?', kind: 'multi', field: 'blocks', shot: 'desk', vignettes: true,
     say: () => [
       { text: 'Be honest, _I won’t tell the other owls..._', mood: 'curious', shot: 'close', cut: true },
-      { text: 'Where does your phone *sleep* at night? Tick one.', mood: 'curious', shot: 'desk' },
+      { text: 'What gets in the way of your *sleep?* Tick any that sound like you.', mood: 'curious', shot: 'desk' },
     ],
-    opts: [
-      { v: 'never', label: 'Never', sub: 'it sleeps elsewhere', icon: 'drawer' },
-      { v: 'sometimes', label: 'Sometimes', sub: 'a quick peek', icon: 'nightstand' },
-      { v: 'nightly', label: 'Every night', sub: 'just one more video', icon: 'pillowbed' },
-    ],
-    react: (a) => (a.phone === 'nightly' ? { text: 'Then I’m switching on the *Bedtime Blocker*: after bedtime, social apps stay shut so your brain can power down.', mood: 'proud', act: 'present' } : a.phone === 'sometimes' ? { text: 'A _peek_ here and there. I’ll nudge you at bedtime.', mood: 'happy' } : { text: 'A phone-free bed! You’re my !hero!!', mood: 'love', act: 'dance' }),
-  },
-  {
-    id: 'chrono', title: 'Early bird or night owl?', kind: 'choice', field: 'chrono', shot: 'window', vignettes: true,
-    say: () => [
-      { text: 'Are you an *early bird* or a *night owl?*', mood: 'curious', shot: 'window', cut: true },
-      { text: '_(No pressure. I am *literally* a night owl.)_ Tick one!', mood: 'proud', shot: 'pipL' },
-    ],
-    opts: [
-      { v: 'lark', label: 'Early bird', sub: 'up with the sun', icon: 'sun' },
-      { v: 'between', label: 'Somewhere between', sub: 'it depends', icon: 'star' },
-      { v: 'owl', label: 'Night owl', sub: 'alive after dark', icon: 'moon' },
-    ],
-    react: (a) => (a.chrono === 'owl' ? { text: 'A fellow owl! ~Hoo hoo!~ !HIGH WING!!', mood: 'excited', act: 'flap' } : a.chrono === 'lark' ? { text: 'A *morning person!* You must tell me what sunrises look like.', mood: 'happy' } : { text: 'Balanced, like a ~good nest.~', mood: 'happy', act: 'nod' }),
-  },
-  {
-    id: 'caffeine', title: 'Caffeine', kind: 'choice', field: 'caffeine', shot: 'desk', vignettes: true,
-    say: () => [{ text: 'Coffee, tea, fizzy drinks... when do you have your *last* one?', mood: 'curious', shot: 'pipR', cut: true }],
-    opts: [
-      { v: 'none', label: 'None', sub: 'warm milk gang', icon: 'milkglass' },
-      { v: 'morning', label: 'Mornings only', sub: 'before noon', icon: 'mugsun' },
-      { v: 'late', label: 'Afternoon or later', sub: 'an evening latte', icon: 'mugmoon' },
-    ],
-    react: (a) => (a.caffeine === 'late' ? { text: 'Caffeine stays awake in you for *hours.* Let’s try to stop by *2 pm.*', mood: 'worried' } : a.caffeine === 'none' ? { text: '!None at all?! Your brain sends a thank-you card.', mood: 'love' } : { text: 'Mornings only. _Very wise._', mood: 'proud', act: 'nod' }),
-  },
-  {
-    id: 'relax', title: 'What helps you relax?', kind: 'multi', field: 'relax', shot: 'window', vignettes: true,
-    say: () => [{ text: 'What helps you *relax?* Tick a few and I’ll play a little.', mood: 'calm', shot: 'pipL', cut: true }],
-    opts: RELAX,
-    react: (a) => ({ text: `Lovely. I’ll play *${SOUND_NAME[planOf(a).soundscape] ?? 'gentle rain'}* when you go to sleep.`, mood: 'calm' }),
-    written: (a) => a.relax.map((r) => RELAX.find((x) => x.v === r)?.label).filter(Boolean).join(', ') || 'Gentle rain',
-  },
-  {
-    id: 'mic', title: 'Sleep sound tracking', kind: 'choice', field: 'mic', shot: 'desk', vignettes: true,
-    say: (_a, o) => [
-      { text: 'One more! At night I can listen for *snoring* and *sleep-talking* with your microphone.', mood: 'curious', shot: 'desk', cut: true },
-      { text: 'Everything stays *on your device.* Nothing is sent anywhere. Tick yes or no!', mood: 'proud', act: 'nod', shot: 'pip' },
-      ...(o.artifact ? [{ text: '_(In this little preview I can’t use the microphone, but it works in the full app.)_', mood: 'happy' as OwlMood }] : []),
-    ],
-    opts: [
-      { v: 'yes', label: 'Yes, listen', sub: 'snores and sleep talk', icon: 'mic' },
-      { v: 'no', label: 'Not now', sub: 'maybe later', icon: 'mic' },
-    ],
-    react: (a) => (a.mic ? { text: '!Brilliant!! I’ll keep an ear out. Owls have *excellent* ears.', mood: 'joy', act: 'flap' } : { text: 'No problem. You can turn it on later in Settings.', mood: 'happy' }),
+    opts: BLOCKS,
+    react: (a) => {
+      const b = a.blocks;
+      if (!b.length) return { text: 'Nothing at all? You’re my !hero!! We’ll keep it that way.', mood: 'love', act: 'dance' };
+      if (b.includes('phone')) return { text: 'Then I’m switching on the *phone lock*: at bedtime your phone goes to bed too.', mood: 'proud', act: 'present' };
+      if (b.includes('mind') || b.includes('slow')) return { text: 'We’ll wind down *together.* A few slow breaths work wonders.', mood: 'love', act: 'nod' };
+      return { text: 'Caffeine stays awake in you for *hours.* Let’s try to stop by *2 pm.*', mood: 'worried' };
+    },
+    written: (a) => a.blocks.map((v) => BLOCKS.find((x) => x.v === v)?.label).filter(Boolean).join(', ') || 'Nothing at all',
   },
   {
     id: 'plan', title: 'Your sleep plan', kind: 'plan', shot: 'pip',
     say: () => [
-      { text: '*All done!* Let me put it _all together..._', mood: 'excited', act: 'ruffle', shot: 'close', cut: true },
-      { text: 'Here’s your *sleep plan.* Sign it, then stamp it to approve!', mood: 'proud', shot: 'pip' },
+      { text: '*All done!* Here’s your *sleep plan.* Sign it, then stamp it to approve!', mood: 'proud', act: 'ruffle', shot: 'pip', cut: true },
     ],
   },
 ];

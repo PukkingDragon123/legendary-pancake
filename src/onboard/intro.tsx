@@ -24,7 +24,7 @@ import { Overlay3D, smoothen } from './overlay3d.ts';
 import { isWide, Panel, panelScale, type PanelActions } from './panel.tsx';
 import { FloatingPen } from './pen.ts';
 import { DRINKS, TAPES } from './props.ts';
-import { answersFrom, applyAnswers, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat } from './script.ts';
+import { answersFrom, applyAnswers, fromBlocks, hm, OUTRO, planOf, RELAX, STEPS, toMin, type Answers, type Beat } from './script.ts';
 import { Speech } from './speech.ts';
 import { plainOf } from '../ui/talk.ts';
 import { light } from '../ui/fx/moment.ts'; // [fx10] a soft press of light
@@ -63,6 +63,9 @@ function phoneSpot(panel: DOMRect | null, wide: boolean): { k: number; x: number
   const k = top - 16 >= PH * 2 ? 2 : 1; // whole pixels only
   return { k, x: Math.round(innerWidth - PW * k - 8), y: Math.max(6, Math.round((top - PH * k) / 2) - 6) };
 }
+
+/** [tutor] the pretend phone (the bedtime lock) stands beside Pip while "my phone" is ticked on the obstacles page */
+const phoneUp = (U: UI) => STEPS[U.si]?.id === 'blocks' && U.a.blocks.includes('phone');
 
 interface UI { show: boolean; leaving: boolean; si: number; a: Answers; picked: Record<string, boolean>; remind: boolean; signed: boolean; stamped: string | null; skipAsk: boolean; k: number; wide: boolean; drink: string | null; deckTape: string | null }
 
@@ -166,7 +169,7 @@ export function Intro() {
       const el = panelEl.current;
       if (!el) return;
       // where the form rests once it has slid in (its box, not its animated transform)
-      const u = U.k, phonePage = st()?.id === 'phone';
+      const u = U.k, phonePage = phoneUp(U);
       if (U.wide) {
         const left = innerWidth - 14 * u - el.offsetWidth;
         let x0 = 0;
@@ -398,8 +401,10 @@ export function Intro() {
           U.picked[s.id] = true; bump();
           inkLoop(v);
         } else if (s.kind === 'multi') {
-          const f = s.field as 'goals' | 'relax', cur = a[f], on = !cur.includes(v);
-          set({ ...a, [f]: on ? [...cur, v] : cur.filter((x) => x !== v) });
+          const f = s.field as 'goals' | 'relax' | 'blocks', cur = a[f], on = !cur.includes(v), next = on ? [...cur, v] : cur.filter((x) => x !== v);
+          // [tutor] the obstacles page fills the profile fields the old latency / phone / caffeine / goals pages did
+          set(f === 'blocks' ? fromBlocks(a, next) : { ...a, [f]: next });
+          if (f === 'blocks' && v === 'phone') window.setTimeout(frameAsk, 60); // the pretend phone comes up beside Pip
           const tape = f === 'relax' && RELAX.find((r) => r.v === v)?.sound && TAPES.some((t) => t.id === v);
           if (on) {
             if (tape) insertTape(v); else reactTo.show(`${s.id}:${v}`);
@@ -480,6 +485,7 @@ export function Intro() {
         if (sel) {
           const s = STEPS[i], f = s.field;
           if (f) U.a = { ...U.a, [f]: s.kind === 'multi' ? sel.split(',') : s.kind === 'hours' ? Number(sel) : f === 'mic' ? sel === 'yes' : sel } as Answers;
+          if (f === 'blocks') U.a = fromBlocks(U.a, sel.split(','));
           U.picked[s.id] = true;
           if (s.kind === 'species') office.setLook(lookFor(sel), false);
         }
@@ -547,7 +553,7 @@ export function Intro() {
   const U = ui.current;
   const st = STEPS[U.si];
   const ready = st ? (st.kind === 'plan' ? U.signed : st.kind !== 'choice' || !!U.picked[st.id]) : false;
-  const showPhone = U.show && st?.id === 'phone';
+  const showPhone = U.show && phoneUp(U);
   const spot = showPhone ? phoneSpot(panelEl.current?.getBoundingClientRect() ?? null, U.wide) : null;
   return (
     <div class="ob">
