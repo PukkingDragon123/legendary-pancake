@@ -10,6 +10,7 @@ import { defaultBlockConfig, type BlockConfig } from './blocker.ts';
 import { DEFAULT_FRAME, FRAME_BY_ID, FRAME_V, STARTER_FRAMES } from '../assets/frames.ts';
 import { AREAS, ITEM_BY_ID, levelOf, TRINKET, ZONE_LEVEL, type LootEntry } from './catalog.ts';
 import type { AdventureResult } from './adventure.ts';
+import { cleanFriend, type FriendSnap } from './social.ts';
 
 export interface SleepPrefs {
   goalMin: number;
@@ -69,6 +70,17 @@ export interface ShopState {
   pity: Record<string, { five: number; four: number; total: number; guaranteed?: boolean }>;
 }
 
+/** [profile] A portrait taken in the photo studio (src/world/stages/studio.ts): a small WebP/PNG data URL. */
+export interface Photo {
+  url: string;
+  at: number;
+  pose: string;
+  mood: string;
+  backdrop: string;
+  /** shown in the portrait frame (false: the live owl, the photo kept for later) */
+  on: boolean;
+}
+
 export interface Save {
   v: 2;
   /** the hollow oak: rooms per floor, which floors are open, unopened moving boxes */
@@ -91,6 +103,12 @@ export interface Save {
   frame: string;
   /** [ui12] frame defaults version: 2 = the carved wooden frame is the default (older saves on the porthole move to it) */
   frameV?: number;
+  /** [profile] the studio portrait in the frame (null / missing: the live owl) */
+  photo?: Photo | null;
+  /** [profile] friends added from their friend codes: local snapshots (src/game/social.ts) */
+  friends?: FriendSnap[];
+  /** [profile] this owl's id in friend codes (random, made once) */
+  pid?: string;
   /** extra copies of furniture the player owns beyond those placed (inventory counts) */
   furniture: Record<string, string>;
   collection: Record<string, number>;
@@ -125,6 +143,7 @@ export function freshSave(): Save {
     owned: { items: ['nestbed', 'moonlamp', 'roundrug', 'fernpot', 'candles', 'stool'], pieces: ['nightcap', 'sprout', 'satchel'], palettes: ['tawny'], skins: ['owl'], species: ['tawny'], finishes: ['wall_heartwood', 'floor_planks'], frames: [...STARTER_FRAMES] },
     frame: DEFAULT_FRAME,
     frameV: FRAME_V,
+    photo: null, friends: [], pid: newPid(),
     furniture: { g_back: 'nestbed', g_left: 'moonlamp', g_mid: 'roundrug', g_frontL: 'fernpot' },
     collection: {}, area: 'woods',
     sleep: { goalMin: 480, wake: '07:00', days: [1, 2, 3, 4, 5], smartMin: 20, alarmSound: 'alarm_musicbox', alarmOn: true, reminders: true, windDownMin: 30, mic: true, clips: false, sensitivity: 0.5, soundscape: 'amb_rain', soundscapeMin: 30, soundscapeVol: 0.6 },
@@ -151,7 +170,7 @@ function load(): Save {
       s.v = 2;
       migrateSpecies(s); // [owl3] the owl line is eight species: retired ones move to their nearest relative
       // shallow-merge new fields into older saves
-      return migrateFrames({ ...f, ...s, frameV: s.frameV, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker } });
+      return migrateProfile(migrateFrames({ ...f, ...s, frameV: s.frameV, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker } }));
     }
   } catch { /* ignore */ }
   return freshSave();
@@ -165,6 +184,23 @@ export function migrateFrames(s: Save): Save {
   for (const id of STARTER_FRAMES) if (!have.includes(id)) have.push(id);
   s.owned = { ...s.owned, frames: have };
   if (typeof s.frame !== 'string' || !FRAME_BY_ID[s.frame] || !have.includes(s.frame)) s.frame = DEFAULT_FRAME;
+  return s;
+}
+
+/** [profile] a fresh random id for friend codes */
+export function newPid(): string {
+  const a = new Uint8Array(6);
+  try { crypto.getRandomValues(a); } catch { for (let i = 0; i < a.length; i++) a[i] = Math.floor(Math.random() * 256); }
+  return Array.from(a, (b) => b.toString(36).padStart(2, '0')).join('').slice(0, 10);
+}
+/** [profile] The studio photo, the friends list and the friend-code id, checked: anything malformed is dropped. */
+export function migrateProfile(s: Save): Save {
+  const p = s.photo;
+  const okPhoto = !!p && typeof p === 'object' && typeof p.url === 'string' && /^data:image\/(png|webp|jpeg);base64,/.test(p.url) && p.url.length < 600_000;
+  s.photo = okPhoto ? { url: p!.url, at: Number(p!.at) || 0, pose: String(p!.pose ?? ''), mood: String(p!.mood ?? ''), backdrop: String(p!.backdrop ?? ''), on: p!.on !== false } : null;
+  const seen = new Set<string>();
+  s.friends = (Array.isArray(s.friends) ? s.friends : []).map(cleanFriend).filter((f): f is FriendSnap => !!f && !seen.has(f.id) && !!seen.add(f.id)).slice(0, 200);
+  if (typeof s.pid !== 'string' || !/^[a-z0-9]{6,16}$/.test(s.pid)) s.pid = newPid();
   return s;
 }
 
@@ -248,6 +284,15 @@ export function setFrame(id: string): boolean {
   if (!FRAME_BY_ID[id] || !ownsEntry(save.value, { kind: 'frame', id })) return false;
   if (save.value.frame !== id) { edit((s) => { s.frame = id; }); void import('./quests.ts').then((q) => q.progress('dress')); }
   return true;
+}
+/** [profile] Keep a studio photo as the portrait (and put it in the frame). */
+export function setPhoto(p: Omit<Photo, 'on'> | null, on = true) {
+  edit((s) => { s.photo = p ? { ...p, on } : null; });
+}
+/** [profile] Show the studio photo in the frame, or the live owl. */
+export function usePhoto(on: boolean) {
+  if (!save.value.photo) return;
+  edit((s) => { if (s.photo) s.photo.on = on; });
 }
 export function setCoat(id: string) { edit((s) => { s.look.palette = id; }); void import('./quests.ts').then((q) => q.progress('dress')); }
 

@@ -10,9 +10,9 @@ import { freshSave, grant, migrateFrames, ownsEntry, save, setFrame, type Save }
 (globalThis as unknown as { window: unknown }).window ??= globalThis;
 
 describe('the frames', () => {
-  it('has between 8 and 12 frames with unique ids, two starters and a sensible price on the rest', () => {
+  it('has between 8 and 16 frames with unique ids, two starters and a sensible price on the rest', () => {
     expect(FRAMES.length).toBeGreaterThanOrEqual(8);
-    expect(FRAMES.length).toBeLessThanOrEqual(12);
+    expect(FRAMES.length).toBeLessThanOrEqual(16); // [profile] 14 since the honeycomb, driftwood and rose window frames
     expect(new Set(FRAMES.map((f) => f.id)).size).toBe(FRAMES.length);
     expect(STARTER_FRAMES).toContain(DEFAULT_FRAME);
     for (const f of FRAMES) {

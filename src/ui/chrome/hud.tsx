@@ -151,7 +151,12 @@ function NameSign() {
     <div class="hh-hang hh-namehang" ref={ref}>
       <Ropes xs={[52, 142]} top={-32} len={40} />
       <button class="hh-board hh-nameboard" style={{ '--art': bg(board(192, 72, k, 1, { seed: 4, hooks: [52, 142], brackets: true })) } as Record<string, string>} onClick={tapSign} aria-label={`${s.name}, level ${lv.level}, ${lv.into} of ${lv.need} experience`}>
-        <span class="hh-portrait"><OwlPortrait size={78} frame={s.frame} pokeKey={poke} /></span>
+        {/* [profile] the portrait itself opens the profile (studio, frames, friends, ranks); the rest of the sign pokes Pip */}
+        <span class="hh-portrait" role="button" tabIndex={0} aria-label="Your profile: photo studio, frames, friends and ranks"
+          onClick={(e) => { e.stopPropagation(); kick(sw, 40); sound.play('ui_open', { volume: 0.45, gap: 80 }); haptic(8); uiBurstAt(e.currentTarget as Element, 'sparkle', 8); openPanel('profile'); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPanel('profile'); } }}>
+          <OwlPortrait size={78} frame={s.frame} pokeKey={poke} photo={s.photo?.on ? s.photo.url : undefined} />
+        </span>
         <span class={'hh-name' + (long ? ' long' : '')}>{s.name}</span>
         {fits && <span class="hh-rank">{rank}</span>}
         <span class="hh-lvl">

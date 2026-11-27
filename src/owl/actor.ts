@@ -60,6 +60,9 @@ const FACES: Record<OwlMood, Face> = {
   teary: { lid: 0.08, low: 0.12, tilt: -0.5, pupil: 6.5, mode: 'normal', brow: 0.2, browTilt: -0.6, tuft: -0.3, jaw: 0.15, pitch: 0.06, roll: 0.08 },
 };
 
+/** [profile] A held pose for the photo studio: offsets added to what the pose, mood and action ask for. */
+export interface OwlHold { wingL?: number; wingR?: number; /** swing the raised wings forward (radians), so they show their face to the front */ fwd?: number; lean?: number; pitch?: number; roll?: number; yaw?: number; tuft?: number; jaw?: number; lx?: number; ly?: number; sy?: number; lid?: number }
+
 export interface ActorHooks {
   fx?(kind: OwlFx, at: THREE.Vector3, n?: number): void;
   sound?(id: OwlSound): void;
@@ -86,6 +89,10 @@ export class OwlActor {
   /** in the fly pose: wingbeat speed multiplier */
   flapRate = 1;
   private flapPh = 0;
+  /** [profile] a held studio pose layered on top (null = none) */
+  hold: OwlHold | null = null;
+  /** [profile] an action replayed whenever it ends (a looping clip in the photo studio) */
+  loop: OwlAction = 'none';
   hooks: ActorHooks = {};
 
   private moodUntil = 0;
@@ -270,6 +277,7 @@ export class OwlActor {
     }
 
     // ---------------- action clips
+    if (this.loop !== 'none' && this.action === 'none') this.play(this.loop);
     if (this.action !== 'none') {
       this.actT += dt;
       const p = this.actT / this.actLen, a = this.action;
@@ -309,6 +317,14 @@ export class OwlActor {
         roll += Math.sin(t * 50) * 0.05 * env; sxz += Math.sin(t * 45) * 0.03 * env;
       }
       if (this.actT >= this.actLen) this.action = 'none';
+    }
+
+    // [profile] a held studio pose
+    const H = this.hold;
+    if (H) {
+      wingL += H.wingL ?? 0; wingR += H.wingR ?? 0; lean += H.lean ?? 0; pitch += H.pitch ?? 0; roll += H.roll ?? 0; yaw += H.yaw ?? 0;
+      tuftL += H.tuft ?? 0; tuftR += H.tuft ?? 0; jaw += H.jaw ?? 0; lx += H.lx ?? 0; ly += H.ly ?? 0; sy += H.sy ?? 0;
+      if (H.lid) lid = Math.min(1, Math.max(0, lid + H.lid));
     }
 
     // hop physics
@@ -359,8 +375,9 @@ export class OwlActor {
     const neckH = (g.neckY - g.bodyY) * PX;
     head.position.set(RV.head[0] * PX, RV.head[1] * PX + Math.sin(s.lean.x) * 0.02, RV.head[2] * PX + Math.sin(s.lean.x) * neckH * 0.3);
     head.rotation.set(s.pitch.x, s.yaw.x, s.roll.x, 'YXZ');
-    B.wingL.rotation.set(0, 0, -s.wingL.x);
-    B.wingR.rotation.set(0, 0, s.wingR.x);
+    const fwd = this.hold?.fwd ?? 0; // [profile]
+    B.wingL.rotation.set(0, fwd, -s.wingL.x);
+    B.wingR.rotation.set(0, fwd, s.wingR.x);
     // the folded wing opens (its 'spread' morph target) as it lifts: fully spread in flight, the hand folding in a
     // touch on each upstroke; a stretch or a flap opens it as far as it rises
     const fly = this.pose === 'fly';

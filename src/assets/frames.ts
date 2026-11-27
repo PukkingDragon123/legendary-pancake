@@ -1,4 +1,4 @@
-// [ui5] Portrait frames: the frame round the live owl portrait on the name sign (top left of the home screen) is a
+// [ui5] Portrait frames: the frame round the live owl portrait (or the studio photo, [profile]) on the name sign (top left of the home screen) is a
 // cosmetic. Two are yours from the start, Barnaby stocks most of the rest in the lodge store (acorns or moon gems,
 // one marked down each day), and two only come from the series banners. The art is in src/ui/chrome/frameart.ts.
 // Kept free of heavy imports: the save (src/game/store.ts) reads these while it loads.
@@ -25,14 +25,18 @@ export interface FrameDef {
 }
 export const FRAMES: FrameDef[] = [
   { id: 'walnut', name: 'Carved Walnut', blurb: 'Hand-carved from a fallen walnut branch: oak leaves and acorns round the rim, oiled until it glows like honey.', price: 0, cur: 'coins', rarity: 'common', starter: true },
-  { id: 'porthole', name: 'Brass Porthole', blurb: 'A ship’s porthole, polished every morning. Four brass rivets hold the sky in.', price: 0, cur: 'coins', rarity: 'common', starter: true },
-  { id: 'moss', name: 'Mossy Branch Ring', blurb: 'A willow twig bent into a ring, moss and two tiny mushrooms moved in.', price: 450, cur: 'coins', rarity: 'uncommon' },
-  { id: 'knit', name: 'Cozy Knit', blurb: 'A knitted ring in cranberry wool with a cable stitch. Warm to the touch.', price: 600, cur: 'coins', rarity: 'uncommon' },
-  { id: 'filigree', name: 'Silver Filigree', blurb: 'Curls of fine silver wire around a pearl at each quarter. Very proper.', price: 900, cur: 'coins', rarity: 'rare', level: 2 },
+  { id: 'porthole', name: 'Brass Porthole', blurb: 'A ship’s porthole in cast brass, polished every morning: eight bolts, a hinge and a wing nut hold the sky in.', price: 0, cur: 'coins', rarity: 'common', starter: true },
+  { id: 'moss', name: 'Mossy Branch Ring', blurb: 'Two willow withies twisted into a ring. Moss, a fern and two tiny mushrooms moved in.', price: 450, cur: 'coins', rarity: 'uncommon' },
+  { id: 'knit', name: 'Cozy Knit', blurb: 'Knitted in cranberry wool with a cable up the middle, a wooden toggle and a pompom. Warm to the touch.', price: 600, cur: 'coins', rarity: 'uncommon' },
+  { id: 'filigree', name: 'Silver Filigree', blurb: 'Curls of fine silver wire, pearls at the quarters and a sapphire on top. Very proper.', price: 900, cur: 'coins', rarity: 'rare', level: 2 },
   { id: 'mushroom', name: 'Toadstool Ring', blurb: 'A fairy ring that grew in a perfect circle overnight. Red caps, white spots.', price: 750, cur: 'coins', rarity: 'uncommon' },
-  { id: 'laurel', name: 'Golden Laurel', blurb: 'A wreath of gilded laurel leaves for a champion sleeper.', price: 120, cur: 'gems', rarity: 'rare' },
+  { id: 'laurel', name: 'Golden Laurel', blurb: 'Two gilded laurel branches tied with a red silk bow, for a champion sleeper.', price: 120, cur: 'gems', rarity: 'rare' },
   { id: 'frost', name: 'Frost Crystal', blurb: 'Ice that grew in feathers on a winter window and never melted.', price: 160, cur: 'gems', rarity: 'rare', level: 3 },
-  { id: 'celestial', name: 'Celestial Orrery', blurb: 'A brass sun and a silver moon chase each other round a ring of midnight enamel.', price: 260, cur: 'gems', rarity: 'legendary', level: 4 },
+  { id: 'celestial', name: 'Celestial Orrery', blurb: 'A brass sun, a silver moon and a ringed planet chase each other round engraved brass and midnight enamel.', price: 260, cur: 'gems', rarity: 'legendary', level: 4 },
+  // [profile] three more for the frame wall
+  { id: 'honeycomb', name: 'Honeycomb', blurb: 'Beeswax cells, some still full of honey, a drip running off the bottom. The bee is just visiting.', price: 650, cur: 'coins', rarity: 'uncommon' },
+  { id: 'driftwood', name: 'Driftwood & Hemp', blurb: 'Sea-bleached driftwood bound with hemp, a starfish and a scallop shell still clinging on.', price: 800, cur: 'coins', rarity: 'uncommon', level: 2 },
+  { id: 'stained', name: 'Rose Window', blurb: 'Carved limestone tracery round jewel-bright leaded glass, like a chapel’s round window.', price: 200, cur: 'gems', rarity: 'legendary', level: 3 },
   { id: 'gingerbread', name: 'Gingerbread', blurb: 'Baked golden, piped with icing and studded with gumdrops. Do not nibble.', price: 0, cur: 'gems', rarity: 'rare', series: 'frostlight' },
   { id: 'starry', name: 'Star-Studded Night', blurb: 'A ring of deep night sky where little gold stars have come to rest.', price: 0, cur: 'gems', rarity: 'rare', series: 'starfall' },
 ];
