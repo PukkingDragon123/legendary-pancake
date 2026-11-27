@@ -220,7 +220,7 @@ function PieceCard(p: { piece: PieceDef; look: OwlLook; on: boolean; wearing: bo
       <div class="nm">{p.piece.name}</div>
       {p.wearing ? <span class="st wear">Wearing</span>
         : st.owned ? <span class="st own">Owned</span>
-        : st.series ? <span class="st muted">Series banner</span>
+        : st.series ? <span class="st muted">Lucky Barrel</span>
         : st.area ? <span class="st muted">Found on trips</span>
         : <Price {...st.price} />}
     </button>
@@ -244,7 +244,7 @@ function FrameCard(p: { f: FrameDef; on: boolean; onPick: (e: MouseEvent) => voi
       <div class="nm">{p.f.name}</div>
       {st.on ? <span class="st wear">Wearing</span>
         : st.own ? <span class="st own">Owned</span>
-        : p.f.series ? <span class="st muted">Series banner</span>
+        : p.f.series ? <span class="st muted">Lucky Barrel</span>
         : st.offer?.locked ? <span class="st lock"><Px name="lock" size={18} /> Level {st.offer.locked}</span>
         : st.offer ? <Price {...(st.offer.cur === 'gems' ? { gems: st.offer.price } : { coins: st.offer.price })} /> : null}
     </button>
@@ -269,7 +269,7 @@ function FramePlaque(p: { f: FrameDef }) {
       <div class="act">
         {st.on ? <button class="btn soft sm" disabled>Wearing</button>
           : st.own ? <button class="btn pillow sm" onClick={() => { tap('wood_knock', 0.5); setFrame(p.f.id); celebrate('wear'); }}>Wear</button>
-          : p.f.series ? <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Banner</button><span class="note">From the {SERIES_NAME[p.f.series]}</span></>
+          : p.f.series ? <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Wishes</button><span class="note">From the {SERIES_NAME[p.f.series]}</span></>
           : o?.locked ? <><button class="btn pillow sm" disabled>Locked</button><span class="note">Reach level {o.locked}</span></>
           : o ? <><button class="btn pillow honey sm" onClick={buy}>Buy <Price {...(o.cur === 'gems' ? { gems: o.price } : { coins: o.price })} /></button>{o.off > 0 && <span class="note">{o.off}% off today</span>}</> : null}
       </div>
@@ -325,7 +325,7 @@ function SkinPlaque(p: { skin: SkinDef2 | null; owned: boolean; wearing: boolean
     <Plaque face={face} title={p.skin ? p.skin.name : 'Natural plumage'} latin={p.skin?.series ? SERIES_NAME[p.skin.series] : undefined} text={p.skin ? p.skin.blurb : 'Pip as nature made them: real feathers, real markings.'}>
       {p.wearing ? <button class="btn soft sm" disabled>Wearing</button>
         : p.owned ? <button class="btn pillow sm" onClick={() => { tap('fabric', 0.6); edit((x) => { x.look.skin = id; }); progressDress(); celebrate('wear'); }}>Wear</button>
-        : <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Store</button><span class="note">{p.skin?.series ? 'Pull it from the series banner' : 'Sold in Barnaby’s lodge store'}</span></>}
+        : <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Store</button><span class="note">{p.skin?.series ? 'Wish for it at the Lucky Barrel' : 'Sold in Barnaby’s lodge store'}</span></>}
     </Plaque>
   );
 }
@@ -338,7 +338,7 @@ function PiecePlaque(p: { piece: PieceDef; look: OwlLook; wearing: boolean }) {
     <Plaque face={face} title={p.piece.name} latin={p.piece.series ? SERIES_NAME[p.piece.series] : undefined} text={p.piece.blurb}>
       {p.wearing ? <button class="btn soft sm" onClick={() => { tap('fabric', 0.5); wear(p.piece.slot, null); }}>Take off</button>
         : st.owned ? <button class="btn pillow sm" onClick={() => { tap('fabric', 0.6); wear(p.piece.slot, p.piece.id); celebrate('wear'); }}>Wear</button>
-        : st.series ? <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Banner</button><span class="note">From the {SERIES_NAME[st.series]}</span></>
+        : st.series ? <><button class="btn pillow night sm" onClick={() => { tap('ui_open', 0.5); panel.value = 'shop'; }}>Wishes</button><span class="note">From the {SERIES_NAME[st.series]}</span></>
         : st.area ? <><button class="btn pillow sm" disabled>Trying on</button><span class="note">Pip may find it in {area}</span></>
         : <button class="btn pillow honey sm" onClick={() => {
           const err = afford(st.price);

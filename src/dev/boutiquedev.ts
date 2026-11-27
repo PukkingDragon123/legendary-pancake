@@ -5,10 +5,9 @@
 import * as THREE from 'three';
 import { Lodge, type DisplayItem } from '../world/stages/lodge.ts';
 import { instanceGLB } from '../gfx/glb.ts';
-import { dailyDeals, SERIES } from '../game/shop.ts';
+import { dailyDeals, handmadeShelf, weeklyBundles } from '../game/shop.ts';
 import { save } from '../game/store.ts';
 import { Post } from '../world/post.ts';
-import { bannerArt } from '../ui/shop/paint.ts';
 import type { BeaverClip } from '../world/stages/beaver.ts';
 
 const q = new URLSearchParams(location.search);
@@ -69,7 +68,7 @@ async function stage() {
   const post = new Post(r, 'high');
   const sky = { night: q.get('night') ? 1 : 0, hour: q.get('night') ? 22 : 14 };
   b.attach(r, { scene: new THREE.Scene(), sky });
-  b.setSeries(SERIES.map((s, k) => ({ id: s.id, art: bannerArt(s, 120, 156), on: k === 0 })));
+  b.setWares(handmadeShelf().map((o) => o.id), weeklyBundles(save.value).map((o) => ({ ribbon: o.def.ribbon })));
   b.chalk([{ text: "Today's deals", size: 26 }, { text: 'new stock in 11h 22m', size: 18, col: '#f1d39a' }]);
   const size = () => { r.setSize(innerWidth, innerHeight, false); post.resize(innerWidth, innerHeight); b.resize(innerWidth, innerHeight); };
   size();

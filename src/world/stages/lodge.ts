@@ -11,7 +11,9 @@
 //   - the acorn stash (a bowl, a sack, a wicker basket, a mountain of acorns) on the floor by the right wall, the moon
 //     gem chests on the shelf above;
 //   - the free daily gift is a wrapped parcel on the counter, beside the brass scales, the till and a chalk slate;
-//   - the weekly series hang as cloth banners on the back wall over the Lucky Barrel, where wishes are made.
+//   - [shop16] the handmade shelf on the back wall: this week's yard pieces and bench-made furniture on two plank
+//     shelves, with the week's two bundles wrapped up in kraft paper between them;
+//   - the Lucky Barrel stands under the shelf, where wishes on the weekly series are made.
 // Barnaby stands at the end of his counter. Taps on things call onPick; focus(id) flies the camera to a thing (leaving
 // room for its detail card); wish() plays the barrel's big reveal. Lighting: warm lanterns (point lights), a shadowed
 // key, the window's daylight or moonlight, an environment map for brass and glass; the app's post chain grades it.
@@ -32,8 +34,8 @@ import type { Look } from '../post.ts';
 import { HOUSE, groundY } from '../layout.ts';
 import { Beaver, CRAFT, type BeaverClip } from './beaver.ts';
 import {
-  M, acornHeap, banner, contactShadow, disposeMats, disposeTextures, gem, gemHeap, hangingSign, herbBundle, logGeo, merged, mtx, parcel, sack, scales, taperTube,
-  shavings, slate, stump, tex, type Banner, type Sign, type Slate,
+  M, acornHeap, contactShadow, disposeMats, disposeTextures, gem, gemHeap, hangingSign, herbBundle, logGeo, merged, mtx, parcel, sack, scales, taperTube,
+  shavings, slate, stump, tex, type Sign, type Slate,
 } from './lodgekit.ts';
 import {
   BOARD, CUT_X, MORTISE, Plank, carcass, chairInProgress, finishingTable, plinth, priceTag, sawdustPatch, shavingHorse, timberRack, toolBoard, workbench,
@@ -53,7 +55,7 @@ export interface WorldView {
 }
 export interface DisplayItem { kind: 'item' | 'piece' | 'species' | 'skin' | 'finish'; id: string }
 export type LodgeLayout = 'side' | 'top';
-export type Section = 'home' | 'deals' | 'stash' | 'series';
+export type Section = 'home' | 'deals' | 'stash' | 'series' | 'handmade';
 
 // ------------------------------------------------------------------ the floor plan (metres; y up, the camera looks toward -z)
 const ROOM = { w: 4.6, back: -3.0, front: 7.5, h: 3.75 };
@@ -73,13 +75,20 @@ const STUMPS: Record<LodgeLayout, { x: number; z: number; h: number }[]> = {
 /** acorn packs on the floor before the shelf (ids from ACORN_PACKS), gem packs on the shelf (GEM_PACKS) */
 const ACORN_SPOTS = [{ id: 'handful', z: -0.25 }, { id: 'sack', z: 0.3 }, { id: 'basket', z: 0.88 }, { id: 'mountain', z: 1.5 }];
 const GEM_SPOTS = [{ id: 'gems_80', z: -0.3 }, { id: 'gems_420', z: 0.26 }, { id: 'gems_1300', z: 0.86 }, { id: 'gems_2800', z: 1.5 }];
-const BANNERS = [{ x: -3.48, w: 1.05 }, { x: -2.0, w: 1.05 }];
-const BANNER_TOP = 3.22, BANNER_H = 1.36;
+/** [shop16] the handmade shelf over the barrel: two plank shelves on brackets against the back wall. The top shelf holds
+ * slots 0-3 of the week's handmade pieces; the lower one slots 4 and 5 at its ends and the two bundles between them. */
+const WARES = { x0: -3.86, x1: -1.44, d: 0.34, ys: [2.28, 1.52] as const, z: ROOM.back + 0.15 + 0.17 };
+const WARE_XS = [-3.55, -2.95, -2.35, -1.75];
+/** where each handmade slot (0-5) and each bundle (6, 7) stands: [shelf, column] */
+const WARE_AT: [number, number][] = [[0, 0], [0, 1], [0, 2], [0, 3], [1, 0], [1, 3], [1, 1], [1, 2]];
+const WARE_W = 0.46, WARE_H = 0.4;
 
 interface Shot { target: THREE.Vector3; yaw: number; pitch: number; dist: number; fov: number; cx: number; cy: number }
 interface Spot { id: string; obj: THREE.Object3D; hit: THREE.Object3D; anchor: THREE.Vector3; focus: (l: LodgeLayout) => Shot }
 interface Deal { def: { x: number; z: number; h: number }; group: THREE.Group; stump: THREE.Group; holder: THREE.Group; model: THREE.Object3D | null; owl: OwlActor | null; sold: boolean; soldSign: THREE.Object3D | null; bounce: number; item: DisplayItem | null }
 interface Lamp { light: THREE.PointLight; flame: THREE.Sprite; halo: THREE.Sprite; base: number; phase: number; swing?: THREE.Object3D }
+/** [shop16] a place on the handmade shelf: a piece of furniture (slots 0-5) or a wrapped bundle (6, 7) */
+interface Ware { id: string; at: THREE.Vector3; holder: THREE.Group; model: THREE.Object3D | null; sold: boolean; soldSign: THREE.Object3D | null; bounce: number; phase: number }
 
 const v3 = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -96,12 +105,14 @@ export class Lodge implements Stage {
   readonly beaver = new Beaver();
   readonly ready: Promise<void>;
   layout: LodgeLayout = 'side';
-  /** a tap on something in the store (ids: deal:<i>, acorn:<id>, gem:<id>, gift, series:<id>, barrel, beaver, till, scales, slate) */
+  /** a tap on something in the store (ids: deal:<i>, made:<i>, bundle:<i>, acorn:<id>, gem:<id>, gift, barrel, beaver, till, scales, slate) */
   onPick: ((id: string) => void) | null = null;
   private spots = new Map<string, Spot>();
   private deals: Deal[] = [];
   private lamps: Lamp[] = [];
-  private banners: { id: string; b: Banner; sign: Sign | null }[] = [];
+  private wares: Ware[] = [];
+  private wareKey = '';
+  private wareToken = 0;
   private signs: Sign[] = [];
   /** boards hung twice, one per layout: on a phone they hang lower and further left, clear of the purse and the Leave sign */
   private boards: { side: THREE.Object3D; top: THREE.Object3D }[] = [];
@@ -165,6 +176,7 @@ export class Lodge implements Stage {
     this.buildCounter();
     this.buildStash();
     this.buildSeries();
+    this.buildWares();
     this.buildDecor();
     S.add(this.fx.group);
     this.fx.setLight(new THREE.Color(0xffe8c8));
@@ -522,19 +534,8 @@ export class Lodge implements Stage {
     return { target: v3(SHELF.x - 0.3, y, z), yaw: -1.2, pitch: 0.42, dist: l === 'side' ? 2.2 : 2.8, fov: 42, cx: l === 'side' ? 0.68 : 0.5, cy: l === 'side' ? 0.5 : 0.3 };
   }
 
-  /** the weekly series: cloth banners on the back wall, the Lucky Barrel before them */
+  /** the weekly series: the Lucky Barrel under the handmade shelf, where wishes are made */
   private buildSeries() {
-    // the beam the banners hang from
-    const rail = this.meshOf(logGeo(3.4, 0.06, 77), M.log());
-    rail.position.set(-2.75, BANNER_TOP + 0.12, ROOM.back + 0.3);
-    this.add(rail);
-    for (const [k, b] of BANNERS.entries()) {
-      const ban = banner(b.w, BANNER_H, k ? 0x8f6db8 : 0xc0383e, k + 1);
-      ban.group.position.set(b.x, BANNER_TOP, ROOM.back + 0.3);
-      this.add(ban.group);
-      this.banners.push({ id: '', b: ban, sign: null });
-      this.disposables.push(() => ban.dispose());
-    }
     // the Lucky Barrel: a fat oak barrel with brass hoops on a cradle, a crank on its side, light leaking from inside
     const B = BARREL;
     const group = new THREE.Group();
@@ -593,9 +594,16 @@ export class Lodge implements Stage {
     this.add(beam);
     this.disposables.push(() => beamM.dispose());
     this.barrelParts = { group, lid, glow, beam, shake: 0, open: 0, col: new THREE.Color(0xffd27a) };
-    const sign = hangingSign(1.05, 0.3, 'The Lucky Barrel', 'wishes · weekly series', 0.32, 9);
-    sign.group.position.set(-2.75, BANNER_TOP + 0.52, ROOM.back + 0.36);
+    // its name on a little board on a stake, driven in beside it
+    const sign = hangingSign(0.66, 0.22, 'Lucky Barrel', 'wishes · weekly series', 0.001, 9);
+    const SX = B.x + B.r + 0.38, SZ = B.z + 0.3, SY = 0.98;
+    sign.group.position.set(SX, SY, SZ);
+    sign.group.rotation.set(-0.06, 0.32, 0.03);
+    const stake = this.meshOf(new THREE.CylinderGeometry(0.022, 0.028, SY - 0.02, 7), M.boardDark());
+    stake.position.set(0, -(SY - 0.02) / 2 - 0.09, -0.03);
+    sign.group.add(stake);
     this.add(sign.group);
+    this.add(contactShadow(0.3, 0.3, 0.4)).position.set(SX, 0.004, SZ - 0.03);
     this.signs.push(sign);
     this.spot('barrel', group, this.hitBox(B.r * 2.2, B.h + 0.2, B.r * 2.2, v3(B.x, B.h / 2 + 0.12, B.z)), v3(B.x, B.h + 0.3, B.z), (l) => this.barrelShot(l));
     this.lamp(v3(-4.05, 2.5, -0.55), true);
@@ -604,10 +612,132 @@ export class Lodge implements Stage {
   private barrelShot(l: LodgeLayout, close = false): Shot {
     const B = BARREL;
     // close: the reveal (the barrel and the prize rising out of it, centred); otherwise the series board is open
-    // beside it (desktop: the board on the left) or below it (phone: the barrel and banners in the top third)
+    // beside it (desktop: the board on the left) or below it (phone: the barrel and the shelf in the top third)
     return close
       ? { target: v3(B.x, B.h + 0.62, B.z), yaw: 0.12, pitch: 0.12, dist: l === 'side' ? 3.4 : 4.6, fov: 44, cx: 0.5, cy: l === 'side' ? 0.36 : 0.34 }
       : { target: v3(B.x + 0.15, l === 'side' ? 1.5 : 1.75, B.z - 0.25), yaw: 0.1, pitch: 0.1, dist: l === 'side' ? 4.2 : 5.4, fov: 46, cx: l === 'side' ? 0.7 : 0.5, cy: l === 'side' ? 0.5 : 0.17 };
+  }
+
+  // ---------------------------------------------------------------- [shop16] the handmade shelf
+
+  /** Two oak shelves on bracketed hangers against the back wall over the barrel, a carved board above them, and the
+   * places for this week's pieces and bundles (filled by setWares). */
+  private buildWares() {
+    const W = WARES, len = W.x1 - W.x0, cx = (W.x0 + W.x1) / 2, zb = ROOM.back + 0.15;
+    const planks: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
+    const brackets: { geo: THREE.BufferGeometry; m: THREE.Matrix4 }[] = [];
+    for (const y of W.ys) {
+      const b = new RoundedBoxGeometry(len, 0.05, W.d, 2, 0.012);
+      const u = b.attributes.uv as THREE.BufferAttribute;
+      for (let i = 0; i < u.count; i++) u.setXY(i, u.getX(i) * len * 0.5, u.getY(i) * 0.3 + y);
+      planks.push({ geo: b, m: mtx(cx, y - 0.025, W.z) });
+      // a lip along the front so nothing rolls off
+      planks.push({ geo: new RoundedBoxGeometry(len - 0.02, 0.035, 0.022, 2, 0.008), m: mtx(cx, y + 0.012, W.z + W.d / 2 - 0.012) });
+      // a cleat on the wall under the back edge, and three brackets: an upright on the wall, an arm, a curved brace
+      brackets.push({ geo: new RoundedBoxGeometry(len - 0.06, 0.07, 0.03, 2, 0.008), m: mtx(cx, y - 0.085, zb + 0.015) });
+      for (const x of [W.x0 + 0.2, cx, W.x1 - 0.2]) {
+        brackets.push({ geo: new RoundedBoxGeometry(0.045, 0.3, 0.035, 2, 0.01), m: mtx(x, y - 0.2, zb + 0.035) });
+        brackets.push({ geo: new RoundedBoxGeometry(0.045, 0.04, W.d - 0.05, 2, 0.01), m: mtx(x, y - 0.07, W.z - 0.01) });
+        const brace = new THREE.Shape();
+        brace.moveTo(0, 0); brace.lineTo(0.03, 0); brace.quadraticCurveTo(0.05, -0.17, 0.25, -0.2); brace.lineTo(0.25, -0.235); brace.quadraticCurveTo(0.02, -0.21, 0, 0);
+        const bg = new THREE.ExtrudeGeometry(brace, { depth: 0.034, bevelEnabled: true, bevelSize: 0.004, bevelThickness: 0.004, bevelSegments: 1, curveSegments: 6 });
+        bg.translate(0, 0, -0.017);
+        brackets.push({ geo: bg, m: mtx(x, y - 0.06, W.z + W.d / 2 - 0.05, Math.PI / 2) });
+      }
+    }
+    this.add(this.meshOf(merged(planks), M.board()));
+    this.add(this.meshOf(merged(brackets), M.boardDark()));
+    // the shelf's name, hung from the beam above it
+    const nm = hangingSign(1.32, 0.32, 'Handmade by Barnaby', 'a new batch every Monday', 0.42, 12);
+    nm.group.position.set(cx, 3.06, ROOM.back + 0.34);
+    this.add(nm.group);
+    this.signs.push(nm);
+    // the places: a hit box over each, a tag hanging off the shelf's lip below it
+    WARE_AT.forEach(([row, col], k) => {
+      const at = v3(WARE_XS[col], W.ys[row], W.z + 0.02);
+      const holder = new THREE.Group();
+      holder.position.copy(at);
+      this.add(holder);
+      const id = k < 6 ? 'made:' + k : 'bundle:' + (k - 6);
+      this.wares.push({ id, at, holder, model: null, sold: false, soldSign: null, bounce: 0, phase: k * 1.7 });
+      this.spot(id, holder, this.hitBox(WARE_W + 0.08, WARE_H + 0.06, W.d, v3(at.x, at.y + WARE_H / 2, W.z)), v3(at.x, at.y - 0.01, W.z + W.d / 2 + 0.01),
+        (l) => ({ target: v3(at.x, at.y + 0.2, W.z), yaw: (at.x - cx) * -0.08, pitch: 0.1, dist: l === 'side' ? 2.0 : 2.7, fov: 42, cx: l === 'side' ? 0.68 : 0.5, cy: l === 'side' ? 0.5 : 0.3 }));
+    });
+    // a lantern over the shelf
+    this.lamp(v3(-1.95, 2.95, -2.1), true);
+  }
+
+  private waresShot(l: LodgeLayout): Shot {
+    const cx = (WARES.x0 + WARES.x1) / 2;
+    return l === 'side'
+      ? { target: v3(cx + 0.05, 1.95, WARES.z), yaw: 0.06, pitch: 0.06, dist: 3.6, fov: 44, cx: 0.5, cy: 0.47 }
+      : { target: v3(cx, 1.95, WARES.z), yaw: 0.04, pitch: 0.08, dist: 5.6, fov: 50, cx: 0.5, cy: 0.38 };
+  }
+
+  /** Put this week's handmade pieces (six) and bundles (two parcels in their ribbons) on the shelf. */
+  setWares(made: string[], bundles: { ribbon: number }[]) {
+    const key = made.join('|') + '/' + bundles.map((b) => b.ribbon).join('|');
+    if (key === this.wareKey) return;
+    this.wareKey = key;
+    const token = ++this.wareToken;
+    this.wares.forEach((w, k) => {
+      for (const c of [...w.holder.children]) { if (c === w.soldSign) continue; w.holder.remove(c); c.userData.dispose?.(); }
+      w.model = null;
+      if (k >= 6) {
+        const b = bundles[k - 6];
+        if (!b) return;
+        const p = parcel(0.3, b.ribbon);
+        p.rotation.y = (k === 6 ? 0.22 : -0.18);
+        w.holder.add(p);
+        // a second, smaller parcel tied on top
+        const p2 = parcel(0.17, b.ribbon, false);
+        p2.position.set(0.02, 0.3 * 0.74 + 0.008, -0.01);
+        p2.rotation.y = 0.5;
+        p.add(p2);
+        w.model = p;
+        this.setWareSold(k, w.sold);
+        return;
+      }
+      const id = made[k];
+      if (!id) return;
+      void displayModel({ kind: 'item', id }, WARE_W, WARE_H).then((r) => {
+        if (token !== this.wareToken || this.dead || !r) { r?.obj.userData.dispose?.(); return; }
+        let obj = r.obj;
+        const sz = new THREE.Box3().setFromObject(obj, true).getSize(new THREE.Vector3());
+        if (sz.y < 0.3 * Math.max(sz.x, sz.z)) {
+          // a blanket or a rug lying flat would hide behind the lip: stand it up against the wall to show it off
+          const lean = new THREE.Group();
+          obj.rotation.x = 1.2;
+          lean.add(obj);
+          fit(lean, WARE_W, WARE_H, WARES.d - 0.06);
+          lean.userData.animate = obj.userData.animate; lean.userData.dispose = obj.userData.dispose;
+          obj = lean;
+        } else if (sz.z > WARES.d - 0.04) obj.scale.multiplyScalar((WARES.d - 0.04) / sz.z); // no deeper than the shelf
+        w.holder.add(obj);
+        w.model = obj;
+        this.setWareSold(k, w.sold);
+      });
+    });
+  }
+
+  /** A piece (0-5) or bundle (6, 7) bought today: it leaves the shelf, a little SOLD card stands in its place. */
+  setWareSold(k: number, sold: boolean) {
+    const w = this.wares[k];
+    if (!w) return;
+    w.sold = sold;
+    if (w.model) w.model.visible = !sold;
+    if (sold && !w.soldSign) {
+      const sg = hangingSign(0.3, 0.13, 'SOLD', '', 0.001, 41 + k);
+      sg.group.position.set(0, 0.13, 0);
+      sg.group.rotation.x = -0.12;
+      const stake = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.08, 5), M.boardDark());
+      stake.position.y = -0.09;
+      sg.group.add(stake);
+      w.holder.add(sg.group);
+      w.soldSign = sg.group;
+      this.disposables.push(() => { sg.dispose(); stake.geometry.dispose(); });
+    }
+    if (w.soldSign) w.soldSign.visible = sold;
   }
 
   /** lanterns, goods, tools, crates and a plant (models from props.glb, placed once it's in) */
@@ -1102,7 +1232,6 @@ export class Lodge implements Stage {
     this.ray.ray.copy(ray);
     const hits = [...this.spots.values()].map((s) => s.hit);
     for (const dl of this.deals) hits.push(dl.group.userData.hit as THREE.Object3D);
-    for (const b of this.banners) hits.push(b.b.cloth);
     const h = this.ray.intersectObjects(hits, false)[0];
     if (h) {
       const id = (h.object.userData.spot as string | undefined) ?? '';
@@ -1200,23 +1329,7 @@ export class Lodge implements Stage {
     if (s.soldSign) s.soldSign.visible = sold;
   }
 
-  // ---------------------------------------------------------------- series banners and the slate
-
-  /** The weekly series' banner art (image URLs) and names, in order. */
-  setSeries(list: { id: string; art: string; on: boolean }[]) {
-    list.slice(0, this.banners.length).forEach((s, k) => {
-      const b = this.banners[k];
-      b.id = s.id;
-      b.b.setArt(s.art);
-      b.b.cloth.userData.spot = 'series:' + s.id;
-      const x = BANNERS[k].x;
-      this.spots.set('series:' + s.id, {
-        id: 'series:' + s.id, obj: b.b.group, hit: b.b.cloth, anchor: v3(x, BANNER_TOP - BANNER_H - 0.12, ROOM.back + 0.32),
-        focus: (l) => ({ target: v3(x, BANNER_TOP - BANNER_H / 2 - 0.15, ROOM.back + 0.3), yaw: 0.05, pitch: 0.02, dist: l === 'side' ? 2.9 : 3.9, fov: 44, cx: l === 'side' ? 0.7 : 0.5, cy: l === 'side' ? 0.5 : 0.3 }),
-      });
-      (b.b.cloth.material as THREE.MeshStandardMaterial).color.setScalar(s.on ? 1 : 0.62);
-    });
-  }
+  // ---------------------------------------------------------------- the slate
 
   /** Chalk the slate: today's deals and when they change. */
   chalk(lines: { text: string; size: number; col?: string }[]) { this.board?.draw(lines); }
@@ -1231,6 +1344,7 @@ export class Lodge implements Stage {
     if (name === 'deals') { const p = STUMPS[l][1]; return l === 'side' ? { target: v3(p.x, 0.75, p.z - 0.3), yaw: 0.05, pitch: 0.2, dist: 3.9, fov: 44, cx: 0.5, cy: 0.5 } : this.shot('home'); }
     if (name === 'stash') return { target: v3(SHELF.x - 0.45, 0.6, (SHELF.z0 + SHELF.z1) / 2 + 0.05), yaw: -1.12, pitch: l === 'side' ? 0.4 : 0.5, dist: l === 'side' ? 3.5 : 5.4, fov: l === 'side' ? 46 : 52, cx: 0.5, cy: l === 'side' ? 0.48 : 0.42 };
     if (name === 'series') return this.barrelShot(l, false);
+    if (name === 'handmade') return this.waresShot(l);
     if (name === 'barrel') return this.barrelShot(l, true);
     const s = this.spots.get(name);
     if (s) return s.focus(l);
@@ -1244,7 +1358,7 @@ export class Lodge implements Stage {
   /** Fly the camera to a section or a thing (`instant` jumps there). */
   focus(name: string, instant = false) {
     this.shotName = name;
-    if (['home', 'deals', 'stash', 'series'].includes(name)) this.section = name as Section;
+    if (['home', 'deals', 'stash', 'series', 'handmade'].includes(name)) this.section = name as Section;
     const to = this.shot(name);
     this.from = { ...this.cur, target: this.cur.target.clone() };
     this.to = to;
@@ -1261,6 +1375,8 @@ export class Lodge implements Stage {
       this.focusOn = 1;
     } else this.focusOn = 0;
     if (name.startsWith('deal:')) { const d = this.deals[+name.slice(5)]; if (d) d.bounce = 1; }
+    const w = this.wares.find((x) => x.id === name);
+    if (w) w.bounce = 1;
   }
   private focusOn = 0;
   get current() { return this.shotName; }
@@ -1440,7 +1556,6 @@ export class Lodge implements Stage {
       if (l.swing?.userData.hang) { l.swing.rotation.z = Math.sin(t * 0.7 + l.phase) * 0.025; l.swing.rotation.x = Math.sin(t * 0.55 + l.phase * 1.3) * 0.02; }
     }
     this.focusLight.intensity += ((this.focusOn ? 9 : 0) - this.focusLight.intensity) * Math.min(1, dt * 3);
-    for (const b of this.banners) b.b.sway(t, 1);
     for (const h of this.herbs) { const ph = h.userData.phase as number; h.rotation.z = Math.sin(t * 0.8 + ph) * 0.04; h.rotation.x = Math.sin(t * 0.6 + ph * 1.7) * 0.03; }
     swayPlants(t);
 
@@ -1469,6 +1584,13 @@ export class Lodge implements Stage {
       if (d.model) d.model.rotation.y = Math.sin(t * 0.35 + d.def.x) * 0.35;
       d.owl?.update(dt);
       (d.model?.userData.animate as ((t: number, dt: number) => void) | undefined)?.(t, dt);
+    }
+    // [shop16] the handmade pieces turn a little on the shelf, and hop when picked
+    for (const w of this.wares) {
+      w.bounce = Math.max(0, w.bounce - dt * 1.6);
+      w.holder.position.y = w.at.y + Math.max(0, Math.sin((1 - w.bounce) * Math.PI * 3) * w.bounce * 0.06);
+      if (w.model && w.id.startsWith('made:')) w.model.rotation.y = Math.sin(t * 0.3 + w.phase) * 0.14;
+      (w.model?.userData.animate as ((t: number, dt: number) => void) | undefined)?.(t, dt);
     }
     // the gift opening
     if (this.gift && this.giftOpen > 0 && this.giftOpen < 1) {
@@ -1528,6 +1650,7 @@ export class Lodge implements Stage {
   dispose() {
     this.dead = true;
     for (const d of this.deals) { d.owl?.model.dispose(); for (const c of d.holder.children) c.userData.dispose?.(); }
+    for (const w of this.wares) for (const c of w.holder.children) c.userData.dispose?.();
     this.clearPrize();
     // [shop11] the workshop's own geometry (built in code; the borrowed models share theirs with the GLB cache)
     const own = new Set<THREE.BufferGeometry>();

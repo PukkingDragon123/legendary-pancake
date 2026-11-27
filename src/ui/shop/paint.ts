@@ -1,4 +1,4 @@
-// Painted art for the lodge store's UI: the series banner backdrops (printed on the cloth banners in the lodge)
+// Painted art for the lodge store's UI: the series posters on the Lucky Barrel's wish board
 // (Frostlight: an evening of first snow over a pine wood, a gingerbread cottage with lamplit windows,
 // garlands and baubles; Starfall: a dusky plum sky of falling stars over cloud banks and a little
 // observatory), the night sky of the wish cinematic, big 3D portraits of the featured owls, finish
@@ -91,7 +91,7 @@ class Pix {
   }
 }
 
-// ------------------------------------------------------------------ banner backdrops
+// ------------------------------------------------------------------ series posters
 
 /** The calm-palette colours a series is shown in (light, mid, dark, accent). */
 export function seriesColors(s: Series): [string, string, string, string] {
@@ -220,12 +220,12 @@ export function skyArt(motif: 'snow' | 'stars', w: number, h: number): string {
   return u;
 }
 
-const bannerCache = new Map<string, string>();
-/** Painted backdrop for a series banner at w x h art pixels (shown upscaled, pixelated). */
-export function bannerArt(s: Series, w: number, h: number): string {
+const posterCache = new Map<string, string>();
+/** Painted poster for a series at w x h art pixels (shown upscaled, pixelated). */
+export function posterArt(s: Series, w: number, h: number): string {
   const key = `${s.id}:${w}x${h}`;
-  let u = bannerCache.get(key);
-  if (!u) { u = (s.motif === 'stars' ? starfall(w, h) : frostlight(w, h)).url(); bannerCache.set(key, u); }
+  let u = posterCache.get(key);
+  if (!u) { u = (s.motif === 'stars' ? starfall(w, h) : frostlight(w, h)).url(); posterCache.set(key, u); }
   return u;
 }
 
@@ -304,5 +304,5 @@ export function prizeArt(kind: RewardKind | 'species', id: string, look: OwlLook
   if (kind === 'frame') return frameWithSky(id, 72); // [ui5] a portrait frame with its little sky
   return '';
 }
-/** The look used to show a featured 5-star skin big on the banner. */
+/** The look used to show a featured 5-star skin big on the wish board. */
 export const skinLook = (id: string): OwlLook => ({ skin: id as OwlLook['skin'], species: 'snowy', palette: 'snowy', outfit: {} });

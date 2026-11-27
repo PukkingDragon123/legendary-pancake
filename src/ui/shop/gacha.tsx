@@ -1,4 +1,4 @@
-// The weekly series at the Lucky Barrel (opened from a banner or the barrel in Barnaby's lodge). The series board is a
+// The weekly series at the Lucky Barrel (opened from the barrel or the Wishes sign in Barnaby's lodge). The series board is a
 // wooden notice board: the series poster pinned up, its featured prizes on paper cards, the pity counted in chalk tally
 // marks on a slate, and two brass-cased stamps to wish x1 / x10. A wish is played in the room: the camera swings to the
 // barrel, it rumbles and shakes, the lid pops and a beam of light shoots up in the colour of the best rarity (blue 3,
@@ -15,7 +15,7 @@ import { Px } from '../icons.tsx';
 import { haptic, Rolling, toast, useTick } from '../kit.tsx';
 import { panel } from '../state.ts';
 import { AnimPx, rewardMoment, Stamp } from './moment.tsx';
-import { bannerArt, prizeArt } from './paint.ts';
+import { posterArt, prizeArt } from './paint.ts';
 import { fxMoment } from '../fx/moment.ts'; // [fx10]
 
 const fmt = (n: number) => n.toLocaleString('en-US');
@@ -88,7 +88,7 @@ export function Gacha(p: { seriesId: string; stage: Lodge | null; say: (t: strin
           <div class="lg-g-body">
             <div class="lg-poster">
               <span class="lg-pin" /><span class="lg-pin r" />
-              <img class="lg-poster-art" src={bannerArt(s, side ? 200 : 180, side ? 112 : 100)} alt="" />
+              <img class="lg-poster-art" src={posterArt(s, side ? 200 : 180, side ? 112 : 100)} alt="" />
               <div class="lg-poster-title">
                 <span class="lg-poster-kick">{on ? `Weekly series · ends in ${fmtLeft(msToWeek())}` : `Arrives in ${fmtLeft(msToWeek())}`}</span>
                 <h2>{s.name}</h2>

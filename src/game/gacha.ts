@@ -96,7 +96,7 @@ export const untilFive = (p: Pity | undefined) => ODDS.hard - (p?.five ?? 0);
 /** Wishes left until a 4-star or better is certain. */
 export const untilFour = (p: Pity | undefined) => ODDS.fourHard - (p?.four ?? 0);
 
-/** Long-run rates a player can read on the banner's details page. */
+/** Long-run rates a player can read on the series' rates page. */
 export function displayRates(s: Series) {
   const f5 = of(s, 5, true), f4 = of(s, 4, true);
   return {

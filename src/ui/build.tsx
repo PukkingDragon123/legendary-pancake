@@ -268,7 +268,7 @@ export function BuildMode() {
     if (room[slot] === f.id) return;
     const owned = s.owned.finishes.includes(f.id);
     if (!owned) {
-      if (f.series || f.noStore) { const sr = f.series ? SERIES_BY_ID[f.series] : undefined; return nope('f-' + f.id, sr ? `From the ${sr.name} banner` : 'Not sold here'); }
+      if (f.series || f.noStore) { const sr = f.series ? SERIES_BY_ID[f.series] : undefined; return nope('f-' + f.id, sr ? `From the ${sr.name} at the Lucky Barrel` : 'Not sold here'); }
       const yes = await ask({ title: `${f.name}?`, body: <>{f.blurb}<br /><span class="small">{f.gems ? `${f.gems} moon gems` : `${f.price.toLocaleString()} acorns`}</span></>, ok: 'Buy & apply', tone: 'honey' });
       if (!yes) return;
     }
@@ -348,7 +348,7 @@ export function BuildMode() {
               <button class={'bm-card' + (lockLv || seasonalLocked ? ' locked' : '') + (shake === 'i-' + d.id ? ' shake' : '')} style={{ animationDelay: `${Math.min(i, 8) * 30}ms` }} onClick={() => pickItem(d)} title={d.blurb}>
                 <span class="bm-art"><Thumb id={d.id} i={i} /></span>
                 <span class="bm-name">{d.name}</span>
-                {have > 0 ? <span class="bm-have">x{have} stored</span> : seasonalLocked ? <span class="bm-have lock"><Px name="lock" size={14} />{d.series ? 'Banner' : 'Adventure'}</span> : <PriceTag {...pr} />}
+                {have > 0 ? <span class="bm-have">x{have} stored</span> : seasonalLocked ? <span class="bm-have lock"><Px name="lock" size={14} />{d.series ? 'Wishes' : 'Adventure'}</span> : <PriceTag {...pr} />}
                 {lockLv > 0 && <span class="bm-lock"><Px name="lock" size={16} />Lv {lockLv}</span>}
                 {have > 0 && !seen.has(d.id) && <i class="bm-new">NEW</i>}
                 {d.series && <i class="bm-series" title={SERIES_BY_ID[d.series]?.name}><Px name="sparkle" size={14} /></i>}

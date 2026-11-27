@@ -46,8 +46,11 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **A visual interview**: one-line questions answered by tapping hand-painted 3D objects (drinks, cassette tapes that
   slide into a recorder and play, a pillow tower, sheep over a stile), a floating fountain pen that writes, ticks and
   signs, and a pretend phone that shows the bedtime phone lock (also in the Sleep panel).
-- **Barnaby's Lodge Store**: a beaver shopkeeper in a log-cabin general store; price tags, packs, banners and
-  the Lucky Barrel wishes are all physical objects.
+- **Barnaby's Lodge Store**: a beaver shopkeeper in a log-cabin general store; price tags, packs, the handmade
+  shelf and the Lucky Barrel wishes are all physical objects. Besides three daily deals, frames and the stash, a
+  handmade shelf over the barrel holds the week's porch pieces sold only at the lodge (bench, picnic blanket, lantern
+  post, stone lantern, campfire, mailbox, wishing well, birdhouse), two bench-made pieces a little under catalogue
+  price, and two wrapped bundles (three pieces of furniture and an outfit piece, 25% off the set); one of each a day.
 - **The Earth**: NASA imagery with city lights, clouds, relief and a real-time terminator; fly down to 20 real
   places with photos, facts and their souvenirs.
 - **UI as objects**: a walnut, brass and leather HUD; a glass moon lamp, a carved cuckoo clock (real time, an owl that
@@ -119,7 +122,7 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Transitions**: 15 of them.
 - **Interview**: in Pip's office, with a desk, a real view out of the window, office props and hands-on
   widgets.
-- **The lodge store**: Barnaby Birchbark, a hand-painted beaver, keeps a general store in his log lodge: deals on gnawed stumps, acorn sacks and gem chests, a gift parcel, series banners over the Lucky Barrel, and a
+- **The lodge store**: Barnaby Birchbark, a hand-painted beaver, keeps a general store in his log lodge: deals on gnawed stumps, acorn sacks and gem chests, a gift parcel, the Lucky Barrel for wishes, and a
   window onto the real forest.
 - **Book**: a simpler diary of your stats.
 - **Explore the world**: a hand-painted globe with 20 real places, each with a real photo, a souvenir
