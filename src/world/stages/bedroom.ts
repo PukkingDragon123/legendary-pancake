@@ -19,6 +19,7 @@ import { at, Batch, bbox, cyl, lathe } from '../../onboard/kit.ts';
 import type { OfficeMats } from '../../onboard/mats.ts';
 import { ramp, rgb, Tex, vnoise, fbm, hash } from '../../onboard/tex.ts';
 import { texCanvas, type TexName } from '../../ui/real/tex.ts';
+import { STACK, TITLE_STACK } from '../../ui/font.ts';
 import { Fx, SPR } from '../fx.ts';
 import type { Look } from '../post.ts';
 import type { Stage } from '../scene.ts';
@@ -174,7 +175,7 @@ function dialTex(): THREE.Texture {
     g.fillStyle = '#f3ead6'; g.beginPath(); g.arc(128, 128, 126, 0, 7); g.fill();
     g.strokeStyle = '#2a2420';
     for (let i = 0; i < 60; i++) { const a = (i / 60) * Math.PI * 2, r0 = i % 5 ? 112 : 104; g.lineWidth = i % 5 ? 2 : 4; g.beginPath(); g.moveTo(128 + Math.sin(a) * r0, 128 - Math.cos(a) * r0); g.lineTo(128 + Math.sin(a) * 120, 128 - Math.cos(a) * 120); g.stroke(); }
-    g.fillStyle = '#2a2420'; g.font = '700 30px Nunito, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#2a2420'; g.font = `700 30px ${TITLE_STACK}`; g.textAlign = 'center'; g.textBaseline = 'middle';
     for (let i = 1; i <= 12; i++) { const a = (i / 12) * Math.PI * 2; g.fillText(String(i), 128 + Math.sin(a) * 84, 130 - Math.cos(a) * 84); }
     g.fillStyle = '#c9a23c'; g.beginPath(); g.arc(128, 172, 13, 0, 7); g.fill(); g.fillStyle = '#f3ead6'; g.beginPath(); g.arc(134, 168, 11, 0, 7); g.fill();
   });
@@ -184,7 +185,7 @@ function phoneTex(): THREE.Texture {
   return canvasTex(180, 360, (g) => {
     const gr = g.createLinearGradient(0, 0, 0, 360); gr.addColorStop(0, '#3a4fa0'); gr.addColorStop(1, '#1b1f4a');
     g.fillStyle = gr; g.fillRect(0, 0, 180, 360);
-    g.fillStyle = '#fff'; g.font = '800 44px Nunito, sans-serif'; g.textAlign = 'center'; g.fillText('11:02', 90, 78);
+    g.fillStyle = '#fff'; g.font = `600 44px ${STACK}`; g.textAlign = 'center'; g.fillText('11:02', 90, 78);
     for (let i = 0; i < 3; i++) { g.fillStyle = 'rgba(255,255,255,.86)'; roundRect(g, 14, 120 + i * 62, 152, 50, 12); g.fill(); g.fillStyle = ['#e5534b', '#4a8af4', '#f2b134'][i]; roundRect(g, 24, 132 + i * 62, 26, 26, 7); g.fill(); g.fillStyle = 'rgba(30,30,50,.5)'; g.fillRect(58, 136 + i * 62, 90, 7); g.fillRect(58, 150 + i * 62, 64, 6); }
   });
 }
@@ -196,7 +197,7 @@ function labelTex(): THREE.Texture {
     for (let r = 20; r < 64; r += 1.5) { g.strokeStyle = `rgba(255,255,255,${0.03 + (r % 3) * 0.015})`; g.beginPath(); g.arc(64, 64, r, 0, 7); g.stroke(); }
     g.fillStyle = '#b8463a'; g.beginPath(); g.arc(64, 64, 20, 0, 7); g.fill();
     g.fillStyle = '#f0d9a8'; g.beginPath(); g.arc(64, 64, 2.5, 0, 7); g.fill();
-    g.fillStyle = '#f0d9a8'; g.font = '700 7px Nunito, sans-serif'; g.textAlign = 'center'; g.fillText('LULLABY', 64, 56);
+    g.fillStyle = '#f0d9a8'; g.font = `700 7px ${STACK}`; g.textAlign = 'center'; g.fillText('LULLABY', 64, 56);
   });
 }
 

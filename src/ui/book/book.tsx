@@ -10,6 +10,7 @@
 // Without 3D the panel stands alone on a walnut wall, with the board and the slides as pictures.
 //
 // Public: <Book /> (rendered by app.tsx while panel.value === 'book'; closes by setting panel to null).
+import { STACK } from '../font.ts';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
 import { progress } from '../../game/quests.ts';
@@ -347,7 +348,7 @@ function Hypno(p: { n: Night; h12: boolean }) {
     const st = p.n.stages ?? [], r = p.n.report;
     const rows: Stage[] = ['awake', 'rem', 'light', 'deep'];
     const L0 = 66, R0 = W - 6, T0 = 8, B0 = H - 26, rowH = (B0 - T0) / 4;
-    g.font = `700 12px 'Hoot Sans', system-ui, sans-serif`; g.textBaseline = 'middle'; g.textAlign = 'right';
+    g.font = `700 12px ${STACK}`; g.textBaseline = 'middle'; g.textAlign = 'right';
     rows.forEach((s, i) => { g.fillStyle = 'rgba(90,60,30,0.08)'; if (i % 2 === 0) g.fillRect(L0, T0 + i * rowH, R0 - L0, rowH); g.fillStyle = '#6b5a48'; g.fillText(s === 'rem' ? 'Dreaming' : s[0].toUpperCase() + s.slice(1), L0 - 8, T0 + (i + 0.5) * rowH); });
     const t0 = p.n.start, t1 = p.n.end ?? r.wokeAt, xOf = (t: number) => L0 + ((t - t0) / Math.max(1, t1 - t0)) * (R0 - L0);
     if (st.length) {

@@ -1,4 +1,4 @@
-// [text15] Plain, calm lettering in the game's face (font.ts, Nunito): titles, signs and names extra-bold, every
+// [text15] Plain, calm lettering in the game's face (font.ts: Fraunces for titles, Figtree for text): titles, signs and names extra-bold, every
 // colour flat. Light text on wood and dark surfaces wears one soft shadow for contrast; dark ink on paper wears none.
 // Motion stays small and physical: titles fade up into place, numbers count up and give a little punch,
 // exclamations shake once. Everything respects reduced motion and the in-app Calm motion setting (the global rules
