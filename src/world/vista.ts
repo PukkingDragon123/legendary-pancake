@@ -10,7 +10,7 @@ import { canopy, conifer, leafMaterial, leafTexture, leavesReady, withLeafState,
 import { MeshBuilder, tube, v3 } from './bushed/geom.ts';
 import type { ForestPlan } from './flora.ts';
 import { HALF, SEED } from './layout.ts';
-import { outerY } from './terrain.ts';
+import { MOSSY_GLSL, outerY } from './terrain.ts';
 import { tex } from './bushed/textures.ts';
 import type { Sky } from './sky.ts';
 import { WX } from './weather.ts';
@@ -123,9 +123,9 @@ export class Vista {
         .replace('#include <common>', '#include <common>\nattribute float aLawn;\nvarying float vLawn;\nvarying vec2 vWxz;')
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvLawn = aLawn; vWxz = position.xz;');
       sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', '#include <common>\nuniform sampler2D uMoss;\nvarying float vLawn;\nvarying vec2 vWxz;')
+        .replace('#include <common>', '#include <common>\nuniform sampler2D uMoss;\nvarying float vLawn;\nvarying vec2 vWxz;\n' + MOSSY_GLSL)
         .replace('#include <map_fragment>', `
-          vec3 vgF = texture2D(map, vMapUv).rgb;
+          vec3 vgF = hhMossyFloor(texture2D(map, vMapUv).rgb, texture2D(uMoss, vWxz / 4.3 + 0.37).rgb); // [ground16] as the clearing's floor
           vec3 vgM = texture2D(uMoss, vWxz / 2.6).rgb * vec3(1.02, 1.16, 0.74);
           diffuseColor.rgb *= mix(vgF, vgM, smoothstep(0.2, 0.8, vLawn));`);
     };
@@ -354,7 +354,7 @@ export class Vista {
 
   /** Dress the far woods for the season (autumn colours on some broadleaves, bare winter broadleaves). */
   setSeason(info: SeasonInfo) {
-    this.groundMat.color.setHex({ spring: 0xf6fbf0, summer: 0xffffff, autumn: 0xf6e6cc, winter: 0xe6eae6 }[info.season]); // as the clearing's ground
+    this.groundMat.color.setHex({ spring: 0xf6fbf0, summer: 0xffffff, autumn: 0xf4eed8, winter: 0xe6eae6 }[info.season]); // as the clearing's ground
     const turned = info.season === 'autumn' ? 0.22 + 0.26 * info.t : 0;
     const stateOf = (t: Tree, i: number, band: number) => {
       if (this.kinds[t.kind].conifer) return 0;
