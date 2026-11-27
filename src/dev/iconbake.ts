@@ -16,7 +16,7 @@
 import * as THREE from 'three';
 import { instanceGLB } from '../gfx/glb.ts';
 import { fbm, hash as h2, hex, type RGB } from '../ui/px/relief.ts';
-import { bark, cloth, cloudTex, enamel, fitUV, flame, gem, glass, keepUV, leafTex, leather, metal, paper, scales, setSwatch, stone, swatchAt, SWATCHES, water, wax, wood, type Painted, type Swatch } from '../ui/chrome/paint3d.ts';
+import { bark, cloth, cloudTex, enamel, fitUV, flame, gem, glass, keepUV, leafTex, leather, metal, paper, scales, setSwatch, shingles, stone, swatchAt, SWATCHES, water, wax, wood, type Painted, type Swatch } from '../ui/chrome/paint3d.ts';
 import {
   acornProp, at, carvedOak, oakLeafProp, ribbon, ball, circlePts, crescentPts, cuckooClock, cyl, ext, grp, journal, lathe, mesh, oilLamp, paintTex, planarUV, rrectPts, setClockHands, shape, shelf, smoothProfile, starPts, studioEnv, torus, tube,
   type O,
@@ -347,7 +347,7 @@ function facetSolid(pts: P2[], rise: number, depth: number, m: THREE.Material, c
   return mesh(g, m);
 }
 /** a cut-gold star: ridged points */
-const goldStar = (R: number, r: number, n = 5, m: THREE.Material = C.gold()) => facetSolid(starPts(R, r, n), R * 0.32, R * 0.16, m);
+const goldStar = (R: number, r: number, n = 5, m: THREE.Material = gilt()) => facetSolid(starPts(R, r, n), R * 0.32, R * 0.16, m);
 const HEART: P2[] = Array.from({ length: 72 }, (_, i) => { const t = (i / 72) * Math.PI * 2; return [(16 * Math.sin(t) ** 3) / 16 * 0.9, ((13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 16) * 0.9 + 0.1] as P2; });
 /** an arrow pointing right (rotate it for the others), its corners softened */
 const ARROW: P2[] = roundPoly([[-0.82, -0.2], [0.06, -0.2], [0.06, -0.56], [0.84, 0], [0.06, 0.56], [0.06, 0.2], [-0.82, 0.2]], 0.07);
@@ -355,11 +355,16 @@ const rot = (pts: P2[], a: number): P2[] => pts.map(([x, y]) => [x * Math.cos(a)
 const mirrorX = (pts: P2[]): P2[] => pts.map(([x, y]) => [-x, y] as P2).reverse();
 /** a curved arrow round the centre (a refresh), clockwise when `cw` */
 function curvedArrow(m: THREE.Material, cw: boolean): THREE.Group {
-  const a0 = cw ? 2.2 : 0.94, a1 = cw ? -2.0 : 5.14, R = 0.64, n = 32, arc: P2[] = [];
+  // [icons10] one outline (the band and its head together) so the cloisonné wire runs round it unbroken
+  const a0 = cw ? 2.2 : 0.94, a1 = cw ? -2.0 : 5.14, R = 0.62, n = 40, w = 0.24, arc: P2[] = [];
   for (let i = 0; i <= n; i++) { const a = a0 + ((a1 - a0) * i) / n; arc.push([Math.cos(a) * R, Math.sin(a) * R]); }
-  const end = arc[n], tan = nrm(sub(arc[n], arc[n - 1])), nx = -tan[1], ny = tan[0];
-  const head = roundPoly([[end[0] + nx * 0.29, end[1] + ny * 0.29], [end[0] + tan[0] * 0.34, end[1] + tan[1] * 0.34], [end[0] - nx * 0.29, end[1] - ny * 0.29]], 0.05);
-  return grp(jewelStroke(arc.slice(0, n - 1), 0.21, m), jewel(head, m, { z: 0.03 }));
+  const end = arc[n], tan = nrm(sub(arc[n], arc[n - 1]));
+  const side = (k: number) => arc.map(([x, y]) => { const l = Math.hypot(x, y); return [x + (x / l) * k, y + (y / l) * k] as P2; });
+  const out = side(w / 2), inn = side(-w / 2), ux = end[0] / R, uy = end[1] / R;
+  const head: P2[] = [[end[0] + ux * 0.3, end[1] + uy * 0.3], [end[0] + tan[0] * 0.36, end[1] + tan[1] * 0.36], [end[0] - ux * 0.3, end[1] - uy * 0.3]];
+  const t0 = nrm(sub(arc[1], arc[0])), r0: P2 = [arc[0][0] / R, arc[0][1] / R];
+  const cap: P2[] = Array.from({ length: 9 }, (_, i) => { const t = (Math.PI * (i + 1)) / 10; return [arc[0][0] - Math.cos(t) * r0[0] * (w / 2) - Math.sin(t) * t0[0] * (w / 2), arc[0][1] - Math.cos(t) * r0[1] * (w / 2) - Math.sin(t) * t0[1] * (w / 2)] as P2; });
+  return cloison(roundPoly([...out.slice(0, n), ...head, ...inn.slice(0, n).reverse(), ...cap], 0.03, 3), m);
 }
 /** [icons9] a struck medallion: a lacquered disc in a turned brass rim, its glyph raised in bare brass (a coin's thickness) */
 function enamelButton(m: THREE.Material, glyph: P2[][]): THREE.Group {
@@ -905,9 +910,809 @@ function moonGem9(withMoon = false): O {
   return g;
 }
 
+// ------------------------------------------------------------------ [icons10] the family, polished
+// The symbols are cloisonné, like an enamel pin or a clockmaker's badge: a domed, glassy vitreous enamel in a natural
+// pigment, edged with a fine polished brass wire and set on a bevelled brass backing a little bigger than it. The
+// medallions are the same enamel in a turned brass bezel with an ivory glyph. Brass is polished (a warm gleam, dark
+// bands from the studio) and chrome is bright; everything else is a real object made of real parts.
+const physCache = new Map<string, THREE.MeshPhysicalMaterial>();
+/** vitreous enamel: a saturated pigment under a glassy clear coat */
+function vitreous(c: number, rough = 0.36): THREE.MeshPhysicalMaterial {
+  const k = c + ':' + rough;
+  let m = physCache.get(k);
+  if (!m) {
+    // a faint mottle in the glass (no crazing, no chips)
+    const map = enamel('#' + c.toString(16).padStart(6, '0'), { craze: 0, chips: false }).map;
+    m = new THREE.MeshPhysicalMaterial({ map, roughness: rough, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.07, envMapIntensity: 0.9 });
+    physCache.set(k, m); ownMats.add(m);
+  }
+  return m;
+}
+/** [icons10] gilt: bright burnished gold that keeps its warm colour in the facets' shadows (stars, the sun, the moon's crescent) */
+function gilt(c = 0xf2c04a): THREE.MeshPhysicalMaterial {
+  const k = 'gilt' + c;
+  let m = physCache.get(k);
+  if (!m) { m = new THREE.MeshPhysicalMaterial({ color: c, metalness: 0.62, roughness: 0.3, clearcoat: 0.5, clearcoatRoughness: 0.15, envMapIntensity: 1.25 }); physCache.set(k, m); ownMats.add(m); }
+  return m;
+}
+/** polished brass (the bezels, wires, bells and stands) */
+const BRASS = () => M(0xe9b24e, { metal: 0.92, rough: 0.24, tex: null, env: 1.15 });
+/** darker, older brass for the backs of things */
+const OLDBRASS = () => M(0xb88436, { metal: 0.9, rough: 0.34, tex: null, env: 1.0 });
+/** bright chrome */
+const CHROME = () => M(0xe6eaf0, { metal: 0.95, rough: 0.16, tex: null, env: 1.35 });
+/** blackened steel (clock hands, screws) */
+const BLACKSTEEL = () => M(0x2a2630, { metal: 0.7, rough: 0.35, tex: null, env: 0.8 });
+/** a domed slab of `pts` (a pillow of enamel): widest at z 0..0.01, its top rounded `h` above */
+function dome(pts: P2[], m: THREE.Material, h = 0.07, b = 0.045, seg = 5): THREE.Mesh {
+  const g = new THREE.ExtrudeGeometry(shape(offsetPts(pts, -b)), { depth: 0.01, bevelEnabled: true, bevelThickness: h, bevelSize: b, bevelSegments: seg, curveSegments: 48 });
+  g.computeVertexNormals();
+  return mesh(g, m);
+}
+/** a polished wire laid along a closed outline */
+const wireAlong = (pts: P2[], r: number, m: THREE.Material, z: number) => tube(pts.map(([x, y]) => [x, y, z] as [number, number, number]), r, m, Math.max(64, pts.length * 3), 6, true);
+/** a cloisonné shape: domed enamel in a brass wire on a bevelled brass backing */
+function cloison(pts: P2[], enamelM: THREE.Material, o: { rim?: number; wire?: number; h?: number; z?: number; back?: THREE.Material } = {}): THREE.Group {
+  const rim = o.rim ?? 0.065, wire = o.wire ?? 0.028, h = o.h ?? 0.075;
+  const g = grp(
+    ext(shape(offsetPts(pts, rim)), 0.06, o.back ?? OLDBRASS(), 0.028, 3, 48),
+    at(dome(pts, enamelM, h, 0.05), 0, 0, 0.03),
+    wireAlong(pts, wire, BRASS(), 0.062),
+  );
+  g.position.z = o.z ?? 0;
+  return g;
+}
+/** a stroke (a polyline of width w) in cloisonné */
+const cloisonStroke = (pts: P2[], w: number, m: THREE.Material, o: Parameters<typeof cloison>[2] = {}) => cloison(strokePts(pts, w, 10), m, o);
+/** an enamel medallion in a turned brass bezel with raised ivory glyphs, each in its own wire */
+function medal(color: number, glyphs: P2[][]): THREE.Group {
+  const g = grp(
+    at(lathe(smoothProfile([[0, -0.08], [0.8, -0.08], [0.88, -0.05], [0.9, 0.02], [0.86, 0.08], [0.8, 0.09], [0.77, 0.05]], 3), BRASS(), 96), 0, 0, 0, Math.PI / 2),
+    at(dome(circlePts(0.78, 96), vitreous(color), 0.05, 0.04), 0, 0, 0.0),
+  );
+  for (const p of glyphs) g.add(at(dome(p, vitreous(0xf3e8cf, 0.4), 0.05, 0.035), 0, 0, 0.07), wireAlong(p, 0.022, BRASS(), 0.09));
+  return g;
+}
+
+/** clear glass (jars, tubes, crystals): `a` opaque */
+const clearGlass = (a = 0.22) => M(0xeef8ff, { rough: 0.04, metal: 0.1, tex: null, env: 1.7, opacity: a, side: THREE.DoubleSide });
+/** a capsule from a to b (a finger, a rod with round ends) */
+function capsule(a: [number, number, number], b: [number, number, number], r: number, m: THREE.Material): THREE.Mesh {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), d = B.clone().sub(A);
+  const me = mesh(new THREE.CapsuleGeometry(r, Math.max(0.001, d.length()), 8, 20), m);
+  me.position.copy(A).add(B).multiplyScalar(0.5);
+  me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  return me;
+}
+/** a rod (cylinder) from a to b */
+function rod(a: [number, number, number], b: [number, number, number], r: number, m: THREE.Material, seg = 12): THREE.Mesh {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), d = B.clone().sub(A);
+  const me = mesh(new THREE.CylinderGeometry(r, r, d.length(), seg), m);
+  me.position.copy(A).add(B).multiplyScalar(0.5);
+  me.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  return me;
+}
+
+// ---- alarm: a brass twin-bell alarm clock (two bells and the hammer between them, a cream dial, splayed feet)
+function alarmDialTex(): THREE.Texture {
+  return drawTex('alarmdial', 256, 256, (g) => {
+    const c = 128;
+    const rg = g.createRadialGradient(c - 30, c - 40, 10, c, c, 128);
+    rg.addColorStop(0, '#fbf3de'); rg.addColorStop(0.8, '#f1e2bf'); rg.addColorStop(1, '#dcc59a');
+    g.fillStyle = rg; g.fillRect(0, 0, 256, 256);
+    grain(g, 256, 256, 0.04);
+    g.strokeStyle = '#3a2c2a';
+    for (let i = 0; i < 60; i++) {
+      const a = (i / 60) * Math.PI * 2, big = i % 5 === 0, r0 = big ? 96 : 104, r1 = 113;
+      g.lineWidth = big ? 6 : 2.2;
+      g.beginPath(); g.moveTo(c + Math.sin(a) * r0, c - Math.cos(a) * r0); g.lineTo(c + Math.sin(a) * r1, c - Math.cos(a) * r1); g.stroke();
+    }
+    g.fillStyle = '#3a2c2a'; g.font = 'bold 40px Georgia, "DejaVu Serif", serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    for (const [t, a] of [['12', 0], ['3', 3], ['6', 6], ['9', 9]] as [string, number][]) { const an = (a / 12) * Math.PI * 2; g.fillText(t, c + Math.sin(an) * 72, c - Math.cos(an) * 72 + 2); }
+    g.strokeStyle = 'rgba(150,110,60,0.5)'; g.lineWidth = 2; g.beginPath(); g.arc(c, c, 118, 0, 7); g.stroke();
+  });
+}
+function alarmClock(): O {
+  const brass = BRASS(), dark = OLDBRASS(), steel = BLACKSTEEL();
+  // the drum: a turned case, its axis towards the viewer
+  const caseP = smoothProfile([[0, -0.24], [0.46, -0.24], [0.58, -0.2], [0.63, -0.12], [0.64, 0.1], [0.62, 0.15], [0.66, 0.17], [0.68, 0.22], [0.65, 0.27], [0.59, 0.27], [0.57, 0.22]], 3);
+  const drum = at(lathe(caseP, brass, 96), 0, 0, 0, Math.PI / 2);
+  const dial = at(mesh(new THREE.CircleGeometry(0.575, 96), faceMat(alarmDialTex(), { rough: 0.55 })), 0, 0, 0.2);
+  const hand = (len: number, w: number, a: number, m: THREE.Material, z: number, spade = true) => {
+    const pts: P2[] = spade
+      ? [[-w / 2, -0.08], [w / 2, -0.08], [w * 0.35, len * 0.62], [w * 1.6, len * 0.72], [0, len], [-w * 1.6, len * 0.72], [-w * 0.35, len * 0.62]]
+      : [[-w / 2, -0.12], [w / 2, -0.12], [w / 4, len * 0.86], [w * 1.4, len * 0.84], [0, len], [-w * 1.4, len * 0.84], [-w / 4, len * 0.86]];
+    return at(ext(shape(pts), 0.012, m, 0.006, 1), 0, 0, z, 0, 0, -a);
+  };
+  const H = 10, Mi = 9; // ten past ten: the hands frame the dial
+  const hands = grp(hand(0.3, 0.05, ((H + Mi / 60) / 12) * Math.PI * 2, steel, 0.215), hand(0.44, 0.04, (Mi / 60) * Math.PI * 2, steel, 0.228),
+    hand(0.4, 0.018, (7 / 12) * Math.PI * 2, M(0xb0302a, { rough: 0.4, tex: 'plain' }), 0.205, false), at(cyl(0.035, 0.035, 0.03, brass, 16), 0, 0, 0.24, Math.PI / 2));
+  // the crystal: a shallow dome of glass over the dial
+  const crystal = at(lathe(smoothProfile([[0, 0.29], [0.3, 0.28], [0.5, 0.25], [0.58, 0.22]], 3), clearGlass(0.14), 64), 0, 0, 0, Math.PI / 2);
+  // the bells: two polished domes on posts, tilted out, with a finial; the hammer between them
+  const bellP = smoothProfile([[0, 0.3], [0.06, 0.3], [0.18, 0.26], [0.27, 0.17], [0.31, 0.06], [0.33, 0.0], [0.33, -0.02], [0.3, -0.02], [0.28, 0.05]], 4);
+  const bell = (s: number) => {
+    const b = grp(lathe(bellP, brass, 64), at(ball(0.05, brass, 16, 12), 0, 0.32, 0), at(cyl(0.035, 0.035, 0.3, dark, 12), 0, -0.1, 0));
+    return at(b, s * 0.4, 0.66, -0.06, 0, 0, -s * 0.5);
+  };
+  const hammer = grp(rod([0, 0.5, -0.12], [0, 0.86, -0.12], 0.022, steel), at(capsule([-0.1, 0.88, -0.12], [0.1, 0.88, -0.12], 0.045, brass), 0, 0, 0));
+  // the feet: splayed legs with ball feet
+  const foot = (s: number) => grp(rod([s * 0.32, -0.5, -0.04], [s * 0.5, -0.8, -0.04], 0.045, brass), at(ball(0.07, brass, 16, 12), s * 0.51, -0.82, -0.04));
+  // the winding keys at the back, peeking out
+  const key = (x: number) => grp(at(ext(shape(roundPoly([[-0.12, 0], [0.12, 0], [0.08, 0.14], [-0.08, 0.14]], 0.03)), 0.03, dark, 0.012, 1), x, 0.0, -0.4), at(cyl(0.03, 0.03, 0.16, dark, 10), x, 0, -0.3, Math.PI / 2));
+  return grp(drum, dial, hands, crystal, bell(-1), bell(1), hammer, foot(-1), foot(1), key(-0.25), key(0.25));
+}
+
+// ---- mic: a vintage broadcast microphone, a chrome capsule with its grille of rings on a brass yoke and stand
+function micro(): O {
+  const chrome = CHROME(), brass = BRASS(), core = M(0x2a2228, { rough: 0.8, tex: 'weave' });
+  const prof: P2[] = smoothProfile([[0, -0.56], [0.12, -0.54], [0.24, -0.46], [0.32, -0.3], [0.35, -0.1], [0.35, 0.12], [0.32, 0.32], [0.24, 0.48], [0.12, 0.56], [0, 0.58]], 4);
+  const rAt = (y: number) => { let best = prof[0]; for (const p of prof) if (Math.abs(p[1] - y) < Math.abs(best[1] - y)) best = p; return best[0]; };
+  const head = grp(lathe(prof.map(([r, y]) => [r * 0.9, y * 0.94] as P2), core, 48));
+  // the grille: chrome rings round the capsule, a top and a bottom cap, a spine down the front and the sides
+  for (let i = 0; i < 9; i++) { const y = -0.36 + i * 0.09; head.add(at(torus(rAt(y) * 0.97, 0.016, chrome, Math.PI * 2, 6, 64), 0, y, 0, Math.PI / 2)); }
+  head.add(lathe(prof.filter(([, y]) => y > 0.4), chrome, 48), lathe(prof.filter(([, y]) => y < -0.42), chrome, 48));
+  for (const a of [Math.PI / 2, Math.PI / 2 + 1.25, Math.PI / 2 - 1.25]) head.add(tube(prof.filter(([, y]) => y > -0.5 && y < 0.52).map(([r, y]) => [Math.cos(a) * r * 0.99, y, Math.sin(a) * r * 0.99] as [number, number, number]), 0.022, chrome, 40, 6));
+  head.add(at(torus(0.352, 0.03, brass, Math.PI * 2, 8, 64), 0, 0, 0, Math.PI / 2));
+  // a little brass badge on the front
+  head.add(at(ext(shape(rrectPts(0.16, 0.1, 0.03)), 0.015, brass, 0.008, 1), 0, -0.2, 0.33));
+  // the yoke holds it at its sides, on knurled knobs
+  const yoke = grp(at(torus(0.44, 0.035, brass, Math.PI, 10, 40), 0, -0.02, 0, 0, 0, Math.PI),
+    ...[-1, 1].map((s) => grp(at(cyl(0.06, 0.06, 0.14, brass, 20), s * 0.4, -0.02, 0, 0, 0, Math.PI / 2), at(cyl(0.075, 0.075, 0.04, chrome, 20), s * 0.48, -0.02, 0, 0, 0, Math.PI / 2))));
+  const stem = grp(rod([0, -0.46, 0], [0, -0.96, 0], 0.04, chrome), at(lathe(smoothProfile([[0.04, 0], [0.075, 0.02], [0.075, 0.08], [0.04, 0.1]], 2), brass, 20), 0, -0.62, 0));
+  const base = at(lathe(smoothProfile([[0, 0.1], [0.12, 0.1], [0.3, 0.07], [0.44, 0.03], [0.48, 0], [0.46, -0.03], [0, -0.03]], 3), M(0x2c2430, { rough: 0.3, tex: 'plain' }), 64), 0, -1.06, 0);
+  const baseRim = at(torus(0.47, 0.022, chrome, Math.PI * 2, 8, 64), 0, -1.07, 0, Math.PI / 2);
+  return grp(at(head, 0, 0.12, 0), yoke, stem, base, baseRim);
+}
+
+// ---- jar: a glass firefly jar with a cork, twine round its neck, grass inside and warm motes of light
+function corkTex(): THREE.Texture {
+  return paintTex('cork', 64, 64, (x, y) => {
+    const n = fbm(x * 0.2, y * 0.2, 3), p = h2(x, y, 5);
+    const base: RGB = hex('#c4925a');
+    const k = 0.85 + n * 0.3 - (p > 0.86 ? 0.35 : 0) + (p < 0.05 ? 0.15 : 0);
+    return [base[0] * k, base[1] * k, base[2] * k];
+  });
+}
+function fireflyJar(): O {
+  const glassP = smoothProfile([[0, -0.8], [0.4, -0.8], [0.52, -0.76], [0.57, -0.64], [0.58, 0.26], [0.54, 0.4], [0.42, 0.5], [0.34, 0.54], [0.33, 0.6], [0.36, 0.64], [0.34, 0.68]], 3);
+  const jar = lathe(glassP, clearGlass(0.2), 64);
+  const corkM = new THREE.MeshStandardMaterial({ map: corkTex(), roughness: 0.9 });
+  const cork = lathe(smoothProfile([[0, 0.54], [0.27, 0.54], [0.3, 0.6], [0.32, 0.8], [0.3, 0.84], [0, 0.85]], 2), corkM, 40);
+  const twine = M(0xc8a46c, { rough: 0.9, tex: 'burlap' });
+  const neck = grp(at(torus(0.355, 0.024, twine, Math.PI * 2, 6, 48), 0, 0.59, 0, Math.PI / 2), at(torus(0.352, 0.024, twine, Math.PI * 2, 6, 48), 0, 0.635, 0, Math.PI / 2),
+    tube([[0.3, 0.6, 0.2], [0.4, 0.5, 0.26], [0.44, 0.32, 0.3], [0.42, 0.2, 0.3]], 0.02, twine, 16, 6), tube([[0.32, 0.6, 0.18], [0.46, 0.56, 0.18], [0.54, 0.44, 0.16]], 0.02, twine, 12, 6));
+  // moss and grass at the bottom, a twig
+  const moss = at(lathe(smoothProfile([[0, -0.62], [0.3, -0.64], [0.5, -0.7], [0.54, -0.77], [0, -0.77]], 2), M(0x4a6a2c, { rough: 0.95, tex: 'foliage' }), 40), 0, 0, 0);
+  const blade = M(0x5e8a34, { rough: 0.6, tex: 'leaf', side: THREE.DoubleSide });
+  const grass = grp(...[[-0.3, 0.1, 0.5, 0.2], [-0.12, -0.1, 0.62, -0.1], [0.18, 0.05, 0.4, 0.25], [0.3, -0.15, 0.55, -0.3], [0.02, 0.2, 0.3, 0.05]].map(([x, z, h, lean]) => {
+    const pts: P2[] = [[-0.035, 0], [0.035, 0], [0.01 + lean * 0.2, h * 0.7], [lean * 0.4, h]];
+    return at(mesh(new THREE.ShapeGeometry(shape(pts)), blade), x, -0.66, z, 0, x * 2, 0);
+  }), tube([[-0.4, -0.6, -0.1], [-0.1, -0.4, 0.05], [0.25, -0.15, -0.05], [0.36, -0.02, -0.12]], 0.025, M(0x6a4428, { rough: 0.9, tex: 'bark' }), 16, 6));
+  // the fireflies: a hot core, a soft halo; and a warm light filling the jar
+  const core = new THREE.MeshBasicMaterial({ color: 0xfffbe0 });
+  const halo = new THREE.MeshBasicMaterial({ color: 0xffd860, transparent: true, opacity: 0.38, depthWrite: false });
+  const halo2 = new THREE.MeshBasicMaterial({ color: 0xffb030, transparent: true, opacity: 0.16, depthWrite: false });
+  const motes = grp();
+  for (const [x, y, z, s] of [[-0.18, 0.12, 0.2, 1], [0.2, -0.18, 0.18, 0.9], [0.06, 0.34, 0.1, 0.75], [-0.26, -0.3, 0.12, 0.8], [0.26, 0.18, -0.05, 0.7], [-0.04, -0.06, 0.32, 0.65]]) {
+    motes.add(at(ball(0.035 * s, core, 12, 8), x, y, z), at(ball(0.09 * s, halo, 16, 12), x, y, z), at(ball(0.17 * s, halo2, 16, 12), x, y, z));
+  }
+  const glow = lathe(glassP.filter(([, y]) => y < 0.4).map(([r, y]) => [r * 0.92, y] as P2), new THREE.MeshBasicMaterial({ color: 0xffc860, transparent: true, opacity: 0.12, depthWrite: false }), 48);
+  return grp(moss, grass, glow, motes, jar, cork, neck);
+}
+
+// ---- nest: a woven nest of twigs and dry grass with a little blue egg
+function eggTex(): THREE.Texture {
+  return paintTex('robinegg', 64, 64, (x, y) => {
+    const n = fbm(x * 0.15, y * 0.15, 3), p = h2(x, y, 3);
+    const c: RGB = hex('#8ccfd6'), k = 0.94 + n * 0.12;
+    if (p > 0.965) return hex('#6a5a4a');
+    return [c[0] * k, c[1] * k, c[2] * k];
+  });
+}
+function twigNest(): O {
+  const twigs = [M(0x8a5a32, { rough: 0.9, tex: 'bark' }), M(0xa8743c, { rough: 0.9, tex: 'bark' }), M(0x6a4426, { rough: 0.9, tex: 'bark' }), M(0xc8a060, { rough: 0.85, tex: 'grain' })];
+  const g = grp();
+  // the bowl: layer on layer of twigs wound round, wider as they rise, with loose ends
+  const N = 84;
+  for (let i = 0; i < N; i++) {
+    const t = (i % 14) / 13, a0 = h2(i, 1, 3) * Math.PI * 2, span = 1.1 + h2(i, 2, 3) * 1.3;
+    const y0 = -0.34 + t * 0.44, R0 = 0.4 + 0.36 * Math.sqrt(t), wob = 0.05;
+    const pts: [number, number, number][] = [];
+    for (let k = 0; k <= 6; k++) {
+      const a = a0 + (span * k) / 6, r = R0 + (h2(i, k, 7) - 0.5) * wob * 2 + (k === 0 || k === 6 ? (h2(i, k, 9) - 0.3) * 0.18 : 0);
+      pts.push([Math.cos(a) * r, y0 + (h2(i, k, 11) - 0.5) * 0.08 + Math.sin(k * 0.9 + i) * 0.03, Math.sin(a) * r * 0.92]);
+    }
+    g.add(tube(pts, 0.016 + h2(i, 3, 3) * 0.016, twigs[i % 4], 24, 5));
+  }
+  // a few sticking out past the rim
+  for (let i = 0; i < 7; i++) {
+    const a = i * 0.9 + 0.3, r = 0.72;
+    g.add(tube([[Math.cos(a) * r * 0.8, 0.0, Math.sin(a) * r * 0.8], [Math.cos(a + 0.25) * r * 1.12, 0.06 + (i % 2) * 0.05, Math.sin(a + 0.25) * r * 1.12], [Math.cos(a + 0.38) * r * 1.3, 0.1 + (i % 3) * 0.04, Math.sin(a + 0.38) * r * 1.3]], 0.014, twigs[(i + 1) % 3], 10, 5));
+  }
+  // the soft lining of dry grass inside, and the floor of the bowl
+  g.add(lathe(smoothProfile([[0, -0.2], [0.24, -0.19], [0.44, -0.12], [0.58, 0.02], [0.62, 0.06]], 3), M(0xb89058, { rough: 0.95, tex: 'burlap' }), 48));
+  g.add(at(lathe(smoothProfile([[0, -0.4], [0.4, -0.38], [0.58, -0.3], [0.7, -0.14]], 3), M(0x7a5030, { rough: 0.95, tex: 'bark' }), 48), 0, 0, 0, 0, 0, 0, [1, 1, 0.92]));
+  // the egg
+  const egg = lathe(smoothProfile([[0, -0.27], [0.15, -0.24], [0.21, -0.12], [0.2, 0.04], [0.14, 0.2], [0, 0.3]], 4), new THREE.MeshStandardMaterial({ map: eggTex(), roughness: 0.32, envMapIntensity: 0.9 }), 40);
+  g.add(at(egg, 0.04, -0.02, 0.02, 0.35, 0, -0.55));
+  // a downy feather on the rim
+  const down = M(0xf4efe6, { rough: 0.8, tex: 'plain' });
+  g.add(at(grp(leafMesh(0.18, 0.09, down, 11), at(cyl(0.008, 0.008, 0.3, down, 5), 0, -0.1, 0.01)), -0.62, 0.12, 0.38, -0.6, 0.4, 0.9));
+  return g;
+}
+
+// ---- wind: flowing ribbons of air curling at their ends, and a leaf riding them
+/** a ribbon that tapers at both ends, its face turned to `face`, twisting a little along its length */
+function airRibbon(pts: [number, number, number][], w: number, m: THREE.Material, twist = 0.5, seg = 96): THREE.Mesh {
+  const c = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(...p)));
+  const P: number[] = [], U: number[] = [], I: number[] = [], face = new THREE.Vector3(0, 0, 1);
+  for (let i = 0; i <= seg; i++) {
+    const t = i / seg, p = c.getPointAt(t), tg = c.getTangentAt(t);
+    const side = new THREE.Vector3().crossVectors(face, tg).normalize().applyAxisAngle(tg, Math.sin(t * Math.PI) * twist * 0.5);
+    const hw = (w / 2) * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.1)), 0.5) * (1 - t * 0.4) + 0.006;
+    for (const s of [-1, 1]) { const q = p.clone().addScaledVector(side, s * hw); P.push(q.x, q.y, q.z); U.push(t, (s + 1) / 2); }
+    if (i < seg) { const a = i * 2; I.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+  g.setIndex(I);
+  g.computeVertexNormals();
+  return mesh(g, m, false);
+}
+/** a gust: a line drawn left to right that ends in a curl (spiral) of `turns` */
+function gust(x0: number, x1: number, y: number, r: number, up: number, turns = 1.1): [number, number, number][] {
+  const pts: [number, number, number][] = [];
+  for (let i = 0; i <= 8; i++) { const t = i / 8; pts.push([x0 + (x1 - x0) * t, y + Math.sin(t * Math.PI * 1.2) * 0.05 * up, Math.sin(t * Math.PI) * 0.12]); }
+  const cx = x1, cy = y + r * up;
+  for (let i = 1; i <= 14; i++) { const t = i / 14, a = -Math.PI / 2 * up + t * Math.PI * 2 * turns * up, rr = r * (1 - t * 0.55); pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 0.12 - t * 0.1]); }
+  return pts;
+}
+function airTex(): THREE.Texture {
+  return drawTex('airribbon', 256, 32, (g) => {
+    const lg = g.createLinearGradient(0, 0, 256, 0);
+    lg.addColorStop(0, '#9cc4e8'); lg.addColorStop(0.45, '#f0f8fe'); lg.addColorStop(1, '#8ab6e0');
+    g.fillStyle = lg; g.fillRect(0, 0, 256, 32);
+    g.strokeStyle = 'rgba(70,120,180,0.3)'; g.lineWidth = 1.5;
+    for (const y of [9, 16, 23]) { g.beginPath(); g.moveTo(0, y); g.lineTo(256, y); g.stroke(); }
+  });
+}
+function windGusts(): O {
+  const m = new THREE.MeshStandardMaterial({ map: airTex(), roughness: 0.6, side: THREE.DoubleSide, envMapIntensity: 0.6, emissive: 0xffffff, emissiveMap: airTex(), emissiveIntensity: 0.14 });
+  const g = grp(
+    airRibbon(gust(-0.95, 0.36, 0.46, 0.22, 1), 0.26, m, 0.6),
+    airRibbon(gust(-0.8, 0.58, -0.02, 0.26, -1, 1.0), 0.3, m, -0.5),
+    airRibbon(gust(-0.98, 0.12, -0.52, 0.18, -1, 1.15), 0.2, m, 0.4),
+  );
+  const leaf = at(grp(oakLeaf(0.9, M(0xc8782a, { rough: 0.55, tex: 'leaf' })), at(cyl(0.016, 0.02, 0.2, M(0x6a4426, { tex: null }), 6), 0, -0.08, 0)), 0.5, 0.05, 0.3, 0.5, 0.4, -1.9);
+  return grp(g, leaf);
+}
+
+// ---- zzz: three soft, plump letters drifting up, night blue fading to lavender
+const ZPTS: P2[] = roundPoly([[-0.5, 0.5], [0.5, 0.5], [0.5, 0.27], [-0.08, -0.26], [0.5, -0.26], [0.5, -0.5], [-0.5, -0.5], [-0.5, -0.27], [0.08, 0.26], [-0.5, 0.26]], 0.1, 5);
+function sleepyZ(): O {
+  const z = (s: number, c: number) => grp(at(dome(ZPTS.map(([x, y]) => [x * s, y * s] as P2), M(c, { rough: 0.42, tex: 'plain', env: 0.9 }), 0.15 * s, 0.05 * s, 6), 0, 0, 0));
+  return grp(at(z(1, 0x46549e), -0.46, -0.44, 0, 0, 0, 0.08), at(z(0.7, 0x6876c4), 0.26, 0.14, 0.05, 0, 0, 0.16), at(z(0.48, 0x9aa2de), 0.72, 0.62, 0.1, 0, 0, 0.24),
+    at(goldStar(0.12, 0.05, 4), 0.28, 0.7, 0.1), at(goldStar(0.08, 0.034, 4), 0.85, 0.08, 0.1));
+}
+
+// ---- cursor_hand: a friendly cartoon glove pointing up, plump fingers, three stitches on its back, a rolled cuff
+function cartoonGlove(): O {
+  const glove = M(0xfbf6ec, { rough: 0.55, tex: 'plain', env: 0.7 }), stitch = M(0x8a7a76, { rough: 0.6, tex: null });
+  const palm = at(dome(rrectPts(0.74, 0.66, 0.28, 8), glove, 0.17, 0.1, 6), 0.01, -0.2, 0);
+  const index = capsule([-0.17, -0.06, 0.06], [-0.16, 0.42, 0.06], 0.15, glove);
+  const knuckle = (x: number, y: number, r: number) => capsule([x, y, 0.12], [x + 0.02, y - 0.16, 0.2], r, glove);
+  const thumb = capsule([-0.36, -0.28, 0.12], [-0.1, -0.06, 0.24], 0.11, glove);
+  // a flared cuff with a rolled edge, closed underneath
+  const cuff = at(grp(lathe(smoothProfile([[0.27, -0.44], [0.29, -0.52], [0.34, -0.6], [0.39, -0.67], [0.42, -0.72], [0.4, -0.77], [0.34, -0.78], [0, -0.78]], 4), glove, 48)), 0, 0, -0.02, -0.12, 0, 0, [1, 1, 0.78]);
+  const st = (x: number) => tube([[x, 0.02, 0.17], [x, -0.14, 0.19], [x, -0.3, 0.17]], 0.012, stitch, 8, 5);
+  return at(grp(palm, index, knuckle(0.06, 0.06, 0.12), knuckle(0.22, 0.02, 0.115), knuckle(0.35, -0.06, 0.105), thumb, cuff, st(0.02), st(0.15), st(0.28)), 0, 0, 0, 0, 0, 0.18);
+}
+
+// ---- hanger: a shaped wooden coat hanger with a polished brass hook and a trouser bar
+function woodHanger(): O {
+  const wd = M(0xc8864a, { tex: 'grain', rough: 0.45 }), brass = BRASS();
+  const top: P2[] = [], bot: P2[] = [];
+  for (let i = 0; i <= 24; i++) {
+    const x = -0.95 + (1.9 * i) / 24, u = Math.abs(x) / 0.95;
+    const y = 0.12 - 0.44 * Math.pow(u, 1.5);
+    const th = 0.15 - 0.06 * u;
+    top.push([x, y]); bot.push([x, y - th]);
+  }
+  const body = ext(shape(roundPoly([...top, ...bot.reverse()], 0.05, 3)), 0.07, wd, 0.035, 3, 48);
+  const bar = grp(rod([-0.8, -0.56, 0], [0.8, -0.56, 0], 0.04, wd, 16), ...[-1, 1].map((s) => tube([[s * 0.86, -0.36, 0], [s * 0.86, -0.46, 0], [s * 0.8, -0.56, 0]], 0.014, CHROME(), 8, 6)));
+  const hook = grp(at(cyl(0.045, 0.055, 0.08, brass, 16), 0, 0.16, 0), tube([[0, 0.14, 0], [0, 0.36, 0], [0.03, 0.5, 0], [0.13, 0.6, 0], [0.25, 0.57, 0], [0.3, 0.46, 0], [0.27, 0.38, 0]], 0.03, brass, 48, 10), at(ball(0.036, brass, 12, 10), 0.27, 0.37, 0));
+  return grp(body, bar, hook);
+}
+
+// ---- stats: three glass level tubes in a brass rack on a walnut plinth, filled to three heights
+function levelTubes(): O {
+  const walnut = M(0x6a3a22, { tex: 'grain', rough: 0.5 }), brass = BRASS();
+  const plinth = at(ext(shape(rrectPts(1.56, 0.24, 0.06)), 0.5, walnut, 0.05, 3), 0, -0.84, 0);
+  const g = grp(plinth, at(ext(shape(rrectPts(1.4, 0.05, 0.02)), 0.42, brass, 0.02, 2), 0, -0.68, 0));
+  const fills: [number, number][] = [[0x7a5cc8, 0.5], [0x2f9a62, 0.86], [0xe0a030, 1.22]];
+  fills.forEach(([c, h], i) => {
+    const x = -0.46 + i * 0.46, y0 = -0.66;
+    g.add(at(lathe(smoothProfile([[0, 0], [0.11, 0.01], [0.15, 0.06], [0.16, 0.14], [0.16, 1.38]], 3), clearGlass(0.24), 32), x, y0, 0));
+    const liquid = M(c, { rough: 0.18, tex: 'plain', glow: 0.12, env: 1.1 });
+    g.add(at(lathe(smoothProfile([[0, 0.02], [0.1, 0.03], [0.135, 0.08], [0.14, 0.14], [0.14, h - 0.02], [0.12, h], [0, h - 0.015]], 3), liquid, 32), x, y0, 0));
+    g.add(at(torus(0.17, 0.03, brass, Math.PI * 2, 8, 32), x, y0 + 0.08, 0, Math.PI / 2), at(torus(0.17, 0.03, brass, Math.PI * 2, 8, 32), x, y0 + 1.3, 0, Math.PI / 2));
+    g.add(at(lathe(smoothProfile([[0, 0.12], [0.1, 0.12], [0.17, 0.08], [0.18, 0.0], [0.15, -0.02], [0, -0.02]], 2), brass, 24), x, y0 + 1.4, 0));
+  });
+  g.add(rod([-0.7, 0.64, -0.2], [0.7, 0.64, -0.2], 0.025, brass), ...[-1, 1].map((s) => rod([s * 0.7, -0.66, -0.2], [s * 0.7, 0.64, -0.2], 0.03, brass)), ...[-1, 1].map((s) => at(ball(0.05, brass, 12, 10), s * 0.7, 0.66, -0.2)));
+  return g;
+}
+
+// ---- nights: a night-sky medallion, deep blue enamel with a gold crescent and stars in a turned brass bezel
+function nightMedal(): O {
+  const g = grp(
+    at(lathe(smoothProfile([[0, -0.08], [0.8, -0.08], [0.88, -0.05], [0.9, 0.02], [0.86, 0.08], [0.8, 0.09], [0.77, 0.05]], 3), BRASS(), 96), 0, 0, 0, Math.PI / 2),
+    at(dome(circlePts(0.78, 96), vitreous(0x1c2a62, 0.3), 0.05, 0.04), 0, 0, 0),
+  );
+  const gold = gilt(0xf4c85a);
+  g.add(at(dome(crescentPts(0.5, 0.42, [0.2, 0.14], 96), gold, 0.06, 0.025), -0.1, -0.04, 0.05));
+  for (const [x, y, r] of [[0.36, 0.38, 0.16], [0.5, -0.18, 0.1], [0.12, 0.6, 0.07], [-0.45, 0.42, 0.06]] as [number, number, number][]) g.add(at(facetSolid(starPts(r, r * 0.45, 5), r * 0.3, r * 0.12, gold), x, y, 0.08));
+  // a wisp of cloud across the moon
+  g.add(at(dome(roundPoly([[-0.62, -0.5], [0.1, -0.5], [0.18, -0.42], [0.06, -0.36], [-0.12, -0.36], [-0.2, -0.3], [-0.42, -0.32], [-0.54, -0.38]], 0.05, 3), vitreous(0x8e9ccc, 0.4), 0.04, 0.03), 0, 0, 0.07));
+  return g;
+}
+
+// ---- things: an open keepsake box, velvet lined, holding the treasures a little owl keeps
+function keepsakeBox(): O {
+  const oak = M(0xb8743a, { tex: 'grain', rough: 0.5 }), velvet = M(0x8a2438, { rough: 0.85, tex: 'felt' }), brass = BRASS();
+  const W = 1.4, D = 0.9, Hb = 0.5;
+  const box = grp(at(ext(shape(rrectPts(W, D, 0.06)), Hb, oak, 0.04, 3), 0, -0.55, 0, Math.PI / 2));
+  // the lining (just inside the top edge) and the box's walls round it
+  box.add(at(ext(shape(rrectPts(W - 0.14, D - 0.14, 0.03)), 0.02, velvet, 0.01, 1), 0, -0.29, 0, Math.PI / 2));
+  // the lid, open and leaning back on its hinges, lined too
+  const lid = grp(at(ext(shape(rrectPts(W, D, 0.06)), 0.08, oak, 0.035, 3), 0, 0.04, D / 2, Math.PI / 2),
+    at(ext(shape(rrectPts(W - 0.16, D - 0.16, 0.03)), 0.02, velvet, 0.01, 1), 0, -0.05, D / 2, Math.PI / 2));
+  box.add(at(lid, 0, -0.3, -D / 2, -1.85));
+  // brass corner caps, the hinges and the clasp
+  for (const s of [-1, 1]) for (const z of [-1, 1]) box.add(at(ext(shape(rrectPts(0.12, 0.5, 0.03)), 0.03, brass, 0.01, 1), s * (W / 2 + 0.005), -0.55, z * (D / 2 - 0.04), 0, Math.PI / 2, 0));
+  box.add(at(ext(shape(roundPoly([[-0.1, 0.05], [0.1, 0.05], [0.1, -0.12], [0, -0.2], [-0.1, -0.12]], 0.03)), 0.03, brass, 0.012, 2), 0, -0.36, D / 2 + 0.03));
+  // the treasures: a moon gem, an acorn, a feather, a blue glass marble, a string of pearls
+  const pearl = M(0xf6eee2, { rough: 0.2, tex: null, env: 1.3 });
+  const pearls = grp(); for (let i = 0; i < 11; i++) { const a = i * 0.42; pearls.add(at(ball(0.045, pearl, 12, 8), -0.32 + Math.cos(a) * 0.2 + i * 0.02, -0.25, 0.1 + Math.sin(a) * 0.14)); }
+  const feather = at(grp(leafMesh(0.34, 0.1, M(0xe8dcc8, { rough: 0.7, tex: 'plain' }), 13), at(cyl(0.01, 0.012, 0.66, M(0xf0e6d0, { tex: null }), 6), 0, -0.04, 0.02)), 0.42, -0.02, -0.1, -0.3, 0, -0.9);
+  const marble = at(ball(0.12, M(0x3a7ad0, { rough: 0.05, metal: 0.1, tex: null, env: 1.6, opacity: 0.85 }), 24, 16), -0.12, -0.16, 0.22);
+  return grp(box, feather, pearls, marble, at(moonGem(), 0.1, -0.03, 0.06, 0.2, 0.4, -0.2, 0.34), at(acorn(0.42, 0.5), -0.42, -0.04, -0.06));
+}
+
+// ---- bell: a polished brass hand bell on a turned walnut handle, swinging, its clapper showing at the lip
+function handBell(): O {
+  const brass = BRASS(), walnut = M(0x5a3020, { tex: 'grain', rough: 0.45 });
+  const body = lathe(smoothProfile([[0.08, 0.36], [0.16, 0.34], [0.22, 0.26], [0.26, 0.1], [0.3, -0.1], [0.4, -0.3], [0.56, -0.44], [0.62, -0.5], [0.62, -0.54], [0.56, -0.52], [0.5, -0.47]], 4), brass, 72);
+  (body.material as THREE.Material).side = THREE.DoubleSide;
+  const bands = grp(at(torus(0.3, 0.018, brass, Math.PI * 2, 6, 64), 0, -0.1, 0, Math.PI / 2), at(torus(0.6, 0.022, brass, Math.PI * 2, 6, 72), 0, -0.48, 0, Math.PI / 2));
+  const collar = at(lathe(smoothProfile([[0.08, 0], [0.13, 0.02], [0.14, 0.07], [0.1, 0.1]], 2), brass, 24), 0, 0.34, 0);
+  const handle = at(lathe(smoothProfile([[0.08, 0], [0.1, 0.04], [0.08, 0.12], [0.07, 0.24], [0.1, 0.38], [0.12, 0.5], [0.1, 0.6], [0.05, 0.64], [0, 0.65]], 4), walnut, 32), 0, 0.42, 0);
+  const clapper = grp(rod([0, 0.2, 0], [0.05, -0.38, 0.1], 0.02, OLDBRASS()), at(ball(0.08, OLDBRASS(), 16, 12), 0.06, -0.46, 0.12));
+  return at(grp(body, bands, collar, handle, clapper), 0, 0, 0, 0, 0, -0.32);
+}
+
+// ---- speaker: a brass horn on its black driver, sound rings (or a red cross) coming from its mouth
+function hornSpeaker(): O {
+  const brass = BRASS();
+  const hornM = M(0xe9b24e, { metal: 0.92, rough: 0.24, tex: null, env: 1.15, side: THREE.DoubleSide });
+  const horn = at(lathe(smoothProfile([[0.1, 0], [0.11, 0.2], [0.14, 0.42], [0.22, 0.62], [0.36, 0.78], [0.52, 0.88], [0.6, 0.9]], 4), hornM, 64), -0.5, 0, 0, 0, 0, -Math.PI / 2);
+  const lip = at(torus(0.6, 0.025, brass, Math.PI * 2, 8, 72), 0.4, 0, 0, 0, Math.PI / 2, 0);
+  const driver = grp(at(cyl(0.24, 0.24, 0.26, M(0x2a2430, { rough: 0.3, tex: 'plain' }), 40), -0.66, 0, 0, 0, 0, Math.PI / 2), at(torus(0.24, 0.025, brass, Math.PI * 2, 8, 48), -0.53, 0, 0, 0, Math.PI / 2, 0), at(torus(0.24, 0.025, brass, Math.PI * 2, 8, 48), -0.79, 0, 0, 0, Math.PI / 2, 0),
+    at(lathe(smoothProfile([[0, 0.06], [0.1, 0.05], [0.13, 0], [0, -0.01]], 2), brass, 24), -0.79, 0, 0, 0, 0, Math.PI / 2));
+  return grp(horn, lip, driver);
+}
+/** a sound ring: an arc of cloisonné, centred on (cx, 0) */
+function soundArc(cx: number, r: number, half: number, m: THREE.Material): O {
+  const arc: P2[] = []; for (let i = 0; i <= 20; i++) { const a = -half + (2 * half * i) / 20; arc.push([cx + Math.cos(a) * r, Math.sin(a) * r]); }
+  return cloisonStroke(arc, 0.12, m, { rim: 0.04, wire: 0.02, h: 0.05 });
+}
+
+// ---- notes: ebony enamel in brass wire
+const noteHead = (x: number, y: number, s: number): P2[] => circlePts(0.2 * s, 40).map(([px, py]) => [px * 1.3, py * 0.92] as P2).map(([px, py]) => [px * Math.cos(0.42) - py * Math.sin(0.42) + x, px * Math.sin(0.42) + py * Math.cos(0.42) + y] as P2);
+function musicNotes(): O {
+  const m = vitreous(0x2a2448, 0.3), o = { rim: 0.045, wire: 0.022, h: 0.06 };
+  return grp(cloison(roundPoly([[-0.31, 0.6], [0.7, 0.84], [0.7, 0.6], [-0.31, 0.36]], 0.04), m, o),
+    cloison(bar(0.1, 1.12, -0.25, 0.02), m, { ...o, z: 0.01 }), cloison(bar(0.1, 1.12, 0.65, 0.2), m, { ...o, z: 0.01 }),
+    cloison(noteHead(-0.45, -0.56, 1), m, { ...o, z: 0.03 }), cloison(noteHead(0.45, -0.38, 1), m, { ...o, z: 0.03 }));
+}
+function musicNote(): O {
+  const m = vitreous(0x2a2448, 0.3), o = { rim: 0.045, wire: 0.022, h: 0.06 };
+  const flag = roundPoly([[0.08, 0.86], [0.24, 0.86], [0.3, 0.7], [0.5, 0.54], [0.58, 0.3], [0.5, 0.06], [0.48, 0.28], [0.36, 0.44], [0.16, 0.5]], 0.04);
+  return grp(cloison(bar(0.13, 1.36, 0.12, 0.18), m, o), cloison(flag, m, { ...o, z: 0.01 }), cloison(noteHead(-0.16, -0.54, 1.5), m, { ...o, z: 0.03 }));
+}
+
+// ---- drop and rain: clear water, deep blue at the top shading to a bright caustic at the bottom
+function waterMat(): THREE.MeshPhysicalMaterial {
+  let m = physCache.get('water');
+  if (!m) {
+    const map = drawTex('waterdrop', 16, 128, (g) => { const lg = g.createLinearGradient(0, 0, 0, 128); lg.addColorStop(0, '#7fd0f4'); lg.addColorStop(0.35, '#2a8ad0'); lg.addColorStop(0.8, '#1c5ea8'); lg.addColorStop(1, '#2a6cb4'); g.fillStyle = lg; g.fillRect(0, 0, 16, 128); });
+    m = new THREE.MeshPhysicalMaterial({ map, roughness: 0.06, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.5 });
+    physCache.set('water', m);
+  }
+  return m;
+}
+/** a drop (lathe, its texture running from the point to the bottom) */
+function waterDrop(s = 1): O {
+  const prof: P2[] = smoothProfile([[0, 0.85], [0.1, 0.62], [0.32, 0.22], [0.52, -0.16], [0.56, -0.42], [0.46, -0.68], [0.26, -0.8], [0, -0.83]], 4).map(([r, y]) => [r * s, y * s]);
+  const g = new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(Math.max(0.0001, r), y)), 48);
+  // the lathe's v runs along the profile from the point (v 0: the texture's bottom, deep blue) to the round bottom (bright)
+  g.computeVertexNormals();
+  const drop = mesh(g, waterMat());
+  return grp(drop);
+}
+function cloudMat(): THREE.MeshStandardMaterial {
+  const map = drawTex('cloudgrad', 16, 128, (g) => { const lg = g.createLinearGradient(0, 0, 0, 128); lg.addColorStop(0, '#f6faff'); lg.addColorStop(0.5, '#dfe6f2'); lg.addColorStop(1, '#8e9eba'); g.fillStyle = lg; g.fillRect(0, 0, 16, 128); });
+  return faceMat(map, { rough: 0.75 });
+}
+function rainCloud(): O {
+  const cl = cloud(cloudMat()) as THREE.Mesh;
+  planarUV(cl.geometry); // white on top, a rain-grey belly
+  return grp(at(cl, 0, 0.32, 0, 0, 0, 0, 1.05), ...([[-0.4, -0.52, 0.3], [0.08, -0.72, 0.34], [0.5, -0.48, 0.28]] as [number, number, number][]).map(([x, y, s]) => at(waterDrop(s), x, y, 0.15, 0, 0, -0.18)));
+}
+
+// ---- leaf: a fresh green leaf with its veins and a drop of dew
+function leafFaceTex(c0: string, c1: string, rib: string, key: string): THREE.Texture {
+  return drawTex('leafface-' + key, 128, 256, (g) => {
+    const lg = g.createLinearGradient(0, 0, 128, 256); lg.addColorStop(0, c0); lg.addColorStop(1, c1);
+    g.fillStyle = lg; g.fillRect(0, 0, 128, 256);
+    grain(g, 128, 256, 0.06);
+    g.strokeStyle = rib; g.lineCap = 'round';
+    g.lineWidth = 5; g.beginPath(); g.moveTo(64, 256); g.lineTo(64, 6); g.stroke();
+    g.lineWidth = 2.4;
+    for (let i = 0; i < 8; i++) { const y = 225 - i * 27; for (const s of [-1, 1]) { g.beginPath(); g.moveTo(64, y); g.quadraticCurveTo(64 + s * 30, y - 22, 64 + s * 60, y - 58); g.stroke(); } }
+  });
+}
+function freshLeaf(): O {
+  const blade = leafMesh(0.92, 0.48, new THREE.MeshStandardMaterial({ map: leafFaceTex('#8ccc4c', '#3e8a2e', 'rgba(220,246,170,0.85)', 'green'), roughness: 0.42, side: THREE.DoubleSide }), 0);
+  const stem = tube([[0, -0.9, 0.0], [0.02, -1.12, 0.02], [0.08, -1.26, 0.04]], 0.03, M(0x4a8a30, { rough: 0.5, tex: null }), 10, 6);
+  return at(grp(blade, stem, at(waterDrop(0.16), 0.16, 0.1, 0.2)), 0, 0.15, 0, 0, 0, -0.4);
+}
+
+// ---- wd_feather: a banded pheasant feather with a white quill
+function featherTex(): THREE.Texture {
+  return drawTex('feather10', 128, 256, (g) => {
+    const lg = g.createLinearGradient(0, 0, 0, 256); lg.addColorStop(0, '#8e5e36'); lg.addColorStop(0.6, '#c49a66'); lg.addColorStop(1, '#efe2ca');
+    g.fillStyle = lg; g.fillRect(0, 0, 128, 256);
+    g.fillStyle = 'rgba(48,30,22,0.8)';
+    for (let i = 0; i < 8; i++) { const y = 14 + i * 22; g.beginPath(); g.moveTo(0, y + 14); g.quadraticCurveTo(64, y - 6, 128, y + 14); g.lineTo(128, y + 19); g.quadraticCurveTo(64, y + 1, 0, y + 19); g.fill(); }
+    g.strokeStyle = 'rgba(255,240,210,0.35)'; g.lineWidth = 1;
+    for (let i = 0; i < 60; i++) { const y = i * 4.5; for (const s of [-1, 1]) { g.beginPath(); g.moveTo(64, y + 10); g.lineTo(64 + s * 64, y - 18); g.stroke(); } }
+  });
+}
+function pheasantFeather(): O {
+  const vane: P2[] = [];
+  for (let i = 0; i <= 64; i++) { const t = (i / 64) * Math.PI * 2, y = Math.cos(t); const notch = (i === 18 || i === 44) ? 0.82 : 1; vane.push([Math.sin(t) * 0.27 * (1 - 0.3 * Math.max(0, y)) * (1 + 0.15 * Math.min(0, y)) * notch, y * 0.9 + 0.1]); }
+  const me = ext(shape(vane), 0.02, faceMat(featherTex(), { rough: 0.7 }), 0.015, 2, 64);
+  planarUV(me.geometry);
+  const p = me.geometry.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < p.count; i++) p.setZ(i, p.getZ(i) - Math.abs(p.getX(i)) * 0.25 + Math.sin(p.getY(i) * 1.6) * 0.05);
+  me.geometry.computeVertexNormals();
+  const quill = tube([[0, -1.1, 0.04], [0, -0.6, 0.05], [0, 0.2, 0.04], [0, 0.96, 0.02]], 0.018, M(0xf4ead6, { rough: 0.5, tex: null }), 24, 6);
+  const fluff = grp(...[-1, 1].map((s) => at(leafMesh(0.12, 0.05, M(0xf2e6d2, { rough: 0.9, tex: 'plain' }), 13), s * 0.06, -0.82, 0.02, 0, 0, s * 0.6)));
+  return at(grp(me, quill, fluff), 0, 0.04, 0, 0, 0, -0.55);
+}
+
+// ---- wd_sweater: a hand-knitted jumper with long sleeves, ribbed collar, cuffs and hem, and a heart on the front
+function knitJumper(col = 0x356a48): O {
+  const knit = M(col, { rough: 0.9, tex: 'knit', rep: 2 }), rib = M(0xefe0c0, { rough: 0.9, tex: 'knit' });
+  const out: P2[] = roundPoly([[-0.22, 0.68], [0.22, 0.68], [0.56, 0.58], [0.82, 0.24], [0.98, -0.34], [0.72, -0.42], [0.56, -0.02], [0.5, -0.7], [-0.5, -0.7], [-0.56, -0.02], [-0.72, -0.42], [-0.98, -0.34], [-0.82, 0.24], [-0.56, 0.58]], 0.08, 4);
+  const body = at(dome(out, knit, 0.14, 0.05, 5), 0, 0, 0);
+  const hem = at(dome(rrectPts(1.02, 0.18, 0.07), rib, 0.14, 0.06, 4), 0, -0.68, 0.02);
+  const cuff = (s: number) => at(dome(rrectPts(0.3, 0.14, 0.06), rib, 0.13, 0.05, 4), s * 0.86, -0.4, 0.02, 0, 0, s * 0.36);
+  const collar = at(torus(0.2, 0.065, rib, Math.PI, 10, 24), 0, 0.68, 0.12, 0, 0, Math.PI, [1.1, 0.7, 1]);
+  // knit-in rows of contrast and a heart
+  const stripe = (y: number) => at(dome(rrectPts(0.98, 0.06, 0.02), rib, 0.03, 0.02, 2), 0, y, 0.13);
+  const heart = at(dome(HEART.map(([x, y]) => [x * 0.2, y * 0.2] as P2), M(0xc0443e, { rough: 0.85, tex: 'knit' }), 0.04, 0.025, 3), 0, -0.1, 0.14);
+  return grp(body, hem, cuff(-1), cuff(1), collar, stripe(-0.44), stripe(0.24), heart);
+}
+
+// ---- wd_mirror: a hand mirror in an engraved brass frame, its glass holding the room's soft light
+function mirrorTex(): THREE.Texture {
+  return drawTex('mirror10', 128, 160, (g) => {
+    const lg = g.createLinearGradient(0, 0, 128, 160); lg.addColorStop(0, '#e6f2f8'); lg.addColorStop(0.5, '#a8c8dc'); lg.addColorStop(1, '#6e8fa8');
+    g.fillStyle = lg; g.fillRect(0, 0, 128, 160);
+    g.fillStyle = 'rgba(255,255,255,0.6)';
+    g.beginPath(); g.moveTo(20, 60); g.lineTo(60, 10); g.lineTo(78, 10); g.lineTo(30, 72); g.fill();
+    g.beginPath(); g.moveTo(36, 84); g.lineTo(88, 20); g.lineTo(96, 24); g.lineTo(42, 92); g.fill();
+  });
+}
+function handMirror(): O {
+  const brass = BRASS();
+  const glassM = new THREE.MeshStandardMaterial({ map: mirrorTex(), roughness: 0.08, metalness: 0.3, envMapIntensity: 1.2 });
+  const face = mesh(planarUV(new THREE.CircleGeometry(0.46, 64)), glassM);
+  const g = grp(at(face, 0, 0.32, 0.04, 0, 0, 0, [1, 1.22, 1]), at(torus(0.48, 0.07, brass, Math.PI * 2, 12, 72), 0, 0.32, 0.03, 0, 0, 0, [1, 1.2, 1]),
+    at(ext(shape(circlePts(0.52, 64)), 0.06, OLDBRASS(), 0.03, 2), 0, 0.32, -0.04, 0, 0, 0, [1, 1.2, 1]));
+  // beads round the rim and a little crest on top
+  for (let i = 0; i < 20; i++) { const a = (i / 20) * Math.PI * 2; g.add(at(ball(0.03, brass, 10, 8), Math.cos(a) * 0.56, 0.32 + Math.sin(a) * 0.67, 0.0)); }
+  g.add(at(facetSolid(starPts(0.12, 0.05, 5), 0.04, 0.04, brass), 0, 0.98, 0.02));
+  g.add(at(lathe(smoothProfile([[0.06, -0.46], [0.09, -0.4], [0.06, -0.3], [0.05, -0.1], [0.07, 0], [0.1, 0.04], [0.07, 0.08]], 3), brass, 24), 0, -0.4, 0), at(ball(0.075, brass, 16, 12), 0, -0.9, 0));
+  return g;
+}
+
+// ---- bp_lamp: a table lamp with a pleated linen shade glowing warm, on a turned brass column and a walnut foot
+function tableLamp(): O {
+  const shadeG = new THREE.LatheGeometry(smoothProfile([[0.3, 0.3], [0.46, 0.0], [0.62, -0.28]], 3).map(([r, y]) => new THREE.Vector2(r, y)), 96);
+  const p = shadeG.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i), a = Math.atan2(z, x), k = 1 + Math.abs(Math.sin(a * 16)) * 0.035; p.setX(i, x * k); p.setZ(i, z * k); }
+  shadeG.computeVertexNormals();
+  const linen = M(0xf4d8a4, { rough: 0.85, glow: 0.28, tex: 'weave', side: THREE.DoubleSide });
+  const shade = mesh(shadeG, linen);
+  const trim = M(0x9a3a2e, { rough: 0.7, tex: 'weave' });
+  const brass = BRASS();
+  return grp(at(shade, 0, 0.62, 0), at(torus(0.31, 0.022, trim, Math.PI * 2, 6, 48), 0, 0.92, 0, Math.PI / 2), at(torus(0.63, 0.026, trim, Math.PI * 2, 6, 72), 0, 0.34, 0, Math.PI / 2),
+    at(lathe(smoothProfile([[0, -0.14], [0.12, -0.12], [0.16, 0], [0.1, 0.12], [0, 0.16]], 3), M(0xfff4cc, { glow: 1.1, tex: null }), 24), 0, 0.48, 0),
+    at(lathe(smoothProfile([[0.04, -0.7], [0.07, -0.6], [0.05, -0.4], [0.14, -0.2], [0.16, -0.05], [0.1, 0.1], [0.05, 0.2], [0.035, 0.36]], 3), brass, 32), 0, 0, 0),
+    at(lathe(smoothProfile([[0, -0.86], [0.42, -0.86], [0.46, -0.8], [0.4, -0.74], [0.2, -0.7], [0, -0.69]], 3), M(0x5a3020, { tex: 'grain', rough: 0.45 }), 48), 0, 0, 0),
+    tube([[0.07, -0.2, 0.02], [0.1, -0.24, 0.12], [0.1, -0.32, 0.14]], 0.012, brass, 8, 5), at(ball(0.03, brass, 10, 8), 0.1, -0.34, 0.14));
+}
+
+// ---- lantern: a brass lantern, glass panes round a warm flame, a ring to carry it
+function lantern10(): O {
+  const brass = BRASS(), old = OLDBRASS();
+  const g = grp(at(lathe(smoothProfile([[0, 0], [0.5, 0], [0.54, 0.04], [0.5, 0.1], [0.42, 0.14], [0, 0.14]], 2), brass, 48), 0, -0.84, 0),
+    at(cyl(0.4, 0.4, 0.98, clearGlass(0.18), 32), 0, -0.2, 0),
+    at(ball(0.26, new THREE.MeshBasicMaterial({ color: 0xffb040, transparent: true, opacity: 0.22, depthWrite: false }), 20, 14), 0, -0.26, 0),
+    at(ball(0.16, new THREE.MeshBasicMaterial({ color: 0xffd470, transparent: true, opacity: 0.4, depthWrite: false }), 16, 12), 0, -0.26, 0),
+    at(lathe(smoothProfile([[0, -0.16], [0.08, -0.08], [0.07, 0.06], [0.03, 0.18], [0, 0.24]], 3), C.flame(), 16), 0, -0.3, 0), at(lathe(smoothProfile([[0, -0.1], [0.045, -0.04], [0.03, 0.06], [0, 0.12]], 2), C.flameIn(), 12), 0, -0.33, 0.02),
+    at(cyl(0.1, 0.12, 0.12, old, 20), 0, -0.62, 0),
+    at(lathe(smoothProfile([[0.5, 0], [0.46, 0.08], [0.34, 0.18], [0.2, 0.28], [0.14, 0.34], [0.14, 0.42], [0, 0.44]], 3), brass, 48), 0, 0.3, 0),
+    at(torus(0.18, 0.04, brass, Math.PI * 2, 8, 32), 0, 0.88, 0), at(cyl(0.05, 0.05, 0.12, brass, 12), 0, 0.72, 0));
+  for (let i = 0; i < 4; i++) { const a = (i / 4) * Math.PI * 2 + Math.PI / 4; g.add(at(cyl(0.04, 0.04, 1.04, brass, 10), Math.cos(a) * 0.42, -0.2, Math.sin(a) * 0.42)); }
+  for (const y of [-0.66, 0.26]) g.add(at(torus(0.42, 0.03, brass, Math.PI * 2, 6, 48), 0, y, 0, Math.PI / 2));
+  for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2; g.add(at(ball(0.035, old, 8, 6), Math.cos(a) * 0.3, 0.46, Math.sin(a) * 0.3)); }
+  return g;
+}
+
+// ---- phone_off: a phone asleep (a moon on its dark screen) struck through with a red enamel bar
+function phoneScreen(): THREE.Texture {
+  return drawTex('phonescreen', 96, 168, (g) => {
+    const lg = g.createLinearGradient(0, 0, 0, 168); lg.addColorStop(0, '#1e2a5a'); lg.addColorStop(1, '#3a2a5e');
+    g.fillStyle = lg; g.fillRect(0, 0, 96, 168);
+    g.fillStyle = '#f4d47a'; g.beginPath(); g.arc(30, 40, 18, 0, 7); g.fill();
+    g.fillStyle = '#1f2b5b'; g.beginPath(); g.arc(39, 33, 16, 0, 7); g.fill();
+    g.fillStyle = 'rgba(255,240,200,0.8)'; for (const [x, y, r] of [[22, 30, 2], [74, 36, 1.6], [30, 112, 1.4], [70, 120, 2]]) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+  });
+}
+function phoneAsleep(): O {
+  const body = ext(shape(rrectPts(0.84, 1.5, 0.16)), 0.08, M(0x3a3440, { rough: 0.3, tex: 'plain' }), 0.04, 3);
+  const screen = at(mesh(planarUV(new THREE.PlaneGeometry(0.72, 1.3)), faceMat(phoneScreen(), { rough: 0.1, glow: 0.35 })), 0, 0.0, 0.082);
+  const edge = at(ext(shape(rrectPts(0.88, 1.54, 0.18)), 0.05, BRASS(), 0.02, 2), 0, 0, -0.02);
+  return grp(edge, body, screen, at(cloisonStroke([[-0.62, -0.66], [0.62, 0.66]], 0.2, vitreous(CINNABAR), { rim: 0.05, wire: 0.022, h: 0.06 }), 0, 0, 0.14));
+}
+
+// ---- map: a folded parchment map, inked coast, hatched hills, a dotted path to an X and a compass rose
+function mapTex10(): THREE.Texture {
+  return drawTex('map10', 288, 192, (g) => {
+    g.fillStyle = '#efdcae'; g.fillRect(0, 0, 288, 192);
+    grain(g, 288, 192, 0.08);
+    // the sea, then the land with its inked coast
+    g.fillStyle = '#9cc4c8'; g.fillRect(0, 0, 288, 192);
+    g.fillStyle = '#ecd7a4';
+    g.beginPath(); g.moveTo(-10, 40); g.bezierCurveTo(60, 10, 120, 60, 170, 30); g.bezierCurveTo(230, 0, 270, 40, 300, 30); g.lineTo(300, 200); g.lineTo(-10, 200); g.closePath(); g.fill();
+    g.strokeStyle = '#5a4030'; g.lineWidth = 2.5; g.stroke();
+    g.strokeStyle = 'rgba(90,64,48,0.4)'; g.lineWidth = 1.2; g.beginPath(); g.moveTo(-10, 32); g.bezierCurveTo(60, 2, 120, 52, 170, 22); g.bezierCurveTo(230, -8, 270, 32, 300, 22); g.stroke();
+    grain(g, 288, 192, 0.06);
+    // woods and hills
+    for (const [x, y] of [[40, 90], [56, 104], [30, 112], [70, 88], [200, 140], [216, 128], [230, 146]]) { g.fillStyle = '#6a8a48'; g.beginPath(); g.arc(x, y, 9, 0, 7); g.fill(); g.strokeStyle = '#3e5a30'; g.lineWidth = 1.5; g.stroke(); }
+    g.strokeStyle = '#7a5a3a'; g.lineWidth = 2.2;
+    for (const [x, y] of [[130, 80], [154, 74], [176, 84]]) { g.beginPath(); g.moveTo(x - 14, y + 10); g.lineTo(x, y - 8); g.lineTo(x + 14, y + 10); g.stroke(); }
+    // the path and the X
+    g.strokeStyle = '#a8342a'; g.lineWidth = 3; g.setLineDash([6, 5]); g.beginPath(); g.moveTo(24, 170); g.bezierCurveTo(90, 130, 120, 170, 160, 120); g.bezierCurveTo(190, 90, 220, 110, 248, 80); g.stroke(); g.setLineDash([]);
+    g.lineWidth = 4.5; g.beginPath(); g.moveTo(240, 72); g.lineTo(258, 90); g.moveTo(258, 72); g.lineTo(240, 90); g.stroke();
+    // a compass rose
+    g.fillStyle = '#5a4030'; g.save(); g.translate(254, 160);
+    for (let i = 0; i < 4; i++) { g.rotate(Math.PI / 2); g.beginPath(); g.moveTo(0, -18); g.lineTo(4, 0); g.lineTo(-4, 0); g.fill(); }
+    g.restore();
+  });
+}
+function foldedMap(): O {
+  const g = grp(), tx = mapTex10();
+  for (let i = 0; i < 3; i++) {
+    const geo = new THREE.PlaneGeometry(0.64, 1.36, 2, 8);
+    const uv = geo.attributes.uv as THREE.BufferAttribute;
+    for (let k = 0; k < uv.count; k++) uv.setX(k, (uv.getX(k) + i) / 3);
+    const p = mesh(geo, new THREE.MeshStandardMaterial({ map: tx, side: THREE.DoubleSide, roughness: 0.85 }));
+    g.add(at(p, -0.6 + i * 0.6, 0, i % 2 ? -0.1 : 0.02, 0, i % 2 ? 0.32 : -0.32, 0));
+  }
+  return g;
+}
+
+// ---- bp_rug: a braided rag rug, rings of plaited cloth in old rose, cream, sage, mustard and indigo, round an oval
+function braidedRug(): O {
+  const cols = [0x9a3a32, 0xeadcc0, 0x6a8a5a, 0xc8963a, 0x3a4a7a, 0xeadcc0, 0x9a3a32, 0x6a8a5a];
+  const g = grp(at(cyl(0.2, 0.2, 0.06, M(0xc8963a, { rough: 0.9, tex: 'weave' }), 32), 0, 0, 0));
+  cols.forEach((c, i) => {
+    const R = 0.22 + i * 0.1, m = M(c, { rough: 0.9, tex: 'weave' });
+    const ring = torus(R, 0.055, m, Math.PI * 2, 8, 96);
+    // a plait: the rope swells and twists along its length
+    const p = ring.geometry.attributes.position as THREE.BufferAttribute;
+    for (let k = 0; k < p.count; k++) { const x = p.getX(k), y = p.getY(k), a = Math.atan2(y, x), r = Math.hypot(x, y), d = r - R, sw = 1 + Math.sin(a * (40 + i * 10)) * 0.25; p.setXY(k, Math.cos(a) * (R + d * sw), Math.sin(a) * (R + d * sw)); p.setZ(k, p.getZ(k) * sw); }
+    ring.geometry.computeVertexNormals();
+    g.add(at(ring, 0, 0, 0, Math.PI / 2));
+  });
+  return at(g, 0, 0, 0, 0, 0, 0, [1.25, 1, 0.85]);
+}
+
+// ---- bp_wallpaper: a roll of sprigged wallpaper (sage vines and rosebuds on cream), a length unrolled, a paste brush
+function sprigTex(): THREE.Texture {
+  const t = drawTex('sprig', 128, 128, (g) => {
+    g.fillStyle = '#f2e6cc'; g.fillRect(0, 0, 128, 128);
+    g.fillStyle = '#dfe2c0'; for (const x of [0, 64]) g.fillRect(x + 50, 0, 14, 128);
+    grain(g, 128, 128, 0.05);
+    for (const [ox, oy] of [[26, 8], [90, 72], [26, 72], [90, 8]]) {
+      g.strokeStyle = '#4e7044'; g.lineWidth = 3; g.beginPath(); g.moveTo(ox, oy); g.bezierCurveTo(ox - 14, oy + 16, ox + 14, oy + 30, ox, oy + 48); g.stroke();
+      g.fillStyle = '#5e8650'; for (const [dx, dy, a] of [[-8, 12, -0.8], [8, 26, 0.8], [-6, 38, -0.6]]) { g.save(); g.translate(ox + dx, oy + dy); g.rotate(a); g.beginPath(); g.ellipse(0, 0, 8, 4, 0, 0, 7); g.fill(); g.restore(); }
+      g.fillStyle = '#b8485e'; g.beginPath(); g.arc(ox, oy + 2, 7, 0, 7); g.fill(); g.fillStyle = '#e88a9a'; g.beginPath(); g.arc(ox - 1.5, oy, 3, 0, 7); g.fill();
+    }
+  });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+function wallpaperRoll(): O {
+  const t = sprigTex();
+  const rollM = new THREE.MeshStandardMaterial({ map: t, roughness: 0.75 });
+  const rollG = new THREE.CylinderGeometry(0.32, 0.32, 1.46, 48);
+  const uv = rollG.attributes.uv as THREE.BufferAttribute; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 2, uv.getY(i) * 1.4);
+  const sheetG = new THREE.PlaneGeometry(0.9, 1.46, 12, 2);
+  const sp = sheetG.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < sp.count; i++) sp.setZ(i, Math.sin((sp.getX(i) + 0.45) * 2.4) * 0.12);
+  sheetG.computeVertexNormals();
+  const su = sheetG.attributes.uv as THREE.BufferAttribute; for (let i = 0; i < su.count; i++) su.setXY(i, su.getX(i) * 1.1, su.getY(i) * 1.4);
+  const sheet = mesh(sheetG, new THREE.MeshStandardMaterial({ map: t, roughness: 0.75, side: THREE.DoubleSide }));
+  const ends = M(0xe8d8b8, { rough: 0.8, tex: 'paper' });
+  return grp(at(mesh(rollG, rollM), -0.4, 0, 0), at(cyl(0.12, 0.12, 1.48, M(0xb89466, { rough: 0.8, tex: 'paper' }), 24), -0.4, 0, 0), at(cyl(0.3, 0.3, 1.47, ends, 48), -0.4, 0, 0), at(sheet, 0.32, -0.02, 0.24, 0, -0.25, 0));
+}
+
+// ---- bp_season: a present wrapped in deep green paper with gold pinstripes, a red satin bow, a sprig of holly
+function giftPaper(): THREE.Texture {
+  const t = drawTex('giftpaper', 64, 64, (g) => { g.fillStyle = '#2e5a3e'; g.fillRect(0, 0, 64, 64); g.strokeStyle = 'rgba(230,190,100,0.75)'; g.lineWidth = 1.6; for (const x of [8, 40]) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 64); g.stroke(); } g.fillStyle = 'rgba(230,190,100,0.75)'; for (const [x, y] of [[24, 16], [56, 48]]) { g.beginPath(); g.arc(x, y, 2.2, 0, 7); g.fill(); } });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 2);
+  return t;
+}
+function seasonGift(): O {
+  const paperM = new THREE.MeshStandardMaterial({ map: giftPaper(), roughness: 0.5 });
+  const satin = M(0xb02a30, { rough: 0.3, tex: 'plain', env: 1.1 });
+  const box = mesh(new THREE.BoxGeometry(1.1, 0.86, 1.1), paperM);
+  const lid = at(mesh(new THREE.BoxGeometry(1.18, 0.22, 1.18), paperM), 0, 0.46, 0);
+  const g = grp(at(box, 0, -0.1, 0), lid,
+    at(mesh(new THREE.BoxGeometry(0.18, 1.1, 1.2), satin), 0, 0.02, 0), at(mesh(new THREE.BoxGeometry(1.2, 1.1, 0.18), satin), 0, 0.02, 0));
+  const loop = (a: number) => { const l = torus(0.22, 0.075, satin, Math.PI * 2, 12, 36); l.scale.set(1.2, 1, 0.6); return at(grp(l), Math.cos(a) * 0.2, 0.68, Math.sin(a) * 0.2, 0, -a, 0.55); };
+  g.add(loop(0), loop(Math.PI), at(ball(0.09, satin, 16, 12), 0, 0.64, 0));
+  // holly: two glossy leaves and three berries tucked into the bow
+  const holly = M(0x2a6a34, { rough: 0.25, tex: 'plain' }), berry = M(0xc8202a, { rough: 0.2, tex: null, env: 1.2 });
+  g.add(at(leafMesh(0.14, 0.065, holly, 7), 0.12, 0.6, 0.62, -0.3, 0, -1.0), at(leafMesh(0.14, 0.065, holly, 7), -0.12, 0.6, 0.62, -0.3, 0, 1.0));
+  for (const [x, y] of [[0, 0.62], [0.06, 0.56], [-0.06, 0.56]]) g.add(at(ball(0.045, berry, 12, 10), x, y, 0.66));
+  return g;
+}
+
+// ---- bp_buy: a kraft price tag with a brass eyelet, a red string and an acorn stamped in sepia ink
+function tagFace(): THREE.Texture {
+  return drawTex('buytag', 192, 128, (g) => {
+    g.fillStyle = '#d8b07a'; g.fillRect(0, 0, 192, 128);
+    grain(g, 192, 128, 0.1);
+    g.strokeStyle = 'rgba(110,60,30,0.55)'; g.lineWidth = 2; g.setLineDash([5, 4]); g.strokeRect(10, 10, 140, 108); g.setLineDash([]);
+    // the stamped acorn
+    g.fillStyle = '#6a3a1e';
+    g.beginPath(); g.ellipse(72, 74, 26, 30, 0, 0, Math.PI); g.lineTo(46, 66); g.fill();
+    g.beginPath(); g.ellipse(72, 58, 32, 16, 0, Math.PI, 0); g.lineTo(104, 64); g.lineTo(40, 64); g.fill();
+    g.fillRect(70, 30, 4, 14);
+    g.fillStyle = '#d8b07a'; g.beginPath(); g.ellipse(64, 78, 6, 12, 0.3, 0, 7); g.fill();
+  });
+}
+function priceTag(): O {
+  const out: P2[] = roundPoly([[-0.8, -0.52], [0.34, -0.52], [0.86, 0], [0.34, 0.52], [-0.8, 0.52]], 0.08);
+  const sh = shape(out), hl = new THREE.Path(); hl.absarc(0.52, 0, 0.09, 0, Math.PI * 2, true); sh.holes.push(hl);
+  const card = ext(sh, 0.04, faceMat(tagFace(), { rough: 0.9 }), 0.015, 1, 48);
+  planarUV(card.geometry);
+  return grp(card, at(torus(0.11, 0.03, BRASS(), Math.PI * 2, 8, 32), 0.52, 0, 0.03), tube([[0.52, 0.1, 0.03], [0.6, 0.32, 0.1], [0.66, 0.62, 0.08], [0.6, 0.9, 0]], 0.022, M(0xa83028, { rough: 0.8, tex: 'weave' }), 16, 6));
+}
+
+// ---- bp_decor: a glazed stoneware vase (celadon running to a toasty foot, a painted band) holding three flowers
+function vaseTex(): THREE.Texture {
+  return drawTex('vase10', 32, 128, (g) => {
+    const lg = g.createLinearGradient(0, 0, 0, 128); lg.addColorStop(0, '#3a6e8c'); lg.addColorStop(0.75, '#4e8aa8'); lg.addColorStop(0.86, '#8ab4bc'); lg.addColorStop(0.9, '#c89a6a'); lg.addColorStop(1, '#9a6a44');
+    g.fillStyle = lg; g.fillRect(0, 0, 32, 128);
+    g.fillStyle = '#e8dcc0'; g.fillRect(0, 44, 32, 4); g.fillRect(0, 54, 32, 2);
+    g.fillStyle = '#e8dcc0'; for (let x = 2; x < 32; x += 8) { g.beginPath(); g.arc(x, 50, 1.8, 0, 7); g.fill(); }
+  });
+}
+function flowerVase(): O {
+  const prof = smoothProfile([[0, -0.85], [0.3, -0.85], [0.42, -0.7], [0.5, -0.45], [0.46, -0.2], [0.3, 0.0], [0.2, 0.08], [0.22, 0.18], [0.26, 0.2]], 4);
+  const geo = new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(Math.max(0.0001, r), y)), 48);
+  geo.computeVertexNormals();
+  const vase = mesh(geo, new THREE.MeshStandardMaterial({ map: vaseTex(), roughness: 0.22, envMapIntensity: 1.1 }));
+  const stemM = M(0x4a7a34, { rough: 0.5, tex: null });
+  const flower = (x: number, y: number, c: number, n: number, r: number) => {
+    const pet: P2[] = Array.from({ length: 80 }, (_, i) => { const a = (i / 80) * Math.PI * 2, rr = r * (0.55 + 0.45 * Math.abs(Math.cos(a * n / 2))); return [Math.cos(a) * rr, Math.sin(a) * rr]; });
+    return grp(tube([[0, 0.05, 0], [x * 0.5, y * 0.55, 0.02], [x, y, 0.04]], 0.028, stemM, 12, 5), at(dome(pet, M(c, { rough: 0.6, tex: 'plain' }), 0.04, 0.025, 3), x, y, 0.06, -0.2, 0, 0), at(dome(circlePts(r * 0.28, 24), M(0xe8a830, { rough: 0.7, tex: 'plain' }), 0.04, 0.02, 2), x, y + 0.01, 0.1, -0.2, 0, 0));
+  };
+  return grp(vase, flower(-0.3, 0.72, 0xd8607a, 5, 0.2), flower(0.08, 0.95, 0xf2c84a, 6, 0.2), flower(0.38, 0.62, 0xf4eee6, 8, 0.18),
+    at(leafMesh(0.2, 0.08, stemM), -0.14, 0.36, 0.06, 0, 0, 0.8), at(leafMesh(0.2, 0.08, stemM), 0.2, 0.4, 0.06, 0, 0, -0.9));
+}
+
+// ---- calendar: a tear-off day calendar, a bookcloth header with brass rings, a big day numeral, a page curling up
+function dayPage(): THREE.Texture {
+  return drawTex('daypage', 160, 160, (g) => {
+    g.fillStyle = '#fbf3e0'; g.fillRect(0, 0, 160, 160);
+    grain(g, 160, 160, 0.04);
+    g.fillStyle = '#a8342a'; g.font = 'bold 26px Georgia, "DejaVu Serif", serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('MON', 80, 40);
+    g.fillStyle = '#3a2c2a'; g.font = 'bold 92px Georgia, "DejaVu Serif", serif'; g.fillText('7', 80, 106);
+    g.strokeStyle = 'rgba(90,70,60,0.35)'; g.lineWidth = 2; g.beginPath(); g.moveTo(24, 58); g.lineTo(136, 58); g.stroke();
+  });
+}
+function dayCalendar(): O {
+  const cloth = M(0x8e2a26, { rough: 0.75, tex: 'weave' });
+  const page = at(mesh(planarUV(new THREE.PlaneGeometry(1.2, 1.2)), faceMat(dayPage(), { rough: 0.9 })), 0, -0.2, 0.125);
+  const pad = at(ext(shape(rrectPts(1.3, 1.3, 0.06)), 0.18, M(0xf4ead2, { rough: 0.9, tex: 'paper' }), 0.02, 1), 0, -0.2, 0);
+  const back = at(ext(shape(rrectPts(1.4, 1.62, 0.08)), 0.06, M(0x6a3a22, { tex: 'grain', rough: 0.55 }), 0.03, 2), 0, -0.08, -0.14);
+  const header = at(ext(shape(rrectPts(1.44, 0.36, 0.08)), 0.26, cloth, 0.04, 3), 0, 0.6, 0.02);
+  // the last torn page's stub, and the next page lifting at its corner
+  const curlG = new THREE.PlaneGeometry(0.5, 0.5, 6, 6);
+  const cp = curlG.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < cp.count; i++) { const x = cp.getX(i) + 0.25, y = -cp.getY(i) + 0.25, d = (x + y) / 1.4; cp.setZ(i, d * d * 0.5); }
+  curlG.computeVertexNormals();
+  const curl = at(mesh(curlG, M(0xf6eedc, { rough: 0.9, tex: 'paper', side: THREE.DoubleSide })), 0.4, -0.6, 0.13, 0, 0, 0);
+  const rings = [-0.42, 0, 0.42].map((x) => at(torus(0.11, 0.03, BRASS(), Math.PI * 2, 8, 24), x, 0.43, 0.2, 0, Math.PI / 2, 0));
+  return grp(back, pad, page, curl, header, ...rings);
+}
+
+// ---- waves: three rolling swells in cloisonné, deep sea to shallow
+function seaWaves(): O {
+  const swell = (y: number, ph: number): P2[] => Array.from({ length: 33 }, (_, k) => { const x = -0.86 + (1.72 * k) / 32; return [x, y + Math.sin(x * 4.2 + ph) * 0.12] as P2; });
+  return grp(...([[0.5, 0x5aa8d0], [0, 0x2f7ab8], [-0.5, 0x1e5494]] as [number, number][]).map(([y, c], i) => cloisonStroke(swell(y, i * 0.7), 0.2, vitreous(c), { z: i * 0.02 })));
+}
+
+// ---- pen: a fountain pen in black lacquer with gold bands, a clip, and a two-tone gold nib with its slit
+function fountainPen(): O {
+  const lac = M(0x1e1a24, { rough: 0.16, tex: 'plain', env: 1.2 }), gold = M(0xf0c458, { metal: 0.9, rough: 0.2, tex: null, env: 1.2 });
+  const barrel = lathe(smoothProfile([[0, 0.92], [0.07, 0.9], [0.12, 0.82], [0.14, 0.6], [0.145, 0.2], [0.14, -0.1], [0.12, -0.3], [0.1, -0.36]], 3), lac, 32);
+  const bands = grp(at(torus(0.146, 0.022, gold, Math.PI * 2, 8, 32), 0, 0.2, 0, Math.PI / 2), at(torus(0.14, 0.014, gold, Math.PI * 2, 6, 32), 0, 0.28, 0, Math.PI / 2), at(torus(0.1, 0.016, gold, Math.PI * 2, 6, 24), 0, -0.36, 0, Math.PI / 2));
+  const clip = grp(tube([[0, 0.86, 0.13], [0, 0.82, 0.18], [0, 0.4, 0.17], [0, 0.32, 0.15]], 0.025, gold, 16, 6), at(ball(0.035, gold, 10, 8), 0, 0.32, 0.15));
+  const grip = at(lathe(smoothProfile([[0.1, 0], [0.095, -0.12], [0.085, -0.22]], 2), lac, 24), 0, -0.36, 0);
+  // the nib: a curved gold blade with a breather hole and its slit
+  const nibPts: P2[] = [[-0.085, 0], [0.085, 0], [0.06, -0.18], [0.0, -0.36], [-0.06, -0.18]];
+  const nibG = new THREE.ExtrudeGeometry(shape(nibPts), { depth: 0.01, bevelEnabled: true, bevelThickness: 0.006, bevelSize: 0.006, bevelSegments: 1 });
+  const np = nibG.attributes.position as THREE.BufferAttribute;
+  for (let i = 0; i < np.count; i++) { const x = np.getX(i); np.setZ(i, np.getZ(i) - x * x * 4); }
+  nibG.computeVertexNormals();
+  const nib = at(mesh(nibG, gold), 0, -0.58, 0.07);
+  const slit = rod([0, -0.68, 0.085], [0, -0.92, 0.075], 0.006, M(0x1e1a24, { tex: null }), 6);
+  const hole = at(cyl(0.016, 0.016, 0.02, M(0x1e1a24, { tex: null }), 12), 0, -0.68, 0.082, Math.PI / 2);
+  const feed = at(lathe([[0.07, 0], [0.05, -0.14], [0.02, -0.26], [0, -0.28]], M(0x2a2428, { rough: 0.5, tex: null }), 16), 0, -0.58, -0.02);
+  return at(grp(barrel, bands, clip, grip, feed, nib, slit, hole), 0, 0, 0, 0.1, 0, -0.72);
+}
+
+// ---- magnifier: a reading glass, its lens in a brass ring joined by a ferrule to a turned walnut handle
+function readingGlass(): O {
+  const brass = BRASS();
+  const lens = at(lathe(smoothProfile([[0, 0.045], [0.25, 0.04], [0.44, 0.02], [0.48, 0]], 3).concat(smoothProfile([[0.48, 0], [0.44, -0.02], [0.25, -0.04], [0, -0.045]], 3)), M(0xd2ecfa, { rough: 0.03, metal: 0.1, tex: null, env: 1.8, opacity: 0.26 }), 48), 0, 0, 0, Math.PI / 2);
+  const ring = grp(at(torus(0.5, 0.06, brass, Math.PI * 2, 12, 64), 0, 0, 0), at(torus(0.5, 0.035, OLDBRASS(), Math.PI * 2, 8, 64), 0, 0, -0.05));
+  const neck = grp(rod([0.39, -0.39, 0], [0.52, -0.52, 0], 0.05, brass), at(lathe(smoothProfile([[0.07, 0], [0.085, 0.05], [0.085, 0.14], [0.07, 0.18]], 2), brass, 24), 0.6, -0.6, 0, 0, 0, Math.PI * 0.75));
+  const handle = at(lathe(smoothProfile([[0.07, 0], [0.09, 0.1], [0.08, 0.24], [0.1, 0.42], [0.11, 0.56], [0.09, 0.66], [0, 0.7]], 3), M(0x5a3020, { tex: 'grain', rough: 0.4 }), 24), 0.72, -0.72, 0, 0, 0, Math.PI * 0.75);
+  return at(grp(lens, ring, neck, handle), -0.2, 0.25, 0);
+}
+
+// ---- birdhouse: an oak birdhouse with a cedar-shingled roof, a round door with a worn rim, a perch, on its post
+function birdhouse10(): O {
+  const oak = M(0xd09a5a, { tex: 'grain', rough: 0.6 }), walnut = M(0x6a3a22, { tex: 'grain', rough: 0.6 });
+  const sh = shingles('#9a5232').map.clone();
+  sh.wrapS = sh.wrapT = THREE.RepeatWrapping; sh.repeat.set(1.2, 1.2); sh.needsUpdate = true;
+  const roofM = new THREE.MeshStandardMaterial({ map: sh, bumpMap: sh, bumpScale: 0.6, roughness: 0.75 });
+  const body = ext(shape([[-0.45, -0.7], [0.45, -0.7], [0.45, 0.1], [0, 0.48], [-0.45, 0.1]]), 0.8, oak, 0.03, 2);
+  const roof = grp(...[-1, 1].map((s) => { const m = mesh(new THREE.BoxGeometry(0.8, 0.08, 1.04), roofM); return at(m, s * 0.27, 0.36, 0, 0, 0, -s * 0.72); }), at(cyl(0.05, 0.05, 1.08, walnut, 12), 0, 0.6, 0, Math.PI / 2));
+  const door = grp(at(cyl(0.14, 0.14, 0.04, M(0x1e1418, { rough: 0.9, tex: null }), 24), 0, -0.06, 0.42, Math.PI / 2), at(torus(0.15, 0.03, M(0xa87440, { tex: 'grain', rough: 0.6 }), Math.PI * 2, 8, 32), 0, -0.06, 0.43));
+  const perch = grp(at(cyl(0.028, 0.028, 0.26, walnut, 10), 0, -0.36, 0.52, Math.PI / 2), at(ball(0.035, walnut, 10, 8), 0, -0.36, 0.65));
+  const ring = at(torus(0.07, 0.02, BRASS(), Math.PI * 2, 8, 20), 0, 0.72, 0);
+  const post = at(mesh(new THREE.BoxGeometry(0.16, 0.5, 0.16), walnut), 0, -0.95, 0);
+  return grp(body, roof, door, perch, ring, post);
+}
+
 // ------------------------------------------------------------------ the icon models
 type Make = () => O | Promise<O>;
-interface Spec { make: Make; yaw?: number; pitch?: number; pad?: number; fin?: Finish }
+/** `edge`: [icons10] how dark the faint edge is (0.35; pale things such as a white glove or air on parchment want more) */
+interface Spec { make: Make; yaw?: number; pitch?: number; pad?: number; fin?: Finish; edge?: number }
 const glb = (path: string, fix?: (o: O) => void): Make => async () => { const { root } = await instanceGLB(path); fix?.(root); root.userData.glb = true; return root; };
 /**
  * Ready a model for the bake: the bake's own textured materials laid on at the icons' density (a painted face, a
@@ -924,21 +1729,22 @@ function prep(obj: O): O {
 }
 const T = 0.3; // token depth
 
+const EMERALD = 0x1c7442, CINNABAR = 0xa02c24, COBALT = 0x2a4f9c, ROSE = 0xae3e5a;
 const CHECK: P2[] = [[-0.72, 0.02], [-0.24, -0.46], [0.74, 0.6]];
 const ICONS: Record<string, Spec> = {
-  check: { make: () => jewelStroke(CHECK, 0.34, glaze(0x2f9457)), yaw: 0.28, pitch: 0.26 },
-  cross: { make: () => grp(jewelStroke([[-0.6, -0.6], [0.6, 0.6]], 0.32, glaze(0xc0392f)), jewelStroke([[-0.6, 0.6], [0.6, -0.6]], 0.32, glaze(0xc0392f), { z: 0.03 })), yaw: 0.28, pitch: 0.26 },
-  plus: { make: () => enamelButton(glaze(0x2f9457), [bar(0.86, 0.24), bar(0.24, 0.86)]), yaw: 0.26, pitch: 0.24 },
-  minus: { make: () => enamelButton(glaze(0xc8506e), [bar(0.86, 0.24)]), yaw: 0.26, pitch: 0.24 },
-  info: { make: () => enamelButton(glaze(0x3462a8), [circlePts(0.13, 24).map(([x, y]) => [x + 0.02, y + 0.4] as P2), roundPoly([[-0.18, 0.18], [0.1, 0.18], [0.1, -0.34], [0.2, -0.34], [0.2, -0.5], [-0.2, -0.5], [-0.2, -0.34], [-0.08, -0.34], [-0.08, 0.04], [-0.18, 0.04]], 0.03)]), yaw: 0.26, pitch: 0.24 },
-  arrow_right: { make: () => jewel(ARROW, glaze(0x2f9457)), yaw: 0.28, pitch: 0.26 },
-  arrow_left: { make: () => jewel(mirrorX(ARROW), glaze(0x2f9457)), yaw: 0.28, pitch: 0.26 },
-  arrow_up: { make: () => jewel(rot(ARROW, Math.PI / 2), glaze(0x2f9457)), yaw: 0.28, pitch: 0.26 },
-  arrow_down: { make: () => jewel(rot(ARROW, -Math.PI / 2), glaze(0xc8506e)), yaw: 0.28, pitch: 0.26 },
-  rotate_right: { make: () => curvedArrow(glaze(0x4a8ac4), true), yaw: 0.26, pitch: 0.26 },
-  rotate_left: { make: () => at(curvedArrow(glaze(0x4a8ac4), true), 0, 0, 0, 0, 0, 0, [-1, 1, 1]), yaw: -0.26, pitch: 0.26 }, // the mirror of rotate_right
-  play: { make: () => jewel(roundPoly([[-0.44, -0.66], [0.72, 0], [-0.44, 0.66]], 0.16), glaze(0x2f9457)), yaw: 0.28, pitch: 0.24 },
-  pause: { make: () => grp(jewel(bar(0.32, 1.12, -0.3), glaze(0x3462a8)), jewel(bar(0.32, 1.12, 0.3), glaze(0x3462a8))), yaw: 0.28, pitch: 0.24 },
+  check: { make: () => cloisonStroke(CHECK, 0.36, vitreous(EMERALD)), yaw: 0.24, pitch: 0.24 },
+  cross: { make: () => grp(cloisonStroke([[-0.6, -0.6], [0.6, 0.6]], 0.34, vitreous(CINNABAR)), cloisonStroke([[-0.6, 0.6], [0.6, -0.6]], 0.34, vitreous(CINNABAR), { z: 0.07 })), yaw: 0.24, pitch: 0.24 },
+  plus: { make: () => medal(EMERALD, [roundPoly([[-0.13, 0.46], [0.13, 0.46], [0.13, 0.13], [0.46, 0.13], [0.46, -0.13], [0.13, -0.13], [0.13, -0.46], [-0.13, -0.46], [-0.13, -0.13], [-0.46, -0.13], [-0.46, 0.13], [-0.13, 0.13]], 0.05)]), yaw: 0.24, pitch: 0.22 },
+  minus: { make: () => medal(ROSE, [bar(0.92, 0.26)]), yaw: 0.24, pitch: 0.22 },
+  info: { make: () => medal(COBALT, [circlePts(0.12, 32).map(([x, y]) => [x + 0.02, y + 0.42] as P2), roundPoly([[-0.18, 0.2], [0.11, 0.2], [0.11, -0.32], [0.21, -0.32], [0.21, -0.5], [-0.21, -0.5], [-0.21, -0.32], [-0.09, -0.32], [-0.09, 0.04], [-0.18, 0.04]], 0.03)]), yaw: 0.24, pitch: 0.22 },
+  arrow_right: { make: () => cloison(ARROW, vitreous(EMERALD)), yaw: 0.24, pitch: 0.24 },
+  arrow_left: { make: () => cloison(mirrorX(ARROW), vitreous(EMERALD)), yaw: 0.24, pitch: 0.24 },
+  arrow_up: { make: () => cloison(rot(ARROW, Math.PI / 2), vitreous(EMERALD)), yaw: 0.24, pitch: 0.24 },
+  arrow_down: { make: () => cloison(rot(ARROW, -Math.PI / 2), vitreous(ROSE)), yaw: 0.24, pitch: 0.24 },
+  rotate_right: { make: () => curvedArrow(vitreous(COBALT), true), yaw: 0.24, pitch: 0.24 },
+  rotate_left: { make: () => at(curvedArrow(vitreous(COBALT), true), 0, 0, 0, 0, 0, 0, [-1, 1, 1]), yaw: -0.24, pitch: 0.24 }, // the mirror of rotate_right
+  play: { make: () => cloison(roundPoly([[-0.44, -0.66], [0.72, 0], [-0.44, 0.66]], 0.16), vitreous(EMERALD)), yaw: 0.24, pitch: 0.22 },
+  pause: { make: () => grp(cloison(bar(0.34, 1.12, -0.3), vitreous(COBALT)), cloison(bar(0.34, 1.12, 0.3), vitreous(COBALT))), yaw: 0.24, pitch: 0.22 },
   lock: {
     make: () => {
       const keyhole = shape([...Array.from({ length: 24 }, (_, i) => { const a = -Math.PI / 3 + (i / 23) * ((Math.PI * 5) / 3); return [Math.cos(a) * 0.1, 0.06 + Math.sin(a) * 0.1] as P2; }), [-0.06, -0.22], [0.06, -0.22]]);
@@ -950,15 +1756,15 @@ const ICONS: Record<string, Spec> = {
     }, yaw: 0.38, pitch: 0.24,
   },
   star: { make: () => grp(goldStar(0.98, 0.44), at(ext(shape(offsetPts(starPts(0.98, 0.44), 0.05)), 0.06, M(0xb07a2a, { metal: 0.6, rough: 0.35, tex: null }), 0.02, 1), 0, 0, -0.06)), yaw: 0.22, pitch: 0.22 },
-  heart: { make: () => jewel(HEART, glaze(0xcc4060), { depth: 0.2, bevel: 0.16 }), yaw: 0.28, pitch: 0.26 },
+  heart: { make: () => cloison(HEART, vitreous(0xb83a52), { h: 0.1 }), yaw: 0.24, pitch: 0.24 },
   sparkle: { make: () => grp(goldStar(0.98, 0.26, 4), at(goldStar(0.34, 0.12, 4, M(0xfff0c0, { metal: 0.3, rough: 0.3, tex: null, glow: 0.25 })), 0.64, 0.62, 0.12)), yaw: 0.22, pitch: 0.22 },
   moon: { make: () => moonJewel(0.86, 0.72, [0.38, 0.22]), yaw: 0.28, pitch: 0.26 },
-  sun: { make: () => { const g = grp(facetSolid(circlePts(0.52, 16), 0.16, 0.14, C.gold())); for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; g.add(at(facetSolid([[-0.14, 0], [0.14, 0], [0, 0.34]], 0.08, 0.08, M(0xe89a38, { metal: 0.5, rough: 0.3, tex: null }), 0, 0.1), Math.cos(a) * 0.62, Math.sin(a) * 0.62, -0.02, 0, 0, a - Math.PI / 2)); } return g; }, yaw: 0.22, pitch: 0.22 },
-  shield: { make: () => { const pts = roundPoly([[-0.7, 0.78], [0.7, 0.78], [0.7, 0.06], [0.48, -0.44], [0, -0.88], [-0.48, -0.44], [-0.7, 0.06]], 0.1); return grp(jewel(pts, glaze(0x3462a8), { rimM: M(0xd6a040, { metal: 0.65, rough: 0.3, tex: null }), rim: 0.1 }), at(goldStar(0.4, 0.18), 0, 0.06, 0.2)); }, yaw: 0.26, pitch: 0.24 },
-  zzz: { make: () => { const Z = (s: number) => strokePts([[-0.45 * s, 0.4 * s], [0.42 * s, 0.4 * s], [-0.42 * s, -0.4 * s], [0.45 * s, -0.4 * s]], 0.17 * s, 6); const m = glaze(0x4a8ac4), r = C.silver(); return grp(at(jewel(Z(0.92), m, { rimM: r, rim: 0.05 }), -0.52, -0.48, 0), at(jewel(Z(0.64), m, { rimM: r, rim: 0.04 }), 0.2, 0.18, 0), at(jewel(Z(0.44), m, { rimM: r, rim: 0.035 }), 0.74, 0.72, 0)); }, yaw: 0.26, pitch: 0.2 },
-  bolt: { make: () => jewel(roundPoly([[0.15, 0.95], [-0.55, -0.1], [-0.05, -0.1], [-0.25, -0.95], [0.55, 0.15], [0.05, 0.15]], 0.04), M(0xf0b632, { rough: 0.26, tex: 'plain', glow: 0.1 }), { rimM: M(0xb87a26, { metal: 0.6, rough: 0.35, tex: null }) }), yaw: 0.28, pitch: 0.26 },
+  sun: { make: () => { const g = grp(facetSolid(circlePts(0.52, 16), 0.16, 0.14, gilt())); for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; g.add(at(facetSolid([[-0.14, 0], [0.14, 0], [0, 0.34]], 0.08, 0.08, gilt(0xec9a34), 0, 0.1), Math.cos(a) * 0.62, Math.sin(a) * 0.62, -0.02, 0, 0, a - Math.PI / 2)); } return g; }, yaw: 0.22, pitch: 0.22 },
+  shield: { make: () => { const pts = roundPoly([[-0.7, 0.78], [0.7, 0.78], [0.7, 0.06], [0.48, -0.44], [0, -0.88], [-0.48, -0.44], [-0.7, 0.06]], 0.1); return grp(cloison(pts, vitreous(COBALT), { rim: 0.08 }), at(goldStar(0.4, 0.18), 0, 0.06, 0.16)); }, yaw: 0.24, pitch: 0.22 },
+  zzz: { make: () => sleepyZ(), yaw: 0.22, pitch: 0.2 },
+  bolt: { make: () => cloison(roundPoly([[0.15, 0.95], [-0.55, -0.1], [-0.05, -0.1], [-0.25, -0.95], [0.55, 0.15], [0.05, 0.15]], 0.05), vitreous(0xe8a028, 0.3)), yaw: 0.24, pitch: 0.24 },
   ice_flake: { make: () => { const ice = M(0x9ad2ee, { rough: 0.18, metal: 0.1, env: 1.2, tex: 'glass' }), g = grp(jewel(circlePts(0.16, 6), ice, { rim: 0, depth: 0.08, bevel: 0.05 })); for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + Math.PI / 2, c = Math.cos(a), s = Math.sin(a); g.add(strokeMesh([[c * 0.1, s * 0.1], [c * 0.92, s * 0.92]], 0.1, ice, 0.08, 0.035)); for (const fr of [0.48, 0.72]) { const px = c * fr, py = s * fr, l = fr < 0.6 ? 0.24 : 0.17; for (const sg of [-1, 1]) g.add(strokeMesh([[px, py], [px + Math.cos(a + sg * 0.75) * l, py + Math.sin(a + sg * 0.75) * l]], 0.08, ice, 0.07, 0.03)); } } return g; }, yaw: 0.24, pitch: 0.24 },
-  alarm: { make: () => { const c = cuckooClock(); simpleDial(c.root); boldHands(c); setClockHands(c, new Date(2024, 0, 1, 7, 0, 0)); c.door.rotation.y = -2.1; c.owl.position.set(0, c.owl.position.y - 0.05, 0.5); c.owl.rotation.x = 0.2; c.owl.scale.setScalar(2.4); return c.root; }, yaw: 0.26, pitch: 0.12 },
+  alarm: { make: () => alarmClock(), yaw: 0.3, pitch: 0.14 },
   clock: { make: () => { const c = cuckooClock(); simpleDial(c.root); boldHands(c); setClockHands(c, new Date(2024, 0, 1, 10, 10, 0)); c.pendulum.rotation.z = 0.2; return c.root; }, yaw: 0.22, pitch: 0.1 },
   hourglass: {
     make: () => { const cap = (y: number, flip: number) => at(lathe(smoothProfile([[0, 0], [0.6, 0], [0.64, 0.05], [0.6, 0.1], [0.5, 0.12], [0, 0.12]], 2), C.wood(), 32), 0, y, 0, flip ? Math.PI : 0);
@@ -966,12 +1772,7 @@ const ICONS: Record<string, Spec> = {
         lathe(smoothProfile([[0.4, -0.78], [0.44, -0.5], [0.3, -0.2], [0.07, 0], [0.3, 0.2], [0.44, 0.5], [0.4, 0.78]], 3), M(0xbfe8ff, { rough: 0.05, metal: 0.1, opacity: 0.45, tex: null, env: 1.6 }), 32),
         lathe(smoothProfile([[0, -0.77], [0.39, -0.76], [0.3, -0.5], [0.12, -0.34], [0, -0.3]], 2), M(0xf4c058, { rough: 0.8 }), 24), lathe([[0, 0.05], [0.16, 0.18], [0.28, 0.32], [0, 0.32]], M(0xf4c058, { rough: 0.8 }), 24), at(cyl(0.015, 0.015, 0.36, M(0xf4c058, { rough: 0.8 }), 6), 0, -0.14, 0)); }, yaw: 0.4, pitch: 0.2,
   },
-  calendar: {
-    make: () => { const red = hex('#d23a34'), ink = hex('#4a3a4a'), paper = hex('#fbf0d8');
-      const tex = faceTex('cal', 32, 32, (x, y): RGB => { if (y > 24) return x > 3 && x < 28 && (y === 27 || y === 28) ? hex('#ffe9c0') : red; const col = Math.floor((x - 3) / 4), row = Math.floor((y - 3) / 5); if (x > 2 && x < 30 && y > 2 && y < 23 && (x - 3) % 4 < 3 && (y - 3) % 5 < 3) return col === 4 && row === 2 ? red : ink; return paper; });
-      const pad = at(mesh(planarUV(new THREE.ExtrudeGeometry(shape(rrectPts(1.4, 1.4, 0.1)), { depth: 0.16, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2 })), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 })), 0, -0.05, -0.08);
-      return grp(pad, ...[-0.4, 0.4].map((x) => at(torus(0.12, 0.035, C.brass(), Math.PI * 2, 8, 20), x, 0.66, 0.06, 0, Math.PI / 2, 0))); }, yaw: 0.32, pitch: 0.24,
-  },
+  calendar: { make: () => dayCalendar(), yaw: 0.28, pitch: 0.16 },
   candle: {
     make: () => grp(lathe(smoothProfile([[0, -0.78], [0.6, -0.76], [0.66, -0.68], [0.62, -0.62], [0.24, -0.6], [0.22, -0.56], [0, -0.56]], 2), C.brass(), 40),
       at(lathe(smoothProfile([[0, -0.6], [0.25, -0.6], [0.26, 0.2], [0.24, 0.3], [0.1, 0.32], [0, 0.3]], 2), M(0xfff1d8, { rough: 0.55, tex: 'wax' }), 28), 0, 0, 0),
@@ -980,41 +1781,19 @@ const ICONS: Record<string, Spec> = {
       at(lathe(smoothProfile([[0, -0.2], [0.13, -0.1], [0.12, 0.05], [0.05, 0.2], [0, 0.3]], 2), C.flame(), 16), 0, 0.6, 0), at(lathe(smoothProfile([[0, -0.12], [0.06, -0.05], [0.04, 0.08], [0, 0.14]], 2), C.flameIn(), 12), 0, 0.56, 0.05),
       at(torus(0.16, 0.05, C.brass(), Math.PI, 8, 16), 0.64, -0.62, 0, 0, 0, -Math.PI / 2)), yaw: 0.4, pitch: 0.24,
   },
-  lantern: {
-    make: () => grp(at(lathe(smoothProfile([[0, 0], [0.52, 0], [0.56, 0.05], [0.5, 0.12], [0.4, 0.14], [0, 0.14]], 2), C.brass(), 32), 0, -0.8, 0),
-      at(cyl(0.36, 0.36, 0.95, M(0xffd77a, { glow: 0.8, tex: null }), 24), 0, -0.18, 0),
-      ...[0, 1, 2, 3].map((i) => at(cyl(0.045, 0.045, 1.0, C.brass(), 8), Math.cos(i * Math.PI / 2 + 0.6) * 0.4, -0.18, Math.sin(i * Math.PI / 2 + 0.6) * 0.4)),
-      at(lathe(smoothProfile([[0.5, 0], [0.46, 0.08], [0.32, 0.2], [0.14, 0.3], [0.1, 0.36], [0, 0.38]], 2), C.brass(), 32), 0, 0.32, 0), at(torus(0.17, 0.045, C.brass(), Math.PI * 2, 8, 24), 0, 0.84, 0),
-      at(lathe(smoothProfile([[0, -0.14], [0.08, -0.06], [0.07, 0.06], [0.03, 0.16], [0, 0.2]], 2), M(0xfff6c8, { glow: 1.2, tex: null }), 12), 0, -0.22, 0)), yaw: 0.4, pitch: 0.2,
-  },
-  nest: {
-    make: () => { const twig = M(0xa8743c, { rough: 0.9, tex: 'bark', rep: 2 }); const g = grp(at(torus(0.6, 0.24, twig, Math.PI * 2, 12, 40), 0, -0.1, 0, Math.PI / 2, 0, 0, [1, 1, 0.75]), at(cyl(0.48, 0.38, 0.2, M(0x8a5a2c, { tex: 'bark' }), 24), 0, -0.22, 0));
-      for (let i = 0; i < 9; i++) { const a = (i / 9) * Math.PI * 2; g.add(tube([[Math.cos(a) * 0.5, 0.0, Math.sin(a) * 0.5], [Math.cos(a + 0.5) * 0.85, 0.06, Math.sin(a + 0.5) * 0.85], [Math.cos(a + 0.8) * 0.95, -0.02, Math.sin(a + 0.8) * 0.95]], 0.025, twig, 8, 5)); }
-      const egg = (x: number, z: number, r: number) => at(lathe(smoothProfile([[0, -0.3], [0.2, -0.24], [0.26, -0.05], [0.2, 0.18], [0, 0.32]], 3), M(0x8fd6f4, { rough: 0.3 }), 24), x, 0.08, z, 0.25, 0, r);
-      g.add(egg(-0.22, 0.02, 0.3), egg(0.2, -0.04, -0.25), egg(0, 0.22, 0.05)); return g; }, yaw: 0.4, pitch: 0.48,
-  },
-  bell: {
-    make: () => grp(at(lathe(smoothProfile([[0, 0], [0.76, 0], [0.8, 0.05], [0.74, 0.12], [0, 0.12]], 2), C.wood(), 40), 0, -0.7, 0),
-      lathe(smoothProfile([[0, 0.38], [0.18, 0.36], [0.4, 0.2], [0.56, -0.12], [0.66, -0.48], [0.7, -0.56], [0, -0.56]], 3), C.brass(), 48),
-      at(cyl(0.06, 0.06, 0.16, C.brass(), 10), 0, 0.46, 0), at(lathe(smoothProfile([[0, 0.14], [0.11, 0.1], [0.12, 0.02], [0, 0]], 2), C.brass(), 16), 0, 0.54, 0)), yaw: 0.4, pitch: 0.32,
-  },
-  phone_off: {
-    make: () => grp(ext(shape(rrectPts(0.86, 1.52, 0.16)), 0.12, M(0x3a3048, { rough: 0.35 }), 0.05, 3), at(mesh(new THREE.PlaneGeometry(0.7, 1.2), M(0x5fa0e8, { rough: 0.15, glow: 0.3, tex: null })), 0, 0.03, 0.12),
-      at(strokeMesh([[-0.66, -0.7], [0.66, 0.7]], 0.2, C.red(), 0.16, 0.06), 0, 0, 0.2)), yaw: 0.32, pitch: 0.2,
-  },
-  music: { make: () => { const b = glaze(0x34509a); const head = (x: number, y: number) => jewel(circlePts(0.2, 32).map(([px, py]) => [px * 1.3, py * 0.9] as P2).map(([px, py]) => [px * Math.cos(0.4) - py * Math.sin(0.4) + x, px * Math.sin(0.4) + py * Math.cos(0.4) + y] as P2), b, { rim: 0, depth: 0.1, bevel: 0.08 }); return grp(head(-0.48, -0.58), head(0.42, -0.44), jewelStroke([[-0.26, -0.52], [-0.26, 0.56]], 0.09, b, { rim: 0, bevel: 0.03, depth: 0.06 }), jewelStroke([[0.64, -0.38], [0.64, 0.74]], 0.09, b, { rim: 0, bevel: 0.03, depth: 0.06 }), jewel(roundPoly([[-0.31, 0.62], [0.69, 0.82], [0.69, 0.6], [-0.31, 0.4]], 0.03), b, { rim: 0, depth: 0.08, bevel: 0.05, z: 0.02 })); }, yaw: 0.24, pitch: 0.2 },
-  note: { make: () => { const b = glaze(0x34509a); return grp(jewel(circlePts(0.3, 32).map(([px, py]) => [px * 1.25, py * 0.9] as P2).map(([px, py]) => [px * Math.cos(0.35) - py * Math.sin(0.35) - 0.18, px * Math.sin(0.35) + py * Math.cos(0.35) - 0.55] as P2), b, { rim: 0 }), jewelStroke([[0.14, -0.5], [0.14, 0.8]], 0.13, b, { rim: 0, bevel: 0.04, depth: 0.08 }), jewel(roundPoly([[0.08, 0.86], [0.24, 0.86], [0.52, 0.56], [0.58, 0.28], [0.48, 0.06], [0.5, 0.3], [0.38, 0.46], [0.16, 0.54]], 0.03), b, { rim: 0, bevel: 0.04, depth: 0.08 })); }, yaw: 0.26, pitch: 0.2 },
-  mic: {
-    make: () => { const grille = M(0x9aa4b4, { metal: 0.6, rough: 0.35, tex: 'weave', rep: 3 });
-      return grp(at(lathe(smoothProfile([[0, 0.62], [0.2, 0.58], [0.3, 0.46], [0.32, 0.25], [0.31, 0.05], [0, 0.04]], 3), grille, 32), 0, 0.02, 0), at(torus(0.315, 0.035, C.brass(), Math.PI * 2, 8, 32), 0, 0.3, 0, Math.PI / 2), at(lathe(smoothProfile([[0, 0.08], [0.32, 0.06], [0.33, 0], [0.2, -0.1], [0, -0.12]], 2), C.brass(), 24), 0, 0.04, 0),
-        at(torus(0.44, 0.045, C.brass(), Math.PI, 8, 24), 0, 0.22, 0, 0, 0, Math.PI), at(cyl(0.045, 0.045, 0.5, C.brass(), 8), 0, -0.46, 0), at(lathe(smoothProfile([[0, 0.1], [0.3, 0.08], [0.42, 0.02], [0.4, -0.04], [0, -0.04]], 2), C.dark(), 32), 0, -0.76, 0)); }, yaw: 0.4, pitch: 0.24,
-  },
-  speaker_on: { make: () => grp(speaker(), at(torus(0.42, 0.07, C.sky(), 1.4, 8, 24), 0.16, 0, 0, 0, 0, -0.7), at(torus(0.7, 0.07, C.sky(), 1.3, 8, 24), 0.16, 0, 0, 0, 0, -0.65)), yaw: 0.25, pitch: 0.15 },
-  speaker_off: { make: () => grp(speaker(), at(grp(jewelStroke([[0.34, -0.3], [0.88, 0.3]], 0.15, glaze(0xc0392f), { rim: 0.04, bevel: 0.05, depth: 0.08 }), jewelStroke([[0.34, 0.3], [0.88, -0.3]], 0.15, glaze(0xc0392f), { rim: 0.04, bevel: 0.05, depth: 0.08, z: 0.02 })), 0, 0, 0.1)), yaw: 0.25, pitch: 0.15 },
-  rain: { make: () => grp(at(cloud(C.snow()), 0, 0.3, 0), ...[[-0.36, -0.5], [0.1, -0.68], [0.52, -0.46]].map(([x, y]) => at(lathe(smoothProfile([[0, -0.16], [0.1, -0.1], [0.09, 0.02], [0.04, 0.12], [0, 0.18]], 3), M(0x4aaef0, { rough: 0.15, tex: 'water' }), 16), x, y, 0.1, 0, 0, -0.2))), yaw: 0.28, pitch: 0.2 },
-  drop: { make: () => lathe(smoothProfile([[0, -0.8], [0.34, -0.72], [0.56, -0.45], [0.55, -0.15], [0.36, 0.25], [0.12, 0.65], [0, 0.85]], 3), M(0x4aaef0, { rough: 0.1, metal: 0.1, env: 1.4, tex: 'water' }), 40), yaw: 0.3, pitch: 0.2 },
-  waves: { make: () => grp(...[0.55, 0, -0.55].map((y, i) => tube(Array.from({ length: 9 }, (_, k) => [-0.9 + k * 0.225, y + Math.sin(k * 1.4 + i) * 0.13, 0] as [number, number, number]), 0.1, M([0x8ad6ff, 0x5ab4f0, 0x3a8ad8][i], { rough: 0.22, tex: 'water' }), 40, 10))), yaw: 0.25, pitch: 0.2 },
-  wind: { make: () => grp(...([[0.5, 0.9], [0, 1.1], [-0.5, 0.75]] as P2[]).map(([y, l]) => tube([[-0.9, y, 0], [-0.9 + l * 0.6, y, 0], [-0.9 + l, y + 0.08, 0], [-0.9 + l + 0.1, y + 0.28, 0], [-0.9 + l - 0.12, y + 0.36, 0]], 0.09, M(0xeaf6ff, { rough: 0.4 }), 40, 10))), yaw: 0.25, pitch: 0.2 },
+  lantern: { make: () => lantern10(), yaw: 0.4, pitch: 0.2 },
+  nest: { make: () => twigNest(), yaw: 0.3, pitch: 0.5 },
+  bell: { make: () => handBell(), yaw: 0.3, pitch: 0.2 },
+  phone_off: { make: () => phoneAsleep(), yaw: 0.28, pitch: 0.18 },
+  music: { make: () => musicNotes(), yaw: 0.22, pitch: 0.2 },
+  note: { make: () => musicNote(), yaw: 0.22, pitch: 0.2 },
+  mic: { make: () => micro(), yaw: 0.3, pitch: 0.16 },
+  speaker_on: { make: () => grp(hornSpeaker(), soundArc(0.12, 0.62, 0.62, vitreous(COBALT)), soundArc(0.12, 0.86, 0.55, vitreous(COBALT))), yaw: 0.22, pitch: 0.12 },
+  speaker_off: { make: () => grp(hornSpeaker(), at(grp(cloisonStroke([[0.5, -0.3], [0.98, 0.3]], 0.15, vitreous(CINNABAR), { rim: 0.04, wire: 0.02, h: 0.05 }), cloisonStroke([[0.5, 0.3], [0.98, -0.3]], 0.15, vitreous(CINNABAR), { rim: 0.04, wire: 0.02, h: 0.05, z: 0.05 })), 0, 0, 0.2)), yaw: 0.22, pitch: 0.12 },
+  rain: { make: () => rainCloud(), yaw: 0.24, pitch: 0.16, edge: 0.5 },
+  drop: { make: () => waterDrop(), yaw: 0.3, pitch: 0.16 },
+  waves: { make: () => seaWaves(), yaw: 0.22, pitch: 0.22 },
+  wind: { make: () => windGusts(), yaw: 0.12, pitch: 0.1, edge: 0.6 },
   campfire: {
     make: () => { const bark = M(0x7a4a26, { tex: 'bark', rough: 0.85 }), end = M(0xe8b070, { tex: 'grain', rough: 0.7 });
       const log = (a: number, tilt: number) => { const g = grp(at(cyl(0.13, 0.15, 1.3, bark, 12), 0, 0, 0), at(cyl(0.13, 0.13, 0.01, end, 12), 0, 0.655, 0), at(cyl(0.15, 0.15, 0.01, end, 12), 0, -0.655, 0)); return at(g, 0, -0.58, 0, Math.PI / 2 - tilt, a, 0); };
@@ -1023,23 +1802,17 @@ const ICONS: Record<string, Spec> = {
         ...([[0, 0, 1], [-0.2, -0.04, 0.7], [0.22, 0.02, 0.75], [0.06, -0.06, 0.55]] as [number, number, number][]).map(([x, z, k]) => at(lathe(smoothProfile([[0, -0.4], [0.3, -0.25], [0.28, 0], [0.14, 0.35], [0, 0.66]], 3), C.flame(), 16), x, -0.1, z, 0, 0, x * 0.6, [k * 0.8, k, k * 0.8])),
         at(lathe(smoothProfile([[0, -0.3], [0.2, -0.15], [0.15, 0.08], [0, 0.3]], 3), C.flameIn(), 16), 0, -0.2, 0.18), at(lathe(smoothProfile([[0, -0.1], [0.08, -0.04], [0.05, 0.06], [0, 0.12]], 2), unlit(0xfff4c0), 10), 0, -0.24, 0.26)); }, yaw: 0.4, pitch: 0.34,
   },
-  leaf: { make: () => grp(leafMesh(0.92, 0.5, C.leaf(), 9), at(cyl(0.025, 0.035, 1.5, M(0x3e8a32, { tex: null }), 6), 0, -0.2, 0.05)), yaw: 0.3, pitch: 0.32 },
+  leaf: { make: () => freshLeaf(), yaw: 0.3, pitch: 0.3 },
   book: { make: () => { const b = journal(); b.ribbon.visible = false; return b.root; }, yaw: 0.5, pitch: 0.2 },
-  pen: {
-    make: () => { const lac = M(0x2c58c0, { rough: 0.2 }); return at(grp(lathe(smoothProfile([[0, -0.36], [0.1, -0.34], [0.14, -0.2], [0.15, 0.5], [0.12, 0.66], [0, 0.7]], 3), lac, 24), at(torus(0.15, 0.025, C.gold(), Math.PI * 2, 6, 24), 0, 0.12, 0, Math.PI / 2), at(torus(0.145, 0.02, C.gold(), Math.PI * 2, 6, 24), 0, 0.5, 0, Math.PI / 2),
-      at(lathe(smoothProfile([[0, -0.42], [0.05, -0.36], [0.1, -0.2], [0.12, 0], [0, 0]], 2), C.gold(), 16), 0, -0.36, 0), strokeMesh([[0.18, 0.62], [0.18, 0.2]], 0.06, C.gold(), 0.04, 0.015)), 0, 0, 0, 0, 0, -0.75); }, yaw: 0.3, pitch: 0.3,
-  },
-  jar: {
-    make: () => grp(lathe(smoothProfile([[0, -0.8], [0.5, -0.78], [0.58, -0.6], [0.58, 0.38], [0.46, 0.54], [0.38, 0.6], [0, 0.6]], 3), M(0xa8dcec, { rough: 0.08, metal: 0.1, tex: null, env: 1.2, opacity: 0.32 }), 40), at(lathe(smoothProfile([[0, 0.12], [0.4, 0.12], [0.43, 0.06], [0.42, 0], [0, 0]], 2), C.brass(), 32), 0, 0.62, 0),
-      ...[[-0.2, -0.2], [0.18, 0.1], [0.05, -0.5], [-0.12, 0.28]].map(([x, y]) => at(ball(0.13, M(0xffe070, { glow: 1.4, tex: null }), 10, 8), x, y, 0.4))), yaw: 0.4, pitch: 0.2,
-  },
-  hanger: { make: () => hanger(), yaw: 0.3, pitch: 0.24 },
+  pen: { make: () => fountainPen(), yaw: 0.3, pitch: 0.3 },
+  jar: { make: () => fireflyJar(), yaw: 0.3, pitch: 0.16, edge: 0.55 },
+  hanger: { make: () => woodHanger(), yaw: 0.26, pitch: 0.16 },
   brush: {
     make: () => at(grp(lathe(smoothProfile([[0, -0.8], [0.08, -0.78], [0.1, -0.3], [0.08, 0.2], [0.1, 0.3]], 2), C.wood(), 16), at(lathe(smoothProfile([[0.1, 0], [0.13, 0.1], [0.13, 0.25], [0.11, 0.32]], 2), C.silver(), 16), 0, 0.28, 0),
       at(lathe(smoothProfile([[0.11, 0], [0.14, 0.12], [0.11, 0.3], [0, 0.42]], 3), M(0xf2d9a0, { tex: 'grain' }), 16), 0, 0.6, 0), at(lathe(smoothProfile([[0.09, 0], [0.06, 0.1], [0, 0.16]], 2), C.blue(), 12), 0, 0.92, 0)), 0, 0, 0, 0, 0, -0.75), yaw: 0.3, pitch: 0.3,
   },
   pushpin: { make: () => at(grp(lathe(smoothProfile([[0, 0.7], [0.36, 0.66], [0.38, 0.56], [0.2, 0.5], [0.18, 0.2], [0.42, 0.1], [0.44, 0.02], [0, 0]], 3), C.red(), 32), at(cyl(0.025, 0.012, 0.6, C.silver(), 8), 0, -0.3, 0)), 0, 0, 0, 0, 0, 0.55), yaw: 0.4, pitch: 0.3 },
-  magnifier: { make: () => grp(at(torus(0.5, 0.09, C.brass(), Math.PI * 2, 10, 40), -0.2, 0.25, 0), at(cyl(0.48, 0.48, 0.04, M(0xd2f0ff, { rough: 0.04, metal: 0.2, tex: null, env: 2 }), 32), -0.2, 0.25, 0, Math.PI / 2), at(lathe(smoothProfile([[0, -0.5], [0.09, -0.46], [0.1, 0], [0.07, 0.3], [0.08, 0.34]], 2), C.wood(), 16), 0.42, -0.38, 0, 0, 0, Math.PI * 0.75)), yaw: 0.28, pitch: 0.24 },
+  magnifier: { make: () => readingGlass(), yaw: 0.28, pitch: 0.2 },
   clipboard: {
     make: () => { const ruled = faceTex('ruled', 24, 32, (x, y): RGB => (y > 6 && y % 5 === 0 && x > 3 && x < 21 ? hex('#8a90b8') : y > 4 && y < 9 && x > 3 && x < 14 ? hex('#5a4a6a') : hex('#fbf2dc')));
       return grp(ext(shape(rrectPts(1.2, 1.56, 0.1)), 0.06, C.wood(), 0.03, 2), at(mesh(planarUV(new THREE.PlaneGeometry(1.0, 1.24)), new THREE.MeshStandardMaterial({ map: ruled, roughness: 0.85 })), 0, -0.08, 0.075),
@@ -1051,7 +1824,7 @@ const ICONS: Record<string, Spec> = {
         ...[-0.32, 0.32].map((x) => grp(at(ext(shape(rrectPts(0.12, 0.5, 0.04)), 0.02, dk, 0.01, 1), x, -0.2, 0.3), at(ext(shape(rrectPts(0.18, 0.14, 0.03)), 0.03, C.brass(), 0.015, 1), x, -0.32, 0.32))),
         tube([[-0.6, 0.2, 0], [-0.52, 0.72, 0], [0, 0.94, 0], [0.52, 0.72, 0], [0.6, 0.2, 0]], 0.06, dk, 24, 8)); }, yaw: 0.34, pitch: 0.22,
   },
-  map: { make: () => { const g = grp(); const tx = mapTex(); for (let i = 0; i < 3; i++) { const p = mesh(new THREE.PlaneGeometry(0.62, 1.4), new THREE.MeshStandardMaterial({ map: tx, side: THREE.DoubleSide, roughness: 0.8 })); const uv = p.geometry.attributes.uv as THREE.BufferAttribute; for (let k = 0; k < uv.count; k++) uv.setX(k, (uv.getX(k) + i) / 3); g.add(at(p, -0.6 + i * 0.6, 0, i % 2 ? -0.12 : 0, 0, i % 2 ? 0.35 : -0.35, 0)); } return g; }, yaw: 0.2, pitch: 0.25 },
+  map: { make: () => foldedMap(), yaw: 0.2, pitch: 0.25 },
   gear: { make: () => gear(M(0xe6ae50, { metal: 0.55, rough: 0.32, tex: 'plain', env: 1.0 }), 10, M(0xa8722e, { metal: 0.6, rough: 0.36, tex: 'plain' })), yaw: 0.3, pitch: 0.3 },
   treehouse: {
     make: () => { const lv = [M(0x4caa3c, { rough: 0.6, tex: 'foliage' }), M(0x62c448, { rough: 0.6, tex: 'foliage' }), M(0x3e9434, { rough: 0.6, tex: 'foliage' })];
@@ -1059,40 +1832,19 @@ const ICONS: Record<string, Spec> = {
       const house = grp(ext(shape([[-0.26, -0.2], [0.26, -0.2], [0.26, 0.14], [0, 0.34], [-0.26, 0.14]]), 0.3, C.oak(), 0.03, 2), at(ext(shape([[-0.34, 0.1], [0, 0.4], [0.34, 0.1], [0.3, 0.06], [0, 0.32], [-0.3, 0.06]]), 0.38, C.red(), 0.03, 2), 0, 0.02, 0), at(ext(shape(rrectPts(0.14, 0.18, 0.05)), 0.02, M(0xffd87a, { glow: 0.7, tex: null }), 0.01, 1), 0, -0.02, 0.17));
       return grp(at(lathe(smoothProfile([[0.34, -1.0], [0.24, -0.8], [0.18, -0.3], [0.16, 0.2]], 2), M(0x8a5a32, { tex: 'bark' }), 16), 0, 0, 0), clump(-0.34, 0.34, 0.46, lv[0]), clump(0.32, 0.4, 0.5, lv[2]), clump(0, 0.7, 0.46, lv[1]), at(house, 0.02, -0.36, 0.22)); }, yaw: 0.3, pitch: 0.18,
   },
-  birdhouse: {
-    make: () => grp(at(ext(shape([[-0.45, -0.7], [0.45, -0.7], [0.45, 0.1], [0, 0.5], [-0.45, 0.1]]), 0.8, C.oak(), 0.04, 2), 0, 0, 0),
-      at(ext(shape(rrectPts(0.78, 0.07, 0.03)), 1.0, C.red(), 0.02, 1), -0.25, 0.36, 0, 0, 0, 0.72), at(ext(shape(rrectPts(0.78, 0.07, 0.03)), 1.0, C.red(), 0.02, 1), 0.25, 0.36, 0, 0, 0, -0.72),
-      at(cyl(0.15, 0.15, 0.06, C.ink(), 20), 0, -0.12, 0.4, Math.PI / 2), at(cyl(0.03, 0.03, 0.26, C.dark(), 8), 0, -0.4, 0.48, Math.PI / 2), at(cyl(0.06, 0.07, 0.5, C.dark(), 8), 0, -0.95, 0)), yaw: 0.45, pitch: 0.2,
-  },
-  cursor_hand: {
-    make: () => { const skin = M(0xffe2bc, { rough: 0.55 });
-      const pts: P2[] = [[-0.42, 0.78], [-0.38, 0.88], [-0.3, 0.92], [-0.22, 0.88], [-0.18, 0.78], [-0.18, 0.26], [-0.14, 0.32], [-0.04, 0.34], [0.04, 0.3], [0.07, 0.2], [0.11, 0.25], [0.2, 0.27], [0.27, 0.22], [0.29, 0.12], [0.33, 0.16], [0.42, 0.16], [0.49, 0.1], [0.51, 0.0],
-        [0.55, -0.2], [0.52, -0.46], [0.42, -0.66], [0.28, -0.78], [-0.26, -0.78], [-0.42, -0.62], [-0.5, -0.36], [-0.56, -0.2], [-0.7, -0.06], [-0.76, 0.04], [-0.72, 0.12], [-0.6, 0.1], [-0.46, 0.0], [-0.42, 0.18]];
-      return grp(ext(shape(pts), 0.28, skin, 0.12, 4), at(ext(shape(rrectPts(0.92, 0.2, 0.06)), 0.4, C.sky(), 0.05, 2), 0.16, -0.86, 0)); }, yaw: 0.28, pitch: 0.2,
-  },
-  stats: {
-    make: () => grp(at(ext(shape(rrectPts(1.7, 0.16, 0.06)), 0.5, C.wood(), 0.03, 2), 0, -0.82, 0),
-      ...([[-0.52, 0.66, C.green()], [0, 1.06, C.gold()], [0.52, 1.46, C.blue()]] as [number, number, THREE.Material][]).map(([x, h, m]) => at(ext(shape(rrectPts(0.34, h, 0.1)), 0.32, m, 0.04, 2), x, -0.74 + h / 2, 0)),
-      at(ext(shape(strokePts([[-0.7, -0.1], [-0.2, 0.3], [0.15, 0.1], [0.66, 0.66]], 0.1)), 0.06, C.red(), 0.03, 2), 0, 0.1, 0.3), at(ext(shape([[0.5, 0.74], [0.82, 0.84], [0.74, 0.52]]), 0.06, C.red(), 0.03, 2), 0, 0.06, 0.3)), yaw: 0.42, pitch: 0.24,
-  },
-  nights: { make: () => grp(at(moonJewel(0.65, 0.55, [0.3, 0.18]), -0.2, 0, 0), at(goldStar(0.3, 0.13), 0.62, 0.55, 0), at(goldStar(0.21, 0.09), 0.72, -0.35, 0)), yaw: 0.24, pitch: 0.24 },
-  things: {
-    make: () => { const wood = M(0xc8783a, { tex: 'grain', rough: 0.55 }), band = M(0x6a5a5a, { metal: 0.6, rough: 0.4, tex: null });
-      const lidG = new THREE.CylinderGeometry(0.42, 0.42, 1.3, 24, 1, false, 0, Math.PI); lidG.rotateZ(Math.PI / 2);
-      return grp(at(ext(shape(rrectPts(1.3, 0.62, 0.05)), 0.84, wood, 0.03, 2), 0, -0.3, 0), at(mesh(lidG, wood), 0, 0.02, 0, 0, 0, 0, [1, 0.8, 1]),
-        ...[-0.42, 0.42].map((x) => grp(at(ext(shape(rrectPts(0.1, 0.62, 0.02)), 0.88, band, 0.015, 1), x, -0.3, 0), at(torus(0.425, 0.05, band, Math.PI, 6, 20), x, 0.02, 0, 0, Math.PI / 2, 0, [1, 0.8, 1]))),
-        at(ext(shape(rrectPts(0.22, 0.28, 0.05)), 0.04, C.gold(), 0.02, 2), 0, -0.04, 0.45), at(ext(shape(circlePts(0.04, 12)), 0.02, C.ink(), 0.01, 1), 0, -0.06, 0.49),
-        at(moonGem(), 0.32, 0.4, 0.06, 0.3, 0.4, -0.3, 0.3), at(acorn(0.3, 0.6), -0.3, 0.42, 0.1)); }, yaw: 0.55, pitch: 0.32,
-  },
+  birdhouse: { make: () => birdhouse10(), yaw: 0.45, pitch: 0.2 },
+  cursor_hand: { make: () => cartoonGlove(), yaw: 0.26, pitch: 0.14, edge: 0.75 },
+  stats: { make: () => levelTubes(), yaw: 0.36, pitch: 0.16 },
+  nights: { make: () => nightMedal(), yaw: 0.24, pitch: 0.22 },
+  things: { make: () => keepsakeBox(), yaw: 0.42, pitch: 0.42 },
   seals: { make: () => { const pts: P2[] = []; for (let i = 0; i < 64; i++) { const a = (i / 64) * Math.PI * 2, r = 0.62 + Math.sin(a * 7) * 0.04 + (h2(i, 1, 2) - 0.5) * 0.04; pts.push([Math.cos(a) * r, Math.sin(a) * r + 0.2]); } const rib = M(0x2f4f8a, { rough: 0.35, tex: 'weave' }), wax = M(0xb0302c, { rough: 0.32, tex: 'plain' }); const tail = (s: number) => at(ext(shape(roundPoly([[s * -0.1, -0.1], [s * 0.12, -0.1], [s * 0.38, -0.96], [s * 0.28, -0.84], [s * 0.18, -1.0]], 0.02)), 0.04, rib, 0.02, 1), 0, 0, -0.12); return grp(tail(-1), tail(1), ext(shape(pts), 0.16, wax, 0.1, 4), at(torus(0.38, 0.05, M(0x8a2024, { rough: 0.35, tex: 'plain' }), Math.PI * 2, 8, 48), 0, 0.2, 0.15), at(goldStar(0.26, 0.11, 5, M(0xd04a40, { rough: 0.3, tex: 'plain' })), 0, 0.2, 0.16)); }, yaw: 0.26, pitch: 0.26 },
-  wd_feather: { make: () => { const vane: P2[] = []; for (let i = 0; i <= 50; i++) { const t = (i / 50) * Math.PI * 2, y = Math.cos(t); const notch = Math.sin(t * 13) > 0.85 ? 0.88 : 1; vane.push([Math.sin(t) * 0.3 * (1 + 0.2 * y) * notch, y * 0.86 + 0.12]); }
-    return at(grp(ext(shape(vane), 0.04, M(0xd8905a, { tex: 'grain', rough: 0.6 }), 0.03, 2), at(cyl(0.025, 0.035, 1.95, C.cream(), 8), 0, -0.03, 0.04)), 0, 0, 0, 0, 0, -0.6); }, yaw: 0.28, pitch: 0.28 },
+  wd_feather: { make: () => pheasantFeather(), yaw: 0.26, pitch: 0.26 },
   tophat: { make: () => grp(lathe(smoothProfile([[0, -0.5], [0.95, -0.5], [0.98, -0.44], [0.62, -0.4], [0.56, -0.3], [0.55, 0.5], [0.6, 0.6], [0, 0.62]], 2), M(0x3a2a52, { rough: 0.45, tex: 'felt' }), 48), at(cyl(0.565, 0.57, 0.2, C.red(), 40), 0, -0.26, 0), at(ext(shape(rrectPts(0.2, 0.16, 0.04)), 0.04, C.gold(), 0.02, 1), 0.2, -0.26, 0.55, 0, 0.35, 0)), yaw: 0.4, pitch: 0.32 },
   wd_glasses: { make: () => grp(...[-0.48, 0.48].map((x) => at(torus(0.36, 0.075, C.gold(), Math.PI * 2, 10, 40), x, 0, 0)), ...[-0.48, 0.48].map((x) => at(cyl(0.33, 0.33, 0.03, M(0x8fd8ff, { rough: 0.06, metal: 0.2, tex: null, env: 2 }), 32), x, 0, -0.01, Math.PI / 2)), at(torus(0.14, 0.055, C.gold(), Math.PI, 8, 16), 0, 0.08, 0), ...[-1, 1].map((sx) => tube([[sx * 0.84, 0.1, -0.02], [sx * 0.92, 0.12, -0.3], [sx * 0.9, 0.0, -0.5]], 0.04, C.gold(), 12, 6))), yaw: 0.3, pitch: 0.2 },
   wd_scarf: { make: () => { const st = new THREE.MeshStandardMaterial({ map: stripeTex(['#b8322e', '#efdcb8', '#b8322e', '#2f4f8a'], [3, 1, 3, 1]), roughness: 0.8, side: THREE.DoubleSide }); const fr = M(0xefdcb8, { rough: 0.8, tex: 'weave' }); const drape = ribbon([[-0.2, -0.95, 0.12], [-0.17, -0.2, 0.1], [-0.08, 0.32, 0.08], [0.04, 0.44, 0], [0.16, 0.32, -0.08], [0.24, -0.2, -0.1], [0.28, -0.75, -0.1]], 0.38, st, { normal: [0, 0, 1], seg: 48 }); const fringe = (x: number, y: number, z: number) => grp(...[0, 1, 2, 3, 4].map((i) => at(cyl(0.022, 0.022, 0.15, fr, 5), x - 0.14 + i * 0.07, y - 0.08, z))); return grp(at(hanger(), 0.04, 0.62, 0, 0, 0, 0, 0.62), drape, fringe(-0.2, -0.95, 0.12), fringe(0.28, -0.75, -0.1)); }, yaw: 0.3, pitch: 0.16 },
-  wd_sweater: { make: () => sweater(), yaw: 0.3, pitch: 0.15 },
+  wd_sweater: { make: () => knitJumper(), yaw: 0.26, pitch: 0.14 },
   wd_cape: { make: () => { const vel = M(0x5a3a8a, { rough: 0.6, tex: 'felt' }), lin = M(0xc8963e, { rough: 0.4, tex: 'plain' }); const prof = smoothProfile([[0.88, -0.86], [0.74, -0.4], [0.62, 0.1], [0.56, 0.36], [0.44, 0.5], [0.2, 0.56]], 3).map(([x, y]) => V2c(x, y)); const shell = (r: number, m: THREE.Material, side: THREE.Side) => { const geo = new THREE.LatheGeometry(prof.map((p) => V2c(p.x * r, p.y)), 48, 0.2, Math.PI * 2 - 0.4); const p = geo.attributes.position as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), a = Math.atan2(x, z), t = Math.max(0, (0.2 - y) / 1.06), k = 1 + Math.sin(a * 6) * 0.12 * t; p.setXYZ(i, x * k, y, z * k); } geo.computeVertexNormals(); const me = mesh(geo, m); (me.material as THREE.Material).side = side; return me; }; return grp(shell(1, vel, THREE.FrontSide), shell(0.97, lin, THREE.BackSide), at(torus(0.3, 0.1, M(0x7a52b0, { rough: 0.6, tex: 'felt' }), Math.PI * 2, 10, 32), 0, 0.52, 0, Math.PI / 2, 0, 0, [1, 1, 0.7]), at(jewel(crescentPts(0.13, 0.11, [0.06, 0.035], 48), C.gold(), { rim: 0, depth: 0.04, bevel: 0.03 }), 0, 0.44, 0.3), at(hanger(), 0, 0.72, -0.05, 0, 0, 0, 0.55)); }, yaw: 0.35, pitch: 0.2 },
-  wd_mirror: { make: () => grp(at(torus(0.48, 0.09, C.brass(), Math.PI * 2, 10, 40), 0, 0.3, 0, 0, 0, 0, [1, 1.2, 1]), at(cyl(0.47, 0.47, 0.05, M(0xcfeeff, { rough: 0.04, metal: 0.5, tex: null, env: 2 }), 32), 0, 0.3, 0, Math.PI / 2, 0, 0, [1, 1, 1.2]), at(lathe(smoothProfile([[0.06, -0.5], [0.1, -0.44], [0.07, -0.1], [0.09, 0.0], [0.12, 0.08]], 2), C.brass(), 16), 0, -0.4, 0), at(lathe(smoothProfile([[0, 0], [0.1, 0.02], [0.13, 0.08], [0.06, 0.14]], 2), C.brass(), 16), 0, -1.02, 0)), yaw: 0.3, pitch: 0.2 },
+  wd_mirror: { make: () => handMirror(), yaw: 0.26, pitch: 0.16 },
   wd_frame: { make: () => grp(at(torus(0.66, 0.18, C.brass(), Math.PI * 2, 14, 48), 0, 0, 0), at(cyl(0.56, 0.56, 0.06, M(0x6ec2f0, { rough: 0.5 }), 40), 0, 0, -0.05, Math.PI / 2), ...[0, 1, 2, 3].map((i) => at(ext(shape(starPts(0.12, 0.05, 4)), 0.06, C.gold(), 0.03, 2), Math.cos(i * Math.PI / 2 + Math.PI / 4) * 0.66, Math.sin(i * Math.PI / 2 + Math.PI / 4) * 0.66, 0.16))), yaw: 0.3, pitch: 0.2 },
   bp_box: {
     make: () => { const k = C.kraft(), tape = M(0xeedcae, { rough: 0.6, tex: null });
@@ -1113,35 +1865,17 @@ const ICONS: Record<string, Spec> = {
   bp_chair: { make: glb('items/armchair.glb'), yaw: 0.6, pitch: 0.28 },
   bp_table: { make: glb('items/round_table.glb'), yaw: 0.6, pitch: 0.34 },
   bp_shelf: { make: glb('items/bookshelf.glb'), yaw: 0.45, pitch: 0.2 },
-  bp_lamp: {
-    make: () => grp(at(lathe(smoothProfile([[0.3, 0], [0.5, -0.32], [0.64, -0.56], [0.6, -0.58], [0.28, -0.04]], 3), M(0xffc46a, { rough: 0.8, glow: 0.35, tex: 'weave', side: THREE.DoubleSide }), 40), 0, 0.74, 0),
-      at(lathe(smoothProfile([[0.04, -0.6], [0.05, 0], [0.04, 0.5]], 2), C.brass(), 10), 0, -0.1, 0), at(lathe(smoothProfile([[0, -0.86], [0.5, -0.84], [0.53, -0.78], [0.3, -0.72], [0.14, -0.6], [0.06, -0.58], [0, -0.58]], 3), C.brass(), 40), 0, 0, 0),
-      at(lathe(smoothProfile([[0, -0.1], [0.1, -0.04], [0.1, 0.06], [0, 0.14]], 2), M(0xfff4c0, { glow: 1.2, tex: null }), 12), 0, 0.3, 0)), yaw: 0.4, pitch: 0.24,
-  },
+  bp_lamp: { make: () => tableLamp(), yaw: 0.4, pitch: 0.2 },
   bp_plant: { make: glb('items/fernpot.glb'), yaw: 0.5, pitch: 0.3 },
-  bp_rug: { make: () => at(mesh(new THREE.CylinderGeometry(1, 1, 0.08, 64), new THREE.MeshStandardMaterial({ map: ringTex(), roughness: 0.9 })), 0, 0, 0, 0, 0, 0, [1, 1, 0.75]), yaw: 0.2, pitch: 0.95 },
+  bp_rug: { make: () => braidedRug(), yaw: 0.2, pitch: 0.9 },
   bp_wall: { make: () => { const gold = M(0xd8a040, { metal: 0.6, rough: 0.32, tex: 'plain' }); const outer = shape(rrectPts(1.7, 1.32, 0.06)), hole = new THREE.Path(); rrectPts(1.36, 0.98, 0.02).forEach(([x, y], i) => (i ? hole.lineTo(x, y) : hole.moveTo(x, y))); outer.holes.push(hole); const pic = mesh(planarUV(new THREE.PlaneGeometry(1.4, 1.02)), new THREE.MeshStandardMaterial({ map: landscape(), roughness: 0.8 })); return grp(ext(outer, 0.12, gold, 0.06, 3), at(pic, 0, 0, -0.02), at(ext(shape(rrectPts(1.44, 1.06, 0.02)), 0.04, M(0x8a5a26, { metal: 0.5, rough: 0.4, tex: 'plain' }), 0.015, 1), 0, 0, -0.06)); }, yaw: 0.22, pitch: 0.12 },
-  bp_decor: {
-    make: () => { const flower = (x: number, y: number, c: number) => { const pet: P2[] = Array.from({ length: 60 }, (_, i) => { const a = (i / 60) * Math.PI * 2, r = 0.2 * (0.6 + 0.4 * Math.abs(Math.cos(a * 2.5))); return [Math.cos(a) * r, Math.sin(a) * r]; });
-      return grp(tube([[0, 0.1, 0], [x * 0.5, y * 0.6, 0], [x, y, 0]], 0.035, M(0x3e9a3a, { tex: null }), 12, 5), at(ext(shape(pet), 0.05, M(c, { rough: 0.5 }), 0.03, 2), x, y, 0.04), at(ext(shape(circlePts(0.06, 16)), 0.04, M(0xffd040, { tex: null }), 0.02, 1), x, y, 0.1)); };
-      return grp(lathe(smoothProfile([[0, -0.85], [0.36, -0.84], [0.48, -0.5], [0.44, -0.2], [0.2, 0.05], [0.24, 0.16], [0, 0.16]], 3), M(0x3d8fd8, { rough: 0.25 }), 40), flower(-0.3, 0.75, 0xf06a86), flower(0.1, 0.92, 0xffd44a), flower(0.38, 0.64, 0xf5f0ff)); }, yaw: 0.35, pitch: 0.2,
-  },
+  bp_decor: { make: () => flowerVase(), yaw: 0.3, pitch: 0.2 },
   bp_fun: { make: glb('items/rocking_horse.glb'), yaw: 0.7, pitch: 0.24 },
-  bp_wallpaper: { make: () => { const t = stripeTex(); const roll = mesh(new THREE.CylinderGeometry(0.34, 0.34, 1.5, 32), new THREE.MeshStandardMaterial({ map: t, roughness: 0.7 })); const sheet = mesh(new THREE.PlaneGeometry(0.9, 1.5), new THREE.MeshStandardMaterial({ map: t, roughness: 0.7, side: THREE.DoubleSide })); return grp(at(roll, -0.35, 0, 0), at(sheet, 0.4, -0.1, 0.25, -0.2, -0.3, 0), at(cyl(0.1, 0.1, 1.52, C.kraft(), 16), -0.35, 0, 0)); }, yaw: 0.4, pitch: 0.25 },
+  bp_wallpaper: { make: () => wallpaperRoll(), yaw: 0.4, pitch: 0.2, edge: 0.55 },
   bp_floor: { make: () => grp(...[-0.5, 0, 0.5].map((x, i) => at(ext(shape(rrectPts(0.46, 1.5, 0.04)), 0.12, [C.wood(), C.oak(), C.dark()][i], 0.02, 1), x, 0, i === 1 ? 0.06 : 0, -Math.PI / 2))), yaw: 0.5, pitch: 0.6 },
-  bp_season: {
-    make: () => { const pap = M(0xe0363c, { rough: 0.45 }); return grp(ext(shape(rrectPts(1.1, 0.9, 0.04)), 1.1, pap, 0.03, 2), at(ext(shape(rrectPts(1.18, 0.22, 0.04)), 1.18, pap, 0.03, 2), 0, 0.5, 0), at(ext(shape(rrectPts(0.2, 0.96, 0.02)), 1.14, C.gold(), 0.02, 1), 0, 0.02, 0), at(ext(shape(rrectPts(1.14, 0.96, 0.02)), 0.2, C.gold(), 0.02, 1), 0, 0.02, 0),
-      at(torus(0.2, 0.065, C.gold(), Math.PI * 2, 8, 24), -0.18, 0.72, 0, 0, 0.4, 0.4), at(torus(0.2, 0.065, C.gold(), Math.PI * 2, 8, 24), 0.18, 0.72, 0, 0, -0.4, -0.4)); }, yaw: 0.6, pitch: 0.34,
-  },
-  bp_move: { make: () => jewel(roundPoly([[-0.12, 0.12], [-0.12, 0.5], [-0.32, 0.5], [0, 0.9], [0.32, 0.5], [0.12, 0.5], [0.12, 0.12], [0.5, 0.12], [0.5, 0.32], [0.9, 0], [0.5, -0.32], [0.5, -0.12], [0.12, -0.12], [0.12, -0.5], [0.32, -0.5], [0, -0.9], [-0.32, -0.5], [-0.12, -0.5], [-0.12, -0.12], [-0.5, -0.12], [-0.5, -0.32], [-0.9, 0], [-0.5, 0.32], [-0.5, 0.12]], 0.04), glaze(0x4a8ac4), { rim: 0, depth: 0.2, bevel: 0.1 }), yaw: 0.26, pitch: 0.26 },
-  bp_buy: {
-    make: () => { const sh = shape([[-0.8, -0.5], [0.3, -0.5], [0.85, 0], [0.3, 0.5], [-0.8, 0.5]]); const hl = new THREE.Path(); hl.absarc(0.5, 0, 0.1, 0, Math.PI * 2, true); sh.holes.push(hl);
-      const nutS = shape(Array.from({ length: 28 }, (_, i) => { const t = (i / 28) * Math.PI * 2, y = Math.cos(t); return [Math.sin(t) * 0.2 * (y < 0 ? 1 - (-y) * 0.35 : 1), y * 0.24 - 0.04] as P2; }));
-      const capS = shape(Array.from({ length: 18 }, (_, i) => { const t = (i / 17) * Math.PI; return [Math.cos(t) * 0.25, Math.sin(t) * 0.14] as P2; }));
-      const stamp = grp(at(ext(nutS, 0.04, C.gold(), 0.02, 2), 0, -0.1, 0), at(ext(capS, 0.04, M(0x8a5020, { rough: 0.6, tex: null }), 0.02, 2), 0, 0.08, 0.01));
-      return grp(ext(sh, 0.06, M(0xf0c890, { rough: 0.8, tex: 'weave' }), 0.03, 2), at(stamp, -0.25, 0.02, 0.07), tube([[0.5, 0.1, 0], [0.66, 0.46, 0.06], [0.74, 0.86, 0]], 0.035, C.red(), 12, 5)); }, yaw: 0.22, pitch: 0.22,
-  },
-  // the side tools
+  bp_season: { make: () => seasonGift(), yaw: 0.6, pitch: 0.3 },
+  bp_move: { make: () => cloison(roundPoly([[-0.12, 0.12], [-0.12, 0.5], [-0.32, 0.5], [0, 0.9], [0.32, 0.5], [0.12, 0.5], [0.12, 0.12], [0.5, 0.12], [0.5, 0.32], [0.9, 0], [0.5, -0.32], [0.5, -0.12], [0.12, -0.12], [0.12, -0.5], [0.32, -0.5], [0, -0.9], [-0.32, -0.5], [-0.12, -0.5], [-0.12, -0.12], [-0.5, -0.12], [-0.5, -0.32], [-0.9, 0], [-0.5, 0.32], [-0.5, 0.12]], 0.04), vitreous(COBALT)), yaw: 0.24, pitch: 0.24 },
+  bp_buy: { make: () => priceTag(), yaw: 0.22, pitch: 0.22 },
   tool_build: { make: () => blueprint(), yaw: 0.22, pitch: 0.12 },
   tool_shop: { make: () => shopStall(), yaw: 0.32, pitch: 0.14 },
   tool_dress: { make: () => topHat(), yaw: 0.35, pitch: 0.3 },
@@ -1290,7 +2024,7 @@ async function bakeIcon(sp: Spec, obj?: O): Promise<Arts> {
   const res = {} as Arts;
   for (const [name, n, outline, ink, ss] of SIZES) {
     const sph = frameIcon(obj, n, sp.yaw ?? 0.5, sp.pitch ?? 0.3, sp.pad ?? 1, outline + 6);
-    res[name] = paintFinish(passes(obj, n, n, ss, sph.center, sph.radius), { groups: groupOf, outline, outlineAlpha: 0.35, ink, lineDepth: sp.fin?.lineDepth ?? 0.045 });
+    res[name] = paintFinish(passes(obj, n, n, ss, sph.center, sph.radius), { groups: groupOf, outline, outlineAlpha: sp.edge ?? 0.35, ink, lineDepth: sp.fin?.lineDepth ?? 0.045 });
   }
   return res;
 }
