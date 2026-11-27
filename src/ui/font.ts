@@ -1,11 +1,10 @@
 // [type16] The game's two typefaces, defined here once for CSS (style.css reads the same names) and for every piece of
 // canvas text (signs, tags, the globe, the office's papers, the floating dialogue):
-//   - the display face, Fraunces (Undercase Type), a warm "wonky" old-style serif with soft, rounded terminals (its
-//     SOFT axis pinned at 100): titles, signs, buttons, names and big numbers. Pip's handwriting is its italic.
-//   - the body face, Figtree (Erik Kennedy), a clean, friendly sans with open shapes and a tall x-height: copy,
-//     dialogue and small interface text.
-// Both are SIL OFL 1.1, bundled as WOFF2 (latin subsets from @fontsource-variable, see src/assets/fonts/FONTS_LICENSE.txt);
-// nothing comes from another host. Callers ask for the display face with `caps: true` (it also picks the title weight)
+//   - the display face, Alegreya (Juan Pablo del Peral, Huerta Tipográfica), a calligraphic storybook serif: titles,
+//     signs, buttons, names and big numbers. Pip's handwriting is its italic.
+//   - the body face, Alegreya Sans, its humanist sans sister: copy, dialogue and small interface text.
+// Both are SIL OFL 1.1, bundled as WOFF2 (latin subsets from @fontsource, see src/assets/fonts/*-OFL.txt); nothing comes
+// from another host. Callers ask for the display face with `caps: true` (it also picks the title weight)
 // or `display: true` (any weight); everything else is set in the body face.
 //
 // Sizes are ordinary px. CSS uses the --t1..--t8 tokens (style.css); canvas code asks for `uiFont(n)` (n size steps),
@@ -14,21 +13,25 @@
 // with it) and snapFont() only rounds to whole px.
 // `textSafe` swaps the handful of invisible or odd characters for plain ones.
 import { options, type VNode } from 'preact';
-import bodyUrl from '../assets/fonts/figtree.woff2?url';
-import bodyItalicUrl from '../assets/fonts/figtree-italic.woff2?url';
-import titleUrl from '../assets/fonts/fraunces-soft.woff2?url';
-import titleItalicUrl from '../assets/fonts/fraunces-soft-italic.woff2?url';
+import bodyUrl from '../assets/fonts/alegreya-sans-500.woff2?url';
+import body400Url from '../assets/fonts/alegreya-sans-400.woff2?url';
+import body700Url from '../assets/fonts/alegreya-sans-700.woff2?url';
+import body800Url from '../assets/fonts/alegreya-sans-800.woff2?url';
+import bodyItalicUrl from '../assets/fonts/alegreya-sans-400i.woff2?url';
+import body700iUrl from '../assets/fonts/alegreya-sans-700i.woff2?url';
+import titleUrl from '../assets/fonts/alegreya.woff2?url';
+import titleItalicUrl from '../assets/fonts/alegreya-italic.woff2?url';
 
-/** the body face's family name (Figtree) */
+/** the body face's family name (Alegreya Sans) */
 export const FAMILY = 'Hoot Text';
-/** the display face's family name (Fraunces, soft) */
+/** the display face's family name (Alegreya) */
 export const CAPS_FAMILY = 'Hoot Display';
 /** the body face, then the system's own sans for any glyph it lacks */
 export const STACK = '"Hoot Text", system-ui, -apple-system, "Segoe UI", sans-serif';
 /** titles, signs, buttons, names and big numbers: the display face, then a system serif */
 export const TITLE_STACK = '"Hoot Display", "Hoot Text", Georgia, "Times New Roman", serif';
 /** the body and title weights (the display face is variable 100-900, the body face 300-900) */
-export const W_BODY = 500, W_TITLE = 650;
+export const W_BODY = 500, W_TITLE = 700;
 /** a fifteenth of an em: offsets of outlines and shadows are counted in these */
 export const GRID = 15;
 /** one size step in px */
@@ -38,8 +41,8 @@ export const VIS = 1;
 /** kept for callers that scale wished sizes (talk.ts) */
 export const SCALE = VIS;
 /** the faces' proportions in fifteenths of an em: capitals, lowercase, ascent and descent (both faces have 0.70 em
- * capitals; Figtree's lowercase is 0.50 em, Fraunces' 0.48 em) */
-export const METRICS = { cap: 10.5, x: 7.4, body: { ascent: 14.25, descent: 3.75 }, title: { ascent: 14.67, descent: 3.83 } } as const;
+ * capitals; Alegreya Sans' lowercase is 0.45 em, Alegreya's 0.45 em) */
+export const METRICS = { cap: 10.2, x: 6.8, body: { ascent: 14.25, descent: 3.75 }, title: { ascent: 14.67, descent: 3.83 } } as const;
 /** capital height as a fraction of the size */
 export const CAP = METRICS.cap / GRID;
 
@@ -121,8 +124,9 @@ export function fontReady(): Promise<void> {
       const have = (fam: string, st: string) => [...document.fonts].some((f) => f.family.replace(/["']/g, '') === fam && f.style === st);
       const add = async (fam: string, url: string, d: FontFaceDescriptors) => { if (!have(fam, d.style ?? 'normal')) document.fonts.add(await new FontFace(fam, `url(${url}) format('woff2')`, d).load()); };
       await Promise.all([
-        add(FAMILY, bodyUrl, { weight: '300 900', style: 'normal' }), add(FAMILY, bodyItalicUrl, { weight: '300 900', style: 'italic' }),
-        add(CAPS_FAMILY, titleUrl, { weight: '100 900', style: 'normal' }), add(CAPS_FAMILY, titleItalicUrl, { weight: '100 900', style: 'italic' }),
+        add(FAMILY, body400Url, { weight: '400', style: 'normal' }), add(FAMILY, bodyUrl, { weight: '500 600', style: 'normal' }), add(FAMILY, body700Url, { weight: '700', style: 'normal' }), add(FAMILY, body800Url, { weight: '800 900', style: 'normal' }),
+        add(FAMILY, bodyItalicUrl, { weight: '300 600', style: 'italic' }), add(FAMILY, body700iUrl, { weight: '700 900', style: 'italic' }),
+        add(CAPS_FAMILY, titleUrl, { weight: '400 900', style: 'normal' }), add(CAPS_FAMILY, titleItalicUrl, { weight: '400 900', style: 'italic' }),
       ]);
       await Promise.all([
         document.fonts.load(`${W_BODY} 16px "${FAMILY}"`, 'Aa1’…'), document.fonts.load(`italic ${W_BODY} 16px "${FAMILY}"`, 'Aa1'),

@@ -5,13 +5,17 @@
    soft glows, vignettes and rays come from pxfx.tsx. Type: two faces, defined in src/ui/font.ts. */
 
 /* [type16] The game's two faces (SIL OFL 1.1; bundled, see src/assets/fonts/FONTS_LICENSE.txt). The display face,
-   Fraunces with its soft terminals ('Hoot Display'), sets titles, signs, buttons, names and big numbers (--font-title,
-   --font-display); the body face, Figtree ('Hoot Text'), sets copy and small text (--font-body, --font-small).
+   Alegreya, a calligraphic storybook serif ('Hoot Display'), sets titles, signs, buttons, names and big numbers (--font-title,
+   --font-display); the body face, Alegreya Sans ('Hoot Text'), sets copy and small text (--font-body, --font-small).
    Body medium (500), titles semi-bold (650), emphasis bold or italic. */
-@font-face { font-family: 'Hoot Text'; src: url('../assets/fonts/figtree.woff2') format('woff2'); font-weight: 300 900; font-style: normal; font-display: block; }
-@font-face { font-family: 'Hoot Text'; src: url('../assets/fonts/figtree-italic.woff2') format('woff2'); font-weight: 300 900; font-style: italic; font-display: block; }
-@font-face { font-family: 'Hoot Display'; src: url('../assets/fonts/fraunces-soft.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: block; }
-@font-face { font-family: 'Hoot Display'; src: url('../assets/fonts/fraunces-soft-italic.woff2') format('woff2'); font-weight: 100 900; font-style: italic; font-display: block; }
+@font-face { font-family: 'Hoot Text'; src: url('../assets/fonts/alegreya-sans-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: 'Hoot Text'; src: url('../assets/fonts/alegreya-sans-500.woff2') format('woff2'); font-weight: 500 600; font-style: normal; font-display: block; }
+@font-face { font-family: 'Hoot Text'; src: url('../assets/fonts/alegreya-sans-700.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: block; }
+@font-face { font-family: 'Hoot Text'; src: url('../assets/fonts/alegreya-sans-800.woff2') format('woff2'); font-weight: 800 900; font-style: normal; font-display: block; }
+@font-face { font-family: 'Hoot Text'; src: url('../assets/fonts/alegreya-sans-400i.woff2') format('woff2'); font-weight: 300 600; font-style: italic; font-display: block; }
+@font-face { font-family: 'Hoot Text'; src: url('../assets/fonts/alegreya-sans-700i.woff2') format('woff2'); font-weight: 700 900; font-style: italic; font-display: block; }
+@font-face { font-family: 'Hoot Display'; src: url('../assets/fonts/alegreya.woff2') format('woff2'); font-weight: 400 900; font-style: normal; font-display: block; }
+@font-face { font-family: 'Hoot Display'; src: url('../assets/fonts/alegreya-italic.woff2') format('woff2'); font-weight: 400 900; font-style: italic; font-display: block; }
 
 :root {
   --ink: #2e2b24;
