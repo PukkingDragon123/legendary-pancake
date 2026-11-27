@@ -92,7 +92,7 @@
 .lg-waretag .lg-wtag em.lock { color: #7c2530; }
 .lg-waretag.sold .lg-wtag, .lg-waretag.locked .lg-wtag { filter: drop-shadow(0 3px 0 rgba(30, 18, 8, 0.4)) saturate(0.6); }
 .lg-waretag.bundle .lg-wtag { padding-top: 12px; background: linear-gradient(var(--ribbon, #b0342c), var(--ribbon, #b0342c)) 0 0 / 100% 5px no-repeat, var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
-.lg-waretag.bundle .lg-wtag b { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: #3d2416; }
+.lg-waretag.bundle .lg-wtag b { max-width: 84px; font-family: var(--font-display); font-weight: 700; font-size: 14px; line-height: 1.05; color: #3d2416; white-space: normal; text-align: center; }
 .lg-waretag .lg-wtag:active { scale: 0.95; }
 
 /* ---------------------------------------------------------------- Barnaby's speech */
@@ -163,7 +163,7 @@
 .lg-now { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #2e2416; }
 .lg-ledger .lg-stampbtn, .lg-ledger .lg-note { grid-area: stamp; justify-self: center; }
 /* [shop16] a bundle: the parts listed down the page, each with its own price, then the set's */
-.lg-ledger.lg-bundle { grid-template-columns: 1fr; grid-template-areas: 'text' 'parts' 'prices' 'stamp'; padding-left: 14px; }
+.lg-card .lg-ledger.lg-bundle { grid-template-columns: 1fr; grid-template-areas: 'text' 'parts' 'prices' 'stamp'; padding-left: 14px; }
 .lg-bundle .lg-prices { grid-area: prices; justify-content: center; }
 .lg-bparts { grid-area: parts; list-style: none; margin: 2px 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; }
 .lg-bparts li { display: grid; grid-template-columns: 40px 1fr; grid-template-rows: auto auto; column-gap: 6px; align-items: center; min-width: 0; }
