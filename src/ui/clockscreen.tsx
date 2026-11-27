@@ -1,21 +1,20 @@
-// The Clock button's screen. [clock6] A 3D scene (src/world/stages/cuckoo.ts): a super big carved Black Forest
-// cuckoo clock on a wall in Pip's house, with your owl living behind its door (it pops out on the hour, when you tap
-// the door, to say hello and to present your numbers). The numbers are things in the room: carved tags hanging from
-// the clock (this week, per night, streak, asleep by), a row of little houses on the shelf (one per night, as tall
-// as you slept), the routine on a clipboard and a wall calendar. Tapping a thing flies the camera to it and pins a
-// paper card with its detail; the clipboard and the calendar slide in their 2D editors (below: the routine board
-// you drag into shape and the tear-off month calendar). The DOM adds only a Back control, a one-line title and the
-// cards. Without WebGL the painted wall (ClockWall2D) stands in.
+// The Clock button's screen. [clock15] A 3D scene (src/world/stages/cuckoo.ts, clockshop.ts): a super big carved Black
+// Forest cuckoo clock on the wall of Barnaby's workshop, Barnaby at his bench beside it, your owl living behind its
+// door (it pops out on the hour and when you tap the door). Its dial sets the night: drag the moon-tipped hand for
+// bedtime and the sun-tipped hand for waking. The ledger beside it (Clock3D, below) holds the night being set, the
+// week's nights, the alarm, the bedtime reminder, the clock's own settings and the week's numbers with the tear-off
+// month calendar. Without WebGL the painted wall (ClockWall2D: the routine board and the calendar) stands in.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { sound } from '../audio/sound.ts';
-import { setRoutine } from '../game/night.ts';
+import { setRoutine, syncReminders } from '../game/night.ts';
 import { copyNight, DAY_NAME, DAY_SHORT, nightDay, nightKey, planFor, setNight, sleepStats, stickerFor, toHHMM, toMin, WEEKNIGHTS } from '../game/routine.ts';
-import { dayKey, save } from '../game/store.ts';
+import { dayKey, edit, save } from '../game/store.ts';
 import type { SleepSession } from '../sleep/types.ts';
 import { Px } from './icons.tsx';
-import { fmtDur, fmtHM, tap, toast, useTick } from './kit.tsx';
-import { CuckooStage, type CuckooPrefs as Prefs3, type RoutineDay, type Sticker } from '../world/stages/cuckoo.ts';
+import { fmtDur, fmtHM, Tags, tap, toast, Toggle, useTick } from './kit.tsx';
+import { CuckooStage, fitSet, type CuckooPrefs as Prefs3, type SetHand } from '../world/stages/cuckoo.ts';
+import { ALARMS, SoundTiles } from './sleep.tsx';
 import { FINISHES as FINISHES3 } from '../world/stages/cuckookit.ts';
 import { NightReport } from './morning.tsx';
 import { Art, dtone, hash, tone } from './px/sleepart.ts';
@@ -393,31 +392,80 @@ function ClockWall2D() {
 }
 
 // ================================================================== the 3D clock (the Clock panel)
+//
+// [clock15] The big cuckoo clock hangs in Barnaby's workshop (world/stages/cuckoo.ts + clockshop.ts) and the dial
+// sets the night: drag the moon-tipped hand for bedtime and the sun-tipped hand for waking (a floating brass plate
+// reads the time as it ticks round in 5-minute steps; Barnaby looks up and nods when you let go). Beside the scene (a
+// carved walnut cabinet on a wide screen, a sheet on a phone) the ledger: the night being set and the week's nights
+// to choose from, then the alarm, the bedtime reminder, the clock itself (its cuckoo, ticking and wood) and the week's
+// numbers with the month calendar.
 
 const PREF3 = 'hoot-hollow:cuckoo3d';
+const HINT_KEY = 'hoot-hollow:clockhint';
 function loadPrefs3(): Prefs3 {
-  const d: Prefs3 = { finish: 'walnut', mute: false, wound: [Date.now() - 7 * 3600_000, Date.now() - 13 * 3600_000] };
+  const d: Prefs3 = { finish: 'walnut', mute: false, chime: true, wound: [Date.now() - 7 * 3600_000, Date.now() - 13 * 3600_000] };
   try { const p = { ...d, ...JSON.parse(localStorage.getItem(PREF3) ?? '{}') }; return p.wound?.length === 2 ? p : d; } catch { return d; }
 }
 const savePrefs3 = (p: Prefs3) => { try { localStorage.setItem(PREF3, JSON.stringify(p)); } catch { /* storage blocked */ } };
-const MONTHS3 = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const isWide = () => innerWidth >= innerHeight * 1.05 && innerWidth >= 640;
+const wrapMin = (m: number) => ((m % 1440) + 1440) % 1440;
+const hhmm = (m: number) => toHHMM(wrapMin(m));
+const ORDER3 = [1, 2, 3, 4, 5, 6, 0];
+const FINISH_HUE: Record<string, string> = { walnut: '#6a3b1f', oak: '#b67233', cherry: '#9c4425', linden: '#caa36e' };
+const FINISH_SHORT: Record<string, string> = { walnut: 'Walnut', oak: 'Oak', cherry: 'Cherry', linden: 'Linden' };
 
-interface Card { id: string; kicker: string; big: string; line: string; night?: SleepSession }
+type CkTab = 'alarm' | 'bedtime' | 'clock' | 'week';
+const TABS: { id: CkTab; label: string; icon: string }[] = [
+  { id: 'alarm', label: 'Alarm', icon: 'alarm' }, { id: 'bedtime', label: 'Bedtime', icon: 'candle' },
+  { id: 'clock', label: 'Clock', icon: 'clock' }, { id: 'week', label: 'Week', icon: 'stats' },
+];
+const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+const CHAT = [
+  'Oiled her works this morning. Keeps time like the river.',
+  'Pine cones for weights: an old Black Forest trick.',
+  'Tap the little door and your owl pops out to say hello.',
+  'A steady bedtime is the best tune-up there is.',
+  'Pull a pine cone down to wind her up.',
+];
+
+/** a time as big digits with a small AM/PM */
+function BigTime(p: { min: number; h12: boolean }) {
+  const t = fmtHM(hhmm(p.min), p.h12);
+  const [a, b] = t.split(/\s+/);
+  return <span class="ck-big">{a}{b ? <i class="ap">{b}</i> : null}</span>;
+}
 
 function Clock3D(p: { onFail: () => void }) {
   const sc = sceneRef.current!;
-  const s = save.value, h12 = s.settings.hour12;
+  const s = save.value, sp = s.sleep, h12 = s.settings.hour12;
   const stage = useRef<CuckooStage | null>(null);
-  const [card, setCard] = useState<Card | null>(null);
-  const [sheet, setSheet] = useState<null | 'routine' | 'calendar'>(null);
+  const tonight = nightDay(Date.now());
+  const [sel, setSel] = useState(tonight);
+  const [tab, setTab] = useState<CkTab>('alarm');
+  const [draft, setDraft] = useState<{ hand: SetHand; bed: number; wake: number } | null>(null);
   const [report, setReport] = useState<SleepSession | null>(null);
-  const [hint, setHint] = useState(true);
+  const [cal, setCal] = useState(false);
   const [wide, setWide] = useState(isWide());
+  const [open, setOpen] = useState(false);
+  const [zoom, setZoom] = useState<string>('home');
+  const [hint, setHint] = useState(() => { try { return !localStorage.getItem(HINT_KEY); } catch { return true; } });
+  const [chat, setChat] = useState<{ text: string; id: number } | null>(null);
+  const [prefs, setPrefs] = useState<Prefs3>(loadPrefs3);
+  const [leaving, setLeaving] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const readRef = useRef<HTMLDivElement>(null);
+  const hintRef = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
   useTick(30_000);
 
-  // ---- the numbers
+  // ---- the night being set
+  const plan = planFor(s.routine, sel);
+  const bedM = draft ? draft.bed : toMin(plan.bed), wakeM = draft ? draft.wake : toMin(plan.wake);
+  const durM = wrapMin(wakeM - bedM);
+  const isTonight = sel === tonight;
+
+  // ---- the numbers (the Week tab)
   const goal = useMemo(() => Math.round([0, 1, 2, 3, 4, 5, 6].reduce((a, d) => a + planFor(s.routine, d).min, 0) / 7 / 15) * 15, [s.routine]);
   const st = useMemo(() => sleepStats(s.nights, goal), [s.nights, goal]);
   const byDay = useMemo(() => {
@@ -426,31 +474,54 @@ function Clock3D(p: { onFail: () => void }) {
     return m;
   }, [s.nights]);
   const streak = Math.max(s.streak, st.run);
-  const bedTxt = st.avgBed === null ? '–' : fmtHM(toHHMM(st.avgBed), h12);
-  const tags = [
-    { id: 'week', label: 'This week', value: st.weekNights ? fmtDur(st.weekTotal) : '–' },
-    { id: 'avg', label: 'Per night', value: st.avgNight ? fmtDur(st.avgNight) : '–' },
-    { id: 'streak', label: 'Streak', value: `${streak} night${streak === 1 ? '' : 's'}` },
-    { id: 'bed', label: 'Asleep by', value: bedTxt },
-  ];
-  const today = dayKey();
   const week = useMemo(() => {
-    const out: { key: string; day: string; hours: number | null; text: string; goal: boolean; today: boolean; date: Date; n?: SleepSession }[] = [];
+    const out: { key: string; day: string; hours: number | null; goal: boolean; today: boolean; n?: SleepSession }[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i);
       const k = ymd(d), n = byDay.get(k), ms = n?.report?.asleep ?? null;
-      const hrs = ms === null ? null : ms / 3600_000;
-      const mins = hrs === null ? 0 : Math.round(hrs * 60);
-      const text = hrs === null ? '–' : hrs >= 10 ? `${Math.round(hrs)}h` : `${Math.floor(mins / 60)}h${String(mins % 60).padStart(2, '0')}`;
-      out.push({ key: k, day: DAY_SHORT[d.getDay()], hours: hrs, text, goal: ms !== null && ms >= goal * 60_000 * 0.92, today: i === 0, date: d, n });
+      out.push({ key: k, day: DAY_SHORT[d.getDay()], hours: ms === null ? null : ms / 3600_000, goal: ms !== null && ms >= goal * 60_000 * 0.92, today: i === 0, n });
     }
     return out;
-  }, [byDay, goal, today]);
-  const ORDER3 = [1, 2, 3, 4, 5, 6, 0];
-  const tonight = nightDay(Date.now());
+  }, [byDay, goal]);
 
-  // Pip's speech bubbles belong to the world view: none over the clock
+  // Pip's speech belongs to the world view: none over the clock
   useEffect(() => { bubble.value = null; return bubble.subscribe((b) => { if (b) bubble.value = null; }); }, []);
+
+  // ---- live handlers through refs (the stage calls them from its own loop)
+  const selRef = useRef(sel); selRef.current = sel;
+  const draftRef = useRef(draft); draftRef.current = draft;
+  const say = (text: string) => setChat({ text, id: Date.now() });
+  const commit = (day: number, hand: SetHand, min: number) => {
+    setRoutine(setNight(save.value.routine, day, hand === 'bed' ? { bed: hhmm(min) } : { wake: hhmm(min) }));
+  };
+  const onSet = (hand: SetHand, min: number, phase: 'start' | 'move' | 'end') => {
+    const pl = planFor(save.value.routine, selRef.current);
+    const cur = draftRef.current ?? { hand, bed: toMin(pl.bed), wake: toMin(pl.wake) };
+    const next = { ...cur, hand, [hand]: min };
+    if (phase === 'start') {
+      setHint(false);
+      try { localStorage.setItem(HINT_KEY, '1'); } catch { /* storage blocked */ }
+      setDraft(next);
+      return;
+    }
+    if (phase === 'move') { setDraft(next); return; }
+    commit(selRef.current, hand, min);
+    setDraft(null);
+    const d = wrapMin(next.wake - next.bed);
+    say(d < 6 * 60 ? 'A short night, that. Your owl will be yawning by noon!' : d > 9.5 * 60 ? 'A long, cosy night. Splendid!' : `${fmtDur(d * 60_000)} of sleep. Lovely, I've set her.`);
+  };
+  const onPick = (id: string) => {
+    const S = stage.current;
+    if (!S) return;
+    if (id === 'door' || id === 'owl') { if (id === 'owl') S.owl.poke(); S.cuckoo(1 + Math.floor(Math.random() * 3)); return; }
+    if (id === 'dial') { tap('clock_tick', 0.4); S.focus('dial'); setZoom('dial'); return; }
+    if (id === 'barnaby') { tap('wood_knock', 0.3); S.shop?.look(S.camera.position, 3); S.shop?.beaver.play('wave'); say(pick(CHAT)); return; }
+    if (id === 'pendulum') { setTick(S.prefs.mute); return; }
+    if (id.startsWith('weight:')) { S.windUp(+id.slice(7)); savePrefs3(S.prefs); setPrefs({ ...S.prefs }); toast('Wound up for the day', undefined, 1500); }
+  };
+  const setRef = useRef(onSet); setRef.current = onSet;
+  const pickRef = useRef(onPick); pickRef.current = onPick;
+
   // ---- the stage: built on open, shown at once (the panel's transition covers the cut)
   useEffect(() => {
     let st3: CuckooStage | null = null;
@@ -460,153 +531,260 @@ function Clock3D(p: { onFail: () => void }) {
       sc.setStage(st3);
     } catch (e) { console.warn('clock stage failed', e); p.onFail(); return; }
     stage.current = st3;
-    st3.onPick = (id) => onPick(id);
+    st3.onPick = (id) => pickRef.current(id);
+    st3.onSet = (h, m, ph) => setRef.current(h, m, ph);
+    const pl = planFor(save.value.routine, selRef.current);
+    st3.setPlan(toMin(pl.bed), toMin(pl.wake), pl.on, true);
     st3.intro();
-    const hideHint = setTimeout(() => setHint(false), 7000);
+    const hello = setTimeout(() => { if (isWide()) say('Evening! Turn the moon and the sun on the dial to set your night.'); }, 3400);
     const onResize = () => setWide(isWide());
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') backRef.current(); };
     addEventListener('resize', onResize);
     addEventListener('keydown', onKey);
-    if (import.meta.env.DEV) (window as unknown as { hhClock: unknown }).hhClock = { stage: st3, pick: (id: string) => onPick(id), back: () => backRef.current() };
+    // the floating plates follow their things in the scene
+    let raf = 0;
+    const place = (el: HTMLElement | null, id: string, dx: number, dy: number) => {
+      if (!el || !st3) return;
+      const a = st3.anchor(id), w = el.offsetWidth, h = el.offsetHeight;
+      const x = Math.max(8, Math.min(innerWidth - w - 8, a.x + dx - w / 2)), y = Math.max(8, Math.min(innerHeight - h - 8, a.y + dy - h));
+      el.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+      el.style.visibility = a.on ? 'visible' : 'hidden';
+    };
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      const S = st3!;
+      const d = draftRef.current, c = S.anchor('dial');
+      // the reading sits just outside the dial, beyond the tip of the hand being turned
+      const el = readRef.current;
+      if (d && el) {
+        const t = S.anchor('set:' + d.hand), dx = t.x - c.x, dy = t.y - c.y, len = Math.hypot(dx, dy) || 1;
+        const w = el.offsetWidth, h = el.offsetHeight, k = Math.abs(dx / len) * w / 2 + Math.abs(dy / len) * h / 2 + 18;
+        const x = Math.max(8, Math.min(innerWidth - w - 8, t.x + (dx / len) * k - w / 2)), y = Math.max(8, Math.min(innerHeight - h - 8, t.y + (dy / len) * k - h / 2));
+        el.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+        el.style.visibility = 'visible';
+      }
+      if (hintRef.current) {
+        // beside the dial on a wide screen, under it on a phone
+        const b = S.anchor('set:bed'), r = Math.hypot(b.x - c.x, b.y - c.y), hw = hintRef.current.offsetWidth;
+        if (isWide()) place(hintRef.current, 'dial', -(r + hw / 2 + 34), 18);
+        else place(hintRef.current, 'dial', 0, r + 64);
+      }
+      if (chatRef.current) place(chatRef.current, 'barnaby', 30, -46);
+    };
+    raf = requestAnimationFrame(loop);
+    if (import.meta.env.DEV) (window as unknown as { hhClock: unknown }).hhClock = { stage: st3, pick: (id: string) => pickRef.current(id), back: () => backRef.current(), set: (h: SetHand, m: number) => { setRef.current(h, m, 'start'); setRef.current(h, m, 'move'); }, open: (v: boolean) => setOpen(v), tab: (t: CkTab) => setTab(t), home: () => st3?.focus('home', true) };
     return () => {
-      clearTimeout(hideHint);
+      clearTimeout(hello);
+      cancelAnimationFrame(raf);
       removeEventListener('resize', onResize); removeEventListener('keydown', onKey);
       if (st3) savePrefs3(st3.prefs);
       if (sc.stage === st3) sc.setStage(null);
       stage.current = null;
     };
   }, []);
-  // ---- keep the things in the scene painted with the numbers
-  const tagKey = tags.map((t) => t.value).join('|');
-  useEffect(() => { void stage.current?.ready.then(() => stage.current?.setStats(tags)); }, [tagKey]);
-  const weekKey = week.map((w) => w.key + w.text).join('|');
-  useEffect(() => { void stage.current?.ready.then(() => stage.current?.setNights(week)); }, [weekKey]);
-  const routineKey = JSON.stringify(s.routine) + h12 + goal + tonight;
-  useEffect(() => {
-    const days: RoutineDay[] = ORDER3.map((d) => { const pl = planFor(s.routine, d); return { day: DAY_SHORT[d], bed: toMin(pl.bed), wake: toMin(pl.wake), on: pl.on, tonight: d === tonight }; });
-    void stage.current?.ready.then(() => stage.current?.setRoutine(days, fmtDur(goal * 60_000), h12));
-  }, [routineKey]);
-  const monthKey = `${new Date().getMonth()}|${byDay.size}`;
-  useEffect(() => {
-    const now = new Date(), y = now.getFullYear(), m = now.getMonth();
-    const marks: Record<number, Sticker> = {};
-    for (const [k, n] of byDay) { const [yy, mm, dd] = k.split('-').map(Number); if (yy === y && mm === m + 1) marks[dd] = stickerFor(n.report!.score); }
-    void stage.current?.ready.then(() => stage.current?.setMonth({ month: MONTHS3[m], year: y, lead: (new Date(y, m, 1).getDay() + 6) % 7, days: new Date(y, m + 1, 0).getDate(), today: now.getDate(), marks }));
-  }, [monthKey]);
 
-  // the clipboard (or the calendar) comes off the wall while its editor is open
-  useEffect(() => { stage.current?.lift(sheet); }, [sheet]);
-  // ---- taps on things in the scene
-  const latest = useRef({ tags, week, st, goal });
-  latest.current = { tags, week, st, goal };
-  function onPick(id: string) {
+  // the hands show the night being set
+  useEffect(() => { stage.current?.setPlan(toMin(plan.bed), toMin(plan.wake), plan.on); }, [plan.bed, plan.wake, plan.on, sel]);
+  // Barnaby's line fades after a while
+  useEffect(() => { if (!chat) return undefined; const t = setTimeout(() => setChat(null), 4200); return () => clearTimeout(t); }, [chat?.id]);
+  // the scene frames what the panel leaves free: a column on the right, or the sheet's height at the bottom
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return undefined;
+    const apply = () => {
+      const S = stage.current, r = el.getBoundingClientRect();
+      if (!S) return;
+      if (wide) S.setInset(Math.max(0, innerWidth - r.left + 8), 0);
+      else S.setInset(0, Math.max(0, innerHeight - r.top - 6), 62);
+    };
+    apply();
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(apply) : null;
+    ro?.observe(el);
+    const t = setTimeout(apply, 520); // (after the sheet's slide)
+    return () => { ro?.disconnect(); clearTimeout(t); };
+  }, [wide, open]);
+  // a phone with the sheet up looks at the dial; down, at the whole clock
+  useEffect(() => {
     const S = stage.current;
-    if (!S) return;
-    setHint(false);
-    const L = latest.current;
-    if (id.startsWith('tag:')) {
-      const k = id.slice(4), t = L.tags.find((x) => x.id === k)!;
-      const line = k === 'week' ? (L.st.weekNights ? `asleep in the last 7 days, over ${L.st.weekNights} night${L.st.weekNights === 1 ? '' : 's'}.` : 'Sleep with Pip tonight to start the count.')
-        : k === 'avg' ? (L.st.avgNight ? `asleep on an average night. Your goal: ${fmtDur(L.goal * 60_000)}.` : 'Your average shows up after your first night.')
-          : k === 'streak' ? `in a row with Pip. Your best: ${Math.max(save.value.bestStreak, L.st.bestRun)}.`
-            : (L.st.avgBed === null ? 'Your usual time to drift off shows up after a night.' : 'is when you usually drift off.');
-      tap('wood_knock', 0.35);
-      S.focus(id); S.present(id);
-      setSheet(null);
-      setCard({ id, kicker: t.label, big: t.value, line });
-      return;
-    }
-    if (id.startsWith('house:')) {
-      const w = L.week[+id.slice(6)];
-      if (!w) return;
-      tap('place_wood', 0.4);
-      S.focus(id); S.present(id);
-      setSheet(null);
-      const dateTxt = w.date.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' });
-      setCard(w.n?.report
-        ? { id, kicker: w.today ? `Last night · ${dateTxt}` : dateTxt, big: fmtDur(w.n.report.asleep), line: `asleep · score ${w.n.report.score}${w.goal ? ' · goal met' : ''}`, night: w.n }
-        : { id, kicker: dateTxt, big: 'No night', line: w.today ? 'Tonight, tap Sleep and Pip will keep count.' : 'Pip didn’t track this night.' });
-      return;
-    }
-    if (id === 'routine' || id === 'calendar') {
-      // the board comes off the wall and forward: on a phone it slides up from where it peeks in at the bottom,
-      // on a wide screen it comes forward where it hangs
-      tap('paper_flip', 0.5);
-      setCard(null);
-      S.focus('home');
-      setSheet(id);
-      return;
-    }
-    if (id === 'door' || id === 'owl') {
-      if (id === 'owl') S.owl.poke();
-      S.cuckoo(1 + Math.floor(Math.random() * 3));
-      return;
-    }
-    if (id === 'dial') {
-      tap('clock_tick', 0.4);
-      S.focus('dial');
-      setSheet(null);
-      const d = new Date();
-      setCard({ id, kicker: 'The time', big: fmtHM(`${d.getHours()}:${d.getMinutes()}`, save.value.settings.hour12), line: 'Pip pops out to cuckoo every hour. Tap the little door any time.' });
-      return;
-    }
-    if (id === 'crest') {
-      const i = (FINISHES3.findIndex((f) => f.id === S.prefs.finish) + 1) % FINISHES3.length;
-      S.setFinish(FINISHES3[i].id);
-      savePrefs3(S.prefs);
-      sound.play('wood_knock', { volume: 0.5 });
-      toast(FINISHES3[i].name, undefined, 1600);
-      return;
-    }
-    if (id === 'pendulum') {
-      S.prefs.mute = !S.prefs.mute;
-      savePrefs3(S.prefs);
-      sound.play('clock_tick', { volume: 0.4 });
-      toast(S.prefs.mute ? 'Shh: the clock ticks silently now' : 'Tick, tock', undefined, 1600);
-      return;
-    }
-    if (id.startsWith('weight:')) {
-      S.windUp(+id.slice(7));
-      savePrefs3(S.prefs);
-      toast('Wound up for the day', undefined, 1500);
-    }
-  }
+    if (!S || wide) return;
+    const want = open ? 'dial' : zoom;
+    if (S.current !== want && S.current !== 'intro') S.focus(want);
+  }, [open, wide]);
+
+  // ---- settings
+  const setSleep = (f: (x: typeof sp) => void) => { edit((x) => f(x.sleep)); syncReminders(); };
+  const setPref = (f: (x: Prefs3) => void) => {
+    const S = stage.current;
+    const np = { ...(S?.prefs ?? prefs) };
+    f(np);
+    if (S) Object.assign(S.prefs, np);
+    savePrefs3(np); setPrefs(np);
+  };
+  const setFinish = (id: string) => {
+    stage.current?.setFinish(id);
+    setPref((x) => { x.finish = id; });
+    sound.play('wood_knock', { volume: 0.45 });
+    stage.current?.focus(wide ? 'home' : stage.current.current);
+  };
+  const setTick = (on: boolean) => { setPref((x) => { x.mute = !on; }); sound.play('clock_tick', { volume: 0.4 }); };
+  const nudge = (hand: SetHand, by: number) => {
+    const pl = planFor(save.value.routine, sel);
+    const b = toMin(pl.bed), w = toMin(pl.wake);
+    const t = fitSet(hand, (hand === 'bed' ? b : w) + by, hand === 'bed' ? w : b);
+    if (t === (hand === 'bed' ? b : w)) { sound.play('ui_error', { volume: 0.25, gap: 100 }); return; }
+    sound.play('clock_tick', { volume: 0.3, rate: hand === 'bed' ? 1.18 : 1.32, gap: 30 });
+    commit(sel, hand, t);
+    stage.current?.glance();
+  };
+  const pickDay = (d: number) => { if (d === sel) return; tap('pencil', 0.35); setSel(d); };
+  const stamp = (days: number[], label: string, el: Element) => {
+    setRoutine(copyNight(save.value.routine, sel, days));
+    sound.play('stamp', { volume: 0.55 });
+    sparkleAt(el, 6);
+    toast(`${DAY_NAME[sel]} night copied to ${label}`, undefined, 1800);
+  };
+
   function back() {
     const S = stage.current;
-    if (sheet || card || (S && S.current !== 'home')) {
-      tap('ui_back', 0.4);
-      setSheet(null); setCard(null);
-      S?.focus('home');
-      return;
-    }
+    if (cal) { tap('ui_back', 0.4); setCal(false); return; }
+    if (!wide && open) { tap('ui_back', 0.4); setOpen(false); return; }
+    if (S && S.current !== 'home') { tap('ui_back', 0.4); S.focus('home'); setZoom('home'); return; }
     tap('ui_close', 0.5);
-    panel.value = null;
+    setLeaving(true);
+    setTimeout(() => { if (panel.value === 'clock') panel.value = null; }, 220);
   }
   const backRef = useRef(back);
   backRef.current = back;
-  const zoomed = !!card || !!sheet;
+
+  const smart = sp.smartMin && sp.alarmOn && plan.on ? fmtHM(hhmm(wakeM - sp.smartMin), h12) : '';
+  const windAt = fmtHM(hhmm(bedM - sp.windDownMin), h12);
+  const nextDay = DAY_SHORT[(sel + 1) % 7];
+
+  const ledger = (
+    <>
+      <Paper kind="cream" opts={{ edge: 0.25, edgeW: 6, seed: 21 }} class="ck-night">
+        <div class="ckn-head">
+          <span class="ckn-kicker">{isTonight ? `Tonight · ${DAY_NAME[sel]}` : `${DAY_NAME[sel]} night`}</span>
+          <span class={'ckn-stamp' + (plan.on ? '' : ' off')}>{plan.on ? 'Alarm set' : 'Free night'}</span>
+        </div>
+        <div class="ckn-times">
+          <div class={'ckn-t bed' + (draft?.hand === 'bed' ? ' live' : '')}>
+            <small><Px name="moon" size={30} />Bedtime</small>
+            <BigTime min={bedM} h12={h12} />
+            <span class="ckn-nudge"><button aria-label="Bedtime 5 minutes earlier" onClick={() => nudge('bed', -5)}>−</button><button aria-label="Bedtime 5 minutes later" onClick={() => nudge('bed', 5)}>+</button></span>
+          </div>
+          <div class="ckn-mid"><i /><b>{fmtDur(durM * 60_000)}</b><i /></div>
+          <div class={'ckn-t wake' + (draft?.hand === 'wake' ? ' live' : '')}>
+            <small><Px name="sun" size={30} />Wake · {nextDay}</small>
+            <BigTime min={wakeM} h12={h12} />
+            <span class="ckn-nudge"><button aria-label="Wake 5 minutes earlier" onClick={() => nudge('wake', -5)}>−</button><button aria-label="Wake 5 minutes later" onClick={() => nudge('wake', 5)}>+</button></span>
+          </div>
+        </div>
+        <p class="ckn-line">{plan.on ? (sp.alarmOn ? (smart ? <>Alarm from <b>{smart}</b> if you're sleeping lightly</> : <>Alarm at <b>{fmtHM(hhmm(wakeM), h12)}</b></>) : 'The alarm is off: Pip wakes you gently with the light') : 'No alarm or reminder this night: sleep in'}</p>
+      </Paper>
+      <div class="ck-week" role="tablist" aria-label="Which night to set">
+        {ORDER3.map((d) => {
+          const pl = planFor(s.routine, d), on = d === sel;
+          return (
+            <button role="tab" aria-selected={on} class={'ck-day' + (on ? ' on' : '') + (pl.on ? '' : ' free') + (d === tonight ? ' today' : '')} onClick={() => pickDay(d)} aria-label={`${DAY_NAME[d]} night: bed ${fmtHM(pl.bed, h12)}, wake ${fmtHM(pl.wake, h12)}`}>
+              <span class="dn">{DAY_SHORT[d].slice(0, 2)}</span>
+              <span class="bar"><i style={{ height: `${Math.max(14, Math.min(100, ((pl.min - 240) / 480) * 100))}%` }} /></span>
+              <span class="dh">{pl.on ? `${Math.floor(pl.min / 60)}h${pl.min % 60 ? String(pl.min % 60).padStart(2, '0') : ''}` : 'free'}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div class="ck-row ck-copy">
+        <button class="ck-check" onClick={() => { tap('pencil', 0.5); setRoutine(setNight(save.value.routine, sel, { on: !plan.on })); }} aria-pressed={plan.on}>
+          <span class={'box' + (plan.on ? ' on' : '')}>{plan.on && <svg viewBox="0 0 14 14" width="22" height="22"><path d="M1.5 7.5 L5.2 11 L12.5 2.5" fill="none" stroke="#2b3142" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" /></svg>}</span>
+          <span>Alarm &amp; reminder this night</span>
+        </button>
+        <span class="ck-stamps">
+          <button class="rstamp" onClick={(e) => stamp(WEEKNIGHTS, 'weeknights', e.currentTarget)}><Px name="calendar" size={30} /><span>Weeknights</span></button>
+          <button class="rstamp alt" onClick={(e) => stamp([0, 1, 2, 3, 4, 5, 6], 'every night', e.currentTarget)}><Px name="star" size={30} /><span>Every night</span></button>
+        </span>
+      </div>
+
+      <div class="tags ck-tabs" role="tablist">
+        {TABS.map((t) => <button role="tab" aria-selected={tab === t.id} class={'tag' + (tab === t.id ? ' on' : '')} onClick={() => { if (tab !== t.id) { tap('ui_tab', 0.45); setTab(t.id); } }}><Px name={t.icon} size={30} /><span>{t.label}</span></button>)}
+      </div>
+
+      <div class="ck-tab" key={tab}>
+        {tab === 'alarm' && <>
+          <div class="ck-set"><Px name="bell" size={30} /><span class="grow"><b>Morning alarm</b><small>{sp.alarmOn ? 'Swells in gently. Snooze or slide to wake.' : 'Off: no alarm on any night'}</small></span><Toggle on={sp.alarmOn} onChange={(v) => setSleep((x) => { x.alarmOn = v; })} label="Morning alarm" /></div>
+          {sp.alarmOn && <>
+            <SoundTiles value={sp.alarmSound} options={ALARMS} cols={4} onPick={(v) => setSleep((x) => { x.alarmSound = v; })} preview={(v) => { sound.preview(v, 4, 'alarm'); return 4000; }} />
+            <div class="ck-set col"><span><b>Smart wake</b><small>{sp.smartMin ? `Rings up to ${sp.smartMin} minutes early when you're in light sleep` : 'Rings at the exact time'}</small></span>
+              <Tags value={sp.smartMin} onChange={(v) => setSleep((x) => { x.smartMin = v; })} options={[{ v: 0, label: 'Exact' }, { v: 10, label: '10m' }, { v: 20, label: '20m' }, { v: 30, label: '30m' }]} /></div>
+          </>}
+        </>}
+        {tab === 'bedtime' && <>
+          <div class="ck-set"><Px name="candle" size={30} /><span class="grow"><b>Bedtime reminder</b><small>{sp.reminders ? `A nudge at ${windAt} to wind down, and at bedtime` : 'Off'}</small></span><Toggle on={sp.reminders} onChange={(v) => setSleep((x) => { x.reminders = v; })} label="Bedtime reminder" /></div>
+          {sp.reminders && <div class="ck-set col"><span><b>Wind-down</b><small>How long before bed the first nudge comes</small></span>
+            <Tags value={sp.windDownMin} onChange={(v) => setSleep((x) => { x.windDownMin = v; })} options={[{ v: 15, label: '15m' }, { v: 30, label: '30m' }, { v: 45, label: '45m' }, { v: 60, label: '1h' }]} /></div>}
+          <div class="ck-set"><Px name="mic" size={30} /><span class="grow"><b>Track my sleep</b><small>Pip listens with the microphone. It all stays on this device.</small></span><Toggle on={sp.mic} onChange={(v) => setSleep((x) => { x.mic = v; })} label="Sleep tracking" /></div>
+        </>}
+        {tab === 'clock' && <>
+          <div class="ck-set"><Px name="nest" size={30} /><span class="grow"><b>Cuckoo on the hour</b><small>Your owl pops out to call the hours</small></span><Toggle on={prefs.chime !== false} onChange={(v) => { setPref((x) => { x.chime = v; }); if (v) stage.current?.cuckoo(1); }} label="Cuckoo on the hour" /></div>
+          <div class="ck-set"><Px name="clock" size={30} /><span class="grow"><b>Ticking</b><small>The pendulum's soft tick</small></span><Toggle on={!prefs.mute} onChange={(v) => setTick(v)} label="Ticking" /></div>
+          <div class="ck-set col"><span><b>Wood</b><small>{FINISHES3.find((f) => f.id === prefs.finish)?.name ?? ''}</small></span>
+            <div class="ck-woods">{FINISHES3.map((f) => <button class={'ck-wood' + (prefs.finish === f.id ? ' on' : '')} style={{ '--wood': FINISH_HUE[f.id] ?? '#8a5a2a' } as JSX.CSSProperties} aria-label={f.name} aria-pressed={prefs.finish === f.id} onClick={() => { if (prefs.finish !== f.id) setFinish(f.id); }}><i /><span>{FINISH_SHORT[f.id] ?? f.name}</span></button>)}</div>
+          </div>
+          <div class="ck-btns">
+            <button class="btn oak sm" onClick={() => { const S = stage.current; if (!S) return; S.windUp(0); setTimeout(() => S.windUp(1), 420); savePrefs3(S.prefs); setPrefs({ ...S.prefs }); toast('Both weights wound up', undefined, 1500); }}>Wind the weights</button>
+            <button class="btn oak sm" onClick={() => { tap('ui_tap', 0.3); stage.current?.cuckoo(1 + Math.floor(Math.random() * 3)); }}>Call the cuckoo</button>
+          </div>
+        </>}
+        {tab === 'week' && <>
+          <div class="ck-stats">
+            {[
+              { k: 'This week', v: st.weekNights ? fmtDur(st.weekTotal) : '–', s: `${st.weekNights} night${st.weekNights === 1 ? '' : 's'}` },
+              { k: 'Per night', v: st.avgNight ? fmtDur(st.avgNight) : '–', s: `goal ${fmtDur(goal * 60_000)}` },
+              { k: 'Streak', v: `${streak}`, s: `best ${Math.max(s.bestStreak, st.bestRun)}` },
+              { k: 'Asleep by', v: st.avgBed === null ? '–' : fmtHM(toHHMM(st.avgBed), h12), s: 'on average' },
+            ].map((x, i) => <Paper kind="cream" opts={{ edge: 0.2, edgeW: 5, seed: 30 + i }} class="ck-stat"><small>{x.k}</small><b>{x.v}</b><em>{x.s}</em></Paper>)}
+          </div>
+          {week.some((w) => w.n) ? <div class="ck-bars" aria-label="The last seven nights">
+            <i class="goal" style={{ bottom: `${Math.min(100, (goal / 60 / 10) * 100)}%` }}><span>goal</span></i>
+            {week.map((w) => (
+              <button class={'ck-bar' + (w.n ? ' has' : '') + (w.goal ? ' met' : '') + (w.today ? ' today' : '')} disabled={!w.n} onClick={() => { if (w.n) { tap('paper_flip', 0.5); setReport(w.n); } }} aria-label={w.n ? `${w.day}: ${fmtDur(w.n.report!.asleep)}` : `${w.day}: no night tracked`}>
+                <span class="col"><i style={{ height: `${w.hours === null ? 0 : Math.max(6, Math.min(100, (w.hours / 10) * 100))}%` }} /></span>
+                <small>{w.day.slice(0, 2)}</small>
+              </button>
+            ))}
+          </div> : <p class="ck-note">No nights this week yet. Sleep with Pip tonight and they show up here, one bar a night.</p>}
+          <div class="ck-btns"><button class="btn oak sm" onClick={() => { tap('paper_flip', 0.5); setCal(true); }}><Px name="calendar" size={30} />Month calendar</button></div>
+        </>}
+      </div>
+    </>
+  );
+
   return (
-    <div class={'ck' + (wide ? ' wide' : '')} role="dialog" aria-label="Clock">
-      <button class="ck-back hh-wood-sm" aria-label={zoomed ? 'Back to the clock' : 'Back to the hollow'} onClick={back}><Px name="arrow_left" size={30} /><span>Back</span></button>
-      <div class={'ck-title hh-wood-sm' + (zoomed ? ' away' : '')}><span>Sleep Clock</span></div>
-      {hint && !zoomed && <div class="ck-hint">Tap anything to look closer</div>}
-      {card && (
-        <Paper kind="cream" class="ck-card" key={card.id} opts={{ seed: card.id.length * 7 }}>
-          <i class="ck-pin" />
-          <small>{card.kicker}</small>
-          <b>{card.big}</b>
-          <span>{card.line}</span>
-          {card.night?.report && <button class="ck-link" onClick={() => { tap('paper_flip', 0.5); setReport(card.night!); }}>Read the night’s report ›</button>}
-        </Paper>
+    <div class={'ck' + (wide ? ' wide' : ' phone') + (open ? ' open' : '') + (leaving ? ' leaving' : '')} role="dialog" aria-label="Sleep clock">
+      <button class="ck-back" aria-label={zoom !== 'home' || open ? 'Back to the clock' : 'Back to the hollow'} onClick={back}><Px name="arrow_left" size={30} /><span>Back</span></button>
+      {!wide && !open && <div class="ck-title"><span>Sleep Clock</span></div>}
+      {hint && !draft && !open && <div class="ck-hint" ref={hintRef}><Px name="cursor_hand" size={30} /><span>Drag the <b>moon</b> and the <b>sun</b> round the dial</span></div>}
+      {draft && (
+        <div class={'ck-read ' + draft.hand} ref={readRef}>
+          <small>{draft.hand === 'bed' ? 'Bedtime' : `Wake · ${nextDay}`}</small>
+          <BigTime min={draft[draft.hand]} h12={h12} />
+          <em>{fmtDur(durM * 60_000)} of sleep</em>
+        </div>
       )}
-      {sheet === 'routine' && <div class="ck-sheet left" key="r"><RoutineBoard /></div>}
-      {sheet === 'calendar' && <div class="ck-sheet ck-cal right" key="c"><MonthCalendar onOpen={(n) => setReport(n)} /></div>}
+      {chat && <div class="ck-chat" ref={chatRef} key={chat.id}><b>Barnaby</b><span>{chat.text}</span></div>}
+      <aside class="ck-panel hh-wood-dark" ref={panelRef}>
+        {wide ? <div class="ck-sign"><span>Sleep Clock</span></div> : (
+          <button class="ck-grab" onClick={() => { tap(open ? 'ui_close' : 'ui_open', 0.4); setOpen(!open); }} aria-expanded={open} aria-label={open ? 'Fewer settings' : 'More settings'}><i /><span>{open ? 'Done' : 'Alarm, reminders & more'}</span></button>
+        )}
+        <div class="ck-pscroll">{ledger}</div>
+      </aside>
+      {cal && <div class="ck-modal" onClick={(e) => { if (e.target === e.currentTarget) { tap('ui_close', 0.4); setCal(false); } }}><div class="ck-calwrap"><MonthCalendar onOpen={(n) => setReport(n)} /><button class="btn oak sm ck-calx" onClick={() => { tap('ui_close', 0.4); setCal(false); }}>Close</button></div></div>}
       {report && report.report && <div class="cs-modal"><NightReport s={report} onClose={() => setReport(null)} /></div>}
     </div>
   );
 }
 
-/** The Clock panel: the 3D cuckoo clock stage, or the painted wall if 3D isn't available. */
+/** The Clock panel: the 3D cuckoo clock in Barnaby's workshop, or the painted wall if 3D isn't available. */
 export function ClockScreen() {
   const [flat, setFlat] = useState(() => !sceneRef.current);
   return flat ? <ClockWall2D /> : <Clock3D onFail={() => setFlat(true)} />;
