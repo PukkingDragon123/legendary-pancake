@@ -1,6 +1,7 @@
 // Barnaby's Lodge Store (the beaver's general store): three discounted daily deals rolled from the day's date, a free daily
-// gift, acorn piles bought with moon gems, moon gem packs (a demo store here), and wishes on the
-// weekly series. Rules that only read a save are pure; the actions change the save via `edit`.
+// gift, the handmade shelf and two themed bundles that change every week, portrait frames, acorn piles bought with moon
+// gems, moon gem packs (a demo store here), and wishes on the weekly series at the Lucky Barrel. Rules that only read a
+// save are pure; the actions change the save via `edit`.
 import { ALL_ITEMS, FINISH, ITEMS } from '../assets/registry.ts';
 import { rng as seededRng, strSeed } from '../gfx/noise.ts';
 import { PIECE, PIECES } from '../owl/outfits.ts';
@@ -148,6 +149,117 @@ export function buyDeal(d: Deal): string | null {
     grant(x, d);
     x.shop.bought.push(d.key);
   });
+  return null;
+}
+
+// ------------------------------------------------------------------ [shop16] the handmade shelf
+
+/** The ISO week a date falls in, as `2026-W48` (the handmade shelf and the bundles change on Mondays). */
+export function weekKey(t = Date.now()): string {
+  const d = new Date(t), th = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 3 - ((d.getDay() + 6) % 7)); // that week's Thursday
+  return `${th.getFullYear()}-W${String(isoWeek(t)).padStart(2, '0')}`;
+}
+
+/** Yard and porch pieces Barnaby makes himself: the lodge is the only place that sells them (Pip may still find some on
+ * a trip). Four of them are on the shelf each week. */
+export const LODGE_ONLY = ['bench', 'picnic', 'lanternpost', 'stonelantern', 'campfire', 'mailbox', 'well', 'birdhouse'];
+/** Wooden pieces from the catalogue that he also turns out at his bench; two a week, a little cheaper than in the
+ * Build catalogue ("straight off the bench"). */
+export const BENCH_MADE = ['rocking_chair', 'toy_chest', 'log_table', 'bobbin_side_table', 'cubby_shelf', 'rocking_horse', 'window_seat', 'chair', 'stool', 'hat_rack', 'bracket_shelf', 'bookshelf', 'nightstand', 'toad_stool'];
+export const BENCH_OFF = 10;
+export interface HandmadeOffer {
+  slot: number; id: string; name: string; blurb: string;
+  /** the catalogue price and the shelf's (lodge-only pieces sell at the catalogue price) */
+  base: number; price: number; off: number;
+  /** sold only here */
+  lodgeOnly: boolean;
+  /** the level the piece needs (0 when the player has it) */
+  locked: number;
+  key: string;
+}
+const madeKey = (id: string) => `made:${id}`;
+const coinItem = (id: string) => { const it = ITEMS[id]; return it && !it.series && !(it.gems ?? 0) && it.price > 0 ? it : null; };
+/** This week's handmade shelf: four lodge-only pieces and two bench-made ones (stable for the week). Each piece can be
+ * bought once a day (he makes one a day); `lv` locks pieces the player's level hasn't reached. */
+export function handmadeShelf(week = weekKey(), lv = 99): HandmadeOffer[] {
+  const r = seededRng(strSeed('handmade:' + week));
+  const only = shuffled(LODGE_ONLY.filter(coinItem), r).slice(0, 4);
+  const bench = shuffled(BENCH_MADE.filter(coinItem), r).slice(0, 2);
+  // the top shelf takes the four lodge-only pieces, the lower one the bench-made pair either side of the bundles
+  return [...only, ...bench].map((id, slot) => {
+    const it = ITEMS[id], lodgeOnly = slot < 4, off = lodgeOnly ? 0 : BENCH_OFF;
+    const price = lodgeOnly ? it.price : Math.max(5, Math.round((it.price * (1 - off / 100)) / 5) * 5);
+    return { slot, id, name: it.name, blurb: it.blurb, base: it.price, price, off, lodgeOnly, locked: (it.level ?? 0) > lv ? it.level ?? 0 : 0, key: madeKey(id) };
+  });
+}
+/** Buy a piece off the handmade shelf (it goes to the stored furniture). Returns an error, or null when it went through. */
+export function buyHandmade(o: HandmadeOffer): string | null {
+  const s = save.value;
+  if (isSold(s, o.key)) return 'Sold out until tomorrow';
+  if (o.locked) return `Reach level ${o.locked} first`;
+  if (s.coins < o.price) return 'Not enough acorns';
+  edit((x) => { rollDay(x); x.coins -= o.price; grant(x, { kind: 'item', id: o.id }); x.shop.bought.push(o.key); });
+  return null;
+}
+
+// ------------------------------------------------------------------ [shop16] bundles
+
+export interface BundlePart { kind: 'item' | 'piece'; id: string }
+export interface BundleDef { id: string; name: string; blurb: string; parts: BundlePart[]; /** the parcel's ribbon */ ribbon: number }
+const I = (id: string): BundlePart => ({ kind: 'item', id }), O = (id: string): BundlePart => ({ kind: 'piece', id });
+/** Themed bundles Barnaby wraps up: three pieces of furniture and an outfit piece that go together. */
+export const BUNDLES: BundleDef[] = [
+  { id: 'reading', name: 'Reading Nook', blurb: 'A squashy seat, a lamp and a pile of books. Spectacles for the small print.', parts: [I('beanbag'), I('mushroomlamp'), I('books'), O('glasses')], ribbon: 0x3f6f4a },
+  { id: 'bedtime', name: 'Bedtime Story', blurb: 'Everything for a long, slow wind-down: a moon to read by and a rug for cold toes.', parts: [I('moonlamp'), I('reading_pile'), I('sheepskin_rug'), O('pajamas')], ribbon: 0x3a4f8c },
+  { id: 'campfire', name: 'Campfire Night', blurb: 'A fire pit from the lodge, a stool to sit on and a lantern for the walk home.', parts: [I('campfire'), I('stool'), I('iron_lantern'), O('scarf')], ribbon: 0xb04a2a },
+  { id: 'tea', name: 'Afternoon Tea', blurb: 'A table for two, the good china and a chair. A bowtie, because it is that kind of tea.', parts: [I('teatable'), I('rose_tea_set'), I('chair'), O('bowtie')], ribbon: 0xc0607a },
+  { id: 'painter', name: 'Painter\'s Corner', blurb: 'An easel, a few vases to paint and a wall of pictures to hang them on.', parts: [I('easel'), I('vase_trio'), I('photo_frames'), O('beret')], ribbon: 0x8a4a9a },
+  { id: 'garden', name: 'Garden Party', blurb: 'A picnic blanket and a birdhouse from the lodge, tulips, and daisies to wear.', parts: [I('picnic'), I('birdhouse'), I('potflowers'), O('flowercrown')], ribbon: 0xd08a2a },
+  { id: 'stargazer', name: 'Stargazer', blurb: 'A telescope, a jar of fireflies and paper stars. A monocle for the faint ones.', parts: [I('telescope'), I('firefly_jar'), I('star_garland'), O('monocle')], ribbon: 0x23305e },
+  { id: 'explorer', name: 'Little Explorer', blurb: 'A globe to plan by, a chest for the finds and a peg rail for the hats. Backpack included.', parts: [I('globe'), I('chest'), I('hat_rack'), O('backpack')], ribbon: 0x5a6b2e },
+];
+/** percent off the parts' catalogue prices */
+export const BUNDLE_OFF = 25;
+export interface BundleOffer {
+  slot: number; def: BundleDef;
+  parts: (BundlePart & { name: string; base: number; owned: boolean })[];
+  /** the catalogue price of the parts the player would get (outfit pieces already owned are left out) */
+  base: number; price: number;
+  /** the highest level any part needs, when the player is below it */
+  locked: number;
+  /** every part is a cosmetic the player already has (nothing to give) */
+  complete: boolean;
+  key: string;
+}
+const bundleKey = (id: string) => `bundle:${id}`;
+const partPrice = (p: BundlePart) => (p.kind === 'item' ? ITEMS[p.id]?.price ?? 0 : PIECE[p.id]?.price ?? 0);
+/** Price a bundle for this save: the parts' catalogue prices less 25%, outfit pieces already owned taken off. */
+export function bundleOffer(s: Save, def: BundleDef, slot = 0, lv = 99): BundleOffer {
+  const parts = def.parts.map((p) => ({ ...p, name: nameOf(p.kind, p.id), base: partPrice(p), owned: p.kind === 'piece' && ownsEntry(s, p) }));
+  const base = parts.reduce((a, p) => a + (p.owned ? 0 : p.base), 0);
+  const need = Math.max(0, ...def.parts.map((p) => (p.kind === 'item' ? ITEMS[p.id]?.level ?? 0 : 0)));
+  return { slot, def, parts, base, price: Math.max(5, Math.round((base * (1 - BUNDLE_OFF / 100)) / 5) * 5), locked: need > lv ? need : 0, complete: base === 0, key: bundleKey(def.id) };
+}
+/** This week's two bundles (stable for the week). */
+export function weeklyBundles(s: Save, week = weekKey(), lv = 99): BundleOffer[] {
+  const r = seededRng(strSeed('bundles:' + week));
+  return shuffled(BUNDLES, r).slice(0, 2).map((d, i) => bundleOffer(s, d, i, lv));
+}
+/** Give a bought bundle's parts to the save (furniture stacks; outfit pieces already owned are skipped) and pay. */
+export function applyBundle(x: Save, o: BundleOffer) {
+  rollDay(x);
+  x.coins -= o.price;
+  for (const p of o.def.parts) if (p.kind === 'item' || !ownsEntry(x, p)) grant(x, p);
+  x.shop.bought.push(o.key);
+}
+/** Buy a bundle (once a day each). Returns an error, or null when it went through. */
+export function buyBundle(o: BundleOffer): string | null {
+  const s = save.value;
+  if (isSold(s, o.key)) return 'Sold out until tomorrow';
+  if (o.complete) return 'You have all of this already';
+  if (o.locked) return `Reach level ${o.locked} first`;
+  if (s.coins < o.price) return 'Not enough acorns';
+  edit((x) => applyBundle(x, o));
   return null;
 }
 

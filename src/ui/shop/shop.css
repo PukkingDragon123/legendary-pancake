@@ -82,10 +82,18 @@
 @keyframes lgBob { 50% { translate: -50% -3px; } }
 .lg-ktag.small { position: relative; translate: none; top: 0; animation: none; padding: 4px 8px 2px; font-size: var(--t1); }
 
-/* cloth ribbons under the banners */
-.lg-bannertag .lg-cloth { position: absolute; left: 0; top: 4px; translate: -50% 0; display: flex; flex-direction: column; align-items: center; min-width: 118px; padding: 2px 6px 4px; color: #fff4dc; text-shadow: 0 2px 1.8px rgba(40, 10, 10, 0.5); animation: lgSwing 5s ease-in-out infinite; transform-origin: 50% 0; filter: drop-shadow(0 3px 0 rgba(30, 18, 8, 0.45)); }
-.lg-cloth span { font-family: var(--font-display); font-size: var(--t1); line-height: 1; white-space: nowrap; }
-.lg-cloth small { font-size: var(--t1); line-height: 1.25; opacity: 0.9; white-space: nowrap; }
+/* [shop16] paper tags tied to the handmade shelf's lip: the price, and a pencilled note under it; the bundles' tags
+   carry a stripe of their ribbon along the top */
+.lg-waretag .lg-wtag { position: absolute; left: 0; top: 8px; translate: -50% 0; transform-origin: 50% 0; display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 64px; padding: 9px 6px 4px; background: var(--lg-pat-linen) 0 0 / 64px 64px; background-clip: padding-box; line-height: 1; white-space: nowrap; color: #2e2416; animation: lgSwing 4.1s ease-in-out infinite, lgTagIn 0.5s var(--pop) both; filter: drop-shadow(0 3px 0 rgba(30, 18, 8, 0.4)); }
+.lg-waretag .lg-wtag .lg-cost { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); }
+.lg-waretag .lg-wtag small { font-size: 13px; line-height: 1.1; color: #6b5844; font-style: italic; }
+.lg-waretag .lg-wtag small.off { color: #b0342c; font-style: normal; font-weight: 700; }
+.lg-waretag .lg-wtag em { font-style: normal; font-family: var(--font-display); font-weight: 700; font-size: var(--t1); color: #b0342c; display: inline-flex; align-items: center; gap: 2px; }
+.lg-waretag .lg-wtag em.lock { color: #7c2530; }
+.lg-waretag.sold .lg-wtag, .lg-waretag.locked .lg-wtag { filter: drop-shadow(0 3px 0 rgba(30, 18, 8, 0.4)) saturate(0.6); }
+.lg-waretag.bundle .lg-wtag { padding-top: 12px; background: linear-gradient(var(--ribbon, #b0342c), var(--ribbon, #b0342c)) 0 0 / 100% 5px no-repeat, var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
+.lg-waretag.bundle .lg-wtag b { max-width: 84px; font-family: var(--font-display); font-weight: 700; font-size: 14px; line-height: 1.05; color: #3d2416; white-space: normal; text-align: center; }
+.lg-waretag .lg-wtag:active { scale: 0.95; }
 
 /* ---------------------------------------------------------------- Barnaby's speech */
 .lg-bubble { position: absolute; z-index: 7; max-width: min(280px, calc(100vw - 24px)); padding: 12px 6px 4px; font-size: var(--t1); line-height: 1.25; color: #2e2416; background: #fbf4e2; background-clip: padding-box; pointer-events: none; animation: lgBubbleIn 0.35s var(--pop); filter: drop-shadow(0 4px 0 rgba(30, 18, 8, 0.4)); }
@@ -109,7 +117,12 @@
 .lg-navsign.on span { text-decoration: underline 2px #ffe39a; text-underline-offset: 3px; }
 .lg-navhook { position: absolute; left: 50%; top: -14px; width: 4px; height: 14px; margin-left: -2px; background: #6a5e50; box-shadow: inset 1px 0 1px #b0a08a; }
 .lg-shop.top .lg-navsign { min-width: 0; flex: 1; font-size: var(--t1); padding: 0 2px; }
-.lg-shop.top .lg-nav { width: calc(100% - 20px); max-width: 420px; }
+.lg-shop.top .lg-nav { width: calc(100% - 20px); max-width: 460px; }
+/* [shop16] five signs on a phone: the icon over the word */
+@media (max-width: 520px) {
+  .lg-shop.top .lg-nav { gap: 4px; width: calc(100% - 12px); }
+  .lg-shop.top .lg-navsign { flex-direction: column; gap: 1px; padding: 4px 0 5px; font-size: 14px; line-height: 1; }
+}
 /* the pinned note: what this part of the store is, and what to do */
 .lg-hint { position: absolute; z-index: 4; left: 12px; top: calc(62px + var(--safe-t)); display: flex; flex-direction: column; gap: 1px; max-width: 220px; padding: 2px 4px 0; background: var(--lg-pat-linen) 0 0 / 64px 64px; background-clip: padding-box; color: #3d2416; rotate: -1.5deg; animation: lgHintIn 0.5s var(--pop) both 0.3s; pointer-events: none; filter: drop-shadow(0 3px 0 rgba(20, 10, 6, 0.35)); }
 .lg-hint b { font-family: var(--font-display); font-weight: 700; font-size: var(--t1); line-height: 1; color: #8e241e; }
@@ -117,10 +130,9 @@
 .lg-hint-time { display: inline-flex; align-items: center; gap: 3px; font-size: var(--t1) !important; color: #6b5844; }
 .lg-hint .lg-pin { top: -10px; }
 @keyframes lgHintIn { from { opacity: 0; scale: 0.6; rotate: -8deg; } }
-/* phone: low in the middle, over the floorboards; desktop: bottom right, clear of the banners and the signs */
+/* phone: low in the middle, over the floorboards; desktop: bottom right, clear of the shelves and the signs */
 .lg-shop.top .lg-hint { top: auto; left: 50%; bottom: calc(78px + var(--safe-b)); translate: -50% 0; max-width: 320px; width: max-content; align-items: center; text-align: center; }
 .lg-shop.side .lg-hint { top: auto; left: auto; right: 18px; bottom: calc(18px + var(--safe-b)); max-width: 260px; }
-.lg-cloth-prize { display: inline-flex; align-items: center; gap: 2px; color: #ffe39a; }
 .lg-bubble.notail::after, .lg-bubble.notail::before { display: none; }
 .lg-gnote { margin: 0 8px; padding: 0 4px; font-size: var(--t1); line-height: 1.25; text-align: center; color: #3d2416; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; }
 .lg-timer { display: inline-flex; align-items: center; gap: 3px; padding: 0 3px; font-size: var(--t1); color: #f1d39a; white-space: nowrap; }
@@ -150,6 +162,19 @@
 .lg-prices { display: flex; align-items: baseline; gap: 10px; margin-top: 2px; }
 .lg-now { font-family: var(--font-display); font-weight: 700; font-size: var(--t2); color: #2e2416; }
 .lg-ledger .lg-stampbtn, .lg-ledger .lg-note { grid-area: stamp; justify-self: center; }
+/* [shop16] a bundle: the parts listed down the page, each with its own price, then the set's */
+.lg-card .lg-ledger.lg-bundle { grid-template-columns: 1fr; grid-template-areas: 'text' 'parts' 'prices' 'stamp'; padding-left: 14px; }
+.lg-bundle .lg-prices { grid-area: prices; justify-content: center; }
+.lg-bparts { grid-area: parts; list-style: none; margin: 2px 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; }
+.lg-bparts li { display: grid; grid-template-columns: 40px 1fr; grid-template-rows: auto auto; column-gap: 6px; align-items: center; min-width: 0; }
+.lg-bparts li.own { opacity: 0.6; }
+.lg-bpart-art { grid-row: span 2; width: 40px; height: 40px; display: grid; place-items: center; }
+.lg-bpart-art img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 2px 0 rgba(30, 18, 8, 0.25)); }
+.lg-bpart-name { font-size: 14px; line-height: 1.1; color: #3d2a1c; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.lg-bpart-p { font-size: 14px; line-height: 1; color: #6b5844; }
+.lg-bpart-p em { font-style: italic; color: #3f6b34; }
+.lg-prize-bundle { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; width: 100%; height: 100%; }
+.lg-prize-bundle img { width: 100%; height: 100%; object-fit: contain; }
 /* the gift tag */
 .lg-gtag { margin: 6px; padding: 18px 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--lg-pat-kraft) 0 0 / 64px 64px; background-clip: padding-box; text-align: center; }
 .lg-hole.big { top: 6px; width: 10px; height: 10px; margin-left: -5px; }
@@ -334,7 +359,7 @@
 .lg-prize-sub { font-size: var(--t1); color: #6b5844; }
 
 @media (prefers-reduced-motion: reduce) {
-  .lg-ptag, .lg-ktag, .lg-cloth, .lg-navsign, .lg-stampbtn, .lg-rays, .lg-mrays { animation: none !important; }
+  .lg-ptag, .lg-ktag, .lg-wtag, .lg-navsign, .lg-stampbtn, .lg-rays, .lg-mrays { animation: none !important; }
 }
 
 /* [ui5] the frame wall: a board of portrait frames hanging on pegs, a paper price tag on each */

@@ -1,4 +1,4 @@
-// Limited series for the banners over the Lucky Barrel in Barnaby's lodge store. This file is the contract
+// Limited series for the Lucky Barrel in Barnaby's lodge store. This file is the contract
 // between content and shop: every id here must exist in its registry (furniture / finishes in
 // src/assets/seasonal.ts, outfit pieces in src/owl/outfits.ts, skins in src/owl/skins.ts).
 export type Stars = 3 | 4 | 5;
@@ -8,10 +8,10 @@ export interface Series {
   id: string;
   name: string;
   tagline: string;
-  /** banner art direction for the shop: palette (light, mid, dark, accent) and motif */
+  /** poster art direction for the wish board: palette (light, mid, dark, accent) and motif */
   colors: [string, string, string, string];
   motif: 'snow' | 'stars';
-  /** ISO week parity this series is on the shelf (0 or 1), so they alternate weekly; 'always' for the standard banner */
+  /** ISO week parity this series is in the barrel (0 or 1), so they alternate weekly; 'always' for a standing series */
   week: 0 | 1 | 'always';
   pool: SeriesEntry[];
 }

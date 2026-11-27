@@ -86,8 +86,11 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **A visual interview**: one-line questions answered by tapping hand-painted 3D objects (drinks, cassette tapes that
   slide into a recorder and play, a pillow tower, sheep over a stile), a floating fountain pen that writes, ticks and
   signs, and a pretend phone that shows the bedtime phone lock (also in the Sleep panel).
-- **Barnaby's Lodge Store**: a beaver shopkeeper in a log-cabin general store; price tags, packs, banners and
-  the Lucky Barrel wishes are all physical objects.
+- **Barnaby's Lodge Store**: a beaver shopkeeper in a log-cabin general store; price tags, packs, the handmade
+  shelf and the Lucky Barrel wishes are all physical objects. Besides three daily deals, frames and the stash, a
+  handmade shelf over the barrel holds the week's porch pieces sold only at the lodge (bench, picnic blanket, lantern
+  post, stone lantern, campfire, mailbox, wishing well, birdhouse), two bench-made pieces a little under catalogue
+  price, and two wrapped bundles (three pieces of furniture and an outfit piece, 25% off the set); one of each a day.
 - **The Earth**: NASA imagery with city lights, clouds, relief and a real-time terminator; fly down to 20 real
   places with photos, facts and their souvenirs.
 - **UI as objects**: a walnut, brass and leather HUD; a glass moon lamp, a carved cuckoo clock (real time, an owl that
@@ -119,12 +122,11 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   overlapping scales; the moon gem is a brilliant cut whose facets flash in turn as the light swings round it. On the
   shelf, Sleep is a brass oil lamp with a ruby glass font and a flame in its glass chimney, and the journal is plain
   tooled leather with gilt corners (no logos).
-- **Clean type (v15)**: every word in the game (screens, signs, tags, the book, the globe, the interview's forms
-  and props, the shop's signs, the pretend phone, Pip's and Barnaby's lines) is set in one warm, rounded, very
-  readable face, Nunito (SIL OFL 1.1; bundled as WOFF2, no web fonts), in a regular-bold body and an extra-bold for
-  titles and signs. Text is plain and calm: dark ink on paper, warm cream on dark wood, with one soft shadow only
-  where the background needs it; emphasis is bold, italic or a single accent colour. Dialogue types on at a
-  readable pace.
+- **Storybook type (v16)**: two faces, both SIL OFL 1.1 and bundled as WOFF2 (no web fonts), defined once in
+  `src/ui/font.ts`: **Fraunces** with its soft terminals for titles, signs, buttons, names and big numbers (and its
+  italic for Pip's handwriting), and **Figtree**, a clear, friendly sans, for copy, dialogue and small text. Text is
+  plain and calm: dark ink on paper, warm cream on dark wood, with one soft shadow only where the background needs
+  it; emphasis is bold, italic or a single accent colour. Dialogue types on at a readable pace.
 - **Inked, full-colour interface (v12)**: every panel, button, tab, card, ribbon and frame has a bold near-black ink
   outline (like the outlined 3D world and the icons) and richer, saturated enamel, wood and brass. Pip's portrait sits
   in a carved walnut frame of honey-oak leaves and acorns by default. Zoom in and out of the oak with a pinch or the
@@ -159,7 +161,7 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **Transitions**: 15 of them.
 - **Interview**: in Pip's office, with a desk, a real view out of the window, office props and hands-on
   widgets.
-- **The lodge store**: Barnaby Birchbark, a hand-painted beaver, keeps a general store in his log lodge: deals on gnawed stumps, acorn sacks and gem chests, a gift parcel, series banners over the Lucky Barrel, and a
+- **The lodge store**: Barnaby Birchbark, a hand-painted beaver, keeps a general store in his log lodge: deals on gnawed stumps, acorn sacks and gem chests, a gift parcel, the Lucky Barrel for wishes, and a
   window onto the real forest.
 - **Book**: a simpler diary of your stats.
 - **Explore the world**: a hand-painted globe with 20 real places, each with a real photo, a souvenir

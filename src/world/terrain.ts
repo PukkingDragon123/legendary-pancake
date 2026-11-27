@@ -133,8 +133,26 @@ function paintMaps(shade: Collider[]): { splat: THREE.DataTexture; tint: THREE.D
   return { splat: mk(sp), tint: mk(tn) };
 }
 
+/**
+ * [ground16] The forest floor and the bare earth, leaning mossy green: the leaf-litter scan is pulled toward olive and
+ * grown over with the moss scan (more where the litter is dark, so the leaves still show through), and the trodden
+ * earth turns a greener, mossier khaki while keeping some of its warmth. Shared by the clearing and the far woods
+ * (vista.ts), so the two floors meet without a seam.
+ */
+export const MOSSY_GLSL = /* glsl */ `
+vec3 hhMossyFloor(vec3 floorC, vec3 mossC) {
+  vec3 olive = floorC * vec3(0.54, 1.06, 0.5);
+  float dark = clamp(1.0 - dot(floorC, vec3(0.3, 0.59, 0.11)) * 3.2, 0.0, 1.0);
+  return mix(olive, mossC * vec3(0.95, 1.42, 1.3), 0.36 + dark * 0.25);
+}
+vec3 hhMossyEarth(vec3 earthC, vec3 mossC) {
+  return mix(earthC * vec3(0.74, 1.04, 0.62), mossC * vec3(1.25, 1.45, 1.2), 0.35);
+}
+`;
+
 const GROUND_PARS = /* glsl */ `
 varying vec3 vGroundW;
+${MOSSY_GLSL}
 uniform sampler2D uSplat; uniform sampler2D uFloor; uniform sampler2D uEarth; uniform sampler2D uMoss; uniform sampler2D uRock;
 float gBayer(vec2 a) { a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))) * 0.25 + fract(dot(floor(a * 0.5), vec2(0.5, floor(a.y * 0.5) * 0.75))); }
 float gLum(vec3 c) { return dot(c, vec3(0.3, 0.59, 0.11)); }
@@ -145,11 +163,13 @@ const GROUND_MAP = /* glsl */ `
 {
   vec2 wp = vGroundW.xz;
   vec4 sp = texture2D(uSplat, vMapUv);
-  vec3 c = texture2D(uFloor, wp / 3.0).rgb;
-  vec3 e = texture2D(uEarth, wp / 2.0).rgb;
   vec3 m = texture2D(uMoss, wp / 1.6).rgb;
+  vec3 m2 = texture2D(uMoss, wp / 4.3 + 0.37).rgb;
+  vec3 c = hhMossyFloor(texture2D(uFloor, wp / 3.0).rgb, m2);
+  vec3 e0 = texture2D(uEarth, wp / 2.0).rgb;
+  vec3 e = hhMossyEarth(e0, m2);
   vec3 r = texture2D(uRock, wp / 3.0).rgb;
-  vec3 s = e * vec3(1.32, 1.28, 1.16);
+  vec3 s = e0 * vec3(1.32, 1.28, 1.16);
   vec4 tn = texture2D(map, vMapUv);
   // [look4] the clearing's lawn: the moss scan worn as close-cropped grass and clover, a fresh spring green
   vec3 g = texture2D(uMoss, wp / 2.6).rgb * vec3(1.02, 1.16, 0.74);

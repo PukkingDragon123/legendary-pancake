@@ -1,7 +1,12 @@
-// [text15] The game's typeface: Nunito (SIL OFL 1.1, The Nunito Project Authors; bundled as WOFF2 from
-// @fontsource-variable/nunito, latin subset, see src/assets/fonts/FONTS_LICENSE.txt). One warm, rounded, very readable
-// family with a variable weight axis: the body is set semi-bold (600), titles, signs and names extra-bold (800), and
-// emphasis is bold or italic. Nothing comes from another host.
+// [type16] The game's two typefaces, defined here once for CSS (style.css reads the same names) and for every piece of
+// canvas text (signs, tags, the globe, the office's papers, the floating dialogue):
+//   - the display face, Fraunces (Undercase Type), a warm "wonky" old-style serif with soft, rounded terminals (its
+//     SOFT axis pinned at 100): titles, signs, buttons, names and big numbers. Pip's handwriting is its italic.
+//   - the body face, Figtree (Erik Kennedy), a clean, friendly sans with open shapes and a tall x-height: copy,
+//     dialogue and small interface text.
+// Both are SIL OFL 1.1, bundled as WOFF2 (latin subsets from @fontsource-variable, see src/assets/fonts/FONTS_LICENSE.txt);
+// nothing comes from another host. Callers ask for the display face with `caps: true` (it also picks the title weight)
+// or `display: true` (any weight); everything else is set in the body face.
 //
 // Sizes are ordinary px. CSS uses the --t1..--t8 tokens (style.css); canvas code asks for `uiFont(n)` (n size steps),
 // `fontPx(px)` (a size given in the old 16 px book-face scale) or `fontAt(px)` (exactly px). The old pixel-grid names
@@ -9,18 +14,21 @@
 // with it) and snapFont() only rounds to whole px.
 // `textSafe` swaps the handful of invisible or odd characters for plain ones.
 import { options, type VNode } from 'preact';
-import bodyUrl from '../assets/fonts/nunito.woff2?url';
-import titleUrl from '../assets/fonts/nunito-italic.woff2?url';
+import bodyUrl from '../assets/fonts/figtree.woff2?url';
+import bodyItalicUrl from '../assets/fonts/figtree-italic.woff2?url';
+import titleUrl from '../assets/fonts/fraunces-soft.woff2?url';
+import titleItalicUrl from '../assets/fonts/fraunces-soft-italic.woff2?url';
 
-export const FAMILY = 'Hoot Sans';
-/** titles, signs and names: the same family, extra-bold */
-export const CAPS_FAMILY = FAMILY;
-/** the game's face, then the system's own sans for any glyph it lacks */
-export const STACK = '"Hoot Sans", system-ui, -apple-system, "Segoe UI", sans-serif';
-/** titles, signs, names (same family; callers pick the weight) */
-export const TITLE_STACK = STACK;
-/** the body and title weights */
-export const W_BODY = 600, W_TITLE = 800;
+/** the body face's family name (Figtree) */
+export const FAMILY = 'Hoot Text';
+/** the display face's family name (Fraunces, soft) */
+export const CAPS_FAMILY = 'Hoot Display';
+/** the body face, then the system's own sans for any glyph it lacks */
+export const STACK = '"Hoot Text", system-ui, -apple-system, "Segoe UI", sans-serif';
+/** titles, signs, buttons, names and big numbers: the display face, then a system serif */
+export const TITLE_STACK = '"Hoot Display", "Hoot Text", Georgia, "Times New Roman", serif';
+/** the body and title weights (the display face is variable 100-900, the body face 300-900) */
+export const W_BODY = 500, W_TITLE = 650;
 /** a fifteenth of an em: offsets of outlines and shadows are counted in these */
 export const GRID = 15;
 /** one size step in px */
@@ -29,14 +37,17 @@ export const EM = 16;
 export const VIS = 1;
 /** kept for callers that scale wished sizes (talk.ts) */
 export const SCALE = VIS;
-/** the face's proportions in fifteenths of an em: capitals, lowercase, ascent and descent */
-export const METRICS = { cap: 10.6, x: 7.3, body: { ascent: 15.2, descent: 5.3 }, title: { ascent: 15.2, descent: 5.3 } } as const;
+/** the faces' proportions in fifteenths of an em: capitals, lowercase, ascent and descent (both faces have 0.70 em
+ * capitals; Figtree's lowercase is 0.50 em, Fraunces' 0.48 em) */
+export const METRICS = { cap: 10.5, x: 7.4, body: { ascent: 14.25, descent: 3.75 }, title: { ascent: 14.67, descent: 3.83 } } as const;
 /** capital height as a fraction of the size */
 export const CAP = METRICS.cap / GRID;
 
 /** CSS px per size step of UI text (the --t1 token is one step). */
 export const uiFontPx = (): number => 1;
-export interface FontOpts { weight?: number; caps?: boolean; italic?: boolean }
+export interface FontOpts { weight?: number; caps?: boolean; italic?: boolean; /** the display face at the given (or body) weight */ display?: boolean }
+/** the family stack for these options */
+export const stackOf = (o: FontOpts = {}) => (o.caps || o.display ? TITLE_STACK : STACK);
 
 /** A size in whole px (at least 6). */
 export function snapFont(px: number): number {
@@ -46,10 +57,10 @@ export function snapFont(px: number): number {
 /** the size for an old book-face size `px` */
 export const visPx = (px: number) => snapFont(px * VIS);
 const style = (o: FontOpts) => `${o.italic ? 'italic ' : ''}${o.weight ?? (o.caps ? W_TITLE : W_BODY)}`;
-/** A canvas/CSS font string for an old book-face size `px` (caps: the title weight). */
-export const fontPx = (px: number, o: FontOpts = {}) => `${style(o)} ${visPx(px)}px ${STACK}`;
+/** A canvas/CSS font string for an old book-face size `px` (caps: the display face at the title weight). */
+export const fontPx = (px: number, o: FontOpts = {}) => `${style(o)} ${visPx(px)}px ${stackOf(o)}`;
 /** a canvas/CSS font string at exactly `px` */
-export const fontAt = (px: number, o: FontOpts = {}) => `${style(o)} ${snapFont(px)}px ${STACK}`;
+export const fontAt = (px: number, o: FontOpts = {}) => `${style(o)} ${snapFont(px)}px ${stackOf(o)}`;
 /** the size in px of `n` steps (one step: the UI's body text in canvas art) */
 export const stepPx = (n = 1) => snapFont(18 * Math.max(0.5, n));
 /** a canvas/CSS font string `n` steps tall */
@@ -102,15 +113,21 @@ export function tokenSizes(_dpr?: number): Record<string, number> {
 }
 
 let ready: Promise<void> | null = null;
-/** Resolves once the face can paint (canvas text waits for it). Adds it itself on pages without the app CSS. */
+/** Resolves once both faces can paint (canvas text waits for it). Adds them itself on pages without the app CSS. */
 export function fontReady(): Promise<void> {
   if (ready) return ready;
   ready = (async () => {
     try {
-      const have = (st: string) => [...document.fonts].some((f) => f.family.replace(/["']/g, '') === FAMILY && f.style === st);
-      const add = async (url: string, d: FontFaceDescriptors) => { if (!have(d.style ?? 'normal')) document.fonts.add(await new FontFace(FAMILY, `url(${url}) format('woff2')`, d).load()); };
-      await Promise.all([add(bodyUrl, { weight: '200 1000', style: 'normal' }), add(titleUrl, { weight: '200 1000', style: 'italic' })]);
-      await Promise.all([document.fonts.load(`${W_BODY} 16px "${FAMILY}"`, 'Aa1’…'), document.fonts.load(`${W_TITLE} 16px "${FAMILY}"`, 'Aa1'), document.fonts.load(`italic ${W_BODY} 16px "${FAMILY}"`, 'Aa1')]);
+      const have = (fam: string, st: string) => [...document.fonts].some((f) => f.family.replace(/["']/g, '') === fam && f.style === st);
+      const add = async (fam: string, url: string, d: FontFaceDescriptors) => { if (!have(fam, d.style ?? 'normal')) document.fonts.add(await new FontFace(fam, `url(${url}) format('woff2')`, d).load()); };
+      await Promise.all([
+        add(FAMILY, bodyUrl, { weight: '300 900', style: 'normal' }), add(FAMILY, bodyItalicUrl, { weight: '300 900', style: 'italic' }),
+        add(CAPS_FAMILY, titleUrl, { weight: '100 900', style: 'normal' }), add(CAPS_FAMILY, titleItalicUrl, { weight: '100 900', style: 'italic' }),
+      ]);
+      await Promise.all([
+        document.fonts.load(`${W_BODY} 16px "${FAMILY}"`, 'Aa1’…'), document.fonts.load(`italic ${W_BODY} 16px "${FAMILY}"`, 'Aa1'),
+        document.fonts.load(`${W_TITLE} 16px "${CAPS_FAMILY}"`, 'Aa1'), document.fonts.load(`italic ${W_TITLE} 16px "${CAPS_FAMILY}"`, 'Aa1'),
+      ]);
     } catch { /* no FontFace API: canvas text falls back */ }
   })();
   return ready;
@@ -120,10 +137,10 @@ export function fontReady(): Promise<void> {
  * Draw text on a canvas (`n` steps, or `size` px; caps: the title weight), with an optional thin outline (a rounded
  * stroke behind the letters) and an optional soft drop shadow. `y` is the baseline. Returns the width in canvas px.
  */
-export function canvasText(g: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, o: { n?: number; size?: number; align?: CanvasTextAlign; shadow?: string; outline?: string; caps?: boolean; weight?: number; italic?: boolean } = {}): number {
+export function canvasText(g: CanvasRenderingContext2D, text: string, x: number, y: number, color: string, o: { n?: number; size?: number; align?: CanvasTextAlign; shadow?: string; outline?: string; caps?: boolean; display?: boolean; weight?: number; italic?: boolean } = {}): number {
   const s = textSafe(text), size = snapFont(o.size ?? stepPx(o.n ?? 1));
   g.save();
-  g.font = fontAt(size, { caps: o.caps, weight: o.weight, italic: o.italic });
+  g.font = fontAt(size, { caps: o.caps, display: o.display, weight: o.weight, italic: o.italic });
   g.textBaseline = 'alphabetic';
   g.textAlign = 'left';
   const w = g.measureText(s).width;
@@ -152,7 +169,7 @@ export function fillTextMid(g: CanvasRenderingContext2D, text: string, ux: numbe
   const p = m.transformPoint(new DOMPoint(ux, uy));
   g.save();
   g.setTransform(1, 0, 0, 1, 0, 0);
-  g.font = `${style(o)} ${size.toFixed(1)}px ${STACK}`; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.font = `${style(o)} ${size.toFixed(1)}px ${stackOf(o)}`; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
   const w = g.measureText(s).width;
   g.fillText(s, p.x - w / 2, p.y + capMid(size));
   g.restore();
@@ -160,11 +177,11 @@ export function fillTextMid(g: CanvasRenderingContext2D, text: string, ux: numbe
 }
 
 let mctx: CanvasRenderingContext2D | null = null;
-/** width of `text` at exactly `px` (a CSS token size, say; caps: the title weight) */
+/** width of `text` at exactly `px` (a CSS token size, say; caps: the display face at the title weight) */
 export function textWidthPx(text: string, px: number, o: FontOpts = {}): number {
   if (!mctx) mctx = document.createElement('canvas').getContext('2d');
   if (!mctx) return text.length * px * 0.5;
-  mctx.font = `${style(o)} ${px}px ${STACK}`;
+  mctx.font = `${style(o)} ${px}px ${stackOf(o)}`;
   return Math.round(mctx.measureText(textSafe(text)).width);
 }
 /** width of `text` at `n` steps (needs a context only for measuring) */
@@ -175,4 +192,4 @@ export function textWidth(text: string, n = 1, o: FontOpts = {}): number {
   return Math.round(mctx.measureText(textSafe(text)).width);
 }
 
-export { bodyUrl, titleUrl };
+export { bodyUrl, bodyItalicUrl, titleUrl, titleItalicUrl };

@@ -1,5 +1,5 @@
 // [ui5] Portrait frames: a cosmetic round the live owl portrait (src/assets/frames.ts), owned in the save, sold on
-// Barnaby's frame wall and given by the series banners.
+// Barnaby's frame wall and given by the Lucky Barrel's series.
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_FRAME, FRAME_BY_ID, FRAMES, STARTER_FRAMES, STORE_FRAMES } from '../assets/frames.ts';
 import { SERIES } from './series.ts';
@@ -144,7 +144,7 @@ describe('the frame wall in the lodge store', () => {
   });
 });
 
-describe('frames on the series banners', () => {
+describe('frames in the Lucky Barrel series', () => {
   it('every frame in a pool exists, has a name and is series-only', () => {
     const inPools = SERIES.flatMap((s) => s.pool.filter((e) => e.kind === 'frame').map((e) => ({ e, s })));
     expect(inPools.length).toBeGreaterThanOrEqual(2);

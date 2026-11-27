@@ -471,9 +471,9 @@ export class Weather {
     const late = s.season === 'autumn' ? Math.max(0, (s.t - 0.45) / 0.55) : 0;
     GRASS.uBloom.value = s.season === 'winter' ? 0 : s.season === 'autumn' ? 0.6 - 0.2 * late : 1; // [look4] autumn asters and late flowers keep the meadow colourful
     GRASS.uLitter.value = s.season === 'autumn' ? 0.35 + late * 0.5 : s.season === 'winter' ? 0.25 : 0;
-    // the painted ground follows along: golden leaf litter in autumn, faded in winter
+    // the painted ground follows along: a touch of gold in autumn (it stays mossy green), faded in winter
     const ground = this.sc.terrain.group.getObjectByName('ground') as THREE.Mesh | undefined;
-    const gt: Record<Season, number> = { spring: 0xf6fbf0, summer: 0xffffff, autumn: 0xf6e6cc, winter: 0xe6eae6 };
+    const gt: Record<Season, number> = { spring: 0xf6fbf0, summer: 0xffffff, autumn: 0xf4eed8, winter: 0xe6eae6 };
     if (ground) (ground.material as THREE.MeshLambertMaterial).color.setHex(gt[s.season]);
   }
 

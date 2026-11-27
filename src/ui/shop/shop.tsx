@@ -1,7 +1,8 @@
-// OWNED BY THE SHOP BUILDER: Barnaby's Lodge Store, the daily shop (a free gift, three discounted daily deals, acorn
-// heaps and moon gem chests, the weekly series and the Lucky Barrel). Every piece is a thing in the beaver's lodge
-// (src/world/stages/lodge.ts): the deals stand on gnawed stumps, the packs sit by the shelf, the gift is a parcel on
-// the counter, the series hang as cloth banners. The DOM adds only what you'd see on real things: paper price tags
+// OWNED BY THE SHOP BUILDER: Barnaby's Lodge Store, the daily shop (a free gift, three discounted daily deals, the
+// handmade shelf and the week's bundles, portrait frames, acorn heaps and moon gem chests, and the Lucky Barrel for the
+// weekly series). Every piece is a thing in the beaver's lodge (src/world/stages/lodge.ts): the deals stand on display
+// plinths, the handmade pieces and the wrapped bundles sit on the shelf over the barrel, the packs sit by the stash
+// shelf, the gift is a parcel on the counter. The DOM adds only what you'd see on real things: paper price tags
 // hanging off the stumps (a red-pencilled old price, a sticker for the discount), kraft and brass labels, wooden signs
 // to move about the store, Barnaby's speech bubble, and a detail card that is itself an object (a ledger page pinned
 // on a board, a burlap label, a brass plate, a gift tag) with the purchase as a rubber stamp. The layout keeps the
@@ -12,8 +13,9 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../../audio/sound.ts';
 import { PIECE } from '../../owl/outfits.ts';
 import {
-  ACORN_PACKS, buyAcorns, buyDeal, buyFrame, claimGift, dailyDeals, dailyGift, ensureDay, fmtLeft, frameWall, GEM_PACKS, giftClaimed, grantGems,
-  isSold, msToMidnight, msToWeek, nameOf, seriesActive, SERIES, type AcornPack, type Deal, type FrameOffer, type GemPack,
+  ACORN_PACKS, BUNDLE_OFF, buyAcorns, buyBundle, buyDeal, buyFrame, buyHandmade, claimGift, dailyDeals, dailyGift, ensureDay, fmtLeft, frameWall, GEM_PACKS,
+  giftClaimed, grantGems, handmadeShelf, isSold, msToMidnight, msToWeek, seriesActive, SERIES, weekKey, weeklyBundles, type AcornPack, type BundleOffer,
+  type Deal, type FrameOffer, type GemPack, type HandmadeOffer,
 } from '../../game/shop.ts';
 import { level, ownsEntry, save } from '../../game/store.ts';
 import { OwlPortrait } from '../chrome/livepip.tsx';
@@ -29,14 +31,14 @@ import { Gacha } from './gacha.tsx';
 import { TalkText } from '../talkview.tsx'; // [dialog10]
 import { holdMs, typeTime, VOICES } from '../talk.ts';
 import { AnimPx, rewardMoment, showPrize, Stamp } from './moment.tsx';
-import { bannerArt, prizeArt } from './paint.ts';
+import { prizeArt } from './paint.ts';
 import { fxMoment } from '../fx/moment.ts'; // [fx10]
 import './shop.css';
 
 const fmt = (n: number) => n.toLocaleString('en-US');
 const isSide = () => innerWidth >= innerHeight * 1.05 && innerWidth >= 640;
 const pick = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-type Section = 'home' | 'deals' | 'stash' | 'series' | 'frames';
+type Section = 'home' | 'deals' | 'handmade' | 'stash' | 'series' | 'frames';
 
 // ------------------------------------------------------------------ Barnaby's voice
 
@@ -65,6 +67,10 @@ export const LINES = {
   frames: ['Portrait frames! I carve the wooden ones myself.', 'A good frame makes a good owl look even better.', 'Try one on, see how your owl likes it.'],
   frame: [(n: string) => `The ${n}? Your owl looks very distinguished in it.`, (n: string) => `Ah, the ${n}. Hangs straight, never squeaks.`],
   series: ['The weekly series is in! Wishes go in the *barrel.*', 'The *Lucky Barrel!* Give it a whirl, see what tumbles out.'],
+  handmade: ['All made right here at the bench. _Mostly with my teeth._', 'A *new batch* every Monday. One of each a day, I only have the one bench.', 'The porch pieces you won\'t find anywhere else, friend.'],
+  made: [(n: string) => `The *${n}.* Sanded it twice and oiled it once.`, (n: string) => `Ah, the ${n}. Took me all of Tuesday. _And a bit of Wednesday._`, (n: string) => `The ${n}? Made to last. Like a good dam.`],
+  bundle: [(n: string) => `The *${n}*, all wrapped up. A quarter off, since they go together.`, (n: string) => `${n}! I tied the bow myself. Cheaper as a set, friend.`],
+  madeSold: ['That one\'s gone home with someone. I\'ll have another off the bench tomorrow.'],
   wish: ['~Here we go, here we go!~', '~Round and round she goes...~', 'Every tenth wish brings something special. Beaver\'s promise.'],
   sold: ['That one\'s spoken for until tomorrow. New stock at midnight!'],
   till: ['!Ka-ching!! Just testing the bell.', 'The till\'s older than me. Still counts better, too.'],
@@ -150,7 +156,14 @@ export function Shop() {
   useEffect(() => { stage?.setDeals(deals.map((d) => ({ kind: d.kind, id: d.id }))); }, [stage, dealKey]);
   useEffect(() => { deals.forEach((d, i) => stage?.setSold(i, isSold(s, d.key))); }, [stage, dealKey, s.shop.bought.length]);
   useEffect(() => { stage?.setGiftClaimed(giftClaimed(s)); }, [stage, s.shop.free, s.shop.day]);
-  useEffect(() => { stage?.setSeries(SERIES.map((x) => ({ id: x.id, art: bannerArt(x, 120, 156), on: seriesActive(x) }))); }, [stage]);
+  // [shop16] the handmade shelf and the week's bundles
+  const week = weekKey(), lv = level.value.level;
+  const made = useMemo(() => handmadeShelf(week, lv), [week, lv]);
+  const bundles = useMemo(() => weeklyBundles(save.value, week, lv), [week, lv, s.owned.pieces.length]);
+  const madeRef = useRef(made), bundlesRef = useRef(bundles);
+  madeRef.current = made; bundlesRef.current = bundles;
+  useEffect(() => { stage?.setWares(made.map((o) => o.id), bundles.map((b) => ({ ribbon: b.def.ribbon }))); }, [stage, week]);
+  useEffect(() => { made.forEach((o, i) => stage?.setWareSold(i, isSold(s, o.key))); bundles.forEach((b, i) => stage?.setWareSold(6 + i, isSold(s, b.key))); }, [stage, week, s.shop.bought.length, s.shop.day]);
   // the slate on the counter: chalked with the countdown to new stock
   const reset = msToMidnight();
   const resetLabel = fmtLeft(reset);
@@ -201,6 +214,7 @@ export function Shop() {
     stageRef.current?.focus((sec === 'deals' && !isSide()) || sec === 'frames' ? 'home' : sec);
     sound.play('step_wood', { volume: 0.35, gap: 100 });
     if (sec === 'stash') say(pick(LINES.stash));
+    if (sec === 'handmade') say(pick(LINES.handmade));
     if (sec === 'frames') say(pick(LINES.frames));
     if (sec === 'series') { say(pick(LINES.series)); stageRef.current?.act('present', 'barrel'); }
   };
@@ -230,13 +244,27 @@ export function Shop() {
       say(isSold(save.value, d.key) ? pick(LINES.sold) : pick(LINES.deal)(d.name));
       return;
     }
-    if (id.startsWith('acorn:') || id.startsWith('gem:')) { if (section !== 'stash') setSection('stash'); openCard(id); say(pick(LINES.pack)); return; }
-    if (id === 'gift') { openCard('gift'); if (!giftClaimed(save.value)) { st.act('present', 'gift'); say(pick(LINES.giftLook)); } return; }
-    if (id.startsWith('series:') || id === 'barrel') {
-      const sid = id.startsWith('series:') ? id.slice(7) : (SERIES.find((x) => seriesActive(x)) ?? SERIES[0]).id;
-      openSeries(sid);
+    if (id.startsWith('made:')) {
+      const o = madeRef.current[+id.slice(5)];
+      if (!o) return;
+      if (section !== 'handmade') setSection('handmade');
+      openCard(id);
+      st.act('present', id);
+      say(isSold(save.value, o.key) ? pick(LINES.madeSold) : pick(LINES.made)(o.name));
       return;
     }
+    if (id.startsWith('bundle:')) {
+      const b = bundlesRef.current[+id.slice(7)];
+      if (!b) return;
+      if (section !== 'handmade') setSection('handmade');
+      openCard(id);
+      st.act('present', id);
+      say(isSold(save.value, b.key) ? pick(LINES.madeSold) : pick(LINES.bundle)(b.def.name));
+      return;
+    }
+    if (id.startsWith('acorn:') || id.startsWith('gem:')) { if (section !== 'stash') setSection('stash'); openCard(id); say(pick(LINES.pack)); return; }
+    if (id === 'gift') { openCard('gift'); if (!giftClaimed(save.value)) { st.act('present', 'gift'); say(pick(LINES.giftLook)); } return; }
+    if (id === 'barrel') { openSeries((SERIES.find((x) => seriesActive(x)) ?? SERIES[0]).id); return; }
     if (id === 'beaver') { say(pick(LINES.poke)); st.act(pick(['wave', 'hop', 'think', 'gnaw'] as const)); haptic(8); return; }
     if (id === 'till') { sound.play('coin_purse', { volume: 0.5 }); say(pick(LINES.till)); return; }
     if (id === 'scales') { sound.play('ui_tap', { volume: 0.4, rate: 1.4 }); say(pick(LINES.scales)); return; }
@@ -345,6 +373,45 @@ export function Shop() {
     fxMoment('bigbuy'); // [fx10]
     say(pick(LINES.bought));
   };
+  // [shop16] a piece off the handmade shelf, or a bundle
+  const tooPoor = () => { sound.play('ui_error', { volume: 0.5 }); say(pick(LINES.poor)); stageRef.current?.act('think'); toast('Not enough acorns'); };
+  const thanks = (id: string) => {
+    setStamped(id);
+    sound.play('stamp', { volume: 0.6 });
+    setTimeout(() => { sound.play('ui_buy', { volume: 0.55 }); sound.play('reward_unlock', { volume: 0.4 }); }, 260);
+    haptic(20);
+    stageRef.current?.celebrate(id);
+    fxMoment('bigbuy'); // [fx10]
+    say(pick(LINES.bought));
+  };
+  const placeIt = { label: 'Place it', tone: 'sage' as const, run: () => { panel.value = 'build'; } };
+  const buyMade = (o: HandmadeOffer, i: number) => {
+    if (o.locked) { sound.play('ui_error', { volume: 0.5 }); say(`That one's for owls of level ${o.locked} and up, friend.`); return; }
+    if (s.coins < o.price) { tooPoor(); return; }
+    const err = buyHandmade(o);
+    if (err) { sound.play('ui_error', { volume: 0.5 }); toast(err); return; }
+    thanks('made:' + i);
+    const a = art({ kind: 'item', id: o.id });
+    setTimeout(() => showPrize({
+      title: 'Yours!', name: o.name, sub: o.lodgeOnly ? 'Furniture · only from the lodge' : `Furniture · you saved ${fmt(o.base - o.price)} acorns`,
+      art: a ? <img class="lg-prize-img" src={a} alt="" /> : <Px name="shop_mystery" size={128} />,
+      actions: [placeIt, { label: 'Lovely!', tone: 'gold', run: () => closeCard() }],
+    }), 1100);
+  };
+  const buyBundleOffer = (b: BundleOffer, i: number) => {
+    if (b.locked) { sound.play('ui_error', { volume: 0.5 }); say(`That bundle's for owls of level ${b.locked} and up, friend.`); return; }
+    if (s.coins < b.price) { tooPoor(); return; }
+    const err = buyBundle(b);
+    if (err) { sound.play('ui_error', { volume: 0.5 }); toast(err); return; }
+    thanks('bundle:' + i);
+    const got = b.parts.filter((x) => !x.owned);
+    setTimeout(() => showPrize({
+      title: 'All yours!', name: b.def.name, sub: `${got.length} things · you saved ${fmt(b.base - b.price)} acorns`,
+      art: <span class="lg-prize-bundle">{got.map((x) => { const u = art(x); return u ? <img src={u} alt="" /> : <Px name="shop_mystery" size={64} />; })}</span>,
+      actions: [b.parts.some((x) => x.kind === 'piece' && !x.owned) ? { label: 'Try it on', tone: 'sage', run: () => { panel.value = 'wardrobe'; } } : placeIt, { label: 'Lovely!', tone: 'gold', run: () => closeCard() }],
+    }), 1100);
+  };
+
   const openFrame = (id: string) => { openCard('frame:' + id); const f = wall.find((o) => o.frame.id === id); if (f) say(pick(LINES.frame)(f.frame.name)); };
 
   const claimed = giftClaimed(s), g = dailyGift();
@@ -357,7 +424,7 @@ export function Shop() {
       <button class="lg-leave lg-btn linen" aria-label="Leave the store" onClick={close}><Px name="arrow_left" size={20} /><span>Leave</span></button>
 
       {/* paper price tags hanging off the stumps */}
-      {showTags && section !== 'stash' && section !== 'series' && section !== 'frames' && deals.map((d, i) => {
+      {showTags && (section === 'home' || section === 'deals') && deals.map((d, i) => {
         const sold = isSold(s, d.key);
         return (
           <Anchored at={'deal:' + i} class={'lg-dealtag' + (sold ? ' sold' : '')}>
@@ -375,7 +442,34 @@ export function Shop() {
           </Anchored>
         );
       })}
-      {/* the gift tag on the parcel, kraft labels on the packs, cloth labels under the banners */}
+      {/* [shop16] paper tags hanging off the handmade shelf's lip, the bundles' in their ribbon colour */}
+      {showTags && section === 'handmade' && made.map((o, i) => {
+        const sold = isSold(s, o.key);
+        return (
+          <Anchored at={'made:' + i} class={'lg-waretag' + (sold ? ' sold' : '') + (o.locked ? ' locked' : '')}>
+            <i class="lg-string short" />
+            <button class="lg-wtag" style={{ animationDelay: `${-i * 0.7}s` }} onClick={() => onPick('made:' + i)} aria-label={`${o.name}: ${sold ? 'sold' : o.locked ? `level ${o.locked}` : `${o.price} acorns`}`}>
+              <span class="lg-hole" />
+              {sold ? <em>Sold</em> : o.locked ? <em class="lock"><Px name="lock" size={14} />Lv {o.locked}</em> : <Cost cur="coins" n={o.price} size={16} />}
+              {!sold && (o.lodgeOnly ? <small>lodge only</small> : <small class="off">-{o.off}%</small>)}
+            </button>
+          </Anchored>
+        );
+      })}
+      {showTags && section === 'handmade' && bundles.map((b, i) => {
+        const sold = isSold(s, b.key);
+        return (
+          <Anchored at={'bundle:' + i} class={'lg-waretag bundle' + (sold ? ' sold' : '') + (b.locked ? ' locked' : '')}>
+            <i class="lg-string short" />
+            <button class="lg-wtag" style={{ animationDelay: `${-i * 1.1}s`, '--ribbon': '#' + b.def.ribbon.toString(16).padStart(6, '0') }} onClick={() => onPick('bundle:' + i)} aria-label={`${b.def.name} bundle: ${sold ? 'sold' : `${b.price} acorns`}`}>
+              <span class="lg-hole" />
+              <b>{b.def.name}</b>
+              {sold ? <em>Sold</em> : b.locked ? <em class="lock"><Px name="lock" size={14} />Lv {b.locked}</em> : <Cost cur="coins" n={b.price} size={16} />}
+            </button>
+          </Anchored>
+        );
+      })}
+      {/* the gift tag on the parcel, kraft labels on the packs */}
       {showTags && (
         <Anchored at="gift" class="lg-gifttag">
           <i class="lg-string short" />
@@ -402,19 +496,6 @@ export function Shop() {
           </button>
         </Anchored>
       ))}
-      {showTags && SERIES.map((x) => {
-        const on = seriesActive(x);
-        return (
-          <Anchored at={'series:' + x.id} class="lg-bannertag">
-            <button class={'lg-cloth ' + (on ? 'on' : 'soon')} onClick={() => openSeries(x.id)}>
-              <span>{on ? 'Make a wish' : 'Next week'}</span>
-              <small class="lg-cloth-prize"><Px name="shop_star5" size={10} />{featuredName(x.id)}</small>
-              <small>{on ? `ends in ${fmtLeft(msToWeek())}` : `arrives in ${fmtLeft(msToWeek())}`}</small>
-            </button>
-          </Anchored>
-        );
-      })}
-
       {/* [ui5] the frame wall: frames hanging on pegs, a paper price tag on each */}
       {!sel && !gacha && section === 'frames' && <FrameWall offers={wall} layout={layout} onPick={openFrame} />}
 
@@ -423,25 +504,26 @@ export function Shop() {
 
       {/* the detail card of whatever's in focus */}
       {sel && !gacha && <DetailCard id={sel} deals={deals} layout={layout} stamped={stamped} onClose={closeCard}
-        onBuy={buy} onGift={gift} onPack={buyPack} onGems={buyGems} art={art} giftInfo={{ claimed, g }} frames={wall} onFrame={buyFrameOffer} />}
+        onBuy={buy} onGift={gift} onPack={buyPack} onGems={buyGems} art={art} giftInfo={{ claimed, g }} frames={wall} onFrame={buyFrameOffer}
+        made={made} bundles={bundles} onMade={buyMade} onBundle={buyBundleOffer} />}
 
       {/* moving about the store: wooden signs on a rope */}
       {!gacha && (
         <nav class="lg-nav" aria-label="Store sections">
           <i class="lg-rope" />
-          {([['deals', 'Deals', 'shop_tag'], ['stash', 'Stash', 'owlcoin'], ['frames', 'Frames', 'wd_frame'], ['series', 'Wishes', 'shop_star5']] as [Section, string, string][]).map(([k, label, ic], n) => (
+          {([['deals', 'Deals', 'shop_tag'], ['handmade', 'Handmade', 'bp_chair'], ['stash', 'Stash', 'owlcoin'], ['frames', 'Frames', 'wd_frame'], ['series', 'Wishes', 'shop_star5']] as [Section, string, string][]).map(([k, label, ic], n) => (
             <button class={'lg-navsign' + ((section === k || (k === 'deals' && section === 'home')) && !sel ? ' on' : '')} style={{ animationDelay: `${n * 0.09}s` }} onClick={() => go(k)}>
               <i class="lg-navhook" /><Px name={ic} size={20} /><span>{label}</span>
             </button>
           ))}
         </nav>
       )}
-      {!sel && !gacha && (section === 'home' || section === 'deals' || section === 'stash') && (
+      {!sel && !gacha && (section === 'home' || section === 'deals' || section === 'stash' || section === 'handmade') && (
         <div class="lg-hint" key={section}>
           <span class="lg-pin" />
-          <b>{section === 'stash' ? 'Acorns & Moon Gems' : "Today's Deals"}</b>
-          <span>{section === 'stash' ? 'Tap a sack or a chest to trade' : 'Tap a price tag, then stamp to buy'}</span>
-          {section !== 'stash' && <span class="lg-hint-time"><Px name="shop_timer" size={14} />new stock in {fmtLeft(reset)}</span>}
+          <b>{section === 'stash' ? 'Acorns & Moon Gems' : section === 'handmade' ? 'Handmade by Barnaby' : "Today's Deals"}</b>
+          <span>{section === 'stash' ? 'Tap a sack or a chest to trade' : section === 'handmade' ? `Porch pieces sold only here, and bundles ${BUNDLE_OFF}% off` : 'Tap a price tag, then stamp to buy'}</span>
+          {section !== 'stash' && <span class="lg-hint-time"><Px name="shop_timer" size={14} />{section === 'handmade' ? `new batch in ${fmtLeft(msToWeek())}` : `new stock in ${fmtLeft(reset)}`}</span>}
         </div>
       )}
 
@@ -488,13 +570,6 @@ function placeBubble(el: HTMLElement, st: Lodge) {
   el.classList.toggle('notail', tail < 0);
 }
 
-/** The featured five-star of a series, by name (what a wish there can give). */
-function featuredName(id: string): string {
-  const s = SERIES.find((x) => x.id === id);
-  const f5 = s?.pool.find((e) => e.stars === 5 && e.featured) ?? s?.pool.find((e) => e.stars === 5);
-  return f5 ? nameOf(f5.kind, f5.id) : '';
-}
-
 /** True the first time the store opens on this device (Barnaby explains how it works). */
 function firstVisit(): boolean {
   try { if (localStorage.getItem('hoot-hollow:lodge-seen')) return false; localStorage.setItem('hoot-hollow:lodge-seen', '1'); return true; } catch { return false; }
@@ -515,8 +590,9 @@ function Bubble(p: { line: Line | null; onNext: () => void; onIdle: () => void }
 
 interface CardProps {
   id: string; deals: Deal[]; layout: 'side' | 'top'; stamped: string | null; onClose: () => void; frames: FrameOffer[]; onFrame: (o: FrameOffer) => void;
+  made: HandmadeOffer[]; bundles: BundleOffer[]; onMade: (o: HandmadeOffer, i: number) => void; onBundle: (b: BundleOffer, i: number) => void;
   onBuy: (d: Deal, i: number) => void; onGift: () => void; onPack: (p: AcornPack) => void; onGems: (p: GemPack) => void;
-  art: (d: { kind: Deal['kind']; id: string }) => string; giftInfo: { claimed: boolean; g: { coins?: number; gems?: number } };
+  art: (d: { kind: Deal['kind'] | 'item'; id: string }) => string; giftInfo: { claimed: boolean; g: { coins?: number; gems?: number } };
 }
 
 function DetailCard(p: CardProps) {
@@ -541,6 +617,61 @@ function DetailCard(p: CardProps) {
         {(sold || stamped) && <span class={'lg-stamp-mark' + (stamped ? ' fresh' : '')}>{stamped ? 'SOLD · THANK YOU' : 'SOLD'}</span>}
         {!sold && <Stamp label="Buy" cost={<Cost cur={d.cur} n={d.price} size={20} />} short={have < d.price} onPress={() => p.onBuy(d, i)} />}
         {sold && !stamped && <p class="lg-note">Spoken for until tomorrow. New stock at midnight.</p>}
+      </div>
+    );
+  } else if (id.startsWith('made:')) {
+    // [shop16] a piece off the handmade shelf
+    const i = +id.slice(5), o = p.made[i];
+    if (!o) return null;
+    const sold = isSold(s, o.key), a = p.art({ kind: 'item', id: o.id }), stamped = p.stamped === id;
+    body = (
+      <div class="lg-ledger">
+        <span class="lg-pin" />
+        <div class="lg-ledger-art">{a ? <img src={a} alt="" /> : <Px name="shop_mystery" size={96} />}{o.off > 0 && <span class="lg-sticker big left">-{o.off}%</span>}</div>
+        <div class="lg-ledger-text">
+          <span class="lg-kind">{o.lodgeOnly ? 'Furniture · lodge only' : 'Furniture · off the bench'}</span>
+          <h3>{o.name}</h3>
+          {o.blurb && <p class="lg-blurb">{o.blurb}</p>}
+          <div class="lg-prices">{o.off > 0 && <s class="lg-was big"><Cost cur="coins" n={o.base} size={18} /></s>}<b class="lg-now"><Cost cur="coins" n={o.price} size={26} /></b></div>
+        </div>
+        {(sold || stamped) && <span class={'lg-stamp-mark' + (stamped ? ' fresh' : '')}>{stamped ? 'SOLD · THANK YOU' : 'SOLD'}</span>}
+        {sold ? !stamped && <p class="lg-note">Barnaby makes one a day. Another tomorrow.</p>
+          : o.locked ? <p class="lg-note">Barnaby keeps this one for owls of level {o.locked} and up.</p>
+          : <Stamp label="Buy" cost={<Cost cur="coins" n={o.price} size={20} />} short={s.coins < o.price} onPress={() => p.onMade(o, i)} />}
+      </div>
+    );
+  } else if (id.startsWith('bundle:')) {
+    // [shop16] a bundle: what's in the parcel, each part with its own price, and the price of the set
+    kind = 'bundle';
+    const i = +id.slice(7), b = p.bundles[i];
+    if (!b) return null;
+    const sold = isSold(s, b.key), stamped = p.stamped === id;
+    body = (
+      <div class="lg-ledger lg-bundle">
+        <span class="lg-pin" />
+        <div class="lg-ledger-text">
+          <span class="lg-kind">Bundle · {BUNDLE_OFF}% off the set</span>
+          <h3>{b.def.name}</h3>
+          <p class="lg-blurb">{b.def.blurb}</p>
+        </div>
+        <ul class="lg-bparts">
+          {b.parts.map((x) => {
+            const a = p.art(x);
+            return (
+              <li class={x.owned ? 'own' : ''}>
+                <span class="lg-bpart-art">{a ? <img src={a} alt="" /> : <Px name="shop_mystery" size={40} />}</span>
+                <span class="lg-bpart-name">{x.name}</span>
+                <span class="lg-bpart-p">{x.owned ? <em>yours</em> : <Cost cur="coins" n={x.base} size={14} />}</span>
+              </li>
+            );
+          })}
+        </ul>
+        <div class="lg-prices"><s class="lg-was big"><Cost cur="coins" n={b.base} size={18} /></s><b class="lg-now"><Cost cur="coins" n={b.price} size={26} /></b></div>
+        {(sold || stamped) && <span class={'lg-stamp-mark' + (stamped ? ' fresh' : '')}>{stamped ? 'SOLD · THANK YOU' : 'SOLD'}</span>}
+        {sold ? !stamped && <p class="lg-note">Wrapped and gone. Another one tomorrow.</p>
+          : b.complete ? <p class="lg-note">You have all of these already.</p>
+          : b.locked ? <p class="lg-note">Barnaby keeps this one for owls of level {b.locked} and up.</p>
+          : <Stamp label="Buy the set" cost={<Cost cur="coins" n={b.price} size={20} />} short={s.coins < b.price} onPress={() => p.onBundle(b, i)} />}
       </div>
     );
   } else if (id.startsWith('frame:')) {

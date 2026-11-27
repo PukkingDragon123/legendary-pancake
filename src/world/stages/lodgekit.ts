@@ -497,11 +497,11 @@ function ribbonAlong(curve: THREE.Curve<THREE.Vector3>, width: number, thick: nu
 }
 
 /** A wrapped parcel: a soft-cornered box in printed kraft paper, a satin ribbon round it both ways, a full bow with
- * two loops and forked tails, and a paper tag on a string. */
-export function parcel(s = 0.26): THREE.Group {
+ * two loops and forked tails, and (unless `withTag` is false) a paper tag on a string. */
+export function parcel(s = 0.26, ribbon = 0xc0383e, withTag = true): THREE.Group {
   const g = new THREE.Group();
   const paper = mat('kraft', () => new THREE.MeshStandardMaterial({ map: kraftTexture(), roughness: 0.88 }));
-  const satin = mat('ribbon', () => new THREE.MeshStandardMaterial({ color: 0xc0383e, roughness: 0.38, envMapIntensity: 1.0 }));
+  const satin = mat('ribbon' + ribbon, () => new THREE.MeshStandardMaterial({ color: ribbon, roughness: 0.38, envMapIntensity: 1.0 }));
   const W = s, H = s * 0.74, D = s * 0.86;
   const box = mesh(new RoundedBoxGeometry(W, H, D, 3, s * 0.035), paper);
   box.position.y = H / 2;
@@ -528,6 +528,9 @@ export function parcel(s = 0.26): THREE.Group {
   bow.add(knot);
   bow.position.y = H + rt;
   g.add(bow);
+  g.userData.bow = bow;
+  g.userData.box = box;
+  if (!withTag) { g.add(contactShadow(s * 2, s * 2, 0.5)); return g; }
   // a paper tag tied to the bow
   const tagShape = new THREE.Shape();
   const tw = s * 0.22, th = s * 0.14;
@@ -540,8 +543,6 @@ export function parcel(s = 0.26): THREE.Group {
   const str = mesh(taperTube(new THREE.CatmullRomCurve3([new THREE.Vector3(0, H + 0.01, 0.01), new THREE.Vector3(s * 0.14, H * 0.95, D / 2 + 0.01), new THREE.Vector3(s * 0.18, H * 0.75, D / 2 + 0.006)]), 0.0016, 0.0016, 10, 4), M.rope(), false, false);
   g.add(str);
   g.add(contactShadow(s * 2, s * 2, 0.5));
-  g.userData.bow = bow;
-  g.userData.box = box;
   return g;
 }
 
@@ -741,69 +742,6 @@ export function slate(w: number, h: number): Slate {
   ]);
   g.add(mesh(frame, fm));
   return { group: g, draw, dispose: () => { t.dispose(); face.dispose(); board.geometry.dispose(); frame.dispose(); } };
-}
-
-// ------------------------------------------------------------------ cloth banners
-
-/** A cloth banner hung from a dowel: the art (an image URL) printed on canvas cloth, gentle folds, tassels. */
-export interface Banner { group: THREE.Group; cloth: THREE.Mesh; setArt(url: string): void; sway(t: number, k: number): void; dispose(): void }
-export function banner(w: number, h: number, edge: number, seed = 1): Banner {
-  const g = new THREE.Group();
-  const geo = new THREE.PlaneGeometry(w, h, 12, 16);
-  geo.translate(0, -h / 2, 0);
-  const base = (geo.attributes.position as THREE.BufferAttribute).array.slice() as Float32Array;
-  const clothMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.92, side: THREE.DoubleSide });
-  const cloth = mesh(geo, clothMat);
-  g.add(cloth);
-  // dowels top and bottom with brass end caps, a cord up to the beam
-  const dowel = (y: number) => {
-    const d = mesh(taperTube(new THREE.LineCurve3(new THREE.Vector3(-w / 2 - 0.05, y, 0), new THREE.Vector3(w / 2 + 0.05, y, 0)), 0.018, 0.018, 4, 8), M.boardDark());
-    g.add(d);
-    for (const sx of [-1, 1]) {
-      const f = turned([[0.001, 0], [0.016, 0.004], [0.02, 0.016], [0.012, 0.026], [0.022, 0.042], [0.026, 0.058], [0.018, 0.072], [0.006, 0.08], [0.001, 0.082]], 10);
-      f.rotation.z = -sx * Math.PI / 2;
-      f.position.set(sx * (w / 2 + 0.05), y, 0);
-      g.add(f);
-    }
-  };
-  dowel(0); dowel(-h - 0.005);
-  // tassels: a knotted head, a collar, a skirt of threads
-  const tasselM = mat('tassel' + edge, () => new THREE.MeshStandardMaterial({ color: edge, roughness: 0.9 }));
-  for (const sx of [-0.33, 0, 0.33]) {
-    const ts = turned([[0.001, 0], [0.012, -0.004], [0.016, -0.016], [0.008, -0.026], [0.011, -0.03], [0.008, -0.034], [0.014, -0.06], [0.022, -0.11], [0.026, -0.128], [0.001, -0.13]], 12, tasselM);
-    const pos = ts.geometry.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < pos.count; i++) { const y = pos.getY(i); if (y < -0.04) { const a = Math.atan2(pos.getZ(i), pos.getX(i)); const k = 1 + Math.sin(a * 9) * 0.12; pos.setX(i, pos.getX(i) * k); pos.setZ(i, pos.getZ(i) * k); } }
-    ts.geometry.computeVertexNormals();
-    ts.position.set(sx * w, -h - 0.02, 0);
-    g.add(ts);
-  }
-  let artTex: THREE.Texture | null = null;
-  const rr = rng(seed);
-  const ph = rr() * 6;
-  return {
-    group: g, cloth,
-    setArt(url: string) {
-      const t = loader.load(url);
-      t.colorSpace = THREE.SRGBColorSpace;
-      t.magFilter = THREE.NearestFilter;
-      t.minFilter = THREE.LinearMipmapLinearFilter;
-      artTex?.dispose();
-      artTex = t;
-      clothMat.map = t;
-      clothMat.needsUpdate = true;
-    },
-    sway(time: number, k: number) {
-      const pos = geo.attributes.position as THREE.BufferAttribute;
-      for (let i = 0; i < pos.count; i++) {
-        const x = base[i * 3], y = base[i * 3 + 1];
-        const v = -y / h;
-        pos.setZ(i, (Math.sin(x * 9 + ph) * 0.012 + Math.sin(time * 1.3 + v * 2.2 + x * 3 + ph) * 0.018 * v * k) * (0.3 + v));
-      }
-      pos.needsUpdate = true;
-      geo.computeVertexNormals();
-    },
-    dispose() { artTex?.dispose(); clothMat.dispose(); geo.dispose(); },
-  };
 }
 
 // ------------------------------------------------------------------ wood shavings
