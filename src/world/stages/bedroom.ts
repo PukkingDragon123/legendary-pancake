@@ -40,14 +40,20 @@ const PIP_H = 0.7;
 const X0 = -2.9, X1 = 2.9, Z0 = -2.0, H = 2.8, WALL_T = 0.32;
 const WIN = { x: -0.5, w: 1.56, y0: 0.66, spring: 1.52 };
 const WIN_TOP = WIN.spring + WIN.w / 2;
-const NS = { x: 0.78, z: Z0 + 0.32, w: 0.52, h: 0.5, d: 0.4 };
+const NS = { x: 0.8, z: Z0 + 0.34, w: 0.62, h: 0.5, d: 0.44 };
+/** on the nightstand: the phone's box on the left (Pip's side), the moon lamp at the back right, the clock at the front right */
+const BOX = { x: NS.x - 0.15, z: NS.z - 0.02, s: 1.5 };
+const LAMP = { x: NS.x + 0.17, z: NS.z - 0.09 };
+const CLK = { x: NS.x + 0.17, z: NS.z + 0.11 };
+const PHONE0 = { x: NS.x + 0.0, z: NS.z + 0.13 };
 const BED = { x: 1.82, z0: Z0 + 0.04, len: 1.75, w: 1.18, top: 0.5 };
 const CAB = { x: -2.15, z: Z0 + 0.3, w: 0.78, h: 0.56, d: 0.44 };
 const GLOBE = { x: -1.72, z: -0.1 };
 /** the little record player on the window seat, left of the cushion */
 const REC = { x: WIN.x - WIN.w / 2 + 0.3, y: WIN.y0, z: Z0 - 0.08, s: 0.72 };
 const PIP_HOME = V(0.15, 0, -0.55);
-const PIP_LOCK = V(0.34, 0, NS.z + 0.32);
+/** beside the nightstand's left end, facing it (his head comes up just over the top) */
+const PIP_LOCK = V(NS.x - NS.w / 2 - 0.17, 0, NS.z + 0.03);
 const PIP_GLOBE = V(-1.2, 0, 0.05);
 
 const smooth = (x: number) => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
@@ -364,7 +370,7 @@ export class BedroomStage implements Stage {
     this.moon.shadow.bias = -0.0005; this.moon.shadow.normalBias = 0.02; this.moon.shadow.radius = 3;
     s.add(this.moon, this.moon.target);
     this.lampLight = new THREE.PointLight(0xffc98a, 2.6, 5.5, 1.6);
-    this.lampLight.position.set(NS.x - 0.1, NS.h + 0.28, NS.z + 0.05);
+    this.lampLight.position.set(LAMP.x, NS.h + 0.28, LAMP.z);
     this.lampLight.castShadow = quality === 'high';
     this.lampLight.shadow.mapSize.set(512, 512); this.lampLight.shadow.bias = -0.002; this.lampLight.shadow.camera.near = 0.08;
     s.add(this.lampLight);
@@ -642,12 +648,12 @@ export class BedroomStage implements Stage {
     const moonMat = new THREE.MeshStandardMaterial({ map: moonTex(), emissiveMap: null, emissive: new THREE.Color(1, 0.86, 0.6), emissiveIntensity: 1.7, roughness: 0.9 });
     this.disposers.push(() => { moonMat.map?.dispose(); moonMat.dispose(); });
     const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.11, 40, 28), moonMat);
-    lamp.position.set(x - 0.12, h + 0.2, z - 0.04);
+    lamp.position.set(LAMP.x, h + 0.2, LAMP.z);
     lamp.userData.noShadow = true; lamp.castShadow = false;
     this.moonLamp = lamp;
     this.add(lamp);
     const stand = new THREE.Mesh(lathe([[0, 0], [0.07, 0], [0.072, 0.02], [0.03, 0.03], [0.012, 0.08], [0, 0.08]], 24), m.walnut);
-    stand.position.set(x - 0.12, h, z - 0.04); this.add(stand);
+    stand.position.set(LAMP.x, h, LAMP.z); this.add(stand);
     this.lampLight.position.copy(lamp.position);
     // the alarm clock: brass, twin bells and a hammer, a cream dial with hands that keep the real time
     const clock = new THREE.Group();
@@ -662,7 +668,7 @@ export class BedroomStage implements Stage {
     const hand = (len: number, wd: number) => { const g = new THREE.Group(); const me = new THREE.Mesh(new THREE.BoxGeometry(wd, len, 0.002).translate(0, len / 2 - 0.006, 0), new THREE.MeshStandardMaterial({ color: 0x1d1a18, roughness: 0.4 })); g.add(me); g.position.z = 0.024; clock.add(g); return g; };
     this.hands = { h: hand(0.036, 0.006), m: hand(0.052, 0.004) };
     const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.004, 12).rotateX(Math.PI / 2), m.brass); cap.position.z = 0.027; clock.add(cap);
-    clock.position.set(x + 0.1, h + 0.11, z + 0.06); clock.rotation.y = -0.35;
+    clock.position.set(CLK.x, h + 0.11, CLK.z); clock.rotation.y = -0.25;
     clock.name = 'alarm';
     this.add(clock);
   }
@@ -674,8 +680,9 @@ export class BedroomStage implements Stage {
     this.phone.add(shell);
     this.phoneScreen = new THREE.MeshBasicMaterial({ map: phoneTex(), toneMapped: false, color: new THREE.Color(0.85, 0.85, 0.85) });
     const scr = new THREE.Mesh(new THREE.PlaneGeometry(0.066, 0.138).rotateX(-Math.PI / 2), this.phoneScreen); scr.position.y = 0.0095; this.phone.add(scr);
-    this.phone.position.set(NS.x + 0.13, NS.h, NS.z + 0.1);
-    this.phone.rotation.y = 0.25;
+    this.phone.position.set(PHONE0.x, NS.h, PHONE0.z);
+    this.phone.rotation.y = 0.35;
+    this.phone.scale.setScalar(1.3);
     this.phone.name = 'phone';
     this.add(this.phone);
     // its bed: a little oak box with a felt lining, a hinged lid, a brass hasp and staple
@@ -714,8 +721,9 @@ export class BedroomStage implements Stage {
     this.lock.add(this.key);
     this.lock.visible = false;
     this.box.add(this.lock);
-    this.box.position.set(NS.x + 0.12, NS.h, NS.z - 0.03);
-    this.box.rotation.y = -0.15;
+    this.box.position.set(BOX.x, NS.h, BOX.z);
+    this.box.rotation.y = 0.12;
+    this.box.scale.setScalar(BOX.s);
     this.box.name = 'phonebox';
     this.add(this.box);
   }
@@ -872,9 +880,9 @@ export class BedroomStage implements Stage {
     };
     hit('mic', [0.26, 0.36, 0.3], V(WIN.x + WIN.w / 2 - 0.2, WIN.y0 + 0.16, Z0 - 0.02), V(WIN.x + WIN.w / 2 - 0.2, WIN.y0 + 0.34, Z0));
     hit('sound', [0.42, 0.42, 0.42], V(REC.x, REC.y + 0.16, REC.z), V(REC.x - 0.05, REC.y + 0.4, REC.z));
-    hit('alarm', [0.22, 0.24, 0.2], V(NS.x + 0.1, NS.h + 0.11, NS.z + 0.06), V(NS.x + 0.1, NS.h + 0.25, NS.z + 0.06));
-    hit('phone', [0.22, 0.1, 0.3], V(NS.x + 0.13, NS.h + 0.04, NS.z + 0.05), V(NS.x + 0.18, NS.h + 0.07, NS.z + 0.16));
-    hit('lamp', [0.26, 0.3, 0.26], V(NS.x - 0.12, NS.h + 0.18, NS.z - 0.04), V(NS.x - 0.12, NS.h + 0.36, NS.z - 0.04));
+    hit('alarm', [0.2, 0.24, 0.18], V(CLK.x, NS.h + 0.11, CLK.z), V(CLK.x + 0.04, NS.h + 0.24, CLK.z));
+    hit('phone', [0.34, 0.12, 0.34], V((BOX.x + PHONE0.x) / 2, NS.h + 0.05, NS.z + 0.04), V(BOX.x, NS.h + 0.16, BOX.z));
+    hit('lamp', [0.24, 0.3, 0.24], V(LAMP.x, NS.h + 0.18, LAMP.z), V(LAMP.x, NS.h + 0.36, LAMP.z));
     hit('globe', [0.7, 1.3, 0.7], V(GLOBE.x, 0.65, GLOBE.z), V(GLOBE.x, 1.34, GLOBE.z));
     hit('window', [WIN.w, WIN_TOP - WIN.y0, 0.2], V(WIN.x, (WIN.y0 + WIN_TOP) / 2 + 0.1, Z0 - 0.1), V(WIN.x - 0.3, WIN_TOP - 0.2, Z0));
     hit('bed', [BED.w, 0.7, BED.len], V(BED.x, 0.35, BED.z0 + BED.len / 2), V(BED.x, 0.85, BED.z0 + BED.len * 0.6));
@@ -937,7 +945,7 @@ export class BedroomStage implements Stage {
   }
   private stepHop(dt: number) {
     const h = this.hop;
-    if (!h) { this.face = lerpAngle(this.face, this.faceWant, Math.min(1, dt * 6)); this.pip.node.rotation.y = this.face; return; }
+    if (!h) { this.face = lerpAngle(this.face, this.faceWant, Math.min(1, dt * 9)); this.pip.node.rotation.y = this.face; return; }
     h.t += dt;
     const k = Math.min(1, h.t / h.dur);
     const p = this.pip.node.position;
@@ -967,8 +975,8 @@ export class BedroomStage implements Stage {
     const p = this.pip;
     this.go('lock');
     p.setMood('determined', 3);
-    await this.hopTo(PIP_LOCK, -Math.PI * 0.62 + Math.PI, 0.9);
-    this.faceWant = Math.atan2(NS.x + 0.12 - PIP_LOCK.x, NS.z - 0.03 - PIP_LOCK.z);
+    await this.hopTo(PIP_LOCK, Math.PI / 2, 0.9);
+    this.faceWant = Math.atan2(BOX.x - PIP_LOCK.x, BOX.z - PIP_LOCK.z);
     p.lookAt = this.phone.getWorldPosition(V(0, 0, 0));
     await this.wait(0.35);
     p.play('peck');
@@ -978,7 +986,7 @@ export class BedroomStage implements Stage {
     const box = this.box.position;
     await this.tween(0.75, (k) => {
       const e = smooth(k);
-      this.phone.position.set(from.x + (box.x - from.x) * e, from.y + Math.sin(k * Math.PI) * 0.12 + 0.016 * e, from.z + (box.z - from.z) * e);
+      this.phone.position.set(from.x + (box.x - from.x) * e, from.y + Math.sin(k * Math.PI) * 0.14 + 0.044 * e, from.z + (box.z - from.z) * e);
       this.phone.rotation.set(r0.x + Math.PI * e, r0.y + (this.box.rotation.y - r0.y) * e, 0);
       if (this.phoneScreen) this.phoneScreen.color.setScalar(0.85 * (1 - e));
     });
@@ -1072,7 +1080,7 @@ export class BedroomStage implements Stage {
     this.pip.node.position.copy(PIP_HOME);
     this.faceWant = 0;
     this.pip.lookAt = null;
-    this.phone.position.set(NS.x + 0.13, NS.h, NS.z + 0.1); this.phone.rotation.set(0, 0.25, 0);
+    this.phone.position.set(PHONE0.x, NS.h, PHONE0.z); this.phone.rotation.set(0, 0.35, 0);
     if (this.phoneScreen) this.phoneScreen.color.setScalar(0.85);
     this.lid.rotation.x = -1.9; this.lock.visible = false; this.key.visible = false; this.shackle.position.y = 0.014; this.key.rotation.z = 0; this.key.position.z = 0.006;
     this.go('room');
@@ -1091,13 +1099,13 @@ export class BedroomStage implements Stage {
     const P = this.camera.aspect < 0.9;
     switch (name) {
       case 'room': return P ? { target: V(0.35, 0.95, -0.95), yaw: 0.08, pitch: 0.12, fit: [2.5, 3.3] as [number, number] } : { target: V(0.05, 1.12, -0.85), yaw: 0.02, pitch: 0.11, fit: [5.1, 2.9] as [number, number] };
-      case 'lock': return { target: V(NS.x + 0.06, NS.h + 0.06, NS.z + 0.02), yaw: -0.38, pitch: 0.34, fit: (P ? [0.62, 0.9] : [1.25, 0.66]) as [number, number] };
+      case 'lock': return { target: V(NS.x - 0.22, NS.h + 0.08, NS.z + 0.02), yaw: 0.42, pitch: 0.3, fit: (P ? [0.55, 0.8] : [1.05, 0.56]) as [number, number] };
       case 'pack': return { target: V(-0.25, PIP_H * 0.62, -0.35), yaw: 0.1, pitch: 0.12, fit: (P ? [1.2, 1.7] : [2.6, 1.4]) as [number, number] };
       case 'globe': return { target: V(GLOBE.x + 0.1, 0.92, GLOBE.z), yaw: 0.32, pitch: 0.08, fit: (P ? [0.9, 1.3] : [1.9, 1.05]) as [number, number] };
       case 'window': return { target: V(WIN.x, (WIN.y0 + WIN_TOP) / 2 + 0.1, Z0), yaw: 0.0, pitch: 0.03, fit: (P ? [1.7, 2.6] : [3.2, 1.8]) as [number, number] };
       case 'mic': return { target: V(WIN.x + WIN.w / 2 - 0.2, WIN.y0 + 0.15, Z0), yaw: -0.2, pitch: 0.12, fit: (P ? [0.9, 1.3] : [1.9, 1.05]) as [number, number] };
       case 'sound': return { target: V(REC.x + 0.1, REC.y + 0.15, REC.z), yaw: 0.25, pitch: 0.2, fit: (P ? [0.9, 1.3] : [1.9, 1.05]) as [number, number] };
-      case 'alarm': return { target: V(NS.x, NS.h + 0.1, NS.z), yaw: -0.25, pitch: 0.25, fit: (P ? [0.8, 1.2] : [1.7, 0.95]) as [number, number] };
+      case 'alarm': return { target: V(NS.x + 0.05, NS.h + 0.1, NS.z), yaw: -0.25, pitch: 0.25, fit: (P ? [0.8, 1.2] : [1.7, 0.95]) as [number, number] };
     }
   }
   /** fly the camera to a shot */

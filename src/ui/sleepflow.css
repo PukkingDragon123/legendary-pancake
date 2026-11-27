@@ -49,16 +49,16 @@
 
 /* ---- the controls: a smoked-glass panel at the side (a sheet on phones) */
 .bd-panel { position: absolute; display: flex; flex-direction: column; background: var(--bd-glass); border: 1px solid var(--bd-rim); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 240, 210, 0.07); backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2); animation: bd-panel-in 0.7s var(--ease) both 0.15s; }
-.bd-panel.side { top: calc(14px + var(--safe-t)); right: 14px; bottom: 14px; width: min(400px, 34vw); border-radius: 22px; }
-.bd-panel.sheet { left: 8px; right: 8px; bottom: 0; height: min(48vh, 460px); border-radius: 22px 22px 0 0; border-bottom: 0; animation-name: bd-sheet-in; }
+.bd-panel.bd-side { top: calc(14px + var(--safe-t)); right: 14px; bottom: 14px; width: min(400px, 34vw); border-radius: 22px; }
+.bd-panel.bd-sheet { left: 8px; right: 8px; bottom: 0; height: min(48vh, 460px); border-radius: 22px 22px 0 0; border-bottom: 0; animation-name: bd-sheet-in; }
 @keyframes bd-panel-in { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
 @keyframes bd-sheet-in { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
 .bd-body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 6px 18px 14px; scrollbar-width: thin; scrollbar-color: rgba(227, 189, 114, 0.35) transparent; }
-.bd-panel.side .bd-body { padding-top: 10px; }
+.bd-panel.bd-side .bd-body { padding-top: 10px; }
 .bd-sec { position: relative; padding: 14px 0 16px; border-bottom: 1px solid rgba(227, 189, 114, 0.14); }
 .bd-sec:last-child { border-bottom: 0; }
-.bd-panel.side .bd-sec::before { content: ''; position: absolute; left: -18px; top: 14px; bottom: 16px; width: 3px; border-radius: 0 3px 3px 0; background: var(--bd-brass); opacity: 0; transform: scaleY(0.4); transition: opacity 0.25s, transform 0.35s var(--ease); }
-.bd-panel.side .bd-sec.sel::before { opacity: 1; transform: none; }
+.bd-panel.bd-side .bd-sec::before { content: ''; position: absolute; left: -18px; top: 14px; bottom: 16px; width: 3px; border-radius: 0 3px 3px 0; background: var(--bd-brass); opacity: 0; transform: scaleY(0.4); transition: opacity 0.25s, transform 0.35s var(--ease); }
+.bd-panel.bd-side .bd-sec.sel::before { opacity: 1; transform: none; }
 .bd-sec h2 { display: flex; align-items: center; gap: 8px; font-size: 17px; margin: 0 0 10px; letter-spacing: 0.01em; }
 .bd-sec h2 .px, .bd-sec h2 img { width: 26px !important; height: 26px !important; }
 .bd-row { display: flex; align-items: center; gap: 10px; }

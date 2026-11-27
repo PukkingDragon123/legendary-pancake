@@ -261,7 +261,7 @@ export function SleepScreen() {
           </div>
         </header>
 
-        <aside class={'bd-panel' + (wide ? ' side' : ' sheet')}>
+        <aside class={'bd-panel' + (wide ? ' bd-side' : ' bd-sheet')}>
           {!wide && <nav class="bd-tabs" role="tablist">
             {panes.map((p) => <button role="tab" aria-selected={pane === p.id} class={'bd-tabbtn' + (pane === p.id ? ' sel' : '')} onClick={() => { tap('ui_tab', 0.4); setPane(p.id); room.current?.go(p.id === 'tonight' ? 'room' : p.id); }}><Px name={p.icon} size={30} /><span>{p.title}</span></button>)}
           </nav>}
