@@ -1,6 +1,7 @@
 // Dev preview of every piece of the diary's pixel art (dev-book.html?art=1).
 import * as A from '../ui/book/art.ts';
-import { SECTIONS } from '../ui/book/pages.tsx';
+/** the old diary's cloth tabs (the art sheet still shows their tints and icons) */
+const SECTIONS = [{ id: 'stats', name: 'Stats', tint: 'moss', icon: 'stats' }, { id: 'nights', name: 'Nights', tint: 'lake', icon: 'nights' }, { id: 'things', name: 'Finds', tint: 'honey', icon: 'things' }, { id: 'seals', name: 'Badges', tint: 'berry', icon: 'seals' }];
 
 export function showArt(root: HTMLElement) {
   root.style.cssText = 'background:#46596a;color:#fff;font:11px sans-serif;padding:8px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;overflow:auto;height:100vh;box-sizing:border-box';

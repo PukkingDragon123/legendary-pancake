@@ -59,6 +59,8 @@ export interface Profile {
   relax: string[];
   interviewed: boolean;
 }
+/** One day's page in the Book's diary. */
+export interface DiaryEntry { note: string; at: number }
 /** The weekly routine: one plan per weekday, 0 = Sunday. */
 export interface DayPlan { on: boolean; bed: string; wake: string }
 export interface ShopState {
@@ -126,6 +128,8 @@ export interface Save {
   onboarded: boolean;
   daily: { day: string; gift: boolean; pets: number };
   seen: { zones: string[]; areas: string[] };
+  /** the Book's diary: a free note per calendar day (dayKey), written in the briefing room */
+  diary?: Record<string, DiaryEntry>;
 }
 
 const KEY = 'hoot-hollow:save:v1';
@@ -170,10 +174,22 @@ function load(): Save {
       s.v = 2;
       migrateSpecies(s); // [owl3] the owl line is eight species: retired ones move to their nearest relative
       // shallow-merge new fields into older saves
-      return migrateProfile(migrateFrames({ ...f, ...s, frameV: s.frameV, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker } }));
+      return migrateProfile(migrateFrames({ ...f, ...s, frameV: s.frameV, home: { ...f.home, ...s.home }, profile: { ...f.profile, ...s.profile }, shop: { ...f.shop, ...s.shop }, look: { ...f.look, ...s.look }, sleep: { ...f.sleep, ...s.sleep }, breath: { ...f.breath, ...s.breath }, settings: { ...f.settings, ...s.settings }, plus: { ...f.plus, ...s.plus }, owned: { ...f.owned, ...s.owned }, daily: { ...f.daily, ...s.daily }, seen: { ...f.seen, ...s.seen }, blocker: { ...f.blocker, ...s.blocker }, diary: cleanDiary(s.diary) }));
     }
   } catch { /* ignore */ }
   return freshSave();
+}
+
+/** The diary from a stored save: only well-formed day pages survive (a bad entry never breaks loading). */
+export function cleanDiary(d: unknown): Record<string, DiaryEntry> {
+  const out: Record<string, DiaryEntry> = {};
+  if (!d || typeof d !== 'object') return out;
+  for (const [k, v] of Object.entries(d as Record<string, unknown>)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || !v || typeof v !== 'object') continue;
+    const e = v as Partial<DiaryEntry>;
+    if (typeof e.note === 'string') out[k] = { note: e.note.slice(0, 4000), at: typeof e.at === 'number' ? e.at : 0 };
+  }
+  return out;
 }
 
 /** [ui5] Saves from before portrait frames: the starter frames are always owned, and the chosen frame must exist and be owned. */
