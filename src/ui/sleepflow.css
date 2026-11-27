@@ -33,14 +33,14 @@
 .bd-tags { position: absolute; inset: 0; pointer-events: none; }
 .bd-tag { position: absolute; left: 0; top: 0; pointer-events: auto; transition: opacity 0.3s; will-change: transform; opacity: 0; }
 .bd.ready .bd-tag { animation: bd-tag-in 0.6s var(--ease) both; animation-delay: calc(var(--i, 0) * 80ms + 0.3s); opacity: 1; }
-.bd-tag-in { position: absolute; left: 0; bottom: 18px; transform: translateX(-50%); display: flex; align-items: center; gap: 7px; white-space: nowrap; padding: 6px 12px 6px 9px; border-radius: 999px;
+.bd-tag-in { position: absolute; left: 0; bottom: calc(18px + var(--lift, 0px)); transform: translateX(-50%); display: flex; align-items: center; gap: 7px; white-space: nowrap; padding: 6px 12px 6px 9px; border-radius: 999px;
   background: linear-gradient(180deg, rgba(38, 30, 26, 0.9), rgba(20, 16, 18, 0.92)); border: 1px solid rgba(227, 189, 114, 0.55);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 236, 190, 0.18), inset 0 -1px 0 rgba(0, 0, 0, 0.4); font-size: 13px; transition: transform 0.2s var(--pop), border-color 0.2s, box-shadow 0.2s; }
 .bd-tag-in b { color: var(--bd-brass); font-weight: 800; letter-spacing: 0.02em; }
 .bd-tag-in span { color: var(--bd-cream); max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
 .bd-tag .led { width: 8px; height: 8px; border-radius: 50%; background: #5a4a3c; box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.6); flex: none; }
 .bd-tag.on .led { background: radial-gradient(circle at 35% 35%, #c8ffd8, var(--bd-on) 55%, #1e6a3c); box-shadow: 0 0 8px rgba(95, 208, 138, 0.8); }
-.bd-tag-stem { position: absolute; left: -1px; bottom: 0; width: 2px; height: 18px; background: linear-gradient(180deg, rgba(227, 189, 114, 0.8), rgba(227, 189, 114, 0)); }
+.bd-tag-stem { position: absolute; left: -1px; bottom: 0; width: 2px; height: calc(18px + var(--lift, 0px)); background: linear-gradient(180deg, rgba(227, 189, 114, 0.8), rgba(227, 189, 114, 0)); }
 .bd-tag-stem::after { content: ''; position: absolute; left: -2px; bottom: -3px; width: 6px; height: 6px; border-radius: 50%; background: var(--bd-brass); box-shadow: 0 0 8px rgba(255, 210, 130, 0.9); }
 .bd-tag:hover .bd-tag-in, .bd-tag.hover .bd-tag-in { transform: translateX(-50%) translateY(-3px); border-color: var(--bd-brass); box-shadow: 0 10px 22px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(227, 189, 114, 0.16), inset 0 1px 0 rgba(255, 236, 190, 0.2); }
 .bd-tag.sel .bd-tag-in { border-color: #ffe3a0; box-shadow: 0 0 0 3px rgba(255, 220, 150, 0.22), 0 10px 22px rgba(0, 0, 0, 0.5); }

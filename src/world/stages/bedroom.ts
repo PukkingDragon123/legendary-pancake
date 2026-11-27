@@ -44,6 +44,8 @@ const NS = { x: 0.78, z: Z0 + 0.32, w: 0.52, h: 0.5, d: 0.4 };
 const BED = { x: 1.82, z0: Z0 + 0.04, len: 1.75, w: 1.18, top: 0.5 };
 const CAB = { x: -2.15, z: Z0 + 0.3, w: 0.78, h: 0.56, d: 0.44 };
 const GLOBE = { x: -1.72, z: -0.1 };
+/** the little record player on the window seat, left of the cushion */
+const REC = { x: WIN.x - WIN.w / 2 + 0.3, y: WIN.y0, z: Z0 - 0.08, s: 0.72 };
 const PIP_HOME = V(0.15, 0, -0.55);
 const PIP_LOCK = V(0.34, 0, NS.z + 0.32);
 const PIP_GLOBE = V(-1.2, 0, 0.05);
@@ -85,23 +87,27 @@ function photo(n: TexName, tint?: string, rep = 2): THREE.Texture | null {
 function boardsTex(): THREE.Texture {
   return canvasTex(1024, 1024, (g) => {
     const oak = texCanvas('oak');
+    const pat = oak ? g.createPattern(oak, 'repeat') : null;
     const bw = 1024 / 6;
     for (let i = 0; i < 6; i++) {
       const x0 = Math.round(i * bw), w = Math.round((i + 1) * bw) - x0, joint = Math.floor(hash(i, 2, 7) * 1024);
-      for (const [y0, h] of [[joint - 1024, 1024], [joint, 1024]] as [number, number][]) {
-        g.save(); g.beginPath(); g.rect(x0, y0, w, h); g.clip();
-        if (oak) { g.translate(x0 + w / 2, y0 + h / 2); g.rotate(Math.PI / 2); g.drawImage(oak, -h / 2 - hash(i, y0, 3) * 200, -w / 2 - hash(i, 4, y0) * 300, 1024, 512); }
-        else { g.fillStyle = '#a8763e'; g.fillRect(x0, y0, w, h); }
-        g.restore();
-        g.fillStyle = `rgba(${hash(i, y0, 9) > 0.5 ? '255,230,190' : '40,20,6'},${0.04 + hash(i, y0, 8) * 0.08})`; g.fillRect(x0, y0, w, h);
+      // two lengths of board per column, each cut from a different part of the scan, a touch lighter or darker
+      for (const [y0, h, k] of [[0, joint, 0], [joint, 1024 - joint, 1]] as [number, number, number][]) {
+        if (h <= 0) continue;
+        if (pat) { pat.setTransform(new DOMMatrix().translate(x0 - hash(i, k, 3) * 400, y0 - hash(k, i, 4) * 400)); g.fillStyle = pat; }
+        else g.fillStyle = '#a8763e';
+        g.fillRect(x0, y0, w, h);
+        g.fillStyle = `rgba(${hash(i, k, 9) > 0.5 ? '255,232,196' : '44,22,8'},${0.05 + hash(i, k, 8) * 0.1})`; g.fillRect(x0, y0, w, h);
       }
-      g.fillStyle = 'rgba(20,10,4,.75)'; g.fillRect(x0, 0, 2, 1024); g.fillStyle = 'rgba(255,235,200,.12)'; g.fillRect(x0 + 2, 0, 1, 1024);
-      g.fillStyle = 'rgba(20,10,4,.7)'; g.fillRect(x0, joint, w, 2);
-      g.fillStyle = '#2a2018'; for (const nx of [x0 + 14, x0 + w - 16]) { g.beginPath(); g.arc(nx, (joint + 12) % 1024, 2.2, 0, 7); g.arc(nx, (joint - 12 + 1024) % 1024, 2.2, 0, 7); g.fill(); }
+      // the gaps between boards, a lit edge, the butt joint and its nails
+      g.fillStyle = 'rgba(22,11,4,.8)'; g.fillRect(x0, 0, 2, 1024);
+      g.fillStyle = 'rgba(255,236,204,.14)'; g.fillRect(x0 + 2, 0, 1, 1024);
+      g.fillStyle = 'rgba(22,11,4,.72)'; g.fillRect(x0, joint, w, 2);
+      g.fillStyle = '#2a2018';
+      for (const nx of [x0 + 14, x0 + w - 16]) for (const ny of [joint + 12, joint - 12]) { g.beginPath(); g.arc(nx, (ny + 1024) % 1024, 2.2, 0, 7); g.fill(); }
     }
   }, true);
 }
-
 /** warm limewash plaster with soft trowel marks */
 function plasterTex(): THREE.Texture {
   const N = 256, t = new Tex(N, N);
@@ -369,7 +375,7 @@ export class BedroomStage implements Stage {
     this.fill.position.set(0.4, 2.3, 2.2);
     s.add(this.fill);
     this.recordLight = new THREE.PointLight(0xffb870, 0, 1.4, 2);
-    this.recordLight.position.set(CAB.x + 0.3, CAB.h + 0.5, CAB.z + 0.2);
+    this.recordLight.position.set(WIN.x - WIN.w / 2 + 0.3, WIN.y0 + 0.4, Z0 + 0.15);
     s.add(this.recordLight);
 
     // ---- Pip (and his packed self, ready for the trip)
@@ -503,8 +509,8 @@ export class BedroomStage implements Stage {
     this.add(glass);
     // a seat cushion on the sill
     const cushMat = new THREE.MeshStandardMaterial({ map: linenTex('#6d7fb0'), roughness: 0.95 });
-    const cush = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, WIN.w - 0.3, 6, 16).rotateZ(Math.PI / 2), cushMat);
-    cush.scale.set(1, 0.7, 1.6); cush.position.set(WIN.x, WIN.y0 + 0.035, Z0 - 0.04);
+    const cush = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, WIN.w - 0.95, 6, 16).rotateZ(Math.PI / 2), cushMat);
+    cush.scale.set(1, 0.7, 1.6); cush.position.set(WIN.x + 0.12, WIN.y0 + 0.035, Z0 - 0.04);
     this.add(cush);
     // velvet curtains on a brass pole, tied back
     const velvet = new THREE.MeshPhysicalMaterial({ map: velvetTex(), roughness: 0.7, sheen: 1, sheenRoughness: 0.4, sheenColor: new THREE.Color(0.5, 0.55, 0.9) });
@@ -753,8 +759,9 @@ export class BedroomStage implements Stage {
     horn.rotation.set(-0.9, 0, 0.5); horn.position.set(0.14, 0.12, -0.08);
     rp.add(horn);
     const neck = new THREE.Mesh(cyl(0.012, 0.1, 10), m.brass); neck.position.set(0.15, 0.09, -0.1); rp.add(neck);
-    rp.position.set(x - 0.05, h + 0.02, z + 0.02);
-    rp.rotation.y = 0.18;
+    rp.position.set(REC.x, REC.y, REC.z);
+    rp.scale.setScalar(REC.s);
+    rp.rotation.y = 0.3;
     rp.name = 'sound';
     this.add(rp);
     // a picture above it: the night sky over the oak, in a gilt frame
@@ -864,7 +871,7 @@ export class BedroomStage implements Stage {
       this.hits.push({ id, mesh: me, label });
     };
     hit('mic', [0.26, 0.36, 0.3], V(WIN.x + WIN.w / 2 - 0.2, WIN.y0 + 0.16, Z0 - 0.02), V(WIN.x + WIN.w / 2 - 0.2, WIN.y0 + 0.34, Z0));
-    hit('sound', [0.6, 0.5, 0.5], V(CAB.x, CAB.h + 0.2, CAB.z + 0.05), V(CAB.x, CAB.h + 0.42, CAB.z + 0.05));
+    hit('sound', [0.42, 0.42, 0.42], V(REC.x, REC.y + 0.16, REC.z), V(REC.x - 0.05, REC.y + 0.4, REC.z));
     hit('alarm', [0.22, 0.24, 0.2], V(NS.x + 0.1, NS.h + 0.11, NS.z + 0.06), V(NS.x + 0.1, NS.h + 0.25, NS.z + 0.06));
     hit('phone', [0.22, 0.1, 0.3], V(NS.x + 0.13, NS.h + 0.04, NS.z + 0.05), V(NS.x + 0.18, NS.h + 0.07, NS.z + 0.16));
     hit('lamp', [0.26, 0.3, 0.26], V(NS.x - 0.12, NS.h + 0.18, NS.z - 0.04), V(NS.x - 0.12, NS.h + 0.36, NS.z - 0.04));
@@ -1089,7 +1096,7 @@ export class BedroomStage implements Stage {
       case 'globe': return { target: V(GLOBE.x + 0.1, 0.92, GLOBE.z), yaw: 0.32, pitch: 0.08, fit: (P ? [0.9, 1.3] : [1.9, 1.05]) as [number, number] };
       case 'window': return { target: V(WIN.x, (WIN.y0 + WIN_TOP) / 2 + 0.1, Z0), yaw: 0.0, pitch: 0.03, fit: (P ? [1.7, 2.6] : [3.2, 1.8]) as [number, number] };
       case 'mic': return { target: V(WIN.x + WIN.w / 2 - 0.2, WIN.y0 + 0.15, Z0), yaw: -0.2, pitch: 0.12, fit: (P ? [0.9, 1.3] : [1.9, 1.05]) as [number, number] };
-      case 'sound': return { target: V(CAB.x, CAB.h + 0.2, CAB.z), yaw: 0.3, pitch: 0.25, fit: (P ? [1.0, 1.4] : [2.1, 1.15]) as [number, number] };
+      case 'sound': return { target: V(REC.x + 0.1, REC.y + 0.15, REC.z), yaw: 0.25, pitch: 0.2, fit: (P ? [0.9, 1.3] : [1.9, 1.05]) as [number, number] };
       case 'alarm': return { target: V(NS.x, NS.h + 0.1, NS.z), yaw: -0.25, pitch: 0.25, fit: (P ? [0.8, 1.2] : [1.7, 0.95]) as [number, number] };
     }
   }

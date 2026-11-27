@@ -133,10 +133,21 @@ export function SleepScreen() {
       const st = room.current;
       if (!st) return;
       const a = st.anchors();
-      for (const [id, el] of chips.current) {
+      // lay the tags out: each sits over its thing; one that would overlap another climbs above it on a longer stem
+      const placed: { x0: number; x1: number; y0: number; y1: number }[] = [];
+      const order = [...chips.current].filter(([id]) => a[id]).sort((p1, p2) => a[p2[0]].y - a[p1[0]].y);
+      for (const [id, el] of order) {
         const p = a[id];
-        if (!p) continue;
+        const w = (el.firstElementChild as HTMLElement | null)?.offsetWidth ?? 110, h = 32;
+        let lift = 0;
+        for (let k = 0; k < 6; k++) {
+          const box = { x0: p.x - w / 2 - 4, x1: p.x + w / 2 + 4, y0: p.y - 18 - lift - h, y1: p.y - 18 - lift };
+          const hit = placed.find((q) => box.x0 < q.x1 && box.x1 > q.x0 && box.y0 < q.y1 && box.y1 > q.y0);
+          if (!hit) { placed.push(box); break; }
+          lift += box.y1 - hit.y0 + 4;
+        }
         el.style.opacity = p.on ? '' : '0';
+        el.style.setProperty('--lift', `${Math.round(lift)}px`);
         el.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`;
       }
     };

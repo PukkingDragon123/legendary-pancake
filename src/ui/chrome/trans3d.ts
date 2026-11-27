@@ -43,7 +43,7 @@ function cupTex() {
 /** the nut: chestnut with fine lengthwise streaks, a pale tip */
 function nutTex() {
   return canvas(256, 256, (g) => {
-    const gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#d9b071'); gr.addColorStop(0.18, '#a5652b'); gr.addColorStop(0.7, '#8a4c1e'); gr.addColorStop(1, '#5a3010');
+    const gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#c99a58'); gr.addColorStop(0.14, '#8e4f1c'); gr.addColorStop(0.65, '#6a3410'); gr.addColorStop(1, '#3e1c06');
     g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
     for (let i = 0; i < 90; i++) { g.strokeStyle = `rgba(${hh(i, 1) > 0.5 ? '255,220,160' : '50,24,8'},${0.05 + hh(i, 2) * 0.08})`; g.lineWidth = 1 + hh(i, 3) * 2; const x = hh(i, 4) * 256; g.beginPath(); g.moveTo(x, 0); g.bezierCurveTo(x + 6, 80, x - 6, 170, x + 2, 256); g.stroke(); }
   });
@@ -65,6 +65,10 @@ function featherTex(seed: number, tone: [string, string, string]) {
       // the odd split in the vane
       if (hh(y, seed + 9) > 0.985) { g.clearRect(64 + (hh(y, 2) > 0.5 ? 6 : -40), y - 2, 34, 3); }
     }
+    // an owl's barring: soft dark bands across the vane (not on the down)
+    g.globalCompositeOperation = 'source-atop';
+    for (let y = 18; y < 190; y += 22 + (seed % 3) * 4) { g.fillStyle = 'rgba(48,26,10,0.5)'; g.beginPath(); g.ellipse(64, y, 60, 4.5, -0.25, 0, Math.PI * 2); g.fill(); }
+    g.globalCompositeOperation = 'source-over';
     g.globalAlpha = 1;
     const q = g.createLinearGradient(60, 0, 68, 0); q.addColorStop(0, '#cfc2a8'); q.addColorStop(0.5, '#fbf3e2'); q.addColorStop(1, '#b8a888');
     g.strokeStyle = q; g.lineWidth = 3; g.beginPath(); g.moveTo(64, 4); g.quadraticCurveTo(66, 130, 63, 252); g.stroke();
@@ -72,18 +76,19 @@ function featherTex(seed: number, tone: [string, string, string]) {
 }
 /** a lit cumulus puff: sphere shading from the upper left, eroded edges; alpha in A */
 function puffTex() {
-  return canvas(128, 128, (g) => {
-    const img = g.createImageData(128, 128), d = img.data;
-    for (let y = 0; y < 128; y++) for (let x = 0; x < 128; x++) {
-      const nx = (x - 64) / 60, ny = (y - 64) / 60, r2 = nx * nx + ny * ny;
-      const n = hh(Math.floor(x / 6), Math.floor(y / 6)) * 0.5 + hh(Math.floor(x / 3), Math.floor(y / 3) + 50) * 0.3 + hh(x, y) * 0.2;
+  return canvas(256, 256, (g) => {
+    const img = g.createImageData(256, 256), d = img.data;
+    const sn = (x: number, y: number, c: number) => { const ix = Math.floor(x / c), iy = Math.floor(y / c), fx = x / c - ix, fy = y / c - iy; const a = hh(ix, iy), b = hh(ix + 1, iy), e = hh(ix, iy + 1), f = hh(ix + 1, iy + 1); const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy); return a + (b - a) * u + (e - a) * v + (a - b - e + f) * u * v; };
+    for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) {
+      const nx = (x - 128) / 120, ny = (y - 128) / 120, r2 = nx * nx + ny * ny;
+      const n = sn(x, y, 24) * 0.5 + sn(x + 300, y, 10) * 0.3 + sn(x, y + 500, 4) * 0.2;
       const edge = 1 - r2 - (n - 0.5) * 0.45;
-      const a = clamp01(edge * 2.2);
+      const a = clamp01(edge * 3.2);
       const nz = Math.sqrt(Math.max(0, 1 - r2));
-      const lit = clamp01(-nx * 0.45 - ny * 0.6 + nz * 0.65);
-      const base = 0.62 + lit * 0.42, warm = lit * 0.06;
-      const i = (y * 128 + x) * 4;
-      d[i] = Math.min(255, (base + warm) * 236); d[i + 1] = Math.min(255, (base + warm * 0.6) * 238); d[i + 2] = Math.min(255, base * 252); d[i + 3] = a * 255;
+      const lit = clamp01(-nx * 0.4 - ny * 0.7 + nz * 0.55);
+      const base = 0.5 + lit * 0.55, warm = Math.pow(lit, 3) * 0.12;
+      const i = (y * 256 + x) * 4;
+      d[i] = Math.min(255, (base + warm) * 240); d[i + 1] = Math.min(255, (base + warm * 0.6) * 240); d[i + 2] = Math.min(255, (base * 0.96 + 0.06) * 252); d[i + 3] = a * 255;
     }
     g.putImageData(img, 0, 0);
   });
@@ -181,7 +186,7 @@ class Trans3D {
   private outMat: THREE.ShaderMaterial;
   private env: THREE.Texture | null = null;
   private W = 1; private H = 1;
-  samples = 5;
+  samples = 7;
 
   constructor() {
     this.canvas = document.createElement('canvas');
@@ -203,7 +208,7 @@ class Trans3D {
     this.cam.position.set(0, 0, 0);
     // the blur costs several renders: fewer samples on small or weak devices
     const nav = navigator as Navigator & { deviceMemory?: number };
-    if ((nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4) this.samples = 3;
+    if ((nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4) this.samples = 4;
   }
 
   private size() {
@@ -224,10 +229,10 @@ class Trans3D {
   // ---------------------------------------------------------------- the sets
 
   private light(scene: THREE.Scene, warm = 0xffe2b8, amb = 0x6a7aa8) {
-    scene.add(new THREE.HemisphereLight(amb, 0x1a120c, 0.9));
-    const key = new THREE.DirectionalLight(warm, 3.2); key.position.set(-4, 6, 5); scene.add(key);
+    scene.add(new THREE.HemisphereLight(amb, 0x1a120c, 0.55));
+    const key = new THREE.DirectionalLight(warm, 2.6); key.position.set(-4, 6, 5); scene.add(key);
     const rim = new THREE.DirectionalLight(0x9ab8ff, 1.6); rim.position.set(5, 2, -4); scene.add(rim);
-    if (this.env) scene.environment = this.env;
+    if (this.env) { scene.environment = this.env; (scene as unknown as { environmentIntensity: number }).environmentIntensity = 0.3; }
   }
 
   private build(kind: Kind3D) {
@@ -265,9 +270,9 @@ class Trans3D {
       };
     } else if (kind === 'plumes') {
       this.light(scene, 0xfff0d8, 0x9aa8c8);
-      const tones: [string, string, string][] = [['#fbf4e6', '#e9dcc6', '#c9b89a'], ['#e8d2b0', '#b88a58', '#7a5634'], ['#f4f0ea', '#d6d0c8', '#a8a2a0'], ['#d8b88a', '#a06a3a', '#5a3a1e']];
+      const tones: [string, string, string][] = [['#f3e6cc', '#d8b888', '#9a7046'], ['#e0bc86', '#a8703a', '#5e3a18'], ['#f6f0e6', '#ddd2c0', '#b0a28c'], ['#cfa06a', '#8e5a2a', '#4a2a10']];
       const mats = tones.map((t, k) => new THREE.MeshStandardMaterial({ map: featherTex(k * 7 + 1, t), transparent: true, alphaTest: 0.04, side: THREE.DoubleSide, roughness: 0.85, depthWrite: false }));
-      const geo = new THREE.PlaneGeometry(0.8, 1.6, 6, 12);
+      const geo = new THREE.PlaneGeometry(1.1, 2.2, 6, 12);
       { const p = geo.attributes.position as THREE.BufferAttribute; for (let k = 0; k < p.count; k++) { const x = p.getX(k), y = p.getY(k); p.setZ(k, x * x * 0.35 - (y * y) * 0.08); } geo.computeVertexNormals(); }
       const n = this.samples >= 5 ? 110 : 80;
       for (let i = 0; i < n; i++) { const m = new THREE.Mesh(geo, mats[i % mats.length]); m.renderOrder = i; scene.add(m); objs.push({ o: m, i }); }
@@ -278,7 +283,7 @@ class Trans3D {
         o.visible = t > -0.02 && t < 1.05;
         if (!o.visible) return;
         const sway = Math.sin(t * 7 + hh(i, 3) * 6) * (0.6 + hh(i, 4) * 0.6);
-        o.scale.setScalar(0.7 + hh(i, 5) * 0.8);
+        o.scale.setScalar(0.8 + hh(i, 5) * 0.9);
         o.position.set((hh(i, 6) * 2.2 - 1.1) * hw + sway, hv + 1.6 - t * (2 * hv + 3.2), z);
         o.rotation.set(Math.sin(t * 5 + i) * 0.7 + 0.3, t * 2 + hh(i, 7) * 6, sway * 0.5 + hh(i, 8) * 6.28);
       };
@@ -345,12 +350,13 @@ class Trans3D {
     const set = this.build(kind);
     const r = this.r;
     const n = Math.max(1, this.samples);
-    const shutter = Math.min(0.06, dT * 0.85);
+    // a 120-degree shutter, its start jittered each frame so a few samples still read as one smooth smear
+    const shutter = Math.min(0.03, dT * 0.34), jit = Math.random() / Math.max(1, n);
     // the objects, several times across the shutter, averaged
     r.setRenderTarget(this.acc); r.setClearColor(0x000000, 0); r.clear(true, false, false);
     this.accMat.uniforms.uTex.value = this.tmp.texture; this.accMat.uniforms.uW.value = 1 / n;
     for (let s = 0; s < n; s++) {
-      const Ts = T - shutter * (s / Math.max(1, n - 1));
+      const Ts = T - shutter * Math.min(1, (s + jit) / Math.max(1, n - 1));
       for (const ob of set.objs) set.pose(ob, Ts);
       r.setRenderTarget(this.tmp); r.clear(true, true, false);
       r.render(set.scene, this.cam);
