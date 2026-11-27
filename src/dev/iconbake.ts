@@ -302,13 +302,6 @@ function roundPoly(pts: P2[], r: number, n = 4): P2[] {
   }
   return out;
 }
-/** [icons9] the symbols' colour: lacquered brass in a muted natural pigment (brushed, a little worn), not a toy glaze */
-function glaze(c: number): THREE.MeshStandardMaterial {
-  const col = new THREE.Color(c), hsl = { h: 0, s: 0, l: 0 };
-  col.getHSL(hsl);
-  col.setHSL(hsl.h, hsl.s * 0.62, hsl.l * 0.86);
-  return M(col.getHex(), { rough: 0.38, metal: 0.3, tex: 'metal', env: 1.0 });
-}
 /**
  * [icons9] The symbols as real objects: a shape cut from lacquered sheet brass, a fine chamfer on its edges, set on a thin
  * plate of bare brass a little bigger than it (realistic thicknesses, nothing puffy).
@@ -321,8 +314,6 @@ function jewel(pts: P2[], m: THREE.Material, o: { depth?: number; bevel?: number
   g.position.z = o.z ?? 0;
   return g;
 }
-/** a stroke (a polyline of width w) in the jewel style */
-const jewelStroke = (pts: P2[], w: number, m: THREE.Material, o: Parameters<typeof jewel>[2] = {}) => jewel(strokePts(pts, w, 10), m, o);
 /** a faceted solid from an outline that is star-shaped about its centre: flat facets rise from every corner to a raised
  * point in the middle (a cut-metal star, a gem), with straight sides and a flat back */
 function facetSolid(pts: P2[], rise: number, depth: number, m: THREE.Material, cx = 0, cy = 0): THREE.Mesh {
@@ -365,12 +356,6 @@ function curvedArrow(m: THREE.Material, cw: boolean): THREE.Group {
   const t0 = nrm(sub(arc[1], arc[0])), r0: P2 = [arc[0][0] / R, arc[0][1] / R];
   const cap: P2[] = Array.from({ length: 9 }, (_, i) => { const t = (Math.PI * (i + 1)) / 10; return [arc[0][0] - Math.cos(t) * r0[0] * (w / 2) - Math.sin(t) * t0[0] * (w / 2), arc[0][1] - Math.cos(t) * r0[1] * (w / 2) - Math.sin(t) * t0[1] * (w / 2)] as P2; });
   return cloison(roundPoly([...out.slice(0, n), ...head, ...inn.slice(0, n).reverse(), ...cap], 0.03, 3), m);
-}
-/** [icons9] a struck medallion: a lacquered disc in a turned brass rim, its glyph raised in bare brass (a coin's thickness) */
-function enamelButton(m: THREE.Material, glyph: P2[][]): THREE.Group {
-  const g = grp(ext(shape(circlePts(0.8, 64)), 0.09, m, 0.025, 3, 64), at(torus(0.84, 0.055, C.brass(), Math.PI * 2, 12, 72), 0, 0, 0));
-  for (const p of glyph) g.add(at(ext(shape(p), 0.04, C.brass(), 0.018, 2, 32), 0, 0, 0.075));
-  return g;
 }
 const bar = (w: number, h: number, x = 0, y = 0): P2[] => rrectPts(w, h, Math.min(w, h) * 0.3).map(([px, py]) => [px + x, py + y] as P2);
 /** a little sunny landscape for the wall-art icon */
@@ -1211,7 +1196,8 @@ function cartoonGlove(): O {
 }
 
 // ---- hanger: a shaped wooden coat hanger with a polished brass hook and a trouser bar
-function woodHanger(): O {
+/** a shaped wooden coat hanger (with its trouser bar unless `bar` is false: a scarf or a cape hangs on the shoulders) */
+function woodHanger(bar = true): O {
   const wd = M(0xc8864a, { tex: 'grain', rough: 0.45 }), brass = BRASS();
   const top: P2[] = [], bot: P2[] = [];
   for (let i = 0; i <= 24; i++) {
@@ -1221,9 +1207,9 @@ function woodHanger(): O {
     top.push([x, y]); bot.push([x, y - th]);
   }
   const body = ext(shape(roundPoly([...top, ...bot.reverse()], 0.05, 3)), 0.07, wd, 0.035, 3, 48);
-  const bar = grp(rod([-0.8, -0.56, 0], [0.8, -0.56, 0], 0.04, wd, 16), ...[-1, 1].map((s) => tube([[s * 0.86, -0.36, 0], [s * 0.86, -0.46, 0], [s * 0.8, -0.56, 0]], 0.014, CHROME(), 8, 6)));
+  const trouserBar = grp(rod([-0.8, -0.56, 0], [0.8, -0.56, 0], 0.04, wd, 16), ...[-1, 1].map((s) => tube([[s * 0.86, -0.36, 0], [s * 0.86, -0.46, 0], [s * 0.8, -0.56, 0]], 0.014, CHROME(), 8, 6)));
   const hook = grp(at(cyl(0.045, 0.055, 0.08, brass, 16), 0, 0.16, 0), tube([[0, 0.14, 0], [0, 0.36, 0], [0.03, 0.5, 0], [0.13, 0.6, 0], [0.25, 0.57, 0], [0.3, 0.46, 0], [0.27, 0.38, 0]], 0.03, brass, 48, 10), at(ball(0.036, brass, 12, 10), 0.27, 0.37, 0));
-  return grp(body, bar, hook);
+  return bar ? grp(body, trouserBar, hook) : grp(body, hook);
 }
 
 // ---- stats: three glass level tubes in a brass rack on a walnut plinth, filled to three heights
@@ -1808,7 +1794,7 @@ const ICONS: Record<string, Spec> = {
   jar: { make: () => fireflyJar(), yaw: 0.3, pitch: 0.16, edge: 0.55 },
   hanger: { make: () => woodHanger(), yaw: 0.26, pitch: 0.16 },
   brush: {
-    make: () => at(grp(lathe(smoothProfile([[0, -0.8], [0.08, -0.78], [0.1, -0.3], [0.08, 0.2], [0.1, 0.3]], 2), C.wood(), 16), at(lathe(smoothProfile([[0.1, 0], [0.13, 0.1], [0.13, 0.25], [0.11, 0.32]], 2), C.silver(), 16), 0, 0.28, 0),
+    make: () => at(grp(lathe(smoothProfile([[0, -0.8], [0.08, -0.78], [0.1, -0.3], [0.08, 0.2], [0.1, 0.3]], 3), M(0x7e2620, { rough: 0.2, tex: 'plain', env: 1.1 }), 24), at(lathe(smoothProfile([[0.1, 0], [0.13, 0.1], [0.13, 0.25], [0.11, 0.32]], 2), CHROME(), 24), 0, 0.28, 0),
       at(lathe(smoothProfile([[0.11, 0], [0.14, 0.12], [0.11, 0.3], [0, 0.42]], 3), M(0xf2d9a0, { tex: 'grain' }), 16), 0, 0.6, 0), at(lathe(smoothProfile([[0.09, 0], [0.06, 0.1], [0, 0.16]], 2), C.blue(), 12), 0, 0.92, 0)), 0, 0, 0, 0, 0, -0.75), yaw: 0.3, pitch: 0.3,
   },
   pushpin: { make: () => at(grp(lathe(smoothProfile([[0, 0.7], [0.36, 0.66], [0.38, 0.56], [0.2, 0.5], [0.18, 0.2], [0.42, 0.1], [0.44, 0.02], [0, 0]], 3), C.red(), 32), at(cyl(0.025, 0.012, 0.6, C.silver(), 8), 0, -0.3, 0)), 0, 0, 0, 0, 0, 0.55), yaw: 0.4, pitch: 0.3 },
@@ -1841,9 +1827,9 @@ const ICONS: Record<string, Spec> = {
   wd_feather: { make: () => pheasantFeather(), yaw: 0.26, pitch: 0.26 },
   tophat: { make: () => grp(lathe(smoothProfile([[0, -0.5], [0.95, -0.5], [0.98, -0.44], [0.62, -0.4], [0.56, -0.3], [0.55, 0.5], [0.6, 0.6], [0, 0.62]], 2), M(0x3a2a52, { rough: 0.45, tex: 'felt' }), 48), at(cyl(0.565, 0.57, 0.2, C.red(), 40), 0, -0.26, 0), at(ext(shape(rrectPts(0.2, 0.16, 0.04)), 0.04, C.gold(), 0.02, 1), 0.2, -0.26, 0.55, 0, 0.35, 0)), yaw: 0.4, pitch: 0.32 },
   wd_glasses: { make: () => grp(...[-0.48, 0.48].map((x) => at(torus(0.36, 0.075, C.gold(), Math.PI * 2, 10, 40), x, 0, 0)), ...[-0.48, 0.48].map((x) => at(cyl(0.33, 0.33, 0.03, M(0x8fd8ff, { rough: 0.06, metal: 0.2, tex: null, env: 2 }), 32), x, 0, -0.01, Math.PI / 2)), at(torus(0.14, 0.055, C.gold(), Math.PI, 8, 16), 0, 0.08, 0), ...[-1, 1].map((sx) => tube([[sx * 0.84, 0.1, -0.02], [sx * 0.92, 0.12, -0.3], [sx * 0.9, 0.0, -0.5]], 0.04, C.gold(), 12, 6))), yaw: 0.3, pitch: 0.2 },
-  wd_scarf: { make: () => { const st = new THREE.MeshStandardMaterial({ map: stripeTex(['#b8322e', '#efdcb8', '#b8322e', '#2f4f8a'], [3, 1, 3, 1]), roughness: 0.8, side: THREE.DoubleSide }); const fr = M(0xefdcb8, { rough: 0.8, tex: 'weave' }); const drape = ribbon([[-0.2, -0.95, 0.12], [-0.17, -0.2, 0.1], [-0.08, 0.32, 0.08], [0.04, 0.44, 0], [0.16, 0.32, -0.08], [0.24, -0.2, -0.1], [0.28, -0.75, -0.1]], 0.38, st, { normal: [0, 0, 1], seg: 48 }); const fringe = (x: number, y: number, z: number) => grp(...[0, 1, 2, 3, 4].map((i) => at(cyl(0.022, 0.022, 0.15, fr, 5), x - 0.14 + i * 0.07, y - 0.08, z))); return grp(at(hanger(), 0.04, 0.62, 0, 0, 0, 0, 0.62), drape, fringe(-0.2, -0.95, 0.12), fringe(0.28, -0.75, -0.1)); }, yaw: 0.3, pitch: 0.16 },
+  wd_scarf: { make: () => { const st = new THREE.MeshStandardMaterial({ map: stripeTex(['#b8322e', '#efdcb8', '#b8322e', '#2f4f8a'], [3, 1, 3, 1]), roughness: 0.8, side: THREE.DoubleSide }); const fr = M(0xefdcb8, { rough: 0.8, tex: 'weave' }); const drape = ribbon([[-0.2, -0.95, 0.12], [-0.17, -0.2, 0.1], [-0.08, 0.32, 0.08], [0.04, 0.44, 0], [0.16, 0.32, -0.08], [0.24, -0.2, -0.1], [0.28, -0.75, -0.1]], 0.38, st, { normal: [0, 0, 1], seg: 48 }); const fringe = (x: number, y: number, z: number) => grp(...[0, 1, 2, 3, 4].map((i) => at(cyl(0.022, 0.022, 0.15, fr, 5), x - 0.14 + i * 0.07, y - 0.08, z))); return grp(at(woodHanger(false), 0.04, 0.56, -0.02, 0, 0, 0, 0.6), drape, fringe(-0.2, -0.95, 0.12), fringe(0.28, -0.75, -0.1)); }, yaw: 0.3, pitch: 0.16 },
   wd_sweater: { make: () => knitJumper(), yaw: 0.26, pitch: 0.14 },
-  wd_cape: { make: () => { const vel = M(0x5a3a8a, { rough: 0.6, tex: 'felt' }), lin = M(0xc8963e, { rough: 0.4, tex: 'plain' }); const prof = smoothProfile([[0.88, -0.86], [0.74, -0.4], [0.62, 0.1], [0.56, 0.36], [0.44, 0.5], [0.2, 0.56]], 3).map(([x, y]) => V2c(x, y)); const shell = (r: number, m: THREE.Material, side: THREE.Side) => { const geo = new THREE.LatheGeometry(prof.map((p) => V2c(p.x * r, p.y)), 48, 0.2, Math.PI * 2 - 0.4); const p = geo.attributes.position as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), a = Math.atan2(x, z), t = Math.max(0, (0.2 - y) / 1.06), k = 1 + Math.sin(a * 6) * 0.12 * t; p.setXYZ(i, x * k, y, z * k); } geo.computeVertexNormals(); const me = mesh(geo, m); (me.material as THREE.Material).side = side; return me; }; return grp(shell(1, vel, THREE.FrontSide), shell(0.97, lin, THREE.BackSide), at(torus(0.3, 0.1, M(0x7a52b0, { rough: 0.6, tex: 'felt' }), Math.PI * 2, 10, 32), 0, 0.52, 0, Math.PI / 2, 0, 0, [1, 1, 0.7]), at(jewel(crescentPts(0.13, 0.11, [0.06, 0.035], 48), C.gold(), { rim: 0, depth: 0.04, bevel: 0.03 }), 0, 0.44, 0.3), at(hanger(), 0, 0.72, -0.05, 0, 0, 0, 0.55)); }, yaw: 0.35, pitch: 0.2 },
+  wd_cape: { make: () => { const vel = M(0x5a3a8a, { rough: 0.6, tex: 'felt' }), lin = M(0xc8963e, { rough: 0.4, tex: 'plain' }); const prof = smoothProfile([[0.88, -0.86], [0.74, -0.4], [0.62, 0.1], [0.56, 0.36], [0.44, 0.5], [0.2, 0.56]], 3).map(([x, y]) => V2c(x, y)); const shell = (r: number, m: THREE.Material, side: THREE.Side) => { const geo = new THREE.LatheGeometry(prof.map((p) => V2c(p.x * r, p.y)), 48, 0.2, Math.PI * 2 - 0.4); const p = geo.attributes.position as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i), a = Math.atan2(x, z), t = Math.max(0, (0.2 - y) / 1.06), k = 1 + Math.sin(a * 6) * 0.12 * t; p.setXYZ(i, x * k, y, z * k); } geo.computeVertexNormals(); const me = mesh(geo, m); (me.material as THREE.Material).side = side; return me; }; return grp(shell(1, vel, THREE.FrontSide), shell(0.97, lin, THREE.BackSide), at(torus(0.3, 0.1, M(0x7a52b0, { rough: 0.6, tex: 'felt' }), Math.PI * 2, 10, 32), 0, 0.52, 0, Math.PI / 2, 0, 0, [1, 1, 0.7]), at(jewel(crescentPts(0.13, 0.11, [0.06, 0.035], 48), C.gold(), { rim: 0, depth: 0.04, bevel: 0.03 }), 0, 0.44, 0.3), at(woodHanger(false), 0, 0.66, -0.05, 0, 0, 0, 0.55)); }, yaw: 0.35, pitch: 0.2 },
   wd_mirror: { make: () => handMirror(), yaw: 0.26, pitch: 0.16 },
   wd_frame: { make: () => grp(at(torus(0.66, 0.18, C.brass(), Math.PI * 2, 14, 48), 0, 0, 0), at(cyl(0.56, 0.56, 0.06, M(0x6ec2f0, { rough: 0.5 }), 40), 0, 0, -0.05, Math.PI / 2), ...[0, 1, 2, 3].map((i) => at(ext(shape(starPts(0.12, 0.05, 4)), 0.06, C.gold(), 0.03, 2), Math.cos(i * Math.PI / 2 + Math.PI / 4) * 0.66, Math.sin(i * Math.PI / 2 + Math.PI / 4) * 0.66, 0.16))), yaw: 0.3, pitch: 0.2 },
   bp_box: {
@@ -1901,9 +1887,6 @@ const ICONS: Record<string, Spec> = {
   door_out: { make: () => roundDoor(false), yaw: 0.18, pitch: 0.1 },
   door_in: { make: () => roundDoor(true), yaw: 0.3, pitch: 0.1 },
 };
-function hanger(): O {
-  return grp(tube([[-0.9, -0.4, 0], [-0.4, -0.12, 0], [0, 0.12, 0], [0.4, -0.12, 0], [0.9, -0.4, 0], [0.82, -0.5, 0], [-0.82, -0.5, 0], [-0.9, -0.4, 0]], 0.08, C.wood(), 64, 8), at(torus(0.2, 0.045, C.brass(), Math.PI * 1.3, 8, 24), 0.05, 0.42, 0, 0, 0, -0.6), at(cyl(0.045, 0.045, 0.14, C.brass(), 8), 0, 0.2, 0));
-}
 function gear(m: THREE.Material, teeth = 10, web?: THREE.Material): O {
   const pts: P2[] = [], N = teeth * 12;
   for (let i = 0; i < N; i++) {
@@ -1927,9 +1910,6 @@ function sweater(col = 0x3a7a4c): O {
   const hem = at(ext(shape(rrectPts(0.98, 0.14, 0.05)), 0.36, M(0xfff0cc, { rough: 0.8, tex: 'knit' }), 0.04, 2), 0, -0.72, 0);
   const heart = at(ext(shape(Array.from({ length: 40 }, (_, i) => { const t = (i / 40) * Math.PI * 2; return [(16 * Math.sin(t) ** 3) / 16 * 0.2, ((13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 16) * 0.2] as P2; })), 0.04, M(0xfff0cc, { rough: 0.7, tex: null }), 0.02, 1), 0, 0.02, 0.22);
   return grp(body, collar, hem, heart);
-}
-function speaker(): O {
-  return grp(at(ext(shape(rrectPts(0.36, 0.62, 0.08)), 0.46, C.brass(), 0.05, 2), -0.55, 0, 0), at(lathe(smoothProfile([[0.16, 0], [0.24, 0.2], [0.5, 0.48], [0.56, 0.52], [0.5, 0.54], [0.2, 0.25], [0.12, 0.02]], 2), C.brass(), 32), -0.42, 0, 0, 0, 0, -Math.PI / 2), at(cyl(0.48, 0.48, 0.04, M(0x5a3a28, { tex: 'weave' }), 32), 0.08, 0, 0, 0, 0, Math.PI / 2));
 }
 const texCache = new Map<string, THREE.Texture>();
 function mapTex(): THREE.Texture {

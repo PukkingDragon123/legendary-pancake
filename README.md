@@ -122,6 +122,12 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   overlapping scales; the moon gem is a brilliant cut whose facets flash in turn as the light swings round it. On the
   shelf, Sleep is a brass oil lamp with a ruby glass font and a flame in its glass chimney, and the journal is plain
   tooled leather with gilt corners (no logos).
+  Polished (icons10): the flat symbols (tick, cross, plus, minus, info, arrows, play, pause, heart, shield, notes,
+  waves) are cloisonné, domed glassy enamel in a fine brass wire on a bevelled brass back, and stars and the sun are
+  burnished gilt. The alarm is a brass twin-bell alarm clock (the clock stays the cuckoo), the microphone a vintage
+  chrome broadcast mic on a brass yoke, the jar a corked firefly jar, the nest woven twigs with a robin-blue egg, the
+  pointer a cartoon glove, the hanger shaped wood with a brass hook, stats glass level tubes, nights a night-sky
+  medallion, things an open keepsake box.
 - **Storybook type (v16)**: two faces, both SIL OFL 1.1 and bundled as WOFF2 (no web fonts), defined once in
   `src/ui/font.ts`: **Fraunces** with its soft terminals for titles, signs, buttons, names and big numbers (and its
   italic for Pip's handwriting), and **Figtree**, a clear, friendly sans, for copy, dialogue and small text. Text is
