@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { freshSave } from '../game/store.ts';
-import { answersFrom, applyAnswers, hm, planOf, STEPS, toMin, type Answers } from './script.ts';
+import { answersFrom, applyAnswers, blocksOf, fromBlocks, hm, planOf, STEPS, toMin, type Answers } from './script.ts';
 
 const base = (): Answers => ({ ...answersFrom(freshSave()), you: 'Sam', name: 'Hoot', goals: ['sleep_better'], wake: '07:00', hours: 8, latency: 'normal', phone: 'sometimes', chrono: 'between', caffeine: 'morning', relax: ['waves'], mic: true });
 
@@ -50,8 +50,43 @@ describe('applyAnswers', () => {
     applyAnswers(s, { ...base(), name: '  ' });
     expect(s.name).toBe('Pip');
   });
-  it('has a page for every profile question', () => {
-    const fields = STEPS.map((x) => x.field).filter(Boolean);
-    for (const f of ['you', 'species', 'name', 'goals', 'wake', 'hours', 'latency', 'phone', 'chrono', 'caffeine', 'relax', 'mic']) expect(fields).toContain(f);
+  it('asks five short questions, then the plan', () => {
+    expect(STEPS.map((x) => x.field ?? x.kind)).toEqual(['you', 'species', 'wake', 'hours', 'blocks', 'plan']);
+  });
+});
+
+describe('what gets in the way of sleep', () => {
+  it('fills the profile fields the old questions set', () => {
+    const a = fromBlocks(base(), ['phone', 'caffeine', 'slow']);
+    expect(a.phone).toBe('nightly');
+    expect(a.caffeine).toBe('late');
+    expect(a.latency).toBe('slow');
+    expect(a.goals).toEqual(['sleep_better', 'less_phone', 'fall_asleep']);
+    const s = freshSave();
+    applyAnswers(s, a);
+    expect(s.profile.latency).toBe('slow');
+    expect(s.profile.phone).toBe('nightly');
+    expect(s.blocker.enabled).toBe(true);
+    expect(planOf(a).tips).toContain('Last coffee by 2 pm');
+  });
+  it('a busy mind and a slow drift together make a long wind-down', () => {
+    const a = fromBlocks(base(), ['mind', 'slow']);
+    expect(a.latency).toBe('long');
+    expect(planOf(a).windDownMin).toBe(60);
+    expect(planOf(a).tips).toContain('Jot your thoughts in the Book');
+  });
+  it('nothing ticked keeps the gentle defaults', () => {
+    const a = fromBlocks(base(), []);
+    expect(a).toMatchObject({ latency: 'normal', phone: 'sometimes', caffeine: 'morning', goals: ['sleep_better'] });
+    const s = freshSave();
+    applyAnswers(s, a);
+    expect(s.blocker.enabled).toBe(freshSave().blocker.enabled);
+    expect(s.sleep.mic).toBe(true);
+    expect(s.name).toBe('Hoot');
+  });
+  it('reads the answer back from a saved profile', () => {
+    expect(blocksOf(freshSave().profile)).toEqual([]);
+    expect(blocksOf({ latency: 'long', phone: 'nightly', caffeine: 'late' })).toEqual(['phone', 'caffeine', 'mind', 'slow']);
+    expect(answersFrom(freshSave()).blocks).toEqual([]);
   });
 });

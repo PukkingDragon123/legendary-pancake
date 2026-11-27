@@ -1,8 +1,11 @@
 // [ui7] The interview's form layer as real materials, drawn smooth at device resolution and cached as data URLs:
 // cream laid paper with a deckled edge, a dog-ear and the odd coffee ring; a stitched tan leather folio; a brass
-// bulldog clip; ink ticks and loops that draw themselves; hand-ruled lines; masking tape; a sticky note with a lifting corner; a brass slider rail and knob; little acorns.
+// bulldog clip; ink ticks and loops that draw themselves; hand-ruled lines; masking tape; a sticky note with a lifting corner; a brass slider rail and knob;
+// [tutor] a carved walnut step rail with brass studs (the form's progress), an engraved brass number plate and brass
+// corner caps on the folio.
 // Sizes stay in texels (the form's `--u` unit); each piece is painted at S device px per texel.
-import { BRASS_OLD, GOLD, Real, bevel, box, circle, deviceK, dome, metal, polygon, tubeX, union } from '../ui/real/paint.ts';
+import { BRASS_OLD, GOLD, Real, bevel, box, circle, cutBox, deviceK, dome, glow, metal, polygon, ring, segment, subtract, tubeX, union, wood } from '../ui/real/paint.ts';
+import { rivet } from '../ui/real/orn.ts';
 import { texCanvas } from '../ui/real/tex.ts';
 
 const cache = new Map<string, string>();
@@ -201,14 +204,53 @@ export function knobURL() {
     void bevel;
   });
 }
-/** a little acorn for the progress row: done (inked), now (gold), to come (outline) */
-export function acornURL(state: 'done' | 'now' | 'todo') {
-  return art('acorn7' + state, 6, 6, (g) => {
-    const [cap, nut] = state === 'done' ? ['#6a4420', '#a06a34'] : state === 'now' ? ['#a87a22', '#f0c060'] : ['#d8c8a0', '#efe3c6'];
-    if (state === 'todo') { g.strokeStyle = '#b8a47a'; g.lineWidth = 0.5; g.beginPath(); g.ellipse(3, 3.9, 1.8, 1.9, 0, 0, Math.PI * 2); g.stroke(); g.beginPath(); g.ellipse(3, 2.2, 2.6, 1.3, 0, Math.PI, Math.PI * 2); g.stroke(); return; }
-    g.shadowColor = state === 'now' ? 'rgba(255,200,80,.7)' : 'rgba(0,0,0,.3)'; g.shadowBlur = 0.6 * S();
-    const ng = g.createLinearGradient(1.2, 2, 4.8, 6); ng.addColorStop(0, nut); ng.addColorStop(1, cap);
-    g.fillStyle = ng; g.beginPath(); g.ellipse(3, 3.9, 1.8, 1.9, 0, 0, Math.PI * 2); g.fill();
-    g.fillStyle = cap; g.beginPath(); g.ellipse(3, 2.4, 2.6, 1.3, 0, Math.PI, Math.PI * 2); g.lineTo(5.6, 2.8); g.lineTo(0.4, 2.8); g.fill();
+// ------------------------------------------------------------------ [tutor] progress: a step rail, a number plate
+
+/** the step rail's width in texels for n steps (the art adds a 1-texel shadow margin all round) */
+export const railW = (n: number) => 10 * n + 4;
+/**
+ * A carved walnut rail with one brass stud per form ((railW(n) + 2) x 14 texels with its margin): filed forms are
+ * polished domed studs joined by an inlaid brass line, the form on the paper is a bigger gilt boss with a lit amber
+ * cabochon, the ones to come are empty sockets bored into the wood.
+ */
+export function stepRailURL(n: number, at: number) {
+  const W = railW(n), H = 12;
+  return art(`steps1:${n}:${at}`, W + 2, H + 2, (g) => {
+    const r = new Real(W, H, S(), 1);
+    r.part(cutBox(0, 2, W, 8, 2.2), bevel(2.4, 1.6), wood('walnut', { along: 'x', ox: at * 13 }), { line: true });
+    r.carve(subtract(cutBox(1.2, 3.2, W - 2.4, 5.6, 1.4), cutBox(1.7, 3.7, W - 3.4, 4.6, 1.1)), 0.35, 0.3); // a cut fillet round the face
+    const cx = (i: number) => 7 + i * 10, cy = 6;
+    if (at > 0) r.part(segment(cx(0), cy, cx(Math.min(at, n - 1)), cy, 0.7), 2.9, metal(GOLD, { along: 'x', polish: 0.8 }), { line: 0.5 });
+    for (let i = 0; i < n; i++) {
+      const x = cx(i);
+      if (i < at) rivet(r, x, cy, 2.3, 2.4, GOLD, 0.85);
+      else if (i === at) {
+        r.part(circle(x, cy, 3.6), dome(x, cy, 3.6, 3.6, 1.6, 2.6), metal(GOLD, { polish: 0.9 }), { line: true });
+        r.carve(ring(x, cy, 2.3, 2.7), 0.4, 0.3);
+        r.part(circle(x, cy, 1.9), dome(x, cy, 1.9, 1.9, 1.1, 3.6), glow('#ffcf5a'), { line: 0.5 });
+      } else { r.carve(circle(x, cy, 1.9), 1.2, 1.3); r.line(circle(x, cy, 1.9), 0.6, 0.3); }
+    }
+    g.drawImage(r.canvas({ shadow: { dy: 0.8, blur: 1.2, a: 0.45 } }), 0, 0, W + 2, H + 2);
+  });
+}
+/** A small engraved brass number plate, w x 12 texels plus a 1-texel margin: notched corners, an engraved border, two rivets. */
+export function numberPlateURL(w: number) {
+  return art(`numplate1:${w}`, w + 2, 14, (g) => {
+    const r = new Real(w, 12, S(), 1);
+    const notch = (x: number, y: number, ww: number, hh: number, nn: number) => subtract(box(x, y, ww, hh, 0), union(circle(x, y, nn), circle(x + ww, y, nn), circle(x, y + hh, nn), circle(x + ww, y + hh, nn)));
+    r.part(notch(0, 0, w, 12, 2.2), bevel(2, 1.4), metal(BRASS_OLD, { along: 'x', polish: 0.65 }), { line: true });
+    r.carve(subtract(notch(1.8, 1.8, w - 3.6, 8.4, 1.5), notch(2.3, 2.3, w - 4.6, 7.4, 1.3)), 0.4, 0.3);
+    rivet(r, 4, 6, 1, 2, BRASS_OLD, 0.5); rivet(r, w - 4, 6, 1, 2, BRASS_OLD, 0.5);
+    g.drawImage(r.canvas({ shadow: { dy: 0.8, blur: 1.2, a: 0.4 } }), 0, 0, w + 2, 14);
+  });
+}
+/** A brass corner cap for the leather folio: 14 x 14 texels plus a 1-texel margin, the top-left one (flip it for the others). */
+export function cornerCapURL() {
+  return art('cap1', 16, 16, (g) => {
+    const r = new Real(14, 14, S(), 1);
+    r.part(polygon([[0, 0], [14, 0], [14, 2.4], [2.4, 14], [0, 14]]), bevel(2.2, 2.2), metal(BRASS_OLD, { polish: 0.7 }), { line: true });
+    r.carve(segment(10.6, 2.6, 2.6, 10.6, 0.35), 0.4, 0.3);
+    rivet(r, 4.2, 4.2, 1.3, 2.2, GOLD, 0.8);
+    g.drawImage(r.canvas({ shadow: { dy: 0.8, blur: 1.4, a: 0.5 } }), 0, 0, 16, 16);
   });
 }

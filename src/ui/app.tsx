@@ -24,6 +24,7 @@ import { Shop } from './shop/shop.tsx';
 import { Profile } from './profile/profile.tsx'; // [profile]
 import { Intro } from './intro.tsx';
 import { TalkText } from './talkview.tsx'; // [dialog10]
+import { Tutorial } from './tutorial/tutorial.tsx'; // [tutor] the guided tour after the interview
 import type { TalkView } from './talk.ts';
 import { Box3, Vector3 } from 'three';
 
@@ -151,6 +152,7 @@ export function App() {
       {ph === 'ringing' && <AlarmOverlay />}
       {ph === 'morning' && <Morning />}
       {!s.onboarded && ph === 'day' && <Intro />}
+      <Tutorial />
       <Flyers />
       <Ceremony />
       <Dialogs />

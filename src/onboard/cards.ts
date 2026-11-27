@@ -21,6 +21,7 @@ const NODES: Record<string, { node: string; o?: SlotOpts }> = {
   'goals:fall_asleep': { node: 'sheep', o: { pitch: 0.22, yaw: 0.9 } },
 };
 const PACK = 'interview/cards.glb';
+const BLOCK_KEY: Record<string, string> = { phone: 'phone:nightly', caffeine: 'drink:coffee', slow: 'latency:slow' };
 const toMinutes = (hhmm: string) => { const [h, m] = hhmm.split(':').map(Number); return (h || 0) * 60 + (m || 0); };
 
 /** largest side one unit, standing on its base at the origin, wrapped in a group */
@@ -113,6 +114,9 @@ export class CardModels {
    * 'ampm:<am|pm>', 'owl:<species>', 'clock', 'pillows:<n>', 'remind'.
    */
   model = (key: string): { obj: THREE.Object3D; opts?: SlotOpts } | null => {
+    // [tutor] the obstacles page borrows the old pages' objects (a sleepless alarm clock stands for a busy mind)
+    if (key === 'blocks:mind') return fromProp(alarmClock(() => 2 * 60 + 47), { pitch: 0.16, yaw: 0.3, sway: 0.28 });
+    if (key.startsWith('blocks:')) key = BLOCK_KEY[key.slice(7)] ?? key;
     if (key.startsWith('owl:')) {
       const sp = key.slice(4);
       let a = this.owls.get(sp);
