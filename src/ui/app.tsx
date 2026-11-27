@@ -21,6 +21,7 @@ import { ClockScreen } from './clockscreen.tsx';
 import { Book } from './book/book.tsx';
 import { BuildMode } from './build.tsx';
 import { Shop } from './shop/shop.tsx';
+import { Profile } from './profile/profile.tsx'; // [profile]
 import { Intro } from './intro.tsx';
 import { TalkText } from './talkview.tsx'; // [dialog10]
 import type { TalkView } from './talk.ts';
@@ -139,6 +140,7 @@ export function App() {
           : panel.value === 'wardrobe' ? <Wardrobe />
           : panel.value === 'map' ? <MapPanel />
           : panel.value === 'quests' ? <QuestBoard />
+          : panel.value === 'profile' ? <Profile />
           : null
       )}
       {panel.value === 'settings' && <Settings />}

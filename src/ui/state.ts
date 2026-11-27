@@ -6,9 +6,10 @@ import { holdMs } from './talk.ts';
 export type Tab = 'home' | 'sleep' | 'breathe' | 'journal' | 'market';
 /**
  * Every full-screen place the player can be. The three big buttons open 'sleep', 'clock' and
- * 'book'; the side tools open 'build', 'shop', 'wardrobe', 'quests', 'map' and 'settings'.
+ * 'book'; the side tools open 'build', 'shop', 'wardrobe', 'quests', 'map' and 'settings'; the portrait on the
+ * name sign opens 'profile' (photo studio, frames, friends, ranks).
  */
-export type Panel = null | 'sleep' | 'breathe' | 'clock' | 'book' | 'build' | 'shop' | 'wardrobe' | 'decorate' | 'map' | 'settings' | 'night' | 'quests';
+export type Panel = null | 'sleep' | 'breathe' | 'clock' | 'book' | 'build' | 'shop' | 'wardrobe' | 'decorate' | 'map' | 'settings' | 'night' | 'quests' | 'profile';
 
 /** Legacy tab signal: setting it opens the matching panel (older code still writes to it). */
 export const tab = signal<Tab>('home');

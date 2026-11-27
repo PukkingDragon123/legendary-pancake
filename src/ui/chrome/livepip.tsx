@@ -195,6 +195,8 @@ function installStyles() {
 .lp-slot::after{content:'';position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 3px 6px rgba(10,8,20,.45),inset 0 -2px 4px rgba(255,255,255,.12);pointer-events:none}
 .lp-slot>img.still{object-fit:cover;transform:translateY(6%) scale(1.08)}
 .lp-slot.live>img.still{visibility:hidden}
+.lp-slot>img.photo{object-fit:cover}
+.lp-slot.photo>canvas{display:none}
 .lp>.lp-frame{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
 .lp.tapped>.lp-frame{animation:lpBump .4s cubic-bezier(.3,1.6,.5,1)}
 @keyframes lpBump{40%{transform:scale(1.06,.95)}70%{transform:scale(.97,1.03)}}
@@ -209,7 +211,7 @@ const FX: Partial<Record<OwlFx, UiFxKind>> = { heart: 'hearts', zzz: 'motes', fe
  * The owl in its frame. `size` CSS px square; `frame` a frame id (src/assets/frames.ts); `look` the owl to show
  * (default: yours). `live` false shows the still. Tapping it (`tappable`) makes the owl react.
  */
-export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; live?: boolean; tappable?: boolean; class?: string; night?: boolean; pokeKey?: number }) {
+export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; live?: boolean; tappable?: boolean; class?: string; night?: boolean; pokeKey?: number; photo?: string }) {
   installStyles();
   const host = useRef<HTMLSpanElement>(null);
   const slot = useRef<HTMLSpanElement>(null);
@@ -220,7 +222,7 @@ export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; li
   const [, tick] = useState(0);
   useEffect(() => { const id = setInterval(() => tick((n) => n + 1), 60000); return () => clearInterval(id); }, []);
   const hRef = useRef<Host | null>(null);
-  const live = p.live !== false;
+  const live = p.live !== false && !p.photo; // [profile] a studio photo stands in for the live owl
   // the still (shown until the live owl is in, and as the fallback)
   const [still, setStill] = useState('');
   useEffect(() => { let u = ''; try { u = portrait(look); } catch { u = ''; } setStill(u); }, [lookKey(look)]);
@@ -255,7 +257,7 @@ export function OwlPortrait(p: { size: number; frame: string; look?: OwlLook; li
   return (
     <span ref={host} class={'lp ' + (p.class ?? '') + (tapped % 2 ? ' tapped' : tapped ? ' tapped2' : '')} style={{ width: `${S}px`, height: `${S}px`, '--lp-clip': clipCircle } as Record<string, string>} onClick={tap}>
       <img class="lp-sky" src={portraitSky(night || (sceneRef.current?.sky.night ?? 0) > 0.5, Math.round(art * 1.4))} style={box} alt="" draggable={false} />
-      <span class="lp-slot" ref={slot} style={box}>{still && <img class="still" src={still} alt="" draggable={false} />}</span>
+      <span class={'lp-slot' + (p.photo ? ' photo' : '')} ref={slot} style={box}>{p.photo ? <img class="photo" src={p.photo} alt="" draggable={false} /> : still && <img class="still" src={still} alt="" draggable={false} />}</span>
       <img class="lp-frame" src={frameArt(p.frame, art)} alt="" draggable={false} />
     </span>
   );
