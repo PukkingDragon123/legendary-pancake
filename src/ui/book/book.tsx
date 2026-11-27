@@ -365,7 +365,12 @@ function Hypno(p: { n: Night; h12: boolean }) {
     }
     g.textAlign = 'center'; g.fillStyle = '#6b5a48';
     const hrs = Math.ceil((t1 - t0) / 3.6e6);
-    for (let h = 0; h <= hrs; h += Math.max(1, Math.round(hrs / 5))) { const t = t0 + h * 3.6e6; if (t > t1) break; g.fillText(clockOf(new Date(t), p.h12).replace(':00', ''), xOf(t), H - 10); }
+    for (let h = 0; h <= hrs; h += Math.max(1, Math.round(hrs / 5))) {
+      const t = t0 + h * 3.6e6;
+      if (t > t1) break;
+      const label = clockOf(new Date(t), p.h12), half = g.measureText(label).width / 2;
+      g.fillText(label, Math.max(L0 + half, Math.min(R0 - half, xOf(t))), H - 10);
+    }
   }, [p.n.id]);
   return <div class="bk2-hypno" ref={box}><canvas ref={ref} role="img" aria-label="Sleep stages through the night" /></div>;
 }

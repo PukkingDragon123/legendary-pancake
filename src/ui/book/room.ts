@@ -33,8 +33,8 @@ const ease = (k: number) => (k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k));
 const BOARD = { at: V(-2.1, 0, -2.28), ry: 0.42, w: 1.62, h: 1.08, y: 1.47 };
 const SCREEN = { x: 2.16, z: -2.7, w: 1.6, h: 1.0, top: 2.28, caseY: 2.36 };
 const CART = { at: V(1.66, 0, -0.32), ry: 0, top: 0.78 };
-const STOOL = V(-1.16, 0, -1.93);
-const LEDGERS = V(3.13, 0, -2.3);
+const STOOL = V(-1.1, 0, -2.42);
+const LEDGERS = V(1.08, 0, -2.52);
 const DIARY = { at: V(-0.22, DESK_TOP, -0.68), ry: 0.14 };
 
 const boardRight = V(Math.cos(BOARD.ry), 0, -Math.sin(BOARD.ry));
@@ -46,8 +46,8 @@ interface Shot { target: THREE.Vector3; yaw: number; pitch: number; fit: [number
 function shotOf(spot: Spot, portrait: boolean): Shot {
   switch (spot) {
     case 'room': return { target: V(0.1, 1.36, -1.7), yaw: 0.02, pitch: 0.12, fit: portrait ? [4.2, 2.6] : [5.7, 2.7] };
-    case 'board': return { target: boardCentre.clone().addScaledVector(boardRight, 0.2).add(V(0, -0.08, 0)), yaw: BOARD.ry - 0.04, pitch: 0.06, fit: [2.25, 1.5] };
-    case 'screen': return { target: screenCentre.clone().add(V(0.22, -0.14, 0)), yaw: -0.24, pitch: 0.07, fit: [2.5, 1.6] };
+    case 'board': return { target: boardCentre.clone().addScaledVector(boardRight, 0.3).add(V(0, -0.1, 0)), yaw: BOARD.ry - 0.1, pitch: 0.06, fit: [2.6, 1.55] };
+    case 'screen': return { target: screenCentre.clone().add(V(-0.18, -0.14, 0)), yaw: 0.3, pitch: 0.07, fit: [2.6, 1.65] };
     case 'desk': return { target: V(0.02, 1.0, -1.3), yaw: 0.0, pitch: 0.3, fit: [2.3, 1.4] };
     case 'diary': return { target: DIARY.at.clone().add(V(0.02, 0.06, 0.02)), yaw: 0.06, pitch: 0.95, fit: [0.66, 0.46] };
   }
@@ -169,11 +169,13 @@ export class Briefing {
     sc.setStage(o);
     o.pip.pose = 'stand';
     o.pip.setMood('happy');
-    this.buildBoard();
-    this.buildScreen();
-    this.buildCart();
-    this.buildPerches();
-    this.buildDiary();
+    try {
+      this.buildBoard();
+      this.buildScreen();
+      this.buildCart();
+      this.buildPerches();
+      this.buildDiary();
+    } catch (e) { this.dispose(); throw e; } // never leave a half-built room on screen
     // a little extra light where the talking happens (the office's lamps are by the desk and the clock)
     this.boardLight = new THREE.PointLight(0xffe2b8, 1.4, 3.4, 1.6);
     this.boardLight.position.copy(boardCentre).addScaledVector(boardNormal, 1.1).add(V(0, 0.5, 0));
@@ -470,14 +472,15 @@ export class Briefing {
     if (id === this.slideId || !this.brief) { this.slideId = id; return; }
     this.slideId = id;
     sfx('tick_brass', 0.4, 0.7);
-    setTimeout(() => sfx('drawer_close', 0.18, 1.6), 90);
+    this.later(0.09, () => sfx('drawer_close', 0.18, 1.6));
     this.dip = 1;
     const b = this.brief;
-    setTimeout(() => {
+    this.later(0.17, () => {
+      if (this.slideId !== id) return;
       this.poi = paintSlide(this.slideCv, id, b);
       this.slideTex.needsUpdate = true;
       this.laserNext = 0;
-    }, 170);
+    });
   }
 
   /** The part of the screen left for the room (CSS px). */
@@ -489,11 +492,16 @@ export class Briefing {
   intro(then: Spot) {
     this.spot = 'room';
     this.cam = null;
-    setTimeout(() => { this.rollWant = 1; sfx('whoosh_cloth', 0.35, 0.9); sfx('drawer', 0.2, 0.7); }, 350);
-    setTimeout(() => { this.powerWant = 1; sfx('ui_toggle', 0.4, 0.8); }, 1150);
-    setTimeout(() => { this.revealWant = 1; sfx('scribble', 0.32, 0.95); }, 900);
-    setTimeout(() => { this.go(then); this.onIntro?.(); }, 1700);
+    this.later(0.35, () => { this.rollWant = 1; sfx('whoosh_cloth', 0.35, 0.9); sfx('drawer', 0.2, 0.7); });
+    this.later(0.9, () => { this.revealWant = 1; sfx('scribble', 0.32, 0.95); });
+    this.later(1.15, () => { this.powerWant = 1; sfx('ui_toggle', 0.4, 0.8); });
+    this.later(1.7, () => { this.go(then); this.onIntro?.(); });
   }
+
+  /** run `f` after `sec` seconds of the office's own time */
+  private later(sec: number, f: () => void) { void this.office.after(sec).then(() => { if (!this.gone) f(); }); }
+  private gone = false;
+  private lamp = true;
 
   get at() { return this.spot; }
 
@@ -507,13 +515,13 @@ export class Briefing {
     if (want !== this.pipSpot) this.flyPip(want);
     else this.gesture();
     this.coverWant = spot === 'diary' ? 1 : 0;
-    if (spot === 'diary' || was === 'diary') setTimeout(() => sfx(spot === 'diary' ? 'book_open' : 'book_close', 0.4), 250);
-    this.office.lampOn(spot !== 'screen');
+    if (spot === 'diary' || was === 'diary') this.later(0.25, () => sfx(spot === 'diary' ? 'book_open' : 'book_close', 0.4));
+    if (this.lamp !== (spot !== 'screen')) { this.lamp = spot !== 'screen'; this.office.lampOn(this.lamp); }
   }
 
   private perch(p: 'board' | 'screen' | 'chair') {
-    if (p === 'board') return { at: STOOL.clone(), ry: -0.25 };
-    if (p === 'screen') return { at: LEDGERS.clone(), ry: -0.45 };
+    if (p === 'board') return { at: STOOL.clone(), ry: 0.08 };
+    if (p === 'screen') return { at: LEDGERS.clone(), ry: 0.45 };
     return { at: PIP_AT.clone(), ry: 0 };
   }
   private flyPip(to: 'board' | 'screen' | 'chair') {
@@ -534,7 +542,7 @@ export class Briefing {
     else pip.setMood('happy');
     const look = this.spot === 'board' ? boardCentre : this.spot === 'screen' ? screenCentre : this.spot === 'diary' ? DIARY.at : null;
     pip.lookAt = look ? look.clone() : null;
-    if (look) setTimeout(() => { if (this.office.pip.lookAt) this.office.pip.lookAt = null; }, 1800);
+    if (look) this.later(1.8, () => { this.office.pip.lookAt = null; });
   }
   /** a happy little reaction (a tap on Pip) */
   poke() { this.office.pip.poke(); }
@@ -644,6 +652,8 @@ export class Briefing {
   }
 
   dispose() {
+    if (this.gone) return;
+    this.gone = true;
     const o = this.office;
     o.rig = null;
     o.onPointer = null;

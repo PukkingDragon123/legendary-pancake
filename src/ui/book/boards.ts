@@ -217,10 +217,9 @@ export function paintBoardInk(c: HTMLCanvasElement, b: Brief): [number, number][
   // header
   const tw = mtext(g, b.sample ? 'Sample week' : 'This week', 84, 128, 88, MARK.blue, { seed: 3, rot: -0.012 });
   underline(g, 80, 84 + tw + 14, 150, MARK.blue, 7, 4);
-  mtext(g, b.range, 1452, 112, 44, MARK.black, { align: 'right', seed: 5, weight: 700 });
-  if (b.sample) {
-    mtext(g, 'not real yet: sleep with Pip', 1452, 162, 34, MARK.red, { align: 'right', seed: 6, weight: 700 });
-  } else if (b.demo) mtext(g, 'pretend nights', 1452, 162, 34, MARK.red, { align: 'right', seed: 6, weight: 700 });
+  mtext(g, b.range, 84 + tw + 44, 124, 44, MARK.black, { seed: 5, weight: 700 });
+  if (b.sample) mtext(g, 'not real yet: sleep with Pip!', 84 + tw + 44, 170, 32, MARK.red, { seed: 6, weight: 700 });
+  else if (b.demo) mtext(g, 'pretend nights', 84 + tw + 44, 170, 32, MARK.red, { seed: 6, weight: 700 });
 
   // the big number
   mtext(g, 'average sleep', 92, 246, 42, MARK.black, { seed: 7, weight: 700 });
@@ -286,8 +285,8 @@ export function paintBoardInk(c: HTMLCanvasElement, b: Brief): [number, number][
     pts.push([cx / 1536, top / 1024]);
   });
   const gy = yOf(b.goalMin / 60);
-  for (let x = X0 + 8; x < X1 - 10; x += 44) mline(g, [[x, gy], [x + 24, gy + 1]], MARK.red, 5, 80 + x, 0.8);
-  mtext(g, 'goal', X1 - 4, gy - 14, 34, MARK.red, { align: 'right', seed: 90, weight: 700 });
+  for (let x = X0 + 8; x < X1 - 20; x += 44) mline(g, [[x, gy], [x + 24, gy + 1]], MARK.red, 5, 80 + x, 0.8);
+  mtext(g, 'goal', X1 + 6, gy + 11, 30, MARK.red, { seed: 90, weight: 700 });
   g.restore();
   // dry felt: fine streaks where the marker ran thin
   g.save();
