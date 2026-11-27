@@ -26,16 +26,22 @@ export function startNightFlight(scene: Scene, trip: OwlLook, home: OwlLook): Ni
   scene.setStage(null);
   scene.setLook(trip);
   scene.setView('sleep');
+  scene.blurOverride = 0.1; // the whole valley stays crisp below him
   scene.setHour(23.2);
+  // a clear, still night for the flight (the real weather comes back when he lands)
+  scene.weather.hold = { kind: 'clear', intensity: 0.1, source: 'seasonal', temp: 10 };
+  scene.weather.snap();
   sky.starBoost = 0.75;
   const moonDir = V(-0.55, 0.42, -0.72).normalize();
   sky.moonOverride = { dir: moonDir, size: 0.085 };
+  scene.placeOwl('porch'); // out of the house (inside, he is carried by its floor)
   owl.node.visible = true;
   owl.pose = 'fly';
   owl.still = true;
   owl.lookAt = null;
   owl.setMood('calm');
 
+  let lastYaw: number | null = null;
   let t = 0, breath = 0, breathV = 0, bank = 0, trailT = 0;
   const pos = V(), vel = V(1, 0, 0);
   const R0 = 34, W = 0.085; // radius (blocks) and angular speed: a lap takes about 74 s
@@ -43,7 +49,7 @@ export function startNightFlight(scene: Scene, trip: OwlLook, home: OwlLook): Ni
     const a = time * W, r = R0 + Math.sin(time * 0.045) * 7;
     const x = HOUSE.x + Math.cos(a) * r, z = HOUSE.z + Math.sin(a) * r;
     const ground = Math.max(outerY(x, z), 0);
-    return out.set(x, ground + 12.5 + Math.sin(time * 0.13) * 1.2, z);
+    return out.set(x, ground + 21 + Math.sin(time * 0.13) * 1.5, z); // well above the crowns (the tallest stand about 12 high)
   };
   place(0, pos);
 
@@ -69,10 +75,14 @@ export function startNightFlight(scene: Scene, trip: OwlLook, home: OwlLook): Ni
   const director = (): CamShot => {
     const fwd = vel.clone().setY(0).normalize(), out = V(fwd.z, 0, -fwd.x); // the outside of the circle
     const swing = Math.sin(t * 0.05) * 0.6; // the camera slowly works round from behind to the side
-    const from = pos.clone().addScaledVector(fwd, -4.6 * Math.cos(swing)).addScaledVector(out, 2.2 + 3.2 * Math.sin(swing) + 1.2).add(V(0, 1.5, 0));
-    const at = pos.clone().addScaledVector(fwd, 5).addScaledVector(out, -2.5).add(V(0, -1.6, 0));
+    const from = pos.clone().addScaledVector(fwd, -5.4 * Math.cos(swing)).addScaledVector(out, 2.4 + 3.2 * Math.sin(swing) + 1.2).add(V(0, 2.2, 0));
+    const at = pos.clone().addScaledVector(fwd, 3.5).addScaledVector(out, -1.2).add(V(0, -0.9, 0));
     const d = from.clone().sub(at), dist = d.length();
-    return { yaw: Math.atan2(d.x, d.z), pitch: Math.asin(THREE.MathUtils.clamp(d.y / dist, -0.98, 0.98)), dist, target: at, fov: scene.camera.aspect < 0.8 ? 58 : 44 };
+    // keep the angle continuous as he circles (the scene eases its camera between shots: a jump of 2 pi would spin it)
+    let yaw = Math.atan2(d.x, d.z);
+    if (lastYaw !== null) { while (yaw - lastYaw > Math.PI) yaw -= Math.PI * 2; while (yaw - lastYaw < -Math.PI) yaw += Math.PI * 2; }
+    lastYaw = yaw;
+    return { snap: t < 0.15, yaw, pitch: Math.asin(THREE.MathUtils.clamp(d.y / dist, -0.98, 0.98)), dist, target: at, fov: scene.camera.aspect < 0.8 ? 58 : 44 };
   };
   scene.tickers.add(tick);
   scene.director = director;
@@ -83,12 +93,17 @@ export function startNightFlight(scene: Scene, trip: OwlLook, home: OwlLook): Ni
     pipScreen() { return scene.screenOf(owl.headWorld); },
     stop() {
       scene.tickers.delete(tick);
+      // hand the camera back with its angle wrapped into one turn, so it doesn't unwind the laps
+      const cur = (scene as unknown as { cur?: { yaw: number } }).cur;
+      if (cur) cur.yaw = Math.atan2(Math.sin(cur.yaw), Math.cos(cur.yaw));
       if (scene.director === director) scene.director = prev.director;
       scene.interceptor = prev.hook;
       owl.still = prev.still;
       owl.pose = 'stand';
       owl.wingbeat = 1;
       owl.node.rotation.set(0, 0, 0);
+      scene.weather.hold = null;
+      scene.blurOverride = null;
       sky.starBoost = 0;
       sky.moonOverride = null;
       scene.setHour(null);

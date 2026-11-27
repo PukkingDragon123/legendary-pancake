@@ -183,6 +183,8 @@ export class Scene {
   stage: Stage | null = null;
   /** takes over the camera while set (cinematics, build mode); return null to fall back to the view */
   director: ((dt: number, t: number) => CamShot | null) | null = null;
+  /** depth-of-field strength while a director wants it (null = the view's own) */
+  blurOverride: number | null = null;
   /** sees world pointer input first (build mode); return true to swallow it */
   interceptor: PointerHook | null = null;
   /** called every world frame after the built-in updates (weather, house animations...) */
@@ -978,7 +980,7 @@ export class Scene {
       this.post.grade.focus = c.dist;
       this.post.grade.focusRange = Math.max(3, c.dist * 0.3);
       this.post.grade.outlineFar = c.dist * 2.4 + 24; // [outline9] ink on the subject and round it, thinning out over the far woods
-      this.post.grade.blur = this.view === 'home' || this.view === 'sleep' || this.view === 'wake' ? 0.48 : 0.36; // [light7] crisper
+      this.post.grade.blur = this.blurOverride ?? (this.view === 'home' || this.view === 'sleep' || this.view === 'wake' ? 0.48 : 0.36); // [light7] crisper
       // [look5] inside the living room: Pip and what's round him sharp, the back wall a little soft and the world
       // outside the windows melting into bokeh
       const ink = home && !shot ? 1 - this.outK : 0;
