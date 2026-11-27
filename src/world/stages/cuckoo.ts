@@ -541,6 +541,8 @@ export class CuckooStage implements Stage {
     this.arcKey = '';
   }
   get dragging() { return this.dragHand; }
+  /** Barnaby glances over at the dial (a time was nudged from the ledger) */
+  glance() { this.shop?.look(v3(0, DIAL.y, CD), 1.6); }
 
   /** lay the arc's vertices from the bedtime hand round to the wake hand (as the hands show them now) */
   private layArc() {

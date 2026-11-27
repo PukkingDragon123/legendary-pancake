@@ -1,11 +1,9 @@
-// The Clock button's screen. [clock6] A 3D scene (src/world/stages/cuckoo.ts): a super big carved Black Forest
-// cuckoo clock on a wall in Pip's house, with your owl living behind its door (it pops out on the hour, when you tap
-// the door, to say hello and to present your numbers). The numbers are things in the room: carved tags hanging from
-// the clock (this week, per night, streak, asleep by), a row of little houses on the shelf (one per night, as tall
-// as you slept), the routine on a clipboard and a wall calendar. Tapping a thing flies the camera to it and pins a
-// paper card with its detail; the clipboard and the calendar slide in their 2D editors (below: the routine board
-// you drag into shape and the tear-off month calendar). The DOM adds only a Back control, a one-line title and the
-// cards. Without WebGL the painted wall (ClockWall2D) stands in.
+// The Clock button's screen. [clock15] A 3D scene (src/world/stages/cuckoo.ts, clockshop.ts): a super big carved Black
+// Forest cuckoo clock on the wall of Barnaby's workshop, Barnaby at his bench beside it, your owl living behind its
+// door (it pops out on the hour and when you tap the door). Its dial sets the night: drag the moon-tipped hand for
+// bedtime and the sun-tipped hand for waking. The ledger beside it (Clock3D, below) holds the night being set, the
+// week's nights, the alarm, the bedtime reminder, the clock's own settings and the week's numbers with the tear-off
+// month calendar. Without WebGL the painted wall (ClockWall2D: the routine board and the calendar) stands in.
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import type { JSX } from 'preact';
 import { sound } from '../audio/sound.ts';
@@ -415,6 +413,7 @@ const wrapMin = (m: number) => ((m % 1440) + 1440) % 1440;
 const hhmm = (m: number) => toHHMM(wrapMin(m));
 const ORDER3 = [1, 2, 3, 4, 5, 6, 0];
 const FINISH_HUE: Record<string, string> = { walnut: '#6a3b1f', oak: '#b67233', cherry: '#9c4425', linden: '#caa36e' };
+const FINISH_SHORT: Record<string, string> = { walnut: 'Walnut', oak: 'Oak', cherry: 'Cherry', linden: 'Linden' };
 
 type CkTab = 'alarm' | 'bedtime' | 'clock' | 'week';
 const TABS: { id: CkTab; label: string; icon: string }[] = [
@@ -635,7 +634,7 @@ function Clock3D(p: { onFail: () => void }) {
     if (t === (hand === 'bed' ? b : w)) { sound.play('ui_error', { volume: 0.25, gap: 100 }); return; }
     sound.play('clock_tick', { volume: 0.3, rate: hand === 'bed' ? 1.18 : 1.32, gap: 30 });
     commit(sel, hand, t);
-    stage.current?.shop?.look(v3d(), 1.6);
+    stage.current?.glance();
   };
   const pickDay = (d: number) => { if (d === sel) return; tap('pencil', 0.35); setSel(d); };
   const stamp = (days: number[], label: string, el: Element) => {
@@ -729,7 +728,7 @@ function Clock3D(p: { onFail: () => void }) {
           <div class="ck-set"><Px name="nest" size={30} /><span class="grow"><b>Cuckoo on the hour</b><small>Your owl pops out to call the hours</small></span><Toggle on={prefs.chime !== false} onChange={(v) => { setPref((x) => { x.chime = v; }); if (v) stage.current?.cuckoo(1); }} label="Cuckoo on the hour" /></div>
           <div class="ck-set"><Px name="clock" size={30} /><span class="grow"><b>Ticking</b><small>The pendulum's soft tick</small></span><Toggle on={!prefs.mute} onChange={(v) => setTick(v)} label="Ticking" /></div>
           <div class="ck-set col"><span><b>Wood</b><small>{FINISHES3.find((f) => f.id === prefs.finish)?.name ?? ''}</small></span>
-            <div class="ck-woods">{FINISHES3.map((f) => <button class={'ck-wood' + (prefs.finish === f.id ? ' on' : '')} style={{ '--wood': FINISH_HUE[f.id] ?? '#8a5a2a' } as JSX.CSSProperties} aria-label={f.name} aria-pressed={prefs.finish === f.id} onClick={() => { if (prefs.finish !== f.id) setFinish(f.id); }}><i /><span>{f.name.split(' ').pop()}</span></button>)}</div>
+            <div class="ck-woods">{FINISHES3.map((f) => <button class={'ck-wood' + (prefs.finish === f.id ? ' on' : '')} style={{ '--wood': FINISH_HUE[f.id] ?? '#8a5a2a' } as JSX.CSSProperties} aria-label={f.name} aria-pressed={prefs.finish === f.id} onClick={() => { if (prefs.finish !== f.id) setFinish(f.id); }}><i /><span>{FINISH_SHORT[f.id] ?? f.name}</span></button>)}</div>
           </div>
           <div class="ck-btns">
             <button class="btn oak sm" onClick={() => { const S = stage.current; if (!S) return; S.windUp(0); setTimeout(() => S.windUp(1), 420); savePrefs3(S.prefs); setPrefs({ ...S.prefs }); toast('Both weights wound up', undefined, 1500); }}>Wind the weights</button>
@@ -745,7 +744,7 @@ function Clock3D(p: { onFail: () => void }) {
               { k: 'Asleep by', v: st.avgBed === null ? '–' : fmtHM(toHHMM(st.avgBed), h12), s: 'on average' },
             ].map((x, i) => <Paper kind="cream" opts={{ edge: 0.2, edgeW: 5, seed: 30 + i }} class="ck-stat"><small>{x.k}</small><b>{x.v}</b><em>{x.s}</em></Paper>)}
           </div>
-          <div class="ck-bars" aria-label="The last seven nights">
+          {week.some((w) => w.n) ? <div class="ck-bars" aria-label="The last seven nights">
             <i class="goal" style={{ bottom: `${Math.min(100, (goal / 60 / 10) * 100)}%` }}><span>goal</span></i>
             {week.map((w) => (
               <button class={'ck-bar' + (w.n ? ' has' : '') + (w.goal ? ' met' : '') + (w.today ? ' today' : '')} disabled={!w.n} onClick={() => { if (w.n) { tap('paper_flip', 0.5); setReport(w.n); } }} aria-label={w.n ? `${w.day}: ${fmtDur(w.n.report!.asleep)}` : `${w.day}: no night tracked`}>
@@ -753,8 +752,7 @@ function Clock3D(p: { onFail: () => void }) {
                 <small>{w.day.slice(0, 2)}</small>
               </button>
             ))}
-          </div>
-          {!s.nights.some((n) => n.report && !n.simulated) && <p class="ck-note">Sleep with Pip tonight and your nights show up here.</p>}
+          </div> : <p class="ck-note">No nights this week yet. Sleep with Pip tonight and they show up here, one bar a night.</p>}
           <div class="ck-btns"><button class="btn oak sm" onClick={() => { tap('paper_flip', 0.5); setCal(true); }}><Px name="calendar" size={30} />Month calendar</button></div>
         </>}
       </div>
@@ -785,8 +783,6 @@ function Clock3D(p: { onFail: () => void }) {
     </div>
   );
 }
-/** the dial, for Barnaby's glance */
-const v3d = () => ({ x: 0, y: 0.43, z: 0.27 } as unknown as import('three').Vector3);
 
 /** The Clock panel: the 3D cuckoo clock in Barnaby's workshop, or the painted wall if 3D isn't available. */
 export function ClockScreen() {

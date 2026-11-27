@@ -139,7 +139,6 @@
 /* floating things: positioned by the scene every frame (transform), so they start at the top left */
 .ck-read, .ck-hint, .ck-chat { position: fixed; left: 0; top: 0; z-index: 7; pointer-events: none; will-change: transform; visibility: hidden; }
 .ck-read { min-width: 132px; padding: 7px 14px 8px; display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; color: #2a1a0c; background: linear-gradient(180deg, rgba(255, 250, 220, 0.55), rgba(255, 255, 255, 0) 40%, rgba(80, 40, 0, 0.18)), linear-gradient(100deg, #b98a38, #f3d27c 30%, #d8a94e 55%, #f6dc8e 78%, #a9772c); box-shadow: inset 0 1px 1px rgba(255, 250, 220, 0.9), inset 0 -2px 2px rgba(90, 50, 0, 0.45), inset 0 0 0 1px rgba(90, 50, 0, 0.55), 0 4px 6px rgba(20, 10, 0, 0.45), 0 12px 22px rgba(20, 10, 0, 0.3); animation: ckRead 0.25s var(--pop); }
-.ck-read::after { content: ''; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; margin-left: -6px; transform: rotate(45deg); background: #c99b44; box-shadow: inset -1px -1px 0 rgba(90, 50, 0, 0.55); }
 .ck-read.bed { color: #1a2048; }
 .ck-read small { font-family: var(--font-display); font-size: var(--t1); line-height: 1.1; color: #5a3a12; }
 .ck-read.bed small { color: #2b3470; }
@@ -234,7 +233,7 @@
 .ck-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 .ck-btns .btn { min-height: 44px; padding: 2px 14px; }
 .ck-btns .btn .ico { margin: -8px -2px -8px -6px; }
-.ck-note { font-size: 14px; line-height: 1.3; color: #d4c0a0; text-align: center; }
+.ck-note { padding: 14px 10px; font-size: 14px; line-height: 1.35; color: #d4c0a0; text-align: center; border: 2px dashed rgba(232, 184, 90, 0.3); }
 
 /* the week's numbers */
 .ck-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
