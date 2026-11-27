@@ -305,7 +305,9 @@ export function paintSticky(c: HTMLCanvasElement, lines: string[], tint: 'yellow
   gr.addColorStop(0, base[0]); gr.addColorStop(1, base[1]);
   g.fillStyle = gr; g.fillRect(0, 0, W, H);
   g.fillStyle = 'rgba(0,0,0,0.06)'; g.fillRect(0, 0, W, H * 0.09); // the gummed strip
-  const sz = W * 0.16;
+  // the largest hand that fits every line inside the note's margins
+  let sz = W * 0.16;
+  for (const t of lines) { g.font = `800 ${sz}px ${STACK}`; const w = g.measureText(textSafe(t)).width; if (w > W * 0.84) sz *= (W * 0.84) / w; }
   lines.forEach((t, i) => mtext(g, t, W / 2, H * 0.36 + i * sz * 1.25, sz, i === 0 ? '#2b2b33' : '#4a3f5c', { align: 'center', seed: 300 + i * 7 + t.length, weight: i === 0 ? 800 : 700, rot: -0.02 }));
 }
 
