@@ -16,6 +16,8 @@ import { sceneSound, sound } from '../../audio/sound.ts';
 import { OwlActor, type OwlFx } from '../../owl/actor.ts';
 import { featherColour, type OwlLook } from '../../owl/model.ts';
 import { at, Batch, bbox, cyl, lathe } from '../../onboard/kit.ts';
+import { instanceGLB, vivid } from '../../gfx/glb.ts';
+import { houseTex } from '../house/kit.ts';
 import type { OfficeMats } from '../../onboard/mats.ts';
 import { ramp, rgb, Tex, vnoise, fbm, hash } from '../../onboard/tex.ts';
 import { texCanvas, type TexName } from '../../ui/real/tex.ts';
@@ -46,7 +48,8 @@ const BOX = { x: NS.x - 0.15, z: NS.z - 0.02, s: 1.5 };
 const LAMP = { x: NS.x + 0.17, z: NS.z - 0.09 };
 const CLK = { x: NS.x + 0.17, z: NS.z + 0.11 };
 const PHONE0 = { x: NS.x + 0.0, z: NS.z + 0.13 };
-const BED = { x: 1.82, z0: Z0 + 0.04, len: 1.75, w: 1.18, top: 0.5 };
+/** Pip's bed (a model from his house, scaled to this footprint) */
+const BED = { x: 2.0, z0: Z0 + 0.18, len: 1.6, w: 1.6, top: 0.5 };
 const CAB = { x: -2.15, z: Z0 + 0.3, w: 0.78, h: 0.56, d: 0.44 };
 const GLOBE = { x: -1.72, z: -0.1 };
 /** the little record player on the window seat, left of the cushion */
@@ -415,7 +418,7 @@ export class BedroomStage implements Stage {
   private buildShell() {
     const m = this.m, b = new Batch();
     const floorMat = new THREE.MeshStandardMaterial({ map: once('boards', boardsTex), roughness: 0.62 });
-    const plaster = new THREE.MeshStandardMaterial({ map: once('plaster', plasterTex), roughness: 0.95 });
+    const plaster = new THREE.MeshStandardMaterial({ map: houseTex('planks'), color: 0xd8c2a6, roughness: 0.85 });
     this.disposers.push(() => { floorMat.dispose(); plaster.dispose(); });
     // floor (world-scaled UVs: 2 m a tile)
     const fl = new THREE.PlaneGeometry(X1 - X0, 5.6).rotateX(-Math.PI / 2);
@@ -460,7 +463,51 @@ export class BedroomStage implements Stage {
     b.add(m.walnut, at(bbox(X1 - X0, 0.12, 0.035, { r: 0.006 }), 0, 0, Z0 + 0.03));
     for (const sx of [X0, X1]) b.add(m.walnut, at(bbox(0.035, 0.12, 5.6, { r: 0.006 }), sx + (sx < 0 ? 0.017 : -0.017), 0, Z0 + 2.8));
     this.add(b.build('shell'));
+    // the oak itself: bark-clad posts where the walls meet, a great limb across under the ceiling, moss in the joints
+    const bark = new THREE.MeshStandardMaterial({ map: houseTex('bark'), roughness: 0.95 });
+    const moss = new THREE.MeshStandardMaterial({ map: houseTex('moss'), roughness: 1 });
+    for (const sx of [X0 + 0.16, X1 - 0.16]) {
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.28, H, 14, 6), bark);
+      const pp = post.geometry.attributes.position as THREE.BufferAttribute;
+      for (let i = 0; i < pp.count; i++) { const y = pp.getY(i), a2 = Math.atan2(pp.getZ(i), pp.getX(i)); const k = 1 + Math.sin(a2 * 5 + y * 3) * 0.06 + Math.sin(y * 7) * 0.03; pp.setX(i, pp.getX(i) * k); pp.setZ(i, pp.getZ(i) * k); }
+      post.geometry.computeVertexNormals();
+      post.position.set(sx, H / 2, Z0 + 0.16);
+      this.add(post);
+      const tuft = new THREE.Mesh(new THREE.SphereGeometry(0.22, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), moss);
+      tuft.scale.set(1.3, 0.45, 1.2); tuft.position.set(sx, 0, Z0 + 0.3); this.add(tuft);
+    }
+    const limb = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.24, X1 - X0, 14, 8).rotateZ(Math.PI / 2), bark);
+    { const lp = limb.geometry.attributes.position as THREE.BufferAttribute; for (let i = 0; i < lp.count; i++) { const x = lp.getX(i); lp.setY(i, lp.getY(i) + Math.sin(x * 1.3) * 0.06); } limb.geometry.computeVertexNormals(); }
+    limb.position.set(0, H - 0.32, Z0 + 1.2); this.add(limb);
+    this.disposers.push(() => { bark.dispose(); moss.dispose(); });
+    // bunting strung along the limb, as in Pip's living room
+    const flagCols = [0xb8463a, 0xe0b84c, 0x6f9a5a, 0x4a6aa8, 0xd8a0a8, 0xe8dcc0];
+    const flagMats = flagCols.map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.9, side: THREE.DoubleSide }));
+    const flagG = new THREE.BufferGeometry().setFromPoints([V(-0.11, 0, 0), V(0.11, 0, 0), V(0, -0.24, 0)]); flagG.computeVertexNormals();
+    for (const z of [Z0 + 1.05, Z0 + 2.4]) for (let i = 0; i < 22; i++) {
+      const x = X0 + 0.4 + i * ((X1 - X0 - 0.8) / 21), sag = Math.sin((i / 21) * Math.PI) * 0.28;
+      const f = new THREE.Mesh(flagG, flagMats[(i + (z > 0 ? 2 : 0)) % flagMats.length]);
+      f.position.set(x, H - 0.5 - sag, z); f.rotation.y = 0.1 * Math.sin(i); this.add(f);
+      this.swing.push({ o: f, ph: i * 0.7, k: 0.12 });
+    }
+    // a hanging lantern over the rug
+    const lant = new THREE.Group();
+    const cage = new THREE.MeshStandardMaterial({ color: 0x2c2420, metalness: 0.7, roughness: 0.4 });
+    lant.add(new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.9, 4).translate(0, 0.45, 0), cage));
+    const top = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.1, 8).translate(0, 0, 0), cage); lant.add(top);
+    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.2, 8).translate(0, -0.15, 0), new THREE.MeshBasicMaterial({ color: new THREE.Color(2.4, 1.6, 0.7) }));
+    glass.userData.noShadow = true; glass.castShadow = false; lant.add(glass);
+    for (let i = 0; i < 4; i++) { const a2 = (i / 4) * Math.PI * 2; const bar = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.22, 0.012).translate(Math.cos(a2) * 0.095, -0.15, Math.sin(a2) * 0.095), cage); lant.add(bar); }
+    lant.add(new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.08, 0.04, 8).translate(0, -0.27, 0), cage));
+    lant.position.set(-0.4, H - 0.95, -0.3);
+    this.add(lant);
+    this.swing.push({ o: lant, ph: 3.3, k: 0.04 });
+    const ll = new THREE.PointLight(0xffb868, 1.6, 4.5, 1.6); ll.position.set(-0.4, H - 1.12, -0.3); this.add(ll);
+    this.lanternLight = ll;
   }
+  private lanternLight: THREE.PointLight | null = null;
+  /** bunting and the lantern stir in the warm air */
+  private swing: { o: THREE.Object3D; ph: number; k: number }[] = [];
 
   private buildWindow() {
     const m = this.m, b = new Batch();
@@ -583,54 +630,34 @@ export class BedroomStage implements Stage {
     this.disposers.push(() => { grille.map?.dispose(); grille.dispose(); });
   }
 
+  /** Pip's own bed from his house (the twig nest bed unless another bed is placed), with a quilt-soft glow */
   private buildBed() {
-    const m = this.m, b = new Batch(), x = BED.x, z0 = BED.z0, L = BED.len, W = BED.w;
-    const zc = z0 + L / 2;
-    // the frame: posts, side rails, a footboard, and a headboard with a crescent moon cut through it
-    for (const sx of [-1, 1]) {
-      b.add(m.walnut, at(bbox(0.08, 1.12, 0.08, { r: 0.012, along: 'y' }), x + sx * (W / 2 + 0.02), 0, z0 + 0.04));
-      b.add(m.walnut, at(bbox(0.08, 0.62, 0.08, { r: 0.012, along: 'y' }), x + sx * (W / 2 + 0.02), 0, z0 + L));
-      b.add(m.walnut, at(bbox(0.05, 0.16, L, { r: 0.01 }), x + sx * (W / 2 + 0.02), 0.18, zc));
-      b.add(m.oak, at(new THREE.SphereGeometry(0.05, 16, 12), x + sx * (W / 2 + 0.02), 1.15, z0 + 0.04));
-      b.add(m.oak, at(new THREE.SphereGeometry(0.05, 16, 12), x + sx * (W / 2 + 0.02), 0.65, z0 + L));
-    }
-    b.add(m.walnut, at(bbox(W, 0.36, 0.04, { r: 0.01 }), x, 0.22, z0 + L));
-    const head = new THREE.Shape();
-    head.moveTo(-W / 2, 0); head.lineTo(W / 2, 0); head.lineTo(W / 2, 0.52); head.quadraticCurveTo(0, 0.72, -W / 2, 0.52); head.lineTo(-W / 2, 0);
-    const moon = new THREE.Path(); moon.absarc(0, 0.36, 0.13, -Math.PI * 0.55, Math.PI * 0.55, true); moon.absarc(0.06, 0.36, 0.11, Math.PI * 0.62, -Math.PI * 0.62, false);
-    head.holes.push(moon);
-    const hg = new THREE.ExtrudeGeometry(head, { depth: 0.045, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.008, bevelSegments: 2, curveSegments: 24 });
-    { const uv = hg.attributes.uv as THREE.BufferAttribute; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 1.5, uv.getY(i) * 1.5); }
-    b.add(m.walnut, at(hg, x, 0.52, z0 + 0.02));
-    this.add(b.build('bed'));
-    // mattress, quilt and pillows
-    const quilt = new THREE.MeshStandardMaterial({ map: once('quilt', quiltTex), roughness: 0.92 });
-    const sheet = new THREE.MeshStandardMaterial({ map: once('sheet', () => linenTex('#efe6d2')), roughness: 0.95 });
-    this.disposers.push(() => { quilt.dispose(); sheet.dispose(); });
-    const mat = new THREE.Mesh(bbox(W - 0.04, 0.2, L - 0.06, { r: 0.06 }), sheet); mat.position.set(x, 0.3, zc + 0.01); this.add(mat);
-    // the quilt: a soft slab that drapes over the sides, with a rumple
-    const qg = new THREE.BoxGeometry(W + 0.12, 0.06, L * 0.72, 30, 2, 30);
-    const p = qg.attributes.position as THREE.BufferAttribute;
-    for (let i = 0; i < p.count; i++) {
-      let qx = p.getX(i), qy = p.getY(i); const qz = p.getZ(i);
-      const edge = Math.max(0, Math.abs(qx) - (W / 2 - 0.08)) / 0.14;
-      qy -= edge * edge * 0.26; qx *= 1 - edge * 0.06;
-      qy += Math.sin(qz * 9 + qx * 4) * 0.008 + Math.sin(qx * 13) * 0.005;
-      p.setXYZ(i, qx, qy, qz);
-    }
-    qg.computeVertexNormals();
-    { const uv = qg.attributes.uv as THREE.BufferAttribute; for (let i = 0; i < uv.count; i++) uv.setXY(i, (p.getX(i) / (W + 0.12) + 0.5) * 1.4, (p.getZ(i) / (L * 0.72) + 0.5) * 2); }
-    const q = new THREE.Mesh(qg, quilt); q.position.set(x, 0.43, z0 + L - L * 0.36 - 0.02); this.add(q);
-    // the turned-down sheet and two plump pillows
-    const fold = new THREE.Mesh(bbox(W - 0.02, 0.045, 0.16, { r: 0.02 }), sheet); fold.position.set(x, 0.4, z0 + L * 0.28 + 0.02); this.add(fold);
-    const pil = new THREE.MeshStandardMaterial({ map: linenTex('#f4eee0'), roughness: 0.96 });
-    for (const sx of [-1, 1]) {
-      const pg = new THREE.SphereGeometry(0.2, 24, 16); pg.scale(1.25, 0.36, 0.72);
-      const pm = new THREE.Mesh(pg, pil); pm.position.set(x + sx * 0.24, 0.47, z0 + 0.24); pm.rotation.set(-0.25, sx * 0.08, sx * 0.04); this.add(pm);
-    }
-    // a small knitted owl-sized blanket roll at the foot
-    const roll = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, W - 0.3, 6, 16).rotateZ(Math.PI / 2), new THREE.MeshStandardMaterial({ map: linenTex('#b45a3c'), roughness: 1 }));
-    roll.position.set(x, 0.5, z0 + L - 0.18); this.add(roll);
+    const g = new THREE.Group();
+    g.position.set(BED.x, 0, BED.z0 + BED.len / 2);
+    g.rotation.y = -0.35;
+    this.add(g);
+    this.bedGroup = g;
+    void this.loadBed(this.bedModel);
+  }
+  private bedGroup: THREE.Group | null = null;
+  private bedModel = 'items/nestbed.glb';
+  /** show a different bed (the one placed in Pip's house) */
+  setBed(model: string) { if (model && model !== this.bedModel) { this.bedModel = model; void this.loadBed(model); } }
+  private async loadBed(model: string) {
+    const g = this.bedGroup;
+    if (!g) return;
+    try {
+      const { root } = await instanceGLB(model);
+      if (this.bedModel !== model) return;
+      vivid(root);
+      const bb = new THREE.Box3().setFromObject(root), size = bb.getSize(V(0, 0, 0)), c = bb.getCenter(V(0, 0, 0));
+      const k = BED.w / Math.max(size.x, size.z);
+      root.scale.setScalar(k);
+      root.position.set(-c.x * k, -bb.min.y * k, -c.z * k);
+      root.traverse((o) => { const me = o as THREE.Mesh; if (me.isMesh) { me.castShadow = true; me.receiveShadow = true; } });
+      g.clear();
+      g.add(root);
+    } catch (e) { console.warn('bed model failed', model, e); }
   }
 
   private buildNightstand() {
@@ -1204,6 +1231,7 @@ export class BedroomStage implements Stage {
     // the clock keeps the real time
     if (this.hands) { const d = new Date(), mn = d.getMinutes() + d.getSeconds() / 60, hr = (d.getHours() % 12) + mn / 60; this.hands.m.rotation.z = -(mn / 60) * Math.PI * 2; this.hands.h.rotation.z = -(hr / 12) * Math.PI * 2; }
     // paper stars sway, the globe turns
+    for (const w of this.swing) { w.o.rotation.x = Math.sin(this.time * 0.8 + w.ph) * w.k; w.o.rotation.z = Math.sin(this.time * 0.55 + w.ph * 1.3) * w.k * 0.5; }
     for (const s of this.stars) { s.o.rotation.z = Math.sin(this.time * 0.6 + s.ph) * 0.05; s.o.rotation.y = Math.sin(this.time * 0.3 + s.ph) * 0.6; }
     this.globeSpin += (0.12 - this.globeSpin) * Math.min(1, dt * 0.6);
     if (this.globeBall) this.globeBall.rotation.y += dt * this.globeSpin;
@@ -1237,6 +1265,7 @@ export class BedroomStage implements Stage {
     this.fairyLight.intensity = (0.9 + this.night * 0.6) * (1 - d * 0.35);
     if (this.bulbMat) this.bulbMat.color.setRGB(3.2, 2.3, 1.2).multiplyScalar(1 - d * 0.3);
     this.fill.intensity = (0.8 + day * 0.6) * (1 - d * 0.75);
+    if (this.lanternLight) this.lanternLight.intensity = 1.6 * flick * (1 - d * 0.6);
     this.look.exposure = 1.04 + this.night * 0.12 - d * 0.18;
     this.look.warm = 0.2 + day * 0.05 - d * 0.1;
   }

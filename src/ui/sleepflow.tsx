@@ -6,27 +6,28 @@
 //   2. "I'm going to bed": Pip puts the phone to bed in its little box and padlocks it, turning the key with his beak.
 //   3. He packs: a spin, a puff, and his trail backpack is on.
 //   4. He spins the floor globe and the room gives way to the real Earth: choose tonight's place.
-//   5. The flight (world/stages/flight.ts): Pip flies over the moonlit forest towards it while you breathe for five
+//   5. The flight (world/nightflight.ts): Pip circles high over the real Hollow at night, heading while you breathe for five
 //      minutes. He rises on each in-breath and glides on each out-breath; a quiet question to think about drifts in now
 //      and then; the time to arrival counts down. When he lands, the night begins (microphone, alarm, sounds).
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { BreathSession, PATTERN, type Phase } from '../breathe/session.ts';
 import { AREA, AREAS, type Area } from '../game/catalog.ts';
+import { ALL_ITEMS } from '../assets/registry.ts';
 import { blockStatus, demoTonight, setPhoneLock, setRoutine, startNight, syncReminders, tonight } from '../game/night.ts';
 import { DAY_NAME, setNight, toMin } from '../game/routine.ts';
 import { areaOpen, dayKey, edit, save } from '../game/store.ts';
 import { homeGuess } from '../world/globe/earth.ts';
 import { GlobeStage, type GlobePlace, type PinView } from '../world/globe/stage.ts';
 import { BedroomStage, type Hot } from '../world/stages/bedroom.ts';
-import { FlightStage } from '../world/stages/flight.ts';
+import { startNightFlight, type NightFlight } from '../world/nightflight.ts';
 import type { OwlLook } from '../owl/model.ts';
 import { transition } from './chrome/transition.ts';
 import { PLACE_SAT, SHEET, sheetUrl } from './globe/photos.ts';
 import { loadThumbs, thumbStyle, thumbsReady } from './globe/placephoto.ts';
 import { PLACE_INFO } from '../game/places.ts';
 import { Px } from './icons.tsx';
-import { fmtDur, fmtHM, haptic, tap, toast, Toggle } from './kit.tsx';
+import { fmtDur, fmtHM, haptic, Tags, tap, toast, Toggle } from './kit.tsx';
 import { ALARMS, SOUNDSCAPES, SoundTiles } from './sleep.tsx';
 import { bubble, panel, sceneRef } from './state.ts';
 import { fxMoment } from './fx/moment.ts';
@@ -96,6 +97,8 @@ export function SleepScreen() {
     st.setMic(save.value.sleep.mic);
     st.setSound(save.value.sleep.soundscape !== 'none');
     st.prepareTrip(save.value.look);
+    // Pip's own bed: the one placed in his house (the twig nest bed if none is)
+    { const home = JSON.stringify(save.value.home) + JSON.stringify(save.value.furniture); const bed = ALL_ITEMS.find((i) => i.cat === 'beds' && i.model && home.includes(`"${i.id}"`)); if (bed?.model) st.setBed(bed.model); }
     st.onPick = (id) => pickHot(id);
     st.onHover = (id) => setHover(id);
     sc.setStage(st);
@@ -255,13 +258,13 @@ export function SleepScreen() {
       {inRoom && <>
         <header class="bd-top">
           <button class="bd-back" aria-label="Back to the hollow" onClick={close}><Px name="arrow_left" size={30} /></button>
-          <div class="bd-title">
+          <div class="bd-title hh-wood-sm">
             <span class="bd-kicker">{DAY_NAME[plan.day]} night</span>
             <h1>Bedtime</h1>
           </div>
         </header>
 
-        <aside class={'bd-panel' + (wide ? ' bd-side' : ' bd-sheet')}>
+        <aside class={'bd-panel hh-wood-dark' + (wide ? ' bd-side' : ' bd-sheet')}>
           {!wide && <nav class="bd-tabs" role="tablist">
             {panes.map((p) => <button role="tab" aria-selected={pane === p.id} class={'bd-tabbtn' + (pane === p.id ? ' sel' : '')} onClick={() => { tap('ui_tab', 0.4); setPane(p.id); room.current?.go(p.id === 'tonight' ? 'room' : p.id); }}><Px name={p.icon} size={30} /><span>{p.title}</span></button>)}
           </nav>}
@@ -290,7 +293,7 @@ export function SleepScreen() {
               {wide && <h2><Px name="music" size={30} />Falling-asleep sounds</h2>}
               <SoundTiles cols={4} value={sp.soundscape} options={SOUNDSCAPES} onPick={(v) => set((x) => { x.soundscape = v; })} preview={(v) => { if (v === 'none') return 0; sound.preview(v, 5); return 5000; }} />
               {sp.soundscape !== 'none' && <div class="bd-row bd-seg"><span class="grow">Fade out</span>
-                {[[15, '15m'], [30, '30m'], [60, '1h'], [0, 'All night']].map(([v, l]) => <button class={'seg' + (sp.soundscapeMin === v ? ' sel' : '')} onClick={(e) => { e.stopPropagation(); tap('ui_tab', 0.35); set((x) => { x.soundscapeMin = v as number; }); }}>{l}</button>)}
+                <Tags value={sp.soundscapeMin} onChange={(v) => set((x) => { x.soundscapeMin = v; })} options={[{ v: 15, label: '15m' }, { v: 30, label: '30m' }, { v: 60, label: '1h' }, { v: 0, label: 'All night' }]} />
               </div>}
             </section>}
 
@@ -302,7 +305,7 @@ export function SleepScreen() {
               {sp.alarmOn && <>
                 <SoundTiles cols={4} value={sp.alarmSound} options={ALARMS} onPick={(v) => set((x) => { x.alarmSound = v; })} preview={(v) => { sound.preview(v, 4, 'alarm'); return 4000; }} />
                 <div class="bd-row bd-seg"><span class="grow">Smart wake</span>
-                  {[[0, 'Exact'], [10, '10m'], [20, '20m'], [30, '30m']].map(([v, l]) => <button class={'seg' + (sp.smartMin === v ? ' sel' : '')} onClick={(e) => { e.stopPropagation(); tap('ui_tab', 0.35); set((x) => { x.smartMin = v as number; }); }}>{l}</button>)}
+                  <Tags value={sp.smartMin} onChange={(v) => set((x) => { x.smartMin = v; })} options={[{ v: 0, label: 'Exact' }, { v: 10, label: '10m' }, { v: 20, label: '20m' }, { v: 30, label: '30m' }]} />
                 </div>
               </>}
             </section>}
@@ -311,7 +314,7 @@ export function SleepScreen() {
         </aside>
 
         <footer class="bd-foot">
-          <button class="bd-go" onClick={() => void goToBed()} disabled={busy}>
+          <button class="bd-go btn pillow night" onClick={() => void goToBed()} disabled={busy}>
             <span class="bd-go-moon" aria-hidden="true" />
             <span class="bd-go-txt"><b>I’m going to bed</b><small>Lock the phone · pack · fly to {area?.title ?? 'the woods'}</small></span>
           </button>
@@ -395,7 +398,7 @@ function GlobePick(p: { onBack: () => void; onGo: () => void }) {
     <div class={'bd bd-globe' + (ready ? ' ready' : '')} role="dialog" aria-label="Choose tonight's place">
       <header class="bd-top">
         <button class="bd-back" aria-label="Back to the bedroom" onClick={() => { tap('ui_back', 0.5); p.onBack(); }}><Px name="arrow_left" size={30} /></button>
-        <div class="bd-title"><span class="bd-kicker">Tonight’s flight</span><h1>Where to?</h1></div>
+        <div class="bd-title hh-wood-sm"><span class="bd-kicker">Tonight’s flight</span><h1>Where to?</h1></div>
       </header>
       <div class="bd-pins">
         {AREAS.map((x) => {
@@ -418,7 +421,7 @@ function GlobePick(p: { onBack: () => void; onGo: () => void }) {
         })}
       </div>
       <footer class="bd-foot">
-        <button class="bd-go" onClick={go} disabled={!a || !areaOpen(sel)}>
+        <button class="bd-go btn pillow night" onClick={go} disabled={!a || !areaOpen(sel)}>
           <span class="bd-go-moon" aria-hidden="true" />
           <span class="bd-go-txt"><b>Fly to {a?.title ?? '…'}</b><small>{a ? `${a.country} · a five-minute breathing flight` : ''}</small></span>
         </button>
@@ -442,14 +445,16 @@ function Flight(p: { onArrive: () => void; arriving: boolean }) {
   const [done, setDone] = useState(false);
   const ring = useRef<HTMLDivElement>(null);
   const bar = useRef<HTMLElement>(null);
-  const stage = useRef<FlightStage | null>(null);
+  const stage = useRef<NightFlight | null>(null);
   const session = useMemo(() => new BreathSession(pattern, FLIGHT_MIN), []);
 
   useEffect(() => {
-    let st: FlightStage | null = null;
+    // over the real Hollow: the oak, the clearing and the forest belts, at night
+    let st: NightFlight | null = null;
     if (sc) {
-      try { st = new FlightStage(sc.renderer, tripLook(save.value.look), sc.quality, Math.floor(Math.random() * 1000)); } catch (e) { console.warn('flight failed', e); }
-      if (st) { stage.current = st; st.resize(innerWidth, innerHeight); sc.setStage(st); }
+      sc.post.enabled = true;
+      try { st = startNightFlight(sc, tripLook(save.value.look), save.value.look); } catch (e) { console.warn('flight failed', e); }
+      stage.current = st;
     }
     sound.music('music_breath');
     sound.preload(['breath_in', 'breath_out', 'breath_hold']);
@@ -479,7 +484,7 @@ function Flight(p: { onArrive: () => void; arriving: boolean }) {
     };
     raf = requestAnimationFrame(loop);
     const qt = setInterval(() => setQ((n) => n + 1), 36000);
-    return () => { cancelAnimationFrame(raf); clearInterval(qt); sound.music(null); if (sc && st && sc.stage === st) sc.setStage(null); };
+    return () => { cancelAnimationFrame(raf); clearInterval(qt); sound.music(null); try { st?.stop(); } catch { /* scene busy */ } };
   }, []);
 
   // if you have dozed off by the time he lands, the night starts by itself
@@ -511,7 +516,7 @@ function Flight(p: { onArrive: () => void; arriving: boolean }) {
         <span class="bd-kicker">You’ve arrived</span>
         <h1>{a?.title ?? 'The woods'}</h1>
         <p>Pip will explore while you sleep, and be home with treasures by morning. The night starts in a moment.</p>
-        <button class="bd-go" onClick={() => { tap('ui_confirm', 0.5); p.onArrive(); }} disabled={p.arriving}>
+        <button class="bd-go btn pillow night" onClick={() => { tap('ui_confirm', 0.5); p.onArrive(); }} disabled={p.arriving}>
           <span class="bd-go-moon" aria-hidden="true" />
           <span class="bd-go-txt"><b>Goodnight</b><small>Start the night</small></span>
         </button>
