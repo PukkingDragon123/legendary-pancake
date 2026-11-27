@@ -77,8 +77,8 @@ function css() {
 .qp-lh{display:flex;align-items:center;gap:calc(1 * var(--u));letter-spacing:.06em;color:#5a3a1a}
 .qp-crest{width:calc(11 * var(--u));height:calc(11 * var(--u));margin:calc(-3 * var(--u)) 0 calc(-2 * var(--u)) calc(-2 * var(--u));background-size:100% 100%;flex:none}
 .qp-rail2{display:block;height:calc(14 * var(--u));margin:calc(-3 * var(--u)) calc(-2 * var(--u)) calc(-2 * var(--u)) 0;background-size:100% 100%;flex:none}
-.qp-no{display:flex;align-items:center;justify-content:center;gap:calc(1.5 * var(--u));width:calc(42 * var(--u));height:calc(14 * var(--u));margin-bottom:calc(5 * var(--u));background-size:100% 100%;flex:none;font:700 var(--a1)/1 var(--font-display);color:#3a2208;letter-spacing:.04em;text-shadow:0 1px 0 rgba(255,236,170,.75),0 -1px 0 rgba(70,40,6,.35);padding-bottom:calc(.5 * var(--u))}
-.qp-no small{font:600 var(--a1)/1 var(--font-body);font-size:.78em;color:#5a3a10;text-transform:uppercase;letter-spacing:.08em}
+.qp-no{display:flex;align-items:center;justify-content:center;gap:calc(1.5 * var(--u));width:calc(46 * var(--u));height:calc(15 * var(--u));margin-bottom:calc(5 * var(--u));background-size:100% 100%;flex:none;font:700 calc(8 * var(--u))/1 var(--font-display);color:#3a2208;letter-spacing:.04em;text-shadow:0 1px 0 rgba(255,236,170,.75),0 -1px 0 rgba(70,40,6,.35);padding-bottom:calc(.5 * var(--u))}
+.qp-no small{font:700 calc(5 * var(--u))/1 var(--font-body);color:#5a3a10;text-transform:uppercase;letter-spacing:.08em}
 .qp-cap{position:absolute;width:calc(16 * var(--u));height:calc(16 * var(--u));background-size:100% 100%;z-index:1;pointer-events:none}
 .qp-cap.tl{left:calc(-1 * var(--u));top:calc(-1 * var(--u))}
 .qp-cap.tr{right:calc(-1 * var(--u));top:calc(-1 * var(--u));transform:scaleX(-1)}
@@ -104,7 +104,8 @@ function css() {
 .qp-box{position:relative;width:calc(78 * var(--u));height:calc(26 * var(--u));border:0;background:transparent;cursor:pointer;padding:0;flex:none;margin-left:auto}
 .qp-box::before{content:'';position:absolute;inset:0;border:calc(2.4 * var(--u)) double rgba(140,64,44,.5)}
 .qp-box::after{content:'FOR OFFICE USE';position:absolute;left:0;right:0;top:calc(-6 * var(--u));font:700 var(--a1)/1 var(--font-body);font-size:max(9px,calc(var(--a1) * .62));letter-spacing:.16em;color:rgba(140,64,44,.72);text-align:center;white-space:nowrap}
-.qp-box b{position:relative;display:block;font:600 var(--a2) var(--font-display);letter-spacing:.06em;color:rgba(140,64,44,.42);white-space:nowrap;line-height:calc(26 * var(--u))}
+.qp-box.plan::after{display:none}
+.qp-box b{position:relative;display:block;font:600 var(--a2) var(--font-display);font-size:calc(var(--a2) * .8);letter-spacing:.04em;color:rgba(140,64,44,.42);white-space:nowrap;line-height:calc(26 * var(--u))}
 .qp-box.ready::before{border-color:#b33a1a;animation:qp-pulse 1s ease-in-out infinite}
 .qp-box.ready b{color:#b33a1a}
 @keyframes qp-pulse{50%{border-color:#e07a2a}}
@@ -112,7 +113,7 @@ function css() {
 .qp-box.inked::before{opacity:.35;transition:opacity .4s}
 .qp.thud .qp-sheet{animation:qp-thud .34s cubic-bezier(.3,1.6,.5,1)}
 @keyframes qp-thud{0%{transform:none}22%{transform:translateY(calc(1.6 * var(--u))) scale(.996,.992)}60%{transform:translateY(calc(-.4 * var(--u)))}100%{transform:none}}
-.qp-sticky{position:absolute;right:calc(-4 * var(--u));top:calc(-28 * var(--u));width:calc(56 * var(--u));min-height:calc(30 * var(--u));background-size:100% 100%;transform:rotate(5deg);z-index:4;border:0;cursor:pointer;font:600 var(--a1) var(--font-body);line-height:var(--a1);color:#3a2a0a;padding:calc(4 * var(--u)) calc(3 * var(--u));text-align:center}
+.qp-sticky{position:absolute;right:calc(-4 * var(--u));top:calc(-36 * var(--u));width:calc(56 * var(--u));min-height:calc(30 * var(--u));background-size:100% 100%;transform:rotate(5deg);z-index:4;border:0;cursor:pointer;font:600 var(--a1) var(--font-body);line-height:var(--a1);color:#3a2a0a;padding:calc(4 * var(--u)) calc(3 * var(--u));text-align:center}
 .qp.wide .qp-sticky{right:auto;left:calc(-62 * var(--u));top:calc(18 * var(--u));transform:rotate(-4deg)}
 .qp-sticky b{display:block;font:600 var(--a2) var(--font-body);line-height:calc(16 * var(--u));color:#8a2a1a;margin-top:calc(1 * var(--u))}
 .qp-sticky .qp-yes{display:flex;gap:calc(5 * var(--u));justify-content:center;margin-top:calc(2 * var(--u));font:600 var(--a1) var(--font-body)}
@@ -135,7 +136,8 @@ function css() {
 .qp-sweet{position:absolute;top:0;height:calc(4 * var(--u));border:var(--u) solid #b07a1a;border-bottom:0}
 .qp-plan{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(3 * var(--u));margin:calc(3 * var(--u)) 0}
 .qp-plan div{text-align:center;font:600 var(--a1) var(--font-body);color:#5a5f80}
-.qp-plan b{display:block;font:600 var(--a2) var(--font-body);color:#1d2552;line-height:calc(16 * var(--u))}
+.qp-plan b{display:block;font:600 var(--a2) var(--font-display);color:#1d2552;line-height:calc(16 * var(--u));white-space:nowrap}
+.qp-plan b small{font:700 var(--a1) var(--font-body);font-size:.55em;letter-spacing:.06em;margin-left:calc(.5 * var(--u));color:#5a5f80}
 .qp-plan .px{display:block;margin:0 auto calc(1 * var(--u))}
 .qp-terms{display:flex;flex-wrap:wrap;gap:calc(2 * var(--u)) calc(6 * var(--u));justify-content:center;font:600 var(--a1) var(--font-body);color:#17130f;margin-bottom:calc(3 * var(--u))}
 .qp-terms span{display:flex;align-items:center;gap:calc(1 * var(--u))}
@@ -301,7 +303,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
     }
     case 'multi': case 'choice': {
       const single = st.kind === 'choice';
-      hint = single ? 'pick one' : 'pick any';
+      hint = single ? 'pick one' : st.id === 'blocks' ? '' : 'pick any'; // [tutor] the obstacles page says it in its fine print
       if (st.id === 'relax') {
         // the sounds: a cassette recorder, a candle and a book; nine hand-labelled tapes to slide in
         const cur = a.relax;
@@ -378,7 +380,7 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
       body = (<>
         <div class="qp-plan">
           {[['candle', 'wind down', pl.windDown], ['zzz', 'bedtime', pl.bed], ['sun', 'wake up', pl.wake]].map(([ic, l, v]) => (
-            <div key={l}><Px name={ic} size={k * 14} class="px" /><b>{fmt(v, s.hour12).replace(/ ([AP]M)$/, '$1')}</b>{l}</div>
+            <div key={l}><Px name={ic} size={k * 14} class="px" /><b>{fmt(v, s.hour12).replace(/ [AP]M$/, '')}{s.hour12 && <small>{fmt(v, true).slice(-2)}</small>}</b>{l}</div>
           ))}
         </div>
         <div class="qp-terms">
@@ -426,8 +428,8 @@ export function Panel(p: { step: Step; index: number; total: number; s: PanelSta
         {body}
         <div class="qp-foot">
           {isPlan ? <div class="qp-fine">Sign, then Pip stamps it.</div>
-            : <span class="qp-no" aria-hidden="true" style={`background-image:url(${numberPlateURL(40)})`}><small>Form</small>{at + 1}<small>of</small>{forms}</span>}
-          <button type="button" class={'qp-box' + (s.ready && !s.stamped ? ' ready' : '') + (s.stamped ? ' inked' : '')} onClick={act.stamp} aria-label={isPlan ? (s.signed ? 'Approve the plan' : 'Sign first') : s.ready ? 'Stamp it' : 'Pick an answer first'}>
+            : <span class="qp-no" aria-hidden="true" style={`background-image:url(${numberPlateURL(44)})`}>{at + 1}<small>of</small>{forms}</span>}
+          <button type="button" class={'qp-box' + (isPlan ? ' plan' : '') + (s.ready && !s.stamped ? ' ready' : '') + (s.stamped ? ' inked' : '')} onClick={act.stamp} aria-label={isPlan ? (s.signed ? 'Approve the plan' : 'Sign first') : s.ready ? 'Stamp it' : 'Pick an answer first'}>
             {!s.stamped && <b>{label}</b>}
             {s.stamped && <Impression word={s.stamped} seed={p.index + 1} />}
           </button>
