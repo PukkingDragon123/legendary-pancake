@@ -85,6 +85,7 @@ export function SleepScreen() {
     let bs: Bedside | null = null;
     try { bs = new Bedside(sc); } catch (e) { console.warn('bedside failed', e); }
     room.current = bs;
+    bs?.frame('room');
     void (bs ? bs.goToBed() : Promise.resolve()).then(() => setReady(true));
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && stepRef.current === 'room') close(); };
     addEventListener('keydown', onKey);

@@ -8,7 +8,7 @@ import { sound } from '../audio/sound.ts';
 import type { OwlLook } from '../owl/model.ts';
 import { at, Batch, bbox, cyl } from '../onboard/kit.ts';
 import { texCanvas } from '../ui/real/tex.ts';
-import type { Scene } from './scene.ts';
+import type { CamShot, Scene } from './scene.ts';
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const smooth = (x: number) => { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
@@ -107,6 +107,25 @@ export class Bedside {
     scene.tickers.add(this.tick);
   }
 
+  /** the camera on Pip at his bed: 'room' a medium shot from the middle of the room, 'close' tight on him and the box */
+  private shot: 'room' | 'close' = 'room';
+  private director = (): CamShot | null => {
+    const sc = this.scene, h = this.pipH(), p = sc.owl.node.position;
+    const centre = sc.spot('inside');
+    const d = centre.clone().sub(p).setY(0);
+    if (d.lengthSq() < 1e-4) d.set(0, 0, 1);
+    d.normalize();
+    const close = this.shot === 'close';
+    const turn = close ? 0.45 : 0.15, c = Math.cos(turn), s2 = Math.sin(turn);
+    const dir = V(d.x * c - d.z * s2, 0, d.x * s2 + d.z * c);
+    const dist = h * (close ? 3.2 : 4.8);
+    const at = p.clone().add(V(0, h * (close ? 0.5 : 0.62), 0)), from = at.clone().addScaledVector(dir, dist).add(V(0, h * (close ? 0.9 : 1.2), 0));
+    const v = from.clone().sub(at), L = v.length();
+    return { yaw: Math.atan2(v.x, v.z), pitch: Math.asin(THREE.MathUtils.clamp(v.y / L, -0.98, 0.98)), dist: L, target: at, fov: sc.camera.aspect < 0.8 ? 50 : 36 };
+  };
+  /** take the camera (call when the bedtime screen opens) */
+  frame(shot: 'room' | 'close') { this.shot = shot; this.scene.director = this.director; }
+
   private wait(sec: number) { return new Promise<void>((r) => setTimeout(r, sec * 1000)); }
   private tween(sec: number, f: (k: number) => void): Promise<void> {
     return new Promise((res) => { let t = 0; this.tweens.push((dt) => { t += dt; const k = Math.min(1, t / sec); f(k); if (k >= 1) { res(); return true; } return false; }); });
@@ -127,9 +146,10 @@ export class Bedside {
   /** The phone goes to bed: it appears beside Pip, slides into its box, the lid shuts, the padlock clicks. */
   async playLock() {
     const sc = this.scene, owl = sc.owl, k = this.pipH() / PIP_REF;
+    this.frame('close');
     // beside Pip, on the camera's side of him, turned to the camera
-    const cam = sc.camera.position, p = owl.node.position.clone();
-    const toCam = cam.clone().sub(p).setY(0).normalize(), right = V(toCam.z, 0, -toCam.x);
+    const p = owl.node.position.clone(), shot = this.director()!;
+    const toCam = V(Math.sin(shot.yaw), 0, Math.cos(shot.yaw)), right = V(toCam.z, 0, -toCam.x);
     this.root.position.copy(p).addScaledVector(right, 0.42 * k).addScaledVector(toCam, 0.22 * k);
     this.root.rotation.y = Math.atan2(toCam.x, toCam.z) + 0.15;
     this.root.scale.setScalar(k);
@@ -184,6 +204,7 @@ export class Bedside {
   /** Ready for the trip: a spin, a puff of feathers, and the trail backpack is on. */
   async playPack(trip: OwlLook) {
     const sc = this.scene, owl = sc.owl;
+    this.frame('room');
     owl.setMood('excited', 3);
     owl.play('spin');
     sound.play('whoosh_cloth', { volume: 0.45 });
@@ -202,6 +223,7 @@ export class Bedside {
   }
 
   dispose() {
+    if (this.scene.director === this.director) this.scene.director = null;
     this.scene.tickers.delete(this.tick);
     this.scene.scene.remove(this.root);
     for (const d of this.disposables) { try { d.dispose(); } catch { /* */ } }
