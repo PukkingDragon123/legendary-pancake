@@ -1,6 +1,6 @@
 // [tex7] Realistic textures for the interface's 3D models (the props in src/ui/chrome/props3d.ts and the icon bake,
 // src/dev/iconbake.ts, which renders them into the pixel-art icons and shelf sprites), and the texture coordinates that
-// lay them on. Dev only: nothing here ships in the app.
+// lay them on. Mostly dev only; the 3D transitions (src/ui/chrome/t3d/) also paint wood, bark and velvet with it at run time.
 //
 // Photo textures (Poly Haven, CC0: oak veneer (in colour and as grain to tint), two leathers, linen, knitted fleece and
 // velour; prepared in art/tex7 and loaded by the bake from there) give wood, leather and cloth their grain
