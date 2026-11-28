@@ -186,7 +186,7 @@ class Trans3D {
   private outMat: THREE.ShaderMaterial;
   private env: THREE.Texture | null = null;
   private W = 1; private H = 1;
-  samples = 4;
+  samples = 3;
 
   constructor() {
     this.canvas = document.createElement('canvas');
@@ -196,7 +196,7 @@ class Trans3D {
     this.r = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: 'high-performance' });
     this.r.setClearColor(0x000000, 0);
     this.r.autoClear = false;
-    const o = { type: THREE.HalfFloatType, depthBuffer: true, samples: 4 };
+    const o = { type: THREE.HalfFloatType, depthBuffer: true, samples: 0 }; // the 1.5x canvas is smooth enough: no MSAA resolve per sample
     this.tmp = new THREE.WebGLRenderTarget(4, 4, o);
     this.acc = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, depthBuffer: false });
     this.backMat = new THREE.ShaderMaterial({ vertexShader: QUAD_VS, fragmentShader: BACK_FS.replace('gl_FragColor = vec4(col * a, a);', 'gl_FragColor = vec4(toSRGB(col) * a, a);').replace('float h(vec2 p)', BACK_OUT + '\nfloat h(vec2 p)'), uniforms: { uKind: { value: 0 }, uT: { value: 0 }, uTime: { value: 0 }, uAspect: { value: 1 } }, transparent: true, depthTest: false, depthWrite: false, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor, blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor });
@@ -208,7 +208,7 @@ class Trans3D {
     this.cam.position.set(0, 0, 0);
     // the blur costs several renders: fewer samples on small or weak devices
     const nav = navigator as Navigator & { deviceMemory?: number };
-    if ((nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4) this.samples = 2;
+    if ((nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4) this.samples = 1;
   }
 
   private size() {
@@ -372,6 +372,15 @@ class Trans3D {
     this.quad.material = this.outMat; r.render(this.qScene, this.qCam);
     // the world under the dream goes soft
   }
+  /** build a set, upload its textures and compile its shaders now (so its first run has no hitch) */
+  warm(kind: Kind3D) {
+    this.size();
+    const set = this.build(kind);
+    set.scene.traverse((o) => { const m = (o as THREE.Mesh).material as THREE.Material & { map?: THREE.Texture | null } | undefined; if (m?.map) this.r.initTexture(m.map); });
+    this.r.compile(set.scene, this.cam);
+    this.quad.material = this.backMat; this.r.compile(this.qScene, this.qCam);
+    this.quad.material = this.outMat; this.r.compile(this.qScene, this.qCam);
+  }
   show(on: boolean) { this.canvas.style.display = on ? 'block' : 'none'; if (!on) this.canvas.style.backdropFilter = ''; this.canvas.style.pointerEvents = on ? 'auto' : 'none'; }
 }
 
@@ -409,6 +418,14 @@ export function animate3D(kind: Kind3D, half: 'in' | 'out', ms: number): Promise
     // animation frames stall in background tabs: never let the change of place wait on them
     setTimeout(() => end(true), ms + 600);
   });
+}
+/** Get the 3D transitions ready in idle moments after the game has loaded: one set per idle slice. */
+export function prewarm3D() {
+  if (typeof window === 'undefined') return;
+  const idle = (f: () => void) => ((window as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => void }).requestIdleCallback ?? ((g: () => void) => setTimeout(g, 200)))(f, { timeout: 3000 });
+  const kinds = [...KINDS_3D];
+  const next = () => { const k = kinds.shift(); if (!k) return; const tr = get(); if (!tr) return; try { tr.warm(k); } catch { /* fine: it builds on first use */ } idle(next); };
+  idle(next);
 }
 /** hold the covered frame (while the swap in the middle runs) */
 export function hold3D(kind: Kind3D) { const tr = get(); if (tr) { tr.show(true); try { tr.draw(kind, 1, performance.now() / 1000, 0.001); } catch { /* */ } } }

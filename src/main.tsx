@@ -22,6 +22,7 @@ import { installIconSet } from './ui/chrome/iconset.ts';
 import { installArtPx } from './gfx/artpx.ts'; // one art pixel for the whole game
 import { Scene } from './world/scene.ts';
 import { fxMoment } from './ui/fx/moment.ts'; // [fx10]
+import { prewarm3D } from './ui/chrome/trans3d.ts';
 import { bindHome } from './build/home-sync.ts'; // [house]
 
 async function boot() {
@@ -147,6 +148,8 @@ async function boot() {
   }
   if (phase.value === 'day' && save.value.onboarded) setTimeout(() => { const h = new Date().getHours(); say(h >= 20 || h < 4 ? lines.evening() : lines.day()); }, 2200);
   document.getElementById('boot')?.classList.add('gone');
+  // the realistic transitions get ready in the background, so the first one never stutters
+  setTimeout(prewarm3D, 6000);
 }
 
 void boot();

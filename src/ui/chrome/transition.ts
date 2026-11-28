@@ -380,6 +380,26 @@ function animate(r: Run, phase: 'in' | 'out', dur: number): Promise<void> {
   });
 }
 
+/**
+ * Wait, while the screen is covered, until the new place has drawn its first frames: a new 3D place compiles its
+ * shaders and uploads its textures on its first frames, and those long frames must not land on the reveal.
+ */
+function settled(): Promise<void> {
+  return new Promise((res) => {
+    const t0 = performance.now();
+    let n = 0, last = t0;
+    const step = (now: number) => {
+      const long = now - last > 40;
+      last = now;
+      n = long ? 0 : n + 1;
+      // two smooth frames in a row (at least 110 ms in all), or give up waiting after 1.5 s
+      if ((n >= 2 && now - t0 > 110) || now - t0 > 1500) res(); else requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    setTimeout(res, 1600); // animation frames stall in background tabs
+  });
+}
+
 /** Cover the screen with a transition, run `mid`, then reveal the new place. */
 export async function transition(kind: TransitionKind, mid?: () => void | Promise<void>, o: TransitionOpts = {}): Promise<void> {
   if (typeof document === 'undefined' || busy) { await mid?.(); return; }
@@ -393,7 +413,7 @@ export async function transition(kind: TransitionKind, mid?: () => void | Promis
       if (await animate3D(kind, 'in', din)) {
         try { await mid?.(); } catch (e) { console.warn('transition mid failed', e); }
         hold3D(kind);
-        await new Promise((res) => setTimeout(res, 140));
+        await settled();
         await animate3D(kind, 'out', dout);
         return;
       }
@@ -408,7 +428,7 @@ export async function transition(kind: TransitionKind, mid?: () => void | Promis
     const [din, dout] = DUR[kind].map((d) => d / (o.speed ?? 1));
     await animate(r, 'in', din);
     try { await mid?.(); } catch (e) { console.warn('transition mid failed', e); }
-    await new Promise((res) => setTimeout(res, 110));
+    await settled();
     cv!.style.pointerEvents = 'none';
     if (kind === 'page') try { sound.play('ui_page', { volume: 0.35, gap: 80 }); } catch { /* */ }
     await animate(r, 'out', dout);
