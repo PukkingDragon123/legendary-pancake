@@ -153,9 +153,9 @@ export function postageStamp(a: Area, scale: number): string {
   });
 }
 
-/** A round postmark with the stamp name and today's date, and wavy cancel lines. */
-export function postmark(a: Area, scale: number): string {
-  const d = new Date(), key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+/** A round postmark with the stamp name and the date (today unless given), and wavy cancel lines. */
+export function postmark(a: Area, scale: number, when?: number): string {
+  const d = when ? new Date(when) : new Date(), key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
   return memo(`mark:${a.id}:${key}:${scale}`, () => {
     const W = 56, H = 30, p = new Pix(W, H), ink = 0x5a5a6e;
     p.ring(15, 15, 13, ink); p.ring(15, 15, 11, ink);

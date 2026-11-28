@@ -34,6 +34,8 @@ import { injectSleepFrames, PaintCanvas, Paper } from './sleepkit.tsx';
 import { paintPresent } from './real/present.ts';
 import { uiBurst } from './chrome/uifx.ts';
 import { fxMoment } from './fx/moment.ts'; // [fx10]
+import { Postcard } from './globe/postcard.tsx'; // [postcard]
+import { postcardDate } from '../game/postcards.ts';
 import './morning.css';
 
 // ------------------------------------------------------------------ the night report
@@ -390,6 +392,13 @@ function Haul(p: { finds: Find[]; night: SleepSession; onReport: () => void; onC
           <span><Px name="star" size={40} />+{adv.xp}<small>XP</small></span>
           {adv.gems > 0 && <span><Px name="moongem" size={40} />+{adv.gems}<small>moon gems</small></span>}
         </div>
+        {/* [postcard] the first night at a place mails its postcard home */}
+        {adv.postcard && AREA[adv.postcard] && (
+          <div class="haul-postcard">
+            <Postcard a={AREA[adv.postcard]} date={postcardDate(s, adv.postcard) ?? Date.now()} />
+            <div><b>A postcard from {AREA[adv.postcard].name}!</b><small>Your first night there. It’s in your passport now; tap it to read Pip’s note.</small></div>
+          </div>
+        )}
       </div>
 
       <div class="haul-row">
