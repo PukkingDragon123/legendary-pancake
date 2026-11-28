@@ -1,35 +1,72 @@
-/* [tutor] The guided tour: a lamplit spotlight over a night dim, a pointing glove, Pip's floating words and a small
-   row of controls (Skip tour, the step plate, Next). Sizes follow the art pixel (--art-px) where they are pixel art. */
+/* [tutor] The guided tour: Pip flying over the interface on his own canvas, the light (one canvas), and his card:
+   a carved walnut board with brass corner brackets holding a sheet of parchment, a brass name plate, wooden Skip and
+   Next buttons and a row of brass studs for the stops. */
 .layer > .tt { pointer-events: none; }
-.tt { position: absolute; inset: 0; z-index: 90; pointer-events: none; }
-.tt-dim { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity 0.45s ease; }
-.tt-dim.on { opacity: 1; }
+.tt { position: absolute; inset: 0; z-index: 90; pointer-events: none; overflow: hidden; }
+.tt-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .tt-block { position: absolute; pointer-events: auto; background: transparent; touch-action: none; }
 
-.tt-hand { position: absolute; width: 0; height: 0; pointer-events: none; animation: ttBob 0.9s cubic-bezier(0.45, 0, 0.55, 1) infinite; transition: left 0.35s var(--ease, ease), top 0.35s var(--ease, ease); filter: drop-shadow(2px 4px 0 rgba(18, 8, 20, 0.35)); }
-.tt-hand img { position: absolute; left: 0; top: 0; image-rendering: pixelated; image-rendering: crisp-edges; }
-.tt-hand.in { animation: ttHandIn 0.35s steps(5) both, ttBob 0.9s cubic-bezier(0.45, 0, 0.55, 1) 0.35s infinite; }
-@keyframes ttBob { 0%, 100% { translate: 0 0; } 50% { translate: calc(var(--dx) * -9px) calc(var(--dy) * -9px); } }
-@keyframes ttHandIn { from { opacity: 0; translate: calc(var(--dx) * -30px) calc(var(--dy) * -30px); } to { opacity: 1; translate: 0 0; } }
+/* Pip: the 3D owl, inked round his silhouette like the world and the icons, with a soft drop */
+.tt-pip { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform;
+  filter: drop-shadow(1px 0 0 rgba(30, 14, 20, 0.85)) drop-shadow(-1px 0 0 rgba(30, 14, 20, 0.85)) drop-shadow(0 1px 0 rgba(30, 14, 20, 0.85)) drop-shadow(0 -1px 0 rgba(30, 14, 20, 0.6)) drop-shadow(0 6px 5px rgba(24, 10, 24, 0.28)); }
+.tt-hit { position: absolute; left: 0; top: 0; pointer-events: auto; border-radius: 45% 45% 40% 40%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
-.tt-say { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; transition: left 0.3s ease, top 0.3s ease, bottom 0.3s ease; }
-.tt-say .hh-talk { pointer-events: auto; }
-.tt-ctl { display: flex; align-items: center; justify-content: center; gap: 10px; pointer-events: auto; animation: ttCtlIn 0.4s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
-@keyframes ttCtlIn { from { opacity: 0; transform: translateY(6px) scale(0.96); } to { opacity: 1; transform: none; } }
-.tt-ctl .btn { min-width: 0; white-space: nowrap; }
-.tt-ctl .btn.pillow { font-family: var(--font-display); padding-left: 18px; padding-right: 18px; }
-.tt-ctl .tt-skip { font-family: var(--font-body); }
-/* the step count, engraved in a little brass plate */
-.tt-plate { position: relative; display: flex; align-items: center; gap: 3px; height: 30px; min-width: 66px; justify-content: center; padding: 0 16px 1px; font: 700 calc(var(--t1) * 1.2)/1 var(--font-display); color: #2e1a04; letter-spacing: 0.04em; text-shadow: 0 1px 0 rgba(255, 236, 170, 0.75), 0 -1px 0 rgba(70, 40, 6, 0.35); white-space: nowrap; }
-.tt-plate small { font: 600 var(--t1)/1 var(--font-body); color: #6a4a18; opacity: 0.8; }
-.tt-plate::before { content: ''; position: absolute; inset: -1px -2px; z-index: -1; background: var(--plate) 0 0 / 100% 100% no-repeat; }
-/* while a place is open: a slim walnut rail with Skip only, out of the way at the top */
-.tt-waiting { position: absolute; left: 50%; transform: translateX(-50%); pointer-events: auto; }
+/* the card */
+.tt-card { position: absolute; left: 50%; top: 40%; width: 380px; pointer-events: auto; opacity: 0; transform: translateY(8px) scale(0.92); transform-origin: 50% 100%;
+  transition: opacity 0.18s ease, transform 0.18s ease; visibility: hidden; }
+.tt-card.show { opacity: 1; transform: none; visibility: visible; transition: opacity 0.22s ease, transform 0.42s cubic-bezier(0.28, 1.6, 0.5, 1), visibility 0s; }
+.tt-card[data-side='below'] { transform-origin: 50% 0; }
+.tt-board { position: relative; padding: 16px 14px 10px; filter: drop-shadow(0 8px 10px rgba(20, 8, 16, 0.38)); }
+.tt-name { position: absolute; left: 22px; top: -13px; z-index: 2; padding: 3px 16px 4px; font: 700 15px/1.1 var(--font-display); color: #3a2206; letter-spacing: 0.03em;
+  text-shadow: 0 1px 0 rgba(255, 238, 180, 0.7); white-space: nowrap; }
+.tt-paper { position: relative; padding: 11px 16px 12px; min-height: 52px; cursor: pointer; }
+.tt-ink { margin: 0; font: 600 18px/1.4 var(--font-body); color: #3b2414; text-wrap: pretty; }
+.tt-w { white-space: nowrap; }
+.tt-c { display: inline-block; opacity: 0; animation: ttInk 0.24s cubic-bezier(0.3, 1.4, 0.5, 1) forwards; }
+.tt-ink.wait .tt-c { animation-play-state: paused; }
+.tt-ink.done .tt-c { animation-delay: 0s !important; animation-duration: 0.05s; }
+@keyframes ttInk { from { opacity: 0; transform: translateY(3px) scale(0.9); } to { opacity: 1; transform: none; } }
+/* *highlight*: bold rust ink over a honey marker; _whisper_: small pale italic; ~sing-song~: a wave; !shout!: big red */
+.tt-c.hi { font-weight: 800; color: #8a3410; background: linear-gradient(transparent 56%, rgba(255, 190, 64, 0.5) 56% 90%, transparent 90%); }
+.tt-c.hush { font-style: italic; color: #7a6048; font-size: 0.92em; }
+.tt-c.yell { font-weight: 900; color: #a8261c; font-size: 1.14em; }
+.tt-c.wave { color: #2f5a3a; font-weight: 700; animation: ttInk 0.24s cubic-bezier(0.3, 1.4, 0.5, 1) forwards, ttWave 1.4s ease-in-out infinite; }
+.tt-ink.done .tt-c.wave { animation: ttInk 0.05s forwards, ttWave 1.4s ease-in-out infinite; }
+@keyframes ttWave { 0%, 100% { translate: 0 0; } 50% { translate: 0 -2.5px; } }
+
+.tt-row { display: flex; align-items: center; gap: 8px; margin-top: 9px; min-height: 36px; }
+.tt-row .btn { min-width: 0; white-space: nowrap; }
+.tt-skip { font-family: var(--font-body); }
+.tt-next { font-family: var(--font-display); padding-left: 20px; padding-right: 20px; animation: ttNext 2.4s ease-in-out 1.2s infinite; }
+@keyframes ttNext { 0%, 88%, 100% { transform: none; } 92% { transform: translateY(-2px) scale(1.04); } 96% { transform: translateY(0) scale(0.99); } }
+.tt-dots { flex: 1; min-width: 0; display: flex; justify-content: center; align-items: center; gap: 4px; }
+.tt-count { display: none; flex: 1; text-align: center; font: 700 14px/1 var(--font-display); color: #f3dcae; letter-spacing: 0.04em; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.tt-count small { font-weight: 600; opacity: 0.7; margin: 0 3px; }
+/* a narrow card (beside a tool) counts the stops in words instead of studs */
+.tt-card { container-type: inline-size; }
+@container (max-width: 340px) { .tt-dots { display: none; } .tt-count { display: block; } .tt-hint { font-size: 13px; } }
+.tt-dots i { width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff2c0, #c8963a 55%, #5e3a0e); box-shadow: 0 1px 1px rgba(0, 0, 0, 0.45); opacity: 0.38; }
+.tt-dots i.on { opacity: 1; }
+.tt-dots i.cur { width: 10px; height: 10px; opacity: 1; box-shadow: 0 0 6px 1px rgba(255, 200, 90, 0.75), 0 1px 1px rgba(0, 0, 0, 0.45); }
+.tt-hint { font: italic 700 15px/1 var(--font-display); color: #f6e2b2; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); white-space: nowrap; padding: 0 6px; animation: ttHint 1.6s ease-in-out infinite; }
+@keyframes ttHint { 50% { opacity: 0.6; } }
+
+/* the tail: a little walnut wedge with a brass edge, towards whoever is talking */
+.tt-tail { position: absolute; width: 16px; height: 16px; background: #4a2b18; border: 2px solid #c9993f; transform: rotate(45deg); display: none; z-index: -1; }
+.tt-card[data-tail='b'] .tt-tail { display: block; bottom: -7px; left: calc(var(--tail) - 9px); border-left: 0; border-top: 0; }
+.tt-card[data-tail='t'] .tt-tail { display: block; top: -7px; left: calc(var(--tail) - 9px); border-right: 0; border-bottom: 0; }
+.tt-card[data-tail='l'] .tt-tail { display: block; left: -7px; top: calc(var(--tail) - 9px); border-top: 0; border-right: 0; }
+.tt-card[data-tail='r'] .tt-tail { display: block; right: -7px; top: calc(var(--tail) - 9px); border-bottom: 0; border-left: 0; }
 
 @media (max-width: 599px) {
-  .tt-ctl { gap: 6px; }
-  .tt-ctl .btn.pillow { padding-left: 12px; padding-right: 12px; }
-  .tt-plate { padding: 0 12px 1px; height: 26px; min-width: 56px; }
+  .tt-board { padding: 15px 11px 9px; }
+  .tt-paper { padding: 9px 12px 10px; }
+  .tt-ink { font-size: 16px; line-height: 1.36; }
+  .tt-row { gap: 6px; margin-top: 7px; }
+  .tt-next { padding-left: 14px; padding-right: 14px; }
+  .tt-dots { gap: 3px; }
+  .tt-dots i { width: 6px; height: 6px; }
+  .tt-dots i.cur { width: 9px; height: 9px; }
 }
-@media (prefers-reduced-motion: reduce) { .tt-hand, .tt-hand.in { animation: none; } }
-.hh-still .tt-hand, .hh-still .tt-hand.in { animation: none; }
+@media (prefers-reduced-motion: reduce) { .tt-c, .tt-next, .tt-hint { animation-duration: 0.01s; animation-iteration-count: 1; } }
+.hh-still .tt-next, .hh-still .tt-hint, .hh-still .tt-c.wave { animation-iteration-count: 1; }
