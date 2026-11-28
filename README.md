@@ -39,9 +39,14 @@ furniture and outfits. The better you sleep, the fuller the satchel.
   great oak, the clearing and the game's own forest belts rolling away to the hills, under a big moon). Pip rises with
   full wingbeats on each in-breath and glides on each out-breath; a halo breathes round him, quiet questions to think
   about drift in, and the time to arrival counts down. When he lands, the night begins.
-- **Realistic 3D transitions with motion blur** (`src/ui/chrome/trans3d.ts`): acorns, feathers, clouds and a dream
-  haze, rendered in 3D on their own overlay with sub-frame motion blur; the main picture gets camera motion blur too
-  (`src/world/post.ts`).
+- **Every transition is a little 3D set** (`src/ui/chrome/trans3d.ts`, the sets in `src/ui/chrome/t3d/`): autumn leaves
+  tumbling with light through them, a leafy branch swept across, acorns, wing feathers and down, a page that curls over,
+  a blueprint unrolling from its roll, velvet curtains on a brass rail, wooden blinds, flipping carved tiles, a walnut and
+  brass camera iris, a brass hand painting a clock face, cumulus banks, a dream haze, the night with a cratered moon,
+  dawn over painted hills, snow with frost creeping over the glass, fireflies, and a painted dusk. One renderer, instanced
+  things, small painted textures, no shadow maps or post passes; built in idle time after loading, and the resolution
+  drops on a device that cannot keep up. *Calm motion* gets a plain fade. Dev page: `/dev-trans.html`
+  (`?kind=page&T=0.6`, `?sheet=1&T=1`, `?play=curtain`; `hhTrans.bench(kind)` / `hhTrans.benchAll()` time the frames).
 - **The Clock** is now set in Barnaby's workshop: drag the moon and sun hands on the cuckoo clock's dial to set bedtime
   and wake time; settings live in a walnut panel beside it (`src/world/stages/clockshop.ts`).
 
