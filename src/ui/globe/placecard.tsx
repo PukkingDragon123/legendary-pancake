@@ -208,7 +208,7 @@ export function PlaceCard(p: { a: Area; shown: boolean; onBack: () => void; onGo
 
         {/* what to do */}
         <footer class="pk-act">
-          <button class="pk-planet btn soft" onClick={p.onBack}><Px name="arrow_left" size={20} /><span>Planet</span></button>
+          <button class="pk-planet" onClick={p.onBack} aria-label="Back to the planet"><Px name="arrow_left" size={22} /><span>Planet</span></button>
           {open ? (
             <button class="pk-go btn pillow night" onClick={p.onGo}>
               <span class="pk-moon" aria-hidden="true" />

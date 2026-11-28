@@ -54,7 +54,7 @@ export function Postcard(p: { a: Area; date?: number; class?: string; flippable?
               <span>Sealed until your first night here</span>
             </div>
           )}
-          {got && <i class="pc-turn" aria-hidden="true">↻</i>}
+          {got && p.flippable !== false && <i class="pc-turn" aria-hidden="true">↻</i>}
         </div>
         <div class="pc-face pc-back-face">
           <div class="pc-note">
