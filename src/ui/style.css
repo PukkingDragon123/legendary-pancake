@@ -402,8 +402,8 @@ input[type='time'].field { font-family: var(--font-small); font-size: var(--t1);
 .sound-tile { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 0; min-width: 0; transition: transform 0.2s var(--pop); }
 .sound-tile:active { transform: translateY(2px) scale(0.96); }
 .sound-tile .sky { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1.25; overflow: hidden;
-  /* [artpass] a little pixel scene per sound (soundSceneURL), centred on the bottom, crisp; the sky colour fills round it */
-  background: var(--b) center bottom / auto no-repeat; image-rendering: pixelated;
+  /* a soft painted sky behind the icon: a glow up top, the colour deepening down */
+  background: radial-gradient(120% 90% at 50% 10%, color-mix(in srgb, var(--a) 70%, #fff8e8), var(--a) 45%, var(--b));
   box-shadow: inset 0 -6px 6px rgba(24, 22, 16, 0.18), inset 0 2px 2px rgba(250, 245, 233, 0.25); }
 .sound-tile .sky .ico { filter: drop-shadow(0 2px 0 rgba(40, 34, 27, 0.45)); transition: transform 0.3s var(--pop); }
 .sound-tile.on .sky .ico { transform: scale(1.12); }

@@ -129,3 +129,19 @@
 .dawn-snooze { align-self: center; height: 52px; padding: 0 14px; }
 @media (max-height: 700px) { .dawn-scene canvas { max-height: 200px; width: auto !important; } }
 
+
+/* the painted night: smooth glows, no pixels */
+.journey.painted { box-shadow: none; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45)); border-radius: 10px; }
+.moonclock.painted { filter: drop-shadow(0 0 22px rgba(255, 236, 190, 0.25)); }
+.soft-stars { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.soft-stars i { position: absolute; border-radius: 50%; background: radial-gradient(circle, #fffaf0 0%, rgba(255, 250, 240, 0.6) 40%, rgba(255, 250, 240, 0) 72%); animation: softTwinkle 5.5s ease-in-out infinite; }
+.soft-stars i.big { box-shadow: 0 0 6px 1px rgba(220, 225, 255, 0.55); }
+@keyframes softTwinkle { 0%, 100% { opacity: 0.35; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.15); } }
+.lock-pip.painted { position: relative; width: 190px; height: 150px; display: grid; place-items: center; filter: none; }
+.lock-pip.painted .cloud { position: absolute; left: 10px; right: 10px; bottom: 6px; height: 56px; border-radius: 40px; background: radial-gradient(ellipse at 50% 20%, #e9e4f6, #a99fc8 70%, #7c72a6); box-shadow: -40px 8px 0 -10px #b8aed6, 40px 10px 0 -12px #b0a6d0, 0 12px 26px rgba(0, 0, 0, 0.35); }
+.lock-pip.painted > span:not(.cloud):not(.zz), .lock-pip.painted > div { position: relative; margin-bottom: 26px; }
+.lock-pip.painted .zz { position: absolute; right: 18px; top: 4px; font-family: var(--font-display); font-style: italic; color: #e8ecff; }
+.lock-pip.painted .zz b { position: absolute; font-size: 18px; opacity: 0; animation: zFloat 4.2s ease-in infinite; }
+.lock-pip.painted .zz b:nth-child(2) { animation-delay: 1.4s; font-size: 22px; } .lock-pip.painted .zz b:nth-child(3) { animation-delay: 2.8s; font-size: 15px; }
+@keyframes zFloat { 0% { opacity: 0; transform: translate(0, 30px); } 20% { opacity: 0.9; } 100% { opacity: 0; transform: translate(18px, -18px); } }
+.hh-still .soft-stars i, .hh-still .lock-pip.painted .zz b { animation: none; opacity: 0.7; }
