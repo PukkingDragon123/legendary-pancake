@@ -183,6 +183,9 @@ export class Scene {
   stage: Stage | null = null;
   /** takes over the camera while set (cinematics, build mode); return null to fall back to the view */
   director: ((dt: number, t: number) => CamShot | null) | null = null;
+  /** fraction of the screen covered by a side panel on the right; the view shifts left to compensate */
+  shiftX = 0;
+  private shiftXCur = 0;
   /** depth-of-field strength while a director wants it (null = the view's own) */
   blurOverride: number | null = null;
   /** sees world pointer input first (build mode); return true to swallow it */
@@ -995,7 +998,8 @@ export class Scene {
     CUT.uCutCam.value.copy(this.camera.position);
     this.shiftCur += (this.shift - this.shiftCur) * k;
     const w = innerWidth, h = innerHeight;
-    if (Math.abs(this.shiftCur) > 0.002) this.camera.setViewOffset(w, h, 0, (this.shiftCur * h) / 2, w, h); else this.camera.clearViewOffset();
+    this.shiftXCur += (this.shiftX - this.shiftXCur) * k;
+    if (Math.abs(this.shiftCur) > 0.002 || Math.abs(this.shiftXCur) > 0.002) this.camera.setViewOffset(w, h, (this.shiftXCur * w) / 2, (this.shiftCur * h) / 2, w, h); else this.camera.clearViewOffset();
 
     this.sky.setViewport(innerWidth, innerHeight, this.renderer.getPixelRatio()); // [world]
     this.sky.update(t, this.camera, dt);

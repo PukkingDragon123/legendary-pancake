@@ -1,11 +1,10 @@
-// The Sleep button's screen: bedtime as one journey in 3D.
-//   1. Pip's bedroom (world/stages/bedroom.ts): a cosy lamplit room with the real forest in its window. The things in
-//      the room are the controls: a microphone on the sill (sleep tracking), a record player (falling-asleep sounds),
-//      the alarm clock on the nightstand, a moon lamp (dim the lights). Little brass tags float over them; tapping one
-//      (or its row in the side panel, a bottom sheet on phones) opens its 2D controls.
-//   2. "I'm going to bed": Pip puts the phone to bed in its little box and padlocks it, turning the key with his beak.
+// The Sleep button's screen: bedtime as one journey.
+//   1. Pip's own room in his real house (world/bedside.ts): he hops onto the bed the player placed there, and the
+//      controls (tonight's times, sleep tracking, sounds, the alarm) sit beside him in a walnut cabinet of parchment cards.
+//   2. "I'm going to bed": a little oak box appears at his side; Pip puts the phone to bed in it and padlocks it,
+//      turning the key with his beak (the night lock is real: it holds until the alarm).
 //   3. He packs: a spin, a puff, and his trail backpack is on.
-//   4. He spins the floor globe and the room gives way to the real Earth: choose tonight's place.
+//   4. The real Earth comes up: choose tonight's place (ui/globepick.tsx).
 //   5. The flight (world/nightflight.ts): Pip circles high over the real Hollow at night, heading while you breathe for five
 //      minutes. He rises on each in-breath and glides on each out-breath; a quiet question to think about drifts in now
 //      and then; the time to arrival counts down. When he lands, the night begins (microphone, alarm, sounds).
@@ -13,11 +12,10 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { BreathSession, PATTERN, type Phase } from '../breathe/session.ts';
 import { AREA } from '../game/catalog.ts';
-import { ALL_ITEMS } from '../assets/registry.ts';
 import { blockStatus, demoTonight, setPhoneLock, setRoutine, startNight, syncReminders, tonight } from '../game/night.ts';
 import { DAY_NAME, setNight, toMin } from '../game/routine.ts';
 import { dayKey, edit, save } from '../game/store.ts';
-import { BedroomStage, type Hot } from '../world/stages/bedroom.ts';
+import { Bedside } from '../world/bedside.ts';
 import { startNightFlight, type NightFlight } from '../world/nightflight.ts';
 import type { OwlLook } from '../owl/model.ts';
 import { transition } from './chrome/transition.ts';
@@ -60,15 +58,13 @@ export function SleepScreen() {
   const area = AREA[s.area];
   const [step, setStep] = useState<Step>('room');
   const [pane, setPane] = useState<Pane>('tonight');
-  const [hover, setHover] = useState<Hot | null>(null);
   const [cap, setCap] = useState<{ text: string; sub?: string; id: number } | null>(null);
   const [wide, setWide] = useState(isWide());
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   /** the bedroom is rebuilt when we come back to it (a stage is disposed when another one takes the screen) */
   const [roomKey, setRoomKey] = useState(0);
-  const room = useRef<BedroomStage | null>(null);
-  const chips = useRef(new Map<Hot, HTMLElement>());
+  const room = useRef<Bedside | null>(null);
   const stepRef = useRef<Step>('room');
   stepRef.current = step;
 
@@ -79,88 +75,36 @@ export function SleepScreen() {
   useEffect(() => { bubble.value = null; return bubble.subscribe((b) => { if (b) bubble.value = null; }); }, []);
   useEffect(() => { const f = () => setWide(isWide()); addEventListener('resize', f); return () => removeEventListener('resize', f); }, []);
 
-  // ---- the bedroom stage
+  // ---- Pip's own room, in his real house: he hops onto his bed and the controls sit beside him
   useEffect(() => {
     if (!sc) { setReady(true); return undefined; }
-    let st: BedroomStage | null = null;
-    try { st = new BedroomStage(sc.renderer, save.value.look, sc, sc.quality); } catch (e) { console.warn('bedroom failed', e); setReady(true); return undefined; }
-    room.current = st;
-    st.resize(innerWidth, innerHeight);
-    st.setMic(save.value.sleep.mic);
-    st.setSound(save.value.sleep.soundscape !== 'none');
-    st.prepareTrip(save.value.look);
-    // Pip's own bed: the one placed in his house (the twig nest bed if none is)
-    { const home = JSON.stringify(save.value.home) + JSON.stringify(save.value.furniture); const bed = ALL_ITEMS.find((i) => i.cat === 'beds' && i.model && home.includes(`"${i.id}"`)); if (bed?.model) st.setBed(bed.model); }
-    st.onPick = (id) => pickHot(id);
-    st.onHover = (id) => setHover(id);
-    sc.setStage(st);
-    void st.ready.then(() => setReady(true));
+    sc.setStage(null);
+    sc.post.enabled = true;
+    if (sc.view !== 'home') sc.setView('home');
+    sc.setOutside(false);
+    let bs: Bedside | null = null;
+    try { bs = new Bedside(sc); } catch (e) { console.warn('bedside failed', e); }
+    room.current = bs;
+    void (bs ? bs.goToBed() : Promise.resolve()).then(() => setReady(true));
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && stepRef.current === 'room') close(); };
     addEventListener('keydown', onKey);
-    if (import.meta.env.DEV) (window as unknown as { hhBed: unknown }).hhBed = { stage: st, bed: () => goToBed(), step: (x: Step) => setStep(x) };
+    if (import.meta.env.DEV) (window as unknown as { hhBed: unknown }).hhBed = { side: bs, bed: () => goToBed(), step: (x: Step) => setStep(x) };
     return () => {
       removeEventListener('keydown', onKey);
-      if (st && sc.stage === st) sc.setStage(null);
+      bs?.dispose();
       room.current = null;
+      sc.shiftX = 0;
+      if (sc.owlPlace === 'bed' && stepRef.current === 'room') { sc.owl.pose = 'stand'; sc.moveOwl('inside'); }
     };
   }, [roomKey]);
 
-  // ---- keep the room in step with the controls
-  useEffect(() => { room.current?.setMic(sp.mic); }, [sp.mic]);
-  useEffect(() => { room.current?.setSound(sp.soundscape !== 'none'); }, [sp.soundscape]);
-
-  // ---- frame the room in the part of the screen the controls leave free
+  // ---- frame Pip in the part of the screen the controls leave free
   useEffect(() => {
-    const st = room.current;
-    if (!st) return;
-    if (step !== 'room') st.free = { x0: 0, x1: 1, y0: 0.04, y1: wide ? 0.84 : 0.78 };
-    else if (wide) st.free = { x0: 0, x1: 1 - Math.min(420, innerWidth * 0.34) / innerWidth, y0: 0.08, y1: 0.86 };
-    else st.free = { x0: 0, x1: 1, y0: 0.06, y1: 0.5 };
-    st.refit();
+    if (!sc) return;
+    if (step !== 'room') { sc.shiftX = 0; sc.shift = 0; }
+    else if (wide) { sc.shiftX = Math.min(420, innerWidth * 0.34) / innerWidth; sc.shift = 0; }
+    else { sc.shiftX = 0; sc.shift = 0.42; }
   }, [wide, step, ready]);
-
-  // ---- the floating tags follow their things
-  useEffect(() => {
-    if (step !== 'room') return undefined;
-    let raf = 0;
-    const loop = () => {
-      raf = requestAnimationFrame(loop);
-      const st = room.current;
-      if (!st) return;
-      const a = st.anchors();
-      // lay the tags out: each sits over its thing; one that would overlap another climbs above it on a longer stem
-      const placed: { x0: number; x1: number; y0: number; y1: number }[] = [];
-      const order = [...chips.current].filter(([id]) => a[id]).sort((p1, p2) => a[p2[0]].y - a[p1[0]].y);
-      for (const [id, el] of order) {
-        const p = a[id];
-        const w = (el.firstElementChild as HTMLElement | null)?.offsetWidth ?? 110, h = 32;
-        let lift = 0;
-        for (let k = 0; k < 6; k++) {
-          const box = { x0: p.x - w / 2 - 4, x1: p.x + w / 2 + 4, y0: p.y - 18 - lift - h, y1: p.y - 18 - lift };
-          const hit = placed.find((q) => box.x0 < q.x1 && box.x1 > q.x0 && box.y0 < q.y1 && box.y1 > q.y0);
-          if (!hit) { placed.push(box); break; }
-          lift += box.y1 - hit.y0 + 4;
-        }
-        el.style.opacity = p.on ? '' : '0';
-        el.style.setProperty('--lift', `${Math.round(lift)}px`);
-        el.style.transform = `translate(${Math.round(p.x)}px, ${Math.round(p.y)}px)`;
-      }
-    };
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, [step]);
-
-  function pickHot(id: Hot) {
-    if (stepRef.current !== 'room') return;
-    const st = room.current;
-    tap('ui_tap', 0.45);
-    if (id === 'mic') { setPane('mic'); st?.go('mic'); }
-    else if (id === 'sound') { setPane('sound'); st?.go('sound'); }
-    else if (id === 'alarm' || id === 'phone') { setPane('alarm'); st?.go('alarm'); }
-    else if (id === 'lamp') { const d = !lampDim.current; lampDim.current = d; st?.setDim(d ? 0.55 : 0); sound.play('ui_toggle', { volume: 0.4 }); }
-    else if (id === 'window' || id === 'globe' || id === 'bed') { setPane('tonight'); st?.go('room'); if (id === 'bed') st?.owl.play('yawn'); else st?.owl.play('nod'); }
-  }
-  const lampDim = useRef(false);
 
   function close() {
     if (busy) return;
@@ -170,28 +114,27 @@ export function SleepScreen() {
 
   // ---- 2..4: lock, pack, globe
   async function goToBed() {
-    const st = room.current;
+    const bs = room.current;
     if (busy) return;
     setBusy(true);
     sound.unlock();
     haptic(14);
     sound.play('bowl', { volume: 0.4 });
-    if (!sc || !st) { await startTheNight(); return; }
+    if (!sc || !bs) { await startTheNight(); return; }
     fxMoment('bedtime');
-    st.setDim(0.4);
     setStep('lock');
     await wait(80);
     caption('Pip tucks your phone into bed…', 'No more scrolling tonight.');
-    await st.playLock();
+    await bs.playLock();
     lockedRef.current = true;
     const wakeTxt = plan.on ? fmtHM(plan.wake, h12) : 'morning';
     caption(`Locked until ${wakeTxt}.`, blockStatus.value ? 'The bedtime blocker is on guard too.' : 'Pip keeps the key.');
     await wait(1500);
     setStep('pack');
     caption('Packing for the trip…', 'Snacks, a map, and one emergency acorn.');
-    await st.playPack(save.value.look);
+    await bs.playPack(tripLook(save.value.look));
     caption('Where shall we fly tonight?');
-    await st.playGlobe();
+    await wait(900);
     await transition('clouds', () => { setStep('globe'); setCap(null); });
   }
 
@@ -226,27 +169,10 @@ export function SleepScreen() {
     { id: 'sound', icon: 'music', title: 'Sounds', value: soundName },
     { id: 'alarm', icon: 'bell', title: 'Alarm', value: sp.alarmOn && plan.on ? wakeHM : 'Off' },
   ];
-  const tags: { id: Hot; icon: string; label: string; value: string; on: boolean }[] = [
-    { id: 'mic', icon: 'mic', label: 'Mic', value: sp.mic ? 'On' : 'Off', on: sp.mic },
-    { id: 'sound', icon: 'music', label: 'Sound', value: soundName, on: sp.soundscape !== 'none' },
-    { id: 'alarm', icon: 'bell', label: 'Alarm', value: sp.alarmOn && plan.on ? wakeHM : 'Off', on: sp.alarmOn && plan.on },
-    { id: 'lamp', icon: 'candle', label: 'Lamp', value: lampDim.current ? 'Dim' : 'On', on: !lampDim.current },
-  ];
   const inRoom = step === 'room';
 
   return (
     <div class={'bd' + (inRoom ? '' : ' cine') + (ready ? ' ready' : '')} role="dialog" aria-label="Bedtime">
-      {inRoom && <div class="bd-veil" aria-hidden="true"><i /></div>}
-      {/* the brass tags over the things in the room */}
-      <div class="bd-tags" aria-hidden={!inRoom}>
-        {inRoom && tags.map((t) => (
-          <button key={t.id} ref={(el) => { if (el) chips.current.set(t.id, el); else chips.current.delete(t.id); }} class={'bd-tag' + (t.on ? ' on' : '') + (hover === t.id ? ' hover' : '') + ((t.id === 'alarm' && pane === 'alarm') || pane === t.id ? ' sel' : '')} onClick={() => pickHot(t.id)} aria-label={`${t.label}: ${t.value}`}>
-            <span class="bd-tag-in"><Px name={t.icon} size={30} /><b>{t.label}</b><span>{t.value}</span><i class="led" /></span>
-            <span class="bd-tag-stem" />
-          </button>
-        ))}
-      </div>
-
       {inRoom && <>
         <header class="bd-top">
           <button class="bd-back" aria-label="Back to the hollow" onClick={close}><Px name="arrow_left" size={30} /></button>
@@ -258,7 +184,7 @@ export function SleepScreen() {
 
         <aside class={'bd-panel hh-wood-dark' + (wide ? ' bd-side' : ' bd-sheet')}>
           {!wide && <nav class="bd-tabs" role="tablist">
-            {panes.map((p) => <button role="tab" aria-selected={pane === p.id} class={'bd-tabbtn' + (pane === p.id ? ' sel' : '')} onClick={() => { tap('ui_tab', 0.4); setPane(p.id); room.current?.go(p.id === 'tonight' ? 'room' : p.id); }}><Px name={p.icon} size={30} /><span>{p.title}</span></button>)}
+            {panes.map((p) => <button role="tab" aria-selected={pane === p.id} class={'bd-tabbtn' + (pane === p.id ? ' sel' : '')} onClick={() => { tap('ui_tab', 0.4); setPane(p.id); }}><Px name={p.icon} size={30} /><span>{p.title}</span></button>)}
           </nav>}
           <div class="bd-body">
             {(wide || pane === 'tonight') && <section class={'bd-sec' + (pane === 'tonight' ? ' sel' : '')} onClick={() => wide && setPane('tonight')}>
@@ -272,7 +198,7 @@ export function SleepScreen() {
               {!plan.on && <button class="bd-link" onClick={() => { tap('stamp', 0.5); setRoutine(setNight(s.routine, plan.day, { on: true })); }}>Set an alarm for tonight</button>}
             </section>}
 
-            {(wide || pane === 'mic') && <section class={'bd-sec' + (pane === 'mic' ? ' sel' : '')} onClick={() => wide && pane !== 'mic' && (setPane('mic'), room.current?.go('mic'))}>
+            {(wide || pane === 'mic') && <section class={'bd-sec' + (pane === 'mic' ? ' sel' : '')} onClick={() => wide && pane !== 'mic' && setPane('mic')}>
               <div class="bd-row">
                 {wide && <h2 class="grow"><Px name="mic" size={30} />Sleep tracking</h2>}
                 {!wide && <b class="grow">Pip listens while you sleep</b>}
@@ -281,7 +207,7 @@ export function SleepScreen() {
               <p class="bd-note">{import.meta.env.MODE === 'artifact' ? 'Here the night is tracked by time; the microphone works in the full app.' : sp.mic ? 'Snores, sleep talk and tossing, analysed on this device. Nothing is uploaded.' : 'Off: the night is tracked by time only.'}</p>
             </section>}
 
-            {(wide || pane === 'sound') && <section class={'bd-sec' + (pane === 'sound' ? ' sel' : '')} onClick={() => wide && pane !== 'sound' && (setPane('sound'), room.current?.go('sound'))}>
+            {(wide || pane === 'sound') && <section class={'bd-sec' + (pane === 'sound' ? ' sel' : '')} onClick={() => wide && pane !== 'sound' && setPane('sound')}>
               {wide && <h2><Px name="music" size={30} />Falling-asleep sounds</h2>}
               <SoundTiles cols={4} value={sp.soundscape} options={SOUNDSCAPES} onPick={(v) => set((x) => { x.soundscape = v; })} preview={(v) => { if (v === 'none') return 0; sound.preview(v, 5); return 5000; }} />
               {sp.soundscape !== 'none' && <div class="bd-row bd-seg"><span class="grow">Fade out</span>
@@ -289,7 +215,7 @@ export function SleepScreen() {
               </div>}
             </section>}
 
-            {(wide || pane === 'alarm') && <section class={'bd-sec' + (pane === 'alarm' ? ' sel' : '')} onClick={() => wide && pane !== 'alarm' && (setPane('alarm'), room.current?.go('alarm'))}>
+            {(wide || pane === 'alarm') && <section class={'bd-sec' + (pane === 'alarm' ? ' sel' : '')} onClick={() => wide && pane !== 'alarm' && setPane('alarm')}>
               <div class="bd-row">
                 {wide ? <h2 class="grow"><Px name="bell" size={30} />Alarm</h2> : <b class="grow">Wake me at {wakeHM}</b>}
                 <Toggle on={sp.alarmOn} onChange={(v) => set((x) => { x.alarmOn = v; })} label="Alarm" />
