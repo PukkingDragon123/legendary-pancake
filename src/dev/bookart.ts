@@ -19,7 +19,6 @@ export function showArt(root: HTMLElement) {
   add('paper R', A.paperArt(110, 150, 'R', 5), 1.5);
   for (const s of SECTIONS) { add('tab ' + s.name, A.tabArt(s.tint, 40, 22, s.id === 'stats'), 3); add('icon ' + s.icon, A.iconArt(s.icon, s.tint), 4); }
   for (const sc of [92, 78, 61, 40]) add('badge ' + sc, A.badgeArt(sc, 26), 3);
-  for (let i = 0; i < 5; i++) add('mood ' + A.MOOD_NAMES[i], A.moodArt(i), 4);
   for (const [c, e] of [['pink', 'heart'], ['blue', 'moon'], ['purple', 'seven'], ['gold', 'phases'], ['red', 'three'], ['gold', 'flame'], ['blue', 'eight'], ['green', 'star'], ['green', 'sun'], ['purple', 'hush'], ['pink', 'feather'], ['blue', 'wind'], ['gold', 'box'], ['purple', 'wish'], ['red', 'face'], ['green', 'quill'], ['green', 'compass'], ['red', 'chair'], ['pink', 'hat'], ['gold', 'crown']]) add(e, A.stampArt(c, e, true), 3);
   add('not yet', A.stampArt('gold', 'crown', false), 3);
   add('ribbon', A.ribbonArt(16, 'berry'), 4);

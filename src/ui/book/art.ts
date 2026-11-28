@@ -447,35 +447,8 @@ export function inkFrameArt(seed = 1): Art {
   });
 }
 
+/** The morning moods; their pictures are the icon family's mood0..mood4 (weather from storm to sun). */
 export const MOOD_NAMES = ['Groggy', 'Meh', 'Okay', 'Good', 'Wonderful'];
-const MOOD_TINT: [number, number, number][] = [[P.slate, P.dusk, P.mist], [P.stoneDark, P.stone, P.pebble], [P.pine, P.fern, P.sage], [P.leaf, P.moss, P.sageLight], [P.brassDark, P.honey, P.lamp]];
-function cloud(g: CanvasRenderingContext2D, cx: number, cy: number, s: number) {
-  g.beginPath(); g.arc(cx - 2.2 * s, cy + 0.6 * s, 2 * s, 0, Math.PI * 2); g.arc(cx, cy - 0.6 * s, 2.8 * s, 0, Math.PI * 2); g.arc(cx + 2.6 * s, cy + 0.6 * s, 2 * s, 0, Math.PI * 2); g.rect(cx - 2.2 * s, cy + 0.6 * s, 4.8 * s, 2 * s); g.fill();
-}
-/** Mood icons (12 x 12): rain cloud, cloud, leaf, sprout, star. */
-export function moodArt(i: number): Art {
-  return art(`mood7:${i}`, 12, 12, (g) => {
-    const [d, m, l] = MOOD_TINT[i].map(hexOf);
-    const grad = (y0: number, y1: number) => { const gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, l); gr.addColorStop(0.6, m); gr.addColorStop(1, d); return gr; };
-    g.shadowColor = 'rgba(40,30,20,.35)'; g.shadowBlur = 0.5 * S(); g.shadowOffsetY = 0.3 * S();
-    if (i <= 1) {
-      g.fillStyle = grad(2, 8); cloud(g, 6, i ? 5.2 : 4.4, 1);
-      if (i === 0) { g.shadowColor = 'transparent'; g.strokeStyle = hexOf(P.lake); g.lineWidth = 0.6; g.lineCap = 'round'; for (const x of [3, 6, 9]) { g.beginPath(); g.moveTo(x, 8.6); g.lineTo(x - 0.8, 10.8); g.stroke(); } }
-    } else if (i === 2) {
-      g.fillStyle = grad(1, 10); g.beginPath(); g.moveTo(2, 10); g.quadraticCurveTo(1.5, 2, 10, 1.5); g.quadraticCurveTo(10.5, 9.5, 2, 10); g.fill();
-      g.shadowColor = 'transparent'; g.strokeStyle = d; g.lineWidth = 0.4; g.beginPath(); g.moveTo(2, 10); g.lineTo(8.5, 3); g.stroke();
-    } else if (i === 3) {
-      g.fillStyle = hexOf(P.woodDark); g.beginPath(); g.ellipse(6, 10.4, 4.6, 1.2, 0, 0, Math.PI * 2); g.fill();
-      g.strokeStyle = hexOf(P.fern); g.lineWidth = 0.7; g.beginPath(); g.moveTo(6, 10); g.lineTo(6, 5); g.stroke();
-      g.fillStyle = grad(1, 7); g.beginPath(); g.ellipse(3.6, 4, 2.6, 1.4, -0.5, 0, Math.PI * 2); g.fill(); g.beginPath(); g.ellipse(8.4, 4, 2.6, 1.4, 0.5, 0, Math.PI * 2); g.fill();
-    } else {
-      g.fillStyle = grad(0.5, 11); g.beginPath();
-      for (let k = 0; k < 10; k++) { const a = (k / 10) * Math.PI * 2 - Math.PI / 2, r = k % 2 ? 2.3 : 5.4; g.lineTo(6 + Math.cos(a) * r, 6.3 + Math.sin(a) * r); }
-      g.closePath(); g.fill();
-    }
-  });
-}
-
 const STAMP_COL: Record<string, [number, number]> = { red: [mutec(P.terracotta), inkc(P.clay)], gold: [mutec(P.honey), inkc(P.brassDark)], green: [mutec(P.moss), inkc(P.pine)], blue: [mutec(P.lake), inkc(P.slate)], purple: [mutec(P.lilac), inkc(P.plum)], pink: [mutec(P.rose), inkc(P.berry)] };
 /** an emblem drawn in a 9 x 9 box at (x, y) */
 function emblem(g: CanvasRenderingContext2D, name: string, x: number, y: number, col: string) {

@@ -12,10 +12,12 @@ import { playDeparture } from '../world/cinematics.ts';
 import { WoodClock } from './clock.tsx';
 import { Px } from './icons.tsx';
 import { fmtDur, fmtTime, SlideToConfirm, tap, useTick } from './kit.tsx';
-import { Art, dtone, hash, tone } from './px/sleepart.ts';
-import { moon, moonPhase, nest } from './px/sleepprops.ts';
+import { bayer } from './px/sleepart.ts';
+import { moonPhase, nest } from './px/sleepprops.ts';
 import { PipPix } from './pippix.tsx';
-import { ArtCanvas, HoldButton, injectSleepFrames, nowT, Paper } from './sleepkit.tsx';
+import { cssPer, NightStars, phaseName, PixArt, PxDivider, soundSceneURL } from './chrome/pixlife.tsx';
+import { journeyArt, moonArt } from './px/nightart.ts'; // [artpass] the night's pixel stars, a vine divider
+import { HoldButton, injectSleepFrames, nowT, Paper } from './sleepkit.tsx';
 import { breathing, panel, sceneRef } from './state.ts';
 import { TalkText } from './talkview.tsx'; // [dialog10] the captions type on like a voice
 import { voice, type Tts } from './voice.ts';
@@ -52,8 +54,7 @@ export function SoundTiles(p: { options: { v: string; label: string }[]; value: 
             setHearing(ms ? o.v : null);
             if (ms) timer.current = window.setTimeout(() => setHearing(null), ms);
           }}>
-            <span class="sky" style={{ '--a': a.sky[0], '--b': a.sky[1] } as any}>
-              <i class="star s1" /><i class="star s2" /><i class="star s3" />
+            <span class="sky" style={{ '--a': a.sky[0], '--b': a.sky[1], backgroundImage: `url("${soundSceneURL(o.v, a.sky[0], a.sky[1])}")`, backgroundSize: `${48 * cssPer()}px ${38 * cssPer()}px` } as any}>
               <Px name={a.sprite} size={40} />
               {live_ && <span class="eq"><i /><i /><i /><i /></span>}
             </span>
@@ -119,45 +120,15 @@ function Departure() {
 
 // ------------------------------------------------------------------ the night screen
 
-/** A sky strip with a dotted trail from the hollow to tonight's area; Pip flies along it. */
+/** [artpass] A sky strip with a dotted path from the hollow to tonight's place; Pip flies along it with his lantern. */
 function Journey(p: { frac: number; color: string }) {
-  const W = 120, H = 30;
-  return <ArtCanvas w={W} h={H} k={3} fps={6} class="journey" label="Pip's trip tonight" deps={[Math.round(p.frac * 100), p.color]} draw={(a, t, f) => {
-    // hills
-    for (let x = 0; x < W; x++) {
-      const h1 = 22 + Math.sin(x * 0.09) * 2 + Math.sin(x * 0.23 + 1) * 1.2;
-      for (let y = Math.floor(h1); y < H; y++) a.px(x, y, dtone('navy', 1.6 - (y - h1) * 0.08, x, y));
-    }
-    // the oak at home (left) and the area's landmark (right)
-    a.rect(6, 12, 3, 11, tone('wood', 1));
-    a.ell(7.5, 11, 6, 5, (x, y) => dtone('moss', 1.4 + (hash(x, y) - 0.5) * 0.6, x, y));
-    a.px(8, 17, '#e9d5ae'); a.px(9, 17, '#dbc3a5');
-    a.ell(W - 10, 21, 7, 4, (x, y) => dtone('navy', 2.4, x, y));
-    for (let i = 0; i < 5; i++) a.px(W - 14 + i * 2, 19 - (i % 2), p.color);
-    // dotted trail (an arc)
-    const pt = (u: number): [number, number] => [12 + u * (W - 26), 20 - Math.sin(u * Math.PI) * 13];
-    for (let u = 0; u <= 1.0001; u += 1 / 40) { const [x, y] = pt(u); a.px(x, y, u <= p.frac ? '#eae2d1' : '#405060'); }
-    // twinkles
-    for (let i = 0; i < 14; i++) { const sx = Math.floor(hash(i, 3) * W), sy = Math.floor(hash(i, 4) * 12); if ((f + i) % 5) a.px(sx, sy, (f + i) % 3 ? '#526272' : '#c7d4e9'); }
-    // Pip's lantern travelling the trail, a few sparks drifting behind it
-    const [ox, oy] = pt(Math.max(0.02, Math.min(0.98, p.frac)));
-    const bob = Math.round(Math.sin(t * 3) * 0.6), lx = Math.round(ox), ly = Math.round(oy) - 4 + bob;
-    for (let i = 1; i <= 3; i++) { const [sx, sy] = pt(Math.max(0, p.frac - i * 0.035)); if ((f + i) % 3) a.px(sx, sy - 3 + ((f + i) % 2), i === 1 ? '#f1d39a' : '#c8a764'); }
-    a.rect(lx - 1, ly - 4, 3, 1, tone('iron', 2)); a.px(lx, ly - 5, tone('iron', 3));
-    a.rect(lx - 2, ly - 3, 5, 5, (x, y) => (x === lx - 2 || x === lx + 2 ? tone('brass', 2) : (f % 2 && y === ly - 1) ? '#fff2c9' : '#f1d39a'));
-    a.rect(lx - 2, ly + 2, 5, 1, tone('brass', 1));
-    a.px(lx - 3, ly - 1, '#c8a764'); a.px(lx + 3, ly - 1, '#c8a764');
-  }} />;
+  return <PixArt w={168} h={40} fps={6} class="journey" label="Pip's trip tonight" stillT={2} draw={(a, t) => journeyArt(a, 168, 40, p.frac, p.color, t)} />;
 }
 
-/** The moon clock: tonight's real moon phase, softly glowing, with a few stars. */
-function MoonClock(p: { size: number }) {
-  const N = 44;
-  return <ArtCanvas w={N} h={N} k={p.size} fps={4} class="moonclock" draw={(a, t, f) => {
-    for (let i = 0; i < 10; i++) { const x = Math.floor(hash(i, 1, 2) * N), y = Math.floor(hash(i, 2, 2) * N); if (Math.hypot(x - N / 2, y - N / 2) > 17 && (f + i) % 6) a.px(x, y, (f + i) % 4 ? '#607081' : '#f6f1e5'); }
-    moon(a, N / 2, N / 2, 12, { phase: moonPhase(), glow: 0.7, face: 'sleep' });
-    void t;
-  }} />;
+/** [artpass] The moon: tonight's real phase, a lit pixel sphere with its seas and craters and a fine halo. */
+function MoonClock(p: { big: boolean }) {
+  const N = p.big ? 64 : 52, ph = moonPhase();
+  return <PixArt w={N} h={N} fps={0} class="moonclock" label={`${phaseName(ph)} tonight`} draw={(a) => moonArt(a, N / 2, N / 2, N * 0.34, ph, 0.8)} />;
 }
 
 function Squiggle() {
@@ -192,11 +163,12 @@ export function NightOverlay() {
   const wide = innerWidth >= 900;
   return (
     <div class={'overlay night2' + (dim ? ' dimmed' : '')} onClick={() => setDim((d) => !d)}>
+      <NightStars />
       <div class="n-top">
         <span class="n-chip"><Px name="map" size={30} />Pip is exploring <b>{area?.name ?? 'the woods'}</b></span>
       </div>
       <div class="n-mid">
-        <MoonClock size={wide ? 4 : 3} />
+        <MoonClock big={wide} />
         <div class="n-time">{clock}{ampm && <small>{ampm}</small>}</div>
         <div class="n-alarm"><Px name="alarm" size={30} />{wake ? <>Alarm {fmtTime(wake, h12)}{s.sleep.smartMin ? <span class="soft"> · smart from {fmtTime(wake - s.sleep.smartMin * 60000, h12)}</span> : null}</> : 'No alarm tonight'}</div>
       </div>
@@ -284,10 +256,11 @@ function CantSleep(p: { onClose: () => void }) {
     <div class="calm" onClick={(e) => { e.stopPropagation(); if (e.target === e.currentTarget) p.onClose(); }}>
       <div class="calm-board hh-wood-dark">
         <header class="calm-head">
-          {view !== 'menu' ? <button class="calm-x" aria-label="Back" onClick={() => { tap('ui_back', 0.3); setView('menu'); }}><Px name="arrow_left" size={30} /></button> : <span class="calm-moon"><Px name="owl" size={40} /></span>}
+          {view !== 'menu' ? <button class="calm-x" aria-label="Back" onClick={() => { tap('ui_back', 0.3); setView('menu'); }}><Px name="arrow_left" size={30} /></button> : <span class="calm-moon"><Px name="nights" size={44} /></span>}
           <div class="grow"><h2>{view === 'sounds' ? 'Something to listen to' : view === 'story' ? 'Shh… a story' : "Can't sleep? That's okay."}</h2>{view === 'menu' && <p>Lying awake happens to everyone. Let's make it softer.</p>}</div>
           <button class="calm-x" aria-label="Close" onClick={() => { tap('ui_close', 0.3); p.onClose(); }}><Px name="cross" size={30} /></button>
         </header>
+        <PxDivider class="calm-div" />
         {view === 'menu' && <>
           <div class="calm-grid">
             {OPTS.map((o) => (
@@ -314,19 +287,22 @@ function CantSleep(p: { onClose: () => void }) {
 // ------------------------------------------------------------------ the phone lock
 
 function SleepingPip() {
-  return <ArtCanvas w={64} h={46} k={4} fps={5} class="lock-pip" label="Pip asleep in the nest" draw={(a, t, f) => {
-    // a soft cloud, and Pip's nest on it with the blanket rising and falling
-    for (const [cx, cy, r] of [[18, 38, 9], [32, 35, 12], [46, 38, 9], [30, 42, 10]] as const) a.disc(cx, cy, r, (x, y) => dtone('lilac', 3.6 + (y < cy - r * 0.4 ? 1 : 0) - (y > 42 ? 0.8 : 0), x, y));
+  // [artpass] drawn at the game's own art pixel, twice the detail it had: a soft cloud lit from the top, the nest with
+  // the blanket rising and falling, z's drifting up
+  return <PixArt w={124} h={88} fps={5} class="lock-pip" label="Pip asleep in the nest" stillT={1} draw={(a, t) => {
+    const LIL = ['#5a4e7a', '#76689a', '#9488b8', '#b4aad0', '#d2cae4', '#ece8f4'];
+    for (const [cx, cy, r] of [[34, 72, 17], [62, 66, 23], [90, 72, 17], [58, 80, 19]] as const) a.disc(cx, cy, r, (x, y) => {
+      const l = ((cx - x) * 0.35 + (cy - y) * 0.9) / r + (y > 80 ? -0.7 : 0);
+      return LIL[Math.max(0, Math.min(5, Math.floor(2.6 + l * 2.2 + bayer(x, y) - 0.5)))];
+    });
     a.outline('#232a39');
-    nest(a, 31, 28, 0.95, Math.sin(t * 1.4) > 0.2 ? 1 : 0);
-    // drifting z's
+    nest(a, 60, 53, 1.85, Math.sin(t * 1.4) > 0.2 ? 1 : 0);
     for (let i = 0; i < 3; i++) {
-      const k = ((t * 0.35 + i / 3) % 1), zx = 44 + k * 12 + Math.sin(k * 6 + i) * 2, zy = 14 - k * 14;
+      const k = ((t * 0.35 + i / 3) % 1), zx = 86 + k * 22 + Math.sin(k * 6 + i) * 3, zy = 28 - k * 26;
       if (k > 0.85) continue;
-      const c = k < 0.5 ? '#ebedef' : '#9aa9bd', sz = i === 1 ? 5 : 4;
+      const c = k < 0.5 ? '#ebedef' : '#9aa9bd', sz = i === 1 ? 7 : 5;
       a.rect(zx, zy, sz, 1, c); for (let j = 1; j < sz - 1; j++) a.px(zx + sz - 1 - j, zy + j, c); a.rect(zx, zy + sz - 1, sz, 1, c);
     }
-    void f;
   }} />;
 }
 
@@ -341,7 +317,8 @@ function PhoneLock() {
   return (
     <div class="plock" role="dialog" aria-label="Phone locked for the night" onClick={(e) => e.stopPropagation()}>
       <div class="lock-sky" />
-      <div class="lock-moon"><ArtCanvas w={40} h={40} k={4} fps={0} draw={(a) => moon(a, 20, 20, 13, { phase: moonPhase(), glow: 0.8 })} /></div>
+      <NightStars />
+      <div class="lock-moon"><PixArt w={56} h={56} fps={0} draw={(a) => moonArt(a, 28, 28, 19, moonPhase(), 0.9)} /></div>
       <div class="lock-time">{hh}</div>
       <p class="lock-sub">{wake ? `Your phone is resting until ${fmtTime(wake, h12)}.` : 'Your phone is resting until morning.'}</p>
       <SleepingPip />
@@ -371,7 +348,7 @@ function PhoneLock() {
 
 function WakingPip() {
   // a render of the 3D Pip, in art pixels, stretching awake (CSS steps)
-  return <span class="wake-pip"><PipPix n={46} size={184} shot="full" label="Pip waking up" /></span>;
+  return <span class="wake-pip"><PipPix size={184} shot="full" smooth label="Pip waking up" /></span>;
 }
 
 export function AlarmOverlay() {

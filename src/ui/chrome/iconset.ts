@@ -15,7 +15,7 @@ interface Sprite3D { w: number; h: number; rows: string[]; pal: Record<string, s
 /** the size a sprite reports to callers that size it by its sprite (spriteURL, AnimPx): its drawing is shrunk to that */
 const NOMINAL = 40;
 /** extra names drawn by a baked model */
-const ALIAS: Record<string, string> = { moonstone: 'moongem' };
+const ALIAS: Record<string, string> = { moonstone: 'moongem', shop_tag: 'bp_buy' };
 
 // ------------------------------------------------------------------ the atlas
 let atlasP: Promise<HTMLImageElement | null> | null = null;

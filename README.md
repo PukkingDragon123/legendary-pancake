@@ -45,6 +45,20 @@ furniture and outfits. The better you sleep, the fuller the satchel.
 - **The Clock** is now set in Barnaby's workshop: drag the moon and sun hands on the cuckoo clock's dial to set bedtime
   and wake time; settings live in a walnut panel beside it (`src/world/stages/clockshop.ts`).
 
+### Art pass: the last old icons, and more pixel life
+
+- **No more old sprites in the interface**: the morning moods (a storm cloud, a grey cloud, the moon over a cloud, the
+  crescent and its stars, the sun), a claw hammer, the mystery parcel, the build view's blueprints and the wishes'
+  rarity stars are now detailed 3D icons in the atlas (`?append=1` on `/dev-iconbake.html` adds new names after the
+  last cell, so older cells never move); the journal's mood stamps use them too; the level-up medal is the enamel
+  medallion.
+- **Hand-made pixel art** (`src/ui/chrome/pixlife.tsx`, `src/ui/px/nightart.ts`), always at a whole number of device
+  pixels per art pixel and still under *Calm motion*: a snail inching along the name sign, a ladybird on the acorn
+  sign, moths at night, a round window on the sky under the gem sign (tonight's real moon phase or the sun, with the
+  Hollow's weather; tap it and Pip tells you), a vine divider under every panel's title and ivy over its top edge,
+  a little scene behind each sleep sound, and on the night screen a detailed moon, twinkling pixel stars with the odd
+  shooting star, and Pip's journey with his lantern.
+
 ### Profile, photo studio and friends
 
 - **Tap Pip's portrait** on the name sign to open the profile: a walnut cabinet over a little 3D photo studio, with

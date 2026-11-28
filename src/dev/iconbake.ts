@@ -11,6 +11,9 @@
 //
 //   /dev-iconbake.html               bake everything and show it (big, at 1:1, on parchment and walnut)
 //   /dev-iconbake.html?only=regex     just some (no atlas)
+//   /dev-iconbake.html?append=1       [artpass] bake only the LATE names the atlas lacks: window.__cells holds each new cell's
+//                                     drawing and place (a tools script pastes them into public/img/ui3d.webp), __module
+//                                     the index with every older entry unchanged
 //   window.__module, window.__atlas, window.__shelfAtlas   the generated src/ui/px/icons3d.ts, public/img/ui3d.webp and
 //                                     public/img/ui3d-shelf.webp (a tools script writes them)
 import * as THREE from 'three';
@@ -1695,6 +1698,77 @@ function birdhouse10(): O {
   return grp(body, roof, door, perch, ring, post);
 }
 
+// ------------------------------------------------------------------ [artpass] the icons that were still old pixel sprites
+// The morning moods ("how did you sleep?") as weather in the family's materials: a slate storm cloud with an enamel
+// bolt and rain (Groggy), a grey cloud in a drift of mist (Meh), the gilt moon peeping over a white cloud (Okay), the
+// crescent and its stars (Good), the burnished sun with a twinkle (Wonderful).
+function gradMat(key: string, stops: [number, string][]): THREE.MeshStandardMaterial {
+  const map = drawTex(key, 16, 128, (g) => { const lg = g.createLinearGradient(0, 0, 0, 128); for (const [o, c] of stops) lg.addColorStop(o, c); g.fillStyle = lg; g.fillRect(0, 0, 16, 128); });
+  return faceMat(map, { rough: 0.8 });
+}
+const stormMat = () => gradMat('stormgrad', [[0, '#c6ccdc'], [0.45, '#8a93ab'], [1, '#474e69']]);
+const greyMat = () => gradMat('greygrad', [[0, '#eef0f4'], [0.55, '#c2c6d0'], [1, '#8c92a2']]);
+function puff(m: THREE.Material, x: number, y: number, z: number, s: number): O { const c = cloud(m) as THREE.Mesh; planarUV(c.geometry); return at(c, x, y, z, 0, 0, 0, s); }
+const BOLT: P2[] = [[0.15, 0.95], [-0.55, -0.1], [-0.05, -0.1], [-0.25, -0.95], [0.55, 0.15], [0.05, 0.15]];
+function moodStorm(): O {
+  return grp(puff(stormMat(), 0, 0.3, 0, 1.05),
+    at(cloison(roundPoly(BOLT, 0.05), vitreous(0xe8a028, 0.3)), 0.04, -0.46, 0.32, 0, 0, 0.12, 0.46),
+    ...([[-0.5, -0.5, 0.26], [0.52, -0.56, 0.24], [-0.18, -0.86, 0.2]] as [number, number, number][]).map(([x, y, s]) => at(waterDrop(s), x, y, 0.12, 0, 0, -0.18)));
+}
+function moodGrey(): O {
+  const mist = M(0xb4bccb, { rough: 0.5, tex: 'plain' });
+  return grp(puff(greyMat(), -0.36, 0.32, -0.2, 0.62), puff(greyMat(), 0.12, 0.04, 0.1, 0.95),
+    capsule([-0.78, -0.52, 0.2], [0.42, -0.52, 0.2], 0.055, mist), capsule([-0.34, -0.72, 0.2], [0.78, -0.72, 0.2], 0.05, mist));
+}
+function moodPeek(): O {
+  return grp(at(moonJewel(0.86, 0.72, [0.38, 0.22]), -0.1, 0.32, -0.25, 0, 0, 0.2, 0.86), puff(cloudMat(), 0.12, -0.36, 0.25, 0.92));
+}
+function moodCrescent(): O {
+  const gold = gilt(0xf4c85a);
+  return grp(at(moonJewel(0.86, 0.72, [0.38, 0.22]), -0.1, -0.04, 0, 0, 0, 0.1, 1.02),
+    at(goldStar(0.3, 0.13), 0.6, 0.6, 0.12), at(goldStar(0.18, 0.08, 5, gold), 0.74, -0.18, 0.12), at(goldStar(0.12, 0.06, 4, gold), 0.28, 0.9, 0.1));
+}
+// ---- hammer: a claw hammer, ash handle with a leather grip, a forged steel head
+function clawHammer(): O {
+  const steel = M(0x9ea6b4, { metal: 0.85, rough: 0.28, tex: null, env: 1.2 }), ash = M(0xd8a868, { tex: 'grain', rough: 0.5 }), grip = M(0x6a2c1c, { rough: 0.55, tex: 'leather' });
+  const handle = grp(lathe(smoothProfile([[0, -0.95], [0.1, -0.94], [0.12, -0.8], [0.1, -0.4], [0.08, 0.1], [0.085, 0.5], [0.07, 0.55]], 3), ash, 24),
+    lathe(smoothProfile([[0.125, -0.88], [0.135, -0.7], [0.125, -0.45], [0.11, -0.36]], 2), grip, 24));
+  const head = grp(
+    at(cyl(0.15, 0.15, 0.42, steel, 28), 0.3, 0, 0, 0, 0, Math.PI / 2), at(cyl(0.17, 0.15, 0.06, steel, 28), 0.52, 0, 0, 0, 0, Math.PI / 2),
+    mesh(new THREE.BoxGeometry(0.22, 0.3, 0.24), steel),
+    tube([[-0.06, 0.06, 0], [-0.32, 0.1, 0], [-0.56, 0.0, 0], [-0.72, -0.2, 0]], 0.09, steel, 24, 10),
+    at(mesh(new THREE.BoxGeometry(0.05, 0.12, 0.2), BLACKSTEEL()), -0.7, -0.2, 0, 0, 0, 0.6));
+  return at(grp(handle, at(head, 0, 0.62, 0)), 0, 0, 0, 0, 0, -0.62);
+}
+// ---- shop_mystery: a parcel in kraft paper tied with twine in a bow, a paper tag with a question mark
+function mysteryTag(): THREE.Texture {
+  return drawTex('mysterytag', 96, 128, (g) => {
+    g.fillStyle = '#efe0bc'; g.fillRect(0, 0, 96, 128); grain(g, 96, 128, 0.08);
+    g.fillStyle = '#7a2a3a'; g.font = 'bold 96px Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('?', 48, 72);
+  });
+}
+function mysteryParcel(): O {
+  const k = C.kraft(), twine = M(0xa87a46, { rough: 0.85, tex: 'weave' });
+  const g = grp(at(mesh(new THREE.BoxGeometry(1.2, 0.9, 1.0), k), 0, -0.18, 0),
+    at(mesh(new THREE.BoxGeometry(0.05, 0.94, 1.04), twine), 0.12, -0.18, 0), at(mesh(new THREE.BoxGeometry(1.24, 0.94, 0.05), twine), 0, -0.18, 0.06),
+    at(mesh(new THREE.BoxGeometry(1.24, 0.05, 1.04), twine), 0, 0.28, 0));
+  const loop = (a: number) => { const l = torus(0.17, 0.035, twine, Math.PI * 2, 8, 28); l.scale.set(1.25, 1, 0.5); return at(grp(l), 0.12 + Math.cos(a) * 0.16, 0.38, 0.06 + Math.sin(a) * 0.16, 0, -a, 0.6); };
+  g.add(loop(0), loop(Math.PI), at(ball(0.07, twine, 12, 10), 0.12, 0.33, 0.06));
+  const tag = ext(shape(roundPoly([[-0.22, -0.32], [0.22, -0.32], [0.22, 0.22], [0, 0.36], [-0.22, 0.22]], 0.04)), 0.02, faceMat(mysteryTag(), { rough: 0.9 }), 0.01, 1, 32);
+  planarUV(tag.geometry);
+  g.add(at(tag, 0.5, -0.12, 0.58, 0, 0.2, -0.22), tube([[0.2, 0.3, 0.1], [0.36, 0.26, 0.45], [0.44, 0.16, 0.6]], 0.015, twine, 12, 5));
+  return g;
+}
+// ---- build's view toggle: the blueprint seen lying back (tilt) and from straight above under a reading glass (top)
+function blueprintSheet(): O {
+  const sheetM = faceMat(blueprintTex(), { rough: 0.85, side: THREE.DoubleSide, pix: { flat: true } });
+  return grp(mesh(new THREE.PlaneGeometry(1.5, 1.4), sheetM), at(mesh(new THREE.BoxGeometry(1.54, 1.44, 0.03), M(0xe8eef6, { rough: 0.9, tex: 'paper' })), 0, 0, -0.02));
+}
+const viewTilt = (): O => grp(at(blueprintSheet(), 0, -0.2, 0, -1.08, 0, 0, 1.05), at(curvedArrow(vitreous(EMERALD), true), 0.02, 0.5, 0.2, 0, 0, 0, 0.42));
+const viewTop = (): O => grp(blueprintSheet(), at(readingGlass(), 0.3, -0.1, 0.25, 0, 0, 0, 0.62));
+/** the wishes' rarity stars below gold: a star of tinted gilt on its darker backing */
+const tintStar = (face: number, back: number): O => grp(goldStar(0.98, 0.44, 5, gilt(face)), at(ext(shape(offsetPts(starPts(0.98, 0.44), 0.05)), 0.06, M(back, { metal: 0.6, rough: 0.35, tex: null }), 0.02, 1), 0, 0, -0.06));
+
 // ------------------------------------------------------------------ the icon models
 type Make = () => O | Promise<O>;
 /** `edge`: [icons10] how dark the faint edge is (0.35; pale things such as a white glove or air on parchment want more) */
@@ -1886,7 +1960,21 @@ const ICONS: Record<string, Spec> = {
   // [icons9] the Outside / Inside tile: a round door, shut; ajar with warm light inside
   door_out: { make: () => roundDoor(false), yaw: 0.18, pitch: 0.1 },
   door_in: { make: () => roundDoor(true), yaw: 0.3, pitch: 0.1 },
+  // [artpass] names added later go after the atlas' last cell (?append=, see bake()), so every older cell stays put
+  mood0: { make: () => moodStorm(), yaw: 0.22, pitch: 0.14, edge: 0.5 },
+  mood1: { make: () => moodGrey(), yaw: 0.2, pitch: 0.12, edge: 0.6 },
+  mood2: { make: () => moodPeek(), yaw: 0.22, pitch: 0.14, edge: 0.5 },
+  mood3: { make: () => moodCrescent(), yaw: 0.26, pitch: 0.22 },
+  mood4: { make: async () => grp(await ICONS.sun.make(), at(goldStar(0.26, 0.09, 4, gilt(0xfff0c0)), 0.78, 0.78, 0.3)), yaw: 0.24, pitch: 0.22 },
+  hammer: { make: () => clawHammer(), yaw: 0.3, pitch: 0.24 },
+  shop_mystery: { make: () => mysteryParcel(), yaw: 0.5, pitch: 0.32 },
+  bp_tilt: { make: () => viewTilt(), yaw: 0.2, pitch: 0.2 },
+  bp_top: { make: () => viewTop(), yaw: 0.12, pitch: 0.08 },
+  shop_star4: { make: () => tintStar(0xc6b2f0, 0x7a62a8), yaw: 0.22, pitch: 0.22 },
+  shop_star3: { make: () => tintStar(0x9ccbe8, 0x4a7a9e), yaw: 0.22, pitch: 0.22 },
 };
+/** [artpass] the names added after the first atlas: baked after the currency's frames, so the cells before them never move */
+const LATE = ['mood0', 'mood1', 'mood2', 'mood3', 'mood4', 'hammer', 'shop_mystery', 'bp_tilt', 'bp_top', 'shop_star4', 'shop_star3'];
 function gear(m: THREE.Material, teeth = 10, web?: THREE.Material): O {
   const pts: P2[] = [], N = teeth * 12;
   for (let i = 0; i < N; i++) {
@@ -2241,7 +2329,7 @@ function bakeShelfClock(): { sprites: ShelfSprite[]; dial: [number, number, numb
 const ANIM: [string, string, number][] = [['owlcoin', 'owlcoin', 8], ['moongem', 'moongem', 8], ['coin_vault', 'coin_vault', 4]];
 const ANIM_ALIAS: Record<string, string> = { acorn_big: 'owlcoin', gem_big: 'moongem' };
 /** names that share a model */
-const ALIAS: Record<string, string> = { acorn: 'owlcoin', wd_hanger: 'hanger' };
+const ALIAS: Record<string, string> = { acorn: 'owlcoin', wd_hanger: 'hanger', chair: 'bp_chair', shop_timer: 'hourglass', shop_star5: 'star' };
 
 /** the photo swatches the models' wood, leather and cloth wear (prepared from Poly Haven CC0 textures in art/tex7) */
 async function loadPhotos(): Promise<void> {
@@ -2273,7 +2361,10 @@ async function bake() {
   const icons: Record<string, number> = {}, anim: Record<string, number[]> = {};
   const push = (r: Arts) => { cells.push(r); return cells.length - 1; };
   const models = new Map<string, O>();
-  for (const name of Object.keys(ICONS).filter(test)) {
+  // [artpass] ?append=1: bake only the LATE names not yet in the atlas and add them after its last cell, leaving every
+  // cell already there (and the shelf) exactly as it is
+  if (q.get('append')) { await appendBake(test); return; }
+  for (const name of Object.keys(ICONS).filter((n) => test(n) && !LATE.includes(n))) {
     try {
       const obj = prep(await ICONS[name].make());
       models.set(name, obj);
@@ -2308,6 +2399,10 @@ async function bake() {
     anim[name] = list;
   }
   for (const [a, b] of Object.entries(ANIM_ALIAS)) if (anim[b]) anim[a] = anim[b];
+  for (const name of LATE.filter(test)) {
+    try { const r = await bakeIcon(ICONS[name]); icons[name] = push(r); show(name, r); } catch (e) { console.error('bake failed', name, e); }
+  }
+  for (const [a, b] of Object.entries(ALIAS)) if (icons[b] !== undefined && test(a)) icons[a] = icons[b];
   // the shelf's sprites
   const sh = test('shelf') ? await bakeShelf() : null;
   if (sh) for (const sp of sh.sprites) {
@@ -2356,6 +2451,33 @@ async function bake() {
   w.__module = moduleText(json);
   w.__atlas = atlas.toDataURL('image/png');
   w.__shelfAtlas = shelfAtlas.toDataURL('image/png');
+  w.__done = true;
+}
+/** [artpass] bake the LATE names the atlas lacks and append them after its last cell; the index keeps every old entry */
+async function appendBake(test: (n: string) => boolean) {
+  const w = window as unknown as { __module: string; __cells: { x: number; y: number; png: string }[]; __height: number; __done: boolean };
+  const old =await new Promise<HTMLImageElement>((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = `/${ICONS3D.atlas}?v=${Date.now()}`; });
+  const [n, cols] = ICONS3D.hd;
+  const used = [...Object.values(ICONS3D.icons), ...Object.values(ICONS3D.anim).flat()];
+  let next = Math.max(...used) + 1;
+  const icons: Record<string, number> = { ...ICONS3D.icons }, fresh: [number, Arts][] = [];
+  for (const name of LATE.filter((x) => test(x) && icons[x] === undefined)) {
+    const r = await bakeIcon(ICONS[name]);
+    show(name, r);
+    icons[name] = next; fresh.push([next, r]); next++;
+  }
+  for (const [a, b] of Object.entries(ALIAS)) if (icons[b] !== undefined && icons[a] === undefined) icons[a] = icons[b];
+  // the new cells only, each with its place: the tools script pastes them into the atlas file losslessly (re-drawing
+  // the whole atlas through a canvas would round its soft edges' colours)
+  w.__cells = fresh.map(([i, r]) => {
+    const c = document.createElement('canvas');
+    c.width = c.height = n;
+    c.getContext('2d')!.putImageData(new ImageData(new Uint8ClampedArray(r.hd.d), n, n), 0, 0);
+    return { x: (i % cols) * n, y: Math.floor(i / cols) * n, png: c.toDataURL('image/png') };
+  });
+  w.__height = Math.max(old.naturalHeight, Math.ceil(next / cols) * n);
+  w.__module = moduleText(JSON.stringify({ atlas: ICONS3D.atlas, hd: ICONS3D.hd, icons, anim: ICONS3D.anim, shelf: ICONS3D.shelf }));
+  document.title = 'appended ' + fresh.length;
   w.__done = true;
 }
 function moduleText(json: string): string {
