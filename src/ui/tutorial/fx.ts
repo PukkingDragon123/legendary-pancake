@@ -64,22 +64,21 @@ export function paintFx(g: CanvasRenderingContext2D, f: FxFrame) {
     }
   }
 
-  // ---- a ring of honey-gold light round the thing, breathing, a glint running round it
+  // ---- a soft warm glow behind the thing to tap: no line round it, just light that breathes
   if (s && f.ring) {
-    const breathe = 0.5 + 0.5 * Math.sin(t * 2.4), p0 = Math.max(0, 1 - f.pulse * 2.5);
-    const pad = 7 + breathe * 3 + p0 * 8, hx = s.w / 2 + pad, hy = s.h / 2 + pad, r = f.round ? Math.min(hx, hy) : Math.min(16, Math.min(hx, hy));
-    const path = () => { g.beginPath(); if (f.round) g.ellipse(cx, cy, hx, hy, 0, 0, Math.PI * 2); else g.roundRect(cx - hx, cy - hy, hx * 2, hy * 2, r); };
+    const breathe = 0.5 + 0.5 * Math.sin(t * 2.2), p0 = Math.max(0, 1 - f.pulse * 2.5);
+    const R = Math.max(s.w, s.h) * 0.75 + 26 + breathe * 8 + p0 * 14;
     g.save();
     g.globalCompositeOperation = 'lighter';
-    g.shadowColor = 'rgba(255, 190, 90, 0.9)'; g.shadowBlur = 18 + breathe * 10;
-    g.strokeStyle = `rgba(255, 206, 110, ${0.55 + breathe * 0.25})`; g.lineWidth = 3; path(); g.stroke();
-    g.shadowBlur = 0;
-    g.strokeStyle = `rgba(255, 246, 214, ${0.6 + breathe * 0.3})`; g.lineWidth = 1.2; path(); g.stroke();
+    g.translate(cx, cy); g.scale(Math.max(1, s.w / s.h) ** 0.3, Math.max(1, s.h / s.w) ** 0.3);
+    const glow = g.createRadialGradient(0, 0, 0, 0, 0, R);
+    glow.addColorStop(0, `rgba(255, 214, 140, ${0.22 + breathe * 0.1 + p0 * 0.15})`); glow.addColorStop(0.55, `rgba(255, 180, 90, ${0.1 + breathe * 0.05})`); glow.addColorStop(1, 'rgba(255, 170, 80, 0)');
+    g.fillStyle = glow; g.beginPath(); g.arc(0, 0, R, 0, Math.PI * 2); g.fill();
     g.restore();
-    // the glint running round
-    const a = (t * 0.9) % (Math.PI * 2);
-    star(g, cx + Math.cos(a) * hx, cy + Math.sin(a) * hy, 2, 0.9, true);
-    star(g, cx + Math.cos(a + Math.PI) * hx, cy + Math.sin(a + Math.PI) * hy, 2, 0.45, false);
+    // two soft glints drifting round it
+    const a = (t * 0.8) % (Math.PI * 2), hx = s.w / 2 + 12, hy = s.h / 2 + 12;
+    star(g, cx + Math.cos(a) * hx, cy + Math.sin(a) * hy, 1.5, 0.75, true);
+    star(g, cx + Math.cos(a + 2.6) * hx, cy + Math.sin(a + 2.6) * hy, 1.2, 0.45, false);
   }
 
   // ---- the sparkle trail from Pip to it

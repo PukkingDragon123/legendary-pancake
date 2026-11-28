@@ -6,13 +6,12 @@
 .tt-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .tt-block { position: absolute; pointer-events: auto; background: transparent; touch-action: none; }
 
-/* Pip: the 3D owl, inked round his silhouette like the world and the icons, with a soft drop */
-.tt-pip { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform;
-  filter: drop-shadow(1px 0 0 rgba(30, 14, 20, 0.85)) drop-shadow(-1px 0 0 rgba(30, 14, 20, 0.85)) drop-shadow(0 1px 0 rgba(30, 14, 20, 0.85)) drop-shadow(0 -1px 0 rgba(30, 14, 20, 0.6)) drop-shadow(0 6px 5px rgba(24, 10, 24, 0.28)); }
+/* Pip: the 3D owl, no outline, just a soft shadow under him */
+.tt-pip { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; filter: drop-shadow(0 8px 8px rgba(24, 10, 24, 0.3)); }
 .tt-hit { position: absolute; left: 0; top: 0; pointer-events: auto; border-radius: 45% 45% 40% 40%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
 /* the card */
-.tt-card { position: absolute; left: 50%; top: 40%; width: 380px; pointer-events: auto; opacity: 0; transform: translateY(8px) scale(0.92); transform-origin: 50% 100%;
+.tt-card { position: absolute; left: 50%; top: 40%; width: 400px; pointer-events: auto; opacity: 0; transform: translateY(8px) scale(0.92); transform-origin: 50% 100%;
   transition: opacity 0.18s ease, transform 0.18s ease; visibility: hidden; }
 .tt-card.show { opacity: 1; transform: none; visibility: visible; transition: opacity 0.22s ease, transform 0.42s cubic-bezier(0.28, 1.6, 0.5, 1), visibility 0s; }
 .tt-card[data-side='below'] { transform-origin: 50% 0; }
@@ -20,7 +19,7 @@
 .tt-name { position: absolute; left: 22px; top: -13px; z-index: 2; padding: 3px 16px 4px; font: 700 15px/1.1 var(--font-display); color: #3a2206; letter-spacing: 0.03em;
   text-shadow: 0 1px 0 rgba(255, 238, 180, 0.7); white-space: nowrap; }
 .tt-paper { position: relative; padding: 11px 16px 12px; min-height: 52px; cursor: pointer; }
-.tt-ink { margin: 0; font: 600 18px/1.4 var(--font-body); color: #3b2414; text-wrap: pretty; }
+.tt-ink { margin: 0; font: 500 19px/1.42 var(--font-body); color: #3b2414; text-wrap: pretty; }
 .tt-w { white-space: nowrap; }
 .tt-c { display: inline-block; opacity: 0; animation: ttInk 0.24s cubic-bezier(0.3, 1.4, 0.5, 1) forwards; }
 .tt-ink.wait .tt-c { animation-play-state: paused; }

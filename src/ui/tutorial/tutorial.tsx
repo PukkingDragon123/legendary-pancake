@@ -1,7 +1,7 @@
 // [tutor] The guided tour of the hollow, right after the interview (and again from Settings). Pip himself shows you
 // round: when you tap him in the room he pops out of it in a puff of feathers and flies over the interface (the
 // real 3D owl, your species and outfit, on his own little canvas: guide.ts). He flies from one thing to the next,
-// lands on top of it (or hovers beside it) and points with a wing; the room dusks a little, the thing sits in a pool
+// lands on top of it (or hovers beside it) and points with a wing; the room stays lit, the thing glows softly in a pool
 // of lamplight inside a breathing ring of golden light, sparkles stream from his wing to it and fireflies drift about
 // (fx.ts). He talks on a parchment card in a carved walnut frame, typed in ink with his voice (ink.tsx), with
 // wooden Skip and Next buttons. Each stop waits for the real action (tapping Pip, opening a place); inside a place he
@@ -353,7 +353,7 @@ function Tour() {
       const b = burst.current;
       paintFx(gx, {
         t: (now - t0) / 1000, dt, dpr, px: artPx(), W, H,
-        spot: r && L.dim ? r : null, round: L.isPip, dusk,
+        spot: r && L.dim ? r : null, round: L.isPip, dusk: 0, // the room stays lit: no blackout
         ring: !!r && L.dim && L.waits, pulse: pulse.current,
         trail: wantTrail && tip && to ? { from: tip, to } : null,
         shadow: perched && g && g.goal?.mode === 'perch' ? { x: g.x, y: g.y + 1, w: g.size * 0.8 } : null,
