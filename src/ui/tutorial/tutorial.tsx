@@ -2,7 +2,7 @@
 // round: when you tap him in the room he pops out of it in a puff of feathers and flies over the interface (the
 // real 3D owl, your species and outfit, on his own little canvas: guide.ts). He flies from one thing to the next,
 // lands on top of it (or hovers beside it) and points with a wing; the room dusks a little, the thing sits in a pool
-// of lamplight inside a breathing pixel-art ring, sparkles stream from his wing to it and fireflies drift about
+// of lamplight inside a breathing ring of golden light, sparkles stream from his wing to it and fireflies drift about
 // (fx.ts). He talks on a parchment card in a carved walnut frame, typed in ink with his voice (ink.tsx), with
 // wooden Skip and Next buttons. Each stop waits for the real action (tapping Pip, opening a place); inside a place he
 // perches on his card and explains, then flies to its way home. Progress is kept in the save (a reload resumes at

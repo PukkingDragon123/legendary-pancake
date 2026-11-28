@@ -1,9 +1,8 @@
-// [tutor] The tour's light, painted on one overlay canvas each frame at the screen's resolution:
+// [tutor] The tour's light, painted smooth on one overlay canvas each frame at the screen's resolution:
 //   a soft warm spotlight (the room only dusks a little; the thing Pip shows sits in a pool of lamplight),
-//   a pixel-art ring round it in honey gold (two tones and an ink edge, whole art pixels) that breathes, with a glint
-//   running round it and twinkling corner stars, a trail of pixel sparkles flowing from Pip's wing to it,
-//   pixel fireflies drifting about the screen and gathering round the light, Pip's soft shadow where he stands,
-//   and the reward's burst of golden pixel rays.
+//   a glowing ring of honey-gold light round it that breathes, with a bright glint travelling round it, a stream of
+//   soft golden motes flowing from Pip's wing to it, fireflies drifting about and gathering round the light, Pip's soft
+//   shadow where he stands, and the reward's burst of golden light.
 import type { Rect } from './layout.ts';
 
 export interface FxFrame {
@@ -19,30 +18,18 @@ export interface FxFrame {
   burst: { x: number; y: number; age: number } | null;
 }
 
-const RING = { hi: '#fff3c0', mid: '#ffcc55', lo: '#e08a2c', deep: '#a8501c', ink: 'rgba(58, 22, 10, 0.75)' };
-
 interface Fly { x: number; y: number; vx: number; vy: number; ph: number; sp: number }
 const flies: Fly[] = [];
 let lastW = 0;
 
-/** a rounded box's signed distance */
-function sdBox(px: number, py: number, hx: number, hy: number, r: number) {
-  const qx = Math.abs(px) - hx + r, qy = Math.abs(py) - hy + r;
-  return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;
-}
-
 function star(g: CanvasRenderingContext2D, x: number, y: number, c: number, a: number, big: boolean) {
-  g.globalAlpha = a;
-  g.fillStyle = RING.hi;
-  g.fillRect(x - c / 2, y - c / 2, c, c);
-  g.fillStyle = RING.mid;
-  const l = big ? 2 : 1;
-  for (let i = 1; i <= l; i++) {
-    g.globalAlpha = a * (i === 1 ? 0.9 : 0.5);
-    g.fillRect(x - c / 2 + i * c, y - c / 2, c, c); g.fillRect(x - c / 2 - i * c, y - c / 2, c, c);
-    g.fillRect(x - c / 2, y - c / 2 + i * c, c, c); g.fillRect(x - c / 2, y - c / 2 - i * c, c, c);
-  }
-  g.globalAlpha = 1;
+  const r = (big ? 9 : 6) * Math.max(1, c * 0.5);
+  g.save(); g.globalCompositeOperation = 'lighter'; g.globalAlpha = Math.max(0, Math.min(1, a));
+  const gl = g.createRadialGradient(x, y, 0, x, y, r); gl.addColorStop(0, 'rgba(255,248,220,0.95)'); gl.addColorStop(0.25, 'rgba(255,214,130,0.45)'); gl.addColorStop(1, 'rgba(255,200,110,0)');
+  g.fillStyle = gl; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  g.fillStyle = 'rgba(255,250,230,0.9)';
+  for (const [w, h] of [[r * 1.6, r * 0.12], [r * 0.12, r * 1.6]]) { g.beginPath(); g.ellipse(x, y, w, h, 0, 0, Math.PI * 2); g.fill(); }
+  g.restore();
 }
 
 export function paintFx(g: CanvasRenderingContext2D, f: FxFrame) {
@@ -77,39 +64,22 @@ export function paintFx(g: CanvasRenderingContext2D, f: FxFrame) {
     }
   }
 
-  // ---- the pixel ring
+  // ---- a ring of honey-gold light round the thing, breathing, a glint running round it
   if (s && f.ring) {
-    const p0 = Math.max(0, 1 - f.pulse / 0.6);
-    const breathe = 0.5 + 0.5 * Math.sin(t * 3.2);
-    const pad = 5 + Math.round(breathe * 2 + p0 * 6) * c * 0.5;
-    const hx = s.w / 2 + pad, hy = s.h / 2 + pad;
-    const r = f.round ? Math.min(hx, hy) : Math.min(16, Math.min(hx, hy));
-    const ox = cx, oy = cy;
-    const x0 = Math.floor((ox - hx - 3 * c) / c) * c, x1 = ox + hx + 3 * c, y0 = Math.floor((oy - hy - 3 * c) / c) * c, y1 = oy + hy + 3 * c;
-    const glint = (t * 0.45) % 1;
-    for (let y = y0; y < y1; y += c) {
-      for (let x = x0; x < x1; x += c) {
-        const px = x + c / 2 - ox, py = y + c / 2 - oy;
-        const d = sdBox(px, py, hx, hy, r);
-        if (d < -c || d >= c * 2) continue;
-        if (d >= c) { g.fillStyle = RING.ink; g.globalAlpha = 0.55; g.fillRect(x, y, c, c); continue; }
-        // lit from the upper left; a glint travels round
-        const ang = Math.atan2(py, px), lit = -Math.cos(ang + Math.PI * 0.25);
-        const u = ((ang / (Math.PI * 2) + 1) % 1), gl = Math.max(0, 1 - Math.abs(((u - glint + 1.5) % 1) - 0.5) * 14);
-        g.globalAlpha = 0.82 + 0.18 * breathe;
-        // two rows: the outer one catches the light, the inner one is a step darker (a little bevel)
-        const tone = (lit > 0.35 ? 2 : lit < -0.35 ? 0 : 1) - (d < 0 ? 1 : 0);
-        g.fillStyle = gl > 0.3 && d >= 0 ? '#ffffff' : tone >= 2 ? RING.hi : tone === 1 ? RING.mid : tone === 0 ? RING.lo : RING.deep;
-        g.fillRect(x, y, c, c);
-      }
-    }
-    g.globalAlpha = 1;
-    // corner stars, twinkling in turn
-    const corners: [number, number][] = [[ox - hx - c, oy - hy - c], [ox + hx + c, oy - hy - c], [ox + hx + c, oy + hy + c], [ox - hx - c, oy + hy + c]];
-    corners.forEach(([x, y], i) => {
-      const a = Math.max(0, Math.sin(t * 2.4 + i * 1.7));
-      if (a > 0.1) star(g, Math.round(x / c) * c, Math.round(y / c) * c, c, a, a > 0.8);
-    });
+    const breathe = 0.5 + 0.5 * Math.sin(t * 2.4), p0 = Math.max(0, 1 - f.pulse * 2.5);
+    const pad = 7 + breathe * 3 + p0 * 8, hx = s.w / 2 + pad, hy = s.h / 2 + pad, r = f.round ? Math.min(hx, hy) : Math.min(16, Math.min(hx, hy));
+    const path = () => { g.beginPath(); if (f.round) g.ellipse(cx, cy, hx, hy, 0, 0, Math.PI * 2); else g.roundRect(cx - hx, cy - hy, hx * 2, hy * 2, r); };
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    g.shadowColor = 'rgba(255, 190, 90, 0.9)'; g.shadowBlur = 18 + breathe * 10;
+    g.strokeStyle = `rgba(255, 206, 110, ${0.55 + breathe * 0.25})`; g.lineWidth = 3; path(); g.stroke();
+    g.shadowBlur = 0;
+    g.strokeStyle = `rgba(255, 246, 214, ${0.6 + breathe * 0.3})`; g.lineWidth = 1.2; path(); g.stroke();
+    g.restore();
+    // the glint running round
+    const a = (t * 0.9) % (Math.PI * 2);
+    star(g, cx + Math.cos(a) * hx, cy + Math.sin(a) * hy, 2, 0.9, true);
+    star(g, cx + Math.cos(a + Math.PI) * hx, cy + Math.sin(a + Math.PI) * hy, 2, 0.45, false);
   }
 
   // ---- the sparkle trail from Pip to it
@@ -125,13 +95,13 @@ export function paintFx(g: CanvasRenderingContext2D, f: FxFrame) {
       const v = 1 - u, x = v * v * a.x + 2 * v * u * mx + u * u * b.x, y = v * v * a.y + 2 * v * u * my + u * u * b.y;
       const fade = Math.min(1, (u - 0.08) * 6, (0.94 - u) * 6);
       const tw = 0.55 + 0.45 * Math.sin(t * 9 + i * 2.3);
-      const sx = Math.round(x / c) * c, sy = Math.round(y / c) * c;
+      const sx = x, sy = y;
       const glow = g.createRadialGradient(sx, sy, 0, sx, sy, c * 4);
       glow.addColorStop(0, `rgba(255, 214, 120, ${0.35 * fade})`); glow.addColorStop(1, 'rgba(255, 200, 90, 0)');
       g.globalCompositeOperation = 'lighter';
       g.fillStyle = glow; g.fillRect(sx - c * 4, sy - c * 4, c * 8, c * 8);
       g.globalCompositeOperation = 'source-over';
-      star(g, sx, sy, c * 0.5 + 0.5, fade * tw, i % 3 === 0);
+      star(g, sx, sy, 1.5, fade * tw, i % 3 === 0);
     }
   }
 
@@ -161,20 +131,16 @@ export function paintFx(g: CanvasRenderingContext2D, f: FxFrame) {
     fl.x += fl.vx * dt; fl.y += fl.vy * dt;
     const a = Math.max(0, Math.sin(t * (1.3 + fl.sp) + fl.ph)) ** 1.5;
     if (a < 0.04) return;
-    const sx = Math.round(fl.x / c) * c, sy = Math.round(fl.y / c) * c;
+    const sx = fl.x, sy = fl.y;
     g.globalCompositeOperation = 'lighter';
-    const gl = g.createRadialGradient(sx, sy, 0, sx, sy, c * 5);
-    gl.addColorStop(0, `rgba(220, 255, 130, ${0.42 * a})`); gl.addColorStop(1, 'rgba(200, 240, 100, 0)');
-    g.fillStyle = gl; g.fillRect(sx - c * 5, sy - c * 5, c * 10, c * 10);
+    const gl = g.createRadialGradient(sx, sy, 0, sx, sy, 14);
+    gl.addColorStop(0, `rgba(240, 255, 170, ${0.55 * a})`); gl.addColorStop(0.2, `rgba(220, 255, 130, ${0.3 * a})`); gl.addColorStop(1, 'rgba(200, 240, 100, 0)');
+    g.fillStyle = gl; g.beginPath(); g.arc(sx, sy, 14, 0, Math.PI * 2); g.fill();
+    g.fillStyle = `rgba(250, 255, 220, ${a})`; g.beginPath(); g.arc(sx, sy, 1.8, 0, Math.PI * 2); g.fill();
     g.globalCompositeOperation = 'source-over';
-    g.globalAlpha = a;
-    g.fillStyle = '#f6ffc8'; g.fillRect(sx - c / 2, sy - c / 2, c, c);
-    g.fillStyle = '#c8f070'; g.globalAlpha = a * 0.6;
-    g.fillRect(sx - c / 2 - c, sy - c / 2, c, c); g.fillRect(sx + c / 2, sy - c / 2, c, c);
-    g.globalAlpha = 1;
   });
 
-  // ---- the reward: rays of golden pixels and a ring of light
+  // ---- the reward: rays of golden light and a soft halo
   if (f.burst && f.burst.age < 1.4) {
     const { x, y, age } = f.burst;
     const k = age / 1.4;
@@ -182,18 +148,16 @@ export function paintFx(g: CanvasRenderingContext2D, f: FxFrame) {
     const halo = g.createRadialGradient(x, y, 0, x, y, 60 + 160 * k);
     halo.addColorStop(0, `rgba(255, 220, 120, ${0.5 * (1 - k)})`); halo.addColorStop(1, 'rgba(255, 190, 80, 0)');
     g.fillStyle = halo; g.fillRect(x - 240, y - 240, 480, 480);
-    g.globalCompositeOperation = 'source-over';
+    // soft golden rays fanning out
     for (let i = 0; i < 14; i++) {
-      const ang = (i / 14) * Math.PI * 2 + 0.2;
-      const r0 = 20 + 150 * k ** 0.7, len = (i % 2 ? 4 : 7) * (1 - k);
-      for (let j = 0; j < len; j++) {
-        const rr = r0 + j * c * 1.2;
-        const px = Math.round((x + Math.cos(ang) * rr) / c) * c, py = Math.round((y + Math.sin(ang) * rr) / c) * c;
-        g.globalAlpha = (1 - k) * (1 - j / Math.max(1, len));
-        g.fillStyle = j === 0 ? '#ffffff' : j < 3 ? RING.hi : RING.mid;
-        g.fillRect(px - c / 2, py - c / 2, c, c);
-      }
+      const ang = (i / 14) * Math.PI * 2 + 0.2, r0 = 24 + 150 * k ** 0.7, len = (i % 2 ? 40 : 70) * (1 - k);
+      const x0 = x + Math.cos(ang) * r0, y0 = y + Math.sin(ang) * r0, x1 = x + Math.cos(ang) * (r0 + len), y1 = y + Math.sin(ang) * (r0 + len);
+      const ray = g.createLinearGradient(x0, y0, x1, y1);
+      ray.addColorStop(0, `rgba(255, 250, 225, ${0.9 * (1 - k)})`); ray.addColorStop(1, 'rgba(255, 200, 100, 0)');
+      g.strokeStyle = ray; g.lineWidth = (i % 2 ? 2 : 3.5) * (1 - k * 0.5); g.lineCap = 'round';
+      g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
     }
+    g.globalCompositeOperation = 'source-over';
     g.globalAlpha = 1;
   }
 }
