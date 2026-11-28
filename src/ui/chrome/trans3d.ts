@@ -186,7 +186,7 @@ class Trans3D {
   private outMat: THREE.ShaderMaterial;
   private env: THREE.Texture | null = null;
   private W = 1; private H = 1;
-  samples = 7;
+  samples = 4;
 
   constructor() {
     this.canvas = document.createElement('canvas');
@@ -208,11 +208,11 @@ class Trans3D {
     this.cam.position.set(0, 0, 0);
     // the blur costs several renders: fewer samples on small or weak devices
     const nav = navigator as Navigator & { deviceMemory?: number };
-    if ((nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4) this.samples = 4;
+    if ((nav.hardwareConcurrency ?? 8) <= 4 || (nav.deviceMemory ?? 8) <= 4) this.samples = 2;
   }
 
   private size() {
-    const k = Math.min(2, devicePixelRatio || 1);
+    const k = Math.min(1.5, devicePixelRatio || 1); // a transition is in motion: 1.5x is plenty and keeps it smooth
     const W = innerWidth, H = innerHeight;
     if (W === this.W && H === this.H) return;
     this.W = W; this.H = H;
@@ -250,7 +250,7 @@ class Trans3D {
       const nm = new THREE.MeshPhysicalMaterial({ map: nutTex(), roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.25, sheen: 0.2 });
       const cm = new THREE.MeshStandardMaterial({ map: cupTex(), roughness: 0.92, bumpScale: 2 });
       const sm = new THREE.MeshStandardMaterial({ color: 0x4a3420, roughness: 0.9 });
-      const n = this.samples >= 5 ? 150 : 100;
+      const n = this.samples >= 4 ? 130 : 90;
       for (let i = 0; i < n; i++) {
         const g = new THREE.Group();
         g.add(new THREE.Mesh(nut, nm), new THREE.Mesh(cup, cm), new THREE.Mesh(stem, sm));
@@ -274,7 +274,7 @@ class Trans3D {
       const mats = tones.map((t, k) => new THREE.MeshStandardMaterial({ map: featherTex(k * 7 + 1, t), transparent: true, alphaTest: 0.04, side: THREE.DoubleSide, roughness: 0.85, depthWrite: false }));
       const geo = new THREE.PlaneGeometry(1.1, 2.2, 6, 12);
       { const p = geo.attributes.position as THREE.BufferAttribute; for (let k = 0; k < p.count; k++) { const x = p.getX(k), y = p.getY(k); p.setZ(k, x * x * 0.35 - (y * y) * 0.08); } geo.computeVertexNormals(); }
-      const n = this.samples >= 5 ? 110 : 80;
+      const n = this.samples >= 4 ? 100 : 70;
       for (let i = 0; i < n; i++) { const m = new THREE.Mesh(geo, mats[i % mats.length]); m.renderOrder = i; scene.add(m); objs.push({ o: m, i }); }
       pose = ({ o, i }, T) => {
         const wave = i % 2, d0 = wave ? 1.0 + hh(i, 1) * 0.5 : hh(i, 1) * 0.5;
@@ -349,7 +349,8 @@ class Trans3D {
     this.size();
     const set = this.build(kind);
     const r = this.r;
-    const n = Math.max(1, this.samples);
+    // the glowing dream lights need no blur samples (they are soft already); the solid things get a few
+    const n = kind === 'dream' ? 1 : kind === 'clouds' ? Math.min(2, this.samples) : Math.max(1, this.samples);
     // a 120-degree shutter, its start jittered each frame so a few samples still read as one smooth smear
     const shutter = Math.min(0.03, dT * 0.34), jit = Math.random() / Math.max(1, n);
     // the objects, several times across the shutter, averaged
@@ -370,7 +371,6 @@ class Trans3D {
     this.quad.material = this.backMat; r.render(this.qScene, this.qCam);
     this.quad.material = this.outMat; r.render(this.qScene, this.qCam);
     // the world under the dream goes soft
-    if (kind === 'dream') { const c = T < 1 ? smooth(T) : 1 - smooth(T - 1); this.canvas.style.backdropFilter = `blur(${(c * 14).toFixed(1)}px) saturate(${(1 - c * 0.3).toFixed(2)})`; }
   }
   show(on: boolean) { this.canvas.style.display = on ? 'block' : 'none'; if (!on) this.canvas.style.backdropFilter = ''; this.canvas.style.pointerEvents = on ? 'auto' : 'none'; }
 }
