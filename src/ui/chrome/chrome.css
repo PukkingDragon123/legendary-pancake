@@ -199,6 +199,10 @@
 .lvup-medal { position: relative; width: 144px; height: 144px; display: grid; place-items: center; animation: hhMedalIn 0.8s cubic-bezier(0.3, 1.6, 0.5, 1) both; filter: drop-shadow(0 6px 7.8px rgba(27, 34, 45, 0.5)); }
 .lvup-medal > img { position: absolute; left: 0; top: 0; }
 .lvup-medal b { position: relative; font-family: var(--font-display); font-weight: 700; font-size: var(--t4); line-height: 1; color: #f1f5f2; text-shadow: 0 1px 2px #27313f; }
+.lvup-medal > .lvup-shine { position: absolute; inset: 14px; border-radius: 50%; overflow: hidden; pointer-events: none; }
+.lvup-medal > .lvup-shine::before { content: ""; position: absolute; top: -20%; bottom: -20%; width: 34%; left: -50%; background: linear-gradient(90deg, rgba(255,248,220,0), rgba(255,248,220,.42), rgba(255,248,220,0)); transform: skewX(-18deg); animation: lvupShine 2.6s ease-in-out 1.2s infinite; }
+@keyframes lvupShine { 0% { left: -50%; } 45%, 100% { left: 130%; } }
+.hh-still .lvup-medal > .lvup-shine { display: none; }
 .lvup.pre .lvup-medal { opacity: 0; animation: none; }
 @keyframes hhMedalIn { 0% { transform: scale(0.2) rotate(-180deg); opacity: 0; } 55% { transform: scale(1.25) rotate(10deg); opacity: 1; } 100% { transform: none; } }
 .lvup-title { font-family: var(--font-display); font-size: var(--t3); line-height: 1; color: #ebe5da; text-shadow: 0 1px 2px #312821; animation: hhTitleIn 0.6s cubic-bezier(0.3, 1.7, 0.5, 1) 0.2s both; white-space: nowrap; }
@@ -253,3 +257,23 @@
 
 /* the tools slide away under full-screen places: their "New" ribbon and badges go with them instead of peeking in at the edge */
 .hh-tools.away .hh-new, .hh-tools.away .hh-badge { opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s; }
+
+/* [artpass] pixel life (src/ui/chrome/pixlife.tsx): critters on the signs, moths at night, the sky window, the night's
+   stars, vine dividers and ivy corners. Every canvas is sized so an art pixel covers whole device pixels. */
+.pixlife { display: block; pointer-events: none; }
+.hh-nameboard > .pl-snail { position: absolute; bottom: calc(100% - 6px); z-index: 2; }
+.hh-curboard > .pl-ladybird { position: absolute; left: 30px; bottom: calc(100% - 6px); z-index: 2; }
+.pl-moths { position: absolute; left: 0; top: 0; width: 100vw; height: min(100vh, 320px); pointer-events: none; z-index: -1; }
+.pl-sky { position: absolute; left: 8px; top: calc(100% - 3px); display: flex; flex-direction: column; align-items: center; padding: 0; border: 0; background: none; cursor: pointer; filter: drop-shadow(1px 2px 1.5px rgba(30, 18, 8, 0.45)); transition: transform 0.2s var(--pop, ease); }
+.pl-sky:active { transform: scale(0.92); }
+.pl-sky-chain { display: block; width: 2px; height: 7px; background: repeating-linear-gradient(180deg, #e8b44c 0 2px, #6e4416 2px 3px); }
+.hh-right.away .pl-sky { pointer-events: none; }
+.night2 > .pl-stars, .plock > .pl-stars { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.pl-divider { display: block; flex: none; width: 100%; background-repeat: no-repeat; background-position: center; image-rendering: pixelated; pointer-events: none; }
+.sheet > .pl-divider { margin: -2px 0 4px; opacity: 0.9; }
+.pl-corner { position: absolute; z-index: 2; pointer-events: none; background-repeat: no-repeat; image-rendering: pixelated; }
+.pl-corner.tl { left: var(--pl-in, 10px); top: var(--pl-in, 10px); }
+.pl-corner.tr { right: var(--pl-in, 10px); top: var(--pl-in, 10px); transform: scaleX(-1); }
+.pl-corner.bl { left: var(--pl-in, 10px); bottom: var(--pl-in, 10px); transform: scaleY(-1); }
+.pl-corner.br { right: var(--pl-in, 10px); bottom: var(--pl-in, 10px); transform: scale(-1, -1); }
+.pl-ivy { position: absolute; z-index: 3; top: -10px; left: 10%; pointer-events: none; background-repeat: no-repeat; image-rendering: pixelated; filter: drop-shadow(0 2px 1px rgba(20, 12, 6, 0.4)); }

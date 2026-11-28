@@ -116,7 +116,7 @@
 .bk2-note { margin: 0; padding-left: 12px; border-left: 3px solid #d6b26a; font-size: 14px; line-height: 1.45; color: #4b3b2c; }
 .bk2-moods > div { display: flex; justify-content: space-between; gap: 4px; margin-top: 6px; }
 .bk2-moodbtn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 2px 4px; color: #6d5946; transition: transform 0.15s var(--pop), background 0.2s; }
-.bk2-moodbtn img { image-rendering: pixelated; filter: saturate(0.7) opacity(0.75); transition: filter 0.2s, transform 0.25s var(--pop); }
+.bk2-moodbtn img { filter: saturate(0.7) opacity(0.8); transition: filter 0.2s, transform 0.25s var(--pop); }
 .bk2-moodbtn small { font-size: 11px; font-weight: 800; }
 .bk2-moodbtn.on { background: rgba(214, 178, 106, 0.28); box-shadow: inset 0 0 0 2px rgba(178, 132, 50, 0.55); color: var(--bk-ink); }
 .bk2-moodbtn.on img, .bk2-moodbtn:hover img { filter: none; transform: scale(1.1); }

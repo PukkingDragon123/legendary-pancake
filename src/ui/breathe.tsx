@@ -11,6 +11,7 @@ import { haptic, tap, toast, Toggle } from './kit.tsx';
 import { breathing, lines, panel, say, sceneRef } from './state.ts';
 import { phase } from '../game/night.ts';
 import { injectSleepFrames } from './sleepkit.tsx';
+import { PxDivider } from './chrome/pixlife.tsx'; // [artpass]
 import './breathe.css';
 import { progress } from '../game/quests.ts';
 import { flyReward } from './fx.tsx';
@@ -67,6 +68,7 @@ export function BreathePicker(p: { embedded?: boolean; preset?: string; onClose?
         <div class="grow"><h2>Breathe with Pip</h2><p>Pick a rhythm. Pip breathes it with you.</p></div>
         <button class="bp-x" aria-label="Close" onClick={close}><IcoClose size={30} /></button>
       </header>
+      <PxDivider class="bp-div" />
       <div class="bp-list">
         {PATTERNS.map((pt) => (
           <button class={'bp-card' + (b.pattern === pt.id ? ' on' : '')} style={{ '--pc': pt.color } as any} onClick={() => { tap('ui_tab', 0.45); edit((x) => { x.breath.pattern = pt.id; }); }}>

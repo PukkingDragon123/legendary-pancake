@@ -32,6 +32,7 @@ import { textWidthPx, tokenSizes, uiFontPx } from '../font.ts';
 import { artPx } from '../../gfx/artpx.ts';
 import { punch } from '../text3d.tsx';
 import { shelf2d, useShelf2D, type NavId } from './shelf2d.tsx'; // [icons8] the main buttons as pixel-art objects
+import { NightMoths, SignLadybird, SignSnail, SkyBadge } from './pixlife.tsx'; // [artpass] pixel critters, moths and the sky window
 import { deviceK } from '../real/paint.ts';
 import { alarmClock, alarmHands, board, brassChain, hempRope, contactShadow, DESK_HUD, DESK_NAV, journal, kFor, lampHalo, medallion, moonLamp, plate, plusButton, shelfBoard, toolIcon, toolTile, type PalRamp, type ToolIcon } from './objects.ts';
 import './chrome.css';
@@ -163,6 +164,7 @@ function NameSign() {
           <MagicBar level={lv.level} into={lv.into} need={lv.need} w={52} />
           <span class={'hh-xp' + (xp ? ' on' : '')}>{lv.into} / {lv.need} XP</span>
         </span>
+        <SignSnail zoom={k} from={58} to={138} />
         <span class="hh-rune" key={lv.level}>
           <img src={medallion(44, k, 1, 'sapphire')} alt="" draggable={false} />
           <b>{lv.level}</b>
@@ -207,6 +209,7 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
           <PxAnim tl={tl} size={44} zoom={k} offset={p.kind === 'gem' ? 400 : 0} />
           {p.kind === 'coin' && <i class="hh-glint" />}
         </span>
+        {p.kind === 'coin' && <SignLadybird zoom={k} width={62} />}
         <span class={'hh-num' + (p.value >= 100000 ? ' huge' : p.value >= 10000 ? ' long' : '')} ref={numRef}><Odometer value={p.value} /></span>
         <button class="hh-plus" style={{ '--plus': bg(plusButton(28, k, 1)), '--plus-dn': bg(plusButton(28, k, 1, true)) } as Record<string, string>} onClick={shop} aria-label={`Get more ${label.toLowerCase()} in the shop`}><span /></button>
       </div>
@@ -217,6 +220,7 @@ function CurrencySign(p: { kind: 'coin' | 'gem'; value: number; swing: [(el: HTM
 
 export function Hud() {
   const s = save.value;
+  const k = useK(DESK_HUD);
   const ov = hudOverride.value;
   const base = hidden(), pnl = panel.value;
   const nameAway = ov === 'none' || (ov !== 'all' && (base || pnl !== null));
@@ -239,23 +243,29 @@ export function Hud() {
     if (c > p.claimed) { const lp = lastPointer(); uiBurst('confetti', lp.x, lp.y, 26); uiBurst('stars', lp.x, lp.y, 8); }
     prev.current = { coins: v.coins, gems: v.gems, claimed: c };
   }), []);
-  // fireflies drift over the signs at night
+  // fireflies drift over the signs at night (and [artpass] two moths flutter round them)
+  const [night, setNight] = useState(false);
   useEffect(() => {
     const id = setInterval(() => {
       const night = (sceneRef.current?.sky.night ?? 0) > 0.55;
+      setNight(night);
       uiAmbient(night && !hidden() && !panel.value ? { x: 0, y: 10, w: innerWidth, h: 200 } : null);
     }, 1200);
     return () => { clearInterval(id); uiAmbient(null); };
   }, []);
   return (
     <div class="hh-hud">
+      <NightMoths on={night && !base && !pnl} />
       <div class={'hh-left' + (nameAway ? ' away' : '')}>
         <div class="hh-lift"><NameSign /></div>
       </div>
       <div class={'hh-right' + (curAway ? ' away' : '')}>
         <div class="hh-lift">
           <CurrencySign kind="coin" value={s.coins} swing={coinSw}>
-            <CurrencySign kind="gem" value={s.gems} swing={gemSw} />
+            <CurrencySign kind="gem" value={s.gems} swing={gemSw}>
+              {/* [artpass] a little round window on the sky hangs under the gem sign: tonight's moon, or the sun, and the weather */}
+              <SkyBadge zoom={k} night={night} onTap={(line) => { kick(gemSw[1], 40); say(line, 4200); }} />
+            </CurrencySign>
           </CurrencySign>
         </div>
       </div>

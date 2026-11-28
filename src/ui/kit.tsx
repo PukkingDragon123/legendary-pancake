@@ -5,6 +5,7 @@ import type { ComponentChildren, JSX } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { sound } from '../audio/sound.ts';
 import { IcoAcorn, IcoBack, IcoClose, IcoStone, Px } from './icons.tsx';
+import { PxDivider, PxIvy } from './chrome/pixlife.tsx'; // [artpass] a pixel vine under every panel's title, ivy over its top edge
 import { textSpans } from './text3d.tsx';
 
 // ------------------------------------------------------------------ feel
@@ -46,7 +47,9 @@ export function Sheet(p: { title?: ComponentChildren; sub?: ComponentChildren; o
           {p.onClose && <button class="icon-btn" aria-label="Close" onClick={close}><IcoClose size={30} /></button>}
         </header>
       )}
+      {p.title && <PxDivider />}
       <div class="sheet-body">{p.children}</div>
+      <PxIvy />
     </section>
   );
 }

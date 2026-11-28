@@ -20,7 +20,7 @@ import { Px } from '../icons.tsx';
 import { tap } from '../kit.tsx';
 import { paperCSS } from '../sleepkit.tsx';
 import { bubble, panel, sceneRef } from '../state.ts';
-import { moodArt, MOOD_NAMES } from './art.ts';
+import { MOOD_NAMES } from './art.ts';
 import { briefOf, clockOf, goalTxt, hm, paintBoardBase, paintBoardInk, paintSlide, scoreCol, SLIDES, STAGE_COL, type Brief, type SlideId } from './boards.ts';
 import { Briefing, type Spot, type Tap } from './room.ts';
 import { averages, fromDay, fromEvening, reported, scoreWord, type Night } from './stats.ts';
@@ -406,7 +406,7 @@ function NightCard(p: { n: Night; onClose: () => void }) {
         {r.notes.slice(0, 2).map((t) => <p class="bk2-note">{t}</p>)}
         <div class="bk2-moods" role="group" aria-label="How did you feel?">
           <small class="bk2-kicker">How did you feel that morning?</small>
-          <div>{MOOD_NAMES.map((m, i) => <button class={'bk2-moodbtn' + (mood === i ? ' on' : '')} aria-pressed={mood === i} onClick={() => stamp(i)}><img src={moodArt(i).url} width={36} height={36} alt="" draggable={false} /><small>{m}</small></button>)}</div>
+          <div>{MOOD_NAMES.map((m, i) => <button class={'bk2-moodbtn' + (mood === i ? ' on' : '')} aria-pressed={mood === i} onClick={() => stamp(i)}><Px name={'mood' + i} size={36} /><small>{m}</small></button>)}</div>
         </div>
         {(saved?.note ?? '').trim() && <p class="bk2-hand">{saved!.note}</p>}
       </article>

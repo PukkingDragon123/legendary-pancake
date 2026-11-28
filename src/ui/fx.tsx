@@ -16,7 +16,7 @@ import { owlIconAsync } from './portraits.ts';
 import { RuneCircle } from './chrome/lvup.tsx';
 import { openPanel } from './chrome/hud.tsx';
 import { MagicBar } from './chrome/magicbar.tsx';
-import { PxAnim, seq } from './chrome/pxanim.tsx';
+import { medallion } from './chrome/objects.ts'; // [artpass] the level medal is the name sign's enamel medallion, big
 import { uiBurstAt } from './chrome/uifx.ts';
 import { pixelate, PxBurst } from './pxfx.tsx';
 import { fxMoment } from './fx/moment.ts'; // [fx10]
@@ -122,7 +122,7 @@ export function Ceremony() {
       <div class="lvup-stack">
         {step > 0 && <PxBurst class="lvup-rays" size={Math.min(900, Math.max(innerWidth, innerHeight) * 1.1)} scale={3} color="#d3cce0" glow="#f1d39a" rays={14} alpha={0.32} />}
         <RuneCircle n={120} drawMs={1000} />
-        <div class="lvup-medal"><PxAnim tl={seq('hud_rune', 8, 120)} size={144} /><b>{c.level}</b></div>
+        <div class="lvup-medal"><img src={medallion(144, 1, 1, 'sapphire')} width={144} height={144} alt="" draggable={false} /><i class="lvup-shine" /><b>{c.level}</b></div>
         <div class="lvup-title"><Letters text={`Level ${c.level}!`} mode="type" /></div>
         {step === 0 && <div class="lvup-bar spill"><MagicBar level={c.level - 1} into={62} need={100} overflow w={56} big /></div>}
         {step > 0 && <CeremonyOwl />}

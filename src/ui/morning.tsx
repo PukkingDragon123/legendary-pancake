@@ -103,7 +103,7 @@ export function NightReport(p: { s: SleepSession; onNext?: () => void; onClose?:
         </div>
         {r.notes.length > 0 && <div class="col" style="gap:6px">{r.notes.map((n) => <p class="note">“{n}”</p>)}</div>}
         <div><div class="label" style="margin-bottom:8px">How do you feel?</div>
-          <div class="moods">{MOODS.map((m, i) => <button class={'mood' + (mood === i ? ' on' : '')} aria-label={m} onClick={() => setMood(i)}><Px name={'mood' + i} size={40} /></button>)}</div>
+          <div class="moods">{MOODS.map((m, i) => <button class={'mood' + (mood === i ? ' on' : '')} aria-pressed={mood === i} onClick={() => setMood(i)}><Px name={'mood' + i} size={44} /><small>{m}</small></button>)}</div>
         </div>
         <textarea class="field" placeholder="Dreams, thoughts, anything…" value={save.value.nights.find((y) => y.id === s.id)?.note ?? ''} onInput={(e) => { const v = (e.target as HTMLTextAreaElement).value; edit((x) => { const ni = x.nights.find((y) => y.id === s.id); if (ni) ni.note = v; }); if (v.trim().length > 3) progress('note'); }} />
       </div></div>
