@@ -52,9 +52,8 @@ export const TOUR: TourStep[] = [
     id: 'sleep', target: '.hh-mobj.sleep', wait: 'sleep', back: BACK.sleep,
     say: () => ['That’s my *Sleep lamp.* Tap it when it’s bedtime.'],
     inside: [
-      'This is my *bedroom,* up in the oak. The things in the room are the controls: the clock, the record player, the lamp.',
-      'At bedtime I tuck your *phone* into its little bed and turn the key. _No more scrolling._',
-      'Then we *fly* over the moonlit forest while you breathe slowly. In... and out...',
+      'My *bedroom!* The things in the room are the controls: the clock, the record player, the lamp.',
+      'At bedtime I tuck your *phone* into its little bed, then we *fly* over the moonlit forest while you breathe. _In... and out..._',
     ],
   },
   {
