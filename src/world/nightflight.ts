@@ -22,7 +22,7 @@ const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 
 export function startNightFlight(scene: Scene, trip: OwlLook, home: OwlLook): NightFlight {
   const owl = scene.owl, sky = scene.sky;
-  const prev = { director: scene.director, hook: scene.interceptor, still: owl.still };
+  const prev = { hook: scene.interceptor, still: owl.still };
   scene.setStage(null);
   scene.setLook(trip);
   scene.setView('sleep');
@@ -96,7 +96,7 @@ export function startNightFlight(scene: Scene, trip: OwlLook, home: OwlLook): Ni
       // hand the camera back with its angle wrapped into one turn, so it doesn't unwind the laps
       const cur = (scene as unknown as { cur?: { yaw: number } }).cur;
       if (cur) cur.yaw = Math.atan2(Math.sin(cur.yaw), Math.cos(cur.yaw));
-      if (scene.director === director) scene.director = prev.director;
+      if (scene.director === director) scene.director = null; // the camera goes back to the view (never to a stale director)
       scene.interceptor = prev.hook;
       owl.still = prev.still;
       owl.pose = 'stand';

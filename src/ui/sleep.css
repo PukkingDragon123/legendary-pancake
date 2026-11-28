@@ -172,3 +172,15 @@
 .n-bottom .n-chip { color: #f1dcae; background: rgba(0, 0, 0, 0.22); border-radius: 4px; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 220, 160, 0.12); }
 .n-bottom .n-chip b { color: #fbe7b8; }
 @media (max-height: 760px) { .n-window { width: 176px; height: 176px; } .n-plate .n-time { font-size: 36px; } }
+
+/* ---- the night shows the 3D world itself (the oak under the real sky and moon): only soft shade at the top and the
+   bottom so the plate and the tray read, a brass rail for the trip */
+.overlay.night2 { background: linear-gradient(180deg, rgba(8, 10, 24, 0.55) 0%, rgba(8, 10, 24, 0) 26%, rgba(8, 10, 24, 0) 52%, rgba(8, 10, 24, 0.7) 100%); }
+.night2 .n-spacer { flex: 1; }
+.night2 .n-mid { margin-top: 4px; }
+.n-rail { width: min(460px, 100%); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 6px; color: #fbe7b8; font-size: 14px; font-weight: 700; text-shadow: 0 1px 0 #2a1209;
+  background: linear-gradient(180deg, rgba(255, 224, 170, 0.25), rgba(255, 224, 170, 0) 40%, rgba(0, 0, 0, 0.3)), var(--tx-walnut) 0 0 / 300px, #5a3018; box-shadow: inset 0 1px 1px rgba(255, 226, 176, 0.45), inset 0 0 0 1.5px rgba(232, 184, 90, 0.55), 0 8px 18px rgba(0, 0, 0, 0.5); }
+.n-rail small { grid-column: 1 / -1; justify-self: center; margin-top: -2px; font-size: 13px; font-weight: 500; color: #e8d2a6; }
+.n-rail .bar { --p: 0; position: relative; height: 8px; border-radius: 4px; background: linear-gradient(180deg, #1c120a, #3a2414); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 220, 160, 0.2); }
+.n-rail .fill { position: absolute; left: 0; top: 1px; bottom: 1px; width: calc(var(--p) * 100%); border-radius: 3px; background: linear-gradient(180deg, #fbe39a, #d2a24a 50%, #9a6c22); box-shadow: 0 0 6px rgba(255, 210, 120, 0.6); }
+.n-rail .pip { position: absolute; top: 50%; left: calc(var(--p) * 100%); width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #fffbe8, #ffd68a 45%, #c8862c); box-shadow: 0 0 10px 3px rgba(255, 200, 110, 0.65), 0 0 0 1.5px #6e4a14; }

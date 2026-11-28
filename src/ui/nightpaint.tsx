@@ -1,7 +1,5 @@
-// The night screen's painted pieces, drawn smooth at the screen's own resolution (no pixel art): tonight's moon in its
-// real phase (a lit sphere with soft maria, craters and a halo), the journey strip from the hollow to tonight's place
-// (layered painted hills, a glowing dashed path, Pip's lantern travelling along it), soft twinkling stars, and Pip asleep
-// on a cloud (the real 3D render, smooth).
+// The phone lock's painted pieces, drawn smooth at the screen's own resolution: tonight's moon in its real phase, soft
+// twinkling stars, and Pip asleep on a cloud (the real 3D render). The night screen itself shows the 3D world.
 import { useEffect, useMemo, useRef } from 'preact/hooks';
 import { PipPix } from './pippix.tsx';
 
@@ -84,45 +82,6 @@ export function PaintedMoon(p: { size: number; phase: number; label?: string }) 
   return <canvas ref={ref} class="moonclock painted" style={{ width: `${S}px`, height: `${S}px` }} aria-label={p.label} role="img" />;
 }
 
-/** A strip of painted hills with the path from the hollow to tonight's place; Pip's lantern glows along it. */
-export function PaintedJourney(p: { frac: number; color: string; width?: number; ink?: boolean }) {
-  const W = p.width ?? 340, H = 82;
-  const ref = useCanvas(W, H, (g, t) => {
-    if (p.ink) { inkMap(g, W, H, p.frac, p.color, t); return; }
-    // three ridges of hills, far to near, in night blues
-    const ridge = (base: number, amp: number, f: number, seed: number, col: string) => {
-      g.fillStyle = col; g.beginPath(); g.moveTo(0, H);
-      for (let x = 0; x <= W; x += 4) g.lineTo(x, base - Math.sin(x * f + seed) * amp - Math.sin(x * f * 2.7 + seed * 2) * amp * 0.35);
-      g.lineTo(W, H); g.closePath(); g.fill();
-    };
-    ridge(H * 0.62, 6, 0.022, 1, '#2a3560'); ridge(H * 0.72, 5, 0.03, 4, '#212a4c'); ridge(H * 0.82, 4, 0.04, 7, '#19203a');
-    // little pines along the near ridge
-    g.fillStyle = '#141a30';
-    for (let i = 0; i < 18; i++) { const x = hh(i, 9) * W, y = H * 0.8 - Math.sin(x * 0.04 + 7) * 4, s = 5 + hh(i, 8) * 6; g.beginPath(); g.moveTo(x, y - s * 1.8); g.lineTo(x - s * 0.6, y); g.lineTo(x + s * 0.6, y); g.closePath(); g.fill(); }
-    // home (the oak with a lit window) and tonight's place (a flag in its colour)
-    const hx = 22, hy = H * 0.7, tx = W - 24, ty = H * 0.72;
-    g.fillStyle = '#3a2a1e'; g.fillRect(hx - 3, hy - 14, 6, 16);
-    g.fillStyle = '#2c4a3a'; g.beginPath(); g.ellipse(hx, hy - 20, 14, 11, 0, 0, Math.PI * 2); g.fill();
-    const win = g.createRadialGradient(hx, hy - 8, 0, hx, hy - 8, 8); win.addColorStop(0, 'rgba(255,210,130,0.95)'); win.addColorStop(1, 'rgba(255,210,130,0)');
-    g.fillStyle = win; g.fillRect(hx - 8, hy - 16, 16, 16); g.fillStyle = '#ffd58a'; g.fillRect(hx - 1.5, hy - 10, 3, 3);
-    g.strokeStyle = '#d8c8a8'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(tx, ty); g.lineTo(tx, ty - 22); g.stroke();
-    g.fillStyle = p.color; g.beginPath(); g.moveTo(tx, ty - 22); g.lineTo(tx + 14, ty - 18); g.lineTo(tx, ty - 13); g.closePath(); g.fill();
-    // the path: an arc over the hills, travelled part bright
-    const pt = (u: number) => [hx + u * (tx - hx), hy - 18 - Math.sin(u * Math.PI) * (H * 0.42)] as const;
-    const fr = Math.max(0.02, Math.min(0.98, p.frac));
-    g.setLineDash([3, 5]); g.lineCap = 'round';
-    g.strokeStyle = 'rgba(120,130,170,0.7)'; g.lineWidth = 1.6; g.beginPath(); for (let u = 0; u <= 1.001; u += 0.02) { const [x, y] = pt(u); if (u === 0) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke();
-    g.strokeStyle = 'rgba(255,232,180,0.95)'; g.lineWidth = 2; g.beginPath(); for (let u = 0; u <= fr + 0.001; u += 0.02) { const [x, y] = pt(Math.min(u, fr)); if (u === 0) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke();
-    g.setLineDash([]);
-    // the lantern
-    const [lx, ly] = pt(fr), bob = Math.sin(t * 2.4) * 1.2;
-    const glow = g.createRadialGradient(lx, ly + bob, 0, lx, ly + bob, 16); glow.addColorStop(0, 'rgba(255,214,140,0.9)'); glow.addColorStop(0.3, 'rgba(255,190,110,0.35)'); glow.addColorStop(1, 'rgba(255,190,110,0)');
-    g.fillStyle = glow; g.fillRect(lx - 16, ly + bob - 16, 32, 32);
-    g.fillStyle = '#fff1cf'; g.beginPath(); g.arc(lx, ly + bob, 2.6, 0, Math.PI * 2); g.fill();
-  }, true, [W, p.frac, p.color]);
-  return <canvas ref={ref} class="journey painted" style={{ width: `${W}px`, height: `${H}px`, maxWidth: '100%' }} aria-label="Pip's trip tonight" role="img" />;
-}
-
 /** soft stars over the night screen (smooth glows, twinkling slowly) */
 export function SoftStars(p: { n?: number }) {
   const stars = useMemo(() => Array.from({ length: p.n ?? 46 }, (_, i) => ({ x: hh(i, 11) * 100, y: hh(i, 12) * 62, s: 1.2 + hh(i, 13) * 2.4, d: hh(i, 14) * 6, big: hh(i, 15) > 0.9 })), [p.n]);
@@ -140,46 +99,3 @@ export function SleepingPipPainted() {
   );
 }
 
-/** the trip as an explorer's map, inked on parchment: hills hatched in sepia, little pines, the oak, a dashed route in
- * red ink, a compass rose and the place marked with an X; Pip's lantern glows on the route */
-function inkMap(g: CanvasRenderingContext2D, W: number, H: number, frac: number, color: string, t: number) {
-  const ink = 'rgba(70, 44, 22, 0.85)', faint = 'rgba(70, 44, 22, 0.35)';
-  g.lineCap = 'round'; g.lineJoin = 'round';
-  // hills: outlines with hatching on their shaded sides
-  for (let i = 0; i < 7; i++) {
-    const x = 40 + i * (W - 80) / 6 + (hh(i, 1) - 0.5) * 20, w = 26 + hh(i, 2) * 22, h = 10 + hh(i, 3) * 12, y = H - 16 - (i % 2) * 6;
-    g.strokeStyle = ink; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x - w, y); g.quadraticCurveTo(x - w * 0.3, y - h * 1.6, x, y - h); g.quadraticCurveTo(x + w * 0.4, y - h * 0.6, x + w, y); g.stroke();
-    g.strokeStyle = faint; g.lineWidth = 0.8;
-    for (let k = 0; k < 5; k++) { const hx = x + k * w * 0.16; g.beginPath(); g.moveTo(hx, y - h * (0.85 - k * 0.15)); g.lineTo(hx + 5, y - 1); g.stroke(); }
-  }
-  // pines
-  for (let i = 0; i < 14; i++) {
-    const x = 30 + hh(i, 4) * (W - 60), y = H - 8 - hh(i, 5) * 8, s = 4 + hh(i, 6) * 3;
-    g.strokeStyle = ink; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - s * 2.2); g.moveTo(x - s * 0.7, y - s * 0.6); g.lineTo(x, y - s * 2.2); g.lineTo(x + s * 0.7, y - s * 0.6); g.stroke();
-  }
-  // the oak at home
-  const hx = 24, hy = H - 22, tx = W - 26, ty = H - 24;
-  g.fillStyle = 'rgba(70, 44, 22, 0.15)'; g.strokeStyle = ink; g.lineWidth = 1.4;
-  g.beginPath(); g.arc(hx, hy - 12, 11, 0, Math.PI * 2); g.fill(); g.stroke();
-  g.beginPath(); g.moveTo(hx - 2, hy - 2); g.lineTo(hx - 2, hy + 8); g.moveTo(hx + 2, hy - 2); g.lineTo(hx + 2, hy + 8); g.stroke();
-  g.fillStyle = 'rgba(255, 196, 96, 0.9)'; g.fillRect(hx - 1.5, hy - 13, 3, 3);
-  // the compass rose
-  const cx = W / 2 + 70, cy = 16;
-  g.strokeStyle = faint; g.lineWidth = 0.9; g.beginPath(); g.arc(cx, cy, 8, 0, Math.PI * 2); g.stroke();
-  g.fillStyle = ink; g.beginPath(); g.moveTo(cx, cy - 11); g.lineTo(cx + 2.5, cy); g.lineTo(cx, cy + 11); g.lineTo(cx - 2.5, cy); g.closePath(); g.fill();
-  g.font = '700 8px serif'; g.textAlign = 'center'; g.fillText('N', cx, cy - 13);
-  // the route: dashed red ink, the flown part solid
-  const pt = (u: number) => [hx + 8 + u * (tx - hx - 8), hy - 16 - Math.sin(u * Math.PI) * (H * 0.42)] as const;
-  const fr = Math.max(0.02, Math.min(0.98, frac));
-  g.strokeStyle = 'rgba(150, 40, 30, 0.55)'; g.lineWidth = 1.5; g.setLineDash([4, 4]);
-  g.beginPath(); for (let u = 0; u <= 1.001; u += 0.02) { const [x, y] = pt(u); if (u === 0) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke();
-  g.setLineDash([]); g.strokeStyle = 'rgba(150, 40, 30, 0.95)'; g.lineWidth = 2;
-  g.beginPath(); for (let u = 0; u <= fr + 0.001; u += 0.02) { const [x, y] = pt(Math.min(u, fr)); if (u === 0) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke();
-  // X marks the place
-  g.strokeStyle = color; g.lineWidth = 2.6; g.beginPath(); g.moveTo(tx - 5, ty - 5); g.lineTo(tx + 5, ty + 5); g.moveTo(tx + 5, ty - 5); g.lineTo(tx - 5, ty + 5); g.stroke();
-  // Pip's lantern on the route
-  const [lx, ly] = pt(fr), bob = Math.sin(t * 2.4) * 1.2;
-  const glow = g.createRadialGradient(lx, ly + bob, 0, lx, ly + bob, 14); glow.addColorStop(0, 'rgba(255, 200, 110, 0.9)'); glow.addColorStop(1, 'rgba(255, 190, 100, 0)');
-  g.fillStyle = glow; g.fillRect(lx - 14, ly + bob - 14, 28, 28);
-  g.fillStyle = '#fff3d6'; g.strokeStyle = ink; g.lineWidth = 1; g.beginPath(); g.arc(lx, ly + bob, 3, 0, Math.PI * 2); g.fill(); g.stroke();
-}

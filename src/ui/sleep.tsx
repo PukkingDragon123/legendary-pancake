@@ -14,7 +14,7 @@ import { Px } from './icons.tsx';
 import { fmtDur, fmtTime, SlideToConfirm, tap, useTick } from './kit.tsx';
 import { moonPhase } from './px/sleepprops.ts';
 import { PipPix } from './pippix.tsx';
-import { PaintedJourney, PaintedMoon, SleepingPipPainted, SoftStars } from './nightpaint.tsx'; // smooth, painted
+import { PaintedMoon, SleepingPipPainted, SoftStars } from './nightpaint.tsx';
 import { HoldButton, injectSleepFrames, nowT, Paper } from './sleepkit.tsx';
 import { breathing, panel, sceneRef } from './state.ts';
 import { TalkText } from './talkview.tsx'; // [dialog10] the captions type on like a voice
@@ -118,15 +118,6 @@ function Departure() {
 
 // ------------------------------------------------------------------ the night screen
 
-/** [artpass] A sky strip with a dotted path from the hollow to tonight's place; Pip flies along it with his lantern. */
-function Journey(p: { frac: number; color: string }) {
-  return <PaintedJourney frac={p.frac} color={p.color} width={Math.min(380, innerWidth - 60)} ink />;
-}
-
-/** [artpass] The moon: tonight's real phase, a lit pixel sphere with its seas and craters and a fine halo. */
-function MoonClock(p: { big: boolean }) {
-  return <PaintedMoon size={p.big ? 176 : 142} phase={moonPhase()} label="Tonight's moon" />;
-}
 
 function Squiggle() {
   const t = trace.value.slice(-90);
@@ -157,21 +148,22 @@ export function NightOverlay() {
   const span = (wake ?? a.session.start + 8 * 3600_000) - a.session.start;
   const frac = Math.max(0, Math.min(1, (Date.now() - a.session.start) / Math.max(1, span)));
   const st = blockStatus.value;
-  const wide = innerWidth >= 900;
   return (
     <div class={'overlay night2' + (dim ? ' dimmed' : '')} onClick={() => setDim((d) => !d)}>
-      <SoftStars />
       <div class="n-top">
         <span class="n-sign hh-wood-sm"><small>Pip is exploring</small><b>{area?.title ?? 'The woods'}</b></span>
       </div>
       <div class="n-mid">
-        <div class="n-window"><MoonClock big={wide} /><i class="n-glass" /></div>
         <div class="n-plate"><span class="n-time">{clock}{ampm && <small>{ampm}</small>}</span></div>
         <div class="n-alarm"><Px name="alarm" size={30} />{wake ? <>Alarm {fmtTime(wake, h12)}{s.sleep.smartMin ? <span class="soft"> · smart from {fmtTime(wake - s.sleep.smartMin * 60000, h12)}</span> : null}</> : 'No alarm tonight'}</div>
       </div>
-      <div class="n-trip">
-        <div class="n-map"><Journey frac={frac} color={area?.color ?? '#b8463a'} /></div>
-        <div class="n-trip-l"><span>Home</span><span>{fmtDur(Date.now() - a.session.start)} away</span><span>{area?.name}</span></div>
+      <div class="n-spacer" />
+      {/* the trip as a brass rail: home to tonight's place, Pip's lantern travelling along it */}
+      <div class="n-rail" style={{ '--p': frac.toFixed(3) } as Record<string, string>}>
+        <span class="end">Home</span>
+        <span class="bar"><i class="fill" /><i class="pip" /></span>
+        <span class="end">{area?.title ?? 'The woods'}</span>
+        <small>{fmtDur(Date.now() - a.session.start)} away</small>
       </div>
       <div class="n-bottom hh-wood-dark" onClick={(e) => e.stopPropagation()}>
         <div class="n-row">
