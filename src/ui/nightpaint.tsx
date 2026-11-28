@@ -85,9 +85,10 @@ export function PaintedMoon(p: { size: number; phase: number; label?: string }) 
 }
 
 /** A strip of painted hills with the path from the hollow to tonight's place; Pip's lantern glows along it. */
-export function PaintedJourney(p: { frac: number; color: string; width?: number }) {
+export function PaintedJourney(p: { frac: number; color: string; width?: number; ink?: boolean }) {
   const W = p.width ?? 340, H = 82;
   const ref = useCanvas(W, H, (g, t) => {
+    if (p.ink) { inkMap(g, W, H, p.frac, p.color, t); return; }
     // three ridges of hills, far to near, in night blues
     const ridge = (base: number, amp: number, f: number, seed: number, col: string) => {
       g.fillStyle = col; g.beginPath(); g.moveTo(0, H);
@@ -137,4 +138,48 @@ export function SleepingPipPainted() {
       <span class="zz"><b>z</b><b>z</b><b>z</b></span>
     </div>
   );
+}
+
+/** the trip as an explorer's map, inked on parchment: hills hatched in sepia, little pines, the oak, a dashed route in
+ * red ink, a compass rose and the place marked with an X; Pip's lantern glows on the route */
+function inkMap(g: CanvasRenderingContext2D, W: number, H: number, frac: number, color: string, t: number) {
+  const ink = 'rgba(70, 44, 22, 0.85)', faint = 'rgba(70, 44, 22, 0.35)';
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  // hills: outlines with hatching on their shaded sides
+  for (let i = 0; i < 7; i++) {
+    const x = 40 + i * (W - 80) / 6 + (hh(i, 1) - 0.5) * 20, w = 26 + hh(i, 2) * 22, h = 10 + hh(i, 3) * 12, y = H - 16 - (i % 2) * 6;
+    g.strokeStyle = ink; g.lineWidth = 1.2; g.beginPath(); g.moveTo(x - w, y); g.quadraticCurveTo(x - w * 0.3, y - h * 1.6, x, y - h); g.quadraticCurveTo(x + w * 0.4, y - h * 0.6, x + w, y); g.stroke();
+    g.strokeStyle = faint; g.lineWidth = 0.8;
+    for (let k = 0; k < 5; k++) { const hx = x + k * w * 0.16; g.beginPath(); g.moveTo(hx, y - h * (0.85 - k * 0.15)); g.lineTo(hx + 5, y - 1); g.stroke(); }
+  }
+  // pines
+  for (let i = 0; i < 14; i++) {
+    const x = 30 + hh(i, 4) * (W - 60), y = H - 8 - hh(i, 5) * 8, s = 4 + hh(i, 6) * 3;
+    g.strokeStyle = ink; g.lineWidth = 1; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - s * 2.2); g.moveTo(x - s * 0.7, y - s * 0.6); g.lineTo(x, y - s * 2.2); g.lineTo(x + s * 0.7, y - s * 0.6); g.stroke();
+  }
+  // the oak at home
+  const hx = 24, hy = H - 22, tx = W - 26, ty = H - 24;
+  g.fillStyle = 'rgba(70, 44, 22, 0.15)'; g.strokeStyle = ink; g.lineWidth = 1.4;
+  g.beginPath(); g.arc(hx, hy - 12, 11, 0, Math.PI * 2); g.fill(); g.stroke();
+  g.beginPath(); g.moveTo(hx - 2, hy - 2); g.lineTo(hx - 2, hy + 8); g.moveTo(hx + 2, hy - 2); g.lineTo(hx + 2, hy + 8); g.stroke();
+  g.fillStyle = 'rgba(255, 196, 96, 0.9)'; g.fillRect(hx - 1.5, hy - 13, 3, 3);
+  // the compass rose
+  const cx = W / 2 + 70, cy = 16;
+  g.strokeStyle = faint; g.lineWidth = 0.9; g.beginPath(); g.arc(cx, cy, 8, 0, Math.PI * 2); g.stroke();
+  g.fillStyle = ink; g.beginPath(); g.moveTo(cx, cy - 11); g.lineTo(cx + 2.5, cy); g.lineTo(cx, cy + 11); g.lineTo(cx - 2.5, cy); g.closePath(); g.fill();
+  g.font = '700 8px serif'; g.textAlign = 'center'; g.fillText('N', cx, cy - 13);
+  // the route: dashed red ink, the flown part solid
+  const pt = (u: number) => [hx + 8 + u * (tx - hx - 8), hy - 16 - Math.sin(u * Math.PI) * (H * 0.42)] as const;
+  const fr = Math.max(0.02, Math.min(0.98, frac));
+  g.strokeStyle = 'rgba(150, 40, 30, 0.55)'; g.lineWidth = 1.5; g.setLineDash([4, 4]);
+  g.beginPath(); for (let u = 0; u <= 1.001; u += 0.02) { const [x, y] = pt(u); if (u === 0) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke();
+  g.setLineDash([]); g.strokeStyle = 'rgba(150, 40, 30, 0.95)'; g.lineWidth = 2;
+  g.beginPath(); for (let u = 0; u <= fr + 0.001; u += 0.02) { const [x, y] = pt(Math.min(u, fr)); if (u === 0) g.moveTo(x, y); else g.lineTo(x, y); } g.stroke();
+  // X marks the place
+  g.strokeStyle = color; g.lineWidth = 2.6; g.beginPath(); g.moveTo(tx - 5, ty - 5); g.lineTo(tx + 5, ty + 5); g.moveTo(tx + 5, ty - 5); g.lineTo(tx - 5, ty + 5); g.stroke();
+  // Pip's lantern on the route
+  const [lx, ly] = pt(fr), bob = Math.sin(t * 2.4) * 1.2;
+  const glow = g.createRadialGradient(lx, ly + bob, 0, lx, ly + bob, 14); glow.addColorStop(0, 'rgba(255, 200, 110, 0.9)'); glow.addColorStop(1, 'rgba(255, 190, 100, 0)');
+  g.fillStyle = glow; g.fillRect(lx - 14, ly + bob - 14, 28, 28);
+  g.fillStyle = '#fff3d6'; g.strokeStyle = ink; g.lineWidth = 1; g.beginPath(); g.arc(lx, ly + bob, 3, 0, Math.PI * 2); g.fill(); g.stroke();
 }

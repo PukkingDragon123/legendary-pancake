@@ -120,12 +120,12 @@ function Departure() {
 
 /** [artpass] A sky strip with a dotted path from the hollow to tonight's place; Pip flies along it with his lantern. */
 function Journey(p: { frac: number; color: string }) {
-  return <PaintedJourney frac={p.frac} color={p.color} width={Math.min(360, innerWidth - 48)} />;
+  return <PaintedJourney frac={p.frac} color={p.color} width={Math.min(380, innerWidth - 60)} ink />;
 }
 
 /** [artpass] The moon: tonight's real phase, a lit pixel sphere with its seas and craters and a fine halo. */
 function MoonClock(p: { big: boolean }) {
-  return <PaintedMoon size={p.big ? 190 : 150} phase={moonPhase()} label="Tonight's moon" />;
+  return <PaintedMoon size={p.big ? 176 : 142} phase={moonPhase()} label="Tonight's moon" />;
 }
 
 function Squiggle() {
@@ -162,18 +162,18 @@ export function NightOverlay() {
     <div class={'overlay night2' + (dim ? ' dimmed' : '')} onClick={() => setDim((d) => !d)}>
       <SoftStars />
       <div class="n-top">
-        <span class="n-chip"><Px name="map" size={30} />Pip is exploring <b>{area?.name ?? 'the woods'}</b></span>
+        <span class="n-sign hh-wood-sm"><small>Pip is exploring</small><b>{area?.title ?? 'The woods'}</b></span>
       </div>
       <div class="n-mid">
-        <MoonClock big={wide} />
-        <div class="n-time">{clock}{ampm && <small>{ampm}</small>}</div>
+        <div class="n-window"><MoonClock big={wide} /><i class="n-glass" /></div>
+        <div class="n-plate"><span class="n-time">{clock}{ampm && <small>{ampm}</small>}</span></div>
         <div class="n-alarm"><Px name="alarm" size={30} />{wake ? <>Alarm {fmtTime(wake, h12)}{s.sleep.smartMin ? <span class="soft"> · smart from {fmtTime(wake - s.sleep.smartMin * 60000, h12)}</span> : null}</> : 'No alarm tonight'}</div>
       </div>
       <div class="n-trip">
-        <Journey frac={frac} color={area?.color ?? '#e9d5ae'} />
+        <div class="n-map"><Journey frac={frac} color={area?.color ?? '#b8463a'} /></div>
         <div class="n-trip-l"><span>Home</span><span>{fmtDur(Date.now() - a.session.start)} away</span><span>{area?.name}</span></div>
       </div>
-      <div class="n-bottom" onClick={(e) => e.stopPropagation()}>
+      <div class="n-bottom hh-wood-dark" onClick={(e) => e.stopPropagation()}>
         <div class="n-row">
           <span class={'n-chip mic ' + micState.value}><Px name="mic" size={30} /><span class="grow">{micLine()}{micState.value === 'listening' && <> · {eventsTonight.value} sounds</>}</span>{micState.value === 'listening' && <Squiggle />}{micState.value === 'listening' && <i class="n-dot" style={{ opacity: live.value ? 0.4 + Math.min(0.6, (live.value.db - live.value.floor) / 20) : 0.4 }} />}</span>
         </div>

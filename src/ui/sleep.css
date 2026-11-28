@@ -145,3 +145,30 @@
 .lock-pip.painted .zz b:nth-child(2) { animation-delay: 1.4s; font-size: 22px; } .lock-pip.painted .zz b:nth-child(3) { animation-delay: 2.8s; font-size: 15px; }
 @keyframes zFloat { 0% { opacity: 0; transform: translate(0, 30px); } 20% { opacity: 0.9; } 100% { opacity: 0; transform: translate(18px, -18px); } }
 .hh-still .soft-stars i, .hh-still .lock-pip.painted .zz b { animation: none; opacity: 0.7; }
+
+/* ---- the night, made of things: a carved sign, a porthole on the sky, a brass plate, an inked map, a walnut tray */
+.night2 { gap: 10px; justify-content: space-between; }
+.n-sign { display: grid; justify-items: center; gap: 0; padding: 6px 22px 9px; color: #fbe7b8; text-shadow: 0 1px 0 #2a1209, 0 0 2px #2a1209; }
+.n-sign small { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #e8c47a; font-family: var(--font-body); font-weight: 700; }
+.n-sign b { font-family: var(--font-display); font-size: 22px; font-weight: 700; line-height: 1.1; }
+.n-window { position: relative; display: grid; place-items: center; width: 212px; height: 212px; border-radius: 50%; margin-bottom: -18px; z-index: 2;
+  background: radial-gradient(circle at 50% 40%, #27345e 0%, #121a36 62%, #0a0f22 70%);
+  box-shadow: inset 0 0 0 9px #c99a46, inset 0 0 0 11px #6e4a14, inset 0 0 0 12px rgba(255, 232, 170, 0.55), inset 0 6px 22px 12px rgba(0, 0, 0, 0.6), 0 0 0 16px #4a2a14, 0 0 0 17px rgba(255, 220, 160, 0.25), 0 0 0 22px #2e180a, 0 14px 30px 18px rgba(0, 0, 0, 0.5); }
+.n-window::before { content: ''; position: absolute; inset: -22px; border-radius: 50%; z-index: 0; pointer-events: none; background: linear-gradient(160deg, rgba(255, 220, 170, 0.28), rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.35)), var(--tx-walnut) 0 0 / 260px, #4a2a14; -webkit-mask: radial-gradient(circle closest-side, transparent calc(100% - 22px), #000 calc(100% - 21px)); mask: radial-gradient(circle closest-side, transparent calc(100% - 22px), #000 calc(100% - 21px)); }
+.n-window .moonclock { position: relative; z-index: 1; }
+.n-window .n-glass { position: absolute; inset: 12px; border-radius: 50%; pointer-events: none; background: linear-gradient(150deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0.05) 100%); z-index: 2; }
+.n-window::after { content: ''; position: absolute; inset: -14px; border-radius: 50%; z-index: 3; pointer-events: none;
+  background: radial-gradient(circle at 50% 0%, #f6dc96 0 3px, #8a6420 4px, transparent 5px), radial-gradient(circle at 100% 50%, #f6dc96 0 3px, #8a6420 4px, transparent 5px), radial-gradient(circle at 50% 100%, #f6dc96 0 3px, #8a6420 4px, transparent 5px), radial-gradient(circle at 0% 50%, #f6dc96 0 3px, #8a6420 4px, transparent 5px); }
+.n-plate { position: relative; z-index: 3; padding: 6px 26px 8px; border-radius: 6px; background: linear-gradient(180deg, #f4d98e, #c99a46 45%, #a8782a 55%, #e0b862); box-shadow: inset 0 1px 0 rgba(255, 248, 220, 0.8), inset 0 -2px 2px rgba(80, 50, 10, 0.5), 0 0 0 1.5px #6e4a14, 0 6px 14px rgba(0, 0, 0, 0.5); }
+.n-plate::before, .n-plate::after { content: ''; position: absolute; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff4cc, #8a6420); box-shadow: 0 1px 1px rgba(0, 0, 0, 0.5); }
+.n-plate::before { left: 8px; } .n-plate::after { right: 8px; }
+.n-plate .n-time { color: #3a2408; text-shadow: 0 1px 0 rgba(255, 244, 210, 0.7); font-size: 44px; }
+.n-plate .n-time small { color: #5a3a10; }
+.night2 .n-alarm { margin-top: 6px; color: #f0dcb4; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7); }
+.n-map { position: relative; padding: 6px 10px 4px; border-radius: 2px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 40%), var(--tx-paper) 0 0 / 256px, #e9dbb8; box-shadow: inset 0 0 18px rgba(140, 96, 40, 0.4), 0 0 0 1px rgba(90, 60, 20, 0.35), 0 3px 0 rgba(30, 12, 2, 0.35), 0 12px 24px rgba(0, 0, 0, 0.5); transform: rotate(-0.6deg); }
+.n-map .journey.painted { filter: none; border-radius: 0; }
+.night2 .n-trip-l { width: min(380px, 100%); color: #d8cdb6; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); font-size: 14px; }
+.n-bottom.hh-wood-dark { padding: 14px 16px 12px; gap: 10px; }
+.n-bottom .n-chip { color: #f1dcae; background: rgba(0, 0, 0, 0.22); border-radius: 4px; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 220, 160, 0.12); }
+.n-bottom .n-chip b { color: #fbe7b8; }
+@media (max-height: 760px) { .n-window { width: 176px; height: 176px; } .n-plate .n-time { font-size: 36px; } }
