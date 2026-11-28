@@ -24,6 +24,8 @@ import { devScale } from './pix.ts';
 import { PlaceView } from './placeview.tsx';
 import { nightsAt, startTravel, travelOf } from './travel.ts';
 import { textSafe } from '../font.ts';
+import { hasPostcard, postcardDate } from '../../game/postcards.ts'; // [postcard]
+import { Postcard } from './postcard.tsx';
 
 startTravel();
 
@@ -315,6 +317,8 @@ function Passport(p: { onClose: () => void; onPick: (id: string) => void }) {
   const log = travelOf(s);
   const stamped = AREAS.filter((a) => log.nights[a.id]).length;
   const [open, setOpen] = useState(false);
+  const [big, setBig] = useState<string | null>(null);
+  const cards = AREAS.filter((a) => hasPostcard(s, a.id)).sort((a, b) => (postcardDate(s, a.id) ?? 0) - (postcardDate(s, b.id) ?? 0));
   useEffect(() => { const t = setTimeout(() => { setOpen(true); sound.play('paper_flip', { volume: 0.5 }); }, 380); return () => clearTimeout(t); }, []);
   useEffect(() => {
     if (!open || !stamped) return;
@@ -347,8 +351,30 @@ function Passport(p: { onClose: () => void; onPick: (id: string) => void }) {
               );
             })}
           </div>
+          {/* [postcard] the postcards Pip mailed home, one from each place's first night */}
+          <div class="gb-cards">
+            <h5>Postcards <small>{cards.length} of {AREAS.length}</small></h5>
+            {cards.length ? (
+              <div class="gb-cardrow">
+                {cards.map((a, i) => (
+                  <button class="gb-pc" style={{ '--r': `${((i * 53) % 5) - 2}deg` } as Record<string, string>} onClick={() => { tap('paper_flip', 0.4); setBig(a.id); }} aria-label={`Postcard from ${a.title}`}>
+                    <Postcard a={a} date={postcardDate(s, a.id)} flippable={false} />
+                    <span>{a.title.replace(/^The /, '')}</span>
+                  </button>
+                ))}
+              </div>
+            ) : <p class="gb-nocards">Sleep a night somewhere new and Pip mails its postcard home.</p>}
+          </div>
         </div>
       </div>
+      {big && AREA[big] && (
+        <div class="gb-pcbig" onClick={(e) => { e.stopPropagation(); setBig(null); }}>
+          <div onClick={(e) => e.stopPropagation()}>
+            <Postcard a={AREA[big]} date={postcardDate(s, big)} />
+            <button class="btn soft" onClick={() => { tap('paper_flip', 0.4); setBig(null); }}><Px name="cross" size={18} /> Back to the passport</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

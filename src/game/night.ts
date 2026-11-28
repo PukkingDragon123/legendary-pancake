@@ -6,6 +6,7 @@ import { effect, signal } from '@preact/signals';
 import { sound } from '../audio/sound.ts';
 import { AlarmClock, analyze, closeAlarmNotification, demoNight, nextOccurrence, Reminders, showAlarmNotification, SleepRecorder, type LiveLevel, type ReminderKind, type SleepSession } from '../sleep/index.ts';
 import { rollAdventure } from './adventure.ts';
+import { awardPostcard } from './postcards.ts';
 import { BlockerBridge, type BlockStatus } from './blocker.ts';
 import { dayKey, edit, flush, grant, ownsEntry, save, type DayPlan } from './store.ts';
 import { progress } from './quests.ts';
@@ -233,7 +234,9 @@ function finishSession(s: SleepSession, area: string, peeks: number[]) {
     const stored: SleepSession = { ...s, events: s.events.slice(0, 400) };
     x.nights = [...x.nights.filter((n) => n.id !== s.id), stored].slice(-90);
     delete x.active;
-    x.pending = { sessionId: s.id, adventure: adv };
+    // [postcard] the first real night at a place mails its postcard home
+    const card = awardPostcard(x, adv.area, s.start, report.asleep);
+    x.pending = { sessionId: s.id, adventure: card ? { ...adv, postcard: card } : adv };
     const key = dayKey(s.end);
     if (!s.simulated && key !== x.lastNightKey) {
       x.streak = goalMet ? x.streak + 1 : 0;

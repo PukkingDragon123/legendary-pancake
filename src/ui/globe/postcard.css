@@ -1,0 +1,64 @@
+/* [postcard] a vintage "Greetings from" postcard (postcard.tsx). Everything inside scales with the card's
+   width (container units), so the same card works as a big hero, a passport thumbnail or a morning gift. */
+.pc { container-type: inline-size; position: relative; width: 100%; aspect-ratio: 3 / 2; perspective: 1200px; cursor: default; -webkit-tap-highlight-color: transparent; }
+.pc.got { cursor: pointer; }
+.pc-in { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.3, 1.25, 0.45, 1); }
+.pc.back .pc-in { transform: rotateY(180deg); }
+.pc-face { position: absolute; inset: 0; overflow: hidden; border-radius: 1.2cqw; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: var(--tx-paper) 0 0 / 260px, #f5ecd6; box-shadow: inset 0 0 0 1px rgba(110, 80, 44, 0.35), inset 0 -0.6cqw 1.2cqw rgba(120, 84, 40, 0.18), 0 0.5cqw 0 rgba(40, 22, 8, 0.35), 0 2cqw 4cqw rgba(10, 6, 2, 0.45); }
+.pc-back-face { transform: rotateY(180deg); }
+
+/* the front: the photo behind a deckled cream border, graded warm like an old print */
+.pc-photo { position: absolute; inset: 3.4cqw; background-color: #3a3428; background-repeat: no-repeat; box-shadow: 0 0 0 1px rgba(60, 40, 20, 0.45); filter: saturate(1.12) contrast(1.04); }
+.pc-grade { position: absolute; inset: 3.4cqw; pointer-events: none; background: radial-gradient(ellipse at 50% 40%, transparent 50%, rgba(40, 20, 6, 0.45)), linear-gradient(180deg, rgba(255, 220, 160, 0.10), transparent 40%, rgba(20, 10, 4, 0.55)); mix-blend-mode: multiply; }
+.pc-greet { position: absolute; left: 6cqw; right: 6cqw; bottom: 5.4cqw; display: grid; gap: 0; pointer-events: none; }
+.pc-greet em { font: italic 600 5.6cqw/1 var(--font-display); color: #fff2d2; text-shadow: 0 0.3cqw 0 rgba(20, 8, 0, 0.8), 0 0 2cqw rgba(0, 0, 0, 0.5); margin-left: 0.6cqw; transform: rotate(-3deg); transform-origin: left bottom; }
+.pc-greet b { position: relative; font: 900 12.5cqw/0.95 var(--font-display); letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; overflow: visible; color: #fff3cf;
+  background: linear-gradient(180deg, #fff8e0 0 40%, #f7cf73 41%, #e7a440 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.55cqw #2a1408; paint-order: stroke fill; filter: drop-shadow(0.6cqw 0.8cqw 0 var(--place, #7a4a24)) drop-shadow(0 1cqw 1.4cqw rgba(0, 0, 0, 0.5)); }
+.pc-greet b { font-size: clamp(5cqw, calc(122cqw / var(--len, 9)), 12.5cqw); }
+.pc-stamp { position: absolute; right: 5.5cqw; top: 5cqw; width: 14cqw; height: auto; image-rendering: pixelated; transform: rotate(4deg); filter: drop-shadow(0.4cqw 0.6cqw 0.6cqw rgba(0, 0, 0, 0.45)); }
+.pc-mark { position: absolute; right: 12cqw; top: 9cqw; width: 26cqw; height: auto; image-rendering: pixelated; opacity: 0.88; transform: rotate(-8deg); mix-blend-mode: multiply; filter: brightness(1.1); }
+.pc-turn { position: absolute; left: 5cqw; top: 4.6cqw; width: 7cqw; height: 7cqw; display: grid; place-items: center; border-radius: 50%; font: 700 4.4cqw/1 var(--font-body); font-style: normal; color: #4a3218; background: rgba(250, 240, 214, 0.9); box-shadow: 0 0.3cqw 0.8cqw rgba(0, 0, 0, 0.4); opacity: 0.85; }
+
+/* not yet sent: faded under a wax seal */
+.pc.sealed .pc-photo { filter: grayscale(0.9) sepia(0.35) brightness(0.72) blur(0.4cqw); }
+.pc.sealed .pc-greet { opacity: 0.55; }
+.pc.sealed .pc-stamp { filter: grayscale(1) opacity(0.6); }
+.pc-seal { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 1.2cqw; width: 70%; text-align: center; pointer-events: none; }
+.pc-seal img { width: 19cqw; height: 19cqw; filter: drop-shadow(0 0.6cqw 1cqw rgba(0, 0, 0, 0.5)); }
+.pc-seal span { font: 700 4cqw/1.15 var(--font-body); color: #fff3d8; padding: 1cqw 2.6cqw 1.3cqw; border-radius: 99px; background: rgba(22, 14, 8, 0.66); }
+
+/* the back: Pip's note on the left, the address on the right */
+.pc-back-face { display: grid; grid-template-columns: 1.15fr 1fr; padding: 5cqw 5cqw 4cqw; gap: 0; }
+.pc-note { padding-right: 4cqw; border-right: 0.35cqw solid rgba(120, 90, 54, 0.45); display: flex; flex-direction: column; gap: 1.6cqw; }
+.pc-note p { margin: 0; font: italic 500 4.3cqw/1.25 var(--font-display); color: #2c3a66; }
+.pc-note .pc-sig { margin-top: auto; text-align: right; font-weight: 700; }
+.pc-addr { padding-left: 4cqw; display: flex; flex-direction: column; justify-content: flex-end; gap: 0; }
+.pc-stamps { position: relative; height: 22cqw; margin-bottom: auto; }
+.pc-stamp2 { position: absolute; right: 0; top: 0; width: 13cqw; image-rendering: pixelated; transform: rotate(2deg); }
+.pc-mark2 { position: absolute; right: 7cqw; top: 3cqw; width: 24cqw; image-rendering: pixelated; opacity: 0.85; mix-blend-mode: multiply; transform: rotate(-6deg); }
+.pc-addr span { font: italic 500 4.2cqw/1.6 var(--font-display); color: #2c3a66; border-bottom: 0.3cqw solid rgba(120, 90, 54, 0.4); }
+.pc-addr small { margin-top: 1.6cqw; font: 600 3.2cqw/1.2 var(--font-body); color: #7a6448; }
+
+@media (prefers-reduced-motion: reduce) { .pc-in { transition: none; } }
+
+/* the passport's postcards (globe.tsx) */
+.gb-cards { margin: 14px 2px 4px; padding-top: 8px; border-top: 3px double #b9a77d; }
+.gb-cards h5 { display: flex; align-items: baseline; justify-content: space-between; margin: 0 4px 8px; font: 700 18px/1 var(--font-display); color: #34493a; }
+.gb-cards h5 small { font: 600 13px/1 var(--font-body); color: #6f553d; }
+.gb-cardrow { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px 12px; padding: 4px 6px 8px; }
+.gb-pc { display: grid; gap: 5px; padding: 0; border: 0; background: none; transform: rotate(var(--r, 0deg)); transition: transform 0.2s var(--pop, ease); }
+.gb-pc:hover { transform: rotate(0deg) translateY(-3px); }
+.gb-pc:active { transform: scale(0.97); }
+.gb-pc span { font: 600 13px/1.1 var(--font-body); color: #4b463a; text-align: center; }
+.gb-nocards { margin: 0 6px 6px; font: 500 14px/1.3 var(--font-body); color: #6f553d; text-align: center; }
+.gb-pcbig { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; padding: 16px; background: rgba(6, 8, 14, 0.82); animation: gb-fadein 0.2s ease both; }
+.gb-pcbig > div { width: min(640px, 100%, calc((100vh - 120px) * 1.5)); display: grid; justify-items: center; gap: 16px; animation: pc-in 0.4s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+@keyframes pc-in { from { transform: translateY(40px) rotate(-4deg) scale(0.9); opacity: 0; } }
+
+/* the morning's haul (morning.tsx) */
+.haul-postcard { display: grid; grid-template-columns: minmax(150px, 46%) 1fr; align-items: center; gap: 14px; padding: 10px 6px 4px; border-top: 2px dashed rgba(238, 232, 222, 0.25); }
+.haul-postcard .pc { transform: rotate(-2deg); animation: pc-in 0.6s cubic-bezier(0.2, 1.3, 0.4, 1) both 0.4s; }
+.haul-postcard div { display: grid; gap: 4px; }
+.haul-postcard b { font: 700 19px/1.15 var(--font-display); color: #fbe7b8; text-shadow: 0 1px 0 #2a1209; }
+.haul-postcard small { font: 500 14px/1.3 var(--font-body); color: #e6dac2; }

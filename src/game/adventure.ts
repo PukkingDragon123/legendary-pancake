@@ -15,6 +15,8 @@ export interface AdventureResult {
   gems: number;
   /** 0..1 how good the trip was */
   luck: number;
+  /** [postcard] the place whose postcard this night mailed home (its first night there) */
+  postcard?: string;
 }
 
 const mulberry = (seed: number) => () => {
@@ -23,6 +25,13 @@ const mulberry = (seed: number) => () => {
   t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
+
+/** [globe] The chance of a souvenir on a night of at least an hour at a place with `total` souvenirs, `missing` of
+ * them not found yet: certain while none is found, likely while some are missing, now and then a spare after. */
+export function souvenirChance(missing: number, total: number, luck: number): number {
+  if (total <= 0) return 0;
+  return missing >= total ? 1 : missing > 0 ? 0.4 + luck * 0.45 : 0.12 + luck * 0.1;
+}
 
 const WEIGHT: Record<Rarity, number> = { common: 10, uncommon: 4.5, rare: 1.6, legendary: 0.45 };
 
@@ -43,9 +52,7 @@ export function rollAdventure(o: { area: string; report: SleepReport; seed: numb
   const souv = souvenirLoot(a.id);
   if (hours >= 1 && souv.length) {
     const missing = souv.filter((e) => !o.owned(e));
-    const none = missing.length === souv.length;
-    const chance = none ? 1 : missing.length ? 0.4 + luck * 0.45 : 0.12 + luck * 0.1;
-    if (r() < chance) {
+    if (r() < souvenirChance(missing.length, souv.length, luck)) {
       const from = missing.length ? missing : souv;
       const pick = from[Math.floor(r() * from.length)];
       finds.push({ ...pick, souvenir: true, dupe: o.owned(pick) });
