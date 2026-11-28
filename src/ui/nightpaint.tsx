@@ -42,7 +42,7 @@ export function PaintedMoon(p: { size: number; phase: number; label?: string }) 
     g.fillStyle = halo; g.fillRect(0, 0, S, S);
     // the dark disc (earthshine) and the lit part, a sphere lit from the sun's side
     g.save(); g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.clip();
-    g.fillStyle = '#2c3352'; g.fillRect(0, 0, S, S);
+    g.fillStyle = '#323a5e'; g.fillRect(0, 0, S, S);
     const lit = document.createElement('canvas'); lit.width = lit.height = Math.ceil(S * DPR());
     const L = lit.getContext('2d')!; L.scale(DPR(), DPR());
     const body = L.createRadialGradient(cx - r * 0.3, cy - r * 0.35, r * 0.1, cx, cy, r * 1.05);
@@ -60,6 +60,9 @@ export function PaintedMoon(p: { size: number; phase: number; label?: string }) 
       L.strokeStyle = 'rgba(110,96,80,0.35)'; L.lineWidth = Math.max(0.6, rr * 0.35); L.beginPath(); L.arc(x, y, rr, 0, Math.PI * 2); L.stroke();
       L.strokeStyle = 'rgba(255,250,235,0.35)'; L.lineWidth = Math.max(0.4, rr * 0.25); L.beginPath(); L.arc(x + rr * 0.15, y + rr * 0.15, rr, Math.PI * 0.9, Math.PI * 1.9); L.stroke();
     }
+    // keep the whole face for the earthshine before the phase cuts it
+    const face = document.createElement('canvas'); face.width = lit.width; face.height = lit.height;
+    face.getContext('2d')!.drawImage(lit, 0, 0);
     // the phase: cut the lit sphere with the terminator (an ellipse), softened
     const ph = ((p.phase % 1) + 1) % 1, waxing = ph < 0.5, k = Math.cos(ph * Math.PI * 2); // 1 new .. -1 full
     L.globalCompositeOperation = 'destination-in';
@@ -69,6 +72,10 @@ export function PaintedMoon(p: { size: number; phase: number; label?: string }) 
     else { L.arc(cx, cy, r, Math.PI / 2, -Math.PI / 2, false); L.ellipse(cx, cy, Math.abs(k) * r, r, 0, -Math.PI / 2, Math.PI / 2, k > 0); }
     L.fill();
     L.filter = 'none'; L.globalCompositeOperation = 'source-over';
+    // earthshine: the dark side still shows its face, faint and blue
+    g.globalAlpha = 0.28; g.filter = 'saturate(0.5) hue-rotate(190deg) brightness(0.75)';
+    g.drawImage(face, 0, 0, S, S);
+    g.globalAlpha = 1; g.filter = 'none';
     g.drawImage(lit, 0, 0, S, S);
     g.restore();
     // a fine rim light
